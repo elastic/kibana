@@ -8,37 +8,50 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
-import type { Investigation } from '@kbn/pnd-common';
+import type { PndProposalRow } from '@kbn/pnd-common';
+import { SYSTEM_SECURITY_WATCH_DEEP_ID } from '@kbn/pnd-common';
 import { ApprovalModal, type ApprovalModalProps } from './approval_modal';
 
 const wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <EuiProvider>{children}</EuiProvider>
 );
 
-const mockInvestigation: Investigation = {
-  id: 'inv-1',
-  title: 'test proposal',
-  template_id: 'investigation',
-  createdAt: '2024-01-01T00:00:00Z',
-  updatedAt: '2024-01-01T00:00:00Z',
-  watch_id: 'watch-1',
-  watch_execution_id: 'exec-1',
-  pendingProposalCount: 0,
-  events: [],
-  primaryActionLabel: 'Apply monitored exception',
-  summary: 'This action suppresses qualys-scan on the DMZ scan pool only.',
+const mockProposal: PndProposalRow = {
+  alwaysGate: false,
+  correlationId: 'alert-1',
+  createdAt: '2026-08-03T12:00:00.000Z',
+  gateId: 'open_investigation',
+  inputSchema: {},
+  message: 'Open an investigation into the credential-dumping attack on host-1?',
+  reasoning: 'This action suppresses qualys-scan on the DMZ scan pool only.',
   recommendedAction: 'investigate',
+  reversible: true,
+  sourceId: 'system-security-watch-deep:run-1:step-exec-1',
+  stepExecutionId: 'step-exec-1',
+  stepId: 'await_open_investigation',
+  threadConversationId: 'thread-1',
+  threadTitle: 'Credential dumping on host-1',
+  title: 'Open an investigation into the credential-dumping attack on host-1?',
+  workflowId: SYSTEM_SECURITY_WATCH_DEEP_ID,
+  workflowRunId: 'run-1',
 };
 
 const baseProps: ApprovalModalProps = {
-  selectedRecommendedActionConversation: mockInvestigation,
-  onConfirm: jest.fn(),
+  decision: 'approve',
   onClose: jest.fn(),
+  onConfirm: jest.fn(),
+  proposal: mockProposal,
   'data-test-subj': 'approvalModal',
 };
 
 const renderModal = (props: Partial<ApprovalModalProps> = {}) =>
   render(<ApprovalModal {...baseProps} {...props} />, { wrapper });
+
+const typeRationale = (rationale: string) => {
+  fireEvent.change(screen.getByTestId('approvalModal-rationale'), {
+    target: { value: rationale },
+  });
+};
 
 describe('ApprovalModal', () => {
   beforeEach(() => {
@@ -47,11 +60,11 @@ describe('ApprovalModal', () => {
 
   it('renders the title and warningLabel', () => {
     renderModal();
-    expect(screen.getAllByText('Apply monitored exception').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Open investigation').length).toBeGreaterThan(0);
     expect(screen.getByText(/approval required/i)).toBeInTheDocument();
   });
 
-  it('renders the description from the investigation summary', () => {
+  it('renders the reasoning the approver needs to decide', () => {
     renderModal();
     expect(
       screen.getByText('This action suppresses qualys-scan on the DMZ scan pool only.')
@@ -61,6 +74,16 @@ describe('ApprovalModal', () => {
   it('renders the blast radius section label', () => {
     renderModal();
     expect(screen.getByText('Blast radius')).toBeInTheDocument();
+  });
+
+  it('renders entity values from discovery context', () => {
+    renderModal({
+      discoveryContext: {
+        correlationId: 'alert-1',
+        entities: [{ count: 3, field: 'host.name', value: 'host-1' }],
+      },
+    });
+    expect(screen.getByTestId('hitlActionCardEntity')).toHaveTextContent('host-1');
   });
 
   it('always renders the actor row', () => {
@@ -78,9 +101,9 @@ describe('ApprovalModal', () => {
     const onChange = jest.fn();
     renderModal({
       alwaysAllow: {
+        checked: false,
         id: 'always-allow',
         label: <span>Always allow session revocation in this case</span>,
-        checked: false,
         onChange,
       },
     });
@@ -92,9 +115,9 @@ describe('ApprovalModal', () => {
     const onChange = jest.fn();
     renderModal({
       alwaysAllow: {
+        checked: false,
         id: 'always-allow',
         label: 'Always allow',
-        checked: false,
         onChange,
       },
     });
@@ -102,10 +125,30 @@ describe('ApprovalModal', () => {
     expect(onChange).toHaveBeenCalledWith(true);
   });
 
-  it('calls onConfirm when the confirm button is clicked', () => {
+  it('does not confirm until a rationale is given', () => {
     renderModal();
     fireEvent.click(screen.getByTestId('approvalModal-confirm'));
-    expect(baseProps.onConfirm).toHaveBeenCalledTimes(1);
+    expect(baseProps.onConfirm).not.toHaveBeenCalled();
+  });
+
+  it('calls onConfirm with decision and rationale when the confirm button is clicked', () => {
+    renderModal();
+    typeRationale('Confirmed on host-1.');
+    fireEvent.click(screen.getByTestId('approvalModal-confirm'));
+    expect(baseProps.onConfirm).toHaveBeenCalledWith({
+      decision: 'approve',
+      rationale: 'Confirmed on host-1.',
+    });
+  });
+
+  it('sends dismiss when that is the decision the modal was opened for', () => {
+    renderModal({ decision: 'dismiss' });
+    typeRationale('Noise.');
+    fireEvent.click(screen.getByTestId('approvalModal-confirm'));
+    expect(baseProps.onConfirm).toHaveBeenCalledWith({
+      decision: 'dismiss',
+      rationale: 'Noise.',
+    });
   });
 
   it('calls onClose when the cancel button is clicked', () => {
@@ -119,11 +162,9 @@ describe('ApprovalModal', () => {
     expect(screen.getByTestId('approvalModal-cancel')).toHaveTextContent('Cancel');
   });
 
-  it('renders the confirm button with the investigation primaryActionLabel as its label', () => {
+  it('renders the confirm button with the gate primary action as its label', () => {
     renderModal();
-    expect(screen.getByTestId('approvalModal-confirm')).toHaveTextContent(
-      'Apply monitored exception'
-    );
+    expect(screen.getByTestId('approvalModal-confirm')).toHaveTextContent('Open investigation');
   });
 
   it('wires aria-labelledby to the rendered title', () => {
@@ -131,7 +172,7 @@ describe('ApprovalModal', () => {
     const modal = screen.getByRole('dialog');
     const labelId = modal.getAttribute('aria-labelledby');
     expect(labelId).toBeTruthy();
-    const titleEl = document.getElementById(labelId!);
-    expect(titleEl).toHaveTextContent('Apply monitored exception');
+    const titleEl = document.getElementById(labelId ?? '');
+    expect(titleEl).toHaveTextContent('Open investigation');
   });
 });

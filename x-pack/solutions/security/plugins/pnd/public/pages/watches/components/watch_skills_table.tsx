@@ -15,6 +15,13 @@ import {
   EuiText,
   type EuiBasicTableColumn,
 } from '@elastic/eui';
+import type { WatchCallableRef, WatchSkill } from '@kbn/pnd-common';
+import { useSkills } from '../../../hooks/use_skills_api';
+import { formatRelativeTime } from './format_relative_time';
+import { flushLastRowStyles, hiddenColumnHeaderStyles } from './table_styles';
+import * as sectionI18n from '../translations';
+import * as i18n from '../settings_translations';
+import * as skillI18n from '../skills/translations';
 
 const tableNoOuterBordersCss = css`
   thead {
@@ -27,12 +34,6 @@ const tableNoOuterBordersCss = css`
     border-bottom: none;
   }
 `;
-import type { WatchCallableRef, WatchSkill } from '@kbn/pnd-common';
-import { useSkills } from '../../../hooks/use_skills_api';
-import { formatRelativeTime } from './format_relative_time';
-import * as sectionI18n from '../translations';
-import * as i18n from '../settings_translations';
-import * as skillI18n from '../skills/translations';
 
 interface SkillRow {
   skillId: string;
@@ -61,6 +62,14 @@ interface WatchSkillsTableProps {
   attachments: WatchCallableRef[];
 }
 
+/**
+ * The skills this watch attaches, read-only.
+ *
+ * ⛔ There is deliberately no Enabled column and no switch (bead kibana-phf4.33). The 2026-08-10
+ * declutter removed the per-row enable toggles from the watch detail page and both catalogs, so
+ * enablement is reported in the status line and changed nowhere in the UI. Adding a toggle back means
+ * re-adding a draft field and a Save path with it — see the note on `WatchSettingsDraft`.
+ */
 export const WatchSkillsTable: React.FC<WatchSkillsTableProps> = ({ attachments }) => {
   const { data } = useSkills();
 
@@ -113,8 +122,13 @@ export const WatchSkillsTable: React.FC<WatchSkillsTableProps> = ({ attachments 
   );
 
   return (
+    /*
+      No column header: this table renders only on the watch detail page, whose "Skills" section title
+      already names the list (2026-08-13 declutter). `tableCaption` is what names it to a screen reader
+      now that the `thead` is gone.
+    */
     <EuiBasicTable
-      css={tableNoOuterBordersCss}
+      css={[tableNoOuterBordersCss, flushLastRowStyles, hiddenColumnHeaderStyles]}
       items={rows}
       columns={columns}
       tableLayout="auto"

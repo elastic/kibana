@@ -6,6 +6,7 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
+import { ALERT_RISK_SCORE } from '@kbn/rule-data-utils';
 import type { RuleExecutorOptions } from '@kbn/alerting-plugin/server';
 import { AlertsClientError } from '@kbn/alerting-plugin/server';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
@@ -21,6 +22,13 @@ const mockIsWorkflowsEnabledForSpace = jest.fn();
 
 jest.mock('../../is_workflows_enabled_for_space', () => ({
   isWorkflowsEnabledForSpace: (...args: unknown[]) => mockIsWorkflowsEnabledForSpace(...args),
+}));
+
+const mockEmitAttackDiscoveryCreatedEvent = jest.fn();
+
+jest.mock('../../../workflows/emit_attack_discovery_created_event', () => ({
+  emitAttackDiscoveryCreatedEvent: (...args: unknown[]) =>
+    mockEmitAttackDiscoveryCreatedEvent(...args),
 }));
 
 const mockGenerateHash = jest.fn().mockReturnValue('mock-alert-hash');
@@ -185,6 +193,9 @@ describe('workflowExecutor', () => {
     pluginsStart: { security: { authz: {} } },
   });
   const mockWorkflowsManagementApi = {} as WorkflowExecutorDeps['workflowsManagementApi'];
+  const mockWorkflowsExtensions = {
+    getClient: jest.fn(),
+  } as unknown as WorkflowExecutorDeps['workflowsExtensions'];
 
   const deps: WorkflowExecutorDeps = {
     getEventLogIndex: mockGetEventLogIndex,
@@ -193,6 +204,7 @@ describe('workflowExecutor', () => {
     logger: mockLogger,
     publicBaseUrl: 'https://localhost:5601',
     request: mockRequest,
+    workflowsExtensions: mockWorkflowsExtensions,
     workflowsManagementApi: mockWorkflowsManagementApi,
   };
 
@@ -921,6 +933,109 @@ describe('workflowExecutor', () => {
       expect(mockLogger.warn).toHaveBeenCalledWith(
         expect.stringContaining('no discoveries to persist')
       );
+    });
+  });
+
+  describe('security.attackDiscoveryCreated emission', () => {
+    it('emits exactly one event per reported discovery', async () => {
+      const options = { ...executorOptions } as unknown as RuleExecutorOptions;
+
+      await workflowExecutor({ deps, options });
+
+      expect(mockEmitAttackDiscoveryCreatedEvent).toHaveBeenCalledTimes(1);
+    });
+
+    it('emits the reported alert id and non-sensitive metadata payload', async () => {
+      const options = {
+        ...executorOptions,
+        executionId: 'exec-uuid-123',
+      } as unknown as RuleExecutorOptions;
+
+      await workflowExecutor({ deps, options });
+
+      expect(mockEmitAttackDiscoveryCreatedEvent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          payload: {
+            alertIds: ['alert-1', 'alert-2'],
+            attackDiscoveryAlertId: 'mock-alert-doc-id',
+            generationUuid: 'exec-uuid-123',
+            riskScore: undefined,
+            spaceId: 'test-space',
+          },
+          request: mockRequest,
+          workflowsExtensions: mockWorkflowsExtensions,
+        })
+      );
+    });
+
+    it('carries the risk score from the base alert document', async () => {
+      mockTransformToBaseAlertDocument.mockReturnValueOnce({
+        'kibana.alert.url': 'https://localhost:5601/app/security/attack_discovery/mock-doc-id',
+        [ALERT_RISK_SCORE]: 55,
+      });
+
+      const options = { ...executorOptions } as unknown as RuleExecutorOptions;
+
+      await workflowExecutor({ deps, options });
+
+      expect(mockEmitAttackDiscoveryCreatedEvent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          payload: expect.objectContaining({ riskScore: 55 }),
+        })
+      );
+    });
+
+    it('emits one event per discovery when multiple are reported', async () => {
+      const secondDiscovery = {
+        alertIds: ['alert-3'],
+        detailsMarkdown: 'second details',
+        entitySummaryMarkdown: 'second entity',
+        mitreAttackTactics: ['Lateral Movement'],
+        summaryMarkdown: 'second summary',
+        timestamp: '2026-02-24T01:00:00Z',
+        title: 'second title',
+      };
+
+      (executeGenerationWorkflow as jest.Mock).mockResolvedValueOnce({
+        alertRetrievalResult: mockAlertRetrievalResult,
+        generationResult: mockGenerationResult,
+        outcome: 'validation_succeeded',
+        validationResult: {
+          ...mockValidationResult,
+          discoveriesToPersist: [mockAttackDiscovery, secondDiscovery],
+        },
+      });
+
+      const options = { ...executorOptions } as unknown as RuleExecutorOptions;
+
+      await workflowExecutor({ deps, options });
+
+      expect(mockEmitAttackDiscoveryCreatedEvent).toHaveBeenCalledTimes(2);
+    });
+
+    it('does not emit when the handover is empty', async () => {
+      (executeGenerationWorkflow as jest.Mock).mockResolvedValueOnce({
+        alertRetrievalResult: mockAlertRetrievalResult,
+        generationResult: mockGenerationResult,
+        outcome: 'validation_succeeded',
+        validationResult: { ...mockValidationResult, discoveriesToPersist: [] },
+      });
+
+      const options = { ...executorOptions } as unknown as RuleExecutorOptions;
+
+      await workflowExecutor({ deps, options });
+
+      expect(mockEmitAttackDiscoveryCreatedEvent).not.toHaveBeenCalled();
+    });
+
+    it('does not emit when Attack Discovery workflows are disabled for the space', async () => {
+      mockIsWorkflowsEnabledForSpace.mockResolvedValue(false);
+
+      const options = { ...executorOptions } as unknown as RuleExecutorOptions;
+
+      await workflowExecutor({ deps, options });
+
+      expect(mockEmitAttackDiscoveryCreatedEvent).not.toHaveBeenCalled();
     });
   });
 

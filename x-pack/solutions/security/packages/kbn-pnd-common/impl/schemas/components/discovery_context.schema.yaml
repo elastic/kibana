@@ -1,0 +1,64 @@
+openapi: 3.0.0
+info:
+  title: PND Discovery context component schemas
+  version: '1'
+paths: {}
+components:
+  x-codegen-enabled: true
+  schemas:
+    PndDiscoveryContextEntity:
+      type: object
+      description: >
+        One entity observed across an Attack Discovery's constituent detection alerts, from a
+        `terms` aggregation over the alerts index (D2). Attack Discovery 2.0 itself has no
+        structured entity field (G2), so the constituent alerts reached through `alert_ids` are the
+        only structured source.
+      required:
+        - count
+        - field
+        - value
+      properties:
+        count:
+          type: integer
+          minimum: 0
+          description: Number of constituent alerts carrying this value
+        field:
+          type: string
+          maxLength: 256
+          description: ECS field the value was aggregated on, e.g. `host.name`
+        value:
+          type: string
+          maxLength: 1024
+          description: The aggregated term, e.g. `host-a`
+
+    PndDiscoveryContext:
+      type: object
+      description: >
+        The blast radius and the normalized risk score for one Attack Discovery, derived together
+        in a single aggregation so both surfaces share one react-query key (D10).
+      required:
+        - correlationId
+        - entities
+      properties:
+        correlationId:
+          type: string
+          maxLength: 1024
+        entities:
+          type: array
+          maxItems: 100
+          description: >
+            Merged entity terms, highest count first. Bounded because the aggregation behind it is:
+            four `terms` sub-aggregations at `size: 20` can emit at most 80 today, and the cap
+            leaves headroom for a fifth field without becoming unbounded.
+          items:
+            $ref: '#/components/schemas/PndDiscoveryContextEntity'
+        riskScore:
+          type: number
+          minimum: 0
+          maximum: 100
+          description: >
+            MAX of the constituent detection alerts' `kibana.alert.risk_score`, which is naturally
+            0-100 (D5) — deliberately NOT the Attack Discovery's own `risk_score`, an unbounded
+            *sum* that reaches four digits in production. Absent — never zero — for an
+            uncorrelated run that has no constituent alerts, so a surface can tell "no score is
+            possible" from "the score is zero".

@@ -13,12 +13,15 @@ import {
 } from '@kbn/pnd-common';
 import { PND_API_PRIVILEGE_READ } from '../../../common/constants';
 import type { RouteDependencies } from '../register_routes';
-import { storeUnavailableResponse } from '../store_route_guard';
 
+/**
+ * Lists workers, which are projected from the managed workflow definitions rather than read from the
+ * in-memory store (kibana-phf4.6). There is deliberately no `config.ui.useMockData` guard: the
+ * definitions are what PND installs, so the answer is the same in both modes and is real in both.
+ */
 export const registerListWorkersRoute = ({
   router,
   logger,
-  config,
   getWatchesService,
 }: RouteDependencies) => {
   router.versioned
@@ -41,10 +44,6 @@ export const registerListWorkersRoute = ({
       },
       async (_context, _request, response) => {
         try {
-          if (!config.ui.useMockData) {
-            return storeUnavailableResponse(response);
-          }
-
           const body: ListWorkersResponse = { workers: getWatchesService().listWorkers() };
           return response.ok({ body });
         } catch (error) {

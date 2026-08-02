@@ -10,6 +10,8 @@ import type { Logger } from '@kbn/core/server';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import type { CoreStart } from '@kbn/core/server';
 
+import { isWorkflowsEnabled } from '@kbn/discoveries/impl/lib/helpers/is_workflows_enabled';
+
 import { createTracedLogger } from '@kbn/discoveries/impl/lib/create_traced_logger';
 import type { DiscoveriesPluginStartDeps } from '../../../types';
 import { asNonEmpty } from '../../../lib/non_empty_string';
@@ -17,6 +19,7 @@ import { resolveConnectorDetails } from '../../helpers/resolve_connector_details
 import { validateAttackDiscoveries } from '../../../routes/post/validate/helpers/validate_attack_discoveries';
 import { PersistDiscoveriesStepCommonDefinition } from '../../../../common/step_types/persist_discoveries_step';
 import { authenticateAndGetSpace } from '../default_validation_step/helpers/authenticate_and_get_space';
+import { emitAttackDiscoveryCreatedEvent } from '../../emit_attack_discovery_created_event';
 
 export const getPersistDiscoveriesStepDefinition = ({
   adhocAttackDiscoveryDataClient,
@@ -142,6 +145,37 @@ export const getPersistDiscoveriesStepDefinition = ({
             result.validated_discoveries?.length ?? 0
           } discoveries (${result.duplicates_dropped_count} duplicates dropped)`
         );
+
+        // Emit one `security.attackDiscoveryCreated` event per net-new discovery
+        // (version conflicts are already excluded from `validated_discoveries`).
+        // Gated on the feature flag and wrapped in try/catch so a Workflows
+        // failure can never fail Attack Discovery persistence.
+        try {
+          if (await isWorkflowsEnabled(coreStart.featureFlags)) {
+            await Promise.all(
+              (result.validated_discoveries ?? []).map((discovery) =>
+                emitAttackDiscoveryCreatedEvent({
+                  logger: tracedLogger,
+                  payload: {
+                    alertIds: discovery.alert_ids,
+                    attackDiscoveryAlertId: discovery.id,
+                    generationUuid: discovery.generation_uuid,
+                    riskScore: discovery.risk_score,
+                    spaceId,
+                  },
+                  request,
+                  workflowsExtensions: pluginsStart.workflowsExtensions,
+                })
+              )
+            );
+          }
+        } catch (emitError) {
+          tracedLogger.warn(
+            `[PERSIST] Failed to emit security.attackDiscoveryCreated events: ${
+              emitError instanceof Error ? emitError.message : String(emitError)
+            }`
+          );
+        }
 
         return {
           output: {

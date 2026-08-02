@@ -150,5 +150,5 @@ export enum SecurityPageName {
   pndWatchOfficer = 'watch_officer',
   pndWatchDark = 'watch_dark',
   pndWatchDeep = 'watch_deep',
-  pndWatchDetection = 'watch_detection',
+  pndWatchPostIncident = 'watch_post_incident',
 }

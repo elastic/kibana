@@ -1,0 +1,180 @@
+openapi: 3.0.0
+info:
+  title: PND detection-rule tuning component schemas
+  version: '1'
+paths: {}
+components:
+  x-codegen-enabled: true
+  schemas:
+    PndCandidateRule:
+      type: object
+      description: >
+        One detection rule a tuning draft may choose to change, projected from the rules behind an
+        Attack Discovery's constituent alerts (register `#24`). `draft_tuning` runs with `NO_TOOLS`,
+        so without these it names a rule from training-data recall — a prebuilt `rule_id` that is not
+        the saved-object id `_apply` needs, or the literal `"UNKNOWN"`.
+
+        `id` is that saved-object id, which is what `_apply` patches; `rule_id` is carried beside it
+        because it is the id the model may recognize, and a draft that names the wrong one is then
+        correctable rather than fatal.
+
+        Only the four identity fields are required. Everything else is projected **only** when the
+        rules API answered with a value of the right shape, because a candidate that claims a
+        `query` it does not have would be diffed as if it did.
+      required:
+        - id
+        - name
+        - rule_id
+        - type
+      properties:
+        from:
+          type: string
+          maxLength: 64
+          description: Start of the rule's execution window, e.g. `now-360s`
+        id:
+          type: string
+          maxLength: 1024
+          description: >
+            The rule's **saved-object** id — the identifier `_apply` patches. Never the `rule_id`.
+        index:
+          type: array
+          maxItems: 100
+          description: >
+            Index patterns the rule searches. Capped at
+            `PND_CANDIDATE_RULE_MAX_INDEX_PATTERNS` (100) — context the model reads rather than
+            text it edits, so a shortened list is acceptable where a shortened `query` is not.
+          items:
+            type: string
+            maxLength: 1024
+        interval:
+          type: string
+          maxLength: 64
+          description: How often the rule runs, e.g. `5m`
+        language:
+          type: string
+          maxLength: 64
+          description: Query language, e.g. `kuery`, `lucene` or `eql`
+        name:
+          type: string
+          maxLength: 1024
+        query:
+          type: string
+          maxLength: 20000
+          description: >
+            The rule's current query, the value a `query` tuning is diffed against. Bounded at
+            `PND_CANDIDATE_RULE_MAX_QUERY_LENGTH` (20000); a longer query is projected as **absent**
+            rather than truncated, because a clipped query would be diffed as if it were the rule's.
+        risk_score:
+          type: integer
+          minimum: 0
+          maximum: 100
+        rule_id:
+          type: string
+          maxLength: 1024
+          description: The rule's human-authored `rule_id`, as an alternative identifier
+        severity:
+          type: string
+          maxLength: 64
+          description: e.g. `low`, `medium`, `high`, `critical`
+        to:
+          type: string
+          maxLength: 64
+          description: End of the rule's execution window, e.g. `now`
+        type:
+          type: string
+          maxLength: 64
+          description: >
+            Rule type, e.g. `query`, `eql`, `threshold`, `machine_learning`. Load-bearing: a `query`
+            change may only be proposed for a `query` rule, and `_apply` refuses it otherwise as a
+            400 naming the field (the route is the boundary, not the schema).
+
+    PndTuningChange:
+      type: object
+      description: >
+        The proposed detection-rule change, constrained to PND_TUNABLE_RULE_FIELDS
+        (`enabled`, `investigation_fields`, `note`, `query`). `query` is in the set because the
+        review flow it was waiting on exists: the watch backtests the current and the proposed
+        query over one shared window, and the approval surfaces render the diff beside both
+        counts. Alert suppression and `threshold` are still excluded — they change how alerts
+        de-duplicate and group rather than which documents match, so a count either side of them
+        does not describe what changed; `exceptions_list` is excluded for a reason of its own,
+        because a rule patch *replaces* the array rather than merging it, so an LLM-authored
+        value would silently detach the rule's existing exception lists.
+
+        This is the schema layer of a three-layer guard. It closes the object, so anything
+        outside the set is stripped rather than forwarded. The layer that actually enforces
+        the boundary is `_apply`'s server-side allow-list, which returns 400 — including for
+        a field this schema might later widen by accident, and including a `query` patch aimed
+        at a rule whose `type` is not `query`, which only the route can know.
+      properties:
+        enabled:
+          type: boolean
+          description: Enable or disable the rule. Behind `canEnableDisableRules`.
+        investigation_fields:
+          type: object
+          description: >
+            Custom highlighted fields for the alert flyout. Behind
+            `canEditCustomHighlightedFields`.
+          properties:
+            field_names:
+              type: array
+              maxItems: 50
+              items:
+                type: string
+                maxLength: 1024
+          required:
+            - field_names
+        note:
+          type: string
+          maxLength: 20000
+          description: Investigation guide markdown. Behind `canEditInvestigationGuides`.
+        query:
+          type: string
+          maxLength: 20000
+          description: >
+            The rewritten rule query. Needs full rules-write, which the route already requires
+            (`RULES_API_ALL`), and only means anything on a rule whose `type` is `query` — `_apply`
+            re-fetches the rule and returns a 400 naming the field for any other type. Bounded at
+            `PND_CANDIDATE_RULE_MAX_QUERY_LENGTH` (20000), the same bound as the current query it
+            is diffed against, so a rewrite of a long query round-trips instead of being rejected.
+
+    PndTuningPreviewResult:
+      type: object
+      additionalProperties: true
+      description: >
+        One side of the backtest: how many alerts the rule produced over the previewed
+        window. Every property is optional and unknown ones are preserved, because the shape
+        the detection-engine rule-preview route returns is not PND's contract to pin.
+      properties:
+        alertCount:
+          type: integer
+          minimum: 0
+          description: Alerts the previewed rule produced over the window
+        from:
+          type: string
+          maxLength: 64
+          description: Start of the previewed window (ISO 8601 or a relative expression)
+        to:
+          type: string
+          maxLength: 64
+          description: End of the previewed window (ISO 8601 or a relative expression)
+
+    PndTuningPreview:
+      type: object
+      description: >
+        Before/after backtest for a tuning proposal: the alert count for the rule as-is and
+        for the rule as-proposed, measured over one shared window anchored at the moment the
+        incident was contained. The Detection Watch produces both by running
+        `system-security-rule-preview` itself, rather than by granting the drafting agent a
+        preview tool. Both sides are optional: a preview can legitimately fail, abort, or be
+        skipped entirely — a proposal that rewrites no query has nothing to backtest, because
+        only a query change alters which documents the rule matches. A missing backtest must
+        degrade to an explicit "no preview available" on the card rather than failing the
+        step, and the card must *say* the preview is missing: a silent absence reads as "no
+        change expected", which is the opposite of the truth, and an unmeasured side is never
+        rendered as a zero.
+      properties:
+        before:
+          $ref: '#/components/schemas/PndTuningPreviewResult'
+        after:
+          $ref: '#/components/schemas/PndTuningPreviewResult'

@@ -13,6 +13,7 @@ import {
   PND_RULE_PREVIEW_WORKFLOW_ID,
   PND_RULE_TUNING_WORKFLOW_ID,
   PND_WATCH_DETECTION_WORKFLOW_ID,
+  PND_WORKFLOW_TEMPLATE_VALUES,
 } from '@kbn/workflows/managed';
 import type { AgentLookup } from '../utils';
 import type { InternalAgentDefinition } from '@kbn/agent-builder-server/agents';
@@ -26,14 +27,39 @@ import {
   projectWorkflowToWatch,
 } from './project_watch';
 
+const buildWatchItem = (watchPolicy: Record<string, unknown>): WorkflowListItemDto =>
+  ({
+    id: 'watch-1',
+    name: 'Watch One',
+    enabled: true,
+    definition: {
+      version: '1',
+      name: 'Watch One',
+      enabled: true,
+      triggers: [{ type: 'manual' }],
+      consts: { watch_policy: watchPolicy },
+      steps: [{ name: 'stub', type: 'console', with: { message: 'hi' } }],
+    },
+  } as unknown as WorkflowListItemDto);
+
+/**
+ * A managed PND definition's YAML, rendered the way the install path renders it.
+ *
+ * `yamlTemplate` rather than `yaml`: decision 7 moved every PND definition onto a template, and every
+ * one of them ignores the values it is handed — `PND_WORKFLOW_TEMPLATE_VALUES` exists only because the
+ * platform refuses a templated install whose values are missing or empty. See the comment at the top
+ * of `kbn-workflows/managed/definitions/pnd/index.ts`.
+ */
 const getManagedYaml = (workflowId: string): string => {
-  const definition = getManagedWorkflowDefinition(workflowId);
-  if (!definition) throw new Error(`Missing managed workflow definition for "${workflowId}"`);
-  if ('yaml' in definition && definition.yaml) return definition.yaml;
-  if ('yamlTemplate' in definition && definition.yamlTemplate) {
-    return definition.yamlTemplate({ settingsVersion: 1, autonomyLevel: 'manual' });
+  const yaml = getManagedWorkflowDefinition(workflowId)?.yamlTemplate?.(
+    PND_WORKFLOW_TEMPLATE_VALUES
+  );
+
+  if (yaml == null) {
+    throw new Error(`No managed workflow definition with a yamlTemplate for '${workflowId}'`);
   }
-  throw new Error(`Managed workflow definition "${workflowId}" has no YAML source`);
+
+  return yaml;
 };
 
 describe('project watch', () => {
@@ -48,7 +74,7 @@ describe('project watch', () => {
           watch_policy: {
             mandate: 'Deep investigation & hunts',
             handoff: 'records',
-            ui: { color: '#8b5cf6', order: 40 },
+            ui: { color: '#8b5cf6', icon: 'console', order: 40 },
           },
         },
         steps: [{ name: 'stub', type: 'console', with: { message: 'hi' } }],
@@ -57,7 +83,7 @@ describe('project watch', () => {
       expect(extractWatchPolicy(definition)).toMatchObject({
         mandate: 'Deep investigation & hunts',
         handoff: 'records',
-        ui: { color: '#8b5cf6', order: 40 },
+        ui: { color: '#8b5cf6', icon: 'console', order: 40 },
       });
     });
   });
@@ -77,24 +103,47 @@ describe('project watch', () => {
   });
 
   describe('projectSchedule', () => {
-    it('derives on-demand behavior from a manual trigger', () => {
-      expect(projectSchedule([{ type: 'manual', summary: 'Manual / on demand' }])).toMatchObject({
-        mode: 'demand',
-        cadence: 'manual',
-        set: false,
-        onDemand: true,
-        handoff: 'none',
-      });
+    it('uses actual manual-only triggers instead of an incompatible policy mode', () => {
+      expect(
+        projectSchedule([{ type: 'manual', summary: 'Manual / on demand' }], {
+          mode: 'always',
+          cadence: 'stream',
+          onDemand: false,
+        })
+      ).toMatchObject({ mode: 'demand', cadence: 'manual', set: false, onDemand: true });
     });
 
-    it('derives a neutral full-day projection from a scheduled trigger', () => {
-      expect(projectSchedule([{ type: 'schedule', summary: 'Scheduled' }])).toMatchObject({
-        mode: 'always',
-        set: true,
-        from: 0,
-        to: 23,
-        onDemand: false,
-      });
+    it('preserves a configured window for scheduled watches', () => {
+      expect(
+        projectSchedule([{ type: 'schedule', summary: 'Scheduled' }], {
+          mode: 'window',
+          from: 22,
+          to: 6,
+        })
+      ).toMatchObject({ mode: 'window', set: true, from: 22, to: 6 });
+    });
+  });
+
+  /**
+   * Autonomy has exactly one source of truth: the `pnd:autonomy:<watchId>` uiSetting that
+   * `GET /internal/pnd/autonomy` serves and the gates read. The projection must therefore not
+   * surface a second one, even though the managed YAML still declares an intended default in
+   * `consts.watch_policy.autonomyLevel` — two copies of the level that can disagree is exactly the
+   * failure this guards against.
+   */
+  describe('projectWorkflowToWatch autonomy', () => {
+    it('does not project an autonomy level, even when the YAML declares one', () => {
+      const watch = projectWorkflowToWatch(buildWatchItem({ autonomyLevel: 'supervised' }));
+
+      expect(watch).not.toHaveProperty('autonomyLevel');
+    });
+
+    it('projects the rest of the policy bag unaffected by the declared level', () => {
+      const watch = projectWorkflowToWatch(
+        buildWatchItem({ autonomyLevel: 'supervised', mandate: 'Deep investigation & hunts' })
+      );
+
+      expect(watch.mandate).toBe('Deep investigation & hunts');
     });
   });
 
@@ -505,7 +554,6 @@ describe('project watch', () => {
       type: string;
       if?: string;
       condition?: string;
-      with?: Record<string, unknown>;
       steps?: NestedStep[];
       else?: NestedStep[];
     }

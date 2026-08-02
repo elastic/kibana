@@ -1,0 +1,35 @@
+openapi: 3.0.0
+info:
+  title: List PND Proposals API endpoint
+  version: '1'
+paths:
+  /internal/pnd/proposals:
+    get:
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      operationId: ListProposals
+      description: >
+        List pending HITL gates awaiting a response, grouped by recommended action
+        for the grouped HITL queue.
+      summary: List proposals
+      tags:
+        - PND API
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  groups:
+                    type: array
+                    maxItems: 4
+                    items:
+                      $ref: '../components/proposal_row.schema.yaml#/components/schemas/PndProposalGroup'
+                  total:
+                    type: integer
+                    minimum: 0
+                required:
+                  - groups
+                  - total

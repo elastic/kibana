@@ -5,122 +5,193 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
+import React, { memo, useCallback, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
+  EuiFormRow,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
+  EuiText,
+  EuiTextArea,
   useEuiTheme,
 } from '@elastic/eui';
-import type { Investigation } from '@kbn/pnd-common';
+import type { PndDiscoveryContext, PndProposalRow } from '@kbn/pnd-common';
 import { ApprovalModalHeader } from './approval_modal_header';
 import { BlastRadiusSection } from './blast_radius_section';
 import { ApprovalActorRow } from './approval_actor_row';
 import { AlwaysAllowCheckbox } from './always_allow_checkbox';
 import { APPROVAL_MODAL_TRANSLATIONS } from './translations';
 import { getActionButtonIconProps } from '../../helpers';
+import { primaryActionLabel } from '../../conversation_card/helpers/primary_action_label';
+import { CONVERSATION_CARD_ACTIONS } from '../../conversation_card/translations';
 
 const TITLE_ID = 'approvalModalTitle';
 
+export type ApprovalModalDecision = 'approve' | 'dismiss';
+
 export interface ApprovalModalProps {
   alwaysAllow?: {
+    checked: boolean;
     id: string;
     label: React.ReactNode;
-    checked: boolean;
     onChange: (checked: boolean) => void;
   };
-  selectedRecommendedActionConversation?: Investigation;
-  onConfirm: () => void;
+  decision: ApprovalModalDecision;
+  discoveryContext?: PndDiscoveryContext;
+  errorMessage?: string;
+  isLoading?: boolean;
   onClose: () => void;
+  onConfirm: (input: Record<string, unknown>) => void;
+  proposal: PndProposalRow;
   'data-test-subj'?: string;
 }
 
 export const ApprovalModal = memo<ApprovalModalProps>(
   ({
     alwaysAllow,
-    selectedRecommendedActionConversation,
-    onConfirm,
+    decision,
+    discoveryContext,
+    errorMessage,
+    isLoading = false,
     onClose,
+    onConfirm,
+    proposal,
     'data-test-subj': dataTestSubj,
   }) => {
     const { euiTheme } = useEuiTheme();
+    const [rationale, setRationale] = useState('');
 
-    const title = selectedRecommendedActionConversation?.primaryActionLabel ?? '';
+    const title =
+      decision === 'dismiss'
+        ? APPROVAL_MODAL_TRANSLATIONS.dismissTitle
+        : primaryActionLabel(proposal.gateId) ?? CONVERSATION_CARD_ACTIONS.default;
 
     const recommendedActionIconProps = useMemo(
       () =>
-        selectedRecommendedActionConversation
-          ? getActionButtonIconProps(selectedRecommendedActionConversation)
-          : { type: 'gear' as const, color: 'primary' as const },
-      [selectedRecommendedActionConversation]
+        getActionButtonIconProps({
+          recommendedAction: proposal.recommendedAction,
+        }),
+      [proposal.recommendedAction]
     );
 
     const { buttonColor, iconColor } = useMemo(
       () =>
-        recommendedActionIconProps.color === 'danger'
+        decision === 'dismiss' || recommendedActionIconProps.color === 'danger'
           ? { buttonColor: 'danger' as const, iconColor: euiTheme.colors.danger }
           : { buttonColor: 'primary' as const, iconColor: euiTheme.colors.primary },
-      [recommendedActionIconProps.color, euiTheme.colors.danger, euiTheme.colors.primary]
+      [decision, recommendedActionIconProps.color, euiTheme.colors.danger, euiTheme.colors.primary]
     );
+
+    const blastRadiusItems = (discoveryContext?.entities ?? []).map(({ field, value }) => ({
+      iconType: 'dot' as const,
+      id: `${field}:${value}`,
+      text: <span data-test-subj="hitlActionCardEntity">{value}</span>,
+    }));
+
+    const blastRadiusDescription =
+      blastRadiusItems.length === 0
+        ? proposal.message ?? proposal.reasoning
+        : undefined;
+
+    const onSubmit = useCallback(() => {
+      if (rationale.trim().length === 0) {
+        return;
+      }
+
+      onConfirm({ decision, rationale: rationale.trim() });
+    }, [decision, onConfirm, rationale]);
 
     return (
       <EuiModal
         aria-labelledby={TITLE_ID}
-        onClose={onClose}
-        css={css({ maxWidth: 560, width: '100%', borderRadius: euiTheme.size.m })}
+        css={css({ borderRadius: euiTheme.size.m, maxWidth: 560, width: '100%' })}
         data-test-subj={dataTestSubj}
+        onClose={onClose}
       >
         <ApprovalModalHeader
-          tone={recommendedActionIconProps.color === 'danger' ? 'danger' : 'primary'}
           iconType={recommendedActionIconProps.type}
-          warningLabel={APPROVAL_MODAL_TRANSLATIONS.warningLabel}
           title={title}
           titleId={TITLE_ID}
+          tone={buttonColor === 'danger' ? 'danger' : 'primary'}
+          warningLabel={APPROVAL_MODAL_TRANSLATIONS.warningLabel}
         />
 
         <EuiModalBody css={css({ padding: `${euiTheme.size.m} 0` })}>
+          {errorMessage != null && errorMessage.length > 0 ? (
+            <EuiCallOut
+              color="danger"
+              data-test-subj="hitlActionCardError"
+              size="s"
+              title={errorMessage}
+            />
+          ) : null}
+          {proposal.reasoning != null && proposal.reasoning.length > 0 ? (
+            <EuiText
+              css={css({ padding: `0 ${euiTheme.size.m} ${euiTheme.size.m}` })}
+              data-test-subj="hitlActionCardReasoning"
+              size="s"
+            >
+              <p>{proposal.reasoning}</p>
+            </EuiText>
+          ) : null}
           <BlastRadiusSection
-            content={{
-              variant: 'description',
-              description: selectedRecommendedActionConversation?.summary ?? '',
-            }}
+            content={
+              blastRadiusItems.length > 0
+                ? { items: blastRadiusItems, variant: 'list' }
+                : { description: blastRadiusDescription, variant: 'description' }
+            }
             defaultItemIconColor={iconColor}
           />
           <ApprovalActorRow />
+          <EuiFormRow
+            css={css({ marginTop: euiTheme.size.m, padding: `0 ${euiTheme.size.m}` })}
+            fullWidth
+            label={APPROVAL_MODAL_TRANSLATIONS.rationaleLabel}
+          >
+            <EuiTextArea
+              data-test-subj={dataTestSubj ? `${dataTestSubj}-rationale` : undefined}
+              fullWidth
+              onChange={(event) => setRationale(event.target.value)}
+              value={rationale}
+            />
+          </EuiFormRow>
         </EuiModalBody>
 
         {alwaysAllow && (
           <AlwaysAllowCheckbox
-            option={alwaysAllow}
             data-test-subj={dataTestSubj ? `${dataTestSubj}-always-allow` : undefined}
+            option={alwaysAllow}
           />
         )}
 
         <EuiModalFooter
           css={css({
+            borderTop: `1px solid ${euiTheme.colors.lightestShade}`,
             justifyContent: 'flex-start',
             padding: euiTheme.size.m,
-            borderTop: `1px solid ${euiTheme.colors.lightestShade}`,
           })}
         >
           <EuiButton
-            fill
-            size="s"
             color={buttonColor}
-            iconType={recommendedActionIconProps.type}
-            onClick={onConfirm}
             data-test-subj={dataTestSubj ? `${dataTestSubj}-confirm` : undefined}
+            fill
+            iconType={recommendedActionIconProps.type}
+            isDisabled={rationale.trim().length === 0}
+            isLoading={isLoading}
+            onClick={onSubmit}
+            size="s"
           >
             {title}
           </EuiButton>
           <EuiButtonEmpty
-            size="s"
             color="text"
-            onClick={onClose}
             data-test-subj={dataTestSubj ? `${dataTestSubj}-cancel` : undefined}
+            onClick={onClose}
+            size="s"
           >
             {APPROVAL_MODAL_TRANSLATIONS.cancel}
           </EuiButtonEmpty>

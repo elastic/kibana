@@ -1,0 +1,850 @@
+version: "1"
+name: Post-Incident Watch
+description: >
+  Post-Incident Watch. Subscribes to security.detectionChangeSignal — the claim a watch emits
+  when it concludes detection coverage is missing or mistuned, which PND raises from the
+  Watch Floor containment gate — and drafts a detection-rule tuning from the closed
+  incident, modeled on Attack Discovery 2.0's Missed Detection Closure pass. The rule is
+  CHOSEN from the rules that actually fired the alerts behind the incident rather than
+  recalled, and the proposal is constrained to the four fields PND's apply route permits
+  (enabled, investigation_fields, note, query). A query change is backed by a real
+  before/after backtest this workflow measures itself, via two previews over one window
+  ending at the moment the incident was contained, so the approver sees the exact query
+  diff and its measured effect rather than a rationale alone. The drafted tuning is staged
+  behind a single, always-on HITL gate
+  (await_apply_tuning): no autonomy level ever bypasses it, matching the four-phase doc's
+  4.3 "Always gated". The consequential rule write happens from the PND UI in the approving
+  user's request context, not from this workflow — see the note on the terminal marker.
+enabled: true
+tags:
+  - watch
+  - watch-post-incident
+# Subscribes to the CLAIM, not the lifecycle fact, and stays manually runnable.
+#
+# This watch used to subscribe to pnd.incidentClosed, which says only "an incident closed" (D14/P3)
+# and carries ids alone. What this watch actually needs is "there is a coverage gap here", which is
+# what security.detectionChangeSignal says: it carries the analyst's own gap description, the
+# incident's ATT&CK tactics, and refs to the evidence. pnd.incidentClosed is still registered and
+# still emitted on containment, deliberately with NO subscriber — see the emit block in
+# `pnd/server/routes/post/proposals/respond_to_proposal.ts`.
+#
+# The condition is an ALLOW-LIST of the four watches that can produce a claim, and it is fail-closed
+# without a negation: a trigger condition that does not match means this workflow does not run, and
+# KQL yields false for a missing or unexpected `sourceWatchId`. Never rewrite it as a `not (…)`
+# deny-list — that fails open for every producer nobody thought of (ADR-014).
+#
+# system-security-watch-post-incident is deliberately ABSENT from the list. It is the subscriber, the
+# containment gate that emits the signal is registered on Watch Floor, and a watch that allow-lists
+# its own id is one future emit away from triggering itself. Adding a producer here is a deliberate
+# act; the four ids are pinned in `watch_post_incident.test.ts`.
+#
+# ⛔ Do NOT add `event.evidenceRefs.kind: "attack_discovery"` to this condition, however reasonable it
+# looks: it can never be true, and adding it silently stops this watch from ever running. Conditions
+# are evaluated in memory by `@kbn/eval-kql`, whose `readContextPath` walks path segments with
+# `segment in result` — and `evidenceRefs` is an array of OBJECTS, so `'kind' in evidenceRefs` is
+# false and the path "does not exist". (Arrays of scalars, like `event.tactics`, do match
+# element-wise; object arrays do not flatten the way they would in Elasticsearch.) Absence of an
+# attack-discovery ref is handled downstream instead, by set_correlation_id degrading and the
+# gate card saying so.
+triggers:
+  - type: security.detectionChangeSignal
+    on:
+      condition: >-
+        event.sourceWatchId: ("system-security-watch-floor" or
+        "system-security-watch-officer" or "system-security-watch-dark" or
+        "system-security-watch-deep")
+  - type: manual
+consts:
+  # `autonomyLevel` here is the watch's intended DEFAULT, and documentation only: the projection
+  # no longer reads it, and the level the gates resolve against is the per-space
+  # `pnd:autonomy:<watchId>` uiSetting that `GET /internal/pnd/autonomy` serves. It is spelled with
+  # the shared scale's name rather than an ordinal so there is one vocabulary everywhere.
+  # `manual` — every proposal requires confirmation — is the only consistent choice for a watch
+  # whose single gate is alwaysGate: a raised level could never auto-accept it anyway (see the gate
+  # registry: apply_tuning.alwaysGate = true).
+  watch_policy:
+    mandate: Detection tuning from closed incidents
+    autonomyLevel: manual
+    handoff: records
+    onDemand: true
+    draft: true
+    cadence: event
+    mode: always
+    ui:
+      color: "#ec4899"
+      icon: indexEdit
+      order: 50
+    scopeSummary: Detection rules · closed incidents
+    scopes:
+      - name: Detection rules
+        access: full
+        label: Read + tune
+      - name: Closed incidents
+        access: full
+        label: Read
+    # Capabilities projected from executable steps — see Watch Floor.
+    callables: []
+steps:
+  # ============================================================================
+  # Phase 4 — Post-Incident Follow-on
+  # ============================================================================
+
+  # The one place the attack discovery id is recovered from the claim.
+  #
+  # security.detectionChangeSignal carries no top-level `correlationId` — its evidence is a
+  # KINDED REF ARRAY (`{ kind, id }`), deliberately, because Dark Watch's evidence is hunt findings
+  # with no Attack Discovery anywhere in its path (D7). An optional field can be added to that
+  # contract later; a field's shape cannot. So the id every step below keys on is projected out of
+  # the refs exactly once, here, instead of six times inline.
+  #
+  # ⚠️ This step must stay FIRST and must stay a `data.set`: six steps read
+  # `steps.set_correlation_id.output.correlationId`, and a `data.set`'s output IS its
+  # rendered `with` block (`data_set_step_impl.ts` returns the rendered input as the output).
+  #
+  # DEGRADATION, and why it is safe. The engine renders with `strictVariables: false`, so on a
+  # manually-run watch (no `event`) or a claim whose refs name no attack_discovery, this renders the
+  # EMPTY STRING rather than failing — precisely the shape the old `{{ event.attackDiscoveryAlertId }}`
+  # produced on a manual run, so nothing downstream changes: `_derive` fails, its `continue: true`
+  # carries the run to the gate, and `reason_apply_tuning` says plainly that nothing was drafted.
+  # An empty string is TRUTHY in Liquid, so any future branch on this value must use `== blank`.
+  - name: set_correlation_id
+    type: data.set
+    with:
+      correlationId: '{{ event.evidenceRefs | where: "kind", "attack_discovery" | map: "id" | first }}'
+
+  # A5: Phase 4 had no conversation context of its own. This is the Deep Watch's derive_ids,
+  # identical in shape, keyed on the attack discovery id the step above recovered from the claim's
+  # evidence refs. It supplies the third derived UUIDv5 (tuningConversationId), the attack
+  # narrative and title, and the phase-4 agent id.
+  #
+  # The path is prefixed with /s/{spaceId} explicitly because the kibana.request step sends
+  # `path` verbatim: buildKibanaRequest short-circuits on the `kibana.request` type before
+  # applySpacePrefix, so only the named-connector branch prefixes the space. The internal
+  # route also needs `elastic-api-version`, which the engine does not inject (it injects
+  # x-elastic-internal-origin and kbn-xsrf for us).
+  #
+  # GRACEFUL DEGRADATION, matching the Deep Watch: retry, then `continue: true`. A persistent
+  # 403/500 leaves the derived ids unset, so the tuning conversation is unnamed and the
+  # attachment renders empty.
+  #
+  # R2c: this comment used to end "— but the gate still opens for manual review instead of the
+  # whole run failing before Phase 4 is ever reachable", which was not true of the workflow it
+  # described. `draft_tuning` sits between this step and the only gate and carried NO `on-failure`
+  # of its own, so a degraded derive_ids (empty agent id, empty conversation id) reliably failed the
+  # very next step and aborted the run BEFORE `await_apply_tuning` — which is why no tuning proposal
+  # ever surfaced in the UI. The guarantee holds now only because `draft_tuning` carries
+  # `continue: true` as well: the two degradations are load-bearing together, not separately.
+  - name: derive_ids
+    type: kibana.request
+    on-failure:
+      continue: true
+      retry:
+        max-attempts: 3
+        delay: 5s
+    with:
+      method: GET
+      path: "/s/{{ workflow.spaceId }}/internal/pnd/conversations/_derive"
+      query:
+        correlationId: "{{ steps.set_correlation_id.output.correlationId }}"
+      headers:
+        kbn-xsrf: "true"
+        elastic-api-version: "1"
+
+  # Read the rules that actually fired the alerts behind this incident, with their current
+  # queries. This is what turns the draft below from recall into a CHOICE: the model picks one
+  # of the rules named here instead of naming a rule from training data, and it sees the exact
+  # query text it is proposing to change rather than guessing at it.
+  #
+  # `ruleRef` is passed straight through from the event. It is optional on the producer side, so
+  # this renders as an empty string when the signal did not name a rule — which the route reads
+  # as "the whole menu" rather than as "no rule matched", so the unpinned case degrades to the
+  # full candidate list instead of an empty one.
+  #
+  # `continue: true` for the same reason as every other read on this path (R2/D5): the single
+  # gate downstream is alwaysGate, so a failed read can only make the card thinner, never open a
+  # gate that should have stayed shut. When it fails, `steps.read_candidate_rules.output.rules`
+  # renders as an empty string and the prompt says so in place of a menu.
+  - name: read_candidate_rules
+    type: kibana.request
+    on-failure:
+      continue: true
+      retry:
+        max-attempts: 3
+        delay: 5s
+    with:
+      method: GET
+      path: "/s/{{ workflow.spaceId }}/internal/pnd/tuning/candidate-rules"
+      query:
+        correlationId: "{{ steps.set_correlation_id.output.correlationId }}"
+        ruleRef: "{{ event.ruleRef }}"
+      headers:
+        kbn-xsrf: "true"
+        elastic-api-version: "1"
+
+  # 4.2 Draft a detection-rule tuning from the closed incident. Modeled on AD 2.0's Missed
+  # Detection Closure pass: map the incident's malicious actions to coverage gaps and draft one
+  # candidate rule change. public-conversation so any analyst working the queue can read it,
+  # matching the Deep Watch's investigation/incident conversations.
+  #
+  # `agent-id` comes over the wire from _derive rather than being hardcoded (ADR-011), so agent
+  # existence and agent-id availability succeed or degrade together.
+  #
+  # 1800s, not the pre-epic 10m: this is a multi-step turn — `attachment_read` over the discovery
+  # markdown, then a choice across a menu of rules and their current queries — not one completion.
+  # The step no longer previews anything itself (the workflow measures the backtest below), but the
+  # timeout stays where the epic put it: shortening it would be an unrelated behaviour change to
+  # the one step whose failure history is this watch's R2.
+  #
+  # R2, the confirmed root cause of "no tuning proposal has ever surfaced in the UI". This step is
+  # the ONLY one on this path that carried no `on-failure` (derive_ids,
+  # rename_tuning, record_dismissed_tuning and record_tuning_outcome all have one), so any agent
+  # failure aborted the whole run. R2a is why that made only *tuning* invisible: in watch_deep.yaml
+  # the first gate PRECEDES the first ai.agent, so an LLM failure there still leaves a parked gate an
+  # analyst can see, whereas here the only gate FOLLOWS this step — abort before the gate means
+  # nothing to render, anywhere. R2b is why the failure rate is highest here of all places: the
+  # structured output below requires five fields including a nested required object, against three
+  # scalars in the Deep Watch.
+  #
+  # NO retry, deliberately, unlike the kibana.request steps: this is a half-hour multi-step agent
+  # turn that creates a conversation at a FIXED id, and Agent Builder's create is `op_type: 'create'`
+  # (a version conflict surfaces as 404, not 409), so a retry after a partial failure re-runs 1800s
+  # of tool work into a likely id conflict. The two neighbouring `ai.agent` steps use the same bare
+  # `continue: true`.
+  #
+  # Continuing is what gets the run TO the gate; `reason_apply_tuning` and `await_apply_tuning` below
+  # then say plainly that nothing was drafted, so the analyst gets an honest "no draft" card rather
+  # than a card whose every field renders empty.
+  - name: draft_tuning
+    type: ai.agent
+    agent-id: "{{ steps.derive_ids.output.tuningAgentId }}"
+    create-conversation: true
+    public-conversation: true
+    timeout: "1800s"
+    on-failure:
+      continue: true
+    with:
+      conversation_id: "{{ steps.derive_ids.output.tuningConversationId }}"
+      # Lands on the agent-execution document, where `metadata` is flattened-mapped and
+      # term-queryable, so all three phases of one attack correlate via findExecutions.
+      metadata:
+        pnd_conversation_kind: tuning
+        pnd_attack_discovery_alert_id: "{{ steps.set_correlation_id.output.correlationId }}"
+      # A4: the same by-value security.alert attachment, with the same stable per-discovery id
+      # as the Deep Watch so Agent Builder merges rather than duplicating the chip.
+      attachments:
+        - type: "security.alert"
+          id: "pnd-ad-{{ steps.set_correlation_id.output.correlationId }}"
+          data:
+            alert: "{{ steps.derive_ids.output.attackDiscoveryMarkdown }}"
+            attachmentLabel: "Attack discovery: {{ steps.derive_ids.output.attackDiscoveryTitle }}"
+      # The prompt used to be `{{ event | json }}`. The event carries only ids, so that handed
+      # the model a blob with no attack narrative in it; the markdown is the substance, and it
+      # stays in `message` as well as the attachment because attachment content is not inlined
+      # into the prompt (the agent must call `attachment_read`).
+      message: >
+        {{ steps.derive_ids.output.attackDiscoveryMarkdown }}
+
+
+        The incident above was contained and closed. Its incident-response conversation is
+        {{ steps.derive_ids.output.incidentConversationId }}.
+
+
+        The coverage gap the analyst who contained it recorded: {{ event.gapDescription }}
+
+
+        The ATT&CK tactics they recorded it under: {{ event.tactics | json }}
+
+
+        The detection rules behind this incident's alerts, with their current queries:
+        {% if steps.read_candidate_rules.output.rules == blank %}NONE — the candidate-rule read
+        did not return, so you have no rule list to choose from.{% else %}{{ steps.read_candidate_rules.output.rules | json }}{% endif %}
+
+
+        Perform a Missed Detection Closure pass over this incident: identify the malicious
+        actions the current detection coverage failed to catch, and draft a single,
+        highest-leverage tuning to ONE of the rules listed above that would have caught them.
+        Explain your reasoning.
+
+
+        CHOOSE that rule from the list, and copy its `id` into `ruleId` and its `name` into
+        `ruleName` verbatim. Do not name a rule from memory: a rule that is not on the list did
+        not fire here or is not readable by the approver, and both the backtest below and the
+        apply step resolve the rule by that exact id. If the list is empty, propose nothing and
+        say so in `rationale`.
+
+
+        Take the gap from what the analyst recorded above rather than re-deriving it from the
+        alerts — their judgement is what this run exists to act on.
+
+
+        Constrain `change` to the four fields the schema allows: `enabled`,
+        `investigation_fields`, `note` and `query`. Propose `query` ONLY when the rule you chose
+        reports `"type": "query"`; for every other rule type the query is expressed differently
+        and PND's apply route refuses the patch. Never propose an alert-suppression or
+        `threshold` change: those alter how alerts group, so they break alert continuity, and the
+        apply route rejects them server-side.
+
+
+        When you propose a query change, return the rule's existing query verbatim in
+        `current_query` and your rewrite in `proposed_query`, byte-identical to `change.query`:
+        `change` is what gets applied, `proposed_query` is what gets backtested, and a difference
+        between them would show the approver a measurement of something else. This workflow runs
+        that backtest itself, over one window ending when the incident was contained, and puts
+        both alert counts on the approval card — so do not estimate, invent, or describe alert
+        counts anywhere. They are measured after you answer.
+
+
+        Do not apply anything — a human analyst approves the tuning at the next step.
+
+
+        End your response by stating plainly (a) what you will propose for human approval,
+        (b) the exact change or action that approval authorizes, and (c) what happens if it is
+        declined. Return that same statement in `proposal`.
+      # B6a, layer 1 of three. The schema closes the change object so the model cannot propose
+      # anything outside PND_TUNABLE_RULE_FIELDS; `apply_tuning_route.schema.yaml` restricts the
+      # request body to the same set; and `_apply` enforces an allow-list server-side, returning
+      # 400 for anything else — including a field a schema might later widen by accident. The
+      # server-side allow-list, not this schema, is the actual guard.
+      #
+      # `query` is inside the allow-list now that this watch renders a real diff and a real
+      # backtest for a human to read before approving. It carries one condition no allow-list can
+      # express, so the route enforces it separately: the rule is re-fetched at apply time and a
+      # `query` patch is refused on any rule whose `type` is not `query`, because on those types
+      # the field either means something else or does not exist.
+      schema:
+        type: object
+        properties:
+          ruleId:
+            type: string
+            maxLength: 1024
+            description: >
+              Id of the detection rule the tuning applies to. LLM-authored, so the approval
+              dialog prefills it in an editable field rather than trusting it.
+          ruleName:
+            type: string
+            maxLength: 1024
+            description: >
+              Name of that rule. Required because a bare id is not reviewable — the approver
+              has to recognise what they are changing.
+          change:
+            type: object
+            description: >
+              The proposed change, restricted to the four fields PND's apply route permits.
+            properties:
+              enabled:
+                type: boolean
+                description: Enable or disable the rule
+              investigation_fields:
+                type: object
+                description: Custom highlighted fields for the alert flyout
+                properties:
+                  field_names:
+                    type: array
+                    maxItems: 50
+                    items:
+                      type: string
+                      maxLength: 1024
+                required: [field_names]
+              note:
+                type: string
+                maxLength: 4000
+                description: >
+                  Investigation guide markdown. Bounded well below the platform's 20000 so the
+                  composed gate card stays inside the proposal row's 8192-character reasoning
+                  field and the backtest is never truncated off the end.
+              query:
+                type: string
+                maxLength: 2000
+                description: >
+                  The rewritten rule query, in the rule's own `language`. Permitted only on a
+                  rule whose `type` is `query`: the apply route re-fetches the rule and refuses
+                  this field for every other type. Byte-identical to `proposed_query` — this is
+                  the copy that gets applied, that one is the copy that gets backtested.
+          current_query:
+            type: string
+            maxLength: 2000
+            description: >
+              The chosen rule's existing query, verbatim from the list above. Carried separately
+              from `change` so the approver sees a diff rather than a replacement, and bounded to
+              match `change.query` so the pair cannot dominate the composed card.
+          proposed_query:
+            type: string
+            maxLength: 2000
+            description: >
+              The query to backtest as-proposed. Present only alongside `change.query` and equal
+              to it; the workflow previews `current_query` and this over one shared window and
+              renders both alert counts on the card.
+
+              R5 is closed by measurement, not by a field: the model no longer returns alert
+              counts at all. It held `NO_TOOLS` and `security.run_rule_preview` sits behind
+              `experimentalFeatures.rulePreviewAttachmentEnabled` (default false), so an
+              agent-authored `preview` object was structurally unfillable and any value in it
+              would have been invented. Two `workflow.execute` calls into
+              `system-security-rule-preview` measure it instead, and a preview that fails or
+              aborts renders as `inconclusive` — never as a zero, which reads as "no alerts" when
+              it means "no measurement".
+          rationale:
+            type: string
+            maxLength: 4000
+            description: Why this change, and the expected false-positive impact
+          proposal:
+            type: string
+            maxLength: 2000
+            description: >
+              One short paragraph stating plainly (a) what you propose for human approval,
+              (b) the exact change or action approval authorizes, and (c) what happens if it
+              is declined. Rendered verbatim on the approver's queue card, so it must stand on
+              its own without the conversation.
+        required: [ruleId, ruleName, change, rationale, proposal]
+
+  # A3: deterministic title, so the chats view and the Agent Builder picker both read the
+  # attack discovery's own title instead of an LLM-generated name.
+  #
+  # The title is the attack discovery title ALONE — no `[Tuning]` tag (kibana-phf4.16). The kind a
+  # conversation renders with is re-derived from the UUIDv5 namespace that minted its id on every
+  # read (register `#21`), so a tag in the title would be a second source of truth. Renaming this
+  # conversation is still right — the watch owns it — whereas a thread's title is left exactly as
+  # Agent Builder wrote it and PND is forbidden to rename it (D9 / register `#23`).
+  #
+  # NO `elastic-api-version`: `_rename` is registered with plain `router.post`
+  # (`access: 'internal'`, unversioned), unlike PND's own `router.versioned` routes, and the
+  # engine already injects `x-elastic-internal-origin`. Cosmetic only — `_rename` defaults to
+  # `{ access: 'owner' }`, which works here only because the same workflow fakeRequest created
+  # the conversation, and that is a structural read of the code rather than an observed runtime
+  # fact. `continue: true` makes a wrong reading harmless.
+  #
+  # It also makes the degraded path harmless: this step reads only `derive_ids`, never the draft, so
+  # when `draft_tuning` fails the conversation it renames may not exist at all. That 404s, retries
+  # twice, and continues to the gate — which is the intended behaviour, not an oversight.
+  - name: rename_tuning
+    type: kibana.request
+    on-failure:
+      continue: true
+      retry:
+        max-attempts: 2
+        delay: 5s
+    with:
+      method: POST
+      path: "/s/{{ workflow.spaceId }}/internal/agent_builder/conversations/{{ steps.derive_ids.output.tuningConversationId }}/_rename"
+      headers:
+        kbn-xsrf: "true"
+      body:
+        # `| default:` because `_rename` takes any string, including an empty one: the title is
+        # optional in the `_derive` contract and renders empty when the attack discovery has none,
+        # and blanking a real conversation name is worse than a generic one.
+        title: "{{ steps.derive_ids.output.attackDiscoveryTitle | default: 'Attack Discovery' }}"
+
+  # Fetch the rule the model chose, as this space's rules API returns it. Three jobs, in order of
+  # importance:
+  #
+  # 1. It VALIDATES the choice. `ruleId` is LLM-authored; a rule that is not in this space 404s
+  #    here, the previews below skip, and the card reads `inconclusive` instead of showing a
+  #    measurement for a rule the apply route would refuse to patch.
+  # 2. It supplies the authoritative current query, so the diff the approver reads is the rule as
+  #    it really is rather than as the model transcribed it.
+  # 3. It supplies `type`, the only trustworthy answer to "may a `query` change be proposed here
+  #    at all". The candidate list carries the model's view of that; this carries the rule's.
+  #
+  # A fetch rather than picking the chosen row back out of `read_candidate_rules`, because
+  # `PndCandidateRule` deliberately carries no `description` — which the preview body requires —
+  # and projects `index` / `severity` / `risk_score` only when the rules API answered with a value
+  # of the right shape. Composing a preview body from the candidate would mean inventing the
+  # difference, and an invented body backtests something nobody proposed.
+  #
+  # `?id=` is the saved-object id, matching `PndCandidateRule.id` and the id the apply route
+  # patches by. A model that returns the rule's `rule_id` instead 404s here rather than being
+  # looked up a second way, deliberately: a `rule_id` fallback would put a real backtest on a card
+  # whose approval could not be applied, which is worse than no backtest at all.
+  - name: fetch_tuning_rule
+    type: kibana.request
+    if: >-
+      ${{ steps.draft_tuning.output.structured_output.ruleId != blank }}
+    on-failure:
+      continue: true
+      retry:
+        max-attempts: 2
+        delay: 5s
+    with:
+      method: GET
+      path: "/s/{{ workflow.spaceId }}/api/detection_engine/rules?id={{ steps.draft_tuning.output.structured_output.ruleId }}"
+      headers:
+        kbn-xsrf: "true"
+        elastic-api-version: "2023-10-31"
+        Content-Type: application/json
+
+  # ONE window, decided once, so both previews provably measure the same span. Each preview reads
+  # `timeframeEnd` from here rather than composing it: two templates that look identical today are
+  # two templates that can drift, and a backtest whose sides ran over different windows is worse
+  # than none, because it reads as a real comparison.
+  #
+  # The anchor is the moment this incident was contained — `event.timestamp`, which the engine
+  # stamps onto every trigger event (`trigger_event_handler.ts` builds the step context as
+  # `{ ...payload, timestamp, spaceId, … }`), and which is therefore readable here even though the
+  # trigger's payload schema deliberately does not declare it: the engine validates the emitter's
+  # raw payload, so declaring it would only let an emitter supply its own.
+  #
+  # NOT `now`. A rule's `from` lookback is relative to `timeframeEnd`, so anchoring at now would
+  # backtest a window in which this incident's events had already aged past the lookback, and both
+  # sides would come back 0 — two honest-looking zeroes that mean nothing.
+  #
+  # On a `manual` run there is no `event`, so this renders the empty string and both previews skip
+  # rather than sending an empty `timeframeEnd` into the preview API. A manual run has no attack
+  # discovery to tune from either, so nothing is lost.
+  - name: set_backtest_window
+    type: data.set
+    with:
+      timeframeEnd: "{{ event.timestamp }}"
+
+  # The backtest, measured by the workflow instead of asked of the model. Two runs of upstream's
+  # `system-security-rule-preview` over the one window above: the rule's own query, then the
+  # proposed one, identical in every other field.
+  #
+  # Upstream's preview workflow, never a PND copy of it. Its output contract is
+  # `{ succeeded, alert_count, preview_id, is_aborted, error_text }`, which is exactly what this
+  # needs, and every step inside it carries `continue: true` — so an input it dislikes degrades to
+  # `succeeded: false` rather than aborting anything of ours.
+  #
+  # ⚠️ NEITHER SIDE COMPOSES A PREVIEW BODY ANY MORE. Both pass the fetched RULE and let the preview
+  # workflow compose the body from it. The thirteen-field block that used to live here was a
+  # field-for-field copy of the one in `rule_tuning.yaml`, and NEITHER carried
+  # `timestamp_override` — so both measured on `@timestamp` while the rule being backtested matched
+  # on its own override, and the approver read that count as the measured effect of the proposed
+  # query. A rule whose documents are only visible through its override (an Endpoint rule; anything
+  # where ingest lag matters) backtested to a number it could never produce.
+  #
+  # Do NOT reintroduce a `preview_body` here to add a field. The worker composes it (see
+  # `rule_preview.yaml`, whose `compose_preview_body` step carries the allow-list and the reason
+  # `actions` / `enabled` / `throttle` are absent from it), and a body passed here would take a
+  # second, silent path through the same worker. Widening the composed field set is a one-line change
+  # in that one file, which is the whole reason composition moved there.
+  #
+  # What this buys beyond the fix: "identical in every field but the query" is now STRUCTURAL. One
+  # composition site builds both bodies from one rule, and these two steps differ only by
+  # `query_override` — so the property no longer depends on two thirteen-line blocks staying in sync.
+  #
+  # `continue: true` here as well, which upstream's own caller does not do. R2 is this epic's
+  # reason to exist: nothing on the path to the gate may abort the run, and an unreachable or
+  # uninstalled preview workflow is exactly the class of failure that used to leave an analyst
+  # with no card at all.
+  #
+  # The guard is four conditions, and each one is load-bearing: a proposed `change.query`, a
+  # `proposed_query` to measure, a rule whose `type` is genuinely `query`, and a window to measure
+  # it over. Written with `!= blank` rather than `!= ''` because an unset step output is nil, and
+  # `nil != ''` is TRUE in Liquid — the `''` spelling would fail open on exactly the degraded runs
+  # this guard exists for.
+  - name: preview_current_query
+    type: workflow.execute
+    if: >-
+      ${{ steps.draft_tuning.output.structured_output.change.query != blank
+        and steps.draft_tuning.output.structured_output.proposed_query != blank
+        and steps.fetch_tuning_rule.output.type == 'query'
+        and steps.set_backtest_window.output.timeframeEnd != blank }}
+    on-failure:
+      continue: true
+    with:
+      workflow-id: system-security-rule-preview
+      inputs:
+        space_id: "{{ workflow.spaceId }}"
+        # No `query_override`, so the worker measures the rule's own query — the authoritative copy of
+        # it, never the model's transcription.
+        rule: "${{ steps.fetch_tuning_rule.output }}"
+        invocation_count: 2
+        timeframe_end: "{{ steps.set_backtest_window.output.timeframeEnd }}"
+
+  # Identical to the step above in every input but `query_override`, and identical by construction
+  # rather than by care: same guard, same rule, same window, one composition site downstream. The one
+  # difference is the one thing being measured.
+  - name: preview_proposed_query
+    type: workflow.execute
+    if: >-
+      ${{ steps.draft_tuning.output.structured_output.change.query != blank
+        and steps.draft_tuning.output.structured_output.proposed_query != blank
+        and steps.fetch_tuning_rule.output.type == 'query'
+        and steps.set_backtest_window.output.timeframeEnd != blank }}
+    on-failure:
+      continue: true
+    with:
+      workflow-id: system-security-rule-preview
+      inputs:
+        space_id: "{{ workflow.spaceId }}"
+        query_override: "{{ steps.draft_tuning.output.structured_output.proposed_query }}"
+        rule: "${{ steps.fetch_tuning_rule.output }}"
+        invocation_count: 2
+        timeframe_end: "{{ steps.set_backtest_window.output.timeframeEnd }}"
+  # D5 / ADR-012: materialise the `[Thread]` conversation paired 1:1 with this proposal, EAGERLY, so
+  # the tuning proposal has a thread the moment it parks rather than only if someone clicks. The
+  # thread is minted via the public create route — no LLM turn — with the title set at creation.
+  #
+  # The body is `{ correlationId, gateId }` and nothing else, forever. `_ensure` builds the
+  # title server-side from the gate registry and the Attack Discovery; a `prompt` or `message` field
+  # here would be unused caller-supplied text. Unknown properties are dropped rather than rejected,
+  # so an extra field could never 400 this step either.
+  #
+  # ⚠️ PLACEMENT IS LOAD-BEARING, AND WRONG PLACEMENT FAILS SILENTLY. `list_pending_pnd_gates`
+  # attaches a gate's reasoning from the single COMPLETED step with the greatest
+  # `finishedAt <= gate.startedAt` — timestamp order, not graph order. Slotting this step between
+  # `reason_apply_tuning` and the gate would make IT that predecessor, and a `kibana.request` output
+  # carries no `reasoning`, so every tuning card would lose its whole body with no error anywhere.
+  # It therefore runs BEFORE the reasoning block, never between it and the gate. It is also before
+  # the `waitForInput` rather than after it: a step after the gate only runs once the analyst has
+  # answered, which is the opposite of eager.
+  #
+  # Consequence of being pre-gate, and expected rather than a bug: `listPendingPndGates` only reads
+  # executions already `WAITING_FOR_INPUT`, so at this moment the gate's step execution does not
+  # exist and `_ensure` finds no proposal row. The attachments degrade to the gate registry plus
+  # the Attack Discovery narrative — real content, not placeholders.
+  #
+  # `continue: true` is non-negotiable: a thread failure aborting the watch would be the same class
+  # of defect as R2, which is the reason this epic exists. Unlike `draft_tuning` this one DOES retry,
+  # because `_ensure` is idempotent by construction (D6: pre-read, per-registration in-flight map,
+  # post-failure re-read, deterministic attachment ids), so a retry answers `created: false` instead
+  # of opening a second thread. Two attempts, not three, bounds the delay the
+  # analyst waits for the proposal to appear.
+  #
+  # Self-call depth: workflow → `_ensure` → POST /conversations is 3 against Core's MAX_SELF_CALL_DEPTH = 4,
+  # with the `_find` read and the three attachment POSTs as siblings at the same depth. There is no
+  # budget for another hop.
+  - name: ensure_thread_apply_tuning
+    type: kibana.request
+    on-failure:
+      continue: true
+      retry:
+        max-attempts: 2
+        delay: 5s
+    with:
+      method: POST
+      path: "/s/{{ workflow.spaceId }}/internal/pnd/threads/_ensure"
+      headers:
+        kbn-xsrf: "true"
+        elastic-api-version: "1"
+      body:
+        correlationId: "{{ steps.set_correlation_id.output.correlationId }}"
+        gateId: apply_tuning
+
+  # 4.3 The single gate. alwaysGate: it gets NO `if` wrapper at all — exactly like the Deep
+  # Watch's await_incident_contained — so a raised autonomy level can never auto-accept it, and
+  # it must never gain an `else` auto-accept marker either. Enforced structurally here, by a
+  # regression test, AND server-side in _sweep (defense in depth). Its reasoning block precedes
+  # it directly so resolvePredecessorReasoning attaches it to this gate.
+  #
+  # A7: this is the one gate that authorizes a write to a production detection rule, so the
+  # queue row has to stand on its own. `build_proposal_rows` projects ONLY `reasoning.summary`
+  # into the row — `extractReasoningSummary` drops `sections` (security finding D3) — so all
+  # four required facts live in the summary: the rule by name AND id, the exact proposed change,
+  # the backtest before/after, and the rationale (via the agent's own closing statement). A
+  # tuning row showing only a rationale is not an approvable proposal; it is a request to trust
+  # the model. The sections repeat the same evidence for any surface that reads the raw step
+  # output.
+  #
+  # R2, second half: `continue: true` on draft_tuning only guarantees the gate is REACHED. Rendered
+  # against a failed draft every field below is empty, which reads as "a change with nothing in it"
+  # rather than "no draft" — so the degraded case is stated explicitly first. `== blank` rather than
+  # `unless`, because in Liquid an empty string is TRUTHY and only `blank` matches nil, false and ''
+  # alike; the engine renders with `strictVariables: false`, so a missing step output is nil here
+  # rather than a render error.
+  #
+  # R6: this summary is the ONLY carrier of `ruleId` / `ruleName` / `change` that reaches the UI.
+  # `PndProposalRow` has no field for any of them, and nothing in `pnd/server` ever reads
+  # `steps.draft_tuning.output.structured_output` — `list_pending_pnd_gates` resolves only the gate's
+  # timestamp-predecessor `output.reasoning`, and `extract_reasoning_summary` reduces even that to
+  # this one string. So the fields are flattened to prose here and recovered from prose there; the
+  # regex in `pnd/public/pages/conversations/helpers/parse_tuning_proposal` exists because the structured
+  # output was never being read, not because the model failed to produce it.
+  #
+  # Each recoverable fact therefore sits behind a STABLE LABEL with a `| json`-encoded value, so the
+  # reader can anchor on the label and `JSON.parse` the value instead of pattern-matching prose. The
+  # labels are pinned on both sides — as `TUNING_*_LABEL` constants in `parse_tuning_proposal`, and
+  # as rendered-text assertions in `watch_post_incident.test.ts`. Changing one side alone silently
+  # drops recovery back to the legacy prose fallback, which is why both sides are tested, and why
+  # they must move in the SAME commit: `@kbn/workflows` is `group: platform` and cannot import
+  # `@kbn/pnd-common`, so a shared constant is not available to pin them with.
+  #
+  # `| json` (not bare interpolation) is what makes this robust: a `ruleName` containing a quote, a
+  # paren, a colon or a newline broke the old `"<name>" (id <id>)` shape, and an empty `ruleName`
+  # with a valid `ruleId` lost the id entirely. JSON escaping removes the whole class. The two
+  # backtest counts are `| json`-encoded for the same reason and read the same way: a measured side
+  # is a bare number, an unmeasured one is the STRING `"inconclusive"`, so the reader tells them
+  # apart by JSON type rather than by parsing prose.
+  #
+  # The labels deliberately differ from the previous wording (`Rule: "x" (id y)`,
+  # `Proposed change, restricted to …`, and `Proposed change (enabled / investigation_fields /
+  # note only):` before `query` joined the set) so a row parked by an older watch version cannot be
+  # read as if it carried the new format — an absent anchor is how the reader detects a legacy row.
+  # Do not "tidy" a label back toward an earlier spelling.
+  #
+  # ORDER IS DELIBERATE: short, load-bearing anchors first, long free-form values last.
+  # `extractReasoningSummary` TRUNCATES this string at 8192 characters silently, and the per-field
+  # bounds are sane individually without summing to anything below that (`note` alone is 4000), so
+  # what sits late is what gets lost. Rule name, rule id and the two counts are cheap and go first;
+  # the change, the current query and the model's closing statement follow.
+  - name: reason_apply_tuning
+    type: data.set
+    with:
+      reasoning:
+        summary: >-
+          {% if steps.draft_tuning.output.structured_output.ruleId == blank %}NO TUNING WAS
+          DRAFTED: the detection-engineer agent did not return a rule to tune, so the fields below
+          are empty because the draft is absent, not because the change is empty. There is nothing
+          to apply — dismiss this proposal. Nothing has been changed, and nothing will be.
+          {% endif %}Approval writes to a production detection rule. Rule name:
+          {{ steps.draft_tuning.output.structured_output.ruleName | json }}. Rule id:
+          {{ steps.draft_tuning.output.structured_output.ruleId | json }}. Backtest alerts as-is:
+          {% if steps.preview_current_query.output.succeeded and steps.preview_current_query.output.is_aborted == false %}{{ steps.preview_current_query.output.alert_count | json }}{% else %}"inconclusive"{% endif %}.
+          Backtest alerts as-proposed:
+          {% if steps.preview_proposed_query.output.succeeded and steps.preview_proposed_query.output.is_aborted == false %}{{ steps.preview_proposed_query.output.alert_count | json }}{% else %}"inconclusive"{% endif %}.
+          An inconclusive side means the rule preview did not run or did not finish, so there is NO
+          measurement on that side — it does not mean zero alerts. Both sides are inconclusive by
+          design when the proposal changes no query: only a query change alters which documents the
+          rule matches, so there is nothing for a backtest to compare. Proposed change
+          (enabled / investigation_fields / note / query only):
+          {{ steps.draft_tuning.output.structured_output.change | json }}. Rule query as-is:
+          {% if steps.fetch_tuning_rule.output.query == blank %}{{ steps.draft_tuning.output.structured_output.current_query | json }}{% else %}{{ steps.fetch_tuning_rule.output.query | json }}{% endif %}.
+          Declining ends the run and changes nothing. The detection engineer's own
+          closing statement follows.
+          {{ steps.draft_tuning.output.structured_output.proposal }}
+        sections:
+          - title: Rule
+            body: >-
+              {{ steps.draft_tuning.output.structured_output.ruleName }}
+              ({{ steps.draft_tuning.output.structured_output.ruleId }})
+          - title: Proposed change
+            body: "{{ steps.draft_tuning.output.structured_output.change | json }}"
+          # Prose, not JSON, and the one place a preview's `error_text` is allowed to appear: it is
+          # operator text of unknown shape, so it stays out of every `| json` anchor above rather
+          # than being escaped into one.
+          #
+          # `!= blank`, never `!= ''`: a skipped or failed preview leaves `error_text` nil, and
+          # `nil != ''` is TRUE in Liquid — the `''` spelling would print an errors line with
+          # nothing after it on exactly the runs where there was no preview to fail.
+          - title: Backtest
+            body: >-
+              As-is: {% if steps.preview_current_query.output.succeeded and steps.preview_current_query.output.is_aborted == false %}{{ steps.preview_current_query.output.alert_count }} alerts{% else %}inconclusive{% endif %}.
+              As-proposed: {% if steps.preview_proposed_query.output.succeeded and steps.preview_proposed_query.output.is_aborted == false %}{{ steps.preview_proposed_query.output.alert_count }} alerts{% else %}inconclusive{% endif %}.
+              {% if steps.set_backtest_window.output.timeframeEnd == blank %}No backtest window was resolved, so neither side was measured.{% else %}Both sides ran over one window ending {{ steps.set_backtest_window.output.timeframeEnd }}, the moment this incident was contained.{% endif %}
+              {% if steps.preview_current_query.output.error_text != blank %}As-is preview reported: {{ steps.preview_current_query.output.error_text }}{% endif %}
+              {% if steps.preview_proposed_query.output.error_text != blank %}As-proposed preview reported: {{ steps.preview_proposed_query.output.error_text }}{% endif %}
+          - title: Rationale
+            body: "{{ steps.draft_tuning.output.structured_output.rationale }}"
+  - name: await_apply_tuning
+    type: waitForInput
+    # 30d, not the 72h default. Expiry FAILS the step, which is fail-closed.
+    timeout: 30d
+    with:
+      # Same degraded branch as the reasoning block above, and it matters more here: this string is
+      # what `extractGatePrompt` projects into the proposal row's title AND message, and an empty
+      # render falls back to `Step "await_apply_tuning" is waiting for input` — boilerplate that
+      # hides the failure instead of naming it.
+      message: >-
+        {% if steps.draft_tuning.output.structured_output.ruleId == blank %}No tuning was drafted:
+        the detection-engineer agent did not return a rule to tune. Dismiss this proposal — there
+        is nothing to apply.{% else %}Apply a tuning to detection rule
+        "{{ steps.draft_tuning.output.structured_output.ruleName }}"
+        ({{ steps.draft_tuning.output.structured_output.ruleId }})?{% endif %}
+      schema:
+        type: object
+        properties:
+          decision:
+            type: string
+            enum: [approve, dismiss]
+          rationale:
+            type: string
+        required: [decision, rationale]
+
+  # Dismissal short-circuits the workflow before the terminal marker. Nested check because
+  # step context only holds predecessors — await_apply_tuning must be in scope here.
+  - name: stop_if_dismissed_tuning
+    type: if
+    condition: 'steps.await_apply_tuning.output.response.decision : "dismiss"'
+    steps:
+      # A6: the refusal to change a production rule is the most consequential thing a human
+      # says on this path, and it used to leave nothing in the conversation. Appended before
+      # the workflow.output below, because workflow.output TERMINATES the run.
+      - name: record_dismissed_tuning
+        type: ai.agent
+        agent-id: "{{ steps.derive_ids.output.tuningAgentId }}"
+        create-conversation: false
+        timeout: "5m"
+        on-failure:
+          continue: true
+        with:
+          conversation_id: "{{ steps.derive_ids.output.tuningConversationId }}"
+          metadata:
+            pnd_conversation_kind: tuning
+            pnd_attack_discovery_alert_id: "{{ steps.set_correlation_id.output.correlationId }}"
+          message: >
+            AUDIT RECORD — do not investigate, do not analyze, do not use any tools.
+
+
+            A human analyst was asked whether to apply this detection-rule tuning, and
+            DECLINED. Record the decision below verbatim, then acknowledge it in one line. No
+            rule was changed and the run ends here.
+
+
+            Responder: {{ steps.await_apply_tuning.output.respondedBy }}
+
+            Decision: dismissed
+
+            Rationale: {{ steps.await_apply_tuning.output.response.rationale }}
+      - name: dismissed_tuning
+        type: workflow.output
+        status: completed
+        with:
+          outcome: dismissed
+          phase: post_incident
+          rationale: "{{ steps.await_apply_tuning.output.response.rationale }}"
+
+  # A6: the tuning gate is TERMINAL for its conversation — nothing follows that could carry the
+  # decision into the thread — so the outcome is appended explicitly. Agent Builder exposes no
+  # plain conversation-append endpoint (its internal conversation routes are `_rename` and
+  # `_mark_read`; `sml/_attach` attaches memory entries to an existing round), so this is the
+  # documented fallback: a minimal ai.agent turn on the same conversation with
+  # create-conversation: false. `continue: true` and no retry — the workflow output is the
+  # authoritative record, the conversation is the additional audit surface, and retrying an LLM
+  # call on a purely-audit path buys nothing.
+  - name: record_tuning_outcome
+    type: ai.agent
+    agent-id: "{{ steps.derive_ids.output.tuningAgentId }}"
+    create-conversation: false
+    timeout: "5m"
+    on-failure:
+      continue: true
+    with:
+      conversation_id: "{{ steps.derive_ids.output.tuningConversationId }}"
+      metadata:
+        pnd_conversation_kind: tuning
+        pnd_attack_discovery_alert_id: "{{ steps.set_correlation_id.output.correlationId }}"
+      message: >
+        AUDIT RECORD — do not investigate, do not analyze, do not use any tools.
+
+
+        A human analyst approved this detection-rule tuning. Record the decision below
+        verbatim, then acknowledge it in one line. The rule write itself is performed by PND in
+        the approving analyst's own request context, not by this workflow.
+
+
+        Responder: {{ steps.await_apply_tuning.output.respondedBy }}
+
+        Decision: {{ steps.await_apply_tuning.output.response.decision }}
+
+        Rationale: {{ steps.await_apply_tuning.output.response.rationale }}
+
+  # Terminal marker for the execution projection.
+  #
+  # B6-yaml: there is deliberately NO apply step here. The previous `apply_tuning`
+  # kibana.request sent only `{ rationale }` while `_apply` expects `body.id | rule_id`, so it
+  # 400'd by design. The consequential write now happens from the PND UI, in the approving
+  # user's request context, with an editable rule id — `draft_tuning`'s `ruleId` is LLM-authored
+  # and may not name a real rule, which would 404 `_apply` live on stage. Both placements are
+  # identity-correct (a resume re-keys the execution to the resumer, so a post-gate step would
+  # also run as the approver); the UI wins on the editable-id affordance and the broken
+  # contract, and it is a POC shortcut rather than a recommendation — the detection team's
+  # direction is a workflow write step (security-team#16012).
+  - name: tuning_applied
+    type: workflow.output
+    status: completed
+    with:
+      outcome: applied
+      phase: post_incident
+      ruleId: "{{ steps.draft_tuning.output.structured_output.ruleId }}"
+      ruleName: "{{ steps.draft_tuning.output.structured_output.ruleName }}"
+      rationale: "{{ steps.await_apply_tuning.output.response.rationale }}"

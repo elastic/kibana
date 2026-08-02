@@ -1,0 +1,59 @@
+openapi: 3.0.0
+info:
+  title: Auto-respond to PND Proposals API endpoint
+  version: '1'
+paths:
+  /internal/pnd/proposals/_auto_respond:
+    post:
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      operationId: AutoRespondToProposals
+      description: >
+        Auto-accept every currently pending gate for a watch that its autonomy
+        level permits, skipping alwaysGate gates. The handler allow-lists
+        watchId against the managed PND watch ids before resuming any step.
+        Autonomy is read server-side from uiSettings; origin only selects the
+        HITL channel stamp.
+      summary: Auto-respond to proposals
+      tags:
+        - PND API
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                origin:
+                  type: string
+                  enum: [auto, dial]
+                  description: >
+                    Who initiated this auto-approval. `auto` is the machine path
+                    and stamps pnd-autonomy-auto; `dial` is the operator raising
+                    the autonomy level and stamps pnd-autonomy-dial.
+                watchId:
+                  type: string
+                  maxLength: 256
+                  description: Managed system watch workflow id to auto-respond for
+              required:
+                - origin
+                - watchId
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  approved:
+                    type: integer
+                    minimum: 0
+                    description: Number of gates auto-approved
+                  skipped:
+                    type: integer
+                    minimum: 0
+                    description: Number of pending gates left in place
+                required:
+                  - approved
+                  - skipped

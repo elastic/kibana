@@ -8,47 +8,43 @@
 import React, { memo } from 'react';
 import { css } from '@emotion/react';
 import { EuiButtonEmpty, EuiIcon, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
-import { type Investigation } from '@kbn/pnd-common';
+import type { PndProposalRow } from '@kbn/pnd-common';
 import { getActionButtonIconProps } from '../helpers';
 import { CONVERSATION_CARD_ACTIONS } from './translations';
+import { primaryActionLabel } from './helpers/primary_action_label';
 import { BaseActions, type BaseActionsProps } from '../actions';
 
 export interface ConversationsActionsGroupProps {
-  investigation: Investigation;
-  onClickRecommendedAction?: ({ id }: { id: Investigation['id'] }) => void;
-
   onClickAction: BaseActionsProps['onClickAction'];
+  onClickRecommendedAction?: ({ id }: { id: string }) => void;
+  proposal: PndProposalRow;
 }
 
 export const ConversationsActionsGroup = memo<ConversationsActionsGroupProps>(
-  ({ investigation, onClickRecommendedAction, onClickAction }) => {
+  ({ onClickAction, onClickRecommendedAction, proposal }) => {
     const { euiTheme } = useEuiTheme();
+    const { recommendedAction, sourceId, threadConversationId } = proposal;
+    const iconProps = getActionButtonIconProps({ recommendedAction });
+    const label = primaryActionLabel(proposal.gateId) ?? CONVERSATION_CARD_ACTIONS.default;
 
     return (
-      <EuiFlexGroup alignItems="center" gutterSize="xs" responsive direction="row">
-        <EuiFlexItem grow={false} alignItems="center" justifyContent="flexStart">
-          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} direction="row">
+      <EuiFlexGroup alignItems="center" direction="row" gutterSize="xs" responsive>
+        <EuiFlexItem alignItems="center" grow={false} justifyContent="flexStart">
+          <EuiFlexGroup alignItems="center" direction="row" gutterSize="s" responsive={false}>
             <EuiFlexItem grow={false}>
-              <EuiIcon
-                size="s"
-                type={getActionButtonIconProps(investigation).type}
-                color={getActionButtonIconProps(investigation).color}
-                aria-hidden={true}
-              />
+              <EuiIcon aria-hidden={true} color={iconProps.color} size="s" type={iconProps.type} />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                color={getActionButtonIconProps(investigation).color}
+                color={iconProps.color}
                 flush="both"
-                size="xs"
                 onClick={(event: React.MouseEvent) => {
                   event.stopPropagation();
-                  onClickRecommendedAction?.({
-                    id: investigation.id,
-                  });
+                  onClickRecommendedAction?.({ id: sourceId });
                 }}
+                size="xs"
               >
-                {investigation.primaryActionLabel ?? CONVERSATION_CARD_ACTIONS.default}
+                {label}
               </EuiButtonEmpty>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -56,18 +52,25 @@ export const ConversationsActionsGroup = memo<ConversationsActionsGroupProps>(
         <span
           aria-hidden="true"
           css={css({
-            width: '1px',
-            height: euiTheme.size.base,
             background: euiTheme.colors.backgroundLightText,
+            height: euiTheme.size.base,
             marginLeft: euiTheme.size.s,
             marginRight: euiTheme.size.xs,
+            width: '1px',
             [`@media (max-width: ${euiTheme.breakpoint.m}px)`]: {
               display: 'none',
             },
           })}
         />
         <EuiFlexItem grow={false}>
-          <BaseActions investigation={investigation} onClickAction={onClickAction} />
+          <BaseActions
+            chatId={threadConversationId}
+            onClickAction={onClickAction}
+            onClickRecommendedAction={onClickRecommendedAction}
+            primaryActionLabel={label}
+            recommendedAction={recommendedAction}
+            recordId={sourceId}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     );

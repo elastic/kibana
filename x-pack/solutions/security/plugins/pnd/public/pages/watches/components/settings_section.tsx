@@ -12,8 +12,12 @@ interface SettingsSectionProps {
   title: string;
   /** Lower-case fragment shown beside the title, e.g. "applies to this watch only". */
   subtitle?: string;
-  /** Optional action rendered flush-right in the header row. */
-  rightAction?: React.ReactNode;
+  /**
+   * Trailing control on the heading row, pushed to the right — the Workers and Skills sections' "View
+   * all …" links (2026-08-17 simplification). A link rather than a button by intent: it navigates to a
+   * catalog page that already exists in this section's subnav.
+   */
+  headerAction?: React.ReactNode;
   children: React.ReactNode;
   'data-test-subj'?: string;
 }
@@ -27,7 +31,7 @@ interface SettingsSectionProps {
 export const SettingsSection: React.FC<SettingsSectionProps> = ({
   title,
   subtitle,
-  rightAction,
+  headerAction,
   children,
   'data-test-subj': dataTestSubj,
 }) => (
@@ -46,10 +50,15 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
             </EuiText>
           </EuiFlexItem>
         ) : null}
-        {rightAction ? (
+        {headerAction ? (
           <>
+            {/*
+              An empty growing item rather than `grow` on the subtitle: growing the text node would
+              stretch the subtitle away from the title it belongs to, which is the pairing the heading
+              row exists to show.
+            */}
             <EuiFlexItem />
-            <EuiFlexItem grow={false}>{rightAction}</EuiFlexItem>
+            <EuiFlexItem grow={false}>{headerAction}</EuiFlexItem>
           </>
         ) : null}
       </EuiFlexGroup>

@@ -1,25 +1,162 @@
 version: "1"
 name: Deep Watch
 description: >
-  Deep Watch skeleton. Specialist, on-demand depth — forensics,
-  hunts, and draft-only conclusions under human review.
-enabled: false
+  Deep Watch. Invokable investigation worker: given an attack discovery
+  alert id it triages via the alert-analysis skill and returns
+  isIncident, rationale, and proposal. Still runs standalone from an
+  alert or manual trigger. The orchestrated Attack Discovery lifecycle
+  this watch used to carry now runs on the Watch Floor (ADR-015).
+enabled: true
 tags:
   - watch
   - watch-deep
 triggers:
+  - type: alert
   - type: manual
+    inputs:
+      properties:
+        attack_discovery_alert_id:
+          type: string
+          description: >
+            Attack discovery alert id this run investigates. Passed when
+            the Floor invokes this watch. Unset on a standalone alert
+            trigger, which then reads the event instead.
+        space_id:
+          type: string
+          description: >
+            Space this run investigates in. Unset on a standalone alert
+            trigger, which then uses the workflow space.
+      additionalProperties: false
+outputs:
+  - name: isIncident
+    type: boolean
+  - name: rationale
+    type: string
+  - name: proposal
+    type: string
 consts:
   watch_policy:
-    settingsVersion: __WATCH_SETTINGS_VERSION__
-    # Persisted plumbing only; runtime autonomy semantics are defined separately.
-    autonomy: "__WATCH_AUTONOMY_LEVEL__"
     mandate: Deep investigation & hunts
+    autonomyLevel: manual
+    handoff: records
+    onDemand: true
+    draft: false
+    cadence: manual
+    from: 8
+    to: 18
+    mode: window
     ui:
       color: "#8b5cf6"
+      icon: console
       order: 40
+    scopeSummary: Security indices · EDR · DNS
+    scopes:
+      - name: Security indices
+        access: full
+        label: Read
+      - name: EDR telemetry
+        access: full
+        label: Read
+      - name: DNS · netflow
+        access: full
+        label: Read
+    # Capabilities projected from executable steps — see Watch Floor.
+    callables: []
 steps:
-  - name: specialist_stub
-    type: console
+  # kibana-tjil.7 / B1. Resolve the derived investigation conversation so
+  # triage_alerts writes somewhere PND can find, not a random thread.
+  # continue so a standalone alert with no attack-discovery id still
+  # reaches triage. The fifth worker namespace (C5 / .11) is not here
+  # yet — investigationConversationId is the derived conversation this
+  # worker owns until then.
+  - name: derive_ids
+    type: kibana.request
+    on-failure:
+      continue: true
+      retry:
+        max-attempts: 3
+        delay: 5s
     with:
-      message: "Deep Watch skeleton — add ai.agent / skill steps (see Floor)"
+      method: GET
+      path: "/s/{{ inputs.space_id | default: workflow.spaceId }}/internal/pnd/conversations/_derive"
+      query:
+        correlationId: "{{ inputs.attack_discovery_alert_id | default: event.attackDiscoveryAlertId }}"
+      headers:
+        kbn-xsrf: "true"
+        elastic-api-version: "1"
+
+  - name: triage_alerts
+    type: ai.agent
+    timeout: "10m"
+    create-conversation: true
+    public-conversation: true
+    with:
+      conversation_id: "{{ steps.derive_ids.output.investigationConversationId }}"
+      metadata:
+        pnd_conversation_kind: investigation
+        pnd_attack_discovery_alert_id: "{{ inputs.attack_discovery_alert_id | default: event.attackDiscoveryAlertId }}"
+      message: >
+        Use the [/alert-analysis](skill://alert-analysis) skill to
+        investigate the security alert context below. Prefer recall
+        over precision when unsure.
+
+        {{ steps.derive_ids.output.attackDiscoveryMarkdown }}
+
+        Alert / event context:
+        {{ event | json }}
+
+
+        Assess whether this represents a real security incident that
+        warrants escalation. End your response by stating plainly
+        (a) what you will propose for human approval, (b) the exact
+        change or action that approval authorizes, and (c) what
+        happens if it is declined. Return that same statement in
+        `proposal`.
+      schema:
+        type: object
+        properties:
+          isIncident:
+            type: boolean
+            description: >
+              True only when this represents a real security incident
+              that warrants escalation.
+          rationale:
+            type: string
+            maxLength: 4000
+            description: Why this is, or is not, a real incident
+          proposal:
+            type: string
+            maxLength: 2000
+            description: >
+              One short paragraph stating plainly (a) what you propose
+              for human approval, (b) the exact change or action
+              approval authorizes, and (c) what happens if it is
+              declined.
+        required:
+          - isIncident
+          - rationale
+          - proposal
+  - name: record_reasoning
+    type: data.set
+    with:
+      reasoning:
+        summary: >-
+          {{ steps.triage_alerts.output.structured_output.rationale
+          | default: "Deep Watch triage completed." }}
+        sections:
+          - title: Incident
+            body: >-
+              {{ steps.triage_alerts.output.structured_output.isIncident
+              | default: "n/a" }}
+          - title: Proposal
+            body: >-
+              {{ steps.triage_alerts.output.structured_output.proposal
+              | default: "n/a" }}
+
+  - name: emit_result
+    type: workflow.output
+    status: completed
+    with:
+      isIncident: "${{ steps.triage_alerts.output.structured_output.isIncident }}"
+      rationale: "{{ steps.triage_alerts.output.structured_output.rationale }}"
+      proposal: "{{ steps.triage_alerts.output.structured_output.proposal }}"

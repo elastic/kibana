@@ -30,6 +30,7 @@ import * as i18n from '../translations';
 /** Nav ids for the sections that are not per-watch. */
 export const WATCHES_NAV_WORKERS_ID = 'workers' as const;
 export const WATCHES_NAV_SKILLS_ID = 'skills' as const;
+export const WATCHES_NAV_ACTIVITY_ID = 'activity' as const;
 
 /**
  * Either a watch id or one of the global section ids above. Not a closed union: the watch list is
@@ -61,6 +62,12 @@ const GLOBAL_NAV_ITEMS: GlobalNavItem[] = [
     label: SUBNAV_SKILLS,
     path: '/watches/skills',
     icon: 'nested',
+  },
+  {
+    id: WATCHES_NAV_ACTIVITY_ID,
+    label: i18n.SUBNAV_ACTIVITY,
+    path: '/watches/activity',
+    icon: 'clock',
   },
 ];
 

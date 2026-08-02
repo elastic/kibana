@@ -6,31 +6,37 @@
  */
 
 import { type IconType, type EuiButtonEmptyProps } from '@elastic/eui';
-import type { RecommendedAction, Investigation } from '@kbn/pnd-common';
+import type { RecommendedAction } from '@kbn/pnd-common';
 
 export const getEmptyValue = () => '—';
 
 const ACTION_ICONS_MAP: Record<RecommendedAction, IconType> = {
   contain: 'lock',
+  escalate: 'lock',
   investigate: 'external',
   tune: 'gear',
-  escalate: 'lock',
 };
 
-export const getActionButtonIconProps = (
-  investigation: Investigation
-): {
-  type: IconType;
+export const getActionButtonIconProps = ({
+  recommendedAction,
+  severity,
+}: {
+  recommendedAction?: RecommendedAction;
+  severity?: string;
+}): {
   color: EuiButtonEmptyProps['color'];
+  type: IconType;
 } => {
-  if (!investigation.recommendedAction) {
-    return { type: 'flag', color: 'warning' };
+  if (recommendedAction == null) {
+    return { color: 'warning', type: 'flag' };
   }
-  if (investigation.recommendedAction === 'contain' && investigation.severity === 'high') {
-    return { type: 'cross', color: 'danger' };
+
+  if (recommendedAction === 'contain' && severity === 'high') {
+    return { color: 'danger', type: 'cross' };
   }
+
   return {
-    type: ACTION_ICONS_MAP[investigation.recommendedAction],
-    color: ['investigate', 'tune'].includes(investigation.recommendedAction) ? 'primary' : 'danger',
+    color: ['investigate', 'tune'].includes(recommendedAction) ? 'primary' : 'danger',
+    type: ACTION_ICONS_MAP[recommendedAction],
   };
 };

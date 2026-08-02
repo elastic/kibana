@@ -1,0 +1,35 @@
+openapi: 3.0.0
+info:
+  title: PND Gate component schemas
+  version: '1'
+paths: {}
+components:
+  x-codegen-enabled: true
+  schemas:
+    PndGateId:
+      type: string
+      enum: [open_investigation, promote_incident, incident_contained, apply_tuning]
+      description: >
+        A registered HITL gate id — the `gateId` half of the `(correlationId,
+        gateId)` key a `[Thread]` conversation is derived from (D1), and the same key
+        `dedupeProposals` dedupes proposals on, which is why "one row per Proposal" and
+        "one thread per Proposal" are the same guarantee.
+
+
+        A **closed enum matching `PND_GATE_IDS`**, never a free string, because
+        `deriveThreadConversationId` fails closed on anything outside `PND_GATE_REGISTRY`:
+        no thread id can exist for an unregistered gate, so no contract may claim one
+        does. In particular the four `waitForInput` **step** ids (`await_open_investigation`
+        …) are deliberately *not* members — they are a different vocabulary, and passing one
+        where a gate id belongs derives `undefined`.
+
+
+        Shared by every surface that names a gate rather than copied per route:
+        `PndConversation.gateId` (present only on the `thread` kind) and
+        `EnsureThreadRequestBody.gateId`. `route_contracts.test.ts` pins the member list
+        against `PND_GATE_IDS` itself, so the two cannot drift.
+
+
+        `PndProposalRow.gateId` is deliberately left as the free string it already was:
+        widening a *response* field to a closed enum would make an older parked row
+        unparseable rather than merely unrecognised.

@@ -9,15 +9,42 @@ triggers:
   - type: manual
     inputs:
       properties:
+        invocation_count:
+          type: number
+          description: How many rule executions the preview should simulate.
         preview_body:
           type: object
           additionalProperties: true
-          description: Detection Engine rule preview request body.
+          description: >-
+            Detection Engine rule preview request body, composed by the CALLER. Use this for a rule
+            that does not exist yet — the creation lane previews a draft, so there is no rule to
+            compose from. Ignored when `rule` is supplied.
+        query_override:
+          type: string
+          description: >-
+            Query to measure instead of the rule's own. Omit to measure the rule as-is, which is how
+            one composition serves both sides of a before/after backtest.
+        rule:
+          type: object
+          additionalProperties: true
+          description: >-
+            A rule as `GET /api/detection_engine/rules` returns it. When supplied, this workflow
+            composes the preview body from it, so the backtest measures the rule's OWN time
+            semantics. Takes precedence over `preview_body`.
         space_id:
           type: string
           description: Space in which to run the preview.
+        timeframe_end:
+          type: string
+          description: >-
+            The moment the preview window ends; a rule's `from` lookback is relative to it. Required
+            in practice when `rule` is passed, since the composed body carries no other window.
+      # ⚠️ Only `space_id` is required, and that is a deliberate LOSS of schema enforcement: the body
+      # may now arrive either composed (`rule`) or literal (`preview_body`), and JSON Schema cannot
+      # say "exactly one of these". Correctness moved to the `if` guard on `compose_preview_body`
+      # below and to the `default:` fallback on `preview_rule`, which is why both are pinned by
+      # `rule_preview.test.ts`.
       required:
-        - preview_body
         - space_id
       additionalProperties: false
 outputs:
@@ -32,6 +59,72 @@ outputs:
   - name: error_text
     type: string
 steps:
+  # Compose the preview body from the rule itself, so a backtest measures what the rule ACTUALLY
+  # does rather than an approximation of it.
+  #
+  # This step exists because the alternative — every caller hand-picking rule fields into a body —
+  # is a contract every caller has to get right independently, and measurably did not: the
+  # thirteen-field block in `watch_post_incident.yaml` was a field-for-field copy of the one in
+  # `rule_tuning.yaml`, and NEITHER carried `timestamp_override`. Both therefore matched documents on
+  # `@timestamp` while the rule they were backtesting matched on its own override, and the approver
+  # read the resulting count as the measured effect of a proposed query change. Composition lives
+  # here now, once.
+  #
+  # ⚠️ `timestamp_override`'s fallback is `'@timestamp'` and NOT the empty string. This is the one
+  # line in the file where the obvious spelling is a regression:
+  # `create_security_rule_type_wrapper.ts` reads `timestampOverride ?? TIMESTAMP` — **nullish**, not
+  # falsy — so `''` would become the primary timestamp field and the preview would query a field
+  # named `''`, breaking every rule that has no override, which is most of them. `'@timestamp'` is
+  # instead provably identical to omitting the field: `TIMESTAMP` IS `'@timestamp'`, so
+  # `primaryTimestamp === TIMESTAMP`, which leaves `secondaryTimestamp` unset, which makes the
+  # runtime-field branch (`secondaryTimestamp && timestampOverride`) false, which leaves
+  # `aggregatableTimestampField` at `'@timestamp'` with no runtime mappings. That is the no-override
+  # path exactly.
+  #
+  # ⚠️ This is an ALLOW-LIST, not a passthrough, and `actions` / `enabled` / `throttle` are absent on
+  # purpose. `run_rule_preview.ts` builds the preview rule as `{ ...internalRule, enabled: true,
+  # actions: internalRule.actions }` and runs it with `shouldWriteAlerts: () => true`. Actions are not
+  # scheduled on that path — the rule type's executor is invoked directly, bypassing the task runner
+  # that schedules them — but "does not currently notify" is a weaker property than "cannot notify",
+  # and a backtest is the place to insist on the stronger one. A passthrough is not expressible here
+  # anyway: the engine has `data.set` and `data.parse` and no object-merge primitive, so there is no
+  # "forward the rule and override one field".
+  #
+  # Fields that still do NOT travel, and would each change the measured count on some rule: `filters`,
+  # `max_signals`, `alert_suppression`, `exceptions_list`, and `data_view_id` (a query rule on a data
+  # view currently composes an empty `index`). Widening the set is now a one-line change in ONE file,
+  # which is the property this step was worth adding for. `query`-type fidelity is what it promises
+  # today; another rule type needs its own type-specific fields and should keep using `preview_body`.
+  #
+  # The guard is on `inputs.rule.id` rather than on the object, because `!= blank` on a scalar is the
+  # idiom used throughout these definitions and a rules-API rule always carries a saved-object id —
+  # so it doubles as "a real rule was passed". `!= blank` and never `!= ''`: an unset input is nil,
+  # and `nil != ''` is TRUE in Liquid, which would fail open on exactly the literal-body calls this
+  # guard exists to skip.
+  - name: compose_preview_body
+    type: data.set
+    if: "${{ inputs.rule.id != blank }}"
+    with:
+      preview_body:
+        description: "{{ inputs.rule.description }}"
+        from: "{{ inputs.rule.from }}"
+        # `${{ }}` for the array and the two numbers: the `{{ }}` form would render them as text.
+        index: "${{ inputs.rule.index }}"
+        interval: "{{ inputs.rule.interval }}"
+        invocationCount: "${{ inputs.invocation_count }}"
+        language: "{{ inputs.rule.language }}"
+        name: "{{ inputs.rule.name }}"
+        # No override means measure the rule as-is, which is how the before side of a backtest gets
+        # the authoritative current query without the caller transcribing it.
+        query: "{{ inputs.query_override | default: inputs.rule.query }}"
+        risk_score: "${{ inputs.rule.risk_score }}"
+        severity: "{{ inputs.rule.severity }}"
+        timeframeEnd: "{{ inputs.timeframe_end }}"
+        timestamp_override: "{{ inputs.rule.timestamp_override | default: '@timestamp' }}"
+        timestamp_override_fallback_disabled: "${{ inputs.rule.timestamp_override_fallback_disabled | default: false }}"
+        to: "{{ inputs.rule.to }}"
+        type: "{{ inputs.rule.type }}"
+
   - name: preview_rule
     type: kibana.request
     with:
@@ -41,13 +134,60 @@ steps:
         kbn-xsrf: string
         elastic-api-version: "2023-10-31"
         Content-Type: application/json
-      body: "${{ inputs.preview_body }}"
+      # The composed body when there was a rule to compose from, and otherwise the caller's own body
+      # untouched. When `compose_preview_body` is skipped its output path resolves to no value, and
+      # Liquid's `default:` substitutes the fallback — which is what makes the new mode purely additive:
+      # every existing literal-body caller reaches the API with exactly the body it sent. (`default:`
+      # and not `unless`: `''` is truthy in `unless`, so that spelling would drop a literal body.)
+      body: "${{ steps.compose_preview_body.output.preview_body | default: inputs.preview_body }}"
     on-failure:
       continue: true
 
   - name: count_preview_alerts
     type: elasticsearch.search
     if: "${{ steps.preview_rule.error == null and steps.preview_rule.output.previewId != null }}"
+    with:
+      index: ".preview.alerts-security.alerts-{{ inputs.space_id }}"
+      size: 0
+      track_total_hits: true
+      query:
+        term:
+          kibana.alert.rule.uuid: "{{ steps.preview_rule.output.previewId }}"
+    on-failure:
+      continue: true
+
+  # Read-your-writes on an index the preview deliberately does not refresh.
+  #
+  # `run_rule_preview` writes its alerts with `refresh: false`
+  # (`create_security_rule_type_wrapper.ts`: `const refresh = isPreview ? false : true`), so a search
+  # issued immediately after the preview races Elasticsearch's 1s auto-refresh interval. The FTR helper
+  # `getPreviewAlerts` calls `refreshIndex` before counting for exactly this reason; this workflow has no
+  # superuser client to do that with (see below), so it tolerates the race instead of assuming it away.
+  #
+  # A lost race is the worst possible failure here, because it is SILENT: `alert_count: 0` is
+  # indistinguishable from "the proposed query matched nothing", and on the tuning card a measured zero
+  # is a meaningful, actionable number. An approver would read "this change would have produced no
+  # alerts" when the truth is "nobody looked in time".
+  #
+  # Guarded on a zero, so a run that already measured something pays NO added latency: the wait and the
+  # second search only execute when the first count came back empty, which turns a silent zero into a
+  # zero confirmed twice.
+  #
+  # ⚠️ This NARROWS the window; it does not close it. An Elasticsearch slower than the wait still yields
+  # a silent zero. The fix that would close it — POSTing `_refresh` to
+  # `.preview.alerts-security.alerts-<space>` — needs the `maintenance` or `manage` index privilege, and
+  # the FTR helper only gets away with it by using a superuser client. Under this workflow's identity
+  # that call can 403, which would leave the race untouched while looking fixed, so it is deliberately
+  # not what this does.
+  - name: wait_for_preview_refresh
+    type: wait
+    if: "${{ steps.count_preview_alerts.output.hits.total.value == 0 }}"
+    with:
+      duration: "2s"
+
+  - name: recount_preview_alerts
+    type: elasticsearch.search
+    if: "${{ steps.count_preview_alerts.output.hits.total.value == 0 }}"
     with:
       index: ".preview.alerts-security.alerts-{{ inputs.space_id }}"
       size: 0
@@ -74,7 +214,12 @@ steps:
     status: completed
     with:
       succeeded: "${{ steps.preview_rule.error == null and steps.count_preview_alerts.error == null and steps.collect_errors.output.error_text == '' }}"
-      alert_count: "${{ steps.count_preview_alerts.output.hits.total.value | default: -1 }}"
+      # Recount first, then the original count, then "no measurement". ⚠️ The chain is safe because
+      # `0` is TRUTHY for liquidjs's `default:` — only `nil`, `false` and empty (`''`, `[]`) are
+      # replaced — so a recount that legitimately confirms zero emits `0` rather than falling through
+      # to `-1`. Do not "simplify" this to `| default: 0`: `-1` means UNMEASURED, which the tuning card
+      # renders as `inconclusive`, and a measured zero must stay distinguishable from it.
+      alert_count: "${{ steps.recount_preview_alerts.output.hits.total.value | default: steps.count_preview_alerts.output.hits.total.value | default: -1 }}"
       preview_id: "{{ steps.preview_rule.output.previewId }}"
       is_aborted: "${{ steps.preview_rule.output.isAborted | default: false }}"
       error_text: "{{ steps.collect_errors.output.error_text }}"

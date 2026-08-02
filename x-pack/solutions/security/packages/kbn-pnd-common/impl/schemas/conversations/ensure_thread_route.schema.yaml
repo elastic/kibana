@@ -1,0 +1,79 @@
+openapi: 3.0.0
+info:
+  title: Ensure PND Thread API endpoint
+  version: '1'
+paths:
+  /internal/pnd/threads/_ensure:
+    post:
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      operationId: EnsureThread
+      description: >
+        Materialise the `[Thread]` conversation paired 1:1 with a single HITL proposal, keyed on
+        `(correlationId, gateId)` (D1). Called eagerly by the Watch Floor and the
+        Post-Incident Watch from a `kibana.request` step with `on-failure: { continue: true }` when a
+        gate parks, so every pending proposal has a thread whether or not anyone opens it (D5).
+
+
+        Idempotent (D6): a retried workflow step returns the same `threadConversationId` with
+        `created: false`, and creates neither a second conversation nor a second attachment set.
+      summary: Ensure thread
+      tags:
+        - PND API
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: >
+                ⛔ **Exactly these two fields, forever.** The seed message is built server-side
+                from the proposal row the server already has (gate, Attack Discovery title,
+                proposed change, rationale). Do **not** add `prompt`, `message`, `title` or any
+                other caller-supplied text: this route is called by a workflow step and reachable
+                by any holder of `pnd_threads_write`, so caller-supplied prompt text would be a
+                prompt-injection and token-burn vector straight into an LLM turn (D5). Unknown
+                properties are dropped rather than rejected, matching `_apply`'s precedent, so an
+                injected field can never reach `/converse` — and a watch is never 400ed for
+                sending one.
+              properties:
+                correlationId:
+                  type: string
+                  format: nonempty
+                  maxLength: 1024
+                  description: >
+                    Attack Discovery 2.0 alert id the thread is derived from. Required and
+                    non-empty: `deriveThreadConversationId` fails closed on a blank or
+                    whitespace-only id, so a body carrying one could only ever derive
+                    `undefined`.
+                gateId:
+                  $ref: '../components/gate.schema.yaml#/components/schemas/PndGateId'
+              required:
+                - correlationId
+                - gateId
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  threadConversationId:
+                    type: string
+                    maxLength: 1024
+                    description: >
+                      Deterministic UUIDv5 thread id,
+                      `uuidv5(`${correlationId}:${gateId}`, PND_THREAD_NAMESPACE)`.
+                      Byte-for-byte the `threadConversationId` already carried on the paired
+                      proposal row.
+                  created:
+                    type: boolean
+                    description: >
+                      True when this call materialised the conversation, false when it already
+                      existed. The idempotency signal a retried workflow step reports with — a
+                      second `true` for one `(correlationId, gateId)` pair means D6's
+                      pre-read / in-flight map / post-failure re-read has a hole.
+                required:
+                  - threadConversationId
+                  - created
