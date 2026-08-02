@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+/**
+ * Migration recommendation: MIXED.
+ */
+
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -46,6 +50,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await searchSessions.expectNoErrorsOrWarnings();
       });
     });
+
+    /**
+     * Migration recommendation: Consider covering this with a unit test.
+     */
     describe('Disabled storing search sessions', () => {
       before(async () => await load(['minimal_read']));
 

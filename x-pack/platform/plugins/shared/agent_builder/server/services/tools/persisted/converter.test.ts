@@ -97,6 +97,16 @@ describe('convertPersistedDefinition', () => {
     });
   });
 
+  it('defaults confirmation to never when not set on the persisted tool', () => {
+    const internal = convertPersistedDefinition({
+      tool: mockedTool,
+      definition: mockedDefinition,
+      context: mockedContext,
+    });
+
+    expect(internal.confirmation).toEqual({ askUser: 'never' });
+  });
+
   it('always sets experimental to false', () => {
     const internal = convertPersistedDefinition({
       tool: mockedTool,
@@ -104,5 +114,33 @@ describe('convertPersistedDefinition', () => {
       context: mockedContext,
     });
     expect(internal.experimental).toBe(false);
+  });
+
+  it('sets confirmation once when persisted', () => {
+    const mockedToolWithConfirmation: ToolPersistedDefinition = {
+      ...mockedTool,
+      confirmation: { askUser: 'once' },
+    };
+    const internal = convertPersistedDefinition({
+      tool: mockedToolWithConfirmation,
+      definition: mockedDefinition,
+      context: mockedContext,
+    });
+
+    expect(internal.confirmation).toMatchObject({ askUser: 'once' });
+  });
+
+  it('sets confirmation always when persisted', () => {
+    const mockedToolWithConfirmation: ToolPersistedDefinition = {
+      ...mockedTool,
+      confirmation: { askUser: 'always' },
+    };
+    const internal = convertPersistedDefinition({
+      tool: mockedToolWithConfirmation,
+      definition: mockedDefinition,
+      context: mockedContext,
+    });
+
+    expect(internal.confirmation).toMatchObject({ askUser: 'always' });
   });
 });

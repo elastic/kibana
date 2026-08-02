@@ -28,6 +28,150 @@
         "0"
       ]
     },
+    "data_autocomplete_rules": {
+      "query": "",
+      "case_sensitive": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
+      "event_category_field": "",
+      "tiebreaker_field": "",
+      "timestamp_field": "",
+      "fetch_size": "",
+      "filter": {
+        "__one_of": [
+          {
+            "__scope_link": "GLOBAL.query"
+          },
+          [
+            {
+              "__scope_link": "GLOBAL.query"
+            }
+          ]
+        ]
+      },
+      "keep_alive": "",
+      "keep_on_completion": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
+      "wait_for_completion_timeout": "",
+      "allow_partial_search_results": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
+      "allow_partial_sequence_results": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
+      "size": "",
+      "fields": {
+        "__one_of": [
+          {
+            "field": "",
+            "format": "",
+            "include_unmapped": {
+              "__one_of": [
+                true,
+                false
+              ]
+            }
+          },
+          ""
+        ]
+      },
+      "result_position": {
+        "__one_of": [
+          "tail",
+          "head"
+        ]
+      },
+      "runtime_mappings": {
+        "*": {
+          "fields": {
+            "*": {
+              "type": {
+                "__one_of": [
+                  "boolean",
+                  "composite",
+                  "date",
+                  "double",
+                  "geo_point",
+                  "geo_shape",
+                  "ip",
+                  "keyword",
+                  "long",
+                  "lookup"
+                ]
+              }
+            }
+          },
+          "fetch_fields": {
+            "__any_of": [
+              {
+                "field": "",
+                "format": ""
+              },
+              ""
+            ]
+          },
+          "format": "",
+          "input_field": "",
+          "target_field": "",
+          "target_index": "",
+          "script": {
+            "__one_of": [
+              {
+                "source": "",
+                "id": "",
+                "params": {},
+                "lang": {
+                  "__one_of": [
+                    "painless",
+                    "expression",
+                    "mustache",
+                    "java"
+                  ]
+                },
+                "options": {
+                  "*": ""
+                }
+              },
+              ""
+            ]
+          },
+          "on_script_error": {
+            "__one_of": [
+              "fail",
+              "continue"
+            ]
+          },
+          "type": {
+            "__one_of": [
+              "boolean",
+              "composite",
+              "date",
+              "double",
+              "geo_point",
+              "geo_shape",
+              "ip",
+              "keyword",
+              "long",
+              "lookup"
+            ]
+          }
+        }
+      },
+      "max_samples_per_key": ""
+    },
     "methods": [
       "GET",
       "POST"

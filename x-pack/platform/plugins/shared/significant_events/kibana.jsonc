@@ -7,7 +7,6 @@
   "visibility": "shared",
   "plugin": {
     "id": "significant_events",
-    "configPath": ["xpack", "significant_events"],
     "browser": true,
     "server": true,
     "requiredPlugins": [
@@ -22,7 +21,6 @@
       "licensing",
       "security",
       "streams",
-      "taskManager",
       "usageCollection",
       "fieldsMetadata"
     ],
