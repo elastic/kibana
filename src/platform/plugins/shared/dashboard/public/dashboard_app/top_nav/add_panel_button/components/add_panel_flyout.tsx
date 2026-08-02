@@ -121,10 +121,9 @@ function NewPanelContent({
                 onChange={(e) => {
                   setSearchTerm(e.target.value);
                 }}
-                aria-label={i18n.translate(
-                  'dashboard.editorMenu.addPanelFlyout.searchLabelText',
-                  { defaultMessage: 'Search field for panels' }
-                )}
+                aria-label={i18n.translate('dashboard.editorMenu.addPanelFlyout.searchLabelText', {
+                  defaultMessage: 'Search field for panels',
+                })}
                 data-test-subj="dashboardPanelSelectionFlyout__searchInput"
               />
             </EuiFormRow>
