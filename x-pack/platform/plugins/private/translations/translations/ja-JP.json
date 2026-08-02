@@ -28904,7 +28904,6 @@
     "xpack.lens.app.cancel": "キャンセル",
     "xpack.lens.app.cancelButtonAriaLabel": "変更を保存せずに最後に使用していたアプリに戻る",
     "xpack.lens.app.convertedLabel": "{title}（変換後）",
-    "xpack.lens.app.createVisualizationDescription": "ES|QLでチャート、メトリクス、表を作成します。",
     "xpack.lens.app.docLoadingError": "保存されたドキュメントの保存中にエラーが発生",
     "xpack.lens.app.downloadButtonFormulasWarningMessage": "CSVには、スプレッドシートアプリケーションで式と解釈される可能性のある文字が含まれています。",
     "xpack.lens.app.downloadButtonFormulasWarningTitle": "式が検出されました",

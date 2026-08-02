@@ -28740,7 +28740,6 @@
     "xpack.lens.app.cancel": "Annuler",
     "xpack.lens.app.cancelButtonAriaLabel": "Revenir à la dernière application sans enregistrer les modifications",
     "xpack.lens.app.convertedLabel": "{title} (converti)",
-    "xpack.lens.app.createVisualizationDescription": "Créez des graphes, des métriques et des tableaux avec ES|QL.",
     "xpack.lens.app.docLoadingError": "Erreur lors du chargement du document enregistré",
     "xpack.lens.app.downloadButtonFormulasWarningMessage": "Votre fichier CSV contient des caractères que les applications de feuilles de calcul pourraient considérer comme des formules.",
     "xpack.lens.app.downloadButtonFormulasWarningTitle": "Formules détectées",

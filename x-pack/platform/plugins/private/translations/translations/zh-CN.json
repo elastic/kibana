@@ -28911,7 +28911,6 @@
     "xpack.lens.app.cancel": "取消",
     "xpack.lens.app.cancelButtonAriaLabel": "返回到上一个应用而不保存更改",
     "xpack.lens.app.convertedLabel": "{title}（已转换）",
-    "xpack.lens.app.createVisualizationDescription": "使用 ES|QL 生成图表、指标和表格。",
     "xpack.lens.app.docLoadingError": "加载已保存文档时出错",
     "xpack.lens.app.downloadButtonFormulasWarningMessage": "您的 CSV 包含电子表格应用程序可能解释为公式的字符。",
     "xpack.lens.app.downloadButtonFormulasWarningTitle": "已检测到公式",

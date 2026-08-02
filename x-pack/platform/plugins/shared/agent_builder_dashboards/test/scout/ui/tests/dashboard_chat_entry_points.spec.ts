@@ -54,13 +54,13 @@ test.describe(
       await kbnClient.importExport.load(DASHBOARD_SAVED_SEARCH_ARCHIVE);
     });
 
-    test.afterAll(async ({ kbnClient }) => {
-      await kbnClient.importExport.unload(DASHBOARD_SAVED_SEARCH_ARCHIVE);
-    });
-
     test.beforeEach(async ({ browserAuth, pageObjects }) => {
       await browserAuth.loginWithCustomRole(dashboardChatRole);
       await pageObjects.dashboard.openNewDashboard();
+    });
+
+    test.afterAll(async ({ kbnClient }) => {
+      await kbnClient.importExport.unload(DASHBOARD_SAVED_SEARCH_ARCHIVE);
     });
 
     test('prefills Chat from an empty-dashboard prompt without sending', async ({
