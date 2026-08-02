@@ -10,6 +10,13 @@ import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
 
 /**
+ * Same kibana archive Dashboard Scout UI tests use to escape the analytics
+ * no-data page on a fresh cluster (data views + dashboards).
+ */
+const DASHBOARD_SAVED_SEARCH_ARCHIVE =
+  'src/platform/test/functional/fixtures/kbn_archiver/dashboard/current/kibana';
+
+/**
  * Scoped role for Chat entry points: dashboard edit + Agent Builder show, plus
  * Actions so EmbeddableAccessBoundary can resolve LLM connectors.
  */
@@ -40,20 +47,15 @@ test.describe(
   'Dashboard Chat entry points',
   { tag: [...tags.stateful.classic, ...tags.serverless.search] },
   () => {
-    /**
-     * Fresh Scout clusters have no data views/dashboards. Without at least one
-     * dashboard, DashboardApp shows the analytics no-data page for this scoped
-     * role ("Contact your administrator") instead of the empty editor.
-     */
-    test.beforeAll(async ({ apiServices }) => {
-      await apiServices.dashboard.create({
-        title: 'chat-entry-points-seed',
-        panels: [],
-      });
+    test.beforeAll(async ({ kbnClient }) => {
+      // Load the shared Dashboard archive so the scoped role skips the analytics
+      // no-data page. Do not cleanStandardList here — that would delete the LLM
+      // connector provisioned by the worker-scoped llmProxy fixture.
+      await kbnClient.importExport.load(DASHBOARD_SAVED_SEARCH_ARCHIVE);
     });
 
     test.afterAll(async ({ kbnClient }) => {
-      await kbnClient.savedObjects.cleanStandardList();
+      await kbnClient.importExport.unload(DASHBOARD_SAVED_SEARCH_ARCHIVE);
     });
 
     test.beforeEach(async ({ browserAuth, pageObjects }) => {
