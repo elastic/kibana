@@ -1,0 +1,66 @@
+openapi: 3.0.0
+info:
+  title: List PND Runs API endpoint
+  version: '1'
+paths:
+  /internal/pnd/runs:
+    get:
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      operationId: ListRuns
+      description: >
+        List recent PND orchestrator runs in the space, newest first. The PND
+        equivalent of Attack Discovery 2.0's Generations list; no cursor pagination.
+      summary: List runs
+      tags:
+        - PND API
+      parameters:
+        - name: size
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 200
+            default: 50
+          description: Maximum number of runs to return
+        - name: watchId
+          in: query
+          required: false
+          schema:
+            type: string
+            maxLength: 256
+          description: Restrict to a single managed system watch workflow id
+        - name: start
+          in: query
+          required: false
+          schema:
+            type: string
+            maxLength: 64
+          description: ISO 8601 or date-math lower bound on startedAt
+        - name: end
+          in: query
+          required: false
+          schema:
+            type: string
+            maxLength: 64
+          description: ISO 8601 or date-math upper bound on startedAt
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  runs:
+                    type: array
+                    maxItems: 200
+                    items:
+                      $ref: '../components/run.schema.yaml#/components/schemas/PndRun'
+                  total:
+                    type: integer
+                    minimum: 0
+                required:
+                  - runs
+                  - total

@@ -13,6 +13,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { PND_PLUGIN_NAME } from '@kbn/pnd-common';
 import { AppChromeLayout } from './components/app_chrome';
+import { PndClientConfigProvider } from './hooks/use_pnd_client_config';
 import type { PndClientConfig, PndStartDependencies } from './types';
 import { PndRoutes } from './routes';
 
@@ -46,17 +47,24 @@ export const renderApp = ({ coreStart, startDeps, params, config }: RenderAppPar
   /**
    * `KibanaContextProvider` backs `useKibana()` from `@kbn/kibana-react-plugin`, which the app uses
    * for `services.http` and `services.notifications`.
+   *
+   * `history` rides along because `@kbn/unsaved-changes-prompt` blocks SPA navigation through the
+   * `ScopedHistory` the `Router` below is mounted with, and react-router's `useHistory()` returns
+   * that same object typed as a plain `History`, which the prompt does not accept. Putting it in
+   * services is how the other plugins that use the prompt reach it (e.g. Ingest Pipelines).
    */
   const App = () => (
-    <KibanaContextProvider services={{ ...coreStart, ...startDeps, pndConfig: config }}>
+    <KibanaContextProvider services={{ ...coreStart, ...startDeps, history: params.history }}>
       <QueryClientProvider client={queryClient}>
-        <Router history={params.history}>
-          <div style={rootStyle}>
-            <AppChromeLayout>
-              <PndRoutes />
-            </AppChromeLayout>
-          </div>
-        </Router>
+        <PndClientConfigProvider config={config}>
+          <Router history={params.history}>
+            <div style={rootStyle}>
+              <AppChromeLayout>
+                <PndRoutes navigateToApp={coreStart.application.navigateToApp} />
+              </AppChromeLayout>
+            </div>
+          </Router>
+        </PndClientConfigProvider>
       </QueryClientProvider>
     </KibanaContextProvider>
   );

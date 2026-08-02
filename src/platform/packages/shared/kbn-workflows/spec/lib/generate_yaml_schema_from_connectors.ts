@@ -133,12 +133,18 @@ function createRecursiveStepSchema(
       switchSchema,
       parallelSchema,
       mergeSchema,
-      WaitStepSchema,
+      WaitStepSchema.extend({
+        'on-failure': getOnFailureStepSchema(stepSchema, loose).optional(),
+      }),
       WaitForInputStepSchema,
       WaitForApprovalStepSchema,
       DataSetStepSchema,
-      WorkflowExecuteStepSchema,
-      WorkflowExecuteAsyncStepSchema,
+      WorkflowExecuteStepSchema.extend({
+        'on-failure': getOnFailureStepSchema(stepSchema, loose).optional(),
+      }),
+      WorkflowExecuteAsyncStepSchema.extend({
+        'on-failure': getOnFailureStepSchema(stepSchema, loose).optional(),
+      }),
       WorkflowOutputStepSchema,
       WorkflowFailStepSchema,
       LoopBreakStepSchema,

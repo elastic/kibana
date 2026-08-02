@@ -17,6 +17,7 @@ import type {
 } from '@kbn/app-header';
 import { PND_WATCHES_SUBNAV_WIDTH } from '../../../components/layout/constants';
 import { PndWatchesNav, type WatchesSectionId } from './pnd_watches_nav';
+import { WATCHES_HEADER_MENU_ITEMS } from './watches_header_menu';
 import * as i18n from '../translations';
 
 const SUBNAV_COLLAPSED_KEY = 'pnd.watches.subnavCollapsed';
@@ -34,8 +35,15 @@ interface WatchesSectionLayoutProps {
   title: AppHeaderTitle;
   description?: AppHeaderDescription;
   badges?: AppHeaderBadge[];
+  /**
+   * The page's own menu items, ahead of the ones every Watches header carries, e.g. the settings
+   * page's Discard changes.
+   */
+  headerMenuItems?: AppHeaderMenu['items'];
   /** Rendered to the left of the header's overflow menu, e.g. a watch's Enabled toggle. */
   headerSwitch?: AppHeaderMenu['switch'];
+  /** The page's filled call to action, e.g. the settings page's Save. */
+  primaryAction?: AppHeaderMenu['primaryActionItem'];
   children: React.ReactNode;
 }
 
@@ -52,7 +60,9 @@ export const WatchesSectionLayout: React.FC<WatchesSectionLayoutProps> = ({
   title,
   description,
   badges,
+  headerMenuItems,
   headerSwitch,
+  primaryAction,
   children,
 }) => {
   const [isCollapsed, setIsCollapsed] = useState(readCollapsed);
@@ -66,27 +76,27 @@ export const WatchesSectionLayout: React.FC<WatchesSectionLayoutProps> = ({
     }
   }, []);
 
-  const menu = useMemo<AppHeaderMenu | undefined>(
-    () =>
-      headerSwitch || isCollapsed
-        ? {
-            switch: headerSwitch,
-            ...(isCollapsed
-              ? {
-                  items: [
-                    {
-                      id: 'pndExpandSubnav',
-                      label: i18n.SUBNAV_EXPAND,
-                      iconType: 'menuRight' as const,
-                      run: () => setCollapsed(false),
-                      testId: 'pndWatchesSubnavExpand',
-                    },
-                  ],
-                }
-              : {}),
-          }
-        : undefined,
-    [headerSwitch, isCollapsed, setCollapsed]
+  const menu = useMemo<AppHeaderMenu>(
+    () => ({
+      items: [
+        ...(isCollapsed
+          ? [
+              {
+                id: 'pndExpandSubnav',
+                label: i18n.SUBNAV_EXPAND,
+                iconType: 'menuRight',
+                run: () => setCollapsed(false),
+                testId: 'pndWatchesSubnavExpand',
+              },
+            ]
+          : []),
+        ...(headerMenuItems ?? []),
+        ...WATCHES_HEADER_MENU_ITEMS,
+      ],
+      primaryActionItem: primaryAction,
+      switch: headerSwitch,
+    }),
+    [headerMenuItems, headerSwitch, isCollapsed, primaryAction, setCollapsed]
   );
 
   return (

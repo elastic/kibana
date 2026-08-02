@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const PLACEHOLDER_BODY = i18n.translate('xpack.pnd.placeholder.body', {
-  defaultMessage: 'This area is coming soon in PND.',
+  defaultMessage: 'This area is coming soon in AlertZero.',
 });
 
 export const PLACEHOLDER_BACK = i18n.translate('xpack.pnd.placeholder.backToBrief', {

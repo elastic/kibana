@@ -1,0 +1,75 @@
+openapi: 3.0.0
+info:
+  title: Apply PND Tuning API endpoint
+  version: '1'
+paths:
+  /internal/pnd/tuning/{proposalId}/_apply:
+    post:
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      operationId: ApplyTuning
+      description: >
+        Apply an approved detection-rule tuning drafted by the Detection Watch. Gated
+        behind the final HITL step; the required, non-empty rationale is recorded for audit.
+        The rule is identified by `id` or `rule_id` (exactly one is required — enforced by
+        the route, which cannot be expressed here), and the change itself is constrained to
+        PND_TUNABLE_RULE_FIELDS.
+      summary: Apply tuning
+      tags:
+        - PND API
+      parameters:
+        - name: proposalId
+          in: path
+          required: true
+          schema:
+            type: string
+            maxLength: 1024
+          description: Id of the tuning proposal being applied
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: string
+                  maxLength: 1024
+                  description: >
+                    Detection rule id. LLM-authored in the draft, so the approval dialog
+                    prefills it in an editable field and the analyst confirms it — otherwise
+                    `_apply` 404s on a rule the model invented.
+                rule_id:
+                  type: string
+                  maxLength: 1024
+                  description: Detection rule `rule_id`, as an alternative to `id`
+                change:
+                  $ref: '../components/tuning.schema.yaml#/components/schemas/PndTuningChange'
+                rationale:
+                  type: string
+                  format: nonempty
+                  maxLength: 2000
+                  description: Required, non-empty human rationale for applying the tuning
+              required:
+                - rationale
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  proposalId:
+                    type: string
+                    maxLength: 1024
+                  ruleId:
+                    type: string
+                    maxLength: 1024
+                    description: Detection rule id that was updated
+                  applied:
+                    type: boolean
+                required:
+                  - proposalId
+                  - ruleId
+                  - applied

@@ -157,4 +157,45 @@ describe('generateYamlSchemaFromConnectors', () => {
       expect(elapsed).toBeLessThan(500);
     });
   });
+
+  describe('on-failure on built-in leaf steps', () => {
+    const schema = generateYamlSchemaFromConnectors([]);
+    const cases = [
+      {
+        name: 'wait',
+        step: {
+          name: 's',
+          'on-failure': { continue: true },
+          type: 'wait',
+          with: { duration: '15s' },
+        },
+      },
+      {
+        name: 'workflow.execute',
+        step: {
+          name: 's',
+          'on-failure': { continue: true },
+          type: 'workflow.execute',
+          with: { 'workflow-id': 'child' },
+        },
+      },
+      {
+        name: 'workflow.executeAsync',
+        step: {
+          name: 's',
+          'on-failure': { continue: true },
+          type: 'workflow.executeAsync',
+          with: { 'workflow-id': 'child' },
+        },
+      },
+    ];
+
+    it.each(cases)('accepts on-failure on $name', ({ step }) => {
+      const parsed = schema.parse({ ...BASE_WORKFLOW, steps: [step] }) as {
+        steps: Array<{ 'on-failure'?: { continue?: boolean } }>;
+      };
+
+      expect(parsed.steps[0]['on-failure']).toEqual({ continue: true });
+    });
+  });
 });

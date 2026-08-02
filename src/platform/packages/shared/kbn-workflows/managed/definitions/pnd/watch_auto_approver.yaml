@@ -1,0 +1,87 @@
+version: "1"
+name: Watch Auto Approver
+description: >
+  Per-run auto-approver. Armed by the Floor via workflow.executeAsync so the
+  child inherits the watch request. Bounded ladder: wait 15s then POST
+  _auto_respond, repeated at 60s and 300s. Every step continues on failure.
+  No retry — a 403 must stay a 403.
+enabled: true
+tags:
+  - security
+  - auto-approver
+triggers:
+  - type: manual
+    inputs:
+      properties:
+        space_id:
+          type: string
+          description: Space the parent watch is running in.
+        watch_id:
+          type: string
+          description: Parent watch id whose parked gates this run may auto-respond for.
+      required:
+        - space_id
+        - watch_id
+      additionalProperties: false
+steps:
+  # Bounded ladder. Three attempts, no retry: a 403 means this run's identity
+  # lacks the dual privilege, and replaying it cannot change that. continue on
+  # every step so a failed rung still tries the later delays — a gate that
+  # parks after the 15s POST can still be answered at 60s or 300s.
+  - name: wait_15s
+    type: wait
+    on-failure:
+      continue: true
+    with:
+      duration: "15s"
+  - name: auto_respond_15s
+    type: kibana.request
+    on-failure:
+      continue: true
+    with:
+      method: POST
+      path: "/s/{{ inputs.space_id }}/internal/pnd/proposals/_auto_respond"
+      headers:
+        kbn-xsrf: "true"
+        elastic-api-version: "1"
+      body:
+        origin: auto
+        watchId: "{{ inputs.watch_id }}"
+  - name: wait_60s
+    type: wait
+    on-failure:
+      continue: true
+    with:
+      duration: "60s"
+  - name: auto_respond_60s
+    type: kibana.request
+    on-failure:
+      continue: true
+    with:
+      method: POST
+      path: "/s/{{ inputs.space_id }}/internal/pnd/proposals/_auto_respond"
+      headers:
+        kbn-xsrf: "true"
+        elastic-api-version: "1"
+      body:
+        origin: auto
+        watchId: "{{ inputs.watch_id }}"
+  - name: wait_300s
+    type: wait
+    on-failure:
+      continue: true
+    with:
+      duration: "300s"
+  - name: auto_respond_300s
+    type: kibana.request
+    on-failure:
+      continue: true
+    with:
+      method: POST
+      path: "/s/{{ inputs.space_id }}/internal/pnd/proposals/_auto_respond"
+      headers:
+        kbn-xsrf: "true"
+        elastic-api-version: "1"
+      body:
+        origin: auto
+        watchId: "{{ inputs.watch_id }}"

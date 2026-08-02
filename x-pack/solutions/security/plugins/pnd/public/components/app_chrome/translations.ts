@@ -60,5 +60,5 @@ export const SUBNAV_SKILLS = i18n.translate('xpack.pnd.watches.subnav.skills', {
 });
 
 export const ASK_PND_LABEL = i18n.translate('xpack.pnd.chrome.askPnd', {
-  defaultMessage: 'Ask PND',
+  defaultMessage: 'Ask AlertZero',
 });

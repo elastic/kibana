@@ -10,7 +10,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { API_VERSIONS, PND_SKILLS_URL, buildSkillUrl } from '@kbn/pnd-common';
 import type { ListSkillsResponse, WatchSkill } from '@kbn/pnd-common';
 import { queryKeys } from '../query_keys';
-import { retryOnTransientError } from './use_watches_api';
+import { retryOnTransientError } from './retry_on_transient_error';
 
 export const useSkills = () => {
   const { services } = useKibana();

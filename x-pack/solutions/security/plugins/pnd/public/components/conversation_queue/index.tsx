@@ -5,4 +5,10 @@
  * 2.0.
  */
 
-export { ConversationQueue } from './conversation_queue';
+export { ConversationQueue, SECTION_PULSE_MS } from './conversation_queue';
+export type { ConversationQueueProps, RevealSectionRequest } from './conversation_queue';
+export {
+  NO_INVESTIGATION_GROUP_KEY,
+  groupProposalsByInvestigation,
+} from './helpers/group_proposals_by_investigation';
+export type { PndInvestigationGroup } from './helpers/group_proposals_by_investigation';

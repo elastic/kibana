@@ -5,13 +5,19 @@
  * 2.0.
  */
 
-import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
+import { useQuery } from '@kbn/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { API_VERSIONS, PND_WORKERS_URL, buildWorkerUrl } from '@kbn/pnd-common';
-import type { ListWorkersResponse, WatchWorker } from '@kbn/pnd-common';
+import { API_VERSIONS, PND_WORKERS_URL } from '@kbn/pnd-common';
+import type { ListWorkersResponse } from '@kbn/pnd-common';
 import { queryKeys } from '../query_keys';
-import { retryOnTransientError } from './use_watches_api';
+import { retryOnTransientError } from './retry_on_transient_error';
 
+/**
+ * Reads the Workers catalog, which the route projects from the lanes' real `ai.agent` steps
+ * (kibana-phf4.6). There is deliberately no `useToggleWorker` beside it: a projection has nothing to
+ * toggle, `PATCH /internal/pnd/workers/{workerId}` answers 400, and the tables render their
+ * switches inert rather than sending a request that is always refused.
+ */
 export const useWorkers = () => {
   const { services } = useKibana();
 
@@ -23,57 +29,5 @@ export const useWorkers = () => {
       }),
     keepPreviousData: true,
     retry: retryOnTransientError,
-  });
-};
-
-export interface ToggleWorkerVariables {
-  workerId: string;
-  enabled: boolean;
-}
-
-/**
- * Toggles a worker's global flag. Optimistic so the switch responds immediately.
- *
- * Also invalidates every watch detail, because a watch's Workers table greys out rows whose global
- * flag is off — effective enablement is global AND the per-watch attachment.
- */
-export const useToggleWorker = () => {
-  const { services } = useKibana();
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async ({
-      workerId,
-      enabled,
-    }: ToggleWorkerVariables): Promise<{
-      worker: WatchWorker;
-    }> =>
-      services.http!.patch<{ worker: WatchWorker }>(buildWorkerUrl(workerId), {
-        version: API_VERSIONS.internal.v1,
-        body: JSON.stringify({ enabled }),
-      }),
-    onMutate: async ({ workerId, enabled }) => {
-      const queryKey = queryKeys.workers.list();
-      await queryClient.cancelQueries({ queryKey });
-
-      const previous = queryClient.getQueryData<ListWorkersResponse>(queryKey);
-      if (previous) {
-        queryClient.setQueryData<ListWorkersResponse>(queryKey, {
-          workers: previous.workers.map((worker) =>
-            worker.id === workerId ? { ...worker, enabled } : worker
-          ),
-        });
-      }
-      return { previous };
-    },
-    onError: (_error, _variables, context) => {
-      if (context?.previous) {
-        queryClient.setQueryData(queryKeys.workers.list(), context.previous);
-      }
-    },
-    onSettled: async () => {
-      await queryClient.invalidateQueries({ queryKey: queryKeys.workers.list() });
-      await queryClient.invalidateQueries({ queryKey: queryKeys.watches.all });
-    },
   });
 };

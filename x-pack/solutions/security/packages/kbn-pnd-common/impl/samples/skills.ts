@@ -8,16 +8,23 @@
 /**
  * Default values for the global skill catalog, seeded into the server store.
  *
- * Skill ids are unique among skills only: Containment and Case assembly each exist as both a worker
- * and a skill.
+ * ⚠️ This is a **stub**, and deliberately kept as one (kibana-phf4.6). Skills belong to Agent
+ * Builder: an agent's skills are the `skill_ids` of its agent definition, and PND neither owns the
+ * catalog nor writes to it. The rows below therefore describe skills PND's agents name, with a
+ * global enablement flag that nothing consults at execution time. Workers went the other way in
+ * kibana-phf4.6 — they are now projected from the lanes that really run, and their `skillIds` come
+ * straight off the agent definition rather than from this seed. Skills stay seeded because the real
+ * replacement is an Agent Builder read, not a PND table; see the register entry in the plugin README.
  *
- * `lastRunSecondsAgo` is a seed-only field — see the note in `workers.ts`.
+ * `lastRunSecondsAgo` is a seed-only field: the store converts it to an absolute ISO timestamp when
+ * it seeds, so relative labels ("4m ago") stay believable for the life of the Kibana process instead
+ * of drifting to "16 days ago" the way a hardcoded date would.
  */
 
 import {
   SYSTEM_SECURITY_WATCH_DARK_ID,
   SYSTEM_SECURITY_WATCH_DEEP_ID,
-  SYSTEM_SECURITY_WATCH_DETECTION_ID,
+  SYSTEM_SECURITY_WATCH_POST_INCIDENT_ID,
   SYSTEM_SECURITY_WATCH_FLOOR_ID,
   SYSTEM_SECURITY_WATCH_OFFICER_ID,
 } from '../../constants';
@@ -44,7 +51,7 @@ export const SKILLS_SEED: WatchSkillSeed[] = [
     watchIds: [
       SYSTEM_SECURITY_WATCH_FLOOR_ID,
       SYSTEM_SECURITY_WATCH_DEEP_ID,
-      SYSTEM_SECURITY_WATCH_DETECTION_ID,
+      SYSTEM_SECURITY_WATCH_POST_INCIDENT_ID,
     ],
     lastRunSecondsAgo: 18 * MINUTE,
     enabled: true,
@@ -83,7 +90,7 @@ export const SKILLS_SEED: WatchSkillSeed[] = [
   },
   {
     id: 'rule-preview',
-    watchIds: [SYSTEM_SECURITY_WATCH_DETECTION_ID],
+    watchIds: [SYSTEM_SECURITY_WATCH_POST_INCIDENT_ID],
     lastRunSecondsAgo: 26 * MINUTE,
     enabled: true,
   },

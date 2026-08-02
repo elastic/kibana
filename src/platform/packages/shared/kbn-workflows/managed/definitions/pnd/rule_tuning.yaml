@@ -35,7 +35,7 @@ outputs:
   - name: harvest_failed
     type: boolean
 consts:
-  # Liquid has no array literal, so `| default: []` yields undefined rather than an
+  # Liquid has no array literal, so `| default: []` yields no value rather than an
   # empty array. A const is the only way to spell an empty-array fallback.
   no_rows: []
   # Written onto every alert that reached a decision, and filtered out by the harvest,

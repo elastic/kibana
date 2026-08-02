@@ -6,3 +6,5 @@
  */
 
 export { BlastRadius } from './blast_radius';
+export type { BlastRadiusProps } from './blast_radius';
+export type { PndBlastRadiusEntity } from './helpers/merge_discovery_entities';

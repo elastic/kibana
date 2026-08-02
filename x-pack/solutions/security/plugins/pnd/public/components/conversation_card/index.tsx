@@ -5,3 +5,4 @@
  * 2.0.
  */
 export { ConversationCard } from './conversation_card';
+export type { ConversationCardProps } from './conversation_card';

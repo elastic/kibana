@@ -1,0 +1,75 @@
+openapi: 3.0.0
+info:
+  title: Emit PND Detection Change Signal API endpoint
+  version: '1'
+paths:
+  /internal/pnd/signals/_detection_change:
+    post:
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      operationId: EmitDetectionChangeSignal
+      description: >
+        Emit one `security.detectionChangeSignal` for a concluded investigation that never
+        parked a HITL gate. The Watch Floor calls this from its `not_an_incident` branch
+        with `on-failure: { continue: true }`, so a signalling failure cannot fail the run.
+
+
+        HITL terminals (a dismissal at open-investigation or promote-incident, and either
+        decision at containment) emit from `_respond` instead. This route exists because
+        `assess_investigation`'s else branch never resumes a gate.
+
+
+        Unknown properties are dropped rather than rejected, matching `_ensure`, so a watch
+        is never 400ed for sending an extra field.
+      summary: Emit detection change signal
+      tags:
+        - PND API
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                correlationId:
+                  type: string
+                  format: nonempty
+                  maxLength: 1024
+                  description: >
+                    Attack Discovery 2.0 alert id the claim is about. The Floor maps
+                    the producer event's alert id onto this field at the boundary, the
+                    same way `_derive` does.
+                gapDescription:
+                  type: string
+                  format: nonempty
+                  maxLength: 2000
+                  description: >
+                    The investigation worker's rationale, verbatim. Clipped by the emit
+                    helper to this bound. Empty or whitespace-only is refused: a coverage
+                    claim that says nothing is worse than no claim.
+                sourceRunId:
+                  type: string
+                  format: nonempty
+                  maxLength: 1024
+                  description: Workflow execution id of the Floor run that concluded.
+              required:
+                - correlationId
+                - gapDescription
+                - sourceRunId
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  emitted:
+                    type: boolean
+                    description: >
+                      True when the claim fired. False when it could not (missing
+                      correlation id, blank rationale, or a Workflows failure). The run
+                      still completed; this is the R4 signal that the subscriber was
+                      not woken.
+                required:
+                  - emitted

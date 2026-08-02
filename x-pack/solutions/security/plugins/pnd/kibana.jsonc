@@ -4,7 +4,7 @@
   "owner": ["@elastic/security-solution"],
   "group": "security",
   "visibility": "private",
-  "description": "PND Security Watch investigation queue and catalog",
+  "description": "AlertZero Security Watch investigation queue and catalog",
   "plugin": {
     "id": "pnd",
     "browser": true,

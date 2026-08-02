@@ -1,24 +1,54 @@
 version: "1"
 name: Watch Floor
 description: >
-  Tier-1 Security Watch Floor. Triages alerts via the alert-analysis skill.
-  Full Alert Analysis managed-workflow wrap (workflow.execute) is the next Floor spike.
-enabled: false
+  Watch Floor Orchestrator. Subscribes to security.attackDiscoveryCreated and drives
+  the four-phase Attack Discovery lifecycle — Signal Triage, Investigation, Incident
+  Response, and Post-Incident Follow-on — through deterministic Agent Builder
+  conversations and fail-closed waitForInput HITL gates. Conversation ids are derived
+  (UUIDv5) by a PND route because Liquid has no uuid5. Every HITL gate always parks as a
+  real waitForInput; autonomy is enforced server-side at approval time, never by a YAML
+  branch. Each investigation and incident conversation is titled for Agent Builder
+  with an `[Investigation]` / `[Incident]` prefix (PND strips those on its own
+  surfaces). Each conversation carries the attack discovery as a
+  security.alert attachment, and records every HITL ask and its outcome — including a
+  dismissal — so the thread is the durable audit surface for the loop.
+enabled: true
 tags:
   - watch
   - watch-floor
+# Fires on a real security.attackDiscoveryCreated event (AD 2.0 only, opt-in per space)
+# and stays manually runnable. The custom trigger's `on.condition` is fail-open by design:
+# it only requires an attack-discovery id to be present, and the engine's default
+# `avoid-loop` cycle guard applies.
 triggers:
-  - type: alert
+  - type: security.attackDiscoveryCreated
+    on:
+      condition: 'event.attackDiscoveryAlertId : *'
   - type: manual
 consts:
   watch_policy:
-    settingsVersion: __WATCH_SETTINGS_VERSION__
-    # Persisted plumbing only; runtime autonomy semantics are defined separately.
-    autonomy: "__WATCH_AUTONOMY_LEVEL__"
     mandate: Frontline triage
+    autonomyLevel: supervised
+    handoff: officer
+    onDemand: false
+    draft: false
+    cadence: stream
+    mode: always
     ui:
       color: "#16b3a6"
+      icon: alert
       order: 10
+    scopeSummary: Security indices · APM · logs
+    scopes:
+      - name: Security indices
+        access: full
+        label: Read
+      - name: APM · logs · SLOs
+        access: full
+        label: Read
+      - name: Finance PII
+        access: masked
+        label: Masked
     # Display overrides only — capabilities are projected from steps below.
     callables:
       - id: alert-analysis
@@ -28,52 +58,631 @@ consts:
         gated: false
         enabled: true
 steps:
-  - name: triage_alerts
-    type: ai.agent
-    timeout: "10m"
-    create-conversation: true
-    with:
-      message: >
-        Use the [/alert-analysis](skill://alert-analysis) skill to triage the
-        security alert context below. Prefer recall over precision when unsure.
-        Return a structured classification.
+  # ============================================================================
+  # Phase 1 — Signal Triage
+  # ============================================================================
 
-        Alert / event context:
-        {{ event | json }}
-      schema:
-        type: object
-        properties:
-          classification:
-            type: string
-            enum:
-              - false_positive
-              - true_positive
-              - inconclusive
-            description: Classification of the alert based on analysis
-          confidence_score:
-            type: number
-            minimum: 0
-            maximum: 1
-            description: Confidence from 0.0–1.0
-          rationale:
-            type: string
-            description: Brief human-readable explanation
-        required:
-          - classification
-          - confidence_score
-          - rationale
-  - name: record_reasoning
+  # Liquid has no uuid5, so all three conversation ids (and the rendered attack-discovery
+  # markdown, its title, the per-phase agent ids and the demo switch) are derived by a PND
+  # route. The path is prefixed with /s/{spaceId} explicitly because the kibana.request step
+  # sends `path` verbatim — buildKibanaRequest short-circuits on the `kibana.request` type
+  # before applySpacePrefix, so only the named-connector branch prefixes the space. The
+  # internal route also needs `elastic-api-version`, which the engine does not inject (it
+  # injects x-elastic-internal-origin and kbn-xsrf for us).
+  #
+  # GRACEFUL DEGRADATION (kibana-idjb.20): retry transient failures, then `continue: true`.
+  # Without `continue`, a persistent 403/500/timeout here (e.g. the AD-generating identity
+  # lacks pnd_read) fails the ENTIRE run before the first HITL gate is reached, so the
+  # investigation vanishes as a failed execution instead of surfacing in the queue. With
+  # `continue`, the exhausted step is recorded FAILED but the run proceeds; the derived
+  # ids/markdown are then unset, so the gate below opens with empty context for manual
+  # review. This matches the documented intent ("failed read -> gate OPENS"). Proved by I1
+  # (kibana-idjb.12) on isolated slot 4: with `continue` the run reaches waiting_for_input.
+  #
+  # It is also what makes the demo switch fail in the right direction: a degraded read renders
+  # `demoForceIncident` empty, KQL yields false, and `assess_investigation` falls through to the
+  # model's REAL verdict. A broken demo switch can never silently force-escalate.
+  - name: derive_ids
+    type: kibana.request
+    on-failure:
+      continue: true
+      retry:
+        max-attempts: 3
+        delay: 5s
+    with:
+      method: GET
+      path: "/s/{{ workflow.spaceId }}/internal/pnd/conversations/_derive"
+      query:
+        correlationId: "{{ event.attackDiscoveryAlertId }}"
+      headers:
+        kbn-xsrf: "true"
+        elastic-api-version: "1"
+
+  # ============================================================================
+  # Phase 2 — Investigation
+  # ============================================================================
+
+  # kibana-tjil.8 / B2 + C4. Mint the Investigation container BEFORE the first
+  # gate parks, so a thread never exists without a parent. POST the public
+  # create route (no LLM turn); title is set here with an `[Investigation]`
+  # prefix for Agent Builder (kibana-tjil.15 / D5). continue: a 409 on a
+  # re-trigger means the container already exists, which is success for this
+  # step. Retry is for transient 5xx, not for the 409. Self-call depth:
+  # workflow → POST /conversations is 2 against Core's MAX_SELF_CALL_DEPTH = 4;
+  # the create route does not nested-self-call.
+  - name: create_investigation_container
+    type: kibana.request
+    on-failure:
+      continue: true
+      retry:
+        max-attempts: 2
+        delay: 5s
+    with:
+      method: POST
+      path: "/s/{{ workflow.spaceId }}/api/agent_builder/conversations"
+      headers:
+        kbn-xsrf: "true"
+        elastic-api-version: "2023-10-31"
+      body:
+        access_control:
+          access_mode: public
+        agent_id: "{{ steps.derive_ids.output.investigationAgentId }}"
+        conversation_id: "{{ steps.derive_ids.output.investigationConversationId }}"
+        title: "[Investigation] {{ steps.derive_ids.output.attackDiscoveryTitle | default: 'Attack Discovery' }}"
+
+  # Gate: open an investigation? Always parks as a waitForInput.
+  # Autonomy is enforced server-side at approval time, never by an if/else here.
+
+  # D5 / ADR-012: materialise the `[Thread]` conversation paired 1:1 with this proposal, EAGERLY,
+  # so the proposal has a thread the moment it parks rather than only if someone clicks. One
+  # step per gate rather than one per file: the thread id is uuidv5(`${adId}:${gateId}`) (D1), so
+  # the gate id a step sends is what decides which proposal the thread belongs to — a single
+  # step would leave the escalation and containment proposals threadless.
+  #
+  # The body is `{ correlationId, gateId }` and nothing else, forever. `_ensure` builds
+  # the title server-side and POSTs the public create route; a `prompt` or `message` field here
+  # would be unused caller-supplied text on a route every holder of `pnd_threads_write` can reach.
+  #
+  # ⚠️ PLACEMENT IS LOAD-BEARING, AND WRONG PLACEMENT FAILS SILENTLY. `list_pending_pnd_gates`
+  # attaches a gate's reasoning from the single COMPLETED step with the greatest
+  # `finishedAt <= gate.startedAt` — timestamp order, not graph order. Slotting this step between
+  # the reasoning block and the gate would make IT that predecessor, and a `kibana.request`
+  # output carries no `reasoning`, so every proposal card would lose its whole body with no error
+  # anywhere. It therefore runs BEFORE the reasoning block, never between it and the gate.
+  #
+  # Before the `waitForInput`, because a step after the gate only
+  # runs once the analyst has answered, which is the opposite of eager. Being pre-gate means
+  # `_ensure` finds no proposal row yet (`listPendingPndGates` reads only executions already
+  # `WAITING_FOR_INPUT`), so the attachments degrade to the gate registry plus the attack
+  # narrative — real content, not placeholders, and expected rather than a bug.
+  #
+  # `continue: true` is non-negotiable: a thread failure aborting the watch would be the same
+  # class of defect as R2, which is the reason this epic exists. It DOES retry, unlike the
+  # `ai.agent` steps, because `_ensure` is idempotent by construction (D6: pre-read,
+  # per-registration in-flight map, post-failure re-read, deterministic attachment ids), so a
+  # retry answers `created: false` instead of opening a second thread. Two attempts, not three,
+  # bounds the delay the analyst waits for the proposal to appear.
+  #
+  # Self-call depth: workflow → `_ensure` → POST /conversations is 3 against Core's
+  # MAX_SELF_CALL_DEPTH = 4, with the `_find` read and the three attachment POSTs as siblings at
+  # the same depth. There is no budget for another hop. The create route does not nested-self-call.
+
+  # kibana-tjil.6 / A5. Arm the per-run auto-approver so parked gates can be answered
+  # the way a human would. `workflow.executeAsync` forwards this run's request, so the
+  # child's `_auto_respond` POSTs as the identity already running the watch. Sits
+  # immediately before `ensure_thread_*` — same placement, never between `reason_*`
+  # and `await_*`. continue, no retry: a failed arm must not abort the watch or spawn
+  # a second child.
+  - name: arm_auto_approver_open_investigation
+    type: workflow.executeAsync
+    on-failure:
+      continue: true
+    with:
+      workflow-id: system-security-watch-auto-approver
+      inputs:
+        space_id: "{{ workflow.spaceId }}"
+        watch_id: system-security-watch-floor
+  - name: ensure_thread_open_investigation
+    type: kibana.request
+    on-failure:
+      continue: true
+      retry:
+        max-attempts: 2
+        delay: 5s
+    with:
+      method: POST
+      path: "/s/{{ workflow.spaceId }}/internal/pnd/threads/_ensure"
+      headers:
+        kbn-xsrf: "true"
+        elastic-api-version: "1"
+      body:
+        correlationId: "{{ event.attackDiscoveryAlertId }}"
+        gateId: open_investigation
+
+  # The reasoning block sits immediately before its waitForInput, so
+  # resolvePredecessorReasoning (greatest finishedAt <= wait.startedAt) attaches it
+  # to this gate. Nothing may sit between them.
+  #
+  # A7: the queue renders `message` as the row headline and `reasoning.summary` as its
+  # body, and `build_proposal_rows` projects ONLY the summary — `extractReasoningSummary`
+  # drops `sections` (security finding D3). So the summary, not the sections, has to say
+  # what approval authorizes and what a decline does. No agent has run yet at this gate,
+  # so there is no closing statement to quote; the summary names the specific attack
+  # instead.
+  - name: reason_open_investigation
     type: data.set
     with:
       reasoning:
         summary: >-
-          {{ steps.triage_alerts.output.structured_output.rationale
-          | default: "Watch Floor triage completed." }}
+          Approving opens an Investigation conversation for
+          "{{ steps.derive_ids.output.attackDiscoveryTitle }}" and runs a full alert
+          analysis against this space's live data; that investigation's own verdict then
+          decides whether an escalation gate is raised. Declining ends the run now,
+          records your rationale in the thread, and opens nothing.
         sections:
-          - title: Classification
-            body: >-
-              {{ steps.triage_alerts.output.structured_output.classification
-              | default: "inconclusive" }}
-              (confidence
-              {{ steps.triage_alerts.output.structured_output.confidence_score
-              | default: "n/a" }})
+          - title: Attack discovery
+            body: "{{ steps.derive_ids.output.attackDiscoveryMarkdown }}"
+  - name: await_open_investigation
+    type: waitForInput
+    # 30d, not the 72h default. Expiry FAILS the step, which is fail-closed.
+    timeout: 30d
+    with:
+      message: >-
+        Open an investigation into
+        "{{ steps.derive_ids.output.attackDiscoveryTitle }}"?
+      schema:
+        type: object
+        properties:
+          decision:
+            type: string
+            enum: [approve, dismiss]
+          rationale:
+            type: string
+        required: [decision, rationale]
+  # Step context only holds predecessors, so the dismissal check must live where
+  # await_open_investigation is in scope.
+  - name: stop_if_dismissed_investigation
+    type: if
+    condition: 'steps.await_open_investigation.output.response.decision : "dismiss"'
+    steps:
+      # A6: a dismissal is the human overriding the machine — the single most important
+      # thing to preserve — and it used to leave NOTHING in any conversation. Agent
+      # Builder exposes no plain conversation-append endpoint (its internal conversation
+      # routes are `_rename` and `_mark_read`; `sml/_attach` attaches memory entries to an
+      # existing round), so this is the documented fallback: a minimal ai.agent turn.
+      #
+      # Unlike the other three records this one still sets create-conversation:
+      # true as a degrade path: the container is minted before this gate, so a
+      # healthy run appends; if minting failed the dismissal can still create
+      # the conversation at the same deterministic UUIDv5.
+      #
+      # `continue: true` and no retry: the workflow output below is the authoritative
+      # record, the conversation is the additional audit surface, and retrying an LLM call
+      # on a purely-audit path doubles latency and cost for no correctness gain.
+      - name: record_dismissed_investigation
+        type: ai.agent
+        agent-id: "{{ steps.derive_ids.output.investigationAgentId }}"
+        create-conversation: true
+        public-conversation: true
+        timeout: "5m"
+        on-failure:
+          continue: true
+        with:
+          conversation_id: "{{ steps.derive_ids.output.investigationConversationId }}"
+          metadata:
+            pnd_conversation_kind: investigation
+            pnd_attack_discovery_alert_id: "{{ event.attackDiscoveryAlertId }}"
+          attachments:
+            - type: "security.alert"
+              id: "pnd-ad-{{ event.attackDiscoveryAlertId }}"
+              data:
+                alert: "{{ steps.derive_ids.output.attackDiscoveryMarkdown }}"
+                attachmentLabel: "Attack discovery: {{ steps.derive_ids.output.attackDiscoveryTitle }}"
+          message: >
+            {{ steps.derive_ids.output.attackDiscoveryMarkdown }}
+
+
+            AUDIT RECORD — do not investigate, do not analyze, do not use any tools.
+
+
+            A human analyst was asked whether to open an investigation into the attack
+            discovery above, and DECLINED. Record the decision below verbatim, then
+            acknowledge it in one line. Nothing further happens on this attack discovery.
+
+
+            Responder: {{ steps.await_open_investigation.output.respondedBy }}
+
+            Decision: dismissed
+
+            Rationale: {{ steps.await_open_investigation.output.response.rationale }}
+      - name: dismissed_investigation
+        type: workflow.output
+        status: completed
+        with:
+          outcome: dismissed
+          phase: investigation
+          rationale: "{{ steps.await_open_investigation.output.response.rationale }}"
+
+  # kibana-tjil.8 / B2. The Floor no longer investigates inline. After the
+  # analyst (or auto-approver) answers the gate, invoke Deep Watch as a sync
+  # child and read its isIncident. Self-call depth: watch → workflow.execute
+  # (in-process, forwards this run's request) → child's kibana.request is 3
+  # against Core's MAX_SELF_CALL_DEPTH = 4. No continue: a failed worker must
+  # not look like a false-positive and skip to not_an_incident.
+  - name: investigate
+    type: workflow.execute
+    with:
+      workflow-id: system-security-watch-deep
+      inputs:
+        attack_discovery_alert_id: "{{ event.attackDiscoveryAlertId }}"
+        space_id: "{{ workflow.spaceId }}"
+
+  # 2.6 The real assessment. kibana-tjil.8 reads `steps.investigate.output.isIncident`
+  # from the Deep Watch worker rather than an inline agent's structured_output.
+  #
+  # The demo override is OR'd in FRONT of the real verdict, and it arrives as Kibana config
+  # (`xpack.pnd.demo.forceIncident`, default false) surfaced through _derive rather than as a
+  # workflow const — so flipping it for a staged run needs no YAML edit, no version bump and
+  # no workflow re-install. `or` is safe: every condition goes through evaluateKql and KQL
+  # supports it natively. Do NOT add `| default: false` to demoForceIncident: an absent value
+  # must render empty so KQL yields false and the real verdict decides.
+  #
+  # NOT a gate, so a positive condition is correct here. Everything that promotes to an
+  # incident lives inside this branch.
+  - name: assess_investigation
+    type: if
+    condition: >-
+      steps.derive_ids.output.demoForceIncident : true
+      or steps.investigate.output.isIncident : true
+    steps:
+      # Gate: promote to an incident? Always parks as a waitForInput.
+      # Autonomy is enforced server-side at approval time, never by an if/else here.
+      # D5 / ADR-012, second gate. Same contract, placement and degradation reasoning as
+      # ensure_thread_open_investigation above; only the gate id differs, and it is the gate id
+      # that keys the thread.
+      # kibana-tjil.6 / A5. Same arm as open_investigation, for the escalation gate.
+      - name: arm_auto_approver_promote_incident
+        type: workflow.executeAsync
+        on-failure:
+          continue: true
+        with:
+          workflow-id: system-security-watch-auto-approver
+          inputs:
+            space_id: "{{ workflow.spaceId }}"
+            watch_id: system-security-watch-floor
+      - name: ensure_thread_promote_incident
+        type: kibana.request
+        on-failure:
+          continue: true
+          retry:
+            max-attempts: 2
+            delay: 5s
+        with:
+          method: POST
+          path: "/s/{{ workflow.spaceId }}/internal/pnd/threads/_ensure"
+          headers:
+            kbn-xsrf: "true"
+            elastic-api-version: "1"
+          body:
+            correlationId: "{{ event.attackDiscoveryAlertId }}"
+            gateId: promote_incident
+
+      # A7: the summary asserts NO verdict of its own. It used to claim "The investigation
+      # assessed this as a real incident" while quoting a rationale that could have
+      # concluded the opposite — and in demo mode the branch is forced, so a fixed verdict
+      # claim would be flatly wrong. Sourcing it from the agent's own closing statement is
+      # what keeps card and conversation from drifting.
+      - name: reason_promote_incident
+        type: data.set
+        with:
+          reasoning:
+            summary: >-
+              Approval escalates
+              "{{ steps.derive_ids.output.attackDiscoveryTitle }}" to an incident: an
+              Incident conversation is opened and containment actions are staged for a
+              second gate that is always human. Declining ends the run and records your
+              rationale in the thread. The investigation's own closing statement follows.
+              {{ steps.investigate.output.proposal }}
+            sections:
+              - title: Investigation assessment
+                body: "{{ steps.investigate.output.rationale }}"
+              - title: Attack discovery
+                body: "{{ steps.derive_ids.output.attackDiscoveryMarkdown }}"
+      - name: await_promote_incident
+        type: waitForInput
+        timeout: 30d
+        with:
+          message: >-
+            Escalate "{{ steps.derive_ids.output.attackDiscoveryTitle }}" to an incident?
+          schema:
+            type: object
+            properties:
+              decision:
+                type: string
+                enum: [approve, dismiss]
+              rationale:
+                type: string
+            required: [decision, rationale]
+      - name: stop_if_dismissed_incident
+        type: if
+        condition: 'steps.await_promote_incident.output.response.decision : "dismiss"'
+        steps:
+          # A6: the escalation dismissal is recorded in the INVESTIGATION conversation —
+          # the thread where the escalation was proposed. The incident conversation does
+          # not exist yet, and creating one for a refused escalation would be a lie.
+          # Appends rather than creates: the investigation container was minted
+          # before the first gate.
+          - name: record_dismissed_incident
+            type: ai.agent
+            agent-id: "{{ steps.derive_ids.output.investigationAgentId }}"
+            create-conversation: false
+            timeout: "5m"
+            on-failure:
+              continue: true
+            with:
+              conversation_id: "{{ steps.derive_ids.output.investigationConversationId }}"
+              metadata:
+                pnd_conversation_kind: investigation
+                pnd_attack_discovery_alert_id: "{{ event.attackDiscoveryAlertId }}"
+              message: >
+                AUDIT RECORD — do not investigate, do not analyze, do not use any tools.
+
+
+                A human analyst was asked whether to escalate this investigation to an
+                incident, and DECLINED. Record the decision below verbatim, then
+                acknowledge it in one line. No incident is opened and the run ends here.
+
+
+                Responder: {{ steps.await_promote_incident.output.respondedBy }}
+
+                Decision: dismissed
+
+                Rationale: {{ steps.await_promote_incident.output.response.rationale }}
+          - name: dismissed_incident
+            type: workflow.output
+            status: completed
+            with:
+              outcome: dismissed
+              phase: incident
+              rationale: "{{ steps.await_promote_incident.output.response.rationale }}"
+
+      # Open the Incident conversation at the second caller-supplied UUIDv5. public again,
+      # for the same queue-readability reason as the investigation.
+      #
+      # A6(ii): the escalation decision, its rationale and its responder are passed INTO this
+      # step's message, so the human's answer lands in the thread naturally and costs nothing
+      # extra. At a raised autonomy level the gate was auto-accepted and never executed, so
+      # all three render empty — the prompt says so explicitly, or the model reads the blanks
+      # as a missing human.
+      - name: open_incident
+        type: ai.agent
+        agent-id: "{{ steps.derive_ids.output.incidentAgentId }}"
+        create-conversation: true
+        public-conversation: true
+        timeout: "1800s"
+        with:
+          conversation_id: "{{ steps.derive_ids.output.incidentConversationId }}"
+          metadata:
+            pnd_conversation_kind: incident
+            pnd_attack_discovery_alert_id: "{{ event.attackDiscoveryAlertId }}"
+          attachments:
+            - type: "security.alert"
+              id: "pnd-ad-{{ event.attackDiscoveryAlertId }}"
+              data:
+                alert: "{{ steps.derive_ids.output.attackDiscoveryMarkdown }}"
+                attachmentLabel: "Attack discovery: {{ steps.derive_ids.output.attackDiscoveryTitle }}"
+          message: >
+            {{ steps.derive_ids.output.attackDiscoveryMarkdown }}
+
+
+            This attack discovery has been promoted to an incident.
+
+
+            Human decision on the escalation gate — responder:
+            {{ steps.await_promote_incident.output.respondedBy }}; decision:
+            {{ steps.await_promote_incident.output.response.decision }}; rationale:
+            {{ steps.await_promote_incident.output.response.rationale }}. All three are empty
+            when the gate was auto-accepted at a raised autonomy level rather than answered by
+            a person.
+
+
+            The investigation's assessment:
+            {{ steps.investigate.output.rationale }}
+
+
+            Recommend and stage containment and response actions, and explain the reasoning
+            behind each. Do not execute anything — a human gate approves containment.
+
+
+            End your response by stating plainly (a) what you will propose for human approval,
+            (b) the exact change or action that approval authorizes, and (c) what happens if
+            it is declined. Return that same statement in `proposal`.
+          schema:
+            type: object
+            properties:
+              summary:
+                type: string
+                maxLength: 4000
+                description: What happened, and what containment is being staged
+              rationale:
+                type: string
+                maxLength: 4000
+                description: Why these containment and response actions, in this order
+              proposal:
+                type: string
+                maxLength: 2000
+                description: >
+                  One short paragraph stating plainly (a) what you propose for human
+                  approval, (b) the exact change or action approval authorizes, and (c) what
+                  happens if it is declined. Rendered verbatim on the approver's queue card,
+                  so it must stand on its own without the conversation.
+            required: [summary, rationale, proposal]
+
+      # A3 / D5: deterministic title for the incident conversation. The incident is still
+      # opened by an ai.agent turn, so title is not set at create and `_rename` remains.
+      # Unversioned route, cosmetic-only. `[Incident]` is an Agent Builder title tag
+      # (a surface PND cannot badge); PND strips it on read.
+      - name: rename_incident
+        type: kibana.request
+        on-failure:
+          continue: true
+          retry:
+            max-attempts: 2
+            delay: 5s
+        with:
+          method: POST
+          path: "/s/{{ workflow.spaceId }}/internal/agent_builder/conversations/{{ steps.derive_ids.output.incidentConversationId }}/_rename"
+          headers:
+            kbn-xsrf: "true"
+          body:
+            title: "[Incident] {{ steps.derive_ids.output.attackDiscoveryTitle | default: 'Attack Discovery' }}"
+    # E3, a latent-bug fix rather than demo behavior. While the verdict was a hardcoded
+    # `true` this branch was unreachable; once the condition can be false, a "not an incident"
+    # result would fall through to the top-level reason_incident_contained /
+    # await_incident_contained, which read
+    # `steps.open_incident.output.structured_output.summary`, render empty, and OPEN A
+    # CONTAINMENT GATE FOR A NON-INCIDENT. `workflow.output` terminates the run instead.
+    #
+    # Note the direction of failure: KQL yields false for a missing path, so a failed or
+    # timed-out investigate ends the run rather than escalating. Fail-closed.
+    else:
+      # kibana-tjil.20: a coverage gap does not require an incident. The investigation
+      # worker has no gap verdict (an LLM-behaviour change, out of budget), so this
+      # terminal is a deterministic emit site. The rationale is the worker's own words,
+      # never summarised. continue: a signalling failure must not fail a valid
+      # not-an-incident outcome. Retry is for transient 5xx, matching _ensure.
+      - name: emit_coverage_gap
+        type: kibana.request
+        on-failure:
+          continue: true
+          retry:
+            max-attempts: 2
+            delay: 5s
+        with:
+          method: POST
+          path: "/s/{{ workflow.spaceId }}/internal/pnd/signals/_detection_change"
+          headers:
+            kbn-xsrf: "true"
+            elastic-api-version: "1"
+          body:
+            correlationId: "{{ event.attackDiscoveryAlertId }}"
+            gapDescription: "{{ steps.investigate.output.rationale }}"
+            sourceRunId: "{{ execution.id }}"
+      - name: not_an_incident
+        type: workflow.output
+        status: completed
+        with:
+          outcome: not_an_incident
+          phase: investigation
+          rationale: "{{ steps.investigate.output.rationale }}"
+
+  # ============================================================================
+  # Phase 3 — Incident Response (containment)
+  # ============================================================================
+
+  # Containment gets NO `if` wrapper at all: it is an alwaysGate gate, enforced
+  # structurally here AND server-side in _sweep (defense in depth), with a regression test
+  # pinning the structure. Do not "optimise" a fail-closed wrapper back in — it would let a
+  # raised autonomy level auto-accept a gate that must always require a human, and it must
+  # never gain an `else` auto-accept marker either. Its reasoning block precedes it directly.
+  #
+  # D5 / ADR-012, third gate. Same contract, placement and degradation reasoning as
+  # ensure_thread_open_investigation. Top level, with no `if` wrapper, matching the alwaysGate it
+  # precedes — a wrapper here would hand a raised autonomy level a branch to skip.
+  - name: ensure_thread_incident_contained
+    type: kibana.request
+    on-failure:
+      continue: true
+      retry:
+        max-attempts: 2
+        delay: 5s
+    with:
+      method: POST
+      path: "/s/{{ workflow.spaceId }}/internal/pnd/threads/_ensure"
+      headers:
+        kbn-xsrf: "true"
+        elastic-api-version: "1"
+      body:
+        correlationId: "{{ event.attackDiscoveryAlertId }}"
+        gateId: incident_contained
+
+  - name: reason_incident_contained
+    type: data.set
+    with:
+      reasoning:
+        summary: >-
+          Approval closes out the incident for
+          "{{ steps.derive_ids.output.attackDiscoveryTitle }}" and emits pnd.incidentClosed,
+          which wakes the Detection Watch to draft a rule tuning. This gate is always human —
+          no autonomy level can auto-accept it. Declining records your rationale in the
+          thread. The incident responder's own closing statement follows.
+          {{ steps.open_incident.output.structured_output.proposal }}
+        sections:
+          - title: Incident
+            body: "{{ steps.open_incident.output.structured_output.summary }}"
+          - title: Staged response
+            body: "{{ steps.open_incident.output.structured_output.rationale }}"
+  - name: await_incident_contained
+    type: waitForInput
+    timeout: 30d
+    with:
+      message: >-
+        Confirm "{{ steps.derive_ids.output.attackDiscoveryTitle }}" has been contained, and
+        close the incident?
+      schema:
+        type: object
+        properties:
+          decision:
+            type: string
+            enum: [approve, dismiss]
+          rationale:
+            type: string
+        required: [decision, rationale]
+
+  # A6: this gate is TERMINAL for the incident conversation — nothing follows it that could
+  # carry the decision into the thread — so the outcome is appended explicitly. Agent Builder
+  # exposes no plain conversation-append endpoint, so this is the documented fallback: a
+  # minimal ai.agent turn on the same conversation with create-conversation: false.
+  #
+  # The decision is recorded VERBATIM rather than interpreted, because `incident_closed` below
+  # reports `outcome: contained` for either answer (a dismissal on containment is a
+  # pre-existing asymmetry owned by the server's pnd.incidentClosed emission, not by this
+  # YAML). The thread stays honest either way.
+  - name: record_containment_outcome
+    type: ai.agent
+    agent-id: "{{ steps.derive_ids.output.incidentAgentId }}"
+    create-conversation: false
+    timeout: "5m"
+    on-failure:
+      continue: true
+    with:
+      conversation_id: "{{ steps.derive_ids.output.incidentConversationId }}"
+      metadata:
+        pnd_conversation_kind: incident
+        pnd_attack_discovery_alert_id: "{{ event.attackDiscoveryAlertId }}"
+      message: >
+        AUDIT RECORD — do not investigate, do not analyze, do not use any tools.
+
+
+        A human analyst answered the containment gate for this incident. Record the decision
+        below verbatim, then acknowledge it in one line.
+
+
+        Responder: {{ steps.await_incident_contained.output.respondedBy }}
+
+        Decision: {{ steps.await_incident_contained.output.response.decision }}
+
+        Rationale: {{ steps.await_incident_contained.output.response.rationale }}
+
+  # Terminal marker for the execution projection. pnd.incidentClosed is emitted server-side
+  # when _respond resolves the containment gate on an approval; security.detectionChangeSignal
+  # is emitted from _respond at every Floor HITL terminal and from emit_coverage_gap on the
+  # not-an-incident branch. The orchestrator does not emit either event itself at this step.
+  - name: incident_closed
+    type: workflow.output
+    status: completed
+    with:
+      outcome: contained
+      phase: incident_response
+      decision: "{{ steps.await_incident_contained.output.response.decision }}"
+      rationale: "{{ steps.await_incident_contained.output.response.rationale }}"

@@ -1,0 +1,25 @@
+openapi: 3.0.0
+info:
+  title: PND Autonomy component schemas
+  version: '1'
+paths: {}
+components:
+  x-codegen-enabled: true
+  schemas:
+    AutonomyAutoAccept:
+      type: object
+      description: >
+        Per-gate auto-accept flags derived from a watch's autonomy level. Keyed by
+        gate id; a flag is present and true only when the level auto-accepts that
+        gate. Absent keys are read fail-closed by the orchestrator
+        (`not …autoAccept.<gateId> : true` keeps the gate), so a watch only carries
+        the gates it owns.
+      properties:
+        open_investigation:
+          type: boolean
+        promote_incident:
+          type: boolean
+        incident_contained:
+          type: boolean
+        apply_tuning:
+          type: boolean

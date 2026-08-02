@@ -12,27 +12,27 @@ export const PAGE_TITLE = i18n.translate('xpack.pnd.watches.workers.pageTitle', 
 });
 
 export const PAGE_SUBTITLE = i18n.translate('xpack.pnd.watches.workers.pageSubtitle', {
-  defaultMessage: 'Orchestrated work shared across Watches',
+  defaultMessage: 'The agent steps the Watch lanes run',
 });
 
 export const TABLE_CAPTION = i18n.translate('xpack.pnd.watches.workers.tableCaption', {
-  defaultMessage: 'Workers available to Security Watches',
+  defaultMessage: 'Workers the Security Watch lanes run',
 });
 
 export const COL_WORKER = i18n.translate('xpack.pnd.watches.workers.col.worker', {
   defaultMessage: 'Worker',
 });
 
+export const COL_PHASE = i18n.translate('xpack.pnd.watches.workers.col.phase', {
+  defaultMessage: 'Phase',
+});
+
+export const COL_AGENT = i18n.translate('xpack.pnd.watches.workers.col.agent', {
+  defaultMessage: 'Agent',
+});
+
 export const COL_WATCHES = i18n.translate('xpack.pnd.watches.workers.col.watches', {
   defaultMessage: 'Watches',
-});
-
-export const COL_LAST_RUN = i18n.translate('xpack.pnd.watches.workers.col.lastRun', {
-  defaultMessage: 'Last run',
-});
-
-export const COL_ENABLED = i18n.translate('xpack.pnd.watches.workers.col.enabled', {
-  defaultMessage: 'Enabled',
 });
 
 export const NO_WORKERS = i18n.translate('xpack.pnd.watches.workers.empty', {
@@ -43,108 +43,106 @@ export const LOAD_ERROR = i18n.translate('xpack.pnd.watches.workers.loadError', 
   defaultMessage: 'Unable to load workers.',
 });
 
-export const NOT_IMPLEMENTED_TITLE = i18n.translate(
-  'xpack.pnd.watches.workers.notImplemented.title',
-  {
-    defaultMessage: 'Workers are not implemented yet',
-  }
-);
-
-export const NOT_IMPLEMENTED_BODY = i18n.translate(
-  'xpack.pnd.watches.workers.notImplemented.body',
-  {
-    defaultMessage:
-      'The worker catalog has no durable storage in live mode. Open a Watch on the left to change its settings.',
-  }
-);
-
-export const enableWorkerAriaLabel = (name: string) =>
-  i18n.translate('xpack.pnd.watches.workers.enableAriaLabel', {
-    defaultMessage: 'Enable worker {name}',
-    values: { name },
+export const workerSkills = (skillIds: string) =>
+  i18n.translate('xpack.pnd.watches.workers.skills', {
+    defaultMessage: 'Skills: {skillIds}',
+    values: { skillIds },
   });
 
+export const NO_SKILLS = i18n.translate('xpack.pnd.watches.workers.noSkills', {
+  defaultMessage: 'No skills configured',
+});
+
 /**
- * Name and description per worker id. The API carries ids only, so all worker copy lives here.
- * Keep in step with `WORKERS_SEED` in `@kbn/pnd-common`.
+ * Name and description per worker id, where a worker id is the orchestrator step name the lane
+ * declares. The API carries ids only, so all worker copy lives here.
+ *
+ * Keep in step with the `ai.agent` steps of the managed watch definitions: these are what
+ * `projectWorkers` in the server projects the catalog from, and an id missing here renders as its raw
+ * step name rather than breaking. Today `watch_floor.yaml` contributes the first five and
+ * `watch_post_incident.yaml` the last three; no other lane runs an agent PND installs.
  */
 export const WORKER_NAMES: Record<string, string> = {
-  'threat-intel-enrichment': i18n.translate(
-    'xpack.pnd.watches.workers.threatIntelEnrichment.name',
+  draft_tuning: i18n.translate('xpack.pnd.watches.workers.draftTuning.name', {
+    defaultMessage: 'Draft tuning',
+  }),
+  open_incident: i18n.translate('xpack.pnd.watches.workers.openIncident.name', {
+    defaultMessage: 'Open incident',
+  }),
+  open_investigation: i18n.translate('xpack.pnd.watches.workers.openInvestigation.name', {
+    defaultMessage: 'Open investigation',
+  }),
+  record_containment_outcome: i18n.translate(
+    'xpack.pnd.watches.workers.recordContainmentOutcome.name',
     {
-      defaultMessage: 'Threat intel enrichment',
+      defaultMessage: 'Record containment outcome',
     }
   ),
-  'alert-correlation': i18n.translate('xpack.pnd.watches.workers.alertCorrelation.name', {
-    defaultMessage: 'Alert correlation',
-  }),
-  'host-context': i18n.translate('xpack.pnd.watches.workers.hostContext.name', {
-    defaultMessage: 'Host context',
-  }),
-  'attack-discovery-continuation': i18n.translate(
-    'xpack.pnd.watches.workers.attackDiscoveryContinuation.name',
+  record_dismissed_incident: i18n.translate(
+    'xpack.pnd.watches.workers.recordDismissedIncident.name',
     {
-      defaultMessage: 'Attack Discovery continuation',
+      defaultMessage: 'Record dismissed incident',
     }
   ),
-  containment: i18n.translate('xpack.pnd.watches.workers.containment.name', {
-    defaultMessage: 'Containment',
-  }),
-  'case-assembly': i18n.translate('xpack.pnd.watches.workers.caseAssembly.name', {
-    defaultMessage: 'Case assembly',
-  }),
-  'rule-tuning': i18n.translate('xpack.pnd.watches.workers.ruleTuning.name', {
-    defaultMessage: 'Rule tuning',
-  }),
-  'rule-creation': i18n.translate('xpack.pnd.watches.workers.ruleCreation.name', {
-    defaultMessage: 'Rule creation',
-  }),
-  'prebuilt-rule-onboarding': i18n.translate(
-    'xpack.pnd.watches.workers.prebuiltRuleOnboarding.name',
+  record_dismissed_investigation: i18n.translate(
+    'xpack.pnd.watches.workers.recordDismissedInvestigation.name',
     {
-      defaultMessage: 'Prebuilt rule onboarding',
+      defaultMessage: 'Record dismissed investigation',
     }
   ),
+  record_dismissed_tuning: i18n.translate('xpack.pnd.watches.workers.recordDismissedTuning.name', {
+    defaultMessage: 'Record dismissed tuning',
+  }),
+  record_tuning_outcome: i18n.translate('xpack.pnd.watches.workers.recordTuningOutcome.name', {
+    defaultMessage: 'Record tuning outcome',
+  }),
 };
 
 export const WORKER_DESCRIPTIONS: Record<string, string> = {
-  'threat-intel-enrichment': i18n.translate(
-    'xpack.pnd.watches.workers.threatIntelEnrichment.description',
-    {
-      defaultMessage: 'Pulls external intel into alerts and drafts enrichment context for triage.',
-    }
-  ),
-  'alert-correlation': i18n.translate('xpack.pnd.watches.workers.alertCorrelation.description', {
-    defaultMessage: 'Groups related alerts into a single proposed case or finding.',
-  }),
-  'host-context': i18n.translate('xpack.pnd.watches.workers.hostContext.description', {
-    defaultMessage: 'Attaches host, user, and asset context for investigation readiness.',
-  }),
-  'attack-discovery-continuation': i18n.translate(
-    'xpack.pnd.watches.workers.attackDiscoveryContinuation.description',
-    {
-      defaultMessage: 'Builds investigation evidence and an attack-assessment proposal from AD.',
-    }
-  ),
-  containment: i18n.translate('xpack.pnd.watches.workers.containment.description', {
-    defaultMessage: 'Executes scoped response actions when a Watch is allowed to act.',
-  }),
-  'case-assembly': i18n.translate('xpack.pnd.watches.workers.caseAssembly.description', {
-    defaultMessage: 'Assembles drafted cases for human review and hand-off.',
-  }),
-  'rule-tuning': i18n.translate('xpack.pnd.watches.workers.ruleTuning.description', {
+  draft_tuning: i18n.translate('xpack.pnd.watches.workers.draftTuning.description', {
     defaultMessage:
-      'Routes each false-positive signal to an exception, suppression, or rule-update proposal, with rule diff and expected impact. Works on rules of any type.',
+      'Drafts a detection-rule change from the incident, with the query diff and its backtested impact, for a human to approve.',
   }),
-  'rule-creation': i18n.translate('xpack.pnd.watches.workers.ruleCreation.description', {
+  open_incident: i18n.translate('xpack.pnd.watches.workers.openIncident.description', {
     defaultMessage:
-      'Drafts new-rule proposals from coverage gap signals, with ATT&CK mapping and backtest summary. Checks installed and prebuilt rules first and defers to tuning when an existing rule covers the gap. MVP supports ES|QL rule types only.',
+      'Opens the incident thread once an escalation is approved, and assembles the picture the analyst answers the containment gate against.',
   }),
-  'prebuilt-rule-onboarding': i18n.translate(
-    'xpack.pnd.watches.workers.prebuiltRuleOnboarding.description',
+  open_investigation: i18n.translate('xpack.pnd.watches.workers.openInvestigation.description', {
+    defaultMessage:
+      'Opens the investigation thread for an attack discovery: fetches the alert, correlates related alerts, enriches with threat intel, and assesses entity risk.',
+  }),
+  record_containment_outcome: i18n.translate(
+    'xpack.pnd.watches.workers.recordContainmentOutcome.description',
     {
       defaultMessage:
-        'Recommends prebuilt rules relevant to active data sources and drafts installation proposals with environment-specific configuration.',
+        "Appends the analyst's containment decision to the incident thread, so the thread records what was actually done.",
+    }
+  ),
+  record_dismissed_incident: i18n.translate(
+    'xpack.pnd.watches.workers.recordDismissedIncident.description',
+    {
+      defaultMessage:
+        'Appends a refused escalation to the investigation thread, where the escalation was proposed.',
+    }
+  ),
+  record_dismissed_investigation: i18n.translate(
+    'xpack.pnd.watches.workers.recordDismissedInvestigation.description',
+    {
+      defaultMessage:
+        'Appends a dismissed attack discovery to the investigation thread, rather than leaving the dismissal unrecorded.',
+    }
+  ),
+  record_dismissed_tuning: i18n.translate(
+    'xpack.pnd.watches.workers.recordDismissedTuning.description',
+    {
+      defaultMessage:
+        'Appends a refused rule change to the tuning thread, the most consequential thing a human says on that path.',
+    }
+  ),
+  record_tuning_outcome: i18n.translate(
+    'xpack.pnd.watches.workers.recordTuningOutcome.description',
+    {
+      defaultMessage: 'Appends the approved rule change to the tuning thread as an audit record.',
     }
   ),
 };

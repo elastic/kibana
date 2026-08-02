@@ -6,4 +6,3 @@
  */
 
 export { AppChromeLayout } from './app_chrome_layout';
-export { AskPndFab } from './pnd_chrome';

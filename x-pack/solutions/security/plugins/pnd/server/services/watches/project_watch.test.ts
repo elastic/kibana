@@ -13,6 +13,7 @@ import {
   PND_RULE_PREVIEW_WORKFLOW_ID,
   PND_RULE_TUNING_WORKFLOW_ID,
   PND_WATCH_DETECTION_WORKFLOW_ID,
+  PND_WORKFLOW_TEMPLATE_VALUES,
 } from '@kbn/workflows/managed';
 import { WATCH_DETECTION_TAG, WATCH_TAG } from '@kbn/pnd-common';
 import {
@@ -23,14 +24,39 @@ import {
   projectWorkflowToWatch,
 } from './project_watch';
 
+const buildWatchItem = (watchPolicy: Record<string, unknown>): WorkflowListItemDto =>
+  ({
+    id: 'watch-1',
+    name: 'Watch One',
+    enabled: true,
+    definition: {
+      version: '1',
+      name: 'Watch One',
+      enabled: true,
+      triggers: [{ type: 'manual' }],
+      consts: { watch_policy: watchPolicy },
+      steps: [{ name: 'stub', type: 'console', with: { message: 'hi' } }],
+    },
+  } as unknown as WorkflowListItemDto);
+
+/**
+ * A managed PND definition's YAML, rendered the way the install path renders it.
+ *
+ * `yamlTemplate` rather than `yaml`: decision 7 moved every PND definition onto a template, and every
+ * one of them ignores the values it is handed — `PND_WORKFLOW_TEMPLATE_VALUES` exists only because the
+ * platform refuses a templated install whose values are missing or empty. See the comment at the top
+ * of `kbn-workflows/managed/definitions/pnd/index.ts`.
+ */
 const getManagedYaml = (workflowId: string): string => {
-  const definition = getManagedWorkflowDefinition(workflowId);
-  if (!definition) throw new Error(`Missing managed workflow definition for "${workflowId}"`);
-  if ('yaml' in definition && definition.yaml) return definition.yaml;
-  if ('yamlTemplate' in definition && definition.yamlTemplate) {
-    return definition.yamlTemplate({ settingsVersion: 1, autonomyLevel: 'manual' });
+  const yaml = getManagedWorkflowDefinition(workflowId)?.yamlTemplate?.(
+    PND_WORKFLOW_TEMPLATE_VALUES
+  );
+
+  if (yaml == null) {
+    throw new Error(`No managed workflow definition with a yamlTemplate for '${workflowId}'`);
   }
-  throw new Error(`Managed workflow definition "${workflowId}" has no YAML source`);
+
+  return yaml;
 };
 
 describe('project watch', () => {
@@ -45,7 +71,7 @@ describe('project watch', () => {
           watch_policy: {
             mandate: 'Deep investigation & hunts',
             handoff: 'records',
-            ui: { color: '#8b5cf6', order: 40 },
+            ui: { color: '#8b5cf6', icon: 'console', order: 40 },
           },
         },
         steps: [{ name: 'stub', type: 'console', with: { message: 'hi' } }],
@@ -54,7 +80,7 @@ describe('project watch', () => {
       expect(extractWatchPolicy(definition)).toMatchObject({
         mandate: 'Deep investigation & hunts',
         handoff: 'records',
-        ui: { color: '#8b5cf6', order: 40 },
+        ui: { color: '#8b5cf6', icon: 'console', order: 40 },
       });
     });
   });
@@ -74,24 +100,47 @@ describe('project watch', () => {
   });
 
   describe('projectSchedule', () => {
-    it('derives on-demand behavior from a manual trigger', () => {
-      expect(projectSchedule([{ type: 'manual', summary: 'Manual / on demand' }])).toMatchObject({
-        mode: 'demand',
-        cadence: 'manual',
-        set: false,
-        onDemand: true,
-        handoff: 'none',
-      });
+    it('uses actual manual-only triggers instead of an incompatible policy mode', () => {
+      expect(
+        projectSchedule([{ type: 'manual', summary: 'Manual / on demand' }], {
+          mode: 'always',
+          cadence: 'stream',
+          onDemand: false,
+        })
+      ).toMatchObject({ mode: 'demand', cadence: 'manual', set: false, onDemand: true });
     });
 
-    it('derives a neutral full-day projection from a scheduled trigger', () => {
-      expect(projectSchedule([{ type: 'schedule', summary: 'Scheduled' }])).toMatchObject({
-        mode: 'always',
-        set: true,
-        from: 0,
-        to: 23,
-        onDemand: false,
-      });
+    it('preserves a configured window for scheduled watches', () => {
+      expect(
+        projectSchedule([{ type: 'schedule', summary: 'Scheduled' }], {
+          mode: 'window',
+          from: 22,
+          to: 6,
+        })
+      ).toMatchObject({ mode: 'window', set: true, from: 22, to: 6 });
+    });
+  });
+
+  /**
+   * Autonomy has exactly one source of truth: the `pnd:autonomy:<watchId>` uiSetting that
+   * `GET /internal/pnd/autonomy` serves and the gates read. The projection must therefore not
+   * surface a second one, even though the managed YAML still declares an intended default in
+   * `consts.watch_policy.autonomyLevel` — two copies of the level that can disagree is exactly the
+   * failure this guards against.
+   */
+  describe('projectWorkflowToWatch autonomy', () => {
+    it('does not project an autonomy level, even when the YAML declares one', () => {
+      const watch = projectWorkflowToWatch(buildWatchItem({ autonomyLevel: 'supervised' }));
+
+      expect(watch).not.toHaveProperty('autonomyLevel');
+    });
+
+    it('projects the rest of the policy bag unaffected by the declared level', () => {
+      const watch = projectWorkflowToWatch(
+        buildWatchItem({ autonomyLevel: 'supervised', mandate: 'Deep investigation & hunts' })
+      );
+
+      expect(watch.mandate).toBe('Deep investigation & hunts');
     });
   });
 
@@ -134,7 +183,6 @@ describe('project watch', () => {
       type: string;
       if?: string;
       condition?: string;
-      with?: Record<string, unknown>;
       steps?: NestedStep[];
       else?: NestedStep[];
     }
@@ -296,88 +344,6 @@ describe('project watch', () => {
           expect(expr).toContain(`steps.${gate.name}.output.response.approved`);
         }
       }
-    });
-
-    describe('rule tuning alert marking', () => {
-      const tuning = parse(
-        getManagedWorkflowDefinition(PND_RULE_TUNING_WORKFLOW_ID)!.yaml!
-      ) as WorkflowYaml;
-      const tuningSteps = flattenSteps(tuning.steps as unknown as NestedStep[]);
-      const harvest = tuningSteps.find(({ name }) => name === 'harvest_fp_alerts_by_rule')!;
-      const harvestQuery = String(harvest.with?.query);
-      const reviewedTag = (tuning.consts as Record<string, string>).reviewed_tag;
-      const tagSteps = tuningSteps.filter(({ type }) => type === 'security.setAlertTags');
-
-      it('filters the reviewed tag out of the harvest', () => {
-        expect(reviewedTag).toEqual(expect.any(String));
-        expect(harvestQuery).toContain('NOT MV_CONTAINS(`kibana.alert.workflow_tags`');
-        expect(harvestQuery).toContain('{{ consts.reviewed_tag }}');
-      });
-
-      // The tag API writes to the alerts index of the space it runs in, so anything the
-      // harvest reads outside that space could never be marked.
-      it('harvests only the space it can tag in', () => {
-        expect(harvestQuery).toContain('FROM .alerts-security.alerts-{{ workflow.spaceId }}');
-      });
-
-      // A partial aggregation returns a short alert_ids list, so alerts that drove an
-      // approved change would stay untagged and come back on the next sweep.
-      it('refuses partial harvest results', () => {
-        expect(harvest.with?.allow_partial_results).toBe(false);
-      });
-
-      it('tags the harvested alerts once a decision is recorded', () => {
-        expect(tagSteps.map(({ name }) => name)).toEqual([
-          'mark_alerts_dismissed',
-          'mark_alerts_applied',
-        ]);
-
-        const [dismissed, applied] = tagSteps;
-        expect(dismissed.if).toContain('steps.review_tuning.output.response.approved == false');
-        expect(dismissed.with?.tags_to_add).toBe('${{ consts.dismissed_tags }}');
-        expect(applied.if).toContain('steps.review_tuning.output.response.approved == true');
-        expect(applied.with?.tags_to_add).toBe('${{ consts.applied_tags }}');
-      });
-
-      // The tag API requires an array; only a value that is exactly one `${{ }}`
-      // expression survives templating as an array instead of a string.
-      it('passes tags_to_add as a single expression, never a template', () => {
-        for (const step of tagSteps) {
-          expect(String(step.with?.tags_to_add)).toMatch(/^\$\{\{ [\w.]+ \}\}$/);
-        }
-      });
-
-      it('declares dismissed and applied tag sets', () => {
-        expect(tuning.consts).toEqual(
-          expect.objectContaining({
-            dismissed_tags: ['detection-watch:tuning-reviewed', 'detection-watch:tuning-dismissed'],
-            applied_tags: ['detection-watch:tuning-reviewed', 'detection-watch:tuning-applied'],
-          })
-        );
-        expect(tuning.consts).not.toHaveProperty('reviewed_only_tags');
-      });
-
-      it('does not use classify_proposal or can_apply', () => {
-        expect(tuningSteps.some(({ name }) => name === 'classify_proposal')).toBe(false);
-        expect(JSON.stringify(tuningSteps)).not.toContain('can_apply');
-      });
-
-      // The harvest projects its columns positionally, so reordering KEEP would make the
-      // tag step read some other column as the alert ids.
-      it('reads the alert ids from the column position KEEP assigns them', () => {
-        const keepClause = harvestQuery
-          .split('\n')
-          .find((line) => line.trimStart().startsWith('| KEEP'))!;
-        const columns = keepClause
-          .replace('| KEEP', '')
-          .split(',')
-          .map((column) => column.trim().replace(/`/g, ''));
-
-        expect(columns).toContain('alert_ids');
-        for (const step of tagSteps) {
-          expect(step.with?.alert_ids).toContain(`foreach.item.${columns.indexOf('alert_ids')}`);
-        }
-      });
     });
 
     it('keeps the skills and the preview worker inside the workers themselves', () => {

@@ -1,0 +1,82 @@
+openapi: 3.0.0
+info:
+  title: PND Execution projection component schemas
+  version: '1'
+paths: {}
+components:
+  x-codegen-enabled: true
+  schemas:
+    PndPhaseStepStatus:
+      type: string
+      enum:
+        - not_started
+        - running
+        - waiting_for_input
+        - completed
+        - failed
+        - skipped
+        - upstream
+      description: >
+        Closed status for one of the 14 four-phase catalog rows, aggregated across the
+        Watch Floor and Post-Incident Watch executions.
+
+        An answered gate — whether a human or the autonomy auto-approver resumed it — is
+        `completed`. There is one representation of an answered gate: the `waitForInput`
+        step execution itself. Every gate always parks, so a skipped-wrapper marker is
+        not a status the projection can emit.
+
+        `upstream` is a row whose work happens before PND is invoked — a catalog row with
+        `liveness: 'upstream'`, performed by Attack Discovery or by existing Elastic Security
+        rather than by a PND orchestrator step. It never carries a `stepExecutionId`, because
+        no PND step execution realizes it, and it must never read `completed` or `not_started`:
+        the first would claim a PND step ran, the second would suggest one is about to. It is
+        resolved from the catalog alone rather than from any execution. It replaces `stubbed`,
+        which kibana-phf4.12 retired with the lifecycle stub, and keeps `skipped` meaning only
+        a genuine engine skip or cancel.
+
+    PndPhaseStepProjection:
+      type: object
+      description: >
+        Projection of a single phase-catalog step (keyed by phaseStepId) onto the
+        orchestrator executions that realize it. Only phaseStepId and status are
+        always present; the correlation fields are filled once a step has run.
+      required:
+        - phaseStepId
+        - status
+      properties:
+        phaseStepId:
+          type: string
+          maxLength: 1024
+          description: Phase-catalog step id (see PHASE_CATALOG)
+        status:
+          $ref: '#/components/schemas/PndPhaseStepStatus'
+        workflowId:
+          type: string
+          maxLength: 1024
+        workflowRunId:
+          type: string
+          maxLength: 1024
+        stepExecutionId:
+          type: string
+          maxLength: 1024
+        startedAt:
+          type: string
+          maxLength: 64
+          description: ISO 8601 timestamp
+        finishedAt:
+          type: string
+          maxLength: 64
+          description: ISO 8601 timestamp
+        deepLinkPath:
+          type: string
+          maxLength: 2048
+          description: >
+            Path to this row's execution details, **relative to the Workflows app**:
+            `/{workflowId}?tab=executions&executionId={workflowRunId}&stepExecutionId={id}` (plan
+            F1 — without the third param every row of a response shares one execution-level link).
+            It is NOT an `/app/pnd` path, and it carries no app mount and no `/s/{space}` prefix —
+            resolve it with `getUrlForApp('workflows', { path })` / `navigateToApp('workflows',
+            { path })`, which add both, and never by concatenating `/app/workflows` by hand. Built
+            by `buildRunDeepLink` (`pnd/server/routes/get/runs/helpers/build_run_deep_link`), which
+            is authoritative for the shape and omits the reserved `__overview` / `trigger` step
+            ids.

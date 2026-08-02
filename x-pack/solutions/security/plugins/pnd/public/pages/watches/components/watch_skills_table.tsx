@@ -11,14 +11,13 @@ import {
   EuiBasicTable,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSwitch,
   EuiText,
-  EuiToolTip,
   type EuiBasicTableColumn,
 } from '@elastic/eui';
 import type { WatchSkill, WatchSkillAttachment } from '@kbn/pnd-common';
 import { useSkills } from '../../../hooks/use_skills_api';
 import { formatRelativeTime } from './format_relative_time';
+import { flushLastRowStyles, hiddenColumnHeaderStyles } from './table_styles';
 import * as sectionI18n from '../translations';
 import * as i18n from '../settings_translations';
 import * as skillI18n from '../skills/translations';
@@ -54,10 +53,17 @@ const statusLine = (row: SkillRow): string => {
 
 interface WatchSkillsTableProps {
   attachments: WatchSkillAttachment[];
-  onToggle: (skillId: string, enabled: boolean) => void;
 }
 
-export const WatchSkillsTable: React.FC<WatchSkillsTableProps> = ({ attachments, onToggle }) => {
+/**
+ * The skills this watch attaches, read-only.
+ *
+ * ⛔ There is deliberately no Enabled column and no switch (bead kibana-phf4.33). The 2026-08-10
+ * declutter removed the per-row enable toggles from the watch detail page and both catalogs, so
+ * enablement is reported in the status line and changed nowhere in the UI. Adding a toggle back means
+ * re-adding a draft field and a Save path with it — see the note on `WatchSettingsDraft`.
+ */
+export const WatchSkillsTable: React.FC<WatchSkillsTableProps> = ({ attachments }) => {
   const { data } = useSkills();
 
   const rows = useMemo<SkillRow[]>(() => {
@@ -105,39 +111,20 @@ export const WatchSkillsTable: React.FC<WatchSkillsTableProps> = ({ attachments,
           );
         },
       },
-      {
-        field: 'attachedEnabled',
-        name: i18n.COL_ENABLED,
-        width: '100px',
-        align: 'right',
-        render: (attachedEnabled: boolean, row: SkillRow) => {
-          const isGloballyOff = row.skill != null && !row.skill.enabled;
-          const control = (
-            <EuiSwitch
-              checked={attachedEnabled && !isGloballyOff}
-              disabled={isGloballyOff}
-              showLabel={false}
-              label={skillI18n.enableSkillAriaLabel(skillI18n.skillName(row.skillId))}
-              data-test-subj={`pndWatchSkillToggle-${row.skillId}`}
-              onChange={(event) => onToggle(row.skillId, event.target.checked)}
-            />
-          );
-
-          return isGloballyOff ? (
-            <EuiToolTip content={i18n.STATUS_DISABLED_GLOBALLY}>{control}</EuiToolTip>
-          ) : (
-            control
-          );
-        },
-      },
     ],
-    [onToggle]
+    []
   );
 
   return (
+    /*
+      No column header: this table renders only on the watch detail page, whose "Skills" section title
+      already names the list (2026-08-13 declutter). `tableCaption` is what names it to a screen reader
+      now that the `thead` is gone.
+    */
     <EuiBasicTable
       items={rows}
       columns={columns}
+      css={[flushLastRowStyles, hiddenColumnHeaderStyles]}
       tableLayout="auto"
       tableCaption={i18n.SKILLS_SECTION_SUBTITLE}
       data-test-subj="pndWatchSkillsTable"

@@ -1,0 +1,141 @@
+openapi: 3.0.0
+info:
+  title: PND Proposal row component schemas
+  version: '1'
+paths: {}
+components:
+  x-codegen-enabled: true
+  schemas:
+    PndProposalRow:
+      type: object
+      description: >
+        A single pending HITL gate awaiting a response, projected from a paused
+        workflow step. The gate metadata (gateId, recommendedAction, reversible,
+        alwaysGate) is resolved from PND_GATE_REGISTRY on the server.
+      required:
+        - sourceId
+        - workflowId
+        - workflowRunId
+        - stepExecutionId
+        - stepId
+        - gateId
+        - recommendedAction
+        - reversible
+        - alwaysGate
+        - correlationId
+        - title
+        - message
+        - inputSchema
+        - reasoning
+        - createdAt
+      properties:
+        sourceId:
+          type: string
+          maxLength: 1024
+          description: Opaque id addressing this pending gate in _respond
+        workflowId:
+          type: string
+          maxLength: 1024
+        workflowRunId:
+          type: string
+          maxLength: 1024
+        stepExecutionId:
+          type: string
+          maxLength: 1024
+        stepId:
+          type: string
+          maxLength: 1024
+        gateId:
+          type: string
+          maxLength: 1024
+          description: Gate id from PND_GATE_REGISTRY
+        recommendedAction:
+          $ref: './investigation.schema.yaml#/components/schemas/RecommendedAction'
+        reversible:
+          type: boolean
+        alwaysGate:
+          type: boolean
+          description: True when this gate can never be auto-accepted at any autonomy level
+        correlationId:
+          type: string
+          maxLength: 1024
+        threadConversationId:
+          type: string
+          maxLength: 1024
+          description: >
+            Deterministic `[Thread]` conversation id for this proposal (D1), derived server-side from
+            `(correlationId, gateId)` — byte-for-byte the key the queue already dedupes on, so
+            "one row per Proposal" and "one thread per Proposal" are the same guarantee. Carried on the
+            row so a client links a proposal to its thread without re-deriving a UUIDv5 in the browser.
+            Absent — never blank — when the derivation fails closed, i.e. the gate is uncorrelated to
+            any Attack Discovery alert, so a surface can distinguish "no thread is possible" from
+            "a thread exists at id ''".
+        threadTitle:
+          type: string
+          maxLength: 1024
+          description: >
+            Title of the `[Thread]` conversation this proposal is paired with, resolved server-side
+            by joining `threadConversationId` so the row stays a pure render of its props rather
+            than doing the join in the browser (D9). Absent — never blank — when the thread has not
+            materialised, so a surface falls back to the gate prompt `title` instead of rendering
+            an empty heading. Bounded to match `PndConversation.title`, so a title that round-trips
+            through the conversations read cannot fail to round-trip through the queue.
+        title:
+          type: string
+          maxLength: 1024
+        message:
+          type: string
+          maxLength: 4096
+        inputSchema:
+          type: object
+          additionalProperties: true
+          description: JSON schema describing the input this gate expects in _respond
+        reasoning:
+          type: string
+          maxLength: 8192
+        preview:
+          $ref: './tuning.schema.yaml#/components/schemas/PndTuningPreview'
+        createdAt:
+          type: string
+          maxLength: 64
+          description: ISO 8601 timestamp
+        decision:
+          type: string
+          enum:
+            - approve
+            - dismiss
+          description: >
+            How the gate was answered. Present only on an ANSWERED row (the history), absent on a
+            pending one. Closed for the same reason `_respond` closes it (security finding D2): an
+            open decision field once let a body carrying only a rationale proceed as an approval, and
+            the history must never render a dismissal as an approval.
+        rationale:
+          type: string
+          maxLength: 8192
+          description: The rationale the analyst gave when answering the gate (answered rows only).
+        respondedBy:
+          type: string
+          maxLength: 1024
+          description: >
+            Server-resolved username that answered the gate. Absent when the autonomy level accepted
+            it, or when an external resume settled it without stamping a principal — never blanked,
+            so the UI cannot render an empty actor as an accountable one.
+        respondedAt:
+          type: string
+          maxLength: 64
+          description: ISO 8601 timestamp the gate was answered (answered rows only).
+
+    PndProposalGroup:
+      type: object
+      description: Pending gates sharing a recommended-action bucket, for the grouped HITL queue.
+      required:
+        - recommendedAction
+        - proposals
+      properties:
+        recommendedAction:
+          $ref: './investigation.schema.yaml#/components/schemas/RecommendedAction'
+        proposals:
+          type: array
+          maxItems: 1000
+          items:
+            $ref: '#/components/schemas/PndProposalRow'

@@ -8,16 +8,16 @@
 /**
  * Copy for the per-watch settings page.
  *
- * The API carries ids only, so every autonomy level, select option, approval gate, run outcome and
- * per-watch intro resolves to a message here. Keep the id maps in step with the managed watch
- * catalog in `@kbn/pnd-common`.
+ * The API carries ids only, so every autonomy level, select option, run outcome and per-watch intro
+ * resolves to a message here. Keep the id maps in step with `WATCH_SETTINGS_SEED` in
+ * `@kbn/pnd-common`.
  */
 
 import { i18n } from '@kbn/i18n';
 import {
   SYSTEM_SECURITY_WATCH_DARK_ID,
   SYSTEM_SECURITY_WATCH_DEEP_ID,
-  SYSTEM_SECURITY_WATCH_DETECTION_ID,
+  SYSTEM_SECURITY_WATCH_POST_INCIDENT_ID,
   SYSTEM_SECURITY_WATCH_FLOOR_ID,
   SYSTEM_SECURITY_WATCH_OFFICER_ID,
 } from '@kbn/pnd-common';
@@ -28,6 +28,68 @@ import {
 
 export const ENABLED_SWITCH_LABEL = i18n.translate('xpack.pnd.watches.settings.enabledSwitch', {
   defaultMessage: 'Enabled',
+});
+
+/* -------------------------------------------------------------------------- */
+/* Draft, save and discard                                                    */
+/* -------------------------------------------------------------------------- */
+
+export const SAVE = i18n.translate('xpack.pnd.watches.settings.save', {
+  defaultMessage: 'Save',
+});
+
+export const SAVE_NO_CHANGES_TOOLTIP = i18n.translate(
+  'xpack.pnd.watches.settings.saveNoChangesTooltip',
+  { defaultMessage: 'No changes to save' }
+);
+
+export const DISCARD_CHANGES = i18n.translate('xpack.pnd.watches.settings.discardChanges', {
+  defaultMessage: 'Discard changes',
+});
+
+export const UNSAVED_CHANGES_BADGE = i18n.translate(
+  'xpack.pnd.watches.settings.unsavedChangesBadge',
+  { defaultMessage: 'Unsaved changes' }
+);
+
+/**
+ * Says which controls the badge does *not* speak for. The autonomy dial and the Enabled switch write
+ * as soon as they are used, so leaving the page with the badge showing loses the settings edits and
+ * nothing else.
+ */
+export const UNSAVED_CHANGES_BADGE_TOOLTIP = i18n.translate(
+  'xpack.pnd.watches.settings.unsavedChangesBadgeTooltip',
+  {
+    defaultMessage:
+      'These settings are not saved yet. Select Save to apply them. Autonomy and the Enabled switch are applied as soon as you change them, so they are never pending.',
+  }
+);
+
+export const SAVE_FAILED = i18n.translate('xpack.pnd.watches.settings.saveFailed', {
+  defaultMessage: 'Could not save these settings',
+});
+
+export const SAVE_FAILED_FALLBACK = i18n.translate(
+  'xpack.pnd.watches.settings.saveFailedFallback',
+  {
+    defaultMessage: 'Nothing was saved. Your changes are still on this page, so you can try again.',
+  }
+);
+
+export const LEAVE_MODAL_TITLE = i18n.translate('xpack.pnd.watches.settings.leaveModalTitle', {
+  defaultMessage: 'Leave without saving?',
+});
+
+export const LEAVE_MODAL_BODY = i18n.translate('xpack.pnd.watches.settings.leaveModalBody', {
+  defaultMessage: 'Your changes have not been saved. Are you sure you want to leave?',
+});
+
+export const LEAVE_MODAL_CANCEL = i18n.translate('xpack.pnd.watches.settings.leaveModalCancel', {
+  defaultMessage: 'Cancel',
+});
+
+export const LEAVE_MODAL_CONFIRM = i18n.translate('xpack.pnd.watches.settings.leaveModalConfirm', {
+  defaultMessage: 'Confirm',
 });
 
 /* -------------------------------------------------------------------------- */
@@ -51,7 +113,7 @@ export const TRIGGERS_SECTION_TITLE = i18n.translate(
 
 export const TRIGGERS_SECTION_SUBTITLE = i18n.translate(
   'xpack.pnd.watches.settings.triggers.sectionSubtitle',
-  { defaultMessage: 'owned by the Watch Orchestrator' }
+  { defaultMessage: 'owned by the Workers in this Watch' }
 );
 
 export const SCOPE_SECTION_TITLE = i18n.translate('xpack.pnd.watches.settings.scope.sectionTitle', {
@@ -70,7 +132,7 @@ export const WORKERS_SECTION_TITLE = i18n.translate(
 
 export const WORKERS_SECTION_SUBTITLE = i18n.translate(
   'xpack.pnd.watches.settings.workers.sectionSubtitle',
-  { defaultMessage: 'Workers attached to this Watch' }
+  { defaultMessage: "the agent steps this Watch's lane runs" }
 );
 
 export const SKILLS_SECTION_TITLE = i18n.translate(
@@ -81,15 +143,6 @@ export const SKILLS_SECTION_TITLE = i18n.translate(
 export const SKILLS_SECTION_SUBTITLE = i18n.translate(
   'xpack.pnd.watches.settings.skills.sectionSubtitle',
   { defaultMessage: "what this Watch's Workers can use" }
-);
-
-export const GATES_SECTION_TITLE = i18n.translate('xpack.pnd.watches.settings.gates.sectionTitle', {
-  defaultMessage: 'Approval gates',
-});
-
-export const GATES_SECTION_SUBTITLE = i18n.translate(
-  'xpack.pnd.watches.settings.gates.sectionSubtitle',
-  { defaultMessage: 'humans stay in control of consequential changes' }
 );
 
 export const LEDGER_SECTION_TITLE = i18n.translate(
@@ -121,7 +174,7 @@ export const AUTONOMY_LEVEL_NAMES: Record<string, string> = {
 export const AUTONOMY_LEVEL_DESCRIPTIONS: Record<string, string> = {
   manual: i18n.translate('xpack.pnd.watches.settings.autonomy.manual.description', {
     defaultMessage:
-      'Nothing runs on its own. The Watch drafts proposals and every one of them waits for your review.',
+      'Nothing runs on its own. The Watch drafts actions and every one of them waits for your review.',
   }),
   assisted: i18n.translate('xpack.pnd.watches.settings.autonomy.assisted.description', {
     defaultMessage:
@@ -142,34 +195,62 @@ export const AUTONOMY_RANGE_ARIA_LABEL = i18n.translate(
 );
 
 /* -------------------------------------------------------------------------- */
+/* Header identity line (what the General section collapsed into)             */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Accessible name for the run-as identity line under the watch's description.
+ *
+ * The 2026-08-17 simplification collapsed the whole General section into the header: the run-as
+ * account is now a muted lock icon plus a monospace account name, with no field label and no MVP-scope
+ * callout. A lock glyph beside bare text carries no meaning to a screen reader, so the pair is labelled
+ * here instead — the visual label the `EuiFormRow` used to supply is exactly what the design removed.
+ */
+export const RUN_AS_IDENTITY_ARIA_LABEL = i18n.translate(
+  'xpack.pnd.watches.settings.header.runAsAriaLabel',
+  { defaultMessage: 'Runs as service account' }
+);
+
+/* -------------------------------------------------------------------------- */
 /* Triggers                                                                   */
 /* -------------------------------------------------------------------------- */
 
-export const AD_SHARED_CALLOUT_TITLE = i18n.translate(
-  'xpack.pnd.watches.settings.triggers.adSharedTitle',
-  { defaultMessage: 'Shared with Attack Discovery' }
-);
-
-export const AD_SHARED_CALLOUT_BODY = i18n.translate(
-  'xpack.pnd.watches.settings.triggers.adSharedBody',
-  {
-    defaultMessage:
-      'The Attack Discovery schedule below is the same configuration as the existing Attack Discovery UI — same flyout, API, and backing data.',
-  }
-);
-
-export const AD_SCHEDULE_LABEL = i18n.translate(
-  'xpack.pnd.watches.settings.triggers.adScheduleLabel',
-  { defaultMessage: 'Attack Discovery schedule' }
-);
-
+/**
+ * ⚠️ The message **ids** below still read `schedule*` while the copy reads "Frequency".
+ *
+ * Deliberate, and the same call bead kibana-phf4.25 made for decision 6's "Open an incident": an id is
+ * a translation key, so churning it drops every existing translation of a string whose meaning did not
+ * change. The rule bead kibana-phf4.15 set is change `defaultMessage`, never the id.
+ */
 export const SCHEDULE_LABEL = i18n.translate('xpack.pnd.watches.settings.triggers.scheduleLabel', {
-  defaultMessage: 'Schedule',
+  defaultMessage: 'Frequency',
 });
 
 export const SCHEDULE_HELP = i18n.translate('xpack.pnd.watches.settings.triggers.scheduleHelp', {
-  defaultMessage: 'How often the Orchestrator looks for new work.',
+  defaultMessage: "How often this Watch runs. Persisted output triggers this Watch's Workers.",
 });
+
+/**
+ * Shown instead of the Frequency select on a watch in {@link PND_SIGNAL_DRIVEN_WATCH_TRIGGERS}.
+ *
+ * A frequency on such a watch would be a lie: nothing is polled. Ours is the phase-4 post-incident
+ * watch, which runs when a producer raises a `security.detectionChangeSignal`, so the body names the
+ * real producers from its own trigger condition rather than the prototype's "every watch" — Watch
+ * Floor, Watch Officer, Dark Watch and Deep Watch are exactly the four `sourceWatchId` values that
+ * condition admits.
+ */
+export const SIGNAL_DRIVEN_CALLOUT_TITLE = i18n.translate(
+  'xpack.pnd.watches.settings.triggers.signalDrivenTitle',
+  { defaultMessage: 'Signal-driven' }
+);
+
+export const SIGNAL_DRIVEN_CALLOUT_BODY = i18n.translate(
+  'xpack.pnd.watches.settings.triggers.signalDrivenBody',
+  {
+    defaultMessage:
+      'This Watch has no frequency: it runs when another Watch raises a detection change signal — a contained incident from Watch Floor, a finding from Watch Officer, or a coverage gap from Dark Watch or Deep Watch. Every run records the signal that triggered it.',
+  }
+);
 
 export const MANUAL_RUN_LABEL = i18n.translate(
   'xpack.pnd.watches.settings.triggers.manualRunLabel',
@@ -222,7 +303,7 @@ export const ASSIGNEE_QUEUE_LABEL = i18n.translate(
 
 export const ASSIGNEE_QUEUE_HELP = i18n.translate(
   'xpack.pnd.watches.settings.scope.assigneeQueueHelp',
-  { defaultMessage: 'Where proposals land for review.' }
+  { defaultMessage: 'Where actions land for review.' }
 );
 
 export const ESCALATION_CONTACT_LABEL = i18n.translate(
@@ -295,29 +376,22 @@ export const ESCALATION_CONTACT_OPTION_LABELS: Record<string, string> = {
 /* Workers & skills sections                                                  */
 /* -------------------------------------------------------------------------- */
 
-export const SKILL_DEPENDENCIES_CALLOUT_TITLE = i18n.translate(
-  'xpack.pnd.watches.settings.skills.dependenciesTitle',
-  { defaultMessage: 'Skill dependencies' }
-);
+/**
+ * "View all …" links on the Workers and Skills section headers (2026-08-17 simplification).
+ *
+ * Both catalogs already exist as full pages in this section's subnav, so the link is navigation rather
+ * than a new surface: the section lists what *this* watch attaches, and the catalog lists every one.
+ */
+export const VIEW_ALL_WORKERS = i18n.translate('xpack.pnd.watches.settings.viewAllWorkers', {
+  defaultMessage: 'View all workers',
+});
 
-export const SKILL_DEPENDENCIES_CALLOUT_BODY = i18n.translate(
-  'xpack.pnd.watches.settings.skills.dependenciesBody',
-  {
-    defaultMessage:
-      'Disabling a skill that a Worker depends on will degrade or disable that Worker.',
-  }
-);
-
-export const COL_WORKER = i18n.translate('xpack.pnd.watches.settings.col.worker', {
-  defaultMessage: 'Worker',
+export const VIEW_ALL_SKILLS = i18n.translate('xpack.pnd.watches.settings.viewAllSkills', {
+  defaultMessage: 'View all skills',
 });
 
 export const COL_SKILL = i18n.translate('xpack.pnd.watches.settings.col.skill', {
   defaultMessage: 'Skill',
-});
-
-export const COL_ENABLED = i18n.translate('xpack.pnd.watches.settings.col.enabled', {
-  defaultMessage: 'Enabled',
 });
 
 export const STATUS_ENABLED = i18n.translate('xpack.pnd.watches.settings.status.enabled', {
@@ -326,10 +400,6 @@ export const STATUS_ENABLED = i18n.translate('xpack.pnd.watches.settings.status.
 
 export const STATUS_DISABLED = i18n.translate('xpack.pnd.watches.settings.status.disabled', {
   defaultMessage: 'disabled',
-});
-
-export const STATUS_PAUSED = i18n.translate('xpack.pnd.watches.settings.status.paused', {
-  defaultMessage: 'paused',
 });
 
 export const STATUS_UNAVAILABLE = i18n.translate('xpack.pnd.watches.settings.status.unavailable', {
@@ -345,127 +415,6 @@ export const lastRunStatus = (relativeTime: string) =>
   i18n.translate('xpack.pnd.watches.settings.status.lastRun', {
     defaultMessage: 'last run {relativeTime}',
     values: { relativeTime },
-  });
-
-export const degradedStatus = (reason: string) =>
-  i18n.translate('xpack.pnd.watches.settings.status.degraded', {
-    defaultMessage: 'degraded — {reason}',
-    values: { reason },
-  });
-
-export const STATUS_DEGRADED = i18n.translate('xpack.pnd.watches.settings.status.degradedPlain', {
-  defaultMessage: 'degraded',
-});
-
-/* -------------------------------------------------------------------------- */
-/* Approval gates                                                             */
-/* -------------------------------------------------------------------------- */
-
-export const COL_ACTION_TYPE = i18n.translate('xpack.pnd.watches.settings.gates.col.actionType', {
-  defaultMessage: 'Action type',
-});
-
-export const COL_REQUIRES_APPROVAL = i18n.translate(
-  'xpack.pnd.watches.settings.gates.col.requiresApproval',
-  { defaultMessage: 'Requires approval' }
-);
-
-export const COL_APPROVER_ROLE = i18n.translate(
-  'xpack.pnd.watches.settings.gates.col.approverRole',
-  { defaultMessage: 'Approver role' }
-);
-
-export const GATE_NAMES: Record<string, string> = {
-  'host-isolation': i18n.translate('xpack.pnd.watches.settings.gates.hostIsolation.name', {
-    defaultMessage: 'Host isolation',
-  }),
-  'detection-rule-change': i18n.translate(
-    'xpack.pnd.watches.settings.gates.detectionRuleChange.name',
-    { defaultMessage: 'Detection rule change' }
-  ),
-  'new-detection-rule': i18n.translate('xpack.pnd.watches.settings.gates.newDetectionRule.name', {
-    defaultMessage: 'New detection rule',
-  }),
-  'hunt-execution': i18n.translate('xpack.pnd.watches.settings.gates.huntExecution.name', {
-    defaultMessage: 'Hunt execution',
-  }),
-  'evidence-only-investigation': i18n.translate(
-    'xpack.pnd.watches.settings.gates.evidenceOnly.name',
-    { defaultMessage: 'Evidence-only investigation' }
-  ),
-};
-
-export const GATE_QUALIFIERS: Record<string, string> = {
-  'host-isolation': i18n.translate('xpack.pnd.watches.settings.gates.hostIsolation.qualifier', {
-    defaultMessage: 'Elastic Defend response',
-  }),
-  'detection-rule-change': i18n.translate(
-    'xpack.pnd.watches.settings.gates.detectionRuleChange.qualifier',
-    { defaultMessage: 'tuning / suppression / exception' }
-  ),
-  'new-detection-rule': i18n.translate(
-    'xpack.pnd.watches.settings.gates.newDetectionRule.qualifier',
-    { defaultMessage: 'ships monitor-only until validated' }
-  ),
-  'hunt-execution': i18n.translate('xpack.pnd.watches.settings.gates.huntExecution.qualifier', {
-    defaultMessage: 'scoped query against telemetry',
-  }),
-  'evidence-only-investigation': i18n.translate(
-    'xpack.pnd.watches.settings.gates.evidenceOnly.qualifier',
-    { defaultMessage: 'no side effects' }
-  ),
-};
-
-export const APPROVAL_REQUIREMENT_LABELS: Record<string, string> = {
-  always: i18n.translate('xpack.pnd.watches.settings.gates.requirement.always', {
-    defaultMessage: 'Always',
-  }),
-  'high-impact': i18n.translate('xpack.pnd.watches.settings.gates.requirement.highImpact', {
-    defaultMessage: 'High-impact only',
-  }),
-  'in-scope': i18n.translate('xpack.pnd.watches.settings.gates.requirement.inScope', {
-    defaultMessage: 'Runs in scope',
-  }),
-};
-
-export const APPROVER_ROLE_LABELS: Record<string, string> = {
-  'incident-lead': i18n.translate('xpack.pnd.watches.settings.gates.role.incidentLead', {
-    defaultMessage: 'Incident lead',
-  }),
-  'detection-engineer': i18n.translate('xpack.pnd.watches.settings.gates.role.detectionEngineer', {
-    defaultMessage: 'Detection engineer',
-  }),
-  'threat-hunter': i18n.translate('xpack.pnd.watches.settings.gates.role.threatHunter', {
-    defaultMessage: 'Threat hunter',
-  }),
-  'soc-lead': i18n.translate('xpack.pnd.watches.settings.gates.role.socLead', {
-    defaultMessage: 'SOC lead',
-  }),
-};
-
-export const AUDIT_TRAIL_CALLOUT_TITLE = i18n.translate(
-  'xpack.pnd.watches.settings.gates.auditTrailTitle',
-  { defaultMessage: 'Audit trail' }
-);
-
-export const AUDIT_TRAIL_CALLOUT_BODY = i18n.translate(
-  'xpack.pnd.watches.settings.gates.auditTrailBody',
-  {
-    defaultMessage:
-      'Every approved action creates an Action Result — target, approver, output, and rollback notes — for the audit trail.',
-  }
-);
-
-export const requirementSelectAriaLabel = (gateName: string) =>
-  i18n.translate('xpack.pnd.watches.settings.gates.requirementAriaLabel', {
-    defaultMessage: 'Approval requirement for {gateName}',
-    values: { gateName },
-  });
-
-export const approverSelectAriaLabel = (gateName: string) =>
-  i18n.translate('xpack.pnd.watches.settings.gates.approverAriaLabel', {
-    defaultMessage: 'Approver role for {gateName}',
-    values: { gateName },
   });
 
 /* -------------------------------------------------------------------------- */
@@ -536,11 +485,11 @@ export const RUN_OUTCOME_LABELS: Record<string, string> = {
 const WATCH_INTROS: Record<string, string> = {
   [SYSTEM_SECURITY_WATCH_FLOOR_ID]: i18n.translate('xpack.pnd.watches.settings.intro.floor', {
     defaultMessage:
-      'Coordinates Workers that reduce alert volume and route what matters. One Orchestrator, one or more Workers. Everything below configures this one Watch — Agents are managed in Workflows & Agent Builder.',
+      'A group of Workers that reduce alert volume and route what matters. One Watch, one or more Workers. Everything below configures this one Watch — Agents are managed in Workflows & Agent Builder.',
   }),
   [SYSTEM_SECURITY_WATCH_OFFICER_ID]: i18n.translate('xpack.pnd.watches.settings.intro.officer', {
     defaultMessage:
-      'Takes what the Floor hands over and decides who needs to know. Assembles cases, escalates criticals, and stages response proposals for approval. Everything below configures this one Watch.',
+      'Takes what the Floor hands over and decides who needs to know. Assembles cases, escalates criticals, and stages response actions for approval. Everything below configures this one Watch.',
   }),
   [SYSTEM_SECURITY_WATCH_DARK_ID]: i18n.translate('xpack.pnd.watches.settings.intro.dark', {
     defaultMessage:
@@ -550,11 +499,11 @@ const WATCH_INTROS: Record<string, string> = {
     defaultMessage:
       'Specialist depth on demand — forensics, timelines, and hunts that need more than triage. Draws draft-only conclusions for a human to confirm. Everything below configures this one Watch.',
   }),
-  [SYSTEM_SECURITY_WATCH_DETECTION_ID]: i18n.translate(
+  [SYSTEM_SECURITY_WATCH_POST_INCIDENT_ID]: i18n.translate(
     'xpack.pnd.watches.settings.intro.detection',
     {
       defaultMessage:
-        'Turns false-positive noise and coverage gaps into reviewable rule proposals — tuning, new rules, and prebuilt onboarding. Nothing ships without a detection engineer. Everything below configures this one Watch.',
+        'Turns false-positive noise and coverage gaps into reviewable rule actions — tuning, new rules, and prebuilt onboarding. Nothing ships without a detection engineer. Everything below configures this one Watch.',
     }
   ),
 };

@@ -1,0 +1,73 @@
+openapi: 3.0.0
+info:
+  title: Get PND Tuning Candidate Rules API endpoint
+  version: '1'
+paths:
+  /internal/pnd/tuning/candidate-rules:
+    get:
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      operationId: GetCandidateRules
+      description: >
+        The distinct detection rules behind one Attack Discovery's constituent alerts, projected as
+        the menu a tuning draft chooses from (register `#24`). `draft_tuning` runs with `NO_TOOLS`,
+        so today it names a rule from training-data recall: a prebuilt `rule_id` that is not the
+        saved-object id `_apply` patches, or the literal `"UNKNOWN"`. This route is what replaces
+        recall with the rules that actually fired.
+
+        The discovery is resolved **as the calling user** over HTTP (S3), never with
+        `asInternalUser`, and an id the caller cannot read is a 404 rather than an empty list — an
+        empty list would read as "this discovery has no rules", which is a different claim. The
+        alerts index is then read as the current user in one aggregation, and each distinct rule is
+        fetched from the detection-engine rules API as the caller too, so a rule the caller cannot
+        read is simply absent from the menu.
+
+        Both fan-outs are bounded: the discovery's `alert_ids` at
+        `PND_DISCOVERY_CONTEXT_MAX_ALERT_IDS` (200, a 400 above it, checked before any query) and
+        the distinct rules at `PND_TUNING_CANDIDATE_RULES_MAX` (20), because each candidate costs
+        one scoped self-call.
+      summary: Get tuning candidate rules
+      tags:
+        - PND API
+      parameters:
+        - name: correlationId
+          in: query
+          required: true
+          schema:
+            type: string
+            maxLength: 1024
+          description: >
+            The Attack Discovery 2.0 alert whose constituent alerts name the candidate rules. A
+            single id rather than an array: the menu is per-draft, and one draft tunes the rules
+            behind one discovery.
+        - name: ruleRef
+          in: query
+          required: false
+          schema:
+            type: string
+            maxLength: 1024
+          description: >
+            Optional filter, matched against **either** `id` or `rule_id`. Present when the
+            discovery-context surface already carries a `ruleRef` for the gate, in which case the
+            draft is refining one known rule rather than choosing among them. An unmatched
+            `ruleRef` yields `rules: []` rather than the unfiltered menu, so a stale ref cannot
+            silently widen the draft's choice back to every rule.
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  rules:
+                    type: array
+                    maxItems: 20
+                    description: >
+                      The distinct rules behind the discovery's alerts, capped at
+                      `PND_TUNING_CANDIDATE_RULES_MAX` (20). May be empty: the discovery resolved,
+                      but its alerts name no rule the caller can read, or `ruleRef` matched none.
+                    items:
+                      $ref: '../components/tuning.schema.yaml#/components/schemas/PndCandidateRule'
+                required:
+                  - rules

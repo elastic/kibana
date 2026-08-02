@@ -84,6 +84,7 @@ const createMockEventLog = () => ({
 const createMockWorkflowsExtensions = () => ({
   registerManagedWorkflowOwner: jest.fn(),
   registerStepType: jest.fn(),
+  registerTriggerDefinition: jest.fn(),
 });
 
 const createMockElasticAssistant = () => ({
@@ -159,6 +160,41 @@ describe('DiscoveriesPlugin', () => {
         expect(mockWorkflowsExtensions.registerManagedWorkflowOwner).toHaveBeenCalledWith(
           'discoveries'
         );
+      });
+
+      it('registers the attackDiscoveryCreated trigger definition exactly once when the plugin is enabled', () => {
+        const mockWorkflowsExtensions = createMockWorkflowsExtensions();
+        const context = coreMock.createPluginInitializerContext({ enabled: true });
+        const plugin = new DiscoveriesPlugin(context);
+
+        plugin.setup(
+          coreMock.createSetup(),
+          createPluginSetupDeps({
+            workflowsExtensions:
+              mockWorkflowsExtensions as unknown as DiscoveriesPluginSetupDeps['workflowsExtensions'],
+          })
+        );
+
+        expect(mockWorkflowsExtensions.registerTriggerDefinition).toHaveBeenCalledTimes(1);
+        expect(mockWorkflowsExtensions.registerTriggerDefinition).toHaveBeenCalledWith(
+          expect.objectContaining({ id: 'security.attackDiscoveryCreated' })
+        );
+      });
+
+      it('does not register the attackDiscoveryCreated trigger definition when the plugin is disabled', () => {
+        const mockWorkflowsExtensions = createMockWorkflowsExtensions();
+        const context = coreMock.createPluginInitializerContext({ enabled: false });
+        const plugin = new DiscoveriesPlugin(context);
+
+        plugin.setup(
+          coreMock.createSetup(),
+          createPluginSetupDeps({
+            workflowsExtensions:
+              mockWorkflowsExtensions as unknown as DiscoveriesPluginSetupDeps['workflowsExtensions'],
+          })
+        );
+
+        expect(mockWorkflowsExtensions.registerTriggerDefinition).not.toHaveBeenCalled();
       });
 
       it('does not register managed workflow owner when the plugin is disabled', () => {

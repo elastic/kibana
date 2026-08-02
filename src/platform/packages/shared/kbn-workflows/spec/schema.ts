@@ -275,7 +275,7 @@ export const WaitStepInputSchema = z.object({
 export const WaitStepSchema = BaseStepSchema.extend({
   type: z.literal('wait').describe('Pause execution for a specified duration'),
   with: WaitStepInputSchema,
-});
+}).merge(StepWithOnFailureSchema);
 export type WaitStep = z.infer<typeof WaitStepSchema>;
 
 export const WaitForApprovalSlackChannelSchema = z.object({
@@ -914,7 +914,7 @@ export const WorkflowExecuteStepInputSchema = z.object({
 
 const WorkflowExecuteBaseSchema = BaseStepSchema.extend({
   with: WorkflowExecuteStepInputSchema,
-});
+}).merge(StepWithOnFailureSchema);
 
 export const WorkflowExecuteStepSchema = WorkflowExecuteBaseSchema.extend({
   type: z.literal('workflow.execute'),

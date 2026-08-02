@@ -8,6 +8,7 @@
 import React, { useMemo } from 'react';
 import { EuiBadge, EuiBasicTable, EuiText, type EuiBasicTableColumn } from '@elastic/eui';
 import type { WatchLedgerEntry, WatchRunAction, WatchRunOutcome } from '@kbn/pnd-common';
+import { flushLastRowStyles } from './table_styles';
 import * as i18n from '../settings_translations';
 import * as workerI18n from '../workers/translations';
 import * as skillI18n from '../skills/translations';
@@ -31,6 +32,10 @@ const OUTCOME_COLOR: Record<WatchRunOutcome, string | undefined> = {
 /**
  * A ledger row names the worker or skill that ran, so resolve against both copy maps. Ids are unique
  * only within a kind, and workers are checked first because they orchestrate the run.
+ *
+ * A worker id is now the lane's own orchestrator step name (kibana-phf4.6), so this resolves the two
+ * step names the seeded ledger rows cite (`open_investigation`, `draft_tuning`) and falls through to
+ * the skill map for the rest.
  */
 const callableName = (callableId: string): string => {
   const asWorker = workerI18n.WORKER_NAMES[callableId];
@@ -101,6 +106,7 @@ export const WatchRunsLedger: React.FC<WatchRunsLedgerProps> = ({ entries }) => 
     <EuiBasicTable
       items={entries}
       columns={columns}
+      css={flushLastRowStyles}
       tableLayout="auto"
       tableCaption={i18n.LEDGER_SECTION_SUBTITLE}
       noItemsMessage={i18n.NO_LEDGER_ENTRIES}

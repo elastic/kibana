@@ -129,12 +129,23 @@ components:
 
     Proposal:
       type: object
+      description: >
+        A proposal awaiting a decision. The **single** proposal contract: both
+        `GET /internal/pnd/investigations/{id}/proposals` (this shape) and the grouped HITL queue's
+        `PndProposalRow` describe the same object, and the queue's row is projected onto this type by
+        `proposalRowToProposal` rather than by a second, parallel declaration.
+
+
+        The `pnd*` block at the end of `properties` is what a **real** proposal — one projected from
+        a parked `waitForInput` gate rather than from a fixture — carries and this type had no field
+        for. Every one of them is optional, so nothing that already consumed a `Proposal` has to
+        change; a second type would have forked the contract instead (epic decision 9: contracts
+        widen additively).
       required:
         - id
         - template_id
         - parentConversationId
         - type
-        - confidence
         - reasoning
         - evidenceRefs
         - status
@@ -161,6 +172,12 @@ components:
           type: number
           minimum: 0
           maximum: 1
+          description: >
+            Producer confidence in the proposal, 0..1. **Optional**, and omitted rather than
+            invented: a proposal projected from a parked HITL gate has no measured confidence, and
+            `security.detectionChangeSignal` already made the same field optional for the same
+            reason ("there is no measured confidence at containment"). Every fixture still supplies
+            it and no surface reads it, so relaxing it broke no consumer.
         reasoning:
           type: string
         evidenceRefs:
@@ -188,6 +205,55 @@ components:
           type: string
         recommendation:
           type: string
+        # ---------------------------------------------------------------------------------------
+        # The gate projection. Present on a proposal read from a parked `waitForInput` gate, absent
+        # on a fixture, so each one is optional and adding them broke no existing consumer. They
+        # carry the same names and bounds as `PndProposalRow`'s so the two surfaces of one contract
+        # cannot drift apart under a rename.
+        # ---------------------------------------------------------------------------------------
+        alwaysGate:
+          type: boolean
+          description: True when this gate can never be auto-accepted at any autonomy level (D15)
+        correlationId:
+          type: string
+          maxLength: 1024
+          description: >
+            The Attack Discovery alert the gate's run was correlated to. Absent — never blank — for
+            an uncorrelated gate, so a surface can tell "no discovery" from "a discovery at id ''".
+        createdAt:
+          type: string
+          maxLength: 64
+          description: ISO 8601 timestamp the gate parked
+        gateId:
+          type: string
+          maxLength: 1024
+          description: >
+            Gate id from `PND_GATE_REGISTRY`. Left a free string rather than `$ref`-ing the closed
+            `PndGateId` enum for the reason `gate.schema.yaml` already records against
+            `PndProposalRow.gateId`: widening a *response* field to a closed enum makes an older
+            parked row unparseable rather than merely unrecognised.
+        inputSchema:
+          type: object
+          additionalProperties: true
+          description: JSON schema describing the input this gate expects in `_respond`
+        preview:
+          $ref: './tuning.schema.yaml#/components/schemas/PndTuningPreview'
+        reversible:
+          type: boolean
+        sourceId:
+          type: string
+          maxLength: 1024
+          description: >
+            Opaque id addressing this pending gate in `_respond`. Equal to `id` by construction —
+            `id` is the same value under this type's own name, so a client that only knows
+            `Proposal` can still answer the gate.
+        threadConversationId:
+          type: string
+          maxLength: 1024
+          description: >
+            Deterministic `[Thread]` conversation id for this proposal (D1), derived server-side
+            from `(correlationId, gateId)` — the same key the queue dedupes on. Absent —
+            never blank — when the derivation fails closed.
 
     Incident:
       type: object

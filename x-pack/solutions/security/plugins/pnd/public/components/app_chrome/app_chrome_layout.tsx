@@ -9,6 +9,7 @@ import React from 'react';
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
 import { useLocation } from 'react-router-dom';
+import { LifecycleFlyoutHost } from '../lifecycle_flyout';
 
 /** Routes that render a fixed-height layout of their own and must not be scrolled as one block. */
 const FIXED_HEIGHT_ROUTES = ['/chats'];
@@ -35,6 +36,12 @@ interface AppChromeLayoutProps {
 /**
  * Content shell only — Kibana / Security solution chrome owns the top header
  * and left rail (including Launchpad, Dev Tools, Settings, collapse).
+ *
+ * It also hosts the four-phase lifecycle overlay. This is the one component that
+ * sits inside the router and above every route, so mounting the host here means a
+ * page can open the overlay with `useOpenLifecycle` alone — no provider to mount,
+ * and no edit to `application.tsx`, which no group owns in this wave. The host
+ * renders `null` until the `lifecycle` search param names a discovery.
  */
 export const AppChromeLayout: React.FC<AppChromeLayoutProps> = ({ children }) => {
   const { euiTheme } = useEuiTheme();
@@ -59,6 +66,7 @@ export const AppChromeLayout: React.FC<AppChromeLayoutProps> = ({ children }) =>
       data-test-subj="pndAppChromeLayout"
     >
       {children}
+      <LifecycleFlyoutHost />
     </div>
   );
 };

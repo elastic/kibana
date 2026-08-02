@@ -12,6 +12,7 @@ import { getPersistDiscoveriesStepDefinition } from './get_persist_discoveries_s
 import { resolveConnectorDetails } from '../../helpers/resolve_connector_details';
 import { validateAttackDiscoveries } from '../../../routes/post/validate/helpers/validate_attack_discoveries';
 import { authenticateAndGetSpace } from '../default_validation_step/helpers/authenticate_and_get_space';
+import { emitAttackDiscoveryCreatedEvent } from '../../emit_attack_discovery_created_event';
 
 jest.mock('../../helpers/resolve_connector_details', () => ({
   resolveConnectorDetails: jest.fn(),
@@ -25,6 +26,16 @@ jest.mock('../default_validation_step/helpers/authenticate_and_get_space', () =>
   authenticateAndGetSpace: jest.fn(),
 }));
 
+jest.mock('../../emit_attack_discovery_created_event', () => ({
+  emitAttackDiscoveryCreatedEvent: jest.fn(),
+}));
+
+const mockIsWorkflowsEnabled = jest.fn();
+
+jest.mock('@kbn/discoveries/impl/lib/helpers/is_workflows_enabled', () => ({
+  isWorkflowsEnabled: (...args: unknown[]) => mockIsWorkflowsEnabled(...args),
+}));
+
 const mockResolveConnectorDetails = resolveConnectorDetails as jest.MockedFunction<
   typeof resolveConnectorDetails
 >;
@@ -33,6 +44,9 @@ const mockValidateAttackDiscoveries = validateAttackDiscoveries as jest.MockedFu
 >;
 const mockAuthenticateAndGetSpace = authenticateAndGetSpace as jest.MockedFunction<
   typeof authenticateAndGetSpace
+>;
+const mockEmitAttackDiscoveryCreatedEvent = emitAttackDiscoveryCreatedEvent as jest.MockedFunction<
+  typeof emitAttackDiscoveryCreatedEvent
 >;
 
 describe('getPersistDiscoveriesStepDefinition', () => {
@@ -51,6 +65,9 @@ describe('getPersistDiscoveriesStepDefinition', () => {
 
   const mockActionsClient = { get: jest.fn() };
 
+  const mockFeatureFlags = { getBooleanValue: jest.fn() };
+  const mockWorkflowsExtensions = { getClient: jest.fn() };
+
   const mockGetStartServices = jest.fn().mockResolvedValue({
     coreStart: {
       elasticsearch: {
@@ -62,11 +79,13 @@ describe('getPersistDiscoveriesStepDefinition', () => {
           },
         },
       },
+      featureFlags: mockFeatureFlags,
     },
     pluginsStart: {
       actions: {
         getActionsClientWithRequest: jest.fn().mockResolvedValue(mockActionsClient),
       },
+      workflowsExtensions: mockWorkflowsExtensions,
     },
   });
 
@@ -123,6 +142,8 @@ describe('getPersistDiscoveriesStepDefinition', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+
+    mockIsWorkflowsEnabled.mockResolvedValue(true);
 
     mockResolveConnectorDetails.mockResolvedValue({
       actionTypeId: '.gen-ai',
@@ -254,6 +275,139 @@ describe('getPersistDiscoveriesStepDefinition', () => {
       expect(mockContext.logger.info).toHaveBeenCalledWith(
         expect.stringContaining('Persisting 1 attack discoveries')
       );
+    });
+  });
+
+  describe('security.attackDiscoveryCreated emission', () => {
+    const persistedDiscoveries = [
+      {
+        alert_ids: ['alert-1', 'alert-2'],
+        connector_id: 'connector-1',
+        connector_name: 'Test Connector',
+        details_markdown: 'Details',
+        generation_uuid: 'generation-1',
+        id: 'discovery-1',
+        risk_score: 88,
+        summary_markdown: 'Summary',
+        timestamp: '2025-01-01T00:00:00Z',
+        title: 'Test Discovery',
+      },
+    ];
+
+    beforeEach(() => {
+      mockValidateAttackDiscoveries.mockResolvedValue({
+        duplicates_dropped_count: 0,
+        validated_discoveries: persistedDiscoveries,
+      });
+    });
+
+    it('emits exactly one event per validated discovery', async () => {
+      const stepDefinition = getPersistDiscoveriesStepDefinition({
+        adhocAttackDiscoveryDataClient: mockAdhocAttackDiscoveryDataClient,
+        getStartServices: mockGetStartServices,
+        logger: mockLogger,
+      });
+
+      await stepDefinition.handler(mockContext as never);
+
+      expect(mockEmitAttackDiscoveryCreatedEvent).toHaveBeenCalledTimes(1);
+    });
+
+    it('emits the id and non-sensitive metadata payload', async () => {
+      const stepDefinition = getPersistDiscoveriesStepDefinition({
+        adhocAttackDiscoveryDataClient: mockAdhocAttackDiscoveryDataClient,
+        getStartServices: mockGetStartServices,
+        logger: mockLogger,
+      });
+
+      await stepDefinition.handler(mockContext as never);
+
+      expect(mockEmitAttackDiscoveryCreatedEvent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          payload: {
+            alertIds: ['alert-1', 'alert-2'],
+            attackDiscoveryAlertId: 'discovery-1',
+            generationUuid: 'generation-1',
+            riskScore: 88,
+            spaceId: 'default',
+          },
+          workflowsExtensions: mockWorkflowsExtensions,
+        })
+      );
+    });
+
+    it('emits one event per discovery when multiple are persisted', async () => {
+      mockValidateAttackDiscoveries.mockResolvedValue({
+        duplicates_dropped_count: 0,
+        validated_discoveries: [
+          persistedDiscoveries[0],
+          { ...persistedDiscoveries[0], id: 'discovery-2' },
+        ],
+      });
+
+      const stepDefinition = getPersistDiscoveriesStepDefinition({
+        adhocAttackDiscoveryDataClient: mockAdhocAttackDiscoveryDataClient,
+        getStartServices: mockGetStartServices,
+        logger: mockLogger,
+      });
+
+      await stepDefinition.handler(mockContext as never);
+
+      expect(mockEmitAttackDiscoveryCreatedEvent).toHaveBeenCalledTimes(2);
+    });
+
+    it('does not emit when Attack Discovery workflows are disabled', async () => {
+      mockIsWorkflowsEnabled.mockResolvedValue(false);
+
+      const stepDefinition = getPersistDiscoveriesStepDefinition({
+        adhocAttackDiscoveryDataClient: mockAdhocAttackDiscoveryDataClient,
+        getStartServices: mockGetStartServices,
+        logger: mockLogger,
+      });
+
+      await stepDefinition.handler(mockContext as never);
+
+      expect(mockEmitAttackDiscoveryCreatedEvent).not.toHaveBeenCalled();
+    });
+
+    it('still returns persisted discoveries when emission throws (never fails persistence)', async () => {
+      mockEmitAttackDiscoveryCreatedEvent.mockRejectedValue(new Error('workflows boom'));
+
+      const stepDefinition = getPersistDiscoveriesStepDefinition({
+        adhocAttackDiscoveryDataClient: mockAdhocAttackDiscoveryDataClient,
+        getStartServices: mockGetStartServices,
+        logger: mockLogger,
+      });
+
+      const result = await stepDefinition.handler(mockContext as never);
+
+      expect(result).toEqual({
+        output: {
+          discoveries_to_persist: mockContext.input.attack_discoveries,
+          duplicates_dropped_count: 0,
+          persisted_discoveries: persistedDiscoveries,
+        },
+      });
+    });
+
+    it('does not emit for scheduled executions', async () => {
+      const scheduledContext = {
+        ...mockContext,
+        input: {
+          ...mockContext.input,
+          source: 'scheduled',
+        },
+      };
+
+      const stepDefinition = getPersistDiscoveriesStepDefinition({
+        adhocAttackDiscoveryDataClient: mockAdhocAttackDiscoveryDataClient,
+        getStartServices: mockGetStartServices,
+        logger: mockLogger,
+      });
+
+      await stepDefinition.handler(scheduledContext as never);
+
+      expect(mockEmitAttackDiscoveryCreatedEvent).not.toHaveBeenCalled();
     });
   });
 

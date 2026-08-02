@@ -8,6 +8,7 @@
 import type { AttackDiscoveryApiAlert } from '@kbn/discoveries-schemas';
 import moment from 'moment';
 import {
+  ALERT_RISK_SCORE,
   ALERT_RULE_UUID,
   ALERT_START,
   ALERT_UPDATED_AT,
@@ -144,6 +145,8 @@ export const transformAttackDiscoveryAlertDocumentToApi = ({
     replacements: replacements
       ? Object.fromEntries(replacements.map((r) => [r.uuid, r.value]))
       : undefined,
+    risk_score:
+      typeof doc[ALERT_RISK_SCORE] === 'number' ? (doc[ALERT_RISK_SCORE] as number) : undefined,
     summary_markdown: getFieldWithReplacementThenRender({
       replacementField: ALERT_ATTACK_DISCOVERY_SUMMARY_MARKDOWN_WITH_REPLACEMENTS,
       normalField: ALERT_ATTACK_DISCOVERY_SUMMARY_MARKDOWN,

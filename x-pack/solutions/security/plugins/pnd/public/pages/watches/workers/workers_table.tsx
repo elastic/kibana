@@ -5,147 +5,29 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import {
-  EuiBadge,
-  EuiBasicTable,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSwitch,
-  EuiText,
-  type EuiBasicTableColumn,
-} from '@elastic/eui';
-import type { WatchWorker, WorkerRunState } from '@kbn/pnd-common';
-import { useToggleWorker, useWorkers } from '../../../hooks/use_workers_api';
-import { formatRelativeTime } from '../components/format_relative_time';
-import { WatchBadges } from '../components/watch_badges';
-import * as sectionI18n from '../translations';
+import React from 'react';
+import { useWorkers } from '../../../hooks/use_workers_api';
+import { WorkerCatalogTable } from '../components/worker_catalog_table';
 import * as i18n from './translations';
 
-/** Workers report health, so the last-run cell doubles as a status cell. */
-const LastRunCell: React.FC<{ lastRun: string | null; state: WorkerRunState }> = ({
-  lastRun,
-  state,
-}) => {
-  if (state === 'paused') {
-    return (
-      <EuiText size="s" color="subdued">
-        {sectionI18n.RUN_STATE_PAUSED}
-      </EuiText>
-    );
-  }
-
-  if (state === 'unavailable') {
-    return (
-      <EuiText size="s" color="warning">
-        {sectionI18n.RUN_STATE_UNAVAILABLE}
-      </EuiText>
-    );
-  }
-
-  if (lastRun == null) {
-    return (
-      <EuiText size="s" color="subdued">
-        {sectionI18n.NOT_RUN_YET}
-      </EuiText>
-    );
-  }
-
-  // A degraded worker is still running, so it keeps its timestamp but flags for attention.
-  return (
-    <EuiText size="s" color={state === 'degraded' ? 'warning' : undefined}>
-      {formatRelativeTime(lastRun)}
-    </EuiText>
-  );
-};
-
+/**
+ * The Workers page's table: every projected Worker, across every Watch (kibana-phf4.6).
+ *
+ * Read-only. It carries the Watches column the per-watch section omits, and it uses the same
+ * `WorkerCatalogTable` so a step reads the same way in both places.
+ */
 export const WorkersTable: React.FC = () => {
   const { data, isLoading, error } = useWorkers();
-  const { mutate: toggleWorker } = useToggleWorker();
-
-  const columns = useMemo<Array<EuiBasicTableColumn<WatchWorker>>>(
-    () => [
-      {
-        field: 'id',
-        name: i18n.COL_WORKER,
-        render: (_id: string, worker: WatchWorker) => {
-          const description = i18n.workerDescription(worker.id);
-          return (
-            <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
-                  <EuiFlexItem grow={false}>
-                    <EuiText size="s">
-                      <strong>{i18n.workerName(worker.id)}</strong>
-                    </EuiText>
-                  </EuiFlexItem>
-                  {worker.lifecycle && worker.lifecycle !== 'ga' ? (
-                    <EuiFlexItem grow={false}>
-                      <EuiBadge color="hollow">
-                        {worker.lifecycle === 'beta'
-                          ? sectionI18n.LIFECYCLE_BETA
-                          : sectionI18n.LIFECYCLE_PILOT}
-                      </EuiBadge>
-                    </EuiFlexItem>
-                  ) : null}
-                </EuiFlexGroup>
-              </EuiFlexItem>
-              {description ? (
-                <EuiFlexItem grow={false}>
-                  <EuiText size="xs" color="subdued">
-                    {description}
-                  </EuiText>
-                </EuiFlexItem>
-              ) : null}
-            </EuiFlexGroup>
-          );
-        },
-      },
-      {
-        field: 'watchIds',
-        name: i18n.COL_WATCHES,
-        width: '220px',
-        render: (watchIds: string[]) => <WatchBadges watchIds={watchIds} />,
-      },
-      {
-        field: 'lastRun',
-        name: i18n.COL_LAST_RUN,
-        width: '140px',
-        render: (lastRun: string | null, worker: WatchWorker) => (
-          <LastRunCell lastRun={lastRun} state={worker.state} />
-        ),
-      },
-      {
-        field: 'enabled',
-        name: i18n.COL_ENABLED,
-        width: '100px',
-        align: 'right',
-        render: (enabled: boolean, worker: WatchWorker) => (
-          <EuiSwitch
-            checked={enabled}
-            showLabel={false}
-            label={i18n.enableWorkerAriaLabel(i18n.workerName(worker.id))}
-            data-test-subj={`pndWorkerToggle-${worker.id}`}
-            onChange={(event) =>
-              toggleWorker({ workerId: worker.id, enabled: event.target.checked })
-            }
-          />
-        ),
-      },
-    ],
-    [toggleWorker]
-  );
 
   return (
-    <EuiBasicTable
-      items={data?.workers ?? []}
-      columns={columns}
-      tableLayout="auto"
-      tableCaption={i18n.TABLE_CAPTION}
-      loading={isLoading}
-      error={error ? i18n.LOAD_ERROR : undefined}
-      noItemsMessage={i18n.NO_WORKERS}
+    <WorkerCatalogTable
+      caption={i18n.TABLE_CAPTION}
       data-test-subj="pndWorkersTable"
+      error={error ? i18n.LOAD_ERROR : undefined}
+      loading={isLoading}
+      noItemsMessage={i18n.NO_WORKERS}
+      showWatches
+      workers={data?.workers ?? []}
     />
   );
 };

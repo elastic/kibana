@@ -27,43 +27,44 @@ export type WatchAutonomyLevelEnum = typeof WatchAutonomyLevel.enum;
 export const WatchAutonomyLevelEnum = WatchAutonomyLevel.enum;
 
 /**
- * Run health of a long-running worker, shown instead of a timestamp when not ok. Workers only — a skill is invoked rather than run continuously, so it has no health of its own.
+ * One of the four lifecycle phases. Mirrors PHASE_IDS, which is hand-written because the phase catalog is not generated; `schemas.test.ts` pins the two together so this enum cannot drift.
  */
-export const WorkerRunState = lazySchema(() => z.enum(['ok', 'paused', 'degraded', 'unavailable']));
-export type WorkerRunState = z.infer<typeof WorkerRunState>;
-export type WorkerRunStateEnum = typeof WorkerRunState.enum;
-export const WorkerRunStateEnum = WorkerRunState.enum;
+export const LifecyclePhase = lazySchema(() =>
+  z.enum(['signal_triage', 'investigation', 'incident_response', 'post_incident'])
+);
+export type LifecyclePhase = z.infer<typeof LifecyclePhase>;
+export type LifecyclePhaseEnum = typeof LifecyclePhase.enum;
+export const LifecyclePhaseEnum = LifecyclePhase.enum;
 
 /**
- * A worker in the global worker catalog.
+ * A worker: one `ai.agent` step of a watch's lane, projected from the managed workflow definition against the agents PND installs (kibana-phf4.6). Read-only, and deliberately carrying no `enabled`, `lastRun` or run-health field. Those described a worker as a long-running service with a global flag and a per-watch attachment, which no such thing ever was: nothing wrote the flag through to execution, so the switch moved a number in an in-memory store and the timestamps were seeded. A projection has nothing to toggle, so `PATCH /internal/pnd/workers/{workerId}` refuses outright rather than accepting a write it would drop.
  */
 export const WatchWorker = lazySchema(() =>
   z.object({
     /**
-     * Copy key — the UI resolves name and description from this id. Unique among workers only; Containment and Case assembly each exist as both a worker and a skill.
+     * The Agent Builder agent the step runs, resolved from the step's `agent-id` template. Always one of the three agents PND installs — a step whose agent PND does not own is not projected at all.
+     */
+    agentId: z.string(),
+    /**
+     * The agent's name as installed, e.g. "Watch Investigator". Travels in the payload rather than living in UI copy because it is the name of a record in Agent Builder, not a label this app chose.
+     */
+    agentName: z.string(),
+    /**
+     * The orchestrator step name, e.g. open_investigation. Unique across the projection, and the copy key the UI resolves a display name and description from.
      */
     id: z.string(),
     /**
-     * Watches this worker is attached to
+     * The phase catalog row whose orchestratorStepId is this step name, falling back to the phase its agent serves.
+     */
+    phase: LifecyclePhase,
+    /**
+     * The agent's configured skills. Agent Builder owns these; PND only names them, which is why there is no PND skill catalog behind them.
+     */
+    skillIds: z.array(z.string()),
+    /**
+     * Watches whose lane declares this step. Usually one.
      */
     watchIds: z.array(z.string()),
-    /**
-     * ISO 8601 timestamp of last invocation, or null when never run or not running
-     */
-    lastRun: z.string().nullable(),
-    /**
-     * Global flag. Effective enablement is this AND the per-watch attachment flag.
-     */
-    enabled: z.boolean(),
-    state: WorkerRunState,
-    /**
-     * Why the worker is not in the ok state, e.g. which dependency is unavailable. Free prose rather than a copy key because it names runtime specifics, like WatchLedgerEntry.event.
-     */
-    stateReason: z.string().optional(),
-    /**
-     * Omitted for generally available workers; badge shown otherwise
-     */
-    lifecycle: Lifecycle.optional(),
   })
 );
 export type WatchWorker = z.infer<typeof WatchWorker>;
@@ -96,17 +97,6 @@ export const WatchSkill = lazySchema(() =>
   })
 );
 export type WatchSkill = z.infer<typeof WatchSkill>;
-
-/**
- * Per-watch enablement of a worker, ANDed with the worker's global flag
- */
-export const WatchWorkerAttachment = lazySchema(() =>
-  z.object({
-    workerId: z.string(),
-    enabled: z.boolean(),
-  })
-);
-export type WatchWorkerAttachment = z.infer<typeof WatchWorkerAttachment>;
 
 /**
  * Per-watch enablement of a skill, ANDed with the skill's global flag
@@ -217,7 +207,7 @@ export const WatchLedgerEntry = lazySchema(() =>
 export type WatchLedgerEntry = z.infer<typeof WatchLedgerEntry>;
 
 /**
- * Per-watch settings. Optional sections are absent when a watch does not offer them, which is what lets each watch legitimately render a different set of sections.
+ * Per-watch settings. Optional sections are absent when a watch does not offer them, which is what lets each watch legitimately render a different set of sections. There is deliberately no `workers` section: a WatchWorker already carries the watches whose lane declares it, so the settings page filters GET /internal/pnd/workers by watch id rather than storing a second, writable copy of the same fact (kibana-phf4.6).
  */
 export const WatchSettings = lazySchema(() =>
   z.object({
@@ -228,8 +218,10 @@ export const WatchSettings = lazySchema(() =>
     autonomy: WatchAutonomyLevel,
     triggers: WatchTriggersSettings.optional(),
     scopeRouting: WatchScopeRoutingSettings.optional(),
-    workers: z.array(WatchWorkerAttachment).optional(),
     skills: z.array(WatchSkillAttachment).optional(),
+    /**
+     * No longer seeded, and no longer rendered anywhere: the 2026-08-10 design deleted the Approval gates section of the Watch settings page, which was this field's only surface (kibana-phf4.33). The field and WatchApprovalGate stay because they are #284009's shape and removing them would break every importer for no design reason. PATCH /internal/pnd/watches/{watchId} refuses to write them.
+     */
     approvalGates: z.array(WatchApprovalGate).optional(),
     runsLedger: z.array(WatchLedgerEntry).optional(),
   })
