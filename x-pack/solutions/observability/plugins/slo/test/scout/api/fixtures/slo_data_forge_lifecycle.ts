@@ -65,7 +65,7 @@ export async function createSloScoutHostsDataView(
         runtimeFieldMap: '{}',
         name: SLO_SCOUT_HOSTS_DATA_VIEW_TITLE,
       },
-      options: { id: dataViewId },
+      options: { id: dataViewId, overwrite: true },
       version: 1,
     },
   });
