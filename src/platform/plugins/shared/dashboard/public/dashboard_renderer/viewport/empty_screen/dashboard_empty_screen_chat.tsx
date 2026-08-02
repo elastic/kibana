@@ -106,9 +106,7 @@ export const DashboardEmptyScreenChat = () => (
               size="s"
               color="text"
               flush="both"
-              onClick={() => {
-                openDashboardChat();
-              }}
+              onClick={() => openDashboardChat()}
               data-test-subj="dashboardCreateWithChatOpenChat"
             >
               {i18n.translate('dashboard.emptyScreen.openChatButtonLabel', {

@@ -26,7 +26,7 @@ import {
   type UseEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { i18n, i18n as i18nFn } from '@kbn/i18n';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useAsync from 'react-use/lib/useAsync';
 
@@ -121,7 +121,7 @@ function NewPanelContent({
                 onChange={(e) => {
                   setSearchTerm(e.target.value);
                 }}
-                aria-label={i18nFn.translate(
+                aria-label={i18n.translate(
                   'dashboard.editorMenu.addPanelFlyout.searchLabelText',
                   { defaultMessage: 'Search field for panels' }
                 )}
