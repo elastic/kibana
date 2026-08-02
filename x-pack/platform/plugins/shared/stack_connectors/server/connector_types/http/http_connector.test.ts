@@ -1597,6 +1597,54 @@ describe('execute()', () => {
     expect(requestMock.mock.calls[0][0].url).toContain('key2=value2');
   });
 
+  test('execute preserves a query string embedded in path', async () => {
+    const config: ConnectorTypeConfigType = {
+      ...emptyConfig,
+      url: 'https://abc.def',
+    };
+    await connectorType.executor?.({
+      actionId: 'some-id',
+      services,
+      config,
+      secrets: { ...emptySecrets, user: 'abc', password: '123' },
+      params: {
+        method: 'GET',
+        path: '/api/users.info?user=U123',
+      },
+      configurationUtilities,
+      logger: mockedLogger,
+      connectorUsageCollector,
+    });
+
+    expect(requestMock.mock.calls[0][0].url).toBe(
+      'https://abc.def/api/users.info?user=U123'
+    );
+  });
+
+  test('execute preserves query strings in both the base URL and path', async () => {
+    const config: ConnectorTypeConfigType = {
+      ...emptyConfig,
+      url: 'https://abc.def?tenant=1',
+    };
+    await connectorType.executor?.({
+      actionId: 'some-id',
+      services,
+      config,
+      secrets: { ...emptySecrets, user: 'abc', password: '123' },
+      params: {
+        method: 'GET',
+        path: '/api/users.info?user=U123',
+      },
+      configurationUtilities,
+      logger: mockedLogger,
+      connectorUsageCollector,
+    });
+
+    expect(requestMock.mock.calls[0][0].url).toBe(
+      'https://abc.def/api/users.info?tenant=1&user=U123'
+    );
+  });
+
   test('execute injects secretQueryParams from connector secrets into URL', async () => {
     const config: ConnectorTypeConfigType = {
       ...emptyConfig,

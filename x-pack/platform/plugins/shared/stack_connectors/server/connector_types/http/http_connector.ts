@@ -188,7 +188,19 @@ function combineUrl(basePath: string, path?: string): string {
   if (!path) return basePath;
   const url = new URL(basePath);
   const normalizedPath = path.startsWith('/') ? path : `/${path}`;
-  url.pathname = url.pathname.replace(/\/$/, '') + normalizedPath;
+  const parsedPath = new URL(`http://placeholder${normalizedPath}`);
+  const baseQueryKeys = new Set(url.searchParams.keys());
+
+  url.pathname = url.pathname.replace(/\/$/, '') + parsedPath.pathname;
+  for (const [key, value] of parsedPath.searchParams) {
+    if (!baseQueryKeys.has(key)) {
+      url.searchParams.append(key, value);
+    }
+  }
+  if (parsedPath.hash) {
+    url.hash = parsedPath.hash;
+  }
+
   return url.toString();
 }
 
