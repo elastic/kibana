@@ -1781,6 +1781,25 @@ describe('UnifiedDataTable', () => {
       await waitFor(() => {
         expect(onChangePageMock).toHaveBeenCalledWith(2);
       });
+
+      // The scroll is retried until the virtualized grid is ready, which must not re-trigger
+      // the page change on every attempt
+      expect(onChangePageMock).toHaveBeenCalledTimes(1);
+    });
+
+    it('should page to the expanded document once it arrives in the results', async () => {
+      // Reached by following a link to a document: it is expanded before the search that
+      // contains it has returned, so there is no row to scroll to on the first attempt
+      const props = { ...getPagedProps(), rows: rows.slice(0, 1), expandedDoc: rows[2] };
+      const { rerender } = await renderComponent(props);
+
+      expect(onChangePageMock).not.toHaveBeenCalled();
+
+      rerender(<DataTableWithI18n {...props} rows={rows} />);
+
+      await waitFor(() => {
+        expect(onChangePageMock).toHaveBeenCalledWith(2);
+      });
     });
 
     it('should not page when the expanded document is already on the current page', async () => {

@@ -125,6 +125,25 @@ const VIRTUALIZATION_OPTIONS: EuiDataGridProps['virtualizationOptions'] = {
   overscanRowCount: 20,
 };
 
+// We need to manually query the react-window wrapper since EUI doesn't
+// expose outerRef in virtualizationOptions, but we should request it
+const VIRTUALIZED_SELECTOR = '.euiDataGrid__virtualized';
+
+/**
+ * Frames to keep retrying a scroll to the expanded row. On initial load the virtualized grid
+ * renders well after the expanded document is known, so the first attempts have nothing to
+ * scroll within.
+ */
+const MAX_SCROLL_TO_ROW_ATTEMPTS = 60;
+
+type ScrollToRowResult =
+  /** The row was brought into view */
+  | 'scrolled'
+  /** The grid is not ready yet, or is on the wrong page */
+  | 'retry'
+  /** There is no row to scroll to, e.g. the document is not part of the results */
+  | 'unavailable';
+
 export type SortOrder = [string, string];
 
 export enum DataLoadingState {
@@ -776,65 +795,6 @@ const InternalUnifiedDataTable = React.forwardRef<
       changeCurrentPageIndex,
     ]);
 
-    // Bring the expanded document's row into view, so expanding a document always shows which
-    // row it came from. This matters most when the document was not expanded by clicking its
-    // row, e.g. when restoring one from a link or paginating within the doc viewer, in which
-    // case it can be on a different page entirely.
-    const scrolledToDocId = useRef<string>();
-    const pendingScrollRowIndex = useRef<number>();
-    const isPagedGrid = paginationMode === 'multiPage' && isPaginationEnabled;
-
-    useEffect(() => {
-      if (!expandedDoc) {
-        scrolledToDocId.current = undefined;
-        return;
-      }
-
-      // Only scroll the first time a document becomes the expanded one, otherwise background
-      // refetches would repeatedly pull the grid away from wherever the user scrolled to
-      if (expandedDoc.id === scrolledToDocId.current) {
-        return;
-      }
-
-      const rowIndex = displayedRows.findIndex(({ id }) => id === expandedDoc.id);
-
-      // The document may not be part of the results, e.g. when restoring one from a link that
-      // the current search does not return, in which case there is no row to scroll to
-      if (rowIndex === -1) {
-        return;
-      }
-
-      const targetPageIndex = isPagedGrid ? Math.floor(rowIndex / currentPageSize) : 0;
-
-      if (isPagedGrid && targetPageIndex !== currentPageIndexRef.current) {
-        // The rows for the target page have not rendered yet, so defer the scroll until they have
-        pendingScrollRowIndex.current = rowIndex % currentPageSize;
-        scrolledToDocId.current = expandedDoc.id;
-        changeCurrentPageIndex(targetPageIndex);
-        return;
-      }
-
-      // `scrollToItem` is only available once the virtualized grid body has rendered, so leave
-      // the document unmarked and retry on a later render if it is missing
-      if (dataGridRef.current?.scrollToItem) {
-        dataGridRef.current.scrollToItem({
-          rowIndex: isPagedGrid ? rowIndex % currentPageSize : rowIndex,
-          align: 'center',
-        });
-        scrolledToDocId.current = expandedDoc.id;
-      }
-    }, [changeCurrentPageIndex, currentPageSize, displayedRows, expandedDoc, isPagedGrid]);
-
-    useEffect(() => {
-      if (pendingScrollRowIndex.current === undefined) {
-        return;
-      }
-
-      const rowIndex = pendingScrollRowIndex.current;
-      pendingScrollRowIndex.current = undefined;
-      dataGridRef.current?.scrollToItem?.({ rowIndex, align: 'center' });
-    }, [currentPageIndex]);
-
     // When the document view is rendered externally, we need to provide some metadata
     // to the consumer to allow them to properly render the doc viewer component
     const prevRenderDocumentViewMeta = useRef<RenderDocumentViewMeta>();
@@ -951,6 +911,109 @@ const InternalUnifiedDataTable = React.forwardRef<
     );
 
     const { dataGridId, dataGridWrapper, setDataGridWrapper } = useFullScreenWatcher();
+
+    // Bring the expanded document's row into view, so expanding a document always shows which
+    // row it came from. This matters most when the document was not expanded by clicking its
+    // row, e.g. when restoring one from a link or paginating within the doc viewer, in which
+    // case it can be on a different page entirely.
+    const scrolledToDocId = useRef<string>();
+    const isPagedGrid = paginationMode === 'multiPage' && isPaginationEnabled;
+
+    const centerExpandedRow = useCallback((): ScrollToRowResult => {
+      if (!expandedDoc) {
+        return 'unavailable';
+      }
+
+      const rowIndex = displayedRows.findIndex(({ id }) => id === expandedDoc.id);
+
+      // The document may not be part of the results, e.g. when restoring one from a link that
+      // the current search does not return, in which case there is no row to scroll to. It may
+      // still arrive in a later fetch, so this is not treated as a failed attempt.
+      if (rowIndex === -1) {
+        return 'unavailable';
+      }
+
+      if (isPagedGrid) {
+        const targetPageIndex = Math.floor(rowIndex / currentPageSize);
+
+        if (targetPageIndex !== currentPageIndexRef.current) {
+          // The rows for the target page have not rendered yet, so retry once they have
+          changeCurrentPageIndex(targetPageIndex);
+          return 'retry';
+        }
+      }
+
+      // Only available once the virtualized grid body has rendered, which on initial load
+      // happens well after the expanded document is known
+      if (!dataGridRef.current?.scrollToItem) {
+        return 'retry';
+      }
+
+      dataGridRef.current.scrollToItem({
+        rowIndex: isPagedGrid ? rowIndex % currentPageSize : rowIndex,
+        align: 'center',
+      });
+
+      return 'scrolled';
+    }, [changeCurrentPageIndex, currentPageSize, displayedRows, expandedDoc, isPagedGrid]);
+
+    useEffect(() => {
+      if (!expandedDoc) {
+        scrolledToDocId.current = undefined;
+        return;
+      }
+
+      // Only scroll the first time a document becomes the expanded one, otherwise background
+      // refetches would repeatedly pull the grid away from wherever the user scrolled to
+      if (expandedDoc.id === scrolledToDocId.current) {
+        return;
+      }
+
+      let frameId: number;
+      let remainingAttempts = MAX_SCROLL_TO_ROW_ATTEMPTS;
+
+      const attemptScroll = () => {
+        const result = centerExpandedRow();
+
+        if (result === 'scrolled') {
+          scrolledToDocId.current = expandedDoc.id;
+        } else if (result === 'retry' && (remainingAttempts -= 1) > 0) {
+          frameId = requestAnimationFrame(attemptScroll);
+        }
+      };
+
+      frameId = requestAnimationFrame(attemptScroll);
+
+      return () => cancelAnimationFrame(frameId);
+    }, [centerExpandedRow, expandedDoc]);
+
+    useEffect(() => {
+      const scrollContainer = dataGridWrapper?.querySelector<HTMLElement>(VIRTUALIZED_SELECTOR);
+
+      if (!scrollContainer || !expandedDoc) {
+        return;
+      }
+
+      // Opening the doc viewer narrows the grid, which re-wraps rows into taller ones and moves
+      // the expanded row back out of view, so re-center it once the new layout is in place
+      let frameId: number;
+      const observer = new ResizeObserver(() => {
+        if (expandedDoc.id !== scrolledToDocId.current) {
+          return;
+        }
+
+        cancelAnimationFrame(frameId);
+        // Row heights are measured after the resize, so wait for that before re-centering
+        frameId = requestAnimationFrame(centerExpandedRow);
+      });
+
+      observer.observe(scrollContainer);
+
+      return () => {
+        cancelAnimationFrame(frameId);
+        observer.disconnect();
+      };
+    }, [centerExpandedRow, dataGridWrapper, expandedDoc]);
 
     const inTableSearchLatestStateRef = useRestorableRef('inTableSearch', undefined);
     const onInTableSearchInitialStateChange = useCallback(
@@ -1396,9 +1459,7 @@ const InternalUnifiedDataTable = React.forwardRef<
             return prevHasScrolledToBottom;
           }
 
-          // We need to manually query the react-window wrapper since EUI doesn't
-          // expose outerRef in virtualizationOptions, but we should request it
-          const outerRef = dataGridWrapper?.querySelector<HTMLElement>('.euiDataGrid__virtualized');
+          const outerRef = dataGridWrapper?.querySelector<HTMLElement>(VIRTUALIZED_SELECTOR);
 
           if (!outerRef) {
             return prevHasScrolledToBottom;
