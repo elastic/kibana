@@ -49,6 +49,9 @@ export const REMOVED_TYPES: string[] = [
   'streams_onboarding',
   'streams_features_identification',
   'streams_significant_events_queries_generation',
+
+  // Legacy streams description generation task replaced by the synchronous suggestion API
+  'streams_description_generation',
 ];
 
 export const SHARED_CONCURRENCY_TASKS: string[][] = [

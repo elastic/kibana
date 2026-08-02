@@ -55,6 +55,7 @@ interface Props {
   allowFeatureVisibility: boolean;
   allowSolutionVisibility: boolean;
   eventTracker: EventTracker;
+  isCpsTierEligible: boolean;
 }
 
 interface State {
@@ -150,7 +151,10 @@ export class CreateSpacePage extends Component<Props, State> {
   }
 
   private canEditProjectRouting(): boolean {
-    return this.props.capabilities.project_routing?.manage_space_default === true;
+    return (
+      this.props.capabilities.project_routing?.manage_space_default === true &&
+      this.props.isCpsTierEligible === true
+    );
   }
 
   private setDefaultProjectRouting() {

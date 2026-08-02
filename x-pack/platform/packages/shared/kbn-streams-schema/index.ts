@@ -91,7 +91,6 @@ export {
   hasSameEsql,
   replaceFromSources,
   rewriteFromSources,
-  stripMetadata,
 } from './src/helpers/esql_helpers';
 
 export * from './src/ingest_pipeline_processors';
@@ -212,10 +211,6 @@ export {
 } from './src/models/processing_simulation';
 
 export { type IngestStreamProcessing } from './src/models/ingest/processing';
-
-export { TaskStatus, type TaskResult } from './src/tasks/types';
-
-export type { GenerateDescriptionResult } from './src/api/description_generation';
 
 export { streamsOasDefinitions } from './src/oas_definitions';
 export type { StreamsOasDefinitions } from './src/oas_definitions';
