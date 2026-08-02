@@ -729,7 +729,7 @@ export class WorkflowsExecutionEnginePlugin
     // Construct the sync-execution log drain when the plugin is enabled.
     // The drain buffers event-log writes from sync executions and flushes them
     // to ES out-of-band so the synchronous call path has no inline ES writes.
-    if (this.config.syncExecution.enabled) {
+    if (this.config.syncExecution.enabled && this.config.syncLogDrain.enabled) {
       this.syncLogDrain = new SyncLogDrain(
         new LogsRepository(coreStart.dataStreams),
         this.logger.get('sync_log_drain'),

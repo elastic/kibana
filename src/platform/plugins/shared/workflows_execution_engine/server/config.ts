@@ -105,6 +105,12 @@ const configSchema = schema.object({
    */
   syncLogDrain: schema.object({
     /**
+     * When false, the drain is disabled and sync executions write event-log
+     * entries to Elasticsearch inline (same as async executions). Useful for
+     * A/B comparisons to measure the drain's overhead vs. direct ES writes.
+     */
+    enabled: schema.boolean({ defaultValue: true }),
+    /**
      * How often (ms) the background timer flushes buffered events to ES.
      * Lower values reduce event latency but increase write frequency.
      */
