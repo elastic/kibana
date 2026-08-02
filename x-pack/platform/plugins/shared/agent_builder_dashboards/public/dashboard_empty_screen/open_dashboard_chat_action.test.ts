@@ -16,12 +16,12 @@ describe('createOpenDashboardChatAction', () => {
     openChat.mockClear();
   });
 
-  it('uses the agent icon and Create with Chat label', () => {
+  it('uses the agent icon and Create with chat label', () => {
     const action = createOpenDashboardChatAction(openChat);
     const context = { trigger: { id: OPEN_DASHBOARD_CHAT_ACTION_ID } };
 
     expect(action.getIconType?.(context)).toBe('productAgent');
-    expect(action.getDisplayName?.(context)).toBe('Create with Chat');
+    expect(action.getDisplayName?.(context)).toBe('Create with chat');
     expect(action.getDisplayNameTooltip?.(context)).toBe('Build any panel using an agent.');
   });
 

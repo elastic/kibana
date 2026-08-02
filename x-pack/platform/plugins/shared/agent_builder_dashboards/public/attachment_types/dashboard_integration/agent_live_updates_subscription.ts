@@ -45,12 +45,15 @@ export const createAgentLiveUpdatesSubscription = ({
     .subscribe((event) => {
       const dashboardAttachments = event.data.attachments?.filter(isDashboardAttachment) ?? [];
       const incomingAttachments = dashboardAttachments.filter((attachment) => {
-        console.log('attachment', event.data.round.input.attachment_refs);
         return (
           event.data.round.input.attachment_refs?.some(
             (ref) =>
               ref.attachment_id === attachment.id &&
-              (ref.operation === ATTACHMENT_REF_OPERATION.updated || ref.operation === ATTACHMENT_REF_OPERATION.created)
+              (ref.operation === ATTACHMENT_REF_OPERATION.updated ||
+                ref.operation === ATTACHMENT_REF_OPERATION.created) &&
+              // Only reapply agent-driven edits. A `user` ref here is the dashboard's own
+              // ambient self-sync echoing back — reapplying it would revert what just changed.
+              ref.actor === ATTACHMENT_REF_ACTOR.agent
           ) === true
         );
       });

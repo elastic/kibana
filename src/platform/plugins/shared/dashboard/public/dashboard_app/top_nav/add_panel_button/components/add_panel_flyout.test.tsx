@@ -224,12 +224,12 @@ describe('AddPanelFlyout', () => {
       });
 
       await waitFor(() => {
-        const button = screen.getByTestId('create-action-Create with Chat');
+        const button = screen.getByTestId('create-action-Create with chat');
         expect(button.tagName).toBe('BUTTON');
-        expect(button).toHaveTextContent('Create with Chat');
+        expect(button).toHaveTextContent('Create with chat');
       });
 
-      await userEvent.click(screen.getByTestId('create-action-Create with Chat'));
+      await userEvent.click(screen.getByTestId('create-action-Create with chat'));
 
       expect(mockDashboardApi.clearOverlays).toHaveBeenCalledTimes(1);
       await waitFor(() => {

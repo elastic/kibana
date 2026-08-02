@@ -50,9 +50,7 @@ test.describe(
     }) => {
       await pageObjects.dashboardChat.openFromMetricsPrompt();
 
-      await expect(pageObjects.dashboardChat.conversationInputForm).toBeVisible({
-        timeout: 60_000,
-      });
+      await expect(pageObjects.dashboardChat.conversationInputForm).toBeVisible();
       await expect(pageObjects.dashboardChat.conversationInputEditor).not.toHaveText('');
       await expect(pageObjects.dashboardChat.roundResponses).toHaveCount(0);
     });
@@ -63,9 +61,7 @@ test.describe(
       await pageObjects.dashboard.openAddPanelFlyout();
       await pageObjects.dashboardChat.openFromAddPanelFlyout();
 
-      await expect(pageObjects.dashboardChat.conversationInputForm).toBeVisible({
-        timeout: 60_000,
-      });
+      await expect(pageObjects.dashboardChat.conversationInputForm).toBeVisible();
       await expect(pageObjects.dashboardChat.conversationInputEditor).toHaveText('');
       await expect(pageObjects.dashboardChat.roundResponses).toHaveCount(0);
     });

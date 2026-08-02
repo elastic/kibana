@@ -139,11 +139,11 @@ function NewPanelContent({
                 item={{
                   id: OPEN_DASHBOARD_CHAT_ACTION_ID,
                   name: i18n.translate('dashboard.addPanelFlyout.createWithChatButtonLabel', {
-                    defaultMessage: 'Create with Chat',
+                    defaultMessage: 'Create with chat',
                   }),
                   icon: 'productAgent',
                   order: 0,
-                  'data-test-subj': 'create-action-Create with Chat',
+                  'data-test-subj': 'create-action-Create with chat',
                   onClick: (event) => {
                     onAddPanelClick(event, dashboardApi, openDashboardChat);
                   },

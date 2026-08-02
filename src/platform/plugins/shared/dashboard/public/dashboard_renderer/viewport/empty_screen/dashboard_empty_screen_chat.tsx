@@ -70,7 +70,7 @@ export const DashboardEmptyScreenChat = () => (
             <EuiText size="s" textAlign="left" css={styles.title}>
               <strong>
                 {i18n.translate('dashboard.emptyScreen.createWithChatTitle', {
-                  defaultMessage: 'Create with Chat',
+                  defaultMessage: 'Create with chat',
                 })}
               </strong>
             </EuiText>
@@ -112,7 +112,7 @@ export const DashboardEmptyScreenChat = () => (
               data-test-subj="dashboardCreateWithChatOpenChat"
             >
               {i18n.translate('dashboard.emptyScreen.openChatButtonLabel', {
-                defaultMessage: 'Open Chat →',
+                defaultMessage: 'Open chat →',
               })}
             </EuiButtonEmpty>
           </EuiFlexItem>

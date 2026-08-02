@@ -88,11 +88,11 @@ describe('DashboardEmptyScreen', () => {
   test('renders the empty-screen chat card when the Chat action is available', () => {
     renderComponent('edit');
 
-    expect(screen.getByText('Create with Chat')).toBeInTheDocument();
+    expect(screen.getByText('Create with chat')).toBeInTheDocument();
     expect(screen.getByTestId('dashboardCreateWithChatOpenChat')).toBeInTheDocument();
     expect(screen.getByTestId('mockAddPanelAction')).toBeInTheDocument();
     // Chat uses the elaborate empty-screen card, not FeaturedItemCard.
-    expect(screen.queryByTestId('create-action-Create with Chat')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('create-action-Create with chat')).not.toBeInTheDocument();
   });
 
   test('opens Chat with the selected prompt', async () => {
