@@ -48,6 +48,7 @@ export async function scheduleEntityMaintainerTask({
   namespace,
   request,
   enabled,
+  initialTaskStatus,
 }: {
   logger: Logger;
   taskManager: TaskManagerStartContract;
@@ -56,6 +57,7 @@ export async function scheduleEntityMaintainerTask({
   namespace: string;
   request: KibanaRequest;
   enabled?: boolean;
+  initialTaskStatus?: EntityMaintainerTaskStatus;
 }): Promise<void> {
   logger.debug(`Scheduling entity maintainer task: ${id}`);
   await taskManager.ensureScheduled(
@@ -63,7 +65,7 @@ export async function scheduleEntityMaintainerTask({
       id: getTaskId(id, namespace),
       taskType: getTaskType(id),
       schedule: { interval },
-      state: { namespace, taskStatus: EntityMaintainerTaskStatus.STARTED },
+      state: { namespace, taskStatus: initialTaskStatus ?? EntityMaintainerTaskStatus.STARTED },
       params: {},
       enabled: enabled ?? true,
     },

@@ -15,6 +15,7 @@ import {
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { LicenseType } from '@kbn/licensing-types';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import type { EntityStoreStatus } from '../../../common';
 import {
   getTaskId,
   removeEntityMaintainer,
@@ -125,12 +126,21 @@ export class EntityMaintainersClient {
   /**
    * Schedules only maintainers that do not yet have a task document (taskSnapshot undefined).
    * Uses getMaintainers() to determine which registry entries already have tasks.
+   * New maintainers inherit the store's current running state: if the store is not running
+   * they are scheduled as STOPPED.
    */
-  public async init(request: KibanaRequest, options?: { autoStart?: boolean }): Promise<void> {
+  public async init(
+    request: KibanaRequest,
+    options?: { autoStart?: boolean; entityStoreStatus?: EntityStoreStatus }
+  ): Promise<void> {
     this.logger.debug('Initializing entity maintainer tasks');
     try {
       const maintainers = await this.getMaintainers();
       const toSchedule = maintainers.filter((m) => m.taskSnapshot === undefined);
+      const initialTaskStatus =
+        options?.entityStoreStatus === 'running'
+          ? EntityMaintainerTaskStatus.STARTED
+          : EntityMaintainerTaskStatus.STOPPED;
       await Promise.all(
         toSchedule.map(async ({ id, interval }) => {
           await scheduleEntityMaintainerTask({
@@ -141,6 +151,7 @@ export class EntityMaintainersClient {
             namespace: this.namespace,
             request,
             enabled: options?.autoStart ?? true,
+            initialTaskStatus,
           });
         })
       );

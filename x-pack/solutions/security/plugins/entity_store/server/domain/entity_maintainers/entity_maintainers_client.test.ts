@@ -499,6 +499,84 @@ describe('EntityMaintainersClient', () => {
         })
       );
     });
+
+    it('should schedule new maintainers as STARTED when store is running', async () => {
+      entityMaintainersRegistry.getAll.mockReturnValue([
+        {
+          id: 'm1',
+          interval: '5m',
+          description: 'M1',
+          minLicense: DEFAULT_ENTITY_MAINTAINER_MIN_LICENSE,
+        },
+      ]);
+      const taskManager = {
+        get: jest.fn().mockRejectedValue(new Error('Not found')),
+      };
+      mockSavedObjectsErrorHelpers.isNotFoundError.mockReturnValue(true);
+      const client = createClient({ taskManager: taskManager as any });
+      const request = createMockRequest();
+
+      await client.init(request, { entityStoreStatus: 'running' });
+
+      expect(scheduleEntityMaintainerTask).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'm1',
+          initialTaskStatus: EntityMaintainerTaskStatus.STARTED,
+        })
+      );
+    });
+
+    it('should schedule new maintainers as STOPPED when store is stopped', async () => {
+      entityMaintainersRegistry.getAll.mockReturnValue([
+        {
+          id: 'm1',
+          interval: '5m',
+          description: 'M1',
+          minLicense: DEFAULT_ENTITY_MAINTAINER_MIN_LICENSE,
+        },
+      ]);
+      const taskManager = {
+        get: jest.fn().mockRejectedValue(new Error('Not found')),
+      };
+      mockSavedObjectsErrorHelpers.isNotFoundError.mockReturnValue(true);
+      const client = createClient({ taskManager: taskManager as any });
+      const request = createMockRequest();
+
+      await client.init(request, { entityStoreStatus: 'stopped' });
+
+      expect(scheduleEntityMaintainerTask).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'm1',
+          initialTaskStatus: EntityMaintainerTaskStatus.STOPPED,
+        })
+      );
+    });
+
+    it('should schedule new maintainers as STOPPED when entityStoreStatus is not provided', async () => {
+      entityMaintainersRegistry.getAll.mockReturnValue([
+        {
+          id: 'm1',
+          interval: '5m',
+          description: 'M1',
+          minLicense: DEFAULT_ENTITY_MAINTAINER_MIN_LICENSE,
+        },
+      ]);
+      const taskManager = {
+        get: jest.fn().mockRejectedValue(new Error('Not found')),
+      };
+      mockSavedObjectsErrorHelpers.isNotFoundError.mockReturnValue(true);
+      const client = createClient({ taskManager: taskManager as any });
+      const request = createMockRequest();
+
+      await client.init(request);
+
+      expect(scheduleEntityMaintainerTask).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'm1',
+          initialTaskStatus: EntityMaintainerTaskStatus.STOPPED,
+        })
+      );
+    });
   });
 
   describe('stop', () => {
