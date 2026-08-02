@@ -64,10 +64,10 @@ export const DashboardEmptyScreenChat = () => (
       <EuiFlexItem grow={false}>
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiIcon type="productAgent" size="m" css={styles.assistanceText} aria-hidden={true} />
+            <EuiIcon type="productAgent" size="m" css={styles.assistanceIcon} aria-hidden={true} />
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiText size="s" textAlign="left" css={styles.assistanceText}>
+            <EuiText size="s" textAlign="left" css={styles.title}>
               <strong>
                 {i18n.translate('dashboard.emptyScreen.createWithChatTitle', {
                   defaultMessage: 'Create with Chat',
@@ -125,7 +125,6 @@ export const DashboardEmptyScreenChat = () => (
 const styles = {
   panel: ({ euiTheme }: UseEuiTheme) =>
     css({
-      border: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderStrongAssistance}`,
       padding: `${euiTheme.size.s} ${euiTheme.size.base}`,
       textAlign: 'left',
       width: '100%',
@@ -137,9 +136,13 @@ const styles = {
     css({
       paddingLeft: euiTheme.size.s,
     }),
-  assistanceText: ({ euiTheme }: UseEuiTheme) =>
+  assistanceIcon: ({ euiTheme }: UseEuiTheme) =>
     css({
       color: euiTheme.colors.textAssistance,
+    }),
+  title: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      color: euiTheme.colors.textParagraph,
     }),
   promptButton: css({
     borderRadius: '8px',
