@@ -94,7 +94,7 @@ export class WorkflowTaskManager {
         runAt: resumeAt,
         scope: generateExecutionTaskScope(workflowExecution as EsWorkflowExecution),
       },
-      { request: fakeRequest }
+      { request: fakeRequest, cloneApiKey: true }
     );
 
     return {
@@ -123,7 +123,7 @@ export class WorkflowTaskManager {
         runAt: resumeAt,
         scope: generateExecutionTaskScope(workflowExecution as EsWorkflowExecution),
       },
-      { request: fakeRequest }
+      { request: fakeRequest, cloneApiKey: true }
     );
 
     return {
@@ -171,7 +171,7 @@ export class WorkflowTaskManager {
         scope: generateExecutionTaskScope(workflowExecution),
         enabled: true,
       },
-      { request }
+      { request, cloneApiKey: true }
     );
 
     return { taskId: task.id };
@@ -229,7 +229,7 @@ export class WorkflowTaskManager {
         state: {},
         scope: [`workflow:execution:${executionId}`],
       },
-      fakeRequest ? { request: fakeRequest } : undefined
+      fakeRequest ? { request: fakeRequest, cloneApiKey: true } : undefined
     );
 
     return {
