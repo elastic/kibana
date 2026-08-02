@@ -40,6 +40,22 @@ test.describe(
   'Dashboard Chat entry points',
   { tag: [...tags.stateful.classic, ...tags.serverless.search] },
   () => {
+    /**
+     * Fresh Scout clusters have no data views/dashboards. Without at least one
+     * dashboard, DashboardApp shows the analytics no-data page for this scoped
+     * role ("Contact your administrator") instead of the empty editor.
+     */
+    test.beforeAll(async ({ apiServices }) => {
+      await apiServices.dashboard.create({
+        title: 'chat-entry-points-seed',
+        panels: [],
+      });
+    });
+
+    test.afterAll(async ({ kbnClient }) => {
+      await kbnClient.savedObjects.cleanStandardList();
+    });
+
     test.beforeEach(async ({ browserAuth, pageObjects }) => {
       await browserAuth.loginWithCustomRole(dashboardChatRole);
       await pageObjects.dashboard.openNewDashboard();
@@ -50,10 +66,8 @@ test.describe(
     }) => {
       await pageObjects.dashboardChat.openFromMetricsPrompt();
 
-      // Prefill is applied after the editor mounts; allow the same CI budget as open.
-      await expect(pageObjects.dashboardChat.conversationInputEditor).not.toHaveText('', {
-        timeout: 60_000,
-      });
+      await expect(pageObjects.dashboardChat.conversationInputForm).toBeVisible();
+      await expect(pageObjects.dashboardChat.conversationInputEditor).not.toHaveText('');
       await expect(pageObjects.dashboardChat.roundResponses).toHaveCount(0);
     });
 
@@ -63,6 +77,7 @@ test.describe(
       await pageObjects.dashboard.openAddPanelFlyout();
       await pageObjects.dashboardChat.openFromAddPanelFlyout();
 
+      await expect(pageObjects.dashboardChat.conversationInputForm).toBeVisible();
       await expect(pageObjects.dashboardChat.conversationInputEditor).toHaveText('');
       await expect(pageObjects.dashboardChat.roundResponses).toHaveCount(0);
     });

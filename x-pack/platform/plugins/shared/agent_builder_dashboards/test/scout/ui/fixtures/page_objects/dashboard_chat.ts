@@ -23,16 +23,10 @@ export class DashboardChatPage {
   }
 
   async openFromMetricsPrompt() {
-    // Empty-screen Chat is gated on featured-items loading; default actionTimeout (10s) is too short in CI.
-    await this.metricsPrompt.click({ timeout: 60_000 });
-    // Chat shell + EmbeddableAccessBoundary/connector resolution is also slow in CI.
-    await this.conversationInputForm.waitFor({ state: 'visible', timeout: 60_000 });
+    await this.metricsPrompt.click();
   }
 
   async openFromAddPanelFlyout() {
-    // Flyout featured section is skeleton-gated on the same featured-items fetch.
-    await this.addPanelChatAction.click({ timeout: 60_000 });
-    // Chat shell + EmbeddableAccessBoundary/connector resolution is also slow in CI.
-    await this.conversationInputForm.waitFor({ state: 'visible', timeout: 60_000 });
+    await this.addPanelChatAction.click();
   }
 }
