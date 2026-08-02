@@ -29,14 +29,18 @@ export const FLYOUT_WIDTH_KEY = 'discover:flyoutWidth';
 export interface DiscoverGridFlyoutProps
   extends Pick<
     UnifiedDocViewerFlyoutProps,
-    'initialDocViewerState' | 'onInitialDocViewerStateChange' | 'onUpdateSelectedTabId'
+    | 'initialDocViewerState'
+    | 'onInitialDocViewerStateChange'
+    | 'onUpdateSelectedTabId'
+    | 'requestState'
+    | 'notice'
   > {
   savedSearchId?: string;
   filters?: Filter[];
   query?: Query | AggregateQuery;
   columns: string[];
   columnsMeta?: DataTableColumnsMeta;
-  hit: DataTableRecord;
+  hit?: DataTableRecord;
   hits?: DataTableRecord[];
   dataView: DataView;
   initialTabId?: string;
@@ -50,9 +54,14 @@ export interface DiscoverGridFlyoutProps
     options?: { initialTabId?: string; initialTabState?: object }
   ) => void;
   hideFilteringOnComputedColumns?: boolean;
+  /**
+   * Copies a link that reopens this document. Only provided by the main Discover view, since
+   * the surrounding documents view and the saved search embeddable have no URL to restore into.
+   */
+  onCopyLink?: () => void;
 }
 
-const getOriginDocType = (record: DataTableRecord): DocumentType =>
+const getOriginDocType = (record: DataTableRecord | undefined): DocumentType =>
   recordHasContext(record) ? record.context.type : DocumentType.Default;
 
 /**
@@ -78,6 +87,9 @@ export function DiscoverGridFlyout({
   onInitialDocViewerStateChange,
   onUpdateSelectedTabId,
   hideFilteringOnComputedColumns,
+  requestState,
+  notice,
+  onCopyLink,
 }: DiscoverGridFlyoutProps) {
   const services = useDiscoverServices();
   const isESQLQuery = isOfAggregateQueryType(query);
@@ -86,11 +98,12 @@ export function DiscoverGridFlyout({
 
   const { flyoutActions } = useFlyoutActions({
     dataView,
-    rowIndex: actualHit.raw._index,
-    rowId: actualHit.raw._id,
+    rowIndex: actualHit?.raw._index,
+    rowId: actualHit?.raw._id,
     columns,
     filters,
     savedSearchId,
+    onCopyLink,
   });
 
   const getDocViewerAccessor = useProfileAccessor('getDocViewer', {
@@ -102,7 +115,9 @@ export function DiscoverGridFlyout({
       docViewsRegistry: (registry: DocViewsRegistry) => registry,
     }));
 
-    return getDocViewer({ record: actualHit });
+    // Document profiles customize the viewer based on the record, so there is nothing to
+    // resolve until it is available
+    return actualHit ? getDocViewer({ record: actualHit }) : undefined;
   }, [actualHit, getDocViewerAccessor]);
 
   useEffect(() => {
@@ -114,19 +129,21 @@ export function DiscoverGridFlyout({
   return (
     <UnifiedDocViewerFlyout
       originDocType={originDocType}
-      flyoutTitle={docViewer.title}
+      flyoutTitle={docViewer?.title}
       flyoutActions={
-        !isESQLQuery && flyoutActions.length > 0 ? (
+        actualHit && !isESQLQuery && flyoutActions.length > 0 ? (
           <DiscoverGridFlyoutActions flyoutActions={flyoutActions} />
         ) : null
       }
       flyoutWidthLocalStorageKey={FLYOUT_WIDTH_KEY}
       services={services}
-      docViewsRegistry={docViewer.docViewsRegistry}
-      renderCustomHeader={docViewer.renderHeader}
-      renderCustomFooter={docViewer.renderFooter}
+      docViewsRegistry={docViewer?.docViewsRegistry}
+      renderCustomHeader={docViewer?.renderHeader}
+      renderCustomFooter={docViewer?.renderFooter}
       isEsqlQuery={isESQLQuery}
       hit={hit}
+      requestState={requestState}
+      notice={notice}
       hits={hits}
       dataView={dataView}
       columns={columns}

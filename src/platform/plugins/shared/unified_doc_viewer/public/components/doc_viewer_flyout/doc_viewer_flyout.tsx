@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ReactNode } from 'react';
 import React, { useCallback, useMemo, useRef } from 'react';
-import type { DocViewerProps } from '@kbn/unified-doc-viewer';
+import type { DocViewerProps, ElasticRequestState } from '@kbn/unified-doc-viewer';
 import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -38,6 +39,7 @@ import { FlyoutHistoryKeyContext } from './flyout_history_key_context';
 import { OriginDocTypeContext } from './origin_doc_type_context';
 import { UnifiedDocViewer } from '../lazy_doc_viewer';
 import { useFlyoutA11y } from './use_flyout_a11y';
+import { UnresolvedDocument } from './unresolved_document';
 
 export interface UnifiedDocViewerFlyoutProps
   extends Pick<DocViewerProps, 'initialTabId' | 'onUpdateSelectedTabId'> {
@@ -57,7 +59,21 @@ export interface UnifiedDocViewerFlyoutProps
   isEsqlQuery: boolean;
   columns: string[];
   columnsMeta?: DataTableColumnsMeta;
-  hit: DataTableRecord;
+  /**
+   * The expanded document. May be undefined while it is still being resolved, e.g. when
+   * restoring a shared link, in which case {@link requestState} drives what is rendered.
+   */
+  hit?: DataTableRecord;
+  /**
+   * State of the request resolving {@link hit}, used to render a loading or error state
+   * in place of the doc viewer when there is no document to show.
+   */
+  requestState?: ElasticRequestState;
+  /**
+   * Rendered in place of the document pagination, which is only available for documents
+   * that belong to the current result set.
+   */
+  notice?: ReactNode;
   hits?: DataTableRecord[];
   dataView: DataView;
   hideFilteringOnComputedColumns?: boolean;
@@ -101,6 +117,8 @@ export function UnifiedDocViewerFlyout({
   columns,
   columnsMeta,
   hit,
+  requestState,
+  notice,
   hits,
   dataView,
   hideFilteringOnComputedColumns,
@@ -130,19 +148,18 @@ export function UnifiedDocViewerFlyout({
   const minWidth = euiTheme.base * 24;
   const maxWidth = euiTheme.breakpoint.xl;
   // Get actual hit with updated highlighted searches
-  const foundHit = useMemo(() => hits?.find(({ id }) => id === hit.id), [hit, hits]);
+  const foundHit = useMemo(() => hits?.find(({ id }) => id === hit?.id), [hit, hits]);
   const actualHit = useMemo(() => foundHit ?? hit, [foundHit, hit]);
   const pageCount = useMemo<number>(() => (hits && foundHit ? hits.length : 0), [foundHit, hits]);
   const activePage = useMemo<number>(() => {
-    const id = hit.id;
-    if (!hits || pageCount <= 1) {
+    if (!hits || !hit || pageCount <= 1) {
       return -1;
     }
 
-    return getIndexByDocId(hits, id);
+    return getIndexByDocId(hits, hit.id);
   }, [hits, hit, pageCount]);
 
-  const renderSubheader = pageCount > 1 || flyoutActions;
+  const renderSubheader = pageCount > 1 || flyoutActions || notice;
 
   const setPage = useCallback(
     (index: number) => {
@@ -193,22 +210,23 @@ export function UnifiedDocViewerFlyout({
     [activePage, onClose, setPage]
   );
 
-  const docViewRenderProps = useMemo<DocViewRenderProps>(
-    () => ({
-      hit: actualHit,
-      dataView,
-      columns,
-      columnsMeta,
-      textBasedHits: isEsqlQuery ? hits : undefined,
-      filter: onFilter,
-      onAddColumn,
-      onRemoveColumn,
-      docViewsRegistry,
-      decreaseAvailableHeightBy: isProjectStyle
-        ? euiTheme.base + PROJECT_VIEW_MARGIN_BOTTOM
-        : euiTheme.base,
-      hideFilteringOnComputedColumns,
-    }),
+  const docViewRenderProps = useMemo<DocViewRenderProps | undefined>(
+    () =>
+      actualHit && {
+        hit: actualHit,
+        dataView,
+        columns,
+        columnsMeta,
+        textBasedHits: isEsqlQuery ? hits : undefined,
+        filter: onFilter,
+        onAddColumn,
+        onRemoveColumn,
+        docViewsRegistry,
+        decreaseAvailableHeightBy: isProjectStyle
+          ? euiTheme.base + PROJECT_VIEW_MARGIN_BOTTOM
+          : euiTheme.base,
+        hideFilteringOnComputedColumns,
+      },
     [
       actualHit,
       dataView,
@@ -285,7 +303,7 @@ export function UnifiedDocViewerFlyout({
                   wrap={true}
                   css={{ paddingBlock: euiTheme.size.s, paddingInline: euiTheme.size.m }}
                 >
-                  {activePage !== -1 && (
+                  {activePage !== -1 ? (
                     <EuiFlexItem data-test-subj={`docViewerFlyoutNavigationPage-${activePage}`}>
                       <EuiPagination
                         aria-label={i18n.translate('unifiedDocViewer.flyout.documentNavigation', {
@@ -298,6 +316,10 @@ export function UnifiedDocViewerFlyout({
                         data-test-subj="docViewerFlyoutNavigation"
                       />
                     </EuiFlexItem>
+                  ) : (
+                    notice && (
+                      <EuiFlexItem data-test-subj="docViewerFlyoutNotice">{notice}</EuiFlexItem>
+                    )
                   )}
                   <EuiFlexItem grow={false} css={{ marginLeft: 'auto' }}>
                     {isEsqlQuery || !flyoutActions ? null : <>{flyoutActions}</>}
@@ -307,24 +329,30 @@ export function UnifiedDocViewerFlyout({
               </>
             )}
             <EuiFlyoutBody>
-              {renderCustomHeader && (
+              {actualHit && docViewRenderProps ? (
                 <>
-                  {renderCustomHeader(docViewRenderProps)}
-                  <EuiSpacer size="m" />
+                  {renderCustomHeader && (
+                    <>
+                      {renderCustomHeader(docViewRenderProps)}
+                      <EuiSpacer size="m" />
+                    </>
+                  )}
+                  <UnifiedDocViewer
+                    key={actualHit.id}
+                    ref={docViewerRef}
+                    initialTabId={initialTabId}
+                    initialState={initialDocViewerState}
+                    onInitialStateChange={onInitialDocViewerStateChange}
+                    onUpdateSelectedTabId={onUpdateSelectedTabId}
+                    originDocType={originDocType}
+                    {...docViewRenderProps}
+                  />
                 </>
+              ) : (
+                <UnresolvedDocument requestState={requestState} />
               )}
-              <UnifiedDocViewer
-                key={actualHit.id}
-                ref={docViewerRef}
-                initialTabId={initialTabId}
-                initialState={initialDocViewerState}
-                onInitialStateChange={onInitialDocViewerStateChange}
-                onUpdateSelectedTabId={onUpdateSelectedTabId}
-                originDocType={originDocType}
-                {...docViewRenderProps}
-              />
             </EuiFlyoutBody>
-            {renderCustomFooter && (
+            {renderCustomFooter && docViewRenderProps && (
               <EuiFlyoutFooter>{renderCustomFooter(docViewRenderProps)}</EuiFlyoutFooter>
             )}
           </EuiFlyout>

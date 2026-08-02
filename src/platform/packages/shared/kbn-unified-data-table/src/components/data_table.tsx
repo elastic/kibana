@@ -776,6 +776,65 @@ const InternalUnifiedDataTable = React.forwardRef<
       changeCurrentPageIndex,
     ]);
 
+    // Bring the expanded document's row into view, so expanding a document always shows which
+    // row it came from. This matters most when the document was not expanded by clicking its
+    // row, e.g. when restoring one from a link or paginating within the doc viewer, in which
+    // case it can be on a different page entirely.
+    const scrolledToDocId = useRef<string>();
+    const pendingScrollRowIndex = useRef<number>();
+    const isPagedGrid = paginationMode === 'multiPage' && isPaginationEnabled;
+
+    useEffect(() => {
+      if (!expandedDoc) {
+        scrolledToDocId.current = undefined;
+        return;
+      }
+
+      // Only scroll the first time a document becomes the expanded one, otherwise background
+      // refetches would repeatedly pull the grid away from wherever the user scrolled to
+      if (expandedDoc.id === scrolledToDocId.current) {
+        return;
+      }
+
+      const rowIndex = displayedRows.findIndex(({ id }) => id === expandedDoc.id);
+
+      // The document may not be part of the results, e.g. when restoring one from a link that
+      // the current search does not return, in which case there is no row to scroll to
+      if (rowIndex === -1) {
+        return;
+      }
+
+      const targetPageIndex = isPagedGrid ? Math.floor(rowIndex / currentPageSize) : 0;
+
+      if (isPagedGrid && targetPageIndex !== currentPageIndexRef.current) {
+        // The rows for the target page have not rendered yet, so defer the scroll until they have
+        pendingScrollRowIndex.current = rowIndex % currentPageSize;
+        scrolledToDocId.current = expandedDoc.id;
+        changeCurrentPageIndex(targetPageIndex);
+        return;
+      }
+
+      // `scrollToItem` is only available once the virtualized grid body has rendered, so leave
+      // the document unmarked and retry on a later render if it is missing
+      if (dataGridRef.current?.scrollToItem) {
+        dataGridRef.current.scrollToItem({
+          rowIndex: isPagedGrid ? rowIndex % currentPageSize : rowIndex,
+          align: 'center',
+        });
+        scrolledToDocId.current = expandedDoc.id;
+      }
+    }, [changeCurrentPageIndex, currentPageSize, displayedRows, expandedDoc, isPagedGrid]);
+
+    useEffect(() => {
+      if (pendingScrollRowIndex.current === undefined) {
+        return;
+      }
+
+      const rowIndex = pendingScrollRowIndex.current;
+      pendingScrollRowIndex.current = undefined;
+      dataGridRef.current?.scrollToItem?.({ rowIndex, align: 'center' });
+    }, [currentPageIndex]);
+
     // When the document view is rendered externally, we need to provide some metadata
     // to the consumer to allow them to properly render the doc viewer component
     const prevRenderDocumentViewMeta = useRef<RenderDocumentViewMeta>();

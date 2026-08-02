@@ -63,12 +63,14 @@ describe('Discover flyout', function () {
     records,
     expandedHit,
     query,
+    onCopyLink,
     services = getServices(),
   }: {
     dataView?: DataView;
     records?: DataTableRecord[];
     expandedHit?: EsHitRecord;
     query?: Query | AggregateQuery;
+    onCopyLink?: () => void;
     services?: DiscoverServices;
   }) => {
     const onClose = jest.fn();
@@ -92,6 +94,7 @@ describe('Discover flyout', function () {
       onFilter: jest.fn(),
       onRemoveColumn: jest.fn(),
       setExpandedDoc: jest.fn(),
+      onCopyLink,
     };
 
     render(
@@ -261,6 +264,22 @@ describe('Discover flyout', function () {
     await user.keyboard('{ArrowRight}{ArrowLeft}');
 
     expect(props.setExpandedDoc).not.toHaveBeenCalled();
+  });
+
+  it('should copy a link to the document when the copy link action is provided', async () => {
+    const onCopyLink = jest.fn();
+    const { user } = await renderComponent({ onCopyLink });
+
+    await user.click(screen.getByTestId('docTableCopyLink'));
+
+    expect(onCopyLink).toHaveBeenCalledTimes(1);
+  });
+
+  it('should not render the copy link action when there is nothing to link to', async () => {
+    // The surrounding documents view and the saved search embeddable have no URL to restore into
+    await renderComponent({});
+
+    expect(screen.queryByTestId('docTableCopyLink')).not.toBeInTheDocument();
   });
 
   it('should not render single/surrounding views for ES|QL', async () => {

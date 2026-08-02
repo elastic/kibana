@@ -7,11 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import React from 'react';
 import { AppMenuActionId, type DiscoverAppMenuItemType } from '@kbn/discover-utils';
 import type { AppHeaderShareAction } from '@kbn/app-header';
-import { omit } from 'lodash';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import { i18n } from '@kbn/i18n';
+import type { TimeRange } from '@kbn/es-query';
+import { KbnInfoCallout } from '@kbn/ui-callout';
+import { isTimeRangeAbsoluteTime } from '@kbn/share-plugin/public';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import type { DiscoverAppMenuPopoverItem } from '@kbn/discover-utils';
 import type { ShowShareMenuOptions } from '@kbn/share-plugin/public';
@@ -25,6 +28,7 @@ import {
   showPublicUrlSwitch,
 } from '../../../../../utils/get_sharing_data';
 import { createSearchSource } from '../../../state_management/utils/create_search_source';
+import { getDiscoverLocatorParams } from '../../../../../utils/get_discover_locator_params';
 import type { DiscoverAppLocatorParams } from '../../../../../../common/app_locator';
 import type { AppMenuDiscoverParams } from './types';
 import type { DiscoverServices } from '../../../../../build_services';
@@ -48,6 +52,34 @@ interface BuildShareOptionsParams {
  * Specifies an explicit type for the sharing data of the Discover app.
  */
 type DiscoverSharingData = SharingData<DiscoverAppLocatorParams> & ReportingCSVSharingData;
+
+/**
+ * A relative time range resolves differently for whoever opens the link, so the expanded
+ * document often will not be in their results and has to be fetched by ID instead, losing its
+ * surrounding context. Point at the switch that captures the range as absolute values instead.
+ */
+const getExpandedDocHelpText = ({
+  currentTab,
+  timeRange,
+}: {
+  currentTab: TabState;
+  timeRange: TimeRange | undefined;
+}) => {
+  if (!currentTab.appState.expandedDoc || isTimeRangeAbsoluteTime(timeRange)) {
+    return undefined;
+  }
+
+  return (
+    <KbnInfoCallout
+      size="s"
+      data-test-subj="discoverShareExpandedDocCallout"
+      title={i18n.translate('discover.share.expandedDocRelativeTime', {
+        defaultMessage:
+          'This link includes an open document. Use an absolute time range so it stays in the results for whoever opens the link, or copy a link from the document itself.',
+      })}
+    />
+  );
+};
 
 /**
  * Builds share options for both share modal and export integrations
@@ -99,24 +131,15 @@ export const buildShareOptions = async ({
   });
 
   // Share -> Get links -> Snapshot
-  const params: DiscoverSharingData['locatorParams'][number]['params'] = {
-    ...omit(currentTab.appState, 'dataSource'),
-    ...(persistedDiscoverSession?.id ? { savedSearchId: persistedDiscoverSession.id } : {}),
-    ...(dataView?.isPersisted()
-      ? { dataViewId: dataView?.id }
-      : { dataViewSpec: dataView?.toMinimalSpec() }),
+  const params: DiscoverSharingData['locatorParams'][number]['params'] = getDiscoverLocatorParams({
+    currentTab,
+    dataView,
+    persistedDiscoverSession,
     filters,
     timeRange,
     refreshInterval,
     profileState,
-  };
-
-  if (currentTab) {
-    params.tab = {
-      id: currentTab.id,
-      label: currentTab.label,
-    };
-  }
+  });
 
   const relativeUrl = locator.getRedirectUrl(params);
 
@@ -169,6 +192,7 @@ export const buildShareOptions = async ({
         },
         link: {
           draftModeCallOut: true,
+          helpText: getExpandedDocHelpText({ currentTab, timeRange }),
         },
       },
     },

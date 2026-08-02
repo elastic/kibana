@@ -14,9 +14,9 @@ import { useNavigationProps } from '../../hooks/use_navigation_props';
 import type { FlyoutActionItem } from './types';
 
 export const useFlyoutActions = (
-  props: UseNavigationProps
+  props: UseNavigationProps & { onCopyLink?: () => void }
 ): { flyoutActions: FlyoutActionItem[] } => {
-  const { dataView } = props;
+  const { dataView, onCopyLink } = props;
   const { singleDocHref, contextViewHref, onOpenSingleDoc, onOpenContextView } =
     useNavigationProps(props);
 
@@ -48,10 +48,24 @@ export const useFlyoutActions = (
             'Inspect documents that occurred before and after this document. Only pinned filters remain active in the Surrounding documents view.',
         }),
       },
+      {
+        id: 'copyLink',
+        enabled: Boolean(onCopyLink),
+        dataTestSubj: 'docTableCopyLink',
+        iconType: 'link',
+        onClick: () => onCopyLink?.(),
+        label: i18n.translate('discover.grid.tableRow.copyLinkLabel', {
+          defaultMessage: 'Copy link',
+        }),
+        helpText: i18n.translate('discover.grid.tableRow.copyLinkHover', {
+          defaultMessage:
+            'Copy a link that reopens this document. The time range is captured as absolute values, so others see the same results.',
+        }),
+      },
     ];
 
     return actions.filter((action) => action.enabled);
-  }, [contextViewHref, dataView, onOpenContextView, onOpenSingleDoc, singleDocHref]);
+  }, [contextViewHref, dataView, onCopyLink, onOpenContextView, onOpenSingleDoc, singleDocHref]);
 
   return { flyoutActions };
 };

@@ -112,6 +112,7 @@ export const parseAppLocatorParams = (
     esqlControls,
     isApproximate,
     profileState,
+    expandedDoc,
   } = params;
 
   const appState: Partial<DiscoverAppState> = {};
@@ -139,6 +140,7 @@ export const parseAppLocatorParams = (
   if (typeof hideSidebar === 'boolean') appState.hideSidebar = hideSidebar;
   if (typeof sampleSize === 'number' && sampleSize > 0) appState.sampleSize = sampleSize;
   if (typeof isApproximate === 'boolean') appState.isApproximate = isApproximate;
+  if (expandedDoc) appState.expandedDoc = { id: expandedDoc.id, index: expandedDoc.index };
 
   const state: MainHistoryLocationState = {};
 

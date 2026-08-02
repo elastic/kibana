@@ -24,7 +24,8 @@ import {
   DISCOVER_QUERY_MODE_KEY,
 } from '../../../../../../common/constants';
 import { createDiscoverServicesMock } from '../../../../../__mocks__/services';
-import { dataViewMockWithTimeField } from '@kbn/discover-utils/src/__mocks__';
+import { buildDataTableRecord } from '@kbn/discover-utils';
+import { dataViewMockWithTimeField, esHitsMock } from '@kbn/discover-utils/src/__mocks__';
 import type { SerializableRecord } from '@kbn/utility-types';
 import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
 import { mockControlState } from '../../../../../__mocks__/esql_controls';
@@ -107,6 +108,82 @@ const clearActiveDataSourceProfileState = ({
 };
 
 describe('tab_state actions', () => {
+  describe('setExpandedDoc', () => {
+    const expandedDoc = buildDataTableRecord(esHitsMock[0], dataViewMockWithTimeField);
+
+    it('should write the expanded doc reference to app state', async () => {
+      const { internalState, tabId } = await setup();
+
+      internalState.dispatch(internalStateActions.setExpandedDoc({ tabId, expandedDoc }));
+
+      const tab = selectTab(internalState.getState(), tabId);
+
+      expect(tab.expandedDoc).toBe(expandedDoc);
+      expect(tab.appState.expandedDoc).toEqual({ id: '1', index: 'i' });
+    });
+
+    it('should clear the expanded doc reference when the flyout is closed', async () => {
+      const { internalState, tabId } = await setup();
+
+      internalState.dispatch(internalStateActions.setExpandedDoc({ tabId, expandedDoc }));
+      internalState.dispatch(
+        internalStateActions.setExpandedDoc({ tabId, expandedDoc: undefined })
+      );
+
+      const tab = selectTab(internalState.getState(), tabId);
+
+      expect(tab.expandedDoc).toBeUndefined();
+      expect(tab.appState.expandedDoc).toBeUndefined();
+    });
+
+    it('should not write a reference for cascade owned flyouts', async () => {
+      const { internalState, tabId } = await setup();
+
+      internalState.dispatch(
+        internalStateActions.setExpandedDoc({
+          tabId,
+          expandedDoc,
+          expandedDocOwner: 'cascade_node_1',
+        })
+      );
+
+      const tab = selectTab(internalState.getState(), tabId);
+
+      expect(tab.expandedDoc).toBe(expandedDoc);
+      expect(tab.appState.expandedDoc).toBeUndefined();
+    });
+
+    it('should not write a reference for records without a stable identity', async () => {
+      const { internalState, tabId } = await setup();
+      const esqlRecord = buildDataTableRecord(
+        { _source: { message: 'no metadata' } },
+        dataViewMockWithTimeField
+      );
+
+      internalState.dispatch(
+        internalStateActions.setExpandedDoc({ tabId, expandedDoc: esqlRecord })
+      );
+
+      const tab = selectTab(internalState.getState(), tabId);
+
+      expect(tab.expandedDoc).toBe(esqlRecord);
+      expect(tab.appState.expandedDoc).toBeUndefined();
+    });
+
+    it('should not update app state when the reference is unchanged', async () => {
+      const { internalState, tabId } = await setup();
+      const initialAppState = selectTab(internalState.getState(), tabId).appState;
+
+      // Closing a flyout that never wrote a reference would otherwise merge an `undefined`
+      // value over a missing key and push a redundant history entry
+      internalState.dispatch(
+        internalStateActions.setExpandedDoc({ tabId, expandedDoc: undefined })
+      );
+
+      expect(selectTab(internalState.getState(), tabId).appState).toBe(initialAppState);
+    });
+  });
+
   describe('setAppState', () => {
     it('should sync snapshotsByProfileId for the current profile', async () => {
       const { internalState, runtimeStateManager, tabId } = await setup();

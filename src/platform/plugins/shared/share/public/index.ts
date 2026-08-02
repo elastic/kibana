@@ -42,6 +42,9 @@ import { SharePlugin } from './plugin';
 
 export { downloadMultipleAs, downloadFileAs } from './lib/download_as';
 export type { DownloadableContent } from './lib/download_as';
+// Exported so consumers contributing `helpText` to the link tab can match the condition under
+// which it offers the absolute time range switch
+export { isTimeRangeAbsoluteTime } from './lib/time_utils';
 
 export function plugin(ctx: PluginInitializerContext) {
   return new SharePlugin(ctx);

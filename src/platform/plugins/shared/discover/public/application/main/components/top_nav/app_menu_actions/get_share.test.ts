@@ -322,4 +322,69 @@ describe('getShare', () => {
 
     getContextsSpy.mockRestore();
   });
+
+  describe('expanded document link callout', () => {
+    const buildOptions = () =>
+      buildShareOptions({
+        services: mockDiscoverService,
+        discoverParams: {
+          dataView: dataViewMock,
+          isEsqlMode: false,
+          adHocDataViews: [],
+          authorizedRuleTypeIds: [],
+        },
+        currentTab: toolkit.getCurrentTab(),
+        runtimeStateManager: toolkit.runtimeStateManager,
+        persistedDiscoverSession: undefined,
+        totalHitsState: { result: 0, fetchStatus: FetchStatus.COMPLETE },
+        hasUnsavedChanges: false,
+      });
+
+    const setExpandedDocRef = (expandedDoc: { id: string; index: string } | undefined) => {
+      toolkit.internalState.dispatch(
+        internalStateActions.updateAppState({
+          tabId: toolkit.getCurrentTab().id,
+          appState: { expandedDoc },
+        })
+      );
+    };
+
+    // The mock's `getTime` is a fixed stub, so drive the range through it rather than `setTime`
+    const setTimeRange = (timeRange: { from: string; to: string }) => {
+      jest
+        .mocked(mockDiscoverService.data.query.timefilter.timefilter.getTime)
+        .mockReturnValue(timeRange);
+    };
+
+    afterEach(() => {
+      setExpandedDocRef(undefined);
+      setTimeRange({ from: 'now-15m', to: 'now' });
+    });
+
+    it('warns that a relative time range may not contain the linked document', async () => {
+      setTimeRange({ from: 'now-15m', to: 'now' });
+      setExpandedDocRef({ id: '1', index: 'i' });
+
+      const shareOptions = await buildOptions();
+
+      expect(shareOptions.objectTypeMeta.config?.link?.helpText).toBeDefined();
+    });
+
+    it('does not warn when the time range is already absolute', async () => {
+      setTimeRange({ from: '2025-01-01T00:00:00.000Z', to: '2025-01-02T00:00:00.000Z' });
+      setExpandedDocRef({ id: '1', index: 'i' });
+
+      const shareOptions = await buildOptions();
+
+      expect(shareOptions.objectTypeMeta.config?.link?.helpText).toBeUndefined();
+    });
+
+    it('does not warn when no document is expanded', async () => {
+      setTimeRange({ from: 'now-15m', to: 'now' });
+
+      const shareOptions = await buildOptions();
+
+      expect(shareOptions.objectTypeMeta.config?.link?.helpText).toBeUndefined();
+    });
+  });
 });

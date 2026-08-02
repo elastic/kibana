@@ -37,6 +37,7 @@ import {
   getTextBasedColumnsMeta,
   getRenderCustomToolbarWithElements,
   getDataGridDensity,
+  getDisplayedColumns,
   getRowHeight,
 } from '@kbn/unified-data-table';
 import {
@@ -62,6 +63,8 @@ import {
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { FetchStatus } from '../../../types';
 import { useDataState } from '../../hooks/use_data_state';
+import { useExpandedDocSync } from '../../hooks/use_expanded_doc_sync';
+import { useCopyExpandedDocLink } from '../../hooks/use_copy_expanded_doc_link';
 import {
   getMaxAllowedSampleSize,
   getAllowedSampleSize,
@@ -86,6 +89,7 @@ import {
 } from '../../state_management/redux';
 import { useScopedServices } from '../../../../components/scoped_services_provider';
 import { DiscoverGridFlyout } from '../../../../components/discover_grid_flyout';
+import { ExpandedDocNoticeText } from './expanded_doc_notice';
 import type { CascadedDocumentsContext } from './cascaded_documents';
 import { isCascadedDocumentsVisible } from './cascaded_documents';
 import { SaveDiscoverTableButton } from './save_discover_table_button';
@@ -171,6 +175,17 @@ function DiscoverDocumentsComponent({
     useCurrentTabSelector((state) => state.isDataViewLoading) && !isEsqlMode;
   const isEmptyDataResult = !documentState.result || documentState.result.length === 0;
   const rows = useMemo(() => documentState.result || [], [documentState.result]);
+
+  const {
+    hasExpandedDoc,
+    requestState: expandedDocRequestState,
+    notice: expandedDocNotice,
+  } = useExpandedDocSync({
+    dataView,
+    rows,
+    fetchStatus: documentState.fetchStatus,
+  });
+  const copyExpandedDocLink = useCopyExpandedDocLink({ dataView });
 
   const { isMoreDataLoading, totalHits, onFetchMoreRecords } = useFetchMoreRecords();
 
@@ -555,6 +570,41 @@ function DiscoverDocumentsComponent({
     return cascadedColumnsMeta;
   }, [expandedDocOwner, columnsMeta, cascadedColumnsMeta]);
 
+  // The grid reports the columns it renders, but the flyout can open before the grid exists,
+  // so fall back to the same derivation the grid uses
+  const displayedColumns = useMemo(
+    () => getDisplayedColumns(currentColumns, dataView),
+    [currentColumns, dataView]
+  );
+
+  // Rendered outside of the grid so a document restored from a link opens immediately, rather
+  // than waiting on the search that populates the grid
+  const documentFlyout = hasExpandedDoc ? (
+    <DiscoverGridFlyout
+      dataView={dataView}
+      hit={expandedDoc}
+      requestState={expandedDocRequestState}
+      notice={<ExpandedDocNoticeText notice={expandedDocNotice} />}
+      hits={renderDocumentViewMeta?.displayedRows}
+      // if default columns are used, don't make them part of the URL - the context state handling will take care to restore them
+      columns={renderDocumentViewMeta?.displayedColumns ?? displayedColumns}
+      columnsMeta={flyoutColumnsMeta}
+      savedSearchId={persistedDiscoverSession?.id}
+      query={query}
+      initialTabId={initialDocViewerTabId}
+      onFilter={onAddFilter}
+      onRemoveColumn={onRemoveColumnWithTracking}
+      onAddColumn={onAddColumnWithTracking}
+      onClose={() => setExpandedDocForCurrentOwner(undefined)}
+      setExpandedDoc={setExpandedDocForCurrentOwner}
+      onCopyLink={copyExpandedDocLink}
+      docViewerRef={docViewerRef}
+      onUpdateSelectedTabId={onUpdateSelectedTabId}
+      initialDocViewerState={docViewerUiState}
+      onInitialDocViewerStateChange={onInitialDocViewerStateChange}
+    />
+  ) : null;
+
   if (isDataViewLoading || (isEmptyDataResult && isDataLoading)) {
     return (
       // class is used in tests
@@ -564,6 +614,7 @@ function DiscoverDocumentsComponent({
           <EuiSpacer size="s" />
           <FormattedMessage id="discover.loadingDocuments" defaultMessage="Loading documents" />
         </EuiText>
+        {documentFlyout}
       </div>
     );
   }
@@ -642,28 +693,7 @@ function DiscoverDocumentsComponent({
           />
         </CellActionsProvider>
       </div>
-      {expandedDoc && renderDocumentViewMeta && (
-        <DiscoverGridFlyout
-          dataView={dataView}
-          hit={expandedDoc}
-          hits={renderDocumentViewMeta.displayedRows}
-          // if default columns are used, don't make them part of the URL - the context state handling will take care to restore them
-          columns={renderDocumentViewMeta.displayedColumns}
-          columnsMeta={flyoutColumnsMeta}
-          savedSearchId={persistedDiscoverSession?.id!}
-          query={query}
-          initialTabId={initialDocViewerTabId}
-          onFilter={onAddFilter}
-          onRemoveColumn={onRemoveColumnWithTracking}
-          onAddColumn={onAddColumnWithTracking}
-          onClose={() => setExpandedDocForCurrentOwner(undefined)}
-          setExpandedDoc={setExpandedDocForCurrentOwner}
-          docViewerRef={docViewerRef}
-          onUpdateSelectedTabId={onUpdateSelectedTabId}
-          initialDocViewerState={docViewerUiState}
-          onInitialDocViewerStateChange={onInitialDocViewerStateChange}
-        />
-      )}
+      {documentFlyout}
     </EuiFlexItem>
   );
 }

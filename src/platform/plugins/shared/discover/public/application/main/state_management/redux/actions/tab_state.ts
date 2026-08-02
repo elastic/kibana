@@ -9,6 +9,7 @@
 
 import { isFunction, isEqual } from 'lodash';
 import { type DataView, DataViewType } from '@kbn/data-views-plugin/common';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 import {
@@ -31,6 +32,8 @@ import {
 } from '../../../../../../common/constants';
 import { APP_STATE_URL_KEY } from '../../../../../../common';
 import { DataSourceType } from '../../../../../../common/data_sources';
+import { getExpandedDocRef } from '../../../../../../common/expanded_doc';
+import { DEFAULT_EXPANDED_DOC_OWNER } from '../constants';
 import { isEqualState } from '../../utils/state_comparators';
 import {
   internalStateSlice,
@@ -107,6 +110,40 @@ export const updateAppState: InternalStateThunkActionCreator<[AppStatePayload]> 
     if (hasStateChanges) {
       dispatch(setAppState({ ...payload, appState: mergedAppState }));
     }
+  };
+
+type ExpandedDocPayload = TabActionPayload<{
+  expandedDoc: DataTableRecord | undefined;
+  expandedDocOwner?: string;
+  initialDocViewerTabId?: string;
+  initialDocViewerTabState?: object;
+}>;
+
+/**
+ * Set the document expanded in the doc viewer flyout, keeping the URL reference in sync
+ * so the open flyout can be captured in a shareable link and restored on load.
+ */
+export const setExpandedDoc: InternalStateThunkActionCreator<[ExpandedDocPayload]> = (payload) =>
+  function setExpandedDocThunkFn(dispatch, getState) {
+    dispatch(internalStateSlice.actions.setExpandedDoc(payload));
+
+    const { tabId, expandedDoc, expandedDocOwner = DEFAULT_EXPANDED_DOC_OWNER } = payload;
+
+    // Only the main grid's flyout is deep linkable. Cascade owned flyouts render documents
+    // from a nested grid, which the restore path has no way to reconstruct.
+    if (expandedDoc && expandedDocOwner !== DEFAULT_EXPANDED_DOC_OWNER) {
+      return;
+    }
+
+    const nextExpandedDocRef = getExpandedDocRef(expandedDoc);
+
+    // Compare before dispatching, since updateAppState treats a merged `undefined` value as a
+    // change against a missing key and would push a redundant history entry on every close
+    if (isEqual(selectTab(getState(), tabId).appState.expandedDoc, nextExpandedDocRef)) {
+      return;
+    }
+
+    dispatch(updateAppState({ tabId, appState: { expandedDoc: nextExpandedDocRef } }));
   };
 
 /**

@@ -34,6 +34,7 @@ import type { SerializedError } from '@reduxjs/toolkit';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import type { DataCascadeRestorableState } from '@kbn/shared-ux-document-data-cascade';
 import type { DiscoverDataSource } from '../../../../../common/data_sources';
+import type { ExpandedDocRef } from '../../../../../common/expanded_doc';
 import type { DiscoverLayoutRestorableState } from '../../components/layout/discover_layout_restorable_state';
 import type { ProfileStateMap } from '../../../../../common/context_awareness';
 import type { DefaultEsqlQueryConfig } from '../../../../context_awareness';
@@ -135,6 +136,12 @@ export interface DiscoverAppState {
    * be reconsidered in a future version once the embedding story is clearer.
    */
   isApproximate?: boolean;
+  /**
+   * The document expanded in the doc viewer flyout, so it can be captured in a
+   * shareable link and reopened on load. Intentionally URL-only and not persisted
+   * to saved sessions, since it identifies a document rather than search config.
+   */
+  expandedDoc?: ExpandedDocRef;
 }
 
 export interface CascadedDocumentsState {
