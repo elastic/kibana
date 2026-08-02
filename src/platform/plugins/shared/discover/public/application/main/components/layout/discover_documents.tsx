@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiFlexItem,
   EuiLoadingSpinner,
@@ -37,7 +37,6 @@ import {
   getTextBasedColumnsMeta,
   getRenderCustomToolbarWithElements,
   getDataGridDensity,
-  getDisplayedColumns,
   getRowHeight,
 } from '@kbn/unified-data-table';
 import {
@@ -48,7 +47,6 @@ import {
 } from '@kbn/discover-utils';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
-import type { DocViewerApi, DocViewerRestorableState } from '@kbn/unified-doc-viewer';
 import useLatest from 'react-use/lib/useLatest';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { DISCOVER_CELL_ACTIONS_TRIGGER_ID } from '@kbn/ui-actions-plugin/common/trigger_ids';
@@ -63,8 +61,6 @@ import {
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { FetchStatus } from '../../../types';
 import { useDataState } from '../../hooks/use_data_state';
-import { useExpandedDocSync } from '../../hooks/use_expanded_doc_sync';
-import { useCopyExpandedDocLink } from '../../hooks/use_copy_expanded_doc_link';
 import {
   getMaxAllowedSampleSize,
   getAllowedSampleSize,
@@ -87,9 +83,6 @@ import {
   useInternalStateDispatch,
   useInternalStateSelector,
 } from '../../state_management/redux';
-import { useScopedServices } from '../../../../components/scoped_services_provider';
-import { DiscoverGridFlyout } from '../../../../components/discover_grid_flyout';
-import { ExpandedDocNoticeText } from './expanded_doc_notice';
 import type { CascadedDocumentsContext } from './cascaded_documents';
 import { isCascadedDocumentsVisible } from './cascaded_documents';
 import { SaveDiscoverTableButton } from './save_discover_table_button';
@@ -118,13 +111,12 @@ function DiscoverDocumentsComponent({
   const [isDataGridFullScreen, setIsDataGridFullScreen] = useState(false);
   const styles = useMemoCss(componentStyles);
   const services = useDiscoverServices();
-  const { scopedEBTManager } = useScopedServices();
   const dispatch = useInternalStateDispatch();
   const updateAppState = useCurrentTabAction(internalStateActions.updateAppState);
   const persistedDiscoverSession = useInternalStateSelector(
     (state) => state.persistedDiscoverSession
   );
-  const { dataViews, capabilities, uiSettings, uiActions, fieldsMetadata } = services;
+  const { dataViews, capabilities, uiSettings, uiActions } = services;
   const requestParams = useCurrentTabSelector((state) => state.dataRequestParams);
   const [
     dataSource,
@@ -153,8 +145,6 @@ function DiscoverDocumentsComponent({
   });
   const expandedDoc = useCurrentTabSelector((state) => state.expandedDoc);
   const expandedDocOwner = useCurrentTabSelector((state) => state.expandedDocOwner);
-  const renderDocumentViewMeta = useCurrentTabSelector((state) => state.renderDocumentViewMeta);
-  const initialDocViewerTabId = useCurrentTabSelector((state) => state.initialDocViewerTabId);
   const isEsqlMode = useIsEsqlMode();
   const dataStateContainer = useCurrentTabDataStateContainer();
   const documentState = useDataState(dataStateContainer.data$.documents$);
@@ -176,17 +166,6 @@ function DiscoverDocumentsComponent({
   const isEmptyDataResult = !documentState.result || documentState.result.length === 0;
   const rows = useMemo(() => documentState.result || [], [documentState.result]);
 
-  const {
-    hasExpandedDoc,
-    requestState: expandedDocRequestState,
-    notice: expandedDocNotice,
-  } = useExpandedDocSync({
-    dataView,
-    rows,
-    fetchStatus: documentState.fetchStatus,
-  });
-  const copyExpandedDocLink = useCopyExpandedDocLink({ dataView });
-
   const { isMoreDataLoading, totalHits, onFetchMoreRecords } = useFetchMoreRecords();
 
   const setAppState = useCallback<UseColumnsProps['setAppState']>(
@@ -196,12 +175,7 @@ function DiscoverDocumentsComponent({
     [dispatch, updateAppState]
   );
 
-  const {
-    columns: currentColumns,
-    onAddColumn,
-    onRemoveColumn,
-    onSetColumns,
-  } = useColumns({
+  const { columns: currentColumns, onSetColumns } = useColumns({
     capabilities,
     defaultOrder: uiSettings.get(SORT_DEFAULT_ORDER_SETTING),
     dataView,
@@ -211,30 +185,6 @@ function DiscoverDocumentsComponent({
     sort,
     settings: grid,
   });
-
-  const onAddColumnWithTracking = useCallback(
-    (columnName: string) => {
-      onAddColumn(columnName);
-      void scopedEBTManager.trackDataTableSelection({ fieldName: columnName, fieldsMetadata });
-    },
-    [onAddColumn, scopedEBTManager, fieldsMetadata]
-  );
-
-  const onRemoveColumnWithTracking = useCallback(
-    (columnName: string) => {
-      onRemoveColumn(columnName);
-      void scopedEBTManager.trackDataTableRemoval({ fieldName: columnName, fieldsMetadata });
-    },
-    [onRemoveColumn, scopedEBTManager, fieldsMetadata]
-  );
-
-  const docViewerRef = useRef<DocViewerApi>(null);
-
-  useEffect(() => {
-    if (initialDocViewerTabId) {
-      docViewerRef.current?.setSelectedTabId(initialDocViewerTabId);
-    }
-  }, [initialDocViewerTabId]);
 
   const setExpandedDoc = useCurrentTabAction(internalStateActions.setExpandedDoc);
   const getExpandedDocSetter = useCallback(
@@ -254,9 +204,6 @@ function DiscoverDocumentsComponent({
             initialDocViewerTabState: options?.initialTabState,
           })
         );
-        if (options?.initialTabId) {
-          docViewerRef.current?.setSelectedTabId(options.initialTabId);
-        }
       },
     [dispatch, setExpandedDoc]
   );
@@ -264,11 +211,6 @@ function DiscoverDocumentsComponent({
   const setExpandedDocForDefaultOwner = useMemo(
     () => getExpandedDocSetter(DEFAULT_EXPANDED_DOC_OWNER),
     [getExpandedDocSetter]
-  );
-
-  const setExpandedDocForCurrentOwner = useMemo(
-    () => getExpandedDocSetter(expandedDocOwner ?? DEFAULT_EXPANDED_DOC_OWNER),
-    [expandedDocOwner, getExpandedDocSetter]
   );
 
   const latestExpandedDocOwner = useLatest(expandedDocOwner);
@@ -372,27 +314,6 @@ function DiscoverDocumentsComponent({
       dispatch(updateESQLQuery({ queryOrUpdater }));
     },
     [dispatch, updateESQLQuery]
-  );
-
-  const docViewerUiState = useCurrentTabSelector((state) => state.uiState.docViewer);
-  const setDocViewerUiState = useCurrentTabAction(internalStateActions.setDocViewerUiState);
-
-  const onInitialDocViewerStateChange = useCallback(
-    (newDocViewerUiState: Partial<DocViewerRestorableState>) => {
-      dispatch(setDocViewerUiState({ docViewerUiState: newDocViewerUiState }));
-    },
-    [dispatch, setDocViewerUiState]
-  );
-
-  const setInitialDocViewerTabIdAction = useCurrentTabAction(
-    internalStateActions.setInitialDocViewerTabId
-  );
-
-  const onUpdateSelectedTabId = useCallback(
-    (tabId: string | undefined) => {
-      dispatch(setInitialDocViewerTabIdAction({ initialDocViewerTabId: tabId }));
-    },
-    [dispatch, setInitialDocViewerTabIdAction]
   );
 
   const dataGridUiState = useCurrentTabSelector((state) => state.uiState.dataGrid);
@@ -563,48 +484,6 @@ function DiscoverDocumentsComponent({
     renderViewModeToggle,
   ]);
 
-  const flyoutColumnsMeta = useMemo(() => {
-    if (!expandedDocOwner || expandedDocOwner === DEFAULT_EXPANDED_DOC_OWNER) {
-      return columnsMeta;
-    }
-    return cascadedColumnsMeta;
-  }, [expandedDocOwner, columnsMeta, cascadedColumnsMeta]);
-
-  // The grid reports the columns it renders, but the flyout can open before the grid exists,
-  // so fall back to the same derivation the grid uses
-  const displayedColumns = useMemo(
-    () => getDisplayedColumns(currentColumns, dataView),
-    [currentColumns, dataView]
-  );
-
-  // Rendered outside of the grid so a document restored from a link opens immediately, rather
-  // than waiting on the search that populates the grid
-  const documentFlyout = hasExpandedDoc ? (
-    <DiscoverGridFlyout
-      dataView={dataView}
-      hit={expandedDoc}
-      requestState={expandedDocRequestState}
-      notice={<ExpandedDocNoticeText notice={expandedDocNotice} />}
-      hits={renderDocumentViewMeta?.displayedRows}
-      // if default columns are used, don't make them part of the URL - the context state handling will take care to restore them
-      columns={renderDocumentViewMeta?.displayedColumns ?? displayedColumns}
-      columnsMeta={flyoutColumnsMeta}
-      savedSearchId={persistedDiscoverSession?.id}
-      query={query}
-      initialTabId={initialDocViewerTabId}
-      onFilter={onAddFilter}
-      onRemoveColumn={onRemoveColumnWithTracking}
-      onAddColumn={onAddColumnWithTracking}
-      onClose={() => setExpandedDocForCurrentOwner(undefined)}
-      setExpandedDoc={setExpandedDocForCurrentOwner}
-      onCopyLink={copyExpandedDocLink}
-      docViewerRef={docViewerRef}
-      onUpdateSelectedTabId={onUpdateSelectedTabId}
-      initialDocViewerState={docViewerUiState}
-      onInitialDocViewerStateChange={onInitialDocViewerStateChange}
-    />
-  ) : null;
-
   if (isDataViewLoading || (isEmptyDataResult && isDataLoading)) {
     return (
       // class is used in tests
@@ -614,7 +493,6 @@ function DiscoverDocumentsComponent({
           <EuiSpacer size="s" />
           <FormattedMessage id="discover.loadingDocuments" defaultMessage="Loading documents" />
         </EuiText>
-        {documentFlyout}
       </div>
     );
   }
@@ -693,7 +571,6 @@ function DiscoverDocumentsComponent({
           />
         </CellActionsProvider>
       </div>
-      {documentFlyout}
     </EuiFlexItem>
   );
 }

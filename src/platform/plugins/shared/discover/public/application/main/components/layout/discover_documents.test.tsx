@@ -8,7 +8,6 @@
  */
 
 import React from 'react';
-import { from, throwError } from 'rxjs';
 import { act, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
@@ -18,7 +17,6 @@ import { DiscoverDocuments, onResize } from './discover_documents';
 import { dataViewMock, esHitsMock } from '@kbn/discover-utils/src/__mocks__';
 import { buildDataTableRecord, type DataTableColumnsMeta } from '@kbn/discover-utils';
 import type { EsHitRecord } from '@kbn/discover-utils/types';
-import type { IKibanaSearchResponse } from '@kbn/search-types';
 import type { InternalStateMockToolkit } from '../../../../__mocks__/discover_state.mock';
 import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_state.mock';
 import { DEFAULT_EXPANDED_DOC_OWNER, internalStateActions } from '../../state_management/redux';
@@ -41,7 +39,6 @@ jest.mock('../../../../components/discover_grid_flyout', () => ({
 }));
 
 const discoverGridMock = jest.mocked(DiscoverGrid);
-const discoverGridFlyoutMock = jest.mocked(DiscoverGridFlyout);
 const singleEsHit = esHitsMock.slice(0, 1);
 const cascadedColumnsMeta: DataTableColumnsMeta = {
   bytes: {
@@ -270,12 +267,9 @@ describe('Discover documents layout', () => {
       expect(discoverGridProps.expandedDoc).toEqual(expandedDoc);
       expect(discoverGridProps.setRenderDocumentViewMeta).toEqual(expect.any(Function));
       expect(toolkit.getCurrentTab().expandedDocOwner).toBe(DEFAULT_EXPANDED_DOC_OWNER);
-      // The flyout no longer waits on the grid reporting its rendered rows and columns, so a
-      // document restored from a link can open before the grid exists
-      expect(screen.getByTestId('discoverGridFlyoutMock')).toHaveTextContent(expandedDoc.id);
     });
 
-    it('hides expanded state from the main grid and preserves the active owner through flyout navigation', async () => {
+    it('hides expanded state from the main grid and preserves the active owner when another grid owns the flyout', async () => {
       const { toolkit } = await setup();
       const tabId = toolkit.getCurrentTab().id;
       const expandedDoc = buildDataTableRecord(esHitsMock[0], dataViewMock);
@@ -333,176 +327,6 @@ describe('Discover documents layout', () => {
       expect(toolkit.getCurrentTab().renderDocumentViewMeta).toEqual({
         displayedRows: [expandedDoc, nextExpandedDoc],
         displayedColumns: ['bytes'],
-      });
-
-      await waitFor(() => {
-        expect(screen.getByTestId('discoverGridFlyoutMock')).toBeVisible();
-      });
-
-      const flyoutProps = discoverGridFlyoutMock.mock.lastCall?.[0]!;
-      expect(flyoutProps.hit).toEqual(expandedDoc);
-      expect(flyoutProps.hits).toEqual([expandedDoc, nextExpandedDoc]);
-      expect(flyoutProps.columns).toEqual(['bytes']);
-      expect(flyoutProps.columnsMeta).toEqual(cascadedColumnsMeta);
-
-      act(() => {
-        flyoutProps.setExpandedDoc(nextExpandedDoc);
-      });
-
-      await waitFor(() => {
-        expect(toolkit.getCurrentTab().expandedDoc).toEqual(nextExpandedDoc);
-        expect(toolkit.getCurrentTab().expandedDocOwner).toBe('nested-grid');
-      });
-    });
-  });
-
-  describe('deep linked documents', () => {
-    const [inResultsHit, outOfResultsHit] = esHitsMock;
-    const expandedDocRef = { id: outOfResultsHit._id, index: outOfResultsHit._index };
-
-    const setupWithRef = async ({
-      searchResult,
-      hits = [inResultsHit],
-      fetchStatus = FetchStatus.COMPLETE,
-    }: {
-      searchResult: Promise<IKibanaSearchResponse> | Error;
-      hits?: EsHitRecord[];
-      fetchStatus?: FetchStatus;
-    }) => {
-      const services = createDiscoverServicesMock();
-
-      jest
-        .mocked(services.data.search.search)
-        .mockImplementation(() =>
-          searchResult instanceof Error ? throwError(() => searchResult) : from(searchResult)
-        );
-
-      const { toolkit } = await setup({ services });
-
-      toolkit.internalState.dispatch(
-        internalStateActions.updateAppState({
-          tabId: toolkit.getCurrentTab().id,
-          appState: { expandedDoc: expandedDocRef },
-        })
-      );
-
-      await mountComponent({ fetchStatus, hits, toolkit });
-
-      return { toolkit };
-    };
-
-    const searchResponseFor = (hit: EsHitRecord): Promise<IKibanaSearchResponse> =>
-      Promise.resolve({ rawResponse: { hits: { hits: [hit] } } });
-
-    it('opens the flyout with a directly fetched document that is not in the results', async () => {
-      const { toolkit } = await setupWithRef({
-        searchResult: searchResponseFor(outOfResultsHit),
-      });
-
-      await waitFor(() => {
-        expect(toolkit.getCurrentTab().expandedDoc?.raw._id).toBe(outOfResultsHit._id);
-      });
-
-      expect(screen.getByTestId('docViewerFlyout')).toBeVisible();
-      expect(screen.getByTestId('expandedDocNotice-NotInResults')).toBeVisible();
-      expect(screen.queryByTestId('docViewerFlyoutNavigation')).not.toBeInTheDocument();
-    });
-
-    it('swaps the directly fetched document for the instance in the results', async () => {
-      const { toolkit } = await setupWithRef({
-        searchResult: searchResponseFor(outOfResultsHit),
-        hits: esHitsMock,
-      });
-
-      await waitFor(() => {
-        expect(toolkit.getCurrentTab().expandedDoc?.raw._id).toBe(outOfResultsHit._id);
-      });
-
-      // The record from the result set is the one the grid renders, so pagination and the row
-      // highlight only work once it has replaced the directly fetched copy
-      const rowFromResults = toolkit
-        .getCurrentTabDataStateContainer()
-        .data$.documents$.getValue()
-        .result?.find((row) => row.raw._id === outOfResultsHit._id);
-
-      expect(toolkit.getCurrentTab().expandedDoc).toBe(rowFromResults);
-      expect(screen.queryByTestId('expandedDocNotice-NotInResults')).not.toBeInTheDocument();
-    });
-
-    it('reports that it is still searching while the results are loading', async () => {
-      await setupWithRef({
-        searchResult: searchResponseFor(outOfResultsHit),
-        hits: [inResultsHit],
-        fetchStatus: FetchStatus.LOADING,
-      });
-
-      await waitFor(() => {
-        expect(screen.getByTestId('expandedDocNotice-SearchingResults')).toBeVisible();
-      });
-    });
-
-    it('shows a not found state when the document no longer exists', async () => {
-      await setupWithRef({
-        searchResult: Promise.resolve({ rawResponse: { hits: { hits: [] } } }),
-      });
-
-      await waitFor(() => {
-        expect(screen.getByTestId('docViewerFlyoutNotFound')).toBeVisible();
-      });
-    });
-
-    it('shows an error state when the document cannot be fetched', async () => {
-      await setupWithRef({ searchResult: new Error('search failed') });
-
-      await waitFor(() => {
-        expect(screen.getByTestId('docViewerFlyoutError')).toBeVisible();
-      });
-    });
-
-    it('closes the flyout when the reference is removed from the URL', async () => {
-      const { toolkit } = await setupWithRef({
-        searchResult: searchResponseFor(outOfResultsHit),
-      });
-
-      await waitFor(() => {
-        expect(toolkit.getCurrentTab().expandedDoc).toBeDefined();
-      });
-
-      // Mirrors the browser back button reverting the app state
-      act(() => {
-        toolkit.internalState.dispatch(
-          internalStateActions.updateAppState({
-            tabId: toolkit.getCurrentTab().id,
-            appState: { expandedDoc: undefined },
-          })
-        );
-      });
-
-      await waitFor(() => {
-        expect(toolkit.getCurrentTab().expandedDoc).toBeUndefined();
-        expect(screen.queryByTestId('docViewerFlyout')).not.toBeInTheDocument();
-      });
-    });
-
-    it('does not fetch when the expanded document already matches the reference', async () => {
-      const services = createDiscoverServicesMock();
-      const { toolkit } = await setup({ services });
-      const expandedDoc = buildDataTableRecord(inResultsHit, dataViewMock);
-
-      toolkit.internalState.dispatch(
-        internalStateActions.setExpandedDoc({ tabId: toolkit.getCurrentTab().id, expandedDoc })
-      );
-
-      await mountComponent({
-        fetchStatus: FetchStatus.COMPLETE,
-        hits: [inResultsHit],
-        toolkit,
-      });
-
-      expect(services.data.search.search).not.toHaveBeenCalled();
-      expect(toolkit.getCurrentTab().appState.expandedDoc).toEqual({
-        id: inResultsHit._id,
-        index: inResultsHit._index,
       });
     });
   });

@@ -69,6 +69,7 @@ import {
   useInternalStateSelector,
 } from '../../state_management/redux';
 import { DiscoverHistogramLayout } from './discover_histogram_layout';
+import { DiscoverDocumentFlyout } from './discover_document_flyout';
 import type { DiscoverLayoutRestorableState } from './discover_layout_restorable_state';
 import { useScopedServices } from '../../../../components/scoped_services_provider';
 import { useIsChromeNextProjectHeader } from '../chrome_app_header';
@@ -475,6 +476,15 @@ export function DiscoverLayout() {
           />
         </div>
       </EuiPageBody>
+      {/* Rendered here rather than next to the grid so a document restored from a link opens
+          immediately, without waiting on the chart or the search that populates the grid */}
+      <DiscoverDocumentFlyout
+        dataView={dataView}
+        columns={currentColumns}
+        onAddColumn={onAddColumnWithTracking}
+        onRemoveColumn={onRemoveColumnWithTracking}
+        onAddFilter={onAddFilter}
+      />
     </EuiPage>
   );
 }
