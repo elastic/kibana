@@ -267,8 +267,9 @@ export function shouldFailOnWorkflowRunRetry(execution: EsWorkflowExecution): bo
 }
 
 /**
- * After `workflow:scheduled` creates an execution and then throws, best-effort mark that
- * execution FAILED if it still occupies a non-terminal slot (skips terminal / waiting_for_input).
+ * After `workflow:scheduled` creates an execution and inline `runWorkflow` throws, best-effort
+ * mark that execution FAILED if it still occupies a non-terminal slot (skips terminal /
+ * waiting_for_input). Complements past-tick abandoned-pending reap for the same-claim case.
  */
 export async function markScheduledExecutionFailedAfterTaskError(params: {
   workflowExecutionRepository: WorkflowExecutionRepository;

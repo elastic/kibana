@@ -627,30 +627,33 @@ export class WorkflowsExecutionEnginePlugin
                 refresh: 'wait_for',
               });
 
+              // Check concurrency limits and apply collision strategy if needed
+              const canProceed = await this.checkConcurrencyIfNeeded(workflowExecution);
+              if (!canProceed) {
+                if (workflowExecution.id && workflowExecution.spaceId) {
+                  await handleConcurrencyBlockedExecution({
+                    workflowExecutionId: workflowExecution.id,
+                    spaceId: workflowExecution.spaceId,
+                    request: fakeRequest,
+                    workflowExecutionRepository,
+                    workflowTaskManager,
+                    internalResumeWorkflowExecution: this.internalResumeWorkflowExecutionHandler,
+                    logger,
+                  });
+                }
+                return;
+              }
+
+              if (!workflowExecution.id || !workflowExecution.spaceId) {
+                throw new Error('Workflow execution must have id and spaceId');
+              }
+
+              const [, , workflowsExecutionEngine] = await core.getStartServices();
+
+              // Create-then-fail: scheduled runs start inline (no bound workflow:run). If
+              // runWorkflow throws after create, terminalize the still-non-terminal doc so a
+              // pending cannot hold a concurrency slot until a later tick reaps it.
               try {
-                // Check concurrency limits and apply collision strategy if needed
-                const canProceed = await this.checkConcurrencyIfNeeded(workflowExecution);
-                if (!canProceed) {
-                  if (workflowExecution.id && workflowExecution.spaceId) {
-                    await handleConcurrencyBlockedExecution({
-                      workflowExecutionId: workflowExecution.id,
-                      spaceId: workflowExecution.spaceId,
-                      request: fakeRequest,
-                      workflowExecutionRepository,
-                      workflowTaskManager,
-                      internalResumeWorkflowExecution: this.internalResumeWorkflowExecutionHandler,
-                      logger,
-                    });
-                  }
-                  return;
-                }
-
-                if (!workflowExecution.id || !workflowExecution.spaceId) {
-                  throw new Error('Workflow execution must have id and spaceId');
-                }
-
-                const [, , workflowsExecutionEngine] = await core.getStartServices();
-
                 await runWorkflow({
                   workflowRunId: workflowExecution.id,
                   spaceId: workflowExecution.spaceId,
@@ -664,15 +667,13 @@ export class WorkflowsExecutionEnginePlugin
                   internalResumeWorkflowExecution: this.internalResumeWorkflowExecutionHandler,
                 });
               } catch (error) {
-                if (workflowExecution.id && workflowExecution.spaceId) {
-                  await markScheduledExecutionFailedAfterTaskError({
-                    workflowExecutionRepository,
-                    stepExecutionRepository,
-                    workflowRunId: workflowExecution.id,
-                    spaceId: workflowExecution.spaceId,
-                    logger,
-                  });
-                }
+                await markScheduledExecutionFailedAfterTaskError({
+                  workflowExecutionRepository,
+                  stepExecutionRepository,
+                  workflowRunId: workflowExecution.id,
+                  spaceId: workflowExecution.spaceId,
+                  logger,
+                });
                 throw error;
               }
 
