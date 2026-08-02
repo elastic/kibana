@@ -1866,7 +1866,6 @@
         "magic-bytes.js",
         "minimist",
         "object-hash",
-        "require-in-the-middle",
         "tough-cookie",
         "xml-crypto",
         "@elastic/node-crypto",
