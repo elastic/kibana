@@ -23,7 +23,7 @@ const MAX_TTL_DAYS = Math.max(...SEVERITY_TTL_GROUPS.keys());
 export const severityTTLQuery = (bound: 'visible' | 'expired'): QueryDslQueryContainer => {
   const timestampRange = (days: number): QueryDslQueryContainer => ({
     range: {
-      '@timestamp': bound === 'visible' ? { gte: `now-${days}d` } : { lt: `now-${days}d/d` },
+      '@timestamp': bound === 'visible' ? { gte: `now-${days}d/d` } : { lt: `now-${days}d/d` },
     },
   });
 
