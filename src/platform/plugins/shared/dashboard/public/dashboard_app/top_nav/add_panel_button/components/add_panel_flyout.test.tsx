@@ -212,7 +212,7 @@ describe('AddPanelFlyout', () => {
       });
     });
 
-    test('renders and executes the Chat action with AiButton styling', async () => {
+    test('renders and executes the Chat action as a featured card', async () => {
       mockHasAction.mockReturnValue(true);
       mockUseFeaturedItems.mockReturnValue({
         featuredItems: [],

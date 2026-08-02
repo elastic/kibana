@@ -28,7 +28,6 @@ import {
 import { css } from '@emotion/react';
 import { i18n, i18n as i18nFn } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { AiButton } from '@kbn/shared-ux-ai-components';
 import useAsync from 'react-use/lib/useAsync';
 
 import type { DashboardApi } from '../../../../dashboard_api/types';
@@ -134,21 +133,22 @@ function NewPanelContent({
         {(hasChatAction || featuredItems.length > 0) && (
           <EuiFlexItem grow={false} css={styles.featuredPanelsWrapper}>
             {hasChatAction && (
-              <AiButton
+              <FeaturedItemCard
                 key={OPEN_DASHBOARD_CHAT_ACTION_ID}
-                fullWidth
-                size="m"
-                variant="base"
-                iconType="productAgent"
-                onClick={(event: React.MouseEvent) => {
-                  onAddPanelClick(event, dashboardApi, openDashboardChat);
+                highlightIcon
+                item={{
+                  id: OPEN_DASHBOARD_CHAT_ACTION_ID,
+                  name: i18n.translate('dashboard.addPanelFlyout.createWithChatButtonLabel', {
+                    defaultMessage: 'Create with Chat',
+                  }),
+                  icon: 'productAgent',
+                  order: 0,
+                  'data-test-subj': 'create-action-Create with Chat',
+                  onClick: (event) => {
+                    onAddPanelClick(event, dashboardApi, openDashboardChat);
+                  },
                 }}
-                data-test-subj="create-action-Create with Chat"
-              >
-                {i18n.translate('dashboard.addPanelFlyout.createWithChatButtonLabel', {
-                  defaultMessage: 'Create with Chat',
-                })}
-              </AiButton>
+              />
             )}
             {featuredItems.map(
               (item) => !item.isDisabled && <FeaturedItemCard key={item.id} item={item} />
