@@ -86,7 +86,7 @@ export interface ContextualServiceMapGraphProps {
   kuery: string;
   start: string;
   end: string;
-  highlightedServiceName?: string;
+  highlightedServiceNames?: string[];
   fullMapHref?: string;
   showFocusMap?: boolean;
   clearKueryOnPopoverNavigation?: boolean;
@@ -112,7 +112,7 @@ function ContextualGraphInner({
   kuery,
   start,
   end,
-  highlightedServiceName,
+  highlightedServiceNames,
   fullMapHref,
   showFocusMap,
   clearKueryOnPopoverNavigation,
@@ -167,10 +167,10 @@ function ContextualGraphInner({
       if (!isServiceNode(n)) {
         return n;
       }
-      const contextHighlight = Boolean(highlightedServiceName && n.id === highlightedServiceName);
+      const contextHighlight = Boolean(highlightedServiceNames?.includes(n.id));
       return { ...n, data: { ...n.data, contextHighlight } };
     });
-  }, [visibleNodes, visibleEdges, highlightedServiceName]);
+  }, [visibleNodes, visibleEdges, highlightedServiceNames]);
 
   const flyoutProps = useServiceMapFlyoutProps({
     selectedServiceNodeForFlyout,
@@ -302,9 +302,12 @@ function ContextualGraphInner({
   const fitViewLabel = i18n.translate('xpack.apm.serviceMap.fitViewControl', {
     defaultMessage: 'Fit View',
   });
-  const viewFullMapButtonLabel = i18n.translate('xpack.apm.serviceMap.viewFullServiceMapButton', {
-    defaultMessage: 'View full service map',
-  });
+  const viewInServiceMapButtonLabel = i18n.translate(
+    'xpack.apm.serviceMap.viewInServiceMapButton',
+    {
+      defaultMessage: 'View in Service map',
+    }
+  );
 
   return (
     <ServiceMapHighlightProvider>
@@ -393,14 +396,14 @@ function ContextualGraphInner({
                       />
                     </EuiToolTip>
                     {fullMapHref && (
-                      <EuiToolTip content={viewFullMapButtonLabel} disableScreenReaderOutput>
+                      <EuiToolTip content={viewInServiceMapButtonLabel} disableScreenReaderOutput>
                         <EuiButtonIcon
                           display="empty"
                           color="text"
                           size="s"
                           iconType="apps"
                           href={fullMapHref}
-                          aria-label={viewFullMapButtonLabel}
+                          aria-label={viewInServiceMapButtonLabel}
                           data-test-subj="serviceMapViewFullMapButton"
                           css={mapToolbarControlIconCss}
                         />
