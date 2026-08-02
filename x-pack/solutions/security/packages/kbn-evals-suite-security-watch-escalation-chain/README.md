@@ -46,9 +46,11 @@ it, do not re-test it.
 node scripts/jest --config \
   x-pack/solutions/security/packages/kbn-evals-suite-security-watch-escalation-chain/jest.config.js
 
-# Live L3/L4 scorecard, against a running Scout stack with EIS connectors:
-node scripts/scout.js run-tests --stateful --config \
-  x-pack/solutions/security/packages/kbn-evals-suite-security-watch-escalation-chain/playwright.config.ts
+# Live L3/L4 scorecard, against a running Scout stack with EIS connectors.
+# Eval suites use createPlaywrightEvalsConfig, so they run via scripts/evals
+# (scripts/scout run-tests rejects them):
+node scripts/evals run --suite security-watch-escalation-chain \
+  --model eis-anthropic-claude-4-6-sonnet --judge eis-anthropic-claude-4-6-sonnet
 ```
 
 Set `TRACING_ES_URL` to the golden trace ES so per-example traces and score docs

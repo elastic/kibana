@@ -48,8 +48,10 @@ gets its own connector, the same golden corpus, and produces its own row.
 
 ```bash
 # From the Kibana root, against a running Scout stack with EIS connectors.
-node scripts/scout.js run-tests --stateful --config \
-  x-pack/solutions/security/packages/kbn-evals-suite-security-threat-intel-hunt/playwright.config.ts
+# Eval suites use createPlaywrightEvalsConfig, so they run via scripts/evals
+# (scripts/scout run-tests rejects them):
+node scripts/evals run --suite security-threat-intel-hunt \
+  --model eis-anthropic-claude-4-6-sonnet --judge eis-anthropic-claude-4-6-sonnet
 ```
 
 Set `TRACING_ES_URL` to the golden trace ES so per-example traces and
