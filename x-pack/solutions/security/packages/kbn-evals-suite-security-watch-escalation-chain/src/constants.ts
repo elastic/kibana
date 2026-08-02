@@ -23,7 +23,22 @@ export const WORKFLOWS_API_VERSION = '2023-10-31';
  * which is the payload bug #9 corrupted into the literal "[object Object]"
  * before the {{ }} -> ${{ }} + event.* -> inputs.* fix.
  */
-export const buildSyntheticEscalation = (investigationId: string) => ({
+/**
+ * Structural shape of the escalation payload — a local mirror of the pnd
+ * plugin's canonical `watchEscalationSchema` (server/common/schemas/
+ * watch_escalation.ts). Kept inline to avoid a package->plugin import; the L1
+ * `schema_conformance.test.ts` asserts the two stay in sync at runtime.
+ */
+interface WatchEscalationShape {
+  fromWatch: 'watch-floor' | 'watch-dark' | 'watch-deep' | 'watch-detection';
+  toWatch: 'watch-floor' | 'watch-dark' | 'watch-deep' | 'watch-detection';
+  reason: string;
+  confidence: number;
+  investigationId: string;
+  indicators: string[];
+}
+
+export const buildSyntheticEscalation = (investigationId: string): WatchEscalationShape => ({
   fromWatch: 'watch-floor',
   toWatch: 'watch-dark',
   reason:

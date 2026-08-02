@@ -12,5 +12,6 @@ export * from './shared_approval_gate_adapter';
 export * from './evidence_package';
 export * from './worker_evaluation_record';
 export * from './detection_change';
+export * from './watch_escalation';
 export * from './orchestration_identity';
 export * from './attack_discovery_continuation';
