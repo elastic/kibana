@@ -7,7 +7,12 @@
 
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import { tags } from '@kbn/scout';
-import { METADATA_UNITED_TRANSFORM } from '@kbn/security-solution-plugin/common/endpoint/constants';
+import {
+  METADATA_UNITED_INDEX,
+  METADATA_UNITED_TRANSFORM,
+  metadataCurrentIndexPattern,
+} from '@kbn/security-solution-plugin/common/endpoint/constants';
+import type { Client } from '@elastic/elasticsearch';
 import { evaluate } from '../../src/evaluate';
 import {
   waitForEndpointPackage,
@@ -15,7 +20,31 @@ import {
   seedScenario,
   SCENARIOS,
 } from '../../src/data_generators/endpoint_data';
-import { cleanupTroubleshootingData } from '../../src/data_generators/cleanup';
+import { cleanupForensicData, cleanupTroubleshootingData } from '../../src/data_generators/cleanup';
+
+/**
+ * Count only the forensic suite's seeded documents in the transform outputs, using
+ * the disjoint `eval-agent-forensic-` namespace. Used to subtract stale forensic
+ * leftovers from waitForTransformPropagation's broad `eval-agent-` counts.
+ */
+const countForensicSeededDocuments = async (
+  esClient: Client
+): Promise<{ metadataCurrent: number; metadataUnited: number }> => {
+  const forensicQuery = { prefix: { 'agent.id': 'eval-agent-forensic-' } };
+  const [current, united] = await Promise.all([
+    esClient.count({
+      index: metadataCurrentIndexPattern,
+      query: forensicQuery,
+      ignore_unavailable: true,
+    }),
+    esClient.count({
+      index: METADATA_UNITED_INDEX,
+      query: forensicQuery,
+      ignore_unavailable: true,
+    }),
+  ]);
+  return { metadataCurrent: current.count, metadataUnited: united.count };
+};
 
 const SKILL_PATH = 'skills/security/endpoint/elastic-defend-configuration-troubleshooting/SKILL.md';
 const UNITED_TRANSFORM_WILDCARD = `${METADATA_UNITED_TRANSFORM}*`;
@@ -214,16 +243,32 @@ evaluate.describe('Automatic Troubleshooting', { tag: tags.stateful.classic }, (
 
     const clients = { esClient, internalEsClient };
     await cleanupTroubleshootingData(clients);
+    // Also reclaim any stale forensic seeds a crashed prior run left behind (its
+    // afterAll never ran). In normal concurrent operation this is a no-op — the
+    // live forensic suite re-seeds in its own beforeAll — and it keeps this
+    // suite's transform-propagation counts and evidence queries free of leftovers.
+    await cleanupForensicData(clients);
 
-    // waiting for transforms takes a while so seed all scenarios here
+    // waiting for transforms takes a while so seed all scenarios here. If a
+    // previous forensic-suite run left its kill chain behind (e.g. a crashed
+    // worker skipped its afterAll), those stale `eval-agent-forensic-*` docs
+    // would also match EVAL_SEEDED_QUERY's broad `eval-agent-` count prefix —
+    // subtract them so the propagation gate waits for exactly the fresh
+    // troubleshooting seeds, not troubleshooting + leftover forensic docs.
+    const forensicBaseline = await countForensicSeededDocuments(esClient);
     for (const scenario of Object.values(SCENARIOS)) {
       await seedScenario(clients, scenario);
     }
 
-    await waitForTransformPropagation(esClient, log, {
-      metadataCurrent: ALL_SCENARIO_COUNT,
-      metadataUnited: ALL_SCENARIO_COUNT,
-    });
+    await waitForTransformPropagation(
+      esClient,
+      log,
+      {
+        metadataCurrent: ALL_SCENARIO_COUNT,
+        metadataUnited: ALL_SCENARIO_COUNT,
+      },
+      forensicBaseline
+    );
   });
 
   evaluate('incompatible antivirus detection', async ({ evaluateDataset }) => {

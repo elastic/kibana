@@ -14,9 +14,9 @@ const EVAL_SEEDED_INDICES = [
   'logs-elastic_agent.endpoint_security-default',
   'logs-endpoint.alerts-default',
   'logs-endpoint.events.process-default',
-  // Forensic kill-chain event indices (see forensic_data.ts) — reclaimed by the
-  // `eval-agent-forensic-` scope so the forensic smoke suite can run concurrently
-  // with automatic_troubleshooting.spec.ts without either cleanup wiping the other.
+  // Forensic kill-chain event indices (see forensic_data.ts) — reclaimed only by the
+  // `eval-agent-forensic-` scope; the troubleshooting suite owns the disjoint
+  // `eval-agent-ts-` namespace, so each suite's cleanup deletes exactly its own seeds.
   'logs-endpoint.events.file-default',
   'logs-endpoint.events.network-default',
   'logs-endpoint.events.registry-default',
@@ -27,10 +27,17 @@ const EVAL_SEEDED_INDICES = [
 const RESTRICTED_INDICES = ['.fleet-agents'];
 
 /**
- * Troubleshooting scenarios in endpoint_data.ts seed `eval-agent-av-001`,
- * `eval-agent-policy-001`, ... — i.e. the shared `eval-agent-` prefix.
+ * Troubleshooting scenarios in endpoint_data.ts seed `eval-agent-ts-av-001`,
+ * `eval-agent-ts-policy-001`, ... — the dedicated `eval-agent-ts-` namespace
+ * (see EVAL_AGENT_ID_PREFIX there).
+ *
+ * The namespaces MUST stay disjoint across suites: `eval-agent-ts-` is neither a
+ * prefix of nor prefixed by `eval-agent-forensic-`, so an ES `prefix` query on one
+ * can never reclaim the other suite's documents. (The old shared `eval-agent-`
+ * prefix WAS a strict prefix of `eval-agent-forensic-`, which let this cleanup
+ * wipe the forensic suite's freshly-seeded kill chain mid-run.)
  */
-const TROUBLESHOOTING_AGENT_ID_PREFIX = 'eval-agent-';
+const TROUBLESHOOTING_AGENT_ID_PREFIX = 'eval-agent-ts-';
 
 /** Forensic smoke suite seeds (see FORENSIC_AGENT_PREFIX in forensic_data.ts). */
 const FORENSIC_AGENT_ID_PREFIX = 'eval-agent-forensic-';

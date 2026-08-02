@@ -17,7 +17,15 @@ import {
 
 const POLL_INTERVAL_MS = 5_000;
 
-const EVAL_AGENT_ID_PREFIX = 'eval-agent-';
+/**
+ * Troubleshooting scenarios use the dedicated `eval-agent-ts-` namespace so the
+ * id set is DISJOINT from the forensic suite's `eval-agent-forensic-*` ids: an ES
+ * `prefix` query on `eval-agent-ts-` can never match a forensic agent id (the old
+ * shared `eval-agent-` prefix was a strict prefix of `eval-agent-forensic-`, so
+ * cleanupTroubleshootingData also deleted the forensic suite's freshly-seeded kill
+ * chain when Playwright scheduled the two spec files on different workers).
+ */
+const EVAL_AGENT_ID_PREFIX = 'eval-agent-ts-';
 const EVAL_SEEDED_QUERY = { prefix: { 'agent.id': EVAL_AGENT_ID_PREFIX } };
 
 export async function waitForEndpointPackage(
@@ -93,12 +101,23 @@ export async function waitForTransformPropagation(
   esClient: Client,
   log: ToolingLog,
   expectedCounts: { metadataCurrent: number; metadataUnited: number },
+  baselineCounts: { metadataCurrent: number; metadataUnited: number } = {
+    metadataCurrent: 0,
+    metadataUnited: 0,
+  },
   maxWaitMs = 180_000
 ): Promise<void> {
   const start = Date.now();
   let lastCounts = { metadataCurrent: 0, metadataUnited: 0 };
+  // EVAL_SEEDED_QUERY's broad `eval-agent-` count prefix also matches any leftover
+  // forensic seeds (`eval-agent-forensic-*`); `baselineCounts` lets the caller
+  // subtract documents that pre-date this run's seeding.
+  const requiredCounts = {
+    metadataCurrent: expectedCounts.metadataCurrent + baselineCounts.metadataCurrent,
+    metadataUnited: expectedCounts.metadataUnited + baselineCounts.metadataUnited,
+  };
   log.info(
-    `Waiting for transform propagation: metadataCurrent >= ${expectedCounts.metadataCurrent}, metadataUnited >= ${expectedCounts.metadataUnited}`
+    `Waiting for transform propagation: metadataCurrent >= ${requiredCounts.metadataCurrent}, metadataUnited >= ${requiredCounts.metadataUnited}`
   );
 
   while (Date.now() - start < maxWaitMs) {
@@ -121,12 +140,12 @@ export async function waitForTransformPropagation(
       };
 
       log.debug(
-        `Transform propagation: metadataCurrent=${currentCount.count}/${expectedCounts.metadataCurrent}, metadataUnited=${unitedCount.count}/${expectedCounts.metadataUnited}`
+        `Transform propagation: metadataCurrent=${currentCount.count}/${requiredCounts.metadataCurrent}, metadataUnited=${unitedCount.count}/${requiredCounts.metadataUnited}`
       );
 
       if (
-        currentCount.count >= expectedCounts.metadataCurrent &&
-        unitedCount.count >= expectedCounts.metadataUnited
+        currentCount.count >= requiredCounts.metadataCurrent &&
+        unitedCount.count >= requiredCounts.metadataUnited
       ) {
         log.info('Transform propagation complete');
         return;
@@ -140,7 +159,7 @@ export async function waitForTransformPropagation(
 
   throw new Error(
     `Timed out waiting for transform propagation after ${maxWaitMs}ms. ` +
-      `Expected metadataCurrent >= ${expectedCounts.metadataCurrent}, metadataUnited >= ${expectedCounts.metadataUnited}; ` +
+      `Expected metadataCurrent >= ${requiredCounts.metadataCurrent}, metadataUnited >= ${requiredCounts.metadataUnited}; ` +
       `last observed metadataCurrent=${lastCounts.metadataCurrent}, metadataUnited=${lastCounts.metadataUnited}`
   );
 }
@@ -356,7 +375,7 @@ export async function seedScenario(clients: SeedClients, scenario: EndpointScena
 
 export const SCENARIOS = {
   incompatibleAntivirus: {
-    agentId: 'eval-agent-av-001',
+    agentId: 'eval-agent-ts-av-001',
     hostName: 'eval-host-av',
     os: { name: 'Windows', version: '10', type: 'windows', full: 'Windows 10' },
     policyName: 'eval-policy-av',
@@ -369,7 +388,7 @@ export const SCENARIOS = {
     ].map((proc, i) => ({
       index: 'logs-endpoint.events.process-default',
       document: {
-        agent: { id: 'eval-agent-av-001' },
+        agent: { id: 'eval-agent-ts-av-001' },
         host: { name: 'eval-host-av' },
         event: { type: 'start', category: 'process' },
         process: { name: proc.name, pid: 1000 + i, executable: `C:\\Program Files\\${proc.name}` },
@@ -379,7 +398,7 @@ export const SCENARIOS = {
   },
 
   policyResponseFailure: {
-    agentId: 'eval-agent-policy-001',
+    agentId: 'eval-agent-ts-policy-001',
     hostName: 'eval-host-policy',
     os: { name: 'Linux', version: 'Ubuntu 22.04', type: 'linux', full: 'Ubuntu 22.04' },
     policyName: 'eval-policy-strict',
@@ -389,7 +408,7 @@ export const SCENARIOS = {
       {
         index: 'metrics-endpoint.policy-default',
         document: {
-          agent: { id: 'eval-agent-policy-001' },
+          agent: { id: 'eval-agent-ts-policy-001' },
           host: { name: 'eval-host-policy' },
           Endpoint: {
             policy: {
@@ -415,7 +434,7 @@ export const SCENARIOS = {
   },
 
   stoppedUnitedTransform: {
-    agentId: 'eval-agent-transform-001',
+    agentId: 'eval-agent-ts-transform-001',
     hostName: 'eval-host-transform',
     os: { name: 'Windows', version: '11', type: 'windows', full: 'Windows 11' },
     policyName: 'eval-policy-transform',
@@ -423,7 +442,7 @@ export const SCENARIOS = {
   },
 
   currentlyHealthyEndpoint: {
-    agentId: 'eval-agent-currently-healthy-001',
+    agentId: 'eval-agent-ts-currently-healthy-001',
     hostName: 'eval-currently-healthy-endpoint',
     os: {
       name: 'Windows',
@@ -438,7 +457,7 @@ export const SCENARIOS = {
     policyId: 'eval-policy-currently-healthy',
     extraDocuments: [
       createPolicyResponseDocument({
-        agentId: 'eval-agent-currently-healthy-001',
+        agentId: 'eval-agent-ts-currently-healthy-001',
         hostName: 'eval-currently-healthy-endpoint',
         os: {
           name: 'Windows',
@@ -455,7 +474,7 @@ export const SCENARIOS = {
   },
 
   missingEndpointAlertsOutputShippingFailure: {
-    agentId: 'eval-agent-output-shipping-001',
+    agentId: 'eval-agent-ts-output-shipping-001',
     hostName: 'eval-endpoint-alerts-missing-output-s',
     os: {
       name: 'Linux',
@@ -470,13 +489,13 @@ export const SCENARIOS = {
     endpointStatus: 'degraded',
     extraDocuments: [
       createEndpointSecurityLogDocument({
-        agentId: 'eval-agent-output-shipping-001',
+        agentId: 'eval-agent-ts-output-shipping-001',
         hostName: 'eval-endpoint-alerts-missing-output-s',
         message:
           'Endpoint is setting status to DEGRADED, reason: Unable to connect to output server. SSL handshake with Logstash server at logstash.example:5044 encountered an error. Logstash connection is down; alert and event documents are not reaching Elasticsearch.',
       }),
       createPolicyResponseDocument({
-        agentId: 'eval-agent-output-shipping-001',
+        agentId: 'eval-agent-ts-output-shipping-001',
         hostName: 'eval-endpoint-alerts-missing-output-s',
         os: {
           name: 'Linux',
@@ -493,7 +512,7 @@ export const SCENARIOS = {
   },
 
   endpointExceptionFieldMismatch: {
-    agentId: 'eval-agent-exception-field-001',
+    agentId: 'eval-agent-ts-exception-field-001',
     hostName: 'eval-endpoint-exception-field-mismatc',
     os: {
       name: 'Windows',
@@ -508,7 +527,7 @@ export const SCENARIOS = {
     policyId: 'eval-policy-exception-field',
     extraDocuments: [
       createPolicyResponseDocument({
-        agentId: 'eval-agent-exception-field-001',
+        agentId: 'eval-agent-ts-exception-field-001',
         hostName: 'eval-endpoint-exception-field-mismatc',
         os: {
           name: 'Windows',
@@ -524,8 +543,8 @@ export const SCENARIOS = {
       {
         index: 'logs-endpoint.alerts-default',
         document: {
-          agent: { id: 'eval-agent-exception-field-001' },
-          elastic: { agent: { id: 'eval-agent-exception-field-001' } },
+          agent: { id: 'eval-agent-ts-exception-field-001' },
+          elastic: { agent: { id: 'eval-agent-ts-exception-field-001' } },
           host: {
             name: 'eval-endpoint-exception-field-mismatc',
             hostname: 'eval-endpoint-exception-field-mismatc',
@@ -541,7 +560,7 @@ export const SCENARIOS = {
   },
 
   endpointAlertNeedsEndpointException: {
-    agentId: 'eval-agent-endpoint-exception-001',
+    agentId: 'eval-agent-ts-endpoint-exception-001',
     hostName: 'eval-endpoint-alert-needs-endpoint-ex',
     os: {
       name: 'Windows',
@@ -556,7 +575,7 @@ export const SCENARIOS = {
     policyId: 'eval-policy-needs-endpoint-exception',
     extraDocuments: [
       createPolicyResponseDocument({
-        agentId: 'eval-agent-endpoint-exception-001',
+        agentId: 'eval-agent-ts-endpoint-exception-001',
         hostName: 'eval-endpoint-alert-needs-endpoint-ex',
         os: {
           name: 'Windows',
@@ -572,8 +591,8 @@ export const SCENARIOS = {
       {
         index: 'logs-endpoint.alerts-default',
         document: {
-          agent: { id: 'eval-agent-endpoint-exception-001' },
-          elastic: { agent: { id: 'eval-agent-endpoint-exception-001' } },
+          agent: { id: 'eval-agent-ts-endpoint-exception-001' },
+          elastic: { agent: { id: 'eval-agent-ts-endpoint-exception-001' } },
           host: {
             name: 'eval-endpoint-alert-needs-endpoint-ex',
             hostname: 'eval-endpoint-alert-needs-endpoint-ex',
@@ -592,7 +611,7 @@ export const SCENARIOS = {
   },
 
   trustedAppWrongConditionField: {
-    agentId: 'eval-agent-trusted-app-field-001',
+    agentId: 'eval-agent-ts-trusted-app-field-001',
     hostName: 'eval-trusted-app-wrong-condition-fiel',
     os: {
       name: 'Windows',
@@ -608,7 +627,7 @@ export const SCENARIOS = {
     endpointStatus: 'degraded',
     extraDocuments: [
       createPolicyResponseDocument({
-        agentId: 'eval-agent-trusted-app-field-001',
+        agentId: 'eval-agent-ts-trusted-app-field-001',
         hostName: 'eval-trusted-app-wrong-condition-fiel',
         os: {
           name: 'Windows',
@@ -625,8 +644,8 @@ export const SCENARIOS = {
       {
         index: 'logs-endpoint.events.process-default',
         document: {
-          agent: { id: 'eval-agent-trusted-app-field-001' },
-          elastic: { agent: { id: 'eval-agent-trusted-app-field-001' } },
+          agent: { id: 'eval-agent-ts-trusted-app-field-001' },
+          elastic: { agent: { id: 'eval-agent-ts-trusted-app-field-001' } },
           host: {
             name: 'eval-trusted-app-wrong-condition-fiel',
             hostname: 'eval-trusted-app-wrong-condition-fiel',
@@ -644,7 +663,7 @@ export const SCENARIOS = {
   },
 
   linuxHighCpuMonitoringScripts: {
-    agentId: 'eval-agent-linux-cpu-script-001',
+    agentId: 'eval-agent-ts-linux-cpu-script-001',
     hostName: 'eval-linux-high-cpu-monitoring-script',
     os: {
       name: 'Linux',
@@ -659,7 +678,7 @@ export const SCENARIOS = {
     endpointStatus: 'degraded',
     extraDocuments: [
       createPolicyResponseDocument({
-        agentId: 'eval-agent-linux-cpu-script-001',
+        agentId: 'eval-agent-ts-linux-cpu-script-001',
         hostName: 'eval-linux-high-cpu-monitoring-script',
         os: {
           name: 'Linux',
@@ -675,7 +694,7 @@ export const SCENARIOS = {
       {
         index: 'metrics-endpoint.metrics-default',
         document: {
-          agent: { id: 'eval-agent-linux-cpu-script-001' },
+          agent: { id: 'eval-agent-ts-linux-cpu-script-001' },
           host: {
             name: 'eval-linux-high-cpu-monitoring-script',
             hostname: 'eval-linux-high-cpu-monitoring-script',
@@ -697,8 +716,8 @@ export const SCENARIOS = {
       {
         index: 'logs-endpoint.events.process-default',
         document: {
-          agent: { id: 'eval-agent-linux-cpu-script-001' },
-          elastic: { agent: { id: 'eval-agent-linux-cpu-script-001' } },
+          agent: { id: 'eval-agent-ts-linux-cpu-script-001' },
+          elastic: { agent: { id: 'eval-agent-ts-linux-cpu-script-001' } },
           host: {
             name: 'eval-linux-high-cpu-monitoring-script',
             hostname: 'eval-linux-high-cpu-monitoring-script',
@@ -717,7 +736,7 @@ export const SCENARIOS = {
   },
 
   windowsHighCpuAuthenticationEvents: {
-    agentId: 'eval-agent-windows-cpu-auth-001',
+    agentId: 'eval-agent-ts-windows-cpu-auth-001',
     hostName: 'eval-windows-high-cpu-authentication-',
     os: {
       name: 'Windows',
@@ -733,7 +752,7 @@ export const SCENARIOS = {
     endpointStatus: 'degraded',
     extraDocuments: [
       createPolicyResponseDocument({
-        agentId: 'eval-agent-windows-cpu-auth-001',
+        agentId: 'eval-agent-ts-windows-cpu-auth-001',
         hostName: 'eval-windows-high-cpu-authentication-',
         os: {
           name: 'Windows',
@@ -750,7 +769,7 @@ export const SCENARIOS = {
       {
         index: 'metrics-endpoint.metrics-default',
         document: {
-          agent: { id: 'eval-agent-windows-cpu-auth-001' },
+          agent: { id: 'eval-agent-ts-windows-cpu-auth-001' },
           host: {
             name: 'eval-windows-high-cpu-authentication-',
             hostname: 'eval-windows-high-cpu-authentication-',
@@ -775,7 +794,7 @@ export const SCENARIOS = {
   },
 
   linuxMissedCheckinsSelinux203Exec: {
-    agentId: 'eval-agent-linux-selinux-001',
+    agentId: 'eval-agent-ts-linux-selinux-001',
     hostName: 'eval-linux-missed-checkins-selinux-20',
     os: {
       name: 'Linux',
@@ -790,7 +809,7 @@ export const SCENARIOS = {
     endpointStatus: 'failed',
     extraDocuments: [
       createPolicyResponseDocument({
-        agentId: 'eval-agent-linux-selinux-001',
+        agentId: 'eval-agent-ts-linux-selinux-001',
         hostName: 'eval-linux-missed-checkins-selinux-20',
         os: {
           name: 'Linux',
@@ -804,7 +823,7 @@ export const SCENARIOS = {
         scenario: 'linux_missed_checkins_selinux_203_exec',
       }),
       createEndpointSecurityLogDocument({
-        agentId: 'eval-agent-linux-selinux-001',
+        agentId: 'eval-agent-ts-linux-selinux-001',
         hostName: 'eval-linux-missed-checkins-selinux-20',
         message:
           'Elastic Agent reports Endpoint component FAILED: endpoint service missed 3 check-ins. journalctl -u ElasticEndpoint.service shows code=exited, status=203/EXEC. SELinux audit denied { execute } for /opt/Elastic/Endpoint/elastic-endpoint with unlabeled_t context.',
@@ -813,7 +832,7 @@ export const SCENARIOS = {
   },
 
   windowsMissedCheckinsCrashDump: {
-    agentId: 'eval-agent-windows-crash-dump-001',
+    agentId: 'eval-agent-ts-windows-crash-dump-001',
     hostName: 'eval-windows-missed-checkins-crash-du',
     os: {
       name: 'Windows',
@@ -829,7 +848,7 @@ export const SCENARIOS = {
     endpointStatus: 'failed',
     extraDocuments: [
       createPolicyResponseDocument({
-        agentId: 'eval-agent-windows-crash-dump-001',
+        agentId: 'eval-agent-ts-windows-crash-dump-001',
         hostName: 'eval-windows-missed-checkins-crash-du',
         os: {
           name: 'Windows',
@@ -844,7 +863,7 @@ export const SCENARIOS = {
         scenario: 'windows_missed_checkins_crash_dump',
       }),
       createEndpointSecurityLogDocument({
-        agentId: 'eval-agent-windows-crash-dump-001',
+        agentId: 'eval-agent-ts-windows-crash-dump-001',
         hostName: 'eval-windows-missed-checkins-crash-du',
         message:
           'Elastic Agent reports Endpoint component FAILED: endpoint service missed 3 check-ins. Endpoint process crashed repeatedly and generated elasticendpoint.dmp in C:\\Program Files\\Elastic\\Endpoint\\cache\\CrashDumps\\elasticendpoint.dmp before Agent marked it failed.',
@@ -853,7 +872,7 @@ export const SCENARIOS = {
   },
 
   outputKafkaMessageSizeRejection: {
-    agentId: 'eval-agent-kafka-size-001',
+    agentId: 'eval-agent-ts-kafka-size-001',
     hostName: 'eval-output-kafka-message-size-reject',
     os: {
       name: 'Linux',
@@ -868,7 +887,7 @@ export const SCENARIOS = {
     endpointStatus: 'degraded',
     extraDocuments: [
       createPolicyResponseDocument({
-        agentId: 'eval-agent-kafka-size-001',
+        agentId: 'eval-agent-ts-kafka-size-001',
         hostName: 'eval-output-kafka-message-size-reject',
         os: {
           name: 'Linux',
@@ -882,7 +901,7 @@ export const SCENARIOS = {
         scenario: 'output_kafka_message_size_rejection_explicit_prompt',
       }),
       createEndpointSecurityLogDocument({
-        agentId: 'eval-agent-kafka-size-001',
+        agentId: 'eval-agent-ts-kafka-size-001',
         hostName: 'eval-output-kafka-message-size-reject',
         message:
           'KafkaClient failed to deliver record with unrecoverable error: Broker: Message size too large [10] | non-retriable; repeated delivery failures correlate with 100% CPU',
@@ -891,7 +910,7 @@ export const SCENARIOS = {
   },
 
   windowsBsodNetworkDriverRegression: {
-    agentId: 'eval-agent-bsod-network-001',
+    agentId: 'eval-agent-ts-bsod-network-001',
     hostName: 'eval-windows-bsod-network-driver-regr',
     os: {
       name: 'Windows',
@@ -908,7 +927,7 @@ export const SCENARIOS = {
     agentVersion: '8.18.3',
     extraDocuments: [
       createPolicyResponseDocument({
-        agentId: 'eval-agent-bsod-network-001',
+        agentId: 'eval-agent-ts-bsod-network-001',
         hostName: 'eval-windows-bsod-network-driver-regr',
         os: {
           name: 'Windows',
@@ -924,7 +943,7 @@ export const SCENARIOS = {
         scenario: 'windows_bsod_network_driver_regression_explicit_prompt',
       }),
       createEndpointSecurityLogDocument({
-        agentId: 'eval-agent-bsod-network-001',
+        agentId: 'eval-agent-ts-bsod-network-001',
         hostName: 'eval-windows-bsod-network-driver-regr',
         message:
           'Windows BSOD bugcheck KERNEL_MODE_HEAP_CORRUPTION; crash dump stack references elastic_endpoint_driver.sys after many long-lived network connections idle for 30 minutes; Elastic Defend version 8.18.3',
@@ -933,7 +952,7 @@ export const SCENARIOS = {
   },
 
   incompatibleAwsVpcCniEbpfConflict: {
-    agentId: 'eval-agent-aws-vpc-cni-001',
+    agentId: 'eval-agent-ts-aws-vpc-cni-001',
     hostName: 'eval-incompatible-aws-vpc-cni-ebpf-co',
     os: {
       name: 'Linux',
@@ -947,7 +966,7 @@ export const SCENARIOS = {
     policyId: 'eval-policy-aws-vpc-cni',
     extraDocuments: [
       createPolicyResponseDocument({
-        agentId: 'eval-agent-aws-vpc-cni-001',
+        agentId: 'eval-agent-ts-aws-vpc-cni-001',
         hostName: 'eval-incompatible-aws-vpc-cni-ebpf-co',
         os: {
           name: 'Linux',
@@ -960,7 +979,7 @@ export const SCENARIOS = {
         scenario: 'incompatible_aws_vpc_cni_ebpf_conflict',
       }),
       createEndpointSecurityLogDocument({
-        agentId: 'eval-agent-aws-vpc-cni-001',
+        agentId: 'eval-agent-ts-aws-vpc-cni-001',
         hostName: 'eval-incompatible-aws-vpc-cni-ebpf-co',
         message:
           'Kubernetes node runs AWS VPC CNI aws-network-policy-agent using TC eBPF. After Elastic Defend installed host isolation TC eBPF probes, NetworkPolicy traffic that should be denied is allowed after about 18 hours.',

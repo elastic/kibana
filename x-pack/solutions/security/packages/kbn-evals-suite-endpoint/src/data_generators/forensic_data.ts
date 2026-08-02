@@ -25,7 +25,9 @@ import type { ToolingLog } from '@kbn/tooling-log';
  *   `@timestamp` so an ascending sort is a real timeline.
  *
  * Agent ids use the dedicated `eval-agent-forensic-` prefix so cleanupForensicData()
- * reclaims them without touching the troubleshooting suite's `eval-agent-*` seeds.
+ * reclaims them without touching the troubleshooting suite's `eval-agent-ts-*` seeds
+ * (the two namespaces are disjoint, so neither suite's cleanup can match the other's
+ * ids regardless of Playwright worker scheduling).
  */
 
 const FORENSIC_AGENT_PREFIX = 'eval-agent-forensic-';
