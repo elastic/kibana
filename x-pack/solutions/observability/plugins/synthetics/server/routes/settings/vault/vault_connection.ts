@@ -7,6 +7,8 @@
 
 import { schema } from '@kbn/config-schema';
 import type { TypeOf } from '@kbn/config-schema';
+import { request as httpsRequest } from 'https';
+import { request as httpRequest } from 'http';
 import type { SyntheticsServerSetup } from '../../../types';
 import type { RouteContext, SyntheticsRestApiRouteFactory } from '../../types';
 import type {
@@ -21,9 +23,11 @@ import { vaultConnectionId } from '../../../saved_objects/synthetics_vault_conne
 import { asyncGlobalParamsPropagation } from '../../../tasks/sync_global_params_task';
 
 // Whether the connection has its provider secret stored, so the UI can render
-// "•••• saved" without receiving the value. Per-provider: HashiCorp Vault stores a
-// token (token auth) or a secret_id (approle).
+// "•••• saved" without receiving the value. Prefers the stored `hasSecret` marker
+// (present on the non-decrypting list read); falls back to inspecting the secrets
+// for the just-saved attributes, whose secrets are still in memory.
 const hasStoredSecret = (a: SyntheticsVaultConnection): boolean => {
+  if (typeof a.hasSecret === 'boolean') return a.hasSecret;
   const secrets = a.secrets ?? {};
   return a.config.authMethod === 'token' ? Boolean(secrets.token) : Boolean(secrets.secretId);
 };
@@ -134,6 +138,9 @@ export const saveVaultConnectionRoute: SyntheticsRestApiRouteFactory<
       token: body.secrets?.token || existing?.secrets?.token,
       secretId: body.secrets?.secretId || existing?.secrets?.secretId,
     };
+    // Non-secret marker so the (non-decrypting) list read can report "secret saved".
+    const hasSecret =
+      body.config.authMethod === 'token' ? Boolean(secrets.token) : Boolean(secrets.secretId);
 
     const attributes: SyntheticsVaultConnection = {
       name: body.name,
@@ -142,6 +149,7 @@ export const saveVaultConnectionRoute: SyntheticsRestApiRouteFactory<
       secretRefreshInterval: body.secretRefreshInterval,
       refreshedAt: new Date().toISOString(),
       secrets,
+      hasSecret,
     };
 
     await savedObjectsClient.create<SyntheticsVaultConnection>(
@@ -205,5 +213,197 @@ export const refreshVaultConnectionsRoute: SyntheticsRestApiRouteFactory<
 
     await propagate(server, spaceId);
     return listConnections(routeContext);
+  },
+});
+
+interface TestResult {
+  ok: boolean;
+  message: string;
+}
+
+const errText = (e: unknown): string => (e instanceof Error ? e.message : String(e));
+
+interface VaultHttpResponse {
+  status: number;
+  body: Record<string, unknown>;
+}
+
+/**
+ * Minimal Vault HTTP call using Node's http(s) client — there is no official Node
+ * Vault client, and new Kibana code must use fetch/node http rather than axios.
+ * Resolves on any HTTP status (a sealed/standby Vault is still "reachable"); only
+ * transport failures reject.
+ */
+const vaultHttp = (
+  urlStr: string,
+  opts: {
+    method?: string;
+    headers?: Record<string, string>;
+    body?: string;
+    tlsSkipVerify?: boolean;
+  }
+): Promise<VaultHttpResponse> =>
+  new Promise((resolve, reject) => {
+    let url: URL;
+    try {
+      url = new URL(urlStr);
+    } catch (e) {
+      reject(new Error('invalid Vault address'));
+      return;
+    }
+    const isHttps = url.protocol === 'https:';
+    const doRequest = isHttps ? httpsRequest : httpRequest;
+    const req = doRequest(
+      url,
+      {
+        method: opts.method ?? 'GET',
+        headers: {
+          ...(opts.body ? { 'Content-Type': 'application/json' } : {}),
+          ...opts.headers,
+        },
+        timeout: 8000,
+        ...(isHttps && opts.tlsSkipVerify ? { rejectUnauthorized: false } : {}),
+      },
+      (res) => {
+        let data = '';
+        res.on('data', (chunk) => (data += chunk));
+        res.on('end', () => {
+          let body: Record<string, unknown> = {};
+          try {
+            body = data ? JSON.parse(data) : {};
+          } catch (e) {
+            body = {};
+          }
+          resolve({ status: res.statusCode ?? 0, body });
+        });
+      }
+    );
+    req.on('error', reject);
+    req.on('timeout', () => req.destroy(new Error('request timed out')));
+    if (opts.body) req.write(opts.body);
+    req.end();
+  });
+
+/**
+ * Verifies Kibana can reach the Vault address and authenticate with the given
+ * credentials. This checks reachability *from Kibana*; the agent (Heartbeat)
+ * resolves from its own network at runtime, which may differ. Secrets are never
+ * returned or logged — only a pass/fail plus the Vault version.
+ */
+const testHashiCorpVault = async (c: {
+  address: string;
+  authMethod: 'token' | 'approle';
+  namespace?: string;
+  tlsSkipVerify?: boolean;
+  roleId?: string;
+  token?: string;
+  secretId?: string;
+}): Promise<TestResult> => {
+  if (!c.address) return { ok: false, message: 'Vault address is required' };
+
+  const base = c.address.replace(/\/+$/, '');
+  const nsHeader: Record<string, string> = c.namespace ? { 'X-Vault-Namespace': c.namespace } : {};
+  const call = (path: string, opts: Parameters<typeof vaultHttp>[1] = {}) =>
+    vaultHttp(`${base}${path}`, {
+      ...opts,
+      tlsSkipVerify: c.tlsSkipVerify,
+      headers: { ...nsHeader, ...opts.headers },
+    });
+
+  // 1) Reachability + version (unauthenticated health endpoint).
+  let versionNote = '';
+  try {
+    const health = await call(
+      '/v1/sys/health?standbyok=true&perfstandbyok=true&sealedok=true&uninitcode=200'
+    );
+    const version = health.body?.version;
+    if (typeof version === 'string') versionNote = ` (Vault ${version})`;
+  } catch (e) {
+    return { ok: false, message: `Could not reach ${base}: ${errText(e)}` };
+  }
+
+  // 2) Authenticate with the configured method.
+  try {
+    if (c.authMethod === 'token') {
+      if (!c.token) return { ok: false, message: 'Token auth requires a token' };
+      const res = await call('/v1/auth/token/lookup-self', {
+        headers: { 'X-Vault-Token': c.token },
+      });
+      return res.status >= 200 && res.status < 300
+        ? { ok: true, message: `Token authenticated${versionNote}.` }
+        : { ok: false, message: `Token rejected (HTTP ${res.status})${versionNote}.` };
+    }
+
+    if (!c.roleId || !c.secretId) {
+      return { ok: false, message: 'AppRole auth requires role_id and secret_id' };
+    }
+    const res = await call('/v1/auth/approle/login', {
+      method: 'POST',
+      body: JSON.stringify({ role_id: c.roleId, secret_id: c.secretId }),
+    });
+    const auth = res.body?.auth as { client_token?: string } | undefined;
+    if (res.status >= 200 && res.status < 300 && auth?.client_token) {
+      return { ok: true, message: `AppRole authenticated${versionNote}.` };
+    }
+    const errs = Array.isArray(res.body?.errors) ? (res.body.errors as string[]).join('; ') : '';
+    return {
+      ok: false,
+      message: `AppRole login failed (HTTP ${res.status})${errs ? `: ${errs}` : ''}${versionNote}.`,
+    };
+  } catch (e) {
+    return { ok: false, message: `Authentication error: ${errText(e)}` };
+  }
+};
+
+const TestBodySchema = schema.object({
+  // When editing a saved connection with the secret left blank, `name` lets the
+  // server fall back to the stored secret so Test works without re-entry.
+  name: schema.maybe(schema.string()),
+  type: schema.maybe(schema.literal('hashicorp_vault')),
+  config: HashiCorpVaultConfigSchema,
+  secrets: schema.maybe(HashiCorpVaultSecretsSchema),
+});
+
+type TestBody = TypeOf<typeof TestBodySchema>;
+
+/** POST /_test: check reachability + auth from Kibana. Never persists anything. */
+export const testVaultConnectionRoute: SyntheticsRestApiRouteFactory<TestResult> = () => ({
+  method: 'POST',
+  path: SYNTHETICS_API_URLS.VAULT_CONNECTION + '/_test',
+  validate: { body: TestBodySchema },
+  writeAccess: true,
+  handler: async ({ request, server, spaceId }) => {
+    const body = request.body as TestBody;
+    const { address, authMethod, namespace, tlsSkipVerify, roleId } = body.config;
+
+    // Fall back to the stored secret when the client submits a blank (editing).
+    let token = body.secrets?.token;
+    let secretId = body.secrets?.secretId;
+    const missingSecret = authMethod === 'token' ? !token : !secretId;
+    if (missingSecret && body.name) {
+      try {
+        const decrypted = await server.encryptedSavedObjects
+          .getClient()
+          .getDecryptedAsInternalUser<SyntheticsVaultConnection>(
+            syntheticsVaultConnectionType,
+            vaultConnectionId(body.name),
+            { namespace: spaceId }
+          );
+        token = token || decrypted.attributes.secrets?.token;
+        secretId = secretId || decrypted.attributes.secrets?.secretId;
+      } catch (e) {
+        // No stored connection; testHashiCorpVault reports the missing secret.
+      }
+    }
+
+    return testHashiCorpVault({
+      address,
+      authMethod,
+      namespace,
+      tlsSkipVerify,
+      roleId,
+      token,
+      secretId,
+    });
   },
 });

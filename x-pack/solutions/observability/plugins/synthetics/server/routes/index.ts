@@ -12,6 +12,7 @@ import {
   saveVaultConnectionRoute,
   deleteVaultConnectionRoute,
   refreshVaultConnectionsRoute,
+  testVaultConnectionRoute,
 } from './settings/vault/vault_connection';
 import { cleanupPrivateLocationRoute } from './settings/private_locations/cleanup_private_locations';
 import { getSyntheticsTriggerTaskRun } from './tasks/trigger_task_run';
@@ -142,6 +143,7 @@ export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   saveVaultConnectionRoute,
   deleteVaultConnectionRoute,
   refreshVaultConnectionsRoute,
+  testVaultConnectionRoute,
   syncParamsSettingsParamsRoute,
   getMonitorsHealthRoute,
   getMonitorHealthRoute,

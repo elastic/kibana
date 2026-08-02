@@ -71,6 +71,9 @@ const HashiCorpVaultConnectionCodec = t.intersection([
     // forces agents to re-resolve (and thus pick up a rotated secret).
     refreshedAt: t.string,
     secrets: HashiCorpVaultSecretsCodec,
+    // Non-secret marker: whether a provider secret is stored. Lets the (non-
+    // decrypting) list read report "secret saved" without reading the secret.
+    hasSecret: t.boolean,
   }),
 ]);
 

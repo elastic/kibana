@@ -12,10 +12,15 @@ import {
   EuiBasicTable,
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiFieldPassword,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiFlyoutHeader,
   EuiForm,
   EuiFormRow,
   EuiPanel,
@@ -23,6 +28,7 @@ import {
   EuiSpacer,
   EuiSwitch,
   EuiText,
+  EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -101,8 +107,16 @@ export const VaultConnectionPanel = () => {
   const [editing, setEditing] = useState<FormState | null>(null);
   const [saving, setSaving] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [testing, setTesting] = useState(false);
+  const [testResult, setTestResult] = useState<{ ok: boolean; message: string } | null>(null);
 
   const accordionId = useGeneratedHtmlId({ prefix: 'vaultConnections' });
+  const flyoutTitleId = useGeneratedHtmlId({ prefix: 'vaultConnectionFlyout' });
+
+  const closeFlyout = () => {
+    setTestResult(null);
+    setEditing(null);
+  };
 
   const load = useCallback(async () => {
     try {
@@ -117,8 +131,51 @@ export const VaultConnectionPanel = () => {
     load();
   }, [load]);
 
-  const set = <K extends keyof FormState>(key: K, value: FormState[K]) =>
+  const set = <K extends keyof FormState>(key: K, value: FormState[K]) => {
+    // A field change invalidates any prior test result.
+    if (testResult) setTestResult(null);
     setEditing((f) => (f ? { ...f, [key]: value } : f));
+  };
+
+  const onTest = async () => {
+    if (!editing) return;
+    setTesting(true);
+    setTestResult(null);
+    try {
+      const config: Record<string, unknown> = {
+        address: editing.address.trim(),
+        authMethod: editing.authMethod,
+        namespace: editing.namespace.trim() || undefined,
+        kvMount: editing.kvMount.trim() || undefined,
+        tlsSkipVerify: editing.tlsSkipVerify,
+      };
+      const secrets: Record<string, unknown> = {};
+      if (editing.authMethod === 'token') {
+        if (editing.token) secrets.token = editing.token;
+      } else {
+        config.roleId = editing.roleId.trim();
+        if (editing.secretId) secrets.secretId = editing.secretId;
+      }
+      const res = await http.post<{ ok: boolean; message: string }>(
+        `${SYNTHETICS_API_URLS.VAULT_CONNECTION}/_test`,
+        {
+          body: JSON.stringify({
+            // Existing connection: let the server fall back to the stored secret
+            // when the secret field is left blank.
+            name: editing.isNew ? undefined : editing.name.trim(),
+            type: editing.type,
+            config,
+            secrets,
+          }),
+        }
+      );
+      setTestResult(res);
+    } catch (e) {
+      setTestResult({ ok: false, message: (e as Error)?.message ?? 'Test failed' });
+    } finally {
+      setTesting(false);
+    }
+  };
 
   const onSave = async () => {
     if (!editing) return;
@@ -212,7 +269,10 @@ export const VaultConnectionPanel = () => {
           description: EDIT_LABEL,
           icon: 'pencil',
           type: 'icon',
-          onClick: (c: VaultConnectionStatus) => setEditing(toForm(c)),
+          onClick: (c: VaultConnectionStatus) => {
+            setTestResult(null);
+            setEditing(toForm(c));
+          },
           enabled: () => canSave,
         },
         {
@@ -275,7 +335,10 @@ export const VaultConnectionPanel = () => {
               iconType="plusInCircle"
               data-test-subj="syntheticsVaultAddConnection"
               isDisabled={!canSave || !!editing}
-              onClick={() => setEditing(blankForm())}
+              onClick={() => {
+                setTestResult(null);
+                setEditing(blankForm());
+              }}
             >
               {ADD_LABEL}
             </EuiButton>
@@ -296,9 +359,19 @@ export const VaultConnectionPanel = () => {
         </EuiFlexGroup>
 
         {editing && (
-          <>
-            <EuiSpacer size="m" />
-            <EuiPanel hasBorder paddingSize="m" color="subdued">
+          <EuiFlyout
+            ownFocus
+            size="m"
+            onClose={closeFlyout}
+            aria-labelledby={flyoutTitleId}
+            data-test-subj="syntheticsVaultConnectionFlyout"
+          >
+            <EuiFlyoutHeader hasBorder>
+              <EuiTitle size="m">
+                <h2 id={flyoutTitleId}>{editing.isNew ? ADD_LABEL : EDIT_TITLE}</h2>
+              </EuiTitle>
+            </EuiFlyoutHeader>
+            <EuiFlyoutBody>
               <EuiForm component="form">
                 <EuiFormRow fullWidth label={PROVIDER_LABEL} helpText={PROVIDER_HELP}>
                   <EuiSelect
@@ -431,31 +504,64 @@ export const VaultConnectionPanel = () => {
                     onChange={(e) => set('tlsSkipVerify', e.target.checked)}
                   />
                 </EuiFormRow>
-                <EuiSpacer size="m" />
-                <EuiFlexGroup gutterSize="s" responsive={false}>
-                  <EuiFlexItem grow={false}>
-                    <EuiButton
-                      fill
-                      data-test-subj="syntheticsVaultSaveConnection"
-                      isLoading={saving}
-                      isDisabled={!editing.name || !editing.address}
-                      onClick={onSave}
-                    >
-                      {SAVE_LABEL}
-                    </EuiButton>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiButtonEmpty
-                      data-test-subj="syntheticsVaultConnectionPanelButton"
-                      onClick={() => setEditing(null)}
-                    >
-                      {CANCEL_LABEL}
-                    </EuiButtonEmpty>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
+                {testResult && (
+                  <>
+                    <EuiSpacer size="s" />
+                    <EuiCallOut
+                      size="s"
+                      color={testResult.ok ? 'success' : 'danger'}
+                      iconType={testResult.ok ? 'check' : 'warning'}
+                      title={testResult.message}
+                    />
+                  </>
+                )}
               </EuiForm>
-            </EuiPanel>
-          </>
+            </EuiFlyoutBody>
+            <EuiFlyoutFooter>
+              <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    iconType="cross"
+                    flush="left"
+                    data-test-subj="syntheticsVaultConnectionPanelButton"
+                    onClick={closeFlyout}
+                  >
+                    {CANCEL_LABEL}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiFlexGroup gutterSize="s" responsive={false}>
+                    <EuiFlexItem grow={false}>
+                      <EuiButton
+                        data-test-subj="syntheticsVaultTestConnection"
+                        iconType="online"
+                        isLoading={testing}
+                        isDisabled={!editing.address}
+                        onClick={onTest}
+                      >
+                        {TEST_LABEL}
+                      </EuiButton>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiButton
+                        fill
+                        data-test-subj="syntheticsVaultSaveConnection"
+                        isLoading={saving}
+                        isDisabled={!editing.name || !editing.address}
+                        onClick={onSave}
+                      >
+                        {SAVE_LABEL}
+                      </EuiButton>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+              <EuiSpacer size="xs" />
+              <EuiText size="xs" color="subdued">
+                {TEST_NOTE}
+              </EuiText>
+            </EuiFlyoutFooter>
+          </EuiFlyout>
         )}
       </EuiAccordion>
     </EuiPanel>
@@ -523,6 +629,9 @@ const ACTIONS_LABEL = i18n.translate('xpack.synthetics.vaultConnection.actions',
 const ADD_LABEL = i18n.translate('xpack.synthetics.vaultConnection.add', {
   defaultMessage: 'Add connection',
 });
+const EDIT_TITLE = i18n.translate('xpack.synthetics.vaultConnection.editTitle', {
+  defaultMessage: 'Edit connection',
+});
 const EDIT_LABEL = i18n.translate('xpack.synthetics.vaultConnection.edit', {
   defaultMessage: 'Edit',
 });
@@ -537,6 +646,13 @@ const CANCEL_LABEL = i18n.translate('xpack.synthetics.vaultConnection.cancel', {
 });
 const REFRESH_BUTTON = i18n.translate('xpack.synthetics.vaultConnection.refreshButton', {
   defaultMessage: 'Refresh secrets',
+});
+const TEST_LABEL = i18n.translate('xpack.synthetics.vaultConnection.test', {
+  defaultMessage: 'Test connection',
+});
+const TEST_NOTE = i18n.translate('xpack.synthetics.vaultConnection.testNote', {
+  defaultMessage:
+    '“Test connection” checks reachability and authentication from Kibana. At runtime the agent (Heartbeat) resolves secrets from its own network, which may differ.',
 });
 const SAVED_TOAST = i18n.translate('xpack.synthetics.vaultConnection.savedToast', {
   defaultMessage: 'Vault connection saved',
