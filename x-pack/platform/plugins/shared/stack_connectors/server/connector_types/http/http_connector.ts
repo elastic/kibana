@@ -188,17 +188,31 @@ function combineUrl(basePath: string, path?: string): string {
   if (!path) return basePath;
   const url = new URL(basePath);
   const normalizedPath = path.startsWith('/') ? path : `/${path}`;
-  const parsedPath = new URL(`http://placeholder${normalizedPath}`);
+  const hashIndex = normalizedPath.indexOf('#');
+  const pathWithoutHash =
+    hashIndex === -1 ? normalizedPath : normalizedPath.slice(0, hashIndex);
+  const queryIndex = pathWithoutHash.indexOf('?');
+  const pathname = queryIndex === -1 ? pathWithoutHash : pathWithoutHash.slice(0, queryIndex);
+  const pathQuery = queryIndex === -1 ? undefined : pathWithoutHash.slice(queryIndex + 1);
   const baseQueryKeys = new Set(url.searchParams.keys());
 
-  url.pathname = url.pathname.replace(/\/$/, '') + parsedPath.pathname;
-  for (const [key, value] of parsedPath.searchParams) {
-    if (!baseQueryKeys.has(key)) {
-      url.searchParams.append(key, value);
+  url.pathname = url.pathname.replace(/\/$/, '') + pathname;
+  if (pathQuery) {
+    const filteredPathQuery = pathQuery
+      .split('&')
+      .filter((queryPart) => {
+        const [key] = new URLSearchParams(queryPart).keys();
+        return key === undefined || !baseQueryKeys.has(key);
+      })
+      .join('&');
+
+    if (filteredPathQuery) {
+      const baseQuery = url.search.slice(1);
+      url.search = baseQuery ? `?${baseQuery}&${filteredPathQuery}` : `?${filteredPathQuery}`;
     }
   }
-  if (parsedPath.hash) {
-    url.hash = parsedPath.hash;
+  if (hashIndex !== -1) {
+    url.hash = normalizedPath.slice(hashIndex);
   }
 
   return url.toString();
@@ -209,11 +223,23 @@ function appendQueryString(baseUrl: string, query?: Record<string, string>): str
     return baseUrl;
   }
   const url = new URL(baseUrl);
+  const existingQueryKeys = new Set(url.searchParams.keys());
+  const appendedQuery = new URLSearchParams();
+
   for (const [key, value] of Object.entries(query)) {
-    if (!url.searchParams.has(key)) {
-      url.searchParams.set(key, value);
+    if (!existingQueryKeys.has(key)) {
+      appendedQuery.set(key, value);
     }
   }
+
+  const appendedQueryString = appendedQuery.toString();
+  if (appendedQueryString) {
+    const existingQuery = url.search.slice(1);
+    url.search = existingQuery
+      ? `?${existingQuery}&${appendedQueryString}`
+      : `?${appendedQueryString}`;
+  }
+
   return url.toString();
 }
 

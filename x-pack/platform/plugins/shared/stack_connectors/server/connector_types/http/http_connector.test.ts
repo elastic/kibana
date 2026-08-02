@@ -1645,6 +1645,59 @@ describe('execute()', () => {
     );
   });
 
+  test('execute preserves the raw encoding of a query string embedded in path', async () => {
+    const config: ConnectorTypeConfigType = {
+      ...emptyConfig,
+      url: 'https://abc.def',
+    };
+    await connectorType.executor?.({
+      actionId: 'some-id',
+      services,
+      config,
+      secrets: { ...emptySecrets, user: 'abc', password: '123' },
+      params: {
+        method: 'GET',
+        path: '/api/search?q=a%20b&flag&symbol=~',
+      },
+      configurationUtilities,
+      logger: mockedLogger,
+      connectorUsageCollector,
+    });
+
+    expect(requestMock.mock.calls[0][0].url).toBe(
+      'https://abc.def/api/search?q=a%20b&flag&symbol=~'
+    );
+  });
+
+  test('execute combines inline, explicit, and secret query parameters', async () => {
+    const config: ConnectorTypeConfigType = {
+      ...emptyConfig,
+      url: 'https://abc.def',
+      hasAuth: false,
+    };
+    await connectorType.executor?.({
+      actionId: 'some-id',
+      services,
+      config,
+      secrets: {
+        ...emptySecrets,
+        secretQueryParams: { apiKey: 'secret-api-key' },
+      },
+      params: {
+        method: 'GET',
+        path: '/api/search?q=a%20b&flag&symbol=~',
+        query: { page: '1' },
+      },
+      configurationUtilities,
+      logger: mockedLogger,
+      connectorUsageCollector,
+    });
+
+    expect(requestMock.mock.calls[0][0].url).toBe(
+      'https://abc.def/api/search?q=a%20b&flag&symbol=~&apiKey=secret-api-key&page=1'
+    );
+  });
+
   test('execute injects secretQueryParams from connector secrets into URL', async () => {
     const config: ConnectorTypeConfigType = {
       ...emptyConfig,
