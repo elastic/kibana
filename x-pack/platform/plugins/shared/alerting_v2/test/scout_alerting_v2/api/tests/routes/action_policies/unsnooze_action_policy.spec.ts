@@ -121,6 +121,7 @@ apiTest.describe('Unsnooze action policy API', { tag: '@local-stateful-classic' 
     );
 
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest(

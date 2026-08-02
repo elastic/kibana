@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { ALERTING_TOOL_IDS, RULE_MANAGEMENT_SKILL_ID } from '@kbn/alerting-v2-constants';
 import type { ManageActionPolicyToolDeps } from '../tools/manage_action_policy';
-import { alertingTools } from '../common/constants';
 import { createRuleManagementSkill } from './rule_management_skill';
 
 const createDeps = (): ManageActionPolicyToolDeps => ({
@@ -18,8 +18,8 @@ describe('createRuleManagementSkill', () => {
   it('registers the skill under the stable rule-management id and name', () => {
     const skill = createRuleManagementSkill(createDeps());
 
-    expect(skill.id).toBe('rule-management');
-    expect(skill.name).toBe('rule-management');
+    expect(skill.id).toBe(RULE_MANAGEMENT_SKILL_ID);
+    expect(skill.name).toBe(RULE_MANAGEMENT_SKILL_ID);
     expect(skill.basePath).toBe('skills/platform/alerting');
   });
 
@@ -42,7 +42,7 @@ describe('createRuleManagementSkill', () => {
     const inlineToolIds = inlineTools.map((tool) => tool.id);
 
     expect(inlineToolIds).toEqual(
-      expect.arrayContaining([alertingTools.manageRule, alertingTools.manageActionPolicy])
+      expect.arrayContaining([ALERTING_TOOL_IDS.manageRule, ALERTING_TOOL_IDS.manageActionPolicy])
     );
   });
 });
