@@ -1616,9 +1616,7 @@ describe('execute()', () => {
       connectorUsageCollector,
     });
 
-    expect(requestMock.mock.calls[0][0].url).toBe(
-      'https://abc.def/api/users.info?user=U123'
-    );
+    expect(requestMock.mock.calls[0][0].url).toBe('https://abc.def/api/users.info?user=U123');
   });
 
   test('execute preserves query strings in both the base URL and path', async () => {
