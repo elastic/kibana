@@ -14,7 +14,6 @@ import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { TimeRange } from '@kbn/es-query';
 import { KbnInfoCallout } from '@kbn/ui-callout';
-import { isTimeRangeAbsoluteTime } from '@kbn/share-plugin/public';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import type { DiscoverAppMenuPopoverItem } from '@kbn/discover-utils';
 import type { ShowShareMenuOptions } from '@kbn/share-plugin/public';
@@ -91,7 +90,9 @@ const getExpandedDocHelpText = ({
   // A relative time range resolves differently for whoever opens the link, so the document often
   // will not be in their results and has to be fetched by ID instead, losing its surrounding
   // context. Point at the switch that captures the range as absolute values instead.
-  if (isTimeRangeAbsoluteTime(timeRange)) {
+  // Duplicated from `isTimeRangeAbsoluteTime` (for bundle size reasons, as elsewhere in this file)
+  const isTimeRangeAbsolute = !(timeRange?.from?.includes('now') || timeRange?.to?.includes('now'));
+  if (isTimeRangeAbsolute) {
     return undefined;
   }
 
