@@ -12,6 +12,7 @@ import {
   EVALS_DATASET_URL,
   EVALS_EXPERIMENT_SCORES_URL,
   EVALS_EXPERIMENT_URL,
+  EVALS_EXPERIMENTS_URL,
   EVALS_SCORES_URL,
   MAX_SCORES_PER_QUERY,
   type EvaluationScoreDocument,
@@ -427,5 +428,268 @@ describe('EvalsClient', () => {
         retries: 0,
       })
     );
+  });
+
+  describe('findLatestBaselineExperiment', () => {
+    const makeExperiment = (
+      executionId: string,
+      overrides: Record<string, unknown> = {}
+    ): Record<string, unknown> => ({
+      execution_id: executionId,
+      experiment_id: `exp-${executionId}`,
+      timestamp: '2026-07-01T10:00:00.000Z',
+      git_branch: 'main',
+      git_commit_sha: 'abc1234',
+      ...overrides,
+    });
+
+    it('returns the first experiment not matching excludeExecutionId', async () => {
+      const kbnClient = createMockKbnClient();
+      const log = createLog();
+      kbnClient.request.mockResolvedValue(
+        asKbnResponse({
+          experiments: [
+            makeExperiment('bk-current::smoke-tests::haiku'),
+            makeExperiment('bk-older::smoke-tests::haiku'),
+          ],
+          total: 2,
+        })
+      );
+      const client = new EvalsClient(kbnClient, log);
+
+      const result = await client.findLatestBaselineExperiment({
+        suiteId: 'smoke-tests',
+        branch: 'main',
+        excludeExecutionId: 'bk-current::smoke-tests::haiku',
+      });
+
+      expect(result).toEqual({
+        executionId: 'bk-older::smoke-tests::haiku',
+        timestamp: '2026-07-01T10:00:00.000Z',
+        gitCommitSha: 'abc1234',
+        gitBranch: 'main',
+      });
+    });
+
+    it('returns undefined when all experiments match excludeExecutionId', async () => {
+      const kbnClient = createMockKbnClient();
+      const log = createLog();
+      kbnClient.request.mockResolvedValue(
+        asKbnResponse({
+          experiments: [makeExperiment('bk-current::smoke-tests::haiku')],
+          total: 1,
+        })
+      );
+      const client = new EvalsClient(kbnClient, log);
+
+      const result = await client.findLatestBaselineExperiment({
+        suiteId: 'smoke-tests',
+        branch: 'main',
+        excludeExecutionId: 'bk-current::smoke-tests::haiku',
+      });
+
+      expect(result).toBeUndefined();
+    });
+
+    it('returns undefined when the experiments list is empty', async () => {
+      const kbnClient = createMockKbnClient();
+      const log = createLog();
+      kbnClient.request.mockResolvedValue(asKbnResponse({ experiments: [], total: 0 }));
+      const client = new EvalsClient(kbnClient, log);
+
+      const result = await client.findLatestBaselineExperiment({
+        suiteId: 'smoke-tests',
+        branch: 'main',
+      });
+
+      expect(result).toBeUndefined();
+    });
+
+    it('forwards suite_id, branch, and model_id query params', async () => {
+      const kbnClient = createMockKbnClient();
+      const log = createLog();
+      kbnClient.request.mockResolvedValue(
+        asKbnResponse({ experiments: [makeExperiment('bk-old::smoke-tests::haiku')], total: 1 })
+      );
+      const client = new EvalsClient(kbnClient, log);
+
+      await client.findLatestBaselineExperiment({
+        suiteId: 'smoke-tests',
+        branch: 'main',
+        taskModelId: 'haiku',
+      });
+
+      expect(kbnClient.request).toHaveBeenCalledWith(
+        expect.objectContaining({
+          path: EVALS_EXPERIMENTS_URL,
+          method: 'GET',
+          query: expect.objectContaining({
+            suite_id: 'smoke-tests',
+            branch: 'main',
+            model_id: 'haiku',
+          }),
+        })
+      );
+    });
+
+    it('omits model_id from query when taskModelId is not provided', async () => {
+      const kbnClient = createMockKbnClient();
+      const log = createLog();
+      kbnClient.request.mockResolvedValue(
+        asKbnResponse({ experiments: [makeExperiment('bk-old::smoke-tests::haiku')], total: 1 })
+      );
+      const client = new EvalsClient(kbnClient, log);
+
+      await client.findLatestBaselineExperiment({ suiteId: 'smoke-tests', branch: 'main' });
+
+      const call = kbnClient.request.mock.calls[0][0] as { query: Record<string, unknown> };
+      expect(call.query).not.toHaveProperty('model_id');
+    });
+
+    it('returns undefined and logs error on request failure', async () => {
+      const kbnClient = createMockKbnClient();
+      const log = createLog();
+      kbnClient.request.mockRejectedValue(new Error('network error'));
+      const client = new EvalsClient(kbnClient, log);
+
+      const result = await client.findLatestBaselineExperiment({
+        suiteId: 'smoke-tests',
+        branch: 'main',
+      });
+
+      expect(result).toBeUndefined();
+      expect(log.error).toHaveBeenCalledWith(expect.stringContaining('network error'));
+    });
+  });
+
+  describe('findLatestExperimentForBuild', () => {
+    const makeExperiment = (
+      executionId: string,
+      overrides: Record<string, unknown> = {}
+    ): Record<string, unknown> => ({
+      execution_id: executionId,
+      experiment_id: `exp-${executionId}`,
+      timestamp: '2026-07-01T10:00:00.000Z',
+      git_branch: 'main',
+      git_commit_sha: 'def5678',
+      ...overrides,
+    });
+
+    it('returns the first experiment whose execution_id starts with baseExecutionId::', async () => {
+      const kbnClient = createMockKbnClient();
+      const log = createLog();
+      kbnClient.request.mockResolvedValue(
+        asKbnResponse({
+          experiments: [makeExperiment('bk-build-123::smoke-tests::haiku')],
+          total: 1,
+        })
+      );
+      const client = new EvalsClient(kbnClient, log);
+
+      const result = await client.findLatestExperimentForBuild({
+        suiteId: 'smoke-tests',
+        baseExecutionId: 'bk-build-123',
+      });
+
+      expect(result).toEqual({
+        executionId: 'bk-build-123::smoke-tests::haiku',
+        timestamp: '2026-07-01T10:00:00.000Z',
+        gitCommitSha: 'def5678',
+        gitBranch: 'main',
+      });
+    });
+
+    it('returns undefined when no experiment matches the baseExecutionId prefix', async () => {
+      const kbnClient = createMockKbnClient();
+      const log = createLog();
+      kbnClient.request.mockResolvedValue(
+        asKbnResponse({
+          experiments: [makeExperiment('bk-different-build::smoke-tests::haiku')],
+          total: 1,
+        })
+      );
+      const client = new EvalsClient(kbnClient, log);
+
+      const result = await client.findLatestExperimentForBuild({
+        suiteId: 'smoke-tests',
+        baseExecutionId: 'bk-build-123',
+      });
+
+      expect(result).toBeUndefined();
+    });
+
+    it('does not match a prefix that is a substring without the :: separator', async () => {
+      const kbnClient = createMockKbnClient();
+      const log = createLog();
+      // 'bk-build' is a prefix of 'bk-build-123' but the separator is missing
+      kbnClient.request.mockResolvedValue(
+        asKbnResponse({
+          experiments: [makeExperiment('bk-build-123::smoke-tests::haiku')],
+          total: 1,
+        })
+      );
+      const client = new EvalsClient(kbnClient, log);
+
+      const result = await client.findLatestExperimentForBuild({
+        suiteId: 'smoke-tests',
+        baseExecutionId: 'bk-build',
+      });
+
+      expect(result).toBeUndefined();
+    });
+
+    it('forwards suite_id and build_id query params, stripping the bk- prefix', async () => {
+      const kbnClient = createMockKbnClient();
+      const log = createLog();
+      kbnClient.request.mockResolvedValue(
+        asKbnResponse({ experiments: [makeExperiment('bk-123::obs::haiku')], total: 1 })
+      );
+      const client = new EvalsClient(kbnClient, log);
+
+      await client.findLatestExperimentForBuild({
+        suiteId: 'obs',
+        baseExecutionId: 'bk-123',
+      });
+
+      expect(kbnClient.request).toHaveBeenCalledWith(
+        expect.objectContaining({
+          path: EVALS_EXPERIMENTS_URL,
+          method: 'GET',
+          query: expect.objectContaining({ suite_id: 'obs', build_id: '123' }),
+        })
+      );
+    });
+
+    it('passes baseExecutionId as-is to build_id when it has no bk- prefix', async () => {
+      const kbnClient = createMockKbnClient();
+      const log = createLog();
+      kbnClient.request.mockResolvedValue(
+        asKbnResponse({ experiments: [makeExperiment('rawid::obs::haiku')], total: 1 })
+      );
+      const client = new EvalsClient(kbnClient, log);
+
+      await client.findLatestExperimentForBuild({
+        suiteId: 'obs',
+        baseExecutionId: 'rawid',
+      });
+
+      const call = kbnClient.request.mock.calls[0][0] as { query: Record<string, unknown> };
+      expect(call.query).toMatchObject({ build_id: 'rawid' });
+    });
+
+    it('returns undefined and logs error on request failure', async () => {
+      const kbnClient = createMockKbnClient();
+      const log = createLog();
+      kbnClient.request.mockRejectedValue(new Error('timeout'));
+      const client = new EvalsClient(kbnClient, log);
+
+      const result = await client.findLatestExperimentForBuild({
+        suiteId: 'smoke-tests',
+        baseExecutionId: 'bk-build-123',
+      });
+
+      expect(result).toBeUndefined();
+      expect(log.error).toHaveBeenCalledWith(expect.stringContaining('timeout'));
+    });
   });
 });
