@@ -901,7 +901,10 @@ export class WorkflowsExecutionEnginePlugin
       } else {
         // Schedule a task: either we're not in a task, or this is a child execution (must not run inline)
         const taskInstance = createTaskInstance(workflowExecution, ['workflows']);
-        await plugins.taskManager.schedule(taskInstance, { request: request as KibanaRequest });
+        await plugins.taskManager.schedule(taskInstance, {
+          request: request as KibanaRequest,
+          cloneApiKey: true,
+        });
         this.logger.debug(
           `Scheduling workflow task for workflow ${workflow.id}, execution ${workflowExecution.id}${
             isChildExecution ? ' (child execution)' : ''
@@ -950,7 +953,7 @@ export class WorkflowsExecutionEnginePlugin
         generateExecutionTaskScope(workflowExecution as EsWorkflowExecution)
       );
 
-      await plugins.taskManager.schedule(taskInstance, { request });
+      await plugins.taskManager.schedule(taskInstance, { request, cloneApiKey: true });
       this.logger.debug(
         `Scheduling workflow task with user context for workflow ${workflow.id}, execution ${workflowExecution.id}`
       );
@@ -1135,7 +1138,7 @@ export class WorkflowsExecutionEnginePlugin
             generateExecutionTaskScope(p.workflowExecution as EsWorkflowExecution)
           )
         );
-        await plugins.taskManager.bulkSchedule(tasks, { request });
+        await plugins.taskManager.bulkSchedule(tasks, { request, cloneApiKey: true });
         this.logger.debug(`Bulk-scheduled ${toSchedule.length} workflow task(s) with user context`);
       }
 
@@ -1193,13 +1196,13 @@ export class WorkflowsExecutionEnginePlugin
         enabled: true,
       };
 
-      // Use Task Manager's first-class API key support by passing the request
-      // This ensures the step runs with the user's permissions, not kibana_system
+      // Use Task Manager's first-class API key support by passing the request.
+      // Clone so org/global UIAM keys are granted as TM-managed internal keys.
       // At this point, request is guaranteed to exist due to the early check above
       this.logger.debug(
         `Scheduling workflow step task with user context for workflow ${workflow.id}, step ${stepId}`
       );
-      await plugins.taskManager.schedule(taskInstance, { request });
+      await plugins.taskManager.schedule(taskInstance, { request, cloneApiKey: true });
 
       return {
         workflowExecutionId: workflowExecution.id as string,
