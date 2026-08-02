@@ -5,17 +5,12 @@
  * 2.0.
  */
 
-import type { Attachment, AttachmentInput } from '@kbn/agent-builder-common/attachments';
+import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import type { Feature } from '@kbn/significant-events-schema';
 
 export const KI_FEATURE_ATTACHMENT_TYPE = 'platform.ki_feature' as const;
 
 export type KiFeatureAttachment = Attachment<typeof KI_FEATURE_ATTACHMENT_TYPE, Feature>;
-
-export type PendingKiFeatureAttachment = AttachmentInput<
-  typeof KI_FEATURE_ATTACHMENT_TYPE,
-  Feature
->;
 
 const FEATURE_ATTACHMENT_ORIGIN_SEPARATOR = '::';
 
