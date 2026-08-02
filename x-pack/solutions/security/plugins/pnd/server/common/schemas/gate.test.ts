@@ -67,13 +67,30 @@ describe('readiness gate (gap #7)', () => {
 
     it('aggregates every missing readiness requirement', () => {
       const result = evaluateReadinessGate(
-        buildProposal({ evidenceRefs: [], recommendation: '', approvals: [] }),
+        buildProposal({ evidenceRefs: [], recommendation: '', approvals: [], confidence: 0.1 }),
         'approved'
       );
       expect(result.approved).toBe(false);
       if (!result.approved) {
-        expect(result.failure.missingRequirements.sort()).toEqual(['evidence', 'recommendation']);
+        expect(result.failure.missingRequirements.sort()).toEqual([
+          'confidence',
+          'evidence',
+          'recommendation',
+        ]);
       }
+    });
+
+    it('rejects a proposal below the confidence threshold', () => {
+      const result = evaluateReadinessGate(buildProposal({ confidence: 0.79 }), 'approved');
+      expect(result.approved).toBe(false);
+      if (!result.approved) {
+        expect(result.failure.missingRequirements).toContain('confidence');
+      }
+    });
+
+    it('admits a proposal exactly at the confidence threshold (inclusive)', () => {
+      const result = evaluateReadinessGate(buildProposal({ confidence: 0.8 }), 'approved');
+      expect(result.approved).toBe(true);
     });
 
     it('does not gate non-approved transitions', () => {
@@ -130,6 +147,29 @@ describe('shared approval gate adapter (gap #7 / security-team#17944)', () => {
     expect(() =>
       requireSharedApprovalGate(buildProposal({ evidenceRefs: [] }), 'approved')
     ).toThrow(ReadinessGateError);
+  });
+
+  it('requireSharedApprovalGate fails CLOSED on a human-approval (approver-count) block', () => {
+    // Regression: a proposal that passes readiness but lacks approvals must
+    // still throw. Previously this fell open because the require-wrapper
+    // re-delegated to the readiness gate, which the proposal already passed.
+    let thrown: unknown;
+    try {
+      requireSharedApprovalGate(
+        buildProposal({ approvals: [], requiredApproverCount: 2 }),
+        'approved'
+      );
+    } catch (err) {
+      thrown = err;
+    }
+    expect(thrown).toBeInstanceOf(ReadinessGateError);
+    expect((thrown as ReadinessGateError).failure.missingRequirements).toContain('approver-count');
+  });
+
+  it('requireSharedApprovalGate fails CLOSED on a confidence block below threshold', () => {
+    expect(() => requireSharedApprovalGate(buildProposal({ confidence: 0.5 }), 'approved')).toThrow(
+      ReadinessGateError
+    );
   });
 
   it('requireSharedApprovalGate is a no-op for a passing gate', () => {

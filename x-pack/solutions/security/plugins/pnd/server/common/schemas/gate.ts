@@ -6,9 +6,10 @@
  */
 
 import type { Proposal, ProposalStatus } from './proposal';
+import { DAYBREAK_APPROVAL_CONFIDENCE_THRESHOLD } from './versions';
 
 /** A requirement that may be missing when the readiness gate fails. */
-export type MissingRequirement = 'evidence' | 'recommendation' | 'approver-count';
+export type MissingRequirement = 'evidence' | 'recommendation' | 'approver-count' | 'confidence';
 
 /**
  * Details of a failed readiness-gate evaluation.
@@ -50,12 +51,25 @@ const isRecommendationMissing = (proposal: Proposal): boolean =>
   !proposal.recommendation || proposal.recommendation.trim().length === 0;
 
 /**
+ * Confidence is "missing" (insufficient) when the worker-reported confidence is
+ * below the UNRATIFIED shared threshold. Fail-closed: a non-numeric or absent
+ * confidence is treated as 0, so it can never clear the bar by default.
+ */
+const isConfidenceInsufficient = (proposal: Proposal): boolean =>
+  !(typeof proposal.confidence === 'number') ||
+  proposal.confidence < DAYBREAK_APPROVAL_CONFIDENCE_THRESHOLD;
+
+/**
  * Fail-closed readiness gate for proposal status transitions (gap #7,
  * migrated from the daybreak-spike; security-team#17944 readiness stage).
  *
  * When transitioning a proposal to `approved`, the readiness stage requires:
  *   1. At least one evidence reference (non-empty `evidenceRefs` array)
  *   2. A non-null, non-empty `recommendation` string
+ *   3. Worker confidence >= the UNRATIFIED shared threshold
+ *      ({@link DAYBREAK_APPROVAL_CONFIDENCE_THRESHOLD}) — the same value the
+ *      eval harness scores against, so runtime enforcement and the scored
+ *      expectation cannot drift.
  *
  * Approver-count is deliberately NOT checked here — it is the distinct
  * `human-approval` phase owned by {@link evaluateSharedApprovalGate}, so the
@@ -81,6 +95,10 @@ export const evaluateReadinessGate = (
 
   if (isRecommendationMissing(proposal)) {
     missingRequirements.push('recommendation');
+  }
+
+  if (isConfidenceInsufficient(proposal)) {
+    missingRequirements.push('confidence');
   }
 
   if (missingRequirements.length > 0) {

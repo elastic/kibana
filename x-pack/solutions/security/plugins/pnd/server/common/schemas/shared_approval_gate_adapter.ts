@@ -6,7 +6,7 @@
  */
 
 import type { Proposal, ProposalStatus } from './proposal';
-import { evaluateReadinessGate, requireReadinessGate, type MissingRequirement } from './gate';
+import { evaluateReadinessGate, ReadinessGateError, type MissingRequirement } from './gate';
 
 /**
  * Platform Shared Approval Gate seam (security-team#17944).
@@ -91,8 +91,15 @@ export const requireSharedApprovalGate = (
 ): void => {
   const decision = evaluateSharedApprovalGate(proposal, targetStatus);
   if (!decision.allowed) {
-    // Delegates to the readiness gate's error so the thrown type/shape is
-    // identical regardless of which phase failed.
-    requireReadinessGate(proposal, targetStatus);
+    // Throw a ReadinessGateError carrying the ACTUAL failed-phase requirements.
+    // We must NOT re-delegate to `requireReadinessGate` here: a `human-approval`
+    // phase failure (approver-count) passes the readiness gate, so re-delegating
+    // would fail open and silently admit an unapproved proposal. Build the error
+    // from the decision's own `missingRequirements` so every phase fails closed.
+    throw new ReadinessGateError({
+      proposalId: proposal.id,
+      targetStatus: targetStatus ?? 'approved',
+      missingRequirements: decision.missingRequirements ?? [],
+    });
   }
 };

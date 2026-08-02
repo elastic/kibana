@@ -27,6 +27,7 @@
     "@kbn/agent-builder-browser",
     "@kbn/agent-builder-common",
     "@kbn/logging-mocks",
-    "@kbn/scout-security"
+    "@kbn/scout-security",
+    "@kbn/elastic-assistant-common"
   ]
 }
