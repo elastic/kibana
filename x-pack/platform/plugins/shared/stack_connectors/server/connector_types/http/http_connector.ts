@@ -188,14 +188,12 @@ function combineUrl(basePath: string, path?: string): string {
   if (!path) return basePath;
   const url = new URL(basePath);
   const normalizedPath = path.startsWith('/') ? path : `/${path}`;
-  const hashIndex = normalizedPath.indexOf('#');
-  const pathWithoutHash =
-    hashIndex === -1 ? normalizedPath : normalizedPath.slice(0, hashIndex);
-  const queryIndex = pathWithoutHash.indexOf('?');
-  const pathname = queryIndex === -1 ? pathWithoutHash : pathWithoutHash.slice(0, queryIndex);
-  const pathQuery = queryIndex === -1 ? undefined : pathWithoutHash.slice(queryIndex + 1);
+  const queryIndex = normalizedPath.indexOf('?');
+  const pathname = queryIndex === -1 ? normalizedPath : normalizedPath.slice(0, queryIndex);
+  const pathQuery = queryIndex === -1 ? undefined : normalizedPath.slice(queryIndex + 1);
   const baseQueryKeys = new Set(url.searchParams.keys());
 
+  // Keep the query out of URL.pathname, which would encode its `?` delimiter as `%3F`.
   url.pathname = url.pathname.replace(/\/$/, '') + pathname;
   if (pathQuery) {
     const filteredPathQuery = pathQuery
@@ -210,9 +208,6 @@ function combineUrl(basePath: string, path?: string): string {
       const baseQuery = url.search.slice(1);
       url.search = baseQuery ? `?${baseQuery}&${filteredPathQuery}` : `?${filteredPathQuery}`;
     }
-  }
-  if (hashIndex !== -1) {
-    url.hash = normalizedPath.slice(hashIndex);
   }
 
   return url.toString();
@@ -234,6 +229,7 @@ function appendQueryString(baseUrl: string, query?: Record<string, string>): str
 
   const appendedQueryString = appendedQuery.toString();
   if (appendedQueryString) {
+    // Avoid reserializing existing parameters, which would normalize their raw encoding.
     const existingQuery = url.search.slice(1);
     url.search = existingQuery
       ? `?${existingQuery}&${appendedQueryString}`
