@@ -10,7 +10,7 @@ import { tags } from '@kbn/scout';
 import { evaluate } from '../../src/evaluate';
 import { waitForEndpointPackage } from '../../src/data_generators/endpoint_data';
 import { seedForensicTimeline } from '../../src/data_generators/forensic_data';
-import { cleanupSeededData } from '../../src/data_generators/cleanup';
+import { cleanupForensicData } from '../../src/data_generators/cleanup';
 
 const FORENSIC_ESQL_TRAJECTORY = [
   'platform.core.generate_esql',
@@ -20,7 +20,7 @@ const FORENSIC_ESQL_TRAJECTORY = [
 evaluate.describe('Endpoint Forensic Analysis — smoke', { tag: tags.stateful.classic }, () => {
   evaluate.beforeAll(async ({ kbnClient, esClient, internalEsClient, agentBuilderClient, log }) => {
     await waitForEndpointPackage(kbnClient, esClient, log);
-    await cleanupSeededData({ esClient, internalEsClient });
+    await cleanupForensicData({ esClient, internalEsClient });
     await seedForensicTimeline({ esClient }, log);
 
     try {
@@ -34,7 +34,7 @@ evaluate.describe('Endpoint Forensic Analysis — smoke', { tag: tags.stateful.c
   });
 
   evaluate.afterAll(async ({ esClient, internalEsClient }) => {
-    await cleanupSeededData({ esClient, internalEsClient });
+    await cleanupForensicData({ esClient, internalEsClient });
   });
 
   evaluate('patient zero happy path', async ({ evaluateForensicDataset }) => {

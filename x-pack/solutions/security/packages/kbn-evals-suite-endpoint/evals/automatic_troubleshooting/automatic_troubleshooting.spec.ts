@@ -15,7 +15,7 @@ import {
   seedScenario,
   SCENARIOS,
 } from '../../src/data_generators/endpoint_data';
-import { cleanupSeededData } from '../../src/data_generators/cleanup';
+import { cleanupTroubleshootingData } from '../../src/data_generators/cleanup';
 
 const SKILL_PATH = 'skills/security/endpoint/elastic-defend-configuration-troubleshooting/SKILL.md';
 const UNITED_TRANSFORM_WILDCARD = `${METADATA_UNITED_TRANSFORM}*`;
@@ -213,7 +213,7 @@ evaluate.describe('Automatic Troubleshooting', { tag: tags.stateful.classic }, (
     }
 
     const clients = { esClient, internalEsClient };
-    await cleanupSeededData(clients);
+    await cleanupTroubleshootingData(clients);
 
     // waiting for transforms takes a while so seed all scenarios here
     for (const scenario of Object.values(SCENARIOS)) {
@@ -361,6 +361,6 @@ evaluate.describe('Automatic Troubleshooting', { tag: tags.stateful.classic }, (
       ignore_unavailable: true,
     });
 
-    await cleanupSeededData({ esClient, internalEsClient });
+    await cleanupTroubleshootingData({ esClient, internalEsClient });
   });
 });

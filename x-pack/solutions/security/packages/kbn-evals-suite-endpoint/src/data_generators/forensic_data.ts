@@ -24,7 +24,8 @@ import type { ToolingLog } from '@kbn/tooling-log';
  *   controller ransomware + shadow-copy deletion). Every event carries a distinct
  *   `@timestamp` so an ascending sort is a real timeline.
  *
- * Agent ids use the shared `eval-agent-` prefix so cleanupSeededData() reclaims them.
+ * Agent ids use the dedicated `eval-agent-forensic-` prefix so cleanupForensicData()
+ * reclaims them without touching the troubleshooting suite's `eval-agent-*` seeds.
  */
 
 const FORENSIC_AGENT_PREFIX = 'eval-agent-forensic-';
@@ -264,7 +265,8 @@ const KILL_CHAIN: ForensicEvent[] = [
 
 /**
  * Bulk-index the ordered kill chain into `logs-endpoint.events.*`. Idempotent when
- * paired with cleanupSeededData() in beforeAll (which reclaims by `eval-agent-` prefix).
+ * paired with cleanupForensicData() in beforeAll (which reclaims by the
+ * `eval-agent-forensic-` prefix only, leaving troubleshooting seeds intact).
  */
 export async function seedForensicTimeline(
   { esClient }: { esClient: Client },
