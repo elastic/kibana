@@ -60,7 +60,7 @@ describe('queryNotifications', () => {
             bool: {
               filter: [
                 { terms: { severity: ['info'] } },
-                { range: { '@timestamp': { gte: 'now-30d' } } },
+                { range: { '@timestamp': { gte: 'now-30d/d' } } },
               ],
             },
           },
