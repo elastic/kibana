@@ -913,6 +913,7 @@
     "@kbn/ml-ui-actions": "link:x-pack/platform/packages/private/ml/ui_actions",
     "@kbn/ml-url-state": "link:x-pack/platform/packages/private/ml/url_state",
     "@kbn/ml-validators": "link:x-pack/platform/packages/private/ml/validators",
+    "@kbn/mock-llm-plugin": "link:x-pack/platform/plugins/private/mock_llm",
     "@kbn/monaco": "link:src/platform/packages/shared/kbn-monaco",
     "@kbn/monitoring-collection-plugin": "link:x-pack/platform/plugins/private/monitoring_collection",
     "@kbn/monitoring-plugin": "link:x-pack/platform/plugins/private/monitoring",

@@ -1,0 +1,13 @@
+{
+  "type": "plugin",
+  "id": "@kbn/mock-llm-plugin",
+  "owner": "@elastic/kibana-core",
+  "group": "platform",
+  "visibility": "private",
+  "description": "Server-only mock LLM that emulates an OpenAI-compatible chat completions API. Used for QA/load testing of the .gen-ai connector and agent flows; returns canned (optionally delayed) responses and never talks to a real model.",
+  "plugin": {
+    "id": "mockLlm",
+    "server": true,
+    "browser": false
+  }
+}

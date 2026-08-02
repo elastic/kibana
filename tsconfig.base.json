@@ -1839,6 +1839,8 @@
       "@kbn/mock-idp-plugin/*": ["./packages/kbn-mock-idp-plugin/*"],
       "@kbn/mock-idp-utils": ["./src/platform/packages/private/kbn-mock-idp-utils"],
       "@kbn/mock-idp-utils/*": ["./src/platform/packages/private/kbn-mock-idp-utils/*"],
+      "@kbn/mock-llm-plugin": ["./x-pack/platform/plugins/private/mock_llm"],
+      "@kbn/mock-llm-plugin/*": ["./x-pack/platform/plugins/private/mock_llm/*"],
       "@kbn/monaco": ["./src/platform/packages/shared/kbn-monaco"],
       "@kbn/monaco/*": ["./src/platform/packages/shared/kbn-monaco/*"],
       "@kbn/monitoring-collection-plugin": ["./x-pack/platform/plugins/private/monitoring_collection"],
