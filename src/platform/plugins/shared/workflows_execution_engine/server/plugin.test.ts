@@ -771,6 +771,93 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
         })
       );
     });
+
+    it('does not reap prior-taskRunAt PENDING when TM still has active work (promoted backlog)', async () => {
+      // Queue drain promotes QUEUED→PENDING while keeping the backlog item's older taskRunAt
+      // and starts it via workflow:run; that PENDING must not be treated as an orphan.
+      const priorRunAt = new Date('2024-01-01T09:00:00Z').toISOString();
+      const hasActiveTaskForExecution = jest.fn().mockResolvedValue(true);
+      esClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            {
+              _source: {
+                id: 'promoted-queued-id',
+                workflowId: workflow.id,
+                spaceId,
+                status: ExecutionStatus.PENDING,
+                triggeredBy: 'scheduled',
+                taskRunAt: priorRunAt,
+              },
+            },
+          ],
+          total: { value: 1, relation: 'eq' },
+        },
+      } as any);
+
+      const result = await checkAndSkipIfExistingScheduledExecution(
+        workflow,
+        spaceId,
+        workflowExecutionRepository,
+        stepExecutionRepository,
+        currentTaskInstance,
+        logger,
+        { createSkippedForInFlightDuplicates: false, hasActiveTaskForExecution }
+      );
+
+      expect(result).toBe(false);
+      expect(hasActiveTaskForExecution).toHaveBeenCalledWith('promoted-queued-id');
+      expect(esClient.update).not.toHaveBeenCalled();
+      expect(esClient.index).not.toHaveBeenCalled();
+      expect(logger.debug).toHaveBeenCalledWith(
+        expect.stringContaining('still has active Task Manager work')
+      );
+    });
+
+    it('still reaps prior-taskRunAt PENDING when TM has no active work for the execution', async () => {
+      const priorRunAt = new Date('2024-01-01T09:00:00Z').toISOString();
+      const hasActiveTaskForExecution = jest.fn().mockResolvedValue(false);
+      esClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            {
+              _source: {
+                id: 'orphan-pending-id',
+                workflowId: workflow.id,
+                spaceId,
+                status: ExecutionStatus.PENDING,
+                triggeredBy: 'scheduled',
+                taskRunAt: priorRunAt,
+              },
+            },
+          ],
+          total: { value: 1, relation: 'eq' },
+        },
+      } as any);
+      esClient.update.mockResolvedValue({} as any);
+
+      const result = await checkAndSkipIfExistingScheduledExecution(
+        workflow,
+        spaceId,
+        workflowExecutionRepository,
+        stepExecutionRepository,
+        currentTaskInstance,
+        logger,
+        { createSkippedForInFlightDuplicates: false, hasActiveTaskForExecution }
+      );
+
+      expect(result).toBe(false);
+      expect(hasActiveTaskForExecution).toHaveBeenCalledWith('orphan-pending-id');
+      expect(esClient.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'orphan-pending-id',
+          refresh: 'wait_for',
+          doc: expect.objectContaining({
+            status: ExecutionStatus.FAILED,
+          }),
+        })
+      );
+    });
   });
 
   describe('createSkippedForInFlightDuplicates: false (concurrency workflows)', () => {

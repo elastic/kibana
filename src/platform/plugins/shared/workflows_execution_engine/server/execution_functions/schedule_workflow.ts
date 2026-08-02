@@ -23,9 +23,15 @@ export interface CheckExistingScheduledExecutionOptions {
    * (different `taskRunAt`) is still non-terminal.
    * When false (workflows with concurrency `key` + `strategy`), leave in-flight overlap
    * to the concurrency check so strategies like `cancel-in-progress` still apply.
-   * Stale same-`taskRunAt` recovery and past-tick abandoned `pending` reaping always run.
+   * Stale same-`taskRunAt` recovery always runs. Past-tick abandoned `pending` reaping
+   * runs unless Task Manager still has active work scoped to that execution (e.g.
+   * queue-promoted backlog with a dormant/`runSoon`'d `workflow:run`).
    */
   createSkippedForInFlightDuplicates?: boolean;
+  /**
+   * Optional: whether TM still has idle/claiming/running work for this execution scope.
+   */
+  hasActiveTaskForExecution?: (executionId: string) => Promise<boolean>;
 }
 
 /**
@@ -47,7 +53,9 @@ export interface CheckExistingScheduledExecutionOptions {
  *   → This stale path always runs when invoked, including for workflows with valid concurrency settings
  *
  * - If execution is still `pending` and `taskRunAt` differs from current `runAt`:
- *   → Never-started orphan from a prior tick; mark FAILED and proceed (one reap per tick)
+ *   → Candidate never-started orphan from a prior tick. If a bound `workflow:run` task
+ *     exists (queue-promoted backlog waiting to claim), leave it alone and fall through.
+ *   → Otherwise mark FAILED and proceed (one reap per tick).
  *
  * - If execution's `taskRunAt` differs from current task's `runAt` (in-flight work):
  *   → When `createSkippedForInFlightDuplicates` is true: skip current run (create SKIPPED)
@@ -66,7 +74,7 @@ export async function checkAndSkipIfExistingScheduledExecution(
   logger: Logger,
   options: CheckExistingScheduledExecutionOptions = {}
 ): Promise<boolean> {
-  const { createSkippedForInFlightDuplicates = true } = options;
+  const { createSkippedForInFlightDuplicates = true, hasActiveTaskForExecution } = options;
 
   // Check if there's already a scheduled workflow execution in non-terminal state
   const runningExecutions = await workflowExecutionRepository.getRunningExecutionsByWorkflowId(
@@ -121,30 +129,43 @@ export async function checkAndSkipIfExistingScheduledExecution(
     }
 
     // Never-started orphan from a prior schedule claim — free the slot and proceed
-    // (one reap per tick). Task Manager only advances `runAt` after that claim
-    // finishes, so `PENDING` + a different `taskRunAt` means the earlier claim
-    // created the doc but never started it and will not retry that `runAt`.
-    const isAbandonedNeverStartedPending =
+    // (one reap per tick). TM only advances `runAt` after that claim finishes, so
+    // `PENDING` + a different `taskRunAt` usually means the earlier claim created the
+    // doc but never started it. Exception: queue drain promotes QUEUED→PENDING while
+    // keeping the backlog `taskRunAt` and leaving a scoped `workflow:run` task — if TM
+    // still has active work for that execution, it is live backlog, not an orphan.
+    const isAbandonedNeverStartedPendingCandidate =
       existingExecution.status === ExecutionStatus.PENDING &&
       executionTaskRunAt != null &&
       currentTaskRunAt != null &&
       executionTaskRunAt !== currentTaskRunAt;
 
-    if (isAbandonedNeverStartedPending) {
-      logger.warn(
-        `Found abandoned pending execution ${existingExecution.id} from a prior scheduled run ` +
-          `(taskRunAt: ${executionTaskRunAt}, current taskRunAt: ${currentTaskRunAt}) - marking as failed and proceeding`
-      );
-      await markExecutionFailedTaskRecovery(
-        workflowExecutionRepository,
-        stepExecutionRepository,
-        existingExecution.id,
-        {
-          message: taskRecoveryMessages.scheduledAbandonedPending,
-        },
-        { refresh: 'wait_for' }
-      );
-      return false;
+    if (isAbandonedNeverStartedPendingCandidate) {
+      const hasActiveTask = hasActiveTaskForExecution
+        ? await hasActiveTaskForExecution(existingExecution.id)
+        : false;
+
+      if (hasActiveTask) {
+        logger.debug(
+          `Prior-tick pending execution ${existingExecution.id} still has active Task Manager work ` +
+            `(taskRunAt: ${executionTaskRunAt}); not treating as abandoned orphan`
+        );
+      } else {
+        logger.warn(
+          `Found abandoned pending execution ${existingExecution.id} from a prior scheduled run ` +
+            `(taskRunAt: ${executionTaskRunAt}, current taskRunAt: ${currentTaskRunAt}) - marking as failed and proceeding`
+        );
+        await markExecutionFailedTaskRecovery(
+          workflowExecutionRepository,
+          stepExecutionRepository,
+          existingExecution.id,
+          {
+            message: taskRecoveryMessages.scheduledAbandonedPending,
+          },
+          { refresh: 'wait_for' }
+        );
+        return false;
+      }
     }
 
     if (!createSkippedForInFlightDuplicates) {

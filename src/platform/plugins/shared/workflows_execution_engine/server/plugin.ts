@@ -533,6 +533,7 @@ export class WorkflowsExecutionEnginePlugin
               const deferInFlightDuplicatesToConcurrency = Boolean(
                 concurrency?.key?.trim() && concurrency?.strategy
               );
+              const workflowTaskManager = new WorkflowTaskManager(pluginsStart.taskManager);
               const wasSkipped = await checkAndSkipIfExistingScheduledExecution(
                 workflow,
                 spaceId,
@@ -542,6 +543,8 @@ export class WorkflowsExecutionEnginePlugin
                 logger,
                 {
                   createSkippedForInFlightDuplicates: !deferInFlightDuplicatesToConcurrency,
+                  hasActiveTaskForExecution: (executionId) =>
+                    workflowTaskManager.hasActiveTaskForExecution(executionId),
                 }
               );
               if (wasSkipped) {
@@ -613,7 +616,7 @@ export class WorkflowsExecutionEnginePlugin
               await maybeDrainConcurrencyQueueBeforeEnqueue({
                 workflowExecution,
                 workflowExecutionRepository,
-                workflowTaskManager: new WorkflowTaskManager(pluginsStart.taskManager),
+                workflowTaskManager,
                 logger,
                 failureLogLabel: 'Scheduled workflow concurrency queue drain failed',
               });
@@ -634,7 +637,7 @@ export class WorkflowsExecutionEnginePlugin
                       spaceId: workflowExecution.spaceId,
                       request: fakeRequest,
                       workflowExecutionRepository,
-                      workflowTaskManager: new WorkflowTaskManager(pluginsStart.taskManager),
+                      workflowTaskManager,
                       internalResumeWorkflowExecution: this.internalResumeWorkflowExecutionHandler,
                       logger,
                     });
