@@ -1,5 +1,5 @@
 {
-  "sha1": "c07423ce307ea6fadd463c58d365a079cf3bb5a1",
+  "sha1": "5ae814a07c714add80860b8b3bc829d02d1b106f",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -15,8 +15,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/private/event_annotation_listing/test/scout/ui/parallel_tests/annotation_listing_delete.spec.ts",
-        "line": 36,
-        "column": 14
+        "line": 32,
+        "column": 42
       }
     },
     {
@@ -29,8 +29,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/private/event_annotation_listing/test/scout/ui/parallel_tests/annotation_listing.spec.ts",
-        "line": 41,
-        "column": 12
+        "line": 37,
+        "column": 59
       }
     },
     {
@@ -43,8 +43,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/private/event_annotation_listing/test/scout/ui/parallel_tests/annotation_listing.spec.ts",
-        "line": 47,
-        "column": 12
+        "line": 39,
+        "column": 5
       }
     },
     {
@@ -57,8 +57,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/private/event_annotation_listing/test/scout/ui/parallel_tests/annotation_listing.spec.ts",
-        "line": 58,
-        "column": 12
+        "line": 47,
+        "column": 13
       }
     },
     {
@@ -71,8 +71,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/private/event_annotation_listing/test/scout/ui/parallel_tests/annotation_listing.spec.ts",
-        "line": 83,
-        "column": 12
+        "line": 65,
+        "column": 18
       }
     },
     {
@@ -85,8 +85,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/private/event_annotation_listing/test/scout/ui/parallel_tests/annotation_listing.spec.ts",
-        "line": 95,
-        "column": 12
+        "line": 77,
+        "column": 18
       }
     }
   ]
