@@ -184,7 +184,7 @@ describe('tab_state actions', () => {
       expect(tab.appState.expandedDoc).toBeUndefined();
     });
 
-    it('should write a reference for ES|QL queries requesting the metadata columns', async () => {
+    it('should write a reference for an ES|QL document carrying _id/_index', async () => {
       const { internalState, tabId } = await setup();
 
       setQuery(internalState, tabId, { esql: 'FROM logs METADATA _id, _index' });
@@ -196,11 +196,19 @@ describe('tab_state actions', () => {
       });
     });
 
-    it('should not write a reference for ES|QL queries without the metadata columns', async () => {
+    it('should not write a reference for an ES|QL document without _id/_index', async () => {
       const { internalState, tabId } = await setup();
+      // Checked on the document itself rather than the query text: a plain "FROM logs" query
+      // without METADATA never produces rows carrying these fields in the first place
+      const esqlRecordWithoutMetadata = buildDataTableRecord(
+        { _source: { message: 'no metadata' } },
+        dataViewMockWithTimeField
+      );
 
       setQuery(internalState, tabId, { esql: 'FROM logs' });
-      internalState.dispatch(internalStateActions.setExpandedDoc({ tabId, expandedDoc }));
+      internalState.dispatch(
+        internalStateActions.setExpandedDoc({ tabId, expandedDoc: esqlRecordWithoutMetadata })
+      );
 
       expect(selectTab(internalState.getState(), tabId).appState.expandedDoc).toBeUndefined();
     });

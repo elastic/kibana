@@ -9,21 +9,20 @@
 
 import { lastValueFrom } from 'rxjs';
 import { zipObject } from 'lodash';
-import type { AggregateQuery, Query } from '@kbn/es-query';
-import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DatatableRow } from '@kbn/expressions-plugin/common';
 import { buildDataTableRecord, getDocId } from '@kbn/discover-utils';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
-import { escapeStringValue, formatEsqlIdentifier, getESQLResults } from '@kbn/esql-utils';
+import { escapeStringValue, getESQLResults, getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { buildSearchBody } from '@kbn/unified-doc-viewer-plugin/public';
 import type { ExpandedDocRef } from '../../../../common/expanded_doc';
 
 export interface FetchExpandedDocParams {
   ref: ExpandedDocRef;
   dataView: DataView;
-  query: Query | AggregateQuery | undefined;
+  /** The current query's ES|QL text, or `undefined` when it is a data view query */
+  esqlQueryText: string | undefined;
   data: DataPublicPluginStart;
   abortSignal: AbortSignal;
 }
@@ -36,7 +35,7 @@ export interface FetchExpandedDocParams {
 export const fetchExpandedDoc = async (
   params: FetchExpandedDocParams
 ): Promise<DataTableRecord | undefined> =>
-  isOfAggregateQueryType(params.query) ? fetchEsqlExpandedDoc(params) : fetchDslExpandedDoc(params);
+  params.esqlQueryText === undefined ? fetchDslExpandedDoc(params) : fetchEsqlExpandedDoc(params);
 
 const fetchDslExpandedDoc = async ({
   ref,
@@ -62,13 +61,18 @@ const fetchDslExpandedDoc = async ({
 
 const fetchEsqlExpandedDoc = async ({
   ref,
+  esqlQueryText,
   data,
   abortSignal,
 }: FetchExpandedDocParams): Promise<DataTableRecord | undefined> => {
-  // Deliberately a standalone query rather than the user's with a filter applied, so the document
-  // is found regardless of the time range, sort, limit, and filtering of the current results
-  const esqlQuery = `FROM ${formatEsqlIdentifier(ref.index)} METADATA _index, _id
-| WHERE _id == ${escapeStringValue(ref.id)}
+  // Backing indices of a data stream cannot be queried directly, so this reuses the index
+  // pattern the current query already resolves against (e.g. `logs-*`) rather than `ref.index`,
+  // and filters for the specific document instead. Deliberately a standalone query rather than
+  // the user's with a filter applied, so the document is found regardless of the time range,
+  // sort, limit, and filtering of the current results.
+  const indexPattern = getIndexPatternFromESQLQuery(esqlQueryText);
+  const esqlQuery = `FROM ${indexPattern} METADATA _index, _id
+| WHERE _index == ${escapeStringValue(ref.index)} AND _id == ${escapeStringValue(ref.id)}
 | LIMIT 1`;
 
   const { response } = await getESQLResults({

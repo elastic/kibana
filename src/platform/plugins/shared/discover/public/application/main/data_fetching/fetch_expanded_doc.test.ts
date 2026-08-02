@@ -36,7 +36,7 @@ describe('fetchExpandedDoc', () => {
       const record = await fetchExpandedDoc({
         ref,
         dataView: dataViewMock,
-        query: { query: '', language: 'kuery' },
+        esqlQueryText: undefined,
         data,
         abortSignal: new AbortController().signal,
       });
@@ -54,7 +54,7 @@ describe('fetchExpandedDoc', () => {
       const record = await fetchExpandedDoc({
         ref,
         dataView: dataViewMock,
-        query: { query: '', language: 'kuery' },
+        esqlQueryText: undefined,
         data,
         abortSignal: new AbortController().signal,
       });
@@ -75,21 +75,23 @@ describe('fetchExpandedDoc', () => {
       },
     };
 
-    it('queries the document index directly rather than reusing the current query', async () => {
+    it('queries the index pattern from the current query rather than the backing index directly', async () => {
       const { data, getSearchParams } = setup(esqlResponse);
 
       await fetchExpandedDoc({
         ref,
         dataView: dataViewMock,
-        query: { esql: 'FROM logs-* METADATA _id, _index | WHERE a == 1 | LIMIT 10' },
+        esqlQueryText: 'FROM logs-* METADATA _id, _index | WHERE a == 1 | LIMIT 10',
         data,
         abortSignal: new AbortController().signal,
       });
 
-      // Standalone so the document is found regardless of the time range, sort, limit and
-      // filtering of the current results
+      // Backing indices of a data stream cannot be queried directly, so this reuses the index
+      // pattern rather than `ref.index`, and filters for the document instead. Standalone, and
+      // without the current query's own filtering, so the document is found regardless of the
+      // time range, sort, limit and filtering of the current results.
       expect(getSearchParams().params.query).toBe(
-        `FROM \`${ref.index}\` METADATA _index, _id\n| WHERE _id == "${ref.id}"\n| LIMIT 1`
+        `FROM logs-* METADATA _index, _id\n| WHERE _index == "${ref.index}" AND _id == "${ref.id}"\n| LIMIT 1`
       );
     });
 
@@ -99,7 +101,7 @@ describe('fetchExpandedDoc', () => {
       const record = await fetchExpandedDoc({
         ref,
         dataView: dataViewMock,
-        query: { esql: 'FROM logs-* METADATA _id, _index' },
+        esqlQueryText: 'FROM logs-* METADATA _id, _index',
         data,
         abortSignal: new AbortController().signal,
       });
@@ -116,7 +118,7 @@ describe('fetchExpandedDoc', () => {
       const record = await fetchExpandedDoc({
         ref,
         dataView: dataViewMock,
-        query: { esql: 'FROM logs-* METADATA _id, _index' },
+        esqlQueryText: 'FROM logs-* METADATA _id, _index',
         data,
         abortSignal: new AbortController().signal,
       });

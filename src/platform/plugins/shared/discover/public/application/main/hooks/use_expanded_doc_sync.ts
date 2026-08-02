@@ -10,14 +10,11 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
+import { isOfAggregateQueryType } from '@kbn/es-query';
+import { hasTransformationalCommand } from '@kbn/esql-utils';
 import { ElasticRequestState } from '@kbn/unified-doc-viewer';
 import { fetchExpandedDoc } from '../data_fetching/fetch_expanded_doc';
-import {
-  ExpandedDocLinkability,
-  getExpandedDocLinkability,
-  getExpandedDocRef,
-  matchesExpandedDocRef,
-} from '../../../../common/expanded_doc';
+import { getExpandedDocRef, matchesExpandedDocRef } from '../../../../common/expanded_doc';
 import {
   DEFAULT_EXPANDED_DOC_OWNER,
   internalStateActions,
@@ -98,10 +95,13 @@ export const useExpandedDocSync = ({
     !expandedDoc ||
     (expandedDocOwner === DEFAULT_EXPANDED_DOC_OWNER && Boolean(getExpandedDocRef(expandedDoc)));
 
-  // The URL only governs the flyout while the current query can produce a linkable document.
-  // Otherwise the flyout is purely local state, which is how ES|QL behaved before deep linking.
-  const isLinkable = useMemo(
-    () => getExpandedDocLinkability(query) === ExpandedDocLinkability.Linkable,
+  // A transformational query derives its rows, so they never correspond to a document that can be
+  // refetched by reference, regardless of what a specific row happens to carry. This is checked
+  // against the query alone, since it must gate fetching a document that has not resolved yet.
+  // Whether a specific resolved document actually carries `_id`/`_index` is handled separately by
+  // `isRestorable` below, which is what keeps the URL from governing non-linkable documents.
+  const isEsqlTransformational = useMemo(
+    () => isOfAggregateQueryType(query) && hasTransformationalCommand(query.esql),
     [query]
   );
 
@@ -123,13 +123,17 @@ export const useExpandedDocSync = ({
   const resolvedDoc = rowFromResults ?? fetchedDocForRef;
 
   const shouldFetch =
-    Boolean(expandedDocRef) && !isRefResolved && !resolvedDoc && isRestorable && isLinkable;
-  const shouldClear = !expandedDocRef && Boolean(expandedDoc) && isRestorable && isLinkable;
+    Boolean(expandedDocRef) &&
+    !isRefResolved &&
+    !resolvedDoc &&
+    isRestorable &&
+    !isEsqlTransformational;
+  const shouldClear =
+    !expandedDocRef && Boolean(expandedDoc) && isRestorable && !isEsqlTransformational;
 
-  // Editing the query can strip the metadata columns or make it transformational, stranding a
-  // reference that can no longer be resolved. Drop it without closing the open flyout, which the
-  // user has not asked to dismiss.
-  const shouldClearRef = Boolean(expandedDocRef) && !isLinkable;
+  // Editing the query to become transformational strands a reference that can no longer be
+  // resolved. Drop it without closing the open flyout, which the user has not asked to dismiss.
+  const shouldClearRef = Boolean(expandedDocRef) && isEsqlTransformational;
 
   useEffect(() => {
     if (shouldClear) {
@@ -143,10 +147,12 @@ export const useExpandedDocSync = ({
     }
   }, [dispatch, shouldClearRef, updateAppState]);
 
-  // Depend on the reference values rather than the object, since URL syncing produces a new
-  // object on every parse and would otherwise refetch on unrelated state changes
+  // Depend on the reference values and the ES|QL text rather than the `query` object itself,
+  // since app state syncing produces a new object on every parse and would otherwise restart the
+  // fetch on unrelated state changes
   const docId = expandedDocRef?.id;
   const docIndex = expandedDocRef?.index;
+  const esqlQueryText = isOfAggregateQueryType(query) ? query.esql : undefined;
 
   useEffect(() => {
     if (!shouldFetch || !docId || !docIndex) {
@@ -162,10 +168,16 @@ export const useExpandedDocSync = ({
         const record = await fetchExpandedDoc({
           ref: { id: docId, index: docIndex },
           dataView,
-          query,
+          esqlQueryText,
           data,
           abortSignal: abortController.signal,
         });
+
+        // A superseded request can still resolve after a newer one has already reported its own
+        // result, and applying it here would clobber that result with a stale one
+        if (abortController.signal.aborted) {
+          return;
+        }
 
         if (!record) {
           setRequestState(ElasticRequestState.NotFound);
@@ -186,7 +198,7 @@ export const useExpandedDocSync = ({
     return () => {
       abortController.abort();
     };
-  }, [data, dataView, docId, docIndex, query, scopedProfilesManager, shouldFetch]);
+  }, [data, dataView, docId, docIndex, esqlQueryText, scopedProfilesManager, shouldFetch]);
 
   // The only place the expanded document is written, so whichever request finishes first cannot
   // clobber the other: the preference above is applied on every render regardless of ordering

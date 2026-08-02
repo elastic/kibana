@@ -10,7 +10,7 @@
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { type AggregateQuery, type Query, isOfAggregateQueryType } from '@kbn/es-query';
-import { hasTransformationalCommand, retrieveMetadataColumns } from '@kbn/esql-utils';
+import { hasTransformationalCommand } from '@kbn/esql-utils';
 
 /**
  * Identifies the document expanded in the doc viewer flyout, so it can be captured
@@ -56,15 +56,19 @@ export enum ExpandedDocLinkability {
 }
 
 /**
- * Determines whether the documents a query returns are deep linkable.
+ * Determines whether a specific expanded document is deep linkable.
  *
- * Data view queries always are, since every document has an `_id` and `_index`. ES|QL only
- * qualifies when the query asks for those via `METADATA` and does not transform its rows, and
- * both must hold: a transformational query can still carry `_id` through (e.g. via `KEEP`) while
- * producing rows that cannot be resolved back to a document.
+ * Data view documents always are, since every document has an `_id` and `_index`. ES|QL rows
+ * only qualify when the query does not transform its rows (a transformational query can still
+ * carry `_id` through, e.g. via `KEEP`, while producing rows that cannot be resolved back to a
+ * document) and the document itself actually carries `_id`/`_index`, which is checked directly
+ * on the document rather than by inspecting whether the query requests `METADATA` - a query edit
+ * does not retroactively add the fields to a document expanded before the edit, and the fetch
+ * used to restore a link does not depend on the current query requesting them either.
  */
 export const getExpandedDocLinkability = (
-  query: Query | AggregateQuery | undefined
+  query: Query | AggregateQuery | undefined,
+  doc: DataTableRecord | undefined
 ): ExpandedDocLinkability => {
   if (!isOfAggregateQueryType(query)) {
     return ExpandedDocLinkability.Linkable;
@@ -74,9 +78,7 @@ export const getExpandedDocLinkability = (
     return ExpandedDocLinkability.EsqlTransformational;
   }
 
-  const metadataColumns = retrieveMetadataColumns(query.esql);
-
-  return metadataColumns.includes('_id') && metadataColumns.includes('_index')
+  return getExpandedDocRef(doc)
     ? ExpandedDocLinkability.Linkable
     : ExpandedDocLinkability.EsqlMissingMetadata;
 };

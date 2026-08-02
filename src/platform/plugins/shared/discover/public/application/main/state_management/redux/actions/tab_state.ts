@@ -142,9 +142,10 @@ export const setExpandedDoc: InternalStateThunkActionCreator<[ExpandedDocPayload
     const { appState } = selectTab(getState(), tabId);
 
     // A query whose rows cannot be resolved back to documents must not produce a reference, even
-    // when its rows happen to carry the metadata columns
+    // when its rows happen to carry the metadata columns, and neither should a document that
+    // itself lacks `_id`/`_index` (e.g. fetched under an earlier, non-linkable query)
     const nextExpandedDocRef =
-      getExpandedDocLinkability(appState.query) === ExpandedDocLinkability.Linkable
+      getExpandedDocLinkability(appState.query, expandedDoc) === ExpandedDocLinkability.Linkable
         ? getExpandedDocRef(expandedDoc)
         : undefined;
 

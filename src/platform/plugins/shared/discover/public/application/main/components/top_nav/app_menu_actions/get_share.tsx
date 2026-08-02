@@ -71,7 +71,7 @@ const getExpandedDocHelpText = ({
   }
 
   const disabledReason = getExpandedDocLinkDisabledReason(
-    getExpandedDocLinkability(currentTab.appState.query)
+    getExpandedDocLinkability(currentTab.appState.query, currentTab.expandedDoc)
   );
 
   // The link cannot capture the document at all, which matters more than how its time range is

@@ -44,37 +44,46 @@ describe('matchesExpandedDocRef', () => {
 });
 
 describe('getExpandedDocLinkability', () => {
-  it('treats data view queries as linkable', () => {
-    expect(getExpandedDocLinkability(undefined)).toBe(ExpandedDocLinkability.Linkable);
-    expect(getExpandedDocLinkability({ query: 'response:200', language: 'kuery' })).toBe(
-      ExpandedDocLinkability.Linkable
-    );
-  });
+  const docWithMetadata = buildDataTableRecord({ _id: '1', _index: 'i' }, dataViewMock);
+  const docWithoutMetadata = buildDataTableRecord(
+    { _source: { message: 'no metadata' } },
+    dataViewMock
+  );
 
-  it('treats ES|QL queries requesting both metadata columns as linkable', () => {
-    expect(getExpandedDocLinkability({ esql: 'FROM logs METADATA _id, _index' })).toBe(
-      ExpandedDocLinkability.Linkable
-    );
+  it('treats data view documents as linkable regardless of the document', () => {
+    expect(getExpandedDocLinkability(undefined, undefined)).toBe(ExpandedDocLinkability.Linkable);
     expect(
-      getExpandedDocLinkability({ esql: 'FROM logs METADATA _index, _id | WHERE a == 1' })
+      getExpandedDocLinkability({ query: 'response:200', language: 'kuery' }, docWithoutMetadata)
     ).toBe(ExpandedDocLinkability.Linkable);
   });
 
-  it('reports ES|QL queries missing metadata columns', () => {
-    expect(getExpandedDocLinkability({ esql: 'FROM logs' })).toBe(
-      ExpandedDocLinkability.EsqlMissingMetadata
-    );
-    expect(getExpandedDocLinkability({ esql: 'FROM logs METADATA _id' })).toBe(
+  it('reports an ES|QL document carrying _id/_index as linkable', () => {
+    expect(
+      getExpandedDocLinkability({ esql: 'FROM logs METADATA _id, _index' }, docWithMetadata)
+    ).toBe(ExpandedDocLinkability.Linkable);
+  });
+
+  it('reports an ES|QL document missing _id/_index as unlinkable', () => {
+    // Checked on the document itself rather than the query text, since a query edit does not
+    // retroactively add the fields to a document expanded before the edit, and the fetch used to
+    // restore a link does not depend on the current query requesting them either
+    expect(
+      getExpandedDocLinkability({ esql: 'FROM logs METADATA _id, _index' }, docWithoutMetadata)
+    ).toBe(ExpandedDocLinkability.EsqlMissingMetadata);
+    expect(getExpandedDocLinkability({ esql: 'FROM logs' }, undefined)).toBe(
       ExpandedDocLinkability.EsqlMissingMetadata
     );
   });
 
-  it('reports transformational ES|QL queries even when they carry the metadata columns', () => {
-    expect(getExpandedDocLinkability({ esql: 'FROM logs | STATS count() BY host' })).toBe(
-      ExpandedDocLinkability.EsqlTransformational
-    );
+  it('reports a transformational ES|QL query as unlinkable regardless of the document', () => {
     expect(
-      getExpandedDocLinkability({ esql: 'FROM logs METADATA _id, _index | KEEP _id, _index, host' })
+      getExpandedDocLinkability({ esql: 'FROM logs | STATS count() BY host' }, docWithMetadata)
+    ).toBe(ExpandedDocLinkability.EsqlTransformational);
+    expect(
+      getExpandedDocLinkability(
+        { esql: 'FROM logs METADATA _id, _index | KEEP _id, _index, host' },
+        docWithMetadata
+      )
     ).toBe(ExpandedDocLinkability.EsqlTransformational);
   });
 });

@@ -78,8 +78,8 @@ const DiscoverDocumentFlyoutComponent = ({
   });
   const { copyLink, isCopyingLink } = useCopyExpandedDocLink({ dataView });
   const copyLinkDisabledReason = useMemo(
-    () => getExpandedDocLinkDisabledReason(getExpandedDocLinkability(query)),
-    [query]
+    () => getExpandedDocLinkDisabledReason(getExpandedDocLinkability(query, expandedDoc)),
+    [query, expandedDoc]
   );
 
   const setExpandedDoc = useCurrentTabAction(internalStateActions.setExpandedDoc);

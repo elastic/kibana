@@ -347,6 +347,11 @@ describe('getShare', () => {
       });
 
     const expandedDoc = buildDataTableRecord({ _id: '1', _index: 'i' }, dataViewMock);
+    // An ES|QL row without METADATA requested never carries these fields in the first place
+    const expandedDocWithoutMetadata = buildDataTableRecord(
+      { _source: { message: 'no metadata' } },
+      dataViewMock
+    );
 
     const setExpandedDoc = (doc: DataTableRecord | undefined) => {
       toolkit.internalState.dispatch(
@@ -408,9 +413,9 @@ describe('getShare', () => {
       expect(await getHelpTextProps()).toBeUndefined();
     });
 
-    it('explains when an ES|QL query is missing the metadata columns', async () => {
+    it('explains when the expanded document is missing _id/_index', async () => {
       setQuery({ esql: 'FROM logs' });
-      setExpandedDoc(expandedDoc);
+      setExpandedDoc(expandedDocWithoutMetadata);
 
       const props = await getHelpTextProps();
 
@@ -436,7 +441,7 @@ describe('getShare', () => {
       // to say about it
       setQuery({ esql: 'FROM logs' });
       setTimeRange({ from: 'now-15m', to: 'now' });
-      setExpandedDoc(expandedDoc);
+      setExpandedDoc(expandedDocWithoutMetadata);
 
       expect((await getHelpTextProps())?.title).toBe('This link cannot include the open document');
     });
