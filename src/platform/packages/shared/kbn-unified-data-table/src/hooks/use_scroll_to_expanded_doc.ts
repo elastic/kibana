@@ -20,6 +20,13 @@ import type { DataGridPaginationMode } from '../types';
  */
 const MAX_SCROLL_ATTEMPTS = 60;
 
+/**
+ * How long to keep the expanded row centered after reaching it, covering the reflow caused by
+ * the doc viewer opening alongside the grid. Kept short so that resizing the window later, or
+ * after scrolling elsewhere, does not pull the grid back to the expanded row.
+ */
+const SCROLL_SETTLE_DURATION = 500;
+
 type ScrollAttemptResult =
   /** The row was brought into view */
   | 'scrolled'
@@ -116,13 +123,43 @@ export const useScrollToExpandedDoc = ({
     }
 
     let frameId: number;
+    let settleTimeoutId: ReturnType<typeof setTimeout>;
+    let observer: ResizeObserver | undefined;
     let remainingAttempts = MAX_SCROLL_ATTEMPTS;
+
+    const stop = () => {
+      cancelAnimationFrame(frameId);
+      clearTimeout(settleTimeoutId);
+      observer?.disconnect();
+    };
+
+    // Opening the doc viewer narrows the grid, which re-wraps rows into taller ones and moves the
+    // expanded row back out of view. That reflow lands over several frames, so hold the row in
+    // place until it is done, then stop: later resizes are the user's own and must not yank them
+    // back to a row they have since scrolled or paged away from.
+    const holdRowCenteredWhileSettling = () => {
+      const scrollContainer = dataGridWrapper?.querySelector<HTMLElement>(VIRTUALIZED_SELECTOR);
+
+      if (!scrollContainer) {
+        return;
+      }
+
+      observer = new ResizeObserver(() => {
+        cancelAnimationFrame(frameId);
+        // Row heights are measured after the resize, so wait for that before re-centering
+        frameId = requestAnimationFrame(centerExpandedRow);
+      });
+
+      observer.observe(scrollContainer);
+      settleTimeoutId = setTimeout(stop, SCROLL_SETTLE_DURATION);
+    };
 
     const attemptScroll = () => {
       const result = centerExpandedRow();
 
       if (result === 'scrolled') {
         scrolledToDocId.current = expandedDoc.id;
+        holdRowCenteredWhileSettling();
       } else if (result === 'retry' && (remainingAttempts -= 1) > 0) {
         frameId = requestAnimationFrame(attemptScroll);
       }
@@ -130,34 +167,6 @@ export const useScrollToExpandedDoc = ({
 
     frameId = requestAnimationFrame(attemptScroll);
 
-    return () => cancelAnimationFrame(frameId);
-  }, [centerExpandedRow, expandedDoc]);
-
-  useEffect(() => {
-    const scrollContainer = dataGridWrapper?.querySelector<HTMLElement>(VIRTUALIZED_SELECTOR);
-
-    if (!scrollContainer || !expandedDoc) {
-      return;
-    }
-
-    // Opening the doc viewer narrows the grid, which re-wraps rows into taller ones and moves the
-    // expanded row back out of view, so re-center it once the new layout is in place
-    let frameId: number;
-    const observer = new ResizeObserver(() => {
-      if (expandedDoc.id !== scrolledToDocId.current) {
-        return;
-      }
-
-      cancelAnimationFrame(frameId);
-      // Row heights are measured after the resize, so wait for that before re-centering
-      frameId = requestAnimationFrame(centerExpandedRow);
-    });
-
-    observer.observe(scrollContainer);
-
-    return () => {
-      cancelAnimationFrame(frameId);
-      observer.disconnect();
-    };
+    return stop;
   }, [centerExpandedRow, dataGridWrapper, expandedDoc]);
 };
