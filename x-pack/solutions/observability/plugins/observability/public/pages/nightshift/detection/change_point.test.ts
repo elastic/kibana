@@ -6,10 +6,11 @@
  */
 
 import {
-  generateChangePointSeries,
-  getChangePointIndex,
+  filterOccurrencesForDetection,
   getChangePointLabel,
-  getChangePointTimestamp,
+  getDetectionOccurrenceTimeRange,
+  getOccurrenceBucketIntervalMs,
+  parseOccurrenceBucketSize,
 } from './change_point';
 
 describe('getChangePointLabel', () => {
@@ -23,35 +24,59 @@ describe('getChangePointLabel', () => {
   });
 });
 
-describe('getChangePointIndex', () => {
-  it('marks spike and dip near the end of the window', () => {
-    expect(getChangePointIndex('spike', 20)).toBe(16);
-    expect(getChangePointIndex('dip', 20)).toBe(16);
+describe('getDetectionOccurrenceTimeRange', () => {
+  it('frames occurrence data around the detection timestamp', () => {
+    expect(getDetectionOccurrenceTimeRange('2026-07-10T12:00:00Z')).toEqual({
+      from: new Date('2026-07-10T11:00:00Z').getTime(),
+      to: new Date('2026-07-10T12:15:00Z').getTime(),
+    });
   });
 
-  it('marks trend and step changes near the middle', () => {
-    expect(getChangePointIndex('trend_change', 20)).toBe(10);
-    expect(getChangePointIndex('step_change', 20)).toBe(10);
-  });
-});
-
-describe('getChangePointTimestamp', () => {
-  it('frames the change knee relative to the detection timestamp', () => {
-    const end = new Date('2026-07-10T12:00:00Z').getTime();
-    const changeIndex = getChangePointIndex('spike', 28);
-    const expected = end - (28 - 1 - changeIndex) * 300_000;
-
-    expect(getChangePointTimestamp('2026-07-10T12:00:00Z', 'spike')).toBe(expected);
+  it('returns undefined for an invalid timestamp', () => {
+    expect(getDetectionOccurrenceTimeRange('invalid')).toBeUndefined();
   });
 });
 
-describe('generateChangePointSeries', () => {
-  it('returns a series for extended change-point types', () => {
-    expect(generateChangePointSeries('distribution_change', 10)).toHaveLength(10);
-    expect(generateChangePointSeries('non_stationary', 10)).toHaveLength(10);
-    expect(generateChangePointSeries('stationary', 10)).toHaveLength(10);
-    expect(getChangePointIndex('distribution_change', 10)).toBe(9);
-    expect(getChangePointIndex('non_stationary', 10)).toBe(9);
-    expect(getChangePointIndex('stationary', 10)).toBe(9);
+describe('filterOccurrencesForDetection', () => {
+  it('keeps only points in the detection time window', () => {
+    const occurrences = [
+      { x: new Date('2026-07-10T10:55:00Z').getTime(), y: 1 },
+      { x: new Date('2026-07-10T11:00:00Z').getTime(), y: 2 },
+      { x: new Date('2026-07-10T12:15:00Z').getTime(), y: 3 },
+      { x: new Date('2026-07-10T12:20:00Z').getTime(), y: 4 },
+    ];
+
+    expect(filterOccurrencesForDetection(occurrences, '2026-07-10T12:00:00Z')).toEqual([
+      occurrences[1],
+      occurrences[2],
+    ]);
+  });
+});
+
+describe('parseOccurrenceBucketSize', () => {
+  it('parses minute and hour bucket sizes', () => {
+    expect(parseOccurrenceBucketSize('5m')).toEqual({
+      value: 5,
+      unit: 'm',
+      unitLabel: 'minutes',
+    });
+    expect(parseOccurrenceBucketSize('1h')).toEqual({
+      value: 1,
+      unit: 'h',
+      unitLabel: 'hours',
+    });
+  });
+
+  it('falls back for invalid bucket sizes', () => {
+    expect(parseOccurrenceBucketSize('invalid')).toEqual({
+      value: 5,
+      unit: 'm',
+      unitLabel: 'minutes',
+    });
+  });
+
+  it('converts bucket sizes to milliseconds', () => {
+    expect(getOccurrenceBucketIntervalMs('5m')).toBe(5 * 60 * 1000);
+    expect(getOccurrenceBucketIntervalMs('1h')).toBe(60 * 60 * 1000);
   });
 });
