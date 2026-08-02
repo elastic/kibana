@@ -167,7 +167,7 @@ const VaultSourceFields = () => {
             'The secret is resolved at runtime by the agent (Heartbeat) from HashiCorp Vault. Kibana stores only this reference and never the plaintext secret.',
         })}
       >
-        <EuiCode>{'${vault/<path>#<field>}'}</EuiCode>
+        <EuiCode>{'${vault/<connection>@<path>#<field>}'}</EuiCode>
       </EuiCallOut>
     </>
   );

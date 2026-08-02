@@ -18,6 +18,11 @@ import type { SyntheticsServerSetup } from '../types';
 export interface HeartbeatVaultConfig {
   enabled: true;
   name: string;
+  // Secret-provider backend. Heartbeat's resolver factory switches on this; it
+  // defaults to hashicorp_vault when absent. The provider-specific fields below are
+  // flattened onto the wire blob (the stored connection keeps them under
+  // config/secrets), so a new provider adds fields here plus an agent resolver.
+  type: string;
   address: string;
   auth_method: 'token' | 'approle';
   kv_mount?: string;
@@ -35,16 +40,17 @@ export interface HeartbeatVaultConfig {
 const toHeartbeatConfig = (attributes: SyntheticsVaultConnection): HeartbeatVaultConfig => ({
   enabled: true,
   name: attributes.name,
-  address: attributes.address,
-  auth_method: attributes.authMethod,
-  kv_mount: attributes.kvMount,
-  namespace: attributes.namespace,
-  tls_skip_verify: attributes.tlsSkipVerify,
+  type: attributes.type,
+  address: attributes.config.address,
+  auth_method: attributes.config.authMethod,
+  kv_mount: attributes.config.kvMount,
+  namespace: attributes.config.namespace,
+  tls_skip_verify: attributes.config.tlsSkipVerify,
   secret_refresh_interval: attributes.secretRefreshInterval,
   version: attributes.refreshedAt,
-  token: attributes.token,
-  role_id: attributes.roleId,
-  secret_id: attributes.secretId,
+  token: attributes.secrets?.token,
+  role_id: attributes.config.roleId,
+  secret_id: attributes.secrets?.secretId,
 });
 
 /**

@@ -14,17 +14,17 @@ import { syntheticsVaultConnectionType } from '../../common/types/saved_objects'
 const VAULT_CONNECTION_NAMESPACE = '5efab9a0-0000-4000-8000-000000000001';
 export const vaultConnectionId = (name: string) => uuidv5(name, VAULT_CONNECTION_NAMESPACE);
 
+// The provider-specific secret fields live under a single `secrets` attribute,
+// which is encrypted as one blob. This is what keeps the encryption model stable
+// as providers are added: a new provider adds fields inside `secrets`/`config`,
+// never a new top-level attribute, so this declaration never has to change.
 export const SYNTHETICS_VAULT_CONNECTION_ENCRYPTED_TYPE = {
   type: syntheticsVaultConnectionType,
-  attributesToEncrypt: new Set(['token', 'secretId']),
+  attributesToEncrypt: new Set(['secrets']),
   attributesToIncludeInAAD: new Set([
     'name',
-    'address',
-    'namespace',
-    'authMethod',
-    'roleId',
-    'kvMount',
-    'tlsSkipVerify',
+    'type',
+    'config',
     'secretRefreshInterval',
     'refreshedAt',
   ]),

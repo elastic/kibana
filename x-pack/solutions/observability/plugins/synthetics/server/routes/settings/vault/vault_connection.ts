@@ -6,29 +6,37 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
 import type { SyntheticsServerSetup } from '../../../types';
 import type { RouteContext, SyntheticsRestApiRouteFactory } from '../../types';
 import type {
+  SecretProviderType,
   SyntheticsVaultConnection,
   VaultConnectionStatus,
 } from '../../../../common/runtime_types';
+import { SECRET_PROVIDER_HASHICORP_VAULT } from '../../../../common/runtime_types';
 import { syntheticsVaultConnectionType } from '../../../../common/types/saved_objects';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import { vaultConnectionId } from '../../../saved_objects/synthetics_vault_connection';
 import { asyncGlobalParamsPropagation } from '../../../tasks/sync_global_params_task';
 
+// Whether the connection has its provider secret stored, so the UI can render
+// "•••• saved" without receiving the value. Per-provider: HashiCorp Vault stores a
+// token (token auth) or a secret_id (approle).
+const hasStoredSecret = (a: SyntheticsVaultConnection): boolean => {
+  const secrets = a.secrets ?? {};
+  return a.config.authMethod === 'token' ? Boolean(secrets.token) : Boolean(secrets.secretId);
+};
+
 const toStatus = (attributes: SyntheticsVaultConnection): VaultConnectionStatus => ({
   configured: true,
   name: attributes.name,
-  address: attributes.address,
-  namespace: attributes.namespace,
-  authMethod: attributes.authMethod,
-  roleId: attributes.roleId,
-  kvMount: attributes.kvMount,
-  tlsSkipVerify: attributes.tlsSkipVerify,
+  type: attributes.type,
   secretRefreshInterval: attributes.secretRefreshInterval,
   refreshedAt: attributes.refreshedAt,
-  hasSecret: Boolean(attributes.authMethod === 'token' ? attributes.token : attributes.secretId),
+  // Non-secret provider config, returned verbatim.
+  config: attributes.config,
+  hasSecret: hasStoredSecret(attributes),
 });
 
 // Re-push private-location configs so the updated connections reach agents,
@@ -63,18 +71,32 @@ export const getVaultConnectionsRoute: SyntheticsRestApiRouteFactory<
   handler: async (routeContext) => listConnections(routeContext),
 });
 
-const SaveBodySchema = schema.object({
-  name: schema.string({ minLength: 1 }),
+// HashiCorp Vault provider request shapes. Adding a provider means adding its
+// config/secrets schema and turning `type`/`config`/`secrets` into a discriminated
+// `schema.oneOf` keyed on `type`.
+const HashiCorpVaultConfigSchema = schema.object({
   address: schema.string({ minLength: 1 }),
   authMethod: schema.oneOf([schema.literal('token'), schema.literal('approle')]),
   namespace: schema.maybe(schema.string()),
   kvMount: schema.maybe(schema.string()),
   tlsSkipVerify: schema.maybe(schema.boolean()),
-  secretRefreshInterval: schema.maybe(schema.string()),
-  token: schema.maybe(schema.string()),
   roleId: schema.maybe(schema.string()),
+});
+
+const HashiCorpVaultSecretsSchema = schema.object({
+  token: schema.maybe(schema.string()),
   secretId: schema.maybe(schema.string()),
 });
+
+const SaveBodySchema = schema.object({
+  name: schema.string({ minLength: 1 }),
+  type: schema.maybe(schema.literal('hashicorp_vault')),
+  secretRefreshInterval: schema.maybe(schema.string()),
+  config: HashiCorpVaultConfigSchema,
+  secrets: schema.maybe(HashiCorpVaultSecretsSchema),
+});
+
+type SaveBody = TypeOf<typeof SaveBodySchema>;
 
 /** PUT: create or update a connection (keyed by name). Blank secrets are kept. */
 export const saveVaultConnectionRoute: SyntheticsRestApiRouteFactory<
@@ -85,8 +107,10 @@ export const saveVaultConnectionRoute: SyntheticsRestApiRouteFactory<
   validate: { body: SaveBodySchema },
   writeAccess: true,
   handler: async ({ request, response, savedObjectsClient, server, spaceId }) => {
-    const body = request.body as SyntheticsVaultConnection;
-    if (body.authMethod === 'approle' && !body.roleId) {
+    const body = request.body as SaveBody;
+    const type: SecretProviderType = body.type ?? SECRET_PROVIDER_HASHICORP_VAULT;
+
+    if (body.config.authMethod === 'approle' && !body.config.roleId) {
       return response.badRequest({ body: { message: 'approle auth requires a role_id' } });
     }
 
@@ -104,18 +128,20 @@ export const saveVaultConnectionRoute: SyntheticsRestApiRouteFactory<
       existing = undefined;
     }
 
+    // Preserve stored secrets when the client submits blanks (editing a connection
+    // without re-entering its secret).
+    const secrets = {
+      token: body.secrets?.token || existing?.secrets?.token,
+      secretId: body.secrets?.secretId || existing?.secrets?.secretId,
+    };
+
     const attributes: SyntheticsVaultConnection = {
       name: body.name,
-      address: body.address,
-      authMethod: body.authMethod,
-      namespace: body.namespace,
-      kvMount: body.kvMount,
-      tlsSkipVerify: body.tlsSkipVerify,
+      type,
+      config: body.config,
       secretRefreshInterval: body.secretRefreshInterval,
       refreshedAt: new Date().toISOString(),
-      token: body.token || existing?.token,
-      roleId: body.roleId,
-      secretId: body.secretId || existing?.secretId,
+      secrets,
     };
 
     await savedObjectsClient.create<SyntheticsVaultConnection>(
