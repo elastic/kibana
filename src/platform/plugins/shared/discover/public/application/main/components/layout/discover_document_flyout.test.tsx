@@ -157,6 +157,11 @@ describe('DiscoverDocumentFlyout', () => {
     await waitFor(() => {
       expect(screen.getByTestId('docViewerFlyoutNotFound')).toBeVisible();
     });
+
+    // Nothing belongs in the subheader for a document that could not be resolved, so it should
+    // not render as an empty bordered strip
+    expect(screen.queryByTestId('docViewerFlyoutNotice')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('docViewerFlyoutActions')).not.toBeInTheDocument();
   });
 
   it('shows an error state when the document cannot be fetched', async () => {

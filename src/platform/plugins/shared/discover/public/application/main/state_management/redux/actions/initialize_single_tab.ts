@@ -336,9 +336,7 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
     // tab to fetch when selected
     if (isCurrentTabActive()) {
       dispatch(initializeAndSync({ tabId }));
-      setTimeout(() => {
-        dispatch(fetchData({ tabId, initial: true }));
-      }, 5000);
+      dispatch(fetchData({ tabId, initial: true }));
     } else {
       dispatch(
         internalStateSlice.actions.setForceFetchOnSelect({ tabId, forceFetchOnSelect: true })

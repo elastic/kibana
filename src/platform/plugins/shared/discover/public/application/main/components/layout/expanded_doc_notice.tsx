@@ -15,12 +15,15 @@ import { ExpandedDocNotice } from '../../hooks/use_expanded_doc_sync';
 /**
  * Explains a flyout showing a document that is not part of the current results, which is
  * reached by following a link to a document the current search does not return.
+ *
+ * Callers pass nothing at all when there is no notice, rather than rendering this with
+ * {@link ExpandedDocNotice.None}, so the flyout can tell an empty subheader from a populated one.
  */
-export const ExpandedDocNoticeText = ({ notice }: { notice: ExpandedDocNotice }) => {
-  if (notice === ExpandedDocNotice.None) {
-    return null;
-  }
-
+export const ExpandedDocNoticeText = ({
+  notice,
+}: {
+  notice: Exclude<ExpandedDocNotice, ExpandedDocNotice.None>;
+}) => {
   const isSearching = notice === ExpandedDocNotice.SearchingResults;
 
   return (

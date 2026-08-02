@@ -26,7 +26,7 @@ import {
   useInternalStateSelector,
 } from '../../state_management/redux';
 import { useDataState } from '../../hooks/use_data_state';
-import { useExpandedDocSync } from '../../hooks/use_expanded_doc_sync';
+import { ExpandedDocNotice, useExpandedDocSync } from '../../hooks/use_expanded_doc_sync';
 import { useCopyExpandedDocLink } from '../../hooks/use_copy_expanded_doc_link';
 import { ExpandedDocNoticeText } from './expanded_doc_notice';
 
@@ -147,7 +147,9 @@ const DiscoverDocumentFlyoutComponent = ({
       dataView={dataView}
       hit={expandedDoc}
       requestState={requestState}
-      notice={<ExpandedDocNoticeText notice={notice} />}
+      notice={
+        notice === ExpandedDocNotice.None ? undefined : <ExpandedDocNoticeText notice={notice} />
+      }
       hits={renderDocumentViewMeta?.displayedRows}
       // if default columns are used, don't make them part of the URL - the context state handling will take care to restore them
       columns={renderDocumentViewMeta?.displayedColumns ?? displayedColumns}

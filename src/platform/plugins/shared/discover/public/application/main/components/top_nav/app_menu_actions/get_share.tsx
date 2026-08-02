@@ -71,11 +71,13 @@ const getExpandedDocHelpText = ({
 
   return (
     <KbnInfoCallout
-      size="s"
       data-test-subj="discoverShareExpandedDocCallout"
-      title={i18n.translate('discover.share.expandedDocRelativeTime', {
+      title={i18n.translate('discover.share.expandedDocRelativeTimeTitle', {
+        defaultMessage: 'This link includes an open document',
+      })}
+      text={i18n.translate('discover.share.expandedDocRelativeTimeDescription', {
         defaultMessage:
-          'This link includes an open document. Use an absolute time range so it stays in the results for whoever opens the link, or copy a link from the document itself.',
+          'Use an absolute time range so it stays in the results for whoever opens the link, or copy a link from the document itself.',
       })}
     />
   );
