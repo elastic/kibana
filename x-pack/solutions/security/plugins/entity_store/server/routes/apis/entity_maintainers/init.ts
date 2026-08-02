@@ -51,7 +51,10 @@ export function registerInitMaintainers(router: EntityStorePluginRouter) {
         }
 
         const { status: entityStoreStatus } = await assetManagerClient.getStatus(false);
-        await entityMaintainersClient.init(req, { autoStart: req.body?.autoStart, entityStoreStatus });
+        await entityMaintainersClient.init(req, {
+          autoStart: req.body?.autoStart,
+          entityStoreStatus,
+        });
 
         return res.ok({ body: { ok: true } });
       })
