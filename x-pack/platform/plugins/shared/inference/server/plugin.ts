@@ -203,8 +203,14 @@ export class InferencePlugin
       );
     }
 
+    const workerConfig = this.config.workers.anonymization;
+    const effectiveWorkerConfig =
+      this.config.anonymization.workflow_driven && workerConfig.minThreads < workerConfig.maxThreads
+        ? { ...workerConfig, minThreads: workerConfig.maxThreads }
+        : workerConfig;
+
     this.regexWorker = new RegexWorkerService(
-      this.config.workers.anonymization,
+      effectiveWorkerConfig,
       this.logger.get('regex_worker')
     );
 
