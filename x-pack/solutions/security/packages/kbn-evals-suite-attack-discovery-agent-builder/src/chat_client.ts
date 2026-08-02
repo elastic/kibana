@@ -8,7 +8,6 @@
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import type { HttpHandler } from '@kbn/core/public';
 import type { ToolingLog } from '@kbn/tooling-log';
-import pRetry from 'p-retry';
 import type { AttackDiscovery } from './types';
 
 export interface AgentBuilderConverseResponse {
@@ -52,51 +51,46 @@ export class AttackDiscoveryAgentBuilderChatClient {
     attachments: Array<{ type: 'security.alerts'; data: { alertIds: string[] } }> = [],
     _expectedSkills?: string[]
   ): Promise<AgentBuilderConverseResponse> {
-    // pRetry wraps the entire converse call. Attack Discovery executions are
-    // not idempotent — a retried call that already succeeded server-side will
-    // produce a second execution. This is acceptable in the eval fixture
-    // context because afterAll cleanup removes all test data, and evaluator
-    // metadata reflects only the final (successful) response. If this client
-    // is ever reused outside isolated fixtures, replace pRetry with a
-    // connection-level retry that does not re-POST the request body.
-    return pRetry(
-      async () => {
-        const body: Record<string, unknown> = {
-          agent_id: agentBuilderDefaultAgentId,
-          connector_id: this.connectorId,
-          input: question,
-          _execution_mode: 'local',
-          attachments,
-        };
+    // No retry around this call. Attack Discovery executions are not
+    // idempotent — a retried call after a dropped response that already
+    // succeeded server-side would trigger a second execution that writes the
+    // same ES indices the evaluators later read (and `afterAll` cleanup runs
+    // after the whole suite, not between attempts). Let the eval fail loudly
+    // instead of risking a silent duplicate execution.
+    const body: Record<string, unknown> = {
+      agent_id: agentBuilderDefaultAgentId,
+      connector_id: this.connectorId,
+      input: question,
+      _execution_mode: 'local',
+      attachments,
+    };
 
-        const response = (await this.fetch('/api/agent_builder/converse', {
-          method: 'POST',
-          version: '2023-10-31',
-          body: JSON.stringify(body),
-        })) as {
-          trace_id?: string;
-          steps?: AgentBuilderConverseResponse['steps'];
-          response: { message: string };
-        };
+    let response: {
+      trace_id?: string;
+      steps?: AgentBuilderConverseResponse['steps'];
+      response: { message: string };
+    };
+    try {
+      response = (await this.fetch('/api/agent_builder/converse', {
+        method: 'POST',
+        version: '2023-10-31',
+        body: JSON.stringify(body),
+      })) as typeof response;
+    } catch (error) {
+      this.log.error(
+        new Error('Agent Builder converse failed (no retry — request is not idempotent)', {
+          cause: error,
+        })
+      );
+      throw error;
+    }
 
-        return {
-          messages: [{ message: response.response.message }],
-          steps: response.steps ?? [],
-          errors: [],
-          traceId: response.trace_id,
-          insights: parseInsightsFromMessage(response.response.message),
-        };
-      },
-      {
-        retries: 2,
-        minTimeout: 2_000,
-        onFailedAttempt: (error) =>
-          this.log.warning(
-            new Error(`Agent Builder converse failed on attempt ${error.attemptNumber}`, {
-              cause: error,
-            })
-          ),
-      }
-    );
+    return {
+      messages: [{ message: response.response.message }],
+      steps: response.steps ?? [],
+      errors: [],
+      traceId: response.trace_id,
+      insights: parseInsightsFromMessage(response.response.message),
+    };
   }
 }
