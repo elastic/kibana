@@ -16,6 +16,20 @@ export const WATCH_WORKFLOW_IDS = {
 export const WORKFLOWS_API_VERSION = '2023-10-31';
 
 /**
+ * Floor -> Dark escalation policy, mirrored from the Floor orchestrator
+ * (`watch_floor_orchestrator.yaml`, step `escalate_to_dark`). The hop fires
+ * deterministically iff the Floor worker classifies `true_positive` AND its
+ * confidence clears `escalateThreshold`. The L0 transition-gate test asserts
+ * the synthetic fixture actually trips this predicate, so a fixture/policy
+ * drift is caught without booting the workflow engine.
+ */
+export const FLOOR_ESCALATION_POLICY = {
+  escalateThreshold: 0.75,
+  escalateTo: 'watch-dark',
+  triggeringClassification: 'true_positive',
+} as const;
+
+/**
  * Synthetic escalation payload used to directly invoke Dark Watch, bypassing
  * Floor (Floor's own alert-trigger path is covered by its own suite). This
  * exercises exactly the input shape a real Floor->Dark handoff produces:

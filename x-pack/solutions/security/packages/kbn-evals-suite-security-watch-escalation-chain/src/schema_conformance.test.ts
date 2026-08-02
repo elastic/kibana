@@ -7,10 +7,11 @@
 
 // L1 schema-conformance for the Watch escalation chain.
 //
-// The chain is driven by `workflow.execute` (no converse router surface), so an
-// L0 routing-smoke is architecturally N/A here — there is no skill/tool the
-// Agent Builder router could pick. What IS deterministically testable at L1 is
-// the CONTRACT of the escalation payload that threads Floor -> Dark -> Deep.
+// The chain is driven by `workflow.execute` (no converse router surface), so a
+// routing-smoke L0 is N/A here — there is no skill/tool the Agent Builder router
+// could pick. The chain's deterministic entrypoint decision is covered separately
+// by `transition_gate.test.ts` (the true L0 signal). What THIS file covers at L1
+// is the CONTRACT of the escalation payload that threads Floor -> Dark -> Deep.
 //
 // This mirrors the canonical `watchEscalationSchema` owned by the pnd plugin
 // (server/common/schemas/watch_escalation.ts). We re-declare it inline rather
