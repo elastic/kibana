@@ -128,11 +128,11 @@ export async function checkAndSkipIfExistingScheduledExecution(
       return false;
     }
 
-    // Never-started orphan from a prior schedule claim — free the slot and proceed
+    // Never-started orphan from a prior schedule claim - free the slot and proceed
     // (one reap per tick). TM only advances `runAt` after that claim finishes, so
     // `PENDING` + a different `taskRunAt` usually means the earlier claim created the
     // doc but never started it. Exception: queue drain promotes QUEUED→PENDING while
-    // keeping the backlog `taskRunAt` and leaving a scoped `workflow:run` task — if TM
+    // keeping the backlog `taskRunAt` and leaving a scoped `workflow:run` task - if TM
     // still has active work for that execution, it is live backlog, not an orphan.
     const isAbandonedNeverStartedPendingCandidate =
       existingExecution.status === ExecutionStatus.PENDING &&
