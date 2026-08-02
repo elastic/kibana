@@ -17,6 +17,7 @@ describe('converse_task', () => {
         steps: [{ type: 'tool_call', tool_id: 'platform.core.execute_esql' }],
         traceId: 'trace-abc',
       }),
+      getConversation: jest.fn(),
     };
 
     const result = await converseQuestionToTaskOutput(agentBuilderClient, 'who is patient zero?');
