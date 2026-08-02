@@ -76,6 +76,10 @@ export const useExpandedDocSync = ({
   const expandedDocOwner = useCurrentTabSelector((tab) => tab.expandedDocOwner);
   const [requestState, setRequestState] = useState(ElasticRequestState.Loading);
 
+  // The document fetched directly by ID, held locally rather than dispatched straight away so
+  // that a single writer below decides which instance wins
+  const [fetchedDoc, setFetchedDoc] = useState<DataTableRecord>();
+
   const isRefResolved = Boolean(
     expandedDocRef && expandedDoc && matchesExpandedDocRef(expandedDoc, expandedDocRef)
   );
@@ -87,7 +91,25 @@ export const useExpandedDocSync = ({
   const isRestorable =
     !expandedDoc ||
     (expandedDocOwner === DEFAULT_EXPANDED_DOC_OWNER && Boolean(getExpandedDocRef(expandedDoc)));
-  const shouldFetch = Boolean(expandedDocRef) && !isRefResolved && isRestorable;
+
+  const rowFromResults = useMemo(
+    () =>
+      expandedDocRef ? rows.find((row) => matchesExpandedDocRef(row, expandedDocRef)) : undefined,
+    [expandedDocRef, rows]
+  );
+
+  // A directly fetched document is only usable while it still describes the current reference,
+  // which it does not after paginating the flyout or following a link to a different document
+  const fetchedDocForRef =
+    expandedDocRef && fetchedDoc && matchesExpandedDocRef(fetchedDoc, expandedDocRef)
+      ? fetchedDoc
+      : undefined;
+
+  // The instance from the result set is the one the grid renders, so it always wins: it restores
+  // flyout pagination and the row highlight, which a directly fetched copy cannot
+  const resolvedDoc = rowFromResults ?? fetchedDocForRef;
+
+  const shouldFetch = Boolean(expandedDocRef) && !isRefResolved && !resolvedDoc && isRestorable;
   const shouldClear = !expandedDocRef && Boolean(expandedDoc) && isRestorable;
 
   useEffect(() => {
@@ -131,11 +153,9 @@ export const useExpandedDocSync = ({
         }
 
         setRequestState(ElasticRequestState.Found);
-        dispatch(
-          setExpandedDoc({
-            expandedDoc: scopedProfilesManager.resolveDocumentProfile({
-              record: buildDataTableRecord(rawHit, dataView),
-            }),
+        setFetchedDoc(
+          scopedProfilesManager.resolveDocumentProfile({
+            record: buildDataTableRecord(rawHit, dataView),
           })
         );
       } catch {
@@ -150,33 +170,18 @@ export const useExpandedDocSync = ({
     return () => {
       abortController.abort();
     };
-  }, [
-    data.search,
-    dataView,
-    dispatch,
-    docId,
-    docIndex,
-    scopedProfilesManager,
-    setExpandedDoc,
-    shouldFetch,
-  ]);
+  }, [data.search, dataView, docId, docIndex, scopedProfilesManager, shouldFetch]);
 
-  // Swap the directly fetched document for the instance from the result set, which restores
-  // flyout pagination and the row highlight
-  const rowFromResults = useMemo(
-    () =>
-      expandedDocRef ? rows.find((row) => matchesExpandedDocRef(row, expandedDocRef)) : undefined,
-    [expandedDocRef, rows]
-  );
-
+  // The only place the expanded document is written, so whichever request finishes first cannot
+  // clobber the other: the preference above is applied on every render regardless of ordering
   useEffect(() => {
-    if (rowFromResults && rowFromResults !== expandedDoc) {
-      dispatch(setExpandedDoc({ expandedDoc: rowFromResults }));
+    if (resolvedDoc && resolvedDoc !== expandedDoc) {
+      dispatch(setExpandedDoc({ expandedDoc: resolvedDoc }));
     }
-  }, [dispatch, expandedDoc, rowFromResults, setExpandedDoc]);
+  }, [dispatch, expandedDoc, resolvedDoc, setExpandedDoc]);
 
   return {
-    hasExpandedDoc: Boolean(expandedDoc) || shouldFetch,
+    hasExpandedDoc: Boolean(expandedDoc) || Boolean(expandedDocRef && isRestorable),
     requestState,
     notice: getExpandedDocNotice({ isOutOfResults: isRefResolved && !rowFromResults, fetchStatus }),
   };

@@ -119,8 +119,8 @@ describe('DiscoverDocumentFlyout', () => {
     expect(screen.queryByTestId('docViewerFlyoutNavigation')).not.toBeInTheDocument();
   });
 
-  it('swaps the directly fetched document for the instance in the results', async () => {
-    const { toolkit } = await setup({
+  it('uses the instance from the results without fetching when they already contain it', async () => {
+    const { toolkit, services } = await setup({
       searchResult: searchResponseFor(outOfResultsHit),
       hits: esHitsMock,
     });
@@ -130,14 +130,91 @@ describe('DiscoverDocumentFlyout', () => {
     });
 
     // The record from the result set is the one the grid renders, so pagination and the row
-    // highlight only work once it has replaced the directly fetched copy
+    // highlight only work with that instance rather than a directly fetched copy
     const rowFromResults = toolkit
       .getCurrentTabDataStateContainer()
       .data$.documents$.getValue()
       .result?.find((row) => row.raw._id === outOfResultsHit._id);
 
     expect(toolkit.getCurrentTab().expandedDoc).toBe(rowFromResults);
+    expect(services.data.search.search).not.toHaveBeenCalled();
     expect(screen.queryByTestId('expandedDocNotice-NotInResults')).not.toBeInTheDocument();
+  });
+
+  it('keeps the instance from the results when the direct fetch finishes after them', async () => {
+    const services = createDiscoverServicesMock();
+    let resolveSearch: (response: IKibanaSearchResponse) => void = () => {};
+
+    jest
+      .mocked(services.data.search.search)
+      .mockImplementation(() =>
+        from(new Promise<IKibanaSearchResponse>((resolve) => (resolveSearch = resolve)))
+      );
+
+    setUnifiedDocViewerServices(mockUnifiedDocViewerServices);
+
+    const toolkit = getDiscoverInternalStateMock({ services });
+
+    await toolkit.initializeTabs();
+    await toolkit.initializeSingleTab({
+      tabId: toolkit.getCurrentTab().id,
+      skipWaitForDataFetching: true,
+    });
+
+    toolkit.internalState.dispatch(
+      internalStateActions.updateAppState({
+        tabId: toolkit.getCurrentTab().id,
+        appState: { expandedDoc: expandedDocRef },
+      })
+    );
+
+    const documents$ = toolkit.getCurrentTabDataStateContainer().data$.documents$;
+
+    // The document is not in the results yet, so the direct fetch starts
+    documents$.next({
+      fetchStatus: FetchStatus.LOADING,
+      result: [buildDataTableRecord(inResultsHit, dataViewMock)],
+    });
+
+    renderWithI18n(
+      <DiscoverToolkitTestProvider toolkit={toolkit}>
+        <DiscoverDocumentFlyout
+          dataView={dataViewMock}
+          columns={['bytes']}
+          onAddColumn={jest.fn()}
+          onRemoveColumn={jest.fn()}
+          onAddFilter={jest.fn()}
+        />
+      </DiscoverToolkitTestProvider>
+    );
+
+    await waitFor(() => {
+      expect(services.data.search.search).toHaveBeenCalled();
+    });
+
+    // The main search comes back with the document while the direct fetch is still in flight
+    act(() => {
+      documents$.next({
+        fetchStatus: FetchStatus.COMPLETE,
+        result: esHitsMock.map((hit) => buildDataTableRecord(hit, dataViewMock)),
+      });
+    });
+
+    const rowFromResults = documents$
+      .getValue()
+      .result?.find((row) => row.raw._id === outOfResultsHit._id);
+
+    await waitFor(() => {
+      expect(toolkit.getCurrentTab().expandedDoc).toBe(rowFromResults);
+    });
+
+    // The late direct fetch must not replace the instance the grid renders, since only that one
+    // restores flyout pagination and the row highlight
+    await act(async () => {
+      resolveSearch({ rawResponse: { hits: { hits: [outOfResultsHit] } } });
+    });
+
+    expect(toolkit.getCurrentTab().expandedDoc).toBe(rowFromResults);
   });
 
   it('reports that it is still searching while the results are loading', async () => {
