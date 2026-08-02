@@ -1,0 +1,127 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { of } from 'rxjs';
+import type { IKibanaSearchResponse } from '@kbn/search-types';
+import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
+import { createDiscoverServicesMock } from '../../../__mocks__/services';
+import { fetchExpandedDoc } from './fetch_expanded_doc';
+
+const ref = { id: 'doc-1', index: '.ds-logs-nginx-2024.01.01-000001' };
+
+const setup = (response: IKibanaSearchResponse) => {
+  const services = createDiscoverServicesMock();
+
+  jest.mocked(services.data.search.search).mockImplementation(() => of(response));
+
+  return {
+    data: services.data,
+    getSearchParams: () => jest.mocked(services.data.search.search).mock.calls[0][0],
+  };
+};
+
+describe('fetchExpandedDoc', () => {
+  describe('data view mode', () => {
+    it('builds a record from the matching hit', async () => {
+      const { data } = setup({
+        rawResponse: { hits: { hits: [{ _id: ref.id, _index: ref.index, _source: { a: 1 } }] } },
+      });
+
+      const record = await fetchExpandedDoc({
+        ref,
+        dataView: dataViewMock,
+        query: { query: '', language: 'kuery' },
+        data,
+        abortSignal: new AbortController().signal,
+      });
+
+      // Data view records keep the ES hit as the raw form and flatten the source alongside the
+      // metadata fields, unlike ES|QL records where both forms are the same row
+      expect(record?.id).toBe(`${ref.index}::${ref.id}::`);
+      expect(record?.raw).toEqual({ _id: ref.id, _index: ref.index, _source: { a: 1 } });
+      expect(record?.flattened).toEqual({ _index: ref.index, _score: undefined, a: 1 });
+    });
+
+    it('returns undefined when the document no longer exists', async () => {
+      const { data } = setup({ rawResponse: { hits: { hits: [] } } });
+
+      const record = await fetchExpandedDoc({
+        ref,
+        dataView: dataViewMock,
+        query: { query: '', language: 'kuery' },
+        data,
+        abortSignal: new AbortController().signal,
+      });
+
+      expect(record).toBeUndefined();
+    });
+  });
+
+  describe('ES|QL mode', () => {
+    const esqlResponse: IKibanaSearchResponse = {
+      rawResponse: {
+        columns: [
+          { name: '_index', type: 'keyword' },
+          { name: '_id', type: 'keyword' },
+          { name: 'message', type: 'keyword' },
+        ],
+        values: [[ref.index, ref.id, 'hello']],
+      },
+    };
+
+    it('queries the document index directly rather than reusing the current query', async () => {
+      const { data, getSearchParams } = setup(esqlResponse);
+
+      await fetchExpandedDoc({
+        ref,
+        dataView: dataViewMock,
+        query: { esql: 'FROM logs-* METADATA _id, _index | WHERE a == 1 | LIMIT 10' },
+        data,
+        abortSignal: new AbortController().signal,
+      });
+
+      // Standalone so the document is found regardless of the time range, sort, limit and
+      // filtering of the current results
+      expect(getSearchParams().params.query).toBe(
+        `FROM \`${ref.index}\` METADATA _index, _id\n| WHERE _id == "${ref.id}"\n| LIMIT 1`
+      );
+    });
+
+    it('builds a record shaped like the ones the main ES|QL search produces', async () => {
+      const { data } = setup(esqlResponse);
+
+      const record = await fetchExpandedDoc({
+        ref,
+        dataView: dataViewMock,
+        query: { esql: 'FROM logs-* METADATA _id, _index' },
+        data,
+        abortSignal: new AbortController().signal,
+      });
+
+      // ES|QL records use the row keyed by column name as both the raw and flattened form
+      const row = { _index: ref.index, _id: ref.id, message: 'hello' };
+
+      expect(record).toEqual({ id: `${ref.index}::${ref.id}::`, raw: row, flattened: row });
+    });
+
+    it('returns undefined when the document no longer exists', async () => {
+      const { data } = setup({ rawResponse: { columns: [], values: [] } });
+
+      const record = await fetchExpandedDoc({
+        ref,
+        dataView: dataViewMock,
+        query: { esql: 'FROM logs-* METADATA _id, _index' },
+        data,
+        abortSignal: new AbortController().signal,
+      });
+
+      expect(record).toBeUndefined();
+    });
+  });
+});

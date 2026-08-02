@@ -111,9 +111,20 @@ describe('tab_state actions', () => {
   describe('setExpandedDoc', () => {
     const expandedDoc = buildDataTableRecord(esHitsMock[0], dataViewMockWithTimeField);
 
+    // The shared setup uses an ES|QL query, so tests state the query they depend on rather than
+    // relying on whichever mode the fixture happens to use
+    const setQuery = (
+      internalState: Awaited<ReturnType<typeof setup>>['internalState'],
+      tabId: string,
+      query: DiscoverAppState['query']
+    ) => {
+      internalState.dispatch(internalStateActions.updateAppState({ tabId, appState: { query } }));
+    };
+
     it('should write the expanded doc reference to app state', async () => {
       const { internalState, tabId } = await setup();
 
+      setQuery(internalState, tabId, { query: '', language: 'kuery' });
       internalState.dispatch(internalStateActions.setExpandedDoc({ tabId, expandedDoc }));
 
       const tab = selectTab(internalState.getState(), tabId);
@@ -125,6 +136,7 @@ describe('tab_state actions', () => {
     it('should clear the expanded doc reference when the flyout is closed', async () => {
       const { internalState, tabId } = await setup();
 
+      setQuery(internalState, tabId, { query: '', language: 'kuery' });
       internalState.dispatch(internalStateActions.setExpandedDoc({ tabId, expandedDoc }));
       internalState.dispatch(
         internalStateActions.setExpandedDoc({ tabId, expandedDoc: undefined })
@@ -139,6 +151,7 @@ describe('tab_state actions', () => {
     it('should not write a reference for cascade owned flyouts', async () => {
       const { internalState, tabId } = await setup();
 
+      setQuery(internalState, tabId, { query: '', language: 'kuery' });
       internalState.dispatch(
         internalStateActions.setExpandedDoc({
           tabId,
@@ -160,6 +173,7 @@ describe('tab_state actions', () => {
         dataViewMockWithTimeField
       );
 
+      setQuery(internalState, tabId, { query: '', language: 'kuery' });
       internalState.dispatch(
         internalStateActions.setExpandedDoc({ tabId, expandedDoc: esqlRecord })
       );
@@ -168,6 +182,39 @@ describe('tab_state actions', () => {
 
       expect(tab.expandedDoc).toBe(esqlRecord);
       expect(tab.appState.expandedDoc).toBeUndefined();
+    });
+
+    it('should write a reference for ES|QL queries requesting the metadata columns', async () => {
+      const { internalState, tabId } = await setup();
+
+      setQuery(internalState, tabId, { esql: 'FROM logs METADATA _id, _index' });
+      internalState.dispatch(internalStateActions.setExpandedDoc({ tabId, expandedDoc }));
+
+      expect(selectTab(internalState.getState(), tabId).appState.expandedDoc).toEqual({
+        id: '1',
+        index: 'i',
+      });
+    });
+
+    it('should not write a reference for ES|QL queries without the metadata columns', async () => {
+      const { internalState, tabId } = await setup();
+
+      setQuery(internalState, tabId, { esql: 'FROM logs' });
+      internalState.dispatch(internalStateActions.setExpandedDoc({ tabId, expandedDoc }));
+
+      expect(selectTab(internalState.getState(), tabId).appState.expandedDoc).toBeUndefined();
+    });
+
+    it('should not write a reference for transformational ES|QL queries', async () => {
+      const { internalState, tabId } = await setup();
+
+      // The rows still carry the metadata columns, but they no longer describe documents
+      setQuery(internalState, tabId, {
+        esql: 'FROM logs METADATA _id, _index | KEEP _id, _index, host',
+      });
+      internalState.dispatch(internalStateActions.setExpandedDoc({ tabId, expandedDoc }));
+
+      expect(selectTab(internalState.getState(), tabId).appState.expandedDoc).toBeUndefined();
     });
 
     it('should not update app state when the reference is unchanged', async () => {

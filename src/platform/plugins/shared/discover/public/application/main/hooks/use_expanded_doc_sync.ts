@@ -8,16 +8,20 @@
  */
 
 import { useEffect, useMemo, useState } from 'react';
-import { lastValueFrom } from 'rxjs';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
-import { buildDataTableRecord } from '@kbn/discover-utils';
 import { ElasticRequestState } from '@kbn/unified-doc-viewer';
-import { buildSearchBody } from '@kbn/unified-doc-viewer-plugin/public';
-import { getExpandedDocRef, matchesExpandedDocRef } from '../../../../common/expanded_doc';
+import { fetchExpandedDoc } from '../data_fetching/fetch_expanded_doc';
+import {
+  ExpandedDocLinkability,
+  getExpandedDocLinkability,
+  getExpandedDocRef,
+  matchesExpandedDocRef,
+} from '../../../../common/expanded_doc';
 import {
   DEFAULT_EXPANDED_DOC_OWNER,
   internalStateActions,
+  useAppStateSelector,
   useCurrentTabAction,
   useCurrentTabSelector,
   useInternalStateDispatch,
@@ -71,6 +75,8 @@ export const useExpandedDocSync = ({
   const { scopedProfilesManager } = useScopedServices();
   const dispatch = useInternalStateDispatch();
   const setExpandedDoc = useCurrentTabAction(internalStateActions.setExpandedDoc);
+  const updateAppState = useCurrentTabAction(internalStateActions.updateAppState);
+  const query = useAppStateSelector((state) => state.query);
   const expandedDocRef = useCurrentTabSelector((tab) => tab.appState.expandedDoc);
   const expandedDoc = useCurrentTabSelector((tab) => tab.expandedDoc);
   const expandedDocOwner = useCurrentTabSelector((tab) => tab.expandedDocOwner);
@@ -92,6 +98,13 @@ export const useExpandedDocSync = ({
     !expandedDoc ||
     (expandedDocOwner === DEFAULT_EXPANDED_DOC_OWNER && Boolean(getExpandedDocRef(expandedDoc)));
 
+  // The URL only governs the flyout while the current query can produce a linkable document.
+  // Otherwise the flyout is purely local state, which is how ES|QL behaved before deep linking.
+  const isLinkable = useMemo(
+    () => getExpandedDocLinkability(query) === ExpandedDocLinkability.Linkable,
+    [query]
+  );
+
   const rowFromResults = useMemo(
     () =>
       expandedDocRef ? rows.find((row) => matchesExpandedDocRef(row, expandedDocRef)) : undefined,
@@ -109,14 +122,26 @@ export const useExpandedDocSync = ({
   // flyout pagination and the row highlight, which a directly fetched copy cannot
   const resolvedDoc = rowFromResults ?? fetchedDocForRef;
 
-  const shouldFetch = Boolean(expandedDocRef) && !isRefResolved && !resolvedDoc && isRestorable;
-  const shouldClear = !expandedDocRef && Boolean(expandedDoc) && isRestorable;
+  const shouldFetch =
+    Boolean(expandedDocRef) && !isRefResolved && !resolvedDoc && isRestorable && isLinkable;
+  const shouldClear = !expandedDocRef && Boolean(expandedDoc) && isRestorable && isLinkable;
+
+  // Editing the query can strip the metadata columns or make it transformational, stranding a
+  // reference that can no longer be resolved. Drop it without closing the open flyout, which the
+  // user has not asked to dismiss.
+  const shouldClearRef = Boolean(expandedDocRef) && !isLinkable;
 
   useEffect(() => {
     if (shouldClear) {
       dispatch(setExpandedDoc({ expandedDoc: undefined }));
     }
   }, [dispatch, setExpandedDoc, shouldClear]);
+
+  useEffect(() => {
+    if (shouldClearRef) {
+      dispatch(updateAppState({ appState: { expandedDoc: undefined } }));
+    }
+  }, [dispatch, shouldClearRef, updateAppState]);
 
   // Depend on the reference values rather than the object, since URL syncing produces a new
   // object on every parse and would otherwise refetch on unrelated state changes
@@ -132,32 +157,23 @@ export const useExpandedDocSync = ({
 
     setRequestState(ElasticRequestState.Loading);
 
-    const fetchExpandedDoc = async () => {
+    const resolveExpandedDoc = async () => {
       try {
-        const response = await lastValueFrom(
-          data.search.search(
-            {
-              params: {
-                index: dataView.getIndexPattern(),
-                ...buildSearchBody(docId, docIndex, dataView),
-              },
-            },
-            { abortSignal: abortController.signal }
-          )
-        );
-        const rawHit = response.rawResponse.hits?.hits?.[0];
+        const record = await fetchExpandedDoc({
+          ref: { id: docId, index: docIndex },
+          dataView,
+          query,
+          data,
+          abortSignal: abortController.signal,
+        });
 
-        if (!rawHit) {
+        if (!record) {
           setRequestState(ElasticRequestState.NotFound);
           return;
         }
 
         setRequestState(ElasticRequestState.Found);
-        setFetchedDoc(
-          scopedProfilesManager.resolveDocumentProfile({
-            record: buildDataTableRecord(rawHit, dataView),
-          })
-        );
+        setFetchedDoc(scopedProfilesManager.resolveDocumentProfile({ record }));
       } catch {
         if (!abortController.signal.aborted) {
           setRequestState(ElasticRequestState.Error);
@@ -165,12 +181,12 @@ export const useExpandedDocSync = ({
       }
     };
 
-    fetchExpandedDoc();
+    resolveExpandedDoc();
 
     return () => {
       abortController.abort();
     };
-  }, [data.search, dataView, docId, docIndex, scopedProfilesManager, shouldFetch]);
+  }, [data, dataView, docId, docIndex, query, scopedProfilesManager, shouldFetch]);
 
   // The only place the expanded document is written, so whichever request finishes first cannot
   // clobber the other: the preference above is applied on every render regardless of ordering

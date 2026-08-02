@@ -59,6 +59,9 @@ export interface DiscoverGridFlyoutProps
    * the surrounding documents view and the saved search embeddable have no URL to restore into.
    */
   onCopyLink?: () => void;
+  isCopyingLink?: boolean;
+  /** Why the document cannot be linked to, when it cannot */
+  copyLinkDisabledReason?: string;
 }
 
 const getOriginDocType = (record: DataTableRecord | undefined): DocumentType =>
@@ -90,9 +93,11 @@ export function DiscoverGridFlyout({
   requestState,
   notice,
   onCopyLink,
+  isCopyingLink,
+  copyLinkDisabledReason,
 }: DiscoverGridFlyoutProps) {
   const services = useDiscoverServices();
-  const isESQLQuery = isOfAggregateQueryType(query);
+  const isEsqlQuery = isOfAggregateQueryType(query);
   // Get actual hit with updated highlighted searches
   const actualHit = useMemo(() => hits?.find(({ id }) => id === hit?.id) || hit, [hit, hits]);
 
@@ -103,7 +108,10 @@ export function DiscoverGridFlyout({
     columns,
     filters,
     savedSearchId,
+    isEsqlQuery,
     onCopyLink,
+    isCopyingLink,
+    copyLinkDisabledReason,
   });
 
   const getDocViewerAccessor = useProfileAccessor('getDocViewer', {
@@ -131,7 +139,7 @@ export function DiscoverGridFlyout({
       originDocType={originDocType}
       flyoutTitle={docViewer?.title}
       flyoutActions={
-        actualHit && !isESQLQuery && flyoutActions.length > 0 ? (
+        actualHit && flyoutActions.length > 0 ? (
           <DiscoverGridFlyoutActions flyoutActions={flyoutActions} />
         ) : null
       }
@@ -140,7 +148,7 @@ export function DiscoverGridFlyout({
       docViewsRegistry={docViewer?.docViewsRegistry}
       renderCustomHeader={docViewer?.renderHeader}
       renderCustomFooter={docViewer?.renderFooter}
-      isEsqlQuery={isESQLQuery}
+      isEsqlQuery={isEsqlQuery}
       hit={hit}
       requestState={requestState}
       notice={notice}

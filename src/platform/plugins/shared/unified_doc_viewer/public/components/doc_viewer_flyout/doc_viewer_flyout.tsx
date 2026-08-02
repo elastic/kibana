@@ -322,7 +322,7 @@ export function UnifiedDocViewerFlyout({
                     )
                   )}
                   <EuiFlexItem grow={false} css={{ marginLeft: 'auto' }}>
-                    {isEsqlQuery || !flyoutActions ? null : <>{flyoutActions}</>}
+                    {flyoutActions}
                   </EuiFlexItem>
                 </EuiFlexGroup>
                 <EuiHorizontalRule margin="none" />

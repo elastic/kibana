@@ -64,6 +64,8 @@ describe('Discover flyout', function () {
     expandedHit,
     query,
     onCopyLink,
+    isCopyingLink,
+    copyLinkDisabledReason,
     services = getServices(),
   }: {
     dataView?: DataView;
@@ -71,6 +73,8 @@ describe('Discover flyout', function () {
     expandedHit?: EsHitRecord;
     query?: Query | AggregateQuery;
     onCopyLink?: () => void;
+    isCopyingLink?: boolean;
+    copyLinkDisabledReason?: string;
     services?: DiscoverServices;
   }) => {
     const onClose = jest.fn();
@@ -95,6 +99,8 @@ describe('Discover flyout', function () {
       onRemoveColumn: jest.fn(),
       setExpandedDoc: jest.fn(),
       onCopyLink,
+      isCopyingLink,
+      copyLinkDisabledReason,
     };
 
     render(
@@ -280,6 +286,54 @@ describe('Discover flyout', function () {
     await renderComponent({});
 
     expect(screen.queryByTestId('docTableCopyLink')).not.toBeInTheDocument();
+  });
+
+  it('should render the copy link action for ES|QL but not the data view based ones', async () => {
+    const onCopyLink = jest.fn();
+
+    await renderComponent({
+      query: { esql: 'FROM logs METADATA _id, _index' },
+      onCopyLink,
+    });
+
+    // Single and surrounding documents both resolve through a data view, which ES|QL lacks
+    expect(screen.queryByTestId('docTableRowAction')).not.toBeInTheDocument();
+    expect(screen.getByTestId('docTableCopyLink')).toBeEnabled();
+  });
+
+  it('should disable the copy link action when the query cannot produce links', async () => {
+    const onCopyLink = jest.fn();
+    const { user } = await renderComponent({
+      query: { esql: 'FROM logs' },
+      onCopyLink,
+      copyLinkDisabledReason: 'Add METADATA _id, _index to your ES|QL query',
+    });
+
+    const copyLink = screen.getByTestId('docTableCopyLink');
+
+    expect(copyLink).toBeDisabled();
+
+    // Disabled buttons do not emit pointer events, so the tooltip explaining why has to hang off
+    // the anchor around the button rather than the button itself
+    const tooltipAnchor = copyLink.closest('.euiToolTipAnchor');
+
+    expect(tooltipAnchor).not.toBeNull();
+
+    await user.hover(tooltipAnchor!);
+
+    await waitFor(() => {
+      expect(screen.getByText('Add METADATA _id, _index to your ES|QL query')).toBeVisible();
+    });
+
+    expect(onCopyLink).not.toHaveBeenCalled();
+  });
+
+  it('should show the copy link action as loading while the link is generated', async () => {
+    await renderComponent({ onCopyLink: jest.fn(), isCopyingLink: true });
+
+    expect(
+      screen.getByTestId('docTableCopyLink').querySelector('.euiLoadingSpinner')
+    ).not.toBeNull();
   });
 
   it('should not render single/surrounding views for ES|QL', async () => {

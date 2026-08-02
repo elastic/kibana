@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { copyToClipboard } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -35,8 +35,10 @@ export const useCopyExpandedDocLink = ({ dataView }: { dataView: DataView }) => 
   const persistedDiscoverSession = useInternalStateSelector(
     (state) => state.persistedDiscoverSession
   );
+  // Generating a short URL is a round trip, so the caller can show progress while it runs
+  const [isCopyingLink, setIsCopyingLink] = useState(false);
 
-  return useCallback(async () => {
+  const copyLink = useCallback(async () => {
     const {
       locator,
       share,
@@ -82,4 +84,16 @@ export const useCopyExpandedDocLink = ({ dataView }: { dataView: DataView }) => 
       }),
     });
   }, [currentTab, dataView, persistedDiscoverSession, runtimeStateManager, services]);
+
+  const copyLinkWithProgress = useCallback(async () => {
+    setIsCopyingLink(true);
+
+    try {
+      await copyLink();
+    } finally {
+      setIsCopyingLink(false);
+    }
+  }, [copyLink]);
+
+  return { copyLink: copyLinkWithProgress, isCopyingLink };
 };

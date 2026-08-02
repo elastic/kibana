@@ -32,7 +32,11 @@ import {
 } from '../../../../../../common/constants';
 import { APP_STATE_URL_KEY } from '../../../../../../common';
 import { DataSourceType } from '../../../../../../common/data_sources';
-import { getExpandedDocRef } from '../../../../../../common/expanded_doc';
+import {
+  ExpandedDocLinkability,
+  getExpandedDocLinkability,
+  getExpandedDocRef,
+} from '../../../../../../common/expanded_doc';
 import { DEFAULT_EXPANDED_DOC_OWNER } from '../constants';
 import { isEqualState } from '../../utils/state_comparators';
 import {
@@ -135,11 +139,18 @@ export const setExpandedDoc: InternalStateThunkActionCreator<[ExpandedDocPayload
       return;
     }
 
-    const nextExpandedDocRef = getExpandedDocRef(expandedDoc);
+    const { appState } = selectTab(getState(), tabId);
+
+    // A query whose rows cannot be resolved back to documents must not produce a reference, even
+    // when its rows happen to carry the metadata columns
+    const nextExpandedDocRef =
+      getExpandedDocLinkability(appState.query) === ExpandedDocLinkability.Linkable
+        ? getExpandedDocRef(expandedDoc)
+        : undefined;
 
     // Compare before dispatching, since updateAppState treats a merged `undefined` value as a
     // change against a missing key and would push a redundant history entry on every close
-    if (isEqual(selectTab(getState(), tabId).appState.expandedDoc, nextExpandedDocRef)) {
+    if (isEqual(appState.expandedDoc, nextExpandedDocRef)) {
       return;
     }
 

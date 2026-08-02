@@ -12,7 +12,11 @@ import type { MouseEventHandler } from 'react';
 
 export interface FlyoutActionItem {
   id: string;
+  /** Whether the action applies at all. Actions that do not are left out entirely. */
   enabled: boolean;
+  /** Whether the action applies but cannot be used right now. Explain why in `helpText`. */
+  disabled?: boolean;
+  isLoading?: boolean;
   label: string;
   helpText?: string;
   iconType: IconType;

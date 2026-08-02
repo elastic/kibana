@@ -7,7 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { isValidElement } from 'react';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
+import { buildDataTableRecord } from '@kbn/discover-utils';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
+import { ExpandedDocLinkability } from '../../../../../../common/expanded_doc';
+import { getExpandedDocLinkDisabledReason } from '../../../../../utils/get_expanded_doc_link_disabled_reason';
+import type { DiscoverAppState } from '../../../state_management/redux';
 import { createDiscoverServicesMock } from '../../../../../__mocks__/services';
 import { buildShareOptions } from './get_share';
 import {
@@ -340,11 +346,22 @@ describe('getShare', () => {
         hasUnsavedChanges: false,
       });
 
-    const setExpandedDocRef = (expandedDoc: { id: string; index: string } | undefined) => {
+    const expandedDoc = buildDataTableRecord({ _id: '1', _index: 'i' }, dataViewMock);
+
+    const setExpandedDoc = (doc: DataTableRecord | undefined) => {
+      toolkit.internalState.dispatch(
+        internalStateActions.setExpandedDoc({
+          tabId: toolkit.getCurrentTab().id,
+          expandedDoc: doc,
+        })
+      );
+    };
+
+    const setQuery = (query: DiscoverAppState['query']) => {
       toolkit.internalState.dispatch(
         internalStateActions.updateAppState({
           tabId: toolkit.getCurrentTab().id,
-          appState: { expandedDoc },
+          appState: { query },
         })
       );
     };
@@ -356,35 +373,72 @@ describe('getShare', () => {
         .mockReturnValue(timeRange);
     };
 
+    const getHelpTextProps = async () => {
+      const shareOptions = await buildOptions();
+      const helpText = shareOptions.objectTypeMeta.config?.link?.helpText;
+
+      return isValidElement<{ title: string; text: string }>(helpText) ? helpText.props : undefined;
+    };
+
     afterEach(() => {
-      setExpandedDocRef(undefined);
+      setExpandedDoc(undefined);
+      setQuery({ query: '', language: 'kuery' });
       setTimeRange({ from: 'now-15m', to: 'now' });
     });
 
     it('warns that a relative time range may not contain the linked document', async () => {
+      setQuery({ query: '', language: 'kuery' });
       setTimeRange({ from: 'now-15m', to: 'now' });
-      setExpandedDocRef({ id: '1', index: 'i' });
+      setExpandedDoc(expandedDoc);
 
-      const shareOptions = await buildOptions();
-
-      expect(shareOptions.objectTypeMeta.config?.link?.helpText).toBeDefined();
+      expect((await getHelpTextProps())?.title).toBe('This link includes an open document');
     });
 
     it('does not warn when the time range is already absolute', async () => {
+      setQuery({ query: '', language: 'kuery' });
       setTimeRange({ from: '2025-01-01T00:00:00.000Z', to: '2025-01-02T00:00:00.000Z' });
-      setExpandedDocRef({ id: '1', index: 'i' });
+      setExpandedDoc(expandedDoc);
 
-      const shareOptions = await buildOptions();
-
-      expect(shareOptions.objectTypeMeta.config?.link?.helpText).toBeUndefined();
+      expect(await getHelpTextProps()).toBeUndefined();
     });
 
     it('does not warn when no document is expanded', async () => {
       setTimeRange({ from: 'now-15m', to: 'now' });
 
-      const shareOptions = await buildOptions();
+      expect(await getHelpTextProps()).toBeUndefined();
+    });
 
-      expect(shareOptions.objectTypeMeta.config?.link?.helpText).toBeUndefined();
+    it('explains when an ES|QL query is missing the metadata columns', async () => {
+      setQuery({ esql: 'FROM logs' });
+      setExpandedDoc(expandedDoc);
+
+      const props = await getHelpTextProps();
+
+      expect(props?.title).toBe('This link cannot include the open document');
+      expect(props?.text).toBe(
+        getExpandedDocLinkDisabledReason(ExpandedDocLinkability.EsqlMissingMetadata)
+      );
+    });
+
+    it('explains when an ES|QL query transforms its rows', async () => {
+      setQuery({ esql: 'FROM logs METADATA _id, _index | STATS count() BY host' });
+      setExpandedDoc(expandedDoc);
+
+      const props = await getHelpTextProps();
+
+      expect(props?.text).toBe(
+        getExpandedDocLinkDisabledReason(ExpandedDocLinkability.EsqlTransformational)
+      );
+    });
+
+    it('reports the unlinkable reason ahead of the relative time range', async () => {
+      // Both apply, but a link that cannot capture the document at all is the more useful thing
+      // to say about it
+      setQuery({ esql: 'FROM logs' });
+      setTimeRange({ from: 'now-15m', to: 'now' });
+      setExpandedDoc(expandedDoc);
+
+      expect((await getHelpTextProps())?.title).toBe('This link cannot include the open document');
     });
   });
 });

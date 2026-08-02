@@ -29,6 +29,8 @@ import { useDataState } from '../../hooks/use_data_state';
 import { ExpandedDocNotice, useExpandedDocSync } from '../../hooks/use_expanded_doc_sync';
 import { useCopyExpandedDocLink } from '../../hooks/use_copy_expanded_doc_link';
 import { ExpandedDocNoticeText } from './expanded_doc_notice';
+import { getExpandedDocLinkability } from '../../../../../common/expanded_doc';
+import { getExpandedDocLinkDisabledReason } from '../../../../utils/get_expanded_doc_link_disabled_reason';
 
 export interface DiscoverDocumentFlyoutProps {
   dataView: DataView;
@@ -74,7 +76,11 @@ const DiscoverDocumentFlyoutComponent = ({
     rows,
     fetchStatus: documentState.fetchStatus,
   });
-  const copyExpandedDocLink = useCopyExpandedDocLink({ dataView });
+  const { copyLink, isCopyingLink } = useCopyExpandedDocLink({ dataView });
+  const copyLinkDisabledReason = useMemo(
+    () => getExpandedDocLinkDisabledReason(getExpandedDocLinkability(query)),
+    [query]
+  );
 
   const setExpandedDoc = useCurrentTabAction(internalStateActions.setExpandedDoc);
   const setExpandedDocForCurrentOwner = useCallback(
@@ -162,7 +168,9 @@ const DiscoverDocumentFlyoutComponent = ({
       onAddColumn={onAddColumn}
       onClose={() => setExpandedDocForCurrentOwner(undefined)}
       setExpandedDoc={setExpandedDocForCurrentOwner}
-      onCopyLink={copyExpandedDocLink}
+      onCopyLink={copyLink}
+      isCopyingLink={isCopyingLink}
+      copyLinkDisabledReason={copyLinkDisabledReason}
       docViewerRef={docViewerRef}
       onUpdateSelectedTabId={onUpdateSelectedTabId}
       initialDocViewerState={docViewerUiState}

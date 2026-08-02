@@ -29,6 +29,8 @@ import {
 } from '../../../../../utils/get_sharing_data';
 import { createSearchSource } from '../../../state_management/utils/create_search_source';
 import { getDiscoverLocatorParams } from '../../../../../utils/get_discover_locator_params';
+import { getExpandedDocLinkability } from '../../../../../../common/expanded_doc';
+import { getExpandedDocLinkDisabledReason } from '../../../../../utils/get_expanded_doc_link_disabled_reason';
 import type { DiscoverAppLocatorParams } from '../../../../../../common/app_locator';
 import type { AppMenuDiscoverParams } from './types';
 import type { DiscoverServices } from '../../../../../build_services';
@@ -54,9 +56,8 @@ interface BuildShareOptionsParams {
 type DiscoverSharingData = SharingData<DiscoverAppLocatorParams> & ReportingCSVSharingData;
 
 /**
- * A relative time range resolves differently for whoever opens the link, so the expanded
- * document often will not be in their results and has to be fetched by ID instead, losing its
- * surrounding context. Point at the switch that captures the range as absolute values instead.
+ * Explains what a link will and will not capture about the open document, so the user is not
+ * left to discover after sharing that the recipient does not land where they did.
  */
 const getExpandedDocHelpText = ({
   currentTab,
@@ -65,7 +66,32 @@ const getExpandedDocHelpText = ({
   currentTab: TabState;
   timeRange: TimeRange | undefined;
 }) => {
-  if (!currentTab.appState.expandedDoc || isTimeRangeAbsoluteTime(timeRange)) {
+  if (!currentTab.expandedDoc) {
+    return undefined;
+  }
+
+  const disabledReason = getExpandedDocLinkDisabledReason(
+    getExpandedDocLinkability(currentTab.appState.query)
+  );
+
+  // The link cannot capture the document at all, which matters more than how its time range is
+  // expressed, so report that instead
+  if (disabledReason) {
+    return (
+      <KbnInfoCallout
+        data-test-subj="discoverShareExpandedDocCallout"
+        title={i18n.translate('discover.share.expandedDocNotLinkableTitle', {
+          defaultMessage: 'This link cannot include the open document',
+        })}
+        text={disabledReason}
+      />
+    );
+  }
+
+  // A relative time range resolves differently for whoever opens the link, so the document often
+  // will not be in their results and has to be fetched by ID instead, losing its surrounding
+  // context. Point at the switch that captures the range as absolute values instead.
+  if (isTimeRangeAbsoluteTime(timeRange)) {
     return undefined;
   }
 
