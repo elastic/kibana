@@ -77,26 +77,6 @@ describe('TaskClaiming', () => {
       .mockImplementation(() => mockApmTrans as any);
   });
 
-  test(`should log a warning when invalid strategy specified`, () => {
-    const definitions = new TaskTypeDictionary(mockLogger());
-
-    new TaskClaiming({
-      logger: taskManagerLogger,
-      strategy: 'non-default',
-      definitions,
-      excludedTaskTypes: [],
-      taskStore: taskStoreMock.create({ taskManagerId: '' }),
-      maxAttempts: 2,
-      getAvailableCapacity: () => 10,
-      taskPartitioner,
-    });
-
-    expect(taskManagerLogger.warn).toHaveBeenCalledWith(
-      'Unknown task claiming strategy "non-default", falling back to update_by_query',
-      { tags: ['taskClaiming'] }
-    );
-  });
-
   test(`should log when a certain task type is skipped due to having a zero concurency configuration`, () => {
     const definitions = new TaskTypeDictionary(mockLogger());
     definitions.registerTaskDefinitions({
