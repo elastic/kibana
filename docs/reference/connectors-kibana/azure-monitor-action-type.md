@@ -1,5 +1,5 @@
 ---
-navigation_title: "Azure monitor"
+navigation_title: "Azure Monitor"
 type: reference
 description: "Use the Azure monitor connector to list and triage Azure Monitor alerts, query metrics and logs, and control alert rules."
 applies_to:
