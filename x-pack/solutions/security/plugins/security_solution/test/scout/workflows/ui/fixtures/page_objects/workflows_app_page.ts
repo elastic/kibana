@@ -90,32 +90,19 @@ export class WorkflowsAppPage {
   }
 
   /**
-   * Run the currently-open, saved workflow with the given inputs.
-   *
-   * Clicking Run either opens the execute modal (manual triggers with
-   * declared `inputs`) or runs the workflow directly and navigates straight
-   * to the execution view (no declared inputs). Both are legitimate app
-   * behavior, so this races the two outcomes instead of assuming the modal
-   * always appears.
+   * Run the currently-open, saved workflow via the execute modal with the
+   * given inputs. Every workflow built by `buildManualWorkflowYaml` declares
+   * a trigger input, so Run always opens the inputs modal rather than
+   * executing immediately.
    */
   async runWorkflow(inputs: Record<string, unknown> = {}): Promise<void> {
     await this.runButton.click();
 
-    const executeModal = this.page.testSubj.locator('workflowExecuteModal');
-    const outcome = await Promise.race([
-      executeModal
-        .waitFor({ state: 'visible', timeout: APP_LOAD_TIMEOUT })
-        .then(() => 'modal' as const),
-      this.page
-        .waitForURL('**/workflows/*?executionId=*', { timeout: APP_LOAD_TIMEOUT })
-        .then(() => 'ran' as const),
-    ]);
-
-    if (outcome === 'ran') {
-      return;
-    }
-
     const inputsEditor = this.page.testSubj.locator('workflow-manual-json-editor');
+    await this.page.testSubj.waitForSelector('workflowExecuteModal', {
+      state: 'visible',
+      timeout: APP_LOAD_TIMEOUT,
+    });
     await inputsEditor.waitFor({ state: 'visible', timeout: APP_LOAD_TIMEOUT });
     await this.setEditorValue(inputsEditor, JSON.stringify(inputs, null, 2));
     await this.page.testSubj.click('executeWorkflowButton');
@@ -143,18 +130,53 @@ export class WorkflowsAppPage {
           .then(() => 'failed' as const),
       ]);
       if (winner === 'failed') {
-        throw new Error('Expected execution status "completed" but got "failed".');
+        const errorDetails = await this.extractFailedStepError();
+        throw new Error(
+          `Expected execution status "completed" but got "failed".\n\n${errorDetails}`
+        );
       }
       return;
     }
     await withStatus(status).waitFor({ state: 'visible', timeout });
   }
 
+  /** Every top-level step button in the execution tree. */
+  private getStepButtons(): Locator {
+    return this.executionPanel.locator('button:has(span[data-test-subj="workflowStepName"])');
+  }
+
   /** Locate a top-level step button in the execution tree by its step name. */
   private getStep(stepName: string): Locator {
-    return this.executionPanel
-      .locator('button:has(span[data-test-subj="workflowStepName"])')
-      .filter({ hasText: stepName });
+    return this.getStepButtons().filter({ hasText: stepName });
+  }
+
+  /**
+   * Clicks the last step in the execution tree (the one that errored, since a
+   * failed execution stops there) and extracts its error JSON. Returns a
+   * formatted string for use in error messages.
+   */
+  private async extractFailedStepError(): Promise<string> {
+    try {
+      const stepButtons = this.getStepButtons();
+      const count = await stepButtons.count();
+      if (count === 0) {
+        return 'No steps found in execution tree.';
+      }
+
+      // eslint-disable-next-line playwright/no-nth-methods -- we need the last step (the failed one)
+      const lastStep = stepButtons.nth(count - 1);
+      const stepName =
+        (await lastStep.locator('span[data-test-subj="workflowStepName"]').textContent()) ??
+        'unknown';
+      await lastStep.click();
+
+      const errorJson = await this.readStepResultJson<unknown>('error');
+      return `Failed step: "${stepName.trim()}"\nError:\n${JSON.stringify(errorJson, null, 2)}`;
+    } catch (e) {
+      return `(could not extract step error details: ${
+        e instanceof Error ? e.message : String(e)
+      })`;
+    }
   }
 
   /**
@@ -163,7 +185,11 @@ export class WorkflowsAppPage {
    */
   async getStepResultJson<T>(stepName: string, type: 'output' | 'error'): Promise<T> {
     await this.getStep(stepName).click();
+    return this.readStepResultJson<T>(type);
+  }
 
+  /** Read the result JSON of whichever step is currently selected in the execution tree. */
+  private async readStepResultJson<T>(type: 'output' | 'error'): Promise<T> {
     const details = this.page.testSubj.locator('workflowStepExecutionDetails');
     await details.locator(`button[data-test-subj="workflowStepTab_${type}"]`).click();
     await details.locator('button[data-test-subj="workflowViewMode_json"]').click();
