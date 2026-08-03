@@ -315,6 +315,7 @@ describe('when calling the Suggestions route handler', () => {
         mockSecuritySolutionContext = {
           getInternalFleetServices: jest.fn().mockReturnValue(mockFleetServices),
           getSpaceId: jest.fn().mockReturnValue('default'),
+          getEndpointAuthz: jest.fn().mockResolvedValue(getEndpointAuthzInitialStateMock()),
         };
 
         applyActionsEsSearchMock(mockScopedEsClient.asInternalUser);
@@ -394,8 +395,29 @@ describe('when calling the Suggestions route handler', () => {
                     },
                   },
                   {
-                    terms: {
-                      'united.agent.policy_id': ['policy-1', 'policy-2'],
+                    bool: {
+                      minimum_should_match: 1,
+                      should: [
+                        {
+                          terms: {
+                            'united.agent.policy_id': ['policy-1', 'policy-2'],
+                          },
+                        },
+                        {
+                          wildcard: {
+                            'united.agent.policy_id': {
+                              value: 'policy-1#*',
+                            },
+                          },
+                        },
+                        {
+                          wildcard: {
+                            'united.agent.policy_id': {
+                              value: 'policy-2#*',
+                            },
+                          },
+                        },
+                      ],
                     },
                   },
                 ],
@@ -481,8 +503,15 @@ describe('when calling the Suggestions route handler', () => {
                     },
                   },
                   {
-                    terms: {
-                      'united.agent.policy_id': [],
+                    bool: {
+                      minimum_should_match: 1,
+                      should: [
+                        {
+                          terms: {
+                            'united.agent.policy_id': [],
+                          },
+                        },
+                      ],
                     },
                   },
                 ],
@@ -606,8 +635,22 @@ describe('when calling the Suggestions route handler', () => {
                     },
                   },
                   {
-                    terms: {
-                      'united.agent.policy_id': ['space-policy-1'],
+                    bool: {
+                      minimum_should_match: 1,
+                      should: [
+                        {
+                          terms: {
+                            'united.agent.policy_id': ['space-policy-1'],
+                          },
+                        },
+                        {
+                          wildcard: {
+                            'united.agent.policy_id': {
+                              value: 'space-policy-1#*',
+                            },
+                          },
+                        },
+                      ],
                     },
                   },
                 ],
@@ -687,6 +730,82 @@ describe('when calling the Suggestions route handler', () => {
         expect(mockFleetServices.getIntegrationNamespaces).toHaveBeenCalledWith(['endpoint']);
         expect(buildIndexNameWithNamespaceMock).toHaveBeenCalledWith(
           DEVICE_EVENTS_INDEX_PATTERN,
+          'custom-namespace',
+          { preserveWildcard: true }
+        );
+        expect(termsEnumSuggestionsMock).toHaveBeenNthCalledWith(
+          1,
+          expect.any(Object),
+          expect.any(Object),
+          mockScopedEsClient.asInternalUser,
+          mockIndexPattern,
+          fieldName,
+          'test-query',
+          [{ term: { 'test.field': 'test-value' } }],
+          'test-field-meta',
+          expect.any(Object)
+        );
+
+        expect(mockResponse.ok).toHaveBeenCalled();
+      });
+    });
+
+    describe('when suggestion_type is trustedApps', () => {
+      beforeEach(() => {
+        mockEndpointContext.experimentalFeatures = {
+          ...mockEndpointContext.experimentalFeatures,
+          trustedAppsAdvancedMode: true,
+        };
+        suggestionsRouteHandler = getEndpointSuggestionsRequestHandler(
+          config$,
+          mockEndpointContext
+        );
+      });
+
+      it('should use the internal user es client for trusted apps suggestions', async () => {
+        const spaceId = 'custom-space';
+        const mockIntegrationNamespaces = { endpoint: ['custom-namespace'] };
+        const mockIndexPattern = 'logs-endpoint.events.*-custom-namespace';
+
+        applyActionsEsSearchMock(mockScopedEsClient.asInternalUser);
+
+        const mockContext = requestContextMock.convertContext(
+          createRouteHandlerContext(mockScopedEsClient, mockSavedObjectClient)
+        );
+
+        ((await mockContext.securitySolution).getSpaceId as jest.Mock).mockReturnValue(spaceId);
+
+        const mockFleetServices = {
+          getIntegrationNamespaces: jest.fn().mockResolvedValue(mockIntegrationNamespaces),
+        };
+        mockEndpointContext.service.getInternalFleetServices = jest
+          .fn()
+          .mockReturnValue(mockFleetServices);
+
+        buildIndexNameWithNamespaceMock.mockReturnValue(mockIndexPattern);
+
+        const fieldName = 'process.name';
+        const mockRequest = httpServerMock.createKibanaRequest<
+          TypeOf<typeof EndpointSuggestionsSchema.params>,
+          never,
+          never
+        >({
+          params: { suggestion_type: 'trustedApps' },
+          body: {
+            field: fieldName,
+            query: 'test-query',
+            filters: [{ term: { 'test.field': 'test-value' } }],
+            fieldMeta: 'test-field-meta',
+          },
+        });
+
+        await suggestionsRouteHandler(mockContext, mockRequest, mockResponse);
+
+        expect((await mockContext.securitySolution).getSpaceId as jest.Mock).toHaveBeenCalled();
+        expect(mockEndpointContext.service.getInternalFleetServices).toHaveBeenCalledWith(spaceId);
+        expect(mockFleetServices.getIntegrationNamespaces).toHaveBeenCalledWith(['endpoint']);
+        expect(buildIndexNameWithNamespaceMock).toHaveBeenCalledWith(
+          eventsIndexPattern,
           'custom-namespace',
           { preserveWildcard: true }
         );
@@ -989,6 +1108,67 @@ describe('when calling the Suggestions route handler', () => {
         });
 
         expect(mockResponse.forbidden).toBeCalled();
+      });
+
+      it('should respond with forbidden for endpoints', async () => {
+        await callRoute(SUGGESTIONS_INTERNAL_ROUTE, {
+          params: { suggestion_type: 'endpoints' },
+          authz: {
+            canReadEventFilters: true,
+            canWriteEventFilters: false,
+            canReadTrustedApplications: true,
+            canWriteTrustedApplications: false,
+            canReadTrustedDevices: true,
+            canWriteTrustedDevices: false,
+            canReadEndpointExceptions: true,
+            canWriteEndpointExceptions: false,
+            canReadEndpointList: false,
+          },
+        });
+
+        expect(mockResponse.forbidden).toBeCalled();
+      });
+    });
+
+    describe('when the user is not authorized for the requested suggestion type', () => {
+      beforeEach(() => {
+        suggestionsRouteHandler = getEndpointSuggestionsRequestHandler(
+          config$,
+          mockEndpointContext
+        );
+      });
+
+      it('should respond with forbidden and not query for suggestions', async () => {
+        const mockContext = requestContextMock.convertContext(
+          createRouteHandlerContext(mockScopedEsClient, mockSavedObjectClient, {
+            endpointAuthz: {
+              canWriteEventFilters: false,
+              canWriteTrustedApplications: false,
+              canWriteTrustedDevices: false,
+              canWriteEndpointExceptions: true,
+              canReadEndpointList: false,
+            },
+          })
+        );
+
+        const mockRequest = httpServerMock.createKibanaRequest<
+          TypeOf<typeof EndpointSuggestionsSchema.params>,
+          never,
+          never
+        >({
+          params: { suggestion_type: 'eventFilters' },
+          body: {
+            field: 'process.args',
+            query: 'test-query',
+            filters: [],
+            fieldMeta: 'test-field-meta',
+          },
+        });
+
+        await suggestionsRouteHandler(mockContext, mockRequest, mockResponse);
+
+        expect(mockResponse.forbidden).toHaveBeenCalled();
+        expect(termsEnumSuggestionsMock).not.toHaveBeenCalled();
       });
     });
   });

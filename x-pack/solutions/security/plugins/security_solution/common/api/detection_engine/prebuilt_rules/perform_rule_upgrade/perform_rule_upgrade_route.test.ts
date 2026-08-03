@@ -116,6 +116,57 @@ describe('Perform Rule Upgrade Route Schemas', () => {
         );
       });
 
+      // Regression test for https://github.com/elastic/kibana/issues/232614:
+      // resolving a `required_fields` conflict must not require the computed
+      // `ecs` property on input (it is derived on the server).
+      it('accepts a resolved required_fields value without the computed `ecs` property', () => {
+        const input = {
+          required_fields: {
+            pick_version: 'RESOLVED',
+            resolved_value: [
+              { name: '@timestamp', type: 'date' },
+              { name: 'user.name', type: 'keyword' },
+            ],
+          },
+        };
+        const result = RuleFieldsToUpgrade.safeParse(input);
+        expectParseSuccess(result);
+        expect(result.data).toEqual(input);
+      });
+
+      // The pre-fix workaround sent `ecs` hardcoded; that must keep working.
+      // `ecs` is not part of the input schema, so it is stripped on parse.
+      it('strips a provided `ecs` property from a resolved required_fields value', () => {
+        const input = {
+          required_fields: {
+            pick_version: 'RESOLVED',
+            resolved_value: [{ name: '@timestamp', type: 'date', ecs: false }],
+          },
+        };
+        const result = RuleFieldsToUpgrade.safeParse(input);
+        expectParseSuccess(result);
+        expect(result.data).toEqual({
+          required_fields: {
+            pick_version: 'RESOLVED',
+            resolved_value: [{ name: '@timestamp', type: 'date' }],
+          },
+        });
+      });
+
+      it('invalidates a resolved required_fields value missing required properties', () => {
+        const input = {
+          required_fields: {
+            pick_version: 'RESOLVED',
+            resolved_value: [{ name: '@timestamp' }],
+          },
+        };
+        const result = RuleFieldsToUpgrade.safeParse(input);
+        expectParseError(result);
+        expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+          `"required_fields.resolved_value.0.type: Invalid input: expected string, received undefined"`
+        );
+      });
+
       it('invalidates unknown fields', () => {
         const input = {
           unknown_field: {

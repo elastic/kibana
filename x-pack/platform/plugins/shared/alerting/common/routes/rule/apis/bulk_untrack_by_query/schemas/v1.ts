@@ -6,8 +6,15 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import {
+  MAX_BULK_UNTRACK_QUERIES,
+  MAX_ARRAY_FIELDS,
+  MAX_ID_LENGTH,
+} from '../../../../../constants';
 
 export const bulkUntrackByQueryBodySchema = schema.object({
-  query: schema.arrayOf(schema.any()),
-  rule_type_ids: schema.arrayOf(schema.string()),
+  query: schema.arrayOf(schema.any(), { maxSize: MAX_BULK_UNTRACK_QUERIES }),
+  rule_type_ids: schema.arrayOf(schema.string({ maxLength: MAX_ID_LENGTH }), {
+    maxSize: MAX_ARRAY_FIELDS,
+  }),
 });

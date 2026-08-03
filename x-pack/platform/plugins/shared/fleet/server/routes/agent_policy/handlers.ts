@@ -7,26 +7,21 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import type { KibanaRequest, RequestHandler, ResponseHeaders } from '@kbn/core/server';
-import {
-  escapeKuery,
-  escapeQuotes,
-  fromKueryExpression,
-  toElasticsearchQuery,
-} from '@kbn/es-query';
+import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 
 import { isEmpty, uniq } from 'lodash';
 
 import yaml from 'yaml';
 
+import { ALL_SPACES_ID, FIPS_AGENT_KUERY, inputsFormat } from '../../../common/constants';
 import {
-  ALL_SPACES_ID,
-  AGENT_POLICY_VERSION_SEPARATOR,
-  FIPS_AGENT_KUERY,
-  inputsFormat,
-} from '../../../common/constants';
-import { removeVersionSuffixFromPolicyId } from '../../../common/services/version_specific_policies_utils';
+  removeVersionSuffixFromPolicyId,
+  buildPolicyIdOrVariantsKuery,
+} from '../../../common/services/version_specific_policies_utils';
 
 import { fullAgentPolicyToYaml } from '../../../common/services';
+import { redactProxySecretsFromPolicy } from '../../services/agent_policies/full_agent_policy';
+import { listFleetProxies } from '../../services/fleet_proxies';
 import {
   appContextService,
   agentPolicyService,
@@ -87,12 +82,6 @@ import { getLatestAgentAvailableDockerImageVersion } from '../../services/agents
 
 const deduplicateIds = (ids: string[]) => uniq(ids);
 
-function getPolicyOrVersionSpecificKuery(policyId: string): string {
-  return `(policy_id:"${escapeQuotes(policyId)}" or policy_id:${escapeKuery(
-    policyId
-  )}${AGENT_POLICY_VERSION_SEPARATOR}*)`;
-}
-
 interface AssignedAgentsCountAggregation {
   buckets: Record<
     string,
@@ -120,7 +109,7 @@ export async function populateAssignedAgentsCount(
   const policyKueryById = new Map(
     agentPolicies.map((agentPolicy) => [
       agentPolicy.id,
-      getPolicyOrVersionSpecificKuery(agentPolicy.id),
+      buildPolicyIdOrVariantsKuery(agentPolicy.id),
     ])
   );
 
@@ -767,6 +756,8 @@ export const getFullAgentPolicy: FleetRequestHandler<
     });
   }
 
+  const canReadSettings = fleetContext.authz.fleet.readSettings;
+
   if (request.query.revision) {
     const coreContext = await context.core;
     const esClient = coreContext.elasticsearch.client.asInternalUser;
@@ -781,9 +772,16 @@ export const getFullAgentPolicy: FleetRequestHandler<
         body: { message: 'Agent policy not found' },
       });
     }
-    const body: GetFullAgentPolicyResponse = {
-      item: fleetServerPolicy.data as unknown as FullAgentPolicy,
-    };
+    const item = fleetServerPolicy.data as unknown as FullAgentPolicy;
+    let redactedItem = item;
+    if (!canReadSettings) {
+      const { items: proxies } = await listFleetProxies(soClient);
+      const proxyUrlsWithCertKey = new Set(
+        proxies.filter((p) => p.certificate_key).map((p) => p.url)
+      );
+      redactedItem = redactProxySecretsFromPolicy(item, proxyUrlsWithCertKey);
+    }
+    const body: GetFullAgentPolicyResponse = { item: redactedItem };
     return response.ok({ body });
   }
 
@@ -794,7 +792,7 @@ export const getFullAgentPolicy: FleetRequestHandler<
       soClient,
       agentPolicyId,
       agentVersion,
-      { standalone: request.query.standalone === true }
+      { standalone: request.query.standalone === true, redactProxySecrets: !canReadSettings }
     );
     if (fullAgentConfigMap) {
       const body: GetFullAgentConfigMapResponse = {
@@ -812,6 +810,7 @@ export const getFullAgentPolicy: FleetRequestHandler<
   } else {
     const fullAgentPolicy = await agentPolicyService.getFullAgentPolicy(soClient, agentPolicyId, {
       standalone: request.query.standalone === true,
+      redactProxySecrets: !canReadSettings,
     });
     if (fullAgentPolicy) {
       const body: GetFullAgentPolicyResponse = {
@@ -846,6 +845,8 @@ export const downloadFullAgentPolicy: FleetRequestHandler<
     });
   }
 
+  const canReadSettings = fleetContext.authz.fleet.readSettings;
+
   if (request.query.revision) {
     const coreContext = await context.core;
     const esClient = coreContext.elasticsearch.client.asInternalUser;
@@ -860,8 +861,16 @@ export const downloadFullAgentPolicy: FleetRequestHandler<
         body: { message: 'Agent policy not found' },
       });
     }
-    const fullAgentPolicy = fleetServerPolicy.data as unknown as FullAgentPolicy;
-    const body = fullAgentPolicyToYaml(fullAgentPolicy, yaml);
+    const storedPolicy = fleetServerPolicy.data as unknown as FullAgentPolicy;
+    let policyToSerialize = storedPolicy;
+    if (!canReadSettings) {
+      const { items: proxies } = await listFleetProxies(soClient);
+      const proxyUrlsWithCertKey = new Set(
+        proxies.filter((p) => p.certificate_key).map((p) => p.url)
+      );
+      policyToSerialize = redactProxySecretsFromPolicy(storedPolicy, proxyUrlsWithCertKey);
+    }
+    const body = fullAgentPolicyToYaml(policyToSerialize, yaml);
     const headers: ResponseHeaders = {
       'content-type': 'text/x-yaml',
       'content-disposition': `attachment; filename="elastic-agent.yml"`,
@@ -876,7 +885,7 @@ export const downloadFullAgentPolicy: FleetRequestHandler<
       soClient,
       agentPolicyId,
       agentVersion,
-      { standalone: request.query.standalone === true }
+      { standalone: request.query.standalone === true, redactProxySecrets: !canReadSettings }
     );
     if (!fullAgentConfigMap) {
       return response.customError({
@@ -896,6 +905,7 @@ export const downloadFullAgentPolicy: FleetRequestHandler<
   } else {
     const fullAgentPolicy = await agentPolicyService.getFullAgentPolicy(soClient, agentPolicyId, {
       standalone: request.query.standalone === true,
+      redactProxySecrets: !canReadSettings,
     });
     if (!fullAgentPolicy) {
       return response.customError({

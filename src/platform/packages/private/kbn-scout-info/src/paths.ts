@@ -148,6 +148,20 @@ export const SCOUT_TESTS_ONLY_SCOPE_GLOBS: readonly string[] = [
 ];
 
 /**
+ * Scout `fixtures/` directories, excluded from the "tests-only" fast path: their
+ * entry points (e.g. page objects) can be imported by other plugins, so a change
+ * must run downstream configs (dependency-tree mode) rather than tests-only.
+ *
+ * The globstar is kept only at the end; a globstar-before-`fixtures` form is
+ * avoided because minimatch fails to match a single trailing segment when a
+ * leading globstar collapses to zero.
+ */
+export const SCOUT_TESTS_ONLY_EXCLUDE_GLOBS: readonly string[] = [
+  `**/test/scout{_*,}/{${SCOUT_TEST_CATEGORIES.join(',')}}/fixtures/**`,
+  `**/test/scout{_*,}/*/{${SCOUT_TEST_CATEGORIES.join(',')}}/fixtures/**`,
+];
+
+/**
  * Captures `<prefix>/test/scout{_*}[/<namespace>]/(api|ui)/<rest?>` and its `.meta/` variant.
  * A negative lookahead prevents `.meta` from being captured as a namespace; backtracking
  * prevents `api`/`ui` from being captured as a namespace.

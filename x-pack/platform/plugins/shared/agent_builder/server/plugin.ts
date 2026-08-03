@@ -273,6 +273,7 @@ export class AgentBuilderPlugin
       actions,
       taskManager,
       searchInferenceEndpoints,
+      security: securityPlugin,
     }: AgentBuilderStartDependencies
   ): AgentBuilderPluginStart {
     const { elasticsearch, security, uiSettings, savedObjects, dataStreams, featureFlags } =
@@ -280,6 +281,7 @@ export class AgentBuilderPlugin
     const startServices = this.serviceManager.startServices({
       logger: this.logger.get('services'),
       security,
+      securityPlugin,
       elasticsearch,
       inference,
       spaces,

@@ -22,7 +22,7 @@ describe('UserService', () => {
 
     await expect(userService.getCurrentUserProfileUid()).resolves.toBe('elastic_profile_uid');
 
-    expect(userProfileService.getCurrent).toHaveBeenCalledWith({
+    expect(userProfileService.getCurrentProfileId).toHaveBeenCalledWith({
       request: expect.anything(),
     });
   });
@@ -42,7 +42,7 @@ describe('UserService', () => {
 
   it('returns null when the profile is not found', async () => {
     const { userService, userProfileService } = createUserService();
-    userProfileService.getCurrent.mockResolvedValue(null);
+    userProfileService.getCurrentProfileId.mockResolvedValue(null);
 
     await expect(userService.getCurrentUserProfileUid()).resolves.toBeNull();
   });

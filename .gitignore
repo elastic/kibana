@@ -1,3 +1,6 @@
+.artifacts
+docs/**/.artifacts
+/.superset
 .aws-config.json
 .signing-config.json
 .ackrc

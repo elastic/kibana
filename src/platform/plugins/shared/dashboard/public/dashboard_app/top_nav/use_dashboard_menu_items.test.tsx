@@ -7,15 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 
 import type { AppMenuPopoverItem } from '@kbn/core-chrome-app-menu-components';
 import type { ShareActionIntents } from '@kbn/share-plugin/public/types';
-import { I18nProvider } from '@kbn/i18n-react';
 
-import { buildMockDashboardApi } from '../../mocks';
-import { DashboardContext } from '../../dashboard_api/use_dashboard_api';
+import { dashboardContextWrapper } from '../../mocks';
 import { coreServices, shareService } from '../../services/kibana_services';
 import { useDashboardMenuItems } from './use_dashboard_menu_items';
 import { BehaviorSubject } from 'rxjs';
@@ -32,8 +29,6 @@ describe('useDashboardMenuItems', () => {
 
   describe('Export', () => {
     test('does not include Export top-nav item when no export integrations are available', () => {
-      const { api } = buildMockDashboardApi({ savedObjectId: 'test-id' });
-
       const { result } = renderHook(
         () =>
           useDashboardMenuItems({
@@ -42,11 +37,7 @@ describe('useDashboardMenuItems', () => {
             maybeRedirect: jest.fn(),
           }),
         {
-          wrapper: ({ children }) => (
-            <I18nProvider>
-              <DashboardContext.Provider value={api}>{children}</DashboardContext.Provider>
-            </I18nProvider>
-          ),
+          wrapper: dashboardContextWrapper({ savedObjectId: 'test-id' }),
         }
       );
 
@@ -58,8 +49,6 @@ describe('useDashboardMenuItems', () => {
     });
 
     test('includes Export top-nav item with JSON when only exportDerivatives integrations are available', () => {
-      const { api } = buildMockDashboardApi({ savedObjectId: 'test-id' });
-
       jest
         .mocked(shareService!.availableIntegrations)
         .mockImplementation((_objectType: string, groupId?: string): ShareActionIntents[] => {
@@ -89,11 +78,7 @@ describe('useDashboardMenuItems', () => {
             maybeRedirect: jest.fn(),
           }),
         {
-          wrapper: ({ children }) => (
-            <I18nProvider>
-              <DashboardContext.Provider value={api}>{children}</DashboardContext.Provider>
-            </I18nProvider>
-          ),
+          wrapper: dashboardContextWrapper({ savedObjectId: 'test-id' }),
         }
       );
 
@@ -113,8 +98,6 @@ describe('useDashboardMenuItems', () => {
     });
 
     test('includes Export top-nav item with JSON and Reporting items when export and exportDerivatives integrations are available', () => {
-      const { api } = buildMockDashboardApi({ savedObjectId: 'test-id' });
-
       jest
         .mocked(shareService!.availableIntegrations)
         .mockImplementation((_objectType: string, groupId?: string): ShareActionIntents[] => {
@@ -157,11 +140,7 @@ describe('useDashboardMenuItems', () => {
             maybeRedirect: jest.fn(),
           }),
         {
-          wrapper: ({ children }) => (
-            <I18nProvider>
-              <DashboardContext.Provider value={api}>{children}</DashboardContext.Provider>
-            </I18nProvider>
-          ),
+          wrapper: dashboardContextWrapper({ savedObjectId: 'test-id' }),
         }
       );
 
@@ -188,7 +167,6 @@ describe('useDashboardMenuItems', () => {
   describe('run switchToViewMode', () => {
     describe('dashboard does not have unsaved changes', () => {
       test('should switch to view mode', () => {
-        const { api } = buildMockDashboardApi({ savedObjectId: 'test-id' });
         const mockSetViewMode = jest.fn();
 
         const { result } = renderHook(
@@ -199,18 +177,10 @@ describe('useDashboardMenuItems', () => {
               maybeRedirect: jest.fn(),
             }),
           {
-            wrapper: ({ children }) => (
-              <I18nProvider>
-                <DashboardContext.Provider
-                  value={{
-                    ...api,
-                    setViewMode: mockSetViewMode,
-                  }}
-                >
-                  {children}
-                </DashboardContext.Provider>
-              </I18nProvider>
-            ),
+            wrapper: dashboardContextWrapper({
+              savedObjectId: 'test-id',
+              apiOverrides: { setViewMode: mockSetViewMode },
+            }),
           }
         );
 
@@ -228,17 +198,11 @@ describe('useDashboardMenuItems', () => {
       const mockAsyncResetToLastSavedState = jest.fn();
       const hasUnsavedChanges$ = new BehaviorSubject(true) as DashboardApi['hasUnsavedChanges$'];
 
-      function getMockDashboardApi() {
-        const { api } = buildMockDashboardApi({ savedObjectId: 'test-id' });
-        return {
-          ...api,
-          asyncResetToLastSavedState: mockAsyncResetToLastSavedState,
-          setViewMode: mockSetViewMode,
-          hasUnsavedChanges$,
-        };
-      }
-
-      const mockApi = getMockDashboardApi();
+      const apiOverrides = {
+        asyncResetToLastSavedState: mockAsyncResetToLastSavedState,
+        setViewMode: mockSetViewMode,
+        hasUnsavedChanges$,
+      };
 
       beforeEach(() => {
         mockSetViewMode.mockReset();
@@ -254,11 +218,7 @@ describe('useDashboardMenuItems', () => {
               maybeRedirect: jest.fn(),
             }),
           {
-            wrapper: ({ children }) => (
-              <I18nProvider>
-                <DashboardContext.Provider value={mockApi}>{children}</DashboardContext.Provider>
-              </I18nProvider>
-            ),
+            wrapper: dashboardContextWrapper({ savedObjectId: 'test-id', apiOverrides }),
           }
         );
 
@@ -286,11 +246,7 @@ describe('useDashboardMenuItems', () => {
               maybeRedirect: jest.fn(),
             }),
           {
-            wrapper: ({ children }) => (
-              <I18nProvider>
-                <DashboardContext.Provider value={mockApi}>{children}</DashboardContext.Provider>
-              </I18nProvider>
-            ),
+            wrapper: dashboardContextWrapper({ savedObjectId: 'test-id', apiOverrides }),
           }
         );
 
