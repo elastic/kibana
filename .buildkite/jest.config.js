@@ -8,12 +8,13 @@
  */
 
 const { createJsWithTsEsmPreset } = require('ts-jest');
+const { dirname } = require('node:path');
 
 const tsJestTransformCfg = createJsWithTsEsmPreset().transform;
 
 /** @type {import("jest").Config} **/
 module.exports = {
-  testEnvironment: 'node',
+  testEnvironment: require.resolve('jest-environment-node', { paths: [dirname(process.argv[1])] }),
   transform: {
     ...tsJestTransformCfg,
   },

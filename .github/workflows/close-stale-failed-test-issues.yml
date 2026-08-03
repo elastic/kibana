@@ -5,8 +5,7 @@ name: Close stale failed-test issues
 # (a new failure comment, a human comment, an edit) restarts the countdown.
 #
 # Closing is safe: the failed test reporter reopens the issue automatically
-# if the test fails again. Issues labeled `skipped-test` are excluded because
-# they stay open on purpose as a reminder to unskip the test.
+# if the test fails again.
 
 on:
   schedule:
@@ -38,7 +37,6 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const LABEL = 'failed-test';
-            const EXCLUDED_LABELS = ['skipped-test'];
             const CREATOR = 'kibanamachine';
             const DAYS_UNTIL_CLOSE = 21;
             // Drain the backlog gradually to avoid rate limits and a
@@ -65,11 +63,7 @@ jobs:
                 core.info(`Reached the limit of ${MAX_CLOSES_PER_RUN} closes, stopping`);
                 break;
               }
-              if (
-                item.pull_request ||
-                new Date(item.updated_at).getTime() > cutoff ||
-                getLabels(item).some((label) => EXCLUDED_LABELS.includes(label))
-              ) {
+              if (item.pull_request || new Date(item.updated_at).getTime() > cutoff) {
                 continue;
               }
 
@@ -90,7 +84,6 @@ jobs:
               if (
                 fresh.state !== 'open' ||
                 !freshLabels.includes(LABEL) ||
-                freshLabels.some((label) => EXCLUDED_LABELS.includes(label)) ||
                 new Date(fresh.updated_at).getTime() > cutoff
               ) {
                 continue;
