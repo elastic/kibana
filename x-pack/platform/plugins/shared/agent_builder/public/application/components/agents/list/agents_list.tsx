@@ -96,7 +96,7 @@ const columnNames = {
     defaultMessage: 'Created by',
   }),
   lastUpdatedBy: i18n.translate('xpack.agentBuilder.agents.lastUpdatedByColumn', {
-    defaultMessage: 'Last updated',
+    defaultMessage: 'Last updated by',
   }),
 };
 
