@@ -6,34 +6,8 @@
  */
 
 import type { IBasePath } from '@kbn/core/server';
-import {
-  getTLSCertAlertId,
-  getTLSAlertContext,
-  setTLSRecoveredAlertsContext,
-} from './message_utils';
+import { getTLSAlertContext, setTLSRecoveredAlertsContext } from './message_utils';
 import type { TLSLatestPing } from './tls_rule_executor';
-
-describe('getTLSCertAlertId', () => {
-  it('uses the sha256 fingerprint for lightweight certificates', () => {
-    expect(
-      getTLSCertAlertId({ sha256: 'abc123', common_name: 'example.com', issuer: 'Test CA' })
-    ).toBe('abc123');
-  });
-
-  it('falls back to common name + issuer for fingerprint-free browser certificates', () => {
-    expect(getTLSCertAlertId({ common_name: 'example.com', issuer: "Let's Encrypt" })).toBe(
-      "browser-cert:example.com:Let's Encrypt"
-    );
-  });
-
-  it('handles a browser certificate with a missing issuer', () => {
-    expect(getTLSCertAlertId({ common_name: 'example.com' })).toBe('browser-cert:example.com:');
-  });
-
-  it('returns undefined when neither a fingerprint nor a common name is available', () => {
-    expect(getTLSCertAlertId({})).toBeUndefined();
-  });
-});
 
 describe('getTLSAlertContext', () => {
   const basePath = {
@@ -242,48 +216,6 @@ describe('setTLSRecoveredAlertsContext', () => {
         summary: 'Expiry/Age threshold has been updated.',
       },
       id: 'alert-id',
-    });
-  });
-
-  it('sets a fingerprint-free recovery context for a recovered browser certificate', async () => {
-    // Browser certs carry no sha256, so the recovery path cannot reconcile them
-    // against a summary ping and emits a generic message instead.
-    const browserAlertState = { ...alertState, sha256: '', commonName: 'browser-cert-cn' };
-    const alertsClientMock = {
-      report: jest.fn(),
-      getAlertLimitValue: jest.fn().mockReturnValue(10),
-      setAlertLimitReached: jest.fn(),
-      getRecoveredAlerts: jest.fn().mockReturnValue([
-        {
-          alert: {
-            getId: () => alertUuid,
-            getState: () => browserAlertState,
-            setContext: jest.fn(),
-            getUuid: () => alertUuid,
-            getStart: () => new Date().toISOString(),
-          },
-        },
-      ]),
-      setAlertData: jest.fn(),
-      isTrackedAlert: jest.fn(),
-    };
-    await setTLSRecoveredAlertsContext({
-      alertsClient: alertsClientMock,
-      basePath,
-      spaceId: 'default',
-      latestPings: [],
-    });
-    expect(alertsClientMock.setAlertData).toBeCalledWith({
-      id: 'alert-id',
-      context: expect.objectContaining({
-        alertDetailsUrl: 'https://localhost:5601/app/observability/alerts/alert-id',
-        viewInAppUrl:
-          'https://localhost:5601/app/synthetics/certificates?search=browser-cert-cn&issuers=%5B%22test-issuer%22%5D',
-        commonName: 'browser-cert-cn',
-        previousStatus: 'Certificate browser-cert-cn test-summary',
-        newStatus: expect.stringContaining('browser-cert-cn'),
-        summary: 'Monitor certificate has been updated or is no longer within the alert threshold.',
-      }),
     });
   });
 });

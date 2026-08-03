@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { stringify } from 'querystring';
-import { CERTIFICATES_ROUTE, SYNTHETICS_APP_BASE_PATH } from '../constants/ui';
+import { CERTIFICATES_ROUTE } from '../constants/ui';
 
 const format = ({ pathname, query }: { pathname: string; query: Record<string, any> }): string => {
   const queryString = stringify(query);
@@ -45,7 +45,7 @@ export const getSyntheticsCertificatesRoute = ({
   }
 
   return format({
-    pathname: `${SYNTHETICS_APP_BASE_PATH}${CERTIFICATES_ROUTE}`,
+    pathname: `/app/synthetics${CERTIFICATES_ROUTE}`,
     query,
   });
 };

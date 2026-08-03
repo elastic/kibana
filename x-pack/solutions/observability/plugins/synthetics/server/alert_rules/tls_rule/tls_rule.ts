@@ -26,7 +26,6 @@ import {
   getCertSummary,
   getTLSAlertContext,
   getTLSAlertDocument,
-  getTLSCertAlertId,
   setTLSRecoveredAlertsContext,
 } from './message_utils';
 import type { SyntheticsCommonState } from '../../../common/runtime_types/alert_rules/common';
@@ -79,7 +78,7 @@ export const registerSyntheticsTLSCheckRule = (
       >
     ) => {
       const { state: ruleState, params, services, spaceId, previousStartedAt, rule } = options;
-      const { alertsClient, savedObjectsClient, scopedClusterClient, uiSettingsClient } = services;
+      const { alertsClient, savedObjectsClient, scopedClusterClient } = services;
       if (!alertsClient) {
         throw new AlertsClientError();
       }
@@ -93,8 +92,7 @@ export const registerSyntheticsTLSCheckRule = (
         server,
         syntheticsMonitorClient,
         spaceId,
-        rule.name,
-        uiSettingsClient
+        rule.name
       );
 
       const { foundCerts, certs, absoluteExpirationThreshold, absoluteAgeThreshold, latestPings } =
@@ -107,14 +105,7 @@ export const registerSyntheticsTLSCheckRule = (
           return;
         }
 
-        // Lightweight HTTP/TCP certs use their sha256 fingerprint as the alert
-        // id; browser certs (which have no fingerprint) fall back to a stable
-        // subject-common-name + issuer identity. Certs with neither are skipped.
-        const alertId = getTLSCertAlertId(cert);
-        if (!alertId) {
-          return;
-        }
-
+        const alertId = cert.sha256;
         const { uuid } = alertsClient.report({
           id: alertId,
           actionGroup: TLS_CERTIFICATE.id,
