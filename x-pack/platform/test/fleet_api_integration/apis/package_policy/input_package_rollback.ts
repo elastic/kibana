@@ -100,15 +100,14 @@ export default function (providerContext: FtrProviderContext) {
       .send({ agentPolicyId });
   };
 
-  // Failing: See https://github.com/elastic/kibana/issues/246424
-  describe.skip('input package policy rollback', function () {
+  describe('input package policy rollback', function () {
     skipIfNoDockerRegistry(providerContext);
 
     let agentPolicyId: string;
     before(async () => {
+      await fleetAndAgents.setup();
       const agentPolicy = await createAgentPolicy();
       agentPolicyId = agentPolicy.id;
-      await fleetAndAgents.setup();
     });
 
     after(async () => {
@@ -125,7 +124,8 @@ export default function (providerContext: FtrProviderContext) {
       expect(pkg?.status).to.eql('not_installed');
     });
 
-    it('should not add es references on package policy create failure when package is already installed', async () => {
+    // Failing: See https://github.com/elastic/kibana/issues/270585
+    it.skip('should not add es references on package policy create failure when package is already installed', async () => {
       await installPackage(PACKAGE_NAME, START_VERSION);
       await createPackagePolicyWithDataset(agentPolicyId, 'test*', 400);
 
