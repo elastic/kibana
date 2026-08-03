@@ -134,6 +134,7 @@ apiTest.describe('Create activate alert action API', { tag: '@local-stateful-cla
       body: {},
     });
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest('schema: rejects empty reason with 400', async ({ apiClient }) => {
@@ -142,6 +143,7 @@ apiTest.describe('Create activate alert action API', { tag: '@local-stateful-cla
       body: { reason: '' },
     });
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest('schema: rejects reason over 1024 chars with 400', async ({ apiClient }) => {
@@ -150,6 +152,7 @@ apiTest.describe('Create activate alert action API', { tag: '@local-stateful-cla
       body: { reason: 'a'.repeat(1025) },
     });
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest('schema: rejects unknown body fields (strict mode) with 400', async ({ apiClient }) => {
@@ -158,6 +161,7 @@ apiTest.describe('Create activate alert action API', { tag: '@local-stateful-cla
       body: { reason: 'valid', extra: 'nope' },
     });
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest('schema: rejects group_hash over 256 chars with 400', async ({ apiClient }) => {
@@ -166,6 +170,7 @@ apiTest.describe('Create activate alert action API', { tag: '@local-stateful-cla
       body: { reason: 'valid reason' },
     });
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest('returns 404 when group_hash matches no events', async ({ apiClient }) => {
