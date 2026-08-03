@@ -60,12 +60,46 @@ describe('benchmark monitoring lifecycle', () => {
   });
 
   it('collects forced-GC stats only after a successful opted-in run', async () => {
-    await run({
+    stopMonitoring.mockResolvedValue({
+      stats: [],
+      samples: [],
+      forcedGcHeapStats: [
+        {
+          requestId: 'request',
+          pid: 123,
+          argv: ['node'],
+          requestedAt: 'now',
+          startedAt: 'now',
+          completedAt: 'now',
+          nodeVersion: '24.18.0',
+          v8Version: '13.6',
+        },
+      ],
+    });
+
+    const result = await run({
       monitoring: { collectForcedGcHeapStatsOnStop: true },
       run: async () => {},
     });
 
+    expect(result.status).toBe('completed');
     expect(stopMonitoring).toHaveBeenCalledWith({ collectForcedGcHeapStats: true });
+  });
+
+  it('fails an opted-in run when monitoring returns no process results', async () => {
+    const result = await run({
+      monitoring: { collectForcedGcHeapStatsOnStop: true },
+      run: async () => {},
+    });
+
+    expect(result).toEqual(
+      expect.objectContaining({
+        status: 'failed',
+        error: expect.objectContaining({
+          message: 'Forced-GC heap collection failed: monitor returned no process results',
+        }),
+      })
+    );
   });
 
   it('stops without forced GC when the runnable fails', async () => {

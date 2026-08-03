@@ -168,11 +168,18 @@ const FORCED_GC_REQUEST_FILE = 'forced_gc_request.json';
     if (forcedGcRequested) {
       return;
     }
-    const request = JSON.parse(await fs.promises.readFile(forcedGcRequestFile, 'utf8'));
+    forcedGcRequested = true;
+
+    let request;
+    try {
+      request = JSON.parse(await fs.promises.readFile(forcedGcRequestFile, 'utf8'));
+    } catch (error) {
+      forcedGcRequested = false;
+      throw error;
+    }
     if (!request.expectedPids.includes(pid)) {
       return;
     }
-    forcedGcRequested = true;
     await freezeNaturalSampling();
     await collectForcedGcHeapStats(request);
   }

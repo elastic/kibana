@@ -158,6 +158,15 @@ describe('post-forced-GC warm-start report', () => {
         wouldTrigger: true,
       })
     );
+    expect(report.diagnostics.forcedGcDurationMs).toEqual(
+      expect.objectContaining({
+        pairs: expect.arrayContaining([
+          expect.objectContaining({ baselineMs: 100, targetMs: 100, deltaMs: 0 }),
+        ]),
+        baselineMeanMs: 100,
+        targetMeanMs: 100,
+      })
+    );
     expect(report.starts[0]).toEqual(
       expect.objectContaining({
         forcedGcHeapStats: validPairs[0].baseline.result.forcedGcHeapStats,

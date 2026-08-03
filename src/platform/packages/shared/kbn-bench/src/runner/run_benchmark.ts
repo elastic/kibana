@@ -124,9 +124,13 @@ export function createBenchmarkExecutor({
       monitoring = await stopMonitoring({
         collectForcedGcHeapStats: runnable.monitoring?.collectForcedGcHeapStatsOnStop,
       });
+      const shouldCollectForcedGc = runnable.monitoring?.collectForcedGcHeapStatsOnStop === true;
       const forcedGcErrors = monitoring.forcedGcHeapStats?.flatMap(({ pid, error }) =>
         error ? [`PID ${pid}: ${error.message}`] : []
       );
+      if (shouldCollectForcedGc && !monitoring.forcedGcHeapStats?.length) {
+        throw new Error('Forced-GC heap collection failed: monitor returned no process results');
+      }
       if (forcedGcErrors?.length) {
         throw new Error(`Forced-GC heap collection failed: ${forcedGcErrors.join('; ')}`);
       }

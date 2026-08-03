@@ -110,6 +110,29 @@ const getPairedMetric = (
   };
 };
 
+const getPairedDuration = (
+  pairs: ReadonlyArray<{ baseline: PairedComparisonStart; target: PairedComparisonStart }>
+): Record<string, unknown> => {
+  const values = pairs.flatMap(({ baseline, target }) => {
+    const baselineMs = getForcedGcMetric(baseline, 'forcedGcDurationMs');
+    const targetMs = getForcedGcMetric(target, 'forcedGcDurationMs');
+    return baselineMs === undefined || targetMs === undefined
+      ? []
+      : [{ baselineMs, targetMs, deltaMs: targetMs - baselineMs }];
+  });
+  return {
+    pairs: values,
+    baselineMeanMs:
+      values.length > 0
+        ? values.reduce((sum, value) => sum + value.baselineMs, 0) / values.length
+        : undefined,
+    targetMeanMs:
+      values.length > 0
+        ? values.reduce((sum, value) => sum + value.targetMs, 0) / values.length
+        : undefined,
+  };
+};
+
 export const compareWarmStartMemory: OnCompareCallback = async ({
   left,
   log,
@@ -172,7 +195,7 @@ export const compareWarmStartMemory: OnCompareCallback = async ({
         'forcedGcHeapReduction',
         getForcedGcMetric
       ),
-      forcedGcDurationMs: getPairedMetric(validPairs, 'forcedGcDurationMs', getForcedGcMetric),
+      forcedGcDurationMs: getPairedDuration(validPairs),
       [TAIL_RSS_METRIC_KEY]: getPairedMetric(validPairs, 'tailRss'),
       [MAX_RSS_METRIC_KEY]: getPairedMetric(validPairs, 'rssMax'),
       [TAIL_HEAP_TOTAL_METRIC_KEY]: getPairedMetric(validPairs, 'tailHeapTotal'),
