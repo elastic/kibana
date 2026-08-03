@@ -42,6 +42,7 @@ export const SourcePicker = ({ selectedSources, onChange }: SourcePickerProps) =
   const {
     connectors,
     connectorNameById,
+    connectorActionTypeById,
     isLoading: isLoadingConnectors,
     isError: isConnectorsError,
   } = useDataConnectors({
@@ -154,17 +155,20 @@ export const SourcePicker = ({ selectedSources, onChange }: SourcePickerProps) =
           <EuiSpacer size="s" />
           <EuiFlexGroup direction="column" gutterSize="s">
             {selectedSources.map((source, index) => {
-              const { label, typeLabel, iconType, content } = getSourceDisplay(
+              const { label, typeLabel, icon, content } = getSourceDisplay(
                 source.type,
                 source.value,
-                { connectorNameById }
+                {
+                  connectorNameById,
+                  connectorActionTypeById,
+                }
               );
               return (
                 <EuiFlexItem key={`${source.type}-${source.id}`}>
                   <SourceRow
                     label={label}
                     typeLabel={typeLabel}
-                    iconType={iconType}
+                    icon={icon}
                     onRemove={() => removeSource(source)}
                     data-test-subj={`contextSelectedSource-${source.type}-${index}`}
                   >

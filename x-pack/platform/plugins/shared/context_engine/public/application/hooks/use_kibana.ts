@@ -11,6 +11,7 @@ import type { ContextEngineStartDependencies } from '../../types';
 
 export interface ContextEngineServices extends CoreStart {
   share: ContextEngineStartDependencies['share'];
+  triggersActionsUi: ContextEngineStartDependencies['triggersActionsUi'];
   console?: ContextEngineStartDependencies['console'];
 }
 
