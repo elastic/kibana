@@ -47,11 +47,11 @@ Simply pass your array of `solutionNav.items` and the required `solution.name` a
 
 ![Screenshots of Stack Management page in mobile view. Menu closed on the left, menu open on the right.](../assets/kibana_template_solution_nav_mobile.png)
 
-If you need custom solution navigation **content**, you can pass your own `solutionNav.children` instead of the items or supply your own componen with `` We still recommend using [**EuiSideNav**](https://elastic.github.io/eui/#/navigation/side-nav).
+If you need custom solution navigation **content**, you can pass your own `solutionNav.children` instead of the items or supply your own component. We still recommend using [**EuiSideNav**](https://elastic.github.io/eui/#/navigation/side-nav).
 
 ## `noDataConfig`
 
-Increases the consistency in messaging across all the solutions during the getting started process when no data exists. Each solution/template instance decides when is the most appropriate time to show this configuration, but is messaged specifically towards having **no indices and/or data views at all or that match the particular solution**.
+Increases the consistency in messaging across all the solutions during the getting started process when no data exists. Each solution/template instance decides when is the most appropriate time to show this configuration, but is messaged specifically towards having **no indices or data views at all or that match the particular solution**.
 
 This is a built-in configuration that displays a very specific UI and requires very specific object keys. It will also ignore all other configurations of the template including `pageHeader` and `children`, with the exception of continuing to show `solutionNav`.
 
@@ -65,7 +65,7 @@ The `noDataConfig` is of type [`NoDataPageProps`](https://github.com/elastic/kib
 
 ### `NoDataPageActions`
 
-There is currently only one promotoed path to ingesting data and that is through the Fleet / Ingest UI. This gets presented to the user by rendering a card that provides consistent messaging. It is mostly pre-configured but require specific `href`s and/or `onClick` handlers for directing the user to the right location for that solution.
+There is currently only one promotoed path to ingesting data and that is through the Fleet / Ingest UI. This gets presented to the user by rendering a card that provides consistent messaging. It is mostly pre-configured but require specific `href`s or `onClick` handlers for directing the user to the right location for that solution.
 
 Optionally you can also replace the `button` label by passing a string, or the whole button component by passing a `ReactNode`.
 

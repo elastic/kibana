@@ -78,7 +78,14 @@ export const AutomationRow = ({
                 iconType="popout"
                 iconSide="right"
                 href={editHref}
-                target="_blank"
+                title={i18n.translate(
+                  'xpack.contextEngine.aiIndexDetail.automations.editWorkflowTooltip',
+                  { defaultMessage: 'Opens the workflow editor' }
+                )}
+                aria-label={i18n.translate(
+                  'xpack.contextEngine.aiIndexDetail.automations.editWorkflowAriaLabel',
+                  { defaultMessage: 'Edit workflow in editor' }
+                )}
                 data-test-subj="contextOpenWorkflowButton"
               >
                 {i18n.translate(
