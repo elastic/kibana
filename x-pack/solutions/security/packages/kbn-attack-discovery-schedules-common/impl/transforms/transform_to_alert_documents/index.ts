@@ -28,7 +28,6 @@ import {
   ALERT_ATTACK_DISCOVERY_ENTITY_SUMMARY_MARKDOWN,
   ALERT_ATTACK_DISCOVERY_ENTITY_SUMMARY_MARKDOWN_WITH_REPLACEMENTS,
   ALERT_ATTACK_DISCOVERY_MITRE_ATTACK_TACTICS,
-  ALERT_ATTACK_DISCOVERY_CONFIDENCE,
   ALERT_ATTACK_DISCOVERY_REPLACEMENTS,
   ALERT_ATTACK_DISCOVERY_SUMMARY_MARKDOWN,
   ALERT_ATTACK_DISCOVERY_SUMMARY_MARKDOWN_WITH_REPLACEMENTS,
@@ -98,7 +97,6 @@ export const transformToBaseAlertDocument = ({
 
   const {
     alertIds,
-    confidence,
     entitySummaryMarkdown,
     detailsMarkdown,
     mitreAttackTactics,
@@ -142,7 +140,6 @@ export const transformToBaseAlertDocument = ({
           })
         : undefined,
     [ALERT_ATTACK_DISCOVERY_MITRE_ATTACK_TACTICS]: mitreAttackTactics,
-    [ALERT_ATTACK_DISCOVERY_CONFIDENCE]: confidence,
     [ALERT_ATTACK_DISCOVERY_REPLACEMENTS]: !isEmpty(replacements)
       ? Object.entries(replacements).map(([uuid, value]) => ({
           uuid,

@@ -6,13 +6,6 @@
  */
 
 export {
-  ConfidenceStepCommonDefinition,
-  ConfidenceStepInputSchema,
-  ConfidenceStepOutputSchema,
-  ConfidenceStepTypeId,
-} from './confidence_step';
-
-export {
   DefaultAlertRetrievalStepCommonDefinition,
   DefaultAlertRetrievalStepTypeId,
 } from './default_alert_retrieval_step';
@@ -23,6 +16,13 @@ export {
 } from './default_validation_step';
 
 export { GenerateStepCommonDefinition, GenerateStepTypeId } from './generate_step';
+
+export {
+  GenericConfidenceStepCommonDefinition,
+  GenericConfidenceStepInputSchema,
+  GenericConfidenceStepOutputSchema,
+  GenericConfidenceStepTypeId,
+} from './generic_confidence_step';
 
 export {
   PersistDiscoveriesStepCommonDefinition,

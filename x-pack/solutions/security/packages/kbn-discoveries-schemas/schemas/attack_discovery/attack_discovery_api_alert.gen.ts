@@ -16,7 +16,7 @@
 
 import { z } from '@kbn/zod/v4';
 
-import { Confidence, Replacements, NonEmptyTimestamp, User } from '../common_attributes.gen';
+import { Replacements, NonEmptyTimestamp, User } from '../common_attributes.gen';
 
 /**
  * An attack discovery that's also an alert
@@ -83,10 +83,6 @@ export const AttackDiscoveryApiAlert = z.object({
    * An optional array of MITRE ATT&CK tactic for the attack discovery
    */
   mitre_attack_tactics: z.array(z.string()).optional(),
-  /**
-   * Optional calibrated confidence for this attack discovery
-   */
-  confidence: Confidence.optional(),
   /**
    * Key-value pairs that are used to replace placeholders in the markdown fields
    */

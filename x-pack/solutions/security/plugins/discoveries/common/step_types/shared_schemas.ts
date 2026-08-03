@@ -68,7 +68,6 @@ export type Confidence = z.infer<typeof ConfidenceSchema>;
  */
 export const AttackDiscoverySchema = z.object({
   alert_ids: z.array(z.string()),
-  confidence: ConfidenceSchema.optional(),
   details_markdown: z.string(),
   entity_summary_markdown: z.string().optional(),
   id: z.string().optional(),

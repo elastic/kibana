@@ -13,90 +13,11 @@ import {
   transformToAlertDocuments,
 } from './transform_to_alert_documents';
 import {
-  ALERT_ATTACK_DISCOVERY_CONFIDENCE,
   ALERT_ATTACK_DISCOVERY_ENTITY_SUMMARY_MARKDOWN_WITH_REPLACEMENTS,
   ALERT_ATTACK_DISCOVERY_REPLACEMENTS,
 } from '@kbn/discoveries/impl/attack_discovery/alert_fields';
 
 describe('transformToAlertDocuments', () => {
-  it('writes the optional confidence object onto the alert document', () => {
-    const authenticatedUser = {
-      profile_uid: 'profile-1',
-      username: 'user-1',
-    } as unknown as AuthenticatedUser;
-
-    const confidence = {
-      band: 'high' as const,
-      factors: [{ name: 'evidence_breadth', assessment: '2 datasets', weight: 0.6 }],
-      rationale: 'Coherent multi-stage chain across process and network.',
-      score: 0.82,
-    };
-
-    const validateRequestBody: PostValidateRequestBody = {
-      alerts_context_count: 1,
-      anonymized_alerts: [{ metadata: {}, page_content: '_id,a1\nkibana.alert.risk_score,10' }],
-      api_config: { action_type_id: '.gen', connector_id: 'connector-1' },
-      attack_discoveries: [
-        {
-          alert_ids: ['a1'],
-          confidence,
-          details_markdown: 'details',
-          summary_markdown: 'summary',
-          timestamp: '2025-12-15T18:39:20.762Z',
-          title: 'title',
-        },
-      ],
-      connector_name: 'Connector 1',
-      enable_field_rendering: true,
-      generation_uuid: 'generation-1',
-      with_replacements: false,
-    };
-
-    const [doc] = transformToAlertDocuments({
-      authenticatedUser,
-      now: new Date('2025-12-15T18:39:20.762Z'),
-      validateRequestBody,
-      spaceId: 'default',
-    });
-
-    expect(doc[ALERT_ATTACK_DISCOVERY_CONFIDENCE]).toEqual(confidence);
-  });
-
-  it('omits confidence from the alert document when the discovery has none', () => {
-    const authenticatedUser = {
-      profile_uid: 'profile-1',
-      username: 'user-1',
-    } as unknown as AuthenticatedUser;
-
-    const validateRequestBody: PostValidateRequestBody = {
-      alerts_context_count: 1,
-      anonymized_alerts: [{ metadata: {}, page_content: '_id,a1\nkibana.alert.risk_score,10' }],
-      api_config: { action_type_id: '.gen', connector_id: 'connector-1' },
-      attack_discoveries: [
-        {
-          alert_ids: ['a1'],
-          details_markdown: 'details',
-          summary_markdown: 'summary',
-          timestamp: '2025-12-15T18:39:20.762Z',
-          title: 'title',
-        },
-      ],
-      connector_name: 'Connector 1',
-      enable_field_rendering: true,
-      generation_uuid: 'generation-1',
-      with_replacements: false,
-    };
-
-    const [doc] = transformToAlertDocuments({
-      authenticatedUser,
-      now: new Date('2025-12-15T18:39:20.762Z'),
-      validateRequestBody,
-      spaceId: 'default',
-    });
-
-    expect(doc[ALERT_ATTACK_DISCOVERY_CONFIDENCE]).toBeUndefined();
-  });
-
   it('returns the risk score of only the anonymized alert matching the discovery alert_ids', () => {
     const authenticatedUser = {
       profile_uid: 'profile-1',

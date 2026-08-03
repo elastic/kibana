@@ -16,7 +16,7 @@
 
 import { z } from '@kbn/zod/v4';
 
-import { Confidence, NonEmptyTimestamp } from '../common_attributes.gen';
+import { NonEmptyTimestamp } from '../common_attributes.gen';
 
 /**
  * An attack discovery generated from one or more alerts
@@ -27,10 +27,6 @@ export const AttackDiscovery = z.object({
    * The alert IDs that the attack discovery is based on
    */
   alert_ids: z.array(z.string()),
-  /**
-   * Optional calibrated confidence for this attack discovery
-   */
-  confidence: Confidence.optional(),
   /**
    * UUID of attack discovery
    */

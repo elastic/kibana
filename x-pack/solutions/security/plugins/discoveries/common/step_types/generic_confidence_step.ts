@@ -13,11 +13,11 @@ import { StepCategory } from '@kbn/workflows';
 import { AnonymizedAlertSchema, ApiConfigSchema, ConfidenceSchema } from './shared_schemas';
 
 /**
- * Step type ID for the generic confidence-scoring step. Unlike
- * `security.attack-discovery.confidence` (which annotates a discovery in place),
- * this step scores an arbitrary bundle of alerts — a set of related detection
- * alerts, or the alerts cited by an attack discovery — and returns ONE
- * calibrated confidence for the bundle.
+ * Step type ID for the generic confidence-scoring step. It scores an arbitrary
+ * bundle of alerts — a set of related detection alerts, or the alerts cited by
+ * an attack discovery — and returns ONE calibrated confidence for the bundle.
+ * Confidence is computed OUTSIDE Attack Discovery generation and is not stored
+ * on the attack discovery document.
  */
 export const GenericConfidenceStepTypeId = 'security.confidence';
 

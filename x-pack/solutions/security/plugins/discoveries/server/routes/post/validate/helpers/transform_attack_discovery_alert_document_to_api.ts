@@ -29,7 +29,6 @@ const ALERT_ATTACK_DISCOVERY_ENTITY_SUMMARY_MARKDOWN_WITH_REPLACEMENTS =
   'kibana.alert.attack_discovery.entity_summary_markdown_with_replacements';
 const ALERT_ATTACK_DISCOVERY_MITRE_ATTACK_TACTICS =
   'kibana.alert.attack_discovery.mitre_attack_tactics';
-const ALERT_ATTACK_DISCOVERY_CONFIDENCE = 'kibana.alert.attack_discovery.confidence';
 const ALERT_ATTACK_DISCOVERY_REPLACEMENTS = 'kibana.alert.attack_discovery.replacements';
 const ALERT_ATTACK_DISCOVERY_SUMMARY_MARKDOWN = 'kibana.alert.attack_discovery.summary_markdown';
 const ALERT_ATTACK_DISCOVERY_SUMMARY_MARKDOWN_WITH_REPLACEMENTS =
@@ -142,7 +141,6 @@ export const transformAttackDiscoveryAlertDocumentToApi = ({
     generation_uuid: (doc[ALERT_RULE_EXECUTION_UUID] as string) ?? '',
     id,
     mitre_attack_tactics: doc[ALERT_ATTACK_DISCOVERY_MITRE_ATTACK_TACTICS] as string[] | undefined,
-    confidence: doc[ALERT_ATTACK_DISCOVERY_CONFIDENCE] as AttackDiscoveryApiAlert['confidence'],
     replacements: replacements
       ? Object.fromEntries(replacements.map((r) => [r.uuid, r.value]))
       : undefined,

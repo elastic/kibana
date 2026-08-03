@@ -46,7 +46,6 @@ import {
   ALERT_ATTACK_DISCOVERY_ENTITY_SUMMARY_MARKDOWN,
   ALERT_ATTACK_DISCOVERY_ENTITY_SUMMARY_MARKDOWN_WITH_REPLACEMENTS,
   ALERT_ATTACK_DISCOVERY_MITRE_ATTACK_TACTICS,
-  ALERT_ATTACK_DISCOVERY_CONFIDENCE,
   ALERT_ATTACK_DISCOVERY_REPLACEMENTS,
   ALERT_ATTACK_DISCOVERY_SUMMARY_MARKDOWN,
   ALERT_ATTACK_DISCOVERY_SUMMARY_MARKDOWN_WITH_REPLACEMENTS,
@@ -82,7 +81,6 @@ const convertApiFieldsToCamelCase = (body: PostValidateRequestBody) => {
     },
     attackDiscoveries: body.attack_discoveries.map((discovery) => ({
       alertIds: discovery.alert_ids,
-      confidence: discovery.confidence,
       detailsMarkdown: discovery.details_markdown,
       entitySummaryMarkdown: discovery.entity_summary_markdown,
       id: discovery.id,
@@ -246,7 +244,6 @@ export const transformToAlertDocuments = ({
             })
           : undefined,
       [ALERT_ATTACK_DISCOVERY_MITRE_ATTACK_TACTICS]: attackDiscovery.mitreAttackTactics,
-      [ALERT_ATTACK_DISCOVERY_CONFIDENCE]: attackDiscovery.confidence,
       [ALERT_ATTACK_DISCOVERY_REPLACEMENTS]: !isEmpty(restParams.replacements)
         ? Object.entries(restParams.replacements as Record<string, string>).map(
             ([uuid, value]) => ({

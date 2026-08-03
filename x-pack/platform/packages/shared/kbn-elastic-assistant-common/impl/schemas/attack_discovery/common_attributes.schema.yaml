@@ -20,9 +20,6 @@ components:
           items:
             type: string
           type: array
-        confidence:
-          description: Optional calibrated confidence for this attack discovery
-          $ref: '#/components/schemas/Confidence'
         id:
           description: UUID of attack discovery
           type: string
@@ -51,46 +48,6 @@ components:
       description: Array of attack discoveries
       items:
         $ref: '#/components/schemas/AttackDiscovery'
-
-    ConfidenceFactor:
-      type: object
-      description: A single contributing factor behind a confidence score
-      required:
-        - name
-        - assessment
-      properties:
-        name:
-          type: string
-        assessment:
-          type: string
-        weight:
-          type: number
-        evidence:
-          type: string
-
-    Confidence:
-      type: object
-      description: Calibrated confidence for an attack discovery (how sure it is real; orthogonal to severity)
-      required:
-        - score
-        - rationale
-        - factors
-      properties:
-        score:
-          type: number
-          description: Confidence from 0.0 (not sure) to 1.0 (certain)
-        band:
-          type: string
-          enum:
-            - high
-            - medium
-            - low
-        rationale:
-          type: string
-        factors:
-          type: array
-          items:
-            $ref: '#/components/schemas/ConfidenceFactor'
 
     AttackDiscoveryStatus:
       type: string

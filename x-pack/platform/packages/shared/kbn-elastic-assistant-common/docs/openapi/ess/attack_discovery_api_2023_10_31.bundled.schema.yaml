@@ -2745,9 +2745,6 @@ components:
           items:
             type: string
           type: array
-        confidence:
-          $ref: '#/components/schemas/Confidence'
-          description: Optional calibrated confidence for this attack discovery
         connector_id:
           description: The ID of the connector that generated the attack discovery
           type: string
@@ -3356,45 +3353,6 @@ components:
         - ids
         - errors
         - total
-    Confidence:
-      description: Calibrated confidence for an attack discovery (how sure it is real;
-        orthogonal to severity)
-      type: object
-      properties:
-        band:
-          enum:
-            - high
-            - medium
-            - low
-          type: string
-        factors:
-          items:
-            $ref: '#/components/schemas/ConfidenceFactor'
-          type: array
-        rationale:
-          type: string
-        score:
-          description: Confidence from 0.0 (not sure) to 1.0 (certain)
-          type: number
-      required:
-        - score
-        - rationale
-        - factors
-    ConfidenceFactor:
-      description: A single contributing factor behind a confidence score
-      type: object
-      properties:
-        assessment:
-          type: string
-        evidence:
-          type: string
-        name:
-          type: string
-        weight:
-          type: number
-      required:
-        - name
-        - assessment
     Filters:
       description: The filter array used to define the conditions for when alerts are
         selected as an Attack Discovery context. Defaults to an empty array.

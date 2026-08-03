@@ -53,9 +53,6 @@ components:
         alert_workflow_status_updated_at:
           description: The optional time the attack discovery alert workflow status was last updated
           type: string
-        confidence:
-          description: Optional calibrated confidence for this attack discovery
-          $ref: '../common_attributes.schema.yaml#/components/schemas/Confidence'
         details_markdown:
           description: Details of the attack with bulleted markdown that always uses special syntax for field names and values from the source data.
           type: string

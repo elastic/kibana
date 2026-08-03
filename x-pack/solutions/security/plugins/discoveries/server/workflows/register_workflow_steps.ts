@@ -13,7 +13,6 @@ import type { IEventLogger } from '@kbn/event-log-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { isWorkflowsEnabled } from '@kbn/discoveries/impl/lib/helpers/is_workflows_enabled';
 import type { DiscoveriesPluginStartDeps } from '../types';
-import { getConfidenceStepDefinition } from './steps/confidence_step';
 import { getGenericConfidenceStepDefinition } from './steps/generic_confidence_step';
 import { getDefaultAlertRetrievalStepDefinition } from './steps/default_alert_retrieval_step';
 import { getDefaultValidationStepDefinition } from './steps/default_validation_step';
@@ -144,21 +143,6 @@ export const registerWorkflowSteps = (
     workflowsExtensions,
   });
 
-  const confidenceStepDef = withWorkflowsEnabledGuard(
-    getConfidenceStepDefinition({
-      getStartServices,
-      logger,
-    }),
-    getStartServices
-  );
-  logger.debug(() => `Registering confidenceStepDefinition with id: ${confidenceStepDef.id}`);
-  const confidenceOutcome = tryRegisterStep({
-    getStartServices,
-    logger,
-    stepDefinition: confidenceStepDef,
-    workflowsExtensions,
-  });
-
   const genericConfidenceStepDef = withWorkflowsEnabledGuard(
     getGenericConfidenceStepDefinition({
       getStartServices,
@@ -234,7 +218,6 @@ export const registerWorkflowSteps = (
   });
 
   const outcomes = [
-    confidenceOutcome,
     genericConfidenceOutcome,
     defaultAlertRetrievalOutcome,
     defaultValidationOutcome,

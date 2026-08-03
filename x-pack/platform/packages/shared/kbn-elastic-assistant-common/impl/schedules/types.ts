@@ -7,10 +7,8 @@
 
 import type { SecurityAttackDiscoveryAlert } from '@kbn/alerts-as-data-utils';
 import type { ALERT_WORKFLOW_STATUS_UPDATED_AT } from '@kbn/rule-data-utils';
-import type { Confidence } from '../schemas/attack_discovery/common_attributes.gen';
 import type {
   ALERT_ATTACK_DISCOVERY_API_CONFIG,
-  ALERT_ATTACK_DISCOVERY_CONFIDENCE,
   ALERT_ATTACK_DISCOVERY_REPLACEMENTS,
   ALERT_ATTACK_DISCOVERY_USERS,
 } from './field_names';
@@ -35,15 +33,6 @@ export type AttackDiscoveryAlertDocument = Omit<
   | 'kibana.alert.attack_discovery.users'
   | 'kibana.alert.attack_discovery.users.id'
   | 'kibana.alert.attack_discovery.users.name'
-  | 'kibana.alert.attack_discovery.confidence'
-  | 'kibana.alert.attack_discovery.confidence.score'
-  | 'kibana.alert.attack_discovery.confidence.band'
-  | 'kibana.alert.attack_discovery.confidence.rationale'
-  | 'kibana.alert.attack_discovery.confidence.factors'
-  | 'kibana.alert.attack_discovery.confidence.factors.name'
-  | 'kibana.alert.attack_discovery.confidence.factors.assessment'
-  | 'kibana.alert.attack_discovery.confidence.factors.weight'
-  | 'kibana.alert.attack_discovery.confidence.factors.evidence'
 > & {
   [ALERT_ATTACK_DISCOVERY_API_CONFIG]: {
     action_type_id: string;
@@ -60,6 +49,5 @@ export type AttackDiscoveryAlertDocument = Omit<
     id?: string;
     name: string;
   }>;
-  [ALERT_ATTACK_DISCOVERY_CONFIDENCE]?: Confidence;
   [ALERT_WORKFLOW_STATUS_UPDATED_AT]?: string;
 };
