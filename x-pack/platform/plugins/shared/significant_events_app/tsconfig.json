@@ -32,7 +32,6 @@
     "@kbn/observability-ai-assistant-plugin",
     "@kbn/react-query",
     "@kbn/share-plugin",
-    "@kbn/shared-ux-utility",
     "@kbn/significant-events-plugin",
     "@kbn/spaces-plugin",
     "@kbn/stack-connectors-plugin",
