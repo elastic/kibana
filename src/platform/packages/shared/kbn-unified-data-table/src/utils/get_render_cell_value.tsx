@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useContext, memo, useRef } from 'react';
+import React, { useCallback, useEffect, useContext, memo, useMemo, useRef } from 'react';
 import classNames from 'classnames';
 import { i18n } from '@kbn/i18n';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
@@ -34,7 +34,7 @@ import {
   setTreeExpansion,
 } from '../components/json_tree_viewer/tree_expansion_store';
 import { InTableSearchTermContext } from '../components/json_tree_viewer/in_table_search_context';
-import { buildDocumentTree } from './build_document_tree';
+import { buildDocumentTree, createHighlightFormatter } from './build_document_tree';
 
 export const CELL_CLASS = 'unifiedDataTable__cellValue';
 
@@ -80,6 +80,13 @@ export const getRenderCellValueFn = ({
     });
     const ctx = useContext(UnifiedDataTableContext);
     const inTableSearchTerm = useContext(InTableSearchTermContext);
+    // Marks the query's matched terms in the JSON tree's leaves. Memoised so the tree's leaf
+    // rendering stays referentially stable across re-renders (e.g. expand/collapse). `dataView` and
+    // `fieldFormats` come from the factory closure and never change for a given renderer.
+    const formatTreeValue = useMemo(
+      () => (row ? createHighlightFormatter({ hit: row.raw, dataView, fieldFormats }) : undefined),
+      [row]
+    );
     const internalCellProps = useRef<EuiDataGridSetCellProps>({});
     const customCellProps = useRef<EuiDataGridSetCellProps>({});
     const CustomCellRenderer = externalCustomRenderers?.[columnId];
@@ -192,7 +199,6 @@ export const getRenderCellValueFn = ({
         const documentTree = buildDocumentTree({
           row,
           dataView,
-          fieldFormats,
           columnsMeta,
           shouldShowFieldHandler,
         });
@@ -215,6 +221,7 @@ export const getRenderCellValueFn = ({
               initialState={getTreeExpansion(row.raw)}
               onStateChange={(state) => setTreeExpansion(row.raw, state)}
               searchTerm={inTableSearchTerm}
+              formatValue={formatTreeValue}
             />
           </span>
         );

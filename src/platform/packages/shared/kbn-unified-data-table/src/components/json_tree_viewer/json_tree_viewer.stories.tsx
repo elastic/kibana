@@ -9,7 +9,7 @@
 
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
-import { JsonTreeViewer, type JsonValue } from './json_tree_viewer';
+import { JsonTreeViewer, type FormatValue, type JsonValue } from './json_tree_viewer';
 
 export default {
   title: 'UnifiedDataTable/JsonTreeViewer',
@@ -114,6 +114,38 @@ export const SyntaxTreeLongValues: StoryObj<typeof JsonTreeViewer> = {
   render: () => (
     <div style={{ width: 440 }}>
       <JsonTreeViewer json={longValueDocument} />
+    </div>
+  ),
+};
+
+const highlightDocument = {
+  message: 'User login successful',
+  service: 'authentication',
+  level: 'info',
+  count: 42,
+};
+
+// Stands in for a host's query-highlight formatter: it marks the first occurrence of a term in a
+// string value, leaving the raw value (and every non-string) untouched.
+const markTerm =
+  (term: string): FormatValue =>
+  ({ value }) => {
+    if (typeof value !== 'string') return undefined;
+    const index = value.toLowerCase().indexOf(term.toLowerCase());
+    if (index === -1) return undefined;
+    return (
+      <>
+        {value.slice(0, index)}
+        <mark>{value.slice(index, index + term.length)}</mark>
+        {value.slice(index + term.length)}
+      </>
+    );
+  };
+
+export const SyntaxTreeHighlighted: StoryObj<typeof JsonTreeViewer> = {
+  render: () => (
+    <div style={{ width: 440 }}>
+      <JsonTreeViewer json={highlightDocument} formatValue={markTerm('e')} />
     </div>
   ),
 };

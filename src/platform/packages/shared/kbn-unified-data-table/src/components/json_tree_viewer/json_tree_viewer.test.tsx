@@ -11,7 +11,7 @@ import React from 'react';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { copyToClipboard } from '@elastic/eui';
-import { JsonTreeViewer, type TreeExpansionState } from './json_tree_viewer';
+import { JsonTreeViewer, type FormatValue, type TreeExpansionState } from './json_tree_viewer';
 
 // Keep every real EUI component; only stub the clipboard side-effect so copies are assertable.
 jest.mock('@elastic/eui', () => ({
@@ -258,6 +258,53 @@ describe('JsonTreeViewer', () => {
         'aria-expanded',
         'false'
       );
+    });
+  });
+
+  // A host can pass `formatValue` to render a leaf's value — e.g. wrapping a query's matched terms
+  // in `<mark>`. The tree keeps the raw value, so copy and in-table search keep working.
+  describe('formatValue', () => {
+    beforeEach(() => copyToClipboardMock.mockClear());
+
+    // Marks a value that contains `term`, so the formatted output is distinguishable from raw text.
+    const markMatch =
+      (term: string): FormatValue =>
+      ({ value }) =>
+        typeof value === 'string' && value.includes(term) ? (
+          <mark data-test-subj="fmt">{value}</mark>
+        ) : undefined;
+
+    it('renders a string through formatValue, keeping the JSON quotes and copyability', async () => {
+      render(<JsonTreeViewer json={{ message: 'hello' }} formatValue={markMatch('ell')} />);
+
+      // The formatted node is rendered…
+      expect(screen.getByTestId('fmt')).toHaveTextContent('hello');
+      // …still wrapped in the string's quotes (consistent styling)…
+      expect(screen.getByRole('treeitem', { name: /message/i })).toHaveTextContent('"hello"');
+
+      // …and the copy button works on the highlighted leaf, copying the RAW value.
+      await userEvent.click(screen.getByRole('button', { name: 'Copy value' }));
+      expect(copyToClipboardMock).toHaveBeenCalledWith('hello');
+    });
+
+    it('falls back to the default rendering when formatValue returns undefined', () => {
+      render(<JsonTreeViewer json={{ message: 'hello' }} formatValue={markMatch('zzz')} />);
+
+      expect(screen.queryByTestId('fmt')).not.toBeInTheDocument();
+      expect(screen.getByText('"hello"')).toBeVisible();
+    });
+
+    it('auto-expands to a hidden match using the raw value even when formatValue transforms it', () => {
+      render(
+        <JsonTreeViewer
+          json={{ user: { city: 'Berlin' } }}
+          searchTerm="berl"
+          formatValue={markMatch('Berlin')}
+        />
+      );
+
+      // `user` was collapsed; the raw value still drives auto-expand and the match renders marked.
+      expect(screen.getByTestId('fmt')).toHaveTextContent('Berlin');
     });
   });
 });

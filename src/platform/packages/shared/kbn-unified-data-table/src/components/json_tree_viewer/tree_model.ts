@@ -10,27 +10,32 @@
 /**
  * The JSON tree's pure data model: it turns a raw document into a node tree (`buildNodes`) and
  * flattens the currently-visible slice of that tree into an ordered list of render rows
- * (`buildRows`). Nothing here touches React state, styling, or the DOM, so it can be reasoned
- * about — and unit-tested — in isolation from the view.
+ * (`buildRows`).
  */
 
-import React from 'react';
+import type { ReactNode } from 'react';
 
 export type JsonPrimitive = string | number | boolean | null;
 export type JsonValue = Record<string, unknown> | unknown[] | JsonPrimitive | undefined;
 
+// Renders a leaf's value — e.g. wrapping a query's matched terms in `<mark>`. The tree keeps the
+// raw `value` (so copy and search still work) and only delegates its *display* to this callback;
+// returning `undefined` falls back to the default primitive rendering. `path` lets a host resolve
+// the leaf's source field (array indices included).
+export type FormatValue = (leaf: { value: JsonPrimitive; path: readonly string[] }) => ReactNode;
+
 // Each collection (root + every expanded node) renders at most this many children before a
-// "Show N more" row appears; revealing bumps the collection's budget by this increment.
+// "Show N more" row appears; revealing bumps the collection's budget by CHILDREN_INCREMENT.
 export const INITIAL_CHILDREN = 10;
 export const CHILDREN_INCREMENT = 10;
 
-// Stable id for the (container-less) root list, so it can carry its own reveal budget.
+// Stable id for the root list.
 export const ROOT_ID = 'json-syntax-$root';
 
 export const OPEN_BRACKET = { object: '{', array: '[' } as const;
 export const CLOSE_BRACKET = { object: '}', array: ']' } as const;
 
-// ---- Data model (a plain tree; a leaf may carry a pre-rendered node, e.g. a highlighted value) ----
+// ---- Data model (a plain tree of raw JSON; leaf display is delegated to a `FormatValue` callback) ----
 
 export type CollectionType = 'object' | 'array';
 export type PrimitiveType = 'string' | 'number' | 'boolean' | 'null';
@@ -51,8 +56,7 @@ export interface LeafNode {
   kind: 'leaf';
   primitiveType: PrimitiveType;
   value: JsonPrimitive;
-  // A search-highlighted value arrives already rendered (matched terms marked); render it verbatim.
-  rendered?: React.ReactNode;
+  path: readonly string[];
 }
 
 export type JsonNode = CollectionNode | LeafNode;
@@ -87,20 +91,6 @@ const buildNode = ({
   value: unknown;
   isArrayItem: boolean;
 }): JsonNode => {
-  // A highlighted value is a React element — a leaf that renders itself, not a collection to
-  // recurse into (React elements are objects, so this must precede the object check below).
-  if (React.isValidElement(value)) {
-    return {
-      id: getNodeId(path),
-      key,
-      isArrayItem,
-      kind: 'leaf',
-      primitiveType: 'string',
-      value: null,
-      rendered: value,
-    };
-  }
-
   if (Array.isArray(value)) {
     return {
       id: getNodeId(path),
@@ -144,6 +134,7 @@ const buildNode = ({
     kind: 'leaf',
     primitiveType: getPrimitiveType(value),
     value: normalizePrimitive(value),
+    path,
   };
 };
 
@@ -172,23 +163,11 @@ export const collectExpandableIds = (nodes: JsonNode[]): string[] =>
 
 // ---- Serialize a subtree back to JSON (drives the copy-value / copy-subtree affordances) ----
 
-// A search-highlighted leaf keeps its raw value only in its rendered React node (matched terms
-// wrapped in `<mark>`), so recover the text by walking the node and concatenating its strings.
-const reactNodeToText = (node: React.ReactNode): string => {
-  if (typeof node === 'string') return node;
-  if (typeof node === 'number') return String(node);
-  if (Array.isArray(node)) return node.map(reactNodeToText).join('');
-  if (React.isValidElement<{ children?: React.ReactNode }>(node)) {
-    return reactNodeToText(node.props.children);
-  }
-  return '';
-};
-
 // Reconstruct the plain JSON value a node stands for, so a leaf or a whole collection can be
 // copied. Mirrors the shape the tree was built from (array items positional, object fields keyed).
 export const nodeToJsonValue = (node: JsonNode): JsonValue => {
   if (node.kind === 'leaf') {
-    return node.rendered != null ? reactNodeToText(node.rendered) : node.value;
+    return node.value;
   }
   if (node.collectionType === 'array') {
     return node.children.map(nodeToJsonValue);
@@ -283,10 +262,12 @@ const flattenRows = (
   parentId: string | null,
   out: RenderRow[]
 ): RenderRow[] => {
+  // Display the initial children count or the provided revealed count, whichever is smaller.
   const shown = Math.min(revealed.get(listId) ?? INITIAL_CHILDREN, nodes.length);
+
   for (let index = 0; index < shown; index++) {
     const node = nodes[index];
-    // Full-length comparison: the last *shown* item still gets a comma when more are hidden.
+    // The last shown item still gets a comma when more are hidden.
     const trailingComma = index < nodes.length - 1;
     const hasChildren = node.kind === 'collection' && node.children.length > 0;
     const isExpanded = hasChildren && expanded.has(node.id);
@@ -321,8 +302,7 @@ const flattenRows = (
       });
     }
   }
-  // One pager row per list carries both affordances so they share a line: "Show N more" while
-  // items remain hidden, and "Show fewer" once the list was revealed past its initial cap.
+
   const hidden = nodes.length - shown;
   const canShowFewer = shown > INITIAL_CHILDREN;
   if (hidden > 0 || canShowFewer) {
@@ -340,7 +320,11 @@ const flattenRows = (
   return out;
 };
 
-// Flatten the visible slice of the tree into ordered render rows, starting at the root list.
+/**
+ * Given a tree of nodes, flatten it into a list of rows, ready to be rendered.
+ * Here lives the logic that determines which rows are visible and which are hidden;
+ * and when to render the pagination buttons.
+ */
 export const buildRows = (
   nodes: JsonNode[],
   rootType: CollectionType,

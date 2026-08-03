@@ -18,13 +18,14 @@ import type {
   ShouldShowFieldInTableHandler,
 } from '@kbn/discover-utils/types';
 import { set } from '@kbn/safer-lodash-set';
-import type { JsonValue } from '../components/json_tree_viewer/json_tree_viewer';
+import type { FormatValue, JsonValue } from '../components/json_tree_viewer/json_tree_viewer';
 
 // Discover's grid fetch uses the fields API with `_source: false`, so a cell only ever gets
 // `row.flattened`: a flat map of dotted keys whose values are (single-element) arrays. To render
 // it as a document tree we un-flatten it back to a nested object and unwrap single-value arrays
-// into scalars. Values are kept RAW (no field formatters) — the only transform applied is search
-// highlighting, so a query's matched terms are marked; those leaves become React nodes.
+// into scalars. Values are kept RAW (no field formatters); the tree receives a purely raw JSON
+// document, and query-highlighting is applied at render time by its `formatValue` (see
+// `createHighlightFormatter`), which keeps the raw value so copy and in-table search still work.
 //
 // A `nested`-mapped field is the exception to the flat shape: Elasticsearch returns it correlated
 // as an array-of-objects under a single key, so we recurse into it to keep the array-of-objects
@@ -45,9 +46,7 @@ import type { JsonValue } from '../components/json_tree_viewer/json_tree_viewer'
 
 interface FormatContext {
   dataView: DataView;
-  fieldFormats: FieldFormatsStart;
   columnsMeta: DataTableColumnsMeta | undefined;
-  hit: EsHitRecord;
   shouldShowFieldHandler: ShouldShowFieldInTableHandler;
 }
 
@@ -75,36 +74,13 @@ const parseEsqlStructuredValue = (value: unknown, esType: string | undefined): u
 };
 
 // Rebuild the nested document from the flat, dotted-key map. Unlike a deep un-flatten, this only
-// de-dots the keys and treats each value as opaque — the values are already fully processed, and
-// crucially a highlighted value is a React element whose (possibly cyclic) internals must never
-// be recursed into.
+// de-dots the keys and treats each value as opaque — the values are already fully processed.
 const unflattenKeys = (source: Record<string, unknown>): Record<string, unknown> => {
   const target: Record<string, unknown> = {};
   for (const key of Object.keys(source)) {
     set(target, key, source[key]);
   }
   return target;
-};
-
-// Keep the raw stored value, except when ES highlighted the field for the active query — then
-// render the value with the matched terms marked (a React node).
-const toLeaf = (
-  value: unknown,
-  fieldName: string,
-  highlighted: boolean,
-  ctx: FormatContext
-): unknown => {
-  if (value === null || value === undefined) return null;
-  if (highlighted) {
-    return formatFieldStringValueWithHighlights({
-      value,
-      hit: ctx.hit,
-      fieldFormats: ctx.fieldFormats,
-      dataView: ctx.dataView,
-      fieldName,
-    });
-  }
-  return value;
 };
 
 const processFieldValue = (rawValue: unknown, fieldName: string, ctx: FormatContext): unknown => {
@@ -138,23 +114,21 @@ const processFieldValue = (rawValue: unknown, fieldName: string, ctx: FormatCont
     });
   }
 
-  // The fields API wraps every value in an array; a single value reads better as a scalar,
-  // while a genuine multi-value field stays an array.
-  const highlighted = Boolean(ctx.hit.highlight?.[fieldName]);
-  const leaves = values.map((value) => toLeaf(value, fieldName, highlighted, ctx));
+  // The fields API wraps every value in an array; a single value reads better as a scalar, while a
+  // genuine multi-value field stays an array. Values are kept raw — query-highlighting is applied
+  // later, at render time, by the tree's `formatValue` (see `createHighlightFormatter`).
+  const leaves = values.map((value) => value ?? null);
   return leaves.length === 1 ? leaves[0] : leaves;
 };
 
 export const buildDocumentTree = ({
   row,
   dataView,
-  fieldFormats,
   columnsMeta,
   shouldShowFieldHandler,
 }: {
   row: DataTableRecord;
   dataView: DataView;
-  fieldFormats: FieldFormatsStart;
   columnsMeta: DataTableColumnsMeta | undefined;
   shouldShowFieldHandler: ShouldShowFieldInTableHandler;
 }): JsonValue => {
@@ -163,9 +137,7 @@ export const buildDocumentTree = ({
 
   const ctx: FormatContext = {
     dataView,
-    fieldFormats,
     columnsMeta,
-    hit: row.raw,
     shouldShowFieldHandler,
   };
   const metaFields = new Set(dataView.metaFields);
@@ -180,4 +152,30 @@ export const buildDocumentTree = ({
   const documentTree = unflattenKeys(documentFlat);
   documentTreeCache.set(row.raw, documentTree);
   return documentTree;
+};
+
+// Reconstruct a leaf's ES field name from its position in the tree: array indices are dropped and
+// the object keys joined with '.', which inverts the un-flattening `buildDocumentTree` applied.
+const fieldNameFromPath = (path: readonly string[]): string =>
+  path.filter((segment) => !/^\d+$/.test(segment)).join('.');
+
+// A `FormatValue` for the JSON tree that marks a query's matched terms in a leaf's value. Only
+// fields Elasticsearch highlighted for the active query are formatted; every other value returns
+// `undefined` and falls through to the tree's default rendering. The raw value stays in the tree,
+// so copy and in-table search keep working on highlighted leaves too.
+export const createHighlightFormatter = ({
+  hit,
+  dataView,
+  fieldFormats,
+}: {
+  hit: EsHitRecord;
+  dataView: DataView;
+  fieldFormats: FieldFormatsStart;
+}): FormatValue => {
+  return ({ value, path }) => {
+    if (value === null) return undefined;
+    const fieldName = fieldNameFromPath(path);
+    if (!hit.highlight?.[fieldName]) return undefined;
+    return formatFieldStringValueWithHighlights({ value, hit, fieldFormats, dataView, fieldName });
+  };
 };

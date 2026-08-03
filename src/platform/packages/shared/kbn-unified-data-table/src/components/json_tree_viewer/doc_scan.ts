@@ -38,9 +38,9 @@ const buildDocScan = (json: JsonValue): DocScan => {
   const nodes = buildNodes(json);
   const parts: string[] = [];
   const collectText = (node: JsonNode) => {
-    // Raw primitive leaves only; a React-node leaf (an ES-query highlight) has no raw text here.
+    // Needed?
     if (node.kind === 'leaf') {
-      if (!node.rendered) parts.push(String(node.value).toLowerCase());
+      parts.push(String(node.value).toLowerCase());
     } else {
       node.children.forEach(collectText);
     }
@@ -68,9 +68,9 @@ export const collectContainersWithMatch = (
   const matched = new Set<string>();
   const visit = (node: JsonNode): boolean => {
     if (node.kind === 'leaf') {
-      return !node.rendered && String(node.value).toLowerCase().includes(termLower);
+      return String(node.value).toLowerCase().includes(termLower);
     }
-    // Visit every child (no early return) so all matching collections are recorded.
+
     let hasMatch = false;
     for (const child of node.children) {
       if (visit(child)) hasMatch = true;

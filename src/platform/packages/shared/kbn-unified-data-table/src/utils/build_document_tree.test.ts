@@ -13,7 +13,7 @@ import { buildDataViewMock, dataViewMock } from '@kbn/discover-utils/src/__mocks
 import { DataViewField, type DataView } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils/types';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { buildDocumentTree } from './build_document_tree';
+import { buildDocumentTree, createHighlightFormatter } from './build_document_tree';
 
 // Stands in for the marked-up React the real highlight formatter returns for matched terms.
 const highlightedNode = createElement('span', {}, 'highlighted');
@@ -32,7 +32,6 @@ const buildTree = (hit: EsHitRecord): Record<string, unknown> => {
   const tree = buildDocumentTree({
     row: buildDataTableRecord(hit, dataViewMock),
     dataView: dataViewMock,
-    fieldFormats,
     columnsMeta: undefined,
     shouldShowFieldHandler: () => true,
   });
@@ -134,7 +133,6 @@ describe('buildDocumentTree', () => {
     const tree = buildDocumentTree({
       row,
       dataView: nestedDataView,
-      fieldFormats,
       columnsMeta: undefined,
       shouldShowFieldHandler: () => true,
     });
@@ -165,7 +163,7 @@ describe('buildDocumentTree', () => {
     });
   });
 
-  it('renders a search-highlighted field as an opaque React node, keeping other values raw', () => {
+  it('keeps a search-highlighted field raw (highlighting is applied later by the formatter)', () => {
     const tree = buildTree({
       _id: '1',
       _index: 'test',
@@ -176,10 +174,8 @@ describe('buildDocumentTree', () => {
       },
     });
 
-    // The React node passes through un-flattening untouched — a deep un-flatten would recurse
-    // into its (possibly cyclic) internals and overflow the stack. Other values stay raw + typed.
-    expect(tree.message).toBe(highlightedNode);
-    expect(tree.count).toBe(5);
+    // The tree now carries only raw values; `createHighlightFormatter` marks matches at render time.
+    expect(tree).toEqual({ message: 'hello world', count: 5 });
   });
 
   it('decodes ES|QL complex columns delivered as JSON strings into structure (via esType)', () => {
@@ -198,7 +194,6 @@ describe('buildDocumentTree', () => {
     const tree = buildDocumentTree({
       row,
       dataView: dataViewMock,
-      fieldFormats,
       columnsMeta: {
         histogram: { type: 'number', esType: 'histogram' },
         agg_metric: { type: 'number', esType: 'aggregate_metric_double' },
@@ -224,7 +219,6 @@ describe('buildDocumentTree', () => {
     const tree = buildDocumentTree({
       row,
       dataView: dataViewMock,
-      fieldFormats,
       columnsMeta: { note: { type: 'string', esType: 'keyword' } },
       shouldShowFieldHandler: () => true,
     });
@@ -262,7 +256,6 @@ describe('buildDocumentTree', () => {
     const tree = buildDocumentTree({
       row,
       dataView,
-      fieldFormats,
       columnsMeta: undefined,
       shouldShowFieldHandler: getShouldShowFieldHandler(
         ['agent', 'agent.keyword'],
@@ -272,5 +265,53 @@ describe('buildDocumentTree', () => {
     });
 
     expect(tree).toEqual({ agent: 'Mozilla/5.0' });
+  });
+});
+
+describe('createHighlightFormatter', () => {
+  const hitWith = (highlight?: Record<string, string[]>): EsHitRecord => ({
+    _id: '1',
+    _index: 'test',
+    ...(highlight ? { highlight } : {}),
+  });
+
+  it('formats a highlighted field, resolving the field name from the leaf path', () => {
+    const formatValue = createHighlightFormatter({
+      hit: hitWith({ 'user.name': ['@kibana-highlighted-field@Alice@/kibana-highlighted-field@'] }),
+      dataView: dataViewMock,
+      fieldFormats,
+    });
+
+    expect(formatValue({ value: 'Alice', path: ['user', 'name'] })).toBe(highlightedNode);
+  });
+
+  it('drops array indices when resolving the field name', () => {
+    const formatValue = createHighlightFormatter({
+      hit: hitWith({ tags: ['@kibana-highlighted-field@security@/kibana-highlighted-field@'] }),
+      dataView: dataViewMock,
+      fieldFormats,
+    });
+
+    expect(formatValue({ value: 'security', path: ['tags', '0'] })).toBe(highlightedNode);
+  });
+
+  it('returns undefined for a field the query did not highlight', () => {
+    const formatValue = createHighlightFormatter({
+      hit: hitWith({ other: ['x'] }),
+      dataView: dataViewMock,
+      fieldFormats,
+    });
+
+    expect(formatValue({ value: 'Alice', path: ['user', 'name'] })).toBeUndefined();
+  });
+
+  it('returns undefined for a null value', () => {
+    const formatValue = createHighlightFormatter({
+      hit: hitWith({ 'user.name': ['x'] }),
+      dataView: dataViewMock,
+      fieldFormats,
+    });
+
+    expect(formatValue({ value: null, path: ['user', 'name'] })).toBeUndefined();
   });
 });

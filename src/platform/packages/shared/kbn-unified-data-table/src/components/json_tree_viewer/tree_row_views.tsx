@@ -34,6 +34,7 @@ import {
   type ClosingRow,
   type CollectionNode,
   type CollectionType,
+  type FormatValue,
   type JsonPrimitive,
   type NodeRow,
   type PagerRow,
@@ -217,19 +218,30 @@ const KeyPrefix = memo(function KeyPrefix({
   );
 });
 
+// Renders a primitive with JSON styling (quotes for strings, type colours). `formatted` — when a
+// host's `FormatValue` returns one — replaces the inner text (e.g. a highlighted value) while
+// keeping the quotes and colour, so a highlighted string still reads as a string.
 const PrimitiveValue = memo(function PrimitiveValue({
   primitiveType,
   value,
+  formatted,
 }: {
   primitiveType: PrimitiveType;
   value: JsonPrimitive;
+  formatted?: React.ReactNode;
 }) {
   const styles = useMemoCss(treeStyles);
   if (primitiveType === 'string') {
-    return <span css={[styles.value, styles.valueString]}>{`"${String(value)}"`}</span>;
+    return (
+      <span css={[styles.value, styles.valueString]}>
+        {'"'}
+        {formatted ?? String(value)}
+        {'"'}
+      </span>
+    );
   }
   if (primitiveType === 'number' || primitiveType === 'boolean') {
-    return <span css={[styles.value, styles.valueScalar]}>{String(value)}</span>;
+    return <span css={[styles.value, styles.valueScalar]}>{formatted ?? String(value)}</span>;
   }
   return <span css={[styles.value, styles.valueNull]}>null</span>;
 });
@@ -306,7 +318,13 @@ const SubtreeCopyButton = memo(function SubtreeCopyButton({ node }: { node: Coll
 });
 
 // The body of a node row (everything after the caret): key prefix + value/brackets + comma.
-const NodeLabel = memo(function NodeLabel({ row }: { row: NodeRow }) {
+const NodeLabel = memo(function NodeLabel({
+  row,
+  formatValue,
+}: {
+  row: NodeRow;
+  formatValue?: FormatValue;
+}) {
   const styles = useMemoCss(treeStyles);
   const { node, isExpanded, hasChildren, trailingComma } = row;
 
@@ -314,13 +332,13 @@ const NodeLabel = memo(function NodeLabel({ row }: { row: NodeRow }) {
     return (
       <span css={styles.label}>
         <KeyPrefix name={node.key} isArrayItem={node.isArrayItem} />
-        {node.rendered ? (
-          <span css={styles.value}>{node.rendered}</span>
-        ) : (
-          <PrimitiveValue primitiveType={node.primitiveType} value={node.value} />
-        )}
+        <PrimitiveValue
+          primitiveType={node.primitiveType}
+          value={node.value}
+          formatted={formatValue?.({ value: node.value, path: node.path })}
+        />
         {trailingComma && <Comma />}
-        {!node.rendered && <ValueCopyButton value={node.value} />}
+        <ValueCopyButton value={node.value} />
       </span>
     );
   }
@@ -383,7 +401,8 @@ export const NodeRowView = function NodeRowView({
   onActivate,
   onFocus,
   onKeyDown,
-}: FocusableRowProps & { row: NodeRow }) {
+  formatValue,
+}: FocusableRowProps & { row: NodeRow; formatValue?: FormatValue }) {
   const styles = useMemoCss(treeStyles);
   const { euiTheme } = useEuiTheme();
   const { node, hasChildren, isExpanded } = row;
@@ -411,7 +430,7 @@ export const NodeRowView = function NodeRowView({
       ) : (
         <span css={styles.caret} aria-hidden />
       )}
-      <NodeLabel row={row} />
+      <NodeLabel row={row} formatValue={formatValue} />
     </div>
   );
 };

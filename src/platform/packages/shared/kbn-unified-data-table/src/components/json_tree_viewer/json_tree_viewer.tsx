@@ -12,7 +12,13 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, useEuiFontSize } from '@elastic/eui';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-import { buildRows, collectExpandableIds, getRootLayout, type JsonValue } from './tree_model';
+import {
+  buildRows,
+  collectExpandableIds,
+  getRootLayout,
+  type FormatValue,
+  type JsonValue,
+} from './tree_model';
 import { collectContainersWithMatch, getDocScan, EMPTY_ID_SET } from './doc_scan';
 import {
   useRovingTreeNavigation,
@@ -21,7 +27,7 @@ import {
 } from './use_tree_interaction';
 import { ClosingBracketRow, NodeRowView, PagerRowView, treeStyles } from './tree_row_views';
 
-export type { JsonValue } from './tree_model';
+export type { FormatValue, JsonValue } from './tree_model';
 export type { TreeExpansionState } from './use_tree_interaction';
 
 export interface JsonTreeViewerProps {
@@ -35,6 +41,10 @@ export interface JsonTreeViewerProps {
    * the match renders — in-table search can only count/highlight rendered DOM text.
    */
   searchTerm?: string;
+  /**
+   * Function called for each leaf node to render its value.
+   */
+  formatValue?: FormatValue;
 }
 
 export const JsonTreeViewer = memo(function JsonTreeViewer({
@@ -42,6 +52,7 @@ export const JsonTreeViewer = memo(function JsonTreeViewer({
   initialState,
   onStateChange,
   searchTerm,
+  formatValue,
 }: JsonTreeViewerProps) {
   const styles = useMemoCss(treeStyles);
   const codeFontCss = css(useEuiFontSize('xs'));
@@ -140,6 +151,7 @@ export const JsonTreeViewer = memo(function JsonTreeViewer({
                 onActivate={() => row.hasChildren && toggle(row.node.id)}
                 onFocus={() => setActive(row.node.id)}
                 onKeyDown={(event) => onRowKeyDown(event, row)}
+                formatValue={formatValue}
               />
             );
           })}
