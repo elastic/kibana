@@ -39,13 +39,6 @@ export function MachineLearningRuleEditorFlyoutProvider({ getService }: FtrProvi
       await testSubjects.click('mlRuleEditorSaveButton');
     },
 
-    async closeIfOpen() {
-      if (await testSubjects.exists('euiFlyoutCloseButton')) {
-        await testSubjects.click('euiFlyoutCloseButton');
-        await testSubjects.missingOrFail('mlRuleEditorFlyout');
-      }
-    },
-
     async selectFilter(scopeFieldName: string) {
       await testSubjects.click(`mlScopeCheckbox_${scopeFieldName}`);
     },

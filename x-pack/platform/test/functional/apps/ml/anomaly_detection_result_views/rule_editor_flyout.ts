@@ -136,7 +136,7 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.ruleEditorFlyout.selectFilter('day_of_week');
       await ml.testExecution.logTestStep('save rule');
       await ml.ruleEditorFlyout.save();
-      await ml.ruleEditorFlyout.closeIfOpen();
+      await ml.ruleEditorFlyout.assertNotExists();
 
       // verify if rule flyout updated its state
       await ml.anomaliesTable.ensureAnomalyActionsMenuOpen(0);
@@ -147,7 +147,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       await ml.ruleEditorFlyout.deleteRule();
       await ml.ruleEditorFlyout.confirmModalConfirmButton();
-      await ml.ruleEditorFlyout.closeIfOpen();
+      await ml.ruleEditorFlyout.assertNotExists();
 
       await ml.api.deleteFilter(filterId);
     });
