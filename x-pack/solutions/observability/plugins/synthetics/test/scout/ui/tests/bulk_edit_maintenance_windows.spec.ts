@@ -127,7 +127,7 @@ test.describe('Bulk edit — maintenance windows', { tag: tags.stateful.classic 
 
     await test.step('save and confirm success', async () => {
       await app.saveBulkMaintenanceWindows();
-      await expect(page.locator('.euiToast')).toBeVisible({ timeout: 15_000 });
+      await expect(page.testSubj.locator('euiToastHeader__title')).toBeVisible({ timeout: 15_000 });
       await capture(page, testInfo, '05-success-toast');
       await app.waitForMonitorManagementLoadingToFinish();
       await capture(page, testInfo, '06-result-table');
