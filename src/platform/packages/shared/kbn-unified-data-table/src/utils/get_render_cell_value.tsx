@@ -199,7 +199,17 @@ export const getRenderCellValueFn = ({
         // Persist expand/reveal state outside the cell (keyed by the row) so it survives the
         // remount in-table search forces on every keystroke.
         return (
-          <span className={CELL_CLASS}>
+          // The tree stays unaware of the grid: it lets Escape bubble, and the cell renderer turns
+          // that into "return focus to the grid cell" so the grid's own navigation resumes.
+          <span
+            className={CELL_CLASS}
+            onKeyDown={(event) => {
+              if (event.key === 'Escape') {
+                event.stopPropagation();
+                event.currentTarget.closest<HTMLElement>('[role="gridcell"]')?.focus();
+              }
+            }}
+          >
             <JsonTreeViewer
               json={documentTree}
               initialState={getTreeExpansion(row.raw)}

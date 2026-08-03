@@ -21,6 +21,27 @@ describe('JsonTreeViewer', () => {
     expect(screen.getByText('5')).toBeVisible();
   });
 
+  // When rendered as an EuiDataGrid cell, the grid moves the focused cell from a bubble-phase
+  // keydown on the grid body. The tree must claim its own navigation keys (stopPropagation) so they
+  // move between tree rows, not between grid cells.
+  it('owns its arrow-key navigation instead of letting it bubble to an ancestor', async () => {
+    let bubbledKey: string | undefined;
+    render(
+      <div onKeyDown={(event) => (bubbledKey = event.key)}>
+        <JsonTreeViewer json={{ a: 1, b: 2, c: 3 }} />
+      </div>
+    );
+
+    const [firstRow, secondRow] = screen.getAllByRole('treeitem');
+    firstRow.focus();
+    await userEvent.keyboard('{ArrowDown}');
+
+    // Focus moved within the tree…
+    expect(secondRow).toHaveFocus();
+    // …and the key never reached the ancestor, where the grid's cell navigation would run.
+    expect(bubbledKey).toBeUndefined();
+  });
+
   // In-table search remounts every cell on each keystroke (a search-term-keyed React `key` on the
   // grid's highlight wrapper), which would collapse the tree. The host persists the state and seeds
   // a fresh instance with it; these tests prove a remounted instance comes up already expanded.
@@ -68,6 +89,53 @@ describe('JsonTreeViewer', () => {
     unmount();
     render(<JsonTreeViewer json={doc} initialState={lastState} />);
     expect(screen.getByText('"value_11"')).toBeVisible();
+  });
+
+  // Inside an EuiDataGrid cell the tree must let the keyboard reach its controls and hand focus back
+  // to the grid — all via its own key handling, without a focus trap.
+  describe('keyboard reaches the tree controls', () => {
+    it('steps from a leaf row into its copy-value button with ArrowRight', async () => {
+      render(<JsonTreeViewer json={{ message: 'hello' }} />);
+
+      screen.getByRole('treeitem', { name: /message/i }).focus();
+      await userEvent.keyboard('{ArrowRight}');
+
+      expect(screen.getByRole('button', { name: 'Copy value' })).toHaveFocus();
+    });
+
+    it('steps from the first row up to the Expand all control with ArrowUp', async () => {
+      render(<JsonTreeViewer json={{ user: { city: 'Berlin' } }} />);
+
+      // `user` is a collapsed collection, so it is the first (and only) visible row.
+      screen.getByRole('treeitem', { name: /user/i }).focus();
+      await userEvent.keyboard('{ArrowUp}');
+
+      expect(screen.getByRole('button', { name: /expand all/i })).toHaveFocus();
+    });
+
+    it('leaves Escape for its host, which returns focus to the grid cell', async () => {
+      // The tree itself stays unaware of the grid: it lets Escape bubble, and the host turns that
+      // into "focus the enclosing cell" — mirroring how the cell renderer wires it.
+      render(
+        <div role="gridcell" tabIndex={-1} data-test-subj="gridcell">
+          <span
+            onKeyDown={(event) => {
+              if (event.key === 'Escape') {
+                event.stopPropagation();
+                event.currentTarget.closest<HTMLElement>('[role="gridcell"]')?.focus();
+              }
+            }}
+          >
+            <JsonTreeViewer json={{ message: 'hello' }} />
+          </span>
+        </div>
+      );
+
+      screen.getByRole('treeitem', { name: /message/i }).focus();
+      await userEvent.keyboard('{Escape}');
+
+      expect(screen.getByTestId('gridcell')).toHaveFocus();
+    });
   });
 
   // In-table search only sees rendered DOM text, so a value inside a collapsed node is invisible to

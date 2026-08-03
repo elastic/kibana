@@ -525,6 +525,17 @@ const ValueCopyButton = memo(function ValueCopyButton({ value }: { value: JsonPr
           event.stopPropagation();
           copyToClipboard(value === null ? 'null' : String(value));
         }}
+        onKeyDown={(event: React.KeyboardEvent<HTMLButtonElement>) => {
+          // Reached with ArrowRight from its row: any arrow returns to the row (Escape bubbles to
+          // the host). The keys never leak to the grid's cell navigation.
+          if (event.key.startsWith('Arrow')) {
+            event.preventDefault();
+            event.stopPropagation();
+            event.currentTarget.closest<HTMLElement>('[role="treeitem"]')?.focus();
+          } else if (event.key === 'Enter' || event.key === ' ') {
+            event.stopPropagation();
+          }
+        }}
         size="xs"
       />
     </EuiToolTip>
@@ -696,6 +707,7 @@ export const JsonTreeViewer = memo(function JsonTreeViewer({
   const [activeId, setActiveId] = useState<string | null>(null);
 
   const rowRefs = useRef(new Map<string, HTMLDivElement>());
+  const expandAllRef = useRef<HTMLButtonElement | null>(null);
 
   // Mirror expand/reveal state to the host on every change so it can restore the tree after a
   // remount. Held in a ref so a changing callback identity never re-fires the effect; local state
@@ -774,33 +786,48 @@ export const JsonTreeViewer = memo(function JsonTreeViewer({
   const onRowKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLDivElement>, row: NodeRow | PagerRow) => {
       const index = orderedIds.indexOf(rowKey(row));
+      const claim = () => {
+        event.preventDefault();
+        event.stopPropagation();
+      };
       switch (event.key) {
         case 'ArrowDown':
-          event.preventDefault();
+          claim();
           focusRow(orderedIds[index + 1]);
           break;
         case 'ArrowUp':
-          event.preventDefault();
-          focusRow(orderedIds[index - 1]);
+          claim();
+          // From the first row, step up to the Expand/Collapse-all control above the tree.
+          if (index === 0 && hasControls) expandAllRef.current?.focus();
+          else focusRow(orderedIds[index - 1]);
           break;
         case 'Home':
-          event.preventDefault();
+          claim();
           focusRow(orderedIds[0]);
           break;
         case 'End':
-          event.preventDefault();
+          claim();
           focusRow(orderedIds[orderedIds.length - 1]);
           break;
         case 'ArrowRight':
-          event.preventDefault();
+          claim();
           if (row.kind === 'pager') {
             if (row.variant === 'more') revealMore(row.collectionId);
             else showFewer(row.collectionId);
-          } else if (row.hasChildren && !row.isExpanded) setExpandedFor(row.node.id, true);
-          else if (row.hasChildren && row.isExpanded) focusRow(orderedIds[index + 1]);
+          } else if (row.hasChildren && !row.isExpanded) {
+            setExpandedFor(row.node.id, true);
+          } else if (row.hasChildren && row.isExpanded) {
+            focusRow(orderedIds[index + 1]);
+          } else {
+            // Leaf row: step into its copy-value button, if it has one.
+            rowRefs.current
+              .get(rowKey(row))
+              ?.querySelector<HTMLElement>('.jsonSyntaxTreeCopyButton')
+              ?.focus();
+          }
           break;
         case 'ArrowLeft':
-          event.preventDefault();
+          claim();
           if (row.kind === 'node' && row.hasChildren && row.isExpanded) {
             setExpandedFor(row.node.id, false);
           } else if (row.parentId) {
@@ -810,11 +837,11 @@ export const JsonTreeViewer = memo(function JsonTreeViewer({
         case 'Enter':
         case ' ':
           if (row.kind === 'pager') {
-            event.preventDefault();
+            claim();
             if (row.variant === 'more') revealMore(row.collectionId);
             else showFewer(row.collectionId);
           } else if (row.hasChildren) {
-            event.preventDefault();
+            claim();
             toggle(row.node.id);
           }
           break;
@@ -822,7 +849,22 @@ export const JsonTreeViewer = memo(function JsonTreeViewer({
           break;
       }
     },
-    [orderedIds, focusRow, setExpandedFor, toggle, revealMore, showFewer]
+    [orderedIds, focusRow, setExpandedFor, toggle, revealMore, showFewer, hasControls]
+  );
+
+  // The Expand/Collapse-all control joins the tree's keyboard navigation: ArrowDown steps into the
+  // first row, Escape returns to the grid cell, and its keys never leak to the grid's cell nav.
+  const onControlKeyDown = useCallback(
+    (event: React.KeyboardEvent<HTMLButtonElement>) => {
+      if (event.key.startsWith('Arrow')) {
+        event.preventDefault();
+        event.stopPropagation();
+        if (event.key === 'ArrowDown') focusRow(orderedIds[0]);
+      } else if (event.key === 'Enter' || event.key === ' ') {
+        event.stopPropagation();
+      }
+    },
+    [orderedIds, focusRow]
   );
 
   return (
@@ -831,9 +873,11 @@ export const JsonTreeViewer = memo(function JsonTreeViewer({
         <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
+              buttonRef={expandAllRef}
               flush="left"
               iconType={isAllExpanded ? 'fold' : 'unfold'}
               onClick={isAllExpanded ? collapseAll : expandAll}
+              onKeyDown={onControlKeyDown}
               size="xs"
             >
               {isAllExpanded
