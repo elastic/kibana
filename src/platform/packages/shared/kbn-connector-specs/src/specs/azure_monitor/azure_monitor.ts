@@ -139,7 +139,7 @@ function throwAzureError(error: unknown): never {
 export const AzureMonitor: ConnectorSpec = {
   metadata: {
     id: '.azure_monitor',
-    displayName: 'Azure monitor',
+    displayName: 'Azure Monitor',
     description: i18n.translate('core.kibanaConnectorSpecs.azureMonitor.metadata.description', {
       defaultMessage:
         'List and triage Azure Monitor alerts, query metrics and logs, and control alert rules',
