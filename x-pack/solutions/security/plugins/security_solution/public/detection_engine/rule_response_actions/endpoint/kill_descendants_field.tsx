@@ -18,7 +18,7 @@ interface KillDescendantsFieldProps {
 const LABEL = i18n.translate(
   'xpack.securitySolution.responseActions.endpoint.killDescendantsFieldLabel',
   {
-    defaultMessage: 'Kill descendants',
+    defaultMessage: 'Kill descendant processes'
   }
 );
 
