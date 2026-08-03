@@ -40,3 +40,28 @@ export const LENS_STATIC_VALUE_DEFAULT = 100;
 export const LENS_LAST_VALUE_DEFAULT_MULTI_VALUE = false;
 export const LENS_RANGE_DEFAULT_INTERVAL = 1000;
 export const LENS_MOVING_AVERAGE_DEFAULT_WINDOW = 5;
+
+/**
+ * Palette ids valid for a `distributed_palette` (color-by-value across a numeric range).
+ *
+ * These must be the dynamic-coloring gradient palettes registered in the charts plugin
+ * (the ones built via `buildGradient`, which sets `canDynamicColoring: true`, and are the only
+ * palettes the Lens color-by-value picker offers). This is the exact set produced by
+ * `buildPalettes` in
+ * `src/platform/plugins/shared/charts/public/services/palettes/palettes.tsx`.
+ *
+ * This package cannot import the charts plugin, so the list is duplicated here and must be kept
+ * in sync manually if that registry changes.
+ */
+export const PALETTE_IDS = [
+  'status',
+  'temperature',
+  'complementary',
+  'negative',
+  'positive',
+  'cool',
+  'warm',
+  'gray',
+] as const;
+
+export type PaletteId = (typeof PALETTE_IDS)[number];

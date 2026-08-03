@@ -18,6 +18,7 @@ import { FakeChatModel, FakeLLM } from '@langchain/core/utils/testing';
 import type { ContentReferencesStore } from '@kbn/elastic-assistant-common';
 import { DefendInsightType } from '@kbn/elastic-assistant-common';
 import { MemorySaver } from '@langchain/langgraph-checkpoint';
+import { getDefaultAttackDiscoveryGraph, getDefaultDefendInsightsGraph } from '@kbn/discoveries';
 import {
   ATTACK_DISCOVERY_GENERATION_DETAILS_MARKDOWN,
   ATTACK_DISCOVERY_GENERATION_ENTITY_SUMMARY_MARKDOWN,
@@ -31,8 +32,6 @@ import {
   DEFEND_INSIGHTS,
 } from '../server/lib/prompt/prompts';
 import { getDefaultAssistantGraph } from '../server/lib/langchain/graphs/default_assistant_graph/graph';
-import { getDefaultAttackDiscoveryGraph } from '../server/lib/attack_discovery/graphs/default_attack_discovery_graph';
-import { getDefaultDefendInsightsGraph } from '../server/lib/defend_insights/graphs/default_defend_insights_graph';
 
 /**
  * Sometimes there is a cloudflare error from mermaid.ink (mermaid js rendered).

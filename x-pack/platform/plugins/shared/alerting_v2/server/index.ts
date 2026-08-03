@@ -22,6 +22,9 @@ import { bindTasks } from './setup/bind_tasks';
 
 export const config: PluginConfigDescriptor<PluginConfig> = {
   schema: configSchema,
+  exposeToBrowser: {
+    rules: { minimumScheduleInterval: true },
+  },
 };
 
 export const module = new ContainerModule((options) => {

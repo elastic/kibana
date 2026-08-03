@@ -33,9 +33,9 @@ export interface PluginStartDependencies {
 
 export interface AgentBuilderPlatformTracingFeaturesStart {
   /**
-   * Syncs the tracing features for a space.
+   * Installs or removes the tracing dashboard for a given space.
    */
-  sync: (options: { enabled: boolean; spaceId?: string }) => Promise<void>;
+  setDashboard: (options: { enabled: boolean; spaceId: string }) => Promise<void>;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

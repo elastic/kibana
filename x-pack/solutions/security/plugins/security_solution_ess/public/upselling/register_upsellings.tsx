@@ -29,6 +29,7 @@ import type { Services } from '../common/services';
 import { withServicesProvider } from '../common/services';
 import {
   AttackDiscoveryUpsellingPageLazy,
+  AttacksUpsellingPageLazy,
   AIValueUpsellingPageLazy,
   AlertAnalysisWorkflowUpsellingPageLazy,
   EntityAnalyticsUpsellingPageLazy,
@@ -105,6 +106,11 @@ export const upsellingPages: UpsellingPages = [
     pageName: SecurityPageName.attackDiscovery,
     minimumLicenseRequired: 'enterprise',
     component: AttackDiscoveryUpsellingPageLazy,
+  },
+  {
+    pageName: SecurityPageName.attacks,
+    minimumLicenseRequired: 'enterprise',
+    component: AttacksUpsellingPageLazy,
   },
   {
     pageName: SecurityPageName.aiValue,

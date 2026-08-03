@@ -6,6 +6,7 @@
  */
 
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
+import { ALERTING_V2_ENABLED_SETTING_ID } from '@kbn/alerting-v2-constants';
 import { manageRuleTool } from '../tools/manage_rule';
 import { manageActionPolicyTool } from '../tools/manage_action_policy';
 import type { ManageActionPolicyToolDeps } from '../tools/manage_action_policy';
@@ -23,6 +24,8 @@ export const createRuleManagementSkill = (deps: ManageActionPolicyToolDeps) =>
     basePath: 'skills/platform/alerting',
     description:
       'Compose, discover, and modify alerting V2 rules and action policies (notification policies) within a conversation.',
+    experimental: true,
+    uiSettingRequired: ALERTING_V2_ENABLED_SETTING_ID,
     referencedContent: [
       {
         name: 'concepts',

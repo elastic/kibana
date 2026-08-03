@@ -154,6 +154,7 @@ dependsOn:
   - '@kbn/ai-assistant-common'
   - '@kbn/management-settings-ids'
   - '@kbn/alerting-v2-utils'
+  - '@kbn/deeplinks-workflows'
   - '@kbn/observability-agent-builder-plugin'
   - '@kbn/kql'
   - '@kbn/shared-ux-utility'

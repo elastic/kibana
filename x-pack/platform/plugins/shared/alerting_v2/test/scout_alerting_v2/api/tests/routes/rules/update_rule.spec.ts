@@ -272,6 +272,7 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
         body: { version: created.version, metadata: { name: 'second-rename' } },
       });
       expect(staleUpdate).toHaveStatusCode(409);
+      expect(staleUpdate.body.code).toBe('RULE_VERSION_CONFLICT');
     }
   );
 
@@ -305,6 +306,7 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
       body: { metadata: { name: 'whatever' } },
     });
     expect(response).toHaveStatusCode(404);
+    expect(response.body.code).toBe('RULE_NOT_FOUND');
   });
 
   apiTest(

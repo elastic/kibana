@@ -94,7 +94,12 @@ const solutionNodesFormatter = (
     if (appLink && !appLink.unauthorized) {
       const deepLink = formatDeepLink(appLink);
       if (appLink.unavailable) {
-        deepLink.visibleIn = ['projectSideNav']; // Links marked as unavailable have an upselling page to display, show only in projectSideNav
+        // Links marked as unavailable have an upselling page to display, so they are shown
+        // only in projectSideNav. But when a link is also explicitly disabled from the side
+        // nav (e.g. the legacy Attack Discovery link kept only for route authorization and
+        // redirect handling once the new Attacks page is enabled), it must stay hidden even
+        // when unavailable, otherwise it would resurface in the side nav on upsell tiers.
+        deepLink.visibleIn = appLink.sideNavDisabled ? [] : ['projectSideNav'];
       }
       if (node.children) {
         const childrenLinks = solutionNodesFormatter(node.children, normalizedLinks);

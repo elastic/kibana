@@ -12,7 +12,6 @@ import {
   addListener as originalAddListener,
   removeListener as originalRemoveListener,
 } from '@reduxjs/toolkit';
-import { ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING } from '../../../common/constants';
 import type { RootState } from '../redux/reducer';
 import { useKibana } from '../../common/lib/kibana';
 import { createDataViewSelectedListener } from '../redux/listeners/data_view_selected';
@@ -41,10 +40,6 @@ const removeListener = <T extends AnyAction>(listener: Listener<T>) =>
 export const useInitDataViewManager = () => {
   const dispatch = useDispatch();
   const services = useKibana().services;
-  const enableAlertsAndAttacksAlignment = services.uiSettings.get(
-    ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING,
-    false
-  );
 
   const {
     loading: loadingSignalIndex,
@@ -72,18 +67,15 @@ export const useInitDataViewManager = () => {
 
   useEffect(() => {
     // NOTE: init listener contains logic that preloads default security solution data view
-    const dataViewsLoadingListener = createInitListener(
-      {
-        dataViews: services.dataViews,
-        http: services.http,
-        uiSettings: services.uiSettings,
-        notifications: services.notifications,
-        application: services.application,
-        spaces: services.spaces,
-        storage: services.storage,
-      },
-      enableAlertsAndAttacksAlignment
-    );
+    const dataViewsLoadingListener = createInitListener({
+      dataViews: services.dataViews,
+      http: services.http,
+      uiSettings: services.uiSettings,
+      notifications: services.notifications,
+      application: services.application,
+      spaces: services.spaces,
+      storage: services.storage,
+    });
 
     dispatch(addListener(dataViewsLoadingListener));
 
@@ -118,7 +110,6 @@ export const useInitDataViewManager = () => {
       });
     };
   }, [
-    enableAlertsAndAttacksAlignment,
     dispatch,
     services.application,
     services.dataViews,

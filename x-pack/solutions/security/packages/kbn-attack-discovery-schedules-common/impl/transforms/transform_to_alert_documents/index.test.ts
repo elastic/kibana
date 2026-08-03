@@ -170,6 +170,22 @@ describe('Transform attack discoveries to alert documents', () => {
         'http://jest.com/test/s/very-nice-space/app/security/attack_discovery?id=test-alert-id'
       );
     });
+
+    it(`returns the expected ${ALERT_URL} with timestamp`, () => {
+      const result = transformToBaseAlertDocument({
+        alertDocId,
+        alertInstanceId,
+        attackDiscovery: attackDiscoveries[0],
+        alertsParams,
+        publicBaseUrl: 'http://jest.com/test',
+        spaceId: 'very-nice-space',
+        timestamp: '2023-10-12T10:00:00.000Z',
+      });
+
+      expect(result[ALERT_URL]).toEqual(
+        'http://jest.com/test/s/very-nice-space/app/security/attack_discovery?id=test-alert-id&timestamp=2023-10-12T10%3A00%3A00.000Z'
+      );
+    });
   });
 
   describe('generateAttackDiscoveryAlertHash', () => {

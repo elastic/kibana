@@ -506,6 +506,156 @@ describe('AttackDiscoveryScheduleDataClient', () => {
     });
   });
 
+  describe('bulk actions', () => {
+    it('`bulkDeleteSchedules` delegates to `rulesClient.bulkDeleteRules` and transforms the result', async () => {
+      (scheduleDataClientParams.rulesClient.bulkDeleteRules as jest.Mock).mockResolvedValue({
+        errors: [],
+        rules: [{ id: 'schedule-1' }, { id: 'schedule-2' }],
+        total: 2,
+      });
+      const client = new AttackDiscoveryScheduleDataClient(scheduleDataClientParams);
+
+      // A non-existent id is included in the request but silently excluded from
+      // the result (query-based RulesClient semantics, per issue #266760).
+      const result = await client.bulkDeleteSchedules({
+        ids: ['schedule-1', 'schedule-2', 'missing'],
+      });
+
+      expect(scheduleDataClientParams.rulesClient.bulkDeleteRules).toHaveBeenCalledWith({
+        ids: ['schedule-1', 'schedule-2', 'missing'],
+      });
+      expect(result).toEqual({ errors: [], ids: ['schedule-1', 'schedule-2'], total: 2 });
+    });
+
+    it('`bulkEnableSchedules` delegates to `rulesClient.bulkEnableRules` and transforms the result', async () => {
+      (scheduleDataClientParams.rulesClient.bulkEnableRules as jest.Mock).mockResolvedValue({
+        errors: [],
+        rules: [{ id: 'schedule-1' }],
+        total: 1,
+      });
+      const client = new AttackDiscoveryScheduleDataClient(scheduleDataClientParams);
+
+      const result = await client.bulkEnableSchedules({ ids: ['schedule-1'] });
+
+      expect(scheduleDataClientParams.rulesClient.bulkEnableRules).toHaveBeenCalledWith({
+        ids: ['schedule-1'],
+      });
+      expect(result).toEqual({ errors: [], ids: ['schedule-1'], total: 1 });
+    });
+
+    it('`bulkDisableSchedules` delegates to `rulesClient.bulkDisableRules` and transforms the result', async () => {
+      (scheduleDataClientParams.rulesClient.bulkDisableRules as jest.Mock).mockResolvedValue({
+        errors: [],
+        rules: [{ id: 'schedule-1' }],
+        total: 1,
+      });
+      const client = new AttackDiscoveryScheduleDataClient(scheduleDataClientParams);
+
+      const result = await client.bulkDisableSchedules({ ids: ['schedule-1'] });
+
+      expect(scheduleDataClientParams.rulesClient.bulkDisableRules).toHaveBeenCalledWith({
+        ids: ['schedule-1'],
+      });
+      expect(result).toEqual({ errors: [], ids: ['schedule-1'], total: 1 });
+    });
+
+    it('passes through genuine per-rule errors from the `rulesClient`', async () => {
+      const ruleErrors = [{ message: 'boom', rule: { id: 'schedule-2', name: 'schedule-2' } }];
+      (scheduleDataClientParams.rulesClient.bulkDeleteRules as jest.Mock).mockResolvedValue({
+        errors: ruleErrors,
+        rules: [{ id: 'schedule-1' }],
+        total: 1,
+      });
+      const client = new AttackDiscoveryScheduleDataClient(scheduleDataClientParams);
+
+      const result = await client.bulkDeleteSchedules({ ids: ['schedule-1', 'schedule-2'] });
+
+      expect(result).toEqual({ errors: ruleErrors, ids: ['schedule-1'], total: 1 });
+    });
+
+    it('does NOT pre-fetch for the unfiltered internal client (native bulk directly)', async () => {
+      (scheduleDataClientParams.rulesClient.bulkDeleteRules as jest.Mock).mockResolvedValue({
+        errors: [],
+        rules: [{ id: 'schedule-1' }],
+        total: 1,
+      });
+      const client = new AttackDiscoveryScheduleDataClient(scheduleDataClientParams);
+
+      await client.bulkDeleteSchedules({ ids: ['schedule-1'] });
+
+      // No `filterTags` -> no per-id visibility read; ids go straight to native bulk.
+      expect(scheduleDataClientParams.rulesClient.get).not.toHaveBeenCalled();
+      expect(scheduleDataClientParams.rulesClient.bulkDeleteRules).toHaveBeenCalledWith({
+        ids: ['schedule-1'],
+      });
+    });
+
+    it('narrows to visible ids before bulk-acting (filtered/public client): hidden + missing are dropped', async () => {
+      const untaggedRule = getInternalAttackDiscoveryScheduleMock(mockBasicScheduleParams, {
+        tags: [],
+      });
+      const workflowTaggedRule = getInternalAttackDiscoveryScheduleMock(mockBasicScheduleParams, {
+        tags: ['attack-discovery-workflow'],
+      });
+      (scheduleDataClientParams.rulesClient.get as jest.Mock).mockImplementation(({ id }) => {
+        if (id === 'visible') return Promise.resolve(untaggedRule);
+        if (id === 'hidden') return Promise.resolve(workflowTaggedRule);
+        return Promise.reject(new Error(`Saved object [alert/${id}] not found`));
+      });
+      (scheduleDataClientParams.rulesClient.bulkDeleteRules as jest.Mock).mockResolvedValue({
+        errors: [],
+        rules: [{ id: 'visible' }],
+        total: 1,
+      });
+      const client = new AttackDiscoveryScheduleDataClient({
+        ...scheduleDataClientParams,
+        filterTags: { excludeTags: ['attack-discovery-schedule', 'attack-discovery-workflow'] },
+      });
+
+      const result = await client.bulkDeleteSchedules({ ids: ['visible', 'hidden', 'missing'] });
+
+      // Only the visible id reaches the native bulk API (isolation + #266760 contract).
+      expect(scheduleDataClientParams.rulesClient.bulkDeleteRules).toHaveBeenCalledWith({
+        ids: ['visible'],
+      });
+      expect(result).toEqual({ errors: [], ids: ['visible'], total: 1 });
+    });
+
+    it('returns an empty result without calling native bulk when nothing is visible (filtered client)', async () => {
+      (scheduleDataClientParams.rulesClient.get as jest.Mock).mockRejectedValue(
+        new Error('Saved object not found')
+      );
+      const client = new AttackDiscoveryScheduleDataClient({
+        ...scheduleDataClientParams,
+        filterTags: { excludeTags: ['attack-discovery-schedule', 'attack-discovery-workflow'] },
+      });
+
+      const result = await client.bulkDeleteSchedules({ ids: ['missing-1', 'missing-2'] });
+
+      expect(scheduleDataClientParams.rulesClient.bulkDeleteRules).not.toHaveBeenCalled();
+      expect(result).toEqual({ errors: [], ids: [], total: 0 });
+    });
+
+    it('applies the same visibility narrowing to bulk enable and bulk disable (filtered client)', async () => {
+      const workflowTaggedRule = getInternalAttackDiscoveryScheduleMock(mockBasicScheduleParams, {
+        tags: ['attack-discovery-workflow'],
+      });
+      (scheduleDataClientParams.rulesClient.get as jest.Mock).mockResolvedValue(workflowTaggedRule);
+      const client = new AttackDiscoveryScheduleDataClient({
+        ...scheduleDataClientParams,
+        filterTags: { excludeTags: ['attack-discovery-schedule', 'attack-discovery-workflow'] },
+      });
+
+      const enableResult = await client.bulkEnableSchedules({ ids: ['hidden'] });
+      const disableResult = await client.bulkDisableSchedules({ ids: ['hidden'] });
+
+      expect(scheduleDataClientParams.rulesClient.bulkEnableRules).not.toHaveBeenCalled();
+      expect(scheduleDataClientParams.rulesClient.bulkDisableRules).not.toHaveBeenCalled();
+      expect(enableResult).toEqual({ errors: [], ids: [], total: 0 });
+      expect(disableResult).toEqual({ errors: [], ids: [], total: 0 });
+    });
+  });
+
   describe('by-ID isolation guard (filterTags)', () => {
     const publicFilterTags = {
       excludeTags: ['attack-discovery-schedule', 'attack-discovery-workflow'],

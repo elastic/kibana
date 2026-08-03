@@ -155,7 +155,7 @@ export const chartTypeRegistry: Record<SupportedChartType, ChartTypeRegistryEntr
         description:
           'For displaying word frequency or categorical data where text size represents value. Best for showing top terms, keywords, categories, or text-based aggregations (e.g., "show top error messages", "display most common tags").',
         guideline:
-          "Choose 'tagcloud' when visualizing text/categorical data where frequency or count determines size",
+          "Choose 'tag_cloud' when visualizing text/categorical data where frequency or count determines size",
       },
     },
   },
@@ -177,7 +177,7 @@ export const chartTypeRegistry: Record<SupportedChartType, ChartTypeRegistryEntr
         description:
           'For displaying data in a structured table format with sortable columns. Best for showing detailed records, precise numeric comparisons, or multi-dimensional breakdowns where exact values matter more than visual patterns (e.g., "list top 20 hosts by CPU usage", "show error counts by service and status code").',
         guideline:
-          "Choose 'datatable' when the user needs precise values, sortable columns, or a spreadsheet-like view of the data",
+          "Choose 'data_table' when the user needs precise values, sortable columns, or a spreadsheet-like view of the data",
       },
       config: {
         options: {

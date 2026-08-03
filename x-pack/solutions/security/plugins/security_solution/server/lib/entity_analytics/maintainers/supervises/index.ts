@@ -34,11 +34,9 @@ export const supervisesMaintainer: RegisterEntityMaintainerConfig = {
         : undefined;
 
     if (lastProcessedTimestamp) {
-      logger.info(
-        `Starting supervises maintainer run (incremental from ${lastProcessedTimestamp})`
-      );
+      logger.info(`[supervises] Starting run (incremental from ${lastProcessedTimestamp})`);
     } else {
-      logger.info('Starting supervises maintainer run (full scan — first run)');
+      logger.info('[supervises] Starting run (full scan — first run)');
     }
 
     const collector: RelationshipMaintainerTelemetryCollector = {
@@ -81,13 +79,13 @@ export const supervisesMaintainer: RegisterEntityMaintainerConfig = {
     });
 
     logger.info(
-      `Completed run: ${result.totalBuckets} buckets, ${result.totalRecords} records, ${result.totalWritten} entities written, ${result.totalDroppedTargets} targets dropped, ${result.totalMetadataDocsApplied} metadata docs appended`
+      `[supervises] Completed run: ${result.totalBuckets} buckets, ${result.totalRecords} records, ${result.totalWritten} entities written, ${result.totalDroppedTargets} targets dropped, ${result.totalMetadataDocsApplied} metadata docs appended`
     );
 
     // Do not advance the watermark if the run was aborted — the next run should
     // re-process the same window to avoid missing entities.
     if (abortController.signal.aborted) {
-      logger.info('Run was aborted; watermark not advanced');
+      logger.info('[supervises] Run was aborted; watermark not advanced');
       return status.state;
     }
 

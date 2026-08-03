@@ -179,6 +179,17 @@ export const selectEditorFocusedStepInfo = createSelector(
     focusedStepId && workflowLookup ? workflowLookup.steps[focusedStepId] : undefined
 );
 
+export const selectEditorFocusedTriggerInfo = createSelector(
+  selectFocusedTriggerId,
+  selectEditorWorkflowLookup,
+  (focusedTriggerId, workflowLookup) => {
+    if (!focusedTriggerId || !workflowLookup) return undefined;
+    const { triggersLineStart, triggersLineEnd } = workflowLookup;
+    if (triggersLineStart == null || triggersLineEnd == null) return undefined;
+    return { lineStart: triggersLineStart, lineEnd: triggersLineEnd };
+  }
+);
+
 export const selectEditorWorkflowGraph = createSelector(
   selectEditorComputed,
   (computed) => computed?.workflowGraph

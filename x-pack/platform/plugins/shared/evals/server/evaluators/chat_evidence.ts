@@ -5,49 +5,57 @@
  * 2.0.
  */
 
+import type { GenAIInputMessage, GenAIOutputMessage, GenAITextPart } from '@kbn/inference-tracing';
+import { parseJsonAttr } from '@kbn/inference-tracing';
 import type { TraceAccessor } from './types';
 import { createTraceAccessor } from './trace_accessor';
 import { rowsFromEsqlResponse } from './esql_utils';
 
-const USER_MESSAGE_CONTENT_COLUMN = 'attributes.content';
-const AGENT_RESPONSE_CONTENT_COLUMN = 'attributes.message.content';
+const INPUT_MESSAGES_COLUMN = 'attributes.gen_ai.input.messages';
+const OUTPUT_MESSAGES_COLUMN = 'attributes.gen_ai.output.messages';
 
-interface UserMessageRow extends Record<string, unknown> {
-  [USER_MESSAGE_CONTENT_COLUMN]: string | null;
+interface ChatSpanRow extends Record<string, unknown> {
+  [INPUT_MESSAGES_COLUMN]?: string | null;
+  [OUTPUT_MESSAGES_COLUMN]?: string | null;
 }
 
-interface AgentResponseRow extends Record<string, unknown> {
-  [AGENT_RESPONSE_CONTENT_COLUMN]: string | null;
-}
+const CHAT_SPANS_PIPELINE = `| WHERE attributes.gen_ai.operation.name == "chat"
+| KEEP @timestamp, ${INPUT_MESSAGES_COLUMN}, ${OUTPUT_MESSAGES_COLUMN}
+| SORT @timestamp ASC`;
 
-const USER_MESSAGE_PIPELINE = `| WHERE event_name == "gen_ai.user.message"
-| KEEP @timestamp, ${USER_MESSAGE_CONTENT_COLUMN}, span_id
-| SORT @timestamp ASC
-| LIMIT 1`;
-
-const AGENT_RESPONSE_PIPELINE = `| WHERE event_name == "gen_ai.choice"
-| KEEP @timestamp, ${AGENT_RESPONSE_CONTENT_COLUMN}, span_id
-| SORT @timestamp DESC
-| LIMIT 1`;
+const extractTextFromParts = (parts: GenAIInputMessage['parts']): string =>
+  parts
+    .filter((p): p is GenAITextPart => p.type === 'text' && typeof p.content === 'string')
+    .map((p) => p.content)
+    .join('\n');
 
 export const extractChatEvidence = async (
   traceAccessor: TraceAccessor
 ): Promise<{ user_query: string; agent_response: string }> => {
   const accessor = createTraceAccessor(traceAccessor);
 
-  const userMsgResponse = await accessor.runEsql('logs', USER_MESSAGE_PIPELINE);
-  const userMsgRows = rowsFromEsqlResponse<UserMessageRow>(userMsgResponse);
+  const response = await accessor.runEsql('traces', CHAT_SPANS_PIPELINE);
+  const chatSpans = rowsFromEsqlResponse<ChatSpanRow>(response);
 
-  if (userMsgRows.length === 0) {
-    throw new Error(`No user message span events found for trace ${accessor.traceId}`);
+  if (chatSpans.length === 0) {
+    throw new Error(`No chat spans found for trace ${accessor.traceId}`);
   }
 
-  const userQuery = userMsgRows[0][USER_MESSAGE_CONTENT_COLUMN] ?? '';
+  let userQuery = '';
+  const inputMessagesRaw = chatSpans[0][INPUT_MESSAGES_COLUMN];
+  const inputMessages = parseJsonAttr<GenAIInputMessage[]>(inputMessagesRaw);
+  const firstUserMsg = inputMessages?.find((m) => m.role === 'user');
+  if (firstUserMsg) {
+    userQuery = extractTextFromParts(firstUserMsg.parts);
+  }
 
-  const agentRespResponse = await accessor.runEsql('logs', AGENT_RESPONSE_PIPELINE);
-  const agentRespRows = rowsFromEsqlResponse<AgentResponseRow>(agentRespResponse);
-  const agentResponse =
-    agentRespRows.length > 0 ? agentRespRows[0][AGENT_RESPONSE_CONTENT_COLUMN] ?? '' : '';
+  let agentResponse = '';
+  const outputMessagesRaw = chatSpans[chatSpans.length - 1][OUTPUT_MESSAGES_COLUMN];
+  const outputMessages = parseJsonAttr<GenAIOutputMessage[]>(outputMessagesRaw);
+  const lastMsg = outputMessages?.[outputMessages.length - 1];
+  if (lastMsg) {
+    agentResponse = extractTextFromParts(lastMsg.parts);
+  }
 
   return { user_query: userQuery, agent_response: agentResponse };
 };

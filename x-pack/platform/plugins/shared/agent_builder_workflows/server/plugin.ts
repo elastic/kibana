@@ -89,7 +89,7 @@ export class AgentBuilderWorkflowsPlugin
       resumeWorkflowExecutionTool({ workflowsManagement }),
       listWorkflowExecutionsTool({ workflowsManagement, getSecurity }),
       generateWorkflowTool({ workflowsManagement, aiTelemetryClient }),
-      executeWorkflowTool({ workflowsManagement }),
+      executeWorkflowTool({ workflowsManagement, getSecurity }),
     ];
     platformTools.forEach((tool) => agentBuilder.tools.register(tool));
 

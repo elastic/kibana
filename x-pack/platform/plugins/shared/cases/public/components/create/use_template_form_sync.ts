@@ -106,6 +106,7 @@ const clearTemplateFromForm = (
   setFieldValue('tags', []);
   setFieldValue('severity', 'low');
   setFieldValue('category', null);
+  setFieldValue('assignees', []);
   innerForm.reset({ [CASE_EXTENDED_FIELDS]: preserveGlobalFields(innerForm, globalFieldKeys) });
 };
 
@@ -218,15 +219,21 @@ export const useTemplateFormSync = (
     }
 
     const fieldMappings: Array<[string, unknown]> = [
+      // The create-case form field is `title`; the template's case-default title is `name`.
       ['title', definition.name],
       ['description', definition.description],
       ['tags', definition.tags?.length ? definition.tags : undefined],
       ['severity', definition.severity],
       ['category', definition.category],
+      ['assignees', definition.assignees],
     ];
 
     for (const [fieldName, value] of fieldMappings) {
-      if (value !== undefined) {
+      // Skip `null` as well as `undefined`. Case-default scalars (severity/description/category) are
+      // nullable and seeded as `null` ("no default") in the editor, so a template can carry e.g.
+      // `severity: null`. A null default means "don't override" — pushing it into the create-case
+      // form would set an invalid `null` on the severity enum (which resets to `low` by default).
+      if (value != null) {
         setFieldValue(fieldName, value);
       }
     }

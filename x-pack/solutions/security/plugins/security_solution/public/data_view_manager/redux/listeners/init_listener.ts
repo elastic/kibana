@@ -34,21 +34,17 @@ import type { DataViewSpec } from '../types';
  * and that state is not reset for slices that already have selections.
  *
  * @param dependencies - Core and plugin services required for data view creation and retrieval.
- * @param enableAlertsAndAttacksAlignment - Prevent attacks dataview creation if feature flag is not enabled.
  * @returns An object with the actionCreator and effect for Redux listener middleware.
  */
-export const createInitListener = (
-  dependencies: {
-    http: CoreStart['http'];
-    application: CoreStart['application'];
-    uiSettings: CoreStart['uiSettings'];
-    notifications: CoreStart['notifications'];
-    dataViews: DataViewsServicePublic;
-    spaces: SpacesPluginStart;
-    storage: Storage;
-  },
-  enableAlertsAndAttacksAlignment: boolean
-) => {
+export const createInitListener = (dependencies: {
+  http: CoreStart['http'];
+  application: CoreStart['application'];
+  uiSettings: CoreStart['uiSettings'];
+  notifications: CoreStart['notifications'];
+  dataViews: DataViewsServicePublic;
+  spaces: SpacesPluginStart;
+  storage: Storage;
+}) => {
   return {
     actionCreator: sharedDataViewManagerSlice.actions.init,
     effect: async (

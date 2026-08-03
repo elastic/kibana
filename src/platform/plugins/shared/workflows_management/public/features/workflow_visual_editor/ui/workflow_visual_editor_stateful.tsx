@@ -24,7 +24,6 @@ import {
   selectEditorWorkflowDefinition,
   selectEditorWorkflowLookup,
   selectEditorYaml,
-  selectHighlightedStepId,
   selectIsExecutionsTab,
   selectIsYamlSyntaxValid,
   selectStepExecutions,
@@ -87,7 +86,6 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
   const isYamlValid = useSelector(selectIsYamlSyntaxValid) ?? true;
   const editorYaml = useSelector(selectEditorYaml) ?? '';
   const workflowLookup = useSelector(selectEditorWorkflowLookup);
-  const highlightedStepId = useSelector(selectHighlightedStepId);
   const { canExecuteWorkflow } = useWorkflowsCapabilities();
   const { selectedStepId, setSelectedStep, setEditorView } = useWorkflowUrlState();
   const dispatch = useDispatch();
@@ -216,7 +214,6 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
         selectedStepId={selectedStepId}
         onStepSelect={handleStepSelect}
         colorMode={toColorMode(colorMode)}
-        focusStepId={highlightedStepId}
         direction={direction}
         renderStepIcon={renderStepIcon}
         onStepRun={handleStepRun}

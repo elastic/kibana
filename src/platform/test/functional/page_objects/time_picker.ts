@@ -179,7 +179,7 @@ export class TimePickerPageObject extends FtrService {
       await input.clearValue();
       await input.type(value);
     } else {
-      await this.testSubjects.setValue(dataTestSubj, value);
+      await this.testSubjects.setValue(dataTestSubj, value, { clearWithKeyboard: true });
     }
 
     await this.testSubjects.pressEnter(dataTestSubj);

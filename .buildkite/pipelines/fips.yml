@@ -8,7 +8,7 @@ steps:
     timeout_in_minutes: 10
     agents:
       machineType: n2-standard-2
-      diskSizeGb: 115
+      diskSizeGb: 130
 
   - wait
 
@@ -21,7 +21,7 @@ steps:
       - terrazzo-initial-pipeline-upload
     agents:
       machineType: n2-highcpu-8
-      diskSizeGb: 95
+      diskSizeGb: 130
 
   - command: .buildkite/scripts/steps/build_kibana.sh
     label: Build Kibana Distribution
@@ -54,7 +54,7 @@ steps:
     timeout_in_minutes: 15
     agents:
       machineType: n2-standard-2
-      diskSizeGb: 115
+      diskSizeGb: 130
     env:
       FTR_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/ftr_configs.sh'
       FTR_EXTRA_ARGS: '$FTR_EXTRA_ARGS'
@@ -74,6 +74,7 @@ steps:
     env:
       SCOUT_TEST_DISTRIBUTION_STRATEGY: 'lanes'
       SCOUT_TEST_LANES_GROUP_DEPS: 'build_scout_tests,build'
+      SCOUT_TEST_CHANNELS: ci-on-commit
       SELECTIVE_TESTING_ENABLED: 'false'
     retry:
       automatic:

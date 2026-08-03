@@ -313,6 +313,49 @@ describe('saved search embeddable', () => {
       expect(search).toHaveBeenCalledTimes(1);
     });
 
+    it('should reflect whether the initial query is an ES|QL query via usesEsql$', async () => {
+      const { search } = createSearchFnMock(1);
+      runtimeState = getInitialRuntimeState({ searchMock: search });
+
+      // getInitialRuntimeState() above sets up its own (query-less) searchSource mock;
+      // override it here with one that has an ES|QL query.
+      const esqlSearchSource = createSearchSourceMock(
+        { index: dataViewMock, query: { esql: 'FROM kibana_sample_data_logs | LIMIT 1' } },
+        undefined,
+        search
+      );
+      discoverServiceMock.data.search.searchSource.create = jest
+        .fn()
+        .mockResolvedValueOnce(esqlSearchSource);
+
+      const { api } = await factory.buildEmbeddable({
+        initializeDrilldownsManager: mockInitializeDrilldownsManager,
+        initialState: { ref_id: 'id', overrides: {} },
+        finalizeApi: finalizeApiMock,
+        uuid,
+        parentApi: mockedDashboardApi,
+      });
+      await waitOneTick();
+
+      expect(api.usesEsql$.getValue()).toBe(true);
+    });
+
+    it('should be false for usesEsql$ when the initial query is not an ES|QL query', async () => {
+      const { search } = createSearchFnMock(1);
+      runtimeState = getInitialRuntimeState({ searchMock: search });
+
+      const { api } = await factory.buildEmbeddable({
+        initializeDrilldownsManager: mockInitializeDrilldownsManager,
+        initialState: { ref_id: 'id', overrides: {} },
+        finalizeApi: finalizeApiMock,
+        uuid,
+        parentApi: mockedDashboardApi,
+      });
+      await waitOneTick();
+
+      expect(api.usesEsql$.getValue()).toBe(false);
+    });
+
     it('should not provide inline editing overrides for by-value embeddables', async () => {
       const { search } = createSearchFnMock(1);
       runtimeState = getInitialRuntimeState({

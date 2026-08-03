@@ -25,4 +25,12 @@ describe('SimplifiedVarsSchema', () => {
     expect(result.myVar).toBe(true);
     expect(typeof result.myVar).toBe('boolean');
   });
+
+  it('should reject oversized string values', () => {
+    expect(() => SimplifiedVarsSchema.validate({ myVar: 'a'.repeat(10001) })).toThrow();
+  });
+
+  it('should reject oversized string values inside arrays', () => {
+    expect(() => SimplifiedVarsSchema.validate({ myVar: ['a'.repeat(10001)] })).toThrow();
+  });
 });

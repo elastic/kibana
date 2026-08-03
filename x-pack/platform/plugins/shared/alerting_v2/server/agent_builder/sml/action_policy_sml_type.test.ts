@@ -50,6 +50,7 @@ describe('createActionPolicySmlType', () => {
   let getActionPolicy: jest.Mock;
   let getRepoSo: jest.Mock;
   let createFinder: jest.Mock;
+  let getIsAlertingV2Enabled: jest.Mock;
   let repository: ISavedObjectsRepository;
   let actionPolicyClient: ActionPolicyClient;
 
@@ -57,6 +58,7 @@ describe('createActionPolicySmlType', () => {
     getActionPolicy = jest.fn();
     getRepoSo = jest.fn();
     createFinder = jest.fn();
+    getIsAlertingV2Enabled = jest.fn().mockResolvedValue(true);
 
     repository = {
       get: getRepoSo,
@@ -70,6 +72,7 @@ describe('createActionPolicySmlType', () => {
     createActionPolicySmlType({
       getScopedActionPolicyClient: () => actionPolicyClient,
       getInternalRepository: () => repository,
+      getIsAlertingV2Enabled: () => getIsAlertingV2Enabled(),
     });
 
   describe('id and fetchFrequency', () => {
@@ -169,6 +172,15 @@ describe('createActionPolicySmlType', () => {
       await expect(drainList()).rejects.toThrow('boom');
       expect(close).toHaveBeenCalledTimes(1);
     });
+
+    it('yields nothing and never touches the repository when alerting v2 is disabled', async () => {
+      getIsAlertingV2Enabled.mockResolvedValue(false);
+
+      const items = await drainList();
+
+      expect(items).toEqual([]);
+      expect(createFinder).not.toHaveBeenCalled();
+    });
   });
 
   describe('getSmlData', () => {
@@ -225,6 +237,15 @@ describe('createActionPolicySmlType', () => {
       expect(logger.warn).toHaveBeenCalledWith(
         expect.stringContaining("SML action policy: failed to get data for 'policy-missing'")
       );
+    });
+
+    it('returns undefined without reading the saved object when alerting v2 is disabled', async () => {
+      getIsAlertingV2Enabled.mockResolvedValue(false);
+
+      const result = await buildDefinition().getSmlData('policy-1', buildSmlContext());
+
+      expect(result).toBeUndefined();
+      expect(getRepoSo).not.toHaveBeenCalled();
     });
   });
 
@@ -326,6 +347,18 @@ describe('createActionPolicySmlType', () => {
       await buildDefinition().toAttachment(document, buildToAttachmentContext());
 
       expect(getActionPolicy).toHaveBeenCalledWith({ id: '' });
+    });
+
+    it('returns undefined without calling the action policy client when alerting v2 is disabled', async () => {
+      getIsAlertingV2Enabled.mockResolvedValue(false);
+
+      const result = await buildDefinition().toAttachment(
+        buildSmlDocument(),
+        buildToAttachmentContext()
+      );
+
+      expect(result).toBeUndefined();
+      expect(getActionPolicy).not.toHaveBeenCalled();
     });
   });
 });

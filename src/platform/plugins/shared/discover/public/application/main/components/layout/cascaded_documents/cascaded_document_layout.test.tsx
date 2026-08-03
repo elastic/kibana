@@ -73,6 +73,9 @@ jest.mock('@kbn/esql-language', () => ({
   EsqlQuery: {
     fromSrc: jest.fn().mockReturnValue({}),
   },
+  // @kbn/monaco's Console ES|QL lexer reads this eagerly at module-load time to build its
+  // keyword list, so it needs a stub here even though this suite doesn't exercise highlighting.
+  esqlCommandRegistry: { getAllCommandNames: () => [] },
 }));
 
 const mockGetESQLStatsQueryMeta = jest.requireMock('@kbn/esql-utils').getESQLStatsQueryMeta;

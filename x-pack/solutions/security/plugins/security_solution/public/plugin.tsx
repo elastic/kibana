@@ -145,7 +145,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     }
 
     if (workflowsExtensions) {
-      registerWorkflowSteps(workflowsExtensions, this.experimentalFeatures);
+      registerWorkflowSteps(workflowsExtensions);
     }
 
     // Lazily instantiate subPlugins and initialize services
@@ -343,7 +343,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         application: core.application,
         agentBuilder: plugins.agentBuilder,
         chrome: core.chrome,
+        experimentalFeatures: this.experimentalFeatures,
         searchSession: plugins.data.search.session,
+        uiSettings: core.uiSettings,
       });
       registerEntityAttachment({
         attachments: plugins.agentBuilder.attachments,
@@ -354,6 +356,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         resolveSecurityCanvasContext: () =>
           this.getSecurityCanvasContext(core, plugins as StartPluginsDependencies),
         searchSession: plugins.data.search.session,
+        uiSettings: core.uiSettings,
       });
       if (this.experimentalFeatures.rulePreviewAttachmentEnabled) {
         registerRulePreviewAttachment({
@@ -646,7 +649,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     const attackFlyoutOverviewTabFeature: SecuritySolutionAttackFlyoutOverviewTabFeature = {
       id: 'security-solution-attack-flyout-overview-tab',
-      render: ({ hit }) => {
+      render: ({ hit, onAttackUpdated, columns, filter, onAddColumn, onRemoveColumn }) => {
         const servicesPromise = this.getDiscoverFlyoutServices(core);
         const storePromise = this.getDiscoverFlyoutStore(core);
 
@@ -656,6 +659,11 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
               hit={hit}
               servicesPromise={servicesPromise}
               storePromise={storePromise}
+              onAttackUpdated={onAttackUpdated}
+              columns={columns}
+              filter={filter}
+              onAddColumn={onAddColumn}
+              onRemoveColumn={onRemoveColumn}
             />
           </React.Suspense>
         );

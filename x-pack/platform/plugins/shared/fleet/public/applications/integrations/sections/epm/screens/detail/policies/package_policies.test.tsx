@@ -118,7 +118,7 @@ describe('PackagePoliciesPage agentless table source', () => {
     jest.restoreAllMocks();
   });
 
-  it('sources the agentless table from the agentless policies API when the agentless policies UI is enabled', () => {
+  it('sources the agentless table from the managed integrations API when the agentless policies UI is enabled', () => {
     renderPage();
 
     expect(jest.mocked(useAgentlessPolicies)).toHaveBeenCalledWith(
@@ -163,6 +163,8 @@ describe('PackagePoliciesPage agentless table source', () => {
     jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({
       ...allowedExperimentalValues,
       enableAgentlessPoliciesUI: false,
+      // disableAgentlessLegacyAPI forces the UI on, so it must be off to exercise the disabled path.
+      disableAgentlessLegacyAPI: false,
     });
 
     renderPage();

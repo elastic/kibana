@@ -52,9 +52,12 @@ describe('createVisualizationGraph', () => {
   const esClient = { asCurrentUser: {} } as IScopedClusterClient;
 
   // Returns a ModelProvider-shaped mock. `createVisualizationGraph` resolves the default model
-  // via `getDefaultModel()` for the config / time-range nodes.
+  // via `getDefaultModel()` for the config / time-range nodes; the ES|QL node resolves the
+  // low-effort model via `selectModel()`. Both resolve to the same connector so the
+  // default-model fallback in `generateVisualizationEsql` stays out of these tests.
   const createMockModel = (invokeResult: string = '```json\n{"type":"metric"}\n```') => {
     const scopedModel = {
+      connector: { connectorId: 'default-connector' },
       chatModel: {
         // invoke resolves to a message-like object; graph_lens reads `.content` via
         // extractTextFromMessage.
@@ -64,6 +67,7 @@ describe('createVisualizationGraph', () => {
     };
     return {
       getDefaultModel: jest.fn().mockResolvedValue(scopedModel),
+      selectModel: jest.fn().mockResolvedValue(scopedModel),
     } as const;
   };
 
@@ -143,6 +147,37 @@ describe('createVisualizationGraph', () => {
     expect(finalState.esqlQuery).toBe(
       'FROM logs-* | WHERE response.code != 503 | STATS count = COUNT(*)'
     );
+  });
+
+  it('finalizes with the esql error without generating a config when esql generation fails', async () => {
+    mockedGenerateEsql.mockResolvedValue({
+      error: 'no such index [metrics-system.load]',
+    } as Awaited<ReturnType<typeof generateEsql>>);
+
+    const model = createMockModel();
+    const graph = await createVisualizationGraph(model as never, logger, events, esClient, false);
+
+    const finalState = await graph.invoke({
+      nlQuery: '5-minute load average',
+      index: 'metrics-*',
+      chartType: SupportedChartType.Metric,
+      schema: {},
+      existingConfig: undefined,
+      parsedExistingConfig: null,
+      esqlQuery: '',
+      currentAttempt: 0,
+      actions: [],
+      validatedConfig: null,
+      error: null,
+    });
+
+    expect(finalState.validatedConfig).toBeNull();
+    expect(finalState.error).toBe(
+      'Could not resolve a valid ES|QL query for the visualization: no such index [metrics-system.load]'
+    );
+    // Config generation must not run without a query: the prompt forbids the
+    // model from emitting data_source, so validation could never succeed.
+    expect((await model.getDefaultModel()).chatModel.invoke as jest.Mock).not.toHaveBeenCalled();
   });
 
   it('injects the validated esql query, overwriting any query emitted by the config LLM', async () => {

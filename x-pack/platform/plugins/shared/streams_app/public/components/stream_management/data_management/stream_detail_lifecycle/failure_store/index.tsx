@@ -23,14 +23,10 @@ const StreamDetailFailureStoreInner = ({
   definition,
   data,
   refreshDefinition,
-  isExternalFlyoutOpen = false,
-  onFlyoutOpenChange,
 }: {
   definition: Streams.ingest.all.GetResponse;
   data: ReturnType<typeof useDataStreamStats>;
   refreshDefinition: () => void;
-  isExternalFlyoutOpen?: boolean;
-  onFlyoutOpenChange?: (isOpen: boolean) => void;
 }) => {
   const kibana = useKibana();
   const { updateFailureStore } = useUpdateFailureStore(definition.stream);
@@ -62,8 +58,6 @@ const StreamDetailFailureStoreInner = ({
     kibana,
     manageFailureStorePrivilege,
     updateFailureStore,
-    isExternalFlyoutOpen,
-    onFlyoutOpenChange,
   });
 
   return (
@@ -129,8 +123,6 @@ export const StreamDetailFailureStore = (props: {
   definition: Streams.ingest.all.GetResponse;
   data: ReturnType<typeof useDataStreamStats>;
   refreshDefinition: () => void;
-  isExternalFlyoutOpen?: boolean;
-  onFlyoutOpenChange?: (isOpen: boolean) => void;
 }) => {
   return (
     <LifecyclePreviewProvider>

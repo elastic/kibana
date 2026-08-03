@@ -449,6 +449,33 @@ describe('UserActionPersister', () => {
           })
         ).toEqual(getTemplateUserActions({ isMock: false, payload: null }));
       });
+
+      it('records the resolved template name on the applied-template user action', () => {
+        expect(
+          persister.buildUserActions({
+            updatedCases: patchTemplateCasesRequest,
+            user: testUser,
+            templateNamesByKey: new Map([['tmpl-1@3', 'My Template']]),
+          })
+        ).toEqual(
+          getTemplateUserActions({
+            isMock: false,
+            payload: { id: 'tmpl-1', version: 3, name: 'My Template' },
+          })
+        );
+      });
+
+      it('does not record a name when only a different version of the template id is resolved', () => {
+        // The applied version is 3; a name keyed to another version must not leak in, since names
+        // can change across versions and the payload must snapshot the applied version's name.
+        expect(
+          persister.buildUserActions({
+            updatedCases: patchTemplateCasesRequest,
+            user: testUser,
+            templateNamesByKey: new Map([['tmpl-1@2', 'Old Name']]),
+          })
+        ).toEqual(getTemplateUserActions({ isMock: false, payload: { id: 'tmpl-1', version: 3 } }));
+      });
     });
 
     it('adds synced alerts count only to status user actions', () => {

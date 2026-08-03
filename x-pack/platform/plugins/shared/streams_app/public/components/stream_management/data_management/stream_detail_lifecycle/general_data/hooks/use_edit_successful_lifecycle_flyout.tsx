@@ -545,6 +545,7 @@ export const useEditSuccessfulLifecycleFlyout = ({
           }}
           isApplyDisabled={isApplyDisabled}
           showWarning={retentionWarning}
+          warningType="ilm_policy"
         />
       </LifecycleFlyout>
 

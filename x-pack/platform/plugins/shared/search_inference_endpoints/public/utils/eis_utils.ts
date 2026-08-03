@@ -12,7 +12,9 @@ import { i18n } from '@kbn/i18n';
 import type { EisInferenceEndpointMetadata } from '@kbn/inference-common';
 import { SERVICE_PROVIDERS, ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
 import type { EisInferenceEndpoint, CspRegion } from '../../common/types';
+import { REGION_DISPLAY_NAMES } from '../../common/constants';
 import { EisModelStatus } from '../../common/types';
+import type { PolicyMode } from '../types';
 import {
   isInferenceEndpointWithMetadata,
   isInferenceEndpointWithDisplayNameMetadata,
@@ -332,6 +334,15 @@ const GEO_DISPLAY_NAMES: Record<string, string> = {
  */
 export const getGeoDisplayName = (geo: string): string => GEO_DISPLAY_NAMES[geo] ?? geo;
 
+/**
+ * Returns the display label for a CSP region, e.g. "US East (N. Virginia) - AWS".
+ * Falls back to the raw region code when no display name is registered.
+ */
+export const getRegionDisplayName = (r: CspRegion): string => {
+  const key = regionKey(r);
+  return `${REGION_DISPLAY_NAMES[key] ?? r.region} - ${r.csp.toUpperCase()}`;
+};
+
 const collectRegionsPerGeo = (endpoints: EisInferenceEndpoint[]): Map<string, CspRegion[]> => {
   const byGeo = new Map<string, Map<string, CspRegion>>();
 
@@ -430,3 +441,60 @@ export const getAvailableRegions = (endpoints: EisInferenceEndpoint[]): CspRegio
 };
 
 export const regionKey = (region: CspRegion): string => `${region.csp}::${region.region}`;
+
+export interface ZoneGroup {
+  geo: string;
+  displayName: string;
+  regions: CspRegion[];
+}
+
+/**
+ * Groups available regions by geo zone, ordered by GEO_ORDER for known geos
+ * and alphabetically for any unknown ones.
+ */
+export const getZoneGroups = (availableRegions: CspRegion[]): ZoneGroup[] => {
+  const regionsByGeo: Record<string, CspRegion[]> = {};
+  for (const region of availableRegions) {
+    (regionsByGeo[region.geo ?? 'other'] ??= []).push(region);
+  }
+
+  const geoOrderList: readonly string[] = GEO_ORDER;
+  const knownGeos = geoOrderList.filter((geo) => geo in regionsByGeo);
+  const unknownGeos = Object.keys(regionsByGeo)
+    .filter((geo) => !geoOrderList.includes(geo))
+    .sort();
+
+  return [...knownGeos, ...unknownGeos].map((geo) => ({
+    geo,
+    displayName: getGeoDisplayName(geo),
+    regions: regionsByGeo[geo],
+  }));
+};
+
+export const isPolicyMode = (id: string): id is PolicyMode => id === 'geo' || id === 'regions';
+
+/**
+ * Returns all unique geo codes present in EIS endpoint metadata, ordered by `GEO_ORDER`
+ * with any unknown codes appended alphabetically. Handles future geo codes gracefully.
+ */
+export const getAvailableGeos = (endpoints: EisInferenceEndpoint[]): string[] => {
+  const seen = new Set<string>();
+
+  for (const ep of endpoints) {
+    if (!isInferenceEndpointWithMetadata(ep)) continue;
+    const regions = ep.metadata.regions;
+    if (!regions) continue;
+
+    for (const region of regions) {
+      if (!region || typeof region !== 'object') continue;
+      if (typeof region.geo === 'string' && region.geo.length > 0) {
+        seen.add(region.geo);
+      }
+    }
+  }
+
+  const geoOrderList: readonly string[] = GEO_ORDER;
+  const knownOrdered = geoOrderList.filter((g) => seen.has(g));
+  const unknownSorted = [...seen].filter((g) => !geoOrderList.includes(g)).sort();
+  return [...knownOrdered, ...unknownSorted];
+};

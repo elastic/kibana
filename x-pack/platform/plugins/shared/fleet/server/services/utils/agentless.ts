@@ -30,7 +30,7 @@ export const logLegacyAgentlessWriteDeprecation = (operation: string) => {
     .getLogger()
     .warn(
       `[${LEGACY_AGENTLESS_WRITE_DEPRECATION_MARKER}] Legacy agentless write via ${operation}. ` +
-        `Migrate to the agentless policies API; this request will be rejected once the ` +
+        `Migrate to the managed integrations API; this request will be rejected once the ` +
         `disableAgentlessLegacyAPI feature flag is enabled.`
     );
 };

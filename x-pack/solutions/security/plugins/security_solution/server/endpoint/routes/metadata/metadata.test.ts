@@ -195,7 +195,18 @@ describe('test endpoint routes', () => {
                   { exists: { field: 'united.endpoint.agent.id' } },
                   { exists: { field: 'united.agent.agent.id' } },
                   { term: { 'united.agent.active': { value: true } } },
-                  { terms: { 'united.agent.policy_id': [] } },
+                  {
+                    bool: {
+                      minimum_should_match: 1,
+                      should: [
+                        {
+                          terms: {
+                            'united.agent.policy_id': [],
+                          },
+                        },
+                      ],
+                    },
+                  },
                 ],
               },
             },

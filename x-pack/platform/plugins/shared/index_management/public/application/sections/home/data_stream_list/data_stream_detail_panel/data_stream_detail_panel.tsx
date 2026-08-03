@@ -250,106 +250,113 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
 
   return (
     <>
-      <EuiFlyout
-        onClose={() => onClose()}
-        data-test-subj="dataStreamDetailPanel"
-        aria-labelledby="dataStreamDetailPanelTitle"
-        size={400}
-      >
-        <EuiFlyoutHeader hasBorder>
-          <EuiTitle size="m">
-            <h2 id="dataStreamDetailPanelTitle" data-test-subj="dataStreamDetailPanelTitle">
-              {dataStreamName}
-              {dataStream && <DataStreamsBadges dataStream={dataStream} />}
-            </h2>
-          </EuiTitle>
-        </EuiFlyoutHeader>
-
-        <EuiFlyoutBody
-          data-test-subj="content"
-          banner={
-            dataStream && dataStream.hidden !== true ? (
-              <StreamsPromotion dataStreamName={dataStreamName} />
-            ) : undefined
-          }
+      {!isEditingDataLifecycle && (
+        <EuiFlyout
+          onClose={() => onClose()}
+          data-test-subj="dataStreamDetailPanel"
+          aria-labelledby="dataStreamDetailPanelTitle"
+          size={400}
         >
-          {content}
-        </EuiFlyoutBody>
+          <EuiFlyoutHeader hasBorder>
+            <EuiTitle size="s">
+              <h2 id="dataStreamDetailPanelTitle" data-test-subj="dataStreamDetailPanelTitle">
+                {dataStreamName}
+                {dataStream && <DataStreamsBadges dataStream={dataStream} />}
+              </h2>
+            </EuiTitle>
+          </EuiFlyoutHeader>
 
-        <EuiFlyoutFooter>
-          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="s">
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                flush="left"
-                onClick={() => onClose()}
-                data-test-subj="closeDetailsButton"
-                aria-label={i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.closeButtonLabel', {
-                  defaultMessage: 'Close',
-                })}
-              >
-                {i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.closeButtonLabel', {
-                  defaultMessage: 'Close',
-                })}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
+          <EuiFlyoutBody
+            data-test-subj="content"
+            banner={
+              dataStream && dataStream.hidden !== true ? (
+                <StreamsPromotion dataStreamName={dataStreamName} />
+              ) : undefined
+            }
+          >
+            {content}
+          </EuiFlyoutBody>
 
-            <EuiFlexItem grow={false}>
-              {hasActions ? (
-                <EuiPopover
+          <EuiFlyoutFooter>
+            <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  flush="left"
+                  size="s"
+                  onClick={() => onClose()}
+                  data-test-subj="closeDetailsButton"
                   aria-label={i18n.translate(
-                    'xpack.idxMgmt.dataStreamDetailPanel.actionsMenuAriaLabel',
-                    { defaultMessage: 'Data stream actions menu' }
+                    'xpack.idxMgmt.dataStreamDetailPanel.closeButtonLabel',
+                    {
+                      defaultMessage: 'Close',
+                    }
                   )}
-                  button={
-                    <EuiSplitButton size="m">
-                      <EuiSplitButton.ActionPrimary
-                        iconType="discoverApp"
-                        onClick={viewInDiscover}
-                        isDisabled={!discoverLocator}
-                        data-test-subj="viewInDiscoverButton"
-                      >
-                        {viewInDiscoverLabel}
-                      </EuiSplitButton.ActionPrimary>
+                >
+                  {i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.closeButtonLabel', {
+                    defaultMessage: 'Close',
+                  })}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
 
-                      <EuiSplitButton.ActionSecondary
-                        iconType="gear"
-                        tooltipProps={{
-                          content: i18n.translate(
-                            'xpack.idxMgmt.dataStreamDetailPanel.actionsButtonToolTip',
-                            { defaultMessage: 'Actions' }
-                          ),
-                          disableScreenReaderOutput: true,
-                        }}
-                        aria-label={i18n.translate(
-                          'xpack.idxMgmt.dataStreamDetailPanel.actionsButtonAriaLabel',
-                          { defaultMessage: 'Open data stream actions menu' }
-                        )}
-                        onClick={() => setActionsPopOverOpen((open) => !open)}
-                        data-test-subj="manageDataStreamButton"
-                      />
-                    </EuiSplitButton>
-                  }
-                  isOpen={isActionsPopOverOpen}
-                  closePopover={closePopover}
-                  panelPaddingSize="none"
-                  anchorPosition="upLeft"
-                >
-                  <EuiContextMenu initialPanelId={0} panels={panels} />
-                </EuiPopover>
-              ) : (
-                <EuiButton
-                  iconType="discoverApp"
-                  onClick={viewInDiscover}
-                  isDisabled={!discoverLocator}
-                  data-test-subj="viewInDiscoverButton"
-                >
-                  {viewInDiscoverLabel}
-                </EuiButton>
-              )}
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlyoutFooter>
-      </EuiFlyout>
+              <EuiFlexItem grow={false}>
+                {hasActions ? (
+                  <EuiPopover
+                    aria-label={i18n.translate(
+                      'xpack.idxMgmt.dataStreamDetailPanel.actionsMenuAriaLabel',
+                      { defaultMessage: 'Data stream actions menu' }
+                    )}
+                    button={
+                      <EuiSplitButton size="s">
+                        <EuiSplitButton.ActionPrimary
+                          iconType="discoverApp"
+                          onClick={viewInDiscover}
+                          isDisabled={!discoverLocator}
+                          data-test-subj="viewInDiscoverButton"
+                        >
+                          {viewInDiscoverLabel}
+                        </EuiSplitButton.ActionPrimary>
+
+                        <EuiSplitButton.ActionSecondary
+                          iconType="gear"
+                          tooltipProps={{
+                            content: i18n.translate(
+                              'xpack.idxMgmt.dataStreamDetailPanel.actionsButtonToolTip',
+                              { defaultMessage: 'Actions' }
+                            ),
+                            disableScreenReaderOutput: true,
+                          }}
+                          aria-label={i18n.translate(
+                            'xpack.idxMgmt.dataStreamDetailPanel.actionsButtonAriaLabel',
+                            { defaultMessage: 'Open data stream actions menu' }
+                          )}
+                          onClick={() => setActionsPopOverOpen((open) => !open)}
+                          data-test-subj="manageDataStreamButton"
+                        />
+                      </EuiSplitButton>
+                    }
+                    isOpen={isActionsPopOverOpen}
+                    closePopover={closePopover}
+                    panelPaddingSize="none"
+                    anchorPosition="upLeft"
+                  >
+                    <EuiContextMenu initialPanelId={0} panels={panels} />
+                  </EuiPopover>
+                ) : (
+                  <EuiButton
+                    iconType="discoverApp"
+                    size="s"
+                    onClick={viewInDiscover}
+                    isDisabled={!discoverLocator}
+                    data-test-subj="viewInDiscoverButton"
+                  >
+                    {viewInDiscoverLabel}
+                  </EuiButton>
+                )}
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlyoutFooter>
+        </EuiFlyout>
+      )}
 
       {isDeleting && (
         <DeleteDataStreamConfirmationModal

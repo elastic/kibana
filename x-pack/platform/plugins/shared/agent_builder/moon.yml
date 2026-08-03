@@ -137,7 +137,7 @@ dependsOn:
   - '@kbn/test-subj-selector'
   - '@kbn/gen-ai-functional-testing'
   - '@kbn/repo-info'
-  - '@kbn/test'
+  - '@kbn/es'
   - '@kbn/test-es-server'
   - '@kbn/react-kibana-mount'
   - '@kbn/user-profile-components'

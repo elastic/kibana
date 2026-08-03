@@ -105,9 +105,26 @@ export const NAME_COLUMN = i18n.translate('xpack.cases.fieldLibrary.nameColumn',
   defaultMessage: 'Name',
 });
 
+export const LABEL_COLUMN = i18n.translate('xpack.cases.fieldLibrary.labelColumn', {
+  defaultMessage: 'Label',
+});
+
 export const DESCRIPTION_COLUMN = i18n.translate('xpack.cases.fieldLibrary.descriptionColumn', {
   defaultMessage: 'Description',
 });
+
+export const REQUIRED_COLUMN = i18n.translate('xpack.cases.fieldLibrary.requiredColumn', {
+  defaultMessage: 'Required',
+});
+
+export const REQUIRED_BADGE = i18n.translate('xpack.cases.fieldLibrary.requiredBadge', {
+  defaultMessage: 'Required',
+});
+
+export const REQUIRED_ON_CLOSE_BADGE = i18n.translate(
+  'xpack.cases.fieldLibrary.requiredOnCloseBadge',
+  { defaultMessage: 'Required on close' }
+);
 
 export const OWNER_COLUMN = i18n.translate('xpack.cases.fieldLibrary.ownerColumn', {
   defaultMessage: 'Owner',
@@ -153,9 +170,24 @@ export const FIELD_DEFINITION_YAML_LABEL = i18n.translate(
   { defaultMessage: 'Field definition (YAML)' }
 );
 
-export const FIELD_DEFINITION_YAML_MISSING_NAME = i18n.translate(
-  'xpack.cases.fieldLibrary.fieldDefinitionYamlMissingName',
-  { defaultMessage: 'The YAML definition must include a `name` property.' }
+export const FIELD_DEFINITION_YAML_HELP_TEXT = i18n.translate(
+  'xpack.cases.fieldLibrary.fieldDefinitionYamlHelpText',
+  { defaultMessage: 'Define one reusable field. Validation updates as you type.' }
+);
+
+export const FIELD_DEFINITION_YAML_INVALID = i18n.translate(
+  'xpack.cases.fieldLibrary.fieldDefinitionYamlInvalid',
+  { defaultMessage: 'Complete the required field properties and correct invalid values.' }
+);
+
+export const FIELD_DEFINITION_YAML_INVALID_SYNTAX = i18n.translate(
+  'xpack.cases.fieldLibrary.fieldDefinitionYamlInvalidSyntax',
+  { defaultMessage: 'Correct the YAML syntax to continue.' }
+);
+
+export const FIELD_DEFINITION_FORM_DESCRIPTION = i18n.translate(
+  'xpack.cases.fieldLibrary.fieldDefinitionFormDescription',
+  { defaultMessage: 'Create a reusable field for case templates.' }
 );
 
 export const FIELD_DEFINITION_PREVIEW_LABEL = i18n.translate(
@@ -201,3 +233,10 @@ export const GLOBAL_FIELD_YES = i18n.translate('xpack.cases.fieldLibrary.globalF
 export const GLOBAL_FIELD_NO = i18n.translate('xpack.cases.fieldLibrary.globalFieldNo', {
   defaultMessage: 'No',
 });
+
+export const FIELD_DEFINITIONS_TABLE_CAPTION = i18n.translate(
+  'xpack.cases.fieldLibrary.tableCaption',
+  {
+    defaultMessage: 'Field definitions',
+  }
+);

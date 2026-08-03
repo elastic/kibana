@@ -155,7 +155,7 @@ export function usePackagePolicyWithRelatedData(
         ) {
           throw new Error(
             i18n.translate('xpack.fleet.editPackagePolicy.agentlessPolicyReassignmentError', {
-              defaultMessage: 'Agentless integrations do not support agent policy reassignment.',
+              defaultMessage: 'Managed integrations do not support agent policy reassignment.',
             })
           );
         }

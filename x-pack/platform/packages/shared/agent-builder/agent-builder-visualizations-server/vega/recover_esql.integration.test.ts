@@ -47,7 +47,8 @@ const existingSpec = JSON.stringify({
 const createMockLogger = (): Logger =>
   ({ debug: jest.fn(), error: jest.fn(), info: jest.fn(), warn: jest.fn() } as unknown as Logger);
 
-describe('recover_esql end-to-end (real build_config + real graph)', () => {
+// Failing: See https://github.com/elastic/kibana/issues/276821
+describe.skip('recover_esql end-to-end (real build_config + real graph)', () => {
   const events = {} as ToolEventEmitter;
   const esClient = { asCurrentUser: {} } as IScopedClusterClient;
 
@@ -67,8 +68,15 @@ describe('recover_esql end-to-end (real build_config + real graph)', () => {
         }) +
         '\n```'
     );
+    // The default and low-effort models share a connector so the default-model
+    // fallback in `generateVisualizationEsql` stays out of this test.
+    const scopedModel = {
+      connector: { connectorId: 'default-connector' },
+      chatModel: { invoke },
+    };
     modelProvider = {
-      getDefaultModel: jest.fn().mockResolvedValue({ chatModel: { invoke } }),
+      getDefaultModel: jest.fn().mockResolvedValue(scopedModel),
+      selectModel: jest.fn().mockResolvedValue(scopedModel),
     } as unknown as ModelProvider;
     mockedValidateEsqlQuery.mockResolvedValue(undefined);
     // A visual-only edit: the generator keeps the seeded query unchanged and

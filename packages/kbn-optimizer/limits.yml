@@ -16,8 +16,9 @@ pageLoadAssetSize:
   automaticImport: 18629
   banners: 4006
   canvas: 14881
-  cases: 242617
+  cases: 310000
   charts: 40269
+  clientApps: 4688
   cloud: 11743
   cloudConnect: 9149
   cloudDataMigration: 5687
@@ -91,7 +92,7 @@ pageLoadAssetSize:
   home: 13091
   imageEmbeddable: 6189
   inbox: 5344
-  indexLifecycleManagement: 47110
+  indexLifecycleManagement: 54326
   indexManagement: 39694
   inference: 10368
   inferenceWorkflows: 25000
@@ -168,8 +169,8 @@ pageLoadAssetSize:
   searchprofiler: 6509
   searchQueryRules: 6689
   searchSynonyms: 6371
-  security: 79627
-  securitySolution: 188674
+  security: 79863
+  securitySolution: 210408
   securitySolutionEss: 42592
   securitySolutionServerless: 57290
   serverless: 7412

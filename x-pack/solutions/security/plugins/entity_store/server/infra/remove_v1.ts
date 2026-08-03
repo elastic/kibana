@@ -15,6 +15,9 @@ interface StopAndRemoveV1Params {
   type: EntityType;
   namespace: string;
   logger: Logger;
+  // Must be the internal/system ES client. V1 cleanup performs privileged transform, enrich, and
+  // index/template/pipeline admin plus a raw `.kibana` delete — legacy migration work the user
+  // enabling the entity store is not (and should not be) required to be authorized for.
   esClient: ElasticsearchClient;
   taskManager: TaskManagerStartContract;
   savedObjectsClient: SavedObjectsClientContract;

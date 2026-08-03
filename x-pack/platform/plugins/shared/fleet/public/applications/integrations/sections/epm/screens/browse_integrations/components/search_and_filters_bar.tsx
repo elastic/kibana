@@ -43,15 +43,11 @@ import {
   useSetUrlCategory,
   useUrlDefaultCategories,
 } from '../hooks/url_categories';
-import type {
-  BrowseIntegrationSortType,
-  IntegrationStatusFilterType,
-  SetupMethodFilterType,
-  SignalFilterType,
-} from '../types';
-import { SETUP_METHOD_AGENTLESS, SETUP_METHOD_ELASTIC_AGENT } from '../types';
+import type { BrowseIntegrationSortType, SetupMethodFilterType, SignalFilterType } from '../types';
+import { SETUP_METHOD_AGENTLESS, SETUP_METHOD_ELASTIC_AGENT, STATUS_DEPRECATED } from '../types';
 import { dataTypes } from '../../../../../../../../common/constants';
-import { StatusFilter } from '../../../components/status_filter';
+
+import { MoreFilter, type MoreFilterValues } from './more_filter';
 
 const SEARCH_DEBOUNCE_MS = 150;
 
@@ -356,85 +352,6 @@ const SignalFilter: React.FC<{
   );
 };
 
-const ContentFilter: React.FC<{
-  selected?: boolean;
-  onChange: (show: boolean) => void;
-}> = ({ selected = false, onChange }) => {
-  const [isOpen, setIsOpen] = useState<boolean>(false);
-  const togglePopover = useCallback(() => setIsOpen((prevIsOpen) => !prevIsOpen), []);
-  const closePopover = useCallback(() => setIsOpen(false), []);
-
-  const options: EuiSelectableOption[] = useMemo(
-    () => [
-      {
-        label: i18n.translate(
-          'xpack.fleet.epm.browseIntegrations.searchAndFilterBar.contentShowContentPacksOption',
-          { defaultMessage: 'Show content packs' }
-        ),
-        key: 'show',
-        checked: selected ? 'on' : undefined,
-        'data-test-subj': 'browseIntegrations.searchBar.contentShowContentPacksOption',
-      },
-    ],
-    [selected]
-  );
-
-  const activeCount = selected ? 1 : 0;
-
-  const onSelectionChange = useCallback(
-    (newOptions: EuiSelectableOption[]) => {
-      const isSelected = newOptions.some(
-        (option) => option.key === 'show' && option.checked === 'on'
-      );
-      onChange(isSelected);
-      closePopover();
-    },
-    [onChange, closePopover]
-  );
-
-  return (
-    <EuiPopover
-      id="browseIntegrationsContentPopover"
-      aria-label={i18n.translate(
-        'xpack.fleet.epm.browseIntegrations.searchAndFilterBar.contentPopoverAriaLabel',
-        { defaultMessage: 'Content options' }
-      )}
-      isOpen={isOpen}
-      closePopover={closePopover}
-      panelPaddingSize="s"
-      button={
-        <EuiFilterButton
-          data-test-subj="browseIntegrations.searchBar.contentBtn"
-          iconType="arrowDown"
-          onClick={togglePopover}
-          isSelected={isOpen}
-          numFilters={activeCount}
-          hasActiveFilters={selected}
-          numActiveFilters={activeCount}
-        >
-          <FormattedMessage
-            id="xpack.fleet.epm.browseIntegrations.searchAndFilterBar.contentLabel"
-            defaultMessage="Content"
-          />
-        </EuiFilterButton>
-      }
-    >
-      <EuiSelectable
-        data-test-subj="browseIntegrations.searchBar.contentSelectableList"
-        searchable={false}
-        options={options}
-        onChange={onSelectionChange}
-        listProps={{
-          showIcons: true,
-          style: { minWidth: 250 },
-        }}
-      >
-        {(list) => list}
-      </EuiSelectable>
-    </EuiPopover>
-  );
-};
-
 interface SearchBarProps {
   categories?: CategoryFacet[];
   availableSubCategories?: CategoryFacet[];
@@ -584,12 +501,8 @@ export const SearchAndFiltersBar: React.FC<SearchAndFiltersBarProps> = ({
 
   const [isSubCategoryPopoverOpen, setIsSubCategoryPopoverOpen] = useState(false);
 
-  const handleStatusChange = useCallback(
-    (statuses: IntegrationStatusFilterType[]) => {
-      addUrlFilters({ status: statuses.length > 0 ? statuses : undefined });
-    },
-    [addUrlFilters]
-  );
+  const hideDeprecated = !(urlFilters.status?.includes(STATUS_DEPRECATED) ?? false);
+  const hideContentPacks = !urlFilters.showContent;
 
   const handleSetupMethodChange = useCallback(
     (methods: SetupMethodFilterType[]) => {
@@ -605,9 +518,15 @@ export const SearchAndFiltersBar: React.FC<SearchAndFiltersBarProps> = ({
     [addUrlFilters]
   );
 
-  const handleContentChange = useCallback(
-    (show: boolean) => {
-      addUrlFilters({ showContent: show ? true : undefined });
+  const handleMoreChange = useCallback(
+    ({
+      hideDeprecated: newHideDeprecated,
+      hideContentPacks: newHideContentPacks,
+    }: MoreFilterValues) => {
+      addUrlFilters({
+        status: newHideDeprecated ? undefined : [STATUS_DEPRECATED],
+        showContent: newHideContentPacks ? undefined : true,
+      });
     },
     [addUrlFilters]
   );
@@ -655,13 +574,11 @@ export const SearchAndFiltersBar: React.FC<SearchAndFiltersBarProps> = ({
             />
             <SignalFilter selectedSignals={urlFilters.signal} onChange={handleSignalChange} />
 
-            <StatusFilter
-              selectedStatuses={urlFilters.status}
-              onChange={handleStatusChange}
-              testSubjPrefix="browseIntegrations.searchBar"
-              popoverId="browseIntegrationsStatusPopover"
+            <MoreFilter
+              hideDeprecated={hideDeprecated}
+              hideContentPacks={hideContentPacks}
+              onChange={handleMoreChange}
             />
-            <ContentFilter selected={urlFilters.showContent} onChange={handleContentChange} />
           </EuiFilterGroup>
         </EuiFlexItem>
 

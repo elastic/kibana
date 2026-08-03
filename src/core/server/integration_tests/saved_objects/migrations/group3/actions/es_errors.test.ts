@@ -8,15 +8,9 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import type { InternalCoreStart } from '@kbn/core-lifecycle-server-internal';
-import type { Root } from '@kbn/core-root-server-internal';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import type { ElasticsearchClient } from '../../../../..';
-import {
-  createRootWithCorePlugins,
-  createTestServers,
-  type TestElasticsearchUtils,
-} from '@kbn/core-test-helpers-kbn-server';
+import { createTestServers, type TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import {
   isWriteBlockException,
   isClusterShardLimitExceeded,
@@ -28,23 +22,12 @@ const { startES } = createTestServers({
 });
 
 describe('Elasticsearch Errors', () => {
-  let root: Root;
-  let start: InternalCoreStart;
   let client: ElasticsearchClient;
   let esServer: TestElasticsearchUtils;
 
   beforeAll(async () => {
     esServer = await startES();
-    root = createRootWithCorePlugins({
-      server: {
-        basePath: '/foo',
-      },
-    });
-
-    await root.preboot();
-    await root.setup();
-    start = await root.start();
-    client = start.elasticsearch.client.asInternalUser;
+    client = esServer.es.getClient();
 
     await createIndex({
       client,
@@ -56,7 +39,6 @@ describe('Elasticsearch Errors', () => {
   });
 
   afterAll(async () => {
-    await root?.shutdown();
     await esServer?.stop();
   });
 

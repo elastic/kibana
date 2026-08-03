@@ -1,5 +1,9 @@
 {
-  "sha1": "c13dfe1deb55cc5c20ecd446e09afffe691e2608",
+  "sha1": "9ccba485ce37e9d01c690532a849375f21a46b37",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
   "tests": [
     {
       "id": "08c621ad2871856-3596071962e357d",
@@ -172,6 +176,20 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/serverless_observability/test/scout/ui/parallel_tests/navigation_logs_essentials.spec.ts",
         "line": 117,
+        "column": 9
+      }
+    },
+    {
+      "id": "dd531796bab2f79-75faf3770b408ff",
+      "title": "Serverless Observability Navigation - Logs Essentials tier body Model Management pages are not reachable via direct URL or global search",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/serverless_observability/test/scout/ui/parallel_tests/navigation_logs_essentials.spec.ts",
+        "line": 124,
         "column": 9
       }
     }

@@ -24,6 +24,7 @@ import {
   isSupportedEpisodeSeverity,
   normalizeEpisodeSeverity,
 } from '@kbn/alerting-v2-episodes-ui/components/severity/severity_utils';
+import { isEpisodeSnoozed } from '@kbn/alerting-v2-episodes-ui/utils/is_episode_snoozed';
 import * as i18n from '../translations';
 
 export interface EpisodeHeaderBadgesArgs {
@@ -154,7 +155,7 @@ export const getEpisodeHeaderBadges = ({
     });
   }
 
-  if (groupAction?.lastSnoozeAction === ALERT_EPISODE_ACTION_TYPE.SNOOZE) {
+  if (groupAction && isEpisodeSnoozed(groupAction.lastSnoozeAction, groupAction.snoozeExpiry)) {
     const snoozeTooltip = getSnoozeTooltip(groupAction);
     badges.push({
       label: i18n.SNOOZED_BADGE_LABEL,

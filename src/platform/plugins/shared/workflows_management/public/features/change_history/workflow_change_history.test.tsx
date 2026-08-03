@@ -52,6 +52,7 @@ const restorableWorkflow: WorkflowDetailDto = {
 const createStoreWithWorkflow = (workflow: WorkflowDetailDto = restorableWorkflow) => {
   const store = createMockStore();
   store.dispatch(setWorkflow(workflow));
+  store.dispatch(setYamlString(workflow.yaml));
   return store;
 };
 
@@ -382,6 +383,33 @@ describe('WorkflowChangeHistoryListItem', () => {
     });
 
     expect(jest.mocked(services.http.get).mock.calls.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it('shows the current version badge on the first history item when there are no unsaved edits', async () => {
+    mockWorkflowChangeHistoryKibanaServices({
+      configureHttp: (http) => {
+        jest.mocked(http.get).mockResolvedValue(sampleWorkflowHistoryResponse);
+      },
+    });
+
+    render(
+      <TestWrapper store={createStoreWithWorkflow()}>
+        <WorkflowChangeHistoryProvider workflowId="workflow-1" workflowName="My workflow">
+          <WorkflowChangeHistoryListItem />
+        </WorkflowChangeHistoryProvider>
+      </TestWrapper>
+    );
+
+    await openHistoryModal();
+
+    const currentItem = await screen.findByTestId('changeHistoryItem-evt-current');
+
+    expect(
+      within(currentItem).getByTestId('workflowChangeHistoryCurrentVersionBadge')
+    ).toHaveTextContent('Current version');
+    expect(within(currentItem).getByTestId('workflowChangeHistoryVersionBadge')).toHaveTextContent(
+      'v3'
+    );
   });
 
   it('shows unsaved edits as the current version without a sequence', async () => {

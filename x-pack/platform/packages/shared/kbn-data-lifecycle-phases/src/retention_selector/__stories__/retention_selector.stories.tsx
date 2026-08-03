@@ -52,7 +52,6 @@ const ILM_OPTIONS: RetentionOption[] = [
 const STREAM_OPTIONS: RetentionOption[] = [
   {
     name: 'logs-elastic_agent-default',
-    method: 'ilm',
     descriptionCategory: 'Success',
     descriptionParts: ['60d', '3 phases', '2 downsamples'],
     descriptionCategorySecondLine: 'Fail',
@@ -60,41 +59,37 @@ const STREAM_OPTIONS: RetentionOption[] = [
     badge: 'ILM',
     inspectable: true,
   },
-  { name: 'logs-synth-default', method: 'dlm', descriptionParts: ['60d'] },
-  { name: 'logs.ecs', method: 'dlm', descriptionParts: ['∞', '1 downsample step'] },
+  { name: 'logs-synth-default', descriptionParts: ['60d'] },
+  { name: 'logs.ecs', descriptionParts: ['∞', '1 downsample step'] },
   {
     name: 'metrics-hostmetrics-default',
-    method: 'ilm',
     descriptionParts: ['.alerts-ilm-policy'],
     badge: 'ILM',
     inspectable: true,
   },
   {
     name: 'profiling-events-5pow01',
-    method: 'ilm',
     descriptionParts: ['.amet-illium-dolor'],
     badge: 'ILM',
     inspectable: true,
   },
   {
     name: 'profiling-events-5pow02',
-    method: 'ilm',
     descriptionParts: ['.amet-ipsum-dolor'],
     badge: 'ILM',
     inspectable: true,
   },
   {
     name: 'logs.ecs.android',
-    method: 'dlm',
     descriptionParts: ['60d'],
     descriptionPartsSecondLine: ['3 data phases', '2 downsample steps'],
   },
-  { name: 'logs.ecs.linux', method: 'dlm', descriptionParts: ['60d'] },
-  { name: 'logs.ecs.windows', method: 'dlm', descriptionParts: ['365d'] },
-  { name: 'logs.otel', method: 'dlm', descriptionParts: ['60d'] },
-  { name: 'logs.otel.android', method: 'dlm', descriptionParts: ['∞'] },
-  { name: 'logs.otel.linux', method: 'dlm', descriptionParts: ['60d'] },
-  { name: 'logs.otel.windows', method: 'dlm', descriptionParts: ['90d'] },
+  { name: 'logs.ecs.linux', descriptionParts: ['60d'] },
+  { name: 'logs.ecs.windows', descriptionParts: ['365d'] },
+  { name: 'logs.otel', descriptionParts: ['60d'] },
+  { name: 'logs.otel.android', descriptionParts: ['∞'] },
+  { name: 'logs.otel.linux', descriptionParts: ['60d'] },
+  { name: 'logs.otel.windows', descriptionParts: ['90d'] },
 ];
 
 const Panel = ({ title, children }: { title: string; children: React.ReactNode }) => (
@@ -182,7 +177,6 @@ export const IlmPoliciesInheritedReadOnly: Story = {
 
 const StreamsExample = () => {
   const [selected, setSelected] = useState('logs.otel');
-  const [selectedMethods, setSelectedMethods] = useState<string[]>([]);
 
   return (
     <>
@@ -195,14 +189,6 @@ const StreamsExample = () => {
           searchPlaceholder="Search by stream name"
           inspectButtonLabel={(name) => `Inspect ILM policy for '${name}'`}
           inspectPlacement="badge"
-          methodFilter={{
-            selectedMethods,
-            onChangeSelectedMethods: setSelectedMethods,
-            methodOptions: [
-              { key: 'dlm', label: 'Data stream lifecycle' },
-              { key: 'ilm', label: 'ILM policy' },
-            ],
-          }}
         />
       </Panel>
 
@@ -218,14 +204,6 @@ const StreamsExample = () => {
           searchPlaceholder="Search by stream name"
           inspectButtonLabel={(name) => `Inspect ILM policy for '${name}'`}
           inspectPlacement="badge"
-          methodFilter={{
-            selectedMethods,
-            onChangeSelectedMethods: setSelectedMethods,
-            methodOptions: [
-              { key: 'dlm', label: 'Data stream lifecycle' },
-              { key: 'ilm', label: 'ILM policy' },
-            ],
-          }}
         />
       </Panel>
     </>

@@ -32,11 +32,8 @@ import {
   WorkflowExecutionNotFoundError,
 } from '@kbn/workflows/common/errors';
 import { ConcurrencyManager } from './concurrency/concurrency_manager';
-import {
-  maybeDrainConcurrencyQueueAfterTerminal,
-  maybeDrainConcurrencyQueueBeforeEnqueue,
-} from './concurrency/concurrency_queue_drainer';
-import { maybeScheduleDormantQueuedRunIfNeeded } from './concurrency/maybe_schedule_dormant_queued_run';
+import { maybeDrainConcurrencyQueueBeforeEnqueue } from './concurrency/concurrency_queue_drainer';
+import { handleConcurrencyBlockedExecution } from './concurrency/maybe_schedule_dormant_queued_run';
 import type { WorkflowsExecutionEngineConfig } from './config';
 import {
   cancelWorkflow,
@@ -44,6 +41,7 @@ import {
   resumeWorkflow,
   runWorkflow,
 } from './execution_functions';
+import { handlePostExecutionLoop } from './execution_functions/handle_post_execution_loop';
 import { buildWorkflowExecutionDocument } from './lib/build_workflow_execution_document';
 import { checkLicense } from './lib/check_license';
 import { ensureWorkflowsDataStreamsRolledOver } from './lib/data_streams/ensure_data_streams_rolled_over';
@@ -253,12 +251,16 @@ export class WorkflowsExecutionEnginePlugin
               });
 
               if (interruptedOutcome === 'task_complete') {
-                await maybeDrainConcurrencyQueueAfterTerminal({
-                  workflowExecutionRepository,
-                  workflowTaskManager: new WorkflowTaskManager(pluginsStart.taskManager),
-                  logger,
+                await handlePostExecutionLoop({
                   workflowRunId,
                   spaceId,
+                  fakeRequest,
+                  workflowExecutionRepository,
+                  internalResumeWorkflowExecution: this.internalResumeWorkflowExecutionHandler,
+                  workflowTaskManager: new WorkflowTaskManager(pluginsStart.taskManager),
+                  meteringService: this.meteringService,
+                  cloudSetup: setupDependencies.cloudSetup,
+                  logger,
                 });
                 return;
               }
@@ -377,6 +379,17 @@ export class WorkflowsExecutionEnginePlugin
               });
 
               if (interruptedOutcome === 'task_complete') {
+                await handlePostExecutionLoop({
+                  workflowRunId,
+                  spaceId,
+                  fakeRequest,
+                  workflowExecutionRepository,
+                  internalResumeWorkflowExecution: this.internalResumeWorkflowExecutionHandler,
+                  workflowTaskManager: new WorkflowTaskManager(pluginsStart.taskManager),
+                  meteringService: this.meteringService,
+                  cloudSetup: setupDependencies.cloudSetup,
+                  logger,
+                });
                 return;
               }
 
@@ -608,12 +621,13 @@ export class WorkflowsExecutionEnginePlugin
               const canProceed = await this.checkConcurrencyIfNeeded(workflowExecution);
               if (!canProceed) {
                 if (workflowExecution.id && workflowExecution.spaceId) {
-                  await maybeScheduleDormantQueuedRunIfNeeded({
+                  await handleConcurrencyBlockedExecution({
                     workflowExecutionId: workflowExecution.id,
                     spaceId: workflowExecution.spaceId,
                     request: fakeRequest,
                     workflowExecutionRepository,
                     workflowTaskManager: new WorkflowTaskManager(pluginsStart.taskManager),
+                    internalResumeWorkflowExecution: this.internalResumeWorkflowExecutionHandler,
                     logger,
                   });
                 }
@@ -846,12 +860,13 @@ export class WorkflowsExecutionEnginePlugin
       const canProceed = await this.checkConcurrencyIfNeeded(workflowExecution);
       if (!canProceed) {
         if (workflowExecution.id && workflowExecution.spaceId) {
-          await maybeScheduleDormantQueuedRunIfNeeded({
+          await handleConcurrencyBlockedExecution({
             workflowExecutionId: workflowExecution.id,
             spaceId: workflowExecution.spaceId,
             request,
             workflowExecutionRepository,
             workflowTaskManager,
+            internalResumeWorkflowExecution: this.internalResumeWorkflowExecutionHandler,
             logger: this.logger,
           });
         }
@@ -886,7 +901,10 @@ export class WorkflowsExecutionEnginePlugin
       } else {
         // Schedule a task: either we're not in a task, or this is a child execution (must not run inline)
         const taskInstance = createTaskInstance(workflowExecution, ['workflows']);
-        await plugins.taskManager.schedule(taskInstance, { request: request as KibanaRequest });
+        await plugins.taskManager.schedule(taskInstance, {
+          request: request as KibanaRequest,
+          cloneApiKey: true,
+        });
         this.logger.debug(
           `Scheduling workflow task for workflow ${workflow.id}, execution ${workflowExecution.id}${
             isChildExecution ? ' (child execution)' : ''
@@ -914,12 +932,13 @@ export class WorkflowsExecutionEnginePlugin
       const canProceed = await this.checkConcurrencyIfNeeded(workflowExecution);
       if (!canProceed) {
         if (workflowExecution.id && workflowExecution.spaceId) {
-          await maybeScheduleDormantQueuedRunIfNeeded({
+          await handleConcurrencyBlockedExecution({
             workflowExecutionId: workflowExecution.id,
             spaceId: workflowExecution.spaceId,
             request,
             workflowExecutionRepository,
             workflowTaskManager,
+            internalResumeWorkflowExecution: this.internalResumeWorkflowExecutionHandler,
             logger: this.logger,
           });
         }
@@ -934,7 +953,7 @@ export class WorkflowsExecutionEnginePlugin
         generateExecutionTaskScope(workflowExecution as EsWorkflowExecution)
       );
 
-      await plugins.taskManager.schedule(taskInstance, { request });
+      await plugins.taskManager.schedule(taskInstance, { request, cloneApiKey: true });
       this.logger.debug(
         `Scheduling workflow task with user context for workflow ${workflow.id}, execution ${workflowExecution.id}`
       );
@@ -1082,12 +1101,16 @@ export class WorkflowsExecutionEnginePlugin
           return;
         }
 
-        await maybeScheduleDormantQueuedRunIfNeeded({
+        // `false` means the current execution was queued or terminalized before a task ran.
+        // `cancel-in-progress` returns true for the new execution; cancelled older executions
+        // resume sync parents through their own running task's normal cancellation path.
+        await handleConcurrencyBlockedExecution({
           workflowExecutionId: p.workflowExecution.id as string,
           spaceId: p.workflowExecution.spaceId ?? 'default',
           request,
           workflowExecutionRepository,
           workflowTaskManager,
+          internalResumeWorkflowExecution: this.internalResumeWorkflowExecutionHandler,
           logger: this.logger,
         });
       };
@@ -1115,7 +1138,7 @@ export class WorkflowsExecutionEnginePlugin
             generateExecutionTaskScope(p.workflowExecution as EsWorkflowExecution)
           )
         );
-        await plugins.taskManager.bulkSchedule(tasks, { request });
+        await plugins.taskManager.bulkSchedule(tasks, { request, cloneApiKey: true });
         this.logger.debug(`Bulk-scheduled ${toSchedule.length} workflow task(s) with user context`);
       }
 
@@ -1173,13 +1196,13 @@ export class WorkflowsExecutionEnginePlugin
         enabled: true,
       };
 
-      // Use Task Manager's first-class API key support by passing the request
-      // This ensures the step runs with the user's permissions, not kibana_system
+      // Use Task Manager's first-class API key support by passing the request.
+      // Clone so org/global UIAM keys are granted as TM-managed internal keys.
       // At this point, request is guaranteed to exist due to the early check above
       this.logger.debug(
         `Scheduling workflow step task with user context for workflow ${workflow.id}, step ${stepId}`
       );
-      await plugins.taskManager.schedule(taskInstance, { request });
+      await plugins.taskManager.schedule(taskInstance, { request, cloneApiKey: true });
 
       return {
         workflowExecutionId: workflowExecution.id as string,

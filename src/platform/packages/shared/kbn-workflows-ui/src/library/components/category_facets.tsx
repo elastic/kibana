@@ -25,7 +25,11 @@ export interface CategoryFacetsProps {
 
 /**
  * Facet sidebar over the closed-vocabulary `categories` field. Labels humanize
- * the kebab-case category id (e.g. `threat-intel` → `Threat Intel`);
+ * the kebab-case category id (e.g. `threat-intel` → `Threat Intel`).
+ *
+ * Selection is single-select like the Integrations catalog: clicking a
+ * category shows only that category; "All categories" resets. The prop shape
+ * stays `string[]` so hosts don't churn, but at most one entry is emitted.
  */
 export const CategoryFacets = React.memo<CategoryFacetsProps>(
   ({ templates, selectedCategories, onChange }) => {
@@ -49,16 +53,7 @@ export const CategoryFacets = React.memo<CategoryFacetsProps>(
       return [...counts.entries()].sort((a, b) => a[0].localeCompare(b[0]));
     }, [templates]);
 
-    const toggleCategory = useCallback(
-      (id: string) => {
-        if (selectedCategories.includes(id)) {
-          onChange(selectedCategories.filter((category) => category !== id));
-        } else {
-          onChange([...selectedCategories, id]);
-        }
-      },
-      [selectedCategories, onChange]
-    );
+    const selectCategory = useCallback((id: string) => onChange([id]), [onChange]);
 
     const clearCategories = useCallback(() => onChange([]), [onChange]);
 
@@ -85,7 +80,7 @@ export const CategoryFacets = React.memo<CategoryFacetsProps>(
               key={id}
               quantity={count}
               isSelected={selectedCategories.includes(id)}
-              onClick={() => toggleCategory(id)}
+              onClick={() => selectCategory(id)}
               css={facetWeightCss(selectedCategories.includes(id))}
               data-test-subj={`workflowLibraryCategoryFacet-${id}`}
             >

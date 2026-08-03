@@ -1,5 +1,9 @@
 {
-  "sha1": "a627f4240297e2c5c4d8c758e9734cf96db968f8",
+  "sha1": "5a21bf3c904879d8a7b72b4d7df43df706e05bb5",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
   "tests": [
     {
       "id": "8fdb537796db270-7132d4e40af07dc",
@@ -257,7 +261,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/draft_stream_simulation.spec.ts",
-        "line": 96,
+        "line": 98,
         "column": 9
       }
     },
@@ -271,7 +275,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/draft_stream_simulation.spec.ts",
-        "line": 103,
+        "line": 105,
         "column": 9
       }
     },
@@ -285,7 +289,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/draft_stream_simulation.spec.ts",
-        "line": 127,
+        "line": 129,
         "column": 9
       }
     },
@@ -299,7 +303,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/draft_stream_simulation.spec.ts",
-        "line": 146,
+        "line": 148,
         "column": 9
       }
     },
@@ -313,7 +317,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/draft_stream_simulation.spec.ts",
-        "line": 170,
+        "line": 172,
         "column": 9
       }
     },
@@ -519,7 +523,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/add_data_phase_flow.spec.ts",
-        "line": 94,
+        "line": 96,
         "column": 9
       }
     },
@@ -533,7 +537,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/add_data_phase_flow.spec.ts",
-        "line": 107,
+        "line": 109,
         "column": 9
       }
     },
@@ -547,7 +551,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/add_data_phase_flow.spec.ts",
-        "line": 131,
+        "line": 133,
         "column": 9
       }
     },
@@ -561,7 +565,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/add_data_phase_flow.spec.ts",
-        "line": 191,
+        "line": 188,
         "column": 9
       }
     },
@@ -575,7 +579,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/add_data_phase_flow.spec.ts",
-        "line": 207,
+        "line": 204,
         "column": 9
       }
     },
@@ -589,7 +593,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/add_data_phase_flow.spec.ts",
-        "line": 246,
+        "line": 240,
         "column": 9
       }
     },
@@ -603,7 +607,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/add_data_phase_flow.spec.ts",
-        "line": 261,
+        "line": 255,
         "column": 9
       }
     },
@@ -617,7 +621,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/add_data_phase_flow.spec.ts",
-        "line": 275,
+        "line": 269,
         "column": 9
       }
     },

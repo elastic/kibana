@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import '@testing-library/jest-dom';
-import { EuiThemeProvider } from '@elastic/eui';
+import { EuiButton, EuiThemeProvider } from '@elastic/eui';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { RetentionOption } from './types';
-import { RetentionSelector } from './retention_selector';
+import { RetentionSelector, RetentionSelectorSearch } from './retention_selector';
 
 describe('RetentionSelector', () => {
   const rowTestSubj = (name: string) =>
@@ -183,37 +183,79 @@ describe('RetentionSelector', () => {
     expect(screen.getByText('Success: 90d · 2 phases')).toBeInTheDocument();
   });
 
-  it('can filter streams options by method', () => {
-    renderWithTheme(
-      <RetentionSelector
-        options={[
-          { name: 'Stream A', descriptionParts: ['60d'], method: 'a' },
-          {
-            name: 'Stream B',
-            descriptionParts: ['policy-a'],
-            badge: 'ILM',
-            inspectable: true,
-            method: 'b',
-          },
-        ]}
-        onSelectOption={() => {}}
-        onInspect={() => {}}
-        searchPlaceholder="Search streams"
-        inspectButtonLabel={(name) => `Inspect ${name}`}
-        inspectPlacement="badge"
-        methodFilter={{
-          selectedMethods: ['b'],
-          onChangeSelectedMethods: () => {},
-          methodOptions: [
-            { key: 'a', label: 'Method A' },
-            { key: 'b', label: 'Method B' },
-          ],
-        }}
-      />
-    );
+  it('ignores internal search value when search is hidden', async () => {
+    const user = userEvent.setup();
 
-    expect(screen.queryByText('Stream A')).not.toBeInTheDocument();
-    expect(screen.getByText('Stream B')).toBeInTheDocument();
-    expect(screen.getByTestId('retentionSelectorMethodFilterButton')).toBeInTheDocument();
+    const ToggleSearchExample = () => {
+      const [showSearch, setShowSearch] = useState(true);
+
+      return (
+        <>
+          <EuiButton onClick={() => setShowSearch(false)}>Hide search</EuiButton>
+          <RetentionSelector
+            options={options}
+            onSelectOption={() => {}}
+            showSearch={showSearch}
+            listStyle={showSearch ? 'plain' : 'panel'}
+            showRowActions={showSearch}
+            searchPlaceholder="Search policies"
+            inspectButtonLabel={(name) => `Inspect ${name}`}
+          />
+        </>
+      );
+    };
+
+    renderWithTheme(<ToggleSearchExample />);
+
+    await user.type(screen.getByTestId('retentionSelectorSearchInput'), 'b');
+    expect(screen.queryByTestId(rowTestSubj('Policy A'))).not.toBeInTheDocument();
+    expect(screen.getByTestId(rowTestSubj('Policy B'))).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'Hide search' }));
+
+    expect(screen.getByTestId(rowTestSubj('Policy A'))).toBeInTheDocument();
+    expect(screen.getByTestId(rowTestSubj('Policy B'))).toBeInTheDocument();
+    expect(screen.queryByTestId('retentionSelectorSearchInput')).not.toBeInTheDocument();
+  });
+
+  describe('split search (RetentionSelectorSearch + showSearch={false})', () => {
+    const SplitExample = () => {
+      const [searchValue, setSearchValue] = useState('');
+      return (
+        <>
+          <RetentionSelectorSearch
+            searchValue={searchValue}
+            onSearchValueChange={setSearchValue}
+            searchPlaceholder="Search policies"
+          />
+          <RetentionSelector
+            options={options}
+            onSelectOption={() => {}}
+            showSearch={false}
+            searchValue={searchValue}
+            searchPlaceholder="Search policies"
+            inspectButtonLabel={(name) => `Inspect ${name}`}
+          />
+        </>
+      );
+    };
+
+    it('renders only one search input, in the split-out component', () => {
+      renderWithTheme(<SplitExample />);
+      expect(screen.getAllByTestId('retentionSelectorSearchInput')).toHaveLength(1);
+    });
+
+    it('filters the externally-rendered list by the header search value', async () => {
+      const user = userEvent.setup();
+      renderWithTheme(<SplitExample />);
+
+      expect(screen.getByTestId(rowTestSubj('Policy A'))).toBeInTheDocument();
+      expect(screen.getByTestId(rowTestSubj('Policy B'))).toBeInTheDocument();
+
+      await user.type(screen.getByTestId('retentionSelectorSearchInput'), 'b');
+
+      expect(screen.queryByTestId(rowTestSubj('Policy A'))).not.toBeInTheDocument();
+      expect(screen.getByTestId(rowTestSubj('Policy B'))).toBeInTheDocument();
+    });
   });
 });

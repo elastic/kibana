@@ -30,26 +30,26 @@ const createMockEsqlQuery = ({ hasToolEvidence }: { hasToolEvidence: boolean }) 
     ? 'The payment service is healthy, as confirmed by the health check tool.'
     : 'The billing service has 99.9% uptime based on the last 30 days.';
 
-  return jest.fn().mockImplementation(async ({ query }: { query: string }) => {
-    if (query.includes('event_name == "gen_ai.user.message"')) {
-      return {
-        columns: [
-          { name: '@timestamp', type: 'date' },
-          { name: 'attributes.content', type: 'keyword' },
-          { name: 'span_id', type: 'keyword' },
-        ],
-        values: [[new Date().toISOString(), userPrompt, 'span-001']],
-      };
-    }
+  const inputMessages = JSON.stringify([
+    { role: 'user', parts: [{ type: 'text', content: userPrompt }] },
+  ]);
+  const outputMessages = JSON.stringify([
+    {
+      role: 'assistant',
+      finish_reason: 'stop',
+      parts: [{ type: 'text', content: agentResponse }],
+    },
+  ]);
 
-    if (query.includes('event_name == "gen_ai.choice"')) {
+  return jest.fn().mockImplementation(async ({ query }: { query: string }) => {
+    if (query.includes('gen_ai.operation.name == "chat"')) {
       return {
         columns: [
           { name: '@timestamp', type: 'date' },
-          { name: 'attributes.message.content', type: 'keyword' },
-          { name: 'span_id', type: 'keyword' },
+          { name: 'attributes.gen_ai.input.messages', type: 'keyword' },
+          { name: 'attributes.gen_ai.output.messages', type: 'keyword' },
         ],
-        values: [[new Date().toISOString(), agentResponse, 'span-002']],
+        values: [[new Date().toISOString(), inputMessages, outputMessages]],
       };
     }
 

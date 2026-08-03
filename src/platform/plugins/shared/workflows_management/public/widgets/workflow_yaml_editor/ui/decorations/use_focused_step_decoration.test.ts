@@ -106,6 +106,43 @@ describe('useFocusedStepDecoration', () => {
     jest.clearAllMocks();
   });
 
+  it('draws a highlight box over the whole triggers block when cursor is on a trigger line', () => {
+    const { editor, decorationsCollection } = createMockEditor();
+    const store = createMockStore();
+
+    store.dispatch(setYamlString('version: "1"\nname: test'));
+    const computedData: ComputedData = {
+      workflowLookup: {
+        steps: {},
+        triggersLineStart: 2,
+        triggersLineEnd: 4,
+        stepsLineStart: 6,
+      },
+    };
+    store.dispatch(_setComputedDataInternal(computedData));
+
+    const wrapper = ({ children }: { children: React.ReactNode }) =>
+      React.createElement(Provider, { store }, children);
+
+    renderHook(() => useFocusedStepDecoration(editor), { wrapper });
+
+    act(() => {
+      // line 3 is within [triggersLineStart=2, stepsLineStart=6) → focusedTriggerId set
+      store.dispatch(setCursorPosition({ lineNumber: 3, column: 1 }));
+    });
+
+    expect(decorationsCollection.set).toHaveBeenCalledTimes(1);
+    const [decoration] = decorationsCollection.set.mock.calls[0][0];
+    expect(decoration.range).toEqual({
+      startLineNumber: 2,
+      startColumn: 1,
+      endLineNumber: 4,
+      endColumn: 1,
+    });
+    expect(decoration.options.blockClassName).toBe('mock-block-class-name');
+    expect(decoration.options.isWholeLine).toBe(true);
+  });
+
   it('should create exactly one block decoration spanning from lineStart to lineEnd', () => {
     const { editor, decorationsCollection } = createMockEditor();
     const { store } = renderHookWithProviders(editor);

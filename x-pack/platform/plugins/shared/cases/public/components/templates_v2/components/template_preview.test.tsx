@@ -11,8 +11,15 @@ import { useForm, FormProvider } from 'react-hook-form';
 import { TemplatePreview } from './template_preview';
 import { TemplateFieldRenderer } from '../field_types/field_renderer';
 
+const mockCaseDefaultsForm = jest.fn((_props?: unknown) => (
+  <div data-test-subj="template-case-defaults-form" />
+));
+
 jest.mock('../field_types/field_renderer', () => ({
   TemplateFieldRenderer: jest.fn(() => <div data-test-subj="template-field-renderer" />),
+}));
+jest.mock('./template_case_defaults_form', () => ({
+  TemplateCaseDefaultsForm: (props: unknown) => mockCaseDefaultsForm(props),
 }));
 
 jest.mock('../../cases_context/use_cases_context', () => ({
@@ -26,7 +33,10 @@ jest.mock('../../../common/use_cases_features', () => ({
 }));
 
 describe('CreateTemplatePreview', () => {
-  const renderPreview = (definition: string) => {
+  const renderPreview = (
+    definition: string,
+    onCaseDefaultChange?: (field: string, value: string | string[] | Array<{ uid: string }>) => void
+  ) => {
     const Wrapper = () => {
       const form = useForm({
         defaultValues: {
@@ -40,7 +50,7 @@ describe('CreateTemplatePreview', () => {
 
       return (
         <FormProvider {...form}>
-          <TemplatePreview />
+          <TemplatePreview onCaseDefaultChange={onCaseDefaultChange} />
         </FormProvider>
       );
     };
@@ -58,6 +68,7 @@ describe('CreateTemplatePreview', () => {
     );
 
     expect(screen.getByTestId('template-field-renderer')).toBeInTheDocument();
+    expect(screen.getByTestId('template-case-defaults-form')).toBeInTheDocument();
     expect(TemplateFieldRenderer).toHaveBeenCalledWith(
       expect.objectContaining({
         parsedTemplate: expect.objectContaining({
@@ -69,6 +80,19 @@ describe('CreateTemplatePreview', () => {
     );
   });
 
+  it('passes the case-default edit handler to the case defaults form', () => {
+    const onCaseDefaultChange = jest.fn();
+    renderPreview(
+      `name: Preview\nfields:\n  - control: INPUT_TEXT\n    name: field_one\n    type: keyword`,
+      onCaseDefaultChange
+    );
+
+    expect(mockCaseDefaultsForm).toHaveBeenCalledWith(
+      expect.objectContaining({
+        onChange: onCaseDefaultChange,
+      })
+    );
+  });
   it('shows an actionable error state when the YAML is invalid', () => {
     renderPreview('name: [');
 
@@ -84,5 +108,21 @@ describe('CreateTemplatePreview', () => {
     expect(screen.getByTestId('templatePreviewEmpty')).toBeInTheDocument();
     expect(screen.queryByTestId('templatePreviewError')).not.toBeInTheDocument();
     expect(TemplateFieldRenderer).not.toHaveBeenCalled();
+  });
+  it('keeps top-level case defaults in the preview model', () => {
+    renderPreview(
+      `name: Legacy title\ndescription: Legacy description\nseverity: low\nfields:\n  - control: INPUT_TEXT\n    name: field_one\n    type: keyword`
+    );
+
+    expect(TemplateFieldRenderer).toHaveBeenCalledWith(
+      expect.objectContaining({
+        parsedTemplate: expect.objectContaining({
+          name: 'Legacy title',
+          description: 'Legacy description',
+          severity: 'low',
+        }),
+      }),
+      expect.any(Object)
+    );
   });
 });

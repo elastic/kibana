@@ -470,7 +470,7 @@ describe('When using the kill-process action from response actions console', () 
         'kill-process --processName="notepad" --comment="some comment"'
       );
 
-      expect(renderResult.getByTestId('killProcess-pending'));
+      expect(renderResult.getByTestId('killProcess-creating'));
 
       await waitFor(() => {
         expect(apiMocks.responseProvider.killProcess).toHaveBeenCalledWith(

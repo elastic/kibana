@@ -52,10 +52,10 @@ describe.skip('AgentlessEnrollmentFlyout', () => {
     const renderer = createIntegrationsTestRendererMock();
     const { getByText } = renderer.render(<AgentlessEnrollmentFlyout {...flyoutProps} />);
     await waitFor(async () => {
-      expect(getByText('Confirm agentless enrollment')).toBeInTheDocument();
+      expect(getByText('Confirm managed integration enrollment')).toBeInTheDocument();
       expect(getByText('Step 1 is loading')).toBeInTheDocument();
       expect(
-        getByText('Listening for agentless connection... this could take several minutes')
+        getByText('Listening for managed integration connection... this could take several minutes')
       ).toBeInTheDocument();
       expect(getByText('Confirm incoming data')).toBeInTheDocument();
       expect(getByText('Step 2 is disabled')).toBeInTheDocument();
@@ -70,9 +70,9 @@ describe.skip('AgentlessEnrollmentFlyout', () => {
     const { getByText } = renderer.render(<AgentlessEnrollmentFlyout {...flyoutProps} />);
 
     await waitFor(() => {
-      expect(getByText('Confirm agentless enrollment')).toBeInTheDocument();
+      expect(getByText('Confirm managed integration enrollment')).toBeInTheDocument();
       expect(getByText('Step 1 has errors')).toBeInTheDocument();
-      expect(getByText('Agentless deployment failed')).toBeInTheDocument();
+      expect(getByText('Managed integration deployment failed')).toBeInTheDocument();
       expect(getByText('Confirm incoming data')).toBeInTheDocument();
       expect(getByText('Step 2 is disabled')).toBeInTheDocument();
     });
@@ -90,9 +90,9 @@ describe.skip('AgentlessEnrollmentFlyout', () => {
       expect(mockSendGetAgents).toHaveBeenCalledWith({
         kuery: `${AGENTS_PREFIX}.policy_id: "test-policy-id"`,
       });
-      expect(getByText('Confirm agentless enrollment')).toBeInTheDocument();
+      expect(getByText('Confirm managed integration enrollment')).toBeInTheDocument();
       expect(getByText('Step 1 is complete')).toBeInTheDocument();
-      expect(getByText('Agentless deployment was successful')).toBeInTheDocument();
+      expect(getByText('Managed integration deployment was successful')).toBeInTheDocument();
       expect(getByText('Confirm incoming data')).toBeInTheDocument();
       expect(getByText('Step 2 is loading')).toBeInTheDocument();
     });
@@ -109,7 +109,7 @@ describe.skip('AgentlessEnrollmentFlyout', () => {
       expect(getByText('Step 1 is complete')).toBeInTheDocument();
       expect(getByText('Confirm incoming data')).toBeInTheDocument();
       expect(getByText('Step 2 has errors')).toBeInTheDocument();
-      expect(getByText('No incoming data received from agentless integration')).toBeInTheDocument();
+      expect(getByText('No incoming data received from managed integration')).toBeInTheDocument();
     });
   });
 
@@ -124,7 +124,7 @@ describe.skip('AgentlessEnrollmentFlyout', () => {
       expect(getByText('Step 1 is complete')).toBeInTheDocument();
       expect(getByText('Confirm incoming data')).toBeInTheDocument();
       expect(getByText('Step 2 is complete')).toBeInTheDocument();
-      expect(getByText('Incoming data received from agentless integration')).toBeInTheDocument();
+      expect(getByText('Incoming data received from managed integration')).toBeInTheDocument();
     });
   });
 });

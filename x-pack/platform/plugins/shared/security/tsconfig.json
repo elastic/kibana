@@ -85,6 +85,7 @@
     "@kbn/core-analytics-browser-mocks",
     "@kbn/core-user-profile-server",
     "@kbn/core-user-profile-browser",
+    "@kbn/core-user-profile-browser-hooks",
     "@kbn/security-api-key-management",
     "@kbn/security-form-components",
     "@kbn/core-security-server-mocks",

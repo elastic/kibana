@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import type { EuiTableFieldDataColumnType } from '@elastic/eui';
 import type { AttackDiscoverySchedule } from '@kbn/elastic-assistant-common';
 
@@ -17,6 +17,8 @@ import { useKibana } from '../../../../../../common/lib/kibana';
 import { ATTACK_DISCOVERY_FEATURE_ID } from '../../../../../../../common/constants';
 
 jest.mock('../../../../../../common/lib/kibana');
+
+const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 
 const deleteScheduleMock = jest.fn();
 
@@ -41,6 +43,12 @@ describe('Actions Column', () => {
               updateAttackDiscoverySchedule: true,
             },
           },
+        },
+        featureFlags: {
+          getBooleanValue: jest.fn().mockResolvedValue(false),
+        },
+        uiSettings: {
+          get: jest.fn().mockReturnValue(false),
         },
       },
     });
@@ -71,6 +79,12 @@ describe('Actions Column', () => {
               },
             },
           },
+          featureFlags: {
+            getBooleanValue: jest.fn().mockResolvedValue(false),
+          },
+          uiSettings: {
+            get: jest.fn().mockReturnValue(false),
+          },
         },
       });
     });
@@ -97,6 +111,41 @@ describe('Actions Column', () => {
 
       const tooltip = screen.getByRole('tooltip');
       expect(tooltip).toHaveTextContent('Missing privileges');
+    });
+  });
+
+  describe('when the workflows execute privilege is missing', () => {
+    beforeEach(() => {
+      (useKibana as jest.Mock).mockReturnValue({
+        services: {
+          application: {
+            capabilities: {
+              [ATTACK_DISCOVERY_FEATURE_ID]: {
+                updateAttackDiscoverySchedule: true,
+              },
+              workflowsManagement: {
+                executeWorkflow: false,
+              },
+            },
+          },
+          featureFlags: {
+            getBooleanValue: jest.fn().mockResolvedValue(true),
+          },
+          uiSettings: {
+            get: jest.fn().mockReturnValue(true),
+          },
+        },
+      });
+    });
+
+    it('should NOT disable the delete button (delete is not gated on workflows execute)', async () => {
+      renderComponent();
+
+      await waitFor(() => {
+        expect(mockUseKibana().services.featureFlags.getBooleanValue).toHaveBeenCalled();
+      });
+
+      expect(screen.getByTestId('deleteButton')).not.toBeDisabled();
     });
   });
 });

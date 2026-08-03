@@ -23,30 +23,35 @@ describe('groundedness trace extractor', () => {
     return { esClient, queryMock };
   };
 
-  it('queries span events and tool spans for the trace and maps groundedness evidence', async () => {
+  it('queries chat spans and tool spans for the trace and maps groundedness evidence', async () => {
     const logger = loggingSystemMock.createLogger();
     const { esClient, queryMock } = createEsClient();
 
+    const inputMessages = JSON.stringify([
+      {
+        role: 'user',
+        parts: [{ type: 'text', content: 'What is the payment status?' }],
+      },
+    ]);
+    const outputMessages = JSON.stringify([
+      {
+        role: 'assistant',
+        finish_reason: 'stop',
+        parts: [{ type: 'text', content: 'Payment service is healthy.' }],
+      },
+    ]);
+
     queryMock
-      // 1. User message span event from logs-*
+      // 1. Chat spans from traces-*
       .mockResolvedValueOnce({
         columns: [
           { name: '@timestamp', type: 'date' },
-          { name: 'attributes.content', type: 'keyword' },
-          { name: 'span_id', type: 'keyword' },
+          { name: 'attributes.gen_ai.input.messages', type: 'keyword' },
+          { name: 'attributes.gen_ai.output.messages', type: 'keyword' },
         ],
-        values: [['2026-06-26T10:00:00.000Z', 'What is the payment status?', 'span-001']],
+        values: [['2026-06-26T10:00:00.000Z', inputMessages, outputMessages]],
       })
-      // 2. Agent response span event (gen_ai.choice) from logs-*
-      .mockResolvedValueOnce({
-        columns: [
-          { name: '@timestamp', type: 'date' },
-          { name: 'attributes.message.content', type: 'keyword' },
-          { name: 'span_id', type: 'keyword' },
-        ],
-        values: [['2026-06-26T10:00:01.000Z', 'Payment service is healthy.', 'span-002']],
-      })
-      // 3. Tool spans from traces-*
+      // 2. Tool spans from traces-*
       .mockResolvedValueOnce({
         columns: [
           { name: 'attributes.gen_ai.tool.call.id', type: 'keyword' },
@@ -68,20 +73,15 @@ describe('groundedness trace extractor', () => {
 
     const evidence = await extractGroundednessEvidence({ traceId, esClient }, logger);
 
-    expect(queryMock).toHaveBeenCalledTimes(3);
+    expect(queryMock).toHaveBeenCalledTimes(2);
 
-    // Logs queries use ?trace_id placeholder with bound params
-    expect(queryMock.mock.calls[0][0]?.query).toContain('trace_id == ?trace_id');
+    // Both queries use traces-* with trace.id
+    expect(queryMock.mock.calls[0][0]?.query).toContain('trace.id == ?trace_id');
     expect(queryMock.mock.calls[0][0]?.params).toEqual([{ trace_id: traceId }]);
-    expect(queryMock.mock.calls[0][0]?.query).toContain('gen_ai.user.message');
+    expect(queryMock.mock.calls[0][0]?.query).toContain('gen_ai.operation.name == "chat"');
 
-    expect(queryMock.mock.calls[1][0]?.query).toContain('trace_id == ?trace_id');
+    expect(queryMock.mock.calls[1][0]?.query).toContain('trace.id == ?trace_id');
     expect(queryMock.mock.calls[1][0]?.params).toEqual([{ trace_id: traceId }]);
-    expect(queryMock.mock.calls[1][0]?.query).toContain('gen_ai.choice');
-
-    // Traces query uses trace.id with bound params
-    expect(queryMock.mock.calls[2][0]?.query).toContain('trace.id == ?trace_id');
-    expect(queryMock.mock.calls[2][0]?.params).toEqual([{ trace_id: traceId }]);
 
     expect(evidence).toEqual({
       user_query: 'What is the payment status?',

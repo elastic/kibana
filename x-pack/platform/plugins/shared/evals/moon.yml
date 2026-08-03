@@ -48,6 +48,7 @@ dependsOn:
   - '@kbn/inference-common'
   - '@kbn/zod'
   - '@kbn/es-types'
+  - '@kbn/inference-tracing'
 tags:
   - plugin
   - prod

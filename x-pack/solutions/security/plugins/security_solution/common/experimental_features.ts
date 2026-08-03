@@ -126,7 +126,7 @@ export const allowedExperimentalValues = Object.freeze({
    * Entity Analytics surfaces such as the entity flyout, and registers the
    * `security.entity` unified cases attachment type.
    */
-  entityAttachmentsEnabled: false,
+  entityAttachmentsEnabled: true,
 
   /**
    * Enables AI rule creation feature
@@ -198,7 +198,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    *  Enables the Microsoft Sentinel rules import feature
    */
-  sentinelRulesMigration: false,
+  sentinelRulesMigration: true,
   /**
    * Enables the Kubernetes Dashboard in Security Solution
    */
@@ -250,18 +250,21 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the find-security-rules Agent Builder skill.
    * Part of the DEX AI skills family (`dexAiSkill*`).
    */
-  dexAiSkillFindRules: false,
+  dexAiSkillFindRules: true,
 
   /**
    * Enables the recommend-prebuilt-rules Agent Builder skill.
    * Part of the DEX AI skills family (`dexAiSkill*`).
    */
-  dexAiSkillRecommendPrebuiltRules: false,
+  dexAiSkillRecommendPrebuiltRules: true,
 
   /**
-   * Enables the new flyout using the EUI flyout system
+   * Disables the new flyout using the EUI flyout system. When this flag is off (the default), the
+   * "Enable new flyout" advanced setting is registered and defaults to off, so users can opt in.
+   * Turning this flag on unregisters that advanced setting, forcing the
+   * legacy flyout and effectively removing the new flyout option.
    */
-  newFlyoutSystemEnabled: false,
+  newFlyoutSystemDisabled: false,
 
   /**
    * Uses entity store v2 for entity analytics skill
@@ -271,7 +274,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables entity ML anomaly details API
    */
-  entityAnalyticsAnomalyDetails: false,
+  entityAnalyticsAnomalyDetails: true,
 
   /**
    * Enables the deprecated prebuilt rules UI
@@ -287,17 +290,7 @@ export const allowedExperimentalValues = Object.freeze({
    * config flag, which gates the underlying primitive that produces the history
    * records. Both must be enabled for the API to return non-empty results.
    */
-  ruleChangesHistoryEnabled: false,
-
-  /**
-   * Enables the Agents, Discover and Workflows external links in the classic Security Solution side navigation
-   */
-  securityClassicNavExternalLinks: true,
-  /**
-   * Enables public Detection Engine attacks REST APIs
-   * (`/api/detection_engine/attacks/*`).
-   */
-  publicAttacksApiEnabled: false,
+  ruleChangesHistoryEnabled: true,
 
   /**
    * Enables the agent builder `run_rule_preview` tool and the `security.rule.preview`
@@ -309,19 +302,13 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the risk score history API endpoint for Entity Analytics.
    */
-  riskScoreHistoryEnabled: false,
-
-  /**
-   * Enables the Attacks page tour (welcome callout + guided tour).
-   * Release: 9.5
-   */
-  attacksPageTourEnabled: false,
+  riskScoreHistoryEnabled: true,
 
   /**
    * Enables UI treatments surfacing rules whose MITRE ATT&CK mappings drift
    * from the locally stored kibana mappings after a MITRE version bump.
    */
-  mitreAttackUpdatesUIEnabled: false,
+  mitreAttackUpdatesUIEnabled: true,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

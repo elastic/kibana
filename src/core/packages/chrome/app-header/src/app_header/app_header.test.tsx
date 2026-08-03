@@ -30,7 +30,7 @@ const renderAppHeader = (
 };
 
 describe('AppHeaderView', () => {
-  it('renders legacy app menu share as a title action', () => {
+  it('renders app menu share as a title action while keeping it in the menu', async () => {
     const runShare = jest.fn();
 
     renderAppHeader(
@@ -51,9 +51,16 @@ describe('AppHeaderView', () => {
     );
 
     expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.root)).toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: 'Share' }));
 
+    // The title-row share button is derived from the menu item.
+    fireEvent.click(
+      screen.getByTestId(`${APP_HEADER_TEST_SUBJECTS.sharePrefix} shareTopNavButton`)
+    );
     expect(runShare).toHaveBeenCalledTimes(1);
+
+    // The share item is no longer removed from the trailing app menu; open the overflow to find it.
+    fireEvent.click(await screen.findByTestId(APP_MENU_TEST_SUBJECTS.overflowButton));
+    expect(await screen.findByTestId('shareTopNavButton')).toBeInTheDocument();
   });
 
   it('renders when the only content is a favorite action', () => {

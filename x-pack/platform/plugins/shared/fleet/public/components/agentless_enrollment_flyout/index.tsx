@@ -84,7 +84,7 @@ export const AgentlessEnrollmentFlyout = ({
           title: i18n.translate(
             'xpack.fleet.epm.packageDetails.integrationList.agentlessStatusError',
             {
-              defaultMessage: 'Error fetching agentless status information',
+              defaultMessage: 'Error fetching managed integration status information',
             }
           ),
         });
@@ -166,7 +166,7 @@ export const AgentlessEnrollmentFlyout = ({
               title: i18n.translate(
                 'xpack.fleet.agentlessEnrollmentFlyout.stepConfirmEnrollmentTitle',
                 {
-                  defaultMessage: 'Confirm agentless enrollment',
+                  defaultMessage: 'Confirm managed integration enrollment',
                 }
               ),
               children: (

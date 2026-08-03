@@ -46,14 +46,9 @@ import {
   isAlertAttachmentType,
   UNIFIED_ALERT_TYPES_ARRAY,
 } from '../../../common/utils/attachments';
+import { getCaseToUpdate, buildFilter, combineFilters, NodeBuilderOperators } from '../utils';
 import {
-  arraysDifference,
-  getCaseToUpdate,
-  buildFilter,
-  combineFilters,
-  NodeBuilderOperators,
-} from '../utils';
-import {
+  applyProfilesToAssignees,
   dedupAssignees,
   fillMissingCustomFields,
   getCloseReasonIfValid,
@@ -61,6 +56,7 @@ import {
   getDurationForUpdate,
   getInProgressInfoForUpdate,
   getTimingMetricsForUpdate,
+  getUserProfilesSafe,
 } from './utils';
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
 import type { LicensingService } from '../../services/licensing';
@@ -83,6 +79,7 @@ import {
 } from './validators';
 import type { InlineField } from '../../../common/types/domain/template/fields';
 import { emptyCasesAssigneesSanitizer } from './sanitizers';
+import { mergeCustomFieldsIntoExtendedFields } from '../../../common/utils/template_fields';
 /**
  * Throws an error if any of the requests attempt to update the owner of a case.
  */
@@ -401,6 +398,16 @@ function partitionPatchRequest(
   };
 }
 
+/**
+ * Fields that are allowed to be present when users reopen cases
+ */
+const REOPEN_ONLY_CASE_FIELDS = new Set(['id', 'version', 'status']);
+
+/**
+ * Fields that are allowed to be present when case is reassigned
+ */
+const ASSIGN_ONLY_CASE_FIELDS = new Set(['id', 'version', 'assignees']);
+
 export function getOperationsToAuthorize({
   reopenedCases,
   changedAssignees,
@@ -412,9 +419,17 @@ export function getOperationsToAuthorize({
 }): OperationDetails[] {
   const operations: OperationDetails[] = [];
   const onlyAssigneeOperations =
-    reopenedCases.length === 0 && changedAssignees.length === allCases.length;
+    reopenedCases.length === 0 &&
+    changedAssignees.length === allCases.length &&
+    changedAssignees.every((caseReq) =>
+      Object.keys(caseReq).every((key) => ASSIGN_ONLY_CASE_FIELDS.has(key))
+    );
   const onlyReopenOperations =
-    changedAssignees.length === 0 && reopenedCases.length === allCases.length;
+    changedAssignees.length === 0 &&
+    reopenedCases.length === allCases.length &&
+    reopenedCases.every((caseReq) =>
+      Object.keys(caseReq).every((key) => REOPEN_ONLY_CASE_FIELDS.has(key))
+    );
 
   if (reopenedCases.length > 0) {
     operations.push(Operations.reopenCase);
@@ -611,6 +626,7 @@ export const bulkUpdate = async (
           updateReq,
           originalCase,
           templatesService,
+          fieldDefinitionsService,
           globalFields: globalFieldsByOwner.get(originalCase.attributes.owner) ?? [],
         })
       )
@@ -651,6 +667,7 @@ export const bulkUpdate = async (
             templateId: id,
             templateVersion: version,
             templatesService,
+            fieldDefinitionsService,
             logger,
           });
           return [`${id}@${version}`, fields] as [string, InlineField[]];
@@ -674,14 +691,64 @@ export const bulkUpdate = async (
       user,
       casesToUpdate,
       customFieldsConfigurationMap,
+      templatesEnabled: clientArgs.config.templates.enabled,
     });
+
+    // Resolve names of newly-applied templates so the "applied template" user action records the
+    // name (durable in the audit trail). Only templates being set on this update; deduped by
+    // "id@version" because template names can change across versions and the recorded name must be a
+    // point-in-time snapshot of the exact version applied (not the current latest).
+    const appliedTemplates = [
+      ...new Map(
+        casesToUpdate
+          .map(({ updateReq }) => updateReq.template)
+          .filter((t): t is NonNullable<typeof t> => t != null)
+          .map((t) => [`${t.id}@${t.version}`, t] as const)
+      ).values(),
+    ];
+    const templateNamesByKey = new Map<string, string>(
+      (
+        await Promise.all(
+          appliedTemplates.map(async ({ id, version }) => {
+            const templateSO = await templatesService.getTemplate(id, String(version));
+            return templateSO
+              ? ([`${id}@${version}`, templateSO.attributes.name] as [string, string])
+              : null;
+          })
+        )
+      ).filter((entry): entry is [string, string] => entry != null)
+    );
+
     let userActionsDict = userActionService.creator.buildUserActions({
       updatedCases: patchCasesPayload,
       user,
+      templateNamesByKey,
     });
 
     await throwIfMaxUserActionsReached({ userActionsDict, userActionService });
     notifyPlatinumUsage(licensingService, casesToUpdate);
+
+    // Server-derived assignee identity, gated by feature flag `assigneeIdentity`
+    if (clientArgs.config.assigneeIdentity.enabled) {
+      const allUids = new Set(
+        patchCasesPayload.cases.flatMap(
+          ({ updatedAttributes }) => updatedAttributes.assignees?.map(({ uid }) => uid) ?? []
+        )
+      );
+
+      if (allUids.size > 0) {
+        const profiles = await getUserProfilesSafe(clientArgs.securityStartPlugin, allUids, logger);
+
+        if (profiles) {
+          for (const patchCase of patchCasesPayload.cases) {
+            const { assignees } = patchCase.updatedAttributes;
+            if (assignees && assignees.length > 0) {
+              patchCase.updatedAttributes.assignees = applyProfilesToAssignees(assignees, profiles);
+            }
+          }
+        }
+      }
+    }
 
     const updatedCases = await patchCases({ caseService, patchCasesPayload });
 
@@ -876,10 +943,12 @@ const createPatchCasesPayload = ({
   casesToUpdate,
   user,
   customFieldsConfigurationMap,
+  templatesEnabled,
 }: {
   casesToUpdate: UpdateRequestWithOriginalCase[];
   user: User;
   customFieldsConfigurationMap: Map<string, CustomFieldsConfiguration>;
+  templatesEnabled: boolean;
 }): PatchCasesArgs => {
   const updatedDt = new Date().toISOString();
 
@@ -919,6 +988,33 @@ const createPatchCasesPayload = ({
           ...(originalCase.attributes.extended_fields ?? {}),
           ...trimmedCaseAttributes.extended_fields,
         };
+      }
+
+      // Mirror customFields into extended_fields so that automations writing to the legacy API
+      // keep the v2 analytics / UI surface populated. Only run when the update includes
+      // customFields — an update that omits customFields must not change extended_fields.
+      //
+      // CustomFields-win semantics: the incoming value always overrides the mirror key; a null
+      // value the caller explicitly submitted clears the mirror key.
+      //
+      // Pass the RAW request customFields (updateCaseAttributes.customFields), not the
+      // post-fill array (trimmedCaseAttributes.customFields). fillMissingCustomFields pads
+      // absent optional-no-default fields with { key, value: null }; those synthetic nulls
+      // would otherwise hit the merge's delete branch and wipe mirror keys the update never
+      // intended to clear — silently destroying values stored via the v2 UI.
+      //
+      // mergeCustomFieldsIntoExtendedFields returns the *same reference* when the result is
+      // value-identical — guard on reference inequality to avoid spurious writes/user-actions.
+      if (templatesEnabled && updateCaseAttributes.customFields) {
+        const currentExtendedFields =
+          trimmedCaseAttributes.extended_fields ?? originalCase.attributes.extended_fields;
+        const merged = mergeCustomFieldsIntoExtendedFields(
+          updateCaseAttributes.customFields,
+          currentExtendedFields
+        );
+        if (merged !== currentExtendedFields && merged != null) {
+          trimmedCaseAttributes.extended_fields = merged;
+        }
       }
 
       return {
@@ -983,16 +1079,18 @@ const getCasesAndAssigneesToNotifyForAssignment = (
       return acc;
     }
 
-    const alreadyAssignedToCase = originalCaseSO.attributes.assignees;
-    const comparedAssignees = arraysDifference(
-      alreadyAssignedToCase,
-      updatedCase.attributes.assignees ?? []
+    // Compare by uid, not object identity: server-derived identity fields make an enriched
+    // assignee unequal to the legacy uid-only record, so a deep diff would flag every retained
+    // assignee on a pre-rollout case as newly added and re-notify them.
+    const alreadyAssignedUids = new Set(originalCaseSO.attributes.assignees.map(({ uid }) => uid));
+    const addedAssignees = (updatedCase.attributes.assignees ?? []).filter(
+      ({ uid }) => !alreadyAssignedUids.has(uid)
     );
 
-    if (comparedAssignees && comparedAssignees.addedItems.length > 0) {
+    if (addedAssignees.length > 0) {
       const theCase = mergeOriginalSOWithUpdatedSO(originalCaseSO, updatedCase);
 
-      const assigneesWithoutCurrentUser = comparedAssignees.addedItems.filter(
+      const assigneesWithoutCurrentUser = addedAssignees.filter(
         (assignee) => assignee.uid !== user.profile_uid
       );
 

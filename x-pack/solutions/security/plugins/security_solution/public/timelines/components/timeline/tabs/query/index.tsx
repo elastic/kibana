@@ -27,6 +27,8 @@ import {
   DocumentDetailsRightPanelKey,
 } from '../../../../../flyout/document_details/shared/constants/panel_keys';
 import { LeftPanelNotesTab } from '../../../../../flyout/document_details/left';
+import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
+import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_flyout_enabled';
 import {
   AttackDetailsLeftPanelKey,
   AttackDetailsRightPanelKey,
@@ -56,7 +58,11 @@ import { isTimerangeSame } from '../shared/utils';
 import type { TimelineTabCommonProps } from '../shared/types';
 import { useTimelineColumns } from '../shared/use_timeline_columns';
 import { useTimelineControlColumn } from '../shared/use_timeline_control_columns';
-import { DocumentEventTypes, NotesEventTypes } from '../../../../../common/lib/telemetry';
+import {
+  DocumentEventTypes,
+  FLYOUT_ORIGIN,
+  NotesEventTypes,
+} from '../../../../../common/lib/telemetry';
 
 const compareQueryProps = (prevProps: Props, nextProps: Props) =>
   prevProps.kqlMode === nextProps.kqlMode &&
@@ -106,6 +112,9 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   const {
     query: { filterManager: timelineFilterManager },
   } = timelineDataService;
+
+  const enableNewFlyout = useIsNewFlyoutEnabled();
+  const { openNotes } = useFlyoutApi();
 
   const getManageTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
 
@@ -232,7 +241,9 @@ export const QueryTabContentComponent: React.FC<Props> = ({
       const indexName =
         (isAttackRow ? eventData.ecs._index : undefined) ?? selectedPatterns.join(',');
 
-      if (isAttackRow) {
+      if (enableNewFlyout && eventData) {
+        openNotes({ hit: eventData, origin: FLYOUT_ORIGIN.TIMELINE });
+      } else if (isAttackRow) {
         openFlyout({
           right: {
             id: AttackDetailsRightPanelKey,
@@ -283,7 +294,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
         panel: 'left',
       });
     },
-    [openFlyout, selectedPatterns, telemetry, timelineId]
+    [enableNewFlyout, openNotes, openFlyout, selectedPatterns, telemetry, timelineId]
   );
 
   const leadingControlColumns = useTimelineControlColumn({
