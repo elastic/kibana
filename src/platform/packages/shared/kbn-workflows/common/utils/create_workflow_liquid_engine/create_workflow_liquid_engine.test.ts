@@ -128,10 +128,9 @@ describe('createWorkflowLiquidEngine', () => {
     it('evaluates grouped expressions in unless conditions', () => {
       const engine = createWorkflowLiquidEngine();
       expect(
-        engine.parseAndRenderSync(
-          '{% unless (items | size) == 0 %}has items{% endunless %}',
-          { items: [1, 2] }
-        )
+        engine.parseAndRenderSync('{% unless (items | size) == 0 %}has items{% endunless %}', {
+          items: [1, 2],
+        })
       ).toBe('has items');
     });
 
