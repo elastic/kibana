@@ -66,12 +66,18 @@ export class DataVisualizerTable {
     });
   }
 
-  async waitForRow(fieldName: string) {
-    await this.page.testSubj.locator(this.rowSelector(fieldName)).waitFor({ state: 'visible' });
+  async waitForRow(fieldName: string, options?: { timeout?: number }) {
+    await this.page.testSubj.locator(this.rowSelector(fieldName)).waitFor({
+      state: 'visible',
+      timeout: options?.timeout ?? 30_000,
+    });
   }
 
-  async waitForRowHidden(fieldName: string) {
-    await this.page.testSubj.locator(this.rowSelector(fieldName)).waitFor({ state: 'hidden' });
+  async waitForRowHidden(fieldName: string, options?: { timeout?: number }) {
+    await this.page.testSubj.locator(this.rowSelector(fieldName)).waitFor({
+      state: 'hidden',
+      timeout: options?.timeout ?? 30_000,
+    });
   }
 
   async getDisplayName(fieldName: string) {

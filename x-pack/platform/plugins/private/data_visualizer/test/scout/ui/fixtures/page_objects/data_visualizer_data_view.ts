@@ -7,6 +7,7 @@
 
 import type { Locator, ScoutPage } from '@kbn/scout';
 import { KibanaCodeEditorWrapper } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 import { setComboBoxValue } from '../combo_box_helpers';
 import type { DataVisualizerTable } from './data_visualizer_table';
 
@@ -21,6 +22,7 @@ export class DataVisualizerDataView {
   private readonly customLabelRow: Locator;
   private readonly customLabelInput: Locator;
   private readonly scriptCodeEditor: KibanaCodeEditorWrapper;
+  private readonly applyTimeButton: Locator;
 
   constructor(private readonly page: ScoutPage, private readonly table: DataVisualizerTable) {
     this.fieldEditorForm = this.page.testSubj.locator('indexPatternFieldEditorForm');
@@ -33,14 +35,15 @@ export class DataVisualizerDataView {
     this.customLabelRow = this.page.testSubj.locator('customLabelRow');
     this.customLabelInput = this.customLabelRow.locator('input');
     this.scriptCodeEditor = new KibanaCodeEditorWrapper(page);
+    this.applyTimeButton = this.page.testSubj.locator('superDatePickerApplyTimeButton');
   }
 
   async waitForIndexPatternFieldEditor() {
-    await this.fieldEditorForm.waitFor({ state: 'visible', timeout: 5000 });
+    await this.fieldEditorForm.waitFor({ state: 'visible', timeout: 10_000 });
   }
 
   async waitForIndexPatternFieldEditorHidden() {
-    await this.fieldEditorForm.waitFor({ state: 'hidden', timeout: 5000 });
+    await this.fieldEditorForm.waitFor({ state: 'hidden', timeout: 15_000 });
   }
 
   async getIndexPatternFieldEditorFieldType() {
@@ -52,20 +55,47 @@ export class DataVisualizerDataView {
     await setComboBoxValue(this.page, 'typeField', type, { optionVisibilityTimeoutMs: 30_000 });
   }
 
+  /**
+   * Refreshes field stats via the date picker apply button (matches FTR).
+   * Callers should wait on a page-ready signal (loaded table / field row) afterward.
+   */
+  async refreshFieldStats() {
+    await expect(this.applyTimeButton).toBeEnabled({ timeout: 10_000 });
+    await this.applyTimeButton.click();
+  }
+
   async addRuntimeField(name: string, script: string, fieldType: string) {
-    await this.dataSourceSelectorButton.click();
-    await this.addFieldButton.click();
-    await this.waitForIndexPatternFieldEditor();
-    await this.fieldNameInput.locator('input').fill(name);
-    const valueSwitch = this.page.testSubj.locator('valueRow').locator('[role="switch"]');
-    if ((await valueSwitch.getAttribute('aria-checked')) !== 'true') {
-      await valueSwitch.click();
-    }
-    await this.scriptCodeEditor.waitCodeEditorReady('scriptFieldRow');
-    await this.scriptCodeEditor.setCodeEditorValue(script);
-    await this.setIndexPatternFieldEditorFieldType(fieldType);
-    await this.fieldEditorSaveButton.click();
-    await this.waitForIndexPatternFieldEditorHidden();
+    // Match FTR: retry the full add-field flow — opening the picker / editor can race
+    // with data-view load, and Monaco script binding needs a settled form.
+    await expect(async () => {
+      await this.dataSourceSelectorButton.click();
+      await this.addFieldButton.click();
+      await this.waitForIndexPatternFieldEditor();
+      await this.fieldNameInput.locator('input').fill(name);
+
+      const valueSwitch = this.page.testSubj.locator('valueRow').locator('[role="switch"]');
+      if ((await valueSwitch.getAttribute('aria-checked')) !== 'true') {
+        await valueSwitch.click();
+      }
+
+      // Wait for the accessible Monaco textarea (Discover/Lens pattern) so the React
+      // form onChange is wired before we set the model value.
+      const scriptEditor = this.page.testSubj
+        .locator('scriptFieldRow')
+        .getByRole('textbox', { name: /Editor content/ });
+      await scriptEditor.waitFor({ state: 'visible', timeout: 10_000 });
+      await this.scriptCodeEditor.setCodeEditorValue(script);
+
+      await this.setIndexPatternFieldEditorFieldType(fieldType);
+      await expect(this.fieldEditorSaveButton).toBeEnabled({ timeout: 10_000 });
+      await this.fieldEditorSaveButton.click();
+      await this.waitForIndexPatternFieldEditorHidden();
+    }).toPass({ timeout: 30_000 });
+
+    // Saving triggers mlTimefilterRefresh$; apply again (FTR does the same). Stats for
+    // the new runtime field can take longer than Playwright's default 10s wait.
+    await this.refreshFieldStats();
+    await this.table.waitForRow(name, { timeout: 60_000 });
   }
 
   async renameField(originalName: string, newName: string) {

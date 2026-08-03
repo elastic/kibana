@@ -182,7 +182,7 @@ spaceTest.describe('data view management', { tag: tags.stateful.classic }, () =>
 
   spaceTest(
     'manages runtime fields and custom labels',
-    async ({ pageObjects, page, mlTestResources, scoutSpace }) => {
+    async ({ pageObjects, mlTestResources, scoutSpace }) => {
       const resetToIndexVisualizer = async () => {
         await mlTestResources.deleteDataViewByTitle(indexPatternTitle, scoutSpace.id);
         await mlTestResources.createDataViewIfNeeded(
@@ -201,8 +201,6 @@ spaceTest.describe('data view management', { tag: tags.stateful.classic }, () =>
             newField.type
           );
         }
-
-        await page.testSubj.click('superDatePickerApplyTimeButton');
 
         for (const fieldRow of addDeleteFieldTestData.expected.metricFields as Array<
           Required<MetricFieldVisConfig>
@@ -253,8 +251,6 @@ spaceTest.describe('data view management', { tag: tags.stateful.classic }, () =>
             newField.type
           );
         }
-
-        await page.testSubj.click('superDatePickerApplyTimeButton');
 
         for (const fieldToDelete of addDeleteFieldTestData.newFields!) {
           await pageObjects.dataVisualizerDataView.deleteField(fieldToDelete.fieldName);
