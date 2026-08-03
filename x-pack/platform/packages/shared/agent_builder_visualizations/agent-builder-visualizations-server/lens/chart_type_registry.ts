@@ -100,6 +100,8 @@ export const chartTypeRegistry: ChartTypeRegistry = {
       config: {
         rules: [
           'Prefer right-aligned metric values. Use left/center only when the user asks.',
+          'Add a secondary metric or background chart only when the request asks for one — never surface extra query columns on your own initiative.',
+          'Apply dynamic coloring to a secondary metric that conveys a comparison or status.',
         ],
         coloringRules: [
           'Metric placement: set `apply_color_to: "value"` only together with a color config; do not color the background unless the user asks. When not coloring, omit both `color` and `apply_color_to` — `apply_color_to` without a color makes Lens tint the value with a default green.',
@@ -149,6 +151,8 @@ export const chartTypeRegistry: ChartTypeRegistry = {
         rules: [
           'For horizontal bars, use type: "bar_horizontal" with x = category field and y = metric field. Example: "top OS by count as horizontal bar" → type: "bar_horizontal", x: { column: "OS" }, y: [{ column: "Count" }]. Do NOT put the metric on x.',
           'Do NOT set axis titles. Rely on the visualization title and column labels to convey meaning. Set axis title visibility to false (e.g. { visible: false }) for both X and Y axes.',
+          "Hide the legend when the chart plots a single series (one layer, one 'y' metric, no 'breakdown_by') — it would only repeat the metric's label. Keep it visible otherwise.",
+          'Default visible legends to outside the chart at the bottom with the list layout (not grid); deviate only when the user asks.',
         ],
         coloringRules: [
           'For new XY charts, omit explicit `color` properties and let Lens apply its current default palettes. Only add colors when the user explicitly requests them.',
