@@ -235,31 +235,19 @@ class ConversationClientImpl implements ConversationClient {
     const { id: conversationId } = conversationUpdate;
     const { access, retryOnConflict = false } = options;
 
-    const applyUpdate = (current: Conversation) =>
-      updateConversation({
-        conversation: current,
-        update: conversationUpdate,
-        updateDate: new Date(),
-        space: this.space,
-      });
-
     try {
-      if (retryOnConflict) {
-        return await this.writeWithOcc({ conversationId, access, mutate: applyUpdate });
-      }
-
-      const document = await this.getDocumentWithAccess({ conversationId, access });
-      const updatedConversation = applyUpdate(fromEs(document));
-
-      await this.storage.getClient().index({
-        id: conversationId,
-        document: toEs(updatedConversation, this.space),
-        // use optimistic concurrency control to prevent concurrent update conflicts
-        if_seq_no: document._seq_no,
-        if_primary_term: document._primary_term,
+      return await this.writeWithOcc({
+        conversationId,
+        access,
+        maxRetries: retryOnConflict ? OCC_MAX_RETRIES : 0,
+        mutate: (current) =>
+          updateConversation({
+            conversation: current,
+            update: conversationUpdate,
+            updateDate: new Date(),
+            space: this.space,
+          }),
       });
-
-      return updatedConversation;
     } catch (error) {
       if (isElasticsearchWriteConflict(error)) {
         throw createConversationWriteConflictError({ conversationId });
@@ -277,14 +265,16 @@ class ConversationClientImpl implements ConversationClient {
     conversationId,
     access,
     mutate,
+    maxRetries = OCC_MAX_RETRIES,
   }: {
     conversationId: string;
     access: ConversationAccess;
     mutate: (current: Conversation) => Conversation;
+    maxRetries?: number;
   }): Promise<Conversation> {
     let updatedConversation: Conversation | undefined;
 
-    await this.createOccWriter(access).readModifyWrite({
+    await this.createOccWriter(access, maxRetries).readModifyWrite({
       id: conversationId,
       mutate: (source) => {
         updatedConversation = mutate(fromEs({ _id: conversationId, _source: source }));
@@ -355,7 +345,10 @@ class ConversationClientImpl implements ConversationClient {
     }
   }
 
-  private createOccWriter(access: ConversationAccess): OccWriter<ConversationProperties> {
+  private createOccWriter(
+    access: ConversationAccess,
+    maxRetries: number
+  ): OccWriter<ConversationProperties> {
     return new OccWriter<ConversationProperties>({
       get: async (id) => {
         const document = await this.getDocumentWithAccess({ conversationId: id, access });
@@ -379,7 +372,7 @@ class ConversationClientImpl implements ConversationClient {
         return { seqNo: response._seq_no!, primaryTerm: response._primary_term! };
       },
       logger: this.logger,
-      maxRetries: OCC_MAX_RETRIES,
+      maxRetries,
       retryDelayMs: OCC_RETRY_DELAY_MS,
     });
   }
