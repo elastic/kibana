@@ -5,25 +5,26 @@
  * 2.0.
  */
 
-import { builtinWorkflowInputDefinitions, scanForTemplateVariables } from '@kbn/workflows';
+import {
+  ALERTING_V2_NOTIFICATION_GROUP_INPUT_DEFINITION_ID,
+  builtinWorkflowInputDefinitions,
+  scanForTemplateVariables,
+  type JsonSchema,
+} from '@kbn/workflows';
 import { parse as parseYaml } from 'yaml';
 
 const PAYLOAD_PREFIX = 'inputs.payload';
 
-/**
- * Minimal JSON Schema shape needed to walk `inputs.payload.*` Liquid paths.
- * Kept local (not `typeof builtinWorkflowInputDefinitions[string]`) so
- * `items` / `properties` access does not create circular inference.
- */
-interface WalkableJsonSchema {
-  type?: string | string[];
-  properties?: Record<string, WalkableJsonSchema>;
-  additionalProperties?: boolean | WalkableJsonSchema;
-  items?: WalkableJsonSchema | WalkableJsonSchema[];
-}
-
-const getPayloadSchema = (): WalkableJsonSchema =>
-  builtinWorkflowInputDefinitions.alertingV2NotificationGroup;
+const getPayloadSchema = (): JsonSchema => {
+  const schema =
+    builtinWorkflowInputDefinitions[ALERTING_V2_NOTIFICATION_GROUP_INPUT_DEFINITION_ID];
+  if (!schema) {
+    throw new Error(
+      `Missing built-in workflow input definition "${ALERTING_V2_NOTIFICATION_GROUP_INPUT_DEFINITION_ID}"`
+    );
+  }
+  return schema;
+};
 
 const isUnderPrefix = (path: string, prefix: string): boolean =>
   path === prefix || path.startsWith(`${prefix}.`) || path.startsWith(`${prefix}[`);
@@ -75,10 +76,10 @@ const isBracketSegment = (segment: string): boolean =>
   segment.startsWith('[') && segment.endsWith(']');
 
 const resolveArrayItemSchema = (
-  items: WalkableJsonSchema | WalkableJsonSchema[] | undefined
-): WalkableJsonSchema | undefined => {
+  items: JsonSchema | JsonSchema[] | undefined
+): JsonSchema | undefined => {
   if (!items) return undefined;
-  // Tuple schemas use WalkableJsonSchema[]; Liquid index access can't pick a
+  // Tuple schemas use JsonSchema[]; Liquid index access can't pick a
   // specific slot, so walk the first item schema.
   return Array.isArray(items) ? items[0] : items;
 };
@@ -90,11 +91,11 @@ const resolveArrayItemSchema = (
  */
 export const getInvalidActionPolicyPayloadField = (
   relativePath: string,
-  schema: WalkableJsonSchema = getPayloadSchema()
+  schema: JsonSchema = getPayloadSchema()
 ): string | null => {
   if (!relativePath) return null;
 
-  let current: WalkableJsonSchema | undefined = schema;
+  let current: JsonSchema | undefined = schema;
   for (const segment of splitPathSegments(relativePath)) {
     if (!current) {
       return relativePath;
@@ -107,10 +108,7 @@ export const getInvalidActionPolicyPayloadField = (
       }
       // Object key access like rules[ep.rule_id]
       if (current.type === 'object' && current.additionalProperties) {
-        current =
-          typeof current.additionalProperties === 'object'
-            ? current.additionalProperties
-            : { type: 'object', additionalProperties: true };
+        current = { type: 'object', additionalProperties: true };
         continue;
       }
       return relativePath;
@@ -120,17 +118,14 @@ export const getInvalidActionPolicyPayloadField = (
       return relativePath;
     }
 
-    const next: WalkableJsonSchema | undefined = current.properties?.[segment];
+    const next: JsonSchema | undefined = current.properties?.[segment];
     if (next) {
       current = next;
       continue;
     }
 
     if (current.additionalProperties) {
-      current =
-        typeof current.additionalProperties === 'object'
-          ? current.additionalProperties
-          : { type: 'object', additionalProperties: true };
+      current = { type: 'object', additionalProperties: true };
       continue;
     }
 
