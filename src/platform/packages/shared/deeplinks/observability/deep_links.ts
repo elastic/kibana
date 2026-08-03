@@ -23,6 +23,7 @@ import type {
   OBLT_PROFILING_APP_ID,
   INVENTORY_APP_ID,
   STREAMS_APP_ID,
+  SIGNIFICANT_EVENTS_APP_ID,
   INGEST_HUB_APP_ID,
   ONBOARDING_APP_ID,
 } from './constants';
@@ -42,6 +43,7 @@ type ObltUxApp = typeof OBLT_UX_APP_ID;
 type ObltProfilingApp = typeof OBLT_PROFILING_APP_ID;
 type InventoryApp = typeof INVENTORY_APP_ID;
 type StreamsApp = typeof STREAMS_APP_ID;
+type SignificantEventsApp = typeof SIGNIFICANT_EVENTS_APP_ID;
 type IngestHubApp = typeof INGEST_HUB_APP_ID;
 type OnboardingApp = typeof ONBOARDING_APP_ID;
 
@@ -61,6 +63,7 @@ export type AppId =
   | ObltProfilingApp
   | InventoryApp
   | StreamsApp
+  | SignificantEventsApp
   | IngestHubApp
   | OnboardingApp;
 
@@ -109,6 +112,8 @@ export type SigEventsLinkId = (typeof significantEventsDeepLinkIds)[number];
 
 export type StreamsLinkId = 'overview' | SigEventsLinkId;
 
+export type SignificantEventsLinkId = 'knowledge_indicators' | 'events' | 'rules';
+
 export type LinkId =
   | LogsLinkId
   | ObservabilityOverviewLinkId
@@ -129,4 +134,5 @@ export type DeepLinkId =
   | `${UptimeApp}:${UptimeLinkId}`
   | `${ObltProfilingApp}:${ProfilingLinkId}`
   | `${InventoryApp}:${InventoryLinkId}`
-  | `${StreamsApp}:${StreamsLinkId}`;
+  | `${StreamsApp}:${StreamsLinkId}`
+  | `${SignificantEventsApp}:${SignificantEventsLinkId}`;
