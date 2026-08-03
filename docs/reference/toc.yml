@@ -91,15 +91,15 @@ toc:
           - file: connectors-kibana/datadog-action-type.md
           - file: connectors-kibana/dropbox-action-type.md
           - file: connectors-kibana/dynatrace-action-type.md
-          - file: connectors-kibana/gmail-action-type.md
+          - file: connectors-kibana/figma-action-type.md
           - file: connectors-kibana/firecrawl-action-type.md
           - file: connectors-kibana/github-action-type.md
-          - file: connectors-kibana/figma-action-type.md
           - file: connectors-kibana/gmail-action-type.md
           - file: connectors-kibana/google-calendar-action-type.md
           - file: connectors-kibana/google-cloud-storage-action-type.md
           - file: connectors-kibana/google-drive-action-type.md
           - file: connectors-kibana/grafana-action-type.md
+          - file: connectors-kibana/graphql-action-type.md
           - file: connectors-kibana/greynoise-action-type.md
           - file: connectors-kibana/hubspot-action-type.md
           - file: connectors-kibana/jenkins-action-type.md
@@ -114,6 +114,7 @@ toc:
           - file: connectors-kibana/one-password-action-type.md
           - file: connectors-kibana/outlook-action-type.md
           - file: connectors-kibana/pagerduty-mcp-action-type.md
+          - file: connectors-kibana/posthog-action-type.md
           - file: connectors-kibana/rootly-action-type.md
           - file: connectors-kibana/salesforce-action-type.md
           - file: connectors-kibana/sentry-action-type.md
