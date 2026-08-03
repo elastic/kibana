@@ -2751,7 +2751,7 @@ describe('ActionPolicyClient', () => {
 
       expect(mockSavedObjectsClient.delete).not.toHaveBeenCalled();
       expect(mockLogger.error).toHaveBeenCalledWith(
-        expect.stringContaining('Skipped deleting action policy "policy-id-del-1"'),
+        expect.stringContaining('Skipped deleting action policy(ies) [policy-id-del-1]'),
         expect.objectContaining({
           error: expect.objectContaining({
             code: ALERTING_V2_LOG_CODES.ACTION_POLICY_DELETE_BLOCKED_BY_API_KEY_INVALIDATION,

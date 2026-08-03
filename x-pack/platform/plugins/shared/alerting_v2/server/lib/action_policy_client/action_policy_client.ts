@@ -83,6 +83,12 @@ const MAX_API_KEY_UPDATES_IN_PARALLEL = 10;
 /** A single per-resource error entry in a bulk response. */
 type ActionPolicyBulkError = BulkResponse['errors'][number];
 
+/** Decrypted API key material owned by an action policy. */
+interface ActionPolicyAuth {
+  apiKey: string;
+  createdByUser: boolean;
+}
+
 /**
  * Maps a saved-object (or Boom) status code to the stable, machine-readable
  * bulk-error `code` returned in the response body. Keeps the bulk endpoints
@@ -509,18 +515,12 @@ export class ActionPolicyClient {
 
   /**
    * Deletes action policies by id, queueing their API keys for invalidation
-   * *before* the saved objects that reference those keys are removed.
+   * *before* the saved objects that reference those keys are removed. See
+   * {@link ActionPolicyClient.queueApiKeysForInvalidation} for why the phases
+   * run in this order.
    *
-   * Ordering matters for security: a saved object is the only record of the
-   * API key a policy owns, so deleting it first and invalidating afterwards
-   * leaves a still-valid key in Elasticsearch that nothing points at if the
-   * second phase never runs. Registering the invalidation first inverts the
-   * failure mode into a recoverable one — a policy that survives with a key
-   * queued for invalidation can be repaired by rotating its key, whereas an
-   * orphaned live credential cannot be found again.
-   *
-   * A policy whose key cannot be queued is therefore not deleted at all; it
-   * is reported as `API_KEY_INVALIDATION_FAILED` so the caller can retry.
+   * A policy whose key cannot be queued is not deleted at all; it is
+   * reported as `API_KEY_INVALIDATION_FAILED` so the caller can retry.
    */
   public async bulkDeleteActionPolicies({
     ids,
@@ -531,54 +531,12 @@ export class ActionPolicyClient {
 
     const authMap = await this.getBulkDecryptedAuth(ids);
 
-    // Keys the user brought themselves are not ours to invalidate, and a
-    // policy with no readable key has nothing to queue — both go straight to
-    // the delete phase.
-    const invalidationTargets = ids.flatMap((id) => {
-      const auth = authMap.get(id);
-      return auth && !auth.createdByUser ? [{ id, apiKey: auth.apiKey }] : [];
-    });
+    const { invalidatedIds, errors: invalidationErrors } = await this.queueApiKeysForInvalidation(
+      ids.map((id) => ({ id, auth: authMap.get(id) ?? null }))
+    );
 
-    const invalidationResults =
-      invalidationTargets.length > 0
-        ? await this.apiKeyService.markApiKeysForInvalidation(
-            invalidationTargets.map(({ apiKey }) => apiKey)
-          )
-        : [];
-
-    const errors: ActionPolicyBulkError[] = [];
-    const blockedIds = new Set<string>();
-    const invalidatedIds = new Set<string>();
-
-    invalidationTargets.forEach(({ id }, index) => {
-      const result = invalidationResults[index];
-      if (result?.success) {
-        invalidatedIds.add(id);
-        return;
-      }
-
-      blockedIds.add(id);
-      errors.push({
-        id,
-        error: {
-          code: ALERTING_V2_ERROR_CODES.API_KEY_INVALIDATION_FAILED,
-          message: `Action policy with id "${id}" was not deleted because its API key could not be queued for invalidation${
-            result ? `: ${result.message}` : ''
-          }`,
-        },
-      });
-    });
-
-    if (blockedIds.size > 0) {
-      this.logger.error({
-        error: new Error(
-          `Skipped deleting action policy(ies) [${[...blockedIds].join(
-            ', '
-          )}]; their API keys could not be queued for invalidation, and deleting them would leave the keys valid with nothing referencing them`
-        ),
-        code: ALERTING_V2_LOG_CODES.ACTION_POLICY_DELETE_BLOCKED_BY_API_KEY_INVALIDATION,
-      });
-    }
+    const errors: ActionPolicyBulkError[] = [...invalidationErrors];
+    const blockedIds = new Set(invalidationErrors.map(({ id }) => id));
 
     const idsToDelete = ids.filter((id) => !blockedIds.has(id));
     const deleteResults =
@@ -731,12 +689,20 @@ export class ActionPolicyClient {
     }
 
     const auth = await this.getDecryptedAuth(id);
-    const invalidated = await this.queueApiKeyForInvalidation({ id, auth });
+    const { invalidatedIds, errors } = await this.queueApiKeysForInvalidation([{ id, auth }]);
+
+    const [invalidationError] = errors;
+    if (invalidationError) {
+      throw Boom.internal(invalidationError.error.message, {
+        code: invalidationError.error.code,
+        details: { action_policy_id: id },
+      });
+    }
 
     try {
       await this.actionPolicySavedObjectService.delete({ id });
     } catch (e) {
-      if (invalidated) {
+      if (invalidatedIds.has(id)) {
         this.logDivergedApiKeyInvalidation([id]);
       }
       throw e;
@@ -744,45 +710,63 @@ export class ActionPolicyClient {
   }
 
   /**
-   * Queues an action policy's API key for invalidation ahead of deleting it,
-   * and reports whether anything was queued. Throws when the key exists but
-   * could not be queued, so the caller aborts before dropping the only
-   * reference to a still-valid credential.
+   * Queues the Kibana-owned API keys of the targeted policies for invalidation
+   * and reports which policies must therefore not be deleted. Shared by both
+   * delete paths so they order the phases and word their failures identically.
+   *
+   * `invalidatedIds` carries the policies whose key is now queued, so a caller
+   * whose delete then fails can report the divergence.
    */
-  private async queueApiKeyForInvalidation({
-    id,
-    auth,
-  }: {
-    id: string;
-    auth: { apiKey: string; createdByUser: boolean } | null;
-  }): Promise<boolean> {
-    // Keys the user brought themselves are not ours to invalidate, and a
-    // policy with no readable key has nothing to queue.
-    if (!auth || auth.createdByUser) {
-      return false;
+  private async queueApiKeysForInvalidation(
+    targets: Array<{ id: string; auth: ActionPolicyAuth | null }>
+  ): Promise<{ invalidatedIds: Set<string>; errors: ActionPolicyBulkError[] }> {
+    const queueable = targets.flatMap(({ id, auth }) =>
+      auth && !auth.createdByUser ? [{ id, apiKey: auth.apiKey }] : []
+    );
+
+    if (queueable.length === 0) {
+      return { invalidatedIds: new Set(), errors: [] };
     }
 
-    const [result] = await this.apiKeyService.markApiKeysForInvalidation([auth.apiKey]);
+    const results = await this.apiKeyService.markApiKeysForInvalidation(
+      queueable.map(({ apiKey }) => apiKey)
+    );
 
-    if (!result?.success) {
-      const reason = result ? `: ${result.message}` : '';
+    const invalidatedIds = new Set<string>();
+    const errors: ActionPolicyBulkError[] = [];
+
+    queueable.forEach(({ id }, index) => {
+      const result = results[index];
+      if (result?.success) {
+        invalidatedIds.add(id);
+        return;
+      }
+
+      errors.push({
+        id,
+        error: {
+          code: ALERTING_V2_ERROR_CODES.API_KEY_INVALIDATION_FAILED,
+          message: `Action policy with id "${id}" was not deleted because its API key could not be queued for invalidation${
+            result ? `: ${result.message}` : ''
+          }`,
+        },
+      });
+    });
+
+    if (errors.length > 0) {
       this.logger.error({
         error: new Error(
-          `Skipped deleting action policy "${id}"; its API key could not be queued for invalidation, and deleting it would leave the key valid with nothing referencing it${reason}`
+          `Skipped deleting action policy(ies) [${errors
+            .map(({ id }) => id)
+            .join(
+              ', '
+            )}]; their API keys could not be queued for invalidation, and deleting them would leave the keys valid with nothing referencing them`
         ),
         code: ALERTING_V2_LOG_CODES.ACTION_POLICY_DELETE_BLOCKED_BY_API_KEY_INVALIDATION,
       });
-
-      throw Boom.internal(
-        `Action policy with id "${id}" was not deleted because its API key could not be queued for invalidation${reason}`,
-        {
-          code: ALERTING_V2_ERROR_CODES.API_KEY_INVALIDATION_FAILED,
-          details: { action_policy_id: id },
-        }
-      );
     }
 
-    return true;
+    return { invalidatedIds, errors };
   }
 
   /**
@@ -809,9 +793,7 @@ export class ActionPolicyClient {
     this.apiKeyService.markApiKeysForInvalidation([apiKey]).catch(() => {});
   }
 
-  private async getDecryptedAuth(
-    id: string
-  ): Promise<{ apiKey: string; createdByUser: boolean } | null> {
+  private async getDecryptedAuth(id: string): Promise<ActionPolicyAuth | null> {
     try {
       const doc =
         await this.esoClient.getDecryptedAsInternalUser<ActionPolicySavedObjectAttributes>(
@@ -831,11 +813,9 @@ export class ActionPolicyClient {
     }
   }
 
-  private async getBulkDecryptedAuth(
-    ids: string[]
-  ): Promise<Map<string, { apiKey: string; createdByUser: boolean }>> {
+  private async getBulkDecryptedAuth(ids: string[]): Promise<Map<string, ActionPolicyAuth>> {
     const targetIds = new Set(ids);
-    const authMap = new Map<string, { apiKey: string; createdByUser: boolean }>();
+    const authMap = new Map<string, ActionPolicyAuth>();
 
     try {
       const finder =
