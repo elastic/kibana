@@ -38,10 +38,9 @@ export const TemplateMetadataForm: React.FC<TemplateMetadataFormProps> = ({
     [metadata.tags]
   );
 
-  // name/description isolate their keystrokes in DebouncedTemplateTextField, so typing never
-  // re-renders this form, Monaco, or the tags combobox — only propagating on pause/blur. Tags change
-  // atomically, so they propagate immediately. (The required-name check does not gate the Save
-  // button; Save validates the freshest metadata at submit time — see template_form_layout.)
+  // The required name commits immediately so the header action accurately enables/disables while
+  // typing. Description keystrokes remain local until pause/blur, avoiding needless re-renders of
+  // this form, Monaco, and the tags combobox. Tags change atomically, so they propagate immediately.
   const handleNameChange = useCallback(
     (value: string) => onChange({ ...metadata, name: value }),
     [metadata, onChange]
@@ -126,6 +125,7 @@ export const TemplateMetadataForm: React.FC<TemplateMetadataFormProps> = ({
         label={i18n.TEMPLATE_NAME_LABEL}
         value={metadata.name}
         onChange={handleNameChange}
+        commitOnChange
         isInvalid={errors.name != null}
         error={errors.name}
         dataTestSubj="templateMetadataNameInput"

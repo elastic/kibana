@@ -47,7 +47,6 @@ import {
 } from '../../utils/eis_utils';
 import { REGION_DISPLAY_NAMES } from '../../../common/constants';
 import type { EisInferenceEndpoint } from '../../../common/types';
-import { useInferencePreferencesEnabled } from '../../feature_flag';
 import { EisModelStatus } from '../../types';
 import { ModelStatusBadge } from '../model_status/model_status_badge';
 
@@ -76,7 +75,6 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingEndpoint, setEditingEndpoint] = useState<EisInferenceEndpoint | undefined>();
   const usageTracker = useUsageTracker();
-  const showRegions = useInferencePreferencesEnabled();
 
   useEffect(() => {
     usageTracker.load([EventType.EIS_MODEL_VIEWED, `${EventType.EIS_MODEL_VIEWED}_${modelId}`]);
@@ -167,7 +165,7 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
       }),
       description: modelEOLDate,
     },
-    ...(showRegions && regionZoneCounts.length > 0
+    ...(regionZoneCounts.length > 0
       ? [
           {
             title: i18n.translate('xpack.searchInferenceEndpoints.modelDetailFlyout.regionsLabel', {
