@@ -61,7 +61,8 @@ export class SyntheticsIndicesCache {
 
     const startGlobalGeneration = this.globalGeneration;
     const startKeyGeneration = this.getKeyGeneration(key);
-    const promise = (async () => {
+    const inflightEntry: { promise?: Promise<string> } = {};
+    inflightEntry.promise = (async () => {
       try {
         const indices = await resolver();
         if (
@@ -72,14 +73,14 @@ export class SyntheticsIndicesCache {
         }
         return indices;
       } finally {
-        if (this.inflight.get(key) === promise) {
+        if (this.inflight.get(key) === inflightEntry.promise) {
           this.inflight.delete(key);
         }
       }
     })();
 
-    this.inflight.set(key, promise);
-    return promise;
+    this.inflight.set(key, inflightEntry.promise);
+    return inflightEntry.promise;
   }
 
   invalidate(key?: string): void {
