@@ -8,6 +8,7 @@
 import type { ExceptionItemOutput } from '../../../../../common/workflows/step_types/common/exception_item_schemas';
 import { spaceTest, expect, tags } from '../fixtures';
 import type { NamespaceType } from '../common/exception_step_test_api';
+import { EXCEPTION_WORKFLOW_STEP_ROLE } from '../common/roles';
 import { buildManualWorkflowYaml } from '../common/workflow_yaml';
 
 const STEP_TYPE = 'security.createExceptionListItem';
@@ -25,7 +26,7 @@ spaceTest.describe(
     });
 
     spaceTest.beforeEach(async ({ browserAuth }) => {
-      await browserAuth.loginAsAdmin();
+      await browserAuth.loginWithCustomRole(EXCEPTION_WORKFLOW_STEP_ROLE);
     });
 
     spaceTest.afterEach(async ({ apiServices }) => {
