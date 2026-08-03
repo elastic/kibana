@@ -42,7 +42,9 @@ export const SourcesPanel = ({
     () => sources.some((source) => source.type === 'connector'),
     [sources]
   );
-  const { connectorNameById } = useDataConnectors({ enabled: hasConnectorSources });
+  const { connectorNameById, connectorActionTypeById } = useDataConnectors({
+    enabled: hasConnectorSources,
+  });
   return (
     <EuiPanel hasBorder paddingSize="l">
       <EuiFlexGroup alignItems="flexStart" gutterSize="m" responsive={false}>
@@ -105,17 +107,17 @@ export const SourcesPanel = ({
       ) : (
         <EuiFlexGroup direction="column" gutterSize="s">
           {sources.map((source) => {
-            const { label, typeLabel, iconType, content } = getSourceDisplay(
+            const { label, typeLabel, icon, content } = getSourceDisplay(
               toSourceType(source.type),
               source.value,
-              { connectorNameById }
+              { connectorNameById, connectorActionTypeById }
             );
             return (
               <EuiFlexItem key={`${source.type}-${source.value}`}>
                 <SourceRow
                   label={label}
                   typeLabel={typeLabel}
-                  iconType={iconType}
+                  icon={icon}
                   data-test-subj="contextAiIndexSourceRow"
                 >
                   {content}
