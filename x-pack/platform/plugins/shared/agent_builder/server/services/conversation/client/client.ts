@@ -30,6 +30,7 @@ import {
 import type {
   AddAttachmentsToLastRoundRequest,
   ConversationCreateRequest,
+  ConversationUpdatableFields,
   ConversationUpdateRequest,
   ConversationListOptions,
   UpsertRoundRequest,
@@ -234,32 +235,17 @@ class ConversationClientImpl implements ConversationClient {
     conversationUpdate: ConversationUpdateRequest,
     options: { access: ConversationAccess; retryOnConflict?: boolean } = { access: 'owner' }
   ): Promise<Conversation> {
-    const { id: conversationId } = conversationUpdate;
+    const { id: conversationId, ...fields } = conversationUpdate;
     const { access, retryOnConflict = false } = options;
 
-    try {
-      return await this.writeWithOcc({
-        conversationId,
-        access,
-        maxRetries: retryOnConflict ? OCC_MAX_RETRIES : 0,
-        mutate: (current) =>
-          updateConversation({
-            conversation: current,
-            update: conversationUpdate,
-            updateDate: new Date(),
-            space: this.space,
-          }),
-      });
-    } catch (error) {
-      if (isElasticsearchWriteConflict(error)) {
-        throw createConversationWriteConflictError({ conversationId });
-      }
-
-      throw error;
-    }
+    return this.writeConversation({
+      conversationId,
+      access,
+      maxRetries: retryOnConflict ? OCC_MAX_RETRIES : 0,
+      fields: () => fields,
+    });
   }
 
-  /** Merges attachments into the conversation as stored and refs them from the last stored round. */
   async addAttachmentsToLastRound(
     request: AddAttachmentsToLastRoundRequest,
     options: { access: ConversationAccess } = { access: 'owner' }
@@ -267,46 +253,29 @@ class ConversationClientImpl implements ConversationClient {
     const { id: conversationId, refs, attachments } = request;
     const { access } = options;
 
-    try {
-      return await this.writeWithOcc({
-        conversationId,
-        access,
-        mutate: (current) => {
-          if (current.rounds.length === 0) {
-            throw createBadRequestError(
-              `Conversation ${conversationId} has no rounds to attach to`
-            );
-          }
+    return this.writeConversation({
+      conversationId,
+      access,
+      fields: (current) => {
+        if (current.rounds.length === 0) {
+          throw createBadRequestError(`Conversation ${conversationId} has no rounds to attach to`);
+        }
 
-          return updateConversation({
-            conversation: current,
-            update: {
-              id: conversationId,
-              rounds: applyAttachmentRefsToRounds(
-                current.rounds,
-                new Map([[current.rounds.length - 1, refs]])
-              ),
-              attachments: reconcileAttachments({
-                snapshot: attachments.snapshot,
-                stored: current.attachments ?? [],
-                produced: attachments.produced,
-              }),
-            },
-            updateDate: new Date(),
-            space: this.space,
-          });
-        },
-      });
-    } catch (error) {
-      if (isElasticsearchWriteConflict(error)) {
-        throw createConversationWriteConflictError({ conversationId });
-      }
-
-      throw error;
-    }
+        return {
+          rounds: applyAttachmentRefsToRounds(
+            current.rounds,
+            new Map([[current.rounds.length - 1, refs]])
+          ),
+          attachments: reconcileAttachments({
+            snapshot: attachments.snapshot,
+            stored: current.attachments ?? [],
+            produced: attachments.produced,
+          }),
+        };
+      },
+    });
   }
 
-  /** Merges a round into the conversation as stored, not into the caller's snapshot. */
   async upsertRound(
     request: UpsertRoundRequest,
     options: { access: ConversationAccess } = { access: 'converse' }
@@ -314,50 +283,28 @@ class ConversationClientImpl implements ConversationClient {
     const { id: conversationId, round, replacesRoundId, state, attachments, workspaceId } = request;
     const { access } = options;
 
-    try {
-      return await this.writeWithOcc({
-        conversationId,
-        access,
-        mutate: (current) =>
-          updateConversation({
-            conversation: current,
-            update: {
-              id: conversationId,
-              rounds: upsertRoundInList(current.rounds, round, replacesRoundId),
-              status: round.status,
-              ...(state ? { state } : {}),
-              ...(attachments
-                ? {
-                    attachments: reconcileAttachments({
-                      snapshot: attachments.snapshot,
-                      stored: current.attachments ?? [],
-                      produced: attachments.produced,
-                    }),
-                  }
-                : {}),
-              // write-once, against stored state so concurrent first rounds agree
-              ...(workspaceId && !current.workspace_id ? { workspace_id: workspaceId } : {}),
-              read: false,
-              // `title` is deliberately absent: generated once at creation, so a
-              // round would only write back the title it read, undoing a rename
-            },
-            updateDate: new Date(),
-            space: this.space,
-          }),
-      });
-    } catch (error) {
-      // also true for the OccConflictError raised once retries are exhausted
-      if (isElasticsearchWriteConflict(error)) {
-        // logged here: mid-stream errors reach the client as SSE, not via wrap_handler
-        this.logger.error(
-          `Failed to persist round ${round.id} of conversation ${conversationId}: concurrent writes could not be reconciled`
-        );
-
-        throw createConversationWriteConflictError({ conversationId });
-      }
-
-      throw error;
-    }
+    return this.writeConversation({
+      conversationId,
+      access,
+      fields: (current) => ({
+        rounds: upsertRoundInList(current.rounds, round, replacesRoundId),
+        status: round.status,
+        ...(state ? { state } : {}),
+        ...(attachments
+          ? {
+              attachments: reconcileAttachments({
+                snapshot: attachments.snapshot,
+                stored: current.attachments ?? [],
+                produced: attachments.produced,
+              }),
+            }
+          : {}),
+        ...(workspaceId && !current.workspace_id ? { workspace_id: workspaceId } : {}),
+        read: false,
+        // `title` is deliberately absent: generated once at creation, so a
+        // round would only write back the title it read, undoing a rename
+      }),
+    });
   }
 
   async delete(conversationId: string): Promise<boolean> {
@@ -379,7 +326,6 @@ class ConversationClientImpl implements ConversationClient {
       track_total_hits: false,
       size: 1,
       terminate_after: 1,
-      // Required for optimistic concurrency control: search omits these unless asked.
       seq_no_primary_term: true,
       query: {
         bool: {
@@ -459,17 +405,18 @@ class ConversationClientImpl implements ConversationClient {
 
   /**
    * Read-modify-write against the stored conversation, retrying on conflict.
-   * `mutate` is replayed per attempt, so it must be free of side effects.
+   * `fields` is replayed per attempt against the freshly read conversation, so
+   * it must be free of side effects.
    */
-  private async writeWithOcc({
+  private async writeConversation({
     conversationId,
     access,
-    mutate,
+    fields,
     maxRetries = OCC_MAX_RETRIES,
   }: {
     conversationId: string;
     access: ConversationAccess;
-    mutate: (current: Conversation) => Conversation;
+    fields: (current: Conversation) => Omit<ConversationUpdatableFields, 'id'>;
     maxRetries?: number;
   }): Promise<Conversation> {
     const writer = new OccWriter<Conversation>({
@@ -498,8 +445,30 @@ class ConversationClientImpl implements ConversationClient {
       retryDelayMs: OCC_RETRY_DELAY_MS,
     });
 
-    const { document } = await writer.readModifyWrite({ id: conversationId, mutate });
+    try {
+      const { document } = await writer.readModifyWrite({
+        id: conversationId,
+        mutate: (current) =>
+          updateConversation({
+            conversation: current,
+            update: { id: conversationId, ...fields(current) },
+            updateDate: new Date(),
+            space: this.space,
+          }),
+      });
 
-    return document;
+      return document;
+    } catch (error) {
+      // retries are exhausted
+      if (isElasticsearchWriteConflict(error)) {
+        this.logger.warn(
+          `Conflicting writes to conversation ${conversationId} could not be reconciled`
+        );
+
+        throw createConversationWriteConflictError({ conversationId });
+      }
+
+      throw error;
+    }
   }
 }
