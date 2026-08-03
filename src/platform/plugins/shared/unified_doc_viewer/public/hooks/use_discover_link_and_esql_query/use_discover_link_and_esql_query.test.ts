@@ -11,11 +11,12 @@ import { renderHook } from '@testing-library/react';
 import { where } from '@kbn/esql-composer';
 import { useDiscoverLinkAndEsqlQuery } from '.';
 import { useGetGenerateDiscoverLink } from '../use_generate_discover_link';
-import { ESQL_NULLIFY_UNMAPPED_FIELDS } from './esql_unmapped_fields';
 
 jest.mock('../use_generate_discover_link', () => ({
   useGetGenerateDiscoverLink: jest.fn(),
 }));
+
+const NULLIFY_HEADER = 'SET unmapped_fields="NULLIFY";';
 
 describe('useDiscoverLinkAndEsqlQuery', () => {
   const mockUseGetGenerateDiscoverLink = jest.mocked(useGetGenerateDiscoverLink);
@@ -66,7 +67,7 @@ describe('useDiscoverLinkAndEsqlQuery', () => {
     );
 
     expect(result.current.esqlQueryString).toBe(
-      `${ESQL_NULLIFY_UNMAPPED_FIELDS}\nFROM logs-*\n  | WHERE trace.id == "abc123"`
+      `${NULLIFY_HEADER}\nFROM logs-*\n  | WHERE trace.id == "abc123"`
     );
   });
 });

@@ -13,8 +13,6 @@ interface WithUnmappedFieldsOptions {
   policy?: UnmappedFieldsPolicy;
 }
 
-export const ESQL_NULLIFY_UNMAPPED_FIELDS = 'SET unmapped_fields="NULLIFY";';
-
 export const withUnmappedFields = (
   esqlQuery: string,
   { policy = 'NULLIFY' }: WithUnmappedFieldsOptions = {}

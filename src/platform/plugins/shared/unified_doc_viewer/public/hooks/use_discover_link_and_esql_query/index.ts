@@ -11,11 +11,7 @@ import { from, type QueryOperator } from '@kbn/esql-composer';
 import { useGetGenerateDiscoverLink } from '../use_generate_discover_link';
 import { withUnmappedFields, type UnmappedFieldsPolicy } from './esql_unmapped_fields';
 
-export {
-  withUnmappedFields,
-  ESQL_NULLIFY_UNMAPPED_FIELDS,
-  type UnmappedFieldsPolicy,
-} from './esql_unmapped_fields';
+export { withUnmappedFields, type UnmappedFieldsPolicy } from './esql_unmapped_fields';
 
 export interface UseDiscoverLinkAndEsqlQueryParams {
   indexPattern?: string;

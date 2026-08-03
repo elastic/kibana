@@ -8,11 +8,13 @@
  */
 
 import { from, where } from '@kbn/esql-composer';
-import { ESQL_NULLIFY_UNMAPPED_FIELDS, withUnmappedFields } from './esql_unmapped_fields';
+import { withUnmappedFields } from './esql_unmapped_fields';
+
+const NULLIFY_HEADER = 'SET unmapped_fields="NULLIFY";';
 
 describe('withUnmappedFields', () => {
   it('prepends NULLIFY with a newline by default', () => {
-    expect(withUnmappedFields('FROM logs-*')).toBe(`${ESQL_NULLIFY_UNMAPPED_FIELDS}\nFROM logs-*`);
+    expect(withUnmappedFields('FROM logs-*')).toBe(`${NULLIFY_HEADER}\nFROM logs-*`);
   });
 
   it('prepends the LOAD SET header with newline when policy is LOAD', () => {
@@ -27,9 +29,7 @@ describe('withUnmappedFields', () => {
       .toString();
 
     expect(composerOutput).toContain('\n');
-    expect(withUnmappedFields(composerOutput)).toBe(
-      `${ESQL_NULLIFY_UNMAPPED_FIELDS}\n${composerOutput}`
-    );
+    expect(withUnmappedFields(composerOutput)).toBe(`${NULLIFY_HEADER}\n${composerOutput}`);
   });
 
   it('is idempotent — does not double-prepend the SET directive', () => {
