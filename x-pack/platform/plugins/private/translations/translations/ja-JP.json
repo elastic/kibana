@@ -51693,8 +51693,6 @@
     "xpack.slo.sloEdit.calendarTimeWindow.monthly": "月ごと",
     "xpack.slo.sloEdit.calendarTimeWindow.weekly": "週ごと",
     "xpack.slo.sloEdit.cancelButton": "キャンセル",
-    "xpack.slo.sloEdit.cpsReadiness.body": "SLOは現在、このプロジェクト内のデータに限定されています。プロジェクト横断検索機能は近日中に実装予定です。",
-    "xpack.slo.sloEdit.cpsReadiness.title": "プロジェクト横断的なSLO検索機能が近日公開予定",
     "xpack.slo.sloEdit.createSloButton": "SLOの作成",
     "xpack.slo.sloEdit.customKql.dataViewSelection.label": "データビューを選択",
     "xpack.slo.sloEdit.customKql.indexSelection.label": "インデックス",

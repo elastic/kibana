@@ -7055,6 +7055,7 @@ components:
         - endpoint_events
         - endpoint_host_isolation_exceptions
         - endpoint_blocklists
+        - endpoint_custom_yara_signatures
       type: string
     ExternalRuleCustomizedFields:
       description: An array of customized field names — that is, fields that the user
