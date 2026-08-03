@@ -17,8 +17,10 @@ import { FilterStateStore } from '@kbn/es-query-constants';
 import styled from '@emotion/styled';
 import { useControlPanels } from '@kbn/observability-shared-plugin/public';
 import type { DataControlApi } from '@kbn/controls-plugin/public';
+import type { CPSPluginStart } from '@kbn/cps/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React, { useCallback, useEffect, useRef, useMemo } from 'react';
-import { Subscription } from 'rxjs';
+import { Subscription, skip } from 'rxjs';
 import {
   DATASTREAM_DATASET,
   findInventoryModel,
@@ -87,6 +89,8 @@ export const ControlsContent = ({
   const subscriptions = useRef<Subscription>(new Subscription());
   const { onPreferredSchemaChange } = useUnifiedSearchContext();
   const { status } = useTimeRangeMetadataContext();
+  const { services } = useKibana<{ cps?: CPSPluginStart }>();
+  const cpsManager = services.cps?.cpsManager;
 
   const isLoading = isPending(status);
 
@@ -133,8 +137,19 @@ export const ControlsContent = ({
           .getInput$()
           .subscribe(({ initialChildControlState }) => setControlPanels(initialChildControlState))
       );
+
+      // The control group already refetches suggestions from `projectRouting$`; reloading here also
+      // refreshes any open popover when the Cross-Project Search picker changes.
+      if (cpsManager) {
+        subscriptions.current.add(
+          cpsManager
+            .getProjectRouting$()
+            .pipe(skip(1))
+            .subscribe(() => controlGroup.reload())
+        );
+      }
     },
-    [onFiltersChange, setControlPanels]
+    [onFiltersChange, setControlPanels, cpsManager]
   );
 
   useEffect(() => {

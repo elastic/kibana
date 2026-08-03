@@ -13,7 +13,7 @@ import {
   registerEmbeddablePublicDefinition,
   type EmbeddablePublicDefinition,
 } from '@kbn/embeddable-plugin/public/react_embeddable_system';
-import type { Filter } from '@kbn/es-query';
+import type { Filter, ProjectRouting } from '@kbn/es-query';
 import type { HasSerializableState } from '@kbn/presentation-publishing';
 import { setStubKibanaServices } from '@kbn/embeddable-plugin/public/mocks';
 import { act, render, waitFor } from '@testing-library/react';
@@ -173,5 +173,19 @@ describe('control group renderer', () => {
       />
     );
     expect(api.timeRange$?.getValue()).toEqual(updatedTime);
+  });
+
+  test('does not publish projectRouting$ when neither prop nor CPS is available', async () => {
+    const { api } = await mountControlGroupRenderer({});
+    expect(api.projectRouting$).toBeUndefined();
+  });
+
+  test('publishes the projectRouting$ prop on the control group API', async () => {
+    const projectRouting$ = new BehaviorSubject<ProjectRouting | undefined>('_alias:_origin');
+    const { api } = await mountControlGroupRenderer({ projectRouting$ });
+    expect(api.projectRouting$?.getValue()).toBe('_alias:_origin');
+
+    projectRouting$.next('_alias:*');
+    expect(api.projectRouting$?.getValue()).toBe('_alias:*');
   });
 });

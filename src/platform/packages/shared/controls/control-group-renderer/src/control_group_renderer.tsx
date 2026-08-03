@@ -11,12 +11,14 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { BehaviorSubject, Subject, Subscription, combineLatest, map } from 'rxjs';
 
 import { ControlsRenderer, type ControlsRendererParentApi } from '@kbn/controls-renderer';
-import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import type { AggregateQuery, Filter, ProjectRouting, Query, TimeRange } from '@kbn/es-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   apiHasSerializableState,
   useSearchApi,
   type EmbeddableApiContext,
+  type PublishesProjectRouting,
+  type PublishingSubject,
   type ViewMode,
 } from '@kbn/presentation-publishing';
 import { asyncForEach } from '@kbn/std';
@@ -32,6 +34,7 @@ import type {
   ControlPanelsState,
 } from './types';
 import { useChildrenApi } from './use_children_api';
+import { useCpsProjectRoutingApi } from './use_cps_project_routing';
 import { useInitialControlGroupState } from './use_initial_control_group_state';
 import { useLayoutApi } from './use_layout_api';
 import { usePropsApi } from './use_props_api';
@@ -49,6 +52,12 @@ export interface ControlGroupRendererProps {
   query?: Query | AggregateQuery;
   dataLoading?: boolean;
   compressed?: boolean;
+  /**
+   * Cross-Project Search routing published to data controls (e.g. options list suggestions). When
+   * omitted, routing is auto-wired from the CPS plugin if it is available; provide this to override
+   * that behavior (for example in tests).
+   */
+  projectRouting$?: PublishingSubject<ProjectRouting | undefined>;
 }
 
 export const ControlGroupRenderer = ({
@@ -60,6 +69,7 @@ export const ControlGroupRenderer = ({
   viewMode,
   dataLoading,
   compressed,
+  projectRouting$,
 }: ControlGroupRendererProps) => {
   const {
     services: { uiActions },
@@ -91,6 +101,13 @@ export const ControlGroupRenderer = ({
   });
   const propsApi = usePropsApi({ dataLoading, viewMode, compressed });
 
+  /** Cross-Project Search routing, auto-wired from CPS unless provided via props */
+  const cpsProjectRoutingApi = useCpsProjectRoutingApi();
+  const projectRoutingApi = useMemo<PublishesProjectRouting | undefined>(
+    () => (projectRouting$ ? { projectRouting$ } : cpsProjectRoutingApi),
+    [projectRouting$, cpsProjectRoutingApi]
+  );
+
   const parentApi = useMemo(() => {
     if (!childrenApi || !layoutApi) return;
 
@@ -102,6 +119,7 @@ export const ControlGroupRenderer = ({
       ...layoutApi,
       ...searchApi,
       ...propsApi,
+      ...projectRoutingApi,
       reload$,
       panelIsPinned: () => true,
       getEditorConfig: getEditorConfig.current,
@@ -110,7 +128,7 @@ export const ControlGroupRenderer = ({
         disabledActionIds$.next(ids);
       },
     };
-  }, [childrenApi, layoutApi, searchApi, propsApi, getEditorConfig]);
+  }, [childrenApi, layoutApi, searchApi, propsApi, projectRoutingApi, getEditorConfig]);
 
   useEffect(() => {
     if (!parentApi || !input$) return;
