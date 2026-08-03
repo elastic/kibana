@@ -7,7 +7,7 @@
 
 import { matchPath } from 'react-router-dom';
 
-import { PageScope } from '../../data_view_manager/constants';
+import { PageScope } from '../constants';
 import {
   ALERTS_PATH,
   ATTACK_DISCOVERY_PATH,
