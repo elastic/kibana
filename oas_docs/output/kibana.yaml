@@ -132308,15 +132308,16 @@ components:
           type: object
           properties:
             field:
-              description: Field to use instead of process.pid
+              description: Field to use instead of `process.pid`
               maxLength: 2000
               type: string
             kill_descendants:
-              description: Whether to also terminate the descendant processes of the targeted process. This field is only available for use with v9.6.0 of the stack.
+              description: Whether to also terminate the descendant processes of the targeted process.
               type: boolean
+              x-state: Added in 9.6.0
             overwrite:
               default: true
-              description: Whether to overwrite field with process.pid
+              description: Whether to overwrite field with `process.pid`
               type: boolean
           required:
             - field
