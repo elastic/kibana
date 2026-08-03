@@ -38,9 +38,8 @@ export type ConversationUpdateRequest = Pick<Conversation, 'id'> &
   >;
 
 /**
- * Persists a single completed round, expressing intent rather than end state so it
- * can be merged into whatever is stored. A caller-supplied `rounds` array cannot be
- * made concurrency-safe: built before the agent ran, writing it drops newer rounds.
+ * Persists a single completed round as intent, not end state, so it can be merged into
+ * whatever is stored. A caller-supplied `rounds` array would drop concurrent rounds.
  */
 export interface PersistRoundRequest {
   id: string;

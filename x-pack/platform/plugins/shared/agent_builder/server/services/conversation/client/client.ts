@@ -223,13 +223,6 @@ class ConversationClientImpl implements ConversationClient {
     return this.get(id);
   }
 
-  /**
-   * Applies the requested fields on top of the stored conversation.
-   *
-   * Only set `retryOnConflict` for values independent of previously-read state,
-   * such as request scalars — re-applying an array built from a stale read would
-   * revert the change it just read.
-   */
   async update(
     conversationUpdate: ConversationUpdateRequest,
     options: { access: ConversationAccess; retryOnConflict?: boolean } = { access: 'owner' }
