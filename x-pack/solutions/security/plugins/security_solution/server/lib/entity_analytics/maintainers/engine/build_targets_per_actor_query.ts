@@ -18,7 +18,7 @@ import { ENGINE_COLUMNS } from './columns';
 
 /**
  * "At least one of these fields exists and is non-empty" ES|QL fragment.
- *user.name
+ *
  * Used as the actor-presence gate (the `AND (...)` clause appended after
  * `esqlWhereClause`) when the config supplies its own `customActor.fields`.
  * The default path (no `customActor`) keeps using
