@@ -1,0 +1,51 @@
+{
+  "sha1": "",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
+  "tests": [
+    {
+      "id": "c598882d7af597b-c129e7cf5767d21",
+      "title": "Ingest Synthetics test data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/ui/tests/global.setup.ts",
+        "line": 5,
+        "column": 1
+      }
+    },
+    {
+      "id": "a409be037e17b3c-8fa17d839dd5b8c",
+      "title": "ProjectAPIKeys generates API key and verifies viewer restrictions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/ui/tests/project_api_keys.spec.ts",
+        "line": 13,
+        "column": 14
+      }
+    },
+    {
+      "id": "e99d9585b4b933e-4400b6af6810211",
+      "title": "ProjectMonitorReadOnly project monitor is read-only and can be re-pushed",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/ui/tests/project_monitor_read_only.spec.ts",
+        "line": 19,
+        "column": 11
+      }
+    }
+  ]
+}

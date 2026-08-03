@@ -1,0 +1,1101 @@
+{
+  "sha1": "",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
+  "tests": [
+    {
+      "id": "3c5879fd2d8f2d0-aa292fd3a18018f",
+      "title": "AddNewMonitorsPublicAPI - Private locations should return error for empty monitor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/create_monitor_public_api_private_location.spec.ts",
+        "line": 45,
+        "column": 25
+      }
+    },
+    {
+      "id": "3c5879fd2d8f2d0-009c9275b7c8cc5",
+      "title": "AddNewMonitorsPublicAPI - Private locations return error if no location specified",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/create_monitor_public_api_private_location.spec.ts",
+        "line": 49,
+        "column": 51
+      }
+    },
+    {
+      "id": "3c5879fd2d8f2d0-a2d37e7e14f9e63",
+      "title": "AddNewMonitorsPublicAPI - Private locations return error if invalid location specified",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/create_monitor_public_api_private_location.spec.ts",
+        "line": 53,
+        "column": 86
+      }
+    },
+    {
+      "id": "3c5879fd2d8f2d0-a3ed39defd639f4",
+      "title": "AddNewMonitorsPublicAPI - Private locations return error if invalid private location specified",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/create_monitor_public_api_private_location.spec.ts",
+        "line": 61,
+        "column": 19
+      }
+    },
+    {
+      "id": "3c5879fd2d8f2d0-f01143ada077c16",
+      "title": "AddNewMonitorsPublicAPI - Private locations return error for origin project",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/create_monitor_public_api_private_location.spec.ts",
+        "line": 90,
+        "column": 44
+      }
+    },
+    {
+      "id": "3c5879fd2d8f2d0-83fef1cfec66eac",
+      "title": "AddNewMonitorsPublicAPI - Private locations HTTP - returns error for empty http",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/create_monitor_public_api_private_location.spec.ts",
+        "line": 102,
+        "column": 50
+      }
+    },
+    {
+      "id": "3c5879fd2d8f2d0-abf0a901aba2196",
+      "title": "AddNewMonitorsPublicAPI - Private locations HTTP - base http monitor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/create_monitor_public_api_private_location.spec.ts",
+        "line": 119,
+        "column": 19
+      }
+    },
+    {
+      "id": "3c5879fd2d8f2d0-b4f30fbfab405aa",
+      "title": "AddNewMonitorsPublicAPI - Private locations HTTP - can enable retries",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/create_monitor_public_api_private_location.spec.ts",
+        "line": 140,
+        "column": 29
+      }
+    },
+    {
+      "id": "3c5879fd2d8f2d0-7f4ffe403afe54f",
+      "title": "AddNewMonitorsPublicAPI - Private locations HTTP - can disable retries",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/create_monitor_public_api_private_location.spec.ts",
+        "line": 168,
+        "column": 52
+      }
+    },
+    {
+      "id": "3c5879fd2d8f2d0-80a83e37e84d55e",
+      "title": "AddNewMonitorsPublicAPI - Private locations TCP - base tcp monitor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/create_monitor_public_api_private_location.spec.ts",
+        "line": 196,
+        "column": 29
+      }
+    },
+    {
+      "id": "3c5879fd2d8f2d0-4bc738a2370cbb2",
+      "title": "AddNewMonitorsPublicAPI - Private locations ICMP - base icmp monitor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/create_monitor_public_api_private_location.spec.ts",
+        "line": 220,
+        "column": 14
+      }
+    },
+    {
+      "id": "3c5879fd2d8f2d0-292fd677f1198a4",
+      "title": "AddNewMonitorsPublicAPI - Private locations Browser - returns error for empty browser monitor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/create_monitor_public_api_private_location.spec.ts",
+        "line": 242,
+        "column": 18
+      }
+    },
+    {
+      "id": "3c5879fd2d8f2d0-376f48d5ef46d4f",
+      "title": "AddNewMonitorsPublicAPI - Private locations Browser - base browser monitor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/create_monitor_public_api_private_location.spec.ts",
+        "line": 263,
+        "column": 23
+      }
+    },
+    {
+      "id": "3c5879fd2d8f2d0-667f585a4577aba",
+      "title": "AddNewMonitorsPublicAPI - Private locations Browser - base browser monitor with inline_script",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/create_monitor_public_api_private_location.spec.ts",
+        "line": 288,
+        "column": 2
+      }
+    },
+    {
+      "id": "5f1c2d8b274e88b-6f068477fd51dd6",
+      "title": "AddNewMonitorsPublicAPI - Public locations HTTP - returns error for empty monitor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/create_monitor_public_api.spec.ts",
+        "line": 43,
+        "column": 7
+      }
+    },
+    {
+      "id": "5f1c2d8b274e88b-ad08f11b530f905",
+      "title": "AddNewMonitorsPublicAPI - Public locations HTTP - base http monitor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/create_monitor_public_api.spec.ts",
+        "line": 57,
+        "column": 19
+      }
+    },
+    {
+      "id": "5f1c2d8b274e88b-e147067784927fd",
+      "title": "AddNewMonitorsPublicAPI - Public locations HTTP - can enable retries",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/create_monitor_public_api.spec.ts",
+        "line": 78,
+        "column": 17
+      }
+    },
+    {
+      "id": "5f1c2d8b274e88b-0798dee67419f52",
+      "title": "AddNewMonitorsPublicAPI - Public locations HTTP - can disable retries",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/create_monitor_public_api.spec.ts",
+        "line": 107,
+        "column": 13
+      }
+    },
+    {
+      "id": "5f1c2d8b274e88b-82cd12a01981ed1",
+      "title": "AddNewMonitorsPublicAPI - Public locations TCP - base tcp monitor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/create_monitor_public_api.spec.ts",
+        "line": 134,
+        "column": 20
+      }
+    },
+    {
+      "id": "5f1c2d8b274e88b-707d3be6ab967c6",
+      "title": "AddNewMonitorsPublicAPI - Public locations ICMP - base icmp monitor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/create_monitor_public_api.spec.ts",
+        "line": 157,
+        "column": 25
+      }
+    },
+    {
+      "id": "5f1c2d8b274e88b-5587d981594cf67",
+      "title": "AddNewMonitorsPublicAPI - Public locations Browser - returns error for empty browser monitor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/create_monitor_public_api.spec.ts",
+        "line": 180,
+        "column": 29
+      }
+    },
+    {
+      "id": "5f1c2d8b274e88b-77a5bae93993d80",
+      "title": "AddNewMonitorsPublicAPI - Public locations Browser - base browser monitor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/create_monitor_public_api.spec.ts",
+        "line": 201,
+        "column": 21
+      }
+    },
+    {
+      "id": "5f1c2d8b274e88b-d9f811723295101",
+      "title": "AddNewMonitorsPublicAPI - Public locations Browser - base browser monitor with inline_script",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/create_monitor_public_api.spec.ts",
+        "line": 225,
+        "column": 7
+      }
+    },
+    {
+      "id": "0a2f53a204e0cde-02e1ce958fdd4be",
+      "title": "AddEditParams adds a test param",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/create_update_delete_params.spec.ts",
+        "line": 222,
+        "column": 8
+      }
+    },
+    {
+      "id": "0a2f53a204e0cde-82feaf043b88bb7",
+      "title": "AddEditParams handles tags and description",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/create_update_delete_params.spec.ts",
+        "line": 230,
+        "column": 22
+      }
+    },
+    {
+      "id": "0a2f53a204e0cde-b2e31d211afb968",
+      "title": "AddEditParams handles editing a param",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/create_update_delete_params.spec.ts",
+        "line": 249,
+        "column": 49
+      }
+    },
+    {
+      "id": "0a2f53a204e0cde-47dd1546e671bb6",
+      "title": "AddEditParams handles partial editing a param",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/create_update_delete_params.spec.ts",
+        "line": 266,
+        "column": 13
+      }
+    },
+    {
+      "id": "0a2f53a204e0cde-f29f4b0687fa0ee",
+      "title": "AddEditParams handles spaces",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/create_update_delete_params.spec.ts",
+        "line": 296,
+        "column": 10
+      }
+    },
+    {
+      "id": "0a2f53a204e0cde-267fbaae0012688",
+      "title": "AddEditParams handles editing a param in spaces",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/create_update_delete_params.spec.ts",
+        "line": 306,
+        "column": 15
+      }
+    },
+    {
+      "id": "0a2f53a204e0cde-a04983ac37a89c6",
+      "title": "AddEditParams does not allow editing a param in created in one space in a different space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/create_update_delete_params.spec.ts",
+        "line": 335,
+        "column": 19
+      }
+    },
+    {
+      "id": "0a2f53a204e0cde-67947fe0a73259a",
+      "title": "AddEditParams handles invalid spaces",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/create_update_delete_params.spec.ts",
+        "line": 363,
+        "column": 29
+      }
+    },
+    {
+      "id": "0a2f53a204e0cde-063d1dbbc2b5a4f",
+      "title": "AddEditParams handles editing with invalid spaces",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/create_update_delete_params.spec.ts",
+        "line": 370,
+        "column": 7
+      }
+    },
+    {
+      "id": "0a2f53a204e0cde-c07d0b5faa447bb",
+      "title": "AddEditParams handles share across spaces",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/create_update_delete_params.spec.ts",
+        "line": 393,
+        "column": 13
+      }
+    },
+    {
+      "id": "0a2f53a204e0cde-e90d8c1e3404a26",
+      "title": "AddEditParams should NOT return values for editor user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/create_update_delete_params.spec.ts",
+        "line": 409,
+        "column": 16
+      }
+    },
+    {
+      "id": "0a2f53a204e0cde-bdb2deb325f5db1",
+      "title": "AddEditParams should NOT return values for read-only synthetics custom role",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/create_update_delete_params.spec.ts",
+        "line": 423,
+        "column": 17
+      }
+    },
+    {
+      "id": "0a2f53a204e0cde-b8239c56be12ff3",
+      "title": "AddEditParams SHOULD RETURN values for admin user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/create_update_delete_params.spec.ts",
+        "line": 446,
+        "column": 17
+      }
+    },
+    {
+      "id": "0a2f53a204e0cde-8eeacb14e9529dd",
+      "title": "AddEditParams should NOT return values with custom role with ALL permissions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/create_update_delete_params.spec.ts",
+        "line": 472,
+        "column": 31
+      }
+    },
+    {
+      "id": "0a2f53a204e0cde-dc87a7b51b8a8ed",
+      "title": "AddEditParams SHOULD RETURN values for custom role with ALL and read params subfeature privilege",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/create_update_delete_params.spec.ts",
+        "line": 489,
+        "column": 31
+      }
+    },
+    {
+      "id": "0a2f53a204e0cde-2c40f519590a9b0",
+      "title": "AddEditParams SHOULD RETURN values for custom role with MINIMAL_ALL and read params subfeature privilege",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/create_update_delete_params.spec.ts",
+        "line": 507,
+        "column": 24
+      }
+    },
+    {
+      "id": "0a2f53a204e0cde-703883cd6d11b4a",
+      "title": "AddEditParams SHOULD RETURN values for custom role with READ and read params subfeature privilege",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/create_update_delete_params.spec.ts",
+        "line": 521,
+        "column": 7
+      }
+    },
+    {
+      "id": "0a2f53a204e0cde-ad98c86d8d44275",
+      "title": "AddEditParams should handle bulk deleting params",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/create_update_delete_params.spec.ts",
+        "line": 595,
+        "column": 27
+      }
+    },
+    {
+      "id": "0a2f53a204e0cde-76a87ef2e17cb2a",
+      "title": "AddEditParams handles single parameter deletion",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/create_update_delete_params.spec.ts",
+        "line": 550,
+        "column": 69
+      }
+    },
+    {
+      "id": "0a2f53a204e0cde-45fa932e3a8687d",
+      "title": "AddEditParams returns a 409 conflict when creating a duplicate key",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/create_update_delete_params.spec.ts",
+        "line": 564,
+        "column": 82
+      }
+    },
+    {
+      "id": "0a2f53a204e0cde-5ac3d381e5ecfff",
+      "title": "AddEditParams returns 403 for a user with no synthetics privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/create_update_delete_params.spec.ts",
+        "line": 651,
+        "column": 27
+      }
+    },
+    {
+      "id": "b9533fb91597569-5cca38cc28eeee3",
+      "title": "EditMonitorsPublicAPI - Private Location adds test monitor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/edit_monitor_public_api_private_location.spec.ts",
+        "line": 53,
+        "column": 26
+      }
+    },
+    {
+      "id": "b9533fb91597569-ec7dc92e1a4dcfa",
+      "title": "EditMonitorsPublicAPI - Private Location should return error for empty monitor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/edit_monitor_public_api_private_location.spec.ts",
+        "line": 73,
+        "column": 23
+      }
+    },
+    {
+      "id": "b9533fb91597569-02d4287a6215c06",
+      "title": "EditMonitorsPublicAPI - Private Location return error if type is being changed",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/edit_monitor_public_api_private_location.spec.ts",
+        "line": 91,
+        "column": 13
+      }
+    },
+    {
+      "id": "b9533fb91597569-3e0223a5050da93",
+      "title": "EditMonitorsPublicAPI - Private Location return error if monitor not found",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/edit_monitor_public_api_private_location.spec.ts",
+        "line": 101,
+        "column": 19
+      }
+    },
+    {
+      "id": "b9533fb91597569-484157646957fb9",
+      "title": "EditMonitorsPublicAPI - Private Location return error if invalid location specified",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/edit_monitor_public_api_private_location.spec.ts",
+        "line": 112,
+        "column": 23
+      }
+    },
+    {
+      "id": "b9533fb91597569-2fab2a7d9c5f44c",
+      "title": "EditMonitorsPublicAPI - Private Location return error if invalid private location specified",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/edit_monitor_public_api_private_location.spec.ts",
+        "line": 125,
+        "column": 23
+      }
+    },
+    {
+      "id": "b9533fb91597569-7e0fa75995c760a",
+      "title": "EditMonitorsPublicAPI - Private Location throws an error if empty locations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/edit_monitor_public_api_private_location.spec.ts",
+        "line": 156,
+        "column": 76
+      }
+    },
+    {
+      "id": "b9533fb91597569-668eb7066441b40",
+      "title": "EditMonitorsPublicAPI - Private Location cannot change origin type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/edit_monitor_public_api_private_location.spec.ts",
+        "line": 167,
+        "column": 13
+      }
+    },
+    {
+      "id": "b9533fb91597569-a0dcc02effa41ba",
+      "title": "EditMonitorsPublicAPI - Private Location can change name of monitor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/edit_monitor_public_api_private_location.spec.ts",
+        "line": 184,
+        "column": 9
+      }
+    },
+    {
+      "id": "b9533fb91597569-00edc96407dc7fc",
+      "title": "EditMonitorsPublicAPI - Private Location prevents duplicate name of monitor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/edit_monitor_public_api_private_location.spec.ts",
+        "line": 205,
+        "column": 13
+      }
+    },
+    {
+      "id": "b9533fb91597569-cbefd2ec74de03f",
+      "title": "EditMonitorsPublicAPI - Private Location can add a second private location to existing monitor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/edit_monitor_public_api_private_location.spec.ts",
+        "line": 248,
+        "column": 45
+      }
+    },
+    {
+      "id": "b9533fb91597569-ec612c1b66629fa",
+      "title": "EditMonitorsPublicAPI - Private Location can remove private location from existing monitor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/edit_monitor_public_api_private_location.spec.ts",
+        "line": 271,
+        "column": 22
+      }
+    },
+    {
+      "id": "b9533fb91597569-b8de64eda84ee22",
+      "title": "EditMonitorsPublicAPI - Private Location can not remove all locations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/edit_monitor_public_api_private_location.spec.ts",
+        "line": 274,
+        "column": 27
+      }
+    },
+    {
+      "id": "bfc5184d1a65ea6-7cbc306b6f2b915",
+      "title": "EditMonitorsPublicAPI - Public location adds test monitor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/edit_monitor_public_api.spec.ts",
+        "line": 48,
+        "column": 25
+      }
+    },
+    {
+      "id": "bfc5184d1a65ea6-23e9c6cad2b60a8",
+      "title": "EditMonitorsPublicAPI - Public location can change name of monitor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/edit_monitor_public_api.spec.ts",
+        "line": 68,
+        "column": 23
+      }
+    },
+    {
+      "id": "bfc5184d1a65ea6-3130dd1d27590d8",
+      "title": "EditMonitorsPublicAPI - Public location prevents duplicate name of monitor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/edit_monitor_public_api.spec.ts",
+        "line": 88,
+        "column": 29
+      }
+    },
+    {
+      "id": "bfc5184d1a65ea6-f07d5c513529672",
+      "title": "EditMonitorsPublicAPI - Public location can add a second public location to existing monitor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/edit_monitor_public_api.spec.ts",
+        "line": 135,
+        "column": 78
+      }
+    },
+    {
+      "id": "bfc5184d1a65ea6-f8c5febf0871ac9",
+      "title": "EditMonitorsPublicAPI - Public location can remove public location from existing monitor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/edit_monitor_public_api.spec.ts",
+        "line": 158,
+        "column": 14
+      }
+    },
+    {
+      "id": "8046d7855afb1d3-b3b0efd0f58a113",
+      "title": "SyncGlobalParamsForFilteredMonitors only re-syncs package policies for monitors that reference the modified param",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/sync_global_params_for_filtered_monitors.spec.ts",
+        "line": 62,
+        "column": 55
+      }
+    },
+    {
+      "id": "42b72ad2749b2a3-4770f9051e3c862",
+      "title": "SyncGlobalParamsSpaces syncs space-scoped params into the right monitor policy and keeps policy/monitor counts in lock-step",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/sync_global_params_spaces.spec.ts",
+        "line": 69,
+        "column": 20
+      }
+    },
+    {
+      "id": "993121f56e1e489-e3b46c114927d9a",
+      "title": "SyncGlobalParams syncs a global param into a private-location monitor policy and removes it on delete",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/sync_global_params.spec.ts",
+        "line": 68,
+        "column": 55
+      }
+    },
+    {
+      "id": "1806196c0383e9f-9c91ca8685a7c4d",
+      "title": "UpdateMonitorBulkAPI partially patches a single monitor with a public location",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/update_monitor_bulk.spec.ts",
+        "line": 101,
+        "column": 25
+      }
+    },
+    {
+      "id": "1806196c0383e9f-9ef299ac98f7736",
+      "title": "UpdateMonitorBulkAPI partially patches a monitor with a private location",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/update_monitor_bulk.spec.ts",
+        "line": 119,
+        "column": 80
+      }
+    },
+    {
+      "id": "1806196c0383e9f-edb9e2140ad4608",
+      "title": "UpdateMonitorBulkAPI patches multiple monitors in one request",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/update_monitor_bulk.spec.ts",
+        "line": 141,
+        "column": 18
+      }
+    },
+    {
+      "id": "1806196c0383e9f-9ce215233ce8242",
+      "title": "UpdateMonitorBulkAPI applies a different patch to each id in one request",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/update_monitor_bulk.spec.ts",
+        "line": 171,
+        "column": 13
+      }
+    },
+    {
+      "id": "1806196c0383e9f-1f629bd44bb0e4b",
+      "title": "UpdateMonitorBulkAPI keeps the monitor decryptable after a partial patch on an AAD field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/update_monitor_bulk.spec.ts",
+        "line": 207,
+        "column": 1
+      }
+    },
+    {
+      "id": "1806196c0383e9f-932249d28094a08",
+      "title": "UpdateMonitorBulkAPI rejects project-origin monitors with an origin error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/update_monitor_bulk.spec.ts",
+        "line": 253,
+        "column": 29
+      }
+    },
+    {
+      "id": "1806196c0383e9f-17387cda604e40e",
+      "title": "UpdateMonitorBulkAPI rejects schedules outside the allowed set with a validation error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/update_monitor_bulk.spec.ts",
+        "line": 295,
+        "column": 17
+      }
+    },
+    {
+      "id": "1806196c0383e9f-cb7bba4c4c5581f",
+      "title": "UpdateMonitorBulkAPI rejects a patch with an unknown field and leaves the monitor unchanged",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/update_monitor_bulk.spec.ts",
+        "line": 290,
+        "column": 27
+      }
+    },
+    {
+      "id": "1806196c0383e9f-1b1e84d58a8ba20",
+      "title": "UpdateMonitorBulkAPI rejects a name patch that collides with another existing monitor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/update_monitor_bulk.spec.ts",
+        "line": 340,
+        "column": 15
+      }
+    },
+    {
+      "id": "1806196c0383e9f-241e4ab4611b503",
+      "title": "UpdateMonitorBulkAPI renames a monitor to a brand-new unique name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/update_monitor_bulk.spec.ts",
+        "line": 355,
+        "column": 88
+      }
+    },
+    {
+      "id": "1806196c0383e9f-c0d77663955abdd",
+      "title": "UpdateMonitorBulkAPI allows a patch that keeps the monitor its own current name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/update_monitor_bulk.spec.ts",
+        "line": 370,
+        "column": 8
+      }
+    },
+    {
+      "id": "1806196c0383e9f-79997ce1e1d1b02",
+      "title": "UpdateMonitorBulkAPI rejects every entry when two updates set the same name in one batch",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/update_monitor_bulk.spec.ts",
+        "line": 400,
+        "column": 15
+      }
+    },
+    {
+      "id": "1806196c0383e9f-075d5d6e34e078b",
+      "title": "UpdateMonitorBulkAPI isolates a name conflict to the offending id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/update_monitor_bulk.spec.ts",
+        "line": 416,
+        "column": 69
+      }
+    }
+  ]
+}
