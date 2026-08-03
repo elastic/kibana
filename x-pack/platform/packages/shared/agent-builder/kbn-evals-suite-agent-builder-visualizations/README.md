@@ -40,17 +40,20 @@ This keeps gold and candidate structurally parallel so the equivalence evaluator
 
 `src/fixtures/replay.ts` uses `@kbn/es-snapshot-loader` to replay a GCS snapshot (same pattern as `@kbn/evals-suite-observability-ai`) into `logs-*`, `metrics-*`, and `traces-*` data streams. The CPU-load examples specifically guard against the failure where the agent leaves the `.1m` / `.5m` / `.15m` field paths unquoted (Elasticsearch lexes `.1m` as a numeric literal → `parsing_exception`).
 
-To create or refresh the snapshot, run the one-off script against a local ES cluster:
+To create or refresh the snapshot:
+
+1. Start ES with `path.repo` set (e.g. `yarn es snapshot -E path.repo=/tmp/es-snapshots`)
+2. Make sure `gsutil` is installed and `gcloud auth login` (or ADC) is set up
+3. Run:
 
 ```bash
 ELASTICSEARCH_URL=http://localhost:9200 \
 ELASTICSEARCH_USERNAME=elastic \
 ELASTICSEARCH_PASSWORD=changeme \
-GOOGLE_APPLICATION_CREDENTIALS=/path/to/keyfile.json \
 npx ts-node scripts/create_snapshot.ts
 ```
 
-The script seeds synthetic `system.cpu.load_average.*` documents, verifies the `TS` query works, then snapshots `metrics-hostmetricsreceiver.otel-default` to `obs-ai-datasets/viz-evals/otel-host-metrics`. Temporary templates are cleaned up on exit. GCS write access to `obs-ai-datasets` is required (use the same service account as the obs-ai team).
+The script seeds synthetic `system.cpu.load_average.*` documents, verifies the `TS` query executes, snapshots `metrics-hostmetricsreceiver.otel-default` to the local filesystem, then uploads to `gs://obs-ai-datasets/viz-evals/otel-host-metrics` via `gsutil`. No GCS credentials are needed in ES — only your local `gcloud` auth is used for the upload.
 
 ## Notes
 
