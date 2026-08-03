@@ -7,6 +7,7 @@
 
 import type { BulkResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { ESQLSearchResponse } from '@kbn/es-types';
+import { MAX_SIGNAL_DESCRIPTION_LENGTH } from '@kbn/significant-events-schema';
 import { BulkCreateOperationError } from '../query_utils';
 import { EventClient } from './event_client';
 import { storedEventSchema, type SignificantEvent } from './data_stream';
@@ -71,6 +72,27 @@ const createSearchClient = ({ hits, total }: { hits: SignificantEvent[]; total: 
 
 describe('EventClient', () => {
   describe('bulkCreate', () => {
+    it('accepts stored signal descriptions that exceed the agent input limit (backward compat)', () => {
+      const event: SignificantEvent = {
+        ...createEvent(),
+        signals: [
+          {
+            type: 'detection',
+            stream_name: 'logs.test',
+            description: 'x'.repeat(MAX_SIGNAL_DESCRIPTION_LENGTH + 1),
+            metadata: {
+              detection_id: 'detection-1',
+              rule_uuid: 'rule-1',
+              change_point_type: 'spike',
+              p_value: 0.01,
+            },
+          },
+        ],
+      };
+
+      expect(storedEventSchema.safeParse(event).success).toBe(true);
+    });
+
     it('returns bulk responses with errors by default', async () => {
       const response = {
         errors: true,

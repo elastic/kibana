@@ -132,7 +132,7 @@ const signalBaseSchema = z.object({
     .describe('Data stream this signal was collected from.'),
   description: z
     .string()
-    .max(MAX_SIGNAL_DESCRIPTION_LENGTH)
+    .max(MAX_TEXT_LENGTH)
     .describe(
       dedent`
         Compact verification account for detection signals — do not use alternative shapes. Max ${MAX_SIGNAL_DESCRIPTION_LENGTH} chars; shorten Found before omitting Impact on confirms.
@@ -149,7 +149,7 @@ const signalBaseSchema = z.object({
     .boolean()
     .optional()
     .describe(
-      'Whether verified evidence supports this record’s failure, material degradation, sensitive-data exposure, or evidenced cascade. True means aligned incident evidence; false means verified healthy, positive, non-confirming, or unrelated evidence; omission means unverified.'
+      "Whether verified evidence supports this record's failure, material degradation, sensitive-data exposure, or evidenced cascade. True means aligned incident evidence; false means verified healthy, positive, non-confirming, or unrelated evidence; omission means unverified."
     ),
   collected_at: z.iso
     .datetime({ offset: true })
@@ -174,7 +174,7 @@ const detectionSignalSchema = signalBaseSchema.extend({
   }),
 });
 
-/** Extensible discriminated union of signal sources. Only `detection` is implemented for now. */
+/** Extensible discriminated union of signal sources accepted from agents. */
 export const signalEntrySchema = z.discriminatedUnion('type', [detectionSignalSchema]);
 export type SignalEntry = z.infer<typeof signalEntrySchema>;
 

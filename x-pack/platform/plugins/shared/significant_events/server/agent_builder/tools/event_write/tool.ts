@@ -10,7 +10,10 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import { significantEventSchema } from '@kbn/significant-events-schema';
+import {
+  significantEventSchema,
+  MAX_SIGNAL_DESCRIPTION_LENGTH,
+} from '@kbn/significant-events-schema';
 import { z } from '@kbn/zod/v4';
 import dedent from 'dedent';
 import type { StreamsServer } from '@kbn/streams-plugin/server/types';
@@ -61,7 +64,14 @@ export const eventsWriteItemSchema = significantEventSchema
   .partial({ event_id: true })
   .refine((item) => !(item.dedup_window !== undefined && item.event_id !== undefined), {
     message: 'dedup_window and event_id are mutually exclusive',
-  });
+  })
+  .refine(
+    (item) =>
+      (item.signals ?? []).every((s) => s.description.length <= MAX_SIGNAL_DESCRIPTION_LENGTH),
+    {
+      message: `Signal descriptions must be at most ${MAX_SIGNAL_DESCRIPTION_LENGTH} characters for agent input`,
+    }
+  );
 
 const eventsWriteItemsSchema = z
   .array(eventsWriteItemSchema)

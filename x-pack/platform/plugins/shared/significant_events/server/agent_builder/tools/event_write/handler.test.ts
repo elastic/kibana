@@ -14,6 +14,8 @@ import {
   type EventsWriteInput,
 } from './handler';
 import type { SignalEntry, BlastRadiusEntry, CausalFeature } from '@kbn/significant-events-schema';
+import { MAX_SIGNAL_DESCRIPTION_LENGTH } from '@kbn/significant-events-schema';
+import { eventsWriteItemSchema } from './tool';
 
 const successfulBulkCreate = async (documents: object[]) => ({
   errors: false,
@@ -955,5 +957,41 @@ describe('eventsWriteBulkHandler — continuation status', () => {
 
     expect(results[0]).toMatchObject({ written: true, status: 'closed' });
     expect(eventClient.bulkCreate.mock.calls[0][0][0].status).toBe('closed');
+  });
+});
+
+describe('eventsWriteItemSchema', () => {
+  const validItem = {
+    ...baseInput,
+    signals: [
+      {
+        type: 'detection',
+        stream_name: 'logs.test',
+        description: 'x'.repeat(MAX_SIGNAL_DESCRIPTION_LENGTH),
+        metadata: {
+          detection_id: 'det-1',
+          rule_uuid: 'rule-1',
+          change_point_type: 'spike',
+          p_value: 0.01,
+        },
+      },
+    ],
+  };
+
+  it('accepts signal descriptions at the 350-char limit', () => {
+    expect(eventsWriteItemSchema.safeParse(validItem).success).toBe(true);
+  });
+
+  it('rejects signal descriptions exceeding the 350-char limit', () => {
+    const result = eventsWriteItemSchema.safeParse({
+      ...validItem,
+      signals: [
+        {
+          ...validItem.signals[0],
+          description: 'x'.repeat(MAX_SIGNAL_DESCRIPTION_LENGTH + 1),
+        },
+      ],
+    });
+    expect(result.success).toBe(false);
   });
 });

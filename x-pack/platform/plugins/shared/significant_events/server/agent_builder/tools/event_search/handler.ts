@@ -49,7 +49,9 @@ export interface CompactEventSignal {
   stream_name: string;
   rule_uuid?: string;
   rule_name?: string;
+  detection_id?: string;
   change_point_type?: string;
+  p_value?: number;
   confirmed?: boolean;
   description?: string;
   collected_at?: string;
@@ -96,9 +98,13 @@ const byRecencyThenConfirmed = (a: Signal, b: Signal): number => {
   return a.confirmed === b.confirmed ? 0 : a.confirmed ? -1 : 1;
 };
 
+const COMPACT_DESCRIPTION_SUFFIX = '… [truncated]';
+const COMPACT_DESCRIPTION_CONTENT_LENGTH =
+  MAX_SIGNAL_DESCRIPTION_LENGTH - COMPACT_DESCRIPTION_SUFFIX.length;
+
 const truncateCompactDescription = (description: string | undefined): string | undefined =>
   description !== undefined && description.length > MAX_SIGNAL_DESCRIPTION_LENGTH
-    ? `${description.slice(0, MAX_SIGNAL_DESCRIPTION_LENGTH)}… [truncated]`
+    ? `${description.slice(0, COMPACT_DESCRIPTION_CONTENT_LENGTH)}${COMPACT_DESCRIPTION_SUFFIX}`
     : description;
 
 // A signal matching the caller's own `rule_uuids`/`stream_names` filter is what the caller
@@ -151,7 +157,9 @@ const toCompactEvent = (
       stream_name: signal.stream_name,
       rule_uuid: signal.metadata.rule_uuid,
       rule_name: signal.metadata.rule_name,
+      detection_id: signal.metadata.detection_id,
       change_point_type: signal.metadata.change_point_type,
+      p_value: signal.metadata.p_value,
       confirmed: signal.confirmed,
       description: truncateCompactDescription(signal.description),
       collected_at: signal.collected_at,
