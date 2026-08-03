@@ -9,6 +9,7 @@
 - [Brave Search](/reference/connectors-kibana/brave-search-action-type.md): Search the web using the Brave Search API.
 - [Buildkite](/reference/connectors-kibana/buildkite-action-type.md): Trigger, observe, retry, and cancel builds, unblock deploy gates, and post annotations.
 - [Confluence Cloud](/reference/connectors-kibana/confluence-cloud-action-type.md): Search and retrieve Confluence Cloud pages and spaces using the REST API v2.
+- [Databricks](/reference/connectors-kibana/databricks-action-type.md): Execute SQL queries, discover tables and schemas, and poll async query results in Databricks.
 - [Datadog](/reference/connectors-kibana/datadog-action-type.md): List and mute monitors, manage downtimes and incidents, post events, and query metrics and logs.
 - [Dropbox](/reference/connectors-kibana/dropbox-action-type.md): Search files and folders, retrieve file content and metadata, and manage shared links in Dropbox.
 - [Dynatrace](/reference/connectors-kibana/dynatrace-action-type.md): Triage Davis problems, ingest events, query metrics and entities, and manage maintenance windows.
@@ -23,6 +24,7 @@ Figma.
 - [Google Gmail](/reference/connectors-kibana/gmail-action-type.md): Search and read emails from Gmail.
 - [Grafana](/reference/connectors-kibana/grafana-action-type.md): Read alerts and rules, manage silences, and post annotations.
 - [HubSpot](/reference/connectors-kibana/hubspot-action-type.md): Search and retrieve contacts, companies, deals, and tickets from HubSpot CRM.
+- [Jenkins](/reference/connectors-kibana/jenkins-action-type.md): Trigger, monitor, and stop Jenkins builds, and manage jobs, test reports, and the build queue.
 - [Jina Reader](/reference/connectors-kibana/jina-action-type.md): Convert web pages into markdown from their URL and search the web for better LLM grounding.
 - [Jira Cloud](/reference/connectors-kibana/jira-cloud-action-type.md): Search issues with JQL, retrieve project and issue details, and look up users in Jira Cloud.
 - [Kubernetes](/reference/connectors-kibana/kubernetes-action-type.md): Read and modify resources in a Kubernetes cluster through its REST API.
@@ -42,6 +44,7 @@ Figma.
 - [Slack (v2)](/reference/connectors-kibana/slack-v2-action-type.md): Search and send messages in Slack.
 - [Snowflake](/reference/connectors-kibana/snowflake-action-type.md): Query Snowflake, discover databases, schemas, tables, and views, and run semantic searches through Cortex Search.
 - [Tavily](/reference/connectors-kibana/tavily-action-type.md): Search the web and extract content from web pages.
+- [Workday](/reference/connectors-kibana/workday-action-type.md): Access Workday HR data across workers, org structure, time off, recruiting, and holidays.
 - [Zoom](/reference/connectors-kibana/zoom-action-type.md): Access Zoom meetings, recordings, transcripts, and participants.
 - [Zendesk](/reference/connectors-kibana/zendesk-action-type.md): Search and retrieve Zendesk tickets, users, organizations, and Help Center articles using the Zendesk API.
 
