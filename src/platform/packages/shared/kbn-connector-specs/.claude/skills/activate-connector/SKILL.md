@@ -77,6 +77,7 @@ Use this table to tell the user what credential to provide. Look up the connecto
 | `bearer` | A bearer/access token string | `ghp_abc123...` |
 | `api_key_header` | An API key string | `sk-abc123...` |
 | `basic` | `username:password` | `admin:secretpass` |
+| `bearer_with_tls` | A bearer/access token string, plus an optional PEM CA certificate for self-hosted APIs with a private CA | token: `eyJhbGciOi...`; optionally pass `--ca-cert-file <path>` and `--verification-mode <none\|certificate\|full>` |
 
 ### Known connectors
 
@@ -94,10 +95,11 @@ Use this table to tell the user what credential to provide. Look up the connecto
 
 If the connector type isn't listed above:
 1. Check the connector spec: `grep -r "auth:" src/platform/packages/shared/kbn-connector-specs/src/specs/<name>/`
-2. Look for `types: ['bearer']`, `types: ['api_key_header']`, or `types: ['oauth_client_credentials']`
+2. Look for `type: 'bearer'`, `'api_key_header'`, `'bearer_with_tls'`, or `'oauth_client_credentials'`
 3. If bearer: the credential is a token string
 4. If api_key_header: the credential is an API key string
-5. If oauth_client_credentials: warn the user this may need UI-based setup
+5. If bearer_with_tls: the credential is a token string; optionally also collect a PEM CA cert (`--ca-cert-file`) if the user's server presents a private/self-signed certificate
+6. If oauth_client_credentials: warn the user this may need UI-based setup
 
 ## Step 4: Create the Connector
 
@@ -114,11 +116,16 @@ src/platform/packages/shared/kbn-connector-specs/.claude/skills/activate-connect
 Where:
 - `<connector_type_id>` is the type ID from Step 1 (e.g., `.github`, `.notion`)
 - `<display_name>` is a human-readable name for the connector instance
-- `<auth_type>` is `bearer`, `api_key_header`, or `basic` — look up the connector spec's auth type from Step 3's Credential Reference. If omitted, the script auto-detects (colon in credential → basic, else bearer), but **always pass it explicitly for `api_key_header` connectors** since auto-detection can't distinguish them from bearer tokens.
+- `<auth_type>` is `bearer`, `api_key_header`, `basic`, or `bearer_with_tls` — look up the connector spec's auth type from Step 3's Credential Reference. If omitted, the script auto-detects (colon in credential → basic, else bearer), but **always pass it explicitly for `api_key_header` and `bearer_with_tls` connectors** since auto-detection can't distinguish them from plain bearer tokens.
 
 For `api_key_header` connectors, you **must also pass `--header-field`** with the header field name from the connector spec's `auth.types[].defaults.headerField`:
 ```bash
   --auth-type api_key_header --header-field "X-Api-Key"
+```
+
+For `bearer_with_tls` connectors, optionally pass a PEM CA certificate (for servers with a private/self-signed cert) and/or a TLS verification mode:
+```bash
+  --auth-type bearer_with_tls --ca-cert-file /tmp/connector_ca_cert --verification-mode full
 ```
 
 If the connector requires additional config (e.g., `serverUrl` for MCP-native connectors), add:

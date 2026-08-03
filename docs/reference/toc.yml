@@ -87,6 +87,7 @@ toc:
           - file: connectors-kibana/brave-search-action-type.md
           - file: connectors-kibana/buildkite-action-type.md
           - file: connectors-kibana/confluence-cloud-action-type.md
+          - file: connectors-kibana/cribl-action-type.md
           - file: connectors-kibana/databricks-action-type.md
           - file: connectors-kibana/datadog-action-type.md
           - file: connectors-kibana/dropbox-action-type.md

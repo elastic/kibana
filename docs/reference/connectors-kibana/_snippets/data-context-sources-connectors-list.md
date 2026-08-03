@@ -9,6 +9,7 @@
 - [Brave Search](/reference/connectors-kibana/brave-search-action-type.md): Search the web using the Brave Search API.
 - [Buildkite](/reference/connectors-kibana/buildkite-action-type.md): Trigger, observe, retry, and cancel builds, unblock deploy gates, and post annotations.
 - [Confluence Cloud](/reference/connectors-kibana/confluence-cloud-action-type.md): Search and retrieve Confluence Cloud pages and spaces using the REST API v2.
+- [Cribl](/reference/connectors-kibana/cribl-action-type.md): Inspect and reshape Cribl telemetry pipelines — routes, pipelines, sources, and destinations.
 - [Databricks](/reference/connectors-kibana/databricks-action-type.md): Execute SQL queries, discover tables and schemas, and poll async query results in Databricks.
 - [Datadog](/reference/connectors-kibana/datadog-action-type.md): List and mute monitors, manage downtimes and incidents, post events, and query metrics and logs.
 - [Dropbox](/reference/connectors-kibana/dropbox-action-type.md): Search files and folders, retrieve file content and metadata, and manage shared links in Dropbox.

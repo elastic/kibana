@@ -299,4 +299,6 @@ export const ConnectorIconsMap: Map<
     '.jenkins',
     lazy(() => import(/* webpackChunkName: "connectorIconjenkins" */ './specs/jenkins/icon')),
   ],
+
+  ['.cribl', lazy(() => import(/* webpackChunkName: "connectorIconcribl" */ './specs/cribl/icon'))],
 ]);
