@@ -28,6 +28,7 @@ export const BulkOperations = ({
   setMonitorPendingStatusUpdate,
   setIsLocationsFlyoutOpen,
   setIsScheduleFlyoutOpen,
+  setIsMaintenanceWindowsFlyoutOpen,
 }: {
   selectedItems: EncryptedSyntheticsSavedMonitor[];
   setMonitorPendingDeletion: (val: string[]) => void;
@@ -38,6 +39,7 @@ export const BulkOperations = ({
   setMonitorPendingStatusUpdate: (val: { ids: string[]; enabled: boolean } | null) => void;
   setIsLocationsFlyoutOpen: (val: boolean) => void;
   setIsScheduleFlyoutOpen: (val: boolean) => void;
+  setIsMaintenanceWindowsFlyoutOpen: (val: boolean) => void;
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const { isUnhealthy, isFixableByReset } = useMonitorIntegrationHealth();
@@ -195,6 +197,19 @@ export const BulkOperations = ({
       onClick: () => {
         closePopover();
         setIsScheduleFlyoutOpen(true);
+      },
+    },
+    {
+      name: i18n.translate('xpack.synthetics.bulkOperations.manageMaintenanceWindows', {
+        defaultMessage: 'Manage maintenance windows',
+      }),
+      icon: 'bellSlash',
+      disabled: isActionDisabled,
+      toolTipContent: disabledTooltip,
+      'data-test-subj': 'syntheticsBulkMaintenanceWindowsItem',
+      onClick: () => {
+        closePopover();
+        setIsMaintenanceWindowsFlyoutOpen(true);
       },
     },
     {

@@ -19,6 +19,7 @@ import { ResetMonitorModal } from './reset_monitor_modal';
 import { BulkStatusUpdateModal } from './bulk_status_update_modal';
 import { BulkLocationsFlyout } from './bulk_locations_flyout';
 import { BulkScheduleFlyout } from './bulk_schedule_flyout';
+import { BulkMaintenanceWindowsFlyout } from './bulk_maintenance_windows_flyout';
 import { useMonitorIntegrationHealth } from '../../../common/hooks/use_monitor_integration_health';
 import type { IHttpSerializedFetchError } from '../../../../state/utils/http_error';
 import type { MonitorListPageState } from '../../../../state';
@@ -68,6 +69,7 @@ export const MonitorList = ({
   } | null>(null);
   const [isLocationsFlyoutOpen, setIsLocationsFlyoutOpen] = useState(false);
   const [isScheduleFlyoutOpen, setIsScheduleFlyoutOpen] = useState(false);
+  const [isMaintenanceWindowsFlyoutOpen, setIsMaintenanceWindowsFlyoutOpen] = useState(false);
   const { resetMonitors, isFixableByReset } = useMonitorIntegrationHealth();
 
   const items: MonitorListItem[] = useMemo(
@@ -156,6 +158,7 @@ export const MonitorList = ({
           setMonitorPendingStatusUpdate={setMonitorPendingStatusUpdate}
           setIsLocationsFlyoutOpen={setIsLocationsFlyoutOpen}
           setIsScheduleFlyoutOpen={setIsScheduleFlyoutOpen}
+          setIsMaintenanceWindowsFlyoutOpen={setIsMaintenanceWindowsFlyoutOpen}
         />
         <EuiHorizontalRule margin="s" />
         <EuiBasicTable<MonitorListItem>
@@ -231,6 +234,16 @@ export const MonitorList = ({
           monitors={selectedItems as EncryptedSyntheticsSavedMonitor[]}
           onClose={() => {
             setIsScheduleFlyoutOpen(false);
+            setSelectedItems([]);
+          }}
+          reloadPage={reloadPage}
+        />
+      )}
+      {isMaintenanceWindowsFlyoutOpen && (
+        <BulkMaintenanceWindowsFlyout
+          monitors={selectedItems as EncryptedSyntheticsSavedMonitor[]}
+          onClose={() => {
+            setIsMaintenanceWindowsFlyoutOpen(false);
             setSelectedItems([]);
           }}
           reloadPage={reloadPage}
