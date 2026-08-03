@@ -795,6 +795,37 @@ describe('[Lens] formula', () => {
       );
     });
 
+    it('should round-trip filters containing backslashes through generation and parsing', () => {
+      // KQL-escaped literal backslash, as the filter bar produces it
+      const filter = { language: 'kuery', query: String.raw`path: "C:\\foo"` };
+      const generated = formulaOperation.buildColumn({
+        previousColumn: {
+          label: 'Count',
+          dataType: 'number',
+          isBucketed: false,
+          operationType: 'count',
+          sourceField: '___records___',
+          filter,
+        } as GenericIndexPatternColumn,
+        layer,
+        indexPattern,
+      }) as FormulaIndexPatternColumn;
+
+      // the backslashes are escaped again in the generated formula text
+      expect(generated.params.formula).toBe(String.raw`count(kql='path: "C:\\\\foo"')`);
+
+      const mergedLayer = { ...layer, columns: { ...layer.columns, col1: generated } };
+      const { layer: newLayer } = insertOrReplaceFormulaColumn('col1', generated, mergedLayer, {
+        indexPattern,
+        operations: operationDefinitionMap,
+      });
+
+      const countColumn = Object.values(newLayer.columns).find(
+        (col) => col.operationType === 'count'
+      );
+      expect(countColumn?.filter).toEqual(filter);
+    });
+
     it('add the formula reducedTimeRange to supported operations', () => {
       const reducedTimeRange = '1h';
       const mergedColumn = { ...currentColumn, reducedTimeRange };
