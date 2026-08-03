@@ -98,7 +98,7 @@ Auto-generated from \`@kbn/alerting-v2-schemas\`. This is the source of truth fo
 | \`no_data_strategy\` | \\"last_known_status\\" | \\"emit\\" | \\"recover\\" | \\"none\\" | optional | How to handle no-data situations. \\"last_known_status\\" holds the last known status; \\"recover\\" forces recovery; \\"none\\" disables no-data detection. \\"emit\\" is not currently accepted by the create/update API. Standalone-format rules must provide a \`no_data\` query block when this is not \\"none\\"; composed-format rules use \`base\` as the data-presence query. (enum: last_known_status | emit | recover | none) |
 | \`state_transition\` | object | null | optional |  |
 | \`grouping\` | object | optional | Grouping configuration. |
-| \`artifacts\` | object[] | optional |  (max items: 100) |
+| \`artifacts\` | object[] | optional | Artifacts attached to the rule, each shaped as \`{ id, type, data }\`. \`data\` carries type-specific fields: a \`runbook\` artifact requires \`data.content\` holding markdown, and a \`dashboard\` artifact requires \`data.dashboardId\` holding a dashboard saved object id. Artifacts of any other type may carry whatever fields they need in \`data\`. (max items: 100) |
 
 ## Query Formats
 
