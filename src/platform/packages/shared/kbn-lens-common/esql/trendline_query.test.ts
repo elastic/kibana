@@ -151,6 +151,40 @@ describe('appendTimeBucketToEsqlQuery', () => {
       'FROM index | STATS AVG(bytes) BY BUCKET(@timestamp, 75, ?_tstart, ?_tend)'
     );
   });
+
+  it('extracts the matching FORK STATS branch and buckets it (timestamp still in scope)', () => {
+    const forkQuery = [
+      'FROM kibana_sample_data_flights',
+      '| FORK (STATS `Total Flights` = COUNT(*))',
+      '       (STATS `Flight Count` = COUNT(*) BY `Time Bucket` = BUCKET(timestamp, 75, ?_tstart, ?_tend))',
+    ].join('\n');
+
+    const result = appendTimeBucketToEsqlQuery(forkQuery, 'timestamp', ['Total Flights']);
+
+    expect(result).toBe(
+      'FROM kibana_sample_data_flights | STATS `Total Flights` = COUNT(*) BY BUCKET(timestamp, 75, ?_tstart, ?_tend)'
+    );
+    expect(result).not.toContain('FORK');
+    expect(result).not.toMatch(/FORK[\s\S]*BUCKET\(timestamp/);
+  });
+
+  it('preserves pre-FORK commands when extracting a STATS branch for the trendline', () => {
+    const forkQuery =
+      'FROM index | WHERE status == "ok" | FORK (STATS total = COUNT(*)) (STATS total = COUNT(*) BY category)';
+
+    expect(appendTimeBucketToEsqlQuery(forkQuery, 'timestamp', ['total'])).toBe(
+      'FROM index | WHERE status == "ok" | STATS total = COUNT(*) BY BUCKET(timestamp, 75, ?_tstart, ?_tend)'
+    );
+  });
+
+  it('falls back to the first FORK STATS branch when metric fields do not match', () => {
+    const forkQuery =
+      'FROM index | FORK (STATS total = SUM(bytes)) (STATS count = COUNT(*) BY host)';
+
+    expect(appendTimeBucketToEsqlQuery(forkQuery, '@timestamp', ['missing'])).toBe(
+      'FROM index | STATS total = SUM(bytes) BY BUCKET(@timestamp, 75, ?_tstart, ?_tend)'
+    );
+  });
 });
 
 describe('buildTrendlineQueryWithMetricFieldMap', () => {
@@ -189,6 +223,20 @@ describe('buildTrendlineQueryWithMetricFieldMap', () => {
 
     expect(result.query).toBe(
       'FROM index | STATS avg_bytes = AVG(bytes) BY BUCKET(timestamp, 75, ?_tstart, ?_tend)'
+    );
+    expect(result.metricFieldMap.size).toBe(0);
+  });
+
+  it('keeps FORK aggregate column names (no AVG wrap) when building a trendline query', () => {
+    const forkQuery =
+      'FROM kibana_sample_data_flights | FORK (STATS `Total Flights` = COUNT(*)) (STATS `Flight Count` = COUNT(*) BY `Time Bucket` = BUCKET(timestamp, 75, ?_tstart, ?_tend))';
+
+    const result = buildTrendlineQueryWithMetricFieldMap(forkQuery, 'timestamp', [
+      'Total Flights',
+    ]);
+
+    expect(result.query).toBe(
+      'FROM kibana_sample_data_flights | STATS `Total Flights` = COUNT(*) BY BUCKET(timestamp, 75, ?_tstart, ?_tend)'
     );
     expect(result.metricFieldMap.size).toBe(0);
   });

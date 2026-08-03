@@ -13,8 +13,16 @@ import {
   BasicPrettyPrinter,
   isOptionNode,
   isFunctionExpression,
+  isParens,
+  isColumn,
 } from '@elastic/esql';
-import type { ESQLCommand, ESQLCommandOption } from '@elastic/esql/types';
+import type {
+  ESQLAstItem,
+  ESQLAstQueryExpression,
+  ESQLCommand,
+  ESQLCommandOption,
+  ESQLFunction,
+} from '@elastic/esql/types';
 import { AUTO_TARGET_NUMBER_OF_BUCKETS } from './constants';
 
 /**
@@ -59,11 +67,40 @@ const findByOption = (statsCmd: ESQLCommand): ESQLCommandOption => {
 };
 
 /**
- * Returns true when the ES|QL query contains at least one STATS command.
+ * Returns true when the ES|QL query contains at least one STATS command,
+ * including STATS nested inside FORK branches.
  */
 export const queryHasStatsCommand = (esqlQuery: string): boolean => {
   const { root } = Parser.parse(esqlQuery);
-  return root.commands.some((c) => c.name === 'stats');
+  if (root.commands.some((c) => c.name === 'stats')) {
+    return true;
+  }
+  return getForkBranchCommandLists(root).some((branchCommands) =>
+    branchCommands.some((c) => c.name === 'stats')
+  );
+};
+
+const asSingleNode = (arg: ESQLAstItem): ESQLAstItem | undefined =>
+  Array.isArray(arg) ? arg[0] : arg;
+
+/**
+ * Resolves a BY argument to a BUCKET() function node, supporting both
+ * `BUCKET(field, ...)` and aliased `name = BUCKET(field, ...)` forms.
+ */
+const getBucketFunction = (arg: ESQLAstItem): ESQLFunction | undefined => {
+  if (!isFunctionExpression(arg)) {
+    return undefined;
+  }
+  if (arg.name === 'bucket') {
+    return arg;
+  }
+  if (arg.name === '=') {
+    const rhs = asSingleNode(arg.args[1]);
+    if (rhs && isFunctionExpression(rhs) && rhs.name === 'bucket') {
+      return rhs;
+    }
+  }
+  return undefined;
 };
 
 /**
@@ -71,12 +108,115 @@ export const queryHasStatsCommand = (esqlQuery: string): boolean => {
  */
 const hasBucketForField = (byOption: ESQLCommandOption, timeField: string): boolean =>
   byOption.args.some((arg) => {
-    if (!isFunctionExpression(arg) || arg.name !== 'bucket' || arg.args.length === 0) {
+    const bucketFn = getBucketFunction(arg);
+    if (!bucketFn || bucketFn.args.length === 0) {
       return false;
     }
-    const firstArg = arg.args[0];
-    return !Array.isArray(firstArg) && firstArg.type === 'column' && firstArg.name === timeField;
+    const firstArg = asSingleNode(bucketFn.args[0]);
+    return Boolean(firstArg && firstArg.type === 'column' && firstArg.name === timeField);
   });
+
+/**
+ * Collects command lists for each FORK branch in the query AST.
+ */
+const getForkBranchCommandLists = (root: ESQLAstQueryExpression): ESQLCommand[][] => {
+  const forkCmd = root.commands.find((c): c is ESQLCommand<'fork'> => c.name === 'fork');
+  if (!forkCmd) return [];
+
+  return forkCmd.args.flatMap((arg) => {
+    if (!isParens(arg) || arg.child.type !== 'query') {
+      return [];
+    }
+    return [arg.child.commands];
+  });
+};
+
+/**
+ * Returns STATS output column names (aliases and bare aggregation expressions).
+ */
+const getStatsOutputColumnNames = (statsCmd: ESQLCommand): string[] => {
+  const names: string[] = [];
+  for (const arg of statsCmd.args) {
+    if (isOptionNode(arg)) continue;
+    if (!isFunctionExpression(arg)) continue;
+    if (arg.name === '=' && isColumn(arg.args[0])) {
+      names.push(arg.args[0].name);
+      continue;
+    }
+    // Bare aggregation: column name is the printed expression (e.g. COUNT(*)).
+    names.push(BasicPrettyPrinter.expression(arg));
+  }
+  return names;
+};
+
+const branchHasStatsBucketForField = (
+  branchCommands: ESQLCommand[],
+  timeField: string
+): boolean => {
+  const statsCmd = branchCommands.findLast((c): c is ESQLCommand<'stats'> => c.name === 'stats');
+  if (!statsCmd) return false;
+  const byOption = statsCmd.args.find(isOptionNode);
+  return Boolean(byOption && hasBucketForField(byOption, timeField));
+};
+
+/**
+ * When the source query uses FORK with nested STATS, trendline generation cannot
+ * append `BY BUCKET(timestamp, ...)` after FORK — source fields like `timestamp`
+ * are no longer in scope. Instead, expand a single STATS branch into a top-level
+ * query (preserving pre-FORK commands) so time bucketing can be applied where
+ * the time field still exists.
+ *
+ * Prefers a STATS branch that produces one of the metric fields and does not
+ * already bucket by time, so Lens can add an unaliased BUCKET(...) whose result
+ * column name matches `buildTrendlineBucketExpression`.
+ */
+const expandForkStatsBranchForTrendline = (
+  root: ESQLAstQueryExpression,
+  timeField: string,
+  metricFields: string[] = []
+): ESQLAstQueryExpression | undefined => {
+  // If a top-level STATS already exists, the regular path can modify it.
+  if (root.commands.some((c) => c.name === 'stats')) {
+    return undefined;
+  }
+
+  const forkIndex = root.commands.findIndex((c) => c.name === 'fork');
+  if (forkIndex === -1) {
+    return undefined;
+  }
+
+  const branches = getForkBranchCommandLists(root).filter((branchCommands) =>
+    branchCommands.some((c) => c.name === 'stats')
+  );
+  if (branches.length === 0) {
+    return undefined;
+  }
+
+  const matchingMetricBranches =
+    metricFields.length > 0
+      ? branches.filter((branchCommands) => {
+          const statsCmd = branchCommands.findLast(
+            (c): c is ESQLCommand<'stats'> => c.name === 'stats'
+          );
+          if (!statsCmd) return false;
+          const outputNames = getStatsOutputColumnNames(statsCmd);
+          return metricFields.some((field) => outputNames.includes(field));
+        })
+      : [];
+
+  const candidates = matchingMetricBranches.length > 0 ? matchingMetricBranches : branches;
+
+  // Prefer a branch without an existing time bucket so we can append an
+  // unaliased BUCKET(...) that matches Lens trendline column fieldNames.
+  const selectedBranch =
+    candidates.find((branchCommands) => !branchHasStatsBucketForField(branchCommands, timeField)) ??
+    candidates[0];
+
+  return {
+    ...root,
+    commands: [...root.commands.slice(0, forkIndex), ...selectedBranch],
+  };
+};
 
 /**
  * Appends a BUCKET time-bucketing clause to an ES|QL query for trendline use.
@@ -88,7 +228,9 @@ const hasBucketForField = (byOption: ESQLCommandOption, timeField: string): bool
  * The query is parsed into an AST, the BUCKET expression is appended to the
  * appropriate STATS/BY clause, and the result is printed back to a string.
  *
- * Handles three cases:
+ * Handles four cases:
+ * - Query has `FORK` with nested `STATS` → expands a matching STATS branch, then
+ *   applies the rules below (so `timestamp` remains in scope)
  * - Query has `STATS ... BY ...` → appends BUCKET to the existing BY clause
  * - Query has `STATS` without `BY` → adds a BY clause with BUCKET
  * - Query has no `STATS` → appends a `STATS <agg> BY BUCKET(...)` command
@@ -106,7 +248,9 @@ export const appendTimeBucketToEsqlQuery = (
   const bucketExpr = buildTrendlineBucketExpression(timeField);
   const bucketNode = parseBucketNode(bucketExpr);
 
-  const { root } = Parser.parse(esqlQuery);
+  const { root: parsedRoot } = Parser.parse(esqlQuery);
+  const root =
+    expandForkStatsBranchForTrendline(parsedRoot, timeField, metricFields) ?? parsedRoot;
 
   if (root.commands.length === 0) {
     throw new Error('Cannot append time bucket to an empty ES|QL query');
@@ -171,7 +315,9 @@ export const buildTrendlineQueryWithMetricFieldMap = (
     query: appendTimeBucketToEsqlQuery(
       esqlQuery,
       timeField,
-      !sourceQueryHasStats ? metricFields : undefined,
+      // Always pass metric fields so FORK branch selection can match the KPI
+      // column. AVG wrapping only happens when the (expanded) query has no STATS.
+      metricFields,
       !sourceQueryHasStats ? groupByFields : undefined
     ),
     metricFieldMap,
