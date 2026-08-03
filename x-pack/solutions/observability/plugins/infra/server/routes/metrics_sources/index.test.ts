@@ -96,50 +96,6 @@ describe('metrics source configuration routes', () => {
     );
   });
 
-  it('passes the request through schema metadata searches', async () => {
-    const { callWithRequest, registerRoute } = createRouteTestHarness();
-    callWithRequest.mockResolvedValue({
-      responses: [{ hits: { total: { value: 0 } } }, { hits: { total: { value: 1 } } }],
-    });
-    const handler = getRouteHandler(
-      registerRoute,
-      'get',
-      '/api/metrics/source/time_range_metadata'
-    );
-    const request = httpServerMock.createKibanaRequest({
-      query: {
-        dataSource: 'host',
-        from: 0,
-        isInventoryView: false,
-        to: 100,
-      },
-      headers: { 'x-project-routing': '_alias:*' },
-    });
-    const context = {
-      core: Promise.resolve({
-        uiSettings: {
-          client: {
-            get: jest.fn().mockResolvedValue([]),
-          },
-        },
-      }),
-      infra: Promise.resolve({
-        getMetricsIndices: jest.fn().mockResolvedValue(['metrics-*']),
-      }),
-    } as unknown as InfraPluginRequestHandlerContext;
-    const response = httpServerMock.createResponseFactory();
-
-    await handler(context, request, response);
-
-    expect(callWithRequest).toHaveBeenCalledWith(context, 'msearch', expect.any(Object), request);
-    expect(response.ok).toHaveBeenCalledWith({
-      body: {
-        preferredSchema: 'semconv',
-        schemas: ['semconv'],
-      },
-    });
-  });
-
   it('passes the request through source has-data searches', async () => {
     const { callWithRequest, registerRoute } = createRouteTestHarness();
     callWithRequest.mockResolvedValue({

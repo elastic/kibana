@@ -31,14 +31,13 @@ export const SearchBar = () => {
     [timeRangeMetadata?.schemas]
   );
 
-  // Keep the selected schema available as the CPS project selection changes.
+  // Set preferredSchema in URL if not set
   useEffect(() => {
     if (!timeRangeMetadata || schemas.length === 0) return;
     const current = searchCriteria.preferredSchema;
-    const next = timeRangeMetadata.preferredSchema;
 
-    if ((current === null || !schemas.includes(current)) && next !== null) {
-      onPreferredSchemaChange(next);
+    if (current === null) {
+      onPreferredSchemaChange(timeRangeMetadata.preferredSchema);
     }
   }, [timeRangeMetadata, searchCriteria.preferredSchema, onPreferredSchemaChange, schemas]);
 
