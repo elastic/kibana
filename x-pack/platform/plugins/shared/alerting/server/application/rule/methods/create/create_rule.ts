@@ -50,7 +50,6 @@ import type { ValidateScheduleLimitResult } from '../get_schedule_frequency';
 import { validateScheduleLimit } from '../get_schedule_frequency';
 import { logRuleChanges } from '../common_utils/log_rule_changes';
 import { RULE_CREATED_EVENT } from './event_based_telemetry';
-import { deriveFleetTemplateId } from './derive_fleet_template_id';
 
 export interface CreateRuleOptions {
   id?: string;
@@ -317,23 +316,12 @@ export async function createRule<Params extends RuleParams = never>(
     enabled: data.enabled,
     consumer: data.consumer,
     producer: ruleType.producer,
-    category: ruleType.category,
-    solution: ruleType.solution,
-    scheduleInterval: data.schedule.interval,
-    notifyWhen,
-    alertDelay: data.alertDelay?.active,
-    actions: actionsWithRefs,
-    predefinedId: options?.id,
-    params: data.params,
-    artifacts: data.artifacts,
   });
 
   // TODO (http-versioning): Remove this cast, this enables us to move forward
   // without fixing all of other solution types
   return rule as SanitizedRule<Params>;
 }
-
-const SLO_BURN_RATE_RULE_TYPE_ID = 'slo.rules.burnRate';
 
 /**
  * Reports the rule-create EBT event. Fails open: telemetry must never break rule creation,
@@ -350,15 +338,6 @@ function reportRuleCreatedEvent(
     enabled,
     consumer,
     producer,
-    category,
-    solution,
-    scheduleInterval,
-    notifyWhen,
-    alertDelay,
-    actions,
-    predefinedId,
-    params,
-    artifacts,
   }: {
     id: string;
     templateId?: string;
@@ -367,59 +346,17 @@ function reportRuleCreatedEvent(
     enabled: boolean;
     consumer: string;
     producer: string;
-    category: string;
-    solution: string;
-    scheduleInterval: string;
-    notifyWhen?: string | null;
-    alertDelay?: number;
-    actions: Array<{ actionTypeId?: string }>;
-    predefinedId?: string;
-    params?: RuleParams;
-    artifacts?: CreateRuleData['artifacts'];
   }
 ): void {
   try {
-    const resolvedTemplateId = templateId ?? deriveFleetTemplateId(predefinedId, context.spaceId);
-
-    const sloId =
-      alertTypeId === SLO_BURN_RATE_RULE_TYPE_ID &&
-      params &&
-      typeof (params as { sloId?: unknown }).sloId === 'string'
-        ? (params as { sloId: string }).sloId
-        : undefined;
-
-    const dashboardIds = (artifacts?.dashboards ?? [])
-      .map((dashboard) => dashboard.id)
-      .filter((dashboardId): dashboardId is string => typeof dashboardId === 'string');
-
-    const actionTypeIds = [
-      ...new Set(
-        actions
-          .map((action) => action.actionTypeId)
-          .filter(
-            (actionTypeId): actionTypeId is string =>
-              typeof actionTypeId === 'string' && actionTypeId.length > 0
-          )
-      ),
-    ];
-
     context.analytics?.reportEvent(RULE_CREATED_EVENT.eventType, {
       rule_id: id,
-      ...(resolvedTemplateId ? { template_id: resolvedTemplateId } : {}),
+      ...(templateId ? { template_id: templateId } : {}),
       created_at: new Date(createTime).toISOString(),
       rule_type_id: alertTypeId,
       enabled,
       consumer,
       producer,
-      ...(sloId ? { slo_id: sloId } : {}),
-      ...(dashboardIds.length > 0 ? { dashboard_ids: dashboardIds } : {}),
-      schedule_interval: scheduleInterval,
-      actions_count: actions.length,
-      ...(actionTypeIds.length > 0 ? { action_type_ids: actionTypeIds } : {}),
-      ...(notifyWhen ? { notify_when: notifyWhen } : {}),
-      rule_type_category: category,
-      rule_type_solution: solution,
-      ...(typeof alertDelay === 'number' ? { alert_delay: alertDelay } : {}),
     });
   } catch (e) {
     context.logger.debug(`Failed to report rule create telemetry event: ${e}`);

@@ -5230,11 +5230,6 @@ This is the type of text _investigation guides_ will contain.`;
           enabled: true,
           consumer: 'bar',
           producer: 'alerts',
-          schedule_interval: '1m',
-          actions_count: 1,
-          action_type_ids: ['test'],
-          rule_type_category: 'test',
-          rule_type_solution: 'stack',
         }
       );
     });
@@ -5250,20 +5245,6 @@ This is the type of text _investigation guides_ will contain.`;
       );
     });
 
-    test('derives the template id from a fleet-prefixed predefined rule id when not provided', async () => {
-      mockSuccessfulCreate();
-
-      await rulesClient.create({
-        data: getMockData(),
-        options: { id: 'fleet-default-elastic_agent-cpu-usage' },
-      });
-
-      expect(rulesClientParams.analytics!.reportEvent).toHaveBeenCalledWith(
-        'alerting_rule_created',
-        expect.objectContaining({ template_id: 'cpu-usage' })
-      );
-    });
-
     test('does not fail rule creation when reportEvent throws', async () => {
       mockSuccessfulCreate();
       (rulesClientParams.analytics!.reportEvent as jest.Mock).mockImplementationOnce(() => {
@@ -5271,79 +5252,6 @@ This is the type of text _investigation guides_ will contain.`;
       });
 
       await expect(rulesClient.create({ data: getMockData() })).resolves.toBeDefined();
-    });
-
-    test('includes slo_id for burn-rate rules', async () => {
-      mockSuccessfulCreate();
-
-      await rulesClient.create({
-        data: getMockData({
-          alertTypeId: 'slo.rules.burnRate',
-          params: { sloId: 'slo-123', bar: true },
-          actions: [],
-        }),
-      });
-
-      expect(rulesClientParams.analytics!.reportEvent).toHaveBeenCalledWith(
-        'alerting_rule_created',
-        expect.objectContaining({
-          rule_type_id: 'slo.rules.burnRate',
-          slo_id: 'slo-123',
-        })
-      );
-    });
-
-    test('includes dashboard_ids when artifacts.dashboards are present', async () => {
-      mockSuccessfulCreate();
-
-      await rulesClient.create({
-        data: getMockData({
-          actions: [],
-          artifacts: {
-            dashboards: [{ id: 'dash-1' }, { id: 'dash-2' }],
-          },
-        }),
-      });
-
-      expect(rulesClientParams.analytics!.reportEvent).toHaveBeenCalledWith(
-        'alerting_rule_created',
-        expect.objectContaining({
-          dashboard_ids: ['dash-1', 'dash-2'],
-        })
-      );
-    });
-
-    test('includes notify_when and alert_delay when configured', async () => {
-      mockSuccessfulCreate();
-
-      await rulesClient.create({
-        data: getMockData({
-          notifyWhen: 'onActiveAlert',
-          alertDelay: { active: 3 },
-        }),
-      });
-
-      expect(rulesClientParams.analytics!.reportEvent).toHaveBeenCalledWith(
-        'alerting_rule_created',
-        expect.objectContaining({
-          notify_when: 'onActiveAlert',
-          alert_delay: 3,
-        })
-      );
-    });
-
-    test('reports actions_count of 0 and omits action_type_ids when there are no actions', async () => {
-      mockSuccessfulCreate();
-
-      await rulesClient.create({
-        data: getMockData({
-          actions: [],
-        }),
-      });
-
-      const [, payload] = (rulesClientParams.analytics!.reportEvent as jest.Mock).mock.calls[0];
-      expect(payload.actions_count).toBe(0);
-      expect(payload).not.toHaveProperty('action_type_ids');
     });
   });
 });
