@@ -26,10 +26,8 @@ export const SEMCONV_HOSTS: SemconvHost[] = [
 
 /**
  * Generates OpenTelemetry `hostmetricsreceiver.otel` host docs (cpu, memory,
- * filesystem, network) for the deployment-agnostic API integration tests.
- * Mirrors the Scout fixture under
- * `plugins/infra/test/scout/ui/fixtures/synthtrace/semconv_host_data.ts`
- * but is parameterized for reuse across infra suites.
+ * filesystem, network) for Scout API tests. Mirrors the FTR helper and UI
+ * scout fixture, parameterized for reuse across infra suites.
  */
 export function generateSemconvHostsData({
   from,

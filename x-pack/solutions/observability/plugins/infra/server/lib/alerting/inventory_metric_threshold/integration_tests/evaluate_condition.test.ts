@@ -5,21 +5,28 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
-import type { InventoryMetricConditions } from '@kbn/infra-plugin/common/alerting/metrics';
+import { EsArchiver } from '@kbn/es-archiver';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { InventoryItemType, SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
-import { evaluateCondition } from '@kbn/infra-plugin/server/lib/alerting/inventory_metric_threshold/evaluate_condition';
-import type { InfraSource } from '@kbn/infra-plugin/server/lib/sources';
 import { COMPARATORS } from '@kbn/alerting-comparators';
-import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
-import { DATES } from './utils/constants';
-import { createFakeLogger } from './utils/create_fake_logger';
+import type { EsTestCluster } from '@kbn/test';
+import { createTestEsCluster } from '@kbn/test';
+import { ToolingLog } from '@kbn/tooling-log';
+import type { InventoryMetricConditions } from '../../../../../common/alerting/metrics';
+import type { InfraSource } from '../../../sources';
+import { evaluateCondition } from '../evaluate_condition';
+import { DATES } from './dates';
 
-export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
-  const esArchiver = getService('esArchiver');
-  const esClient = getService('es');
-  const log = getService('log');
-  const logger = createFakeLogger(log);
+const HOSTS_ONLY_ARCHIVE =
+  'x-pack/solutions/observability/test/fixtures/es_archives/infra/8.0.0/hosts_only';
+const PODS_ONLY_ARCHIVE =
+  'x-pack/solutions/observability/test/fixtures/es_archives/infra/8.0.0/pods_only';
+
+describe('Inventory Threshold Rule Executor', () => {
+  let esServer: EsTestCluster;
+  let esClient: ReturnType<EsTestCluster['getClient']>;
+  let esArchiver: EsArchiver;
+  const logger = loggingSystemMock.createLogger();
 
   const baseCondition: InventoryMetricConditions = {
     metric: 'cpu',
@@ -75,24 +82,39 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     logger,
   };
 
-  describe('Inventory Threshold Rule Executor', () => {
+  beforeAll(async () => {
+    jest.setTimeout(120_000);
+    const log = new ToolingLog({ writeTo: process.stdout, level: 'error' });
+    esServer = createTestEsCluster({ log });
+    await esServer.start();
+    esClient = esServer.getClient();
+    esArchiver = new EsArchiver({
+      client: esClient,
+      log,
+      dataOnly: true,
+    });
+  });
+
+  afterAll(async () => {
+    await esServer?.stop();
+  });
+
+  describe('with hosts_only archive', () => {
+    beforeAll(async () => {
+      await esArchiver.load(HOSTS_ONLY_ARCHIVE);
+    });
+
+    afterAll(async () => {
+      await esArchiver.unload(HOSTS_ONLY_ARCHIVE);
+    });
+
     describe('CPU per Host', () => {
-      before(() =>
-        esArchiver.load(
-          'x-pack/solutions/observability/test/fixtures/es_archives/infra/8.0.0/hosts_only'
-        )
-      );
-      after(() =>
-        esArchiver.unload(
-          'x-pack/solutions/observability/test/fixtures/es_archives/infra/8.0.0/hosts_only'
-        )
-      );
       it('should work FOR LAST 1 minute', async () => {
         const results = await evaluateCondition({
           ...baseOptions,
           esClient,
         });
-        expect(results).to.eql({
+        expect(results).toEqual({
           'host-0': {
             metric: 'cpu',
             timeSize: 1,
@@ -123,7 +145,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           esClient,
         };
         const results = await evaluateCondition(options);
-        expect(results).to.eql({
+        expect(results).toEqual({
           'host-0': {
             metric: 'cpu',
             timeSize: 5,
@@ -150,16 +172,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     describe('Inbound network traffic per host', () => {
-      before(() =>
-        esArchiver.load(
-          'x-pack/solutions/observability/test/fixtures/es_archives/infra/8.0.0/hosts_only'
-        )
-      );
-      after(() =>
-        esArchiver.unload(
-          'x-pack/solutions/observability/test/fixtures/es_archives/infra/8.0.0/hosts_only'
-        )
-      );
       it('should work FOR LAST 1 minute', async () => {
         const results = await evaluateCondition({
           ...baseOptions,
@@ -171,7 +183,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
           esClient,
         });
-        expect(results).to.eql({
+        expect(results).toEqual({
           'host-0': {
             metric: 'rx',
             timeSize: 1,
@@ -228,7 +240,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
           esClient,
         });
-        expect(results).to.eql({
+        expect(results).toEqual({
           'host-0': {
             metric: 'rx',
             timeSize: 1,
@@ -286,7 +298,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           esClient,
         };
         const results = await evaluateCondition(options);
-        expect(results).to.eql({
+        expect(results).toEqual({
           'host-0': {
             metric: 'rx',
             timeSize: 5,
@@ -334,16 +346,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     describe('Custom rate metric per host', () => {
-      before(() =>
-        esArchiver.load(
-          'x-pack/solutions/observability/test/fixtures/es_archives/infra/8.0.0/hosts_only'
-        )
-      );
-      after(() =>
-        esArchiver.unload(
-          'x-pack/solutions/observability/test/fixtures/es_archives/infra/8.0.0/hosts_only'
-        )
-      );
       it('should work FOR LAST 1 minute', async () => {
         const results = await evaluateCondition({
           ...baseOptions,
@@ -361,7 +363,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
           esClient,
         });
-        expect(results).to.eql({
+        expect(results).toEqual({
           'host-0': {
             metric: 'custom',
             timeSize: 1,
@@ -438,7 +440,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
           esClient,
         });
-        expect(results).to.eql({
+        expect(results).toEqual({
           'host-0': {
             metric: 'custom',
             timeSize: 5,
@@ -500,16 +502,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     describe('Log rate per host', () => {
-      before(() =>
-        esArchiver.load(
-          'x-pack/solutions/observability/test/fixtures/es_archives/infra/8.0.0/hosts_only'
-        )
-      );
-      after(() =>
-        esArchiver.unload(
-          'x-pack/solutions/observability/test/fixtures/es_archives/infra/8.0.0/hosts_only'
-        )
-      );
       it('should work FOR LAST 1 minute', async () => {
         const results = await evaluateCondition({
           ...baseOptions,
@@ -521,7 +513,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
           esClient,
         });
-        expect(results).to.eql({
+        expect(results).toEqual({
           'host-0': {
             metric: 'logRate',
             timeSize: 1,
@@ -579,7 +571,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           esClient,
         };
         const results = await evaluateCondition(options);
-        expect(results).to.eql({
+        expect(results).toEqual({
           'host-0': {
             metric: 'logRate',
             timeSize: 5,
@@ -625,148 +617,146 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
       });
     });
+  });
 
-    describe('Network rate per pod', () => {
-      before(() =>
-        esArchiver.load(
-          'x-pack/solutions/observability/test/fixtures/es_archives/infra/8.0.0/pods_only'
-        )
-      );
-      after(() =>
-        esArchiver.unload(
-          'x-pack/solutions/observability/test/fixtures/es_archives/infra/8.0.0/pods_only'
-        )
-      );
-      it('should work FOR LAST 1 minute', async () => {
-        const results = await evaluateCondition({
-          ...baseOptions,
-          executionTimestamp: new Date(DATES['8.0.0'].pods_only.max),
-          nodeType: 'pod' as InventoryItemType,
-          condition: {
-            ...baseCondition,
-            metric: 'rx',
-            threshold: [1],
-          },
-          esClient,
-        });
-        expect(results).to.eql({
-          '7d6d7955-f853-42b1-8613-11f52d0d2725': {
-            metric: 'rx',
-            timeSize: 1,
-            timeUnit: 'm',
-            sourceId: 'default',
-            threshold: [1],
-            comparator: '>',
-            shouldFire: true,
-            shouldWarn: false,
-            isNoData: false,
-            isError: false,
-            currentValue: 43332.833333333336,
-            context: {
-              cloud: undefined,
-              host: undefined,
-              container: [],
-              orchestrator: undefined,
-              labels: undefined,
-              tags: undefined,
-            },
-          },
-          'ed01e3a3-4787-42f6-b73e-ac9e97294e9d': {
-            metric: 'rx',
-            timeSize: 1,
-            timeUnit: 'm',
-            sourceId: 'default',
-            threshold: [1],
-            comparator: '>',
-            shouldFire: true,
-            shouldWarn: false,
-            isNoData: false,
-            isError: false,
-            currentValue: 42783.833333333336,
-            context: {
-              cloud: undefined,
-              host: undefined,
-              container: [],
-              orchestrator: undefined,
-              labels: undefined,
-              tags: undefined,
-            },
-          },
-        });
+  describe('Network rate per pod', () => {
+    beforeAll(async () => {
+      await esArchiver.load(PODS_ONLY_ARCHIVE);
+    });
+
+    afterAll(async () => {
+      await esArchiver.unload(PODS_ONLY_ARCHIVE);
+    });
+
+    it('should work FOR LAST 1 minute', async () => {
+      const results = await evaluateCondition({
+        ...baseOptions,
+        executionTimestamp: new Date(DATES['8.0.0'].pods_only.max),
+        nodeType: 'pod' as InventoryItemType,
+        condition: {
+          ...baseCondition,
+          metric: 'rx',
+          threshold: [1],
+        },
+        esClient,
       });
-      it('should work FOR LAST 5 minute', async () => {
-        const results = await evaluateCondition({
-          ...baseOptions,
-          executionTimestamp: new Date(DATES['8.0.0'].pods_only.max),
-          logQueryFields: { indexPattern: 'metricbeat-*' },
-          nodeType: 'pod',
-          condition: {
-            ...baseCondition,
-            metric: 'rx',
-            threshold: [1],
-            timeSize: 5,
+      expect(results).toEqual({
+        '7d6d7955-f853-42b1-8613-11f52d0d2725': {
+          metric: 'rx',
+          timeSize: 1,
+          timeUnit: 'm',
+          sourceId: 'default',
+          threshold: [1],
+          comparator: '>',
+          shouldFire: true,
+          shouldWarn: false,
+          isNoData: false,
+          isError: false,
+          currentValue: 43332.833333333336,
+          context: {
+            cloud: undefined,
+            host: undefined,
+            container: [],
+            orchestrator: undefined,
+            labels: undefined,
+            tags: undefined,
           },
-          esClient,
-        });
-        expect(results).to.eql({
-          '7d6d7955-f853-42b1-8613-11f52d0d2725': {
-            metric: 'rx',
-            timeSize: 5,
-            timeUnit: 'm',
-            sourceId: 'default',
-            threshold: [1],
-            comparator: '>',
-            shouldFire: true,
-            shouldWarn: false,
-            isNoData: false,
-            isError: false,
-            currentValue: 50197.666666666664,
-            context: {
-              cloud: undefined,
-              host: undefined,
-              container: [
-                {
-                  id: 'container-03',
-                },
-                {
-                  id: 'container-04',
-                },
-              ],
-              orchestrator: undefined,
-              labels: undefined,
-              tags: undefined,
-            },
+        },
+        'ed01e3a3-4787-42f6-b73e-ac9e97294e9d': {
+          metric: 'rx',
+          timeSize: 1,
+          timeUnit: 'm',
+          sourceId: 'default',
+          threshold: [1],
+          comparator: '>',
+          shouldFire: true,
+          shouldWarn: false,
+          isNoData: false,
+          isError: false,
+          currentValue: 42783.833333333336,
+          context: {
+            cloud: undefined,
+            host: undefined,
+            container: [],
+            orchestrator: undefined,
+            labels: undefined,
+            tags: undefined,
           },
-          'ed01e3a3-4787-42f6-b73e-ac9e97294e9d': {
-            metric: 'rx',
-            timeSize: 5,
-            timeUnit: 'm',
-            sourceId: 'default',
-            threshold: [1],
-            comparator: '>',
-            shouldFire: true,
-            shouldWarn: false,
-            isNoData: false,
-            isError: false,
-            currentValue: 50622.066666666666,
-            context: {
-              cloud: undefined,
-              host: undefined,
-              container: [
-                {
-                  id: 'container-01',
-                },
-                {
-                  id: 'container-02',
-                },
-              ],
-              orchestrator: undefined,
-              labels: undefined,
-              tags: undefined,
-            },
+        },
+      });
+    });
+    it('should work FOR LAST 5 minute', async () => {
+      const results = await evaluateCondition({
+        ...baseOptions,
+        executionTimestamp: new Date(DATES['8.0.0'].pods_only.max),
+        logQueryFields: { indexPattern: 'metricbeat-*' },
+        nodeType: 'pod',
+        condition: {
+          ...baseCondition,
+          metric: 'rx',
+          threshold: [1],
+          timeSize: 5,
+        },
+        esClient,
+      });
+      expect(results).toEqual({
+        '7d6d7955-f853-42b1-8613-11f52d0d2725': {
+          metric: 'rx',
+          timeSize: 5,
+          timeUnit: 'm',
+          sourceId: 'default',
+          threshold: [1],
+          comparator: '>',
+          shouldFire: true,
+          shouldWarn: false,
+          isNoData: false,
+          isError: false,
+          currentValue: 50197.666666666664,
+          context: {
+            cloud: undefined,
+            host: undefined,
+            container: [
+              {
+                id: 'container-03',
+              },
+              {
+                id: 'container-04',
+              },
+            ],
+            orchestrator: undefined,
+            labels: undefined,
+            tags: undefined,
           },
-        });
+        },
+        'ed01e3a3-4787-42f6-b73e-ac9e97294e9d': {
+          metric: 'rx',
+          timeSize: 5,
+          timeUnit: 'm',
+          sourceId: 'default',
+          threshold: [1],
+          comparator: '>',
+          shouldFire: true,
+          shouldWarn: false,
+          isNoData: false,
+          isError: false,
+          currentValue: 50622.066666666666,
+          context: {
+            cloud: undefined,
+            host: undefined,
+            container: [
+              {
+                id: 'container-01',
+              },
+              {
+                id: 'container-02',
+              },
+            ],
+            orchestrator: undefined,
+            labels: undefined,
+            tags: undefined,
+          },
+        },
       });
     });
   });
-}
+});

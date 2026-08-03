@@ -5,9 +5,12 @@
  * 2.0.
  */
 
-import type { ScoutTestFixtures, ScoutWorkerFixtures } from '@kbn/scout-oblt';
-import { apiTest as baseApiTest } from '@kbn/scout-oblt';
+import { apiTest as baseApiTest, mergeTests } from '@kbn/scout-oblt';
+import { synthtraceFixture } from '@kbn/scout-synthtrace';
 
-export const apiTest = baseApiTest.extend<ScoutTestFixtures, ScoutWorkerFixtures>({});
+export const apiTest = mergeTests(baseApiTest, synthtraceFixture);
 
 export * as testData from './constants';
+export { generateSemconvHostsData } from './semconv_hosts_data';
+export type { SemconvHost } from './semconv_hosts_data';
+export { generateServicesData, generateServicesLogsOnlyData } from './services_data';
