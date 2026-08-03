@@ -5,66 +5,17 @@
  * 2.0.
  */
 
-import type {
-  AttackDiscovery,
-  ConfidenceFactor,
-} from '../../../../../common/step_types/shared_schemas';
-import type { ParsedAlertFields } from './parse_anonymized_alerts_csv';
-import { splitMultiValue } from './parse_anonymized_alerts_csv';
+import { computeConfidenceFactors } from '@kbn/discoveries/impl/confidence';
+import type { DeterministicFactors, ParsedAlertFields } from '@kbn/discoveries/impl/confidence';
+import type { AttackDiscovery } from '../../../../../common/step_types/shared_schemas';
+
+export { toBand } from '@kbn/discoveries/impl/confidence';
+export type { DeterministicFactors } from '@kbn/discoveries/impl/confidence';
 
 /**
- * Canonical enterprise ATT&CK tactic order (kill-chain progression), by tactic
- * id. Used to score how far along the chain a discovery's alerts span.
- */
-const TACTIC_ORDER: readonly string[] = [
-  'TA0043', // Reconnaissance
-  'TA0042', // Resource Development
-  'TA0001', // Initial Access
-  'TA0002', // Execution
-  'TA0003', // Persistence
-  'TA0004', // Privilege Escalation
-  'TA0005', // Defense Evasion
-  'TA0006', // Credential Access
-  'TA0007', // Discovery
-  'TA0008', // Lateral Movement
-  'TA0009', // Collection
-  'TA0011', // Command and Control
-  'TA0010', // Exfiltration
-  'TA0040', // Impact
-];
-
-const clamp01 = (value: number): number => Math.max(0, Math.min(1, value));
-
-export interface DeterministicFactors {
-  /** Positive-signal base score in [0, 1], before counter-evidence penalty. */
-  baseScore: number;
-  /** Strength of benign/counter evidence in [0, 1]; higher lowers confidence. */
-  counterStrength: number;
-  factors: ConfidenceFactor[];
-  /** Number of the discovery's alerts that were found in the anonymized CSV. */
-  matchedAlertCount: number;
-}
-
-const maxSharedFraction = (rows: ParsedAlertFields[], field: string): number => {
-  if (rows.length === 0) {
-    return 0;
-  }
-  const counts = new Map<string, number>();
-  for (const row of rows) {
-    const value = row[field];
-    if (value != null && value.length > 0) {
-      counts.set(value, (counts.get(value) ?? 0) + 1);
-    }
-  }
-  const max = counts.size > 0 ? Math.max(...counts.values()) : 0;
-  return max / rows.length;
-};
-
-/**
- * Compute the deterministic confidence factors for one discovery from the
- * anonymized-alert CSV rows it cites. Pure, in-memory, no ES/LLM call — these
- * factors are the auditable prior handed to the LLM synthesis step (and the
- * fallback score if the LLM call is unavailable).
+ * Attack-Discovery adapter over the reusable confidence core: selects the
+ * discovery's cited alert rows and scores the bundle, falling back to the
+ * discovery's MITRE tactic names when the alerts carry no `threat.tactic.id`.
  */
 export const computeDeterministicFactors = ({
   discovery,
@@ -74,101 +25,13 @@ export const computeDeterministicFactors = ({
   rowsById: Map<string, ParsedAlertFields>;
 }): DeterministicFactors => {
   const alertIds = discovery.alert_ids ?? [];
-  const rows = alertIds
+  const alertRows = alertIds
     .map((id) => rowsById.get(id))
     .filter((row): row is ParsedAlertFields => row != null);
-  const matchedAlertCount = rows.length;
-  const factors: ConfidenceFactor[] = [];
 
-  // --- Evidence breadth: distinct data types across the cited alerts ---
-  const categories = new Set<string>();
-  const datasets = new Set<string>();
-  for (const row of rows) {
-    splitMultiValue(row['event.category']).forEach((value) => categories.add(value));
-    splitMultiValue(row['event.dataset']).forEach((value) => datasets.add(value));
-  }
-  const breadth = clamp01(
-    ((categories.size + datasets.size) / 6) * 0.7 +
-      Math.min(1, Math.log2(alertIds.length + 1) / 3) * 0.3
-  );
-  factors.push({
-    assessment: `${categories.size} event categories, ${datasets.size} datasets across ${alertIds.length} alerts`,
-    evidence: [...categories, ...datasets].join(', ') || undefined,
-    name: 'evidence_breadth',
-    weight: breadth,
+  return computeConfidenceFactors({
+    alertRows,
+    alertCount: alertIds.length,
+    mitreTacticNamesFallback: discovery.mitre_attack_tactics,
   });
-
-  // --- MITRE completeness: distinct tactics + techniques (technique-level) ---
-  const tactics = new Set<string>();
-  const techniques = new Set<string>();
-  for (const row of rows) {
-    splitMultiValue(row['threat.tactic.id']).forEach((value) => tactics.add(value));
-    splitMultiValue(row['threat.technique.id']).forEach((value) => techniques.add(value));
-  }
-  // Fall back to the discovery's tactic NAMES when the CSV lacks threat.* fields.
-  const tacticCount = tactics.size > 0 ? tactics.size : discovery.mitre_attack_tactics?.length ?? 0;
-  const mitre = clamp01(
-    Math.min(1, tacticCount / 5) * 0.7 + Math.min(1, techniques.size / 4) * 0.3
-  );
-  factors.push({
-    assessment: `${tacticCount} tactics, ${techniques.size} techniques`,
-    evidence: [...tactics, ...techniques].join(', ') || undefined,
-    name: 'mitre_completeness',
-    weight: mitre,
-  });
-
-  // --- Chain coherence (structural): kill-chain progression + entity cohesion ---
-  const stagePositions = [...tactics]
-    .map((tactic) => TACTIC_ORDER.indexOf(tactic))
-    .filter((index) => index >= 0)
-    .sort((a, b) => a - b);
-  const progression =
-    stagePositions.length > 1
-      ? clamp01(
-          (stagePositions[stagePositions.length - 1] - stagePositions[0]) /
-            (TACTIC_ORDER.length - 1)
-        )
-      : 0;
-  const entityCohesion = Math.max(
-    maxSharedFraction(rows, 'host.name'),
-    maxSharedFraction(rows, 'user.name')
-  );
-  const coherence = clamp01(progression * 0.55 + entityCohesion * 0.45);
-  factors.push({
-    assessment: `${
-      stagePositions.length
-    } kill-chain stages spanned, entity cohesion ${entityCohesion.toFixed(2)}`,
-    name: 'chain_coherence_structural',
-    weight: coherence,
-  });
-
-  // --- Counter-evidence (penalty): benign signals in the cited alerts ---
-  let trustedSigned = 0;
-  let benignDisposition = 0;
-  for (const row of rows) {
-    if ((row['process.code_signature.trusted'] ?? '').toLowerCase() === 'true') {
-      trustedSigned += 1;
-    }
-    const severity = (row['kibana.alert.severity'] ?? '').toLowerCase();
-    const status = (row['kibana.alert.workflow_status'] ?? '').toLowerCase();
-    if (status === 'closed' || status === 'acknowledged' || severity === 'low') {
-      benignDisposition += 1;
-    }
-  }
-  const counterStrength =
-    matchedAlertCount > 0
-      ? clamp01((trustedSigned * 0.5 + benignDisposition) / matchedAlertCount)
-      : 0;
-  factors.push({
-    assessment: `${trustedSigned}/${matchedAlertCount} trusted-signed, ${benignDisposition}/${matchedAlertCount} closed/low-severity`,
-    name: 'counter_evidence',
-    weight: -counterStrength,
-  });
-
-  const baseScore = clamp01(((breadth + mitre + coherence) / 3) * (1 - 0.5 * counterStrength));
-
-  return { baseScore, counterStrength, factors, matchedAlertCount };
 };
-
-export const toBand = (score: number): 'high' | 'medium' | 'low' =>
-  score >= 0.7 ? 'high' : score >= 0.4 ? 'medium' : 'low';

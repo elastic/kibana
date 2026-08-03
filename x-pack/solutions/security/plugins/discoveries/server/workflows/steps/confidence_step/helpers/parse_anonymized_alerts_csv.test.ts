@@ -11,7 +11,6 @@ describe('parseAnonymizedAlertsCsv', () => {
   it('parses field,value lines and keys the row by its _id', () => {
     const byId = parseAnonymizedAlertsCsv([
       {
-        metadata: {},
         page_content:
           '@timestamp,2024-10-16T02:40:08.837Z\n' +
           '_id,abc123\n' +
@@ -32,14 +31,14 @@ describe('parseAnonymizedAlertsCsv', () => {
 
   it('splits on the FIRST comma only so values may contain commas', () => {
     const byId = parseAnonymizedAlertsCsv([
-      { metadata: {}, page_content: '_id,x\nprocess.command_line,wscript,C:\\a.vbs,/o' },
+      { page_content: '_id,x\nprocess.command_line,wscript,C:\\a.vbs,/o' },
     ]);
     expect(byId.get('x')?.['process.command_line']).toBe('wscript,C:\\a.vbs,/o');
   });
 
   it('falls back to the document id when page_content has no _id line', () => {
     const byId = parseAnonymizedAlertsCsv([
-      { id: 'doc-1', metadata: {}, page_content: 'event.dataset,endpoint.alerts' },
+      { id: 'doc-1', page_content: 'event.dataset,endpoint.alerts' },
     ]);
     expect(byId.get('doc-1')?.['event.dataset']).toBe('endpoint.alerts');
   });
@@ -47,7 +46,6 @@ describe('parseAnonymizedAlertsCsv', () => {
   it('skips lines without a comma and empty field names', () => {
     const byId = parseAnonymizedAlertsCsv([
       {
-        metadata: {},
         page_content: '_id,y\nnojustonetoken\n,leadingcommavalue\nevent.module,endpoint',
       },
     ]);
@@ -56,7 +54,7 @@ describe('parseAnonymizedAlertsCsv', () => {
   });
 
   it('ignores alerts with neither an _id line nor a document id', () => {
-    const byId = parseAnonymizedAlertsCsv([{ metadata: {}, page_content: 'event.dataset,x' }]);
+    const byId = parseAnonymizedAlertsCsv([{ page_content: 'event.dataset,x' }]);
     expect(byId.size).toBe(0);
   });
 });
