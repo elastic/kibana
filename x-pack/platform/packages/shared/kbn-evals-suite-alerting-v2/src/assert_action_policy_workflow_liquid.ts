@@ -10,11 +10,20 @@ import {
   builtinWorkflowInputDefinitions,
   parseJsPropertyAccess,
   scanForTemplateVariables,
+  WorkflowSchemaForAutocomplete,
   type JsonSchema,
 } from '@kbn/workflows';
+import type { z } from '@kbn/zod/v4';
 import { parse as parseYaml } from 'yaml';
 
 const PAYLOAD_PREFIX = 'inputs.payload';
+
+/**
+ * The lenient workflow shape, it describes the document's structure
+ * without rejecting connector-specific step configuration the way
+ * the strict `WorkflowSchema` would.
+ */
+type ParsedWorkflow = z.output<typeof WorkflowSchemaForAutocomplete>;
 
 const getPayloadSchema = (): JsonSchema => {
   const schema =
@@ -112,6 +121,18 @@ const parseWorkflowYaml = (yaml: string): unknown => {
   }
 };
 
+const throwInvalidWorkflowDocument = (parsed: unknown): ParsedWorkflow => {
+  const result = WorkflowSchemaForAutocomplete.safeParse(parsed);
+  if (!result.success) {
+    throw new Error(
+      `Generated workflow YAML is not a workflow document: ${result.error.issues
+        .map((issue) => `${issue.path.join('.') || '(root)'}: ${issue.message}`)
+        .join('; ')}`
+    );
+  }
+  return result.data;
+};
+
 const scanWorkflowLiquidVariables = (parsed: unknown): string[] => {
   try {
     return Array.from(new Set(scanForTemplateVariables(parsed))).sort();
@@ -149,9 +170,10 @@ export const isActionPolicyPayloadPathInSchema = (
  * Asserts that an action-policy notification workflow:
  * 1. Includes a workflow YAML string
  * 2. Parses as valid YAML
- * 3. Contains valid Liquid (via `@kbn/workflows` `scanForTemplateVariables`)
- * 4. References `inputs.payload.*` at least once
- * 5. Those `inputs.payload.*` paths use fields from the
+ * 3. Parses as a workflow document
+ * 4. Contains valid Liquid (via `@kbn/workflows` `scanForTemplateVariables`)
+ * 5. References `inputs.payload.*` at least once
+ * 6. Those `inputs.payload.*` paths use fields from the
  *    `alertingV2NotificationGroup` payload schema
  */
 export const assertActionPolicyWorkflowLiquid = (
@@ -159,16 +181,19 @@ export const assertActionPolicyWorkflowLiquid = (
 ): {
   /** Unique Liquid variable paths extracted from the workflow YAML. */
   variables: string[];
+  /** The parsed workflow document, for assertions on triggers, steps, etc. */
+  workflow: ParsedWorkflow;
   /** The validated workflow YAML string. */
   yaml: string;
 } => {
   const workflowYaml = throwMissingWorkflowYaml(yaml);
   const parsed = parseWorkflowYaml(workflowYaml);
+  const workflow = throwInvalidWorkflowDocument(parsed);
   const variables = scanWorkflowLiquidVariables(parsed);
   const payloadVariables = variables.filter(isActionPolicyPayloadLiquidPath);
 
   throwMissingPayloadLiquidReferences(payloadVariables, variables);
   throwUnknownPayloadLiquidFields(payloadVariables, getPayloadSchema());
 
-  return { variables, yaml: workflowYaml };
+  return { variables, workflow, yaml: workflowYaml };
 };

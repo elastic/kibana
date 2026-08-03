@@ -16,5 +16,6 @@
     "@kbn/scout",
     "@kbn/data-forge",
     "@kbn/workflows",
+    "@kbn/zod",
   ]
 }

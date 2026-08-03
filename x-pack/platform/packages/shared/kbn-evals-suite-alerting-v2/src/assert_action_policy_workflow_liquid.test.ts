@@ -83,6 +83,20 @@ steps:
     expect(variables).toEqual(expect.arrayContaining(['inputs.payload.episodes', 'execution.url']));
   });
 
+  it('returns the parsed workflow document', () => {
+    const { workflow } = assertActionPolicyWorkflowLiquid(validWorkflowYaml);
+
+    expect(workflow.name).toBe('Notify');
+    expect(workflow.triggers.map((trigger) => trigger.type)).toEqual(['manual']);
+    expect(workflow.steps.map((step) => step.name)).toEqual(['send_email']);
+  });
+
+  it('rejects YAML that is not a workflow document', () => {
+    expect(() => assertActionPolicyWorkflowLiquid('just a string')).toThrow(
+      /not a workflow document/i
+    );
+  });
+
   it('rejects invalid Liquid syntax', () => {
     const yaml = `
 steps:

@@ -13,7 +13,6 @@ import {
 } from '@kbn/alerting-v2-schemas';
 import { expect } from '@playwright/test';
 import { tags } from '@kbn/scout';
-import { parse as parseYaml } from 'yaml';
 import { evaluate } from '../../src/evaluate';
 import {
   ACTION_POLICY_MANAGEMENT_SKILL_ID,
@@ -108,11 +107,10 @@ evaluate.describe(
                       { type: 'workflow', id: workflowId },
                     ]);
 
-                    const { yaml: workflowYaml } = assertActionPolicyWorkflowLiquid(workflow?.yaml);
-                    const parsedWorkflow = parseYaml(workflowYaml) as {
-                      triggers?: Array<{ type?: string }>;
-                    };
-                    expect(parsedWorkflow.triggers?.map((trigger) => trigger.type)).toEqual([
+                    const { workflow: parsedWorkflow } = assertActionPolicyWorkflowLiquid(
+                      workflow?.yaml
+                    );
+                    expect(parsedWorkflow.triggers.map((trigger) => trigger.type)).toEqual([
                       'manual',
                     ]);
                   },
