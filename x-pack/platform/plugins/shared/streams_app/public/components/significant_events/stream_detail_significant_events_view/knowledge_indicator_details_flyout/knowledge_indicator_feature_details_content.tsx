@@ -7,6 +7,7 @@
 
 import {
   EuiBadge,
+  EuiButtonEmpty,
   EuiCodeBlock,
   EuiDescriptionList,
   EuiFlexGroup,
@@ -24,9 +25,10 @@ import { getConfidenceColor } from '../utils/get_confidence_color';
 
 interface Props {
   feature: Feature;
+  onOpenInDiscover?: () => void;
 }
 
-export function KnowledgeIndicatorFeatureDetailsContent({ feature }: Props) {
+export function KnowledgeIndicatorFeatureDetailsContent({ feature, onOpenInDiscover }: Props) {
   const listItems = useMemo(() => {
     const tags = feature.tags?.length ? feature.tags : [];
 
@@ -95,7 +97,22 @@ export function KnowledgeIndicatorFeatureDetailsContent({ feature }: Props) {
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
       <EuiFlexItem>
-        <InfoPanel title={GENERAL_INFORMATION_LABEL}>
+        <InfoPanel
+          title={GENERAL_INFORMATION_LABEL}
+          headerRightContent={
+            onOpenInDiscover ? (
+              <EuiButtonEmpty
+                data-test-subj="streamsAppFeatureDetailsFlyoutOpenInDiscover"
+                size="xs"
+                iconType="discoverApp"
+                iconSide="left"
+                onClick={onOpenInDiscover}
+              >
+                {OPEN_IN_DISCOVER_LABEL}
+              </EuiButtonEmpty>
+            ) : undefined
+          }
+        >
           {listItems.map((item, index) => (
             <React.Fragment key={item.title}>
               <EuiDescriptionList
@@ -161,6 +178,13 @@ const GENERAL_INFORMATION_LABEL = i18n.translate(
   'xpack.streams.featureDetailsFlyout.generalInformationLabel',
   {
     defaultMessage: 'General information',
+  }
+);
+
+const OPEN_IN_DISCOVER_LABEL = i18n.translate(
+  'xpack.streams.featureDetailsFlyout.openInDiscoverLabel',
+  {
+    defaultMessage: 'Open in Discover',
   }
 );
 

@@ -14,7 +14,6 @@ import type {
   AgentToolKnowledgeIndicatorIdentificationStartedProps,
   CodeAnalysisGroundingProps,
   DetectionScanProps,
-  EndpointLatencyProps,
   KnowledgeIndicatorFeaturesIdentifiedProps,
   KnowledgeIndicatorQueriesGeneratedProps,
   KnowledgeIndicatorOnboardingScheduledProps,
@@ -22,27 +21,6 @@ import type {
   AgentToolDiscoveryWriteProps,
   AgentToolEventSearchProps,
 } from './types';
-
-const endpointLatencySchema: RootSchema<EndpointLatencyProps> = {
-  name: {
-    type: 'keyword',
-    _meta: {
-      description: 'The name of the Stream',
-    },
-  },
-  endpoint: {
-    type: 'keyword',
-    _meta: {
-      description: 'The name of the Streams endpoint',
-    },
-  },
-  duration_ms: {
-    type: 'long',
-    _meta: {
-      description: 'The duration of the endpoint in milliseconds',
-    },
-  },
-};
 
 const knowledgeIndicatorQueriesGeneratedSchema: RootSchema<KnowledgeIndicatorQueriesGeneratedProps> =
   {
@@ -474,22 +452,28 @@ const detectionScanSchema: RootSchema<DetectionScanProps> = {
         'Wall-clock duration (ms) of the change-point scan read, including transport and parsing',
     },
   },
+  rules_requested: {
+    type: 'long',
+    _meta: {
+      description: 'Rule-backed queries requested for the scan (all analysis profiles)',
+    },
+  },
   rules_scanned: {
     type: 'long',
     _meta: {
-      description: 'Number of distinct rules covered by the change-point scan',
+      description: 'Distinct rules that returned a change-point series bucket',
     },
   },
   critical_rule_count: {
     type: 'long',
     _meta: {
-      description: 'Rule-backed query count using the critical 1m cadence',
+      description: 'Rule-backed query count on the critical analysis profile',
     },
   },
   default_rule_count: {
     type: 'long',
     _meta: {
-      description: 'Rule-backed query count using the default 5m cadence',
+      description: 'Rule-backed query count on the default analysis profile',
     },
   },
   alerting_engine: {
@@ -507,13 +491,25 @@ const detectionScanSchema: RootSchema<DetectionScanProps> = {
   lookback: {
     type: 'keyword',
     _meta: {
-      description: 'The scan lookback window (e.g. `now-30m`)',
+      description: 'Critical analysis lookback duration (e.g. `now-40m`)',
     },
   },
   bucket_interval: {
     type: 'keyword',
     _meta: {
-      description: 'The change-point bucket interval (e.g. `30s`)',
+      description: 'Critical analysis outer bucket interval (e.g. `1m`)',
+    },
+  },
+  default_lookback: {
+    type: 'keyword',
+    _meta: {
+      description: 'Default analysis lookback duration (e.g. `now-125m`)',
+    },
+  },
+  default_bucket_interval: {
+    type: 'keyword',
+    _meta: {
+      description: 'Default analysis outer bucket interval (e.g. `5m`)',
     },
   },
   space_id: {
@@ -671,6 +667,18 @@ const agentToolEventSearchSchema: RootSchema<AgentToolEventSearchProps> = {
       optional: true,
     },
   },
+  view: {
+    type: 'keyword',
+    _meta: {
+      description: 'The requested event response view (compact or full)',
+    },
+  },
+  page: {
+    type: 'long',
+    _meta: {
+      description: 'The requested event search page',
+    },
+  },
   error_message: {
     type: 'text',
     _meta: {
@@ -725,7 +733,6 @@ export {
   codeAnalysisGroundingSchema,
   detectionScanSchema,
   discoveryTriggeredSchema,
-  endpointLatencySchema,
   knowledgeIndicatorFeaturesIdentifiedSchema,
   knowledgeIndicatorQueriesGeneratedSchema,
   onboardingScheduledSchema,

@@ -7,11 +7,11 @@
 
 import { schema } from '@kbn/config-schema';
 import type { CoreSetup, Logger } from '@kbn/core/server';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import { i18n } from '@kbn/i18n';
 import {
   OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED,
   OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_INTERVAL_HOURS,
-  OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_EXCLUDED_STREAM_PATTERNS,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_INDEX_PATTERNS,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_TUNING_CONFIG,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED,
@@ -31,6 +31,7 @@ import {
   validateSignificantEventsTuningConfig,
 } from '@kbn/significant-events-schema';
 import type { SignificantEventsPluginStartDependencies } from './types';
+import { isObservabilityDeployment } from './routes/utils/assert_significant_events_access';
 import { STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE } from '../common';
 import {
   DEFAULT_EXTRACTION_INTERVAL_HOURS,
@@ -76,12 +77,19 @@ const sigEventsTuningConfigSchema = schema.object(
 
 export function registerFeatureFlags(
   core: CoreSetup<SignificantEventsPluginStartDependencies>,
-  logger: Logger
+  logger: Logger,
+  cloud?: CloudSetup
 ) {
+  // The pricing tier below is a no-op in project types that leave tiers disabled, so it cannot
+  // keep these Observability settings out on its own.
+  if (!isObservabilityDeployment({ cloud })) {
+    return;
+  }
+
   core.pricing
     .isFeatureAvailable(STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE.id)
-    .then((isSignificantEventsAvailable) => {
-      if (isSignificantEventsAvailable) {
+    .then((isTierAvailable) => {
+      if (isTierAvailable) {
         core.uiSettings.register({
           [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_INDEX_PATTERNS]: {
             category: ['observability'],
@@ -166,7 +174,7 @@ export function registerFeatureFlags(
                 'xpack.significantEvents.scheduledSigEventsDiscoveryDetectionBucketIntervalMinutesDescription',
                 {
                   defaultMessage:
-                    'Date-histogram bucket width used by the scheduled Significant Events change-point detection in this Kibana space. Wider buckets smooth out short-term burst noise.',
+                    'Outer date-histogram bucket width for the critical analysis profile in scheduled Significant Events change-point detection. Must be at least 1 minute (MATCH rules emit closed-minute points). Default-severity rules keep a fixed 5-minute profile.',
                 }
               ),
               type: 'number',
@@ -193,7 +201,7 @@ export function registerFeatureFlags(
                 'xpack.significantEvents.scheduledSigEventsDiscoveryDetectionLookbackMinutesDescription',
                 {
                   defaultMessage:
-                    'Time window analysed by the scheduled Significant Events change-point detection in this Kibana space. Must be a multiple of the detection bucket interval yielding between 22 and 1000 buckets.',
+                    'Critical analysis lookback (minutes) for scheduled Significant Events change-point detection. Must be a multiple of the detection bucket interval yielding between 22 and 1000 buckets. Default-severity rules keep a fixed 125-minute profile.',
                 }
               ),
               type: 'number',
@@ -368,29 +376,6 @@ export function registerFeatureFlags(
             ),
             type: 'number',
             schema: schema.number({ min: 0 }),
-            scope: 'global',
-            solutionViews: ['classic', 'oblt'],
-            readonly: true,
-            readonlyMode: 'ui',
-          },
-          [OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_EXCLUDED_STREAM_PATTERNS]: {
-            category: ['observability'],
-            name: i18n.translate(
-              'xpack.significantEvents.continuousKiExtractionExcludedStreamPatternsName',
-              {
-                defaultMessage: 'Continuous KI extraction excluded streams',
-              }
-            ),
-            value: '',
-            description: i18n.translate(
-              'xpack.significantEvents.continuousKiExtractionExcludedStreamPatternsDescription',
-              {
-                defaultMessage:
-                  'Comma-separated list of stream names or glob patterns (e.g. logs.debug.*) to exclude from automatic knowledge indicator extraction.',
-              }
-            ),
-            type: 'string',
-            schema: schema.string(),
             scope: 'global',
             solutionViews: ['classic', 'oblt'],
             readonly: true,

@@ -40,8 +40,10 @@
     "@kbn/core-user-activity-server-internal",
     "@kbn/core-user-activity-server-mocks",
     "@kbn/core-security-common",
+    "@kbn/core-security-server",
     "@kbn/core-spaces-common",
     "@kbn/apm-utils",
+    "@kbn/core-http-server-utils",
   ],
   "exclude": [
     "target/**/*",

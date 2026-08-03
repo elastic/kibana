@@ -35,6 +35,7 @@ import { useFetchSignificantEventLifecycle } from '../../../../../hooks/signific
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { useTriggerInvestigation } from '../../../../../hooks/significant_events/use_trigger_investigation';
 import { useUpdateSignificantEvent } from '../../../../../hooks/significant_events/use_update_significant_event';
+import { useBlocksNewActivity } from '../../../../../hooks/significant_events/use_significant_events_maintenance';
 import { FlyoutToolbarHeader } from '../../../../flyout_components/flyout_toolbar_header';
 import { LifecycleTimeline } from './lifecycle_timeline';
 import { getSignificantEventStatusColor } from '../shared/status_display';
@@ -142,6 +143,7 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
   }, []);
 
   const { triggerInvestigation, isTriggering } = useTriggerInvestigation({ onTriggerSuccess });
+  const { blocksActivity, activityBlockTooltip } = useBlocksNewActivity();
   const { updateEventStatus, isUpdating } = useUpdateSignificantEvent({
     onUpdateSuccess: onClose,
   });
@@ -290,14 +292,18 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
         <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
           <EuiFlexItem grow={false}>
             <EuiToolTip
-              content={isInvestigationRunning ? RESTART_INVESTIGATION_TOOLTIP : undefined}
+              content={
+                activityBlockTooltip ??
+                (isInvestigationRunning ? RESTART_INVESTIGATION_TOOLTIP : undefined)
+              }
             >
               <EuiButton
                 iconType="inspect"
                 onClick={() => {
                   if (!isTriggering) triggerInvestigation(latestEvent.event_uuid);
                 }}
-                isDisabled={isTriggering}
+                isDisabled={isTriggering || blocksActivity}
+                hasAriaDisabled={blocksActivity}
                 isLoading={isTriggering}
                 fill
                 size="s"

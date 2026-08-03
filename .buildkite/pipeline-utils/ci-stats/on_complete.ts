@@ -27,6 +27,12 @@ export async function onComplete() {
     return;
   }
 
+  // Opt-out for artifact-reuse pipelines (e.g. kibana-evals-pr-llm-evals) with no bundle metrics,
+  // where the PR report always fails. Build already completed above.
+  if (process.env.CI_STATS_DISABLE_PR_REPORT === 'true') {
+    return;
+  }
+
   const report = await ciStats.getPrReport(process.env.CI_STATS_BUILD_ID);
   if (report?.md) {
     // buildkite has a metadata size limit of 100kb, so we only add this, if it's small enough

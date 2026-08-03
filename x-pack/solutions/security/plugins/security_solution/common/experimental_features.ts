@@ -45,6 +45,12 @@ export const allowedExperimentalValues = Object.freeze({
   responseActionsEndpointMemoryDump: true,
 
   /**
+   * `physical` memory dump type for the Memory Dump response action for Elastic Defend Endpoint
+   * Release: 9.6
+   */
+  responseActionsEndpointMemoryDumpRaw: false,
+
+  /**
    * `runscript` response action for Elastic Defend Endpoint
    * Release: 9.4
    */
@@ -67,6 +73,12 @@ export const allowedExperimentalValues = Object.freeze({
    * Release: 9.5
    */
   responseActionsEndpointCancel: false,
+
+  /**
+   * `kill_descendants` parameter option for the `kill-process` response action for Elastic Defend Endpoint
+   * Release: 9.6
+   */
+  responseActionsEndpointKillProcessDescendants: false,
 
   /**
    * Enables CCS prefixing of endpoint indices so a Defend agent shipping to a remote ES output
@@ -245,6 +257,12 @@ export const allowedExperimentalValues = Object.freeze({
    * Gates skill + tool registration so the feature can ship dark and be enabled per environment.
    */
   pciComplianceAgentBuilder: true,
+
+  /**
+   * Enables the Endpoint Forensic Analysis Agent Builder skill (DFIR / patient zero / timeline).
+   * Shipped dark by default; enable per environment via config.
+   */
+  endpointForensicAnalysisSkill: false,
 
   /**
    * Enables the investigate-rule Agent Builder skill.

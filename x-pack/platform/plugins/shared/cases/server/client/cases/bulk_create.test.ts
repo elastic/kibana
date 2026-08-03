@@ -14,6 +14,7 @@ import {
   MAX_TITLE_LENGTH,
   MAX_ASSIGNEES_PER_CASE,
   MAX_CUSTOM_FIELDS_PER_CASE,
+  MAX_EXTENDED_FIELD_VALUE_BYTES,
 } from '../../../common/constants';
 import type { CasePostRequest } from '../../../common';
 import { SECURITY_SOLUTION_OWNER } from '../../../common';
@@ -83,6 +84,69 @@ describe('bulkCreate', () => {
         clientArgs.request,
         { caseId: 'mock-id-2', owner: caseSO.attributes.owner }
       );
+    });
+  });
+
+  describe('assignee identity population', () => {
+    const clientArgs = createCasesClientMockArgs();
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      clientArgs.config = { ...clientArgs.config, assigneeIdentity: { enabled: true } };
+      clientArgs.services.caseService.bulkCreateCases.mockResolvedValue({
+        saved_objects: [caseSO],
+      });
+    });
+
+    it('resolves every uid across all cases in a single bulkGet and populates identity', async () => {
+      clientArgs.securityStartPlugin.userProfiles.bulkGet.mockResolvedValue([
+        {
+          uid: '1',
+          enabled: true,
+          data: {},
+          user: { username: 'u1', full_name: 'User One', email: 'u1@e.com' },
+        },
+        {
+          uid: '2',
+          enabled: true,
+          data: {},
+          user: { username: 'u2', full_name: 'User Two', email: 'u2@e.com' },
+        },
+      ] as never);
+
+      await bulkCreate(
+        {
+          cases: [
+            getCases({ assignees: [{ uid: '1' }] })[0],
+            getCases({ assignees: [{ uid: '2' }] })[0],
+          ],
+        },
+        clientArgs,
+        casesClientMock
+      );
+
+      expect(clientArgs.securityStartPlugin.userProfiles.bulkGet).toHaveBeenCalledTimes(1);
+      const { cases } = clientArgs.services.caseService.bulkCreateCases.mock.calls[0][0];
+      expect(cases[0].assignees).toEqual([
+        { uid: '1', username: 'u1', full_name: 'User One', email: 'u1@e.com' },
+      ]);
+      expect(cases[1].assignees).toEqual([
+        { uid: '2', username: 'u2', full_name: 'User Two', email: 'u2@e.com' },
+      ]);
+    });
+
+    it('does not resolve profiles when the flag is disabled', async () => {
+      clientArgs.config = { ...clientArgs.config, assigneeIdentity: { enabled: false } };
+
+      await bulkCreate(
+        { cases: getCases({ assignees: [{ uid: '1' }] }) },
+        clientArgs,
+        casesClientMock
+      );
+
+      expect(clientArgs.securityStartPlugin.userProfiles.bulkGet).not.toHaveBeenCalled();
+      const { cases } = clientArgs.services.caseService.bulkCreateCases.mock.calls[0][0];
+      expect(cases[0].assignees).toEqual([{ uid: '1' }]);
     });
   });
 
@@ -646,6 +710,26 @@ describe('bulkCreate', () => {
       ).rejects.toThrowErrorMatchingInlineSnapshot(
         `"Failed to bulk create cases: Error: invalid keys \\"foo\\""`
       );
+    });
+
+    it('rejects an extended field value that exceeds the maximum byte size before writing', async () => {
+      await expect(
+        bulkCreate(
+          {
+            cases: getCases({
+              extended_fields: {
+                large_as_keyword: 'a'.repeat(MAX_EXTENDED_FIELD_VALUE_BYTES + 1),
+              },
+            }),
+          },
+          clientArgs,
+          casesClientMock
+        )
+      ).rejects.toThrow(
+        `Failed to bulk create cases: Error: Invalid extended_fields: Extended field "large_as_keyword" exceeds the maximum size of ${MAX_EXTENDED_FIELD_VALUE_BYTES} bytes`
+      );
+
+      expect(clientArgs.services.caseService.bulkCreateCases).not.toHaveBeenCalled();
     });
   });
 
@@ -1431,6 +1515,27 @@ describe('bulkCreate', () => {
       expect(clientArgs.logger.warn).toHaveBeenCalledWith(
         expect.stringContaining('Failed to update template usage stats')
       );
+    });
+
+    it('rejects a template reference without a pinned version (no server-side expansion on bulkCreate)', async () => {
+      await expect(
+        bulkCreate({ cases: getCases({ template: { id: 'tmpl-1' } }) }, clientArgs, casesClient)
+      ).rejects.toThrow('template.version is required');
+      expect(clientArgs.services.caseService.bulkCreateCases).not.toHaveBeenCalled();
+    });
+
+    it('accepts a version-pinned template reference', async () => {
+      clientArgs.services.caseService.bulkCreateCases.mockResolvedValue({
+        saved_objects: [caseSO],
+      });
+
+      await expect(
+        bulkCreate(
+          { cases: getCases({ template: { id: 'tmpl-1', version: 2 } }) },
+          clientArgs,
+          casesClient
+        )
+      ).resolves.not.toThrow();
     });
   });
 
