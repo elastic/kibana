@@ -20,7 +20,7 @@ You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.
 AWS CloudWatch connectors have the following configuration properties:
 
 AWS Region
-:   The AWS Region where your CloudWatch alarms, metrics, and log groups are located, for example `us-east-1`. All actions run against this single region; to work across multiple regions, create one connector per region.
+:   The AWS Region where your CloudWatch alarms, metrics, and log groups are located, for example `us-east-1`. All actions run against this single region. To work across multiple regions, create one connector per region.
 
 ### Authentication [aws-cloudwatch-connector-authentication]
 
@@ -56,7 +56,7 @@ The AWS CloudWatch connector has the following actions:
 :   Retrieve the state-transition, configuration, and action history for an alarm, or for all alarms if `alarmName` is omitted. Timestamps in the response are Unix epoch seconds.
 
 `putMetricAlarm`
-:   Create a new metric alarm, or completely overwrite an existing one with the same `alarmName`. Supports both a simple metric/threshold alarm and a metric-math-expression alarm (`metrics`).
+:   Create a new metric alarm, or completely overwrite an existing one with the same `alarmName`. Supports both a basic metric/threshold alarm and a metric-math-expression alarm (`metrics`).
 
 `listMetrics`
 :   Discover available metrics and their dimensions, optionally filtered by `namespace`, `metricName`, or `dimensions`. Use this to resolve the exact identifiers `getMetricData` and `putMetricAlarm` need.
@@ -71,7 +71,7 @@ The AWS CloudWatch connector has the following actions:
 :   List CloudWatch Logs log groups, optionally filtered by name prefix or substring. Use this to find the log group name `filterLogEvents` and `startLogsQuery` need.
 
 `filterLogEvents`
-:   Search log events in a single log group (`logGroupName` or `logGroupIdentifier`) by filter pattern and/or time range — a fast search for enrichment, without running a full Logs Insights query.
+:   Search log events in a single log group (`logGroupName` or `logGroupIdentifier`) by filter pattern, time range, or both — a fast search for enrichment, without running a full Logs Insights query.
 
 `startLogsQuery`
 :   Start an asynchronous [CloudWatch Logs Insights](https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/AnalyzingLogData.html) query (`queryString`) over one or more log groups and a time range. Returns a `queryId` to pass to `getLogsQueryResults`.
