@@ -20,5 +20,4 @@ export const transformGetResponse = (ruleTemplate: RuleTemplate): RuleTemplateRe
   ...(ruleTemplate.flapping ? { flapping: transformFlappingV1(ruleTemplate.flapping) } : {}),
   ...(ruleTemplate.artifacts ? { artifacts: ruleTemplate.artifacts } : {}),
   ...(ruleTemplate.description ? { description: ruleTemplate.description } : {}),
-  ...(ruleTemplate.engine ? { engine: ruleTemplate.engine } : {}),
 });

@@ -39,14 +39,6 @@ export const ruleTemplateResponseSchema = schema.object(
         meta: { description: 'The description of the rule template.' },
       })
     ),
-    engine: schema.maybe(
-      schema.string({
-        meta: {
-          description:
-            'The alerting engine this template targets (for example, "v1" or "v2"). Omit for the default engine.',
-        },
-      })
-    ),
     artifacts: ruleResponseSchemaV1.getPropSchemas().artifacts,
   },
   { meta: { id: 'rule_template_response' } }
