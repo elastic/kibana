@@ -14,7 +14,6 @@ import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/publi
 import type { SignificantEventsPublicPluginStart } from '@kbn/significant-events-plugin/public';
 import type { SignificantEventsAvailabilityResponse } from '@kbn/significant-events-plugin/common';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import type { StreamsPluginStart } from '@kbn/streams-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { Observable } from 'rxjs';
 import type { SignificantEventsAppLocator } from '../common/locators';
@@ -29,7 +28,6 @@ export interface SignificantEventsAppStartDependencies {
   licensing: LicensingPluginStart;
   share: SharePluginStart;
   significant_events: SignificantEventsPublicPluginStart;
-  streams: StreamsPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   agentBuilder?: AgentBuilderPluginStart;
   cloud?: CloudStart;

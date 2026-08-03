@@ -7,5 +7,5 @@
   ids or test subjects. `significantEvent` / `significant_event` only.
 - i18n messages use the `xpack.significantEventsApp.` prefix.
 - Data access goes through `significantEventsRepositoryClient`
-  (`dependencies.start.significant_events`); only the stream listing uses
-  `streamsRepositoryClient` (`dependencies.start.streams`).
+  (`dependencies.start.significant_events`). If stream listing is rehomed here and
+  needs `streamsRepositoryClient`, re-add `streams` as a required plugin.

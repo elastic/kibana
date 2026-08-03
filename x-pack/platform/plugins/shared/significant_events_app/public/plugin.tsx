@@ -108,24 +108,22 @@ export class SignificantEventsAppPlugin
         },
       ],
       // TODO(significant-events-app): restore global search once the real pages are
-      // rehomed here (and streams_app stops advertising the same deep links). Wire:
+      // rehomed here (and streams_app stops advertising the same deep links). Gate on
+      // availability$ only (flag × license × pricing) — not streams navigationStatus$.
+      // Wire after start services resolve so this.availability$ is assigned:
       //
       //   updater$: from(startServicesPromise).pipe(
-      //     switchMap(([, pluginsStart]) =>
-      //       combineLatest([pluginsStart.streams.navigationStatus$, this.availability$]).pipe(
-      //         map(([{ status }, isAvailable]) => status === 'enabled' && isAvailable),
-      //         distinctUntilChanged(),
-      //         map(
-      //           (visible): AppUpdater =>
-      //             (app) => ({
-      //               visibleIn: visible ? ['globalSearch'] : [],
-      //               deepLinks: (app.deepLinks ?? []).map((link) => ({
-      //                 ...link,
-      //                 visibleIn: visible ? ['globalSearch'] : [],
-      //               })),
-      //             })
-      //         )
-      //       )
+      //     switchMap(() => this.availability$),
+      //     distinctUntilChanged(),
+      //     map(
+      //       (visible): AppUpdater =>
+      //         (app) => ({
+      //           visibleIn: visible ? ['globalSearch'] : [],
+      //           deepLinks: (app.deepLinks ?? []).map((link) => ({
+      //             ...link,
+      //             visibleIn: visible ? ['globalSearch'] : [],
+      //           })),
+      //         })
       //     )
       //   ),
       //

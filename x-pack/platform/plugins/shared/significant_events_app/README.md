@@ -7,8 +7,7 @@ Browser-only plugin serving the Significant Events UI at `/app/significant_event
 The application covers the Significant Events surface: streams onboarding overview,
 knowledge indicators, rules (queries), detections, events, memory and settings. It
 consumes the `significant_events` plugin (server APIs via the typed
-`significantEventsRepositoryClient`) and the `streams` plugin (stream listing and
-navigation status).
+`significantEventsRepositoryClient`).
 
 The app is gated behind the Significant Events rollout feature flag
 (`streams.significantEventsAvailable`), the Enterprise license and the pricing tier;
