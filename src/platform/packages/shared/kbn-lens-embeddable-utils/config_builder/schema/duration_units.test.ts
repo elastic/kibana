@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { TypeOf } from '@kbn/config-schema';
+import type { z } from '@kbn/zod';
 import { durationFormatSchema, legacyDurationFormatSchema } from './duration_units';
 
-type DurationFormat = TypeOf<typeof durationFormatSchema>;
-type LegacyDurationFormat = TypeOf<typeof legacyDurationFormatSchema>;
+type DurationFormat = z.infer<typeof durationFormatSchema>;
+type LegacyDurationFormat = z.infer<typeof legacyDurationFormatSchema>;
 
 describe('Duration unit schemas', () => {
   describe('durationFormatSchema (GA)', () => {
@@ -22,7 +22,7 @@ describe('Duration unit schemas', () => {
         to: 'auto-approximate',
       } satisfies DurationFormat;
 
-      expect(durationFormatSchema.validate(input)).toEqual(input);
+      expect(durationFormatSchema.parse(input)).toEqual(input);
     });
 
     it('validates minutes with the short form `min`', () => {
@@ -32,7 +32,7 @@ describe('Duration unit schemas', () => {
         to: 'auto',
       } satisfies DurationFormat;
 
-      expect(durationFormatSchema.validate(input)).toEqual(input);
+      expect(durationFormatSchema.parse(input)).toEqual(input);
     });
 
     it('validates standard input and output units', () => {
@@ -42,36 +42,36 @@ describe('Duration unit schemas', () => {
         to: 'auto',
       } satisfies DurationFormat;
 
-      expect(durationFormatSchema.validate(input)).toEqual(input);
+      expect(durationFormatSchema.parse(input)).toEqual(input);
     });
 
     it('rejects long-form unit names', () => {
       expect(() =>
-        durationFormatSchema.validate({ type: 'duration', from: 'seconds', to: 'auto-approximate' })
+        durationFormatSchema.parse({ type: 'duration', from: 'seconds', to: 'auto-approximate' })
       ).toThrow();
     });
 
     it('rejects legacy `m` for minutes', () => {
       expect(() =>
-        durationFormatSchema.validate({ type: 'duration', from: 'm', to: 'auto-approximate' })
+        durationFormatSchema.parse({ type: 'duration', from: 'm', to: 'auto-approximate' })
       ).toThrow();
     });
 
     it('rejects legacy `humanize` output value', () => {
       expect(() =>
-        durationFormatSchema.validate({ type: 'duration', from: 's', to: 'humanize' })
+        durationFormatSchema.parse({ type: 'duration', from: 's', to: 'humanize' })
       ).toThrow();
     });
 
     it('rejects legacy `humanizePrecise` output value', () => {
       expect(() =>
-        durationFormatSchema.validate({ type: 'duration', from: 's', to: 'humanizePrecise' })
+        durationFormatSchema.parse({ type: 'duration', from: 's', to: 'humanizePrecise' })
       ).toThrow();
     });
 
     it('rejects auto strategies as input units', () => {
       expect(() =>
-        durationFormatSchema.validate({ type: 'duration', from: 'auto', to: 's' })
+        durationFormatSchema.parse({ type: 'duration', from: 'auto', to: 's' })
       ).toThrow();
     });
   });
@@ -86,7 +86,7 @@ describe('Duration unit schemas', () => {
         to: 'humanize',
       } satisfies LegacyDurationFormat;
 
-      expect(legacyDurationFormatSchema.validate(input)).toEqual(input);
+      expect(legacyDurationFormatSchema.parse(input)).toEqual(input);
     });
 
     it('validates legacy `humanizePrecise` output', () => {
@@ -96,7 +96,7 @@ describe('Duration unit schemas', () => {
         to: 'humanizePrecise',
       } satisfies LegacyDurationFormat;
 
-      expect(legacyDurationFormatSchema.validate(input)).toEqual(input);
+      expect(legacyDurationFormatSchema.parse(input)).toEqual(input);
     });
 
     it('accepts GA unit names without enum validation', () => {
@@ -106,7 +106,7 @@ describe('Duration unit schemas', () => {
         to: 'auto-approximate',
       } satisfies LegacyDurationFormat;
 
-      expect(legacyDurationFormatSchema.validate(input)).toEqual(input);
+      expect(legacyDurationFormatSchema.parse(input)).toEqual(input);
     });
 
     it('accepts arbitrary unit strings for backwards compatibility', () => {
@@ -116,7 +116,7 @@ describe('Duration unit schemas', () => {
         to: 'anything',
       } satisfies LegacyDurationFormat;
 
-      expect(legacyDurationFormatSchema.validate(input)).toEqual(input);
+      expect(legacyDurationFormatSchema.parse(input)).toEqual(input);
     });
   });
 });

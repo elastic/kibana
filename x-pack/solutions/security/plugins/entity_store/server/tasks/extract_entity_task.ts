@@ -9,7 +9,12 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import type { RunContext, RunResult } from '@kbn/task-manager-plugin/server/task';
+import type {
+  ConcreteTaskInstance,
+  IntervalSchedule,
+  RunContext,
+  RunResult,
+} from '@kbn/task-manager-plugin/server/task';
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core/server';
 import moment from 'moment';
@@ -29,6 +34,20 @@ function getTaskType(entityType: EntityType): string {
 export function getExtractEntityTaskId(entityType: EntityType, namespace: string): string {
   return `${getTaskType(entityType)}:${namespace}`;
 }
+
+export const getNewSchedule = (
+  frequency: string,
+  taskInstance: ConcreteTaskInstance
+): { schedule: IntervalSchedule } | undefined => {
+  const currentInterval = taskInstance.schedule?.interval;
+  if (currentInterval !== frequency) {
+    return {
+      schedule: {
+        interval: frequency,
+      },
+    };
+  }
+};
 
 async function runTask({
   taskInstance,
@@ -107,8 +126,16 @@ async function runTask({
       status: 'success',
     };
 
+    let schedule: { schedule: IntervalSchedule } | undefined;
+    try {
+      const config = await logsExtractionClient.globalStateClient.findOrThrow();
+      schedule = getNewSchedule(config.logsExtraction.frequency, taskInstance);
+    } catch (e) {
+      logger.warn(`Error getting new schedule, received ${e.message}`);
+    }
     return {
       state: updatedState,
+      ...schedule,
     };
   } catch (e) {
     logger.error(`Error running extract entity task, received ${e.message}`);
