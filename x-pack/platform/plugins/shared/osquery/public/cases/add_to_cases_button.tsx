@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useContext, useMemo } from 'react';
-import { AttachmentType, OSQUERY_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
+import { buildAlertCaseAttachment, OSQUERY_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -16,7 +16,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { JsonValue } from '@kbn/utility-types';
-import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
 import { useKibana } from '../common/lib/kibana';
 import { AlertAttachmentContext } from '../common/contexts';
 
@@ -56,21 +55,9 @@ export const AddToCaseButton: React.FC<AddToCaseButtonProps> = ({
 }) => {
   const { cases } = useKibana().services;
   const ecsData = useContext(AlertAttachmentContext);
-  const alertAttachments = useMemo(
+  const rule = useMemo(
     () =>
-      ecsData?._id
-        ? [
-            {
-              alertId: ecsData?._id ?? '',
-              index: ecsData?._index ?? '',
-              rule: cases.helpers.getRuleIdFromEvent({
-                ecs: ecsData,
-                data: [],
-              }),
-              type: AttachmentType.alert as const,
-            },
-          ]
-        : [],
+      ecsData ? cases.helpers.getRuleIdFromEvent({ ecs: ecsData, data: [] }) : { id: '', name: '' },
     [cases.helpers, ecsData]
   );
 
@@ -89,24 +76,39 @@ export const AddToCaseButton: React.FC<AddToCaseButtonProps> = ({
       metadata.executionCount = executionCount;
     }
 
-    const attachments: CaseAttachmentsWithoutOwner = [
-      ...alertAttachments,
-      {
-        type: OSQUERY_ATTACHMENT_TYPE,
-        attachmentId: actionId,
-        metadata,
-      },
-    ];
     if (hasCasesPermissions) {
-      selectCaseModal.open({ getAttachments: () => attachments });
+      selectCaseModal.open({
+        getAttachments: ({ theCase }) => {
+          const alertAttachment =
+            ecsData?._id && theCase
+              ? [
+                  buildAlertCaseAttachment(theCase.owner, {
+                    alertId: ecsData._id,
+                    index: ecsData._index ?? '',
+                    rule,
+                  }),
+                ]
+              : [];
+
+          return [
+            ...alertAttachment,
+            {
+              type: OSQUERY_ATTACHMENT_TYPE,
+              attachmentId: actionId,
+              metadata,
+            },
+          ];
+        },
+      });
     }
   }, [
     actionId,
     agentIds,
-    alertAttachments,
+    ecsData,
     executionCount,
     hasCasesPermissions,
     queryId,
+    rule,
     scheduleId,
     selectCaseModal,
   ]);

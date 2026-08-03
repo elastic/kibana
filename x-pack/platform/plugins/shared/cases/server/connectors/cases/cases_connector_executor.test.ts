@@ -4075,7 +4075,6 @@ fields: []
             casesService: new CasesServiceMock(),
             casesClient: casesClientMock,
             spaceId: 'default',
-            isCasesAttachmentsEnabled: true,
           });
 
           await connectorExecutorWithFlagOn.execute(paramsWithGroupedAlerts);

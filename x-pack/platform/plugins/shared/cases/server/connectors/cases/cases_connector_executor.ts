@@ -26,7 +26,7 @@ import {
   MAX_SUFFIX_LENGTH,
 } from '../../../common/constants';
 import { COMMENT_ATTACHMENT_TYPE } from '../../../common/constants/attachments';
-import { hasOwnerUnifiedPrefix, toUnifiedAttachmentType } from '../../../common/utils/attachments';
+import { toUnifiedAttachmentType } from '../../../common/utils/attachments';
 import type { AttachmentRequestV2, BulkCreateCasesRequest } from '../../../common/types/api';
 import type { Case, CaseSeverity } from '../../../common';
 import { ConnectorTypes, AttachmentType } from '../../../common';
@@ -68,7 +68,6 @@ interface CasesConnectorExecutorParams {
   casesService: CasesService;
   casesClient: CasesClient;
   spaceId: string;
-  isCasesAttachmentsEnabled?: boolean;
   isTemplatesEnabled?: boolean;
 }
 
@@ -83,7 +82,6 @@ export class CasesConnectorExecutor {
   private readonly casesService: CasesService;
   private readonly casesClient: CasesClient;
   private readonly spaceId: string;
-  private readonly isCasesAttachmentsEnabled: boolean;
   private readonly isTemplatesEnabled: boolean;
 
   constructor({
@@ -92,7 +90,6 @@ export class CasesConnectorExecutor {
     casesService,
     casesClient,
     spaceId,
-    isCasesAttachmentsEnabled = false,
     isTemplatesEnabled = false,
   }: CasesConnectorExecutorParams) {
     this.logger = logger;
@@ -100,7 +97,6 @@ export class CasesConnectorExecutor {
     this.casesService = casesService;
     this.casesClient = casesClient;
     this.spaceId = spaceId;
-    this.isCasesAttachmentsEnabled = isCasesAttachmentsEnabled;
     this.isTemplatesEnabled = isTemplatesEnabled;
   }
 
@@ -1287,19 +1283,11 @@ export class CasesConnectorExecutor {
     const bulkCreateAlertsRequest: BulkCreateAlertsReq[] = casesUnderAlertLimit.map(
       ({ theCase, alerts, comments }) => {
         const extraComments: AttachmentRequestV2[] =
-          comments?.map((comment) =>
-            this.isCasesAttachmentsEnabled
-              ? {
-                  type: COMMENT_ATTACHMENT_TYPE,
-                  data: { content: comment },
-                  owner: theCase.owner,
-                }
-              : {
-                  type: AttachmentType.user,
-                  comment,
-                  owner: theCase.owner,
-                }
-          ) ?? [];
+          comments?.map((comment) => ({
+            type: COMMENT_ATTACHMENT_TYPE,
+            data: { content: comment },
+            owner: theCase.owner,
+          })) ?? [];
         const rulePayload = internallyManagedAlerts
           ? { id: null, name: null }
           : { id: rule.id, name: rule.name };
@@ -1317,31 +1305,12 @@ export class CasesConnectorExecutor {
           { alertIds: [], alertIndices: [] }
         );
 
-        // Only write the unified shape when the feature flag is on AND the
-        // case owner has a registered unified prefix.
-        const isUnifiedAlertValid =
-          this.isCasesAttachmentsEnabled && hasOwnerUnifiedPrefix(theCase.owner);
-
-        if (this.isCasesAttachmentsEnabled && !isUnifiedAlertValid) {
-          this.logger.warn(
-            `[CasesConnector][CasesConnectorExecutor][attachAlertsToCases] Owner "${theCase.owner}" has no unified attachment prefix; falling back to legacy alert attachment for case ${theCase.id}.`
-          );
-        }
-
-        const alertAttachment: AttachmentRequestV2 = isUnifiedAlertValid
-          ? {
-              type: toUnifiedAttachmentType(AttachmentType.alert, theCase.owner),
-              attachmentId: alertIds,
-              metadata: { index: alertIndices, rule: rulePayload },
-              owner: theCase.owner,
-            }
-          : {
-              type: AttachmentType.alert,
-              rule: rulePayload,
-              alertId: alertIds,
-              index: alertIndices,
-              owner: theCase.owner,
-            };
+        const alertAttachment: AttachmentRequestV2 = {
+          type: toUnifiedAttachmentType(AttachmentType.alert, theCase.owner),
+          attachmentId: alertIds,
+          metadata: { index: alertIndices, rule: rulePayload },
+          owner: theCase.owner,
+        };
 
         return {
           caseId: theCase.id,

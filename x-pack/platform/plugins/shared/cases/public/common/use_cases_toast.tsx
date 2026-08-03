@@ -24,6 +24,7 @@ import {
 } from './translations';
 import { OWNER_INFO } from '../../common/constants';
 import { useApplication } from './lib/kibana/use_application';
+import { isAlertAttachmentType } from '../../common/utils/attachments';
 
 function getAlertsCount(attachments: CaseAttachmentsWithoutOwner): number {
   let alertsCount = 0;
@@ -78,7 +79,7 @@ function getToastContent({
   let toastContent;
   if (attachments !== undefined) {
     for (const attachment of attachments) {
-      if (attachment.type === AttachmentType.alert) {
+      if (attachment.type === AttachmentType.alert || isAlertAttachmentType(attachment.type)) {
         if (theCase.settings.syncAlerts && theCase.settings.extractObservables) {
           toastContent = CASE_ALERT_SUCCESS_SYNC_AND_EXTRACT_TEXT;
         } else if (theCase.settings.syncAlerts) {
