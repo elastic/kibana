@@ -302,6 +302,7 @@ export const ConnectorIconsMap: Map<
     '.azure_monitor',
     lazy(
       () => import(/* webpackChunkName: "connectorIconazuremonitor" */ './specs/azure_monitor/icon')
+    ),
   ],
   [
     '.aws_x_ray',
