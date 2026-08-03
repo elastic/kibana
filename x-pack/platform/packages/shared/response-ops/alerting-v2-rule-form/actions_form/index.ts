@@ -10,13 +10,7 @@ export {
   buildInlineWorkflowYaml,
   InvalidInlineWorkflowError,
 } from './helpers/build_inline_workflow_yaml';
-export { mapWorkflowToActionDraft } from './helpers/map_workflow_to_action_draft';
-export type { WorkflowForActionDraft } from './helpers/map_workflow_to_action_draft';
-export {
-  buildRuleScopedMatcher,
-  selectRuleSimpleActionPolicies,
-} from './helpers/rule_scoped_action_policies';
-export type { RuleScopedSimpleActionPolicy } from './helpers/rule_scoped_action_policies';
+export { buildRuleScopedMatcher } from './helpers/rule_scoped_action_policies';
 export {
   isExplicitlyLinkedToRule,
   isRuleScopedCatchAllMatcher,
@@ -35,7 +29,6 @@ export { InlineWorkflowEditor } from './components/inline_workflow_editor';
 export { isActionValid } from './types';
 export type {
   ActionDraft,
-  ActionDraftOrigin,
   ActionFormValue,
   ActionSource,
   ExistingWorkflowActionDraft,

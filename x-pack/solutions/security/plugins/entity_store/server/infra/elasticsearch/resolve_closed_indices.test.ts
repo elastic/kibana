@@ -307,6 +307,68 @@ describe('resolveClosedIndexAdjustments', () => {
     });
   });
 
+  it('limits concurrent batch resolveIndex calls to 30 at a time', async () => {
+    // Long names (~183 chars) keep each URL chunk to ~18 indices.
+    // 800 names → ~45 chunks, well above the 30 concurrency cap.
+    const longPrefix = '.ds-logs-climit-' + 'a'.repeat(160);
+    const allBackingIndices = Array.from(
+      { length: 800 },
+      (_, i) => `${longPrefix}-${String(i).padStart(6, '0')}`
+    );
+
+    let activeCalls = 0;
+    let peakActiveCalls = 0;
+    const pendingResolvers: Array<() => void> = [];
+
+    const resolveIndex = jest
+      .fn()
+      .mockResolvedValueOnce({
+        indices: [],
+        aliases: [],
+        data_streams: [
+          {
+            name: 'logs-climit',
+            backing_indices: allBackingIndices,
+            timestamp_field: '@timestamp',
+          },
+        ],
+      })
+      .mockImplementation(
+        () =>
+          new Promise((resolve) => {
+            activeCalls++;
+            peakActiveCalls = Math.max(peakActiveCalls, activeCalls);
+            pendingResolvers.push(() => {
+              activeCalls--;
+              resolve(emptyResolve);
+            });
+          })
+      );
+
+    const resultPromise = resolveClosedIndexAdjustments(
+      makeEsClient(resolveIndex),
+      ['logs-climit'],
+      logger
+    );
+
+    // Flush all microtasks so pLimit fills up to its concurrency cap before we inspect.
+    await new Promise<void>((resolve) => setImmediate(resolve));
+
+    expect(peakActiveCalls).toBe(30);
+    expect(activeCalls).toBe(30);
+
+    // Drain in rounds: resolving a batch lets pLimit start the next queued chunks.
+    while (pendingResolvers.length > 0) {
+      pendingResolvers.splice(0).forEach((r) => r());
+      await new Promise<void>((resolve) => setImmediate(resolve));
+    }
+
+    await resultPromise;
+
+    // Sanity check: there were more than 30 chunks, so the cap was actually exercised.
+    expect(resolveIndex.mock.calls.length - 1).toBeGreaterThan(30);
+  });
+
   it('returns empty result and logs a warning on resolveIndex failure', async () => {
     const resolveIndex = jest.fn().mockRejectedValue(new Error('connection refused'));
 

@@ -33,6 +33,19 @@ export const SHOW_METRICS = i18n.translate('xpack.cases.casesRedesign.details.sh
   defaultMessage: 'Show metrics',
 });
 
+export const TEMPLATE_NOT_FOUND = (name: string) =>
+  i18n.translate('xpack.cases.casesRedesign.details.templateNotFound', {
+    defaultMessage: '{name} (not found)',
+    values: { name },
+  });
+
+export const TEMPLATE_NOT_FOUND_GENERIC = i18n.translate(
+  'xpack.cases.casesRedesign.details.templateNotFoundGeneric',
+  {
+    defaultMessage: 'Template not found',
+  }
+);
+
 export const REPORTED_BY = (name: string) =>
   i18n.translate('xpack.cases.casesRedesign.details.reportedBy', {
     defaultMessage: 'Reported by: {name}',
@@ -161,19 +174,5 @@ export const LEGACY_CUSTOM_FIELDS_TITLE = i18n.translate(
   'xpack.cases.casesRedesign.details.legacyCustomFieldsTitle',
   {
     defaultMessage: 'Legacy custom fields',
-  }
-);
-
-export const LEGACY_CUSTOM_FIELDS_VIEW_CUSTOM_FIELDS = i18n.translate(
-  'xpack.cases.casesRedesign.details.legacyCustomFieldsViewCustomFields',
-  {
-    defaultMessage: 'custom fields',
-  }
-);
-
-export const LEGACY_CUSTOM_FIELDS_VIEW_SETTINGS = i18n.translate(
-  'xpack.cases.casesRedesign.details.legacyCustomFieldsViewSettings',
-  {
-    defaultMessage: 'settings',
   }
 );

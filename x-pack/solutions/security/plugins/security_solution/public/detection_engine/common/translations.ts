@@ -1686,3 +1686,10 @@ export const RULE_SETTINGS_TITLE = i18n.translate(
     defaultMessage: 'Settings',
   }
 );
+
+export const UPGRADE_PREBUILT_RULES_TABLE_CAPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.upgradePrebuiltRulesTableCaption',
+  {
+    defaultMessage: 'Prebuilt rules available for upgrade',
+  }
+);

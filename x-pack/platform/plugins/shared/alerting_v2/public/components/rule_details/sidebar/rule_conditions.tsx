@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiCodeBlock, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiCodeBlock, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { formatDuration } from '@kbn/alerting-plugin/common';
 import { getBreachEsqlQuery, getRootEsqlQuery } from '@kbn/alerting-v2-schemas';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
@@ -145,6 +145,9 @@ export const RuleConditions: React.FunctionComponent<RuleConditionsProps> = ({
       : []),
   ];
 
+  // The summary flyout renders the description in its header.
+  const description = isSummary ? undefined : rule.metadata.description;
+
   return (
     <>
       {isSummary && (
@@ -156,6 +159,14 @@ export const RuleConditions: React.FunctionComponent<RuleConditionsProps> = ({
               })}
             </h2>
           </EuiTitle>
+          <EuiSpacer size="m" />
+        </>
+      )}
+      {description && (
+        <>
+          <EuiText size="s" data-test-subj="ruleConditionsDescription">
+            <p>{description}</p>
+          </EuiText>
           <EuiSpacer size="m" />
         </>
       )}

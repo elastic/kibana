@@ -29,6 +29,7 @@ dependsOn:
   - '@kbn/shared-ux-error-boundary'
   - '@kbn/restorable-state'
   - '@kbn/core'
+  - '@kbn/scout'
 tags:
   - shared-browser
   - package

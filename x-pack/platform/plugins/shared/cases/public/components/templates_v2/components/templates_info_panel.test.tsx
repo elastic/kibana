@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 import { TemplatesInfoPanel } from './templates_info_panel';
 import { renderWithTestingProviders } from '../../../common/mock';
@@ -51,5 +52,26 @@ describe('TemplatesInfoPanel', () => {
     renderWithTestingProviders(<TemplatesInfoPanel />);
 
     expect(await screen.findByTestId('templates-info-panel-illustration')).toBeInTheDocument();
+  });
+
+  it('does not render the dismiss button when onDismiss is not provided', () => {
+    renderWithTestingProviders(<TemplatesInfoPanel />);
+
+    expect(screen.queryByTestId('templates-info-panel-dismiss')).not.toBeInTheDocument();
+  });
+
+  it('calls onDismiss when the dismiss button is clicked', async () => {
+    const onDismiss = jest.fn();
+    renderWithTestingProviders(<TemplatesInfoPanel onDismiss={onDismiss} />);
+
+    await userEvent.click(await screen.findByTestId('templates-info-panel-dismiss'));
+
+    expect(onDismiss).toHaveBeenCalled();
+  });
+
+  it('renders the start tour button when onStartTour is provided', async () => {
+    renderWithTestingProviders(<TemplatesInfoPanel onStartTour={jest.fn()} />);
+
+    expect(await screen.findByTestId('templates-info-panel-start-tour')).toBeInTheDocument();
   });
 });
