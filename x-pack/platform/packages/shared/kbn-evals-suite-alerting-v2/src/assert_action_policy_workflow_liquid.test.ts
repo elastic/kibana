@@ -93,7 +93,10 @@ steps:
 
   it('rejects YAML that is not a workflow document', () => {
     expect(() => assertActionPolicyWorkflowLiquid('just a string')).toThrow(
-      /not a workflow document/i
+      new Error(
+        'Generated workflow YAML is not a workflow document: ' +
+          '(root): Invalid input: expected object, received string'
+      )
     );
   });
 
@@ -106,7 +109,12 @@ steps:
       message: "{{ inputs.payload.episodes | "
 `;
 
-    expect(() => assertActionPolicyWorkflowLiquid(yaml)).toThrow(/invalid Liquid/i);
+    expect(() => assertActionPolicyWorkflowLiquid(yaml)).toThrow(
+      new Error(
+        'Generated workflow contains invalid Liquid template syntax: ' +
+          'output "{{ inputs.payload.episodes | " not closed, line:1, col:1'
+      )
+    );
   });
 
   it('rejects unknown inputs.payload fields', () => {
@@ -119,10 +127,12 @@ steps:
 `;
 
     expect(() => assertActionPolicyWorkflowLiquid(yaml)).toThrow(
-      /unknown `inputs\.payload` fields/i
+      new Error(
+        'Generated workflow Liquid references unknown `inputs.payload` fields: ' +
+          '`inputs.payload.alerts`, `inputs.payload.policy_id`. ' +
+          'Allowed top-level payload fields: id, policyId, groupKey, episodes, rules.'
+      )
     );
-    expect(() => assertActionPolicyWorkflowLiquid(yaml)).toThrow(/inputs\.payload\.policy_id/);
-    expect(() => assertActionPolicyWorkflowLiquid(yaml)).toThrow(/inputs\.payload\.alerts/);
   });
 
   it('rejects workflows with no inputs.payload references', () => {
@@ -138,8 +148,14 @@ steps:
       message: "{{ execution.url }} {{ event.alerts }}"
 `;
 
-    expect(() => assertActionPolicyWorkflowLiquid(yaml)).toThrow(/inputs\.payload/);
-    expect(() => assertActionPolicyWorkflowLiquid(yaml)).toThrow(/event\.alerts/);
+    expect(() => assertActionPolicyWorkflowLiquid(yaml)).toThrow(
+      new Error(
+        'Generated workflow Liquid does not reference `inputs.payload.*`. ' +
+          'Action-policy dispatch exposes alert data as `inputs.payload` ' +
+          '(mirrors `ActionPolicyWorkflowPayload`). ' +
+          'Found variables: `event.alerts`, `execution.url`.'
+      )
+    );
   });
 
   it('rejects workflows with no Liquid', () => {
@@ -155,7 +171,13 @@ steps:
       message: plain text
 `;
 
-    expect(() => assertActionPolicyWorkflowLiquid(yaml)).toThrow(/inputs\.payload/);
-    expect(() => assertActionPolicyWorkflowLiquid(yaml)).toThrow(/\(none\)/);
+    expect(() => assertActionPolicyWorkflowLiquid(yaml)).toThrow(
+      new Error(
+        'Generated workflow Liquid does not reference `inputs.payload.*`. ' +
+          'Action-policy dispatch exposes alert data as `inputs.payload` ' +
+          '(mirrors `ActionPolicyWorkflowPayload`). ' +
+          'Found variables: (none).'
+      )
+    );
   });
 });
