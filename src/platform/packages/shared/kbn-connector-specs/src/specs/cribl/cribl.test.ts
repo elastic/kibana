@@ -149,8 +149,10 @@ describe('Cribl', () => {
   });
 
   describe('listRoutes', () => {
-    it('reads the routing table scoped to a group', async () => {
-      mockRequest.mockResolvedValue(okResponse({ id: 'default', routes: [{ id: 'r1' }] }));
+    it('reads the routing table scoped to a group and unwraps the items envelope', async () => {
+      mockRequest.mockResolvedValue(
+        okResponse({ items: [{ id: 'default', routes: [{ id: 'r1' }] }], count: 1 })
+      );
 
       const result = await Cribl.actions.listRoutes.handler(mockContext, {
         groupName: 'myGroup',
@@ -168,13 +170,13 @@ describe('Cribl', () => {
   });
 
   describe('updateRoutes', () => {
-    it('sends the complete routes array as a full replace', async () => {
-      mockRequest.mockResolvedValue(okResponse({}));
+    it('sends the complete routes array as a full replace and unwraps the items envelope', async () => {
       const routes = [
         { id: 'r1', filter: 'true', pipeline: 'main', output: 'default', final: false },
       ];
+      mockRequest.mockResolvedValue(okResponse({ items: [{ id: 'default', routes }], count: 1 }));
 
-      await Cribl.actions.updateRoutes.handler(mockContext, {
+      const result = await Cribl.actions.updateRoutes.handler(mockContext, {
         groupName: 'myGroup',
         routeId: 'default',
         routes,
@@ -187,6 +189,7 @@ describe('Cribl', () => {
           data: { id: 'default', routes },
         })
       );
+      expect(result).toEqual({ id: 'default', routes });
     });
   });
 

@@ -428,7 +428,8 @@ export const Cribl: ConnectorSpec = {
           group: input.groupName,
           path: `/routes/${encodeURIComponent(input.routeId)}`,
         });
-        return response.data as RouteTable;
+        const data = response.data as WorkerGroupList;
+        return (data.items?.[0] as RouteTable | undefined) ?? { id: input.routeId, routes: [] };
       },
     },
 
@@ -448,7 +449,10 @@ export const Cribl: ConnectorSpec = {
           path: `/routes/${encodeURIComponent(input.routeId)}`,
           data: { id: input.routeId, routes: input.routes },
         });
-        return response.data as RouteTable;
+        const data = response.data as WorkerGroupList;
+        return (
+          (data.items?.[0] as RouteTable | undefined) ?? { id: input.routeId, routes: input.routes }
+        );
       },
     },
 
