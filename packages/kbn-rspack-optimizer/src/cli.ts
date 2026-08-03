@@ -141,8 +141,10 @@ export function runRspackCli(options: CliOptions = {}): void {
       }
 
       const effectiveDist = updateLimits || dist;
-      const effectiveExamples = updateLimits ? false : examples;
-      const effectiveTestPlugins = updateLimits ? false : testPlugins;
+      // CI validates distribution metrics built with example and test plugins, so limit updates
+      // must include the same plugin set.
+      const effectiveExamples = updateLimits || examples;
+      const effectiveTestPlugins = updateLimits || testPlugins;
 
       log.info('Building with RSPack unified compilation...');
 
