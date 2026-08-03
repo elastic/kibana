@@ -665,8 +665,10 @@ describe('Outputs preconfiguration', () => {
         },
       ]);
 
-      expect(mockedOutputService.create).toHaveBeenCalled();
-      expect(mockedOutputService.create.mock.calls[0][2].hosts).toEqual(['http://default-es:9200']);
+      expect(mockedOutputService.create).toBeCalled();
+      expect(mockedOutputService.create.mock.calls[0][2]).toMatchObject({
+        hosts: ['http://default-es:9200'],
+      });
     });
 
     it('should create a preconfigured logstash output that does not exist', async () => {
