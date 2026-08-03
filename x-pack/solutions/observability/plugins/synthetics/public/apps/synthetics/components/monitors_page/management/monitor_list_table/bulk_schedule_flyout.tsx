@@ -128,10 +128,13 @@ export const BulkScheduleFlyout = ({
     if (!allowSeconds) {
       return minutes;
     }
-    const seconds = ALLOWED_SCHEDULES_IN_SECONDS.map((value) => ({
-      value,
-      text: scheduleContent(parseInt(value, 10), true),
-    }));
+    const seconds = ALLOWED_SCHEDULES_IN_SECONDS.map((value) => {
+      const numeric = parseInt(value, 10);
+      // Force an explicit `s` suffix on the option value so toSchedule() can
+      // always tell seconds from minutes, even if ALLOWED_SCHEDULES_IN_SECONDS
+      // ever changes to bare numbers (e.g. '10' instead of '10s').
+      return { value: `${numeric}s`, text: scheduleContent(numeric, true) };
+    });
     return [...seconds, ...minutes];
   }, [allowSeconds]);
 
