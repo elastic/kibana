@@ -66,6 +66,35 @@ describe('schema_to_skill_docs', () => {
       );
     });
 
+    it('renders nullable fields as a type union, keeping array item types', () => {
+      const doc = generateApiSchemaDoc({
+        title: 'Nullable Example',
+        schema: z.object({
+          matcher: z.string().nullable().describe('KQL query, or null for a catch-all.'),
+          groupBy: z.array(z.string()).nullable().describe('Grouping fields.'),
+        }),
+      });
+
+      expect(doc).toContain(
+        '| `matcher` | string \\| null | required | KQL query, or null for a catch-all. |'
+      );
+      expect(doc).toContain('| `groupBy` | string[] \\| null | required | Grouping fields. |');
+    });
+
+    it('escapes union separators so each cell stays a single table column', () => {
+      const doc = generateApiSchemaDoc({
+        title: 'Enum Example',
+        schema: z.object({ mode: z.enum(['a', 'b', 'c']).describe('Mode.') }),
+      });
+
+      const rows = doc.split('\n').filter((line) => line.startsWith('| `mode`'));
+      expect(rows).toEqual([
+        '| `mode` | "a" \\| "b" \\| "c" | required | Mode. (enum: a \\| b \\| c) |',
+      ]);
+      // Unescaped `|` would split the enum cells into extra columns.
+      expect(rows[0].split(/(?<!\\)\|/).length - 2).toBe(4);
+    });
+
     it('appends extra sections from the converted JSON schema', () => {
       const doc = generateApiSchemaDoc({
         title: 'Example API Schema Reference',
@@ -234,6 +263,11 @@ describe('schema_to_skill_docs', () => {
       for (const field of Object.keys(episodeKeyGuard)) {
         expect(doc).toContain(`\`${field}\``);
       }
+    });
+
+    it('documents rule_id as nullable, since external-alert episodes have no rule', () => {
+      const doc = generateActionPolicyWorkflowPayloadDoc();
+      expect(doc).toContain('| `rule_id` | string \\| null | required |');
     });
 
     it('documents the inputs.payload Liquid access pattern', () => {

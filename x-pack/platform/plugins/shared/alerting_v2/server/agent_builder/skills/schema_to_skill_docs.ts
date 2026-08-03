@@ -90,6 +90,17 @@ function formatFieldConstraintsSummary(prop: JsonSchemaNode): string {
   return parts.join(', ');
 }
 
+/**
+ * JSON Schema `type` may be a union array — nullable fields are emitted as
+ * `['string', 'null']` rather than as an `anyOf`.
+ */
+function formatTypeKeyword(type: unknown): string {
+  if (Array.isArray(type)) {
+    return (type as string[]).join(' | ');
+  }
+  return (type as string) ?? 'unknown';
+}
+
 function resolveType(prop: JsonSchemaNode): string {
   if (prop.const !== undefined) {
     return `"${prop.const}"`;
@@ -98,13 +109,7 @@ function resolveType(prop: JsonSchemaNode): string {
     return (prop.enum as string[]).map((v) => `"${v}"`).join(' | ');
   }
   if (prop.anyOf !== undefined && Array.isArray(prop.anyOf)) {
-    return (prop.anyOf as JsonSchemaNode[])
-      .map((variant) => {
-        if (variant.enum) return (variant.enum as string[]).map((v) => `"${v}"`).join(' | ');
-        if (variant.const !== undefined) return `"${variant.const}"`;
-        return (variant.type as string) ?? 'unknown';
-      })
-      .join(' | ');
+    return (prop.anyOf as JsonSchemaNode[]).map(resolveType).join(' | ');
   }
   if (prop.oneOf !== undefined && Array.isArray(prop.oneOf)) {
     return (prop.oneOf as JsonSchemaNode[])
@@ -119,12 +124,13 @@ function resolveType(prop: JsonSchemaNode): string {
       })
       .join(' | ');
   }
-  if (prop.type === 'array') {
+  const types = Array.isArray(prop.type) ? (prop.type as string[]) : [prop.type as string];
+  if (types.includes('array')) {
     const items = prop.items as JsonSchemaNode | undefined;
     const itemType = items ? resolveType(items) : 'unknown';
-    return `${itemType}[]`;
+    return [`${itemType}[]`, ...types.filter((t) => t !== 'array')].join(' | ');
   }
-  return (prop.type as string) ?? 'unknown';
+  return formatTypeKeyword(prop.type);
 }
 
 function jsonSchemaToFieldTable(jsonSchema: unknown): FieldInfo[] {
@@ -146,14 +152,21 @@ function jsonSchemaToFieldTable(jsonSchema: unknown): FieldInfo[] {
   });
 }
 
+/** Type unions and enum lists contain `|`, which would otherwise split the cell into extra columns. */
+function escapeTableCell(value: string): string {
+  return value.replace(/\|/g, '\\|');
+}
+
 function formatFieldTable(fields: FieldInfo[]): string {
   if (fields.length === 0) return '';
-  const rows = fields.map(
-    (f) =>
-      `| \`${f.name}\` | ${f.type} | ${f.required ? 'required' : 'optional'} | ${f.description}${
-        f.constraints ? ` (${f.constraints})` : ''
-      } |`
-  );
+  const rows = fields.map((f) => {
+    const description = escapeTableCell(
+      `${f.description}${f.constraints ? ` (${f.constraints})` : ''}`
+    );
+    return `| \`${f.name}\` | ${escapeTableCell(f.type)} | ${
+      f.required ? 'required' : 'optional'
+    } | ${description} |`;
+  });
   return ['| Field | Type | Required | Description |', '|---|---|---|---|', ...rows].join('\n');
 }
 
