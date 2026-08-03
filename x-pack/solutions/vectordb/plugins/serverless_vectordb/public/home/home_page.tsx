@@ -13,6 +13,7 @@ import {
   EuiPageTemplate,
   EuiShowFor,
   EuiSpacer,
+  useEuiTheme,
   type UseEuiTheme,
 } from '@elastic/eui';
 import { TrialUsageBadge, CloudLinks } from '@kbn/shared-components';
@@ -25,12 +26,7 @@ import { HomePageStatPanel } from './home_page_stat_panel';
 import { AddDataSection } from './add_data_section';
 import { ChatWithYourDataSection } from './chat_with_data_section';
 import { useKibana } from '../hooks/use_kibana';
-import { STAT_TILE_LABELS } from '../constants';
-
-const VerticalSeparatorStyle = ({ euiTheme }: UseEuiTheme) => css`
-  border-left: ${euiTheme.border.thin};
-  height: ${euiTheme.size.l};
-`;
+import { STAT_TILE_LABELS, PLACEHOLDER_DEPLOYMENT_STATS } from '../constants';
 
 export const HomePage = () => {
   const {
@@ -38,7 +34,9 @@ export const HomePage = () => {
   } = useKibana();
   const { stats, isLoading } = useDeploymentStats();
   const { elasticsearchUrl, apiKey, isLoading: isCredentialsLoading } = useOnboardingCredentials();
-  const hasData = (stats.vectorDocsCount ?? 0) > 0 || (stats.indicesCount ?? 0) > 0;
+  const { euiTheme } = useEuiTheme();
+  const hasData =
+    (PLACEHOLDER_DEPLOYMENT_STATS.vectorsCount ?? 0) > 0 || (stats.indicesCount ?? 0) > 0;
 
   const dataStats = [
     {
@@ -56,8 +54,8 @@ export const HomePage = () => {
     {
       key: 'vectors',
       label: STAT_TILE_LABELS.vectors,
-      value: formatNumber(stats.vectorDocsCount),
-      isLoading,
+      value: formatNumber(PLACEHOLDER_DEPLOYMENT_STATS.vectorsCount),
+      isLoading: false,
     },
     {
       key: 'totalSize',
@@ -85,8 +83,10 @@ export const HomePage = () => {
                     <TrialUsageBadge cloud={cloud} />
                   </EuiFlexItem>
                   <EuiShowFor sizes={['m', 'l', 'xl']}>
-                    <EuiFlexItem grow={false}>
-                      <span css={VerticalSeparatorStyle} />
+                    <EuiFlexItem grow={false} css={css`
+                    border-left: ${euiTheme.border.thin};
+                    height: ${euiTheme.size.l};`
+                    }>
                     </EuiFlexItem>
                   </EuiShowFor>
                 </>
@@ -298,7 +298,7 @@ export const HomePage = () => {
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
-      </EuiPageTemplate.Section>
-    </EuiPageTemplate>
+      </EuiPageTemplate.Section >
+    </EuiPageTemplate >
   );
 };

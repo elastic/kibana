@@ -70,3 +70,10 @@ export const STAT_TILE_LABELS = {
     defaultMessage: 'Expiring',
   }),
 };
+
+/**
+ * Placeholder stats
+ */
+export const PLACEHOLDER_DEPLOYMENT_STATS = {
+  vectorsCount: null as number | null,
+} as const;
