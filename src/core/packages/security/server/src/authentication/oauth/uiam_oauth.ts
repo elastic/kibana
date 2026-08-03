@@ -139,15 +139,17 @@ export interface UiamOAuthType {
   ): Promise<UiamOAuthClientResponse | null>;
 
   /**
-   * Lists OAuth connections, optionally filtered by client ID and/or connection ID.
+   * Lists OAuth connections, optionally filtered by client ID, connection ID and/or project ID.
    * @param request The Kibana request containing the authorization header.
    * @param clientId Optional client ID filter.
    * @param connectionId Optional connection ID filter.
+   * @param projectId Optional project ID filter.
    */
   listConnections(
     request: KibanaRequest,
     clientId?: string,
-    connectionId?: string
+    connectionId?: string,
+    projectId?: string
   ): Promise<{ connections: UiamOAuthConnectionResponse[] } | null>;
 
   /**

@@ -8,12 +8,14 @@
  */
 
 import type { EuiSwitchEvent } from '@elastic/eui';
-import { EuiCallOut, EuiSpacer, EuiSwitch, EuiText, useEuiTheme } from '@elastic/eui';
+import { EuiSpacer, EuiSwitch, EuiText, useEuiTheme } from '@elastic/eui';
 import type { ReactNode } from 'react';
 import React, { useState } from 'react';
 import { FormattedMessage, FormattedRelativeTime, FormattedDate } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import type { TimeRange } from '@kbn/es-query';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import {
   convertRelativeTimeStringToAbsoluteTimeDate,
   getRelativeTimeValueAndUnitFromTimeString,
@@ -123,11 +125,6 @@ const RelativeTimeText = ({
   );
 };
 
-interface TimeRange {
-  from: string;
-  to: string;
-}
-
 interface Props {
   timeRange?: TimeRange;
   isAbsoluteTimeByDefault: boolean;
@@ -214,7 +211,7 @@ export const TimeTypeSection = ({
       </EuiText>
       <EuiSpacer size="m" />
       {isAbsoluteTimeByDefault && (
-        <EuiCallOut
+        <KbnInfoCallout
           announceOnMount
           size="s"
           title={i18n.translate('share.link.timeRange.relativeTimeCallout', {
