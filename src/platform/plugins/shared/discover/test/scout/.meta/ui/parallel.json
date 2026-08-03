@@ -1,5 +1,5 @@
 {
-  "sha1": "a7c53f93ce2aeb580c6c4054e41a93d2597b3ab6",
+  "sha1": "a35ecd3d40937f7af9498ccc9da2a54c3eb38948",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -1512,6 +1512,71 @@
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/unmapped_fields.spec.ts",
         "line": 70,
         "column": 12
+      }
+    },
+    {
+      "id": "35067bbcb21d5b1-28cdc8d1189eea3",
+      "title": "Discover feature controls — share and reporting discover:all gets a short share URL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/feature_controls/discover_share_and_reporting.spec.ts",
+        "line": 37,
+        "column": 14
+      }
+    },
+    {
+      "id": "35067bbcb21d5b1-00052ff5a8cd2fa",
+      "title": "Discover feature controls — share and reporting discover:all can generate a CSV report",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/feature_controls/discover_share_and_reporting.spec.ts",
+        "line": 47,
+        "column": 14
+      }
+    },
+    {
+      "id": "35067bbcb21d5b1-3f1dc73612eea1e",
+      "title": "Discover feature controls — share and reporting discover:read + url_create also gets a short share URL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/feature_controls/discover_share_and_reporting.spec.ts",
+        "line": 55,
+        "column": 14
+      }
+    },
+    {
+      "id": "35067bbcb21d5b1-658b64ad2978e8b",
+      "title": "Discover feature controls — share and reporting discover:read without url_create only gets a long share URL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/feature_controls/discover_share_and_reporting.spec.ts",
+        "line": 68,
+        "column": 14
+      }
+    },
+    {
+      "id": "35067bbcb21d5b1-c763afe8d7022e3",
+      "title": "Discover feature controls — share and reporting discover:read snapshot URL encodes the current query, sort and time range",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/feature_controls/discover_share_and_reporting.spec.ts",
+        "line": 82,
+        "column": 14
       }
     },
     {
