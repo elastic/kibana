@@ -574,8 +574,10 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
 
                   if (
                     !existingAlert ||
-                    getAlertSourceField<string>(existingAlert._source, ALERT_RULE_EXECUTION_UUID) ===
-                      options.executionId
+                    getAlertSourceField<string>(
+                      existingAlert._source,
+                      ALERT_RULE_EXECUTION_UUID
+                    ) === options.executionId
                   ) {
                     return true;
                   }

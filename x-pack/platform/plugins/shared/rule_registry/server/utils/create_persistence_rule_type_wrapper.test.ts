@@ -358,9 +358,9 @@ describe('getUpdatedSuppressionBoundaries', () => {
 
 describe('getAlertSourceField', () => {
   it('should read a field stored with a flat dotted key', () => {
-    expect(
-      getAlertSourceField({ [ALERT_INSTANCE_ID]: 'instance-id-1' }, ALERT_INSTANCE_ID)
-    ).toBe('instance-id-1');
+    expect(getAlertSourceField({ [ALERT_INSTANCE_ID]: 'instance-id-1' }, ALERT_INSTANCE_ID)).toBe(
+      'instance-id-1'
+    );
   });
 
   it('should read a field when `_source` is returned in nested form', () => {
@@ -376,10 +376,7 @@ describe('getAlertSourceField', () => {
 
   it('should read a field when `_source` is returned in partially nested form', () => {
     expect(
-      getAlertSourceField(
-        { 'kibana.alert': { 'instance.id': 'instance-id-1' } },
-        ALERT_INSTANCE_ID
-      )
+      getAlertSourceField({ 'kibana.alert': { 'instance.id': 'instance-id-1' } }, ALERT_INSTANCE_ID)
     ).toBe('instance-id-1');
     expect(
       getAlertSourceField(
