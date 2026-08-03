@@ -25,13 +25,13 @@ import type {
 import type { EsHitRecord } from '@kbn/discover-utils';
 import type {
   EntityType,
+  RunTimeMappings,
   TimelineFactoryQueryTypes,
   TimelineRequestSortField,
   TimelineStrategyResponseType,
 } from '@kbn/timelines-plugin/common/search_strategy';
 import { dataTableActions, Direction } from '@kbn/securitysolution-data-table';
 import { DETECTIONS_TABLE_IDS } from '../../../detections/constants';
-import type { RunTimeMappings } from '../../../sourcerer/store/model';
 import { TimelineEventsQueries } from '../../../../common/search_strategy';
 import type { KueryFilterQueryKind } from '../../../../common/types';
 import type { ESQuery } from '../../../../common/typed_json';

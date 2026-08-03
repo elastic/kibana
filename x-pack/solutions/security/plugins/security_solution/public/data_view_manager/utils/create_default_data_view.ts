@@ -6,7 +6,6 @@
  */
 
 import type { CoreStart } from '@kbn/core/public';
-import type { KibanaDataView, SourcererModel } from '../../sourcerer/store/model';
 import { initDataView } from '../../sourcerer/store/model';
 import { initializeSecuritySolution } from '../../common/components/initialization/api';
 import {
@@ -24,15 +23,17 @@ export interface CreateDefaultDataViewDependencies {
   skip?: boolean;
 }
 
+type DataViewEntry = typeof initDataView;
+
 export const createDefaultDataView = async ({
   http,
   application,
   skip = false,
 }: CreateDefaultDataViewDependencies) => {
-  let defaultDataView: SourcererModel['defaultDataView'];
-  let alertDataView: SourcererModel['alertDataView'];
-  let attackDataView: SourcererModel['attackDataView'];
-  let kibanaDataViews: SourcererModel['kibanaDataViews'];
+  let defaultDataView: DataViewEntry;
+  let alertDataView: DataViewEntry;
+  let attackDataView: DataViewEntry;
+  let kibanaDataViews: DataViewEntry[];
 
   const signal: { name: string | null; index_mapping_outdated: null | boolean } = {
     index_mapping_outdated: null,
@@ -80,7 +81,7 @@ export const createDefaultDataView = async ({
     attackDataView = payload.attackDataView
       ? { ...initDataView, ...payload.attackDataView }
       : { ...initDataView };
-    kibanaDataViews = payload.kibanaDataViews.map((dataView: KibanaDataView) => ({
+    kibanaDataViews = payload.kibanaDataViews.map((dataView) => ({
       ...initDataView,
       ...dataView,
     }));
