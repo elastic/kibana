@@ -2,12 +2,12 @@
 #
 # One-command demo seed for the Nightshift landing page.
 #
-# Seeds significant events, discoveries, detections, backing stream data, and
-# Knowledge Indicator (KI) entity features, then triggers an investigation for
-# every event so the full UI is populated:
+# Seeds significant events, discoveries, detections, backing stream data,
+# Knowledge Indicator (KI) entity/query links, and rule-event occurrence series,
+# then triggers an investigation for every event so the full UI is populated:
 #   - Landing page (Need action / Resolved, blast-radius stream chips)
-#   - Event flyout (summary, detections list, lifecycle)
-#   - Detection flyout (trend chart, ES|QL evidence, entity pills)
+#   - Event flyout (summary, detections list, real occurrence sparklines, lifecycle)
+#   - Detection flyout (real occurrence trend chart, ES|QL evidence, entity pills)
 #   - Entity flyout (summary, evidence, raw document)
 #
 # Summaries use backtick-wrapped entity names for inline code styling in flyouts (see
@@ -113,6 +113,13 @@ print(lengthen_significant_events_ndjson(os.environ["BODY"]), end="")
 '
 }
 
+normalize_evidence_bucket_size() {
+  local body="$1"
+  body="${body//BUCKET(@timestamp, 1 minute)/BUCKET(@timestamp, 5 minutes)}"
+  body="${body//BUCKET(@timestamp, 5 minute)/BUCKET(@timestamp, 5 minutes)}"
+  printf "%s" "$body"
+}
+
 trigger_investigation() {
   local event_uuid="$1"
   local response_file
@@ -149,6 +156,7 @@ trigger_investigation() {
 if [[ "$CLEAN" == "true" ]]; then
   echo "Cleaning prior Nightshift seed indices ..."
   for idx in "$INDEX" "$DETECTIONS_INDEX" "$DISCOVERIES_INDEX"; do
+    curl -s -u "$ES_AUTH" -X DELETE "${ES_URL}/_data_stream/${idx}" >/dev/null || true
     curl -s -u "$ES_AUTH" -X DELETE "${ES_URL}/${idx}" >/dev/null || true
     echo "  deleted ${idx} (if it existed)"
   done
@@ -214,6 +222,7 @@ EVENTS_BODY=$(cat <<NDJSON
 NDJSON
 )
 
+EVENTS_BODY="$(normalize_evidence_bucket_size "$EVENTS_BODY")"
 EVENTS_BODY="$(lengthen_significant_events_ndjson "$EVENTS_BODY")"
 
 bulk_index "9 significant events" "$INDEX" "$EVENTS_BODY"
@@ -280,18 +289,23 @@ DISCOVERIES_BODY=$(cat <<NDJSON
 NDJSON
 )
 
+DISCOVERIES_BODY="$(normalize_evidence_bucket_size "$DISCOVERIES_BODY")"
 DISCOVERIES_BODY="$(lengthen_significant_events_ndjson "$DISCOVERIES_BODY")"
 
 bulk_index "9 discoveries" "$DISCOVERIES_INDEX" "$DISCOVERIES_BODY"
 echo "Successfully indexed 9 discoveries."
 
 # ---------------------------------------------------------------------------
-# Backing stream indices + KI entity features (Python)
+# Backing streams + KI features/query links + rule-event occurrences (Python)
 # ---------------------------------------------------------------------------
 echo ""
-echo "Seeding backing stream indices and KI entity features ..."
+echo "Seeding backing streams, Knowledge Indicators, and detection occurrences ..."
 
-ES_URL="$ES_URL" ES_AUTH="$ES_AUTH" KIBANA_URL="$KIBANA_URL" python3 "${SCRIPT_DIR}/seed_nightshift_helpers.py"
+ES_URL="$ES_URL" \
+  ES_AUTH="$ES_AUTH" \
+  KIBANA_URL="$KIBANA_URL" \
+  DETECTIONS_BODY="$DETECTIONS_BODY" \
+  python3 "${SCRIPT_DIR}/seed_nightshift_helpers.py"
 
 echo ""
 echo "Triggering investigations for open landing-visible significant events ..."
@@ -313,6 +327,7 @@ echo "Done! Open Nightshift to explore:"
 echo "  - Need action: open critical events (evt-001, evt-002, evt-003, evt-006, evt-008, evt-009)"
 echo "  - Resolved: closed critical events (evt-004, evt-005) and dismissed evt-007"
 echo "  - Investigations: triggered for all 9 seeded events"
+echo "  - Detections: real occurrence sparklines backed by .rule-events"
 echo "  - Event flyout → detection flyout → entity pill for KI-backed entities"
 echo ""
 echo "Tip: re-run with --clean to wipe and re-seed from scratch."
