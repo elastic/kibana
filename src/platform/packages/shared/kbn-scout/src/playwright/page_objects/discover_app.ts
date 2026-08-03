@@ -293,7 +293,6 @@ export class DiscoverApp {
       await row.locator('[data-test-subj="toggle"]').click();
     }
     const input = row.locator('textarea, input');
-    await input.waitFor({ state: 'visible' });
     await input.fill(description);
   }
 
@@ -320,7 +319,6 @@ export class DiscoverApp {
     await fieldEditor.waitFor({ state: 'visible' });
     await this.page.testSubj.click('closeFlyoutButton');
     const confirmButton = this.page.testSubj.locator('confirmModalConfirmButton');
-    await confirmButton.waitFor({ state: 'visible' });
     await confirmButton.click();
     await fieldEditor.waitFor({ state: 'hidden' });
   }
@@ -333,7 +331,6 @@ export class DiscoverApp {
     await field.waitFor({ state: 'visible' });
     await field.click();
     const deleteButton = this.page.testSubj.locator(`discoverFieldListPanelDelete-${fieldName}`);
-    await deleteButton.waitFor({ state: 'visible' });
     await deleteButton.click();
     await this.page.testSubj.fill('deleteModalConfirmText', 'REMOVE');
     await this.page.testSubj.click('confirmModalConfirmButton');
