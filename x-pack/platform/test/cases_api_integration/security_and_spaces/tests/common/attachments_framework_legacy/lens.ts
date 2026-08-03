@@ -170,6 +170,8 @@ export default ({ getService }: FtrProviderContext): void => {
         params: persistableStateAttachment,
       });
 
+      const updatedState = { attributes: { title: 'Updated visualization' } };
+
       await updateComment({
         supertest,
         caseId: postedCase.id,
@@ -177,7 +179,7 @@ export default ({ getService }: FtrProviderContext): void => {
           id: patchedCase.comments![0].id,
           version: patchedCase.comments![0].version,
           ...persistableStateAttachment,
-          persistableStateAttachmentState: { foo: 'bar' },
+          persistableStateAttachmentState: updatedState,
         },
       });
 
@@ -192,7 +194,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       expect(comment).to.eql({
         ...persistableStateAttachment,
-        persistableStateAttachmentState: { foo: 'bar' },
+        persistableStateAttachmentState: updatedState,
         created_by: defaultUser,
         pushed_at: null,
         pushed_by: null,
