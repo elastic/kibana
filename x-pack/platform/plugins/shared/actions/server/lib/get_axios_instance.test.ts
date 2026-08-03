@@ -442,7 +442,7 @@ describe('getAxiosInstance', () => {
     });
 
     // @ts-expect-error
-    result!.interceptors.request.handlers[1].fulfilled({ url: 'https://example.com/api' });
+    void result!.interceptors.request.handlers[1].fulfilled({ url: 'https://example.com/api' });
 
     expect(configurationUtilities.ensureUriAllowed).toHaveBeenCalledWith('https://example.com/api');
   });
@@ -468,7 +468,9 @@ describe('getAxiosInstance', () => {
     let thrown: Error | undefined;
     try {
       // @ts-expect-error
-      result!.interceptors.request.handlers[1].fulfilled({ url: 'https://denied.example.com/api' });
+      void result!.interceptors.request.handlers[1].fulfilled({
+        url: 'https://denied.example.com/api',
+      });
     } catch (e) {
       thrown = e as Error;
     }
@@ -487,7 +489,7 @@ describe('getAxiosInstance', () => {
     });
 
     // @ts-expect-error
-    result!.interceptors.request.handlers[1].fulfilled({
+    void result!.interceptors.request.handlers[1].fulfilled({
       url: '/api/resource',
       baseURL: 'https://myhost.example.com',
     });
@@ -519,7 +521,7 @@ describe('getAxiosInstance', () => {
     expect(result!.interceptors.request.handlers.length).toBe(2);
 
     // @ts-expect-error
-    result!.interceptors.request.handlers[1].fulfilled({
+    void result!.interceptors.request.handlers[1].fulfilled({
       url: 'https://pfx-target.example.com/api',
     });
 
