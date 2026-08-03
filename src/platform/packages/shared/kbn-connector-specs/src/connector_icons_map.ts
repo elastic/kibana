@@ -299,4 +299,14 @@ export const ConnectorIconsMap: Map<
     '.jenkins',
     lazy(() => import(/* webpackChunkName: "connectorIconjenkins" */ './specs/jenkins/icon')),
   ],
+
+  [
+    '.prometheus_alertmanager',
+    lazy(
+      () =>
+        import(
+          /* webpackChunkName: "connectorIconPrometheusAlertmanager" */ './specs/prometheus_alertmanager/icon'
+        )
+    ),
+  ],
 ]);
