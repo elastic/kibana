@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   EuiBadge,
   EuiButtonEmpty,
@@ -26,6 +26,7 @@ import { css } from '@emotion/react';
 import moment from 'moment';
 import { labels } from '../../../utils/i18n';
 import { resolveOwnerLabel } from '../../../utils/owner';
+import { useOwnerProfiles } from '../../../hooks/use_owner_profiles';
 import { AgentAvatar } from '../../common/agent_avatar';
 import { AgentAccessControlModeBadge } from '../list/agent_access_control_mode_badge';
 import { AgentTypeBadge, isPreconfiguredAgentType } from '../list/agent_type_badge';
@@ -52,6 +53,8 @@ export const AgentHeader: React.FC<AgentHeaderProps> = ({
   onManageAccess,
 }) => {
   const { euiTheme } = useEuiTheme();
+  const agentList = useMemo(() => [agent], [agent]);
+  const profileMap = useOwnerProfiles(agentList);
 
   const textSubduedStyles = css`
     color: ${euiTheme.colors.textSubdued};
@@ -66,8 +69,8 @@ export const AgentHeader: React.FC<AgentHeaderProps> = ({
     align-self: center;
   `;
 
-  const byAuthorLabel = resolveOwnerLabel(agent.created_by?.username);
-  const lastUpdatedByLabel = resolveOwnerLabel(agent.updated_by?.username);
+  const byAuthorLabel = resolveOwnerLabel(agent.created_by, profileMap);
+  const lastUpdatedByLabel = resolveOwnerLabel(agent.updated_by, profileMap);
   const createdAtRelative = agent.created_at ? moment(agent.created_at).fromNow() : undefined;
   const createdAtAbsolute = agent.created_at ? moment(agent.created_at).format('LL LT') : undefined;
   const updatedAtRelative = agent.updated_at ? moment(agent.updated_at).fromNow() : undefined;

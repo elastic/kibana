@@ -29,6 +29,7 @@ import moment from 'moment';
 import React, { useMemo } from 'react';
 import type { AgentDefinitionWithPermissions } from '../../../../../common/http_api/agents';
 import { resolveOwnerLabel } from '../../../utils/owner';
+import { useOwnerProfiles } from '../../../hooks/use_owner_profiles';
 import { useDeleteAgent } from '../../../context/delete_agent_context';
 import { useAgentBuilderAgents } from '../../../hooks/agents/use_agents';
 import { useNavigation } from '../../../hooks/use_navigation';
@@ -43,8 +44,12 @@ import { AgentTypeBadge, isPreconfiguredAgentType } from './agent_type_badge';
 import { AccessFlyout } from '../access/access_flyout';
 import { accessSummaryManageButton } from '../access/access_i18n';
 
-const renderOwnerCell = (username?: string, date?: string) => {
-  const label = resolveOwnerLabel(username);
+const renderOwnerCell = (
+  owner: { id?: string; username?: string } | undefined,
+  date?: string,
+  profileMap?: Map<string, string>
+) => {
+  const label = resolveOwnerLabel(owner, profileMap);
   const relativeDate = date ? moment(date).fromNow() : undefined;
 
   if (!label && !relativeDate) {
@@ -116,6 +121,7 @@ const actionLabels = {
 
 export const AgentsList: React.FC = () => {
   const { agents, isLoading, error } = useAgentBuilderAgents();
+  const profileMap = useOwnerProfiles(agents ?? []);
   const { createAgentBuilderUrl } = useNavigation();
   const { deleteAgent } = useDeleteAgent();
   const { manageAgents } = useUiPrivileges();
@@ -209,7 +215,7 @@ export const AgentsList: React.FC = () => {
       render: (
         createdBy: AgentDefinitionWithPermissions['created_by'],
         agent: AgentDefinitionWithPermissions
-      ) => renderOwnerCell(createdBy?.username, agent.created_at),
+      ) => renderOwnerCell(createdBy, agent.created_at, profileMap),
       'data-test-subj': 'agentBuilderAgentsListCreatedBy',
     };
 
@@ -220,7 +226,7 @@ export const AgentsList: React.FC = () => {
       render: (
         updatedBy: AgentDefinitionWithPermissions['updated_by'],
         agent: AgentDefinitionWithPermissions
-      ) => renderOwnerCell(updatedBy?.username, agent.updated_at),
+      ) => renderOwnerCell(updatedBy, agent.updated_at, profileMap),
       'data-test-subj': 'agentBuilderAgentsListLastUpdatedBy',
     };
 
@@ -310,7 +316,7 @@ export const AgentsList: React.FC = () => {
       agentLastUpdatedBy,
       agentActions,
     ];
-  }, [createAgentBuilderUrl, deleteAgent, manageAgents, canManageAgentAccess]);
+  }, [createAgentBuilderUrl, deleteAgent, manageAgents, canManageAgentAccess, profileMap]);
 
   const errorMessage = useMemo(
     () =>

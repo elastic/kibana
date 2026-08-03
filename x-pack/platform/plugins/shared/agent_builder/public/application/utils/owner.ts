@@ -8,5 +8,12 @@
 import { SYSTEM_USER_ID } from '@kbn/agent-builder-common/constants';
 import { labels } from './i18n';
 
-export const resolveOwnerLabel = (username?: string): string | undefined =>
-  username === SYSTEM_USER_ID ? labels.agentOverview.createdByElastic : username;
+export const resolveOwnerLabel = (
+  owner: { id?: string; username?: string } | undefined,
+  profileMap?: Map<string, string>
+): string | undefined => {
+  if (!owner) return undefined;
+  if (owner.username === SYSTEM_USER_ID) return labels.agentOverview.createdByElastic;
+  const resolved = owner.id ? profileMap?.get(owner.id) : undefined;
+  return resolved ?? owner.username;
+};

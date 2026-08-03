@@ -42,7 +42,7 @@ export const getUserFromRequest = async ({
   if (authUser?.username) {
     return {
       id: authUser.profile_uid,
-      username: authUser.full_name || authUser.username,
+      username: authUser.username,
     };
   }
 
@@ -51,7 +51,7 @@ export const getUserFromRequest = async ({
   const authResponse = await esClient.security.authenticate();
   return {
     id: authUser?.profile_uid,
-    username: authResponse.full_name || authResponse.username,
+    username: authResponse.username,
   };
 };
 
