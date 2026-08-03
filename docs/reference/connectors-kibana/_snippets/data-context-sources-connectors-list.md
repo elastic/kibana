@@ -4,7 +4,7 @@
 - [Ansible Control Server](/reference/connectors-kibana/ansible-controller-action-type.md): Launch and monitor Ansible Automation Controller / AWX jobs.
 - [Argo CD](/reference/connectors-kibana/argocd-action-type.md): Manage GitOps applications in Argo CD — sync, inspect health and resources.
 - [Azure Blob Storage](/reference/connectors-kibana/azure-blob-action-type.md): List containers and blobs, and retrieve blob content from Azure Blob Storage.
-- [Azure monitor](/reference/connectors-kibana/azure-monitor-action-type.md): List and triage alerts, query metrics and logs, and control alert rules in Azure Monitor.
+- [Azure Monitor](/reference/connectors-kibana/azure-monitor-action-type.md): List and triage alerts, query metrics and logs, and control alert rules in Azure Monitor.
 - [BigQuery](/reference/connectors-kibana/bigquery-action-type.md): Run GoogleSQL queries and retrieve results from Google BigQuery.
 - [Box](/reference/connectors-kibana/box-action-type.md): Search files and folders, read content, and query enterprise content using Box AI.
 - [Brave Search](/reference/connectors-kibana/brave-search-action-type.md): Search the web using the Brave Search API.
