@@ -32,14 +32,14 @@ import { isComputedFeature, QUERY_TYPE_STATS } from '@kbn/significant-events-sch
 import type { Feature } from '@kbn/significant-events-schema';
 import { upperFirst } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useKibana } from '../../../../hooks/use_kibana';
-import { useTimefilter } from '../../../../hooks/use_timefilter';
-import { buildFeatureDiscoverParams } from '../../significant_events_discovery/utils/discover_helpers';
+import { useKibana } from '../../../hooks/use_kibana';
+import { useTimefilter } from '../../../hooks/use_timefilter';
+import { buildFeatureDiscoverParams } from '../../../pages/significant_events/utils/discover_helpers';
 import { getKnowledgeIndicatorItemId } from '../utils/get_knowledge_indicator_item_id';
 import { getConfidenceColor } from '../utils/get_confidence_color';
-import { FlyoutMetadataCard } from '../../../flyout_components/flyout_metadata_card';
-import { FlyoutToolbarHeader } from '../../../flyout_components/flyout_toolbar_header';
-import { SeverityBadge } from '../../significant_events_discovery/components/severity_badge/severity_badge';
+import { FlyoutMetadataCard } from '../../flyout_components/flyout_metadata_card';
+import { FlyoutToolbarHeader } from '../../flyout_components/flyout_toolbar_header';
+import { SeverityBadge } from '../../../pages/significant_events/components/severity_badge/severity_badge';
 import { useStreamKnowledgeIndicatorsBulkDelete } from '../hooks/use_stream_knowledge_indicators_bulk_delete';
 import { useRulesDemote } from '../hooks/use_queries_bulk_delete';
 import {
@@ -49,8 +49,8 @@ import {
   RESTORE_LABEL,
   PROMOTE_LABEL,
 } from '../hooks/use_knowledge_indicator_actions';
-import { useBlocksNewActivity } from '../../../../hooks/significant_events/use_significant_events_maintenance';
-import { STATS_PROMOTE_DISABLED_TOOLTIP } from '../../significant_events_discovery/components/queries_table/translations';
+import { useBlocksNewActivity } from '../../../hooks/use_significant_events_maintenance';
+import { STATS_PROMOTE_DISABLED_TOOLTIP } from '../../../pages/significant_events/components/queries_table/translations';
 import { DeleteTableItemsModal } from '../delete_table_items_modal';
 import { getKnowledgeIndicatorStreamName } from '../utils/get_knowledge_indicator_stream_name';
 import { KnowledgeIndicatorFeatureDetailsContent } from './knowledge_indicator_feature_details_content';

@@ -16,7 +16,6 @@ import { isEmpty } from 'lodash';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
-import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
 import { useTimefilter } from '../../hooks/use_timefilter';
 import { StreamsAppHeader, StreamsAppPageTemplate } from '../streams_app_page_template';
@@ -42,7 +41,6 @@ export function StreamListView() {
   } = context;
   const streamsDocsLink = core.docLinks.links.observability.logsStreams;
   const { onPageReady } = usePerformanceContext();
-  const router = useStreamsAppRouter();
 
   const { timeState } = useTimefilter();
   const streamsListFetch = useStreamsAppFetch(
@@ -59,7 +57,7 @@ export function StreamListView() {
 
   const {
     ui: { manage: canManageStreamsKibana },
-    features: { significantEvents, queryStreams },
+    features: { queryStreams },
   } = useStreamsPrivileges();
   const { significantEventsApp, isAvailable: isSignificantEventsAvailable } =
     useSignificantEventsApp();

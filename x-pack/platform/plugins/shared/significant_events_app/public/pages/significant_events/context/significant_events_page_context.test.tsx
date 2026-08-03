@@ -14,16 +14,16 @@ import {
   useSignificantEventsPageContext,
 } from './significant_events_page_context';
 
-jest.mock('../../../../hooks/use_kibana', () => ({
+jest.mock('../../../hooks/use_kibana', () => ({
   useKibana: jest.fn(),
 }));
 
-jest.mock('../../../../hooks/significant_events/use_significant_events_discovery_api', () => ({
+jest.mock('../../../hooks/use_significant_events_discovery_api', () => ({
   useSignificantEventsDiscoveryApi: jest.fn(),
 }));
 
-import { useKibana } from '../../../../hooks/use_kibana';
-import { useSignificantEventsDiscoveryApi } from '../../../../hooks/significant_events/use_significant_events_discovery_api';
+import { useKibana } from '../../../hooks/use_kibana';
+import { useSignificantEventsDiscoveryApi } from '../../../hooks/use_significant_events_discovery_api';
 
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 const mockUseApi = useSignificantEventsDiscoveryApi as jest.MockedFunction<

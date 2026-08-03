@@ -13,9 +13,9 @@ import {
   type SignificantEventsMaintenanceStatus,
   type SignificantEventsMaintenanceSummary,
 } from '@kbn/significant-events-plugin/common';
-import { getActivityBlockTooltip } from '../../components/significant_events/significant_events_discovery/components/shared/translations';
-import { useKibana } from '../use_kibana';
-import { getFormattedError } from '../../util/errors';
+import { getActivityBlockTooltip } from '../pages/significant_events/components/shared/translations';
+import { useKibana } from './use_kibana';
+import { getFormattedError } from '../util/errors';
 
 const MAINTENANCE_STATUS_QUERY_KEY = ['significantEventsMaintenanceStatus'] as const;
 

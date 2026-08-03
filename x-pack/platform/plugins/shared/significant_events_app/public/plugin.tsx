@@ -144,6 +144,7 @@ export class SignificantEventsAppPlugin
 
         const services: SignificantEventsAppServices = {
           availability$: this.availability$,
+          focusedSignificantEventService: this.focusedSignificantEventService,
         };
 
         // Trigger fetch to ensure the time filter has an up-to-date time range when
@@ -213,6 +214,12 @@ export class SignificantEventsAppPlugin
     return {
       availability$: this.availability$,
       locator: this.locator,
+      KnowledgeIndicatorsPanel: createKnowledgeIndicatorsPanel({
+        coreStart,
+        pluginsStart,
+        services,
+        isServerless,
+      }),
     };
   }
 

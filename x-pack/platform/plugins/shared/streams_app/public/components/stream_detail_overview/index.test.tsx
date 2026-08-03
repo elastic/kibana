@@ -27,10 +27,6 @@ jest.mock('../../hooks/use_streams_privileges', () => ({
   useStreamsPrivileges: () => mockUseStreamsPrivileges(),
 }));
 
-jest.mock('../../hooks/significant_events/use_significant_events_availability', () => ({
-  useSignificantEventsAvailability: () => mockUseSignificantEventsAvailability(),
-}));
-
 jest.mock('../../hooks/use_significant_events_app', () => ({
   useSignificantEventsApp: () => mockUseSignificantEventsApp(),
 }));
@@ -49,12 +45,6 @@ jest.mock('./ingest_rate_chart', () => ({
 
 jest.mock('./import_export_panel', () => ({
   ImportExportPanel: () => <div data-test-subj="mockImportExportPanel">Import & export</div>,
-}));
-
-jest.mock('./knowledge_indicators_panel', () => ({
-  KnowledgeIndicatorsPanel: () => (
-    <div data-test-subj="mockKnowledgeIndicatorsPanel">Knowledge indicators</div>
-  ),
 }));
 
 const MockKnowledgeIndicatorsPanel = () => (
@@ -113,9 +103,10 @@ describe('StreamOverview', () => {
       },
       isLoading: false,
     });
-    mockUseSignificantEventsAvailability.mockReturnValue({
-      availability: { available: true },
+    mockUseSignificantEventsApp.mockReturnValue({
+      isAvailable: true,
       isLoading: false,
+      significantEventsApp: { KnowledgeIndicatorsPanel: MockKnowledgeIndicatorsPanel },
     });
     mockUseStreamDetail.mockReturnValue({
       definition: createMockWiredStreamDefinition(),

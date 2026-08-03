@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import type { SignificantEventStatus } from '@kbn/significant-events-schema';
-import { useKibana } from '../use_kibana';
+import { useKibana } from './use_kibana';
 
 interface UpdateSignificantEventArgs {
   eventUuid: string;

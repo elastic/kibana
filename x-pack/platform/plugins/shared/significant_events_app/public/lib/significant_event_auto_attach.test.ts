@@ -13,7 +13,7 @@ import { ChatEventType, type ChatEvent } from '@kbn/agent-builder-common';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import type { SignificantEvent } from '@kbn/significant-events-schema';
 import { SIGNIFICANT_EVENT_ATTACHMENT_TYPE } from '@kbn/significant-events-plugin/common';
-import { FocusedSignificantEventService } from '../../../services/significant_events/focused_significant_event_service';
+import { FocusedSignificantEventService } from '../services/focused_significant_event_service';
 import {
   registerSignificantEventAutoAttach,
   type IdGenerator,

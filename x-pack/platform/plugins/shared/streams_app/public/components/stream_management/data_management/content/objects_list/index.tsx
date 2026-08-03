@@ -17,7 +17,7 @@ import { EuiCallOut, EuiCheckbox, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { StreamTree } from './tree';
 import { containsMappings } from '../helpers';
-import { useSignificantEventsAvailability } from '../../../../../hooks/significant_events/use_significant_events_availability';
+import { useSignificantEventsApp } from '../../../../../hooks/use_significant_events_app';
 import { useStreamsPrivileges } from '../../../../../hooks/use_streams_privileges';
 
 export function ContentPackObjectsList({
@@ -30,12 +30,8 @@ export function ContentPackObjectsList({
   const streamEntries = objects.filter(
     (entry): entry is ContentPackStream => entry.type === 'stream'
   );
-  const {
-    features: { significantEvents },
-  } = useStreamsPrivileges();
-  const { availability, isLoading: isAvailabilityLoading } = useSignificantEventsAvailability();
-  const isSignificantEventsAvailable =
-    !!significantEvents?.available && !isAvailabilityLoading && availability?.available === true;
+  useStreamsPrivileges();
+  const { isAvailable: isSignificantEventsAvailable } = useSignificantEventsApp();
   const [includeMappings, setIncludeMappings] = useState<boolean>(containsMappings(streamEntries));
   const [selection, setSelection] = useState<Record<string, { selected: boolean }>>({
     ...objects

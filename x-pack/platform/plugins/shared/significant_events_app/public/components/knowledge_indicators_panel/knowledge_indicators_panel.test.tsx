@@ -15,19 +15,19 @@ const mockUseStreamFeatures = jest.fn();
 const mockUseFetchDiscoveryQueries = jest.fn();
 const mockUseStreamsAppRouter = jest.fn();
 
-jest.mock('../../hooks/significant_events/use_stream_features', () => ({
+jest.mock('../../hooks/use_stream_features', () => ({
   useStreamFeatures: (...args: unknown[]) => mockUseStreamFeatures(...args),
 }));
 
-jest.mock('../../hooks/significant_events/use_fetch_discovery_queries', () => ({
+jest.mock('../../hooks/use_fetch_discovery_queries', () => ({
   useFetchDiscoveryQueries: (...args: unknown[]) => mockUseFetchDiscoveryQueries(...args),
 }));
 
-jest.mock('../../hooks/significant_events/use_stream_onboarding_status', () => ({
+jest.mock('../../hooks/use_stream_onboarding_status', () => ({
   useStreamOnboardingStatus: () => undefined,
 }));
 
-jest.mock('../../hooks/use_streams_app_router', () => ({
+jest.mock('../../hooks/use_significant_events_app_router', () => ({
   useStreamsAppRouter: () => mockUseStreamsAppRouter(),
 }));
 

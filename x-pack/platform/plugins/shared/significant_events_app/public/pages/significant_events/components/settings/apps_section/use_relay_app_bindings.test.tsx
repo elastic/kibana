@@ -10,9 +10,9 @@ import { renderHook, act } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { SlackAppBindingsResponse } from '@kbn/significant-events-plugin/common';
 import { useRelayAppBindings, useBindChannel, useUnbindChannel } from './use_relay_app_bindings';
-import { useKibana } from '../../../../../../hooks/use_kibana';
+import { useKibana } from '../../../../../hooks/use_kibana';
 
-jest.mock('../../../../../../hooks/use_kibana', () => ({
+jest.mock('../../../../../hooks/use_kibana', () => ({
   useKibana: jest.fn(),
 }));
 

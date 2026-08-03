@@ -9,7 +9,7 @@ import { getPromoteSkipReason } from './promote_skip_reason';
 import {
   NOT_FILTER_ONLY_PROMOTE_DISABLED,
   STATS_PROMOTE_DISABLED_TOOLTIP,
-} from '../significant_events_discovery/components/queries_table/translations';
+} from '../pages/significant_events/components/queries_table/translations';
 
 describe('getPromoteSkipReason', () => {
   it('returns nothing when every requested query was promoted', () => {

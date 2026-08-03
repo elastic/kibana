@@ -7,9 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 import { useMutation, useQueryClient } from '@kbn/react-query';
-import { DISCOVERY_QUERIES_QUERY_KEY } from '../../../../hooks/significant_events/use_fetch_discovery_queries';
-import { useKibana } from '../../../../hooks/use_kibana';
-import { useQueriesApi } from '../../../../hooks/significant_events/use_queries_api';
+import { DISCOVERY_QUERIES_QUERY_KEY } from '../../../hooks/use_fetch_discovery_queries';
+import { useKibana } from '../../../hooks/use_kibana';
+import { useQueriesApi } from '../../../hooks/use_queries_api';
 
 interface UseRulesDemoteParams {
   onSuccess?: () => void;

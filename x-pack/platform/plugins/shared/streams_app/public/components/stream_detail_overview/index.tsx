@@ -9,14 +9,13 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer, useIsWithinBreakpoints } from '@e
 import { css } from '@emotion/react';
 import { isDraftGetResponse, Streams } from '@kbn/streams-schema';
 import React, { type CSSProperties, type ReactNode, useMemo } from 'react';
-import { useSignificantEventsAvailability } from '../../hooks/significant_events/use_significant_events_availability';
+import { useSignificantEventsApp } from '../../hooks/use_significant_events_app';
 import { useStreamDetail } from '../../hooks/use_stream_detail';
 import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
 import { AboutPanel } from './about_panel';
 import { DataQualityCard } from './data_quality_card';
 import { IngestRateChart } from './ingest_rate_chart';
 import { ImportExportPanel } from './import_export_panel';
-import { KnowledgeIndicatorsPanel } from './knowledge_indicators_panel';
 
 interface OverviewSection {
   id: string;
@@ -26,17 +25,15 @@ interface OverviewSection {
 
 export function StreamOverview() {
   const { definition, refresh } = useStreamDetail();
-  const {
-    features: { contentPacks, significantEvents },
-    isLoading: isPrivilegesLoading,
-  } = useStreamsPrivileges();
-  const { availability, isLoading: isAvailabilityLoading } = useSignificantEventsAvailability();
-  // Client-side gate (flag + license + tier); availability also confirms required plugins.
+  const { features: { contentPacks }, isLoading: isPrivilegesLoading } = useStreamsPrivileges();
+  const { significantEventsApp, isAvailable, isLoading: isAvailabilityLoading } =
+    useSignificantEventsApp();
+  const KnowledgeIndicatorsPanel = significantEventsApp?.KnowledgeIndicatorsPanel;
   const showKnowledgeIndicatorsPanel =
-    !!significantEvents?.available &&
+    KnowledgeIndicatorsPanel !== undefined &&
+    isAvailable &&
     !isPrivilegesLoading &&
-    !isAvailabilityLoading &&
-    availability?.available === true;
+    !isAvailabilityLoading;
 
   const isIngest = Streams.ingest.all.GetResponse.is(definition);
   const isDraft = isDraftGetResponse(definition);
@@ -63,7 +60,7 @@ export function StreamOverview() {
     { id: 'about', node: <AboutPanel />, show: true },
     {
       id: 'knowledge-indicators',
-      node: <KnowledgeIndicatorsPanel definition={definition} />,
+      node: KnowledgeIndicatorsPanel ? <KnowledgeIndicatorsPanel definition={definition} /> : null,
       show: showKnowledgeIndicatorsPanel,
     },
     {

@@ -13,7 +13,10 @@ import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { SignificantEventsPublicPluginStart } from '@kbn/significant-events-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { StreamsPluginStart } from '@kbn/streams-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type React from 'react';
+import type { Streams } from '@kbn/streams-schema';
 import type { Observable } from 'rxjs';
 import type { SignificantEventsAppLocator } from '../common/locators';
 
@@ -27,6 +30,7 @@ export interface SignificantEventsAppStartDependencies {
   licensing: LicensingPluginStart;
   share: SharePluginStart;
   significant_events: SignificantEventsPublicPluginStart;
+  streams: StreamsPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   agentBuilder?: AgentBuilderPluginStart;
   cloud?: CloudStart;
@@ -49,4 +53,10 @@ export interface SignificantEventsAppPublicStart {
    * SIGNIFICANT_EVENTS_APP_LOCATOR_ID).
    */
   locator: SignificantEventsAppLocator;
+  /**
+   * Embeddable Knowledge Indicators panel for use in streams_app's stream
+   * overview.  Rendered outside the SEA app tree — carries its own
+   * QueryClient and KibanaContext so no extra wrapping is needed.
+   */
+  KnowledgeIndicatorsPanel: React.ComponentType<{ definition: Streams.all.GetResponse }>;
 }

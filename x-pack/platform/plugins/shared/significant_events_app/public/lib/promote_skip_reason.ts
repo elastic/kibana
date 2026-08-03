@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { PromoteResult } from '../../../hooks/significant_events/use_queries_api';
+import type { PromoteResult } from '../hooks/use_queries_api';
 import {
   NOT_FILTER_ONLY_PROMOTE_DISABLED,
   STATS_PROMOTE_DISABLED_TOOLTIP,
-} from '../significant_events_discovery/components/queries_table/translations';
+} from '../pages/significant_events/components/queries_table/translations';
 
 /**
  * Why a promotion left queries behind, or `undefined` when it left none.

@@ -29,11 +29,11 @@ import type { Feature } from '@kbn/significant-events-schema';
 import { useBoolean } from '@kbn/react-hooks';
 import { upperFirst } from 'lodash';
 import React from 'react';
-import { FlyoutMetadataCard } from '../../../flyout_components/flyout_metadata_card';
-import { FlyoutToolbarHeader } from '../../../flyout_components/flyout_toolbar_header';
-import { KnowledgeIndicatorFeatureDetailsContent } from '../../stream_detail_significant_events_view/knowledge_indicator_details_flyout';
+import { FlyoutMetadataCard } from '../flyout_components/flyout_metadata_card';
+import { FlyoutToolbarHeader } from '../flyout_components/flyout_toolbar_header';
+import { KnowledgeIndicatorFeatureDetailsContent } from '../knowledge_indicators/knowledge_indicator_details_flyout';
 import { DeleteFeatureModal } from './delete_feature_modal';
-import { getConfidenceColor } from '../../stream_detail_significant_events_view/utils/get_confidence_color';
+import { getConfidenceColor } from '../knowledge_indicators/utils/get_confidence_color';
 
 interface FeatureDetailsFlyoutProps {
   feature: Feature;

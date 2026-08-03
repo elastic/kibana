@@ -17,10 +17,10 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { useKibana } from '../../../../hooks/use_kibana';
-import { useSignificantEventsDiscoveryApi } from '../../../../hooks/significant_events/use_significant_events_discovery_api';
-import { getFormattedError } from '../../../../util/errors';
-import { RUNNING_POLL_INTERVAL_MS } from '../../constants';
+import { useKibana } from '../../../hooks/use_kibana';
+import { useSignificantEventsDiscoveryApi } from '../../../hooks/use_significant_events_discovery_api';
+import { getFormattedError } from '../../../util/errors';
+import { RUNNING_POLL_INTERVAL_MS } from '../../../constants';
 
 const TERMINAL_STATUS_TOAST_DELAY_MS = 5 * 1000;
 // Records, per execution id, the last terminal status we already notified about.

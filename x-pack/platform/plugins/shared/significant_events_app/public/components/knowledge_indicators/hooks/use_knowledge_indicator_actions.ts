@@ -8,17 +8,17 @@
 import { i18n } from '@kbn/i18n';
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import { useCallback } from 'react';
-import { DISCOVERY_QUERIES_QUERY_KEY } from '../../../../hooks/significant_events/use_fetch_discovery_queries';
-import { DISCOVERY_QUERIES_OCCURRENCES_QUERY_KEY } from '../../../../hooks/significant_events/use_fetch_discovery_queries_occurrences';
-import { useKibana } from '../../../../hooks/use_kibana';
+import { DISCOVERY_QUERIES_QUERY_KEY } from '../../../hooks/use_fetch_discovery_queries';
+import { DISCOVERY_QUERIES_OCCURRENCES_QUERY_KEY } from '../../../hooks/use_fetch_discovery_queries_occurrences';
+import { useKibana } from '../../../hooks/use_kibana';
 import {
   useQueriesApi,
   type PromoteResult,
-} from '../../../../hooks/significant_events/use_queries_api';
-import { useStreamFeaturesApi } from '../../../../hooks/significant_events/use_stream_features_api';
-import { getFormattedError } from '../../../../util/errors';
-import { PROMOTE_QUERY_ALREADY_PROMOTED } from '../../significant_events_discovery/components/queries_table/translations';
-import { getPromoteSkipReason } from '../../lib/promote_skip_reason';
+} from '../../../hooks/use_queries_api';
+import { useStreamFeaturesApi } from '../../../hooks/use_stream_features_api';
+import { getFormattedError } from '../../../util/errors';
+import { PROMOTE_QUERY_ALREADY_PROMOTED } from '../../../pages/significant_events/components/queries_table/translations';
+import { getPromoteSkipReason } from '../../../lib/promote_skip_reason';
 
 export const KI_ROW_ACTION_MUTATION_KEY = ['ki-row-action'];
 

@@ -24,7 +24,6 @@
       "navigation",
       "savedObjectsTagging",
       "share",
-      "significant_events",
       "streams",
       "unifiedSearch",
       "unifiedDocViewer",
@@ -36,7 +35,8 @@
       "cps",
       "spaces",
       "indexLifecycleManagement",
-      "evals"
+      "evals",
+      "significantEventsApp"
     ],
     "requiredBundles": [
       "discover",

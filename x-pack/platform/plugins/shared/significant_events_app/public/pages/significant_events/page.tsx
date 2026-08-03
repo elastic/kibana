@@ -13,10 +13,6 @@ import type { StreamsAppLocationParams } from '@kbn/streams-plugin/common';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { useKibana } from '../../hooks/use_kibana';
 import { getFormattedError } from '../../util/errors';
-import { useStreamsAppBreadcrumbs } from '../../hooks/use_streams_app_breadcrumbs';
-import { useStreamsAppParams } from '../../hooks/use_streams_app_params';
-import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
-import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
 import { useSignificantEventsAppParams } from '../../hooks/use_significant_events_app_params';
 import { useSignificantEventsAppRouter } from '../../hooks/use_significant_events_app_router';
 import { useSignificantEventsPrivileges } from '../../hooks/use_significant_events_privileges';
@@ -26,7 +22,6 @@ import {
   SignificantEventsAppHeader,
   SignificantEventsAppPageTemplate,
 } from '../../components/page_template';
-import { StreamsAppHeader, StreamsAppPageTemplate } from '../../streams_app_page_template';
 import {
   KnowledgeIndicatorsTable,
   KiGenerationProvider,
@@ -58,12 +53,13 @@ function isValidSignificantEventsTab(value: string): value is SignificantEventsT
 export function SignificantEventsPage() {
   const {
     path: { tab },
-  } = useStreamsAppParams('/_discovery/{tab}');
+  } = useSignificantEventsAppParams('/{tab}');
 
-  const router = useStreamsAppRouter();
+  const router = useSignificantEventsAppRouter();
   const {
     core: {
       application: { getUrlForApp },
+      chrome,
       notifications: { toasts },
     },
     dependencies: {
@@ -79,11 +75,10 @@ export function SignificantEventsPage() {
 
   const {
     ui: streamsUiPrivileges,
-    features: { significantEvents },
-  } = useStreamsPrivileges();
+    significantEvents,
+    isLoading: isPrivilegesLoading,
+  } = useSignificantEventsPrivileges();
   const canManageStreams = streamsUiPrivileges.manage;
-
-  const { isLoading: isPrivilegesLoading } = useSignificantEventsPrivileges();
 
   const {
     isBlocked,
@@ -165,16 +160,15 @@ export function SignificantEventsPage() {
     systemOnboardingLabel,
   ]);
 
-  useStreamsAppBreadcrumbs(() => {
-    return [
+  useEffect(() => {
+    chrome.setBreadcrumbs([
       {
-        title: i18n.translate('xpack.streams.significantEventsDiscovery.breadcrumbTitle', {
+        text: i18n.translate('xpack.significantEventsApp.breadcrumb', {
           defaultMessage: 'Significant Events',
         }),
-        path: '/_discovery',
       },
-    ];
-  }, []);
+    ]);
+  }, [chrome]);
 
   const tabs = useMemo(
     () => [
@@ -183,7 +177,7 @@ export function SignificantEventsPage() {
         label: i18n.translate('xpack.significantEventsApp.streamsTab', {
           defaultMessage: 'Streams',
         }),
-        href: router.link('/_discovery/{tab}', { path: { tab: 'streams' } }),
+        href: router.link('/{tab}', { path: { tab: 'streams' } }),
         isSelected: tab === 'streams',
       },
       {
@@ -191,7 +185,7 @@ export function SignificantEventsPage() {
         label: i18n.translate('xpack.significantEventsApp.knowledgeIndicatorsTab', {
           defaultMessage: 'Knowledge Indicators',
         }),
-        href: router.link('/_discovery/{tab}', { path: { tab: 'knowledge_indicators' } }),
+        href: router.link('/{tab}', { path: { tab: 'knowledge_indicators' } }),
         isSelected: tab === 'knowledge_indicators',
       },
       {
@@ -199,7 +193,7 @@ export function SignificantEventsPage() {
         label: i18n.translate('xpack.significantEventsApp.queriesTab', {
           defaultMessage: 'Rules',
         }),
-        href: router.link('/_discovery/{tab}', { path: { tab: 'queries' } }),
+        href: router.link('/{tab}', { path: { tab: 'queries' } }),
         isSelected: tab === 'queries',
       },
 
@@ -208,7 +202,7 @@ export function SignificantEventsPage() {
         label: i18n.translate('xpack.significantEventsApp.detectionsTab', {
           defaultMessage: 'Detections',
         }),
-        href: router.link('/_discovery/{tab}', { path: { tab: 'detections' } }),
+        href: router.link('/{tab}', { path: { tab: 'detections' } }),
         isSelected: tab === 'detections',
       },
       {
@@ -216,7 +210,7 @@ export function SignificantEventsPage() {
         label: i18n.translate('xpack.significantEventsApp.significantEventsTab', {
           defaultMessage: 'Significant Events',
         }),
-        href: router.link('/_discovery/{tab}', { path: { tab: 'significant_events' } }),
+        href: router.link('/{tab}', { path: { tab: 'significant_events' } }),
         isSelected: tab === 'significant_events',
       },
       {
@@ -224,7 +218,7 @@ export function SignificantEventsPage() {
         label: i18n.translate('xpack.significantEventsApp.memoryTab', {
           defaultMessage: 'Memory',
         }),
-        href: router.link('/_discovery/{tab}', { path: { tab: 'memory' } }),
+        href: router.link('/{tab}', { path: { tab: 'memory' } }),
         isSelected: tab === 'memory',
       },
       {
@@ -232,7 +226,7 @@ export function SignificantEventsPage() {
         label: i18n.translate('xpack.significantEventsApp.settingsTab', {
           defaultMessage: 'Settings',
         }),
-        href: router.link('/_discovery/{tab}', { path: { tab: 'settings' } }),
+        href: router.link('/{tab}', { path: { tab: 'settings' } }),
         isSelected: tab === 'settings',
       },
     ],
@@ -246,7 +240,7 @@ export function SignificantEventsPage() {
 
 
   if (tab === 'discoveries') {
-    return <RedirectTo path="/_discovery/{tab}" params={{ path: { tab: 'significant_events' } }} />;
+    return <RedirectTo path="/{tab}" params={{ path: { tab: 'significant_events' } }} />;
   }
 
   if (!isValidSignificantEventsTab(tab)) {
@@ -255,7 +249,7 @@ export function SignificantEventsPage() {
 
   return (
     <>
-      <StreamsAppHeader title={pageTitle} menu={menu} tabs={tabs} />
+      <SignificantEventsAppHeader title={pageTitle} menu={menu} tabs={tabs} />
       <KiGenerationProvider onFailed={onOnboardingFailed}>
         <SignificantEventsPageProvider>
           <SignificantEventsAppPageTemplate.Body grow>
@@ -299,7 +293,7 @@ export function SignificantEventsPage() {
                   </p>
                   {canManageStreams && (
                     <EuiButton
-                      href={router.link('/_discovery/{tab}', { path: { tab: 'settings' } })}
+                      href={router.link('/{tab}', { path: { tab: 'settings' } })}
                       color="danger"
                       size="s"
                       data-test-subj="significantEventsStatusErrorBannerSettingsLink"
@@ -346,7 +340,7 @@ export function SignificantEventsPage() {
                   )}
                   {canManageStreams && (
                     <EuiButton
-                      href={router.link('/_discovery/{tab}', { path: { tab: 'settings' } })}
+                      href={router.link('/{tab}', { path: { tab: 'settings' } })}
                       color="warning"
                       size="s"
                       data-test-subj="significantEventsPausedBannerSettingsLink"

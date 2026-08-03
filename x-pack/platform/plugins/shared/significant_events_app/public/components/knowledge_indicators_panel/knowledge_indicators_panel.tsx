@@ -20,10 +20,10 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { Streams } from '@kbn/streams-schema';
 import React from 'react';
-import { useFetchDiscoveryQueries } from '../../hooks/significant_events/use_fetch_discovery_queries';
-import { useStreamFeatures } from '../../hooks/significant_events/use_stream_features';
-import { useStreamOnboardingStatus } from '../../hooks/significant_events/use_stream_onboarding_status';
-import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
+import { useFetchDiscoveryQueries } from '../../hooks/use_fetch_discovery_queries';
+import { useStreamFeatures } from '../../hooks/use_stream_features';
+import { useStreamOnboardingStatus } from '../../hooks/use_stream_onboarding_status';
+import { useStreamsAppRouter } from '../../hooks/use_significant_events_app_router';
 
 const ACTIVE_DRAFT_STATUS = ['active', 'draft'] as const;
 

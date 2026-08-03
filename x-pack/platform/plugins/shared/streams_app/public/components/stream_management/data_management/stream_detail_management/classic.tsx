@@ -97,7 +97,6 @@ function ClassicStreamDetailManagementContent({
 
   const {
     features: { queryStreams, significantEvents },
-    isLoading: isPrivilegesLoading,
   } = useStreamsPrivileges();
   const { isAvailable: isSignificantEventsAvailable, isLoading: isSignificantEventsLoading } =
     useSignificantEventsApp();

@@ -6,7 +6,7 @@
  */
 
 import { useLoadConnectors } from '@kbn/inference-connectors';
-import { useKibana } from '../use_kibana';
+import { useKibana } from './use_kibana';
 
 export interface UseInferenceFeatureConnectorsResult {
   resolvedConnectorId: string | undefined;

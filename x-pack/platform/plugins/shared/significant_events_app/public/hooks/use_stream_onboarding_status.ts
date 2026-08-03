@@ -10,7 +10,7 @@ import {
   KIS_ONBOARDING_IN_PROGRESS_STATUSES,
   type SignificantEventsWorkflowStatusResult,
 } from '@kbn/significant-events-schema';
-import { RUNNING_POLL_INTERVAL_MS } from '../../components/significant_events/constants';
+import { RUNNING_POLL_INTERVAL_MS } from '../constants';
 import { useOnboardingApi } from '../use_onboarding_api';
 
 export const useStreamOnboardingStatus = (streamName: string) => {

@@ -17,7 +17,7 @@ import {
   type PendingSignificantEventAttachment,
 } from '@kbn/significant-events-plugin/common';
 import { AGENTBUILDER_FEATURE_ID } from '@kbn/agent-builder-plugin/public';
-import type { FocusedSignificantEventService } from '../../../services/significant_events/focused_significant_event_service';
+import type { FocusedSignificantEventService } from '../services/focused_significant_event_service';
 
 export interface IdGenerator {
   readonly current: string;

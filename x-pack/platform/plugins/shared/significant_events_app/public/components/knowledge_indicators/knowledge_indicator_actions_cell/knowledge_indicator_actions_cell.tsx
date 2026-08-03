@@ -24,8 +24,8 @@ import {
   RESTORE_LABEL,
   PROMOTE_LABEL,
 } from '../hooks/use_knowledge_indicator_actions';
-import { useBlocksNewActivity } from '../../../../hooks/significant_events/use_significant_events_maintenance';
-import { STATS_PROMOTE_DISABLED_TOOLTIP } from '../../significant_events_discovery/components/queries_table/translations';
+import { useBlocksNewActivity } from '../../../hooks/use_significant_events_maintenance';
+import { STATS_PROMOTE_DISABLED_TOOLTIP } from '../../../pages/significant_events/components/queries_table/translations';
 
 interface Props {
   streamName: string;

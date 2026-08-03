@@ -10,19 +10,19 @@ import { useIsMutating, useMutation } from '@kbn/react-query';
 import { isComputedFeature } from '@kbn/significant-events-schema';
 import type { KnowledgeIndicator } from '@kbn/streams-ai';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useFetchKnowledgeIndicators } from '../../../../../hooks/significant_events/use_fetch_knowledge_indicators';
-import { useDiscoveryFeaturesApi } from '../../../../../hooks/significant_events/use_discovery_features_api';
-import { useKnowledgeIndicatorsBulkDelete } from '../../../../../hooks/significant_events/use_knowledge_indicators_bulk_delete';
+import { useFetchKnowledgeIndicators } from '../../../../hooks/use_fetch_knowledge_indicators';
+import { useDiscoveryFeaturesApi } from '../../../../hooks/use_discovery_features_api';
+import { useKnowledgeIndicatorsBulkDelete } from '../../../../hooks/use_knowledge_indicators_bulk_delete';
 import {
   useQueriesApi,
   type PromoteResult,
-} from '../../../../../hooks/significant_events/use_queries_api';
-import { useInvalidatePromoteRelatedQueries } from '../../../../../hooks/significant_events/use_invalidate_promote_queries';
-import { useKibana } from '../../../../../hooks/use_kibana';
-import { getFormattedError } from '../../../../../util/errors';
-import { KI_ROW_ACTION_MUTATION_KEY } from '../../../stream_detail_significant_events_view/knowledge_indicator_actions_cell';
-import { getKnowledgeIndicatorItemId } from '../../../stream_detail_significant_events_view/utils/get_knowledge_indicator_item_id';
-import { matchesKnowledgeIndicatorFilters } from '../../../stream_detail_significant_events_view/utils/matches_knowledge_indicator_filters';
+} from '../../../../hooks/use_queries_api';
+import { useInvalidatePromoteRelatedQueries } from '../../../../hooks/use_invalidate_promote_queries';
+import { useKibana } from '../../../../hooks/use_kibana';
+import { getFormattedError } from '../../../../util/errors';
+import { KI_ROW_ACTION_MUTATION_KEY } from '../../../../components/knowledge_indicators/knowledge_indicator_actions_cell';
+import { getKnowledgeIndicatorItemId } from '../../../../components/knowledge_indicators/utils/get_knowledge_indicator_item_id';
+import { matchesKnowledgeIndicatorFilters } from '../../../../components/knowledge_indicators/utils/matches_knowledge_indicator_filters';
 import {
   BULK_EXCLUDE_SUCCESS_TOAST_TITLE,
   BULK_EXCLUDE_PARTIAL_TOAST_TITLE,
@@ -34,7 +34,7 @@ import {
   BULK_PROMOTE_PARTIAL_TOAST_TITLE,
   BULK_PROMOTE_ERROR_TITLE,
 } from './translations';
-import { getPromoteSkipReason } from '../../../lib/promote_skip_reason';
+import { getPromoteSkipReason } from '../../../../lib/promote_skip_reason';
 import { useKnowledgeIndicatorsUrlState } from './use_knowledge_indicators_url_state';
 
 export const getKnowledgeIndicatorTitle = (ki: KnowledgeIndicator): string =>

@@ -26,7 +26,7 @@ import { i18n } from '@kbn/i18n';
 import type { KnowledgeIndicator } from '@kbn/streams-ai';
 import { upperFirst } from 'lodash';
 import React, { useMemo } from 'react';
-import { SeverityBadge } from '../../significant_events_discovery/components/severity_badge/severity_badge';
+import { SeverityBadge } from '../../../pages/significant_events/components/severity_badge/severity_badge';
 
 interface DeleteTableItemsModalProps {
   title: string;

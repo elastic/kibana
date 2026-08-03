@@ -18,7 +18,7 @@ import {
   isRootStreamDefinition,
   Streams,
 } from '@kbn/streams-schema';
-import { parseDurationInSeconds } from '../../../../../util/parse_duration';
+import { parseDurationInSeconds } from '../../../../util/parse_duration';
 
 const SORTABLE_FIELDS = ['nameSortKey'] as const;
 
