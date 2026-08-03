@@ -16,3 +16,8 @@ export { getCloudProviderIcon } from './src/components/cloud_provider_icon/get_c
 export type { CloudProvider } from './src/components/cloud_provider_icon/get_cloud_provider_icon';
 export { CloudProviderIcon } from './src/components/cloud_provider_icon';
 export type { CloudProviderIconProps } from './src/components/cloud_provider_icon';
+
+export { getLogoIcon, LOGO_NAMES } from './src/components/logo_icon/get_logo_icon';
+export type { LogoName } from './src/components/logo_icon/get_logo_icon';
+export { LogoIcon } from './src/components/logo_icon';
+export type { LogoIconProps } from './src/components/logo_icon';
