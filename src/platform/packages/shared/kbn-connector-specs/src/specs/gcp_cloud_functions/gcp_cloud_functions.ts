@@ -113,6 +113,9 @@ export const GcpCloudFunctionsConnector: ConnectorSpec = {
     }),
     minimumLicense: 'gold',
     supportedFeatureIds: ['workflows', 'agentBuilder'],
+    // No dedicated docs page yet; empty string resolves to the connectors index via the
+    // doc-links service (see getDocsUrlFromSpec), so it stays correct if the docs move.
+    docsUrl: '',
   },
 
   auth: {

@@ -1,5 +1,9 @@
 {
-  "sha1": "13481005cebd05b87d3571b0e6abe57c1f61bb8c",
+  "sha1": "cd4b3a030fcd31ce6195029607864cb0e62efe0d",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
   "tests": [
     {
       "id": "db4898614990d08-c129e7cf5767d21",
@@ -11,8 +15,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/global.setup.ts",
-        "line": 11,
-        "column": 16
+        "line": 5,
+        "column": 1
       }
     },
     {
@@ -25,8 +29,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/add_monitor.spec.ts",
-        "line": 38,
-        "column": 9
+        "line": 37,
+        "column": 25
       }
     },
     {
@@ -39,8 +43,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/add_monitor.spec.ts",
-        "line": 38,
-        "column": 9
+        "line": 37,
+        "column": 25
       }
     },
     {
@@ -53,8 +57,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/add_monitor.spec.ts",
-        "line": 38,
-        "column": 9
+        "line": 37,
+        "column": 25
       }
     },
     {
@@ -67,8 +71,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/add_monitor.spec.ts",
-        "line": 38,
-        "column": 9
+        "line": 37,
+        "column": 25
       }
     },
     {
@@ -81,8 +85,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/add_monitor.spec.ts",
-        "line": 38,
-        "column": 9
+        "line": 37,
+        "column": 25
       }
     },
     {
@@ -95,8 +99,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/alerting_default.spec.ts",
-        "line": 26,
-        "column": 7
+        "line": 21,
+        "column": 41
       }
     },
     {
@@ -109,64 +113,64 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/alerting_default.spec.ts",
-        "line": 39,
-        "column": 7
+        "line": 32,
+        "column": 23
       }
     },
     {
       "id": "3d44a2f50baed58-cfa2476ff58cabc",
       "title": "CustomStatusAlert creates a custom status alert rule",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/custom_status_alert.spec.ts",
-        "line": 23,
-        "column": 7
+        "line": 17,
+        "column": 11
       }
     },
     {
       "id": "ca66767fd9fda95-74afbfcf9ca5efd",
       "title": "Creates a custom TLS alert rule can filter monitors by KQL",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/custom_tls_alert.spec.ts",
-        "line": 56,
-        "column": 7
+        "line": 46,
+        "column": 24
       }
     },
     {
       "id": "ca66767fd9fda95-41c3eabe24bb637",
       "title": "Creates a custom TLS alert rule can filter monitors by type",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/custom_tls_alert.spec.ts",
-        "line": 65,
-        "column": 7
+        "line": 53,
+        "column": 11
       }
     },
     {
       "id": "ca66767fd9fda95-761cf21fcc31efc",
       "title": "Creates a custom TLS alert rule can create rule and fire alert",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/custom_tls_alert.spec.ts",
-        "line": 77,
-        "column": 7
+        "line": 66,
+        "column": 8
       }
     },
     {
@@ -179,8 +183,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/default_status_alert.spec.ts",
-        "line": 30,
-        "column": 7
+        "line": 24,
+        "column": 8
       }
     },
     {
@@ -193,22 +197,22 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/detail_flyout.spec.ts",
-        "line": 29,
-        "column": 7
+        "line": 22,
+        "column": 18
       }
     },
     {
       "id": "11f0fb11404caa0-56c73ac2d78fb44",
       "title": "FilterMonitors filters monitors by tags with AND/OR logic",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/filter_monitors.spec.ts",
-        "line": 24,
-        "column": 7
+        "line": 19,
+        "column": 5
       }
     },
     {
@@ -221,8 +225,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/getting_started.spec.ts",
-        "line": 23,
-        "column": 7
+        "line": 16,
+        "column": 5
       }
     },
     {
@@ -235,8 +239,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/global_parameters.spec.ts",
-        "line": 21,
-        "column": 7
+        "line": 14,
+        "column": 11
       }
     },
     {
@@ -249,7 +253,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/management_list.spec.ts",
-        "line": 38,
+        "line": 31,
         "column": 7
       }
     },
@@ -263,7 +267,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/monitor_form_validation.spec.ts",
-        "line": 28,
+        "line": 21,
         "column": 7
       }
     },
@@ -277,8 +281,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/monitor_selector.spec.ts",
-        "line": 29,
-        "column": 7
+        "line": 22,
+        "column": 11
       }
     },
     {
@@ -291,22 +295,22 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/overview_compact_view.spec.ts",
-        "line": 21,
-        "column": 7
+        "line": 14,
+        "column": 11
       }
     },
     {
       "id": "63227c5cfe04f39-ccf6627ff5bcb2c",
       "title": "OverviewSaveLensVisualization opens save lens visualization modal with correct attributes",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/overview_save_lens_visualization.spec.ts",
-        "line": 21,
-        "column": 7
+        "line": 15,
+        "column": 11
       }
     },
     {
@@ -319,8 +323,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/overview_sorting.spec.ts",
-        "line": 31,
-        "column": 7
+        "line": 22,
+        "column": 11
       }
     },
     {
@@ -333,8 +337,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/private_locations.spec.ts",
-        "line": 29,
-        "column": 7
+        "line": 23,
+        "column": 8
       }
     },
     {
@@ -347,8 +351,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/project_api_keys.spec.ts",
-        "line": 14,
-        "column": 7
+        "line": 13,
+        "column": 14
       }
     },
     {
@@ -361,8 +365,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/project_monitor_read_only.spec.ts",
-        "line": 26,
-        "column": 7
+        "line": 19,
+        "column": 11
       }
     },
     {
@@ -375,8 +379,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/step_details.spec.ts",
-        "line": 35,
-        "column": 7
+        "line": 28,
+        "column": 6
       }
     }
   ]

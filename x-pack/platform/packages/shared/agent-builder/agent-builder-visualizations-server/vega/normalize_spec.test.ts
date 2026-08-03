@@ -22,7 +22,7 @@ describe('normalizeVegaSpec', () => {
   it('injects the ES|QL query as the data source', () => {
     const result = normalizeVegaSpec({ spec: { mark: 'bar' }, esqlQuery: ESQL });
 
-    expect(result.data).toEqual({ url: { '%type%': 'esql', query: ESQL } });
+    expect(result.data).toEqual({ url: { '%type%': 'esql', '%context%': true, query: ESQL } });
   });
 
   it('adds the timefield binding when provided', () => {
@@ -33,7 +33,7 @@ describe('normalizeVegaSpec', () => {
     });
 
     expect(result.data).toEqual({
-      url: { '%type%': 'esql', query: ESQL, '%timefield%': '@timestamp' },
+      url: { '%type%': 'esql', '%context%': true, query: ESQL, '%timefield%': '@timestamp' },
     });
   });
 
@@ -52,7 +52,12 @@ describe('normalizeVegaSpec', () => {
     });
 
     expect(result.data).toEqual({
-      url: { '%type%': 'esql', query: timeAwareEsql, '%timefield%': 'event.created' },
+      url: {
+        '%type%': 'esql',
+        '%context%': true,
+        query: timeAwareEsql,
+        '%timefield%': 'event.created',
+      },
     });
   });
 
@@ -73,7 +78,12 @@ describe('normalizeVegaSpec', () => {
     });
 
     expect(result.data).toEqual({
-      url: { '%type%': 'esql', query: timeSeriesEsql, '%timefield%': '@timestamp' },
+      url: {
+        '%type%': 'esql',
+        '%context%': true,
+        query: timeSeriesEsql,
+        '%timefield%': '@timestamp',
+      },
     });
   });
 
@@ -92,7 +102,7 @@ describe('normalizeVegaSpec', () => {
     });
 
     expect(result.data).toEqual({
-      url: { '%type%': 'esql', query: tbucketEsql, '%timefield%': 'created_at' },
+      url: { '%type%': 'esql', '%context%': true, query: tbucketEsql, '%timefield%': 'created_at' },
     });
   });
 
@@ -112,7 +122,12 @@ describe('normalizeVegaSpec', () => {
     });
 
     expect(result.data).toEqual({
-      url: { '%type%': 'esql', query: timeAwareEsql, '%timefield%': '@timestamp' },
+      url: {
+        '%type%': 'esql',
+        '%context%': true,
+        query: timeAwareEsql,
+        '%timefield%': '@timestamp',
+      },
     });
   });
 
@@ -123,7 +138,7 @@ describe('normalizeVegaSpec', () => {
       columns: [{ name: 'status', type: 'keyword' }],
     });
 
-    expect(result.data).toEqual({ url: { '%type%': 'esql', query: ESQL } });
+    expect(result.data).toEqual({ url: { '%type%': 'esql', '%context%': true, query: ESQL } });
   });
 
   it('replaces any data source the model may have authored', () => {
@@ -132,7 +147,7 @@ describe('normalizeVegaSpec', () => {
       esqlQuery: ESQL,
     });
 
-    expect(result.data).toEqual({ url: { '%type%': 'esql', query: ESQL } });
+    expect(result.data).toEqual({ url: { '%type%': 'esql', '%context%': true, query: ESQL } });
   });
 
   describe('nested data sources', () => {
@@ -148,7 +163,7 @@ describe('normalizeVegaSpec', () => {
       const result = normalizeVegaSpec({ spec, esqlQuery: ESQL });
       const layer = result.layer as Array<Record<string, unknown>>;
 
-      expect(result.data).toEqual({ url: { '%type%': 'esql', query: ESQL } });
+      expect(result.data).toEqual({ url: { '%type%': 'esql', '%context%': true, query: ESQL } });
       expect(layer[1]).not.toHaveProperty('data');
       expect(layer[1]).toEqual({ mark: 'rule' });
       expect(spec).toEqual(snapshot);
@@ -162,7 +177,7 @@ describe('normalizeVegaSpec', () => {
 
       const result = normalizeVegaSpec({ spec, esqlQuery: ESQL });
 
-      expect(result.data).toEqual({ url: { '%type%': 'esql', query: ESQL } });
+      expect(result.data).toEqual({ url: { '%type%': 'esql', '%context%': true, query: ESQL } });
       expect(result.spec).toEqual({ mark: 'line' });
     });
 

@@ -5,8 +5,25 @@
  * 2.0.
  */
 
-export { detectionSchema, type Detection } from './detections';
+export {
+  detectionSchema,
+  CHANGE_POINT_TYPES,
+  type Detection,
+  type ChangePointType,
+} from './detections';
 export { discoverySchema, type Discovery } from './discoveries';
+export {
+  blastRadiusEntrySchema,
+  causalFeatureSchema,
+  signalEntrySchema,
+  severitySchema,
+  SEVERITY_OPTIONS,
+  getSeverityLabel,
+  type BlastRadiusEntry,
+  type CausalFeature,
+  type SignalEntry,
+  type Severity,
+} from './common_schemas';
 export type { KnowledgeIndicator } from '../queries';
 export {
   type SignificantEvent,
@@ -26,7 +43,12 @@ export {
 export {
   INVESTIGATION_PROGRESS_UI_EVENT,
   INVESTIGATE_STEP_ID,
+  MAX_SIGNIFICANT_EVENT_UPDATE_EVIDENCE,
+  MAX_SIGNIFICANT_EVENT_UPDATES,
+  significantEventUpdateSchema,
   investigationStateSchema,
+  type SignificantEventUpdate,
+  type SignificantEventUpdateEvidence,
   type InvestigationHypothesis,
   type InvestigationState,
 } from './investigation_state';

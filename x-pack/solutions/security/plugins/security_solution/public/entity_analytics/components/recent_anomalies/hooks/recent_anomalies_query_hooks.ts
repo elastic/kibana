@@ -13,12 +13,12 @@ import { useMemo } from 'react';
 import { getLatestEntitiesIndexName } from '@kbn/entity-store/common';
 import { ML_ANOMALIES_INDEX } from '../../../../../common/constants';
 import type { ESBoolQuery } from '../../../../../common/typed_json';
-import { useEsqlTimeRangeFilter } from '../../../../common/hooks/esql/use_esql_global_filter';
 import { useGlobalFilterQuery } from '../../../../common/hooks/use_global_filter_query';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { esqlResponseToRecords } from '../../../../common/utils/esql';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useErrorToast } from '../../../../common/hooks/use_error_toast';
+import { useSecurityMlModuleJobIds } from '../../../../common/components/ml/hooks/use_security_ml_module_job_ids';
 import type { AnomalyBand } from '../anomaly_bands';
 import {
   useRecentAnomaliesDataEsqlSource,
@@ -44,16 +44,25 @@ interface FixedTimeRange {
 const MAX_FILTERED_ENTITIES = 1000;
 
 /**
- * Time-range-only ES|QL filter for the ML anomalies source. The search bar on
+ * Time-range-only resolver for the ML anomalies source. The search bar on
  * the Entity Analytics home page targets the entity store data view, so its
  * field filters cannot be applied as a pre-filter on the ML anomalies index;
  * they are resolved separately via {@link useFilteredEntityIds}.
+ *
+ * The time range is applied inside the query text as ?_tstart/?_tend named
+ * params (via getESQLResults' timeRange option) rather than the request-level
+ * `filter` DSL. A request-level filter that matches no data makes the FROM
+ * pattern resolve to zero indices, triggering an Elasticsearch bug in LOOKUP
+ * JOIN lookup-index resolution (elastic/kibana#277613).
  */
-const useRecentAnomaliesTimeFilter = (timeRange?: FixedTimeRange): ESBoolQuery => {
+const useRecentAnomaliesTimeRange = (timeRange?: FixedTimeRange): FixedTimeRange => {
   const { from: globalFrom, to: globalTo } = useGlobalTime();
-  const from = timeRange?.from ?? globalFrom;
-  const to = timeRange?.to ?? globalTo;
-  return useEsqlTimeRangeFilter(from, to);
+  const fixedFrom = timeRange?.from;
+  const fixedTo = timeRange?.to;
+  return useMemo(
+    () => ({ from: fixedFrom ?? globalFrom, to: fixedTo ?? globalTo }),
+    [fixedFrom, fixedTo, globalFrom, globalTo]
+  );
 };
 
 const hasActiveFilter = (query?: ESBoolQuery): boolean => {
@@ -119,6 +128,23 @@ const useFilteredEntityIds = (spaceId?: string): FilteredEntityIds => {
   };
 };
 
+interface SecurityJobIds {
+  /** `undefined` while the installed security ML jobs are still loading. */
+  jobIds: string[] | undefined;
+  isLoading: boolean;
+}
+
+/**
+ * Resolves the ML jobs in the `security`/`siem` ML group, matching the
+ * server's `getSecurityMlJobIds` (all module-defined security jobs, whether
+ * installed or not) so this panel is constrained to the same job set as the
+ * anomaly overview/summary APIs.
+ */
+const useSecurityJobIds = (): SecurityJobIds => {
+  const { jobIds, loading } = useSecurityMlModuleJobIds();
+  return { jobIds: loading ? undefined : jobIds, isLoading: loading };
+};
+
 interface MlAnomaliesIndexExists {
   indexExists: boolean | undefined;
   isLoading: boolean;
@@ -154,36 +180,42 @@ const useRecentAnomaliesTopRowsQuery = (params: {
   timeRange?: FixedTimeRange;
 }) => {
   const search = useKibana().services.data.search.search;
-  const timeFilter = useRecentAnomaliesTimeFilter(params.timeRange);
+  const timeRange = useRecentAnomaliesTimeRange(params.timeRange);
   const { entityIds, isLoading: isEntityIdsLoading } = useFilteredEntityIds(params.spaceId);
+  const { jobIds: securityJobIds, isLoading: isSecurityJobIdsLoading } = useSecurityJobIds();
   const { indexExists: mlIndexExists, isLoading: isMlIndexLoading } = useMlAnomaliesIndexExists();
   const noFilterMatches = entityIds !== undefined && entityIds.length === 0;
+  const noSecurityJobs = securityJobIds !== undefined && securityJobIds.length === 0;
   const rowField = params.viewBy === 'jobId' ? 'job_id' : 'entity_id';
 
   const topRowsEsqlSource = useRecentAnomaliesTopRowsEsqlSource({
     ...params,
     rowsLimit: 5,
     entityIds,
+    jobIds: securityJobIds,
   });
 
   const { isLoading, data, isError } = useQuery(
-    [timeFilter, topRowsEsqlSource, entityIds, mlIndexExists],
+    [timeRange, topRowsEsqlSource, entityIds, securityJobIds, mlIndexExists],
     async ({ signal }) => {
-      if (!topRowsEsqlSource || noFilterMatches || !mlIndexExists) {
+      if (!topRowsEsqlSource || noFilterMatches || noSecurityJobs || !mlIndexExists) {
         return { records: [], rawResponse: undefined };
       }
       const esqlResult = await getESQLResults({
         esqlQuery: topRowsEsqlSource,
         search,
         signal,
-        filter: timeFilter,
+        timeRange,
       });
       return {
         records: esqlResponseToRecords<Record<string, string>>(esqlResult?.response),
         rawResponse: esqlResult?.response,
       };
     },
-    { enabled: !!topRowsEsqlSource && !isEntityIdsLoading && !isMlIndexLoading }
+    {
+      enabled:
+        !!topRowsEsqlSource && !isEntityIdsLoading && !isSecurityJobIdsLoading && !isMlIndexLoading,
+    }
   );
 
   const records = data?.records;
@@ -201,7 +233,7 @@ const useRecentAnomaliesTopRowsQuery = (params: {
   );
 
   return {
-    isLoading: isLoading || isEntityIdsLoading || isMlIndexLoading,
+    isLoading: isLoading || isEntityIdsLoading || isSecurityJobIdsLoading || isMlIndexLoading,
     rowLabels: records?.map((each) => each[rowField]),
     entityMetadata,
     isError,
@@ -222,9 +254,11 @@ export const useRecentAnomaliesQuery = (params: {
   timeRange?: FixedTimeRange;
 }) => {
   const search = useKibana().services.data.search.search;
-  const timeFilter = useRecentAnomaliesTimeFilter(params.timeRange);
+  const timeRange = useRecentAnomaliesTimeRange(params.timeRange);
   const { entityIds, isLoading: isEntityIdsLoading } = useFilteredEntityIds(params.spaceId);
+  const { jobIds: securityJobIds, isLoading: isSecurityJobIdsLoading } = useSecurityJobIds();
   const noFilterMatches = entityIds !== undefined && entityIds.length === 0;
+  const noSecurityJobs = securityJobIds !== undefined && securityJobIds.length === 0;
 
   const {
     rowLabels,
@@ -239,6 +273,7 @@ export const useRecentAnomaliesQuery = (params: {
     ...params,
     rowLabels,
     entityIds,
+    jobIds: securityJobIds,
     timeRange: params.timeRange,
   });
 
@@ -255,16 +290,16 @@ export const useRecentAnomaliesQuery = (params: {
     rowLabels: string[];
     rawResponse?: ESQLSearchResponse;
   }>(
-    [timeFilter, anomalyDataEsqlSource, rowLabels, entityIds],
+    [timeRange, anomalyDataEsqlSource, rowLabels, entityIds, securityJobIds],
     async ({ signal }) => {
-      if (!anomalyDataEsqlSource || !hasAnomaliesData || noFilterMatches) {
+      if (!anomalyDataEsqlSource || !hasAnomaliesData || noFilterMatches || noSecurityJobs) {
         return { anomalyRecords: [], rowLabels: [] };
       }
       const esqlResult = await getESQLResults({
         esqlQuery: anomalyDataEsqlSource,
         search,
         signal,
-        filter: timeFilter,
+        timeRange,
       });
       const anomalyRecords = esqlResponseToRecords<Record<string, string | number>>(
         esqlResult.response
@@ -279,7 +314,8 @@ export const useRecentAnomaliesQuery = (params: {
       };
     },
     {
-      enabled: !!anomalyDataEsqlSource && !!rowLabels && !isEntityIdsLoading,
+      enabled:
+        !!anomalyDataEsqlSource && !!rowLabels && !isEntityIdsLoading && !isSecurityJobIdsLoading,
       keepPreviousData: true,
     }
   );

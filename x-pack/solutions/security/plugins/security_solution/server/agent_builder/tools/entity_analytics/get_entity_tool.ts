@@ -45,6 +45,7 @@ import {
   type EntityAttachmentRiskStats,
 } from './entity_attachment_utils';
 import { createToolTelemetryTracker } from './tool_telemetry_tracker';
+import { fetchRiskScoreGrounding } from './risk_score_grounding';
 
 const schema = z.object({
   entityType: IdentifierType.describe(
@@ -658,12 +659,16 @@ When exactly one entity is resolved, this tool also stores a \`security.entity\`
           uiSettingsClient,
         });
 
-        const { source, query, columns, values } = await findEntityById({
-          entityIndex,
-          entityId,
-          entityType,
-          esClient: client,
-        });
+        const [{ source, query, columns, values }, grounding] = await Promise.all([
+          findEntityById({ entityIndex, entityId, entityType, esClient: client }),
+          fetchRiskScoreGrounding({
+            entityStore,
+            namespace: spaceId,
+            logger,
+          }),
+        ]);
+
+        const groundingResult = grounding ? [grounding] : [];
 
         if (values.length === 0) {
           return {
@@ -673,6 +678,7 @@ When exactly one entity is resolved, this tool also stores a \`security.entity\`
                 type: ToolResultType.error,
                 data: { message: `No entity found for id: ${normalizedEntityId}` },
               },
+              ...groundingResult,
             ],
           };
         }
@@ -787,7 +793,9 @@ When exactly one entity is resolved, this tool also stores a \`security.entity\`
           );
 
           telemetryTracker.recordResultCount(enrichedResults.length);
-          return { results: [...enrichedResults, ...attachmentSideEffectResults] };
+          return {
+            results: [...enrichedResults, ...attachmentSideEffectResults, ...groundingResult],
+          };
         } catch (error) {
           logger.debug(
             `Error enriching entity results: ${
@@ -803,6 +811,7 @@ When exactly one entity is resolved, this tool also stores a \`security.entity\`
                 data: { query, columns, values: [row] },
               })),
               ...attachmentSideEffectResults,
+              ...groundingResult,
             ],
           };
         }

@@ -10,9 +10,13 @@ import { css } from '@emotion/react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBasicTable,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
+  EuiLoadingChart,
+  EuiSkeletonRectangle,
+  EuiLink,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -27,15 +31,19 @@ import type {
 import type { EntityDetailsPath } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import { EntityDetailsLeftPanelTab } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import { ExpandablePanel } from '../../../flyout_v2/shared/components/expandable_panel';
+import { useKibana } from '../../../common/lib/kibana';
 import { MitreAttackChain } from './mitre/components/mitre_attack_chain';
 import {
   ENTITY_ANOMALIES_ALL_LINK_TOOLTIP,
   ENTITY_ANOMALIES_ALL_LINK_TITLE,
   ENTITY_ANOMALIES_RECENT_TABLE_TITLE,
+  ENTITY_ANOMALIES_MISSING_THREAT_TACTICS_WARNING,
+  ENTITY_ANOMALIES_MISSING_THREAT_TACTICS_WARNING_LINK,
   getEntityAnomaliesCountLabel,
   ENTITY_ANOMALY_TABLE_JOB_COLUMN,
   ENTITY_ANOMALY_TABLE_TIMESTAMP_COLUMN,
   ENTITY_ANOMALY_TABLE_ANOMALY_COLUMN,
+  ENTITY_ANOMALY_RECENT_TABLE_EMPTY_MESSAGE,
 } from './translations';
 import { AnomalyJobName } from './table/anomaly_job_name';
 import { AnomalyTimestamp } from './table/anomaly_timestamp';
@@ -43,7 +51,12 @@ import { truncatedAnchorCss } from './table/constants';
 import {
   ANOMALIES_SECTION_EXPANDABLE_PANEL_TEST_ID,
   ANOMALIES_RECENT_TABLE_TEST_ID,
+  ANOMALIES_MISSING_THREAT_TACTICS_WARNING_TEST_ID,
 } from './test_ids';
+import { AnomaliesErrorPrompt } from './anomalies_error_prompt';
+import { MitreAttackChainPlaceholder } from './mitre/components/mitre_attack_chain_placeholder';
+import { AnomaliesTableLoadingSkeleton } from './table/loading_skeleton';
+import { AnomaliesTableEmptyMessage } from './table/empty_message';
 
 const RECENT_TABLE_OTHER_COLUMN_WIDTH = '35.71%';
 const RECENT_TABLE_ANOMALY_COLUMN_WIDTH = '28.57%';
@@ -53,6 +66,8 @@ interface AnomaliesOverviewProps {
   isPreviewMode?: boolean;
   openDetailsPanel: (path: EntityDetailsPath) => void;
   hideHeaderIcons?: boolean;
+  isLoading?: boolean;
+  isError?: boolean;
 }
 
 export const AnomaliesOverview: React.FC<AnomaliesOverviewProps> = ({
@@ -60,16 +75,34 @@ export const AnomaliesOverview: React.FC<AnomaliesOverviewProps> = ({
   isPreviewMode,
   openDetailsPanel,
   hideHeaderIcons,
+  isLoading = false,
+  isError = false,
 }) => {
   const { euiTheme } = useEuiTheme();
+  const { services } = useKibana();
+  const integrationsUrl = services.application.getUrlForApp('integrations', {
+    path: '/installed',
+  });
 
   const uniqueTactics = useMemo(() => Object.keys(data.tacticCounts), [data.tacticCounts]);
   const totalAnomaliesCount = data.totalAnomaliesCount;
+  const isEmpty = data.totalAnomaliesCount === 0;
 
   const goToAnomaliesTab = useCallback(
     () => openDetailsPanel({ tab: EntityDetailsLeftPanelTab.ANOMALIES }),
     [openDetailsPanel]
   );
+
+  const recentAnomaliesTableEmptyRowCss = css`
+    .euiTableRow:has(.entityAnomaliesRecentTableEmptyMessage) {
+      background-color: ${euiTheme.colors.backgroundBaseSubdued};
+      pointer-events: none;
+
+      &:hover {
+        background-color: ${euiTheme.colors.backgroundBaseSubdued};
+      }
+    }
+  `;
 
   const recentAnomaliesColumns: Array<EuiBasicTableColumn<AnomalyOverviewHit>> = useMemo(
     () => [
@@ -140,51 +173,103 @@ export const AnomaliesOverview: React.FC<AnomaliesOverviewProps> = ({
         link,
       }}
     >
-      <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
-        <EuiFlexItem grow={false} css={statCellCss}>
-          <EuiFlexGroup direction="column" gutterSize="none">
-            <EuiFlexItem>
-              <EuiTitle size="s">
-                <h3>{getAbbreviatedNumber(totalAnomaliesCount)}</h3>
-              </EuiTitle>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiText
-                size="xs"
-                css={css`
-                  font-weight: ${euiTheme.font.weight.semiBold};
-                `}
+      {isError ? (
+        <AnomaliesErrorPrompt variant="rightOverview" />
+      ) : (
+        <>
+          {data.hasJobsMissingThreatTactics && (
+            <>
+              <EuiCallOut
+                data-test-subj={ANOMALIES_MISSING_THREAT_TACTICS_WARNING_TEST_ID}
+                announceOnMount={false}
+                size="s"
+                color="warning"
+                iconType="warning"
               >
-                {getEntityAnomaliesCountLabel(totalAnomaliesCount)}
-              </EuiText>
+                <p>
+                  {ENTITY_ANOMALIES_MISSING_THREAT_TACTICS_WARNING}{' '}
+                  <EuiLink href={integrationsUrl} target="_blank" external>
+                    {ENTITY_ANOMALIES_MISSING_THREAT_TACTICS_WARNING_LINK}
+                  </EuiLink>
+                </p>
+              </EuiCallOut>
+              <EuiSpacer size="m" />
+            </>
+          )}
+          <EuiFlexGroup gutterSize="l" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false} css={statCellCss}>
+              {isLoading ? (
+                <EuiSkeletonRectangle width={72} height={40} />
+              ) : (
+                <EuiFlexGroup direction="column" gutterSize="none">
+                  <EuiFlexItem>
+                    <EuiTitle size="s">
+                      <h3>{getAbbreviatedNumber(totalAnomaliesCount)}</h3>
+                    </EuiTitle>
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiText
+                      size="xs"
+                      css={css`
+                        font-weight: ${euiTheme.font.weight.semiBold};
+                      `}
+                    >
+                      {getEntityAnomaliesCountLabel(totalAnomaliesCount)}
+                    </EuiText>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              )}
+            </EuiFlexItem>
+            <EuiFlexItem
+              css={css`
+                flex: 1;
+                min-width: 0;
+              `}
+            >
+              {isLoading ? (
+                <div>
+                  <MitreAttackChainPlaceholder showLabels={false}>
+                    <EuiLoadingChart size="l" />
+                  </MitreAttackChainPlaceholder>
+                </div>
+              ) : (
+                <MitreAttackChain
+                  triggeredTactics={uniqueTactics}
+                  anomalyCountByTactic={data.tacticCounts}
+                  showLabels={false}
+                  showPersistentFirstTacticBadge={isEmpty}
+                />
+              )}
             </EuiFlexItem>
           </EuiFlexGroup>
-        </EuiFlexItem>
-        <EuiFlexItem
-          css={css`
-            flex: 1;
-            min-width: 0;
-          `}
-        >
-          <MitreAttackChain
-            triggeredTactics={uniqueTactics}
-            anomalyCountByTactic={data.tacticCounts}
-            showLabels={false}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiHorizontalRule margin="m" />
-      <EuiTitle size="xxs">
-        <h4>{ENTITY_ANOMALIES_RECENT_TABLE_TITLE}</h4>
-      </EuiTitle>
-      <EuiSpacer size="s" />
-      <EuiBasicTable
-        tableCaption={ENTITY_ANOMALIES_RECENT_TABLE_TITLE}
-        data-test-subj={ANOMALIES_RECENT_TABLE_TEST_ID}
-        items={data.recentAnomalies}
-        columns={recentAnomaliesColumns}
-        compressed
-      />
+          <EuiHorizontalRule margin="m" />
+          <EuiTitle size="xxs">
+            <h4>{ENTITY_ANOMALIES_RECENT_TABLE_TITLE}</h4>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          {isLoading ? (
+            <AnomaliesTableLoadingSkeleton />
+          ) : (
+            <div css={isEmpty ? recentAnomaliesTableEmptyRowCss : undefined}>
+              <EuiBasicTable
+                tableCaption={ENTITY_ANOMALIES_RECENT_TABLE_TITLE}
+                data-test-subj={ANOMALIES_RECENT_TABLE_TEST_ID}
+                items={data.recentAnomalies}
+                columns={recentAnomaliesColumns}
+                compressed
+                noItemsMessage={
+                  isEmpty ? (
+                    <AnomaliesTableEmptyMessage
+                      message={ENTITY_ANOMALY_RECENT_TABLE_EMPTY_MESSAGE}
+                      className="entityAnomaliesRecentTableEmptyMessage"
+                    />
+                  ) : undefined
+                }
+              />
+            </div>
+          )}
+        </>
+      )}
     </ExpandablePanel>
   );
 };

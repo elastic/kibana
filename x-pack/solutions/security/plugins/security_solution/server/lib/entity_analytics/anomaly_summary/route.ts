@@ -7,6 +7,7 @@
 
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { InsufficientMLCapabilities, MLPrivilegesUninitialized } from '@kbn/ml-plugin/server';
 import {
   GetAnomalyOverviewRequestBody,
   GetAnomalyOverviewRequestParams,
@@ -23,14 +24,15 @@ import {
 } from '../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../types';
 import { withMinimumLicense } from '../utils/with_minimum_license';
+import { checkEntityExists, EntityStoreAccessError } from '../utils/check_entity_exists';
 import { getEntityAnomalies } from './get_anomaly_details';
 import { DEFAULT_OVERVIEW_LOOKBACK_MS, getEntityAnomalyOverview } from './get_anomaly_overview';
 import { _formatPrivileges, hasReadWritePermissions } from '../utils/check_and_format_privileges';
 
-const ONE_YEAR_MS = 365 * 24 * 60 * 60 * 1000;
-
 const getStartOfDayOneYearAgo = (): number => {
-  const d = new Date(Date.now() - ONE_YEAR_MS);
+  const d = new Date();
+  d.setUTCFullYear(d.getUTCFullYear() - 1);
+  d.setUTCDate(d.getUTCDate() - 1); // one extra day tolerance for timezone offsets
   d.setUTCHours(0, 0, 0, 0);
   return d.getTime();
 };
@@ -108,8 +110,7 @@ export const registerAnomalySummaryRoutes = ({
           const {
             from,
             to,
-            min_score: minScore,
-            max_score: maxScore,
+            score_ranges: scoreRanges,
             threat_tactics: threatTactics,
           } = request.body ?? {};
 
@@ -120,15 +121,28 @@ export const registerAnomalySummaryRoutes = ({
             });
           }
 
-          if (minScore !== undefined && maxScore !== undefined && minScore > maxScore) {
+          if (scoreRanges?.some((r) => r.max_score !== undefined && r.min_score > r.max_score)) {
             return siemResponse.error({
               statusCode: 400,
-              body: '`min_score` must not be greater than `max_score`',
+              body: "each `score_ranges` entry's `min_score` must not be greater than its `max_score`",
             });
           }
 
           const core = await context.core;
           const soClient = core.savedObjects.client;
+          const securitySolution = await context.securitySolution;
+          const entityStoreCrudClient = securitySolution.getEntityStoreUpdateClient();
+          const entityExists = await checkEntityExists({
+            crudClient: entityStoreCrudClient,
+            entityId,
+            entityType,
+          });
+          if (!entityExists) {
+            return siemResponse.error({
+              statusCode: 404,
+              body: `Entity "${entityId}" not found`,
+            });
+          }
 
           if (!ml) {
             logger.warn('ML plugin is unavailable; returning empty anomaly overview.');
@@ -143,6 +157,7 @@ export const registerAnomalySummaryRoutes = ({
                 totalAnomaliesCount: 0,
                 from: from ?? now - DEFAULT_OVERVIEW_LOOKBACK_MS,
                 to: to ?? now,
+                hasJobsMissingThreatTactics: false,
               },
             });
           }
@@ -152,8 +167,7 @@ export const registerAnomalySummaryRoutes = ({
             entityType,
             fromMs: from,
             toMs: to,
-            minScore,
-            maxScore,
+            scoreRanges,
             threatTactics,
             logger,
             ml,
@@ -164,6 +178,14 @@ export const registerAnomalySummaryRoutes = ({
           return response.ok({ body: { entityId, entityType, ...overview } });
         } catch (err) {
           logger.error(`Error retrieving anomaly overview - ${err}`);
+
+          if (
+            err instanceof InsufficientMLCapabilities ||
+            err instanceof MLPrivilegesUninitialized ||
+            err instanceof EntityStoreAccessError
+          ) {
+            return siemResponse.error({ statusCode: 403, body: err.message });
+          }
 
           const error = transformError(err);
           return siemResponse.error({ statusCode: error.statusCode, body: error.message });
@@ -201,8 +223,7 @@ export const registerAnomalySummaryRoutes = ({
             page_size: pageSize = 100,
             from,
             to,
-            min_score: minScore,
-            max_score: maxScore,
+            score_ranges: scoreRanges,
             job_ids: jobIds,
             threat_tactics: threatTactics,
             sort,
@@ -215,16 +236,30 @@ export const registerAnomalySummaryRoutes = ({
             });
           }
 
-          if (minScore !== undefined && maxScore !== undefined && minScore > maxScore) {
+          if (scoreRanges?.some((r) => r.max_score !== undefined && r.min_score > r.max_score)) {
             return siemResponse.error({
               statusCode: 400,
-              body: '`min_score` must not be greater than `max_score`',
+              body: "each `score_ranges` entry's `min_score` must not be greater than its `max_score`",
             });
           }
 
           const core = await context.core;
           const esClient = core.elasticsearch.client.asCurrentUser;
           const soClient = core.savedObjects.client;
+          const securitySolution = await context.securitySolution;
+          const entityStoreCrudClient = securitySolution.getEntityStoreUpdateClient();
+
+          const entityExists = await checkEntityExists({
+            crudClient: entityStoreCrudClient,
+            entityId,
+            entityType,
+          });
+          if (!entityExists) {
+            return siemResponse.error({
+              statusCode: 404,
+              body: `Entity "${entityId}" not found`,
+            });
+          }
 
           if (!ml) {
             logger.warn('ML plugin is unavailable; returning empty anomaly summary.');
@@ -246,8 +281,7 @@ export const registerAnomalySummaryRoutes = ({
             esClient,
             fromMs: from,
             toMs: to,
-            minScore,
-            maxScore,
+            scoreRanges,
             jobIds,
             threatTactics,
             logger,
@@ -271,6 +305,14 @@ export const registerAnomalySummaryRoutes = ({
           });
         } catch (err) {
           logger.error(`Error retrieving anomaly summary - ${err}`);
+
+          if (
+            err instanceof InsufficientMLCapabilities ||
+            err instanceof MLPrivilegesUninitialized ||
+            err instanceof EntityStoreAccessError
+          ) {
+            return siemResponse.error({ statusCode: 403, body: err.message });
+          }
 
           const error = transformError(err);
           return siemResponse.error({ statusCode: error.statusCode, body: error.message });

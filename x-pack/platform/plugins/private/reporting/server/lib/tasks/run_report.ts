@@ -23,6 +23,7 @@ import type {
   ExecutionError,
   ReportDocument,
   ReportOutput,
+  ReportSource,
   TaskInstanceFields,
   TaskRunResult,
 } from '@kbn/reporting-common/types';
@@ -38,7 +39,7 @@ import {
 
 import type { ExportTypesRegistry } from '@kbn/reporting-server/export_types_registry';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
-import { asSpaceId, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { brandSpaceId, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { isNumber } from 'lodash';
 import { mapToReportingError } from '../../../common/errors/map_to_reporting_error';
 import type { ReportTaskParams, ReportingTask } from '.';
@@ -222,6 +223,32 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
     return Math.ceil(this.getQueueTimeout().asSeconds()) + 's';
   }
 
+  /**
+   * Re-fetches the report doc's current `_seq_no`/`_primary_term` and updates `report` in place.
+   * A prior attempt can advance the doc's `seq_no` (e.g. via `ContentStream#writeHead`) before
+   * failing; without this refresh the next write reuses the stale value and Elasticsearch rejects
+   * it with a `version_conflict_engine_exception` (#255230, #234877).
+   */
+  private async refreshReportSeqNo(report: SavedReport): Promise<void> {
+    try {
+      const { asInternalUser: client } = await this.opts.reporting.getEsClient();
+      const document = await client.get<ReportSource>({
+        index: report._index,
+        id: report._id,
+      });
+      if (document._seq_no == null || document._primary_term == null) {
+        throw new Error(`Report doc ${report._id} is missing _seq_no/_primary_term!`);
+      }
+      report._seq_no = document._seq_no;
+      report._primary_term = document._primary_term;
+    } catch (err) {
+      // Non-fatal: fall back to the in-memory values (the subsequent write may still conflict).
+      errorLogger(this.logger, `Error refreshing report doc state for ${report._id}`, err, [
+        report._id,
+      ]);
+    }
+  }
+
   private async saveExecutionError(
     report: SavedReport,
     failedToExecuteErr: Error,
@@ -360,7 +387,7 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
     }
     const rawRequest: FakeRawRequest = {
       headers,
-      spaceId: spaceId ? asSpaceId(spaceId) : undefined,
+      spaceId: spaceId ? brandSpaceId(spaceId) : undefined,
     };
     return kibanaRequestFactory(rawRequest);
   }
@@ -538,6 +565,12 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
               operation: async (rep: SavedReport) => {
                 // keep track of the number of times we try within the task
                 atmpts = isNumber(atmpts) ? atmpts + 1 : undefined;
+
+                // Retries only: a prior attempt may have advanced the doc's seq_no before failing.
+                if (isNumber(atmpts) && atmpts > 1) {
+                  await this.refreshReportSeqNo(rep);
+                }
+
                 const jobContentEncoding = this.getJobContentEncoding(jobType);
                 const stream = await getContentStream(
                   this.opts.reporting,
@@ -560,17 +593,34 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
                   stream.once('error', reject);
                 });
 
-                const output = await Promise.race<TaskRunResult>([
-                  this.performJob({
-                    task,
-                    fakeRequest,
-                    taskInstanceFields: { retryAt: taskRetryAt, startedAt: taskStartedAt },
-                    cancellationToken,
-                    stream,
-                  }),
-                  this.throwIfKibanaShutsDown(),
-                  rejectIfStreamError,
-                ]);
+                const performJobPromise = this.performJob({
+                  task,
+                  fakeRequest,
+                  taskInstanceFields: { retryAt: taskRetryAt, startedAt: taskStartedAt },
+                  cancellationToken,
+                  stream,
+                });
+
+                let output: TaskRunResult;
+                try {
+                  output = await Promise.race<TaskRunResult>([
+                    performJobPromise,
+                    this.throwIfKibanaShutsDown(),
+                    rejectIfStreamError,
+                  ]);
+                } catch (raceErr) {
+                  stream.removeListener('error', streamErrorReject!);
+                  // performJob may still reject after losing the race; swallow it to avoid an
+                  // unhandled rejection.
+                  performJobPromise.catch(() => {});
+                  // Swallow errors from the abandoned stream so an unhandled 'error' can't crash
+                  // the process. `on`, not `once`, in case it errors more than once.
+                  stream.on('error', () => {});
+                  // Stop the abandoned stream so it can't keep writing to the report doc
+                  // concurrently with the next attempt.
+                  stream.destroy();
+                  throw raceErr;
+                }
 
                 // Removing so errors in _final are handled only by finishedWithNoPendingCallbacks
                 // and don't cause unhandled rejections
@@ -617,6 +667,12 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
           } catch (failedToExecuteErr) {
             const isLastAttempt = taskAttempts ? taskAttempts >= maxAttempts.maxTaskAttempts : true;
             eventLog.logError(failedToExecuteErr);
+
+            // A prior attempt may have advanced the doc's seq_no before failing; refresh so the
+            // failure-status write doesn't hit a version conflict.
+            if (report) {
+              await this.refreshReportSeqNo(report);
+            }
 
             await this.saveExecutionError(report, failedToExecuteErr, isLastAttempt).catch(
               (failedToSaveError) => {

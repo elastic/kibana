@@ -28,12 +28,12 @@ apiTest.describe('Create deactivate alert action API', { tag: '@local-stateful-c
 
   apiTest.beforeEach(async ({ apiServices }) => {
     await apiServices.alertingV2.ruleEvents.cleanUp();
-    await apiServices.alertingV2.alertActions.cleanUp();
+    await apiServices.alertingV2.alertActionsEvents.cleanUp();
   });
 
   apiTest.afterAll(async ({ apiServices }) => {
     await apiServices.alertingV2.ruleEvents.cleanUp();
-    await apiServices.alertingV2.alertActions.cleanUp();
+    await apiServices.alertingV2.alertActionsEvents.cleanUp();
   });
 
   apiTest(
@@ -58,7 +58,7 @@ apiTest.describe('Create deactivate alert action API', { tag: '@local-stateful-c
 
       expect(response).toHaveStatusCode(204);
 
-      const actions = await apiServices.alertingV2.alertActions.find({
+      const actions = await apiServices.alertingV2.alertActionsEvents.find({
         ruleId,
         actionTypes: ['deactivate'],
       });
@@ -132,6 +132,7 @@ apiTest.describe('Create deactivate alert action API', { tag: '@local-stateful-c
     });
 
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest('schema: rejects empty reason with 400', async ({ apiClient }) => {
@@ -141,6 +142,7 @@ apiTest.describe('Create deactivate alert action API', { tag: '@local-stateful-c
     });
 
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest('schema: rejects reason over 1024 chars with 400', async ({ apiClient }) => {
@@ -150,6 +152,7 @@ apiTest.describe('Create deactivate alert action API', { tag: '@local-stateful-c
     });
 
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest('schema: rejects unknown body fields (strict mode) with 400', async ({ apiClient }) => {
@@ -159,6 +162,7 @@ apiTest.describe('Create deactivate alert action API', { tag: '@local-stateful-c
     });
 
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest('schema: rejects group_hash over 256 chars with 400', async ({ apiClient }) => {
@@ -168,6 +172,7 @@ apiTest.describe('Create deactivate alert action API', { tag: '@local-stateful-c
     });
 
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest('returns 404 when group_hash matches no events', async ({ apiClient }) => {
@@ -177,6 +182,7 @@ apiTest.describe('Create deactivate alert action API', { tag: '@local-stateful-c
     });
 
     expect(response).toHaveStatusCode(404);
+    expect(response.body.code).toBe('ALERT_EVENT_NOT_FOUND');
   });
 
   apiTest(
@@ -202,10 +208,11 @@ apiTest.describe('Create deactivate alert action API', { tag: '@local-stateful-c
       });
 
       expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('INVALID_EPISODE_STATE_TRANSITION');
 
       const ruleEvents = await apiServices.alertingV2.ruleEvents.find(ruleId);
       expect(ruleEvents).toHaveLength(1);
-      const actions = await apiServices.alertingV2.alertActions.find({
+      const actions = await apiServices.alertingV2.alertActionsEvents.find({
         ruleId,
         actionTypes: ['deactivate'],
       });

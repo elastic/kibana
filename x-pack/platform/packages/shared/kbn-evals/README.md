@@ -6,7 +6,10 @@ Offline evaluation framework for LLM-based workflows in Kibana. Requires the `ev
 
 - **Local** - `node scripts/evals start` (interactive CLI, see [CLI.md](./CLI.md) for the full command reference)
 - **CI on PRs** - GitHub labels (`evals:<suite-id>`, `models:<model-group>`)
-- **On-demand** - [Buildkite pipeline](https://buildkite.com/elastic/kibana-evals-on-demand)
+- **On-demand** - [Buildkite pipeline](https://buildkite.com/elastic/kibana-evals-on-demand-llm-evals)
+- **UI** - the "New experiment" form on the Experiments tab runs experiments server-side via Kibana Workflows, no CLI required (see [From the UI](../../../plugins/shared/evals/README.md#from-the-ui))
+- **Agent Builder** - the `eval-experiment-authoring` skill composes, previews, saves, and runs experiments from a chat (see [From Agent Builder](../../../plugins/shared/evals/README.md#from-agent-builder))
+- **Workflow YAML** - a version-controlled experiment workflow file, run via Workflows Management (see [From YAML](../../../plugins/shared/evals/README.md#from-yaml))
 
 ---
 
@@ -197,8 +200,18 @@ Add GitHub labels to trigger evals in PR CI:
 | `models:<model-group>`        | Select model(s) to evaluate (required -- evals skip without this) |
 | `models:judge:<connector-id>` | Override the judge connector                                      |
 | `models:weekly-eis-models`    | Per-suite EIS model alias (resolves from `evals.suites.json`)     |
+| `evals:skip-<suite-id>`       | Skip a suite, e.g. `evals:skip-smoke-tests`                       |
 
 Model groups follow the pattern `eis/<modelId>` for EIS or `llm-gateway/<model>` for LiteLLM.
+
+PRs touching the eval framework get `evals:smoke-tests` automatically
+([`.github/paths-labeller.yml`](../../../../../.github/paths-labeller.yml)). Add
+`evals:skip-smoke-tests` to skip it.
+
+When the labels match, PR CI triggers the dedicated
+[`kibana-evals-pr-llm-evals`](https://buildkite.com/elastic/kibana-evals-pr-llm-evals) pipeline. Results
+surface on the PR as a separate `kibana-evals` commit status — open its build for per-suite/per-model
+results and triage.
 
 ---
 
@@ -206,7 +219,7 @@ Model groups follow the pattern `eis/<modelId>` for EIS or `llm-gateway/<model>`
 
 Run a suite on any branch without a PR:
 
-1. Open [kibana-evals-on-demand](https://buildkite.com/elastic/kibana-evals-on-demand)
+1. Open [kibana-evals-on-demand-llm-evals](https://buildkite.com/elastic/kibana-evals-on-demand-llm-evals)
 2. Click **New build**, select branch/commit
 3. Add environment variables:
 

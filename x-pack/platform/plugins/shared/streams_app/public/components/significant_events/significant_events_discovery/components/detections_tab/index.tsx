@@ -26,12 +26,12 @@ import { RUNNING_POLL_INTERVAL_MS } from '../../../constants';
 import { useFetchDetections } from '../../../../../hooks/significant_events/use_fetch_detections';
 import { useTimefilter } from '../../../../../hooks/use_timefilter';
 import { useSignificantEventsDiscoveryContext } from '../../context/significant_events_discovery_context';
+import { useBlocksNewActivity } from '../../../../../hooks/significant_events/use_significant_events_maintenance';
 import { DetectionFlyout } from './detection_flyout';
 import { FindSignificantEventsButton } from '../streams_view/find_significant_events_button';
 import { StreamsAppSearchBar } from '../../../../streams_app_search_bar';
 import { formatTimestamp } from '../../../../../util/formatters';
-import { CHANGE_TYPE_LABELS, DETECTION_KIND_LABELS } from '../shared/translations';
-import { DETECTION_KIND_COLORS } from '../shared/constants';
+import { CHANGE_TYPE_LABELS } from '../shared/translations';
 
 const DISCOVERY_STATUS_LABELS = {
   processed: i18n.translate('xpack.streams.detectionsTab.statusProcessed', {
@@ -42,6 +42,10 @@ const DISCOVERY_STATUS_LABELS = {
   }),
 };
 
+const DISCOVERY_STATUS_TOOLTIP = i18n.translate('xpack.streams.detectionsTab.discoveryTooltip', {
+  defaultMessage: 'Whether the discovery pipeline has ingested this detection.',
+});
+
 const VIEW_DETAILS_ARIA_LABEL = i18n.translate('xpack.streams.detectionsTab.viewDetailsAriaLabel', {
   defaultMessage: 'View details',
 });
@@ -51,12 +55,10 @@ const MINIMIZE_DETAILS_ARIA_LABEL = i18n.translate(
   { defaultMessage: 'Collapse details' }
 );
 
-const kindLabel = (kind: Detection['kind']) => DETECTION_KIND_LABELS[kind] ?? kind;
-const kindColor = (kind: Detection['kind']) => DETECTION_KIND_COLORS[kind] ?? 'default';
-
 export const DetectionsTab = () => {
   const { euiTheme } = useEuiTheme();
   const { timeState } = useTimefilter();
+  const { blocksActivity, activityBlockTooltip } = useBlocksNewActivity();
 
   const { isRunning, isCanceling, handleRun, handleCancel } =
     useSignificantEventsDiscoveryContext();
@@ -128,22 +130,13 @@ export const DetectionsTab = () => {
         }),
         width: '140px',
         render: (detection: Detection) => {
-          const changeType = detection.detection_evidence?.change_point_type;
+          const changeType = detection.change_point_type;
+          // Change-point observation only — never mapped to a lifecycle state.
           if (!changeType) {
-            return '-';
+            return '—';
           }
           return <EuiBadge color="hollow">{CHANGE_TYPE_LABELS[changeType] ?? changeType}</EuiBadge>;
         },
-      },
-      {
-        field: 'kind',
-        name: i18n.translate('xpack.streams.detectionsTab.kindColumn', {
-          defaultMessage: 'Kind',
-        }),
-        width: '100px',
-        render: (kind: Detection['kind']) => (
-          <EuiBadge color={kindColor(kind)}>{kindLabel(kind)}</EuiBadge>
-        ),
       },
       {
         field: '@timestamp',
@@ -163,9 +156,15 @@ export const DetectionsTab = () => {
           streamName ? <EuiBadge color="hollow">{streamName}</EuiBadge> : null,
       },
       {
-        name: i18n.translate('xpack.streams.detectionsTab.discoveryColumn', {
-          defaultMessage: 'Discovery',
-        }),
+        name: (
+          <EuiToolTip content={DISCOVERY_STATUS_TOOLTIP}>
+            <span tabIndex={0}>
+              {i18n.translate('xpack.streams.detectionsTab.discoveryColumn', {
+                defaultMessage: 'Discovery',
+              })}
+            </span>
+          </EuiToolTip>
+        ),
         width: '100px',
         render: (detection: Detection) => {
           if (detection.processed) {
@@ -191,7 +190,8 @@ export const DetectionsTab = () => {
               onCancel={handleCancel}
               isRunning={isRunning}
               isCanceling={isCanceling}
-              isDisabled={isRunning}
+              isDisabled={isRunning || blocksActivity}
+              disabledTooltip={activityBlockTooltip}
             />
           </EuiFlexItem>
         </EuiFlexGroup>

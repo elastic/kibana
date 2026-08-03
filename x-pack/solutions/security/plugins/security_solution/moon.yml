@@ -217,6 +217,8 @@ dependsOn:
   - '@kbn/data-stream-adapter'
   - '@kbn/core-lifecycle-server'
   - '@kbn/core-user-profile-common'
+  - '@kbn/core-user-profile-server'
+  - '@kbn/core-user-profile-server-mocks'
   - '@kbn/langchain'
   - '@kbn/discover-shared-plugin'
   - '@kbn/react-hooks'
@@ -274,7 +276,7 @@ dependsOn:
   - '@kbn/ai-assistant-common'
   - '@kbn/product-doc-common'
   - '@kbn/kql'
-  - '@kbn/babel-register'
+  - '@kbn/swc-register'
   - '@kbn/core-security-common'
   - '@kbn/entity-store'
   - '@kbn/as-code-filters-transforms'
@@ -299,6 +301,10 @@ dependsOn:
   - '@kbn/workflows-management-plugin'
   - '@kbn/core-application-browser-mocks'
   - '@kbn/date-range-picker'
+  - '@kbn/esql-types'
+  - '@kbn/discoveries-schemas'
+  - '@kbn/chart-icons'
+  - '@kbn/core-mount-utils-browser'
 tags:
   - plugin
   - prod
@@ -314,7 +320,6 @@ fileGroups:
     - test/scout_ai_value_report/**/*
     - test/scout_cps_local/**/*
     - test/scout_security_attacks_alignment/**/*
-    - test/scout_security_entity_ml_anomaly_summary/**/*
     - common/**/*.json
     - server/**/*.json
     - scripts/**/*.json

@@ -51,12 +51,6 @@ export type { AlertSnoozePanelInlineProps } from './components/alert_snooze_pane
 export { useAlertSnooze } from './hooks/use_alert_snooze';
 export type { UseAlertSnoozeParams, UseAlertSnoozeResult } from './hooks/use_alert_snooze';
 
-export {
-  DEFAULT_DATA_CONDITION_TYPES,
-  fieldChangeDescriptor,
-  severityChangeDescriptor,
-  severityEqualsDescriptor,
-} from './components/built_in_data_conditions';
 export { DataConditionType } from './components/types';
 export type {
   AlertSeverityLevel,

@@ -7,19 +7,42 @@
 
 import {
   agentBuilderDefaultAgentId,
+  ConversationAccessControlMode,
   isConversationCreatedEvent,
   isConversationUpdatedEvent,
   isRoundCompleteEvent,
   AgentExecutionMode,
 } from '@kbn/agent-builder-common';
+import { ByteSizeValue } from '@kbn/config-schema';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { firstValueFrom, tap, toArray } from 'rxjs';
 import type { ServiceManager } from '../services';
 import {
+  CONNECTOR_ID_BY_FEATURE_CONFLICT_MESSAGE_WORKFLOW,
   CONNECTOR_OR_INFERENCE_ID_CONFLICT_MESSAGE_WORKFLOW,
+  ConnectorOrInferenceIdConflictError,
   resolveConnectorOrInferenceId,
 } from '../../common/resolve_connector_or_inference_id';
+import { normalizeOptionalStringParam } from '../../common/normalize_optional_string_param';
 import { runAgentStepCommonDefinition } from '../../common/step_types/run_agent_step';
+import { resolveConnectorIdByFeature } from '../utils/resolve_connector_id_by_feature';
+
+/**
+ * Parses a `max-step-size` value (e.g. `"10mb"`, `"1gb"`, or a raw byte count) into bytes,
+ * reusing Kibana's shared `ByteSizeValue` parser for consistency with the rest of the platform.
+ * Returns `undefined` for empty or malformed values so the caller simply skips the override.
+ */
+export const parseMaxStepSize = (value: string): number | undefined => {
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return undefined;
+  }
+  try {
+    return ByteSizeValue.parse(trimmed).getValueInBytes();
+  } catch {
+    return undefined;
+  }
+};
 
 /**
  * Server step definition for the "ai.agent" step.
@@ -46,16 +69,22 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
           conversation_id: conversationId,
           attachments,
           metadata,
+          configuration_overrides: configurationOverrides,
         } = context.input;
 
         const {
           'agent-id': agentId,
           'connector-id': connectorIdRaw,
           'inference-id': inferenceIdRaw,
+          'connector-id-by-feature': connectorIdByFeatureRaw,
           'create-conversation': createConversation,
+          'public-conversation': publicConversation,
           'plugin-id': pluginId,
           'aggregate-by': aggregateBy,
+          'max-step-size': maxStepSize,
         } = context.config;
+        const maxContentLength =
+          typeof maxStepSize === 'string' ? parseMaxStepSize(maxStepSize) : undefined;
 
         context.logger.debug('ai.agent step started');
         const request = context.contextManager.getFakeRequest();
@@ -64,12 +93,33 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
         }
 
         const effectiveAgentId = (agentId as string | undefined) || agentBuilderDefaultAgentId;
-        const effectiveConnectorId = resolveConnectorOrInferenceId(
+        let effectiveConnectorId = resolveConnectorOrInferenceId(
           { connectorId: connectorIdRaw, inferenceId: inferenceIdRaw },
           CONNECTOR_OR_INFERENCE_ID_CONFLICT_MESSAGE_WORKFLOW
         );
 
+        const connectorIdByFeature = normalizeOptionalStringParam(connectorIdByFeatureRaw);
+        if (connectorIdByFeature !== undefined) {
+          if (effectiveConnectorId !== undefined) {
+            throw new ConnectorOrInferenceIdConflictError(
+              CONNECTOR_ID_BY_FEATURE_CONFLICT_MESSAGE_WORKFLOW
+            );
+          }
+          const { searchInferenceEndpoints } = serviceManager.internalStart ?? {};
+          if (!searchInferenceEndpoints) {
+            throw new Error('searchInferenceEndpoints service is not available');
+          }
+          effectiveConnectorId = await resolveConnectorIdByFeature({
+            featureId: connectorIdByFeature,
+            request,
+            searchInferenceEndpoints,
+          });
+        }
+
         const storeConversation = createConversation || Boolean(conversationId);
+        const accessControl = publicConversation
+          ? { access_mode: ConversationAccessControlMode.Public }
+          : undefined;
 
         const executionService = serviceManager.internalStart?.execution;
         if (!executionService) {
@@ -91,12 +141,15 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
             conversationId,
             autoCreateConversationWithId: createConversation,
             storeConversation,
+            accessControl,
             structuredOutput: !!schema,
             outputSchema: schema,
+            configurationOverrides,
             nextInput: {
               message,
               attachments,
             },
+            ...(maxContentLength !== undefined ? { maxContentLength } : {}),
             ...(pluginId ? { telemetryMetadata: { pluginId, aggregateBy } } : {}),
           },
           // workflows already run as scheduled tasks

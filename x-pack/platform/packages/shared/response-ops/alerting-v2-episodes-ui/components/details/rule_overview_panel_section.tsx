@@ -50,7 +50,6 @@ export const AlertEpisodeRuleOverviewPanelSection = ({
       />
     );
   }
-
   if (isEpisodeError || isRuleError(ruleState)) {
     return (
       <EuiEmptyPrompt

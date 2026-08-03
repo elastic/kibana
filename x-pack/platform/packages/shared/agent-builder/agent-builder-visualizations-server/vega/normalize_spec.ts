@@ -28,6 +28,7 @@ const isCompositeView = (spec: Record<string, unknown>): boolean =>
 /** Inline ES|QL data source understood by Kibana's Vega renderer. */
 interface EsqlDataUrl {
   '%type%': 'esql';
+  '%context%': true;
   query: string;
   '%timefield%'?: string;
 }
@@ -84,6 +85,9 @@ const buildEsqlDataUrl = ({
 
   return {
     '%type%': 'esql',
+    // Always apply the dashboard context (time range + filters) so the panel
+    // stays in sync with the dashboard the chart is embedded in.
+    '%context%': true,
     query: esqlQuery,
     ...(effectiveTimefield ? { '%timefield%': effectiveTimefield } : {}),
   };

@@ -29,6 +29,7 @@ import { ConnectorSelector } from '@kbn/security-solution-connectors';
 import { AiIcon } from '@kbn/shared-ux-ai-components';
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import { WorkflowsManagementUiActions } from '@kbn/workflows';
+import { TAG_PREFIX_PATTERN } from '../../../../../common/workflows/alert_analysis_workflow';
 import { SecuritySolutionPageWrapper } from '../../../../common/components/page_wrapper';
 import { HeaderPage } from '../../../../common/components/header_page';
 import { ExperimentalBadge } from '../../../../common/components/experimental_badge';
@@ -86,14 +87,21 @@ export const AlertAnalysisWorkflowPage: React.FC = () => {
   >();
   const isDirty = !isEqual(pageSettings, savedSettings);
   const isWorkflowEnabled = pageSettings?.workflowEnabled ?? true;
+  // The confidence thresholds only apply to auto-close, so their range is only validated (and only
+  // blocks saving) when auto-close is enabled. When it is off the inputs are disabled and their
+  // values are irrelevant.
   const isThresholdRangeInvalid =
     pageSettings !== undefined &&
+    pageSettings.autoCloseEnabled &&
     !(
       pageSettings.autoCloseConfidenceScoreMinThreshold <
       pageSettings.autoCloseConfidenceScoreMaxThreshold
     );
+  // Mirror the server-side tag prefix validation (charset + at least one alphanumeric) so an invalid
+  // value is flagged inline and the Save button is disabled, rather than letting the PUT through to a
+  // 400. Tested against the raw value because the server does not trim.
   const isTagPrefixInvalid =
-    pageSettings !== undefined && (pageSettings.tagPrefix ?? '').trim() === '';
+    pageSettings !== undefined && !TAG_PREFIX_PATTERN.test(pageSettings.tagPrefix ?? '');
   const selectedAgentId = pageSettings?.agentId ?? agentBuilderDefaultAgentId;
   const agentOptions = useMemo<Array<EuiSuperSelectOption<string>>>(() => {
     const options = agents.map((agent) => ({ value: agent.id, inputDisplay: agent.name }));
@@ -378,7 +386,9 @@ export const AlertAnalysisWorkflowPage: React.FC = () => {
                   max={1}
                   step={0.01}
                   value={pageSettings.autoCloseConfidenceScoreMinThreshold}
-                  disabled={!canEditAdvancedSettings || !isWorkflowEnabled}
+                  disabled={
+                    !canEditAdvancedSettings || !isWorkflowEnabled || !pageSettings.autoCloseEnabled
+                  }
                   isInvalid={isThresholdRangeInvalid}
                   aria-label={translations.MIN_THRESHOLD_ARIA_LABEL}
                   onChange={(event) =>
@@ -420,7 +430,9 @@ export const AlertAnalysisWorkflowPage: React.FC = () => {
                   max={1}
                   step={0.01}
                   value={pageSettings.autoCloseConfidenceScoreMaxThreshold}
-                  disabled={!canEditAdvancedSettings || !isWorkflowEnabled}
+                  disabled={
+                    !canEditAdvancedSettings || !isWorkflowEnabled || !pageSettings.autoCloseEnabled
+                  }
                   isInvalid={isThresholdRangeInvalid}
                   aria-label={translations.MAX_THRESHOLD_ARIA_LABEL}
                   onChange={(event) =>

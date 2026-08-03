@@ -9,8 +9,8 @@ import React, { useCallback, useMemo, useRef, useState } from 'react';
 import {
   EuiBadge,
   EuiBasicTable,
+  EuiButton,
   EuiButtonEmpty,
-  EuiConfirmModal,
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiDescribedFormGroup,
@@ -20,7 +20,13 @@ import {
   EuiFormRow,
   EuiHorizontalRule,
   EuiLoadingSpinner,
+  EuiModal,
+  EuiModalBody,
+  EuiModalFooter,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
   EuiPopover,
+  EuiSelect,
   EuiSpacer,
   EuiText,
   type CriteriaWithPagination,
@@ -36,6 +42,7 @@ import {
   fetchAlertAnalysisWorkflowRuleAttachments,
   fetchAlertAnalysisWorkflowRuleAttachmentSelection,
   fetchAlertAnalysisWorkflowRuleAttachmentStats,
+  type RuleAttachmentFilter,
   type RuleAttachmentPage,
   type RuleAttachmentSelection,
   type RuleAttachmentStats,
@@ -45,6 +52,30 @@ import {
 } from './api';
 
 const RULE_ATTACHMENTS_PER_PAGE = 5;
+
+const ATTACHMENT_FILTER_OPTIONS: Array<{ value: RuleAttachmentFilter; text: string }> = [
+  {
+    value: 'all',
+    text: i18n.translate(
+      'xpack.securitySolution.alertAnalysisWorkflow.ruleAttachmentFilterAttachmentAllLabel',
+      { defaultMessage: 'All rules' }
+    ),
+  },
+  {
+    value: 'attached',
+    text: i18n.translate(
+      'xpack.securitySolution.alertAnalysisWorkflow.ruleAttachmentFilterAttachmentAttachedLabel',
+      { defaultMessage: 'Attached' }
+    ),
+  },
+  {
+    value: 'not_attached',
+    text: i18n.translate(
+      'xpack.securitySolution.alertAnalysisWorkflow.ruleAttachmentFilterAttachmentNotAttachedLabel',
+      { defaultMessage: 'Not attached' }
+    ),
+  },
+];
 
 const RULE_ATTACHMENT_STATS_QUERY_KEY = [
   'alertAnalysisWorkflow',
@@ -96,6 +127,7 @@ export const AlertAnalysisWorkflowRuleAttachmentSection: React.FC = () => {
   const queryClient = useQueryClient();
   const [ruleQuery, setRuleQuery] = useState('');
   const [appliedRuleQuery, setAppliedRuleQuery] = useState('');
+  const [attachmentFilter, setAttachmentFilter] = useState<RuleAttachmentFilter>('all');
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(RULE_ATTACHMENTS_PER_PAGE);
   const [selectedRuleIds, setSelectedRuleIds] = useState<string[]>([]);
@@ -126,12 +158,13 @@ export const AlertAnalysisWorkflowRuleAttachmentSection: React.FC = () => {
   );
 
   const statsQuery = useQuery<RuleAttachmentStats, RuleAttachmentError>({
-    queryKey: [...RULE_ATTACHMENT_STATS_QUERY_KEY, normalizedRuleQuery],
+    queryKey: [...RULE_ATTACHMENT_STATS_QUERY_KEY, normalizedRuleQuery, attachmentFilter],
     retry: false,
     queryFn: async () => {
       return fetchAlertAnalysisWorkflowRuleAttachmentStats({
         http,
         search: normalizedRuleQuery,
+        attachmentFilter,
       });
     },
     onError: (error) => {
@@ -148,7 +181,7 @@ export const AlertAnalysisWorkflowRuleAttachmentSection: React.FC = () => {
   });
 
   const ruleAttachmentsQuery = useQuery<RuleAttachmentPage, RuleAttachmentError>({
-    queryKey: [...RULE_ATTACHMENTS_QUERY_KEY, normalizedRuleQuery, page, perPage],
+    queryKey: [...RULE_ATTACHMENTS_QUERY_KEY, normalizedRuleQuery, attachmentFilter, page, perPage],
     enabled: statsQuery.isSuccess,
     keepPreviousData: true,
     retry: false,
@@ -156,6 +189,7 @@ export const AlertAnalysisWorkflowRuleAttachmentSection: React.FC = () => {
       return fetchAlertAnalysisWorkflowRuleAttachments({
         http,
         search: normalizedRuleQuery,
+        attachmentFilter,
         page,
         perPage,
       });
@@ -176,15 +210,19 @@ export const AlertAnalysisWorkflowRuleAttachmentSection: React.FC = () => {
   const bulkSelectionMutation = useMutation<
     RuleAttachmentSelection,
     RuleAttachmentError,
-    { action: BulkSelectionAction; query: string }
+    { action: BulkSelectionAction; query: string; attachmentFilter: RuleAttachmentFilter }
   >({
-    mutationKey: [...RULE_ATTACHMENT_SELECTION_QUERY_KEY, normalizedRuleQuery],
-    // Take the query as a mutation variable rather than closing over normalizedRuleQuery: react-query
-    // rebinds onSuccess to the latest render's options even while a mutation is in flight, so a
-    // closed-over value would reflect a search the user typed after clicking this button, not the
-    // one the fetch below actually ran against.
-    mutationFn: async ({ query }) => {
-      return fetchAlertAnalysisWorkflowRuleAttachmentSelection({ http, search: query });
+    mutationKey: [...RULE_ATTACHMENT_SELECTION_QUERY_KEY, normalizedRuleQuery, attachmentFilter],
+    // Take the query and filter as mutation variables rather than closing over the render's values:
+    // react-query rebinds onSuccess to the latest render's options even while a mutation is in
+    // flight, so a closed-over value would reflect a search/filter the user changed after clicking
+    // this button, not the one the fetch below actually ran against.
+    mutationFn: async ({ query, attachmentFilter: selectionFilter }) => {
+      return fetchAlertAnalysisWorkflowRuleAttachmentSelection({
+        http,
+        search: query,
+        attachmentFilter: selectionFilter,
+      });
     },
     onSuccess: ({ attachedRuleIds, ruleIds }, { action, query }) => {
       setBulkSelection({ query, attachedRuleIds, ruleIds });
@@ -384,6 +422,14 @@ export const AlertAnalysisWorkflowRuleAttachmentSection: React.FC = () => {
     setPage(1);
   }, []);
 
+  const onAttachmentFilterChange = useCallback((event: React.ChangeEvent<HTMLSelectElement>) => {
+    // Reset paging and any prior "Select all" the way a new search does: the filtered result set
+    // is different, so a stale page index or bulk selection would no longer line up with it.
+    setAttachmentFilter(event.target.value as RuleAttachmentFilter);
+    setBulkSelection(null);
+    setPage(1);
+  }, []);
+
   const onRuleQueryChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
       const nextQuery = event.target.value;
@@ -427,38 +473,65 @@ export const AlertAnalysisWorkflowRuleAttachmentSection: React.FC = () => {
     >
       <EuiFlexGroup direction="column" gutterSize="m">
         <EuiFlexItem>
-          <EuiFormRow
-            fullWidth
-            label={i18n.translate(
-              'xpack.securitySolution.alertAnalysisWorkflow.ruleAttachmentFilterQueryLabel',
-              {
-                defaultMessage: 'Rule filter',
-              }
-            )}
-            helpText={i18n.translate(
-              'xpack.securitySolution.alertAnalysisWorkflow.ruleAttachmentFilterQueryHelpText',
-              {
-                defaultMessage:
-                  'Search by rule name. Press Enter to apply. Leave empty to show every rule.',
-              }
-            )}
-          >
-            <EuiFieldSearch
-              fullWidth
-              data-test-subj="alertAnalysisWorkflowRuleAttachmentQuery"
-              value={ruleQuery}
-              placeholder={i18n.translate(
-                'xpack.securitySolution.alertAnalysisWorkflow.ruleAttachmentFilterQueryPlaceholder',
-                {
-                  defaultMessage: 'Search by rule name',
-                }
-              )}
-              onChange={onRuleQueryChange}
-              onKeyDown={onRuleQueryKeyDown}
-              onSearch={applyRuleQuery}
-              isClearable
-            />
-          </EuiFormRow>
+          <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false} wrap>
+            <EuiFlexItem grow>
+              <EuiFormRow
+                fullWidth
+                label={i18n.translate(
+                  'xpack.securitySolution.alertAnalysisWorkflow.ruleAttachmentFilterQueryLabel',
+                  {
+                    defaultMessage: 'Rule filter',
+                  }
+                )}
+                helpText={i18n.translate(
+                  'xpack.securitySolution.alertAnalysisWorkflow.ruleAttachmentFilterQueryHelpText',
+                  {
+                    defaultMessage:
+                      'Search by rule name. Press Enter to apply. Leave empty to show every rule.',
+                  }
+                )}
+              >
+                <EuiFieldSearch
+                  fullWidth
+                  data-test-subj="alertAnalysisWorkflowRuleAttachmentQuery"
+                  value={ruleQuery}
+                  placeholder={i18n.translate(
+                    'xpack.securitySolution.alertAnalysisWorkflow.ruleAttachmentFilterQueryPlaceholder',
+                    {
+                      defaultMessage: 'Search by rule name',
+                    }
+                  )}
+                  onChange={onRuleQueryChange}
+                  onKeyDown={onRuleQueryKeyDown}
+                  onSearch={applyRuleQuery}
+                  isClearable
+                />
+              </EuiFormRow>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiFormRow
+                label={i18n.translate(
+                  'xpack.securitySolution.alertAnalysisWorkflow.ruleAttachmentFilterAttachmentLabel',
+                  {
+                    defaultMessage: 'Attachment status',
+                  }
+                )}
+              >
+                <EuiSelect
+                  data-test-subj="alertAnalysisWorkflowRuleAttachmentAttachmentFilter"
+                  options={ATTACHMENT_FILTER_OPTIONS}
+                  value={attachmentFilter}
+                  onChange={onAttachmentFilterChange}
+                  aria-label={i18n.translate(
+                    'xpack.securitySolution.alertAnalysisWorkflow.ruleAttachmentFilterAttachmentAriaLabel',
+                    {
+                      defaultMessage: 'Filter rules by workflow attachment state',
+                    }
+                  )}
+                />
+              </EuiFormRow>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFlexGroup
@@ -565,6 +638,7 @@ export const AlertAnalysisWorkflowRuleAttachmentSection: React.FC = () => {
                       bulkSelectionMutation.mutate({
                         action: bulkSelectionButtonAction,
                         query: normalizedRuleQuery,
+                        attachmentFilter,
                       })
                     }
                     size="s"
@@ -653,96 +727,110 @@ export const AlertAnalysisWorkflowRuleAttachmentSection: React.FC = () => {
         </EuiFlexItem>
       </EuiFlexGroup>
       {confirmAction && (
-        <EuiConfirmModal
+        // Built from EuiModal primitives rather than EuiConfirmModal so the footer controls can be
+        // disabled while the update is in flight. The request can't be aborted server-side, so
+        // instead of leaving a Cancel/close that silently does nothing, we disable Cancel, keep the
+        // confirm button in its loading state, and ignore close (X / Escape / overlay) until it
+        // settles.
+        <EuiModal
           data-test-subj="alertAnalysisWorkflowRuleAttachmentConfirmModal"
           aria-labelledby={confirmModalTitleId}
-          title={
-            confirmAction === 'attach'
-              ? i18n.translate(
-                  'xpack.securitySolution.alertAnalysisWorkflow.ruleAttachmentConfirmModalAttachTitle',
-                  { defaultMessage: 'Attach the workflow?' }
-                )
-              : i18n.translate(
-                  'xpack.securitySolution.alertAnalysisWorkflow.ruleAttachmentConfirmModalDetachTitle',
-                  { defaultMessage: 'Remove the workflow?' }
-                )
-          }
-          titleProps={{ id: confirmModalTitleId }}
-          onCancel={() => {
+          onClose={() => {
             if (!isUpdatingRuleAttachments) {
               setConfirmAction(null);
             }
           }}
-          onConfirm={() => {
-            setIsUpdatingRuleAttachments(true);
-            updateMutation.mutate(confirmAction);
-          }}
-          cancelButtonText={i18n.translate(
-            'xpack.securitySolution.alertAnalysisWorkflow.ruleAttachmentConfirmModalCancelButtonLabel',
-            {
-              defaultMessage: 'Cancel',
-            }
-          )}
-          confirmButtonText={
-            confirmAction === 'attach'
-              ? i18n.translate(
-                  'xpack.securitySolution.alertAnalysisWorkflow.ruleAttachmentConfirmModalAttachConfirmButtonLabel',
-                  {
-                    defaultMessage:
-                      'Attach workflow to {selectedRulesCount, plural, one {# rule} other {# rules}}',
-                    values: { selectedRulesCount },
-                  }
-                )
-              : i18n.translate(
-                  'xpack.securitySolution.alertAnalysisWorkflow.ruleAttachmentConfirmModalDetachConfirmButtonLabel',
-                  {
-                    defaultMessage:
-                      'Remove workflow from {selectedRulesCount, plural, one {# rule} other {# rules}}',
-                    values: { selectedRulesCount },
-                  }
-                )
-          }
-          buttonColor={confirmAction === 'attach' ? 'primary' : 'warning'}
-          defaultFocusedButton="confirm"
-          confirmButtonDisabled={isUpdatingRuleAttachments}
-          isLoading={isUpdatingRuleAttachments}
         >
-          <EuiText size="s">
-            <p>
+          <EuiModalHeader>
+            <EuiModalHeaderTitle id={confirmModalTitleId}>
               {confirmAction === 'attach' ? (
                 <FormattedMessage
-                  id="xpack.securitySolution.alertAnalysisWorkflow.ruleAttachmentConfirmModalAttachDescription"
-                  defaultMessage="This will attach the alert analysis workflow to {selectedRulesCount, plural, one {# rule} other {# rules}}."
+                  id="xpack.securitySolution.alertAnalysisWorkflow.ruleAttachmentConfirmModalAttachTitle"
+                  defaultMessage="Attach the workflow?"
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.securitySolution.alertAnalysisWorkflow.ruleAttachmentConfirmModalDetachTitle"
+                  defaultMessage="Remove the workflow?"
+                />
+              )}
+            </EuiModalHeaderTitle>
+          </EuiModalHeader>
+          <EuiModalBody>
+            <EuiText size="s">
+              <p>
+                {confirmAction === 'attach' ? (
+                  <FormattedMessage
+                    id="xpack.securitySolution.alertAnalysisWorkflow.ruleAttachmentConfirmModalAttachDescription"
+                    defaultMessage="This will attach the alert analysis workflow to {selectedRulesCount, plural, one {# rule} other {# rules}}."
+                    values={{ selectedRulesCount }}
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="xpack.securitySolution.alertAnalysisWorkflow.ruleAttachmentConfirmModalDetachDescription"
+                    defaultMessage="This will remove the alert analysis workflow from {selectedRulesCount, plural, one {# rule} other {# rules}}."
+                    values={{ selectedRulesCount }}
+                  />
+                )}
+              </p>
+              {isUpdatingRuleAttachments && (
+                <EuiFlexGroup
+                  alignItems="center"
+                  gutterSize="s"
+                  responsive={false}
+                  data-test-subj="alertAnalysisWorkflowRuleAttachmentUpdatingIndicator"
+                >
+                  <EuiFlexItem grow={false}>
+                    <EuiLoadingSpinner size="l" />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <FormattedMessage
+                      id="xpack.securitySolution.alertAnalysisWorkflow.ruleAttachmentConfirmModalLoadingLabel"
+                      defaultMessage="Updating rule attachments..."
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              )}
+            </EuiText>
+          </EuiModalBody>
+          <EuiModalFooter>
+            <EuiButtonEmpty
+              data-test-subj="alertAnalysisWorkflowRuleAttachmentConfirmModalCancelButton"
+              onClick={() => setConfirmAction(null)}
+              isDisabled={isUpdatingRuleAttachments}
+            >
+              <FormattedMessage
+                id="xpack.securitySolution.alertAnalysisWorkflow.ruleAttachmentConfirmModalCancelButtonLabel"
+                defaultMessage="Cancel"
+              />
+            </EuiButtonEmpty>
+            <EuiButton
+              data-test-subj="alertAnalysisWorkflowRuleAttachmentConfirmModalConfirmButton"
+              onClick={() => {
+                setIsUpdatingRuleAttachments(true);
+                updateMutation.mutate(confirmAction);
+              }}
+              fill
+              color={confirmAction === 'attach' ? 'primary' : 'warning'}
+              isLoading={isUpdatingRuleAttachments}
+              isDisabled={isUpdatingRuleAttachments}
+            >
+              {confirmAction === 'attach' ? (
+                <FormattedMessage
+                  id="xpack.securitySolution.alertAnalysisWorkflow.ruleAttachmentConfirmModalAttachConfirmButtonLabel"
+                  defaultMessage="Attach workflow to {selectedRulesCount, plural, one {# rule} other {# rules}}"
                   values={{ selectedRulesCount }}
                 />
               ) : (
                 <FormattedMessage
-                  id="xpack.securitySolution.alertAnalysisWorkflow.ruleAttachmentConfirmModalDetachDescription"
-                  defaultMessage="This will remove the alert analysis workflow from {selectedRulesCount, plural, one {# rule} other {# rules}}."
+                  id="xpack.securitySolution.alertAnalysisWorkflow.ruleAttachmentConfirmModalDetachConfirmButtonLabel"
+                  defaultMessage="Remove workflow from {selectedRulesCount, plural, one {# rule} other {# rules}}"
                   values={{ selectedRulesCount }}
                 />
               )}
-            </p>
-            {isUpdatingRuleAttachments && (
-              <EuiFlexGroup
-                alignItems="center"
-                gutterSize="s"
-                responsive={false}
-                data-test-subj="alertAnalysisWorkflowRuleAttachmentUpdatingIndicator"
-              >
-                <EuiFlexItem grow={false}>
-                  <EuiLoadingSpinner size="l" />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <FormattedMessage
-                    id="xpack.securitySolution.alertAnalysisWorkflow.ruleAttachmentConfirmModalLoadingLabel"
-                    defaultMessage="Updating rule attachments..."
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            )}
-          </EuiText>
-        </EuiConfirmModal>
+            </EuiButton>
+          </EuiModalFooter>
+        </EuiModal>
       )}
       <EuiSpacer size="s" />
     </EuiDescribedFormGroup>

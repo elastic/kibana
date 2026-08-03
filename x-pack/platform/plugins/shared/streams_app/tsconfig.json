@@ -123,6 +123,7 @@
     "@kbn/agent-builder-browser",
     "@kbn/agent-builder-common",
     "@kbn/core-chrome-layout-constants",
+    "@kbn/app-header",
     "@kbn/significant-events-plugin",
     "@kbn/server-route-repository",
   ]

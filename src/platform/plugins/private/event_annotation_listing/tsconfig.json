@@ -42,7 +42,6 @@
     "@kbn/embeddable-plugin",
     "@kbn/scout",
     "@kbn/content-list-provider",
-    "@kbn/test"
   ],
   "exclude": [
     "target/**/*",

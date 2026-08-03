@@ -90,7 +90,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const docs = await waitForAttachmentForCase(es, created.id, 1);
       const userDoc = docs.find((d) => d.attachment.type === UNIFIED_COMMENT_TYPE);
       expect(userDoc).to.be.an('object');
-      expect(userDoc!.cases.id).to.eql(created.id);
+      expect(userDoc!.case.id).to.eql(created.id);
       // The suite creates every case in `space1` (see `getAuthWithSuperUser`),
       // so the analytics doc's `space_id` — derived from the SO namespaces —
       // is `space1`, not the default space.

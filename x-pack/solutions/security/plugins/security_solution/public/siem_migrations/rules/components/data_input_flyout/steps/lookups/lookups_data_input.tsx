@@ -24,11 +24,14 @@ import { getEuiStepStatus } from '../../../../../common/utils/get_eui_step_statu
 import { useKibana } from '../../../../../../common/lib/kibana/kibana_react';
 import type { RuleMigrationTaskStats } from '../../../../../../../common/siem_migrations/model/rule_migration.gen';
 import type { OnResourcesCreated } from '../../types';
-import * as i18n from './translations';
 import { useMissingLookupsListStep } from './sub_steps/missing_lookups_list';
 import { useLookupsFileUploadStep } from './sub_steps/lookups_file_upload';
-import type { MigrationStepProps } from '../../../../../common/types';
-import { SplunkDataInputStep } from '../../../../../common/types';
+import {
+  MigrationSource,
+  SplunkDataInputStep,
+  type MigrationStepProps,
+} from '../../../../../common/types';
+import { useRuleMigrationVendorCopy } from '../../../../hooks/use_rule_migration_vendor_copy';
 
 interface LookupsDataInputSubStepsProps {
   migrationStats: RuleMigrationTaskStats;
@@ -38,6 +41,7 @@ interface LookupsDataInputSubStepsProps {
 
 export const LookupsDataInput = React.memo<MigrationStepProps>(
   ({ dataInputStep, migrationStats, missingResourcesIndexed, setDataInputStep }) => {
+    const { resourceDataInputStep } = useRuleMigrationVendorCopy(MigrationSource.SPLUNK);
     const missingLookups = useMemo(
       () => missingResourcesIndexed?.lookups,
       [missingResourcesIndexed]
@@ -67,7 +71,7 @@ export const LookupsDataInput = React.memo<MigrationStepProps>(
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiTitle size="xs" data-test-subj="lookupsUploadTitle">
-                  <b>{i18n.LOOKUPS_DATA_INPUT_TITLE}</b>
+                  <b>{resourceDataInputStep.title}</b>
                 </EuiTitle>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -76,7 +80,7 @@ export const LookupsDataInput = React.memo<MigrationStepProps>(
             <>
               <EuiFlexItem>
                 <EuiText size="s" color="subdued" data-test-subj="lookupsUploadDescription">
-                  {i18n.LOOKUPS_DATA_INPUT_DESCRIPTION}
+                  {resourceDataInputStep.description}
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem>

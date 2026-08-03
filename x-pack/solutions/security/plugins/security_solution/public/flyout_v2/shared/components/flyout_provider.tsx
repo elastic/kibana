@@ -11,8 +11,8 @@ import type { History } from 'history';
 import { createMemoryHistory } from 'history';
 import { Router } from '@kbn/shared-ux-router';
 import { useLocation } from 'react-router-dom';
-import type { Store } from 'redux';
-import { Provider, useStore } from 'react-redux';
+import type { Store } from 'redux-v4';
+import { Provider, useStore } from 'react-redux-v7';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import { ExpandableFlyoutProvider } from '@kbn/expandable-flyout';
 import { NavigationProvider } from '@kbn/security-solution-navigation';
@@ -31,13 +31,27 @@ import { InputsModelId } from '../../../common/store/inputs/constants';
 import { ConsoleManager } from '../../../management/components/console/components/console_manager';
 
 /**
- * Syncs Kibana's global time filter to the Security Solution Redux store on mount.
+ * Seeds the Security Solution Redux `global` time range from Kibana's global time filter on mount.
+ *
+ * This is only needed when the flyout is rendered OUTSIDE the Security app (e.g. in Discover), where
+ * the Security Redux `global` input is not otherwise populated. Inside the Security app that Redux
+ * input is already the source of truth for the page's time range — and may hold a *relative* range
+ * such as "Today". Seeding it from the timefilter there calls `getAbsoluteTime()` and would overwrite
+ * the relative range with fixed timestamps on every flyout open (which then syncs to the URL), so we
+ * skip it in the Security app.
+ *
+ * The guard is a SYNCHRONOUS `window.location.pathname` check, not an app-id observable
+ * (`useIsInSecurityApp`): this effect runs once on mount, and an observable-based hook yields
+ * `undefined` on the first render, so the destructive seed would run before the guard resolved.
+ * The flyout renders in a separate React root (EUI flyout-manager portal), which makes that
+ * first-render race reliably lose. The pathname is correct synchronously on mount regardless.
  */
 const TimeRangeSync: FC<{ children: ReactNode }> = ({ children }) => {
   const { services } = useKibana();
   const store = useStore();
 
   useEffect(() => {
+    if (window.location.pathname.includes('/app/security')) return;
     const tf = services.data.query.timefilter.timefilter;
     const { from, to } = tf.getAbsoluteTime();
     store.dispatch(setAbsoluteRangeDatePicker({ id: InputsModelId.global, from, to }));

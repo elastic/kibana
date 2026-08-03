@@ -20,7 +20,7 @@ describe('createInitialState', () => {
     const state = createInitialState({ mode: 'create' });
 
     expect(state.mode).toBe('create');
-    expect(state.childOpen).toBe(true);
+    expect(state.childOpen).toBe(false);
     expect(state.queryCommitted).toBe(false);
     /*
      * Create uses a single unified editor (no split tabs), so the default tab
@@ -72,10 +72,19 @@ describe('createInitialState', () => {
     expect(withSignal.recoveryType).toBe('default');
   });
 
-  it('opens the query preview in create mode', () => {
+  it('applies initialRecoveryType none for alert rules', () => {
+    const state = createInitialState({
+      mode: 'edit',
+      initialKind: 'alert',
+      initialRecoveryType: 'none',
+    });
+    expect(state.recoveryType).toBe('none');
+  });
+
+  it('keeps the query sandbox closed in create mode', () => {
     const state = createInitialState({ mode: 'create' });
 
-    expect(state.childOpen).toBe(true);
+    expect(state.childOpen).toBe(false);
     expect(state.queryCommitted).toBe(false);
   });
 
@@ -83,7 +92,7 @@ describe('createInitialState', () => {
     const state = createInitialState({ mode: 'create', isQueryPrePopulated: true });
 
     expect(state.queryCommitted).toBe(true);
-    expect(state.childOpen).toBe(true);
+    expect(state.childOpen).toBe(false);
   });
 
   it('sets queryCommitted false when Discover query has no splittable alert condition', () => {

@@ -10,9 +10,12 @@ import { EuiProvider } from '@elastic/eui';
 import { fireEvent, render, waitFor } from '@testing-library/react';
 
 import type { ToastsStart } from '@kbn/core/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { DataSourcesClient } from '../data_sources_client';
+import type { DatasetsClient } from '../datasets_client';
 import type { DataSource } from '../../common/datasource_types';
 import { CreateDataSourceFlyout } from './create_data_source_flyout';
+import type { DataFederationKibanaServices } from '../types';
 
 const createToastsMock = (): ToastsStart =>
   ({
@@ -27,10 +30,23 @@ const createClientMock = (): DataSourcesClient =>
     delete: jest.fn().mockResolvedValue(undefined),
   } as unknown as DataSourcesClient);
 
+const createDatasetsClientMock = (): DatasetsClient =>
+  ({
+    add: jest.fn().mockResolvedValue(undefined),
+    get: jest.fn().mockResolvedValue([]),
+    delete: jest.fn().mockResolvedValue(undefined),
+  } as unknown as DatasetsClient);
+
 describe('CreateDataSourceFlyout', () => {
   it('renders core actions and disables save while saving', async () => {
     const toasts = createToastsMock();
     const client = createClientMock();
+    const services: DataFederationKibanaServices = {
+      dataSourcesClient: client,
+      datasetsClient: createDatasetsClientMock(),
+      toasts,
+      featureFlags: {},
+    };
     let resolveSave: (value: string | null) => void;
     const savePromise = new Promise<string | null>((resolve) => {
       resolveSave = resolve;
@@ -51,14 +67,14 @@ describe('CreateDataSourceFlyout', () => {
 
     const { getByTestId } = render(
       <EuiProvider>
-        <CreateDataSourceFlyout
-          dataSourcesClient={client}
-          toasts={toasts}
-          onClose={jest.fn()}
-          onSave={onSave}
-          existingDataSourceNames={[]}
-          initialDataSource={initialDataSource}
-        />
+        <KibanaContextProvider services={services}>
+          <CreateDataSourceFlyout
+            onClose={jest.fn()}
+            onSave={onSave}
+            existingDataSourceNames={[]}
+            initialDataSource={initialDataSource}
+          />
+        </KibanaContextProvider>
       </EuiProvider>
     );
 
@@ -79,17 +95,23 @@ describe('CreateDataSourceFlyout', () => {
   it('shows the S3 region field without expanding connection settings, and requires it on create', async () => {
     const toasts = createToastsMock();
     const client = createClientMock();
+    const services: DataFederationKibanaServices = {
+      dataSourcesClient: client,
+      datasetsClient: createDatasetsClientMock(),
+      toasts,
+      featureFlags: {},
+    };
     const onSave = jest.fn().mockResolvedValue(null);
 
     const { getByTestId, queryByText } = render(
       <EuiProvider>
-        <CreateDataSourceFlyout
-          dataSourcesClient={client}
-          toasts={toasts}
-          onClose={jest.fn()}
-          onSave={onSave}
-          existingDataSourceNames={[]}
-        />
+        <KibanaContextProvider services={services}>
+          <CreateDataSourceFlyout
+            onClose={jest.fn()}
+            onSave={onSave}
+            existingDataSourceNames={[]}
+          />
+        </KibanaContextProvider>
       </EuiProvider>
     );
 

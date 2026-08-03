@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import controls from '@elastic/eui/lib/components/icon/svgs/controls.svg';
 import beta from './icons/beta.svg';
 import bolt from './icons/bolt.svg';
 import branch from './icons/branch.svg';
 import clock from './icons/clock.svg';
-import console from './icons/console.svg';
+import consoleSvg from './icons/console.svg';
 import database from './icons/database.svg';
 import email from './icons/email.svg';
 import fail from './icons/fail.svg';
@@ -31,19 +32,21 @@ import user from './icons/user.svg';
 import warning from './icons/warning.svg';
 
 export const HardcodedIcons: Record<string, string> = {
-  '.slack': slackLogoSvg,
-  '.slack_api': slackLogoSvg,
+  '.slack': 'logoSlack',
+  '.slack_api': 'logoSlack',
   '.email': email,
   '.inference': sparkles,
   elasticsearch: elasticsearchLogoSvg,
   kibana: kibanaLogoSvg,
-  console,
+  console: 'commandLine',
   'data.set': database,
-  foreach: refresh,
-  while: refresh,
+  foreach: 'refresh',
+  while: 'refresh',
   switch: productStreamsWired,
   parallel,
-  if: branch,
+  if: 'branch',
+  'loop.break': controls,
+  'loop.continue': controls,
   wait: clock,
   waitForInput: user,
   waitForApproval: user,
@@ -51,6 +54,7 @@ export const HardcodedIcons: Record<string, string> = {
   scheduled: clock,
   manual: user,
   'workflow.execute': glyph,
+  merge: union,
   'workflow.executeAsync': union,
   'workflow.output': output,
   'workflow.fail': fail,
@@ -58,4 +62,24 @@ export const HardcodedIcons: Record<string, string> = {
   flask,
   beta,
   default: plugs,
+};
+
+// Entries in HardcodedIcons that are EUI icon-name strings (valid for <EuiIcon type={...} />)
+// but cannot be used directly in CSS url(). This map replaces each one with its SVG data URL.
+const CSS_ICON_URL_OVERRIDES: Record<string, string> = {
+  '.slack': slackLogoSvg,
+  '.slack_api': slackLogoSvg,
+  console: consoleSvg,
+  foreach: refresh,
+  while: refresh,
+  if: branch,
+};
+
+/**
+ * Data URL variants of HardcodedIcons for CSS contexts (mask-image / background-image).
+ * Every value here is guaranteed to be a data URL — never a bare EUI icon-name string.
+ */
+export const HardcodedIconDataUrls: Record<string, string> = {
+  ...HardcodedIcons,
+  ...CSS_ICON_URL_OVERRIDES,
 };

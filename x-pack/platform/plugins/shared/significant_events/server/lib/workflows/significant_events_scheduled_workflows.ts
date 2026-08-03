@@ -7,18 +7,22 @@
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { NonTerminalExecutionStatuses } from '@kbn/workflows';
-import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
 import {
   SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
+import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import { SCHEDULED_MAINTENANCE_WORKFLOW_IDS } from '../maintenance/managed_workflow_targets';
 import { pollUntil } from './poll_until';
 
 const RUNNING_EXECUTIONS_PAGE_SIZE = 1000;
 
 export interface SignificantEventsScheduledWorkflowsConfig {
   detectionIntervalMinutes: number;
+  detectionBucketIntervalMinutes: number;
+  detectionLookbackMinutes: number;
+  targetCoverageMinutes: number;
   reviewIntervalMinutes: number;
   discoveryBatchSize: number;
   triageBatchSize: number;
@@ -56,16 +60,26 @@ export const createSignificantEventsScheduledWorkflowsService = ({
 }): SignificantEventsScheduledWorkflowsService => {
   const log = logger.get('significant-events-scheduled-workflows');
 
+  // Managed workflow document ids are global at the storage layer (the document
+  // carries a `spaceId` field for filtering, but the id itself is not namespaced
+  // by space). Installing the same managed workflow in more than one space would
+  // therefore collide on a single shared document and fail with an OCC
+  // "updated concurrently" error. Disambiguate per space with `workflowIdSuffix`
+  // so each space gets its own `${managedWorkflowId}-${spaceId}` document, and
+  // reference that same id for every enable/execution operation below.
+  const getWorkflowDocumentId = (managedWorkflowId: string, spaceId: string) =>
+    `${managedWorkflowId}-${spaceId}`;
+
   const getNonTerminalExecutions = async ({
-    workflowId,
+    documentId,
     spaceId,
   }: {
-    workflowId: string;
+    documentId: string;
     spaceId: string;
   }) => {
     const { results, total } = await managementApi.getWorkflowExecutions(
       {
-        workflowId,
+        workflowId: documentId,
         statuses: [...NonTerminalExecutionStatuses],
         size: RUNNING_EXECUTIONS_PAGE_SIZE,
       },
@@ -75,15 +89,15 @@ export const createSignificantEventsScheduledWorkflowsService = ({
   };
 
   const cancelAndAwaitTermination = async ({
-    workflowId,
+    documentId,
     spaceId,
     request,
   }: {
-    workflowId: string;
+    documentId: string;
     spaceId: string;
     request: KibanaRequest;
   }) => {
-    const { results } = await getNonTerminalExecutions({ workflowId, spaceId });
+    const { results } = await getNonTerminalExecutions({ documentId, spaceId });
     if (results.length === 0) {
       return;
     }
@@ -98,7 +112,7 @@ export const createSignificantEventsScheduledWorkflowsService = ({
     );
 
     await pollUntil(
-      () => getNonTerminalExecutions({ workflowId, spaceId }),
+      () => getNonTerminalExecutions({ documentId, spaceId }),
       ({ total }) => total === 0
     );
   };
@@ -115,12 +129,17 @@ export const createSignificantEventsScheduledWorkflowsService = ({
     await Promise.all([
       client.install(SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID, {
         spaceId,
+        workflowIdSuffix: spaceId,
         values: {
           detectionIntervalMinutes: config.detectionIntervalMinutes,
+          detectionBucketIntervalMinutes: config.detectionBucketIntervalMinutes,
+          detectionLookbackMinutes: config.detectionLookbackMinutes,
+          targetCoverageMinutes: config.targetCoverageMinutes,
         },
       }),
       client.install(SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID, {
         spaceId,
+        workflowIdSuffix: spaceId,
         values: {
           reviewIntervalMinutes: config.reviewIntervalMinutes,
           discoveryBatchSize: config.discoveryBatchSize,
@@ -132,21 +151,21 @@ export const createSignificantEventsScheduledWorkflowsService = ({
   };
 
   const setManagedEnabled = async ({
-    workflowId,
+    documentId,
     enabled,
     request,
     spaceId,
   }: {
-    workflowId: string;
+    documentId: string;
     enabled: boolean;
     request: KibanaRequest;
     spaceId: string;
   }) => {
-    const existing = await managementApi.getWorkflow(workflowId, spaceId);
+    const existing = await managementApi.getWorkflow(documentId, spaceId);
 
     if (!existing) {
       if (enabled) {
-        throw new Error(`Managed scheduled Significant Events workflow ${workflowId} is missing`);
+        throw new Error(`Managed scheduled Significant Events workflow ${documentId} is missing`);
       }
       return;
     }
@@ -155,7 +174,7 @@ export const createSignificantEventsScheduledWorkflowsService = ({
       return;
     }
 
-    await managementApi.updateWorkflow(workflowId, { enabled }, spaceId, request);
+    await managementApi.updateWorkflow(documentId, { enabled }, spaceId, request);
   };
 
   const setAllEnabled = async ({
@@ -168,10 +187,14 @@ export const createSignificantEventsScheduledWorkflowsService = ({
     spaceId: string;
   }) => {
     await Promise.all(
-      [
-        SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
-        SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
-      ].map((workflowId) => setManagedEnabled({ workflowId, enabled, request, spaceId }))
+      SCHEDULED_MAINTENANCE_WORKFLOW_IDS.map((workflowId) =>
+        setManagedEnabled({
+          documentId: getWorkflowDocumentId(workflowId, spaceId),
+          enabled,
+          request,
+          spaceId,
+        })
+      )
     );
   };
 
@@ -183,11 +206,12 @@ export const createSignificantEventsScheduledWorkflowsService = ({
     spaceId: string;
   }) => {
     await Promise.all(
-      [
-        SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
-        SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
-      ].map((workflowId) =>
-        cancelAndAwaitTermination({ workflowId, spaceId, request }).catch((err) =>
+      SCHEDULED_MAINTENANCE_WORKFLOW_IDS.map((workflowId) =>
+        cancelAndAwaitTermination({
+          documentId: getWorkflowDocumentId(workflowId, spaceId),
+          spaceId,
+          request,
+        }).catch((err) =>
           log.warn(`Failed to cancel running scheduled Significant Events executions: ${err}`)
         )
       )
@@ -202,8 +226,14 @@ export const createSignificantEventsScheduledWorkflowsService = ({
     spaceId: string;
   }) => {
     await Promise.all([
-      client.uninstall(SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID, { spaceId }),
-      client.uninstall(SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID, { spaceId }),
+      client.uninstall(SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID, {
+        spaceId,
+        workflowIdSuffix: spaceId,
+      }),
+      client.uninstall(SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID, {
+        spaceId,
+        workflowIdSuffix: spaceId,
+      }),
     ]);
   };
 

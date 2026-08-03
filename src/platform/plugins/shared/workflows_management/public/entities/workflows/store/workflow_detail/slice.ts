@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice } from 'redux-toolkit-v1';
 import type { EsWorkflow, WorkflowDetailDto, WorkflowExecutionDto } from '@kbn/workflows';
 import { WORKFLOW_GRAPH_FOCUS_TRIGGER } from '@kbn/workflows';
 import type { ActiveTab, ComputedData, LineColumnPosition, WorkflowDetailState } from './types';

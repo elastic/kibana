@@ -25,6 +25,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const filterBar = getService('filterBar');
   const browser = getService('browser');
 
+  /**
+   * Purpose: Explore data drilldown smoke test
+   *
+   * Migration: Migrate to scout - move to lens scout tests since drilldown is regsitered by in lens plugin
+   */
   describe('Explore underlying data - chart action', () => {
     describe('value click action', () => {
       it('action exists in chart click popup menu', async () => {

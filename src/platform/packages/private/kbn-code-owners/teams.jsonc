@@ -40,6 +40,19 @@
     }
   },
   {
+    "id": "apm-agent-approvers",
+    "name": "APM Agent Approvers",
+    "areas": [
+      "observability"
+    ],
+    "github": {
+      "team": "elastic/apm-agent-approvers"
+    },
+    "responsibilities": [
+      "Client Apps plugin"
+    ]
+  },
+  {
     "id": "ai-infra",
     "name": "AI Infrastructure",
     "areas": [
@@ -426,7 +439,6 @@
     "github": {
       "team": "elastic/kibana-telemetry",
       "label": "Team:Core"
-      
     }
   },
   {
@@ -484,22 +496,31 @@
     ]
   },
   {
-    "id": "obs-ai",
-    "name": "Observability AI",
+    "id": "nightshift-context-and-research",
+    "name": "Nightshift Context & Research",
     "areas": [
       "observability"
     ],
     "github": {
       "team": "elastic/nightshift-context-and-research-team",
-      "label": "Team:obs-ai"
+      "label": "Team:nightshift-context-and-research"
     },
     "responsibilities": [
       "Observability AI assistant",
       "Observability AIOps",
       "Observability BI and telemetry",
       "Observability GenAI",
-      "Observability observed asset model"
+      "Observability observed asset model",
+      "Evals"
     ]
+  },
+  {
+    "id": "nightshift-sre-agent",
+    "name": "Nightshift SRE Agent Team",
+    "areas": ["observability"],
+    "github": {
+      "team": "elastic/nightshift-sre-agent-team"
+    }
   },
   {
     "id": "obs-cloudnative-monitoring",
@@ -587,6 +608,40 @@
       "Infrastructure",
       "Universal Profiling",
       "Observability Overview"
+    ]
+  },
+  {
+    "id": "obs-signals-metrics",
+    "name": "Obs UX: Signals & Metrics",
+    "areas": [
+      "observability"
+    ],
+    "github": {
+      "team": "elastic/obs-signals-metrics-team",
+      "label": "Team:obs-signals-metrics"
+    },
+    "responsibilities": [
+      "Infrastructure metrics",
+      "Hosts UI",
+      "Metrics Explorer",
+      "Metrics Experience"
+    ]
+  },
+  {
+    "id": "obs-signals-traces",
+    "name": "Obs UX: Signals & Traces",
+    "areas": [
+      "observability"
+    ],
+    "github": {
+      "team": "elastic/obs-signals-traces-team",
+      "label": "Team:obs-signals-traces"
+    },
+    "responsibilities": [
+      "APM",
+      "Distributed tracing",
+      "Service maps",
+      "APM data access"
     ]
   },
   {
@@ -940,6 +995,20 @@
     ]
   },
   {
+    "id": "streams-ui",
+    "name": "Streams UI",
+    "areas": [
+      "observability"
+    ],
+    "github": {
+      "team": "elastic/streams-ui",
+      "label": "Team:streams-ui"
+    },
+    "responsibilities": [
+      "Streams"
+    ]
+  },
+  {
     "id": "workchat-eng",
     "name": "Agent Builder",
     "areas": [
@@ -1051,14 +1120,6 @@
     "github": {
       "team": "elastic/security-scalability",
       "label": "Team:Security-Scalability"
-    }
-  },
-  {
-    "id": "obs-ai-assistant",
-    "name": "Obs AI Assistant",
-    "github": {
-      "team": "elastic/obs-ai-assistant",
-      "label": "Team:Obs AI Assistant"
     }
   },
   {

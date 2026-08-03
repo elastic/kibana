@@ -40,7 +40,7 @@ import type { AuditLogService } from '../audit';
 import type { TaskHandler } from './execution';
 import type { MeteringService, ConsumptionServiceStart } from './metering';
 import type { PluginsServiceSetup, PluginsServiceStart } from './plugins';
-import type { CallbackDeliveryService } from './execution/callback_delivery_service';
+import type { CallbackDeliveryService } from './execution/callback';
 
 export interface InternalSetupServices {
   tools: ToolsServiceSetup;
@@ -72,6 +72,7 @@ export interface InternalStartServices {
   taskHandler: TaskHandler;
   plugins: PluginsServiceStart;
   consumption: ConsumptionServiceStart;
+  searchInferenceEndpoints: SearchInferenceEndpointsPluginStart;
   callbackDeliveryService: CallbackDeliveryService;
 }
 

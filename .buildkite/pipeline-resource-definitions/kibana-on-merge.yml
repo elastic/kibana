@@ -27,7 +27,7 @@ spec:
         SLACK_NOTIFICATIONS_SKIP_FOR_RETRIES: 'true'
         SCOUT_REPORTER_ENABLED: 'true'
       allow_rebuilds: true
-      branch_configuration: main 9.4 9.3 8.19
+      branch_configuration: main 9.5 9.4 9.3 8.19
       default_branch: main
       repository: elastic/kibana
       pipeline_file: .buildkite/pipelines/on_merge.yml

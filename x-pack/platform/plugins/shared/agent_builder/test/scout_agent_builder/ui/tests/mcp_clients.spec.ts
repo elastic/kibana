@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { AGENT_BUILDER_UIAM_OAUTH_CLIENT_MANAGEMENT_SETTING_ID } from '@kbn/management-settings-ids';
 import { expect } from '@kbn/scout/ui';
 import {
   createOAuthClient,
@@ -15,17 +14,15 @@ import {
 } from '../../../scout_agent_builder_shared/lib/oauth_clients_kbn';
 import { test } from '../fixtures';
 
-test.describe(
+// Failing: See https://github.com/elastic/kibana/issues/277343
+test.describe.skip(
   '[NON-MKI] Agent Builder — MCP Clients management',
   { tag: ['@local-serverless-search'] },
   () => {
     let authHeaders: Record<string, string>;
     const createdClientIds: string[] = [];
 
-    test.beforeAll(async ({ kbnClient, samlAuth }) => {
-      await kbnClient.uiSettings.update({
-        [AGENT_BUILDER_UIAM_OAUTH_CLIENT_MANAGEMENT_SETTING_ID]: true,
-      });
+    test.beforeAll(async ({ samlAuth }) => {
       authHeaders = await createUiamAuthHeaders(samlAuth);
     });
 
@@ -33,12 +30,11 @@ test.describe(
       await browserAuth.loginAsAdmin();
     });
 
-    test.afterAll(async ({ apiClient, kbnClient }) => {
+    test.afterAll(async ({ apiClient }) => {
       await Promise.all(
         createdClientIds.map((id) => revokeOAuthClient(apiClient, authHeaders, id))
       );
       createdClientIds.length = 0;
-      await kbnClient.uiSettings.unset(AGENT_BUILDER_UIAM_OAUTH_CLIENT_MANAGEMENT_SETTING_ID);
     });
 
     test('opens the MCP Clients page from the Manage MCP menu', async ({ page, pageObjects }) => {

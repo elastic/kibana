@@ -143,6 +143,10 @@ export const OPTIONAL = i18n.translate('xpack.cases.caseView.optional', {
   defaultMessage: 'Optional',
 });
 
+export const REQUIRED_ON_CLOSE = i18n.translate('xpack.cases.caseView.requiredOnClose', {
+  defaultMessage: 'Required on close',
+});
+
 export const PAGE_TITLE = i18n.translate('xpack.cases.pageTitle', {
   defaultMessage: 'Cases',
 });
@@ -244,6 +248,10 @@ export const TITLE_REQUIRED = i18n.translate('xpack.cases.createCase.titleFieldR
 
 export const CONFIGURE_CASES_BUTTON = i18n.translate('xpack.cases.configureCasesButton', {
   defaultMessage: 'Settings',
+});
+
+export const TEMPLATES_BUTTON = i18n.translate('xpack.cases.templatesButton', {
+  defaultMessage: 'Templates',
 });
 
 export const ADD_COMMENT = i18n.translate('xpack.cases.caseView.comment.addComment', {

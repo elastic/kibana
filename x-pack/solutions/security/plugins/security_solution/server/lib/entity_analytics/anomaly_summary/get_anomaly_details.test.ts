@@ -45,6 +45,7 @@ const makeJobConfig = (overrides: Partial<JobConfig> = {}): JobConfig => ({
   jobName: null,
   threatTactics: [],
   threatTechniques: [],
+  hasThreatTactics: false,
   ...overrides,
 });
 

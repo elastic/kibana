@@ -27,6 +27,7 @@ import type { FleetStartServices } from '../../../../../../../plugin';
 import type { PackageInfo, PackageMetadata, RegistryPolicyTemplate } from '../../../../../types';
 import { InstallStatus } from '../../../../../types';
 import {
+  useBulkGetAgentPoliciesQuery,
   useGetPackagePoliciesQuery,
   useGetPackageInstallStatus,
   useLink,
@@ -145,41 +146,73 @@ export const SettingsPage: React.FC<Props> = memo(
     } = useChangelog(name, latestVersion, version);
 
     // Agentless package policies must upgrade through the agentless API, not the
-    // (deprecated-for-agentless) package-policy API. Partition by `supports_agentless`
-    // so each set goes to its own upgrade + dry-run endpoint. When the agentless policies UI
-    // kill switch is off, everything stays on the legacy package-policy upgrade path (the
-    // agentless partition is empty, so its dry-run and upgrade calls never fire).
+    // (deprecated-for-agentless) package-policy API. Partition by whether each policy is
+    // effectively agentless so each set goes to its own upgrade + dry-run endpoint. When the
+    // agentless policies UI kill switch is off, everything stays on the legacy package-policy
+    // upgrade path (the agentless partition is empty, so its dry-run and upgrade calls never fire).
     const agentlessUIEnabled = isAgentlessPoliciesUIEnabled();
-    const agentlessPolicyIds = useMemo(
-      () =>
-        agentlessUIEnabled
-          ? packagePoliciesData?.items
-              .filter((packagePolicy) => packagePolicy.supports_agentless === true)
-              .map(({ id }) => id) ?? []
-          : [],
-      [packagePoliciesData, agentlessUIEnabled]
-    );
-
-    const packagePolicyIds = useMemo(
-      () =>
-        packagePoliciesData?.items
-          .filter(
-            (packagePolicy) => !agentlessUIEnabled || packagePolicy.supports_agentless !== true
-          )
-          .map(({ id }) => id) ?? [],
-      [packagePoliciesData, agentlessUIEnabled]
-    );
 
     const agentPolicyIds = useMemo(
       () => packagePoliciesData?.items.flatMap((packagePolicy) => packagePolicy.policy_ids) ?? [],
       [packagePoliciesData]
     );
 
+    // The server's legacy-API block treats a policy as agentless if its own `supports_agentless`
+    // flag is set OR its parent agent policy is agentless (older policies predate the per-policy
+    // flag). Mirror that fallback so such a policy is routed to the agentless upgrade path instead
+    // of poisoning the legacy batch — otherwise, with `disableAgentlessLegacyAPI` on, the whole
+    // legacy dry-run/upgrade 400s and takes the user's regular policies down with it. Only needed
+    // when the agentless UI is enabled; the query stays disabled otherwise.
+    const { data: agentPoliciesData, isLoading: isAgentPoliciesLoading } =
+      useBulkGetAgentPoliciesQuery(agentPolicyIds, {
+        ignoreMissing: true,
+        enabled: agentlessUIEnabled && agentPolicyIds.length > 0,
+      });
+    const agentlessParentPolicyIds = useMemo(
+      () =>
+        new Set(
+          (agentPoliciesData?.items ?? [])
+            .filter((agentPolicy) => agentPolicy.supports_agentless)
+            .map(({ id }) => id)
+        ),
+      [agentPoliciesData]
+    );
+    const isEffectivelyAgentless = useCallback(
+      (packagePolicy: { supports_agentless?: boolean | null; policy_ids?: string[] }) =>
+        packagePolicy.supports_agentless === true ||
+        (packagePolicy.policy_ids ?? []).some((id) => agentlessParentPolicyIds.has(id)),
+      [agentlessParentPolicyIds]
+    );
+    // While the parent lookup is still resolving, an older (parent-only) agentless policy would be
+    // mis-classified as legacy; hold the legacy dry-run until it settles so we never fire it with a
+    // still-hidden agentless policy in the batch. The guard short-circuits before reading the
+    // loading state when the query is disabled (a disabled react-query reports `isLoading` forever).
+    const isAgentlessDetectionPending =
+      agentlessUIEnabled && agentPolicyIds.length > 0 && isAgentPoliciesLoading;
+
+    const agentlessPolicyIds = useMemo(
+      () =>
+        agentlessUIEnabled
+          ? packagePoliciesData?.items
+              .filter((packagePolicy) => isEffectivelyAgentless(packagePolicy))
+              .map(({ id }) => id) ?? []
+          : [],
+      [packagePoliciesData, agentlessUIEnabled, isEffectivelyAgentless]
+    );
+
+    const packagePolicyIds = useMemo(
+      () =>
+        packagePoliciesData?.items
+          .filter((packagePolicy) => !agentlessUIEnabled || !isEffectivelyAgentless(packagePolicy))
+          .map(({ id }) => id) ?? [],
+      [packagePoliciesData, agentlessUIEnabled, isEffectivelyAgentless]
+    );
+
     const { data: dryRunData } = useUpgradePackagePolicyDryRunQuery(
       packagePolicyIds,
       latestVersion,
       {
-        enabled: packagePolicyIds.length > 0,
+        enabled: packagePolicyIds.length > 0 && !isAgentlessDetectionPending,
       }
     );
 

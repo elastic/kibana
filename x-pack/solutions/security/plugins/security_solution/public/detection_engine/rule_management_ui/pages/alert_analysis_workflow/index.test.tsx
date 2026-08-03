@@ -220,4 +220,39 @@ describe('AlertAnalysisWorkflowPage', () => {
       expect.objectContaining({ method: 'PUT' })
     );
   });
+
+  it('disables the confidence score inputs when auto-close is turned off', async () => {
+    renderComponent();
+
+    const autoCloseSwitch = await screen.findByTestId('alertAnalysisWorkflowAutoCloseEnabled');
+    await waitFor(() => expect(autoCloseSwitch).toBeChecked());
+
+    const minThresholdField = await screen.findByTestId('alertAnalysisWorkflowMinThreshold');
+    const maxThresholdField = await screen.findByTestId('alertAnalysisWorkflowMaxThreshold');
+    expect(minThresholdField).not.toBeDisabled();
+    expect(maxThresholdField).not.toBeDisabled();
+
+    fireEvent.click(autoCloseSwitch);
+
+    expect(minThresholdField).toBeDisabled();
+    expect(maxThresholdField).toBeDisabled();
+  });
+
+  it('does not block saving on an out-of-range threshold pair when auto-close is off', async () => {
+    renderComponent();
+
+    // Make min (0.85) >= max (0.5): the range is invalid while auto-close is still on.
+    const maxThresholdField = await screen.findByTestId('alertAnalysisWorkflowMaxThreshold');
+    fireEvent.change(maxThresholdField, { target: { value: '0.5' } });
+
+    const saveButton = await screen.findByTestId('alertAnalysisWorkflowSaveButton');
+    expect(saveButton).toBeDisabled();
+
+    // Turning auto-close off makes the thresholds irrelevant, so the invalid range no longer blocks
+    // saving.
+    const autoCloseSwitch = await screen.findByTestId('alertAnalysisWorkflowAutoCloseEnabled');
+    fireEvent.click(autoCloseSwitch);
+
+    expect(saveButton).not.toBeDisabled();
+  });
 });

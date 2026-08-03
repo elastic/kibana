@@ -241,7 +241,7 @@ export async function runReconcileSoon(
 
 /**
  * Poll `.cases-activity` until the count of docs matching
- * `cases.id = caseId` reaches at least `minCount`. The activity
+ * `case.id = caseId` reaches at least `minCount`. The activity
  * writer is fire-and-forget on a separate code path from the
  * user-actions SO write — `?refresh=true` on the cases API doesn't
  * refresh `.cases-activity`, so tests must poll-with-refresh.
@@ -271,7 +271,7 @@ export async function waitForActivityForCase(
         // caller passing `minCount > 100` loop until timeout.
         size: Math.max(minCount, 100),
         sort: [{ '@timestamp': { order: 'asc' } }],
-        query: { term: { 'cases.id': caseId } },
+        query: { term: { 'case.id': caseId } },
       });
       const hits = search.hits.hits.map((h) => h._source!).filter(Boolean);
       if (hits.length >= minCount) return hits;
@@ -286,7 +286,7 @@ export async function waitForActivityForCase(
 }
 
 /**
- * Poll `.cases-activity` until ZERO docs match `cases.id = caseId`.
+ * Poll `.cases-activity` until ZERO docs match `case.id = caseId`.
  * Used after a cases delete to assert the cascade-delete fired.
  */
 export async function waitForActivityAbsent(
@@ -300,7 +300,7 @@ export async function waitForActivityAbsent(
       await es.indices.refresh({ index: ACTIVITY_INDEX });
       const count = await es.count({
         index: ACTIVITY_INDEX,
-        query: { term: { 'cases.id': caseId } },
+        query: { term: { 'case.id': caseId } },
       });
       if ((count.count ?? 0) === 0) return;
     } catch {
@@ -317,7 +317,7 @@ export async function waitForActivityAbsent(
 
 /**
  * Poll `.cases-attachments` until the count of docs matching
- * `cases.id = caseId` reaches at least `minCount`. Same fire-and-forget
+ * `case.id = caseId` reaches at least `minCount`. Same fire-and-forget
  * caveat as `waitForActivityForCase`: the analytics writer runs on a
  * separate code path from the SO write, so tests must poll-with-refresh.
  */
@@ -339,7 +339,7 @@ export async function waitForAttachmentForCase(
         index: ATTACHMENTS_INDEX,
         size: 100,
         sort: [{ '@timestamp': { order: 'asc' } }],
-        query: { term: { 'cases.id': caseId } },
+        query: { term: { 'case.id': caseId } },
       });
       const hits = search.hits.hits.map((h) => h._source!).filter(Boolean);
       if (hits.length >= minCount) return hits;
@@ -354,7 +354,7 @@ export async function waitForAttachmentForCase(
 }
 
 /**
- * Poll `.cases-attachments` until ZERO docs match `cases.id = caseId`.
+ * Poll `.cases-attachments` until ZERO docs match `case.id = caseId`.
  * Used after a cases delete to assert the cascade-delete fired against
  * BOTH source SO types (legacy + unified).
  */
@@ -369,7 +369,7 @@ export async function waitForAttachmentsAbsent(
       await es.indices.refresh({ index: ATTACHMENTS_INDEX });
       const count = await es.count({
         index: ATTACHMENTS_INDEX,
-        query: { term: { 'cases.id': caseId } },
+        query: { term: { 'case.id': caseId } },
       });
       if ((count.count ?? 0) === 0) return;
     } catch {
@@ -392,7 +392,7 @@ export interface AnalyticsCaseSource {
   // cases are space-isolated). See server `mappings/case.ts`.
   space_id: string;
   owner: string;
-  cases: {
+  case: {
     id: string;
     title: string;
     description?: string;
@@ -483,7 +483,7 @@ export interface ActivityDocSource {
   '@timestamp': string;
   // Top-level singular scoping field, matching the cases surface (DLS).
   space_id: string;
-  cases: { id: string };
+  case: { id: string };
   owner: string;
   actor: {
     username?: string | null;
@@ -514,7 +514,7 @@ export interface AttachmentDocSource {
   '@timestamp': string;
   // Top-level singular scoping field, matching the cases + activity surfaces (DLS).
   space_id: string;
-  cases: { id: string };
+  case: { id: string };
   owner: string;
   created_at: string;
   created_by: {

@@ -10,13 +10,14 @@ import { EuiButton, EuiButtonEmpty, EuiHorizontalRule, useEuiTheme } from '@elas
 import { SnoozeFormBody } from './snooze_form_body';
 import { useSnoozeForm } from './use_snooze_form';
 import type { AlertSnoozePayload } from './use_snooze_form';
-import type { DataConditionTypeDescriptor } from './types';
 import * as i18n from './translations';
 
 export interface AlertSnoozePanelInlineProps {
   onApply: (payload: AlertSnoozePayload) => void;
   onBack: () => void;
-  dataConditionTypes?: readonly DataConditionTypeDescriptor[];
+  /** alert field names for the `field_change` condition dropdown. */
+  fieldOptions?: string[];
+  isLoadingFields?: boolean;
 }
 
 /**
@@ -33,7 +34,8 @@ export interface AlertSnoozePanelInlineProps {
 export const AlertSnoozePanelInline = ({
   onApply,
   onBack,
-  dataConditionTypes,
+  fieldOptions,
+  isLoadingFields,
 }: AlertSnoozePanelInlineProps) => {
   const { euiTheme } = useEuiTheme();
   const {
@@ -81,7 +83,8 @@ export const AlertSnoozePanelInline = ({
         onTabChange={setActiveTab}
         onQuickScheduleChange={setQuickEndDate}
         onConditionalScheduleChange={setConditionalSchedule}
-        dataConditionTypes={dataConditionTypes}
+        fieldOptions={fieldOptions}
+        isLoadingFields={isLoadingFields}
       />
 
       {/* Sticky footer — keeps the apply button pinned at the bottom */}

@@ -13,12 +13,7 @@ export {
   USER_AVATAR_MAX_INITIALS,
 } from './user_profile';
 export { getUserDisplayName } from './user';
-export {
-  canUserChangePassword,
-  canUserChangeDetails,
-  isUserAnonymous,
-  canUserHaveProfile,
-} from './authenticated_user';
+export { canUserChangePassword, canUserChangeDetails } from './authenticated_user';
 export { shouldProviderUseLoginForm } from './authentication_provider';
 export type { BuiltinESPrivileges } from './builtin_es_privileges';
 export {

@@ -9,20 +9,34 @@ import type { YAMLMap } from 'yaml';
 import { parse as parseYaml, parseDocument, isMap } from 'yaml';
 import type { CaseConnectorWithoutName } from '../../../../common/types/domain_zod/connector/v1';
 import { ConnectorTypes } from '../../../../common/types/domain';
+import { NONE_CONNECTOR_ID } from '../../../../common/constants';
 import type { TemplateSettings } from '../../../../common/types/domain/template/v1';
 import { TemplateSettingsSchema } from '../../../../common/types/domain/template/v1';
 
 const CONNECTOR_KEY = 'connector';
 const SETTINGS_KEY = 'settings';
 
+/**
+ * The `.none` connector block. `connector` is an always-present block in the template YAML, so a
+ * template with no default connector is written as this explicit `.none` shape rather than omitting
+ * the key. `normalizeTemplateConnector` collapses it back to `undefined` for the Settings form and
+ * for unsaved-change detection.
+ */
+export const NONE_TEMPLATE_CONNECTOR: CaseConnectorWithoutName = {
+  type: ConnectorTypes.none,
+  id: NONE_CONNECTOR_ID,
+  fields: null,
+};
+
+/** Both settings keys, defaulting to `false` — the always-present `settings` block shape. */
+export const getExplicitTemplateSettings = (settings?: TemplateSettings): TemplateSettings => ({
+  syncAlerts: settings?.syncAlerts ?? false,
+  extractObservables: settings?.extractObservables ?? false,
+});
+
 export interface TemplateSettingsAndConnector {
   connector?: CaseConnectorWithoutName;
   settings?: TemplateSettings;
-}
-
-export interface SplitTemplateDefinition extends TemplateSettingsAndConnector {
-  /** The definition YAML with the `connector` and `settings` blocks removed. */
-  fieldsYaml: string;
 }
 
 const isPlainRecord = (value: unknown): value is Record<string, unknown> =>
@@ -42,6 +56,37 @@ const isValidTemplateConnector = (value: unknown): value is CaseConnectorWithout
   }
   const { type, id } = value;
   return typeof id === 'string' && typeof type === 'string' && CONNECTOR_TYPES.has(type);
+};
+
+/**
+ * Reads validated `connector` / `settings` blocks from a full template definition YAML.
+ * Invalid or malformed shapes are safely treated as `undefined`.
+ */
+export const getTemplateSettingsAndConnectorFromYaml = (
+  yaml: string
+): TemplateSettingsAndConnector => {
+  if (!yaml || yaml.trim() === '') {
+    return {};
+  }
+
+  try {
+    const parsed = parseYaml(yaml);
+    const record = isPlainRecord(parsed) ? parsed : undefined;
+    if (!record) {
+      return {};
+    }
+
+    const connectorValue = CONNECTOR_KEY in record ? record[CONNECTOR_KEY] : undefined;
+    const connector = isValidTemplateConnector(connectorValue) ? connectorValue : undefined;
+
+    const settingsResult =
+      SETTINGS_KEY in record ? TemplateSettingsSchema.safeParse(record[SETTINGS_KEY]) : undefined;
+    const settings = settingsResult?.success ? settingsResult.data : undefined;
+
+    return { connector, settings };
+  } catch {
+    return {};
+  }
 };
 
 /**
@@ -71,63 +116,38 @@ export const normalizeTemplateConnector = (
   connector == null || connector.type === ConnectorTypes.none ? undefined : connector;
 
 /**
- * Splits a template definition into the fields-only YAML that stays in the editor buffer and the
- * `connector` / `settings` blocks that are managed by the Settings form.
- *
- * The `connector` and `settings` keys are removed from the YAML via the `yaml` library's document
- * API so the formatting and comments of the remaining (fields) content are preserved. Their parsed
- * values are validated against the domain schemas (invalid shapes seed the form as `undefined`
- * rather than reaching the Settings form unvalidated) and returned so the Settings form can be
- * seeded. Invalid YAML is returned untouched.
+ * Removes the renderer-managed `connector` and `settings` blocks from a definition YAML, leaving the
+ * "case blueprint" (case defaults + `fields`) that the Fields tab edits two-way. Under Option 2 the
+ * connector and settings live as panel state (never in the editor buffer); they are lifted out on
+ * load and merged back in on save (see mergeTemplateDefinition). Preserves the author's formatting
+ * and comments for everything else.
  */
-export const splitTemplateDefinition = (yaml: string): SplitTemplateDefinition => {
-  if (!yaml || yaml.trim() === '') {
-    return { fieldsYaml: yaml };
-  }
-
+export const stripTemplateConfigBlocks = (definitionYaml: string): string => {
   try {
-    const parsed = parseYaml(yaml);
-    const record = isPlainRecord(parsed) ? parsed : undefined;
-    const hasConnector = record !== undefined && CONNECTOR_KEY in record;
-    const hasSettings = record !== undefined && SETTINGS_KEY in record;
-
-    // Nothing to strip — return the buffer untouched so we never reformat a fields-only definition.
-    if (!hasConnector && !hasSettings) {
-      return { fieldsYaml: yaml };
+    const doc = parseDocument(definitionYaml ?? '');
+    if (!isMap(doc.contents)) {
+      return definitionYaml;
     }
-
-    // Validate rather than blindly cast: migrated/imported definitions flow through here, so a
-    // malformed connector/settings shape must not reach the Settings form. Failures seed `undefined`.
-    const connectorValue = hasConnector ? record[CONNECTOR_KEY] : undefined;
-    const connector: CaseConnectorWithoutName | undefined = isValidTemplateConnector(connectorValue)
-      ? connectorValue
-      : undefined;
-
-    const settingsResult = hasSettings
-      ? TemplateSettingsSchema.safeParse(record[SETTINGS_KEY])
-      : undefined;
-    const settings: TemplateSettings | undefined = settingsResult?.success
-      ? settingsResult.data
-      : undefined;
-
-    const doc = parseDocument(yaml);
-    const root = doc.contents;
-    if (isMap(root)) {
-      const rootMap = root as YAMLMap<unknown, unknown>;
-      rootMap.delete(CONNECTOR_KEY);
-      rootMap.delete(SETTINGS_KEY);
+    const root = doc.contents as YAMLMap<unknown, unknown>;
+    let modified = false;
+    for (const key of [CONNECTOR_KEY, SETTINGS_KEY]) {
+      if (root.has(key)) {
+        root.delete(key);
+        modified = true;
+      }
     }
-
-    return { fieldsYaml: doc.toString(), connector, settings };
+    return modified ? doc.toString() : definitionYaml;
   } catch {
-    return { fieldsYaml: yaml };
+    return definitionYaml;
   }
 };
 
 /**
- * Merges the form-managed `connector` / `settings` blocks back into the fields YAML to produce the
- * complete definition that gets persisted. Empty settings and the `.none` (or absent) connector are
- * omitted so we never write empty blocks. Preserves the fields content's formatting and comments.
+ * Composes the COMPLETE persisted definition from the edited blueprint YAML plus the panel-owned
+ * `settings` and `connector`. Called once at save time (never per keystroke). `settings` is written
+ * explicitly with both keys so the stored definition is complete; the `.none` connector is omitted
+ * (it is the implicit default, matching the v1→v2 migration output), and any stale connector block
+ * is removed when there is no real connector.
  */
 export const mergeTemplateDefinition = (
   fieldsYaml: string,
@@ -143,17 +163,12 @@ export const mergeTemplateDefinition = (
 
     const rootMap = root as YAMLMap<unknown, unknown>;
 
-    const normalizedSettings = normalizeTemplateSettings(settings);
-    if (normalizedSettings) {
-      rootMap.set(SETTINGS_KEY, doc.createNode(normalizedSettings));
-    } else {
-      rootMap.delete(SETTINGS_KEY);
-    }
+    rootMap.set(SETTINGS_KEY, doc.createNode(getExplicitTemplateSettings(settings)));
 
     const normalizedConnector = normalizeTemplateConnector(connector);
     if (normalizedConnector) {
       rootMap.set(CONNECTOR_KEY, doc.createNode(normalizedConnector));
-    } else {
+    } else if (rootMap.has(CONNECTOR_KEY)) {
       rootMap.delete(CONNECTOR_KEY);
     }
 

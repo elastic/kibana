@@ -11,6 +11,7 @@ import {
   LOGSDB_INDEX_MODE,
   TIME_SERIES_MODE,
   LOOKUP_INDEX_MODE,
+  VECTOR_DB_INDEX_MODE,
 } from '../../../common/constants';
 
 export const indexModeLabels = {
@@ -25,6 +26,9 @@ export const indexModeLabels = {
   }),
   [LOOKUP_INDEX_MODE]: i18n.translate('xpack.idxMgmt.indexModeLabels.lookupIndexModeLabel', {
     defaultMessage: 'Lookup',
+  }),
+  [VECTOR_DB_INDEX_MODE]: i18n.translate('xpack.idxMgmt.indexModeLabels.vectorDbIndexModeLabel', {
+    defaultMessage: 'VectorDB',
   }),
 };
 
@@ -53,6 +57,12 @@ export const indexModeDescriptions = {
     'xpack.idxMgmt.indexModeDescriptions.lookupIndexModeDescription',
     {
       defaultMessage: 'Optimized for ES|QL join operations.',
+    }
+  ),
+  [VECTOR_DB_INDEX_MODE]: i18n.translate(
+    'xpack.idxMgmt.indexModeDescriptions.vectorDbIndexModeDescription',
+    {
+      defaultMessage: 'Optimized for vector search and similarity operations.',
     }
   ),
 };

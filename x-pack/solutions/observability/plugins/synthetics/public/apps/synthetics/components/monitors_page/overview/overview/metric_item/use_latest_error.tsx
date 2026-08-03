@@ -6,7 +6,7 @@
  */
 
 import { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { getRangeFilter } from '../../../../../../../../common/constants/client_defaults';
 import { getSyntheticsCcsIndex } from '../../../../../../../../common/get_synthetics_indices';
 import type { OverviewStatusMetaData, Ping } from '../../../../../../../../common/runtime_types';

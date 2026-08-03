@@ -63,6 +63,7 @@ jest.mock('../../app_context', () => {
       getExperimentalFeatures: jest.fn(),
       getCloud: jest.fn(),
       getTaskManagerStart: jest.fn(() => ({ runSoon: jest.fn().mockResolvedValue({}) })),
+      getKibanaVersion: jest.fn(() => '8.0.0'),
     },
   };
 });
@@ -210,6 +211,59 @@ describe('install', () => {
         status: 'failure',
         automaticInstall: false,
       });
+    });
+
+    it('should bypass out-of-date check when allow_outdated_version is true', async () => {
+      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+
+      const response = await installPackage({
+        spaceId: DEFAULT_SPACE_ID,
+        installSource: 'registry',
+        pkgkey: 'apache-1.1.0',
+        savedObjectsClient: savedObjectsClientMock.create(),
+        esClient: {} as ElasticsearchClient,
+        allowOutdatedVersion: true,
+      });
+
+      // Should reach the state machine (i.e. not fail with out-of-date error)
+      expect(response.error).toBeUndefined();
+      expect(response.status).toEqual('installed');
+    });
+
+    it('should still reject out-of-date version without allow_outdated_version', async () => {
+      const response = await installPackage({
+        spaceId: DEFAULT_SPACE_ID,
+        installSource: 'registry',
+        pkgkey: 'apache-1.1.0',
+        savedObjectsClient: savedObjectsClientMock.create(),
+        esClient: {} as ElasticsearchClient,
+      });
+
+      expect(response.error).toBeDefined();
+      expect(response.error!.message).toEqual(
+        'apache-1.1.0 is out-of-date and cannot be installed or updated'
+      );
+    });
+
+    it('should not bypass agentless guard when allow_outdated_version is true but not force', async () => {
+      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+      jest.mocked(isAgentlessEnabled).mockReturnValueOnce(false);
+      jest.mocked(isOnlyAgentlessIntegration).mockReturnValueOnce(true);
+
+      const response = await installPackage({
+        spaceId: DEFAULT_SPACE_ID,
+        installSource: 'registry',
+        // use the latest version so the out-of-date check is not the blocking issue
+        pkgkey: 'test_package',
+        savedObjectsClient: savedObjectsClientMock.create(),
+        esClient: {} as ElasticsearchClient,
+        allowOutdatedVersion: true,
+      });
+
+      expect(response.error).toBeDefined();
+      expect(response.error!.message).toEqual(
+        'test_package contains agentless policy templates, agentless is not available on this deployment'
+      );
     });
 
     it('should send telemetry on install failure, license error', async () => {

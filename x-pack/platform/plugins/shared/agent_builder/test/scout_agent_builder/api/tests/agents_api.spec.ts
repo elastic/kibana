@@ -230,6 +230,84 @@ apiTest.describe(
       }
     );
 
+    apiTest(
+      'agent responses expose the raw configuration and default the type to chat',
+      async ({ asAdmin }) => {
+        const agentId = 'config-shape-agent';
+        const createRes = await asAdmin.post(`${API_AGENT_BUILDER}/agents`, {
+          body: { ...mockAgent, id: agentId },
+          responseType: 'json',
+        });
+        expect(createRes).toHaveStatusCode(200);
+        createdAgentIds.push(agentId);
+
+        expect(createRes.body.type).toBe('chat');
+        expect(createRes.body.configuration).toMatchObject({
+          instructions: mockAgent.configuration.instructions,
+        });
+
+        const getRes = await asAdmin.get(`${API_AGENT_BUILDER}/agents/${agentId}`, {
+          responseType: 'json',
+        });
+        expect(getRes).toHaveStatusCode(200);
+      }
+    );
+
+    apiTest(
+      'GET-modify-PUT round-trips keep the stored configuration stable',
+      async ({ asAdmin }) => {
+        const agentId = 'round-trip-agent';
+        const createRes = await asAdmin.post(`${API_AGENT_BUILDER}/agents`, {
+          body: { ...mockAgent, id: agentId },
+          responseType: 'json',
+        });
+        expect(createRes).toHaveStatusCode(200);
+        createdAgentIds.push(agentId);
+
+        const initial = createRes.body.configuration;
+        for (let i = 0; i < 2; i++) {
+          const getRes = await asAdmin.get(`${API_AGENT_BUILDER}/agents/${agentId}`, {
+            responseType: 'json',
+          });
+          expect(getRes).toHaveStatusCode(200);
+
+          const putRes = await asAdmin.put(`${API_AGENT_BUILDER}/agents/${agentId}`, {
+            body: { configuration: getRes.body.configuration },
+            responseType: 'json',
+          });
+          expect(putRes).toHaveStatusCode(200);
+          expect(putRes.body.configuration).toStrictEqual(initial);
+        }
+      }
+    );
+
+    apiTest(
+      'POST rejects a type field (typed agents are created in code, not via the API)',
+      async ({ asAdmin }) => {
+        const response = await asAdmin.post(`${API_AGENT_BUILDER}/agents`, {
+          body: { ...mockAgent, id: 'typed-create-agent', type: 'investigation' },
+          responseType: 'json',
+        });
+        expect(response).toHaveStatusCode(400);
+      }
+    );
+
+    apiTest('PUT rejects changing the agent type', async ({ asAdmin }) => {
+      const agentId = 'immutable-type-agent';
+      const createRes = await asAdmin.post(`${API_AGENT_BUILDER}/agents`, {
+        body: { ...mockAgent, id: agentId },
+        responseType: 'json',
+      });
+      expect(createRes).toHaveStatusCode(200);
+      createdAgentIds.push(agentId);
+
+      const response = await asAdmin.put(`${API_AGENT_BUILDER}/agents/${agentId}`, {
+        body: { type: 'chat' },
+        responseType: 'json',
+      });
+      expect(response).toHaveStatusCode(400);
+    });
+
     apiTest('DELETE /api/agent_builder/agents/:id deletes agent', async ({ asAdmin }) => {
       const testAgent = { ...mockAgent, id: 'delete-test-agent' };
       await asAdmin.post(`${API_AGENT_BUILDER}/agents`, {

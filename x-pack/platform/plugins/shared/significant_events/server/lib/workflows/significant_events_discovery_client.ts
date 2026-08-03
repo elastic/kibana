@@ -6,21 +6,20 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import { SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW_ID } from '@kbn/workflows/managed';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import { isTerminalStatus } from '@kbn/workflows';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { type SignificantEventsWorkflowStatusResult } from '@kbn/significant-events-schema';
+import { installDiscoveryAgents } from '../../agent_builder/agents/discovery';
 import { WorkflowExecutionService } from './workflow_execution_service';
-
-interface SignificantEventsDiscoveryWorkflowInputPayload {
-  agentConnectorId: string;
-}
 
 export interface SignificantEventsDiscoveryRunParams {
   request: KibanaRequest;
   spaceId: string;
-  inputs: SignificantEventsDiscoveryWorkflowInputPayload;
+  /** Ensures discovery/judge agent profiles exist in `spaceId` before a new run. */
+  agentBuilder?: AgentBuilderPluginStart;
 }
 
 /**
@@ -29,7 +28,7 @@ export interface SignificantEventsDiscoveryRunParams {
  * Extend the generic when the discovery pipeline produces structured output.
  */
 export class SignificantEventsDiscoveryClient {
-  private readonly workflowExecutionService: WorkflowExecutionService<SignificantEventsDiscoveryWorkflowInputPayload>;
+  private readonly workflowExecutionService: WorkflowExecutionService;
 
   constructor({ managementApi }: { managementApi: WorkflowsServerPluginSetup['management'] }) {
     this.workflowExecutionService = new WorkflowExecutionService({
@@ -39,7 +38,7 @@ export class SignificantEventsDiscoveryClient {
     });
   }
 
-  async run({ request, spaceId, inputs }: SignificantEventsDiscoveryRunParams): Promise<{
+  async run({ request, spaceId, agentBuilder }: SignificantEventsDiscoveryRunParams): Promise<{
     executionId: string;
     isNew: boolean;
   }> {
@@ -48,9 +47,15 @@ export class SignificantEventsDiscoveryClient {
       return { executionId: lastExecution.id, isNew: false };
     }
 
+    // Just-in-time install for manual runs and any space that never went through
+    // scheduled-discovery enablement. Idempotent — does not overwrite user edits.
+    if (!agentBuilder) {
+      throw new Error('Agent Builder is required to run significant events discovery');
+    }
+    await installDiscoveryAgents({ agentBuilder, spaceId });
+
     const executionId = await this.workflowExecutionService.execute({
       executionSpaceId: spaceId,
-      inputs: { agentConnectorId: inputs.agentConnectorId },
       request,
     });
     return { executionId, isNew: true };

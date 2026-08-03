@@ -12,7 +12,7 @@ import {
   coreMock,
   savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
-import { produce } from 'immer';
+import { produce } from 'immer-v9';
 import type {
   KibanaRequest,
   SavedObjectsClientContract,
@@ -2008,6 +2008,110 @@ describe('Package policy service', () => {
         id: 'test-package-policy-2',
         name: 'Test Package Policy 2',
         savedObjectType: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      });
+    });
+
+    describe('secret storage', () => {
+      const buildTestPolicy = () => ({
+        id: 'test-package-policy-1',
+        name: 'Test Package Policy 1',
+        namespace: 'test',
+        enabled: true,
+        policy_id: 'test_agent_policy',
+        policy_ids: ['test_agent_policy'],
+        inputs: [],
+        package: {
+          name: 'test',
+          title: 'Test',
+          version: '0.0.1',
+        },
+      });
+
+      const setupBulkCreateMocks = (soClient: ReturnType<typeof createSavedObjectClientMock>) => {
+        // getPackageInfo must return a name/version that matches the policy's package so the
+        // package policy resolves and lands in the array passed to `soClient.bulkCreate`.
+        (getPackageInfo as jest.Mock).mockResolvedValue({
+          name: 'test',
+          version: '0.0.1',
+          policy_templates: [{ name: 'test', inputs: [] }],
+        });
+        soClient.bulkCreate.mockResolvedValueOnce({
+          saved_objects: [
+            {
+              id: 'test-package-policy-1',
+              attributes: {
+                package: { name: 'test', title: 'Test', version: '0.0.1' },
+                inputs: [],
+              },
+              references: [],
+              type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+            },
+          ],
+        });
+        soClient.get.mockImplementation(async (_type: any, id: string) => ({
+          id,
+          attributes: { inputs: [] },
+          references: [],
+          type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+        }));
+        mockAgentPolicyGet();
+      };
+
+      beforeEach(() => {
+        // Reset call history/implementations left over from sibling tests (e.g. the
+        // audit-logger test above also triggers `isSecretStorageEnabled`).
+        mockedSecretsModule.isSecretStorageEnabled.mockReset();
+        mockedSecretsModule.extractAndWriteSecrets.mockReset();
+      });
+
+      afterEach(() => {
+        mockedSecretsModule.isSecretStorageEnabled.mockReset();
+        mockedSecretsModule.extractAndWriteSecrets.mockReset();
+        // Restore the shared default so later tests are not affected.
+        (getPackageInfo as jest.Mock).mockImplementation(mockedGetPackageInfo);
+      });
+
+      it('extracts secrets and stores secret_references when secret storage is enabled', async () => {
+        const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+        const soClient = createSavedObjectClientMock();
+        setupBulkCreateMocks(soClient);
+
+        mockedSecretsModule.isSecretStorageEnabled.mockResolvedValue(true);
+        mockedSecretsModule.extractAndWriteSecrets.mockImplementation(
+          async ({ packagePolicy }) => ({
+            packagePolicy,
+            secretReferences: [{ id: 'secret-1' }],
+          })
+        );
+
+        await packagePolicyService.bulkCreate(soClient, esClient, [buildTestPolicy()]);
+
+        expect(mockedSecretsModule.isSecretStorageEnabled).toHaveBeenCalledTimes(1);
+        expect(mockedSecretsModule.extractAndWriteSecrets).toHaveBeenCalledTimes(1);
+        expect(mockedSecretsModule.extractAndWriteSecrets).toHaveBeenCalledWith(
+          expect.objectContaining({
+            esClient,
+            packagePolicy: expect.objectContaining({ name: 'Test Package Policy 1' }),
+          })
+        );
+
+        const createdAttributes = (soClient.bulkCreate.mock.calls[0][0] as any)[0].attributes;
+        expect(createdAttributes.secret_references).toEqual([{ id: 'secret-1' }]);
+      });
+
+      it('does not extract secrets when secret storage is disabled', async () => {
+        const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+        const soClient = createSavedObjectClientMock();
+        setupBulkCreateMocks(soClient);
+
+        mockedSecretsModule.isSecretStorageEnabled.mockResolvedValue(false);
+
+        await packagePolicyService.bulkCreate(soClient, esClient, [buildTestPolicy()]);
+
+        expect(mockedSecretsModule.extractAndWriteSecrets).not.toHaveBeenCalled();
+
+        const createdAttributes = (soClient.bulkCreate.mock.calls[0][0] as any)[0].attributes;
+        expect(createdAttributes).not.toHaveProperty('secret_references');
       });
     });
   });
@@ -4082,6 +4186,7 @@ describe('Package policy service', () => {
     describe('remove protections', () => {
       beforeEach(() => {
         mockAgentPolicyService.bumpRevision.mockReset();
+        jest.mocked(licenseService.hasAtLeast).mockReturnValue(true);
       });
 
       const generateAttributes = (overrides: Record<string, unknown> = {}) => ({
@@ -4283,19 +4388,19 @@ describe('Package policy service', () => {
           testPolicyIds,
           [],
           // Add package override for both old and new policies
-          { package: { name: 'not-endpoint', title: 'Other', version: '1.0.0' } }
+          { package: { name: 'apache', title: 'Apache', version: '1.0.0' } }
         );
 
         await packagePolicyService.update(
           savedObjectsClient,
           elasticsearchClient,
           generateSO({
-            package: { name: 'not-endpoint', title: 'Other', version: '1.0.0' },
+            package: { name: 'apache', title: 'Apache', version: '1.0.0' },
           }).id,
           generateAttributes({
             policy_ids: [],
             name: 'test-package-policy-1',
-            package: { name: 'not-endpoint', title: 'Other', version: '1.0.0' },
+            package: { name: 'apache', title: 'Apache', version: '1.0.0' },
           })
         );
 
@@ -4312,7 +4417,7 @@ describe('Package policy service', () => {
         const savedObjectsClient = createSavedObjectClientMock();
         const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
-        // Mock existing package policy
+        // Mock existing package policy with same package name as the update ('test')
         savedObjectsClient.bulkGet.mockResolvedValue({
           saved_objects: [
             {
@@ -4320,7 +4425,10 @@ describe('Package policy service', () => {
               type: 'abcd',
               references: [],
               version: 'test',
-              attributes: createPackagePolicyMock(),
+              attributes: {
+                ...createPackagePolicyMock(),
+                package: { name: 'test', title: 'Test', version: '0.0.1' },
+              },
             },
           ],
         });
@@ -4603,6 +4711,48 @@ describe('Package policy service', () => {
       expect(res.failedPolicies[0].packagePolicy).toEqual(toUpdate);
       expect(res.failedPolicies[0].error).toEqual(
         new PackagePolicyValidationError(`cat is a frozen variable and cannot be modified`)
+      );
+    });
+
+    it('should put item in failedPolicies when package name is changed', async () => {
+      const savedObjectsClient = createSavedObjectClientMock();
+      const mockPackagePolicy = createPackagePolicyMock(); // package.name: 'endpoint'
+
+      savedObjectsClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'test',
+            type: 'abcd',
+            references: [],
+            version: 'test',
+            attributes: mockPackagePolicy,
+          },
+        ],
+      });
+
+      savedObjectsClient.bulkUpdate.mockResolvedValue({ saved_objects: [] });
+
+      const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      // Change package name from 'endpoint' to 'aws' — both known to mocks so the
+      // outer package-info fetch succeeds, but the per-item guard fires before the
+      // asset-lookup step and puts the item in failedPolicies.
+      const toUpdate = {
+        ...mockPackagePolicy,
+        package: { name: 'aws', title: 'AWS', version: '0.3.3' },
+      };
+
+      const res = await packagePolicyService.bulkUpdate(savedObjectsClient, elasticsearchClient, [
+        toUpdate,
+      ]);
+
+      expect(res.failedPolicies).toHaveLength(1);
+      expect(res.updatedPolicies).toHaveLength(0);
+      expect(res.failedPolicies[0].packagePolicy).toEqual(toUpdate);
+      expect(res.failedPolicies[0].error).toEqual(
+        new PackagePolicyValidationError(
+          'Cannot change the package of an existing integration policy. Create a new policy with the desired package.'
+        )
       );
     });
 
@@ -5636,16 +5786,16 @@ describe('Package policy service', () => {
         // All non-endpoint policies
         const nonEndpointPoliciesSO = [
           generateSO({
-            name: 'not-endpoint-policy',
+            name: 'apache-policy',
             policy_ids: ['test-agent-policy-1'],
-            id: 'not-endpoint-1',
-            package: { name: 'not-endpoint', title: 'Other', version: '1.0.0' },
+            id: 'apache-1',
+            package: { name: 'apache', title: 'Apache', version: '1.0.0' },
           }),
           generateSO({
-            name: 'not-endpoint-policy-2',
+            name: 'apache-policy-2',
             policy_ids: ['test-agent-policy-2'],
-            id: 'not-endpoint-2',
-            package: { name: 'not-endpoint', title: 'Other', version: '1.0.0' },
+            id: 'apache-2',
+            package: { name: 'apache', title: 'Apache', version: '1.0.0' },
           }),
         ];
 
@@ -5683,10 +5833,10 @@ describe('Package policy service', () => {
             package: { name: 'endpoint', title: 'Elastic Endpoint', version: '0.9.0' },
           }),
           generateSO({
-            name: 'not-endpoint-policy',
+            name: 'apache-policy',
             policy_ids: ['test-agent-policy-2'],
-            id: 'not-endpoint-1',
-            package: { name: 'not-endpoint', title: 'Other', version: '1.0.0' },
+            id: 'apache-1',
+            package: { name: 'apache', title: 'Apache', version: '1.0.0' },
           }),
         ];
         const mixedTestedPolicies = [
@@ -13800,6 +13950,54 @@ describe('_validateRestrictedFieldsNotModifiedOrThrow()', () => {
       _validateRestrictedFieldsNotModifiedOrThrow({
         oldPackagePolicy: makePolicyWithType('logs'),
         packagePolicyUpdate: makePolicyWithType('logs'),
+      })
+    ).not.toThrow();
+  });
+
+  it('should throw if package name is changed', () => {
+    const oldPackagePolicy = createInputPkgPolicy({
+      namespace: 'default',
+      dataset: 'custom_logs.logs',
+    });
+    expect(() =>
+      _validateRestrictedFieldsNotModifiedOrThrow({
+        oldPackagePolicy,
+        packagePolicyUpdate: {
+          ...oldPackagePolicy,
+          package: { name: 'different_package', title: 'Different', version: '1.0.0' },
+        },
+      })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"Cannot change the package of an existing integration policy. Create a new policy with the desired package."`
+    );
+  });
+
+  it('should not throw if package name is unchanged', () => {
+    const oldPackagePolicy = createInputPkgPolicy({
+      namespace: 'default',
+      dataset: 'custom_logs.logs',
+    });
+    expect(() =>
+      _validateRestrictedFieldsNotModifiedOrThrow({
+        oldPackagePolicy,
+        packagePolicyUpdate: {
+          ...oldPackagePolicy,
+          package: { name: 'custom_logs', title: 'Custom Logs', version: '2.0.0' },
+        },
+      })
+    ).not.toThrow();
+  });
+
+  it('should not throw if package is omitted from update', () => {
+    const oldPackagePolicy = createInputPkgPolicy({
+      namespace: 'default',
+      dataset: 'custom_logs.logs',
+    });
+    const { package: _pkg, ...updateWithoutPackage } = oldPackagePolicy;
+    expect(() =>
+      _validateRestrictedFieldsNotModifiedOrThrow({
+        oldPackagePolicy,
+        packagePolicyUpdate: updateWithoutPackage,
       })
     ).not.toThrow();
   });

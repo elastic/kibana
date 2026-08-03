@@ -18,13 +18,13 @@ import { asyncForEach } from '@kbn/std';
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
 import { ActionsClientLlm } from '@kbn/langchain/server';
 
+import type { DefaultDefendInsightsGraph } from '@kbn/discoveries';
 import type { DefendInsightsGraphMetadata } from '../../langchain/graphs';
-import type { DefaultDefendInsightsGraph } from '../graphs/default_defend_insights_graph';
 import type { AIAssistantKnowledgeBaseDataClient } from '../../../ai_assistant_data_clients/knowledge_base';
 import { createOrUpdateEvaluationResults, EvaluationStatus } from '../../../routes/evaluate/utils';
 import { getLlmType } from '../../../routes/utils';
 import { DEFAULT_EVAL_ANONYMIZATION_FIELDS } from '../../attack_discovery/evaluation/constants';
-import { getDefendInsightsPrompt } from '../graphs/default_defend_insights_graph/prompts';
+import { getDefendInsightsPrompt } from '../prompts';
 import { runDefendInsightsEvaluations } from './run_evaluations';
 
 export const evaluateDefendInsights = async ({

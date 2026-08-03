@@ -136,3 +136,23 @@ export const resolveUnifiedAttachmentType = (
   const routingKey = getAttachmentTypeFromAttributes(attachment);
   return toUnifiedAttachmentType(toUnifiedPersistableStateAttachmentType(routingKey), owner);
 };
+
+/**
+ * Extracts the reference id from a reference-based attachment for delete label
+ * Other reference attachment ids are not extracted because they are singular
+ * and delete label is static.
+ */
+export const getReferenceAttachmentId = (
+  attachment: AttachmentRequestV2
+): string | string[] | undefined => {
+  if ('attachmentId' in attachment) {
+    return attachment.attachmentId;
+  }
+  if ('alertId' in attachment) {
+    return attachment.alertId;
+  }
+  if ('eventId' in attachment) {
+    return attachment.eventId;
+  }
+  return undefined;
+};
