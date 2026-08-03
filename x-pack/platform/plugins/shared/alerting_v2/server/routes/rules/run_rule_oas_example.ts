@@ -6,18 +6,18 @@
  */
 
 import type { AlertingOasOperationObject } from '../oas_types';
-import {
-  ACTION_POLICY_NOT_FOUND_RESPONSE,
-  INVALID_QUERY_PARAMETERS_RESPONSE,
-  actionPolicyResponseExample,
-} from './action_policy_oas_shared_examples';
 import { buildOasOperation } from '../oas_utils';
+import {
+  RULE_ALREADY_RUNNING_RESPONSE,
+  RULE_DISABLED_RESPONSE,
+  RULE_NOT_FOUND_RESPONSE,
+} from './rule_oas_shared_examples';
 
-export const getActionPolicyOasExamples = (): AlertingOasOperationObject =>
+export const runRuleOasExamples = (): AlertingOasOperationObject =>
   buildOasOperation({
     responses: {
-      200: actionPolicyResponseExample('getActionPolicyResponse', 'An action policy'),
-      400: INVALID_QUERY_PARAMETERS_RESPONSE,
-      404: ACTION_POLICY_NOT_FOUND_RESPONSE,
+      400: RULE_DISABLED_RESPONSE,
+      404: RULE_NOT_FOUND_RESPONSE,
+      409: RULE_ALREADY_RUNNING_RESPONSE,
     },
   });
