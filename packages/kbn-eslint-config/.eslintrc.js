@@ -457,6 +457,18 @@ module.exports = {
      * EUI Team rules
      */
 
+    '@elastic/eui/callout-prefer-props-for-content': [
+      'warn',
+      {
+        components: [
+          'EuiCallOut',
+          'KbnInfoCallout',
+          'KbnSuccessCallout',
+          'KbnWarningCallout',
+          'KbnDangerCallout',
+        ],
+      },
+    ],
     '@elastic/eui/no-restricted-eui-imports': [
       'warn',
       {
