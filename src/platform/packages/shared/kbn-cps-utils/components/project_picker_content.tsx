@@ -12,7 +12,6 @@ import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { UseEuiTheme } from '@elastic/eui';
 import {
   EuiButtonGroup,
-  EuiCallOut,
   EuiHorizontalRule,
   EuiFlexItem,
   EuiFlexGroup,
@@ -24,6 +23,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import type { ProjectRouting } from '@kbn/es-query';
 import { PROJECT_ROUTING } from '@kbn/cps-common';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { ProjectListItem } from './project_list_item';
 import { strings } from './strings';
 import type { UseFetchProjectsResult } from './use_fetch_projects';
@@ -60,10 +60,12 @@ const projectPickerOptions = [
     label: i18n.translate('cpsUtils.projectPicker.allProjectsLabel', {
       defaultMessage: 'All projects',
     }),
+    'data-test-subj': 'cpsProjectRoutingButton-all',
   },
   {
     id: PROJECT_ROUTING.ORIGIN,
     label: strings.getOriginProjectLabel(),
+    'data-test-subj': 'cpsProjectRoutingButton-origin',
   },
 ];
 
@@ -122,10 +124,9 @@ export const ProjectPickerContent = ({
         )}
         <EuiFlexGroup direction="column" gutterSize="none" justifyContent="center">
           {error ? (
-            <EuiCallOut
+            <KbnDangerCallout
               announceOnMount
               size="s"
-              color="danger"
               title={strings.getProjectPickerFetchError()}
               css={styles.errorCallout}
             />

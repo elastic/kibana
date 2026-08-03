@@ -19,7 +19,6 @@ import type { RulesClientCreateOptions } from '@kbn/alerting-plugin/server';
 import { distinctUntilChanged, filter, skip } from 'rxjs';
 import type { Subscription } from 'rxjs';
 import type { StreamsServer } from '@kbn/streams-plugin/server/types';
-import type { SignificantEventsConfig } from '../common/config';
 import { getRelayAppConnectionSavedObjectType } from './lib/slack_app/saved_object';
 import { getSignificantEventsMaintenanceStateSavedObjectType } from './lib/maintenance/saved_object';
 import {
@@ -37,7 +36,7 @@ import { deleteLegacyRules } from './lib/significant_events/rules/delete_legacy_
 
 import { createSignificantEventsAlertingContextResolver } from './lib/significant_events/alerting/significant_events_alerting_context';
 import type { SignificantEventsAlertingContext } from './lib/significant_events/alerting/significant_events_alerting_context';
-import { EbtTelemetryService } from './lib/telemetry';
+import { EbtTelemetryService } from './lib/telemetry/ebt';
 import { significantEventsRouteRepository } from './routes';
 import type { GetScopedClients, RouteHandlerScopedClients } from './routes/types';
 import type {
@@ -63,6 +62,7 @@ import {
   createContinuousKiOnboardingWorkflowService,
   type ContinuousKiOnboardingWorkflowService,
 } from './lib/workflows/continuous_onboarding_workflow';
+import { createSyncWorkflowService, type SyncWorkflowService } from './lib/workflows/sync_workflow';
 import {
   createSignificantEventsScheduledWorkflowsService,
   type SignificantEventsScheduledWorkflowsService,
@@ -81,39 +81,28 @@ import type { SignificantEventsKIsOnboardingClient } from './lib/workflows/onboa
 
 const SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER = 'significant_events';
 
-export interface SignificantEventsPluginSetup {
-  registerKnowledgeIndicatorClientProvider(
-    provider: (request: KibanaRequest) => Promise<KnowledgeIndicatorClient>
-  ): void;
-}
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface SignificantEventsPluginStart {}
-
 export class SignificantEventsPlugin
   implements
     Plugin<
-      SignificantEventsPluginSetup,
-      SignificantEventsPluginStart,
+      void,
+      void,
       SignificantEventsPluginSetupDependencies,
       SignificantEventsPluginStartDependencies
     >
 {
-  public config: SignificantEventsConfig;
   public logger: Logger;
   public server?: StreamsServer;
   private isDev: boolean;
   private ebtTelemetryService = new EbtTelemetryService();
   private getScopedClients?: GetScopedClients;
   private subscriptions: Subscription[] = [];
-  private kiProvider?: (request: KibanaRequest) => Promise<KnowledgeIndicatorClient>;
   private kibanaVersion: string;
   private streamsKIsOnboardingClient?: SignificantEventsKIsOnboardingClient;
   private managedWorkflowsInstaller?: ManagedWorkflowsInstaller;
   private maintenanceService?: SignificantEventsMaintenanceService;
 
-  constructor(context: PluginInitializerContext<SignificantEventsConfig>) {
+  constructor(context: PluginInitializerContext) {
     this.isDev = context.env.mode.dev;
-    this.config = context.config.get();
     this.logger = context.logger.get();
     this.kibanaVersion = context.env.packageInfo.version;
   }
@@ -121,7 +110,7 @@ export class SignificantEventsPlugin
   public setup(
     core: CoreSetup<SignificantEventsPluginStartDependencies>,
     plugins: SignificantEventsPluginSetupDependencies
-  ): SignificantEventsPluginSetup {
+  ): void {
     this.server = {
       logger: this.logger,
       workflowsManagement: plugins.workflowsManagement,
@@ -207,13 +196,11 @@ export class SignificantEventsPlugin
         });
 
       let kiClientPromise: ReturnType<typeof createKnowledgeIndicatorClient> | undefined;
-      const getKnowledgeIndicatorClient: () => Promise<KnowledgeIndicatorClient> = this.kiProvider
-        ? () => this.kiProvider!(request)
-        : () => {
-            kiClientPromise ??= (async () =>
-              createKnowledgeIndicatorClient(await resolveSignificantEventsAlertingContext()))();
-            return kiClientPromise;
-          };
+      const getKnowledgeIndicatorClient: () => Promise<KnowledgeIndicatorClient> = () => {
+        kiClientPromise ??= (async () =>
+          createKnowledgeIndicatorClient(await resolveSignificantEventsAlertingContext()))();
+        return kiClientPromise;
+      };
 
       const license = await licensing.getLicense();
       const isSecurityEnabled = license.getFeature('security').isEnabled;
@@ -280,6 +267,7 @@ export class SignificantEventsPlugin
     }
 
     let continuousKiOnboardingWorkflowService: ContinuousKiOnboardingWorkflowService | undefined;
+    let syncWorkflowService: SyncWorkflowService | undefined;
     let significantEventsScheduledWorkflowsService:
       | SignificantEventsScheduledWorkflowsService
       | undefined;
@@ -289,6 +277,13 @@ export class SignificantEventsPlugin
         logger: this.logger,
         managementApi: plugins.workflowsManagement.management,
         streamsKIsOnboardingClient,
+      });
+    }
+
+    if (plugins.workflowsManagement) {
+      syncWorkflowService = createSyncWorkflowService({
+        logger: this.logger,
+        managementApi: plugins.workflowsManagement.management,
       });
     }
 
@@ -330,6 +325,7 @@ export class SignificantEventsPlugin
         telemetry: telemetryClient,
         getScopedClients: this.getScopedClients,
         continuousKiOnboardingWorkflowService,
+        syncWorkflowService,
         significantEventsScheduledWorkflowsService,
         workflowClients,
         maintenanceService: this.maintenanceService,
@@ -342,18 +338,9 @@ export class SignificantEventsPlugin
       logger: this.logger,
       runDevModeChecks: this.isDev,
     });
-
-    return {
-      registerKnowledgeIndicatorClientProvider: (provider) => {
-        this.kiProvider = provider;
-      },
-    };
   }
 
-  public start(
-    core: CoreStart,
-    plugins: SignificantEventsPluginStartDependencies
-  ): SignificantEventsPluginStart {
+  public start(core: CoreStart, plugins: SignificantEventsPluginStartDependencies): void {
     if (this.server) {
       this.server.core = core;
       this.server.isServerless = core.elasticsearch.getCapabilities().serverless;
@@ -362,7 +349,6 @@ export class SignificantEventsPlugin
       this.server.encryptedSavedObjects = plugins.encryptedSavedObjects;
       this.server.inference = plugins.inference;
       this.server.licensing = plugins.licensing;
-      this.server.taskManager = plugins.taskManager;
       this.server.searchInferenceEndpoints = plugins.searchInferenceEndpoints;
       this.server.spaces = plugins.spaces;
       this.server.workflowsExtensions = plugins.workflowsExtensions;
@@ -505,8 +491,6 @@ export class SignificantEventsPlugin
           this.logger.error(`Failed to register significant events memory skills: ${err.message}`);
         });
     }
-
-    return {};
   }
 
   /**

@@ -37,3 +37,6 @@ export { getTaskManagerService } from './task_manager_service';
 
 export type { TelemetryService } from './telemetry_service';
 export { getTelemetryService } from './telemetry_service';
+
+export type { WorkflowsApiService, WorkflowSummary } from './workflows_api_service';
+export { getWorkflowsApiService } from './workflows_api_service';

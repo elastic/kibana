@@ -93,7 +93,6 @@ describe('Security Plugin', () => {
         },
         management: managementSetupMock,
         fatalErrors: coreSetupMock.fatalErrors,
-        uiSettings: coreSetupMock.uiSettings,
         getStartServices: coreSetupMock.getStartServices,
         buildFlavor: expect.stringMatching(new RegExp('^serverless|traditional$')),
       });
