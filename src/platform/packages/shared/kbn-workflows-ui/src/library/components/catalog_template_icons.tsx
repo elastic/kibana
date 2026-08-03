@@ -88,9 +88,10 @@ export const CatalogTemplateIcons = React.memo<CatalogTemplateIconsProps>(
           </EuiFlexItem>
         ))}
         {overflowCount > 0 && (
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem grow={false} css={{ flexShrink: 0 }}>
             <EuiNotificationBadge
               color="subdued"
+              css={{ whiteSpace: 'nowrap' }}
               title={i18n.translate('workflows.library.templateIcons.overflowTitle', {
                 defaultMessage: '{count} more step types',
                 values: { count: overflowCount },
