@@ -8,6 +8,7 @@
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { SYNTHETICS_INDEX_PATTERN } from '../../common/constants';
+import type { SyntheticsMultiSpaceSettingsWithSpaces } from '../../common/runtime_types';
 import { DefaultSyntheticsMultiSpaceSettingsRepository } from './synthetics_multi_space_settings_repository';
 import * as getSyntheticsIndicesModule from './get_synthetics_indices';
 import { resolveHeartbeatIndices } from './resolve_heartbeat_indices';
@@ -101,7 +102,7 @@ describe('resolveHeartbeatIndices', () => {
   it('passes the default settings shape when the repository returns nullish CCS attributes', async () => {
     jest
       .spyOn(DefaultSyntheticsMultiSpaceSettingsRepository.prototype, 'get')
-      .mockResolvedValue({ spaces: ['default'] } as any);
+      .mockResolvedValue({ spaces: ['default'] } satisfies SyntheticsMultiSpaceSettingsWithSpaces);
     const getIndicesSpy = jest
       .spyOn(getSyntheticsIndicesModule, 'getSyntheticsIndices')
       .mockResolvedValue({ indices: SYNTHETICS_INDEX_PATTERN });
@@ -132,5 +133,22 @@ describe('resolveHeartbeatIndices', () => {
     expect(indices).toBe(SYNTHETICS_INDEX_PATTERN);
     expect(warn).toHaveBeenCalledTimes(1);
     expect(warn.mock.calls[0][0]).toContain('elasticsearch unavailable');
+  });
+
+  it('falls back to the local pattern when the cache rejects with a non-Error value', async () => {
+    const warn = jest.fn();
+    const cacheGet = jest.fn().mockRejectedValue('timeout');
+    const server = buildServer({ cacheGet, warn });
+
+    const indices = await resolveHeartbeatIndices({
+      server,
+      spaceId,
+      savedObjectsClient,
+      esClient,
+    });
+
+    expect(indices).toBe(SYNTHETICS_INDEX_PATTERN);
+    expect(warn).toHaveBeenCalledTimes(1);
+    expect(warn.mock.calls[0][0]).toContain('timeout');
   });
 });

@@ -186,5 +186,28 @@ describe('multi space settings routes', () => {
 
       expect(invalidateCache).not.toHaveBeenCalled();
     });
+
+    it('invalidates the cache even when save throws after a partial update', async () => {
+      jest
+        .spyOn(DefaultSyntheticsMultiSpaceSettingsRepository.prototype, 'save')
+        .mockRejectedValue(new Error('updateObjectsSpaces failed'));
+
+      const invalidateCache = jest.fn();
+      const route = createPutMultiSpaceSettingsRoute();
+
+      await expect(
+        route.handler(
+          buildRouteContext({
+            server: buildServer({ invalidateCache }),
+            request: {
+              body: { useAllRemoteClusters: true, selectedRemoteClusters: ['cluster-a'] },
+            } as unknown as RouteContext['request'],
+          })
+        )
+      ).rejects.toThrow('updateObjectsSpaces failed');
+
+      expect(invalidateCache).toHaveBeenCalledTimes(1);
+      expect(invalidateCache).toHaveBeenCalledWith();
+    });
   });
 });

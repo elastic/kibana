@@ -159,6 +159,43 @@ describe('SyntheticsIndicesCache', () => {
     expect(resolver).toHaveBeenCalledTimes(2);
   });
 
+  it('does not leak in-flight entries when an unrelated key is invalidated', async () => {
+    const cache = new SyntheticsIndicesCache({ ttlMs: 1_000, now });
+    let resolvePending: (value: string) => void = () => {};
+    const spaceBResolver = jest
+      .fn()
+      .mockImplementationOnce(
+        () =>
+          new Promise<string>((resolve) => {
+            resolvePending = resolve;
+          })
+      )
+      .mockResolvedValueOnce('synthetics-*,refreshed:synthetics-*');
+
+    const inflight = cache.get('spaceB', spaceBResolver);
+    cache.invalidate('spaceA');
+    resolvePending('synthetics-*,space-b:synthetics-*');
+    await inflight;
+
+    currentTime += 100_000;
+    expect(await cache.get('spaceB', spaceBResolver)).toBe('synthetics-*,refreshed:synthetics-*');
+    expect(spaceBResolver).toHaveBeenCalledTimes(2);
+  });
+
+  it('drops expired entries instead of retaining them until overwrite', async () => {
+    const cache = new SyntheticsIndicesCache({ ttlMs: 1_000, now });
+    const resolver = jest
+      .fn()
+      .mockResolvedValueOnce('synthetics-*')
+      .mockResolvedValueOnce('synthetics-*,refreshed:synthetics-*');
+
+    await cache.get('default', resolver);
+    currentTime += 1_001;
+    await cache.get('default', resolver);
+
+    expect(resolver).toHaveBeenCalledTimes(2);
+  });
+
   it('invalidate() with no key clears every entry', async () => {
     const cache = new SyntheticsIndicesCache({ ttlMs: 60_000, now });
     const defaultResolver = jest

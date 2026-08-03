@@ -26,16 +26,23 @@ export interface SyntheticsIndicesCacheOptions {
 export class SyntheticsIndicesCache {
   private readonly entries = new Map<string, CacheEntry>();
   private readonly inflight = new Map<string, Promise<string>>();
+  private readonly keyGenerations = new Map<string, number>();
   private readonly ttlMs: number;
   private readonly now: () => number;
-  // Bumped on every invalidate(). A resolve that started before an invalidation
-  // must not write its now-stale result back, so we compare generations before
-  // caching.
-  private generation = 0;
+  // Bumped only on invalidate() with no key; per-key invalidation uses keyGenerations.
+  private globalGeneration = 0;
 
   constructor(options: SyntheticsIndicesCacheOptions = {}) {
     this.ttlMs = options.ttlMs ?? DEFAULT_SYNTHETICS_INDICES_CACHE_TTL_MS;
     this.now = options.now ?? Date.now;
+  }
+
+  private getKeyGeneration(key: string): number {
+    return this.keyGenerations.get(key) ?? 0;
+  }
+
+  private bumpKeyGeneration(key: string): void {
+    this.keyGenerations.set(key, this.getKeyGeneration(key) + 1);
   }
 
   async get(key: string, resolver: () => Promise<string>): Promise<string> {
@@ -43,27 +50,29 @@ export class SyntheticsIndicesCache {
     if (cached && cached.expiresAt > this.now()) {
       return cached.indices;
     }
+    if (cached) {
+      this.entries.delete(key);
+    }
 
     const inflight = this.inflight.get(key);
     if (inflight) {
       return inflight;
     }
 
-    const startGeneration = this.generation;
+    const startGlobalGeneration = this.globalGeneration;
+    const startKeyGeneration = this.getKeyGeneration(key);
     const promise = (async () => {
       try {
         const indices = await resolver();
-        // Skip the write if an invalidate() happened while resolving, otherwise
-        // a resolve that read pre-save settings would repopulate stale indices.
-        if (this.generation === startGeneration) {
+        if (
+          this.globalGeneration === startGlobalGeneration &&
+          this.getKeyGeneration(key) === startKeyGeneration
+        ) {
           this.entries.set(key, { indices, expiresAt: this.now() + this.ttlMs });
         }
         return indices;
       } finally {
-        // An invalidate() during the resolve already cleared this in-flight
-        // entry (and may have replaced it with a newer resolve), so only this
-        // resolve removes its own entry.
-        if (this.generation === startGeneration) {
+        if (this.inflight.get(key) === promise) {
           this.inflight.delete(key);
         }
       }
@@ -74,12 +83,14 @@ export class SyntheticsIndicesCache {
   }
 
   invalidate(key?: string): void {
-    this.generation += 1;
     if (key === undefined) {
+      this.globalGeneration += 1;
       this.entries.clear();
       this.inflight.clear();
+      this.keyGenerations.clear();
       return;
     }
+    this.bumpKeyGeneration(key);
     this.entries.delete(key);
     this.inflight.delete(key);
   }
