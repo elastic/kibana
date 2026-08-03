@@ -8,7 +8,6 @@
 import {
   actionPolicyResponseSchema,
   findActionPoliciesResponseSchema,
-  bulkActionActionPoliciesResponseSchema,
 } from './action_policy_response_schema';
 
 const validResponse = {
@@ -94,36 +93,6 @@ describe('findActionPoliciesResponseSchema', () => {
         items: [],
         page: 1,
         perPage: 10,
-      })
-    ).toThrow();
-  });
-});
-
-describe('bulkActionActionPoliciesResponseSchema', () => {
-  it('accepts a valid bulk response', () => {
-    const result = bulkActionActionPoliciesResponseSchema.parse({
-      processed: 5,
-      total: 6,
-      errors: [{ id: 'np-2', message: 'Not found' }],
-    });
-    expect(result.processed).toBe(5);
-    expect(result.errors).toHaveLength(1);
-  });
-
-  it('accepts empty errors', () => {
-    const result = bulkActionActionPoliciesResponseSchema.parse({
-      processed: 3,
-      total: 3,
-      errors: [],
-    });
-    expect(result.errors).toHaveLength(0);
-  });
-
-  it('rejects missing processed', () => {
-    expect(() =>
-      bulkActionActionPoliciesResponseSchema.parse({
-        total: 3,
-        errors: [],
       })
     ).toThrow();
   });

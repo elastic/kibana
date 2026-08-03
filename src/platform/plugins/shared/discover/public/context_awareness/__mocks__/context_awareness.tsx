@@ -25,6 +25,7 @@ import {
 } from '../profiles';
 import { ProfilesManager } from '../profiles_manager';
 import { DiscoverEBTManager } from '../../ebt_manager';
+import { TEST_PROFILE_STATE_DEF } from './profile_state';
 
 export const FEATURE_ID_1 = 'discover:feature1';
 export const FEATURE_ID_2 = 'discover:feature2';
@@ -117,6 +118,7 @@ export const createContextAwarenessMocks = ({
       isMatch: true,
       context: {
         category: DataSourceCategory.Logs,
+        profileState: TEST_PROFILE_STATE_DEF,
       },
     })),
   };

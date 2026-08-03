@@ -79,39 +79,55 @@ toc:
           - file: connectors-kibana/abuseipdb-action-type.md
           - file: connectors-kibana/alienvault-otx-action-type.md
           - file: connectors-kibana/amazon-s3-action-type.md
+          - file: connectors-kibana/ansible-controller-action-type.md
+          - file: connectors-kibana/argocd-action-type.md
           - file: connectors-kibana/azure-blob-action-type.md
           - file: connectors-kibana/bigquery-action-type.md
           - file: connectors-kibana/box-action-type.md
           - file: connectors-kibana/brave-search-action-type.md
+          - file: connectors-kibana/buildkite-action-type.md
           - file: connectors-kibana/confluence-cloud-action-type.md
+          - file: connectors-kibana/databricks-action-type.md
+          - file: connectors-kibana/datadog-action-type.md
           - file: connectors-kibana/dropbox-action-type.md
+          - file: connectors-kibana/dynatrace-action-type.md
           - file: connectors-kibana/gmail-action-type.md
           - file: connectors-kibana/firecrawl-action-type.md
           - file: connectors-kibana/github-action-type.md
           - file: connectors-kibana/figma-action-type.md
+          - file: connectors-kibana/gmail-action-type.md
           - file: connectors-kibana/google-calendar-action-type.md
           - file: connectors-kibana/google-cloud-storage-action-type.md
           - file: connectors-kibana/google-drive-action-type.md
+          - file: connectors-kibana/grafana-action-type.md
           - file: connectors-kibana/greynoise-action-type.md
           - file: connectors-kibana/hubspot-action-type.md
+          - file: connectors-kibana/jenkins-action-type.md
           - file: connectors-kibana/jina-action-type.md
           - file: connectors-kibana/jira-cloud-action-type.md
+          - file: connectors-kibana/kubernetes-action-type.md
           - file: connectors-kibana/microsoft-teams-action-type.md
+          - file: connectors-kibana/monday-com-action-type.md
+          - file: connectors-kibana/new-relic-action-type.md
           - file: connectors-kibana/notion-action-type.md
           - file: connectors-kibana/one-drive-action-type.md
           - file: connectors-kibana/one-password-action-type.md
           - file: connectors-kibana/outlook-action-type.md
           - file: connectors-kibana/pagerduty-mcp-action-type.md
+          - file: connectors-kibana/rootly-action-type.md
           - file: connectors-kibana/salesforce-action-type.md
+          - file: connectors-kibana/sentry-action-type.md
           - file: connectors-kibana/servicenow-search-action-type.md
           - file: connectors-kibana/sharepoint-online-action-type.md
           - file: connectors-kibana/sharepoint-server-action-type.md
           - file: connectors-kibana/shodan-action-type.md
           - file: connectors-kibana/slack-v2-action-type.md
           - file: connectors-kibana/snowflake-action-type.md
+          - file: connectors-kibana/sublime-security-action-type.md
           - file: connectors-kibana/tavily-action-type.md
           - file: connectors-kibana/urlvoid-action-type.md
           - file: connectors-kibana/virustotal-action-type.md
+          - file: connectors-kibana/workday-action-type.md
           - file: connectors-kibana/zendesk-action-type.md
           - file: connectors-kibana/zoom-action-type.md
       - file: connectors-kibana/pre-configured-connectors.md

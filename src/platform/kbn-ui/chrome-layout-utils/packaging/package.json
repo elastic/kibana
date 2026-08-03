@@ -13,7 +13,8 @@
     "package.json"
   ],
   "peerDependencies": {
-    "@elastic/eui": ">=112.0.0"
+    "@elastic/eui": ">=112.0.0",
+    "react": ">=18.0.0"
   },
   "license": "Elastic License 2.0 OR AGPL-3.0-only OR SSPL-1.0"
 }

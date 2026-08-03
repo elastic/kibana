@@ -21,6 +21,7 @@ import { cellActionRenderer } from '../../../../shared/components/cell_actions';
 import { ALERTS_INSIGHTS_TITLE } from '../../../../shared/constants/flyout_titles';
 import { getAlertHistoryTitle } from '../../../../document/main/utils/get_header_title';
 import { ALERTS_INSIGHTS_TOOL_TEST_ID } from './test_ids';
+import { FLYOUT_ORIGIN } from '../../../../../common/lib/telemetry';
 
 const TITLE = ALERTS_INSIGHTS_TITLE;
 
@@ -57,6 +58,7 @@ export const AlertsInsights = memo(
           indexName,
           renderCellActions: cellActionRenderer,
           onAlertUpdated: noop,
+          origin: FLYOUT_ORIGIN.ALERTS_INSIGHTS_ALERT,
           title: getAlertHistoryTitle(ruleName),
         });
       },

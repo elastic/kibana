@@ -6,7 +6,7 @@
  */
 
 import { useCallback } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { selectOverviewPageState, setOverviewPageStateAction } from '../../../state';
 import { useKibanaSpace } from '../../../../../hooks/use_kibana_space';

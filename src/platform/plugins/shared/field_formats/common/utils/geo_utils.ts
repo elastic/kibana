@@ -56,18 +56,18 @@ export function ddToDMS(lat: number, lon: number) {
   const southing = lat < 0;
   const westing = lon < 0;
   lat = Math.abs(lat);
-  const lathours = parseInt(lat.toString(), 10).toString();
-  const latmins = parseInt(((lat % 1) * 60).toString(), 10).toString();
-  const latsec = parseInt(((((lat % 1) * 60) % 1) * 60).toString(), 10).toString();
+  const lathours = Math.trunc(lat).toString();
+  const latmins = Math.trunc((lat % 1) * 60).toString();
+  const latsec = Math.trunc((((lat % 1) * 60) % 1) * 60).toString();
   const lats =
     lathours.padStart(2, '0') +
     latmins.padStart(2, '0') +
     latsec.padStart(2, '0') +
     (southing ? 'S' : 'N');
   lon = Math.abs(lon);
-  const lonhours = parseInt(lon.toString(), 10).toString();
-  const lonmins = parseInt(((lon % 1) * 60).toString(), 10).toString();
-  const lonsec = parseInt(((((lon % 1) * 60) % 1) * 60).toString(), 10).toString();
+  const lonhours = Math.trunc(lon).toString();
+  const lonmins = Math.trunc((lon % 1) * 60).toString();
+  const lonsec = Math.trunc((((lon % 1) * 60) % 1) * 60).toString();
   const lons =
     lonhours.padStart(3, '0') +
     lonmins.padStart(2, '0') +

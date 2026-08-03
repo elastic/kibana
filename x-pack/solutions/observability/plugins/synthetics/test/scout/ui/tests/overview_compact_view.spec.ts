@@ -9,7 +9,8 @@ import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../fixtures';
 
-test.describe('OverviewCompactView', { tag: tags.stateful.classic }, () => {
+// Failing: See https://github.com/elastic/kibana/issues/281826
+test.describe.skip('OverviewCompactView', { tag: tags.stateful.classic }, () => {
   test.beforeAll(async ({ syntheticsServices }) => {
     await syntheticsServices.cleanUp();
   });

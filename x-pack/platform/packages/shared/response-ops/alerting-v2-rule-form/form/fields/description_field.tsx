@@ -9,6 +9,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiTextArea } from '@elastic/eui';
 import { Controller, useFormContext } from 'react-hook-form';
+import { MAX_DESCRIPTION_LENGTH } from '@kbn/alerting-v2-schemas';
 import type { FormValues } from '../types';
 import { useRuleFormMeta } from '../contexts';
 
@@ -22,6 +23,17 @@ export const DescriptionField = () => {
     <Controller
       name="metadata.description"
       control={control}
+      rules={{
+        validate: (value) => {
+          if (value && value.length > MAX_DESCRIPTION_LENGTH) {
+            return i18n.translate('xpack.alertingV2.ruleForm.descriptionTooLongError', {
+              defaultMessage: 'Description cannot exceed {maxLength} characters.',
+              values: { maxLength: MAX_DESCRIPTION_LENGTH },
+            });
+          }
+          return true;
+        },
+      }}
       render={({ field: { ref, ...field }, fieldState: { error } }) => (
         <EuiFormRow
           id={DESCRIPTION_ROW_ID}

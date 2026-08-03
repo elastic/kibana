@@ -28,7 +28,6 @@ import { StreamDetailAttachments } from '../../../stream_detail_attachments';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useStreamsPrivileges } from '../../../../hooks/use_streams_privileges';
 import { buildLifecycleTabActions } from './lifecycle_tab_label_with_actions';
-import { StreamDetailCanvas } from '../stream_detail_canvas';
 import {
   ImportLifecycleFlyoutProvider,
   useImportLifecycleFlyoutContext,
@@ -42,7 +41,6 @@ const wiredStreamManagementSubTabs = [
   'lifecycle',
   'dataQuality',
   'attachments',
-  'canvas',
 ] as const;
 
 type WiredStreamManagementSubTab = (typeof wiredStreamManagementSubTabs)[number];
@@ -97,7 +95,7 @@ function WiredStreamDetailManagementContent({
 
   const isProcessingEnabled = !definition.replicated;
   const {
-    features: { canvas, significantEvents },
+    features: { significantEvents },
     isLoading: isPrivilegesLoading,
   } = useStreamsPrivileges();
 
@@ -120,7 +118,6 @@ function WiredStreamDetailManagementContent({
           title={key}
           back={{ href: router.link('/'), label: backToStreamsLabel }}
           badges={wiredBadges}
-          padding="m"
         />
         <StreamsAppPageTemplate.Body>
           <EuiCallOut
@@ -155,7 +152,6 @@ function WiredStreamDetailManagementContent({
           title={key}
           back={{ href: router.link('/'), label: backToStreamsLabel }}
           badges={wiredBadges}
-          padding="m"
         />
         <StreamsAppPageTemplate.Body>
           <MissingDataStreamCallout
@@ -178,7 +174,6 @@ function WiredStreamDetailManagementContent({
           title={key}
           back={{ href: router.link('/'), label: backToStreamsLabel }}
           badges={wiredBadges}
-          padding="m"
         />
         <StreamsAppPageTemplate.Body>
           <PendingRootDataStreamCallout
@@ -286,16 +281,6 @@ function WiredStreamDetailManagementContent({
         defaultMessage: 'Attachments',
       }),
     },
-    ...(canvas.enabled
-      ? {
-          canvas: {
-            content: <StreamDetailCanvas definition={definition} />,
-            label: i18n.translate('xpack.streams.streamDetailView.canvasTab', {
-              defaultMessage: 'Canvas',
-            }),
-          },
-        }
-      : {}),
   };
 
   const redirectConfig = tabRedirects[tab];
@@ -328,12 +313,6 @@ function WiredStreamDetailManagementContent({
   }
 
   if (isValidManagementSubTab(tab) && tabs[tab]?.content) {
-    if (tab === 'canvas' && !canvas.enabled) {
-      return (
-        <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: 'overview' } }} />
-      );
-    }
-
     return <Wrapper tabs={tabs} streamId={key} tab={tab} />;
   }
 

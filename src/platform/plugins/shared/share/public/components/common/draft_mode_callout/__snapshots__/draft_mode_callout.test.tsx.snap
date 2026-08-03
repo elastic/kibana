@@ -14,10 +14,8 @@ exports[`DraftModeCallout Custom content case renders a callout with custom cont
       class="css-wlziyu-body"
     >
       <span
-        aria-hidden="true"
-        class="css-1cmanx3-icon-l-icon"
-        color="#966B03"
-        data-euiicon-type="warning"
+        class="css-1qkppnb-icon"
+        data-euiicon-type="warningStatic"
       />
       <div
         class="css-ak2bmi-content"
@@ -28,12 +26,10 @@ exports[`DraftModeCallout Custom content case renders a callout with custom cont
           You have unsaved changes
         </p>
         <div
-          class="euiText euiCallOut__additionalContent emotion-euiText-s-euiTextColor-default"
-          data-test-subj="customDraftModeCallOut__content"
+          class="euiText euiCallOut__text emotion-euiText-s-euiTextColor-default"
+          data-test-subj="customDraftModeCallOut__message"
         >
-          <p
-            class="euiText emotion-euiText-s"
-          >
+          <p>
             Custom message
           </p>
         </div>
@@ -63,10 +59,8 @@ exports[`DraftModeCallout Default case renders a default callout when custom pro
       class="css-wlziyu-body"
     >
       <span
-        aria-hidden="true"
-        class="css-1cmanx3-icon-l-icon"
-        color="#966B03"
-        data-euiicon-type="warning"
+        class="css-1qkppnb-icon"
+        data-euiicon-type="warningStatic"
       />
       <div
         class="css-ak2bmi-content"
@@ -77,12 +71,10 @@ exports[`DraftModeCallout Default case renders a default callout when custom pro
           You have unsaved changes
         </p>
         <div
-          class="euiText euiCallOut__additionalContent emotion-euiText-s-euiTextColor-default"
-          data-test-subj="unsavedChangesDraftModeCallOut__content"
+          class="euiText euiCallOut__text emotion-euiText-s-euiTextColor-default"
+          data-test-subj="unsavedChangesDraftModeCallOut__message"
         >
-          <p
-            class="euiText emotion-euiText-s"
-          >
+          <p>
             This link might not be permanent. Save your changes to ensure it works as expected.
           </p>
         </div>

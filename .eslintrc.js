@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-require('@kbn/babel-register').install();
+require('@kbn/swc-register').install();
 
 const { getPackages } = require('@kbn/repo-packages');
 const { REPO_ROOT } = require('@kbn/repo-info');
@@ -305,10 +305,6 @@ const RESTRICTED_IMPORTS = [
     name: 'rxjs/operators',
     message:
       'Please, use rxjs instead: rxjs/operators is just a subset, unnecessarily duplicating the package import.',
-  },
-  {
-    name: '@testing-library/react-hooks',
-    message: 'Please use @testing-library/react instead',
   },
   {
     name: '@elastic/ecs',
@@ -1174,6 +1170,14 @@ module.exports = {
       },
     },
     {
+      // This file is the security control that hardens lodash.template, so it must load the
+      // otherwise-restricted lodash template modules in order to wrap them with safe proxies.
+      files: ['src/setup_node_env/harden/index.js'],
+      rules: {
+        'no-restricted-modules': 'off',
+      },
+    },
+    {
       files: ['**/common/**/*.{js,mjs,ts,tsx}', '**/public/**/*.{js,mjs,ts,tsx}'],
       rules: {
         'no-restricted-imports': [
@@ -1750,6 +1754,17 @@ module.exports = {
         },
       },
       rules: {
+        // Allow assert* helpers (e.g. assertDowngradeResult) that wrap expect()
+        // calls. The linter can't trace expects into called functions, so without
+        // this config tests using assertion helpers trigger a false-positive
+        // "Test has no assertions" warning. Registering the assert* pattern as
+        // known assertion functions avoids that.
+        'playwright/expect-expect': [
+          'warn',
+          {
+            assertFunctionNames: ['expect', 'expect.soft', 'assert*'],
+          },
+        ],
         'playwright/no-commented-out-tests': 'error',
         'playwright/no-conditional-expect': 'error',
         'playwright/no-conditional-in-test': 'warn',
@@ -3137,8 +3152,80 @@ module.exports = {
         '@kbn/eslint/no_npx_playwright': 'off',
       },
     },
+    {
+      files: [
+        'x-pack/solutions/observability/plugins/**/*.{ts,tsx}',
+        'x-pack/solutions/observability/packages/**/*.{ts,tsx}',
+        'src/platform/packages/shared/kbn-apm-ui-shared/**/*.{ts,tsx}',
+      ],
+      excludedFiles: [
+        'x-pack/solutions/observability/plugins/**/*.test.*',
+        'x-pack/solutions/observability/plugins/**/*.stories.*',
+        'x-pack/solutions/observability/plugins/**/*.mock.*',
+        'x-pack/solutions/observability/plugins/**/*.storybook_decorator.*',
+        'x-pack/solutions/observability/packages/**/*.test.*',
+        'x-pack/solutions/observability/packages/**/*.stories.*',
+        'x-pack/solutions/observability/packages/**/*.mock.*',
+        'x-pack/solutions/observability/packages/**/*.storybook_decorator.*',
+        'src/platform/packages/shared/kbn-apm-ui-shared/**/*.test.*',
+        'src/platform/packages/shared/kbn-apm-ui-shared/**/*.stories.*',
+        'src/platform/packages/shared/kbn-apm-ui-shared/**/*.mock.*',
+        'src/platform/packages/shared/kbn-apm-ui-shared/**/*.storybook_decorator.*',
+      ],
+      rules: {
+        '@kbn/telemetry/ebt_props_should_be_present': 'warn',
+      },
+    },
   ],
 };
+
+/**
+ * Redux Toolkit v1 enforcement.
+ * These paths still use RTK v1 aliased packages (redux-toolkit-v1, react-redux-v7, etc.).
+ * When a plugin/package migrates to RTK v2, remove its entry here.
+ * See dev_docs/contributing/redux_toolkit_v1_v2_migration.mdx
+ */
+module.exports.overrides.push({
+  files: [
+    'src/platform/packages/private/kbn-ambient-common-types/**/*.{js,mjs,ts,tsx}',
+    'src/platform/packages/shared/kbn-coloring/**/*.{js,mjs,ts,tsx}',
+    'src/platform/packages/shared/kbn-test-jest-helpers/**/*.{js,mjs,ts,tsx}',
+    'src/platform/packages/shared/kbn-lens-embeddable-utils/**/*.{js,mjs,ts,tsx}',
+    'src/platform/packages/shared/shared-ux/**/*.{js,mjs,ts,tsx}',
+    'src/platform/plugins/shared/data_view_management/**/*.{js,mjs,ts,tsx}',
+    'src/platform/plugins/shared/discover/**/*.{js,mjs,ts,tsx}',
+    'src/platform/plugins/shared/expressions/**/*.{js,mjs,ts,tsx,d.ts}',
+    'src/platform/plugins/shared/unified_doc_viewer/**/*.{js,mjs,ts,tsx}',
+    'src/platform/plugins/shared/workflows_management/**/*.{js,mjs,ts,tsx}',
+    'x-pack/platform/plugins/private/canvas/**/*.{js,mjs,ts,tsx}',
+    'x-pack/platform/plugins/private/cross_cluster_replication/**/*.{js,mjs,ts,tsx}',
+    'x-pack/platform/plugins/private/graph/**/*.{js,mjs,ts,tsx}',
+    'x-pack/platform/plugins/private/monitoring/**/*.{js,mjs,ts,tsx}',
+    'x-pack/platform/plugins/private/remote_clusters/**/*.{js,mjs,ts,tsx}',
+    'x-pack/platform/plugins/private/rollup/**/*.{js,mjs,ts,tsx}',
+    'x-pack/platform/plugins/shared/agent_builder/**/*.{js,mjs,ts,tsx}',
+    'x-pack/platform/plugins/shared/content_connectors/**/*.{js,mjs,ts,tsx}',
+    'x-pack/platform/plugins/shared/fleet/**/*.{js,mjs,ts,tsx}',
+    'x-pack/platform/plugins/shared/index_management/**/*.{js,mjs,ts,tsx}',
+    'x-pack/platform/plugins/shared/lens/**/*.{js,mjs,ts,tsx}',
+    'x-pack/platform/plugins/shared/license_management/**/*.{js,mjs,ts,tsx}',
+    'x-pack/platform/plugins/shared/maps/**/*.{js,mjs,ts,tsx}',
+    'x-pack/platform/plugins/shared/osquery/**/*.{js,mjs,ts,tsx}',
+    'x-pack/platform/plugins/shared/searchprofiler/**/*.{js,mjs,ts,tsx}',
+    'x-pack/platform/plugins/shared/streams_app/**/*.{js,mjs,ts,tsx}',
+    'x-pack/solutions/observability/plugins/apm/**/*.{js,mjs,ts,tsx}',
+    'x-pack/solutions/observability/plugins/synthetics/**/*.{js,mjs,ts,tsx}',
+    'x-pack/solutions/observability/plugins/uptime/**/*.{js,mjs,ts,tsx}',
+    'x-pack/solutions/search/plugins/enterprise_search/**/*.{js,mjs,ts,tsx}',
+    'x-pack/solutions/security/packages/data-table/**/*.{js,mjs,ts,tsx}',
+    'x-pack/solutions/security/packages/expandable-flyout/**/*.{js,mjs,ts,tsx}',
+    'x-pack/solutions/security/plugins/security_solution/**/*.{js,mjs,ts,tsx}',
+    'x-pack/solutions/security/plugins/timelines/**/*.{js,mjs,ts,tsx}',
+  ],
+  rules: {
+    '@kbn/imports/no_redux_toolkit_v2_imports': 'error',
+  },
+});
 
 /**
  * Prettier disables all conflicting rules, listing as last override so it takes precedence

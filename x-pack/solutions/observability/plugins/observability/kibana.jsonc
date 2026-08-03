@@ -51,6 +51,7 @@
       "discover",
       "exploratoryView",
       "home",
+      "globalSearch",
       "usageCollection",
       "cloud",
       "spaces",
@@ -58,7 +59,8 @@
       "observabilityAIAssistant",
       "investigate",
       "cps",
-      "ingestHub"
+      "ingestHub",
+      "significant_events"
     ],
     "requiredBundles": [
       "aiops",

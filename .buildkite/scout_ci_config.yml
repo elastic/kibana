@@ -14,6 +14,7 @@ plugins:
     - console
     - contentManagementExamples
     - content_management
+    - context_engine
     - cross_cluster_replication
     - custom_branding
     - dashboard
@@ -68,6 +69,7 @@ plugins:
     - searchprofiler
     - security
     - security_solution
+    - security_solution_serverless
     - serverless_observability
     - share
     - significant_events
@@ -111,3 +113,4 @@ excluded_configs:
   - x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/ui/playwright.config.ts
   - x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/api/playwright.config.ts
   - x-pack/solutions/security/plugins/entity_store/test/scout_cps_local/api/playwright.config.ts
+  - x-pack/platform/plugins/shared/spaces/test/scout_cps_local/ui/playwright.config.ts

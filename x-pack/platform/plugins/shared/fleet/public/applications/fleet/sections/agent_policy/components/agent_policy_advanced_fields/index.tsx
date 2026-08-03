@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useMemo, Suspense } from 'react';
+import React, { useState, useMemo, Suspense, useCallback } from 'react';
 import {
   EuiDescribedFormGroup,
   EuiFormRow,
@@ -24,6 +24,9 @@ import {
   EuiFlexItem,
   EuiBadge,
   EuiSwitch,
+  EuiButtonEmpty,
+  EuiConfirmModal,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -56,6 +59,7 @@ import type { ValidationResults } from '../agent_policy_validation';
 import { policyHasEndpointSecurity as hasElasticDefend } from '../../../../../../../common/services';
 
 import { AgentPolicyCustomFields } from '../../../../components/custom_fields';
+import { sendRotateUninstallToken } from '../../../../../../hooks/use_request/uninstall_tokens';
 
 import {
   useOutputOptions,
@@ -82,7 +86,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
   setInvalidSpaceError,
   disabled = false,
 }) => {
-  const { docLinks } = useStartServices();
+  const { docLinks, notifications } = useStartServices();
   const { spaceId, isSpaceAwarenessEnabled } = useFleetStatus();
 
   const { getAbsolutePath } = useLink();
@@ -124,7 +128,35 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
   const monitoringCheckboxIdSuffix = Date.now();
 
   const licenseService = useLicense();
+  const rotateConfirmModalTitleId = useGeneratedHtmlId();
   const [isUninstallCommandFlyoutOpen, setIsUninstallCommandFlyoutOpen] = useState(false);
+  const [isRotateConfirmOpen, setIsRotateConfirmOpen] = useState(false);
+  const [isRotating, setIsRotating] = useState(false);
+
+  const handleRotateToken = useCallback(async () => {
+    if (!agentPolicy.id) return;
+    setIsRotating(true);
+    try {
+      const { error } = await sendRotateUninstallToken(agentPolicy.id);
+      if (error) {
+        throw error;
+      }
+      notifications.toasts.addSuccess(
+        i18n.translate('xpack.fleet.agentPolicyForm.rotateTokenSuccessMessage', {
+          defaultMessage: 'Uninstall token rotated successfully.',
+        })
+      );
+    } catch (e) {
+      notifications.toasts.addError(e, {
+        title: i18n.translate('xpack.fleet.agentPolicyForm.rotateTokenErrorTitle', {
+          defaultMessage: 'Failed to rotate uninstall token',
+        }),
+      });
+    } finally {
+      setIsRotating(false);
+      setIsRotateConfirmOpen(false);
+    }
+  }, [agentPolicy.id, notifications.toasts]);
   const policyHasElasticDefend = useMemo(() => hasElasticDefend(agentPolicy), [agentPolicy]);
   const isManagedPolicy = agentPolicy.is_managed === true;
   const isManagedOrAgentlessPolicy = isManagedPolicy || agentPolicy?.supports_agentless === true;
@@ -189,28 +221,88 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
         {agentPolicy.id && (
           <>
             <EuiSpacer size="s" />
-            <MissingPrivilegesToolTip
-              missingPrivilege={
-                policyHasElasticDefend && agentPolicy.is_protected && !authz.fleet.allAgents
-                  ? 'Agents All'
-                  : undefined
-              }
-              position="left"
-            >
-              <EuiLink
-                onClick={() => {
-                  setIsUninstallCommandFlyoutOpen(true);
-                }}
-                disabled={
-                  !agentPolicy.is_protected || !policyHasElasticDefend || !authz.fleet.allAgents
-                }
-                data-test-subj="uninstallCommandLink"
+            <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false} wrap>
+              <EuiFlexItem grow={false}>
+                <MissingPrivilegesToolTip
+                  missingPrivilege={
+                    policyHasElasticDefend && agentPolicy.is_protected && !authz.fleet.allAgents
+                      ? 'Agents All'
+                      : undefined
+                  }
+                  position="left"
+                >
+                  <EuiButtonEmpty
+                    size="s"
+                    iconType="console"
+                    onClick={() => {
+                      setIsUninstallCommandFlyoutOpen(true);
+                    }}
+                    disabled={
+                      !agentPolicy.is_protected || !policyHasElasticDefend || !authz.fleet.allAgents
+                    }
+                    data-test-subj="uninstallCommandLink"
+                  >
+                    {i18n.translate('xpack.fleet.agentPolicyForm.tamperingUninstallLink', {
+                      defaultMessage: 'Get uninstall command',
+                    })}
+                  </EuiButtonEmpty>
+                </MissingPrivilegesToolTip>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <MissingPrivilegesToolTip
+                  missingPrivilege={
+                    policyHasElasticDefend && agentPolicy.is_protected && !authz.fleet.allAgents
+                      ? 'Agents All'
+                      : undefined
+                  }
+                  position="left"
+                >
+                  <EuiButtonEmpty
+                    size="s"
+                    color="danger"
+                    iconType="refresh"
+                    isLoading={isRotating}
+                    onClick={() => setIsRotateConfirmOpen(true)}
+                    disabled={
+                      !agentPolicy.is_protected || !policyHasElasticDefend || !authz.fleet.allAgents
+                    }
+                    data-test-subj="rotateUninstallTokenButton"
+                  >
+                    {i18n.translate('xpack.fleet.agentPolicyForm.rotateUninstallTokenButton', {
+                      defaultMessage: 'Rotate uninstall token',
+                    })}
+                  </EuiButtonEmpty>
+                </MissingPrivilegesToolTip>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            {isRotateConfirmOpen && (
+              <EuiConfirmModal
+                title={i18n.translate(
+                  'xpack.fleet.agentPolicyForm.rotateUninstallTokenModal.title',
+                  { defaultMessage: 'Rotate uninstall token?' }
+                )}
+                titleProps={{ id: rotateConfirmModalTitleId }}
+                aria-labelledby={rotateConfirmModalTitleId}
+                onCancel={() => setIsRotateConfirmOpen(false)}
+                onConfirm={handleRotateToken}
+                cancelButtonText={i18n.translate(
+                  'xpack.fleet.agentPolicyForm.rotateUninstallTokenModal.cancelButton',
+                  { defaultMessage: 'Cancel' }
+                )}
+                confirmButtonText={i18n.translate(
+                  'xpack.fleet.agentPolicyForm.rotateUninstallTokenModal.confirmButton',
+                  { defaultMessage: 'Rotate token' }
+                )}
+                buttonColor="danger"
+                isLoading={isRotating}
+                data-test-subj="rotateUninstallTokenConfirmModal"
               >
-                {i18n.translate('xpack.fleet.agentPolicyForm.tamperingUninstallLink', {
-                  defaultMessage: 'Get uninstall command',
-                })}
-              </EuiLink>
-            </MissingPrivilegesToolTip>
+                <FormattedMessage
+                  id="xpack.fleet.agentPolicyForm.rotateUninstallTokenModal.body"
+                  defaultMessage="This will generate a new uninstall token and push an updated policy to all agents. The previous token will no longer be valid. To uninstall agents that are still using the old policy, you need to use the new uninstall command."
+                />
+              </EuiConfirmModal>
+            )}
           </>
         )}
       </EuiDescribedFormGroup>
@@ -222,6 +314,10 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
       updateAgentPolicy,
       disabled,
       authz.fleet.allAgents,
+      isRotateConfirmOpen,
+      isRotating,
+      handleRotateToken,
+      rotateConfirmModalTitleId,
     ]
   );
 

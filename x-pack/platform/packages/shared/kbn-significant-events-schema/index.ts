@@ -66,6 +66,7 @@ export {
   isFeatureWithFilter,
   mergeFeature,
   normalizeFeatureSlug,
+  normalizeFeatureSlugForMatching,
   toBaseFeature,
 } from './src/feature';
 
@@ -92,9 +93,14 @@ export {
   type SignificantEventInvestigation,
   type InvestigationHypothesis,
   type InvestigationState,
+  type SignificantEventUpdate,
+  type SignificantEventUpdateEvidence,
   SIGNIFICANT_EVENT_STATUS_OPTIONS,
   INVESTIGATION_PROGRESS_UI_EVENT,
   INVESTIGATE_STEP_ID,
+  MAX_SIGNIFICANT_EVENT_UPDATE_EVIDENCE,
+  MAX_SIGNIFICANT_EVENT_UPDATES,
+  significantEventUpdateSchema,
   type BlastRadiusEntry,
   type CausalFeature,
   type SignalEntry,
@@ -143,10 +149,3 @@ export {
 } from './src/inference_feature_ids';
 
 export type { KnowledgeIndicatorClientContract } from './src/knowledge_indicator_client';
-
-export type {
-  RelayClaimResponse,
-  RelayClientContract,
-  RelayInstallRequest,
-  RelayInstallResponse,
-} from './src/relay_client';

@@ -5,17 +5,22 @@
  * 2.0.
  */
 
-import type { NavigationTreeDefinition, NodeDefinition } from '@kbn/core-chrome-browser';
+import type {
+  AppDeepLinkId,
+  NavigationTreeDefinition,
+  PanelOpenerChildDefinition,
+  RootNodeDefinition,
+} from '@kbn/core-chrome-browser';
 import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { DATA_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-management';
 import { getAlertingV2ManagementNavPanel } from '@kbn/alerting-v2-utils';
 import { getWorkflowsNavPanel } from '@kbn/deeplinks-workflows';
+import { NightshiftNavigationIcon } from '@kbn/observability-plugin/public';
 
-export function filterForFeatureAvailability(
-  node: NodeDefinition,
-  featureFlag: boolean = false
-): NodeDefinition[] {
+export function filterForFeatureAvailability<
+  T extends RootNodeDefinition<AppDeepLinkId> | PanelOpenerChildDefinition<AppDeepLinkId>
+>(node: T, featureFlag: boolean = false): T[] {
   if (!featureFlag) {
     return [];
   }
@@ -24,6 +29,7 @@ export function filterForFeatureAvailability(
 
 export const createNavigationTree = ({
   core,
+  significantEventsAvailable = false,
   streamsAvailable,
   overviewAvailable = true,
   genAiSettingsAvailable = true,
@@ -31,6 +37,7 @@ export const createNavigationTree = ({
   showAiAssistant = true,
 }: {
   core: CoreStart;
+  significantEventsAvailable?: boolean;
   streamsAvailable?: boolean;
   overviewAvailable?: boolean;
   genAiSettingsAvailable?: boolean;
@@ -39,6 +46,13 @@ export const createNavigationTree = ({
 }): NavigationTreeDefinition => {
   return {
     body: [
+      ...filterForFeatureAvailability(
+        {
+          link: 'observability-overview:nightshift' as const,
+          icon: NightshiftNavigationIcon,
+        },
+        significantEventsAvailable
+      ),
       {
         id: 'observability_project_nav',
         title: i18n.translate('xpack.serverlessObservability.nav.projectSettings.observability', {
