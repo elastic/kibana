@@ -260,6 +260,8 @@ export interface Transformations {
 // ============================================================================
 
 export interface ConnectorTest {
+  /** When false, the connection test is not exposed/run. Defaults to enabled when omitted. */
+  enabled?: boolean;
   handler: (ctx: ActionContext) => Promise<{
     ok: boolean;
     message?: string;
