@@ -32,7 +32,6 @@ export class AgentlessConnectorsInfraServiceFactory {
 
     const agentlessPolicyService = plugins.fleet.agentlessPoliciesService;
     const packagePolicyService = plugins.fleet.packagePolicyService;
-    const agentService = plugins.fleet.agentService;
 
     const soClient = new SavedObjectsClient(savedObjects.createInternalRepository());
 
@@ -41,7 +40,6 @@ export class AgentlessConnectorsInfraServiceFactory {
       esClient,
       packagePolicyService,
       agentlessPolicyService,
-      agentService,
       logger
     );
   }

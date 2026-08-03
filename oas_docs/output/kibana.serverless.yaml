@@ -4489,6 +4489,17 @@ paths:
                     nullable: true
                   description: Tool-specific configuration parameters. See examples for details.
                   type: object
+                confirmation:
+                  additionalProperties: false
+                  description: Optional tool call policy to control tool call confirmation behavior
+                  type: object
+                  properties:
+                    askUser:
+                      enum:
+                        - once
+                        - always
+                        - never
+                      type: string
                 description:
                   default: ''
                   description: Description of what the tool does.
@@ -5126,6 +5137,17 @@ paths:
                     nullable: true
                   description: Updated tool-specific configuration parameters. See examples for details.
                   type: object
+                confirmation:
+                  additionalProperties: false
+                  description: Updated tool call policy to control tool call confirmation behavior
+                  type: object
+                  properties:
+                    askUser:
+                      enum:
+                        - once
+                        - always
+                        - never
+                      type: string
                 description:
                   description: Updated description of what the tool does.
                   type: string
@@ -49849,6 +49871,7 @@ paths:
       summary: Get risk score history for an entity
       tags:
         - Security Entity Analytics API
+      x-state: Added in 9.5.0
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -132853,6 +132876,11 @@ components:
           description: The interval between checks for changes in the source data. The minimum value is 1m and the maximum is 59m. The default value is 1 minute.
           example: 5m
           type: string
+        preventCrossProjectSearch:
+          default: false
+          description: Pin the L1 rollup transform to the local/origin project only, preventing flat-world (cross-linked-project) reads. Only applies on serverless. Default is false (flat-world).
+          example: true
+          type: boolean
         preventInitialBackfill:
           default: false
           description: Start aggregating data from the time the SLO is created, instead of backfilling data from the beginning of the time window.
