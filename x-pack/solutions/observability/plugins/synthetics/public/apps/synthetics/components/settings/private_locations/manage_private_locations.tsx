@@ -4,12 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useEffect, useCallback, useMemo } from 'react';
+import React, { useEffect, useCallback, useMemo, useState } from 'react';
+import { EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { useDispatch, useSelector } from 'react-redux-v7';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { SpacesContextProps } from '@kbn/spaces-plugin/public';
 import { isEqual } from 'lodash';
 import type { PrivateLocation } from '../../../../../../common/runtime_types';
+import { SYNTHETICS_API_URLS } from '../../../../../../common/constants';
 import { LoadingState } from '../../monitors_page/overview/overview/monitor_detail_flyout';
 import { PrivateLocationsTable } from './locations_table';
 import { ManageEmptyState } from './manage_empty_state';
@@ -65,6 +68,33 @@ export const ManagePrivateLocations = () => {
     dispatch(setIsPrivateLocationFlyoutVisible(false));
   }, [dispatch]);
 
+  // Warn when Fleet secret storage is off AND this space has Vault connections:
+  // in that case the delivered Vault credentials are stored unencrypted in the
+  // agent policy rather than as a Fleet secret.
+  const { http } = services;
+  const [showSecretStorageWarning, setShowSecretStorageWarning] = useState(false);
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await http?.get<{
+          secretStorageEnabled: boolean;
+          hasVaultConnections: boolean;
+        }>(SYNTHETICS_API_URLS.FLEET_SECRET_STORAGE_STATUS);
+        if (!cancelled) {
+          setShowSecretStorageWarning(
+            Boolean(res && !res.secretStorageEnabled && res.hasVaultConnections)
+          );
+        }
+      } catch {
+        // Non-fatal: leave the warning hidden if the status can't be fetched.
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [http]);
+
   const handleSubmit = (formData: NewLocation) => {
     if (privateLocationToEdit) {
       const isLabelChanged = formData.label !== privateLocationToEdit.label;
@@ -93,6 +123,19 @@ export const ManagePrivateLocations = () => {
 
   return (
     <SpacesContextProvider>
+      {showSecretStorageWarning && (
+        <>
+          <EuiCallOut
+            color="warning"
+            iconType="warning"
+            title={SECRET_STORAGE_WARNING_TITLE}
+            data-test-subj="syntheticsVaultSecretStorageWarning"
+          >
+            {SECRET_STORAGE_WARNING_BODY}
+          </EuiCallOut>
+          <EuiSpacer size="m" />
+        </>
+      )}
       {loading ? (
         <LoadingState />
       ) : (
@@ -117,3 +160,15 @@ export const ManagePrivateLocations = () => {
     </SpacesContextProvider>
   );
 };
+
+const SECRET_STORAGE_WARNING_TITLE = i18n.translate(
+  'xpack.synthetics.privateLocations.secretStorageWarning.title',
+  { defaultMessage: 'Vault credentials may be stored unencrypted' }
+);
+const SECRET_STORAGE_WARNING_BODY = i18n.translate(
+  'xpack.synthetics.privateLocations.secretStorageWarning.body',
+  {
+    defaultMessage:
+      'Fleet secret storage is not enabled, so HashiCorp Vault connection credentials delivered to private-location agents are stored unencrypted in the agent policy. Secret storage turns on once all Fleet Servers meet the minimum required version — upgrade your Fleet Server(s) to secure these credentials.',
+  }
+);

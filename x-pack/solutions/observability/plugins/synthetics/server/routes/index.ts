@@ -13,6 +13,7 @@ import {
   deleteVaultConnectionRoute,
   refreshVaultConnectionsRoute,
   testVaultConnectionRoute,
+  getFleetSecretStorageStatusRoute,
 } from './settings/vault/vault_connection';
 import { cleanupPrivateLocationRoute } from './settings/private_locations/cleanup_private_locations';
 import { getSyntheticsTriggerTaskRun } from './tasks/trigger_task_run';
@@ -144,6 +145,7 @@ export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   deleteVaultConnectionRoute,
   refreshVaultConnectionsRoute,
   testVaultConnectionRoute,
+  getFleetSecretStorageStatusRoute,
   syncParamsSettingsParamsRoute,
   getMonitorsHealthRoute,
   getMonitorHealthRoute,

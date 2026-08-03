@@ -8,6 +8,8 @@
 import { schema } from '@kbn/config-schema';
 import type { TypeOf } from '@kbn/config-schema';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { appContextService } from '@kbn/fleet-plugin/server/services';
+import { isSecretStorageEnabled } from '@kbn/fleet-plugin/server/services/secrets';
 import { request as httpsRequest } from 'https';
 import { request as httpRequest } from 'http';
 import type { SyntheticsServerSetup } from '../../../types';
@@ -447,5 +449,40 @@ export const testVaultConnectionRoute: SyntheticsRestApiRouteFactory<TestResult>
       token,
       secretId,
     });
+  },
+});
+
+/**
+ * Whether Fleet secret storage is enabled. Runs as the internal user (so the
+ * caller needs no Fleet privileges). When it is disabled, Fleet stores the
+ * delivered Vault credential blob in plaintext in the agent policy rather than as
+ * a Fleet secret — which is what the Private Locations UI warns about.
+ */
+const getFleetSecretStorageEnabled = async (server: SyntheticsServerSetup): Promise<boolean> => {
+  try {
+    const esClient = server.coreStart.elasticsearch.client.asInternalUser;
+    const soClient = appContextService.getInternalUserSOClientWithoutSpaceExtension();
+    return await isSecretStorageEnabled(esClient, soClient);
+  } catch (e) {
+    server.logger.error(`Vault: failed to determine Fleet secret storage status: ${e.message}`);
+    // Don't raise a false alarm if the check itself fails.
+    return true;
+  }
+};
+
+/** GET: secret-storage status + whether this space has any Vault connections. */
+export const getFleetSecretStorageStatusRoute: SyntheticsRestApiRouteFactory<{
+  secretStorageEnabled: boolean;
+  hasVaultConnections: boolean;
+}> = () => ({
+  method: 'GET',
+  path: SYNTHETICS_API_URLS.FLEET_SECRET_STORAGE_STATUS,
+  validate: {},
+  handler: async (routeContext) => {
+    const [secretStorageEnabled, connections] = await Promise.all([
+      getFleetSecretStorageEnabled(routeContext.server),
+      listConnections(routeContext),
+    ]);
+    return { secretStorageEnabled, hasVaultConnections: connections.length > 0 };
   },
 });
