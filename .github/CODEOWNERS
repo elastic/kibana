@@ -1322,7 +1322,7 @@ x-pack/solutions/observability/packages/kbn-observability-schema @elastic/obs-si
 x-pack/solutions/observability/packages/kbn-scout-oblt @elastic/appex-qa
 x-pack/solutions/observability/packages/kbn-synthetics-forge @elastic/obs-ux-management-team
 x-pack/solutions/observability/packages/kbn-ts-type-check-oblt-cli @elastic/observability-ui
-x-pack/solutions/observability/packages/nav-icons @elastic/obs-signals-traces-team
+x-pack/solutions/observability/packages/nav-icons @elastic/obs-signals-logs-team
 x-pack/solutions/observability/packages/observability-ai/observability-ai-common @elastic/nightshift-context-and-research-team
 x-pack/solutions/observability/packages/observability-ai/observability-ai-server @elastic/nightshift-context-and-research-team
 x-pack/solutions/observability/packages/synthetics-test-data @elastic/actionable-obs-team
