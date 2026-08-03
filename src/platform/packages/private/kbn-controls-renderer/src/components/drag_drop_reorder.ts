@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Edge } from '@atlaskit/pragmatic-drag-and-drop-hitbox/closest-edge';
-import { getReorderDestinationIndex } from '@atlaskit/pragmatic-drag-and-drop-hitbox/util/get-reorder-destination-index';
 import { reorder } from '@atlaskit/pragmatic-drag-and-drop/reorder';
 import type { PinnedControlLayoutState } from '@kbn/controls-schemas';
 
@@ -16,22 +14,6 @@ import type { ControlsLayout } from '../types';
 
 type Controls = ControlsLayout['controls'];
 type OrderedControl = PinnedControlLayoutState & { id: string };
-
-/** The control group is laid out horizontally, so the indicator only ever sits on a side edge. */
-export type DropIndicatorEdge = Extract<Edge, 'left' | 'right'>;
-
-export interface DropIndicatorPosition {
-  /** Index, within the current order, of the control the indicator is rendered against. */
-  index: number;
-  edge: DropIndicatorEdge;
-}
-
-interface DropParams {
-  controls: Controls;
-  sourceId: string;
-  targetId: string;
-  closestEdge: Edge | null;
-}
 
 const toOrderedArray = (controls: Controls): OrderedControl[] =>
   Object.entries(controls)
@@ -45,65 +27,26 @@ const toControls = (ordered: OrderedControl[]): Controls =>
   }, {});
 
 /**
- * Resolves the control being hovered and the closest edge of it (as reported by Pragmatic
- * drag-and-drop's `closest-edge` hitbox) into the index the dragged control will occupy once
- * dropped. The control group is laid out horizontally, so the `horizontal` axis is used.
- *
- * Several hover positions describe the same slot — the right edge of one control and the left
- * edge of the next are the same gap, and the edges either side of the dragged control are no-ops
- * — so both the drop indicator and the reorder are derived from this to keep what the user sees
- * during the drag in step with where the control actually lands.
- *
- * Returns `null` when dropping would leave the order unchanged.
- */
-const resolveDestination = ({ controls, sourceId, targetId, closestEdge }: DropParams) => {
-  const ordered = toOrderedArray(controls);
-  const startIndex = ordered.findIndex(({ id }) => id === sourceId);
-  const indexOfTarget = ordered.findIndex(({ id }) => id === targetId);
-
-  if (startIndex === -1 || indexOfTarget === -1) return null;
-
-  const destinationIndex = getReorderDestinationIndex({
-    startIndex,
-    indexOfTarget,
-    closestEdgeOfTarget: closestEdge,
-    axis: 'horizontal',
-  });
-
-  if (destinationIndex === startIndex) return null;
-
-  return { ordered, startIndex, destinationIndex };
-};
-
-/**
- * Returns the control to render the drop indicator against, and which of its edges, for the drop
- * currently being previewed. Returns `null` when the drop would not move the control, so that no
- * indicator promises a move that will not happen.
- */
-export const getDropIndicatorPosition = (params: DropParams): DropIndicatorPosition | null => {
-  const destination = resolveDestination(params);
-  if (!destination) return null;
-
-  const { startIndex, destinationIndex } = destination;
-
-  // Moving forwards lands the control immediately after whatever currently sits at the
-  // destination; moving backwards lands it immediately before.
-  return {
-    index: destinationIndex,
-    edge: destinationIndex > startIndex ? 'right' : 'left',
-  };
-};
-
-/**
- * Reorders the controls for the drop described by `params`.
+ * Moves `sourceId` to `destinationIndex`, the slot the group has been reflowing around for the
+ * duration of the drag.
  *
  * Returns the updated controls with recalculated `order`, or `null` when the drop is a no-op.
  */
-export const reorderControlsByEdge = (params: DropParams): Controls | null => {
-  const destination = resolveDestination(params);
-  if (!destination) return null;
+export const reorderControlsToIndex = ({
+  controls,
+  sourceId,
+  destinationIndex,
+}: {
+  controls: Controls;
+  sourceId: string;
+  destinationIndex: number;
+}): Controls | null => {
+  const ordered = toOrderedArray(controls);
+  const startIndex = ordered.findIndex(({ id }) => id === sourceId);
 
-  const { ordered, startIndex, destinationIndex } = destination;
+  if (startIndex === -1) return null;
+  if (destinationIndex < 0 || destinationIndex >= ordered.length) return null;
+  if (destinationIndex === startIndex) return null;
 
   return toControls(reorder({ list: ordered, startIndex, finishIndex: destinationIndex }));
 };

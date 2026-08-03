@@ -11,14 +11,9 @@ import classNames from 'classnames';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Subscription, of } from 'rxjs';
 
-import { combine } from '@atlaskit/pragmatic-drag-and-drop/combine';
-import {
-  draggable,
-  dropTargetForElements,
-} from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
+import { draggable } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
 import { setCustomNativeDragPreview } from '@atlaskit/pragmatic-drag-and-drop/element/set-custom-native-drag-preview';
 import { preserveOffsetOnSource } from '@atlaskit/pragmatic-drag-and-drop/element/preserve-offset-on-source';
-import { attachClosestEdge } from '@atlaskit/pragmatic-drag-and-drop-hitbox/closest-edge';
 import { createRoot } from 'react-dom/client';
 import { flushSync } from 'react-dom';
 import {
@@ -27,6 +22,7 @@ import {
   EuiFormLabel,
   EuiFormRow,
   EuiIcon,
+  euiCanAnimate,
   transparentize,
   type UseEuiTheme,
 } from '@elastic/eui';
@@ -48,35 +44,25 @@ import type { ControlsRendererParentApi } from '../types';
 import { apiPublishesLabel } from '../utils';
 import { controlWidthStyles } from './control_panel.styles';
 import { ControlClone } from './control_clone';
-import type { DropIndicatorEdge } from './drag_drop_reorder';
 import { DragHandle, DragHandleContext } from './drag_handle';
 import { FloatingActions } from './floating_actions';
 import { ControlLabelTooltip } from './control_label_tooltip';
 import { useIndicateRelatedPanelsSelector } from '../hooks';
 
-const DropIndicator = ({ edge }: { edge: DropIndicatorEdge }) => {
-  const styles = useMemoCss(controlPanelStyles);
-  return (
-    <span
-      aria-hidden={true}
-      css={[
-        styles.dropIndicator,
-        edge === 'left' ? styles.dropIndicatorLeft : styles.dropIndicatorRight,
-      ]}
-    />
-  );
-};
-
 export const ControlPanel = ({
   parentApi,
   control: { id, grow, width, type },
-  dropIndicatorEdge,
+  displayPosition,
   onKeyboardReorder,
 }: {
   parentApi: ControlsRendererParentApi;
   control: Required<PinnedControlLayoutState>;
-  /** Which edge to preview the in-flight drop against, or `null` when this control is not the drop slot */
-  dropIndicatorEdge: DropIndicatorEdge | null;
+  /**
+   * Where this control sits while the group reflows around an in-flight drag, or `null` when no
+   * drag is in progress. Handed to flexbox as an `order` so that it works out the wrapping and the
+   * widths, which change as controls move between rows.
+   */
+  displayPosition: number | null;
   onKeyboardReorder: (id: string, direction: 'back' | 'forward') => void;
 }) => {
   const styles = useMemoCss(controlPanelStyles);
@@ -173,50 +159,39 @@ export const ControlPanel = ({
     const element = elementRef.current;
     if (!element || !isEditable) return;
 
-    return combine(
-      draggable({
-        element,
-        dragHandle: dragHandleRef.current ?? undefined,
-        getInitialData: () => ({ id }),
-        onGenerateDragPreview: ({ location, nativeSetDragImage, source }) => {
-          setCustomNativeDragPreview({
-            nativeSetDragImage,
-            // Keep the preview under the point that was grabbed, so the drag handle stays
-            // beneath the pointer rather than the control jumping away from it
-            getOffset: preserveOffsetOnSource({
-              element: source.element,
-              input: location.current.input,
-            }),
-            render: ({ container }) => {
-              const { width: sourceWidth, height: sourceHeight } =
-                source.element.getBoundingClientRect();
-              const root = createRoot(container);
-              flushSync(() =>
-                root.render(
-                  <ControlClone
-                    state={parentApi.getSerializedStateForChild(id)}
-                    width={sourceWidth}
-                    height={sourceHeight}
-                  />
-                )
-              );
-              return () => root.unmount();
-            },
-          });
-        },
-        onDragStart: () => setIsDragging(true),
-        onDrop: () => setIsDragging(false),
-      }),
-      dropTargetForElements({
-        element,
-        canDrop: ({ source }) => source.data.id !== id,
-        getData: ({ input, element: targetElement }) =>
-          attachClosestEdge(
-            { id },
-            { input, element: targetElement, allowedEdges: ['left', 'right'] }
-          ),
-      })
-    );
+    return draggable({
+      element,
+      dragHandle: dragHandleRef.current ?? undefined,
+      getInitialData: () => ({ id }),
+      onGenerateDragPreview: ({ location, nativeSetDragImage, source }) => {
+        setCustomNativeDragPreview({
+          nativeSetDragImage,
+          // Keep the preview under the point that was grabbed, so the drag handle stays
+          // beneath the pointer rather than the control jumping away from it
+          getOffset: preserveOffsetOnSource({
+            element: source.element,
+            input: location.current.input,
+          }),
+          render: ({ container }) => {
+            const { width: sourceWidth, height: sourceHeight } =
+              source.element.getBoundingClientRect();
+            const root = createRoot(container);
+            flushSync(() =>
+              root.render(
+                <ControlClone
+                  state={parentApi.getSerializedStateForChild(id)}
+                  width={sourceWidth}
+                  height={sourceHeight}
+                />
+              )
+            );
+            return () => root.unmount();
+          },
+        });
+      },
+      onDragStart: () => setIsDragging(true),
+      onDrop: () => setIsDragging(false),
+    });
   }, [id, isEditable, parentApi]);
 
   const handleDragHandleKeyDown = useCallback(
@@ -283,10 +258,10 @@ export const ControlPanel = ({
         ref={setRefs}
         grow={Boolean(grow)}
         data-test-subj="control-frame"
-        css={css([styles.wrapper, isDragging && styles.draggingItem, styles.controlWidthStyles])}
+        css={css([isDragging && styles.draggingItem, styles.reflowing, styles.controlWidthStyles])}
         className={`controlFrameWrapper--${width}`}
+        style={displayPosition === null ? undefined : { order: displayPosition }}
       >
-        {dropIndicatorEdge && <DropIndicator edge={dropIndicatorEdge} />}
         <FloatingActions
           data-test-subj="control-frame-floating-actions"
           api={api}
@@ -360,30 +335,21 @@ export const ControlPanel = ({
 };
 
 const controlPanelStyles = {
-  wrapper: css({
-    position: 'relative',
-  }),
   draggingItem: css({
     opacity: 0,
     visibility: 'hidden',
   }),
-  dropIndicator: ({ euiTheme }: UseEuiTheme) =>
+  /**
+   * Animates the reordering the group asks flexbox for. Layout changes cannot be transitioned, so
+   * the group takes the control back to where it was with a transform and lets this carry it to its
+   * new place; see `useReflowAnimation`.
+   */
+  reflowing: ({ euiTheme }: UseEuiTheme) =>
     css({
-      position: 'absolute',
-      top: 0,
-      bottom: 0,
-      width: euiTheme.size.xxs,
-      borderRadius: '1px',
-      backgroundColor: euiTheme.colors.borderStrongAccentSecondary,
-      pointerEvents: 'none',
-      zIndex: 1,
+      [euiCanAnimate]: {
+        transition: `transform ${euiTheme.animation.fast} ease`,
+      },
     }),
-  dropIndicatorLeft: css({
-    insetInlineStart: '-2px',
-  }),
-  dropIndicatorRight: css({
-    insetInlineEnd: '-2px',
-  }),
   controlWidthStyles,
   tooltipStyles: {
     height: '100%',
