@@ -7,12 +7,11 @@
 
 import { spaceTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { enableElasticChartDebug, getChartDebugData } from '../fixtures/open_in_lens_helpers';
 import {
   completeLensCsvExport,
   createAdHocDataViewFromLens,
   createRuntimeFieldFromEditor,
-  switchDataPanelIndexPattern,
+  enableElasticChartDebug,
   testData,
 } from '../fixtures';
 
@@ -90,7 +89,7 @@ spaceTest.describe('Lens ad hoc data view', { tag: '@local-stateful-classic' }, 
       // Default terms size is Top 9 (+ Other). Exact bucket values belong at the API layer.
       await expect
         .poll(async () => {
-          const bars = (await getChartDebugData(page, 'xyVisChart')).bars?.[0]?.bars ?? [];
+          const bars = (await lens.getCurrentChartDebugState('xyVisChart')).bars?.[0]?.bars ?? [];
           return {
             length: bars.length,
             hasOther: bars.some((bar) => bar.x === 'Other'),
@@ -142,10 +141,10 @@ spaceTest.describe('Lens ad hoc data view', { tag: '@local-stateful-classic' }, 
 
       await spaceTest.step('switch to another data view and back', async () => {
         await page.testSubj.locator('lnsIndexPatternFieldSearch').fill('');
-        await switchDataPanelIndexPattern(page, testData.DATA_VIEW_ID.LOGSTASH);
+        await lens.switchDataPanelIndexPattern(testData.DATA_VIEW_ID.LOGSTASH);
         await expect(page.testSubj.locator('lnsFieldListPanelField-runtimefield')).toHaveCount(0);
 
-        await switchDataPanelIndexPattern(page, testData.AD_HOC_DATA_VIEW_NAME);
+        await lens.switchDataPanelIndexPattern(testData.AD_HOC_DATA_VIEW_NAME);
         // Scope to Available fields — the same test subject also appears under Selected.
         await expect(
           page.testSubj
