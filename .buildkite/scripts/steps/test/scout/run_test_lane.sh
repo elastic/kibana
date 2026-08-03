@@ -13,7 +13,6 @@ PASSED=()
 FAILED=()
 SKIPPED=()
 RETRY_SPEC_FILES=()
-# Sum of Playwright's `stats.flaky` (tests that failed then passed on retry) across the lane.
 TOTAL_FLAKY=0
 
 # Fail early if any of the given environment variable names are unset or empty
@@ -52,8 +51,7 @@ json_report_path() {
   echo ".scout/test-results-${1}.json"
 }
 
-# Reads stats.flaky from a config's JSON report. Echoes 0 if the report is missing or
-# malformed — this is a display-only nicety and must never affect the lane.
+# Reads stats.flaky from a config's JSON report. Echoes 0 if the report is missing or malformed.
 flaky_count() {
   local idx="$1" report
   report="$(json_report_path "$idx")"
