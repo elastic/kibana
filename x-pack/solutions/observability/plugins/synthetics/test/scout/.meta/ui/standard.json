@@ -1,5 +1,5 @@
 {
-  "sha1": "cc8347bc8eb803c6b3827e9e56f82dcb595d7a47",
+  "sha1": "cd4b3a030fcd31ce6195029607864cb0e62efe0d",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -288,28 +288,28 @@
     {
       "id": "0ffb4babb4c147d-1128db6b7fad457",
       "title": "OverviewCompactView switches to compact view and persists the selection",
-      "expectedStatus": "skipped",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/overview_compact_view.spec.ts",
-        "line": 15,
-        "column": 11
-      }
-    },
-    {
-      "id": "63227c5cfe04f39-ccf6627ff5bcb2c",
-      "title": "OverviewSaveLensVisualization opens save lens visualization modal with correct attributes",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/overview_save_lens_visualization.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/overview_compact_view.spec.ts",
         "line": 14,
+        "column": 11
+      }
+    },
+    {
+      "id": "63227c5cfe04f39-ccf6627ff5bcb2c",
+      "title": "OverviewSaveLensVisualization opens save lens visualization modal with correct attributes",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/overview_save_lens_visualization.spec.ts",
+        "line": 15,
         "column": 11
       }
     },
