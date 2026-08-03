@@ -14,4 +14,5 @@ export { cancelWorkflow } from './cancel_workflow';
 export {
   checkAndSkipIfExistingScheduledExecution,
   type CheckAndSkipScheduledExecutionResult,
+  type CheckExistingScheduledExecutionOptions,
 } from './schedule_workflow';

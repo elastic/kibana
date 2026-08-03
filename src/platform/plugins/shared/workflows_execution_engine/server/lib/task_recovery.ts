@@ -20,6 +20,10 @@ export const TASK_RECOVERY_ERROR_TYPE = 'TaskRecoveryError' as const;
 export const taskRecoveryMessages = {
   scheduledStale:
     'Execution abandoned due to recovery mechanism. The scheduled task was interrupted before completion.',
+  scheduledAbandonedPending:
+    'Execution abandoned due to recovery mechanism. The scheduled run never started and a later schedule tick superseded it.',
+  scheduledRunFailedAfterCreate:
+    'Execution abandoned due to recovery mechanism. The scheduled task failed after creating the execution.',
   workflowRunInterrupted:
     'Execution abandoned due to recovery mechanism. The workflow run task was interrupted before completion.',
   workflowResumeInterrupted:
@@ -216,17 +220,21 @@ export async function markExecutionFailedTaskRecovery(
   }: {
     message: string;
     type?: typeof TASK_RECOVERY_ERROR_TYPE | 'TaskAttemptsExhaustedError';
-  }
+  },
+  options: { refresh?: boolean | 'wait_for' } = {}
 ): Promise<void> {
   const error = { type, message };
   const finishedAt = new Date().toISOString();
 
-  await workflowExecutionRepository.updateWorkflowExecution({
-    id: executionId,
-    status: ExecutionStatus.FAILED,
-    error,
-    finishedAt,
-  });
+  await workflowExecutionRepository.updateWorkflowExecution(
+    {
+      id: executionId,
+      status: ExecutionStatus.FAILED,
+      error,
+      finishedAt,
+    },
+    { refresh: options.refresh ?? false }
+  );
 
   await stepExecutionRepository.markNonTerminalStepsFailed(executionId, error);
 }
@@ -303,4 +311,53 @@ export function shouldFailOnWorkflowRunRetry(execution: EsWorkflowExecution): bo
     return false;
   }
   return true;
+}
+
+/**
+ * After `workflow:scheduled` creates an execution and inline `runWorkflow` throws, best-effort
+ * mark that execution FAILED if it still occupies a non-terminal slot (skips terminal /
+ * waiting_for_input). Complements past-tick abandoned-pending reap for the same-claim case.
+ */
+export async function markScheduledExecutionFailedAfterTaskError(params: {
+  workflowExecutionRepository: WorkflowExecutionRepository;
+  stepExecutionRepository: StepExecutionRepository;
+  workflowRunId: string;
+  spaceId: string;
+  logger: Logger;
+}): Promise<void> {
+  const { workflowExecutionRepository, stepExecutionRepository, workflowRunId, spaceId, logger } =
+    params;
+
+  try {
+    const execution = await workflowExecutionRepository.getWorkflowExecutionById(
+      workflowRunId,
+      spaceId
+    );
+    if (
+      !execution ||
+      isTerminalStatus(execution.status) ||
+      execution.status === ExecutionStatus.WAITING_FOR_INPUT
+    ) {
+      return;
+    }
+
+    await markExecutionFailedTaskRecovery(
+      workflowExecutionRepository,
+      stepExecutionRepository,
+      workflowRunId,
+      {
+        message: taskRecoveryMessages.scheduledRunFailedAfterCreate,
+      },
+      { refresh: 'wait_for' }
+    );
+    logger.warn(
+      `Marked workflow execution ${workflowRunId} FAILED after scheduled task error (status was ${execution.status})`
+    );
+  } catch (markFailedErr) {
+    logger.error(
+      `Failed to mark scheduled workflow execution ${workflowRunId} as FAILED after task error: ${
+        markFailedErr instanceof Error ? markFailedErr.message : String(markFailedErr)
+      }`
+    );
+  }
 }
