@@ -191,6 +191,10 @@ function createServerlessES({
       });
       const client = getServerlessESClient({ port: esPort, ssl: enableCPS });
 
+      if (enableCPS) {
+        await waitForCpsProjectRoutingReady({ client, log });
+      }
+
       return {
         getClient: () => client,
         stop: async () => {
@@ -200,6 +204,48 @@ function createServerlessES({
     },
   };
 }
+
+// `waitForReady` only gates on cluster health + the security index, not on CPS. When CPS is enabled
+// ES rejects every request with `No origin project state for project default` until it initializes
+// that origin state, so gate on it here to avoid handing the cluster to tests before routing is ready.
+const CPS_READY_TIMEOUT = 60 * 1000; // 60 seconds
+
+const waitForCpsProjectRoutingReady = async ({
+  client,
+  log,
+}: {
+  client: Client;
+  log: ToolingLog;
+}) => {
+  const start = Date.now();
+  let attempt = 0;
+
+  log.info('waiting for CPS to initialize the default origin project state');
+
+  while (true) {
+    attempt += 1;
+    try {
+      await client.search({
+        index: '_all',
+        size: 0,
+        allow_no_indices: true,
+        ignore_unavailable: true,
+      });
+      log.success('CPS project routing is ready');
+      return;
+    } catch (error) {
+      const message: string = error?.message ?? '';
+      const timeSinceStart = Date.now() - start;
+      if (!message.includes('No origin project state') || timeSinceStart > CPS_READY_TIMEOUT) {
+        throw error;
+      }
+      log.warning(
+        `waiting for CPS project routing to initialize, attempt ${attempt} failed with: ${message}`
+      );
+      await new Promise((resolve) => setTimeout(resolve, Math.min(attempt * 500, 3000)));
+    }
+  }
+};
 
 const getServerlessESClient = ({ port, ssl = false }: { port: number; ssl?: boolean }) => {
   return new Client({
