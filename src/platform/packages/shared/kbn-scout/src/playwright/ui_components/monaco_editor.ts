@@ -292,9 +292,9 @@ export class KibanaCodeEditorWrapper {
     await this.getDecoration(decorationClassName).hover();
 
     const hover = this.getHoverPopover();
-    await expect(hover).toBeVisible();
+    await hover.waitFor({ state: 'visible' });
     const rows = hover.locator('.hover-row');
-    await expect(rows).not.toHaveCount(0);
+    await rows.waitFor({ state: 'visible' });
 
     const texts = await rows.allInnerTexts();
     return texts.join(' ').trim();
@@ -312,9 +312,9 @@ export class KibanaCodeEditorWrapper {
     await this.getDecoration(decorationClassName).hover();
 
     const hover = this.getHoverPopover();
-    await expect(hover).toBeVisible();
+    await hover.waitFor({ state: 'visible' });
     const option = hover.locator('.hover-row', { hasText: optionText });
-    await expect(option).toBeVisible();
+    await option.waitFor({ state: 'visible' });
     await option.click();
   }
 }

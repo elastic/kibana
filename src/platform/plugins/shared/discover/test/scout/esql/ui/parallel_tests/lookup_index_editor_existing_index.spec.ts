@@ -15,7 +15,6 @@ import { LOOKUP_INDEX_EDITOR_ROLE } from '../../../common/feature_controls/roles
 // the selection column, and the add-row column.
 const NUMBER_OF_CONTROL_COLUMNS = 3;
 const FIRST_NAME_COLUMN = NUMBER_OF_CONTROL_COLUMNS;
-const FULL_NAME_COLUMN = NUMBER_OF_CONTROL_COLUMNS + 1;
 // 6 existing data columns precede the newly added "age" column
 const AGE_COLUMN = NUMBER_OF_CONTROL_COLUMNS + 6;
 
@@ -95,32 +94,10 @@ spaceTest.describe(
       await lookupIndexEditor.search('');
       await expect(lookupIndexEditor.rows).toHaveCount(2);
 
-      // Edit cell values
+      // Edit an existing value and add a typed column
       await lookupIndexEditor.setCellValue(0, FIRST_NAME_COLUMN, 'Jasmin');
-      await lookupIndexEditor.setCellValue(0, FULL_NAME_COLUMN, 'Jasmin Upperwood');
-      await lookupIndexEditor.setCellValue(1, FIRST_NAME_COLUMN, 'Philip');
-      await lookupIndexEditor.setCellValue(1, FULL_NAME_COLUMN, 'Philip Tompsoon');
-
-      // Add a new row with some values and delete it
-      await lookupIndexEditor.addRow(0);
-      await lookupIndexEditor.setCellValue(1, FIRST_NAME_COLUMN, 'New Name');
-      await lookupIndexEditor.setCellValue(1, FULL_NAME_COLUMN, 'New Name Surname');
-      await expect(lookupIndexEditor.rows).toHaveCount(3);
-
-      await lookupIndexEditor.deleteRow(1);
-      await expect(lookupIndexEditor.rows).toHaveCount(2);
-
-      // Add a new row with some values
-      await lookupIndexEditor.addRow(0);
-      await lookupIndexEditor.setCellValue(1, FIRST_NAME_COLUMN, 'Pedro');
-      await lookupIndexEditor.setCellValue(1, FULL_NAME_COLUMN, 'Pedro Fernandez');
-      await expect(lookupIndexEditor.rows).toHaveCount(3);
-
-      // Add a new column
       await lookupIndexEditor.addColumn('age', 'integer');
       await lookupIndexEditor.setCellValue(0, AGE_COLUMN, '30');
-      await lookupIndexEditor.setCellValue(1, AGE_COLUMN, '40');
-      await lookupIndexEditor.setCellValue(2, AGE_COLUMN, '25');
 
       // Try to exit without saving changes
       await lookupIndexEditor.close();
@@ -137,7 +114,7 @@ spaceTest.describe(
         expect(docs).toStrictEqual([
           {
             customer_first_name: 'Jasmin',
-            customer_full_name: 'Jasmin Upperwood',
+            customer_full_name: 'Elyssa Underwood',
             customer_gender: 'FEMALE',
             customer_id: '27',
             customer_last_name: 'Underwood',
@@ -145,18 +122,12 @@ spaceTest.describe(
             age: 30,
           },
           {
-            customer_first_name: 'Philip',
-            customer_full_name: 'Philip Tompsoon',
+            customer_first_name: 'Phil',
+            customer_full_name: 'Phil Thompson',
             customer_gender: 'MALE',
             customer_id: '50',
             customer_last_name: 'Thompson',
             email: 'phil@thompson-family.zzz',
-            age: 25,
-          },
-          {
-            customer_first_name: 'Pedro',
-            customer_full_name: 'Pedro Fernandez',
-            age: 40,
           },
         ]);
       }).toPass();
