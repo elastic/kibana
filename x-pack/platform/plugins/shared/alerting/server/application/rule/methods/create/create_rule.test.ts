@@ -5230,6 +5230,11 @@ This is the type of text _investigation guides_ will contain.`;
           enabled: true,
           consumer: 'bar',
           producer: 'alerts',
+          schedule_interval: '1m',
+          actions_count: 1,
+          action_type_ids: ['test'],
+          rule_type_category: 'test',
+          rule_type_solution: 'stack',
         }
       );
     });
@@ -5306,6 +5311,39 @@ This is the type of text _investigation guides_ will contain.`;
           dashboard_ids: ['dash-1', 'dash-2'],
         })
       );
+    });
+
+    test('includes notify_when and alert_delay when configured', async () => {
+      mockSuccessfulCreate();
+
+      await rulesClient.create({
+        data: getMockData({
+          notifyWhen: 'onActiveAlert',
+          alertDelay: { active: 3 },
+        }),
+      });
+
+      expect(rulesClientParams.analytics!.reportEvent).toHaveBeenCalledWith(
+        'alerting_rule_created',
+        expect.objectContaining({
+          notify_when: 'onActiveAlert',
+          alert_delay: 3,
+        })
+      );
+    });
+
+    test('reports actions_count of 0 and omits action_type_ids when there are no actions', async () => {
+      mockSuccessfulCreate();
+
+      await rulesClient.create({
+        data: getMockData({
+          actions: [],
+        }),
+      });
+
+      const [, payload] = (rulesClientParams.analytics!.reportEvent as jest.Mock).mock.calls[0];
+      expect(payload.actions_count).toBe(0);
+      expect(payload).not.toHaveProperty('action_type_ids');
     });
   });
 });

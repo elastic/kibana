@@ -317,6 +317,12 @@ export async function createRule<Params extends RuleParams = never>(
     enabled: data.enabled,
     consumer: data.consumer,
     producer: ruleType.producer,
+    category: ruleType.category,
+    solution: ruleType.solution,
+    scheduleInterval: data.schedule.interval,
+    notifyWhen,
+    alertDelay: data.alertDelay?.active,
+    actions: actionsWithRefs,
     predefinedId: options?.id,
     params: data.params,
     artifacts: data.artifacts,
@@ -344,6 +350,12 @@ function reportRuleCreatedEvent(
     enabled,
     consumer,
     producer,
+    category,
+    solution,
+    scheduleInterval,
+    notifyWhen,
+    alertDelay,
+    actions,
     predefinedId,
     params,
     artifacts,
@@ -355,6 +367,12 @@ function reportRuleCreatedEvent(
     enabled: boolean;
     consumer: string;
     producer: string;
+    category: string;
+    solution: string;
+    scheduleInterval: string;
+    notifyWhen?: string | null;
+    alertDelay?: number;
+    actions: Array<{ actionTypeId?: string }>;
     predefinedId?: string;
     params?: RuleParams;
     artifacts?: CreateRuleData['artifacts'];
@@ -374,6 +392,17 @@ function reportRuleCreatedEvent(
       .map((dashboard) => dashboard.id)
       .filter((dashboardId): dashboardId is string => typeof dashboardId === 'string');
 
+    const actionTypeIds = [
+      ...new Set(
+        actions
+          .map((action) => action.actionTypeId)
+          .filter(
+            (actionTypeId): actionTypeId is string =>
+              typeof actionTypeId === 'string' && actionTypeId.length > 0
+          )
+      ),
+    ];
+
     context.analytics?.reportEvent(RULE_CREATED_EVENT.eventType, {
       rule_id: id,
       ...(resolvedTemplateId ? { template_id: resolvedTemplateId } : {}),
@@ -384,6 +413,13 @@ function reportRuleCreatedEvent(
       producer,
       ...(sloId ? { slo_id: sloId } : {}),
       ...(dashboardIds.length > 0 ? { dashboard_ids: dashboardIds } : {}),
+      schedule_interval: scheduleInterval,
+      actions_count: actions.length,
+      ...(actionTypeIds.length > 0 ? { action_type_ids: actionTypeIds } : {}),
+      ...(notifyWhen ? { notify_when: notifyWhen } : {}),
+      rule_type_category: category,
+      rule_type_solution: solution,
+      ...(typeof alertDelay === 'number' ? { alert_delay: alertDelay } : {}),
     });
   } catch (e) {
     context.logger.debug(`Failed to report rule create telemetry event: ${e}`);
