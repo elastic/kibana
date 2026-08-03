@@ -771,10 +771,11 @@ export function XYChart({
         ...style.tickLabel,
         truncate: style.tickLabel.truncate ?? 'middle',
       };
+
       if (!isHorizontalChart(dataLayers)) {
         style.tickLabel = {
           ...style.tickLabel,
-          minLength: 80,
+          minLength: xAxisConfig?.truncate ? Math.min(80, xAxisConfig.truncate) : 80,
         };
       }
     }
