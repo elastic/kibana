@@ -274,7 +274,34 @@ class ConversationClientImpl implements ConversationClient {
   }): Promise<Conversation> {
     let updatedConversation: Conversation | undefined;
 
-    await this.createOccWriter(access, maxRetries).readModifyWrite({
+    const writer = new OccWriter<ConversationProperties>({
+      get: async (id) => {
+        const document = await this.getDocumentWithAccess({ conversationId: id, access });
+
+        return {
+          id,
+          source: document._source!,
+          occ: { seqNo: document._seq_no!, primaryTerm: document._primary_term! },
+        };
+      },
+      // `refresh` stays at the adapter's `wait_for` default so a retry's re-read sees the winner
+      index: async ({ id, document, ifSeqNo, ifPrimaryTerm }) => {
+        const response = await this.storage.getClient().index({
+          id,
+          document,
+          ...(ifSeqNo != null && ifPrimaryTerm != null
+            ? { if_seq_no: ifSeqNo, if_primary_term: ifPrimaryTerm }
+            : {}),
+        });
+
+        return { seqNo: response._seq_no!, primaryTerm: response._primary_term! };
+      },
+      logger: this.logger,
+      maxRetries,
+      retryDelayMs: OCC_RETRY_DELAY_MS,
+    });
+
+    await writer.readModifyWrite({
       id: conversationId,
       mutate: (source) => {
         updatedConversation = mutate(fromEs({ _id: conversationId, _source: source }));
@@ -343,38 +370,6 @@ class ConversationClientImpl implements ConversationClient {
 
       throw error;
     }
-  }
-
-  private createOccWriter(
-    access: ConversationAccess,
-    maxRetries: number
-  ): OccWriter<ConversationProperties> {
-    return new OccWriter<ConversationProperties>({
-      get: async (id) => {
-        const document = await this.getDocumentWithAccess({ conversationId: id, access });
-
-        return {
-          id,
-          source: document._source!,
-          occ: { seqNo: document._seq_no!, primaryTerm: document._primary_term! },
-        };
-      },
-      // `refresh` stays at the adapter's `wait_for` default so a retry's re-read sees the winner
-      index: async ({ id, document, ifSeqNo, ifPrimaryTerm }) => {
-        const response = await this.storage.getClient().index({
-          id,
-          document,
-          ...(ifSeqNo != null && ifPrimaryTerm != null
-            ? { if_seq_no: ifSeqNo, if_primary_term: ifPrimaryTerm }
-            : {}),
-        });
-
-        return { seqNo: response._seq_no!, primaryTerm: response._primary_term! };
-      },
-      logger: this.logger,
-      maxRetries,
-      retryDelayMs: OCC_RETRY_DELAY_MS,
-    });
   }
 
   async delete(conversationId: string): Promise<boolean> {
