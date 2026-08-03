@@ -312,11 +312,7 @@ export function KnowledgeIndicatorDetailsFlyout({
               anchorPosition="downRight"
             >
               <EuiContextMenuPanel
-                items={[
-                  ...openInDiscoverActionItems,
-                  ...featureActionItems,
-                  ...queryActionItems,
-                ]}
+                items={[...openInDiscoverActionItems, ...featureActionItems, ...queryActionItems]}
               />
             </EuiPopover>
           </EuiFlexItem>
