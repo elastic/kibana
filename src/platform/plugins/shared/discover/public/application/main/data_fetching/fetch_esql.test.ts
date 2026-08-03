@@ -117,37 +117,43 @@ describe('fetchEsql', () => {
   });
 
   it('should generate identical stable ids across two fetches when _id and _index are present', async () => {
-    const hits = [
-      { _index: 'i', _id: '1', foo: 'bar' },
-      { _index: 'i', _id: '2', foo: 'baz' },
-    ] as unknown as EsHitRecord[];
+    jest.useFakeTimers();
 
-    const mockExecute = () =>
-      ({
-        cancel: jest.fn(),
-        getData: jest.fn(() =>
-          of({
-            result: {
-              columns: ['_id', '_index', 'foo'],
-              rows: hits,
-            },
-          })
-        ),
-      } as unknown as ExecutionContract);
+    try {
+      const hits = [
+        { _index: 'i', _id: '1', foo: 'bar' },
+        { _index: 'i', _id: '2', foo: 'baz' },
+      ] as unknown as EsHitRecord[];
 
-    const expressionsExecuteSpy = jest.spyOn(discoverServiceMock.expressions, 'execute');
+      const mockExecute = () =>
+        ({
+          cancel: jest.fn(),
+          getData: jest.fn(() =>
+            of({
+              result: {
+                columns: ['_id', '_index', 'foo'],
+                rows: hits,
+              },
+            })
+          ),
+        } as unknown as ExecutionContract);
 
-    jest.setSystemTime(new Date(2026, 4, 7, 22, 34, 46));
-    expressionsExecuteSpy.mockReturnValueOnce(mockExecute());
-    const { records: firstFetch } = await fetchEsql(fetchEsqlMockProps);
+      const expressionsExecuteSpy = jest.spyOn(discoverServiceMock.expressions, 'execute');
 
-    // Advance time to simulate a later refresh
-    jest.setSystemTime(new Date(2026, 4, 7, 22, 34, 47));
-    expressionsExecuteSpy.mockReturnValueOnce(mockExecute());
-    const { records: secondFetch } = await fetchEsql(fetchEsqlMockProps);
+      jest.setSystemTime(new Date(2026, 4, 7, 22, 34, 46));
+      expressionsExecuteSpy.mockReturnValueOnce(mockExecute());
+      const { records: firstFetch } = await fetchEsql(fetchEsqlMockProps);
 
-    expect(firstFetch[0].id).toBe(secondFetch[0].id);
-    expect(firstFetch[1].id).toBe(secondFetch[1].id);
+      // Advance time to simulate a later refresh
+      jest.setSystemTime(new Date(2026, 4, 7, 22, 34, 47));
+      expressionsExecuteSpy.mockReturnValueOnce(mockExecute());
+      const { records: secondFetch } = await fetchEsql(fetchEsqlMockProps);
+
+      expect(firstFetch[0].id).toBe(secondFetch[0].id);
+      expect(firstFetch[1].id).toBe(secondFetch[1].id);
+    } finally {
+      jest.useRealTimers();
+    }
   });
 
   it('should generate different ids across two fetches when _index is absent', async () => {
