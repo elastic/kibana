@@ -86,7 +86,7 @@ export const allowedExperimentalValues = Object.freeze({
    * it covers from the internal user to a project-routed current-user client. Off until the request
    * user holds index privileges on the Defend indices: a missing grant drops rows silently.
    */
-  defendCrossProjectSearch: true,
+  defendCrossProjectSearch: false,
 
   /**
    * Enables the Assistant Model Evaluation advanced setting and API endpoint, introduced in `8.11.0`.
