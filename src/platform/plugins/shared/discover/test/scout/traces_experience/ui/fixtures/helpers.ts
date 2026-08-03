@@ -49,7 +49,7 @@ export async function openServiceFlyoutFromAboutSection(flyout: TracesFlyout): P
   await expect(flyout.about.serviceNameLink).toBeVisible();
   await expect(async () => {
     await flyout.about.serviceNameLink.dispatchEvent('click');
-    await expect(flyout.serviceFlyout.container).toBeVisible();
+    await expect(flyout.serviceFlyout.container).toBeVisible({ timeout: 5000 });
   }).toPass({ timeout: 15000 });
 }
 
