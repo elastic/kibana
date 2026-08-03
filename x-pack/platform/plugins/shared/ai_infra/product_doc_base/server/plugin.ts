@@ -130,7 +130,13 @@ export class ProductDocBasePlugin
       taskManager,
     };
 
-    void this.runStartupTasks(core, documentationManager, isServerless, this.cloud);
+    this.runStartupTasks(core, documentationManager, isServerless, this.cloud).catch(
+      (err: Error) => {
+        this.logger.error(
+          `Unexpected error in product documentation startup tasks: ${err.message}`
+        );
+      }
+    );
     return {
       management: {
         install: documentationManager.install.bind(documentationManager),
@@ -188,6 +194,11 @@ export class ProductDocBasePlugin
     // Security labs only for security projects; in traditional deployments all solutions are available
     const isSecurityProject = isServerless ? cloud?.serverless?.projectType === 'security' : true;
     if (isSecurityProject) {
+      documentationManager.ensureDefaultSecurityLabs().catch((err: Error) => {
+        this.logger.error(
+          `Error ensuring Security Labs content for default inference ID: ${err.message}`
+        );
+      });
       documentationManager.updateSecurityLabsAll().catch((err: Error) => {
         this.logger.error(`Error scheduling Security Labs update task: ${err.message}`);
       });

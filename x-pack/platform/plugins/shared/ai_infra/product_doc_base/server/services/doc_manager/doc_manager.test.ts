@@ -336,6 +336,72 @@ describe('DocumentationManager', () => {
     });
   });
 
+  describe('#ensureDefaultSecurityLabs', () => {
+    beforeEach(() => {
+      licensing.getLicense.mockResolvedValue(
+        licensingMock.createLicense({ license: { type: 'enterprise' } })
+      );
+    });
+
+    it('installs when Security Labs is not installed', async () => {
+      packageInstaller.getSecurityLabsStatus.mockResolvedValue({ status: 'uninstalled' });
+
+      await docManager.ensureDefaultSecurityLabs();
+
+      expect(packageInstaller.installSecurityLabs).toHaveBeenCalledWith({
+        inferenceId: defaultInferenceEndpoints.ELSER,
+        version: undefined,
+      });
+    });
+
+    it('schedules no install when Security Labs is already installed', async () => {
+      packageInstaller.getSecurityLabsStatus.mockResolvedValue({ status: 'installed' });
+
+      await docManager.ensureDefaultSecurityLabs();
+
+      expect(packageInstaller.installSecurityLabs).not.toHaveBeenCalled();
+      expect(scheduleEnsureSecurityLabsUpToDateTaskMock).not.toHaveBeenCalled();
+    });
+
+    it('reinstalls when Security Labs is in error state', async () => {
+      packageInstaller.getSecurityLabsStatus.mockResolvedValue({ status: 'error' });
+
+      await docManager.ensureDefaultSecurityLabs();
+
+      expect(packageInstaller.installSecurityLabs).toHaveBeenCalledWith({
+        inferenceId: defaultInferenceEndpoints.ELSER,
+        version: undefined,
+      });
+    });
+
+    it('skips when Security Labs is currently installing', async () => {
+      packageInstaller.getSecurityLabsStatus.mockResolvedValue({ status: 'installing' });
+
+      await docManager.ensureDefaultSecurityLabs();
+
+      expect(packageInstaller.installSecurityLabs).not.toHaveBeenCalled();
+    });
+
+    it('skips when Security Labs is currently uninstalling', async () => {
+      packageInstaller.getSecurityLabsStatus.mockResolvedValue({ status: 'uninstalling' });
+
+      await docManager.ensureDefaultSecurityLabs();
+
+      expect(packageInstaller.installSecurityLabs).not.toHaveBeenCalled();
+    });
+
+    it('skips when license is invalid', async () => {
+      packageInstaller.getSecurityLabsStatus.mockResolvedValue({ status: 'uninstalled' });
+      licensing.getLicense.mockResolvedValue(
+        licensingMock.createLicense({ license: { type: 'basic' } })
+      );
+
+      await docManager.ensureDefaultSecurityLabs();
+
+      expect(packageInstaller.installSecurityLabs).not.toHaveBeenCalled();
+    });
+  });
+
   describe('#updateAll', () => {
     beforeEach(() => {
       getTaskStatusMock.mockResolvedValue('not_scheduled');

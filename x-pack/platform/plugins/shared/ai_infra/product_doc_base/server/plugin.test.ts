@@ -53,6 +53,7 @@ describe('ProductDocBasePlugin', () => {
       getStatuses: jest.fn().mockResolvedValue({}),
       updateAll: jest.fn().mockResolvedValue({}),
       ensureDefaultProductDocumentation: jest.fn().mockResolvedValue(undefined),
+      ensureDefaultSecurityLabs: jest.fn().mockResolvedValue(undefined),
       installSecurityLabs: jest.fn().mockResolvedValue({}),
       uninstallSecurityLabs: jest.fn().mockResolvedValue({}),
       getSecurityLabsStatus: jest.fn().mockResolvedValue({}),
@@ -138,15 +139,17 @@ describe('ProductDocBasePlugin', () => {
 
         expect(DocumentationManagerMock().ensureDefaultProductDocumentation).not.toHaveBeenCalled();
         expect(DocumentationManagerMock().updateAll).not.toHaveBeenCalled();
+        expect(DocumentationManagerMock().ensureDefaultSecurityLabs).not.toHaveBeenCalled();
         expect(DocumentationManagerMock().updateSecurityLabsAll).not.toHaveBeenCalled();
       }
     );
 
-    it('schedules updateSecurityLabsAll in non-serverless deployments', async () => {
+    it('schedules ensureDefaultSecurityLabs and updateSecurityLabsAll in non-serverless deployments', async () => {
       plugin.setup(coreMock.createSetup(), pluginSetupDeps);
       // Default initContext is non-serverless (buildFlavor: 'traditional')
       plugin.start(coreMock.createStart(), pluginStartDeps);
       await new Promise((resolve) => setImmediate(resolve));
+      expect(DocumentationManagerMock().ensureDefaultSecurityLabs).toHaveBeenCalledTimes(1);
       expect(DocumentationManagerMock().updateSecurityLabsAll).toHaveBeenCalledTimes(1);
     });
 
@@ -160,7 +163,7 @@ describe('ProductDocBasePlugin', () => {
         serverlessPlugin = new ProductDocBasePlugin(serverlessContext);
       });
 
-      it('calls updateSecurityLabsAll in serverless security projects', async () => {
+      it('calls ensureDefaultSecurityLabs and updateSecurityLabsAll in serverless security projects', async () => {
         serverlessPlugin.setup(coreMock.createSetup(), {
           ...pluginSetupDeps,
           cloud: {
@@ -169,10 +172,11 @@ describe('ProductDocBasePlugin', () => {
         });
         serverlessPlugin.start(coreMock.createStart(), pluginStartDeps);
         await new Promise((resolve) => setImmediate(resolve));
+        expect(DocumentationManagerMock().ensureDefaultSecurityLabs).toHaveBeenCalledTimes(1);
         expect(DocumentationManagerMock().updateSecurityLabsAll).toHaveBeenCalledTimes(1);
       });
 
-      it('skips updateSecurityLabsAll in serverless non-security projects', async () => {
+      it('skips Security Labs startup tasks in serverless non-security projects', async () => {
         serverlessPlugin.setup(coreMock.createSetup(), {
           ...pluginSetupDeps,
           cloud: {
@@ -181,6 +185,7 @@ describe('ProductDocBasePlugin', () => {
         });
         serverlessPlugin.start(coreMock.createStart(), pluginStartDeps);
         await new Promise((resolve) => setImmediate(resolve));
+        expect(DocumentationManagerMock().ensureDefaultSecurityLabs).not.toHaveBeenCalled();
         expect(DocumentationManagerMock().updateSecurityLabsAll).not.toHaveBeenCalled();
       });
     });

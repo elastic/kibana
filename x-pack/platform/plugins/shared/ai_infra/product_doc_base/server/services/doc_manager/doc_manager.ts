@@ -208,6 +208,42 @@ export class DocumentationManager implements DocumentationManagerAPI {
     };
   }
 
+  async ensureDefaultSecurityLabs(): Promise<void> {
+    const inferenceId = await resolveDefaultInferenceIdFromInferenceGet(
+      () => this.esClient.inference.get({}),
+      { resourceType: ResourceTypes.securityLabs }
+    );
+    const { status } = await this.getSecurityLabsStatus({ inferenceId });
+
+    this.logger.info(
+      `Ensuring Security Labs content for default inference ID [${inferenceId}] (status: ${status})`
+    );
+
+    if (status === 'uninstalled' || status === 'error') {
+      const license = await this.licensing.getLicense();
+      if (!checkLicense(license)) {
+        this.logger.debug(
+          `Skipping Security Labs install for inference ID [${inferenceId}]: invalid license`
+        );
+        return;
+      }
+      await this.installSecurityLabs({ inferenceId });
+      return;
+    }
+
+    if (status === 'installing' || status === 'uninstalling') {
+      this.logger.debug(
+        `Skipping Security Labs for inference ID [${inferenceId}]: installation already in progress (status: ${status})`
+      );
+      return;
+    }
+
+    // 'installed' — updateSecurityLabsAll() on startup handles updates for all installed IDs
+    this.logger.debug(
+      `Security Labs for inference ID [${inferenceId}] is already installed; update will be handled by updateSecurityLabsAll`
+    );
+  }
+
   async updateSecurityLabsAll(options?: {
     forceUpdate?: boolean;
   }): Promise<{ inferenceIds: string[] }> {
