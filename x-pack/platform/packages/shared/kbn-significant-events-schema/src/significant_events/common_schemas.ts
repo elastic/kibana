@@ -317,5 +317,3 @@ export const significantEventBaseSchema = z.object({
     .optional()
     .describe('ID of the agent chat conversation this write originated from.'),
 });
-
-export type SigEventBase = z.infer<typeof significantEventBaseSchema>;
