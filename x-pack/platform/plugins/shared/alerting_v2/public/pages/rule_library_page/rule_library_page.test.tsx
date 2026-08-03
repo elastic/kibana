@@ -37,14 +37,23 @@ jest.mock('@kbn/core-di-browser', () => {
 jest.mock('./components/rule_library_table', () => ({
   RuleLibraryTable: ({
     onCreateFromTemplate,
+    onInstallFromTemplate,
   }: {
     onCreateFromTemplate: (templateId: string, data: unknown) => void;
+    onInstallFromTemplate: (templateId: string, data: unknown) => void;
   }) => (
-    <button
-      type="button"
-      data-test-subj="mockedRuleLibraryTable"
-      onClick={() => onCreateFromTemplate('template-1', { kind: 'alert' })}
-    />
+    <>
+      <button
+        type="button"
+        data-test-subj="mockedCreateFromTemplate"
+        onClick={() => onCreateFromTemplate('template-1', { kind: 'alert' })}
+      />
+      <button
+        type="button"
+        data-test-subj="mockedInstallFromTemplate"
+        onClick={() => onInstallFromTemplate('template-1', { kind: 'alert' })}
+      />
+    </>
   ),
 }));
 
@@ -78,7 +87,8 @@ describe('RuleLibraryPage', () => {
   it('renders the rule library table', () => {
     renderPage();
 
-    expect(screen.getByTestId('mockedRuleLibraryTable')).toBeInTheDocument();
+    expect(screen.getByTestId('mockedCreateFromTemplate')).toBeInTheDocument();
+    expect(screen.getByTestId('mockedInstallFromTemplate')).toBeInTheDocument();
   });
 
   it('renders the page header with experimental badge and back link', () => {
@@ -95,24 +105,22 @@ describe('RuleLibraryPage', () => {
     expect(screen.getByTestId('mockedComposeFlyout')).toBeInTheDocument();
   });
 
-  it('renders the 1 click install toggle off by default', () => {
+  it('does not render the 1 click install toggle', () => {
     renderPage();
 
-    const toggle = screen.getByTestId('ruleLibraryOneClickInstallSwitch');
-    expect(toggle).toBeInTheDocument();
-    expect(toggle).not.toBeChecked();
+    expect(screen.queryByTestId('ruleLibraryOneClickInstallSwitch')).not.toBeInTheDocument();
   });
 
-  it('opens the compose flyout when create is clicked with 1 click install off', () => {
+  it('opens the compose flyout when create is clicked', () => {
     renderPage();
 
-    fireEvent.click(screen.getByTestId('mockedRuleLibraryTable'));
+    fireEvent.click(screen.getByTestId('mockedCreateFromTemplate'));
 
     expect(mockOpenCreateFromTemplate).toHaveBeenCalledWith({ kind: 'alert' });
     expect(mockInstallMutate).not.toHaveBeenCalled();
   });
 
-  it('installs a disabled rule then opens the Actions step when 1 click install is on', () => {
+  it('installs a disabled rule then opens the Actions step when install is clicked', () => {
     mockInstallMutate.mockImplementation((_data, opts) => {
       opts?.onSuccess?.({ id: 'rule-1', enabled: false, metadata: { name: 'Installed' } });
       opts?.onSettled?.();
@@ -120,8 +128,7 @@ describe('RuleLibraryPage', () => {
 
     renderPage();
 
-    fireEvent.click(screen.getByTestId('ruleLibraryOneClickInstallSwitch'));
-    fireEvent.click(screen.getByTestId('mockedRuleLibraryTable'));
+    fireEvent.click(screen.getByTestId('mockedInstallFromTemplate'));
 
     expect(mockInstallMutate).toHaveBeenCalledWith(
       { kind: 'alert' },

@@ -24,13 +24,13 @@ const FEATURES_FIELDS: FieldDefinition[] = [tagFieldDefinition];
 
 interface RuleLibraryTableProps {
   onCreateFromTemplate: (templateId: string, createData: CreateRuleData) => void;
-  oneClickInstall: boolean;
+  onInstallFromTemplate: (templateId: string, createData: CreateRuleData) => void;
   installingTemplateId: string | null;
 }
 
 export const RuleLibraryTable = ({
   onCreateFromTemplate,
-  oneClickInstall,
+  onInstallFromTemplate,
   installingTemplateId,
 }: RuleLibraryTableProps) => {
   const dataSource = useRuleTemplatesDataSource();
@@ -76,7 +76,7 @@ export const RuleLibraryTable = ({
       <ContentList>
         <RuleLibraryTableContent
           onCreateFromTemplate={onCreateFromTemplate}
-          oneClickInstall={oneClickInstall}
+          onInstallFromTemplate={onInstallFromTemplate}
           installingTemplateId={installingTemplateId}
         />
       </ContentList>

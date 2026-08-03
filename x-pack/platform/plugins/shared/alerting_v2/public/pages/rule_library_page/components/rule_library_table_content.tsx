@@ -7,7 +7,7 @@
 
 import React, { useCallback, useMemo } from 'react';
 import type { Query } from '@elastic/eui';
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiLink, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
   ContentListFooter,
@@ -23,6 +23,7 @@ import type { CreateRuleData } from '@kbn/alerting-v2-schemas';
 import { createRuleDataFromTemplate } from '../../../../common/create_rule_data_from_template';
 import { useFetchRuleTemplateTags } from '../../../hooks/use_fetch_rule_template_tags';
 import type { RuleTemplateContentListItem } from '../rule_templates_data_source';
+import { RuleTemplateActionsMenu } from './rule_template_actions_menu';
 
 const { Column } = ContentListTable;
 
@@ -34,36 +35,39 @@ const RULE_LIBRARY_PAGE_TITLE = i18n.translate('xpack.alertingV2.ruleLibrary.pag
   defaultMessage: 'Rule library',
 });
 
-const CREATE_ACTION_LABEL = i18n.translate('xpack.alertingV2.ruleLibrary.column.create', {
-  defaultMessage: 'Create',
-});
-
-const INSTALL_ACTION_LABEL = i18n.translate('xpack.alertingV2.ruleLibrary.column.install', {
-  defaultMessage: 'Install',
-});
-
 interface RuleLibraryTableContentProps {
   onCreateFromTemplate: (templateId: string, createData: CreateRuleData) => void;
-  oneClickInstall: boolean;
+  onInstallFromTemplate: (templateId: string, createData: CreateRuleData) => void;
   installingTemplateId: string | null;
 }
 
 export const RuleLibraryTableContent = ({
   onCreateFromTemplate,
-  oneClickInstall,
+  onInstallFromTemplate,
   installingTemplateId,
 }: RuleLibraryTableContentProps) => {
   const isInstallInProgress = installingTemplateId != null;
 
+  const getCreateData = useCallback((item: ContentListItem) => {
+    const { id, ...templateData } = toTemplate(item);
+    return { id, createData: createRuleDataFromTemplate(templateData) };
+  }, []);
+
   const handleCreate = useCallback(
     (item: ContentListItem) => {
-      const { id, ...templateData } = toTemplate(item);
-      onCreateFromTemplate(id, createRuleDataFromTemplate(templateData));
+      const { id, createData } = getCreateData(item);
+      onCreateFromTemplate(id, createData);
     },
-    [onCreateFromTemplate]
+    [getCreateData, onCreateFromTemplate]
   );
 
-  const actionLabel = oneClickInstall ? INSTALL_ACTION_LABEL : CREATE_ACTION_LABEL;
+  const handleInstall = useCallback(
+    (item: ContentListItem) => {
+      const { id, createData } = getCreateData(item);
+      onInstallFromTemplate(id, createData);
+    },
+    [getCreateData, onInstallFromTemplate]
+  );
 
   return (
     <>
@@ -112,7 +116,7 @@ export const RuleLibraryTableContent = ({
           name={i18n.translate('xpack.alertingV2.ruleLibrary.column.actions', {
             defaultMessage: 'Actions',
           })}
-          width="100px"
+          width="80px"
           render={(item) => {
             const templateId = toTemplate(item).id;
             if (installingTemplateId === templateId) {
@@ -122,19 +126,12 @@ export const RuleLibraryTableContent = ({
             }
 
             return (
-              <EuiLink
+              <RuleTemplateActionsMenu
+                templateId={templateId}
                 disabled={isInstallInProgress}
-                onClick={(event: React.MouseEvent) => {
-                  event.preventDefault();
-                  if (isInstallInProgress) {
-                    return;
-                  }
-                  handleCreate(item);
-                }}
-                data-test-subj="ruleLibraryCreateAction"
-              >
-                {actionLabel}
-              </EuiLink>
+                onInstall={() => handleInstall(item)}
+                onCreate={() => handleCreate(item)}
+              />
             );
           }}
         />

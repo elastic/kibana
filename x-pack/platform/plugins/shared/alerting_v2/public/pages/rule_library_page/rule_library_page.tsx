@@ -7,7 +7,7 @@
 
 import React, { useCallback, useState } from 'react';
 import { AppHeader } from '@kbn/app-header';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiSwitch } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { CreateRuleData } from '@kbn/alerting-v2-schemas';
 import { experimentalBadge } from '../../components/experimental_badge';
@@ -21,13 +21,8 @@ const RULE_LIBRARY_PAGE_TITLE = i18n.translate('xpack.alertingV2.ruleLibrary.pag
   defaultMessage: 'Rule library',
 });
 
-const ONE_CLICK_INSTALL_LABEL = i18n.translate('xpack.alertingV2.ruleLibrary.oneClickInstall', {
-  defaultMessage: '1 click install',
-});
-
 export const RuleLibraryPage = () => {
   useBreadcrumbs('rule_library');
-  const [oneClickInstall, setOneClickInstall] = useState(false);
   const [installingTemplateId, setInstallingTemplateId] = useState<string | null>(null);
   const installDisabledRuleMutation = useInstallDisabledRule();
   const { flyout, openCreateFromTemplate, openEditFlyout } = useComposeDiscoverFlyout({
@@ -35,22 +30,25 @@ export const RuleLibraryPage = () => {
   });
 
   const handleCreateFromTemplate = useCallback(
-    (templateId: string, createData: CreateRuleData) => {
-      if (oneClickInstall) {
-        setInstallingTemplateId(templateId);
-        installDisabledRuleMutation.mutate(createData, {
-          onSuccess: (rule) => {
-            openEditFlyout(rule, { initialStepId: 'notifications' });
-          },
-          onSettled: () => {
-            setInstallingTemplateId(null);
-          },
-        });
-        return;
-      }
+    (_templateId: string, createData: CreateRuleData) => {
       openCreateFromTemplate(createData);
     },
-    [installDisabledRuleMutation, oneClickInstall, openCreateFromTemplate, openEditFlyout]
+    [openCreateFromTemplate]
+  );
+
+  const handleInstallFromTemplate = useCallback(
+    (templateId: string, createData: CreateRuleData) => {
+      setInstallingTemplateId(templateId);
+      installDisabledRuleMutation.mutate(createData, {
+        onSuccess: (rule) => {
+          openEditFlyout(rule, { initialStepId: 'notifications' });
+        },
+        onSettled: () => {
+          setInstallingTemplateId(null);
+        },
+      });
+    },
+    [installDisabledRuleMutation, openEditFlyout]
   );
 
   return (
@@ -68,22 +66,9 @@ export const RuleLibraryPage = () => {
         }}
       />
       <EuiSpacer size="m" />
-      <EuiFlexGroup justifyContent="flexEnd" alignItems="center" gutterSize="s">
-        <EuiFlexItem grow={false}>
-          <EuiSwitch
-            compressed
-            label={ONE_CLICK_INSTALL_LABEL}
-            checked={oneClickInstall}
-            disabled={installingTemplateId != null}
-            onChange={(event) => setOneClickInstall(event.target.checked)}
-            data-test-subj="ruleLibraryOneClickInstallSwitch"
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="s" />
       <RuleLibraryTable
         onCreateFromTemplate={handleCreateFromTemplate}
-        oneClickInstall={oneClickInstall}
+        onInstallFromTemplate={handleInstallFromTemplate}
         installingTemplateId={installingTemplateId}
       />
       {flyout}
