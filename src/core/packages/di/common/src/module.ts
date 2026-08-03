@@ -12,6 +12,8 @@ import {
   type Container,
   ContainerModule,
   type ContainerModuleLoadOptions,
+  LazyServiceIdentifier,
+  type MapToResolvedValueInjectOptions,
   type ResolutionContext,
   type ServiceIdentifier,
 } from 'inversify';
@@ -20,20 +22,32 @@ import { OnSetup, OnStart } from './services/plugin';
 export type KibanaBind = <T>(
   serviceIdentifier: ServiceIdentifier<T>
 ) => KibanaBindToFluentSyntax<T>;
-export type KibanaHandler<T> = (context: ResolutionContext, injectable: T) => void;
+export type KibanaHandler<T, A extends unknown[] = []> = (
+  context: ResolutionContext,
+  injectable: T,
+  ...services: A
+) => void;
 
 export interface KibanaBindToFluentSyntax<T> extends BindToFluentSyntax<T> {
   /**
    * Binds a handler that will be called after the setup phase against every bound service.
    * @param handler The handler to perform an action with the service instance.
+   * @param dependencies Dependencies to resolve before calling the handler.
    */
-  onSetup(handler: KibanaHandler<T>): void;
+  onSetup<A extends unknown[] = any[]>(
+    handler: KibanaHandler<T, A>,
+    ...dependencies: MapToResolvedValueInjectOptions<A>
+  ): void;
 
   /**
    * Binds a handler that will be called after the start phase against every bound service.
    * @param handler The handler to perform an action with the service instance.
+   * @param dependencies Dependencies to resolve before calling the handler.
    */
-  onStart(handler: KibanaHandler<T>): void;
+  onStart<A extends unknown[] = any[]>(
+    handler: KibanaHandler<T, A>,
+    ...dependencies: MapToResolvedValueInjectOptions<A>
+  ): void;
 }
 
 /**
@@ -77,19 +91,44 @@ export class KibanaContainerModule extends ContainerModule {
     return fluentSyntax as KibanaBindToFluentSyntax<T>;
   }
 
-  #onHook<T>(
+  #onHook<T, A extends unknown[]>(
     hook: ServiceIdentifier<(container: Container) => void>,
     { bind, onActivation }: ContainerModuleLoadOptions,
     serviceIdentifier: ServiceIdentifier<T>,
-    handler: KibanaHandler<T>,
+    handler: KibanaHandler<T, A>,
+    ...dependences: MapToResolvedValueInjectOptions<A>
   ): void {
     onActivation(serviceIdentifier, (context, injectable) => {
-      handler(context, injectable);
+      handler.apply(undefined, [context, injectable, ...this.#resolve(context, dependences)]);
 
       return injectable;
     });
     bind(hook).toConstantValue((container) => {
       container.getAll(serviceIdentifier);
     });
+  }
+
+  #resolve<A extends unknown[]>(
+    context: ResolutionContext,
+    services: MapToResolvedValueInjectOptions<A>
+  ): A {
+    return services.map((service) => {
+      if (typeof service !== 'object') {
+        return context.get(service);
+      }
+
+      if (LazyServiceIdentifier.is(service)) {
+        return context.get(service.unwrap());
+      }
+
+      const serviceIdentifier = LazyServiceIdentifier.is(service.serviceIdentifier)
+        ? service.serviceIdentifier.unwrap()
+        : service.serviceIdentifier;
+      const method = (service as typeof service & { isMultiple: boolean }).isMultiple
+        ? 'getAll'
+        : 'get';
+
+      return context[method](serviceIdentifier, service);
+    }) as A;
   }
 }
