@@ -300,6 +300,10 @@ export const ConnectorIconsMap: Map<
   ],
   ['.cribl', lazy(() => import(/* webpackChunkName: "connectorIconCribl" */ './specs/cribl/icon'))],
   [
+    '.aws_x_ray',
+    lazy(() => import(/* webpackChunkName: "connectorIconawsxray" */ './specs/aws_x_ray/icon')),
+  ],
+  [
     '.prometheus_alertmanager',
     lazy(
       () =>
