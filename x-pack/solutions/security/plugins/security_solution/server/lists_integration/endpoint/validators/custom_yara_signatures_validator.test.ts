@@ -16,6 +16,13 @@ import type {
 } from '@kbn/lists-plugin/server';
 import type { ExperimentalFeatures } from '../../../../common';
 import type { Mutable } from 'utility-types';
+import { validateYaraRule } from '../../../endpoint/lib/libyara';
+
+jest.mock('../../../endpoint/lib/libyara', () => ({
+  validateYaraRule: jest.fn(async () => ({ errors: [], warnings: [] })),
+}));
+
+const mockValidateYaraRule = validateYaraRule as jest.MockedFunction<typeof validateYaraRule>;
 
 describe('YARA Signatures API validations', () => {
   let mockEndpointAppContextService: ReturnType<typeof createMockEndpointAppContextService>;
@@ -30,6 +37,8 @@ describe('YARA Signatures API validations', () => {
       httpServerMock.createKibanaRequest()
     );
     exceptionsGenerator = new ExceptionsListItemGenerator();
+    mockValidateYaraRule.mockReset();
+    mockValidateYaraRule.mockResolvedValue({ errors: [], warnings: [] });
   });
 
   it('should initialize', () => {
@@ -237,4 +246,48 @@ describe('YARA Signatures API validations', () => {
   //  `x-pack/solutions/security/test/security_solution_api_integration/test_suites/edr_workflows`
   //
   // -----------------------------------------------------------------------------
+
+  describe('libyara compile validation', () => {
+    beforeEach(() => {
+      (
+        mockEndpointAppContextService.experimentalFeatures as Mutable<ExperimentalFeatures>
+      ).customYaraSignaturesEnabled = true;
+    });
+
+    const buildCreateItem = (): CreateExceptionListItemOptions => {
+      const generated = exceptionsGenerator.generateCustomYaraSignatureForCreate();
+      return {
+        ...generated,
+        namespaceType: 'agnostic',
+        osTypes: generated.os_types,
+        listId: generated.list_id,
+        itemId: generated.item_id,
+      } as unknown as CreateExceptionListItemOptions;
+    };
+
+    it('rejects create when libyara reports compile errors', async () => {
+      mockValidateYaraRule.mockResolvedValue({
+        errors: [{ severity: 'error', message: 'syntax error', line: 2 }],
+        warnings: [],
+      });
+
+      await expect(
+        customYaraSignaturesValidator.validatePreCreateItem(buildCreateItem())
+      ).rejects.toThrow(/Invalid YARA rule \(libyara 4\.3\.2\): line 2: syntax error/);
+      expect(mockValidateYaraRule).toHaveBeenCalled();
+    });
+
+    it('allows create when libyara only returns warnings', async () => {
+      mockValidateYaraRule.mockResolvedValue({
+        errors: [],
+        warnings: [{ severity: 'warning', message: 'may slow down scanning', line: 1 }],
+      });
+
+      try {
+        await customYaraSignaturesValidator.validatePreCreateItem(buildCreateItem());
+      } catch (error) {
+        expect(error.message).not.toContain('Invalid YARA rule');
+      }
+    });
+  });
 });

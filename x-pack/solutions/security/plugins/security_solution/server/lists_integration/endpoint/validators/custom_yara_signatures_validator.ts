@@ -14,6 +14,7 @@ import type {
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import type { PromiseFromStreams } from '@kbn/lists-plugin/server/services/exception_lists/import_exception_list_and_items';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
+import { validateYaraRule } from '../../../endpoint/lib/libyara';
 import { CUSTOM_YARA_SIGNATURE_FIELD_TYPE } from '../../../../common/endpoint/service/artifacts/constants';
 import { BaseValidator } from './base_validator';
 import { EndpointArtifactExceptionValidationError } from './errors';
@@ -189,6 +190,26 @@ export class CustomYaraSignaturesValidator extends BaseValidator {
       YaraSignatureDataSchema.validate(item);
     } catch (error) {
       throw new EndpointArtifactExceptionValidationError(error.message);
+    }
+
+    const entry = item.entries[0];
+    const ruleText =
+      entry && 'value' in entry && typeof entry.value === 'string' ? entry.value : undefined;
+
+    if (ruleText === undefined) {
+      throw new EndpointArtifactExceptionValidationError('YARA rule content is missing');
+    }
+
+    const { errors } = await validateYaraRule(ruleText);
+
+    // TODO: in POC we reject on errors, and allow warnings. Improve error messages.
+    if (errors.length > 0) {
+      const details = errors
+        .map((e) => (e.line > 0 ? `line ${e.line}: ${e.message}` : e.message))
+        .join('; ');
+      throw new EndpointArtifactExceptionValidationError(
+        `Invalid YARA rule (libyara 4.3.2): ${details}`
+      );
     }
   }
 }
