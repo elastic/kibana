@@ -59,12 +59,8 @@ const sameIdSet = (a: MonitorServiceLocation[], b: MonitorServiceLocation[]) => 
   return a.every((loc) => bIds.has(loc.id));
 };
 
-// The bulk-update route is the *public* API (no `internal` flag), so its
-// location normalizer carries a monitor's existing private locations forward
-// whenever the payload provides no private-location info. For overwrite/remove
-// that silently re-adds a private location the user just dropped. Split the
-// authoritative set into public `locations` and an explicit `private_locations`
-// (even when empty) so the server takes our set verbatim.
+// Public bulk-update carries forward private locations unless `private_locations`
+// is explicit (even `[]`); split so overwrite/remove drop private as intended.
 const toLocationsPatch = (nextLocations: MonitorServiceLocation[]) => ({
   [ConfigKey.LOCATIONS]: nextLocations.filter((loc) => loc.isServiceManaged),
   private_locations: nextLocations.filter((loc) => !loc.isServiceManaged).map((loc) => loc.id),

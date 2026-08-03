@@ -149,10 +149,7 @@ describe('<BulkLocationsFlyout />', () => {
   });
 
   it('clears a monitor’s private location when overwriting with a public one', async () => {
-    // Regression: the public bulk-update route carries a monitor's existing
-    // private locations forward unless the payload names them. Overwriting a
-    // private-only monitor with a public location must send an explicit (empty)
-    // `private_locations` so the private location is actually dropped.
+    // Overwrite private → public must send `private_locations: []` or private survives.
     const monitors = [
       makeMonitor('ui-1', 'Monitor 1', {
         locations: [{ id: 'qa_private', label: 'QA private', isServiceManaged: false }],
