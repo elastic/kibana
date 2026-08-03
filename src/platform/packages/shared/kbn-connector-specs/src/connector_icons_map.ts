@@ -303,6 +303,7 @@ export const ConnectorIconsMap: Map<
     lazy(
       () =>
         import(/* webpackChunkName: "connectorIconawscloudwatch" */ './specs/aws_cloudwatch/icon')
+    ),
   ],
   [
     '.prometheus_alertmanager',
