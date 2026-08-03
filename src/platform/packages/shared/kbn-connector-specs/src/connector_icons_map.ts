@@ -312,4 +312,14 @@ export const ConnectorIconsMap: Map<
         )
     ),
   ],
+
+  [
+    '.google_cloud_monitoring',
+    lazy(
+      () =>
+        import(
+          /* webpackChunkName: "connectorIcongooglecloudmonitoring" */ './specs/google_cloud_monitoring/icon'
+        )
+    ),
+  ],
 ]);
