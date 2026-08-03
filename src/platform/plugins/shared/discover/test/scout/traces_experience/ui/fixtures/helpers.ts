@@ -37,20 +37,10 @@ async function waitForTracesProfileApplied(
   await pageObjects.dataGrid.waitForDocTableRendered();
 }
 
-/**
- * Clicks the service name link and waits for the service flyout to open.
- *
- * EuiDataGrid shows hover action buttons when a row is focused or hovered. These buttons
- * overlay the link and intercept pointer events, and EuiDataGrid cell handling can also
- * swallow native DOM clicks intermittently. dispatchEvent bypasses pointer events entirely,
- * and toPass retries until the flyout appears.
- */
 export async function openServiceFlyoutFromAboutSection(flyout: TracesFlyout): Promise<void> {
   await expect(flyout.about.serviceNameLink).toBeVisible();
-  await expect(async () => {
-    await flyout.about.serviceNameLink.dispatchEvent('click');
-    await expect(flyout.serviceFlyout.container).toBeVisible({ timeout: 5000 });
-  }).toPass({ timeout: 15000 });
+  await flyout.about.serviceNameLink.dispatchEvent('click');
+  await expect(flyout.serviceFlyout.container).toBeVisible({ timeout: 15000 });
 }
 
 export async function expectTracesExperienceEnabled(
