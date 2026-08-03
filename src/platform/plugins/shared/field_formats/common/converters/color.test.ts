@@ -199,9 +199,11 @@ describe('Color Format', () => {
     expect(colorer.convertToText([100, 200])).toBe('["100","200"]');
     const container = renderReactNode(colorer.convertToReact([100, 200]));
     expect(container.textContent).toBe('[100, 200]');
-    expect(
-      [...container.querySelectorAll('span[style]')].map(({ textContent }) => textContent)
-    ).toEqual(['100', '200']);
+    const coloredValues = container.querySelectorAll('span[style]');
+    expect([...coloredValues].map(({ textContent }) => textContent)).toEqual(['100', '200']);
+    for (const coloredValue of coloredValues) {
+      expect(coloredValue).toHaveStyle({ color: 'blue', backgroundColor: 'yellow' });
+    }
   });
 
   test('returns the single element without brackets for a one-element array', () => {
