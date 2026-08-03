@@ -7,4 +7,5 @@
 
 export const APM_EBT_ACTIONS = {
   EXPLORE_TRACES: 'exploreTraces',
+  EXPLORE_SERVICE_MAP: 'exploreServiceMap',
 } as const;
