@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AppMountParameters } from '@kbn/core/public';
+import type { AppMountParameters, AppUpdater } from '@kbn/core/public';
 import {
   DEFAULT_APP_CATEGORIES,
   type CoreSetup,
@@ -23,7 +23,7 @@ import {
   STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG,
 } from '@kbn/significant-events-plugin/common';
 import type { Observable } from 'rxjs';
-import { combineLatest, distinctUntilChanged, map, shareReplay } from 'rxjs';
+import { combineLatest, distinctUntilChanged, from, map, shareReplay, switchMap } from 'rxjs';
 import { SIGNIFICANT_EVENTS_APP_ROUTE } from '../common/constants';
 import type { SignificantEventsAppLocator } from '../common/locators';
 import { SignificantEventsAppLocatorDefinition } from '../common/locators';
@@ -107,32 +107,34 @@ export class SignificantEventsAppPlugin
           keywords: ['rules', 'queries', 'significant events', 'sig events', 'sig events rules'],
         },
       ],
-      // TODO(significant-events-app): restore global search once the real pages are
-      // rehomed here (and streams_app stops advertising the same deep links). Gate on
-      // availability$ only (flag × license × pricing) — not streams navigationStatus$.
-      // Wire after start services resolve so this.availability$ is assigned:
-      //
-      //   updater$: from(startServicesPromise).pipe(
-      //     switchMap(() => this.availability$),
-      //     distinctUntilChanged(),
-      //     map(
-      //       (visible): AppUpdater =>
-      //         (app) => ({
-      //           visibleIn: visible ? ['globalSearch'] : [],
-      //           deepLinks: (app.deepLinks ?? []).map((link) => ({
-      //             ...link,
-      //             visibleIn: visible ? ['globalSearch'] : [],
-      //           })),
-      //         })
-      //     )
-      //   ),
-      //
-      // Re-add AppUpdater, from, and switchMap imports when restoring.
+      updater$: from(startServicesPromise).pipe(
+        switchMap(([, pluginsStart]) =>
+          combineLatest([pluginsStart.streams.navigationStatus$, this.availability$]).pipe(
+            // Mirrors the server-side gate: the app and its deep links only surface
+            // in global search when streams navigation is enabled and the rollout
+            // flag is on. The app never appears in the side navigations.
+            map(([{ status }, isAvailable]) => status === 'enabled' && isAvailable),
+            // Every updater emission makes core rebuild the status of all registered
+            // apps, so drop the redundant re-emissions of the sources.
+            distinctUntilChanged(),
+            map(
+              (visible): AppUpdater =>
+                (app) => ({
+                  visibleIn: visible ? ['globalSearch'] : [],
+                  deepLinks: (app.deepLinks ?? []).map((link) => ({
+                    ...link,
+                    visibleIn: visible ? ['globalSearch'] : [],
+                  })),
+                })
+            )
+          )
+        )
+      ),
       mount: async (appMountParameters: AppMountParameters<unknown>) => {
-        const [[coreStart, pluginsStart], { renderApp }] = await Promise.all([
-          startServicesPromise,
-          import('./app_root/render_app'),
-        ]);
+        // Warm the application chunk in parallel with resolving start services.
+        void import('./app_root/render_app');
+        const [coreStart, pluginsStart] = await startServicesPromise;
+        const { renderApp } = await import('./app_root/render_app');
 
         const services: SignificantEventsAppServices = {
           availability$: this.availability$,

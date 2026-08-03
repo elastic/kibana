@@ -29,8 +29,8 @@ export function AppRoot({
   coreStart: CoreStart;
   pluginsStart: SignificantEventsAppStartDependencies;
   services: SignificantEventsAppServices;
-  isServerless: boolean;
   appMountParameters: AppMountParameters;
+  isServerless: boolean;
 }) {
   const { history } = appMountParameters;
 
