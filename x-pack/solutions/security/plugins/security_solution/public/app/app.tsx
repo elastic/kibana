@@ -19,6 +19,7 @@ import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import { NavigationProvider } from '@kbn/security-solution-navigation';
 import { EntityStoreEuidApiProvider, useInstallEntityStoreV2 } from '@kbn/entity-store/public';
+import { useEnsureSecurityLabs } from '@kbn/product-doc-base-plugin/public';
 import { APP_NAME } from '../../common/constants';
 import { UpsellingProvider } from '../common/components/upselling_provider';
 import { ManageUserInfo } from '../detections/components/user_info';
@@ -117,6 +118,11 @@ const SecurityAppComponent: React.FC<SecurityAppComponentProps> = ({
   const CloudProvider = services.cloud?.CloudContextProvider ?? React.Fragment;
 
   useInstallEntityStoreV2(services);
+  useEnsureSecurityLabs({
+    productDocBase: services.productDocBase,
+    uiSettings: services.uiSettings,
+    logger: services.logger,
+  });
 
   // Set conversation flyout active config on mount, clear on unmount.
   // Skip if the sidebar is already open (e.g. navigating from Agent Builder

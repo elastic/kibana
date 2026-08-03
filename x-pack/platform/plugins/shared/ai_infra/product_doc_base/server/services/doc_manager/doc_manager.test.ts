@@ -363,15 +363,12 @@ describe('DocumentationManager', () => {
       expect(scheduleEnsureSecurityLabsUpToDateTaskMock).not.toHaveBeenCalled();
     });
 
-    it('reinstalls when Security Labs is in error state', async () => {
+    it('skips when Security Labs is in error state', async () => {
       packageInstaller.getSecurityLabsStatus.mockResolvedValue({ status: 'error' });
 
       await docManager.ensureDefaultSecurityLabs();
 
-      expect(packageInstaller.installSecurityLabs).toHaveBeenCalledWith({
-        inferenceId: defaultInferenceEndpoints.ELSER,
-        version: undefined,
-      });
+      expect(packageInstaller.installSecurityLabs).not.toHaveBeenCalled();
     });
 
     it('skips when Security Labs is currently installing', async () => {

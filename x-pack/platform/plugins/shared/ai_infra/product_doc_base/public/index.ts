@@ -22,10 +22,13 @@ export {
   useInstallProductDoc,
   useUninstallProductDoc,
   useDefaultInferenceId,
+  useEnsureSecurityLabs,
+  ensureSecurityLabsInstalled,
   REACT_QUERY_KEYS,
   type UseProductDocStatusOptions,
   type UseInstallProductDocOptions,
   type UseUninstallProductDocOptions,
+  type EnsureSecurityLabsServices,
 } from './hooks';
 
 export const plugin: PluginInitializer<
