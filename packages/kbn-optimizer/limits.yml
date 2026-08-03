@@ -1,5 +1,5 @@
 pageLoadAssetSize:
-  actions: 20500
+  actions: 20800
   advancedSettings: 6119
   agentBuilder: 51190
   agentBuilderDashboards: 7786
@@ -36,7 +36,7 @@ pageLoadAssetSize:
   core: 563984
   cps: 9209
   crossClusterReplication: 12662
-  customContent: 4765
+  customContent: 6111
   customIntegrations: 11715
   dashboard: 20000
   dashboardMarkdown: 8613
