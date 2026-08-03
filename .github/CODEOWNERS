@@ -2747,7 +2747,6 @@ src/platform/plugins/shared/workflows_management/test/connector_workflows @elast
 /x-pack/platform/test/functional/page_objects/search_sessions_management_page.ts @elastic/search-kibana
 x-pack/platform/test/functional/page_objects/search_profiler_page.ts @elastic/search-kibana
 /x-pack/platform/test/serverless/functional/page_objects/svl_ingest_pipelines.ts @elastic/search-kibana
-/x-pack/platform/test/functional/apps/dev_tools/embedded_console.ts @elastic/search-kibana
 /x-pack/platform/test/functional/apps/ingest_pipelines/feature_controls/ingest_pipelines_security.ts @elastic/search-kibana
 /x-pack/solutions/search/plugins/enterprise_search/public/applications/shared/doc_links @elastic/platform-docs
 /x-pack/solutions/search/test/serverless/functional/test_suites/ @elastic/search-kibana
@@ -2805,7 +2804,7 @@ x-pack/platform/test/functional/page_objects/search_profiler_page.ts @elastic/se
 /src/platform/test/plugin_functional/plugins/management_test_plugin @elastic/kibana-management
 /src/platform/test/functional/page_objects/management/indexpattern_field_editor_page.ts @elastic/kibana-data-discovery
 /src/platform/test/functional/page_objects/management/saved_objects_page.ts @elastic/kibana-core
-/src/platform/test/functional/page_objects/embedded_console.ts @elastic/kibana-management
+/src/platform/test/functional/page_objects/embedded_console.ts @elastic/search-kibana
 /src/platform/test/functional/page_objects/console_page.ts @elastic/kibana-management
 /src/platform/test/functional/firefox/console.config.ts @elastic/kibana-management
 /src/platform/test/functional/apps/console/*.ts @elastic/kibana-management

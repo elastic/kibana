@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { GetRuleExecutionsResponse } from '@kbn/alerting-v2-schemas';
+import type { ListRuleExecutionsResponse } from '@kbn/alerting-v2-schemas';
 import { buildOasOperation, invalidResponseExample } from '../oas_utils';
 import type { AlertingOasOperationObject } from '../oas_types';
 
-export const GET_RULE_EXECUTIONS_RESPONSE: GetRuleExecutionsResponse = {
+export const LIST_RULE_EXECUTIONS_RESPONSE: ListRuleExecutionsResponse = {
   items: [
     {
       id: 'execution-1',
@@ -28,20 +28,20 @@ export const GET_RULE_EXECUTIONS_RESPONSE: GetRuleExecutionsResponse = {
   perPage: 20,
 };
 
-// Mirrors the page * perPage refinement message in getRuleExecutionsQuerySchema.
+// Mirrors the page * perPage refinement message in listRuleExecutionsQuerySchema.
 const INVALID_RULE_EXECUTIONS_QUERY_RESPONSE = invalidResponseExample({
   summary: 'Exceeds the max result window',
   message: 'page * perPage cannot exceed 10000.',
   details: { errors: { page: ['page * perPage cannot exceed 10000.'] } },
 });
 
-export const getRuleExecutionsOasExamples = (): AlertingOasOperationObject =>
+export const listRuleExecutionsOasExamples = (): AlertingOasOperationObject =>
   buildOasOperation({
     responses: {
       200: {
-        name: 'getRuleExecutionsResponse',
+        name: 'listRuleExecutionsResponse',
         summary: 'One successful rule execution',
-        value: GET_RULE_EXECUTIONS_RESPONSE,
+        value: LIST_RULE_EXECUTIONS_RESPONSE,
       },
       400: INVALID_RULE_EXECUTIONS_QUERY_RESPONSE,
     },
