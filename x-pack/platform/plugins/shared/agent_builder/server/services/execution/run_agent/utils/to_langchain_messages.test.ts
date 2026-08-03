@@ -1368,11 +1368,12 @@ describe('convertPreviousRounds — relevant_skills replay', () => {
       ]),
     });
 
-    const notice = result
+    const noticeMessage = result
       .filter(isHumanMessage)
-      .map((m) => m.content as string)
-      .find((c) => c.includes('<relevant_skills>'));
-    expect(notice).toBeDefined();
+      .find((m) => (m.content as string).includes('<relevant_skills>'));
+    expect(noticeMessage).toBeDefined();
+    expect(noticeMessage?.name).toBe('relevant_skills');
+    const notice = noticeMessage?.content as string;
     expect(notice).toContain('- alpha (/skills/a/alpha/SKILL.md): Alpha skill');
     expect(notice).toContain('why alpha');
   });

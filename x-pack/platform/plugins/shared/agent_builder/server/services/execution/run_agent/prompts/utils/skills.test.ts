@@ -7,10 +7,13 @@
 
 import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
 import type { RelevantSkill } from '@kbn/agent-builder-common';
+import { isHumanMessage } from '@langchain/core/messages';
 import {
   getSkillsInstructions,
   getRelevantSkillsPointerInstructions,
   formatRelevantSkillsNotice,
+  createRelevantSkillsNoticeMessage,
+  RELEVANT_SKILLS_MESSAGE_NAME,
 } from './skills';
 
 const skill = (overrides: Partial<InternalSkillDefinition>): InternalSkillDefinition =>
@@ -125,5 +128,25 @@ describe('formatRelevantSkillsNotice', () => {
     const result = formatRelevantSkillsNotice([relevant()]);
     const skillLineCount = result.split('\n').filter((line) => line.startsWith('- ')).length;
     expect(skillLineCount).toBe(1);
+  });
+});
+
+describe('createRelevantSkillsNoticeMessage', () => {
+  const relevant = (overrides: Partial<RelevantSkill> = {}): RelevantSkill => ({
+    id: 'platform.core.alpha',
+    name: 'alpha',
+    path: '/skills/platform/core/alpha/SKILL.md',
+    description: 'Alpha skill',
+    ...overrides,
+  });
+
+  it('is a user-role message tagged with the relevant-skills name so it is distinguishable from real user input', () => {
+    const message = createRelevantSkillsNoticeMessage([relevant()]);
+    expect(isHumanMessage(message)).toBe(true);
+    expect(message.name).toBe(RELEVANT_SKILLS_MESSAGE_NAME);
+    expect(message.content).toContain('<relevant_skills>');
+    expect(message.content).toContain(
+      '- alpha (/skills/platform/core/alpha/SKILL.md): Alpha skill'
+    );
   });
 });

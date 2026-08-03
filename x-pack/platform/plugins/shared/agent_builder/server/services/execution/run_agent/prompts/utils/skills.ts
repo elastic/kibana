@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { HumanMessage } from '@langchain/core/messages';
 import type { RelevantSkill } from '@kbn/agent-builder-common';
 import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
 import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
@@ -109,3 +110,17 @@ export const formatRelevantSkillsNotice = (skills: RelevantSkill[]): string => {
     '</relevant_skills>',
   ].join('\n');
 };
+
+export const RELEVANT_SKILLS_MESSAGE_NAME = 'relevant_skills';
+
+/**
+ * Builds the append-only `<relevant_skills>` notification as a user-role message tagged with
+ * {@link RELEVANT_SKILLS_MESSAGE_NAME}. User role matches every other injected notice (compaction,
+ * background-execution, cycle-limit) and is the only role portable across LLM connectors mid-stream;
+ * the `name` marker keeps it distinguishable from an actual user message.
+ */
+export const createRelevantSkillsNoticeMessage = (skills: RelevantSkill[]): HumanMessage =>
+  new HumanMessage({
+    content: formatRelevantSkillsNotice(skills),
+    name: RELEVANT_SKILLS_MESSAGE_NAME,
+  });

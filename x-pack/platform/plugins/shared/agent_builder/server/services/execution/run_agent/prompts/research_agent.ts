@@ -7,11 +7,10 @@
 
 import type { BaseMessageLike } from '@langchain/core/messages';
 import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
-import { createUserMessage } from '@kbn/agent-builder-genai-utils/langchain';
 import {
   getSkillsInstructions,
   getRelevantSkillsPointerInstructions,
-  formatRelevantSkillsNotice,
+  createRelevantSkillsNoticeMessage,
 } from './utils/skills';
 import { convertPreviousRounds } from '../utils/to_langchain_messages';
 import { attachmentToolsInstructions, renderAttachmentPrompt } from './utils/attachments';
@@ -51,7 +50,7 @@ export const getResearchAgentPrompt = async (
 
   const relevantSkillsMessages =
     relevantSkillsEnabled && relevantSkills && relevantSkills.skills.length > 0
-      ? [createUserMessage(formatRelevantSkillsNotice(relevantSkills.skills))]
+      ? [createRelevantSkillsNoticeMessage(relevantSkills.skills)]
       : [];
 
   return [

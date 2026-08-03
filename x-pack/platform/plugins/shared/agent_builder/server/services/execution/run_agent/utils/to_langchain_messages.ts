@@ -36,7 +36,7 @@ import type {
 } from '@kbn/agent-builder-server';
 import type { CompactionSummary } from '@kbn/agent-builder-common';
 import { formatSystemNotice } from '../prompts/utils/actions';
-import { formatRelevantSkillsNotice } from '../prompts/utils/skills';
+import { createRelevantSkillsNoticeMessage } from '../prompts/utils/skills';
 import { formatDate } from '../prompts/utils/helpers';
 import type { ProcessedConversation, ProcessedConversationRound } from './prepare_conversation';
 import type { ToolCallResultTransformer } from './tool_summarization';
@@ -169,7 +169,7 @@ export const roundToLangchain = async (
         messages.push(createUserMessage(formatSystemNotice(step)));
       } else if (isRelevantSkillsStep(step)) {
         if (step.skills.length > 0) {
-          messages.push(createUserMessage(formatRelevantSkillsNotice(step.skills)));
+          messages.push(createRelevantSkillsNoticeMessage(step.skills));
         }
       } else if (isToolCallStep(step)) {
         // Only process when we hit the first tool call of a group
