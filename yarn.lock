@@ -10467,10 +10467,19 @@
     https-proxy-agent "^7.0.6"
     launchdarkly-eventsource "2.2.0"
 
-"@launchdarkly/openfeature-node-server@1.2.0":
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/@launchdarkly/openfeature-node-server/-/openfeature-node-server-1.2.0.tgz#f71c3a9a6b6974afba04296be0b98aae27aa3db5"
-  integrity sha512-VXnfQJfHsofhmHV4HvURLdMiX3bSwLumyeSPzuFn+5FdNKH2l44ijwXeSsotXpANMp+Gmz1LiQLz7ftgTSHKXg==
+"@launchdarkly/openfeature-js-server-common@1.0.0":
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@launchdarkly/openfeature-js-server-common/-/openfeature-js-server-common-1.0.0.tgz#9dbb82f38f3c6eb9e2a5ef5ba1fb3d5fd699727a"
+  integrity sha512-aCJUn4d/pkjCICqzQVXlL3Q4d3OvZmt7dgOya9aawXxZv8G5ooedkFNjEecmsWhScjORLHzTU0UdaNDwP6XhFA==
+  dependencies:
+    "@launchdarkly/js-sdk-common" "2.25.1"
+
+"@launchdarkly/openfeature-node-server@1.3.0":
+  version "1.3.0"
+  resolved "https://registry.yarnpkg.com/@launchdarkly/openfeature-node-server/-/openfeature-node-server-1.3.0.tgz#782e832e0a5178c31f8f19090a8d9365a4a449b2"
+  integrity sha512-yaYhlS76Iboiz96kDfTNvdrwaH9q75T+HQ2LKN+gAD9DkUc6Jm+2Ypp0A1fxJPHgIJd68pRCXhZYG4YLzj7+Bw==
+  dependencies:
+    "@launchdarkly/openfeature-js-server-common" "1.0.0"
 
 "@leichtgewicht/ip-codec@^2.0.1":
   version "2.0.4"
@@ -14608,13 +14617,6 @@
   dependencies:
     tslib "^2.4.0"
 
-"@types/adm-zip@0.5.7":
-  version "0.5.7"
-  resolved "https://registry.yarnpkg.com/@types/adm-zip/-/adm-zip-0.5.7.tgz#eec10b6f717d3948beb64aca0abebc4b344ac7e9"
-  integrity sha512-DNEs/QvmyRLurdQPChqq0Md4zGvPwHerAJYWk9l2jCbD1VPpnzRJorOdiq4zsw09NFbYnhfsoEhWtxIzXpn2yw==
-  dependencies:
-    "@types/node" "*"
-
 "@types/archiver@7.0.0":
   version "7.0.0"
   resolved "https://registry.yarnpkg.com/@types/archiver/-/archiver-7.0.0.tgz#475d5aa4076ffc05f2c78dc7540b0ea4ab8c7d7a"
@@ -16693,15 +16695,10 @@ acorn@^8.0.4, acorn@^8.1.0, acorn@^8.10.0, acorn@^8.11.0, acorn@^8.14.0, acorn@^
   resolved "https://registry.yarnpkg.com/acorn/-/acorn-8.15.0.tgz#a360898bc415edaac46c8241f6383975b930b816"
   integrity sha512-NZyJarBfL7nWwIq+FDL6Zp/yHEhePMNnnJ0y3qfieCrmNvYct8uvtiV41UvlSe6apAfk0fY1FbWx+NwfmpvtTg==
 
-adm-zip@0.5.16:
-  version "0.5.16"
-  resolved "https://registry.yarnpkg.com/adm-zip/-/adm-zip-0.5.16.tgz#0b5e4c779f07dedea5805cdccb1147071d94a909"
-  integrity sha512-TGw5yVi4saajsSEgz25grObGHEUaDrniwvA2qwSC060KfqGPdglhvPMA2lPIoxs3PQIItj2iag35fONcQqgUaQ==
-
-adm-zip@^0.5.17:
-  version "0.5.17"
-  resolved "https://registry.yarnpkg.com/adm-zip/-/adm-zip-0.5.17.tgz#5c0b65f37aeec5c2a94995c024f931f62e4bbc5a"
-  integrity sha512-+Ut8d9LLqwEvHHJl1+PIHqoyDxFgVN847JTVM3Izi3xHDWPE4UtzzXysMZQs64DMcrJfBeS/uoEP4AD3HQHnQQ==
+adm-zip@0.6.0, adm-zip@^0.5.17:
+  version "0.6.0"
+  resolved "https://registry.yarnpkg.com/adm-zip/-/adm-zip-0.6.0.tgz#bbc5c6c333755e967a06dd98747f431e1d53a3cf"
+  integrity sha512-XleryMhbuksdKtofnWZ9Sk+4CUTbms4Mb/EU32SZwToAyZ5RgVos/ki8n+yr0LWHOGKuakbXTuuYNHLQjhddgg==
 
 after-all-results@^2.0.0:
   version "2.0.0"
@@ -23171,7 +23168,7 @@ graphemer@^1.4.0:
   resolved "https://registry.yarnpkg.com/graphemer/-/graphemer-1.4.0.tgz#fb2f1d55e0e3a1849aeffc90c4fa0dd53a0e66c6"
   integrity sha512-EtKwoO6kxCL9WO5xipiHTZlSzBm7WLT627TqC/uVRd0HKmq8NXyebnNYxDoBi7wt8eTWrUrKXCOVaFq9x1kgag==
 
-graphql@^16.13.1, graphql@^16.13.2:
+graphql@16.13.2, graphql@^16.13.1, graphql@^16.13.2:
   version "16.13.2"
   resolved "https://registry.yarnpkg.com/graphql/-/graphql-16.13.2.tgz#4d2b73df5796b201f1bc2765f5d7067f689cb55f"
   integrity sha512-5bJ+nf/UCpAjHM8i06fl7eLyVC9iuNAjm9qzkiu2ZGhM0VscSvS6WDPfAwkdkBuoXGM9FJSbKl6wylMwP9Ktig==
@@ -26092,10 +26089,10 @@ linkify-it@^5.0.1:
   dependencies:
     uc.micro "^2.0.0"
 
-liquidjs@10.27.2:
-  version "10.27.2"
-  resolved "https://registry.yarnpkg.com/liquidjs/-/liquidjs-10.27.2.tgz#4cf2940632c154fc87554d5a34c40e5d618785fe"
-  integrity sha512-kvknfAEtOHjHkAAv7GxLEJh8ghpMQm3Fc4uWVyF7hERSTsSRsdC7saWs0p5aDG7GDcWsu5o+T4232O+8KZO55w==
+liquidjs@10.28.0:
+  version "10.28.0"
+  resolved "https://registry.yarnpkg.com/liquidjs/-/liquidjs-10.28.0.tgz#af5e0529bdccc36e4a3ce3c5fc3bda0cb0197c48"
+  integrity sha512-b6tmBXYMQTuGPnM5vB0CuZMo5kvmKMtSB/gvUWP6RFn2pIB5s+bJkBfIyJnattkc5bgeAiflrZVptx3iaLLioQ==
   dependencies:
     commander "^10.0.0"
 
