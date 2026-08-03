@@ -2848,9 +2848,19 @@ paths:
                   description: Runtime configuration overrides. These override the stored agent configuration for this execution only.
                   type: object
                   properties:
+                    enable_elastic_capabilities:
+                      description: Whether to enable built-in Elastic skills for this execution.
+                      type: boolean
                     instructions:
                       description: Custom instructions for the agent.
                       type: string
+                    skill_ids:
+                      description: 'Skill IDs to enable for this execution, replacing the stored skill list. Note: only fully restricts the available skill set when enable_elastic_capabilities is also set to false.'
+                      items:
+                        maxLength: 256
+                        type: string
+                      maxItems: 100
+                      type: array
                     tools:
                       description: Tool selection to enable for this execution.
                       items:
@@ -3307,9 +3317,19 @@ paths:
                   description: Runtime configuration overrides. These override the stored agent configuration for this execution only.
                   type: object
                   properties:
+                    enable_elastic_capabilities:
+                      description: Whether to enable built-in Elastic skills for this execution.
+                      type: boolean
                     instructions:
                       description: Custom instructions for the agent.
                       type: string
+                    skill_ids:
+                      description: 'Skill IDs to enable for this execution, replacing the stored skill list. Note: only fully restricts the available skill set when enable_elastic_capabilities is also set to false.'
+                      items:
+                        maxLength: 256
+                        type: string
+                      maxItems: 100
+                      type: array
                     tools:
                       description: Tool selection to enable for this execution.
                       items:
@@ -4469,6 +4489,17 @@ paths:
                     nullable: true
                   description: Tool-specific configuration parameters. See examples for details.
                   type: object
+                confirmation:
+                  additionalProperties: false
+                  description: Optional tool call policy to control tool call confirmation behavior
+                  type: object
+                  properties:
+                    askUser:
+                      enum:
+                        - once
+                        - always
+                        - never
+                      type: string
                 description:
                   default: ''
                   description: Description of what the tool does.
@@ -5106,6 +5137,17 @@ paths:
                     nullable: true
                   description: Updated tool-specific configuration parameters. See examples for details.
                   type: object
+                confirmation:
+                  additionalProperties: false
+                  description: Updated tool call policy to control tool call confirmation behavior
+                  type: object
+                  properties:
+                    askUser:
+                      enum:
+                        - once
+                        - always
+                        - never
+                      type: string
                 description:
                   description: Updated description of what the tool does.
                   type: string
@@ -49829,6 +49871,7 @@ paths:
       summary: Get risk score history for an entity
       tags:
         - Security Entity Analytics API
+      x-state: Added in 9.5.0
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -63494,6 +63537,7 @@ paths:
                           - count: 7
                             date: '2025-01-15T12:00:00.000Z'
                         rule_backed: false
+                        rule_uuid: 9fdfcf5a-4e1d-5ee3-b05d-7bc2b014e81c
                         severity_score: 75
                         stream_name: logs.nginx
                         title: Error count by host
@@ -65525,7 +65569,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Retrieve a paginated list of workflows with optional filtering.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:read OR workflowsManagement:managed:read OR workflowsManagement:readExecution OR workflowsManagement:managed:readExecution.
+        Retrieve a paginated list of workflows with optional filtering.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:read. Extended privileges (optional, expand functionality when granted): workflowsManagement:managed:read, workflowsManagement:readExecution, workflowsManagement:managed:readExecution.
       operationId: get-workflows
       parameters:
         - description: Free-text search query.
@@ -67042,7 +67086,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Retrieve summary statistics about workflows, including total, enabled, and disabled counts; execution history metrics for the last 30 days are included only when the caller has execution read privilege.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:read OR workflowsManagement:managed:read OR workflowsManagement:readExecution OR workflowsManagement:managed:readExecution.
+        Retrieve summary statistics about workflows, including total, enabled, and disabled counts; execution history metrics for the last 30 days are included only when the caller has execution read privilege.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:read. Extended privileges (optional, expand functionality when granted): workflowsManagement:managed:read, workflowsManagement:readExecution, workflowsManagement:managed:readExecution.
       operationId: get-workflows-stats
       parameters: []
       responses:
@@ -67945,6 +67989,7 @@ paths:
           required: false
           schema:
             type: string
+            x-state: Generally available; added in 9.5.0
         - description: Whether to exclude step-level execution data.
           in: query
           name: omitStepRuns
@@ -67957,12 +68002,14 @@ paths:
           required: false
           schema:
             type: string
+            x-state: Generally available; added in 9.5.0
         - description: Datemath upper bound for filtering executions by finishedAt (inclusive when parsed with roundUp).
           in: query
           name: finishedBefore
           required: false
           schema:
             type: string
+            x-state: Generally available; added in 9.5.0
         - description: Field to collapse execution results by.
           in: query
           name: collapse
@@ -67974,6 +68021,7 @@ paths:
               - executedBy
               - triggeredBy
             type: string
+            x-state: Generally available; added in 9.5.0
         - description: Field to sort executions by.
           in: query
           name: sortField
@@ -67983,6 +68031,7 @@ paths:
               - createdAt
               - finishedAt
             type: string
+            x-state: Generally available; added in 9.5.0
         - description: Sort order.
           in: query
           name: sortOrder
@@ -67992,6 +68041,7 @@ paths:
               - asc
               - desc
             type: string
+            x-state: Generally available; added in 9.5.0
         - description: Page number.
           in: query
           name: page
@@ -68013,12 +68063,14 @@ paths:
           required: false
           schema:
             type: string
+            x-state: Generally available; added in 9.5.0
         - description: Datemath upper bound for filtering executions by startedAt (inclusive when parsed with roundUp).
           in: query
           name: startedBefore
           required: false
           schema:
             type: string
+            x-state: Generally available; added in 9.5.0
       responses:
         '200':
           content:
@@ -74130,6 +74182,12 @@ components:
         hide_title:
           description: When true, the panel title is hidden. Defaults to false.
           type: boolean
+        highlighted_service_names:
+          items:
+            maxLength: 1024
+            type: string
+          maxItems: 50
+          type: array
         kuery:
           maxLength: 2048
           type: string
@@ -80048,6 +80106,9 @@ components:
           description: The ID of the API key in the Security API.
           type: string
         created_at:
+          type: string
+        expire_at:
+          description: The expiration date of the enrollment token as an ISO 8601 date string. Absent when the token never expires.
           type: string
         hidden:
           type: boolean
@@ -96400,6 +96461,8 @@ components:
       additionalProperties: false
       properties:
         expiration:
+          description: The expiration time for the enrollment token, expressed as a duration (for example, 30d, 24h, 90m). By default, enrollment tokens never expire.
+          maxLength: 20
           type: string
         name:
           type: string
@@ -118877,6 +118940,7 @@ components:
         - endpoint_events
         - endpoint_host_isolation_exceptions
         - endpoint_blocklists
+        - endpoint_custom_yara_signatures
       type: string
     Security_Detections_API_ExternalRuleCustomizedFields:
       description: An array of customized field names — that is, fields that the user has modified from their base value. Defaults to an empty array.
@@ -123353,12 +123417,12 @@ components:
 
         For endpoint artifacts, use one of the following values:
 
-        * `endpoint_list`: [Elastic Endpoint exception list](https://www.elastic.co/docs/solutions/security/detect-and-alert/add-manage-exceptions)
-        * `endpoint_trusted_apps`: [Trusted applications list](https://www.elastic.co/docs/solutions/security/manage-elastic-defend/trusted-applications)
-        * `endpoint_trusted_devices`: [Trusted devices list](https://www.elastic.co/docs/solutions/security/manage-elastic-defend/trusted-devices)
-        * `endpoint_event_filters`: [Event filters list](https://www.elastic.co/docs/solutions/security/manage-elastic-defend/event-filters)
-        * `endpoint_host_isolation_exceptions`: [Host isolation exceptions list](https://www.elastic.co/docs/solutions/security/manage-elastic-defend/host-isolation-exceptions)
-        * `endpoint_blocklists`: [Blocklists list](https://www.elastic.co/docs/solutions/security/manage-elastic-defend/blocklist)
+        * `endpoint_list`: Elastic Endpoint exceptions list
+        * `endpoint_trusted_apps`: Trusted applications list
+        * `endpoint_trusted_devices`: Trusted devices list
+        * `endpoint_event_filters`: Event filters list
+        * `endpoint_host_isolation_exceptions`: Host isolation exceptions list
+        * `endpoint_blocklists`: Blocklist
       example: simple_list
       format: nonempty
       minLength: 1
@@ -123683,6 +123747,7 @@ components:
         - endpoint_events
         - endpoint_host_isolation_exceptions
         - endpoint_blocklists
+        - endpoint_custom_yara_signatures
       type: string
     Security_Endpoint_Exceptions_API_ExceptionListVersion:
       description: The document version, automatically increasd on updates.
@@ -127248,12 +127313,12 @@ components:
 
         For endpoint artifacts, use one of the following values:
 
-        * `endpoint_list`: [Elastic Endpoint exception list](https://www.elastic.co/docs/solutions/security/detect-and-alert/add-manage-exceptions)
-        * `endpoint_trusted_apps`: [Trusted applications list](https://www.elastic.co/docs/solutions/security/manage-elastic-defend/trusted-applications)
-        * `endpoint_trusted_devices`: [Trusted devices list](https://www.elastic.co/docs/solutions/security/manage-elastic-defend/trusted-devices)
-        * `endpoint_event_filters`: [Event filters list](https://www.elastic.co/docs/solutions/security/manage-elastic-defend/event-filters)
-        * `endpoint_host_isolation_exceptions`: [Host isolation exceptions list](https://www.elastic.co/docs/solutions/security/manage-elastic-defend/host-isolation-exceptions)
-        * `endpoint_blocklists`: [Blocklists list](https://www.elastic.co/docs/solutions/security/manage-elastic-defend/blocklist)
+        * `endpoint_list`: Elastic Endpoint exceptions list
+        * `endpoint_trusted_apps`: Trusted applications list
+        * `endpoint_trusted_devices`: Trusted devices list
+        * `endpoint_event_filters`: Event filters list
+        * `endpoint_host_isolation_exceptions`: Host isolation exceptions list
+        * `endpoint_blocklists`: Blocklist
       example: simple_list
       format: nonempty
       minLength: 1
@@ -127603,6 +127668,7 @@ components:
         - endpoint_events
         - endpoint_host_isolation_exceptions
         - endpoint_blocklists
+        - endpoint_custom_yara_signatures
       type: string
     Security_Exceptions_API_ExceptionListVersion:
       description: The document version, automatically increasd on updates.
@@ -132821,6 +132887,11 @@ components:
           description: The interval between checks for changes in the source data. The minimum value is 1m and the maximum is 59m. The default value is 1 minute.
           example: 5m
           type: string
+        preventCrossProjectSearch:
+          default: false
+          description: Pin the L1 rollup transform to the local/origin project only, preventing flat-world (cross-linked-project) reads. Only applies on serverless. Default is false (flat-world).
+          example: true
+          type: boolean
         preventInitialBackfill:
           default: false
           description: Start aggregating data from the time the SLO is created, instead of backfilling data from the beginning of the time window.
