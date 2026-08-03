@@ -12,7 +12,6 @@ Per [issue #277136](https://github.com/elastic/kibana/issues/277136), "correct" 
 - **ES|QL Validity** (`CODE`) — the generated query parses via `@kbn/esql-language`.
 - **ES|QL Execution Validity** (`CODE`) — the query executes against real sample data and (per example) returns rows. This is the tier that surfaces the fast-model regressions that motivated the suite.
 - **ES|QL Functional Equivalence** (`LLM` judge) — the generated query is equivalent to the ground-truth query. Uses a calibrated three-point rubric (`equivalent` / `equivalent_with_caveats` / `not_equivalent`) with explicit allow/deny lists, ported from `@kbn/evals-suite-security-esql-generation-regression`, so cosmetic differences (aliases, interchangeable bucketing, `?_tstart`/`?_tend` vs literal ranges) earn partial credit rather than a hard 0.
-- **ES|QL Result Equivalence** (`CODE`) — executes gold + candidate and compares result rows via Jaccard similarity (row-order- and float-tolerant); a deterministic complement to the LLM judge.
 - **Trajectory** — the agent routed the request to `load_skill` → `platform.core.create_visualization`.
 - **Trace-based** — tokens / latency / tool-call counts from OTel spans.
 
@@ -28,9 +27,14 @@ node scripts/evals run --suite agent-builder-visualizations
 
 ## Dataset
 
-Seed examples live inline in `evals/visualization_creation/visualization_creation.spec.ts`. Most target the `kibana_sample_data_logs` index (loaded in `beforeAll`). Two examples reproduce an OTel host-metrics `TS` failure seen in dashboard-level evals and target a self-contained TSDB fixture, `metrics-hostmetricsreceiver.otel-default` (`system.cpu.load_average.{1m,5m,15m}` gauges, `host.name` dimension), created and torn down by `src/fixtures/setup.ts`. Grow this to 20–30 real prompts with ground-truth ES|QL and expected chart types.
+Seed examples live inline in `evals/visualization_creation/visualization_creation.spec.ts`. Most target the `kibana_sample_data_logs` index (loaded in `beforeAll`). One example reproduces an OTel host-metrics `TS` failure seen in dashboard-level evals and targets a self-contained TSDB fixture, `metrics-hostmetricsreceiver.otel-default` (`system.cpu.load_average.{1m,5m,15m}` gauges, `host.name` dimension), created and torn down by `src/fixtures/setup.ts`. Grow this to 20–30 real prompts with ground-truth ES|QL and expected chart types.
 
-**Gold queries follow the agent's idiom.** Each gold query includes the raw-`@timestamp` time filter (`WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend`) and the auto-bucket-count form (`BUCKET(@timestamp, 75, ?_tstart, ?_tend)` / `TBUCKET(75, ?_tstart, ?_tend)`) the default agent emits, rather than fixed intervals. This keeps the gold and candidate structurally parallel so the equivalence evaluators measure real differences instead of cosmetic ones. The `?_tstart` / `?_tend` bind params substitute to a **now-relative** window (see `src/evaluators/esql_bind_params.ts`), which is why the OTel fixture is seeded with now-relative timestamps — a single realistic window brackets both `kibana_sample_data_logs` (anchored around install time) and the OTel samples.
+**Gold queries follow the agent's idiom** (see `agent-builder-visualizations-server/shared/esql_instructions.ts`):
+
+- **Categorical / metric** golds include the raw-`@timestamp` time filter (`WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend`).
+- **Time-series** golds express the window via the auto-bucket-count form (`BUCKET(@timestamp, 75, ?_tstart, ?_tend)` / `TBUCKET(75, ?_tstart, ?_tend)`); an extra `@timestamp` WHERE is optional and stripped before equivalence scoring.
+
+This keeps gold and candidate structurally parallel so the equivalence evaluators measure real differences instead of cosmetic ones. The `?_tstart` / `?_tend` bind params substitute to a **now-relative** window (see `src/evaluators/esql_bind_params.ts`), which is why the OTel fixture is seeded with now-relative timestamps — a single realistic window brackets both `kibana_sample_data_logs` (anchored around install time) and the OTel samples.
 
 ### OTel metrics fixture
 
@@ -38,4 +42,4 @@ Seed examples live inline in `evals/visualization_creation/visualization_creatio
 
 ## Notes
 
-The ES|QL validity, execution, result-equivalence, and calibrated functional-equivalence evaluators plus the `?_tstart` / `?_tend` bind-param substitution are copied from `@kbn/evals-suite-security-esql-generation-regression` because Kibana module-visibility rules forbid importing across sibling `functional-tests` suites. If a third suite needs them, consider promoting them into `@kbn/evals` (which already exports the v1 `createEsqlEquivalenceEvaluator`).
+The ES|QL validity, execution, and calibrated functional-equivalence evaluators plus the `?_tstart` / `?_tend` bind-param substitution are copied from `@kbn/evals-suite-security-esql-generation-regression` because Kibana module-visibility rules forbid importing across sibling `functional-tests` suites. If a third suite needs them, consider promoting them into `@kbn/evals` (which already exports the v1 `createEsqlEquivalenceEvaluator`).

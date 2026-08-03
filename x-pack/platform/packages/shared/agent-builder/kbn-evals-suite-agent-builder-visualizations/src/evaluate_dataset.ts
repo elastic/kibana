@@ -23,7 +23,6 @@ import type { VisualizationAgentEvaluationChatClient } from './chat_client';
 import { extractVisualizationEsql, getToolIds } from './extract_visualization';
 import { createEsqlValidityEvaluator } from './evaluators/esql_validity';
 import { createEsqlExecutionEvaluator } from './evaluators/esql_execution';
-import { createEsqlResultEquivalenceEvaluator } from './evaluators/esql_result_equivalence';
 import { createCalibratedEsqlEquivalenceEvaluator } from './evaluators/esql_functional_equivalence';
 import { visualizationSkillActivatedEvaluator } from './skill_selection_evaluators';
 
@@ -173,30 +172,6 @@ export function createEvaluateDataset({
       ),
   };
 
-  // Deterministic complement to the LLM judge: executes gold + candidate and
-  // compares result rows via Jaccard similarity. Ignores row order and
-  // rounds floats so aggregation/precision drift doesn't spuriously fail.
-  const baseResultEquivalenceEvaluator = createEsqlResultEquivalenceEvaluator<
-    VisualizationDatasetExample,
-    VisualizationAgentTaskOutput
-  >({
-    esClient,
-    predictionExtractor,
-    groundTruthExtractor,
-    // Visualization queries differ cosmetically in output shape (column
-    // aliases via RENAME, reordering via KEEP). Compare rows as unordered
-    // value multisets so those differences don't produce a spurious 0.
-    normalize: { ignoreColumnIdentity: true },
-  });
-
-  const esqlResultEquivalenceEvaluator: VisualizationAgentEvaluator = {
-    ...baseResultEquivalenceEvaluator,
-    evaluate: (args) =>
-      withEvaluatorSpan('EsqlResultEquivalence', {}, () =>
-        baseResultEquivalenceEvaluator.evaluate(args)
-      ),
-  };
-
   const trajectoryEvaluator = createTrajectoryEvaluator({
     extractToolCalls: (output) => getToolIds(output as VisualizationAgentTaskOutput),
     goldenPathExtractor: (expected) =>
@@ -236,7 +211,6 @@ export function createEvaluateDataset({
         esqlValidityEvaluator,
         esqlExecutionEvaluator,
         esqlEquivalenceEvaluator,
-        esqlResultEquivalenceEvaluator,
         trajectoryEvaluator,
       ]),
       ...Object.values(evaluators.traceBasedEvaluators).map(useAgentTraceId),

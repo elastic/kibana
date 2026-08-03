@@ -6,16 +6,16 @@
  */
 
 /**
- * Normalize ES|QL before functional / result equivalence so cosmetic
- * time-bound differences do not move scores.
+ * Normalize ES|QL before functional equivalence so cosmetic time-bound
+ * differences do not move scores.
  *
  * Agent-authored visualization queries often encode the dashboard time
  * window only via `BUCKET(@timestamp, …, ?_tstart, ?_tend)` /
  * `TBUCKET(…, ?_tstart, ?_tend)`, while gold examples also include an
  * explicit `| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend`.
  * For `@timestamp`-bounded viz queries those forms are equivalent for
- * evaluation purposes — strip the redundant WHERE so the LLM judge and
- * the executed-result Jaccard compare the same logical query.
+ * evaluation purposes — strip the redundant WHERE so the LLM judge
+ * compares the same logical query.
  */
 
 /** Match `@timestamp` (optionally backticked). */

@@ -27,8 +27,8 @@
  *    divides the substituted window into ~75 buckets. A 100-year window
  *    collapsed every time-series query into a single ~1.3-year bucket
  *    (1 row), which — against a fixed-interval gold — produced a spurious
- *    zero from the result-equivalence evaluator. A realistic window keeps
- *    bucketing meaningful.
+ *    mismatch on executed results. A realistic window keeps bucketing
+ *    meaningful.
  * 2. It brackets both fixtures: `kibana_sample_data_logs` (anchored around
  *    install time, i.e. now) and the OTel host-metrics TSDB fixture (seeded
  *    in the last few hours — see `src/fixtures`). A fixed calendar window

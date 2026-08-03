@@ -21,10 +21,10 @@ import {
  * `TS`-based gold query in the visualization dataset has real time-series
  * data to execute against.
  *
- * Fail-fast on errors: without this index the `ES|QL Execution Validity` and
- * `ES|QL Result Equivalence` evaluators score 0 for every OTel example
- * (`verification_exception: Unknown index`), silently masking regressions in
- * `TS` query generation. Surfacing the failure lets CI fail loudly instead.
+ * Fail-fast on errors: without this index the `ES|QL Execution Validity`
+ * evaluator scores 0 for every OTel example (`verification_exception: Unknown
+ * index`), silently masking regressions in `TS` query generation. Surfacing
+ * the failure lets CI fail loudly instead.
  */
 export async function setupOtelMetricsFixtures({
   esClient,

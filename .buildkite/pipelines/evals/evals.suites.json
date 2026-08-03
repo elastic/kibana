@@ -358,12 +358,6 @@
       ],
       "ciLabels": [
         "evals:agent-builder-visualizations"
-      ],
-      "weeklyEisModelGroups": [
-        "eis/anthropic-claude-4.6-sonnet",
-        "eis/anthropic-claude-4.6-opus",
-        "eis/openai-gpt-5.2",
-        "eis/openai-gpt-5.4"
       ]
     },
     {

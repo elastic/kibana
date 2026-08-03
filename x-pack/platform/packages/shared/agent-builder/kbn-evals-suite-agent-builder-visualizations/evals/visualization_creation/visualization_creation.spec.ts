@@ -17,8 +17,8 @@ evaluate.describe(
     // without real data, every generated query would hit
     // `verification_exception` and score 0 regardless of the model's quality.
     // The OTel TSDB fixture backs the `TS`-based CPU-load examples below with
-    // real time-series data so their execution / result-equivalence signals
-    // are meaningful. Fixture setup is hard-failing on purpose (see setup.ts).
+    // real time-series data so their execution / validity signals are
+    // meaningful. Fixture setup is hard-failing on purpose (see setup.ts).
     evaluate.beforeAll(async ({ fetch, esClient, log }) => {
       await fetch('/api/sample_data/logs', {
         method: 'POST',
@@ -47,6 +47,7 @@ evaluate.describe(
                 expected:
                   'A bar chart backed by ES|QL that counts documents grouped by the response code field.',
                 query: `FROM kibana_sample_data_logs
+| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend
 | STATS \`Request Count\` = COUNT(*) BY response.keyword
 | SORT \`Request Count\` DESC
 | LIMIT 10`,
@@ -63,6 +64,7 @@ evaluate.describe(
                 expected:
                   'A single metric visualization backed by ES|QL that counts all documents.',
                 query: `FROM kibana_sample_data_logs
+| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend
 | STATS \`Total Requests\` = COUNT(*)`,
                 goldenToolPath: ['load_skill', 'platform.core.create_visualization'],
               },
@@ -88,25 +90,11 @@ evaluate.describe(
             // (unquoted, `.1m` is lexed as a numeric literal and the parse
             // fails) and wraps each gauge in an `AVG_OVER_TIME` inner
             // aggregation. Backed by the `metrics-hostmetricsreceiver.otel-default`
-            // TSDB fixture so execution / result-equivalence are meaningful.
+            // TSDB fixture so execution / validity are meaningful.
             {
               input: {
                 question:
                   'Show CPU load average metrics over time as a line chart. Include system.cpu.load_average.1m (1-minute), system.cpu.load_average.5m (5-minute), and system.cpu.load_average.15m (15-minute) as separate lines, bucketed by auto time interval.',
-              },
-              output: {
-                expected:
-                  'A time-series line chart backed by a TS ES|QL query that averages each CPU load-average gauge (1m, 5m, 15m) over time buckets, with the dotted field paths quoted so they are not misparsed as numeric literals.',
-                query: `TS metrics-hostmetricsreceiver.otel-default
-| STATS \`1-Minute Load Average\` = AVG(AVG_OVER_TIME(\`system.cpu.load_average.1m\`)), \`5-Minute Load Average\` = AVG(AVG_OVER_TIME(\`system.cpu.load_average.5m\`)), \`15-Minute Load Average\` = AVG(AVG_OVER_TIME(\`system.cpu.load_average.15m\`)) BY \`Time Bucket\` = TBUCKET(75, ?_tstart, ?_tend)`,
-                goldenToolPath: ['load_skill', 'platform.core.create_visualization'],
-              },
-              metadata: { includeHitDetection: true },
-            },
-            {
-              input: {
-                question:
-                  'Show CPU load average over time with three separate lines: 1-minute load average (system.cpu.load_average.1m), 5-minute load average (system.cpu.load_average.5m), and 15-minute load average (system.cpu.load_average.15m). Bucket by time interval.',
               },
               output: {
                 expected:
