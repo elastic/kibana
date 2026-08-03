@@ -12,7 +12,6 @@ import {
   StreamableHTTPError,
 } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
 import type { ServerCapabilities } from '@modelcontextprotocol/sdk/types.js';
-import { CfWorkerJsonSchemaValidator } from '@modelcontextprotocol/sdk/validation/cfworker-provider.js';
 import type { Logger } from '@kbn/core/server';
 import type {
   ClientDetails,
@@ -24,6 +23,7 @@ import type {
   McpClientOptions,
 } from './types';
 import { isEmbeddedResourcePart, isResourceLinkPart, isTextPart } from './types';
+import { ZodJsonSchemaValidator } from './json_schema_validator';
 
 /**
  * Produces a human-readable error message from a connection error,
@@ -89,7 +89,7 @@ export class McpClient {
         version: clientDetails.version,
       },
       {
-        jsonSchemaValidator: new CfWorkerJsonSchemaValidator({ shortcircuit: false }),
+        jsonSchemaValidator: new ZodJsonSchemaValidator(this.logger),
       }
     );
   }
