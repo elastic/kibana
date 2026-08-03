@@ -1,19 +1,19 @@
 pageLoadAssetSize:
   actions: 3110
   advancedSettings: 1981
-  agentBuilder: 376
+  agentBuilder: 375
   agentBuilderDashboards: 3074
-  agentBuilderPlatform: 22339
+  agentBuilderPlatform: 22338
   agentBuilderSml: 328
   agentBuilderVisualizations: 1284
   agentBuilderWorkflows: 761
   aiAssistantManagementSelection: 355
   aiops: 317
   alerting: 8789
-  alertingVTwo: 15502
+  alertingVTwo: 17372
   apm: 31419
   apmShared: 1896
-  apmSourcesAccess: 779
+  apmSourcesAccess: 906
   automaticImport: 13257
   banners: 1157
   canvas: 6000
@@ -24,29 +24,29 @@ pageLoadAssetSize:
   cloudConnect: 4998
   cloudDataMigration: 1755
   cloudDefend: 3152
-  cloudExperiments: 67357
+  cloudExperiments: 67356
   cloudFullStory: 1373
   cloudLinks: 18103
   cloudSecurityPosture: 12224
   console: 24516
   contentConnectors: 2789
-  contentManagement: 6738
-  contextEngine: 1415
+  contentManagement: 6737
+  contextEngine: 1378
   controls: 4166
   core: 320
   cps: 5002
   crossClusterReplication: 7691
-  customContent: 1037
+  customContent: 1848
   customIntegrations: 636
   dashboard: 452
   dashboardMarkdown: 4012
   data: 11798
-  dataFederation: 3324
+  dataFederation: 4838
   dataQuality: 5836
   datasetQuality: 41081
   dataUsage: 4123
   dataViewEditor: 3312
-  dataViewFieldEditor: 16209
+  dataViewFieldEditor: 16177
   dataViewManagement: 1302
   dataViews: 1697
   dataVisualizer: 7461
@@ -59,14 +59,14 @@ pageLoadAssetSize:
   elasticAssistant: 137336
   elasticAssistantSharedState: 3369
   elasticConsole: 850
-  embeddable: 895
+  embeddable: 990
   embeddableAlertsTable: 1263
   enterpriseSearch: 28188
-  entityStore: 1496
+  entityStore: 1734
   esql: 306
   esqlDataGrid: 215
   esUiShared: 2284
-  evals: 1711
+  evals: 4255
   eventAnnotation: 17299
   eventAnnotationListing: 2987
   exploratoryView: 707
@@ -86,9 +86,9 @@ pageLoadAssetSize:
   filesManagement: 952
   fileUpload: 217
   fleet: 6095
-  genAiSettings: 1542
+  genAiSettings: 1541
   globalSearch: 5183
-  globalSearchBar: 21462
+  globalSearchBar: 21452
   globalSearchProviders: 2586
   graph: 3659
   grokdebugger: 1333
@@ -143,7 +143,7 @@ pageLoadAssetSize:
   observabilityShared: 7496
   osquery: 13046
   painlessLab: 2282
-  pnd: 10000
+  pnd: 3034
   presentationUtil: 669
   productDocBase: 4218
   productIntercept: 4738
@@ -159,14 +159,14 @@ pageLoadAssetSize:
   savedObjectsFinder: 256
   savedObjectsManagement: 18227
   savedObjectsTagging: 18398
-  savedObjectsTaggingOss: 808
+  savedObjectsTaggingOss: 807
   savedSearch: 849
   screenshotMode: 979
   screenshotting: 1493
   searchAssistant: 1545
   searchGettingStarted: 2339
   searchHomepage: 3873
-  searchInferenceEndpoints: 4815
+  searchInferenceEndpoints: 4743
   searchNavigation: 7205
   searchNotebooks: 3490
   searchPlayground: 5566
@@ -174,7 +174,7 @@ pageLoadAssetSize:
   searchQueryRules: 2167
   searchSynonyms: 1919
   security: 718
-  securitySolution: 141181
+  securitySolution: 156216
   securitySolutionEss: 19938
   securitySolutionServerless: 33422
   serverless: 1272
@@ -183,19 +183,19 @@ pageLoadAssetSize:
   serverlessVectordb: 7165
   serverlessWorkplaceAI: 3338
   sessionView: 379
-  share: 440
+  share: 379
   shared-core: 348361
   shared-misc: 103637
   shared-packages: 4103474
-  shared-plugins: 12276963
+  shared-plugins: 13536562
   shared-solution-packages: 353531
   significant_events: 2455
   slo: 19531
   snapshotRestore: 16909
   spaces: 22966
   stackAlerts: 1717
-  stackConnectors: 63574
-  streams: 4709
+  stackConnectors: 63548
+  streams: 6778
   streamsApp: 83679
   synthetics: 18443
   telemetry: 20586
