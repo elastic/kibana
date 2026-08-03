@@ -108,13 +108,13 @@ evaluate.describe(
                       { type: 'workflow', id: workflowId },
                     ]);
 
-                    const parsedWorkflow = parseYaml(workflow!.yaml!) as {
+                    const { yaml: workflowYaml } = assertActionPolicyWorkflowLiquid(workflow?.yaml);
+                    const parsedWorkflow = parseYaml(workflowYaml) as {
                       triggers?: Array<{ type?: string }>;
                     };
                     expect(parsedWorkflow.triggers?.map((trigger) => trigger.type)).toEqual([
                       'manual',
                     ]);
-                    assertActionPolicyWorkflowLiquid(workflow!.yaml!);
                   },
                 },
               },

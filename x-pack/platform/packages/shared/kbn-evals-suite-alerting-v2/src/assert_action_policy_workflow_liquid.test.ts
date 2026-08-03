@@ -7,8 +7,8 @@
 
 import {
   assertActionPolicyWorkflowLiquid,
-  getInvalidActionPolicyPayloadField,
   isActionPolicyPayloadLiquidPath,
+  isActionPolicyPayloadPathInSchema,
 } from './assert_action_policy_workflow_liquid';
 
 describe('isActionPolicyPayloadLiquidPath', () => {
@@ -30,7 +30,7 @@ describe('isActionPolicyPayloadLiquidPath', () => {
   );
 });
 
-describe('getInvalidActionPolicyPayloadField', () => {
+describe('isActionPolicyPayloadPathInSchema', () => {
   it.each([
     '',
     'id',
@@ -42,16 +42,15 @@ describe('getInvalidActionPolicyPayloadField', () => {
     'rules',
     'rules[ep.rule_id].name',
   ])('accepts %s', (relativePath) => {
-    expect(getInvalidActionPolicyPayloadField(relativePath)).toBeNull();
+    expect(isActionPolicyPayloadPathInSchema(relativePath)).toBe(true);
   });
 
-  it.each([
-    ['foo', 'foo'],
-    ['episodes[0].bogus', 'bogus'],
-    ['policy_id', 'policy_id'],
-  ])('rejects %s', (relativePath, invalidSegment) => {
-    expect(getInvalidActionPolicyPayloadField(relativePath)).toBe(invalidSegment);
-  });
+  it.each(['foo', 'episodes[0].bogus', 'episodes.foo', 'policy_id', 'policyId.anything'])(
+    'rejects %s',
+    (relativePath) => {
+      expect(isActionPolicyPayloadPathInSchema(relativePath)).toBe(false);
+    }
+  );
 });
 
 describe('assertActionPolicyWorkflowLiquid', () => {

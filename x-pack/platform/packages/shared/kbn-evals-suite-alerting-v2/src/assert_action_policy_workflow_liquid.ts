@@ -8,6 +8,7 @@
 import {
   ALERTING_V2_NOTIFICATION_GROUP_INPUT_DEFINITION_ID,
   builtinWorkflowInputDefinitions,
+  parseJsPropertyAccess,
   scanForTemplateVariables,
   type JsonSchema,
 } from '@kbn/workflows';
@@ -29,145 +30,49 @@ const getPayloadSchema = (): JsonSchema => {
 const isUnderPrefix = (path: string, prefix: string): boolean =>
   path === prefix || path.startsWith(`${prefix}.`) || path.startsWith(`${prefix}[`);
 
-/**
- * Returns true when `path` references the action-policy dispatch payload
- * (`ActionPolicyWorkflowPayload` via `inputs.payload.*`).
- */
-export const isActionPolicyPayloadLiquidPath = (path: string): boolean =>
-  isUnderPrefix(path, PAYLOAD_PREFIX);
+const ANY_KEY_OBJECT: JsonSchema = { type: 'object', additionalProperties: true };
 
 /**
- * Split a Liquid path into segments, treating `[...]` as its own segment.
- * e.g. `rules[ep.rule_id].name` → `['rules', '[ep.rule_id]', 'name']`
+ * Follows one path segment into `schema` and returns the schema of the value it lands
+ * on, or `null` when the schema doesn't allow that segment.
  */
-const splitPathSegments = (path: string): string[] => {
-  const segments: string[] = [];
-  let current = '';
-
-  for (let i = 0; i < path.length; i += 1) {
-    const char = path[i];
-    if (char === '.' && !current.startsWith('[')) {
-      if (current) segments.push(current);
-      current = '';
-      continue;
-    }
-    if (char === '[') {
-      if (current) {
-        segments.push(current);
-        current = '';
-      }
-      const close = path.indexOf(']', i);
-      if (close === -1) {
-        segments.push(path.slice(i));
-        return segments;
-      }
-      segments.push(path.slice(i, close + 1));
-      i = close;
-      continue;
-    }
-    current += char;
+const resolveSegment = (schema: JsonSchema, segment: string): JsonSchema | null => {
+  if (schema.type === 'array') {
+    // Liquid indexes arrays numerically and can't pick a slot out of a tuple schema.
+    const items = Array.isArray(schema.items) ? schema.items[0] : schema.items;
+    return /^\d+$/.test(segment) ? items ?? ANY_KEY_OBJECT : null;
   }
 
-  if (current) segments.push(current);
-  return segments;
+  if (schema.type !== 'object') {
+    return null;
+  }
+
+  // Open maps (groupKey, rules, episode data) accept any key but don't describe their
+  // values, so everything below them is unconstrained.
+  return schema.properties?.[segment] ?? (schema.additionalProperties ? ANY_KEY_OBJECT : null);
 };
 
-const isBracketSegment = (segment: string): boolean =>
-  segment.startsWith('[') && segment.endsWith(']');
-
-const resolveArrayItemSchema = (
-  items: JsonSchema | JsonSchema[] | undefined
-): JsonSchema | undefined => {
-  if (!items) return undefined;
-  // Tuple schemas use JsonSchema[]; Liquid index access can't pick a
-  // specific slot, so walk the first item schema.
-  return Array.isArray(items) ? items[0] : items;
+const toPayloadRelativePath = (path: string): string => {
+  if (path === PAYLOAD_PREFIX) {
+    return '';
+  }
+  if (path.startsWith(`${PAYLOAD_PREFIX}.`)) {
+    return path.slice(PAYLOAD_PREFIX.length + 1);
+  }
+  return path.slice(PAYLOAD_PREFIX.length); // inputs.payload[...]
 };
 
-/**
- * Walk `relativePath` (everything after `inputs.payload`) against the
- * alertingV2NotificationGroup JSON Schema. Returns null when valid, or the
- * first invalid segment.
- */
-export const getInvalidActionPolicyPayloadField = (
-  relativePath: string,
-  schema: JsonSchema = getPayloadSchema()
-): string | null => {
-  if (!relativePath) return null;
-
-  let current: JsonSchema | undefined = schema;
-  for (const segment of splitPathSegments(relativePath)) {
-    if (!current) {
-      return relativePath;
-    }
-
-    if (isBracketSegment(segment)) {
-      if (current.type === 'array') {
-        current = resolveArrayItemSchema(current.items);
-        continue;
-      }
-      // Object key access like rules[ep.rule_id]
-      if (current.type === 'object' && current.additionalProperties) {
-        current = { type: 'object', additionalProperties: true };
-        continue;
-      }
-      return relativePath;
-    }
-
-    if (current.type !== 'object') {
-      return relativePath;
-    }
-
-    const next: JsonSchema | undefined = current.properties?.[segment];
-    if (next) {
-      current = next;
-      continue;
-    }
-
-    if (current.additionalProperties) {
-      current = { type: 'object', additionalProperties: true };
-      continue;
-    }
-
-    return segment;
+const throwMissingWorkflowYaml = (yaml: string | undefined): string => {
+  if (typeof yaml !== 'string') {
+    throw new Error('Expected workflow yaml attachment');
   }
-
-  return null;
+  return yaml;
 };
 
-export interface AssertActionPolicyWorkflowLiquidResult {
-  /** Unique Liquid variable paths extracted from the workflow YAML. */
-  variables: string[];
-}
-
-/**
- * Asserts that an action-policy notification workflow:
- * 1. Parses as valid YAML
- * 2. Contains valid Liquid (via `@kbn/workflows` `scanForTemplateVariables`)
- * 3. References `inputs.payload.*` at least once
- * 4. Those `inputs.payload.*` paths use fields from the
- *    `alertingV2NotificationGroup` payload schema
- */
-export const assertActionPolicyWorkflowLiquid = (
-  yaml: string
-): AssertActionPolicyWorkflowLiquidResult => {
-  let parsed: unknown;
-  try {
-    parsed = parseYaml(yaml);
-  } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    throw new Error(`Generated workflow YAML is not valid YAML: ${message}`);
-  }
-
-  let variables: string[];
-  try {
-    variables = Array.from(new Set(scanForTemplateVariables(parsed))).sort();
-  } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    throw new Error(`Generated workflow contains invalid Liquid template syntax: ${message}`);
-  }
-
-  const payloadVariables = variables.filter(isActionPolicyPayloadLiquidPath);
+const throwMissingPayloadLiquidReferences = (
+  payloadVariables: string[],
+  variables: string[]
+): void => {
   if (payloadVariables.length === 0) {
     throw new Error(
       `Generated workflow Liquid does not reference \`inputs.payload.*\`. ` +
@@ -178,26 +83,92 @@ export const assertActionPolicyWorkflowLiquid = (
         }.`
     );
   }
+};
 
-  const payloadSchema = getPayloadSchema();
-  const invalidPayloadPaths = payloadVariables.filter((path) => {
-    const relative =
-      path === PAYLOAD_PREFIX
-        ? ''
-        : path.startsWith(`${PAYLOAD_PREFIX}.`)
-        ? path.slice(PAYLOAD_PREFIX.length + 1)
-        : path.slice(PAYLOAD_PREFIX.length); // inputs.payload[...]
-    return getInvalidActionPolicyPayloadField(relative, payloadSchema) !== null;
-  });
+const throwUnknownPayloadLiquidFields = (
+  payloadVariables: string[],
+  payloadSchema: JsonSchema
+): void => {
+  const invalidPayloadPaths = payloadVariables.filter(
+    (path) => !isActionPolicyPayloadPathInSchema(toPayloadRelativePath(path), payloadSchema)
+  );
+  if (invalidPayloadPaths.length === 0) {
+    return;
+  }
+  const allowedTopLevelFields = Object.keys(payloadSchema.properties ?? {});
+  throw new Error(
+    `Generated workflow Liquid references unknown \`inputs.payload\` fields: ` +
+      `${invalidPayloadPaths.map((path) => `\`${path}\``).join(', ')}. ` +
+      `Allowed top-level payload fields: ${allowedTopLevelFields.join(', ')}.`
+  );
+};
 
-  if (invalidPayloadPaths.length > 0) {
-    const allowedTopLevel = Object.keys(payloadSchema.properties ?? {}).join(', ');
-    throw new Error(
-      `Generated workflow Liquid references unknown \`inputs.payload\` fields: ` +
-        `${invalidPayloadPaths.map((path) => `\`${path}\``).join(', ')}. ` +
-        `Allowed top-level payload fields: ${allowedTopLevel}.`
-    );
+const parseWorkflowYaml = (yaml: string): unknown => {
+  try {
+    return parseYaml(yaml);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    throw new Error(`Generated workflow YAML is not valid YAML: ${message}`);
+  }
+};
+
+const scanWorkflowLiquidVariables = (parsed: unknown): string[] => {
+  try {
+    return Array.from(new Set(scanForTemplateVariables(parsed))).sort();
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    throw new Error(`Generated workflow contains invalid Liquid template syntax: ${message}`);
+  }
+};
+
+export const isActionPolicyPayloadLiquidPath = (path: string): boolean =>
+  isUnderPrefix(path, PAYLOAD_PREFIX);
+
+/**
+ * Walks `relativePath` (everything after `inputs.payload`) against the
+ * alertingV2NotificationGroup JSON Schema. An empty path is the payload root, which is
+ * always valid.
+ */
+export const isActionPolicyPayloadPathInSchema = (
+  relativePath: string,
+  schema: JsonSchema = getPayloadSchema()
+): boolean => {
+  let current: JsonSchema | null = schema;
+
+  for (const segment of parseJsPropertyAccess(relativePath)) {
+    current = resolveSegment(current, segment);
+    if (!current) {
+      return false;
+    }
   }
 
-  return { variables };
+  return true;
+};
+
+/**
+ * Asserts that an action-policy notification workflow:
+ * 1. Includes a workflow YAML string
+ * 2. Parses as valid YAML
+ * 3. Contains valid Liquid (via `@kbn/workflows` `scanForTemplateVariables`)
+ * 4. References `inputs.payload.*` at least once
+ * 5. Those `inputs.payload.*` paths use fields from the
+ *    `alertingV2NotificationGroup` payload schema
+ */
+export const assertActionPolicyWorkflowLiquid = (
+  yaml: string | undefined
+): {
+  /** Unique Liquid variable paths extracted from the workflow YAML. */
+  variables: string[];
+  /** The validated workflow YAML string. */
+  yaml: string;
+} => {
+  const workflowYaml = throwMissingWorkflowYaml(yaml);
+  const parsed = parseWorkflowYaml(workflowYaml);
+  const variables = scanWorkflowLiquidVariables(parsed);
+  const payloadVariables = variables.filter(isActionPolicyPayloadLiquidPath);
+
+  throwMissingPayloadLiquidReferences(payloadVariables, variables);
+  throwUnknownPayloadLiquidFields(payloadVariables, getPayloadSchema());
+
+  return { variables, yaml: workflowYaml };
 };
