@@ -50,6 +50,7 @@ export const eventsWriteItemSchema = significantEventSchema
   .extend({
     dedup_window: z
       .string()
+      .max(256)
       .optional()
       .describe(
         dedent`
