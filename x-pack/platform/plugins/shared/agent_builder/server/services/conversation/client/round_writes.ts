@@ -9,15 +9,11 @@ import type { ConversationRound } from '@kbn/agent-builder-common';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 
 /**
- * Places `round` into `rounds`, keyed on `round.id` rather than on position.
+ * Places `round` into `rounds` keyed on `round.id`, not on position: appends when
+ * absent, replaces in place when present (HITL resume keeps the pending id).
+ * `replacesRoundId` drops the round superseded by a regenerate, which mints a new id.
  *
- * Appends when the id is absent, and replaces in place when it is already
- * present — which covers the HITL resume flow, where the resumed round keeps the
- * pending round's id. `replacesRoundId` handles the regenerate flow, where a new
- * id is minted and the superseded round has to be dropped.
- *
- * Idempotent, so a retried write cannot duplicate a round, and commutative with
- * a concurrent append of a different round.
+ * Idempotent, so a retried write cannot duplicate a round.
  */
 export const upsertRound = (
   rounds: ConversationRound[],
@@ -35,12 +31,9 @@ export const upsertRound = (
 };
 
 /**
- * Merges two attachment lists by id, with `latestAttachments` winning.
- *
- * Callers pass a list derived from a snapshot read before a long-running
- * operation, so assigning it wholesale would revert any attachment changes that
- * landed in the meantime. Preferring the freshly-read record keeps those, while
- * still picking up attachments the operation created.
+ * Merges attachment lists by id, `latestAttachments` winning. Callers pass a list
+ * derived from a stale snapshot, so preferring the fresh record keeps concurrent
+ * changes while still picking up attachments the operation created.
  */
 export const mergeAttachmentsById = (
   latestAttachments: VersionedAttachment[],

@@ -45,13 +45,8 @@ import {
   type Document,
 } from './converters';
 
-/**
- * Conversation writes are appends against a document another client may be
- * writing to at the same time, so conflicts are expected rather than
- * exceptional. The re-read is a `search`, which is near-real-time, so a retry
- * can briefly still see the pre-conflict document — hence a longer delay and
- * more attempts than the `@kbn/occ` defaults.
- */
+// Higher than the `@kbn/occ` defaults: the re-read is a near-real-time search,
+// so a retry can briefly still see the pre-conflict document.
 const OCC_MAX_RETRIES = 5;
 const OCC_RETRY_DELAY_MS = 250;
 
@@ -62,7 +57,7 @@ export interface ConversationClient {
   create(conversation: ConversationCreateRequest): Promise<Conversation>;
   update(
     conversation: ConversationUpdateRequest,
-    options?: { access: ConversationAccess }
+    options?: { access: ConversationAccess; retryOnConflict?: boolean }
   ): Promise<Conversation>;
   persistRound(
     request: PersistRoundRequest,
@@ -226,32 +221,45 @@ class ConversationClientImpl implements ConversationClient {
     return this.get(id);
   }
 
+  /**
+   * Applies the requested fields on top of the stored conversation.
+   *
+   * Only set `retryOnConflict` for values independent of previously-read state,
+   * such as request scalars — re-applying an array built from a stale read would
+   * revert the change it just read.
+   */
   async update(
     conversationUpdate: ConversationUpdateRequest,
-    options: { access: ConversationAccess } = { access: 'owner' }
+    options: { access: ConversationAccess; retryOnConflict?: boolean } = { access: 'owner' }
   ): Promise<Conversation> {
     const { id: conversationId } = conversationUpdate;
-    const { access } = options;
-    const now = new Date();
-    const document = await this.getDocumentWithAccess({ conversationId, access });
+    const { access, retryOnConflict = false } = options;
 
-    const storedConversation = fromEs(document);
-    const updatedConversation = updateConversation({
-      conversation: storedConversation,
-      update: conversationUpdate,
-      updateDate: now,
-      space: this.space,
-    });
-    const attributes = toEs(updatedConversation, this.space);
+    const applyUpdate = (current: Conversation) =>
+      updateConversation({
+        conversation: current,
+        update: conversationUpdate,
+        updateDate: new Date(),
+        space: this.space,
+      });
 
     try {
+      if (retryOnConflict) {
+        return await this.writeWithOcc({ conversationId, access, mutate: applyUpdate });
+      }
+
+      const document = await this.getDocumentWithAccess({ conversationId, access });
+      const updatedConversation = applyUpdate(fromEs(document));
+
       await this.storage.getClient().index({
-        id: conversationUpdate.id,
-        document: attributes,
+        id: conversationId,
+        document: toEs(updatedConversation, this.space),
         // use optimistic concurrency control to prevent concurrent update conflicts
         if_seq_no: document._seq_no,
         if_primary_term: document._primary_term,
       });
+
+      return updatedConversation;
     } catch (error) {
       if (isElasticsearchWriteConflict(error)) {
         throw createConversationWriteConflictError({ conversationId });
@@ -259,17 +267,37 @@ class ConversationClientImpl implements ConversationClient {
 
       throw error;
     }
-
-    return updatedConversation;
   }
 
   /**
-   * Persists a single round, merging it into the conversation as currently
-   * stored rather than into the snapshot the caller started from.
-   *
-   * The mutator is replayed on every conflict retry, so it must stay free of
-   * side effects beyond the document it returns.
+   * Read-modify-write against the stored conversation, retrying on conflict.
+   * `mutate` is replayed per attempt, so it must be free of side effects.
    */
+  private async writeWithOcc({
+    conversationId,
+    access,
+    mutate,
+  }: {
+    conversationId: string;
+    access: ConversationAccess;
+    mutate: (current: Conversation) => Conversation;
+  }): Promise<Conversation> {
+    let updatedConversation: Conversation | undefined;
+
+    await this.createOccWriter(access).readModifyWrite({
+      id: conversationId,
+      mutate: (source) => {
+        updatedConversation = mutate(fromEs({ _id: conversationId, _source: source }));
+
+        return toEs(updatedConversation, this.space);
+      },
+    });
+
+    // readModifyWrite either invokes the mutator or throws
+    return updatedConversation!;
+  }
+
+  /** Merges a round into the conversation as stored, not into the caller's snapshot. */
   async persistRound(
     request: PersistRoundRequest,
     options: { access: ConversationAccess } = { access: 'converse' }
@@ -285,45 +313,37 @@ class ConversationClientImpl implements ConversationClient {
     } = request;
     const { access } = options;
 
-    let updatedConversation: Conversation | undefined;
-
     try {
-      await this.createOccWriter(access).readModifyWrite({
-        id: conversationId,
-        mutate: (source) => {
-          const current = fromEs({ _id: conversationId, _source: source });
-
-          updatedConversation = updateConversation({
+      return await this.writeWithOcc({
+        conversationId,
+        access,
+        mutate: (current) =>
+          updateConversation({
             conversation: current,
             update: {
               id: conversationId,
               rounds: upsertRound(current.rounds, round, replacesRoundId),
               ...(status ? { status } : {}),
               ...(state ? { state } : {}),
-              // Merged rather than assigned: the payload was seeded before the
-              // agent ran, so assigning it would revert attachment changes made
-              // since — and the retry would do so having just read them.
+              // merged, not assigned: the payload predates the agent run, so
+              // assigning it would revert attachment changes made since
               ...(attachments
                 ? { attachments: mergeAttachmentsById(current.attachments ?? [], attachments) }
                 : {}),
-              // Write-once, resolved against the stored conversation so two
-              // concurrent first rounds cannot each mint a workspace.
+              // write-once, against stored state so concurrent first rounds agree
               ...(workspaceId && !current.workspace_id ? { workspace_id: workspaceId } : {}),
               read: false,
-              // `title` is deliberately absent. Titles are generated once, at
-              // creation, so a round would only ever write back the title it
-              // read — reverting any rename made while the agent was running.
+              // `title` is deliberately absent: generated once at creation, so a
+              // round would only write back the title it read, undoing a rename
             },
             updateDate: new Date(),
             space: this.space,
-          });
-
-          return toEs(updatedConversation, this.space);
-        },
+          }),
       });
     } catch (error) {
       // also true for the OccConflictError raised once retries are exhausted
       if (isElasticsearchWriteConflict(error)) {
+        // logged here: mid-stream errors reach the client as SSE, not via wrap_handler
         this.logger.error(
           `Failed to persist round ${round.id} of conversation ${conversationId}: concurrent writes could not be reconciled`
         );
@@ -333,8 +353,6 @@ class ConversationClientImpl implements ConversationClient {
 
       throw error;
     }
-
-    return updatedConversation!;
   }
 
   private createOccWriter(access: ConversationAccess): OccWriter<ConversationProperties> {
@@ -348,8 +366,7 @@ class ConversationClientImpl implements ConversationClient {
           occ: { seqNo: document._seq_no!, primaryTerm: document._primary_term! },
         };
       },
-      // `refresh` is left at the storage adapter's `wait_for` default so a retry's
-      // re-read — a near-real-time search — can see the winning write.
+      // `refresh` stays at the adapter's `wait_for` default so a retry's re-read sees the winner
       index: async ({ id, document, ifSeqNo, ifPrimaryTerm }) => {
         const response = await this.storage.getClient().index({
           id,

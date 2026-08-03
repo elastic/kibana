@@ -55,6 +55,7 @@ describe('ConversationClient', () => {
     rounds = [],
     attachments,
     workspaceId,
+    read = false,
   }: {
     id?: string;
     agentId?: string;
@@ -67,6 +68,7 @@ describe('ConversationClient', () => {
     rounds?: unknown[];
     attachments?: unknown[];
     workspaceId?: string;
+    read?: boolean;
   } = {}): Document =>
     ({
       _id: id,
@@ -80,7 +82,7 @@ describe('ConversationClient', () => {
         title,
         created_at: '2024-09-04T06:44:17.944Z',
         updated_at: '2025-08-04T06:44:19.123Z',
-        read: false,
+        read,
         conversation_rounds: rounds,
         ...(attachments ? { attachments } : {}),
         ...(workspaceId ? { workspace_id: workspaceId } : {}),
@@ -590,6 +592,49 @@ describe('ConversationClient', () => {
 
       expect(isConversationWriteConflictError(error)).toBe(true);
       expect(error.meta.statusCode).toBe(409);
+    });
+
+    it('does not retry by default, so a payload built from a stale read is not re-applied', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [createConversationDocument()] },
+      });
+      mockEsClient.index.mockRejectedValue(createConflictError());
+
+      await expect(client.update({ id: 'conversation-1', title: 'x' })).rejects.toThrow();
+
+      expect(mockEsClient.index).toHaveBeenCalledTimes(1);
+    });
+
+    it('re-applies the requested value over the fresh document when retryOnConflict is set', async () => {
+      mockEsClient.search
+        .mockResolvedValueOnce({ hits: { hits: [createConversationDocument()] } })
+        // a round landed first, adding a round and marking the conversation unread
+        .mockResolvedValue({
+          hits: {
+            hits: [
+              createConversationDocument({
+                seqNo: 2,
+                read: false,
+                rounds: [createRound({ id: 'round-concurrent' })],
+              }),
+            ],
+          },
+        });
+      mockEsClient.index.mockRejectedValueOnce(createConflictError());
+      mockEsClient.index.mockResolvedValue({ _seq_no: 3, _primary_term: 1 });
+
+      const result = await client.update(
+        { id: 'conversation-1', read: true },
+        { access: 'converse', retryOnConflict: true }
+      );
+
+      expect(mockEsClient.index).toHaveBeenCalledTimes(2);
+
+      const { document } = mockEsClient.index.mock.calls[1][0];
+      expect(document.read).toBe(true);
+      // the concurrently written round is preserved
+      expect(document.conversation_rounds).toHaveLength(1);
+      expect(result.read).toBe(true);
     });
   });
 

@@ -41,17 +41,13 @@ export type ConversationUpdateRequest = Pick<Conversation, 'id'> &
   >;
 
 /**
- * Persists a single completed round.
- *
- * Expresses intent ("place this round") rather than desired end state ("here is
- * the full rounds array"), so the round can be merged into whatever is currently
- * stored. A caller-supplied array cannot be made concurrency-safe: it is built
- * from a snapshot read before the agent ran, so writing it would drop any round
- * that landed in the meantime.
+ * Persists a single completed round, expressing intent rather than end state so it
+ * can be merged into whatever is stored. A caller-supplied `rounds` array cannot be
+ * made concurrency-safe: built before the agent ran, writing it drops newer rounds.
  */
 export interface PersistRoundRequest {
   id: string;
-  /** Upserted by `round.id` — appended if new, replaced in place if present (HITL resume). */
+  /** Upserted by `round.id`: appended if new, replaced in place if present (HITL resume). */
   round: ConversationRound;
   /** `action: 'regenerate'` only: id of the round this one supersedes. */
   replaces_round_id?: string;
@@ -59,7 +55,7 @@ export interface PersistRoundRequest {
   status?: ConversationRoundStatus;
   /** Merged into the stored list by id; never used to remove attachments. */
   attachments?: VersionedAttachment[];
-  /** Applied only when the freshly-read conversation has no workspace yet. */
+  /** Applied only when the stored conversation has no workspace yet. */
   workspace_id?: string;
 }
 

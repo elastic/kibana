@@ -267,8 +267,7 @@ export const createConversationNotFoundError = ({
 };
 
 /**
- * Error thrown when a conversation write lost an optimistic concurrency race and
- * could not be reconciled, e.g. two clients writing to the same conversation.
+ * Error thrown when concurrent writes to a conversation could not be reconciled.
  */
 export type AgentBuilderConversationWriteConflictError =
   AgentBuilderError<AgentBuilderErrorCode.conversationWriteConflict>;
