@@ -52,7 +52,7 @@ import type {
   ValidXYDataLayerConfig,
   XYLayerConfig,
 } from './types';
-import { getColumnToLabelMap, getDefaultFillOpacity } from './state_helpers';
+import { getColumnToLabelMap } from './state_helpers';
 import { getDefaultPalette } from './default_palette';
 import { defaultReferenceLineColor } from './color_assignment';
 import { getDefaultVisualValuesForLayer } from '../../shared_components/datasource_default_values';
@@ -345,7 +345,7 @@ export const buildXYExpression = (
     endValue: state.endValue ?? 'None',
     emphasizeFitting: state.emphasizeFitting ?? true,
     minBarHeight: state.minBarHeight ?? 1,
-    fillOpacity: state.fillOpacity ?? getDefaultFillOpacity(state.areaFill),
+    fillOpacity: state.fillOpacity ?? 0.3,
     pointVisibility: state.pointVisibility ?? PointVisibilityOptions.AUTO,
     areaFill: state.areaFill ?? AreaFillOptions.SOLID,
     valueLabels: state.valueLabels ?? 'hide',

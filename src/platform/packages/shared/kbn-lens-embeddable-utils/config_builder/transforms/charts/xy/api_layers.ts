@@ -90,7 +90,7 @@ function convertDataLayerToAPI(
   const yConfigMap = new Map(visualization.yConfig?.map((y) => [y.forAccessor, y]));
   const yAccessorModesMap = getYAccessorAxisModeMap(visualization, (accessor) => accessor);
   const defaultColorMapping =
-    visualization.seriesType === 'line' || visualization.seriesType === 'area'
+    visualization.seriesType === 'line'
       ? DEFAULT_LINE_CATEGORICAL_COLOR_MAPPING
       : DEFAULT_CATEGORICAL_COLOR_MAPPING;
 

@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SeriesType } from '@kbn/lens-common';
-import type { AreaFillOption } from '@kbn/expression-xy-plugin/common';
 import type { ColorMappingCategoricalType } from '../../../schema/color';
 
 /**
@@ -33,25 +31,4 @@ export const DEFAULT_LINE_CATEGORICAL_COLOR_MAPPING: ColorMappingCategoricalType
   mode: 'categorical',
   palette: 'elastic_line_optimized',
   mapping: [],
-};
-
-export const getDefaultAreaFill = (seriesTypes: SeriesType[]) => {
-  if (seriesTypes.includes('area_percentage_stacked') || seriesTypes.includes('area_stacked')) {
-    return 'solid' as const;
-  }
-  if (seriesTypes.includes('area')) {
-    return 'gradient' as const;
-  }
-  return undefined;
-};
-
-export const getDefaultAreaFillOpacity = (fillOption: AreaFillOption | undefined) => {
-  switch (fillOption) {
-    case 'gradient':
-      return DEFAULT_AREAS_GRADIENT_FILL_OPACITY;
-    case 'solid':
-      return DEFAULT_AREAS_FILL_OPACITY;
-    default:
-      return undefined;
-  }
 };

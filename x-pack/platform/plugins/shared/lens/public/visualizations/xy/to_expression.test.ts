@@ -89,7 +89,7 @@ describe('#toExpression', () => {
           legend: { position: Position.Left, isVisible: true },
           valueLabels: 'hide',
           preferredSeriesType: 'bar',
-          areaFill: 'gradient',
+          areaFill: 'solid',
           fittingFunction: 'Carry',
           endValue: 'Nearest',
           emphasizeFitting: true,
@@ -894,7 +894,7 @@ describe('#toExpression', () => {
     ).toBeUndefined();
   });
 
-  it('should use the line-optimized palette for unstacked area charts without explicit palette', () => {
+  it('should use the default palette for area charts without explicit palette', () => {
     const expression = xyVisualization.toExpression(
       {
         legend: { position: Position.Bottom, isVisible: true },
@@ -905,35 +905,6 @@ describe('#toExpression', () => {
             layerId: 'first',
             layerType: LayerTypes.DATA,
             seriesType: 'area',
-            splitAccessors: ['d'],
-            xAccessor: 'a',
-            accessors: ['b', 'c'],
-          },
-        ],
-      },
-      frame.datasourceLayers,
-      undefined,
-      datasourceExpressionsByLayers
-    ) as Ast;
-
-    const layerChain = (expression.chain[0].arguments.layers[0] as Ast).chain;
-    const extendedDataLayer = layerChain[layerChain.length - 1];
-    const paletteExpression = extendedDataLayer.arguments.palette[0] as Ast;
-    expect(paletteExpression.chain[0].function).toEqual('system_palette');
-    expect(paletteExpression.chain[0].arguments.name).toEqual(['elastic_line_optimized']);
-  });
-
-  it('should use the default palette for stacked area charts without explicit palette', () => {
-    const expression = xyVisualization.toExpression(
-      {
-        legend: { position: Position.Bottom, isVisible: true },
-        valueLabels: 'hide',
-        preferredSeriesType: 'area_stacked',
-        layers: [
-          {
-            layerId: 'first',
-            layerType: LayerTypes.DATA,
-            seriesType: 'area_stacked',
             splitAccessors: ['d'],
             xAccessor: 'a',
             accessors: ['b', 'c'],

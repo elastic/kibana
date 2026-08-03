@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { SeriesType } from '@kbn/lens-common';
 import type { XYConfig } from '../../../schema/charts/xy';
 import {
   convertStylingToAPIFormat,
@@ -24,6 +25,8 @@ import {
   DEFAULT_POINTS_VISIBILITY,
 } from './defaults';
 
+const allLayersPresent: SeriesType[] = ['bar', 'area', 'line'];
+
 describe('XY Appearances Transforms', () => {
   it('should return empty state when given empty API config', () => {
     const apiConfig: XYConfig['styling'] = {};
@@ -31,21 +34,15 @@ describe('XY Appearances Transforms', () => {
     expect(result).toEqual({});
   });
 
-  it('should default areaFill when omitted, unstacked to gradient and stacked to solid', () => {
-    expect(convertStylingToStateFormat({ areas: { fill_opacity: 0.5 } }, ['area_stacked'])).toEqual(
-      {
-        fillOpacity: 0.5,
-        areaFill: 'solid' as const,
-      }
-    );
+  it('should default areaFill when omitted to solid', () => {
     expect(convertStylingToStateFormat({ areas: { fill_opacity: 0.5 } }, ['area'])).toEqual({
       fillOpacity: 0.5,
-      areaFill: 'gradient' as const,
+      areaFill: 'solid' as const,
     });
   });
 
   it('should fill styling defaults when converting empty state to API format', () => {
-    const result = convertStylingToAPIFormat({}, ['area_stacked', 'bar_stacked', 'line']);
+    const result = convertStylingToAPIFormat({}, allLayersPresent);
     expect(result.bars?.minimum_height).toBe(DEFAULT_BARS_MINIMUM_HEIGHT);
     expect(result.areas?.fill_opacity).toBe(DEFAULT_AREAS_FILL_OPACITY);
     expect(result.areas?.fill).toBe(DEFAULT_AREAS_FILL);
@@ -171,8 +168,8 @@ describe('XY Appearances Transforms', () => {
       areas: { fill_opacity: 0.5, fill: 'gradient' },
       fitting: { type: 'linear', emphasize: true, extend: 'zero' },
     };
-    const state = convertStylingToStateFormat(original, ['area', 'bar_stacked', 'line']);
-    const result = convertStylingToAPIFormat(state, ['area', 'bar_stacked', 'line']);
+    const state = convertStylingToStateFormat(original, allLayersPresent);
+    const result = convertStylingToAPIFormat(state, allLayersPresent);
 
     expect(result.overlays?.partial_buckets).toEqual(original.overlays?.partial_buckets);
     expect(result.overlays?.current_time_marker).toEqual(original.overlays?.current_time_marker);
@@ -200,8 +197,8 @@ describe('XY Appearances Transforms', () => {
       endValue: 'Zero' as const,
     };
 
-    const api = convertStylingToAPIFormat(original, ['area', 'bar_stacked', 'line']);
-    const result = convertStylingToStateFormat(api, ['area', 'bar_stacked', 'line']);
+    const api = convertStylingToAPIFormat(original, allLayersPresent);
+    const result = convertStylingToStateFormat(api, allLayersPresent);
 
     expect(result.valueLabels).toBe(original.valueLabels);
     expect(result.curveType).toBe(original.curveType);

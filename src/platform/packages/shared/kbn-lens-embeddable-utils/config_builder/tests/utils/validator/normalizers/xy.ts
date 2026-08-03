@@ -220,9 +220,7 @@ const alignLegacyTypes: NormalizerConfig<XYAttributes> = {
         } else if (!layer.palette) {
           // No colorMapping, no palette → the transform always adds a default
           layer.colorMapping =
-            layer.seriesType === 'line' || layer.seriesType === 'area'
-              ? DEFAULT_LINE_COLOR_MAPPING
-              : DEFAULT_COLOR_MAPPING;
+            layer.seriesType === 'line' ? DEFAULT_LINE_COLOR_MAPPING : DEFAULT_COLOR_MAPPING;
         }
         // If only palette present (legacy) → round-trip preserves palette; leave as-is.
 

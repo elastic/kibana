@@ -994,23 +994,6 @@ describe('xy_suggestions', () => {
     expect(suggestion.state.preferredSeriesType).toBe('area');
   });
 
-  test('defaults areaFill to "gradient" for a new unstacked area chart', () => {
-    const [suggestion, ...rest] = getSuggestions({
-      table: {
-        isMultiRow: true,
-        columns: [numCol('price'), numCol('quantity'), dateCol('date'), strCol('product')],
-        layerId: 'first',
-        changeType: 'reduced',
-      },
-      keptLayerIds: [],
-      subVisualizationId: 'area',
-    });
-
-    expect(rest).toHaveLength(0);
-    expect(suggestion.state.preferredSeriesType).toBe('area');
-    expect(suggestion.state.areaFill).toBe('gradient');
-  });
-
   test('keeps existing seriesType for initial tables', () => {
     const currentState: XYVisualizationState = {
       legend: { isVisible: true, position: 'bottom' },
@@ -1715,7 +1698,7 @@ describe('xy_suggestions', () => {
         fittingFunction: 'Carry',
         curveType: 'CURVE_MONOTONE_X',
         fillOpacity: 0.3,
-        areaFill: 'gradient',
+        areaFill: 'solid',
         xTitle: 'Custom X',
         yTitle: 'Custom Y',
         yRightTitle: 'Custom Y Right',
@@ -1762,7 +1745,7 @@ describe('xy_suggestions', () => {
       expect(suggestion.state.fittingFunction).toBe('Carry');
       expect(suggestion.state.curveType).toBe('CURVE_MONOTONE_X');
       expect(suggestion.state.fillOpacity).toBe(0.3);
-      expect(suggestion.state.areaFill).toBe('gradient');
+      expect(suggestion.state.areaFill).toBe('solid');
       expect(suggestion.state.xTitle).toBe('Custom X');
       expect(suggestion.state.yTitle).toBe('Custom Y');
       expect(suggestion.state.yRightTitle).toBe('Custom Y Right');

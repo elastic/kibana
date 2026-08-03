@@ -15,14 +15,13 @@ import type { XYApiLineInterpolation } from '../../../schema/charts/xy';
 import { getReversibleMappings, stripUndefined } from '../utils';
 import {
   DEFAULT_AREAS_FILL,
+  DEFAULT_AREAS_FILL_OPACITY,
   DEFAULT_BARS_MINIMUM_HEIGHT,
   DEFAULT_CURRENT_TIME_MARKER_VISIBLE,
   DEFAULT_DATA_LABELS_VISIBLE,
   DEFAULT_LINES_INTERPOLATION,
   DEFAULT_PARTIAL_BUCKETS_VISIBLE,
   DEFAULT_POINTS_VISIBILITY,
-  getDefaultAreaFill,
-  getDefaultAreaFillOpacity,
 } from './defaults';
 
 type XYStyling = NonNullable<XYConfig['styling']>;
@@ -124,8 +123,7 @@ export function convertStylingToAPIFormat(
     areas: layerPresence.hasAreas
       ? {
           fill: config.areaFill ?? DEFAULT_AREAS_FILL,
-          fill_opacity:
-            config.fillOpacity ?? getDefaultAreaFillOpacity(config.areaFill ?? DEFAULT_AREAS_FILL),
+          fill_opacity: config.fillOpacity ?? DEFAULT_AREAS_FILL_OPACITY,
         }
       : undefined,
     bars: layerPresence.hasBars
@@ -162,8 +160,7 @@ export function convertStylingToStateFormat(
   config: XYStyling,
   seriesTypes: SeriesType[]
 ): XYLensAppearanceState {
-  const areaFill = config.areas?.fill ?? getDefaultAreaFill(seriesTypes);
-  const fillOpacity = config.areas?.fill_opacity ?? getDefaultAreaFillOpacity(areaFill);
+  const layerPresence = getLayerPresence(seriesTypes);
 
   return stripUndefined<XYLensAppearanceState>({
     hideEndzones:
@@ -180,8 +177,12 @@ export function convertStylingToStateFormat(
     pointVisibility: pointVisibilityCompat.toState(config.points?.visibility),
     curveType: curveTypeCompat.toState(config.interpolation),
     minBarHeight: config.bars?.minimum_height,
-    fillOpacity,
-    areaFill,
+    ...(layerPresence.hasAreas
+      ? {
+          fillOpacity: config.areas?.fill_opacity ?? DEFAULT_AREAS_FILL_OPACITY,
+          areaFill: config.areas?.fill ?? DEFAULT_AREAS_FILL,
+        }
+      : {}),
     fittingFunction: fittingFunctionCompat.toState(config.fitting?.type),
     emphasizeFitting: config.fitting?.emphasize,
     endValue: extendCompat.toState(config.fitting?.extend),

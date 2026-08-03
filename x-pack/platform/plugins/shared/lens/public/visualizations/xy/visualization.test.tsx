@@ -6,7 +6,6 @@
  */
 
 import { type ExtraAppendLayerArg, getXyVisualization } from './visualization';
-import { resolveAreaFill } from './state_helpers';
 import { LegendValue, Position } from '@elastic/charts';
 import type {
   Operation,
@@ -2785,12 +2784,12 @@ describe('xy_visualization', () => {
       });
 
       it('should query palette to fill in colors for other dimensions', () => {
-        // The example state uses an unstacked area layer, which defaults to the line-optimized palette.
-        const palette = paletteServiceMock.get(KbnPalette.ElasticLineOptimized);
+        const palette = paletteServiceMock.get('default');
         (palette.getCategoricalColor as jest.Mock).mockClear();
         const accessorConfig = callConfigAndFindYConfig({}, 'c');
         expect(accessorConfig.triggerIconType).toEqual('color');
-        expect(accessorConfig.color).toEqual('blue');
+        // black is the color returned from the palette mock
+        expect(accessorConfig.color).toEqual('black');
         expect(palette.getCategoricalColor).toHaveBeenCalledWith(
           [
             {
@@ -4577,39 +4576,6 @@ describe('xy_visualization', () => {
       );
     });
 
-    it('should change palette from default to line-optimized when switching to unstacked area', () => {
-      const state = exampleState();
-      (state.layers[0] as XYDataLayerConfig).seriesType = 'bar';
-      (state.layers[0] as XYDataLayerConfig).colorMapping = DEFAULT_COLOR_MAPPING_CONFIG;
-      const newState = xyVisualization.switchVisualizationType!('area', state);
-      expect((newState.layers[0] as XYDataLayerConfig).colorMapping?.paletteId).toEqual(
-        KbnPalette.ElasticLineOptimized
-      );
-    });
-
-    it('should keep the default palette when switching to stacked area', () => {
-      const state = exampleState();
-      (state.layers[0] as XYDataLayerConfig).seriesType = 'bar';
-      (state.layers[0] as XYDataLayerConfig).colorMapping = DEFAULT_COLOR_MAPPING_CONFIG;
-      const newState = xyVisualization.switchVisualizationType!('area_stacked', state);
-      expect((newState.layers[0] as XYDataLayerConfig).colorMapping?.paletteId).toEqual(
-        KbnPalette.Default
-      );
-    });
-
-    it('should switch palette from line-optimized to default when switching from unstacked area to stacked area', () => {
-      const state = exampleState();
-      (state.layers[0] as XYDataLayerConfig).seriesType = 'area';
-      (state.layers[0] as XYDataLayerConfig).colorMapping = {
-        ...DEFAULT_COLOR_MAPPING_CONFIG,
-        paletteId: KbnPalette.ElasticLineOptimized,
-      };
-      const newState = xyVisualization.switchVisualizationType!('area_stacked', state);
-      expect((newState.layers[0] as XYDataLayerConfig).colorMapping?.paletteId).toEqual(
-        KbnPalette.Default
-      );
-    });
-
     it('should switch only the second layer to the new visualization type if layerId is specified (chart switch case)', () => {
       const state = exampleState();
       state.layers[1] = { ...state.layers[0] };
@@ -4624,43 +4590,14 @@ describe('xy_visualization', () => {
     });
 
     describe('areaFill defaulting', () => {
-      it('applies the gradient default when an unstacked area is introduced', () => {
+      it('applies the solid default when an area layer is introduced', () => {
         const state = exampleState();
         (state.layers[0] as XYDataLayerConfig).seriesType = 'bar';
         expect(state.areaFill).toBeUndefined();
         const newState = xyVisualization.switchVisualizationType!('area', state);
         expect((newState.layers[0] as XYDataLayerConfig).seriesType).toEqual('area');
-        expect(newState.areaFill).toEqual('gradient');
-      });
-
-      it('applies the solid default when a stacked area is introduced', () => {
-        const state = exampleState();
-        (state.layers[0] as XYDataLayerConfig).seriesType = 'bar_stacked';
-        const newState = xyVisualization.switchVisualizationType!('area', state);
-        expect((newState.layers[0] as XYDataLayerConfig).seriesType).toEqual('area_stacked');
         expect(newState.areaFill).toEqual('solid');
       });
-    });
-  });
-
-  describe('resolveAreaFill', () => {
-    it('applies gradient for unstacked and solid for stacked/percentage areas', () => {
-      expect(resolveAreaFill('bar', 'area', undefined)).toEqual('gradient');
-      expect(resolveAreaFill('bar', 'area_stacked', undefined)).toEqual('solid');
-      expect(resolveAreaFill('bar', 'area_percentage_stacked', undefined)).toEqual('solid');
-    });
-
-    it('overrides a prior fill when the stacking category changes', () => {
-      expect(resolveAreaFill('area', 'area_stacked', 'gradient')).toEqual('solid');
-      expect(resolveAreaFill('area_stacked', 'area', 'solid')).toEqual('gradient');
-    });
-
-    it('preserves the current value when the stacking default is unchanged', () => {
-      expect(resolveAreaFill('area_stacked', 'area_percentage_stacked', 'gradient')).toEqual(
-        'gradient'
-      );
-      expect(resolveAreaFill('area', 'bar', 'gradient')).toEqual('gradient');
-      expect(resolveAreaFill('area', 'bar', undefined)).toBeUndefined();
     });
   });
 });

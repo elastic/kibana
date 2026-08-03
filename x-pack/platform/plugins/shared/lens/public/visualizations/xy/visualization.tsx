@@ -83,10 +83,8 @@ import {
   getAnnotationLayerErrors,
   isHorizontalChart,
   isHorizontalSeries,
-  usesLineOptimizedPalette,
   getColumnToLabelMap,
-  AREA_SERIES,
-  resolveAreaFill,
+  isLineSeries,
 } from './state_helpers';
 import {
   getGroupsAvailableInData,
@@ -302,17 +300,13 @@ export const getXyVisualization = ({
         compatibleSeriesType
       );
 
-    return applyChartDefaultsIfNeeded(
-      {
-        ...state,
-        preferredSeriesType: compatibleSeriesType,
-        layers: layerId
-          ? state.layers.map((layer) => (layer.layerId === layerId ? switchLayer(layer) : layer))
-          : state.layers.map(switchLayer),
-      },
-      dataLayer.seriesType,
-      compatibleSeriesType
-    );
+    return {
+      ...state,
+      preferredSeriesType: compatibleSeriesType,
+      layers: layerId
+        ? state.layers.map((layer) => (layer.layerId === layerId ? switchLayer(layer) : layer))
+        : state.layers.map(switchLayer),
+    };
   },
 
   getSuggestions,
@@ -821,14 +815,10 @@ export const getXyVisualization = ({
         layer={layer}
         setLayerState={(newLayer: XYDataLayerConfig) =>
           setState(
-            applyChartDefaultsIfNeeded(
-              updateLayer(
-                state,
-                applySeriesDefaultsIfNeeded(newLayer, layer.seriesType, newLayer.seriesType),
-                index
-              ),
-              layer.seriesType,
-              newLayer.seriesType
+            updateLayer(
+              state,
+              applySeriesDefaultsIfNeeded(newLayer, layer.seriesType, newLayer.seriesType),
+              index
             )
           )
         }
@@ -1330,45 +1320,24 @@ function applySeriesDefaultsIfNeeded(
 }
 
 /**
- * Applies chart-type-specific defaults to a state after a type switch.
- */
-export const applyChartDefaultsIfNeeded = (
-  state: XYVisualizationState,
-  seriesType: SeriesType,
-  toSeriesType: SeriesType
-): XYVisualizationState => {
-  if (!AREA_SERIES.includes(toSeriesType)) {
-    return state;
-  }
-
-  return {
-    ...state,
-    areaFill: resolveAreaFill(seriesType, toSeriesType, state.areaFill),
-  };
-};
-
-/**
  * Resolves the default palette when switching between series types.
  * Uses direction-specific matching so that user-chosen palettes are preserved:
- *  - Switching TO a line-optimized type (line/unstacked area): only replaces 'default' with 'elastic_line_optimized'
- *  - Switching FROM a line-optimized type: only replaces 'elastic_line_optimized' with 'default'
+ *  - Switching TO line: only replaces 'default' with 'elastic_line_optimized'
+ *  - Switching FROM line: only replaces 'elastic_line_optimized' with 'default'
  */
 function resolveDefaultPaletteForSeriesType(
   colorMapping: NonNullable<XYDataLayerConfig['colorMapping']>,
   fromSeriesType: SeriesType,
   toSeriesType: SeriesType
 ): NonNullable<XYDataLayerConfig['colorMapping']> {
-  if (usesLineOptimizedPalette(fromSeriesType) === usesLineOptimizedPalette(toSeriesType)) {
+  if (isLineSeries(fromSeriesType) === isLineSeries(toSeriesType)) {
     return colorMapping;
   }
 
-  if (usesLineOptimizedPalette(toSeriesType) && colorMapping.paletteId === KbnPalette.Default) {
+  if (isLineSeries(toSeriesType) && colorMapping.paletteId === KbnPalette.Default) {
     return { ...colorMapping, paletteId: KbnPalette.ElasticLineOptimized };
   }
-  if (
-    usesLineOptimizedPalette(fromSeriesType) &&
-    colorMapping.paletteId === KbnPalette.ElasticLineOptimized
-  ) {
+  if (isLineSeries(fromSeriesType) && colorMapping.paletteId === KbnPalette.ElasticLineOptimized) {
     return { ...colorMapping, paletteId: KbnPalette.Default };
   }
 
