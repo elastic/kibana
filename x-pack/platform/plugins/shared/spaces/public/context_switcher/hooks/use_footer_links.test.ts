@@ -62,10 +62,12 @@ describe('useFooterLinks', () => {
     );
   });
 
-  it('returns "Connection details" link for serverless cloud', () => {
+  it('returns "Connection details" link when cloud is enabled', () => {
     const application = createApplication();
 
-    const { result } = renderHook(() => useFooterLinks({ application, cloud, isServerless: true }));
+    const { result } = renderHook(() =>
+      useFooterLinks({ application, cloud, isServerless: false, activeSpaceSolution: 'es' })
+    );
 
     expect(result.current).toEqual(
       expect.arrayContaining([
@@ -77,11 +79,12 @@ describe('useFooterLinks', () => {
     );
   });
 
-  it('does not return "Connection details" when not serverless', () => {
+  it('does not return "Connection details" when cloud is disabled', () => {
     const application = createApplication();
+    const cloudMock = createCloud({ isCloudEnabled: false });
 
     const { result } = renderHook(() =>
-      useFooterLinks({ application, cloud, isServerless: false, activeSpaceSolution: 'es' })
+      useFooterLinks({ application, cloud: cloudMock, activeSpaceSolution: 'es' })
     );
 
     const ids = result.current.map((item) => item.id);
