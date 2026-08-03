@@ -25,6 +25,7 @@
     "@kbn/core-saved-objects-api-server",
     "@kbn/migrator-test-kit",
     "@kbn/config-schema",
+    "@kbn/zod",
     "@kbn/repo-info",
     "@kbn/encrypted-saved-objects-plugin",
     "@kbn/object-utils",

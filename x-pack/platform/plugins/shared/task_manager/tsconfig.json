@@ -17,6 +17,7 @@
     "@kbn/uiam-api-keys-provisioning-status",
     "@kbn/usage-collection-plugin",
     "@kbn/config-schema",
+    "@kbn/config-schema-helpers",
     "@kbn/config",
     "@kbn/utility-types",
     "@kbn/safer-lodash-set",

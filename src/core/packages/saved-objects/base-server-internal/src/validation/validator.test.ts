@@ -8,6 +8,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import type {
   SavedObjectSanitizedDoc,
@@ -202,6 +203,35 @@ describe('Saved Objects type validator', () => {
       const data = createMockObject({});
       validator.validate(data);
       expect(getCalledVersion()).toEqual('3.0.0');
+    });
+  });
+
+  describe('zod validation specs', () => {
+    const zodValidationMap: SavedObjectsValidationMap = {
+      '3.0.0': z.object({
+        foo: z.string(),
+      }),
+    };
+
+    beforeEach(() => {
+      validator = new SavedObjectsTypeValidator({
+        logger,
+        type,
+        validationMap: zodValidationMap,
+        defaultVersion,
+      });
+    });
+
+    it('validates with zod when attributes match', () => {
+      const data = createMockObject({ attributes: { foo: 'hi' } });
+      expect(() => validator.validate(data)).not.toThrowError();
+    });
+
+    it('throws when zod rejects attributes', () => {
+      const data = createMockObject({ attributes: { foo: 1 } });
+      expect(() => validator.validate(data)).toThrow(
+        /Invalid input: expected string, received number/
+      );
     });
   });
 });

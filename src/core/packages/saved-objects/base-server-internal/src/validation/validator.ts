@@ -14,7 +14,7 @@ import type {
   SavedObjectsValidationMap,
   SavedObjectSanitizedDoc,
 } from '@kbn/core-saved-objects-server';
-import { createSavedObjectSanitizedDocSchema } from './schema';
+import { createSavedObjectSanitizedDocValidator } from './schema';
 import { isVirtualModelVersion } from '../model_version';
 
 /**
@@ -64,8 +64,8 @@ export class SavedObjectsTypeValidator {
     }
 
     try {
-      const validationSchema = createSavedObjectSanitizedDocSchema(validationRule);
-      validationSchema.validate(document);
+      const validate = createSavedObjectSanitizedDocValidator(validationRule);
+      validate(document);
     } catch (e) {
       this.log.warn(
         `Error validating object of type [${this.type}] against version [${usedVersion}]`

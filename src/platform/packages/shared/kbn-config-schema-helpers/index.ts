@@ -7,12 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// Side-effect import so the `GlobalMeta` augmentation (adding the typed
-// `openapi` field to `.meta()`) is included wherever `@kbn/zod` is imported.
-import './openapi';
-
-export * from 'zod/v4';
-export { isZod } from './util';
-export { getZodSchemaStructure } from './get_schema_structure';
-export { lazySchema, setLazySchemaDisabled } from './lazy_schema';
-export type { OasMetaExtensions, OasMetaAvailability } from './openapi';
+export { expectConfigSchema } from './src/expect_config_schema';
