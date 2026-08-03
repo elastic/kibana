@@ -191,7 +191,13 @@ const formatAllocationExplanation = (explain: estypes.ClusterAllocationExplainRe
   if (explain.node_allocation_decisions) {
     const groups = new Map<
       string,
-      { decider: string; decision: string; explanation: string; count: number; firstNodeName: string }
+      {
+        decider: string;
+        decision: string;
+        explanation: string;
+        count: number;
+        firstNodeName: string;
+      }
     >();
 
     for (const node of explain.node_allocation_decisions) {
