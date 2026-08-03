@@ -434,7 +434,13 @@ export class TaskManagerPlugin
       }`
     );
 
-    const startingCapacity = calculateStartingCapacity(this.config!, this.logger, defaultCapacity);
+    // TEMPORARY perf-test override — DO NOT MERGE. Serverless ignores
+    // `xpack.task_manager.capacity`, so force the starting capacity to 50 for the
+    // alerting v2 ES|QL streaming saturation test to run at capacity 50 on
+    // Serverless as well as ECH. Remove this override (restore the plain
+    // `calculateStartingCapacity` assignment) before merging.
+    let startingCapacity = calculateStartingCapacity(this.config!, this.logger, defaultCapacity);
+    startingCapacity = 50;
 
     // Only poll for tasks if configured to run tasks
     if (this.shouldRunBackgroundTasks) {

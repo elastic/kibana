@@ -106,22 +106,29 @@ export class GenerateDataRoute extends BaseAlertingRoute {
     }
 
     if (!exists || recreate) {
-      await this.esClient.indices.create({
-        index,
-        settings: {
-          number_of_shards: 1,
-          number_of_replicas: 0,
+      const mappings = {
+        properties: {
+          '@timestamp': { type: 'date' },
+          host: { properties: { name: { type: 'keyword' } } },
+          // ignore_above kept below Lucene's 32766-byte term limit so the
+          // ~5KB value is stored in doc values and readable by ES|QL.
+          message: { type: 'keyword', ignore_above: 32766 },
         },
-        mappings: {
-          properties: {
-            '@timestamp': { type: 'date' },
-            host: { properties: { name: { type: 'keyword' } } },
-            // ignore_above kept below Lucene's 32766-byte term limit so the
-            // ~5KB value is stored in doc values and readable by ES|QL.
-            message: { type: 'keyword', ignore_above: 32766 },
-          },
-        },
-      });
+      } as const;
+
+      try {
+        // Stateful (ECH / self-managed): pin shards/replicas for deterministic
+        // single-node perf behavior.
+        await this.esClient.indices.create({
+          index,
+          settings: { number_of_shards: 1, number_of_replicas: 0 },
+          mappings,
+        });
+      } catch {
+        // Serverless rejects explicit shard/replica settings; retry with
+        // mappings only (shard topology is managed by the platform there).
+        await this.esClient.indices.create({ index, mappings });
+      }
     }
   }
 
