@@ -57,17 +57,26 @@ export const OCCURRENCES_TOOLTIP_NAME = i18n.translate(
   { defaultMessage: 'Detected event occurrences' }
 );
 
-export const TABLE_CAPTION = i18n.translate('xpack.significantEventsApp.knowledgeIndicators.tableCaption', {
-  defaultMessage: 'Knowledge Indicators table',
-});
+export const TABLE_CAPTION = i18n.translate(
+  'xpack.significantEventsApp.knowledgeIndicators.tableCaption',
+  {
+    defaultMessage: 'Knowledge Indicators table',
+  }
+);
 
-export const TABLE_LABEL = i18n.translate('xpack.significantEventsApp.knowledgeIndicators.tableLabel', {
-  defaultMessage: 'Knowledge indicators',
-});
+export const TABLE_LABEL = i18n.translate(
+  'xpack.significantEventsApp.knowledgeIndicators.tableLabel',
+  {
+    defaultMessage: 'Knowledge indicators',
+  }
+);
 
-export const NO_ITEMS_MESSAGE = i18n.translate('xpack.significantEventsApp.knowledgeIndicators.noItemsMessage', {
-  defaultMessage: 'No knowledge indicators found',
-});
+export const NO_ITEMS_MESSAGE = i18n.translate(
+  'xpack.significantEventsApp.knowledgeIndicators.noItemsMessage',
+  {
+    defaultMessage: 'No knowledge indicators found',
+  }
+);
 
 export const SEARCH_PLACEHOLDER = i18n.translate(
   'xpack.significantEventsApp.knowledgeIndicators.searchPlaceholder',
@@ -127,20 +136,26 @@ export const GENERATION_IN_PROGRESS_TITLE = i18n.translate(
 export const getGenerationInProgressDescription = (streamNames: string[]): string => {
   const count = streamNames.length;
   if (count <= 2) {
-    return i18n.translate('xpack.significantEventsApp.knowledgeIndicators.generationInProgressDescriptionFew', {
-      defaultMessage: 'Generation is running for: {streams}. This may take a few minutes.',
-      values: { streams: streamNames.join(', ') },
-    });
+    return i18n.translate(
+      'xpack.significantEventsApp.knowledgeIndicators.generationInProgressDescriptionFew',
+      {
+        defaultMessage: 'Generation is running for: {streams}. This may take a few minutes.',
+        values: { streams: streamNames.join(', ') },
+      }
+    );
   }
-  return i18n.translate('xpack.significantEventsApp.knowledgeIndicators.generationInProgressDescriptionMany', {
-    defaultMessage:
-      'Generation is running for {first}, {second} and {remaining} more. This may take a few minutes.',
-    values: {
-      first: streamNames[0],
-      second: streamNames[1],
-      remaining: count - 2,
-    },
-  });
+  return i18n.translate(
+    'xpack.significantEventsApp.knowledgeIndicators.generationInProgressDescriptionMany',
+    {
+      defaultMessage:
+        'Generation is running for {first}, {second} and {remaining} more. This may take a few minutes.',
+      values: {
+        first: streamNames[0],
+        second: streamNames[1],
+        remaining: count - 2,
+      },
+    }
+  );
 };
 
 export const HIDDEN_COMPUTED_FEATURES_HINT = i18n.translate(

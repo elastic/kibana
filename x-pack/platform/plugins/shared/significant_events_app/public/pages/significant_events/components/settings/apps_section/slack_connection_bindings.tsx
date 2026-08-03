@@ -88,20 +88,18 @@ export function SlackConnectionBindings({ canEdit }: SlackConnectionBindingsProp
     () => [
       {
         field: 'channel' as const,
-        name: i18n.translate(
-          'xpack.significantEventsApp.settings.apps.slackTableChannel',
-          { defaultMessage: 'Channel' }
-        ),
+        name: i18n.translate('xpack.significantEventsApp.settings.apps.slackTableChannel', {
+          defaultMessage: 'Channel',
+        }),
         render: (_: unknown, binding: SlackChannelBinding) => (
           <EuiText size="s">{channelLabel(binding)}</EuiText>
         ),
       },
       {
         field: 'actions' as const,
-        name: i18n.translate(
-          'xpack.significantEventsApp.settings.apps.slackTableActions',
-          { defaultMessage: 'Actions' }
-        ),
+        name: i18n.translate('xpack.significantEventsApp.settings.apps.slackTableActions', {
+          defaultMessage: 'Actions',
+        }),
         width: '100px',
         render: (_: unknown, binding: SlackChannelBinding) => (
           <BindingActionCell
@@ -133,10 +131,9 @@ export function SlackConnectionBindings({ canEdit }: SlackConnectionBindingsProp
               botName: <strong>{'@Elastic'}</strong>,
               bind: (
                 <strong>
-                  {i18n.translate(
-                    'xpack.significantEventsApp.settings.apps.slackBindChannel',
-                    { defaultMessage: 'Connect' }
-                  )}
+                  {i18n.translate('xpack.significantEventsApp.settings.apps.slackBindChannel', {
+                    defaultMessage: 'Connect',
+                  })}
                 </strong>
               ),
             }}
@@ -175,12 +172,9 @@ export function SlackConnectionBindings({ canEdit }: SlackConnectionBindingsProp
             onClick={onBind}
             data-test-subj="streamsSlackAppBindChannelButton"
           >
-            {i18n.translate(
-              'xpack.significantEventsApp.settings.apps.slackBindChannel',
-              {
-                defaultMessage: 'Connect',
-              }
-            )}
+            {i18n.translate('xpack.significantEventsApp.settings.apps.slackBindChannel', {
+              defaultMessage: 'Connect',
+            })}
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -192,10 +186,9 @@ export function SlackConnectionBindings({ canEdit }: SlackConnectionBindingsProp
         loading={isLoading || isFetching}
         noItemsMessage={
           <EuiText size="xs" color="subdued">
-            {i18n.translate(
-              'xpack.significantEventsApp.settings.apps.slackNoChannels',
-              { defaultMessage: 'No connected channels' }
-            )}
+            {i18n.translate('xpack.significantEventsApp.settings.apps.slackNoChannels', {
+              defaultMessage: 'No connected channels',
+            })}
           </EuiText>
         }
         tableLayout="auto"
@@ -229,10 +222,10 @@ export function SlackConnectionBindings({ canEdit }: SlackConnectionBindingsProp
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiText size="xs" color="subdued" data-test-subj="streamsSlackAppChannelsPageLabel">
-                {i18n.translate(
-                  'xpack.significantEventsApp.settings.apps.slackChannelsPageLabel',
-                  { defaultMessage: 'Page {page}', values: { page: pageIndex + 1 } }
-                )}
+                {i18n.translate('xpack.significantEventsApp.settings.apps.slackChannelsPageLabel', {
+                  defaultMessage: 'Page {page}',
+                  values: { page: pageIndex + 1 },
+                })}
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -244,10 +237,9 @@ export function SlackConnectionBindings({ canEdit }: SlackConnectionBindingsProp
                 onClick={onNextPage}
                 data-test-subj="streamsSlackAppChannelsNextPage"
               >
-                {i18n.translate(
-                  'xpack.significantEventsApp.settings.apps.slackChannelsNextPage',
-                  { defaultMessage: 'Next' }
-                )}
+                {i18n.translate('xpack.significantEventsApp.settings.apps.slackChannelsNextPage', {
+                  defaultMessage: 'Next',
+                })}
               </EuiButtonEmpty>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -280,10 +272,9 @@ function BindingActionCell({ binding, canEdit, onDisconnected }: BindingActionCe
         onClick={() => setConfirmOpen(true)}
         data-test-subj="streamsSlackAppUnbindChannelButton"
       >
-        {i18n.translate(
-          'xpack.significantEventsApp.settings.apps.slackUnbindChannel',
-          { defaultMessage: 'Disconnect' }
-        )}
+        {i18n.translate('xpack.significantEventsApp.settings.apps.slackUnbindChannel', {
+          defaultMessage: 'Disconnect',
+        })}
       </EuiButtonEmpty>
       {confirmOpen && (
         <EuiConfirmModal
@@ -318,13 +309,10 @@ function BindingActionCell({ binding, canEdit, onDisconnected }: BindingActionCe
           data-test-subj="streamsSlackAppUnbindConfirmModal"
         >
           <EuiText size="s">
-            {i18n.translate(
-              'xpack.significantEventsApp.settings.apps.slackUnbindConfirmBody',
-              {
-                defaultMessage:
-                  'This will stop routing Slack messages for this channel to this deployment.',
-              }
-            )}
+            {i18n.translate('xpack.significantEventsApp.settings.apps.slackUnbindConfirmBody', {
+              defaultMessage:
+                'This will stop routing Slack messages for this channel to this deployment.',
+            })}
           </EuiText>
         </EuiConfirmModal>
       )}

@@ -9,11 +9,11 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KnowledgeIndicatorsPanel } from './knowledge_indicators_panel';
-import { createMockWiredStreamDefinition } from '../stream_management/data_management/shared/mocks';
+import { createMockWiredStreamDefinition } from './mocks';
 
 const mockUseStreamFeatures = jest.fn();
 const mockUseFetchDiscoveryQueries = jest.fn();
-const mockUseStreamsAppRouter = jest.fn();
+const mockUseSignificantEventsAppRouter = jest.fn();
 
 jest.mock('../../hooks/use_stream_features', () => ({
   useStreamFeatures: (...args: unknown[]) => mockUseStreamFeatures(...args),
@@ -28,7 +28,7 @@ jest.mock('../../hooks/use_stream_onboarding_status', () => ({
 }));
 
 jest.mock('../../hooks/use_significant_events_app_router', () => ({
-  useStreamsAppRouter: () => mockUseStreamsAppRouter(),
+  useSignificantEventsAppRouter: () => mockUseSignificantEventsAppRouter(),
 }));
 
 const renderWithI18n = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I18nProvider>);
@@ -39,7 +39,7 @@ describe('KnowledgeIndicatorsPanel', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseStreamsAppRouter.mockReturnValue({ link });
+    mockUseSignificantEventsAppRouter.mockReturnValue({ link });
     mockUseStreamFeatures.mockReturnValue({
       features: [{ id: 'feature-1' }, { id: 'feature-2' }],
       featuresLoading: false,

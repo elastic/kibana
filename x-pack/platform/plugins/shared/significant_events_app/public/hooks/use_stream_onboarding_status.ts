@@ -11,7 +11,7 @@ import {
   type SignificantEventsWorkflowStatusResult,
 } from '@kbn/significant-events-schema';
 import { RUNNING_POLL_INTERVAL_MS } from '../constants';
-import { useOnboardingApi } from '../use_onboarding_api';
+import { useOnboardingApi } from './use_onboarding_api';
 
 export const useStreamOnboardingStatus = (streamName: string) => {
   const { getOnboardingStatus } = useOnboardingApi();

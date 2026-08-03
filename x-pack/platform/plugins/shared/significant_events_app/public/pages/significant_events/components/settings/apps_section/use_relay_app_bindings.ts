@@ -61,10 +61,9 @@ export function useRelayAppBindings(enabled: boolean, cursor?: string): UseRelay
     keepPreviousData: true,
     onError: (error) => {
       notifications.toasts.addError(getFormattedError(error), {
-        title: i18n.translate(
-          'xpack.significantEventsApp.settings.apps.listBindingsError',
-          { defaultMessage: 'Failed to load connected Slack channels' }
-        ),
+        title: i18n.translate('xpack.significantEventsApp.settings.apps.listBindingsError', {
+          defaultMessage: 'Failed to load connected Slack channels',
+        }),
       });
     },
     // Connected channels only change via bind/unbind in this UI (which invalidate this
@@ -97,10 +96,9 @@ export function useBindChannel(): UseBindChannel {
       http.post<SlackAppBindChannelResponse>(BIND_CHANNEL_ROUTE(channelId)),
     onError: (error) => {
       notifications.toasts.addError(getFormattedError(error), {
-        title: i18n.translate(
-          'xpack.significantEventsApp.settings.apps.bindChannelError',
-          { defaultMessage: 'Failed to bind the Slack channel' }
-        ),
+        title: i18n.translate('xpack.significantEventsApp.settings.apps.bindChannelError', {
+          defaultMessage: 'Failed to bind the Slack channel',
+        }),
       });
     },
     onSettled: () => queryClient.invalidateQueries({ queryKey: RELAY_APP_BINDINGS_QUERY_KEY }),
@@ -129,10 +127,9 @@ export function useUnbindChannel(): UseUnbindChannel {
       http.post<SlackAppUnbindChannelResponse>(UNBIND_CHANNEL_ROUTE(channelId)),
     onError: (error) => {
       notifications.toasts.addError(getFormattedError(error), {
-        title: i18n.translate(
-          'xpack.significantEventsApp.settings.apps.unbindChannelError',
-          { defaultMessage: 'Failed to unbind the Slack channel' }
-        ),
+        title: i18n.translate('xpack.significantEventsApp.settings.apps.unbindChannelError', {
+          defaultMessage: 'Failed to unbind the Slack channel',
+        }),
       });
     },
     onSettled: () => queryClient.invalidateQueries({ queryKey: RELAY_APP_BINDINGS_QUERY_KEY }),

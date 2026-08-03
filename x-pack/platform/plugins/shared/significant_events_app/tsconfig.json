@@ -39,6 +39,22 @@
     "@kbn/streams-schema",
     "@kbn/typed-react-router-config",
     "@kbn/unified-search-plugin",
-    "@kbn/utility-types"
+    "@kbn/utility-types",
+    "@kbn/significant-events-schema",
+    "@kbn/i18n-react",
+    "@kbn/react-hooks",
+    "@kbn/streams-ai",
+    "@kbn/deeplinks-analytics",
+    "@kbn/discover-plugin",
+    "@kbn/shared-ux-utility",
+    "@kbn/app-header",
+    "@kbn/calculate-auto",
+    "@kbn/management-settings-ids",
+    "@kbn/agent-builder-common",
+    "@kbn/agent-builder-plugin",
+    "@kbn/code-editor",
+    "@kbn/investigation-output",
+    "@kbn/dataset-quality-plugin",
+    "@kbn/streamlang"
   ]
 }

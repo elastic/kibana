@@ -28,8 +28,8 @@ import {
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import { FormattedRelative } from '@kbn/i18n-react';
-import { useStreamsPrivileges } from '../../../../../hooks/use_streams_privileges';
-import { useBlocksNewActivity } from '../../../../../hooks/significant_events/use_significant_events_maintenance';
+import { useSignificantEventsPrivileges } from '../../../../hooks/use_significant_events_privileges';
+import { useBlocksNewActivity } from '../../../../hooks/use_significant_events_maintenance';
 import {
   useConsolidateMemory,
   useMemorySearch,
@@ -56,7 +56,7 @@ export function MemoryTab() {
 
   const {
     ui: { manage: canManage },
-  } = useStreamsPrivileges();
+  } = useSignificantEventsPrivileges();
 
   const { data: treeData, isLoading: isTreeLoading } = useMemoryTree();
   const { data: searchData, isLoading: isSearchLoading } = useMemorySearch(searchQuery);
@@ -178,9 +178,12 @@ export function MemoryTab() {
               <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
                 <EuiFlexItem>
                   <EuiFieldSearch
-                    placeholder={i18n.translate('xpack.significantEventsApp.memory.searchPlaceholder', {
-                      defaultMessage: 'Search memory entries...',
-                    })}
+                    placeholder={i18n.translate(
+                      'xpack.significantEventsApp.memory.searchPlaceholder',
+                      {
+                        defaultMessage: 'Search memory entries...',
+                      }
+                    )}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     incremental
@@ -199,9 +202,12 @@ export function MemoryTab() {
                     >
                       <EuiButtonIcon
                         iconType="plusInCircle"
-                        aria-label={i18n.translate('xpack.significantEventsApp.memory.newEntryButton', {
-                          defaultMessage: 'New memory entry',
-                        })}
+                        aria-label={i18n.translate(
+                          'xpack.significantEventsApp.memory.newEntryButton',
+                          {
+                            defaultMessage: 'New memory entry',
+                          }
+                        )}
                         onClick={() => setShowCreateFlyout(true)}
                         data-test-subj="streamsMemoryNewEntryButton"
                       />
@@ -212,16 +218,22 @@ export function MemoryTab() {
                   <EuiPopover
                     button={
                       <EuiToolTip
-                        content={i18n.translate('xpack.significantEventsApp.memory.workflowActionsButton', {
-                          defaultMessage: 'Workflow actions',
-                        })}
+                        content={i18n.translate(
+                          'xpack.significantEventsApp.memory.workflowActionsButton',
+                          {
+                            defaultMessage: 'Workflow actions',
+                          }
+                        )}
                         disableScreenReaderOutput
                       >
                         <EuiButtonIcon
                           iconType="boxesHorizontal"
-                          aria-label={i18n.translate('xpack.significantEventsApp.memory.workflowActionsButton', {
-                            defaultMessage: 'Workflow actions',
-                          })}
+                          aria-label={i18n.translate(
+                            'xpack.significantEventsApp.memory.workflowActionsButton',
+                            {
+                              defaultMessage: 'Workflow actions',
+                            }
+                          )}
                           onClick={() => setIsActionsPopoverOpen((v) => !v)}
                           data-test-subj="streamsMemoryWorkflowActionsButton"
                         />
@@ -265,12 +277,18 @@ export function MemoryTab() {
                                 data-test-subj="streamsMemoryToggleWorkflowsButton"
                               >
                                 {workflowsEnabled
-                                  ? i18n.translate('xpack.significantEventsApp.memory.disableWorkflowsButton', {
-                                      defaultMessage: 'Disable background workflows',
-                                    })
-                                  : i18n.translate('xpack.significantEventsApp.memory.enableWorkflowsButton', {
-                                      defaultMessage: 'Enable background workflows',
-                                    })}
+                                  ? i18n.translate(
+                                      'xpack.significantEventsApp.memory.disableWorkflowsButton',
+                                      {
+                                        defaultMessage: 'Disable background workflows',
+                                      }
+                                    )
+                                  : i18n.translate(
+                                      'xpack.significantEventsApp.memory.enableWorkflowsButton',
+                                      {
+                                        defaultMessage: 'Enable background workflows',
+                                      }
+                                    )}
                               </EuiContextMenuItem>,
                             ]
                           : []),

@@ -120,9 +120,12 @@ const CONSEQUENCE_MESSAGE = i18n.translate(
   }
 );
 
-const WARNING_MESSAGE = i18n.translate('xpack.significantEventsApp.deleteTableItemsModal.warningMessage', {
-  defaultMessage: 'This action cannot be undone.',
-});
+const WARNING_MESSAGE = i18n.translate(
+  'xpack.significantEventsApp.deleteTableItemsModal.warningMessage',
+  {
+    defaultMessage: 'This action cannot be undone.',
+  }
+);
 
 const TABLE_CONTENT_ARIA_LABEL = i18n.translate(
   'xpack.significantEventsApp.deleteTableItemsModal.tableContentAriaLabel',
@@ -131,9 +134,12 @@ const TABLE_CONTENT_ARIA_LABEL = i18n.translate(
   }
 );
 
-const CANCEL_BUTTON_LABEL = i18n.translate('xpack.significantEventsApp.deleteTableItemsModal.cancelButton', {
-  defaultMessage: 'Cancel',
-});
+const CANCEL_BUTTON_LABEL = i18n.translate(
+  'xpack.significantEventsApp.deleteTableItemsModal.cancelButton',
+  {
+    defaultMessage: 'Cancel',
+  }
+);
 
 const MODAL_TABLE_CSS = css`
   max-height: 300px;

@@ -31,12 +31,12 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getSeverityLabel, type SignificantEvent } from '@kbn/significant-events-schema';
-import { useFetchSignificantEventLifecycle } from '../../../../../hooks/significant_events/use_fetch_significant_event_lifecycle';
-import { useKibana } from '../../../../../hooks/use_kibana';
-import { useTriggerInvestigation } from '../../../../../hooks/significant_events/use_trigger_investigation';
-import { useUpdateSignificantEvent } from '../../../../../hooks/significant_events/use_update_significant_event';
-import { useBlocksNewActivity } from '../../../../../hooks/significant_events/use_significant_events_maintenance';
-import { FlyoutToolbarHeader } from '../../../../flyout_components/flyout_toolbar_header';
+import { useFetchSignificantEventLifecycle } from '../../../../hooks/use_fetch_significant_event_lifecycle';
+import { useKibana } from '../../../../hooks/use_kibana';
+import { useTriggerInvestigation } from '../../../../hooks/use_trigger_investigation';
+import { useUpdateSignificantEvent } from '../../../../hooks/use_update_significant_event';
+import { useBlocksNewActivity } from '../../../../hooks/use_significant_events_maintenance';
+import { FlyoutToolbarHeader } from '../../../../components/flyout_components/flyout_toolbar_header';
 import { LifecycleTimeline } from './lifecycle_timeline';
 import { getSignificantEventStatusColor } from '../shared/status_display';
 import { SIGNIFICANT_EVENT_STATUS_LABELS } from '../shared/translations';
@@ -44,20 +44,32 @@ import { formatTimestamp } from '../../../../util/formatters';
 import { SignificantEventDetails } from '../../../../components/significant_event_details/significant_event_details';
 import { EventInvestigations } from './event_investigations';
 import { hasRunningInvestigation } from '../shared/investigation_status';
-import { RUNNING_POLL_INTERVAL_MS } from '../../../constants';
+import { RUNNING_POLL_INTERVAL_MS } from '../../../../constants';
 
-const LIFECYCLE_TITLE = i18n.translate('xpack.significantEventsApp.sigEventsTab.flyout.lifecycleTitle', {
-  defaultMessage: 'Lifecycle',
-});
-const LIFECYCLE_ERROR = i18n.translate('xpack.significantEventsApp.sigEventsTab.flyout.lifecycleError', {
-  defaultMessage: 'Failed to load lifecycle data',
-});
-const CLOSE_BUTTON_ARIA_LABEL = i18n.translate('xpack.significantEventsApp.sigEventsTab.flyout.close', {
-  defaultMessage: 'Close',
-});
-const CLOSE_EVENT_LABEL = i18n.translate('xpack.significantEventsApp.sigEventsTab.flyout.closeEvent', {
-  defaultMessage: 'Close significant event',
-});
+const LIFECYCLE_TITLE = i18n.translate(
+  'xpack.significantEventsApp.sigEventsTab.flyout.lifecycleTitle',
+  {
+    defaultMessage: 'Lifecycle',
+  }
+);
+const LIFECYCLE_ERROR = i18n.translate(
+  'xpack.significantEventsApp.sigEventsTab.flyout.lifecycleError',
+  {
+    defaultMessage: 'Failed to load lifecycle data',
+  }
+);
+const CLOSE_BUTTON_ARIA_LABEL = i18n.translate(
+  'xpack.significantEventsApp.sigEventsTab.flyout.close',
+  {
+    defaultMessage: 'Close',
+  }
+);
+const CLOSE_EVENT_LABEL = i18n.translate(
+  'xpack.significantEventsApp.sigEventsTab.flyout.closeEvent',
+  {
+    defaultMessage: 'Close significant event',
+  }
+);
 const ACTIONS_BUTTON_ARIA_LABEL = i18n.translate(
   'xpack.significantEventsApp.sigEventsTab.flyout.actionsMenuButtonAriaLabel',
   {
@@ -65,17 +77,26 @@ const ACTIONS_BUTTON_ARIA_LABEL = i18n.translate(
   }
 );
 
-const COPY_LINK_ARIA_LABEL = i18n.translate('xpack.significantEventsApp.sigEventsTab.flyout.copyLink', {
-  defaultMessage: 'Copy link to this event',
-});
+const COPY_LINK_ARIA_LABEL = i18n.translate(
+  'xpack.significantEventsApp.sigEventsTab.flyout.copyLink',
+  {
+    defaultMessage: 'Copy link to this event',
+  }
+);
 
-const COPY_LINK_SUCCESS = i18n.translate('xpack.significantEventsApp.sigEventsTab.flyout.copyLinkSuccess', {
-  defaultMessage: 'Copied link to event',
-});
+const COPY_LINK_SUCCESS = i18n.translate(
+  'xpack.significantEventsApp.sigEventsTab.flyout.copyLinkSuccess',
+  {
+    defaultMessage: 'Copied link to event',
+  }
+);
 
-const RUN_LABEL = i18n.translate('xpack.significantEventsApp.sigEventsTab.runInvestigationButton.label', {
-  defaultMessage: 'Run investigation',
-});
+const RUN_LABEL = i18n.translate(
+  'xpack.significantEventsApp.sigEventsTab.runInvestigationButton.label',
+  {
+    defaultMessage: 'Run investigation',
+  }
+);
 const RESTART_LABEL = i18n.translate(
   'xpack.significantEventsApp.sigEventsTab.runInvestigationButton.restartLabel',
   {
@@ -88,12 +109,18 @@ const RESTART_INVESTIGATION_TOOLTIP = i18n.translate(
     defaultMessage: 'This will cancel the running investigation and start a new one.',
   }
 );
-const SEVERITY_LABEL = i18n.translate('xpack.significantEventsApp.sigEventsTab.flyout.severityLabel', {
-  defaultMessage: 'Severity',
-});
-const CONFIDENCE_LABEL = i18n.translate('xpack.significantEventsApp.sigEventsTab.flyout.confidenceLabel', {
-  defaultMessage: 'Confidence',
-});
+const SEVERITY_LABEL = i18n.translate(
+  'xpack.significantEventsApp.sigEventsTab.flyout.severityLabel',
+  {
+    defaultMessage: 'Severity',
+  }
+);
+const CONFIDENCE_LABEL = i18n.translate(
+  'xpack.significantEventsApp.sigEventsTab.flyout.confidenceLabel',
+  {
+    defaultMessage: 'Confidence',
+  }
+);
 
 interface SignificantEventFlyoutProps {
   event: SignificantEvent;

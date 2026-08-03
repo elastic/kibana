@@ -24,8 +24,8 @@ import type {
   SignificantEventInvestigation,
 } from '@kbn/significant-events-schema';
 import { InvestigationOutput, useInvestigationState } from '@kbn/investigation-output';
-import { formatTimestamp } from '../../../../../util/formatters';
-import { useKibana } from '../../../../../hooks/use_kibana';
+import { formatTimestamp } from '../../../../util/formatters';
+import { useKibana } from '../../../../hooks/use_kibana';
 import { isInvestigationRunning } from '../shared/investigation_status';
 
 const SECTION_TITLE = i18n.translate(

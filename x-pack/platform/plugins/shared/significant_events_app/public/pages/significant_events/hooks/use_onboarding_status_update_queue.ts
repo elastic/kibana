@@ -10,7 +10,7 @@ import {
   type SignificantEventsWorkflowStatusResult,
 } from '@kbn/significant-events-schema';
 import { useCallback, useRef } from 'react';
-import { useOnboardingApi } from '../../../../hooks/use_onboarding_api';
+import { useOnboardingApi } from '../../../hooks/use_onboarding_api';
 
 type StreamOnboardingStatusUpdateCallback = (
   streamName: string,

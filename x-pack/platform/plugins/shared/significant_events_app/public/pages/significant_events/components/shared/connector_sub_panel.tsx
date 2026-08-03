@@ -9,7 +9,7 @@ import { EuiBadge, EuiSelectable } from '@elastic/eui';
 import type { EuiSelectableOption } from '@elastic/eui';
 import type { InferenceConnector } from '@kbn/inference-common';
 import React, { useCallback, useMemo } from 'react';
-import { ConnectorIcon } from '../../../../connector_list_button/connector_icon';
+import { ConnectorIcon } from '../../../../components/connector_icon';
 import { DEFAULT_MODEL_BADGE_LABEL } from './translations';
 
 interface ConnectorSubPanelProps {

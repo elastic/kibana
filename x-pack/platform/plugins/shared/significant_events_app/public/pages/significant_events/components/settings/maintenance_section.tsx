@@ -13,12 +13,11 @@ import type { SignificantEventsMaintenanceStatus } from '@kbn/significant-events
 import {
   useMaintenanceStatus,
   useSignificantEventsMaintenanceActions,
-} from '../../../../../hooks/significant_events/use_significant_events_maintenance';
+} from '../../../../hooks/use_significant_events_maintenance';
 
-const SECTION_TITLE = i18n.translate(
-  'xpack.significantEventsApp.settings.maintenance.title',
-  { defaultMessage: 'Significant Events activity' }
-);
+const SECTION_TITLE = i18n.translate('xpack.significantEventsApp.settings.maintenance.title', {
+  defaultMessage: 'Significant Events activity',
+});
 
 const SECTION_DESCRIPTION = i18n.translate(
   'xpack.significantEventsApp.settings.maintenance.description',
@@ -41,10 +40,9 @@ function PausedCallout({ status }: { status: SignificantEventsMaintenanceStatus 
       color="warning"
       iconType="pause"
       data-test-subj="streams-settings-maintenance-paused-status"
-      title={i18n.translate(
-        'xpack.significantEventsApp.settings.maintenance.pausedTitle',
-        { defaultMessage: 'Significant Events activity is paused' }
-      )}
+      title={i18n.translate('xpack.significantEventsApp.settings.maintenance.pausedTitle', {
+        defaultMessage: 'Significant Events activity is paused',
+      })}
     >
       {updatedBy && (
         <p>
@@ -121,23 +119,19 @@ export function MaintenanceSection({ canManage }: { canManage: boolean }) {
               )}
             >
               <p>
-                {i18n.translate(
-                  'xpack.significantEventsApp.settings.maintenance.statusErrorBody',
-                  {
-                    defaultMessage:
-                      'Pause and Resume are unavailable until status can be loaded. Activity controls stay disabled while status is unknown.',
-                  }
-                )}
+                {i18n.translate('xpack.significantEventsApp.settings.maintenance.statusErrorBody', {
+                  defaultMessage:
+                    'Pause and Resume are unavailable until status can be loaded. Activity controls stay disabled while status is unknown.',
+                })}
               </p>
               <EuiButton
                 size="s"
                 onClick={() => refetch()}
                 data-test-subj="streams-settings-maintenance-status-retry"
               >
-                {i18n.translate(
-                  'xpack.significantEventsApp.settings.maintenance.statusRetry',
-                  { defaultMessage: 'Retry' }
-                )}
+                {i18n.translate('xpack.significantEventsApp.settings.maintenance.statusRetry', {
+                  defaultMessage: 'Retry',
+                })}
               </EuiButton>
             </EuiCallOut>
             <EuiSpacer />
@@ -189,13 +183,10 @@ export function MaintenanceSection({ canManage }: { canManage: boolean }) {
               )}
             >
               <p>
-                {i18n.translate(
-                  'xpack.significantEventsApp.settings.maintenance.noManageBody',
-                  {
-                    defaultMessage:
-                      'You can view pause status, but pausing or resuming Significant Events activity requires the Streams manage privilege.',
-                  }
-                )}
+                {i18n.translate('xpack.significantEventsApp.settings.maintenance.noManageBody', {
+                  defaultMessage:
+                    'You can view pause status, but pausing or resuming Significant Events activity requires the Streams manage privilege.',
+                })}
               </p>
             </EuiCallOut>
             <EuiSpacer />
@@ -210,19 +201,16 @@ export function MaintenanceSection({ canManage }: { canManage: boolean }) {
           onClick={() => setIsModalOpen(true)}
         >
           {isLoading
-            ? i18n.translate(
-                'xpack.significantEventsApp.settings.maintenance.loadingButton',
-                { defaultMessage: 'Checking status…' }
-              )
+            ? i18n.translate('xpack.significantEventsApp.settings.maintenance.loadingButton', {
+                defaultMessage: 'Checking status…',
+              })
             : paused
-            ? i18n.translate(
-                'xpack.significantEventsApp.settings.maintenance.resumeButton',
-                { defaultMessage: 'Resume Significant Events activity' }
-              )
-            : i18n.translate(
-                'xpack.significantEventsApp.settings.maintenance.pauseButton',
-                { defaultMessage: 'Pause Significant Events activity' }
-              )}
+            ? i18n.translate('xpack.significantEventsApp.settings.maintenance.resumeButton', {
+                defaultMessage: 'Resume Significant Events activity',
+              })
+            : i18n.translate('xpack.significantEventsApp.settings.maintenance.pauseButton', {
+                defaultMessage: 'Pause Significant Events activity',
+              })}
         </EuiButton>
       </EuiPanel>
 
@@ -273,13 +261,10 @@ export function MaintenanceSection({ canManage }: { canManage: boolean }) {
                       'This re-enables the managed workflows and alerting rules that Pause disabled, and restores scheduled discovery / continuous onboarding only if they were enabled before pause. It does not restart executions that were cancelled.',
                   }
                 )
-              : i18n.translate(
-                  'xpack.significantEventsApp.settings.maintenance.pauseConfirmBody',
-                  {
-                    defaultMessage:
-                      'This disables all Significant Events managed workflows, cancels their in-flight executions, and disables the alerting rules backing knowledge indicator queries. No data is deleted.',
-                  }
-                )}
+              : i18n.translate('xpack.significantEventsApp.settings.maintenance.pauseConfirmBody', {
+                  defaultMessage:
+                    'This disables all Significant Events managed workflows, cancels their in-flight executions, and disables the alerting rules backing knowledge indicator queries. No data is deleted.',
+                })}
           </p>
         </EuiConfirmModal>
       )}

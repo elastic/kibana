@@ -144,9 +144,12 @@ export function SparkPlot({
         noResults={
           <EuiIcon
             type="chartLine"
-            aria-label={i18n.translate('xpack.significantEventsApp.columns.euiIcon.noOccurrencesLabel', {
-              defaultMessage: 'No occurrences',
-            })}
+            aria-label={i18n.translate(
+              'xpack.significantEventsApp.columns.euiIcon.noOccurrencesLabel',
+              {
+                defaultMessage: 'No occurrences',
+              }
+            )}
           />
         }
       />

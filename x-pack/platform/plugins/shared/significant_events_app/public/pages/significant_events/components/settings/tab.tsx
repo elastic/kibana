@@ -48,11 +48,11 @@ import {
   MIN_SIG_EVENTS_SCHEDULED_INTERVAL_MINUTES,
   MIN_SIG_EVENTS_SCHEDULED_REVIEW_PASSES,
 } from '@kbn/significant-events-plugin/common';
-import { useKibana } from '../../../../../hooks/use_kibana';
-import { useModelSettingsUrl } from '../../../../../hooks/use_model_settings_url';
-import { useStreamsPrivileges } from '../../../../../hooks/use_streams_privileges';
-import { getFormattedError } from '../../../../../util/errors';
-import { useBlocksNewActivity } from '../../../../../hooks/significant_events/use_significant_events_maintenance';
+import { useKibana } from '../../../../hooks/use_kibana';
+import { useModelSettingsUrl } from '../../../../hooks/use_model_settings_url';
+import { useSignificantEventsPrivileges } from '../../../../hooks/use_significant_events_privileges';
+import { getFormattedError } from '../../../../util/errors';
+import { useBlocksNewActivity } from '../../../../hooks/use_significant_events_maintenance';
 import { useFetchStreams } from '../../hooks/use_fetch_streams';
 import { useContinuousExtractionSettings } from './use_continuous_extraction_settings';
 import { useScheduledDiscoverySettings } from './use_scheduled_discovery_settings';
@@ -81,7 +81,7 @@ export function SettingsTab() {
   // settings routes used by `core.settings.client`/`globalClient` (require
   // `advancedSettings.save`). Gate the whole form on both so the user never
   // triggers a partial save that 403s halfway through.
-  const { ui: streamsUiPrivileges } = useStreamsPrivileges();
+  const { ui: streamsUiPrivileges } = useSignificantEventsPrivileges();
   const canManageStreams = streamsUiPrivileges.manage;
   const canSaveAdvancedSettings = core.application.capabilities.advancedSettings?.save === true;
   const canEditSettings = canManageStreams && canSaveAdvancedSettings;
@@ -275,10 +275,9 @@ export function SettingsTab() {
       {!canEditSettings && (
         <>
           <EuiCallOut
-            title={i18n.translate(
-              'xpack.significantEventsApp.settings.noPermissionCalloutTitle',
-              { defaultMessage: 'You need additional privileges to edit these settings' }
-            )}
+            title={i18n.translate('xpack.significantEventsApp.settings.noPermissionCalloutTitle', {
+              defaultMessage: 'You need additional privileges to edit these settings',
+            })}
             color="warning"
             iconType="lock"
             data-test-subj="streams-settings-no-permission-callout"
@@ -314,23 +313,19 @@ export function SettingsTab() {
         <EuiPanel hasShadow={false} hasBorder={false}>
           <EuiText size="s">
             <p>
-              {i18n.translate(
-                'xpack.significantEventsApp.settings.modelSettingsDescription',
-                {
-                  defaultMessage:
-                    'LLM models for Significant Events features are managed centrally in the Model Settings page under Stack Management.',
-                }
-              )}
+              {i18n.translate('xpack.significantEventsApp.settings.modelSettingsDescription', {
+                defaultMessage:
+                  'LLM models for Significant Events features are managed centrally in the Model Settings page under Stack Management.',
+              })}
             </p>
           </EuiText>
           {modelSettingsUrl && (
             <>
               <EuiSpacer size="s" />
               <EuiLink href={modelSettingsUrl} external>
-                {i18n.translate(
-                  'xpack.significantEventsApp.settings.modelSettingsLink',
-                  { defaultMessage: 'Go to Model Settings' }
-                )}
+                {i18n.translate('xpack.significantEventsApp.settings.modelSettingsLink', {
+                  defaultMessage: 'Go to Model Settings',
+                })}
               </EuiLink>
             </>
           )}
@@ -343,10 +338,9 @@ export function SettingsTab() {
         <EuiPanel hasShadow={false} color="subdued">
           <EuiText size="s">
             <h3>
-              {i18n.translate(
-                'xpack.significantEventsApp.settings.scheduledDiscoveryTitle',
-                { defaultMessage: 'Scheduled discovery' }
-              )}
+              {i18n.translate('xpack.significantEventsApp.settings.scheduledDiscoveryTitle', {
+                defaultMessage: 'Scheduled discovery',
+              })}
             </h3>
           </EuiText>
         </EuiPanel>
@@ -598,10 +592,9 @@ export function SettingsTab() {
         <EuiPanel hasShadow={false} color="subdued">
           <EuiText size="s">
             <h3>
-              {i18n.translate(
-                'xpack.significantEventsApp.settings.dataSourcesSectionTitle',
-                { defaultMessage: 'Data sources' }
-              )}
+              {i18n.translate('xpack.significantEventsApp.settings.dataSourcesSectionTitle', {
+                defaultMessage: 'Data sources',
+              })}
             </h3>
           </EuiText>
         </EuiPanel>
@@ -612,26 +605,21 @@ export function SettingsTab() {
                 <EuiFlexItem>
                   <EuiText size="m">
                     <h4>
-                      {i18n.translate(
-                        'xpack.significantEventsApp.settings.indexPatternsLabel',
-                        { defaultMessage: 'Index patterns' }
-                      )}
+                      {i18n.translate('xpack.significantEventsApp.settings.indexPatternsLabel', {
+                        defaultMessage: 'Index patterns',
+                      })}
                     </h4>
                   </EuiText>
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <EuiText color="subdued" size="s">
-                    {i18n.translate(
-                      'xpack.significantEventsApp.settings.indexPatternsHelp',
-                      {
-                        defaultMessage:
-                          'Comma-separated list of index patterns to use for feature detection and analysis.',
-                      }
-                    )}{' '}
-                    {i18n.translate(
-                      'xpack.significantEventsApp.settings.indexPatternsDefault',
-                      { defaultMessage: 'Default:' }
-                    )}{' '}
+                    {i18n.translate('xpack.significantEventsApp.settings.indexPatternsHelp', {
+                      defaultMessage:
+                        'Comma-separated list of index patterns to use for feature detection and analysis.',
+                    })}{' '}
+                    {i18n.translate('xpack.significantEventsApp.settings.indexPatternsDefault', {
+                      defaultMessage: 'Default:',
+                    })}{' '}
                     <EuiBadge color="hollow">{DEFAULT_INDEX_PATTERNS}</EuiBadge>
                   </EuiText>
                 </EuiFlexItem>
@@ -694,10 +682,9 @@ export function SettingsTab() {
         <EuiPanel hasShadow={false} color="subdued">
           <EuiText size="s">
             <h3>
-              {i18n.translate(
-                'xpack.significantEventsApp.settings.continuousKiOnboardingTitle',
-                { defaultMessage: 'Continuous KI onboarding' }
-              )}
+              {i18n.translate('xpack.significantEventsApp.settings.continuousKiOnboardingTitle', {
+                defaultMessage: 'Continuous KI onboarding',
+              })}
             </h3>
           </EuiText>
         </EuiPanel>
@@ -850,10 +837,9 @@ export function SettingsTab() {
                   setParsedTuningConfig(DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG);
                 }}
               >
-                {i18n.translate(
-                  'xpack.significantEventsApp.settings.resetToDefaults',
-                  { defaultMessage: 'Reset to defaults' }
-                )}
+                {i18n.translate('xpack.significantEventsApp.settings.resetToDefaults', {
+                  defaultMessage: 'Reset to defaults',
+                })}
               </EuiButtonEmpty>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -885,10 +871,9 @@ export function SettingsTab() {
       {isConfirmingZeroMatch && (
         <EuiConfirmModal
           data-test-subj="streams-settings-zero-match-confirm"
-          title={i18n.translate(
-            'xpack.significantEventsApp.settings.zeroMatchConfirmTitle',
-            { defaultMessage: 'No streams match these patterns' }
-          )}
+          title={i18n.translate('xpack.significantEventsApp.settings.zeroMatchConfirmTitle', {
+            defaultMessage: 'No streams match these patterns',
+          })}
           onCancel={() => setIsConfirmingZeroMatch(false)}
           onConfirm={handleConfirmZeroMatch}
           cancelButtonText={i18n.translate(
@@ -902,13 +887,10 @@ export function SettingsTab() {
           buttonColor="warning"
         >
           <p>
-            {i18n.translate(
-              'xpack.significantEventsApp.settings.zeroMatchConfirmBody',
-              {
-                defaultMessage:
-                  'None of your index patterns match any current stream, so Significant Events will not detect or onboard anything yet. Patterns can match streams created later. Save anyway?',
-              }
-            )}
+            {i18n.translate('xpack.significantEventsApp.settings.zeroMatchConfirmBody', {
+              defaultMessage:
+                'None of your index patterns match any current stream, so Significant Events will not detect or onboard anything yet. Patterns can match streams created later. Save anyway?',
+            })}
           </p>
         </EuiConfirmModal>
       )}
@@ -926,10 +908,9 @@ export function SettingsTab() {
                     onClick={handleCancel}
                     isDisabled={isSaving}
                   >
-                    {i18n.translate(
-                      'xpack.significantEventsApp.settings.cancelButton',
-                      { defaultMessage: 'Cancel' }
-                    )}
+                    {i18n.translate('xpack.significantEventsApp.settings.cancelButton', {
+                      defaultMessage: 'Cancel',
+                    })}
                   </EuiButtonEmpty>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
@@ -948,10 +929,9 @@ export function SettingsTab() {
                       }
                       hasAriaDisabled={saveBlockedByPause}
                     >
-                      {i18n.translate(
-                        'xpack.significantEventsApp.settings.saveChangesButton',
-                        { defaultMessage: 'Save changes' }
-                      )}
+                      {i18n.translate('xpack.significantEventsApp.settings.saveChangesButton', {
+                        defaultMessage: 'Save changes',
+                      })}
                     </EuiButton>
                   </EuiToolTip>
                 </EuiFlexItem>

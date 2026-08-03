@@ -33,22 +33,22 @@ import {
   DISCOVERY_QUERIES_QUERY_KEY,
   useFetchDiscoveryQueries,
   type SignificantEventQueryRow,
-} from '../../../../../hooks/significant_events/use_fetch_discovery_queries';
+} from '../../../../hooks/use_fetch_discovery_queries';
 import {
   DISCOVERY_QUERIES_OCCURRENCES_QUERY_KEY,
   useFetchDiscoveryQueriesOccurrences,
-} from '../../../../../hooks/significant_events/use_fetch_discovery_queries_occurrences';
-import { useKibana } from '../../../../../hooks/use_kibana';
-import { useQueriesApi } from '../../../../../hooks/significant_events/use_queries_api';
-import { getFormattedError } from '../../../../../util/errors';
-import { AssetImage } from '../../../../asset_image';
-import { useStreamsAppRouter } from '../../../../../hooks/use_streams_app_router';
-import { useStreamsAppParams } from '../../../../../hooks/use_streams_app_params';
-import { LoadingPanel } from '../../../../loading_panel';
-import { SparkPlot } from '../../../../spark_plot';
-import { StreamsAppSearchBar } from '../../../../streams_app_search_bar';
+} from '../../../../hooks/use_fetch_discovery_queries_occurrences';
+import { useKibana } from '../../../../hooks/use_kibana';
+import { useQueriesApi } from '../../../../hooks/use_queries_api';
+import { getFormattedError } from '../../../../util/errors';
+import { AssetImage } from '../../../../components/asset_image';
+import { useSignificantEventsAppRouter } from '../../../../hooks/use_significant_events_app_router';
+import { useSignificantEventsAppParams } from '../../../../hooks/use_significant_events_app_params';
+import { LoadingPanel } from '../../../../components/loading_panel';
+import { SparkPlot } from '../../../../components/spark_plot';
+import { SignificantEventsSearchBar } from '../../../../components/search_bar';
 import { SeverityBadge } from '../severity_badge/severity_badge';
-import { useTimefilter } from '../../../../../hooks/use_timefilter';
+import { useTimefilter } from '../../../../hooks/use_timefilter';
 import { buildDiscoverParams } from '../../utils/discover_helpers';
 import {
   ACTIONS_COLUMN_TITLE,
@@ -88,8 +88,8 @@ const DEFAULT_PAGINATION = { index: 0, size: 10 };
 const PAGE_SIZE_OPTIONS = [10, 25, 50] as const;
 
 export function QueriesTable() {
-  const router = useStreamsAppRouter();
-  const { query: routeQuery } = useStreamsAppParams('/_discovery/{tab}');
+  const router = useSignificantEventsAppRouter();
+  const { query: routeQuery } = useSignificantEventsAppParams('/_discovery/{tab}');
   const { euiTheme } = useEuiTheme();
   const {
     dependencies: {
@@ -362,21 +362,17 @@ export function QueriesTable() {
         icon={<AssetImage type="significantEventsEmptyState" />}
         title={
           <h2>
-            {i18n.translate(
-              'xpack.significantEventsApp.queriesTable.emptyState.title',
-              { defaultMessage: 'Rules' }
-            )}
+            {i18n.translate('xpack.significantEventsApp.queriesTable.emptyState.title', {
+              defaultMessage: 'Rules',
+            })}
           </h2>
         }
         body={
           <p>
-            {i18n.translate(
-              'xpack.significantEventsApp.queriesTable.emptyState.description',
-              {
-                defaultMessage:
-                  'No rules created yet. Promote queries from the Knowledge Indicators tab to create rules.',
-              }
-            )}
+            {i18n.translate('xpack.significantEventsApp.queriesTable.emptyState.description', {
+              defaultMessage:
+                'No rules created yet. Promote queries from the Knowledge Indicators tab to create rules.',
+            })}
           </p>
         }
         actions={
@@ -398,7 +394,7 @@ export function QueriesTable() {
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
       <EuiFlexItem grow={false}>
-        <StreamsAppSearchBar
+        <SignificantEventsSearchBar
           isLoading={queriesLoading}
           onQuerySubmit={(queryPayload) => {
             setSearchQuery(String(queryPayload.query?.query ?? ''));

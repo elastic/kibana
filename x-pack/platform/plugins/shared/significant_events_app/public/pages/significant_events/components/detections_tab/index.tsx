@@ -29,8 +29,8 @@ import { useSignificantEventsPageContext } from '../../context/significant_event
 import { useBlocksNewActivity } from '../../../../hooks/use_significant_events_maintenance';
 import { DetectionFlyout } from './detection_flyout';
 import { FindSignificantEventsButton } from '../streams_view/find_significant_events_button';
-import { StreamsAppSearchBar } from '../../../../streams_app_search_bar';
-import { formatTimestamp } from '../../../../../util/formatters';
+import { SignificantEventsSearchBar } from '../../../../components/search_bar';
+import { formatTimestamp } from '../../../../util/formatters';
 import { CHANGE_TYPE_LABELS } from '../shared/translations';
 
 const DISCOVERY_STATUS_LABELS = {
@@ -42,13 +42,19 @@ const DISCOVERY_STATUS_LABELS = {
   }),
 };
 
-const DISCOVERY_STATUS_TOOLTIP = i18n.translate('xpack.significantEventsApp.detectionsTab.discoveryTooltip', {
-  defaultMessage: 'Whether the discovery pipeline has ingested this detection.',
-});
+const DISCOVERY_STATUS_TOOLTIP = i18n.translate(
+  'xpack.significantEventsApp.detectionsTab.discoveryTooltip',
+  {
+    defaultMessage: 'Whether the discovery pipeline has ingested this detection.',
+  }
+);
 
-const VIEW_DETAILS_ARIA_LABEL = i18n.translate('xpack.significantEventsApp.detectionsTab.viewDetailsAriaLabel', {
-  defaultMessage: 'View details',
-});
+const VIEW_DETAILS_ARIA_LABEL = i18n.translate(
+  'xpack.significantEventsApp.detectionsTab.viewDetailsAriaLabel',
+  {
+    defaultMessage: 'View details',
+  }
+);
 
 const MINIMIZE_DETAILS_ARIA_LABEL = i18n.translate(
   'xpack.significantEventsApp.detectionsTab.minimizeDetailsAriaLabel',
@@ -60,8 +66,7 @@ export const DetectionsTab = () => {
   const { timeState } = useTimefilter();
   const { blocksActivity, activityBlockTooltip } = useBlocksNewActivity();
 
-  const { isRunning, isCanceling, handleRun, handleCancel } =
-    useSignificantEventsPageContext();
+  const { isRunning, isCanceling, handleRun, handleCancel } = useSignificantEventsPageContext();
 
   const { data, isLoading, isError, refetch, pagination, setPagination } = useFetchDetections({
     from: timeState.start,
@@ -182,7 +187,7 @@ export const DetectionsTab = () => {
       <EuiFlexItem grow={false}>
         <EuiFlexGroup justifyContent="flexEnd" alignItems="center" wrap={false}>
           <EuiFlexItem grow={false}>
-            <StreamsAppSearchBar showDatePicker enableDateRangePicker />
+            <SignificantEventsSearchBar showDatePicker enableDateRangePicker />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <FindSignificantEventsButton

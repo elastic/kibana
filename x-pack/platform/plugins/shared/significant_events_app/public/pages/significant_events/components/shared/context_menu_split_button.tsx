@@ -16,7 +16,7 @@ import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { useBoolean } from '@kbn/react-hooks';
 import React, { useCallback, useMemo, useState } from 'react';
 import type { ComponentProps, ReactNode } from 'react';
-import { useModelSettingsUrl } from '../../../../../hooks/use_model_settings_url';
+import { useModelSettingsUrl } from '../../../../hooks/use_model_settings_url';
 import { MODEL_SETTINGS_LABEL } from './translations';
 
 export interface MenuHelpers {

@@ -29,7 +29,9 @@ export function MemoryDiffViewer({
 
   const sections = [
     {
-      label: i18n.translate('xpack.significantEventsApp.memory.diffTitleLabel', { defaultMessage: 'Title' }),
+      label: i18n.translate('xpack.significantEventsApp.memory.diffTitleLabel', {
+        defaultMessage: 'Title',
+      }),
       originalText: original.title,
       modifiedText: modified.title,
     },
@@ -41,7 +43,9 @@ export function MemoryDiffViewer({
       modifiedText: modified.categories.join('\n'),
     },
     {
-      label: i18n.translate('xpack.significantEventsApp.memory.diffTagsLabel', { defaultMessage: 'Tags' }),
+      label: i18n.translate('xpack.significantEventsApp.memory.diffTagsLabel', {
+        defaultMessage: 'Tags',
+      }),
       originalText: original.tags.join('\n'),
       modifiedText: modified.tags.join('\n'),
     },

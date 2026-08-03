@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getSeverityLabel, type EventLifecycleResponse } from '@kbn/significant-events-schema';
-import { formatTimestamp } from '../../../../../util/formatters';
+import { formatTimestamp } from '../../../../util/formatters';
 import { changeTypeLabel } from '../shared/translations';
 import { getLifecycleStatusColor, getLifecycleStatusLabel } from '../shared/status_display';
 

@@ -66,7 +66,9 @@ export function EntryFormFields({
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
       <FieldSection
-        label={i18n.translate('xpack.significantEventsApp.memory.titleLabel', { defaultMessage: 'Title' })}
+        label={i18n.translate('xpack.significantEventsApp.memory.titleLabel', {
+          defaultMessage: 'Title',
+        })}
       >
         <EuiFieldText
           value={title}
@@ -112,7 +114,9 @@ export function EntryFormFields({
         />
       </FieldSection>
       <FieldSection
-        label={i18n.translate('xpack.significantEventsApp.memory.tagsLabel', { defaultMessage: 'Tags' })}
+        label={i18n.translate('xpack.significantEventsApp.memory.tagsLabel', {
+          defaultMessage: 'Tags',
+        })}
       >
         <EuiComboBox
           aria-label={i18n.translate('xpack.significantEventsApp.memory.tagsAriaLabel', {

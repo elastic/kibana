@@ -11,8 +11,8 @@ import { COMPUTED_FEATURE_TYPES } from '@kbn/significant-events-schema';
 import type { KnowledgeIndicator } from '@kbn/streams-ai';
 import type React from 'react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useStreamsAppParams } from '../../../../hooks/use_significant_events_app_params';
-import { useStreamsAppRouter } from '../../../../hooks/use_significant_events_app_router';
+import { useSignificantEventsAppParams } from '../../../../hooks/use_significant_events_app_params';
+import { useSignificantEventsAppRouter } from '../../../../hooks/use_significant_events_app_router';
 import { getKnowledgeIndicatorItemId } from '../../../../components/knowledge_indicators/utils/get_knowledge_indicator_item_id';
 import { getKnowledgeIndicatorStreamName } from '../../../../components/knowledge_indicators/utils/get_knowledge_indicator_stream_name';
 import { getKnowledgeIndicatorSubtype } from '../../../../components/knowledge_indicators/utils/get_knowledge_indicator_subtype';
@@ -35,8 +35,8 @@ export function useKnowledgeIndicatorsUrlState({
   resetPagination,
   clearSelection,
 }: UseKnowledgeIndicatorsUrlStateParams) {
-  const router = useStreamsAppRouter();
-  const { query } = useStreamsAppParams('/_discovery/{tab}');
+  const router = useSignificantEventsAppRouter();
+  const { query } = useSignificantEventsAppParams('/_discovery/{tab}');
 
   const timeRangeRef = useRef<{ rangeFrom?: string; rangeTo?: string }>({});
   timeRangeRef.current = { rangeFrom: query?.rangeFrom, rangeTo: query?.rangeTo };

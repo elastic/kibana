@@ -51,8 +51,7 @@ export function StreamsView() {
   const isConnectorCatalogUnavailable =
     !allConnectors.length || !!aiFeatures?.genAiConnectors?.loading || !!connectorError;
 
-  const { isRunning, isCanceling, handleRun, handleCancel } =
-    useSignificantEventsPageContext();
+  const { isRunning, isCanceling, handleRun, handleCancel } = useSignificantEventsPageContext();
 
   const isStreamActionable = useCallback(
     (streamName: string) => {
@@ -163,13 +162,10 @@ export function StreamsView() {
 
       <EuiFlexItem grow={false}>
         <EuiText size="s">
-          {i18n.translate(
-            'xpack.significantEventsApp.streamsTree.streamsCountLabel',
-            {
-              defaultMessage: '{count} streams',
-              values: { count: filteredStreams?.length ?? 0 },
-            }
-          )}
+          {i18n.translate('xpack.significantEventsApp.streamsTree.streamsCountLabel', {
+            defaultMessage: '{count} streams',
+            values: { count: filteredStreams?.length ?? 0 },
+          })}
         </EuiText>
       </EuiFlexItem>
 

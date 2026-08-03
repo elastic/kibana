@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { formatTimestamp } from '../../../../../util/formatters';
+import { formatTimestamp } from '../../../../util/formatters';
 
 export const DEFAULT_LAST_OCCURRED_AT = '--';
 

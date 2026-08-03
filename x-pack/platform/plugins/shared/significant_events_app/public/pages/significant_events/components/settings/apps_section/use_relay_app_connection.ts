@@ -71,12 +71,9 @@ export function useRelayAppConnection(): UseRelayAppConnection {
     },
     onError: (error) => {
       notifications.toasts.addError(getFormattedError(error), {
-        title: i18n.translate(
-          'xpack.significantEventsApp.settings.apps.connectError',
-          {
-            defaultMessage: 'Failed to start the Slack connection',
-          }
-        ),
+        title: i18n.translate('xpack.significantEventsApp.settings.apps.connectError', {
+          defaultMessage: 'Failed to start the Slack connection',
+        }),
       });
     },
     onSettled: () => {
@@ -91,10 +88,9 @@ export function useRelayAppConnection(): UseRelayAppConnection {
     },
     onError: (error) => {
       notifications.toasts.addError(getFormattedError(error), {
-        title: i18n.translate(
-          'xpack.significantEventsApp.settings.apps.disconnectError',
-          { defaultMessage: 'Failed to disconnect the Slack app' }
-        ),
+        title: i18n.translate('xpack.significantEventsApp.settings.apps.disconnectError', {
+          defaultMessage: 'Failed to disconnect the Slack app',
+        }),
       });
     },
     onSettled: () => {

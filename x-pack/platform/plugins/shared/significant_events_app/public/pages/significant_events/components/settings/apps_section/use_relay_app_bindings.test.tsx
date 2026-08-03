@@ -43,7 +43,6 @@ describe('useRelayAppBindings', () => {
         http: { get: httpGet, post: httpPost },
         notifications: { toasts: { addError } },
       },
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any);
   });
 
@@ -136,7 +135,6 @@ describe('useBindChannel', () => {
         http: { get: httpGet, post: httpPost },
         notifications: { toasts: { addError } },
       },
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any);
   });
 
@@ -201,7 +199,6 @@ describe('useUnbindChannel', () => {
         http: { get: httpGet, post: httpPost },
         notifications: { toasts: { addError } },
       },
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any);
   });
 

@@ -17,11 +17,11 @@ import {
 import { css } from '@emotion/react';
 import type { KnowledgeIndicator } from '@kbn/streams-ai';
 import React from 'react';
-import { TableTitle } from '../../../stream_detail_systems/table_title';
-import { KnowledgeIndicatorsTypeFilter } from '../../../stream_detail_significant_events_view/knowledge_indicators_type_filter';
-import { KnowledgeIndicatorsSubtypeFilter } from '../../../stream_detail_significant_events_view/knowledge_indicators_subtype_filter';
-import { MATCH_QUERY_TYPE } from '../../../stream_detail_significant_events_view/utils/get_knowledge_indicator_type';
-import { KnowledgeIndicatorsStatusFilter } from '../../../stream_detail_significant_events_view/knowledge_indicators_status_filter';
+import { TableTitle } from '../../../../components/features/table_title';
+import { KnowledgeIndicatorsTypeFilter } from '../../../../components/knowledge_indicators/knowledge_indicators_type_filter';
+import { KnowledgeIndicatorsSubtypeFilter } from '../../../../components/knowledge_indicators/knowledge_indicators_subtype_filter';
+import { MATCH_QUERY_TYPE } from '../../../../components/knowledge_indicators/utils/get_knowledge_indicator_type';
+import { KnowledgeIndicatorsStatusFilter } from '../../../../components/knowledge_indicators/knowledge_indicators_status_filter';
 import { StreamFilter } from '../stream_filter';
 import {
   SEARCH_PLACEHOLDER,

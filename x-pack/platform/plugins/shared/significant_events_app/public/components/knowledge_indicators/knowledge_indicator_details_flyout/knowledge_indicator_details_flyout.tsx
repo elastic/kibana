@@ -431,13 +431,19 @@ const CONFIDENCE_LABEL = i18n.translate(
   { defaultMessage: 'Confidence' }
 );
 
-const TYPE_LABEL = i18n.translate('xpack.significantEventsApp.knowledgeIndicatorDetailsFlyout.typeLabel', {
-  defaultMessage: 'Type',
-});
+const TYPE_LABEL = i18n.translate(
+  'xpack.significantEventsApp.knowledgeIndicatorDetailsFlyout.typeLabel',
+  {
+    defaultMessage: 'Type',
+  }
+);
 
-const STREAM_LABEL = i18n.translate('xpack.significantEventsApp.knowledgeIndicatorDetailsFlyout.streamLabel', {
-  defaultMessage: 'Stream',
-});
+const STREAM_LABEL = i18n.translate(
+  'xpack.significantEventsApp.knowledgeIndicatorDetailsFlyout.streamLabel',
+  {
+    defaultMessage: 'Stream',
+  }
+);
 
 const SEVERITY_LABEL = i18n.translate(
   'xpack.significantEventsApp.knowledgeIndicatorDetailsFlyout.severityLabel',

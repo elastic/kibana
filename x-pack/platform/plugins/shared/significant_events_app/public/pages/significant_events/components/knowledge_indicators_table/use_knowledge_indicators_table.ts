@@ -13,10 +13,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useFetchKnowledgeIndicators } from '../../../../hooks/use_fetch_knowledge_indicators';
 import { useDiscoveryFeaturesApi } from '../../../../hooks/use_discovery_features_api';
 import { useKnowledgeIndicatorsBulkDelete } from '../../../../hooks/use_knowledge_indicators_bulk_delete';
-import {
-  useQueriesApi,
-  type PromoteResult,
-} from '../../../../hooks/use_queries_api';
+import { useQueriesApi, type PromoteResult } from '../../../../hooks/use_queries_api';
 import { useInvalidatePromoteRelatedQueries } from '../../../../hooks/use_invalidate_promote_queries';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { getFormattedError } from '../../../../util/errors';

@@ -126,13 +126,19 @@ const GENERAL_INFORMATION_LABEL = i18n.translate(
   }
 );
 
-const DETAILS_TYPE_LABEL = i18n.translate('xpack.significantEventsApp.knowledgeIndicatorDetails.typeLabel', {
-  defaultMessage: 'Type',
-});
+const DETAILS_TYPE_LABEL = i18n.translate(
+  'xpack.significantEventsApp.knowledgeIndicatorDetails.typeLabel',
+  {
+    defaultMessage: 'Type',
+  }
+);
 
-const DETAILS_QUERY_LABEL = i18n.translate('xpack.significantEventsApp.knowledgeIndicatorDetails.queryLabel', {
-  defaultMessage: 'Query',
-});
+const DETAILS_QUERY_LABEL = i18n.translate(
+  'xpack.significantEventsApp.knowledgeIndicatorDetails.queryLabel',
+  {
+    defaultMessage: 'Query',
+  }
+);
 
 const DETAILS_SEVERITY_LABEL = i18n.translate(
   'xpack.significantEventsApp.knowledgeIndicatorDetails.severityLabel',
@@ -162,9 +168,12 @@ const QUERY_BADGE_LABEL = i18n.translate(
   }
 );
 
-const EMPTY_VALUE = i18n.translate('xpack.significantEventsApp.knowledgeIndicatorDetails.emptyValue', {
-  defaultMessage: '-',
-});
+const EMPTY_VALUE = i18n.translate(
+  'xpack.significantEventsApp.knowledgeIndicatorDetails.emptyValue',
+  {
+    defaultMessage: '-',
+  }
+);
 
 const SOURCE_FEATURES_LABEL = i18n.translate(
   'xpack.significantEventsApp.knowledgeIndicatorDetails.sourceFeaturesLabel',

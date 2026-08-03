@@ -110,7 +110,9 @@ export function CreateEntryFlyout({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty onClick={onClose}>
-              {i18n.translate('xpack.significantEventsApp.memory.cancelButton', { defaultMessage: 'Cancel' })}
+              {i18n.translate('xpack.significantEventsApp.memory.cancelButton', {
+                defaultMessage: 'Cancel',
+              })}
             </EuiButtonEmpty>
           </EuiFlexItem>
         </EuiFlexGroup>

@@ -16,11 +16,11 @@ const mockReplace = jest.fn();
 let mockQuery: Record<string, unknown> = {};
 
 jest.mock('../../../../hooks/use_significant_events_app_params', () => ({
-  useStreamsAppParams: () => ({ query: mockQuery }),
+  useSignificantEventsAppParams: () => ({ query: mockQuery }),
 }));
 
 jest.mock('../../../../hooks/use_significant_events_app_router', () => ({
-  useStreamsAppRouter: () => ({ push: mockPush, replace: mockReplace }),
+  useSignificantEventsAppRouter: () => ({ push: mockPush, replace: mockReplace }),
 }));
 
 jest.mock('@kbn/react-hooks', () => ({

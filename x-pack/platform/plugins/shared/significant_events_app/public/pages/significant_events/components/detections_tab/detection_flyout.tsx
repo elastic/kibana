@@ -27,11 +27,11 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Detection } from '@kbn/significant-events-schema';
-import { FlyoutMetadataCard } from '../../../../flyout_components/flyout_metadata_card';
-import { FlyoutToolbarHeader } from '../../../../flyout_components/flyout_toolbar_header';
-import { InfoPanel } from '../../../../info_panel';
-import { useFetchDetectionHistory } from '../../../../../hooks/significant_events/use_fetch_detections';
-import { formatTimestamp } from '../../../../../util/formatters';
+import { FlyoutMetadataCard } from '../../../../components/flyout_components/flyout_metadata_card';
+import { FlyoutToolbarHeader } from '../../../../components/flyout_components/flyout_toolbar_header';
+import { InfoPanel } from '../../../../components/info_panel';
+import { useFetchDetectionHistory } from '../../../../hooks/use_fetch_detections';
+import { formatTimestamp } from '../../../../util/formatters';
 import { changeTypeLabel } from '../shared/translations';
 
 const formatPValue = (pValue?: number | string): string => {
@@ -39,7 +39,9 @@ const formatPValue = (pValue?: number | string): string => {
   const n = Number(pValue);
   if (isNaN(n)) return '-';
   if (n === 0)
-    return i18n.translate('xpack.significantEventsApp.detectionFlyout.pValue.zero', { defaultMessage: 'p=0' });
+    return i18n.translate('xpack.significantEventsApp.detectionFlyout.pValue.zero', {
+      defaultMessage: 'p=0',
+    });
   if (n < 0.0001)
     return i18n.translate('xpack.significantEventsApp.detectionFlyout.pValue.scientific', {
       defaultMessage: 'p={value}',
@@ -185,9 +187,12 @@ export const DetectionFlyout = ({ detection, onClose }: DetectionFlyoutProps) =>
           </EuiText>
         ) : (
           <EuiTimeline
-            aria-label={i18n.translate('xpack.significantEventsApp.detectionFlyout.timeline.title', {
-              defaultMessage: 'Timeline',
-            })}
+            aria-label={i18n.translate(
+              'xpack.significantEventsApp.detectionFlyout.timeline.title',
+              {
+                defaultMessage: 'Timeline',
+              }
+            )}
             gutterSize="m"
           >
             {historyData.hits.map((entry, idx) => {
@@ -248,9 +253,12 @@ const STREAM_LABEL = i18n.translate('xpack.significantEventsApp.detectionFlyout.
   defaultMessage: 'Stream',
 });
 
-const TIMESTAMP_LABEL = i18n.translate('xpack.significantEventsApp.detectionFlyout.timestampLabel', {
-  defaultMessage: 'Timestamp',
-});
+const TIMESTAMP_LABEL = i18n.translate(
+  'xpack.significantEventsApp.detectionFlyout.timestampLabel',
+  {
+    defaultMessage: 'Timestamp',
+  }
+);
 
 const CHANGE_LABEL = i18n.translate('xpack.significantEventsApp.detectionFlyout.changeLabel', {
   defaultMessage: 'Change',
@@ -261,10 +269,16 @@ const STATISTICAL_SIGNIFICANCE_LABEL = i18n.translate(
   { defaultMessage: 'Statistical significance' }
 );
 
-const STATUS_PROCESSED_LABEL = i18n.translate('xpack.significantEventsApp.detectionFlyout.status.processed', {
-  defaultMessage: 'Processed',
-});
+const STATUS_PROCESSED_LABEL = i18n.translate(
+  'xpack.significantEventsApp.detectionFlyout.status.processed',
+  {
+    defaultMessage: 'Processed',
+  }
+);
 
-const STATUS_PENDING_LABEL = i18n.translate('xpack.significantEventsApp.detectionFlyout.status.pending', {
-  defaultMessage: 'Pending',
-});
+const STATUS_PENDING_LABEL = i18n.translate(
+  'xpack.significantEventsApp.detectionFlyout.status.pending',
+  {
+    defaultMessage: 'Pending',
+  }
+);

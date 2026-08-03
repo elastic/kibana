@@ -12,10 +12,10 @@ import {
 } from '@kbn/significant-events-schema';
 import pMap from 'p-map';
 import { useCallback, useState } from 'react';
-import type { ScheduleOnboardingOptions } from '../../../../hooks/use_onboarding_api';
-import { useOnboardingApi } from '../../../../hooks/use_onboarding_api';
-import { useKibana } from '../../../../hooks/use_kibana';
-import { getFormattedError } from '../../../../util/errors';
+import type { ScheduleOnboardingOptions } from '../../../hooks/use_onboarding_api';
+import { useOnboardingApi } from '../../../hooks/use_onboarding_api';
+import { useKibana } from '../../../hooks/use_kibana';
+import { getFormattedError } from '../../../util/errors';
 import type { OnboardingConfig } from '../components/shared/types';
 import { useOnboardingStatusUpdateQueue } from './use_onboarding_status_update_queue';
 
@@ -75,11 +75,14 @@ export function useBulkOnboarding({
               .join('\n')
           ),
           {
-            title: i18n.translate('xpack.significantEventsApp.bulkOnboarding.schedulingErrorSummary', {
-              defaultMessage:
-                'Failed to schedule onboarding for {count, plural, one {# stream} other {# streams}}',
-              values: { count: failures.length },
-            }),
+            title: i18n.translate(
+              'xpack.significantEventsApp.bulkOnboarding.schedulingErrorSummary',
+              {
+                defaultMessage:
+                  'Failed to schedule onboarding for {count, plural, one {# stream} other {# streams}}',
+                values: { count: failures.length },
+              }
+            ),
           }
         );
       }

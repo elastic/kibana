@@ -7,12 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const TITLE_COLUMN = i18n.translate(
-  'xpack.significantEventsApp.queriesTable.titleColumn',
-  {
-    defaultMessage: 'Title',
-  }
-);
+export const TITLE_COLUMN = i18n.translate('xpack.significantEventsApp.queriesTable.titleColumn', {
+  defaultMessage: 'Title',
+});
 
 export const STREAM_COLUMN = i18n.translate(
   'xpack.significantEventsApp.queriesTable.streamColumn',
@@ -62,12 +59,9 @@ export const SEARCH_PLACEHOLDER = i18n.translate(
   { defaultMessage: 'Search' }
 );
 
-export const CHART_TITLE = i18n.translate(
-  'xpack.significantEventsApp.queriesTable.chart.title',
-  {
-    defaultMessage: 'Detected event occurrences',
-  }
-);
+export const CHART_TITLE = i18n.translate('xpack.significantEventsApp.queriesTable.chart.title', {
+  defaultMessage: 'Detected event occurrences',
+});
 
 export const CHART_SERIES_NAME = i18n.translate(
   'xpack.significantEventsApp.queriesTable.chart.seriesName',

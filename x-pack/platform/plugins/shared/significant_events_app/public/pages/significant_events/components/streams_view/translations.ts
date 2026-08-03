@@ -7,9 +7,12 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const NAME_COLUMN_HEADER = i18n.translate('xpack.significantEventsApp.streamsTreeTable.nameColumnName', {
-  defaultMessage: 'Name',
-});
+export const NAME_COLUMN_HEADER = i18n.translate(
+  'xpack.significantEventsApp.streamsTreeTable.nameColumnName',
+  {
+    defaultMessage: 'Name',
+  }
+);
 
 export const SIGNIFICANT_EVENTS_COLUMN_HEADER = i18n.translate(
   'xpack.significantEventsApp.streamsTree.significantEventsColumnName',

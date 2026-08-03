@@ -25,9 +25,15 @@ interface OverviewSection {
 
 export function StreamOverview() {
   const { definition, refresh } = useStreamDetail();
-  const { features: { contentPacks }, isLoading: isPrivilegesLoading } = useStreamsPrivileges();
-  const { significantEventsApp, isAvailable, isLoading: isAvailabilityLoading } =
-    useSignificantEventsApp();
+  const {
+    features: { contentPacks },
+    isLoading: isPrivilegesLoading,
+  } = useStreamsPrivileges();
+  const {
+    significantEventsApp,
+    isAvailable,
+    isLoading: isAvailabilityLoading,
+  } = useSignificantEventsApp();
   const KnowledgeIndicatorsPanel = significantEventsApp?.KnowledgeIndicatorsPanel;
   const showKnowledgeIndicatorsPanel =
     KnowledgeIndicatorsPanel !== undefined &&

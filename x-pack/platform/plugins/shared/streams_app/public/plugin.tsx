@@ -254,6 +254,4 @@ export class StreamsAppPlugin
 
     return {};
   }
-
 }
-

@@ -35,23 +35,23 @@ import type {
   Severity,
 } from '@kbn/significant-events-schema';
 import { useSignificantEventsUrlState } from './use_significant_events_url_state';
-import { useFetchSignificantEventLifecycle } from '../../../../../hooks/significant_events/use_fetch_significant_event_lifecycle';
-import { RUNNING_POLL_INTERVAL_MS } from '../../../constants';
-import { useFetchSignificantEvents } from '../../../../../hooks/significant_events/use_fetch_significant_events';
-import { useTimefilter } from '../../../../../hooks/use_timefilter';
+import { useFetchSignificantEventLifecycle } from '../../../../hooks/use_fetch_significant_event_lifecycle';
+import { RUNNING_POLL_INTERVAL_MS } from '../../../../constants';
+import { useFetchSignificantEvents } from '../../../../hooks/use_fetch_significant_events';
+import { useTimefilter } from '../../../../hooks/use_timefilter';
 import { useKiGeneration } from '../knowledge_indicators_table/ki_generation_context';
 import { useSignificantEventsPageContext } from '../../context/significant_events_page_context';
 import { SignificantEventFlyout } from './significant_event_flyout';
 import { FindSignificantEventsButton } from '../streams_view/find_significant_events_button';
-import type { StreamsAppSearchBarProps } from '../../../../streams_app_search_bar';
-import { StreamsAppSearchBar } from '../../../../streams_app_search_bar';
-import { formatTimestamp } from '../../../../../util/formatters';
+import type { SignificantEventsSearchBarProps } from '../../../../components/search_bar';
+import { SignificantEventsSearchBar } from '../../../../components/search_bar';
+import { formatTimestamp } from '../../../../util/formatters';
 import { FilterPopover } from './filter_popover';
 import { getSignificantEventStatusColor } from '../shared/status_display';
 import { SIGNIFICANT_EVENT_STATUS_LABELS } from '../shared/translations';
-import { useTriggerInvestigation } from '../../../../../hooks/significant_events/use_trigger_investigation';
-import { useUpdateSignificantEvent } from '../../../../../hooks/significant_events/use_update_significant_event';
-import { useBlocksNewActivity } from '../../../../../hooks/significant_events/use_significant_events_maintenance';
+import { useTriggerInvestigation } from '../../../../hooks/use_trigger_investigation';
+import { useUpdateSignificantEvent } from '../../../../hooks/use_update_significant_event';
+import { useBlocksNewActivity } from '../../../../hooks/use_significant_events_maintenance';
 
 export const DEFAULT_SIGNIFICANT_EVENT_SEVERITY_FILTER: Severity[] = ['80-critical', '60-high'];
 
@@ -121,9 +121,12 @@ const clickableRowCss = css`
   cursor: pointer;
 `;
 
-const SEARCH_PLACEHOLDER = i18n.translate('xpack.significantEventsApp.sigEventsTab.searchPlaceholder', {
-  defaultMessage: 'Search events...',
-});
+const SEARCH_PLACEHOLDER = i18n.translate(
+  'xpack.significantEventsApp.sigEventsTab.searchPlaceholder',
+  {
+    defaultMessage: 'Search events...',
+  }
+);
 const FETCH_ERROR_TITLE = i18n.translate('xpack.significantEventsApp.sigEventsTab.fetchError', {
   defaultMessage: 'Failed to load significant events',
 });
@@ -283,8 +286,7 @@ export const SignificantEventsTab = () => {
     [filteredStreams]
   );
 
-  const { isRunning, isCanceling, handleRun, handleCancel } =
-    useSignificantEventsPageContext();
+  const { isRunning, isCanceling, handleRun, handleCancel } = useSignificantEventsPageContext();
   const { blocksActivity, activityBlockTooltip } = useBlocksNewActivity();
 
   const { data, isLoading, isError, refetch, pagination, setPagination } =
@@ -337,9 +339,12 @@ export const SignificantEventsTab = () => {
         label: i18n.translate('xpack.significantEventsApp.sigEventsTab.filter.status', {
           defaultMessage: 'Status',
         }),
-        ariaLabel: i18n.translate('xpack.significantEventsApp.sigEventsTab.filter.statusAriaLabel', {
-          defaultMessage: 'Filter by status',
-        }),
+        ariaLabel: i18n.translate(
+          'xpack.significantEventsApp.sigEventsTab.filter.statusAriaLabel',
+          {
+            defaultMessage: 'Filter by status',
+          }
+        ),
         options: buildSelectableOptions({
           values: SIGNIFICANT_EVENT_STATUS_OPTIONS,
           selected: statusFilter,
@@ -352,9 +357,12 @@ export const SignificantEventsTab = () => {
         label: i18n.translate('xpack.significantEventsApp.sigEventsTab.filter.severity', {
           defaultMessage: 'Severity',
         }),
-        ariaLabel: i18n.translate('xpack.significantEventsApp.sigEventsTab.filter.severityAriaLabel', {
-          defaultMessage: 'Filter by severity',
-        }),
+        ariaLabel: i18n.translate(
+          'xpack.significantEventsApp.sigEventsTab.filter.severityAriaLabel',
+          {
+            defaultMessage: 'Filter by severity',
+          }
+        ),
         options: buildSelectableOptions({
           values: SEVERITY_OPTIONS,
           selected: severityFilter,
@@ -368,9 +376,12 @@ export const SignificantEventsTab = () => {
         label: i18n.translate('xpack.significantEventsApp.sigEventsTab.filter.stream', {
           defaultMessage: 'Stream',
         }),
-        ariaLabel: i18n.translate('xpack.significantEventsApp.sigEventsTab.filter.streamAriaLabel', {
-          defaultMessage: 'Filter by stream',
-        }),
+        ariaLabel: i18n.translate(
+          'xpack.significantEventsApp.sigEventsTab.filter.streamAriaLabel',
+          {
+            defaultMessage: 'Filter by stream',
+          }
+        ),
         options: buildSelectableOptions({
           values: streamOptions,
           selected: streamFilter,
@@ -398,7 +409,7 @@ export const SignificantEventsTab = () => {
     }
   };
 
-  const handleQueryChange: StreamsAppSearchBarProps['onQueryChange'] = (queryPayload) => {
+  const handleQueryChange: SignificantEventsSearchBarProps['onQueryChange'] = (queryPayload) => {
     setSearchQuery(String(queryPayload.query?.query ?? ''));
   };
 
@@ -407,7 +418,7 @@ export const SignificantEventsTab = () => {
       <EuiFlexItem grow={false}>
         <EuiFlexGroup gutterSize="s" alignItems="center" wrap>
           <EuiFlexItem grow style={{ minWidth: 160 }}>
-            <StreamsAppSearchBar
+            <SignificantEventsSearchBar
               onQuerySubmit={handleQueryChange}
               onQueryChange={handleQueryChange}
               placeholder={SEARCH_PLACEHOLDER}

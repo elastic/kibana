@@ -11,10 +11,7 @@ import { useCallback } from 'react';
 import { DISCOVERY_QUERIES_QUERY_KEY } from '../../../hooks/use_fetch_discovery_queries';
 import { DISCOVERY_QUERIES_OCCURRENCES_QUERY_KEY } from '../../../hooks/use_fetch_discovery_queries_occurrences';
 import { useKibana } from '../../../hooks/use_kibana';
-import {
-  useQueriesApi,
-  type PromoteResult,
-} from '../../../hooks/use_queries_api';
+import { useQueriesApi, type PromoteResult } from '../../../hooks/use_queries_api';
 import { useStreamFeaturesApi } from '../../../hooks/use_stream_features_api';
 import { getFormattedError } from '../../../util/errors';
 import { PROMOTE_QUERY_ALREADY_PROMOTED } from '../../../pages/significant_events/components/queries_table/translations';
@@ -123,9 +120,12 @@ export const PROMOTE_LABEL = i18n.translate(
   { defaultMessage: 'Promote' }
 );
 
-export const DELETE_LABEL = i18n.translate('xpack.significantEventsApp.knowledgeIndicatorActions.deleteLabel', {
-  defaultMessage: 'Delete',
-});
+export const DELETE_LABEL = i18n.translate(
+  'xpack.significantEventsApp.knowledgeIndicatorActions.deleteLabel',
+  {
+    defaultMessage: 'Delete',
+  }
+);
 
 const EXCLUDE_SUCCESS_TOAST = i18n.translate(
   'xpack.significantEventsApp.knowledgeIndicatorActions.excludeSuccessToast',

@@ -70,7 +70,6 @@ describe('useRelayAppConnection', () => {
         http: { get: httpGet, post: httpPost },
         notifications: { toasts: { addError } },
       },
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any);
   });
 

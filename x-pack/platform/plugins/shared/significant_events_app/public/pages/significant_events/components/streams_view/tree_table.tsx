@@ -16,7 +16,6 @@ import {
   EuiLink,
   EuiLoadingSpinner,
   EuiToolTip,
-  EuiTourStep,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
@@ -32,8 +31,7 @@ import { STREAMS_APP_LOCATOR_ID } from '@kbn/deeplinks-observability';
 import type { StreamsAppLocationParams } from '@kbn/streams-plugin/common';
 import React, { useState } from 'react';
 import { useKibana } from '../../../../hooks/use_kibana';
-import { useStreamsTour } from '../../../../streams_tour';
-import { QueryStreamBadge, TechnicalPreviewBadge } from '../../../../stream_badges';
+import { QueryStreamBadge, TechnicalPreviewBadge } from '../../../../components/badges';
 import { KnowledgeIndicatorsColumn } from './knowledge_indicators_column';
 import { QueriesColumn } from './queries_column';
 import { SignificantEventsColumn } from './significant_events_column';
@@ -94,7 +92,6 @@ export function StreamsTreeTable({
   } = useKibana();
   const streamsLocator = locators.get<StreamsAppLocationParams>(STREAMS_APP_LOCATOR_ID);
   const { euiTheme } = useEuiTheme();
-  const { getStepPropsByStepId } = useStreamsTour();
 
   const [sortField, setSortField] = useState<SortableField>('nameSortKey');
   const [sortDirection, setSortDirection] = useState<Direction>('asc');
@@ -253,33 +250,15 @@ export function StreamsTreeTable({
     </EuiToolTip>
   );
 
-  const streamsListStepProps = getStepPropsByStepId('streams_list');
-
+  // Streams onboarding tour stays in streams_app; this table is rendered outside
+  // that provider, so the name header is plain text.
   const nameColumnHeader = (
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
       {shouldComposeTree(sortField) && hasExpandable && (
         <EuiFlexItem grow={false}>{expandCollapseAllButton}</EuiFlexItem>
       )}
       <EuiFlexItem>
-        {streamsListStepProps ? (
-          <EuiTourStep
-            step={streamsListStepProps.step}
-            stepsTotal={streamsListStepProps.stepsTotal}
-            title={streamsListStepProps.title}
-            subtitle={streamsListStepProps.subtitle}
-            content={streamsListStepProps.content}
-            anchorPosition={streamsListStepProps.anchorPosition}
-            offset={streamsListStepProps.offset}
-            maxWidth={streamsListStepProps.maxWidth}
-            isStepOpen={streamsListStepProps.isStepOpen}
-            footerAction={streamsListStepProps.footerAction}
-            onFinish={streamsListStepProps.onFinish}
-          >
-            <span>{NAME_COLUMN_HEADER}</span>
-          </EuiTourStep>
-        ) : (
-          <span>{NAME_COLUMN_HEADER}</span>
-        )}
+        <span>{NAME_COLUMN_HEADER}</span>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

@@ -136,31 +136,46 @@ export function DeleteFeatureModal({
 
 // i18n labels
 
-const FEATURE_COLUMN_LABEL = i18n.translate('xpack.significantEventsApp.deleteFeatureModal.featureColumn', {
-  defaultMessage: 'Feature',
-});
+const FEATURE_COLUMN_LABEL = i18n.translate(
+  'xpack.significantEventsApp.deleteFeatureModal.featureColumn',
+  {
+    defaultMessage: 'Feature',
+  }
+);
 
-const TYPE_COLUMN_LABEL = i18n.translate('xpack.significantEventsApp.deleteFeatureModal.typeColumn', {
-  defaultMessage: 'Type',
-});
+const TYPE_COLUMN_LABEL = i18n.translate(
+  'xpack.significantEventsApp.deleteFeatureModal.typeColumn',
+  {
+    defaultMessage: 'Type',
+  }
+);
 
-const STREAM_COLUMN_LABEL = i18n.translate('xpack.significantEventsApp.deleteFeatureModal.streamColumn', {
-  defaultMessage: 'Stream',
-});
+const STREAM_COLUMN_LABEL = i18n.translate(
+  'xpack.significantEventsApp.deleteFeatureModal.streamColumn',
+  {
+    defaultMessage: 'Stream',
+  }
+);
 
 const MODAL_ARIA_LABEL = i18n.translate(
   'xpack.significantEventsApp.deleteFeatureModal.euiModal.deleteFeaturesModalLabel',
   { defaultMessage: 'Delete features modal' }
 );
 
-const WARNING_MESSAGE = i18n.translate('xpack.significantEventsApp.deleteFeatureModal.warningMessage', {
-  defaultMessage: 'This action cannot be undone.',
-});
+const WARNING_MESSAGE = i18n.translate(
+  'xpack.significantEventsApp.deleteFeatureModal.warningMessage',
+  {
+    defaultMessage: 'This action cannot be undone.',
+  }
+);
 
 const TABLE_CAPTION = i18n.translate('xpack.significantEventsApp.deleteFeatureModal.tableCaption', {
   defaultMessage: 'List of features to delete',
 });
 
-const CANCEL_BUTTON_LABEL = i18n.translate('xpack.significantEventsApp.deleteFeatureModal.cancelButton', {
-  defaultMessage: 'Cancel',
-});
+const CANCEL_BUTTON_LABEL = i18n.translate(
+  'xpack.significantEventsApp.deleteFeatureModal.cancelButton',
+  {
+    defaultMessage: 'Cancel',
+  }
+);

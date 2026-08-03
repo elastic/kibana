@@ -18,10 +18,10 @@ import { css } from '@emotion/react';
 import type { KnowledgeIndicator } from '@kbn/streams-ai';
 import { QUERY_TYPE_STATS } from '@kbn/significant-events-schema';
 import React, { useMemo } from 'react';
-import { SparkPlot } from '../../../../spark_plot';
-import { KnowledgeIndicatorActionsCell } from '../../../stream_detail_significant_events_view/knowledge_indicator_actions_cell';
-import { getKnowledgeIndicatorItemId } from '../../../stream_detail_significant_events_view/utils/get_knowledge_indicator_item_id';
-import { getKnowledgeIndicatorStreamName } from '../../../stream_detail_significant_events_view/utils/get_knowledge_indicator_stream_name';
+import { SparkPlot } from '../../../../components/spark_plot';
+import { KnowledgeIndicatorActionsCell } from '../../../../components/knowledge_indicators/knowledge_indicator_actions_cell';
+import { getKnowledgeIndicatorItemId } from '../../../../components/knowledge_indicators/utils/get_knowledge_indicator_item_id';
+import { getKnowledgeIndicatorStreamName } from '../../../../components/knowledge_indicators/utils/get_knowledge_indicator_stream_name';
 import { getKnowledgeIndicatorTitle } from './use_knowledge_indicators_table';
 import {
   TITLE_COLUMN_LABEL,

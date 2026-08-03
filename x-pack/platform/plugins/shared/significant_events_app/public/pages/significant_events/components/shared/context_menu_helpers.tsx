@@ -8,7 +8,7 @@
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { InferenceConnector } from '@kbn/inference-common';
 import React from 'react';
-import { ConnectorIcon } from '../../../../connector_list_button/connector_icon';
+import { ConnectorIcon } from '../../../../components/connector_icon';
 import { ConnectorSubPanel } from './connector_sub_panel';
 import { MODEL_SELECTION_PANEL_TITLE } from './translations';
 

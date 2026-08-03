@@ -24,7 +24,7 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import { QUERY_TYPE_MATCH } from '@kbn/significant-events-schema';
-import type { SignificantEventQueryRow } from '../../../../../hooks/significant_events/use_fetch_discovery_queries';
+import type { SignificantEventQueryRow } from '../../../../hooks/use_fetch_discovery_queries';
 import { SeverityBadge } from '../severity_badge/severity_badge';
 import { QueryTypeBadge } from '../query_type_badge/query_type_badge';
 
@@ -114,10 +114,9 @@ export function DeleteQueriesModal({
   );
 }
 
-const MODAL_ARIA_LABEL = i18n.translate(
-  'xpack.significantEventsApp.deleteQueriesModal.ariaLabel',
-  { defaultMessage: 'Delete queries modal' }
-);
+const MODAL_ARIA_LABEL = i18n.translate('xpack.significantEventsApp.deleteQueriesModal.ariaLabel', {
+  defaultMessage: 'Delete queries modal',
+});
 
 const CONSEQUENCE_MESSAGE = i18n.translate(
   'xpack.significantEventsApp.deleteQueriesModal.consequenceMessage',

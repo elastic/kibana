@@ -11,9 +11,12 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { SignificantEvent } from '@kbn/significant-events-schema';
 
-const CAUSAL_FEATURES_TITLE = i18n.translate('xpack.significantEventsApp.sigEventsTab.flyout.causalFeatures', {
-  defaultMessage: 'Causal Features',
-});
+const CAUSAL_FEATURES_TITLE = i18n.translate(
+  'xpack.significantEventsApp.sigEventsTab.flyout.causalFeatures',
+  {
+    defaultMessage: 'Causal Features',
+  }
+);
 const STREAMS_TITLE = i18n.translate('xpack.significantEventsApp.sigEventsTab.flyout.streams', {
   defaultMessage: 'Streams',
 });

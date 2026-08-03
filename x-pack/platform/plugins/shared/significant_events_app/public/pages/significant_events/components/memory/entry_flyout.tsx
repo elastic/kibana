@@ -232,14 +232,18 @@ export function EntryFlyout({ entryId, onClose }: { entryId: string; onClose: ()
           <EuiSpacer size="s" />
           <EuiTabs size="s">
             <EuiTab isSelected={activeTab === 'content'} onClick={() => setActiveTab('content')}>
-              {i18n.translate('xpack.significantEventsApp.memory.contentTab', { defaultMessage: 'Content' })}
+              {i18n.translate('xpack.significantEventsApp.memory.contentTab', {
+                defaultMessage: 'Content',
+              })}
             </EuiTab>
             <EuiTab
               isSelected={activeTab === 'history'}
               onClick={() => setActiveTab('history')}
               disabled={isEditing}
             >
-              {i18n.translate('xpack.significantEventsApp.memory.historyTab', { defaultMessage: 'History' })}
+              {i18n.translate('xpack.significantEventsApp.memory.historyTab', {
+                defaultMessage: 'History',
+              })}
             </EuiTab>
           </EuiTabs>
         </EuiFlyoutHeader>

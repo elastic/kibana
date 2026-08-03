@@ -16,9 +16,9 @@ import {
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useFetchQueryOccurrenceStats } from '../../../../../hooks/significant_events/use_fetch_query_occurrence_stats';
-import { getFormattedError } from '../../../../../util/errors';
-import { SparkPlot } from '../../../../spark_plot';
+import { useFetchQueryOccurrenceStats } from '../../../../hooks/use_fetch_query_occurrence_stats';
+import { getFormattedError } from '../../../../util/errors';
+import { SparkPlot } from '../../../../components/spark_plot';
 
 const COUNT_WIDTH = '60px';
 const CHART_WIDTH = '100px';
@@ -56,9 +56,12 @@ export function SignificantEventsColumn({ streamName }: SignificantEventsColumnP
       <EuiFlexItem grow={false} css={{ width: CHART_WIDTH, flexShrink: 0 }}>
         <SparkPlot
           id={`significant-events-histogram-${streamName}`}
-          name={i18n.translate('xpack.significantEventsApp.significantEventsTable.histogramSeriesTitle', {
-            defaultMessage: 'Count',
-          })}
+          name={i18n.translate(
+            'xpack.significantEventsApp.significantEventsTable.histogramSeriesTitle',
+            {
+              defaultMessage: 'Count',
+            }
+          )}
           timeseries={significantEventsFetchState.data.aggregated_occurrences || []}
           type="bar"
           annotations={[]}

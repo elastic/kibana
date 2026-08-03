@@ -6,12 +6,12 @@
  */
 
 import { useCallback, useRef } from 'react';
-import { useStreamsAppParams } from '../../../../../hooks/use_streams_app_params';
-import { useStreamsAppRouter } from '../../../../../hooks/use_streams_app_router';
+import { useSignificantEventsAppParams } from '../../../../hooks/use_significant_events_app_params';
+import { useSignificantEventsAppRouter } from '../../../../hooks/use_significant_events_app_router';
 
 export const useSignificantEventsUrlState = () => {
-  const router = useStreamsAppRouter();
-  const { query } = useStreamsAppParams('/_discovery/{tab}');
+  const router = useSignificantEventsAppRouter();
+  const { query } = useSignificantEventsAppParams('/_discovery/{tab}');
 
   const queryRef = useRef(query);
   queryRef.current = query;

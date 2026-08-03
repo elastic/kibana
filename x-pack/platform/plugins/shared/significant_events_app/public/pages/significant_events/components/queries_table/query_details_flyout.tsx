@@ -36,20 +36,20 @@ import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { QUERY_TYPE_MATCH, QUERY_TYPE_STATS } from '@kbn/significant-events-schema';
 import React, { useEffect, useState } from 'react';
-import { FlyoutMetadataCard } from '../../../../flyout_components/flyout_metadata_card';
-import { FlyoutToolbarHeader } from '../../../../flyout_components/flyout_toolbar_header';
-import type { StreamQueryStats } from '../../../../../hooks/significant_events/use_fetch_query_occurrence_stats';
-import { useKibana } from '../../../../../hooks/use_kibana';
-import { useTimefilter } from '../../../../../hooks/use_timefilter';
-import { InfoPanel } from '../../../../info_panel';
-import { SparkPlot } from '../../../../spark_plot';
+import { FlyoutMetadataCard } from '../../../../components/flyout_components/flyout_metadata_card';
+import { FlyoutToolbarHeader } from '../../../../components/flyout_components/flyout_toolbar_header';
+import type { StreamQueryStats } from '../../../../hooks/use_fetch_query_occurrence_stats';
+import { useKibana } from '../../../../hooks/use_kibana';
+import { useTimefilter } from '../../../../hooks/use_timefilter';
+import { InfoPanel } from '../../../../components/info_panel';
+import { SparkPlot } from '../../../../components/spark_plot';
 import { SeverityBadge } from '../severity_badge/severity_badge';
 import {
   OCCURRENCES_COLUMN,
   THRESHOLD_BREACHES_TOOLTIP_NAME,
   OPEN_IN_DISCOVER_ACTION_TITLE,
 } from './translations';
-import { AssetImage } from '../../../../asset_image';
+import { AssetImage } from '../../../../components/asset_image';
 import { QueryTypeBadge } from '../query_type_badge/query_type_badge';
 import { buildDiscoverParams } from '../../utils/discover_helpers';
 
@@ -321,20 +321,18 @@ function getQueryInputValue(item: StreamQueryStats) {
   return item.query.esql?.query ?? '';
 }
 
-const STREAM_LABEL = i18n.translate(
-  'xpack.significantEventsApp.queryDetailsFlyout.streamLabel',
-  { defaultMessage: 'Stream' }
-);
+const STREAM_LABEL = i18n.translate('xpack.significantEventsApp.queryDetailsFlyout.streamLabel', {
+  defaultMessage: 'Stream',
+});
 
 const GENERAL_INFORMATION_TITLE = i18n.translate(
   'xpack.significantEventsApp.queryDetailsFlyout.generalInformationTitle',
   { defaultMessage: 'General information' }
 );
 
-const TYPE_LABEL = i18n.translate(
-  'xpack.significantEventsApp.queryDetailsFlyout.typeLabel',
-  { defaultMessage: 'Type' }
-);
+const TYPE_LABEL = i18n.translate('xpack.significantEventsApp.queryDetailsFlyout.typeLabel', {
+  defaultMessage: 'Type',
+});
 
 const QUERY_PANEL_TITLE = i18n.translate(
   'xpack.significantEventsApp.queryDetailsFlyout.queryLabel',

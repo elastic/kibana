@@ -24,9 +24,9 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { useInferenceFeatureConnectors } from '../../../../../hooks/significant_events/use_inference_feature_connectors';
-import { useIndexPatternsConfig } from '../../../../../hooks/use_index_patterns_config';
-import type { ScheduleOnboardingOptions } from '../../../../../hooks/use_onboarding_api';
+import { useInferenceFeatureConnectors } from '../../../../hooks/use_inference_feature_connectors';
+import { useIndexPatternsConfig } from '../../../../hooks/use_index_patterns_config';
+import type { ScheduleOnboardingOptions } from '../../../../hooks/use_onboarding_api';
 import { useBulkOnboarding } from '../../hooks/use_bulk_onboarding';
 import { useFetchStreams } from '../../hooks/use_fetch_streams';
 import type { OnboardingConfig } from '../shared/types';

@@ -40,8 +40,7 @@ interface SignificantEventsPageContextValue {
   handleCancel: () => void;
 }
 
-const SignificantEventsPageContext =
-  createContext<SignificantEventsPageContextValue | null>(null);
+const SignificantEventsPageContext = createContext<SignificantEventsPageContextValue | null>(null);
 
 interface SignificantEventsPageProviderProps {
   children: React.ReactNode;
@@ -110,12 +109,9 @@ export function SignificantEventsPageProvider({
       setIsOptimisticallyRunning(false);
       setTrackedExecutionId(null);
       toasts.addError(getFormattedError(error), {
-        title: i18n.translate(
-          'xpack.significantEventsApp.discoveryWorkflow.triggerErrorTitle',
-          {
-            defaultMessage: 'Failed to start discovery pipeline',
-          }
-        ),
+        title: i18n.translate('xpack.significantEventsApp.discoveryWorkflow.triggerErrorTitle', {
+          defaultMessage: 'Failed to start discovery pipeline',
+        }),
       });
     },
   });

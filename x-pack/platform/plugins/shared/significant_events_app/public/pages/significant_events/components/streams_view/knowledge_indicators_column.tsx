@@ -10,7 +10,7 @@ import { css } from '@emotion/css';
 import type { Streams } from '@kbn/streams-schema';
 import type { SignificantEventsWorkflowStatusResult } from '@kbn/significant-events-schema';
 import React from 'react';
-import { useStreamFeatures } from '../../../../../hooks/significant_events/use_stream_features';
+import { useStreamFeatures } from '../../../../hooks/use_stream_features';
 
 interface KnowledgeIndicatorsColumnProps {
   stream: Streams.all.Definition;

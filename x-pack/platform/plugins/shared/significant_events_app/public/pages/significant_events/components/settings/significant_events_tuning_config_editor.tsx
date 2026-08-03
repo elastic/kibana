@@ -146,9 +146,12 @@ export function SignificantEventsTuningConfigEditor({
             size="s"
             color="danger"
             iconType="error"
-            title={i18n.translate('xpack.significantEventsApp.settings.sigEventsTuningConfig.validationErrors', {
-              defaultMessage: 'Configuration errors',
-            })}
+            title={i18n.translate(
+              'xpack.significantEventsApp.settings.sigEventsTuningConfig.validationErrors',
+              {
+                defaultMessage: 'Configuration errors',
+              }
+            )}
           >
             <ul>
               {errors.map((err, i) => (

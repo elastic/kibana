@@ -23,7 +23,7 @@ import React from 'react';
 import { useFetchDiscoveryQueries } from '../../hooks/use_fetch_discovery_queries';
 import { useStreamFeatures } from '../../hooks/use_stream_features';
 import { useStreamOnboardingStatus } from '../../hooks/use_stream_onboarding_status';
-import { useStreamsAppRouter } from '../../hooks/use_significant_events_app_router';
+import { useSignificantEventsAppRouter } from '../../hooks/use_significant_events_app_router';
 
 const ACTIVE_DRAFT_STATUS = ['active', 'draft'] as const;
 
@@ -84,7 +84,7 @@ function KnowledgeIndicatorCount({
 }
 
 export function KnowledgeIndicatorsPanel({ definition }: KnowledgeIndicatorsPanelProps) {
-  const router = useStreamsAppRouter();
+  const router = useSignificantEventsAppRouter();
   const streamName = definition.stream.name;
   const streamOnboardingResult = useStreamOnboardingStatus(streamName);
 
@@ -134,13 +134,10 @@ export function KnowledgeIndicatorsPanel({ definition }: KnowledgeIndicatorsPane
 
   const ariaLabel =
     featuresIsLoading || queriesIsLoading
-      ? i18n.translate(
-          'xpack.significantEventsApp.knowledgeIndicatorsPanel.linkAriaLabelLoading',
-          {
-            defaultMessage: 'View knowledge indicators for {streamName}: loading counts',
-            values: { streamName },
-          }
-        )
+      ? i18n.translate('xpack.significantEventsApp.knowledgeIndicatorsPanel.linkAriaLabelLoading', {
+          defaultMessage: 'View knowledge indicators for {streamName}: loading counts',
+          values: { streamName },
+        })
       : i18n.translate('xpack.significantEventsApp.knowledgeIndicatorsPanel.linkAriaLabel', {
           defaultMessage:
             'View knowledge indicators for {streamName}: {featuresCount, plural, one {# feature} other {# features}}, {queriesCount, plural, one {# query} other {# queries}}',
