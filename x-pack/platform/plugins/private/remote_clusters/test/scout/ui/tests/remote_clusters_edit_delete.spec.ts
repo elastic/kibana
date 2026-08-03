@@ -7,13 +7,7 @@
 
 import type { ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import {
-  test,
-  testData,
-  seedSniffCluster,
-  seedProxyCluster,
-  removeCluster,
-} from '../fixtures';
+import { test, testData, seedSniffCluster, seedProxyCluster, removeCluster } from '../fixtures';
 import type { RemoteClustersPage } from '../fixtures/page_objects/remote_clusters_page';
 
 const { REMOTE_CLUSTERS_ADMIN_ROLE, A11Y_SELECTORS, SNIFF_CLUSTER_NAME, PROXY_CLUSTER_NAME } =

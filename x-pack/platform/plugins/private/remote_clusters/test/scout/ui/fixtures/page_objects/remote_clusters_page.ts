@@ -123,7 +123,9 @@ export class RemoteClustersPage {
   }
 
   async openEditForm(name: string): Promise<void> {
-    await this.clusterRow(name).locator('[data-test-subj="remoteClusterTableRowEditButton"]').click();
+    await this.clusterRow(name)
+      .locator('[data-test-subj="remoteClusterTableRowEditButton"]')
+      .click();
     // The edit form reuses the same page title element as the add wizard.
     await this.pageTitle.waitFor({ state: 'visible' });
   }
