@@ -46,6 +46,10 @@ interface LocationOption {
   isServiceManaged: boolean;
 }
 
+// LocationsComboBox is typed as EuiComboBoxProps<unknown>, but the options we
+// pass it also carry id/isServiceManaged, so its onChange hands those back too.
+type LocationComboBoxOption = EuiComboBoxOptionOption<unknown> & LocationOption;
+
 const sameIdSet = (a: MonitorServiceLocation[], b: MonitorServiceLocation[]) => {
   if (a.length !== b.length) {
     return false;
@@ -233,12 +237,12 @@ export const BulkLocationsFlyout = ({
               isServiceManaged: loc.isServiceManaged ?? false,
             }))}
             onChange={(selected: Array<EuiComboBoxOptionOption<unknown>>) => {
-              // Options carry `id`/`isServiceManaged` alongside the EUI props, so
-              // read them back through the LocationOption shape.
               setSelectedLocations(
-                (selected as unknown as LocationOption[]).map(
-                  ({ id, label, isServiceManaged }) => ({ id, label, isServiceManaged })
-                )
+                (selected as LocationComboBoxOption[]).map(({ id, label, isServiceManaged }) => ({
+                  id,
+                  label,
+                  isServiceManaged,
+                }))
               );
             }}
             data-test-subj="syntheticsBulkLocationsComboBox"
