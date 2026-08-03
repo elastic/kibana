@@ -19,7 +19,7 @@ import {
   statusServiceMock,
 } from '@kbn/core/server/mocks';
 
-import { AuditService, createAuditLoggingConfig } from './audit_service';
+import { AuditService, createLoggingConfig } from './audit_service';
 import type { SecurityLicenseFeatures } from '../../common';
 import { licenseMock } from '../../common/licensing/index.mock';
 import type { ConfigType } from '../config';
@@ -44,11 +44,11 @@ const rollingFileAppender = (fileName: string) =>
     strategy: { type: 'numeric', max: 10 },
   } as ConfigType['audit']['appender']);
 
-describe('createAuditLoggingConfig', () => {
+describe('createLoggingConfig', () => {
   const config = auditConfig(rollingFileAppender('/var/log/kibana/audit.log'));
 
   it('keeps the configured appender and `info` level while the log is writable', () => {
-    const loggingConfig = createAuditLoggingConfig(config, false, {
+    const loggingConfig = createLoggingConfig(config, false, {
       writable: true,
       path: '/var/log/kibana/audit.log',
       checkedAt: '2026-08-03T10:00:00.000Z',
@@ -60,7 +60,7 @@ describe('createAuditLoggingConfig', () => {
 
   describe('when the audit log cannot be written', () => {
     const loggingConfig = (): LoggerContextConfigInput =>
-      createAuditLoggingConfig(config, false, {
+      createLoggingConfig(config, false, {
         writable: false,
         path: '/var/log/kibana/audit.log',
         code: 'EROFS',
@@ -89,11 +89,7 @@ describe('createAuditLoggingConfig', () => {
   it('is unaffected when there is nothing to probe', () => {
     const consoleConfig = auditConfig({ type: 'console', layout: { type: 'pattern' } } as any);
 
-    const loggingConfig = createAuditLoggingConfig(
-      consoleConfig,
-      false,
-      undefined
-    )(allowAuditLogging);
+    const loggingConfig = createLoggingConfig(consoleConfig, false, undefined)(allowAuditLogging);
 
     expect((loggingConfig.appenders as any).auditTrailAppender.type).toEqual('console');
     expect(loggingConfig.loggers![0].level).toEqual('info');

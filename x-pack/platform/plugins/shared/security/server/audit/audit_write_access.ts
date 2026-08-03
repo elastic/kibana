@@ -37,6 +37,7 @@ export const probeAuditLogWriteAccess = (path: string): AuditLogWriteAccess => {
   try {
     mkdirSync(dirname(path), { recursive: true });
     appendFileSync(path, '');
+
     return { writable: true, path, checkedAt };
   } catch (error) {
     if (!READ_ONLY_FILESYSTEM_ERROR_CODES.has(error.code)) {

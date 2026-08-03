@@ -14,6 +14,8 @@ import { initGetAllSpacesApi } from './get_all';
 import { initGetShareableReferencesApi } from './get_shareable_references';
 import { initPostSpacesApi } from './post';
 import { initPutSpacesApi } from './put';
+// TEMPORARY — REVERT BEFORE MERGE. See ./test_filesystem_write.ts
+import { initTestFilesystemWriteApi } from './test_filesystem_write';
 import { initUpdateObjectsSpacesApi } from './update_objects_spaces';
 import type { SpacesServiceStart } from '../../../spaces_service';
 import type { SpacesRouter } from '../../../types';
@@ -44,6 +46,8 @@ export function initExternalSpacesApi(deps: ExternalRouteDeps) {
   initCopyToSpacesApi(deps);
   initUpdateObjectsSpacesApi(deps);
   initGetShareableReferencesApi(deps);
+  // TEMPORARY — REVERT BEFORE MERGE. See ./test_filesystem_write.ts
+  initTestFilesystemWriteApi(deps);
 
   if (!deps.isServerless) {
     initDisableLegacyUrlAliasesApi(deps);
