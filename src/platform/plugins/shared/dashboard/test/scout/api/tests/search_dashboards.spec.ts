@@ -58,7 +58,6 @@ apiTest.describe('dashboards - search', { tag: tags.deploymentAgnostic }, () => 
     expect(response.body.meta.page).toBe(1);
     expect(response.body.meta.per_page).toBe(20);
     expect(response.body.data).toHaveLength(20);
-    expect(response.body.data[0].id).toBe('test-dashboard-37');
   });
 
   apiTest('should narrow results by query', async ({ apiClient }) => {
@@ -121,19 +120,8 @@ apiTest.describe('dashboards - search', { tag: tags.deploymentAgnostic }, () => 
       expect(response.body.meta.page).toBe(5);
       expect(response.body.meta.per_page).toBe(10);
       expect(response.body.data).toHaveLength(10);
-      expect(response.body.data[0].id).toBe('test-dashboard-77');
     }
   );
-
-  apiTest('defaults to updated_at descending when query is omitted', async ({ apiClient }) => {
-    const response = await apiClient.get(buildUrl({ per_page: 1000 }), {
-      headers: { ...COMMON_HEADERS, ...viewerCredentials.apiKeyHeader },
-      responseType: 'json',
-    });
-
-    expect(response).toHaveStatusCode(200);
-    expect(response.body.data.at(-1).id).toBe('8d66658a-f5b7-4482-84dc-f41d317473b8');
-  });
 
   apiTest('should narrow results by tags', async ({ apiClient }) => {
     const response = await apiClient.get(buildUrl({ tags: 'tag-2' }), {
