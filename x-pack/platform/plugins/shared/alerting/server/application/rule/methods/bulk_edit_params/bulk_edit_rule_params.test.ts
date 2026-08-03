@@ -377,6 +377,113 @@ describe('bulkEditRuleParamsWithReadAuth()', () => {
         { overwrite: true }
       );
     });
+
+    test('does not run the rule type params authorizer', async () => {
+      // The read-auth caller authorizes the field-level edit before this method;
+      // the shared helper must not run the rule type's params authorizer, so a
+      // throwing authorizer must not block the update.
+      ruleTypeRegistry.get.mockReturnValue({
+        id: 'myType',
+        name: 'Test',
+        actionGroups: [{ id: 'default', name: 'Default' }],
+        defaultActionGroupId: 'default',
+        minimumLicenseRequired: 'basic',
+        isExportable: true,
+        recoveryActionGroup: RecoveredActionGroup,
+        async executor() {
+          return { state: {} };
+        },
+        category: 'test',
+        validLegacyConsumers: [],
+        producer: 'alerts',
+        solution: 'stack',
+        validate: {
+          params: { validate: (params) => params },
+        },
+        authorize: {
+          params: {
+            authorize: async () => {
+              throw new Error('params authorizer must not run in the bulk-edit helper');
+            },
+          },
+        },
+      });
+
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+        saved_objects: [
+          {
+            id: '1',
+            type: RULE_SAVED_OBJECT_TYPE,
+            attributes: {
+              enabled: true,
+              tags: [],
+              alertTypeId: 'myType',
+              schedule: { interval: '1m' },
+              consumer: 'myApp',
+              scheduledTaskId: 'task-123',
+              executionStatus: {
+                lastExecutionDate: '2019-02-12T21:01:22.479Z',
+                status: 'pending',
+              },
+              params: {
+                exceptionsList: [
+                  {
+                    id: 'exception-list-id',
+                    list_id: 'exception-list',
+                    type: 'detection',
+                    namespace_type: 'single',
+                  },
+                  {
+                    id: 'exception-list-id-2',
+                    list_id: 'exception-list',
+                    type: 'detection',
+                    namespace_type: 'single',
+                  },
+                ],
+              },
+              throttle: null,
+              notifyWhen: null,
+              actions: [],
+              revision: 0,
+            },
+            references: [
+              { name: 'param:exceptionsList_0', id: 'exception-list-id', type: 'exception-list' },
+              { name: 'param:exceptionsList_1', id: 'exception-list-id-2', type: 'exception-list' },
+            ],
+            version: '123',
+          },
+        ],
+      });
+
+      // The existing rule has a single exception list; setting two is a genuine
+      // change, so the rule is updated (not skipped) even though the authorizer
+      // above would throw if it ran.
+      const result = await rulesClient.bulkEditRuleParamsWithReadAuth({
+        operations: [
+          {
+            field: 'exceptionsList',
+            operation: 'set',
+            value: [
+              {
+                id: 'exception-list-id',
+                list_id: 'exception-list',
+                type: 'detection',
+                namespace_type: 'single',
+              },
+              {
+                id: 'exception-list-id-2',
+                list_id: 'exception-list',
+                type: 'detection',
+                namespace_type: 'single',
+              },
+            ],
+          },
+        ],
+      });
+
+      expect(result.errors).toEqual([]);
+      expect(result.rules).toHaveLength(1);
+    });
   });
 
   describe('apiKeys', () => {

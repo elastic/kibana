@@ -105,6 +105,8 @@ async function updateRuleParamsInMemory<Params extends RuleParams>({
       paramsModifier,
       shouldInvalidateApiKeys,
       shouldIncrementRevision,
+      // Read-auth path: the caller has already authorized the field-level edit.
+      shouldAuthorizeRuleTypeParams: false,
       updateAttributesFn: async ({ domainRule, ruleActions }) => {
         const result = await getUpdatedParamAttributesFromOperations({
           operations,
