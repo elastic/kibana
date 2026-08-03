@@ -7,46 +7,33 @@
 
 import type { FtrConfigProviderContext } from '@kbn/test';
 import type { ExperimentalFeatures as SecuritySolutionExperimentalFeatures } from '@kbn/security-solution-plugin/common';
-import type { ExperimentalFeatures as FleetExperimentalFeatures } from '@kbn/fleet-plugin/common/experimental_features';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const functionalConfig = await readConfigFile(
-    require.resolve('../../../../../config/serverless/config.base.edr_workflows')
+    require.resolve('../../../../../config/ess/config.base.edr_workflows.basic')
   );
-
   const securitySolutionEnableExperimental: Array<keyof SecuritySolutionExperimentalFeatures> = [
     'customYaraSignaturesEnabled',
   ];
-  const fleetEnableExperimental: Partial<FleetExperimentalFeatures> = {
-    useSpaceAwareness: true,
-  };
 
   return {
     ...functionalConfig.getAll(),
     testFiles: [require.resolve('..')],
     junit: {
-      reportName: 'EDR Workflows - Space Awareness Integration Tests - Serverless Env - Complete',
+      reportName: 'EDR Workflows - Artifacts Integration Tests - ESS Env - Basic License',
     },
     kbnTestServer: {
       ...functionalConfig.get('kbnTestServer'),
       serverArgs: [
         ...functionalConfig.get('kbnTestServer.serverArgs').filter(
-          // Exclude Fleet and Security solution experimental features
+          // Exclude Security solution experimental features
           // properties since we are overriding them here
-          (arg: string) =>
-            !arg.includes('xpack.fleet.experimentalFeatures') &&
-            !arg.includes('xpack.securitySolution.enableExperimental')
+          (arg: string) => !arg.includes('xpack.securitySolution.enableExperimental')
         ),
-        // FLEET: set any experimental feature flags for testing
-        `--xpack.fleet.experimentalFeatures=${JSON.stringify(fleetEnableExperimental)}`,
-
         // SECURITY SOLUTION: set any experimental feature flags for testing
         `--xpack.securitySolution.enableExperimental=${JSON.stringify(
           securitySolutionEnableExperimental
         )}`,
-
-        // Enable spaces UI capabilities
-        '--xpack.spaces.maxSpaces=100',
       ],
     },
   };
