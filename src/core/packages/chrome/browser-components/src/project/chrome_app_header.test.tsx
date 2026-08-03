@@ -11,7 +11,6 @@ import React from 'react';
 import '@testing-library/jest-dom';
 import { BehaviorSubject } from 'rxjs';
 import { render, screen } from '@testing-library/react';
-import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import type { ChromeBadge, ChromeBreadcrumb } from '@kbn/core-chrome-browser';
 import { TestChromeProviders } from '../test_helpers';
@@ -50,11 +49,10 @@ describe('useHasChromeAppHeaderContent', () => {
   it('detects favorite-only registered content', () => {
     const chrome = chromeServiceMock.createStartContract();
     chrome.next.appHeader.set({
-      favorite: (
-        <EuiToolTip content="Favorite" disableScreenReaderOutput>
-          <EuiButtonIcon aria-label="Favorite" iconType="starEmpty" onClick={jest.fn()} />
-        </EuiToolTip>
-      ),
+      favorite: {
+        status: 'unfavorited',
+        onToggle: jest.fn(),
+      },
     });
 
     render(

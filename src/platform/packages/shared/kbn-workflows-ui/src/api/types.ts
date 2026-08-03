@@ -215,3 +215,7 @@ export interface GetLibraryHealthResponse {
   lastError?: { message: string; at: string };
   enabled: boolean;
 }
+
+export interface InstallTemplateResponse {
+  workflowId: string;
+}
