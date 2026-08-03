@@ -62,3 +62,4 @@ export * from './specs/buildkite/buildkite';
 export * from './specs/dynatrace/dynatrace';
 export * from './specs/datadog/datadog';
 export * from './specs/jenkins/jenkins';
+export * from './specs/aws_x_ray/aws_x_ray';

@@ -291,4 +291,9 @@ export const ConnectorIconsMap: Map<
     '.jenkins',
     lazy(() => import(/* webpackChunkName: "connectorIconjenkins" */ './specs/jenkins/icon')),
   ],
+
+  [
+    '.aws_x_ray',
+    lazy(() => import(/* webpackChunkName: "connectorIconawsxray" */ './specs/aws_x_ray/icon')),
+  ],
 ]);
