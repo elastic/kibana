@@ -170,16 +170,6 @@ spaceTest.describe('Lens open in Lens — agg-based Goal', { tag: tags.deploymen
           showingBar: true,
           showingTrendline: false,
         },
-        {
-          title: undefined,
-          subtitle: undefined,
-          extraText: undefined,
-          value: undefined,
-          color: 'rgba(255, 255, 255, 1)',
-          trendlineColor: undefined,
-          showingBar: true,
-          showingTrendline: false,
-        },
       ]);
 
     await dimensions[0].click();
