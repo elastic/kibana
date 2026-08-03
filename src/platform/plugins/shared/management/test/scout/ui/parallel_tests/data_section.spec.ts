@@ -64,7 +64,7 @@ test.describe('Stack Management — data section', { tag: tags.stateful.classic 
     });
   });
 
-  test('ccr_user sees cross_cluster_replication and the full cluster:manage data section', async ({
+  test('ccr_user sees cross_cluster_replication and the cluster:manage data section', async ({
     browserAuth,
     pageObjects,
   }) => {
@@ -87,7 +87,6 @@ test.describe('Stack Management — data section', { tag: tags.stateful.classic 
         sectionLinks: [
           'index_management',
           'index_lifecycle_management',
-          'data_federation',
           'snapshot_restore',
           'rollup_jobs',
           'transform',

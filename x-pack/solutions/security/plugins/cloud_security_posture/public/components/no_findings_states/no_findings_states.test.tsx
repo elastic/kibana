@@ -49,14 +49,14 @@ describe('NoFindingsStates', () => {
     await waitFor(() => {
       expect(screen.getByRole('link', { name: /add cspm integration/i })).toHaveAttribute(
         'href',
-        '/app/fleet/integrations/cloud_security_posture-1.9.0/add-integration/cspm'
+        '/app/integrations/detail/cloud_security_posture-1.9.0/add-integration/cspm'
       );
     });
 
     await waitFor(() => {
       expect(screen.getByRole('link', { name: /add kspm integration/i })).toHaveAttribute(
         'href',
-        '/app/fleet/integrations/cloud_security_posture-1.9.0/add-integration/kspm'
+        '/app/integrations/detail/cloud_security_posture-1.9.0/add-integration/kspm'
       );
     });
 
