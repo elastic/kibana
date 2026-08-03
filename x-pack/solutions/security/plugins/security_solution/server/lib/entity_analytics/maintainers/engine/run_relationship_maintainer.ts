@@ -290,6 +290,20 @@ async function runIntegration(
           namespace,
           config.validateTargetIds
         );
+        // Accumulate the entity write immediately — BEFORE the metadata write,
+        // which can throw. These entities are already durable in the store, so
+        // the counter must reflect them even if the rest of this page fails.
+        totalWriteResult = {
+          updated: totalWriteResult.updated + pageWrite.updated,
+          notFound: totalWriteResult.notFound + pageWrite.notFound,
+          errors: totalWriteResult.errors + pageWrite.errors,
+          droppedTargets: totalWriteResult.droppedTargets + pageWrite.droppedTargets,
+          relationshipTypeApplied: mergeRelTypeApplied(
+            totalWriteResult.relationshipTypeApplied,
+            pageWrite.relationshipTypeApplied
+          ),
+        };
+
         const { validTargetIds, succeededEntityIds } = pageWrite;
         // Only write metadata for actors that actually landed in the latest index.
         // When bulkUpdateEntity returns a 404 (actor not yet extracted), we skip
@@ -322,17 +336,6 @@ async function runIntegration(
           }
         );
 
-        // Accumulate counters across pages.
-        totalWriteResult = {
-          updated: totalWriteResult.updated + pageWrite.updated,
-          notFound: totalWriteResult.notFound + pageWrite.notFound,
-          errors: totalWriteResult.errors + pageWrite.errors,
-          droppedTargets: totalWriteResult.droppedTargets + pageWrite.droppedTargets,
-          relationshipTypeApplied: mergeRelTypeApplied(
-            totalWriteResult.relationshipTypeApplied,
-            pageWrite.relationshipTypeApplied
-          ),
-        };
         totalMetadataResult = {
           docsAttempted: totalMetadataResult.docsAttempted + pageMetadata.docsAttempted,
           docsApplied: totalMetadataResult.docsApplied + pageMetadata.docsApplied,
@@ -361,20 +364,19 @@ async function runIntegration(
     };
   } catch (err) {
     logger.error(`${logPrefix} Integration failed: ${errMsg(err)}`);
+    // Return the counters accumulated so far, NOT zeros. Writes stream per page,
+    // so pages 1..N-1 are already durable in the entity store when a later page
+    // throws (e.g. requestTimeoutMs firing during esql.query or writeEntityIds).
+    // Reporting zeros here would tell operators `written=0 records=<big>` during
+    // exactly the timeout scenario the configurable timeout exists to surface.
     return {
       buckets: totalBuckets,
       recordsCount: totalRecordsCount,
-      write: {
-        updated: 0,
-        notFound: 0,
-        errors: 0,
-        droppedTargets: 0,
-        relationshipTypeApplied: {},
-      },
-      metadata: { docsAttempted: 0, docsApplied: 0 },
+      write: totalWriteResult,
+      metadata: totalMetadataResult,
       outcome: 'error',
       iterations,
-      truncated: false,
+      truncated,
     };
   }
 }
@@ -519,17 +521,27 @@ export const runRelationshipMaintainer = async ({
     totalIterations += iterations;
     if (integrationTruncated) truncated = true;
 
+    // Accumulate unconditionally, including `outcome: 'error'`. Because writes
+    // stream per page, a failed integration has still durably persisted every
+    // page that completed before the throw — those entities are in the store
+    // whether or not the integration finished. Excluding them would make the
+    // run-level totals under-report real work and contradict the per-integration
+    // completion log. `outcome` is reported separately (log + telemetry
+    // `sources[].outcome`), so callers can still distinguish a clean run from a
+    // partial one without the counters lying about what was written.
     if (outcome === 'error') {
-      logger.warn(`${logPrefix} Integration failed; skipping totals accumulation for this run`);
-    } else {
-      totalBuckets += buckets;
-      totalRecords += recordsCount;
-      totalWritten += write.updated;
-      totalNotFound += write.notFound;
-      totalWriteErrors += write.errors;
-      totalMetadataDocsApplied += metadata.docsApplied;
-      totalDroppedTargets += write.droppedTargets;
+      logger.warn(
+        `${logPrefix} Integration failed after persisting ${write.updated} entities across ` +
+          `${iterations} page(s); counting them toward run totals`
+      );
     }
+    totalBuckets += buckets;
+    totalRecords += recordsCount;
+    totalWritten += write.updated;
+    totalNotFound += write.notFound;
+    totalWriteErrors += write.errors;
+    totalMetadataDocsApplied += metadata.docsApplied;
+    totalDroppedTargets += write.droppedTargets;
 
     if (telemetryCollector) {
       telemetryCollector.sources.push({

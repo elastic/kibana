@@ -558,11 +558,65 @@ describe('runRelationshipMaintainer', () => {
         integrations: [baseConfig],
         maintainerName: 'communicates_with',
       });
-      expect(result.totalBuckets).toBe(0); // error integration excluded from totals
+      // The page's buckets were scanned before ES|QL threw, so they count. Nothing
+      // reached the entity store, so written stays 0 — the counters describe work
+      // actually done, not a blanket zero for the whole integration.
+      expect(result.totalBuckets).toBe(1);
       expect(result.totalRecords).toBe(0);
       expect(result.totalWritten).toBe(0);
       expect(bulkUpdate).not.toHaveBeenCalled();
       expect(logger.error).toHaveBeenCalled();
+    });
+
+    it('reports entities persisted by earlier pages when a later page throws mid-pagination', async () => {
+      // Regression guard for the per-page-write invariant: page 1 writes durably,
+      // then page 2's ES|QL throws (e.g. requestTimeoutMs fires). The already-
+      // persisted entities must still be reported — otherwise the completion log
+      // and telemetry claim `written=0` during exactly the timeout scenario the
+      // configurable requestTimeoutMs exists to surface.
+      const { esClient, search, esql } = makeEsClient();
+      const { crudClient, entityMetadataClient, bulkUpdate } = makeClients();
+
+      // Page 1: one actor, with an after_key so pagination continues.
+      search.mockResolvedValueOnce(
+        successResponse([{ key: { 'user.name': 'alice' }, doc_count: 1 }], {
+          'user.name': 'alice',
+        })
+      );
+      esql.mockResolvedValueOnce({
+        columns: [
+          { name: 'actorUserId', type: 'keyword' },
+          { name: 'accesses_frequently', type: 'keyword' },
+          { name: 'accesses_infrequently', type: 'keyword' },
+        ],
+        values: [['user:alice@corp', ['host:H1'], null]],
+      });
+      // Page 2: another actor, but ES|QL fails for it.
+      search.mockResolvedValueOnce(
+        successResponse([{ key: { 'user.name': 'bob' }, doc_count: 1 }])
+      );
+      esql.mockRejectedValueOnce(new Error('Request timed out'));
+
+      const logger = loggerMock.create();
+      const result = await runRelationshipMaintainer({
+        esClient,
+        logger,
+        namespace: 'default',
+        crudClient,
+        entityMetadataClient,
+        integrations: [baseConfig],
+        maintainerName: 'communicates_with',
+      });
+
+      expect(bulkUpdate).toHaveBeenCalledTimes(1);
+      expect(result.totalWritten).toBe(1);
+      expect(result.totalRecords).toBe(1);
+
+      // The completion log must agree with the returned totals.
+      const infos = logger.info.mock.calls.map((c) => c[0] as string);
+      const completion = infos.find((m) => m.includes('Integration complete:'));
+      expect(completion).toContain('outcome=error');
+      expect(completion).toContain('written=1');
     });
 
     // Defense in depth: ES|QL responses are typed loosely on the client. A
@@ -1256,7 +1310,11 @@ describe('runRelationshipMaintainer', () => {
         integrations: [baseConfig],
         maintainerName: 'communicates_with',
       });
-      expect(result.totalWritten).toBe(0); // error integration excluded from totals
+      // The entity write completed before the metadata write threw, so that entity
+      // IS durably in the store. Reporting 0 here would tell operators nothing was
+      // written when something was — counters must reflect persisted work even
+      // when the integration ends in `outcome: 'error'`.
+      expect(result.totalWritten).toBe(1);
       expect(logger.error).toHaveBeenCalled();
     });
 
