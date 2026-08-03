@@ -60,7 +60,7 @@ async function resolveTaskDocumentConflictsOnce({
     );
   }
 
-  if (currentTask.startedAt !== originalTask.startedAt) {
+  if (currentTask.startedAt?.valueOf() !== originalTask.startedAt?.valueOf()) {
     throw new Error(
       `Unable to resolve task document conflicts for task "${taskId}": task startedAthas been updated by another worker`
     );
