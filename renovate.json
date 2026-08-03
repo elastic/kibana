@@ -884,7 +884,7 @@
     },
     {
       "groupName": "typescript",
-      "matchDepNames": ["typescript"],
+      "matchDepNames": ["typescript", "typescript-7"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Operations"],

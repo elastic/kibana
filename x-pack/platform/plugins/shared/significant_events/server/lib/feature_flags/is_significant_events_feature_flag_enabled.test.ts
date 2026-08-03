@@ -7,14 +7,14 @@
 
 import type { FeatureFlagsStart } from '@kbn/core/server';
 import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '../../../common/feature_flags';
-import { isSignificantEventsAvailable } from './is_significant_events_available';
+import { isSignificantEventsFeatureFlagEnabled } from './is_significant_events_feature_flag_enabled';
 
-describe('isSignificantEventsAvailable', () => {
+describe('isSignificantEventsFeatureFlagEnabled', () => {
   it('returns false when the feature flag is not enabled', async () => {
     const getBooleanValue = jest.fn().mockResolvedValue(false);
     const featureFlags = { getBooleanValue } as unknown as FeatureFlagsStart;
 
-    await expect(isSignificantEventsAvailable(featureFlags)).resolves.toBe(false);
+    await expect(isSignificantEventsFeatureFlagEnabled(featureFlags)).resolves.toBe(false);
     expect(getBooleanValue).toHaveBeenCalledWith(STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG, false);
   });
 
@@ -22,7 +22,7 @@ describe('isSignificantEventsAvailable', () => {
     const getBooleanValue = jest.fn().mockResolvedValue(true);
     const featureFlags = { getBooleanValue } as unknown as FeatureFlagsStart;
 
-    await expect(isSignificantEventsAvailable(featureFlags)).resolves.toBe(true);
+    await expect(isSignificantEventsFeatureFlagEnabled(featureFlags)).resolves.toBe(true);
     expect(getBooleanValue).toHaveBeenCalledWith(STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG, false);
   });
 });
