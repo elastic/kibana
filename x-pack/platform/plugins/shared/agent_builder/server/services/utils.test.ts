@@ -101,32 +101,95 @@ describe('getUserFromRequest', () => {
     });
   });
 
-  it('does not synthesize a realm id for api_key auth without profile uid', async () => {
-    const request = httpServerMock.createKibanaRequest();
+  it('resolves the API key creator profile uid when getCurrentUser omits it', async () => {
+    const apiKeyId = 'api-key-id';
+    const request = httpServerMock.createKibanaRequest({
+      headers: {
+        authorization: `ApiKey ${Buffer.from(`${apiKeyId}:secret`).toString('base64')}`,
+      },
+    });
 
     security.authc.getCurrentUser.mockReturnValue({
       username: 'shareduser',
       authentication_type: 'api_key',
-      authentication_realm: { type: 'native', name: 'native1' },
+      authentication_realm: { type: '_es_api_key', name: '_es_api_key' },
+    } as any);
+    esClient.security.getApiKey.mockResolvedValue({
+      api_keys: [{ id: apiKeyId, profile_uid: 'profile-from-api-key' }],
     } as any);
 
     const result = await getUserFromRequest({ request, security, esClient });
 
-    // Preserve username ownership fallback so API-key requests can still access
-    // private conversations/agents stamped with the interactive user's profile uid.
+    expect(result).toEqual({
+      id: 'profile-from-api-key',
+      username: 'shareduser',
+    });
+    expect(esClient.security.getApiKey).toHaveBeenCalledWith({
+      with_profile_uid: true,
+      id: apiKeyId,
+    });
+  });
+
+  it('falls back to username-only for api_key auth when creator profile uid is unavailable', async () => {
+    const apiKeyId = 'api-key-id';
+    const request = httpServerMock.createKibanaRequest({
+      headers: {
+        authorization: `ApiKey ${Buffer.from(`${apiKeyId}:secret`).toString('base64')}`,
+      },
+    });
+
+    security.authc.getCurrentUser.mockReturnValue({
+      username: 'shareduser',
+      authentication_type: 'api_key',
+      authentication_realm: { type: '_es_api_key', name: '_es_api_key' },
+    } as any);
+    esClient.security.getApiKey.mockResolvedValue({
+      api_keys: [{ id: apiKeyId }],
+    } as any);
+
+    const result = await getUserFromRequest({ request, security, esClient });
+
+    // No realm id: `_es_api_key` is not a stable owner identity. Username fallback keeps
+    // access working for older keys / creators without an activated profile.
+    expect(result).toEqual({
+      username: 'shareduser',
+    });
+    expect(esClient.security.getApiKey).toHaveBeenCalledWith({
+      with_profile_uid: true,
+      id: apiKeyId,
+    });
+  });
+
+  it('falls back to username-only when API key profile lookup fails', async () => {
+    const apiKeyId = 'api-key-id';
+    const request = httpServerMock.createKibanaRequest({
+      headers: {
+        authorization: `ApiKey ${Buffer.from(`${apiKeyId}:secret`).toString('base64')}`,
+      },
+    });
+
+    security.authc.getCurrentUser.mockReturnValue({
+      username: 'shareduser',
+      authentication_type: 'api_key',
+      authentication_realm: { type: '_es_api_key', name: '_es_api_key' },
+    } as any);
+    esClient.security.getApiKey.mockRejectedValue(new Error('forbidden'));
+
+    const result = await getUserFromRequest({ request, security, esClient });
+
     expect(result).toEqual({
       username: 'shareduser',
     });
   });
 
-  it('still prefers profile uid for api_key auth when present', async () => {
+  it('prefers profile uid on the authenticated user for api_key auth without looking up the key', async () => {
     const request = httpServerMock.createKibanaRequest();
 
     security.authc.getCurrentUser.mockReturnValue({
       username: 'shareduser',
       profile_uid: 'profile-123',
       authentication_type: 'api_key',
-      authentication_realm: { type: 'native', name: 'native1' },
+      authentication_realm: { type: '_es_api_key', name: '_es_api_key' },
     } as any);
 
     const result = await getUserFromRequest({ request, security, esClient });
@@ -135,6 +198,7 @@ describe('getUserFromRequest', () => {
       id: 'profile-123',
       username: 'shareduser',
     });
+    expect(esClient.security.getApiKey).not.toHaveBeenCalled();
   });
 
   it('falls back to ES authenticate for username without synthesizing a realm id', async () => {

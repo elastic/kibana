@@ -7,7 +7,10 @@
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { SecurityServiceStart } from '@kbn/core-security-server';
+import {
+  extractApiKeyIdFromAuthzHeader,
+  type SecurityServiceStart,
+} from '@kbn/core-security-server';
 import type { CurrentUser } from '@kbn/agent-builder-common';
 import { APPLICATION_PREFIX } from '@kbn/security-plugin/common/constants';
 import { apiPrivileges } from '../../common/features';
@@ -47,6 +50,38 @@ export const toStableUserId = ({
 };
 
 /**
+ * Resolves the API key creator's profile uid via Elasticsearch, when available.
+ *
+ * `getCurrentUser` for API-key auth often omits `profile_uid`. Looking up the key with
+ * `with_profile_uid` recovers the creator's profile so ownership can match interactive
+ * sessions for the same user. Older keys or creators without an activated profile return
+ * undefined and callers fall back to username matching.
+ */
+const resolveApiKeyOwnerProfileUid = async ({
+  request,
+  esClient,
+}: {
+  request: KibanaRequest;
+  esClient: ElasticsearchClient;
+}): Promise<string | undefined> => {
+  try {
+    const id = extractApiKeyIdFromAuthzHeader(request.headers.authorization);
+    if (!id) {
+      return undefined;
+    }
+
+    const response = await esClient.security.getApiKey({
+      with_profile_uid: true,
+      id,
+    });
+
+    return response.api_keys?.[0]?.profile_uid;
+  } catch {
+    return undefined;
+  }
+};
+
+/**
  * Resolves the current user from a request.
  *
  * For real HTTP requests, `security.authc.getCurrentUser` returns the authenticated user
@@ -59,10 +94,6 @@ export const toStableUserId = ({
  *
  * For un-enriched fake requests (e.g. tasks scheduled before enrichment was available), we fall
  * back to the ES `_security/_authenticate` API for the username only.
- *
- * Realm-qualified ids are only synthesized for realm authentication. API keys often lack
- * `profile_uid`; inventing a realm id for them would mismatch resources stamped with the
- * interactive user's profile uid and close the username ownership fallback.
  */
 export const getUserFromRequest = async ({
   request,
@@ -75,12 +106,17 @@ export const getUserFromRequest = async ({
 }): Promise<CurrentUser> => {
   const authUser = security.authc.getCurrentUser(request);
   if (authUser?.username) {
-    const allowRealmFallback = authUser.authentication_type !== 'api_key';
+    const isApiKey = authUser.authentication_type === 'api_key';
+    let profileUid = authUser.profile_uid;
+    if (isApiKey && profileUid === undefined) {
+      profileUid = await resolveApiKeyOwnerProfileUid({ request, esClient });
+    }
+
     return {
       id: toStableUserId({
-        profileUid: authUser.profile_uid,
+        profileUid,
         username: authUser.username,
-        authenticationRealm: allowRealmFallback ? authUser.authentication_realm : undefined,
+        authenticationRealm: isApiKey ? undefined : authUser.authentication_realm,
       }),
       username: authUser.username,
     };
