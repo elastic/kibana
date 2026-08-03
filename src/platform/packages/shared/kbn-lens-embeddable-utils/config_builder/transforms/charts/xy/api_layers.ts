@@ -27,8 +27,6 @@ import {
   isPersistedLinkedByValueAnnotationsLayer,
   isRuntimeByReferenceAnnotationsLayer,
 } from '@kbn/lens-common';
-import { AS_CODE_DATA_VIEW_SPEC_TYPE } from '@kbn/as-code-data-views-schema';
-import { AS_CODE_DATA_VIEW_REFERENCE_TYPE } from '@kbn/as-code-data-views-schema';
 import type {
   AnnotationLayerByValueType,
   AnnotationLayerType,
@@ -40,7 +38,7 @@ import type {
   ReferenceLineLayerTypeNoESQL,
 } from '../../../schema/charts/xy';
 import { LENS_IGNORE_GLOBAL_FILTERS_DEFAULT_VALUE } from '../../../schema/constants';
-import type { DataSourceType } from '../../../schema/data_source';
+import type { DataSourceTypeNoESQL } from '../../../schema/data_source';
 import type { LensApiStaticValueOperation } from '../../../schema/metric_ops';
 import { isEsqlTableTypeDataSource } from '../../../utils';
 import {
@@ -59,12 +57,14 @@ import {
 } from '../../columns/utils';
 import {
   buildDataSourceState,
+  buildDataViewDataSource,
   generateApiLayer,
-  isDataViewSpec,
+  getXYAnnotationLayerReferenceName,
   isFormBasedLayer,
   isTextBasedLayer,
   nonNullable,
   operationFromColumn,
+  resolveDataViewId,
 } from '../../utils';
 import { stripUndefined } from '../utils';
 import { getYAccessorAxisModeMap, type ResolveAxisId } from './chart';
@@ -421,11 +421,6 @@ export function buildAPIReferenceLinesLayer(
   };
 }
 
-function findAnnotationDataView(layerId: string, references: SavedObjectReference[]) {
-  const ref = references.find((r) => r.name === `xy-visualization-layer-${layerId}`);
-  return ref?.id;
-}
-
 function getTextConfigurationForQueryAnnotation(
   annotation: XYByValueAnnotationLayerConfig['annotations'][number]
 ): Pick<
@@ -481,40 +476,36 @@ export function buildAPIAnnotationsLayer(
     };
   }
 
-  const indexPatternId =
-    'indexPatternId' in layer
-      ? layer.indexPatternId
-      : findAnnotationDataView(layer.layerId, references);
+  // XY annotation layers resolve their data view exactly like data layers, except
+  // it is persisted under the `xy-visualization-layer-<layerId>` reference name
+  // (in top-level `references` when persisted, in `state.internalReferences` when
+  // ad hoc), or carried inline via `indexPatternId` on a runtime by-value layer.
+  const inlineDataViewId = 'indexPatternId' in layer ? layer.indexPatternId : undefined;
+  const dataViewId = resolveDataViewId(
+    references,
+    adhocReferences ?? [],
+    getXYAnnotationLayerReferenceName(layer.layerId),
+    inlineDataViewId
+  );
 
-  if (!indexPatternId) {
-    // shouldn't happen unless data is corrupt
+  // Only query annotations actually query an index, so the data view is only
+  // meaningful for them. Manual point/range annotations are positioned purely by
+  // timestamp and don't need a data view: we omit `data_source` for those layers
+  // so the API output isn't polluted with an unused data view, and the data view
+  // is re-derived from the chart's data layers when converting back to state.
+  const hasQueryAnnotation = layer.annotations.some(isQueryAnnotationConfig);
+
+  if (hasQueryAnnotation && !dataViewId) {
+    // A query annotation without a resolvable data view cannot be represented.
     throw new Error('XY visualization: cannot find data view ID for annotation layer.');
   }
 
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  const ignore_global_filters =
-    layer.ignoreGlobalFilters ?? LENS_IGNORE_GLOBAL_FILTERS_DEFAULT_VALUE;
-  const adHocDataView = adHocDataViews[layer.layerId];
-  const referencedDataView = findAnnotationDataView(layer.layerId, references);
-  const dataSource = (
-    isDataViewSpec(adHocDataView) && adHocDataView?.id === indexPatternId
-      ? {
-          type: AS_CODE_DATA_VIEW_SPEC_TYPE,
-          index_pattern: indexPatternId,
-          time_field: adHocDataView.timeFieldName,
-        }
-      : {
-          type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
-          ref_id: referencedDataView ?? indexPatternId,
-        }
-  ) satisfies Extract<
-    DataSourceType,
-    { type: typeof AS_CODE_DATA_VIEW_REFERENCE_TYPE | typeof AS_CODE_DATA_VIEW_SPEC_TYPE }
-  >;
+  const dataSource: DataSourceTypeNoESQL | null =
+    !hasQueryAnnotation || !dataViewId ? null : buildDataViewDataSource(dataViewId, adHocDataViews);
   return {
     type: 'annotations',
-    data_source: dataSource,
-    ignore_global_filters,
+    ...(dataSource ? { data_source: dataSource } : {}),
+    ignore_global_filters: layer.ignoreGlobalFilters ?? LENS_IGNORE_GLOBAL_FILTERS_DEFAULT_VALUE,
     events: layer.annotations.map((annotation) => {
       if (isQueryAnnotationConfig(annotation)) {
         return {
