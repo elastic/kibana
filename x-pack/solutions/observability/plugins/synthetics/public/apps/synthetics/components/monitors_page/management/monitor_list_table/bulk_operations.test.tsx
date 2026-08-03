@@ -71,6 +71,7 @@ describe('<BulkOperations />', () => {
         setMonitorPendingDeletion={jest.fn()}
         setMonitorPendingReset={jest.fn()}
         setMonitorPendingStatusUpdate={setMonitorPendingStatusUpdate}
+        setIsMaintenanceWindowsFlyoutOpen={jest.fn()}
       />
     );
     fireEvent.click(utils.getByTestId('syntheticsBulkActionsButton'));

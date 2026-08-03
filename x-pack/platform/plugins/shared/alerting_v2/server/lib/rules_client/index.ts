@@ -15,7 +15,7 @@ export type {
   CreateRuleData,
   CreateRuleParams,
   DryRunResponse,
-  FindRulesParams,
+  FindRulesArgs,
   FindRulesResponse,
   RuleResponse,
   UpdateRuleData,
