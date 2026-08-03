@@ -169,7 +169,7 @@ export const nextActionMap = (
          * Right now, it's performed during OUTDATED_DOCUMENTS_REFRESH step.
          */
         refresh: false,
-        fetchAllocationExplain: state.retryCount === 0,
+        fetchAllocationExplain: state.explainAllocation,
       }),
     MARK_VERSION_INDEX_READY: (state: MarkVersionIndexReady) =>
       Actions.updateAliases({ client, aliasActions: state.versionIndexReadyActions.value }),

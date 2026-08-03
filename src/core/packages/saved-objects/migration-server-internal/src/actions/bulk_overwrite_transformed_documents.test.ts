@@ -8,6 +8,7 @@
  */
 
 import * as Either from 'fp-ts/Either';
+import type { estypes } from '@elastic/elasticsearch';
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { catchRetryableEsClientErrors } from './catch_retryable_es_client_errors';
@@ -265,6 +266,7 @@ describe('bulkOverwriteTransformedDocuments', () => {
     expect(Either.isLeft(result)).toBe(true);
     expect((result as Either.Left<any>).left.type).toEqual('unavailable_shards_exception');
     expect((result as Either.Left<any>).left.message).toContain('new_index');
+    expect(client.cluster.allocationExplain).not.toHaveBeenCalled();
   });
 
   it('explains the replica when the primary is started (yellow index)', async () => {
@@ -289,7 +291,10 @@ describe('bulkOverwriteTransformedDocuments', () => {
       shard: 0,
       primary: true,
       current_state: 'started',
-    } as any);
+    } as estypes.ClusterAllocationExplainResponse);
+    client.indices.getSettings.mockResolvedValueOnce({
+      new_index: { settings: { index: { number_of_replicas: '1' } } },
+    });
     client.cluster.allocationExplain.mockResolvedValueOnce({
       index: 'new_index',
       shard: 0,
@@ -301,9 +306,9 @@ describe('bulkOverwriteTransformedDocuments', () => {
         {
           node_id: 'abc',
           node_name: 'instance-0000000003',
-          node_decision: 'no' as any,
+          node_decision: 'no' as estypes.ClusterAllocationExplainDecision,
           node_attributes: {},
-          roles: [] as any,
+          roles: [] as estypes.NodeRoles,
           transport_address: '10.0.0.1:9300',
           deciders: [
             {
@@ -315,7 +320,7 @@ describe('bulkOverwriteTransformedDocuments', () => {
           ],
         },
       ],
-    } as any);
+    } as estypes.ClusterAllocationExplainResponse);
 
     const task = bulkOverwriteTransformedDocuments({
       client,
@@ -369,12 +374,13 @@ describe('bulkOverwriteTransformedDocuments', () => {
       primary: true,
       current_state: 'unassigned',
       unassigned_info: {
-        reason: 'NODE_LEFT',
+        reason: 'NODE_LEFT' as estypes.ClusterAllocationExplainUnassignedInformationReason,
+        at: '2026-08-03T09:00:00.000Z',
         last_allocation_status: 'no_valid_shard_copy',
       },
       allocate_explanation:
         'cannot allocate because a previous copy of the primary shard existed but can no longer be found on the nodes in the cluster',
-    } as any);
+    } as estypes.ClusterAllocationExplainResponse);
 
     const task = bulkOverwriteTransformedDocuments({
       client,
@@ -456,7 +462,10 @@ describe('bulkOverwriteTransformedDocuments', () => {
       shard: 0,
       primary: true,
       current_state: 'started',
-    } as any);
+    } as estypes.ClusterAllocationExplainResponse);
+    client.indices.getSettings.mockResolvedValueOnce({
+      new_index: { settings: { index: { number_of_replicas: '1' } } },
+    });
     client.cluster.allocationExplain.mockRejectedValueOnce(new Error('socket hang up'));
 
     const task = bulkOverwriteTransformedDocuments({

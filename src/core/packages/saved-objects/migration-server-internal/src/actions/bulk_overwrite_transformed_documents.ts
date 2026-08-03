@@ -157,12 +157,21 @@ const explainShardAllocation = async (
     { index, shard: 0, primary: true, master_timeout: '30s' },
     { maxRetries: 0 }
   );
-  // Primary is healthy, the problem is with the replica
   if (primaryExplain.current_state === 'started') {
-    return await client.cluster.allocationExplain(
-      { index, shard: 0, primary: false, master_timeout: '30s' },
-      { maxRetries: 0 }
+    const settingsResponse = await client.indices.getSettings({
+      index,
+      filter_path: ['*.settings.index.number_of_replicas'],
+    });
+    const numberOfReplicas = parseInt(
+      String(Object.values(settingsResponse)[0]?.settings?.index?.number_of_replicas ?? 0),
+      10
     );
+    if (numberOfReplicas > 0) {
+      return await client.cluster.allocationExplain(
+        { index, shard: 0, primary: false, master_timeout: '30s' },
+        { maxRetries: 0 }
+      );
+    }
   }
   return primaryExplain;
 };
@@ -176,29 +185,44 @@ const formatAllocationExplanation = (explain: estypes.ClusterAllocationExplainRe
   }
 
   if (explain.allocate_explanation) {
-    parts.push(explain.allocate_explanation);
+    parts.push(explain.allocate_explanation.replace(/\.$/, ''));
   }
 
   if (explain.node_allocation_decisions) {
-    const seen = new Set<string>();
-    const blockingReasons: string[] = [];
+    const groups = new Map<
+      string,
+      { decider: string; decision: string; explanation: string; count: number; firstNodeName: string }
+    >();
 
     for (const node of explain.node_allocation_decisions) {
       for (const decider of node.deciders ?? []) {
         if (decider.decision === 'NO' || decider.decision === 'THROTTLE') {
-          const key = `${decider.decider}: ${decider.explanation}`;
-          if (!seen.has(key)) {
-            seen.add(key);
-            blockingReasons.push(
-              `[${decider.decider}] ${decider.decision}: ${decider.explanation}`
-            );
+          const key = `${decider.decider}|${decider.decision}|${decider.explanation}`;
+          const existing = groups.get(key);
+          if (existing) {
+            existing.count++;
+          } else {
+            groups.set(key, {
+              decider: decider.decider,
+              decision: decider.decision,
+              explanation: decider.explanation,
+              count: 1,
+              firstNodeName: node.node_name,
+            });
           }
         }
       }
     }
 
-    if (blockingReasons.length > 0) {
-      parts.push(`blocking deciders: ${blockingReasons.slice(0, 5).join('; ')}`);
+    if (groups.size > 0) {
+      const blockingReasons = [...groups.values()].map(
+        ({ decider, decision, explanation, count, firstNodeName }) => {
+          const nodeLabel =
+            count === 1 ? firstNodeName : `${count} nodes (${firstNodeName}, +${count - 1})`;
+          return `[${decider}] ${decision} on ${nodeLabel}: ${explanation}`;
+        }
+      );
+      parts.push(`blocking deciders: ${blockingReasons.join('; ')}`);
     }
   }
 
