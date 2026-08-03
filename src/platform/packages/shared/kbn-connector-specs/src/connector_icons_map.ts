@@ -94,6 +94,10 @@ export const ConnectorIconsMap: Map<
         import(/* webpackChunkName: "connectorIconJiraCloud" */ './specs/atlassian/jira-cloud/icon')
     ),
   ],
+  [
+    '.databricks',
+    lazy(() => import(/* webpackChunkName: "connectorIconDatabricks" */ './specs/databricks/icon')),
+  ],
   ['.figma', lazy(() => import(/* webpackChunkName: "connectorIconFigma" */ './specs/figma/icon'))],
   [
     '.confluence-cloud',
@@ -247,6 +251,10 @@ export const ConnectorIconsMap: Map<
     ),
   ],
   [
+    '.workday',
+    lazy(() => import(/* webpackChunkName: "connectorIconWorkday" */ './specs/workday/icon')),
+  ],
+  [
     '.kubernetes',
     lazy(() => import(/* webpackChunkName: "connectorIconKubernetes" */ './specs/kubernetes/icon')),
   ],
@@ -277,5 +285,10 @@ export const ConnectorIconsMap: Map<
   [
     '.datadog',
     lazy(() => import(/* webpackChunkName: "connectorIconDatadog" */ './specs/datadog/icon')),
+  ],
+
+  [
+    '.jenkins',
+    lazy(() => import(/* webpackChunkName: "connectorIconjenkins" */ './specs/jenkins/icon')),
   ],
 ]);
