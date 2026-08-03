@@ -85,6 +85,16 @@ export const euid = {
      * Input: entity type. Output: ESQL expression string for `EVAL`, or `undefined` if none defined.
      */
     getFieldEvaluations: euidModule.getFieldEvaluationsEsql,
+
+    /**
+     * Minimal ESQL fragments for the host-scoped (non-IDP) user EUID
+     * (`user:<user.name>@<host.id>@local`), skipping the namespace-derivation EVAL chain.
+     * Takes no input — which fields form this identity comes from the entity definition.
+     * Output: `{ evalAssignment, presenceGate, hostPresenceGate }`.
+     * Only valid for callers whose documents are exclusively host-scoped users
+     * (e.g. system.auth, system.security).
+     */
+    getHostScopedUserEuid: euidModule.getHostScopedUserEuidEsql,
   },
 
   /**

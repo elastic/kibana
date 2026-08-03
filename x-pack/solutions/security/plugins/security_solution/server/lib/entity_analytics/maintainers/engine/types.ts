@@ -166,18 +166,29 @@ interface RelationshipIntegrationBase {
    */
   disableLookbackWindow?: boolean;
   /**
-   * When true, the ES|QL builder emits a minimized local-namespace query:
-   * hardcodes `@local` as the namespace suffix in the actor EUID, reads only
-   * the three identity fields (`user.email`, `user.name`, `host.id`), and skips
-   * the namespace/EUID EVAL chain. Measured to be ~26× faster than the full
-   * builder on large indices (e.g. logs-system.auth, ~700M docs, 30d lookback).
+   * Declares that every document this integration reads describes a *host-scoped*
+   * (non-IDP) user — an identity meaningful only within one host, keyed by
+   * `user.name` + `host.id` — and always carries `host.id`. This is an assertion
+   * about the *data*, not a build directive, but it lets Step 2 skip work that
+   * only exists to handle the general case:
    *
-   * Only valid for integrations whose data exclusively uses the `@local`
-   * namespace — all current `system_auth` and `system_security` configs qualify.
-   * Setting this on a multi-namespace integration will silently produce wrong
-   * EUIDs for non-local entities.
+   * - the actor EUID comes from `euid.esql.getHostScopedUserEuid()`, which emits
+   *   the namespace directly instead of deriving `entity.namespace` (a 7-arm
+   *   CASE/COALESCE tree over `event.module`, `event.dataset`,
+   *   `data_stream.dataset`, `cloud.provider` and `event.kind`);
+   * - the target EUID and its existence gate read `host.id` alone, skipping the
+   *   `host.name` / `host.hostname` fallback chain.
+   *
+   * Net effect is ~2 EVAL columns per row instead of ~35 — measured ~26× faster
+   * on logs-system.auth (~700M docs, 30d lookback).
+   *
+   * Both claims must hold. `system_auth` and `system_security` qualify (SSH and
+   * Windows logon events are host-scoped and always carry `host.id`). Setting
+   * this where IDP-issued users can appear silently produces EUIDs that do not
+   * match the entity store, 404-ing every write; setting it where `host.id` can
+   * be absent silently drops those documents.
    */
-  localNamespaceFastPath?: true;
+  hostScopedUsersOnly?: true;
 }
 
 /**

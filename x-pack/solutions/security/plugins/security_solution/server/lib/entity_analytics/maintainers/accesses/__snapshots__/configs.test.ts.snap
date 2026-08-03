@@ -126,7 +126,7 @@ FROM logs-system.auth-__namespace__
     AND event.outcome == \\"success\\"
     AND ((\`user.email\` IS NOT NULL AND \`user.email\` != \\"\\") OR (\`user.name\` IS NOT NULL AND \`user.name\` != \\"\\"))
     AND (\`host.id\` IS NOT NULL AND \`host.id\` != \\"\\")
-| EVAL actorUserId = CONCAT(\\"user:\\", COALESCE(TO_STRING(\`user.name\`), TO_STRING(\`user.email\`)), \\"@\\", TO_STRING(\`host.id\`), \\"@local\\")
+| EVAL actorUserId = CONCAT(\\"user:\\", TO_STRING(\`user.name\`), \\"@\\", TO_STRING(\`host.id\`), \\"@local\\")
 | WHERE COALESCE(actorUserId, \\"\\") != \\"\\"
 | EVAL targetEntityId = CONCAT(\\"host:\\", TO_STRING(\`host.id\`))
 | MV_EXPAND targetEntityId
@@ -154,7 +154,7 @@ FROM logs-system.security-__namespace__
     AND NOT user.name IN (\\"SYSTEM\\", \\"LOCAL SERVICE\\", \\"NETWORK SERVICE\\", \\"ANONYMOUS LOGON\\")
     AND ((\`user.email\` IS NOT NULL AND \`user.email\` != \\"\\") OR (\`user.name\` IS NOT NULL AND \`user.name\` != \\"\\"))
     AND (\`host.id\` IS NOT NULL AND \`host.id\` != \\"\\")
-| EVAL actorUserId = CONCAT(\\"user:\\", COALESCE(TO_STRING(\`user.name\`), TO_STRING(\`user.email\`)), \\"@\\", TO_STRING(\`host.id\`), \\"@local\\")
+| EVAL actorUserId = CONCAT(\\"user:\\", TO_STRING(\`user.name\`), \\"@\\", TO_STRING(\`host.id\`), \\"@local\\")
 | WHERE COALESCE(actorUserId, \\"\\") != \\"\\"
 | EVAL targetEntityId = CONCAT(\\"host:\\", TO_STRING(\`host.id\`))
 | MV_EXPAND targetEntityId
