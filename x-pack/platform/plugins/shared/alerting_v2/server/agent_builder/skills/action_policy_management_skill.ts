@@ -77,7 +77,9 @@ A workflow is a **concrete automation defined in YAML** that executes when dispa
 
 - Workflow steps can use Kibana **connectors** (email, Slack, PagerDuty, etc.) via the \`connector-id\` field on each step.
 - Action policy destinations reference **workflow IDs**, never connector IDs directly.
-- Destination workflows must use **exactly one** \`triggers: - type: manual\` trigger — never \`alert\`.
+- Destination workflows should use **exactly one** \`triggers: - type: manual\` trigger — never \`alert\`.
+- Dispatch hands the alert data to the workflow as \`inputs.payload\`. A destination workflow that never reads \`inputs.payload\` will deliver notifications with no alert detail in them.
+- A disabled workflow is skipped at dispatch time, so the policy will not notify until it is enabled.
 
 ---
 
@@ -180,6 +182,17 @@ If you set both in one request, put \`set_grouping\` before \`set_throttle\`. Th
 
 Always include \`{ operation: "validate" }\` as the **last operation** in the final ${ALERTING_TOOL_IDS.manageActionPolicy} call after all fields are set. This validates the accumulated policy against the API request schema and throws if the policy is not ready to save (missing required fields, invalid values, etc.). If validation fails, read the error issues, fix them with corrective operations, and retry with \`validate\` again.
 
+## Destination Workflow Compatibility
+
+Whenever you set destinations, the tool also checks each destination workflow against what notification dispatch actually provides:
+
+- The workflow must read its alert data from \`inputs.payload.*\`, using only fields listed in the [workflow dispatch payload](./references/workflow-dispatch-payload.md).
+- It should declare exactly one \`triggers: - type: manual\` trigger, and it should be enabled.
+
+How to react:
+- **The call fails on a new policy.** Nothing was attached. Read the reported issue, regenerate the workflow with \`platform.core.generate_workflow\` reusing the **same** \`workflowId\`, then retry the ${ALERTING_TOOL_IDS.manageActionPolicy} call.
+- **The result contains \`warnings\`.** The policy was composed successfully, but tell the user what each warning says and offer to fix the workflow. Never drop a warning silently.
+
 ## Action Policy Persistence
 
 The ${ALERTING_TOOL_IDS.manageActionPolicy} tool only manages the **in-memory attachment** — it never writes to Elasticsearch.
@@ -255,6 +268,8 @@ steps:
 - Reference \`ep.data.*\` from the rule's ES|QL columns; dotted names nest
   (\`ep.data.host.name\`, not \`ep.data["host.name"]\`).
 - Guard empty \`data\` on recovering/inactive (\`| default\` or \`{% if ep.data %}\`).
+- The trigger, \`inputs.payload\` usage, and payload field names above are all checked when
+  you set this workflow as a destination in Step 2 — see [Destination Workflow Compatibility](#destination-workflow-compatibility).
 
 5. After creating the workflow, render it inline for user review:
    \`<render_attachment id="{attachmentId}" version="{attachmentVersion}"/>\`

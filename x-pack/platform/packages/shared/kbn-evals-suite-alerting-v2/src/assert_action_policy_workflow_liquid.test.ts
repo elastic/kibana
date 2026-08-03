@@ -5,54 +5,12 @@
  * 2.0.
  */
 
-import {
-  assertActionPolicyWorkflowLiquid,
-  isActionPolicyPayloadLiquidPath,
-  isActionPolicyPayloadPathInSchema,
-} from './assert_action_policy_workflow_liquid';
+import { assertActionPolicyWorkflowLiquid } from './assert_action_policy_workflow_liquid';
 
-describe('isActionPolicyPayloadLiquidPath', () => {
-  it.each([
-    'inputs.payload',
-    'inputs.payload.policyId',
-    'inputs.payload.episodes',
-    'inputs.payload.episodes[0].data.host.name',
-    'inputs.payload.rules',
-  ])('matches %s', (path) => {
-    expect(isActionPolicyPayloadLiquidPath(path)).toBe(true);
-  });
-
-  it.each(['inputs', 'inputs.other', 'event.alerts', 'execution.url'])(
-    'does not match %s',
-    (path) => {
-      expect(isActionPolicyPayloadLiquidPath(path)).toBe(false);
-    }
-  );
-});
-
-describe('isActionPolicyPayloadPathInSchema', () => {
-  it.each([
-    '',
-    'id',
-    'policyId',
-    'groupKey',
-    'episodes',
-    'episodes[0].episode_status',
-    'episodes[0].data.host.name',
-    'rules',
-    'rules[ep.rule_id].name',
-  ])('accepts %s', (relativePath) => {
-    expect(isActionPolicyPayloadPathInSchema(relativePath)).toBe(true);
-  });
-
-  it.each(['foo', 'episodes[0].bogus', 'episodes.foo', 'policy_id', 'policyId.anything'])(
-    'rejects %s',
-    (relativePath) => {
-      expect(isActionPolicyPayloadPathInSchema(relativePath)).toBe(false);
-    }
-  );
-});
-
+// The individual compatibility checks are covered by the alerting_v2 plugin's
+// validate_workflow_compatibility tests. These cover what the wrapper adds:
+// requiring the attachment, failing only on error severity, and returning the
+// parsed document the specs assert on.
 describe('assertActionPolicyWorkflowLiquid', () => {
   const validWorkflowYaml = `
 version: '1'
@@ -77,43 +35,19 @@ steps:
         View: {{ execution.url }}
 `;
 
-  it('accepts a workflow with valid inputs.payload.* fields', () => {
-    const { variables } = assertActionPolicyWorkflowLiquid(validWorkflowYaml);
+  it('returns the Liquid variables and the parsed workflow document', () => {
+    const { variables, workflow, yaml } = assertActionPolicyWorkflowLiquid(validWorkflowYaml);
 
     expect(variables).toEqual(expect.arrayContaining(['inputs.payload.episodes', 'execution.url']));
-  });
-
-  it('returns the parsed workflow document', () => {
-    const { workflow } = assertActionPolicyWorkflowLiquid(validWorkflowYaml);
-
     expect(workflow.name).toBe('Notify');
     expect(workflow.triggers.map((trigger) => trigger.type)).toEqual(['manual']);
     expect(workflow.steps.map((step) => step.name)).toEqual(['send_email']);
+    expect(yaml).toBe(validWorkflowYaml);
   });
 
-  it('rejects YAML that is not a workflow document', () => {
-    expect(() => assertActionPolicyWorkflowLiquid('just a string')).toThrow(
-      new Error(
-        'Generated workflow YAML is not a workflow document: ' +
-          '(root): Invalid input: expected object, received string'
-      )
-    );
-  });
-
-  it('rejects invalid Liquid syntax', () => {
-    const yaml = `
-steps:
-  - name: send_email
-    type: email
-    with:
-      message: "{{ inputs.payload.episodes | "
-`;
-
-    expect(() => assertActionPolicyWorkflowLiquid(yaml)).toThrow(
-      new Error(
-        'Generated workflow contains invalid Liquid template syntax: ' +
-          'output "{{ inputs.payload.episodes | " not closed, line:1, col:1'
-      )
+  it('rejects a missing workflow yaml attachment', () => {
+    expect(() => assertActionPolicyWorkflowLiquid(undefined)).toThrow(
+      new Error('Expected workflow yaml attachment')
     );
   });
 
@@ -149,35 +83,18 @@ steps:
 `;
 
     expect(() => assertActionPolicyWorkflowLiquid(yaml)).toThrow(
-      new Error(
-        'Generated workflow Liquid does not reference `inputs.payload.*`. ' +
-          'Action-policy dispatch exposes alert data as `inputs.payload` ' +
-          '(mirrors `ActionPolicyWorkflowPayload`). ' +
-          'Found variables: `event.alerts`, `execution.url`.'
-      )
+      /does not reference `inputs.payload.\*`/
     );
   });
 
-  it('rejects workflows with no Liquid', () => {
-    const yaml = `
-version: '1'
-name: Static
-triggers:
-  - type: manual
-steps:
-  - name: send_email
-    type: email
-    with:
-      message: plain text
-`;
+  it('accepts warning-only workflows so specs can assert on them directly', () => {
+    const yaml = validWorkflowYaml
+      .replace('- type: manual', '- type: scheduled')
+      .replace('enabled: true', 'enabled: false');
 
-    expect(() => assertActionPolicyWorkflowLiquid(yaml)).toThrow(
-      new Error(
-        'Generated workflow Liquid does not reference `inputs.payload.*`. ' +
-          'Action-policy dispatch exposes alert data as `inputs.payload` ' +
-          '(mirrors `ActionPolicyWorkflowPayload`). ' +
-          'Found variables: (none).'
-      )
-    );
+    const { workflow } = assertActionPolicyWorkflowLiquid(yaml);
+
+    expect(workflow.enabled).toBe(false);
+    expect(workflow.triggers.map((trigger) => trigger.type)).toEqual(['scheduled']);
   });
 });

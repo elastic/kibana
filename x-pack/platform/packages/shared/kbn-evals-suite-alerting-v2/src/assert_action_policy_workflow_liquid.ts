@@ -5,18 +5,10 @@
  * 2.0.
  */
 
-import {
-  ALERTING_V2_NOTIFICATION_GROUP_INPUT_DEFINITION_ID,
-  builtinWorkflowInputDefinitions,
-  parseJsPropertyAccess,
-  scanForTemplateVariables,
-  WorkflowSchemaForAutocomplete,
-  type JsonSchema,
-} from '@kbn/workflows';
+import { validateActionPolicyWorkflow } from '@kbn/alerting-v2-plugin/server';
+import { scanForTemplateVariables, WorkflowSchemaForAutocomplete } from '@kbn/workflows';
 import type { z } from '@kbn/zod/v4';
 import { parse as parseYaml } from 'yaml';
-
-const PAYLOAD_PREFIX = 'inputs.payload';
 
 /**
  * The lenient workflow shape, it describes the document's structure
@@ -25,156 +17,15 @@ const PAYLOAD_PREFIX = 'inputs.payload';
  */
 type ParsedWorkflow = z.output<typeof WorkflowSchemaForAutocomplete>;
 
-const getPayloadSchema = (): JsonSchema => {
-  const schema =
-    builtinWorkflowInputDefinitions[ALERTING_V2_NOTIFICATION_GROUP_INPUT_DEFINITION_ID];
-  if (!schema) {
-    throw new Error(
-      `Missing built-in workflow input definition "${ALERTING_V2_NOTIFICATION_GROUP_INPUT_DEFINITION_ID}"`
-    );
-  }
-  return schema;
-};
-
-const isUnderPrefix = (path: string, prefix: string): boolean =>
-  path === prefix || path.startsWith(`${prefix}.`) || path.startsWith(`${prefix}[`);
-
-const ANY_KEY_OBJECT: JsonSchema = { type: 'object', additionalProperties: true };
-
 /**
- * Follows one path segment into `schema` and returns the schema of the value it lands
- * on, or `null` when the schema doesn't allow that segment.
- */
-const resolveSegment = (schema: JsonSchema, segment: string): JsonSchema | null => {
-  if (schema.type === 'array') {
-    // Liquid indexes arrays numerically and can't pick a slot out of a tuple schema.
-    const items = Array.isArray(schema.items) ? schema.items[0] : schema.items;
-    return /^\d+$/.test(segment) ? items ?? ANY_KEY_OBJECT : null;
-  }
-
-  if (schema.type !== 'object') {
-    return null;
-  }
-
-  // Open maps (groupKey, rules, episode data) accept any key but don't describe their
-  // values, so everything below them is unconstrained.
-  return schema.properties?.[segment] ?? (schema.additionalProperties ? ANY_KEY_OBJECT : null);
-};
-
-const toPayloadRelativePath = (path: string): string => {
-  if (path === PAYLOAD_PREFIX) {
-    return '';
-  }
-  if (path.startsWith(`${PAYLOAD_PREFIX}.`)) {
-    return path.slice(PAYLOAD_PREFIX.length + 1);
-  }
-  return path.slice(PAYLOAD_PREFIX.length); // inputs.payload[...]
-};
-
-const throwMissingWorkflowYaml = (yaml: string | undefined): string => {
-  if (typeof yaml !== 'string') {
-    throw new Error('Expected workflow yaml attachment');
-  }
-  return yaml;
-};
-
-const throwMissingPayloadLiquidReferences = (
-  payloadVariables: string[],
-  variables: string[]
-): void => {
-  if (payloadVariables.length === 0) {
-    throw new Error(
-      `Generated workflow Liquid does not reference \`inputs.payload.*\`. ` +
-        `Action-policy dispatch exposes alert data as \`inputs.payload\` ` +
-        `(mirrors \`ActionPolicyWorkflowPayload\`). ` +
-        `Found variables: ${
-          variables.length > 0 ? variables.map((path) => `\`${path}\``).join(', ') : '(none)'
-        }.`
-    );
-  }
-};
-
-const throwUnknownPayloadLiquidFields = (
-  payloadVariables: string[],
-  payloadSchema: JsonSchema
-): void => {
-  const invalidPayloadPaths = payloadVariables.filter(
-    (path) => !isActionPolicyPayloadPathInSchema(toPayloadRelativePath(path), payloadSchema)
-  );
-  if (invalidPayloadPaths.length === 0) {
-    return;
-  }
-  const allowedTopLevelFields = Object.keys(payloadSchema.properties ?? {});
-  throw new Error(
-    `Generated workflow Liquid references unknown \`inputs.payload\` fields: ` +
-      `${invalidPayloadPaths.map((path) => `\`${path}\``).join(', ')}. ` +
-      `Allowed top-level payload fields: ${allowedTopLevelFields.join(', ')}.`
-  );
-};
-
-const parseWorkflowYaml = (yaml: string): unknown => {
-  try {
-    return parseYaml(yaml);
-  } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    throw new Error(`Generated workflow YAML is not valid YAML: ${message}`);
-  }
-};
-
-const throwInvalidWorkflowDocument = (parsed: unknown): ParsedWorkflow => {
-  const result = WorkflowSchemaForAutocomplete.safeParse(parsed);
-  if (!result.success) {
-    throw new Error(
-      `Generated workflow YAML is not a workflow document: ${result.error.issues
-        .map((issue) => `${issue.path.join('.') || '(root)'}: ${issue.message}`)
-        .join('; ')}`
-    );
-  }
-  return result.data;
-};
-
-const scanWorkflowLiquidVariables = (parsed: unknown): string[] => {
-  try {
-    return Array.from(new Set(scanForTemplateVariables(parsed))).sort();
-  } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    throw new Error(`Generated workflow contains invalid Liquid template syntax: ${message}`);
-  }
-};
-
-export const isActionPolicyPayloadLiquidPath = (path: string): boolean =>
-  isUnderPrefix(path, PAYLOAD_PREFIX);
-
-/**
- * Walks `relativePath` (everything after `inputs.payload`) against the
- * alertingV2NotificationGroup JSON Schema. An empty path is the payload root, which is
- * always valid.
- */
-export const isActionPolicyPayloadPathInSchema = (
-  relativePath: string,
-  schema: JsonSchema = getPayloadSchema()
-): boolean => {
-  let current: JsonSchema | null = schema;
-
-  for (const segment of parseJsPropertyAccess(relativePath)) {
-    current = resolveSegment(current, segment);
-    if (!current) {
-      return false;
-    }
-  }
-
-  return true;
-};
-
-/**
- * Asserts that an action-policy notification workflow:
- * 1. Includes a workflow YAML string
- * 2. Parses as valid YAML
- * 3. Parses as a workflow document
- * 4. Contains valid Liquid (via `@kbn/workflows` `scanForTemplateVariables`)
- * 5. References `inputs.payload.*` at least once
- * 6. Those `inputs.payload.*` paths use fields from the
- *    `alertingV2NotificationGroup` payload schema
+ * Asserts that an action-policy notification workflow can actually deliver its
+ * notification, using the same checks the `manage_action_policy` tool runs at
+ * runtime: the YAML parses as a workflow document, its Liquid is valid, and it
+ * reads alert data from `inputs.payload` fields the dispatch payload carries.
+ *
+ * Only `error`-severity diagnostics fail the eval. Warnings (unexpected triggers,
+ * disabled workflows) are assertions individual specs opt into, since the tool
+ * itself lets them through.
  */
 export const assertActionPolicyWorkflowLiquid = (
   yaml: string | undefined
@@ -186,14 +37,22 @@ export const assertActionPolicyWorkflowLiquid = (
   /** The validated workflow YAML string. */
   yaml: string;
 } => {
-  const workflowYaml = throwMissingWorkflowYaml(yaml);
-  const parsed = parseWorkflowYaml(workflowYaml);
-  const workflow = throwInvalidWorkflowDocument(parsed);
-  const variables = scanWorkflowLiquidVariables(parsed);
-  const payloadVariables = variables.filter(isActionPolicyPayloadLiquidPath);
+  if (typeof yaml !== 'string') {
+    throw new Error('Expected workflow yaml attachment');
+  }
 
-  throwMissingPayloadLiquidReferences(payloadVariables, variables);
-  throwUnknownPayloadLiquidFields(payloadVariables, getPayloadSchema());
+  const errors = validateActionPolicyWorkflow(yaml).filter(({ severity }) => severity === 'error');
+  if (errors.length > 0) {
+    throw new Error(errors.map(({ message }) => message).join(' '));
+  }
 
-  return { variables, workflow, yaml: workflowYaml };
+  // The validator only reports diagnostics, so re-derive the document and variables
+  // the specs assert on. Both are known parseable because validation found no errors.
+  const parsed = parseYaml(yaml);
+
+  return {
+    variables: Array.from(new Set(scanForTemplateVariables(parsed))).sort(),
+    workflow: WorkflowSchemaForAutocomplete.parse(parsed),
+    yaml,
+  };
 };

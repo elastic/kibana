@@ -8,6 +8,7 @@
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import type { ToolHandlerContextMock } from '@kbn/agent-builder-plugin/server/mocks';
+import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
 import { manageActionPolicyTool, type ManageActionPolicyToolDeps } from './manage_action_policy';
 import { AGENT_BUILDER_TAG } from '../../common/constants';
 
@@ -165,6 +166,165 @@ describe('manageActionPolicyTool', () => {
       const { results } = result as { results: Array<{ type: string; data: { message: string } }> };
       expect(results[0].type).toBe(ToolResultType.error);
       expect(results[0].data.message).toContain('Failed to persist action policy attachment');
+    });
+
+    describe('destination workflow compatibility', () => {
+      const compatibleYaml = `
+version: '1'
+name: Notify
+enabled: true
+triggers:
+  - type: manual
+steps:
+  - name: send_email
+    type: email
+    with:
+      message: "{{ inputs.payload.episodes | size }} episode(s)"
+`;
+      const incompatibleYaml = `
+version: '1'
+name: Notify
+enabled: true
+triggers:
+  - type: manual
+steps:
+  - name: send_email
+    type: email
+    with:
+      message: "{{ inputs.payload.bogus_field }}"
+`;
+
+      const createDepsWithWorkflowYaml = (yaml: string): ManageActionPolicyToolDeps => ({
+        getWorkflow: jest.fn().mockResolvedValue({ id: 'wf-1', name: 'My Workflow', yaml }),
+        getAvailableConnectors: jest.fn().mockResolvedValue({ connectorTypes: {} }),
+      });
+
+      const setDestinationOperations = [
+        { operation: 'set_metadata' as const, name: 'Notify Policy' },
+        {
+          operation: 'set_destinations' as const,
+          destinations: [{ type: 'workflow' as const, id: 'wf-1' }],
+        },
+      ];
+
+      it('blocks a new policy whose destination workflow is incompatible', async () => {
+        const tool = manageActionPolicyTool(createDepsWithWorkflowYaml(incompatibleYaml));
+        const ctx = createContext();
+
+        const result = await tool.handler({ operations: setDestinationOperations }, ctx);
+
+        const { results } = result as {
+          results: Array<{ type: string; data: { message: string } }>;
+        };
+        expect(results[0].type).toBe(ToolResultType.error);
+        expect(results[0].data.message).toContain(
+          'Destination workflow "wf-1": Generated workflow Liquid references unknown `inputs.payload` fields'
+        );
+        expect(ctx.attachments.add).not.toHaveBeenCalled();
+      });
+
+      it('creates a new policy without warnings when the destination workflow is compatible', async () => {
+        const tool = manageActionPolicyTool(createDepsWithWorkflowYaml(compatibleYaml));
+        const ctx = createContext();
+
+        const result = await tool.handler({ operations: setDestinationOperations }, ctx);
+
+        const { results } = result as {
+          results: Array<{ type: string; data?: { warnings?: string[] } }>;
+        };
+        expect(results[0].type).toBe(ToolResultType.other);
+        expect(results[0].data?.warnings).toBeUndefined();
+        expect(ctx.attachments.add).toHaveBeenCalledTimes(1);
+      });
+
+      it('warns instead of blocking when editing a policy with an incompatible workflow', async () => {
+        const tool = manageActionPolicyTool(createDepsWithWorkflowYaml(incompatibleYaml));
+        const ctx = createContext();
+        ctx.attachments.getAttachmentRecord.mockReturnValue({
+          versions: [
+            {
+              data: {
+                id: 'policy-uuid',
+                name: 'Existing Policy',
+                destinations: [{ type: 'workflow', id: 'wf-1' }],
+              },
+            },
+          ],
+        } as never);
+
+        const result = await tool.handler(
+          {
+            actionPolicyAttachmentId: 'existing-id',
+            operations: [{ operation: 'set_throttle', strategy: 'every_time' }],
+          },
+          ctx
+        );
+
+        const { results } = result as {
+          results: Array<{ type: string; data?: { warnings?: string[] } }>;
+        };
+        expect(results[0].type).toBe(ToolResultType.other);
+        expect(results[0].data?.warnings).toEqual([
+          expect.stringContaining(
+            'Destination workflow "wf-1": Generated workflow Liquid references unknown `inputs.payload` fields'
+          ),
+        ]);
+        expect(ctx.attachments.update).toHaveBeenCalledTimes(1);
+      });
+
+      it('surfaces warning-only issues on a new policy without blocking it', async () => {
+        const tool = manageActionPolicyTool(
+          createDepsWithWorkflowYaml(compatibleYaml.replace('enabled: true', 'enabled: false'))
+        );
+        const ctx = createContext();
+
+        const result = await tool.handler({ operations: setDestinationOperations }, ctx);
+
+        const { results } = result as {
+          results: Array<{ type: string; data?: { warnings?: string[] } }>;
+        };
+        expect(results[0].type).toBe(ToolResultType.other);
+        expect(results[0].data?.warnings).toEqual([
+          expect.stringContaining('Destination workflow "wf-1": Generated workflow is disabled.'),
+        ]);
+        expect(ctx.attachments.add).toHaveBeenCalledTimes(1);
+      });
+
+      it('skips compatibility checks when the workflow definition is unavailable', async () => {
+        const tool = manageActionPolicyTool(createDeps());
+        const ctx = createContext();
+
+        const result = await tool.handler({ operations: setDestinationOperations }, ctx);
+
+        const { results } = result as {
+          results: Array<{ type: string; data?: { warnings?: string[] } }>;
+        };
+        expect(results[0].type).toBe(ToolResultType.other);
+        expect(results[0].data?.warnings).toBeUndefined();
+      });
+
+      it('validates the workflow YAML attached in this conversation', async () => {
+        const tool = manageActionPolicyTool({
+          getWorkflow: jest.fn().mockResolvedValue(null),
+          getAvailableConnectors: jest.fn().mockResolvedValue({ connectorTypes: {} }),
+        });
+        const ctx = createContext();
+        (ctx.attachments as any).getActive = jest.fn().mockReturnValue([
+          {
+            id: 'att-wf-1',
+            type: WORKFLOW_YAML_ATTACHMENT_TYPE,
+            versions: [{ data: { workflowId: 'wf-1', yaml: incompatibleYaml } }],
+          },
+        ]);
+
+        const result = await tool.handler({ operations: setDestinationOperations }, ctx);
+
+        const { results } = result as {
+          results: Array<{ type: string; data: { message: string } }>;
+        };
+        expect(results[0].type).toBe(ToolResultType.error);
+        expect(results[0].data.message).toContain('Destination workflow "wf-1"');
+      });
     });
 
     it('calls validateDestinations for destinations', async () => {
