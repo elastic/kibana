@@ -232,6 +232,36 @@ export class DiscoverApp {
     await this.waitUntilSearchingHasFinished();
   }
 
+  async getSharedUrl(): Promise<string> {
+    await this.clickAppMenuItem('shareTopNavButton');
+
+    const copyButton = this.page.testSubj.locator('copyShareUrlButton');
+
+    await copyButton.waitFor({ state: 'visible' });
+    await copyButton.click();
+
+    const sharedUrl = await this.page.waitForFunction(() => {
+      return document
+        .querySelector('[data-test-subj="copyShareUrlButton"]')
+        ?.getAttribute('data-share-url');
+    });
+
+    const url = await sharedUrl.jsonValue();
+    if (typeof url !== 'string') {
+      throw new Error('Share URL was not available on the copy button');
+    }
+    return url;
+  }
+
+  async closeShareModal() {
+    const shareModal = this.page.testSubj.locator('shareContextModal');
+
+    if (await shareModal.isVisible()) {
+      await shareModal.getByLabel(/Close/).click();
+      await shareModal.waitFor({ state: 'hidden' });
+    }
+  }
+
   /**
    * Save the currently rendered inline visualization (e.g. an ES|QL chart) to a
    * brand-new dashboard via the "Save visualization" flow in the unified
