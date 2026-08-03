@@ -17,6 +17,7 @@ import {
   getRulesApiService,
   getTaskManagerService,
   getTelemetryService,
+  getWorkflowsApiService,
   type ActionPoliciesApiService,
   type AlertActionsApiService,
   type AlertActionsEventsService,
@@ -27,6 +28,7 @@ import {
   type RuleEventsApiService,
   type TaskManagerService,
   type TelemetryService,
+  type WorkflowsApiService,
 } from '../../common/services';
 import { getRuleEventsApiService } from '../../common/services/rule_events_api_service';
 import type { SourceIndexApiService } from '../../common/services/source_index_api_service';
@@ -44,6 +46,7 @@ export interface AlertingApiServices {
   dispatcher: DispatcherApiService;
   taskManager: TaskManagerService;
   telemetry: TelemetryService;
+  workflows: WorkflowsApiService;
 }
 
 export interface AlertingApiServicesFixture extends ApiServicesFixture {
@@ -77,6 +80,7 @@ export const buildAlertingApiServices = ({
     dispatcher: getDispatcherApiService({ esClient, log }),
     taskManager,
     telemetry: getTelemetryService({ esClient, log, taskManager }),
+    workflows: getWorkflowsApiService({ kbnClient, log }),
   };
 };
 
@@ -112,8 +116,10 @@ export {
 } from '../../common/roles';
 export {
   buildAlertEvent,
+  buildExternalAlertEvent,
   buildCreateRuleData,
   buildCreateActionPolicyData,
+  buildWorkflowYaml,
   getSnoozeDate,
 } from '../../common/builders';
 export {
@@ -126,6 +132,8 @@ export {
   getUnsnoozeAlertActionUrl,
   getActivateAlertActionUrl,
   getDeactivateAlertActionUrl,
+  CREATE_ALERT_EVENT_URL,
+  getCreateAlertEventBySourceUrl,
   getRuleUrl,
   getRunRuleUrl,
   getEnableRuleUrl,
@@ -145,8 +153,7 @@ export {
   getUnsnoozeActionPolicyUrl,
   getUpdateActionPolicyApiKeyUrl,
   getListExecutionHistoryUrl,
-  getCountNewExecutionHistoryEventsUrl,
-  getRuleExecutionsUrl,
+  listRuleExecutionsUrl,
 } from '../../common/urls';
 export {
   ACTION_POLICY_PER_PAGE_MAX,
