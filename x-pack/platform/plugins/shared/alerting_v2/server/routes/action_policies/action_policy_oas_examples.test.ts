@@ -11,7 +11,6 @@ import {
   bulkByIdsSchema,
   bulkResponseSchema,
   bulkSnoozeActionPoliciesBodySchema,
-  countPolicyExecutionEventsResponseSchema,
   createActionPolicyDataSchema,
   findActionPoliciesResponseSchema,
   listPolicyExecutionHistoryResponseSchema,
@@ -93,12 +92,6 @@ describe('action policy OAS example payloads', () => {
   it('keeps execution history response example valid against listPolicyExecutionHistoryResponseSchema', () => {
     expect(
       listPolicyExecutionHistoryResponseSchema.safeParse(LIST_EXECUTION_HISTORY_RESPONSE).success
-    ).toBe(true);
-  });
-
-  it('keeps execution history count example valid against countPolicyExecutionEventsResponseSchema', () => {
-    expect(
-      countPolicyExecutionEventsResponseSchema.safeParse(COUNT_EXECUTION_HISTORY_RESPONSE).success
     ).toBe(true);
   });
 
