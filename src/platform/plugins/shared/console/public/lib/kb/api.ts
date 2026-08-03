@@ -15,6 +15,7 @@ import {
   compileBodyDescription,
 } from '../autocomplete/body_completer';
 import type { AutocompleteComponent } from '../autocomplete/components/autocomplete_component';
+import { GENERATED_GLOBAL_PREFIX } from '../../../common/constants';
 
 type UrlFactories = ConstructorParameters<typeof UrlPatternMatcher>[0];
 type BodyFactories = Parameters<typeof compileBodyDescription>[2];
@@ -31,6 +32,11 @@ type EndpointDescription = Record<string, unknown> & {
   bodyAutocompleteRootComponents?: AutocompleteComponent[];
 };
 
+interface GlobalRule {
+  components?: AutocompleteComponent[];
+  description?: unknown;
+}
+
 const emptyUrlFactories: UrlFactories = { getComponent: () => undefined };
 const emptyBodyFactories: BodyFactories = { getComponent: () => undefined };
 
@@ -42,7 +48,7 @@ const emptyBodyFactories: BodyFactories = { getComponent: () => undefined };
 export class Api {
   public name = '';
 
-  private globalRules: Record<string, AutocompleteComponent[] | undefined> = Object.create(null);
+  private globalRules: Record<string, GlobalRule | undefined> = Object.create(null);
   private endpoints: Record<string, EndpointDescription> = Object.create(null);
 
   private urlPatternMatcher: UrlPatternMatcher;
@@ -57,19 +63,29 @@ export class Api {
   }
 
   public addGlobalAutocompleteRules(parentNode: string, rules: unknown) {
-    this.globalRules[parentNode] = compileBodyDescription(
-      'GLOBAL.' + parentNode,
-      rules,
-      this.globalBodyComponentFactories
-    );
+    this.globalRules[parentNode] = { description: rules };
   }
 
   public getGlobalAutocompleteComponents(term: string, throwOnMissing?: boolean) {
-    const result = this.globalRules[term];
-    if (_.isUndefined(result) && (throwOnMissing || _.isUndefined(throwOnMissing))) {
-      throw new Error("failed to resolve global components for  ['" + term + "']");
+    if (term.startsWith(GENERATED_GLOBAL_PREFIX) && throwOnMissing === false) {
+      return;
     }
-    return result;
+    const rule = this.globalRules[term];
+    if (_.isUndefined(rule)) {
+      if (throwOnMissing || _.isUndefined(throwOnMissing)) {
+        throw new Error("failed to resolve global components for  ['" + term + "']");
+      }
+      return;
+    }
+    if (!rule.components) {
+      rule.components = compileBodyDescription(
+        'GLOBAL.' + term,
+        rule.description,
+        this.globalBodyComponentFactories
+      );
+      delete rule.description;
+    }
+    return rule.components;
   }
 
   public addEndpointDescription(endpoint: string, description: unknown) {
@@ -94,11 +110,18 @@ export class Api {
     });
 
     copiedDescription.paramsAutocomplete = new UrlParams(copiedDescription.url_params);
-    copiedDescription.bodyAutocompleteRootComponents = compileBodyDescription(
-      copiedDescription.id,
-      copiedDescription.data_autocomplete_rules,
-      this.globalBodyComponentFactories
-    );
+    let bodyAutocompleteRootComponents: AutocompleteComponent[] | undefined;
+    Object.defineProperty(copiedDescription, 'bodyAutocompleteRootComponents', {
+      enumerable: true,
+      get: () => {
+        bodyAutocompleteRootComponents ??= compileBodyDescription(
+          copiedDescription.id,
+          copiedDescription.data_autocomplete_rules,
+          this.globalBodyComponentFactories
+        );
+        return bodyAutocompleteRootComponents;
+      },
+    });
 
     this.endpoints[endpoint] = copiedDescription;
   }
