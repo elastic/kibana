@@ -7,11 +7,18 @@
 
 import { platformCoreTools } from '@kbn/agent-builder-common';
 import { validateSkillDefinition } from '@kbn/agent-builder-server/skills/type_definition';
+import { THREAT_INTEL_TOOL_IDS } from '../../../common/threat_intelligence/hub';
 import { threatHuntingSkill } from './threat_hunting';
 import { alertAnalysisSkill } from './alert_analysis';
 import { alertTriageSkill, ALERT_TRIAGE_TOOL_ID } from './alert_triage';
+import { threatIntelligenceSkill } from './threat_intelligence';
 
-const ALL_SKILLS = [threatHuntingSkill, alertAnalysisSkill, alertTriageSkill];
+const ALL_SKILLS = [
+  threatHuntingSkill,
+  alertAnalysisSkill,
+  alertTriageSkill,
+  threatIntelligenceSkill,
+];
 
 describe('Security Skills', () => {
   describe('threat-hunting skill', () => {
@@ -131,6 +138,28 @@ describe('Security Skills', () => {
 
     it('content references alert-analysis for investigation', () => {
       expect(alertTriageSkill.content).toContain('alert-analysis');
+    });
+  });
+
+  describe('threat-intelligence skill', () => {
+    it('validates successfully via validateSkillDefinition', async () => {
+      await expect(validateSkillDefinition(threatIntelligenceSkill)).resolves.toBeDefined();
+    });
+
+    it('returns 7 inline tools', async () => {
+      const inlineTools = await threatIntelligenceSkill.getInlineTools!();
+      expect(inlineTools).toHaveLength(7);
+    });
+
+    it('includes threat_intel.find_threat_reports as an inline tool', async () => {
+      const inlineTools = await threatIntelligenceSkill.getInlineTools!();
+      expect(inlineTools.map((tool) => tool.id)).toContain(THREAT_INTEL_TOOL_IDS.findThreatReports);
+    });
+
+    it('does not expose advisory and orchestrator hunt as registry tools', () => {
+      const tools = threatIntelligenceSkill.getRegistryTools!();
+      expect(tools).not.toContain(THREAT_INTEL_TOOL_IDS.huntOrchestrator);
+      expect(tools).not.toContain(THREAT_INTEL_TOOL_IDS.synthesizeAdvisory);
     });
   });
 

@@ -1,0 +1,73 @@
+# =============================================================================
+# continuous_threat_hunt
+#
+# Schedule: every 4 hours.
+# Purpose:  Select top enriched threat reports that have not been hunted
+#           recently (or ever) and run `hunt_orchestrator` with
+#           `tier2_when: always` so the scheduled path still produces Tier 2
+#           proposals on stage even when Tier 1 finds no environment hits.
+#           Findings are persisted server-side by hunt_orchestrator into
+#           `.kibana-threat-intel-hunt-findings`.
+# =============================================================================
+name: Continuous threat hunt
+description: Schedule continuous hunts against top threat reports and persist findings for Intelligence Hub
+tags:
+  - threat-intel
+enabled: true
+triggers:
+  - type: scheduled
+    with:
+      every: "4h"
+steps:
+  - name: load_hunt_candidates
+    type: elasticsearch.search
+    with:
+      index: .kibana-threat-reports
+      size: 10
+      query:
+        bool:
+          filter:
+            - bool:
+                should:
+                  - nested:
+                      path: extracted.iocs
+                      query:
+                        exists:
+                          field: extracted.iocs.value
+                  - nested:
+                      path: extracted.behaviors
+                      query:
+                        exists:
+                          field: extracted.behaviors.technique_id
+                minimum_should_match: 1
+          must_not:
+            - range:
+                feedback.last_hunted_at:
+                  gte: "now-4h"
+      sort:
+        - corroborated_rank_score:
+            order: desc
+            missing: _last
+        - rank_score:
+            order: desc
+            missing: _last
+        - "@timestamp":
+            order: desc
+
+  - name: hunt_each_report
+    type: foreach
+    foreach: "{{ steps.load_hunt_candidates.output.hits.hits }}"
+    steps:
+      - name: run_hunt_orchestrator
+        type: kibana.request
+        with:
+          method: POST
+          path: /api/threat_intelligence/hunt_orchestrator
+          headers:
+            elastic-api-version: "2023-10-31"
+            x-elastic-internal-origin: "kibana"
+          body:
+            report_id: "{{ foreach.item._id }}"
+            tier2_when: always
+        on-failure:
+          continue: true

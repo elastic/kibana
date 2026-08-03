@@ -16,6 +16,7 @@ import { createEntityAttachmentType } from './entity';
 import { createEntityAnalyticsDashboardAttachmentType } from './entity_analytics_dashboard';
 import { createSiemReadinessAttachmentType } from './siem_readiness';
 import { createRulePreviewAttachmentType, getRulePreviewAlertCount } from './rule_preview';
+import { ALL_ATTACHMENT_TYPES as THREAT_INTELLIGENCE_ATTACHMENT_TYPES } from './threat_intelligence_attachment_types';
 import { SIEM_READINESS_AGENT_BUILDER_ENABLED } from '../siem_readiness_feature_flag';
 
 /**
@@ -36,6 +37,16 @@ export const registerAttachments = async (
   agentBuilder.attachments.registerType(createEntityAttachmentType());
   agentBuilder.attachments.registerType(createEntityAnalyticsDashboardAttachmentType());
   agentBuilder.attachments.registerType(createRuleAttachmentType(core, logger));
+
+  // Threat-intelligence attachment types. Tools that emit these are gated by
+  // `threatIntelligenceSkillEnabled`; registering the types when the skill is
+  // off is harmless dead weight.
+  for (const attachmentType of THREAT_INTELLIGENCE_ATTACHMENT_TYPES) {
+    agentBuilder.attachments.registerType(
+      attachmentType as Parameters<typeof agentBuilder.attachments.registerType>[0]
+    );
+  }
+
   if (SIEM_READINESS_AGENT_BUILDER_ENABLED) {
     agentBuilder.attachments.registerType(createSiemReadinessAttachmentType());
   }

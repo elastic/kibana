@@ -89,6 +89,7 @@ import {
   registerEntityAttachment,
   registerRuleAttachment,
   registerRulePreviewAttachment,
+  registerThreatIntelligenceAttachments,
 } from './agent_builder/attachment_types';
 import type { SecurityCanvasEmbeddedBundle } from './agent_builder/components/security_redux_embedded_provider';
 import { registerWorkflowSteps } from './workflows/step_types';
@@ -378,6 +379,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           this.getSecurityCanvasContext(core, plugins as StartPluginsDependencies),
         searchSession: plugins.data.search.session,
         uiSettings: core.uiSettings,
+      });
+      // Threat-intelligence attachment renderers. Registered unconditionally;
+      // when the skill flag is off, server tools never emit these types.
+      registerThreatIntelligenceAttachments({
+        attachments: plugins.agentBuilder.attachments,
+        core,
       });
       if (this.experimentalFeatures.rulePreviewAttachmentEnabled) {
         registerRulePreviewAttachment({

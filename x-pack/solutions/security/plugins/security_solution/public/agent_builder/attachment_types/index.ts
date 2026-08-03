@@ -24,6 +24,8 @@ import type { SecurityCanvasEmbeddedBundle } from '../components/security_redux_
 import type { SecurityAgentBuilderChrome } from './entity_explore_navigation';
 import type { AiRuleCreationService } from '../../detection_engine/common/ai_rule_creation_store';
 
+export { registerThreatIntelligenceAttachments } from './threat_intelligence';
+
 /**
  * Extension of UnknownAttachment that includes an optional attachmentLabel field in the data property
  */

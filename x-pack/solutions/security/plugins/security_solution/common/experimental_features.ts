@@ -327,6 +327,24 @@ export const allowedExperimentalValues = Object.freeze({
    * from the locally stored kibana mappings after a MITRE version bump.
    */
   mitreAttackUpdatesUIEnabled: true,
+
+  /**
+   * Enables the Attacks page tour (welcome callout + guided tour).
+   * Release: 9.5
+   */
+  attacksPageTourEnabled: false,
+
+  /**
+   * Enables the Threat Intelligence AI skill assistant integration.
+   * Default true on this demo-only branch (do not merge).
+   */
+  threatIntelligenceSkillEnabled: true,
+
+  /**
+   * Enables Promote threat indicators background task.
+   * Default true on this demo-only branch (do not merge).
+   */
+  iocIndicatorSyncEnabled: true,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

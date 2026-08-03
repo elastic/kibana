@@ -114,6 +114,11 @@ export const createNavigationTree = async (
         link: securityLink(SecurityPageName.attackDiscovery),
       },
       {
+        id: SecurityPageName.threatIntelligenceHub,
+        icon: 'bulb',
+        link: securityLink(SecurityPageName.threatIntelligenceHub),
+      },
+      {
         id: SecurityPageName.cloudSecurityPostureFindings,
         icon: 'bullseye',
         link: securityLink(SecurityPageName.cloudSecurityPostureFindings),
@@ -124,11 +129,6 @@ export const createNavigationTree = async (
       ),
       defaultNavigationTree.explore(),
       defaultNavigationTree.investigations(),
-      {
-        id: SecurityPageName.threatIntelligence,
-        icon: 'processor',
-        link: securityLink(SecurityPageName.threatIntelligence),
-      },
       {
         id: SecurityPageName.assetInventory,
         icon: 'listCheck',
