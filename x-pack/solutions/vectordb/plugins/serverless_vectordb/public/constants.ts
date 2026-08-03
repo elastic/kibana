@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const HOME_PAGE_BANNER_DATA_TEST_SUBJ = 'vectordbHomePageBanner';
 export const BANNER_DISMISSED_KEY = 'vectordb.home.banner.dismissed';
 
 export const HOME_PAGE_BANNER_COPY = {
