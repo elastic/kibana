@@ -7,13 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { css } from '@emotion/react';
 import {
   EuiButtonIcon,
   EuiContextMenuItem,
   EuiContextMenuPanel,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiIcon,
   EuiIconTip,
   EuiNotificationBadge,
@@ -21,6 +20,7 @@ import {
   EuiTab,
   EuiTabs,
   EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
 import type { AppHeaderTab, AppHeaderTabActions } from '../types';
 
@@ -100,23 +100,105 @@ const TabActions = ({ actions }: { actions: AppHeaderTabActions }) => {
   );
 };
 
-const renderTabAppend = (tab: AppHeaderTab) => {
-  const badge = renderTabBadge(tab.badge);
+// A tab's actions button stays mounted and animates its width open/closed as the
+// tab is selected/deselected, rather than snapping in — which shifts every tab to
+// its right. The label→actions gap is collapsed along with the button so a
+// deselected tab leaves no residual whitespace (see `tabWithActionsStyles`).
+const TabActionsSlot = ({
+  actions,
+  isSelected,
+}: {
+  actions: AppHeaderTabActions;
+  isSelected: boolean;
+}) => {
+  const { euiTheme } = useEuiTheme();
+  const collapseRef = useRef<HTMLSpanElement>(null);
 
-  // Tab actions are only surfaced for the selected tab.
-  if (!tab.actions || !tab.isSelected) {
-    return badge;
-  }
+  useEffect(() => {
+    // Keep the collapsed actions out of the tab order and the a11y tree.
+    collapseRef.current?.toggleAttribute('inert', !isSelected);
+  }, [isSelected]);
 
   return (
-    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-      {badge !== undefined && <EuiFlexItem grow={false}>{badge}</EuiFlexItem>}
-      <EuiFlexItem grow={false}>
-        <TabActions actions={tab.actions} />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <span
+      ref={collapseRef}
+      css={css`
+        display: flex;
+        align-items: center;
+        overflow: hidden;
+        // Animate a concrete width — the xs actions button is euiTheme.size.l square
+        // — rather than the grid 0fr↔1fr trick. In an auto-width (content-sized)
+        // container a single fr track interpolates non-linearly and rushes to zero at
+        // the very end; a fixed px length interpolates linearly, so the collapse stays
+        // smooth all the way to the finish. The gap rides along as a margin (no padding
+        // floor) so it animates out cleanly too.
+        inline-size: ${isSelected ? euiTheme.size.l : '0px'};
+        margin-inline-start: ${isSelected ? euiTheme.size.s : '0px'};
+        opacity: ${isSelected ? 1 : 0};
+        transition: inline-size ${euiTheme.animation.fast} ease,
+          margin-inline-start ${euiTheme.animation.fast} ease,
+          opacity ${euiTheme.animation.fast} ease;
+        @media (prefers-reduced-motion: reduce) {
+          transition: none;
+        }
+      `}
+    >
+      <span
+        css={css`
+          flex: 0 0 auto;
+        `}
+      >
+        <TabActions actions={actions} />
+      </span>
+    </span>
   );
 };
+
+const TabAppend = ({ tab }: { tab: AppHeaderTab }) => {
+  const { euiTheme } = useEuiTheme();
+  const badge = renderTabBadge(tab.badge);
+
+  return (
+    <span
+      css={css`
+        display: flex;
+        align-items: center;
+      `}
+    >
+      {badge !== undefined && (
+        <span
+          css={css`
+            margin-inline-start: ${euiTheme.size.s};
+          `}
+        >
+          {badge}
+        </span>
+      )}
+      {tab.actions !== undefined && (
+        <TabActionsSlot actions={tab.actions} isSelected={Boolean(tab.isSelected)} />
+      )}
+    </span>
+  );
+};
+
+const renderTabAppend = (tab: AppHeaderTab) => {
+  // Tabs without actions keep their plain badge (or nothing) — unchanged behavior.
+  if (tab.actions === undefined) {
+    return renderTabBadge(tab.badge);
+  }
+
+  return <TabAppend tab={tab} />;
+};
+
+// Collapse EuiTab's flex `gap` for tabs that carry actions; the label→actions
+// spacing is re-added inside TabActionsSlot so it animates away with the button,
+// leaving no residual gap when deselected. `&&` raises specificity above EuiTab's
+// own emotion styles.
+const tabWithActionsStyles = css`
+  && {
+    gap: 0;
+  }
+`;
 
 export const AppTabs = React.memo<AppTabsProps>(({ tabs }) => {
   if (!tabs?.length) return null;
@@ -132,6 +214,7 @@ export const AppTabs = React.memo<AppTabsProps>(({ tabs }) => {
           data-test-subj={tab['data-test-subj']}
           disabled={tab.disabled}
           append={renderTabAppend(tab)}
+          css={tab.actions !== undefined ? tabWithActionsStyles : undefined}
         >
           {tab.toolTipContent !== undefined ? (
             <EuiToolTip content={tab.toolTipContent} position="bottom">

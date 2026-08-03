@@ -294,7 +294,7 @@ describe('AppHeaderView', () => {
     expect(onTabClick).not.toHaveBeenCalled();
   });
 
-  it('only renders tab actions for the selected tab', () => {
+  it('keeps a non-selected tab’s actions mounted but inert so they can animate in on selection', () => {
     renderAppHeader(
       <AppHeaderView
         tabs={[
@@ -312,7 +312,11 @@ describe('AppHeaderView', () => {
       />
     );
 
-    expect(screen.queryByTestId('lifecycleTabActionsButton')).not.toBeInTheDocument();
+    // The actions button stays mounted (so its width can animate open when the tab
+    // is selected), but while the tab is not selected it lives inside an `inert`
+    // container that removes it from the tab order and the accessibility tree.
+    const button = screen.getByTestId('lifecycleTabActionsButton');
+    expect(button.closest('[inert]')).not.toBeNull();
   });
 
   it('only treats exact base path prefixes as already prepended for back links', () => {
