@@ -137,6 +137,9 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.testExecution.logTestStep('save rule');
       await ml.ruleEditorFlyout.save();
       await ml.ruleEditorFlyout.assertNotExists();
+      // The save success toast overlays the anomalies table actions button; dismiss it so the
+      // next menu-open click is not intercepted.
+      await ml.ruleEditorFlyout.dismissToasts();
 
       // verify if rule flyout updated its state
       await ml.anomaliesTable.ensureAnomalyActionsMenuOpen(0);
