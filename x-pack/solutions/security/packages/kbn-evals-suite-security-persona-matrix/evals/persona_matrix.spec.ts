@@ -19,7 +19,7 @@ const DATASET_NAME = 'security: security-persona-matrix';
 const DATASET_DESCRIPTION =
   'Breadth-first persona matrix: 21 prompts across 7 security skill categories.';
 
-evaluate.describe('Security Persona Matrix', { tag: tags.serverless.security.complete }, () => {
+evaluate.describe('Security Persona Matrix', { tag: tags.stateful.classic }, () => {
   evaluate.beforeAll(async ({ esClient, kbnClient, log }) => {
     await seedChrysalisAlerts({ esClient: esClient as unknown as EsClient, log, count: 3 });
     log.info('[persona-matrix] seeded Chrysalis alerts');
