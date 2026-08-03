@@ -160,7 +160,7 @@ describe('getUserFromRequest', () => {
     });
   });
 
-  it('falls back to username-only when API key profile lookup fails', async () => {
+  it('propagates API key profile lookup failures instead of falling back to username', async () => {
     const apiKeyId = 'api-key-id';
     const request = httpServerMock.createKibanaRequest({
       headers: {
@@ -175,11 +175,7 @@ describe('getUserFromRequest', () => {
     } as any);
     esClient.security.getApiKey.mockRejectedValue(new Error('forbidden'));
 
-    const result = await getUserFromRequest({ request, security, esClient });
-
-    expect(result).toEqual({
-      username: 'shareduser',
-    });
+    await expect(getUserFromRequest({ request, security, esClient })).rejects.toThrow('forbidden');
   });
 
   it('prefers profile uid on the authenticated user for api_key auth without looking up the key', async () => {

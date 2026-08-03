@@ -64,21 +64,17 @@ const resolveApiKeyOwnerProfileUid = async ({
   request: KibanaRequest;
   esClient: ElasticsearchClient;
 }): Promise<string | undefined> => {
-  try {
-    const id = extractApiKeyIdFromAuthzHeader(request.headers.authorization);
-    if (!id) {
-      return undefined;
-    }
-
-    const response = await esClient.security.getApiKey({
-      with_profile_uid: true,
-      id,
-    });
-
-    return response.api_keys?.[0]?.profile_uid;
-  } catch {
+  const id = extractApiKeyIdFromAuthzHeader(request.headers.authorization);
+  if (!id) {
     return undefined;
   }
+
+  const response = await esClient.security.getApiKey({
+    with_profile_uid: true,
+    id,
+  });
+
+  return response.api_keys?.[0]?.profile_uid;
 };
 
 /**
