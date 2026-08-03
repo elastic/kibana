@@ -417,7 +417,7 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
               /** Query to match documents in the index(es). */
               query: schema.maybe(schema.any()),
               runtimeMappings: schema.maybe(runtimeMappingsSchema),
-              projectRouting: schema.maybe(schema.string({ maxLength: 1000 })),
+              projectRouting: schema.maybe(schema.string({ maxLength: 10000 })),
             }),
           },
         },
