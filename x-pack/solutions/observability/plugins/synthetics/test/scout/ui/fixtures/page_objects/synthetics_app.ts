@@ -303,14 +303,6 @@ export class SyntheticsAppPage {
     await this.page.testSubj.click('syntheticsBulkActionsButton');
   }
 
-  async openBulkMaintenanceWindowsFlyout() {
-    await this.openBulkActionsMenu();
-    await this.page.testSubj.click('syntheticsBulkMaintenanceWindowsItem');
-    await expect(this.page.testSubj.locator('syntheticsBulkMaintenanceWindowsFlyout')).toBeVisible({
-      timeout: 30_000,
-    });
-  }
-
   async selectMaintenanceWindowInFlyout(title: string) {
     const flyout = this.page.testSubj.locator('syntheticsBulkMaintenanceWindowsFlyout');
     await flyout.locator('[data-test-subj="comboBoxSearchInput"]').click();
