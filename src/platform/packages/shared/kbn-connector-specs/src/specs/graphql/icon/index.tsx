@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './apm';
-export * from './dataset_quality';
-export * from './dataset_quality_details';
-export * from './observability_logs_explorer';
-export * from './observability_onboarding';
-export * from './significant_events';
-export * from './slo';
-export * from './streams';
-export * from './uptime';
+import React from 'react';
+import { EuiIcon } from '@elastic/eui';
+import type { ConnectorIconProps } from '../../../types';
+
+import graphqlIcon from './graphql.svg';
+
+export default (props: ConnectorIconProps) => {
+  return <EuiIcon type={graphqlIcon} {...props} />;
+};

@@ -2654,6 +2654,7 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/gmail/** @elastic/wor
 src/platform/packages/shared/kbn-connector-specs/src/specs/google_calendar/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/google_cloud_storage/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/google_drive/** @elastic/workchat-eng
+src/platform/packages/shared/kbn-connector-specs/src/specs/graphql/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/greynoise/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/hubspot/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/jenkins/** @elastic/workflows-eng
