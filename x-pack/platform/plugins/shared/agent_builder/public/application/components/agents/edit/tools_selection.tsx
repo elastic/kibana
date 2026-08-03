@@ -75,7 +75,7 @@ export const ToolsSelection: React.FC<ToolsSelectionProps> = ({
   useUpdateEffect(() => {
     setLiveAnnouncement(
       i18n.translate('xpack.agentBuilder.tools.tableUpdatedAnnouncement', {
-        defaultMessage: 'Table updated. Showing {count} tools.',
+        defaultMessage: 'Table updated. Showing {count, plural, one {# tool} other {# tools}}.',
         values: { count: filteredTools.length },
       })
     );
