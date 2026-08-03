@@ -376,6 +376,106 @@ export class DataGrid {
     return selectedMode.trim() as DataGridComparisonDiffMode;
   }
 
+  async getComparisonFieldNames(): Promise<string[]> {
+    const comparisonGrid = this.page.testSubj.locator('unifiedDataTableCompareDocuments');
+    const fieldNames = comparisonGrid.locator(
+      '[data-test-subj="unifiedDataTableComparisonFieldName"]'
+    );
+    return fieldNames.allInnerTexts();
+  }
+
+  async getComparisonFieldCount(): Promise<number> {
+    const grid = this.page.testSubj
+      .locator('unifiedDataTableCompareDocuments')
+      .locator('[role="grid"]');
+    const rowCount = await grid.getAttribute('aria-rowcount');
+    return rowCount ? parseInt(rowCount, 10) : 0;
+  }
+
+  async compareSelectedButtonExists(): Promise<boolean> {
+    const isMenuVisible = await this.isSelectedRowsMenuVisible();
+    if (!isMenuVisible) return false;
+    await this.openSelectedRowsMenu();
+    const exists = await this.page.testSubj
+      .locator('unifiedDataTableCompareSelectedDocuments')
+      .waitFor({ state: 'visible', timeout: 1_000 })
+      .then(() => true)
+      .catch(() => false);
+    await this.page.keyboard.press('Escape');
+    return exists;
+  }
+
+  async getComparisonRow(rowIndex: number): Promise<{ fieldName: string; values: string[] }> {
+    const comparisonGrid = this.page.testSubj.locator('unifiedDataTableCompareDocuments');
+    const row = comparisonGrid.locator(`[data-grid-visible-row-index="${rowIndex}"]`);
+    const fieldName = (
+      await row.locator('[data-test-subj="unifiedDataTableComparisonFieldName"]').innerText()
+    ).trim();
+    const valueCells = row.locator('.unifiedDataTable__cellValue');
+    const values = await valueCells.evaluateAll((cells) => cells.map((cell) => cell.innerHTML));
+    return { fieldName, values };
+  }
+
+  async getComparisonDiffSegments(
+    rowIndex: number,
+    colIndex: number
+  ): Promise<Array<{ decoration: 'removed' | 'added' | undefined; value: string }>> {
+    const comparisonGrid = this.page.testSubj.locator('unifiedDataTableCompareDocuments');
+    const row = comparisonGrid.locator(`[data-grid-visible-row-index="${rowIndex}"]`);
+    // showDiffDecorations controls CSS text-decoration only (not DOM classes),
+    // so we read computed style to detect decoration state faithfully.
+    return row.evaluate((rowEl, colIdx) => {
+      const cell = rowEl.querySelectorAll('.unifiedDataTable__cellValue')[colIdx];
+      if (!cell) return [];
+      return Array.from(cell.querySelectorAll('.unifiedDataTable__comparisonSegment')).map((el) => {
+        const textDecoration = window.getComputedStyle(el).textDecoration;
+        const decoration = textDecoration.includes('line-through')
+          ? ('removed' as const)
+          : textDecoration.includes('underline')
+          ? ('added' as const)
+          : undefined;
+        return { decoration, value: (el as HTMLElement).innerText.trim() };
+      });
+    }, colIndex - 1);
+  }
+
+  private async toggleComparisonSwitch(testSubj: string) {
+    await this.openComparisonSettings();
+    const switchEl = this.page.testSubj.locator(testSubj);
+    const prevChecked = await switchEl.getAttribute('aria-checked');
+    await switchEl.click();
+    const expectedChecked = prevChecked === 'true' ? 'false' : 'true';
+    await expect(switchEl).toHaveAttribute('aria-checked', expectedChecked);
+    const menu = this.page.testSubj.locator('unifiedDataTableComparisonSettingsMenu');
+    if (await menu.isVisible()) {
+      await this.page.keyboard.press('Escape');
+      await menu.waitFor({ state: 'hidden' });
+    }
+  }
+
+  async toggleShowDiffSwitch() {
+    await this.toggleComparisonSwitch('unifiedDataTableShowDiffSwitch');
+  }
+
+  async toggleShowAllFieldsSwitch() {
+    await this.toggleComparisonSwitch('unifiedDataTableDiffOptionSwitch-showAllFields');
+  }
+
+  async toggleShowMatchingValuesSwitch() {
+    await this.toggleComparisonSwitch('unifiedDataTableDiffOptionSwitch-showMatchingValues');
+  }
+
+  async toggleShowDiffDecorationsSwitch() {
+    await this.toggleComparisonSwitch('unifiedDataTableDiffOptionSwitch-showDiffDecorations');
+  }
+
+  async exitComparisonMode() {
+    await this.page.testSubj.click('unifiedDataTableExitDocumentComparison');
+    await this.page.testSubj
+      .locator('unifiedDataTableCompareDocuments')
+      .waitFor({ state: 'hidden' });
+  }
+
   async openColumnMenuByField(field: string) {
     await expect(async () => {
       await this.page.testSubj.hover(`dataGridHeaderCell-${field}`);
