@@ -347,8 +347,7 @@ describe('AiIndexDetailPage', () => {
 
     await waitForElementToBeRemoved(() => screen.queryByTestId('contextAiIndexTitleLoading'));
 
-    fireEvent.click(screen.getByTestId('contextEditAutomationsButton'));
-    fireEvent.click(await screen.findByTestId('contextCreateAutomationButton'));
+    fireEvent.click(screen.getByTestId('contextCreateAutomationButton'));
 
     await waitFor(() => {
       expect(mockCreateWorkflow).toHaveBeenCalledWith({
@@ -370,7 +369,7 @@ describe('AiIndexDetailPage', () => {
     });
 
     expect(services.application.navigateToApp).toHaveBeenCalledWith('workflows', {
-      path: '/wf-created',
+      path: '/wf-created?returnApp=context_engine&returnPath=%2Fai_index%2Fmy-ai-index',
     });
   });
 

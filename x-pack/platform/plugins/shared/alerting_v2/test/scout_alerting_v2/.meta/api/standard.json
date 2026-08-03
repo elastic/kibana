@@ -1,5 +1,5 @@
 {
-  "sha1": "ce12a5aa8b03cddcf667bac53d4ed1f4a41525f4",
+  "sha1": "d37cd5bec519195e92f0293b5dbde33292ba15b5",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -5295,6 +5295,97 @@
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_unsnooze_alert_action.spec.ts",
         "line": 100,
         "column": 12
+      }
+    },
+    {
+      "id": "4017b7518a01fcd-295c78b4211308c",
+      "title": "Create alert event API POST /alerts: creates an external alert event when source is in the body",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_events/create_alert_event.spec.ts",
+        "line": 29,
+        "column": 31
+      }
+    },
+    {
+      "id": "4017b7518a01fcd-112f740e2469c7c",
+      "title": "Create alert event API POST /alerts/:source: creates an external alert event when source is in the path",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_events/create_alert_event.spec.ts",
+        "line": 56,
+        "column": 19
+      }
+    },
+    {
+      "id": "4017b7518a01fcd-819ba9e2117495f",
+      "title": "Create alert event API schema: rejects a body missing identity fields with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_events/create_alert_event.spec.ts",
+        "line": 77,
+        "column": 25
+      }
+    },
+    {
+      "id": "4017b7518a01fcd-1600cb3180ad7db",
+      "title": "Create alert event API schema: rejects a reserved elastic.* source with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_events/create_alert_event.spec.ts",
+        "line": 88,
+        "column": 28
+      }
+    },
+    {
+      "id": "4017b7518a01fcd-8057981c18d60b1",
+      "title": "Create alert event API schema: rejects a reserved bare \"elastic\" source with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_events/create_alert_event.spec.ts",
+        "line": 98,
+        "column": 16
+      }
+    },
+    {
+      "id": "4017b7518a01fcd-333ae27acab175a",
+      "title": "Create alert event API authorization: returns 403 for a user with read-only alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_events/create_alert_event.spec.ts",
+        "line": 105,
+        "column": 22
+      }
+    },
+    {
+      "id": "4017b7518a01fcd-9d7abd95f31ff90",
+      "title": "Create alert event API authorization: returns 403 for a user without alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_events/create_alert_event.spec.ts",
+        "line": 115,
+        "column": 13
       }
     },
     {
