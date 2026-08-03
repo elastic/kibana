@@ -4560,6 +4560,17 @@ paths:
                     nullable: true
                   description: Tool-specific configuration parameters. See examples for details.
                   type: object
+                confirmation:
+                  additionalProperties: false
+                  description: Optional tool call policy to control tool call confirmation behavior
+                  type: object
+                  properties:
+                    askUser:
+                      enum:
+                        - once
+                        - always
+                        - never
+                      type: string
                 description:
                   default: ''
                   description: Description of what the tool does.
@@ -5197,6 +5208,17 @@ paths:
                     nullable: true
                   description: Updated tool-specific configuration parameters. See examples for details.
                   type: object
+                confirmation:
+                  additionalProperties: false
+                  description: Updated tool call policy to control tool call confirmation behavior
+                  type: object
+                  properties:
+                    askUser:
+                      enum:
+                        - once
+                        - always
+                        - never
+                      type: string
                 description:
                   description: Updated description of what the tool does.
                   type: string
@@ -75764,6 +75786,7 @@ paths:
           required: false
           schema:
             type: string
+            x-state: Generally available; added in 9.5.0
         - description: Whether to exclude step-level execution data.
           in: query
           name: omitStepRuns
@@ -75776,12 +75799,14 @@ paths:
           required: false
           schema:
             type: string
+            x-state: Generally available; added in 9.5.0
         - description: Datemath upper bound for filtering executions by finishedAt (inclusive when parsed with roundUp).
           in: query
           name: finishedBefore
           required: false
           schema:
             type: string
+            x-state: Generally available; added in 9.5.0
         - description: Field to collapse execution results by.
           in: query
           name: collapse
@@ -75793,6 +75818,7 @@ paths:
               - executedBy
               - triggeredBy
             type: string
+            x-state: Generally available; added in 9.5.0
         - description: Field to sort executions by.
           in: query
           name: sortField
@@ -75802,6 +75828,7 @@ paths:
               - createdAt
               - finishedAt
             type: string
+            x-state: Generally available; added in 9.5.0
         - description: Sort order.
           in: query
           name: sortOrder
@@ -75811,6 +75838,7 @@ paths:
               - asc
               - desc
             type: string
+            x-state: Generally available; added in 9.5.0
         - description: Page number.
           in: query
           name: page
@@ -75832,12 +75860,14 @@ paths:
           required: false
           schema:
             type: string
+            x-state: Generally available; added in 9.5.0
         - description: Datemath upper bound for filtering executions by startedAt (inclusive when parsed with roundUp).
           in: query
           name: startedBefore
           required: false
           schema:
             type: string
+            x-state: Generally available; added in 9.5.0
       responses:
         '200':
           content:
@@ -146234,6 +146264,11 @@ components:
           description: The interval between checks for changes in the source data. The minimum value is 1m and the maximum is 59m. The default value is 1 minute.
           example: 5m
           type: string
+        preventCrossProjectSearch:
+          default: false
+          description: Pin the L1 rollup transform to the local/origin project only, preventing flat-world (cross-linked-project) reads. Only applies on serverless. Default is false (flat-world).
+          example: true
+          type: boolean
         preventInitialBackfill:
           default: false
           description: Start aggregating data from the time the SLO is created, instead of backfilling data from the beginning of the time window.
