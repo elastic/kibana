@@ -64,7 +64,7 @@ describe('createAckAction', () => {
 
   it('execute: POSTs per-episode ACK items with distinct episode_ids, toasts, calls onSuccess', async () => {
     const deps = makeDeps();
-    jest.spyOn(bulk, 'bulkCreateAlertActions').mockResolvedValue({ processed: 2, total: 2 });
+    jest.spyOn(bulk, 'bulkCreateAlertActions').mockResolvedValue({ affected_count: 2, errors: [] });
     const onSuccess = jest.fn();
     await createAckAction(deps).execute({
       episodes: [
