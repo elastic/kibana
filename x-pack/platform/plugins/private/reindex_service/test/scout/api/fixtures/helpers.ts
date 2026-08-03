@@ -25,30 +25,33 @@ const systemIndicesSuperuser = {
 /**
  * ES client as `system_indices_superuser`, which (unlike Scout's default `elastic` `esClient`) can
  * write restricted system indices like `.kibana` — needed for the hidden reindex-operation saved
- * object, whose paused-op setup has no HTTP API. Mirrors agent_builder/entity_store: provisions the
- * role/user on stateful; on serverless they are preconfigured by `@kbn/es`.
+ * object, whose paused-op setup has no HTTP API. Stateful only.
  */
 export const createSystemIndicesEsClient = async (
   esClient: EsClient,
   config: ScoutTestConfig
 ): Promise<EsClient> => {
-  if (!config.serverless) {
-    await esClient.security.putRole({
-      name: SYSTEM_INDICES_SUPERUSER_ROLE,
-      refresh: 'wait_for',
-      cluster: ['all'],
-      indices: [{ names: ['*'], privileges: ['all'], allow_restricted_indices: true }],
-      applications: [{ application: '*', privileges: ['*'], resources: ['*'] }],
-      run_as: ['*'],
-    });
-
-    await esClient.security.putUser({
-      username: systemIndicesSuperuser.username,
-      refresh: 'wait_for',
-      password: systemIndicesSuperuser.password,
-      roles: [SYSTEM_INDICES_SUPERUSER_ROLE],
-    });
+  // Tagged stateful-only; fail loudly if ever mis-tagged onto serverless rather than
+  // silently skipping the role/user provisioning below.
+  if (config.serverless) {
+    throw new Error('Reindex service API tests are stateful-only and cannot run on serverless');
   }
+
+  await esClient.security.putRole({
+    name: SYSTEM_INDICES_SUPERUSER_ROLE,
+    refresh: 'wait_for',
+    cluster: ['all'],
+    indices: [{ names: ['*'], privileges: ['all'], allow_restricted_indices: true }],
+    applications: [{ application: '*', privileges: ['*'], resources: ['*'] }],
+    run_as: ['*'],
+  });
+
+  await esClient.security.putUser({
+    username: systemIndicesSuperuser.username,
+    refresh: 'wait_for',
+    password: systemIndicesSuperuser.password,
+    roles: [SYSTEM_INDICES_SUPERUSER_ROLE],
+  });
 
   return createEsClientForTesting({
     esUrl: config.hosts.elasticsearch,

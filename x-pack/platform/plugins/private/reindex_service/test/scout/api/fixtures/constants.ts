@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import { tags } from '@kbn/scout';
 import { REINDEX_SERVICE_BASE_PATH } from '../../../../common';
-
-// Reindexing manipulates the `.kibana` system index directly (paused-op setup and
-// saved-object cleanup), which is not permitted on serverless. Keep to stateful,
-// matching the FTR suite this replaced.
-export const REINDEX_SERVICE_API_TAGS = tags.stateful.classic;
 
 // `apiClient` expects a path relative to the Kibana base URL (no leading slash).
 export const API_BASE_PATH = REINDEX_SERVICE_BASE_PATH.replace(/^\//, '');

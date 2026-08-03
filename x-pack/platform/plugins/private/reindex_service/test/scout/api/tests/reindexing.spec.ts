@@ -6,6 +6,7 @@
  */
 
 import type { EsClient, RoleApiCredentials } from '@kbn/scout';
+import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { ReindexStatus } from '@kbn/upgrade-assistant-pkg-common';
 import { apiTest, testData } from '../fixtures';
@@ -18,19 +19,25 @@ import {
   waitForReindexToComplete,
 } from '../fixtures/helpers';
 
-const { API_BASE_PATH, COMMON_HEADERS, SOURCE_INDEX, REINDEXED_INDEX, REINDEX_SERVICE_API_TAGS } =
-  testData;
+const { API_BASE_PATH, COMMON_HEADERS, SOURCE_INDEX, REINDEXED_INDEX } = testData;
 
-apiTest.describe('Reindex service API', { tag: REINDEX_SERVICE_API_TAGS }, () => {
+// Wildcards covering every index this suite creates or reindexes into.
+const INDEX_CLEANUP_PATTERNS = ['dummydata*', 'reindexed-v8-dummydata*', 'lookup-dummydata*'];
+
+// Stateful only: reindexing writes directly to the `.kibana` system index, not allowed on serverless.
+apiTest.describe('Reindex service API', { tag: tags.stateful.classic }, () => {
   let adminCredentials: RoleApiCredentials;
   let headers: Record<string, string>;
-  // Client with system-index privileges for the `.kibana` reindex-operation saved objects.
+  // System-index privileges for the `.kibana` reindex-operation saved objects.
   let sysEsClient: EsClient;
 
   apiTest.beforeAll(async ({ requestAuth, config, esClient }) => {
     adminCredentials = await requestAuth.getApiKey('admin');
     headers = { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader };
     sysEsClient = await createSystemIndicesEsClient(esClient, config);
+
+    await cleanupReindexOperations(sysEsClient);
+    await cleanupIndices(esClient, INDEX_CLEANUP_PATTERNS);
   });
 
   apiTest.beforeEach(async ({ esClient }) => {
@@ -39,10 +46,7 @@ apiTest.describe('Reindex service API', { tag: REINDEX_SERVICE_API_TAGS }, () =>
 
   apiTest.afterEach(async ({ esClient }) => {
     await cleanupReindexOperations(sysEsClient);
-    // Wildcard patterns so a missing candidate (e.g. `dummydata_v2` only exists in one test) does
-    // not make the whole resolve 404 and skip deleting the indices that do exist. Covers the
-    // source, its reindex targets, and the `dummydata_v2`/`lookup-dummydata` variants.
-    await cleanupIndices(esClient, ['dummydata*', 'reindexed-v8-dummydata*', 'lookup-dummydata*']);
+    await cleanupIndices(esClient, INDEX_CLEANUP_PATTERNS);
   });
 
   apiTest.afterAll(async () => {
@@ -162,7 +166,6 @@ apiTest.describe('Reindex service API', { tag: REINDEX_SERVICE_API_TAGS }, () =>
   apiTest(
     'updates any aliases pointing at the reindexed index',
     async ({ apiClient, esClient }) => {
-      // Add aliases and ensure each returns the expected number of docs.
       await esClient.indices.updateAliases({
         actions: [
           { add: { index: SOURCE_INDEX, alias: 'myAlias' } },
