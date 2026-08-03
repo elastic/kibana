@@ -5,9 +5,12 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/logging';
 import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import { kqlQuery, dateRangeQuery } from '@kbn/es-query';
 import { getSigEventsLogPatternsEsql } from './get_log_patterns';
+
+const logger = { debug: jest.fn() } as unknown as Logger;
 
 const createEsClient = (
   columns: Array<{ name: string; type: string }> = [{ name: 'message', type: 'text' }]
@@ -60,6 +63,7 @@ describe('getSigEventsLogPatternsEsql', () => {
 
     const result = await getSigEventsLogPatternsEsql({
       esClient,
+      logger,
       samplingSource: 'logs-*',
       start: 100,
       end: 200,
@@ -77,7 +81,7 @@ describe('getSigEventsLogPatternsEsql', () => {
       'categorize_noise_exclusion_head',
       expect.objectContaining({
         query:
-          'FROM logs-* | STATS count = COUNT(*), `sample` = TOP(body.text::KEYWORD, 1, "desc") BY pattern = CATEGORIZE(body.text, {"output_format": "tokens"}) | WHERE count > 0.1',
+          'FROM logs-* | STATS count = COUNT(*), `sample` = TOP(body.text::KEYWORD, 1, "desc") BY pattern = CATEGORIZE(body.text, {"output_format": "tokens"}) | WHERE count > 0.1 | SORT count ASC | LIMIT 1000',
         filter: {
           bool: { filter: [...kqlQuery('service.name:"checkout"'), ...dateRangeQuery(100, 200)] },
         },
@@ -100,6 +104,7 @@ describe('getSigEventsLogPatternsEsql', () => {
 
     const result = await getSigEventsLogPatternsEsql({
       esClient,
+      logger,
       samplingSource: 'logs-*',
       start: 100,
       end: 200,
@@ -124,6 +129,7 @@ describe('getSigEventsLogPatternsEsql', () => {
 
     const result = await getSigEventsLogPatternsEsql({
       esClient,
+      logger,
       samplingSource: 'logs-*',
       start: 100,
       end: 200,
@@ -144,6 +150,7 @@ describe('getSigEventsLogPatternsEsql', () => {
 
     const result = await getSigEventsLogPatternsEsql({
       esClient,
+      logger,
       samplingSource: 'logs-*',
       start: 100,
       end: 200,

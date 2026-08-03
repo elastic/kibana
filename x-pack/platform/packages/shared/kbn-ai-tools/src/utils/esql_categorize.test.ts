@@ -7,6 +7,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ESQLSearchResponse } from '@kbn/es-types';
+import type { Logger } from '@kbn/logging';
 import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import {
   buildCategorizeWithSampleQuery,
@@ -33,8 +34,10 @@ const createTracedEsClient = (
     client: { capabilities },
   } as unknown as TracedElasticsearchClient);
 
+const logger = { debug: jest.fn() } as unknown as Logger;
+
 describe('buildCategorizeWithSampleQuery', () => {
-  it('defaults to regex CATEGORIZE with no SORT/LIMIT and no SAMPLE at probability 1', () => {
+  it('defaults to regex CATEGORIZE, rare-tail truncation, and no SAMPLE at probability 1', () => {
     const query = buildCategorizeWithSampleQuery({
       indices: 'logs-*',
       field: 'message',
@@ -42,7 +45,7 @@ describe('buildCategorizeWithSampleQuery', () => {
     });
 
     expect(query).toBe(
-      'FROM logs-* | STATS count = COUNT(*), `sample` = TOP(message::KEYWORD, 1, "desc") BY pattern = CATEGORIZE(message)'
+      'FROM logs-* | STATS count = COUNT(*), `sample` = TOP(message::KEYWORD, 1, "desc") BY pattern = CATEGORIZE(message) | SORT count ASC | LIMIT 1000'
     );
   });
 
@@ -75,9 +78,7 @@ describe('buildCategorizeWithSampleQuery', () => {
       countThreshold: 42,
     });
 
-    expect(query).toContain('| WHERE count > 42');
-    expect(query).not.toContain('SORT');
-    expect(query).not.toContain('LIMIT');
+    expect(query).toContain('| WHERE count > 42 | SORT count ASC | LIMIT 1000');
   });
 
   it('chains full-text NOT MATCH exclusions before STATS', () => {
@@ -95,20 +96,21 @@ describe('buildCategorizeWithSampleQuery', () => {
     expect(query.indexOf('NOT MATCH')).toBeLessThan(query.indexOf('STATS'));
   });
 
-  it('reproduces the legacy SORT count DESC | LIMIT shape only when opted in', () => {
+  it('honors an explicit row limit', () => {
     const query = buildCategorizeWithSampleQuery({
       indices: 'logs-*',
       field: 'message',
       samplingProbability: 1,
-      sortByCountDesc: true,
       limit: 10,
     });
 
-    expect(query).toContain('| SORT count DESC | LIMIT 10');
+    expect(query).toContain('| SORT count ASC | LIMIT 10');
   });
 });
 
 describe('categorizeWithNoiseExclusion', () => {
+  beforeEach(() => jest.clearAllMocks());
+
   it('excludes the noisy head then recategorizes the residual at full probability', async () => {
     const esql = jest
       .fn()
@@ -121,6 +123,7 @@ describe('categorizeWithNoiseExclusion', () => {
       esClient: createTracedEsClient(esql),
       indices: 'logs-*',
       field: 'message',
+      logger,
       total: 1000,
       samplingProbability: 1,
     });
@@ -128,11 +131,11 @@ describe('categorizeWithNoiseExclusion', () => {
     expect(esql).toHaveBeenCalledTimes(2);
     const pass1 = esql.mock.calls[0][1].query;
     expect(pass1).toContain('CATEGORIZE(message, {"output_format": "tokens"})');
-    expect(pass1).toContain('| WHERE count > 10');
-    expect(pass1).not.toContain('SORT');
+    expect(pass1).toContain('| WHERE count > 10 | SORT count ASC | LIMIT 1000');
     expect(esql.mock.calls[0][0]).toBe('categorize_noise_exclusion_head');
     const pass2 = esql.mock.calls[1][1].query;
     expect(pass2).toContain('NOT MATCH(message, "request completed", {"operator": "AND"})');
+    expect(pass2).toContain('| SORT count ASC | LIMIT 1000');
     expect(pass2).not.toContain('SAMPLE');
     expect(esql.mock.calls[1][0]).toBe('categorize_noise_exclusion_rare');
     expect(rows).toEqual([
@@ -151,6 +154,7 @@ describe('categorizeWithNoiseExclusion', () => {
       esClient: createTracedEsClient(esql),
       indices: 'logs-*',
       field: 'message',
+      logger,
       total: 1000,
       samplingProbability: 0.1,
     });
@@ -171,6 +175,7 @@ describe('categorizeWithNoiseExclusion', () => {
       esClient: createTracedEsClient(esql),
       indices: 'logs-*',
       field: 'message',
+      logger,
       total: 1_000_000,
       samplingProbability: 0.1,
     });
@@ -194,6 +199,7 @@ describe('categorizeWithNoiseExclusion', () => {
       esClient: createTracedEsClient(esql),
       indices: 'logs-*',
       field: 'message',
+      logger,
       total: 2200,
       samplingProbability: 1,
       maxDocsToSample: 1000,
@@ -215,6 +221,7 @@ describe('categorizeWithNoiseExclusion', () => {
       esClient: createTracedEsClient(esql),
       indices: 'logs-*',
       field: 'message',
+      logger,
       total: 100,
       samplingProbability: 1,
     });
@@ -238,6 +245,7 @@ describe('categorizeWithNoiseExclusion', () => {
       esClient: createTracedEsClient(esql),
       indices: 'logs-*',
       field: 'message',
+      logger,
       total: 1000,
       samplingProbability: 1,
     });
@@ -258,6 +266,7 @@ describe('categorizeWithNoiseExclusion', () => {
         esClient: createTracedEsClient(esql),
         indices: 'logs-*',
         field: 'message',
+        logger,
         total: 1000,
         samplingProbability: 1,
       })
@@ -276,6 +285,7 @@ describe('categorizeWithNoiseExclusion', () => {
       esClient: createTracedEsClient(esql, capabilities),
       indices: 'logs-*',
       field: 'message',
+      logger,
       total: 1000,
       samplingProbability: 1,
     });
@@ -287,6 +297,7 @@ describe('categorizeWithNoiseExclusion', () => {
     expect(query).not.toContain('NOT MATCH');
     expect(query).not.toContain('WHERE count >');
     expect(rows).toEqual([{ count: 7, pattern: 'legacy', sample: 'legacy sample' }]);
+    expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('falling back'));
   });
 });
 
@@ -298,14 +309,11 @@ describe('esqlSupportsTwoPass', () => {
     const capabilities = jest.fn().mockResolvedValue({ supported: true });
 
     await expect(esqlSupportsTwoPass(createClient(capabilities))).resolves.toBe(true);
-    expect(capabilities).toHaveBeenCalledWith(
-      {
-        method: 'POST',
-        path: '/_query',
-        capabilities: ['categorize_options', 'match_function_options'],
-      },
-      undefined
-    );
+    expect(capabilities).toHaveBeenCalledWith({
+      method: 'POST',
+      path: '/_query',
+      capabilities: ['categorize_options', 'match_function_options'],
+    });
   });
 
   it('resolves false when support is partial (false) or unknown (null)', async () => {

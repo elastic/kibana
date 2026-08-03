@@ -186,7 +186,6 @@ describe('fetchSampleDocuments', () => {
       size: 6,
       iteration: 1,
       logger,
-      requestTimeout: 30_000,
     });
     expect(getSampleDocumentsEsqlMock.mock.calls[1][0]).toEqual({
       esClient,

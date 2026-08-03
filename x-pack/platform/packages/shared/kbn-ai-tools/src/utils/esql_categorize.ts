@@ -9,6 +9,7 @@ import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/type
 import { esql } from '@elastic/esql';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ESQLSearchResponse } from '@kbn/es-types';
+import type { Logger } from '@kbn/logging';
 import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import { orderBy, uniqBy } from 'lodash';
 
@@ -25,9 +26,10 @@ export type CategorizeOutputFormat = 'regex' | 'tokens';
 export const CATEGORIZE_MAX_DOCS_TO_SAMPLE = 100_000;
 
 // Stream fraction above which a pattern is "noise", excluded from the rare pass.
-// Enforced as post-`STATS` `WHERE count >`, not `SORT | LIMIT`, which triggers the
-// CATEGORIZE+TopN pushdown crash (elastic/elasticsearch#154534).
 export const NOISE_FRACTION_DEFAULT = 0.01;
+
+// ES|QL's implicit row cap; on truncation the ASC sort keeps the rare tail.
+const MAX_CATEGORIZE_ROWS = 1000;
 
 // Capabilities the two-pass flow depends on (`CATEGORIZE`/`MATCH` option maps).
 export const TWO_PASS_ESQL_CAPABILITIES = ['categorize_options', 'match_function_options'];
@@ -38,15 +40,13 @@ export const TWO_PASS_ESQL_CAPABILITIES = ['categorize_options', 'match_function
  * explicit `supported: true` (partial cluster, old node, transient error) maps to
  * false, and nothing is latched — a rolling upgrade re-checks every call.
  */
-export const esqlSupportsTwoPass = async (
-  esClient: ElasticsearchClient,
-  options?: { signal?: AbortSignal }
-): Promise<boolean> => {
+export const esqlSupportsTwoPass = async (esClient: ElasticsearchClient): Promise<boolean> => {
   try {
-    const response = await esClient.capabilities(
-      { method: 'POST', path: '/_query', capabilities: TWO_PASS_ESQL_CAPABILITIES },
-      options
-    );
+    const response = await esClient.capabilities({
+      method: 'POST',
+      path: '/_query',
+      capabilities: TWO_PASS_ESQL_CAPABILITIES,
+    });
     return response.supported === true;
   } catch {
     return false;
@@ -62,18 +62,15 @@ export function columnPath(field: string): string | string[] {
  * Per-pattern doc count + one representative sample. `::keyword` cast because `TOP`
  * needs an aggregatable field. Metadata-free (no `_index`/`_id`/`_source`) so it
  * also runs on ES|QL views, where `METADATA _index` raises `Unknown column`.
- * `sortByCountDesc`+`limit` reproduce the legacy shape but trigger
- * elastic/elasticsearch#154534, so prefer client-side ordering.
  */
 export function buildCategorizeWithSampleQuery({
   indices,
   field,
-  limit,
+  limit = MAX_CATEGORIZE_ROWS,
   samplingProbability,
   outputFormat,
   excludeTokens,
   countThreshold,
-  sortByCountDesc = false,
 }: {
   indices: string | string[];
   field: string;
@@ -82,7 +79,6 @@ export function buildCategorizeWithSampleQuery({
   outputFormat?: CategorizeOutputFormat;
   excludeTokens?: string[];
   countThreshold?: number;
-  sortByCountDesc?: boolean;
 }): string {
   const fieldCol = esql.col(columnPath(field));
 
@@ -113,15 +109,10 @@ export function buildCategorizeWithSampleQuery({
     stats = stats.where`count > ${esql.num(countThreshold)}`;
   }
 
-  if (sortByCountDesc) {
-    stats = stats.sort([['count'], 'DESC', '']);
-  }
-
-  if (limit !== undefined) {
-    stats = stats.limit(limit);
-  }
-
-  return stats.print('basic');
+  return stats
+    .sort([['count'], 'ASC', ''])
+    .limit(limit)
+    .print('basic');
 }
 
 export function parseCategorizeWithSampleRows(
@@ -165,7 +156,7 @@ export async function categorizeWithNoiseExclusion({
   filter,
   noiseFraction = NOISE_FRACTION_DEFAULT,
   maxDocsToSample = CATEGORIZE_MAX_DOCS_TO_SAMPLE,
-  signal,
+  logger,
 }: {
   esClient: TracedElasticsearchClient;
   indices: string | string[];
@@ -175,16 +166,19 @@ export async function categorizeWithNoiseExclusion({
   filter?: QueryDslQueryContainer;
   noiseFraction?: number;
   maxDocsToSample?: number;
-  signal?: AbortSignal;
+  logger: Logger;
 }): Promise<CategorizeWithSampleRow[]> {
   const p1 = samplingProbability;
   const run = (operationName: string, query: string) =>
     runCategorizeEsql(esClient, operationName, query, filter);
 
-  const twoPassSupported = await esqlSupportsTwoPass(esClient.client, { signal });
+  const twoPassSupported = await esqlSupportsTwoPass(esClient.client);
 
   // Degraded path for pre-capability clusters; reached via the gate, never a failed query.
   if (!twoPassSupported) {
+    logger.debug(
+      'ES|QL two-pass categorization unsupported by cluster; falling back to single-pass sampling (rare patterns may be missed).'
+    );
     const legacyQuery = buildCategorizeWithSampleQuery({ indices, field, samplingProbability: p1 });
     return dedupeByPattern(
       normalizeCounts(

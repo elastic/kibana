@@ -110,7 +110,6 @@ describe('getDiverseSampleDocuments', () => {
 
     const result = await getDiverseSampleDocuments({
       esClient,
-      requestTimeout: 30_000,
       index: ['logs-a', 'logs-b'],
       start: 100,
       end: 200,
@@ -125,8 +124,7 @@ describe('getDiverseSampleDocuments', () => {
       'STATS count = COUNT(*), `sample` = TOP(message::KEYWORD, 1, "desc") BY pattern = CATEGORIZE(message, {"output_format": "tokens"})'
     );
     expect(categorizeQuery).toContain('WHERE count >');
-    expect(categorizeQuery).not.toContain('SORT count DESC');
-    expect(categorizeQuery).not.toContain('LIMIT');
+    expect(categorizeQuery).toContain('| SORT count ASC | LIMIT 1000');
 
     const fetchQuery = esql.mock.calls[3][1].query;
     expect(fetchQuery).toContain('FROM logs-a, logs-b METADATA _id, _source');
@@ -149,7 +147,6 @@ describe('getDiverseSampleDocuments', () => {
 
     const result = await getDiverseSampleDocuments({
       esClient,
-      requestTimeout: 30_000,
       index: '$.query',
       start: 100,
       end: 200,
@@ -176,7 +173,6 @@ describe('getDiverseSampleDocuments', () => {
 
     const result = await getDiverseSampleDocuments({
       esClient,
-      requestTimeout: 30_000,
       index: 'logs.otel.android',
       start: 100,
       end: 200,
@@ -202,7 +198,6 @@ describe('getDiverseSampleDocuments', () => {
 
     await getDiverseSampleDocuments({
       esClient,
-      requestTimeout: 30_000,
       index: 'logs-*',
       start: 100,
       end: 200,
@@ -225,7 +220,6 @@ describe('getDiverseSampleDocuments', () => {
 
     const result = await getDiverseSampleDocuments({
       esClient,
-      requestTimeout: 30_000,
       index: 'logs-*',
       start: 100,
       end: 200,
@@ -253,7 +247,6 @@ describe('getDiverseSampleDocuments', () => {
 
     const result = await getDiverseSampleDocuments({
       esClient,
-      requestTimeout: 30_000,
       index: 'logs-*',
       start: 100,
       end: 200,
@@ -293,7 +286,6 @@ describe('getDiverseSampleDocuments', () => {
 
       const { hits } = await getDiverseSampleDocuments({
         esClient,
-        requestTimeout: 30_000,
         index: 'logs-*',
         start: 100,
         end: 200,
@@ -307,7 +299,6 @@ describe('getDiverseSampleDocuments', () => {
     const first = await runIteration(1);
     const second = await runIteration(2);
 
-    expect(esql.mock.calls[2][1].query).not.toContain('LIMIT');
     expect(first).toHaveLength(1);
     expect(second).toHaveLength(1);
     expect(first[0]._id).not.toEqual(second[0]._id);
@@ -325,7 +316,6 @@ describe('getDiverseSampleDocuments', () => {
 
     const result = await getDiverseSampleDocuments({
       esClient,
-      requestTimeout: 30_000,
       index: ['logs-a', 'logs-b'],
       start: 100,
       end: 200,

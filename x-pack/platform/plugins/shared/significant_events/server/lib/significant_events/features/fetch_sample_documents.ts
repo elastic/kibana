@@ -83,10 +83,11 @@ export async function fetchSampleDocuments({
   }
 
   const entityFilters = getEntityFilters(features, maxEntityFilters);
+  const samplingSignal = AbortSignal.timeout(samplingTimeoutMs);
   const tracedEsClient = createSignificantEventsTracedEsClient({
     client: esClient,
     logger,
-    abortSignal: AbortSignal.timeout(samplingTimeoutMs),
+    abortSignal: samplingSignal,
   });
 
   if (entityFilters.length === 0) {
@@ -108,7 +109,6 @@ export async function fetchSampleDocuments({
                 size: diverseSize,
                 iteration,
                 logger,
-                requestTimeout: samplingTimeoutMs,
               })
           ).catch((err) => {
             logger.warn(`Diverse sampling query failed: ${parseError(err).message}`);
@@ -207,7 +207,6 @@ export async function fetchSampleDocuments({
                 size: diverseSize + entityFilteredSize,
                 iteration,
                 logger,
-                requestTimeout: samplingTimeoutMs,
               })
           ).catch((err) => {
             logger.warn(`Diverse sampling query failed: ${parseError(err).message}`);

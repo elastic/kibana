@@ -36,7 +36,6 @@ interface GetDiverseSampleDocumentsOptions {
   iteration: number;
   size?: number;
   logger: Logger;
-  requestTimeout: number;
 }
 
 export async function getDiverseSampleDocuments({
@@ -72,6 +71,7 @@ export async function getDiverseSampleDocuments({
     total: totalDocs,
     samplingProbability,
     filter,
+    logger,
   });
 
   const window = selectStratifiedWindow(rows, { iteration, size });
