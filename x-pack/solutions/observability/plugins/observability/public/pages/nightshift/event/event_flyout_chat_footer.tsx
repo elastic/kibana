@@ -19,6 +19,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import type { InvestigationStatus } from '@kbn/investigation-output';
 import type {
@@ -31,6 +32,11 @@ import {
   buildInvestigationConversationChatOptions,
   buildNewSignificantEventChatOptions,
 } from '../chat/open_significant_event_in_chat';
+import {
+  NIGHTSHIFT_EBT_ACTIONS,
+  NIGHTSHIFT_EBT_DETAILS,
+  NIGHTSHIFT_EBT_ELEMENTS,
+} from '../common/ebt_constants';
 
 const INVESTIGATION_MENU_TITLE_MAX_LENGTH = 48;
 
@@ -137,6 +143,11 @@ export function EventFlyoutChatFooter({
         icon="discuss"
         onClick={openInvestigationChat}
         toolTipContent={conversationId ? undefined : investigationChatUnavailableLabel}
+        {...getEbtProps({
+          action: NIGHTSHIFT_EBT_ACTIONS.OPEN_IN_CHAT,
+          element: NIGHTSHIFT_EBT_ELEMENTS.EVENT_FLYOUT,
+          detail: NIGHTSHIFT_EBT_DETAILS.EXISTING_CONVERSATION,
+        })}
       >
         {investigationMenuItemLabel}
       </EuiContextMenuItem>
@@ -145,6 +156,11 @@ export function EventFlyoutChatFooter({
         data-test-subj="nightshiftEventFlyoutStartNewChatItem"
         icon="productAgent"
         onClick={openNewChat}
+        {...getEbtProps({
+          action: NIGHTSHIFT_EBT_ACTIONS.OPEN_IN_CHAT,
+          element: NIGHTSHIFT_EBT_ELEMENTS.EVENT_FLYOUT,
+          detail: NIGHTSHIFT_EBT_DETAILS.NEW_CONVERSATION,
+        })}
       >
         {newChatItemLabel}
       </EuiContextMenuItem>
@@ -194,6 +210,11 @@ export function EventFlyoutChatFooter({
       iconType="productAgent"
       data-test-subj="nightshiftEventFlyoutChatButton"
       onClick={openNewChat}
+      {...getEbtProps({
+        action: NIGHTSHIFT_EBT_ACTIONS.OPEN_IN_CHAT,
+        element: NIGHTSHIFT_EBT_ELEMENTS.EVENT_FLYOUT,
+        detail: NIGHTSHIFT_EBT_DETAILS.NEW_CONVERSATION,
+      })}
     >
       {openInChatLabel}
     </AiButton>

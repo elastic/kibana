@@ -42,6 +42,9 @@
   {
     "id": "apm-agent-approvers",
     "name": "APM Agent Approvers",
+    "areas": [
+      "observability"
+    ],
     "github": {
       "team": "elastic/apm-agent-approvers"
     },

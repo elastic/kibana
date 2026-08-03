@@ -21,6 +21,7 @@ export const APP_HEADER_TEST_SUBJECTS = {
   titleActions: 'appHeaderTitleActions',
   sharePrefix: 'appHeaderShare',
   favorite: 'appHeaderFavorite',
+  favoriteButton: 'appHeaderFavoriteButton',
   description: 'appHeaderDescription',
   metadata: 'appHeaderMetadata',
   tabs: 'appHeaderTabs',
