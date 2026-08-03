@@ -55,6 +55,9 @@ interface EntityStoreHealthEnginePayload {
 
 interface EntityStoreHealthReportPayload {
   namespace: string;
+  // 'legacy': the global state doc still has the pre-overrides defaults baked in;
+  // 'latest': it stores only overrides. Absent when the store is not installed.
+  configDefaultsVersion?: 'legacy' | 'latest';
   engines: EntityStoreHealthEnginePayload[];
 }
 
@@ -743,6 +746,14 @@ export const ENTITY_STORE_HEALTH_REPORT_EVENT = {
       type: 'keyword',
       _meta: {
         description: 'Namespace where the entity store health is reported (e.g. "default")',
+      },
+    },
+    configDefaultsVersion: {
+      type: 'keyword',
+      _meta: {
+        optional: true,
+        description:
+          "Global state storage format: 'legacy' (pre-overrides defaults baked in) or 'latest' (overrides only). Absent when the store is not installed.",
       },
     },
     engines: {

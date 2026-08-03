@@ -12,6 +12,7 @@ import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import { registerStatusReportTask, getResolutionState } from './status_report_task';
 import { createAssetManagerClient } from './factories';
 import {
+  ENTITY_STORE_HEALTH_REPORT_EVENT,
   ENTITY_STORE_METADATA_USAGE_EVENT,
   ENTITY_STORE_RESOLUTION_STATE_EVENT,
   ENTITY_STORE_USAGE_EVENT,
@@ -164,6 +165,7 @@ describe('status report task — usage, resolution state & metadata telemetry', 
   let count: jest.Mock;
   let esqlQuery: jest.Mock;
   let getStatus: jest.Mock;
+  let getDefaultsVersion: jest.Mock;
   let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
 
   // Drives the task the way task-manager does: register, grab the definition,
@@ -203,6 +205,7 @@ describe('status report task — usage, resolution state & metadata telemetry', 
     logger = loggerMock.create();
     reportEvent = jest.fn();
     getStatus = jest.fn().mockResolvedValue({ status: ENTITY_STORE_STATUS.NOT_INSTALLED });
+    getDefaultsVersion = jest.fn().mockResolvedValue('latest');
     // Store-usage counts carry a `query`; the metadata-datastream count does not.
     count = jest.fn(async (params: { query?: unknown }) =>
       params.query ? { count: 5 } : { count: 42 }
@@ -216,7 +219,19 @@ describe('status report task — usage, resolution state & metadata telemetry', 
     createAssetManagerClientMock.mockResolvedValue({
       assetManagerClient: { getStatus },
       esClient,
+      globalStateClient: { getDefaultsVersion },
     });
+  });
+
+  it('reports the global state defaults version in the health report', async () => {
+    getDefaultsVersion.mockResolvedValue('legacy');
+
+    await runStatusReportTask();
+
+    expect(reportEvent).toHaveBeenCalledWith(
+      ENTITY_STORE_HEALTH_REPORT_EVENT.eventType,
+      expect.objectContaining({ namespace: NAMESPACE, configDefaultsVersion: 'legacy' })
+    );
   });
 
   it('reports the metadata datastream doc count when the datastream exists', async () => {

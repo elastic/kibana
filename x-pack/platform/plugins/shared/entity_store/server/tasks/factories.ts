@@ -21,6 +21,7 @@ export interface LogsExtractionClientFactoryResult {
 export interface AssetManagerClientFactoryResult {
   assetManagerClient: AssetManagerClient;
   esClient: ElasticsearchClient;
+  globalStateClient: EntityStoreGlobalStateClient;
 }
 
 export async function createLogsExtractionClient({
@@ -96,6 +97,7 @@ export async function createAssetManagerClient({
 
   return {
     esClient,
+    globalStateClient,
     assetManagerClient: new AssetManagerClient({
       logger,
       esClient,
