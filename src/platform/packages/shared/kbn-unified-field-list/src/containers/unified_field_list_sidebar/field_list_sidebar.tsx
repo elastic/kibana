@@ -35,6 +35,7 @@ import { useGroupedFields } from '../../hooks/use_grouped_fields';
 import { UnifiedFieldListItem, type UnifiedFieldListItemProps } from '../unified_field_list_item';
 import { SidebarToggleButton, type SidebarToggleButtonProps } from './sidebar_toggle_button';
 import {
+  getReorderTargetIndex,
   getSelectedFields,
   shouldShowField,
   type SelectedFieldsResult,
@@ -267,17 +268,32 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
 
   const onReorderSelectedField = useCallback(
     (sourceFieldName: string, targetFieldName: string) => {
-      if (!onMoveFieldInWorkspace || sourceFieldName === targetFieldName) {
+      if (!onMoveFieldInWorkspace) {
         return;
       }
-      const selectedFieldNames = selectedFieldsState.selectedFields.map((field) => field.name);
-      const targetIndex = selectedFieldNames.indexOf(targetFieldName);
-      if (targetIndex === -1 || !selectedFieldNames.includes(sourceFieldName)) {
-        return;
+      const targetIndex = getReorderTargetIndex({
+        selectedFieldNames: selectedFieldsState.selectedFields.map((field) => field.name),
+        sourceFieldName,
+        targetFieldName,
+      });
+      if (targetIndex > -1) {
+        // apply the new order to the local state right away, otherwise the dropped field
+        // would flicker back to its old position until the workspace state update
+        // (app state, URL sync) has completed its round trip back into this component
+        setSelectedFieldsState((prevState) => {
+          const selectedFields = [...prevState.selectedFields];
+          const sourceIndex = selectedFields.findIndex((field) => field.name === sourceFieldName);
+          if (sourceIndex === -1) {
+            return prevState;
+          }
+          const [movedField] = selectedFields.splice(sourceIndex, 1);
+          selectedFields.splice(targetIndex, 0, movedField);
+          return { ...prevState, selectedFields };
+        });
+        onMoveFieldInWorkspace(sourceFieldName, targetIndex);
       }
-      onMoveFieldInWorkspace(sourceFieldName, targetIndex);
     },
-    [onMoveFieldInWorkspace, selectedFieldsState.selectedFields]
+    [onMoveFieldInWorkspace, selectedFieldsState.selectedFields, setSelectedFieldsState]
   );
 
   useEffect(() => {
