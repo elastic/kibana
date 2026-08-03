@@ -46,6 +46,7 @@ type PanelProps = Pick<
   | 'hideInspector'
   | 'getActions'
   | 'titleHighlight'
+  | 'onInteraction'
 >;
 
 /**
@@ -73,6 +74,7 @@ export function LensRenderer({
   hidePanelTitles,
   lastReloadRequestTime,
   titleHighlight,
+  onInteraction,
   ...props
 }: LensRendererProps) {
   // Use the settings interface to store panel settings
@@ -165,8 +167,9 @@ export function LensRenderer({
 
         return (extraActions ?? []).concat(actions || []);
       },
+      onInteraction: () => onInteraction?.(),
     };
-  }, [showInspector, withDefaultActions, extraActions, lensApi, titleHighlight]);
+  }, [showInspector, withDefaultActions, extraActions, lensApi, titleHighlight, onInteraction]);
 
   return (
     <EmbeddableRenderer<LensWireAPIConfig, LensApi>

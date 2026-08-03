@@ -34,6 +34,7 @@ export type LensWrapperProps = {
   disabledActions?: string[];
   extraDisabledActions?: string[];
   quickActionIds?: QuickActionIds;
+  onInteraction?: () => void;
 } & Pick<UnifiedMetricsGridProps, 'services' | 'onBrushEnd' | 'onFilter'>;
 
 const DEFAULT_DISABLED_ACTIONS = ['ACTION_CUSTOMIZE_PANEL', 'ACTION_EXPORT_CSV', 'alertRule'];
@@ -51,6 +52,7 @@ export function LensWrapper({
   syncCursor,
   extraDisabledActions = [],
   quickActionIds,
+  onInteraction,
 }: LensWrapperProps) {
   const { euiTheme } = useEuiTheme();
 
@@ -141,6 +143,7 @@ export function LensWrapper({
           onFilter={onFilter}
           syncTooltips={syncTooltips}
           syncCursor={syncCursor}
+          onInteraction={onInteraction}
         />
       </EmbeddableRendererContext.Provider>
     </div>

@@ -328,21 +328,6 @@ const ChartItem = React.memo(
       [euiTheme.colors.vis]
     );
 
-    const recordExploredMetric = useCallback<React.MouseEventHandler<HTMLDivElement>>(
-      (event) => {
-        // Only count clicks on panel action controls (Inspect, View details, Explore in
-        // Discover, Copy to dashboard, and the overflow menu that hosts Cases), not clicks
-        // on the chart body, legend, or time series selection.
-        const isActionClick = (event.target as HTMLElement).closest(
-          '[data-test-subj^="embeddablePanelAction-"], [data-test-subj="embeddablePanelToggleMenuIcon"]'
-        );
-        if (isActionClick) {
-          onMetricExplored?.(getMetricUniqueKey(metricItem));
-        }
-      },
-      [onMetricExplored, metricItem]
-    );
-
     const applicableDimensions = useStableApplicableDimensions(
       dimensions,
       metricItem.dimensionFields
@@ -374,6 +359,11 @@ const ChartItem = React.memo(
       [index, esqlQuery, metricItem, onViewDetails]
     );
 
+    const handleMetricExplored = useCallback(
+      () => onMetricExplored?.(getMetricUniqueKey(metricItem)),
+      [onMetricExplored, metricItem]
+    );
+
     const titleHighlight = useMemo(() => {
       if (!searchTerm?.trim()) {
         return undefined;
@@ -390,7 +380,6 @@ const ChartItem = React.memo(
         isFocused={isFocused}
         isSelected={isSelected}
         onFocus={onFocusCell}
-        onClickCapture={recordExploredMetric}
       >
         <Chart
           id={metricItem.metricName}
@@ -414,6 +403,7 @@ const ChartItem = React.memo(
           quickActionIds={METRICS_QUICK_ACTION_IDS}
           userMessages={userMessages}
           profileId={profileId}
+          onInteraction={handleMetricExplored}
         />
       </A11yGridCell>
     );
