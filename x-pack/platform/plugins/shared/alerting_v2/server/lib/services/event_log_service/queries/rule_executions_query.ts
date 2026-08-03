@@ -69,7 +69,7 @@ const SORT_FIELD_TO_ES: Record<RuleExecutionSortField, string> = {
  *     verbatim.
  *
  * `track_total_hits` is intentionally not set. The schema caps the
- * paginatable window via {@link RULE_EXECUTIONS_MAX_RESULT_WINDOW}
+ * paginatable window via {@link EXECUTION_HISTORY_MAX_RESULT_WINDOW}
  * (= 10_000), which mirrors Elasticsearch's default
  * `index.max_result_window`. Both are independently configurable, but
  * the schema cap binds first — the request validator rejects
