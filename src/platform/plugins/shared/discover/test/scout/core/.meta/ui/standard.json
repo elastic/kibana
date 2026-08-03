@@ -1,5 +1,5 @@
 {
-  "sha1": "5f65bef21f76dfcfaa3b2e3e09e56391e6a271ee",
+  "sha1": "661eaac64ab93a08bb87038c431ac80210a030a5",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -12,8 +12,8 @@
       "tags": [],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/tests/global.setup.ts",
-        "line": 12,
-        "column": 16
+        "line": 7,
+        "column": 1
       }
     },
     {
@@ -25,8 +25,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/tests/feature_controls/discover_index_alias_access.spec.ts",
-        "line": 50,
-        "column": 9
+        "line": 44,
+        "column": 38
       }
     },
     {
@@ -38,8 +38,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/tests/query_mode.spec.ts",
-        "line": 74,
-        "column": 16
+        "line": 59,
+        "column": 9
       }
     },
     {
@@ -51,8 +51,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/tests/query_mode.spec.ts",
-        "line": 74,
-        "column": 16
+        "line": 59,
+        "column": 9
       }
     }
   ]
