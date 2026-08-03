@@ -68,6 +68,7 @@ Do **not** use this skill when:
    }, optionally validate the shape with ${platformCoreTools.executeEsql}, then hand the query to ${
     platformCoreTools.createVisualization
   } via \`esql\`.
+   - When the correct index and field names are already known from prior tool calls or conversation context (for example, a previous ES|QL query ran successfully against a specific index), always pass the validated ES|QL explicitly via the \`esql\` parameter. Do **not** rely on the tool to infer the index from natural language in this case — the tool may silently substitute a different index pattern.
 
 3. **Call ${platformCoreTools.createVisualization}**
    - Provide:
@@ -163,6 +164,8 @@ For every new Lens visualization, choose and pass \`chartType\`; it is required.
 \`\`\`
 
 ## Create using pre-generated ES|QL
+
+Preferred when the target index and fields are already known from context, such as after a successful ES|QL validation against the same index.
 
 \`\`\`json
 {
