@@ -248,17 +248,27 @@ export const PostHog: ConnectorSpec = {
     updateFeatureFlag: {
       isTool: true,
       description:
-        'Toggle a PostHog feature flag active/inactive or change its rollout percentage, giving a workflow a mitigation lever to disable or roll back a bad rollout during an incident.',
+        'Toggle a PostHog feature flag active/inactive or change its rollout percentage, giving a workflow a mitigation lever to disable or roll back a bad rollout during an incident. Changing rolloutPercentage preserves the flag\'s existing release-condition groups and their targeting properties (e.g. "internal users only"), applying the new percentage to each group rather than replacing them with a single ungated group.',
       input: PostHogUpdateFeatureFlagInputSchema,
       handler: async (ctx, input: PostHogUpdateFeatureFlagInput) => {
-        const body: Record<string, unknown> = {};
-        if (input.active !== undefined) body.active = input.active;
-        if (input.rolloutPercentage !== undefined) {
-          body.filters = {
-            groups: [{ properties: [], rollout_percentage: input.rolloutPercentage }],
-          };
-        }
         try {
+          const body: Record<string, unknown> = {};
+          if (input.active !== undefined) body.active = input.active;
+          if (input.rolloutPercentage !== undefined) {
+            const current = await ctx.client.get(
+              buildProjectUrl(ctx, `/feature_flags/${input.flagId}/`)
+            );
+            const currentFilters = (current.data as { filters?: Record<string, unknown> })?.filters;
+            const existingGroups = currentFilters?.groups;
+            const groups =
+              Array.isArray(existingGroups) && existingGroups.length > 0
+                ? existingGroups.map((group: Record<string, unknown>) => ({
+                    ...group,
+                    rollout_percentage: input.rolloutPercentage,
+                  }))
+                : [{ properties: [], rollout_percentage: input.rolloutPercentage }];
+            body.filters = { ...currentFilters, groups };
+          }
           const response = await ctx.client.patch(
             buildProjectUrl(ctx, `/feature_flags/${input.flagId}/`),
             body

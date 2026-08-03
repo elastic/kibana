@@ -187,7 +187,8 @@ describe('PostHog', () => {
   });
 
   describe('feature flag actions', () => {
-    it('updateFeatureFlag should send active and rollout percentage', async () => {
+    it('updateFeatureFlag should send active and rollout percentage when the flag has no existing groups', async () => {
+      mockClient.get.mockResolvedValue({ data: { id: 1, filters: {} } });
       mockClient.patch.mockResolvedValue({ data: { id: 1, active: false } });
 
       const result = await PostHog.actions.updateFeatureFlag.handler(mockContext, {
@@ -196,6 +197,7 @@ describe('PostHog', () => {
         rolloutPercentage: 25,
       });
 
+      expect(mockClient.get).toHaveBeenCalledWith(`${BASE}/feature_flags/1/`);
       expect(mockClient.patch).toHaveBeenCalledWith(`${BASE}/feature_flags/1/`, {
         active: false,
         filters: { groups: [{ properties: [], rollout_percentage: 25 }] },
@@ -203,11 +205,47 @@ describe('PostHog', () => {
       expect(result).toEqual({ id: 1, active: false });
     });
 
+    it('updateFeatureFlag should preserve existing group targeting properties when changing rollout percentage', async () => {
+      mockClient.get.mockResolvedValue({
+        data: {
+          id: 1,
+          filters: {
+            groups: [
+              {
+                properties: [{ key: 'email', value: '@elastic.co', operator: 'icontains' }],
+                rollout_percentage: 100,
+              },
+              { properties: [], rollout_percentage: 10 },
+            ],
+          },
+        },
+      });
+      mockClient.patch.mockResolvedValue({ data: { id: 1 } });
+
+      await PostHog.actions.updateFeatureFlag.handler(mockContext, {
+        flagId: 1,
+        rolloutPercentage: 25,
+      });
+
+      expect(mockClient.patch).toHaveBeenCalledWith(`${BASE}/feature_flags/1/`, {
+        filters: {
+          groups: [
+            {
+              properties: [{ key: 'email', value: '@elastic.co', operator: 'icontains' }],
+              rollout_percentage: 25,
+            },
+            { properties: [], rollout_percentage: 25 },
+          ],
+        },
+      });
+    });
+
     it('updateFeatureFlag should send only active when rollout not provided', async () => {
       mockClient.patch.mockResolvedValue({ data: { id: 1, active: true } });
 
       await PostHog.actions.updateFeatureFlag.handler(mockContext, { flagId: 1, active: true });
 
+      expect(mockClient.get).not.toHaveBeenCalled();
       expect(mockClient.patch).toHaveBeenCalledWith(`${BASE}/feature_flags/1/`, { active: true });
     });
 
