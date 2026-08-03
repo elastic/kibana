@@ -33,7 +33,7 @@ export enum AttackDiscoveryEventTypes {
 
 export type AttackDiscoverySettingsTab = 'settings' | 'schedule';
 
-export type AttackDiscoveryAlertRetrievalMode = 'custom_only' | 'custom_query' | 'esql';
+export type AttackDiscoveryAlertRetrievalMode = 'custom_only' | 'custom_query' | 'esql' | 'skill';
 
 export type AttackDiscoveryQueryMode = 'custom_query' | 'esql';
 

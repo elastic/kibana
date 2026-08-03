@@ -22,7 +22,7 @@ jest.mock('@kbn/core-di-browser', () => ({
 }));
 
 jest.mock('../../../pages/rules_list_page/rule_actions_menu', () => ({
-  RuleActionsMenu: ({ rule, onEdit, onClone, onDelete, onToggleEnabled }: any) => (
+  RuleActionsMenu: ({ rule, onEdit, onClone, onDelete, onToggleEnabled, onRun }: any) => (
     <div data-test-subj={`ruleActionsMenu-${rule.id}`}>
       <button data-test-subj="mockEdit" onClick={() => onEdit(rule)}>
         Edit
@@ -35,6 +35,9 @@ jest.mock('../../../pages/rules_list_page/rule_actions_menu', () => ({
       </button>
       <button data-test-subj="mockToggleEnabled" onClick={() => onToggleEnabled(rule)}>
         Toggle
+      </button>
+      <button data-test-subj="mockRun" onClick={() => onRun(rule)}>
+        Run
       </button>
     </div>
   ),
@@ -75,6 +78,7 @@ const renderFlyout = (overrides: Partial<React.ComponentProps<typeof RuleSummary
     onClone: jest.fn(),
     onDelete: jest.fn(),
     onToggleEnabled: jest.fn(),
+    onRun: jest.fn(),
     ...overrides,
   };
 
@@ -154,6 +158,16 @@ describe('RuleSummaryFlyout', () => {
     expect(props.onQuickEdit).toHaveBeenCalledWith(baseRule);
   });
 
+  it('hides the quick edit and actions menu when canWrite is false', () => {
+    renderFlyout({ canWrite: false });
+
+    expect(screen.queryByTestId('ruleSummaryFlyoutQuickEditButton')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('ruleActionsMenu-rule-1')).not.toBeInTheDocument();
+    // Read-only affordances remain available.
+    expect(screen.getByTestId('ruleSummaryFlyoutOpenDetailsButton')).toBeInTheDocument();
+    expect(screen.getByTestId('ruleSummaryFlyoutCloseButton')).toBeInTheDocument();
+  });
+
   it('forwards action callbacks to the RuleActionsMenu with the rule', () => {
     const { props } = renderFlyout();
 
@@ -168,5 +182,8 @@ describe('RuleSummaryFlyout', () => {
 
     fireEvent.click(screen.getByTestId('mockToggleEnabled'));
     expect(props.onToggleEnabled).toHaveBeenCalledWith(baseRule);
+
+    fireEvent.click(screen.getByTestId('mockRun'));
+    expect(props.onRun).toHaveBeenCalledWith(baseRule);
   });
 });

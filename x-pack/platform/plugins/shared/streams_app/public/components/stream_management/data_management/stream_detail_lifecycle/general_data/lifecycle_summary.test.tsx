@@ -13,6 +13,13 @@ import { LifecycleSummary } from './lifecycle_summary';
 import { Streams, type IngestStreamLifecycle } from '@kbn/streams-schema';
 import { LifecycleAfterSaveProvider } from '../common/hooks/lifecycle_after_save';
 import { LifecyclePreviewProvider } from '../common/hooks/lifecycle_preview';
+import type { StreamLifecycleFlyoutId } from '../common/hooks/lifecycle_flyout_coordination';
+import {
+  LifecycleFlyoutCoordinationProvider,
+  STREAM_LIFECYCLE_FLYOUT_IDS,
+  useLifecycleFlyoutCoordination,
+  useRegisterLifecycleFlyoutOpen,
+} from '../common/hooks/lifecycle_flyout_coordination';
 
 // Mock the hooks
 const mockFetch = jest.fn();
@@ -80,12 +87,46 @@ jest.mock('../hooks/use_ilm_phases_color_and_description', () => ({
   }),
 }));
 
+const FlyoutCoordinationProbe = () => {
+  const { isAnyFlyoutOpen } = useLifecycleFlyoutCoordination();
+  return <div data-test-subj="isAnyFlyoutOpenProbe">{String(isAnyFlyoutOpen)}</div>;
+};
+
+// Registers a flyout as open in the shared registry, the way the real parent (general_data's
+// index.tsx) does for the "data phases" flyout it owns directly. `NonIlmLifecycleSummary` reads
+// that flyout's open state straight from the registry via `isFlyoutOpen`, so registering it here
+// is enough to drive its "navigate into that flyout" UI behavior in tests too.
+const FlyoutRegistrant = ({ id, isOpen }: { id: StreamLifecycleFlyoutId; isOpen: boolean }) => {
+  useRegisterLifecycleFlyoutOpen(id, isOpen);
+  return null;
+};
+
 describe('LifecycleSummary', () => {
   const renderWithSync = (ui: React.ReactElement) => {
     return render(
       <I18nProvider>
         <LifecycleAfterSaveProvider>
-          <LifecyclePreviewProvider>{ui}</LifecyclePreviewProvider>
+          <LifecyclePreviewProvider>
+            <LifecycleFlyoutCoordinationProvider>{ui}</LifecycleFlyoutCoordinationProvider>
+          </LifecyclePreviewProvider>
+        </LifecycleAfterSaveProvider>
+      </I18nProvider>
+    );
+  };
+
+  // Renders `ui` alongside a sibling probe in the *same* LifecycleFlyoutCoordinationProvider, so
+  // tests can observe the shared registry the way a real sibling (e.g. the failure store section)
+  // would — without needing a bespoke onXFlyoutOpenChange prop for every flyout.
+  const renderWithProbe = (ui: React.ReactElement) => {
+    return render(
+      <I18nProvider>
+        <LifecycleAfterSaveProvider>
+          <LifecyclePreviewProvider>
+            <LifecycleFlyoutCoordinationProvider>
+              {ui}
+              <FlyoutCoordinationProbe />
+            </LifecycleFlyoutCoordinationProvider>
+          </LifecyclePreviewProvider>
         </LifecycleAfterSaveProvider>
       </I18nProvider>
     );
@@ -269,6 +310,55 @@ describe('LifecycleSummary', () => {
       );
     });
 
+    it('disables the edit lifecycle method button while the downsample-steps flyout is open', async () => {
+      const definition = createDslDefinition('60d', [{ after: '10d', fixed_interval: '1h' }]);
+
+      renderWithSync(
+        <LifecycleSummary
+          definition={definition}
+          isMetricsStream
+          onEditSuccessfulLifecycle={jest.fn()}
+        />
+      );
+
+      expect(screen.getByTestId('dataLifecycleSummaryEditLifecycleMethod')).toBeEnabled();
+
+      fireEvent.click(screen.getByTestId('dataLifecycleSummaryAddDownsampleStep'));
+      await waitFor(() =>
+        expect(screen.getByTestId('streamsEditDslStepsFlyoutFromSummary')).toBeInTheDocument()
+      );
+
+      // Once the flyout is open, the edit lifecycle method button is disabled so both flyouts
+      // can't be opened at once.
+      expect(screen.getByTestId('dataLifecycleSummaryEditLifecycleMethod')).toBeDisabled();
+    });
+
+    it('registers the downsample-steps flyout with the shared coordination registry', async () => {
+      const definition = createDslDefinition('60d', [{ after: '10d', fixed_interval: '1h' }]);
+
+      renderWithProbe(<LifecycleSummary definition={definition} isMetricsStream />);
+
+      // Reported as closed initially, so a sibling section (e.g. failure store) reading the same
+      // shared registry isn't stuck assuming a flyout is open.
+      expect(screen.getByTestId('isAnyFlyoutOpenProbe')).toHaveTextContent('false');
+
+      fireEvent.click(screen.getByTestId('dataLifecycleSummaryAddDownsampleStep'));
+      await waitFor(() =>
+        expect(screen.getByTestId('streamsEditDslStepsFlyoutFromSummary')).toBeInTheDocument()
+      );
+
+      // A sibling reading the shared registry sees it's open too, so it can, in turn, disable its
+      // own flyout triggers (e.g. the failure store's "edit lifecycle" button) while this is open.
+      expect(screen.getByTestId('isAnyFlyoutOpenProbe')).toHaveTextContent('true');
+
+      fireEvent.click(screen.getByTestId('streamsEditDslStepsFlyoutFromSummaryCancelButton'));
+
+      await waitFor(() =>
+        expect(screen.queryByTestId('streamsEditDslStepsFlyoutFromSummary')).not.toBeInTheDocument()
+      );
+      expect(screen.getByTestId('isAnyFlyoutOpenProbe')).toHaveTextContent('false');
+    });
+
     it('should disable "Add data phase" when the DSL downsample flyout is open', async () => {
       const definition = createDslDefinition(undefined, [{ after: '1d', fixed_interval: '1d' }]);
 
@@ -378,7 +468,10 @@ describe('LifecycleSummary', () => {
       const definition = createDslDefinition('60d', [{ after: '10d', fixed_interval: '1h' }]);
 
       renderWithSync(
-        <LifecycleSummary definition={definition} isMetricsStream isDataPhaseFlyoutOpen />
+        <>
+          <FlyoutRegistrant id={STREAM_LIFECYCLE_FLYOUT_IDS.dataPhases} isOpen />
+          <LifecycleSummary definition={definition} isMetricsStream />
+        </>
       );
 
       expect(screen.getByTestId('dataLifecycleSummaryAddDownsampleStep')).toBeDisabled();
@@ -790,6 +883,219 @@ describe('LifecycleSummary', () => {
       renderWithSync(<LifecycleSummary definition={definition} isMetricsStream={false} />);
 
       expect(screen.queryByTestId('downsamplingBar-label')).not.toBeInTheDocument();
+    });
+
+    it('disables the edit lifecycle method button while the ILM edit-phases flyout is open', async () => {
+      const policies = [
+        {
+          name: 'test-policy',
+          phases: {
+            hot: { name: 'hot', size_in_bytes: 0, rollover: {} },
+            warm: { name: 'warm', size_in_bytes: 0, min_age: '30d' },
+          },
+          in_use_by: { data_streams: ['test-stream'], indices: [] },
+        },
+      ];
+      const ilmStatsValue = {
+        phases: {
+          hot: { name: 'hot', min_age: '0ms', size_in_bytes: 1000, rollover: {} },
+          warm: { name: 'warm', min_age: '30d', size_in_bytes: 1000 },
+        },
+      };
+
+      mockUseStreamsAppFetch.mockReturnValue({
+        value: ilmStatsValue,
+        loading: false,
+        refresh: jest.fn(),
+      });
+      mockFetch.mockImplementation((endpoint: string) => {
+        if (endpoint === 'GET /internal/streams/lifecycle/_policies') {
+          return Promise.resolve(policies);
+        }
+        if (endpoint === 'GET /internal/streams/lifecycle/_snapshot_repositories') {
+          return Promise.resolve({ repositories: [] });
+        }
+        return Promise.resolve(undefined);
+      });
+
+      const definition = createIlmDefinition();
+
+      renderWithSync(
+        <LifecycleSummary
+          definition={definition}
+          isMetricsStream
+          onEditSuccessfulLifecycle={jest.fn()}
+        />
+      );
+
+      // The edit lifecycle method button starts enabled.
+      expect(await screen.findByTestId('dataLifecycleSummaryEditLifecycleMethod')).toBeEnabled();
+
+      // Open the ILM edit-phases flyout from the warm phase.
+      await waitFor(() =>
+        expect(screen.getByTestId('lifecyclePhase-warm-name')).toBeInTheDocument()
+      );
+      fireEvent.click(screen.getByTestId('lifecyclePhase-warm-button'));
+      await waitFor(() =>
+        expect(screen.getByTestId('lifecyclePhase-warm-editButton')).toBeInTheDocument()
+      );
+      fireEvent.click(screen.getByTestId('lifecyclePhase-warm-editButton'));
+
+      // Once the flyout is open, the edit lifecycle method button is disabled so both flyouts
+      // can't be opened at once.
+      await waitFor(() =>
+        expect(
+          screen.getByTestId('streamsEditIlmPhasesFlyoutFromSummarySaveButton')
+        ).toBeInTheDocument()
+      );
+      expect(screen.getByTestId('dataLifecycleSummaryEditLifecycleMethod')).toBeDisabled();
+    });
+
+    it('registers the ILM edit-phases flyout with the shared coordination registry', async () => {
+      const policies = [
+        {
+          name: 'test-policy',
+          phases: {
+            hot: { name: 'hot', size_in_bytes: 0, rollover: {} },
+            warm: { name: 'warm', size_in_bytes: 0, min_age: '30d' },
+          },
+          in_use_by: { data_streams: ['test-stream'], indices: [] },
+        },
+      ];
+      const ilmStatsValue = {
+        phases: {
+          hot: { name: 'hot', min_age: '0ms', size_in_bytes: 1000, rollover: {} },
+          warm: { name: 'warm', min_age: '30d', size_in_bytes: 1000 },
+        },
+      };
+
+      mockUseStreamsAppFetch.mockReturnValue({
+        value: ilmStatsValue,
+        loading: false,
+        refresh: jest.fn(),
+      });
+      mockFetch.mockImplementation((endpoint: string) => {
+        if (endpoint === 'GET /internal/streams/lifecycle/_policies') {
+          return Promise.resolve(policies);
+        }
+        if (endpoint === 'GET /internal/streams/lifecycle/_snapshot_repositories') {
+          return Promise.resolve({ repositories: [] });
+        }
+        return Promise.resolve(undefined);
+      });
+
+      const definition = createIlmDefinition();
+
+      renderWithProbe(
+        <LifecycleSummary
+          definition={definition}
+          isMetricsStream
+          onEditSuccessfulLifecycle={jest.fn()}
+        />
+      );
+
+      // Reported as closed initially, so a sibling section (e.g. failure store) reading the same
+      // shared registry isn't stuck assuming a flyout is open.
+      expect(screen.getByTestId('isAnyFlyoutOpenProbe')).toHaveTextContent('false');
+
+      // Open the ILM edit-phases flyout from the warm phase.
+      await waitFor(() =>
+        expect(screen.getByTestId('lifecyclePhase-warm-name')).toBeInTheDocument()
+      );
+      fireEvent.click(screen.getByTestId('lifecyclePhase-warm-button'));
+      await waitFor(() =>
+        expect(screen.getByTestId('lifecyclePhase-warm-editButton')).toBeInTheDocument()
+      );
+      fireEvent.click(screen.getByTestId('lifecyclePhase-warm-editButton'));
+
+      // Opening the flyout fetches ILM policies first, so wait for it to actually finish opening.
+      await waitFor(() =>
+        expect(
+          screen.getByTestId('streamsEditIlmPhasesFlyoutFromSummarySaveButton')
+        ).toBeInTheDocument()
+      );
+
+      // A sibling reading the shared registry sees it's open too, so it can, in turn, disable its
+      // own flyout triggers (e.g. the failure store's "edit lifecycle" button) while this is open.
+      expect(screen.getByTestId('isAnyFlyoutOpenProbe')).toHaveTextContent('true');
+
+      fireEvent.click(screen.getByTestId('streamsEditIlmPhasesFlyoutFromSummaryCancelButton'));
+
+      await waitFor(() =>
+        expect(
+          screen.queryByTestId('streamsEditIlmPhasesFlyoutFromSummary')
+        ).not.toBeInTheDocument()
+      );
+      expect(screen.getByTestId('isAnyFlyoutOpenProbe')).toHaveTextContent('false');
+    });
+
+    it('closes the flyout without the confirmation modal when applying with no changes', async () => {
+      const policies = [
+        {
+          name: 'test-policy',
+          phases: {
+            hot: { name: 'hot', size_in_bytes: 0, rollover: {} },
+            warm: { name: 'warm', size_in_bytes: 0, min_age: '30d' },
+          },
+          // Affected resources present: without the no-change short-circuit this would open the
+          // "save as new policy" confirmation modal.
+          in_use_by: { data_streams: ['other-stream'], indices: [] },
+        },
+      ];
+      const ilmStatsValue = {
+        phases: {
+          hot: { name: 'hot', min_age: '0ms', size_in_bytes: 1000, rollover: {} },
+          warm: { name: 'warm', min_age: '30d', size_in_bytes: 1000 },
+        },
+      };
+
+      mockUseStreamsAppFetch.mockReturnValue({
+        value: ilmStatsValue,
+        loading: false,
+        refresh: jest.fn(),
+      });
+      mockFetch.mockImplementation((endpoint: string) => {
+        if (endpoint === 'GET /internal/streams/lifecycle/_policies') {
+          return Promise.resolve(policies);
+        }
+        if (endpoint === 'GET /internal/streams/lifecycle/_snapshot_repositories') {
+          return Promise.resolve({ repositories: [] });
+        }
+        return Promise.resolve(undefined);
+      });
+
+      const definition = createIlmDefinition();
+
+      renderWithSync(<LifecycleSummary definition={definition} isMetricsStream />);
+
+      // Open the ILM edit-phases flyout from the warm phase.
+      await waitFor(() =>
+        expect(screen.getByTestId('lifecyclePhase-warm-name')).toBeInTheDocument()
+      );
+      fireEvent.click(screen.getByTestId('lifecyclePhase-warm-button'));
+      await waitFor(() =>
+        expect(screen.getByTestId('lifecyclePhase-warm-editButton')).toBeInTheDocument()
+      );
+      fireEvent.click(screen.getByTestId('lifecyclePhase-warm-editButton'));
+
+      const saveButton = await screen.findByTestId(
+        'streamsEditIlmPhasesFlyoutFromSummarySaveButton'
+      );
+
+      // Apply without making any changes.
+      fireEvent.click(saveButton);
+
+      // The flyout closes and neither the confirmation modal nor a policy save is triggered.
+      await waitFor(() =>
+        expect(
+          screen.queryByTestId('streamsEditIlmPhasesFlyoutFromSummary')
+        ).not.toBeInTheDocument()
+      );
+      expect(screen.queryByTestId('editPolicyModalTitle')).not.toBeInTheDocument();
+      expect(mockFetch).not.toHaveBeenCalledWith(
+        'POST /internal/streams/lifecycle/_policy',
+        expect.any(Object)
+      );
     });
   });
 });

@@ -212,7 +212,7 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
           'xpack.fleet.integrations.settings.skippedAgentlessPoliciesToast.title',
           {
             defaultMessage:
-              'Fleet skipped {skippedCount, plural, one {# agentless policy} other {# agentless policies}}',
+              'Fleet skipped {skippedCount, plural, one {# managed integration} other {# managed integrations}}',
             values: { skippedCount: agentlessGuardFailures.length },
           }
         ),
@@ -301,7 +301,7 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
             title: i18n.translate(
               'xpack.fleet.integrations.settings.errorUpdatingAgentlessPoliciesToast.title',
               {
-                defaultMessage: 'Error upgrading agentless policies',
+                defaultMessage: 'Error upgrading managed integrations',
               }
             ),
             text: i18n.translate(
@@ -327,7 +327,7 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
           title: toMountPoint(
             <FormattedMessage
               id="xpack.fleet.integrations.agentlessPackageUpdateSuccessTitle"
-              defaultMessage="Updated {title} and upgraded agentless policies"
+              defaultMessage="Updated {title} and upgraded managed integrations"
               values={{ title }}
             />,
             startServices
@@ -335,7 +335,7 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
           text: toMountPoint(
             <FormattedMessage
               id="xpack.fleet.integrations.agentlessPackageUpdateSuccessDescription"
-              defaultMessage="Fleet upgraded {agentlessPolicyCount, plural, one {# agentless policy} other {# agentless policies}}."
+              defaultMessage="Fleet upgraded {agentlessPolicyCount, plural, one {# managed integration} other {# managed integrations}}."
               values={{ agentlessPolicyCount: agentlessIdsToUpgrade.length }}
             />,
             startServices
@@ -346,13 +346,13 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
           title: i18n.translate(
             'xpack.fleet.integrations.settings.errorUpdatingAgentlessPoliciesToast.title',
             {
-              defaultMessage: 'Error upgrading agentless policies',
+              defaultMessage: 'Error upgrading managed integrations',
             }
           ),
           toastMessage: i18n.translate(
             'xpack.fleet.integrations.settings.errorUpdatingAgentlessPoliciesToast.exceptionMessage',
             {
-              defaultMessage: 'Upgrade agentless integration policies manually.\nError: {error}',
+              defaultMessage: 'Upgrade managed integrations manually.\nError: {error}',
               values: {
                 error: error.message,
               },
@@ -487,7 +487,7 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
                   <strong>
                     <FormattedMessage
                       id="xpack.fleet.integrations.confirmUpdateModal.body.agentlessPolicyCount"
-                      defaultMessage="{agentlessPolicyCount, plural, one {# agentless policy} other {# agentless policies}}"
+                      defaultMessage="{agentlessPolicyCount, plural, one {# managed integration} other {# managed integrations}}"
                       values={{ agentlessPolicyCount }}
                     />
                   </strong>

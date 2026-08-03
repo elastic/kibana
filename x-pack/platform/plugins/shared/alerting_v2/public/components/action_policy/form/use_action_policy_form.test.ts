@@ -123,7 +123,7 @@ describe('useActionPolicyForm', () => {
           {
             id: 'draft-1',
             source: 'inline',
-            stepType: 'slack',
+            stepType: 'slack2.sendMessage',
             connectorId: 'connector-1',
             params: 'message: hi',
           },
@@ -144,7 +144,7 @@ describe('useActionPolicyForm', () => {
           {
             id: 'draft-1',
             source: 'inline',
-            stepType: 'slack',
+            stepType: 'slack2.sendMessage',
             connectorId: null,
             params: 'message: ""',
           },

@@ -46,6 +46,9 @@ class SecurityTelemetry {
   private readonly logoutCounter: Counter<Attributes>;
   private readonly privilegeRegistrationDuration: Histogram<Attributes>;
   private readonly getCurrentProfileCounter: Counter<Attributes>;
+  private readonly getCurrentProfileIdCounter: Counter<Attributes>;
+  private readonly oauthTokenExchangeAttempts: Counter<Attributes>;
+  private readonly oauthTokenExchangeDuration: Histogram<Attributes>;
 
   // Adds more boundaries in 50-500ms range where most operations typically fall
   private readonly DEFAULT_BUCKET_BOUNDARIES = [
@@ -120,6 +123,36 @@ class SecurityTelemetry {
         valueType: ValueType.INT,
       }
     );
+
+    this.getCurrentProfileIdCounter = this.meter.createCounter(
+      'user_profiles.get_current_profile_id.invocations',
+      {
+        description: 'Number of invocations of getCurrentProfileId',
+        unit: '1',
+        valueType: ValueType.INT,
+      }
+    );
+
+    this.oauthTokenExchangeAttempts = this.meter.createCounter(
+      'auth.uiam.oauth_token_exchange.attempts',
+      {
+        description: 'Number of UIAM OAuth access token to ephemeral token exchange attempts',
+        unit: '1',
+        valueType: ValueType.INT,
+      }
+    );
+
+    this.oauthTokenExchangeDuration = this.meter.createHistogram(
+      'auth.uiam.oauth_token_exchange.duration',
+      {
+        description: 'Duration of UIAM OAuth access token to ephemeral token exchange attempts',
+        unit: 'ms',
+        valueType: ValueType.DOUBLE,
+        advice: {
+          explicitBucketBoundaries: this.DEFAULT_BUCKET_BOUNDARIES,
+        },
+      }
+    );
   }
 
   private transformAttributes<T extends SecurityTelemetryAttributes>(attributes: T): Attributes {
@@ -191,6 +224,17 @@ class SecurityTelemetry {
   recordGetCurrentProfileInvocation = (attributes: GetCurrentProfileAttributes) => {
     const transformedAttributes = this.transformAttributes<GetCurrentProfileAttributes>(attributes);
     this.getCurrentProfileCounter.add(1, transformedAttributes);
+  };
+
+  recordGetCurrentProfileIdInvocation = (attributes: GetCurrentProfileAttributes) => {
+    const transformedAttributes = this.transformAttributes<GetCurrentProfileAttributes>(attributes);
+    this.getCurrentProfileIdCounter.add(1, transformedAttributes);
+  };
+
+  recordOAuthTokenExchangeAttempt = (duration: number, attributes: BasicAttributes) => {
+    const transformedAttributes = this.transformAttributes<BasicAttributes>(attributes);
+    this.oauthTokenExchangeAttempts.add(1, transformedAttributes);
+    this.oauthTokenExchangeDuration.record(duration, transformedAttributes);
   };
 }
 

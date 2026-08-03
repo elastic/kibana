@@ -19,7 +19,12 @@ export class OtelKubernetesOverviewDashboardPage {
   }
 
   async assertNodesPanelNotEmpty() {
-    await expect(this.metricPanelValues.first()).toBeVisible();
-    expect(await this.metricPanelValues.first().textContent()).toMatch(/\d+/);
+    // The dashboard may not auto-refresh if its saved state has refresh disabled.
+    // Reload periodically to trigger fresh Elasticsearch queries until a numeric
+    // value appears in a metric panel.
+    await expect(async () => {
+      await this.page.reload();
+      await expect(this.metricPanelValues.first()).toHaveText(/\d+/, { timeout: 30_000 });
+    }).toPass({ timeout: 10 * 60_000 });
   }
 }

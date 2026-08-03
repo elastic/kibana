@@ -17,6 +17,7 @@ import type {
   HasSupportedTriggers,
   PublishesDataLoading,
   PublishesDataViews,
+  PublishesEsqlUsage,
   PublishesProjectRoutingOverrides,
   PublishesRendered,
   PublishesTimeRange,
@@ -63,6 +64,7 @@ export type VisualizeApi = Partial<HasEditCapabilities> &
   PublishesDataLoading &
   PublishesRendered &
   PublishesProjectRoutingOverrides &
+  PublishesEsqlUsage &
   Required<PublishesTitle> &
   HasVisualizeConfig &
   HasInspectorAdapters &

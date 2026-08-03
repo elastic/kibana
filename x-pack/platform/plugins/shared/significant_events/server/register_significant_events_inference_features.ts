@@ -12,6 +12,7 @@ import {
   SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
   SIGNIFICANT_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID,
   SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID,
+  SIGNIFICANT_EVENTS_TRIAGE_INFERENCE_FEATURE_ID,
   SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
   SIGNIFICANT_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
   SIGNIFICANT_EVENTS_MEMORY_INFERENCE_FEATURE_ID,
@@ -30,15 +31,25 @@ const KI_QUERY_GENERATION_RECOMMENDED_MODELS = [
   defaultInferenceEndpoints.OPENAI_GPT_OSS_120B,
 ];
 
+// Ordered to keep the recommended default GPT-5.2, matching the hardcoded
+// `agentConnectorId` default `discovery.yaml` used before it started resolving via this feature.
 const DISCOVERY_RECOMMENDED_MODELS = [
+  defaultInferenceEndpoints.OPENAI_GPT_5_2,
   defaultInferenceEndpoints.ANTHROPIC_CLAUDE_4_6_OPUS,
   defaultInferenceEndpoints.ANTHROPIC_CLAUDE_4_6_SONNET,
-  defaultInferenceEndpoints.OPENAI_GPT_5_2,
 ];
 
 const INVESTIGATION_RECOMMENDED_MODELS = [
   defaultInferenceEndpoints.ANTHROPIC_CLAUDE_4_6_SONNET,
   defaultInferenceEndpoints.OPENAI_GPT_5_4,
+];
+
+// Ordered to keep the recommended default Sonnet 4.6, matching the hardcoded
+// `agentConnectorId` default `triage.yaml` used before it started resolving via this feature.
+const TRIAGE_RECOMMENDED_MODELS = [
+  defaultInferenceEndpoints.ANTHROPIC_CLAUDE_4_6_SONNET,
+  defaultInferenceEndpoints.ANTHROPIC_CLAUDE_4_6_OPUS,
+  defaultInferenceEndpoints.OPENAI_GPT_5_2,
 ];
 
 // Background memory upkeep is low-stakes curation, not deep reasoning — a
@@ -155,6 +166,20 @@ export function registerSignificantEventsInferenceFeatures(
         }
       ),
       recommendedEndpoints: INVESTIGATION_RECOMMENDED_MODELS,
+      ignoreGlobalDefault: true,
+    },
+    {
+      featureId: SIGNIFICANT_EVENTS_TRIAGE_INFERENCE_FEATURE_ID,
+      featureName: i18n.translate('xpack.significantEvents.inferenceFeature.triageName', {
+        defaultMessage: 'Triage',
+      }),
+      featureDescription: i18n.translate(
+        'xpack.significantEvents.inferenceFeature.triageDescription',
+        {
+          defaultMessage: 'Model used to judge discovery candidates during triage.',
+        }
+      ),
+      recommendedEndpoints: TRIAGE_RECOMMENDED_MODELS,
       ignoreGlobalDefault: true,
     },
     {

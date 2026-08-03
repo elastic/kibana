@@ -149,6 +149,9 @@ export function ChatContextMenu({
   return (
     <>
       <EuiPopover
+        aria-label={i18n.translate('xpack.aiAssistant.chatHeader.contextMenu.popoverAriaLabel', {
+          defaultMessage: 'Conversation actions',
+        })}
         button={
           <EuiToolTip
             content={i18n.translate('xpack.aiAssistant.chatHeader.contextMenu.chatActionsTooltip', {

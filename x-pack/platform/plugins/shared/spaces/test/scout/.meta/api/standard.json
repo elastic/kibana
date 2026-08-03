@@ -1,5 +1,9 @@
 {
-  "sha1": "22140c928cd15ea35f869a3cddcd12948800c7ca",
+  "sha1": "f8068a550ca8ce2ef2b2002ed704e91782c28270",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
   "tests": [
     {
       "id": "cea249672d0d325-f99b36e4e77ecfa",
@@ -103,6 +107,162 @@
         "file": "x-pack/platform/plugins/shared/spaces/test/scout/api/tests/active_space.spec.ts",
         "line": 71,
         "column": 12
+      }
+    },
+    {
+      "id": "55d75d248c8e235-2f053464eca6e2e",
+      "title": "Enter space redirect routing redirects to the space default route when no next route is provided",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout/api/tests/enter_space_routing.spec.ts",
+        "line": 78,
+        "column": 10
+      }
+    },
+    {
+      "id": "55d75d248c8e235-06ccd4c3a8fe0db",
+      "title": "Enter space redirect routing redirects to a valid provided next route",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout/api/tests/enter_space_routing.spec.ts",
+        "line": 89,
+        "column": 10
+      }
+    },
+    {
+      "id": "55d75d248c8e235-2cfb502c4e6cb21",
+      "title": "Enter space redirect routing normalizes a next route containing path traversal segments",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout/api/tests/enter_space_routing.spec.ts",
+        "line": 94,
+        "column": 10
+      }
+    },
+    {
+      "id": "55d75d248c8e235-2440df79c26004b",
+      "title": "Enter space redirect routing falls back to the default route when next is an external URL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout/api/tests/enter_space_routing.spec.ts",
+        "line": 100,
+        "column": 10
+      }
+    },
+    {
+      "id": "55d75d248c8e235-972292cca1cec89",
+      "title": "Enter space redirect routing preserves the query string and hash of the provided next route",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout/api/tests/enter_space_routing.spec.ts",
+        "line": 112,
+        "column": 10
+      }
+    },
+    {
+      "id": "55d75d248c8e235-04c6924949b9837",
+      "title": "Enter space redirect routing preserves the query string and hash of the default route",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout/api/tests/enter_space_routing.spec.ts",
+        "line": 125,
+        "column": 10
       }
     },
     {

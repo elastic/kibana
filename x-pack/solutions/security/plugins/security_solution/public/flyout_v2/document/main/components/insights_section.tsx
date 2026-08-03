@@ -6,49 +6,24 @@
  */
 
 import { type DataTableRecord, getFieldValue } from '@kbn/discover-utils';
-import { i18n } from '@kbn/i18n';
 import React, { memo, useCallback, useMemo } from 'react';
 import { EVENT_KIND } from '@kbn/rule-data-utils';
-import { useHistory } from 'react-router-dom';
-import { useStore } from 'react-redux';
-import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
-import { documentFlyoutHistoryKey } from '../../../shared/constants/flyout_history';
-import { DocumentFlyoutWrapper } from '../document_flyout_wrapper';
+import { useFlyoutApi } from '../../../use_flyout_api';
 import { type CellActionRenderer } from '../../../shared/components/cell_actions';
 import { EventKind } from '../constants/event_kinds';
-import { getColumns } from '../../tools/prevalence/utils/get_columns';
 import { useRuleWithFallback } from '../../../../detection_engine/rule_management/logic/use_rule_with_fallback';
 import { FLYOUT_STORAGE_KEYS } from '../constants/local_storage';
 import { PREFIX } from '../../../../flyout/shared/test_ids';
-import { useKibana } from '../../../../common/lib/kibana';
 import { ExpandableSection } from '../../../shared/components/expandable_section';
 import { useExpandSection } from '../../../shared/hooks/use_expand_section';
 import { ThreatIntelligenceOverview } from './threat_intelligence_overview';
 import { CorrelationsOverview } from './correlations_overview';
 import { PrevalenceOverview } from './prevalence_overview';
 import { EntitiesOverview } from './entities_overview';
-import { PrevalenceDetails } from '../../tools/prevalence';
-import { flyoutProviders } from '../../../shared/components/flyout_provider';
-import { useIsInSecurityApp } from '../../../../common/hooks/is_in_security_app';
-import { CorrelationsDetails } from '../../tools/correlations';
-import { ThreatIntelligenceDetails } from '../../tools/threat_intelligence';
-import { EntityDetails as EntitiesDetails } from '../../tools/entities';
-import {
-  defaultToolsFlyoutProperties,
-  useDefaultDocumentFlyoutProperties,
-} from '../../../shared/hooks/use_default_flyout_properties';
-import type { OpenFlyoutLinkProps } from '../../../shared/components/open_flyout_link';
-import { OpenFlyoutLink } from '../../../shared/components/open_flyout_link';
-import { HOST_NAME_FIELD_NAME } from '../../../../timelines/components/timeline/body/renderers/constants';
+import { FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
+import { INSIGHTS_SECTION_TITLE } from '../../../shared/constants/flyout_titles';
 
 export const INSIGHTS_SECTION_TEST_ID = `${PREFIX}InsightsSection` as const;
-
-export const INSIGHTS_SECTION_TITLE = i18n.translate(
-  'xpack.securitySolution.flyout.document.insights.sectionTitle',
-  {
-    defaultMessage: 'Insights',
-  }
-);
 
 const LOCAL_STORAGE_SECTION_KEY = 'insights';
 
@@ -73,13 +48,14 @@ export interface InsightsSectionProps {
  */
 export const InsightsSection = memo(
   ({ hit, renderCellActions, onAlertUpdated }: InsightsSectionProps) => {
-    const { services } = useKibana();
-    const { overlays } = services;
-    const store = useStore();
-    const history = useHistory();
-    const defaultFlyoutProperties = useDefaultDocumentFlyoutProperties();
-    const isInSecurityApp = useIsInSecurityApp();
-    const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
+    const {
+      openDocumentFlyoutFromIndexAsChild,
+      openDocumentEntities,
+      openDocumentCorrelations,
+      openDocumentThreatIntelligence,
+      openDocumentPrevalence,
+      openAttackFlyoutAsChild,
+    } = useFlyoutApi();
 
     const expanded = useExpandSection({
       storageKey: FLYOUT_STORAGE_KEYS.OVERVIEW_TAB_EXPANDED_SECTIONS,
@@ -105,132 +81,55 @@ export const InsightsSection = memo(
     );
 
     const onShowThreatIntelligenceDetails = useCallback(() => {
-      overlays.openSystemFlyout(
-        flyoutProviders({
-          services,
-          store,
-          history,
-          children: <ThreatIntelligenceDetails hit={hit} />,
-        }),
-        {
-          ...defaultToolsFlyoutProperties,
-          historyKey,
-          session: 'start',
-        }
-      );
-    }, [history, historyKey, hit, overlays, services, store]);
+      openDocumentThreatIntelligence({ hit, origin: FLYOUT_ORIGIN.INSIGHTS_THREAT_INTEL });
+    }, [openDocumentThreatIntelligence, hit]);
 
     const onShowAlert = useCallback(
-      (id: string, indexName: string) =>
-        overlays.openSystemFlyout(
-          flyoutProviders({
-            services,
-            store,
-            history,
-            children: (
-              <DocumentFlyoutWrapper
-                documentId={id}
-                indexName={indexName}
-                renderCellActions={renderCellActions}
-                onAlertUpdated={onAlertUpdated}
-              />
-            ),
-          }),
-          {
-            ...defaultFlyoutProperties,
-            session: 'inherit',
-          }
-        ),
-      [
-        defaultFlyoutProperties,
-        renderCellActions,
-        history,
-        onAlertUpdated,
-        overlays,
-        services,
-        store,
-      ]
+      (id: string, indexName: string, title?: string) =>
+        openDocumentFlyoutFromIndexAsChild({
+          documentId: id,
+          indexName,
+          renderCellActions,
+          onAlertUpdated,
+          origin: FLYOUT_ORIGIN.CORRELATIONS_ALERT,
+          title,
+        }),
+      [openDocumentFlyoutFromIndexAsChild, renderCellActions, onAlertUpdated]
     );
 
-    const onShowEntitiesDetails = useCallback(() => {
-      overlays.openSystemFlyout(
-        flyoutProviders({
-          services,
-          store,
-          history,
-          children: <EntitiesDetails hit={hit} />,
-        }),
-        {
-          ...defaultToolsFlyoutProperties,
-          historyKey,
-          session: 'start',
-        }
-      );
-    }, [history, historyKey, hit, overlays, services, store]);
+    const onShowEntitiesDetails = useCallback(
+      () => openDocumentEntities({ hit, origin: FLYOUT_ORIGIN.INSIGHTS_ENTITIES }),
+      [openDocumentEntities, hit]
+    );
 
-    const onShowCorrelationsDetails = useCallback(() => {
-      overlays.openSystemFlyout(
-        flyoutProviders({
-          services,
-          store,
-          history,
-          children: (
-            <CorrelationsDetails
-              hit={hit}
-              scopeId=""
-              isRulePreview={false}
-              onShowAlert={onShowAlert}
-            />
-          ),
-        }),
-        {
-          ...defaultToolsFlyoutProperties,
-          historyKey,
-          session: 'start',
-        }
-      );
-    }, [history, historyKey, hit, onShowAlert, overlays, services, store]);
+    const onShowAttack = useCallback(
+      (id: string, indexName: string, title?: string) =>
+        openAttackFlyoutAsChild({ attackId: id, indexName, attackTitle: title }),
+      [openAttackFlyoutAsChild]
+    );
 
-    const renderFlyoutLink = useCallback(
-      (props: OpenFlyoutLinkProps) => (
-        <OpenFlyoutLink {...props} asParent={props.field === HOST_NAME_FIELD_NAME} />
-      ),
-      []
+    const onShowCorrelationsDetails = useCallback(
+      () =>
+        openDocumentCorrelations({
+          hit,
+          scopeId: '',
+          isRulePreview: false,
+          onShowAlert,
+          onShowAttack,
+          origin: FLYOUT_ORIGIN.INSIGHTS_CORRELATIONS,
+        }),
+      [openDocumentCorrelations, hit, onShowAlert, onShowAttack]
     );
 
     const onShowPrevalenceDetails = useCallback(() => {
-      overlays.openSystemFlyout(
-        flyoutProviders({
-          services,
-          store,
-          history,
-          children: (
-            <PrevalenceDetails
-              hit={hit}
-              investigationFields={investigationFields}
-              scopeId={''}
-              columns={getColumns(renderCellActions, isInSecurityApp, '', renderFlyoutLink)}
-            />
-          ),
-        }),
-        {
-          ...defaultToolsFlyoutProperties,
-          historyKey,
-          session: 'start',
-        }
-      );
-    }, [
-      renderCellActions,
-      history,
-      historyKey,
-      hit,
-      investigationFields,
-      isInSecurityApp,
-      overlays,
-      services,
-      store,
-      renderFlyoutLink,
-    ]);
+      openDocumentPrevalence({
+        hit,
+        investigationFields,
+        scopeId: '',
+        renderCellActions,
+        origin: FLYOUT_ORIGIN.INSIGHTS_PREVALENCE,
+      });
+    }, [openDocumentPrevalence, renderCellActions, hit, investigationFields]);
 
     return (
       <ExpandableSection

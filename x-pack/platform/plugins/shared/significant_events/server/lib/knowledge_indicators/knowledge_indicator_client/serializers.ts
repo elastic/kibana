@@ -57,7 +57,7 @@ export function toStoredFeature(
   const slug = normalizeFeatureSlug(feature.id);
   return {
     '@timestamp': timestamp,
-    id: computeFeatureUuid({ id: slug, stream_name: streamName, type: feature.type }),
+    id: computeFeatureUuid({ id: slug, stream_name: streamName }),
     type: KI_TYPE_FEATURE,
     title: feature.title,
     description: feature.description,
@@ -109,7 +109,7 @@ export function toStoredQuery(
       severity_score: query.severity_score,
       rule_backed: ruleBacked,
       rule_id: ruleId,
-      features: query.features,
+      features: query.features?.map((feat) => ({ ...feat, id: normalizeFeatureSlug(feat.id) })),
     },
     ...(includeEmbedding && embedding ? { search_embedding: embedding } : {}),
   };

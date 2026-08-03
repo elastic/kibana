@@ -77,6 +77,7 @@ export const MonacoEditor = ({
       application,
     },
     docLinkVersion,
+    docLinks,
     config: { defaultEditorContent },
   } = context;
   const { toasts } = notifications;
@@ -107,8 +108,11 @@ export const MonacoEditor = ({
   }, []);
 
   const getDocumenationLink = useCallback(async () => {
-    return actionsProvider.current!.getDocumentationLink(docLinkVersion);
-  }, [docLinkVersion]);
+    return actionsProvider.current!.getDocumentationLink(
+      docLinkVersion,
+      docLinks.console.kibanaApiReference
+    );
+  }, [docLinkVersion, docLinks]);
 
   const autoIndentCallback = useCallback(async () => {
     return actionsProvider.current!.autoIndent(context);

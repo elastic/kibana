@@ -9,7 +9,7 @@ import React, { useEffect, useState } from 'react';
 import { EuiLoadingSpinner, EuiPanel } from '@elastic/eui';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { useDarkMode } from '@kbn/kibana-react-plugin/public';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import type { SecurityAppStore, State } from '../../../common/store/types';
 import type { StartServices } from '../../../types';
 import { useInitDataViewManager } from '../../../data_view_manager/hooks/use_init_data_view_manager';

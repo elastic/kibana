@@ -5,7 +5,35 @@
  * 2.0.
  */
 
+import type { ScoutPage, ScoutParallelTestFixtures, ScoutParallelWorkerFixtures } from '@kbn/scout';
+import { spaceTest as baseSpaceTest } from '@kbn/scout';
+import type { LensPageObjects } from './page_objects';
+import { extendPageObjects } from './page_objects';
+
 export * as testData from './constants';
-export * from './dashboard_api';
 export * from './helpers';
 export * from './open_in_lens_helpers';
+export * from './saved_object_helpers';
+export * from './tsdb_helpers';
+
+export interface LensParallelTestFixtures extends ScoutParallelTestFixtures {
+  pageObjects: LensPageObjects;
+}
+
+export const spaceTest = baseSpaceTest.extend<
+  LensParallelTestFixtures,
+  ScoutParallelWorkerFixtures
+>({
+  pageObjects: async (
+    {
+      pageObjects,
+      page,
+    }: {
+      pageObjects: LensPageObjects;
+      page: ScoutPage;
+    },
+    use: (pageObjects: LensPageObjects) => Promise<void>
+  ) => {
+    await use(extendPageObjects(pageObjects, page));
+  },
+});

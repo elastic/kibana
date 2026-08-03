@@ -132,7 +132,7 @@ describe('getCommentAttachmentType', () => {
       const commentType = getCommentAttachmentType();
       const removal = commentType.getAttachmentRemovalObject?.(attachmentViewProps);
 
-      expect(removal).toEqual({ event: 'Deleted comment' });
+      expect(removal).toEqual({ event: 'removed comment' });
     });
   });
 });

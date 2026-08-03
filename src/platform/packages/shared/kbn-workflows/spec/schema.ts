@@ -1163,6 +1163,10 @@ export const WorkflowDataContextSchema = z.object({
   name: z.string(),
   enabled: z.boolean(),
   spaceId: z.string(),
+  version: z
+    .number()
+    .optional()
+    .describe('Workflow document version captured when the execution was created.'),
 });
 export type WorkflowDataContext = z.infer<typeof WorkflowDataContextSchema>;
 

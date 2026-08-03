@@ -69,6 +69,7 @@ describe('installPrebuiltWatchlists', function () {
   const mockLogger = loggingSystemMock.createLogger();
   const mockEsClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
   const mockSoClient = mockSavedObjectsClient.create();
+  let mockCreateInternalRepository: jest.Mock;
 
   const callInstall = () =>
     installPrebuiltWatchlists({
@@ -94,10 +95,23 @@ describe('installPrebuiltWatchlists', function () {
     mockEntitySourceCreate.mockResolvedValue({ id: 'entity-source-id' });
     mockEntitySourceList.mockResolvedValue({ sources: [] });
     mockAddEntitySourceReference.mockResolvedValue(undefined);
+    // Mirror core `find` behavior: the hidden `space` type is only queryable when
+    // it is explicitly passed via `includedHiddenTypes`; otherwise `find` returns
+    // an empty result. This guards against regressing back to an un-scoped repo.
+    mockCreateInternalRepository = jest
+      .fn()
+      .mockImplementation((includedHiddenTypes?: string[]) => {
+        if (includedHiddenTypes?.includes('space')) {
+          return mockSoClient;
+        }
+        const repoWithoutSpaceAccess = mockSavedObjectsClient.create();
+        repoWithoutSpaceAccess.find.mockResolvedValue(buildEmptySpacesResponse());
+        return repoWithoutSpaceAccess;
+      });
     mockGetStartServices.mockResolvedValue([
       {
         savedObjects: {
-          createInternalRepository: jest.fn().mockReturnValue(mockSoClient),
+          createInternalRepository: mockCreateInternalRepository,
         },
         elasticsearch: {
           client: {
@@ -106,6 +120,17 @@ describe('installPrebuiltWatchlists', function () {
         },
       },
     ]);
+  });
+
+  it('requests the hidden space saved object type so custom spaces are discovered', async () => {
+    mockSoClient.find.mockResolvedValue(buildSpacesResponse(['default', 'custom-space']));
+    mockWatchlistGet.mockRejectedValue(new Error('Saved object not found'));
+
+    await callInstall();
+
+    expect(mockCreateInternalRepository).toHaveBeenCalledWith(['space']);
+    // default + custom-space
+    expect(mockWatchlistCreate).toHaveBeenCalledTimes(2);
   });
 
   it('should install in default namespace even when no spaces are found', async () => {

@@ -22,6 +22,7 @@ import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_flyout_enabled';
 import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
 import { createFlyoutApiMock } from '../../../../../flyout_v2/use_flyout_api.mock';
+import { PageScope } from '../../../../../data_view_manager/constants';
 
 jest.mock('../../../../../common/hooks/use_is_new_flyout_enabled', () => ({
   useIsNewFlyoutEnabled: jest.fn().mockReturnValue(false),
@@ -200,7 +201,7 @@ describe('unified data table', () => {
   );
 
   it(
-    'opens DocumentFlyoutWrapper via system flyout when enableNewFlyout setting is enabled and row is not an attack',
+    'opens the new document flyout (from index) when enableNewFlyout setting is enabled and row is not an attack',
     async () => {
       jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
 
@@ -210,13 +211,48 @@ describe('unified data table', () => {
       fireEvent.click(screen.getAllByTestId('docTableExpandToggleColumn')[0]);
 
       await waitFor(() => {
-        expect(mockOpenSystemFlyout).toHaveBeenCalled();
+        expect(flyoutApi.openDocumentFlyoutFromIndex).toHaveBeenCalledWith(
+          expect.objectContaining({
+            documentId: mockTimelineData[0]._id,
+            indexName: mockTimelineData[0].ecs._index,
+          })
+        );
       });
 
-      const flyoutElement = mockOpenSystemFlyout.mock.calls[0][0];
-      expect(flyoutElement.props.documentId).toBe(mockTimelineData[0]._id);
-      expect(flyoutElement.props.indexName).toBe(mockTimelineData[0].ecs._index);
-      expect(flyoutElement.props.onAlertUpdated).toBe(refetchMock);
+      // the document (non-attack) new flyout no longer goes through the inline system flyout
+      expect(mockOpenSystemFlyout).not.toHaveBeenCalled();
+    },
+    SPECIAL_TEST_TIMEOUT
+  );
+
+  it(
+    'opens the new document flyout with a cell-action renderer bound to the timeline scope',
+    async () => {
+      jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
+
+      render(<TestComponent />);
+      expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
+
+      fireEvent.click(screen.getAllByTestId('docTableExpandToggleColumn')[0]);
+
+      await waitFor(() => {
+        expect(flyoutApi.openDocumentFlyoutFromIndex).toHaveBeenCalled();
+      });
+
+      const { renderCellActions } = jest.mocked(flyoutApi.openDocumentFlyoutFromIndex).mock
+        .calls[0][0];
+
+      // Even when a cell passes an empty scopeId, the bound timeline scope must win so Filter
+      // In/Out target the timeline's own filter manager instead of the page behind it.
+      const cellAction = renderCellActions?.({
+        field: 'host.name',
+        value: ['host-1'],
+        scopeId: '',
+        children: null,
+      }) as React.ReactElement;
+
+      expect(cellAction.props.metadata).toEqual({ scopeId: TimelineId.test });
+      expect(cellAction.props.sourcererScopeId).toEqual(PageScope.timeline);
     },
     SPECIAL_TEST_TIMEOUT
   );

@@ -5,24 +5,23 @@
  * 2.0.
  */
 
-import { spaceTest, tags } from '@kbn/scout';
+import { spaceTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import {
   applyLensInlineEditorAndWaitClosed,
   convertToEsqlViaModal,
-  createDashboardWithPanelId,
   openInlineEditorAndWaitVisible,
   testData,
 } from '../fixtures';
 
 spaceTest.describe(
   'Lens metric trendline conversion to ES|QL',
-  { tag: tags.stateful.classic },
+  { tag: '@local-stateful-classic' },
   () => {
     let dashboardId: string;
     let panelId: string;
 
-    spaceTest.beforeAll(async ({ scoutSpace, apiServices, kbnClient }) => {
+    spaceTest.beforeAll(async ({ scoutSpace, apiServices }) => {
       await apiServices.core.settings({
         'feature_flags.overrides': {
           'lens.enable_esql_conversion': true,
@@ -66,7 +65,7 @@ spaceTest.describe(
         ],
       };
 
-      const result = await createDashboardWithPanelId(kbnClient, body, scoutSpace.id);
+      const result = await apiServices.dashboard.createWithPanelId(body, scoutSpace.id);
       dashboardId = result.dashboardId;
       panelId = result.panelId;
     });

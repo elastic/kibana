@@ -49,6 +49,12 @@ export const AttackDiscoveryUpsellingPageLazy = lazy(() =>
   }))
 );
 
+export const AttacksUpsellingPageLazy = lazy(() =>
+  import('./pages/attacks').then(({ AttacksUpsellingPageESS }) => ({
+    default: AttacksUpsellingPageESS,
+  }))
+);
+
 export const AIValueUpsellingPageLazy = withSuspenseUpsell(
   lazy(() =>
     import('./pages/ai_value').then(({ AIValueUpsellingPageESS }) => ({

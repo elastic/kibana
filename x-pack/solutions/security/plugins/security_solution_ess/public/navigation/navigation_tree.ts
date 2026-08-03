@@ -16,6 +16,7 @@ import { defaultNavigationTree } from '@kbn/security-solution-navigation/navigat
 import { STACK_MANAGEMENT_NAV_ID, DATA_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-management';
 import { AGENT_BUILDER_NAV_AT_TOP_FLAG } from '@kbn/navigation-plugin/public';
 import { getAlertingV2ManagementNavPanel } from '@kbn/alerting-v2-utils';
+import { getWorkflowsNavPanel } from '@kbn/deeplinks-workflows';
 import { type Services } from '../common/services';
 import { SOLUTION_NAME } from './translations';
 
@@ -48,22 +49,58 @@ export const createNavigationTree = (
         link: 'inbox' as AppDeepLinkId,
         icon: 'email',
       },
+      // PND body (nodes omitted when xpack.pnd.enabled is false)
+      {
+        link: 'pnd' as AppDeepLinkId,
+        icon: 'sparkles',
+      },
+      {
+        link: 'pnd:chats' as AppDeepLinkId,
+        icon: 'comment',
+      },
       {
         link: 'discover',
         icon: 'productDiscover',
       },
       defaultNavigationTree.dashboards(),
+      {
+        link: 'pnd:alerts' as AppDeepLinkId,
+        icon: 'bell',
+      },
+      {
+        link: 'pnd:attacks' as AppDeepLinkId,
+        icon: 'warning',
+      },
+      {
+        link: 'pnd:records' as AppDeepLinkId,
+        icon: 'documents',
+      },
+      {
+        link: 'pnd:threat_hunt' as AppDeepLinkId,
+        icon: 'inspect',
+      },
+      {
+        link: 'pnd:streams' as AppDeepLinkId,
+        icon: 'aggregate',
+      },
+      {
+        link: 'pnd:watches' as AppDeepLinkId,
+        icon: 'eye',
+        getIsActive: ({ pathNameSerialized, prepend }) =>
+          pathNameSerialized.startsWith(prepend('/app/pnd/watches')),
+      },
       defaultNavigationTree.rules(),
-      services.uiSettings.get(ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING, false)
+      services.uiSettings.get(
+        ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING,
+        services.experimentalFeatures?.enableAlertsAndAttacksAlignment
+      )
         ? defaultNavigationTree.alertDetections()
         : {
             id: SecurityPageName.alerts,
             icon: 'warning',
             link: securityLink(SecurityPageName.alerts),
           },
-      {
-        link: 'workflows',
-      },
+      ...getWorkflowsNavPanel(services),
       // TODO: remove this item when agentBuilderNavAtTop is enabled by default and the Agent Builder link is always at the top of the nav
       ...(showAgentBuilder && !agentBuilderNavAtTop ? [agentBuilderLink] : []),
       {
@@ -211,7 +248,6 @@ export const createNavigationTree = (
                       link: 'cloud_connect' as const,
                     },
                   ]),
-              { link: 'monitoring' },
             ],
           },
           ...getAlertingV2ManagementNavPanel(services),

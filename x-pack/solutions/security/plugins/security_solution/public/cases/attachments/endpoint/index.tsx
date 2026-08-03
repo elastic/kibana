@@ -7,10 +7,8 @@
 
 import React, { lazy, Suspense } from 'react';
 import { EuiAvatar } from '@elastic/eui';
-import type {
-  UnifiedReferenceAttachmentType,
-  UnifiedReferenceAttachmentViewProps,
-} from '@kbn/cases-plugin/public/client/attachment_framework/types';
+import type { UnifiedReferenceAttachmentViewProps } from '@kbn/cases-plugin/public/client/attachment_framework/types';
+import { defineAttachment } from '@kbn/cases-plugin/public';
 import { SECURITY_ENDPOINT_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
 import { EndpointAttachmentPayloadSchema } from '../../../../common/cases/attachments/endpoint';
 import type { EndpointMetadata } from './types';
@@ -25,21 +23,22 @@ const getEventContent = (props: UnifiedReferenceAttachmentViewProps) => (
   </Suspense>
 );
 
-export const getEndpointUnifiedAttachment = (): UnifiedReferenceAttachmentType => ({
-  id: SECURITY_ENDPOINT_ATTACHMENT_TYPE,
-  icon: 'lockOpen',
-  displayName: ENDPOINT_DISPLAY_NAME,
-  schema: EndpointAttachmentPayloadSchema,
-  getAttachmentViewObject: (props) => {
-    const metadata = props.metadata as EndpointMetadata | undefined;
-    const iconType = metadata?.command === 'isolate' ? 'lock' : 'lockOpen';
+export const getEndpointUnifiedAttachment = () =>
+  defineAttachment({
+    id: SECURITY_ENDPOINT_ATTACHMENT_TYPE,
+    icon: 'lockOpen',
+    displayName: ENDPOINT_DISPLAY_NAME,
+    schema: EndpointAttachmentPayloadSchema,
+    getAttachmentViewObject: (props) => {
+      const metadata = props.metadata as EndpointMetadata | undefined;
+      const iconType = metadata?.command === 'isolate' ? 'lock' : 'lockOpen';
 
-    return {
-      event: getEventContent(props),
-      timelineAvatar: (
-        <EuiAvatar name="endpoint" color="subdued" iconType={iconType} aria-label={iconType} />
-      ),
-      children: LazyChildren,
-    };
-  },
-});
+      return {
+        event: getEventContent(props),
+        timelineAvatar: (
+          <EuiAvatar name="endpoint" color="subdued" iconType={iconType} aria-label={iconType} />
+        ),
+        children: LazyChildren,
+      };
+    },
+  });

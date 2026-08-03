@@ -600,7 +600,7 @@ describe('When calling package policy', () => {
         });
 
         await expect(routeHandler(context, getUpdateKibanaRequest(), response)).rejects.toThrow(
-          /To update agentless package policies.*Offending package policy: 1\./
+          /To update managed integrations.*Offending ID: 1\./
         );
         expect(packagePolicyServiceMock.update).not.toHaveBeenCalled();
       });
@@ -612,7 +612,7 @@ describe('When calling package policy', () => {
             getUpdateKibanaRequest({ supports_agentless: true } as any),
             response
           )
-        ).rejects.toThrow(/To update agentless package policies/);
+        ).rejects.toThrow(/To update managed integrations/);
         expect(packagePolicyServiceMock.update).not.toHaveBeenCalled();
       });
 
@@ -628,7 +628,7 @@ describe('When calling package policy', () => {
             response
           )
         ).rejects.toThrow(
-          /To add integrations to an agentless agent policy.*Agentless agent policies: agentless\./
+          /To add integrations to a managed integration.*Offending IDs: agentless\./
         );
         expect(packagePolicyServiceMock.update).not.toHaveBeenCalled();
       });
@@ -640,7 +640,7 @@ describe('When calling package policy', () => {
 
         await expect(
           routeHandler(context, getUpdateKibanaRequest({ policy_id: 'agentless' } as any), response)
-        ).rejects.toThrow(/To add integrations to an agentless agent policy/);
+        ).rejects.toThrow(/To add integrations to a managed integration/);
         expect(packagePolicyServiceMock.update).not.toHaveBeenCalled();
       });
 
@@ -650,7 +650,7 @@ describe('When calling package policy', () => {
         ]);
 
         await expect(routeHandler(context, getUpdateKibanaRequest(), response)).rejects.toThrow(
-          /To update agentless package policies.*Offending package policy: 1\./
+          /To update managed integrations.*Offending ID: 1\./
         );
         expect(packagePolicyServiceMock.update).not.toHaveBeenCalled();
       });
@@ -877,7 +877,7 @@ describe('When calling package policy', () => {
       });
 
       await expect(createPackagePolicyHandler(context, request, response)).rejects.toThrow(
-        /To create agentless package policies, use the agentless policies API./
+        /To create managed integrations, use the managed integrations API./
       );
     });
 
@@ -928,7 +928,7 @@ describe('When calling package policy', () => {
         });
 
         await expect(createPackagePolicyHandler(context, request, response)).rejects.toThrow(
-          /only supports agentless deployment/
+          /can only be used as a managed integration/
         );
         // The rejection happens before anything is installed or created, so the
         // catch-block rollback must not run — even when a concurrent request has
@@ -949,7 +949,7 @@ describe('When calling package policy', () => {
         });
 
         await expect(createPackagePolicyHandler(context, request, response)).rejects.toThrow(
-          /To add integrations to an agentless agent policy/
+          /To add integrations to a managed integration/
         );
       });
 
@@ -1196,7 +1196,7 @@ describe('When calling package policy', () => {
 
         // Only the offending id is named, so a batch owner can self-remediate.
         await expect(upgradePackagePolicyHandler(context, request, response)).rejects.toThrow(
-          /To upgrade agentless package policies.*Agentless package policies in this request: 2\./
+          /To upgrade managed integrations.*Offending IDs: 2\./
         );
         expect(packagePolicyServiceMock.bulkUpgrade).not.toHaveBeenCalled();
       });
@@ -1216,7 +1216,7 @@ describe('When calling package policy', () => {
         });
 
         await expect(upgradePackagePolicyHandler(context, request, response)).rejects.toThrow(
-          /Agentless package policies in this request: 1\./
+          /Offending IDs: 1\./
         );
         expect(packagePolicyServiceMock.bulkUpgrade).not.toHaveBeenCalled();
       });
@@ -1382,7 +1382,7 @@ describe('When calling package policy', () => {
       });
 
       await expect(dryRunUpgradePackagePolicyHandler(context, request, response)).rejects.toThrow(
-        /To upgrade agentless package policies/
+        /To upgrade managed integrations/
       );
       expect(packagePolicyServiceMock.getUpgradeDryRunDiff).not.toHaveBeenCalled();
     });

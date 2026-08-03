@@ -12,13 +12,12 @@ import { useHasVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use
 import { TableId } from '@kbn/securitysolution-data-table';
 import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { EuiFlyoutFooter, EuiPanel, EuiSpacer } from '@elastic/eui';
+import { useAlertTimeRange } from '../../../entity_analytics/hooks/use_alert_time_range';
 import { useAssetCriticalityPrivileges } from '../../../entity_analytics/components/asset_criticality/use_asset_criticality';
 import { useUpdateAssetCriticality } from '../../../entity_analytics/api/hooks/use_update_asset_criticality';
 import { buildEuidCspPreviewOptions } from '../../../cloud_security_posture/utils/build_euid_csp_preview_options';
 import { useNonClosedAlerts } from '../../../cloud_security_posture/hooks/use_non_closed_alerts';
 import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from '../../../overview/components/detection_response/alerts_by_status/types';
-import { useRefetchQueryById } from '../../../entity_analytics/api/hooks/use_refetch_query_by_id';
-import type { Refetch } from '../../../common/types';
 import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score';
 import { useEntityRiskScoreRecalculation } from '../../../entity_analytics/api/hooks/use_entity_risk_score_recalculation';
 import { useQueryInspector } from '../../../common/components/page/manage_query';
@@ -55,7 +54,6 @@ import { useEntityPanelTabs, TABLE_TAB_ID } from '../shared/hooks/use_entity_pan
 import { EntityPanelHeaderTabs } from '../shared/components/entity_panel_tabs';
 import { EntityStoreTableTab } from '../shared/components/entity_store_table_tab';
 import { EntitySummaryGrid } from '../shared/components/entity_summary_grid';
-import { ENTITY_ANALYTICS_TABLE_ID } from '../../../entity_analytics/components/home/constants';
 
 export { HOST_PANEL_RISK_SCORE_QUERY_ID, HOST_PANEL_OBSERVED_HOST_QUERY_ID };
 
@@ -96,7 +94,7 @@ export const HostPanel = memo(function HostPanel({
   const euidApi = useEntityStoreEuidApi();
   const assetInventoryEnabled = uiSettings.get(ENABLE_ASSET_INVENTORY_SETTING, true);
   const safeContextID = contextID ?? scopeId ?? 'host-panel';
-  const { to, from, setQuery, deleteQuery, isInitializing } = useGlobalTime();
+  const { setQuery, deleteQuery, isInitializing } = useGlobalTime();
 
   const hostStoreIdentityFields = useMemo(
     () => (!entityId && hostName ? { 'host.name': hostName } : undefined),
@@ -138,12 +136,6 @@ export const HostPanel = memo(function HostPanel({
   const { data: hostRisk } = riskScoreState;
   const hostRiskData = hostRisk && hostRisk.length > 0 ? hostRisk[0] : undefined;
 
-  const refetchEntitiesTable = useRefetchQueryById(ENTITY_ANALYTICS_TABLE_ID);
-
-  const onRecalculation = useCallback(() => {
-    (refetchEntitiesTable as Refetch | null)?.();
-  }, [refetchEntitiesTable]);
-
   const { entityRiskScores, recalculatingScore, calculateEntityRiskScore } =
     useEntityRiskScoreRecalculation({
       entityType: EntityType.host,
@@ -152,13 +144,11 @@ export const HostPanel = memo(function HostPanel({
       entityStoreV2Enabled: true,
       entityFromStoreResult,
       riskScoreState,
-      onRecalculation,
     });
 
   const onAssetCriticalityChanged = useCallback(() => {
-    (refetchEntitiesTable as Refetch | null)?.();
     calculateEntityRiskScore();
-  }, [calculateEntityRiskScore, refetchEntitiesTable]);
+  }, [calculateEntityRiskScore]);
 
   const { updateAssetCriticalityLevel } = useUpdateAssetCriticality('host', {
     onSuccess: calculateEntityRiskScore,
@@ -178,12 +168,14 @@ export const HostPanel = memo(function HostPanel({
         hostName != null && hostName !== '' ? { 'host.name': hostName } : undefined,
     })
   );
+
+  const { from: alertFrom, to: alertTo } = useAlertTimeRange(scopeId);
   const { hasNonClosedAlerts } = useNonClosedAlerts({
     identityFields: documentEntityIdentifiers,
     entityType: EntityType.host,
     entityRecord: entityFromStoreResult.entityRecord,
-    to,
-    from,
+    to: alertTo,
+    from: alertFrom,
     queryId: `${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}HOST_NAME_RIGHT`,
   });
 
@@ -330,6 +322,7 @@ export const HostPanel = memo(function HostPanel({
             refetchEntityRecord={entityFromStoreResult.refetch}
             skipRiskAndCriticality={noEntityInStore}
             entityStoreEntityId={entityStoreEntityId}
+            riskScoreQueryId={HOST_PANEL_RISK_SCORE_QUERY_ID}
           />
         )}
       </FlyoutBody>
@@ -344,7 +337,11 @@ export const HostPanel = memo(function HostPanel({
       {!isPreviewMode && assetInventoryEnabled && (
         <EuiFlyoutFooter>
           <EuiPanel color="transparent">
-            <Footer identityFields={documentEntityIdentifiers} entity={entityFromStore} />
+            <Footer
+              hostName={hostName}
+              identityFields={documentEntityIdentifiers}
+              entity={entityFromStore}
+            />
           </EuiPanel>
         </EuiFlyoutFooter>
       )}

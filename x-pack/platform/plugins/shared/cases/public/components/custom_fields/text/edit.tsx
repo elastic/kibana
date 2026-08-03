@@ -6,7 +6,7 @@
  */
 
 import { isEmpty } from 'lodash';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -39,6 +39,8 @@ import {
   POPULATED_WITH_DEFAULT,
 } from '../translations';
 import { getTextFieldConfig } from './config';
+import { InlineFieldActions } from '../../templates_v2/field_types/controls/inline_field_actions';
+import { OptionalFieldLabel } from '../../optional_field_label';
 
 interface FormState {
   value: string;
@@ -49,6 +51,8 @@ interface FormState {
 interface FormWrapper {
   initialValue: string;
   isLoading: boolean;
+  canUpdate?: boolean;
+  showFormLabel?: boolean;
   customFieldConfiguration: CasesConfigurationUICustomField;
   onChange: (state: FormState) => void;
 }
@@ -57,14 +61,18 @@ const FormWrapperComponent: React.FC<FormWrapper> = ({
   initialValue,
   customFieldConfiguration,
   isLoading,
+  canUpdate = true,
+  showFormLabel = false,
   onChange,
 }) => {
+  const defaultValue =
+    customFieldConfiguration?.defaultValue != null && isEmpty(initialValue)
+      ? String(customFieldConfiguration.defaultValue)
+      : initialValue;
+
   const { form } = useForm<{ value: string }>({
     defaultValue: {
-      value:
-        customFieldConfiguration?.defaultValue != null && isEmpty(initialValue)
-          ? String(customFieldConfiguration.defaultValue)
-          : initialValue,
+      value: defaultValue,
     },
   });
   const [{ value }] = useFormData({ form });
@@ -90,11 +98,24 @@ const FormWrapperComponent: React.FC<FormWrapper> = ({
         path="value"
         config={formFieldConfig}
         component={TextField}
+        label={showFormLabel ? customFieldConfiguration.label : undefined}
         helpText={populatedWithDefault && POPULATED_WITH_DEFAULT}
         componentProps={{
+          labelAppend: showFormLabel ? (
+            !customFieldConfiguration.required || isLoading ? (
+              <>
+                {!customFieldConfiguration.required ? OptionalFieldLabel : null}
+                {isLoading ? (
+                  <EuiLoadingSpinner
+                    data-test-subj={`case-text-custom-field-loading-${customFieldConfiguration.key}`}
+                  />
+                ) : null}
+              </>
+            ) : undefined
+          ) : undefined,
           euiFieldProps: {
             fullWidth: true,
-            disabled: isLoading,
+            disabled: isLoading || (showFormLabel && !canUpdate),
             isLoading,
             'data-test-subj': `case-text-custom-field-form-field-${customFieldConfiguration.key}`,
           },
@@ -106,7 +127,7 @@ const FormWrapperComponent: React.FC<FormWrapper> = ({
 
 FormWrapperComponent.displayName = 'FormWrapper';
 
-const EditComponent: CustomFieldType<CaseCustomFieldText>['Edit'] = ({
+const ClassicEdit: CustomFieldType<CaseCustomFieldText>['Edit'] = ({
   customField,
   customFieldConfiguration,
   onSubmit,
@@ -239,6 +260,96 @@ const EditComponent: CustomFieldType<CaseCustomFieldText>['Edit'] = ({
       </EuiFlexGroup>
     </>
   );
+};
+
+ClassicEdit.displayName = 'ClassicEdit';
+
+const InlineEdit: CustomFieldType<CaseCustomFieldText>['Edit'] = ({
+  customField,
+  customFieldConfiguration,
+  onSubmit,
+  isLoading,
+  canUpdate,
+}) => {
+  const initialValue = customField?.value ?? '';
+  const defaultValueAsString =
+    customFieldConfiguration.defaultValue != null
+      ? String(customFieldConfiguration.defaultValue)
+      : undefined;
+  const effectiveInitialValue =
+    isEmpty(initialValue) && defaultValueAsString != null ? defaultValueAsString : initialValue;
+  const [formResetKey, setFormResetKey] = useState(0);
+  const [formState, setFormState] = useState<FormState>({
+    isValid: undefined,
+    submit: async () => ({ isValid: false, data: { value: '' } }),
+    value: effectiveInitialValue,
+  });
+
+  const onCancel = useCallback(() => {
+    setFormResetKey((key) => key + 1);
+  }, []);
+
+  const onSubmitCustomField = useCallback(async () => {
+    const { isValid, data } = await formState.submit();
+
+    if (isValid) {
+      const value = isEmpty(data.value) ? null : data.value;
+
+      onSubmit({
+        ...customField,
+        key: customField?.key ?? customFieldConfiguration.key,
+        type: CustomFieldTypes.TEXT,
+        value,
+      });
+    }
+  }, [customField, customFieldConfiguration.key, formState, onSubmit]);
+
+  const hasPendingChange = formState.value !== effectiveInitialValue;
+  const isTextFieldValid =
+    formState.isValid ||
+    (formState.value === customFieldConfiguration.defaultValue && !initialValue);
+
+  return (
+    <EuiFlexGroup
+      gutterSize="xs"
+      data-test-subj={`case-text-custom-field-${customFieldConfiguration.key}`}
+      direction="column"
+    >
+      <EuiFlexItem>
+        <FormWrapperComponent
+          key={formResetKey}
+          initialValue={initialValue}
+          isLoading={isLoading}
+          canUpdate={canUpdate}
+          showFormLabel
+          onChange={setFormState}
+          customFieldConfiguration={customFieldConfiguration}
+        />
+      </EuiFlexItem>
+      {hasPendingChange && canUpdate && !isLoading && (
+        <InlineFieldActions
+          name={customFieldConfiguration.key}
+          onConfirm={onSubmitCustomField}
+          onCancel={onCancel}
+          isLoading={isLoading}
+          isDisabled={!isTextFieldValid}
+        />
+      )}
+    </EuiFlexGroup>
+  );
+};
+
+InlineEdit.displayName = 'InlineEdit';
+
+const EditComponent: CustomFieldType<CaseCustomFieldText>['Edit'] = ({
+  editVariant = 'classic',
+  ...props
+}) => {
+  if (editVariant === 'inline') {
+    return <InlineEdit {...props} />;
+  }
+
+  return <ClassicEdit {...props} />;
 };
 
 EditComponent.displayName = 'Edit';

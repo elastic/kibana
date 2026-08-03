@@ -397,7 +397,7 @@ describe('registerGenerateRoute', () => {
   });
 
   describe('workflow_config validation', () => {
-    it('returns bad request when no alert retrieval toggle is enabled', async () => {
+    it('returns bad request when no retrieval toggle is enabled', async () => {
       mockRequest.body = {
         alerts_index_pattern: '.alerts-security.alerts-default',
         api_config: {
@@ -406,11 +406,9 @@ describe('registerGenerateRoute', () => {
         },
         type: 'attack_discovery',
         workflow_config: {
-          alert_retrieval_workflow_ids: [],
           alert_retrieval_workflows_enabled: false,
           default_retrieval_enabled: false,
           skill_enabled: false,
-          validation_workflow_id: 'default',
         },
       };
 
@@ -514,6 +512,8 @@ describe('registerGenerateRoute', () => {
         workflow_config: {
           alert_retrieval_workflow_ids: ['workflow-1', 'workflow-2'],
           alert_retrieval_workflows_enabled: true,
+          default_retrieval_enabled: false,
+          skill_enabled: false,
           validation_workflow_id: 'custom-validation',
         },
       };

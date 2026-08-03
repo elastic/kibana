@@ -138,12 +138,18 @@ export const runAgent = async ({
   const agentRegistry = await agentsService.getRegistry({ request });
   const agent = await agentRegistry.get(agentId, { access: 'use' });
 
-  // Single merge point for runtime overrides — consumed by both the agent handler
-  // (prompt construction, tool selection) and tool handlers (via ToolHandlerContext).
-  const effectiveConfiguration = {
-    ...agent.configuration,
-    ...(agentParams.configurationOverrides || {}),
+  // Layer runtime overrides onto the agent's own config first, then merge with the type base.
+  const agentWithOverrides = {
+    ...agent,
+    configuration: {
+      ...agent.configuration,
+      ...(agentParams.configurationOverrides || {}),
+    },
   };
+  const effectiveConfiguration = await agentsService.resolveAgentConfiguration({
+    agent: agentWithOverrides,
+    request,
+  });
   manager.deps.agentConfiguration = effectiveConfiguration;
 
   const chatModel = (await manager.deps.modelProvider.getDefaultModel()).chatModel;

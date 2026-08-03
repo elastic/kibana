@@ -133,8 +133,12 @@ EOF
     echo "KBN_EVALS was set - exposing evals connectors and export credentials"
 
     KBN_EVALS_CONFIG_JSON="$(vault_get kbn-evals config | base64 -d)"
-    # Validate config shape (safe; does not print secrets)
-    node x-pack/platform/packages/shared/kbn-evals/scripts/vault/validate_config.js --stdin <<<"$KBN_EVALS_CONFIG_JSON" >/dev/null
+    # Validate config shape. Guarded because lightweight sparse-checkout steps (pipeline upload, Post-Build)
+    #don't fetch the validator; eval steps run on a full checkout.
+    kbn_evals_validator="x-pack/platform/packages/shared/kbn-evals/scripts/vault/validate_config.js"
+    if [[ -f "$kbn_evals_validator" ]]; then
+      node "$kbn_evals_validator" --stdin <<<"$KBN_EVALS_CONFIG_JSON" >/dev/null
+    fi
 
     # Eval suites require this for the LLM-as-a-judge connector selection
     export EVALUATION_CONNECTOR_ID="${EVALUATION_CONNECTOR_ID:-"$(jq -r '.evaluationConnectorId // empty' <<<"$KBN_EVALS_CONFIG_JSON")"}"

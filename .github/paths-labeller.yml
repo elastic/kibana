@@ -32,10 +32,6 @@
 - 'Team:Fleet':
     - 'x-pack/platform/plugins/shared/fleet/**/*.*'
     - 'x-pack/platform/test/fleet_api_integration/**/*.*'
-- 'Team:obs-ai':
-    - 'x-pack/platform/plugins/shared/observability_ai_assistant/**/*.*'
-    - 'x-pack/plugins/observability_solution/observability_ai_assistant_*/**/*.*'
-    - 'x-pack/solutions/observability/test/observability_ai_assistant_functional/**/*.*'
 - 'ci:project-deploy-observability':
     - 'packages/kbn-apm-*/**/*.*'
     - 'src/platform/plugins/shared/ai_assistant_management/**/*.*'
@@ -48,3 +44,16 @@
     - 'x-pack/solutions/observability/plugins/serverless_observability/**/*.*'
     - 'x-pack/solutions/observability/test/apm_api_integration/**/*.*'
     - 'x-pack/solutions/observability/test/observability_*/**/*.*'
+- 'evals:smoke-tests':
+    - 'x-pack/platform/packages/shared/kbn-evals/**/*.*'
+    - 'x-pack/platform/packages/shared/kbn-evals-common/**/*.*'
+    - 'x-pack/platform/packages/shared/kbn-evals-extensions/**/*.*'
+    - 'x-pack/platform/packages/shared/kbn-evals-phoenix-executor/**/*.*'
+    - 'x-pack/platform/packages/shared/kbn-evals-suite-smoke-tests/**/*.*'
+    - 'x-pack/platform/plugins/shared/evals/**/*.*'
+    - 'x-pack/platform/packages/shared/llm-trace-waterfall/**/*.*'
+    - 'x-pack/platform/packages/shared/kbn-es-snapshot-loader/**/*.*'
+    - 'src/platform/packages/shared/kbn-edot-collector/**/*.*'
+    - 'src/platform/packages/shared/kbn-tracing/**/*.*'
+    - '.buildkite/pipelines/evals/**/*.*'
+    - '.buildkite/scripts/steps/evals/**/*.*'

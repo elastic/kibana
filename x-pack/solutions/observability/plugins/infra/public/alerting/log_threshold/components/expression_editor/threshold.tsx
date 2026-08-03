@@ -84,7 +84,12 @@ export const Threshold: React.FC<Props> = ({ comparator, value, updateThreshold,
             <EuiPopoverTitle id={popoverTitleId}>{popoverTitle}</EuiPopoverTitle>
             <EuiFlexGroup>
               <EuiFlexItem grow={false}>
-                <EuiFormRow>
+                <EuiFormRow
+                  aria-label={i18n.translate(
+                    'xpack.infra.logs.alertFlyout.threshold.comparatorAriaLabel',
+                    { defaultMessage: 'Threshold comparator' }
+                  )}
+                >
                   <EuiSelect
                     data-test-subj="infraThresholdSelect"
                     compressed

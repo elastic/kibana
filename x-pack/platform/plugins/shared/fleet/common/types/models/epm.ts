@@ -769,6 +769,7 @@ export interface FailedAttempt {
 
 export interface InstallFailedAttempt extends FailedAttempt {
   target_version: string;
+  missing_assets?: Array<{ id: string; type: string }>;
 }
 
 export interface CustomAssetFailedAttempt extends FailedAttempt {
@@ -793,6 +794,7 @@ export enum INSTALL_STATES {
   SAVE_ARCHIVE_ENTRIES = 'save_archive_entries_from_assets_map',
   SAVE_KNOWLEDGE_BASE = 'save_knowledge_base',
   RESOLVE_KIBANA_PROMISE = 'resolve_kibana_promise',
+  VERIFY_ASSETS = 'verify_assets',
   UPDATE_SO = 'update_so',
 }
 type StatesKeys = keyof typeof INSTALL_STATES;
@@ -829,6 +831,8 @@ export interface Installation {
   install_started_at: string;
   install_source: InstallSource;
   installed_kibana_space_id?: string;
+  /** Kibana version running at the time Kibana assets for this package were last installed/updated */
+  installed_kibana_version?: string;
   keep_policies_up_to_date?: boolean;
   install_format_schema_version?: string;
   verification_status: PackageVerificationStatus;

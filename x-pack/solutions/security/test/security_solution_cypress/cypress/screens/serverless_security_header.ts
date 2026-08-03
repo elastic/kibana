@@ -20,12 +20,12 @@ export const EXPLORE_PANEL_BTN = '[data-test-subj*="nav-item-id-securityGroup:ex
 export const RULES_PANEL_BTN = '[data-test-subj*="nav-item-id-securityGroup:rules"]';
 export const ASSETS_PANEL_BTN = '[data-test-subj*="nav-item-id-securityGroup:assets"]';
 
+export const DETECTIONS_PANEL_BTN = '[data-test-subj*="nav-item-id-securityGroup:alertDetections"]';
+
 // main direct links
 export const DISCOVER = '[data-test-subj*="nav-item-deepLinkId-discover"]';
 
 export const DASHBOARDS = '[data-test-subj*="nav-item-deepLinkId-securitySolutionUI:dashboards"]';
-
-export const ALERTS = '[data-test-subj*="nav-item-deepLinkId-securitySolutionUI:alerts"]';
 
 export const CSP_FINDINGS =
   '[data-test-subj*="nav-item-deepLinkId-securitySolutionUI:cloud_security_posture-findings"]';
@@ -60,6 +60,7 @@ export const NETWORK = '[data-test-subj~="nav-item-id-network"]';
 
 export const USERS = '[data-test-subj~="nav-item-id-users"]';
 
+export const ALERTS = '[data-test-subj~="nav-item-id-alerts"]';
 export const RULES = '[data-test-subj~="nav-item-id-rules"]';
 
 export const EXCEPTIONS = '[data-test-subj~="nav-item-id-exceptions"]';
@@ -75,6 +76,10 @@ export const TRANSLATED_RULES_PAGE = getDataTestSubjectSelectorMatch(
 export const openNavigationPanelFor = (pageName: string) => {
   let panel;
   switch (pageName) {
+    case ALERTS: {
+      panel = DETECTIONS_PANEL_BTN;
+      break;
+    }
     case RULES:
     case CSP_BENCHMARKS:
     case EXCEPTIONS:

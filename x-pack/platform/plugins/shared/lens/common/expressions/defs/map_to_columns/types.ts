@@ -20,6 +20,8 @@ export type OriginalColumn = {
 } & (
   | { operationType: 'date_histogram'; sourceField: string; interval: number }
   | { operationType: string; sourceField?: string; interval: never }
+  // text-based ES|QL columns
+  | { operationType?: undefined; sourceField?: string }
 );
 
 export type MapToColumnsExpressionFunction = ExpressionFunctionDefinition<

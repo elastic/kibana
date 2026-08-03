@@ -158,6 +158,23 @@ describe('buildWorkflowContext', () => {
       expect(context.execution.usage).toBeUndefined();
     });
 
+    it('should include workflow document version in workflow context when present on execution', () => {
+      const execution: EsWorkflowExecution = {
+        ...baseExecution,
+        version: 7,
+      };
+
+      const context = buildWorkflowContext(execution, undefined, dependencies);
+
+      expect(context.workflow.version).toBe(7);
+    });
+
+    it('should omit workflow document version from workflow context when absent on execution', () => {
+      const context = buildWorkflowContext(baseExecution, undefined, dependencies);
+
+      expect(context.workflow).not.toHaveProperty('version');
+    });
+
     it('should not expose context.hitl links from persisted execution context', () => {
       const execution: EsWorkflowExecution = {
         ...baseExecution,

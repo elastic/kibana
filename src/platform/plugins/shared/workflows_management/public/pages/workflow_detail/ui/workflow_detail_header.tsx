@@ -7,13 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiPageTemplate, useIsWithinBreakpoints } from '@elastic/eui';
+import { EuiPageTemplate } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { selectUnit } from '@formatjs/intl-utils';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { useLocation, useParams } from 'react-router-dom';
-import type { AppHeaderBadge } from '@kbn/app-header';
+import useObservable from 'react-use/lib/useObservable';
+import type { AppHeaderBack, AppHeaderBadge } from '@kbn/app-header';
 import { AppHeader } from '@kbn/app-header';
 import { ChangeHistoryModalContext } from '@kbn/change-history-ui';
 import type { AppMenuConfig, AppMenuItemType } from '@kbn/core-chrome-app-menu-components';
@@ -22,8 +23,6 @@ import { i18n } from '@kbn/i18n';
 import { WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/workflows';
 import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { useRunWorkflowWithConfirmation } from './use_run_workflow_with_confirmation';
-import { WORKFLOW_DETAIL_INLINE_TOOLBAR_BREAKPOINTS } from './workflow_detail_header_layout';
-import { WorkflowDetailHeaderToolbar } from './workflow_detail_header_toolbar';
 import { PLUGIN_ID, WORKFLOWS_DOCUMENTATION_URL } from '../../../../common';
 import { useSaveYaml } from '../../../entities/workflows/model/use_save_yaml';
 import { useUpdateWorkflow } from '../../../entities/workflows/model/use_update_workflow';
@@ -41,6 +40,7 @@ import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 import { useWorkflowsExperimentalUiSetting } from '../../../hooks/use_workflows_experimental_ui_setting';
 import { getSaveWorkflowTooltipContent, getTestRunTooltipContent } from '../../../shared/ui';
 import {
+  getReturnDestinationFromSearch,
   navigateToWorkflowsList,
   type WorkflowDetailRouteState,
 } from '../../../shared/utils/workflow_navigation';
@@ -67,6 +67,45 @@ const Translations = {
   }),
 };
 
+const useWorkflowDetailHeaderBack = (): AppHeaderBack => {
+  const { application } = useKibana().services;
+  const location = useLocation<WorkflowDetailRouteState | undefined>();
+  const appList = useObservable(application.applications$);
+
+  // Honor `returnApp`/`returnPath` query params when the app is known.
+  return useMemo<AppHeaderBack>(() => {
+    const returnDestination = getReturnDestinationFromSearch(location.search);
+    const returnApp = returnDestination && appList?.get(returnDestination.returnAppId);
+
+    if (returnDestination && returnApp) {
+      return {
+        href: application.getUrlForApp(returnDestination.returnAppId, {
+          path: returnDestination.returnPath,
+        }),
+        label: returnApp.title,
+        onClick: (event) => {
+          event.preventDefault();
+          application.navigateToApp(
+            returnDestination.returnAppId,
+            returnDestination.returnPath ? { path: returnDestination.returnPath } : undefined
+          );
+        },
+      };
+    }
+
+    return {
+      href: `/app/${PLUGIN_ID}`,
+      label: i18n.translate('workflows.workflowDetailHeader.backLinkLabel', {
+        defaultMessage: 'Workflows',
+      }),
+      onClick: (event) => {
+        event.preventDefault();
+        void navigateToWorkflowsList(application, location.state);
+      },
+    };
+  }, [application, appList, location.search, location.state]);
+};
+
 export interface WorkflowDetailHeaderProps {
   isLoading: boolean;
   // TODO: manage it in a workflow state context
@@ -77,8 +116,7 @@ export interface WorkflowDetailHeaderProps {
 export const WorkflowDetailHeader = React.memo(
   ({ isLoading, highlightDiff, setHighlightDiff }: WorkflowDetailHeaderProps) => {
     const { id: workflowId } = useParams<{ id?: string }>();
-    const { application } = useKibana().services;
-    const location = useLocation<WorkflowDetailRouteState | undefined>();
+    const back = useWorkflowDetailHeaderBack();
     const styles = useMemoCss(componentStyles);
     const dispatch = useDispatch();
     const {
@@ -219,7 +257,7 @@ export const WorkflowDetailHeader = React.memo(
     const executionsToggleItem = useMemo<AppMenuItemType>(
       () => ({
         id: 'toggleExecutions',
-        order: 1,
+        order: 0,
         label: i18n.translate('workflows.workflowDetailHeader.executionsButton', {
           defaultMessage: 'Executions',
         }),
@@ -247,19 +285,15 @@ export const WorkflowDetailHeader = React.memo(
       changeHistoryModal?.openModal();
     }, [changeHistoryModal]);
     const showHistoryButton = Boolean(canReadWorkflow && !isExecutionsTab && changeHistoryModal);
-    const isAppMenuSwitchInline = useIsWithinBreakpoints([
-      ...WORKFLOW_DETAIL_INLINE_TOOLBAR_BREAKPOINTS,
-    ]);
 
     const historyItem = useMemo<AppMenuItemType | undefined>(() => {
-      if (!showHistoryButton || isAppMenuSwitchInline) {
+      if (!showHistoryButton) {
         return undefined;
       }
 
       return {
         id: 'workflowHistory',
-        order: 0,
-        overflow: true,
+        order: 2,
         label: i18n.translate('workflows.workflowDetailHeader.historyButton', {
           defaultMessage: 'History',
         }),
@@ -267,7 +301,7 @@ export const WorkflowDetailHeader = React.memo(
         run: openHistoryModal,
         testId: 'workflowDetailHistoryButton',
       };
-    }, [showHistoryButton, isAppMenuSwitchInline, openHistoryModal]);
+    }, [showHistoryButton, openHistoryModal]);
 
     const enabledSwitchConfig = useMemo<NonNullable<AppMenuConfig['switch']> | undefined>(() => {
       if (!workflowId) {
@@ -298,20 +332,6 @@ export const WorkflowDetailHeader = React.memo(
       hasUnsavedChanges,
       enabledSwitchTooltipContent,
     ]);
-
-    const titleAppend = useMemo(() => {
-      if (!enabledSwitchConfig || !isAppMenuSwitchInline) {
-        return undefined;
-      }
-
-      return (
-        <WorkflowDetailHeaderToolbar
-          switchConfig={enabledSwitchConfig}
-          showHistoryButton={showHistoryButton}
-          onOpenHistory={openHistoryModal}
-        />
-      );
-    }, [enabledSwitchConfig, isAppMenuSwitchInline, showHistoryButton, openHistoryModal]);
 
     const { handleRunClick, runConfirmationModal } = useRunWorkflowWithConfirmation(openTestModal);
 
@@ -373,7 +393,7 @@ export const WorkflowDetailHeader = React.memo(
       if (!isVisualEditorEnabled) {
         items.push({
           id: 'runWorkflow',
-          order: 2,
+          order: 1,
           label: Translations.runWorkflow,
           iconType: 'play',
           run: handleRunClick,
@@ -407,7 +427,7 @@ export const WorkflowDetailHeader = React.memo(
           tooltipContent: saveWorkflowTooltipContent ?? undefined,
           testId: 'saveWorkflowHeaderButton',
         },
-        switch: enabledSwitchConfig && !isAppMenuSwitchInline ? enabledSwitchConfig : undefined,
+        switch: enabledSwitchConfig,
         items,
       };
     }, [
@@ -415,7 +435,6 @@ export const WorkflowDetailHeader = React.memo(
       workflowId,
       executionsToggleItem,
       historyItem,
-      isAppMenuSwitchInline,
       enabledSwitchConfig,
       isVisualEditorEnabled,
       handleSaveWorkflow,
@@ -437,18 +456,8 @@ export const WorkflowDetailHeader = React.memo(
         <EuiPageTemplate offset={0} minHeight={0} grow={false} css={styles.pageTemplate}>
           <AppHeader
             title={name}
-            back={{
-              href: `/app/${PLUGIN_ID}`,
-              label: i18n.translate('workflows.workflowDetailHeader.backLinkLabel', {
-                defaultMessage: 'Workflows',
-              }),
-              onClick: (event) => {
-                event.preventDefault();
-                void navigateToWorkflowsList(application, location.state);
-              },
-            }}
+            back={back}
             badges={badges}
-            titleAppend={titleAppend}
             menu={appMenu}
             docLink={WORKFLOWS_DOCUMENTATION_URL}
             showAddIntegrations

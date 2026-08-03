@@ -5,27 +5,42 @@
  * 2.0.
  */
 
-import type { Discovery, Detection } from '@kbn/significant-events-schema';
+import type { Discovery, Detection, SignalEntry } from '@kbn/significant-events-schema';
 import { groupingCorrectnessEvaluator } from './grouping_correctness';
 
+// Only `rule_uuid` matters to this evaluator (grouping is judged by rule_uuid membership per
+// discovery) — cast past the full `Discovery['detections']` shape rather than filling in
+// unused required fields, matching the `evaluate()` helper's casts below.
 const buildDiscovery = (...ruleUuids: string[]): Partial<Discovery> => ({
-  detections: ruleUuids.map((rule_uuid) => ({ kind: 'detection', rule_uuid })),
+  signals: ruleUuids.map(
+    (rule_uuid): SignalEntry => ({
+      type: 'detection',
+      stream_name: 'logs',
+      confirmed: true,
+      description: 'Testing: something.',
+      metadata: {
+        rule_uuid,
+        detection_id: 'detection-1',
+        change_point_type: 'spike',
+        p_value: 0.01,
+      },
+    })
+  ),
 });
 
 // The expected grouping is derived from `expected_discoveries`, so build them from the gold groups.
-// The evaluator only reads output.discoveries[].detections and expected.expected_discoveries[].detections.
+// The evaluator only reads output.discoveries[].signals and expected.expected_discoveries[].signals.
 const evaluate = (discoveries: Array<Partial<Discovery>>, expectedGroups?: string[][]) =>
   groupingCorrectnessEvaluator.evaluate({
     input: {
-      episodeSuffix: 'test',
-      detections: discoveries.flatMap((d) => d.detections ?? []) as Detection[],
+      detections: [] as Detection[],
     },
     output: { discoveries: discoveries as unknown as Discovery[], steps: [] },
     expected: {
       criteria: [],
-      expected_discoveries: expectedGroups?.map((group) => ({
-        detections: group.map((rule_uuid) => ({ kind: 'detection' as const, rule_uuid })),
-      })) as unknown as Discovery[],
+      expected_discoveries: expectedGroups?.map((group) =>
+        buildDiscovery(...group)
+      ) as unknown as Discovery[],
     },
     metadata: null,
   });
@@ -48,9 +63,32 @@ describe('groupingCorrectnessEvaluator', () => {
     expect(result.score).toBe(1);
   });
 
+  it('scores 0 when independent rules were merged', async () => {
+    const result = await evaluate([buildDiscovery('a', 'b')], [['a'], ['b']]);
+    expect(result.score).toBe(0);
+  });
+
   it('scores 0 when rules that should be grouped were split', async () => {
     const result = await evaluate([buildDiscovery('a'), buildDiscovery('b')], [['a', 'b']]);
     expect(result.score).toBe(0);
+  });
+
+  it('scores 0 when a rule is assigned to both a continuation and a new discovery', async () => {
+    const result = await evaluate([buildDiscovery('a', 'b'), buildDiscovery('b')], [['a', 'b']]);
+    expect(result.score).toBe(0);
+    expect(result.label).toBe('duplicate-rule-assignment');
+  });
+
+  it('scores 0 when an expected rule is not assigned to any discovery', async () => {
+    const result = await evaluate([buildDiscovery('a')], [['a'], ['b']]);
+    expect(result.score).toBe(0);
+    expect(result.label).toBe('incomplete-rule-assignment');
+  });
+
+  it('scores 0 when no discoveries are emitted', async () => {
+    const result = await evaluate([], [['a']]);
+    expect(result.score).toBe(0);
+    expect(result.label).toBe('missing-all-rule-assignments');
   });
 
   it('gives partial credit for a partially-correct partition', async () => {
@@ -61,6 +99,26 @@ describe('groupingCorrectnessEvaluator', () => {
     );
     // precision 1 (1/1), recall 1/3 → F1 = 0.5
     expect(result.score).toBeCloseTo(0.5, 5);
+  });
+
+  it('penalizes merging unrelated failure, exposure, and health groups', async () => {
+    const result = await evaluate(
+      [
+        buildDiscovery(
+          'rule-charge-failure',
+          'rule-pci-exposed',
+          'rule-card-metadata',
+          'rule-email-pii',
+          'rule-checkout-success'
+        ),
+      ],
+      [
+        ['rule-charge-failure'],
+        ['rule-pci-exposed', 'rule-card-metadata', 'rule-email-pii'],
+        ['rule-checkout-success'],
+      ]
+    );
+    expect(result.score).toBeLessThan(0.5);
   });
 
   it('is unavailable when expected and actual rule universes are disjoint (snapshot catalog mismatch)', async () => {

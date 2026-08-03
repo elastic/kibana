@@ -573,7 +573,6 @@ exports[`XYChart component it renders area 1`] = `
                 },
                 "fit": Object {
                   "area": Object {
-                    "fill": "__use__series__color__",
                     "opacity": 0.15,
                     "visible": true,
                   },
@@ -2043,7 +2042,6 @@ exports[`XYChart component it renders bar 1`] = `
                 },
                 "fit": Object {
                   "area": Object {
-                    "fill": "__use__series__color__",
                     "opacity": 0.15,
                     "visible": true,
                   },
@@ -3513,7 +3511,6 @@ exports[`XYChart component it renders horizontal bar 1`] = `
                 },
                 "fit": Object {
                   "area": Object {
-                    "fill": "__use__series__color__",
                     "opacity": 0.15,
                     "visible": true,
                   },
@@ -4985,7 +4982,6 @@ exports[`XYChart component it renders line 1`] = `
                 },
                 "fit": Object {
                   "area": Object {
-                    "fill": "__use__series__color__",
                     "opacity": 0.15,
                     "visible": true,
                   },
@@ -6455,7 +6451,6 @@ exports[`XYChart component it renders stacked area 1`] = `
                 },
                 "fit": Object {
                   "area": Object {
-                    "fill": "__use__series__color__",
                     "opacity": 0.15,
                     "visible": true,
                   },
@@ -7925,7 +7920,6 @@ exports[`XYChart component it renders stacked bar 1`] = `
                 },
                 "fit": Object {
                   "area": Object {
-                    "fill": "__use__series__color__",
                     "opacity": 0.15,
                     "visible": true,
                   },
@@ -9395,7 +9389,6 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
                 },
                 "fit": Object {
                   "area": Object {
-                    "fill": "__use__series__color__",
                     "opacity": 0.15,
                     "visible": true,
                   },
@@ -10886,7 +10879,6 @@ exports[`XYChart component split chart should render split chart if both, splitR
                 },
                 "fit": Object {
                   "area": Object {
-                    "fill": "__use__series__color__",
                     "opacity": 0.15,
                     "visible": true,
                   },
@@ -12446,7 +12438,6 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                 },
                 "fit": Object {
                   "area": Object {
-                    "fill": "__use__series__color__",
                     "opacity": 0.15,
                     "visible": true,
                   },
@@ -13999,7 +13990,6 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                 },
                 "fit": Object {
                   "area": Object {
-                    "fill": "__use__series__color__",
                     "opacity": 0.15,
                     "visible": true,
                   },
