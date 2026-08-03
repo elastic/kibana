@@ -58,7 +58,6 @@ This is useful for understanding the types of logs in the stream and identifying
       start,
       end,
       fields: LOG_MESSAGE_FIELDS,
-      logger,
     });
 
     return { patterns: selectLogPatternsForLlm(patterns) };

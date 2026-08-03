@@ -180,7 +180,6 @@ export const createCodeAnalysisProvider = ({
         start,
         end,
         fields: LOG_MESSAGE_FIELDS,
-        logger,
       });
       distinctiveStrings = patterns
         .map(({ sample }) => sample)

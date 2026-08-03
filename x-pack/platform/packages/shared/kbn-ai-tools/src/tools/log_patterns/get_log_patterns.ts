@@ -20,7 +20,6 @@ import type { ESQLSearchResponse } from '@kbn/es-types';
 import { calculateAuto } from '@kbn/calculate-auto';
 import { omit, orderBy, uniqBy } from 'lodash';
 import moment from 'moment';
-import type { Logger } from '@kbn/logging';
 import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import { kqlQuery, dateRangeQuery } from '@kbn/es-query';
 import { buildCountQuery } from '../../utils/build_count_query';
@@ -286,7 +285,6 @@ interface SigEventsLogPatternEsqlOptions {
   samplingSource: string;
   fields: string[];
   kql?: string;
-  logger: Logger;
 }
 
 export async function getLogPatterns<TChanges extends boolean | undefined = undefined>(
@@ -421,7 +419,6 @@ export async function getSigEventsLogPatternsEsql({
   samplingSource,
   kql,
   fields,
-  logger,
 }: SigEventsLogPatternEsqlOptions): Promise<LogPatternEsqlEntry[]> {
   const signal = AbortSignal.timeout(DEFAULT_ESQL_QUERY_TIMEOUT_MS);
   const columns = await getEsqlColumnSchema({
@@ -467,7 +464,6 @@ export async function getSigEventsLogPatternsEsql({
         total: totalDocs,
         samplingProbability,
         filter,
-        logger,
       });
 
       return rows.map((row) => ({

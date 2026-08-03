@@ -71,7 +71,6 @@ export async function getDiverseSampleDocuments({
     total: totalDocs,
     samplingProbability,
     filter,
-    logger,
   });
 
   const window = selectStratifiedWindow(rows, { iteration, size });

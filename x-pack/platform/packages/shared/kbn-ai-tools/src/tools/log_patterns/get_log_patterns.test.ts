@@ -5,12 +5,9 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/logging';
 import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import { kqlQuery, dateRangeQuery } from '@kbn/es-query';
 import { getSigEventsLogPatternsEsql } from './get_log_patterns';
-
-const logger = { debug: jest.fn() } as unknown as Logger;
 
 const createEsClient = (
   columns: Array<{ name: string; type: string }> = [{ name: 'message', type: 'text' }]
@@ -21,10 +18,7 @@ const createEsClient = (
   return {
     esClient: {
       esql,
-      client: {
-        esql: { query: rawEsqlQuery },
-        capabilities: jest.fn().mockResolvedValue({ supported: true }),
-      },
+      client: { esql: { query: rawEsqlQuery } },
     } as unknown as TracedElasticsearchClient,
     esql,
     rawEsqlQuery,
@@ -63,7 +57,6 @@ describe('getSigEventsLogPatternsEsql', () => {
 
     const result = await getSigEventsLogPatternsEsql({
       esClient,
-      logger,
       samplingSource: 'logs-*',
       start: 100,
       end: 200,
@@ -104,7 +97,6 @@ describe('getSigEventsLogPatternsEsql', () => {
 
     const result = await getSigEventsLogPatternsEsql({
       esClient,
-      logger,
       samplingSource: 'logs-*',
       start: 100,
       end: 200,
@@ -129,7 +121,6 @@ describe('getSigEventsLogPatternsEsql', () => {
 
     const result = await getSigEventsLogPatternsEsql({
       esClient,
-      logger,
       samplingSource: 'logs-*',
       start: 100,
       end: 200,
@@ -150,7 +141,6 @@ describe('getSigEventsLogPatternsEsql', () => {
 
     const result = await getSigEventsLogPatternsEsql({
       esClient,
-      logger,
       samplingSource: 'logs-*',
       start: 100,
       end: 200,

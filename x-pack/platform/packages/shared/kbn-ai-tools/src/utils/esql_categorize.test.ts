@@ -5,15 +5,9 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ESQLSearchResponse } from '@kbn/es-types';
-import type { Logger } from '@kbn/logging';
 import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
-import {
-  buildCategorizeWithSampleQuery,
-  categorizeWithNoiseExclusion,
-  esqlSupportsTwoPass,
-} from './esql_categorize';
+import { buildCategorizeWithSampleQuery, categorizeWithNoiseExclusion } from './esql_categorize';
 
 const categorizeResponse = (values: unknown[][]): ESQLSearchResponse =>
   ({
@@ -25,16 +19,10 @@ const categorizeResponse = (values: unknown[][]): ESQLSearchResponse =>
     values,
   } as unknown as ESQLSearchResponse);
 
-const createTracedEsClient = (
-  esql: jest.Mock,
-  capabilities = jest.fn().mockResolvedValue({ supported: true })
-) =>
+const createTracedEsClient = (esql: jest.Mock) =>
   ({
     esql,
-    client: { capabilities },
   } as unknown as TracedElasticsearchClient);
-
-const logger = { debug: jest.fn() } as unknown as Logger;
 
 describe('buildCategorizeWithSampleQuery', () => {
   it('defaults to regex CATEGORIZE, rare-tail truncation, and no SAMPLE at probability 1', () => {
@@ -109,8 +97,6 @@ describe('buildCategorizeWithSampleQuery', () => {
 });
 
 describe('categorizeWithNoiseExclusion', () => {
-  beforeEach(() => jest.clearAllMocks());
-
   it('excludes the noisy head then recategorizes the residual at full probability', async () => {
     const esql = jest
       .fn()
@@ -123,7 +109,6 @@ describe('categorizeWithNoiseExclusion', () => {
       esClient: createTracedEsClient(esql),
       indices: 'logs-*',
       field: 'message',
-      logger,
       total: 1000,
       samplingProbability: 1,
     });
@@ -154,7 +139,6 @@ describe('categorizeWithNoiseExclusion', () => {
       esClient: createTracedEsClient(esql),
       indices: 'logs-*',
       field: 'message',
-      logger,
       total: 1000,
       samplingProbability: 0.1,
     });
@@ -175,7 +159,6 @@ describe('categorizeWithNoiseExclusion', () => {
       esClient: createTracedEsClient(esql),
       indices: 'logs-*',
       field: 'message',
-      logger,
       total: 1_000_000,
       samplingProbability: 0.1,
     });
@@ -199,7 +182,6 @@ describe('categorizeWithNoiseExclusion', () => {
       esClient: createTracedEsClient(esql),
       indices: 'logs-*',
       field: 'message',
-      logger,
       total: 2200,
       samplingProbability: 1,
       maxDocsToSample: 1000,
@@ -221,7 +203,6 @@ describe('categorizeWithNoiseExclusion', () => {
       esClient: createTracedEsClient(esql),
       indices: 'logs-*',
       field: 'message',
-      logger,
       total: 100,
       samplingProbability: 1,
     });
@@ -245,7 +226,6 @@ describe('categorizeWithNoiseExclusion', () => {
       esClient: createTracedEsClient(esql),
       indices: 'logs-*',
       field: 'message',
-      logger,
       total: 1000,
       samplingProbability: 1,
     });
@@ -266,74 +246,11 @@ describe('categorizeWithNoiseExclusion', () => {
         esClient: createTracedEsClient(esql),
         indices: 'logs-*',
         field: 'message',
-        logger,
         total: 1000,
         samplingProbability: 1,
       })
     ).rejects.toThrow('circuit_breaking_exception');
 
     expect(esql).toHaveBeenCalledTimes(1);
-  });
-
-  it('runs a single legacy categorize (no speculative query) when two-pass is unsupported', async () => {
-    const capabilities = jest.fn().mockResolvedValue({ supported: false });
-    const esql = jest
-      .fn()
-      .mockResolvedValueOnce(categorizeResponse([[7, 'legacy sample', 'legacy']]));
-
-    const rows = await categorizeWithNoiseExclusion({
-      esClient: createTracedEsClient(esql, capabilities),
-      indices: 'logs-*',
-      field: 'message',
-      logger,
-      total: 1000,
-      samplingProbability: 1,
-    });
-
-    expect(esql).toHaveBeenCalledTimes(1);
-    expect(esql.mock.calls[0][0]).toBe('categorize_noise_exclusion_legacy');
-    const query = esql.mock.calls[0][1].query;
-    expect(query).not.toContain('output_format');
-    expect(query).not.toContain('NOT MATCH');
-    expect(query).not.toContain('WHERE count >');
-    expect(rows).toEqual([{ count: 7, pattern: 'legacy', sample: 'legacy sample' }]);
-    expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('falling back'));
-  });
-});
-
-describe('esqlSupportsTwoPass', () => {
-  const createClient = (capabilities: jest.Mock) =>
-    ({ capabilities } as unknown as ElasticsearchClient);
-
-  it('resolves true only when the cluster reports supported: true', async () => {
-    const capabilities = jest.fn().mockResolvedValue({ supported: true });
-
-    await expect(esqlSupportsTwoPass(createClient(capabilities))).resolves.toBe(true);
-    expect(capabilities).toHaveBeenCalledWith({
-      method: 'POST',
-      path: '/_query',
-      capabilities: ['categorize_options', 'match_function_options'],
-    });
-  });
-
-  it('resolves false when support is partial (false) or unknown (null)', async () => {
-    await expect(
-      esqlSupportsTwoPass(createClient(jest.fn().mockResolvedValue({ supported: false })))
-    ).resolves.toBe(false);
-    await expect(
-      esqlSupportsTwoPass(createClient(jest.fn().mockResolvedValue({ supported: null })))
-    ).resolves.toBe(false);
-  });
-
-  it('resolves false when the capabilities check fails, without latching the result', async () => {
-    const capabilities = jest
-      .fn()
-      .mockRejectedValueOnce(new Error('capabilities unavailable'))
-      .mockResolvedValueOnce({ supported: true });
-    const client = createClient(capabilities);
-
-    await expect(esqlSupportsTwoPass(client)).resolves.toBe(false);
-    await expect(esqlSupportsTwoPass(client)).resolves.toBe(true);
-    expect(capabilities).toHaveBeenCalledTimes(2);
   });
 });
