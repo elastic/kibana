@@ -6,7 +6,9 @@
  */
 
 import React, { useMemo, useCallback, useState } from 'react';
-import { EuiLoadingSpinner, EuiSpacer, EuiSearchBar } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiLiveAnnouncer, EuiSpacer, EuiSearchBar } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 import type { ToolSelection, ToolDefinition } from '@kbn/agent-builder-common';
 import { activeToolsCountWarningThreshold, defaultAgentToolIds } from '@kbn/agent-builder-common';
 import { getActiveTools, toggleToolSelection } from '../../../utils/tool_selection_utils';
@@ -67,6 +69,18 @@ export const ToolsSelection: React.FC<ToolsSelectionProps> = ({
 
   const activeToolsCount = activeTools.length;
 
+  const [liveAnnouncement, setLiveAnnouncement] = useState('');
+
+  // only announce when the table actually reloads in response to user input, not on first mount.
+  useUpdateEffect(() => {
+    setLiveAnnouncement(
+      i18n.translate('xpack.agentBuilder.tools.tableUpdatedAnnouncement', {
+        defaultMessage: 'Table updated. Showing {count} tools.',
+        values: { count: filteredTools.length },
+      })
+    );
+  }, [filteredTools]);
+
   const handleToggleTool = useCallback(
     (toolId: string) => {
       if (areElasticCapabilitiesEnabled && defaultToolIdSet.has(toolId)) return;
@@ -96,6 +110,8 @@ export const ToolsSelection: React.FC<ToolsSelectionProps> = ({
 
   return (
     <div>
+      <EuiLiveAnnouncer>{liveAnnouncement}</EuiLiveAnnouncer>
+
       <ActiveToolsStatus
         activeToolsCount={activeToolsCount}
         warningThreshold={activeToolsCountWarningThreshold}
