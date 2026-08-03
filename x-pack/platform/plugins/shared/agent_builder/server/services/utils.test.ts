@@ -84,11 +84,12 @@ describe('getUserFromRequest', () => {
     expect(esClient.security.authenticate).not.toHaveBeenCalled();
   });
 
-  it('uses a realm-qualified id when profile uid is missing', async () => {
+  it('uses a realm-qualified id when profile uid is missing for realm auth', async () => {
     const request = httpServerMock.createKibanaRequest();
 
     security.authc.getCurrentUser.mockReturnValue({
       username: 'shareduser',
+      authentication_type: 'realm',
       authentication_realm: { type: 'file', name: 'file1' },
     } as any);
 
@@ -96,6 +97,42 @@ describe('getUserFromRequest', () => {
 
     expect(result).toEqual({
       id: 'realm:["file","file1","shareduser"]',
+      username: 'shareduser',
+    });
+  });
+
+  it('does not synthesize a realm id for api_key auth without profile uid', async () => {
+    const request = httpServerMock.createKibanaRequest();
+
+    security.authc.getCurrentUser.mockReturnValue({
+      username: 'shareduser',
+      authentication_type: 'api_key',
+      authentication_realm: { type: 'native', name: 'native1' },
+    } as any);
+
+    const result = await getUserFromRequest({ request, security, esClient });
+
+    // Preserve username ownership fallback so API-key requests can still access
+    // private conversations/agents stamped with the interactive user's profile uid.
+    expect(result).toEqual({
+      username: 'shareduser',
+    });
+  });
+
+  it('still prefers profile uid for api_key auth when present', async () => {
+    const request = httpServerMock.createKibanaRequest();
+
+    security.authc.getCurrentUser.mockReturnValue({
+      username: 'shareduser',
+      profile_uid: 'profile-123',
+      authentication_type: 'api_key',
+      authentication_realm: { type: 'native', name: 'native1' },
+    } as any);
+
+    const result = await getUserFromRequest({ request, security, esClient });
+
+    expect(result).toEqual({
+      id: 'profile-123',
       username: 'shareduser',
     });
   });

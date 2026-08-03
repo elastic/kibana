@@ -59,6 +59,10 @@ export const toStableUserId = ({
  *
  * For un-enriched fake requests (e.g. tasks scheduled before enrichment was available), we fall
  * back to the ES `_security/_authenticate` API for the username only.
+ *
+ * Realm-qualified ids are only synthesized for realm authentication. API keys often lack
+ * `profile_uid`; inventing a realm id for them would mismatch resources stamped with the
+ * interactive user's profile uid and close the username ownership fallback.
  */
 export const getUserFromRequest = async ({
   request,
@@ -71,11 +75,12 @@ export const getUserFromRequest = async ({
 }): Promise<CurrentUser> => {
   const authUser = security.authc.getCurrentUser(request);
   if (authUser?.username) {
+    const allowRealmFallback = authUser.authentication_type !== 'api_key';
     return {
       id: toStableUserId({
         profileUid: authUser.profile_uid,
         username: authUser.username,
-        authenticationRealm: authUser.authentication_realm,
+        authenticationRealm: allowRealmFallback ? authUser.authentication_realm : undefined,
       }),
       username: authUser.username,
     };
