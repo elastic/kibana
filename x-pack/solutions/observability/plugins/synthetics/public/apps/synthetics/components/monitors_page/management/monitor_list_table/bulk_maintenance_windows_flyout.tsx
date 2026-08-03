@@ -305,7 +305,7 @@ export const BulkMaintenanceWindowsFlyout = ({
               fill
               onClick={handleSave}
               isLoading={isUpdating}
-              disabled={saveDisabled}
+              isDisabled={saveDisabled}
               data-test-subj="syntheticsBulkMaintenanceWindowsSave"
             >
               {mode === 'apply' ? APPLY_LABEL : REMOVE_LABEL}
