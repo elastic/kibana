@@ -54,7 +54,7 @@ Use the [Action configuration settings](/reference/configuration-reference/alert
 ## Get API credentials [aws-x-ray-api-credentials]
 
 1. Sign in to the [AWS Management Console](https://console.aws.amazon.com/) and open **IAM**.
-2. Create (or choose) an IAM user or role that will be used only for this connector, then attach a policy granting read access to X-Ray. The AWS managed policy **AWSXRayReadOnlyAccess** covers every action this connector exposes (`xray:Get*`, `xray:BatchGetTraces`, `xray:StartTraceRetrieval`). To scope permissions more tightly, grant exactly the `xray:Get*`, `xray:BatchGetTraces`, and `xray:StartTraceRetrieval` actions this connector uses instead of the full `xray:*` namespace.
+2. Create (or choose) an IAM user or role that will be used only for this connector, then attach a policy granting read access to X-Ray. The AWS managed policy **AWSXRayReadOnlyAccess** covers most actions this connector exposes, but **not** the Transaction Search actions `startTraceRetrieval` and `getRetrievedTracesGraph`; to use those you must additionally grant `xray:StartTraceRetrieval` and `xray:GetRetrievedTracesGraph`. To scope permissions more tightly instead, grant exactly the `xray:Get*`, `xray:BatchGetTraces`, and `xray:StartTraceRetrieval` actions this connector uses instead of the full `xray:*` namespace.
 3. Under **Security credentials**, create an **Access key** for that user and copy the **Access Key ID** and **Secret Access Key**. Store the secret access key securely — AWS only shows it once.
 4. Note the AWS region where your X-Ray traces and groups live (for example `us-east-1`).
 5. When configuring the connector, enter the Access Key ID, Secret Access Key, and Region.
