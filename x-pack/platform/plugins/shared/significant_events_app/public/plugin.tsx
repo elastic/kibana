@@ -27,6 +27,8 @@ import { combineLatest, distinctUntilChanged, from, map, shareReplay, switchMap 
 import { SIGNIFICANT_EVENTS_APP_ROUTE } from '../common/constants';
 import type { SignificantEventsAppLocator } from '../common/locators';
 import { SignificantEventsAppLocatorDefinition } from '../common/locators';
+import { FocusedSignificantEventService } from './services/focused_significant_event_service';
+import { createKnowledgeIndicatorsPanel } from './components/knowledge_indicators_panel/create_knowledge_indicators_panel';
 import type {
   SignificantEventsAppPublicSetup,
   SignificantEventsAppPublicStart,
@@ -48,6 +50,10 @@ export class SignificantEventsAppPlugin
   // Built in start(); core guarantees every plugin start() runs before any app mount,
   // so the mount callback below can safely read it.
   private availability$!: Observable<boolean>;
+  private focusedSignificantEventService!: FocusedSignificantEventService;
+  private cleanupSignificantEventAttachment?: () => void;
+  // Async so attachment UI / significant-events-schema (→ streamlang) stay off page-load.
+  private significantEventAttachmentReady?: Promise<void>;
 
   constructor(private readonly context: PluginInitializerContext) {}
 
@@ -181,9 +187,38 @@ export class SignificantEventsAppPlugin
       shareReplay(1)
     );
 
+    this.focusedSignificantEventService = new FocusedSignificantEventService();
+
+    if (pluginsStart.agentBuilder) {
+      const { agentBuilder } = pluginsStart;
+      const { chrome } = coreStart;
+      const { focusedSignificantEventService } = this;
+      this.significantEventAttachmentReady = import(
+        './components/significant_event_attachment'
+      ).then(({ registerSignificantEventAttachment }) => {
+        this.cleanupSignificantEventAttachment = registerSignificantEventAttachment({
+          agentBuilder,
+          chrome,
+          focusedSignificantEventService,
+        });
+      });
+    }
+
+    const services: SignificantEventsAppServices = {
+      availability$: this.availability$,
+      focusedSignificantEventService: this.focusedSignificantEventService,
+    };
+    const isServerless = this.context.env.packageInfo.buildFlavor === 'serverless';
+
     return {
       availability$: this.availability$,
       locator: this.locator,
     };
+  }
+
+  stop() {
+    void this.significantEventAttachmentReady?.then(() => {
+      this.cleanupSignificantEventAttachment?.();
+    });
   }
 }

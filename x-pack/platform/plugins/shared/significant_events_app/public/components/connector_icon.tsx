@@ -8,14 +8,12 @@
 import type { IconType } from '@elastic/eui';
 import { EuiIcon } from '@elastic/eui';
 import React from 'react';
-import { SERVICE_PROVIDERS, ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
-import { GeminiLogo } from '@kbn/stack-connectors-plugin/public/common';
-
-const getProviderIcon = (key: ServiceProviderKeys) => SERVICE_PROVIDERS[key].icon;
+import { GeminiLogo, OpenAILogo } from '@kbn/stack-connectors-plugin/public/common';
+import anthropicIcon from '@kbn/inference-endpoint-ui-common/src/components/providers/assets/images/anthropic.svg';
 
 const connectorIcons: Array<{ match: string[]; icon: IconType }> = [
-  { match: ['gpt', 'openai'], icon: getProviderIcon(ServiceProviderKeys.openai) },
-  { match: ['claude', 'anthropic'], icon: getProviderIcon(ServiceProviderKeys.anthropic) },
+  { match: ['gpt', 'openai'], icon: OpenAILogo },
+  { match: ['claude', 'anthropic'], icon: anthropicIcon },
   { match: ['gemini'], icon: GeminiLogo },
   { match: ['elastic'], icon: 'logoElastic' },
 ];

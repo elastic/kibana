@@ -1944,7 +1944,6 @@ x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/stream_matches_in
 x-pack/platform/packages/shared/kbn-streams-ai/src/significant_events @elastic/obs-sig-events-team
 x-pack/platform/packages/shared/kbn-streams-ai/src/features @elastic/obs-sig-events-team
 x-pack/platform/packages/shared/kbn-streams-ai/src/knowledge_indicators @elastic/obs-sig-events-team
-# app
 x-pack/platform/plugins/shared/streams_app/public/components/significant_events @elastic/obs-sig-events-team
 x-pack/platform/plugins/shared/streams_app/public/hooks/significant_events @elastic/obs-sig-events-team
 x-pack/platform/plugins/shared/streams_app/public/hooks/use_onboarding_api.ts @elastic/obs-sig-events-team

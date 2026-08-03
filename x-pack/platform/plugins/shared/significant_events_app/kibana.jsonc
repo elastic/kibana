@@ -18,7 +18,12 @@
       "unifiedSearch"
     ],
     "optionalPlugins": ["agentBuilder", "cloud", "spaces"],
-    "requiredBundles": ["kibanaReact"],
+    "requiredBundles": [
+      "agentBuilder",
+      "kibanaReact",
+      "observabilityAIAssistant",
+      "stackConnectors"
+    ],
     "extraPublicDirs": ["common"]
   }
 }
