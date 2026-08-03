@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useEffect } from 'react';
-import { EuiTextColor, useEuiTheme } from '@elastic/eui';
+import { EuiIcon, EuiTextColor, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useWithCommandList } from '../../../hooks/state_selectors/use_with_command_list';
 import { useInputSuggestion } from '../hooks/use_input_suggestion';
@@ -124,6 +124,15 @@ export const AutoSuggestComplete = memo<AutoSuggestCompleteProps>(
     return (
       <span data-test-subj={getTestId()} css={STYLES}>
         <EuiTextColor color="subdued">{suggestionValue}</EuiTextColor>
+        <EuiIcon
+          type="kqlFunction"
+          size="m"
+          color="subdued"
+          aria-hidden={true}
+          css={css`
+            margin-left: ${euiTheme.size.xs};
+          `}
+        />
       </span>
     );
   }
