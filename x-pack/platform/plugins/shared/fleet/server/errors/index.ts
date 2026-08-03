@@ -10,6 +10,8 @@ import type { ElasticsearchErrorDetails } from '@kbn/es-errors';
 
 import { isObjectLike } from 'lodash';
 
+import type { RegistryConnectionErrorType } from '../../common/types';
+
 import { FleetError } from '../../common/errors';
 
 import { isESClientError } from './utils';
@@ -49,10 +51,23 @@ export class FleetErrorWithStatusCode<TMeta = unknown> extends FleetError<TMeta>
 }
 
 export class RegistryError extends FleetError {}
-export class RegistryConnectionError extends RegistryError {}
+export class RegistryConnectionError extends RegistryError {
+  constructor(
+    message?: string,
+    attributes?: { type: RegistryConnectionErrorType; reason?: string }
+  ) {
+    super(message);
+    if (attributes) {
+      this.attributes = attributes;
+    }
+  }
+}
 export class RegistryResponseError extends RegistryError {
   constructor(message?: string, public readonly status?: number) {
     super(message);
+    if (status) {
+      this.attributes = { type: 'http', reason: String(status) };
+    }
   }
 }
 

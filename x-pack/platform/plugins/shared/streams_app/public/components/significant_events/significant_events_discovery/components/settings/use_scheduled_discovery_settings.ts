@@ -24,6 +24,7 @@ import {
   DEFAULT_SIG_EVENTS_SCHEDULED_TRIAGE_BATCH_SIZE,
   DEFAULT_SIG_EVENTS_TARGET_COVERAGE_MINUTES,
 } from '@kbn/significant-events-plugin/common';
+import { useSyncEnabledFromStatus } from './use_sync_enabled_from_status';
 
 export interface ScheduledDiscoveryState {
   enabled: boolean;
@@ -69,12 +70,23 @@ const readSettingsFromClient = (client: IUiSettingsClient): ScheduledDiscoverySt
 export const useScheduledDiscoverySettings = ({
   client,
   http,
+  /** Live enabled flag from maintenance status (keeps UI in sync after pause/resume). */
+  enabledFromStatus,
 }: {
   client: IUiSettingsClient;
   http: HttpSetup;
+  enabledFromStatus?: boolean;
 }) => {
   const [saved, setSaved] = useState<ScheduledDiscoveryState>(() => readSettingsFromClient(client));
   const [draft, setDraft] = useState<ScheduledDiscoveryState>(saved);
+
+  useSyncEnabledFromStatus({
+    client,
+    settingId: OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED,
+    enabledFromStatus,
+    setSaved,
+    setDraft,
+  });
 
   const hasChanged = useMemo(
     () =>

@@ -36,6 +36,7 @@ dependsOn:
   - '@kbn/ui-actions-plugin'
   - '@kbn/spaces-plugin'
   - '@kbn/config-schema'
+  - '@kbn/zod'
   - '@kbn/utility-types'
   - '@kbn/es-query'
   - '@kbn/i18n'
@@ -116,7 +117,6 @@ dependsOn:
   - '@kbn/scout'
   - '@kbn/cps-utils'
   - '@kbn/code-editor-mock'
-  - '@kbn/monaco'
   - '@kbn/code-editor'
   - '@kbn/as-code-shared-schemas'
   - '@kbn/as-code-utils'
@@ -131,6 +131,7 @@ dependsOn:
   - '@kbn/core-test-helpers-test-utils'
   - '@kbn/app-header'
   - '@kbn/core-chrome-browser-hooks'
+  - '@kbn/ui-callout'
 tags:
   - plugin
   - prod

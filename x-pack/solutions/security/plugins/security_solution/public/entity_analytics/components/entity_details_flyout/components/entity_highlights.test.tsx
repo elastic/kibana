@@ -7,8 +7,10 @@
 
 import React from 'react';
 import { render, screen, fireEvent, within } from '@testing-library/react';
+import { InferenceConnectorType } from '@kbn/inference-common';
 import { EntityHighlightsAccordion } from './entity_highlights';
 import type { EntityType } from '../../../../../common/search_strategy';
+import type { Entity } from '../../../../../common/api/entity_analytics';
 import { TestProviders } from '../../../../common/mock';
 
 // Mock the hooks
@@ -23,6 +25,7 @@ const mockUseAgentBuilderAvailability = jest.fn();
 const mockUseFetchEntityDetailsHighlights = jest.fn();
 const mockUseFetchPersistedAiSummary = jest.fn();
 const mockUseHasEntityHighlightsLicense = jest.fn();
+const mockUseInferenceConnectorAccess = jest.fn();
 
 jest.mock('@kbn/elastic-assistant', () => ({
   useAssistantContext: () => mockUseAssistantContext(),
@@ -69,6 +72,10 @@ jest.mock('../../../../common/hooks/use_has_entity_highlights_license', () => ({
   useHasEntityHighlightsLicense: () => mockUseHasEntityHighlightsLicense(),
 }));
 
+jest.mock('../hooks/use_inference_connector_access', () => ({
+  useInferenceConnectorAccess: (params: unknown) => mockUseInferenceConnectorAccess(params),
+}));
+
 jest.mock('@kbn/inference-connectors', () => ({
   useLoadConnectors: () => mockUseLoadConnectors(),
 }));
@@ -103,7 +110,7 @@ describe('EntityHighlights', () => {
       {
         id: 'connector-1',
         name: 'Test Connector',
-        actionTypeId: '.gen-ai',
+        actionTypeId: InferenceConnectorType.OpenAI,
       },
     ],
   };
@@ -147,6 +154,9 @@ describe('EntityHighlights', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    // The staleness callout dismiss state is persisted per-entity/per-space in local storage.
+    // Clear it so tests don't leak dismissal state into one another.
+    window.localStorage.clear();
 
     mockUseFetchAnonymizationFields.mockReturnValue(defaultAnonymizationFields);
     mockUseAssistantContext.mockReturnValue(defaultAssistantContext);
@@ -165,6 +175,11 @@ describe('EntityHighlights', () => {
       refetch: jest.fn(),
     });
     mockUseHasEntityHighlightsLicense.mockReturnValue(true);
+    mockUseInferenceConnectorAccess.mockReturnValue({
+      canUseSelectedConnector: true,
+      isCheckingPrivileges: false,
+      missingInferencePrivilege: false,
+    });
   });
 
   it('renders EntityHighlights with title and icon', () => {
@@ -354,6 +369,88 @@ describe('EntityHighlights', () => {
 
     fireEvent.click(generateButton);
 
+    expect(mockFetchEntityHighlights).toHaveBeenCalled();
+  });
+
+  it('disables Generate and shows a privilege message for .inference connectors without monitor_inference', () => {
+    const inferenceConnectors = [
+      {
+        id: 'connector-1',
+        name: 'Elastic Managed LLM',
+        actionTypeId: InferenceConnectorType.Inference,
+      },
+    ];
+    mockUseLoadConnectors.mockReturnValue({ data: inferenceConnectors });
+    mockUseInferenceConnectorAccess.mockReturnValue({
+      canUseSelectedConnector: false,
+      isCheckingPrivileges: false,
+      missingInferencePrivilege: true,
+    });
+
+    render(<EntityHighlightsAccordion {...defaultProps} />, {
+      wrapper: TestProviders,
+    });
+
+    expect(screen.getByRole('button', { name: 'Generate' })).toBeDisabled();
+    expect(document.body).toHaveTextContent(
+      'The selected connector Elastic Managed LLM requires the Elasticsearch cluster privilege monitor_inference. Ask an administrator to grant it.'
+    );
+    expect(document.body).not.toHaveTextContent('switch to a different AI connector');
+  });
+
+  it('suggests switching connectors when a non-inference alternative is available', () => {
+    const mixedConnectors = [
+      {
+        id: 'connector-1',
+        name: 'Elastic Managed LLM',
+        actionTypeId: InferenceConnectorType.Inference,
+      },
+      {
+        id: 'connector-2',
+        name: 'OpenAI',
+        actionTypeId: InferenceConnectorType.OpenAI,
+      },
+    ];
+    mockUseLoadConnectors.mockReturnValue({ data: mixedConnectors });
+    mockUseStoredAssistantConnectorId.mockReturnValue(['connector-1', jest.fn()]);
+    mockUseInferenceConnectorAccess.mockReturnValue({
+      canUseSelectedConnector: false,
+      isCheckingPrivileges: false,
+      missingInferencePrivilege: true,
+    });
+
+    render(<EntityHighlightsAccordion {...defaultProps} />, {
+      wrapper: TestProviders,
+    });
+
+    expect(screen.getByRole('button', { name: 'Generate' })).toBeDisabled();
+    expect(document.body).toHaveTextContent(
+      'The selected connector Elastic Managed LLM requires the Elasticsearch cluster privilege monitor_inference. Ask an administrator to grant it, or switch to a different AI connector.'
+    );
+  });
+
+  it('allows Generate for .inference connectors when monitor_inference is granted', () => {
+    const inferenceConnectors = [
+      {
+        id: 'connector-1',
+        name: 'Elastic Managed LLM',
+        actionTypeId: InferenceConnectorType.Inference,
+      },
+    ];
+    mockUseLoadConnectors.mockReturnValue({ data: inferenceConnectors });
+    mockUseInferenceConnectorAccess.mockReturnValue({
+      canUseSelectedConnector: true,
+      isCheckingPrivileges: false,
+      missingInferencePrivilege: false,
+    });
+
+    render(<EntityHighlightsAccordion {...defaultProps} />, {
+      wrapper: TestProviders,
+    });
+
+    const generateButton = screen.getByRole('button', { name: 'Generate' });
+    expect(generateButton).not.toBeDisabled();
+    fireEvent.click(generateButton);
     expect(mockFetchEntityHighlights).toHaveBeenCalled();
   });
 
@@ -575,5 +672,123 @@ describe('EntityHighlights', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Regenerate' }));
 
     expect(mockFetchEntityHighlights).toHaveBeenCalled();
+  });
+
+  describe('staleness callout dismiss (per-entity/per-space local storage)', () => {
+    // Persisted summary whose captured risk snapshot (70) differs from the entity's current
+    // normalized risk (90 below), so the summary is considered stale and the callout renders.
+    const stalePersistedSummary = {
+      summary: {
+        highlights: [{ title: 'Key Insights', text: 'User has high risk activity' }],
+        recommended_actions: null,
+        generated_at: Date.now(),
+        generated_by: 'test_user',
+        staleness: {
+          enabled_signals: ['risk_score'],
+          snapshot: { risk_score: 70 },
+        },
+      },
+      canRead: true,
+      isLoading: false,
+      isFetching: false,
+      refetch: jest.fn(),
+    };
+
+    // Current entity signals — normalized risk score of 90 drifts from the snapshot's 70.
+    const staleEntityRecord = {
+      entity: { risk: { calculated_score_norm: 90 } },
+    } as unknown as Entity;
+
+    // The key mirrors the one built in entity_highlights.tsx:
+    // `securitySolution.entitySummary.staleness.dismissed.${space}.${entityType}.${entityId}`
+    const dismissKey = 'securitySolution.entitySummary.staleness.dismissed.default.user.test-user';
+
+    const renderStale = () => {
+      mockUseFetchPersistedAiSummary.mockReturnValue(stalePersistedSummary);
+      mockUseFetchEntityDetailsHighlights.mockReturnValue({
+        ...defaultFetchEntityDetailsHighlights,
+        result: createAssistantResult(),
+      });
+
+      return render(
+        <EntityHighlightsAccordion {...defaultProps} entityRecord={staleEntityRecord} />,
+        { wrapper: TestProviders }
+      );
+    };
+
+    it('shows the staleness callout when the persisted snapshot drifts from the current risk', () => {
+      renderStale();
+
+      expect(screen.getByTestId('entity-highlights-staleness-callout')).toBeInTheDocument();
+    });
+
+    it('hides the callout and persists the dismissal at the current score when dismissed', () => {
+      renderStale();
+
+      const callout = screen.getByTestId('entity-highlights-staleness-callout');
+      fireEvent.click(within(callout).getByLabelText('Dismiss this callout'));
+
+      expect(screen.queryByTestId('entity-highlights-staleness-callout')).not.toBeInTheDocument();
+      // The dismissed score (current normalized risk) is stored so the same drift stays dismissed.
+      expect(window.localStorage.getItem(dismissKey)).toBe('90');
+    });
+
+    it('keeps the callout hidden when local storage already records a dismissal at the current score', () => {
+      window.localStorage.setItem(dismissKey, '90');
+
+      renderStale();
+
+      expect(screen.queryByTestId('entity-highlights-staleness-callout')).not.toBeInTheDocument();
+    });
+
+    it('re-shows the callout when the risk score changed since the previous dismissal', () => {
+      // Dismissed at 55 previously, but the current score is 90 → the dismissal no longer applies.
+      window.localStorage.setItem(dismissKey, '55');
+
+      renderStale();
+
+      expect(screen.getByTestId('entity-highlights-staleness-callout')).toBeInTheDocument();
+    });
+
+    it('scopes the dismissal to the current space', () => {
+      // A dismissal recorded under a different space must not suppress the callout here.
+      window.localStorage.setItem(
+        'securitySolution.entitySummary.staleness.dismissed.other-space.user.test-user',
+        '90'
+      );
+
+      renderStale();
+
+      expect(screen.getByTestId('entity-highlights-staleness-callout')).toBeInTheDocument();
+    });
+
+    it('scopes the dismissal to the current entity', () => {
+      // A dismissal recorded for a different entity must not suppress the callout here.
+      window.localStorage.setItem(
+        'securitySolution.entitySummary.staleness.dismissed.default.user.other-user',
+        '90'
+      );
+
+      renderStale();
+
+      expect(screen.getByTestId('entity-highlights-staleness-callout')).toBeInTheDocument();
+    });
+
+    it('clears the persisted dismissal when the summary is regenerated', () => {
+      // Regression guard for: dismiss at score Y → regenerate at Z → score later returns to Y.
+      // The old dismissal was tied to the previous summary, so regenerating must clear it,
+      // otherwise a genuine future drift back to Y would be wrongly treated as still-dismissed.
+      renderStale();
+
+      const callout = screen.getByTestId('entity-highlights-staleness-callout');
+      fireEvent.click(within(callout).getByLabelText('Dismiss this callout'));
+      expect(window.localStorage.getItem(dismissKey)).toBe('90');
+
+      // Regenerate via the summary's refresh control (also wired to onGenerateSummary).
+      fireEvent.click(screen.getByLabelText('Regenerate summary'));
+
+      expect(mockFetchEntityHighlights).toHaveBeenCalled();
+      expect(window.localStorage.getItem(dismissKey)).toBeNull();
+    });
   });
 });

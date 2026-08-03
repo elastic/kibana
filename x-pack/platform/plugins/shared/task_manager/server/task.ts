@@ -92,7 +92,7 @@ export interface RunContext {
    * is generated using the API key and passed as part of the run context.
    */
   fakeRequest?: KibanaRequest;
-  abortController: AbortController;
+  signal: AbortSignal;
 
   /**
    * If the task has a known `profile_uid`, binds it to a child fake request
@@ -109,6 +109,19 @@ export interface RunContext {
    * `kibana.action.execution.uuid` align with `kibana.task.execution.uuid`.
    */
   executionUuid: string;
+
+  /**
+   * Attach custom data to this run's `task-run` event log document.
+   *
+   * The provided fields are written to the task-manager-owned `kibana.task.data`
+   * field, which is mapped as `flattened`.
+   *
+   * Notes:
+   *  - Calling this more than once replaces any previously set fields.
+   *  - The serialized fields must not exceed 4 KB. Larger payloads are
+   *  dropped with a warning to protect the shared event log index.
+   */
+  setCustomTaskRunEventFields: (fields: Record<string, unknown>) => void;
 }
 
 /**

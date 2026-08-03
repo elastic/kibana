@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import type { EuiTableFieldDataColumnType } from '@elastic/eui';
 import type { AttackDiscoverySchedule } from '@kbn/elastic-assistant-common';
 
@@ -47,6 +48,9 @@ describe('Actions Column', () => {
         featureFlags: {
           getBooleanValue: jest.fn().mockResolvedValue(false),
         },
+        uiSettings: {
+          get: jest.fn().mockReturnValue(false),
+        },
       },
     });
   });
@@ -79,6 +83,9 @@ describe('Actions Column', () => {
           featureFlags: {
             getBooleanValue: jest.fn().mockResolvedValue(false),
           },
+          uiSettings: {
+            get: jest.fn().mockReturnValue(false),
+          },
         },
       });
     });
@@ -100,8 +107,7 @@ describe('Actions Column', () => {
     it('should render missing privileges tooltip', async () => {
       renderComponent();
 
-      const deleteButton = screen.getByTestId('deleteButton');
-      fireEvent.mouseOver(deleteButton.parentElement as Node);
+      await userEvent.hover(screen.getByTestId('missingPrivilegesTooltipAnchor'));
 
       const tooltip = screen.getByRole('tooltip');
       expect(tooltip).toHaveTextContent('Missing privileges');
@@ -124,6 +130,9 @@ describe('Actions Column', () => {
           },
           featureFlags: {
             getBooleanValue: jest.fn().mockResolvedValue(true),
+          },
+          uiSettings: {
+            get: jest.fn().mockReturnValue(true),
           },
         },
       });

@@ -31,8 +31,10 @@ import {
   BULK_RESTORE_PARTIAL_TOAST_TITLE,
   BULK_RESTORE_ERROR_TOAST_TITLE,
   BULK_PROMOTE_SUCCESS_TOAST_TITLE,
+  BULK_PROMOTE_PARTIAL_TOAST_TITLE,
   BULK_PROMOTE_ERROR_TITLE,
 } from './translations';
+import { getPromoteSkipReason } from '../../../lib/promote_skip_reason';
 import { useKnowledgeIndicatorsUrlState } from './use_knowledge_indicators_url_state';
 
 export const getKnowledgeIndicatorTitle = (ki: KnowledgeIndicator): string =>
@@ -63,6 +65,14 @@ export function useKnowledgeIndicatorsTable() {
     setPagination((current) => {
       if (current.pageIndex === 0) return current;
       return { ...current, pageIndex: 0 };
+    });
+  }, []);
+
+  // Keeps the table page in sync with flyout prev/next navigation.
+  const goToPageForItemIndex = useCallback((index: number) => {
+    setPagination((current) => {
+      const targetPage = Math.floor(index / current.pageSize);
+      return current.pageIndex === targetPage ? current : { ...current, pageIndex: targetPage };
     });
   }, []);
 
@@ -206,8 +216,15 @@ export function useKnowledgeIndicatorsTable() {
 
   const bulkPromoteMutation = useMutation<PromoteResult, Error, string[]>({
     mutationFn: (queryIds) => promote({ queryIds }),
-    onSuccess: async () => {
-      toasts.addSuccess({ title: BULK_PROMOTE_SUCCESS_TOAST_TITLE });
+    onSuccess: async (result) => {
+      const skipReason = getPromoteSkipReason(result);
+      if (!skipReason) {
+        toasts.addSuccess({ title: BULK_PROMOTE_SUCCESS_TOAST_TITLE });
+      } else if (result.promoted > 0) {
+        toasts.addWarning({ title: BULK_PROMOTE_PARTIAL_TOAST_TITLE, text: skipReason });
+      } else {
+        toasts.addInfo({ title: skipReason });
+      }
       setSelectedKnowledgeIndicators([]);
       closeFlyout();
       await invalidatePromoteRelatedQueries();
@@ -298,6 +315,7 @@ export function useKnowledgeIndicatorsTable() {
     handleBulkRestore,
     deleteKnowledgeIndicatorsInBulk,
     handleBulkPromote,
+    goToPageForItemIndex,
     ...urlState,
   };
 }

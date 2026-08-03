@@ -24,8 +24,7 @@ const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 const getAppInfoMock = getAppInfo as jest.Mock;
 const updateActionConnectorMock = updateActionConnector as jest.Mock;
 
-// FLAKY: https://github.com/elastic/kibana/issues/253539
-describe.skip('ServiceNowActionConnectorFields renders', () => {
+describe('ServiceNowActionConnectorFields renders', () => {
   const usesTableApiConnector = {
     id: 'test',
     actionTypeId: '.servicenow',
@@ -148,7 +147,7 @@ describe.skip('ServiceNowActionConnectorFields renders', () => {
     };
 
     render(
-      <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit}>
+      <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit} isEdit>
         <ServiceNowConnectorFields
           readOnly={false}
           isEdit={false}
@@ -159,26 +158,18 @@ describe.skip('ServiceNowActionConnectorFields renders', () => {
 
     await userEvent.click(screen.getByTestId('use-oauth-switch'));
 
-    await userEvent.type(
-      await screen.findByRole('textbox', { name: 'Client ID' }),
-      'test-client-id'
-    );
-
-    await userEvent.type(
-      screen.getByRole('textbox', { name: 'User identifier' }),
-      'test-user-identifier'
-    );
-    await userEvent.type(
-      screen.getByRole('textbox', { name: 'JWT verifier key ID' }),
-      'test-jwt-key-id'
-    );
-
-    await userEvent.type(screen.getByLabelText('Client secret'), 'test-client-secret');
-    await userEvent.type(screen.getByLabelText('Private key'), 'test-private-key');
-    await userEvent.type(
-      screen.getByLabelText('Private key password'),
-      'test-private-key-password'
-    );
+    await userEvent.click(await screen.findByRole('textbox', { name: 'Client ID' }));
+    await userEvent.paste('test-client-id');
+    await userEvent.click(screen.getByRole('textbox', { name: 'User identifier' }));
+    await userEvent.paste('test-user-identifier');
+    await userEvent.click(screen.getByRole('textbox', { name: 'JWT verifier key ID' }));
+    await userEvent.paste('test-jwt-key-id');
+    await userEvent.click(screen.getByLabelText('Client secret'));
+    await userEvent.paste('test-client-secret');
+    await userEvent.click(screen.getByLabelText('Private key'));
+    await userEvent.paste('test-private-key');
+    await userEvent.click(screen.getByLabelText('Private key password'));
+    await userEvent.paste('test-private-key-password');
 
     await userEvent.click(await screen.findByTestId('form-test-provide-submit'));
 
@@ -367,7 +358,7 @@ describe.skip('ServiceNowActionConnectorFields renders', () => {
       updateActionConnectorMock.mockResolvedValue({ isDeprecated: false });
 
       render(
-        <ConnectorFormTestProvider connector={usesTableApiConnector}>
+        <ConnectorFormTestProvider connector={usesTableApiConnector} isEdit>
           <ServiceNowConnectorFields
             readOnly={false}
             isEdit={false}
@@ -496,7 +487,7 @@ describe.skip('ServiceNowActionConnectorFields renders', () => {
       'connector validation succeeds when connector config is valid',
       async (connector) => {
         render(
-          <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit}>
+          <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit} isEdit>
             <ServiceNowConnectorFields
               readOnly={false}
               isEdit={false}
@@ -525,7 +516,7 @@ describe.skip('ServiceNowActionConnectorFields renders', () => {
       };
 
       render(
-        <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit}>
+        <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit} isEdit>
           <ServiceNowConnectorFields
             readOnly={false}
             isEdit={false}

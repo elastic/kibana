@@ -2265,6 +2265,42 @@ describe('enrichCasesWithFieldLabels', () => {
     expect(result[0]).toEqual(baseCase);
   });
 
+  it('populates labels for a template-less case from global field definitions', () => {
+    const caseWithGlobalOnly = {
+      ...baseCase,
+      extended_fields: { team_as_keyword: 'soc' },
+    };
+    const globalFields = [
+      { name: 'team', label: 'Team', control: 'INPUT_TEXT' as const, type: 'keyword' as const },
+    ];
+
+    const result = enrichCasesWithFieldLabels([caseWithGlobalOnly], [], globalFields);
+
+    expect(result[0].extended_fields_labels).toEqual({
+      team_as_keyword: 'Team',
+    });
+  });
+
+  it('merges global and template labels with template winning on key collision', () => {
+    const globalFields = [
+      {
+        name: 'priority',
+        label: 'Global Priority',
+        control: 'INPUT_TEXT' as const,
+        type: 'keyword' as const,
+      },
+      { name: 'team', label: 'Team', control: 'INPUT_TEXT' as const, type: 'keyword' as const },
+    ];
+
+    const result = enrichCasesWithFieldLabels([caseWithTemplate], [templateSO], globalFields);
+
+    expect(result[0].extended_fields_labels).toEqual({
+      priority_as_keyword: 'Priority Level',
+      effort_as_integer: 'Effort Points',
+      team_as_keyword: 'Team',
+    });
+  });
+
   it('returns case unchanged when it has no extended_fields', () => {
     const caseNoExtFields = { ...baseCase, template: { id: 'template-id-1', version: 1 } };
 

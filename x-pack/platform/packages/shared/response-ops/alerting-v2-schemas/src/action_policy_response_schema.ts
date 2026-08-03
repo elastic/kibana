@@ -76,23 +76,3 @@ export const findActionPoliciesResponseSchema = z
   .meta({ id: 'alerting_v2_action_policy_list_response' });
 
 export type FindActionPoliciesResponse = z.infer<typeof findActionPoliciesResponseSchema>;
-
-export const bulkActionActionPoliciesResponseSchema = z
-  .object({
-    processed: z.number().describe('The number of action policies processed.'),
-    total: z.number().describe('The total number of action policies targeted.'),
-    errors: z
-      .array(
-        z.object({
-          id: z.string().describe('The identifier of the action policy that failed.'),
-          message: z.string().describe('The error message.'),
-        })
-      )
-      .describe('Errors encountered during the bulk operation.'),
-  })
-  .describe('Result of a bulk action policy operation.')
-  .meta({ id: 'alerting_v2_bulk_action_policies_response' });
-
-export type BulkActionActionPoliciesResponse = z.infer<
-  typeof bulkActionActionPoliciesResponseSchema
->;

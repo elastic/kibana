@@ -6,10 +6,17 @@ paths:
   /api/security_solution/initialize:
     post:
       summary: Initialize security solution flows
+      description: |
+        Run one or more Security Solution initialization flows for the current space.
+        Each flow provisions a specific set of assets, for example list indices,
+        security data views, prebuilt detection rules, endpoint protection, AI prompts,
+        or detection rule monitoring assets. Only the requested flows are run, and the
+        response reports a result for each one.
       operationId: InitializeSecuritySolution
       x-codegen-enabled: true
       x-labels: [ess, serverless]
       requestBody:
+        description: The initialization flows to run.
         required: true
         content:
           application/json:
@@ -23,9 +30,16 @@ paths:
                   items:
                     $ref: '#/components/schemas/InitializationFlowId'
                   minItems: 1
+            examples:
+              default:
+                value:
+                  flows:
+                    - init-prebuilt-rules
+                    - init-endpoint-protection
+                    - init-ai-prompts
       responses:
         '200':
-          description: OK
+          description: Indicates a successful call. Returns a result for each requested flow.
           content:
             application/json:
               schema:
@@ -35,6 +49,28 @@ paths:
                 properties:
                   flows:
                     $ref: '#/components/schemas/InitializationFlowsResult'
+              examples:
+                default:
+                  value:
+                    flows:
+                      init-prebuilt-rules:
+                        status: ready
+                        payload:
+                          name: security_detection_engine
+                          version: 8.17.1
+                          install_status: installed
+                      init-endpoint-protection:
+                        status: ready
+                        payload:
+                          name: endpoint
+                          version: 8.17.1
+                          install_status: already_installed
+                      init-ai-prompts:
+                        status: ready
+                        payload:
+                          name: security_ai_prompts
+                          version: 8.17.1
+                          install_status: installed
 
 components:
   x-codegen-enabled: true

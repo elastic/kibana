@@ -14,7 +14,6 @@ import {
   ruleTagsResponseSchema,
   bulkGetRulesParamsSchema,
   bulkGetRulesResponseSchema,
-  bulkOperationResponseSchema,
   querySchema,
   composedQuerySchema,
   standaloneQuerySchema,
@@ -25,16 +24,14 @@ import {
 import {
   createActionPolicyDataSchema,
   updateActionPolicyBodySchema,
-  bulkActionActionPoliciesBodySchema,
+  bulkSnoozeActionPoliciesBodySchema,
   snoozeActionPolicyBodySchema,
-  actionPolicyBulkActionSchema,
   actionPolicyDestinationSchema,
   groupingModeSchema,
 } from './action_policy_data_schema';
 import {
   actionPolicyResponseSchema,
   findActionPoliciesResponseSchema,
-  bulkActionActionPoliciesResponseSchema,
 } from './action_policy_response_schema';
 import {
   createAckAlertActionBodySchema,
@@ -56,14 +53,18 @@ import {
 } from './matched_action_policies_response_schema';
 import {
   ruleExecutionViewSchema,
-  getRuleExecutionsResponseSchema,
+  listRuleExecutionsResponseSchema,
 } from './rule_execution_history_schema';
 import {
   policyExecutionHistoryItemSchema,
   listPolicyExecutionHistoryResponseSchema,
-  countPolicyExecutionEventsResponseSchema,
 } from './policy_execution_history_schema';
-import { bulkOperationParamsSchema } from './bulk_operation_schema';
+import {
+  bulkByIdsSchema,
+  bulkByQuerySchema,
+  bulkResponseSchema,
+  dryRunResponseSchema,
+} from './bulk_operation_schema';
 import { errorResponseSchema } from './error_response_schema';
 
 /**
@@ -88,7 +89,6 @@ const EXPECTED_IDS: ReadonlyArray<readonly [z.ZodType, string]> = [
   [ruleTagsResponseSchema, 'alerting_v2_rule_tags_response'],
   [bulkGetRulesParamsSchema, 'alerting_v2_bulk_get_rules_request'],
   [bulkGetRulesResponseSchema, 'alerting_v2_bulk_get_rules_response'],
-  [bulkOperationResponseSchema, 'alerting_v2_bulk_operation_response'],
   [querySchema, 'alerting_v2_rule_query'],
   [composedQuerySchema, 'alerting_v2_composed_rule_query'],
   [standaloneQuerySchema, 'alerting_v2_standalone_rule_query'],
@@ -98,14 +98,12 @@ const EXPECTED_IDS: ReadonlyArray<readonly [z.ZodType, string]> = [
   // action policies
   [createActionPolicyDataSchema, 'alerting_v2_new_action_policy'],
   [updateActionPolicyBodySchema, 'alerting_v2_update_action_policy'],
-  [bulkActionActionPoliciesBodySchema, 'alerting_v2_bulk_action_policies_request'],
+  [bulkSnoozeActionPoliciesBodySchema, 'alerting_v2_bulk_snooze_action_policies_request'],
   [snoozeActionPolicyBodySchema, 'alerting_v2_snooze_action_policy_request'],
-  [actionPolicyBulkActionSchema, 'alerting_v2_action_policy_bulk_action'],
   [actionPolicyDestinationSchema, 'alerting_v2_action_policy_destination'],
   [groupingModeSchema, 'alerting_v2_action_policy_grouping_mode'],
   [actionPolicyResponseSchema, 'alerting_v2_action_policy_response'],
   [findActionPoliciesResponseSchema, 'alerting_v2_action_policy_list_response'],
-  [bulkActionActionPoliciesResponseSchema, 'alerting_v2_bulk_action_policies_response'],
   // alert actions
   [createAckAlertActionBodySchema, 'alerting_v2_new_ack_alert_action'],
   [createUnackAlertActionBodySchema, 'alerting_v2_new_unack_alert_action'],
@@ -124,12 +122,14 @@ const EXPECTED_IDS: ReadonlyArray<readonly [z.ZodType, string]> = [
   [matchActionPoliciesForRuleResponseSchema, 'alerting_v2_match_action_policies_for_rule_response'],
   // execution history
   [ruleExecutionViewSchema, 'alerting_v2_rule_execution'],
-  [getRuleExecutionsResponseSchema, 'alerting_v2_rule_executions_response'],
+  [listRuleExecutionsResponseSchema, 'alerting_v2_rule_executions_response'],
   [policyExecutionHistoryItemSchema, 'alerting_v2_policy_execution_history_item'],
   [listPolicyExecutionHistoryResponseSchema, 'alerting_v2_policy_execution_history_response'],
-  [countPolicyExecutionEventsResponseSchema, 'alerting_v2_policy_execution_events_count_response'],
-  // shared
-  [bulkOperationParamsSchema, 'alerting_v2_bulk_operation_request'],
+  // shared bulk primitives, reused by every by-ID / by-query bulk endpoint
+  [bulkByIdsSchema, 'alerting_v2_bulk_by_ids_request'],
+  [bulkByQuerySchema, 'alerting_v2_bulk_by_query_request'],
+  [bulkResponseSchema, 'alerting_v2_bulk_operation_response'],
+  [dryRunResponseSchema, 'alerting_v2_bulk_dry_run_response'],
   [errorResponseSchema, 'alerting_v2_error_response'],
 ];
 
@@ -137,7 +137,6 @@ const EXPECTED_IDS: ReadonlyArray<readonly [z.ZodType, string]> = [
 const DISCRIMINATED_UNIONS: ReadonlyArray<readonly [string, z.ZodType]> = [
   ['querySchema', querySchema],
   ['actionPolicyDestinationSchema', actionPolicyDestinationSchema],
-  ['actionPolicyBulkActionSchema', actionPolicyBulkActionSchema],
   ['createAlertActionBodySchema', createAlertActionBodySchema],
 ];
 

@@ -31,15 +31,6 @@ jest.mock('./alert_condition_step', () => ({
   AlertConditionStep: () => <div data-test-subj="mockAlertConditionStep" />,
 }));
 
-jest.mock('../compose_discover_time_field_context', () => ({
-  useComposeDiscoverTimeField: () => ({
-    timeFieldOptions: [{ value: '@timestamp', text: '@timestamp' }],
-    isTimeFieldResolved: true,
-  }),
-  ComposeDiscoverTimeFieldContextProvider: ({ children }: { children: React.ReactNode }) =>
-    children,
-}));
-
 const createState = (overrides: Partial<ComposeDiscoverState> = {}): ComposeDiscoverState => ({
   ...createInitialState({ mode: 'create' }),
   ...overrides,

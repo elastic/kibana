@@ -17,18 +17,10 @@ import {
   EuiEmptyPrompt,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import {
-  getSeverityLabel,
-  type Discovery,
-  type EventLifecycleResponse,
-} from '@kbn/significant-events-schema';
+import { getSeverityLabel, type EventLifecycleResponse } from '@kbn/significant-events-schema';
 import { formatTimestamp } from '../../../../../util/formatters';
 import { changeTypeLabel } from '../shared/translations';
-import {
-  getLifecycleStatusColor,
-  getLifecycleStatusLabel,
-  isVisibleDiscoveryKind,
-} from '../shared/status_display';
+import { getLifecycleStatusColor, getLifecycleStatusLabel } from '../shared/status_display';
 
 interface TimelineEntry {
   icon: string;
@@ -38,11 +30,12 @@ interface TimelineEntry {
   title: string;
   description?: string;
   detail?: string;
+  /** Set when a workflow execution produced this version; shown as a "created by workflow" line. */
+  workflowExecutionId?: string;
 }
 
 const FLOW_ICONS = {
   detection: 'bell',
-  discovery: 'inspect',
   event: 'documentEdit',
 } as const;
 
@@ -58,25 +51,6 @@ function buildEntries(data: EventLifecycleResponse): TimelineEntry[] {
       .filter(Boolean)
       .join(' · '),
   }));
-
-  const discoveries: TimelineEntry[] = data.discoveries
-    .filter((discovery): discovery is Discovery & { kind: Exclude<Discovery['kind'], 'handled'> } =>
-      isVisibleDiscoveryKind(discovery.kind)
-    )
-    .map((discovery) => ({
-      icon: FLOW_ICONS.discovery,
-      label: getLifecycleStatusLabel(discovery.kind),
-      color: getLifecycleStatusColor(discovery.kind),
-      timestamp: discovery['@timestamp'],
-      title: discovery.title,
-      description:
-        discovery.kind === 'discovery' && discovery.severity != null
-          ? i18n.translate('xpack.streams.lifecycle.severity', {
-              defaultMessage: 'Severity: {severity}',
-              values: { severity: getSeverityLabel(discovery.severity) },
-            })
-          : undefined,
-    }));
 
   const events: TimelineEntry[] = [...data.events]
     .sort((a, b) => Date.parse(a['@timestamp']) - Date.parse(b['@timestamp']))
@@ -95,12 +69,26 @@ function buildEntries(data: EventLifecycleResponse): TimelineEntry[] {
           : undefined,
 
       detail: event.assessment_note,
+      workflowExecutionId: event.workflow_execution_id,
     }));
 
-  return [...detections, ...discoveries, ...events].sort(
+  return [...detections, ...events].sort(
     (a, b) => Date.parse(a.timestamp) - Date.parse(b.timestamp)
   );
 }
+
+/** A subdued detail line under a timeline entry, preceded by a small spacer. */
+const SubduedLine: React.FC<{ children: React.ReactNode; 'data-test-subj'?: string }> = ({
+  children,
+  'data-test-subj': dataTestSubj,
+}) => (
+  <>
+    <EuiSpacer size="xs" />
+    <EuiText size="xs" color="subdued" data-test-subj={dataTestSubj}>
+      {children}
+    </EuiText>
+  </>
+);
 
 export const LifecycleTimeline = ({ data }: { data: EventLifecycleResponse | undefined }) => {
   const entries = data ? buildEntries(data) : [];
@@ -148,21 +136,15 @@ export const LifecycleTimeline = ({ data }: { data: EventLifecycleResponse | und
                 </EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>
-            {entry.description && (
-              <>
-                <EuiSpacer size="xs" />
-                <EuiText size="xs" color="subdued">
-                  {entry.description}
-                </EuiText>
-              </>
-            )}
-            {entry.detail && (
-              <>
-                <EuiSpacer size="xs" />
-                <EuiText size="xs" color="subdued">
-                  {entry.detail}
-                </EuiText>
-              </>
+            {entry.description && <SubduedLine>{entry.description}</SubduedLine>}
+            {entry.detail && <SubduedLine>{entry.detail}</SubduedLine>}
+            {entry.workflowExecutionId && (
+              <SubduedLine data-test-subj="lifecycleCreatedByWorkflow">
+                {i18n.translate('xpack.streams.lifecycle.createdByWorkflow', {
+                  defaultMessage: 'Created by workflow: {id}',
+                  values: { id: entry.workflowExecutionId },
+                })}
+              </SubduedLine>
             )}
           </EuiPanel>
         </EuiTimelineItem>

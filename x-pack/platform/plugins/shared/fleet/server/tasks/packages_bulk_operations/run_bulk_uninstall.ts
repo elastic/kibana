@@ -25,12 +25,12 @@ export interface BulkUninstallTaskParams extends BulkPackageOperationsTaskParams
 }
 
 export async function _runBulkUninstallTask({
-  abortController,
+  signal,
   taskParams,
   logger,
 }: {
   taskParams: BulkUninstallTaskParams;
-  abortController: AbortController;
+  signal: AbortSignal;
   logger: Logger;
 }) {
   const { packages, force } = taskParams;
@@ -40,7 +40,7 @@ export async function _runBulkUninstallTask({
 
   for (const pkg of packages) {
     // Throw between package uninstall if task is aborted
-    if (abortController.signal.aborted) {
+    if (signal.aborted) {
       throw new Error('Task was aborted');
     }
     try {

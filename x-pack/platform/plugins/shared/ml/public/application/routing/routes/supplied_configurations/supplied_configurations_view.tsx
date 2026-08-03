@@ -7,9 +7,8 @@
 
 import type { FC } from 'react';
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { dynamic } from '@kbn/shared-ux-utility';
 import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import type { MlRoute } from '../../router';
@@ -21,8 +20,7 @@ import {
   getMlManagementBreadcrumb,
   getStackManagementBreadcrumb,
 } from '../../breadcrumbs';
-import { MlPageHeader } from '../../../components/page_header';
-import { PageTitle } from '../../../components/page_title';
+import { MlAppHeader } from '../../../components/ml_app_header';
 
 const SuppliedConfigurations = dynamic(async () => ({
   default: (await import('../../../supplied_configurations/supplied_configurations'))
@@ -41,7 +39,6 @@ export const suppliedConfigurationsRouteFactory = (navigateToApp: NavigateToApp)
     getMlManagementBreadcrumb('ANOMALY_DETECTION_MANAGEMENT_BREADCRUMB', navigateToApp),
     getMlManagementBreadcrumb('SUPPLIED_CONFIGURATIONS_MANAGEMENT_BREADCRUMB', navigateToApp),
   ],
-  enableDatePicker: false,
   'data-test-subj': 'mlPageSuppliedConfigurations',
 });
 
@@ -50,25 +47,18 @@ const PageWrapper: FC = () => {
 
   return (
     <PageLoader context={context}>
-      <MlPageHeader>
-        <PageTitle
-          title={
-            <span data-test-subj="mlPageSuppliedConfigurations">
-              <FormattedMessage
-                id="xpack.ml.suppliedConfigurations.preconfigurecJobsHeader"
-                defaultMessage="Supplied configurations"
-              />
-            </span>
-          }
-        />
-        <EuiSpacer size="s" />
-        <EuiText size="s">
-          <FormattedMessage
-            id="xpack.ml.suppliedConfigurations.preconfigurecJobsHeaderDescription"
-            defaultMessage="This page lists pre-defined anomaly detection job configurations with related Kibana assets."
-          />
-        </EuiText>
-      </MlPageHeader>
+      <MlAppHeader
+        title={i18n.translate('xpack.ml.suppliedConfigurations.preconfigurecJobsHeader', {
+          defaultMessage: 'Supplied configurations',
+        })}
+      />
+      <EuiText data-test-subj="mlPageSuppliedConfigurations">
+        {i18n.translate('xpack.ml.suppliedConfigurations.preconfigurecJobsHeaderDescription', {
+          defaultMessage:
+            'This page lists pre-defined anomaly detection job configurations with related Kibana assets.',
+        })}
+      </EuiText>
+      <EuiSpacer />
       <SuppliedConfigurations />
     </PageLoader>
   );
