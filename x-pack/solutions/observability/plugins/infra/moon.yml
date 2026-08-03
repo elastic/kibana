@@ -129,6 +129,7 @@ dependsOn:
   - '@kbn/xstate-utils'
   - '@kbn/shared-ux-error-boundary'
   - '@kbn/react-query'
+  - '@kbn/scout-oblt'
 tags:
   - plugin
   - prod
@@ -141,6 +142,7 @@ fileGroups:
     - public/**/*
     - server/**/*
     - types/**/*
+    - test/scout/api/**/*
     - '!target/**/*'
   jest-config:
     - jest.config.js

@@ -126,6 +126,7 @@ export class RulesClientFactory {
     const authorization = await this.authorization.create(request);
 
     return new RulesClient({
+      request,
       spaceId,
       kibanaVersion: this.kibanaVersion,
       logger: this.logger,

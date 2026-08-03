@@ -7,6 +7,7 @@ plugins:
     - discover_enhanced
     - exploratory_view
     - index_management
+    - infra
     - logstash
     - maps
     - observability_onboarding

@@ -118,7 +118,7 @@ export default function getGapsSummaryByRuleIdsTests({ getService }: FtrProvider
                 expect(response.body).to.eql({
                   error: 'Forbidden',
                   message:
-                    'Failed to find gaps summary for rules: Unauthorized to find rules for any rule types',
+                    'Failed to find gaps summary for rules: Unauthorized to find rules for any rule types.',
                   statusCode: 403,
                 });
                 break;
@@ -175,7 +175,7 @@ export default function getGapsSummaryByRuleIdsTests({ getService }: FtrProvider
                 expect(response.body).to.eql({
                   error: 'Forbidden',
                   message:
-                    'Failed to find gaps summary for rules: Unauthorized to find rules for any rule types',
+                    'Failed to find gaps summary for rules: Unauthorized to find rules for any rule types.',
                   statusCode: 403,
                 });
                 break;

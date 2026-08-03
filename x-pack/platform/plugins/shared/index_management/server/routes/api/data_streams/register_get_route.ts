@@ -179,8 +179,8 @@ export function registerGetAllRoute({ router, lib: { handleEsError }, config }: 
 
         // Only take the lifecycle of the first data stream since all data streams have the same global retention period
         const lifecycle = await getDataStreamLifecycle(client, dataStreams[0].name);
-        // @ts-ignore - TS doesn't know about the `global_retention` property yet
-        const globalMaxRetention = lifecycle?.global_retention?.max_retention;
+        const maxRetention = lifecycle?.global_retention?.max_retention;
+        const globalMaxRetention = typeof maxRetention === 'string' ? maxRetention : undefined;
 
         const enhancedDataStreams = enhanceDataStreams({
           dataStreams,
@@ -229,8 +229,8 @@ export function registerGetOneRoute({ router, lib: { handleEsError }, config }: 
         const { data_streams: dataStreams } = await getDataStreams(client, name);
 
         const lifecycle = await getDataStreamLifecycle(client, name);
-        // @ts-ignore - TS doesn't know about the `global_retention` property yet
-        const globalMaxRetention = lifecycle?.global_retention?.max_retention;
+        const maxRetention = lifecycle?.global_retention?.max_retention;
+        const globalMaxRetention = typeof maxRetention === 'string' ? maxRetention : undefined;
 
         if (config.isDataStreamStatsEnabled !== false) {
           ({ data_streams: dataStreamsStats } = await getDataStreamsStats(client, name));
