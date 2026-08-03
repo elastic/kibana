@@ -350,6 +350,15 @@ export const RunSearchInputSchema = lazySchema(() =>
         'The Cribl Search query. Must start with the "cribl" operator, e.g. ' +
           '\'cribl dataset="my_dataset" | limit 1000\'. Must be a single line.'
       ),
+    groupName: z
+      .string()
+      .min(1)
+      .max(MAX_ID_LENGTH)
+      .optional()
+      .describe(
+        'The Cribl Search group to run the query against, as returned by listWorkerGroups. ' +
+          'Defaults to "default_search". Only needed if the deployment has additional Search groups.'
+      ),
     earliest: z
       .string()
       .max(100)
@@ -375,6 +384,15 @@ export type RunSearchInput = z.infer<typeof RunSearchInputSchema>;
 export const GetSearchResultsInputSchema = lazySchema(() =>
   z.object({
     jobId: idField('The search job id returned by runSearch.'),
+    groupName: z
+      .string()
+      .min(1)
+      .max(MAX_ID_LENGTH)
+      .optional()
+      .describe(
+        'The Cribl Search group the job was run against, as passed to runSearch. Defaults to ' +
+          '"default_search".'
+      ),
     limit: z
       .number()
       .int()

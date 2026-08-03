@@ -125,6 +125,22 @@ describe('Cribl', () => {
         Cribl.actions.request.handler(mockContext, { method: 'GET', path: '/system/users' })
       ).rejects.toThrow('not permitted');
     });
+
+    it('rejects blocked endpoints even when group-scoped via /m/{group}/...', async () => {
+      await expect(
+        Cribl.actions.request.handler(mockContext, {
+          method: 'GET',
+          path: '/m/default/system/users',
+        })
+      ).rejects.toThrow('not permitted');
+
+      await expect(
+        Cribl.actions.request.handler(mockContext, {
+          method: 'GET',
+          path: '/m/default/api-credentials',
+        })
+      ).rejects.toThrow('not permitted');
+    });
   });
 
   describe('listWorkerGroups', () => {
@@ -442,6 +458,21 @@ describe('Cribl', () => {
         timeCreated: 1700000000000,
       });
     });
+
+    it('targets a custom Search group when groupName is provided', async () => {
+      mockRequest.mockResolvedValue(okResponse({ items: [{ id: 'job-2' }], count: 1 }));
+
+      await Cribl.actions.runSearch.handler(mockContext, {
+        query: 'cribl dataset="ds" | limit 1000',
+        groupName: 'custom_search',
+      });
+
+      expect(mockRequest).toHaveBeenCalledWith(
+        expect.objectContaining({
+          url: `${SERVER_URL}/api/v1/m/custom_search/search/jobs`,
+        })
+      );
+    });
   });
 
   describe('getSearchResults', () => {
@@ -478,6 +509,21 @@ describe('Cribl', () => {
 
       expect(result.truncated).toBe(true);
       expect(result.records.length).toBeLessThan(5);
+    });
+
+    it('targets a custom Search group when groupName is provided', async () => {
+      mockRequest.mockResolvedValue(okResponse(''));
+
+      await Cribl.actions.getSearchResults.handler(mockContext, {
+        jobId: 'job-1',
+        groupName: 'custom_search',
+      });
+
+      expect(mockRequest).toHaveBeenCalledWith(
+        expect.objectContaining({
+          url: `${SERVER_URL}/api/v1/m/custom_search/search/jobs/job-1/results`,
+        })
+      );
     });
   });
 

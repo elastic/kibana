@@ -97,10 +97,10 @@ The Cribl connector has the following actions:
 :   Restart the Worker Processes in a Worker Group/Fleet (`groupName`). Only needed for customer-managed (on-prem) deployments to apply changes that require a full process restart.
 
 `runSearch`
-:   Submit a Cribl Search query (`query`, optional `earliest`, `latest`, `sampleRate`). The query must start with the `cribl` operator. Returns a job id.
+:   Submit a Cribl Search query (`query`, optional `groupName`, `earliest`, `latest`, `sampleRate`). The query must start with the `cribl` operator. `groupName` defaults to `default_search` and only needs to be set if the deployment has additional Search groups. Returns a job id.
 
 `getSearchResults`
-:   Read results for a search job started by `runSearch` (`jobId`, optional `limit`, `offset` for pagination). Output is capped to stay within an agent-safe context size.
+:   Read results for a search job started by `runSearch` (`jobId`, optional `groupName`, `limit`, `offset` for pagination). `groupName` must match the group passed to `runSearch` and defaults to `default_search`. Output is capped to stay within an agent-safe context size.
 
 `updateLookup`
 :   Create a new lookup file, or replace the contents of an existing one, used for data enrichment (`groupName`, `lookupId`, `content`, optional `contentType`, default `text/csv`).

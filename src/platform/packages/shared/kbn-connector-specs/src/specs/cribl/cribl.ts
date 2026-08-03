@@ -106,7 +106,7 @@ interface CriblRequestOptions {
 // Security guardrails
 // =============================================================================
 
-const normalizePathForGuards = (path: string): string => {
+const normalizePathSegments = (path: string): string[] => {
   const pathOnly = path.split(/[?#]/, 1)[0] ?? path;
   let decoded: string;
   try {
@@ -115,7 +115,7 @@ const normalizePathForGuards = (path: string): string => {
     throw new Error('Cribl API path contains invalid percent-encoding');
   }
   const segments: string[] = [];
-  for (const segment of decoded.split('/')) {
+  for (const segment of decoded.toLowerCase().split('/')) {
     if (segment === '' || segment === '.') {
       continue;
     }
@@ -125,14 +125,21 @@ const normalizePathForGuards = (path: string): string => {
     }
     segments.push(segment);
   }
-  return `/${segments.join('/')}`.toLowerCase();
+  return segments;
 };
 
 const assertPathAllowed = (path: string): void => {
   if (!path.startsWith('/')) {
     throw new Error('Cribl API path must start with "/"');
   }
-  const normalized = normalizePathForGuards(path);
+  const segments = normalizePathSegments(path);
+  // A path can reach the same Leader-global endpoints scoped to a Worker Group via the
+  // "/m/{group}/..." namespace (see criblRequest's own `group` option). Strip that prefix
+  // before matching so the blocklist can't be bypassed by group-scoping a blocked path,
+  // e.g. "/m/default/system/users" resolving to the same handler as "/system/users".
+  const unscopedSegments =
+    segments[0] === 'm' && segments.length > 1 ? segments.slice(2) : segments;
+  const normalized = `/${unscopedSegments.join('/')}`;
   for (const prefix of BLOCKED_PATH_PREFIXES) {
     if (normalized === prefix || normalized.startsWith(`${prefix}/`)) {
       throw new Error(`Requests to "${prefix}" are not permitted via this connector`);
@@ -676,7 +683,7 @@ export const Cribl: ConnectorSpec = {
       handler: async (ctx, input: RunSearchInput) => {
         const response = await criblRequest(ctx, {
           method: 'POST',
-          group: 'default_search',
+          group: input.groupName ?? 'default_search',
           path: '/search/jobs',
           data: {
             query: input.query,
@@ -709,7 +716,7 @@ export const Cribl: ConnectorSpec = {
       handler: async (ctx, input: GetSearchResultsInput) => {
         const response = await criblRequest(ctx, {
           method: 'GET',
-          group: 'default_search',
+          group: input.groupName ?? 'default_search',
           path: `/search/jobs/${encodeURIComponent(input.jobId)}/results`,
           params: {
             limit: String(input.limit ?? 100),
