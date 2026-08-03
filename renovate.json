@@ -1025,8 +1025,7 @@
         "ora",
         "@parcel/watcher",
         "@types/cli-progress",
-        "@types/dedent",
-        "@types/ora"
+        "@types/dedent"
       ],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
@@ -1882,11 +1881,20 @@
       "enabled": true
     },
     {
-      "groupName": "platform security modules - ESM required",
-      "matchDepNames": ["@kayahr/text-encoding", "uuid", "@types/uuid"],
+      "groupName": "@kayahr/text-encoding",
+      "matchDepNames": ["@kayahr/text-encoding", "uuid"],
       "reviewers": ["team:kibana-security"],
       "matchBaseBranches": ["main"],
-      "addLabels": ["Team:Security", "blocked"],
+      "addLabels": ["Team:Security"],
+      "minimumReleaseAge": "14 days",
+      "enabled": true
+    },
+    {
+      "groupName": "uuid",
+      "matchDepNames": ["uuid"],
+      "reviewers": ["team:kibana-security"],
+      "matchBaseBranches": ["main"],
+      "addLabels": ["Team:Security"],
       "minimumReleaseAge": "14 days",
       "enabled": true
     },
