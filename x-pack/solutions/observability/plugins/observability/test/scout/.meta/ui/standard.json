@@ -601,7 +601,7 @@
     },
     {
       "id": "d3ffd39f648f151-77c285778f177cc",
-      "title": "Observability cases - no privileges returns the feature-privileges-required page",
+      "title": "Observability cases - no privileges returns Application not found when the Observability app is inaccessible",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
