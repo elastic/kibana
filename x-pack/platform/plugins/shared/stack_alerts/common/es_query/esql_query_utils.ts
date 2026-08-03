@@ -144,14 +144,22 @@ export const toGroupedEsqlQueryHits = async (
   const duplicateAlertIds: Set<string> = new Set<string>();
   const longAlertIds: Set<string> = new Set<string>();
   const rows: EsqlDocument[] = [];
-  const mappedAlertIds: Record<string, Array<string | null>> = {};
+  const mappedAlertIds: Record<string, string[]> = {};
   const mappedAlertIdFields: Record<string, string[]> = {};
   const groupedHits: Record<string, EsqlHit[]> = {};
   for (let r = 0; r < table.values.length; r++) {
     const row = table.values[r];
     const document = rowToDocument(table.columns, row);
-    const filteredAlertIdFields = alertIdFields.filter((a) => !isNil(document[a]));
-    const mappedAlertId = filteredAlertIdFields.map((a) => document[a]);
+    // Single pass keeps fields/values index-aligned (bucket keyFields/key) and narrows out nulls.
+    const filteredAlertIdFields: string[] = [];
+    const mappedAlertId: string[] = [];
+    for (const field of alertIdFields) {
+      const value = document[field];
+      if (!isNil(value)) {
+        filteredAlertIdFields.push(field);
+        mappedAlertId.push(value);
+      }
+    }
     if (mappedAlertId.length > 0) {
       const alertId = mappedAlertId.join(',');
       const hit = {

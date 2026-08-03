@@ -29,7 +29,7 @@ export interface ParsedAggregationGroup {
  * Shape of a single `groupAgg` bucket consumed by {@link parseAggregationResults}.
  */
 export interface ParsedAggregationBucket {
-  key: string | Array<string | null>;
+  key: string | Array<string>;
   keyFields?: string[];
   doc_count: number;
   topHitsAgg?: {
@@ -120,7 +120,7 @@ export const parseAggregationResults = ({
         ? groupKeys.reduce<Group[]>((resultGroups, groupByItem, groupIndex) => {
             resultGroups.push({
               field: groupByItem,
-              value: `${groupValues[groupIndex]}`,
+              value: groupValues[groupIndex],
             });
             return resultGroups;
           }, [])
