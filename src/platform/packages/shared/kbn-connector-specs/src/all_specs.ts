@@ -64,3 +64,4 @@ export * from './specs/buildkite/buildkite';
 export * from './specs/dynatrace/dynatrace';
 export * from './specs/datadog/datadog';
 export * from './specs/jenkins/jenkins';
+export * from './specs/azure_monitor/azure_monitor';

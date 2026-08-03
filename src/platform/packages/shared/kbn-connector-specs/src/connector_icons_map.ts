@@ -299,4 +299,11 @@ export const ConnectorIconsMap: Map<
     '.jenkins',
     lazy(() => import(/* webpackChunkName: "connectorIconjenkins" */ './specs/jenkins/icon')),
   ],
+
+  [
+    '.azure_monitor',
+    lazy(
+      () => import(/* webpackChunkName: "connectorIconazuremonitor" */ './specs/azure_monitor/icon')
+    ),
+  ],
 ]);
