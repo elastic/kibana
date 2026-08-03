@@ -20,7 +20,10 @@ export type AppHeaderBack = string | AppHeaderBackTarget;
 /** @public */
 export interface AppHeaderBackTarget {
   href: string;
-  /** Click handler, called alongside href navigation when provided. */
+  /**
+   * Optional handler for behavior that differs from `href` navigation.
+   * Do not use it to navigate to `href`; Kibana handles same-origin links as SPA navigation.
+   */
   onClick?: MouseEventHandler;
   /** Destination name for accessibility (e.g. "Back to {label}"). */
   label?: string;
