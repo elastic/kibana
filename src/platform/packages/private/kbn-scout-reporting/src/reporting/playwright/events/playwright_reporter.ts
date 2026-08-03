@@ -336,6 +336,8 @@ export class ScoutPlaywrightReporter implements Reporter {
         suite: this.getSuitePropsFromTest(test),
         test: {
           ...this.getTestPropsFromTest(test),
+          // Status of the last attempt
+          status: attempts.at(-1)?.status,
           outcome: test.outcome(),
           attempts: attempts.length,
           duration: attempts.reduce((total, attempt) => total + attempt.duration, 0),

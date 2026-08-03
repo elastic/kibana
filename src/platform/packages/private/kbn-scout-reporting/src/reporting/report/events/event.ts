@@ -109,6 +109,7 @@ export interface ScoutTestInfo {
   }>;
   expected_status?: string;
   duration?: number;
+  /** On `test-end`, this attempt's status. On `test-outcome`, the last attempt's status. */
   status?: string;
   /** Zero-based attempt index; 0 is the first run, 1 the first retry. Present on `test-end`. */
   attempt?: number;

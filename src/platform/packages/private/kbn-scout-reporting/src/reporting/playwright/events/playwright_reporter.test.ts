@@ -237,12 +237,23 @@ describe('ScoutPlaywrightReporter', () => {
       expect(outcomeByTitle['passes first time']).toMatchObject({
         outcome: 'expected',
         attempts: 1,
+        status: 'passed',
       });
-      expect(outcomeByTitle['flaky test']).toMatchObject({ outcome: 'flaky', attempts: 2 });
-      expect(outcomeByTitle['hard fail']).toMatchObject({ outcome: 'unexpected', attempts: 2 });
+      expect(outcomeByTitle['flaky test']).toMatchObject({
+        outcome: 'flaky',
+        attempts: 2,
+        // Last attempt's status, not the first failing one.
+        status: 'passed',
+      });
+      expect(outcomeByTitle['hard fail']).toMatchObject({
+        outcome: 'unexpected',
+        attempts: 2,
+        status: 'failed',
+      });
       expect(outcomeByTitle['statically skipped']).toMatchObject({
         outcome: 'skipped',
         attempts: 1,
+        status: 'skipped',
       });
       expect(getTestOutcomeEvents()).toHaveLength(4);
     });
