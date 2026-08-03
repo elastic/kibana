@@ -14,6 +14,7 @@ import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugi
 import { isWorkflowsEnabled } from '@kbn/discoveries/impl/lib/helpers/is_workflows_enabled';
 import type { DiscoveriesPluginStartDeps } from '../types';
 import { getConfidenceStepDefinition } from './steps/confidence_step';
+import { getGenericConfidenceStepDefinition } from './steps/generic_confidence_step';
 import { getDefaultAlertRetrievalStepDefinition } from './steps/default_alert_retrieval_step';
 import { getDefaultValidationStepDefinition } from './steps/default_validation_step';
 import { getGenerateStepDefinition } from './steps/generate_step';
@@ -158,6 +159,23 @@ export const registerWorkflowSteps = (
     workflowsExtensions,
   });
 
+  const genericConfidenceStepDef = withWorkflowsEnabledGuard(
+    getGenericConfidenceStepDefinition({
+      getStartServices,
+      logger,
+    }),
+    getStartServices
+  );
+  logger.debug(
+    () => `Registering genericConfidenceStepDefinition with id: ${genericConfidenceStepDef.id}`
+  );
+  const genericConfidenceOutcome = tryRegisterStep({
+    getStartServices,
+    logger,
+    stepDefinition: genericConfidenceStepDef,
+    workflowsExtensions,
+  });
+
   const persistDiscoveriesStepDef = withWorkflowsEnabledGuard(
     getPersistDiscoveriesStepDefinition({
       adhocAttackDiscoveryDataClient,
@@ -217,6 +235,7 @@ export const registerWorkflowSteps = (
 
   const outcomes = [
     confidenceOutcome,
+    genericConfidenceOutcome,
     defaultAlertRetrievalOutcome,
     defaultValidationOutcome,
     generateOutcome,
