@@ -197,7 +197,7 @@ const formatAllocationExplanation = (explain: estypes.ClusterAllocationExplainRe
     for (const node of explain.node_allocation_decisions) {
       for (const decider of node.deciders ?? []) {
         if (decider.decision === 'NO' || decider.decision === 'THROTTLE') {
-          const key = `${decider.decider}|${decider.decision}|${decider.explanation}`;
+          const key = `${decider.decider}|${decider.decision}`;
           const existing = groups.get(key);
           if (existing) {
             existing.count++;
