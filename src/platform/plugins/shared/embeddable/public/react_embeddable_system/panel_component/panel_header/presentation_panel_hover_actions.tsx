@@ -353,21 +353,6 @@ export const PresentationPanelHoverActions = ({
           {dragHandle}
           {/* Wrapping all "right actions" in a span so that flex space-between works as expected */}
           <span>
-            {showDescription && (
-              <EuiIconTip
-                size="m"
-                title={!hideTitle ? title || undefined : undefined}
-                content={description}
-                position="top"
-                data-test-subj="embeddablePanelDescriptionTooltip"
-                type="info"
-                iconProps={{
-                  css: css`
-                    margin: ${euiTheme.size.xs};
-                  `,
-                }}
-              />
-            )}
             {quickActionElements.map(
               ({ iconType, 'data-test-subj': dataTestSubj, MenuItem, onClick, name, id }) => {
                 return MenuItem ? (
@@ -389,6 +374,21 @@ export const PresentationPanelHoverActions = ({
                   </EuiToolTip>
                 );
               }
+            )}
+            {showDescription && (
+              <EuiIconTip
+                size="m"
+                title={!hideTitle ? title || undefined : undefined}
+                content={description}
+                position="top"
+                data-test-subj="embeddablePanelDescriptionTooltip"
+                type="info"
+                iconProps={{
+                  css: css`
+                    margin: ${euiTheme.size.xs};
+                  `,
+                }}
+              />
             )}
             {showContextMenu ? (
               <EuiPopover
