@@ -9,7 +9,27 @@ import type { InlineField, RefField } from './fields';
 import { FieldType, isInlineField, isDisplayOnlyField } from './fields';
 import { evaluateCondition } from './evaluate_conditions';
 import { getFieldSnakeKey } from '../../../utils';
-import { MAX_EXTENDED_FIELD_VALUE_LENGTH } from '../../../constants';
+import { MAX_EXTENDED_FIELD_VALUE_BYTES } from '../../../constants';
+
+// Lucene's keyword-term limit is measured in UTF-8 bytes, while string.length
+// counts UTF-16 code units and can undercount non-ASCII input.
+const textEncoder = new TextEncoder();
+
+export const validateExtendedFieldValueSizes = (
+  extendedFields: Record<string, string>
+): string[] => {
+  const errors: string[] = [];
+
+  for (const [key, value] of Object.entries(extendedFields)) {
+    if (textEncoder.encode(value).byteLength > MAX_EXTENDED_FIELD_VALUE_BYTES) {
+      errors.push(
+        `Extended field "${key}" exceeds the maximum size of ${MAX_EXTENDED_FIELD_VALUE_BYTES} bytes`
+      );
+    }
+  }
+
+  return errors;
+};
 
 const validatePattern = (
   label: string,
@@ -129,7 +149,7 @@ export const validateExtendedFields = (
   fields: Array<RefField | InlineField>,
   { partial = false, onClose = false }: { partial?: boolean; onClose?: boolean } = {}
 ): string[] => {
-  const errors: string[] = [];
+  let errors: string[] = [];
   // Display-only fields (e.g. MARKDOWN) hold no value and are excluded from a case's stored
   // `extended_fields`, so they take no part in value/required validation. Dropping them here also
   // ensures their snake key is treated as an unknown key if it is ever submitted.
@@ -138,23 +158,13 @@ export const validateExtendedFields = (
   // 1. Build valid key set
   const validKeys = new Set(inlineFields.map((f) => getFieldSnakeKey(f.name, f.type)));
 
-  // 2. Unknown keys + value-length backstop
+  // 2. Unknown keys + value-size backstop
   for (const key of Object.keys(extendedFields)) {
     if (!validKeys.has(key)) {
       errors.push(`Unknown extended field key: "${key}"`);
     }
-    // Guard against a single oversized value regardless of control type or hidden/partial state:
-    // ES stores extended fields as a `flattened` field, and Lucene rejects a keyword term over
-    // ~32,766 bytes, which would otherwise fail the SO write opaquely. Applies to every submitted
-    // value, including one for a known key (the per-field validation below is control-specific and
-    // can skip hidden/absent fields, but the term-length limit is unconditional).
-    const rawValue = extendedFields[key];
-    if (typeof rawValue === 'string' && rawValue.length > MAX_EXTENDED_FIELD_VALUE_LENGTH) {
-      errors.push(
-        `Extended field "${key}" exceeds the maximum length of ${MAX_EXTENDED_FIELD_VALUE_LENGTH} characters`
-      );
-    }
   }
+  errors = errors.concat(validateExtendedFieldValueSizes(extendedFields));
 
   // 3. Build helper maps
   const fieldValues: Record<string, string | undefined> = {};

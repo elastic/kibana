@@ -66,7 +66,6 @@ import {
   FleetEncryptedSavedObjectEncryptionKeyRequired,
   OutputInvalidError,
   OutputUnauthorizedError,
-  FleetError,
 } from '../errors';
 
 import type { OutputType } from '../types';
@@ -879,10 +878,6 @@ class OutputService {
       savedObjectType: OUTPUT_SAVED_OBJECT_TYPE,
     });
 
-    if (outputSO.error) {
-      throw new FleetError(outputSO.error.message);
-    }
-
     return outputSavedObjectToOutput(outputSO);
   }
 
@@ -1232,15 +1227,11 @@ class OutputService {
       savedObjectType: OUTPUT_SAVED_OBJECT_TYPE,
     });
 
-    const outputSO = await this.soClient.update<Nullable<OutputSOAttributes>>(
+    await this.soClient.update<Nullable<OutputSOAttributes>>(
       SAVED_OBJECT_TYPE,
       outputIdToUuid(id),
       updateData
     );
-
-    if (outputSO.error) {
-      throw new FleetError(outputSO.error.message);
-    }
 
     if (secretsToDelete.length) {
       try {
@@ -1347,15 +1338,6 @@ class OutputService {
       SAVED_OBJECT_TYPE,
       outputIdToUuid(id)
     );
-
-    if (outputSO.error) {
-      appContextService
-        .getLogger()
-        .debug(
-          `Error getting output ${id} SO, using updated_at:undefined, cause: ${outputSO.error.message}`
-        );
-      return undefined;
-    }
 
     return outputSO.updated_at;
   }

@@ -14,7 +14,13 @@ import type {
   SavedObjectsSearchResponse,
 } from '@kbn/core-saved-objects-api-server';
 import type { Template } from '../../../common/types/domain/template/v1';
-import { CASE_TEMPLATE_SAVED_OBJECT } from '../../../common/constants';
+import {
+  CASE_TEMPLATE_SAVED_OBJECT,
+  MAX_EXTENDED_FIELD_VALUE_BYTES,
+  MAX_FIELDS_PER_TEMPLATE,
+  MAX_TEMPLATE_DEFINITION_LENGTH,
+  MAX_TEMPLATES_PER_OWNER,
+} from '../../../common/constants';
 import { TemplatesService } from '.';
 
 const buildDefinition = (
@@ -72,12 +78,13 @@ const createTemplateSO = (
   } as SavedObject<Template>);
 
 const createMockFindResponse = (
-  savedObjects: Array<SavedObject<Template>>
+  savedObjects: Array<SavedObject<Template>>,
+  totalOverride?: number
 ): SavedObjectsFindResponse<Template> =>
   ({
     page: 1,
     per_page: savedObjects.length,
-    total: savedObjects.length,
+    total: totalOverride ?? savedObjects.length,
     saved_objects: savedObjects,
   } as SavedObjectsFindResponse<Template>);
 
@@ -1527,189 +1534,296 @@ describe('TemplatesService', () => {
     const buildDefinitionWithFields = (name: string, fieldCount: number) =>
       yamlStringify({
         name,
-        fields: Array.from({ length: fieldCount }, (_, i) => ({
+        fields: Array.from({ length: fieldCount }, (_, index) => ({
           control: 'INPUT_TEXT',
-          name: `field_${i}`,
+          name: `field_${index}`,
           type: 'keyword',
         })),
       });
 
-    beforeEach(() => {
-      unsecuredSavedObjectsClient.create.mockResolvedValue({
-        id: 'template-id',
-        attributes: {} as Template,
-      } as SavedObject<Template>);
-    });
-
-    describe('MAX_TEMPLATES_PER_OWNER', () => {
-      it('rejects create when the owner is already at the template limit', async () => {
-        const service = createService();
-        // name-uniqueness + count both read `find`; return a full-but-distinctly-named set so the
-        // name check passes and only the count cap fires.
-        unsecuredSavedObjectsClient.find.mockResolvedValue({
-          page: 1,
-          per_page: 0,
-          total: 200,
-          saved_objects: [],
-        } as unknown as SavedObjectsFindResponse<Template>);
-
-        await expect(
-          service.createTemplate(
-            {
-              name: 'One Too Many',
-              owner: 'securitySolution',
-              definition: buildDefinition('One Too Many'),
-            },
-            'alice',
-            'generated-id'
-          )
-        ).rejects.toThrow('Cannot create more than 200 templates per owner.');
-
-        expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
-      });
-
-      it('allows create when the owner is one below the limit', async () => {
-        const service = createService();
-        unsecuredSavedObjectsClient.find.mockResolvedValue({
-          page: 1,
-          per_page: 0,
-          total: 199,
-          saved_objects: [],
-        } as unknown as SavedObjectsFindResponse<Template>);
-
-        await service.createTemplate(
+    const buildDefinitionWithDefault = (name: string, defaultValue: string) =>
+      yamlStringify({
+        name,
+        fields: [
           {
-            name: 'Just Fits',
-            owner: 'securitySolution',
-            definition: buildDefinition('Just Fits'),
+            control: 'INPUT_TEXT',
+            name: 'field_one',
+            type: 'keyword',
+            metadata: { default: defaultValue },
           },
-          'alice',
-          'generated-id'
-        );
-
-        expect(unsecuredSavedObjectsClient.create).toHaveBeenCalled();
+        ],
       });
 
-      it('surfaces the per-owner count cap on the create dry_run preflight', async () => {
-        const service = createService();
-        unsecuredSavedObjectsClient.find.mockResolvedValue({
-          page: 1,
-          per_page: 0,
-          total: 200,
-          saved_objects: [],
-        } as unknown as SavedObjectsFindResponse<Template>);
+    const buildDefinitionWithRefDefault = (name: string, defaultValue: string) =>
+      yamlStringify({
+        name,
+        fields: [
+          {
+            $ref: 'library_field',
+            metadata: { default: defaultValue },
+          },
+        ],
+      });
 
-        await expect(
-          service.validateWriteInput({
+    it('rejects create when the owner is at the template limit', async () => {
+      const service = createService();
+      unsecuredSavedObjectsClient.find.mockResolvedValue(
+        createMockFindResponse([], MAX_TEMPLATES_PER_OWNER)
+      );
+
+      await expect(
+        service.createTemplate(
+          {
             name: 'One Too Many',
             owner: 'securitySolution',
             definition: buildDefinition('One Too Many'),
-          })
-        ).rejects.toThrow('Cannot create more than 200 templates per owner.');
-
-        expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
-      });
-
-      it('does NOT apply the create-only count cap on the update dry_run preflight', async () => {
-        const service = createService();
-        // Owner is at the limit, but an update (identified by `excludeTemplateId`) edits an existing
-        // template in place — it must not be rejected by the create-only count cap.
-        unsecuredSavedObjectsClient.find.mockResolvedValue({
-          page: 1,
-          per_page: 0,
-          total: 200,
-          saved_objects: [],
-        } as unknown as SavedObjectsFindResponse<Template>);
-
-        await expect(
-          service.validateWriteInput(
-            {
-              name: 'Edited In Place',
-              owner: 'securitySolution',
-              definition: buildDefinition('Edited In Place'),
-            },
-            { excludeTemplateId: 'template-id' }
-          )
-        ).resolves.toBeUndefined();
-      });
-    });
-
-    describe('MAX_FIELDS_PER_TEMPLATE', () => {
-      it('rejects create when a definition declares more than 200 fields', async () => {
-        const service = createService();
-
-        await expect(
-          service.createTemplate(
-            {
-              name: 'Too Many Fields',
-              owner: 'securitySolution',
-              definition: buildDefinitionWithFields('Too Many Fields', 201),
-            },
-            'alice',
-            'generated-id'
-          )
-        ).rejects.toThrow('A template cannot define more than 200 fields.');
-
-        expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
-      });
-
-      it('allows create with exactly 200 fields', async () => {
-        const service = createService();
-
-        await service.createTemplate(
-          {
-            name: 'Exactly At Limit',
-            owner: 'securitySolution',
-            definition: buildDefinitionWithFields('Exactly At Limit', 200),
           },
           'alice',
           'generated-id'
-        );
+        )
+      ).rejects.toThrow(`Cannot create more than ${MAX_TEMPLATES_PER_OWNER} templates per owner.`);
 
-        expect(unsecuredSavedObjectsClient.create).toHaveBeenCalled();
-      });
+      expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+    });
 
-      it('rejects update when a definition declares more than 200 fields', async () => {
-        const service = createService();
-        jest
-          .spyOn(
-            service as unknown as Record<'_getTemplate', typeof service.getTemplate>,
-            '_getTemplate'
-          )
-          .mockResolvedValue({
-            id: 'template-so-id',
-            attributes: {
-              templateId: 'template-id',
-              name: 'Existing',
-              owner: 'securitySolution',
-              definition: buildDefinition('Existing'),
-              templateVersion: 1,
-              deletedAt: null,
-            },
-          } as SavedObject<Template>);
+    it('allows create when the owner is below the template limit', async () => {
+      const service = createService();
+      unsecuredSavedObjectsClient.find.mockResolvedValue(
+        createMockFindResponse([], MAX_TEMPLATES_PER_OWNER - 1)
+      );
 
-        await expect(
-          service.updateTemplate('template-id', {
+      await service.createTemplate(
+        {
+          name: 'Just Fits',
+          owner: 'securitySolution',
+          definition: buildDefinition('Just Fits'),
+        },
+        'alice',
+        'generated-id'
+      );
+
+      expect(unsecuredSavedObjectsClient.create).toHaveBeenCalled();
+    });
+
+    it('rejects an owner-changing update when the target owner is at the template limit', async () => {
+      const service = createService();
+      jest
+        .spyOn(
+          service as unknown as Record<'_getTemplate', typeof service.getTemplate>,
+          '_getTemplate'
+        )
+        .mockResolvedValue(
+          createTemplateSO('template-so-id', {
+            templateId: 'template-id',
             name: 'Existing',
             owner: 'securitySolution',
-            definition: buildDefinitionWithFields('Existing', 201),
           })
-        ).rejects.toThrow('A template cannot define more than 200 fields.');
+        );
+      unsecuredSavedObjectsClient.find.mockResolvedValue(
+        createMockFindResponse([], MAX_TEMPLATES_PER_OWNER)
+      );
 
-        expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+      await expect(
+        service.updateTemplate('template-id', {
+          name: 'Existing',
+          owner: 'observability',
+          definition: buildDefinition('Existing'),
+        })
+      ).rejects.toThrow(`Cannot create more than ${MAX_TEMPLATES_PER_OWNER} templates per owner.`);
+
+      expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+    });
+
+    it('allows a same-owner update when the owner is at the template limit', async () => {
+      const service = createService();
+      jest
+        .spyOn(
+          service as unknown as Record<'_getTemplate', typeof service.getTemplate>,
+          '_getTemplate'
+        )
+        .mockResolvedValue(
+          createTemplateSO('template-so-id', {
+            templateId: 'template-id',
+            name: 'Existing',
+            owner: 'securitySolution',
+          })
+        );
+      unsecuredSavedObjectsClient.find.mockResolvedValue(
+        createMockFindResponse([], MAX_TEMPLATES_PER_OWNER)
+      );
+
+      await service.updateTemplate('template-id', {
+        name: 'Updated',
+        owner: 'securitySolution',
+        definition: buildDefinition('Updated'),
       });
 
-      it('rejects the dry_run preflight when a definition declares more than 200 fields', async () => {
-        const service = createService();
+      expect(unsecuredSavedObjectsClient.find).not.toHaveBeenCalledWith(
+        expect.objectContaining({ perPage: 0 })
+      );
+      expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+        CASE_TEMPLATE_SAVED_OBJECT,
+        expect.objectContaining({ name: 'Updated', owner: 'securitySolution' }),
+        expect.any(Object)
+      );
+    });
 
-        await expect(
-          service.validateWriteInput({
+    it('rejects create when a definition declares too many fields', async () => {
+      const service = createService();
+
+      await expect(
+        service.createTemplate(
+          {
             name: 'Too Many Fields',
             owner: 'securitySolution',
-            definition: buildDefinitionWithFields('Too Many Fields', 201),
+            definition: buildDefinitionWithFields('Too Many Fields', MAX_FIELDS_PER_TEMPLATE + 1),
+          },
+          'alice',
+          'generated-id'
+        )
+      ).rejects.toThrow(`A template cannot define more than ${MAX_FIELDS_PER_TEMPLATE} fields.`);
+
+      expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+    });
+
+    it('allows create with exactly the maximum number of fields', async () => {
+      const service = createService();
+
+      await service.createTemplate(
+        {
+          name: 'Exactly At Limit',
+          owner: 'securitySolution',
+          definition: buildDefinitionWithFields('Exactly At Limit', MAX_FIELDS_PER_TEMPLATE),
+        },
+        'alice',
+        'generated-id'
+      );
+
+      expect(unsecuredSavedObjectsClient.create).toHaveBeenCalled();
+    });
+
+    it('rejects create when an ASCII template default exceeds the maximum byte size', async () => {
+      const service = createService();
+
+      await expect(
+        service.createTemplate(
+          {
+            name: 'Large Default',
+            owner: 'securitySolution',
+            definition: buildDefinitionWithDefault(
+              'Large Default',
+              'a'.repeat(MAX_EXTENDED_FIELD_VALUE_BYTES + 1)
+            ),
+          },
+          'alice',
+          'generated-id'
+        )
+      ).rejects.toThrow(
+        `Template field "field_one" default exceeds the maximum size of ${MAX_EXTENDED_FIELD_VALUE_BYTES} bytes`
+      );
+
+      expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+    });
+
+    it('allows create when a multibyte template default is exactly the maximum byte size', async () => {
+      const service = createService();
+      const cjkCharacter = '界';
+      const defaultValue = cjkCharacter.repeat(
+        MAX_EXTENDED_FIELD_VALUE_BYTES / new TextEncoder().encode(cjkCharacter).byteLength
+      );
+      const definition = buildDefinitionWithDefault('Boundary Default', defaultValue);
+
+      expect(definition.length).toBeLessThanOrEqual(MAX_TEMPLATE_DEFINITION_LENGTH);
+
+      await service.createTemplate(
+        {
+          name: 'Boundary Default',
+          owner: 'securitySolution',
+          definition,
+        },
+        'alice',
+        'generated-id'
+      );
+
+      expect(unsecuredSavedObjectsClient.create).toHaveBeenCalled();
+    });
+
+    it('rejects create when a $ref default override exceeds the maximum byte size', async () => {
+      const service = createService();
+
+      await expect(
+        service.createTemplate(
+          {
+            name: 'Large Ref Default',
+            owner: 'securitySolution',
+            definition: buildDefinitionWithRefDefault(
+              'Large Ref Default',
+              'a'.repeat(MAX_EXTENDED_FIELD_VALUE_BYTES + 1)
+            ),
+          },
+          'alice',
+          'generated-id'
+        )
+      ).rejects.toThrow(
+        `Template field "library_field" default exceeds the maximum size of ${MAX_EXTENDED_FIELD_VALUE_BYTES} bytes`
+      );
+
+      expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+    });
+
+    it('rejects update when a definition declares too many fields', async () => {
+      const service = createService();
+      jest
+        .spyOn(
+          service as unknown as Record<'_getTemplate', typeof service.getTemplate>,
+          '_getTemplate'
+        )
+        .mockResolvedValue(
+          createTemplateSO('template-so-id', {
+            templateId: 'template-id',
+            name: 'Existing',
           })
-        ).rejects.toThrow('A template cannot define more than 200 fields.');
-      });
+        );
+
+      await expect(
+        service.updateTemplate('template-id', {
+          name: 'Existing',
+          owner: 'securitySolution',
+          definition: buildDefinitionWithFields('Existing', MAX_FIELDS_PER_TEMPLATE + 1),
+        })
+      ).rejects.toThrow(`A template cannot define more than ${MAX_FIELDS_PER_TEMPLATE} fields.`);
+
+      expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+    });
+
+    it('rejects update when a non-ASCII template default exceeds the maximum byte size', async () => {
+      const service = createService();
+      jest
+        .spyOn(
+          service as unknown as Record<'_getTemplate', typeof service.getTemplate>,
+          '_getTemplate'
+        )
+        .mockResolvedValue(
+          createTemplateSO('template-so-id', {
+            templateId: 'template-id',
+            name: 'Existing',
+          })
+        );
+
+      await expect(
+        service.updateTemplate('template-id', {
+          name: 'Existing',
+          owner: 'securitySolution',
+          definition: buildDefinitionWithDefault(
+            'Existing',
+            '界'.repeat(Math.floor(MAX_EXTENDED_FIELD_VALUE_BYTES / 3) + 1)
+          ),
+        })
+      ).rejects.toThrow(
+        `Template field "field_one" default exceeds the maximum size of ${MAX_EXTENDED_FIELD_VALUE_BYTES} bytes`
+      );
+
+      expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
     });
 
     it('does not cap version history: allows update well past the former version limit', async () => {
@@ -1719,17 +1833,15 @@ describe('TemplatesService', () => {
           service as unknown as Record<'_getTemplate', typeof service.getTemplate>,
           '_getTemplate'
         )
-        .mockResolvedValue({
-          id: 'template-so-id',
-          attributes: {
+        .mockResolvedValue(
+          createTemplateSO('template-so-id', {
             templateId: 'template-id',
             name: 'Busy Template',
             owner: 'securitySolution',
             definition: buildDefinition('Busy Template'),
             templateVersion: 1000,
-            deletedAt: null,
-          },
-        } as SavedObject<Template>);
+          })
+        );
 
       await service.updateTemplate('template-id', {
         name: 'Busy Template',
@@ -1742,6 +1854,76 @@ describe('TemplatesService', () => {
         expect.objectContaining({ templateVersion: 1001 }),
         expect.any(Object)
       );
+    });
+
+    describe('validateWriteInput (dry_run preflight)', () => {
+      it('surfaces the per-owner count cap on the create dry_run preflight', async () => {
+        const service = createService();
+        unsecuredSavedObjectsClient.find.mockResolvedValue(
+          createMockFindResponse([], MAX_TEMPLATES_PER_OWNER)
+        );
+
+        await expect(
+          service.validateWriteInput({
+            name: 'One Too Many',
+            owner: 'securitySolution',
+            definition: buildDefinition('One Too Many'),
+          })
+        ).rejects.toThrow(
+          `Cannot create more than ${MAX_TEMPLATES_PER_OWNER} templates per owner.`
+        );
+
+        expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+      });
+
+      it('does NOT apply the create-only count cap on the update dry_run preflight', async () => {
+        const service = createService();
+        // Owner is at the limit, but an update (identified by `excludeTemplateId`) edits an existing
+        // template in place — it must not be rejected by the create-only count cap.
+        unsecuredSavedObjectsClient.find.mockResolvedValue(
+          createMockFindResponse([], MAX_TEMPLATES_PER_OWNER)
+        );
+
+        await expect(
+          service.validateWriteInput(
+            {
+              name: 'Edited In Place',
+              owner: 'securitySolution',
+              definition: buildDefinition('Edited In Place'),
+            },
+            { excludeTemplateId: 'template-id' }
+          )
+        ).resolves.toBeUndefined();
+      });
+
+      it('rejects the dry_run preflight when a definition declares too many fields', async () => {
+        const service = createService();
+
+        await expect(
+          service.validateWriteInput({
+            name: 'Too Many Fields',
+            owner: 'securitySolution',
+            definition: buildDefinitionWithFields('Too Many Fields', MAX_FIELDS_PER_TEMPLATE + 1),
+          })
+        ).rejects.toThrow(`A template cannot define more than ${MAX_FIELDS_PER_TEMPLATE} fields.`);
+      });
+
+      it('rejects the dry_run preflight when a template default exceeds the maximum byte size', async () => {
+        const service = createService();
+
+        await expect(
+          service.validateWriteInput({
+            name: 'Large Default',
+            owner: 'securitySolution',
+            definition: buildDefinitionWithDefault(
+              'Large Default',
+              'a'.repeat(MAX_EXTENDED_FIELD_VALUE_BYTES + 1)
+            ),
+          })
+        ).rejects.toThrow(
+          `Template field "field_one" default exceeds the maximum size of ${MAX_EXTENDED_FIELD_VALUE_BYTES} bytes`
+        );
+      });
     });
   });
 

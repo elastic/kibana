@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { dump } from 'js-yaml';
+import { stringify } from 'yaml';
 import type { Output } from '@kbn/fleet-plugin/common/types';
 import { transformOutputToFullPolicyOutput } from '@kbn/fleet-plugin/server/services/output_client';
 import type { InstalledIntegration } from '../types';
@@ -28,7 +28,7 @@ export function generateAgentConfigTar(
       path: 'elastic-agent.yml',
       mode: 0o644,
       mtime: now,
-      data: dump({
+      data: stringify({
         outputs: {
           default: outputConfig,
         },

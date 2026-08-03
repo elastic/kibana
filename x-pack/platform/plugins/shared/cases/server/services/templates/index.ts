@@ -25,16 +25,20 @@ import type {
 import { ParsedTemplateDefinitionSchema } from '../../../common/types/domain/template/v1';
 import type { FieldDefinition } from '../../../common/types/domain/field_definition/v1';
 import { isRefField } from '../../../common/types/domain/template/fields';
+import { getYamlDefaultAsString } from '../../../common/utils';
 import { toFieldDefinitions, trimFieldDefaults } from './utils';
 import {
   CASE_TEMPLATE_SAVED_OBJECT,
-  MAX_TEMPLATES_PER_OWNER,
+  MAX_EXTENDED_FIELD_VALUE_BYTES,
   MAX_FIELDS_PER_TEMPLATE,
+  MAX_TEMPLATES_PER_OWNER,
 } from '../../../common/constants';
 import type {
   TemplatesFindRequest,
   TemplatesFindResponse,
 } from '../../../common/types/api/template/v1';
+
+const textEncoder = new TextEncoder();
 
 export class TemplatesService {
   constructor(
@@ -366,6 +370,7 @@ export class TemplatesService {
     }
 
     this.assertFieldCountWithinLimit(parsedDefinition.fields.length);
+    this.assertTemplateDefaultValuesWithinLimit(parsedDefinition.fields);
 
     await this.assertTemplateNameIsUnique({
       name: templateName,
@@ -427,12 +432,17 @@ export class TemplatesService {
     }
 
     this.assertFieldCountWithinLimit(parsedDefinition.fields.length);
+    this.assertTemplateDefaultValuesWithinLimit(parsedDefinition.fields);
 
     await this.assertTemplateNameIsUnique({
       name: templateName,
       owner: input.owner,
       excludeTemplateId: currentTemplate.attributes.templateId,
     });
+
+    if (input.owner !== currentTemplate.attributes.owner) {
+      await this.assertOwnerTemplateCountWithinLimit(input.owner);
+    }
 
     const libraryDefs = await this.getLibraryDefsIfReferenced(parsedDefinition.fields, input.owner);
 
@@ -617,9 +627,11 @@ export class TemplatesService {
     }
 
     // Keep dry_run faithful to the real write: mirror the same resource-limit assertions each write
-    // path runs. Field count is capped on both create and update; the per-owner count cap is
-    // create-only, so gate it on whether this is a create preflight (no `excludeTemplateId`).
+    // path runs. Field count and default-value size are capped on both create and update; the
+    // per-owner count cap is create-only, so gate it on whether this is a create preflight (no
+    // `excludeTemplateId`).
     this.assertFieldCountWithinLimit(parsedDefinition.fields?.length ?? 0);
+    this.assertTemplateDefaultValuesWithinLimit(parsedDefinition.fields ?? []);
 
     await this.assertTemplateNameIsUnique({
       name: templateName,
@@ -643,6 +655,33 @@ export class TemplatesService {
       throw Boom.badRequest(
         `A template cannot define more than ${MAX_FIELDS_PER_TEMPLATE} fields.`
       );
+    }
+  }
+
+  /**
+   * Limits defaults stored in a newly written template definition. Value-bearing
+   * fields are later coerced into a case's `extended_fields`, so measure the
+   * same UTF-8 representation that will be persisted on the case.
+   */
+  private assertTemplateDefaultValuesWithinLimit(
+    fields: ParsedTemplate['definition']['fields']
+  ): void {
+    for (const field of fields) {
+      const metadata = field.metadata;
+      if (
+        metadata !== undefined &&
+        'default' in metadata &&
+        metadata.default !== undefined &&
+        metadata.default !== null
+      ) {
+        const value = getYamlDefaultAsString(metadata.default);
+        if (textEncoder.encode(value).byteLength > MAX_EXTENDED_FIELD_VALUE_BYTES) {
+          const fieldName = isRefField(field) ? field.name ?? field.$ref : field.name;
+          throw Boom.badRequest(
+            `Template field "${fieldName}" default exceeds the maximum size of ${MAX_EXTENDED_FIELD_VALUE_BYTES} bytes`
+          );
+        }
+      }
     }
   }
 
@@ -677,20 +716,6 @@ export class TemplatesService {
       );
     }
   }
-
-  /**
-   * Enforces that a template's identity `name` is unique per owner within the space, comparing
-   * case-insensitively against the latest, non-deleted version of every other template. The
-   * case-default title inside the YAML definition is intentionally NOT constrained here — only the
-   * template's metadata name.
-   *
-   * NOTE: This is a best-effort read-then-write check, not an atomic constraint. Saved objects have
-   * no unique index on `name`, so two concurrent creates/renames racing on the same name can both
-   * pass this check and persist. That is an accepted trade-off: template create/rename is a
-   * low-frequency administrative action, and the check reads the latest committed state (`refresh`
-   * writes are used on create/update), so the practical collision window is small. Enforcing true
-   * atomicity would require a dedicated uniqueness SO or an alias/lock, which is out of scope here.
-   */
 
   /**
    * Returns the names of active (non-deleted, latest-version) templates for the given owner
@@ -770,6 +795,19 @@ export class TemplatesService {
     return referencing;
   }
 
+  /**
+   * Enforces that a template's identity `name` is unique per owner within the space, comparing
+   * case-insensitively against the latest, non-deleted version of every other template. The
+   * case-default title inside the YAML definition is intentionally NOT constrained here — only the
+   * template's metadata name.
+   *
+   * NOTE: This is a best-effort read-then-write check, not an atomic constraint. Saved objects have
+   * no unique index on `name`, so two concurrent creates/renames racing on the same name can both
+   * pass this check and persist. That is an accepted trade-off: template create/rename is a
+   * low-frequency administrative action, and the check reads the latest committed state (`refresh`
+   * writes are used on create/update), so the practical collision window is small. Enforcing true
+   * atomicity would require a dedicated uniqueness SO or an alias/lock, which is out of scope here.
+   */
   private async assertTemplateNameIsUnique({
     name,
     owner,

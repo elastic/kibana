@@ -17,13 +17,20 @@ import {
   useEuiFontSize,
   useEuiTheme,
 } from '@elastic/eui';
+import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
+import {
+  getBlastRadiusEbtDetail,
+  NIGHTSHIFT_EBT_ACTIONS,
+  NIGHTSHIFT_EBT_ELEMENTS,
+} from '../common/ebt_constants';
 import { nightshiftInteractiveSurfaceTransition } from '../common/nightshift_transition';
 import type { BlastRadiusChip } from './blast_radius_chips';
 
 export const MAX_VISIBLE_BLAST_RADIUS_ENTITIES = 10;
 
 interface BlastRadiusEntityButtonProps {
+  chipKey: string;
   count: number;
   isSelected: boolean;
   name: string;
@@ -31,6 +38,7 @@ interface BlastRadiusEntityButtonProps {
 }
 
 function BlastRadiusEntityButton({
+  chipKey,
   count,
   isSelected,
   name,
@@ -46,6 +54,13 @@ function BlastRadiusEntityButton({
       })}
       aria-pressed={isSelected}
       data-test-subj="blast-radius-chip"
+      {...getEbtProps({
+        action: isSelected
+          ? NIGHTSHIFT_EBT_ACTIONS.CLEAR_BLAST_RADIUS_FILTER
+          : NIGHTSHIFT_EBT_ACTIONS.FILTER_BY_BLAST_RADIUS,
+        element: NIGHTSHIFT_EBT_ELEMENTS.BLAST_RADIUS,
+        detail: getBlastRadiusEbtDetail(chipKey),
+      })}
       css={css`
         align-items: center;
         background: ${isSelected
@@ -191,6 +206,7 @@ export function BlastRadiusEntities({
           {visibleEntities.map(({ count, key, name }) => (
             <EuiFlexItem grow={false} key={key}>
               <BlastRadiusEntityButton
+                chipKey={key}
                 count={count}
                 isSelected={selectedEntityKey === key}
                 name={name}
@@ -210,6 +226,10 @@ export function BlastRadiusEntities({
                 flush="left"
                 onClick={() => setExpanded(true)}
                 size="xs"
+                {...getEbtProps({
+                  action: NIGHTSHIFT_EBT_ACTIONS.EXPAND_BLAST_RADIUS,
+                  element: NIGHTSHIFT_EBT_ELEMENTS.BLAST_RADIUS,
+                })}
               >
                 {i18n.translate('xpack.observability.nightshift.blastRadiusShowMore', {
                   defaultMessage: '+{count} more',
@@ -230,6 +250,10 @@ export function BlastRadiusEntities({
                 flush="left"
                 onClick={() => setExpanded(false)}
                 size="xs"
+                {...getEbtProps({
+                  action: NIGHTSHIFT_EBT_ACTIONS.COLLAPSE_BLAST_RADIUS,
+                  element: NIGHTSHIFT_EBT_ELEMENTS.BLAST_RADIUS,
+                })}
               >
                 {i18n.translate('xpack.observability.nightshift.blastRadiusShowLess', {
                   defaultMessage: 'Show less',

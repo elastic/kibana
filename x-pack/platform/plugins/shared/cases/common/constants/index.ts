@@ -205,6 +205,7 @@ export const MAX_CASE_ID_LENGTH = 512 as const; // ES `_id` upper bound; connect
 export const MAX_TEMPLATE_VERSION_STRING_LENGTH = 10 as const;
 export const MAX_TEMPLATE_NAME_LENGTH = 50 as const;
 export const MAX_TEMPLATE_DESCRIPTION_LENGTH = 1000 as const;
+export const MAX_TEMPLATE_DEFINITION_LENGTH = 30000 as const;
 export const MAX_TEMPLATES_LENGTH = 10 as const;
 export const MAX_TEMPLATE_TAG_LENGTH = 50 as const;
 export const MAX_TAGS_PER_TEMPLATE = 10 as const;
@@ -225,12 +226,13 @@ export const MAX_FIELD_DEFINITIONS_PER_OWNER = 200 as const;
 export const MAX_TEMPLATES_PER_OWNER = 200 as const;
 export const MAX_FIELDS_PER_TEMPLATE = 200 as const;
 /**
- * Backstop on a single stored extended-field value. ES `flattened` fields have no key-count limit
- * and subfields don't count toward `index.mapping.total_fields.limit`, but Lucene rejects a keyword
- * term over 32,766 bytes and the SO write then fails opaquely. Cap below that (chars, not bytes, so
- * there's headroom for multi-byte UTF-8) to return an actionable 400 instead.
+ * Backstop on the UTF-8 byte size of a single stored extended-field value. ES `flattened` fields
+ * have no key-count limit and subfields don't count toward `index.mapping.total_fields.limit`, but
+ * Lucene rejects a keyword term over 32,766 bytes and the SO write then fails opaquely. Measure the
+ * UTF-8 byte length (not `string.length`, which counts UTF-16 code units and can undercount
+ * non-ASCII input) so this maps directly onto Lucene's limit.
  */
-export const MAX_EXTENDED_FIELD_VALUE_LENGTH = 30000 as const;
+export const MAX_EXTENDED_FIELD_VALUE_BYTES = 30000 as const;
 export const MAX_FILENAME_LENGTH = 160 as const;
 export const MAX_CUSTOM_OBSERVABLE_TYPES_LABEL_LENGTH = 50 as const;
 export const MAX_USER_ACTION_SEARCH_LENGTH = 256 as const;
@@ -408,6 +410,15 @@ export const CASES_LIST_PAGE_VIEW_EVENT_TYPE = 'cases_list_page_view' as const;
 
 export const CASE_VIEW_ATTACHMENT_ACCORDION_OPENED_EVENT_TYPE =
   'case_view_attachment_accordion_opened' as const;
+
+export const CASE_VIEW_ATTACH_BUTTON_CLICKED_EVENT_TYPE =
+  'case_view_attach_button_clicked' as const;
+
+export const CASE_VIEW_ATTACH_MENU_ITEM_CLICKED_EVENT_TYPE =
+  'case_view_attach_menu_item_clicked' as const;
+
+export const CASE_MARKDOWN_EDITOR_PLUGIN_CLICKED_EVENT_TYPE =
+  'case_markdown_editor_plugin_clicked' as const;
 
 /**
  * Cases list view toggle. Defined in `common` (rather than the redesign UI package) so that
