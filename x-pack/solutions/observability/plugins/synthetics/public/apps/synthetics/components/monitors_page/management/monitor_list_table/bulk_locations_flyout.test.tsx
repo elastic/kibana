@@ -148,6 +148,34 @@ describe('<BulkLocationsFlyout />', () => {
     ).toEqual(['us_east']);
   });
 
+  it('clears a monitor’s private location when overwriting with a public one', async () => {
+    // Regression: the public bulk-update route carries a monitor's existing
+    // private locations forward unless the payload names them. Overwriting a
+    // private-only monitor with a public location must send an explicit (empty)
+    // `private_locations` so the private location is actually dropped.
+    const monitors = [
+      makeMonitor('ui-1', 'Monitor 1', {
+        locations: [{ id: 'qa_private', label: 'QA private', isServiceManaged: false }],
+      }),
+    ];
+    fetchBulkUpdateMonitorsMock.mockResolvedValue({ result: [{ id: 'ui-1', updated: true }] });
+
+    const { getByTestId, getByRole } = render(
+      <BulkLocationsFlyout monitors={monitors} onClose={onClose} reloadPage={reloadPage} />
+    );
+
+    setMode(getByRole, 'Overwrite');
+    selectUsEast(getByTestId);
+    clickSave(getByTestId);
+
+    await waitFor(() => expect(fetchBulkUpdateMonitorsMock).toHaveBeenCalledTimes(1));
+    const { attributes } = fetchBulkUpdateMonitorsMock.mock.calls[0][0].updates[0];
+    expect((attributes[ConfigKey.LOCATIONS] as Array<{ id: string }>).map((l) => l.id)).toEqual([
+      'us_east',
+    ]);
+    expect(attributes.private_locations).toEqual([]);
+  });
+
   it('warns and disables save when a removal would empty a monitor’s locations', () => {
     const monitors = [
       makeMonitor('ui-1', 'Monitor 1', { locations: [location('us_east', 'US East')] }),

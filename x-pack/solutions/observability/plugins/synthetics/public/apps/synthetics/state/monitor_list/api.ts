@@ -74,7 +74,10 @@ export const fetchDeleteMonitor = async ({
 
 export interface BulkUpdateMonitorRequest {
   id: string;
-  attributes: Partial<EncryptedSyntheticsMonitor>;
+  // `private_locations` isn't a stored monitor attribute — it's a request-only
+  // field the public API's location normalizer reads alongside `locations`.
+  // Sending it lets callers express the full, authoritative location set.
+  attributes: Partial<EncryptedSyntheticsMonitor> & { private_locations?: string[] };
 }
 
 export interface BulkUpdateMonitorsResult {
