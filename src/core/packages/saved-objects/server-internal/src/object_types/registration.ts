@@ -49,10 +49,12 @@ const deferredInitStateType: SavedObjectsType = {
   mappings: {
     dynamic: false,
     properties: {
-      status: { type: 'keyword' },
+      // `ignore_above` bounds these keyword fields so an over-long value can't blow up the
+      // mapping (both are short by construction: a fixed enum and a Kibana version string).
+      status: { type: 'keyword', ignore_above: 256 },
       updatedAt: { type: 'date' },
       attempts: { type: 'integer' },
-      kibanaVersion: { type: 'keyword' },
+      kibanaVersion: { type: 'keyword', ignore_above: 256 },
       // lastError is diagnostic free text; deliberately unmapped (dynamic: false covers it).
     },
   },
