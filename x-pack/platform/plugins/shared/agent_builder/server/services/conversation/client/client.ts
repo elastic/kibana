@@ -257,63 +257,6 @@ class ConversationClientImpl implements ConversationClient {
     }
   }
 
-  /**
-   * Read-modify-write against the stored conversation, retrying on conflict.
-   * `mutate` is replayed per attempt, so it must be free of side effects.
-   */
-  private async writeWithOcc({
-    conversationId,
-    access,
-    mutate,
-    maxRetries = OCC_MAX_RETRIES,
-  }: {
-    conversationId: string;
-    access: ConversationAccess;
-    mutate: (current: Conversation) => Conversation;
-    maxRetries?: number;
-  }): Promise<Conversation> {
-    let updatedConversation: Conversation | undefined;
-
-    const writer = new OccWriter<ConversationProperties>({
-      get: async (id) => {
-        const document = await this.getDocumentWithAccess({ conversationId: id, access });
-
-        return {
-          id,
-          source: document._source!,
-          occ: { seqNo: document._seq_no!, primaryTerm: document._primary_term! },
-        };
-      },
-      // `refresh` stays at the adapter's `wait_for` default so a retry's re-read sees the winner
-      index: async ({ id, document, ifSeqNo, ifPrimaryTerm }) => {
-        const response = await this.storage.getClient().index({
-          id,
-          document,
-          ...(ifSeqNo != null && ifPrimaryTerm != null
-            ? { if_seq_no: ifSeqNo, if_primary_term: ifPrimaryTerm }
-            : {}),
-        });
-
-        return { seqNo: response._seq_no!, primaryTerm: response._primary_term! };
-      },
-      logger: this.logger,
-      maxRetries,
-      retryDelayMs: OCC_RETRY_DELAY_MS,
-    });
-
-    await writer.readModifyWrite({
-      id: conversationId,
-      mutate: (source) => {
-        updatedConversation = mutate(fromEs({ _id: conversationId, _source: source }));
-
-        return toEs(updatedConversation, this.space);
-      },
-    });
-
-    // readModifyWrite either invokes the mutator or throws
-    return updatedConversation!;
-  }
-
   /** Merges a round into the conversation as stored, not into the caller's snapshot. */
   async persistRound(
     request: PersistRoundRequest,
@@ -458,5 +401,62 @@ class ConversationClientImpl implements ConversationClient {
     }
 
     return document;
+  }
+
+  /**
+   * Read-modify-write against the stored conversation, retrying on conflict.
+   * `mutate` is replayed per attempt, so it must be free of side effects.
+   */
+  private async writeWithOcc({
+    conversationId,
+    access,
+    mutate,
+    maxRetries = OCC_MAX_RETRIES,
+  }: {
+    conversationId: string;
+    access: ConversationAccess;
+    mutate: (current: Conversation) => Conversation;
+    maxRetries?: number;
+  }): Promise<Conversation> {
+    let updatedConversation: Conversation | undefined;
+
+    const writer = new OccWriter<ConversationProperties>({
+      get: async (id) => {
+        const document = await this.getDocumentWithAccess({ conversationId: id, access });
+
+        return {
+          id,
+          source: document._source!,
+          occ: { seqNo: document._seq_no!, primaryTerm: document._primary_term! },
+        };
+      },
+      // `refresh` stays at the adapter's `wait_for` default so a retry's re-read sees the winner
+      index: async ({ id, document, ifSeqNo, ifPrimaryTerm }) => {
+        const response = await this.storage.getClient().index({
+          id,
+          document,
+          ...(ifSeqNo != null && ifPrimaryTerm != null
+            ? { if_seq_no: ifSeqNo, if_primary_term: ifPrimaryTerm }
+            : {}),
+        });
+
+        return { seqNo: response._seq_no!, primaryTerm: response._primary_term! };
+      },
+      logger: this.logger,
+      maxRetries,
+      retryDelayMs: OCC_RETRY_DELAY_MS,
+    });
+
+    await writer.readModifyWrite({
+      id: conversationId,
+      mutate: (source) => {
+        updatedConversation = mutate(fromEs({ _id: conversationId, _source: source }));
+
+        return toEs(updatedConversation, this.space);
+      },
+    });
+
+    // readModifyWrite either invokes the mutator or throws
+    return updatedConversation!;
   }
 }
