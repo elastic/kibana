@@ -58,7 +58,11 @@ apiTest.describe('dashboards - search', { tag: tags.deploymentAgnostic }, () => 
     expect(response.body.meta.page).toBe(1);
     expect(response.body.meta.per_page).toBe(20);
     expect(response.body.data).toHaveLength(20);
-    expect(response.body.data[0].id).toBe('test-dashboard-00');
+    // Fixture dashboards share the same updated_at, so relative order among ties is not guaranteed.
+    for (const dashboard of response.body.data) {
+      expect(dashboard.id).toBeDefined();
+      expect(dashboard.meta.updated_at).toBeDefined();
+    }
   });
 
   apiTest('should narrow results by query', async ({ apiClient }) => {
@@ -121,9 +125,23 @@ apiTest.describe('dashboards - search', { tag: tags.deploymentAgnostic }, () => 
       expect(response.body.meta.page).toBe(5);
       expect(response.body.meta.per_page).toBe(10);
       expect(response.body.data).toHaveLength(10);
-      expect(response.body.data[0].id).toBe('test-dashboard-40');
+      // Relative order among equal updated_at values is not guaranteed; assert page membership only.
+      const pageIds = response.body.data.map((dashboard: { id: string }) => dashboard.id);
+      expect(new Set(pageIds).size).toBe(10);
     }
   );
+
+  apiTest('defaults to updated_at descending when query is omitted', async ({ apiClient }) => {
+    const response = await apiClient.get(buildUrl({ per_page: 1000 }), {
+      headers: { ...COMMON_HEADERS, ...viewerCredentials.apiKeyHeader },
+      responseType: 'json',
+    });
+
+    expect(response).toHaveStatusCode(200);
+    // The tagged dashboard fixture is older than many_dashboards, so it is last under the default.
+    const ids = response.body.data.map((dashboard: { id: string }) => dashboard.id);
+    expect(ids[ids.length - 1]).toBe('8d66658a-f5b7-4482-84dc-f41d317473b8');
+  });
 
   apiTest('should narrow results by tags', async ({ apiClient }) => {
     const response = await apiClient.get(buildUrl({ tags: 'tag-2' }), {
