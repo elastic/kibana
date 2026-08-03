@@ -37,6 +37,7 @@ export const AutoSuggestComplete = memo<AutoSuggestCompleteProps>(
             suggestion: { value: '' },
           },
         });
+
         return;
       }
 
@@ -60,6 +61,8 @@ export const AutoSuggestComplete = memo<AutoSuggestCompleteProps>(
             },
           });
         }
+
+        return;
       }
 
       // Suggest argument names
@@ -82,6 +85,18 @@ export const AutoSuggestComplete = memo<AutoSuggestCompleteProps>(
             },
           });
         }
+
+        return;
+      }
+
+      // Nothing to suggest - ensure no suggestion is stored in state
+      if (suggestionValue) {
+        dispatch({
+          type: 'updateInputSuggestionState',
+          payload: {
+            suggestion: { value: '' },
+          },
+        });
       }
     }, [
       dispatch,
