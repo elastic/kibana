@@ -265,7 +265,29 @@ describe('UiamOAuth', () => {
       expect(mockUiam.listOAuthConnections).toHaveBeenCalledWith(
         'essu_access_token',
         'c1',
-        'conn1'
+        'conn1',
+        undefined
+      );
+    });
+
+    it('forwards project_id filter to UIAM service', async () => {
+      const mockResponse = { connections: [] };
+      mockUiam.listOAuthConnections.mockResolvedValue(mockResponse);
+      const request = createMockRequest('Bearer essu_access_token');
+
+      const result = await uiamOAuth.listConnections(
+        request,
+        undefined,
+        undefined,
+        'my-project-id'
+      );
+
+      expect(result).toEqual(mockResponse);
+      expect(mockUiam.listOAuthConnections).toHaveBeenCalledWith(
+        'essu_access_token',
+        undefined,
+        undefined,
+        'my-project-id'
       );
     });
   });
