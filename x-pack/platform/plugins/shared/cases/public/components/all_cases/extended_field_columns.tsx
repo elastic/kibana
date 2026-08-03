@@ -5,46 +5,14 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import type { CaseUI } from '../../../common/ui/types';
 import type { InlineField } from '../../../common/types/domain/template/fields';
 import { FieldType } from '../../../common/types/domain/template/fields';
-import {
-  getFieldCamelKey,
-  getFieldSnakeKey,
-  parseFieldDefinitionsToInlineFields,
-} from '../../../common/utils';
-import { useCasesContext } from '../cases_context/use_cases_context';
-import { useGetFieldDefinitions } from '../field_library/hooks/use_get_field_definitions';
+import { getFieldCamelKey, getFieldSnakeKey } from '../../../common/utils';
 import { getEmptyCellValue } from '../empty_value';
 import { TOGGLE_FIELD_ON_LABEL, TOGGLE_FIELD_OFF_LABEL } from '../custom_fields/translations';
-
-/**
- * Fetches and parses the owner's global field definitions into inline fields.
- * Global (isGlobal) fields apply to every case, so they map 1:1 to columns; migrated
- * legacy custom fields also surface here (migration writes them as global fields).
- * The fetch is skipped (owner undefined) when `enabled` is false so the legacy
- * customFields path pays no extra request.
- */
-export const useGlobalInlineFields = ({ enabled = true }: { enabled?: boolean } = {}): {
-  globalInlineFields: InlineField[];
-  isLoading: boolean;
-} => {
-  const { owner } = useCasesContext();
-  const { data, isFetching } = useGetFieldDefinitions({
-    owner: enabled ? owner : undefined,
-    isGlobal: true,
-    // Fetch once per session; a new array reference on refetch would churn the column memos.
-    staleTime: Infinity,
-  });
-
-  const globalInlineFields = useMemo(
-    () => parseFieldDefinitionsToInlineFields(data?.fieldDefinitions ?? []),
-    [data]
-  );
-
-  return { globalInlineFields, isLoading: enabled && isFetching };
-};
 
 /**
  * Stable column/config identity for a global field (e.g. `priority_as_keyword`). Kept snake so the
@@ -74,11 +42,13 @@ export const renderExtendedFieldValue = (
     return getEmptyCellValue();
   }
 
+  // `eui-textTruncate` keeps long values inside the column's bounded width (see
+  // getExtendedFieldTableColumn) so one field can't stretch the whole table.
   const dataTestSubj = `case-table-column-extendedField-${getExtendedFieldColumnKey(field)}`;
 
   if (field.control === FieldType.TOGGLE) {
     return (
-      <span data-test-subj={dataTestSubj}>
+      <span className="eui-textTruncate" data-test-subj={dataTestSubj}>
         {rawValue === 'true' ? TOGGLE_FIELD_ON_LABEL : TOGGLE_FIELD_OFF_LABEL}
       </span>
     );
@@ -86,15 +56,27 @@ export const renderExtendedFieldValue = (
 
   if (field.control === FieldType.CHECKBOX_GROUP) {
     const values = parseJsonArray(rawValue);
-    return <span data-test-subj={dataTestSubj}>{values ? values.join(', ') : rawValue}</span>;
+    return (
+      <span className="eui-textTruncate" data-test-subj={dataTestSubj}>
+        {values ? values.join(', ') : rawValue}
+      </span>
+    );
   }
 
   if (field.control === FieldType.USER_PICKER) {
     const names = [...rawValue.matchAll(/"name":"([^"]*)"/g)].map((match) => match[1]);
-    return <span data-test-subj={dataTestSubj}>{names.length ? names.join(', ') : rawValue}</span>;
+    return (
+      <span className="eui-textTruncate" data-test-subj={dataTestSubj}>
+        {names.length ? names.join(', ') : rawValue}
+      </span>
+    );
   }
 
-  return <span data-test-subj={dataTestSubj}>{rawValue}</span>;
+  return (
+    <span className="eui-textTruncate" data-test-subj={dataTestSubj}>
+      {rawValue}
+    </span>
+  );
 };
 
 /**
@@ -107,3 +89,14 @@ export const getExtendedFieldCellValue = (field: InlineField, theCase: CaseUI): 
     field,
     theCase.extendedFields?.[getFieldCamelKey(field.name, field.type)]
   );
+
+/**
+ * Builds the all-cases table column for a global field. Width is bounded (matching the legacy
+ * text custom-field column) so a single extended-field column can't push the rest off-screen.
+ */
+export const getExtendedFieldTableColumn = (field: InlineField): EuiBasicTableColumn<CaseUI> => ({
+  name: field.label ?? field.name,
+  maxWidth: '18em',
+  minWidth: '6em',
+  render: (theCase: CaseUI) => getExtendedFieldCellValue(field, theCase),
+});

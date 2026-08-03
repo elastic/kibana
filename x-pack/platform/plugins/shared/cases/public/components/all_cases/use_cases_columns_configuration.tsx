@@ -10,7 +10,8 @@ import { ALERTS, EVENTS } from '../../common/translations';
 import { useCasesFeatures } from '../../common/use_cases_features';
 import { useCasesConfig } from '../../common/lib/kibana';
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
-import { getExtendedFieldColumnKey, useGlobalInlineFields } from './extended_field_columns';
+import { getExtendedFieldColumnKey } from './extended_field_columns';
+import { useGlobalInlineFields } from './hooks/use_global_inline_fields';
 
 export type CasesColumnsConfiguration = Record<
   string,

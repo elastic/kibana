@@ -38,10 +38,10 @@ import {
   useKibana,
 } from '../../../../common/lib/kibana';
 import {
-  getExtendedFieldCellValue,
   getExtendedFieldColumnKey,
-  useGlobalInlineFields,
+  getExtendedFieldTableColumn,
 } from '../../../all_cases/extended_field_columns';
+import { useGlobalInlineFields } from '../../../all_cases/hooks/use_global_inline_fields';
 import { TruncatedText } from '../../../truncated_text';
 import { getConnectorIcon } from '../../../utils';
 import { AssigneesColumn } from '../../../all_cases/assignees_column';
@@ -362,10 +362,7 @@ export const useCasesColumns = ({
     // `extendedFields`; otherwise they come from the legacy customFields config.
     if (templatesEnabled) {
       globalInlineFields.forEach((field) => {
-        dict[getExtendedFieldColumnKey(field)] = {
-          name: field.label ?? field.name,
-          render: (theCase: CaseUI) => getExtendedFieldCellValue(field, theCase),
-        };
+        dict[getExtendedFieldColumnKey(field)] = getExtendedFieldTableColumn(field);
       });
 
       return dict;

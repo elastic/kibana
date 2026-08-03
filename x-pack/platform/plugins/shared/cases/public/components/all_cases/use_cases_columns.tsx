@@ -34,11 +34,8 @@ import * as i18n from './translations';
 import { useActions } from './use_actions';
 import { useCasesColumnsConfiguration } from './use_cases_columns_configuration';
 import { useApplicationCapabilities, useCasesConfig, useKibana } from '../../common/lib/kibana';
-import {
-  getExtendedFieldCellValue,
-  getExtendedFieldColumnKey,
-  useGlobalInlineFields,
-} from './extended_field_columns';
+import { getExtendedFieldColumnKey, getExtendedFieldTableColumn } from './extended_field_columns';
+import { useGlobalInlineFields } from './hooks/use_global_inline_fields';
 import { TruncatedText } from '../truncated_text';
 import { getConnectorIcon } from '../utils';
 import { AssigneesColumn } from './assignees_column';
@@ -354,10 +351,7 @@ export const useCasesColumns = ({
   // `extendedFields`; otherwise they come from the legacy customFields config.
   if (templatesEnabled) {
     globalInlineFields.forEach((field) => {
-      columnsDict[getExtendedFieldColumnKey(field)] = {
-        name: field.label ?? field.name,
-        render: (theCase: CaseUI) => getExtendedFieldCellValue(field, theCase),
-      };
+      columnsDict[getExtendedFieldColumnKey(field)] = getExtendedFieldTableColumn(field);
     });
   } else {
     customFields.forEach(({ key, type, label }) => {

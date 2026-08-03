@@ -17,7 +17,7 @@ import { useCaseConfigureResponse } from '../configure_cases/__mock__';
 import { CustomFieldTypes } from '../../../common/types/domain';
 import { FieldType } from '../../../common/types/domain/template/fields';
 import { useCasesConfig } from '../../common/lib/kibana';
-import { useGlobalInlineFields } from './extended_field_columns';
+import { useGlobalInlineFields } from './hooks/use_global_inline_fields';
 import React from 'react';
 
 jest.mock('../../common/use_cases_features');
@@ -26,8 +26,8 @@ jest.mock('../../common/lib/kibana', () => ({
   ...jest.requireActual('../../common/lib/kibana'),
   useCasesConfig: jest.fn(),
 }));
-jest.mock('./extended_field_columns', () => ({
-  ...jest.requireActual('./extended_field_columns'),
+jest.mock('./hooks/use_global_inline_fields', () => ({
+  ...jest.requireActual('./hooks/use_global_inline_fields'),
   useGlobalInlineFields: jest.fn(),
 }));
 
