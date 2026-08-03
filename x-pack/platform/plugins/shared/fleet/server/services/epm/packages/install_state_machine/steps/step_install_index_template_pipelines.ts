@@ -162,10 +162,8 @@ async function reinstallCustomDatasetTemplates({
         customDataStreamOriginType: originInfo.type,
       });
 
-      // Pass packageInfo so an OTel-derived custom dataset gets the same `.otel` suffix as its
-      // manifest counterpart. Custom datasets have no manifest entry of their own, so the
-      // install/upgrade recompute in stepSaveSystemObject (which only recomputes manifest
-      // entries) can never repair a pattern stored without it.
+      // Pass packageInfo so an OTel-derived custom dataset gets the `.otel` suffix too; it has
+      // no manifest entry for stepSaveSystemObject's recompute to repair later.
       currentRefs = await optimisticallyAddEsAssetReferences(
         savedObjectsClient,
         packageInfo.name,

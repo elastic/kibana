@@ -275,12 +275,8 @@ export async function getIncomingDataByAgentsId({
 
 /**
  * Identity-free incoming-data check for a single agentless agent whose data streams carry no
- * queryable agent identity (native OTel documents). `dataStreamPattern` must be scoped to the
- * requesting agent's own namespace by the caller: an unscoped wildcard would report success for
- * any document from any deployment of the same package, since there is no `agent.id` left to
- * narrow the match. `agentId` is deliberately singular so a single hit can never be fanned out
- * across agents that were not measured. See `getAgentDataHandler` for the gate that gives both
- * guarantees before calling this function.
+ * queryable agent identity (native OTel documents). The caller must scope `dataStreamPattern` to
+ * the agent's own namespace; see `getAgentDataHandler` for the gate that guarantees this.
  */
 export async function getIncomingDataByDataStreams({
   esClient,
@@ -313,10 +309,8 @@ export async function getIncomingDataByDataStreams({
       () =>
         esClient.search({
           index: dataStreamPattern,
-          // The pattern names concrete, non-wildcarded data stream names (see the doc
-          // comment above), which do not exist until the first document is ingested.
-          // Without this, Elasticsearch rejects the request with index_not_found_exception
-          // instead of returning zero hits, which would otherwise stop the polling caller.
+          // The pattern names concrete data streams that may not exist yet; without this,
+          // Elasticsearch throws index_not_found_exception instead of returning zero hits.
           ignore_unavailable: true,
           allow_partial_search_results: true,
           _source: returnDataPreview,

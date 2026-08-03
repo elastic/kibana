@@ -78,11 +78,9 @@ export async function stepSaveSystemObject(context: InstallContext) {
   );
   logger.debug(`Package install - Install status ${updatedPackage?.attributes?.install_status}`);
 
-  // Recompute es_index_patterns from the manifest and merge over the stored map, so that an
-  // install or upgrade repairs stale or missing entries (including, but not limited to, OTel
-  // '.otel' suffixes). The merge base is re-read on every attempt, matching the retry precedent
-  // in es_assets_reference.ts, since custom-dataset and input-package flows can concurrently
-  // add entries through optimisticallyAddEsAssetReferences that this recompute must not drop.
+  // Recompute es_index_patterns from the manifest and merge over the stored map so install/
+  // upgrade repairs stale entries (e.g. missing '.otel' suffixes). The merge base is re-read on
+  // every retry attempt so this doesn't clobber entries other install flows add concurrently.
   const recomputedEsIndexPatterns = generateESIndexPatterns(
     getNormalizedDataStreams(packageInfo, GENERIC_DATASET_NAME).filter(
       (ds): ds is RegistryDataStream => !!ds.type

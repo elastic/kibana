@@ -797,9 +797,8 @@ describe('stepInstallIndexTemplatePipelines', () => {
         esReferences: [],
       });
 
-      // Without packageInfo, isOtelDataStream (invoked inside the real generateESIndexPatterns)
-      // can never fire, so an OTel-derived custom dataset would silently keep the unsuffixed
-      // pattern that the manifest-driven recompute in stepSaveSystemObject cannot repair.
+      // Without packageInfo, this pattern would keep an unsuffixed dataset that
+      // stepSaveSystemObject's manifest-driven recompute can't repair later.
       expect(mockedGenerateESIndexPatterns).toHaveBeenCalledWith(
         [expect.objectContaining({ dataset: 'my_custom_access', path: 'my_custom_access' })],
         packageInstallContext.packageInfo

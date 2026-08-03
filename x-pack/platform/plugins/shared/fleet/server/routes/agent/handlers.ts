@@ -377,14 +377,10 @@ export const getAgentStatusForAgentPolicyHandler: FleetRequestHandler<
 };
 
 /**
- * Resolves the namespace-scoped OTel pattern for the identity-free incoming-data path,
- * or undefined if any condition of the gate does not hold. Every unresolved step falls back
- * to the identity path unchanged: a `notFound` agent, a missing or unresolved policy, a policy
- * that is not agentless, or a namespace that cannot be determined.
- *
- * The pattern is scoped to one namespace, never a wildcard: an unscoped pattern would report
- * success for any document from any deployment of the same package, since there is no
- * `agent.id` left to narrow the match once the identity filter is dropped.
+ * Resolves the namespace-scoped OTel pattern for the identity-free incoming-data path, or
+ * undefined if any condition of the gate (agent, policy, namespace) does not hold. The pattern
+ * is scoped to a single namespace, never a wildcard, since there is no `agent.id` left to
+ * narrow the match once the identity filter is dropped.
  */
 async function resolveAgentlessOtelDataStreamPattern({
   agentClient,
@@ -414,18 +410,17 @@ async function resolveAgentlessOtelDataStreamPattern({
     return undefined;
   }
 
-  // The identity-free path answers "did this policy's data streams receive data", so the
-  // requested package and version must actually be attached to the policy. `otelDataStreams`
-  // was resolved from the requested pkgVersion's manifest, which can differ from the version
-  // actually deployed. Matching name only would let a caller whose policy runs version A
-  // attribute data to a query for version B's (possibly different) OTel streams.
-  const matchingPackagePolicy = agentPolicy.package_policies?.find(
+  // Require exactly one attached package policy matching pkgName and pkgVersion; zero or more
+  // than one (e.g. attached in multiple namespaces) is ambiguous, so fall back to the identity
+  // path instead of guessing.
+  const matchingPackagePolicies = (agentPolicy.package_policies ?? []).filter(
     (packagePolicy) =>
       packagePolicy.package?.name === pkgName && packagePolicy.package?.version === pkgVersion
   );
-  if (!matchingPackagePolicy) {
+  if (matchingPackagePolicies.length !== 1) {
     return undefined;
   }
+  const [matchingPackagePolicy] = matchingPackagePolicies;
 
   const namespace = matchingPackagePolicy.namespace || agentPolicy.namespace;
   if (!namespace) {
@@ -460,10 +455,8 @@ export const getAgentDataHandler: FleetRequestHandler<
       pkgName,
       pkgVersion,
     });
-    // Input-only OTel packages (e.g. `aws_cloudwatch_input_otel`, `verifier_otel`) declare no
-    // manifest data streams, so `dataStreams` is empty and the gate below falls through to the
-    // unchanged identity path. That's a known, tracked gap, not an oversight: see
-    // https://github.com/elastic/ingest-dev/issues/8988.
+    // Input-only OTel packages declare no manifest data streams, so this falls through to the
+    // identity path. Known gap: https://github.com/elastic/ingest-dev/issues/8988.
     const dataStreams = packageInfo.data_streams || [];
     otelDataStreams = dataStreams.filter((ds) => isOtelDataStream(ds, packageInfo));
     nonOtelDataStreams = dataStreams.filter((ds) => !isOtelDataStream(ds, packageInfo));
@@ -472,11 +465,12 @@ export const getAgentDataHandler: FleetRequestHandler<
         .map((ds) => generateTemplateIndexPattern(ds, isOtelDataStream(ds, packageInfo)))
         .join(',') || undefined;
 
-    // Native OTel documents carry no queryable agent identity, so the identity path can never
-    // succeed for them. Reachable only for a single agentless agent, so a namespace-scoped
-    // "this policy received data" answer cannot be attributed to the wrong agent.
+    // Native OTel data has no queryable agent identity, so only a single-agent, namespace-scoped
+    // lookup can answer for it.
     if (otelDataStreams.length > 0 && agentsIds.length === 1) {
       const fleetContext = await context.fleet;
+      // internalSoClient reads only policy metadata for the gate below; the route still requires
+      // agents:read, and ES data is queried with asCurrentUser.
       const namespacedPattern = await resolveAgentlessOtelDataStreamPattern({
         agentClient: fleetContext.agentClient.asCurrentUser,
         soClient: fleetContext.internalSoClient,
@@ -494,9 +488,8 @@ export const getAgentDataHandler: FleetRequestHandler<
           returnDataPreview,
         });
 
-        // A mixed package can still have non-OTel streams that the identity path can answer
-        // for. Returning only the identity-free answer here would silently ignore data that
-        // arrived on those streams, so combine both answers instead of returning early.
+        // Combine with the identity path's answer so non-OTel streams in a mixed package
+        // aren't silently ignored.
         if (nonOtelDataStreams.length === 0) {
           return response.ok({ body: identityFreeResult });
         }

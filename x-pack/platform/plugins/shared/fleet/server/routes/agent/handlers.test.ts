@@ -803,8 +803,6 @@ describe('Handlers', () => {
             id: 'policy-1',
             namespace: 'default',
             supports_agentless: true,
-            // Attached package policy is for a different integration, so a caller-supplied
-            // pkgName cannot be used to attribute this policy's data to it.
             package_policies: [{ package: { name: 'other-package' }, namespace: 'production' }],
           },
         ]);
@@ -834,9 +832,6 @@ describe('Handlers', () => {
             id: 'policy-1',
             namespace: 'default',
             supports_agentless: true,
-            // Attached package policy runs version 2.0.0, but the request asks about
-            // version 1.0.0's OTel streams. Those manifests can differ, so a name-only
-            // match would attribute this policy's data to a version it does not run.
             package_policies: [
               { package: { name: 'supabase', version: '2.0.0' }, namespace: 'production' },
             ],
@@ -858,6 +853,78 @@ describe('Handlers', () => {
 
         expect(getIncomingDataByDataStreams).not.toHaveBeenCalled();
         expect(getIncomingDataByAgentsId).toHaveBeenCalled();
+      });
+
+      it('falls back for an agentless agent whose policy has more than one package policy matching pkgName and pkgVersion', async () => {
+        (getPackageInfo as jest.Mock).mockResolvedValue(otelPackageInfo);
+        mockGetByIds.mockResolvedValue([{ id: 'agent-1', policy_id: 'policy-1' }]);
+        (agentPolicyService.getByIds as jest.Mock).mockResolvedValue([
+          {
+            id: 'policy-1',
+            namespace: 'default',
+            supports_agentless: true,
+            // Same name+version attached under two namespaces; the match is ambiguous.
+            package_policies: [
+              { package: { name: 'supabase', version: '1.0.0' }, namespace: 'production' },
+              { package: { name: 'supabase', version: '1.0.0' }, namespace: 'staging' },
+            ],
+          },
+        ]);
+
+        await getAgentDataHandler(
+          mockContext,
+          {
+            query: {
+              agentsIds: ['agent-1'],
+              pkgName: 'supabase',
+              pkgVersion: '1.0.0',
+              previewData: false,
+            },
+          } as any,
+          mockResponse
+        );
+
+        expect(getIncomingDataByDataStreams).not.toHaveBeenCalled();
+        expect(getIncomingDataByAgentsId).toHaveBeenCalled();
+      });
+
+      it('falls back and skips agent/policy lookups when enableOtelIntegrations is disabled, even for an otherwise-eligible agentless setup', async () => {
+        (appContextService.getExperimentalFeatures as jest.Mock).mockReturnValue({
+          enableOtelIntegrations: false,
+        });
+        (getPackageInfo as jest.Mock).mockResolvedValue(otelPackageInfo);
+        mockGetByIds.mockResolvedValue([{ id: 'agent-1', policy_id: 'policy-1' }]);
+        (agentPolicyService.getByIds as jest.Mock).mockResolvedValue([
+          {
+            id: 'policy-1',
+            namespace: 'default',
+            supports_agentless: true,
+            package_policies: [
+              { package: { name: 'supabase', version: '1.0.0' }, namespace: 'production' },
+            ],
+          },
+        ]);
+
+        await getAgentDataHandler(
+          mockContext,
+          {
+            query: {
+              agentsIds: ['agent-1'],
+              pkgName: 'supabase',
+              pkgVersion: '1.0.0',
+              previewData: false,
+            },
+          } as any,
+          mockResponse
+        );
+
+        // With the flag off, otelDataStreams stays empty, so the gate never looks up the agent.
+        expect(mockGetByIds).not.toHaveBeenCalled();
+        expect(agentPolicyService.getByIds).not.toHaveBeenCalled();
+        expect(getIncomingDataByDataStreams).not.toHaveBeenCalled();
+        expect(getIncomingDataByAgentsId).toHaveBeenCalledWith(
+          expect.objectContaining({ dataStreamPattern: 'metrics-supabase.metrics-*' })
+        );
       });
 
       it('passes ignoreMissing so a deleted agent policy falls back instead of throwing', async () => {
