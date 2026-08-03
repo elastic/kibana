@@ -404,6 +404,9 @@ export async function isSecretDifferent(
   }
 }
 
+// TODO: refactor to compare non-secret fields programmatically (strip secrets/id/is_preconfigured,
+// normalize ES hosts, deep-equal the rest) so new output-type fields are covered automatically
+// without having to enumerate them here.
 async function isPreconfiguredOutputDifferentFromCurrent(
   existingOutput: Output,
   preconfiguredOutput: Partial<Output>
@@ -427,7 +430,14 @@ async function isPreconfiguredOutputDifferentFromCurrent(
 
   if (existingOutput.type === 'otlp') {
     const preconfiguredOtlp = preconfiguredOutput as Partial<NewOtlpOutput>;
-    return isDifferent(existingOutput.otlp_exporter, preconfiguredOtlp.otlp_exporter);
+    const tlsKeyIsDifferent = await isSecretDifferent(
+      preconfiguredOtlp.secrets?.otlp_exporter?.tls?.key_pem,
+      existingOutput.secrets?.otlp_exporter?.tls?.key_pem
+    );
+    return (
+      isDifferent(existingOutput.otlp_exporter, preconfiguredOtlp.otlp_exporter) ||
+      tlsKeyIsDifferent
+    );
   }
 
   const preconfiguredBeats = preconfiguredOutput as Partial<BeatsOutput>;
