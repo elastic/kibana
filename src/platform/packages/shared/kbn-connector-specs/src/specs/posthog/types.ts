@@ -24,7 +24,10 @@ export const PostHogListIssuesInputSchema = lazySchema(() =>
       .string()
       .max(200)
       .optional()
-      .describe('Filter by assignee user or role ID. Requires assigneeType.'),
+      .describe(
+        'Filter by assignee ID. Requires assigneeType. For type "user" this is the numeric ' +
+          'PostHog user ID (e.g. "304865"), not the user\'s UUID; for type "role" it\'s the role UUID.'
+      ),
     assigneeType: z
       .enum(['user', 'role'])
       .optional()
@@ -91,7 +94,13 @@ export type PostHogUpdateIssueStatusInput = z.infer<typeof PostHogUpdateIssueSta
 export const PostHogAssignIssueInputSchema = lazySchema(() =>
   z.object({
     issueId: z.string().max(200).describe('UUID of the error-tracking issue to assign.'),
-    assigneeId: z.string().max(200).describe('ID of the user or role to assign the issue to.'),
+    assigneeId: z
+      .string()
+      .max(200)
+      .describe(
+        'ID of the user or role to assign the issue to. For type "user" this is the numeric ' +
+          'PostHog user ID (e.g. "304865"), not the user\'s UUID; for type "role" it\'s the role UUID.'
+      ),
     assigneeType: z
       .enum(['user', 'role'])
       .default('user')
