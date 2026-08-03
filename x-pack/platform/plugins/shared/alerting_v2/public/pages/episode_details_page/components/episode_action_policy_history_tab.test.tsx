@@ -63,7 +63,7 @@ jest.mock(
 const buildItem = (
   overrides: Partial<PolicyExecutionHistoryItem> = {}
 ): PolicyExecutionHistoryItem => ({
-  '@timestamp': '2026-05-05T10:00:00.000Z',
+  dispatched_at: '2026-05-05T10:00:00.000Z',
   policy: { id: 'policy-1', name: 'My Policy' },
   rules: [{ id: 'rule-1', name: 'My Rule' }],
   totalRuleCount: 1,
@@ -115,7 +115,7 @@ describe('EpisodeActionPolicyHistoryTab', () => {
     expect(mockUseFetchExecutionHistory).toHaveBeenCalledWith({
       page: 1,
       perPage: 10,
-      outcome: 'all',
+      outcome: undefined,
       episodeIds: [EPISODE_ID],
     });
   });
@@ -127,7 +127,7 @@ describe('EpisodeActionPolicyHistoryTab', () => {
     expect(mockUseFetchExecutionHistory).toHaveBeenCalledWith({
       page: 1,
       perPage: 10,
-      outcome: 'all',
+      outcome: undefined,
       episodeIds: [EPISODE_ID],
       startDate: '2026-01-01T00:00:00.000Z',
     });
@@ -152,7 +152,7 @@ describe('EpisodeActionPolicyHistoryTab', () => {
     );
 
     expect(mockUseFetchExecutionHistory).toHaveBeenLastCalledWith(
-      expect.objectContaining({ outcome: 'dispatched', episodeIds: [EPISODE_ID] })
+      expect.objectContaining({ outcome: ['dispatched'], episodeIds: [EPISODE_ID] })
     );
   });
 
