@@ -215,7 +215,7 @@ describe('ApmSystem', () => {
           executionContext: executionContextServiceMock.createInternalStartContract(),
         });
 
-        await new Promise((resolve) => queueMicrotask(resolve));
+        await new Promise<void>((resolve) => queueMicrotask(() => resolve()));
 
         expect(mockTransaction.name).toBe('/login');
         expect(mockTransaction.end).toHaveBeenCalledTimes(1);
