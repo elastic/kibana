@@ -99,6 +99,14 @@ describe('LogsLocatorDefinition', () => {
         expect(delegatedParams).not.toHaveProperty('dataViewId');
       });
 
+      it('delegates a managed spec, so the data view matches the one the root profiles register', async () => {
+        const locator = createLocator();
+
+        await locator.getLocation({});
+
+        expect(mockGetLocation.mock.calls[0][0].dataViewSpec.managed).toBe(true);
+      });
+
       it('spreads consumer-provided params into the delegated call', async () => {
         const locator = createLocator();
         const extraParams = {
