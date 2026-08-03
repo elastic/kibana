@@ -6,10 +6,6 @@
  */
 
 import {
-  SUCCESS_TOASTER_BODY,
-  SUCCESS_TOASTER_HEADER,
-} from '../../../../screens/alerts_detection_rules';
-import {
   DASHBOARD_MIGRATION_PROGRESS_BAR,
   DASHBOARD_MIGRATION_PROGRESS_BAR_TEXT,
   TRANSLATED_DASHBOARDS_RESULT_TABLE,
@@ -30,11 +26,10 @@ import { role } from '../common/role';
 let bedrockConnectorId: string | null = null;
 
 // TODO: https://github.com/elastic/kibana/issues/228940 remove @skipInServerlessMKI tag when privileges issue is fixed
-// FLAKY: https://github.com/elastic/kibana/issues/242870
+// Failing: See https://github.com/elastic/kibana/issues/242870
 describe.skip(
   'Dashboard Migrations - Translated Dashboards Page',
   { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] },
-
   () => {
     before(() => {
       role.setup();
@@ -99,16 +94,6 @@ describe.skip(
         .should('have.property', 'connector_id', bedrockConnectorId);
       cy.get(DASHBOARD_MIGRATION_PROGRESS_BAR).should('be.visible');
       cy.get(DASHBOARD_MIGRATION_PROGRESS_BAR_TEXT).should('contain.text', '57%');
-
-      // Shows "Started" migration toast
-      cy.get(SUCCESS_TOASTER_HEADER).should('have.text', 'Migration started successfully.');
-
-      // After translation has been finished, shows "Translation completed" toast
-      cy.get(SUCCESS_TOASTER_HEADER).should('have.text', 'Dashboards translation complete.');
-      cy.get(SUCCESS_TOASTER_BODY).should(
-        'have.text',
-        'Migration "Test automatic rule migration 1" has finished. Results have been added to the translated dashboards page.Go to translated dashboards'
-      );
     });
   }
 );

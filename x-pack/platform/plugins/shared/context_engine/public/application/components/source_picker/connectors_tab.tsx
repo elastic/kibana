@@ -5,30 +5,173 @@
  * 2.0.
  */
 
-import { EuiEmptyPrompt } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiSelectable,
+  EuiSkeletonText,
+  EuiSpacer,
+} from '@elastic/eui';
+import type { EuiSelectableOption } from '@elastic/eui';
+import type { LinkId } from '@kbn/deeplinks-management';
+import { MANAGEMENT_APP_ID } from '@kbn/deeplinks-management/constants';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
+import React, { useMemo } from 'react';
+import { useKibana } from '../../hooks/use_kibana';
+import type { DataConnector } from '../../hooks/use_data_connectors';
+import { ConnectorTypeIcon } from '../connector_type_icon';
 
-export const ConnectorsTab = () => (
-  <EuiEmptyPrompt
-    iconType="plugs"
-    titleSize="xs"
-    data-test-subj="contextConnectorsPlaceholder"
-    title={
-      <h3>
-        <FormattedMessage
-          id="xpack.contextEngine.sourcePicker.connectors.placeholderTitle"
-          defaultMessage="Connectors coming soon"
-        />
-      </h3>
+const CONNECTORS_DEEP_LINK_ID: LinkId = 'triggersActionsConnectors';
+
+interface ConnectorsTabProps {
+  connectors: DataConnector[];
+  isLoading: boolean;
+  isError: boolean;
+  selectedConnectorIds: string[];
+  onToggle: (params: { id: string; name: string; checked: boolean }) => void;
+}
+
+export const ConnectorsTab = ({
+  connectors,
+  isLoading,
+  isError,
+  selectedConnectorIds,
+  onToggle,
+}: ConnectorsTabProps) => {
+  const {
+    services: { application },
+  } = useKibana();
+
+  const selectedIds = useMemo(() => new Set(selectedConnectorIds), [selectedConnectorIds]);
+
+  const options = useMemo<EuiSelectableOption[]>(
+    () =>
+      connectors.map((connector) => ({
+        key: connector.id,
+        label: connector.name,
+        checked: selectedIds.has(connector.id) ? 'on' : undefined,
+        prepend: <ConnectorTypeIcon actionTypeId={connector.actionTypeId} />,
+        'data-test-subj': `contextConnectorOption-${connector.id}`,
+      })),
+    [connectors, selectedIds]
+  );
+
+  const handleChange = (
+    _options: EuiSelectableOption[],
+    _event: unknown,
+    changedOption: EuiSelectableOption
+  ) => {
+    if (!changedOption.key) {
+      return;
     }
-    body={
-      <p>
-        <FormattedMessage
-          id="xpack.contextEngine.sourcePicker.connectors.placeholderBody"
-          defaultMessage="Support for adding connectors as a source is not available yet."
-        />
-      </p>
-    }
-  />
-);
+    onToggle({
+      id: changedOption.key,
+      name: changedOption.label,
+      checked: changedOption.checked === 'on',
+    });
+  };
+
+  const createConnectorButton = (
+    <EuiButtonEmpty
+      iconType="plusInCircle"
+      onClick={() =>
+        application.navigateToApp(MANAGEMENT_APP_ID, { deepLinkId: CONNECTORS_DEEP_LINK_ID })
+      }
+      data-test-subj="contextCreateConnectorButton"
+    >
+      <FormattedMessage
+        id="xpack.contextEngine.sourcePicker.connectors.createButton"
+        defaultMessage="Create connector"
+      />
+    </EuiButtonEmpty>
+  );
+
+  if (isLoading) {
+    return <EuiSkeletonText lines={3} data-test-subj="contextConnectorsLoading" />;
+  }
+
+  if (isError) {
+    return (
+      <EuiEmptyPrompt
+        color="danger"
+        iconType="error"
+        data-test-subj="contextConnectorsError"
+        title={
+          <h3>
+            <FormattedMessage
+              id="xpack.contextEngine.sourcePicker.connectors.errorTitle"
+              defaultMessage="Unable to load connectors"
+            />
+          </h3>
+        }
+        body={
+          <p>
+            <FormattedMessage
+              id="xpack.contextEngine.sourcePicker.connectors.errorBody"
+              defaultMessage="Connectors could not be loaded. Try again or check your permissions."
+            />
+          </p>
+        }
+      />
+    );
+  }
+
+  if (connectors.length === 0) {
+    return (
+      <EuiEmptyPrompt
+        iconType="plugs"
+        titleSize="xs"
+        data-test-subj="contextConnectorsEmpty"
+        title={
+          <h3>
+            <FormattedMessage
+              id="xpack.contextEngine.sourcePicker.connectors.emptyTitle"
+              defaultMessage="No connectors yet"
+            />
+          </h3>
+        }
+        body={
+          <p>
+            <FormattedMessage
+              id="xpack.contextEngine.sourcePicker.connectors.emptyBody"
+              defaultMessage="Create a connector in this space to use it as a source."
+            />
+          </p>
+        }
+        actions={createConnectorButton}
+      />
+    );
+  }
+
+  return (
+    <div data-test-subj="contextConnectorsTab">
+      <EuiSelectable
+        aria-label={i18n.translate('xpack.contextEngine.sourcePicker.connectors.listAriaLabel', {
+          defaultMessage: 'Select connectors to use as sources',
+        })}
+        searchable
+        options={options}
+        onChange={handleChange}
+        height={240}
+        listProps={{ bordered: true, onFocusBadge: false }}
+        data-test-subj="contextConnectorsSelectable"
+      >
+        {(list, search) => (
+          <>
+            {search}
+            <EuiSpacer size="s" />
+            {list}
+          </>
+        )}
+      </EuiSelectable>
+      <EuiHorizontalRule margin="m" />
+      <EuiFlexGroup justifyContent="flexEnd" gutterSize="none">
+        <EuiFlexItem grow={false}>{createConnectorButton}</EuiFlexItem>
+      </EuiFlexGroup>
+    </div>
+  );
+};

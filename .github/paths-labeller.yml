@@ -13,6 +13,8 @@
     - 'src/platform/packages/shared/kbn-connector-specs/src/specs/shodan/**/*.*'
     - 'src/platform/packages/shared/kbn-connector-specs/src/specs/urlvoid/**/*.*'
     - 'src/platform/packages/shared/kbn-connector-specs/src/specs/virustotal/**/*.*'
+- 'connectors-v2':
+    - 'src/platform/packages/shared/kbn-connector-specs/**/*.*'
 - 'Feature:Embedding':
     - 'src/platform/plugins/shared/embeddable/**/*.*'
     - 'src/plugins/dashboard_embeddable_container/**/*.*'
