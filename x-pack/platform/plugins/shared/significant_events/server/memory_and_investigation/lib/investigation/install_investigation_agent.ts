@@ -7,6 +7,7 @@
 
 import { AgentAccessControlMode } from '@kbn/agent-builder-common';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
+import type { AgentAvailabilityConfig } from '@kbn/agent-builder-server/agents';
 import {
   SIGNIFICANT_EVENTS_INVESTIGATION_AGENT_ID,
   SIGNIFICANT_EVENTS_INVESTIGATION_AGENT_TYPE_ID,
@@ -15,12 +16,15 @@ import {
 export const installInvestigationAgent = async ({
   agentBuilder,
   spaceId,
+  availability,
 }: {
   agentBuilder: AgentBuilderPluginStart;
   spaceId: string;
+  availability?: AgentAvailabilityConfig;
 }): Promise<void> => {
   await agentBuilder.agents.ensure({
     spaceId,
+    availability,
     agent: {
       id: SIGNIFICANT_EVENTS_INVESTIGATION_AGENT_ID,
       type: SIGNIFICANT_EVENTS_INVESTIGATION_AGENT_TYPE_ID,
