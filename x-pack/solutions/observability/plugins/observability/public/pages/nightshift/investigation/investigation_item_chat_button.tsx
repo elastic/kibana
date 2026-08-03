@@ -8,16 +8,20 @@
 import { css } from '@emotion/react';
 import React from 'react';
 import { EuiToolTip, useEuiTheme } from '@elastic/eui';
+import { getEbtProps } from '@kbn/ebt-click';
 import { AiButtonIcon } from '@kbn/shared-ux-ai-components';
 import { useKibana } from '../../../utils/kibana_react';
+import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_DETAILS } from '../common/ebt_constants';
 
 export interface InvestigationItemChatButtonProps {
+  ebtElement: string;
   tooltip: string;
   testSubj: string;
   onClick: () => void;
 }
 
 export function InvestigationItemChatButton({
+  ebtElement,
   tooltip,
   testSubj,
   onClick,
@@ -35,12 +39,14 @@ export function InvestigationItemChatButton({
         aria-label={tooltip}
         data-test-subj={testSubj}
         iconType="productAgent"
-        onClick={(clickEvent: React.MouseEvent<HTMLButtonElement>) => {
-          clickEvent.stopPropagation();
-          onClick();
-        }}
+        onClick={onClick}
         size="xs"
         variant="empty"
+        {...getEbtProps({
+          action: NIGHTSHIFT_EBT_ACTIONS.OPEN_IN_CHAT,
+          element: ebtElement,
+          detail: NIGHTSHIFT_EBT_DETAILS.NEW_CONVERSATION,
+        })}
         css={css`
           && {
             color: ${euiTheme.colors.textSubdued} !important;
