@@ -173,7 +173,7 @@ describe('mustache lambdas', () => {
         'error evaluating tinymath expression ") 1 ++++ 0 (": Failed to parse expression. Expected "(", function, or literal but ")" found.'
       );
       expect(logger.warn).toHaveBeenCalledWith(
-        `mustache render error: error evaluating tinymath expression ") 1 ++++ 0 (": Failed to parse expression. Expected "(", function, literal, or whitespace but ")" found.`
+        `mustache render error: error evaluating tinymath expression ") 1 ++++ 0 (": Failed to parse expression. Expected "(", function, or literal but ")" found.`
       );
     });
   });
