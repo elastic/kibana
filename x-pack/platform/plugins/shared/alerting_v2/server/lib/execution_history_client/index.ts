@@ -7,4 +7,4 @@
 
 export { ExecutionHistoryClient } from './execution_history_client';
 export { ExecutionHistoryClientToken } from './tokens';
-export type { ExecutionHistoryClientContract, GetRuleExecutionsArgs } from './types';
+export type { ExecutionHistoryClientContract, ListRuleExecutionsArgs } from './types';
