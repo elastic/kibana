@@ -21,39 +21,51 @@ import type { IndicatorTypes } from '../../domain/models';
 export function createTransformGenerators(
   spaceId: string,
   dataViewsService: DataViewsService,
-  isServerless: boolean
+  isServerless: boolean,
+  isCpsEnabled: boolean = false
 ): Record<IndicatorTypes, TransformGenerator> {
   return {
     'sli.apm.transactionDuration': new ApmTransactionDurationTransformGenerator(
       spaceId,
       dataViewsService,
-      isServerless
+      isServerless,
+      isCpsEnabled
     ),
     'sli.apm.transactionErrorRate': new ApmTransactionErrorRateTransformGenerator(
       spaceId,
       dataViewsService,
-      isServerless
+      isServerless,
+      isCpsEnabled
     ),
     'sli.synthetics.availability': new SyntheticsAvailabilityTransformGenerator(
       spaceId,
       dataViewsService,
-      isServerless
+      isServerless,
+      isCpsEnabled
     ),
-    'sli.kql.custom': new KQLCustomTransformGenerator(spaceId, dataViewsService, isServerless),
+    'sli.kql.custom': new KQLCustomTransformGenerator(
+      spaceId,
+      dataViewsService,
+      isServerless,
+      isCpsEnabled
+    ),
     'sli.metric.custom': new MetricCustomTransformGenerator(
       spaceId,
       dataViewsService,
-      isServerless
+      isServerless,
+      isCpsEnabled
     ),
     'sli.histogram.custom': new HistogramTransformGenerator(
       spaceId,
       dataViewsService,
-      isServerless
+      isServerless,
+      isCpsEnabled
     ),
     'sli.metric.timeslice': new TimesliceMetricTransformGenerator(
       spaceId,
       dataViewsService,
-      isServerless
+      isServerless,
+      isCpsEnabled
     ),
   };
 }
