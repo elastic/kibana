@@ -80,7 +80,7 @@ export const MultiJobActionsMenu: FC<Props> = ({
 
   const canStartStopDatafeed = canStartStopDatafeedCap && mlNodesAvailable();
   const canCloseJob = canCloseJobCap && mlNodesAvailable();
-  const canUpdateProjectRouting = cps?.cpsManager && canUpdateDatafeed;
+  const canUpdateProjectRouting = cps?.cpsManager && canUpdateDatafeed && canStartStopDatafeed;
 
   const onButtonClick = useCallback(() => {
     setIsOpen((prev) => !prev);

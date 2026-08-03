@@ -78,7 +78,7 @@ export const CpsProjectRoutingCallout: FC<CpsProjectRoutingCalloutProps> = ({
     return () => {
       cancelled = true;
     };
-  }, [http, options]);
+  }, [http, options?.filterJobGroups]);
 
   const onUpdateProjectRouting = useCallback(() => {
     void uiActions.executeTriggerActions(UPDATE_AD_JOBS_PROJECT_ROUTING_TRIGGER, {
