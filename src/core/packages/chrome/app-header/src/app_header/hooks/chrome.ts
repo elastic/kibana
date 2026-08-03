@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Capabilities } from '@kbn/core-capabilities-common';
 import type { IBasePath } from '@kbn/core-http-browser';
 import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import { useObservable } from '@kbn/use-observable';
@@ -16,6 +17,18 @@ import { useChromeService } from '@kbn/core-chrome-browser-context';
 // Chrome-owned dependencies that are not part of the public plugin contract.
 export function useBasePath(): IBasePath {
   return useChromeService().componentDeps.basePath;
+}
+
+export function useCapabilities(): Capabilities {
+  return useChromeService().componentDeps.capabilities;
+}
+
+/**
+ * True when the current user can access the Integrations app.
+ * Same signal used by Home and NoDataCard (`capabilities.navLinks.integrations`).
+ */
+export function useCanAccessIntegrations(): boolean {
+  return useCapabilities().navLinks.integrations === true;
 }
 
 export function useLegacyActionMenu(): MountPoint | undefined {

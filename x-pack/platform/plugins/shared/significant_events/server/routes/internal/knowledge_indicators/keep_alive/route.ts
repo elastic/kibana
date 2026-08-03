@@ -11,7 +11,7 @@ import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 
-export const keepAlivePersistentIndicatorsRoute = createServerRoute({
+const keepAlivePersistentIndicatorsRoute = createServerRoute({
   endpoint: 'POST /internal/streams/{streamName}/knowledge_indicators/_keep_alive',
   options: {
     access: 'internal',
@@ -27,11 +27,11 @@ export const keepAlivePersistentIndicatorsRoute = createServerRoute({
     body: z.object({ lastRefreshedBefore: z.iso.datetime() }),
   }),
   handler: async ({ params, request, getScopedClients, server }) => {
-    const { getKnowledgeIndicatorClient, licensing, uiSettingsClient } = await getScopedClients({
+    const { getKnowledgeIndicatorClient, licensing } = await getScopedClients({
       request,
     });
 
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    await assertSignificantEventsAccess({ server, licensing });
 
     const kiClient = await getKnowledgeIndicatorClient();
     const { refreshed } = await kiClient.keepAlivePersistentIndicators(params.path.streamName, {

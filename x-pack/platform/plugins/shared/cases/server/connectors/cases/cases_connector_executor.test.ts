@@ -125,6 +125,12 @@ describe('CasesConnectorExecutor', () => {
       fieldDefinitions: [],
       total: 0,
     });
+    casesClientMock.templates.getAllTemplates.mockResolvedValue({
+      templates: [],
+      page: 1,
+      perPage: 10000,
+      total: 0,
+    });
 
     getCasesClient.mockReturnValue(casesClientMock);
 
@@ -1657,6 +1663,128 @@ metadata:
 
             expect(createdCase.description).toBe('Created from v2 template');
             expect(createdCase.severity).toBe('medium');
+          });
+
+          describe('Legacy template key bridge (v1 -> v2)', () => {
+            const migratedV2Template = {
+              templateId: 'migrated-v2-id',
+              name: 'TestTemplateOne',
+              owner: params.owner,
+              templateVersion: 3,
+              deletedAt: null,
+              legacyKey: 'legacy-template-key',
+              fieldSearchMatches: false,
+              definition: `
+name: "TestTemplateOne"
+description: "Migrated from v1"
+severity: medium
+fields:
+  - name: my_text
+    type: keyword
+    control: INPUT_TEXT
+    label: My text
+    metadata:
+      default: "bridged value"
+`,
+            };
+
+            beforeEach(() => {
+              casesClientMock.configure.get = jest.fn().mockResolvedValue([
+                {
+                  owner: params.owner,
+                  customFields: [],
+                  templates: [
+                    { key: 'legacy-template-key', name: 'TestTemplateOne', caseFields: null },
+                  ],
+                },
+              ]);
+
+              casesClientMock.cases.bulkGet.mockResolvedValue({
+                cases: [],
+                errors: [
+                  { caseId: 'mock-id-1', error: 'Not found', message: 'Not found', status: 404 },
+                ],
+              });
+            });
+
+            it('bridges a stored legacy template key to the migrated v2 template', async () => {
+              casesClientMock.templates.getAllTemplates.mockResolvedValue({
+                templates: [migratedV2Template],
+                page: 1,
+                perPage: 10000,
+                total: 1,
+              });
+
+              await connectorExecutor.execute({
+                ...params,
+                templateId: 'legacy-template-key',
+                templateVersion: null,
+              });
+
+              // Legacy keys are bridged by name via getAllTemplates, not the id+version getTemplate lookup.
+              expect(casesClientMock.templates.getTemplate).not.toHaveBeenCalled();
+
+              const createdCase = casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0];
+
+              expect(createdCase.description).toBe('Migrated from v1');
+              expect(createdCase.severity).toBe('medium');
+              expect(createdCase.template).toEqual({ id: 'migrated-v2-id', version: 3 });
+              expect(createdCase[CASE_EXTENDED_FIELDS]).toEqual({
+                my_text_as_keyword: 'bridged value',
+              });
+            });
+
+            it('resolves the correct migrated template by legacyKey when two v1 templates shared a name', async () => {
+              casesClientMock.templates.getAllTemplates.mockResolvedValue({
+                templates: [
+                  {
+                    ...migratedV2Template,
+                    templateId: 'migrated-v2-id-other',
+                    legacyKey: 'some-other-key',
+                    definition: `
+name: "TestTemplateOne"
+description: "Wrong sibling"
+fields: []
+`,
+                  },
+                  migratedV2Template,
+                ],
+                page: 1,
+                perPage: 10000,
+                total: 2,
+              });
+
+              await connectorExecutor.execute({
+                ...params,
+                templateId: 'legacy-template-key',
+                templateVersion: null,
+              });
+
+              const createdCase = casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0];
+
+              expect(createdCase.template).toEqual({ id: 'migrated-v2-id', version: 3 });
+              expect(createdCase.description).toBe('Migrated from v1');
+            });
+
+            it('falls back to the v1 path when the legacy key has no migrated v2 template', async () => {
+              casesClientMock.templates.getAllTemplates.mockResolvedValue({
+                templates: [],
+                page: 1,
+                perPage: 10000,
+                total: 0,
+              });
+
+              await connectorExecutor.execute({
+                ...params,
+                templateId: 'legacy-template-key',
+                templateVersion: null,
+              });
+
+              const createdCase = casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0];
+
+              expect(createdCase.template).toBeUndefined();
+              expect(createdCase[CASE_EXTENDED_FIELDS]).toBeUndefined();
+            });
           });
         });
 

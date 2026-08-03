@@ -14,8 +14,8 @@ import {
 import { MissingLookupsList } from '../../../../../../../common/components';
 import { useUpsertResources } from '../../../../../../service/hooks/use_upsert_resources';
 import type { RuleMigrationTaskStats } from '../../../../../../../../../common/siem_migrations/model/rule_migration.gen';
-import * as i18n from './translations';
 import { MigrationSource } from '../../../../../../../common/types';
+import { useRuleMigrationVendorCopy } from '../../../../../../hooks/use_rule_migration_vendor_copy';
 
 export interface MissingReferenceSetsListStepProps {
   status: EuiStepStatus;
@@ -34,6 +34,7 @@ export const useMissingReferenceSetsListStep = ({
   onCopied,
 }: MissingReferenceSetsListStepProps): EuiStepProps => {
   const { upsertResources, isLoading, error } = useUpsertResources(addUploadedLookups);
+  const { resourceDataInputStep } = useRuleMigrationVendorCopy(MigrationSource.QRADAR);
 
   const omitLookup = useCallback(
     (lookupName: string) => {
@@ -59,7 +60,7 @@ export const useMissingReferenceSetsListStep = ({
   }, [isLoading, error, status]);
 
   return {
-    title: i18n.REFERENCE_SET_DATA_INPUT_COPY_TITLE,
+    title: resourceDataInputStep.copyTitle,
     status: listStepStatus,
     children: (
       <MissingLookupsList

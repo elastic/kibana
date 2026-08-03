@@ -51,6 +51,7 @@ export async function getConnectorSpecAsJsonSchema({
     return {
       metadata: serialized.metadata,
       schema: serialized.schema,
+      isTestable: Boolean(spec.test?.enabled),
     };
   } catch (error) {
     throw new Error(

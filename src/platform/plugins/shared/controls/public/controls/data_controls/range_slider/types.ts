@@ -7,13 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { RangeSliderControlState } from '@kbn/controls-schemas';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type {
   PublishesRelatedPanels,
   PublishesUnsavedChanges,
   PublishingSubject,
+  SupportsJsonExport,
 } from '@kbn/presentation-publishing';
-import type { RangeSliderControlState } from '@kbn/controls-schemas';
 import type { DataControlApi } from '../types';
 
 export type RangeSliderControlApi = DefaultEmbeddableApi<RangeSliderControlState> &
@@ -22,4 +23,4 @@ export type RangeSliderControlApi = DefaultEmbeddableApi<RangeSliderControlState
   PublishesRelatedPanels & {
     clearSelections: () => void;
     hasSelections$: PublishingSubject<boolean | undefined>;
-  };
+  } & SupportsJsonExport;

@@ -3,7 +3,7 @@ apiVersion: backstage.io/v1alpha1
 kind: Resource
 metadata:
   name: bk-kibana-console-definitions-sync
-  description: Opens a PR if anything changes in the console definitions in elasticsearch-definitions
+  description: Opens PRs when console definitions or Kibana API doc links are out of date
   links:
     - url: 'https://buildkite.com/elastic/kibana-console-definitions-sync'
       title: Pipeline link
@@ -16,7 +16,7 @@ spec:
     kind: Pipeline
     metadata:
       name: kibana / Console definitions sync
-      description: Opens a PR if anything changes in the console definitions in elasticsearch-definitions
+      description: Opens PRs when console definitions or Kibana API doc links are out of date
     spec:
       env:
         SLACK_NOTIFICATIONS_CHANNEL: '#kibana-management'

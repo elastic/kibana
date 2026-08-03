@@ -8,6 +8,7 @@
 import type {
   ISavedObjectsRepository,
   SavedObject,
+  SavedObjectErrorResult,
   SavedObjectReference,
   SavedObjectsBulkGetObject,
   SavedObjectsClientContract,
@@ -312,7 +313,7 @@ export class MonitorConfigRepository {
     }
 
     // Use bulkCreate for recreations
-    let recreateResults: Array<SavedObject<MonitorFields>> = [];
+    let recreateResults: Array<SavedObject<MonitorFields> | SavedObjectErrorResult> = [];
     if (toRecreate.length > 0) {
       const bulkCreateObjects = toRecreate.map(({ id, attributes, references }) => ({
         id,
@@ -339,7 +340,7 @@ export class MonitorConfigRepository {
   async find<T>(
     options: Omit<SavedObjectsFindOptions, 'type'>,
     types: string[] = syntheticsMonitorSOTypes,
-    soClient: SavedObjectsClientContract = this.soClient
+    soClient: SavedObjectsClientContract | ISavedObjectsRepository = this.soClient
   ): Promise<SavedObjectsFindResponse<T>> {
     const perPage = options.perPage ?? 5000;
     const page = options.page ?? 1;

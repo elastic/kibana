@@ -127,6 +127,7 @@ export const getGridAttrs = async (
     variables: esqlVariables,
     timezone,
     ...(approximation !== undefined ? { approximation } : {}),
+    includeColumnMetadata: true,
   });
 
   const { all_columns: allColumns = [], columns: valueColumns = [], values } = results.response;
@@ -239,7 +240,9 @@ export const getSuggestions = async (
       },
     };
   } catch (e) {
-    setErrors?.([e]);
+    if (!abortController?.signal.aborted) {
+      setErrors?.([e]);
+    }
   }
   return undefined;
 };

@@ -9,7 +9,7 @@
 
 import deepEqual from 'fast-deep-equal';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { combineLatest, distinctUntilChanged, map } from 'rxjs';
+import { distinctUntilChanged, map } from 'rxjs';
 import UseUnmount from 'react-use/lib/useUnmount';
 
 import type { EuiBreadcrumb, UseEuiTheme } from '@elastic/eui';
@@ -25,24 +25,23 @@ import {
 import { css } from '@emotion/react';
 import type { MountPoint } from '@kbn/core/public';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-import type { AggregateQuery, Query } from '@kbn/es-query';
-import { isOfAggregateQueryType } from '@kbn/es-query';
+import type { Query } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getManagedContentBadge } from '@kbn/managed-content-badge';
 import type { TopNavMenuBadgeProps, TopNavMenuProps } from '@kbn/navigation-plugin/public';
 import {
   apiPublishesEsqlUsage,
-  apiPublishesUnifiedSearch,
   combineCompatibleChildrenApis,
   type PublishesEsqlUsage,
-  type PublishesUnifiedSearch,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import { LazyLabsFlyout, withSuspense } from '@kbn/presentation-util-plugin/public';
 
 import { AppHeader, ChromeAppHeaderRegistration } from '@kbn/app-header';
 import type { AppHeaderBack, AppHeaderBadge } from '@kbn/app-header';
+import { useFavorite } from '@kbn/content-management-favorites-public';
+import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import { useChromeStyle, useIsNextChrome } from '@kbn/core-chrome-browser-hooks';
 import { UI_SETTINGS } from '../../common/constants';
 import { DASHBOARD_APP_ID, LANDING_PAGE_PATH } from '../../common/page_bundle_constants';
@@ -68,7 +67,7 @@ import {
 } from '../services/kibana_services';
 import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
 import { getFullEditPath } from '../utils/urls';
-import { DashboardFavoriteButton } from './dashboard_favorite_button';
+import { DashboardFavoritesProvider } from './dashboard_favorite_button';
 import { LegacyDashboardHeader } from './legacy_dashboard_header';
 import { DashboardControlsRenderer } from '../dashboard_controls_renderer';
 
@@ -83,6 +82,58 @@ export interface InternalDashboardTopNavProps {
 }
 
 const LabsFlyout = withSuspense(LazyLabsFlyout, null);
+
+interface DashboardChromeNextHeaderProps {
+  headerMode: 'inline' | 'registered';
+  title: string;
+  back: AppHeaderBack;
+  menu?: AppMenuConfig;
+  badges: AppHeaderBadge[];
+  dashboardId?: string;
+  viewMode: string;
+}
+
+/**
+ * Chrome Next header path. Must render inside `DashboardFavoritesProvider`.
+ */
+const DashboardChromeNextHeader = ({
+  headerMode,
+  title,
+  back,
+  menu,
+  badges,
+  dashboardId,
+  viewMode,
+}: DashboardChromeNextHeaderProps) => {
+  const favorite = useFavorite({ id: dashboardId });
+
+  if (headerMode === 'inline') {
+    if (viewMode === 'print') {
+      return null;
+    }
+
+    return (
+      <AppHeader
+        title={title}
+        back={back}
+        menu={menu}
+        badges={badges}
+        favorite={favorite}
+        spacing="compact"
+      />
+    );
+  }
+
+  return (
+    <ChromeAppHeaderRegistration
+      title={title}
+      menu={menu}
+      badges={badges}
+      favorite={favorite}
+      spacing="compact"
+    />
+  );
+};
 
 export function InternalDashboardTopNav({
   customLeadingBreadCrumbs = [],
@@ -157,25 +208,14 @@ export function InternalDashboardTopNav({
 
   const [hasEsqlPanel, setHasEsqlPanel] = useState(false);
   useEffect(() => {
-    const hasEsqlQuery$ = combineCompatibleChildrenApis<
-      PublishesUnifiedSearch,
-      (Query | AggregateQuery | undefined)[]
-    >(dashboardApi, 'query$', apiPublishesUnifiedSearch, []).pipe(
-      map((queries) => queries.some((q) => isOfAggregateQueryType(q)))
-    );
-
-    // Vega panels can embed ES|QL data sources directly in their spec, without ever
-    // publishing an aggregate query$, so they publish their own usesEsql$ signal instead.
-    const hasEsqlVegaPanel$ = combineCompatibleChildrenApis<PublishesEsqlUsage, boolean[]>(
+    const subscription = combineCompatibleChildrenApis<PublishesEsqlUsage, boolean[]>(
       dashboardApi,
       'usesEsql$',
       apiPublishesEsqlUsage,
       []
-    ).pipe(map((usesEsqlValues) => usesEsqlValues.some(Boolean)));
-
-    const subscription = combineLatest([hasEsqlQuery$, hasEsqlVegaPanel$])
+    )
       .pipe(
-        map(([hasEsqlQuery, hasEsqlVegaPanel]) => hasEsqlQuery || hasEsqlVegaPanel),
+        map((usesEsqlValues) => usesEsqlValues.some(Boolean)),
         distinctUntilChanged()
       )
       .subscribe(setHasEsqlPanel);
@@ -431,12 +471,6 @@ export function InternalDashboardTopNav({
     return viewMode === 'edit' ? editModeTopNavConfig : viewModeTopNavConfig;
   }, [visibilityProps.showTopNavMenu, viewMode, editModeTopNavConfig, viewModeTopNavConfig]);
 
-  // Stable identity so `ChromeAppHeaderRegistration` doesn't re-register on every top-nav re-render.
-  const favoriteButton = useMemo(
-    () => <DashboardFavoriteButton dashboardId={lastSavedId} />,
-    [lastSavedId]
-  );
-
   // Chrome Next hides the classic breadcrumbs, so the header carries its own back button that leads to the dashboard listing page.
   const backToListing = useMemo<AppHeaderBack>(
     () => ({
@@ -456,22 +490,18 @@ export function InternalDashboardTopNav({
           ref={dashboardTitleRef}
         >{`${getDashboardBreadcrumb()} - ${dashboardTitle}`}</h1>
       </EuiScreenReaderOnly>
-      {headerMode === 'inline' && viewMode !== 'print' && (
-        <AppHeader
-          title={dashboardTitle}
-          back={backToListing}
-          menu={appMenuConfig}
-          badges={appHeaderBadges}
-          favorite={favoriteButton}
-        />
-      )}
-      {headerMode === 'registered' && (
-        <ChromeAppHeaderRegistration
-          title={dashboardTitle}
-          menu={appMenuConfig}
-          badges={appHeaderBadges}
-          favorite={favoriteButton}
-        />
+      {(headerMode === 'inline' || headerMode === 'registered') && (
+        <DashboardFavoritesProvider>
+          <DashboardChromeNextHeader
+            headerMode={headerMode}
+            title={dashboardTitle}
+            back={backToListing}
+            menu={appMenuConfig}
+            badges={appHeaderBadges}
+            dashboardId={lastSavedId}
+            viewMode={viewMode}
+          />
+        </DashboardFavoritesProvider>
       )}
       {headerMode === 'legacy' && (
         <LegacyDashboardHeader badges={badges} config={appMenuConfig} lastSavedId={lastSavedId} />

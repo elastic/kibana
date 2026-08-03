@@ -6,11 +6,14 @@
  */
 
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
-import { ALERTING_V2_ENABLED_SETTING_ID } from '@kbn/alerting-v2-constants';
+import {
+  ALERTING_TOOL_IDS,
+  ALERTING_V2_ENABLED_SETTING_ID,
+  RULE_MANAGEMENT_SKILL_ID,
+} from '@kbn/alerting-v2-constants';
 import { manageRuleTool } from '../tools/manage_rule';
 import { manageActionPolicyTool } from '../tools/manage_action_policy';
 import type { ManageActionPolicyToolDeps } from '../tools/manage_action_policy';
-import { alertingTools } from '../common/constants';
 import {
   generateRuleSchemaDoc,
   generateRuleOperationsDoc,
@@ -19,11 +22,11 @@ import {
 
 export const createRuleManagementSkill = (deps: ManageActionPolicyToolDeps) =>
   defineSkillType({
-    id: 'rule-management',
-    name: 'rule-management',
+    id: RULE_MANAGEMENT_SKILL_ID,
+    name: RULE_MANAGEMENT_SKILL_ID,
     basePath: 'skills/platform/alerting',
     description:
-      'Compose, discover, and modify alerting V2 rules and action policies (notification policies) within a conversation.',
+      'Compose, discover, and modify alerting V2 rules and action policies (notification policies) within a conversation. Use when the user wants to be alerted or notified about conditions in their data — metrics, logs, or any index ("create an alert rule that fires when...", "alert me when CPU goes above...", "notify me if there are more than N errors", "set up alerting on my data"). Covers threshold, aggregation, and grouped conditions over any Elasticsearch index. Not for Security/SIEM detection rules (threat detection, MITRE ATT&CK) — use the detection-rule-edit skill for those.',
     experimental: true,
     uiSettingRequired: ALERTING_V2_ENABLED_SETTING_ID,
     referencedContent: [
@@ -188,12 +191,12 @@ When a user asks about existing rules:
 - For a broad listing, use \`keywords: ["*"]\`.
 - Summarize matches in plain language: name, kind, schedule, and query snippet.
 - Do **not** attach rules by default when only listing or comparing.
-- To inspect or edit a saved rule, attach it with \`platform.core.sml_attach\` using the \`chunk_id\` from the search result.
-- After attaching, use the returned \`attachment_id\` for subsequent ${alertingTools.manageRule} calls.
+- To inspect or edit a saved rule, attach it with \`platform.core.sml_attach\` using the \`entry_id\` from the search result.
+- After attaching, use the returned \`attachment_id\` for subsequent ${ALERTING_TOOL_IDS.manageRule} calls.
 
 ## Composing and Modifying Rules
 
-Build the request for ${alertingTools.manageRule} as an ordered \`operations\` array. Operations run in sequence.
+Build the request for ${ALERTING_TOOL_IDS.manageRule} as an ordered \`operations\` array. Operations run in sequence.
 
 For a new rule, start with \`set_metadata\` (name required), then \`set_kind\`, \`set_schedule\`, and \`set_query\`.
 
@@ -258,11 +261,11 @@ Refer to the [rule-schema reference](./references/rule-schema.md) for allowed va
 
 ## Final Validation
 
-Always include \`{ operation: "validate" }\` as the **last operation** in the final ${alertingTools.manageRule} call after all fields are set. This validates the accumulated rule against the API request schema and throws if the rule is not ready to save (missing required fields, invalid values, etc.). If validation fails, read the error issues, fix them with corrective operations, and retry with \`validate\` again.
+Always include \`{ operation: "validate" }\` as the **last operation** in the final ${ALERTING_TOOL_IDS.manageRule} call after all fields are set. This validates the accumulated rule against the API request schema and throws if the rule is not ready to save (missing required fields, invalid values, etc.). If validation fails, read the error issues, fix them with corrective operations, and retry with \`validate\` again.
 
 ## Rendering Attachments
 
-After calling ${alertingTools.manageRule}, **always** render the rule attachment inline in your response using the \`<render_attachment>\` tag with the attachment ID and version from the tool result:
+After calling ${ALERTING_TOOL_IDS.manageRule}, **always** render the rule attachment inline in your response using the \`<render_attachment>\` tag with the attachment ID and version from the tool result:
 
 \`\`\`
 <render_attachment id="<ruleAttachment.id>" version="<version>" />
@@ -272,7 +275,7 @@ This displays the interactive rule card with Preview and Create/Update buttons.
 
 ## Persistence
 
-The ${alertingTools.manageRule} tool only manages the **in-memory attachment** — it never writes to Elasticsearch.
+The ${ALERTING_TOOL_IDS.manageRule} tool only manages the **in-memory attachment** — it never writes to Elasticsearch.
 Always direct the user to the rendered attachment's action buttons for persistence:
 - **Create rule** — create a new V2 rule from the in-memory attachment.
 - **Update Rule** — push changes back to the origin rule (only for attached saved rules).
@@ -282,7 +285,7 @@ Never attempt to create, update, delete, enable, or disable rules directly via A
 
 After composing or modifying a rule, always render it inline for user review:
 \`<render_attachment id="{attachmentId}" version="{version}"/>\`
-where \`attachmentId\` is \`ruleAttachment.id\` and \`version\` is \`version\` from the ${alertingTools.manageRule} tool result.
+where \`attachmentId\` is \`ruleAttachment.id\` and \`version\` is \`version\` from the ${ALERTING_TOOL_IDS.manageRule} tool result.
 
 ## Save Order
 
@@ -326,12 +329,12 @@ Action policies control how alert episodes are matched, grouped, throttled, and 
 When a user asks about existing action policies:
 - Search with \`platform.core.sml_search\`, using keywords like the policy name, matcher, or destination.
 - Summarize matches: name, enabled/disabled, destination count, matcher snippet, grouping mode.
-- To inspect or edit a saved policy, attach it with \`platform.core.sml_attach\` using the \`chunk_id\`.
-- After attaching, use the returned \`attachment_id\` for subsequent ${alertingTools.manageActionPolicy} calls.
+- To inspect or edit a saved policy, attach it with \`platform.core.sml_attach\` using the \`entry_id\`.
+- After attaching, use the returned \`attachment_id\` for subsequent ${ALERTING_TOOL_IDS.manageActionPolicy} calls.
 
 ## Composing and Modifying Action Policies
 
-Build the request for ${alertingTools.manageActionPolicy} as an ordered \`operations\` array. Operations run in sequence.
+Build the request for ${ALERTING_TOOL_IDS.manageActionPolicy} as an ordered \`operations\` array. Operations run in sequence.
 
 For a new policy, start with \`set_metadata\` (name required), then \`set_destinations\`.
 
@@ -363,11 +366,11 @@ The throttle strategy must be compatible with the grouping mode. If you set both
 
 ## Final Validation
 
-Always include \`{ operation: "validate" }\` as the **last operation** in the final ${alertingTools.manageActionPolicy} call after all fields are set. This validates the accumulated policy against the API request schema and throws if the policy is not ready to save (missing required fields, invalid values, etc.). If validation fails, read the error issues, fix them with corrective operations, and retry with \`validate\` again.
+Always include \`{ operation: "validate" }\` as the **last operation** in the final ${ALERTING_TOOL_IDS.manageActionPolicy} call after all fields are set. This validates the accumulated policy against the API request schema and throws if the policy is not ready to save (missing required fields, invalid values, etc.). If validation fails, read the error issues, fix them with corrective operations, and retry with \`validate\` again.
 
 ## Action Policy Persistence
 
-The ${alertingTools.manageActionPolicy} tool only manages the **in-memory attachment** — it never writes to Elasticsearch.
+The ${ALERTING_TOOL_IDS.manageActionPolicy} tool only manages the **in-memory attachment** — it never writes to Elasticsearch.
 Always direct the user to the rendered attachment's action buttons for persistence:
 - **Create policy** — create a new action policy from the in-memory attachment.
 - **Update Policy** — push changes back to the origin policy (only for attached saved policies).
@@ -376,7 +379,7 @@ Never attempt to create, update, delete, enable, or disable action policies dire
 
 After composing or modifying an action policy, always render it inline for user review:
 \`<render_attachment id="{attachmentId}" version="{version}"/>\`
-where \`attachmentId\` is \`actionPolicyAttachment.id\` and \`version\` is \`version\` from the ${alertingTools.manageActionPolicy} tool result.
+where \`attachmentId\` is \`actionPolicyAttachment.id\` and \`version\` is \`version\` from the ${ALERTING_TOOL_IDS.manageActionPolicy} tool result.
 
 ---
 
@@ -476,7 +479,7 @@ steps:
 
 ## Step 2 — Create a Default Action Policy
 
-Use ${alertingTools.manageActionPolicy} with these operations in order:
+Use ${ALERTING_TOOL_IDS.manageActionPolicy} with these operations in order:
 
 1. \`set_metadata\`: name = \`"Notify on <rule-name>"\`, description = \`"Default notification for <rule-name>"\`
 2. \`set_destinations\`: \`[{ type: "workflow", id: "<workflowId-from-step-1>" }]\`
@@ -490,7 +493,7 @@ Use ${alertingTools.manageActionPolicy} with these operations in order:
 
 Render the action policy inline for user review:
 \`<render_attachment id="{attachmentId}" version="{version}"/>\`
-where \`attachmentId\` is \`actionPolicyAttachment.id\` and \`version\` is \`version\` from the ${alertingTools.manageActionPolicy} tool result.
+where \`attachmentId\` is \`actionPolicyAttachment.id\` and \`version\` is \`version\` from the ${ALERTING_TOOL_IDS.manageActionPolicy} tool result.
 
 ## Save Order Reminder
 

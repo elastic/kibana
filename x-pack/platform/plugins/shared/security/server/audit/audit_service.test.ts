@@ -12,11 +12,18 @@ import { coreMock } from '@kbn/core/server/mocks';
 import type { FakeRawRequest } from '@kbn/core-http-server';
 import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
+import type { AppenderConfigType, OtelAppenderConfig } from '@kbn/core-logging-server';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { asSpaceId } from '@kbn/core-spaces-common';
 import type { AuditEvent } from '@kbn/security-plugin-types-server';
 
 import {
+  AUDIT_OTEL_FIELD_ADDITIONS,
+  AUDIT_OTEL_FIELD_DEFAULTS,
+  AUDIT_OTEL_FIELD_DROPS,
+  AUDIT_OTEL_FIELD_RENAMES,
+  AUDIT_OTEL_PROMOTE_RESOURCE_ATTRIBUTES,
+  AUDIT_OTEL_RESOURCE_ATTRIBUTES,
   AuditService,
   createLoggingConfig,
   filterEvent,
@@ -578,6 +585,343 @@ describe('#createLoggingConfig', () => {
     );
 
     expect(loggingConfig.loggers![0].level).toEqual('off');
+  });
+
+  test('injects audit field renames when using an OTel appender', async () => {
+    const features$ = of({ allowAuditLogging: true });
+
+    const loggingConfig = await lastValueFrom(
+      features$.pipe(
+        createLoggingConfig(
+          {
+            enabled: true,
+            include_saved_object_names: false,
+            appender: {
+              type: 'otel',
+              protocol: 'http',
+              url: 'http://collector:4318/v1/logs',
+            },
+          },
+          true
+        )
+      )
+    );
+
+    const appenders = loggingConfig.appenders as Record<string, AppenderConfigType>;
+    expect((appenders.auditTrailAppender as OtelAppenderConfig).fieldRenames).toEqual(
+      AUDIT_OTEL_FIELD_RENAMES
+    );
+  });
+
+  test('does not inject field renames for non-OTel appenders', async () => {
+    const features$ = of({ allowAuditLogging: true });
+
+    const loggingConfig = await lastValueFrom(
+      features$.pipe(
+        createLoggingConfig({
+          enabled: true,
+          include_saved_object_names: false,
+          appender: {
+            type: 'console',
+            layout: { type: 'pattern' },
+          },
+        })
+      )
+    );
+
+    const appenders = loggingConfig.appenders as Record<string, AppenderConfigType>;
+    expect(appenders.auditTrailAppender).not.toHaveProperty('fieldRenames');
+  });
+
+  test('merges user-provided fieldRenames with audit renames; audit renames take precedence on conflict', async () => {
+    const features$ = of({ allowAuditLogging: true });
+
+    const loggingConfig = await lastValueFrom(
+      features$.pipe(
+        createLoggingConfig(
+          {
+            enabled: true,
+            include_saved_object_names: false,
+            appender: {
+              type: 'otel',
+              protocol: 'http',
+              url: 'http://collector:4318/v1/logs',
+              fieldRenames: {
+                'custom.field': 'custom.new_field',
+                // User tries to override an audit rename — audit wins.
+                'kibana.space_id': 'kibana.space.overridden',
+              },
+            },
+          },
+          true
+        )
+      )
+    );
+
+    const appenders = loggingConfig.appenders as Record<string, AppenderConfigType>;
+    expect((appenders.auditTrailAppender as OtelAppenderConfig).fieldRenames).toMatchObject({
+      'custom.field': 'custom.new_field',
+      'kibana.space_id': 'kibana.space.id', // audit rename wins
+    });
+  });
+
+  test('injects audit fieldDrops when using an OTel appender', async () => {
+    const features$ = of({ allowAuditLogging: true });
+
+    const loggingConfig = await lastValueFrom(
+      features$.pipe(
+        createLoggingConfig(
+          {
+            enabled: true,
+            include_saved_object_names: false,
+            appender: {
+              type: 'otel',
+              protocol: 'http',
+              url: 'http://collector:4318/v1/logs',
+            },
+          },
+          true
+        )
+      )
+    );
+
+    const appenders = loggingConfig.appenders as Record<string, AppenderConfigType>;
+    expect((appenders.auditTrailAppender as OtelAppenderConfig).fieldDrops).toEqual(
+      AUDIT_OTEL_FIELD_DROPS
+    );
+  });
+
+  test('merges user-provided fieldDrops with audit drops', async () => {
+    const features$ = of({ allowAuditLogging: true });
+
+    const loggingConfig = await lastValueFrom(
+      features$.pipe(
+        createLoggingConfig(
+          {
+            enabled: true,
+            include_saved_object_names: false,
+            appender: {
+              type: 'otel',
+              protocol: 'http',
+              url: 'http://collector:4318/v1/logs',
+              fieldDrops: ['custom.field'],
+            },
+          },
+          true
+        )
+      )
+    );
+
+    const appenders = loggingConfig.appenders as Record<string, AppenderConfigType>;
+    expect((appenders.auditTrailAppender as OtelAppenderConfig).fieldDrops).toEqual([
+      'custom.field',
+      ...AUDIT_OTEL_FIELD_DROPS,
+    ]);
+  });
+
+  test('injects audit fieldDefaults when using an OTel appender', async () => {
+    const features$ = of({ allowAuditLogging: true });
+
+    const loggingConfig = await lastValueFrom(
+      features$.pipe(
+        createLoggingConfig(
+          {
+            enabled: true,
+            include_saved_object_names: false,
+            appender: {
+              type: 'otel',
+              protocol: 'http',
+              url: 'http://collector:4318/v1/logs',
+            },
+          },
+          true
+        )
+      )
+    );
+
+    const appenders = loggingConfig.appenders as Record<string, AppenderConfigType>;
+    expect((appenders.auditTrailAppender as OtelAppenderConfig).fieldDefaults).toEqual(
+      AUDIT_OTEL_FIELD_DEFAULTS
+    );
+  });
+
+  test('user-provided fieldDefaults take precedence over audit defaults', async () => {
+    const features$ = of({ allowAuditLogging: true });
+
+    const loggingConfig = await lastValueFrom(
+      features$.pipe(
+        createLoggingConfig(
+          {
+            enabled: true,
+            include_saved_object_names: false,
+            appender: {
+              type: 'otel',
+              protocol: 'http',
+              url: 'http://collector:4318/v1/logs',
+              fieldDefaults: { 'event.type': ['change'] },
+            },
+          },
+          true
+        )
+      )
+    );
+
+    const appenders = loggingConfig.appenders as Record<string, AppenderConfigType>;
+    expect((appenders.auditTrailAppender as OtelAppenderConfig).fieldDefaults).toMatchObject({
+      'event.type': ['change'], // user wins
+    });
+  });
+
+  test('injects audit fieldAdditions when using an OTel appender', async () => {
+    const features$ = of({ allowAuditLogging: true });
+
+    const loggingConfig = await lastValueFrom(
+      features$.pipe(
+        createLoggingConfig(
+          {
+            enabled: true,
+            include_saved_object_names: false,
+            appender: {
+              type: 'otel',
+              protocol: 'http',
+              url: 'http://collector:4318/v1/logs',
+            },
+          },
+          true
+        )
+      )
+    );
+
+    const appenders = loggingConfig.appenders as Record<string, AppenderConfigType>;
+    expect((appenders.auditTrailAppender as OtelAppenderConfig).fieldAdditions).toEqual(
+      AUDIT_OTEL_FIELD_ADDITIONS
+    );
+  });
+
+  test('injects a minimal resource allowlist + attributes when using an OTel appender', async () => {
+    const features$ = of({ allowAuditLogging: true });
+
+    const loggingConfig = await lastValueFrom(
+      features$.pipe(
+        createLoggingConfig(
+          {
+            enabled: true,
+            include_saved_object_names: false,
+            appender: {
+              type: 'otel',
+              protocol: 'http',
+              url: 'http://collector:4318/v1/logs',
+            },
+          },
+          true
+        )
+      )
+    );
+
+    const appenders = loggingConfig.appenders as Record<string, AppenderConfigType>;
+    const otelAppender = appenders.auditTrailAppender as OtelAppenderConfig;
+    // includeResources keeps the audit resource attribute keys plus the promoted keys (so project.id
+    // stays in the resource for log delivery); attributes supply the service.name/service.type values.
+    expect(otelAppender.includeResources).toEqual([
+      ...Object.keys(AUDIT_OTEL_RESOURCE_ATTRIBUTES),
+      ...AUDIT_OTEL_PROMOTE_RESOURCE_ATTRIBUTES,
+    ]);
+    expect(otelAppender.attributes).toEqual(AUDIT_OTEL_RESOURCE_ATTRIBUTES);
+    // project.id is also copied into per-record attributes (kept in both places).
+    expect(otelAppender.promoteResourceAttributes).toEqual(AUDIT_OTEL_PROMOTE_RESOURCE_ATTRIBUTES);
+  });
+
+  test('merges user-provided attributes with audit resource attributes', async () => {
+    const features$ = of({ allowAuditLogging: true });
+
+    const loggingConfig = await lastValueFrom(
+      features$.pipe(
+        createLoggingConfig(
+          {
+            enabled: true,
+            include_saved_object_names: false,
+            appender: {
+              type: 'otel',
+              protocol: 'http',
+              url: 'http://collector:4318/v1/logs',
+              attributes: { 'custom.attr': 'value' },
+            },
+          },
+          true
+        )
+      )
+    );
+
+    const appenders = loggingConfig.appenders as Record<string, AppenderConfigType>;
+    const otelAppender = appenders.auditTrailAppender as OtelAppenderConfig;
+    expect(otelAppender.attributes).toEqual({
+      'custom.attr': 'value',
+      ...AUDIT_OTEL_RESOURCE_ATTRIBUTES,
+    });
+    // includeResources must cover ALL configured attribute keys — not just the audit two — plus the
+    // promoted keys, so a deployment-provided resource attribute (e.g. project.id) is not stripped.
+    expect(otelAppender.includeResources).toEqual([
+      'custom.attr',
+      ...Object.keys(AUDIT_OTEL_RESOURCE_ATTRIBUTES),
+      ...AUDIT_OTEL_PROMOTE_RESOURCE_ATTRIBUTES,
+    ]);
+  });
+
+  test('does not inject fieldDrops, fieldDefaults, fieldAdditions or includeResources for non-OTel appenders', async () => {
+    const features$ = of({ allowAuditLogging: true });
+
+    const loggingConfig = await lastValueFrom(
+      features$.pipe(
+        createLoggingConfig({
+          enabled: true,
+          include_saved_object_names: false,
+          appender: {
+            type: 'console',
+            layout: { type: 'pattern' },
+          },
+        })
+      )
+    );
+
+    const appenders = loggingConfig.appenders as Record<string, AppenderConfigType>;
+    expect(appenders.auditTrailAppender).not.toHaveProperty('fieldDrops');
+    expect(appenders.auditTrailAppender).not.toHaveProperty('fieldDefaults');
+    expect(appenders.auditTrailAppender).not.toHaveProperty('fieldAdditions');
+    expect(appenders.auditTrailAppender).not.toHaveProperty('includeResources');
+    expect(appenders.auditTrailAppender).not.toHaveProperty('promoteResourceAttributes');
+  });
+
+  test('does not inject audit transforms for an OTel appender when not serverless', async () => {
+    const features$ = of({ allowAuditLogging: true });
+
+    const loggingConfig = await lastValueFrom(
+      features$.pipe(
+        createLoggingConfig(
+          {
+            enabled: true,
+            include_saved_object_names: false,
+            appender: {
+              type: 'otel',
+              protocol: 'http',
+              url: 'http://collector:4318/v1/logs',
+            },
+          },
+          false // not serverless — the OTel appender is left untouched
+        )
+      )
+    );
+
+    // The transforms are Serverless-only: on other build flavors the OTel appender passes through
+    // unchanged (full resource, raw ECS field names).
+    const appenders = loggingConfig.appenders as Record<string, AppenderConfigType>;
+    const otelAppender = appenders.auditTrailAppender as OtelAppenderConfig;
+    expect(otelAppender).not.toHaveProperty('fieldRenames');
+    expect(otelAppender).not.toHaveProperty('fieldDrops');
+    expect(otelAppender).not.toHaveProperty('fieldDefaults');
+    expect(otelAppender).not.toHaveProperty('fieldUppercase');
+    expect(otelAppender).not.toHaveProperty('fieldAdditions');
+    expect(otelAppender).not.toHaveProperty('includeResources');
+    expect(otelAppender).not.toHaveProperty('promoteResourceAttributes');
   });
 });
 

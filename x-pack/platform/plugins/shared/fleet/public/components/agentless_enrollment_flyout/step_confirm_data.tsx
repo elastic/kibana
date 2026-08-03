@@ -17,6 +17,11 @@ import {
   usePollingIncomingData,
   POLLING_TIMEOUT_MS,
 } from '../agent_enrollment_flyout/use_get_agent_incoming_data';
+import {
+  AWS_ONBOARDING_PACKAGE_NAME,
+  reportAwsOnboardingFirstDataArrived,
+  reportAwsOnboardingFirstDataTimeout,
+} from '../../../common/telemetry/aws_onboarding_events';
 
 import { NextSteps } from './next_steps';
 
@@ -33,29 +38,35 @@ export const AgentlessStepConfirmData = ({
   setConfirmDataStatus: (status: EuiStepStatus) => void;
   policyTemplates?: RegistryPolicyTemplate[];
 }) => {
-  const { docLinks } = useStartServices();
+  const { docLinks, analytics } = useStartServices();
   const [overallState, setOverallState] = useState<'pending' | 'success' | 'failure'>('pending');
 
-  // Fetch integration data for the given agent and package
   const { incomingData, hasReachedTimeout } = usePollingIncomingData({
     agentIds: [agent.id],
     pkgName: packageName,
     pkgVersion: packageVersion,
   });
 
-  // Calculate overall UI state from polling data
+  // Calculate overall UI state from polling data; emit telemetry on terminal transitions.
   useEffect(() => {
     if (incomingData.length > 0) {
       setConfirmDataStatus('complete');
       setOverallState('success');
+
+      if (analytics && packageName === AWS_ONBOARDING_PACKAGE_NAME) {
+        reportAwsOnboardingFirstDataArrived(analytics, sessionStorage, packageName);
+      }
     } else if (hasReachedTimeout) {
       setConfirmDataStatus('danger');
       setOverallState('failure');
+      if (analytics && packageName === AWS_ONBOARDING_PACKAGE_NAME) {
+        reportAwsOnboardingFirstDataTimeout(analytics, sessionStorage, packageName);
+      }
     } else {
       setConfirmDataStatus('loading');
       setOverallState('pending');
     }
-  }, [incomingData, hasReachedTimeout, setConfirmDataStatus]);
+  }, [incomingData, hasReachedTimeout, setConfirmDataStatus, analytics, packageName]);
 
   if (overallState === 'success') {
     return (

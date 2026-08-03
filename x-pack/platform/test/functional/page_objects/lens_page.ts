@@ -823,12 +823,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       });
 
       await testSubjects.click('confirmSaveSavedObjectButton');
-      await retry.waitForWithTimeout('Save modal to disappear', 5000, () =>
-        testSubjects
-          .missingOrFail('confirmSaveSavedObjectButton')
-          .then(() => true)
-          .catch(() => false)
-      );
+      await common.waitForSaveModalToClose();
     },
 
     /**

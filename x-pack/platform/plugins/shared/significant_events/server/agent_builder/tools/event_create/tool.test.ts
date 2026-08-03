@@ -38,9 +38,9 @@ describe('event_create tool', () => {
   it('returns success result', async () => {
     (assertSignificantEventsAccess as jest.Mock).mockResolvedValue(undefined);
     (eventsWriteHandler as jest.Mock).mockResolvedValue({
-      event_id: 'e1',
-      discovery_slug: 'agent-event-abcd1234',
-      status: 'promoted',
+      event_uuid: 'e1',
+      event_id: 'agent-event-abcd1234',
+      status: 'open',
       written: true,
     });
 
@@ -61,12 +61,11 @@ describe('event_create tool', () => {
       tool as never,
       {
         title: 'T',
+        symptom_hypothesis: 'Requests fail because the upstream dependency is unavailable.',
         summary: 'S',
-        root_cause: 'R',
         stream_names: ['logs.a'],
-        criticality: 40,
+        severity: '60-high',
         confidence: 0.8,
-        recommendations: ['open incident'],
       },
       createMockToolContext()
     );

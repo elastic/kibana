@@ -8,22 +8,27 @@
 import type { EsqlQueryRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { QueryLink } from '@kbn/significant-events-schema';
 import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
-import { SignificantEventsAlertsReaderV1 } from './v1_alerts_reader';
 import { SignificantEventsAlertsReaderV2 } from './v2_alerts_reader';
-import { getRuleDetectionSchedule, type RuleDetectionSchedule } from '../rules/schedule';
 
 export interface ChangePointScanParams {
+  /** Analysis duration as ES date math (`now-40m`). */
   lookback: string;
+  /** Outer date_histogram interval (`1m`, `5m`, …). Must be ≥ 1m. */
   bucketInterval: string;
   spaceId: string;
   ruleIds?: string[];
-  recentActivityMinutes?: number;
 }
 
-export type ChangePointTypeMap = Record<string, { p_value: number }>;
+/**
+ * Single-entry map of the detector's verdict, keyed by change type. `stationary`
+ * carries `{}`; the rest carry `p_value` and `change_point`. Empty when the rule
+ * had no verdict or the reader dropped an `indeterminable` one.
+ */
+export type ChangePointTypeMap = Record<string, { p_value?: number; change_point?: number }>;
 
 export interface ChangePointRuleBucket {
   key: string;
+  severity_score: number;
   doc_count: number;
   rule_name: {
     top: Array<{ metrics: Record<string, string> }>;
@@ -34,19 +39,12 @@ export interface ChangePointRuleBucket {
   change_points: {
     type: ChangePointTypeMap;
   };
-  last_5m: {
-    doc_count: number;
-  };
-  last_floor_window: {
-    doc_count: number;
-  };
-  rule_schedule: RuleDetectionSchedule;
 }
 
 export interface RuleMetadata {
   ruleName: string;
   streamName: string;
-  schedule: RuleDetectionSchedule;
+  severityScore: number;
 }
 
 export interface CountDetectionAlertsParams {
@@ -61,45 +59,18 @@ export interface OccurrencesEsqlParams {
   esqlUnit: string;
   limit: number;
   spaceId: string;
-}
-
-export interface ChangePointSeriesBucket {
-  key?: string | number;
-  key_as_string?: string;
-  doc_count?: number;
-  signal_count?: { value?: number };
-}
-
-export interface RuleChangePointAggregations {
-  over_time?: {
-    buckets?: ChangePointSeriesBucket[];
-  };
-  change_points?: {
-    type?: ChangePointTypeMap;
-  };
-}
-
-export interface RuleActivityAggregations {
-  activity_windows?: {
-    buckets?: Array<{ key: string | number; doc_count: number }>;
-  };
-  peak?: {
-    value?: number | null;
-  };
-}
-
-export interface RuleAlertWindowAggregations {
-  current_window?: {
-    doc_count: number;
-  };
-  reference_window?: {
-    doc_count: number;
-  };
+  /**
+   * Inclusive chart window as UTC ISO-8601 strings. Applied to source `bucket`
+   * (match minute), not write-time `@timestamp`. Strings (not `Date`) keep this
+   * boundary free of `toISOString` crashes if a caller omits the range.
+   */
+  rangeFromIso: string;
+  rangeToIso: string;
 }
 
 export interface ISignificantEventsAlertsReader {
   readonly index: string;
-  readonly ruleIdColumn: 'rule_uuid' | 'rule_id';
+  readonly ruleIdColumn: 'rule_id';
 
   buildOccurrencesEsqlRequest(params: OccurrencesEsqlParams): EsqlQueryRequest;
 
@@ -113,37 +84,6 @@ export interface ISignificantEventsAlertsReader {
     params: ChangePointScanParams,
     queryLinks: QueryLink[]
   ): Promise<{ took?: number; by_rule: { buckets: ChangePointRuleBucket[] } }>;
-
-  runRuleChangePoint(
-    esClient: TracedElasticsearchClient,
-    params: {
-      ruleUuid: string;
-      lookback: string;
-      bucketInterval: string;
-      spaceId: string;
-    }
-  ): Promise<{ aggregations: RuleChangePointAggregations }>;
-
-  runRuleActivity(
-    esClient: TracedElasticsearchClient,
-    params: {
-      ruleUuid: string;
-      lookback: string;
-      windowInterval: string;
-      spaceId: string;
-    }
-  ): Promise<{ aggregations: RuleActivityAggregations }>;
-
-  runRuleAlertWindows(
-    esClient: TracedElasticsearchClient,
-    params: {
-      ruleUuid: string;
-      currentLookback: string;
-      referenceLookbackGte: string;
-      referenceLookbackLt: string;
-      spaceId: string;
-    }
-  ): Promise<{ aggregations: RuleAlertWindowAggregations }>;
 }
 
 export function buildRuleMetadataMap(queryLinks: QueryLink[]): Map<string, RuleMetadata> {
@@ -152,17 +92,11 @@ export function buildRuleMetadataMap(queryLinks: QueryLink[]): Map<string, RuleM
     map.set(link.rule_id, {
       ruleName: link.query.title,
       streamName: link.stream_name,
-      schedule: getRuleDetectionSchedule(link.query),
+      severityScore: link.query.severity_score ?? 0,
     });
   }
   return map;
 }
 
-export const ALERTS_READER_V1: ISignificantEventsAlertsReader =
-  new SignificantEventsAlertsReaderV1();
 export const ALERTS_READER_V2: ISignificantEventsAlertsReader =
   new SignificantEventsAlertsReaderV2();
-
-export function createAlertsReader(alertingV2Active: boolean): ISignificantEventsAlertsReader {
-  return alertingV2Active ? ALERTS_READER_V2 : ALERTS_READER_V1;
-}

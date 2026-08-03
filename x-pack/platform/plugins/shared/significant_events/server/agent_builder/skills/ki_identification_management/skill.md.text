@@ -13,7 +13,7 @@ You have 3 tools for KI identification management:
   When to use:
   - Use when the user asks to start KI identification for a stream.
   - Use when the user wants to run feature identification and query generation in the background.
-  - Use when the user wants a direct path to track progress in Streams Significant Events UI.
+  - Use when the user wants a direct path to track progress in Streams Discovery knowledge indicators.
 
 - `ki_identification_status`
   When to use:
@@ -53,12 +53,12 @@ Example call:
 
 Example success output:
 {
-  "kibanaPath": "/app/streams/logs.ecs.linux/management/significantEvents"
+  "kibanaPath": "/app/streams/_discovery/knowledge_indicators?stream=logs.ecs.linux"
 }
 
 Example chat response after start:
-- [Open KI identification progress](/app/streams/logs.ecs.linux/management/significantEvents)
-- /app/streams/logs.ecs.linux/management/significantEvents
+- [Open KI identification progress](/app/streams/_discovery/knowledge_indicators?stream=logs.ecs.linux)
+- /app/streams/_discovery/knowledge_indicators?stream=logs.ecs.linux
 
 Example: check KI identification status
 Tool: `ki_identification_status`

@@ -10,6 +10,7 @@ import { SecurityRuleChangeTrackingAction } from '../../../../../../../../common
 import type { RuleResponse } from '../../../../../../../../common/api/detection_engine/model/rule_schema';
 import type { RuleParams } from '../../../../../rule_schema';
 import { SERVER_APP_ID } from '../../../../../../../../common';
+import { withSecuritySpan } from '../../../../../../../utils/with_security_span';
 import { convertAlertingRuleToRuleResponse } from '../../converters/convert_alerting_rule_to_rule_response';
 import { convertRuleResponseToAlertingRule } from '../../converters/convert_rule_response_to_alerting_rule';
 import { ClientError, validateFieldWritePermissions, validateMlAuth } from '../../utils';
@@ -40,32 +41,40 @@ export async function restoreDeletedRule({
     );
   }
 
-  await validateMlAuth(mlAuthz, snapshotRule.type);
-
-  validateFieldWritePermissions(
+  return withSecuritySpan(
     {
-      exceptions_list: snapshotRule.exceptions_list,
-      note: snapshotRule.note,
-      investigation_fields: snapshotRule.investigation_fields,
-      enabled: false,
+      name: 'DetectionRulesClient.restoreRuleFromHistory.restoreDeletedRule',
+      labels: { solution: 'security' },
     },
-    rulesAuthz
+    async () => {
+      await validateMlAuth(mlAuthz, snapshotRule.type);
+
+      validateFieldWritePermissions(
+        {
+          exceptions_list: snapshotRule.exceptions_list,
+          note: snapshotRule.note,
+          investigation_fields: snapshotRule.investigation_fields,
+          enabled: false,
+        },
+        rulesAuthz
+      );
+
+      const createdRule = await rulesClient.create<RuleParams>({
+        data: {
+          ...convertRuleResponseToAlertingRule(snapshotRule, actionsClient),
+          alertTypeId: ruleTypeMappings[snapshotRule.type],
+          consumer: SERVER_APP_ID,
+          enabled: false,
+        },
+        options: { id: ruleId, initialRevision: snapshotRule.revision + 1 },
+        changeTracking: {
+          action: SecurityRuleChangeTrackingAction.ruleRestore,
+          metadata: { restoredFromChangeId: changeId, restoredFromRevision: snapshotRule.revision },
+          refresh: 'wait_for',
+        },
+      });
+
+      return { rule: convertAlertingRuleToRuleResponse(createdRule), restoredRevisionTimestamp };
+    }
   );
-
-  const createdRule = await rulesClient.create<RuleParams>({
-    data: {
-      ...convertRuleResponseToAlertingRule(snapshotRule, actionsClient),
-      alertTypeId: ruleTypeMappings[snapshotRule.type],
-      consumer: SERVER_APP_ID,
-      enabled: false,
-    },
-    options: { id: ruleId, initialRevision: snapshotRule.revision + 1 },
-    changeTracking: {
-      action: SecurityRuleChangeTrackingAction.ruleRestore,
-      metadata: { restoredFromChangeId: changeId, restoredFromRevision: snapshotRule.revision },
-      refresh: 'wait_for',
-    },
-  });
-
-  return { rule: convertAlertingRuleToRuleResponse(createdRule), restoredRevisionTimestamp };
 }

@@ -18,16 +18,17 @@ import { cacheParametrizedAsyncFunction } from './utils/cache';
  * @returns A promise that resolves to the views list.
  */
 export const getViews = cacheParametrizedAsyncFunction(
-  async (http: HttpStart) => {
+  async (http: HttpStart, signal?: AbortSignal) => {
     try {
-      const result = await http.get<EsqlViewsResult>(VIEWS_ROUTE);
+      const result = await http.get<EsqlViewsResult>(VIEWS_ROUTE, { signal });
       return result ?? { views: [] };
-    } catch {
+    } catch (e) {
+      if (signal?.aborted) throw e;
       // API may be unavailable (e.g. 404 in FTR when ES plugin route is not registered)
       return { views: [] };
     }
   },
-  (http: HttpStart) => 'views',
+  (_http: HttpStart, _signal?: AbortSignal) => 'views',
   1000 * 60 * 5, // Keep the value in cache for 5 minutes
   1000 * 15 // Refresh the cache in the background only if 15 seconds passed since the last call
 );

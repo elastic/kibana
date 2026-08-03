@@ -85,6 +85,10 @@ export function ChatItemActions({
 
       {canCopy ? (
         <EuiPopover
+          aria-label={i18n.translate(
+            'xpack.aiAssistant.chatTimeline.actions.copyMessagePopoverAriaLabel',
+            { defaultMessage: 'Copy message confirmation' }
+          )}
           button={
             <EuiToolTip content={copyMessageLabel} disableScreenReaderOutput>
               <EuiButtonIcon

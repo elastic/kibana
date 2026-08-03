@@ -7,7 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
-import { formatDuration, PRESERVED_TIME_UNITS, toMilliseconds } from '../../shared';
+import { BOUNDARY_VALIDATION_ERROR } from '@kbn/data-lifecycle-phases';
+import { PRESERVED_TIME_UNITS, toMilliseconds } from '../../shared';
 import type { DlmPhasesFlyoutFormInternal } from './types';
 
 export const getDlmPhasesFlyoutFormSchema = (): z.ZodType<DlmPhasesFlyoutFormInternal> => {
@@ -93,18 +94,10 @@ export const getDlmPhasesFlyoutFormSchema = (): z.ZodType<DlmPhasesFlyoutFormInt
         const deleteMs = toMilliseconds(data.delete.afterValue.trim(), data.delete.afterUnit);
 
         if (frozenMs >= 0 && deleteMs >= 0 && deleteMs < frozenMs) {
-          const frozenEs =
-            formatDuration(data.frozen.afterValue.trim(), data.frozen.afterUnit) ?? '';
           ctx.addIssue({
             code: 'custom',
             path: ['delete', 'afterValue'],
-            message: i18n.translate(
-              'xpack.streams.editDlmPhasesFlyout.deleteAfterSmallerThanFrozenAfterError',
-              {
-                defaultMessage: 'Must be greater or equal than the frozen phase value ({value})',
-                values: { value: frozenEs },
-              }
-            ),
+            message: BOUNDARY_VALIDATION_ERROR,
           });
         }
       }

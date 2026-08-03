@@ -7,7 +7,7 @@
 
 import { isEmpty } from 'lodash/fp';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import { i18n } from '@kbn/i18n';
 import type { EqlOptions } from '@kbn/timelines-plugin/common';
 import { PageScope } from '../../data_view_manager/constants';
@@ -55,9 +55,9 @@ export const useRuleFromTimeline = (setRuleQuery: SetRuleQuery): RuleFromTimelin
   const queryTimelineById = useQueryTimelineById();
   const [urlStateInitialized, setUrlStateInitialized] = useState(false);
 
-  const selectedPatterns = useSelectedPatterns(PageScope.timeline);
-  const browserFields = useBrowserFields(PageScope.timeline);
   const { dataView } = useDataView(PageScope.timeline);
+  const browserFields = useBrowserFields(dataView);
+  const selectedPatterns = useSelectedPatterns(dataView);
   const selectDataView = useSelectDataView();
 
   const dataViewId = dataView?.id ?? '';

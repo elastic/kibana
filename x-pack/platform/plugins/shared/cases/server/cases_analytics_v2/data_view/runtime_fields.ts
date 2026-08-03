@@ -115,16 +115,27 @@ export const splitSnakeKey = (snakeKey: string): { name: string; suffix: string 
  * publish every value, and swallows per-value parse failures so a single
  * bad value doesn't break the field for every doc in Lens / Discover.
  *
+ * The `doc[path]` access is wrapped in try/catch: a `flattened` sub-key
+ * isn't in the index field infos until some document indexes it, so until
+ * then `doc[...]` throws `No field found for [...] in mapping` instead of
+ * returning empty, aborting the whole request. Runtime fields are published
+ * eagerly from template metadata — before any case populates the field — so
+ * the guard treats a not-yet-indexed sub-key like an absent value: return.
+ *
  * `${snakeKey}` is interpolated verbatim into the Painless string literal;
  * `splitSnakeKey` restricts it to `[A-Za-z0-9_]+` so the literal stays
  * safe.
  */
 export const buildPainlessSource = (snakeKey: string, runtimeType: RuntimeType): string => {
   const fieldPath = `case.extended_fields.${snakeKey}`;
-  // `doc[path]` returns a `ScriptDocValues` instance. `.empty` short-circuits
-  // when no value is present; iteration yields the typed leaf values (Strings
-  // for keyword-backed fields, which is how ES indexes flattened sub-keys).
-  const guard = `def vals = doc['${fieldPath}']; if (vals == null || vals.empty) { return; }`;
+  // `doc[path]` throws if the flattened sub-key was never indexed, so the
+  // access is wrapped in try/catch and treated as "no value". `.empty`
+  // handles the key-exists-but-unset case; iteration yields the typed leaf
+  // values (Strings for keyword-backed flattened sub-keys).
+  const guard =
+    `def vals; ` +
+    `try { vals = doc['${fieldPath}']; } catch (Exception e) { return; } ` +
+    `if (vals == null || vals.empty) { return; }`;
 
   switch (runtimeType) {
     case 'long':

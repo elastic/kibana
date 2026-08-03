@@ -29,6 +29,7 @@ import type {
 } from '../../../common/search_strategy';
 import { generateTablePaginationOptions } from '../../../common/utils/build_query';
 import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
+import { OSQUERY_SEARCH_STRATEGY } from '../../search_strategy/constants';
 import { actionResultsResponseSchema } from './response_schemas';
 
 export const getActionResultsRoute = (
@@ -128,7 +129,7 @@ export const getActionResultsRoute = (
                   : undefined,
                 spaceId,
               },
-              { abortSignal, strategy: 'osquerySearchStrategy' }
+              { abortSignal, strategy: OSQUERY_SEARCH_STRATEGY }
             )
           );
 
@@ -162,10 +163,10 @@ export const getActionResultsRoute = (
             },
           });
         } catch (err) {
-          const error = err as Error;
+          const error = err as Error & { statusCode?: number };
 
           return response.customError({
-            statusCode: 500,
+            statusCode: error.statusCode ?? 500,
             body: { message: error.message },
           });
         }

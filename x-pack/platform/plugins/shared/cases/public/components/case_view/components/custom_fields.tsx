@@ -18,6 +18,8 @@ interface Props {
   customFields: CaseUI['customFields'];
   customFieldsConfiguration: CasesConfigurationUI['customFields'];
   onSubmit: (customField: CaseUICustomField) => void;
+  /** Defaults to classic (legacy case view). Redesign passes `inline`. */
+  editVariant?: 'classic' | 'inline';
 }
 
 const CustomFieldsComponent: React.FC<Props> = ({
@@ -25,6 +27,7 @@ const CustomFieldsComponent: React.FC<Props> = ({
   customFields,
   customFieldsConfiguration,
   onSubmit,
+  editVariant = 'classic',
 }) => {
   const { permissions } = useCasesContext();
   const sortedCustomFieldsConfiguration = useMemo(
@@ -59,6 +62,7 @@ const CustomFieldsComponent: React.FC<Props> = ({
           customFieldConfiguration={customFieldConf}
           customField={customField}
           onSubmit={onSubmitCustomField}
+          editVariant={editVariant}
         />
       </EuiFlexItem>
     );

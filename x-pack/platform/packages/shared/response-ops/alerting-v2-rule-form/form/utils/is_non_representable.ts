@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import type { RuleResponse } from '@kbn/alerting-v2-schemas';
+import type { RecoveryStrategy, RuleResponse } from '@kbn/alerting-v2-schemas';
+
+const REPRESENTABLE_RECOVERY_STRATEGIES: readonly RecoveryStrategy[] = [
+  'no_breach',
+  'query',
+  'none',
+];
 
 /**
  * Determines whether a rule (from the API response) contains features that
@@ -13,7 +19,7 @@ import type { RuleResponse } from '@kbn/alerting-v2-schemas';
  *
  * Non-representable cases:
  * - `alert` kind with `standalone` query format (form requires composed base+segments)
- * - `recovery_strategy` other than `'query'` (form only supports custom recovery queries)
+ * - `recovery_strategy` outside the form's supported set (`no_breach` | `query` | `none`; null/unset is fine)
  * - `no_data_strategy: 'emit'` (temporarily rejected by the write API; dropdown has no option)
  *
  * Note: `query.no_data` is not checked separately because it can only appear on
@@ -24,7 +30,10 @@ export const isNonRepresentableRule = (rule: RuleResponse): boolean => {
 
   if (rule.query.format === 'standalone') return true;
 
-  if (rule.recovery_strategy != null && rule.recovery_strategy !== 'query') {
+  if (
+    rule.recovery_strategy != null &&
+    !REPRESENTABLE_RECOVERY_STRATEGIES.includes(rule.recovery_strategy)
+  ) {
     return true;
   }
 

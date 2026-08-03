@@ -14,7 +14,13 @@ import { useManagedOtlpServiceAvailability } from '../shared/use_managed_otlp_se
 import type { SupportedLogo } from '../shared/logo_icon';
 import type { ApiEndpointId } from '../../../common/api_endpoints';
 import type { ObservabilityOnboardingAppServices } from '../..';
-import { API_ENDPOINTS, type ApiEndpointContext } from './endpoints_config';
+import {
+  API_ENDPOINTS,
+  getPopoverVendorEndpoints,
+  getVendorEndpointsForTab,
+  type ApiEndpointContext,
+  type ResolvedVendorEndpoint,
+} from './endpoints_config';
 
 export interface ResolvedApiEndpoint {
   id: ApiEndpointId;
@@ -22,10 +28,13 @@ export interface ResolvedApiEndpoint {
   logo?: SupportedLogo;
   euiIconType?: EuiIconType;
   url?: string;
+  usesManagedInput: boolean;
+  additionalEndpoints: ResolvedVendorEndpoint[];
 }
 
 export function useApiEndpoints(): {
   endpoints: ResolvedApiEndpoint[];
+  popoverEndpoints: ResolvedVendorEndpoint[];
   isLoading: boolean;
   isError: boolean;
 } {
@@ -47,7 +56,7 @@ export function useApiEndpoints(): {
     { showToastOnError: false }
   );
 
-  const endpoints = useMemo(() => {
+  const { endpoints, popoverEndpoints } = useMemo(() => {
     const endpointContext: ApiEndpointContext = {
       elasticsearchUrl: data?.elasticsearchUrl || undefined,
       managedOtlpServiceUrl: data?.managedOtlpServiceUrl || undefined,
@@ -56,13 +65,18 @@ export function useApiEndpoints(): {
       managedOtlpPrwEndpointEnabled,
     };
 
-    return API_ENDPOINTS.map((definition) => ({
-      id: definition.id,
-      label: definition.label,
-      logo: definition.logo,
-      euiIconType: definition.euiIconType,
-      url: definition.getUrl(endpointContext),
-    }));
+    return {
+      endpoints: API_ENDPOINTS.map((definition) => ({
+        id: definition.id,
+        label: definition.label,
+        logo: definition.logo,
+        euiIconType: definition.euiIconType,
+        url: definition.getUrl(endpointContext),
+        usesManagedInput: definition.usesManagedInput(endpointContext),
+        additionalEndpoints: getVendorEndpointsForTab(definition.id, endpointContext),
+      })),
+      popoverEndpoints: getPopoverVendorEndpoints(endpointContext),
+    };
   }, [
     data?.elasticsearchUrl,
     data?.managedOtlpServiceUrl,
@@ -71,5 +85,10 @@ export function useApiEndpoints(): {
     managedOtlpPrwEndpointEnabled,
   ]);
 
-  return { endpoints, isLoading: isPending(status), isError: status === FETCH_STATUS.FAILURE };
+  return {
+    endpoints,
+    popoverEndpoints,
+    isLoading: isPending(status),
+    isError: status === FETCH_STATUS.FAILURE,
+  };
 }

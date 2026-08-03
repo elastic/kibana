@@ -99,8 +99,8 @@ const readSignificantEventsKIQueryOccurrenceStatsRoute = createServerRoute({
     logger,
   }): Promise<QueryOccurrencesResponse> => {
     const scopedClients = await getScopedClients({ request });
-    const { streamsClient, scopedClusterClient, licensing, uiSettingsClient } = scopedClients;
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    const { streamsClient, scopedClusterClient, licensing } = scopedClients;
+    await assertSignificantEventsAccess({ server, licensing });
     await streamsClient.ensureStream(params.path.name);
 
     const esClient = createSignificantEventsTracedEsClient({

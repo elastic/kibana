@@ -1,0 +1,9 @@
+prs:
+- https://github.com/elastic/kibana/pull/275765
+issues:
+- https://github.com/elastic/security-team/issues/17887
+type: enhancement
+products:
+- product: cloud-serverless
+  target: 2026-07-09
+title: Improve AI authoring experience in the workflow YAML editor

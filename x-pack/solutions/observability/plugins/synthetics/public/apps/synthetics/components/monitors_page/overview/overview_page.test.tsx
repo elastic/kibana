@@ -7,10 +7,10 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { Provider } from 'react-redux';
+import { Provider } from 'react-redux-v7';
 import { Router } from '@kbn/shared-ux-router';
 import { createMemoryHistory } from 'history';
-import { applyMiddleware, createStore } from 'redux';
+import { applyMiddleware, createStore } from 'redux-v4';
 import createSagaMiddleware from 'redux-saga';
 
 import { rootReducer } from '../../../state/root_reducer';
@@ -21,7 +21,8 @@ const mockUseOverviewStatus = jest.fn((_opts?: { scopeStatusByLocation: boolean 
   error: undefined,
   loading: false,
   loaded: false,
-  allConfigs: [],
+  settled: false,
+  allConfigs: [] as unknown[],
 }));
 
 jest.mock('../hooks/use_overview_status', () => ({
@@ -31,18 +32,21 @@ jest.mock('../hooks/use_overview_status', () => ({
     error: undefined,
     loading: false,
     loaded: false,
+    settled: false,
     allConfigs: [],
   })),
 }));
 
+const mockUseMonitorList = jest.fn(() => ({
+  loading: false,
+  loaded: false,
+  handleFilterChange: jest.fn(),
+  absoluteTotal: 0,
+  syntheticsMonitors: [],
+}));
+
 jest.mock('../hooks/use_monitor_list', () => ({
-  useMonitorList: jest.fn(() => ({
-    loading: false,
-    loaded: false,
-    handleFilterChange: jest.fn(),
-    absoluteTotal: 0,
-    syntheticsMonitors: [],
-  })),
+  useMonitorList: () => mockUseMonitorList(),
 }));
 
 jest.mock('../../../hooks', () => ({
@@ -114,6 +118,8 @@ jest.mock('../common/no_monitors_found', () => ({
 }));
 
 import { OverviewPage } from './overview_page';
+import { setOverviewPageStateAction } from '../../../state';
+import type { MonitorOverviewPageState } from '../../../state';
 
 const buildStore = () => {
   const sagaMiddleware = createSagaMiddleware();
@@ -122,23 +128,214 @@ const buildStore = () => {
   return store;
 };
 
+const renderPage = (initialEntry = '/overview', pageState?: Partial<MonitorOverviewPageState>) => {
+  const store = buildStore();
+  if (pageState) {
+    store.dispatch(setOverviewPageStateAction(pageState));
+  }
+  const history = createMemoryHistory({ initialEntries: [initialEntry] });
+
+  render(
+    <Provider store={store}>
+      <Router history={history}>
+        <OverviewPage />
+      </Router>
+    </Provider>
+  );
+
+  return history;
+};
+
 describe('OverviewPage wiring', () => {
   beforeEach(() => {
     mockUseOverviewStatus.mockClear();
+    mockUseMonitorList.mockReset();
+    mockUseMonitorList.mockReturnValue({
+      loading: false,
+      loaded: false,
+      handleFilterChange: jest.fn(),
+      absoluteTotal: 0,
+      syntheticsMonitors: [],
+    });
   });
 
   it('calls useOverviewStatus with scopeStatusByLocation: true on mount', () => {
-    const store = buildStore();
-    const history = createMemoryHistory({ initialEntries: ['/overview'] });
-
-    render(
-      <Provider store={store}>
-        <Router history={history}>
-          <OverviewPage />
-        </Router>
-      </Provider>
-    );
+    const history = renderPage();
 
     expect(mockUseOverviewStatus).toHaveBeenCalledWith({ scopeStatusByLocation: true });
+    expect(history.location.pathname).toBe('/overview');
+  });
+
+  it('redirects to Getting Started when there are no saved-object and no overview monitors', () => {
+    mockUseMonitorList.mockReturnValue({
+      loading: false,
+      loaded: true,
+      handleFilterChange: jest.fn(),
+      absoluteTotal: 0,
+      syntheticsMonitors: [],
+    });
+    mockUseOverviewStatus.mockReturnValue({
+      status: undefined,
+      error: undefined,
+      loading: false,
+      loaded: true,
+      settled: true,
+      allConfigs: [],
+    });
+
+    const history = renderPage();
+
+    expect(history.location.pathname).toBe('/monitors/getting-started');
+  });
+
+  it('redirects to Getting Started on an empty deployment when only a date range is set (not a monitor filter)', () => {
+    // The date range scopes each monitor's status, not which monitors exist, so it must
+    // not block onboarding a genuinely empty deployment. (Regression: the old `!search`
+    // gate wrongly kept the user on the overview whenever the date picker put params in
+    // the URL.)
+    mockUseMonitorList.mockReturnValue({
+      loading: false,
+      loaded: true,
+      handleFilterChange: jest.fn(),
+      absoluteTotal: 0,
+      syntheticsMonitors: [],
+    });
+    mockUseOverviewStatus.mockReturnValue({
+      status: undefined,
+      error: undefined,
+      loading: false,
+      loaded: true,
+      settled: true,
+      allConfigs: [],
+    });
+
+    const history = renderPage('/overview', {
+      dateRangeStart: 'now-1h',
+      dateRangeEnd: 'now',
+    });
+
+    expect(history.location.pathname).toBe('/monitors/getting-started');
+  });
+
+  it('does not redirect when a monitor filter is active, even if the filtered overview is empty', () => {
+    // `allConfigs` is filtered (the active filter is forwarded to the overview-status
+    // request), so an empty result under a filter does NOT prove the deployment is empty
+    // — a ping-only deployment could simply have its Heartbeat monitors excluded by the
+    // filter. Redirecting to Getting Started here would wrongly onboard away from a
+    // filtered view of a deployment that does have (read-only) monitors.
+    mockUseMonitorList.mockReturnValue({
+      loading: false,
+      loaded: true,
+      handleFilterChange: jest.fn(),
+      absoluteTotal: 0,
+      syntheticsMonitors: [],
+    });
+    mockUseOverviewStatus.mockReturnValue({
+      status: undefined,
+      error: undefined,
+      loading: false,
+      loaded: true,
+      settled: true,
+      allConfigs: [],
+    });
+
+    const history = renderPage('/overview', { monitorTypes: ['http'] });
+
+    expect(history.location.pathname).toBe('/overview');
+  });
+
+  it('does not redirect when only ping-only overview monitors exist (no saved objects)', () => {
+    mockUseMonitorList.mockReturnValue({
+      loading: false,
+      loaded: true,
+      handleFilterChange: jest.fn(),
+      absoluteTotal: 0,
+      syntheticsMonitors: [],
+    });
+    mockUseOverviewStatus.mockReturnValue({
+      status: undefined,
+      error: undefined,
+      loading: false,
+      loaded: true,
+      settled: true,
+      allConfigs: [{ configId: 'hb-1', origin: 'heartbeat' }],
+    });
+
+    const history = renderPage();
+
+    expect(history.location.pathname).toBe('/overview');
+  });
+
+  it('redirects when the only overview entry is a stale saved-object monitor (e.g. just deleted)', () => {
+    // A just-deleted saved-object monitor lingers in the overview status until the
+    // next refetch, but it has no `origin: 'heartbeat'` / `remote`, so it must not
+    // block the Getting Started redirect once `absoluteTotal` has dropped to 0.
+    mockUseMonitorList.mockReturnValue({
+      loading: false,
+      loaded: true,
+      handleFilterChange: jest.fn(),
+      absoluteTotal: 0,
+      syntheticsMonitors: [],
+    });
+    mockUseOverviewStatus.mockReturnValue({
+      status: undefined,
+      error: undefined,
+      loading: false,
+      loaded: true,
+      settled: true,
+      allConfigs: [{ configId: 'deleted-1' }],
+    });
+
+    const history = renderPage();
+
+    expect(history.location.pathname).toBe('/monitors/getting-started');
+  });
+
+  it('does not redirect before the overview status has loaded (avoids the empty-state flash)', () => {
+    mockUseMonitorList.mockReturnValue({
+      loading: false,
+      loaded: true,
+      handleFilterChange: jest.fn(),
+      absoluteTotal: 0,
+      syntheticsMonitors: [],
+    });
+    mockUseOverviewStatus.mockReturnValue({
+      status: undefined,
+      error: undefined,
+      loading: false,
+      loaded: false,
+      settled: false,
+      allConfigs: [],
+    });
+
+    const history = renderPage();
+
+    expect(history.location.pathname).toBe('/overview');
+  });
+
+  it('redirects to Getting Started when the overview status request failed (settled, not loaded)', () => {
+    // A failed overview-status request never flips `loaded`, and its `error` is
+    // cleared almost immediately by the OverviewStatus toast effect. The persistent
+    // `settled` flag is what lets a truly empty deployment whose status request
+    // fails still reach Getting Started instead of hanging on an empty overview.
+    mockUseMonitorList.mockReturnValue({
+      loading: false,
+      loaded: true,
+      handleFilterChange: jest.fn(),
+      absoluteTotal: 0,
+      syntheticsMonitors: [],
+    });
+    mockUseOverviewStatus.mockReturnValue({
+      status: undefined,
+      error: undefined, // already cleared by the toast effect by the time we render
+      loading: false,
+      loaded: false,
+      settled: true,
+      allConfigs: [],
+    });
+
+    const history = renderPage();
+
+    expect(history.location.pathname).toBe('/monitors/getting-started');
   });
 });

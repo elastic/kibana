@@ -8,7 +8,6 @@
 import {
   MAX_ID_LENGTH,
   MAX_RULE_NAME_LENGTH,
-  detectionSchema,
   type Detection,
 } from '@kbn/significant-events-schema';
 import { z } from '@kbn/zod/v4';
@@ -53,9 +52,9 @@ const detectionsSearchRoute = createServerRoute({
     getScopedClients,
     server,
   }): Promise<PaginatedResponse<Detection>> => {
-    const { getDetectionClient, licensing, uiSettingsClient } = await getScopedClients({ request });
+    const { getDetectionClient, licensing } = await getScopedClients({ request });
 
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    await assertSignificantEventsAccess({ server, licensing });
 
     return getDetectionClient().findLatestPaginated(params.query);
   },
@@ -65,8 +64,9 @@ const detectionsHistoryRoute = createServerRoute({
   endpoint: 'GET /internal/significant_events/detections/{id}/history',
   options: {
     access: 'internal',
-    summary: 'Get detection history',
-    description: 'Get all state transition documents for a detection episode, sorted ascending.',
+    summary: 'Get a rule change-point history',
+    description:
+      "Get a rule's change-point detections (keyed by rule_uuid, path `{id}` = rule_uuid), sorted ascending.",
   },
   security: {
     authz: {
@@ -84,40 +84,15 @@ const detectionsHistoryRoute = createServerRoute({
     getScopedClients,
     server,
   }): Promise<{ hits: Detection[] }> => {
-    const { getDetectionClient, licensing, uiSettingsClient } = await getScopedClients({ request });
+    const { getDetectionClient, licensing } = await getScopedClients({ request });
 
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    await assertSignificantEventsAccess({ server, licensing });
 
-    return getDetectionClient().findById(params.path.id);
-  },
-});
-
-const detectionsBulkCreateRoute = createServerRoute({
-  endpoint: 'POST /internal/significant_events/detections',
-  options: {
-    access: 'internal',
-    summary: 'Bulk create detections',
-    description: 'Create detection entities in bulk.',
-  },
-  security: {
-    authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
-    },
-  },
-  params: z.object({
-    body: z.array(detectionSchema),
-  }),
-  handler: async ({ params, request, getScopedClients, server }) => {
-    const { getDetectionClient, licensing, uiSettingsClient } = await getScopedClients({ request });
-
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
-
-    return getDetectionClient().bulkCreate(params.body);
+    return getDetectionClient().findHistoryByRuleUuid(params.path.id);
   },
 });
 
 export const internalDetectionsRoutes = {
   ...detectionsSearchRoute,
   ...detectionsHistoryRoute,
-  ...detectionsBulkCreateRoute,
 };

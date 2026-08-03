@@ -49,13 +49,19 @@ const DEFAULT_PER_PAGE = POLICY_EXECUTION_HISTORY_MAX_PER_PAGE;
 const SEARCH_ID_CAP = 500;
 const DEFAULT_OUTCOME_FILTER: PolicyExecutionOutcomeFilter = 'all';
 
-export interface ListExecutionHistoryParams {
+export interface ListExecutionHistoryArgs {
   request: KibanaRequest;
   page?: number;
   perPage?: number;
   search?: string;
   ruleIds?: string[];
   outcome?: PolicyExecutionOutcomeFilter;
+  episodeIds?: string[];
+  /**
+   * Inclusive ISO timestamp lower bound for `@timestamp`. When provided it
+   * replaces the default rolling {@link TIME_WINDOW_HOURS}-hour window.
+   */
+  startDate?: string;
 }
 
 export interface ListExecutionHistoryResult {
@@ -66,7 +72,7 @@ export interface ListExecutionHistoryResult {
   searchMatches: SearchMatchCounts | null;
 }
 
-export interface CountNewEventsSinceParams {
+export interface CountNewEventsSinceArgs {
   request: KibanaRequest;
   since: string;
   search?: string;
@@ -98,8 +104,11 @@ export class ActionPolicyExecutionHistoryClient {
     search,
     ruleIds,
     outcome = DEFAULT_OUTCOME_FILTER,
-  }: ListExecutionHistoryParams): Promise<ListExecutionHistoryResult> {
-    const startDate = new Date(Date.now() - TIME_WINDOW_HOURS * 60 * 60 * 1000).toISOString();
+    episodeIds,
+    startDate,
+  }: ListExecutionHistoryArgs): Promise<ListExecutionHistoryResult> {
+    const effectiveStartDate =
+      startDate ?? new Date(Date.now() - TIME_WINDOW_HOURS * 60 * 60 * 1000).toISOString();
     const spaceId = this.spaces.spacesService.getSpaceId(request);
     const searchIsActive = search !== undefined && search.trim() !== '';
 
@@ -111,13 +120,14 @@ export class ActionPolicyExecutionHistoryClient {
 
     const result = await this.eventLogService.findActionPolicyExecutionEvents({
       spaceId,
-      startDate,
+      startDate: effectiveStartDate,
       page,
       perPage,
       outcome: toOutcomeForService(outcome),
       policyIds: matchingSearchIds.policyIds,
       ruleIds: matchingSearchIds.ruleIds,
       mandatoryRuleIds: ruleIds,
+      episodeIds,
     });
 
     const nameMaps = await this.resolveNames(result.events, spaceId);
@@ -147,7 +157,7 @@ export class ActionPolicyExecutionHistoryClient {
     search,
     ruleIds,
     outcome = DEFAULT_OUTCOME_FILTER,
-  }: CountNewEventsSinceParams): Promise<CountNewEventsSinceResult> {
+  }: CountNewEventsSinceArgs): Promise<CountNewEventsSinceResult> {
     const spaceId = this.spaces.spacesService.getSpaceId(request);
 
     const searchIds = await this.resolveSearchIds(search);
