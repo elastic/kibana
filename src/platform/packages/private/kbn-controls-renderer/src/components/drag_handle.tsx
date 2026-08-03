@@ -27,6 +27,8 @@ interface DragHandleProps {
   children?: React.ReactNode;
   className?: string;
   onKeyDown?: (event: React.KeyboardEvent) => void;
+  /** Id of the element describing how to reorder with the keyboard; announced when the handle is focused */
+  reorderInstructionsId?: string;
 }
 
 const dragHandleStyles = {
@@ -62,6 +64,7 @@ export const DragHandle = ({
   highContrast,
   className,
   onKeyDown,
+  reorderInstructionsId,
 }: DragHandleProps) => {
   const styles = useMemoCss(dragHandleStyles);
   const dragHandleRef = useContext(DragHandleContext);
@@ -79,6 +82,15 @@ export const DragHandle = ({
         defaultMessage: 'Move control {controlTitle}',
         values: { controlTitle },
       })}
+      // Tells screen readers the control is reorderable and how, restoring the affordance dnd-kit
+      // used to inject. `aria-describedby` points at shared usage instructions announced on focus;
+      // `aria-keyshortcuts` is a supplementary hint, as its support across screen readers is patchy.
+      aria-describedby={reorderInstructionsId}
+      aria-roledescription={i18n.translate(
+        'controls.controlGroup.ariaActions.sortableRoleDescription',
+        { defaultMessage: 'Sortable' }
+      )}
+      aria-keyshortcuts="ArrowLeft ArrowRight ArrowUp ArrowDown"
       css={[styles.dragHandle, highContrast ? styles.dragHandleHighContrast : null]}
     >
       <EuiIcon type="dragHorizontal" aria-hidden={true} />

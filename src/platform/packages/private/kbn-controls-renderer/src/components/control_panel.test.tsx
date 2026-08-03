@@ -92,6 +92,7 @@ describe.skip('render', () => {
           parentApi={parentApi}
           displayPosition={null}
           onKeyboardReorder={jest.fn()}
+          reorderInstructionsId="reorder-instructions"
         />
       );
       await waitFor(() => {
@@ -114,6 +115,7 @@ describe.skip('render', () => {
           parentApi={parentApi}
           displayPosition={null}
           onKeyboardReorder={jest.fn()}
+          reorderInstructionsId="reorder-instructions"
         />
       );
       await waitFor(() => {

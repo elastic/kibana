@@ -8,7 +8,7 @@
  */
 
 import { css } from '@emotion/react';
-import { default as React, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { default as React, useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
 import { distinctUntilChanged } from 'rxjs';
 
 import { combine } from '@atlaskit/pragmatic-drag-and-drop/combine';
@@ -53,6 +53,7 @@ export const ControlsRenderer = ({
 }) => {
   const [isEditFlyoutOpen, setIsEditFlyoutOpen] = useState(false);
   const [announcement, setAnnouncement] = useState('');
+  const reorderInstructionsId = useId();
 
   const groupRef = useRef<HTMLUListElement | null>(null);
   const dragOrigin = useRef<DragOrigin | null>(null);
@@ -224,9 +225,19 @@ export const ControlsRenderer = ({
             control={control}
             displayPosition={displayPositions?.[index] ?? null}
             onKeyboardReorder={onKeyboardReorder}
+            reorderInstructionsId={reorderInstructionsId}
           />
         ))}
       </EuiFlexGroup>
+      <EuiScreenReaderOnly>
+        {/* Shared usage instructions, referenced by every drag handle's `aria-describedby` */}
+        <div id={reorderInstructionsId}>
+          {i18n.translate('controls.controlGroup.ariaDescription.keyboardReorder', {
+            defaultMessage:
+              'Press the Left or Up arrow key to move this control earlier, or the Right or Down arrow key to move it later.',
+          })}
+        </div>
+      </EuiScreenReaderOnly>
       <EuiScreenReaderOnly>
         <div aria-live="assertive">{announcement}</div>
       </EuiScreenReaderOnly>

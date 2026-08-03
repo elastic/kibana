@@ -54,6 +54,7 @@ export const ControlPanel = ({
   control: { id, grow, width, type },
   displayPosition,
   onKeyboardReorder,
+  reorderInstructionsId,
 }: {
   parentApi: ControlsRendererParentApi;
   control: Required<PinnedControlLayoutState>;
@@ -64,6 +65,8 @@ export const ControlPanel = ({
    */
   displayPosition: number | null;
   onKeyboardReorder: (id: string, direction: 'back' | 'forward') => void;
+  /** Id of the shared instructions describing keyboard reordering, for the drag handle to reference */
+  reorderInstructionsId: string;
 }) => {
   const styles = useMemoCss(controlPanelStyles);
 
@@ -297,6 +300,7 @@ export const ControlPanel = ({
                         controlTitle={panelLabel}
                         className="controlFrame__dragHandle"
                         onKeyDown={handleDragHandleKeyDown}
+                        reorderInstructionsId={reorderInstructionsId}
                       />
                       <api.CustomPrependComponent />
                     </>
@@ -308,6 +312,7 @@ export const ControlPanel = ({
                         className="controlFrame__dragHandle"
                         highContrast={isIndicatingRelatedPanels}
                         onKeyDown={handleDragHandleKeyDown}
+                        reorderInstructionsId={reorderInstructionsId}
                       >
                         {!enableIndicateRelatedPanels && controlLabel}
                       </DragHandle>
