@@ -1896,6 +1896,48 @@ describe('TemplatesService', () => {
         ).resolves.toBeUndefined();
       });
 
+      it('applies the count cap on the update dry_run preflight when the update changes owner', async () => {
+        const service = createService();
+        // The target owner (observability) is at the limit; the update moves the template from
+        // securitySolution into observability, so the cap must be enforced — mirroring the real
+        // `updateTemplate` write, which asserts the target-owner count whenever `input.owner`
+        // differs from the template's current owner.
+        unsecuredSavedObjectsClient.find.mockResolvedValue(
+          createMockFindResponse([], MAX_TEMPLATES_PER_OWNER)
+        );
+
+        await expect(
+          service.validateWriteInput(
+            {
+              name: 'Moved Owner',
+              owner: 'observability',
+              definition: buildDefinition('Moved Owner'),
+            },
+            { excludeTemplateId: 'template-id', currentOwner: 'securitySolution' }
+          )
+        ).rejects.toThrow(
+          `Cannot create more than ${MAX_TEMPLATES_PER_OWNER} templates per owner.`
+        );
+      });
+
+      it('does NOT apply the count cap on the update dry_run preflight when the owner is unchanged', async () => {
+        const service = createService();
+        unsecuredSavedObjectsClient.find.mockResolvedValue(
+          createMockFindResponse([], MAX_TEMPLATES_PER_OWNER)
+        );
+
+        await expect(
+          service.validateWriteInput(
+            {
+              name: 'Same Owner',
+              owner: 'securitySolution',
+              definition: buildDefinition('Same Owner'),
+            },
+            { excludeTemplateId: 'template-id', currentOwner: 'securitySolution' }
+          )
+        ).resolves.toBeUndefined();
+      });
+
       it('rejects the dry_run preflight when a definition declares too many fields', async () => {
         const service = createService();
 

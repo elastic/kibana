@@ -608,17 +608,24 @@ export class TemplatesService {
    * anything. Throws the same Boom errors (400 missing name / resource-limit, 409 conflict) the
    * real write would, so a `{ valid: true }` dry_run is a reliable predictor of a successful write.
    *
+   * Parses through the zod schema (not a raw `parseYaml` cast) for the same reason `createTemplate`
+   * /`updateTemplate` do: field-level defaults must be resolved identically so the default-value
+   * size check below sees what the real write would persist. Safe to re-parse here — the route
+   * layer already ran the input through `ParsedTemplateDefinitionSchema` via
+   * `validateTemplateDefinition` before calling into this preflight.
+   *
    * `excludeTemplateId` is passed for the update preflight (it excludes the template being edited
-   * from the uniqueness check); its presence also marks this as an update. When omitted the call is
-   * treated as a create preflight and the per-owner count cap is asserted — matching which cap each
-   * real write path enforces (the count cap is create-only).
+   * from the uniqueness check); its presence also marks this as an update. `currentOwner` — the
+   * template's owner before this write — is passed alongside it so an owner-changing update can be
+   * detected. The per-owner count cap is asserted on the target owner whenever this is a create, or
+   * an update that changes owner, matching which cap each real write path enforces.
    */
   async validateWriteInput(
     input: Pick<CreateTemplateInput, 'name' | 'owner' | 'definition'>,
-    { excludeTemplateId }: { excludeTemplateId?: string } = {}
+    { excludeTemplateId, currentOwner }: { excludeTemplateId?: string; currentOwner?: string } = {}
   ): Promise<void> {
     const normalizedDefinition = trimFieldDefaults(input.definition);
-    const parsedDefinition = parseYaml(normalizedDefinition) as ParsedTemplate['definition'];
+    const parsedDefinition = ParsedTemplateDefinitionSchema.parse(parseYaml(normalizedDefinition));
     const templateName = input.name ?? parsedDefinition.name;
     if (!templateName) {
       throw Boom.badRequest(
@@ -627,11 +634,9 @@ export class TemplatesService {
     }
 
     // Keep dry_run faithful to the real write: mirror the same resource-limit assertions each write
-    // path runs. Field count and default-value size are capped on both create and update; the
-    // per-owner count cap is create-only, so gate it on whether this is a create preflight (no
-    // `excludeTemplateId`).
-    this.assertFieldCountWithinLimit(parsedDefinition.fields?.length ?? 0);
-    this.assertTemplateDefaultValuesWithinLimit(parsedDefinition.fields ?? []);
+    // path runs.
+    this.assertFieldCountWithinLimit(parsedDefinition.fields.length);
+    this.assertTemplateDefaultValuesWithinLimit(parsedDefinition.fields);
 
     await this.assertTemplateNameIsUnique({
       name: templateName,
@@ -639,7 +644,8 @@ export class TemplatesService {
       excludeTemplateId,
     });
 
-    if (excludeTemplateId === undefined) {
+    const isCreate = excludeTemplateId === undefined;
+    if (isCreate || (currentOwner !== undefined && input.owner !== currentOwner)) {
       await this.assertOwnerTemplateCountWithinLimit(input.owner);
     }
   }

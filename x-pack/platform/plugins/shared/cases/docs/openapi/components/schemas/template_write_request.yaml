@@ -15,6 +15,8 @@ properties:
   name:
     type: string
     minLength: 1
+    # Keep in sync with MAX_TEMPLATE_NAME_LENGTH in
+    # x-pack/platform/plugins/shared/cases/common/constants/index.ts.
     maxLength: 50
     description: >
       The template identity name, unique per owner (case-insensitive). May be omitted when the
@@ -44,6 +46,8 @@ properties:
         - $ref: risk_score
   description:
     type: string
+    # Keep in sync with MAX_TEMPLATE_DESCRIPTION_LENGTH in
+    # x-pack/platform/plugins/shared/cases/common/constants/index.ts.
     maxLength: 1000
     description: A description of the template.
   tags:

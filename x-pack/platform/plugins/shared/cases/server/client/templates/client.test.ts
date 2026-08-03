@@ -284,6 +284,7 @@ describe('templates client', () => {
 
       expect(clientArgs.services.templatesService.validateWriteInput).toHaveBeenCalledWith(input, {
         excludeTemplateId: 'template-1',
+        currentOwner: 'securitySolution',
       });
       expect(clientArgs.services.templatesService.updateTemplate).not.toHaveBeenCalled();
     });
