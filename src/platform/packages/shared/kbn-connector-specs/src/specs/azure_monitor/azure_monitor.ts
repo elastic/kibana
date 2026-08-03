@@ -443,14 +443,19 @@ export const AzureMonitor: ConnectorSpec = {
       input: QueryActivityLogInputSchema,
       handler: async (ctx, input: QueryActivityLogInput) => {
         try {
+          // Agent-supplied values are interpolated into single-quoted OData
+          // literals; OData escapes an embedded quote by doubling it
+          // (' -> ''), so this prevents a value from breaking out of its
+          // literal and injecting extra filter clauses.
+          const escapeOData = (value: string) => value.replace(/'/g, "''");
           const filterParts = [
-            `eventTimestamp ge '${input.startTime}'`,
-            `eventTimestamp le '${input.endTime}'`,
+            `eventTimestamp ge '${escapeOData(input.startTime)}'`,
+            `eventTimestamp le '${escapeOData(input.endTime)}'`,
           ];
           if (input.resourceGroupName) {
-            filterParts.push(`resourceGroupName eq '${input.resourceGroupName}'`);
+            filterParts.push(`resourceGroupName eq '${escapeOData(input.resourceGroupName)}'`);
           } else if (input.resourceId) {
-            filterParts.push(`resourceUri eq '${input.resourceId}'`);
+            filterParts.push(`resourceUri eq '${escapeOData(input.resourceId)}'`);
           }
 
           const response = await ctx.client.get(
