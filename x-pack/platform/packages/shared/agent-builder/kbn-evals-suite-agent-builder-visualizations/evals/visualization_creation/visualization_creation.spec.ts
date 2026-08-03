@@ -7,28 +7,28 @@
 
 import { tags } from '@kbn/evals';
 import { evaluate } from '../../src/evaluate';
-import { cleanupOtelMetricsFixtures, setupOtelMetricsFixtures } from '../../src/fixtures/setup';
+import {
+  cleanVisualizationDataStreams,
+  replayVisualizationDataStreams,
+  type LoadResult,
+} from '../../src/fixtures/replay';
 
 evaluate.describe(
   'Agent Builder Visualizations - Standalone Visualization Creation',
   { tag: tags.serverless.search },
   () => {
-    // The sample logs index is what makes the execution evaluator meaningful:
-    // without real data, every generated query would hit
-    // `verification_exception` and score 0 regardless of the model's quality.
-    // The OTel TSDB fixture backs the `TS`-based CPU-load examples below with
-    // real time-series data so their execution / validity signals are
-    // meaningful. Fixture setup is hard-failing on purpose (see setup.ts).
+    let replayResult: LoadResult;
+
     evaluate.beforeAll(async ({ fetch, esClient, log }) => {
       await fetch('/api/sample_data/logs', {
         method: 'POST',
         version: '2023-10-31',
       });
-      await setupOtelMetricsFixtures({ esClient, log });
+      replayResult = await replayVisualizationDataStreams(esClient, log);
     });
 
     evaluate.afterAll(async ({ esClient, log }) => {
-      await cleanupOtelMetricsFixtures({ esClient, log });
+      await cleanVisualizationDataStreams(esClient, replayResult, log);
     });
 
     evaluate('standalone visualization ES|QL generation', async ({ evaluateDataset }) => {
@@ -84,13 +84,10 @@ evaluate.describe(
               },
               metadata: { includeHitDetection: true },
             },
-            // Regression for the OTel host-metrics failure captured in
-            // dashboard-level evals (see src/fixtures): the agent must emit a
-            // `TS` query that quotes the `.1m` / `.5m` / `.15m` field paths
-            // (unquoted, `.1m` is lexed as a numeric literal and the parse
-            // fails) and wraps each gauge in an `AVG_OVER_TIME` inner
-            // aggregation. Backed by the `metrics-hostmetricsreceiver.otel-default`
-            // TSDB fixture so execution / validity are meaningful.
+            // Regression: the agent must emit a `TS` query that quotes the `.1m` / `.5m` / `.15m`
+            // field paths (unquoted, `.1m` is lexed as a numeric literal and the parse fails) and
+            // wraps each gauge in `AVG_OVER_TIME`. Backed by the GCS snapshot replay so execution
+            // / validity signals are meaningful.
             {
               input: {
                 question:

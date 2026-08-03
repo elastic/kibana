@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-// Now-relative window: wide enough to bracket kibana_sample_data_logs (install-time) and the OTel
-// TSDB fixture (last few hours). A 100-year span collapsed auto-bucket queries to 1 row, so moderate
-// bounds keep bucketing meaningful. Evaluated per call so the window tracks `now`.
+// Now-relative window: wide enough to bracket kibana_sample_data_logs (install-time) and GCS
+// snapshot replay data (timestamp-shifted to end at now). A 100-year span collapsed auto-bucket
+// queries to 1 row, so moderate bounds keep bucketing meaningful. Evaluated per call so the window
+// tracks `now`.
 const DEFAULT_LOOKBACK_MS = 60 * 24 * 60 * 60 * 1000; // 60 days
 const DEFAULT_LOOKAHEAD_MS = 2 * 24 * 60 * 60 * 1000; // 2 days
 export function getDefaultTimeBounds(now: number = Date.now()): { tstart: string; tend: string } {

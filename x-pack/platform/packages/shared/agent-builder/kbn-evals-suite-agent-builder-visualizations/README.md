@@ -27,18 +27,20 @@ node scripts/evals run --suite agent-builder-visualizations
 
 ## Dataset
 
-Seed examples live inline in `evals/visualization_creation/visualization_creation.spec.ts`. Most target the `kibana_sample_data_logs` index (loaded in `beforeAll`). One example reproduces an OTel host-metrics `TS` failure seen in dashboard-level evals and targets a self-contained TSDB fixture, `metrics-hostmetricsreceiver.otel-default` (`system.cpu.load_average.{1m,5m,15m}` gauges, `host.name` dimension), created and torn down by `src/fixtures/setup.ts`. Grow this to 20–30 real prompts with ground-truth ES|QL and expected chart types.
+Seed examples live inline in `evals/visualization_creation/visualization_creation.spec.ts`. Most target the `kibana_sample_data_logs` index (loaded in `beforeAll`). One example reproduces an OTel host-metrics `TS` failure seen in dashboard-level evals and targets the replayed OTel data stream (`metrics-hostmetricsreceiver.otel-default`, `system.cpu.load_average.{1m,5m,15m}` gauges). Grow this to 20–30 real prompts with ground-truth ES|QL and expected chart types.
 
 **Gold queries follow the agent's idiom** (see `agent-builder-visualizations-server/shared/esql_instructions.ts`):
 
 - **Categorical / metric** golds include the raw-`@timestamp` time filter (`WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend`).
 - **Time-series** golds express the window via the auto-bucket-count form (`BUCKET(@timestamp, 75, ?_tstart, ?_tend)` / `TBUCKET(75, ?_tstart, ?_tend)`); an extra `@timestamp` WHERE is optional and stripped before equivalence scoring.
 
-This keeps gold and candidate structurally parallel so the equivalence evaluators measure real differences instead of cosmetic ones. The `?_tstart` / `?_tend` bind params substitute to a **now-relative** window (see `src/evaluators/esql_bind_params.ts`), which is why the OTel fixture is seeded with now-relative timestamps — a single realistic window brackets both `kibana_sample_data_logs` (anchored around install time) and the OTel samples.
+This keeps gold and candidate structurally parallel so the equivalence evaluators measure real differences instead of cosmetic ones. The `?_tstart` / `?_tend` bind params substitute to a **now-relative** window (see `src/evaluators/esql_bind_params.ts`), which brackets both `kibana_sample_data_logs` and the GCS snapshot replay data (whose timestamps are shifted to end at `now` by the replay pipeline).
 
-### OTel metrics fixture
+### OTel data fixture
 
-`src/fixtures` builds the TSDB index the CPU-load examples execute against. Because Elasticsearch ships a managed `metrics-otel@template` (priority 120) that forces `metrics-*.otel-*` names to be data streams, `setupOtelMetricsFixtures` first registers a higher-priority (500) override template with no `data_stream` block so the fixture can be created as a plain TSDB index with the exact field paths the gold `TS` query references. These examples specifically guard against the failure where the agent leaves the `.1m` / `.5m` / `.15m` field paths unquoted (Elasticsearch lexes `.1m` as a numeric literal → `parsing_exception`).
+`src/fixtures/replay.ts` uses `@kbn/es-snapshot-loader` to replay a GCS snapshot (same pattern as `@kbn/evals-suite-observability-ai`) into `logs-*`, `metrics-*`, and `traces-*` data streams. The CPU-load examples specifically guard against the failure where the agent leaves the `.1m` / `.5m` / `.15m` field paths unquoted (Elasticsearch lexes `.1m` as a numeric literal → `parsing_exception`).
+
+To create or refresh the snapshot: spin up ES + an OTel collector, ingest representative data, then call `createSnapshot` from `@kbn/es-snapshot-loader` targeting the `agent-builder-datasets` GCS bucket at path `viz-evals/otel-host-metrics`.
 
 ## Notes
 

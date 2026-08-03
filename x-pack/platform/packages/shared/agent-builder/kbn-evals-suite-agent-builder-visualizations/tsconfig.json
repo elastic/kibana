@@ -9,6 +9,7 @@
   "kbn_references": [
     "@kbn/agent-builder-common",
     "@kbn/core",
+    "@kbn/es-snapshot-loader",
     "@kbn/esql-language",
     "@kbn/evals",
     "@kbn/inference-common",
