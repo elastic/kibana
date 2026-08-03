@@ -27,7 +27,7 @@ import { isInternalTool } from '@kbn/agent-builder-common/tools';
 import { getToolResultId } from '@kbn/agent-builder-server';
 import type {
   ConversationCreateRequest,
-  ConversationUpdateRequest,
+  ConversationUpdatableFields,
   LegacyAgentStateFields,
   PersistentConversationRound,
   PersistentConversationRoundStep,
@@ -254,7 +254,7 @@ export const updateConversation = ({
   updateDate,
 }: {
   conversation: Conversation;
-  update: ConversationUpdateRequest;
+  update: ConversationUpdatableFields;
   space: string;
   updateDate: Date;
 }) => {

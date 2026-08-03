@@ -18,8 +18,6 @@ import {
   type SmlAttachHttpResultItem,
 } from '../../../common/http_api/sml';
 import { AGENT_BUILDER_WRITE_SECURITY } from '../route_security';
-import { applyAttachmentRefsToRounds } from '../../services/conversation/client/migrate_attachments';
-import { reconcileAttachments } from '../../services/conversation/client/round_writes';
 
 export function registerInternalSmlRoutes({
   router,
@@ -115,27 +113,14 @@ export function registerInternalSmlRoutes({
           })
         );
 
-        // Update the conversation with the new attachments
         if (resultItems.some((r) => r.success)) {
-          const latestConversation = await conversationClient.get(conversationId);
-          const newRefs = stateManager.getAccessedRefs();
-
-          const lastRoundIndex = latestConversation.rounds.length - 1;
-          const updatedRounds = applyAttachmentRefsToRounds(
-            latestConversation.rounds,
-            new Map([[lastRoundIndex, newRefs]])
-          );
-          // Merge attachments to prevent duplication or overwriting older attachments
-          const mergedAttachments = reconcileAttachments({
-            snapshot: conversationForAttach.attachments ?? [],
-            stored: latestConversation.attachments ?? [],
-            produced: stateManager.getAll(),
-          });
-
-          await conversationClient.update({
+          await conversationClient.addAttachmentsToLastRound({
             id: conversationId,
-            attachments: mergedAttachments,
-            rounds: updatedRounds,
+            refs: stateManager.getAccessedRefs(),
+            attachments: {
+              snapshot: conversationForAttach.attachments ?? [],
+              produced: stateManager.getAll(),
+            },
           });
         }
 

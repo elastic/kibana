@@ -651,7 +651,7 @@ describe('ConversationClient', () => {
     });
   });
 
-  describe('persistRound', () => {
+  describe('upsertRound', () => {
     const round = createRound({ id: 'round-2', input: { message: 'second' } });
 
     const persistedRounds = (call: number = 0) =>
@@ -666,7 +666,7 @@ describe('ConversationClient', () => {
         hits: { hits: [createConversationDocument({ rounds: [createRound({ id: 'round-1' })] })] },
       });
 
-      await client.persistRound({ id: 'conversation-1', round });
+      await client.upsertRound({ id: 'conversation-1', round });
 
       expect(persistedRounds().map(({ id }) => id)).toEqual(['round-1', 'round-2']);
     });
@@ -691,7 +691,7 @@ describe('ConversationClient', () => {
         });
       mockEsClient.index.mockRejectedValueOnce(createConflictError());
 
-      await client.persistRound({ id: 'conversation-1', round });
+      await client.upsertRound({ id: 'conversation-1', round });
 
       expect(mockEsClient.index).toHaveBeenCalledTimes(2);
       expect(persistedRounds(1).map(({ id }) => id)).toEqual([
@@ -707,7 +707,7 @@ describe('ConversationClient', () => {
       });
       mockEsClient.index.mockRejectedValue(createConflictError());
 
-      const error = await client.persistRound({ id: 'conversation-1', round }).catch((e) => e);
+      const error = await client.upsertRound({ id: 'conversation-1', round }).catch((e) => e);
 
       expect(isConversationWriteConflictError(error)).toBe(true);
       expect(error.meta.statusCode).toBe(409);
@@ -718,7 +718,7 @@ describe('ConversationClient', () => {
         hits: { hits: [createConversationDocument({ title: 'Renamed by user' })] },
       });
 
-      const result = await client.persistRound({ id: 'conversation-1', round });
+      const result = await client.upsertRound({ id: 'conversation-1', round });
 
       expect(mockEsClient.index).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -736,7 +736,7 @@ describe('ConversationClient', () => {
         hits: { hits: [createConversationDocument({ attachments: [concurrent] })] },
       });
 
-      await client.persistRound({
+      await client.upsertRound({
         id: 'conversation-1',
         round,
         attachments: { snapshot: [], produced: [fromRound] } as never,
@@ -757,7 +757,7 @@ describe('ConversationClient', () => {
         hits: { hits: [createConversationDocument({ attachments: [stored] })] },
       });
 
-      await client.persistRound({
+      await client.upsertRound({
         id: 'conversation-1',
         round,
         // the round started from v1 and edited it in memory; nothing has
@@ -774,7 +774,7 @@ describe('ConversationClient', () => {
         hits: { hits: [createConversationDocument({ workspaceId: 'workspace-existing' })] },
       });
 
-      await client.persistRound({
+      await client.upsertRound({
         id: 'conversation-1',
         round,
         workspaceId: 'workspace-new',
@@ -792,7 +792,7 @@ describe('ConversationClient', () => {
         hits: { hits: [createConversationDocument()] },
       });
 
-      await client.persistRound({
+      await client.upsertRound({
         id: 'conversation-1',
         round,
         workspaceId: 'workspace-new',
@@ -803,6 +803,143 @@ describe('ConversationClient', () => {
           document: expect.objectContaining({ workspace_id: 'workspace-new' }),
         })
       );
+    });
+  });
+
+  describe('addAttachmentsToLastRound', () => {
+    const refs = [{ attachment_id: 'attachment-1', version: 1 }];
+    const produced = [{ id: 'attachment-1', versions: [], current_version: 1 }];
+
+    const persistedRounds = (call: number = 0) =>
+      mockEsClient.index.mock.calls[call][0].document.conversation_rounds as Array<{
+        id: string;
+        input: { attachment_refs?: Array<{ attachment_id: string }> };
+      }>;
+
+    const request = {
+      id: 'conversation-1',
+      refs,
+      attachments: { snapshot: [], produced },
+    } as never;
+
+    beforeEach(() => {
+      mockEsClient.index.mockResolvedValue({ _seq_no: 2, _primary_term: 1 });
+    });
+
+    it('merges the refs into the last stored round only', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            createConversationDocument({
+              rounds: [createRound({ id: 'round-1' }), createRound({ id: 'round-2' })],
+            }),
+          ],
+        },
+      });
+
+      await client.addAttachmentsToLastRound(request);
+
+      const [first, last] = persistedRounds();
+      expect(first.input.attachment_refs).toBeUndefined();
+      expect(last.input.attachment_refs).toEqual(refs);
+    });
+
+    it('applies the refs to a round appended concurrently after a conflict', async () => {
+      mockEsClient.search
+        .mockResolvedValueOnce({
+          hits: {
+            hits: [createConversationDocument({ rounds: [createRound({ id: 'round-1' })] })],
+          },
+        })
+        .mockResolvedValue({
+          hits: {
+            hits: [
+              createConversationDocument({
+                seqNo: 2,
+                rounds: [createRound({ id: 'round-1' }), createRound({ id: 'round-concurrent' })],
+              }),
+            ],
+          },
+        });
+      mockEsClient.index.mockRejectedValueOnce(createConflictError());
+
+      await client.addAttachmentsToLastRound(request);
+
+      expect(mockEsClient.index).toHaveBeenCalledTimes(2);
+
+      const [first, last] = persistedRounds(1);
+      expect(first.id).toBe('round-1');
+      expect(first.input.attachment_refs).toBeUndefined();
+      expect(last.id).toBe('round-concurrent');
+      expect(last.input.attachment_refs).toEqual(refs);
+    });
+
+    it('keeps a concurrent attachment alongside the produced ones', async () => {
+      const concurrent = { id: 'attachment-concurrent', versions: [], current_version: 1 };
+
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            createConversationDocument({
+              rounds: [createRound({ id: 'round-1' })],
+              attachments: [concurrent],
+            }),
+          ],
+        },
+      });
+
+      await client.addAttachmentsToLastRound(request);
+
+      const { attachments } = mockEsClient.index.mock.calls[0][0].document;
+      expect(attachments.map(({ id }: { id: string }) => id).sort()).toEqual([
+        'attachment-1',
+        'attachment-concurrent',
+      ]);
+    });
+
+    it('throws a bad request error when the stored conversation has no rounds', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [createConversationDocument()] },
+      });
+
+      await expect(client.addAttachmentsToLastRound(request)).rejects.toThrow(
+        'Conversation conversation-1 has no rounds to attach to'
+      );
+
+      expect(mockEsClient.index).not.toHaveBeenCalled();
+    });
+
+    it('throws a write conflict error once retries are exhausted', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [createConversationDocument({ rounds: [createRound({ id: 'round-1' })] })] },
+      });
+      mockEsClient.index.mockRejectedValue(createConflictError());
+
+      const error = await client.addAttachmentsToLastRound(request).catch((e) => e);
+
+      expect(isConversationWriteConflictError(error)).toBe(true);
+      expect(error.meta.statusCode).toBe(409);
+    });
+
+    it('remains owner-only by default for public conversations', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            createConversationDocument({
+              userId: 'other-user-id',
+              username: 'other-user',
+              accessMode: ConversationAccessControlMode.Public,
+              rounds: [createRound({ id: 'round-1' })],
+            }),
+          ],
+        },
+      });
+
+      await expect(client.addAttachmentsToLastRound(request)).rejects.toThrow(
+        'Conversation conversation-1 not found'
+      );
+
+      expect(mockEsClient.index).not.toHaveBeenCalled();
     });
   });
 

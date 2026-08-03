@@ -195,7 +195,7 @@ describe('conversations utils', () => {
       roundCompleteEvent: RoundCompleteEvent;
       action?: 'regenerate';
     }) => {
-      conversationClient.persistRound.mockResolvedValue(conversation);
+      conversationClient.upsertRound.mockResolvedValue(conversation);
 
       const result$ = updateConversation$({
         conversationClient,
@@ -230,7 +230,7 @@ describe('conversations utils', () => {
           },
         });
 
-        expect(conversationClient.persistRound).toHaveBeenCalledWith(
+        expect(conversationClient.upsertRound).toHaveBeenCalledWith(
           expect.objectContaining({
             round: newRound,
             replacesRoundId: 'round-1',
@@ -255,13 +255,13 @@ describe('conversations utils', () => {
           },
         });
 
-        expect(conversationClient.persistRound).toHaveBeenCalledWith(
+        expect(conversationClient.upsertRound).toHaveBeenCalledWith(
           expect.objectContaining({
             round: newRound,
           }),
           { access: 'converse' }
         );
-        expect(conversationClient.persistRound).not.toHaveBeenCalledWith(
+        expect(conversationClient.upsertRound).not.toHaveBeenCalledWith(
           expect.objectContaining({ replacesRoundId: expect.anything() }),
           expect.anything()
         );
@@ -284,13 +284,13 @@ describe('conversations utils', () => {
           },
         });
 
-        expect(conversationClient.persistRound).toHaveBeenCalledWith(
+        expect(conversationClient.upsertRound).toHaveBeenCalledWith(
           expect.objectContaining({
             round: newRound,
           }),
           { access: 'converse' }
         );
-        expect(conversationClient.persistRound).not.toHaveBeenCalledWith(
+        expect(conversationClient.upsertRound).not.toHaveBeenCalledWith(
           expect.objectContaining({ replacesRoundId: expect.anything() }),
           expect.anything()
         );
@@ -312,7 +312,7 @@ describe('conversations utils', () => {
         },
       });
 
-      const [request] = conversationClient.persistRound.mock.calls[0];
+      const [request] = conversationClient.upsertRound.mock.calls[0];
       expect(request).not.toHaveProperty('rounds');
       expect(request).not.toHaveProperty('title');
     });

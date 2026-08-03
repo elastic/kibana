@@ -12,6 +12,7 @@ import type { ConversationOrigin, ConversationWithoutRounds } from '@kbn/agent-b
 import {
   type UserIdAndName,
   type Conversation,
+  createBadRequestError,
   createConversationNotFoundError,
   createConversationWriteConflictError,
   createInternalError,
@@ -27,16 +28,18 @@ import {
   type ConversationAccess,
 } from '../access_control';
 import type {
+  AddAttachmentsToLastRoundRequest,
   ConversationCreateRequest,
   ConversationUpdateRequest,
   ConversationListOptions,
-  PersistRoundRequest,
+  UpsertRoundRequest,
 } from './types';
 import { createSpaceDslFilter } from '../../../utils/spaces';
 import { isVersionConflictError } from '../../../utils/is_version_conflict_error';
 import type { ConversationStorage } from './storage';
 import { createStorage } from './storage';
-import { reconcileAttachments, upsertRound } from './round_writes';
+import { reconcileAttachments, upsertRound as upsertRoundInList } from './round_writes';
+import { applyAttachmentRefsToRounds } from './migrate_attachments';
 import {
   fromEs,
   fromEsWithoutRounds,
@@ -59,8 +62,12 @@ export interface ConversationClient {
     conversation: ConversationUpdateRequest,
     options?: { access: ConversationAccess; retryOnConflict?: boolean }
   ): Promise<Conversation>;
-  persistRound(
-    request: PersistRoundRequest,
+  addAttachmentsToLastRound(
+    request: AddAttachmentsToLastRoundRequest,
+    options?: { access: ConversationAccess }
+  ): Promise<Conversation>;
+  upsertRound(
+    request: UpsertRoundRequest,
     options?: { access: ConversationAccess }
   ): Promise<Conversation>;
   list(options?: ConversationListOptions): Promise<ConversationWithoutRounds[]>;
@@ -252,9 +259,56 @@ class ConversationClientImpl implements ConversationClient {
     }
   }
 
+  /** Merges attachments into the conversation as stored and refs them from the last stored round. */
+  async addAttachmentsToLastRound(
+    request: AddAttachmentsToLastRoundRequest,
+    options: { access: ConversationAccess } = { access: 'owner' }
+  ): Promise<Conversation> {
+    const { id: conversationId, refs, attachments } = request;
+    const { access } = options;
+
+    try {
+      return await this.writeWithOcc({
+        conversationId,
+        access,
+        mutate: (current) => {
+          if (current.rounds.length === 0) {
+            throw createBadRequestError(
+              `Conversation ${conversationId} has no rounds to attach to`
+            );
+          }
+
+          return updateConversation({
+            conversation: current,
+            update: {
+              id: conversationId,
+              rounds: applyAttachmentRefsToRounds(
+                current.rounds,
+                new Map([[current.rounds.length - 1, refs]])
+              ),
+              attachments: reconcileAttachments({
+                snapshot: attachments.snapshot,
+                stored: current.attachments ?? [],
+                produced: attachments.produced,
+              }),
+            },
+            updateDate: new Date(),
+            space: this.space,
+          });
+        },
+      });
+    } catch (error) {
+      if (isElasticsearchWriteConflict(error)) {
+        throw createConversationWriteConflictError({ conversationId });
+      }
+
+      throw error;
+    }
+  }
+
   /** Merges a round into the conversation as stored, not into the caller's snapshot. */
-  async persistRound(
-    request: PersistRoundRequest,
+  async upsertRound(
+    request: UpsertRoundRequest,
     options: { access: ConversationAccess } = { access: 'converse' }
   ): Promise<Conversation> {
     const { id: conversationId, round, replacesRoundId, state, attachments, workspaceId } = request;
@@ -269,7 +323,7 @@ class ConversationClientImpl implements ConversationClient {
             conversation: current,
             update: {
               id: conversationId,
-              rounds: upsertRound(current.rounds, round, replacesRoundId),
+              rounds: upsertRoundInList(current.rounds, round, replacesRoundId),
               status: round.status,
               ...(state ? { state } : {}),
               ...(attachments

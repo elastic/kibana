@@ -61,7 +61,7 @@ describe('handleAgentExecution', () => {
     const conversationClient = createConversationClientMock();
     conversationClient.getByOrigin.mockResolvedValue(conversation);
     conversationClient.update.mockResolvedValue(conversation);
-    conversationClient.persistRound.mockResolvedValue(conversation);
+    conversationClient.upsertRound.mockResolvedValue(conversation);
 
     const roundCompleteEvent: ChatEvent = {
       type: ChatEventType.roundComplete,
@@ -145,7 +145,7 @@ describe('handleAgentExecution', () => {
       conversationClient.get.mockResolvedValue(conversation);
       conversationClient.getByOrigin.mockResolvedValue(conversation);
       conversationClient.update.mockResolvedValue(conversation);
-      conversationClient.persistRound.mockResolvedValue(conversation);
+      conversationClient.upsertRound.mockResolvedValue(conversation);
 
       executeAgentMock.mockReturnValue(of(roundCompleteEvent));
       resolveServicesMock.mockResolvedValue({
@@ -232,7 +232,7 @@ describe('handleAgentExecution', () => {
       const conversationClient = createConversationClientMock();
       conversationClient.get.mockResolvedValue(conversation);
       conversationClient.update.mockResolvedValue(conversation);
-      conversationClient.persistRound.mockResolvedValue(conversation);
+      conversationClient.upsertRound.mockResolvedValue(conversation);
 
       executeAgentMock.mockReturnValue(
         of({

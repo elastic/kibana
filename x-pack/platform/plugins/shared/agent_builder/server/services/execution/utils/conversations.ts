@@ -88,7 +88,7 @@ export const updateConversation$ = ({
           ? conversation.rounds[conversation.rounds.length - 1]?.id
           : undefined;
 
-      return conversationClient.persistRound(
+      return conversationClient.upsertRound(
         {
           id: conversation.id,
           round,
