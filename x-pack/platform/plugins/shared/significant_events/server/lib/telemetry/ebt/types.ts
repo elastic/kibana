@@ -9,12 +9,6 @@ import type { SignificantEventsToolUsage } from '@kbn/streams-ai';
 import type { StreamType } from '@kbn/streams-schema';
 import type { SignificantEventStatus } from '@kbn/significant-events-schema';
 
-interface EndpointLatencyProps {
-  name: string;
-  endpoint: string;
-  duration_ms: number;
-}
-
 interface KnowledgeIndicatorQueriesGeneratedProps {
   count: number;
   connector_id: string;
@@ -187,7 +181,6 @@ export {
   type CodeAnalysisGroundingProps,
   type DetectionScanProps,
   type DiscoveryTriggeredProps,
-  type EndpointLatencyProps,
   type KnowledgeIndicatorQueriesGeneratedProps,
   type KnowledgeIndicatorFeaturesIdentifiedProps,
   type KnowledgeIndicatorOnboardingScheduledProps,
