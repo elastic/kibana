@@ -98,7 +98,7 @@ export const BROWSER_CERT_ALERT_ID_PREFIX = 'browser-cert';
  * available, in which case the certificate is skipped.
  */
 export const getTLSCertAlertId = (
-  cert: Pick<Cert, 'sha256' | 'common_name' | 'issuer'>
+  cert: Partial<Pick<Cert, 'sha256' | 'common_name' | 'issuer'>>
 ): string | undefined => {
   if (cert.sha256) {
     return cert.sha256;
