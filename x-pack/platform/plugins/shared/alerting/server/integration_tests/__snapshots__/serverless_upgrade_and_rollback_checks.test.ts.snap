@@ -18,7 +18,6 @@ Object {
         "error": [Function],
         "presence": "optional",
       },
-      },
       "metas": Array [
         Object {
           "x-oas-min-length": 1,
