@@ -18,65 +18,21 @@ import {
   type SignificantEventsLinkId,
 } from '@kbn/deeplinks-observability';
 import { i18n } from '@kbn/i18n';
-import { dynamic } from '@kbn/shared-ux-utility';
 import {
   SIGNIFICANT_EVENTS_TIERED_FEATURE,
   STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG,
 } from '@kbn/significant-events-plugin/common';
-import React from 'react';
-import ReactDOM from 'react-dom';
 import type { Observable } from 'rxjs';
 import { combineLatest, distinctUntilChanged, from, map, shareReplay, switchMap } from 'rxjs';
 import { SIGNIFICANT_EVENTS_APP_ROUTE } from '../common/constants';
 import type { SignificantEventsAppLocator } from '../common/locators';
 import { SignificantEventsAppLocatorDefinition } from '../common/locators';
-import type { SignificantEventsAppServices } from './services/types';
 import type {
   SignificantEventsAppPublicSetup,
   SignificantEventsAppPublicStart,
   SignificantEventsAppSetupDependencies,
   SignificantEventsAppStartDependencies,
 } from './types';
-
-const SignificantEventsApplication = dynamic(() =>
-  import('./application').then((mod) => ({ default: mod.SignificantEventsApplication }))
-);
-
-export const renderApp = ({
-  appMountParameters,
-  services,
-  coreStart,
-  pluginsStart,
-  isServerless,
-}: {
-  appMountParameters: AppMountParameters;
-  services: SignificantEventsAppServices;
-  coreStart: CoreStart;
-  pluginsStart: SignificantEventsAppStartDependencies;
-  isServerless: boolean;
-}) => {
-  const { element } = appMountParameters;
-
-  // `element` is core's app wrapper node; make it scrollable for this app.
-  // A plain inline style avoids pulling @emotion/css into the page-load bundle.
-  const previousOverflow = element.style.overflow;
-  element.style.overflow = 'auto';
-
-  ReactDOM.render(
-    <SignificantEventsApplication
-      coreStart={coreStart}
-      pluginsStart={pluginsStart}
-      services={services}
-      isServerless={isServerless}
-      appMountParameters={appMountParameters}
-    />,
-    element
-  );
-  return () => {
-    ReactDOM.unmountComponentAtNode(element);
-    element.style.overflow = previousOverflow;
-  };
-};
 
 export class SignificantEventsAppPlugin
   implements
@@ -184,8 +140,9 @@ export class SignificantEventsAppPlugin
       ),
       mount: async (appMountParameters: AppMountParameters<unknown>) => {
         // Warm the application chunk in parallel with resolving start services.
-        void import('./application');
+        void import('./applications/significant_events');
         const [coreStart, pluginsStart] = await coreSetup.getStartServices();
+        const { renderApp } = await import('./applications/significant_events');
 
         const services: SignificantEventsAppServices = {
           availability$: this.availability$,
