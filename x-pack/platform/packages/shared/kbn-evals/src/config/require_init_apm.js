@@ -16,7 +16,7 @@ const { registerInstrumentations } = require('@opentelemetry/instrumentation');
 require('@kbn/setup-node-env');
 // we send an empty process.argv argument, as playwright uses the same --config
 // flag as kibana, leading it to not read from kibana.{dev.}yml
-require('../../../../../../../src/cli/kibana/apm')('playwright', []);
+require('@kbn/cli/kibana/apm')('playwright', []);
 
 registerInstrumentations({
   instrumentations: [
