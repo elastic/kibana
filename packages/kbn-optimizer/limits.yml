@@ -1,5 +1,5 @@
 pageLoadAssetSize:
-  actions: 20500
+  actions: 20800
   advancedSettings: 6119
   agentBuilder: 51190
   agentBuilderDashboards: 7786
@@ -10,7 +10,7 @@ pageLoadAssetSize:
   aiAssistantManagementSelection: 11569
   aiops: 15227
   alerting: 22371
-  alertingVTwo: 27673
+  alertingVTwo: 29788
   apm: 53172
   apmShared: 5852
   apmSourcesAccess: 2747
@@ -36,7 +36,7 @@ pageLoadAssetSize:
   core: 563984
   cps: 9209
   crossClusterReplication: 12662
-  customContent: 4765
+  customContent: 6111
   customIntegrations: 11715
   dashboard: 20000
   dashboardMarkdown: 8613
@@ -66,7 +66,7 @@ pageLoadAssetSize:
   esql: 29469
   esqlDataGrid: 10209
   esUiShared: 101220
-  evals: 6117
+  evals: 8650
   eventAnnotation: 22334
   eventAnnotationListing: 13164
   exploratoryView: 45042
@@ -133,7 +133,7 @@ pageLoadAssetSize:
   newsfeed: 11110
   noDataPage: 1749
   notificationCenter: 1791
-  observability: 107797
+  observability: 122800
   observabilityAgentBuilder: 10178
   observabilityAIAssistant: 67295
   observabilityAIAssistantApp: 17100
@@ -143,6 +143,7 @@ pageLoadAssetSize:
   observabilityShared: 75022
   osquery: 48128
   painlessLab: 6299
+  pnd: 7674
   presentationUtil: 8391
   productDocBase: 6767
   productIntercept: 9860

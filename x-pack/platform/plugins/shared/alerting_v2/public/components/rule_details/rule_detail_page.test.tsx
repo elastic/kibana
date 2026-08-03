@@ -60,6 +60,11 @@ jest.mock('../../hooks/use_toggle_rule_enabled', () => ({
   useToggleRuleEnabled: () => ({ mutate: mockToggleRuleEnabled, isLoading: mockIsToggling }),
 }));
 
+const mockRunRule = jest.fn();
+jest.mock('../../hooks/use_run_rule', () => ({
+  useRunRule: () => ({ mutate: mockRunRule, isLoading: false }),
+}));
+
 const mockOpenEditFlyout = jest.fn();
 const mockOpenCloneFlyout = jest.fn();
 jest.mock('../../hooks/use_compose_discover_flyout', () => ({
@@ -118,6 +123,7 @@ const baseRule: RuleApiResponse = {
   enabled: true,
   metadata: {
     name: 'Test Signal Rule',
+    version: 1,
     description: 'Test rule description',
     tags: ['prod', 'infra'],
   },
