@@ -77,7 +77,7 @@ A workflow is a **concrete automation defined in YAML** that executes when dispa
 
 - Workflow steps can use Kibana **connectors** (email, Slack, PagerDuty, etc.) via the \`connector-id\` field on each step.
 - Action policy destinations reference **workflow IDs**, never connector IDs directly.
-- When triggered by action policies, workflows must use \`triggers: - type: manual\` (the \`alert\` trigger type is for the legacy v1 alerting connector path with a different event shape).
+- Destination workflows must use **exactly one** \`triggers: - type: manual\` trigger — never \`alert\`.
 
 ---
 
@@ -248,8 +248,7 @@ steps:
 
 **Key rules for the template:**
 
-- Use **only** \`triggers: - type: manual\` (no \`alert\` trigger). Action policies call \`scheduleWorkflow\`;
-  \`alert\` is the v1 connector path with a different \`event.*\` shape — do not use \`event.*\` here.
+- Use **exactly one** \`triggers: - type: manual\` (never \`alert\`, never \`event.*\`).
 - Liquid payload fields: [workflow dispatch payload](./references/workflow-dispatch-payload.md)
   (prefer \`inputs.payload.rules[ep.rule_id].name\`). Engine vars (\`execution.url\`, etc.) come from
   the \`workflow-authoring\` skill.

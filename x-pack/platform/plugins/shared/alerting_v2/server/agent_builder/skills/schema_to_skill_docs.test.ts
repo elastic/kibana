@@ -5,11 +5,14 @@
  * 2.0.
  */
 
+import { z } from '@kbn/zod/v4';
 import type {
   ActionPolicyWorkflowPayload,
   AlertEpisode,
 } from '../../lib/dispatcher/types';
 import {
+  generateApiSchemaDoc,
+  generateOperationsDoc,
   generateRuleSchemaDoc,
   generateRuleOperationsDoc,
   generateActionPolicySchemaDoc,
@@ -43,6 +46,66 @@ const episodeKeyGuard: Record<keyof AlertEpisode, true> = {
 };
 
 describe('schema_to_skill_docs', () => {
+  describe('generateApiSchemaDoc', () => {
+    const exampleApiSchema = z.object({
+      name: z.string().min(1).max(64).describe('Display name.'),
+      enabled: z.boolean().optional().describe('Whether the resource is enabled.'),
+    });
+
+    it('renders title, default source line, and top-level field table', () => {
+      const doc = generateApiSchemaDoc({
+        title: 'Example API Schema Reference',
+        schema: exampleApiSchema,
+      });
+
+      expect(doc).toContain('# Example API Schema Reference');
+      expect(doc).toContain('Auto-generated from `@kbn/alerting-v2-schemas`.');
+      expect(doc).toContain('## Top-Level Fields');
+      expect(doc).toContain('| `name` | string | required | Display name. (min length: 1, max length: 64) |');
+      expect(doc).toContain('| `enabled` | boolean | optional | Whether the resource is enabled. |');
+    });
+
+    it('appends extra sections from the converted JSON schema', () => {
+      const doc = generateApiSchemaDoc({
+        title: 'Example API Schema Reference',
+        schema: exampleApiSchema,
+        extraSections: () => [
+          { heading: 'Notes', content: 'Extra guidance for the agent.' },
+        ],
+      });
+
+      expect(doc).toContain('## Notes');
+      expect(doc).toContain('Extra guidance for the agent.');
+    });
+  });
+
+  describe('generateOperationsDoc', () => {
+    const exampleOperationSchema = z.discriminatedUnion('operation', [
+      z.object({
+        operation: z.literal('set_name'),
+        name: z.string().min(1).max(64).describe('Display name.'),
+      }),
+      z.object({
+        operation: z.literal('validate'),
+      }),
+    ]);
+
+    it('renders title, source line, and discriminated operation variants', () => {
+      const doc = generateOperationsDoc({
+        title: 'Example Operations Schema Reference',
+        source: 'the example tool Zod schemas',
+        schema: exampleOperationSchema,
+      });
+
+      expect(doc).toContain('# Example Operations Schema Reference');
+      expect(doc).toContain('Auto-generated from the example tool Zod schemas.');
+      expect(doc).toContain('#### `operation: "set_name"`');
+      expect(doc).toContain('#### `operation: "validate"`');
+      expect(doc).toContain('| `name` | string | required | Display name. (min length: 1, max length: 64) |');
+      expect(doc).toContain('| `operation` | "set_name" | required |');
+    });
+  });
+
   describe('generateRuleSchemaDoc', () => {
     it('matches the snapshot', () => {
       expect(generateRuleSchemaDoc()).toMatchSnapshot();
@@ -133,6 +196,13 @@ describe('schema_to_skill_docs', () => {
       expect(doc).toContain('set_grouping');
       expect(doc).toContain('set_throttle');
       expect(doc).toContain('validate');
+    });
+
+    it('renders Zod literals (JSON Schema const) as quoted types, not bare string', () => {
+      const doc = generateActionPolicyOperationsDoc();
+      // z.literal('set_metadata') → { const: "set_metadata" } → Type column "set_metadata"
+      expect(doc).toContain('| `operation` | "set_metadata" | required |');
+      expect(doc).not.toMatch(/\| `operation` \| string \|/);
     });
   });
 

@@ -9,7 +9,7 @@ Auto-generated from the \`manage_action_policy\` tool Zod schemas.
 
 | Field | Type | Required | Description |
 |---|---|---|---|
-| \`operation\` | string | required |  |
+| \`operation\` | \\"set_metadata\\" | required |  |
 | \`name\` | string | optional | The action policy name. (min length: 1, max length: 256) |
 | \`description\` | string | optional | A description of the action policy. (max length: 1024) |
 | \`tags\` | string[] | optional | Tags for categorizing the action policy. (max items: 20) |
@@ -18,21 +18,21 @@ Auto-generated from the \`manage_action_policy\` tool Zod schemas.
 
 | Field | Type | Required | Description |
 |---|---|---|---|
-| \`operation\` | string | required |  |
+| \`operation\` | \\"set_destinations\\" | required |  |
 | \`destinations\` | { type: \\"workflow\\", ... }[] | required | The list of workflow destinations. (min items: 1, max items: 10) |
 
 #### \`operation: \\"set_matcher\\"\`
 
 | Field | Type | Required | Description |
 |---|---|---|---|
-| \`operation\` | string | required |  |
+| \`operation\` | \\"set_matcher\\" | required |  |
 | \`matcher\` | string | null | required | A KQL query to match alert episodes, or null for a catch-all. |
 
 #### \`operation: \\"set_grouping\\"\`
 
 | Field | Type | Required | Description |
 |---|---|---|---|
-| \`operation\` | string | required |  |
+| \`operation\` | \\"set_grouping\\" | required |  |
 | \`groupingMode\` | \\"per_episode\\" | \\"all\\" | \\"per_field\\" | optional | The grouping mode. (enum: per_episode | all | per_field) |
 | \`groupBy\` | array | null | optional | Fields used to group alerts (required when groupingMode is per_field). |
 
@@ -40,7 +40,7 @@ Auto-generated from the \`manage_action_policy\` tool Zod schemas.
 
 | Field | Type | Required | Description |
 |---|---|---|---|
-| \`operation\` | string | required |  |
+| \`operation\` | \\"set_throttle\\" | required |  |
 | \`strategy\` | \\"on_status_change\\" | \\"per_status_interval\\" | \\"time_interval\\" | \\"every_time\\" | optional | The throttle strategy. (enum: on_status_change | per_status_interval | time_interval | every_time) |
 | \`interval\` | string | optional | The throttle interval (e.g. 5m, 1h). |
 
@@ -48,13 +48,15 @@ Auto-generated from the \`manage_action_policy\` tool Zod schemas.
 
 | Field | Type | Required | Description |
 |---|---|---|---|
-| \`operation\` | string | required |  |"
+| \`operation\` | \\"validate\\" | required |  |"
 `;
 
 exports[`schema_to_skill_docs generateActionPolicySchemaDoc matches the reviewed skill-doc snapshot 1`] = `
 "# Action Policy API Schema Reference
 
 Auto-generated from \`@kbn/alerting-v2-schemas\`. This is the source of truth for field names, types, and constraints.
+
+## Top-Level Fields
 
 | Field | Type | Required | Description |
 |---|---|---|---|
@@ -114,13 +116,13 @@ Auto-generated from the \`manage_rule\` tool Zod schemas.
 | \`description\` | string | optional | Human-readable description of the rule. (max length: 1024) |
 | \`tags\` | string[] | optional | Tags for categorization, e.g. [\\"production\\", \\"infra\\"]. (min items: 1, max items: 20) |
 | \`builder_type\` | string | optional | Identifies the rule builder that authored this rule (e.g. \\"threshold\\"). Absent for rules authored directly in ES|QL. (max length: 64) |
-| \`operation\` | string | required |  |
+| \`operation\` | \\"set_metadata\\" | required |  |
 
 #### \`operation: \\"set_kind\\"\`
 
 | Field | Type | Required | Description |
 |---|---|---|---|
-| \`operation\` | string | required |  |
+| \`operation\` | \\"set_kind\\" | required |  |
 | \`kind\` | \\"alert\\" | \\"signal\\" | required | Rule kind: \\"alert\\" for stateful alerting with transitions, \\"signal\\" for stateless detection. (enum: alert | signal) |
 
 #### \`operation: \\"set_schedule\\"\`
@@ -129,13 +131,13 @@ Auto-generated from the \`manage_rule\` tool Zod schemas.
 |---|---|---|---|
 | \`every\` | string | optional | Execution interval, e.g. 1m, 5m, 1h. |
 | \`lookback\` | string | optional | Lookback window for the query, e.g. 5m, 1h. Can also be expressed in ES|QL. |
-| \`operation\` | string | required |  |
+| \`operation\` | \\"set_schedule\\" | required |  |
 
 #### \`operation: \\"set_query\\"\`
 
 | Field | Type | Required | Description |
 |---|---|---|---|
-| \`operation\` | string | required |  |
+| \`operation\` | \\"set_query\\" | required |  |
 | \`query\` | { format: \\"composed\\", ... } | { format: \\"standalone\\", ... } | required | Detection query configuration. |
 | \`recovery_strategy\` | \\"no_breach\\" | \\"query\\" | \\"none\\" | optional |  (enum: no_breach | query | none) |
 | \`no_data_strategy\` | \\"last_known_status\\" | \\"emit\\" | \\"recover\\" | \\"none\\" | optional |  (enum: last_known_status | emit | recover | none) |
@@ -145,7 +147,7 @@ Auto-generated from the \`manage_rule\` tool Zod schemas.
 | Field | Type | Required | Description |
 |---|---|---|---|
 | \`fields\` | string[] | required | Fields to group alerts by, e.g. [\\"host.name\\", \\"service.name\\"]. Should match ES|QL GROUP BY fields. (max items: 16) |
-| \`operation\` | string | required |  |
+| \`operation\` | \\"set_grouping\\" | required |  |
 
 #### \`operation: \\"set_state_transition\\"\`
 
@@ -155,13 +157,13 @@ Auto-generated from the \`manage_rule\` tool Zod schemas.
 | \`pending_timeframe\` | string | optional | Time window for pending evaluation, e.g. 5m, 15m. |
 | \`recovering_count\` | integer | optional | Consecutive recoveries before transitioning to inactive. (min: 0, max: 1000) |
 | \`recovering_timeframe\` | string | optional | Time window for recovering evaluation, e.g. 5m, 15m. |
-| \`operation\` | string | required |  |
+| \`operation\` | \\"set_state_transition\\" | required |  |
 
 #### \`operation: \\"validate\\"\`
 
 | Field | Type | Required | Description |
 |---|---|---|---|
-| \`operation\` | string | required |  |"
+| \`operation\` | \\"validate\\" | required |  |"
 `;
 
 exports[`schema_to_skill_docs generateRuleSchemaDoc matches the snapshot 1`] = `
@@ -190,7 +192,7 @@ Auto-generated from \`@kbn/alerting-v2-schemas\`. This is the source of truth fo
 
 | Field | Type | Required | Description |
 |---|---|---|---|
-| \`format\` | string | required |  |
+| \`format\` | \\"composed\\" | required |  |
 | \`base\` | string | required | Base ES|QL query. Time filters are applied automatically via the lookback window. (min length: 1, max length: 10000) |
 | \`breach\` | object | required | Breach detection configuration (required). |
 | \`recovery\` | object | optional | Recovery query segment. Required when recovery_strategy is \\"query\\". |
@@ -199,7 +201,7 @@ Auto-generated from \`@kbn/alerting-v2-schemas\`. This is the source of truth fo
 
 | Field | Type | Required | Description |
 |---|---|---|---|
-| \`format\` | string | required |  |
+| \`format\` | \\"standalone\\" | required |  |
 | \`breach\` | object | required | Breach detection configuration (required). |
 | \`recovery\` | object | optional | Recovery query. Required when recovery_strategy is \\"query\\". |
 | \`no_data\` | object | optional | No-data detection query. Required when no_data_strategy is not \\"none\\". |"
