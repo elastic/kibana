@@ -7,12 +7,13 @@
 
 import type { FindMaintenanceWindowsResult } from '@kbn/maintenance-windows-plugin/common';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
+import { ConfigKey } from '../../../common/constants/monitor_management';
 import type { SyntheticsRestApiRouteFactory } from '../types';
 
 /**
  * The subset of maintenance window fields the Synthetics UI actually consumes: the id/title
- * for the overview callout and the add/edit picker, the status to know which windows are
- * currently running, and updatedAt to detect changes pending a private-location sync.
+ * for the overview callout, the status to know which windows are currently running, and
+ * updatedAt to detect changes pending a private-location sync.
  */
 export type SyntheticsMaintenanceWindow = Pick<
   FindMaintenanceWindowsResult['data'][number],
@@ -24,15 +25,19 @@ export interface SyntheticsMaintenanceWindowsResult {
 }
 
 /**
- * Returns the maintenance windows for the current space.
+ * Returns the maintenance windows referenced by the current space's monitors.
  *
- * Synthetics needs this data on the monitors overview (to surface the "active maintenance
- * windows" callout and per-monitor state) and in the monitor add/edit form. The alerting
- * maintenance-window endpoints require the `read-maintenance-window` privilege, which the
- * Synthetics read-only role does not grant, so calling them directly resulted in a 403 and
- * an error toast for those users. Here we fetch with the internal maintenance-window client
- * (authorization extension excluded) so the data is available regardless of the caller's
- * maintenance-window privileges, while still scoping the result to the caller's space.
+ * The monitors overview needs this to surface the "active maintenance windows" callout and
+ * per-monitor state. The alerting maintenance-window endpoints require the
+ * `read-maintenance-window` privilege, which the Synthetics read-only role does not grant,
+ * so calling them directly returned a 403 and an error toast for those users.
+ *
+ * We resolve the windows with the internal maintenance-window client (authorization
+ * extension excluded) so the data is available regardless of the caller's maintenance-window
+ * privileges. To keep that elevated read as narrow as possible we return only the windows
+ * that are actually referenced by a monitor in the caller's space — a read-only user cannot
+ * use this route to enumerate every maintenance window in the space. The add/edit form, which
+ * needs the full list to assign new windows, keeps using the privileged alerting endpoint.
  */
 export const getMaintenanceWindowsRoute: SyntheticsRestApiRouteFactory<
   SyntheticsMaintenanceWindowsResult
@@ -40,10 +45,31 @@ export const getMaintenanceWindowsRoute: SyntheticsRestApiRouteFactory<
   method: 'GET',
   path: SYNTHETICS_API_URLS.MAINTENANCE_WINDOWS,
   validate: {},
-  handler: async ({ server, request, spaceId }): Promise<SyntheticsMaintenanceWindowsResult> => {
+  handler: async ({
+    server,
+    request,
+    spaceId,
+    monitorConfigRepository,
+  }): Promise<SyntheticsMaintenanceWindowsResult> => {
     const maintenanceWindowClient = server.getMaintenanceWindowClientInternal(request);
 
     if (!maintenanceWindowClient) {
+      return { maintenanceWindows: [] };
+    }
+
+    // Collect the maintenance window ids referenced by monitors in this space so we only
+    // expose those windows, not every window the space happens to contain.
+    const monitors = await monitorConfigRepository.getAll({
+      fields: [ConfigKey.MAINTENANCE_WINDOWS],
+    });
+    const referencedIds = new Set<string>();
+    for (const monitor of monitors) {
+      for (const id of monitor.attributes[ConfigKey.MAINTENANCE_WINDOWS] ?? []) {
+        referencedIds.add(id);
+      }
+    }
+
+    if (referencedIds.size === 0) {
       return { maintenanceWindows: [] };
     }
 
@@ -54,12 +80,9 @@ export const getMaintenanceWindowsRoute: SyntheticsRestApiRouteFactory<
     });
 
     return {
-      maintenanceWindows: data.map(({ id, title, status, updatedAt }) => ({
-        id,
-        title,
-        status,
-        updatedAt,
-      })),
+      maintenanceWindows: data
+        .filter((mw) => referencedIds.has(mw.id))
+        .map(({ id, title, status, updatedAt }) => ({ id, title, status, updatedAt })),
     };
   },
 });

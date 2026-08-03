@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { useFetchMaintenanceWindows } from '../../../../hooks';
+import { useFetchAllMaintenanceWindows } from '../../../../hooks';
 
 export function useMaintenanceWindows() {
-  const { isLoading, data } = useFetchMaintenanceWindows();
+  const { isLoading, data } = useFetchAllMaintenanceWindows();
 
   return {
     isLoading,
