@@ -7,10 +7,6 @@
 
 /**
  * Public Attacks API client helpers.
- *
- * Requires `publicAttacksApiEnabled` on both the Kibana client and server
- * (`xpack.securitySolution.enableExperimental`). The UI gates calls on the client
- * flag; if only the client flag is enabled, requests will 404.
  */
 
 import type { estypes } from '@elastic/elasticsearch';

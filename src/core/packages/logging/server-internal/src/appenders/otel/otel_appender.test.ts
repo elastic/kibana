@@ -131,7 +131,7 @@ describe('OtelAppender', () => {
       expect(result.fieldRenames).toBeUndefined();
     });
 
-    it('fieldDrops, fieldUppercase and fieldDefaults are optional and absent by default', () => {
+    it('fieldDrops, fieldUppercase, fieldDefaults, fieldAdditions and includeResources are optional and absent by default', () => {
       const result = OtelAppender.configSchema.validate({
         type: 'otel',
         url: 'http://collector:4318/v1/logs',
@@ -139,6 +139,35 @@ describe('OtelAppender', () => {
       expect(result.fieldDrops).toBeUndefined();
       expect(result.fieldUppercase).toBeUndefined();
       expect(result.fieldDefaults).toBeUndefined();
+      expect(result.fieldAdditions).toBeUndefined();
+      expect(result.includeResources).toBeUndefined();
+      expect(result.promoteResourceAttributes).toBeUndefined();
+    });
+
+    it('accepts fieldAdditions as a map of template strings', () => {
+      const result = OtelAppender.configSchema.validate({
+        ...validConfig,
+        fieldAdditions: { 'url.original': '{url.scheme}://{url.domain}{url.path}' },
+      });
+      expect(result.fieldAdditions).toEqual({
+        'url.original': '{url.scheme}://{url.domain}{url.path}',
+      });
+    });
+
+    it('accepts includeResources as an array of strings', () => {
+      const result = OtelAppender.configSchema.validate({
+        ...validConfig,
+        includeResources: ['service.name', 'service.type'],
+      });
+      expect(result.includeResources).toEqual(['service.name', 'service.type']);
+    });
+
+    it('accepts promoteResourceAttributes as an array of strings', () => {
+      const result = OtelAppender.configSchema.validate({
+        ...validConfig,
+        promoteResourceAttributes: ['project.id'],
+      });
+      expect(result.promoteResourceAttributes).toEqual(['project.id']);
     });
 
     it('accepts fieldUppercase as an array of strings', () => {
@@ -408,6 +437,166 @@ describe('OtelAppender', () => {
           'processDetector',
         ]),
       });
+    });
+
+    describe('includeResources', () => {
+      // Wires buildOtelResources().merge(...) to resolve to a resource whose getRawAttributes()
+      // returns the given entries, so we can assert what survives the allowlist/denylist filter.
+      const wireResourceWithRawAttributes = (rawAttributes: Array<[string, unknown]>) => {
+        const resourceWithKnownRaw = makeMockResource('known');
+        (resourceWithKnownRaw.getRawAttributes as jest.Mock).mockReturnValue(rawAttributes);
+        const r1 = makeMockResource('r1', {});
+        r1.merge.mockReturnValueOnce(resourceWithKnownRaw);
+        mockMergeResource.mockReturnValueOnce(r1);
+        return resourceWithKnownRaw;
+      };
+
+      it('filters the resource to the allowlisted keys (detectors still run)', () => {
+        wireResourceWithRawAttributes([
+          ['service.name', 'serverless-kibana'],
+          ['service.type', 'kibana'],
+          ['host.name', 'my-host'],
+          ['process.pid', 123],
+          ['telemetry.sdk.language', 'nodejs'],
+        ]);
+
+        new OtelAppender({
+          ...validConfig,
+          includeResources: ['service.name', 'service.type'],
+          attributes: { 'service.name': 'serverless-kibana', 'service.type': 'kibana' },
+        });
+
+        // includeResources filters the detected resource — it does not skip detection.
+        expect(mockDetectResources).toHaveBeenCalled();
+        // Only the allowlisted keys survive.
+        const filteredArg = mockResourceFromAttributes.mock.calls.at(-1)![0];
+        expect(Object.keys(filteredArg).sort()).toEqual(['service.name', 'service.type']);
+        expect(filteredArg['service.name']).toBe('serverless-kibana');
+        expect(filteredArg['service.type']).toBe('kibana');
+      });
+
+      it('keeps the configured value on duplicate keys regardless of merge() ordering', () => {
+        // The APM-derived service.name ('kibana') is deliberately placed FIRST in the raw entries —
+        // i.e. as if merge() emitted the base before the override. config.attributes must still win,
+        // because precedence is resolved from config.attributes, not from raw-entry position.
+        wireResourceWithRawAttributes([
+          ['service.name', 'kibana'],
+          ['service.type', 'kibana'],
+          ['service.name', 'serverless-kibana'],
+        ]);
+
+        new OtelAppender({
+          ...validConfig,
+          includeResources: ['service.name', 'service.type'],
+          attributes: { 'service.name': 'serverless-kibana', 'service.type': 'kibana' },
+        });
+
+        const filteredArg = mockResourceFromAttributes.mock.calls.at(-1)![0];
+        // The configured override wins even though the base value appears first in the raw entries.
+        expect(filteredArg['service.name']).toBe('serverless-kibana');
+        expect(filteredArg['service.type']).toBe('kibana');
+      });
+
+      it('lets an explicit allowlist govern the resource even when a key is also in fieldDrops', () => {
+        wireResourceWithRawAttributes([
+          ['service.name', 'serverless-kibana'],
+          ['service.type', 'kibana'],
+          ['host.name', 'my-host'],
+        ]);
+
+        new OtelAppender({
+          ...validConfig,
+          includeResources: ['service.name', 'service.type'],
+          // service.type is also dropped from the per-record attributes, but the resource allowlist
+          // keeps it in the resource (fieldDrops does not shape the resource when an allowlist is set).
+          fieldDrops: ['service.type'],
+        });
+
+        const filteredArg = mockResourceFromAttributes.mock.calls.at(-1)![0];
+        expect(Object.keys(filteredArg).sort()).toEqual(['service.name', 'service.type']);
+      });
+
+      it('does not rebuild the resource when includeResources defaults to all and no fieldDrops', () => {
+        const resourceWithKnownRaw = wireResourceWithRawAttributes([['service.name', 'kibana']]);
+
+        new OtelAppender(validConfig); // no includeResources, no fieldDrops
+
+        // Fast path: the merged resource is used directly, with no getRawAttributes()-based rebuild.
+        expect(resourceWithKnownRaw.getRawAttributes).not.toHaveBeenCalled();
+      });
+    });
+  });
+
+  describe('promoteResourceAttributes', () => {
+    // Wire buildOtelResources().merge(...) to resolve to a resource whose getRawAttributes()
+    // returns the given entries (mirrors the includeResources wiring above).
+    const wireResource = (rawAttributes: Array<[string, unknown]>) => {
+      const resourceWithKnownRaw = makeMockResource('known');
+      (resourceWithKnownRaw.getRawAttributes as jest.Mock).mockReturnValue(rawAttributes);
+      const r1 = makeMockResource('r1', {});
+      r1.merge.mockReturnValueOnce(resourceWithKnownRaw);
+      mockMergeResource.mockReturnValueOnce(r1);
+    };
+
+    it('promotes a resource attribute into per-record attributes', () => {
+      wireResource([
+        ['service.name', 'serverless-kibana'],
+        ['project.id', 'proj-123'],
+      ]);
+
+      const appender = new OtelAppender({
+        ...validConfig,
+        promoteResourceAttributes: ['project.id'],
+      });
+      appender.append(makeRecord({ meta: { event: { action: 'user_login' } } }));
+
+      const { attributes } = mockEmit.mock.calls[0][0];
+      expect(attributes).toHaveProperty(['project.id'], 'proj-123');
+    });
+
+    it('skips async (Promise) resource values', () => {
+      wireResource([['host.id', Promise.resolve('async-host-id')]]);
+
+      const appender = new OtelAppender({ ...validConfig, promoteResourceAttributes: ['host.id'] });
+      appender.append(makeRecord({ meta: { event: { action: 'user_login' } } }));
+
+      const { attributes } = mockEmit.mock.calls[0][0];
+      expect(attributes).not.toHaveProperty(['host.id']);
+    });
+
+    it('promotes nothing when the key is absent from the resource', () => {
+      wireResource([['service.name', 'serverless-kibana']]);
+
+      const appender = new OtelAppender({
+        ...validConfig,
+        promoteResourceAttributes: ['project.id'],
+      });
+      appender.append(makeRecord({ meta: { event: { action: 'user_login' } } }));
+
+      const { attributes } = mockEmit.mock.calls[0][0];
+      expect(attributes).not.toHaveProperty(['project.id']);
+    });
+
+    it('promotes per-record even when includeResources strips it from the resource', () => {
+      wireResource([
+        ['service.name', 'serverless-kibana'],
+        ['service.type', 'kibana'],
+        ['project.id', 'proj-123'],
+      ]);
+
+      const appender = new OtelAppender({
+        ...validConfig,
+        includeResources: ['service.name', 'service.type'],
+        promoteResourceAttributes: ['project.id'],
+      });
+      appender.append(makeRecord({ meta: { event: { action: 'user_login' } } }));
+
+      // Per-record attributes carry project.id...
+      const { attributes } = mockEmit.mock.calls[0][0];
+      expect(attributes).toHaveProperty(['project.id'], 'proj-123');
+      // ...but the resource does not (the allowlist stripped it).
+      const filteredResourceArg = mockResourceFromAttributes.mock.calls.at(-1)![0];
+      expect(filteredResourceArg).not.toHaveProperty(['project.id']);
     });
   });
 
@@ -699,53 +888,39 @@ describe('OtelAppender', () => {
         expect(attributes).not.toHaveProperty(['kibana.space.id']);
       });
 
-      it('applies all audit field renames for a representative audit event meta payload', () => {
+      it('applies multiple renames — including a fan-out — in a single pass', () => {
+        // Generic coverage of the rename mechanism (single-target, dotted-path, and array
+        // fan-out). The audit-specific rename set is asserted in audit_service.test.ts; this
+        // test intentionally uses neutral example keys and must not mirror those constants.
         const appender = new OtelAppender({
           ...validConfig,
           fieldRenames: {
-            'kibana.space_id': 'kibana.space.id',
-            'kibana.session_id': 'kibana.session.id',
-            'kibana.lookup_realm': 'kibana.lookup.realm',
-            'kibana.authentication_type': 'authentication.type',
-            'client.ip': ['source.address', 'source.ip'],
-            'trace.id': 'request.id',
-            'http.request.headers.x-forwarded-for': 'http.request.header.x-forwarded-for',
+            'a.old': 'a.new',
+            'nested.old_key': 'nested.new.key',
+            'fanout.source': ['fanout.target_one', 'fanout.target_two'],
           },
         });
         appender.append(
           makeRecord({
             meta: {
-              kibana: {
-                space_id: 'default',
-                session_id: 'abc123',
-                lookup_realm: 'native',
-                authentication_type: 'basic',
-              },
-              client: { ip: '1.2.3.4' },
-              trace: { id: 'req-xyz' },
-              http: { request: { headers: { 'x-forwarded-for': '10.0.0.1' } } },
+              a: { old: 'value-a' },
+              nested: { old_key: 'value-nested' },
+              fanout: { source: 'value-fanout' },
             },
           })
         );
 
         const { attributes } = mockEmit.mock.calls[0][0];
         // Renamed keys present with correct values
-        expect(attributes).toHaveProperty(['kibana.space.id'], 'default');
-        expect(attributes).toHaveProperty(['kibana.session.id'], 'abc123');
-        expect(attributes).toHaveProperty(['kibana.lookup.realm'], 'native');
-        expect(attributes).toHaveProperty(['authentication.type'], 'basic');
-        expect(attributes).toHaveProperty(['source.address'], '1.2.3.4');
-        expect(attributes).toHaveProperty(['source.ip'], '1.2.3.4');
-        expect(attributes).toHaveProperty(['request.id'], 'req-xyz');
-        expect(attributes).toHaveProperty(['http.request.header.x-forwarded-for'], '10.0.0.1');
+        expect(attributes).toHaveProperty(['a.new'], 'value-a');
+        expect(attributes).toHaveProperty(['nested.new.key'], 'value-nested');
+        // Fan-out: value copied to every target
+        expect(attributes).toHaveProperty(['fanout.target_one'], 'value-fanout');
+        expect(attributes).toHaveProperty(['fanout.target_two'], 'value-fanout');
         // Original keys removed
-        expect(attributes).not.toHaveProperty(['kibana.space_id']);
-        expect(attributes).not.toHaveProperty(['kibana.session_id']);
-        expect(attributes).not.toHaveProperty(['kibana.lookup_realm']);
-        expect(attributes).not.toHaveProperty(['kibana.authentication_type']);
-        expect(attributes).not.toHaveProperty(['client.ip']);
-        expect(attributes).not.toHaveProperty(['trace.id']);
-        expect(attributes).not.toHaveProperty(['http.request.headers.x-forwarded-for']);
+        expect(attributes).not.toHaveProperty(['a.old']);
+        expect(attributes).not.toHaveProperty(['nested.old_key']);
+        expect(attributes).not.toHaveProperty(['fanout.source']);
       });
     });
   });
@@ -898,7 +1073,80 @@ describe('OtelAppender', () => {
     });
   });
 
-  describe('ordering: rename → drop → defaults', () => {
+  describe('fieldAdditions', () => {
+    it('builds a value from a template referencing other flattened attributes', () => {
+      const appender = new OtelAppender({
+        ...validConfig,
+        fieldAdditions: { 'url.original': '{url.scheme}://{url.domain}{url.path}' },
+      });
+      appender.append(
+        makeRecord({
+          meta: { url: { scheme: 'http', domain: 'localhost', path: '/api/status' } },
+        })
+      );
+
+      const { attributes } = mockEmit.mock.calls[0][0];
+      expect(attributes).toHaveProperty(['url.original'], 'http://localhost/api/status');
+    });
+
+    it('runs before fieldDrops: can reference fields that are then dropped', () => {
+      const appender = new OtelAppender({
+        ...validConfig,
+        fieldAdditions: { 'url.original': '{url.scheme}://{url.domain}{url.path}' },
+        fieldDrops: ['url.scheme', 'url.domain', 'url.path'],
+      });
+      appender.append(
+        makeRecord({
+          meta: { url: { scheme: 'http', domain: 'localhost', path: '/api/status' } },
+        })
+      );
+
+      const { attributes } = mockEmit.mock.calls[0][0];
+      // Derived value survives; the source components are gone.
+      expect(attributes).toHaveProperty(['url.original'], 'http://localhost/api/status');
+      expect(attributes).not.toHaveProperty(['url.scheme']);
+      expect(attributes).not.toHaveProperty(['url.domain']);
+      expect(attributes).not.toHaveProperty(['url.path']);
+    });
+
+    it('skips the addition when any referenced field is missing', () => {
+      const appender = new OtelAppender({
+        ...validConfig,
+        fieldAdditions: { 'url.original': '{url.scheme}://{url.domain}{url.path}' },
+      });
+      // Non-http event: no url.* fields at all.
+      appender.append(makeRecord({ meta: { event: { action: 'user_login' } } }));
+
+      const { attributes } = mockEmit.mock.calls[0][0];
+      expect(attributes).not.toHaveProperty(['url.original']);
+    });
+
+    it('leaves attributes unchanged when fieldAdditions is not configured', () => {
+      const appender = new OtelAppender(validConfig);
+      appender.append(
+        makeRecord({ meta: { url: { scheme: 'http', domain: 'localhost', path: '/api/status' } } })
+      );
+
+      const { attributes } = mockEmit.mock.calls[0][0];
+      expect(attributes).not.toHaveProperty(['url.original']);
+    });
+
+    it('skips the addition when a referenced field is array-valued (no silent comma-join)', () => {
+      const appender = new OtelAppender({
+        ...validConfig,
+        // event.category is an array; a template must not stringify it into a degenerate value.
+        fieldAdditions: { 'derived.field': 'prefix-{event.category}' },
+      });
+      appender.append(makeRecord({ meta: { event: { category: ['authentication', 'web'] } } }));
+
+      const { attributes } = mockEmit.mock.calls[0][0];
+      expect(attributes).not.toHaveProperty(['derived.field']);
+      // The array-valued source itself is untouched.
+      expect(attributes).toHaveProperty(['event.category'], ['authentication', 'web']);
+    });
+  });
+
+  describe('ordering: rename → additions → drop → defaults', () => {
     it('drop is a no-op when the key was already renamed away', () => {
       // fieldRenames runs before fieldDrops: the old key is gone before the drop runs.
       const appender = new OtelAppender({

@@ -127,7 +127,13 @@
     "@kbn/alerts-ui-shared",
     "@kbn/es-types",
     "@kbn/app-header",
-    "@kbn/core-chrome-browser-context-mocks"
+    "@kbn/core-chrome-browser-context-mocks",
+    "@kbn/change-history",
+    "@kbn/content-list",
+    "@kbn/content-list-provider",
+    "@kbn/content-list-toolbar",
+    "@kbn/es",
+    "@kbn/test-es-server"
   ],
   "exclude": ["target/**/*", ".storybook/**/*.js"]
 }

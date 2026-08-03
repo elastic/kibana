@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { spaceTest, tags } from '@kbn/scout';
+import { spaceTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import type { PageObjects, ScoutPage } from '@kbn/scout';
 import { testData } from '../fixtures';
@@ -82,7 +82,7 @@ async function setupMetricProgressBarInLensEditor(
 
 spaceTest.describe(
   'Lens metric progress bar in Lens editor',
-  { tag: tags.stateful.classic },
+  { tag: '@local-stateful-classic' },
   () => {
     let storedDataViewId: string | undefined;
 

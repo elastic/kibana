@@ -29,6 +29,7 @@ import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import { FormattedRelative } from '@kbn/i18n-react';
 import { useStreamsPrivileges } from '../../../../../hooks/use_streams_privileges';
+import { useBlocksNewActivity } from '../../../../../hooks/significant_events/use_significant_events_maintenance';
 import {
   useConsolidateMemory,
   useMemorySearch,
@@ -71,6 +72,10 @@ export function MemoryTab() {
   const workflowsEnabled = workflowsEnabledData?.enabled ?? false;
   const areWorkflowActionsDisabled =
     isWorkflowsEnabledLoading || !workflowsEnabled || toggleWorkflows.isLoading;
+
+  // While Significant Events is paused, enabling memory workflows or triggering a
+  // manual workflow is rejected server-side (409). Disable those controls here.
+  const { blocksActivity, isBlocked, activityBlockTooltip } = useBlocksNewActivity();
 
   const workflowActions: Array<{
     key: string;
@@ -247,7 +252,16 @@ export function MemoryTab() {
                                     onSettled: () => setIsActionsPopoverOpen(false),
                                   });
                                 }}
-                                disabled={isWorkflowsEnabledLoading || toggleWorkflows.isLoading}
+                                disabled={
+                                  isWorkflowsEnabledLoading ||
+                                  toggleWorkflows.isLoading ||
+                                  // Allow disable while paused; only block re-enable
+                                  // (server allows disable-while-paused for recovery).
+                                  (blocksActivity && !workflowsEnabled)
+                                }
+                                toolTipContent={
+                                  isBlocked && !workflowsEnabled ? activityBlockTooltip : undefined
+                                }
                                 data-test-subj="streamsMemoryToggleWorkflowsButton"
                               >
                                 {workflowsEnabled
@@ -264,7 +278,8 @@ export function MemoryTab() {
                           const isDisabled =
                             action.mutation.isLoading ||
                             (action.requiresManage && !canManage) ||
-                            areWorkflowActionsDisabled;
+                            areWorkflowActionsDisabled ||
+                            blocksActivity;
 
                           return (
                             <EuiContextMenuItem
@@ -282,7 +297,9 @@ export function MemoryTab() {
                               }}
                               disabled={isDisabled}
                               toolTipContent={
-                                !workflowsEnabled && !isWorkflowsEnabledLoading
+                                blocksActivity
+                                  ? activityBlockTooltip
+                                  : !workflowsEnabled && !isWorkflowsEnabledLoading
                                   ? i18n.translate(
                                       'xpack.streams.memory.workflowActionRequiresEnabledTooltip',
                                       {

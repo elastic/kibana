@@ -323,7 +323,7 @@ export class DiscoverApp {
   }
 
   async openSaveSearchModal(name?: string) {
-    await this.page.testSubj.click('discoverSaveButton');
+    await this.clickAppMenuItem('discoverSaveButton');
     await this.page.testSubj.locator('savedObjectSaveModal').waitFor({ state: 'visible' });
     if (name !== undefined) {
       await this.page.testSubj.fill('savedObjectTitle', name);
@@ -348,7 +348,7 @@ export class DiscoverApp {
   }
 
   async saveSearchAsNew(name: string) {
-    await this.page.testSubj.click('discoverSaveButton');
+    await this.clickAppMenuItem('discoverSaveButton');
     await this.page.testSubj.fill('savedObjectTitle', name);
     const checkbox = this.page.testSubj.locator('saveAsNewCheckbox');
     if (!(await checkbox.isChecked())) {
@@ -358,7 +358,7 @@ export class DiscoverApp {
   }
 
   async saveUnsavedChanges() {
-    await this.page.testSubj.click('discoverSaveButton');
+    await this.clickAppMenuItem('discoverSaveButton');
     await this.page.testSubj.waitForSelector('confirmSaveSavedObjectButton', { state: 'visible' });
     await this.confirmSaveModal();
     await this.waitUntilSearchingHasFinished();
@@ -490,8 +490,12 @@ export class DiscoverApp {
   }
 
   async getCurrentQueryName(): Promise<string> {
-    const breadcrumb = this.page.testSubj.locator('breadcrumb last');
-    return await breadcrumb.innerText();
+    // Project (chrome-next) shows the saved search name in the app header; classic chrome shows it
+    // as the last breadcrumb. `.or()` keeps this layout-agnostic without a runtime gate.
+    const title = this.page.testSubj
+      .locator('appHeaderTitle')
+      .or(this.page.testSubj.locator('breadcrumb last'));
+    return await title.innerText();
   }
 
   async loadSavedSearch(searchName: string) {
@@ -551,6 +555,10 @@ export class DiscoverApp {
     return await row.innerText();
   }
 
+  getSearchTermHighlights(): Locator {
+    return this.page.testSubj.locator('docTable').locator('mark');
+  }
+
   async getDocTableField(index: number): Promise<string> {
     const rowIndex = index - 1;
     await this.page.testSubj.click('dataGridFullScreenButton');
@@ -608,6 +616,24 @@ export class DiscoverApp {
    */
   async getBreakdownFieldValue(): Promise<string> {
     return this.page.testSubj.innerText('unifiedHistogramBreakdownSelectorButton');
+  }
+
+  /**
+   * Clears the histogram breakdown field by selecting the "No breakdown" option.
+   */
+  async clearBreakdownField() {
+    await this.page.testSubj.click('unifiedHistogramBreakdownSelectorButton');
+    await this.page.testSubj.waitForSelector('unifiedHistogramBreakdownSelectorSelectable', {
+      state: 'visible',
+    });
+    await this.page
+      .locator(
+        `[data-test-subj="unifiedHistogramBreakdownSelectorSelectable"] .euiSelectableListItem[value="__EMPTY_SELECTOR_OPTION__"]`
+      )
+      .click();
+    await this.page.testSubj.waitForSelector('unifiedHistogramBreakdownSelectorSelectable', {
+      state: 'hidden',
+    });
   }
 
   async expandTimeRangeAsSuggestedInNoResultsMessage() {
@@ -1045,22 +1071,25 @@ export class DiscoverApp {
   }
 
   /**
-   * Persists the requested Discover query mode in localStorage on the next
-   * page load. Useful to make tests resilient to the `discover.isEsqlDefault`
-   * feature flag being toggled at the project level.
+   * Seeds the persisted query mode in localStorage on the next page load. Discover
+   * ignores `currentMode` unless `defaultMode` matches the resolved default (the
+   * `discover.isEsqlDefault` flag), so `defaultMode` defaults to `'classic'` to
+   * match today's default. When the flag is flipped to make ES|QL the default,
+   * update `defaultMode` or the seed is ignored.
    *
-   * Note: this is not idempotent. Each call registers an additional init
-   * script via Playwright's `addInitScript`, and on subsequent page loads
-   * every registered script runs in order, so the value written by the
-   * last call wins. Avoid calling it multiple times in the same test
-   * unless that stacking behavior is intentional.
+   * Not idempotent: each call adds an `addInitScript` that reruns on every later
+   * load in order, so the last write wins. Avoid calling it more than once per
+   * test unless that stacking is intentional.
    */
-  public setQueryMode(mode: DiscoverQueryMode) {
+  public setQueryMode(currentMode: DiscoverQueryMode, defaultMode: DiscoverQueryMode = 'classic') {
     return this.page.addInitScript(
-      ([_mode, _discoverQueryModeKey]) => {
-        window.localStorage.setItem(_discoverQueryModeKey, JSON.stringify(_mode));
+      ({ storageKey, storageValue }) => {
+        window.localStorage.setItem(storageKey, storageValue);
       },
-      [mode, DISCOVER_QUERY_MODE_KEY]
+      {
+        storageKey: DISCOVER_QUERY_MODE_KEY,
+        storageValue: JSON.stringify({ currentMode, defaultMode }),
+      }
     );
   }
 
@@ -1089,5 +1118,123 @@ export class DiscoverApp {
     } catch {
       return false;
     }
+  }
+
+  getCascadeLayout(): Locator {
+    return this.page.testSubj.locator('data-cascade');
+  }
+
+  getCascadeLayoutSwitch(): Locator {
+    return this.page.testSubj.locator('discoverEnableCascadeLayoutSwitch');
+  }
+
+  async isShowingCascadeLayout(): Promise<boolean> {
+    const cascadeLayout = this.getCascadeLayout();
+    const flatLayout = this.page.testSubj.locator('discoverDocTable');
+
+    await cascadeLayout.or(flatLayout).waitFor({ state: 'visible' });
+    return cascadeLayout.isVisible();
+  }
+
+  private getCascadeScrollContainer(): Locator {
+    return this.page.testSubj.locator('dataCascadeScrollContainer');
+  }
+
+  /**
+   * Returns the ids of the top-level ("root") cascade rows currently
+   * scrolled into view within the cascade scroll container.
+   */
+  async getCascadeLayoutVisibleRowIds(): Promise<string[]> {
+    return this.getCascadeScrollContainer().evaluate((container) => {
+      const containerRect = container.getBoundingClientRect();
+      const rows = container.querySelectorAll('[data-row-type="root"]');
+      const visibleIds: string[] = [];
+      for (const row of rows) {
+        const rowRect = row.getBoundingClientRect();
+        if (rowRect.top >= containerRect.bottom) break;
+        if (rowRect.bottom > containerRect.top) {
+          visibleIds.push(row.id || '');
+        }
+      }
+      return visibleIds;
+    });
+  }
+
+  /**
+   * Whether the given cascade row id is currently expanded.
+   */
+  async isCascadeLayoutRowExpanded(rowId: string): Promise<boolean> {
+    return (await this.page.locator(`[id="${rowId}"]`).getAttribute('aria-expanded')) === 'true';
+  }
+
+  /**
+   * Clicks the expand/collapse toggle for the cascade row with the given id,
+   * without waiting for the resulting state change. Scoped to the row: while
+   * scrolled, the sticky pinned group header renders a `createPortal`
+   * duplicate of this same button elsewhere in the DOM (outside the row), so
+   * an unscoped page-wide testSubj locator can match two elements.
+   */
+  async clickCascadeRowToggle(rowId: string): Promise<void> {
+    await this.page
+      .locator(`[id="${rowId}"]`)
+      .locator(`[data-test-subj="toggle-row-${rowId}-button"]`)
+      .click();
+  }
+
+  /**
+   * Toggles (expands/collapses) the cascade row with the given id and waits
+   * for the `aria-expanded` state to flip before returning. Waits for the doc
+   * table to finish rendering after an expand, since that triggers a fetch.
+   */
+  async toggleCascadeLayoutRow(rowId: string): Promise<void> {
+    const row = this.page.locator(`[id="${rowId}"]`);
+    const wasExpanded = (await row.getAttribute('aria-expanded')) === 'true';
+
+    await this.clickCascadeRowToggle(rowId);
+    await row
+      .and(this.page.locator(`[aria-expanded="${!wasExpanded}"]`))
+      .waitFor({ state: 'attached' });
+
+    if (!wasExpanded) {
+      await this.dataGrid.waitForDocTableRendered();
+    }
+  }
+
+  /**
+   * Waits for the cascade layout's virtualizer to finish
+   * measuring/correcting itself (e.g. restoring a scroll anchor after a tab
+   * switch). The scroll container is hidden behind a loading spinner via
+   * `visibility: hidden` until the virtualizer reports itself stable.
+   */
+  async waitForCascadeLayoutStable(): Promise<void> {
+    await this.getCascadeScrollContainer().waitFor({ state: 'visible' });
+  }
+
+  /**
+   * Current `scrollTop` of the cascade layout's scroll container.
+   */
+  async getCascadeLayoutScrollTop(): Promise<number> {
+    return this.getCascadeScrollContainer().evaluate((container) => container.scrollTop);
+  }
+
+  /**
+   * Scrolls the cascade layout's scroll container by `delta` pixels.
+   */
+  async scrollCascadeLayoutBy(delta: number): Promise<void> {
+    await this.getCascadeScrollContainer().evaluate((container, scrollDelta) => {
+      container.scrollTop += scrollDelta;
+    }, delta);
+  }
+
+  /**
+   * Waits for a just-performed scroll/expand of the cascade layout to be
+   * persisted for state restoration. Persistence is debounced/throttled
+   * internally with no externally observable signal, so callers must pause
+   * here before triggering a remount (e.g. switching tabs) or the
+   * just-performed change can be dropped and restored from stale state.
+   */
+  async waitForCascadeStatePersisted(): Promise<void> {
+    // eslint-disable-next-line playwright/no-wait-for-timeout
+    await this.page.waitForTimeout(500);
   }
 }
