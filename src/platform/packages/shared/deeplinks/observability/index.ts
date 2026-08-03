@@ -16,9 +16,16 @@ export {
   AI_ASSISTANT_APP_ID,
   OBLT_UX_APP_ID,
   OBLT_PROFILING_APP_ID,
+  SIGNIFICANT_EVENTS_APP_ID,
   INGEST_HUB_APP_ID,
   ONBOARDING_APP_ID,
 } from './constants';
 export { significantEventsDeepLinkIds } from './deep_links';
-export type { AppId, DeepLinkId, SigEventsLinkId, StreamsLinkId } from './deep_links';
+export type {
+  AppId,
+  DeepLinkId,
+  SigEventsLinkId,
+  SignificantEventsLinkId,
+  StreamsLinkId,
+} from './deep_links';
 export * from './locators';

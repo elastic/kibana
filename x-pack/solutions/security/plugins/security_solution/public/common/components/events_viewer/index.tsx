@@ -140,7 +140,7 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
   const { uiSettings, data } = useKibana().services;
 
   const { dataView, status } = useDataView(pageScope);
-  const selectedPatterns = useSelectedPatterns(pageScope);
+  const selectedPatterns = useSelectedPatterns(dataView);
   const browserFields = useBrowserFields(dataView);
   const isLoadingIndexPattern = status !== 'ready';
   const dataViewId = dataView.id ?? null;
