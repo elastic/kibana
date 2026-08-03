@@ -32,11 +32,11 @@ const BadgeRow = ({ items, color }: { items: string[]; color?: string }) => (
   </EuiFlexGroup>
 );
 
-interface SigEventDetailsProps {
+interface SignificantEventDetailsProps {
   event: SignificantEvent;
 }
 
-export const SigEventDetails = ({ event }: SigEventDetailsProps) => {
+export const SignificantEventDetails = ({ event }: SignificantEventDetailsProps) => {
   const signals = event.signals ?? [];
   const detectionSignals = signals.filter((s) => s.type === 'detection');
 

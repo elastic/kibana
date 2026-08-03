@@ -11,11 +11,11 @@ import { KIS_ONBOARDING_IN_PROGRESS_STATUSES } from '@kbn/significant-events-sch
 import React, { useCallback, useMemo, useState } from 'react';
 import type { TableRow } from './utils';
 import { parseSearchQuery } from './utils';
-import { useAIFeatures } from '../../../../../hooks/use_ai_features';
-import { useSignificantEventsDiscoveryContext } from '../../context/significant_events_discovery_context';
-import type { StreamsAppSearchBarProps } from '../../../../streams_app_search_bar';
-import { StreamsAppSearchBar } from '../../../../streams_app_search_bar';
-import { useBlocksNewActivity } from '../../../../../hooks/significant_events/use_significant_events_maintenance';
+import { useAIFeatures } from '../../../../hooks/use_ai_features';
+import { useSignificantEventsPageContext } from '../../context/significant_events_page_context';
+import type { SignificantEventsSearchBarProps } from '../../../../components/search_bar';
+import { SignificantEventsSearchBar } from '../../../../components/search_bar';
+import { useBlocksNewActivity } from '../../../../hooks/use_significant_events_maintenance';
 import { useKiGeneration } from '../knowledge_indicators_table/ki_generation_context';
 import { GenerateSplitButton } from '../shared/generate_split_button';
 import { FindSignificantEventsButton } from './find_significant_events_button';
@@ -52,7 +52,7 @@ export function StreamsView() {
     !allConnectors.length || !!aiFeatures?.genAiConnectors?.loading || !!connectorError;
 
   const { isRunning, isCanceling, handleRun, handleCancel } =
-    useSignificantEventsDiscoveryContext();
+    useSignificantEventsPageContext();
 
   const isStreamActionable = useCallback(
     (streamName: string) => {
@@ -99,7 +99,7 @@ export function StreamsView() {
     cancelOnboarding(streamName);
   };
 
-  const handleQueryChange: StreamsAppSearchBarProps['onQueryChange'] = (queryPayload) => {
+  const handleQueryChange: SignificantEventsSearchBarProps['onQueryChange'] = (queryPayload) => {
     setSearchText(String(queryPayload.query?.query ?? ''));
   };
 
@@ -108,7 +108,7 @@ export function StreamsView() {
       <EuiFlexItem grow={false}>
         <EuiFlexGroup gutterSize="s" alignItems="center" wrap>
           <EuiFlexItem grow style={{ minWidth: 200 }}>
-            <StreamsAppSearchBar
+            <SignificantEventsSearchBar
               onQuerySubmit={handleQueryChange}
               onQueryChange={handleQueryChange}
               placeholder={STREAMS_TABLE_SEARCH_ARIA_LABEL}

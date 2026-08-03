@@ -10,9 +10,9 @@ import { renderHook, act, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { SignificantEventsWorkflowStatus } from '@kbn/significant-events-schema';
 import {
-  SignificantEventsDiscoveryProvider,
-  useSignificantEventsDiscoveryContext,
-} from './significant_events_discovery_context';
+  SignificantEventsPageProvider,
+  useSignificantEventsPageContext,
+} from './significant_events_page_context';
 
 jest.mock('../../../../hooks/use_kibana', () => ({
   useKibana: jest.fn(),
@@ -51,9 +51,9 @@ const createSetup = (onComplete?: () => void) => {
   });
   const wrapper = ({ children }: { children: React.ReactNode }) => (
     <QueryClientProvider client={queryClient}>
-      <SignificantEventsDiscoveryProvider onComplete={onComplete}>
+      <SignificantEventsPageProvider onComplete={onComplete}>
         {children}
-      </SignificantEventsDiscoveryProvider>
+      </SignificantEventsPageProvider>
     </QueryClientProvider>
   );
   const setStatus = (status: StatusResponse) => queryClient.setQueryData(STATUS_QUERY_KEY, status);
@@ -62,11 +62,11 @@ const createSetup = (onComplete?: () => void) => {
 
 const renderContext = (onComplete?: () => void) => {
   const { wrapper, setStatus, queryClient } = createSetup(onComplete);
-  const view = renderHook(() => useSignificantEventsDiscoveryContext(), { wrapper });
+  const view = renderHook(() => useSignificantEventsPageContext(), { wrapper });
   return { ...view, setStatus, queryClient };
 };
 
-describe('SignificantEventsDiscoveryProvider', () => {
+describe('SignificantEventsPageProvider', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.useRealTimers();
@@ -250,7 +250,7 @@ describe('SignificantEventsDiscoveryProvider', () => {
       const { queryClient, setStatus } = createSetup();
       const wrapper = ({ children }: { children: React.ReactNode }) => (
         <QueryClientProvider client={queryClient}>
-          <SignificantEventsDiscoveryProvider>{children}</SignificantEventsDiscoveryProvider>
+          <SignificantEventsPageProvider>{children}</SignificantEventsPageProvider>
         </QueryClientProvider>
       );
 
@@ -259,14 +259,14 @@ describe('SignificantEventsDiscoveryProvider', () => {
         setStatus({ status: SignificantEventsWorkflowStatus.InProgress, executionId: 'exec-1' });
       });
 
-      const first = renderHook(() => useSignificantEventsDiscoveryContext(), { wrapper });
+      const first = renderHook(() => useSignificantEventsPageContext(), { wrapper });
       await waitFor(() => expect(first.result.current.isRunning).toBe(true));
 
       // Simulate a tab switch: unmount the provider, then mount a fresh one with
       // the same (persisted) QueryClient.
       first.unmount();
 
-      const second = renderHook(() => useSignificantEventsDiscoveryContext(), { wrapper });
+      const second = renderHook(() => useSignificantEventsPageContext(), { wrapper });
 
       // Running state is restored from the cached server status, not lost.
       await waitFor(() => expect(second.result.current.isRunning).toBe(true));
@@ -276,11 +276,11 @@ describe('SignificantEventsDiscoveryProvider', () => {
       const { queryClient, setStatus } = createSetup();
       const wrapper = ({ children }: { children: React.ReactNode }) => (
         <QueryClientProvider client={queryClient}>
-          <SignificantEventsDiscoveryProvider>{children}</SignificantEventsDiscoveryProvider>
+          <SignificantEventsPageProvider>{children}</SignificantEventsPageProvider>
         </QueryClientProvider>
       );
 
-      const first = renderHook(() => useSignificantEventsDiscoveryContext(), { wrapper });
+      const first = renderHook(() => useSignificantEventsPageContext(), { wrapper });
 
       // Run completes while the first instance is mounted (toasts once).
       act(() => {
@@ -297,7 +297,7 @@ describe('SignificantEventsDiscoveryProvider', () => {
 
       // Tab switch remount with the completion still cached — must not re-toast.
       first.unmount();
-      renderHook(() => useSignificantEventsDiscoveryContext(), { wrapper });
+      renderHook(() => useSignificantEventsPageContext(), { wrapper });
       await new Promise((resolve) => setTimeout(resolve, 50));
       expect(addSuccess).toHaveBeenCalledTimes(1);
     });

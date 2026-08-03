@@ -31,16 +31,16 @@ import {
   KnowledgeIndicatorsTable,
   KiGenerationProvider,
 } from './components/knowledge_indicators_table';
-import { SignificantEventsDiscoveryProvider } from './context/significant_events_discovery_context';
+import { SignificantEventsPageProvider } from './context/significant_events_page_context';
 import { ONBOARDING_FAILURE_TITLE } from './components/streams_view/translations';
 import { QueriesTable } from './components/queries_table/queries_table';
 import { StreamsView } from './components/streams_view/streams_view';
 import { SettingsTab } from './components/settings/tab';
 import { MemoryTab } from './components/memory/tab';
 import { DetectionsTab } from './components/detections_tab';
-import { SigEventsTab } from './components/significant_events_tab';
+import { SignificantEventsTab } from './components/significant_events_tab';
 
-const discoveryTabs = [
+const significantEventsTabs = [
   'streams',
   'knowledge_indicators',
   'queries',
@@ -49,13 +49,13 @@ const discoveryTabs = [
   'memory',
   'settings',
 ] as const;
-type DiscoveryTab = (typeof discoveryTabs)[number];
+type SignificantEventsTabId = (typeof significantEventsTabs)[number];
 
-function isValidDiscoveryTab(value: string): value is DiscoveryTab {
-  return discoveryTabs.includes(value as DiscoveryTab);
+function isValidSignificantEventsTab(value: string): value is SignificantEventsTabId {
+  return significantEventsTabs.includes(value as SignificantEventsTabId);
 }
 
-export function SignificantEventsDiscoveryPage() {
+export function SignificantEventsPage() {
   const {
     path: { tab },
   } = useStreamsAppParams('/_discovery/{tab}');
@@ -249,16 +249,16 @@ export function SignificantEventsDiscoveryPage() {
     return <RedirectTo path="/_discovery/{tab}" params={{ path: { tab: 'significant_events' } }} />;
   }
 
-  if (!isValidDiscoveryTab(tab)) {
-    return <RedirectTo path="/_discovery/{tab}" params={{ path: { tab: 'streams' } }} />;
+  if (!isValidSignificantEventsTab(tab)) {
+    return <RedirectTo path="/{tab}" params={{ path: { tab: 'streams' } }} />;
   }
 
   return (
     <>
       <StreamsAppHeader title={pageTitle} menu={menu} tabs={tabs} />
       <KiGenerationProvider onFailed={onOnboardingFailed}>
-        <SignificantEventsDiscoveryProvider>
-          <StreamsAppPageTemplate.Body grow>
+        <SignificantEventsPageProvider>
+          <SignificantEventsAppPageTemplate.Body grow>
             {showMaintenanceBanners && isMaintenanceStatusLoading && (
               <>
                 <EuiCallOut
@@ -364,11 +364,11 @@ export function SignificantEventsDiscoveryPage() {
             {tab === 'knowledge_indicators' && <KnowledgeIndicatorsTable />}
             {tab === 'queries' && <QueriesTable />}
             {tab === 'detections' && <DetectionsTab />}
-            {tab === 'significant_events' && <SigEventsTab />}
+            {tab === 'significant_events' && <SignificantEventsTab />}
             {tab === 'memory' && <MemoryTab />}
             {tab === 'settings' && <SettingsTab />}
-          </StreamsAppPageTemplate.Body>
-        </SignificantEventsDiscoveryProvider>
+          </SignificantEventsAppPageTemplate.Body>
+        </SignificantEventsPageProvider>
       </KiGenerationProvider>
     </>
   );

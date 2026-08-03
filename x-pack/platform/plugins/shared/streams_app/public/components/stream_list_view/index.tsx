@@ -155,7 +155,7 @@ export function StreamListView() {
     { defaultMessage: 'Create classic stream' }
   );
   const significantEventsLabel = i18n.translate(
-    'xpack.streams.streamsListView.sigEventsDiscoveryButtonLabel',
+    'xpack.streams.streamsListView.sigEventsButtonLabel',
     { defaultMessage: 'Significant Events' }
   );
   const createLabel = i18n.translate('xpack.streams.streamsListView.createButtonLabel', {
@@ -170,10 +170,10 @@ export function StreamListView() {
     { defaultMessage: 'Classic stream' }
   );
 
-  const showSignificantEventsDiscovery = Boolean(significantEvents?.available);
+  const showSignificantEvents = isSignificantEventsAvailable;
   const showQueryStreams = Boolean(queryStreams?.enabled);
   const canCreateClassicStream = canManageStreamsKibana && canManageClassicElasticsearch;
-  const significantEventsDiscoveryHref =
+  const significantEventsHref =
     significantEventsApp?.locator.getRedirectUrl({}) ??
     core.application.getUrlForApp(SIGNIFICANT_EVENTS_APP_ID);
 
@@ -190,14 +190,14 @@ export function StreamListView() {
       },
     ];
 
-    if (showSignificantEventsDiscovery) {
+    if (showSignificantEvents) {
       items.push({
-        id: 'significantEventsDiscovery',
+        id: 'significantEvents',
         order: 2,
         label: significantEventsLabel,
         iconType: 'significantEvents',
-        href: significantEventsDiscoveryHref,
-        testId: 'streamsSignificantEventsDiscoveryButton',
+        href: significantEventsHref,
+        testId: 'streamsSignificantEventsButton',
       });
     }
 
@@ -249,8 +249,8 @@ export function StreamListView() {
     queryStreamMenuItemLabel,
     settingsLabel,
     showQueryStreams,
-    showSignificantEventsDiscovery,
-    significantEventsDiscoveryHref,
+    showSignificantEvents,
+    significantEventsHref,
     significantEventsLabel,
   ]);
 

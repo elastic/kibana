@@ -55483,7 +55483,7 @@
     "xpack.streams.streamsListView.shipperConfigFleetDescriptionStep3": "Activez le paramètre 'Utiliser le flux de données \"logs.ecs\"' dans la configuration d’intégration.",
     "xpack.streams.streamsListView.shipperConfigFleetDescriptionStep4": "Assurez-vous que la stratégie de l'agent utilise la sortie que vous avez configurée à l'étape 1.",
     "xpack.streams.streamsListView.shipperConfigTitle": "Configurez vos agents de transfert",
-    "xpack.streams.streamsListView.sigEventsDiscoveryButtonLabel": "Événements importants",
+    "xpack.streams.streamsListView.sigEventsButtonLabel": "Événements importants",
     "xpack.streams.streamsListView.wiredStreamsDescription": "Envoyez des données à Elasticsearch et traitez-les selon une hiérarchie claire, avec des paramètres hérités et des composants gérés. Si elle est désactivée, certaines fonctionnalités ne fonctionneront pas comme prévu.",
     "xpack.streams.streamsListView.wiredStreamsEnabledToastTitle": "Les flux filaires ont bien été activés",
     "xpack.streams.streamsListView.wiredStreamsTitle": "Wired Streams",

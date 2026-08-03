@@ -55718,7 +55718,7 @@
     "xpack.streams.streamsListView.shipperConfigFleetDescriptionStep3": "Aktivieren Sie die Einstellung „Use the \"logs.ecs\" data stream“ in der Integrationskonfiguration.",
     "xpack.streams.streamsListView.shipperConfigFleetDescriptionStep4": "Vergewissern Sie sich, dass die Agentenrichtlinie den in Schritt 1 konfigurierten Ausgang verwendet.",
     "xpack.streams.streamsListView.shipperConfigTitle": "Konfigurieren Sie Ihre Übermittler",
-    "xpack.streams.streamsListView.sigEventsDiscoveryButtonLabel": "Wichtige Ereignisse",
+    "xpack.streams.streamsListView.sigEventsButtonLabel": "Wichtige Ereignisse",
     "xpack.streams.streamsListView.wiredStreamsDescription": "Senden Sie Daten an Elasticsearch und verarbeiten Sie sie mit einer klaren Hierarchie, vererbten Einstellungen und verwalteten Komponenten. Wenn diese Funktion deaktiviert ist, funktionieren einige Features nicht wie erwartet.",
     "xpack.streams.streamsListView.wiredStreamsEnabledToastTitle": "Kabelgebundene Streams wurden erfolgreich aktiviert",
     "xpack.streams.streamsListView.wiredStreamsTitle": "Wired Streams",

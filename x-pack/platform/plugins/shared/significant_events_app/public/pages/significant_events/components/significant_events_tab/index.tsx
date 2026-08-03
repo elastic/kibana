@@ -40,7 +40,7 @@ import { RUNNING_POLL_INTERVAL_MS } from '../../../constants';
 import { useFetchSignificantEvents } from '../../../../../hooks/significant_events/use_fetch_significant_events';
 import { useTimefilter } from '../../../../../hooks/use_timefilter';
 import { useKiGeneration } from '../knowledge_indicators_table/ki_generation_context';
-import { useSignificantEventsDiscoveryContext } from '../../context/significant_events_discovery_context';
+import { useSignificantEventsPageContext } from '../../context/significant_events_page_context';
 import { SignificantEventFlyout } from './significant_event_flyout';
 import { FindSignificantEventsButton } from '../streams_view/find_significant_events_button';
 import type { StreamsAppSearchBarProps } from '../../../../streams_app_search_bar';
@@ -263,7 +263,7 @@ const buildSelectableOptions = <T extends string>({
     checked: selected.includes(v) ? ('on' as const) : undefined,
   }));
 
-export const SigEventsTab = () => {
+export const SignificantEventsTab = () => {
   const { timeState } = useTimefilter();
 
   const { filteredStreams } = useKiGeneration();
@@ -284,7 +284,7 @@ export const SigEventsTab = () => {
   );
 
   const { isRunning, isCanceling, handleRun, handleCancel } =
-    useSignificantEventsDiscoveryContext();
+    useSignificantEventsPageContext();
   const { blocksActivity, activityBlockTooltip } = useBlocksNewActivity();
 
   const { data, isLoading, isError, refetch, pagination, setPagination } =

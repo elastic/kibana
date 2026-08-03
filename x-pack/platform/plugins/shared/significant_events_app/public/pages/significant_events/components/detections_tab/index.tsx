@@ -22,11 +22,11 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { Detection } from '@kbn/significant-events-schema';
-import { RUNNING_POLL_INTERVAL_MS } from '../../../constants';
-import { useFetchDetections } from '../../../../../hooks/significant_events/use_fetch_detections';
-import { useTimefilter } from '../../../../../hooks/use_timefilter';
-import { useSignificantEventsDiscoveryContext } from '../../context/significant_events_discovery_context';
-import { useBlocksNewActivity } from '../../../../../hooks/significant_events/use_significant_events_maintenance';
+import { RUNNING_POLL_INTERVAL_MS } from '../../../../constants';
+import { useFetchDetections } from '../../../../hooks/use_fetch_detections';
+import { useTimefilter } from '../../../../hooks/use_timefilter';
+import { useSignificantEventsPageContext } from '../../context/significant_events_page_context';
+import { useBlocksNewActivity } from '../../../../hooks/use_significant_events_maintenance';
 import { DetectionFlyout } from './detection_flyout';
 import { FindSignificantEventsButton } from '../streams_view/find_significant_events_button';
 import { StreamsAppSearchBar } from '../../../../streams_app_search_bar';
@@ -61,7 +61,7 @@ export const DetectionsTab = () => {
   const { blocksActivity, activityBlockTooltip } = useBlocksNewActivity();
 
   const { isRunning, isCanceling, handleRun, handleCancel } =
-    useSignificantEventsDiscoveryContext();
+    useSignificantEventsPageContext();
 
   const { data, isLoading, isError, refetch, pagination, setPagination } = useFetchDetections({
     from: timeState.start,

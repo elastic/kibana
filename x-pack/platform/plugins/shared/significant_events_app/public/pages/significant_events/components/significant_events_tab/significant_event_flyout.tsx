@@ -40,8 +40,8 @@ import { FlyoutToolbarHeader } from '../../../../flyout_components/flyout_toolba
 import { LifecycleTimeline } from './lifecycle_timeline';
 import { getSignificantEventStatusColor } from '../shared/status_display';
 import { SIGNIFICANT_EVENT_STATUS_LABELS } from '../shared/translations';
-import { formatTimestamp } from '../../../../../util/formatters';
-import { SigEventDetails } from '../../../significant_event_details/sig_event_details';
+import { formatTimestamp } from '../../../../util/formatters';
+import { SignificantEventDetails } from '../../../../components/significant_event_details/significant_event_details';
 import { EventInvestigations } from './event_investigations';
 import { hasRunningInvestigation } from '../shared/investigation_status';
 import { RUNNING_POLL_INTERVAL_MS } from '../../../constants';
@@ -259,7 +259,7 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
 
       <EuiFlyoutBody>
         <EuiFlexGroup direction="column" gutterSize="m">
-          <SigEventDetails event={event} />
+          <SignificantEventDetails event={event} />
 
           <EuiHorizontalRule margin="none" />
 

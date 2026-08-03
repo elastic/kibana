@@ -55901,7 +55901,7 @@
     "xpack.streams.streamsListView.shipperConfigFleetDescriptionStep3": "在集成配置中启用“使用 logs.ecs 数据流”设置。",
     "xpack.streams.streamsListView.shipperConfigFleetDescriptionStep4": "确保代理策略使用您在步骤 1 中配置的输出。",
     "xpack.streams.streamsListView.shipperConfigTitle": "配置您的采集器",
-    "xpack.streams.streamsListView.sigEventsDiscoveryButtonLabel": "重大事件",
+    "xpack.streams.streamsListView.sigEventsButtonLabel": "重大事件",
     "xpack.streams.streamsListView.wiredStreamsDescription": "将数据发送到 Elasticsearch，并以清晰的层级结构对其进行处理，包括继承设置和管理组件。如果禁用，某些功能将无法正常工作。",
     "xpack.streams.streamsListView.wiredStreamsEnabledToastTitle": "Wired Streams 已成功启用",
     "xpack.streams.streamsListView.wiredStreamsTitle": "Wired Streams",

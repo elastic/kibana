@@ -55895,7 +55895,7 @@
     "xpack.streams.streamsListView.shipperConfigFleetDescriptionStep3": "統合設定で［「logs.ecs」データストリームを使用］設定を有効にします。",
     "xpack.streams.streamsListView.shipperConfigFleetDescriptionStep4": "エージェントポリシーがステップ1で設定した出力を使用していることを確認してください。",
     "xpack.streams.streamsListView.shipperConfigTitle": "シッパーを構成",
-    "xpack.streams.streamsListView.sigEventsDiscoveryButtonLabel": "重要なイベント",
+    "xpack.streams.streamsListView.sigEventsButtonLabel": "重要なイベント",
     "xpack.streams.streamsListView.wiredStreamsDescription": "データをElasticsearchに送信し、設定と管理コンポーネントを継承した明確な階層で処理します。無効にすると、一部の機能が期待どおりに動作しなくなります。",
     "xpack.streams.streamsListView.wiredStreamsEnabledToastTitle": "有線ストリームが正常に有効化されました",
     "xpack.streams.streamsListView.wiredStreamsTitle": "有線ストリーム",

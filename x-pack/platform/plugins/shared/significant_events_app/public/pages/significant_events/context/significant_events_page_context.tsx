@@ -33,17 +33,17 @@ const isTerminalStatus = (status: string) =>
   status === SignificantEventsWorkflowStatus.Failed ||
   status === SignificantEventsWorkflowStatus.Canceled;
 
-interface SignificantEventsDiscoveryContextValue {
+interface SignificantEventsPageContextValue {
   isRunning: boolean;
   isCanceling: boolean;
   handleRun: () => void;
   handleCancel: () => void;
 }
 
-const SignificantEventsDiscoveryContext =
-  createContext<SignificantEventsDiscoveryContextValue | null>(null);
+const SignificantEventsPageContext =
+  createContext<SignificantEventsPageContextValue | null>(null);
 
-interface SignificantEventsDiscoveryProviderProps {
+interface SignificantEventsPageProviderProps {
   children: React.ReactNode;
   onComplete?: () => void;
 }
@@ -51,10 +51,10 @@ interface SignificantEventsDiscoveryProviderProps {
 // Hosts the discovery run/cancel state above the tabs (like KiGenerationProvider),
 // so the optimistic isRunning/isCanceling guards are shared across tabs and
 // survive tab switches — which unmount and remount the individual tabs.
-export function SignificantEventsDiscoveryProvider({
+export function SignificantEventsPageProvider({
   children,
   onComplete,
-}: SignificantEventsDiscoveryProviderProps) {
+}: SignificantEventsPageProviderProps) {
   const {
     core: {
       notifications: { toasts },
@@ -111,7 +111,7 @@ export function SignificantEventsDiscoveryProvider({
       setTrackedExecutionId(null);
       toasts.addError(getFormattedError(error), {
         title: i18n.translate(
-          'xpack.significantEventsApp.significantEventsDiscoveryWorkflow.triggerErrorTitle',
+          'xpack.significantEventsApp.discoveryWorkflow.triggerErrorTitle',
           {
             defaultMessage: 'Failed to start discovery pipeline',
           }
@@ -125,7 +125,7 @@ export function SignificantEventsDiscoveryProvider({
     onError: (error: Error) => {
       setIsCanceling(false);
       toasts.addError(getFormattedError(error), {
-        title: i18n.translate('xpack.significantEventsApp.significantEventsDiscoveryWorkflow.cancelErrorTitle', {
+        title: i18n.translate('xpack.significantEventsApp.discoveryWorkflow.cancelErrorTitle', {
           defaultMessage: 'Failed to cancel discovery pipeline',
         }),
       });
@@ -199,7 +199,7 @@ export function SignificantEventsDiscoveryProvider({
       const timer = setTimeout(invalidateAll, TERMINAL_STATUS_TOAST_DELAY_MS);
 
       toasts.addSuccess({
-        title: i18n.translate('xpack.significantEventsApp.significantEventsDiscoveryWorkflow.completedTitle', {
+        title: i18n.translate('xpack.significantEventsApp.discoveryWorkflow.completedTitle', {
           defaultMessage: 'Significant events discovery completed',
         }),
       });
@@ -209,14 +209,14 @@ export function SignificantEventsDiscoveryProvider({
 
     if (status === SignificantEventsWorkflowStatus.Failed) {
       toasts.addDanger({
-        title: i18n.translate('xpack.significantEventsApp.significantEventsDiscoveryWorkflow.failedTitle', {
+        title: i18n.translate('xpack.significantEventsApp.discoveryWorkflow.failedTitle', {
           defaultMessage: 'Significant events discovery failed',
         }),
         text: serverError,
       });
     } else if (wasUserCancel) {
       toasts.addSuccess({
-        title: i18n.translate('xpack.significantEventsApp.significantEventsDiscoveryWorkflow.canceledTitle', {
+        title: i18n.translate('xpack.significantEventsApp.discoveryWorkflow.canceledTitle', {
           defaultMessage: 'Significant events discovery canceled',
         }),
       });
@@ -239,23 +239,23 @@ export function SignificantEventsDiscoveryProvider({
     cancelMutate();
   }, [cancelMutate]);
 
-  const value = useMemo<SignificantEventsDiscoveryContextValue>(
+  const value = useMemo<SignificantEventsPageContextValue>(
     () => ({ isRunning, isCanceling, handleRun, handleCancel }),
     [isRunning, isCanceling, handleRun, handleCancel]
   );
 
   return (
-    <SignificantEventsDiscoveryContext.Provider value={value}>
+    <SignificantEventsPageContext.Provider value={value}>
       {children}
-    </SignificantEventsDiscoveryContext.Provider>
+    </SignificantEventsPageContext.Provider>
   );
 }
 
-export function useSignificantEventsDiscoveryContext(): SignificantEventsDiscoveryContextValue {
-  const context = useContext(SignificantEventsDiscoveryContext);
+export function useSignificantEventsPageContext(): SignificantEventsPageContextValue {
+  const context = useContext(SignificantEventsPageContext);
   if (!context) {
     throw new Error(
-      'useSignificantEventsDiscoveryContext must be used within a SignificantEventsDiscoveryProvider'
+      'useSignificantEventsPageContext must be used within a SignificantEventsPageProvider'
     );
   }
   return context;
