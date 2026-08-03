@@ -121,6 +121,54 @@ describe(`POST ${INTERNAL_ROUTES.SCHEDULE_PREFIX}`, () => {
     await server.stop();
   });
 
+  describe('access control', () => {
+    it('requires generateReport privilege when roles.enabled is false', () => {
+      jest.spyOn(reportingCore, 'getDeprecatedAllowedRoles').mockReturnValue(false);
+      const { router } = reportingCore.getPluginSetupDeps();
+      const postSpy = jest.spyOn(router, 'post');
+
+      registerScheduleRoutesInternal(reportingCore, mockLogger);
+
+      expect(postSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          security: {
+            authz: {
+              requiredPrivileges: ['generateReport'],
+            },
+          },
+          options: expect.objectContaining({
+            tags: ['access:generateReport'],
+          }),
+        }),
+        expect.any(Function)
+      );
+    });
+
+    it('opts out of generateReport privilege when roles.enabled is true', () => {
+      jest.spyOn(reportingCore, 'getDeprecatedAllowedRoles').mockReturnValue(['reporting_user']);
+      const { router } = reportingCore.getPluginSetupDeps();
+      const postSpy = jest.spyOn(router, 'post');
+
+      registerScheduleRoutesInternal(reportingCore, mockLogger);
+
+      expect(postSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          security: {
+            authz: {
+              enabled: false,
+              reason:
+                'This route is opted out from authorization because of the kibana access control flag',
+            },
+          },
+          options: expect.objectContaining({
+            tags: [],
+          }),
+        }),
+        expect.any(Function)
+      );
+    });
+  });
+
   it('returns 400 if there are no job params', async () => {
     registerScheduleRoutesInternal(reportingCore, mockLogger);
 
