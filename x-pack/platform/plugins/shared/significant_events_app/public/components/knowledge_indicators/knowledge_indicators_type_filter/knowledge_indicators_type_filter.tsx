@@ -51,19 +51,19 @@ export function KnowledgeIndicatorsTypeFilter({
       getLabel={getTypeLabel}
       labels={{
         button: i18n.translate(
-          'xpack.streams.significantEventsTable.knowledgeIndicatorTypeFilterLabel',
+          'xpack.significantEventsApp.significantEventsTable.knowledgeIndicatorTypeFilterLabel',
           { defaultMessage: 'Type' }
         ),
         groupLabel: i18n.translate(
-          'xpack.streams.significantEventsTable.knowledgeIndicatorTypeFilterGroupLabel',
+          'xpack.significantEventsApp.significantEventsTable.knowledgeIndicatorTypeFilterGroupLabel',
           { defaultMessage: 'Filter by field type' }
         ),
         popoverAriaLabel: i18n.translate(
-          'xpack.streams.significantEventsTable.knowledgeIndicatorTypeFilterPopoverLabel',
+          'xpack.significantEventsApp.significantEventsTable.knowledgeIndicatorTypeFilterPopoverLabel',
           { defaultMessage: 'Knowledge indicator type filter' }
         ),
         selectableAriaLabel: i18n.translate(
-          'xpack.streams.significantEventsTable.knowledgeIndicatorTypeFilterSelectableAriaLabel',
+          'xpack.significantEventsApp.significantEventsTable.knowledgeIndicatorTypeFilterSelectableAriaLabel',
           { defaultMessage: 'Filter knowledge indicators by type' }
         ),
       }}
@@ -74,13 +74,13 @@ export function KnowledgeIndicatorsTypeFilter({
 function getTypeLabel(type: string): string {
   if (type === MATCH_QUERY_TYPE) {
     return i18n.translate(
-      'xpack.streams.significantEventsTable.knowledgeIndicatorType.matchQuery',
+      'xpack.significantEventsApp.significantEventsTable.knowledgeIndicatorType.matchQuery',
       { defaultMessage: 'Match query' }
     );
   }
   if (type === STATS_QUERY_TYPE) {
     return i18n.translate(
-      'xpack.streams.significantEventsTable.knowledgeIndicatorType.statsQuery',
+      'xpack.significantEventsApp.significantEventsTable.knowledgeIndicatorType.statsQuery',
       { defaultMessage: 'Stats query' }
     );
   }

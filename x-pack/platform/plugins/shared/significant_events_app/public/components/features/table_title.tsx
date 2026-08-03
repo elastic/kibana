@@ -25,7 +25,7 @@ export const TableTitle = ({
   return (
     <EuiText size="xs">
       <FormattedMessage
-        id="xpack.streams.tableTitle.showing"
+        id="xpack.significantEventsApp.tableTitle.showing"
         defaultMessage="Showing {count} of {total} {label}"
         values={{
           count: (

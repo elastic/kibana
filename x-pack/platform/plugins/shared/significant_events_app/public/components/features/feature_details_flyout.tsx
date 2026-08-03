@@ -219,36 +219,36 @@ export function FeatureDetailsFlyout({
   );
 }
 
-const CONFIDENCE_LABEL = i18n.translate('xpack.streams.featureDetailsFlyout.confidenceLabel', {
+const CONFIDENCE_LABEL = i18n.translate('xpack.significantEventsApp.featureDetailsFlyout.confidenceLabel', {
   defaultMessage: 'Confidence',
 });
 
-const TYPE_LABEL = i18n.translate('xpack.streams.featureDetailsFlyout.typeLabel', {
+const TYPE_LABEL = i18n.translate('xpack.significantEventsApp.featureDetailsFlyout.typeLabel', {
   defaultMessage: 'Type',
 });
 
-const STREAM_LABEL = i18n.translate('xpack.streams.featureDetailsFlyout.streamLabel', {
+const STREAM_LABEL = i18n.translate('xpack.significantEventsApp.featureDetailsFlyout.streamLabel', {
   defaultMessage: 'Stream',
 });
 
 const ACTIONS_BUTTON_ARIA_LABEL = i18n.translate(
-  'xpack.streams.featureDetailsFlyout.actionsButtonAriaLabel',
+  'xpack.significantEventsApp.featureDetailsFlyout.actionsButtonAriaLabel',
   { defaultMessage: 'Actions' }
 );
 
-const RESTORE_ACTION_LABEL = i18n.translate('xpack.streams.featureDetailsFlyout.restoreAction', {
+const RESTORE_ACTION_LABEL = i18n.translate('xpack.significantEventsApp.featureDetailsFlyout.restoreAction', {
   defaultMessage: 'Restore',
 });
 
-const EXCLUDE_ACTION_LABEL = i18n.translate('xpack.streams.featureDetailsFlyout.excludeAction', {
+const EXCLUDE_ACTION_LABEL = i18n.translate('xpack.significantEventsApp.featureDetailsFlyout.excludeAction', {
   defaultMessage: 'Exclude',
 });
 
-const DELETE_ACTION_LABEL = i18n.translate('xpack.streams.featureDetailsFlyout.deleteAction', {
+const DELETE_ACTION_LABEL = i18n.translate('xpack.significantEventsApp.featureDetailsFlyout.deleteAction', {
   defaultMessage: 'Delete',
 });
 
 const CLOSE_BUTTON_ARIA_LABEL = i18n.translate(
-  'xpack.streams.featureDetailsFlyout.closeButtonAriaLabel',
+  'xpack.significantEventsApp.featureDetailsFlyout.closeButtonAriaLabel',
   { defaultMessage: 'Close' }
 );

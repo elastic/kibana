@@ -28,8 +28,10 @@ import {
   KIS_ONBOARDING_IN_PROGRESS_STATUSES,
   type SignificantEventsWorkflowStatusResult,
 } from '@kbn/significant-events-schema';
+import { STREAMS_APP_LOCATOR_ID } from '@kbn/deeplinks-observability';
+import type { StreamsAppLocationParams } from '@kbn/streams-plugin/common';
 import React, { useState } from 'react';
-import { useStreamsAppRouter } from '../../../../../hooks/use_streams_app_router';
+import { useKibana } from '../../../../hooks/use_kibana';
 import { useStreamsTour } from '../../../../streams_tour';
 import { QueryStreamBadge, TechnicalPreviewBadge } from '../../../../stream_badges';
 import { KnowledgeIndicatorsColumn } from './knowledge_indicators_column';
@@ -81,7 +83,16 @@ export function StreamsTreeTable({
   onOnboardStreamActionClick: (streamName: string) => void;
   onStopOnboardingActionClick: (streamName: string) => void;
 }) {
-  const router = useStreamsAppRouter();
+  const {
+    dependencies: {
+      start: {
+        share: {
+          url: { locators },
+        },
+      },
+    },
+  } = useKibana();
+  const streamsLocator = locators.get<StreamsAppLocationParams>(STREAMS_APP_LOCATOR_ID);
   const { euiTheme } = useEuiTheme();
   const { getStepPropsByStepId } = useStreamsTour();
 
@@ -211,10 +222,10 @@ export function StreamsTreeTable({
     <EuiToolTip
       content={
         allExpanded
-          ? i18n.translate('xpack.streams.streamsTreeTable.collapseAll', {
+          ? i18n.translate('xpack.significantEventsApp.streamsTreeTable.collapseAll', {
               defaultMessage: 'Collapse all',
             })
-          : i18n.translate('xpack.streams.streamsTreeTable.expandAll', {
+          : i18n.translate('xpack.significantEventsApp.streamsTreeTable.expandAll', {
               defaultMessage: 'Expand all',
             })
       }
@@ -231,10 +242,10 @@ export function StreamsTreeTable({
         data-test-subj={`streams${allExpanded ? 'Collapse' : 'Expand'}AllButton`}
         aria-label={
           allExpanded
-            ? i18n.translate('xpack.streams.streamsTreeTable.collapseAll', {
+            ? i18n.translate('xpack.significantEventsApp.streamsTreeTable.collapseAll', {
                 defaultMessage: 'Collapse all',
               })
-            : i18n.translate('xpack.streams.streamsTreeTable.expandAll', {
+            : i18n.translate('xpack.significantEventsApp.streamsTreeTable.expandAll', {
                 defaultMessage: 'Expand all',
               })
         }
@@ -313,8 +324,8 @@ export function StreamsTreeTable({
                           }`}
                           aria-label={i18n.translate(
                             isCollapsed
-                              ? 'xpack.streams.streamsTreeTable.collapsedNodeAriaLabel'
-                              : 'xpack.streams.streamsTreeTable.expandedNodeAriaLabel',
+                              ? 'xpack.significantEventsApp.streamsTreeTable.collapsedNodeAriaLabel'
+                              : 'xpack.significantEventsApp.streamsTreeTable.expandedNodeAriaLabel',
                             {
                               defaultMessage: isCollapsed
                                 ? 'Collapsed node with {childCount} children'
@@ -350,8 +361,9 @@ export function StreamsTreeTable({
                     <EuiFlexItem grow={false}>
                       <EuiLink
                         data-test-subj={`streamsNameLink-${item.stream.name}`}
-                        href={router.link('/{key}/management/{tab}', {
-                          path: { key: item.stream.name, tab: 'overview' },
+                        href={streamsLocator?.getRedirectUrl({
+                          name: item.stream.name,
+                          managementTab: 'overview',
                         })}
                       >
                         <EuiHighlight search={searchQuery.text}>{item.stream.name}</EuiHighlight>

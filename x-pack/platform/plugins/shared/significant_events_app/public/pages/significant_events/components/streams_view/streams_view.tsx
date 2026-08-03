@@ -164,7 +164,7 @@ export function StreamsView() {
       <EuiFlexItem grow={false}>
         <EuiText size="s">
           {i18n.translate(
-            'xpack.streams.significantEventsDiscovery.streamsTree.streamsCountLabel',
+            'xpack.significantEventsApp.streamsTree.streamsCountLabel',
             {
               defaultMessage: '{count} streams',
               values: { count: filteredStreams?.length ?? 0 },

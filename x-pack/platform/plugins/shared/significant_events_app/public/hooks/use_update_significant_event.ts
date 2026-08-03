@@ -23,14 +23,14 @@ interface UpdateSignificantEventResult {
 }
 
 const UPDATE_SUCCESS_TOAST_TITLE = i18n.translate(
-  'xpack.streams.sigEventsTab.updateEvent.successToastTitle',
+  'xpack.significantEventsApp.sigEventsTab.updateEvent.successToastTitle',
   {
     defaultMessage: 'Significant event updated',
   }
 );
 
 const UPDATE_ERROR_TOAST_TITLE = i18n.translate(
-  'xpack.streams.sigEventsTab.updateEvent.errorToastTitle',
+  'xpack.significantEventsApp.sigEventsTab.updateEvent.errorToastTitle',
   {
     defaultMessage: 'Failed to update significant event',
   }

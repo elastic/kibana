@@ -87,14 +87,14 @@ export function useStreamKnowledgeIndicatorsBulkDelete({
 }
 
 const BULK_DELETE_ERROR_TOAST_TITLE = i18n.translate(
-  'xpack.streams.significantEventsTable.bulkDeleteErrorToastTitle',
+  'xpack.significantEventsApp.significantEventsTable.bulkDeleteErrorToastTitle',
   {
     defaultMessage: 'Failed to delete selected knowledge indicators',
   }
 );
 
 const BULK_DELETE_SUCCESS_TOAST_TITLE = i18n.translate(
-  'xpack.streams.significantEventsTable.bulkDeleteSuccessToastTitle',
+  'xpack.significantEventsApp.significantEventsTable.bulkDeleteSuccessToastTitle',
   {
     defaultMessage: 'Knowledge indicators deleted',
   }

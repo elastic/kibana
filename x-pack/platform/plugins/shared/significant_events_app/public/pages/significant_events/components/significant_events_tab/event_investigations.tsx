@@ -29,28 +29,28 @@ import { useKibana } from '../../../../../hooks/use_kibana';
 import { isInvestigationRunning } from '../shared/investigation_status';
 
 const SECTION_TITLE = i18n.translate(
-  'xpack.streams.sigEventsTab.flyout.investigationsSectionTitle',
+  'xpack.significantEventsApp.sigEventsTab.flyout.investigationsSectionTitle',
   {
     defaultMessage: 'Investigations',
   }
 );
 
 const NO_INVESTIGATIONS_TEXT = i18n.translate(
-  'xpack.streams.sigEventsTab.flyout.noInvestigations',
+  'xpack.significantEventsApp.sigEventsTab.flyout.noInvestigations',
   {
     defaultMessage: 'No investigations yet.',
   }
 );
 
 const OPEN_CONVERSATION_LABEL = i18n.translate(
-  'xpack.streams.sigEventsTab.flyout.openConversationAriaLabel',
+  'xpack.significantEventsApp.sigEventsTab.flyout.openConversationAriaLabel',
   {
     defaultMessage: 'Open investigation conversation',
   }
 );
 
 const getRunningDurationText = (duration: string): string =>
-  i18n.translate('xpack.streams.sigEventsTab.flyout.investigationRunningDuration', {
+  i18n.translate('xpack.significantEventsApp.sigEventsTab.flyout.investigationRunningDuration', {
     defaultMessage: '{duration} (running)',
     values: { duration },
   });

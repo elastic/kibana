@@ -120,53 +120,53 @@ export function KnowledgeIndicatorQueryDetailsContent({
 }
 
 const GENERAL_INFORMATION_LABEL = i18n.translate(
-  'xpack.streams.knowledgeIndicatorDetails.generalInformationLabel',
+  'xpack.significantEventsApp.knowledgeIndicatorDetails.generalInformationLabel',
   {
     defaultMessage: 'General information',
   }
 );
 
-const DETAILS_TYPE_LABEL = i18n.translate('xpack.streams.knowledgeIndicatorDetails.typeLabel', {
+const DETAILS_TYPE_LABEL = i18n.translate('xpack.significantEventsApp.knowledgeIndicatorDetails.typeLabel', {
   defaultMessage: 'Type',
 });
 
-const DETAILS_QUERY_LABEL = i18n.translate('xpack.streams.knowledgeIndicatorDetails.queryLabel', {
+const DETAILS_QUERY_LABEL = i18n.translate('xpack.significantEventsApp.knowledgeIndicatorDetails.queryLabel', {
   defaultMessage: 'Query',
 });
 
 const DETAILS_SEVERITY_LABEL = i18n.translate(
-  'xpack.streams.knowledgeIndicatorDetails.severityLabel',
+  'xpack.significantEventsApp.knowledgeIndicatorDetails.severityLabel',
   {
     defaultMessage: 'Severity',
   }
 );
 
 const DETAILS_DESCRIPTION_LABEL = i18n.translate(
-  'xpack.streams.knowledgeIndicatorDetails.descriptionLabel',
+  'xpack.significantEventsApp.knowledgeIndicatorDetails.descriptionLabel',
   {
     defaultMessage: 'Description',
   }
 );
 
 const OCCURRENCES_LABEL = i18n.translate(
-  'xpack.streams.knowledgeIndicatorDetails.occurrencesLabel',
+  'xpack.significantEventsApp.knowledgeIndicatorDetails.occurrencesLabel',
   {
     defaultMessage: 'Occurrences',
   }
 );
 
 const QUERY_BADGE_LABEL = i18n.translate(
-  'xpack.streams.knowledgeIndicatorDetails.queryBadgeLabel',
+  'xpack.significantEventsApp.knowledgeIndicatorDetails.queryBadgeLabel',
   {
     defaultMessage: 'Query',
   }
 );
 
-const EMPTY_VALUE = i18n.translate('xpack.streams.knowledgeIndicatorDetails.emptyValue', {
+const EMPTY_VALUE = i18n.translate('xpack.significantEventsApp.knowledgeIndicatorDetails.emptyValue', {
   defaultMessage: '-',
 });
 
 const SOURCE_FEATURES_LABEL = i18n.translate(
-  'xpack.streams.knowledgeIndicatorDetails.sourceFeaturesLabel',
+  'xpack.significantEventsApp.knowledgeIndicatorDetails.sourceFeaturesLabel',
   { defaultMessage: 'Source KI features' }
 );

@@ -62,14 +62,14 @@ export function CreateEntryFlyout({
       onClose={onClose}
       size="m"
       data-test-subj="streamsMemoryCreateFlyout"
-      aria-label={i18n.translate('xpack.streams.memory.createFlyoutAriaLabel', {
+      aria-label={i18n.translate('xpack.significantEventsApp.memory.createFlyoutAriaLabel', {
         defaultMessage: 'Create memory entry',
       })}
     >
       <EuiFlyoutHeader hasBorder={false}>
         <EuiTitle size="m">
           <h2>
-            {i18n.translate('xpack.streams.memory.createFlyoutTitle', {
+            {i18n.translate('xpack.significantEventsApp.memory.createFlyoutTitle', {
               defaultMessage: 'New memory entry',
             })}
           </h2>
@@ -103,14 +103,14 @@ export function CreateEntryFlyout({
               isDisabled={!title.trim()}
               data-test-subj="streamsMemoryCreateSaveButton"
             >
-              {i18n.translate('xpack.streams.memory.createSaveButton', {
+              {i18n.translate('xpack.significantEventsApp.memory.createSaveButton', {
                 defaultMessage: 'Create',
               })}
             </EuiButton>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty onClick={onClose}>
-              {i18n.translate('xpack.streams.memory.cancelButton', { defaultMessage: 'Cancel' })}
+              {i18n.translate('xpack.significantEventsApp.memory.cancelButton', { defaultMessage: 'Cancel' })}
             </EuiButtonEmpty>
           </EuiFlexItem>
         </EuiFlexGroup>

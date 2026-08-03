@@ -46,23 +46,23 @@ function DeleteEntryModal({
 }) {
   return (
     <EuiConfirmModal
-      aria-label={i18n.translate('xpack.streams.memory.deleteConfirmAriaLabel', {
+      aria-label={i18n.translate('xpack.significantEventsApp.memory.deleteConfirmAriaLabel', {
         defaultMessage: 'Confirm delete memory entry',
       })}
-      title={i18n.translate('xpack.streams.memory.deleteConfirmTitle', {
+      title={i18n.translate('xpack.significantEventsApp.memory.deleteConfirmTitle', {
         defaultMessage: 'Delete memory entry',
       })}
       onCancel={onCancel}
       onConfirm={onConfirm}
-      cancelButtonText={i18n.translate('xpack.streams.memory.deleteConfirmCancel', {
+      cancelButtonText={i18n.translate('xpack.significantEventsApp.memory.deleteConfirmCancel', {
         defaultMessage: 'Cancel',
       })}
-      confirmButtonText={i18n.translate('xpack.streams.memory.deleteConfirmButton', {
+      confirmButtonText={i18n.translate('xpack.significantEventsApp.memory.deleteConfirmButton', {
         defaultMessage: 'Delete',
       })}
       buttonColor="danger"
     >
-      {i18n.translate('xpack.streams.memory.deleteConfirmBody', {
+      {i18n.translate('xpack.significantEventsApp.memory.deleteConfirmBody', {
         defaultMessage: 'Are you sure you want to delete "{title}"? This action cannot be undone.',
         values: { title },
       })}
@@ -79,23 +79,23 @@ function DiscardChangesModal({
 }) {
   return (
     <EuiConfirmModal
-      aria-label={i18n.translate('xpack.streams.memory.discardConfirmAriaLabel', {
+      aria-label={i18n.translate('xpack.significantEventsApp.memory.discardConfirmAriaLabel', {
         defaultMessage: 'Confirm discard changes',
       })}
-      title={i18n.translate('xpack.streams.memory.discardConfirmTitle', {
+      title={i18n.translate('xpack.significantEventsApp.memory.discardConfirmTitle', {
         defaultMessage: 'Discard unsaved changes?',
       })}
       onCancel={onCancel}
       onConfirm={onConfirm}
-      cancelButtonText={i18n.translate('xpack.streams.memory.discardConfirmCancel', {
+      cancelButtonText={i18n.translate('xpack.significantEventsApp.memory.discardConfirmCancel', {
         defaultMessage: 'Keep editing',
       })}
-      confirmButtonText={i18n.translate('xpack.streams.memory.discardConfirmButton', {
+      confirmButtonText={i18n.translate('xpack.significantEventsApp.memory.discardConfirmButton', {
         defaultMessage: 'Discard',
       })}
       buttonColor="danger"
     >
-      {i18n.translate('xpack.streams.memory.discardConfirmBody', {
+      {i18n.translate('xpack.significantEventsApp.memory.discardConfirmBody', {
         defaultMessage: 'You have unsaved changes. Are you sure you want to discard them?',
       })}
     </EuiConfirmModal>
@@ -191,7 +191,7 @@ export function EntryFlyout({ entryId, onClose }: { entryId: string; onClose: ()
         onClose={handleClose}
         size="m"
         data-test-subj="streamsMemoryEntryFlyout"
-        aria-label={i18n.translate('xpack.streams.memory.entryFlyoutAriaLabel', {
+        aria-label={i18n.translate('xpack.significantEventsApp.memory.entryFlyoutAriaLabel', {
           defaultMessage: 'Memory entry detail',
         })}
       >
@@ -210,7 +210,7 @@ export function EntryFlyout({ entryId, onClose }: { entryId: string; onClose: ()
               )}
               <EuiSpacer size="xs" />
               <EuiText size="xs" color="subdued">
-                {i18n.translate('xpack.streams.memory.entryMeta', {
+                {i18n.translate('xpack.significantEventsApp.memory.entryMeta', {
                   defaultMessage:
                     'v{version} · Created by {createdBy} · Updated {updatedAt} by {updatedBy}',
                   values: {
@@ -224,7 +224,7 @@ export function EntryFlyout({ entryId, onClose }: { entryId: string; onClose: ()
             </>
           ) : (
             <EuiText>
-              {i18n.translate('xpack.streams.memory.entryNotFound', {
+              {i18n.translate('xpack.significantEventsApp.memory.entryNotFound', {
                 defaultMessage: 'Memory entry not found.',
               })}
             </EuiText>
@@ -232,14 +232,14 @@ export function EntryFlyout({ entryId, onClose }: { entryId: string; onClose: ()
           <EuiSpacer size="s" />
           <EuiTabs size="s">
             <EuiTab isSelected={activeTab === 'content'} onClick={() => setActiveTab('content')}>
-              {i18n.translate('xpack.streams.memory.contentTab', { defaultMessage: 'Content' })}
+              {i18n.translate('xpack.significantEventsApp.memory.contentTab', { defaultMessage: 'Content' })}
             </EuiTab>
             <EuiTab
               isSelected={activeTab === 'history'}
               onClick={() => setActiveTab('history')}
               disabled={isEditing}
             >
-              {i18n.translate('xpack.streams.memory.historyTab', { defaultMessage: 'History' })}
+              {i18n.translate('xpack.significantEventsApp.memory.historyTab', { defaultMessage: 'History' })}
             </EuiTab>
           </EuiTabs>
         </EuiFlyoutHeader>
@@ -298,14 +298,14 @@ export function EntryFlyout({ entryId, onClose }: { entryId: string; onClose: ()
                     isDisabled={!editTitle.trim()}
                     data-test-subj="streamsMemorySaveButton"
                   >
-                    {i18n.translate('xpack.streams.memory.saveButton', {
+                    {i18n.translate('xpack.significantEventsApp.memory.saveButton', {
                       defaultMessage: 'Save',
                     })}
                   </EuiButton>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty onClick={() => setIsEditing(false)}>
-                    {i18n.translate('xpack.streams.memory.cancelButton', {
+                    {i18n.translate('xpack.significantEventsApp.memory.cancelButton', {
                       defaultMessage: 'Cancel',
                     })}
                   </EuiButtonEmpty>
@@ -321,7 +321,7 @@ export function EntryFlyout({ entryId, onClose }: { entryId: string; onClose: ()
                     isDisabled={!entry}
                     data-test-subj="streamsMemoryEditButton"
                   >
-                    {i18n.translate('xpack.streams.memory.editButton', {
+                    {i18n.translate('xpack.significantEventsApp.memory.editButton', {
                       defaultMessage: 'Edit',
                     })}
                   </EuiButton>
@@ -333,7 +333,7 @@ export function EntryFlyout({ entryId, onClose }: { entryId: string; onClose: ()
                     size="s"
                     isDisabled={!entry}
                   >
-                    {i18n.translate('xpack.streams.memory.deleteButton', {
+                    {i18n.translate('xpack.significantEventsApp.memory.deleteButton', {
                       defaultMessage: 'Delete',
                     })}
                   </EuiButtonEmpty>

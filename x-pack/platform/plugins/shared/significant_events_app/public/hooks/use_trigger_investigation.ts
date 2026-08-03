@@ -15,14 +15,14 @@ interface TriggerInvestigationResult {
 }
 
 const TRIGGER_SUCCESS_TOAST_TITLE = i18n.translate(
-  'xpack.streams.sigEventsTab.triggerInvestigation.successToastTitle',
+  'xpack.significantEventsApp.sigEventsTab.triggerInvestigation.successToastTitle',
   {
     defaultMessage: 'Investigation started',
   }
 );
 
 const TRIGGER_SUCCESS_TOAST_TEXT = i18n.translate(
-  'xpack.streams.sigEventsTab.triggerInvestigation.successToastText',
+  'xpack.significantEventsApp.sigEventsTab.triggerInvestigation.successToastText',
   {
     defaultMessage:
       'The investigation workflow has been triggered. Results will appear once it completes.',
@@ -30,7 +30,7 @@ const TRIGGER_SUCCESS_TOAST_TEXT = i18n.translate(
 );
 
 const TRIGGER_ERROR_TOAST_TITLE = i18n.translate(
-  'xpack.streams.sigEventsTab.triggerInvestigation.errorToastTitle',
+  'xpack.significantEventsApp.sigEventsTab.triggerInvestigation.errorToastTitle',
   {
     defaultMessage: 'Failed to start investigation',
   }

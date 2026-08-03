@@ -48,7 +48,7 @@ export function ChangeFlyout({
       onClose={onClose}
       size="m"
       data-test-subj="streamsMemoryChangeFlyout"
-      aria-label={i18n.translate('xpack.streams.memory.changeFlyoutAriaLabel', {
+      aria-label={i18n.translate('xpack.significantEventsApp.memory.changeFlyoutAriaLabel', {
         defaultMessage: 'Memory change detail',
       })}
     >
@@ -70,7 +70,7 @@ export function ChangeFlyout({
         </EuiFlexGroup>
         <EuiSpacer size="xs" />
         <EuiText size="xs" color="subdued">
-          {i18n.translate('xpack.streams.memory.changeMeta', {
+          {i18n.translate('xpack.significantEventsApp.memory.changeMeta', {
             defaultMessage: 'v{version} · {date} · {author}',
             values: {
               version: change.version,
@@ -133,7 +133,7 @@ export function ChangeFlyout({
             }}
             data-test-subj="streamsMemoryChangeFlyoutViewCurrentPage"
           >
-            {i18n.translate('xpack.streams.memory.viewCurrentPage', {
+            {i18n.translate('xpack.significantEventsApp.memory.viewCurrentPage', {
               defaultMessage: 'View current page',
             })}
           </EuiButtonEmpty>

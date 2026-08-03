@@ -118,14 +118,14 @@ export function KnowledgeIndicatorsPanel({ definition }: KnowledgeIndicatorsPane
   });
 
   const featuresLabel = i18n.translate(
-    'xpack.streams.streamOverview.knowledgeIndicatorsPanel.featuresLabel',
+    'xpack.significantEventsApp.knowledgeIndicatorsPanel.featuresLabel',
     {
       defaultMessage: '{count, plural, one {feature} other {features}}',
       values: { count: featuresCount },
     }
   );
   const queriesLabel = i18n.translate(
-    'xpack.streams.streamOverview.knowledgeIndicatorsPanel.queriesLabel',
+    'xpack.significantEventsApp.knowledgeIndicatorsPanel.queriesLabel',
     {
       defaultMessage: '{count, plural, one {query} other {queries}}',
       values: { count: queriesCount ?? 0 },
@@ -135,13 +135,13 @@ export function KnowledgeIndicatorsPanel({ definition }: KnowledgeIndicatorsPane
   const ariaLabel =
     featuresIsLoading || queriesIsLoading
       ? i18n.translate(
-          'xpack.streams.streamOverview.knowledgeIndicatorsPanel.linkAriaLabelLoading',
+          'xpack.significantEventsApp.knowledgeIndicatorsPanel.linkAriaLabelLoading',
           {
             defaultMessage: 'View knowledge indicators for {streamName}: loading counts',
             values: { streamName },
           }
         )
-      : i18n.translate('xpack.streams.streamOverview.knowledgeIndicatorsPanel.linkAriaLabel', {
+      : i18n.translate('xpack.significantEventsApp.knowledgeIndicatorsPanel.linkAriaLabel', {
           defaultMessage:
             'View knowledge indicators for {streamName}: {featuresCount, plural, one {# feature} other {# features}}, {queriesCount, plural, one {# query} other {# queries}}',
           values: { streamName, featuresCount, queriesCount: queriesCount ?? 0 },
@@ -164,7 +164,7 @@ export function KnowledgeIndicatorsPanel({ definition }: KnowledgeIndicatorsPane
       <EuiPanel hasBorder hasShadow={false} paddingSize="m">
         <EuiTitle size="xs">
           <h2>
-            {i18n.translate('xpack.streams.streamOverview.knowledgeIndicatorsPanel.title', {
+            {i18n.translate('xpack.significantEventsApp.knowledgeIndicatorsPanel.title', {
               defaultMessage: 'Knowledge indicators',
             })}
           </h2>

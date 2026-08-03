@@ -125,8 +125,8 @@ describe('NightshiftApp', () => {
       services: {
         agentBuilder: { openChat },
         application: {
-          getUrlForApp: (_appId: string, options?: { path?: string }) =>
-            options?.path ? `/app/streams${options.path}` : '/events',
+          getUrlForApp: (appId: string, options?: { path?: string; deepLinkId?: string }) =>
+            options?.path ? `/app/${appId}${options.path}` : `/app/${appId}`,
         },
       },
     });
@@ -392,7 +392,7 @@ describe('NightshiftApp', () => {
     });
     expect(logsLink).toHaveAttribute(
       'href',
-      '/app/streams/_discovery/significant_events?rangeFrom=now-24h&rangeTo=now'
+      '/app/significantEvents/significant_events?rangeFrom=now-24h&rangeTo=now'
     );
     expect(logsLink).toHaveAttribute('data-ebt-action', 'viewSignificantEvents');
     expect(logsLink).toHaveAttribute('data-ebt-element', 'nightshiftPageHeader');
@@ -434,7 +434,7 @@ describe('NightshiftApp', () => {
     setEvents({ events: [mockEvent()] });
     renderWithIntl();
     const showAllEventsLink = screen.getByRole('link', { name: 'Show all events' });
-    expect(showAllEventsLink).toHaveAttribute('href', '/events');
+    expect(showAllEventsLink).toHaveAttribute('href', '/app/significantEvents');
     expect(showAllEventsLink).toHaveAttribute('data-ebt-action', 'viewAllSignificantEvents');
     expect(showAllEventsLink).toHaveAttribute('data-ebt-element', 'nightshiftPageHeader');
   });

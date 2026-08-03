@@ -62,7 +62,7 @@ export function useRelayAppBindings(enabled: boolean, cursor?: string): UseRelay
     onError: (error) => {
       notifications.toasts.addError(getFormattedError(error), {
         title: i18n.translate(
-          'xpack.streams.significantEventsDiscovery.settings.apps.listBindingsError',
+          'xpack.significantEventsApp.settings.apps.listBindingsError',
           { defaultMessage: 'Failed to load connected Slack channels' }
         ),
       });
@@ -98,7 +98,7 @@ export function useBindChannel(): UseBindChannel {
     onError: (error) => {
       notifications.toasts.addError(getFormattedError(error), {
         title: i18n.translate(
-          'xpack.streams.significantEventsDiscovery.settings.apps.bindChannelError',
+          'xpack.significantEventsApp.settings.apps.bindChannelError',
           { defaultMessage: 'Failed to bind the Slack channel' }
         ),
       });
@@ -130,7 +130,7 @@ export function useUnbindChannel(): UseUnbindChannel {
     onError: (error) => {
       notifications.toasts.addError(getFormattedError(error), {
         title: i18n.translate(
-          'xpack.streams.significantEventsDiscovery.settings.apps.unbindChannelError',
+          'xpack.significantEventsApp.settings.apps.unbindChannelError',
           { defaultMessage: 'Failed to unbind the Slack channel' }
         ),
       });

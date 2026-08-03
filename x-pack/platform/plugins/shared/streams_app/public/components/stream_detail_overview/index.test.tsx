@@ -17,6 +17,7 @@ import {
 const mockUseStreamDetail = jest.fn();
 const mockUseStreamsPrivileges = jest.fn();
 const mockUseSignificantEventsAvailability = jest.fn();
+const mockUseSignificantEventsApp = jest.fn();
 
 jest.mock('../../hooks/use_stream_detail', () => ({
   useStreamDetail: () => mockUseStreamDetail(),
@@ -28,6 +29,10 @@ jest.mock('../../hooks/use_streams_privileges', () => ({
 
 jest.mock('../../hooks/significant_events/use_significant_events_availability', () => ({
   useSignificantEventsAvailability: () => mockUseSignificantEventsAvailability(),
+}));
+
+jest.mock('../../hooks/use_significant_events_app', () => ({
+  useSignificantEventsApp: () => mockUseSignificantEventsApp(),
 }));
 
 jest.mock('./data_quality_card', () => ({
@@ -52,6 +57,10 @@ jest.mock('./knowledge_indicators_panel', () => ({
   ),
 }));
 
+const MockKnowledgeIndicatorsPanel = () => (
+  <div data-test-subj="mockKnowledgeIndicatorsPanel">Knowledge indicators</div>
+);
+
 const renderWithI18n = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I18nProvider>);
 
 describe('StreamOverview', () => {
@@ -67,6 +76,11 @@ describe('StreamOverview', () => {
     mockUseSignificantEventsAvailability.mockReturnValue({
       availability: { available: false },
       isLoading: false,
+    });
+    mockUseSignificantEventsApp.mockReturnValue({
+      isAvailable: false,
+      isLoading: false,
+      significantEventsApp: undefined,
     });
   });
 
@@ -136,9 +150,9 @@ describe('StreamOverview', () => {
       },
       isLoading: true,
     });
-    mockUseSignificantEventsAvailability.mockReturnValue({
-      availability: { available: true },
-      isLoading: false,
+    mockUseSignificantEventsApp.mockReturnValue({
+      isAvailable: true,
+      significantEventsApp: { KnowledgeIndicatorsPanel: MockKnowledgeIndicatorsPanel },
     });
     mockUseStreamDetail.mockReturnValue({
       definition: createMockWiredStreamDefinition(),
@@ -183,6 +197,21 @@ describe('StreamOverview', () => {
     mockUseSignificantEventsAvailability.mockReturnValue({
       availability: { available: false, reason: 'feature_flag' },
       isLoading: false,
+    });
+    mockUseStreamDetail.mockReturnValue({
+      definition: createMockWiredStreamDefinition(),
+      refresh: jest.fn(),
+    });
+
+    renderWithI18n(<StreamOverview />);
+
+    expect(screen.queryByTestId('mockKnowledgeIndicatorsPanel')).not.toBeInTheDocument();
+  });
+
+  it('does not render knowledge indicators panel when plugin is not installed', () => {
+    mockUseSignificantEventsApp.mockReturnValue({
+      isAvailable: true,
+      significantEventsApp: undefined,
     });
     mockUseStreamDetail.mockReturnValue({
       definition: createMockWiredStreamDefinition(),

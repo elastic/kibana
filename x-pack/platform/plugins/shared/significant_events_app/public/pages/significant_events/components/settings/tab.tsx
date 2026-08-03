@@ -223,7 +223,7 @@ export function SettingsTab() {
       }
     } catch (err) {
       core.notifications.toasts.addDanger({
-        title: i18n.translate('xpack.streams.significantEventsDiscovery.settings.saveErrorTitle', {
+        title: i18n.translate('xpack.significantEventsApp.settings.saveErrorTitle', {
           defaultMessage: 'Failed to save settings',
         }),
         text: getFormattedError(err).message,
@@ -276,7 +276,7 @@ export function SettingsTab() {
         <>
           <EuiCallOut
             title={i18n.translate(
-              'xpack.streams.significantEventsDiscovery.settings.noPermissionCalloutTitle',
+              'xpack.significantEventsApp.settings.noPermissionCalloutTitle',
               { defaultMessage: 'You need additional privileges to edit these settings' }
             )}
             color="warning"
@@ -286,7 +286,7 @@ export function SettingsTab() {
           >
             <p>
               {i18n.translate(
-                'xpack.streams.significantEventsDiscovery.settings.noPermissionCalloutDescription',
+                'xpack.significantEventsApp.settings.noPermissionCalloutDescription',
                 {
                   defaultMessage:
                     'Editing these settings requires both the Streams "Manage" privilege and the Advanced Settings "All" privilege. Contact your administrator if you need to make changes.',
@@ -305,7 +305,7 @@ export function SettingsTab() {
         <EuiPanel hasShadow={false} color="subdued">
           <EuiText size="s">
             <h3>
-              {i18n.translate('xpack.streams.significantEventsDiscovery.settings.llmSectionTitle', {
+              {i18n.translate('xpack.significantEventsApp.settings.llmSectionTitle', {
                 defaultMessage: 'LLM selection',
               })}
             </h3>
@@ -315,7 +315,7 @@ export function SettingsTab() {
           <EuiText size="s">
             <p>
               {i18n.translate(
-                'xpack.streams.significantEventsDiscovery.settings.modelSettingsDescription',
+                'xpack.significantEventsApp.settings.modelSettingsDescription',
                 {
                   defaultMessage:
                     'LLM models for Significant Events features are managed centrally in the Model Settings page under Stack Management.',
@@ -328,7 +328,7 @@ export function SettingsTab() {
               <EuiSpacer size="s" />
               <EuiLink href={modelSettingsUrl} external>
                 {i18n.translate(
-                  'xpack.streams.significantEventsDiscovery.settings.modelSettingsLink',
+                  'xpack.significantEventsApp.settings.modelSettingsLink',
                   { defaultMessage: 'Go to Model Settings' }
                 )}
               </EuiLink>
@@ -344,7 +344,7 @@ export function SettingsTab() {
           <EuiText size="s">
             <h3>
               {i18n.translate(
-                'xpack.streams.significantEventsDiscovery.settings.scheduledDiscoveryTitle',
+                'xpack.significantEventsApp.settings.scheduledDiscoveryTitle',
                 { defaultMessage: 'Scheduled discovery' }
               )}
             </h3>
@@ -358,7 +358,7 @@ export function SettingsTab() {
                   <EuiText size="m">
                     <h4>
                       {i18n.translate(
-                        'xpack.streams.significantEventsDiscovery.settings.scheduledDiscoveryLabel',
+                        'xpack.significantEventsApp.settings.scheduledDiscoveryLabel',
                         { defaultMessage: 'Scheduled discovery' }
                       )}
                     </h4>
@@ -368,14 +368,14 @@ export function SettingsTab() {
                   <EuiText color="subdued" size="s">
                     {isBlocked
                       ? i18n.translate(
-                          'xpack.streams.significantEventsDiscovery.settings.scheduledDiscoveryPausedHelp',
+                          'xpack.significantEventsApp.settings.scheduledDiscoveryPausedHelp',
                           {
                             defaultMessage:
                               'Turned off while Significant Events activity is paused. Resume above to restore scheduled discovery if it was enabled before pause.',
                           }
                         )
                       : i18n.translate(
-                          'xpack.streams.significantEventsDiscovery.settings.scheduledDiscoveryHelp',
+                          'xpack.significantEventsApp.settings.scheduledDiscoveryHelp',
                           {
                             defaultMessage:
                               'When enabled, Significant Events detection, discovery, and triage run automatically in the current Kibana space.',
@@ -392,7 +392,7 @@ export function SettingsTab() {
                     <EuiSwitch
                       data-test-subj="streams-settings-scheduled-discovery-toggle"
                       label={i18n.translate(
-                        'xpack.streams.significantEventsDiscovery.settings.enableScheduledDiscovery',
+                        'xpack.significantEventsApp.settings.enableScheduledDiscovery',
                         { defaultMessage: 'Enable scheduled discovery' }
                       )}
                       checked={scheduledDiscovery.draft.enabled}
@@ -410,11 +410,11 @@ export function SettingsTab() {
                   <>
                     <EuiFormRow
                       label={i18n.translate(
-                        'xpack.streams.significantEventsDiscovery.settings.detectionIntervalLabel',
+                        'xpack.significantEventsApp.settings.detectionIntervalLabel',
                         { defaultMessage: 'Detection interval (minutes)' }
                       )}
                       helpText={i18n.translate(
-                        'xpack.streams.significantEventsDiscovery.settings.detectionIntervalHelp',
+                        'xpack.significantEventsApp.settings.detectionIntervalHelp',
                         { defaultMessage: 'How often scheduled detection runs.' }
                       )}
                     >
@@ -437,11 +437,11 @@ export function SettingsTab() {
                     </EuiFormRow>
                     <EuiFormRow
                       label={i18n.translate(
-                        'xpack.streams.significantEventsDiscovery.settings.targetCoverageLabel',
+                        'xpack.significantEventsApp.settings.targetCoverageLabel',
                         { defaultMessage: 'Target coverage (minutes)' }
                       )}
                       helpText={i18n.translate(
-                        'xpack.streams.significantEventsDiscovery.settings.targetCoverageHelp',
+                        'xpack.significantEventsApp.settings.targetCoverageHelp',
                         {
                           defaultMessage:
                             'Every active rule is scanned at least once within this window. Must exceed the detection interval to spread the fleet across runs.',
@@ -467,11 +467,11 @@ export function SettingsTab() {
                     </EuiFormRow>
                     <EuiFormRow
                       label={i18n.translate(
-                        'xpack.streams.significantEventsDiscovery.settings.reviewIntervalLabel',
+                        'xpack.significantEventsApp.settings.reviewIntervalLabel',
                         { defaultMessage: 'Review interval (minutes)' }
                       )}
                       helpText={i18n.translate(
-                        'xpack.streams.significantEventsDiscovery.settings.reviewIntervalHelp',
+                        'xpack.significantEventsApp.settings.reviewIntervalHelp',
                         { defaultMessage: 'How often scheduled discovery and triage review runs.' }
                       )}
                     >
@@ -494,11 +494,11 @@ export function SettingsTab() {
                     </EuiFormRow>
                     <EuiFormRow
                       label={i18n.translate(
-                        'xpack.streams.significantEventsDiscovery.settings.discoveryBatchSizeLabel',
+                        'xpack.significantEventsApp.settings.discoveryBatchSizeLabel',
                         { defaultMessage: 'Discovery batch size' }
                       )}
                       helpText={i18n.translate(
-                        'xpack.streams.significantEventsDiscovery.settings.discoveryBatchSizeHelp',
+                        'xpack.significantEventsApp.settings.discoveryBatchSizeHelp',
                         {
                           defaultMessage:
                             'Maximum detections sent to each scheduled discovery pass.',
@@ -525,11 +525,11 @@ export function SettingsTab() {
                     </EuiFormRow>
                     <EuiFormRow
                       label={i18n.translate(
-                        'xpack.streams.significantEventsDiscovery.settings.triageBatchSizeLabel',
+                        'xpack.significantEventsApp.settings.triageBatchSizeLabel',
                         { defaultMessage: 'Triage batch size' }
                       )}
                       helpText={i18n.translate(
-                        'xpack.streams.significantEventsDiscovery.settings.triageBatchSizeHelp',
+                        'xpack.significantEventsApp.settings.triageBatchSizeHelp',
                         {
                           defaultMessage: 'Maximum discoveries sent to each scheduled triage pass.',
                         }
@@ -555,11 +555,11 @@ export function SettingsTab() {
                     </EuiFormRow>
                     <EuiFormRow
                       label={i18n.translate(
-                        'xpack.streams.significantEventsDiscovery.settings.maxReviewPassesLabel',
+                        'xpack.significantEventsApp.settings.maxReviewPassesLabel',
                         { defaultMessage: 'Review passes' }
                       )}
                       helpText={i18n.translate(
-                        'xpack.streams.significantEventsDiscovery.settings.maxReviewPassesHelp',
+                        'xpack.significantEventsApp.settings.maxReviewPassesHelp',
                         {
                           defaultMessage:
                             'Maximum discovery and triage pass pairs per scheduled review run.',
@@ -599,7 +599,7 @@ export function SettingsTab() {
           <EuiText size="s">
             <h3>
               {i18n.translate(
-                'xpack.streams.significantEventsDiscovery.settings.dataSourcesSectionTitle',
+                'xpack.significantEventsApp.settings.dataSourcesSectionTitle',
                 { defaultMessage: 'Data sources' }
               )}
             </h3>
@@ -613,7 +613,7 @@ export function SettingsTab() {
                   <EuiText size="m">
                     <h4>
                       {i18n.translate(
-                        'xpack.streams.significantEventsDiscovery.settings.indexPatternsLabel',
+                        'xpack.significantEventsApp.settings.indexPatternsLabel',
                         { defaultMessage: 'Index patterns' }
                       )}
                     </h4>
@@ -622,14 +622,14 @@ export function SettingsTab() {
                 <EuiFlexItem>
                   <EuiText color="subdued" size="s">
                     {i18n.translate(
-                      'xpack.streams.significantEventsDiscovery.settings.indexPatternsHelp',
+                      'xpack.significantEventsApp.settings.indexPatternsHelp',
                       {
                         defaultMessage:
                           'Comma-separated list of index patterns to use for feature detection and analysis.',
                       }
                     )}{' '}
                     {i18n.translate(
-                      'xpack.streams.significantEventsDiscovery.settings.indexPatternsDefault',
+                      'xpack.significantEventsApp.settings.indexPatternsDefault',
                       { defaultMessage: 'Default:' }
                     )}{' '}
                     <EuiBadge color="hollow">{DEFAULT_INDEX_PATTERNS}</EuiBadge>
@@ -654,7 +654,7 @@ export function SettingsTab() {
                     {indexPatternsMatch.matchedStreamCount > 0 && (
                       <p>
                         {i18n.translate(
-                          'xpack.streams.significantEventsDiscovery.settings.indexPatternsMatchCount',
+                          'xpack.significantEventsApp.settings.indexPatternsMatchCount',
                           {
                             defaultMessage:
                               'Matches {count, plural, one {# stream} other {# streams}}.',
@@ -667,7 +667,7 @@ export function SettingsTab() {
                       <p>
                         <EuiTextColor color="warning">
                           {i18n.translate(
-                            'xpack.streams.significantEventsDiscovery.settings.indexPatternsNoMatch',
+                            'xpack.significantEventsApp.settings.indexPatternsNoMatch',
                             {
                               defaultMessage:
                                 '{count, plural, one {# pattern matches} other {# patterns match}} no current streams: {patterns}',
@@ -695,7 +695,7 @@ export function SettingsTab() {
           <EuiText size="s">
             <h3>
               {i18n.translate(
-                'xpack.streams.significantEventsDiscovery.settings.continuousKiOnboardingTitle',
+                'xpack.significantEventsApp.settings.continuousKiOnboardingTitle',
                 { defaultMessage: 'Continuous KI onboarding' }
               )}
             </h3>
@@ -709,7 +709,7 @@ export function SettingsTab() {
                   <EuiText size="m">
                     <h4>
                       {i18n.translate(
-                        'xpack.streams.significantEventsDiscovery.settings.continuousKiOnboardingLabel',
+                        'xpack.significantEventsApp.settings.continuousKiOnboardingLabel',
                         { defaultMessage: 'Automatic onboarding' }
                       )}
                     </h4>
@@ -719,14 +719,14 @@ export function SettingsTab() {
                   <EuiText color="subdued" size="s">
                     {isBlocked
                       ? i18n.translate(
-                          'xpack.streams.significantEventsDiscovery.settings.continuousKiOnboardingPausedHelp',
+                          'xpack.significantEventsApp.settings.continuousKiOnboardingPausedHelp',
                           {
                             defaultMessage:
                               'Turned off while Significant Events activity is paused. Resume above to restore continuous onboarding if it was enabled before pause.',
                           }
                         )
                       : i18n.translate(
-                          'xpack.streams.significantEventsDiscovery.settings.continuousKiOnboardingHelp',
+                          'xpack.significantEventsApp.settings.continuousKiOnboardingHelp',
                           {
                             defaultMessage:
                               'When enabled, knowledge indicator onboarding runs automatically on managed streams at the configured interval.',
@@ -743,7 +743,7 @@ export function SettingsTab() {
                     <EuiSwitch
                       data-test-subj="streams-settings-continuous-onboarding-toggle"
                       label={i18n.translate(
-                        'xpack.streams.significantEventsDiscovery.settings.enableContinuousKiOnboarding',
+                        'xpack.significantEventsApp.settings.enableContinuousKiOnboarding',
                         { defaultMessage: 'Enable continuous KI onboarding' }
                       )}
                       checked={continuousExtraction.draft.enabled}
@@ -763,7 +763,7 @@ export function SettingsTab() {
                       <EuiText color="subdued" size="xs">
                         <p>
                           {i18n.translate(
-                            'xpack.streams.significantEventsDiscovery.settings.continuousKiOnboardingScopeHelp',
+                            'xpack.significantEventsApp.settings.continuousKiOnboardingScopeHelp',
                             {
                               defaultMessage:
                                 'Onboards the streams matching your index patterns in the Data sources section above.',
@@ -775,7 +775,7 @@ export function SettingsTab() {
                           indexPatternsMatch.queryStreamCount > 0 && (
                             <p data-test-subj="streams-settings-onboarding-query-streams-note">
                               {i18n.translate(
-                                'xpack.streams.significantEventsDiscovery.settings.continuousKiOnboardingQueryStreamsNote',
+                                'xpack.significantEventsApp.settings.continuousKiOnboardingQueryStreamsNote',
                                 {
                                   defaultMessage:
                                     'Also onboards {count, plural, one {# query stream} other {# query streams}}, which are always eligible regardless of index patterns.',
@@ -788,11 +788,11 @@ export function SettingsTab() {
                     </EuiFormRow>
                     <EuiFormRow
                       label={i18n.translate(
-                        'xpack.streams.significantEventsDiscovery.settings.onboardingIntervalLabel',
+                        'xpack.significantEventsApp.settings.onboardingIntervalLabel',
                         { defaultMessage: 'Onboarding interval (hours)' }
                       )}
                       helpText={i18n.translate(
-                        'xpack.streams.significantEventsDiscovery.settings.onboardingIntervalHelp',
+                        'xpack.significantEventsApp.settings.onboardingIntervalHelp',
                         {
                           defaultMessage:
                             'Minimum period in hours between onboarding runs for a given stream. Set to 0 for no cooldown between runs.',
@@ -831,7 +831,7 @@ export function SettingsTab() {
             <EuiFlexItem grow={false}>
               <EuiText size="s">
                 <h3>
-                  {i18n.translate('xpack.streams.significantEventsDiscovery.settings.tuningTitle', {
+                  {i18n.translate('xpack.significantEventsApp.settings.tuningTitle', {
                     defaultMessage: 'Significant Events tuning',
                   })}
                 </h3>
@@ -851,7 +851,7 @@ export function SettingsTab() {
                 }}
               >
                 {i18n.translate(
-                  'xpack.streams.significantEventsDiscovery.settings.resetToDefaults',
+                  'xpack.significantEventsApp.settings.resetToDefaults',
                   { defaultMessage: 'Reset to defaults' }
                 )}
               </EuiButtonEmpty>
@@ -863,7 +863,7 @@ export function SettingsTab() {
             size="s"
             color="warning"
             iconType="warning"
-            title={i18n.translate('xpack.streams.significantEventsDiscovery.settings.tuningInfo', {
+            title={i18n.translate('xpack.significantEventsApp.settings.tuningInfo', {
               defaultMessage:
                 'These are advanced settings that control how features are discovered and queries are searched. Incorrect values may degrade onboarding quality or cause unexpected behavior. Changes take effect on the next run.',
             })}
@@ -886,24 +886,24 @@ export function SettingsTab() {
         <EuiConfirmModal
           data-test-subj="streams-settings-zero-match-confirm"
           title={i18n.translate(
-            'xpack.streams.significantEventsDiscovery.settings.zeroMatchConfirmTitle',
+            'xpack.significantEventsApp.settings.zeroMatchConfirmTitle',
             { defaultMessage: 'No streams match these patterns' }
           )}
           onCancel={() => setIsConfirmingZeroMatch(false)}
           onConfirm={handleConfirmZeroMatch}
           cancelButtonText={i18n.translate(
-            'xpack.streams.significantEventsDiscovery.settings.zeroMatchConfirmCancel',
+            'xpack.significantEventsApp.settings.zeroMatchConfirmCancel',
             { defaultMessage: 'Keep editing' }
           )}
           confirmButtonText={i18n.translate(
-            'xpack.streams.significantEventsDiscovery.settings.zeroMatchConfirmConfirm',
+            'xpack.significantEventsApp.settings.zeroMatchConfirmConfirm',
             { defaultMessage: 'Save anyway' }
           )}
           buttonColor="warning"
         >
           <p>
             {i18n.translate(
-              'xpack.streams.significantEventsDiscovery.settings.zeroMatchConfirmBody',
+              'xpack.significantEventsApp.settings.zeroMatchConfirmBody',
               {
                 defaultMessage:
                   'None of your index patterns match any current stream, so Significant Events will not detect or onboard anything yet. Patterns can match streams created later. Save anyway?',
@@ -927,7 +927,7 @@ export function SettingsTab() {
                     isDisabled={isSaving}
                   >
                     {i18n.translate(
-                      'xpack.streams.significantEventsDiscovery.settings.cancelButton',
+                      'xpack.significantEventsApp.settings.cancelButton',
                       { defaultMessage: 'Cancel' }
                     )}
                   </EuiButtonEmpty>
@@ -949,7 +949,7 @@ export function SettingsTab() {
                       hasAriaDisabled={saveBlockedByPause}
                     >
                       {i18n.translate(
-                        'xpack.streams.significantEventsDiscovery.settings.saveChangesButton',
+                        'xpack.significantEventsApp.settings.saveChangesButton',
                         { defaultMessage: 'Save changes' }
                       )}
                     </EuiButton>

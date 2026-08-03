@@ -56,14 +56,14 @@ import { useBlocksNewActivity } from '../../../../../hooks/significant_events/us
 export const DEFAULT_SIGNIFICANT_EVENT_SEVERITY_FILTER: Severity[] = ['80-critical', '60-high'];
 
 const RUN_ARIA_LABEL = i18n.translate(
-  'xpack.streams.sigEventsTab.runInvestigationButton.ariaLabel',
+  'xpack.significantEventsApp.sigEventsTab.runInvestigationButton.ariaLabel',
   {
     defaultMessage: 'Run investigation for this event',
   }
 );
 
 const CLOSE_EVENT_ARIA_LABEL = i18n.translate(
-  'xpack.streams.sigEventsTab.closeEventButton.ariaLabel',
+  'xpack.significantEventsApp.sigEventsTab.closeEventButton.ariaLabel',
   {
     defaultMessage: 'Close this significant event',
   }
@@ -121,25 +121,25 @@ const clickableRowCss = css`
   cursor: pointer;
 `;
 
-const SEARCH_PLACEHOLDER = i18n.translate('xpack.streams.sigEventsTab.searchPlaceholder', {
+const SEARCH_PLACEHOLDER = i18n.translate('xpack.significantEventsApp.sigEventsTab.searchPlaceholder', {
   defaultMessage: 'Search events...',
 });
-const FETCH_ERROR_TITLE = i18n.translate('xpack.streams.sigEventsTab.fetchError', {
+const FETCH_ERROR_TITLE = i18n.translate('xpack.significantEventsApp.sigEventsTab.fetchError', {
   defaultMessage: 'Failed to load significant events',
 });
-const TABLE_CAPTION = i18n.translate('xpack.streams.sigEventsTab.tableCaption', {
+const TABLE_CAPTION = i18n.translate('xpack.significantEventsApp.sigEventsTab.tableCaption', {
   defaultMessage: 'Significant Events',
 });
-const LOADING_MESSAGE = i18n.translate('xpack.streams.sigEventsTab.loadingMessage', {
+const LOADING_MESSAGE = i18n.translate('xpack.significantEventsApp.sigEventsTab.loadingMessage', {
   defaultMessage: 'Loading events...',
 });
-const EMPTY_MESSAGE = i18n.translate('xpack.streams.sigEventsTab.emptyBody', {
+const EMPTY_MESSAGE = i18n.translate('xpack.significantEventsApp.sigEventsTab.emptyBody', {
   defaultMessage: 'No significant events found.',
 });
 const columns: Array<EuiBasicTableColumn<SignificantEvent>> = [
   {
     field: '@timestamp',
-    name: i18n.translate('xpack.streams.sigEventsTab.timestampColumn', {
+    name: i18n.translate('xpack.significantEventsApp.sigEventsTab.timestampColumn', {
       defaultMessage: 'Timestamp',
     }),
     width: '200px',
@@ -147,14 +147,14 @@ const columns: Array<EuiBasicTableColumn<SignificantEvent>> = [
   },
   {
     field: 'title',
-    name: i18n.translate('xpack.streams.sigEventsTab.titleColumn', {
+    name: i18n.translate('xpack.significantEventsApp.sigEventsTab.titleColumn', {
       defaultMessage: 'Title',
     }),
     truncateText: true,
   },
   {
     field: 'status',
-    name: i18n.translate('xpack.streams.sigEventsTab.statusColumn', {
+    name: i18n.translate('xpack.significantEventsApp.sigEventsTab.statusColumn', {
       defaultMessage: 'Status',
     }),
     width: '100px',
@@ -166,7 +166,7 @@ const columns: Array<EuiBasicTableColumn<SignificantEvent>> = [
   },
   {
     field: 'stream_names',
-    name: i18n.translate('xpack.streams.sigEventsTab.streamsColumn', {
+    name: i18n.translate('xpack.significantEventsApp.sigEventsTab.streamsColumn', {
       defaultMessage: 'Streams',
     }),
     width: '160px',
@@ -215,7 +215,7 @@ const columns: Array<EuiBasicTableColumn<SignificantEvent>> = [
   },
   {
     field: 'severity',
-    name: i18n.translate('xpack.streams.sigEventsTab.severityColumn', {
+    name: i18n.translate('xpack.significantEventsApp.sigEventsTab.severityColumn', {
       defaultMessage: 'Severity',
     }),
     width: '100px',
@@ -334,10 +334,10 @@ export const SigEventsTab = () => {
   const filters = useMemo(
     () => [
       {
-        label: i18n.translate('xpack.streams.sigEventsTab.filter.status', {
+        label: i18n.translate('xpack.significantEventsApp.sigEventsTab.filter.status', {
           defaultMessage: 'Status',
         }),
-        ariaLabel: i18n.translate('xpack.streams.sigEventsTab.filter.statusAriaLabel', {
+        ariaLabel: i18n.translate('xpack.significantEventsApp.sigEventsTab.filter.statusAriaLabel', {
           defaultMessage: 'Filter by status',
         }),
         options: buildSelectableOptions({
@@ -349,10 +349,10 @@ export const SigEventsTab = () => {
         onChange: onStatusChange,
       },
       {
-        label: i18n.translate('xpack.streams.sigEventsTab.filter.severity', {
+        label: i18n.translate('xpack.significantEventsApp.sigEventsTab.filter.severity', {
           defaultMessage: 'Severity',
         }),
-        ariaLabel: i18n.translate('xpack.streams.sigEventsTab.filter.severityAriaLabel', {
+        ariaLabel: i18n.translate('xpack.significantEventsApp.sigEventsTab.filter.severityAriaLabel', {
           defaultMessage: 'Filter by severity',
         }),
         options: buildSelectableOptions({
@@ -365,10 +365,10 @@ export const SigEventsTab = () => {
         onChange: onSeverityChange,
       },
       {
-        label: i18n.translate('xpack.streams.sigEventsTab.filter.stream', {
+        label: i18n.translate('xpack.significantEventsApp.sigEventsTab.filter.stream', {
           defaultMessage: 'Stream',
         }),
-        ariaLabel: i18n.translate('xpack.streams.sigEventsTab.filter.streamAriaLabel', {
+        ariaLabel: i18n.translate('xpack.significantEventsApp.sigEventsTab.filter.streamAriaLabel', {
           defaultMessage: 'Filter by stream',
         }),
         options: buildSelectableOptions({

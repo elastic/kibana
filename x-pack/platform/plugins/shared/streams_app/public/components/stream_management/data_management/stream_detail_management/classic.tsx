@@ -31,6 +31,8 @@ import {
   ImportLifecycleFlyoutProvider,
   useImportLifecycleFlyoutContext,
 } from '../stream_detail_lifecycle/import_from_stream';
+import { useSignificantEventsApp } from '../../../../hooks/use_significant_events_app';
+import { SignificantEventsAppRedirect } from '../../../significant_events_app_redirect';
 
 const classicStreamManagementSubTabs = [
   'overview',
@@ -97,6 +99,8 @@ function ClassicStreamDetailManagementContent({
     features: { queryStreams, significantEvents },
     isLoading: isPrivilegesLoading,
   } = useStreamsPrivileges();
+  const { isAvailable: isSignificantEventsAvailable, isLoading: isSignificantEventsLoading } =
+    useSignificantEventsApp();
 
   const isProcessingEnabled = !definition.replicated;
 
@@ -228,8 +232,11 @@ function ClassicStreamDetailManagementContent({
   }
 
   if (tab === 'significantEvents') {
-    if (isPrivilegesLoading) {
+    if (isSignificantEventsLoading) {
       return null;
+    }
+    if (isSignificantEventsAvailable) {
+      return <SignificantEventsAppRedirect tab="knowledge_indicators" stream={key} />;
     }
 
     if (significantEvents?.available) {

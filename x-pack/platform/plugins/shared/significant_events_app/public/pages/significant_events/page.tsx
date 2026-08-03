@@ -7,18 +7,25 @@
 
 import { EuiButton, EuiCallOut, EuiLoadingElastic, EuiSpacer } from '@elastic/eui';
 import type { AppHeaderMenu } from '@kbn/app-header';
+import { STREAMS_APP_LOCATOR_ID } from '@kbn/deeplinks-observability';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useMemo } from 'react';
-import { useKibana } from '../../../hooks/use_kibana';
-import { getFormattedError } from '../../../util/errors';
-import { useStreamsAppBreadcrumbs } from '../../../hooks/use_streams_app_breadcrumbs';
-import { useStreamsAppParams } from '../../../hooks/use_streams_app_params';
-import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
-import { useStreamsPrivileges } from '../../../hooks/use_streams_privileges';
-import { useSignificantEventsAvailability } from '../../../hooks/significant_events/use_significant_events_availability';
-import { useBlocksNewActivity } from '../../../hooks/significant_events/use_significant_events_maintenance';
-import { RedirectTo } from '../../redirect_to';
-import { SignificantEventsNotEnabledPrompt } from '../significant_events_not_enabled_prompt';
+import type { StreamsAppLocationParams } from '@kbn/streams-plugin/common';
+import React, { useCallback, useEffect, useMemo } from 'react';
+import { useKibana } from '../../hooks/use_kibana';
+import { getFormattedError } from '../../util/errors';
+import { useStreamsAppBreadcrumbs } from '../../hooks/use_streams_app_breadcrumbs';
+import { useStreamsAppParams } from '../../hooks/use_streams_app_params';
+import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
+import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
+import { useSignificantEventsAppParams } from '../../hooks/use_significant_events_app_params';
+import { useSignificantEventsAppRouter } from '../../hooks/use_significant_events_app_router';
+import { useSignificantEventsPrivileges } from '../../hooks/use_significant_events_privileges';
+import { useBlocksNewActivity } from '../../hooks/use_significant_events_maintenance';
+import { RedirectTo } from '../../components/redirect_to';
+import {
+  SignificantEventsAppHeader,
+  SignificantEventsAppPageTemplate,
+} from '../../components/page_template';
 import { StreamsAppHeader, StreamsAppPageTemplate } from '../../streams_app_page_template';
 import {
   KnowledgeIndicatorsTable,
@@ -60,9 +67,15 @@ export function SignificantEventsDiscoveryPage() {
       notifications: { toasts },
     },
     dependencies: {
-      start: { agentBuilder },
+      start: {
+        agentBuilder,
+        share: {
+          url: { locators },
+        },
+      },
     },
   } = useKibana();
+  const streamsLocator = locators.get<StreamsAppLocationParams>(STREAMS_APP_LOCATOR_ID);
 
   const {
     ui: streamsUiPrivileges,
@@ -70,7 +83,8 @@ export function SignificantEventsDiscoveryPage() {
   } = useStreamsPrivileges();
   const canManageStreams = streamsUiPrivileges.manage;
 
-  const { availability, isLoading: isAvailabilityLoading } = useSignificantEventsAvailability();
+  const { isLoading: isPrivilegesLoading } = useSignificantEventsPrivileges();
+
   const {
     isBlocked,
     isLoading: isMaintenanceStatusLoading,
@@ -78,6 +92,14 @@ export function SignificantEventsDiscoveryPage() {
     status: maintenanceStatus,
   } = useBlocksNewActivity();
   const showMaintenanceBanners = tab !== 'settings';
+
+  // Direct visits when the client-side gate is off must leave this app — `/` here
+  // redirects to `/{tab}` and would otherwise loop with the gate below.
+  useEffect(() => {
+    if (!isPrivilegesLoading && !significantEvents.available) {
+      void streamsLocator?.navigate({}, { replace: true });
+    }
+  }, [isPrivilegesLoading, significantEvents.available, streamsLocator]);
 
   const onOnboardingFailed = useCallback(
     (error: string) => {
@@ -88,30 +110,26 @@ export function SignificantEventsDiscoveryPage() {
     [toasts]
   );
 
-  const pageTitle = i18n.translate('xpack.streams.significantEventsDiscovery.pageHeaderTitle', {
+  const pageTitle = i18n.translate('xpack.significantEventsApp.pageHeaderTitle', {
     defaultMessage: 'Significant Events',
   });
 
-  const nightshiftLabel = i18n.translate(
-    'xpack.streams.significantEventsDiscovery.nightshiftButtonLabel',
-    { defaultMessage: 'Nightshift' }
-  );
+  const nightshiftLabel = i18n.translate('xpack.significantEventsApp.nightshiftButtonLabel', {
+    defaultMessage: 'Nightshift',
+  });
 
   const systemOnboardingLabel = i18n.translate(
-    'xpack.streams.significantEventsDiscovery.systemOnboardingButton',
+    'xpack.significantEventsApp.systemOnboardingButton',
     { defaultMessage: 'Tell us about your system' }
   );
 
   const handleOpenSystemOnboarding = useCallback(() => {
     agentBuilder?.openChat({
       newConversation: true,
-      initialMessage: i18n.translate(
-        'xpack.streams.significantEventsDiscovery.onboardingInitialMessage',
-        {
-          defaultMessage:
-            'Start the significant-events-onboarding skill. First check whether there is already memory about my system. If there is, summarise what you know and ask whether I have something specific to add or correct, or whether I want a general review of the gaps. If memory is empty, go straight into gathering information.',
-        }
-      ),
+      initialMessage: i18n.translate('xpack.significantEventsApp.onboardingInitialMessage', {
+        defaultMessage:
+          'Start the significant-events-onboarding skill. First check whether there is already memory about my system. If there is, summarise what you know and ask whether I have something specific to add or correct, or whether I want a general review of the gaps. If memory is empty, go straight into gathering information.',
+      }),
       autoSendInitialMessage: true,
     });
   }, [agentBuilder]);
@@ -162,7 +180,7 @@ export function SignificantEventsDiscoveryPage() {
     () => [
       {
         id: 'streams',
-        label: i18n.translate('xpack.streams.significantEventsDiscovery.streamsTab', {
+        label: i18n.translate('xpack.significantEventsApp.streamsTab', {
           defaultMessage: 'Streams',
         }),
         href: router.link('/_discovery/{tab}', { path: { tab: 'streams' } }),
@@ -170,7 +188,7 @@ export function SignificantEventsDiscoveryPage() {
       },
       {
         id: 'knowledge_indicators',
-        label: i18n.translate('xpack.streams.significantEventsDiscovery.knowledgeIndicatorsTab', {
+        label: i18n.translate('xpack.significantEventsApp.knowledgeIndicatorsTab', {
           defaultMessage: 'Knowledge Indicators',
         }),
         href: router.link('/_discovery/{tab}', { path: { tab: 'knowledge_indicators' } }),
@@ -178,7 +196,7 @@ export function SignificantEventsDiscoveryPage() {
       },
       {
         id: 'queries',
-        label: i18n.translate('xpack.streams.significantEventsDiscovery.queriesTab', {
+        label: i18n.translate('xpack.significantEventsApp.queriesTab', {
           defaultMessage: 'Rules',
         }),
         href: router.link('/_discovery/{tab}', { path: { tab: 'queries' } }),
@@ -187,7 +205,7 @@ export function SignificantEventsDiscoveryPage() {
 
       {
         id: 'detections',
-        label: i18n.translate('xpack.streams.significantEventsDiscovery.detectionsTab', {
+        label: i18n.translate('xpack.significantEventsApp.detectionsTab', {
           defaultMessage: 'Detections',
         }),
         href: router.link('/_discovery/{tab}', { path: { tab: 'detections' } }),
@@ -195,7 +213,7 @@ export function SignificantEventsDiscoveryPage() {
       },
       {
         id: 'significant_events',
-        label: i18n.translate('xpack.streams.significantEventsDiscovery.significantEventsTab', {
+        label: i18n.translate('xpack.significantEventsApp.significantEventsTab', {
           defaultMessage: 'Significant Events',
         }),
         href: router.link('/_discovery/{tab}', { path: { tab: 'significant_events' } }),
@@ -203,7 +221,7 @@ export function SignificantEventsDiscoveryPage() {
       },
       {
         id: 'memory',
-        label: i18n.translate('xpack.streams.significantEventsDiscovery.memoryTab', {
+        label: i18n.translate('xpack.significantEventsApp.memoryTab', {
           defaultMessage: 'Memory',
         }),
         href: router.link('/_discovery/{tab}', { path: { tab: 'memory' } }),
@@ -211,7 +229,7 @@ export function SignificantEventsDiscoveryPage() {
       },
       {
         id: 'settings',
-        label: i18n.translate('xpack.streams.significantEventsDiscovery.settingsTab', {
+        label: i18n.translate('xpack.significantEventsApp.settingsTab', {
           defaultMessage: 'Settings',
         }),
         href: router.link('/_discovery/{tab}', { path: { tab: 'settings' } }),
@@ -221,22 +239,11 @@ export function SignificantEventsDiscoveryPage() {
     [tab, router]
   );
 
-  if (significantEvents === undefined || isAvailabilityLoading) {
-    // Waiting to load license / availability
+  if (isPrivilegesLoading || !significantEvents.available) {
+    // Waiting for the gate, or leaving the app when unavailable (see effect above).
     return <EuiLoadingElastic size="xxl" />;
   }
 
-  if (!significantEvents.available) {
-    return <RedirectTo path="/" />;
-  }
-
-  if (availability && !availability.available) {
-    return (
-      <StreamsAppPageTemplate.Body grow>
-        <SignificantEventsNotEnabledPrompt reason={availability.reason} />
-      </StreamsAppPageTemplate.Body>
-    );
-  }
 
   if (tab === 'discoveries') {
     return <RedirectTo path="/_discovery/{tab}" params={{ path: { tab: 'significant_events' } }} />;
@@ -259,19 +266,15 @@ export function SignificantEventsDiscoveryPage() {
                   color="primary"
                   iconType="clock"
                   data-test-subj="significantEventsStatusLoadingBanner"
-                  title={i18n.translate(
-                    'xpack.streams.significantEventsDiscovery.statusLoadingBannerTitle',
-                    { defaultMessage: 'Checking Significant Events activity status' }
-                  )}
+                  title={i18n.translate('xpack.significantEventsApp.statusLoadingBannerTitle', {
+                    defaultMessage: 'Checking Significant Events activity status',
+                  })}
                 >
                   <p>
-                    {i18n.translate(
-                      'xpack.streams.significantEventsDiscovery.statusLoadingBannerBody',
-                      {
-                        defaultMessage:
-                          'Manual triggers stay disabled until activity status is known.',
-                      }
-                    )}
+                    {i18n.translate('xpack.significantEventsApp.statusLoadingBannerBody', {
+                      defaultMessage:
+                        'Manual triggers stay disabled until activity status is known.',
+                    })}
                   </p>
                 </EuiCallOut>
                 <EuiSpacer />
@@ -284,19 +287,15 @@ export function SignificantEventsDiscoveryPage() {
                   color="danger"
                   iconType="error"
                   data-test-subj="significantEventsStatusErrorBanner"
-                  title={i18n.translate(
-                    'xpack.streams.significantEventsDiscovery.statusErrorBannerTitle',
-                    { defaultMessage: 'Could not load Significant Events activity status' }
-                  )}
+                  title={i18n.translate('xpack.significantEventsApp.statusErrorBannerTitle', {
+                    defaultMessage: 'Could not load Significant Events activity status',
+                  })}
                 >
                   <p>
-                    {i18n.translate(
-                      'xpack.streams.significantEventsDiscovery.statusErrorBannerBody',
-                      {
-                        defaultMessage:
-                          'Manual triggers stay disabled until status can be loaded. Open Settings to retry, or refresh the page.',
-                      }
-                    )}
+                    {i18n.translate('xpack.significantEventsApp.statusErrorBannerBody', {
+                      defaultMessage:
+                        'Manual triggers stay disabled until status can be loaded. Open Settings to retry, or refresh the page.',
+                    })}
                   </p>
                   {canManageStreams && (
                     <EuiButton
@@ -306,7 +305,7 @@ export function SignificantEventsDiscoveryPage() {
                       data-test-subj="significantEventsStatusErrorBannerSettingsLink"
                     >
                       {i18n.translate(
-                        'xpack.streams.significantEventsDiscovery.statusErrorBannerSettingsButton',
+                        'xpack.significantEventsApp.statusErrorBannerSettingsButton',
                         { defaultMessage: 'Go to Settings' }
                       )}
                     </EuiButton>
@@ -322,37 +321,27 @@ export function SignificantEventsDiscoveryPage() {
                   color="warning"
                   iconType="pause"
                   data-test-subj="significantEventsPausedBanner"
-                  title={i18n.translate(
-                    'xpack.streams.significantEventsDiscovery.pausedBannerTitle',
-                    { defaultMessage: 'Significant Events activity is paused' }
-                  )}
+                  title={i18n.translate('xpack.significantEventsApp.pausedBannerTitle', {
+                    defaultMessage: 'Significant Events activity is paused',
+                  })}
                 >
                   <p>
                     {canManageStreams
-                      ? i18n.translate(
-                          'xpack.streams.significantEventsDiscovery.pausedBannerBody',
-                          {
-                            defaultMessage:
-                              'Significant Events activity is stopped across the deployment: scheduled discovery, continuous onboarding, detections, memory, investigations, and the alerting rules backing knowledge indicator queries. Manual triggers are blocked until you resume from Settings.',
-                          }
-                        )
-                      : i18n.translate(
-                          'xpack.streams.significantEventsDiscovery.pausedBannerBodyReadOnly',
-                          {
-                            defaultMessage:
-                              'Significant Events activity is stopped across the deployment: scheduled discovery, continuous onboarding, detections, memory, investigations, and the alerting rules backing knowledge indicator queries. Manual triggers are blocked. An administrator with the Streams manage privilege must resume activity from Settings.',
-                          }
-                        )}
+                      ? i18n.translate('xpack.significantEventsApp.pausedBannerBody', {
+                          defaultMessage:
+                            'Significant Events activity is stopped across the deployment: scheduled discovery, continuous onboarding, detections, memory, investigations, and the alerting rules backing knowledge indicator queries. Manual triggers are blocked until you resume from Settings.',
+                        })
+                      : i18n.translate('xpack.significantEventsApp.pausedBannerBodyReadOnly', {
+                          defaultMessage:
+                            'Significant Events activity is stopped across the deployment: scheduled discovery, continuous onboarding, detections, memory, investigations, and the alerting rules backing knowledge indicator queries. Manual triggers are blocked. An administrator with the Streams manage privilege must resume activity from Settings.',
+                        })}
                   </p>
                   {(maintenanceStatus?.lastSummary?.partialFailures.length ?? 0) > 0 && (
                     <p>
-                      {i18n.translate(
-                        'xpack.streams.significantEventsDiscovery.pausedBannerPartialFailures',
-                        {
-                          defaultMessage:
-                            'Some maintenance operations could not be completed. Check Settings and the Kibana server logs for details.',
-                        }
-                      )}
+                      {i18n.translate('xpack.significantEventsApp.pausedBannerPartialFailures', {
+                        defaultMessage:
+                          'Some maintenance operations could not be completed. Check Settings and the Kibana server logs for details.',
+                      })}
                     </p>
                   )}
                   {canManageStreams && (
@@ -362,10 +351,9 @@ export function SignificantEventsDiscoveryPage() {
                       size="s"
                       data-test-subj="significantEventsPausedBannerSettingsLink"
                     >
-                      {i18n.translate(
-                        'xpack.streams.significantEventsDiscovery.pausedBannerSettingsButton',
-                        { defaultMessage: 'Go to Settings' }
-                      )}
+                      {i18n.translate('xpack.significantEventsApp.pausedBannerSettingsButton', {
+                        defaultMessage: 'Go to Settings',
+                      })}
                     </EuiButton>
                   )}
                 </EuiCallOut>

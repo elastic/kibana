@@ -128,28 +128,28 @@ export function useKnowledgeIndicatorsBulkDelete({
 }
 
 const BULK_DELETE_REJECTED_ERROR_MESSAGE = i18n.translate(
-  'xpack.streams.knowledgeIndicators.bulkDeleteRejectedErrorMessage',
+  'xpack.significantEventsApp.knowledgeIndicators.bulkDeleteRejectedErrorMessage',
   {
     defaultMessage: 'Some knowledge indicators could not be deleted',
   }
 );
 
 const BULK_DELETE_ERROR_TOAST_TITLE = i18n.translate(
-  'xpack.streams.knowledgeIndicators.bulkDeleteErrorToastTitle',
+  'xpack.significantEventsApp.knowledgeIndicators.bulkDeleteErrorToastTitle',
   {
     defaultMessage: 'Failed to delete selected knowledge indicators',
   }
 );
 
 const getBulkDeletePartialToastTitle = (succeeded: number, failed: number) =>
-  i18n.translate('xpack.streams.knowledgeIndicators.bulkDeletePartialToastTitle', {
+  i18n.translate('xpack.significantEventsApp.knowledgeIndicators.bulkDeletePartialToastTitle', {
     defaultMessage:
       '{succeeded, plural, one {# knowledge indicator} other {# knowledge indicators}} deleted. {failed, plural, one {# knowledge indicator} other {# knowledge indicators}} failed.',
     values: { succeeded, failed },
   });
 
 const getBulkDeleteSuccessToastTitle = (count: number) =>
-  i18n.translate('xpack.streams.knowledgeIndicators.bulkDeleteSuccessToastTitle', {
+  i18n.translate('xpack.significantEventsApp.knowledgeIndicators.bulkDeleteSuccessToastTitle', {
     defaultMessage:
       '{count, plural, one {# knowledge indicator} other {# knowledge indicators}} deleted',
     values: { count },

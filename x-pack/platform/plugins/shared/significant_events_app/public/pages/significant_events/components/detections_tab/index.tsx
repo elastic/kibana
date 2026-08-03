@@ -34,24 +34,24 @@ import { formatTimestamp } from '../../../../../util/formatters';
 import { CHANGE_TYPE_LABELS } from '../shared/translations';
 
 const DISCOVERY_STATUS_LABELS = {
-  processed: i18n.translate('xpack.streams.detectionsTab.statusProcessed', {
+  processed: i18n.translate('xpack.significantEventsApp.detectionsTab.statusProcessed', {
     defaultMessage: 'Processed',
   }),
-  pending: i18n.translate('xpack.streams.detectionsTab.statusPending', {
+  pending: i18n.translate('xpack.significantEventsApp.detectionsTab.statusPending', {
     defaultMessage: 'Pending',
   }),
 };
 
-const DISCOVERY_STATUS_TOOLTIP = i18n.translate('xpack.streams.detectionsTab.discoveryTooltip', {
+const DISCOVERY_STATUS_TOOLTIP = i18n.translate('xpack.significantEventsApp.detectionsTab.discoveryTooltip', {
   defaultMessage: 'Whether the discovery pipeline has ingested this detection.',
 });
 
-const VIEW_DETAILS_ARIA_LABEL = i18n.translate('xpack.streams.detectionsTab.viewDetailsAriaLabel', {
+const VIEW_DETAILS_ARIA_LABEL = i18n.translate('xpack.significantEventsApp.detectionsTab.viewDetailsAriaLabel', {
   defaultMessage: 'View details',
 });
 
 const MINIMIZE_DETAILS_ARIA_LABEL = i18n.translate(
-  'xpack.streams.detectionsTab.minimizeDetailsAriaLabel',
+  'xpack.significantEventsApp.detectionsTab.minimizeDetailsAriaLabel',
   { defaultMessage: 'Collapse details' }
 );
 
@@ -115,7 +115,7 @@ export const DetectionsTab = () => {
       },
       {
         field: 'rule_name',
-        name: i18n.translate('xpack.streams.detectionsTab.ruleColumn', {
+        name: i18n.translate('xpack.significantEventsApp.detectionsTab.ruleColumn', {
           defaultMessage: 'Rule',
         }),
         render: (_: unknown, detection: Detection) => (
@@ -125,7 +125,7 @@ export const DetectionsTab = () => {
         ),
       },
       {
-        name: i18n.translate('xpack.streams.detectionsTab.changeTypeColumn', {
+        name: i18n.translate('xpack.significantEventsApp.detectionsTab.changeTypeColumn', {
           defaultMessage: 'Change',
         }),
         width: '140px',
@@ -140,7 +140,7 @@ export const DetectionsTab = () => {
       },
       {
         field: '@timestamp',
-        name: i18n.translate('xpack.streams.detectionsTab.timestampColumn', {
+        name: i18n.translate('xpack.significantEventsApp.detectionsTab.timestampColumn', {
           defaultMessage: 'Timestamp',
         }),
         width: '200px',
@@ -148,7 +148,7 @@ export const DetectionsTab = () => {
       },
       {
         field: 'stream_name',
-        name: i18n.translate('xpack.streams.detectionsTab.streamColumn', {
+        name: i18n.translate('xpack.significantEventsApp.detectionsTab.streamColumn', {
           defaultMessage: 'Stream',
         }),
         width: '140px',
@@ -159,7 +159,7 @@ export const DetectionsTab = () => {
         name: (
           <EuiToolTip content={DISCOVERY_STATUS_TOOLTIP}>
             <span tabIndex={0}>
-              {i18n.translate('xpack.streams.detectionsTab.discoveryColumn', {
+              {i18n.translate('xpack.significantEventsApp.detectionsTab.discoveryColumn', {
                 defaultMessage: 'Discovery',
               })}
             </span>
@@ -200,7 +200,7 @@ export const DetectionsTab = () => {
         <EuiFlexItem grow={false}>
           <EuiCallOut
             announceOnMount
-            title={i18n.translate('xpack.streams.detectionsTab.fetchError', {
+            title={i18n.translate('xpack.significantEventsApp.detectionsTab.fetchError', {
               defaultMessage: 'Failed to load detections',
             })}
             color="danger"
@@ -216,7 +216,7 @@ export const DetectionsTab = () => {
               background-color: ${euiTheme.colors.backgroundBaseSubdued};
             }
           `}
-          tableCaption={i18n.translate('xpack.streams.detectionsTab.tableCaption', {
+          tableCaption={i18n.translate('xpack.significantEventsApp.detectionsTab.tableCaption', {
             defaultMessage: 'Detections',
           })}
           items={data?.hits ?? []}
@@ -225,7 +225,7 @@ export const DetectionsTab = () => {
           pagination={euiPagination}
           onChange={onTableChange}
           loading={isLoading}
-          noItemsMessage={i18n.translate('xpack.streams.detectionsTab.emptyBody', {
+          noItemsMessage={i18n.translate('xpack.significantEventsApp.detectionsTab.emptyBody', {
             defaultMessage: 'No detections found.',
           })}
           rowProps={(detection: Detection) => ({

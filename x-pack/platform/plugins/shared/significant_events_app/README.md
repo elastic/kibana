@@ -14,7 +14,6 @@ The app is gated behind the Significant Events rollout feature flag
 when unavailable it is hidden from navigation/global search and direct visits are
 redirected to the Streams app.
 
-The plugin's start contract exposes the availability gate (`availability$`,
-`fetchAvailability`) and the app locator, so other plugins — notably `streams_app` —
-can gate and link to sig-events entry points without depending on this plugin's
-internals.
+The plugin's start contract exposes the availability gate (`availability$`) and the
+app locator, so other plugins — notably `streams_app` — can gate and link to
+sig-events entry points without depending on this plugin's internals.

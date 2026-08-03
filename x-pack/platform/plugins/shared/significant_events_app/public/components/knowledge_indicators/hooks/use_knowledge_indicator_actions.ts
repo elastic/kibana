@@ -109,50 +109,50 @@ export function useKnowledgeIndicatorActions({
 }
 
 export const EXCLUDE_LABEL = i18n.translate(
-  'xpack.streams.knowledgeIndicatorActions.excludeLabel',
+  'xpack.significantEventsApp.knowledgeIndicatorActions.excludeLabel',
   { defaultMessage: 'Exclude' }
 );
 
 export const RESTORE_LABEL = i18n.translate(
-  'xpack.streams.knowledgeIndicatorActions.restoreLabel',
+  'xpack.significantEventsApp.knowledgeIndicatorActions.restoreLabel',
   { defaultMessage: 'Restore' }
 );
 
 export const PROMOTE_LABEL = i18n.translate(
-  'xpack.streams.knowledgeIndicatorActions.promoteLabel',
+  'xpack.significantEventsApp.knowledgeIndicatorActions.promoteLabel',
   { defaultMessage: 'Promote' }
 );
 
-export const DELETE_LABEL = i18n.translate('xpack.streams.knowledgeIndicatorActions.deleteLabel', {
+export const DELETE_LABEL = i18n.translate('xpack.significantEventsApp.knowledgeIndicatorActions.deleteLabel', {
   defaultMessage: 'Delete',
 });
 
 const EXCLUDE_SUCCESS_TOAST = i18n.translate(
-  'xpack.streams.knowledgeIndicatorActions.excludeSuccessToast',
+  'xpack.significantEventsApp.knowledgeIndicatorActions.excludeSuccessToast',
   { defaultMessage: 'Knowledge indicator excluded' }
 );
 
 const EXCLUDE_ERROR_TOAST = i18n.translate(
-  'xpack.streams.knowledgeIndicatorActions.excludeErrorToast',
+  'xpack.significantEventsApp.knowledgeIndicatorActions.excludeErrorToast',
   { defaultMessage: 'Failed to exclude knowledge indicator' }
 );
 
 const RESTORE_SUCCESS_TOAST = i18n.translate(
-  'xpack.streams.knowledgeIndicatorActions.restoreSuccessToast',
+  'xpack.significantEventsApp.knowledgeIndicatorActions.restoreSuccessToast',
   { defaultMessage: 'Knowledge indicator restored' }
 );
 
 const RESTORE_ERROR_TOAST = i18n.translate(
-  'xpack.streams.knowledgeIndicatorActions.restoreErrorToast',
+  'xpack.significantEventsApp.knowledgeIndicatorActions.restoreErrorToast',
   { defaultMessage: 'Failed to restore knowledge indicator' }
 );
 
 const PROMOTE_SUCCESS_TOAST = i18n.translate(
-  'xpack.streams.knowledgeIndicatorActions.promoteSuccessToast',
+  'xpack.significantEventsApp.knowledgeIndicatorActions.promoteSuccessToast',
   { defaultMessage: 'Knowledge indicator promoted' }
 );
 
 const PROMOTE_ERROR_TOAST = i18n.translate(
-  'xpack.streams.knowledgeIndicatorActions.promoteErrorToast',
+  'xpack.significantEventsApp.knowledgeIndicatorActions.promoteErrorToast',
   { defaultMessage: 'Failed to promote knowledge indicator' }
 );

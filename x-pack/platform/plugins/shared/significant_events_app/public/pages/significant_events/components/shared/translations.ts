@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import type { SignificantEventStatus } from '@kbn/significant-events-schema';
 
 export const FIND_SIGNIFICANT_EVENTS_LABEL = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.findSignificantEventsLabel',
+  'xpack.significantEventsApp.findSignificantEventsLabel',
   {
     defaultMessage: 'Find Significant Events',
   }
@@ -17,7 +17,7 @@ export const FIND_SIGNIFICANT_EVENTS_LABEL = i18n.translate(
 
 /** Tooltip for controls disabled while Significant Events activity is paused. */
 export const ACTIVITY_PAUSED_TOOLTIP = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.activityPausedTooltip',
+  'xpack.significantEventsApp.activityPausedTooltip',
   {
     defaultMessage: 'Significant Events activity is paused. Resume it in Settings.',
   }
@@ -25,7 +25,7 @@ export const ACTIVITY_PAUSED_TOOLTIP = i18n.translate(
 
 /** Tooltip while maintenance status is still loading. */
 export const ACTIVITY_STATUS_LOADING_TOOLTIP = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.activityStatusLoadingTooltip',
+  'xpack.significantEventsApp.activityStatusLoadingTooltip',
   {
     defaultMessage: 'Checking Significant Events activity status…',
   }
@@ -33,7 +33,7 @@ export const ACTIVITY_STATUS_LOADING_TOOLTIP = i18n.translate(
 
 /** Tooltip when maintenance status could not be loaded. */
 export const ACTIVITY_STATUS_ERROR_TOOLTIP = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.activityStatusErrorTooltip',
+  'xpack.significantEventsApp.activityStatusErrorTooltip',
   {
     defaultMessage:
       'Could not load Significant Events activity status. New activity stays blocked until status is available.',
@@ -63,70 +63,70 @@ export const getActivityBlockTooltip = ({
 };
 
 export const CANCEL_DISCOVERY_LABEL = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.cancelDiscoveryLabel',
+  'xpack.significantEventsApp.cancelDiscoveryLabel',
   {
     defaultMessage: 'Cancel',
   }
 );
 
 export const GENERATE_FEATURES_BUTTON_LABEL = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.streamsView.generateFeaturesButtonLabel',
+  'xpack.significantEventsApp.streamsView.generateFeaturesButtonLabel',
   {
     defaultMessage: 'Generate KI Features',
   }
 );
 
 export const GENERATE_QUERIES_BUTTON_LABEL = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.streamsView.generateQueriesButtonLabel',
+  'xpack.significantEventsApp.streamsView.generateQueriesButtonLabel',
   {
     defaultMessage: 'Generate KI Queries',
   }
 );
 
 export const CONNECTOR_LOAD_ERROR = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.streamsView.connectorLoadError',
+  'xpack.significantEventsApp.streamsView.connectorLoadError',
   {
     defaultMessage: 'Failed to load connectors',
   }
 );
 
 export const GENERATE_CONFIG_ARIA_LABEL = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.streamsView.generateConfigAriaLabel',
+  'xpack.significantEventsApp.streamsView.generateConfigAriaLabel',
   {
     defaultMessage: 'Configure generation steps and models',
   }
 );
 
 export const GENERATE_BUTTON_LABEL = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.streamsView.generateButtonLabel',
+  'xpack.significantEventsApp.streamsView.generateButtonLabel',
   {
     defaultMessage: 'Generate',
   }
 );
 
 export const MODEL_SELECTION_PANEL_TITLE = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.streamsView.modelSelectionPanelTitle',
+  'xpack.significantEventsApp.streamsView.modelSelectionPanelTitle',
   {
     defaultMessage: 'Model selection',
   }
 );
 
 export const MODEL_SETTINGS_LABEL = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.streamsView.modelSettingsLabel',
+  'xpack.significantEventsApp.streamsView.modelSettingsLabel',
   {
     defaultMessage: 'Model settings',
   }
 );
 
 export const DEFAULT_MODEL_BADGE_LABEL = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.streamsView.defaultModelBadgeLabel',
+  'xpack.significantEventsApp.streamsView.defaultModelBadgeLabel',
   {
     defaultMessage: 'Default',
   }
 );
 
 export const GENERATE_FEATURES_TOOLTIP = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.streamsView.generateFeaturesTooltip',
+  'xpack.significantEventsApp.streamsView.generateFeaturesTooltip',
   {
     defaultMessage:
       'Runs only feature identification on selected streams using the configured model.',
@@ -134,32 +134,32 @@ export const GENERATE_FEATURES_TOOLTIP = i18n.translate(
 );
 
 export const GENERATE_QUERIES_TOOLTIP = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.streamsView.generateQueriesTooltip',
+  'xpack.significantEventsApp.streamsView.generateQueriesTooltip',
   {
     defaultMessage: 'Runs only query generation on selected streams using the configured model.',
   }
 );
 
 export const CHANGE_TYPE_LABELS: Record<string, string> = {
-  dip: i18n.translate('xpack.streams.changeType.dip', {
+  dip: i18n.translate('xpack.significantEventsApp.changeType.dip', {
     defaultMessage: 'Dip',
   }),
-  distribution_change: i18n.translate('xpack.streams.changeType.distributionChange', {
+  distribution_change: i18n.translate('xpack.significantEventsApp.changeType.distributionChange', {
     defaultMessage: 'Distribution change',
   }),
-  non_stationary: i18n.translate('xpack.streams.changeType.nonStationary', {
+  non_stationary: i18n.translate('xpack.significantEventsApp.changeType.nonStationary', {
     defaultMessage: 'Non-stationary',
   }),
-  spike: i18n.translate('xpack.streams.changeType.spike', {
+  spike: i18n.translate('xpack.significantEventsApp.changeType.spike', {
     defaultMessage: 'Spike',
   }),
-  stationary: i18n.translate('xpack.streams.changeType.stationary', {
+  stationary: i18n.translate('xpack.significantEventsApp.changeType.stationary', {
     defaultMessage: 'Stationary',
   }),
-  step_change: i18n.translate('xpack.streams.changeType.stepChange', {
+  step_change: i18n.translate('xpack.significantEventsApp.changeType.stepChange', {
     defaultMessage: 'Step change',
   }),
-  trend_change: i18n.translate('xpack.streams.changeType.trendChange', {
+  trend_change: i18n.translate('xpack.significantEventsApp.changeType.trendChange', {
     defaultMessage: 'Trend change',
   }),
 };
@@ -168,13 +168,13 @@ export const changeTypeLabel = (type?: string): string =>
   (type ? CHANGE_TYPE_LABELS[type] : undefined) ?? type ?? '-';
 
 export const SIGNIFICANT_EVENT_STATUS_LABELS: Record<SignificantEventStatus, string> = {
-  open: i18n.translate('xpack.streams.significantEvent.status.open', {
+  open: i18n.translate('xpack.significantEventsApp.significantEvent.status.open', {
     defaultMessage: 'Open',
   }),
-  dismissed: i18n.translate('xpack.streams.significantEvent.status.dismissed', {
+  dismissed: i18n.translate('xpack.significantEventsApp.significantEvent.status.dismissed', {
     defaultMessage: 'Dismissed',
   }),
-  closed: i18n.translate('xpack.streams.significantEvent.status.closed', {
+  closed: i18n.translate('xpack.significantEventsApp.significantEvent.status.closed', {
     defaultMessage: 'Closed',
   }),
 };

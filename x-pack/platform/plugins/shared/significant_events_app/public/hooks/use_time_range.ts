@@ -26,11 +26,18 @@ export function useTimeRange() {
   const location = useLocation();
 
   // DateRangeRedirect ensures rangeFrom/rangeTo are always present.
-  // Parsing is memoized so URLSearchParams isn't re-allocated on every render.
-  return useMemo(() => {
+  const { rangeFrom, rangeTo } = useMemo(() => {
     const searchParams = new URLSearchParams(location.search);
-    const rangeFrom = searchParams.get('rangeFrom') ?? DEFAULT_FROM;
-    const rangeTo = searchParams.get('rangeTo') ?? DEFAULT_TO;
+    return {
+      rangeFrom: searchParams.get('rangeFrom') ?? DEFAULT_FROM,
+      rangeTo: searchParams.get('rangeTo') ?? DEFAULT_TO,
+    };
+  }, [location.search]);
+
+  // Resolving "now" is memoized on the relative range: without it every render
+  // produces new absolute values, which turns them into unstable effect/query
+  // dependencies for consumers.
+  return useMemo(() => {
     const { from: start, to: end } = getAbsoluteTimeRange(
       { from: rangeFrom, to: rangeTo },
       { forceNow: new Date() }
@@ -44,5 +51,5 @@ export function useTimeRange() {
       startMs: new Date(start).getTime(), // Absolute milliseconds
       endMs: new Date(end).getTime(),
     };
-  }, [location.search]);
+  }, [rangeFrom, rangeTo]);
 }

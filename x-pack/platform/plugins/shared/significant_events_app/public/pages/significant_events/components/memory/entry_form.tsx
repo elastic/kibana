@@ -66,7 +66,7 @@ export function EntryFormFields({
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
       <FieldSection
-        label={i18n.translate('xpack.streams.memory.titleLabel', { defaultMessage: 'Title' })}
+        label={i18n.translate('xpack.significantEventsApp.memory.titleLabel', { defaultMessage: 'Title' })}
       >
         <EuiFieldText
           value={title}
@@ -76,7 +76,7 @@ export function EntryFormFields({
         />
       </FieldSection>
       <FieldSection
-        label={i18n.translate('xpack.streams.memory.contentLabel', {
+        label={i18n.translate('xpack.significantEventsApp.memory.contentLabel', {
           defaultMessage: 'Content',
         })}
       >
@@ -89,12 +89,12 @@ export function EntryFormFields({
         />
       </FieldSection>
       <FieldSection
-        label={i18n.translate('xpack.streams.memory.categoriesLabel', {
+        label={i18n.translate('xpack.significantEventsApp.memory.categoriesLabel', {
           defaultMessage: 'Categories',
         })}
       >
         <EuiComboBox
-          aria-label={i18n.translate('xpack.streams.memory.categoriesAriaLabel', {
+          aria-label={i18n.translate('xpack.significantEventsApp.memory.categoriesAriaLabel', {
             defaultMessage: 'Categories',
           })}
           options={categoryOptions}
@@ -105,17 +105,17 @@ export function EntryFormFields({
           }
           isClearable
           fullWidth
-          placeholder={i18n.translate('xpack.streams.memory.categoriesPlaceholder', {
+          placeholder={i18n.translate('xpack.significantEventsApp.memory.categoriesPlaceholder', {
             defaultMessage: 'e.g. infrastructure/kubernetes',
           })}
           data-test-subj={categoriesTestSubj}
         />
       </FieldSection>
       <FieldSection
-        label={i18n.translate('xpack.streams.memory.tagsLabel', { defaultMessage: 'Tags' })}
+        label={i18n.translate('xpack.significantEventsApp.memory.tagsLabel', { defaultMessage: 'Tags' })}
       >
         <EuiComboBox
-          aria-label={i18n.translate('xpack.streams.memory.tagsAriaLabel', {
+          aria-label={i18n.translate('xpack.significantEventsApp.memory.tagsAriaLabel', {
             defaultMessage: 'Tags',
           })}
           options={[]}

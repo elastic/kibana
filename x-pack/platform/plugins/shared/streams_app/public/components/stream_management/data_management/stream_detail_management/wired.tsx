@@ -27,6 +27,8 @@ import { WiredStreamBadge } from '../../../stream_badges';
 import { StreamDetailAttachments } from '../../../stream_detail_attachments';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useStreamsPrivileges } from '../../../../hooks/use_streams_privileges';
+import { useSignificantEventsApp } from '../../../../hooks/use_significant_events_app';
+import { SignificantEventsAppRedirect } from '../../../significant_events_app_redirect';
 import { buildLifecycleTabActions } from './lifecycle_tab_label_with_actions';
 import {
   ImportLifecycleFlyoutProvider,
@@ -96,8 +98,9 @@ function WiredStreamDetailManagementContent({
   const isProcessingEnabled = !definition.replicated;
   const {
     features: { significantEvents },
-    isLoading: isPrivilegesLoading,
   } = useStreamsPrivileges();
+  const { isAvailable: isSignificantEventsAvailable, isLoading: isSignificantEventsLoading } =
+    useSignificantEventsApp();
 
   const backToStreamsLabel = i18n.translate('xpack.streams.streamDetailView.backToStreamsLabel', {
     defaultMessage: 'Streams',
@@ -294,8 +297,11 @@ function WiredStreamDetailManagementContent({
   }
 
   if (tab === 'significantEvents') {
-    if (isPrivilegesLoading) {
+    if (isSignificantEventsLoading) {
       return null;
+    }
+    if (isSignificantEventsAvailable) {
+      return <SignificantEventsAppRedirect tab="knowledge_indicators" stream={key} />;
     }
 
     if (significantEvents?.available) {

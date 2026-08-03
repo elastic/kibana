@@ -73,7 +73,7 @@ export function DeleteFeatureModal({
     <EuiModal onClose={onCancel} aria-label={MODAL_ARIA_LABEL} maxWidth={600}>
       <EuiModalHeader>
         <EuiModalHeaderTitle>
-          {i18n.translate('xpack.streams.deleteFeatureModal.title', {
+          {i18n.translate('xpack.significantEventsApp.deleteFeatureModal.title', {
             defaultMessage:
               'Are you sure you want to delete {count, plural, one {this feature} other {these features}}?',
             values: { count: features.length },
@@ -82,7 +82,7 @@ export function DeleteFeatureModal({
       </EuiModalHeader>
       <EuiModalBody>
         <EuiText>
-          {i18n.translate('xpack.streams.deleteFeatureModal.consequenceMessage', {
+          {i18n.translate('xpack.significantEventsApp.deleteFeatureModal.consequenceMessage', {
             defaultMessage:
               'This will permanently delete {count, plural, one {the feature} other {the selected features}}.',
             values: { count: features.length },
@@ -124,7 +124,7 @@ export function DeleteFeatureModal({
           fill
           data-test-subj="streamsAppDeleteFeatureModalConfirmButton"
         >
-          {i18n.translate('xpack.streams.deleteFeatureModal.deleteButton', {
+          {i18n.translate('xpack.significantEventsApp.deleteFeatureModal.deleteButton', {
             defaultMessage: 'Delete {count, plural, one {feature} other {features}}',
             values: { count: features.length },
           })}
@@ -136,31 +136,31 @@ export function DeleteFeatureModal({
 
 // i18n labels
 
-const FEATURE_COLUMN_LABEL = i18n.translate('xpack.streams.deleteFeatureModal.featureColumn', {
+const FEATURE_COLUMN_LABEL = i18n.translate('xpack.significantEventsApp.deleteFeatureModal.featureColumn', {
   defaultMessage: 'Feature',
 });
 
-const TYPE_COLUMN_LABEL = i18n.translate('xpack.streams.deleteFeatureModal.typeColumn', {
+const TYPE_COLUMN_LABEL = i18n.translate('xpack.significantEventsApp.deleteFeatureModal.typeColumn', {
   defaultMessage: 'Type',
 });
 
-const STREAM_COLUMN_LABEL = i18n.translate('xpack.streams.deleteFeatureModal.streamColumn', {
+const STREAM_COLUMN_LABEL = i18n.translate('xpack.significantEventsApp.deleteFeatureModal.streamColumn', {
   defaultMessage: 'Stream',
 });
 
 const MODAL_ARIA_LABEL = i18n.translate(
-  'xpack.streams.deleteFeatureModal.euiModal.deleteFeaturesModalLabel',
+  'xpack.significantEventsApp.deleteFeatureModal.euiModal.deleteFeaturesModalLabel',
   { defaultMessage: 'Delete features modal' }
 );
 
-const WARNING_MESSAGE = i18n.translate('xpack.streams.deleteFeatureModal.warningMessage', {
+const WARNING_MESSAGE = i18n.translate('xpack.significantEventsApp.deleteFeatureModal.warningMessage', {
   defaultMessage: 'This action cannot be undone.',
 });
 
-const TABLE_CAPTION = i18n.translate('xpack.streams.deleteFeatureModal.tableCaption', {
+const TABLE_CAPTION = i18n.translate('xpack.significantEventsApp.deleteFeatureModal.tableCaption', {
   defaultMessage: 'List of features to delete',
 });
 
-const CANCEL_BUTTON_LABEL = i18n.translate('xpack.streams.deleteFeatureModal.cancelButton', {
+const CANCEL_BUTTON_LABEL = i18n.translate('xpack.significantEventsApp.deleteFeatureModal.cancelButton', {
   defaultMessage: 'Cancel',
 });

@@ -62,7 +62,7 @@ function buildEntries(data: EventLifecycleResponse): TimelineEntry[] {
       title: event.title,
       description:
         event.severity != null
-          ? i18n.translate('xpack.streams.lifecycle.severity', {
+          ? i18n.translate('xpack.significantEventsApp.lifecycle.severity', {
               defaultMessage: 'Severity: {severity}',
               values: { severity: getSeverityLabel(event.severity) },
             })
@@ -100,12 +100,12 @@ export const LifecycleTimeline = ({ data }: { data: EventLifecycleResponse | und
         titleSize="xs"
         title={
           <h3>
-            {i18n.translate('xpack.streams.lifecycle.emptyTitle', {
+            {i18n.translate('xpack.significantEventsApp.lifecycle.emptyTitle', {
               defaultMessage: 'No lifecycle data',
             })}
           </h3>
         }
-        body={i18n.translate('xpack.streams.lifecycle.emptyBody', {
+        body={i18n.translate('xpack.significantEventsApp.lifecycle.emptyBody', {
           defaultMessage: 'No lifecycle chain could be reconstructed for this event.',
         })}
       />
@@ -140,7 +140,7 @@ export const LifecycleTimeline = ({ data }: { data: EventLifecycleResponse | und
             {entry.detail && <SubduedLine>{entry.detail}</SubduedLine>}
             {entry.workflowExecutionId && (
               <SubduedLine data-test-subj="lifecycleCreatedByWorkflow">
-                {i18n.translate('xpack.streams.lifecycle.createdByWorkflow', {
+                {i18n.translate('xpack.significantEventsApp.lifecycle.createdByWorkflow', {
                   defaultMessage: 'Created by workflow: {id}',
                   values: { id: entry.workflowExecutionId },
                 })}

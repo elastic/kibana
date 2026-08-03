@@ -170,14 +170,14 @@ export function KnowledgeIndicatorActionsCell({
 }
 
 const ACTIONS_MENU_BUTTON_ARIA_LABEL = i18n.translate(
-  'xpack.streams.significantEventsTable.actionsMenuButtonAriaLabel',
+  'xpack.significantEventsApp.significantEventsTable.actionsMenuButtonAriaLabel',
   {
     defaultMessage: 'Knowledge indicator actions',
   }
 );
 
 const ACTIONS_MENU_POPOVER_ARIA_LABEL = i18n.translate(
-  'xpack.streams.significantEventsTable.actionsMenuPopoverAriaLabel',
+  'xpack.significantEventsApp.significantEventsTable.actionsMenuPopoverAriaLabel',
   {
     defaultMessage: 'Knowledge indicator actions menu',
   }

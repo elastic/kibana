@@ -322,74 +322,74 @@ function getQueryInputValue(item: StreamQueryStats) {
 }
 
 const STREAM_LABEL = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.queryDetailsFlyout.streamLabel',
+  'xpack.significantEventsApp.queryDetailsFlyout.streamLabel',
   { defaultMessage: 'Stream' }
 );
 
 const GENERAL_INFORMATION_TITLE = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.queryDetailsFlyout.generalInformationTitle',
+  'xpack.significantEventsApp.queryDetailsFlyout.generalInformationTitle',
   { defaultMessage: 'General information' }
 );
 
 const TYPE_LABEL = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.queryDetailsFlyout.typeLabel',
+  'xpack.significantEventsApp.queryDetailsFlyout.typeLabel',
   { defaultMessage: 'Type' }
 );
 
 const QUERY_PANEL_TITLE = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.queryDetailsFlyout.queryLabel',
+  'xpack.significantEventsApp.queryDetailsFlyout.queryLabel',
   { defaultMessage: 'Query' }
 );
 
 const DESCRIPTION_LABEL = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.queryDetailsFlyout.descriptionLabel',
+  'xpack.significantEventsApp.queryDetailsFlyout.descriptionLabel',
   { defaultMessage: 'Description' }
 );
 
 const SEVERITY_DETAILS_LABEL = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.queryDetailsFlyout.severityDetailsLabel',
+  'xpack.significantEventsApp.queryDetailsFlyout.severityDetailsLabel',
   { defaultMessage: 'Severity' }
 );
 
 const ACTIONS_BUTTON_ARIA_LABEL = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.queryDetailsFlyout.actionsButtonAriaLabel',
+  'xpack.significantEventsApp.queryDetailsFlyout.actionsButtonAriaLabel',
   { defaultMessage: 'Actions' }
 );
 
 const CLOSE_BUTTON_ARIA_LABEL = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.queryDetailsFlyout.closeButtonAriaLabel',
+  'xpack.significantEventsApp.queryDetailsFlyout.closeButtonAriaLabel',
   { defaultMessage: 'Close' }
 );
 
 const DELETE_ACTION_LABEL = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.queryDetailsFlyout.deleteActionLabel',
+  'xpack.significantEventsApp.queryDetailsFlyout.deleteActionLabel',
   { defaultMessage: 'Delete' }
 );
 
 const CANCEL_BUTTON_LABEL = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.queryDetailsFlyout.cancelButtonLabel',
+  'xpack.significantEventsApp.queryDetailsFlyout.cancelButtonLabel',
   { defaultMessage: 'Cancel' }
 );
 
 const DELETE_MODAL_TITLE_ID = 'queryDetailsFlyoutDeleteModalTitle';
 
 const DELETE_MODAL_TITLE = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.queryDetailsFlyout.deleteModalTitle',
+  'xpack.significantEventsApp.queryDetailsFlyout.deleteModalTitle',
   { defaultMessage: 'Delete query' }
 );
 
 const DELETE_MODAL_BODY = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.queryDetailsFlyout.deleteModalBody',
+  'xpack.significantEventsApp.queryDetailsFlyout.deleteModalBody',
   { defaultMessage: 'Are you sure you want to delete this query? This action cannot be undone.' }
 );
 
 const DELETE_CONFIRM_BUTTON_LABEL = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.queryDetailsFlyout.deleteConfirmButtonLabel',
+  'xpack.significantEventsApp.queryDetailsFlyout.deleteConfirmButtonLabel',
   { defaultMessage: 'Delete query' }
 );
 
 const NO_OCCURRENCES_DESCRIPTION = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.queryDetailsFlyout.noOccurrencesDescription',
+  'xpack.significantEventsApp.queryDetailsFlyout.noOccurrencesDescription',
   {
     defaultMessage:
       'No events detected yet. Leave the query as-is to display future events, or use the Open in Discover action to explore further.',
@@ -397,7 +397,7 @@ const NO_OCCURRENCES_DESCRIPTION = i18n.translate(
 );
 
 const NO_OCCURRENCES_STATS_DESCRIPTION = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.queryDetailsFlyout.noOccurrencesStatsDescription',
+  'xpack.significantEventsApp.queryDetailsFlyout.noOccurrencesStatsDescription',
   {
     defaultMessage:
       'This STATS query is not monitored in the background. Use the Open in Discover action to preview its results.',
@@ -405,12 +405,12 @@ const NO_OCCURRENCES_STATS_DESCRIPTION = i18n.translate(
 );
 
 const STATS_CALLOUT_TITLE = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.queryDetailsFlyout.statsCalloutTitle',
+  'xpack.significantEventsApp.queryDetailsFlyout.statsCalloutTitle',
   { defaultMessage: 'STATS query' }
 );
 
 const STATS_CALLOUT_DESCRIPTION = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.queryDetailsFlyout.statsCalloutDescription',
+  'xpack.significantEventsApp.queryDetailsFlyout.statsCalloutDescription',
   {
     defaultMessage:
       'STATS queries detect aggregate patterns like rising error rates or latency spikes. They cannot be promoted to background scanning rules yet.',

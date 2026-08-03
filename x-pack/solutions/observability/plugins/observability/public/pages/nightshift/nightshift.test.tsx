@@ -82,7 +82,7 @@ describe('NightshiftPage', () => {
     await openAppMenuOverflow();
 
     const settingsLink = await screen.findByTestId('nightshiftSettingsLink');
-    expect(settingsLink).toHaveAttribute('href', '/app/streams/_discovery/settings');
+    expect(settingsLink).toHaveAttribute('href', '/app/significantEvents/settings');
 
     let trackedClick: { action: string | null; element: string | null } | undefined;
     const captureTrackedClick = (event: MouseEvent) => {
@@ -105,6 +105,6 @@ describe('NightshiftPage', () => {
         element: 'nightshiftPageHeader',
       })
     );
-    expect(navigateToUrl).toHaveBeenCalledWith('/app/streams/_discovery/settings');
+    expect(navigateToUrl).toHaveBeenCalledWith('/app/significantEvents/settings');
   });
 });

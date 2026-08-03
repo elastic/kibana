@@ -13,7 +13,7 @@ import { ContextMenuSplitButton } from '../shared/context_menu_split_button';
 import type { MenuHelpers, ContextMenuSplitButtonProps } from '../shared/context_menu_split_button';
 
 const SECONDARY_ARIA_LABEL = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.findSignificantEventsSecondaryAriaLabel',
+  'xpack.significantEventsApp.findSignificantEventsSecondaryAriaLabel',
   { defaultMessage: 'Discovery options' }
 );
 

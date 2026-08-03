@@ -24,10 +24,10 @@ import type { FocusedSignificantEventService } from '../../../services/significa
 import { registerSignificantEventAutoAttach } from '../lib/significant_event_auto_attach';
 
 const labels = {
-  fallback: i18n.translate('xpack.streams.significantEventAttachment.fallbackLabel', {
+  fallback: i18n.translate('xpack.significantEventsApp.significantEventAttachment.fallbackLabel', {
     defaultMessage: 'Significant event',
   }),
-  open: i18n.translate('xpack.streams.significantEventAttachment.openButton', {
+  open: i18n.translate('xpack.significantEventsApp.significantEventAttachment.openButton', {
     defaultMessage: 'Open preview',
   }),
 };

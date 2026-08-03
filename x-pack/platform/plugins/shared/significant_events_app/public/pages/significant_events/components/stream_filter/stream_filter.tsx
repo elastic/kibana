@@ -43,18 +43,18 @@ export function StreamFilter({
       selected={selectedStreams}
       onSelectedChange={onSelectedStreamsChange}
       labels={{
-        button: i18n.translate('xpack.streams.knowledgeIndicators.streamFilterLabel', {
+        button: i18n.translate('xpack.significantEventsApp.knowledgeIndicators.streamFilterLabel', {
           defaultMessage: 'Stream',
         }),
-        groupLabel: i18n.translate('xpack.streams.knowledgeIndicators.streamFilterGroupLabel', {
+        groupLabel: i18n.translate('xpack.significantEventsApp.knowledgeIndicators.streamFilterGroupLabel', {
           defaultMessage: 'Filter by stream',
         }),
         popoverAriaLabel: i18n.translate(
-          'xpack.streams.knowledgeIndicators.streamFilterPopoverLabel',
+          'xpack.significantEventsApp.knowledgeIndicators.streamFilterPopoverLabel',
           { defaultMessage: 'Stream filter' }
         ),
         selectableAriaLabel: i18n.translate(
-          'xpack.streams.knowledgeIndicators.streamFilterSelectableAriaLabel',
+          'xpack.significantEventsApp.knowledgeIndicators.streamFilterSelectableAriaLabel',
           { defaultMessage: 'Filter knowledge indicators by stream' }
         ),
       }}

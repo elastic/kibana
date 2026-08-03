@@ -57,14 +57,14 @@ export function useRulesDemote({ onSuccess }: UseRulesDemoteParams) {
 }
 
 const BULK_DELETE_ERROR_TOAST_TITLE = i18n.translate(
-  'xpack.streams.rulesTable.bulkDeleteErrorToastTitle',
+  'xpack.significantEventsApp.rulesTable.bulkDeleteErrorToastTitle',
   {
     defaultMessage: 'Failed to delete selected rules',
   }
 );
 
 const BULK_DELETE_SUCCESS_TOAST_TITLE = i18n.translate(
-  'xpack.streams.rulesTable.bulkDeleteSuccessToastTitle',
+  'xpack.significantEventsApp.rulesTable.bulkDeleteSuccessToastTitle',
   {
     defaultMessage: 'Rules deleted',
   }

@@ -88,7 +88,7 @@ export function MemoryTab() {
     {
       key: 'scrape',
       icon: 'refresh',
-      label: i18n.translate('xpack.streams.memory.scrapeButton', {
+      label: i18n.translate('xpack.significantEventsApp.memory.scrapeButton', {
         defaultMessage: 'Scrape Conversations',
       }),
       testSubj: 'streamsMemoryScrapeButton',
@@ -98,7 +98,7 @@ export function MemoryTab() {
     {
       key: 'consolidate',
       icon: 'broom',
-      label: i18n.translate('xpack.streams.memory.consolidateButton', {
+      label: i18n.translate('xpack.significantEventsApp.memory.consolidateButton', {
         defaultMessage: 'Consolidate Memory',
       }),
       testSubj: 'streamsMemoryConsolidateButton',
@@ -108,7 +108,7 @@ export function MemoryTab() {
     {
       key: 'synthesize',
       icon: 'sparkles',
-      label: i18n.translate('xpack.streams.memory.synthesizeButton', {
+      label: i18n.translate('xpack.significantEventsApp.memory.synthesizeButton', {
         defaultMessage: 'Synthesize Memory',
       }),
       testSubj: 'streamsMemorySynthesizeButton',
@@ -118,7 +118,7 @@ export function MemoryTab() {
     {
       key: 'detectGaps',
       icon: 'inspect',
-      label: i18n.translate('xpack.streams.memory.detectGapsButton', {
+      label: i18n.translate('xpack.significantEventsApp.memory.detectGapsButton', {
         defaultMessage: 'Detect Gaps',
       }),
       testSubj: 'streamsMemoryDetectGapsButton',
@@ -137,7 +137,7 @@ export function MemoryTab() {
         id: '__uncategorized__',
         label: (
           <EuiText size="s">
-            {i18n.translate('xpack.streams.memory.uncategorized', {
+            {i18n.translate('xpack.significantEventsApp.memory.uncategorized', {
               defaultMessage: 'Uncategorized',
             })}
           </EuiText>
@@ -178,7 +178,7 @@ export function MemoryTab() {
               <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
                 <EuiFlexItem>
                   <EuiFieldSearch
-                    placeholder={i18n.translate('xpack.streams.memory.searchPlaceholder', {
+                    placeholder={i18n.translate('xpack.significantEventsApp.memory.searchPlaceholder', {
                       defaultMessage: 'Search memory entries...',
                     })}
                     value={searchQuery}
@@ -192,14 +192,14 @@ export function MemoryTab() {
                 {canManage && (
                   <EuiFlexItem grow={false}>
                     <EuiToolTip
-                      content={i18n.translate('xpack.streams.memory.newEntryButton', {
+                      content={i18n.translate('xpack.significantEventsApp.memory.newEntryButton', {
                         defaultMessage: 'New memory entry',
                       })}
                       disableScreenReaderOutput
                     >
                       <EuiButtonIcon
                         iconType="plusInCircle"
-                        aria-label={i18n.translate('xpack.streams.memory.newEntryButton', {
+                        aria-label={i18n.translate('xpack.significantEventsApp.memory.newEntryButton', {
                           defaultMessage: 'New memory entry',
                         })}
                         onClick={() => setShowCreateFlyout(true)}
@@ -212,14 +212,14 @@ export function MemoryTab() {
                   <EuiPopover
                     button={
                       <EuiToolTip
-                        content={i18n.translate('xpack.streams.memory.workflowActionsButton', {
+                        content={i18n.translate('xpack.significantEventsApp.memory.workflowActionsButton', {
                           defaultMessage: 'Workflow actions',
                         })}
                         disableScreenReaderOutput
                       >
                         <EuiButtonIcon
                           iconType="boxesHorizontal"
-                          aria-label={i18n.translate('xpack.streams.memory.workflowActionsButton', {
+                          aria-label={i18n.translate('xpack.significantEventsApp.memory.workflowActionsButton', {
                             defaultMessage: 'Workflow actions',
                           })}
                           onClick={() => setIsActionsPopoverOpen((v) => !v)}
@@ -265,10 +265,10 @@ export function MemoryTab() {
                                 data-test-subj="streamsMemoryToggleWorkflowsButton"
                               >
                                 {workflowsEnabled
-                                  ? i18n.translate('xpack.streams.memory.disableWorkflowsButton', {
+                                  ? i18n.translate('xpack.significantEventsApp.memory.disableWorkflowsButton', {
                                       defaultMessage: 'Disable background workflows',
                                     })
-                                  : i18n.translate('xpack.streams.memory.enableWorkflowsButton', {
+                                  : i18n.translate('xpack.significantEventsApp.memory.enableWorkflowsButton', {
                                       defaultMessage: 'Enable background workflows',
                                     })}
                               </EuiContextMenuItem>,
@@ -301,7 +301,7 @@ export function MemoryTab() {
                                   ? activityBlockTooltip
                                   : !workflowsEnabled && !isWorkflowsEnabledLoading
                                   ? i18n.translate(
-                                      'xpack.streams.memory.workflowActionRequiresEnabledTooltip',
+                                      'xpack.significantEventsApp.memory.workflowActionRequiresEnabledTooltip',
                                       {
                                         defaultMessage:
                                           'Enable background workflows before running this action.',
@@ -359,7 +359,7 @@ export function MemoryTab() {
                     ))}
                     {searchData?.results.length === 0 && (
                       <EuiText color="subdued">
-                        {i18n.translate('xpack.streams.memory.noResults', {
+                        {i18n.translate('xpack.significantEventsApp.memory.noResults', {
                           defaultMessage: 'No memory entries found.',
                         })}
                       </EuiText>
@@ -372,13 +372,13 @@ export function MemoryTab() {
                 <EuiTreeView
                   items={treeItems}
                   expandByDefault
-                  aria-label={i18n.translate('xpack.streams.memory.treeAriaLabel', {
+                  aria-label={i18n.translate('xpack.significantEventsApp.memory.treeAriaLabel', {
                     defaultMessage: 'Memory entries tree',
                   })}
                 />
               ) : (
                 <EuiText color="subdued">
-                  {i18n.translate('xpack.streams.memory.empty', {
+                  {i18n.translate('xpack.significantEventsApp.memory.empty', {
                     defaultMessage:
                       'No memory entries yet. Agents will automatically create entries as they learn, or you can create entries manually.',
                   })}
@@ -399,7 +399,7 @@ export function MemoryTab() {
           >
             <EuiTitle size="xs">
               <h3>
-                {i18n.translate('xpack.streams.memory.recentChanges.title', {
+                {i18n.translate('xpack.significantEventsApp.memory.recentChanges.title', {
                   defaultMessage: 'Recent Changes',
                 })}
               </h3>
@@ -417,7 +417,7 @@ export function MemoryTab() {
               </EuiFlexGroup>
             ) : (
               <EuiText size="s" color="subdued">
-                {i18n.translate('xpack.streams.memory.recentChanges.empty', {
+                {i18n.translate('xpack.significantEventsApp.memory.recentChanges.empty', {
                   defaultMessage: 'No recent changes.',
                 })}
               </EuiText>

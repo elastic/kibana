@@ -17,6 +17,8 @@ import { useStreamsPrivileges } from '../../../../hooks/use_streams_privileges';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { QueryStreamSchemaEditor } from '../../../query_streams/query_stream_schema_editor';
 import { RedirectTo } from '../../../redirect_to';
+import { useSignificantEventsApp } from '../../../../hooks/use_significant_events_app';
+import { SignificantEventsAppRedirect } from '../../../significant_events_app_redirect';
 import { QueryStreamBadge, useDiscoverStreamLink } from '../../../stream_badges';
 import { StreamDeleteModal } from '../../../stream_delete_modal';
 import { StreamDetailAttachments } from '../../../stream_detail_attachments';
@@ -58,8 +60,9 @@ export function QueryStreamDetailManagement({
   const {
     ui,
     features: { significantEvents },
-    isLoading: isPrivilegesLoading,
   } = useStreamsPrivileges();
+  const { isAvailable: isSignificantEventsAvailable, isLoading: isSignificantEventsLoading } =
+    useSignificantEventsApp();
 
   const canDeleteQueryStream = ui[STREAMS_UI_PRIVILEGES.manage];
 
@@ -174,8 +177,11 @@ export function QueryStreamDetailManagement({
   }));
 
   if (tab === 'significantEvents') {
-    if (isPrivilegesLoading) {
+    if (isSignificantEventsLoading) {
       return null;
+    }
+    if (isSignificantEventsAvailable) {
+      return <SignificantEventsAppRedirect tab="knowledge_indicators" stream={key} />;
     }
 
     if (significantEvents?.available) {

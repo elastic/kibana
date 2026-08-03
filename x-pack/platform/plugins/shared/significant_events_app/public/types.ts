@@ -12,7 +12,6 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { SignificantEventsPublicPluginStart } from '@kbn/significant-events-plugin/public';
-import type { SignificantEventsAvailabilityResponse } from '@kbn/significant-events-plugin/common';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { Observable } from 'rxjs';
@@ -45,11 +44,6 @@ export interface SignificantEventsAppPublicStart {
    * recreating the observable.
    */
   availability$: Observable<boolean>;
-  /**
-   * Server-side availability probe (`GET /internal/significant_events/availability`).
-   * Rejects on transport errors; callers decide how to degrade.
-   */
-  fetchAvailability(signal?: AbortSignal): Promise<SignificantEventsAvailabilityResponse>;
   /**
    * Typed locator for linking into the app (registered under
    * SIGNIFICANT_EVENTS_APP_LOCATOR_ID).

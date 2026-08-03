@@ -65,7 +65,7 @@ export async function startKiIdentificationToolHandler({
   await streamsKIsOnboardingClient.run({ inputs, request });
 
   return {
-    kibanaPath: `/app/streams/_discovery/knowledge_indicators?stream=${encodeURIComponent(
+    kibanaPath: `/app/significant_events/knowledge_indicators?stream=${encodeURIComponent(
       streamName
     )}`,
   };

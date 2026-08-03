@@ -183,11 +183,6 @@ export class SignificantEventsAppPlugin
 
     return {
       availability$: this.availability$,
-      fetchAvailability: (signal) =>
-        pluginsStart.significant_events.significantEventsRepositoryClient.fetch(
-          'GET /internal/significant_events/availability',
-          { signal: signal ?? null }
-        ),
       locator: this.locator,
     };
   }

@@ -115,12 +115,12 @@ export function DeleteQueriesModal({
 }
 
 const MODAL_ARIA_LABEL = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.deleteQueriesModal.ariaLabel',
+  'xpack.significantEventsApp.deleteQueriesModal.ariaLabel',
   { defaultMessage: 'Delete queries modal' }
 );
 
 const CONSEQUENCE_MESSAGE = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.deleteQueriesModal.consequenceMessage',
+  'xpack.significantEventsApp.deleteQueriesModal.consequenceMessage',
   {
     defaultMessage:
       'This will stop scanning for the selected rules. The underlying queries will be preserved on the Knowledge Indicators tab.',
@@ -128,42 +128,42 @@ const CONSEQUENCE_MESSAGE = i18n.translate(
 );
 
 const WARNING_MESSAGE = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.deleteQueriesModal.warningMessage',
+  'xpack.significantEventsApp.deleteQueriesModal.warningMessage',
   { defaultMessage: 'You can re-promote these queries later to resume scanning.' }
 );
 
 const TABLE_CONTENT_ARIA_LABEL = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.deleteQueriesModal.tableContentAriaLabel',
+  'xpack.significantEventsApp.deleteQueriesModal.tableContentAriaLabel',
   { defaultMessage: 'List of queries to delete' }
 );
 
 const CANCEL_BUTTON_LABEL = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.deleteQueriesModal.cancelButton',
+  'xpack.significantEventsApp.deleteQueriesModal.cancelButton',
   { defaultMessage: 'Cancel' }
 );
 
 const DELETE_BUTTON_LABEL = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.deleteQueriesModal.deleteButton',
+  'xpack.significantEventsApp.deleteQueriesModal.deleteButton',
   { defaultMessage: 'Delete' }
 );
 
 const TITLE_COLUMN_LABEL = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.deleteQueriesModal.titleColumn',
+  'xpack.significantEventsApp.deleteQueriesModal.titleColumn',
   { defaultMessage: 'Title' }
 );
 
 const SEVERITY_COLUMN_LABEL = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.deleteQueriesModal.severityColumn',
+  'xpack.significantEventsApp.deleteQueriesModal.severityColumn',
   { defaultMessage: 'Severity' }
 );
 
 const STREAM_COLUMN_LABEL = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.deleteQueriesModal.streamColumn',
+  'xpack.significantEventsApp.deleteQueriesModal.streamColumn',
   { defaultMessage: 'Stream' }
 );
 
 const TYPE_COLUMN_LABEL = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.deleteQueriesModal.typeColumn',
+  'xpack.significantEventsApp.deleteQueriesModal.typeColumn',
   { defaultMessage: 'Type' }
 );
 

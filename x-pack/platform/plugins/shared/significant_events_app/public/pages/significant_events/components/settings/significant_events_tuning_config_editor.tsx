@@ -116,7 +116,7 @@ export function SignificantEventsTuningConfigEditor({
       return validateSignificantEventsTuningConfig(parseSimpleYaml(value));
     } catch (e) {
       return [
-        i18n.translate('xpack.streams.settings.sigEventsTuningConfig.yamlParseError', {
+        i18n.translate('xpack.significantEventsApp.settings.sigEventsTuningConfig.yamlParseError', {
           defaultMessage: 'Invalid YAML: {message}',
           values: { message: e instanceof Error ? e.message : String(e) },
         }),
@@ -146,7 +146,7 @@ export function SignificantEventsTuningConfigEditor({
             size="s"
             color="danger"
             iconType="error"
-            title={i18n.translate('xpack.streams.settings.sigEventsTuningConfig.validationErrors', {
+            title={i18n.translate('xpack.significantEventsApp.settings.sigEventsTuningConfig.validationErrors', {
               defaultMessage: 'Configuration errors',
             })}
           >

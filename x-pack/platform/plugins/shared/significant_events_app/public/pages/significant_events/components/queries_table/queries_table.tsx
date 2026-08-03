@@ -299,7 +299,7 @@ export function QueriesTable() {
       },
       {
         field: 'query.type',
-        name: i18n.translate('xpack.streams.queriesTable.typeColumn', {
+        name: i18n.translate('xpack.significantEventsApp.queriesTable.typeColumn', {
           defaultMessage: 'Type',
         }),
         width: '80px',
@@ -363,7 +363,7 @@ export function QueriesTable() {
         title={
           <h2>
             {i18n.translate(
-              'xpack.streams.significantEventsDiscovery.queriesTable.emptyState.title',
+              'xpack.significantEventsApp.queriesTable.emptyState.title',
               { defaultMessage: 'Rules' }
             )}
           </h2>
@@ -371,7 +371,7 @@ export function QueriesTable() {
         body={
           <p>
             {i18n.translate(
-              'xpack.streams.significantEventsDiscovery.queriesTable.emptyState.description',
+              'xpack.significantEventsApp.queriesTable.emptyState.description',
               {
                 defaultMessage:
                   'No rules created yet. Promote queries from the Knowledge Indicators tab to create rules.',
@@ -386,7 +386,7 @@ export function QueriesTable() {
             })}
           >
             {i18n.translate(
-              'xpack.streams.significantEventsDiscovery.queriesTable.emptyState.goToKnowledgeIndicatorsButton',
+              'xpack.significantEventsApp.queriesTable.emptyState.goToKnowledgeIndicatorsButton',
               { defaultMessage: 'Go to Knowledge Indicators' }
             )}
           </EuiButtonEmpty>

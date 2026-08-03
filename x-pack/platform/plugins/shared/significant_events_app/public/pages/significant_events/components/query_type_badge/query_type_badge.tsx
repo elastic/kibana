@@ -10,11 +10,11 @@ import { EuiBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { QUERY_TYPE_STATS, type QueryType } from '@kbn/significant-events-schema';
 
-const STATS_LABEL = i18n.translate('xpack.streams.queryTypeBadge.statsLabel', {
+const STATS_LABEL = i18n.translate('xpack.significantEventsApp.queryTypeBadge.statsLabel', {
   defaultMessage: 'Stats',
 });
 
-const MATCH_LABEL = i18n.translate('xpack.streams.queryTypeBadge.matchLabel', {
+const MATCH_LABEL = i18n.translate('xpack.significantEventsApp.queryTypeBadge.matchLabel', {
   defaultMessage: 'Match',
 });
 

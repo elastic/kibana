@@ -144,7 +144,7 @@ export function SparkPlot({
         noResults={
           <EuiIcon
             type="chartLine"
-            aria-label={i18n.translate('xpack.streams.columns.euiIcon.noOccurrencesLabel', {
+            aria-label={i18n.translate('xpack.significantEventsApp.columns.euiIcon.noOccurrencesLabel', {
               defaultMessage: 'No occurrences',
             })}
           />

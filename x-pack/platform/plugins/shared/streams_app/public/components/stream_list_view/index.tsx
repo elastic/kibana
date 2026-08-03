@@ -7,6 +7,7 @@
 
 import { EuiEmptyPrompt, EuiLoadingElastic } from '@elastic/eui';
 import type { AppHeaderMenu } from '@kbn/app-header';
+import { SIGNIFICANT_EVENTS_APP_ID } from '@kbn/deeplinks-observability';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { i18n } from '@kbn/i18n';
 import { Streams } from '@kbn/streams-schema';
@@ -27,6 +28,7 @@ import { StreamsTreeTable } from './tree_table';
 import { LegacyLogsDeprecationCallout } from './legacy_logs_deprecation_callout';
 import { CreateQueryStreamFlyoutContent } from '../query_streams/create_query_stream_flyout';
 import { getFormattedError } from '../../util/errors';
+import { useSignificantEventsApp } from '../../hooks/use_significant_events_app';
 
 export function StreamListView() {
   const context = useKibana();
@@ -59,6 +61,8 @@ export function StreamListView() {
     ui: { manage: canManageStreamsKibana },
     features: { significantEvents, queryStreams },
   } = useStreamsPrivileges();
+  const { significantEventsApp, isAvailable: isSignificantEventsAvailable } =
+    useSignificantEventsApp();
 
   const [canManageClassicElasticsearch, setCanManageClassicElasticsearch] =
     useState<boolean>(false);
@@ -169,7 +173,9 @@ export function StreamListView() {
   const showSignificantEventsDiscovery = Boolean(significantEvents?.available);
   const showQueryStreams = Boolean(queryStreams?.enabled);
   const canCreateClassicStream = canManageStreamsKibana && canManageClassicElasticsearch;
-  const significantEventsDiscoveryHref = router.link('/_discovery');
+  const significantEventsDiscoveryHref =
+    significantEventsApp?.locator.getRedirectUrl({}) ??
+    core.application.getUrlForApp(SIGNIFICANT_EVENTS_APP_ID);
 
   const menu = useMemo<AppHeaderMenu>(() => {
     const items: NonNullable<AppHeaderMenu['items']> = [

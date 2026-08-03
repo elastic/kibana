@@ -44,7 +44,7 @@ export function HistoryPanel({ entryId, entry }: { entryId: string; entry: Memor
   const columns: Array<EuiBasicTableColumn<MemoryVersionRecord>> = [
     {
       field: 'version',
-      name: i18n.translate('xpack.streams.memory.history.versionColumn', {
+      name: i18n.translate('xpack.significantEventsApp.memory.history.versionColumn', {
         defaultMessage: 'v',
       }),
       width: '50px',
@@ -53,7 +53,7 @@ export function HistoryPanel({ entryId, entry }: { entryId: string; entry: Memor
     },
     {
       field: 'change_type',
-      name: i18n.translate('xpack.streams.memory.history.changeTypeColumn', {
+      name: i18n.translate('xpack.significantEventsApp.memory.history.changeTypeColumn', {
         defaultMessage: 'Change',
       }),
       width: '90px',
@@ -63,20 +63,20 @@ export function HistoryPanel({ entryId, entry }: { entryId: string; entry: Memor
     },
     {
       field: 'change_summary',
-      name: i18n.translate('xpack.streams.memory.history.summaryColumn', {
+      name: i18n.translate('xpack.significantEventsApp.memory.history.summaryColumn', {
         defaultMessage: 'Summary',
       }),
     },
     {
       field: 'created_by',
-      name: i18n.translate('xpack.streams.memory.history.authorColumn', {
+      name: i18n.translate('xpack.significantEventsApp.memory.history.authorColumn', {
         defaultMessage: 'Author',
       }),
       width: '120px',
     },
     {
       field: 'created_at',
-      name: i18n.translate('xpack.streams.memory.history.dateColumn', {
+      name: i18n.translate('xpack.significantEventsApp.memory.history.dateColumn', {
         defaultMessage: 'Date',
       }),
       width: '130px',
@@ -95,7 +95,7 @@ export function HistoryPanel({ entryId, entry }: { entryId: string; entry: Memor
       <EuiBasicTable
         items={historyData?.history ?? []}
         columns={columns}
-        tableCaption={i18n.translate('xpack.streams.memory.history.tableCaption', {
+        tableCaption={i18n.translate('xpack.significantEventsApp.memory.history.tableCaption', {
           defaultMessage: 'Version history',
         })}
         rowProps={(record) => ({
@@ -115,7 +115,7 @@ export function HistoryPanel({ entryId, entry }: { entryId: string; entry: Memor
           <EuiSpacer size="m" />
           <EuiTitle size="xs">
             <h3>
-              {i18n.translate('xpack.streams.memory.history.diffTitle', {
+              {i18n.translate('xpack.significantEventsApp.memory.history.diffTitle', {
                 defaultMessage: 'Changes in version {version}',
                 values: { version: selectedVersion },
               })}

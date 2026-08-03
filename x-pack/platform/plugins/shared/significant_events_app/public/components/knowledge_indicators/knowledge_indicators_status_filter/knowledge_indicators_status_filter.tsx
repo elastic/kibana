@@ -81,14 +81,14 @@ export function KnowledgeIndicatorsStatusFilter({
 }
 
 const KNOWLEDGE_INDICATOR_STATUS_FILTER_ACTIVE_LABEL = i18n.translate(
-  'xpack.streams.significantEventsTable.knowledgeIndicatorStatusFilterActiveLabel',
+  'xpack.significantEventsApp.significantEventsTable.knowledgeIndicatorStatusFilterActiveLabel',
   {
     defaultMessage: 'Active',
   }
 );
 
 const KNOWLEDGE_INDICATOR_STATUS_FILTER_EXCLUDED_LABEL = i18n.translate(
-  'xpack.streams.significantEventsTable.knowledgeIndicatorStatusFilterExcludedLabel',
+  'xpack.significantEventsApp.significantEventsTable.knowledgeIndicatorStatusFilterExcludedLabel',
   {
     defaultMessage: 'Excluded',
   }

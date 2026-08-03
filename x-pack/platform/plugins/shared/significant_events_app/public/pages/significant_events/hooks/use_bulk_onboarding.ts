@@ -75,7 +75,7 @@ export function useBulkOnboarding({
               .join('\n')
           ),
           {
-            title: i18n.translate('xpack.streams.bulkOnboarding.schedulingErrorSummary', {
+            title: i18n.translate('xpack.significantEventsApp.bulkOnboarding.schedulingErrorSummary', {
               defaultMessage:
                 'Failed to schedule onboarding for {count, plural, one {# stream} other {# streams}}',
               values: { count: failures.length },

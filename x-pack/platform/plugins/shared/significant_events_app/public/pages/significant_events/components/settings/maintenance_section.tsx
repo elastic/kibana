@@ -16,12 +16,12 @@ import {
 } from '../../../../../hooks/significant_events/use_significant_events_maintenance';
 
 const SECTION_TITLE = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.settings.maintenance.title',
+  'xpack.significantEventsApp.settings.maintenance.title',
   { defaultMessage: 'Significant Events activity' }
 );
 
 const SECTION_DESCRIPTION = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.settings.maintenance.description',
+  'xpack.significantEventsApp.settings.maintenance.description',
   {
     defaultMessage:
       'Pause all Significant Events activity across the entire deployment (every Kibana space), not only this space: scheduled discovery, continuous onboarding, detections, memory, investigations, and the alerting rules backing knowledge indicator queries. Existing data is kept. Resume restores managed workflows and rules that Pause disabled, and turns scheduled discovery / continuous onboarding back on only if they were enabled before pause.',
@@ -42,14 +42,14 @@ function PausedCallout({ status }: { status: SignificantEventsMaintenanceStatus 
       iconType="pause"
       data-test-subj="streams-settings-maintenance-paused-status"
       title={i18n.translate(
-        'xpack.streams.significantEventsDiscovery.settings.maintenance.pausedTitle',
+        'xpack.significantEventsApp.settings.maintenance.pausedTitle',
         { defaultMessage: 'Significant Events activity is paused' }
       )}
     >
       {updatedBy && (
         <p>
           <FormattedMessage
-            id="xpack.streams.significantEventsDiscovery.settings.maintenance.pausedBy"
+            id="xpack.significantEventsApp.settings.maintenance.pausedBy"
             defaultMessage="Paused by {pausedBy}."
             values={{ pausedBy: <strong>{updatedBy}</strong> }}
           />
@@ -58,7 +58,7 @@ function PausedCallout({ status }: { status: SignificantEventsMaintenanceStatus 
       {hasCounts && (
         <p>
           <FormattedMessage
-            id="xpack.streams.significantEventsDiscovery.settings.maintenance.pausedSummary"
+            id="xpack.significantEventsApp.settings.maintenance.pausedSummary"
             defaultMessage="Disabled {workflowsDisabled} workflow(s) and {rulesDisabled} rule(s)."
             values={{ workflowsDisabled, rulesDisabled }}
           />
@@ -67,7 +67,7 @@ function PausedCallout({ status }: { status: SignificantEventsMaintenanceStatus 
       {failureCount > 0 && (
         <p data-test-subj="streams-settings-maintenance-partial-failures">
           <FormattedMessage
-            id="xpack.streams.significantEventsDiscovery.settings.maintenance.partialFailures"
+            id="xpack.significantEventsApp.settings.maintenance.partialFailures"
             defaultMessage="{failureCount, plural, one {# maintenance operation} other {# maintenance operations}} could not be completed. Check the Kibana server logs for details. Pause again while paused re-sweeps disable/cancel."
             values={{ failureCount }}
           />
@@ -116,13 +116,13 @@ export function MaintenanceSection({ canManage }: { canManage: boolean }) {
               iconType="error"
               data-test-subj="streams-settings-maintenance-status-error"
               title={i18n.translate(
-                'xpack.streams.significantEventsDiscovery.settings.maintenance.statusErrorTitle',
+                'xpack.significantEventsApp.settings.maintenance.statusErrorTitle',
                 { defaultMessage: 'Could not load maintenance status' }
               )}
             >
               <p>
                 {i18n.translate(
-                  'xpack.streams.significantEventsDiscovery.settings.maintenance.statusErrorBody',
+                  'xpack.significantEventsApp.settings.maintenance.statusErrorBody',
                   {
                     defaultMessage:
                       'Pause and Resume are unavailable until status can be loaded. Activity controls stay disabled while status is unknown.',
@@ -135,7 +135,7 @@ export function MaintenanceSection({ canManage }: { canManage: boolean }) {
                 data-test-subj="streams-settings-maintenance-status-retry"
               >
                 {i18n.translate(
-                  'xpack.streams.significantEventsDiscovery.settings.maintenance.statusRetry',
+                  'xpack.significantEventsApp.settings.maintenance.statusRetry',
                   { defaultMessage: 'Retry' }
                 )}
               </EuiButton>
@@ -158,13 +158,13 @@ export function MaintenanceSection({ canManage }: { canManage: boolean }) {
               iconType="warning"
               data-test-subj="streams-settings-maintenance-feature-settings-unavailable"
               title={i18n.translate(
-                'xpack.streams.significantEventsDiscovery.settings.maintenance.featureSettingsUnavailableTitle',
+                'xpack.significantEventsApp.settings.maintenance.featureSettingsUnavailableTitle',
                 { defaultMessage: 'Some activity settings could not be loaded' }
               )}
             >
               <p>
                 {i18n.translate(
-                  'xpack.streams.significantEventsDiscovery.settings.maintenance.featureSettingsUnavailableBody',
+                  'xpack.significantEventsApp.settings.maintenance.featureSettingsUnavailableBody',
                   {
                     defaultMessage:
                       'Scheduled discovery and continuous onboarding status may be incomplete. Pause and Resume still work; refresh or retry if those toggles look wrong.',
@@ -184,13 +184,13 @@ export function MaintenanceSection({ canManage }: { canManage: boolean }) {
               iconType="lock"
               data-test-subj="streams-settings-maintenance-no-manage"
               title={i18n.translate(
-                'xpack.streams.significantEventsDiscovery.settings.maintenance.noManageTitle',
+                'xpack.significantEventsApp.settings.maintenance.noManageTitle',
                 { defaultMessage: 'Administrator access required' }
               )}
             >
               <p>
                 {i18n.translate(
-                  'xpack.streams.significantEventsDiscovery.settings.maintenance.noManageBody',
+                  'xpack.significantEventsApp.settings.maintenance.noManageBody',
                   {
                     defaultMessage:
                       'You can view pause status, but pausing or resuming Significant Events activity requires the Streams manage privilege.',
@@ -211,16 +211,16 @@ export function MaintenanceSection({ canManage }: { canManage: boolean }) {
         >
           {isLoading
             ? i18n.translate(
-                'xpack.streams.significantEventsDiscovery.settings.maintenance.loadingButton',
+                'xpack.significantEventsApp.settings.maintenance.loadingButton',
                 { defaultMessage: 'Checking status…' }
               )
             : paused
             ? i18n.translate(
-                'xpack.streams.significantEventsDiscovery.settings.maintenance.resumeButton',
+                'xpack.significantEventsApp.settings.maintenance.resumeButton',
                 { defaultMessage: 'Resume Significant Events activity' }
               )
             : i18n.translate(
-                'xpack.streams.significantEventsDiscovery.settings.maintenance.pauseButton',
+                'xpack.significantEventsApp.settings.maintenance.pauseButton',
                 { defaultMessage: 'Pause Significant Events activity' }
               )}
         </EuiButton>
@@ -230,34 +230,34 @@ export function MaintenanceSection({ canManage }: { canManage: boolean }) {
         <EuiConfirmModal
           data-test-subj="streams-settings-maintenance-confirm-modal"
           aria-label={i18n.translate(
-            'xpack.streams.significantEventsDiscovery.settings.maintenance.confirmAriaLabel',
+            'xpack.significantEventsApp.settings.maintenance.confirmAriaLabel',
             { defaultMessage: 'Confirm Significant Events activity change' }
           )}
           title={
             paused
               ? i18n.translate(
-                  'xpack.streams.significantEventsDiscovery.settings.maintenance.resumeConfirmTitle',
+                  'xpack.significantEventsApp.settings.maintenance.resumeConfirmTitle',
                   { defaultMessage: 'Resume Significant Events activity?' }
                 )
               : i18n.translate(
-                  'xpack.streams.significantEventsDiscovery.settings.maintenance.pauseConfirmTitle',
+                  'xpack.significantEventsApp.settings.maintenance.pauseConfirmTitle',
                   { defaultMessage: 'Pause Significant Events activity?' }
                 )
           }
           onCancel={() => setIsModalOpen(false)}
           onConfirm={onConfirm}
           cancelButtonText={i18n.translate(
-            'xpack.streams.significantEventsDiscovery.settings.maintenance.confirmCancel',
+            'xpack.significantEventsApp.settings.maintenance.confirmCancel',
             { defaultMessage: 'Cancel' }
           )}
           confirmButtonText={
             paused
               ? i18n.translate(
-                  'xpack.streams.significantEventsDiscovery.settings.maintenance.resumeConfirmButton',
+                  'xpack.significantEventsApp.settings.maintenance.resumeConfirmButton',
                   { defaultMessage: 'Resume' }
                 )
               : i18n.translate(
-                  'xpack.streams.significantEventsDiscovery.settings.maintenance.pauseConfirmButton',
+                  'xpack.significantEventsApp.settings.maintenance.pauseConfirmButton',
                   { defaultMessage: 'Pause' }
                 )
           }
@@ -267,14 +267,14 @@ export function MaintenanceSection({ canManage }: { canManage: boolean }) {
           <p>
             {paused
               ? i18n.translate(
-                  'xpack.streams.significantEventsDiscovery.settings.maintenance.resumeConfirmBody',
+                  'xpack.significantEventsApp.settings.maintenance.resumeConfirmBody',
                   {
                     defaultMessage:
                       'This re-enables the managed workflows and alerting rules that Pause disabled, and restores scheduled discovery / continuous onboarding only if they were enabled before pause. It does not restart executions that were cancelled.',
                   }
                 )
               : i18n.translate(
-                  'xpack.streams.significantEventsDiscovery.settings.maintenance.pauseConfirmBody',
+                  'xpack.significantEventsApp.settings.maintenance.pauseConfirmBody',
                   {
                     defaultMessage:
                       'This disables all Significant Events managed workflows, cancels their in-flight executions, and disables the alerting rules backing knowledge indicator queries. No data is deleted.',

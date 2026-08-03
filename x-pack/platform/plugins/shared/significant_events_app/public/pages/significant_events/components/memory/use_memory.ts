@@ -103,7 +103,7 @@ export const useMemoryMutations = () => {
 
   const onMutationError = (error: unknown) => {
     core.notifications.toasts.addError(getFormattedError(error), {
-      title: i18n.translate('xpack.streams.memory.mutationError', {
+      title: i18n.translate('xpack.significantEventsApp.memory.mutationError', {
         defaultMessage: 'Failed to save memory entry.',
       }),
     });
@@ -168,7 +168,7 @@ const useMemoryTaskAction = (
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: memoryKeys.all });
       core.notifications.toasts.addSuccess(
-        i18n.translate('xpack.streams.memory.taskSuccess', {
+        i18n.translate('xpack.significantEventsApp.memory.taskSuccess', {
           defaultMessage: '{actionName} queued. Results will appear once the workflow completes.',
           values: { actionName },
         })
@@ -176,7 +176,7 @@ const useMemoryTaskAction = (
     },
     onError: (error) => {
       core.notifications.toasts.addError(getFormattedError(error), {
-        title: i18n.translate('xpack.streams.memory.taskError', {
+        title: i18n.translate('xpack.significantEventsApp.memory.taskError', {
           defaultMessage: '{actionName} failed.',
           values: { actionName },
         }),
@@ -188,7 +188,7 @@ const useMemoryTaskAction = (
 export const useScrapeConversations = () => {
   return useMemoryTaskAction(
     `${MEMORY_BASE}/_scrape_conversations`,
-    i18n.translate('xpack.streams.memory.scrapeActionName', {
+    i18n.translate('xpack.significantEventsApp.memory.scrapeActionName', {
       defaultMessage: 'Scrape conversations',
     })
   );
@@ -197,7 +197,7 @@ export const useScrapeConversations = () => {
 export const useConsolidateMemory = () => {
   return useMemoryTaskAction(
     `${MEMORY_BASE}/_consolidate`,
-    i18n.translate('xpack.streams.memory.consolidateActionName', {
+    i18n.translate('xpack.significantEventsApp.memory.consolidateActionName', {
       defaultMessage: 'Consolidate memory',
     })
   );
@@ -206,7 +206,7 @@ export const useConsolidateMemory = () => {
 export const useSynthesizeMemory = () => {
   return useMemoryTaskAction(
     `${MEMORY_BASE}/_synthesize`,
-    i18n.translate('xpack.streams.memory.synthesizeActionName', {
+    i18n.translate('xpack.significantEventsApp.memory.synthesizeActionName', {
       defaultMessage: 'Synthesize memory',
     })
   );
@@ -215,7 +215,7 @@ export const useSynthesizeMemory = () => {
 export const useDetectGaps = () => {
   return useMemoryTaskAction(
     `${MEMORY_BASE}/_detect_gaps`,
-    i18n.translate('xpack.streams.memory.detectGapsActionName', {
+    i18n.translate('xpack.significantEventsApp.memory.detectGapsActionName', {
       defaultMessage: 'Detect gaps',
     })
   );
@@ -244,14 +244,14 @@ export const useToggleMemoryWorkflows = () => {
     onSuccess: (_, enabled) => {
       queryClient.invalidateQueries({ queryKey: memoryKeys.workflowsEnabled });
       core.notifications.toasts.addSuccess(
-        i18n.translate('xpack.streams.memory.workflowsToggleSuccess', {
+        i18n.translate('xpack.significantEventsApp.memory.workflowsToggleSuccess', {
           defaultMessage: 'Background workflows {state}.',
           values: {
             state: enabled
-              ? i18n.translate('xpack.streams.memory.workflowsEnabled', {
+              ? i18n.translate('xpack.significantEventsApp.memory.workflowsEnabled', {
                   defaultMessage: 'enabled',
                 })
-              : i18n.translate('xpack.streams.memory.workflowsDisabled', {
+              : i18n.translate('xpack.significantEventsApp.memory.workflowsDisabled', {
                   defaultMessage: 'disabled',
                 }),
           },
@@ -260,7 +260,7 @@ export const useToggleMemoryWorkflows = () => {
     },
     onError: (error) => {
       core.notifications.toasts.addError(getFormattedError(error), {
-        title: i18n.translate('xpack.streams.memory.workflowsToggleError', {
+        title: i18n.translate('xpack.significantEventsApp.memory.workflowsToggleError', {
           defaultMessage: 'Failed to update background workflow state.',
         }),
       });

@@ -175,7 +175,7 @@ export function KnowledgeIndicatorFeatureDetailsContent({ feature, onOpenInDisco
 }
 
 const GENERAL_INFORMATION_LABEL = i18n.translate(
-  'xpack.streams.featureDetailsFlyout.generalInformationLabel',
+  'xpack.significantEventsApp.featureDetailsFlyout.generalInformationLabel',
   {
     defaultMessage: 'General information',
   }
@@ -188,77 +188,77 @@ const OPEN_IN_DISCOVER_LABEL = i18n.translate(
   }
 );
 
-const DETAILS_TYPE_LABEL = i18n.translate('xpack.streams.featureDetailsFlyout.typeLabel', {
+const DETAILS_TYPE_LABEL = i18n.translate('xpack.significantEventsApp.featureDetailsFlyout.typeLabel', {
   defaultMessage: 'Type',
 });
 
-const DETAILS_ID_LABEL = i18n.translate('xpack.streams.featureDetailsFlyout.idLabel', {
+const DETAILS_ID_LABEL = i18n.translate('xpack.significantEventsApp.featureDetailsFlyout.idLabel', {
   defaultMessage: 'ID',
 });
 
-const DETAILS_SUBTYPE_LABEL = i18n.translate('xpack.streams.featureDetailsFlyout.subtypeLabel', {
+const DETAILS_SUBTYPE_LABEL = i18n.translate('xpack.significantEventsApp.featureDetailsFlyout.subtypeLabel', {
   defaultMessage: 'Subtype',
 });
 
 const DETAILS_PROPERTIES_LABEL = i18n.translate(
-  'xpack.streams.featureDetailsFlyout.propertiesLabel',
+  'xpack.significantEventsApp.featureDetailsFlyout.propertiesLabel',
   {
     defaultMessage: 'Properties',
   }
 );
 
 const DETAILS_CONFIDENCE_LABEL = i18n.translate(
-  'xpack.streams.featureDetailsFlyout.confidenceLabel',
+  'xpack.significantEventsApp.featureDetailsFlyout.confidenceLabel',
   {
     defaultMessage: 'Confidence',
   }
 );
 
-const DETAILS_TAGS_LABEL = i18n.translate('xpack.streams.featureDetailsFlyout.tagsLabel', {
+const DETAILS_TAGS_LABEL = i18n.translate('xpack.significantEventsApp.featureDetailsFlyout.tagsLabel', {
   defaultMessage: 'Tags',
 });
 
 const DETAILS_UPDATED_AT_LABEL = i18n.translate(
-  'xpack.streams.featureDetailsFlyout.updatedAtLabel',
+  'xpack.significantEventsApp.featureDetailsFlyout.updatedAtLabel',
   {
     defaultMessage: 'Updated',
   }
 );
 
-const DESCRIPTION_LABEL = i18n.translate('xpack.streams.featureDetailsFlyout.descriptionLabel', {
+const DESCRIPTION_LABEL = i18n.translate('xpack.significantEventsApp.featureDetailsFlyout.descriptionLabel', {
   defaultMessage: 'Description',
 });
 
 const NO_DESCRIPTION_AVAILABLE = i18n.translate(
-  'xpack.streams.featureDetailsFlyout.noDescriptionAvailable',
+  'xpack.significantEventsApp.featureDetailsFlyout.noDescriptionAvailable',
   {
     defaultMessage: 'No description available',
   }
 );
 
-const EVIDENCE_LABEL = i18n.translate('xpack.streams.featureDetailsFlyout.evidenceLabel', {
+const EVIDENCE_LABEL = i18n.translate('xpack.significantEventsApp.featureDetailsFlyout.evidenceLabel', {
   defaultMessage: 'Evidence',
 });
 
 const NO_EVIDENCE_AVAILABLE = i18n.translate(
-  'xpack.streams.featureDetailsFlyout.noEvidenceAvailable',
+  'xpack.significantEventsApp.featureDetailsFlyout.noEvidenceAvailable',
   {
     defaultMessage: 'No evidence available',
   }
 );
 
-const META_LABEL = i18n.translate('xpack.streams.featureDetailsFlyout.metaLabel', {
+const META_LABEL = i18n.translate('xpack.significantEventsApp.featureDetailsFlyout.metaLabel', {
   defaultMessage: 'Meta',
 });
 
-const NO_META_AVAILABLE = i18n.translate('xpack.streams.featureDetailsFlyout.noMetaAvailable', {
+const NO_META_AVAILABLE = i18n.translate('xpack.significantEventsApp.featureDetailsFlyout.noMetaAvailable', {
   defaultMessage: 'No meta information',
 });
 
-const RAW_DOCUMENT_LABEL = i18n.translate('xpack.streams.featureDetailsFlyout.rawDocumentLabel', {
+const RAW_DOCUMENT_LABEL = i18n.translate('xpack.significantEventsApp.featureDetailsFlyout.rawDocumentLabel', {
   defaultMessage: 'Raw document',
 });
 
-const EMPTY_VALUE = i18n.translate('xpack.streams.featureDetailsFlyout.emptyValue', {
+const EMPTY_VALUE = i18n.translate('xpack.significantEventsApp.featureDetailsFlyout.emptyValue', {
   defaultMessage: '-',
 });

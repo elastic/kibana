@@ -20,37 +20,37 @@ import { getFormattedError } from '../../util/errors';
 const MAINTENANCE_STATUS_QUERY_KEY = ['significantEventsMaintenanceStatus'] as const;
 
 const PAUSE_SUCCESS_TOAST_TITLE = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.maintenance.pauseSuccessToastTitle',
+  'xpack.significantEventsApp.maintenance.pauseSuccessToastTitle',
   { defaultMessage: 'Paused Significant Events activity' }
 );
 
 const PAUSE_ERROR_TOAST_TITLE = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.maintenance.pauseErrorToastTitle',
+  'xpack.significantEventsApp.maintenance.pauseErrorToastTitle',
   { defaultMessage: 'Failed to pause Significant Events activity' }
 );
 
 const RESUME_SUCCESS_TOAST_TITLE = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.maintenance.resumeSuccessToastTitle',
+  'xpack.significantEventsApp.maintenance.resumeSuccessToastTitle',
   { defaultMessage: 'Resumed Significant Events activity' }
 );
 
 const RESUME_ERROR_TOAST_TITLE = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.maintenance.resumeErrorToastTitle',
+  'xpack.significantEventsApp.maintenance.resumeErrorToastTitle',
   { defaultMessage: 'Failed to resume Significant Events activity' }
 );
 
 const PAUSE_PARTIAL_TOAST_TITLE = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.maintenance.pausePartialToastTitle',
+  'xpack.significantEventsApp.maintenance.pausePartialToastTitle',
   { defaultMessage: 'Paused, but some items could not be stopped' }
 );
 
 const RESUME_WARNINGS_TOAST_TITLE = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.maintenance.resumeWarningsToastTitle',
+  'xpack.significantEventsApp.maintenance.resumeWarningsToastTitle',
   { defaultMessage: 'Resumed Significant Events activity with warnings' }
 );
 
 const partialFailuresText = (count: number) =>
-  i18n.translate('xpack.streams.significantEventsDiscovery.maintenance.partialFailuresText', {
+  i18n.translate('xpack.significantEventsApp.maintenance.partialFailuresText', {
     defaultMessage:
       '{count, plural, one {# operation} other {# operations}} could not be completed. Check the Kibana server logs for details.',
     values: { count },

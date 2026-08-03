@@ -17,28 +17,28 @@ export const SIGNIFICANT_EVENT_SEVERITY: Record<
 > = {
   low: {
     color: '#5a6d8c',
-    label: i18n.translate('xpack.streams.significantEventsTable.severityBadge.lowLabel', {
+    label: i18n.translate('xpack.significantEventsApp.significantEventsTable.severityBadge.lowLabel', {
       defaultMessage: 'Low',
     }),
     defaultValue: 20,
   },
   medium: {
     color: '#facb3d',
-    label: i18n.translate('xpack.streams.significantEventsTable.severityBadge.mediumLabel', {
+    label: i18n.translate('xpack.significantEventsApp.significantEventsTable.severityBadge.mediumLabel', {
       defaultMessage: 'Medium',
     }),
     defaultValue: 50,
   },
   high: {
     color: '#ed6723',
-    label: i18n.translate('xpack.streams.significantEventsTable.severityBadge.highLabel', {
+    label: i18n.translate('xpack.significantEventsApp.significantEventsTable.severityBadge.highLabel', {
       defaultMessage: 'High',
     }),
     defaultValue: 70,
   },
   critical: {
     color: 'danger',
-    label: i18n.translate('xpack.streams.significantEventsTable.severityBadge.criticalLabel', {
+    label: i18n.translate('xpack.significantEventsApp.significantEventsTable.severityBadge.criticalLabel', {
       defaultMessage: 'Critical',
     }),
     defaultValue: 90,
@@ -60,7 +60,7 @@ export function SeverityBadge({ score }: { score?: number }) {
   if (!score) {
     return (
       <EuiHealth color="text" style={{ lineHeight: 'inherit' }} textSize="xs">
-        {i18n.translate('xpack.streams.significantEventsTable.severityBadge.noSeverity', {
+        {i18n.translate('xpack.significantEventsApp.significantEventsTable.severityBadge.noSeverity', {
           defaultMessage: 'None',
         })}
       </EuiHealth>

@@ -111,7 +111,7 @@ export function SignificantEventsDiscoveryProvider({
       setTrackedExecutionId(null);
       toasts.addError(getFormattedError(error), {
         title: i18n.translate(
-          'xpack.streams.SignificantEventsDiscoveryWorkflow.triggerErrorTitle',
+          'xpack.significantEventsApp.significantEventsDiscoveryWorkflow.triggerErrorTitle',
           {
             defaultMessage: 'Failed to start discovery pipeline',
           }
@@ -125,7 +125,7 @@ export function SignificantEventsDiscoveryProvider({
     onError: (error: Error) => {
       setIsCanceling(false);
       toasts.addError(getFormattedError(error), {
-        title: i18n.translate('xpack.streams.SignificantEventsDiscoveryWorkflow.cancelErrorTitle', {
+        title: i18n.translate('xpack.significantEventsApp.significantEventsDiscoveryWorkflow.cancelErrorTitle', {
           defaultMessage: 'Failed to cancel discovery pipeline',
         }),
       });
@@ -199,7 +199,7 @@ export function SignificantEventsDiscoveryProvider({
       const timer = setTimeout(invalidateAll, TERMINAL_STATUS_TOAST_DELAY_MS);
 
       toasts.addSuccess({
-        title: i18n.translate('xpack.streams.SignificantEventsDiscoveryWorkflow.completedTitle', {
+        title: i18n.translate('xpack.significantEventsApp.significantEventsDiscoveryWorkflow.completedTitle', {
           defaultMessage: 'Significant events discovery completed',
         }),
       });
@@ -209,14 +209,14 @@ export function SignificantEventsDiscoveryProvider({
 
     if (status === SignificantEventsWorkflowStatus.Failed) {
       toasts.addDanger({
-        title: i18n.translate('xpack.streams.SignificantEventsDiscoveryWorkflow.failedTitle', {
+        title: i18n.translate('xpack.significantEventsApp.significantEventsDiscoveryWorkflow.failedTitle', {
           defaultMessage: 'Significant events discovery failed',
         }),
         text: serverError,
       });
     } else if (wasUserCancel) {
       toasts.addSuccess({
-        title: i18n.translate('xpack.streams.SignificantEventsDiscoveryWorkflow.canceledTitle', {
+        title: i18n.translate('xpack.significantEventsApp.significantEventsDiscoveryWorkflow.canceledTitle', {
           defaultMessage: 'Significant events discovery canceled',
         }),
       });

@@ -97,7 +97,7 @@ export function DeleteTableItemsModal({
           {CANCEL_BUTTON_LABEL}
         </EuiButtonEmpty>
         <EuiButton color="danger" onClick={onConfirm} isLoading={isLoading} fill>
-          {i18n.translate('xpack.streams.deleteTableItemsModal.confirmButtonLabel', {
+          {i18n.translate('xpack.significantEventsApp.deleteTableItemsModal.confirmButtonLabel', {
             defaultMessage: 'Delete',
           })}
         </EuiButton>
@@ -107,31 +107,31 @@ export function DeleteTableItemsModal({
 }
 
 const MODAL_ARIA_LABEL = i18n.translate(
-  'xpack.streams.deleteTableItemsModal.euiModal.deleteTableItemsModalLabel',
+  'xpack.significantEventsApp.deleteTableItemsModal.euiModal.deleteTableItemsModalLabel',
   {
     defaultMessage: 'Delete items modal',
   }
 );
 
 const CONSEQUENCE_MESSAGE = i18n.translate(
-  'xpack.streams.deleteTableItemsModal.consequenceMessage',
+  'xpack.significantEventsApp.deleteTableItemsModal.consequenceMessage',
   {
     defaultMessage: 'This will permanently delete the selected items.',
   }
 );
 
-const WARNING_MESSAGE = i18n.translate('xpack.streams.deleteTableItemsModal.warningMessage', {
+const WARNING_MESSAGE = i18n.translate('xpack.significantEventsApp.deleteTableItemsModal.warningMessage', {
   defaultMessage: 'This action cannot be undone.',
 });
 
 const TABLE_CONTENT_ARIA_LABEL = i18n.translate(
-  'xpack.streams.deleteTableItemsModal.tableContentAriaLabel',
+  'xpack.significantEventsApp.deleteTableItemsModal.tableContentAriaLabel',
   {
     defaultMessage: 'List of items to delete',
   }
 );
 
-const CANCEL_BUTTON_LABEL = i18n.translate('xpack.streams.deleteTableItemsModal.cancelButton', {
+const CANCEL_BUTTON_LABEL = i18n.translate('xpack.significantEventsApp.deleteTableItemsModal.cancelButton', {
   defaultMessage: 'Cancel',
 });
 

@@ -39,13 +39,13 @@ const formatPValue = (pValue?: number | string): string => {
   const n = Number(pValue);
   if (isNaN(n)) return '-';
   if (n === 0)
-    return i18n.translate('xpack.streams.detectionFlyout.pValue.zero', { defaultMessage: 'p=0' });
+    return i18n.translate('xpack.significantEventsApp.detectionFlyout.pValue.zero', { defaultMessage: 'p=0' });
   if (n < 0.0001)
-    return i18n.translate('xpack.streams.detectionFlyout.pValue.scientific', {
+    return i18n.translate('xpack.significantEventsApp.detectionFlyout.pValue.scientific', {
       defaultMessage: 'p={value}',
       values: { value: n.toExponential(2) },
     });
-  return i18n.translate('xpack.streams.detectionFlyout.pValue.decimal', {
+  return i18n.translate('xpack.significantEventsApp.detectionFlyout.pValue.decimal', {
     defaultMessage: 'p={value}',
     values: { value: n.toFixed(4) },
   });
@@ -168,7 +168,7 @@ export const DetectionFlyout = ({ detection, onClose }: DetectionFlyoutProps) =>
 
         <EuiTitle size="xs">
           <h3>
-            {i18n.translate('xpack.streams.detectionFlyout.timeline', {
+            {i18n.translate('xpack.significantEventsApp.detectionFlyout.timeline', {
               defaultMessage: 'Timeline',
             })}
           </h3>
@@ -179,13 +179,13 @@ export const DetectionFlyout = ({ detection, onClose }: DetectionFlyoutProps) =>
           <EuiLoadingSpinner size="m" />
         ) : !historyData?.hits.length ? (
           <EuiText size="s" color="subdued">
-            {i18n.translate('xpack.streams.detectionFlyout.noHistory', {
+            {i18n.translate('xpack.significantEventsApp.detectionFlyout.noHistory', {
               defaultMessage: 'No history available.',
             })}
           </EuiText>
         ) : (
           <EuiTimeline
-            aria-label={i18n.translate('xpack.streams.detectionFlyout.timeline.title', {
+            aria-label={i18n.translate('xpack.significantEventsApp.detectionFlyout.timeline.title', {
               defaultMessage: 'Timeline',
             })}
             gutterSize="m"
@@ -227,44 +227,44 @@ export const DetectionFlyout = ({ detection, onClose }: DetectionFlyoutProps) =>
 };
 
 const CLOSE_BUTTON_ARIA_LABEL = i18n.translate(
-  'xpack.streams.detectionFlyout.closeButtonAriaLabel',
+  'xpack.significantEventsApp.detectionFlyout.closeButtonAriaLabel',
   { defaultMessage: 'Close' }
 );
 
 const GENERAL_INFORMATION_TITLE = i18n.translate(
-  'xpack.streams.detectionFlyout.generalInformationTitle',
+  'xpack.significantEventsApp.detectionFlyout.generalInformationTitle',
   { defaultMessage: 'General information' }
 );
 
-const STATUS_LABEL = i18n.translate('xpack.streams.detectionFlyout.statusLabel', {
+const STATUS_LABEL = i18n.translate('xpack.significantEventsApp.detectionFlyout.statusLabel', {
   defaultMessage: 'Discovery',
 });
 
-const STATUS_TOOLTIP = i18n.translate('xpack.streams.detectionFlyout.statusTooltip', {
+const STATUS_TOOLTIP = i18n.translate('xpack.significantEventsApp.detectionFlyout.statusTooltip', {
   defaultMessage: 'Whether the discovery pipeline has ingested this detection.',
 });
 
-const STREAM_LABEL = i18n.translate('xpack.streams.detectionFlyout.streamLabel', {
+const STREAM_LABEL = i18n.translate('xpack.significantEventsApp.detectionFlyout.streamLabel', {
   defaultMessage: 'Stream',
 });
 
-const TIMESTAMP_LABEL = i18n.translate('xpack.streams.detectionFlyout.timestampLabel', {
+const TIMESTAMP_LABEL = i18n.translate('xpack.significantEventsApp.detectionFlyout.timestampLabel', {
   defaultMessage: 'Timestamp',
 });
 
-const CHANGE_LABEL = i18n.translate('xpack.streams.detectionFlyout.changeLabel', {
+const CHANGE_LABEL = i18n.translate('xpack.significantEventsApp.detectionFlyout.changeLabel', {
   defaultMessage: 'Change',
 });
 
 const STATISTICAL_SIGNIFICANCE_LABEL = i18n.translate(
-  'xpack.streams.detectionFlyout.statisticalSignificanceLabel',
+  'xpack.significantEventsApp.detectionFlyout.statisticalSignificanceLabel',
   { defaultMessage: 'Statistical significance' }
 );
 
-const STATUS_PROCESSED_LABEL = i18n.translate('xpack.streams.detectionFlyout.status.processed', {
+const STATUS_PROCESSED_LABEL = i18n.translate('xpack.significantEventsApp.detectionFlyout.status.processed', {
   defaultMessage: 'Processed',
 });
 
-const STATUS_PENDING_LABEL = i18n.translate('xpack.streams.detectionFlyout.status.pending', {
+const STATUS_PENDING_LABEL = i18n.translate('xpack.significantEventsApp.detectionFlyout.status.pending', {
   defaultMessage: 'Pending',
 });

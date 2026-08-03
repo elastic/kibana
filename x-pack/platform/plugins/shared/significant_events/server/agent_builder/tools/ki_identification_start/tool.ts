@@ -59,7 +59,7 @@ export const createKiIdentificationStartTool = ({
     - Get a direct Kibana path to track background task progress in the Streams UI
 
     Returns:
-    - On success: \`{ kibanaPath: "/app/streams/_discovery/knowledge_indicators?stream=<stream>" }\`
+    - On success: \`{ kibanaPath: "/app/significant_events/knowledge_indicators?stream=<stream>" }\`
     - On failure: an error result with \`message\`, \`operation\`, and \`likely_cause\`
   `,
   schema: onboardingStartSchema,

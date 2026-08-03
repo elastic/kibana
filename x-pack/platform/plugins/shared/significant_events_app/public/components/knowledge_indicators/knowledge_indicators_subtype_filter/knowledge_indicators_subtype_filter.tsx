@@ -50,19 +50,19 @@ export function KnowledgeIndicatorsSubtypeFilter({
       disableWhenEmpty
       labels={{
         button: i18n.translate(
-          'xpack.streams.significantEventsTable.knowledgeIndicatorSubtypeFilterLabel',
+          'xpack.significantEventsApp.significantEventsTable.knowledgeIndicatorSubtypeFilterLabel',
           { defaultMessage: 'Subtype' }
         ),
         groupLabel: i18n.translate(
-          'xpack.streams.significantEventsTable.knowledgeIndicatorSubtypeFilterGroupLabel',
+          'xpack.significantEventsApp.significantEventsTable.knowledgeIndicatorSubtypeFilterGroupLabel',
           { defaultMessage: 'Filter by field subtype' }
         ),
         popoverAriaLabel: i18n.translate(
-          'xpack.streams.significantEventsTable.knowledgeIndicatorSubtypeFilterPopoverLabel',
+          'xpack.significantEventsApp.significantEventsTable.knowledgeIndicatorSubtypeFilterPopoverLabel',
           { defaultMessage: 'Knowledge indicator subtype filter' }
         ),
         selectableAriaLabel: i18n.translate(
-          'xpack.streams.significantEventsTable.knowledgeIndicatorSubtypeFilterSelectableAriaLabel',
+          'xpack.significantEventsApp.significantEventsTable.knowledgeIndicatorSubtypeFilterSelectableAriaLabel',
           { defaultMessage: 'Filter knowledge indicators by subtype' }
         ),
       }}

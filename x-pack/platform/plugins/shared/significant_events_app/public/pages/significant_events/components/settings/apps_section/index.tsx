@@ -58,7 +58,7 @@ export function AppsSection({ canEdit }: AppsSectionProps) {
           <EuiText size="s">
             <h3>
               {i18n.translate(
-                'xpack.streams.significantEventsDiscovery.settings.apps.sectionTitle',
+                'xpack.significantEventsApp.settings.apps.sectionTitle',
                 { defaultMessage: 'Apps' }
               )}
             </h3>
@@ -73,11 +73,11 @@ export function AppsSection({ canEdit }: AppsSectionProps) {
                 icon={<EuiIcon type="logoSlack" size="xl" aria-hidden={true} />}
                 data-test-subj="streamsSlackAppCard"
                 title={i18n.translate(
-                  'xpack.streams.significantEventsDiscovery.settings.apps.slackWorkspaceTitle',
+                  'xpack.significantEventsApp.settings.apps.slackWorkspaceTitle',
                   { defaultMessage: 'Elastic Slack App' }
                 )}
                 description={i18n.translate(
-                  'xpack.streams.significantEventsDiscovery.settings.apps.slackCardDescription',
+                  'xpack.significantEventsApp.settings.apps.slackCardDescription',
                   {
                     defaultMessage:
                       'Send Significant Event notifications to Slack and invoke Elastic agents from a channel.',
@@ -132,7 +132,7 @@ function SlackCardFooter({
             <EuiFlexItem grow={false}>
               <EuiText size="s" color="subdued">
                 {i18n.translate(
-                  'xpack.streams.significantEventsDiscovery.settings.apps.slackAwaitingAuth',
+                  'xpack.significantEventsApp.settings.apps.slackAwaitingAuth',
                   { defaultMessage: 'Waiting for authorization…' }
                 )}
               </EuiText>
@@ -147,7 +147,7 @@ function SlackCardFooter({
             isDisabled={!canEdit || isMutating}
             data-test-subj="streamsSlackAppCancelButton"
           >
-            {i18n.translate('xpack.streams.significantEventsDiscovery.settings.apps.slackCancel', {
+            {i18n.translate('xpack.significantEventsApp.settings.apps.slackCancel', {
               defaultMessage: 'Cancel',
             })}
           </EuiButtonEmpty>
@@ -171,7 +171,7 @@ function SlackCardFooter({
                 <EuiFlexItem grow={false}>
                   <EuiBadge color="success" iconType="check">
                     {i18n.translate(
-                      'xpack.streams.significantEventsDiscovery.settings.apps.slackConnected',
+                      'xpack.significantEventsApp.settings.apps.slackConnected',
                       { defaultMessage: 'Connected' }
                     )}
                   </EuiBadge>
@@ -195,11 +195,11 @@ function SlackCardFooter({
               >
                 {showChannels
                   ? i18n.translate(
-                      'xpack.streams.significantEventsDiscovery.settings.apps.slackHideChannels',
+                      'xpack.significantEventsApp.settings.apps.slackHideChannels',
                       { defaultMessage: 'Hide channels' }
                     )
                   : i18n.translate(
-                      'xpack.streams.significantEventsDiscovery.settings.apps.slackShowChannels',
+                      'xpack.significantEventsApp.settings.apps.slackShowChannels',
                       { defaultMessage: 'Show channels' }
                     )}
               </EuiButtonEmpty>
@@ -232,7 +232,7 @@ function SlackCardFooter({
           isDisabled={!canEdit || isMutating}
           data-test-subj="streamsSlackAppConnectButton"
         >
-          {i18n.translate('xpack.streams.significantEventsDiscovery.settings.apps.slackConnect', {
+          {i18n.translate('xpack.significantEventsApp.settings.apps.slackConnect', {
             defaultMessage: 'Connect Slack',
           })}
         </EuiButton>
@@ -265,14 +265,14 @@ function DisconnectWorkspaceButton({
         isDisabled={!canEdit || isMutating}
         data-test-subj="streamsSlackAppDisconnectButton"
       >
-        {i18n.translate('xpack.streams.significantEventsDiscovery.settings.apps.slackDisconnect', {
+        {i18n.translate('xpack.significantEventsApp.settings.apps.slackDisconnect', {
           defaultMessage: 'Disconnect workspace',
         })}
       </EuiButtonEmpty>
       {confirmOpen && (
         <EuiConfirmModal
           title={i18n.translate(
-            'xpack.streams.significantEventsDiscovery.settings.apps.slackDisconnectConfirmTitle',
+            'xpack.significantEventsApp.settings.apps.slackDisconnectConfirmTitle',
             { defaultMessage: 'Disconnect Slack App?' }
           )}
           onCancel={() => setConfirmOpen(false)}
@@ -284,11 +284,11 @@ function DisconnectWorkspaceButton({
               .finally(() => setConfirmOpen(false));
           }}
           cancelButtonText={i18n.translate(
-            'xpack.streams.significantEventsDiscovery.settings.apps.slackDisconnectConfirmCancel',
+            'xpack.significantEventsApp.settings.apps.slackDisconnectConfirmCancel',
             { defaultMessage: 'Cancel' }
           )}
           confirmButtonText={i18n.translate(
-            'xpack.streams.significantEventsDiscovery.settings.apps.slackDisconnectConfirmConfirm',
+            'xpack.significantEventsApp.settings.apps.slackDisconnectConfirmConfirm',
             { defaultMessage: 'Disconnect workspace' }
           )}
           buttonColor="danger"
@@ -298,7 +298,7 @@ function DisconnectWorkspaceButton({
         >
           <EuiText size="s">
             {i18n.translate(
-              'xpack.streams.significantEventsDiscovery.settings.apps.slackDisconnectConfirmBody',
+              'xpack.significantEventsApp.settings.apps.slackDisconnectConfirmBody',
               {
                 defaultMessage:
                   'This removes all Slack channel connections for this deployment. You can reconnect later.',

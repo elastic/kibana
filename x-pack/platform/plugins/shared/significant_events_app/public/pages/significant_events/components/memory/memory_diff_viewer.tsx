@@ -29,24 +29,24 @@ export function MemoryDiffViewer({
 
   const sections = [
     {
-      label: i18n.translate('xpack.streams.memory.diffTitleLabel', { defaultMessage: 'Title' }),
+      label: i18n.translate('xpack.significantEventsApp.memory.diffTitleLabel', { defaultMessage: 'Title' }),
       originalText: original.title,
       modifiedText: modified.title,
     },
     {
-      label: i18n.translate('xpack.streams.memory.diffCategoriesLabel', {
+      label: i18n.translate('xpack.significantEventsApp.memory.diffCategoriesLabel', {
         defaultMessage: 'Categories',
       }),
       originalText: original.categories.join('\n'),
       modifiedText: modified.categories.join('\n'),
     },
     {
-      label: i18n.translate('xpack.streams.memory.diffTagsLabel', { defaultMessage: 'Tags' }),
+      label: i18n.translate('xpack.significantEventsApp.memory.diffTagsLabel', { defaultMessage: 'Tags' }),
       originalText: original.tags.join('\n'),
       modifiedText: modified.tags.join('\n'),
     },
     {
-      label: i18n.translate('xpack.streams.memory.diffContentLabel', {
+      label: i18n.translate('xpack.significantEventsApp.memory.diffContentLabel', {
         defaultMessage: 'Content',
       }),
       originalText: original.content,

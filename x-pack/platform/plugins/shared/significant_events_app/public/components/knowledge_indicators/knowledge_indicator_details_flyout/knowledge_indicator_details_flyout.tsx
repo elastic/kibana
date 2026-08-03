@@ -406,7 +406,7 @@ export function KnowledgeIndicatorDetailsFlyout({
 }
 
 const CLOSE_BUTTON_ARIA_LABEL = i18n.translate(
-  'xpack.streams.knowledgeIndicatorDetailsFlyout.closeButtonAriaLabel',
+  'xpack.significantEventsApp.knowledgeIndicatorDetailsFlyout.closeButtonAriaLabel',
   {
     defaultMessage: 'Close',
   }
@@ -427,51 +427,51 @@ const OPEN_IN_DISCOVER_LABEL = i18n.translate(
 );
 
 const CONFIDENCE_LABEL = i18n.translate(
-  'xpack.streams.knowledgeIndicatorDetailsFlyout.confidenceLabel',
+  'xpack.significantEventsApp.knowledgeIndicatorDetailsFlyout.confidenceLabel',
   { defaultMessage: 'Confidence' }
 );
 
-const TYPE_LABEL = i18n.translate('xpack.streams.knowledgeIndicatorDetailsFlyout.typeLabel', {
+const TYPE_LABEL = i18n.translate('xpack.significantEventsApp.knowledgeIndicatorDetailsFlyout.typeLabel', {
   defaultMessage: 'Type',
 });
 
-const STREAM_LABEL = i18n.translate('xpack.streams.knowledgeIndicatorDetailsFlyout.streamLabel', {
+const STREAM_LABEL = i18n.translate('xpack.significantEventsApp.knowledgeIndicatorDetailsFlyout.streamLabel', {
   defaultMessage: 'Stream',
 });
 
 const SEVERITY_LABEL = i18n.translate(
-  'xpack.streams.knowledgeIndicatorDetailsFlyout.severityLabel',
+  'xpack.significantEventsApp.knowledgeIndicatorDetailsFlyout.severityLabel',
   { defaultMessage: 'Severity' }
 );
 
 const QUERY_TYPE_LABEL = i18n.translate(
-  'xpack.streams.knowledgeIndicatorDetailsFlyout.queryTypeLabel',
+  'xpack.significantEventsApp.knowledgeIndicatorDetailsFlyout.queryTypeLabel',
   { defaultMessage: 'Query' }
 );
 
 const ACTIONS_MENU_BUTTON_ARIA_LABEL = i18n.translate(
-  'xpack.streams.knowledgeIndicatorDetailsFlyout.actionsMenuButtonAriaLabel',
+  'xpack.significantEventsApp.knowledgeIndicatorDetailsFlyout.actionsMenuButtonAriaLabel',
   {
     defaultMessage: 'Actions',
   }
 );
 
 const ACTIONS_MENU_POPOVER_ARIA_LABEL = i18n.translate(
-  'xpack.streams.knowledgeIndicatorDetailsFlyout.actionsMenuPopoverAriaLabel',
+  'xpack.significantEventsApp.knowledgeIndicatorDetailsFlyout.actionsMenuPopoverAriaLabel',
   {
     defaultMessage: 'Actions menu',
   }
 );
 
 const DELETE_KI_MODAL_TITLE = i18n.translate(
-  'xpack.streams.knowledgeIndicatorDetailsFlyout.deleteKIModalTitle',
+  'xpack.significantEventsApp.knowledgeIndicatorDetailsFlyout.deleteKIModalTitle',
   {
     defaultMessage: 'Are you sure you want to delete this knowledge indicator?',
   }
 );
 
 const DELETE_RULE_MODAL_TITLE = i18n.translate(
-  'xpack.streams.knowledgeIndicatorDetailsFlyout.deleteRuleModalTitle',
+  'xpack.significantEventsApp.knowledgeIndicatorDetailsFlyout.deleteRuleModalTitle',
   {
     defaultMessage: 'Are you sure you want to delete this rule?',
   }
