@@ -93,7 +93,7 @@ describe('forced-GC monitor control', () => {
 
   afterEach(async () => {
     await fs.promises.rm(tempDir, { recursive: true, force: true });
-    jest.clearAllMocks();
+    jest.restoreAllMocks();
   });
 
   it('matches one structured result to its request and PID', async () => {
@@ -152,6 +152,18 @@ describe('forced-GC monitor control', () => {
     );
   });
 
+  it('fails loudly when forced-GC collection finds no monitored process', async () => {
+    const [result] = await requestForcedGcHeapStats({
+      monitorDir: tempDir,
+      expectedPids: [],
+      timeoutMs: 1,
+    });
+
+    expect(result.error).toEqual(
+      expect.objectContaining({ name: 'ForcedGcHeapStatsNoProcessesError' })
+    );
+  });
+
   it('returns a per-PID diagnostic rather than substituting data on timeout', async () => {
     const [result] = await requestForcedGcHeapStats({
       monitorDir: tempDir,
@@ -163,6 +175,27 @@ describe('forced-GC monitor control', () => {
       expect.objectContaining({ name: 'ForcedGcHeapStatsTimeoutError' })
     );
     expect(result.postForcedGcHeapUsed).toBeUndefined();
+  });
+
+  it('restores monitoring environment when forced-GC request setup fails', async () => {
+    const stopMonitoring = await startMonitoring({ dir: tempDir, log });
+    const monitorDir = process.env.KBN_BENCH_MONITOR_DIR!;
+    const pid = process.pid + 1;
+    await fs.promises.writeFile(
+      path.join(monitorDir, `${pid}.ndjson`),
+      `${JSON.stringify(makeSample(pid))}\n`,
+      'utf8'
+    );
+    jest.spyOn(fs.promises, 'rename').mockRejectedValueOnce(new Error('rename failed'));
+
+    const result = await stopMonitoring({ collectForcedGcHeapStats: true });
+
+    expect(result.forcedGcHeapStats?.[0].error).toEqual(
+      expect.objectContaining({ name: 'ForcedGcHeapStatsControlError' })
+    );
+    expect(process.env.KBN_BENCH_MONITOR_DIR).toBeUndefined();
+    expect(process.env.KBN_BENCH_MONITOR_INTERVAL).toBeUndefined();
+    expect(process.env.NODE_OPTIONS).not.toContain('init_monitoring.js');
   });
 
   it('leaves forced-GC collection disabled unless stop explicitly requests it', async () => {

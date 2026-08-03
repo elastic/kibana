@@ -58,6 +58,21 @@ const toForcedGcErrorResult = ({
   error: { name, message },
 });
 
+const toMonitorControlError = (name: string, message: string): ForcedGcHeapStats => {
+  const timestamp = new Date().toISOString();
+  return {
+    requestId: `monitor-${process.pid}-${Date.now()}`,
+    pid: 0,
+    argv: [],
+    requestedAt: timestamp,
+    startedAt: timestamp,
+    completedAt: timestamp,
+    nodeVersion: process.versions.node,
+    v8Version: process.versions.v8,
+    error: { name, message },
+  };
+};
+
 const validateForcedGcResult = (result: ForcedGcHeapStats, request: ForcedGcRequest): string[] => {
   if (result.error) {
     return [];
@@ -162,7 +177,12 @@ export const requestForcedGcHeapStats = async ({
   timeoutMs?: number;
 }): Promise<ForcedGcHeapStats[]> => {
   if (!expectedPids.length) {
-    return [];
+    return [
+      toMonitorControlError(
+        'ForcedGcHeapStatsNoProcessesError',
+        'No monitored PIDs were available for forced-GC heap collection'
+      ),
+    ];
   }
 
   const request: ForcedGcRequest = {
@@ -274,6 +294,20 @@ export async function startMonitoring({
   process.env.KBN_BENCH_MONITOR_INTERVAL = String(procStatsRefreshInterval);
   log.debug(`kbn-bench monitor enabled: dir=${monitorDir}`);
 
+  const restoreEnvironment = () => {
+    if (prevNodeOptions) {
+      const current = process.env.NODE_OPTIONS ?? '';
+      process.env.NODE_OPTIONS = current
+        .split(' ')
+        .filter((part) => part && part !== requireFlag)
+        .join(' ');
+    } else {
+      delete process.env.NODE_OPTIONS;
+    }
+    delete process.env.KBN_BENCH_MONITOR_DIR;
+    delete process.env.KBN_BENCH_MONITOR_INTERVAL;
+  };
+
   let stopPromise: Promise<MonitoringResult> | undefined;
   return async function stopMonitoring(options = {}) {
     stopPromise ??= (async () => {
@@ -284,34 +318,50 @@ export async function startMonitoring({
       const expectedPids = naturalFiles
         .map((file) => Number.parseInt(file, 10))
         .filter((pid) => pid !== process.pid);
+      let forcedGcHeapStats: ForcedGcHeapStats[] | undefined;
 
-      const forcedGcHeapStats = options.collectForcedGcHeapStats
-        ? await requestForcedGcHeapStats({ monitorDir, expectedPids })
-        : undefined;
+      if (options.collectForcedGcHeapStats) {
+        try {
+          forcedGcHeapStats = await requestForcedGcHeapStats({ monitorDir, expectedPids });
+        } catch (error) {
+          forcedGcHeapStats = [
+            toMonitorControlError(
+              'ForcedGcHeapStatsControlError',
+              `Failed to request forced-GC heap stats: ${
+                error instanceof Error ? error.message : String(error)
+              }`
+            ),
+          ];
+        }
+      }
 
-      await fs.promises.writeFile(path.join(monitorDir, 'stop'), '1', 'utf8');
+      try {
+        await fs.promises.writeFile(path.join(monitorDir, 'stop'), '1', 'utf8');
+      } catch (error) {
+        if (!options.collectForcedGcHeapStats) {
+          throw error;
+        }
+        forcedGcHeapStats = [
+          ...(forcedGcHeapStats ?? []),
+          toMonitorControlError(
+            'ForcedGcHeapStatsControlError',
+            `Failed to stop process monitoring: ${
+              error instanceof Error ? error.message : String(error)
+            }`
+          ),
+        ];
+      } finally {
+        restoreEnvironment();
+      }
+
       if (!options.collectForcedGcHeapStats) {
         await wait(50);
       }
 
-      if (prevNodeOptions) {
-        const current = process.env.NODE_OPTIONS ?? '';
-        process.env.NODE_OPTIONS = current
-          .split(' ')
-          .filter((part) => part && part !== requireFlag)
-          .join(' ');
-      } else {
-        delete process.env.NODE_OPTIONS;
-      }
-      delete process.env.KBN_BENCH_MONITOR_DIR;
-      delete process.env.KBN_BENCH_MONITOR_INTERVAL;
-
       const natural = await readNaturalStats({ monitorDir, log });
-      const hasTimeout = forcedGcHeapStats?.some(
-        ({ error }) => error?.name === 'ForcedGcHeapStatsTimeoutError'
-      );
-      if (hasTimeout) {
-        log.warning(`Preserving timed-out monitor diagnostics at ${monitorDir}`);
+      const hasForcedGcError = forcedGcHeapStats?.some(({ error }) => error);
+      if (hasForcedGcError) {
+        log.warning(`Preserving failed forced-GC monitor diagnostics at ${monitorDir}`);
       } else {
         await fs.promises.rm(monitorDir, { recursive: true, force: true });
       }

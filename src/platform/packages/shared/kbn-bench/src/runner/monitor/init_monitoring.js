@@ -10,11 +10,17 @@
 const fs = require('fs');
 const path = require('path');
 const { performance, PerformanceObserver, constants } = require('perf_hooks');
+const { isMainThread } = require('node:worker_threads');
 
 const MONITOR_KEY = '__KBN_BENCH_MONITOR';
 const FORCED_GC_REQUEST_FILE = 'forced_gc_request.json';
 
 (() => {
+  // Worker-thread isolates share a PID and are intentionally outside this monitor's scope.
+  if (!isMainThread) {
+    return;
+  }
+
   const dir = process.env.KBN_BENCH_MONITOR_DIR;
   const interval = Number(process.env.KBN_BENCH_MONITOR_INTERVAL ?? 250);
   if (global[MONITOR_KEY]) {
