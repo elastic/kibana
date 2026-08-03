@@ -69,6 +69,7 @@ apiTest.describe('Get rule API', { tag: '@local-stateful-classic' }, () => {
         headers: readerHeaders,
       });
       expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
     }
   );
 
