@@ -5,27 +5,23 @@
  * 2.0.
  */
 
-/**
- * Composite "shell" stories: the outer `EuiSplitPanel` + `AttachmentHeader` +
- * a placeholder body slot, i.e. what every attachment card looks like before
- * plugin-specific content is rendered inside it. Mirrors the layout of
- * `InlineAttachmentWithActions` but with hardcoded mock data so no Kibana
- * services are needed.
- */
-
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { EuiCallOut, EuiSplitPanel, EuiText } from '@elastic/eui';
+import { css } from '@emotion/react';
+import type { HeaderBadge } from '@kbn/agent-builder-browser/attachments';
 import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
+import { AB_PANEL_RADIUS } from '../../../../../../common.styles';
 import { AttachmentHeader } from './attachment_header';
 import { AttachmentLoadingSkeleton } from './attachment_loading_skeleton';
+import { AttachmentRenderErrorBoundary } from './attachment_render_error_boundary';
 
 interface ShellArgs {
   icon?: string;
   title: string;
   subtitle?: string;
-  badges?: Array<{ label: string; color?: string; iconType?: string }>;
+  badges?: HeaderBadge[];
   body: React.ReactNode;
   actionButtons?: React.ComponentProps<typeof AttachmentHeader>['actionButtons'];
   previewBadgeState?: React.ComponentProps<typeof AttachmentHeader>['previewBadgeState'];
@@ -40,7 +36,16 @@ const Shell: React.FC<ShellArgs> = ({
   actionButtons,
   previewBadgeState,
 }) => (
-  <EuiSplitPanel.Outer grow hasShadow={false} hasBorder={true} style={{ maxWidth: 820 }}>
+  <EuiSplitPanel.Outer
+    grow
+    hasShadow={false}
+    hasBorder={true}
+    css={css`
+      overflow: visible;
+      border-radius: ${AB_PANEL_RADIUS}px;
+      max-width: 820px;
+    `}
+  >
     <AttachmentHeader
       icon={icon}
       title={title}
@@ -48,43 +53,42 @@ const Shell: React.FC<ShellArgs> = ({
       badges={badges}
       actionButtons={actionButtons}
       previewBadgeState={previewBadgeState}
-      onClose={action('close')}
       onClosePreview={action('close preview')}
     />
     <EuiSplitPanel.Inner grow={false} paddingSize="none">
-      {body}
+      <AttachmentRenderErrorBoundary>{() => body}</AttachmentRenderErrorBoundary>
     </EuiSplitPanel.Inner>
   </EuiSplitPanel.Outer>
 );
 
 const bodyPlaceholder = (
-  <EuiSplitPanel.Inner paddingSize="l" color="plain">
+  <div style={{ padding: 16 }}>
     <EuiText size="s" color="subdued">
       <em>
         Attachment body placeholder — real content is contributed by each attachment type&apos;s own
         renderer and is intentionally out of scope for this Storybook (see search-team#15189).
       </em>
     </EuiText>
-  </EuiSplitPanel.Inner>
+  </div>
 );
 
 const emptyBody = (
-  <EuiSplitPanel.Inner paddingSize="l" color="plain">
-    <EuiText size="s" color="subdued" textAlign="center">
+  <div style={{ padding: 16, textAlign: 'center' }}>
+    <EuiText size="s" color="subdued">
       Nothing to display.
     </EuiText>
-  </EuiSplitPanel.Inner>
+  </div>
 );
 
 const errorBody = (
-  <EuiSplitPanel.Inner paddingSize="m" color="plain">
+  <div style={{ padding: 8 }}>
     <EuiCallOut
       title="Couldn't render this attachment"
       color="warning"
       iconType="warning"
       size="s"
     />
-  </EuiSplitPanel.Inner>
+  </div>
 );
 
 const defaultActions = [
@@ -142,7 +146,7 @@ export const WithBadges: Story = {
   },
 };
 
-export const DiffAttachment: Story = {
+export const WithOverflowActions: Story = {
   args: {
     icon: 'document',
     title: 'workflow.yaml.diff',
@@ -155,13 +159,15 @@ export const DiffAttachment: Story = {
         type: ActionButtonType.OVERFLOW,
         handler: action('save'),
       },
+      {
+        label: 'Delete',
+        icon: 'trash',
+        type: ActionButtonType.OVERFLOW,
+        handler: action('delete'),
+      },
     ],
     body: bodyPlaceholder,
   },
-};
-
-export const LoadingSkeleton: Story = {
-  render: () => <AttachmentLoadingSkeleton />,
 };
 
 export const EmptyState: Story = {
@@ -200,6 +206,25 @@ export const Previewing: Story = {
     subtitle: 'Currently previewing',
     actionButtons: defaultActions,
     previewBadgeState: 'previewing',
+    body: bodyPlaceholder,
+  },
+};
+
+export const LoadingSkeleton: Story = {
+  render: () => (
+    <div style={{ maxWidth: 820 }}>
+      <AttachmentLoadingSkeleton />
+    </div>
+  ),
+};
+
+export const LongTitleTruncation: Story = {
+  args: {
+    icon: 'document',
+    title: 'a-very-long-workflow-configuration-file-with-a-name-that-should-truncate-nicely.yaml',
+    subtitle:
+      'Also a very long subtitle that describes what the attachment contains and should truncate in the same way as the title.',
+    actionButtons: defaultActions,
     body: bodyPlaceholder,
   },
 };
