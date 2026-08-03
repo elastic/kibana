@@ -494,6 +494,7 @@ export class VisualBuilder {
    * next click; blurring both commits the query and dismisses the popover.
    */
   private async fillQueryBar(queryBar: Locator, query: string) {
+    await queryBar.clear();
     await queryBar.fill(query);
     await queryBar.blur();
   }
