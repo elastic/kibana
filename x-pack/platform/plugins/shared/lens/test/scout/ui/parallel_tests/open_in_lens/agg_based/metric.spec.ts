@@ -182,16 +182,6 @@ spaceTest.describe('Lens open in Lens — agg-based Metric', { tag: tags.deploym
           showingBar: false,
           showingTrendline: false,
         },
-        {
-          title: undefined,
-          subtitle: undefined,
-          extraText: undefined,
-          value: undefined,
-          color: 'rgba(255, 255, 255, 1)',
-          trendlineColor: undefined,
-          showingBar: false,
-          showingTrendline: false,
-        },
       ]);
 
     await dimensions[0].click();

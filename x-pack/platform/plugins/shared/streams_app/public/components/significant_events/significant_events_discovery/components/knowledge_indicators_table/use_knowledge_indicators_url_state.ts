@@ -222,6 +222,16 @@ export function useKnowledgeIndicatorsUrlState({
     [router, buildQueryParams]
   );
 
+  const selectKnowledgeIndicator = useCallback(
+    (ki: KnowledgeIndicator) => {
+      router.push('/_discovery/{tab}', {
+        path: { tab: 'knowledge_indicators' },
+        query: buildQueryParams(getKnowledgeIndicatorItemId(ki)),
+      });
+    },
+    [router, buildQueryParams]
+  );
+
   const handleStatusFilterChange = useCallback(
     (filter: 'active' | 'excluded') => {
       setStatusFilter(filter);
@@ -296,5 +306,6 @@ export function useKnowledgeIndicatorsUrlState({
     handleSearchChange,
     closeFlyout,
     toggleSelectedKnowledgeIndicator,
+    selectKnowledgeIndicator,
   };
 }

@@ -39,9 +39,10 @@ describe('GoogleCloudStorageConnector', () => {
       expect(GoogleCloudStorageConnector.metadata.isTechnicalPreview).toBe(true);
     });
 
-    it('should support workflows and agentBuilder features', () => {
+    it('should support workflows, agentBuilder, and contextEngine features', () => {
       expect(GoogleCloudStorageConnector.metadata.supportedFeatureIds).toContain('workflows');
       expect(GoogleCloudStorageConnector.metadata.supportedFeatureIds).toContain('agentBuilder');
+      expect(GoogleCloudStorageConnector.metadata.supportedFeatureIds).toContain('contextEngine');
     });
   });
 
