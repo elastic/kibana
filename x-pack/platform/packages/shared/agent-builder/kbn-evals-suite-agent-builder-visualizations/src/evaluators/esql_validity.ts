@@ -17,29 +17,8 @@ interface QueryValidationDetail {
 }
 
 /**
- * Deterministic evaluator that validates ES|QL strings using the
- * `@kbn/esql-language` parser. No LLM call — runs `validateQuery`
- * without callbacks so only syntax / AST errors are flagged (field
- * and source resolution are intentionally skipped).
- *
- * Returns score 1.0 when every extracted query is syntactically valid,
- * 0.0 when at least one query contains a parse error.
- *
- * ### Empty-output behavior
- *
- * The default `scoreOnEmptyQueries` is `1`: if the extractor returns an empty
- * array, the evaluator scores 1.0 with label `no-queries` ("nothing to
- * validate means nothing is invalid"). This differs from
- * {@link createEsqlExecutionEvaluator}, which scores 0 by default for empty
- * output (a missing query in an execution context usually means the task
- * failed). Set this option explicitly when neither default fits.
- *
- * @param config.queryExtractor - extracts ES|QL strings from the task output.
- *   Must return an array.
- * @param config.scoreOnEmptyQueries - Score returned when the extractor yields
- *   no queries. Defaults to `1`.
- * @param config.name - Override the evaluator name (defaults to
- *   `ES|QL Validity`).
+ * CODE evaluator: syntax-checks ES|QL via `@kbn/esql-language` (no LLM, no infra).
+ * `scoreOnEmptyQueries` defaults to `1` — nothing to validate means nothing is invalid.
  */
 export function createEsqlValidityEvaluator<
   TExample extends Example = Example,
@@ -92,21 +71,11 @@ export function createEsqlValidityEvaluator<
       const invalidQueries = details.filter((d) => !d.valid);
       const allValid = invalidQueries.length === 0;
 
+      const noun = details.length === 1 ? 'query' : 'queries';
       const explanation = allValid
-        ? `All ${details.length} ES|QL ${pluralize(
-            'query',
-            details.length,
-            'is',
-            'queries',
-            'are'
-          )} syntactically valid.`
+        ? `All ${details.length} ES|QL ${details.length === 1 ? 'query is' : 'queries are'} syntactically valid.`
         : [
-            `${invalidQueries.length} of ${details.length} ES|QL ${pluralize(
-              'query',
-              details.length,
-              undefined,
-              'queries'
-            )} failed validation:`,
+            `${invalidQueries.length} of ${details.length} ES|QL ${noun} failed validation:`,
             ...invalidQueries.map((d) => `  • "${truncate(d.query, 80)}": ${d.errors.join('; ')}`),
           ].join('\n');
 
@@ -128,16 +97,4 @@ export function createEsqlValidityEvaluator<
 function truncate(str: string, maxLen: number): string {
   const oneLine = str.replace(/\n/g, ' ').trim();
   return oneLine.length <= maxLen ? oneLine : `${oneLine.slice(0, maxLen - 3)}...`;
-}
-
-function pluralize(
-  singular: string,
-  count: number,
-  singularVerb?: string,
-  plural?: string,
-  pluralVerb?: string
-): string {
-  const noun = count === 1 ? singular : plural ?? `${singular}s`;
-  const verb = count === 1 ? singularVerb : pluralVerb;
-  return verb ? `${noun} ${verb}` : noun;
 }

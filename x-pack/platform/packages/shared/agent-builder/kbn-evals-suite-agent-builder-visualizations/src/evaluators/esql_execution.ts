@@ -109,39 +109,10 @@ async function evaluateSingleQuery(
 }
 
 /**
- * Two- or three-tier ES|QL execution evaluator (CODE-kind, deterministic).
- *
- * Tiers (each contributes one component to the composite score):
- * 1. **AST parse** via `@kbn/esql-language` `validateQuery` — catches pure
- *    syntax errors (no field/source resolution, no LLM call).
- * 2. **ES execution** via `esClient.esql.query` — catches runtime errors
- *    (unknown fields, invalid functions, type mismatches, etc.) by running
- *    each query against the live cluster.
- * 3. **Hit detection** (optional) — fraction of queries that returned ≥1 row.
- *    Useful when the dataset asserts that queries should match real data.
- *
- * The final score is the unweighted mean of the included tiers.
- *
- * Unlike {@link createEsqlValidityEvaluator} (syntax-only, no infra needed),
- * this evaluator requires an `ElasticsearchClient` because it actually runs
- * each query.
- *
- * ### Empty-output behavior
- *
- * The default `scoreOnEmptyQueries` is `0`: if the extractor returns an empty
- * array, the evaluator scores 0 with label `no-queries` (in this suite, no
- * visualization ES|QL usually means the generation failed).
- *
- * @param config.esClient - Elasticsearch client used to execute each query.
- * @param config.queryExtractor - Extracts ES|QL strings from the task output.
- * @param config.includeHitDetection - When `true`, adds hit-rate as a third
- *   scoring component. Can also be a function that decides per-example based
- *   on the evaluator params (e.g. dataset metadata).
- * @param config.logger - Optional logger for execution failures.
- * @param config.name - Override the evaluator name (defaults to
- *   `ES|QL Execution Validity`).
- * @param config.scoreOnEmptyQueries - Score returned when the extractor yields
- *   no queries. Defaults to `0`.
+ * Two- or three-tier CODE evaluator: AST parse → ES execution → optional hit detection.
+ * Score is the unweighted mean of included tiers. Requires a live ES cluster.
+ * `scoreOnEmptyQueries` defaults to `0` (no query = failed generation).
+ * `includeHitDetection` can be a per-example function keyed on dataset metadata.
  */
 export function createEsqlExecutionEvaluator<
   TExample extends Example = Example,

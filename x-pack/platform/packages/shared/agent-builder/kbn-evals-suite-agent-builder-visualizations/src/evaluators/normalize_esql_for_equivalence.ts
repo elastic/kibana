@@ -57,10 +57,11 @@ export function stripRedundantTimestampBindBounds(query: string): string {
   );
 
   // Trailing conjunct: `WHERE <rest> AND <bounds>` → `WHERE <rest>`
+  // The `s` flag allows `.` to match newlines in case WHERE spans multiple lines.
   normalized = normalized.replace(
     new RegExp(
       String.raw`(\|\s*WHERE\s+.+?)\s+AND\s+${TIMESTAMP_BOUND_CONJUNCT}(?=\s*(?:\||$))`,
-      'gi'
+      'gis'
     ),
     '$1'
   );

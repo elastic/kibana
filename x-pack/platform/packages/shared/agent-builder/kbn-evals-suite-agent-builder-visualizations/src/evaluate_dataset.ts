@@ -64,27 +64,21 @@ export type VisualizationAgentEvaluator = Evaluator<
 export type EvaluateDataset = ({
   dataset,
   evaluators,
+  additionalEvaluators,
 }: {
   dataset: {
     name: string;
     description: string;
     examples: VisualizationDatasetExample[];
   };
+  /** Replaces the default evaluator set when provided. */
   evaluators?: VisualizationAgentEvaluator[];
+  /** Appended alongside the default (or custom) evaluator set. */
+  additionalEvaluators?: VisualizationAgentEvaluator[];
 }) => Promise<void>;
 
-const queryExtractor = (output: VisualizationAgentTaskOutput): string[] =>
-  extractVisualizationEsql(output);
-
-const predictionExtractor = (output: unknown): string =>
-  (output as VisualizationAgentTaskOutput | undefined)?.esql ?? '';
-
-const groundTruthExtractor = (expected: unknown): string =>
-  (expected as { query?: string } | undefined)?.query ?? '';
-
-// The framework trace-based evaluators resolve their OTel trace by `traceId`.
-// The converse turn surfaces the agent trace under `agentTraceId`, so map it
-// onto `traceId` before delegating (mirrors the dashboards suite).
+// The converse turn surfaces the agent trace under `agentTraceId`; the
+// framework trace-based evaluators look for `traceId` — remap before delegating.
 const useAgentTraceId = (evaluator: Evaluator): VisualizationAgentEvaluator => ({
   ...evaluator,
   evaluate: async ({ input, output, expected, metadata }) =>
@@ -114,17 +108,12 @@ export function createEvaluateDataset({
   esClient: EsClient;
   log: ToolingLog;
 }): EvaluateDataset {
-  // Each ES|QL evaluator is wrapped in a named `withEvaluatorSpan` so its
-  // work shows up as a discrete span on the task's trace (mirrors the
-  // security ES|QL regression suite), making per-evaluator latency and
-  // failures observable in the golden cluster.
-  // Every example in this suite expects a visualization ES|QL query. Score
-  // empty extracts as 0 so Validity tracks "produced a syntactically valid
-  // query" rather than the framework default of 1 ("nothing to validate").
+  // Evaluators are wrapped in withEvaluatorSpan for per-evaluator trace observability.
+  // scoreOnEmptyQueries: 0 — every example expects a viz query, so no output = failure.
   const baseValidityEvaluator = createEsqlValidityEvaluator<
     VisualizationDatasetExample,
     VisualizationAgentTaskOutput
-  >({ queryExtractor, scoreOnEmptyQueries: 0 });
+  >({ queryExtractor: extractVisualizationEsql, scoreOnEmptyQueries: 0 });
 
   const esqlValidityEvaluator: VisualizationAgentEvaluator = {
     ...baseValidityEvaluator,
@@ -137,11 +126,8 @@ export function createEvaluateDataset({
     VisualizationAgentTaskOutput
   >({
     esClient,
-    queryExtractor,
-    // Seed examples target real sample-data indices, so a correct
-    // visualization query should return rows. Opt in per-example via
-    // `metadata.includeHitDetection` to avoid penalising legitimately
-    // empty results (e.g. narrow filters) in future datasets.
+    queryExtractor: extractVisualizationEsql,
+    // Per-example opt-in so future examples with legitimately empty results aren't penalised.
     includeHitDetection: ({ metadata }) => Boolean(metadata?.includeHitDetection),
   });
 
@@ -151,17 +137,11 @@ export function createEvaluateDataset({
       withEvaluatorSpan('EsqlExecution', {}, () => baseExecutionEvaluator.evaluate(args)),
   };
 
-  // Calibrated three-point LLM judge (ported from the security ES|QL
-  // regression suite) replaces the framework's binary Yes/No default.
-  // Cosmetic-but-imperfect visualization queries (column-alias differences,
-  // interchangeable bucketing granularity, `?_tstart`/`?_tend` vs literal
-  // ranges) earn partial credit instead of a hard 0. Same evaluator name +
-  // a `judgeVersion` metadata stamp keep golden-cluster history continuous.
   const baseEquivalenceEvaluator = createCalibratedEsqlEquivalenceEvaluator({
     inferenceClient,
     log,
-    predictionExtractor,
-    groundTruthExtractor,
+    predictionExtractor: (output) => (output as VisualizationAgentTaskOutput | undefined)?.esql ?? '',
+    groundTruthExtractor: (expected) => (expected as { query?: string } | undefined)?.query ?? '',
   });
 
   const esqlEquivalenceEvaluator: Evaluator = {
@@ -183,6 +163,7 @@ export function createEvaluateDataset({
   return async function evaluateDataset({
     dataset: { name, description, examples },
     evaluators: customEvaluators,
+    additionalEvaluators,
   }) {
     const dataset = { name, description, examples } satisfies EvaluationDataset;
 
@@ -213,6 +194,7 @@ export function createEvaluateDataset({
         esqlEquivalenceEvaluator,
         trajectoryEvaluator,
       ]),
+      ...(additionalEvaluators ?? []),
       ...Object.values(evaluators.traceBasedEvaluators).map(useAgentTraceId),
     ]);
   };

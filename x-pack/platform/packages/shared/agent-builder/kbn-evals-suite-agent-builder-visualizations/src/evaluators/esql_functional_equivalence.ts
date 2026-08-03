@@ -16,28 +16,10 @@ import { normalizeEsqlForEquivalence } from './normalize_esql_for_equivalence';
 
 export const ESQL_FUNCTIONAL_EQUIVALENCE_EVALUATOR_NAME = 'ES|QL Functional Equivalence';
 
-/**
- * Calibration version stamped into every score document's metadata so
- * historical scores in the golden cluster can be partitioned cleanly:
- *
- *   - `v1` (framework default): vague "Yes/No" rubric, no calibration.
- *   - `v2`: three-point rubric + few-shot + bias toward conservative
- *     partial credit for caveats.
- *   - `v3` (this evaluator): same rubric as v2, plus pre-judge stripping of
- *     redundant `@timestamp` `?_tstart`/`?_tend` WHERE bounds (those are
- *     optional when the window is already expressed via BUCKET/TBUCKET).
- *
- * The Kibana evaluations data stream keys evaluator history on
- * `evaluator.name` only, so we deliberately keep the same name as the
- * framework's evaluator (history-compatible). Dashboards that want to
- * isolate a rubric trend can filter on `evaluator.metadata.judgeVersion`.
- *
- * Ported from `@kbn/evals-suite-security-esql-generation-regression` — the
- * rubric is language-level (not security-specific), so the visualization
- * suite shares it verbatim. Kibana module-visibility rules forbid importing
- * across sibling `functional-tests` suites, so it is copied rather than
- * imported. If a third suite needs it, promote it into `@kbn/evals`.
- */
+// v1 = framework binary Yes/No; v2 = three-point rubric; v3 = same + strips redundant @timestamp WHERE bounds.
+// Evaluator name is kept identical to the framework's so golden-cluster history is continuous;
+// filter on `evaluator.metadata.judgeVersion` for rubric trends.
+// Copied from @kbn/evals-suite-security-esql-generation-regression; promote to @kbn/evals if a third suite needs it.
 export const ESQL_FUNCTIONAL_EQUIVALENCE_JUDGE_VERSION = 'v3';
 
 /**
@@ -58,24 +40,6 @@ const JUDGEMENT_TO_LABEL: Record<EquivalenceJudgement, string> = {
   not_equivalent: 'Non-equivalent ES|QL query',
 };
 
-/**
- * Calibrated rubric. Spelled out enough that smaller judge models (Sonnet,
- * GPT-4o-mini, gpt-oss-120b) don't anchor on token-level similarity, and
- * tight enough that the larger ones don't free-associate.
- *
- * The leading sections cover:
- *   1. What "functional equivalence" means (logical outcome, not syntax).
- *   2. Three-point scale with concrete grading anchors.
- *   3. Allow-list of transformations that DO NOT break equivalence —
- *      drawn from real failure cases (column renames, `?_tstart` ↔ literal
- *      date, equivalent date functions, interchangeable bucketing, etc.).
- *   4. Deny-list of patterns that DO break equivalence (wrong aggregation,
- *      wrong source, missing critical filter, swapped subject).
- *   5. Tie-breaker rule: when unsure between "equivalent" and
- *      "equivalent_with_caveats", pick the latter — biases the judge
- *      against false-positive equivalence claims that mask real
- *      regressions.
- */
 const SYSTEM_PROMPT = `You are a senior Elasticsearch analyst evaluating whether a candidate ES|QL query is functionally equivalent to a gold reference ES|QL query.
 
 Two queries are FUNCTIONALLY EQUIVALENT when they would produce the same answer for the same underlying question, even if the syntax differs. Judge on a three-point scale:
@@ -186,30 +150,10 @@ function isEquivalenceJudgement(value: unknown): value is EquivalenceJudgement {
 }
 
 /**
- * LLM-judged functional equivalence evaluator with a calibrated three-point
- * rubric. Drop-in replacement for the framework's
- * `createEsqlEquivalenceEvaluator` (`@kbn/evals`) — same factory signature,
- * same evaluator name (so golden-cluster history stays comparable), same
- * `kind: 'LLM'`. Differences from the framework default:
- *
- *   - Three-point scale instead of binary Yes/No, so cosmetic-but-imperfect
- *     candidates earn partial credit and don't get dumped into the same
- *     bucket as wrong-aggregation or wrong-source regressions.
- *   - Explicit allow-list of transformations (column renames, equivalent
- *     date functions, `?_tstart`/`?_tend` ↔ literal time range, broader
- *     index patterns, etc.) so judges don't over-penalise stylistic
- *     differences that would otherwise be thrown away as `0`.
- *   - Explicit deny-list of substantive differences (wrong aggregation,
- *     wrong source, missing critical filter, swapped subject) so judges
- *     don't over-credit superficially-similar candidates.
- *   - Conservative tie-breaker: when uncertain, judges must return
- *     `equivalent_with_caveats`, not `equivalent`. Biases the suite
- *     against false-positive equivalence claims that would mask
- *     regressions during model swaps.
- *
- * Every result is stamped with `metadata.judgeVersion` so historical
- * scores from the framework's v1 rubric can be partitioned out of trend
- * dashboards if needed.
+ * LLM-judged functional equivalence with a calibrated three-point rubric
+ * (equivalent / equivalent_with_caveats / not_equivalent). Drop-in replacement
+ * for the framework's binary `createEsqlEquivalenceEvaluator` — same name for
+ * history continuity; results are stamped with `metadata.judgeVersion`.
  */
 export function createCalibratedEsqlEquivalenceEvaluator({
   inferenceClient,
@@ -253,7 +197,9 @@ export function createCalibratedEsqlEquivalenceEvaluator({
         equivalence: EquivalenceJudgement;
         reason: string;
       }> {
-        const response = await executeUntilValid({
+        let captured: { equivalence: EquivalenceJudgement; reason: string } | undefined;
+
+        await executeUntilValid({
           prompt: CalibratedEsqlEquivalencePrompt,
           inferenceClient,
           input: {
@@ -277,42 +223,17 @@ export function createCalibratedEsqlEquivalenceEvaluator({
                   )}, reason=${typeof reason}`
                 );
               }
-              return {
-                response: {
-                  equivalence,
-                  reason,
-                },
-              };
+              captured = { equivalence, reason };
+              return { response: { equivalence, reason } };
             },
           },
         });
 
-        // Defensive: `executeUntilValid` is supposed to coerce the judge into
-        // emitting a structured `evaluate` tool call (we pass
-        // `finalToolChoice = { function: 'evaluate' }`), but some judges
-        // — especially when the candidate prediction is huge or contains
-        // long chain-of-thought traces from thinking models — still come
-        // back with empty `toolCalls`. Dereferencing `toolCalls[0].function`
-        // directly would throw and take down the whole suite for that
-        // connector. Throw a clean Error here instead so the surrounding
-        // `pRetry` can do its job, and the outer catch below can score
-        // conservatively if all retries exhaust.
-        const firstToolCall = response.toolCalls?.[0];
-        if (!firstToolCall?.function?.arguments) {
-          throw new Error(
-            `Calibrated FuncEq judge returned no structured tool call ` +
-              `(received ${response.toolCalls?.length ?? 0} tool calls). ` +
-              `Likely a bare-text refusal or truncation on the judge side.`
-          );
+        if (!captured) {
+          // executeUntilValid resolved but the callback never ran — bare-text refusal from the judge.
+          throw new Error('Judge returned no structured tool call');
         }
-        const args = firstToolCall.function.arguments as {
-          equivalence?: unknown;
-          reason?: unknown;
-        };
-        if (!isEquivalenceJudgement(args.equivalence) || typeof args.reason !== 'string') {
-          throw new Error('Calibrated FuncEq judge returned malformed tool-call arguments');
-        }
-        return { equivalence: args.equivalence, reason: args.reason };
+        return captured;
       }
 
       try {

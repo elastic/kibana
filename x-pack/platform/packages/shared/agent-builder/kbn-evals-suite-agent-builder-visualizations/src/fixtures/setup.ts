@@ -12,7 +12,6 @@ import {
   OTEL_METRICS_INDEX,
   OTEL_METRICS_OVERRIDE_TEMPLATE_NAME,
   buildOtelMetricsIndexCreateRequest,
-  otelMetricsFixtureIndexWildcards,
   otelMetricsOverrideTemplate,
 } from './indices';
 
@@ -84,11 +83,9 @@ export async function setupOtelMetricsFixtures({
 }
 
 /**
- * Delete the OTel host-metrics fixture. Resolves the configured wildcard
- * patterns to concrete names first because Scout clusters boot with
- * `action.destructive_requires_name=true`, which rejects wildcard deletes.
- * Tolerates missing indices so a partially-completed setup doesn't cascade
- * into a fixture leak on the next run.
+ * Delete the OTel host-metrics fixture. Uses exact names (not wildcards)
+ * because Scout clusters boot with `action.destructive_requires_name=true`.
+ * All deletes swallow 404s so a partial setup doesn't block the next run.
  */
 export async function cleanupOtelMetricsFixtures({
   esClient,
@@ -99,87 +96,9 @@ export async function cleanupOtelMetricsFixtures({
 }): Promise<void> {
   log.info('[viz-evals] cleaning up OTel host-metrics fixture');
 
-  const resolveResponses = await Promise.all(
-    otelMetricsFixtureIndexWildcards.map(async (pattern) => {
-      try {
-        return await esClient.indices.resolveIndex({
-          name: pattern,
-          expand_wildcards: 'open',
-          ignore_unavailable: true,
-          allow_no_indices: true,
-        });
-      } catch (err) {
-        log.warning(
-          new Error(`[viz-evals] cleanup resolve failed for pattern "${pattern}" — skipping`, {
-            cause: err instanceof Error ? err : new Error(String(err)),
-          })
-        );
-        return undefined;
-      }
-    })
-  );
-
-  const dataStreamsToDelete = Array.from(
-    new Set(
-      resolveResponses
-        .flatMap((response) => response?.data_streams ?? [])
-        .map((dataStream) => dataStream.name)
-    )
-  );
-
-  if (dataStreamsToDelete.length > 0) {
-    try {
-      await esClient.indices.deleteDataStream({ name: dataStreamsToDelete });
-      log.debug(`[viz-evals] deleted data streams: ${dataStreamsToDelete.join(', ')}`);
-    } catch (err) {
-      log.warning(
-        new Error(
-          `[viz-evals] cleanup failed to delete data streams ${dataStreamsToDelete.join(
-            ', '
-          )} — continuing`,
-          { cause: err instanceof Error ? err : new Error(String(err)) }
-        )
-      );
-    }
-  }
-
-  const indicesToDelete = Array.from(
-    new Set(
-      resolveResponses.flatMap((response) => response?.indices ?? []).map((index) => index.name)
-    )
-  );
-
-  if (indicesToDelete.length > 0) {
-    try {
-      await esClient.indices.delete({ index: indicesToDelete });
-      log.debug(`[viz-evals] deleted indices: ${indicesToDelete.join(', ')}`);
-    } catch (err) {
-      log.warning(
-        new Error(
-          `[viz-evals] cleanup failed to delete indices ${indicesToDelete.join(', ')} — continuing`,
-          { cause: err instanceof Error ? err : new Error(String(err)) }
-        )
-      );
-    }
-  }
-
-  // Also try the exact fixture name in case resolve missed a data stream
-  // (e.g. closed / hidden) that still blocks the override template put.
-  try {
-    await esClient.indices.deleteDataStream({ name: OTEL_METRICS_INDEX });
-  } catch {
-    // missing is fine
-  }
-
-  try {
-    await esClient.indices.deleteIndexTemplate({ name: OTEL_METRICS_OVERRIDE_TEMPLATE_NAME });
-    log.debug(`[viz-evals] deleted index template: ${OTEL_METRICS_OVERRIDE_TEMPLATE_NAME}`);
-  } catch (err) {
-    log.warning(
-      new Error(
-        `[viz-evals] cleanup failed to delete index template ${OTEL_METRICS_OVERRIDE_TEMPLATE_NAME} — continuing`,
-        { cause: err instanceof Error ? err : new Error(String(err)) }
-      )
-    );
-  }
+  await esClient.indices.delete({ index: OTEL_METRICS_INDEX }).catch(() => {});
+  await esClient.indices.deleteDataStream({ name: OTEL_METRICS_INDEX }).catch(() => {});
+  await esClient.indices
+    .deleteIndexTemplate({ name: OTEL_METRICS_OVERRIDE_TEMPLATE_NAME })
+    .catch(() => {});
 }
