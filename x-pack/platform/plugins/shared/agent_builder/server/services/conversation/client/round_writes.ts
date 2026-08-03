@@ -11,7 +11,9 @@ import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments'
 /**
  * Places `round` into `rounds` keyed on `round.id`, not on position: appends when
  * absent, replaces in place when present (HITL resume keeps the pending id).
- * `replacesRoundId` drops the round superseded by a regenerate, which mints a new id.
+ * `replacesRoundId` drops the round superseded by a regenerate, which mints a new
+ * id; the replacement is appended rather than taking the dropped round's slot, so
+ * it still sorts after a round that landed concurrently.
  *
  * Idempotent, so a retried write cannot duplicate a round.
  */
@@ -25,9 +27,9 @@ export const upsertRound = (
       ? rounds.filter(({ id }) => id !== replacesRoundId)
       : rounds;
 
-  const index = base.findIndex(({ id }) => id === round.id);
-
-  return index >= 0 ? [...base.slice(0, index), round, ...base.slice(index + 1)] : [...base, round];
+  return base.some(({ id }) => id === round.id)
+    ? base.map((existing) => (existing.id === round.id ? round : existing))
+    : [...base, round];
 };
 
 /**

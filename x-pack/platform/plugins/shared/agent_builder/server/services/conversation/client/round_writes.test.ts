@@ -37,7 +37,7 @@ describe('upsertRound', () => {
     expect(result[0]).toBe(resumed);
   });
 
-  it('drops the superseded round and inserts at its position (regenerate)', () => {
+  it('drops the superseded round (regenerate)', () => {
     const first = createRound({ id: 'round-1' });
     const second = createRound({ id: 'round-2', input: { message: 'original' } });
     const regenerated = createRound({ id: 'round-3', input: { message: 'regenerated' } });
@@ -45,6 +45,18 @@ describe('upsertRound', () => {
     const result = upsertRound([first, second], regenerated, 'round-2');
 
     expect(ids(result)).toEqual(['round-1', 'round-3']);
+  });
+
+  it('appends the replacement after a concurrently added round', () => {
+    const first = createRound({ id: 'round-1' });
+    const superseded = createRound({ id: 'round-2' });
+    const concurrent = createRound({ id: 'round-concurrent' });
+    const regenerated = createRound({ id: 'round-3' });
+
+    const result = upsertRound([first, superseded, concurrent], regenerated, 'round-2');
+
+    // appended, not slotted where round-2 was, so it still sorts last
+    expect(ids(result)).toEqual(['round-1', 'round-concurrent', 'round-3']);
   });
 
   it('ignores a replacesRoundId that matches the incoming round', () => {
