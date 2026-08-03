@@ -70,6 +70,7 @@ export type {
   AnyRequiredCondition,
   Privilege,
   PrivilegeSet,
+  Privileges,
   RouteDeprecationInfo,
   PostValidationMetadata,
 } from './route';
