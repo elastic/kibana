@@ -27,6 +27,11 @@ const LOG_ANALYTICS_SCOPE = 'https://api.loganalytics.io/.default';
  * (Log Analytics) require a token scoped to a different audience, so this
  * helper repeats the same client-credentials exchange with a different
  * `scope`, using the raw credentials from `ctx.secrets`.
+ *
+ * The request goes through `ctx.client` (rather than a raw `fetch`) so it
+ * honors the same operator-configured networking policy — proxies, custom
+ * host settings, and TLS/CA settings — as every other request this
+ * connector makes, and stays subject to the framework's SSRF protections.
  */
 async function getAccessTokenForScope(ctx: ActionContext, scope: string): Promise<string> {
   const tokenUrl = ctx.secrets?.tokenUrl as string | undefined;
@@ -47,24 +52,38 @@ async function getAccessTokenForScope(ctx: ActionContext, scope: string): Promis
     scope,
   });
 
-  const response = await fetch(tokenUrl, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: body.toString(),
-  });
+  try {
+    const response = await ctx.client.post<{ access_token?: string }>(tokenUrl, body.toString(), {
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        // Override the ARM-scoped bearer token `ctx.client` was already
+        // configured with — irrelevant (and undesirable to send) here since
+        // this request authenticates via the client-credentials body, not a
+        // bearer token.
+        Authorization: undefined,
+      },
+    });
 
-  if (!response.ok) {
-    const errorBody = await response.text();
-    throw new Error(
-      `Failed to obtain an access token for ${scope} (${response.status}): ${errorBody}`
-    );
+    if (!response.data.access_token) {
+      throw new Error(`Azure AD token endpoint did not return an access_token for scope ${scope}`);
+    }
+    return response.data.access_token;
+  } catch (error) {
+    const err = error as {
+      response?: { status?: number; data?: unknown };
+      message?: string;
+    };
+    if (err.response) {
+      const detail =
+        typeof err.response.data === 'string'
+          ? err.response.data
+          : JSON.stringify(err.response.data);
+      throw new Error(
+        `Failed to obtain an access token for ${scope} (${err.response.status}): ${detail}`
+      );
+    }
+    throw error;
   }
-
-  const data = (await response.json()) as { access_token?: string };
-  if (!data.access_token) {
-    throw new Error(`Azure AD token endpoint did not return an access_token for scope ${scope}`);
-  }
-  return data.access_token;
 }
 
 /**
