@@ -12,14 +12,14 @@ import {
   ALERTING_V2_EXECUTION_HISTORY_READ_ROLE,
   apiTest,
   buildCreateRuleData,
-  getRuleExecutionsUrl,
+  listRuleExecutionsUrl,
   NO_ACCESS_ROLE,
   testData,
 } from '../../../fixtures';
 
 const OTHER_SPACE_ID = 'cross-space-execution-history';
 
-apiTest.describe('Get rule executions API', { tag: '@local-stateful-classic' }, () => {
+apiTest.describe('List rule executions API', { tag: '@local-stateful-classic' }, () => {
   let readerCredentials: RoleApiCredentials;
   let readerHeaders: Record<string, string>;
 
@@ -51,7 +51,7 @@ apiTest.describe('Get rule executions API', { tag: '@local-stateful-classic' }, 
 
       await apiServices.alertingV2.ruleExecutions.waitForRuns({ ruleId: rule.id, runs: 1 });
 
-      const response = await apiClient.get(getRuleExecutionsUrl({ rule_id: [rule.id] }), {
+      const response = await apiClient.get(listRuleExecutionsUrl({ rule_ids: [rule.id] }), {
         headers: readerHeaders,
       });
 
@@ -99,7 +99,7 @@ apiTest.describe('Get rule executions API', { tag: '@local-stateful-classic' }, 
         spaceId: OTHER_SPACE_ID,
       });
 
-      const response = await apiClient.get(getRuleExecutionsUrl({ per_page: 100 }), {
+      const response = await apiClient.get(listRuleExecutionsUrl({ per_page: 100 }), {
         headers: readerHeaders,
       });
 
@@ -125,7 +125,7 @@ apiTest.describe('Get rule executions API', { tag: '@local-stateful-classic' }, 
   );
 
   apiTest('validation: rejects page=0', async ({ apiClient }) => {
-    const response = await apiClient.get(getRuleExecutionsUrl({ page: 0 }), {
+    const response = await apiClient.get(listRuleExecutionsUrl({ page: 0 }), {
       headers: readerHeaders,
     });
     expect(response).toHaveStatusCode(400);
@@ -133,7 +133,7 @@ apiTest.describe('Get rule executions API', { tag: '@local-stateful-classic' }, 
   });
 
   apiTest('validation: rejects perPage=0', async ({ apiClient }) => {
-    const response = await apiClient.get(getRuleExecutionsUrl({ per_page: 0 }), {
+    const response = await apiClient.get(listRuleExecutionsUrl({ per_page: 0 }), {
       headers: readerHeaders,
     });
     expect(response).toHaveStatusCode(400);
@@ -141,7 +141,7 @@ apiTest.describe('Get rule executions API', { tag: '@local-stateful-classic' }, 
   });
 
   apiTest('validation: rejects perPage above the maximum', async ({ apiClient }) => {
-    const response = await apiClient.get(getRuleExecutionsUrl({ per_page: 101 }), {
+    const response = await apiClient.get(listRuleExecutionsUrl({ per_page: 101 }), {
       headers: readerHeaders,
     });
     expect(response).toHaveStatusCode(400);
@@ -149,7 +149,7 @@ apiTest.describe('Get rule executions API', { tag: '@local-stateful-classic' }, 
   });
 
   apiTest('validation: rejects unknown outcome values', async ({ apiClient }) => {
-    const response = await apiClient.get(`${getRuleExecutionsUrl()}?outcome=cancelled`, {
+    const response = await apiClient.get(`${listRuleExecutionsUrl()}?outcome=cancelled`, {
       headers: readerHeaders,
     });
     expect(response).toHaveStatusCode(400);
@@ -157,7 +157,7 @@ apiTest.describe('Get rule executions API', { tag: '@local-stateful-classic' }, 
   });
 
   apiTest('validation: rejects malformed datetimes for from', async ({ apiClient }) => {
-    const response = await apiClient.get(`${getRuleExecutionsUrl()}?from=yesterday`, {
+    const response = await apiClient.get(`${listRuleExecutionsUrl()}?from=yesterday`, {
       headers: readerHeaders,
     });
     expect(response).toHaveStatusCode(400);
@@ -167,7 +167,7 @@ apiTest.describe('Get rule executions API', { tag: '@local-stateful-classic' }, 
   apiTest(
     'authorization: 200 with alerting_v2_execution_history read privilege',
     async ({ apiClient }) => {
-      const response = await apiClient.get(getRuleExecutionsUrl(), { headers: readerHeaders });
+      const response = await apiClient.get(listRuleExecutionsUrl(), { headers: readerHeaders });
       expect(response).toHaveStatusCode(200);
     }
   );
@@ -178,7 +178,7 @@ apiTest.describe('Get rule executions API', { tag: '@local-stateful-classic' }, 
       const writerCredentials = await requestAuth.getApiKeyForCustomRole(
         ALERTING_V2_EXECUTION_HISTORY_ALL_ROLE
       );
-      const response = await apiClient.get(getRuleExecutionsUrl(), {
+      const response = await apiClient.get(listRuleExecutionsUrl(), {
         headers: { ...testData.COMMON_HEADERS, ...writerCredentials.apiKeyHeader },
       });
       expect(response).toHaveStatusCode(200);
@@ -189,7 +189,7 @@ apiTest.describe('Get rule executions API', { tag: '@local-stateful-classic' }, 
     'authorization: 403 without any alerting_v2 privileges',
     async ({ apiClient, requestAuth }) => {
       const noAccessCredentials = await requestAuth.getApiKeyForCustomRole(NO_ACCESS_ROLE);
-      const response = await apiClient.get(getRuleExecutionsUrl(), {
+      const response = await apiClient.get(listRuleExecutionsUrl(), {
         headers: { ...testData.COMMON_HEADERS, ...noAccessCredentials.apiKeyHeader },
       });
       expect(response).toHaveStatusCode(403);
