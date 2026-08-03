@@ -16,11 +16,9 @@ import type { MenuItem } from '../types';
 
 interface FeaturedItemCardProps {
   item: MenuItem;
-  /** When true, tints the icon with the assistance (AI) color. */
-  highlightIcon?: boolean;
 }
 
-export const FeaturedItemCard = ({ item, highlightIcon = false }: FeaturedItemCardProps) => (
+export const FeaturedItemCard = ({ item }: FeaturedItemCardProps) => (
   <EuiPanel
     element="button"
     hasBorder
@@ -31,12 +29,7 @@ export const FeaturedItemCard = ({ item, highlightIcon = false }: FeaturedItemCa
   >
     <EuiFlexGroup alignItems="flexStart" gutterSize="s" responsive={false}>
       <EuiFlexItem grow={false}>
-        <EuiIcon
-          type={item.icon}
-          size="m"
-          aria-hidden={true}
-          css={highlightIcon ? styles.assistanceIcon : undefined}
-        />
+        <EuiIcon type={item.icon} size="m" aria-hidden={true} />
       </EuiFlexItem>
       <EuiFlexItem css={styles.textColumn}>
         <EuiText size="s" textAlign="left" css={styles.title}>
@@ -69,10 +62,6 @@ const styles = {
   title: ({ euiTheme }: UseEuiTheme) =>
     css({
       color: euiTheme.colors.textParagraph,
-    }),
-  assistanceIcon: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      color: euiTheme.colors.textAssistance,
     }),
   description: ({ euiTheme }: UseEuiTheme) =>
     css({
