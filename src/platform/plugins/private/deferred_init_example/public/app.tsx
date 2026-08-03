@@ -60,35 +60,35 @@ const DemoApp: React.FC<DemoAppProps> = ({ http }) => {
         {/* Hardcoded summary of the deferred-init phases that ran server-side. */}
         <EuiText size="s">
           <p>
-            <EuiIcon type="check" color="success" />{' '}
+            <EuiIcon type="check" color="success" aria-hidden={true} />{' '}
             <FormattedMessage
               id="deferredInitExample.app.step.migrations"
               defaultMessage="Ran saved object migrations"
             />
           </p>
           <p>
-            <EuiIcon type="check" color="success" />{' '}
+            <EuiIcon type="check" color="success" aria-hidden={true} />{' '}
             <FormattedMessage
               id="deferredInitExample.app.step.defaultState"
               defaultMessage="Initialized default state"
             />
           </p>
           <p>
-            <EuiIcon type="check" color="success" />{' '}
+            <EuiIcon type="check" color="success" aria-hidden={true} />{' '}
             <FormattedMessage
               id="deferredInitExample.app.step.dependency"
               defaultMessage="Loaded deferredInitExampleDependency's start contract via loadPluginContract"
             />
           </p>
           <p>
-            <EuiIcon type="check" color="success" />{' '}
+            <EuiIcon type="check" color="success" aria-hidden={true} />{' '}
             <FormattedMessage
               id="deferredInitExample.app.step.index"
               defaultMessage="Created the Elasticsearch index and mappings"
             />
           </p>
           <p>
-            <EuiIcon type="check" color="success" />{' '}
+            <EuiIcon type="check" color="success" aria-hidden={true} />{' '}
             <FormattedMessage
               id="deferredInitExample.app.step.document"
               defaultMessage="Wrote the default state document"
@@ -98,6 +98,7 @@ const DemoApp: React.FC<DemoAppProps> = ({ http }) => {
         <EuiSpacer />
         {doc !== null && (
           <EuiCallOut
+            announceOnMount
             title={
               <FormattedMessage
                 id="deferredInitExample.app.successTitle"
