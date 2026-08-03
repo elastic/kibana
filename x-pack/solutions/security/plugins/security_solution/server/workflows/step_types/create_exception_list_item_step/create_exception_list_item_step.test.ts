@@ -268,6 +268,38 @@ describe('createExceptionListItemStepDefinition', () => {
       expect(result.output).toEqual({ ...createdItemOutput, outcome: 'overwritten' });
     });
 
+    it('fails without skipping, overwriting, or creating when item_id belongs to a different list', async () => {
+      const foreignItem = { ...createdItem, id: 'other-so-id', list_id: 'other-list' };
+      mockContextManager.callKibanaApi.mockImplementation(async ({ method }) => ({
+        status: 200,
+        headers: {},
+        body: method === 'GET' ? foreignItem : createdItem,
+      }));
+      mockContext = {
+        ...mockContext,
+        input: { ...mockContext.input, overwrite: true },
+      } as Context;
+
+      await expect(
+        createExceptionListItemStepDefinition.handler(mockContext)
+      ).rejects.toMatchObject({
+        type: 'ConflictError',
+        message: expect.stringContaining('other-list'),
+      });
+
+      expect(mockContextManager.callKibanaApi).toHaveBeenCalledTimes(1);
+      expect(mockContextManager.callKibanaApi).toHaveBeenCalledWith({
+        method: 'GET',
+        path: `${EXCEPTION_LIST_ITEM_URL}?item_id=scanner-ip&namespace_type=agnostic`,
+      });
+      expect(mockContextManager.callKibanaApi).not.toHaveBeenCalledWith(
+        expect.objectContaining({ method: 'PUT' })
+      );
+      expect(mockContextManager.callKibanaApi).not.toHaveBeenCalledWith(
+        expect.objectContaining({ method: 'POST' })
+      );
+    });
+
     it('rejects overwrite without item_id at the schema level', () => {
       const result = createExceptionListItemInputSchema.safeParse({
         list_id: 'corporate-allowlist',

@@ -6,6 +6,7 @@
  */
 
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
+import { ExecutionError } from '@kbn/workflows/server';
 import type { ExceptionListItem } from '@kbn/securitysolution-exceptions-common/api';
 import { createExceptionListItemStepCommonDefinition } from '../../../../common/workflows/step_types/create_exception_list_item_step/create_exception_list_item_step_common';
 import {
@@ -33,12 +34,31 @@ export const createExceptionListItemStepDefinition = createServerStepDefinition(
     try {
       let existingItem: ExceptionListItem | undefined;
       if (itemId !== undefined) {
-        existingItem = await findExceptionItemByItemId(
+        // `item_id` is not scoped to a particular list, so an item with this
+        // `item_id` could belong to a different list than the one targeted.
+        // Skipping or overwriting that item would silently act on the wrong
+        // list, so a mismatch is a hard failure rather than a fall-through to
+        // create (which would 409 anyway, since the exception-list-items API
+        // does enforce item_id uniqueness, but with a less specific message).
+        const candidate = await findExceptionItemByItemId(
           context.contextManager,
           ACTION,
           itemId,
           namespaceType
         );
+        if (candidate !== undefined) {
+          if (candidate.list_id === listId) {
+            existingItem = candidate;
+          } else {
+            throw new ExecutionError({
+              type: 'ConflictError',
+              message:
+                `Failed to ${ACTION}: item_id "${itemId}" already exists on a different ` +
+                `exception list (list_id: "${candidate.list_id}"), not the target list ` +
+                `(list_id: "${listId}"). Choose a different item_id, or manage that item directly.`,
+            });
+          }
+        }
       }
 
       if (existingItem && !overwrite) {
