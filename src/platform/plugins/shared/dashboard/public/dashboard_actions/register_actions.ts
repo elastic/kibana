@@ -7,10 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  ADD_PANEL_TRIGGER,
-  ON_OPEN_PANEL_MENU,
-} from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { ADD_PANEL_TRIGGER, ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { DashboardStartDependencies } from '../plugin';
 import {
   ACTION_ADD_SECTION,
