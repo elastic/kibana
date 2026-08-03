@@ -8,15 +8,13 @@
 import {
   EuiButton,
   EuiCard,
-  EuiFlexGroup,
+  EuiFlexGrid,
   EuiFlexItem,
   EuiIcon,
   EuiPanel,
   EuiSpacer,
   EuiText,
-  useEuiTheme,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import React, { useState } from 'react';
 
 import { isHttpFetchError } from '@kbn/core-http-browser';
@@ -34,7 +32,6 @@ interface Props {
 }
 
 export const InitialSolutionSetup = ({ spacesManager, serverBasePath }: Props) => {
-  const { euiTheme } = useEuiTheme();
   const [selectedSolution, setSelectedSolution] = useState<InitialSolutionSetupView>();
   const [error, setError] = useState<Error>();
 
@@ -75,20 +72,11 @@ export const InitialSolutionSetup = ({ spacesManager, serverBasePath }: Props) =
 
   return (
     <>
-      <EuiFlexGroup gutterSize="l" justifyContent="center" wrap>
+      <EuiFlexGrid columns={4} gutterSize="l">
         {SOLUTION_VIEW_OPTIONS.map(
           ({ value, initialSetupName, description, icon, dataTestSubj }) => (
-            <EuiFlexItem key={value} grow={false} css={{ maxWidth: '100%' }}>
+            <EuiFlexItem key={value}>
               <EuiCard
-                css={css`
-                  width: calc(${euiTheme.size.l} * 13);
-                  max-width: 100%;
-                  min-height: calc(${euiTheme.size.base} * 15);
-
-                  .euiCard__content {
-                    overflow: hidden;
-                  }
-                `}
                 data-test-subj={`initialSolutionSetup-${dataTestSubj}`}
                 icon={<EuiIcon type={icon} size="xl" />}
                 title={initialSetupName}
@@ -118,7 +106,7 @@ export const InitialSolutionSetup = ({ spacesManager, serverBasePath }: Props) =
             </EuiFlexItem>
           )
         )}
-      </EuiFlexGroup>
+      </EuiFlexGrid>
       {error ? (
         <>
           <EuiSpacer />
