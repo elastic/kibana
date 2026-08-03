@@ -58,9 +58,29 @@ import type {
 
 const MONITORING_API_BASE = 'https://monitoring.googleapis.com/v3';
 
-// Matches either a bare resource ID or a full "projects/{p}/{collection}/{id}" name,
-// mirroring the character-set restriction already enforced by the Zod input schemas.
-const FULL_NAME_REGEX = /^projects\/([A-Za-z0-9_.-]+)\/([A-Za-z0-9_.-]+)\/([A-Za-z0-9_.-]+)$/;
+// Matches a full "projects/{p}/{collection}/{id}" name, mirroring the character-set
+// restriction already enforced by the Zod input schemas — including the negative
+// lookaheads that reject a dot-only segment (".", "..") so a value that passes this
+// regex can't produce a path-traversing URL once interpolated below.
+const FULL_NAME_REGEX =
+  /^projects\/(?!\.+\/)([A-Za-z0-9_.-]+)\/(?!\.+\/)([A-Za-z0-9_.-]+)\/(?!\.+$)([A-Za-z0-9_.-]+)$/;
+
+/**
+ * Encodes a single dynamic URL path segment, rejecting a segment that consists
+ * solely of dots (".", "..", ...). Such a segment passes the `[A-Za-z0-9_.-]+`
+ * character-class check but is not neutralized by `encodeURIComponent` (dots are
+ * unreserved), so it would otherwise reach the request URL as literal ".."/"."
+ * and risk path traversal once the URL is parsed/normalized downstream. This is
+ * defense in depth on top of the input schemas' own dot-only-segment rejection,
+ * for any value that reaches this helper from a source other than a validated
+ * Zod schema.
+ */
+function encodeResourceSegment(segment: string): string {
+  if (/^\.+$/.test(segment)) {
+    throw new Error(`Invalid resource path segment: "${segment}".`);
+  }
+  return encodeURIComponent(segment);
+}
 
 function getDefaultProjectId(ctx: ActionContext): string {
   const config = ctx.config as { projectId?: string } | undefined;
@@ -86,11 +106,11 @@ function resolveResourceName(value: string, collection: string, defaultProjectId
   const match = value.match(FULL_NAME_REGEX);
   if (match) {
     const [, projectId, matchedCollection, id] = match;
-    return `projects/${encodeURIComponent(projectId)}/${matchedCollection}/${encodeURIComponent(
-      id
-    )}`;
+    return `projects/${encodeResourceSegment(
+      projectId
+    )}/${matchedCollection}/${encodeResourceSegment(id)}`;
   }
-  return `projects/${encodeURIComponent(defaultProjectId)}/${collection}/${encodeURIComponent(
+  return `projects/${encodeURIComponent(defaultProjectId)}/${collection}/${encodeResourceSegment(
     value
   )}`;
 }
@@ -264,15 +284,17 @@ export const GoogleCloudMonitoring: ConnectorSpec = {
           updateMaskFields.push('displayName');
         }
         if (input.documentationContent !== undefined || input.documentationSubject !== undefined) {
-          body.documentation = {
-            ...(input.documentationContent !== undefined
-              ? { content: input.documentationContent, mimeType: 'text/markdown' }
-              : {}),
-            ...(input.documentationSubject !== undefined
-              ? { subject: input.documentationSubject }
-              : {}),
-          };
-          updateMaskFields.push('documentation');
+          const documentation: Record<string, unknown> = {};
+          if (input.documentationContent !== undefined) {
+            documentation.content = input.documentationContent;
+            documentation.mimeType = 'text/markdown';
+            updateMaskFields.push('documentation.content', 'documentation.mimeType');
+          }
+          if (input.documentationSubject !== undefined) {
+            documentation.subject = input.documentationSubject;
+            updateMaskFields.push('documentation.subject');
+          }
+          body.documentation = documentation;
         }
         if (input.notificationChannels !== undefined) {
           body.notificationChannels = input.notificationChannels.map((channel) =>
@@ -524,7 +546,7 @@ export const GoogleCloudMonitoring: ConnectorSpec = {
       input: ListServiceLevelObjectivesInputSchema,
       handler: async (ctx, input: ListServiceLevelObjectivesInput) => {
         const projectId = resolveProjectId(ctx, input.projectId);
-        const parent = `projects/${encodeURIComponent(projectId)}/services/${encodeURIComponent(
+        const parent = `projects/${encodeURIComponent(projectId)}/services/${encodeResourceSegment(
           input.serviceId
         )}`;
         const params: Record<string, string | number> = {};

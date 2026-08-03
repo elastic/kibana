@@ -182,6 +182,32 @@ describe('GoogleCloudMonitoring', () => {
       });
       expect(parsed.success).toBe(false);
     });
+
+    it('should scope the updateMask to only the documentation subfield provided', async () => {
+      mockClient.patch.mockResolvedValue({ data: {} });
+
+      await GoogleCloudMonitoring.actions.updateAlertPolicy.handler(mockContext, {
+        policyName: '123',
+        documentationSubject: 'New subject only',
+      });
+
+      expect(mockClient.patch).toHaveBeenCalledWith(
+        'https://monitoring.googleapis.com/v3/projects/my-gcp-project/alertPolicies/123',
+        {
+          name: 'projects/my-gcp-project/alertPolicies/123',
+          documentation: { subject: 'New subject only' },
+        },
+        { params: { updateMask: 'documentation.subject' } }
+      );
+    });
+
+    it('should reject a policyName consisting only of dots', () => {
+      const parsed = GoogleCloudMonitoring.actions.updateAlertPolicy.input.safeParse({
+        policyName: '..',
+        displayName: 'x',
+      });
+      expect(parsed.success).toBe(false);
+    });
   });
 
   describe('createSnooze', () => {
@@ -355,6 +381,13 @@ describe('GoogleCloudMonitoring', () => {
         'https://monitoring.googleapis.com/v3/projects/my-gcp-project/services/my-service/serviceLevelObjectives',
         { params: {} }
       );
+    });
+
+    it('should reject a serviceId consisting only of dots', () => {
+      const parsed = GoogleCloudMonitoring.actions.listServiceLevelObjectives.input.safeParse({
+        serviceId: '..',
+      });
+      expect(parsed.success).toBe(false);
     });
   });
 

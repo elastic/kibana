@@ -11,9 +11,12 @@ import { z, lazySchema } from '@kbn/zod/v4';
 
 // A bare resource ID (as returned by list operations) or a full resource name.
 // Restricting the character set (no "/", "?", "#", or whitespace) also protects
-// the URL path segments these values are interpolated into.
+// the URL path segments these values are interpolated into. Each segment also
+// rejects dot-only values (".", "..") via the negative lookaheads below, since
+// those pass the character-class check but are normalized as path traversal
+// once interpolated into the request URL.
 const RESOURCE_ID_OR_NAME =
-  /^[A-Za-z0-9_.-]+$|^projects\/[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/;
+  /^(?!\.+$)[A-Za-z0-9_.-]+$|^projects\/(?!\.+\/)[A-Za-z0-9_.-]+\/(?!\.+\/)[A-Za-z0-9_.-]+\/(?!\.+$)[A-Za-z0-9_.-]+$/;
 
 const PROJECT_ID_DESCRIPTION =
   "GCP project ID to use for this call. Defaults to the connector's configured project ID; only set this to target a different project.";
@@ -474,7 +477,7 @@ export const ListServiceLevelObjectivesInputSchema = lazySchema(() =>
       .min(1)
       .max(200)
       .regex(
-        /^[A-Za-z0-9_.-]+$/,
+        /^(?!\.+$)[A-Za-z0-9_.-]+$/,
         'Must be a bare service ID, e.g. the last path segment of a service name.'
       )
       .describe(
