@@ -14,7 +14,12 @@ import {
 import type { AgentCreateRequest, AgentUpdateRequest } from '../../../../../common/agents';
 import type { AgentProperties } from './storage';
 import type { Document } from './converters';
-import { accessControlUpdateToEs, createRequestToEs, fromEs, updateRequestToEs } from './converters';
+import {
+  accessControlUpdateToEs,
+  createRequestToEs,
+  fromEs,
+  updateRequestToEs,
+} from './converters';
 
 const creationDate = '2024-09-04T06:44:17.944Z';
 const updateDate = '2025-08-04T06:44:19.123Z';
