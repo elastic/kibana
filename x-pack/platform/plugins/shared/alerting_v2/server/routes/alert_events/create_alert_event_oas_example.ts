@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import type {
-  CreateAlertEventData,
-  CreateAlertEventResponse,
-} from '@kbn/alerting-v2-schemas';
+import type { CreateAlertEventData, CreateAlertEventResponse } from '@kbn/alerting-v2-schemas';
 import type { AlertingOasOperationObject } from '../oas_types';
 import { buildOasOperation, invalidResponseExample } from '../oas_utils';
 import { INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION } from '../route_descriptions';

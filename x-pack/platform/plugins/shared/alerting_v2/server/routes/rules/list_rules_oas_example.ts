@@ -8,10 +8,7 @@
 import type { FindRulesResponse } from '@kbn/alerting-v2-schemas';
 import { buildOasOperation } from '../oas_utils';
 import type { AlertingOasOperationObject } from '../oas_types';
-import {
-  INVALID_QUERY_PARAMETERS_RESPONSE,
-  RULE_RESPONSE,
-} from './rule_oas_shared_examples';
+import { INVALID_QUERY_PARAMETERS_RESPONSE, RULE_RESPONSE } from './rule_oas_shared_examples';
 
 export const LIST_RULES_RESPONSE: FindRulesResponse = {
   items: [RULE_RESPONSE],

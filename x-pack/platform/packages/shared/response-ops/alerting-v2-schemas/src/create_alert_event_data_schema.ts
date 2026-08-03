@@ -122,7 +122,6 @@ export const createAlertEventSourceParamsSchema = z.object({
   ),
 });
 
-
 export const createAlertEventResponseSchema = z.object({
   group_hash: z.string(),
   episode_id: z.string(),
