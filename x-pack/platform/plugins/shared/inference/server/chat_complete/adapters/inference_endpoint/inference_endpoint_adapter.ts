@@ -61,7 +61,7 @@ export const inferenceEndpointAdapter = {
       toolChoice,
       tools,
       functionCalling,
-      temperature = 0,
+      temperature,
       modelName,
       endpointModelId,
       logger,
@@ -105,7 +105,7 @@ const createEndpointRequest = ({
   toolChoice,
   tools,
   simulatedFunctionCalling,
-  temperature = 0,
+  temperature,
   modelName,
   endpointModelId,
 }: {

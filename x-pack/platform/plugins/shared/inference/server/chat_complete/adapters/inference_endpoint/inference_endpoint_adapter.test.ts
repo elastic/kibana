@@ -277,7 +277,7 @@ describe('inferenceEndpointAdapter', () => {
       );
     });
 
-    it('keeps the default temperature for a supported Claude endpoint model', () => {
+    it('omits temperature when unset for a supported Claude endpoint model', () => {
       executorMock.invoke.mockResolvedValue(
         observableIntoEventSourceStream(of(createOpenAIChunk({ delta: { content: '' } })), logger)
       );
@@ -286,6 +286,29 @@ describe('inferenceEndpointAdapter', () => {
         .chatComplete({
           ...defaultArgs,
           messages: [{ role: MessageRole.User, content: 'question' }],
+          endpointModelId: 'anthropic-claude-4.6-sonnet',
+        })
+        .subscribe(noop);
+
+      expect(executorMock.invoke).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: expect.not.objectContaining({
+            temperature: expect.anything(),
+          }),
+        })
+      );
+    });
+
+    it('keeps an explicit temperature for a supported Claude endpoint model', () => {
+      executorMock.invoke.mockResolvedValue(
+        observableIntoEventSourceStream(of(createOpenAIChunk({ delta: { content: '' } })), logger)
+      );
+
+      inferenceEndpointAdapter
+        .chatComplete({
+          ...defaultArgs,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          temperature: 0,
           endpointModelId: 'anthropic-claude-4.6-sonnet',
         })
         .subscribe(noop);

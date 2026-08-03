@@ -64,7 +64,8 @@ const shouldExcludeTemperature = ({
   const model =
     modelName ?? connector?.config?.providerConfig?.model_id ?? connector?.config?.defaultModel;
 
-  if (!connector && !modelId?.trim() && !model?.trim()) {
+  // Inference-endpoint path passes modelId (and no connector). Omit when that identity is missing.
+  if (!connector && !modelId?.trim()) {
     return true;
   }
 
@@ -87,6 +88,7 @@ const shouldExcludeTemperature = ({
     }
   }
 
+  // Claude omission is scoped to the inference-endpoint adapter, which passes modelId.
   return typeof modelId === 'string' && shouldExcludeTemperatureForModelId(modelId);
 };
 

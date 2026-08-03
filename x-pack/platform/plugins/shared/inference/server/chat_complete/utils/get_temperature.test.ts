@@ -115,8 +115,25 @@ describe('getTemperatureIfValid', () => {
     });
   });
 
-  it('omits temperature when model metadata is missing', () => {
+  it('omits temperature when inference-endpoint model metadata is missing', () => {
     expect(getTemperatureIfValid(0.7)).toEqual({});
+  });
+
+  it('keeps temperature for connector adapters without model metadata', () => {
+    expect(getTemperatureIfValid(0.7, { connector: GEMINI_CONNECTOR })).toEqual({
+      temperature: 0.7,
+    });
+  });
+
+  it('does not apply Claude omission to connector adapters using modelName', () => {
+    expect(
+      getTemperatureIfValid(0.7, {
+        connector: { type: InferenceConnectorType.Bedrock } as InferenceConnector,
+        modelName: 'claude-sonnet-5',
+      })
+    ).toEqual({
+      temperature: 0.7,
+    });
   });
 
   it('keeps connector-config temperature even for excluded models (escape hatch)', () => {
