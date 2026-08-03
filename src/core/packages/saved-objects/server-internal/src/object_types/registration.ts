@@ -17,17 +17,9 @@ import {
   type LegacyUrlAlias,
 } from '@kbn/core-saved-objects-base-server-internal';
 import type { ISavedObjectTypeRegistryInternal } from '@kbn/core-saved-objects-base-server-internal';
+import { DEFERRED_INIT_STATE_TYPE } from '@kbn/core-deferred-init-common';
 
-/**
- * Type name for the core-owned, cluster-global record of a plugin's deferred (lazy)
- * Elasticsearch initialization state. One document per plugin id, keyed by plugin id.
- *
- * @remarks This constant is intentionally duplicated (not imported) in
- * `@kbn/core-plugins-server-internal`'s `deferred_init` module, which is the sole reader/writer
- * of documents of this type. Keep the two literal values in sync; see that module for why the
- * dependency isn't inverted instead.
- */
-export const DEFERRED_INIT_STATE_TYPE = 'core-deferred-init-state';
+export { DEFERRED_INIT_STATE_TYPE };
 
 const deferredInitStateAttributesSchemaV1 = schema.object({
   /** `available` once `lazyInitialize` has completed successfully anywhere in the cluster. */

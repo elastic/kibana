@@ -326,6 +326,10 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
       onStart: (...dependencyNames) => runtimeResolver.onStart(plugin.name, dependencyNames),
       loadPluginContract: (dependencyName) =>
         runtimeResolver.loadPluginContract(plugin.name, dependencyName),
+      lazyInit:
+        deferredInitEngine && plugin.enableLazyInitialize
+          ? { waitForInit: () => deferredInitEngine.waitUntilAvailable(plugin.name) }
+          : undefined,
     },
     pricing: {
       isFeatureAvailable: deps.pricing.isFeatureAvailable,

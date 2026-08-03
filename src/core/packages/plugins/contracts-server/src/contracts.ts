@@ -10,6 +10,41 @@
 import type { PluginName } from '@kbn/core-base-common';
 
 /**
+ * Deferred (lazy) initialization helpers available to a plugin that has opted in via
+ * `enableLazyInitialize: true` in its manifest.
+ *
+ * @public
+ */
+export interface LazyInitPluginsSetup {
+  /**
+   * Returns a promise that resolves once this plugin's deferred initialization is complete, or
+   * rejects with a `DeferredInitializationError` if initialization ultimately fails.
+   *
+   * Call this at the start of a background task runner's `run` function (or inside a
+   * `taskManager.addMiddleware` `beforeRun` hook) to gate task execution until the plugin is
+   * ready. The task manager timeout still applies, so tasks that wait longer than their timeout
+   * will be retried automatically.
+   *
+   * @example
+   * ```ts
+   * // In plugin setup:
+   * const { waitForInit } = core.plugins.lazyInit!;
+   * deps.taskManager.registerTaskDefinitions({
+   *   'myPlugin:myTask': {
+   *     createTaskRunner: (ctx) => ({
+   *       run: async () => {
+   *         await waitForInit();
+   *         // ... actual task work
+   *       },
+   *     }),
+   *   },
+   * });
+   * ```
+   */
+  waitForInit: () => Promise<void>;
+}
+
+/**
  * Setup contract of Core's `plugins` service.
  *
  * @public
@@ -100,6 +135,13 @@ export interface PluginsServiceSetup {
    * ```
    */
   loadPluginContract: LoadPluginContract;
+  /**
+   * Available only for plugins that have `enableLazyInitialize: true` in their manifest.
+   * `undefined` for plugins without deferred initialization.
+   *
+   * @see {@link LazyInitPluginsSetup}
+   */
+  lazyInit?: LazyInitPluginsSetup;
 }
 
 /**

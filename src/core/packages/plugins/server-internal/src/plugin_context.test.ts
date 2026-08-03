@@ -16,7 +16,11 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { NodeInfo } from '@kbn/core-node-server';
 import { nodeServiceMock } from '@kbn/core-node-server-mocks';
 import type { InstanceInfo } from './plugin_context';
-import { createPluginInitializerContext, createPluginPrebootSetupContext } from './plugin_context';
+import {
+  createPluginInitializerContext,
+  createPluginPrebootSetupContext,
+  createPluginSetupContext,
+} from './plugin_context';
 
 import { PluginType } from '@kbn/core-base-common';
 import type { PluginManifest } from '@kbn/core-plugins-server';
@@ -249,5 +253,108 @@ describe('createPluginPrebootSetupContext', () => {
       'some-reason',
       holdSetupPromise
     );
+  });
+});
+
+describe('createPluginSetupContext', () => {
+  let coreContext: CoreContext;
+  let opaqueId: symbol;
+  let nodeInfo: NodeInfo;
+
+  beforeEach(async () => {
+    opaqueId = Symbol();
+    coreContext = {
+      coreId: Symbol('core'),
+      env: Env.createDefault(REPO_ROOT, getEnvOptions()),
+      logger: loggingSystemMock.create(),
+      configService: configServiceMock.create(),
+    };
+    nodeInfo = nodeServiceMock.createInternalPrebootContract();
+  });
+
+  const createPlugin = (manifest: PluginManifest) =>
+    new PluginWrapper({
+      path: 'some-path',
+      manifest,
+      opaqueId,
+      initializerContext: createPluginInitializerContext({
+        coreContext,
+        opaqueId,
+        manifest,
+        instanceInfo: { uuid: 'instance-uuid', airgapped: false },
+        nodeInfo,
+      }),
+    });
+
+  const createRuntimeResolver = () =>
+    ({
+      onSetup: jest.fn(),
+      onStart: jest.fn(),
+      loadPluginContract: jest.fn(),
+    } as any);
+
+  describe('plugins.lazyInit', () => {
+    it('is undefined when the plugin does not have enableLazyInitialize', () => {
+      const plugin = createPlugin(createPluginManifest({ enableLazyInitialize: false }));
+      const coreSetup = coreInternalLifecycleMock.createInternalSetup();
+      const ctx = createPluginSetupContext({
+        deps: coreSetup,
+        plugin,
+        runtimeResolver: createRuntimeResolver(),
+      });
+
+      expect(ctx.plugins.lazyInit).toBeUndefined();
+    });
+
+    it('is undefined when enableLazyInitialize is true but no engine is passed', () => {
+      const plugin = createPlugin(createPluginManifest({ enableLazyInitialize: true }));
+      const coreSetup = coreInternalLifecycleMock.createInternalSetup();
+      const ctx = createPluginSetupContext({
+        deps: coreSetup,
+        plugin,
+        runtimeResolver: createRuntimeResolver(),
+        // no deferredInitEngine
+      });
+
+      expect(ctx.plugins.lazyInit).toBeUndefined();
+    });
+
+    it('exposes waitForInit that delegates to engine.waitUntilAvailable for the plugin', async () => {
+      const plugin = createPlugin(createPluginManifest({ enableLazyInitialize: true }));
+      const coreSetup = coreInternalLifecycleMock.createInternalSetup();
+      const deferredInitEngine = {
+        waitUntilAvailable: jest.fn().mockResolvedValue(undefined),
+      } as any;
+
+      const ctx = createPluginSetupContext({
+        deps: coreSetup,
+        plugin,
+        runtimeResolver: createRuntimeResolver(),
+        deferredInitEngine,
+      });
+
+      expect(ctx.plugins.lazyInit).toBeDefined();
+      await ctx.plugins.lazyInit!.waitForInit();
+
+      expect(deferredInitEngine.waitUntilAvailable).toHaveBeenCalledWith('some-plugin-id');
+    });
+
+    it('waitForInit rejects when the engine rejects', async () => {
+      const plugin = createPlugin(createPluginManifest({ enableLazyInitialize: true }));
+      const coreSetup = coreInternalLifecycleMock.createInternalSetup();
+      const initError = new Error('init failed');
+      const deferredInitEngine = {
+        waitUntilAvailable: jest.fn().mockRejectedValue(initError),
+      } as any;
+
+      const ctx = createPluginSetupContext({
+        deps: coreSetup,
+        plugin,
+        runtimeResolver: createRuntimeResolver(),
+        deferredInitEngine,
+      });
+
+      await expect(ctx.plugins.lazyInit!.waitForInit()).rejects.toThrow('init failed');
+    });
   });
 });

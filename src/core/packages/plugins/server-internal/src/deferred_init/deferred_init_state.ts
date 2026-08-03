@@ -10,17 +10,15 @@
 import type { Logger } from '@kbn/logging';
 import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
+import { DEFERRED_INIT_STATE_TYPE } from '@kbn/core-deferred-init-common';
+
+export { DEFERRED_INIT_STATE_TYPE };
 
 /**
  * Cluster-global record of a plugin's deferred-init outcome, one document per plugin id.
  * Mutual exclusion for the run itself is handled separately by `@kbn/lock-manager`; this doc is
  * purely the "did anyone already finish this" cache so warm instances can skip both the lock and
  * the runner entirely.
- *
- * @remarks The type name is duplicated (not imported) from
- * `@kbn/core-saved-objects-server-internal`'s `object_types/registration.ts`, which registers
- * and owns the mapping. Core packages don't depend on that internal package from here; keep the
- * literal type name below (`DEFERRED_INIT_STATE_TYPE`) in sync with the one there.
  */
 export interface DeferredInitStateAttributes {
   status: 'available' | 'failed';
@@ -30,8 +28,6 @@ export interface DeferredInitStateAttributes {
   /** Kibana version that last wrote this record. Used to invalidate stale state after an upgrade. */
   kibanaVersion: string;
 }
-
-export const DEFERRED_INIT_STATE_TYPE = 'core-deferred-init-state';
 
 /**
  * Read the shared state doc for a plugin id. Returns `undefined` if it doesn't exist yet or

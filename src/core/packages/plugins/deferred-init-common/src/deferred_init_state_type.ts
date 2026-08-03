@@ -7,16 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { DEFERRED_INIT_STATE_TYPE } from './src/deferred_init_state_type';
-export {
-  DeferredInitializationError,
-  isDeferredInitializationError,
-} from './src/deferred_initialization_error';
-export {
-  DEFERRED_INIT_STATUS_ROUTE,
-  getDeferredInitStatusPath,
-} from './src/deferred_init_status_route';
-export type {
-  DeferredInitState,
-  DeferredInitStatusResponse,
-} from './src/deferred_init_status_route';
+/**
+ * Saved Object type name for the cluster-global record of a plugin's deferred (lazy)
+ * Elasticsearch initialization state. One document per plugin id, keyed by plugin id.
+ *
+ * Owned (registered + mapped) by `@kbn/core-saved-objects-server-internal`; read and
+ * written by `@kbn/core-plugins-server-internal`.
+ */
+export const DEFERRED_INIT_STATE_TYPE = 'core-deferred-init-state';
