@@ -2342,6 +2342,7 @@
       "matchDepNames": [
         "@types/stats-lite",
         "email-addresses",
+        "graphql",
         "murmurhash",
         "stats-lite"
       ],
