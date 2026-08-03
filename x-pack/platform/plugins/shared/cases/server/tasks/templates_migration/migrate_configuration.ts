@@ -154,7 +154,7 @@ const migrateFieldDefinitions = async (
           description: cf.label,
           isGlobal: true,
         };
-        const created_so = await repo.create<FieldDefinition>(
+        const createdSo = await repo.create<FieldDefinition>(
           CASE_FIELD_DEFINITION_SAVED_OBJECT,
           attributes,
           {
@@ -168,7 +168,7 @@ const migrateFieldDefinitions = async (
         );
         // Insert into the index so intra-request duplicate custom-field keys (which the
         // API blocks but imported/legacy SOs may contain) only produce one SO.
-        existingByName.set(normalizeFieldDefinitionName(cf.key), created_so);
+        existingByName.set(normalizeFieldDefinitionName(cf.key), createdSo);
         refNamesByKey.set(cf.key, cf.key);
         libraryDefs.push(attributes);
         created++;

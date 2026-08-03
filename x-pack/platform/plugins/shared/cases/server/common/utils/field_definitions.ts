@@ -39,11 +39,6 @@ const coerceLegacyToggleDefault = (value: string | number | boolean): boolean | 
 };
 
 /**
- * Builds a YAML string for a single FieldSchema entry from a legacy custom field configuration.
- * The returned `name` matches the legacy `key` so that per-case `customField.key` references
- * remain meaningful in the v2 system.
- */
-/**
  * Normalizes a field definition name for deduplication/conflict checks — the same
  * semantics the field-definitions sub-client enforces at the API layer (trim +
  * toLowerCase, matching `ensureUniqueTemplateName` in the templates service).
@@ -71,6 +66,11 @@ export const buildFieldDefinitionNameIndex = <T>(
   return index;
 };
 
+/**
+ * Builds a YAML string for a single FieldSchema entry from a legacy custom field configuration.
+ * The returned `name` matches the legacy `key` so that per-case `customField.key` references
+ * remain meaningful in the v2 system.
+ */
 export const buildFieldDefinitionYaml = (
   legacy: LegacyCustomField
 ): { name: string; yaml: string } => {

@@ -100,12 +100,9 @@ export const ensureGlobalFieldDefinitions = async ({
             );
           }
         }
+      } else if (totalCount >= MAX_FIELD_DEFINITIONS_PER_OWNER) {
+        skippedKeys.push(cf.key);
       } else {
-        if (totalCount >= MAX_FIELD_DEFINITIONS_PER_OWNER) {
-          skippedKeys.push(cf.key);
-          continue;
-        }
-
         try {
           const { yaml } = buildFieldDefinitionYaml(cf);
           const createdSo = await fieldDefinitionsService.createFieldDefinition({
