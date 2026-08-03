@@ -67,14 +67,10 @@ dependsOn:
   - '@kbn/licensing-plugin'
   - '@kbn/fields-metadata-plugin'
   - '@kbn/actions-plugin'
-  - '@kbn/global-search-plugin'
   - '@kbn/encrypted-saved-objects-plugin'
-  - '@kbn/features-plugin'
   - '@kbn/inference-plugin'
   - '@kbn/security-plugin'
   - '@kbn/cloud-plugin'
-  - '@kbn/usage-collection-plugin'
-  - '@kbn/console-plugin'
   - '@kbn/scout'
   - '@kbn/core-http-server-mocks'
   - '@kbn/apm-utils'
@@ -89,11 +85,9 @@ tags:
 fileGroups:
   src:
     - common/**/*
-    - docs/**/*
     - scripts/**/*
     - server/**/*
     - public/**/*
-    - types/**/*
     - test/**/*
     - '!target/**/*'
   jest-config:
