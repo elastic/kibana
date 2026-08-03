@@ -68406,6 +68406,43 @@ paths:
       x-metaTags:
         - content: Kibana
           name: product_name
+  /api/spaces/test-filesystem-write:
+    post:
+      operationId: post-spaces-test-filesystem-write
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                content:
+                  default: test content
+                  description: The content to write to the file
+                  type: string
+                directory:
+                  default: /usr/share/kibana
+                  description: The directory path to attempt writing to
+                  type: string
+                filename:
+                  default: test-write.txt
+                  description: The filename to write
+                  type: string
+      responses: {}
+      summary: Test filesystem write to a non-writable directory
+      tags:
+        - spaces
+      x-metaTags:
+        - content: Kibana
+          name: product_name
   /api/status:
     get:
       description: Returns Kibana's overall operational status and a per-service breakdown for Elasticsearch, Saved Objects, and registered plugins. The endpoint is intended for liveness and readiness checks (for example, by Kubernetes probes) and for operators monitoring a Kibana deployment. Unauthenticated callers receive a redacted response that exposes only the overall status level.
