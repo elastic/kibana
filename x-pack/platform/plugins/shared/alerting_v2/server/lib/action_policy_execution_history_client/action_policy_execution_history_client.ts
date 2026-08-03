@@ -13,10 +13,14 @@ import { nodeBuilder, nodeTypes, toKqlExpression } from '@kbn/es-query';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import {
   EXECUTION_HISTORY_DEFAULT_PER_PAGE,
+  DISPATCH_FAILURES_DEFAULT_PER_PAGE,
   type PolicyExecutionHistoryItem,
   type RuleResponse,
   type PolicyExecutionOutcomeFilter,
   type SearchMatchCounts,
+  type GetDispatchFailuresRequest,
+  type GetDispatchFailuresResponse,
+  type DispatchFailureItem,
 } from '@kbn/alerting-v2-schemas';
 import { ActionPolicyClient } from '../action_policy_client';
 import { RulesClient } from '../rules_client';
@@ -35,6 +39,7 @@ import {
   buildExecutionHistoryItem,
   type NameMaps,
 } from './build_execution_history_item';
+import { buildDispatchFailureItem } from './build_dispatch_failure_item';
 
 // Default lower bound on the event timestamp when the caller does not pass an
 // explicit `start_date`.
@@ -142,6 +147,37 @@ export class ActionPolicyExecutionHistoryClient {
       totalEvents: result.total,
       searchMatches: matchingSearchIds.matches,
     };
+  }
+
+  public async listDispatchFailures(
+    request: KibanaRequest,
+    params: GetDispatchFailuresRequest
+  ): Promise<GetDispatchFailuresResponse> {
+    const page = params.page ?? 1;
+    const perPage = params.per_page ?? DISPATCH_FAILURES_DEFAULT_PER_PAGE;
+    const spaceId = this.spaces.spacesService.getSpaceId(request);
+
+    const { events, total } = await this.eventLogService.findDispatchFailureEvents({
+      spaceId,
+      from: params.from,
+      to: params.to,
+      policyIds: params.policy_ids,
+      ruleIds: params.rule_ids,
+      workflowIds: params.workflow_ids,
+      episodeIds: params.episode_ids,
+      reasons: params.reason,
+      page,
+      perPage,
+    });
+
+    const nameMaps = await this.resolveNames(events, spaceId);
+    const { policyNames, ruleNames, workflowNames } = nameMaps;
+
+    const items = events
+      .map((event) => buildDispatchFailureItem(event, policyNames, ruleNames, workflowNames))
+      .filter((item): item is DispatchFailureItem => item !== null);
+
+    return { items, total, page, perPage };
   }
 
   private async resolveSearchIds(search: string | undefined): Promise<ResolvedSearchIds> {

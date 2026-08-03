@@ -10,13 +10,18 @@ import {
   EuiBadge,
   EuiBadgeGroup,
   EuiBasicTable,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiLink,
+  EuiToolTip,
   type CriteriaWithPagination,
   type EuiBasicTableColumn,
+  type EuiBadgeProps,
 } from '@elastic/eui';
 import moment from 'moment';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import { WORKFLOWS_APP_ID } from '@kbn/deeplinks-workflows';
+import type { PolicyExecutionOutcome } from '@kbn/alerting-v2-schemas';
 import { UserCapabilities } from '../../../services/user_capabilities';
 import type { PolicyExecutionHistoryItem } from '../../../services/execution_history_api';
 import { RulesCell } from './rules_cell';
@@ -24,6 +29,28 @@ import * as i18n from '../translations';
 
 const MAX_VISIBLE_RULES = 3;
 const PAGE_SIZE_OPTIONS = [10, 25, 50, 100];
+
+const getOutcomeDisplay = (
+  outcome: PolicyExecutionOutcome
+): { color: EuiBadgeProps['color']; label: string } => {
+  switch (outcome) {
+    case 'dispatched':
+      return {
+        color: 'hollow',
+        label: i18n.OUTCOME_DISPATCHED,
+      };
+    case 'throttled':
+      return {
+        color: 'hollow',
+        label: i18n.OUTCOME_THROTTLED,
+      };
+    case 'dispatch_failed':
+      return {
+        color: 'danger',
+        label: i18n.OUTCOME_FAILED,
+      };
+  }
+};
 
 const buildColumns = ({
   onPolicyClick,
@@ -65,11 +92,26 @@ const buildColumns = ({
   {
     field: 'outcome',
     name: i18n.COLUMN_OUTCOME,
-    render: (outcome: PolicyExecutionHistoryItem['outcome']) => (
-      <EuiBadge color="hollow" iconType={outcome === 'dispatched' ? 'check' : 'clock'}>
-        {outcome}
-      </EuiBadge>
-    ),
+    render: (outcome: PolicyExecutionOutcome, item: PolicyExecutionHistoryItem) => {
+      const { color, label } = getOutcomeDisplay(outcome);
+      if (outcome === 'dispatch_failed') {
+        return (
+          <EuiToolTip content={item.error?.message}>
+            <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap>
+              <EuiFlexItem grow={false}>
+                <EuiBadge color={color}>{label}</EuiBadge>
+              </EuiFlexItem>
+              {item.failure_reason && (
+                <EuiFlexItem grow={false}>
+                  <EuiBadge color="warning">{item.failure_reason}</EuiBadge>
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+          </EuiToolTip>
+        );
+      }
+      return <EuiBadge color={color}>{label}</EuiBadge>;
+    },
   },
   ...(showRulesColumn
     ? [

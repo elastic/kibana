@@ -129,7 +129,11 @@ const actionFilter = (outcomes: PolicyExecutionOutcome[] | undefined): QueryDslQ
   const actions =
     outcomes && outcomes.length > 0
       ? outcomes
-      : [ACTION_POLICY_EVENT_ACTIONS.DISPATCHED, ACTION_POLICY_EVENT_ACTIONS.THROTTLED];
+      : [
+          ACTION_POLICY_EVENT_ACTIONS.DISPATCHED,
+          ACTION_POLICY_EVENT_ACTIONS.THROTTLED,
+          ACTION_POLICY_EVENT_ACTIONS.DISPATCH_FAILED,
+        ];
 
   return { terms: { 'event.action': actions } };
 };
@@ -168,7 +172,7 @@ const buildIdFilter = (
   return { bool: { should, minimum_should_match: 1 } };
 };
 
-const buildMandatoryRuleClause = (ruleIds: string[]): QueryDslQueryContainer => ({
+export const buildMandatoryRuleClause = (ruleIds: string[]): QueryDslQueryContainer => ({
   bool: {
     should: [
       buildNestedSavedObjectClause(RULE_SAVED_OBJECT_TYPE, ruleIds),
@@ -178,7 +182,10 @@ const buildMandatoryRuleClause = (ruleIds: string[]): QueryDslQueryContainer => 
   },
 });
 
-const buildNestedSavedObjectClause = (type: string, ids: string[]): QueryDslQueryContainer => ({
+export const buildNestedSavedObjectClause = (
+  type: string,
+  ids: string[]
+): QueryDslQueryContainer => ({
   nested: {
     path: 'kibana.saved_objects',
     query: {

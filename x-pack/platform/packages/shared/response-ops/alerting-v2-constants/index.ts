@@ -21,3 +21,5 @@ export const ALERTING_V2_INTERNAL_SUGGESTIONS_MATCHER_VALUES_API_PATH =
   '/internal/alerting/v2/suggestions/values' as const;
 export const ALERTING_V2_INTERNAL_SUGGESTIONS_USER_PROFILES_API_PATH =
   '/internal/alerting/v2/suggestions/user_profiles' as const;
+export const ALERTING_V2_EXECUTION_HISTORY_DISPATCH_FAILURES_API_PATH =
+  '/api/alerting/v2/execution_history/dispatch_failures' as const;

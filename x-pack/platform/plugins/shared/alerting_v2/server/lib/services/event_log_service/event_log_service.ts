@@ -22,6 +22,10 @@ import { ALERTING_V2_LOG_CODES } from '../../errors/error_codes';
 import { EventLoggerToken } from './tokens';
 import { buildFindActionPolicyEventsQuery } from './queries/action_policy_events_query';
 import { buildRuleExecutionsQuery } from './queries/rule_executions_query';
+import {
+  buildDispatchFailuresQuery,
+  type BuildDispatchFailuresQueryParams,
+} from './queries/dispatch_failures_query';
 import { normalizeRuleExecution } from './normalizers/rule_execution_normalizer';
 import type { FindRuleExecutionsQuery, PaginatedResult, RuleExecution } from './types';
 
@@ -47,12 +51,22 @@ export interface FindActionPolicyExecutionEventsResult {
   total: number;
 }
 
+export interface FindDispatchFailureEventsResult {
+  events: IValidatedEvent[];
+  total: number;
+  page: number;
+  perPage: number;
+}
+
 export interface EventLogServiceContract {
   logEvent(event: IEvent, id?: string): void;
   findActionPolicyExecutionEvents(
     params: FindActionPolicyExecutionEventsParams
   ): Promise<FindActionPolicyExecutionEventsResult>;
   findRuleExecutions(query: FindRuleExecutionsQuery): Promise<PaginatedResult<RuleExecution>>;
+  findDispatchFailureEvents(
+    params: BuildDispatchFailuresQueryParams
+  ): Promise<FindDispatchFailureEventsResult>;
 }
 
 @injectable()
@@ -153,6 +167,24 @@ export class EventLogService implements EventLogServiceContract {
       total: extractTotal(response.hits.total),
       page: query.page,
       perPage: query.perPage,
+    };
+  }
+
+  public async findDispatchFailureEvents(
+    params: BuildDispatchFailuresQueryParams
+  ): Promise<FindDispatchFailureEventsResult> {
+    const index = this.eventLogService.getIndexPattern();
+    const body = buildDispatchFailuresQuery(params);
+
+    const response = await this.esClient.search<IValidatedEvent>({ index, ...body });
+
+    const events = response.hits.hits.map((hit) => hit._source as IValidatedEvent);
+
+    return {
+      events,
+      total: extractTotal(response.hits.total),
+      page: params.page,
+      perPage: params.perPage,
     };
   }
 }

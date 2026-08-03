@@ -16,6 +16,7 @@ export const LIST_ACTION_POLICY_EXECUTIONS_RESPONSE: ListPolicyExecutionHistoryR
       policy: { id: 'action-policy-1', name: 'Notify on host alerts' },
       outcome: 'dispatched',
       episode_count: 1,
+      episodes: [{ id: 'episode-1' }],
       action_group_count: 1,
       rules: [{ id: 'rule-1', name: 'Host CPU high' }],
       totalRuleCount: 1,

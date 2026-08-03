@@ -24,8 +24,16 @@ const idFilterArraySchema = arrayOrSingleSchema(
   EXECUTION_HISTORY_MAX_RULE_ID_FILTER
 );
 
-export const policyExecutionOutcomeSchema = z.enum(['dispatched', 'throttled']);
+export const policyExecutionOutcomeSchema = z.enum(['dispatched', 'throttled', 'dispatch_failed']);
 export type PolicyExecutionOutcome = z.infer<typeof policyExecutionOutcomeSchema>;
+
+export const dispatchFailureReasonSchema = z.enum([
+  'missing_api_key',
+  'workflow_not_found',
+  'workflow_disabled',
+  'schedule_error',
+]);
+export type DispatchFailureReason = z.infer<typeof dispatchFailureReasonSchema>;
 
 export const policyExecutionOutcomeFilterSchema = arrayOrSingleSchema(
   policyExecutionOutcomeSchema,
@@ -51,7 +59,7 @@ const sharedFilterFields = {
   outcome: policyExecutionOutcomeFilterSchema
     .optional()
     .describe(
-      'Outcome filter. When omitted matches all outcomes. Pass "dispatched" and/or "throttled" to narrow.'
+      'Outcome filter. When omitted matches all outcomes. Pass "dispatched", "throttled", and/or "dispatch_failed" to narrow.'
     ),
 };
 
@@ -96,7 +104,7 @@ export type ListPolicyExecutionHistoryRequest = z.infer<
   typeof listPolicyExecutionHistoryRequestSchema
 >;
 
-const namedRefSchema = z.object({
+export const namedRefSchema = z.object({
   id: z.string(),
   name: z.string().nullable().optional(),
 });
@@ -107,12 +115,22 @@ const MAX_WORKFLOWS_PER_ITEM = 100;
 // emit one event referencing thousands of rules; the response only carries a
 // bounded sample and clients rely on `totalRuleCount` for the true count.
 export const MAX_EMBEDDED_RULES_PER_ITEM = 20;
+// Cap for the embedded `episodes` array in each item.
+export const MAX_EMBEDDED_EPISODES_PER_ITEM = 50;
+
+const episodeRefSchema = z.object({ id: z.string() });
 
 export const policyExecutionHistoryItemSchema = z.object({
   dispatched_at: z.string(),
   policy: namedRefSchema,
   outcome: policyExecutionOutcomeSchema,
   episode_count: z.number(),
+  episodes: z
+    .array(episodeRefSchema)
+    .max(MAX_EMBEDDED_EPISODES_PER_ITEM)
+    .describe(
+      'Episode ids referenced by this event, bounded to MAX_EMBEDDED_EPISODES_PER_ITEM. Use `episode_count` for the true total.'
+    ),
   action_group_count: z.number(),
   rules: z
     .array(namedRefSchema)
@@ -126,6 +144,8 @@ export const policyExecutionHistoryItemSchema = z.object({
       'Total number of rules referenced by this event after search / rule-filter narrowing. May exceed `rules.length` when the embedded array is truncated to the cap.'
     ),
   workflows: z.array(namedRefSchema).max(MAX_WORKFLOWS_PER_ITEM),
+  failure_reason: dispatchFailureReasonSchema.optional(),
+  error: z.object({ message: z.string() }).optional(),
 });
 export type PolicyExecutionHistoryItem = z.infer<typeof policyExecutionHistoryItemSchema>;
 

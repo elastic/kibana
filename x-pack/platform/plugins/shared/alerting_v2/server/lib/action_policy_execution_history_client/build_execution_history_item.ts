@@ -8,6 +8,7 @@
 import type { IValidatedEvent } from '@kbn/event-log-plugin/server';
 import {
   MAX_EMBEDDED_RULES_PER_ITEM,
+  MAX_EMBEDDED_EPISODES_PER_ITEM,
   type PolicyExecutionHistoryItem,
   type PolicyExecutionOutcome,
   type SearchMatchCounts,
@@ -34,7 +35,8 @@ export const isString = (v: unknown): v is string => typeof v === 'string';
 
 export const isPolicyOutcome = (action: unknown): action is PolicyExecutionOutcome =>
   action === ACTION_POLICY_EVENT_ACTIONS.DISPATCHED ||
-  action === ACTION_POLICY_EVENT_ACTIONS.THROTTLED;
+  action === ACTION_POLICY_EVENT_ACTIONS.THROTTLED ||
+  action === ACTION_POLICY_EVENT_ACTIONS.DISPATCH_FAILED;
 
 export function collectIdsFromEvents(events: IValidatedEvent[]): {
   policyIds: string[];
@@ -144,7 +146,12 @@ export function buildExecutionHistoryItem(
     matchingSearchIds,
     mandatoryRuleIds
   );
-  if (relevantRuleIds.length === 0) return null;
+  // Only drop if a narrowing filter (search or explicit ruleIds) is active.
+  // Failures for policies with no matched rules are still valid events.
+  const isNarrowingActive =
+    (matchingSearchIds !== undefined && !matchingSearchIds.policyIds.includes(policyId)) ||
+    (mandatoryRuleIds !== undefined && mandatoryRuleIds.length > 0);
+  if (relevantRuleIds.length === 0 && isNarrowingActive) return null;
 
   const totalRuleCount = relevantRuleIds.length;
   const rules = relevantRuleIds
@@ -155,14 +162,23 @@ export function buildExecutionHistoryItem(
     .filter(isString)
     .map((id) => ({ id, name: workflowNames.get(id) ?? null }));
 
+  const episodeIds = (dispatcher.episode_ids ?? []).filter(isString);
+  const episodes = episodeIds.slice(0, MAX_EMBEDDED_EPISODES_PER_ITEM).map((id) => ({ id }));
+
+  const failureReason = dispatcher.failure_reason;
+  const errorMessage = event.error?.message;
+
   return {
     dispatched_at: timestamp,
     policy: { id: policyId, name: policyNames.get(policyId) ?? null },
     outcome: action,
     episode_count: Number(dispatcher.episode_count ?? 0),
+    episodes,
     action_group_count: Number(dispatcher.action_group_count ?? 0),
     rules,
     totalRuleCount,
     workflows,
+    ...(failureReason !== undefined ? { failure_reason: failureReason as string } : {}),
+    ...(errorMessage !== undefined ? { error: { message: errorMessage } } : {}),
   };
 }
