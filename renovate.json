@@ -1882,7 +1882,7 @@
     },
     {
       "groupName": "@kayahr/text-encoding",
-      "matchDepNames": ["`@kayahr/text-encoding`"],
+      "matchDepNames": ["@kayahr/text-encoding"],
       "reviewers": ["team:kibana-security"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Security"],
