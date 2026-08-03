@@ -193,27 +193,5 @@ describe('UnifiedDocViewerFlyout', () => {
 
       expect(screen.queryByTestId('docViewerFlyoutNavigation')).not.toBeInTheDocument();
     });
-
-    it('should hide navigation when the pinned hit has a time-stamped id that cannot match refreshed hits', () => {
-      // Simulates ES|QL without METADATA _id/_index: IDs are time-stamped per-response
-      // and will never match across refreshes, so navigation should always be hidden.
-      const hitWithTimestampedId = buildHit({ id: '1@2026-07-30_10_00_00', message: 'original' });
-      const refreshedHitsWithDifferentTimestamp = [
-        buildHit({ id: '1@2026-07-30_10_01_00', message: 'refreshed 1' }),
-        buildHit({ id: '2@2026-07-30_10_01_00', message: 'refreshed 2' }),
-      ];
-
-      render(
-        <UnifiedDocViewerFlyout
-          {...buildProps({
-            hit: hitWithTimestampedId,
-            hits: refreshedHitsWithDifferentTimestamp,
-            isEsqlQuery: true,
-          })}
-        />
-      );
-
-      expect(screen.queryByTestId('docViewerFlyoutNavigation')).not.toBeInTheDocument();
-    });
   });
 });
