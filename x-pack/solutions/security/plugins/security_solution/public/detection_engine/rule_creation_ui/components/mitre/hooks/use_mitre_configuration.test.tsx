@@ -19,7 +19,7 @@ jest.mock('../api/api');
 const mockTactic: MitreEntity = {
   type: 'tactic',
   framework: 'enterprise',
-  versions: ['ATT&CK-v18.1'],
+  versions: ['ATT&CK-v19.1'],
   id: 'TA0006',
   name: 'Credential Access',
   reference: 'https://attack.mitre.org/tactics/TA0006/',
@@ -29,7 +29,7 @@ const mockTactic: MitreEntity = {
 const mockTechnique: MitreEntity = {
   type: 'technique',
   framework: 'enterprise',
-  versions: ['ATT&CK-v18.1'],
+  versions: ['ATT&CK-v19.1'],
   id: 'T1078',
   name: 'Valid Accounts',
   reference: 'https://attack.mitre.org/techniques/T1078/',
@@ -40,7 +40,7 @@ const mockTechnique: MitreEntity = {
 const mockSubtechnique: MitreEntity = {
   type: 'subtechnique',
   framework: 'enterprise',
-  versions: ['ATT&CK-v18.1'],
+  versions: ['ATT&CK-v19.1'],
   id: 'T1078.001',
   name: 'Default Accounts',
   reference: 'https://attack.mitre.org/techniques/T1078/001/',

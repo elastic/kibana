@@ -17,7 +17,7 @@ const { sortBy } = require('lodash');
  * upgrade — same cadence as the previous `extract_tactics_techniques_mitre.js`
  * flow.
  */
-const MITRE_CONTENT_VERSION = 'ATT&CK-v18.1';
+const MITRE_CONTENT_VERSION = 'ATT&CK-v19.1'; // keep in sync with scripts/extract_tactics_techniques_mitre.js
 
 /**
  * Source list. POC ships only ATT&CK Enterprise. ATLAS / Mobile / ICS plug

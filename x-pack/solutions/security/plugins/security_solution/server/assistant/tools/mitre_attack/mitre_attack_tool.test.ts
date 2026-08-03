@@ -12,7 +12,7 @@ import { buildMitreAttackTool, MITRE_ATTACK_TOOL_ID } from './mitre_attack_tool'
 const sampleHit: MitreEntity = {
   type: 'technique',
   framework: 'enterprise',
-  versions: ['ATT&CK-v18.1'],
+  versions: ['ATT&CK-v19.1'],
   id: 'T1078',
   name: 'Valid Accounts',
   reference: 'https://attack.mitre.org/techniques/T1078/',

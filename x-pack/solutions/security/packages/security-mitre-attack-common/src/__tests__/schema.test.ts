@@ -28,7 +28,7 @@ describe('mitreEntitySchema', () => {
   const baseTactic = {
     type: 'tactic' as const,
     framework: 'enterprise' as const,
-    versions: ['ATT&CK-v18.1'],
+    versions: ['ATT&CK-v19.1'],
     id: 'TA0001',
     name: 'Initial Access',
     reference: 'https://attack.mitre.org/tactics/TA0001/',

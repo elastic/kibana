@@ -9,14 +9,14 @@ import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mo
 import type { MitreAttackArtifact } from '@kbn/security-mitre-attack-common';
 import { hydrateIndex, readStoredStamp } from './hydration';
 
-const buildArtifact = (stamp = 'enterprise:ATT&CK-v18.1'): MitreAttackArtifact => ({
+const buildArtifact = (stamp = 'enterprise:ATT&CK-v19.1'): MitreAttackArtifact => ({
   stamp,
   generatedAt: '2026-05-06T16:00:00Z',
   entities: [
     {
       type: 'tactic',
       framework: 'enterprise',
-      versions: ['ATT&CK-v18.1'],
+      versions: ['ATT&CK-v19.1'],
       id: 'TA0006',
       name: 'Credential Access',
       reference: 'https://attack.mitre.org/tactics/TA0006/',
@@ -25,7 +25,7 @@ const buildArtifact = (stamp = 'enterprise:ATT&CK-v18.1'): MitreAttackArtifact =
     {
       type: 'technique',
       framework: 'enterprise',
-      versions: ['ATT&CK-v18.1'],
+      versions: ['ATT&CK-v19.1'],
       id: 'T1078',
       name: 'Valid Accounts',
       reference: 'https://attack.mitre.org/techniques/T1078/',

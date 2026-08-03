@@ -13,7 +13,7 @@ const buildHit = <T extends object>(source: T) => ({ _source: source });
 const sampleTactic = {
   type: 'tactic' as const,
   framework: 'enterprise' as const,
-  versions: ['ATT&CK-v18.1'],
+  versions: ['ATT&CK-v19.1'],
   id: 'TA0006',
   name: 'Credential Access',
   reference: 'https://attack.mitre.org/tactics/TA0006/',

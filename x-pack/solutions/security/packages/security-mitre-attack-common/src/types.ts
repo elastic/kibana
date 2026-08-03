@@ -23,7 +23,7 @@ interface MitreEntityBase {
   framework: MitreFramework;
   /**
    * Versions of the framework that contain this entity. POC always emits a
-   * single-element array (e.g. `['ATT&CK-v18.1']`). The array shape leaves room
+   * single-element array (e.g. `['ATT&CK-v19.1']`). The array shape leaves room
    * for a future build script that deduplicates identical entities across
    * versions without breaking the on-disk schema.
    */
