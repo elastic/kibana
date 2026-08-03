@@ -15,7 +15,10 @@ import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { getColumnHeaders } from '../../body/column_headers/helpers';
-import { mockSourcererScope } from '../../../../../sourcerer/containers/mocks';
+import {
+  mockBrowserFieldsWithId,
+  mockDataViewSpec,
+} from '../../../../../data_view_manager/mocks/timeline_data_view';
 import * as timelineActions from '../../../../store/actions';
 import { defaultUdtHeaders } from '../../body/column_headers/default_headers';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
@@ -78,10 +81,7 @@ jest.mock('../../../../../common/lib/kibana', () => {
   };
 });
 
-const initialEnrichedColumns = getColumnHeaders(
-  defaultUdtHeaders,
-  mockSourcererScope.browserFields
-);
+const initialEnrichedColumns = getColumnHeaders(defaultUdtHeaders, mockBrowserFieldsWithId);
 
 const initialEnrichedColumnsIds = initialEnrichedColumns.map((c) => c.id);
 const mockAttackTimelineData = [
@@ -109,7 +109,7 @@ type TestComponentProps = Partial<ComponentProps<typeof TimelineDataTable>> & {
 const SPECIAL_TEST_TIMEOUT = 50000;
 
 const mockDataView = new DataView({
-  spec: mockSourcererScope.sourcererDataView,
+  spec: mockDataViewSpec,
   fieldFormats: fieldFormatsMock,
 });
 
