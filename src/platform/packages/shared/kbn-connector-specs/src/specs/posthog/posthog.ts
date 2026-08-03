@@ -48,7 +48,7 @@ const buildProjectUrl = (ctx: ActionContext, path: string): string => {
   if (!projectId) {
     throw new Error('PostHog connector is missing the required projectId configuration field.');
   }
-  return `${host}/api/projects/${projectId}${path}`;
+  return `${host}/api/projects/${encodeURIComponent(projectId)}${path}`;
 };
 
 function formatPostHogError(action: string, error: unknown): Error {
@@ -69,7 +69,8 @@ export const PostHog: ConnectorSpec = {
     }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
-    supportedFeatureIds: ['workflows', 'agentBuilder'],
+    // 'workflows' is added in a follow-up PR once this type reaches Production-NonCanary everywhere.
+    supportedFeatureIds: ['agentBuilder'],
   },
 
   auth: {
@@ -178,7 +179,7 @@ export const PostHog: ConnectorSpec = {
       handler: async (ctx, input: PostHogGetIssueInput) => {
         try {
           const response = await ctx.client.get(
-            buildProjectUrl(ctx, `/error_tracking/issues/${input.issueId}/`)
+            buildProjectUrl(ctx, `/error_tracking/issues/${encodeURIComponent(input.issueId)}/`)
           );
           return response.data;
         } catch (error) {
@@ -195,7 +196,7 @@ export const PostHog: ConnectorSpec = {
       handler: async (ctx, input: PostHogUpdateIssueStatusInput) => {
         try {
           const response = await ctx.client.patch(
-            buildProjectUrl(ctx, `/error_tracking/issues/${input.issueId}/`),
+            buildProjectUrl(ctx, `/error_tracking/issues/${encodeURIComponent(input.issueId)}/`),
             { status: input.status }
           );
           return response.data;
@@ -213,7 +214,10 @@ export const PostHog: ConnectorSpec = {
       handler: async (ctx, input: PostHogAssignIssueInput) => {
         try {
           const response = await ctx.client.patch(
-            buildProjectUrl(ctx, `/error_tracking/issues/${input.issueId}/assign/`),
+            buildProjectUrl(
+              ctx,
+              `/error_tracking/issues/${encodeURIComponent(input.issueId)}/assign/`
+            ),
             { assignee: { id: input.assigneeId, type: input.assigneeType } }
           );
           return response.data;

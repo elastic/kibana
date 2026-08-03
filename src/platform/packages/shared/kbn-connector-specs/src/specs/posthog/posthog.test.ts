@@ -122,6 +122,16 @@ describe('PostHog', () => {
       expect(mockClient.get).toHaveBeenCalledWith(`${BASE}/error_tracking/issues/i1/`);
       expect(result).toEqual({ id: 'i1', status: 'active' });
     });
+
+    it('should URL-encode the issueId path segment', async () => {
+      mockClient.get.mockResolvedValue({ data: {} });
+
+      await PostHog.actions.getIssue.handler(mockContext, { issueId: 'i1/../secret?x=1' });
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        `${BASE}/error_tracking/issues/i1%2F..%2Fsecret%3Fx%3D1/`
+      );
+    });
   });
 
   describe('updateIssueStatus action', () => {

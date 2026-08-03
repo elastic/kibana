@@ -3,7 +3,7 @@ navigation_title: "PostHog"
 type: reference
 description: "Use the PostHog connector to triage error-tracking issues, run HogQL queries, toggle feature flags, post annotations, and look up session recordings."
 applies_to:
-  stack: preview 9.4
+  stack: preview 9.6
   serverless: preview
 ---
 
