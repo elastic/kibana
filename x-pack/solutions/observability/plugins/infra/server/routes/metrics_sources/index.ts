@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import type { KibanaRequest } from '@kbn/core/server';
 import Boom from '@hapi/boom';
 import { createRouteValidationFunction } from '@kbn/io-ts-utils';
 import { existsQuery, termQuery } from '@kbn/observability-plugin/server';
@@ -46,10 +47,15 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
 
   const composeSourceStatus = async (
     requestContext: InfraPluginRequestHandlerContext,
-    sourceId: string
+    sourceId: string,
+    request: KibanaRequest
   ): Promise<MetricsSourceStatus> => {
     try {
-      const hasMetricIndices = await libs.sourceStatus.hasMetricIndices(requestContext, sourceId);
+      const hasMetricIndices = await libs.sourceStatus.hasMetricIndices(
+        requestContext,
+        sourceId,
+        request
+      );
       return {
         metricIndicesExist: hasMetricIndices,
         remoteClustersExist: true,
@@ -85,7 +91,7 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
       try {
         const [sourceSettled, statusSettled] = await Promise.allSettled([
           libs.sources.getSourceConfiguration(soClient, sourceId),
-          composeSourceStatus(requestContext, sourceId),
+          composeSourceStatus(requestContext, sourceId, request),
         ]);
 
         const source = isFulfilled<InfraSource>(sourceSettled) ? sourceSettled.value : null;
@@ -146,7 +152,7 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
           ? sources.updateSourceConfiguration(soClient, sourceId, sourceConfigurationPayload)
           : sources.createSourceConfiguration(soClient, sourceId, sourceConfigurationPayload));
 
-        const status = await composeSourceStatus(requestContext, sourceId);
+        const status = await composeSourceStatus(requestContext, sourceId, request);
 
         const sourceResponse = {
           source: { ...patchedSourceConfiguration, status },
@@ -192,7 +198,7 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
     async (requestContext, request, response) => {
       const { sourceId } = request.params;
 
-      const client = createSearchClient(requestContext, framework);
+      const client = createSearchClient(requestContext, framework, request);
       const soClient = (await requestContext.core).savedObjects.client;
       const source = await libs.sources.getSourceConfiguration(soClient, sourceId);
 

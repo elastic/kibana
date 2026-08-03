@@ -7,6 +7,7 @@
 
 import createContainer from 'constate';
 import React, { useEffect, useState } from 'react';
+import { EMPTY, skip } from 'rxjs';
 
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
@@ -15,6 +16,10 @@ import type {
   MetricsSourceConfiguration,
   PartialMetricsSourceConfigurationProperties,
 } from '../../../common/metrics_sources';
+import {
+  OBSERVABILITY_INFRA_CPS_ENABLED_DEFAULT,
+  OBSERVABILITY_INFRA_CPS_ENABLED_FEATURE_FLAG,
+} from '../../../common/cps_feature_flag';
 
 import { useTrackedPromise } from '../../hooks/use_tracked_promise';
 import { MissingHttpClientException } from './source_errors';
@@ -26,8 +31,13 @@ const API_URL = `/api/metrics/source`;
 export const useSourceFetcher = ({ sourceId }: { sourceId: string }) => {
   const [source, setSource] = useState<MetricsSourceConfiguration | undefined>(undefined);
   const {
-    services: { http, telemetry },
+    services: { cps, featureFlags, http, telemetry },
   } = useKibanaContextForPlugin();
+  const infraCpsEnabled = featureFlags.getBooleanValue(
+    OBSERVABILITY_INFRA_CPS_ENABLED_FEATURE_FLAG,
+    OBSERVABILITY_INFRA_CPS_ENABLED_DEFAULT
+  );
+  const cpsManager = infraCpsEnabled ? cps?.cpsManager : undefined;
   const notify = useSourceNotifier();
 
   const [loadSourceRequest, loadSource] = useTrackedPromise(
@@ -90,6 +100,13 @@ export const useSourceFetcher = ({ sourceId }: { sourceId: string }) => {
   useEffect(() => {
     loadSource();
   }, [loadSource, sourceId]);
+
+  useEffect(() => {
+    const subscription = (cpsManager?.getProjectRouting$() ?? EMPTY).pipe(skip(1)).subscribe(() => {
+      loadSource();
+    });
+    return () => subscription.unsubscribe();
+  }, [cpsManager, loadSource]);
 
   const error = loadSourceRequest.state === 'rejected' ? `${loadSourceRequest.value}` : undefined;
   const isLoading =

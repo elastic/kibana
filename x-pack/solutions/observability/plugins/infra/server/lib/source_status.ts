@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { KibanaRequest } from '@kbn/core/server';
 import type { InfraPluginRequestHandlerContext } from '../types';
 import type { InfraSources } from './sources';
 
@@ -42,13 +43,15 @@ export class InfraSourceStatus {
 
   public async hasMetricIndices(
     requestContext: InfraPluginRequestHandlerContext,
-    sourceId: string
+    sourceId: string,
+    request?: KibanaRequest
   ): Promise<boolean> {
     const soClient = (await requestContext.core).savedObjects.client;
     const sourceConfiguration = await this.libs.sources.getSourceConfiguration(soClient, sourceId);
     const indexStatus = await this.adapter.getIndexStatus(
       requestContext,
-      sourceConfiguration.configuration.metricAlias
+      sourceConfiguration.configuration.metricAlias,
+      request
     );
     return indexStatus !== 'missing';
   }
@@ -66,6 +69,7 @@ export interface InfraSourceStatusAdapter {
 
   getIndexStatus(
     requestContext: InfraPluginRequestHandlerContext,
-    indexNames: string
+    indexNames: string,
+    request?: KibanaRequest
   ): Promise<SourceIndexStatus>;
 }
