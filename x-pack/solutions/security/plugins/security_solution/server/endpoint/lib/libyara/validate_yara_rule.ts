@@ -12,16 +12,34 @@ import type { YaraDiagnostic, YaraValidateResult } from './types';
 /**
  * Compile-check a YARA rule source string with classic libyara (WASM).
  * Lazy-inits the WASM module once per process; frees per-call allocations.
+ * Reloads the module if a WASM trap leaves it unusable.
  */
 export const validateYaraRule = async (source: string): Promise<YaraValidateResult> => {
   const mod = await loadModule();
-  const ptr = mod.ccall<number>('validate_yara', 'number', ['string'], [source]);
+  let ptr = 0;
 
   try {
+    ptr = mod.ccall<number>('validate_yara', 'number', ['string'], [source]);
     const json = mod.UTF8ToString(ptr);
     return parseResult(json);
+  } catch (error) {
+    // WASM traps (signature mismatch, OOB, abort) can leave linear memory /
+    // the function table unusable for the rest of the process. Drop the
+    // singleton so the next call instantiates a fresh module.
+    if (isWasmTrap(error)) {
+      modulePromise = undefined;
+    }
+    throw error;
   } finally {
-    mod.ccall('validate_yara_free', null, ['number'], [ptr]);
+    if (ptr !== 0) {
+      try {
+        mod.ccall('validate_yara_free', null, ['number'], [ptr]);
+      } catch (freeError) {
+        if (isWasmTrap(freeError)) {
+          modulePromise = undefined;
+        }
+      }
+    }
   }
 };
 
@@ -39,6 +57,15 @@ type CreateYaraValidateModule = (opts?: {
 }) => Promise<YaraValidateModule>;
 
 let modulePromise: Promise<YaraValidateModule> | undefined;
+
+/**
+ * Checks if the error is a WASM trap, which means the WASM module is unusable for the rest of the process.
+ */
+const isWasmTrap = (error: unknown): boolean =>
+  error instanceof WebAssembly.RuntimeError ||
+  (error instanceof Error &&
+    (/memory access out of bounds|function signature mismatch|Aborted\(/i.test(error.message) ||
+      error.name === 'RuntimeError'));
 
 const loadModule = async (): Promise<YaraValidateModule> => {
   if (!modulePromise) {
