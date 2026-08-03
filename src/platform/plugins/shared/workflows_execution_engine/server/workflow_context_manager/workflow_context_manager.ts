@@ -303,9 +303,8 @@ export class WorkflowContextManager {
    * request for authentication and propagating event-chain headers so the receiving handler
    * keeps the same chain-depth context.
    *
-   * The transport (currently `fetch`) is an implementation detail; the public surface is
-   * intentionally narrow so it can be swapped to an in-process call later without affecting
-   * callers. Throws on non-2xx responses.
+   * The transport (Core's HTTP self client) is an implementation detail; the public surface is
+   * intentionally narrow so it can change without affecting callers. Throws on non-2xx responses.
    */
   public async callKibanaApi<T = unknown>(
     params: CallKibanaApiParams
@@ -314,7 +313,6 @@ export class WorkflowContextManager {
       {
         fakeRequest: this.fakeRequest,
         coreStart: this.coreStart,
-        cloudSetup: this.dependencies.cloudSetup,
         workflowRunId: this.workflowExecutionState.getWorkflowExecution().id,
         spaceId: this.getWorkflowSpaceId(),
       },
