@@ -1,0 +1,8 @@
+{
+  "integration": "github",
+  "version": "3.0.0",
+  "dataStream": "github.audit",
+  "fidelity": "authored",
+  "upstreamCommit": "f86430f5d38a3d5a1f85679f147797c86c50be2c",
+  "upstreamScenarioId": "github-audit-events"
+}

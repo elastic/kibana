@@ -99,7 +99,7 @@ export const syntheticsFeature = {
   app: ['uptime', 'kibana', 'synthetics'],
   catalogue: ['uptime'],
   management: {
-    insightsAndAlerting: ['triggersActions'],
+    insightsAndAlerting: ['triggersActionsRules', 'triggersActionsAlerts'],
   },
   alerting: alertingFeatures,
   privileges: {
@@ -132,7 +132,7 @@ export const syntheticsFeature = {
         },
       },
       management: {
-        insightsAndAlerting: ['triggersActions'],
+        insightsAndAlerting: ['triggersActionsRules', 'triggersActionsAlerts'],
       },
       ui: ['save', 'configureSettings', 'show', 'alerting:save'],
     },
@@ -163,7 +163,7 @@ export const syntheticsFeature = {
         },
       },
       management: {
-        insightsAndAlerting: ['triggersActions'],
+        insightsAndAlerting: ['triggersActionsRules', 'triggersActionsAlerts'],
       },
       ui: ['show', 'alerting:save'],
     },

@@ -14,7 +14,7 @@ import { sendCreateAgentlessPolicy } from '../../../../../../hooks/use_request/a
 import type { MockedFleetStartServices, TestRenderer } from '../../../../../../mock';
 import { createFleetTestRendererMock } from '../../../../../../mock';
 import {
-  FLEET_ROUTING_PATHS,
+  INTEGRATIONS_ROUTING_PATHS,
   pagePathGetters,
   PLUGIN_ID,
   INTEGRATIONS_PLUGIN_ID,
@@ -100,6 +100,7 @@ jest.mock('../../../../hooks', () => {
         id: 'policy-1',
         inputs: [],
         policy_ids: ['agent-policy-1'],
+        package: { name: 'nginx', version: '1.3.0', title: 'Nginx' },
       },
     }),
     sendCreateAgentPolicy: jest.fn().mockResolvedValue({
@@ -178,7 +179,7 @@ describe('When on the package policy create page', () => {
   let renderResult: ReturnType<typeof testRenderer.render>;
   const render = (queryParamsPolicyId?: string) =>
     (renderResult = testRenderer.render(
-      <Route path={FLEET_ROUTING_PATHS.add_integration_to_policy}>
+      <Route path={INTEGRATIONS_ROUTING_PATHS.add_integration_to_policy}>
         <CreatePackagePolicySinglePage
           from="package"
           queryParamsPolicyId={queryParamsPolicyId}
@@ -552,12 +553,15 @@ describe('When on the package policy create page', () => {
         expect(useStartServices().application.navigateToApp).toHaveBeenCalledWith(PLUGIN_ID);
       });
 
-      test('should navigate to agent policy if no route state is set', async () => {
+      test('should navigate to integration policies page if no route state and no queryParamsPolicyId', async () => {
         await setupSaveNavigate({});
 
-        expect(useStartServices().application.navigateToApp).toHaveBeenCalledWith(PLUGIN_ID, {
-          path: '/policies/agent-policy-1?openEnrollmentFlyout=true',
-        });
+        expect(useStartServices().application.navigateToApp).toHaveBeenCalledWith(
+          INTEGRATIONS_PLUGIN_ID,
+          {
+            path: '/detail/nginx-1.3.0/policies',
+          }
+        );
       });
     });
 
@@ -801,14 +805,17 @@ describe('When on the package policy create page', () => {
           item: {
             name: 'Nginx',
             id: 'policy-1',
-            inputs: [],
-            policy_ids: ['agent-policy-1'],
-            supports_agentless: true,
+            namespace: 'default',
+            inputs: {},
             package: {
               name: 'nginx',
               title: 'Nginx',
               version: '1.3.0',
             },
+            created_at: '2025-11-06T18:27:43.541Z',
+            created_by: 'test_user',
+            updated_at: '2025-11-06T18:27:43.541Z',
+            updated_by: 'test_user',
           },
         });
 
@@ -832,15 +839,14 @@ describe('When on the package policy create page', () => {
         expect(sendCreateAgentlessPolicy).toHaveBeenCalledWith(
           expect.objectContaining({
             name: 'nginx-1',
-          }),
-          { format: 'legacy' }
+          })
         );
         expect(sendCreatePackagePolicyForRq).not.toHaveBeenCalled();
 
         await waitFor(() => {
           expect(useStartServices().application.navigateToApp).toHaveBeenCalledWith(
             INTEGRATIONS_PLUGIN_ID,
-            { path: '/detail/nginx-1.3.0/policies?openEnrollmentFlyout=agent-policy-1' }
+            { path: '/detail/nginx-1.3.0/policies?openEnrollmentFlyout=policy-1' }
           );
         });
       });
@@ -850,7 +856,7 @@ describe('When on the package policy create page', () => {
           expect(renderResult.getByTestId(SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ)).toBeInTheDocument();
         });
 
-        fireEvent.click(renderResult.getAllByText('Agentless')[0]);
+        fireEvent.click(renderResult.getAllByText(/elastic managed integration/i)[0]);
 
         await act(async () => {
           fireEvent.click(renderResult.getByText(/Save and continue/).closest('button')!);
@@ -859,14 +865,13 @@ describe('When on the package policy create page', () => {
         expect(sendCreateAgentlessPolicy).toHaveBeenCalledWith(
           expect.objectContaining({
             name: 'nginx-1',
-          }),
-          { format: 'legacy' }
+          })
         );
         expect(sendCreatePackagePolicyForRq).not.toHaveBeenCalled();
 
         expect(useStartServices().application.navigateToApp).toHaveBeenCalledWith(
           INTEGRATIONS_PLUGIN_ID,
-          { path: '/detail/nginx-1.3.0/policies?openEnrollmentFlyout=agent-policy-1' }
+          { path: '/detail/nginx-1.3.0/policies?openEnrollmentFlyout=policy-1' }
         );
       });
     });

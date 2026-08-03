@@ -21,6 +21,7 @@ import type {
   AttachmentPersistedAttributes,
   UnifiedAttachmentAttributes,
 } from '../types/attachments_v2';
+import { isUnifiedAttachmentWithSoReference } from '../../services/type_guards';
 import type { AttachmentTypeTransformer } from './base';
 
 const isRecord = (value: unknown): value is Record<string, unknown> => isPlainObject(value);
@@ -49,6 +50,8 @@ const getStateFromLegacyAttachment = (
   return {};
 };
 
+// Exclude SO-reference attachments (e.g. Lens-by-reference): they have no
+// by-value legacy counterpart, so `toLegacySchema` must not downgrade them.
 const isUnifiedValueAttachmentForType = (
   value: unknown,
   typeId: string
@@ -56,7 +59,8 @@ const isUnifiedValueAttachmentForType = (
   isRecord(value) &&
   value.type === typeId &&
   typeof value.owner === 'string' &&
-  isRecord(value.data);
+  isRecord(value.data) &&
+  !isUnifiedAttachmentWithSoReference(value);
 
 const getStateFromUnifiedData = (
   data: Record<string, unknown>

@@ -17,11 +17,7 @@ import {
   type DefaultProfileStateField,
   type DefaultProfileStateFields,
 } from '../redux';
-import {
-  getDefaultProfileState,
-  getFieldsToReset,
-  getProfileStateSnapshot,
-} from './default_profile_state';
+import { getDefaultProfileState, getFieldsToReset } from './default_profile_state';
 
 const emptyDataView = buildDataViewMock({
   name: 'emptyDataView',
@@ -47,6 +43,7 @@ const getResetByField = (fieldsToReset: DefaultProfileStateField[]) => ({
   breakdownField: fieldsToReset.includes('breakdownField'),
   hideChart: fieldsToReset.includes('hideChart'),
   hideTable: fieldsToReset.includes('hideTable'),
+  hideSidebar: fieldsToReset.includes('hideSidebar'),
 });
 
 describe('getDefaultProfileState', () => {
@@ -180,30 +177,6 @@ describe('getDefaultProfileState', () => {
         esqlQueryColumns: undefined,
       });
       expect(appState).toBeUndefined();
-    });
-  });
-});
-
-describe('getProfileStateSnapshot', () => {
-  const appState = {
-    columns: ['message'],
-    rowHeight: 3,
-    breakdownField: 'extension',
-    hideChart: true,
-  };
-
-  it('should return undefined for none', () => {
-    expect(getProfileStateSnapshot(appState, 'none')).toBeUndefined();
-  });
-
-  it('should return all tracked fields for all', () => {
-    expect(getProfileStateSnapshot(appState, 'all')).toEqual(appState);
-  });
-
-  it('should return only requested fields', () => {
-    expect(getProfileStateSnapshot(appState, ['columns', 'hideChart'])).toEqual({
-      columns: ['message'],
-      hideChart: true,
     });
   });
 });

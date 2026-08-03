@@ -9,9 +9,11 @@ import { inject, injectable } from 'inversify';
 import type { HttpStart } from '@kbn/core/public';
 import { CoreStart } from '@kbn/core-di-browser';
 import type {
-  CountPolicyExecutionEventsParams,
+  CountPolicyExecutionEventsRequest,
   CountPolicyExecutionEventsResponse,
-  ListPolicyExecutionHistoryParams,
+  GetRuleExecutionsRequest,
+  GetRuleExecutionsResponse,
+  ListPolicyExecutionHistoryRequest,
   ListPolicyExecutionHistoryResponse,
   PolicyExecutionHistoryItem,
   PolicyExecutionOutcomeFilter,
@@ -19,36 +21,49 @@ import type {
 import {
   ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_API_PATH,
   ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_COUNT_API_PATH,
+  ALERTING_V2_EXECUTION_HISTORY_RULES_API_PATH,
 } from '../constants';
 
-export type { PolicyExecutionHistoryItem, PolicyExecutionOutcomeFilter };
-
-export type CountNewSinceParams = Omit<CountPolicyExecutionEventsParams, 'since'>;
+export type { GetRuleExecutionsResponse, PolicyExecutionHistoryItem, PolicyExecutionOutcomeFilter };
 
 @injectable()
 export class ExecutionHistoryApi {
   constructor(@inject(CoreStart('http')) private readonly http: HttpStart) {}
 
-  public async listExecutionHistory(params: ListPolicyExecutionHistoryParams = {}) {
+  public async listExecutionHistory(params: ListPolicyExecutionHistoryRequest = {}) {
     return this.http.get<ListPolicyExecutionHistoryResponse>(
       ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_API_PATH,
       {
         query: {
           page: params.page,
-          perPage: params.perPage,
+          per_page: params.per_page,
           search: params.search,
+          rule_ids: params.rule_ids,
+          outcome: params.outcome,
+          episode_ids: params.episode_ids,
+          start_date: params.start_date,
+        },
+      }
+    );
+  }
+
+  public async countNewSince(params: CountPolicyExecutionEventsRequest) {
+    return this.http.get<CountPolicyExecutionEventsResponse>(
+      ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_COUNT_API_PATH,
+      {
+        query: {
+          since: params.since,
+          search: params.search,
+          rule_ids: params.rule_ids,
           outcome: params.outcome,
         },
       }
     );
   }
 
-  public async countNewSince(since: string, params: CountNewSinceParams = {}) {
-    return this.http.get<CountPolicyExecutionEventsResponse>(
-      ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_COUNT_API_PATH,
-      {
-        query: { since, search: params.search, outcome: params.outcome },
-      }
-    );
+  public async getRuleExecutions(params: Partial<GetRuleExecutionsRequest>) {
+    return this.http.get<GetRuleExecutionsResponse>(ALERTING_V2_EXECUTION_HISTORY_RULES_API_PATH, {
+      query: params,
+    });
   }
 }

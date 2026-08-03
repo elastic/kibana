@@ -8,8 +8,10 @@
  */
 
 import type { ChangeHistoryDocument } from '@kbn/change-history';
+import type { UserProfile } from '@kbn/core-user-profile-common';
 
 import { mapWorkflowHistoryItem } from './map_workflow_history_item';
+import { WORKFLOW_CHANGE_HISTORY_SYSTEM_USER } from '../../common/lib/workflow_change_history/constants';
 
 const createDocument = (overrides: Partial<ChangeHistoryDocument> = {}): ChangeHistoryDocument => ({
   '@timestamp': '2026-06-17T10:00:00.000Z',
@@ -27,7 +29,7 @@ const createDocument = (overrides: Partial<ChangeHistoryDocument> = {}): ChangeH
     type: 'workflow',
     hash: 'abc',
     sequence: 3,
-    fields: { hashed: [] },
+    fields: { hashed: [], redacted: [] },
     snapshot: {
       name: 'My workflow',
       description: 'desc',
@@ -49,13 +51,75 @@ describe('mapWorkflowHistoryItem', () => {
     expect(result).toEqual({
       timestamp: '2026-06-17T10:00:00.000Z',
       id: 'event-1',
-      user: { id: 'profile-1', name: 'alice' },
+      user: { profileId: 'profile-1', name: 'alice' },
       action: 'workflow_update',
       version: 3,
       workflow: {
         yaml: 'name: My workflow',
       },
     });
+  });
+
+  it('maps restore comment from change-history document', () => {
+    const result = mapWorkflowHistoryItem(
+      createDocument({
+        event: {
+          id: 'event-restore',
+          module: 'stack',
+          dataset: 'workflows',
+          action: 'restore',
+          type: 'change',
+          reason: 'Restored from v3',
+        },
+        metadata: {
+          restore: {
+            eventId: 'event-v3',
+          },
+        },
+      })
+    );
+
+    expect(result).toEqual(
+      expect.objectContaining({
+        action: 'restore',
+        comment: 'Restored from v3',
+      })
+    );
+    expect(result).not.toHaveProperty('restoredFromSequence');
+  });
+
+  it('resolves `name` to the profile `full_name` when the profile is known', () => {
+    const userProfilesById = new Map<string, UserProfile>([
+      [
+        'profile-1',
+        {
+          uid: 'profile-1',
+          enabled: true,
+          user: { username: 'alice', full_name: 'Alice Smith' },
+          data: {},
+        },
+      ],
+    ]);
+
+    const result = mapWorkflowHistoryItem(createDocument(), userProfilesById);
+
+    expect(result.user).toEqual({ profileId: 'profile-1', name: 'Alice Smith' });
+  });
+
+  it('falls back to the raw `name` when the profile has no `full_name`', () => {
+    const userProfilesById = new Map<string, UserProfile>([
+      ['profile-1', { uid: 'profile-1', enabled: true, user: { username: 'alice' }, data: {} }],
+    ]);
+
+    const result = mapWorkflowHistoryItem(createDocument(), userProfilesById);
+
+    expect(result.user).toEqual({ profileId: 'profile-1', name: 'alice' });
+  });
+
+  it('falls back to the raw `name` when no matching profile is present', () => {
+    const result = mapWorkflowHistoryItem(createDocument(), new Map());
+
+    expect(result.user).toEqual({ profileId: 'profile-1', name: 'alice' });
   });
 
   it('omits optional fields when absent', () => {
@@ -66,7 +130,7 @@ describe('mapWorkflowHistoryItem', () => {
           id: 'wf-1',
           type: 'workflow',
           hash: 'abc',
-          fields: { hashed: [] },
+          fields: { hashed: [], redacted: [] },
           snapshot: {
             name: 'W',
             enabled: false,
@@ -79,7 +143,7 @@ describe('mapWorkflowHistoryItem', () => {
     );
 
     expect(result.version).toBeUndefined();
-    expect(result.user).toBeNull();
+    expect(result.user).toEqual({ name: WORKFLOW_CHANGE_HISTORY_SYSTEM_USER });
     expect(result.workflow).toEqual({ yaml: '' });
   });
 });

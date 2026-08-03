@@ -8,6 +8,7 @@
 import React from 'react';
 import '@testing-library/jest-dom';
 import { EuiThemeProvider } from '@elastic/eui';
+import userEvent from '@testing-library/user-event';
 import { render, screen } from '@testing-library/react';
 import type { Phases } from '@kbn/index-lifecycle-management-common-shared';
 import { IlmPolicySummaryTab, PhaseAccordion } from './ilm_policy_summary_tab';
@@ -83,5 +84,23 @@ describe('PhaseAccordion', () => {
 
     expect(screen.getByTestId('ilmInspectPhaseAccordion-frozen')).not.toBeNull();
     expect(screen.queryByTestId('ilmInspectPhaseAccordionContent-frozen')).toBeNull();
+  });
+
+  it('shows a down chevron when closed and an up chevron when opened', async () => {
+    const user = userEvent.setup();
+    const phases: Phases = {
+      warm: { min_age: '7d', actions: { forcemerge: { max_num_segments: 1 } } },
+    };
+
+    renderWithTheme(<PhaseAccordion phase="warm" phases={phases} />);
+
+    const toggleIcon = screen.getByTestId('ilmInspectPhaseAccordionToggleIcon-warm');
+    expect(toggleIcon).toHaveStyle({ transform: 'rotate(0deg)' });
+
+    await user.click(screen.getByTestId('ilmInspectPhaseAccordionButton-warm'));
+    expect(toggleIcon).toHaveStyle({ transform: 'rotate(180deg)' });
+
+    await user.click(screen.getByTestId('ilmInspectPhaseAccordionButton-warm'));
+    expect(toggleIcon).toHaveStyle({ transform: 'rotate(0deg)' });
   });
 });

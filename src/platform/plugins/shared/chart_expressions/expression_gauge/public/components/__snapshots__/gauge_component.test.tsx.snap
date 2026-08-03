@@ -29,7 +29,6 @@ exports[`GaugeComponent renders the chart 1`] = `
           },
           "fit": Object {
             "area": Object {
-              "fill": "__use__series__color__",
               "opacity": 0.15,
               "visible": true,
             },
@@ -501,6 +500,7 @@ exports[`GaugeComponent renders the chart 1`] = `
           "minHeight": 64,
           "minValueFontSize": 12,
           "nonFiniteText": "N/A",
+          "spacing": "small",
           "textDarkColor": "#111C2C",
           "textExtraDarkColor": "#1D2A3E",
           "textExtraLightColor": "#CAD3E2",

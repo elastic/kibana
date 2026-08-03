@@ -260,7 +260,7 @@ export const initializeDataControlManager = async <EditorState extends object = 
           })
         );
       }
-      const dataViewId = await getDataViewIdFromESQLQuery(query);
+      const dataViewId = await getDataViewIdFromESQLQuery(query, { parentApi });
       if (!dataViewId) {
         throw new Error(
           i18n.translate('controls.dataControl.esqlDataViewDeriveFailed', {

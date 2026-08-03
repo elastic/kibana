@@ -7,74 +7,101 @@
 
 import type { CustomCommand } from 'just-bash';
 import { defineCommand } from 'just-bash';
+import type { ZodObject } from '@kbn/zod/v4';
+import type { MaybePromise } from '@kbn/utility-types';
+import type { RunToolReturn } from '@kbn/agent-builder-server/runner';
+import { parseExecToolArgs } from './parse_args';
+import { coerceParamValue } from './param_coercion';
+import { formatToolReturn } from './format_tool_return';
 
-export type ExecToolFn = (toolId: string, args: unknown) => Promise<unknown>;
+export type ExecToolFn = (toolId: string, args: unknown) => Promise<RunToolReturn>;
 export type ResolveToolIdFn = (toolId: string) => string;
+export type GetToolSchemaFn = (resolvedToolId: string) => MaybePromise<ZodObject<any>>;
 
-interface ParsedArgs {
-  toolId?: string;
-  argsRaw?: string;
-  error?: string;
+export interface BashToolAccess {
+  execToolFn: ExecToolFn;
+  resolveToolId: ResolveToolIdFn;
+  getToolSchema: GetToolSchemaFn;
 }
-
-/**
- * Hand-rolled argv parser for `exec_tool` — one positional + an optional `--args=<json>` flag.
- */
-const parseArgs = (argv: string[]): ParsedArgs => {
-  if (argv.length === 0) {
-    return { error: 'exec_tool: missing tool id argument' };
-  }
-  const [toolId, ...rest] = argv;
-  let argsRaw: string | undefined;
-  for (const a of rest) {
-    if (a.startsWith('--args=')) {
-      argsRaw = a.slice('--args='.length);
-    } else if (a === '--args') {
-      return { error: "exec_tool: --args requires a value (use --args='<json>')" };
-    } else {
-      return { error: `exec_tool: unexpected argument '${a}'` };
-    }
-  }
-  return { toolId, argsRaw };
-};
 
 export const createExecToolCommand = ({
   execToolFn,
   resolveToolId,
-}: {
-  execToolFn: ExecToolFn;
-  resolveToolId: ResolveToolIdFn;
-}): CustomCommand => {
+  getToolSchema,
+}: BashToolAccess): CustomCommand => {
   return defineCommand('exec_tool', async (argv) => {
-    const parsed = parseArgs(argv);
+    const parsed = parseExecToolArgs(argv);
     if (parsed.error) {
-      return { stdout: '', stderr: `${parsed.error}\n`, exitCode: 1 };
+      return fail(parsed.error);
     }
-    const { toolId, argsRaw } = parsed;
+    const { toolId, argsRaw, params } = parsed;
     const resolvedToolId = resolveToolId(toolId!);
 
-    let args: unknown;
+    // Parse the optional --args base object.
+    let argsValue: unknown;
     if (argsRaw !== undefined) {
       try {
-        args = JSON.parse(argsRaw);
+        argsValue = JSON.parse(argsRaw);
       } catch (err) {
-        return {
-          stdout: '',
-          stderr: `exec_tool: invalid JSON for --args: ${(err as Error).message}\n`,
-          exitCode: 1,
-        };
+        return fail(`exec_tool: invalid JSON for --args: ${(err as Error).message}`);
       }
     }
 
+    const hasParams = params !== undefined && params.length > 0;
+
+    let finalArgs: unknown = argsValue;
+
+    if (hasParams) {
+      // --args must be an object when merging individual params into it.
+      if (
+        argsRaw !== undefined &&
+        (typeof argsValue !== 'object' || argsValue === null || Array.isArray(argsValue))
+      ) {
+        return fail(
+          'exec_tool: --args must be a JSON object when combined with individual --params'
+        );
+      }
+
+      let schema: ZodObject<any>;
+      try {
+        schema = await getToolSchema(resolvedToolId);
+      } catch (err) {
+        return fail(errMessage(err));
+      }
+
+      const base = (argsValue as Record<string, unknown>) ?? {};
+      const coerced: Record<string, unknown> = {};
+      for (const { key, value } of params!) {
+        try {
+          coerced[key] = coerceParamValue(schema, key, value);
+        } catch (err) {
+          return fail(errMessage(err));
+        }
+      }
+
+      finalArgs = { ...base, ...coerced };
+    }
+
     try {
-      const result = await execToolFn(resolvedToolId, args);
-      return { stdout: `${JSON.stringify(result)}\n`, stderr: '', exitCode: 0 };
+      const result = await execToolFn(resolvedToolId, finalArgs);
+      const formatted = formatToolReturn(result);
+      return formatted.ok ? ok(formatted.value) : fail(`exec_tool: ${formatted.error}`);
     } catch (err) {
-      return {
-        stdout: '',
-        stderr: `exec_tool: ${(err as Error).message ?? String(err)}\n`,
-        exitCode: 1,
-      };
+      return fail(errMessage(err));
     }
   });
 };
+
+const fail = (message: string, exitCode: number = 1) => ({
+  stdout: '',
+  stderr: `${message}\n`,
+  exitCode,
+});
+
+const ok = (result: unknown) => ({
+  stdout: `${JSON.stringify(result)}\n`,
+  stderr: '',
+  exitCode: 0,
+});
+
+const errMessage = (err: unknown) => `exec_tool: ${(err as Error).message ?? String(err)}`;

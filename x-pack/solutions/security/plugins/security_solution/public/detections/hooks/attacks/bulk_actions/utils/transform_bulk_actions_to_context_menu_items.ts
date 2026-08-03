@@ -47,15 +47,21 @@ export const transformBulkActionsToContextMenuItems = ({
       panel: item.panel,
       'data-test-subj': item['data-test-subj'],
       key: item.key,
+      // Items that navigate to a sub-panel (panel != null) must NOT close the popover —
+      // EuiContextMenu navigates within the same popover. Direct-action items (those
+      // exposing an `onClick`) close the popover before running, mirroring the legacy
+      // bulk-actions behavior in `useBulkActionItems`.
       onClick: item.onClick
-        ? () =>
+        ? () => {
+            closePopover?.();
             item.onClick?.(
               alertItems,
               false,
               (loading) => setIsLoading?.(loading),
               () => clearSelection?.(),
               () => refresh?.()
-            )
+            );
+          }
         : undefined,
     };
   });

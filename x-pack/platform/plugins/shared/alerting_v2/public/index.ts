@@ -8,7 +8,8 @@
 import React from 'react';
 import { ContainerModule } from 'inversify';
 import { OnSetup, PluginSetup, PluginStart, Start } from '@kbn/core-di';
-import { CoreSetup, CoreStart } from '@kbn/core-di-browser';
+import { CoreSetup, CoreStart, PluginInitializer } from '@kbn/core-di-browser';
+import type { PluginInitializerContext } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -16,6 +17,8 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { DashboardStart } from '@kbn/dashboard-plugin/public';
+import type { CPSPluginStart } from '@kbn/cps/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
 import { WorkflowApi } from '@kbn/workflows-ui';
@@ -30,9 +33,11 @@ import {
 import { ActionPoliciesApi } from './services/action_policies_api';
 import { ExecutionHistoryApi } from './services/execution_history_api';
 import { RulesApi } from './services/rules_api';
+import { UserCapabilities } from './services/user_capabilities';
 import { registerTriggerDefinitions } from './lib/workflow_extensions/register_trigger_definitions';
 import { disableAlertingManagementUi } from './lib/disable_management_ui';
 import { setKibanaServices } from './kibana_services';
+import type { AlertingV2UIConfig } from './kibana_services';
 import type { AlertingV2PublicStart } from './types';
 import type { CreateRuleOptionsFlyoutProps } from './create_rule_options_flyout';
 
@@ -50,10 +55,11 @@ const CreateRuleOptionsFlyout = (props: CreateRuleOptionsFlyoutProps) =>
 export type { AlertingV2PublicStart, CreateRuleOptionsFlyoutLegacyItem } from './types';
 export type { CreateRuleOptionsFlyoutProps } from './create_rule_options_flyout';
 
-export const module = new ContainerModule(({ bind }) => {
+const pluginModule = new ContainerModule(({ bind }) => {
   bind(RulesApi).toSelf().inSingletonScope();
   bind(ActionPoliciesApi).toSelf().inSingletonScope();
   bind(ExecutionHistoryApi).toSelf().inSingletonScope();
+  bind(UserCapabilities).toSelf().inSingletonScope();
   bind(WorkflowApi)
     .toDynamicValue(({ get }) => new WorkflowApi(get(CoreStart('http'))))
     .inSingletonScope();
@@ -144,6 +150,23 @@ export const module = new ContainerModule(({ bind }) => {
 
     getStartServices().then(([coreStart]) => {
       const diContainer = coreStart.injection.getContainer();
+
+      const dashboardToken = PluginStart('dashboard');
+      const dashboard = diContainer.isBound(dashboardToken)
+        ? (diContainer.get(dashboardToken) as DashboardStart)
+        : undefined;
+
+      // Optional RuleFormServices field; used by ComposeDiscoverFlyout (CpsPicker), not artifacts UI.
+      const cpsToken = PluginStart('cps');
+      const cps = diContainer.isBound(cpsToken)
+        ? (diContainer.get(cpsToken) as CPSPluginStart)
+        : undefined;
+
+      const configAccessor = diContainer.get<
+        PluginInitializerContext<AlertingV2UIConfig>['config']
+      >(PluginInitializer('config'));
+      const { minimumScheduleInterval } = configAccessor.get<AlertingV2UIConfig>().rules;
+
       setKibanaServices({
         http: coreStart.http,
         notifications: coreStart.notifications,
@@ -154,6 +177,9 @@ export const module = new ContainerModule(({ bind }) => {
         lens: diContainer.get(PluginStart('lens')) as LensPublicStart,
         expressions: diContainer.get(PluginStart('expressions')) as ExpressionsStart,
         uiActions: diContainer.get(PluginStart('uiActions')) as UiActionsStart,
+        dashboard,
+        cps,
+        minimumScheduleInterval,
         container: diContainer,
       });
 
@@ -201,3 +227,5 @@ export const module = new ContainerModule(({ bind }) => {
     });
   });
 });
+
+export { pluginModule as module };

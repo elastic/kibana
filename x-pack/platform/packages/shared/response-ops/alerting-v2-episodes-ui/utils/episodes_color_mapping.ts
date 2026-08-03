@@ -28,7 +28,7 @@ export const getStatusColorMap = (colors: EpisodeStatusColors): Record<string, s
  * Patches a Lens `TypedLensByValueInput` attributes object to apply episode-aware
  * color coding and strip axis titles.
  *
- * - When `breakdownField` is `'effective_status'`: applies a categorical color
+ * - When `breakdownField` is `'episode.status'`: applies a categorical color
  *   mapping so each status value gets its own color.
  * - When there is no breakdown: colors the whole series to match the active
  *   status filter, falling back to `danger` (red) when no filter is set.
@@ -65,7 +65,7 @@ export const buildModifiedVisAttributes = (
     },
   });
 
-  if (breakdownField === 'effective_status') {
+  if (breakdownField === 'episode.status') {
     return applyColorMapping({
       paletteId: 'default',
       colorMode: { type: 'categorical' },
@@ -95,13 +95,15 @@ export const buildModifiedVisAttributes = (
     });
   }
 
-  // When no breakdown is selected but a single status is filtered, colour the whole
-  // series to match the status — so the chart stays visually consistent with the filter.
-  // Fall back to danger (red) when no status filter is active so the no-breakdown,
-  // no-filter state still has a meaningful colour rather than the Lens palette default.
+  // When no breakdown is selected but exactly one status is filtered, colour the whole
+  // series to match that status — so the chart stays visually consistent with the filter.
+  // Fall back to danger (red) when zero or multiple statuses are selected so the
+  // no-breakdown state still has a meaningful colour rather than the Lens palette default.
   const statusColorMap = getStatusColorMap(colors);
+  const selectedStatuses = filterState.status ?? [];
   const statusColor =
-    (filterState.status ? statusColorMap[filterState.status] : undefined) ?? colors.danger;
+    (selectedStatuses.length === 1 ? statusColorMap[selectedStatuses[0]] : undefined) ??
+    colors.danger;
 
   if (!breakdownField) {
     return {

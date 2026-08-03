@@ -120,7 +120,9 @@ const createUserActionPersisterServiceMock = (): CaseUserActionPersisterServiceM
 const createUserActionFinderServiceMock = (): CaseUserActionFinderServiceMock => {
   const service: PublicMethodsOf<UserActionFinder> = {
     find: jest.fn(),
+    findAll: jest.fn(),
     findStatusChanges: jest.fn(),
+    decodeUserActions: jest.fn((userActions) => userActions),
   };
 
   return service as unknown as CaseUserActionFinderServiceMock;
@@ -233,6 +235,7 @@ export const createTemplatesServiceMock = (): TemplatesServiceMock => {
     getTags: jest.fn(),
     getAuthors: jest.fn(),
     getTemplateVersionsForExtendedFieldSearch: jest.fn().mockResolvedValue([]),
+    getActiveTemplatesReferencingField: jest.fn().mockResolvedValue([]),
   });
 
   // the cast here is required because jest.Mocked tries to include private members and would throw an error
@@ -241,7 +244,8 @@ export const createTemplatesServiceMock = (): TemplatesServiceMock => {
 
 export const createFieldDefinitionsServiceMock = (): FieldDefinitionsServiceMock => {
   const service: PublicMethodsOf<FieldDefinitionsService> = lazyObject({
-    getFieldDefinitions: jest.fn(),
+    getFieldDefinitions: jest.fn().mockResolvedValue({ fieldDefinitions: [], total: 0 }),
+    getGlobalFieldDefinitionsForSearch: jest.fn().mockResolvedValue([]),
     getFieldDefinition: jest.fn(),
     createFieldDefinition: jest.fn(),
     updateFieldDefinition: jest.fn(),

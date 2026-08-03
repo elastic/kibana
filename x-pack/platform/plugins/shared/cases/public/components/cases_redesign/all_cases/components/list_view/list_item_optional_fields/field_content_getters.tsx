@@ -11,8 +11,6 @@ import { CaseStatuses } from '@kbn/cases-components';
 
 import type { CaseUI, CaseUICustomField } from '../../../../../../../common/ui/types';
 import { FormattedRelativePreferenceDate } from '../../../../../formatted_date';
-import { getExtendedFieldDisplayLabels } from '../../../../../all_cases/utils/extended_fields_column_utils';
-import { ExtendedFieldsListItemContent } from './extended_fields_content';
 import type { ListItemFieldContent } from './types';
 import * as i18n from '../../../translations';
 
@@ -101,17 +99,17 @@ const listItemFieldContentGetters: Record<
         },
   totalComment: (theCase) => ({
     label: i18n.COMMENTS,
-    content: i18n.LIST_FIELD_COMMENTS(theCase.totalComment),
+    content: String(theCase.totalComment),
     testSubj: 'cases-list-item-field-comments',
   }),
   totalAlerts: (theCase) => ({
     label: i18n.ALERTS,
-    content: i18n.LIST_FIELD_ALERTS(theCase.totalAlerts ?? 0),
+    content: String(theCase.totalAlerts ?? 0),
     testSubj: 'cases-list-item-field-alerts',
   }),
   totalEvents: (theCase) => ({
     label: i18n.EVENTS,
-    content: i18n.LIST_FIELD_EVENTS(theCase.totalEvents ?? 0),
+    content: String(theCase.totalEvents ?? 0),
     testSubj: 'cases-list-item-field-events',
   }),
   createdAt: (theCase) => ({
@@ -153,25 +151,6 @@ const listItemFieldContentGetters: Record<
       label: i18n.DESCRIPTION,
       content: truncatedDescription,
       testSubj: 'cases-list-item-field-description',
-    };
-  },
-  extendedFields: (theCase) => {
-    const labels = getExtendedFieldDisplayLabels(
-      theCase.extendedFields,
-      theCase.extendedFieldsLabels
-    );
-    if (labels.length === 0) {
-      return null;
-    }
-    return {
-      label: i18n.EXTENDED_FIELDS,
-      content: (
-        <ExtendedFieldsListItemContent
-          extendedFields={theCase.extendedFields}
-          extendedFieldsLabels={theCase.extendedFieldsLabels}
-        />
-      ),
-      testSubj: 'cases-list-item-field-extended-fields',
     };
   },
 };

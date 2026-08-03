@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { ServiceIdentifier } from 'inversify';
+import { createToken } from '@kbn/core-di';
 import type { DispatcherService } from './dispatcher';
 
 /**
  * DispatcherService singleton
  */
-export const DispatcherServiceInternalToken = Symbol.for(
+export const DispatcherServiceInternalToken = createToken<DispatcherService>(
   'alerting_v2.DispatcherServiceInternal'
-) as ServiceIdentifier<DispatcherService>;
+);

@@ -29,6 +29,7 @@ import {
   createDataStreamTabActions,
   createDataStreamDetailPanelActions,
   createDataRetentionFormActions,
+  createDataLifecycleFlyoutActions,
   createDataStreamPayload,
   createDataStreamBackingIndex,
   createNonDataStreamIndex,
@@ -585,6 +586,7 @@ describe('Data Streams tab', () => {
             delete_index: true,
             manage_data_stream_lifecycle: true,
             read_failure_store: true,
+            manage: true,
           },
         });
         const ds2 = createDataStreamPayload({
@@ -593,6 +595,7 @@ describe('Data Streams tab', () => {
             delete_index: true,
             manage_data_stream_lifecycle: true,
             read_failure_store: true,
+            manage: true,
           },
         });
 
@@ -946,7 +949,9 @@ describe('Data Streams tab', () => {
 
           await actions.clickNameAt(0);
           await detailPanelActions.waitForDetailPanel();
-          expect(await screen.findByTestId('dataRetentionDetail')).toHaveTextContent('Disabled');
+          expect(await screen.findByTestId('successfulIngestLifecycleDetail')).toHaveTextContent(
+            'Disabled'
+          );
 
           // Close detail panel
           fireEvent.click(screen.getByTestId('closeDetailsButton'));
@@ -957,8 +962,9 @@ describe('Data Streams tab', () => {
           httpRequestsMockHelpers.setLoadDataStreamResponse(ds2.name, ds2);
           await actions.clickNameAt(1);
           await detailPanelActions.waitForDetailPanel();
-          expect(await screen.findByTestId('dataRetentionDetail')).toHaveTextContent(
-            'Keep data indefinitely'
+          // An enabled lifecycle with no retention shows the infinite retention symbol.
+          expect(await screen.findByTestId('successfulIngestLifecycleDetail')).toHaveTextContent(
+            '∞'
           );
         });
 
@@ -979,35 +985,38 @@ describe('Data Streams tab', () => {
 
           const actions = createDataStreamTabActions();
           const detailPanelActions = createDataStreamDetailPanelActions();
-          const formActions = createDataRetentionFormActions();
+          const flyoutActions = createDataLifecycleFlyoutActions();
 
           await actions.clickNameAt(0);
           await detailPanelActions.waitForDetailPanel();
 
-          await actions.clickEditDataRetentionButton();
+          await actions.openEditDataLifecycleFlyout();
 
-          httpRequestsMockHelpers.setEditDataRetentionResponse({
+          httpRequestsMockHelpers.setDataStreamsDataLifecycleResponse({
             success: true,
           });
 
-          await formActions.setDataRetentionValue('7');
-          await formActions.setTimeUnit('h');
-          formActions.clickSaveButton();
-
-          // Flush timers after form submission before checking HTTP call
+          await flyoutActions.goToSuccessfulDataTab();
+          await flyoutActions.stopInheritingLifecycle();
+          await flyoutActions.setSuccessfulRetention('7', 'h');
+          await flyoutActions.clickApplyButton();
 
           await waitFor(() => {
-            expect(httpSetup.put).toHaveBeenLastCalledWith(
-              `${API_BASE_PATH}/data_streams/data_retention`,
+            expect(httpSetup.put).toHaveBeenCalledWith(
+              `${API_BASE_PATH}/data_streams/data_lifecycle`,
               expect.objectContaining({
-                body: JSON.stringify({ dataRetention: '7h', dataStreams: ['dataStream1'] }),
+                body: expect.stringContaining('"dataRetention":"7h"'),
               })
             );
           });
         }, 10000);
 
-        test('can disable lifecycle', async () => {
+        test('disables data stream lifecycle when switching to an ILM policy', async () => {
           setupDataStreamsMocks();
+          httpRequestsMockHelpers.setLoadDataStreamsIlmPoliciesResponse({
+            hasManageIlm: true,
+            policies: [{ name: 'my_ilm_policy', phases: { hot: { min_age: '0ms', actions: {} } } }],
+          });
           await renderHome(httpSetup, {
             initialEntries: ['/data_streams'],
             appServicesContext: { url: urlServiceMock },
@@ -1023,28 +1032,26 @@ describe('Data Streams tab', () => {
 
           const actions = createDataStreamTabActions();
           const detailPanelActions = createDataStreamDetailPanelActions();
-          const formActions = createDataRetentionFormActions();
+          const flyoutActions = createDataLifecycleFlyoutActions();
 
           await actions.clickNameAt(0);
           await detailPanelActions.waitForDetailPanel();
 
-          await actions.clickEditDataRetentionButton();
+          await actions.openEditDataLifecycleFlyout();
 
-          httpRequestsMockHelpers.setEditDataRetentionResponse({
-            success: true,
-          });
+          httpRequestsMockHelpers.setDataStreamsDataLifecycleResponse({ success: true });
 
-          await formActions.toggleDataRetentionEnabled();
-          formActions.clickSaveButton();
-
-          // Flush timers after form submission before checking HTTP call
+          // Switching the successful lifecycle to ILM turns off the data stream lifecycle.
+          await flyoutActions.goToSuccessfulDataTab();
+          await flyoutActions.stopInheritingLifecycle();
+          fireEvent.click(await screen.findByTestId('editDataLifecycle-methodCard-ilm'));
+          fireEvent.click(await screen.findByTestId('retentionSelectableRow-my_ilm_policy'));
+          await flyoutActions.clickApplyButton();
 
           await waitFor(() => {
-            expect(httpSetup.put).toHaveBeenLastCalledWith(
-              `${API_BASE_PATH}/data_streams/data_retention`,
-              expect.objectContaining({
-                body: JSON.stringify({ enabled: false, dataStreams: ['dataStream1'] }),
-              })
+            expect(httpSetup.put).toHaveBeenCalledWith(
+              `${API_BASE_PATH}/data_streams/data_lifecycle`,
+              expect.objectContaining({ body: expect.stringContaining('"enabled":false') })
             );
           });
         }, 10000);
@@ -1066,62 +1073,33 @@ describe('Data Streams tab', () => {
 
           const actions = createDataStreamTabActions();
           const detailPanelActions = createDataStreamDetailPanelActions();
-          const formActions = createDataRetentionFormActions();
+          const flyoutActions = createDataLifecycleFlyoutActions();
 
           await actions.clickNameAt(0);
           await detailPanelActions.waitForDetailPanel();
 
-          await actions.clickEditDataRetentionButton();
+          await actions.openEditDataLifecycleFlyout();
 
-          httpRequestsMockHelpers.setEditDataRetentionResponse({
+          httpRequestsMockHelpers.setDataStreamsDataLifecycleResponse({
             success: true,
           });
 
-          await formActions.toggleInfiniteRetentionPeriod();
-          formActions.clickSaveButton();
-
-          // Flush timers after form submission before checking HTTP call
+          // Turning off the "delete after" phase keeps data indefinitely (infinite retention).
+          await flyoutActions.goToSuccessfulDataTab();
+          await flyoutActions.stopInheritingLifecycle();
+          await flyoutActions.toggleSuccessfulDeletePhase();
+          await flyoutActions.clickApplyButton();
 
           await waitFor(() => {
-            expect(httpSetup.put).toHaveBeenLastCalledWith(
-              `${API_BASE_PATH}/data_streams/data_retention`,
-              expect.objectContaining({ body: JSON.stringify({ dataStreams: ['dataStream1'] }) })
+            expect(httpSetup.put).toHaveBeenCalledWith(
+              `${API_BASE_PATH}/data_streams/data_lifecycle`,
+              expect.objectContaining({ body: expect.stringContaining('"enabled":true') })
             );
           });
-        });
 
-        test('shows single edit callout for reduced data retention', async () => {
-          setupDataStreamsMocks();
-          await renderHome(httpSetup, {
-            initialEntries: ['/data_streams'],
-            appServicesContext: { url: urlServiceMock },
-          });
-
-          // Use waitForElementToBeRemoved for more reliable waiting
-          const loadingElement = screen.queryByTestId('sectionLoading');
-          if (loadingElement) {
-            await waitForElementToBeRemoved(loadingElement);
-          }
-
-          await screen.findByTestId('dataStreamTable');
-
-          const actions = createDataStreamTabActions();
-          const detailPanelActions = createDataStreamDetailPanelActions();
-          const formActions = createDataRetentionFormActions();
-
-          await actions.clickNameAt(0);
-          await detailPanelActions.waitForDetailPanel();
-
-          await actions.clickEditDataRetentionButton();
-
-          // Decrease data retention value to 5d (it was 7d initially)
-          await formActions.setDataRetentionValue('5');
-
-          await screen.findByTestId('reducedDataRetentionCallout');
-
-          const calloutText = formActions.getReducedRetentionCalloutText();
-          expect(calloutText).toContain(
-            'The retention period will be reduced. Data older than then new retention period will be permanently deleted.'
+          expect(httpSetup.put).not.toHaveBeenCalledWith(
+            `${API_BASE_PATH}/data_streams/data_lifecycle`,
+            expect.objectContaining({ body: expect.stringContaining('dataRetention') })
           );
         });
       });
@@ -1178,8 +1156,132 @@ describe('Data Streams tab', () => {
         await actions.clickNameAt(0);
         await detailPanelActions.waitForDetailPanel();
 
-        expect(await screen.findByTestId('dataRetentionDetail')).toBeInTheDocument();
+        expect(await screen.findByTestId('successfulIngestLifecycleDetail')).toBeInTheDocument();
       }, 20000);
+    });
+
+    describe('configure failure store', () => {
+      test('marks the failed data lifecycle as inherited by default', async () => {
+        setupDataStreamsMocks();
+        await renderHome(httpSetup, {
+          initialEntries: ['/data_streams'],
+          appServicesContext: { url: urlServiceMock },
+        });
+
+        const loadingElement = screen.queryByTestId('sectionLoading');
+        if (loadingElement) {
+          await waitForElementToBeRemoved(loadingElement);
+        }
+
+        await screen.findByTestId('dataStreamTable');
+
+        const actions = createDataStreamTabActions();
+        const detailPanelActions = createDataStreamDetailPanelActions();
+        const flyoutActions = createDataLifecycleFlyoutActions();
+
+        await actions.clickNameAt(0);
+        await detailPanelActions.waitForDetailPanel();
+        await actions.openEditDataLifecycleFlyout();
+
+        await flyoutActions.goToFailedDataTab();
+
+        const inheritCheckbox = (await screen.findByTestId(
+          'dataLifecycleInheritCheckbox'
+        )) as HTMLInputElement;
+        expect(inheritCheckbox.checked).toBe(true);
+
+        const failureStoreCheckbox = (await screen.findByTestId(
+          'editFailedDataLifecycle-enableFailureStoreCheckbox'
+        )) as HTMLInputElement;
+        expect(failureStoreCheckbox.disabled).toBe(true);
+      }, 10000);
+
+      test('can enable the failure store', async () => {
+        setupDataStreamsMocks();
+        await renderHome(httpSetup, {
+          initialEntries: ['/data_streams'],
+          appServicesContext: { url: urlServiceMock },
+        });
+
+        const loadingElement = screen.queryByTestId('sectionLoading');
+        if (loadingElement) {
+          await waitForElementToBeRemoved(loadingElement);
+        }
+
+        await screen.findByTestId('dataStreamTable');
+
+        const actions = createDataStreamTabActions();
+        const detailPanelActions = createDataStreamDetailPanelActions();
+        const flyoutActions = createDataLifecycleFlyoutActions();
+
+        await actions.clickNameAt(0);
+        await detailPanelActions.waitForDetailPanel();
+        await actions.openEditDataLifecycleFlyout();
+
+        httpRequestsMockHelpers.setConfigureFailureStoreResponse({ success: true });
+
+        await flyoutActions.goToFailedDataTab();
+        await flyoutActions.stopInheritingLifecycle();
+        await flyoutActions.setFailureStoreEnabled(true);
+        await flyoutActions.clickApplyButton();
+
+        await waitFor(() => {
+          expect(httpSetup.put).toHaveBeenCalledWith(
+            `${API_BASE_PATH}/data_streams/configure_failure_store`,
+            expect.objectContaining({ body: expect.stringContaining('"dsFailureStore":true') })
+          );
+        });
+      }, 10000);
+
+      test('can disable the failure store', async () => {
+        setupDataStreamsMocks();
+        const dataStreamWithFailureStore = createDataStreamPayload({
+          name: 'dataStream1',
+          failureStoreEnabled: true,
+          failureStoreRetention: {
+            customRetentionPeriod: '10d',
+            retentionDeterminedBy: 'data_stream_configuration',
+          },
+        });
+        httpRequestsMockHelpers.setLoadDataStreamResponse(
+          dataStreamWithFailureStore.name,
+          dataStreamWithFailureStore
+        );
+
+        await renderHome(httpSetup, {
+          initialEntries: ['/data_streams'],
+          appServicesContext: { url: urlServiceMock },
+        });
+
+        const loadingElement = screen.queryByTestId('sectionLoading');
+        if (loadingElement) {
+          await waitForElementToBeRemoved(loadingElement);
+        }
+
+        await screen.findByTestId('dataStreamTable');
+
+        const actions = createDataStreamTabActions();
+        const detailPanelActions = createDataStreamDetailPanelActions();
+        const flyoutActions = createDataLifecycleFlyoutActions();
+
+        await actions.clickNameAt(0);
+        await detailPanelActions.waitForDetailPanel();
+        await actions.openEditDataLifecycleFlyout();
+
+        httpRequestsMockHelpers.setConfigureFailureStoreResponse({ success: true });
+
+        await flyoutActions.goToFailedDataTab();
+        await flyoutActions.stopInheritingLifecycle();
+        await flyoutActions.setFailureStoreEnabled(false);
+        await flyoutActions.clickApplyButton();
+
+        await waitFor(() => {
+          expect(httpSetup.put).toHaveBeenCalledWith(
+            `${API_BASE_PATH}/data_streams/configure_failure_store`,
+            expect.objectContaining({ body: expect.stringContaining('"dsFailureStore":false') })
+          );
+        });
+      }, 10000);
     });
 
     describe('shows all possible states according to who manages the data stream', () => {
@@ -1187,6 +1289,7 @@ describe('Data Streams tab', () => {
         name: 'dataStream1',
         nextGenerationManagedBy: 'Index Lifecycle Management',
         lifecycle: undefined,
+        ilmPolicyName: 'my-ilm-policy',
         indices: [
           {
             managedBy: 'Index Lifecycle Management',
@@ -1242,7 +1345,7 @@ describe('Data Streams tab', () => {
         httpRequestsMockHelpers.setLoadTemplatesResponse({ templates: [], legacyTemplates: [] });
       };
 
-      test('when fully managed by ILM, user cannot edit data retention', async () => {
+      test('when fully managed by ILM, the summary reflects the ILM policy', async () => {
         setupILMMocks();
         httpRequestsMockHelpers.setLoadDataStreamResponse(
           dsFullyManagedByILM.name,
@@ -1267,15 +1370,9 @@ describe('Data Streams tab', () => {
         await actions.clickNameAt(0);
         await detailPanelActions.waitForDetailPanel();
 
-        expect(await screen.findByTestId('dataRetentionDetail')).toHaveTextContent('Disabled');
-
-        // There should be a warning that the data stream is fully managed by ILM
-        expect(screen.getByTestId('dsIsFullyManagedByILM')).toBeInTheDocument();
-
-        // Edit data retention button should not be visible
-        fireEvent.click(await screen.findByTestId('manageDataStreamButton'));
-        await screen.findByText('Data stream options');
-        expect(screen.queryByTestId('editDataRetentionButton')).not.toBeInTheDocument();
+        const summary = await screen.findByTestId('successfulIngestLifecycleDetail');
+        expect(summary).toHaveTextContent('ILM');
+        expect(summary).toHaveTextContent('my-ilm-policy');
       });
 
       test('displays/hides bulk edit data retention depending if data stream fully managed by ILM is selected', async () => {
@@ -1318,7 +1415,7 @@ describe('Data Streams tab', () => {
         expect(screen.getByTestId('bulkEditDataRetentionButton')).toBeInTheDocument();
       });
 
-      test('when partially managed by dsl but has backing indices managed by ILM should show a warning', async () => {
+      test('when managed by dsl, the summary reflects the data retention', async () => {
         setupILMMocks();
         httpRequestsMockHelpers.setLoadDataStreamResponse(
           dsPartiallyManagedByILM.name,
@@ -1343,17 +1440,9 @@ describe('Data Streams tab', () => {
         await actions.clickNameAt(1);
         await detailPanelActions.waitForDetailPanel();
 
-        expect(await screen.findByTestId('dataRetentionDetail')).toHaveTextContent('7 days');
-
-        await actions.clickEditDataRetentionButton();
-
-        await screen.findByTestId('someIndicesAreManagedByILMCallout');
-
-        // There should be a warning that the data stream is managed by DSL
-        // but the backing indices that are managed by ILM wont be affected.
-        expect(screen.getByTestId('someIndicesAreManagedByILMCallout')).toBeInTheDocument();
-        expect(screen.getByTestId('viewIlmPolicyLink')).toBeInTheDocument();
-        expect(screen.getByTestId('viewAllIndicesLink')).toBeInTheDocument();
+        expect(await screen.findByTestId('successfulIngestLifecycleDetail')).toHaveTextContent(
+          '7 days'
+        );
       });
     });
   });
@@ -1431,6 +1520,8 @@ describe('Data Streams tab', () => {
 
       const dataStreamForDetailPanel = createDataStreamPayload({
         name: 'dataStream1',
+        nextGenerationManagedBy: 'Index Lifecycle Management',
+        lifecycle: undefined,
         ilmPolicyName: 'my_ilm_policy',
       });
 
@@ -1457,7 +1548,7 @@ describe('Data Streams tab', () => {
 
       const ilmPolicyLink = await screen.findByTestId('ilmPolicyLink');
       await waitFor(() => {
-        expect(ilmPolicyLink.getAttribute('data-href')).toBe('/test/my_ilm_policy');
+        expect(ilmPolicyLink.getAttribute('href')).toBe('/test/my_ilm_policy');
       });
     });
 
@@ -1496,6 +1587,8 @@ describe('Data Streams tab', () => {
 
       const dataStreamForDetailPanel = createDataStreamPayload({
         name: 'dataStream1',
+        nextGenerationManagedBy: 'Index Lifecycle Management',
+        lifecycle: undefined,
         ilmPolicyName: 'my_ilm_policy',
       });
 
@@ -1527,7 +1620,9 @@ describe('Data Streams tab', () => {
       await detailPanelActions.waitForDetailPanel();
 
       expect(detailPanelActions.findIlmPolicyLink()).toBeNull();
-      expect(await screen.findByTestId('ilmPolicyDetail')).toHaveTextContent('my_ilm_policy');
+      expect(await screen.findByTestId('successfulIngestLifecycleDetail')).toHaveTextContent(
+        'my_ilm_policy'
+      );
     });
   });
 
@@ -1669,6 +1764,7 @@ describe('Data Streams tab', () => {
         delete_index: true,
         manage_data_stream_lifecycle: true,
         read_failure_store: true,
+        manage: true,
       },
     });
     const dataStreamNoDelete = createDataStreamPayload({
@@ -1677,6 +1773,7 @@ describe('Data Streams tab', () => {
         delete_index: false,
         manage_data_stream_lifecycle: true,
         read_failure_store: true,
+        manage: true,
       },
     });
     const dataStreamNoEditRetention = createDataStreamPayload({
@@ -1685,6 +1782,7 @@ describe('Data Streams tab', () => {
         delete_index: true,
         manage_data_stream_lifecycle: false,
         read_failure_store: true,
+        manage: false,
       },
     });
     const dataStreamNoPermissions = createDataStreamPayload({
@@ -1693,6 +1791,7 @@ describe('Data Streams tab', () => {
         delete_index: false,
         manage_data_stream_lifecycle: false,
         read_failure_store: false,
+        manage: false,
       },
     });
 
@@ -1800,7 +1899,7 @@ describe('Data Streams tab', () => {
         await detailPanelActions.waitForDetailPanel();
 
         fireEvent.click(await screen.findByTestId('manageDataStreamButton'));
-        await screen.findByText('Data stream options');
+        await screen.findByTestId('editDataLifecycleButton');
         expect(screen.queryByTestId('deleteDataStreamButton')).not.toBeInTheDocument();
       });
 
@@ -1830,8 +1929,7 @@ describe('Data Streams tab', () => {
         await detailPanelActions.waitForDetailPanel();
 
         fireEvent.click(await screen.findByTestId('manageDataStreamButton'));
-        await screen.findByText('Data stream options');
-        expect(screen.getByTestId('deleteDataStreamButton')).toBeInTheDocument();
+        expect(await screen.findByTestId('deleteDataStreamButton')).toBeInTheDocument();
       });
     });
 
@@ -1904,8 +2002,8 @@ describe('Data Streams tab', () => {
         await detailPanelActions.waitForDetailPanel();
 
         fireEvent.click(await screen.findByTestId('manageDataStreamButton'));
-        await screen.findByText('Data stream options');
-        expect(screen.queryByTestId('editDataRetentionButton')).not.toBeInTheDocument();
+        await screen.findByTestId('deleteDataStreamButton');
+        expect(screen.queryByTestId('editDataLifecycleButton')).not.toBeInTheDocument();
       });
 
       test('displays edit retention button in detail panel', async () => {
@@ -1934,8 +2032,7 @@ describe('Data Streams tab', () => {
         await detailPanelActions.waitForDetailPanel();
 
         fireEvent.click(await screen.findByTestId('manageDataStreamButton'));
-        await screen.findByText('Data stream options');
-        expect(screen.getByTestId('editDataRetentionButton')).toBeInTheDocument();
+        expect(await screen.findByTestId('editDataLifecycleButton')).toBeInTheDocument();
       });
     });
 

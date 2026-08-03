@@ -13,17 +13,21 @@ import {
   INDICATOR_ATTACHMENT_TYPE,
   LEGACY_LENS_ATTACHMENT_TYPE,
   LENS_ATTACHMENT_TYPE,
+  SECURITY_ENTITY_ATTACHMENT_TYPE,
   MAP_ATTACHMENT_TYPE,
   SECURITY_ENDPOINT_ATTACHMENT_TYPE,
   OSQUERY_ATTACHMENT_TYPE,
   SECURITY_ALERT_ATTACHMENT_TYPE,
   SECURITY_TIMELINE_ATTACHMENT_TYPE,
+  OWNER_TO_PREFIX_MAP,
+  registerOwnerPrefix,
 } from '../../constants/attachments';
 import { AttachmentType, ExternalReferenceStorageType } from '../../types/domain';
 import { SECURITY_SOLUTION_OWNER, OBSERVABILITY_OWNER, GENERAL_CASES_OWNER } from '../../constants';
 import type { AttachmentRequestV2 } from '../../types/api';
 import {
   getAttachmentTypeFromAttributes,
+  getReferenceAttachmentId,
   isMigratedAttachmentType,
   isPersistableType,
   resolveUnifiedAttachmentType,
@@ -106,6 +110,24 @@ describe('migration_utils', () => {
     it('does not produce undefined prefixes for unknown owners', () => {
       expect(toUnifiedAttachmentType(AttachmentType.event, 'unknownOwner')).toBe(
         AttachmentType.event
+      );
+    });
+  });
+
+  describe('registerOwnerPrefix', () => {
+    const customOwner = 'customFixtureOwner';
+
+    afterEach(() => {
+      delete OWNER_TO_PREFIX_MAP[customOwner];
+    });
+
+    it('lets a dynamically registered owner resolve legacy alert/event to a unified type', () => {
+      expect(toUnifiedAttachmentType(AttachmentType.alert, customOwner)).toBe(AttachmentType.alert);
+
+      registerOwnerPrefix(customOwner, 'security');
+
+      expect(toUnifiedAttachmentType(AttachmentType.alert, customOwner)).toBe(
+        SECURITY_ALERT_ATTACHMENT_TYPE
       );
     });
   });
@@ -287,21 +309,33 @@ describe('migration_utils', () => {
 
   describe('isUnifiedOnlyAttachmentType', () => {
     it('is true for unified types with no legacy equivalent', () => {
-      expect(isUnifiedOnlyAttachmentType(SECURITY_TIMELINE_ATTACHMENT_TYPE)).toBe(true);
-      expect(isUnifiedOnlyAttachmentType(DASHBOARD_ATTACHMENT_TYPE)).toBe(true);
-      expect(isUnifiedOnlyAttachmentType(MAP_ATTACHMENT_TYPE)).toBe(true);
-      expect(isUnifiedOnlyAttachmentType(DISCOVER_SESSION_ATTACHMENT_TYPE)).toBe(true);
+      expect(isUnifiedOnlyAttachmentType(SECURITY_TIMELINE_ATTACHMENT_TYPE, owner)).toBe(true);
+      expect(isUnifiedOnlyAttachmentType(SECURITY_ENTITY_ATTACHMENT_TYPE, owner)).toBe(true);
+      expect(isUnifiedOnlyAttachmentType(DASHBOARD_ATTACHMENT_TYPE, owner)).toBe(true);
+      expect(isUnifiedOnlyAttachmentType(MAP_ATTACHMENT_TYPE, owner)).toBe(true);
+      expect(isUnifiedOnlyAttachmentType(DISCOVER_SESSION_ATTACHMENT_TYPE, owner)).toBe(true);
     });
 
     it('is false for unified types that map back to a legacy type', () => {
-      expect(isUnifiedOnlyAttachmentType(SECURITY_ALERT_ATTACHMENT_TYPE)).toBe(false);
-      expect(isUnifiedOnlyAttachmentType(FILE_ATTACHMENT_TYPE)).toBe(false);
-      expect(isUnifiedOnlyAttachmentType(LENS_ATTACHMENT_TYPE)).toBe(false);
+      expect(isUnifiedOnlyAttachmentType(SECURITY_ALERT_ATTACHMENT_TYPE, owner)).toBe(false);
+      expect(isUnifiedOnlyAttachmentType(FILE_ATTACHMENT_TYPE, owner)).toBe(false);
+    });
+
+    it('is false for persistable unified types', () => {
+      expect(isUnifiedOnlyAttachmentType(LENS_ATTACHMENT_TYPE, owner)).toBe(false);
     });
 
     it('is false for legacy and unknown types', () => {
-      expect(isUnifiedOnlyAttachmentType(AttachmentType.user)).toBe(false);
-      expect(isUnifiedOnlyAttachmentType('something-custom')).toBe(false);
+      expect(isUnifiedOnlyAttachmentType(AttachmentType.user, owner)).toBe(false);
+      expect(isUnifiedOnlyAttachmentType('something-custom', owner)).toBe(false);
+    });
+
+    it('is false for the legacy alert type with a security owner (owner drives legacy→unified mapping)', () => {
+      // AttachmentType.alert + SECURITY_SOLUTION_OWNER → toUnifiedAttachmentType → 'security.alert'
+      // 'security.alert' IS in UNIFIED_TO_LEGACY_MAP, so hasLegacyMapping=true → returns false.
+      expect(isUnifiedOnlyAttachmentType(AttachmentType.alert, SECURITY_SOLUTION_OWNER)).toBe(
+        false
+      );
     });
   });
 
@@ -313,6 +347,40 @@ describe('migration_utils', () => {
 
     it('is false for unrelated persistable subtype ids', () => {
       expect(isPersistableType('.test')).toBe(false);
+    });
+  });
+
+  describe('getReferenceAttachmentId', () => {
+    it('returns attachmentId for unified reference attachments', () => {
+      expect(getReferenceAttachmentId(makeUnifiedRef(SECURITY_ALERT_ATTACHMENT_TYPE))).toBe(
+        'att-id'
+      );
+    });
+
+    it('returns alertId for legacy alert attachments', () => {
+      expect(getReferenceAttachmentId(makeAlert())).toBe('alert-id');
+    });
+
+    it('returns eventId for legacy event attachments', () => {
+      expect(getReferenceAttachmentId(makeEvent())).toBe('evt-id');
+    });
+
+    it('preserves array reference ids', () => {
+      expect(
+        getReferenceAttachmentId({
+          type: AttachmentType.alert,
+          alertId: ['a', 'b'],
+          index: ['i', 'j'],
+          rule: { id: 'rule-id', name: 'rule' },
+          owner,
+        })
+      ).toEqual(['a', 'b']);
+    });
+
+    it('returns undefined for non-reference attachments (user comment)', () => {
+      expect(
+        getReferenceAttachmentId({ type: AttachmentType.user, comment: 'hi', owner })
+      ).toBeUndefined();
     });
   });
 });

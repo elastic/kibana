@@ -10,14 +10,17 @@ import type { ApiServicesFixture, EsClient, KbnClient, ScoutLogger } from '@kbn/
 import {
   getActionPoliciesApiService,
   getAlertActionsApiService,
+  getAlertActionsEventsService,
   getDispatcherApiService,
   getMaintenanceWindowsApiService,
   getRuleExecutionsApiService,
   getRulesApiService,
   getTaskManagerService,
   getTelemetryService,
+  getWorkflowsApiService,
   type ActionPoliciesApiService,
   type AlertActionsApiService,
+  type AlertActionsEventsService,
   type DispatcherApiService,
   type MaintenanceWindowsApiService,
   type RuleExecutionsApiService,
@@ -25,6 +28,7 @@ import {
   type RuleEventsApiService,
   type TaskManagerService,
   type TelemetryService,
+  type WorkflowsApiService,
 } from '../../common/services';
 import { getRuleEventsApiService } from '../../common/services/rule_events_api_service';
 import type { SourceIndexApiService } from '../../common/services/source_index_api_service';
@@ -33,6 +37,7 @@ import { getSourceIndexApiService } from '../../common/services/source_index_api
 export interface AlertingApiServices {
   rules: RulesApiService;
   ruleEvents: RuleEventsApiService;
+  alertActionsEvents: AlertActionsEventsService;
   alertActions: AlertActionsApiService;
   actionPolicies: ActionPoliciesApiService;
   maintenanceWindows: MaintenanceWindowsApiService;
@@ -41,6 +46,7 @@ export interface AlertingApiServices {
   dispatcher: DispatcherApiService;
   taskManager: TaskManagerService;
   telemetry: TelemetryService;
+  workflows: WorkflowsApiService;
 }
 
 export interface AlertingApiServicesFixture extends ApiServicesFixture {
@@ -65,7 +71,8 @@ export const buildAlertingApiServices = ({
   return {
     rules: getRulesApiService({ kbnClient, log }),
     ruleEvents: getRuleEventsApiService({ esClient, log }),
-    alertActions: getAlertActionsApiService({ esClient, log }),
+    alertActionsEvents: getAlertActionsEventsService({ esClient, log }),
+    alertActions: getAlertActionsApiService({ kbnClient, log }),
     actionPolicies: getActionPoliciesApiService({ kbnClient, log }),
     maintenanceWindows: getMaintenanceWindowsApiService({ kbnClient, log }),
     sourceIndex: getSourceIndexApiService({ esClient, log }),
@@ -73,6 +80,7 @@ export const buildAlertingApiServices = ({
     dispatcher: getDispatcherApiService({ esClient, log }),
     taskManager,
     telemetry: getTelemetryService({ esClient, log, taskManager }),
+    workflows: getWorkflowsApiService({ kbnClient, log }),
   };
 };
 
@@ -108,8 +116,11 @@ export {
 } from '../../common/roles';
 export {
   buildAlertEvent,
+  buildExternalAlertEvent,
   buildCreateRuleData,
   buildCreateActionPolicyData,
+  buildWorkflowYaml,
+  getSnoozeDate,
 } from '../../common/builders';
 export {
   getActionPolicyUrl,
@@ -121,10 +132,20 @@ export {
   getUnsnoozeAlertActionUrl,
   getActivateAlertActionUrl,
   getDeactivateAlertActionUrl,
+  CREATE_ALERT_EVENT_URL,
+  getCreateAlertEventBySourceUrl,
   getRuleUrl,
+  getRunRuleUrl,
+  getEnableRuleUrl,
+  getDisableRuleUrl,
   getBulkRulesUrl,
   BULK_ALERT_ACTION_URL,
-  getBulkActionPoliciesUrl,
+  getBulkDeleteActionPoliciesUrl,
+  getBulkEnableActionPoliciesUrl,
+  getBulkDisableActionPoliciesUrl,
+  getBulkSnoozeActionPoliciesUrl,
+  getBulkUnsnoozeActionPoliciesUrl,
+  getBulkUpdateApiKeyActionPoliciesUrl,
   getDisableActionPolicyUrl,
   getEnableActionPolicyUrl,
   getListActionPoliciesUrl,
@@ -133,8 +154,8 @@ export {
   getUpdateActionPolicyApiKeyUrl,
   getListExecutionHistoryUrl,
   getCountNewExecutionHistoryEventsUrl,
+  getRuleExecutionsUrl,
 } from '../../common/urls';
-export { expectNoBulkTruncationMetadata } from '../../common/assertions';
 export {
   ACTION_POLICY_PER_PAGE_MAX,
   ACTION_POLICY_SEARCH_MAX_LENGTH,

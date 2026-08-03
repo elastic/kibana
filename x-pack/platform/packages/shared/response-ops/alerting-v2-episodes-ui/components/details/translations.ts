@@ -65,6 +65,13 @@ export const FLYOUT_TAB_RELATED = i18n.translate(
   }
 );
 
+export const FLYOUT_TAB_TIMELINE = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.flyout.tab.timeline',
+  {
+    defaultMessage: 'Timeline',
+  }
+);
+
 export const FLYOUT_TAB_METADATA = i18n.translate(
   'xpack.alertingV2EpisodesUi.details.flyout.tab.metadata',
   {
@@ -95,6 +102,13 @@ export const HEADER_LOADING_TITLE = i18n.translate(
   'xpack.alertingV2EpisodesUi.details.header.loadingTitle',
   {
     defaultMessage: 'Loading…',
+  }
+);
+
+export const HEADER_EPISODE_TITLE_FALLBACK = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.header.episodeTitleFallback',
+  {
+    defaultMessage: 'Alert episode',
   }
 );
 
@@ -152,14 +166,6 @@ export const LIFECYCLE_HEATMAP_UNKNOWN_STATUS_LABEL = i18n.translate(
   'xpack.alertingV2EpisodesUi.details.lifecycleHeatmap.unknownStatusLabel',
   {
     defaultMessage: 'Unknown',
-  }
-);
-
-/** --- Lifecycle heatmap section --- */
-export const LIFECYCLE_HEATMAP_SECTION_LOAD_ERROR = i18n.translate(
-  'xpack.alertingV2EpisodesUi.details.lifecycleHeatmapSection.loadError',
-  {
-    defaultMessage: 'Could not load episode lifecycle.',
   }
 );
 
@@ -221,11 +227,26 @@ export const SEVERITY_HEATMAP_SECTION_LOAD_ERROR = i18n.translate(
   }
 );
 
+/** --- Timeline heatmaps section --- */
+export const TIMELINE_HEATMAPS_SECTION_LOAD_ERROR = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.timelineHeatmapsSection.loadError',
+  {
+    defaultMessage: 'Could not load episode timeline.',
+  }
+);
+
 /** --- Metadata details list --- */
 export const METADATA_LIST_GROUPING_LABEL = i18n.translate(
   'xpack.alertingV2EpisodesUi.details.metadataList.groupingLabel',
   {
     defaultMessage: 'Grouping',
+  }
+);
+
+export const METADATA_LIST_GROUPING_ERROR = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.metadataList.groupingError',
+  {
+    defaultMessage: 'Could not load grouping.',
   }
 );
 
@@ -247,6 +268,27 @@ export const METADATA_LIST_ASSIGNEE_LABEL = i18n.translate(
   'xpack.alertingV2EpisodesUi.details.metadataList.assigneeLabel',
   {
     defaultMessage: 'Assignee',
+  }
+);
+
+export const METADATA_LIST_TAGS_LABEL = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.metadataList.tagsLabel',
+  {
+    defaultMessage: 'Tags',
+  }
+);
+
+export const METADATA_LIST_SOURCE_URL_LABEL = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.metadataList.sourceUrlLabel',
+  {
+    defaultMessage: 'Source',
+  }
+);
+
+export const METADATA_LIST_SOURCE_URL_LINK = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.metadataList.sourceUrlLink',
+  {
+    defaultMessage: 'View in source system',
   }
 );
 
@@ -331,27 +373,6 @@ export const RULE_OVERVIEW_VIEW_DETAILS = i18n.translate(
   }
 );
 
-export const RULE_OVERVIEW_KIND_SIGNAL = i18n.translate(
-  'xpack.alertingV2EpisodesUi.details.ruleOverview.kind.signal',
-  {
-    defaultMessage: 'Signal',
-  }
-);
-
-export const RULE_OVERVIEW_KIND_ALERTING = i18n.translate(
-  'xpack.alertingV2EpisodesUi.details.ruleOverview.kind.alerting',
-  {
-    defaultMessage: 'Alert',
-  }
-);
-
-export const RULE_OVERVIEW_KIND_TOOLTIP = i18n.translate(
-  'xpack.alertingV2EpisodesUi.details.ruleOverview.kind.tooltip',
-  {
-    defaultMessage: 'Mode can be changed in the rule edit form',
-  }
-);
-
 export const RULE_OVERVIEW_ENABLED = i18n.translate(
   'xpack.alertingV2EpisodesUi.details.ruleOverview.enabled',
   {
@@ -386,3 +407,28 @@ export const RUNBOOK_SECTION_LOAD_ERROR = i18n.translate(
     defaultMessage: 'Could not load the runbook for this episode.',
   }
 );
+
+/** --- Trend chart section --- */
+export const TREND_CHART_TITLE = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.trendChart.title',
+  {
+    defaultMessage: 'Trend',
+  }
+);
+
+export const TREND_CHART_LOAD_ERROR = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.trendChart.loadError',
+  {
+    defaultMessage: 'Unable to load the trend chart.',
+  }
+);
+
+export const getTrendChartThresholdComparatorLabel = (
+  metric: string,
+  comparator: string,
+  threshold: number
+): string =>
+  i18n.translate('xpack.alertingV2EpisodesUi.details.trendChart.thresholdComparatorLabel', {
+    defaultMessage: '{metric} {comparator} {threshold}',
+    values: { metric, comparator, threshold },
+  });

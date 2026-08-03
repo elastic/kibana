@@ -69,6 +69,7 @@
     "@kbn/core-security-server-mocks",
     "@kbn/core-http-server-utils",
     "@kbn/response-ops-rule-params",
+    "@kbn/response-ops-schedule-schema",
     "@kbn/datemath",
     "@kbn/elastic-assistant-common",
     "@kbn/licensing-types",
@@ -87,7 +88,7 @@
     "@kbn/core-analytics-server-mocks",
     "@kbn/cps-server-utils",
     "@kbn/cps-utils",
-    "@kbn/cloud-plugin",
+    "@kbn/core-saved-objects-common",
   ],
   "exclude": ["target/**/*"]
 }

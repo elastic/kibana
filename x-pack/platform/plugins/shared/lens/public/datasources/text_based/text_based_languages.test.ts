@@ -15,6 +15,7 @@ import type {
   Datasource,
   FramePublicAPI,
 } from '@kbn/lens-common';
+import { LENS_METRIC_GROUP_ID } from '@kbn/lens-common';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { getTextBasedDatasource } from './text_based_languages';
@@ -415,6 +416,96 @@ describe('Textbased Data Source', () => {
     });
   });
 
+  describe('#syncColumns', () => {
+    it('keeps breakdown fields in BY when creating a trendline query from ES|QL without STATS', () => {
+      // The outcome of this is a bit of a useless config, but it's a real world
+      // edge case you can end up with like this:
+      // - If you start with just `FROM kibana_sample_data_logs` the panel will
+      //   be a table and some fields as metrics, among them `@timestamp`.
+      // - If you then switch from table to metric, you'll end up with
+      //   metric `bytes` and `@timestamp` as the breakdown field.
+      // - In earlier iterations of the trendline feature, then enabling the
+      //   trendline would crash the panel because the query and generated
+      //   columns were not in sync.
+      //
+      // This test ensures that the trendline query is generated correctly and
+      // that the breakdown field is preserved in the BY clause.
+
+      const state = {
+        layers: {
+          main: {
+            columns: [
+              {
+                columnId: 'metric-accessor',
+                fieldName: 'bytes',
+                meta: { type: 'number' },
+              },
+              {
+                columnId: 'breakdown-accessor',
+                fieldName: '@timestamp',
+                meta: { type: 'date' },
+              },
+            ],
+            query: { esql: 'FROM kibana_sample_data_logs' },
+            index: 'logs',
+          },
+          trendline: {
+            columns: [],
+            query: { esql: 'FROM kibana_sample_data_logs' },
+            index: 'logs',
+            timeField: '@timestamp',
+          },
+        },
+      } as unknown as TextBasedPrivateState;
+
+      const newState = TextBasedDatasource.syncColumns({
+        state,
+        links: [
+          {
+            from: {
+              layerId: 'main',
+              columnId: 'metric-accessor',
+              groupId: LENS_METRIC_GROUP_ID.METRIC,
+            },
+            to: {
+              layerId: 'trendline',
+              columnId: 'trendline-metric-accessor',
+              groupId: LENS_METRIC_GROUP_ID.TREND_METRIC,
+            },
+          },
+          {
+            from: {
+              layerId: 'main',
+              columnId: 'breakdown-accessor',
+              groupId: LENS_METRIC_GROUP_ID.BREAKDOWN_BY,
+            },
+            to: {
+              layerId: 'trendline',
+              columnId: 'trendline-breakdown-accessor',
+              groupId: LENS_METRIC_GROUP_ID.TREND_BREAKDOWN_BY,
+            },
+          },
+        ],
+        getDimensionGroups: jest.fn(),
+        indexPatterns: {},
+      });
+
+      expect(newState.layers.trendline.query?.esql).toBe(
+        'FROM kibana_sample_data_logs | STATS AVG(bytes) BY BUCKET(@timestamp, 75, ?_tstart, ?_tend)'
+      );
+      expect(
+        newState.layers.trendline.columns.find(
+          (column) => column.columnId === 'trendline-metric-accessor'
+        )?.fieldName
+      ).toBe('AVG(bytes)');
+      expect(
+        newState.layers.trendline.columns.some(
+          (column) => column.columnId === 'trendline-breakdown-accessor'
+        )
+      ).toBe(false);
+    });
+  });
+
   describe('#insertLayer', () => {
     it('should insert an empty layer into the previous state', () => {
       expect(TextBasedDatasource.insertLayer(baseState, 'newLayer')).toEqual({
@@ -437,15 +528,51 @@ describe('Textbased Data Source', () => {
         removedLayerIds: ['a'],
         newState: {
           ...baseState,
-          layers: {
-            a: {
-              columns: [],
-              query: { esql: 'FROM foo' },
-              index: 'foo',
-            },
-          },
+          layers: {},
         },
       });
+    });
+
+    it('should not accumulate orphaned layers on repeated add/remove cycles', () => {
+      // Simulate toggling a trendline on/off/on: each cycle adds a new layer
+      // and removes the previous one. Removed layers must be fully deleted.
+      const stateAfterFirstAdd: TextBasedPrivateState = {
+        ...baseState,
+        layers: {
+          ...baseState.layers,
+          trendline1: {
+            columns: [{ columnId: 't1', fieldName: 'metric', meta: { type: 'number' } }],
+            query: { esql: 'FROM foo' },
+            index: 'foo',
+          },
+        },
+      };
+
+      // Remove the trendline layer
+      const { newState: stateAfterRemove } = TextBasedDatasource.removeLayer(
+        stateAfterFirstAdd,
+        'trendline1'
+      );
+
+      // The removed layer should be completely gone, not just emptied
+      expect(stateAfterRemove.layers).not.toHaveProperty('trendline1');
+      expect(Object.keys(stateAfterRemove.layers)).toEqual(['a']);
+
+      // Add a second trendline layer
+      const stateAfterSecondAdd: TextBasedPrivateState = {
+        ...stateAfterRemove,
+        layers: {
+          ...stateAfterRemove.layers,
+          trendline2: {
+            columns: [{ columnId: 't2', fieldName: 'metric', meta: { type: 'number' } }],
+            query: { esql: 'FROM foo' },
+            index: 'foo',
+          },
+        },
+      };
+
+      // Only the primary layer and the new trendline should exist
+      expect(Object.keys(stateAfterSecondAdd.layers)).toEqual(['a', 'trendline2']);
     });
   });
 
@@ -1039,13 +1166,18 @@ describe('Textbased Data Source', () => {
             Object {
               "arguments": Object {
                 "idMap": Array [
-                  "{\\"Test 1\\":[{\\"id\\":\\"a\\",\\"label\\":\\"Test 1\\"}],\\"Test 2\\":[{\\"id\\":\\"b\\",\\"label\\":\\"Test 2\\"}]}",
+                  "{\\"Test 1\\":[{\\"id\\":\\"a\\",\\"label\\":\\"Test 1\\",\\"dataType\\":\\"number\\"}],\\"Test 2\\":[{\\"id\\":\\"b\\",\\"label\\":\\"Test 2\\",\\"dataType\\":\\"number\\"}]}",
                 ],
                 "isTextBased": Array [
                   true,
                 ],
               },
               "function": "lens_map_to_columns",
+              "type": "function",
+            },
+            Object {
+              "arguments": Object {},
+              "function": "lens_date_histogram_textbased",
               "type": "function",
             },
           ],

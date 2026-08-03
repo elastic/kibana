@@ -70,6 +70,19 @@ export const DefaultRepositoryRequiredRefreshing: Story = {
   ),
 };
 
+export const DefaultRepositoryRequiredWithExistingRepositories: Story = {
+  name: 'Default repository required — existing repositories',
+  render: () => (
+    <Container>
+      <FrozenDefaultRepositoryRequiredCallout
+        manageRepositoriesUrl="/app/management/data/snapshot_restore/repositories"
+        hasExistingRepositories
+        onRefresh={() => action('onRefresh')()}
+      />
+    </Container>
+  ),
+};
+
 export const DefaultRepositoryRequiredNoActions: Story = {
   name: 'Default repository required — no actions',
   render: () => (

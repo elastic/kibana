@@ -1,0 +1,92 @@
+openapi: 3.0.0
+info:
+  title: Default Alert Retrieval Workflow Step
+  version: '2023-10-31'
+  description: >-
+    Note: File named default_alert_retrieval to avoid ESLint restrictions on "legacy" keyword,
+    but this implements the default alert retrieval workflow step for backwards compatibility.
+paths: {}
+components:
+  x-codegen-enabled: true
+  schemas:
+    DefaultAlertRetrievalInput:
+      type: object
+      description: Input for the default alert retrieval workflow step
+      required:
+        - alerts_index_pattern
+        - anonymization_fields
+        - api_config
+        - size
+      properties:
+        alerts_index_pattern:
+          type: string
+          description: The index pattern for security alerts
+        anonymization_fields:
+          type: array
+          description: Fields to anonymize
+          items:
+            $ref: '../anonymization_fields/anonymization_field_response.schema.yaml#/components/schemas/AnonymizationFieldResponse'
+        api_config:
+          $ref: '../common_attributes.schema.yaml#/components/schemas/ApiConfig'
+          description: Connector configuration
+        filter:
+          type: object
+          description: Query filter for alerts
+          additionalProperties: true
+        size:
+          type: integer
+          description: Maximum number of alerts to retrieve
+        start:
+          type: string
+          description: Start time for alert query (ISO 8601 or relative like 'now-24h')
+        end:
+          type: string
+          description: End time for alert query (ISO 8601 or relative like 'now')
+        replacements:
+          $ref: '../common_attributes.schema.yaml#/components/schemas/Replacements'
+          description: Existing anonymization replacements to use
+
+    DefaultAlertRetrievalOutput:
+      type: object
+      description: Output from the default alert retrieval workflow step
+      required:
+        - alerts
+        - replacements
+        - api_config
+        - alerts_context_count
+      properties:
+        alerts:
+          type: array
+          description: Retrieved alerts in a format compatible with the Attack Discovery prompt
+          items:
+            type: string
+        replacements:
+          $ref: '../common_attributes.schema.yaml#/components/schemas/Replacements'
+          description: Updated anonymization replacements map
+        api_config:
+          $ref: '../common_attributes.schema.yaml#/components/schemas/ApiConfig'
+          description: Connector configuration (passed through for generation step)
+        connector_name:
+          type: string
+          description: Name of the connector
+        alerts_context_count:
+          type: integer
+          description: Number of alerts retrieved
+        anonymized_alerts:
+          type: array
+          description: Anonymized alerts as Document objects
+          items:
+            type: object
+            required:
+              - metadata
+              - page_content
+            properties:
+              id:
+                type: string
+              metadata:
+                type: object
+              page_content:
+                type: string
+
+
+

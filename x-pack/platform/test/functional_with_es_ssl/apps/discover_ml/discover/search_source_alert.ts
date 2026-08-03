@@ -294,6 +294,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const clickViewInApp = async (ruleName: string) => {
     // navigate to discover using view in app link
     await openAlertRuleInManagement(ruleName);
+    await testSubjects.click('app-menu-overflow-button');
     await testSubjects.click('ruleDetails-viewInDiscover');
     await PageObjects.header.waitUntilLoadingHasFinished();
   };
@@ -460,7 +461,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       }
       const dataViewsElem = await testSubjects.find('euiSelectableList');
       const sourceDataViewOption = await dataViewsElem.findByCssSelector(
-        `[title="${SOURCE_DATA_VIEW}"]`
+        `[data-test-subj="dataView-${SOURCE_DATA_VIEW}"]`
       );
       await sourceDataViewOption.click();
 
@@ -479,6 +480,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       await openAlertRuleInManagement(RULE_NAME);
+      await testSubjects.click('app-menu-overflow-button');
       await testSubjects.click('ruleDetails-viewInDiscover');
       await PageObjects.header.waitUntilLoadingHasFinished();
 
@@ -495,7 +497,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await openAlertRuleInManagement(RULE_NAME);
 
       // change rule configuration
-      await testSubjects.click('ruleActionsButton');
+      await testSubjects.click('app-menu-overflow-button');
       await testSubjects.click('openEditRuleFlyoutButton');
       await queryBar.setQuery('message:msg-1');
       await filterBar.addFilter({ field: 'message.keyword', operation: 'is', value: 'msg-1' });
@@ -691,7 +693,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       }
       const dataViewsElem = await testSubjects.find('euiSelectableList');
       const sourceDataViewOption = await dataViewsElem.findByCssSelector(
-        `[title="${SOURCE_DATA_VIEW}"]`
+        `[data-test-subj="dataView-${SOURCE_DATA_VIEW}"]`
       );
       await sourceDataViewOption.click();
 

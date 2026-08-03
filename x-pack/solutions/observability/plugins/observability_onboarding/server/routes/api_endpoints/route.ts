@@ -23,7 +23,10 @@ import {
   INDEX_PROMETHEUS_REMOTE_WRITE,
 } from '../../lib/api_key/privileges';
 import { ApiEndpointId } from '../../../common/api_endpoints';
-import { IS_MANAGED_OTLP_SERVICE_ENABLED } from '../../../common/feature_flags';
+import {
+  IS_MANAGED_OTLP_SERVICE_ENABLED,
+  IS_MANAGED_OTLP_SERVICE_PRW_ENDPOINT_ENABLED,
+} from '../../../common/feature_flags';
 
 export interface ApiEndpointsRouteResponse {
   elasticsearchUrl: string;
@@ -34,9 +37,35 @@ export interface ApiEndpointApiKeyResponse {
   encodedApiKey: string;
 }
 
+// ES-compatible bulk availability is based on managed ingest URL presence, not the legacy OTLP feature flag.
+export const hasManagedElasticsearchBulkEndpoint = (managedOtlpServiceUrl?: string): boolean =>
+  Boolean(managedOtlpServiceUrl?.trim());
+
+const VENDOR_ENDPOINT_IDS: readonly ApiEndpointId[] = [
+  ApiEndpointId.Supabase,
+  ApiEndpointId.Vercel,
+];
+
+// Vendor paths exist only on the managed OTLP collector. Reject key creation when it is unavailable.
+export function ensureVendorEndpointAvailable(
+  id: ApiEndpointId,
+  isManagedOtlpServiceAvailable: boolean
+): void {
+  if (VENDOR_ENDPOINT_IDS.includes(id) && !isManagedOtlpServiceAvailable) {
+    throw Boom.badRequest(
+      `The ${id} endpoint requires the managed OTLP service, which is not available on this deployment.`
+    );
+  }
+}
+
 function hasRequiredPrivileges(
   id: ApiEndpointId,
-  { isManagedOtlpServiceAvailable, isServerless }: ApiKeyFactoryContext,
+  {
+    isManagedOtlpServiceAvailable,
+    isServerless,
+    managedOtlpPrwEndpointEnabled,
+    isManagedElasticsearchBulkEndpointAvailable,
+  }: ApiKeyFactoryContext,
   esClient: ElasticsearchClient
 ): Promise<boolean> {
   switch (id) {
@@ -45,11 +74,16 @@ function hasRequiredPrivileges(
         ? hasApiKeyPrivileges(esClient, { application: [APM_EVENT_WRITE_APPLICATION] })
         : hasApiKeyPrivileges(esClient, { index: [INDEX_OTLP_LOGS_METRICS_AND_TRACES] });
     case ApiEndpointId.Prometheus:
-      return isServerless
+      return isServerless || managedOtlpPrwEndpointEnabled
         ? hasApiKeyPrivileges(esClient, { application: [APM_EVENT_WRITE_APPLICATION] })
         : hasApiKeyPrivileges(esClient, { index: [INDEX_PROMETHEUS_REMOTE_WRITE] });
     case ApiEndpointId.Elasticsearch:
-      return hasLogMonitoringPrivileges(esClient, true);
+      return isManagedElasticsearchBulkEndpointAvailable
+        ? hasApiKeyPrivileges(esClient, { application: [APM_EVENT_WRITE_APPLICATION] })
+        : hasLogMonitoringPrivileges(esClient, true);
+    case ApiEndpointId.Supabase:
+    case ApiEndpointId.Vercel:
+      return hasApiKeyPrivileges(esClient, { application: [APM_EVENT_WRITE_APPLICATION] });
   }
 }
 
@@ -90,6 +124,8 @@ const createApiKeyRoute = createObservabilityOnboardingServerRoute({
         [ApiEndpointId.Prometheus]: null,
         [ApiEndpointId.OpenTelemetry]: null,
         [ApiEndpointId.Elasticsearch]: null,
+        [ApiEndpointId.Supabase]: null,
+        [ApiEndpointId.Vercel]: null,
       }),
     }),
   }),
@@ -113,10 +149,26 @@ const createApiKeyRoute = createObservabilityOnboardingServerRoute({
       isServerless ||
       ((await featureFlags.getBooleanValue(IS_MANAGED_OTLP_SERVICE_ENABLED, false)) &&
         Boolean(managedOtlpServiceUrl));
+    const managedOtlpPrwEndpointEnabled =
+      (await featureFlags.getBooleanValue(IS_MANAGED_OTLP_SERVICE_PRW_ENDPOINT_ENABLED, false)) &&
+      Boolean(managedOtlpServiceUrl);
+    const isManagedElasticsearchBulkEndpointAvailable =
+      hasManagedElasticsearchBulkEndpoint(managedOtlpServiceUrl);
+    const isVendorEndpointAvailable =
+      isManagedOtlpServiceAvailable && Boolean(managedOtlpServiceUrl);
+
+    const apiKeyFactoryContext: ApiKeyFactoryContext = {
+      isManagedOtlpServiceAvailable,
+      isServerless,
+      managedOtlpPrwEndpointEnabled,
+      isManagedElasticsearchBulkEndpointAvailable,
+    };
+
+    ensureVendorEndpointAvailable(id, isVendorEndpointAvailable);
 
     const hasPrivileges = await hasRequiredPrivileges(
       id,
-      { isManagedOtlpServiceAvailable, isServerless },
+      apiKeyFactoryContext,
       client.asCurrentUser
     );
     if (!hasPrivileges) {
@@ -125,7 +177,7 @@ const createApiKeyRoute = createObservabilityOnboardingServerRoute({
       );
     }
 
-    const createApiKey = resolveApiKeyFactory(id, { isManagedOtlpServiceAvailable, isServerless });
+    const createApiKey = resolveApiKeyFactory(id, apiKeyFactoryContext);
     const { encoded } = await createApiKey(client.asCurrentUser, `onboarding-${id}-api`);
 
     return { encodedApiKey: encoded };

@@ -25,7 +25,9 @@ import {
   ALERT_TAGGING_CONTEXT_MENU,
   ALERT_TAGGING_CONTEXT_MENU_ITEM,
   ALERT_TAGGING_UPDATE_BUTTON,
-  ALERTS_HISTOGRAM_LEGEND,
+  ALERTS_HISTOGRAM,
+  ALERTS_HISTOGRAM_LEGEND_BUTTON,
+  ALERTS_HISTOGRAM_SERIES,
   ALERTS_TABLE_ROW_LOADER,
   CELL_ADD_TO_TIMELINE_BUTTON,
   CELL_FILTER_IN_BUTTON,
@@ -394,8 +396,17 @@ export const openAnalyzerForFirstAlertInTimeline = () => {
   cy.get(OPEN_ANALYZER_BTN).first().click({ force: true });
 };
 
-export const clickAlertsHistogramLegend = () => {
-  cy.get(ALERTS_HISTOGRAM_LEGEND).click();
+export const clickAlertsHistogramLegend = (ruleName: string) => {
+  cy.get(ALERTS_HISTOGRAM).find(ALERTS_HISTOGRAM_SERIES).should('contain.text', ruleName);
+
+  recurse(
+    () => {
+      cy.get('body').type('{esc}');
+      cy.get(ALERTS_HISTOGRAM).contains(ruleName).realHover();
+      return cy.get(ALERTS_HISTOGRAM_LEGEND_BUTTON(ruleName));
+    },
+    ($el) => $el.is(':visible')
+  ).click();
 };
 
 export const clickAlertsHistogramLegendAddToTimeline = (ruleName: string) => {
@@ -454,9 +465,13 @@ export const showTopNAlertProperty = (propertySelector: string, rowIndex: number
 export const waitForAlerts = () => {
   waitForPageFilters();
   cy.get(REFRESH_BUTTON).should('not.have.attr', 'aria-label', 'Needs updating');
-  cy.waitForNetworkIdle('/internal/search/privateRuleRegistryAlertsSearchStrategy', 500);
-  cy.get(DATAGRID_CHANGES_IN_PROGRESS).should('not.be.true');
+  // `.should('not.be.true')` on a jQuery collection is always true (a jQuery object is
+  // never strictly `=== true`), so this used to be a silent no-op regardless of whether
+  // the data grid was mid-refresh. Assert on absence of the element instead so Cypress
+  // actually retries until the in-progress indicator is gone.
+  cy.get(DATAGRID_CHANGES_IN_PROGRESS).should('not.exist');
   cy.get(EVENT_CONTAINER_TABLE_LOADING).should('not.exist');
+  cy.waitForNetworkIdle('/internal/search/privateRuleRegistryAlertsSearchStrategy', 500);
 };
 
 export const scrollAlertTableColumnIntoView = (columnSelector: string) => {

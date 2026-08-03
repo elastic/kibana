@@ -19,3 +19,8 @@ export const DELETE_COMMENT_SUCCESS_TITLE = i18n.translate(
   'xpack.cases.attachments.comment.deleteSuccessToasterTitle',
   { defaultMessage: 'Deleted comment' }
 );
+
+export const REMOVED_COMMENT_LABEL_TITLE = i18n.translate(
+  'xpack.cases.attachments.comment.removedCommentLabelTitle',
+  { defaultMessage: 'removed comment' }
+);

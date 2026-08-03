@@ -38,6 +38,9 @@ export const transformBackfillParamToAdHocRun = (
     adHocRunSO: {
       apiKeyId: Buffer.from(rule.apiKey!, 'base64').toString().split(':')[0],
       apiKeyToUse: rule.apiKey!,
+      // Snapshot the rule's UIAM API key (when present) so the ad hoc task runner
+      // can authenticate the same way a regular rule run does in UIAM deployments.
+      ...(rule.uiamApiKey ? { uiamApiKey: rule.uiamApiKey } : {}),
       createdAt: new Date().toISOString(),
       duration: rule.schedule.interval,
       enabled: true,

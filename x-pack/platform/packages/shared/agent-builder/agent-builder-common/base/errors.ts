@@ -16,9 +16,11 @@ import type { HookExecutionMode, HookLifecycle } from '../hooks/lifecycle';
 export enum AgentBuilderErrorCode {
   internalError = 'internalError',
   badRequest = 'badRequest',
+  forbidden = 'forbidden',
   toolNotFound = 'toolNotFound',
   skillNotFound = 'skillNotFound',
   agentNotFound = 'agentNotFound',
+  agentUnavailable = 'agentUnavailable',
   conversationNotFound = 'conversationNotFound',
   pluginNotFound = 'pluginNotFound',
   agentExecutionError = 'agentExecutionError',
@@ -98,6 +100,28 @@ export const createBadRequestError = (
 };
 
 /**
+ * Represents a forbidden error (the caller lacks the required privileges).
+ */
+export type AgentBuilderForbiddenError = AgentBuilderError<AgentBuilderErrorCode.forbidden>;
+
+/**
+ * Checks if the given error is a {@link AgentBuilderForbiddenError}
+ */
+export const isForbiddenError = (err: unknown): err is AgentBuilderForbiddenError => {
+  return isAgentBuilderError(err) && err.code === AgentBuilderErrorCode.forbidden;
+};
+
+export const createForbiddenError = (
+  message: string,
+  meta: Record<string, any> = {}
+): AgentBuilderForbiddenError => {
+  return new AgentBuilderError(AgentBuilderErrorCode.forbidden, message, {
+    ...meta,
+    statusCode: 403,
+  });
+};
+
+/**
  * Error thrown when trying to retrieve or execute a tool not present or available in the current context.
  */
 export type AgentBuilderToolNotFoundError = AgentBuilderError<AgentBuilderErrorCode.toolNotFound>;
@@ -154,7 +178,7 @@ export const createSkillNotFoundError = ({
 };
 
 /**
- * Error thrown when trying to retrieve or execute a tool not present or available in the current context.
+ * Error thrown when trying to retrieve an agent not present in the current context.
  */
 export type AgentBuilderAgentNotFoundError = AgentBuilderError<AgentBuilderErrorCode.agentNotFound>;
 
@@ -178,6 +202,35 @@ export const createAgentNotFoundError = ({
     AgentBuilderErrorCode.agentNotFound,
     customMessage ?? `Agent ${agentId} not found`,
     { ...meta, agentId, statusCode: 404 }
+  );
+};
+
+/**
+ * Error thrown when trying to retrieve an agent that exists but is not currently available.
+ */
+export type AgentBuilderAgentUnavailableError =
+  AgentBuilderError<AgentBuilderErrorCode.agentUnavailable>;
+
+export const isAgentUnavailableError = (
+  err: unknown,
+  _agentId?: string
+): err is AgentBuilderAgentUnavailableError => {
+  return isAgentBuilderError(err) && err.code === AgentBuilderErrorCode.agentUnavailable;
+};
+
+export const createAgentUnavailableError = ({
+  agentId,
+  customMessage,
+  meta = {},
+}: {
+  agentId: string;
+  customMessage?: string;
+  meta?: Record<string, any>;
+}): AgentBuilderAgentUnavailableError => {
+  return new AgentBuilderError(
+    AgentBuilderErrorCode.agentUnavailable,
+    customMessage ?? `Agent ${agentId} is not available`,
+    { ...meta, agentId, statusCode: 400 }
   );
 };
 
@@ -382,9 +435,11 @@ export const isHooksExecutionError = (err: unknown): err is AgentBuilderHooksExe
 export const AgentBuilderErrorUtils = {
   isAgentBuilderError,
   isInternalError,
+  isForbiddenError,
   isToolNotFoundError,
   isSkillNotFoundError,
   isAgentNotFoundError,
+  isAgentUnavailableError,
   isConversationNotFoundError,
   isPluginNotFoundError,
   isWorkflowAbortedError,
@@ -392,9 +447,11 @@ export const AgentBuilderErrorUtils = {
   isAgentExecutionError,
   isContextLengthExceededAgentError,
   createInternalError,
+  createForbiddenError,
   createToolNotFoundError,
   createSkillNotFoundError,
   createAgentNotFoundError,
+  createAgentUnavailableError,
   createConversationNotFoundError,
   createPluginNotFoundError,
   createWorkflowAbortedError,

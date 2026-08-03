@@ -126,6 +126,17 @@ describe('esqlTabSchema', () => {
   it('rejects a classic data view reference used as an ES|QL tab', () => {
     expect(() => esqlTabSchema.validate(classicTabInput)).toThrow();
   });
+
+  it('accepts data table limits on ES|QL tabs', () => {
+    const validated = esqlTabSchema.validate({
+      ...esqlTabInput,
+      rows_per_page: 25,
+      sample_size: 500,
+    }) as DiscoverSessionEsqlTab;
+
+    expect(validated.rows_per_page).toBe(25);
+    expect(validated.sample_size).toBe(500);
+  });
 });
 
 describe('tabSchema', () => {

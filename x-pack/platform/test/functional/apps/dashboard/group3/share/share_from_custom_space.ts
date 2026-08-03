@@ -23,6 +23,11 @@ export default function sharingFromSpace({ getPageObjects, getService }: FtrProv
 
   const spaceId = 'another-space';
 
+  /**
+   * Purpose: Verify share URL contains space
+   *
+   * Migration: Replace with unit test
+   */
   describe('Dashboard Custom Space share', () => {
     before(async () => {
       await spacesService.create({

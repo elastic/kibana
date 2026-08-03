@@ -11,7 +11,6 @@ import moment from 'moment';
 import type { Locator, ScoutPage } from '@kbn/scout';
 import {
   EuiCodeBlockWrapper,
-  EuiComboBoxWrapper,
   EuiDataGridWrapper,
   EuiSuperSelectWrapper,
   KibanaCodeEditorWrapper,
@@ -35,6 +34,7 @@ export class StreamsApp {
   public readonly saveRoutingRuleButton;
   public readonly concatFieldInput;
   public readonly concatLiteralInput;
+  public readonly createStreamButton;
   public readonly createQueryStreamButton;
   public readonly childStreamTypeSelector;
   public readonly queryStreamFlyout;
@@ -47,26 +47,39 @@ export class StreamsApp {
   public readonly queryStreamDeletedSuccessToast;
   public readonly queryStreamCreateErrorToast;
   public readonly fetchMoreMatchingSamplesButton;
+  // Canvas
+  public readonly canvasTab;
+  public readonly canvasZoomControls;
+  public readonly canvasZoomIn;
+  public readonly canvasZoomOut;
+  public readonly canvasFitToScreen;
+  public readonly canvasMinimap;
+  public readonly canvasMinimapCollapse;
+  public readonly canvasMinimapExpand;
+  public readonly canvasToolbar;
+  public readonly canvasUndo;
+  public readonly canvasRedo;
+  public readonly canvasAddSource;
+  public readonly canvasAddDestination;
+  public readonly canvasContextMenu;
+  public readonly canvasContextMenuTidyUp;
+  // Streams layout
+  public readonly streamsLayoutSourcesPlaceholder;
+  public readonly streamsLayoutPipelinesPlaceholder;
+  public readonly streamsLayoutDestinationsPlaceholder;
 
   constructor(private readonly page: ScoutPage) {
-    this.processorFieldComboBox = new EuiComboBoxWrapper(
-      this.page,
+    this.processorFieldComboBox = this.page.components.comboBox(
       'streamsAppProcessorFieldSelectorComboFieldText'
     );
-    this.conditionEditorFieldComboBox = new EuiComboBoxWrapper(
-      this.page,
+    this.conditionEditorFieldComboBox = this.page.components.comboBox(
       'streamsAppConditionEditorFieldText'
     );
-    this.conditionEditorValueComboBox = new EuiComboBoxWrapper(
-      this.page,
+    this.conditionEditorValueComboBox = this.page.components.comboBox(
       'streamsAppConditionEditorValueText'
     );
-    this.processorTypeComboBox = new EuiComboBoxWrapper(
-      this.page,
-      'streamsAppProcessorTypeSelector'
-    );
-    this.dateProcessorFormatsComboBox = new EuiComboBoxWrapper(
-      this.page,
+    this.processorTypeComboBox = this.page.components.comboBox('streamsAppProcessorTypeSelector');
+    this.dateProcessorFormatsComboBox = this.page.components.comboBox(
       'streamsAppDateProcessorFormatsComboBox'
     );
     this.fieldTypeSuperSelect = new EuiSuperSelectWrapper(
@@ -86,6 +99,7 @@ export class StreamsApp {
     this.saveRoutingRuleButton = this.page.getByTestId('streamsAppStreamDetailRoutingSaveButton');
     this.concatFieldInput = new EuiSuperSelectWrapper(this.page, 'streamsAppConcatFieldInput');
     this.concatLiteralInput = this.page.getByTestId('streamsAppConcatLiteralInput');
+    this.createStreamButton = this.page.getByTestId('streamsAppCreateStreamButton');
     this.createQueryStreamButton = this.page.getByTestId('streamsAppCreateQueryStreamButton');
     this.childStreamTypeSelector = this.page.getByTestId('streamsAppChildStreamTypeSelector');
     this.queryStreamFlyout = this.page.getByTestId('streamsAppQueryStreamFlyout');
@@ -105,6 +119,32 @@ export class StreamsApp {
     this.queryStreamCreateErrorToast = this.page.getByText('Error creating query stream');
     this.fetchMoreMatchingSamplesButton = this.page.getByTestId(
       'streamsAppFetchMoreMatchingSamplesButton'
+    );
+    // Canvas locators
+    this.canvasTab = this.page.testSubj.locator('streamsCanvasTab');
+    this.canvasZoomControls = this.page.testSubj.locator('streamsCanvasZoomControls');
+    this.canvasZoomIn = this.page.testSubj.locator('streamsCanvasZoomIn');
+    this.canvasZoomOut = this.page.testSubj.locator('streamsCanvasZoomOut');
+    this.canvasFitToScreen = this.page.testSubj.locator('streamsCanvasFitToScreen');
+    this.canvasMinimap = this.page.testSubj.locator('streamsCanvasMinimap');
+    this.canvasMinimapCollapse = this.page.testSubj.locator('streamsCanvasMinimapCollapse');
+    this.canvasMinimapExpand = this.page.testSubj.locator('streamsCanvasMinimapExpand');
+    this.canvasToolbar = this.page.testSubj.locator('streamsCanvasToolbar');
+    this.canvasUndo = this.page.testSubj.locator('streamsCanvasUndo');
+    this.canvasRedo = this.page.testSubj.locator('streamsCanvasRedo');
+    this.canvasAddSource = this.page.testSubj.locator('streamsCanvasAddSource');
+    this.canvasAddDestination = this.page.testSubj.locator('streamsCanvasAddDestination');
+    this.canvasContextMenu = this.page.testSubj.locator('streamsCanvasContextMenu');
+    this.canvasContextMenuTidyUp = this.page.testSubj.locator('streamsCanvasContextMenuTidyUp');
+    // Streams layout locators
+    this.streamsLayoutSourcesPlaceholder = this.page.testSubj.locator(
+      'streamsLayoutSourcesPlaceholder'
+    );
+    this.streamsLayoutPipelinesPlaceholder = this.page.testSubj.locator(
+      'streamsLayoutPipelinesPlaceholder'
+    );
+    this.streamsLayoutDestinationsPlaceholder = this.page.testSubj.locator(
+      'streamsLayoutDestinationsPlaceholder'
     );
   }
 
@@ -144,12 +184,60 @@ export class StreamsApp {
     await this.gotoStreamManagementTab(streamName, 'schema');
   }
 
-  async gotoSignificantEventsTab(streamName: string) {
-    await this.gotoStreamManagementTab(streamName, 'significantEvents');
-  }
-
   async gotoAttachmentsTab(streamName: string) {
     await this.gotoStreamManagementTab(streamName, 'attachments');
+  }
+
+  async gotoStreamsLayout() {
+    await this.page.gotoApp('streams/new-experience');
+  }
+
+  async gotoStreamsLayoutTab(tabName: string) {
+    await this.page.gotoApp(`streams/new-experience/${tabName}`);
+  }
+
+  getStreamsLayoutTab(tabName: string) {
+    return this.page.testSubj.locator(`streamsLayoutTab-${tabName}`);
+  }
+
+  async clickStreamsLayoutTab(tabName: string) {
+    await this.getStreamsLayoutTab(tabName).click();
+  }
+
+  // Canvas utility methods
+  getCanvasSourceNode(streamName: string) {
+    return this.page.testSubj.locator('streamsCanvasSourceNode').filter({ hasText: streamName });
+  }
+
+  getCanvasDestinationNode(streamName: string) {
+    return this.page.testSubj
+      .locator('streamsCanvasDestinationNode')
+      .filter({ hasText: streamName });
+  }
+
+  getCanvasProcessingGlyph(streamName: string) {
+    return this.getCanvasDestinationNode(streamName).getByTestId('streamsCanvasProcessingGlyph');
+  }
+
+  getCanvasNodeByAriaLabel(ariaLabel: string) {
+    return this.page.locator(`.react-flow__node[aria-label="${ariaLabel}"]`);
+  }
+
+  async rightClickCanvasNode(node: Locator) {
+    await node.click({ button: 'right' });
+  }
+
+  async openCanvasPaneContextMenu() {
+    await this.page
+      .locator('.react-flow__pane')
+      .click({ button: 'right', position: { x: 5, y: 5 } });
+    await expect(this.canvasContextMenu).toBeVisible();
+  }
+
+  async tidyUpCanvasFromPane() {
+    await this.openCanvasPaneContextMenu();
+    await this.canvasContextMenuTidyUp.click();
+    await expect(this.canvasContextMenu).toHaveCount(0);
   }
 
   async clickStreamNameLink(streamName: string) {
@@ -168,11 +256,18 @@ export class StreamsApp {
     await this.page.getByTestId('breadcrumb first').click();
   }
 
-  async clickStreamsBreadcrumb() {
-    await this.page
-      .locator('a[data-test-subj^="breadcrumb"]')
-      .filter({ hasText: /^Streams$/ })
-      .click();
+  async backToStreamsMainPage() {
+    const backButton = this.page.testSubj.locator('appHeaderBack');
+    // Both the breadcrumb trail and the app header back button can be present at once, and each
+    // navigates to the Streams main page. Prefer the back button when it is rendered.
+    if (await backButton.isVisible()) {
+      await backButton.click();
+    } else {
+      await this.page
+        .locator('a[data-test-subj^="breadcrumb"]')
+        .filter({ hasText: /^Streams$/ })
+        .click();
+    }
     await this.expectStreamsTableVisible();
   }
 
@@ -348,10 +443,21 @@ export class StreamsApp {
   }
 
   // Streams header utility methods
+
+  /**
+   * The shared app header only renders the first two badges inline and collapses the rest into a
+   * "Show N more badges" overflow popover (overflow triggers at more than three badges). Call this
+   * from tests that drive a stream with enough badges to overflow (e.g. TSDB streams) so overflowed
+   * badges like the lifecycle badge become assertable.
+   */
+  async openBadgesOverflow() {
+    await this.page.testSubj.click('appHeaderBadgesOverflow');
+  }
+
   async verifyLifecycleBadge(streamName: string, expectedLabel: string) {
-    await expect(
-      this.page.locator(`[data-test-subj="lifecycleBadge-${streamName}"]`)
-    ).toContainText(expectedLabel);
+    await expect(this.page.testSubj.locator(`lifecycleBadge-${streamName}`)).toContainText(
+      expectedLabel
+    );
   }
 
   async verifyClassicBadge() {
@@ -380,6 +486,26 @@ export class StreamsApp {
   async switchToColumnsView() {
     // Draft streams fetch samples via ES|QL from the parent, which can be slow
     await this.page.getByTestId('streamsAppPreviewTableViewModeToggle').click({ timeout: 60_000 });
+  }
+
+  /**
+   * Draft-stream samples are fetched via ES|QL from the parent stream's `$.` view,
+   * which the server creates asynchronously. Until it propagates, the query fails with
+   * "Unknown index" and the data-source machine treats that as terminal (empty grid, no
+   * auto-retry), so the preview grid — and the view-mode toggle inside its toolbar — never
+   * render and any wait times out. Re-trigger the fetch via the refresh button until the
+   * grid appears, so a not-yet-propagated parent view is retried rather than fatally awaited.
+   */
+  async waitForDraftPreviewSamples() {
+    const grid = this.page.getByTestId('euiDataGridBody');
+    const refreshButton = this.page.getByRole('button', { name: 'Refresh data preview' });
+
+    await expect(async () => {
+      if (await grid.isVisible()) return;
+      // `click` auto-waits for the button to be enabled (i.e. not mid-load) before refetching.
+      await refreshButton.click({ timeout: 15_000 });
+      await expect(grid).toBeVisible({ timeout: 10_000 });
+    }).toPass({ timeout: 90_000 });
   }
 
   async saveRoutingRule() {
@@ -431,10 +557,10 @@ export class StreamsApp {
     operator?: string;
   }) {
     if (field) {
-      await this.conditionEditorFieldComboBox.setCustomSingleOption(field);
+      await this.conditionEditorFieldComboBox.setCustomSelectedOptions([field]);
     }
     if (value) {
-      await this.conditionEditorValueComboBox.setCustomSingleOption(value);
+      await this.conditionEditorValueComboBox.setCustomSelectedOptions([value]);
     }
     if (operator) {
       await this.page.getByTestId('streamsAppConditionEditorOperator').selectOption(operator);
@@ -730,15 +856,15 @@ export class StreamsApp {
   }
 
   async selectProcessorType(value: string) {
-    await this.processorTypeComboBox.selectSingleOption(value);
+    await this.processorTypeComboBox.setSelectedOptions([value]);
   }
 
   async fillProcessorFieldInput(value: string, options?: { isCustomValue: boolean }) {
     const isCustomValue = options?.isCustomValue || false;
     if (isCustomValue) {
-      return await this.processorFieldComboBox.setCustomSingleOption(value);
+      return await this.processorFieldComboBox.setCustomSelectedOptions([value]);
     }
-    await this.processorFieldComboBox.selectSingleOption(value);
+    await this.processorFieldComboBox.setSelectedOptions([value]);
   }
 
   async fillGrokPatternInput(value: string) {
@@ -764,11 +890,11 @@ export class StreamsApp {
   }
 
   async fillDateProcessorSourceFieldInput(value: string) {
-    await this.processorFieldComboBox.setCustomSingleOption(value);
+    await this.processorFieldComboBox.setCustomSelectedOptions([value]);
   }
 
   async fillDateProcessorFormatInput(value: string) {
-    await this.dateProcessorFormatsComboBox.setCustomMultiOption(value);
+    await this.dateProcessorFormatsComboBox.setCustomSelectedOptions([value]);
   }
 
   async fillDateProcessorTargetFieldInput(value: string) {
@@ -804,9 +930,9 @@ export class StreamsApp {
   }
 
   async fillCondition(field: string, operator: string, value: string) {
-    await this.conditionEditorFieldComboBox.setCustomSingleOption(field);
+    await this.conditionEditorFieldComboBox.setCustomSelectedOptions([field]);
     await this.page.getByTestId('streamsAppConditionEditorOperator').selectOption(operator);
-    await this.conditionEditorValueComboBox.setCustomSingleOption(value);
+    await this.conditionEditorValueComboBox.setCustomSelectedOptions([value]);
   }
 
   async removeProcessor(pos: number) {
@@ -1215,8 +1341,13 @@ export class StreamsApp {
 
   async selectAllAttachmentsInFlyout() {
     const flyoutTable = this.page.getByTestId('streamsAppAddAttachmentFlyoutAttachmentsTable');
-    // Click the header checkbox to select all
     await flyoutTable.locator('thead input[type="checkbox"]').click();
+  }
+
+  async selectAttachmentInFlyout(attachmentTitle: string) {
+    const flyoutTable = this.page.getByTestId('streamsAppAddAttachmentFlyoutAttachmentsTable');
+    const row = flyoutTable.getByRole('row', { name: attachmentTitle });
+    await row.locator('input[type="checkbox"]').click();
   }
 
   async clickAddToStreamButton() {
@@ -1321,7 +1452,17 @@ export class StreamsApp {
     await this.concatLiteralInput.fill(value);
   }
 
+  async openCreateStreamPopover() {
+    await this.createStreamButton.click();
+  }
+
+  async openStreamsSettings() {
+    await this.page.getByTestId('app-menu-overflow-button').click();
+    await this.page.getByTestId('streamsAppSettingsButton').click();
+  }
+
   async clickCreateQueryStreamButton() {
+    await this.openCreateStreamPopover();
     await this.createQueryStreamButton.click();
   }
 
@@ -1354,8 +1495,8 @@ export class StreamsApp {
   }
 
   async clickDeleteQueryStreamButton() {
-    await this.page.getByTestId('streamsAppStreamDetailActionsButton').click();
-    await this.page.getByTestId('deleteQueryStreamButton').click();
+    await this.page.testSubj.click('app-menu-overflow-button');
+    await this.page.testSubj.click('streamsDeleteStreamButton');
   }
 
   async fillDeleteQueryStreamModalInput(value: string) {

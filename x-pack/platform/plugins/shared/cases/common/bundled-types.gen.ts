@@ -393,6 +393,24 @@ export const CreateCaseRequest = lazySchema(() =>
       )
       .max(10)
       .optional(),
+    /**
+      * A case template to create the case from. Requires the `xpack.cases.templates.enabled` setting. The server applies the template's case defaults (severity, category, tags, assignees, settings, connector) and its field defaults into `extended_fields`; any value explicitly provided in the request wins over the template default. When `version` is omitted, the latest version of the template is resolved and pinned on the case. To discover a template's fields before creating a case, use the get case fields API (`GET /api/cases/fields`).
+
+      */
+    template: z
+      .object({
+        /**
+         * The template identifier. Retrieve template ids with `GET /api/cases/templates`.
+         */
+        id: z.string(),
+        /**
+      * The template version to apply. Omit to use (and pin) the latest version.
+
+      */
+        version: z.number().int().min(1).optional(),
+      })
+      .nullable()
+      .optional(),
   })
 );
 export type CreateCaseRequest = z.infer<typeof CreateCaseRequest>;
@@ -1101,6 +1119,190 @@ export const UpdateCaseConfigurationRequest = lazySchema(() =>
   })
 );
 export type UpdateCaseConfigurationRequest = z.infer<typeof UpdateCaseConfigurationRequest>;
+
+/**
+ * A case template (v2).
+ */
+export const TemplateV2Response = lazySchema(() =>
+  z.object({
+    /**
+     * The unique identifier of the template, shared across all versions.
+     */
+    templateId: z.string().max(36),
+    /**
+     * The display name of the template.
+     */
+    name: z.string().max(100),
+    /**
+     * The owning solution (e.g. cases, observability, securitySolution).
+     */
+    owner: z.string().max(50),
+    /**
+     * The parsed template definition.
+     */
+    definition: z.unknown(),
+    /**
+     * The raw YAML definition string.
+     */
+    definitionString: z.string().max(30000),
+    /**
+     * The version number of this template revision.
+     */
+    templateVersion: z.number().int(),
+    /**
+     * The date the template was soft-deleted, or null if active.
+     */
+    deletedAt: z.string().datetime().nullable(),
+    /**
+     * A human-readable description of the template.
+     */
+    description: z.string().max(30000).optional(),
+    tags: TemplateTags.optional(),
+    /**
+     * The username of the template author.
+     */
+    author: z.string().max(1000).optional(),
+    /**
+     * The number of times this template has been used to create a case.
+     */
+    usageCount: z.number().int().optional(),
+    /**
+     * The number of fields defined in the template.
+     */
+    fieldCount: z.number().int().optional(),
+    /**
+     * Metadata about each field defined in the template.
+     */
+    fieldDefinitions: z
+      .array(
+        z.object({
+          name: z.string().max(256),
+          label: z.string().max(256),
+          type: z.string().max(50),
+          control: z.string().max(50),
+        })
+      )
+      .optional(),
+    /**
+     * The date the template was last used to create a case.
+     */
+    lastUsedAt: z.string().datetime().optional(),
+    /**
+     * Whether this is the default template for its owner.
+     */
+    isDefault: z.boolean().optional(),
+    /**
+     * Whether this is the latest version of the template.
+     */
+    isLatest: z.boolean(),
+    /**
+     * Whether the template is enabled.
+     */
+    isEnabled: z.boolean().optional(),
+    /**
+     * The latest version number of this template.
+     */
+    latestVersion: z.number().int(),
+  })
+);
+export type TemplateV2Response = z.infer<typeof TemplateV2Response>;
+
+/**
+ * Response returned by the get all case templates API.
+ */
+export const GetCaseTemplatesResponse = lazySchema(() =>
+  z.object({
+    templates: z.array(
+      TemplateV2Response.merge(
+        z.object({
+          /**
+           * Whether the search query matched a field name in this template.
+           */
+          fieldSearchMatches: z.boolean(),
+        })
+      )
+    ),
+    /**
+     * The page number of the returned results.
+     */
+    page: z.number().int(),
+    /**
+     * The number of results per page.
+     */
+    perPage: z.number().int(),
+    /**
+     * The total number of templates matching the query.
+     */
+    total: z.number().int(),
+  })
+);
+export type GetCaseTemplatesResponse = z.infer<typeof GetCaseTemplatesResponse>;
+
+/**
+  * The fields a caller may apply to a case's `extended_fields`. When no template is in scope, this is the owner's global (library-wide) fields; when a template is applied, it also includes that template's fields. Migrated legacy custom fields appear here as `global` fields, so existing automations can look up the exact key to write.
+
+  */
+export const ApplicableFieldsResponse = lazySchema(() =>
+  z.object({
+    fields: z.array(
+      z.object({
+        /**
+      * The storage key to write in the case `extended_fields` map. Follows the `<field_name>_as_<storage_type>` convention (for example `priority_as_keyword`).
+
+      */
+        key: z.string(),
+        /**
+         * The field name as authored in the field definition.
+         */
+        name: z.string(),
+        /**
+         * The human-readable label. Falls back to `name` when no label is authored.
+         */
+        label: z.string(),
+        /**
+         * The storage type: `keyword`, `integer`, `long`, `boolean`, or `date`.
+         */
+        type: z.string(),
+        /**
+      * The UI control for the field, such as `INPUT_TEXT`, `INPUT_NUMBER`, `SELECT_BASIC`, `TOGGLE`, or `MARKDOWN`.
+
+      */
+        control: z.string(),
+        /**
+         * Whether a value must be supplied at write time.
+         */
+        required: z.boolean(),
+        /**
+         * Whether the field must be filled before the case can be closed.
+         */
+        requiredOnClose: z.boolean(),
+        /**
+      * When `true` the field is display-only (for example a `MARKDOWN` block): it is returned so the full form shape is visible, but it holds no value and its `key` cannot be written to `extended_fields`.
+
+      */
+        displayOnly: z.boolean(),
+        /**
+         * The allowed values for `SELECT_BASIC`, `RADIO_GROUP`, and `CHECKBOX_GROUP` fields.
+         */
+        options: z.array(z.string()).optional(),
+        /**
+         * The default value, as a string, when the field definition declares one.
+         */
+        defaultValue: z.string().optional(),
+        /**
+      * Where the field comes from: `global` for a library-wide (`isGlobal`) definition writable on any case, or `template` for a field contributed by the applied template.
+
+      */
+        source: z.enum(['global', 'template']),
+        /**
+         * Whether the field is a global (library-wide) definition.
+         */
+        isGlobal: z.boolean(),
+      })
+    ),
+  })
+);
+export type ApplicableFieldsResponse = z.infer<typeof ApplicableFieldsResponse>;
 
 /**
   * Case details returned by the get case API. The comments property is not included in the response. Use the find case comments API to retrieve comments. totalComment reflects the actual number of user comments.

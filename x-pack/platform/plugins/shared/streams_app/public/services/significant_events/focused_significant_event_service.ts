@@ -6,28 +6,30 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import type { SigEvent } from '@kbn/streams-schema';
+import type { SignificantEvent } from '@kbn/significant-events-schema';
 
 export class FocusedSignificantEventService {
-  private readonly focusedEventSubject$ = new BehaviorSubject<SigEvent | undefined>(undefined);
+  private readonly focusedEventSubject$ = new BehaviorSubject<SignificantEvent | undefined>(
+    undefined
+  );
 
   public readonly focusedEvent$ = this.focusedEventSubject$.asObservable();
 
-  public setFocusedEvent(event: SigEvent): void {
+  public setFocusedEvent(event: SignificantEvent): void {
     this.focusedEventSubject$.next(event);
   }
 
-  public clearFocusedEvent(discoverySlug?: string): void {
+  public clearFocusedEvent(eventId?: string): void {
     const focusedEvent = this.focusedEventSubject$.getValue();
 
-    if (discoverySlug && focusedEvent?.discovery_slug !== discoverySlug) {
+    if (eventId && focusedEvent?.event_id !== eventId) {
       return;
     }
 
     this.focusedEventSubject$.next(undefined);
   }
 
-  public getFocusedEvent(): SigEvent | undefined {
+  public getFocusedEvent(): SignificantEvent | undefined {
     return this.focusedEventSubject$.getValue();
   }
 }

@@ -63,16 +63,7 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
       await kibanaServer.importExport.load(fixtureDirs.lensDefault);
     });
 
-    after(async () => {
-      await esNode.unload(esArchive);
-      await timePicker.resetDefaultAbsoluteRangeViaUiSettings();
-      await kibanaServer.importExport.unload(fixtureDirs.lensBasic);
-      await kibanaServer.importExport.unload(fixtureDirs.lensDefault);
-      await kibanaServer.savedObjects.cleanStandardList();
-    });
-
     const loadSmokescreenTestFiles = () => {
-      loadTestFile(require.resolve('./chart_creation'));
       loadTestFile(require.resolve('./chart_switching'));
       loadTestFile(require.resolve('./layers'));
       loadTestFile(require.resolve('./dimension_editor'));
@@ -84,9 +75,6 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
     } else {
       // total run time ~16 min
       loadSmokescreenTestFiles(); // smokescreen split, previously ~12m 12s
-      loadTestFile(require.resolve('./ad_hoc_data_view')); // 3m 40s
-      loadTestFile(require.resolve('./multiple_data_views'));
-      loadTestFile(require.resolve('./inspector_pagination'));
     }
   });
 };

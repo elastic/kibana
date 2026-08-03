@@ -6,6 +6,7 @@
  */
 
 import type { z } from '@kbn/zod/v4';
+import { MAX_EXTENDED_FIELD_VALUE_BYTES } from '../../../constants';
 import { validateExtendedFields } from './validate_extended_fields';
 import type { FieldSchema } from './fields';
 import { FieldType } from './fields';
@@ -68,7 +69,89 @@ const makeUserPickerField = (overrides: Partial<FieldSchemaType> = {}): FieldSch
     ...overrides,
   } as FieldSchemaType);
 
+const makeToggleField = (overrides: Partial<FieldSchemaType> = {}): FieldSchemaType =>
+  ({
+    name: 'requires_escalation',
+    label: 'Requires escalation',
+    type: 'boolean',
+    control: FieldType.TOGGLE,
+    ...overrides,
+  } as FieldSchemaType);
+
+const makeMarkdownField = (overrides: Partial<FieldSchemaType> = {}): FieldSchemaType =>
+  ({
+    name: 'instructions',
+    label: 'Instructions',
+    type: 'keyword',
+    control: FieldType.MARKDOWN,
+    metadata: { content: 'Follow these steps.' },
+    ...overrides,
+  } as FieldSchemaType);
+
 describe('validateExtendedFields', () => {
+  describe('value size backstop', () => {
+    const valueBearingFieldCases: Array<[string, FieldSchemaType, string]> = [
+      ['INPUT_TEXT', makeInputTextField(), 'summary_as_keyword'],
+      ['TEXTAREA', makeTextareaField(), 'notes_as_keyword'],
+      ['INPUT_NUMBER', makeInputNumberField(), 'score_as_long'],
+      ['SELECT_BASIC', makeSelectField(), 'priority_as_keyword'],
+      ['CHECKBOX_GROUP', makeCheckboxGroupField(), 'systems_as_keyword'],
+      ['USER_PICKER', makeUserPickerField(), 'assignee_as_keyword'],
+      ['TOGGLE', makeToggleField(), 'requires_escalation_as_boolean'],
+    ];
+
+    it.each(valueBearingFieldCases)(
+      'reports an error when a %s value exceeds the maximum byte size',
+      (_control, field, key) => {
+        const errors = validateExtendedFields(
+          { [key]: 'a'.repeat(MAX_EXTENDED_FIELD_VALUE_BYTES + 1) },
+          [field]
+        );
+
+        expect(errors).toContain(
+          `Extended field "${key}" exceeds the maximum size of ${MAX_EXTENDED_FIELD_VALUE_BYTES} bytes`
+        );
+      }
+    );
+
+    it('accepts an ASCII field value exactly at the maximum byte size', () => {
+      const fields: FieldSchemaType[] = [makeTextareaField()];
+      const errors = validateExtendedFields(
+        { notes_as_keyword: 'a'.repeat(MAX_EXTENDED_FIELD_VALUE_BYTES) },
+        fields
+      );
+
+      expect(errors).not.toContain(
+        `Extended field "notes_as_keyword" exceeds the maximum size of ${MAX_EXTENDED_FIELD_VALUE_BYTES} bytes`
+      );
+    });
+
+    it('rejects a non-ASCII field value that exceeds the maximum byte size', () => {
+      const fields: FieldSchemaType[] = [makeTextareaField()];
+      const errors = validateExtendedFields(
+        { notes_as_keyword: '界'.repeat(Math.floor(MAX_EXTENDED_FIELD_VALUE_BYTES / 3) + 1) },
+        fields
+      );
+
+      expect(errors).toContain(
+        `Extended field "notes_as_keyword" exceeds the maximum size of ${MAX_EXTENDED_FIELD_VALUE_BYTES} bytes`
+      );
+    });
+
+    it('enforces the size backstop for an unknown key', () => {
+      const fields: FieldSchemaType[] = [makeInputTextField()];
+      const errors = validateExtendedFields(
+        { rogue_as_keyword: 'a'.repeat(MAX_EXTENDED_FIELD_VALUE_BYTES + 1) },
+        fields
+      );
+
+      expect(errors).toContain('Unknown extended field key: "rogue_as_keyword"');
+      expect(errors).toContain(
+        `Extended field "rogue_as_keyword" exceeds the maximum size of ${MAX_EXTENDED_FIELD_VALUE_BYTES} bytes`
+      );
+    });
+  });
+
   describe('valid payload', () => {
     it('returns empty array for valid payload', () => {
       const fields: FieldSchemaType[] = [makeInputTextField()];
@@ -126,8 +209,30 @@ describe('validateExtendedFields', () => {
     });
   });
 
+  describe('display-only (MARKDOWN) fields', () => {
+    it('does not enforce required on a display-only field', () => {
+      const fields: FieldSchemaType[] = [makeMarkdownField({ validation: { required: true } })];
+      const errors = validateExtendedFields({}, fields);
+      expect(errors).toEqual([]);
+    });
+
+    it('does not enforce required_on_close on a display-only field', () => {
+      const fields: FieldSchemaType[] = [
+        makeMarkdownField({ validation: { required_on_close: true } }),
+      ];
+      const errors = validateExtendedFields({}, fields, { onClose: true });
+      expect(errors).toEqual([]);
+    });
+
+    it('treats a value submitted for a display-only field as an unknown key', () => {
+      const fields: FieldSchemaType[] = [makeMarkdownField()];
+      const errors = validateExtendedFields({ instructions_as_keyword: 'value' }, fields);
+      expect(errors).toContain('Unknown extended field key: "instructions_as_keyword"');
+    });
+  });
+
   describe('required_on_close flag', () => {
-    it('does not report an error when required_on_close field is empty (not enforced at create/update time)', () => {
+    it('does not report an error when required_on_close field is empty (onClose not set)', () => {
       const fields: FieldSchemaType[] = [
         makeInputTextField({ validation: { required_on_close: true } }),
       ];
@@ -135,7 +240,7 @@ describe('validateExtendedFields', () => {
       expect(errors).toEqual([]);
     });
 
-    it('does not report an error when required_on_close field is an empty string', () => {
+    it('does not report an error when required_on_close field is an empty string (onClose not set)', () => {
       const fields: FieldSchemaType[] = [
         makeInputTextField({ validation: { required_on_close: true } }),
       ];
@@ -143,12 +248,80 @@ describe('validateExtendedFields', () => {
       expect(errors).toEqual([]);
     });
 
-    it('does not treat required_on_close as required even alongside required: false', () => {
+    it('does not treat required_on_close as required even alongside required: false (onClose not set)', () => {
       const fields: FieldSchemaType[] = [
         makeInputTextField({ validation: { required: false, required_on_close: true } }),
       ];
       const errors = validateExtendedFields({}, fields);
       expect(errors).toEqual([]);
+    });
+
+    it('reports error when required_on_close field is missing and onClose is true', () => {
+      const fields: FieldSchemaType[] = [
+        makeInputTextField({ validation: { required_on_close: true } }),
+      ];
+      // FAILURE SCENARIO: case is being closed but the required_on_close field was never filled
+      const errors = validateExtendedFields({}, fields, { onClose: true });
+      expect(errors).toContain('Field "Summary" is required');
+    });
+
+    it('reports error when required_on_close field is empty string and onClose is true', () => {
+      const fields: FieldSchemaType[] = [
+        makeInputTextField({ validation: { required_on_close: true } }),
+      ];
+      // FAILURE SCENARIO: field exists but was explicitly cleared before closing
+      const errors = validateExtendedFields({ summary_as_keyword: '' }, fields, { onClose: true });
+      expect(errors).toContain('Field "Summary" is required');
+    });
+
+    it('does not report error when required_on_close field has a value and onClose is true', () => {
+      const fields: FieldSchemaType[] = [
+        makeInputTextField({ validation: { required_on_close: true } }),
+      ];
+      const errors = validateExtendedFields({ summary_as_keyword: 'resolution notes' }, fields, {
+        onClose: true,
+      });
+      expect(errors).toEqual([]);
+    });
+
+    it('skips required_on_close for hidden fields when onClose is true', () => {
+      const fields: FieldSchemaType[] = [
+        makeInputTextField({ name: 'trigger', label: 'Trigger', type: 'keyword' }),
+        makeInputTextField({
+          name: 'summary',
+          label: 'Summary',
+          type: 'keyword',
+          display: {
+            show_when: { field: 'trigger', operator: 'eq', value: 'show_me' },
+          },
+          validation: { required_on_close: true },
+        }),
+      ];
+      // trigger is not 'show_me', so summary is hidden → skip required_on_close
+      const errors = validateExtendedFields({ trigger_as_keyword: 'other' }, fields, {
+        onClose: true,
+      });
+      expect(errors).toEqual([]);
+    });
+
+    it('enforces required_on_close for visible conditional fields when onClose is true', () => {
+      const fields: FieldSchemaType[] = [
+        makeInputTextField({ name: 'trigger', label: 'Trigger', type: 'keyword' }),
+        makeInputTextField({
+          name: 'summary',
+          label: 'Summary',
+          type: 'keyword',
+          display: {
+            show_when: { field: 'trigger', operator: 'eq', value: 'show_me' },
+          },
+          validation: { required_on_close: true },
+        }),
+      ];
+      // trigger equals 'show_me' → field is visible → required on close
+      const errors = validateExtendedFields({ trigger_as_keyword: 'show_me' }, fields, {
+        onClose: true,
+      });
+      expect(errors).toContain('Field "Summary" is required');
     });
   });
 
@@ -413,6 +586,26 @@ describe('validateExtendedFields', () => {
         fields
       );
       expect(errors).toEqual([]);
+    });
+  });
+
+  describe('TOGGLE validation', () => {
+    it('accepts true/false string values', () => {
+      const fields: FieldSchemaType[] = [makeToggleField()];
+
+      expect(validateExtendedFields({ requires_escalation_as_boolean: 'true' }, fields)).toEqual(
+        []
+      );
+      expect(validateExtendedFields({ requires_escalation_as_boolean: 'false' }, fields)).toEqual(
+        []
+      );
+    });
+
+    it('rejects values other than true/false', () => {
+      const fields: FieldSchemaType[] = [makeToggleField()];
+      const errors = validateExtendedFields({ requires_escalation_as_boolean: 'yes' }, fields);
+
+      expect(errors).toContain('Field "Requires escalation" must be either true or false');
     });
   });
 

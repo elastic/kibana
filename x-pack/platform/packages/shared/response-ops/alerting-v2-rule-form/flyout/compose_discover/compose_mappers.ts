@@ -18,13 +18,12 @@ import {
 } from '../../form/utils/state_transition_helpers';
 import { resolveRecoveryStrategy } from '../../form/utils/rule_request_mappers';
 import type { FormValues } from '../../form/types';
-import type { ComposeFormValues } from './compose_form_types';
 
 const DELAY_IMMEDIATE = 'immediate';
 const DELAY_BREACHES = 'breaches';
 const DELAY_DURATION = 'duration';
 
-const mapStateTransition = (formValues: ComposeFormValues) => {
+const mapStateTransition = (formValues: FormValues) => {
   const { kind, stateTransition } = formValues;
   if (kind !== 'alert') return undefined;
 
@@ -58,11 +57,16 @@ const mapStateTransition = (formValues: ComposeFormValues) => {
 };
 
 export const composeFormToCreateRequest = (
-  formValues: ComposeFormValues,
+  formValues: FormValues,
   builderType?: string
 ): CreateRuleData => {
   const artifacts = mapArtifacts(mergeArtifactsByType(formValues));
   const recoveryStrategy = resolveRecoveryStrategy(formValues);
+
+  const noDataStrategy =
+    formValues.kind === 'alert' && formValues.noDataStrategy
+      ? formValues.noDataStrategy
+      : undefined;
 
   return {
     kind: formValues.kind,
@@ -77,7 +81,7 @@ export const composeFormToCreateRequest = (
     schedule: { every: formValues.schedule.every, lookback: formValues.schedule.lookback },
     query: ruleQueryToApiQuery(formValues.query),
     ...(recoveryStrategy ? { recovery_strategy: recoveryStrategy } : {}),
-    ...(formValues.noDataStrategy ? { no_data_strategy: formValues.noDataStrategy } : {}),
+    ...(noDataStrategy ? { no_data_strategy: noDataStrategy } : {}),
     grouping: formValues.grouping?.fields?.length
       ? { fields: formValues.grouping.fields }
       : undefined,
@@ -87,7 +91,7 @@ export const composeFormToCreateRequest = (
 };
 
 export const composeFormToUpdateRequest = (
-  formValues: ComposeFormValues,
+  formValues: FormValues,
   builderType?: string
 ): UpdateRuleData => {
   const { kind, ...request } = composeFormToCreateRequest(formValues, builderType);
@@ -115,17 +119,17 @@ export const composeFormToUpdateRequest = (
 };
 
 // ---------------------------------------------------------------------------
-// API response → ComposeFormValues
+// API response → FormValues
 // ---------------------------------------------------------------------------
 
 /** Bridge YAML parse output into compose form values for the Discover flyout. */
-export const mapYamlFormValuesToComposeFormValues = (parsed: FormValues): ComposeFormValues => ({
+export const mapYamlFormValuesToComposeFormValues = (parsed: FormValues): FormValues => ({
   ...parsed,
   ...splitArtifactsByType(parsed.artifacts),
 });
 
-export const mapRuleToComposeFormValues = (rule: RuleResponse): ComposeFormValues => {
-  const stateTransition: ComposeFormValues['stateTransition'] = rule.state_transition
+export const mapRuleToComposeFormValues = (rule: RuleResponse): FormValues => {
+  const stateTransition: FormValues['stateTransition'] = rule.state_transition
     ? {
         pendingCount: rule.state_transition.pending_count ?? null,
         pendingTimeframe: rule.state_transition.pending_timeframe ?? null,
@@ -150,7 +154,7 @@ export const mapRuleToComposeFormValues = (rule: RuleResponse): ComposeFormValue
     },
     query: apiQueryToFormQuery(rule.query, rule.recovery_strategy),
     recoveryStrategy: rule.recovery_strategy ?? undefined,
-    noDataStrategy: rule.no_data_strategy ?? undefined,
+    noDataStrategy: rule.no_data_strategy ?? (rule.kind === 'alert' ? 'none' : undefined),
     ...(rule.grouping ? { grouping: { fields: rule.grouping.fields } } : {}),
     stateTransition,
     stateTransitionAlertDelayMode: deriveAlertDelayModeFromStateTransition(stateTransition),

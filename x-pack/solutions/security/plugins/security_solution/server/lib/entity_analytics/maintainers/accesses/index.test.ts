@@ -28,7 +28,7 @@ describe('accessesFrequentlyMaintainer', () => {
         state: {},
         taskStatus: 'started',
       },
-      abortController: new AbortController(),
+      signal: new AbortController().signal,
       logger: loggerMock.create(),
       fakeRequest: {} as KibanaRequest,
       esClient: {} as ElasticsearchClient,
@@ -62,6 +62,8 @@ describe('accessesFrequentlyMaintainer', () => {
           totalWritten: 8,
           totalNotFound: 0,
           totalWriteErrors: 0,
+          totalMetadataDocsApplied: 8,
+          totalDroppedTargets: 0,
           totalIterations: 15,
           truncated: false,
           lastRunTimestamp: '2026-05-21T00:00:00.000Z',
@@ -83,6 +85,7 @@ describe('accessesFrequentlyMaintainer', () => {
       applied: 8,
       droppedNotInStore: 0,
       failed: 0,
+      metadataDocsApplied: 8,
     });
 
     expect(payload.sources).toEqual([
@@ -118,6 +121,8 @@ describe('accessesFrequentlyMaintainer', () => {
           totalWritten: 0,
           totalNotFound: 0,
           totalWriteErrors: 0,
+          totalMetadataDocsApplied: 0,
+          totalDroppedTargets: 0,
           totalIterations: 2,
           truncated: false,
           lastRunTimestamp: '2026-05-21T00:00:00.000Z',
@@ -130,12 +135,12 @@ describe('accessesFrequentlyMaintainer', () => {
     expect(payload).not.toHaveProperty('breakdown');
   });
 
-  it('passes abortController to runRelationshipMaintainer', async () => {
+  it('passes signal to runRelationshipMaintainer', async () => {
     const telemetry = makeTelemetry();
     const ac = new AbortController();
     const ctx = makeContext({
       telemetry: telemetry as unknown as Ctx['telemetry'],
-      abortController: ac,
+      signal: ac.signal,
     });
 
     const spy = jest.spyOn(engineModule, 'runRelationshipMaintainer').mockResolvedValue({
@@ -144,6 +149,8 @@ describe('accessesFrequentlyMaintainer', () => {
       totalWritten: 0,
       totalNotFound: 0,
       totalWriteErrors: 0,
+      totalMetadataDocsApplied: 0,
+      totalDroppedTargets: 0,
       totalIterations: 1,
       truncated: false,
       lastRunTimestamp: '2026-05-21T00:00:00.000Z',
@@ -151,6 +158,6 @@ describe('accessesFrequentlyMaintainer', () => {
 
     await accessesFrequentlyMaintainer.run(ctx);
 
-    expect(spy).toHaveBeenCalledWith(expect.objectContaining({ abortController: ac }));
+    expect(spy).toHaveBeenCalledWith(expect.objectContaining({ signal: ac.signal }));
   });
 });

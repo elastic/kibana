@@ -8,6 +8,7 @@
  */
 
 import type { Meta, StoryObj } from '@storybook/react';
+import moment from 'moment';
 import React from 'react';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { ExecutionStatus } from '@kbn/workflows';
@@ -40,6 +41,18 @@ export const Completed: Story = {
     startedAt: new Date(),
     executedByProfile,
     showExecutor: true,
+    triggeredBy: 'manual',
+  },
+};
+
+// Regression story for elastic/kibana#275866: a completed execution that finished
+// a few days ago but crosses the calendar-month boundary. Before the fix this
+// rendered "1 month ago"; after, "N days ago" / "N weeks ago".
+export const CompletedRecentPrevMonth: Story = {
+  args: {
+    status: ExecutionStatus.COMPLETED,
+    startedAt: moment().startOf('month').subtract(6, 'days').toDate(),
+    executedBy: 'john.doe@example.com',
     triggeredBy: 'manual',
   },
 };

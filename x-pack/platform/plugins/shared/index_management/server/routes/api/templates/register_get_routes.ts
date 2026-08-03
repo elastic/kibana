@@ -17,6 +17,7 @@ import {
 import { getCloudManagedTemplatePrefix } from '../../../lib/get_managed_templates';
 import type { RouteDependencies } from '../../../types';
 import { addBasePath } from '..';
+import { getTemplateDataStreamOptions } from './lib';
 
 export function registerGetAllRoute({ router, config, lib: { handleEsError } }: RouteDependencies) {
   router.get(
@@ -127,13 +128,27 @@ export function registerGetOneRoute({ router, config, lib: { handleEsError } }: 
             await client.asCurrentUser.indices.getIndexTemplate({ name });
 
           if (indexTemplates.length > 0) {
+            const dataStreamOptions = await getTemplateDataStreamOptions({ name, client });
+            const deserialized = deserializeTemplate(
+              // @ts-expect-error TemplateSerialized.index_patterns not compatible with IndicesIndexTemplate.index_patterns
+              { ...indexTemplates[0].index_template, name },
+              cloudManagedTemplatePrefix,
+              isLogsdbEnabled
+            );
+
+            const nextTemplate =
+              dataStreamOptions !== undefined
+                ? {
+                    ...(deserialized.template ?? {}),
+                    data_stream_options: dataStreamOptions,
+                  }
+                : deserialized.template;
+
             return response.ok({
-              body: deserializeTemplate(
-                // @ts-expect-error TemplateSerialized.index_patterns not compatible with IndicesIndexTemplate.index_patterns
-                { ...indexTemplates[0].index_template, name },
-                cloudManagedTemplatePrefix,
-                isLogsdbEnabled
-              ),
+              body: {
+                ...deserialized,
+                ...(nextTemplate ? { template: nextTemplate } : {}),
+              },
             });
           }
         }

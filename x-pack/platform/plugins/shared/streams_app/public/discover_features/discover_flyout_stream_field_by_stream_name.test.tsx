@@ -84,4 +84,28 @@ describe('DiscoverFlyoutStreamFieldByStreamName', () => {
 
     expect(screen.queryByRole('link')).toBeNull();
   });
+
+  it('renders a CCS-qualified name as annotated non-clickable text without hitting any endpoint', async () => {
+    const fetch = jest.fn();
+    const streamsRepositoryClient = { fetch } as unknown as StreamsRepositoryClient;
+    const locator = { getRedirectUrl: jest.fn() } as unknown as StreamsAppLocator;
+
+    renderWithI18n(
+      <DiscoverFlyoutStreamFieldByStreamName
+        streamName="remote_cluster:metrics-activemq.broker-default"
+        streamsRepositoryClient={streamsRepositoryClient}
+        locator={locator}
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText(/metrics-activemq\.broker-default/)).toBeInTheDocument();
+    });
+
+    // The remote cluster is surfaced as an annotation next to the clean stream name.
+    expect(screen.getByText(/\(Remote cluster: remote_cluster\)/)).toBeInTheDocument();
+    // Remote streams cannot be linked locally, and no local resolution is attempted.
+    expect(screen.queryByRole('link')).toBeNull();
+    expect(fetch).not.toHaveBeenCalled();
+  });
 });

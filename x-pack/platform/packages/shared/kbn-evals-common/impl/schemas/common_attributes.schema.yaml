@@ -32,6 +32,16 @@ components:
         experiment_name:
           type: string
           maxLength: 256
+        space_ids:
+          type: array
+          maxItems: 100
+          items:
+            type: string
+            maxLength: 256
+          nullable: true
+          description: >-
+            Spaces this score belongs to. Absent on documents created before
+            space-awareness was introduced (those are treated as the default space).
         example:
           $ref: '#/components/schemas/ExampleInfo'
         task:
@@ -197,6 +207,7 @@ components:
         example_count:
           type: integer
           minimum: 0
+          default: 0
           description: Number of unique examples evaluated in this dataset
         stats:
           type: object

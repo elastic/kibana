@@ -93,6 +93,10 @@ export const defineIndexThresholdRule = async (
   name: string,
   indexName: string = THRESHOLD_TEST_INDEX
 ) => {
+  // Wait for the rules app to finish its (potentially slow, cold) client-side
+  // bootstrap before the first interaction: gotoApp only resolves on the `load`
+  // event, so the button can be absent when the default 10s click timeout fires.
+  await expect(page.testSubj.locator('createRuleButton')).toBeVisible({ timeout: 30_000 });
   await page.testSubj.click('createRuleButton');
   await page.testSubj.locator('ruleTypeModal').waitFor({ state: 'visible' });
   await page.testSubj.click('.index-threshold-SelectOption');
@@ -112,7 +116,7 @@ export const defineIndexThresholdRule = async (
   await indexCombo
     .locator('[data-test-subj="comboBoxSearchInput"]')
     .pressSequentially(indexName.slice(0, -1), { delay: 50 });
-  const indexOption = page.locator(`.euiComboBoxOption[title="${indexName}"]`);
+  const indexOption = page.testSubj.locator(`thresholdIndexOption-${indexName}`);
   await indexOption.waitFor({ state: 'visible', timeout: 30000 });
   await indexOption.click();
 

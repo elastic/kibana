@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useEuiTheme } from '@elastic/eui';
 import { SecuritySolutionPageWrapper } from '../../../../common/components/page_wrapper';
 import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 import { SecurityPageName } from '../../../../app/types';
+import { useKibana } from '../../../../common/lib/kibana';
+import { RuleChangesHistoryEventTypes } from '../../../../common/lib/telemetry/events/rule_changes_history/types';
 import { useRuleWithFallback } from '../../../rule_management/logic/use_rule_with_fallback';
 import { RuleChangesHistory } from '../../components/changes_history';
 import { RuleChangesHistoryPageHeader } from './rule_change_history_page_header';
@@ -19,6 +21,11 @@ export const RuleChangesHistoryPage = memo(function RuleChangesHistoryPage(): JS
   const { ruleId } = useParams<{ ruleId: string }>();
   const { rule } = useRuleWithFallback(ruleId);
   const { euiTheme } = useEuiTheme();
+  const { telemetry } = useKibana().services;
+
+  useEffect(() => {
+    telemetry.reportEvent(RuleChangesHistoryEventTypes.ChangesHistoryViewed, {});
+  }, [telemetry, ruleId]);
 
   return (
     <>
@@ -30,7 +37,10 @@ export const RuleChangesHistoryPage = memo(function RuleChangesHistoryPage(): JS
           overflow: 'hidden',
         }}
       >
-        <RuleChangesHistory ruleId={ruleId} header={<RuleChangesHistoryPageHeader rule={rule} />} />
+        <RuleChangesHistory
+          ruleId={ruleId}
+          header={<RuleChangesHistoryPageHeader ruleId={ruleId} rule={rule} />}
+        />
       </SecuritySolutionPageWrapper>
       {/* We can't use SecurityPageName.rulesChangesHistory here for
           deepLinkId as deep linking doesn't support path parameters. */}

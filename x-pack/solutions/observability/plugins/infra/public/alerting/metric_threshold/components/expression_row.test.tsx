@@ -140,6 +140,21 @@ describe('ExpressionRow', () => {
     expect(helpText).toMatchSnapshot();
   });
 
+  it('should display "(severity: critical)" on the alert threshold when a warning threshold is set', async () => {
+    const expression = {
+      metric: 'system.load.1',
+      comparator: COMPARATORS.GREATER_THAN,
+      threshold: [0.5],
+      timeSize: 1,
+      timeUnit: 'm',
+      aggType: 'avg',
+      warningComparator: COMPARATORS.GREATER_THAN,
+      warningThreshold: [0.25],
+    };
+    const { wrapper } = await setup(expression as MetricExpression);
+    expect(wrapper.text()).toContain('(severity: critical)');
+  });
+
   it('should include inclusive range comparators in threshold options', async () => {
     const expression = {
       metric: 'system.load.1',

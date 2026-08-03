@@ -120,6 +120,14 @@ interface AppMenuItemBase {
    * Hides the item at the specified responsive breakpoints.
    * */
   hidden?: EuiHideForProps['sizes'];
+  /**
+   * Renders the item in a "pressed" visual state, for toggle-style buttons whose action
+   * opens/closes a paired UI (e.g. a side panel). When the item is displayed inline it uses
+   * `aria-pressed`; when it collapses into the overflow "More" popover the pressed state is
+   * shown with a highlighted background.
+   * Ignored for items with sub-items — those already reflect popover-open state.
+   */
+  isSelected?: boolean;
 }
 
 type AppMenuLinkItem = AppMenuItemBase & {
@@ -212,9 +220,10 @@ export type AppMenuItemCommon = AppMenuButtonItem | AppMenuItemWithPopover | App
 
 type AppMenuItemTypeBase = AppMenuItemCommon & {
   /**
-   * Order of the item in the menu. Lower numbers appear first.
+   * Order of the item in the menu. Lower numbers appear first. Defaults to 0.
+   * Items with the same order preserve their array order.
    */
-  order: number;
+  order?: number;
   /**
    * Adds a separator line above or below the item when rendered inside a popover menu.
    * Ignored for top-level, non-popover items.
@@ -278,6 +287,8 @@ export interface AppMenuSwitch {
   checked: boolean;
   onChange: (checked: boolean) => void;
   disabled?: boolean;
+  tooltipContent?: string | (() => string | undefined);
+  tooltipTitle?: string | (() => string | undefined);
   'data-test-subj'?: string;
 }
 

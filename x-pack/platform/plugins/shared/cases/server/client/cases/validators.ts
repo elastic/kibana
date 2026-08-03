@@ -7,7 +7,9 @@
 
 import { differenceWith, intersectionWith, isEmpty } from 'lodash';
 import Boom from '@hapi/boom';
+import type { Logger } from '@kbn/core/server';
 import type { CustomFieldsConfiguration } from '../../../common/types/domain';
+import { CaseStatuses } from '../../../common/types/domain';
 import type {
   CasePatchRequest,
   CaseRequestCustomFields,
@@ -23,7 +25,10 @@ import type { FieldDefinitionsService } from '../../services/field_definitions';
 import { parseTemplate } from '../../routes/api/templates/parse_template';
 import { validateExtendedFields } from '../../../common/types/domain/template/validate_extended_fields';
 import { parseFieldDefinitionsToInlineFields, getFieldSnakeKey } from '../../../common/utils';
+import { resolveTemplateFields } from '../../../common/utils/template_fields';
 import type { InlineField } from '../../../common/types/domain/template/fields';
+import { isDisplayOnlyField, FieldType } from '../../../common/types/domain/template/fields';
+import { evaluateCondition } from '../../../common/types/domain/template/evaluate_conditions';
 
 interface CustomFieldValidationParams {
   requestCustomFields?: CaseRequestCustomFields;
@@ -204,14 +209,25 @@ export const validateCaseExtendedFields = async ({
   templateId,
   globalFields,
   templatesService,
+  fieldDefinitionsService,
+  owner,
   partial = false,
+  preResolvedTemplateFields,
 }: {
   extendedFields: Record<string, string>;
   templateId: string | null | undefined;
   globalFields: InlineField[];
   templatesService: TemplatesService;
+  fieldDefinitionsService: FieldDefinitionsService;
+  owner: string;
   /** Pass `true` for update paths where only a subset of fields may be present. */
   partial?: boolean;
+  /**
+   * The template's already-resolved inline fields, when the caller fetched and parsed the
+   * template earlier in the same request (e.g. server-side template expansion on create) —
+   * skips a duplicate SO fetch + parse.
+   */
+  preResolvedTemplateFields?: InlineField[];
 }): Promise<void> => {
   const globalKeySet = new Set(globalFields.map((f) => getFieldSnakeKey(f.name, f.type)));
 
@@ -233,39 +249,59 @@ export const validateCaseExtendedFields = async ({
     return;
   }
 
-  const templateSO = await templatesService.getTemplate(templateId);
-  if (!templateSO) {
-    throw Boom.badRequest(`Template ${templateId} not found`);
-  }
-  let parsedTemplate;
-  try {
-    parsedTemplate = parseTemplate(templateSO.attributes);
-  } catch (err) {
-    throw Boom.badRequest(`Template ${templateId} has an invalid definition`);
+  let resolvedTemplateFields = preResolvedTemplateFields;
+
+  if (resolvedTemplateFields === undefined) {
+    const templateSO = await templatesService.getTemplate(templateId, undefined, {
+      includeDeleted: true,
+    });
+    if (!templateSO) {
+      throw Boom.badRequest(`Template ${templateId} not found`);
+    }
+    let parsedTemplate;
+    try {
+      parsedTemplate = parseTemplate(templateSO.attributes);
+    } catch (err) {
+      throw Boom.badRequest(`Template ${templateId} has an invalid definition`);
+    }
+
+    // Resolve $ref entries in the template definition against the field library so
+    // that keys from library-referenced fields are recognised during validation.
+    const { fieldDefinitions } = await fieldDefinitionsService.getFieldDefinitions(owner);
+    resolvedTemplateFields = resolveTemplateFields(
+      parsedTemplate.definition.fields,
+      fieldDefinitions
+    );
   }
 
-  // Validate template-specific keys against the template definition.
+  // Validate template-specific keys against the resolved template fields. On a storage-key
+  // collision the global definition is authoritative (see resolveApplicableFields), so fields
+  // the template `$ref`s from the global library are excluded here — their values live under
+  // global keys and are validated in the global pass below. Without this exclusion a required
+  // global field referenced by the template is checked against an always-absent value and
+  // wrongly fails as "required".
   const templateOnlyFields = Object.fromEntries(
     Object.entries(extendedFields).filter(([k]) => !globalKeySet.has(k))
   );
-  const templateErrors = validateExtendedFields(
-    templateOnlyFields,
-    parsedTemplate.definition.fields,
-    { partial }
+  const templateNonGlobalFields = resolvedTemplateFields.filter(
+    (f) => !globalKeySet.has(getFieldSnakeKey(f.name, f.type))
   );
+  const templateErrors = validateExtendedFields(templateOnlyFields, templateNonGlobalFields, {
+    partial,
+  });
   if (templateErrors.length) {
     throw Boom.badRequest(`Invalid extended_fields: ${templateErrors.join('; ')}`);
   }
 
-  // Also validate global-key VALUES against their own definitions.
+  // Also validate global-key VALUES against their own definitions. Runs even when the request
+  // carries no global keys so that non-partial (create) requests still enforce required global
+  // fields — the template pass above no longer covers the ones the template `$ref`s.
   const globalOnlyFields = Object.fromEntries(
     Object.entries(extendedFields).filter(([k]) => globalKeySet.has(k))
   );
-  if (Object.keys(globalOnlyFields).length > 0) {
-    const globalErrors = validateExtendedFields(globalOnlyFields, globalFields, { partial });
-    if (globalErrors.length) {
-      throw Boom.badRequest(`Invalid extended_fields: ${globalErrors.join('; ')}`);
-    }
+  const globalErrors = validateExtendedFields(globalOnlyFields, globalFields, { partial });
+  if (globalErrors.length) {
+    throw Boom.badRequest(`Invalid extended_fields: ${globalErrors.join('; ')}`);
   }
 };
 
@@ -273,11 +309,13 @@ export const validateExtendedFieldsInRequest = async ({
   updateReq,
   originalCase,
   templatesService,
+  fieldDefinitionsService,
   globalFields,
 }: {
   updateReq: CasePatchRequest;
   originalCase: CaseSavedObjectTransformed;
   templatesService: TemplatesService;
+  fieldDefinitionsService: FieldDefinitionsService;
   globalFields: InlineField[];
 }): Promise<void> => {
   if (!updateReq.extended_fields) return;
@@ -293,8 +331,138 @@ export const validateExtendedFieldsInRequest = async ({
     templateId,
     globalFields,
     templatesService,
+    fieldDefinitionsService,
+    owner: originalCase.attributes.owner,
     partial: true,
   });
+};
+
+/**
+ * Fetches and parses a template's inline fields for use in close-time validation.
+ * Returns [] if the template is not found or its definition is unparseable.
+ * Callers in bulk operations should pre-resolve templates by ID+version to avoid N SO fetches.
+ *
+ * Pass `templateVersion` to pin validation to the version the case was created with, preventing
+ * a later template edit (adding a required_on_close field) from blocking closure of older cases.
+ * When omitted, falls back to the latest version.
+ */
+export const resolveTemplateFieldsForClose = async ({
+  templateId,
+  templateVersion,
+  templatesService,
+  fieldDefinitionsService,
+  logger,
+}: {
+  templateId: string;
+  templateVersion?: number;
+  templatesService: TemplatesService;
+  fieldDefinitionsService: FieldDefinitionsService;
+  logger: Logger;
+}): Promise<InlineField[]> => {
+  const templateSO = await templatesService.getTemplate(
+    templateId,
+    templateVersion != null ? String(templateVersion) : undefined,
+    { includeDeleted: true }
+  );
+  if (!templateSO) {
+    return [];
+  }
+  try {
+    const parsedTemplate = parseTemplate(templateSO.attributes);
+    const { fieldDefinitions } = await fieldDefinitionsService.getFieldDefinitions(
+      templateSO.attributes.owner
+    );
+    return resolveTemplateFields(parsedTemplate.definition.fields, fieldDefinitions);
+  } catch (err) {
+    logger.warn(
+      `Failed to parse template "${templateId}" definition during close validation — skipping template field enforcement: ${err}`
+    );
+    return [];
+  }
+};
+
+/**
+ * Validates that all `required_on_close` fields are filled when a case transitions to closed.
+ * Operates on the merged extended_fields (existing SO state + request updates).
+ * Only checks fields with `required_on_close: true` — regular required fields are a write-time
+ * concern and are not re-validated here. Orphaned keys from old templates are silently ignored.
+ *
+ * Template fields must be pre-resolved by the caller (via resolveTemplateFieldsForClose) so that
+ * bulk operations can deduplicate SO fetches across cases sharing the same template.
+ *
+ * NOTE: We intentionally do not delegate to the common validateExtendedFields({ onClose: true })
+ * here, even though that option was added in the same PR, because:
+ *   1. The common function is designed for client-side real-time preview (no SO access; caller
+ *      provides a flat extendedFields map). Here we operate on pre-merged SO + request state.
+ *   2. This implementation passes fieldControlMap to evaluateCondition for correct
+ *      CHECKBOX_GROUP / USER_PICKER show_when evaluation — the common function omits it
+ *      (pre-existing gap). If the common function gains fieldControlMap support, this can
+ *      be revisited.
+ */
+export const validateExtendedFieldsOnClose = ({
+  updateReq,
+  originalCase,
+  templateFields,
+  globalFields,
+}: {
+  updateReq: CasePatchRequest;
+  originalCase: CaseSavedObjectTransformed;
+  templateFields: InlineField[];
+  globalFields: InlineField[];
+}): void => {
+  if (
+    updateReq.status !== CaseStatuses.closed ||
+    originalCase.attributes.status === CaseStatuses.closed
+  ) {
+    return;
+  }
+
+  const mergedExtendedFields: Record<string, string> = {
+    ...(originalCase.attributes.extended_fields ?? {}),
+    ...(updateReq.extended_fields ?? {}),
+  };
+
+  const allFields = [...globalFields, ...templateFields];
+
+  // Build helper maps for condition evaluation (show_when).
+  const fieldValues: Record<string, string | undefined> = {};
+  const fieldTypeMap: Record<string, string> = {};
+  const fieldControlMap: Record<string, string> = {};
+  for (const field of allFields) {
+    fieldValues[field.name] = mergedExtendedFields[getFieldSnakeKey(field.name, field.type)];
+    fieldTypeMap[field.name] = field.type;
+    fieldControlMap[field.name] = field.control;
+  }
+
+  const isFieldVisible = (field: InlineField): boolean =>
+    field.display?.show_when == null ||
+    evaluateCondition(field.display.show_when, fieldValues, fieldTypeMap, fieldControlMap);
+
+  const isFieldEmpty = (field: InlineField): boolean => {
+    const value = fieldValues[field.name];
+    const isArrayField =
+      field.control === FieldType.CHECKBOX_GROUP || field.control === FieldType.USER_PICKER;
+    return (
+      value === undefined || value === null || value === '' || (isArrayField && value === '[]')
+    );
+  };
+
+  const errors = allFields
+    .filter(
+      (field) =>
+        // Display-only fields (e.g. MARKDOWN) hold no value and can never satisfy a required check.
+        !isDisplayOnlyField(field) &&
+        field.validation?.required_on_close === true &&
+        isFieldVisible(field) &&
+        isFieldEmpty(field)
+    )
+    .map((field) => `Field "${field.label ?? field.name}" is required`);
+
+  if (errors.length > 0) {
+    throw Boom.badRequest(
+      `Cannot close case ${updateReq.id}, required fields must be filled: ${errors.join('; ')}`
+    );
+  }
 };
 
 export const validateSearchCasesCustomFields = ({

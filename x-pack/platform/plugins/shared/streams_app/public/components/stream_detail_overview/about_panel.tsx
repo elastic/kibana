@@ -93,7 +93,6 @@ export function AboutPanel() {
         await updateStream(
           Streams.all.UpsertRequest.parse({
             dashboards: definition.dashboards,
-            queries: definition.queries,
             rules: definition.rules,
             stream: { ...stream, description: newDescription },
           })
@@ -129,17 +128,6 @@ export function AboutPanel() {
       node.focus();
       node.setSelectionRange(node.value.length, node.value.length);
     }
-  }, [isEditing]);
-
-  useEffect(() => {
-    const handleKeyup = (e: KeyboardEvent) => {
-      if (!isEditing) return;
-      if (e.key === 'Escape') {
-        setIsEditing(false);
-      }
-    };
-    window.addEventListener('keyup', handleKeyup);
-    return () => window.removeEventListener('keyup', handleKeyup);
   }, [isEditing]);
 
   return (
@@ -229,6 +217,11 @@ export function AboutPanel() {
                   if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
                     e.preventDefault();
                     void saveDescription(descriptionValue.trim());
+                  }
+                  if (e.key === 'Escape') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setIsEditing(false);
                   }
                 }}
                 onChange={(e) => setDescriptionValue(e.target.value)}
