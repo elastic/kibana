@@ -3419,6 +3419,117 @@ describe('TaskManagerRunner', () => {
       );
     });
 
+    test('resolves a version conflict when updating a recurring task after a successful run', async () => {
+      const id = 'conflict-success';
+      const startedAt = new Date();
+      const { runner, store, logger, instance } = await readyToRunStageSetup({
+        instance: {
+          id,
+          schedule: { interval: '1m' },
+          startedAt,
+          ownerId: 'kibana-node-1',
+          version: 'WzEsMV0=',
+        },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            createTaskRunner: () => ({
+              async run() {
+                return { state: { foo: 'bar' } };
+              },
+            }),
+          },
+        },
+      });
+
+      const currentTask = {
+        ...instance,
+        version: 'WzIsMV0=',
+        schedule: { interval: '5m' },
+        runAt: minutesFromNow(5),
+      };
+
+      store.partialUpdate
+        .mockRejectedValueOnce(
+          SavedObjectsErrorHelpers.decorateConflictError(new Error('Saved object conflict'))
+        )
+        .mockResolvedValueOnce(currentTask);
+      store.get.mockResolvedValue(currentTask);
+
+      await runner.run();
+
+      expect(logger.warn).toHaveBeenCalledWith(`Resolving version conflict for task bar:${id}`, {
+        tags: [id, 'bar'],
+      });
+      expect(logger.info).toHaveBeenCalledWith(`Resolved version conflict for task bar:${id}`, {
+        tags: [id, 'bar'],
+      });
+      expect(store.get).toHaveBeenCalledWith(id);
+      expect(store.partialUpdate).toHaveBeenCalledTimes(2);
+      expect(store.partialUpdate).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          version: 'WzIsMV0=',
+          schedule: { interval: '5m' },
+          runAt: currentTask.runAt,
+          state: { foo: 'bar' },
+        }),
+        { validate: false, doc: currentTask }
+      );
+    });
+
+    test('resolves a version_conflict_engine_exception when updating a recurring task', async () => {
+      const id = 'conflict-engine';
+      const startedAt = new Date();
+      const { runner, store, logger, instance } = await readyToRunStageSetup({
+        instance: {
+          id,
+          schedule: { interval: '1m' },
+          startedAt,
+          ownerId: 'kibana-node-1',
+          version: 'WzEsMV0=',
+        },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            createTaskRunner: () => ({
+              async run() {
+                return { state: {} };
+              },
+            }),
+          },
+        },
+      });
+
+      const currentTask = {
+        ...instance,
+        version: 'WzMsMV0=',
+      };
+
+      store.partialUpdate
+        .mockRejectedValueOnce({
+          type: 'task',
+          id,
+          status: 409,
+          error: {
+            type: 'version_conflict_engine_exception',
+            reason: `[task:${id}]: version conflict`,
+          },
+        })
+        .mockResolvedValueOnce(currentTask);
+      store.get.mockResolvedValue(currentTask);
+
+      await runner.run();
+
+      expect(logger.warn).toHaveBeenCalledWith(`Resolving version conflict for task bar:${id}`, {
+        tags: [id, 'bar'],
+      });
+      expect(logger.info).toHaveBeenCalledWith(`Resolved version conflict for task bar:${id}`, {
+        tags: [id, 'bar'],
+      });
+      expect(store.get).toHaveBeenCalledWith(id);
+      expect(store.partialUpdate).toHaveBeenCalledTimes(2);
+    });
+
     test('Prints debug logs on task start/end', async () => {
       const { runner, logger } = await readyToRunStageSetup({
         definitions: {
