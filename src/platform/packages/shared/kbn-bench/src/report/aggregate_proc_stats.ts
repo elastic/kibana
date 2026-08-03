@@ -8,7 +8,13 @@
  */
 
 import { last, mean, sumBy } from 'lodash';
-import type { ProcStats, ProcStatSample, RunProcStats } from '../runner/monitor/types';
+import type {
+  ForcedGcHeapStats,
+  ProcStats,
+  ProcStatSample,
+  RunForcedGcHeapStats,
+  RunProcStats,
+} from '../runner/monitor/types';
 
 const TAIL_RSS_SAMPLE_COUNT = 8;
 
@@ -54,6 +60,31 @@ export function aggregateProcStatSamples(samples: ProcStatSample[]): ProcStats {
 /**
  * Aggregate proc stats for run, by summing the stats per process
  */
+export function aggregateForcedGcHeapStats(
+  stats: readonly ForcedGcHeapStats[]
+): RunForcedGcHeapStats | undefined {
+  if (
+    !stats.length ||
+    stats.some(
+      (stat) =>
+        stat.error ||
+        stat.preForcedGcHeapUsed === undefined ||
+        stat.postForcedGcHeapUsed === undefined ||
+        stat.forcedGcHeapReduction === undefined ||
+        stat.forcedGcDurationMs === undefined
+    )
+  ) {
+    return;
+  }
+
+  return {
+    preForcedGcHeapUsed: sumBy(stats, (stat) => stat.preForcedGcHeapUsed ?? 0),
+    postForcedGcHeapUsed: sumBy(stats, (stat) => stat.postForcedGcHeapUsed ?? 0),
+    forcedGcHeapReduction: sumBy(stats, (stat) => stat.forcedGcHeapReduction ?? 0),
+    forcedGcDurationMs: sumBy(stats, (stat) => stat.forcedGcDurationMs ?? 0),
+  };
+}
+
 export function aggregateProcStats(stats: ProcStats[]): RunProcStats {
   return {
     gcIncremental: sumBy(stats, (stat) => stat.gcIncremental),

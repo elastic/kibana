@@ -39,6 +39,7 @@ export interface WarmStartMemoryRegressionReport {
     readonly monitorIntervalMs: number;
     readonly postReadySettlingMs: number;
     readonly tailSampleCount: number;
+    readonly forcedGcTimeoutMs: number;
     readonly confidence: number;
     readonly materialityBytes: number;
   };
@@ -54,6 +55,7 @@ export interface WarmStartMemoryRegressionReport {
   readonly starts: readonly Record<string, unknown>[];
   readonly pairs: readonly Record<string, unknown>[];
   readonly tailHeapUsed: Record<string, unknown>;
+  readonly postForcedGcHeapUsed: Record<string, unknown>;
   readonly diagnostics: Record<string, unknown>;
 }
 

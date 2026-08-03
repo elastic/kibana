@@ -8,7 +8,6 @@
  */
 
 import type { ToolingLog } from '@kbn/tooling-log';
-import type { IWorkspace } from '@kbn/workspaces';
 import getPort from 'get-port';
 import type { BenchmarkRunContext } from '@kbn/bench';
 import warmStart, { WARM_START_POST_READY_SETTLING_MS } from './warm_start.bench';
@@ -26,7 +25,7 @@ const mockedStartKibana = startKibana as jest.MockedFunction<typeof startKibana>
 
 const context: BenchmarkRunContext = {
   log: {} as ToolingLog,
-  workspace: { getDir: () => 'workspace' } as IWorkspace,
+  workspace: { getDir: () => 'workspace' } as BenchmarkRunContext['workspace'],
 };
 
 describe('warm_start', () => {
@@ -45,6 +44,7 @@ describe('warm_start', () => {
 
   it('keeps a measured Kibana start alive for the fixed post-ready settling window', async () => {
     const runnable = await warmStart();
+    expect(runnable.monitoring).toEqual({ collectForcedGcHeapStatsOnStop: true });
     const run = runnable.run(context);
 
     await Promise.resolve();

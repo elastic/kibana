@@ -16,7 +16,8 @@ export type {
   PairedComparisonStart,
 } from './src/config/types';
 export type { BenchmarkRunContext, BenchmarkRunnable } from './src/runner/types';
+export type { ForcedGcHeapStats } from './src/runner/monitor/types';
 
 export { cli } from './src/cli';
-export { aggregateProcStats } from './src/report/aggregate_proc_stats';
+export { aggregateForcedGcHeapStats, aggregateProcStats } from './src/report/aggregate_proc_stats';
 export { createPairedOrder } from './src/run_paired_config';

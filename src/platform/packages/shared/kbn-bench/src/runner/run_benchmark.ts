@@ -29,7 +29,7 @@ import type {
   BenchmarkRunnable,
 } from './types';
 import { wrapInProfiler } from './profile/wrap_in_profiler';
-import { startMonitoring } from './monitor/start_monitoring';
+import { startMonitoring, type MonitoringResult } from './monitor/start_monitoring';
 
 function createCallbackWrapper(
   context: BenchmarkRunContext,
@@ -112,6 +112,7 @@ export function createBenchmarkExecutor({
           procStatsRefreshInterval: config.monitorInterval,
         })
       : async () => ({ stats: [], samples: [] });
+    let monitoring: MonitoringResult | undefined;
 
     try {
       await wrapInTimeout(`${benchmark.name}:before()`, runnable.before);
@@ -120,21 +121,31 @@ export function createBenchmarkExecutor({
         `${benchmark.name}:run()`,
         runnable.run
       );
-      const monitoring = await stopMonitoring();
+      monitoring = await stopMonitoring({
+        collectForcedGcHeapStats: runnable.monitoring?.collectForcedGcHeapStatsOnStop,
+      });
+      const forcedGcErrors = monitoring.forcedGcHeapStats?.flatMap(({ pid, error }) =>
+        error ? [`PID ${pid}: ${error.message}`] : []
+      );
+      if (forcedGcErrors?.length) {
+        throw new Error(`Forced-GC heap collection failed: ${forcedGcErrors.join('; ')}`);
+      }
       return {
         metrics: result?.metrics ?? {},
         status: 'completed',
         time: performance.now() - start,
         stats: monitoring.stats,
         samples: monitoring.samples,
+        forcedGcHeapStats: monitoring.forcedGcHeapStats,
       };
     } catch (error) {
-      const monitoring = await stopMonitoring();
+      monitoring ??= await stopMonitoring();
       return {
         error: error instanceof Error ? error : new Error(String(error)),
         status: 'failed',
         stats: monitoring.stats,
         samples: monitoring.samples,
+        forcedGcHeapStats: monitoring.forcedGcHeapStats,
       };
     } finally {
       await wrapInTimeout(`${benchmark.name}:after()`, runnable.after);

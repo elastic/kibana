@@ -23,6 +23,9 @@ export default async (): Promise<BenchmarkRunnable> => {
   let kbnProc: ExecaChildProcess | undefined;
 
   return {
+    monitoring: {
+      collectForcedGcHeapStatsOnStop: true,
+    },
     async beforeAll({ workspace, log, buildDir }) {
       if (!buildDir) {
         await workspace.ensureBuild();

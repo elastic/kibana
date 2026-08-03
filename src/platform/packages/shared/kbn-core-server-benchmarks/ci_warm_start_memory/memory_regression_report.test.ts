@@ -33,6 +33,7 @@ const report: WarmStartMemoryRegressionReport = {
     monitorIntervalMs: 250,
     postReadySettlingMs: 30_000,
     tailSampleCount: 8,
+    forcedGcTimeoutMs: 30_000,
     confidence: 0.99,
     materialityBytes: 20 * 1024 * 1024,
   },
@@ -46,6 +47,7 @@ const report: WarmStartMemoryRegressionReport = {
   starts: [{ attempt: 0, side: 'baseline', status: 'failed' }],
   pairs: [],
   tailHeapUsed: { pairCount: 0, wouldTrigger: false },
+  postForcedGcHeapUsed: { pairCount: 0, wouldTrigger: false },
   diagnostics: {},
 };
 

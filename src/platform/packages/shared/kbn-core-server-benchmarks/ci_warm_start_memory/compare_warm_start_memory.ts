@@ -16,7 +16,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { aggregateProcStats, type OnCompareCallback, type PairedComparisonStart } from '@kbn/bench';
+import {
+  aggregateForcedGcHeapStats,
+  aggregateProcStats,
+  type OnCompareCallback,
+  type PairedComparisonStart,
+} from '@kbn/bench';
 import {
   MAX_RSS_METRIC_KEY,
   TAIL_ARRAY_BUFFERS_METRIC_KEY,
@@ -39,6 +44,7 @@ import {
 
 const SETTLING_MS = 30_000;
 const TAIL_SAMPLE_COUNT = 8;
+const FORCED_GC_TIMEOUT_MS = 30_000;
 
 const formatBytes = (bytes: number): string => `${(bytes / (1024 * 1024)).toFixed(2)} MiB`;
 
@@ -51,6 +57,21 @@ const getMetric = (start: PairedComparisonStart, metric: string): number | undef
   ];
 };
 
+const getForcedGcMetric = (start: PairedComparisonStart, metric: string): number | undefined => {
+  if (start.result.status !== 'completed' || !start.result.forcedGcHeapStats) {
+    return;
+  }
+  const aggregated = aggregateForcedGcHeapStats(start.result.forcedGcHeapStats);
+  if (
+    metric !== 'postForcedGcHeapUsed' &&
+    metric !== 'forcedGcHeapReduction' &&
+    metric !== 'forcedGcDurationMs'
+  ) {
+    return;
+  }
+  return aggregated?.[metric];
+};
+
 const toStartRecord = (start: PairedComparisonStart): Record<string, unknown> => ({
   attempt: start.attempt,
   pair: start.pair,
@@ -61,15 +82,17 @@ const toStartRecord = (start: PairedComparisonStart): Record<string, unknown> =>
   failureReason: start.result.status === 'failed' ? start.result.error.message : undefined,
   metrics: start.result.status === 'completed' ? aggregateProcStats(start.result.stats) : undefined,
   samples: start.result.samples,
+  forcedGcHeapStats: start.result.forcedGcHeapStats,
 });
 
 const getPairedMetric = (
   pairs: ReadonlyArray<{ baseline: PairedComparisonStart; target: PairedComparisonStart }>,
-  metric: string
+  metric: string,
+  getStartMetric: (start: PairedComparisonStart, metric: string) => number | undefined = getMetric
 ): Record<string, unknown> => {
   const values = pairs.flatMap(({ baseline, target }) => {
-    const baselineBytes = getMetric(baseline, metric);
-    const targetBytes = getMetric(target, metric);
+    const baselineBytes = getStartMetric(baseline, metric);
+    const targetBytes = getStartMetric(target, metric);
     return baselineBytes === undefined || targetBytes === undefined
       ? []
       : [{ baselineBytes, targetBytes, deltaBytes: targetBytes - baselineBytes }];
@@ -103,6 +126,16 @@ export const compareWarmStartMemory: OnCompareCallback = async ({
     ({ deltaBytes }) => deltaBytes
   );
   const rule = evaluatePairedMemoryRule({ deltas: heapDeltas });
+  const postForcedGcHeapPairs = getPairedMetric(
+    validPairs,
+    'postForcedGcHeapUsed',
+    getForcedGcMetric
+  );
+  const postForcedGcHeapRule = evaluatePairedMemoryRule({
+    deltas: (postForcedGcHeapPairs.pairs as Array<{ deltaBytes: number }>).map(
+      ({ deltaBytes }) => deltaBytes
+    ),
+  });
   const inconclusive = validPairs.length < MIN_VALID_WARM_START_MEMORY_PAIRS;
   const wouldTrigger = !inconclusive && rule.wouldTrigger;
   const outcome = inconclusive ? 'inconclusive' : wouldTrigger ? 'regression' : 'observed';
@@ -116,6 +149,7 @@ export const compareWarmStartMemory: OnCompareCallback = async ({
       monitorIntervalMs: left.config.monitorInterval,
       postReadySettlingMs: SETTLING_MS,
       tailSampleCount: TAIL_SAMPLE_COUNT,
+      forcedGcTimeoutMs: FORCED_GC_TIMEOUT_MS,
       confidence: WARM_START_MEMORY_CONFIDENCE,
       materialityBytes: WARM_START_MEMORY_MATERIALITY_BYTES,
     },
@@ -131,7 +165,14 @@ export const compareWarmStartMemory: OnCompareCallback = async ({
     starts: (pairedBenchmark?.starts ?? []).map(toStartRecord),
     pairs: heapPairs.pairs as Record<string, unknown>[],
     tailHeapUsed: { ...heapPairs, ...rule },
+    postForcedGcHeapUsed: { ...postForcedGcHeapPairs, ...postForcedGcHeapRule },
     diagnostics: {
+      forcedGcHeapReduction: getPairedMetric(
+        validPairs,
+        'forcedGcHeapReduction',
+        getForcedGcMetric
+      ),
+      forcedGcDurationMs: getPairedMetric(validPairs, 'forcedGcDurationMs', getForcedGcMetric),
       [TAIL_RSS_METRIC_KEY]: getPairedMetric(validPairs, 'tailRss'),
       [MAX_RSS_METRIC_KEY]: getPairedMetric(validPairs, 'rssMax'),
       [TAIL_HEAP_TOTAL_METRIC_KEY]: getPairedMetric(validPairs, 'tailHeapTotal'),
@@ -151,11 +192,19 @@ export const compareWarmStartMemory: OnCompareCallback = async ({
   }
 
   log.info(
-    `Warm-start paired tail heap: mean delta ${formatBytes(
+    `Warm-start paired heap: natural mean ${formatBytes(
       rule.meanBytes ?? 0
-    )}, 99% LCB ${formatBytes(rule.lowerConfidenceBoundBytes ?? 0)}, materiality ${formatBytes(
+    )}, natural 99% LCB ${formatBytes(
+      rule.lowerConfidenceBoundBytes ?? 0
+    )}; post-forced-GC mean ${formatBytes(
+      postForcedGcHeapRule.meanBytes ?? 0
+    )}, post-forced-GC 99% LCB ${formatBytes(
+      postForcedGcHeapRule.lowerConfidenceBoundBytes ?? 0
+    )}; materiality ${formatBytes(
       WARM_START_MEMORY_MATERIALITY_BYTES
-    )}, wouldTrigger=${wouldTrigger}. Report: ${reportPath}`
+    )}, natural wouldTrigger=${wouldTrigger}, post-forced-GC hypotheticalWouldTrigger=${
+      postForcedGcHeapRule.wouldTrigger
+    }. Report: ${reportPath}`
   );
 
   if (wouldTrigger && enforcement === 'fail') {
