@@ -8,6 +8,7 @@
  */
 
 import { BoolFormat } from './boolean';
+import { HTML_CONTEXT_TYPE, TEXT_CONTEXT_TYPE } from '../content_types';
 
 describe('Boolean Format', () => {
   let boolean: BoolFormat;
@@ -63,5 +64,22 @@ describe('Boolean Format', () => {
     const s = 'non-boolean value!!';
 
     expect(boolean.convert(s)).toBe(s);
+  });
+
+  test('handles a missing value', () => {
+    expect(boolean.convert(null, TEXT_CONTEXT_TYPE)).toBe('(null)');
+    expect(boolean.convert(undefined, TEXT_CONTEXT_TYPE)).toBe('(null)');
+    expect(boolean.convert(null, HTML_CONTEXT_TYPE)).toBe(
+      '<span class="ffString__emptyValue">(null)</span>'
+    );
+    expect(boolean.convert(undefined, HTML_CONTEXT_TYPE)).toBe(
+      '<span class="ffString__emptyValue">(null)</span>'
+    );
+  });
+
+  test('escapes HTML characters in html context via fallback', () => {
+    expect(boolean.convert('<script>alert("test")</script>', HTML_CONTEXT_TYPE)).toBe(
+      '&lt;script&gt;alert(&quot;test&quot;)&lt;/script&gt;'
+    );
   });
 });

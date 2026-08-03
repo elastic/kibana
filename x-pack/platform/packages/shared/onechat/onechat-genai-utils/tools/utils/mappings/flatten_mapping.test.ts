@@ -100,6 +100,71 @@ describe('flattenMapping', () => {
     ]);
   });
 
+  it('flattens multi-fields defined under the fields property', () => {
+    const mapping: MappingTypeMapping = {
+      properties: {
+        body: {
+          type: 'text',
+          fields: {
+            keyword: {
+              type: 'keyword',
+              ignore_above: 256,
+            },
+            semantic_elser: {
+              type: 'semantic_text',
+            },
+          },
+        },
+        title: {
+          type: 'text',
+          fields: {
+            raw: {
+              type: 'keyword',
+            },
+          },
+          properties: {
+            sub: { type: 'integer' },
+          },
+        },
+      },
+    };
+
+    const flattened = flattenMapping(mapping).sort((a, b) => a.path.localeCompare(b.path));
+
+    expect(flattened).toEqual([
+      {
+        meta: {},
+        path: 'body',
+        type: 'text',
+      },
+      {
+        meta: {},
+        path: 'body.keyword',
+        type: 'keyword',
+      },
+      {
+        meta: {},
+        path: 'body.semantic_elser',
+        type: 'semantic_text',
+      },
+      {
+        meta: {},
+        path: 'title',
+        type: 'text',
+      },
+      {
+        meta: {},
+        path: 'title.raw',
+        type: 'keyword',
+      },
+      {
+        meta: {},
+        path: 'title.sub',
+        type: 'integer',
+      },
+    ]);
+  });
+
   it('keeps internal fields', () => {
     const mapping: MappingTypeMapping = {
       properties: {

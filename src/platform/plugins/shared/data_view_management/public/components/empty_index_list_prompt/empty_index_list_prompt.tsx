@@ -89,7 +89,7 @@ export const EmptyIndexListPrompt = ({
               onClick={() => {
                 navigateToApp('integrations', { path: '/browse' });
               }}
-              icon={<EuiIcon size="xl" type="database" color="subdued" />}
+              icon={<EuiIcon size="xl" type="database" color="subdued" aria-hidden={true} />}
               title={
                 <FormattedMessage
                   id="indexPatternManagement.createDataView.emptyState.integrationCardTitle"
@@ -108,7 +108,7 @@ export const EmptyIndexListPrompt = ({
             <EuiCard
               onClick={() => navigateToApp('home', { path: '#/tutorial_directory/fileDataViz' })}
               css={styles.card}
-              icon={<EuiIcon size="xl" type="document" color="subdued" />}
+              icon={<EuiIcon size="xl" type="document" color="subdued" aria-hidden={true} />}
               title={
                 <FormattedMessage
                   id="indexPatternManagement.createDataView.emptyState.uploadCardTitle"
@@ -129,7 +129,7 @@ export const EmptyIndexListPrompt = ({
               onClick={() => {
                 navigateToApp('home', { path: '#/tutorial_directory/sampleData' });
               }}
-              icon={<EuiIcon size="xl" type="heatmap" color="subdued" />}
+              icon={<EuiIcon size="xl" type="heatmap" color="subdued" aria-hidden={true} />}
               title={
                 <FormattedMessage
                   id="indexPatternManagement.createDataView.emptyState.sampleDataCardTitle"
@@ -186,7 +186,7 @@ export const EmptyIndexListPrompt = ({
                           id="indexPatternManagement.createDataView.emptyState.checkDataButton"
                           defaultMessage="Check for new data"
                         />{' '}
-                        <EuiIcon type="refresh" size="s" />
+                        <EuiIcon type="refresh" size="s" aria-hidden={true} />
                       </EuiLink>
                     ),
                   },

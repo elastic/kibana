@@ -35,7 +35,7 @@ const SELECT_PICKER_HEIGHT = '250px';
 const NoFilterItems = () => {
   return (
     <EuiSelectableMessage>
-      <EuiIcon type="minusInCircle" />
+      <EuiIcon aria-hidden={true} type="minusInCircle" />
       <EuiSpacer size="xs" />
       <p>
         <FormattedMessage
@@ -130,6 +130,8 @@ export const MultiSelectPicker: FC<{
           />
         </EuiPopoverTitle>
         <div
+          role="listbox"
+          aria-label={title}
           css={
             cssStyles?.filterItemContainer ??
             css`

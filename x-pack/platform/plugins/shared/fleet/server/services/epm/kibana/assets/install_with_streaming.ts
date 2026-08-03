@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
 
-import type { PackageInstallContext } from '../../../../../common/types';
+import type { Installation, PackageInstallContext } from '../../../../../common/types';
 import {
   KibanaSavedObjectType,
   type KibanaAssetReference,
@@ -18,6 +18,7 @@ import { getPathParts } from '../../archive';
 import { appContextService } from '../../../app_context';
 
 import { saveKibanaAssetsRefs } from '../../packages/install';
+import { isOutdatedKibanaVersion } from '../../packages/kibana_version_check';
 
 import type { ArchiveAsset } from './install';
 import {
@@ -28,6 +29,7 @@ import {
   toAssetReference,
 } from './install';
 import { getSpaceAwareSaveobjectsClients } from './saved_objects';
+import { indexPatternTypes } from '../index_pattern/install';
 
 interface InstallKibanaAssetsWithStreamingArgs {
   pkgName: string;
@@ -35,6 +37,7 @@ interface InstallKibanaAssetsWithStreamingArgs {
   spaceId: string;
   assetTags?: PackageSpecTags[];
   savedObjectsClient: SavedObjectsClientContract;
+  installedPkg?: SavedObject<Installation>;
 }
 
 const MAX_ASSETS_TO_INSTALL_IN_PARALLEL = 100;
@@ -44,6 +47,7 @@ export async function installKibanaAssetsWithStreaming({
   packageInstallContext,
   savedObjectsClient,
   pkgName,
+  installedPkg,
 }: InstallKibanaAssetsWithStreamingArgs): Promise<KibanaAssetReference[]> {
   const { archiveIterator } = packageInstallContext;
 
@@ -54,6 +58,14 @@ export async function installKibanaAssetsWithStreaming({
     savedObjectsImporter,
     savedObjectsClient,
   });
+
+  // Existing assets are normally left untouched (huge perf win on repeat installs of the
+  // ~20k-asset security_detection_engine package, see #195888). See isOutdatedKibanaVersion for
+  // why we force an overwrite once per Kibana major.minor bump.
+  const overwriteExistingAssets = isOutdatedKibanaVersion(
+    installedPkg?.attributes.installed_kibana_version,
+    appContextService.getKibanaVersion()
+  );
 
   const assetRefs: KibanaAssetReference[] = [];
   let batch: ArchiveAsset[] = [];
@@ -76,6 +88,13 @@ export async function installKibanaAssetsWithStreaming({
       return;
     }
 
+    if (
+      soType === KibanaSavedObjectType.indexPattern &&
+      indexPatternTypes.some((pattern) => `${pattern}-*` === savedObject.id)
+    ) {
+      return;
+    }
+
     batch.push(savedObject);
     assetRefs.push(toAssetReference(savedObject));
 
@@ -84,6 +103,7 @@ export async function installKibanaAssetsWithStreaming({
         savedObjectsClient: savedObjectClientWithSpace,
         kibanaAssets: batch,
         refresh: false,
+        overwrite: overwriteExistingAssets,
       });
       batch = [];
     }
@@ -96,11 +116,12 @@ export async function installKibanaAssetsWithStreaming({
       kibanaAssets: batch,
       // Use wait_for with the last batch to ensure all assets are readable once the install is complete
       refresh: 'wait_for',
+      overwrite: overwriteExistingAssets,
     });
   }
 
   // Update the installation saved object with installed kibana assets
-  await saveKibanaAssetsRefs(savedObjectsClient, pkgName, assetRefs);
+  await saveKibanaAssetsRefs(savedObjectsClient, pkgName, assetRefs, spaceId);
 
   return assetRefs;
 }
@@ -109,10 +130,12 @@ async function bulkCreateSavedObjects({
   savedObjectsClient,
   kibanaAssets,
   refresh,
+  overwrite,
 }: {
   kibanaAssets: ArchiveAsset[];
   savedObjectsClient: SavedObjectsClientContract;
   refresh?: boolean | 'wait_for';
+  overwrite: boolean;
 }) {
   if (!kibanaAssets.length) {
     return [];
@@ -123,8 +146,9 @@ async function bulkCreateSavedObjects({
   const { saved_objects: createdSavedObjects } = await savedObjectsClient.bulkCreate(
     toBeSavedObjects,
     {
-      // We only want to install new saved objects without overwriting existing ones
-      overwrite: false,
+      // Skip existing assets by default (huge perf win on repeat installs); overwrite is forced
+      // once per Kibana version bump, see the comment in installKibanaAssetsWithStreaming.
+      overwrite,
       managed: true,
       refresh,
     }

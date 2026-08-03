@@ -411,6 +411,6 @@ export const ES_INVALID_SAMPLE_STEPS = [
       },
     },
     zodErrorMessage: '"Unrecognized key:',
-    diagnosticErrorMessage: 'DisallowedExtraPropWarning',
+    diagnosticErrorMessage: 'Property notValidField is not allowed.',
   },
 ];

@@ -6,13 +6,18 @@
  */
 
 import type { KibanaUrl, ScoutPage } from '@kbn/scout-oblt';
+import { EXTENDED_TIMEOUT } from '..';
 
 export class ProfilingSettingsPage {
   constructor(public readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {}
 
   async goto() {
     await this.page.goto(`${this.kbnUrl.app('profiling')}/settings`);
-    await this.page.waitForLoadingIndicatorHidden();
+    await this.page.testSubj
+      .locator('profilingSettingsLink')
+      // eslint-disable-next-line playwright/no-nth-methods
+      .first()
+      .waitFor({ timeout: EXTENDED_TIMEOUT });
   }
 
   // Settings Form methods

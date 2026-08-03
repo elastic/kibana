@@ -396,6 +396,7 @@ paths:
           name: feature_id
           required: false
           schema:
+            maxLength: 100
             type: string
       responses:
         '200':
@@ -1222,6 +1223,15 @@ paths:
       summary: Get A2A agent card
       tags:
         - agent builder
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X GET "${KIBANA_URL}/api/agent_builder/a2a/{agentId}.json" \
+              -H "Authorization: ApiKey ${API_KEY}"
+        - lang: Console
+          source: |
+            GET kbn://api/agent_builder/a2a/{agentId}.json
       x-state: Technical Preview; added in 9.2.0
       x-metaTags:
         - content: Kibana
@@ -1279,6 +1289,15 @@ paths:
       summary: List agents
       tags:
         - agent builder
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+             -X GET "${KIBANA_URL}/api/agent_builder/agents" \
+             -H "Authorization: ApiKey ${API_KEY}"
+        - lang: Console
+          source: |
+            GET kbn://api/agent_builder/agents
       x-state: Added in 9.2.0
       x-metaTags:
         - content: Kibana
@@ -1408,6 +1427,59 @@ paths:
       summary: Create an agent
       tags:
         - agent builder
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X POST "${KIBANA_URL}/api/agent_builder/agents" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true" \
+              -H "Content-Type: application/json" \
+              -d '{
+                "id": "new-agent-id",
+                "name": "Search Index Helper",
+                "description": "Hi! I can help you search the data within the indices starting with \"content-\" prefix.",
+                "labels": ["custom-indices", "department-search"],
+                "avatar_color": "#BFDBFF",
+                "avatar_symbol": "SI",
+                "configuration": {
+                  "instructions": "You are a custom agent that wants to help searching data using all indices starting with prefix \"content-\".",
+                  "tools": [
+                    {
+                      "tool_ids": [
+                        "platform.core.search",
+                        "platform.core.list_indices",
+                        "platform.core.get_index_mapping",
+                        "platform.core.get_document_by_id"
+                      ]
+                    }
+                  ]
+                }
+            }'
+        - lang: Console
+          source: |
+            POST kbn://api/agent_builder/agents
+            {
+              "id": "new-agent-id",
+              "name": "Search Index Helper",
+              "description": "Hi! I can help you search the data within the indices starting with \"content-\" prefix.",
+              "labels": ["custom-indices", "department-search"],
+              "avatar_color": "#BFDBFF",
+              "avatar_symbol": "SI",
+              "configuration": {
+                "instructions": "You are a custom agent that wants to help searching data using all indices starting with prefix \"content-\".",
+                "tools": [
+                  {
+                    "tool_ids": [
+                      "platform.core.search",
+                      "platform.core.list_indices",
+                      "platform.core.get_index_mapping",
+                      "platform.core.get_document_by_id"
+                    ]
+                  }
+                ]
+              }
+            }
       x-state: Added in 9.2.0
       x-metaTags:
         - content: Kibana
@@ -1450,6 +1522,16 @@ paths:
       summary: Delete an agent
       tags:
         - agent builder
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X DELETE "${KIBANA_URL}/api/agent_builder/agents/{id}" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true"
+        - lang: Console
+          source: |
+            DELETE kbn://api/agent_builder/agents/{id}
       x-state: Added in 9.2.0
       x-metaTags:
         - content: Kibana
@@ -1500,6 +1582,15 @@ paths:
       summary: Get an agent by ID
       tags:
         - agent builder
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X GET "${KIBANA_URL}/api/agent_builder/agents/{id}" \
+              -H "Authorization: ApiKey ${API_KEY}"
+        - lang: Console
+          source: |
+            GET kbn://api/agent_builder/agents/{id}
       x-state: Added in 9.2.0
       x-metaTags:
         - content: Kibana
@@ -1627,6 +1718,53 @@ paths:
       summary: Update an agent
       tags:
         - agent builder
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X PUT "${KIBANA_URL}/api/agent_builder/agents/{id}" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true" \
+              -H "Content-Type: application/json" \
+              -d '{
+                "name": "Search Index Helper",
+                "description": "Updated description - Search for anything in \"content-*\" indices!",
+                "labels": ["custom-indices", "department-search", "elastic-employees"],
+                "avatar_color": "#BFDBFF",
+                "avatar_symbol": "SI",
+                "configuration": {
+                  "instructions": "You are a custom agent that wants to help searching data using all indices starting with prefix \"content-\".",
+                  "tools": [{
+                    "tool_ids": [
+                      "platform.core.search",
+                      "platform.core.list_indices",
+                      "platform.core.get_index_mapping",
+                      "platform.core.get_document_by_id"
+                    ]
+                  }]
+                }
+              }'
+        - lang: Console
+          source: |
+            PUT kbn://api/agent_builder/agents/{id}
+            {
+              "name": "Search Index Helper",
+              "description": "Updated description - Search for anything in \"content-*\" indices!",
+              "labels": ["custom-indices", "department-search", "elastic-employees"],
+              "avatar_color": "#BFDBFF",
+              "avatar_symbol": "SI",
+              "configuration": {
+                "instructions": "You are a custom agent that wants to help searching data using all indices starting with prefix \"content-\".",
+                "tools": [{
+                  "tool_ids": [
+                    "platform.core.search",
+                    "platform.core.list_indices",
+                    "platform.core.get_index_mapping",
+                    "platform.core.get_document_by_id"
+                  ]
+                }]
+              }
+            }
       x-state: Added in 9.2.0
       x-metaTags:
         - content: Kibana
@@ -1669,6 +1807,15 @@ paths:
       summary: List conversations
       tags:
         - agent builder
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X GET "${KIBANA_URL}/api/agent_builder/conversations" \
+              -H "Authorization: ApiKey ${API_KEY}"
+        - lang: Console
+          source: |
+            GET kbn://api/agent_builder/conversations
       x-state: Added in 9.2.0
       x-metaTags:
         - content: Kibana
@@ -1711,6 +1858,16 @@ paths:
       summary: Delete conversation by ID
       tags:
         - agent builder
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X DELETE "${KIBANA_URL}/api/agent_builder/conversations/{conversation_id}" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true"
+        - lang: Console
+          source: |
+            DELETE kbn://api/agent_builder/conversations/{conversation_id}
       x-state: Added in 9.2.0
       x-metaTags:
         - content: Kibana
@@ -1761,6 +1918,15 @@ paths:
       summary: Get conversation by ID
       tags:
         - agent builder
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X GET "${KIBANA_URL}/api/agent_builder/conversations/{conversation_id}" \
+              -H "Authorization: ApiKey ${API_KEY}"
+        - lang: Console
+          source: |
+            GET kbn://api/agent_builder/conversations/{conversation_id}
       x-state: Added in 9.2.0
       x-metaTags:
         - content: Kibana
@@ -1891,6 +2057,24 @@ paths:
       summary: Send chat message
       tags:
         - agent builder
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X POST "${KIBANA_URL}/api/agent_builder/converse" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true" \
+              -H "Content-Type: application/json" \
+              -d '{
+                "input": "What is Elasticsearch?",
+                "agent_id": "elastic-ai-agent"}'
+        - lang: Console
+          source: |
+            POST kbn://api/agent_builder/converse
+            {
+              "input": "What is Elasticsearch?",
+              "agent_id": "elastic-ai-agent"
+            }
       x-state: Added in 9.2.0
       x-metaTags:
         - content: Kibana
@@ -2212,6 +2396,27 @@ paths:
       summary: Send chat message (streaming)
       tags:
         - agent builder
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X POST "${KIBANA_URL}/api/agent_builder/converse/async" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true" \
+              -H "Content-Type: application/json" \
+              -d '{
+                "input": "Hello again let us have an async chat",
+                "agent_id": "elastic-ai-agent",
+                "conversation_id": "<CONVERSATION_ID>"
+              }'
+        - lang: Console
+          source: |
+            POST kbn://api/agent_builder/converse/async
+            {
+              "input": "Hello again let's have an async chat",
+              "agent_id": "elastic-ai-agent",
+              "conversation_id": "<CONVERSATION_ID>"
+            }
       x-state: Added in 9.2.0
       x-metaTags:
         - content: Kibana
@@ -2659,7 +2864,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Execute a tool with parameters. Use this endpoint to run a tool directly with specified inputs and optional external connector integration. To learn more, refer to the [tools documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/tools).<br/><br/>[Required authorization] Route required privileges: read_onechat.
+        Run a tool with parameters. Use this endpoint to run a tool directly with specified inputs and optional external connector integration. To learn more, refer to the [tools documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/tools).<br/><br/>[Required authorization] Route required privileges: read_onechat.
       operationId: post-agent-builder-tools-execute
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -2850,7 +3055,7 @@ paths:
                         tool_result_id: uE8y
                         type: tabular_data
           description: Indicates a successful response
-      summary: Execute a Tool
+      summary: Run a tool
       tags:
         - agent builder
       x-codeSamples:
@@ -3787,7 +3992,7 @@ paths:
                               description: Indicates whether the action is a summary.
                               type: boolean
                             throttle:
-                              description: 'The throttle interval, which defines how often an alert generates repeated actions. It is specified in seconds, minutes, hours, or days and is applicable only if ''notify_when'' is set to ''onThrottleInterval''. NOTE: You cannot specify the throttle interval at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.'
+                              description: "The throttle interval, which defines how often an alert generates repeated actions. It is specified in seconds, minutes, hours, or days and is applicable only if 'notify_when' is set to 'onThrottleInterval'. NOTE: You cannot specify the throttle interval at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values."
                               nullable: true
                               type: string
                           required:
@@ -5198,7 +5403,7 @@ paths:
                               description: Indicates whether the action is a summary.
                               type: boolean
                             throttle:
-                              description: 'The throttle interval, which defines how often an alert generates repeated actions. It is specified in seconds, minutes, hours, or days and is applicable only if ''notify_when'' is set to ''onThrottleInterval''. NOTE: You cannot specify the throttle interval at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.'
+                              description: "The throttle interval, which defines how often an alert generates repeated actions. It is specified in seconds, minutes, hours, or days and is applicable only if 'notify_when' is set to 'onThrottleInterval'. NOTE: You cannot specify the throttle interval at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values."
                               nullable: true
                               type: string
                           required:
@@ -6246,7 +6451,7 @@ paths:
                               description: Indicates whether the action is a summary.
                               type: boolean
                             throttle:
-                              description: 'The throttle interval, which defines how often an alert generates repeated actions. It is specified in seconds, minutes, hours, or days and is applicable only if ''notify_when'' is set to ''onThrottleInterval''. NOTE: You cannot specify the throttle interval at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.'
+                              description: "The throttle interval, which defines how often an alert generates repeated actions. It is specified in seconds, minutes, hours, or days and is applicable only if 'notify_when' is set to 'onThrottleInterval'. NOTE: You cannot specify the throttle interval at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values."
                               nullable: true
                               type: string
                           required:
@@ -7762,7 +7967,7 @@ paths:
                               description: Indicates whether the action is a summary.
                               type: boolean
                             throttle:
-                              description: 'The throttle interval, which defines how often an alert generates repeated actions. It is specified in seconds, minutes, hours, or days and is applicable only if ''notify_when'' is set to ''onThrottleInterval''. NOTE: You cannot specify the throttle interval at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.'
+                              description: "The throttle interval, which defines how often an alert generates repeated actions. It is specified in seconds, minutes, hours, or days and is applicable only if 'notify_when' is set to 'onThrottleInterval'. NOTE: You cannot specify the throttle interval at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values."
                               nullable: true
                               type: string
                           required:
@@ -14336,7 +14541,7 @@ paths:
         ...
         ```
 
-        Additionally, you can set up notifications for when rules create alerts. The notifications use the [Alerting and Actions framework](https://www.elastic.co/guide/en/kibana/current/alerting-getting-started.html). Each action type requires a connector. Connectors store the information required to send notifications via external systems. The following connector types are supported for rule notifications:
+        Additionally, you can set up notifications for when rules create alerts. The notifications use the [Alerting and Actions framework](https://www.elastic.co/docs/explore-analyze/alerting). Each action type requires a connector. Connectors store the information required to send notifications via external systems. The following connector types are supported for rule notifications:
 
         * Slack
         * Email
@@ -14349,12 +14554,12 @@ paths:
         > info
         > For more information on PagerDuty fields, see [Send a v2 Event](https://developer.pagerduty.com/docs/events-api-v2/trigger-events/).
 
-        To retrieve connector IDs, which are required to configure rule notifications, call the [Find objects API](https://www.elastic.co/guide/en/kibana/current/saved-objects-api-find.html) with `"type": "action"` in the request payload.
+        To retrieve connector IDs, which are required to configure rule notifications, call the [Find objects API](https://www.elastic.co/docs/api/doc/kibana/operation/operation-findsavedobjects) with `"type": "action"` in the request payload.
 
         For detailed information on Kibana actions and alerting, and additional API calls, see:
 
         * [Alerting API](https://www.elastic.co/docs/api/doc/kibana/group/endpoint-alerting)
-        * [Alerting and Actions framework](https://www.elastic.co/guide/en/kibana/current/alerting-getting-started.html)
+        * [Alerting and Actions framework](https://www.elastic.co/docs/explore-analyze/alerting)
         * [Connectors API](https://www.elastic.co/docs/api/doc/kibana/group/endpoint-connectors)
       operationId: CreateRule
       requestBody:
@@ -15515,7 +15720,7 @@ paths:
                               eventAction: trigger
                               severity: critical
                               summary: The message body
-                              timestamp: '2023-10-31T00:00:00.000Z'
+                              timestamp: '2023-10-31T00:00:00Z'
                   ids:
                     - 9e946bfc-3118-4c77-bb25-67d781191921
               example27:
@@ -15628,7 +15833,7 @@ paths:
                             max_signals: 100
                             name: DNS Tunneling [Duplicate]
                             references:
-                              - https://www.elastic.co/guide/en/security/current/prebuilt-ml-jobs.html
+                              - https://www.elastic.co/docs/reference/machine-learning/ootb-ml-jobs-siem
                             related_integrations: []
                             required_fields: []
                             risk_score: 21
@@ -15823,7 +16028,7 @@ paths:
                               - packetbeat-*
                               - traces-apm*
                               - winlogbeat-*
-                              - '-*elastic-cloud-logs-*'
+                              - -*elastic-cloud-logs-*
                             interval: 5m
                             language: kuery
                             license: ''
@@ -15885,7 +16090,7 @@ paths:
                               - packetbeat-*
                               - traces-apm*
                               - winlogbeat-*
-                              - '-*elastic-cloud-logs-*'
+                              - -*elastic-cloud-logs-*
                             interval: 3m
                             investigation_fields:
                               field_names:
@@ -15997,7 +16202,7 @@ paths:
                               - packetbeat-*
                               - traces-apm*
                               - winlogbeat-*
-                              - '-*elastic-cloud-logs-*'
+                              - -*elastic-cloud-logs-*
                             interval: 3m
                             investigation_fields:
                               field_names:
@@ -16084,7 +16289,7 @@ paths:
                               - packetbeat-*
                               - traces-apm*
                               - winlogbeat-*
-                              - '-*elastic-cloud-logs-*'
+                              - -*elastic-cloud-logs-*
                             interval: 3m
                             investigation_fields:
                               field_names:
@@ -16181,7 +16386,7 @@ paths:
                               - packetbeat-*
                               - traces-apm*
                               - winlogbeat-*
-                              - '-*elastic-cloud-logs-*'
+                              - -*elastic-cloud-logs-*
                             interval: 5m
                             language: kuery
                             license: ''
@@ -16243,9 +16448,9 @@ paths:
         > info
         > Rule actions and connectors are included in the exported file, but sensitive information about the connector (such as authentication credentials) is not included. You must re-add missing connector details after importing detection rules.
 
-        > You can use Kibana’s [Saved Objects](https://www.elastic.co/guide/en/kibana/current/managing-saved-objects.html) UI (Stack Management → Kibana → Saved Objects) or the Saved Objects APIs (experimental) to [export](https://www.elastic.co/docs/api/doc/kibana/operation/operation-exportsavedobjectsdefault) and [import](https://www.elastic.co/docs/api/doc/kibana/operation/operation-importsavedobjectsdefault) any necessary connectors before importing detection rules.
+        > You can use Kibana’s [Saved Objects](https://www.elastic.co/docs/explore-analyze/find-and-organize/saved-objects) UI (Stack Management → Kibana → Saved Objects) or the Saved Objects APIs (experimental) to [export](https://www.elastic.co/docs/api/doc/kibana/operation/operation-exportsavedobjectsdefault) and [import](https://www.elastic.co/docs/api/doc/kibana/operation/operation-importsavedobjectsdefault) any necessary connectors before importing detection rules.
 
-        > Similarly, any value lists used for rule exceptions are not included in rule exports or imports. Use the [Manage value lists](https://www.elastic.co/guide/en/security/current/value-lists-exceptions.html#manage-value-lists) UI (Rules → Detection rules (SIEM) → Manage value lists) to export and import value lists separately.
+        > Similarly, any value lists used for rule exceptions are not included in rule exports or imports. Use the [Manage value lists](https://www.elastic.co/docs/solutions/security/detect-and-alert/create-manage-value-lists) UI (Rules → Detection rules (SIEM) → Manage value lists) to export and import value lists separately.
       operationId: ExportRules
       parameters:
         - description: Determines whether a summary of the exported rules is returned.
@@ -16525,14 +16730,14 @@ paths:
 
         > If the API key that is used for authorization has different privileges than the key that created or most recently updated the rule, the rule behavior might change.
         > info
-        > To import rules with actions, you need at least Read privileges for the Action and Connectors feature. To overwrite or add new connectors, you need All privileges for the Actions and Connectors feature. To import rules without actions, you don’t need Actions and Connectors privileges. Refer to [Enable and access detections](https://www.elastic.co/guide/en/security/current/detections-permissions-section.html#enable-detections-ui) for more information.
+        > To import rules with actions, you need at least Read privileges for the Action and Connectors feature. To overwrite or add new connectors, you need All privileges for the Actions and Connectors feature. To import rules without actions, you don’t need Actions and Connectors privileges. Refer to [Enable and access detections](https://www.elastic.co/docs/solutions/security/detect-and-alert/detections-privileges) for more information.
 
         > info
         > Rule actions and connectors are included in the exported file, but sensitive information about the connector (such as authentication credentials) is not included. You must re-add missing connector details after importing detection rules.
 
-        > You can use Kibana’s [Saved Objects](https://www.elastic.co/guide/en/kibana/current/managing-saved-objects.html) UI (Stack Management → Kibana → Saved Objects) or the Saved Objects APIs (experimental) to [export](https://www.elastic.co/docs/api/doc/kibana/operation/operation-exportsavedobjectsdefault) and [import](https://www.elastic.co/docs/api/doc/kibana/operation/operation-importsavedobjectsdefault) any necessary connectors before importing detection rules.
+        > You can use Kibana’s [Saved Objects](https://www.elastic.co/docs/explore-analyze/find-and-organize/saved-objects) UI (Stack Management → Kibana → Saved Objects) or the Saved Objects APIs (experimental) to [export](https://www.elastic.co/docs/api/doc/kibana/operation/operation-exportsavedobjectsdefault) and [import](https://www.elastic.co/docs/api/doc/kibana/operation/operation-importsavedobjectsdefault) any necessary connectors before importing detection rules.
 
-        > Similarly, any value lists used for rule exceptions are not included in rule exports or imports. Use the [Manage value lists](https://www.elastic.co/guide/en/security/current/value-lists-exceptions.html#manage-value-lists) UI (Rules → Detection rules (SIEM) → Manage value lists) to export and import value lists separately.
+        > Similarly, any value lists used for rule exceptions are not included in rule exports or imports. Use the [Manage value lists](https://www.elastic.co/docs/solutions/security/detect-and-alert/create-manage-value-lists) UI (Rules → Detection rules (SIEM) → Manage value lists) to export and import value lists separately.
       operationId: ImportRules
       parameters:
         - description: Determines whether existing rules with the same `rule_id` are overwritten.
@@ -17096,7 +17301,7 @@ paths:
                     deleted: 0,
                     failures: []
                     noops: 0,
-                    requests_per_second: '-1,'
+                    requests_per_second: -1,
                     retries:
                       - bulk: 0,
                       - search: 0
@@ -17743,7 +17948,7 @@ paths:
                     deleted: 0,
                     failures: []
                     noops: 0,
-                    requests_per_second: '-1,'
+                    requests_per_second: -1,
                     retries:
                       bulk: 0,
                       search: 0
@@ -18957,7 +19162,7 @@ paths:
                   endpoint_ids:
                     - ed518850-681a-4d60-bb98-e22640cae2a8
                   parameters:
-                    args: '-param1 value1 -param2 value2'
+                    args: -param1 value1 -param2 value2
                     scriptName: my-script.ps1
               SentinelOne:
                 description: SentinelOne runscript
@@ -18967,7 +19172,7 @@ paths:
                   endpoint_ids:
                     - ed518850-681a-4d60-bb98-e22640cae2a8
                   parameters:
-                    inputParams: '--delete --paths-to-delete /tmp/temp_file.txt,/tmp/random_file.txt'
+                    inputParams: --delete --paths-to-delete /tmp/temp_file.txt,/tmp/random_file.txt
                     script: 1111-2222-3333-4444-5555-6666-7777-8888
             schema:
               $ref: '#/components/schemas/Security_Endpoint_Management_API_RunScriptRouteRequestBody'
@@ -19914,10 +20119,25 @@ paths:
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
   /api/entity_store/enable:
     post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_store/enable</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Initialize the entire Entity Store, creating engines for all or specified entity types.
       operationId: InitEntityStore
       requestBody:
         content:
           application/json:
+            examples:
+              initEntityStoreRequest:
+                summary: Initialize with default settings
+                value:
+                  entityTypes:
+                    - host
+                    - user
             schema:
               type: object
               properties:
@@ -19967,20 +20187,47 @@ paths:
                   default: '@timestamp'
                   description: The field to use as the timestamp.
                   type: string
-        description: Schema for the entity store initialization
+        description: Configuration for the entity store initialization.
         required: true
       responses:
         '200':
           content:
             application/json:
+              examples:
+                initEntityStoreExample:
+                  description: The Entity Store was successfully initialized, creating host and user engines in the installing state.
+                  summary: Entity Store initialized with host and user engines
+                  value:
+                    engines:
+                      - delay: 1m
+                        fieldHistoryLength: 10
+                        frequency: 1m
+                        indexPattern: ''
+                        lookbackPeriod: 24h
+                        status: installing
+                        timeout: 180s
+                        timestampField: '@timestamp'
+                        type: host
+                      - delay: 1m
+                        fieldHistoryLength: 10
+                        frequency: 1m
+                        indexPattern: ''
+                        lookbackPeriod: 24h
+                        status: installing
+                        timeout: 180s
+                        timestampField: '@timestamp'
+                        type: user
+                    succeeded: true
               schema:
                 type: object
                 properties:
                   engines:
+                    description: The engine descriptors created during initialization.
                     items:
                       $ref: '#/components/schemas/Security_Entity_Analytics_API_EngineDescriptor'
                     type: array
                   succeeded:
+                    description: Whether the Entity Store was initialized successfully.
                     type: boolean
           description: Successful response
         '400':
@@ -19991,12 +20238,6 @@ paths:
       x-metaTags:
         - content: Kibana
           name: product_name
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_store/enable</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
   /api/entity_store/engines:
     delete:
       operationId: DeleteEntityEngines
@@ -20037,10 +20278,12 @@ paths:
                 type: object
                 properties:
                   deleted:
+                    description: Entity types whose engines were successfully deleted.
                     items:
                       $ref: '#/components/schemas/Security_Entity_Analytics_API_EntityType'
                     type: array
                   still_running:
+                    description: Entity types whose engines are still running.
                     items:
                       $ref: '#/components/schemas/Security_Entity_Analytics_API_EntityType'
                     type: array
@@ -20058,17 +20301,52 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
     get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_store/engines</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Get a list of all installed entity engines and their current status.
       operationId: ListEntityEngines
       responses:
         '200':
           content:
             application/json:
+              examples:
+                listEntityEnginesExample:
+                  description: Returns a list with one running host engine and one stopped user engine.
+                  summary: Two engines installed
+                  value:
+                    count: 2
+                    engines:
+                      - delay: 1m
+                        fieldHistoryLength: 10
+                        frequency: 1m
+                        indexPattern: ''
+                        lookbackPeriod: 24h
+                        status: started
+                        timeout: 180s
+                        timestampField: '@timestamp'
+                        type: host
+                      - delay: 1m
+                        fieldHistoryLength: 10
+                        frequency: 1m
+                        indexPattern: ''
+                        lookbackPeriod: 24h
+                        status: stopped
+                        timeout: 180s
+                        timestampField: '@timestamp'
+                        type: user
               schema:
                 type: object
                 properties:
                   count:
+                    description: The total number of entity engines.
                     type: integer
                   engines:
+                    description: An array of engine descriptors.
                     items:
                       $ref: '#/components/schemas/Security_Entity_Analytics_API_EngineDescriptor'
                     type: array
@@ -20079,12 +20357,6 @@ paths:
       x-metaTags:
         - content: Kibana
           name: product_name
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_store/engines</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
   /api/entity_store/engines/{entityType}:
     delete:
       operationId: DeleteEntityEngine
@@ -20124,6 +20396,7 @@ paths:
                 type: object
                 properties:
                   deleted:
+                    description: Whether the engine was successfully deleted.
                     type: boolean
           description: Successful response
       summary: Delete the Entity Engine
@@ -20139,9 +20412,18 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
     get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_store/engines/{entityType}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Get the engine descriptor for a specific entity type, including its configuration and current status.
       operationId: GetEntityEngine
       parameters:
-        - description: The entity type of the engine (either 'user' or 'host').
+        - description: The entity type of the engine.
+          example: host
           in: path
           name: entityType
           required: true
@@ -20151,6 +20433,20 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                getEntityEngineExample:
+                  description: Returns the engine descriptor for a host engine that is currently running with default settings.
+                  summary: A running host engine
+                  value:
+                    delay: 1m
+                    fieldHistoryLength: 10
+                    frequency: 1m
+                    indexPattern: ''
+                    lookbackPeriod: 24h
+                    status: started
+                    timeout: 180s
+                    timestampField: '@timestamp'
+                    type: host
               schema:
                 $ref: '#/components/schemas/Security_Entity_Analytics_API_EngineDescriptor'
           description: Successful response
@@ -20160,14 +20456,16 @@ paths:
       x-metaTags:
         - content: Kibana
           name: product_name
+  /api/entity_store/engines/{entityType}/init:
+    post:
       description: |-
         **Spaces method and path for this operation:**
 
-        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_store/engines/{entityType}</span></div>
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_store/engines/{entityType}/init</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-  /api/entity_store/engines/{entityType}/init:
-    post:
+
+        Initialize a single entity engine for the specified entity type.
       operationId: InitEntityEngine
       parameters:
         - description: The entity type of the engine.
@@ -20179,6 +20477,16 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              initEntityEngineRequest:
+                summary: Initialize a host engine with default settings
+                value:
+                  delay: 1m
+                  fieldHistoryLength: 10
+                  frequency: 1m
+                  indexPattern: ''
+                  lookbackPeriod: 24h
+                  timestampField: '@timestamp'
             schema:
               type: object
               properties:
@@ -20230,6 +20538,20 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                initEntityEngineExample:
+                  description: A host engine was successfully initialized and is now in the installing state.
+                  summary: Host engine initialized
+                  value:
+                    delay: 1m
+                    fieldHistoryLength: 10
+                    frequency: 1m
+                    indexPattern: ''
+                    lookbackPeriod: 3h
+                    status: installing
+                    timeout: 180s
+                    timestampField: '@timestamp'
+                    type: host
               schema:
                 $ref: '#/components/schemas/Security_Entity_Analytics_API_EngineDescriptor'
           description: Successful response
@@ -20241,17 +20563,20 @@ paths:
       x-metaTags:
         - content: Kibana
           name: product_name
+  /api/entity_store/engines/{entityType}/start:
+    post:
       description: |-
         **Spaces method and path for this operation:**
 
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_store/engines/{entityType}/init</span></div>
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_store/engines/{entityType}/start</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-  /api/entity_store/engines/{entityType}/start:
-    post:
+
+        Start a previously stopped entity engine, resuming transform processing for the given entity type.
       operationId: StartEntityEngine
       parameters:
-        - description: The entity type of the engine
+        - description: The entity type of the engine to start.
+          example: host
           in: path
           name: entityType
           required: true
@@ -20261,10 +20586,17 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                startEntityEngineExample:
+                  description: The engine was successfully started and is now processing data.
+                  summary: Engine started successfully
+                  value:
+                    started: true
               schema:
                 type: object
                 properties:
                   started:
+                    description: Whether the engine was successfully started.
                     type: boolean
           description: Successful response
       summary: Start an Entity Engine
@@ -20273,17 +20605,20 @@ paths:
       x-metaTags:
         - content: Kibana
           name: product_name
+  /api/entity_store/engines/{entityType}/stop:
+    post:
       description: |-
         **Spaces method and path for this operation:**
 
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_store/engines/{entityType}/start</span></div>
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_store/engines/{entityType}/stop</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-  /api/entity_store/engines/{entityType}/stop:
-    post:
+
+        Stop a running entity engine, pausing transform processing for the given entity type.
       operationId: StopEntityEngine
       parameters:
-        - description: The entity type of the engine (either 'user' or 'host').
+        - description: The entity type of the engine to stop.
+          example: host
           in: path
           name: entityType
           required: true
@@ -20293,10 +20628,17 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                stopEntityEngineExample:
+                  description: The engine was successfully stopped and is no longer processing data.
+                  summary: Engine stopped successfully
+                  value:
+                    stopped: true
               schema:
                 type: object
                 properties:
                   stopped:
+                    description: Whether the engine was successfully stopped.
                     type: boolean
           description: Successful response
       summary: Stop an Entity Engine
@@ -20305,55 +20647,104 @@ paths:
       x-metaTags:
         - content: Kibana
           name: product_name
+  /api/entity_store/engines/apply_dataview_indices:
+    post:
       description: |-
         **Spaces method and path for this operation:**
 
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_store/engines/{entityType}/stop</span></div>
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_store/engines/apply_dataview_indices</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-  /api/entity_store/engines/apply_dataview_indices:
-    post:
+
+        Synchronize data view index patterns to all running entity engines so that newly added indices are picked up by the transforms.
       operationId: ApplyEntityEngineDataviewIndices
       responses:
         '200':
           content:
             application/json:
+              examples:
+                applyDataviewIndicesExample:
+                  description: All running engines were successfully updated with the current data view index patterns.
+                  summary: All engines updated
+                  value:
+                    result:
+                      - changes:
+                          indexPatterns:
+                            - logs-*
+                            - filebeat-*
+                            - auditbeat-*
+                        type: host
+                      - changes:
+                          indexPatterns:
+                            - logs-*
+                            - filebeat-*
+                            - auditbeat-*
+                        type: user
+                    success: true
               schema:
                 type: object
                 properties:
                   result:
+                    description: Per-engine update results.
                     items:
                       $ref: '#/components/schemas/Security_Entity_Analytics_API_EngineDataviewUpdateResult'
                     type: array
                   success:
+                    description: Whether all engines updated successfully.
                     type: boolean
           description: Successful response
         '207':
           content:
             application/json:
+              examples:
+                partialSuccessExample:
+                  description: The host engine was updated but the user engine failed due to insufficient privileges.
+                  summary: One engine failed
+                  value:
+                    errors:
+                      - 'Failed to update user engine: insufficient privileges'
+                    result:
+                      - changes:
+                          indexPatterns:
+                            - logs-*
+                            - filebeat-*
+                        type: host
+                    success: false
               schema:
                 type: object
                 properties:
                   errors:
+                    description: Error messages for engines that failed to update.
                     items:
                       type: string
                     type: array
                   result:
+                    description: Per-engine update results for engines that succeeded.
                     items:
                       $ref: '#/components/schemas/Security_Entity_Analytics_API_EngineDataviewUpdateResult'
                     type: array
                   success:
+                    description: Always `false` for a partial success.
                     type: boolean
           description: Partial successful response
         '500':
           content:
             application/json:
+              examples:
+                serverErrorExample:
+                  description: An unexpected error occurred while applying data view indices.
+                  summary: Internal server error
+                  value:
+                    body: An internal error occurred while updating engine indices
+                    statusCode: 500
               schema:
                 type: object
                 properties:
                   body:
+                    description: Error message.
                     type: string
                   statusCode:
+                    description: HTTP status code.
                     type: number
           description: Error response
       summary: Apply DataView indices to all installed engines
@@ -20362,12 +20753,6 @@ paths:
       x-metaTags:
         - content: Kibana
           name: product_name
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_store/engines/apply_dataview_indices</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
   /api/entity_store/entities/{entityType}:
     delete:
       description: |
@@ -20381,7 +20766,9 @@ paths:
         The entity will be immediately deleted from the latest index.  It will remain available in historical snapshots if it has been snapshotted.  The delete operation does not prevent the entity from being recreated if it is observed again in the future. 
       operationId: DeleteSingleEntity
       parameters:
-        - in: path
+        - description: The entity type of the entity to delete.
+          example: user
+          in: path
           name: entityType
           required: true
           schema:
@@ -20389,11 +20776,17 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              deleteEntityRequest:
+                summary: Delete a user entity by ID
+                value:
+                  id: arn:aws:iam::123456789012:user/jane.doe
             schema:
               type: object
               properties:
                 id:
                   description: Identifier of the entity to be deleted, commonly entity.id value.
+                  example: arn:aws:iam::123456789012:user/jane.doe
                   type: string
               required:
                 - id
@@ -20403,10 +20796,17 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                deleteEntityExample:
+                  description: The entity was found and successfully removed from the latest index.
+                  summary: Entity deleted
+                  value:
+                    deleted: true
               schema:
                 type: object
                 properties:
                   deleted:
+                    description: Whether the entity was successfully deleted.
                     type: boolean
           description: Successful response. Entity deleted.
         '404':
@@ -20433,12 +20833,15 @@ paths:
         > Due to technical limitations, create is an async operation. The time for a document to be present in the  > final index depends on the entity store transform and usually takes more than 1 minute.
       operationId: UpsertEntity
       parameters:
-        - in: path
+        - description: The entity type of the entity to create or update.
+          example: user
+          in: path
           name: entityType
           required: true
           schema:
             $ref: '#/components/schemas/Security_Entity_Analytics_API_EntityType'
-        - in: query
+        - description: When true, allows updating protected fields.
+          in: query
           name: force
           required: false
           schema:
@@ -20447,6 +20850,18 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              upsertUserEntityRequest:
+                summary: Create or update a user entity
+                value:
+                  entity:
+                    id: arn:aws:iam::123456789012:user/jane.doe
+                    name: jane.doe
+                    type: user
+                  user:
+                    email:
+                      - jane.doe@example.com
+                    name: jane.doe
             schema:
               $ref: '#/components/schemas/Security_Entity_Analytics_API_Entity'
         description: Schema for the updating a single entity
@@ -20455,6 +20870,18 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                upsertUserEntityResponse:
+                  summary: User entity created
+                  value:
+                    entity:
+                      id: arn:aws:iam::123456789012:user/jane.doe
+                      name: jane.doe
+                      type: user
+                    user:
+                      email:
+                        - jane.doe@example.com
+                      name: jane.doe
               schema:
                 $ref: '#/components/schemas/Security_Entity_Analytics_API_Entity'
           description: Entity updated or created
@@ -20484,7 +20911,8 @@ paths:
         The creation is asynchronous. The time for a document to be present in the  final index depends on the entity store transform and usually takes more than 1 minute.
       operationId: UpsertEntitiesBulk
       parameters:
-        - in: query
+        - description: When true, allows updating protected fields.
+          in: query
           name: force
           required: false
           schema:
@@ -20493,6 +20921,27 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              upsertEntitiesBulkRequest:
+                summary: Bulk upsert a user and a host entity
+                value:
+                  entities:
+                    - record:
+                        entity:
+                          id: arn:aws:iam::123456789012:user/jane.doe
+                          name: jane.doe
+                          type: user
+                        user:
+                          name: jane.doe
+                      type: user
+                    - record:
+                        entity:
+                          id: web-server-01
+                          name: web-server-01
+                          type: host
+                        host:
+                          name: web-server-01
+                      type: host
             schema:
               $ref: '#/components/schemas/Security_Entity_Analytics_API_EntitiesContainer'
         description: Schema for the updating many entities
@@ -20522,12 +20971,15 @@ paths:
         List entities records, paging, sorting and filtering as needed.
       operationId: ListEntities
       parameters:
-        - in: query
+        - description: Field to sort results by.
+          example: entity.name
+          in: query
           name: sort_field
           required: false
           schema:
             type: string
-        - in: query
+        - description: Sort order.
+          in: query
           name: sort_order
           required: false
           schema:
@@ -20535,13 +20987,17 @@ paths:
               - asc
               - desc
             type: string
-        - in: query
+        - description: Page number to return (1-indexed).
+          example: 1
+          in: query
           name: page
           required: false
           schema:
             minimum: 1
             type: integer
-        - in: query
+        - description: Number of entities per page.
+          example: 10
+          in: query
           name: per_page
           required: false
           schema:
@@ -20554,7 +21010,8 @@ paths:
           required: false
           schema:
             type: string
-        - in: query
+        - description: Entity types to include in the results.
+          in: query
           name: entity_types
           required: true
           schema:
@@ -20565,23 +21022,43 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                listEntitiesResponse:
+                  summary: A page of host entities
+                  value:
+                    page: 1
+                    per_page: 10
+                    records:
+                      - entity:
+                          id: web-server-01
+                          name: web-server-01
+                          type: host
+                        host:
+                          ip:
+                            - 10.0.0.1
+                          name: web-server-01
+                    total: 1
               schema:
                 type: object
                 properties:
                   inspect:
                     $ref: '#/components/schemas/Security_Entity_Analytics_API_InspectQuery'
                   page:
+                    description: Current page number.
                     minimum: 1
                     type: integer
                   per_page:
+                    description: Number of entities per page.
                     maximum: 1000
                     minimum: 1
                     type: integer
                   records:
+                    description: The entity records for this page.
                     items:
                       $ref: '#/components/schemas/Security_Entity_Analytics_API_Entity'
                     type: array
                   total:
+                    description: Total number of entities matching the query.
                     minimum: 0
                     type: integer
                 required:
@@ -20598,9 +21075,18 @@ paths:
           name: product_name
   /api/entity_store/status:
     get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_store/status</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Get the overall Entity Store status and per-engine statuses, optionally including component-level health details.
       operationId: GetEntityStoreStatus
       parameters:
-        - description: If true returns a detailed status of the engine including all it's components
+        - description: If true, returns a detailed status of each engine including all its components.
+          example: true
           in: query
           name: include_components
           schema:
@@ -20609,22 +21095,50 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                entityStoreRunning:
+                  description: The Entity Store is running with both host and user engines started and using default settings.
+                  summary: Entity Store running with two engines
+                  value:
+                    engines:
+                      - delay: 1m
+                        fieldHistoryLength: 10
+                        frequency: 1m
+                        indexPattern: ''
+                        lookbackPeriod: 24h
+                        status: started
+                        timeout: 180s
+                        timestampField: '@timestamp'
+                        type: host
+                      - delay: 1m
+                        fieldHistoryLength: 10
+                        frequency: 1m
+                        indexPattern: ''
+                        lookbackPeriod: 24h
+                        status: started
+                        timeout: 180s
+                        timestampField: '@timestamp'
+                        type: user
+                    status: running
               schema:
                 type: object
                 properties:
                   engines:
+                    description: Per-engine status information.
                     items:
                       allOf:
                         - $ref: '#/components/schemas/Security_Entity_Analytics_API_EngineDescriptor'
                         - type: object
                           properties:
                             components:
+                              description: Detailed component-level status. Only included when include_components is true.
                               items:
                                 $ref: '#/components/schemas/Security_Entity_Analytics_API_EngineComponentStatus'
                               type: array
                     type: array
                   status:
                     $ref: '#/components/schemas/Security_Entity_Analytics_API_StoreStatus'
+                    description: The overall status of the Entity Store.
                 required:
                   - status
                   - engines
@@ -20635,12 +21149,6 @@ paths:
       x-metaTags:
         - content: Kibana
           name: product_name
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_store/status</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
   /api/exception_lists:
     delete:
       description: |-
@@ -20716,7 +21224,7 @@ paths:
                 badRequest:
                   value:
                     error: Bad Request
-                    message: '[request query]: namespace_type.0: Invalid enum value. Expected ''agnostic'' | ''single'', received ''blob'''
+                    message: "[request query]: namespace_type.0: Invalid enum value. Expected 'agnostic' | 'single', received 'blob'"
                     statusCode: 400
               schema:
                 oneOf:
@@ -20844,7 +21352,7 @@ paths:
                 badRequest:
                   value:
                     error: Bad Request
-                    message: '[request query]: namespace_type.0: Invalid enum value. Expected ''agnostic'' | ''single'', received ''blob'''
+                    message: "[request query]: namespace_type.0: Invalid enum value. Expected 'agnostic' | 'single', received 'blob'"
                     statusCode: 400
               schema:
                 oneOf:
@@ -21066,7 +21574,10 @@ paths:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]"
+                    message: |-
+                      [security_exception
+                      	Root causes:
+                      		security_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
                     statusCode: 401
               schema:
                 $ref: '#/components/schemas/Security_Exceptions_API_PlatformErrorResponse'
@@ -21332,7 +21843,7 @@ paths:
                 badRequest:
                   value:
                     error: Bad Request
-                    message: '[request query]: namespace_type: Invalid enum value. Expected ''agnostic'' | ''single'', received ''foo'''
+                    message: "[request query]: namespace_type: Invalid enum value. Expected 'agnostic' | 'single', received 'foo'"
                     statusCode: 400
               schema:
                 oneOf:
@@ -21652,7 +22163,7 @@ paths:
                 badRequest:
                   value:
                     error: Bad Request
-                    message: '[request query]: namespace_type.0: Invalid enum value. Expected ''agnostic'' | ''single'', received ''blob'''
+                    message: "[request query]: namespace_type.0: Invalid enum value. Expected 'agnostic' | 'single', received 'blob'"
                     statusCode: 400
               schema:
                 oneOf:
@@ -21936,7 +22447,7 @@ paths:
               schema:
                 example:
                   error: Bad Request
-                  message: '[request query]: namespace_type.0: Invalid enum value. Expected ''agnostic'' | ''single'', received ''blob'''
+                  message: "[request query]: namespace_type.0: Invalid enum value. Expected 'agnostic' | 'single', received 'blob'"
                   statusCode: 400
                 oneOf:
                   - $ref: '#/components/schemas/Security_Exceptions_API_PlatformErrorResponse'
@@ -22073,7 +22584,7 @@ paths:
                 badRequest:
                   value:
                     error: Bad Request
-                    message: '[request query]: namespace_type.0: Invalid enum value. Expected ''agnostic'' | ''single'', received ''blob'''
+                    message: "[request query]: namespace_type.0: Invalid enum value. Expected 'agnostic' | 'single', received 'blob'"
                     statusCode: 400
               schema:
                 oneOf:
@@ -22789,7 +23300,7 @@ paths:
                 badRequest:
                   value:
                     error: Bad Request
-                    message: '[request query]: namespace_type.0: Invalid enum value. Expected ''agnostic'' | ''single'', received ''blob'''
+                    message: "[request query]: namespace_type.0: Invalid enum value. Expected 'agnostic' | 'single', received 'blob'"
                     statusCode: 400
               schema:
                 oneOf:
@@ -22924,7 +23435,7 @@ paths:
                 badRequest:
                   value:
                     error: Bad Request
-                    message: '[request query]: namespace_type.0: Invalid enum value. Expected ''agnostic'' | ''single'', received ''blob'''
+                    message: "[request query]: namespace_type.0: Invalid enum value. Expected 'agnostic' | 'single', received 'blob'"
                     statusCode: 400
               schema:
                 oneOf:
@@ -23068,7 +23579,10 @@ paths:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]"
+                    message: |-
+                      [security_exception
+                      	Root causes:
+                      		security_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
                     statusCode: 401
               schema:
                 $ref: '#/components/schemas/Security_Exceptions_API_PlatformErrorResponse'
@@ -24002,7 +24516,7 @@ paths:
                             required:
                               - name
                               - value
-                          maxItems: 10
+                          maxItems: 100
                           type: array
                         has_fleet_server:
                           type: boolean
@@ -24256,7 +24770,7 @@ paths:
                                                   - enabled
                                                   - data_stream
                                                   - compiled_stream
-                                              maxItems: 100
+                                              maxItems: 1000
                                               type: array
                                             type:
                                               type: string
@@ -24299,9 +24813,9 @@ paths:
                                                   vars:
                                                     additionalProperties:
                                                       anyOf:
-                                                        - type: boolean
                                                         - type: string
                                                         - type: number
+                                                        - type: boolean
                                                         - items:
                                                             type: string
                                                           maxItems: 100
@@ -24328,9 +24842,9 @@ paths:
                                             vars:
                                               additionalProperties:
                                                 anyOf:
-                                                  - type: boolean
                                                   - type: string
                                                   - type: number
+                                                  - type: boolean
                                                   - items:
                                                       type: string
                                                     maxItems: 100
@@ -24441,7 +24955,7 @@ paths:
                                           type: string
                                       required:
                                         - id
-                                    maxItems: 100
+                                    maxItems: 1000
                                     type: array
                                   spaceIds:
                                     items:
@@ -24479,9 +24993,9 @@ paths:
                                         type: object
                                       - additionalProperties:
                                           anyOf:
-                                            - type: boolean
                                             - type: string
                                             - type: number
+                                            - type: boolean
                                             - items:
                                                 type: string
                                               maxItems: 100
@@ -24747,7 +25261,7 @@ paths:
                     required:
                       - name
                       - value
-                  maxItems: 10
+                  maxItems: 100
                   type: array
                 has_fleet_server:
                   type: boolean
@@ -24984,7 +25498,7 @@ paths:
                           required:
                             - name
                             - value
-                        maxItems: 10
+                        maxItems: 100
                         type: array
                       has_fleet_server:
                         type: boolean
@@ -25238,7 +25752,7 @@ paths:
                                                 - enabled
                                                 - data_stream
                                                 - compiled_stream
-                                            maxItems: 100
+                                            maxItems: 1000
                                             type: array
                                           type:
                                             type: string
@@ -25281,9 +25795,9 @@ paths:
                                                 vars:
                                                   additionalProperties:
                                                     anyOf:
-                                                      - type: boolean
                                                       - type: string
                                                       - type: number
+                                                      - type: boolean
                                                       - items:
                                                           type: string
                                                         maxItems: 100
@@ -25310,9 +25824,9 @@ paths:
                                           vars:
                                             additionalProperties:
                                               anyOf:
-                                                - type: boolean
                                                 - type: string
                                                 - type: number
+                                                - type: boolean
                                                 - items:
                                                     type: string
                                                   maxItems: 100
@@ -25423,7 +25937,7 @@ paths:
                                         type: string
                                     required:
                                       - id
-                                  maxItems: 100
+                                  maxItems: 1000
                                   type: array
                                 spaceIds:
                                   items:
@@ -25461,9 +25975,9 @@ paths:
                                       type: object
                                     - additionalProperties:
                                         anyOf:
-                                          - type: boolean
                                           - type: string
                                           - type: number
+                                          - type: boolean
                                           - items:
                                               type: string
                                             maxItems: 100
@@ -25750,7 +26264,7 @@ paths:
                             required:
                               - name
                               - value
-                          maxItems: 10
+                          maxItems: 100
                           type: array
                         has_fleet_server:
                           type: boolean
@@ -26004,7 +26518,7 @@ paths:
                                                   - enabled
                                                   - data_stream
                                                   - compiled_stream
-                                              maxItems: 100
+                                              maxItems: 1000
                                               type: array
                                             type:
                                               type: string
@@ -26047,9 +26561,9 @@ paths:
                                                   vars:
                                                     additionalProperties:
                                                       anyOf:
-                                                        - type: boolean
                                                         - type: string
                                                         - type: number
+                                                        - type: boolean
                                                         - items:
                                                             type: string
                                                           maxItems: 100
@@ -26076,9 +26590,9 @@ paths:
                                             vars:
                                               additionalProperties:
                                                 anyOf:
-                                                  - type: boolean
                                                   - type: string
                                                   - type: number
+                                                  - type: boolean
                                                   - items:
                                                       type: string
                                                     maxItems: 100
@@ -26189,7 +26703,7 @@ paths:
                                           type: string
                                       required:
                                         - id
-                                    maxItems: 100
+                                    maxItems: 1000
                                     type: array
                                   spaceIds:
                                     items:
@@ -26227,9 +26741,9 @@ paths:
                                         type: object
                                       - additionalProperties:
                                           anyOf:
-                                            - type: boolean
                                             - type: string
                                             - type: number
+                                            - type: boolean
                                             - items:
                                                 type: string
                                               maxItems: 100
@@ -26495,7 +27009,7 @@ paths:
                           required:
                             - name
                             - value
-                        maxItems: 10
+                        maxItems: 100
                         type: array
                       has_fleet_server:
                         type: boolean
@@ -26749,7 +27263,7 @@ paths:
                                                 - enabled
                                                 - data_stream
                                                 - compiled_stream
-                                            maxItems: 100
+                                            maxItems: 1000
                                             type: array
                                           type:
                                             type: string
@@ -26792,9 +27306,9 @@ paths:
                                                 vars:
                                                   additionalProperties:
                                                     anyOf:
-                                                      - type: boolean
                                                       - type: string
                                                       - type: number
+                                                      - type: boolean
                                                       - items:
                                                           type: string
                                                         maxItems: 100
@@ -26821,9 +27335,9 @@ paths:
                                           vars:
                                             additionalProperties:
                                               anyOf:
-                                                - type: boolean
                                                 - type: string
                                                 - type: number
+                                                - type: boolean
                                                 - items:
                                                     type: string
                                                   maxItems: 100
@@ -26934,7 +27448,7 @@ paths:
                                         type: string
                                     required:
                                       - id
-                                  maxItems: 100
+                                  maxItems: 1000
                                   type: array
                                 spaceIds:
                                   items:
@@ -26972,9 +27486,9 @@ paths:
                                       type: object
                                     - additionalProperties:
                                         anyOf:
-                                          - type: boolean
                                           - type: string
                                           - type: number
+                                          - type: boolean
                                           - items:
                                               type: string
                                             maxItems: 100
@@ -27239,7 +27753,7 @@ paths:
                     required:
                       - name
                       - value
-                  maxItems: 10
+                  maxItems: 100
                   type: array
                 has_fleet_server:
                   type: boolean
@@ -27476,7 +27990,7 @@ paths:
                           required:
                             - name
                             - value
-                        maxItems: 10
+                        maxItems: 100
                         type: array
                       has_fleet_server:
                         type: boolean
@@ -27730,7 +28244,7 @@ paths:
                                                 - enabled
                                                 - data_stream
                                                 - compiled_stream
-                                            maxItems: 100
+                                            maxItems: 1000
                                             type: array
                                           type:
                                             type: string
@@ -27773,9 +28287,9 @@ paths:
                                                 vars:
                                                   additionalProperties:
                                                     anyOf:
-                                                      - type: boolean
                                                       - type: string
                                                       - type: number
+                                                      - type: boolean
                                                       - items:
                                                           type: string
                                                         maxItems: 100
@@ -27802,9 +28316,9 @@ paths:
                                           vars:
                                             additionalProperties:
                                               anyOf:
-                                                - type: boolean
                                                 - type: string
                                                 - type: number
+                                                - type: boolean
                                                 - items:
                                                     type: string
                                                   maxItems: 100
@@ -27915,7 +28429,7 @@ paths:
                                         type: string
                                     required:
                                       - id
-                                  maxItems: 100
+                                  maxItems: 1000
                                   type: array
                                 spaceIds:
                                   items:
@@ -27953,9 +28467,9 @@ paths:
                                       type: object
                                     - additionalProperties:
                                         anyOf:
-                                          - type: boolean
                                           - type: string
                                           - type: number
+                                          - type: boolean
                                           - items:
                                               type: string
                                             maxItems: 100
@@ -28334,7 +28848,7 @@ paths:
                           required:
                             - name
                             - value
-                        maxItems: 10
+                        maxItems: 100
                         type: array
                       has_fleet_server:
                         type: boolean
@@ -28588,7 +29102,7 @@ paths:
                                                 - enabled
                                                 - data_stream
                                                 - compiled_stream
-                                            maxItems: 100
+                                            maxItems: 1000
                                             type: array
                                           type:
                                             type: string
@@ -28631,9 +29145,9 @@ paths:
                                                 vars:
                                                   additionalProperties:
                                                     anyOf:
-                                                      - type: boolean
                                                       - type: string
                                                       - type: number
+                                                      - type: boolean
                                                       - items:
                                                           type: string
                                                         maxItems: 100
@@ -28660,9 +29174,9 @@ paths:
                                           vars:
                                             additionalProperties:
                                               anyOf:
-                                                - type: boolean
                                                 - type: string
                                                 - type: number
+                                                - type: boolean
                                                 - items:
                                                     type: string
                                                   maxItems: 100
@@ -28773,7 +29287,7 @@ paths:
                                         type: string
                                     required:
                                       - id
-                                  maxItems: 100
+                                  maxItems: 1000
                                   type: array
                                 spaceIds:
                                   items:
@@ -28811,9 +29325,9 @@ paths:
                                       type: object
                                     - additionalProperties:
                                         anyOf:
-                                          - type: boolean
                                           - type: string
                                           - type: number
+                                          - type: boolean
                                           - items:
                                               type: string
                                             maxItems: 100
@@ -30315,9 +30829,9 @@ paths:
                             vars:
                               additionalProperties:
                                 anyOf:
-                                  - type: boolean
                                   - type: string
                                   - type: number
+                                  - type: boolean
                                   - items:
                                       type: string
                                     maxItems: 100
@@ -30344,9 +30858,9 @@ paths:
                       vars:
                         additionalProperties:
                           anyOf:
-                            - type: boolean
                             - type: string
                             - type: number
+                            - type: boolean
                             - items:
                                 type: string
                               maxItems: 100
@@ -30425,9 +30939,9 @@ paths:
                 vars:
                   additionalProperties:
                     anyOf:
-                      - type: boolean
                       - type: string
                       - type: number
+                      - type: boolean
                       - items:
                           type: string
                         maxItems: 100
@@ -30755,7 +31269,7 @@ paths:
                                       - enabled
                                       - data_stream
                                       - compiled_stream
-                                  maxItems: 100
+                                  maxItems: 1000
                                   type: array
                                 type:
                                   type: string
@@ -30798,9 +31312,9 @@ paths:
                                       vars:
                                         additionalProperties:
                                           anyOf:
-                                            - type: boolean
                                             - type: string
                                             - type: number
+                                            - type: boolean
                                             - items:
                                                 type: string
                                               maxItems: 100
@@ -30827,9 +31341,9 @@ paths:
                                 vars:
                                   additionalProperties:
                                     anyOf:
-                                      - type: boolean
                                       - type: string
                                       - type: number
+                                      - type: boolean
                                       - items:
                                           type: string
                                         maxItems: 100
@@ -30940,7 +31454,7 @@ paths:
                               type: string
                           required:
                             - id
-                        maxItems: 100
+                        maxItems: 1000
                         type: array
                       spaceIds:
                         items:
@@ -30978,9 +31492,9 @@ paths:
                             type: object
                           - additionalProperties:
                               anyOf:
-                                - type: boolean
                                 - type: string
                                 - type: number
+                                - type: boolean
                                 - items:
                                     type: string
                                   maxItems: 100
@@ -31579,6 +32093,8 @@ paths:
                                     - UPG_WATCHING
                                     - UPG_ROLLBACK
                                   type: string
+                                reason:
+                                  type: string
                                 retry_error_msg:
                                   type: string
                                 retry_until:
@@ -32120,6 +32636,8 @@ paths:
                                   - UPG_WATCHING
                                   - UPG_ROLLBACK
                                 type: string
+                              reason:
+                                type: string
                               retry_error_msg:
                                 type: string
                               retry_until:
@@ -32516,6 +33034,8 @@ paths:
                                   - UPG_FAILED
                                   - UPG_WATCHING
                                   - UPG_ROLLBACK
+                                type: string
+                              reason:
                                 type: string
                               retry_error_msg:
                                 type: string
@@ -33079,13 +33599,21 @@ paths:
           content:
             application/json:
               schema:
-                additionalProperties: false
-                type: object
-                properties:
-                  actionId:
-                    type: string
-                required:
-                  - actionId
+                anyOf:
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      actionId:
+                        type: string
+                    required:
+                      - actionId
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      count:
+                        type: number
+                    required:
+                      - count
           description: 'OK: A successful request.'
         '400':
           content:
@@ -33780,6 +34308,8 @@ paths:
                     - type: string
                 batchSize:
                   type: number
+                dryRun:
+                  type: boolean
                 enrollment_token:
                   type: string
                 settings:
@@ -33829,13 +34359,21 @@ paths:
           content:
             application/json:
               schema:
-                additionalProperties: false
-                type: object
-                properties:
-                  actionId:
-                    type: string
-                required:
-                  - actionId
+                anyOf:
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      actionId:
+                        type: string
+                    required:
+                      - actionId
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      count:
+                        type: number
+                    required:
+                      - count
           description: 'OK: A successful request.'
         '400':
           content:
@@ -33907,6 +34445,8 @@ paths:
                     - type: string
                 batchSize:
                   type: number
+                dryRun:
+                  type: boolean
                 user_info:
                   additionalProperties: false
                   type: object
@@ -33928,13 +34468,21 @@ paths:
                   value:
                     actionId: actionId
               schema:
-                additionalProperties: false
-                type: object
-                properties:
-                  actionId:
-                    type: string
-                required:
-                  - actionId
+                anyOf:
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      actionId:
+                        type: string
+                    required:
+                      - actionId
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      count:
+                        type: number
+                    required:
+                      - count
           description: 'OK: A successful request.'
         '400':
           content:
@@ -34003,6 +34551,8 @@ paths:
                     - type: string
                 batchSize:
                   type: number
+                dryRun:
+                  type: boolean
                 includeInactive:
                   default: false
                   type: boolean
@@ -34016,13 +34566,21 @@ paths:
           content:
             application/json:
               schema:
-                additionalProperties: false
-                type: object
-                properties:
-                  actionId:
-                    type: string
-                required:
-                  - actionId
+                anyOf:
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      actionId:
+                        type: string
+                    required:
+                      - actionId
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      count:
+                        type: number
+                    required:
+                      - count
           description: 'OK: A successful request.'
         '400':
           content:
@@ -34093,6 +34651,8 @@ paths:
                     - type: string
                 batchSize:
                   type: number
+                dryRun:
+                  type: boolean
               required:
                 - agents
       responses:
@@ -34100,13 +34660,21 @@ paths:
           content:
             application/json:
               schema:
-                additionalProperties: false
-                type: object
-                properties:
-                  actionId:
-                    type: string
-                required:
-                  - actionId
+                anyOf:
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      actionId:
+                        type: string
+                    required:
+                      - actionId
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      count:
+                        type: number
+                    required:
+                      - count
           description: 'OK: A successful request.'
         '400':
           content:
@@ -34178,6 +34746,8 @@ paths:
                     - type: string
                 batchSize:
                   type: number
+                dryRun:
+                  type: boolean
                 includeInactive:
                   default: false
                   type: boolean
@@ -34194,16 +34764,25 @@ paths:
                       - actionId1
                       - actionId2
               schema:
-                additionalProperties: false
-                type: object
-                properties:
-                  actionIds:
-                    items:
-                      type: string
-                    maxItems: 10000
-                    type: array
-                required:
-                  - actionIds
+                anyOf:
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      actionIds:
+                        items:
+                          maxLength: 36
+                          type: string
+                        maxItems: 10000
+                        type: array
+                    required:
+                      - actionIds
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      count:
+                        type: number
+                    required:
+                      - count
           description: 'OK: A successful request.'
         '400':
           content:
@@ -34274,6 +34853,8 @@ paths:
                       type: string
                 batchSize:
                   type: number
+                dryRun:
+                  type: boolean
                 force:
                   description: Unenrolls hosted agents too
                   type: boolean
@@ -34290,13 +34871,21 @@ paths:
           content:
             application/json:
               schema:
-                additionalProperties: false
-                type: object
-                properties:
-                  actionId:
-                    type: string
-                required:
-                  - actionId
+                anyOf:
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      actionId:
+                        type: string
+                    required:
+                      - actionId
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      count:
+                        type: number
+                    required:
+                      - count
           description: 'OK: A successful request.'
         '400':
           content:
@@ -34360,6 +34949,8 @@ paths:
                     - type: string
                 batchSize:
                   type: number
+                dryRun:
+                  type: boolean
                 includeInactive:
                   default: false
                   type: boolean
@@ -34380,13 +34971,21 @@ paths:
           content:
             application/json:
               schema:
-                additionalProperties: false
-                type: object
-                properties:
-                  actionId:
-                    type: string
-                required:
-                  - actionId
+                anyOf:
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      actionId:
+                        type: string
+                    required:
+                      - actionId
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      count:
+                        type: number
+                    required:
+                      - count
           description: 'OK: A successful request.'
         '400':
           content:
@@ -34450,6 +35049,8 @@ paths:
                     - type: string
                 batchSize:
                   type: number
+                dryRun:
+                  type: boolean
                 force:
                   type: boolean
                 includeInactive:
@@ -34474,13 +35075,21 @@ paths:
           content:
             application/json:
               schema:
-                additionalProperties: false
-                type: object
-                properties:
-                  actionId:
-                    type: string
-                required:
-                  - actionId
+                anyOf:
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      actionId:
+                        type: string
+                    required:
+                      - actionId
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      count:
+                        type: number
+                    required:
+                      - count
           description: 'OK: A successful request.'
         '400':
           content:
@@ -35775,71 +36384,13 @@ paths:
                 properties:
                   items:
                     items:
-                      additionalProperties: false
-                      type: object
-                      properties:
-                        active:
-                          description: When false, the enrollment API key is revoked and cannot be used for enrolling Elastic Agents.
-                          type: boolean
-                        api_key:
-                          description: The enrollment API key (token) used for enrolling Elastic Agents.
-                          type: string
-                        api_key_id:
-                          description: The ID of the API key in the Security API.
-                          type: string
-                        created_at:
-                          type: string
-                        hidden:
-                          type: boolean
-                        id:
-                          type: string
-                        name:
-                          description: The name of the enrollment API key.
-                          type: string
-                        policy_id:
-                          description: The ID of the agent policy the Elastic Agent will be enrolled in.
-                          type: string
-                      required:
-                        - id
-                        - api_key_id
-                        - api_key
-                        - active
-                        - created_at
+                      $ref: '#/components/schemas/Kibana_HTTP_APIs_enrollment_api_key'
                     maxItems: 10000
                     type: array
                   list:
                     deprecated: true
                     items:
-                      additionalProperties: false
-                      type: object
-                      properties:
-                        active:
-                          description: When false, the enrollment API key is revoked and cannot be used for enrolling Elastic Agents.
-                          type: boolean
-                        api_key:
-                          description: The enrollment API key (token) used for enrolling Elastic Agents.
-                          type: string
-                        api_key_id:
-                          description: The ID of the API key in the Security API.
-                          type: string
-                        created_at:
-                          type: string
-                        hidden:
-                          type: boolean
-                        id:
-                          type: string
-                        name:
-                          description: The name of the enrollment API key.
-                          type: string
-                        policy_id:
-                          description: The ID of the agent policy the Elastic Agent will be enrolled in.
-                          type: string
-                      required:
-                        - id
-                        - api_key_id
-                        - api_key
-                        - active
-                        - created_at
+                      $ref: '#/components/schemas/Kibana_HTTP_APIs_enrollment_api_key'
                     maxItems: 10000
                     type: array
                   page:
@@ -35904,17 +36455,7 @@ paths:
         content:
           application/json:
             schema:
-              additionalProperties: false
-              type: object
-              properties:
-                expiration:
-                  type: string
-                name:
-                  type: string
-                policy_id:
-                  type: string
-              required:
-                - policy_id
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_new_enrollment_api_key'
       responses:
         '200':
           content:
@@ -35928,36 +36469,7 @@ paths:
                       - created
                     type: string
                   item:
-                    additionalProperties: false
-                    type: object
-                    properties:
-                      active:
-                        description: When false, the enrollment API key is revoked and cannot be used for enrolling Elastic Agents.
-                        type: boolean
-                      api_key:
-                        description: The enrollment API key (token) used for enrolling Elastic Agents.
-                        type: string
-                      api_key_id:
-                        description: The ID of the API key in the Security API.
-                        type: string
-                      created_at:
-                        type: string
-                      hidden:
-                        type: boolean
-                      id:
-                        type: string
-                      name:
-                        description: The name of the enrollment API key.
-                        type: string
-                      policy_id:
-                        description: The ID of the agent policy the Elastic Agent will be enrolled in.
-                        type: string
-                    required:
-                      - id
-                      - api_key_id
-                      - api_key
-                      - active
-                      - created_at
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_enrollment_api_key'
                 required:
                   - item
                   - action
@@ -36080,36 +36592,7 @@ paths:
                 type: object
                 properties:
                   item:
-                    additionalProperties: false
-                    type: object
-                    properties:
-                      active:
-                        description: When false, the enrollment API key is revoked and cannot be used for enrolling Elastic Agents.
-                        type: boolean
-                      api_key:
-                        description: The enrollment API key (token) used for enrolling Elastic Agents.
-                        type: string
-                      api_key_id:
-                        description: The ID of the API key in the Security API.
-                        type: string
-                      created_at:
-                        type: string
-                      hidden:
-                        type: boolean
-                      id:
-                        type: string
-                      name:
-                        description: The name of the enrollment API key.
-                        type: string
-                      policy_id:
-                        description: The ID of the agent policy the Elastic Agent will be enrolled in.
-                        type: string
-                    required:
-                      - id
-                      - api_key_id
-                      - api_key
-                      - active
-                      - created_at
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_enrollment_api_key'
                 required:
                   - item
           description: 'OK: A successful request.'
@@ -36702,7 +37185,7 @@ paths:
                         categories:
                           items:
                             type: string
-                          maxItems: 10
+                          maxItems: 100
                           type: array
                         conditions:
                           additionalProperties: true
@@ -36746,7 +37229,7 @@ paths:
                                     type: string
                                 required:
                                   - name
-                              maxItems: 10
+                              maxItems: 100
                               type: array
                             fields:
                               items:
@@ -36757,7 +37240,7 @@ paths:
                                     type: string
                                 required:
                                   - name
-                              maxItems: 10
+                              maxItems: 100
                               type: array
                         download:
                           type: string
@@ -36782,7 +37265,7 @@ paths:
                                 type: string
                             required:
                               - src
-                          maxItems: 10
+                          maxItems: 100
                           type: array
                         id:
                           type: string
@@ -37032,7 +37515,7 @@ paths:
                           items:
                             additionalProperties: {}
                             type: object
-                          maxItems: 100
+                          maxItems: 1000
                           type: array
                         readme:
                           type: string
@@ -38195,12 +38678,12 @@ paths:
                             asset_ids:
                               items:
                                 type: string
-                              maxItems: 100
+                              maxItems: 1000
                               type: array
                             asset_types:
                               items:
                                 type: string
-                              maxItems: 10
+                              maxItems: 100
                               type: array
                             text:
                               type: string
@@ -38214,7 +38697,7 @@ paths:
                       categories:
                         items:
                           type: string
-                        maxItems: 10
+                        maxItems: 100
                         type: array
                       conditions:
                         additionalProperties: true
@@ -38258,7 +38741,7 @@ paths:
                                   type: string
                               required:
                                 - name
-                            maxItems: 10
+                            maxItems: 100
                             type: array
                           fields:
                             items:
@@ -38269,7 +38752,7 @@ paths:
                                   type: string
                               required:
                                 - name
-                            maxItems: 10
+                            maxItems: 100
                             type: array
                       download:
                         type: string
@@ -38297,7 +38780,7 @@ paths:
                               type: string
                           required:
                             - src
-                        maxItems: 10
+                        maxItems: 100
                         type: array
                       installationInfo:
                         additionalProperties: true
@@ -38551,7 +39034,7 @@ paths:
                         items:
                           additionalProperties: {}
                           type: object
-                        maxItems: 100
+                        maxItems: 1000
                         type: array
                       readme:
                         type: string
@@ -38580,7 +39063,7 @@ paths:
                               type: string
                           required:
                             - src
-                        maxItems: 10
+                        maxItems: 100
                         type: array
                       signature_path:
                         type: string
@@ -38902,12 +39385,12 @@ paths:
                             asset_ids:
                               items:
                                 type: string
-                              maxItems: 100
+                              maxItems: 1000
                               type: array
                             asset_types:
                               items:
                                 type: string
-                              maxItems: 10
+                              maxItems: 100
                               type: array
                             text:
                               type: string
@@ -38921,7 +39404,7 @@ paths:
                       categories:
                         items:
                           type: string
-                        maxItems: 10
+                        maxItems: 100
                         type: array
                       conditions:
                         additionalProperties: true
@@ -38965,7 +39448,7 @@ paths:
                                   type: string
                               required:
                                 - name
-                            maxItems: 10
+                            maxItems: 100
                             type: array
                           fields:
                             items:
@@ -38976,7 +39459,7 @@ paths:
                                   type: string
                               required:
                                 - name
-                            maxItems: 10
+                            maxItems: 100
                             type: array
                       download:
                         type: string
@@ -39004,7 +39487,7 @@ paths:
                               type: string
                           required:
                             - src
-                        maxItems: 10
+                        maxItems: 100
                         type: array
                       installationInfo:
                         additionalProperties: true
@@ -39258,7 +39741,7 @@ paths:
                         items:
                           additionalProperties: {}
                           type: object
-                        maxItems: 100
+                        maxItems: 1000
                         type: array
                       readme:
                         type: string
@@ -39287,7 +39770,7 @@ paths:
                               type: string
                           required:
                             - src
-                        maxItems: 10
+                        maxItems: 100
                         type: array
                       signature_path:
                         type: string
@@ -40076,7 +40559,7 @@ paths:
                                 type: string
                             required:
                               - src
-                          maxItems: 10
+                          maxItems: 100
                           type: array
                         name:
                           type: string
@@ -46783,7 +47266,7 @@ paths:
                                         - enabled
                                         - data_stream
                                         - compiled_stream
-                                    maxItems: 100
+                                    maxItems: 1000
                                     type: array
                                   type:
                                     type: string
@@ -46826,9 +47309,9 @@ paths:
                                         vars:
                                           additionalProperties:
                                             anyOf:
-                                              - type: boolean
                                               - type: string
                                               - type: number
+                                              - type: boolean
                                               - items:
                                                   type: string
                                                 maxItems: 100
@@ -46855,9 +47338,9 @@ paths:
                                   vars:
                                     additionalProperties:
                                       anyOf:
-                                        - type: boolean
                                         - type: string
                                         - type: number
+                                        - type: boolean
                                         - items:
                                             type: string
                                           maxItems: 100
@@ -46968,7 +47451,7 @@ paths:
                                 type: string
                             required:
                               - id
-                          maxItems: 100
+                          maxItems: 1000
                           type: array
                         spaceIds:
                           items:
@@ -47006,9 +47489,9 @@ paths:
                               type: object
                             - additionalProperties:
                                 anyOf:
-                                  - type: boolean
                                   - type: string
                                   - type: number
+                                  - type: boolean
                                   - items:
                                       type: string
                                     maxItems: 100
@@ -47251,7 +47734,7 @@ paths:
                                 - enabled
                                 - data_stream
                                 - compiled_stream
-                            maxItems: 100
+                            maxItems: 1000
                             type: array
                           type:
                             type: string
@@ -47418,9 +47901,9 @@ paths:
                                 vars:
                                   additionalProperties:
                                     anyOf:
-                                      - type: boolean
                                       - type: string
                                       - type: number
+                                      - type: boolean
                                       - items:
                                           type: string
                                         maxItems: 100
@@ -47447,9 +47930,9 @@ paths:
                           vars:
                             additionalProperties:
                               anyOf:
-                                - type: boolean
                                 - type: string
                                 - type: number
+                                - type: boolean
                                 - items:
                                     type: string
                                   maxItems: 100
@@ -47544,9 +48027,9 @@ paths:
                     vars:
                       additionalProperties:
                         anyOf:
-                          - type: boolean
                           - type: string
                           - type: number
+                          - type: boolean
                           - items:
                               type: string
                             maxItems: 100
@@ -47735,7 +48218,7 @@ paths:
                                       - enabled
                                       - data_stream
                                       - compiled_stream
-                                  maxItems: 100
+                                  maxItems: 1000
                                   type: array
                                 type:
                                   type: string
@@ -47778,9 +48261,9 @@ paths:
                                       vars:
                                         additionalProperties:
                                           anyOf:
-                                            - type: boolean
                                             - type: string
                                             - type: number
+                                            - type: boolean
                                             - items:
                                                 type: string
                                               maxItems: 100
@@ -47807,9 +48290,9 @@ paths:
                                 vars:
                                   additionalProperties:
                                     anyOf:
-                                      - type: boolean
                                       - type: string
                                       - type: number
+                                      - type: boolean
                                       - items:
                                           type: string
                                         maxItems: 100
@@ -47920,7 +48403,7 @@ paths:
                               type: string
                           required:
                             - id
-                        maxItems: 100
+                        maxItems: 1000
                         type: array
                       spaceIds:
                         items:
@@ -47958,9 +48441,9 @@ paths:
                             type: object
                           - additionalProperties:
                               anyOf:
-                                - type: boolean
                                 - type: string
                                 - type: number
+                                - type: boolean
                                 - items:
                                     type: string
                                   maxItems: 100
@@ -48254,7 +48737,7 @@ paths:
                                         - enabled
                                         - data_stream
                                         - compiled_stream
-                                    maxItems: 100
+                                    maxItems: 1000
                                     type: array
                                   type:
                                     type: string
@@ -48297,9 +48780,9 @@ paths:
                                         vars:
                                           additionalProperties:
                                             anyOf:
-                                              - type: boolean
                                               - type: string
                                               - type: number
+                                              - type: boolean
                                               - items:
                                                   type: string
                                                 maxItems: 100
@@ -48326,9 +48809,9 @@ paths:
                                   vars:
                                     additionalProperties:
                                       anyOf:
-                                        - type: boolean
                                         - type: string
                                         - type: number
+                                        - type: boolean
                                         - items:
                                             type: string
                                           maxItems: 100
@@ -48439,7 +48922,7 @@ paths:
                                 type: string
                             required:
                               - id
-                          maxItems: 100
+                          maxItems: 1000
                           type: array
                         spaceIds:
                           items:
@@ -48477,9 +48960,9 @@ paths:
                               type: object
                             - additionalProperties:
                                 anyOf:
-                                  - type: boolean
                                   - type: string
                                   - type: number
+                                  - type: boolean
                                   - items:
                                       type: string
                                     maxItems: 100
@@ -48822,7 +49305,7 @@ paths:
                                       - enabled
                                       - data_stream
                                       - compiled_stream
-                                  maxItems: 100
+                                  maxItems: 1000
                                   type: array
                                 type:
                                   type: string
@@ -48865,9 +49348,9 @@ paths:
                                       vars:
                                         additionalProperties:
                                           anyOf:
-                                            - type: boolean
                                             - type: string
                                             - type: number
+                                            - type: boolean
                                             - items:
                                                 type: string
                                               maxItems: 100
@@ -48894,9 +49377,9 @@ paths:
                                 vars:
                                   additionalProperties:
                                     anyOf:
-                                      - type: boolean
                                       - type: string
                                       - type: number
+                                      - type: boolean
                                       - items:
                                           type: string
                                         maxItems: 100
@@ -49007,7 +49490,7 @@ paths:
                               type: string
                           required:
                             - id
-                        maxItems: 100
+                        maxItems: 1000
                         type: array
                       spaceIds:
                         items:
@@ -49045,9 +49528,9 @@ paths:
                             type: object
                           - additionalProperties:
                               anyOf:
-                                - type: boolean
                                 - type: string
                                 - type: number
+                                - type: boolean
                                 - items:
                                     type: string
                                   maxItems: 100
@@ -49294,7 +49777,7 @@ paths:
                                 - enabled
                                 - data_stream
                                 - compiled_stream
-                            maxItems: 100
+                            maxItems: 1000
                             type: array
                           type:
                             type: string
@@ -49315,7 +49798,7 @@ paths:
                         required:
                           - type
                           - enabled
-                      maxItems: 100
+                      maxItems: 1000
                       type: array
                     is_managed:
                       type: boolean
@@ -49458,9 +49941,9 @@ paths:
                                 vars:
                                   additionalProperties:
                                     anyOf:
-                                      - type: boolean
                                       - type: string
                                       - type: number
+                                      - type: boolean
                                       - items:
                                           type: string
                                         maxItems: 100
@@ -49487,9 +49970,9 @@ paths:
                           vars:
                             additionalProperties:
                               anyOf:
-                                - type: boolean
                                 - type: string
                                 - type: number
+                                - type: boolean
                                 - items:
                                     type: string
                                   maxItems: 100
@@ -49584,9 +50067,9 @@ paths:
                     vars:
                       additionalProperties:
                         anyOf:
-                          - type: boolean
                           - type: string
                           - type: number
+                          - type: boolean
                           - items:
                               type: string
                             maxItems: 100
@@ -49774,7 +50257,7 @@ paths:
                                       - enabled
                                       - data_stream
                                       - compiled_stream
-                                  maxItems: 100
+                                  maxItems: 1000
                                   type: array
                                 type:
                                   type: string
@@ -49817,9 +50300,9 @@ paths:
                                       vars:
                                         additionalProperties:
                                           anyOf:
-                                            - type: boolean
                                             - type: string
                                             - type: number
+                                            - type: boolean
                                             - items:
                                                 type: string
                                               maxItems: 100
@@ -49846,9 +50329,9 @@ paths:
                                 vars:
                                   additionalProperties:
                                     anyOf:
-                                      - type: boolean
                                       - type: string
                                       - type: number
+                                      - type: boolean
                                       - items:
                                           type: string
                                         maxItems: 100
@@ -49959,7 +50442,7 @@ paths:
                               type: string
                           required:
                             - id
-                        maxItems: 100
+                        maxItems: 1000
                         type: array
                       spaceIds:
                         items:
@@ -49997,9 +50480,9 @@ paths:
                             type: object
                           - additionalProperties:
                               anyOf:
-                                - type: boolean
                                 - type: string
                                 - type: number
+                                - type: boolean
                                 - items:
                                     type: string
                                   maxItems: 100
@@ -50637,7 +51120,7 @@ paths:
                                               - enabled
                                               - data_stream
                                               - compiled_stream
-                                          maxItems: 100
+                                          maxItems: 1000
                                           type: array
                                         type:
                                           type: string
@@ -50680,9 +51163,9 @@ paths:
                                               vars:
                                                 additionalProperties:
                                                   anyOf:
-                                                    - type: boolean
                                                     - type: string
                                                     - type: number
+                                                    - type: boolean
                                                     - items:
                                                         type: string
                                                       maxItems: 100
@@ -50709,9 +51192,9 @@ paths:
                                         vars:
                                           additionalProperties:
                                             anyOf:
-                                              - type: boolean
                                               - type: string
                                               - type: number
+                                              - type: boolean
                                               - items:
                                                   type: string
                                                 maxItems: 100
@@ -50822,7 +51305,7 @@ paths:
                                       type: string
                                   required:
                                     - id
-                                maxItems: 100
+                                maxItems: 1000
                                 type: array
                               spaceIds:
                                 items:
@@ -50860,9 +51343,9 @@ paths:
                                     type: object
                                   - additionalProperties:
                                       anyOf:
-                                        - type: boolean
                                         - type: string
                                         - type: number
+                                        - type: boolean
                                         - items:
                                             type: string
                                           maxItems: 100
@@ -51063,7 +51546,7 @@ paths:
                                           - enabled
                                           - data_stream
                                           - compiled_stream
-                                      maxItems: 100
+                                      maxItems: 1000
                                       type: array
                                     type:
                                       type: string
@@ -51177,7 +51660,7 @@ paths:
                                       type: string
                                   required:
                                     - id
-                                maxItems: 100
+                                maxItems: 1000
                                 type: array
                               supports_agentless:
                                 default: false
@@ -53001,7 +53484,10 @@ paths:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]"
+                    message: |-
+                      [security_exception
+                      	Root causes:
+                      		security_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
                     statusCode: 401
               schema:
                 $ref: '#/components/schemas/Security_Lists_API_PlatformErrorResponse'
@@ -53205,26 +53691,20 @@ paths:
               keyword_custom_format:
                 value:
                   description: This parses the first found ipv4 only
-                  deserializer: '{{value}}'
                   id: keyword_custom_format_list
                   name: Simple list with a keyword using a custom format
-                  serializer: (?<value>((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))
                   type: keyword
             schema:
               type: object
               properties:
                 description:
                   $ref: '#/components/schemas/Security_Lists_API_ListDescription'
-                deserializer:
-                  $ref: '#/components/schemas/Security_Lists_API_ListDeserializer'
                 id:
                   $ref: '#/components/schemas/Security_Lists_API_ListId'
                 meta:
                   $ref: '#/components/schemas/Security_Lists_API_ListMetadata'
                 name:
                   $ref: '#/components/schemas/Security_Lists_API_ListName'
-                serializer:
-                  $ref: '#/components/schemas/Security_Lists_API_ListSerializer'
                 type:
                   $ref: '#/components/schemas/Security_Lists_API_ListType'
                 version:
@@ -53294,11 +53774,9 @@ paths:
                     created_at: '2025-01-09T18:25:39.604Z'
                     created_by: elastic
                     description: This parses the first found ipv4 only
-                    deserializer: '{{value}}'
                     id: keyword_custom_format_list
                     immutable: false
                     name: Simple list with a keyword using a custom format
-                    serializer: (?<value>((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))
                     tie_breaker_id: 8247ae63-b780-47b8-9a89-948b643e9ec2
                     type: keyword
                     updated_at: '2025-01-09T18:25:39.604Z'
@@ -54865,29 +55343,6 @@ paths:
           required: false
           schema:
             $ref: '#/components/schemas/Security_Lists_API_ListType'
-        - description: |
-            Determines how uploaded list item values are parsed. By default, list items are parsed using these named regex groups:
-
-            - `(?<value>.+)` - Single value item types, such as ip, long, date, keyword, and text.
-            - `(?<gte>.+)-(?<lte>.+)|(?<value>.+)` - Range value item types, such as `date_range`, `ip_range`, `double_range`, `float_range`, `integer_range`, and `long_range`.
-          in: query
-          name: serializer
-          required: false
-          schema:
-            example: (?<value>((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))
-            type: string
-        - description: |
-            Determines how retrieved list item values are presented. By default list items are presented using these Handelbar expressions:
-
-            - `{{{value}}}` - Single value item types, such as `ip`, `long`, `date`, `keyword`, and `text`.
-            - `{{{gte}}}-{{{lte}}}` - Range value item types, such as `ip_range`, `double_range`, `float_range`, `integer_range`, and `long_range`.
-            - `{{{gte}}},{{{lte}}}` - Date range values.
-          in: query
-          name: deserializer
-          required: false
-          schema:
-            example: '{{value}}'
-            type: string
         - description: Determines when changes made by the request are made visible to search.
           in: query
           name: refresh
@@ -57958,6 +58413,7 @@ paths:
                         required:
                           - type
                           - id
+                      maxItems: 100
                       type: array
                 includeReferencesDeep:
                   default: false
@@ -57986,6 +58442,7 @@ paths:
                     - type: string
                     - items:
                         type: string
+                      maxItems: 100
                       type: array
                   description: The saved object types to include in the export. Use `*` to export all the types. Valid options depend on enabled plugins, but may include `visualization`, `dashboard`, `search`, `index-pattern`, `tag`, `config`, `config-global`, `lens`, `map`, `event-annotation-group`, `query`, `url`, `action`, `alert`, `alerting_rule_template`, `apm-indices`, `cases-user-actions`, `cases`, `cases-comments`, `infrastructure-monitoring-log-view`, `ml-trained-model`, `osquery-saved-query`, `osquery-pack`, `osquery-pack-asset`.
       responses:
@@ -58717,7 +59174,7 @@ paths:
                       type: array
                     query:
                       description: Query to filter the bulk action.
-                      example: 'status: ''inactive'''
+                      example: "status: 'inactive'"
                       type: string
                 update:
                   description: Array of anonymization fields to update.
@@ -60186,7 +60643,7 @@ paths:
                       type: array
                     query:
                       description: Query to filter the bulk action.
-                      example: 'status: ''inactive'''
+                      example: "status: 'inactive'"
                       type: string
                 update:
                   description: List of prompts to be updated.
@@ -84385,6 +84842,7 @@ paths:
                     - 15c1929b-0af7-42bd-85a8-56e234cc7c4e
                   items:
                     type: string
+                  maxItems: 100
                   type: array
                 searchIds:
                   description: Saved search IDs that should be deleted alongside the timelines
@@ -84393,6 +84851,7 @@ paths:
                     - 6ce1b592-84e3-4b4a-9552-f189d4b82075
                   items:
                     type: string
+                  maxItems: 100
                   type: array
               required:
                 - savedObjectIds
@@ -84752,6 +85211,8 @@ paths:
                 ids:
                   items:
                     type: string
+                  maxItems: 1000
+                  minItems: 1
                   nullable: true
                   type: array
         description: The IDs of the Timelines to export.
@@ -88840,7 +89301,10 @@ components:
       summary: Two anomaly detection jobs required synchronization in this example.
       value:
         error: Unauthorized
-        message: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [ml_viewer] for REST request [/_security/_authenticate]]: unable to authenticate user [ml_viewer] for REST request [/_security/_authenticate]"
+        message: |-
+          [security_exception
+          	Root causes:
+          		security_exception: unable to authenticate user [ml_viewer] for REST request [/_security/_authenticate]]: unable to authenticate user [ml_viewer] for REST request [/_security/_authenticate]
         statusCode: 401
     Machine_learning_APIs_mlSyncExample:
       summary: Two anomaly detection jobs required synchronization in this example.
@@ -89041,12 +89505,6 @@ components:
                     "p99": 2079
                   },
                   "security:endpoint-diagnostics": {
-                    "p50": 2525,
-                    "p90": 2525,
-                    "p95": 2525,
-                    "p99": 2525
-                  },
-                  "logs-data-telemetry": {
                     "p50": 2525,
                     "p90": 2525,
                     "p95": 2525,
@@ -89284,12 +89742,6 @@ components:
                       "p99": 78
                     },
                     "security:endpoint-diagnostics": {
-                      "p50": 6,
-                      "p90": 6,
-                      "p95": 6,
-                      "p99": 6
-                    },
-                    "logs-data-telemetry": {
                       "p50": 6,
                       "p90": 6,
                       "p95": 6,
@@ -89538,12 +89990,6 @@ components:
                       "status": "OK"
                     },
                     "security:endpoint-diagnostics": {
-                      "Success": 100,
-                      "RetryScheduled": 0,
-                      "Failed": 0,
-                      "status": "OK"
-                    },
-                    "logs-data-telemetry": {
                       "Success": 100,
                       "RetryScheduled": 0,
                       "Failed": 0,
@@ -89848,13 +90294,6 @@ components:
                     }
                   },
                   "fleet:unenroll-inactive-agents-task": {
-                    "count": 1,
-                    "cost": 2,
-                    "status": {
-                      "idle": 1
-                    }
-                  },
-                  "logs-data-telemetry": {
                     "count": 1,
                     "cost": 2,
                     "status": {
@@ -94218,6 +94657,54 @@ components:
         - version
         - status
         - metrics
+    Kibana_HTTP_APIs_enrollment_api_key:
+      additionalProperties: false
+      type: object
+      properties:
+        active:
+          description: When false, the enrollment API key is revoked and cannot be used for enrolling Elastic Agents.
+          type: boolean
+        api_key:
+          description: The enrollment API key (token) used for enrolling Elastic Agents.
+          type: string
+        api_key_id:
+          description: The ID of the API key in the Security API.
+          type: string
+        created_at:
+          type: string
+        expire_at:
+          description: The expiration date of the enrollment token as an ISO 8601 date string. Absent when the token never expires.
+          type: string
+        hidden:
+          type: boolean
+        id:
+          type: string
+        name:
+          description: The name of the enrollment API key.
+          type: string
+        policy_id:
+          description: The ID of the agent policy the Elastic Agent will be enrolled in.
+          type: string
+      required:
+        - id
+        - api_key_id
+        - api_key
+        - active
+        - created_at
+    Kibana_HTTP_APIs_new_enrollment_api_key:
+      additionalProperties: false
+      type: object
+      properties:
+        expiration:
+          description: The expiration time for the enrollment token, expressed as a duration (for example, 30d, 24h, 90m). By default, enrollment tokens never expire.
+          maxLength: 20
+          type: string
+        name:
+          type: string
+        policy_id:
+          type: string
+      required:
+        - policy_id
     Machine_learning_APIs_mlSync200Response:
       properties:
         datafeedsAdded:
@@ -97073,7 +97560,7 @@ components:
       description: |
         Determines if the rule acts as a building block. If yes, the value must be `default`.
         By default, building-block alerts are not displayed in the UI. These rules are used as a foundation for other rules that do generate alerts.
-        For more information, refer to [About building block rules](https://www.elastic.co/guide/en/security/current/building-block-rule.html).
+        For more information, refer to [About building block rules](https://www.elastic.co/docs/solutions/security/detect-and-alert/about-building-block-rules).
       type: string
     Security_Detections_API_BulkActionEditPayload:
       anyOf:
@@ -99375,9 +99862,9 @@ components:
     Security_Detections_API_MaxSignals:
       default: 100
       description: |
-        Maximum number of alerts the rule can create during a single run (the rule’s Max alerts per run [advanced setting](https://www.elastic.co/guide/en/security/current/rules-ui-create.html#rule-ui-advanced-params) value).
+        Maximum number of alerts the rule can create during a single run (the rule’s Max alerts per run [advanced setting](https://www.elastic.co/docs/solutions/security/detect-and-alert/create-detection-rule#rule-ui-advanced-params) value).
         > info
-        > This setting can be superseded by the [Kibana configuration setting](https://www.elastic.co/guide/en/kibana/current/alert-action-settings-kb.html#alert-settings) `xpack.alerting.rules.run.alerts.max`, which determines the maximum alerts generated by any rule in the Kibana alerting framework. For example, if `xpack.alerting.rules.run.alerts.max` is set to 1000, the rule can generate no more than 1000 alerts even if `max_signals` is set higher.
+        > This setting can be superseded by the [Kibana configuration setting](https://www.elastic.co/docs/reference/kibana/configuration-reference/alerting-settings) `xpack.alerting.rules.run.alerts.max`, which determines the maximum alerts generated by any rule in the Kibana alerting framework. For example, if `xpack.alerting.rules.run.alerts.max` is set to 1000, the rule can generate no more than 1000 alerts even if `max_signals` is set higher.
       minimum: 1
       type: integer
     Security_Detections_API_MigrationCleanupResult:
@@ -100977,7 +101464,7 @@ components:
         - id
     Security_Detections_API_RuleExceptionList:
       description: |
-        Array of [exception containers](https://www.elastic.co/guide/en/security/current/exceptions-api-overview.html), which define exceptions that prevent the rule from generating alerts even when its other criteria are met.
+        Array of [exception containers](https://www.elastic.co/docs/solutions/security/detect-and-alert/detection-rule-concepts), which define exceptions that prevent the rule from generating alerts even when its other criteria are met.
       type: object
       properties:
         id:
@@ -101187,10 +101674,10 @@ components:
         - timeframeEnd
     Security_Detections_API_RuleQuery:
       description: |
-        [Query](https://www.elastic.co/guide/en/kibana/8.17/search.html) used by the rule to create alerts.
+        [Query](https://www.elastic.co/docs/explore-analyze/query-filter) used by the rule to create alerts.
 
         - For indicator match rules, only the query’s results are used to determine whether an alert is generated.
-        - ES|QL rules have additional query requirements. Refer to [Create ES|QL](https://www.elastic.co/guide/en/security/current/rules-ui-create.html#create-esql-rule) rules for more information.
+        - ES|QL rules have additional query requirements. Refer to [Create ES|QL](https://www.elastic.co/docs/solutions/security/detect-and-alert/create-detection-rule#create-esql-rule) rules for more information.
       type: string
     Security_Detections_API_RuleReferenceArray:
       description: Array containing notes about or references to relevant information about the rule. Defaults to an empty array.
@@ -101269,7 +101756,7 @@ components:
         - conflict
       type: string
     Security_Detections_API_SavedQueryId:
-      description: Kibana [saved search](https://www.elastic.co/guide/en/kibana/current/save-open-search.html) used by the rule to create alerts.
+      description: Kibana [saved search](https://www.elastic.co/docs/explore-analyze/discover/search-sessions) used by the rule to create alerts.
       type: string
     Security_Detections_API_SavedQueryRule:
       allOf:
@@ -103892,7 +104379,7 @@ components:
               - 10.0.2.15
               - fe80::21a6:63d3:d70e:e3ad
               - 127.0.0.1
-              - '::1'
+              - ::1
             mac:
               - 08:00:27:b1:1d:5a
             name: WinDev2104Eval
@@ -104551,7 +105038,7 @@ components:
       properties: {}
     Security_Endpoint_Management_API_Kuery:
       description: A KQL string.
-      example: 'united.endpoint.host.os.name : ''Windows'''
+      example: "united.endpoint.host.os.name : 'Windows'"
       type: string
     Security_Endpoint_Management_API_MDERunScriptParameters:
       description: Parameters for Run Script response action against Microsoft Defender Endpoint agent type.
@@ -104560,7 +105047,7 @@ components:
         endpoint_ids:
           - endpoint-id-1
         parameters:
-          args: '-param1 value1 -param2 value2'
+          args: -param1 value1 -param2 value2
           scriptName: my-script.ps1
       properties:
         args:
@@ -104772,7 +105259,7 @@ components:
                 id: 0cfead88e2024bd8a27476352b5ab264
                 ip:
                   - 127.0.0.1
-                  - '::1'
+                  - ::1
                   - 10.0.2.15
                   - fe80::2ac7:8e15:b957:2fa1
                 mac:
@@ -104856,7 +105343,7 @@ components:
                   - 10.0.2.15
                   - fe80::21a6:63d3:d70e:e3ad
                   - 127.0.0.1
-                  - '::1'
+                  - ::1
                 mac:
                   - 08:00:27:b1:1d:5a
                 name: WinDev2104Eval
@@ -105322,7 +105809,7 @@ components:
         endpoint_ids:
           - endpoint-id-1
         parameters:
-          inputParams: '--delete --paths-to-delete /tmp/temp_file.txt,/tmp/random_file.txt'
+          inputParams: --delete --paths-to-delete /tmp/temp_file.txt,/tmp/random_file.txt
           script: 1111-2222-3333-4444-5555-6666-7777-8888
       properties:
         inputParams:
@@ -105687,25 +106174,35 @@ components:
           type: string
     Security_Entity_Analytics_API_Asset:
       additionalProperties: false
+      description: Asset metadata associated with the entity.
       type: object
       properties:
         business_unit:
+          description: Business unit the asset belongs to.
           type: string
         criticality:
           $ref: '#/components/schemas/Security_Entity_Analytics_API_AssetCriticalityLevel'
+          description: The criticality level assigned to this asset.
         environment:
+          description: Deployment environment (for example, production, staging).
           type: string
         id:
+          description: Unique identifier for the asset.
           type: string
         model:
+          description: Model name or number.
           type: string
         name:
+          description: Human-readable asset name.
           type: string
         owner:
+          description: The owner of the asset.
           type: string
         serial_number:
+          description: Serial number of the asset.
           type: string
         vendor:
+          description: Vendor or manufacturer.
           type: string
     Security_Entity_Analytics_API_AssetCriticalityBulkUploadErrorItem:
       type: object
@@ -105904,6 +106401,7 @@ components:
           required:
             - criticality_level
     Security_Entity_Analytics_API_EngineComponentResource:
+      description: The type of Elasticsearch or Kibana resource backing an engine component.
       enum:
         - entity_engine
         - entity_definition
@@ -105918,18 +106416,23 @@ components:
         - ilm_policy
       type: string
     Security_Entity_Analytics_API_EngineComponentStatus:
+      description: Status of an individual Elasticsearch or Kibana resource backing an engine.
       type: object
       properties:
         errors:
+          description: Errors reported by this component, if any.
           items:
             type: object
             properties:
               message:
+                description: Detailed error message.
                 type: string
               title:
+                description: Short error title.
                 type: string
           type: array
         health:
+          description: The health status of the component.
           enum:
             - green
             - yellow
@@ -105938,8 +106441,10 @@ components:
             - unknown
           type: string
         id:
+          description: Unique identifier for the component.
           type: string
         installed:
+          description: Whether the component is currently installed.
           type: boolean
         metadata:
           $ref: '#/components/schemas/Security_Entity_Analytics_API_TransformStatsMetadata'
@@ -105950,61 +106455,84 @@ components:
         - installed
         - resource
     Security_Entity_Analytics_API_EngineDataviewUpdateResult:
+      description: The result of applying data view index changes to a single engine.
       type: object
       properties:
         changes:
+          description: The changes applied to the engine.
           type: object
           properties:
             indexPatterns:
+              description: The updated list of index patterns now used by the engine.
               items:
                 type: string
               type: array
         type:
+          description: The entity type of the engine that was updated.
           type: string
       required:
         - type
     Security_Entity_Analytics_API_EngineDescriptor:
+      description: Describes a single entity engine, including its configuration and current status.
       type: object
       properties:
         delay:
           default: 1m
+          description: The delay before the transform processes new data, allowing late-arriving documents to be included.
+          example: 1m
           pattern: '[smdh]$'
           type: string
         docsPerSecond:
+          description: Throttle value for the number of documents processed per second. Use -1 for no throttle.
           type: integer
         error:
+          description: Present when the engine status is `error`. Describes the failure.
           type: object
           properties:
             action:
+              description: The lifecycle action that caused the error.
               enum:
                 - init
               type: string
             message:
+              description: A human-readable error message.
               type: string
           required:
             - message
             - action
         fieldHistoryLength:
+          description: The number of historical values retained per field.
+          example: 10
           type: integer
         filter:
+          description: An optional Kibana Query Language (KQL) filter applied to source documents before aggregation.
+          example: 'host.name: "my-host"'
           type: string
         frequency:
           default: 1m
+          description: How often the transform runs.
+          example: 1m
           pattern: '[smdh]$'
           type: string
         indexPattern:
           $ref: '#/components/schemas/Security_Entity_Analytics_API_IndexPattern'
         lookbackPeriod:
           default: 24h
+          description: How far back the transform looks when calculating aggregations.
+          example: 24h
           pattern: '[smdh]$'
           type: string
         status:
           $ref: '#/components/schemas/Security_Entity_Analytics_API_EngineStatus'
         timeout:
           default: 180s
+          description: The timeout for initializing the aggregating transform.
+          example: 180s
           pattern: '[smdh]$'
           type: string
         timestampField:
+          description: The field used as the timestamp for source documents.
+          example: '@timestamp'
           type: string
         type:
           $ref: '#/components/schemas/Security_Entity_Analytics_API_EntityType'
@@ -106015,13 +106543,16 @@ components:
         - fieldHistoryLength
     Security_Entity_Analytics_API_EngineMetadata:
       additionalProperties: false
+      description: Internal metadata attached to an entity by the engine that produced it.
       type: object
       properties:
         Type:
+          description: The engine type that produced this entity record.
           type: string
       required:
         - Type
     Security_Entity_Analytics_API_EngineStatus:
+      description: The current operational status of an entity engine.
       enum:
         - installing
         - started
@@ -106030,15 +106561,18 @@ components:
         - error
       type: string
     Security_Entity_Analytics_API_EntitiesContainer:
+      description: A collection of entities to upsert in bulk.
       type: object
       properties:
         entities:
+          description: The entities to create or update.
           items:
             $ref: '#/components/schemas/Security_Entity_Analytics_API_EntityContainer'
           type: array
       required:
         - entities
     Security_Entity_Analytics_API_Entity:
+      description: An entity record from the Entity Store. The `entity` namespace is a root-level field in the latest index, unlike source logs where it is nested under `host`, `user`, or `service`.
       oneOf:
         - $ref: '#/components/schemas/Security_Entity_Analytics_API_UserEntity'
         - $ref: '#/components/schemas/Security_Entity_Analytics_API_HostEntity'
@@ -106079,99 +106613,130 @@ components:
         - has_all_required
         - privileges
     Security_Entity_Analytics_API_EntityContainer:
+      description: A wrapper that pairs an entity type with the entity record to upsert.
       type: object
       properties:
         record:
           $ref: '#/components/schemas/Security_Entity_Analytics_API_Entity'
+          description: The entity record to create or update.
         type:
           $ref: '#/components/schemas/Security_Entity_Analytics_API_EntityType'
+          description: The entity type of the record.
       required:
         - type
         - record
     Security_Entity_Analytics_API_EntityField:
       additionalProperties: false
+      description: Core entity fields shared across all entity types. The `entity` namespace is a root-level field in the Entity Store latest index.
       type: object
       properties:
         attributes:
           additionalProperties: false
+          description: Boolean flags describing characteristics of the entity.
           type: object
           properties:
             asset:
+              description: Whether the entity is classified as an asset.
               type: boolean
             managed:
+              description: Whether the entity is managed (for example, via a directory service).
               type: boolean
             mfa_enabled:
+              description: Whether multi-factor authentication is enabled for the entity.
               type: boolean
             privileged:
+              description: Whether the entity has elevated privileges.
               type: boolean
         behaviors:
           additionalProperties: false
+          description: Boolean flags indicating observed behavioral signals.
           type: object
           properties:
             brute_force_victim:
+              description: Whether the entity has been targeted by brute-force attacks.
               type: boolean
             new_country_login:
+              description: Whether the entity has logged in from a new country.
               type: boolean
             used_usb_device:
+              description: Whether the entity has used a USB device.
               type: boolean
         EngineMetadata:
           $ref: '#/components/schemas/Security_Entity_Analytics_API_EngineMetadata'
         id:
+          description: Unique identifier for this entity.
+          example: arn:aws:iam::123456789012:user/jane.doe
           type: string
         lifecycle:
           additionalProperties: false
+          description: Timestamps tracking the entity lifecycle.
           type: object
           properties:
             first_seen:
+              description: When the entity was first observed.
               format: date-time
               type: string
             last_activity:
+              description: When the entity last generated activity.
               format: date-time
               type: string
         name:
+          description: Human-readable name of the entity.
+          example: jane.doe
           type: string
         relationships:
           additionalProperties: false
+          description: Connections between this entity and other entities.
           type: object
           properties:
             accessed_frequently_by:
+              description: Entity IDs that frequently access this entity.
               items:
                 type: string
               type: array
             accesses_frequently:
+              description: Entity IDs this entity accesses frequently.
               items:
                 type: string
               type: array
             communicates_with:
+              description: Entity IDs this entity communicates with.
               items:
                 type: string
               type: array
             dependent_of:
+              description: Entity IDs that depend on this entity.
               items:
                 type: string
               type: array
             depends_on:
+              description: Entity IDs this entity depends on.
               items:
                 type: string
               type: array
             owned_by:
+              description: Entity IDs that own this entity.
               items:
                 type: string
               type: array
             owns:
+              description: Entity IDs owned by this entity.
               items:
                 type: string
               type: array
             supervised_by:
+              description: Entity IDs that supervise this entity.
               items:
                 type: string
               type: array
             supervises:
+              description: Entity IDs supervised by this entity.
               items:
                 type: string
               type: array
         risk:
           additionalProperties: false
+          description: Risk scoring information for the entity.
           type: object
           properties:
             calculated_level:
@@ -106189,10 +106754,14 @@ components:
               minimum: 0
               type: number
         source:
+          description: The source that produced this entity record.
           type: string
         sub_type:
+          description: Optional sub-type classification for the entity.
           type: string
         type:
+          description: The entity type.
+          example: user
           type: string
       required:
         - id
@@ -106294,6 +106863,7 @@ components:
         - inputs
         - notes
     Security_Entity_Analytics_API_EntityType:
+      description: The type of entity.
       enum:
         - user
         - host
@@ -106302,9 +106872,11 @@ components:
       type: string
     Security_Entity_Analytics_API_GenericEntity:
       additionalProperties: false
+      description: A generic entity record. Maps only the `entity` and `asset` namespaces. Add additional field mappings here as needed.
       type: object
       properties:
         '@timestamp':
+          description: The time the entity record was last updated.
           format: date-time
           type: string
         asset:
@@ -106316,9 +106888,11 @@ components:
         - entity
     Security_Entity_Analytics_API_HostEntity:
       additionalProperties: false
+      description: An entity record representing a host, stored in the Entity Store latest index.
       type: object
       properties:
         '@timestamp':
+          description: The time the entity record was last updated.
           format: date-time
           type: string
         asset:
@@ -106331,43 +106905,53 @@ components:
           type: object
           properties:
             ingested:
+              description: When the event was ingested into Elasticsearch.
               format: date-time
               type: string
         host:
           additionalProperties: false
+          description: Elastic Common Schema (ECS) host fields collected on the entity.
           type: object
           properties:
             architecture:
+              description: Observed CPU architectures.
               items:
                 type: string
               type: array
             domain:
+              description: Observed host domains.
               items:
                 type: string
               type: array
             entity:
               $ref: '#/components/schemas/Security_Entity_Analytics_API_EntityField'
             hostname:
+              description: Observed hostnames.
               items:
                 type: string
               type: array
             id:
+              description: Observed host IDs.
               items:
                 type: string
               type: array
             ip:
+              description: Observed IP addresses.
               items:
                 type: string
               type: array
             mac:
+              description: Observed MAC addresses.
               items:
                 type: string
               type: array
             name:
+              description: Primary host name.
               type: string
             risk:
               $ref: '#/components/schemas/Security_Entity_Analytics_API_EntityRiskScoreRecord'
             type:
+              description: Observed host types.
               items:
                 type: string
               type: array
@@ -106383,15 +106967,20 @@ components:
         - entity.id
       type: string
     Security_Entity_Analytics_API_IndexPattern:
+      description: An additional Elasticsearch index pattern to include as a source for entity data. Merged with the default data view indices when the engine runs.
+      example: logs-*
       type: string
     Security_Entity_Analytics_API_InspectQuery:
+      description: Debug information about the Elasticsearch query executed.
       type: object
       properties:
         dsl:
+          description: Elasticsearch query DSL that was executed.
           items:
             type: string
           type: array
         response:
+          description: Raw Elasticsearch responses.
           items:
             type: string
           type: array
@@ -106450,17 +107039,22 @@ components:
                 $ref: '#/components/schemas/Security_Entity_Analytics_API_MonitoringLabel'
               type: array
         id:
+          maxLength: 256
           type: string
         labels:
           type: object
           properties:
             source_ids:
               items:
+                maxLength: 256
                 type: string
+              maxItems: 100
               type: array
             source_integrations:
               items:
+                maxLength: 256
                 type: string
+              maxItems: 100
               type: array
             sources:
               items:
@@ -106468,6 +107062,7 @@ components:
                   - csv
                   - index_sync
                   - api
+              maxItems: 100
               type: array
         user:
           type: object
@@ -106476,6 +107071,7 @@ components:
               description: Indicates if the user is privileged.
               type: boolean
             name:
+              maxLength: 512
               type: string
     Security_Entity_Analytics_API_MonitoringEngineDescriptor:
       type: object
@@ -106494,10 +107090,12 @@ components:
       type: object
       properties:
         field:
+          maxLength: 256
           type: string
         source:
           type: string
         value:
+          maxLength: 256
           type: string
       required:
         - field
@@ -106597,9 +107195,11 @@ components:
         - category
     Security_Entity_Analytics_API_ServiceEntity:
       additionalProperties: false
+      description: An entity record representing a service, stored in the Entity Store latest index.
       type: object
       properties:
         '@timestamp':
+          description: The time the entity record was last updated.
           format: date-time
           type: string
         asset:
@@ -106612,15 +107212,18 @@ components:
           type: object
           properties:
             ingested:
+              description: When the event was ingested into Elasticsearch.
               format: date-time
               type: string
         service:
           additionalProperties: false
+          description: Elastic Common Schema (ECS) service fields collected on the entity.
           type: object
           properties:
             entity:
               $ref: '#/components/schemas/Security_Entity_Analytics_API_EntityField'
             name:
+              description: Primary service name.
               type: string
             risk:
               $ref: '#/components/schemas/Security_Entity_Analytics_API_EntityRiskScoreRecord'
@@ -106629,6 +107232,7 @@ components:
       required:
         - entity
     Security_Entity_Analytics_API_StoreStatus:
+      description: The overall operational status of the Entity Store.
       enum:
         - not_installed
         - installing
@@ -106649,41 +107253,59 @@ components:
         - status_code
         - message
     Security_Entity_Analytics_API_TransformStatsMetadata:
+      description: Statistics from the underlying Elasticsearch transform.
       type: object
       properties:
         delete_time_in_ms:
+          description: Total time spent deleting documents, in milliseconds.
           type: integer
         documents_deleted:
+          description: Total number of documents deleted from the destination index.
           type: integer
         documents_indexed:
+          description: Total number of documents written to the destination index.
           type: integer
         documents_processed:
+          description: Total number of source documents processed.
           type: integer
         exponential_avg_checkpoint_duration_ms:
+          description: Exponential moving average of checkpoint duration, in milliseconds.
           type: integer
         exponential_avg_documents_indexed:
+          description: Exponential moving average of documents indexed per checkpoint.
           type: integer
         exponential_avg_documents_processed:
+          description: Exponential moving average of documents processed per checkpoint.
           type: integer
         index_failures:
+          description: Total number of failed index operations.
           type: integer
         index_time_in_ms:
+          description: Total time spent indexing documents, in milliseconds.
           type: integer
         index_total:
+          description: Total number of index operations.
           type: integer
         pages_processed:
+          description: Number of composite aggregation pages processed.
           type: integer
         processing_time_in_ms:
+          description: Total time spent processing results, in milliseconds.
           type: integer
         processing_total:
+          description: Total number of processing operations.
           type: integer
         search_failures:
+          description: Total number of failed search operations.
           type: integer
         search_time_in_ms:
+          description: Total time spent on search queries, in milliseconds.
           type: integer
         search_total:
+          description: Total number of search operations.
           type: integer
         trigger_count:
+          description: Number of times the transform has been triggered.
           type: integer
       required:
         - pages_processed
@@ -106703,9 +107325,11 @@ components:
         - exponential_avg_documents_processed
     Security_Entity_Analytics_API_UserEntity:
       additionalProperties: false
+      description: An entity record representing a user, stored in the Entity Store latest index.
       type: object
       properties:
         '@timestamp':
+          description: The time the entity record was last updated.
           format: date-time
           type: string
         asset:
@@ -106718,38 +107342,47 @@ components:
           type: object
           properties:
             ingested:
+              description: When the event was ingested into Elasticsearch.
               format: date-time
               type: string
         user:
           additionalProperties: false
+          description: Elastic Common Schema (ECS) user fields collected on the entity.
           type: object
           properties:
             domain:
+              description: Observed user domains.
               items:
                 type: string
               type: array
             email:
+              description: Observed email addresses.
               items:
                 type: string
               type: array
             full_name:
+              description: Observed full names of the user.
               items:
                 type: string
               type: array
             hash:
+              description: Observed user hashes.
               items:
                 type: string
               type: array
             id:
+              description: Observed user IDs.
               items:
                 type: string
               type: array
             name:
+              description: Primary user name.
               type: string
             risk:
               $ref: '#/components/schemas/Security_Entity_Analytics_API_EntityRiskScoreRecord'
               additionalProperties: false
             roles:
+              description: Observed roles assigned to the user.
               items:
                 type: string
               type: array
@@ -106771,6 +107404,7 @@ components:
                 properties:
                   field:
                     description: The field name for the label
+                    maxLength: 256
                     type: string
                   source:
                     description: The source where this label was created (api, csv, or index_sync)
@@ -106781,13 +107415,16 @@ components:
                     type: string
                   value:
                     description: The value of the label
+                    maxLength: 256
                     type: string
+              maxItems: 100
               type: array
         user:
           type: object
           properties:
             name:
               description: The name of the user.
+              maxLength: 512
               type: string
     Security_Exceptions_API_CreateExceptionListItemComment:
       type: object
@@ -107403,8 +108040,6 @@ components:
           type: string
         description:
           $ref: '#/components/schemas/Security_Lists_API_ListDescription'
-        deserializer:
-          $ref: '#/components/schemas/Security_Lists_API_ListDeserializer'
         id:
           $ref: '#/components/schemas/Security_Lists_API_ListId'
         immutable:
@@ -107413,8 +108048,6 @@ components:
           $ref: '#/components/schemas/Security_Lists_API_ListMetadata'
         name:
           $ref: '#/components/schemas/Security_Lists_API_ListName'
-        serializer:
-          $ref: '#/components/schemas/Security_Lists_API_ListSerializer'
         tie_breaker_id:
           description: Field used in search to ensure all containers are sorted and returned correctly.
           example: f5508188-b1e9-4e6e-9662-d039a7d89899
@@ -107449,15 +108082,6 @@ components:
       format: nonempty
       minLength: 1
       type: string
-    Security_Lists_API_ListDeserializer:
-      description: |
-        Determines how retrieved list item values are presented. By default list items are presented using these Handelbar expressions:
-
-        - `{{{value}}}` - Single value item types, such as `ip`, `long`, `date`, `keyword`, and `text`.
-        - `{{{gte}}}-{{{lte}}}` - Range value item types, such as `ip_range`, `double_range`, `float_range`, `integer_range`, and `long_range`.
-        - `{{{gte}}},{{{lte}}}` - Date range values.
-      example: '{{value}}'
-      type: string
     Security_Lists_API_ListId:
       description: Value list's identifier.
       example: 21b01cfb-058d-44b9-838c-282be16c91cd
@@ -107482,16 +108106,12 @@ components:
           description: Autogenerated value - user that created object.
           example: elastic
           type: string
-        deserializer:
-          $ref: '#/components/schemas/Security_Lists_API_ListDeserializer'
         id:
           $ref: '#/components/schemas/Security_Lists_API_ListItemId'
         list_id:
           $ref: '#/components/schemas/Security_Lists_API_ListId'
         meta:
           $ref: '#/components/schemas/Security_Lists_API_ListItemMetadata'
-        serializer:
-          $ref: '#/components/schemas/Security_Lists_API_ListSerializer'
         tie_breaker_id:
           description: Field used in search to ensure all containers are sorted and returned correctly.
           example: f5508188-b1e9-4e6e-9662-d039a7d89899
@@ -107598,14 +108218,6 @@ components:
         - cluster
         - index
         - application
-    Security_Lists_API_ListSerializer:
-      description: |
-        Determines how uploaded list item values are parsed. By default, list items are parsed using these named regex groups:
-
-        - `(?<value>.+)` - Single value item types, such as ip, long, date, keyword, and text.
-        - `(?<gte>.+)-(?<lte>.+)|(?<value>.+)` - Range value item types, such as `date_range`, `ip_range`, `double_range`, `float_range`, `integer_range`, and `long_range`.
-      example: (?<value>((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))
-      type: string
     Security_Lists_API_ListType:
       description: |
         Specifies the Elasticsearch data type of excludes the list container holds. Some common examples:
@@ -109201,7 +109813,7 @@ components:
           example: Bad Request
           type: string
         message:
-          example: 'Invalid value ''foo'' supplied to: [...]'
+          example: "Invalid value 'foo' supplied to: [...]"
           type: string
         statusCode:
           example: 400
@@ -109218,7 +109830,10 @@ components:
           example: Unauthorized
           type: string
         message:
-          example: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastics] for REST request [/_security/_authenticate]]: unable to authenticate user [elastics] for REST request [/_security/_authenticate]"
+          example: |-
+            [security_exception
+            	Root causes:
+            		security_exception: unable to authenticate user [elastics] for REST request [/_security/_authenticate]]: unable to authenticate user [elastics] for REST request [/_security/_authenticate]
           type: string
         statusCode:
           example: 401
@@ -109235,7 +109850,10 @@ components:
           example: Unauthorized
           type: string
         message:
-          example: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastics] for REST request [/_security/_authenticate]]: unable to authenticate user [elastics] for REST request [/_security/_authenticate]"
+          example: |-
+            [security_exception
+            	Root causes:
+            		security_exception: unable to authenticate user [elastics] for REST request [/_security/_authenticate]]: unable to authenticate user [elastics] for REST request [/_security/_authenticate]
           type: string
         statusCode:
           example: 403
@@ -110994,6 +111612,10 @@ components:
         apiUrl:
           type: string
           description: The Amazon Bedrock request URL.
+        region:
+          type: string
+          description: |
+            Optional AWS region for request signing. Required when using a custom endpoint URL that does not include the region in the hostname (for example, `us-west-1`).
         defaultModel:
           type: string
           description: |

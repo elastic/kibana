@@ -17,8 +17,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const { dashboard, header, timePicker } = getPageObjects(['dashboard', 'header', 'timePicker']);
   const pieChart = getService('pieChart');
   const browser = getService('browser');
+  const retry = getService('retry');
 
-  describe('dashboard time', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/261894
+  describe.skip('dashboard time', () => {
     before(async function () {
       await dashboard.initTests();
       await dashboard.preserveCrossAppState();
@@ -28,7 +30,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.navigateToApp();
     });
 
-    describe('dashboard without stored timed', () => {
+    describe('dashboard without stored time', () => {
       it('is saved', async () => {
         await dashboard.clickNewDashboard();
         await dashboard.addVisualizations([dashboard.getTestVisualizationNames()[0]]);
@@ -49,8 +51,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/241757
-    describe.skip('dashboard with stored timed', function () {
+    describe('dashboard with stored time', function () {
       it('is saved with time', async function () {
         await dashboard.switchToEditMode();
         await timePicker.setDefaultAbsoluteRange();
@@ -68,9 +69,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await dashboard.loadSavedDashboard(dashboardName);
 
-        const time = await timePicker.getTimeConfig();
-        expect(time.start).to.equal(timePicker.defaultStartTime);
-        expect(time.end).to.equal(timePicker.defaultEndTime);
+        await retry.try(async () => {
+          const time = await timePicker.getTimeConfig();
+          expect(time.start).to.equal(timePicker.defaultStartTime);
+          expect(time.end).to.equal(timePicker.defaultEndTime);
+        });
       });
 
       // If time is stored with a dashboard, it's supposed to override the current time settings when opened.

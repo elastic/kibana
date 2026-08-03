@@ -20,7 +20,7 @@ import { licensePreRoutingFactory } from '../../lib/license_pre_routing_factory'
 const bodyValidation = schema.object({
   skipUnavailable: schema.boolean(),
   mode: schema.oneOf([schema.literal(PROXY_MODE), schema.literal(SNIFF_MODE)]),
-  seeds: schema.nullable(schema.arrayOf(schema.string())),
+  seeds: schema.nullable(schema.arrayOf(schema.string(), { maxSize: 1000 })),
   nodeConnections: schema.nullable(schema.number()),
   proxyAddress: schema.nullable(schema.string()),
   proxySocketConnections: schema.nullable(schema.number()),

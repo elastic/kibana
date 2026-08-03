@@ -19,6 +19,7 @@
     "@kbn/core-http-common",
     "@kbn/alerting-plugin",
     "@kbn/task-manager-plugin",
-    "@kbn/test"
+    "@kbn/test",
+    "@kbn/spaces-plugin"
   ]
 }

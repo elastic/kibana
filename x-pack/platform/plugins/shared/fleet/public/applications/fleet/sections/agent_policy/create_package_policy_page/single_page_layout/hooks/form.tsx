@@ -8,7 +8,6 @@
 import React from 'react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { load } from 'js-yaml';
 import { isEqual, omit } from 'lodash';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -76,6 +75,7 @@ import {
   getCloudShellUrlFromPackagePolicy,
 } from '../../../../../../../components/cloud_security_posture/services';
 import { ensurePackageKibanaAssetsInstalled } from '../../../../../services/ensure_kibana_assets_installed';
+import { useYaml } from '../../../../../../../services';
 
 import { useAgentless, useSetupTechnology } from './setup_technology';
 
@@ -306,6 +306,7 @@ export function useOnSubmit({
 }) {
   const { notifications, docLinks } = useStartServices();
   const { spaceId } = useFleetStatus();
+  const yaml = useYaml();
   const confirmForceInstall = useConfirmForceInstall();
   const spaceSettings = useSpaceSettingsContext();
   const { canUseMultipleAgentPolicies } = useMultipleAgentPolicies();
@@ -351,11 +352,11 @@ export function useOnSubmit({
   // Update package policy validation
   const updatePackagePolicyValidation = useCallback(
     (newPackagePolicy?: NewPackagePolicy) => {
-      if (packageInfo) {
+      if (packageInfo && yaml) {
         const newValidationResult = validatePackagePolicy(
           newPackagePolicy || packagePolicy,
           packageInfo,
-          load,
+          yaml.parse,
           spaceSettings
         );
         setValidationResults(newValidationResult);
@@ -363,7 +364,7 @@ export function useOnSubmit({
         return newValidationResult;
       }
     },
-    [packagePolicy, packageInfo, spaceSettings]
+    [packagePolicy, packageInfo, spaceSettings, yaml]
   );
   // Update package policy method
   const updatePackagePolicy = useCallback(
@@ -488,7 +489,17 @@ export function useOnSubmit({
     isAgentlessIntegration(packageInfo) && selectedSetupTechnology === SetupTechnology.AGENTLESS;
 
   const newInputs = useMemo(() => {
-    return packagePolicy.inputs.map((input, i) => {
+    // For single-input agentless integrations the simplified UX shows no enable/disable
+    // toggle, so if the input is disabled by default the user has no way to enable it or
+    // see any configuration fields.  Auto-enable it when switching to agentless.
+    const agentlessAllowedInputCount = isAgentlessSelected
+      ? packagePolicy.inputs.filter((inp) =>
+          isInputAllowedForDeploymentMode(inp, 'agentless', packageInfo)
+        ).length
+      : 0;
+    const isSingleAgentlessInput = agentlessAllowedInputCount === 1;
+
+    return packagePolicy.inputs.map((input) => {
       if (
         isInputAllowedForDeploymentMode(
           input,
@@ -496,6 +507,13 @@ export function useOnSubmit({
           packageInfo
         )
       ) {
+        if (isAgentlessSelected && !input.enabled && isSingleAgentlessInput) {
+          return {
+            ...input,
+            enabled: true,
+            streams: input.streams.map((stream) => ({ ...stream, enabled: true })),
+          };
+        }
         return input;
       } else {
         return { ...input, enabled: false };

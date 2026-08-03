@@ -254,6 +254,20 @@ describe('create', () => {
       )
     ).rejects.toThrow(`Fleet server host needs encrypted saved object api key to be set`);
   });
+
+  it('should throw FleetError when given an invalid id', async () => {
+    const soClientMock = getMockedSoClient();
+    const esClientMock = elasticsearchServiceMock.createInternalClient();
+
+    await expect(
+      fleetServerHostService.create(
+        soClientMock,
+        esClientMock,
+        { name: 'Test', host_urls: [], is_default: false, is_preconfigured: false },
+        { id: '../bad-id' }
+      )
+    ).rejects.toThrow('id is not valid');
+  });
 });
 
 describe('delete fleetServerHost', () => {

@@ -5,16 +5,24 @@
  * 2.0.
  */
 
-import { expectParseSuccess } from '@kbn/zod-helpers';
+import { expectParseError, expectParseSuccess } from '@kbn/zod-helpers';
 import { AnalyzeLogsRequestBody } from './analyze_logs_route.gen';
 import { getAnalyzeLogsRequestBody } from '../model/api_test.mock';
 
 describe('Analyze Logs request schema', () => {
-  test('full request validate', () => {
-    const payload: AnalyzeLogsRequestBody = getAnalyzeLogsRequestBody();
-
+  test('accepts valid full request', () => {
+    const payload = getAnalyzeLogsRequestBody();
     const result = AnalyzeLogsRequestBody.safeParse(payload);
     expectParseSuccess(result);
     expect(result.data).toEqual(payload);
+  });
+
+  test('rejects logSamples exceeding max items', () => {
+    expectParseError(
+      AnalyzeLogsRequestBody.safeParse({
+        ...getAnalyzeLogsRequestBody(),
+        logSamples: new Array(101).fill('{}'),
+      })
+    );
   });
 });

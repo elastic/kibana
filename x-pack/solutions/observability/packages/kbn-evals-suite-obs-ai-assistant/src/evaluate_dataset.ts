@@ -12,7 +12,7 @@ import {
   type EvaluationDataset,
   type KibanaPhoenixClient,
 } from '@kbn/evals';
-import type { Example } from '@arizeai/phoenix-client/dist/esm/types/datasets';
+import type { Example } from '@arizeai/phoenix-client/types/datasets';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
 import type { ChatClient } from './clients/chat';
 

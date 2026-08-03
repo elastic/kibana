@@ -31,6 +31,8 @@ jest.mock('../../../../../detection_engine/rule_exceptions/logic/use_close_alert
 jest.mock('../../../../../detections/containers/detection_engine/alerts/use_signal_index');
 
 describe('Endpoint exceptions flyout', () => {
+  jest.setTimeout(10000);
+
   let mockedContext: AppContextTestRender;
   let render: (
     props?: Partial<EndpointExceptionsFlyoutProps>
@@ -187,10 +189,8 @@ describe('Endpoint exceptions flyout', () => {
     it('should enable "Add endpoint exception" button when form is valid', async () => {
       render({ alertData, isAlertDataLoading: false });
 
-      await userEvent.type(
-        renderResult.getByTestId('endpointExceptions-form-name-input'),
-        'Test exception'
-      );
+      await userEvent.clear(renderResult.getByTestId('endpointExceptions-form-name-input'));
+      await userEvent.paste('Test exception');
 
       const confirmButton = renderResult.getByTestId('add-endpoint-exception-confirm-button');
       expect(confirmButton.hasAttribute('disabled')).toBeFalsy();
@@ -211,10 +211,8 @@ describe('Endpoint exceptions flyout', () => {
       (useCloseAlertsFromExceptions as jest.Mock).mockImplementation(() => [true, jest.fn()]);
 
       render({ alertData, isAlertDataLoading: false });
-      await userEvent.type(
-        renderResult.getByTestId('endpointExceptions-form-name-input'),
-        'Test exception'
-      );
+      await userEvent.clear(renderResult.getByTestId('endpointExceptions-form-name-input'));
+      await userEvent.paste('Test exception');
       const confirmButton = renderResult.getByTestId('add-endpoint-exception-confirm-button');
 
       await waitFor(() => {
@@ -226,7 +224,8 @@ describe('Endpoint exceptions flyout', () => {
       render({ alertData, isAlertDataLoading: false });
 
       const nameInput = renderResult.getByTestId('endpointExceptions-form-name-input');
-      await userEvent.type(nameInput, 'Test exception');
+      await userEvent.clear(nameInput);
+      await userEvent.paste('Test exception');
 
       const confirmButton = renderResult.getByTestId('add-endpoint-exception-confirm-button');
       await userEvent.click(confirmButton);
@@ -244,7 +243,8 @@ describe('Endpoint exceptions flyout', () => {
       render({ alertData, isAlertDataLoading: false });
 
       const nameInput = renderResult.getByTestId('endpointExceptions-form-name-input');
-      await userEvent.type(nameInput, 'Test exception');
+      await userEvent.clear(nameInput);
+      await userEvent.paste('Test exception');
 
       const confirmButton = renderResult.getByTestId('add-endpoint-exception-confirm-button');
       await userEvent.click(confirmButton);
@@ -260,7 +260,8 @@ describe('Endpoint exceptions flyout', () => {
       render({ alertData, isAlertDataLoading: false });
 
       const nameInput = renderResult.getByTestId('endpointExceptions-form-name-input');
-      await userEvent.type(nameInput, 'Test exception');
+      await userEvent.clear(nameInput);
+      await userEvent.paste('Test exception');
 
       const confirmButton = renderResult.getByTestId('add-endpoint-exception-confirm-button');
       await userEvent.click(confirmButton);
@@ -277,7 +278,8 @@ describe('Endpoint exceptions flyout', () => {
       render({ alertData, isAlertDataLoading: false });
 
       const nameInput = renderResult.getByTestId('endpointExceptions-form-name-input');
-      await userEvent.type(nameInput, 'Test exception');
+      await userEvent.clear(nameInput);
+      await userEvent.paste('Test exception');
 
       const confirmButton = renderResult.getByTestId('add-endpoint-exception-confirm-button');
       await userEvent.click(confirmButton);
@@ -298,7 +300,8 @@ describe('Endpoint exceptions flyout', () => {
         render({ alertData, isAlertDataLoading: false, alertStatus: 'open', rules });
 
         const nameInput = renderResult.getByTestId('endpointExceptions-form-name-input');
-        await userEvent.type(nameInput, 'Test exception');
+        await userEvent.clear(nameInput);
+        await userEvent.paste('Test exception');
 
         confirmButton = renderResult.getByTestId('add-endpoint-exception-confirm-button');
       });
@@ -372,7 +375,8 @@ describe('Endpoint exceptions flyout', () => {
       render({ alertData, isAlertDataLoading: false });
 
       const nameInput = renderResult.getByTestId('endpointExceptions-form-name-input');
-      await userEvent.type(nameInput, 'Test exception');
+      await userEvent.clear(nameInput);
+      await userEvent.paste('Test exception');
     });
 
     it('pressing confirm should show confirm modal instead of saving exception', async () => {

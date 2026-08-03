@@ -157,12 +157,18 @@ describe('validateAvatarColor', () => {
     expect(validator.validateAvatarColor(space)).toHaveProperty('isInvalid', false);
   });
 
-  it('it requires a non-empty value', () => {
+  it('it allows an empty value (transparent)', () => {
     const space = {
       color: '',
     };
 
-    expect(validator.validateAvatarColor(space)).toHaveProperty('isInvalid', true);
+    expect(validator.validateAvatarColor(space)).toHaveProperty('isInvalid', false);
+  });
+
+  it('it allows an undefined value', () => {
+    const space = {};
+
+    expect(validator.validateAvatarColor(space)).toHaveProperty('isInvalid', false);
   });
 
   it('it requires a valid hex code', () => {

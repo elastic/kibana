@@ -21,6 +21,7 @@
     "@kbn/dev-utils",
     "@kbn/safer-lodash-set",
     "@kbn/repo-info",
+    "@kbn/utils",
   ],
   "exclude": [
     "target/**/*",

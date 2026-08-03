@@ -76,6 +76,7 @@ export {
 } from './utils';
 
 export {
+  fromSavedObjectTabToAppState,
   fromSavedObjectTabToTabState,
   fromSavedObjectTabToSavedSearch,
   fromTabStateToSavedObjectTab,

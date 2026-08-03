@@ -48,6 +48,7 @@ export const OptionsListPopoverEmptyMessage = ({
       <EuiIcon
         type={searchStringValid ? 'minusInCircle' : 'alert'}
         color={searchStringValid ? 'default' : 'danger'}
+        aria-hidden={true}
       />
       <EuiSpacer size="xs" />
       {noResultsMessage}

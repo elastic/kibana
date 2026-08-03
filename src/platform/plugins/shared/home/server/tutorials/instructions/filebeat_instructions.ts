@@ -15,7 +15,7 @@ import type {
   Platform,
   TutorialContext,
 } from '../../services/tutorials/lib/tutorials_registry_types';
-import { cloudPasswordAndResetLink } from './cloud_instructions';
+import { cloudPasswordAndResetLink, cloudServerlessApiKeyNote } from './cloud_instructions';
 
 export const createFilebeatInstructions = (context: TutorialContext) => {
   const SSL_DOC_URL = `https://www.elastic.co/guide/en/beats/filebeat/${context.kibanaBranch}/configuration-ssl.html#ca-sha256`;
@@ -391,6 +391,107 @@ export const createFilebeatCloudInstructions = () => ({
   },
 });
 
+export const createFilebeatCloudInstructionsServerless = () => ({
+  CONFIG: {
+    OSX: {
+      title: i18n.translate(
+        'home.tutorials.common.filebeatCloudInstructionsServerless.config.osxTitle',
+        {
+          defaultMessage: 'Edit the configuration',
+        }
+      ),
+      textPre: i18n.translate(
+        'home.tutorials.common.filebeatCloudInstructionsServerless.config.osxTextPre',
+        {
+          defaultMessage:
+            'Modify {path} to set the connection information for Elastic Cloud Serverless:',
+          values: {
+            path: '`filebeat.yml`',
+          },
+        }
+      ),
+      commands: [
+        'output.elasticsearch:',
+        '  hosts: ["<elasticsearch_endpoint_url>"]',
+        '  api_key: "<your_api_key>"',
+      ],
+      textPost: cloudServerlessApiKeyNote,
+    },
+    DEB: {
+      title: i18n.translate(
+        'home.tutorials.common.filebeatCloudInstructionsServerless.config.debTitle',
+        {
+          defaultMessage: 'Edit the configuration',
+        }
+      ),
+      textPre: i18n.translate(
+        'home.tutorials.common.filebeatCloudInstructionsServerless.config.debTextPre',
+        {
+          defaultMessage:
+            'Modify {path} to set the connection information for Elastic Cloud Serverless:',
+          values: {
+            path: '`/etc/filebeat/filebeat.yml`',
+          },
+        }
+      ),
+      commands: [
+        'output.elasticsearch:',
+        '  hosts: ["<elasticsearch_endpoint_url>"]',
+        '  api_key: "<your_api_key>"',
+      ],
+      textPost: cloudServerlessApiKeyNote,
+    },
+    RPM: {
+      title: i18n.translate(
+        'home.tutorials.common.filebeatCloudInstructionsServerless.config.rpmTitle',
+        {
+          defaultMessage: 'Edit the configuration',
+        }
+      ),
+      textPre: i18n.translate(
+        'home.tutorials.common.filebeatCloudInstructionsServerless.config.rpmTextPre',
+        {
+          defaultMessage:
+            'Modify {path} to set the connection information for Elastic Cloud Serverless:',
+          values: {
+            path: '`/etc/filebeat/filebeat.yml`',
+          },
+        }
+      ),
+      commands: [
+        'output.elasticsearch:',
+        '  hosts: ["<elasticsearch_endpoint_url>"]',
+        '  api_key: "<your_api_key>"',
+      ],
+      textPost: cloudServerlessApiKeyNote,
+    },
+    WINDOWS: {
+      title: i18n.translate(
+        'home.tutorials.common.filebeatCloudInstructionsServerless.config.windowsTitle',
+        {
+          defaultMessage: 'Edit the configuration',
+        }
+      ),
+      textPre: i18n.translate(
+        'home.tutorials.common.filebeatCloudInstructionsServerless.config.windowsTextPre',
+        {
+          defaultMessage:
+            'Modify {path} to set the connection information for Elastic Cloud Serverless:',
+          values: {
+            path: '`C:\\Program Files\\Filebeat\\filebeat.yml`',
+          },
+        }
+      ),
+      commands: [
+        'output.elasticsearch:',
+        '  hosts: ["<elasticsearch_endpoint_url>"]',
+        '  api_key: "<your_api_key>"',
+      ],
+      textPost: cloudServerlessApiKeyNote,
+    },
+  },
+});
+
 export function filebeatEnableInstructions(moduleName: string) {
   return {
     OSX: {
@@ -567,7 +668,9 @@ export function cloudInstructions(
   context: TutorialContext
 ) {
   const FILEBEAT_INSTRUCTIONS = createFilebeatInstructions(context);
-  const FILEBEAT_CLOUD_INSTRUCTIONS = createFilebeatCloudInstructions();
+  const FILEBEAT_CLOUD_INSTRUCTIONS = context.isServerless
+    ? createFilebeatCloudInstructionsServerless()
+    : createFilebeatCloudInstructions();
 
   const variants = [];
   for (let i = 0; i < platforms.length; i++) {

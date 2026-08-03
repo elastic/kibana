@@ -10,13 +10,13 @@ import type { Role } from '@kbn/security-plugin-types-common';
 import { ToolingLog } from '@kbn/tooling-log';
 
 import type { SecurityRoleName } from '@kbn/security-solution-plugin/common/test';
-import type { HostOptions } from '@kbn/test';
-import { SamlSessionManager } from '@kbn/test';
+import type { HostOptions } from '@kbn/test-saml-auth';
+import { SamlSessionManager } from '@kbn/test-saml-auth';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { resolve } from 'path';
 import axios from 'axios';
 import fs from 'fs';
-import yaml from 'js-yaml';
+import yaml from 'yaml';
 import { DEFAULT_SERVERLESS_ROLE } from '../env_var_names_constants';
 
 export const samlAuthentication = async (
@@ -53,7 +53,7 @@ export const samlAuthentication = async (
 
   const getYamlData = (filePath: string): any => {
     const fileContents = fs.readFileSync(filePath, 'utf8');
-    return yaml.load(fileContents);
+    return yaml.parse(fileContents);
   };
 
   const getRoleConfiguration = (role: string, filePath: string): any => {

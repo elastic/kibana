@@ -6,7 +6,10 @@
  */
 
 import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
-import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  MappingRuntimeFields,
+  OpenPointInTimeResponse,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { CspBenchmarkRule } from '@kbn/cloud-security-posture-common/schema/rules/latest';
@@ -56,56 +59,51 @@ export const getBenchmarksData = async (
   const benchmarkAgg: any = benchmarksResponse.aggregations;
   const rulesFilter = await getMutedRulesFilterQuery(encryptedSoClient);
 
-  const { id: pitId } = await esClient.openPointInTime({
+  const pit: OpenPointInTimeResponse = await esClient.openPointInTime({
     index: CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS,
     keep_alive: '30s',
   });
   // Transform response to a benchmark row: {id, name, version}
   // For each Benchmark entry : Calculate Score, Get amount of enrolled agents
-  const result = await Promise.all(
-    benchmarkAgg.benchmark_id.buckets.flatMap(async (benchmark: any) => {
-      const benchmarkId = benchmark.key;
-      const benchmarkName = benchmark.name.buckets[0].key;
+  const result: Benchmark[] = [];
 
-      const benchmarksTableObjects = await Promise.all(
-        benchmark?.name?.buckets[0]?.version?.buckets.flatMap(async (benchmarkObj: any) => {
-          const benchmarkVersion = benchmarkObj.key;
-          const postureType =
-            benchmarkId === 'cis_eks' || benchmarkId === 'cis_k8s' ? 'kspm' : 'cspm';
-          const runtimeMappings: MappingRuntimeFields = getSafePostureTypeRuntimeMapping();
-          const query: QueryDslQueryContainer = {
-            bool: {
-              filter: [
-                { term: { 'rule.benchmark.id': benchmarkId } },
-                { term: { 'rule.benchmark.version': benchmarkVersion } },
-                { term: { safe_posture_type: postureType } },
-              ],
-              must_not: rulesFilter,
-            },
-          };
-          const benchmarkScore = await getStats(esClient, query, pitId, runtimeMappings, logger);
-          const benchmarkEvaluation = await getClusters(
-            esClient,
-            query,
-            pitId,
-            runtimeMappings,
-            logger
-          );
+  for (const benchmark of benchmarkAgg.benchmark_id.buckets) {
+    const benchmarkId = benchmark.key;
+    const benchmarkName = benchmark.name.buckets[0].key;
+    const versions = benchmark?.name?.buckets[0]?.version?.buckets ?? [];
 
-          return {
-            id: benchmarkId,
-            name: benchmarkName,
-            version: benchmarkVersion.replace('v', ''),
-            score: benchmarkScore,
-            evaluation: benchmarkEvaluation.length,
-          };
-        })
-      );
+    for (const benchmarkObj of versions) {
+      const benchmarkVersion = benchmarkObj.key;
+      const postureType = benchmarkId === 'cis_eks' || benchmarkId === 'cis_k8s' ? 'kspm' : 'cspm';
+      const runtimeMappings: MappingRuntimeFields = getSafePostureTypeRuntimeMapping();
+      const query: QueryDslQueryContainer = {
+        bool: {
+          filter: [
+            { term: { 'rule.benchmark.id': benchmarkId } },
+            { term: { 'rule.benchmark.version': benchmarkVersion } },
+            { term: { safe_posture_type: postureType } },
+          ],
+          must_not: rulesFilter,
+        },
+      };
+      const benchmarkScore = await getStats(esClient, query, pit, runtimeMappings, logger);
+      const benchmarkEvaluation = await getClusters(esClient, query, pit, runtimeMappings, logger);
 
-      return benchmarksTableObjects;
-    })
-  );
-  return result.flat();
+      result.push({
+        id: benchmarkId,
+        name: benchmarkName,
+        version: benchmarkVersion.replace('v', ''),
+        score: benchmarkScore,
+        evaluation: benchmarkEvaluation.length,
+      });
+    }
+  }
+
+  esClient.closePointInTime(pit).catch((err) => {
+    logger.warn(`Could not close PIT for benchmarks endpoint: ${err}`);
+  });
+
+  return result;
 };
 
 export const getBenchmarks = async (

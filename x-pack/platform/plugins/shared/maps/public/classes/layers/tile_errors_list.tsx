@@ -114,6 +114,9 @@ export function TileErrorsList(props: Props) {
         closePopover={() => {
           setIsPopoverOpen(false);
         }}
+        aria-label={i18n.translate('xpack.maps.tileErrorsList.popoverAriaLabel', {
+          defaultMessage: 'Tile errors',
+        })}
       >
         <EuiContextMenu initialPanelId={0} panels={panels} size="s" />
       </EuiPopover>

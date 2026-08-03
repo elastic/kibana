@@ -19,6 +19,12 @@ export interface MeteringStats {
   size_in_bytes: number;
 }
 
+export interface DataStreamNamesResponse {
+  data_streams: Array<{
+    name: string;
+  }>;
+}
+
 class DataStreamService {
   public async getAllFleetDataStreams(esClient: ElasticsearchClient) {
     const { data_streams: dataStreamsInfo } = await esClient.indices.getDataStream({
@@ -38,6 +44,15 @@ class DataStreamService {
     });
 
     return res.datastreams ?? [];
+  }
+
+  public async getAllFleetDataStreamNames(esClient: ElasticsearchClient): Promise<string[]> {
+    const res = await esClient.transport.request<DataStreamNamesResponse>({
+      path: `/_data_stream/${DATA_STREAM_INDEX_PATTERN}`,
+      method: 'GET',
+      querystring: { filter_path: 'data_streams.name' },
+    });
+    return (res.data_streams ?? []).map(({ name }) => name);
   }
 
   public async getAllFleetDataStreamsStats(esClient: ElasticsearchClient) {

@@ -158,6 +158,7 @@ export type {
   NewPackagePolicyInput,
   NewPackagePolicyInputStream,
   UpdatePackagePolicy,
+  UpdatePackagePolicyWithId,
   PackagePolicy,
   PackagePolicyPackage,
   Installable,

@@ -19,9 +19,9 @@ import type { CategorizationAdditionalFilter } from '@kbn/aiops-log-pattern-anal
 import type { EmbeddablePatternAnalysisInput } from '@kbn/aiops-log-pattern-analysis/embeddable';
 import { useTableState } from '@kbn/ml-in-memory-table/hooks/use_table_state';
 import { AIOPS_ANALYSIS_RUN_ORIGIN, AIOPS_EMBEDDABLE_ORIGIN } from '@kbn/aiops-common/constants';
-import datemath from '@elastic/datemath';
 import useMountedState from 'react-use/lib/useMountedState';
 import { getEsQueryConfig } from '@kbn/data-service';
+import { calculateBounds } from '@kbn/data-plugin/common';
 import { useFilterQueryUpdates } from '../../../hooks/use_filters_query';
 import type { PatternAnalysisProps } from '../../../shared_components/pattern_analysis';
 import { useSearch } from '../../../hooks/use_search';
@@ -135,10 +135,9 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
 
   const timeRangeParsed = useMemo(() => {
     if (timeRange) {
-      const min = datemath.parse(timeRange.from);
-      const max = datemath.parse(timeRange.to);
-      if (min && max) {
-        return { min, max };
+      const bounds = calculateBounds(timeRange);
+      if (bounds.min && bounds.max) {
+        return { min: bounds.min, max: bounds.max };
       }
     }
   }, [timeRange]);

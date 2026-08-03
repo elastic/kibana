@@ -34,9 +34,10 @@ export const snapshot: Command = {
       -E                Additional key=value settings to pass to Elasticsearch
       --download-only   Download the snapshot but don't actually start it
       --ssl             Sets up SSL on Elasticsearch
-      --use-cached      Skips cache verification and use cached ES snapshot.
+      --use-cached      Prefer locally cached ES snapshots instead of downloading promoted snapshots.
       --skip-ready-check  Disable the ready check,
       --ready-timeout   Customize the ready check timeout, in seconds or "Xm" format, defaults to 1m
+      --es-log-level    Log level for ES stdout output (all, info, warn, error, silent) [default: info]
       --plugins         Comma seperated list of Elasticsearch plugins to install
       --secure-files     Comma seperated list of secure_setting_name=/path pairs
 
@@ -63,10 +64,11 @@ export const snapshot: Command = {
         useCached: 'use-cached',
         skipReadyCheck: 'skip-ready-check',
         readyTimeout: 'ready-timeout',
+        esLogLevel: 'es-log-level',
         secureFiles: 'secure-files',
       },
 
-      string: ['version', 'ready-timeout'],
+      string: ['version', 'ready-timeout', 'es-log-level'],
       boolean: ['download-only', 'use-cached', 'skip-ready-check'],
 
       default: defaults,
@@ -115,6 +117,7 @@ export const snapshot: Command = {
         reportTime,
         startTime: runStartTime,
         ...options,
+        esStdoutLogLevel: options.esLogLevel || 'info',
         readyTimeout: parseTimeoutToMs(options.readyTimeout),
       });
     }

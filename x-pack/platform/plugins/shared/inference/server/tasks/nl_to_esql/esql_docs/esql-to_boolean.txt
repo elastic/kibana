@@ -1,6 +1,6 @@
 # TO_BOOLEAN
 
-Converts an input value to a boolean value. A string value of `true` will be case-insensitively converted to the Boolean `true`. For anything else, including the empty string, the function will return `false`. The numerical value of `0` will be converted to `false`, and anything else will be converted to `true`.
+Converts an input value to a boolean value. A string value of `true` is case-insensitively converted to the Boolean `true`. Any other string, including the empty string, returns `false`. The numerical value `0` is converted to `false`, while any other number is converted to `true`.
 
 ## Syntax
 
@@ -8,28 +8,15 @@ Converts an input value to a boolean value. A string value of `true` will be cas
 
 ### Parameters
 
-#### `field`
+#### field
 
-The input value to be converted. This can be a single- or multi-valued column or an expression.
+Input value to be converted. The input can be a single- or multi-valued column or an expression.
 
 ## Examples
+
+Converts each string in the list to its boolean equivalent, where only case-insensitive "true" becomes true and all other values become false.
 
 ```esql
 ROW str = ["true", "TRuE", "false", "", "yes", "1"]
 | EVAL bool = TO_BOOLEAN(str)
 ```
-
-This example converts a multi-valued string column into boolean values. For instance:
-- `"true"` and `"TRuE"` are converted to `true`.
-- `"false"`, `""` (empty string), and other non-`true` strings are converted to `false`.
-- `"1"` is converted to `true`.
-
-```esql
-ROW num = [0, 1, 2, -1]
-| EVAL bool = TO_BOOLEAN(num)
-```
-
-## Notes
-
-- A string value of `true` is case-insensitively converted to the boolean `true`. For any other value, including an empty string, the function returns `false`.
-- A numerical value of `0` is converted to `false`, while any other numerical value is converted to `true`.

@@ -365,4 +365,49 @@ describe('validateJobParams', () => {
       ]"
     `);
   });
+
+  it('validates multiple locator params', () => {
+    const validParams = {
+      title: 'Monthly Report',
+      version: '8.0.0',
+      layout: {
+        id: idSchema.Enum.print,
+        dimensions: { width: 800, height: 600 },
+      },
+      browserTimezone: 'UTC',
+      objectType: 'dashboard',
+      forceNow: '2024-01-01T00:00:00',
+      locatorParams: [{ id: 'some-id' }, { version: 'some-version' }],
+    } as unknown as BaseParams;
+
+    expect(() => validateJobParams(validParams)).not.toThrow();
+  });
+
+  it('preserves esqlVariables nested in locator params', () => {
+    const validParams = {
+      title: 'ES|QL CSV',
+      version: '8.0.0',
+      browserTimezone: 'UTC',
+      objectType: 'search',
+      locatorParams: [
+        {
+          id: 'DISCOVER_APP_LOCATOR',
+          version: '8.0.0',
+          params: {
+            query: { esql: 'FROM test | WHERE crew.id == ?crew_id' },
+            columns: ['crew.id'],
+            esqlVariables: [{ key: 'crew_id', value: '123', type: 'values' }],
+          },
+        },
+      ],
+    } as unknown as BaseParams;
+
+    const result = validateJobParams(validParams) as unknown as {
+      locatorParams: Array<{ params: { esqlVariables: unknown } }>;
+    };
+
+    expect(result.locatorParams[0].params.esqlVariables).toEqual([
+      { key: 'crew_id', value: '123', type: 'values' },
+    ]);
+  });
 });

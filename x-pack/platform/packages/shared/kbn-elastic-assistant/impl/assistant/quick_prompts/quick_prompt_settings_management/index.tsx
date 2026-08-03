@@ -162,6 +162,7 @@ const QuickPromptSettingsManagementComponent = () => {
         </EuiFlexGroup>
         <EuiSpacer size="s" />
         <EuiInMemoryTable
+          tableCaption={i18n.QUICK_PROMPT_TABLE_CAPTION}
           columns={columns}
           items={quickPromptSettings}
           onTableChange={onTableChange}

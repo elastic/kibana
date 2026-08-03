@@ -34,7 +34,7 @@ export const ViewResultsPanel: FC<Props> = ({ jobId, analysisType }) => {
     <Fragment>
       <EuiCard
         css={{ width: `calc(${size.xxl} * 7.5)` }}
-        icon={<EuiIcon size="xxl" type="visTable" />}
+        icon={<EuiIcon size="xxl" type="visTable" aria-hidden={true} />}
         title={i18n.translate('xpack.ml.dataframe.analytics.create.viewResultsCardTitle', {
           defaultMessage: 'View Results',
         })}

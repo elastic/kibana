@@ -8,9 +8,10 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { SectionError } from '@kbn/es-ui-shared-plugin/public';
+
 import { REPOSITORY_TYPES } from '../../../../../common';
 import type { Repository, RepositoryType, EmptyRepository } from '../../../../../common/types';
-import { SectionError } from '../../../../shared_imports';
 import { useServices } from '../../../app_context';
 import type { RepositorySettingsValidation } from '../../../services/validation';
 

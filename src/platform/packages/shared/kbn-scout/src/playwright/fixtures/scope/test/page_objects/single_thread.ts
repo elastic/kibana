@@ -9,7 +9,7 @@
 
 import type { PageObjects } from '../../../../page_objects';
 import { createCorePageObjects } from '../../../../page_objects';
-import type { ScoutTestConfig } from '../../worker';
+import type { KibanaUrl, ScoutTestConfig } from '../../worker';
 import { scoutPageFixture } from '../scout_page';
 
 /**
@@ -24,10 +24,10 @@ export const pageObjectsFixture = scoutPageFixture.extend<
   {
     pageObjects: PageObjects;
   },
-  { config: ScoutTestConfig }
+  { config: ScoutTestConfig; kbnUrl: KibanaUrl }
 >({
-  pageObjects: async ({ page, log, config }, use) => {
-    const corePageObjects = createCorePageObjects({ page, config, log });
+  pageObjects: async ({ page, log, config, kbnUrl }, use) => {
+    const corePageObjects = createCorePageObjects({ page, config, log, kbnUrl });
     log.serviceLoaded('pageObjects');
     await use(corePageObjects);
   },

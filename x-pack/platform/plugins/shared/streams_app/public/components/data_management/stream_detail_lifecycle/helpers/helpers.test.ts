@@ -180,8 +180,12 @@ describe('helpers', () => {
   });
 
   describe('getILMRatios', () => {
-    it('should return undefined if no phases', () => {
+    it('should return undefined if phases is undefined', () => {
       expect(getILMRatios(undefined)).toBeUndefined();
+    });
+
+    it('should return undefined if phases is an empty object', () => {
+      expect(getILMRatios({ phases: {} })).toBeUndefined();
     });
 
     it('should calculate grow ratios correctly for multiple phases', () => {

@@ -1,0 +1,20 @@
+fileGroups:
+  src:
+    - 'version_dependencies.txt'
+tasks:
+  extract-version-dependencies:
+    command: node
+    args:
+     - $workspaceRoot/scripts/extract_version_dependencies.js
+     - packages/kbn-eslint-config/version_dependencies.txt
+     - --collect
+     - eslint
+    env:
+      CI_STATS_DISABLED: 'true'
+    inputs:
+      - /package.json
+      - /yarn.lock
+    outputs:
+      - version_dependencies.txt
+    options:
+      runFromWorkspaceRoot: true

@@ -819,8 +819,7 @@ const prepareDefinitionSectionListItems = ({
       description: (
         <Filters
           filters={rule.threat_filters as Filter[]}
-          dataViewId={rule.data_view_id}
-          index={rule.index}
+          index={rule.threat_index}
           data-test-subj="threatFiltersPropertyValue"
         />
       ),

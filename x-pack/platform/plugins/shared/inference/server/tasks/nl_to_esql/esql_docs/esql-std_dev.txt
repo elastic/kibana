@@ -1,6 +1,6 @@
 # STD_DEV
 
-Calculates the standard deviation of a numeric field.
+Calculates the population standard deviation of a numeric field.
 
 ## Syntax
 
@@ -10,24 +10,20 @@ Calculates the standard deviation of a numeric field.
 
 #### number
 
-A numeric field for which the standard deviation is calculated.
+The numeric column or expression for which to calculate the population standard deviation.
 
 ## Examples
 
-Calculate the standard deviation of a field
+Calculates the population standard deviation of the height field for all employees.
 
 ```esql
 FROM employees
-| STATS STD_DEV(height)
+| STATS std_dev_height = STD_DEV(height)
 ```
 
-Calculate the standard deviation of the `height` field.
-
-Use inline functions with STD_DEV
+Calculates the population standard deviation of the maximum salary change for each employee.
 
 ```esql
 FROM employees
 | STATS stddev_salary_change = STD_DEV(MV_MAX(salary_change))
 ```
-
-Calculate the standard deviation of each employee’s maximum salary changes by first applying the `MV_MAX` function to determine the maximum salary change per row, and then using `STD_DEV` on the result.

@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
-import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
+import { useApmIndexSettingsContext } from '../../../../context/apm_index_settings/use_apm_index_settings_context';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 
 export function BaseDiscoverButton({
@@ -28,7 +28,7 @@ export function BaseDiscoverButton({
   ariaLabel: string;
 }) {
   const { share } = useApmPluginContext();
-  const { indexSettingsStatus } = useApmServiceContext();
+  const { indexSettingsStatus } = useApmIndexSettingsContext();
 
   const discoverHref = share.url.locators.get(DISCOVER_APP_LOCATOR)?.getRedirectUrl({
     timeRange: {

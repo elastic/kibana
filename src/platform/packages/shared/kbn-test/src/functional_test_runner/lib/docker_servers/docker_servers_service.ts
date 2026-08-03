@@ -13,10 +13,10 @@ import * as Rx from 'rxjs';
 import { filter, take, map } from 'rxjs';
 import type { ToolingLog } from '@kbn/tooling-log';
 
+import type { DockerServer, DockerServerSpec } from '@kbn/test-docker-servers';
 import type { Lifecycle } from '../lifecycle';
 import { observeContainerRunning } from './container_running';
 import { observeContainerLogs } from './container_logs';
-import type { DockerServer, DockerServerSpec } from './define_docker_servers_config';
 
 const SECOND = 1000;
 

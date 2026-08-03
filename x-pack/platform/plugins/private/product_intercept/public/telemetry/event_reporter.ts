@@ -32,22 +32,27 @@ export class PromptTelemetry {
   private reportInterceptTermination({
     interactionType,
     interceptRunId,
+    interceptId,
   }: {
     interactionType: 'dismissal' | 'completion';
     interceptRunId: number;
+    interceptId: string;
   }) {
     this.reportEvent?.(EventMetric.PRODUCT_INTERCEPT_TERMINATION_INTERACTION, {
       [EventFieldType.INTERACTION_TYPE]: interactionType,
       [EventFieldType.INTERCEPT_RUN_ID]: String(interceptRunId),
+      [EventFieldType.INTERCEPT_ID]: interceptId,
     });
   }
 
   private reportInterceptInteractionProgress({
     interceptRunId,
+    interceptId,
     metricId,
     value,
   }: {
     interceptRunId: number;
+    interceptId: string;
     metricId: string;
     value: number;
   }) {
@@ -55,12 +60,20 @@ export class PromptTelemetry {
       [EventFieldType.INTERACTION_METRIC]: metricId,
       [EventFieldType.INTERACTION_METRIC_VALUE]: value,
       [EventFieldType.INTERCEPT_RUN_ID]: String(interceptRunId),
+      [EventFieldType.INTERCEPT_ID]: interceptId,
     });
   }
 
-  private reportTriggerFetchError({ errorMessage }: { errorMessage: string }) {
+  private reportTriggerFetchError({
+    errorMessage,
+    interceptId,
+  }: {
+    errorMessage: string;
+    interceptId: string;
+  }) {
     this.reportEvent?.(EventMetric.PRODUCT_INTERCEPT_TRIGGER_FETCH_ERROR, {
       [EventFieldType.TRIGGER_FETCH_ERROR_MESSAGE]: errorMessage,
+      [EventFieldType.INTERCEPT_ID]: interceptId,
     });
   }
 }

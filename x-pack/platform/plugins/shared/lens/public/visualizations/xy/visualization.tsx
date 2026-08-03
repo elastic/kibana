@@ -74,7 +74,6 @@ import { getAccessorColorConfigs, getColorAssignments } from './color_assignment
 import {
   getAnnotationLayerErrors,
   isHorizontalChart,
-  annotationLayerHasUnsavedChanges,
   isHorizontalSeries,
   getColumnToLabelMap,
 } from './state_helpers';
@@ -735,12 +734,7 @@ export const getXyVisualization = ({
       return <ReferenceLayerHeader />;
     }
     if (isAnnotationsLayer(layer)) {
-      return (
-        <AnnotationsLayerHeader
-          title={getAnnotationLayerTitle(layer)}
-          hasUnsavedChanges={annotationLayerHasUnsavedChanges(layer)}
-        />
-      );
+      return <AnnotationsLayerHeader title={getAnnotationLayerTitle(layer)} />;
     }
     return undefined;
   },
@@ -1417,6 +1411,9 @@ const SubtypeSwitch = ({
   return (
     <>
       <EuiPopover
+        aria-label={i18n.translate('xpack.lens.xyChart.stackingOptionsPopoverAriaLabel', {
+          defaultMessage: 'Stacking options',
+        })}
         ownFocus
         panelPaddingSize="none"
         button={

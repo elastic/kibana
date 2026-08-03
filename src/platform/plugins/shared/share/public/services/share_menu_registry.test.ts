@@ -8,8 +8,16 @@
  */
 
 import { ShareRegistry } from './share_menu_registry';
-import type { ShareContext, ShareRegistryApiStart, RegisterShareIntegrationArgs } from '../types';
+import type {
+  ShareContext,
+  ShareRegistryApiStart,
+  RegisterShareIntegrationArgs,
+  ShareIntegration,
+  SharingData,
+} from '../types';
 import { url } from '../mocks';
+
+type TestShareIntegration = ShareIntegration<Record<string, unknown>, SharingData>;
 
 describe('ShareActionsRegistry', () => {
   const startDeps: ShareRegistryApiStart = {
@@ -26,15 +34,15 @@ describe('ShareActionsRegistry', () => {
     test('throws when registering duplicate id', () => {
       const shareRegistrySetup = new ShareRegistry().setup();
 
-      shareRegistrySetup.registerShareIntegration({
+      shareRegistrySetup.registerShareIntegration<TestShareIntegration>({
         id: 'csvReports',
-        getShareIntegrationConfig: () => Promise.resolve({}),
+        getShareIntegrationConfig: (..._args) => Promise.resolve({}),
       });
 
       expect(() =>
-        shareRegistrySetup.registerShareIntegration({
+        shareRegistrySetup.registerShareIntegration<TestShareIntegration>({
           id: 'csvReports',
-          getShareIntegrationConfig: () => Promise.resolve({}),
+          getShareIntegrationConfig: (..._args) => Promise.resolve({}),
         })
       ).toThrowErrorMatchingInlineSnapshot(
         `"Share action with type [integration] for app [*] has already been registered."`
@@ -51,7 +59,7 @@ describe('ShareActionsRegistry', () => {
         const { availableIntegrations } = shareRegistry.start(startDeps);
 
         // register a global integration without a prerequisite
-        registerShareIntegration({
+        registerShareIntegration<TestShareIntegration>({
           id: 'csvReports',
           getShareIntegrationConfig: () => Promise.resolve({}),
         });
@@ -69,7 +77,7 @@ describe('ShareActionsRegistry', () => {
         const prerequisiteCheckFn = jest.fn(() => false);
 
         // register a global integration with a prerequisiteCheck
-        registerShareIntegration({
+        registerShareIntegration<TestShareIntegration>({
           id: 'csvReports',
           getShareIntegrationConfig: () => Promise.resolve({}),
           prerequisiteCheck: prerequisiteCheckFn,
@@ -95,7 +103,7 @@ describe('ShareActionsRegistry', () => {
         const prerequisiteCheckFn = jest.fn(() => true);
 
         // register a global integration with a prerequisiteCheck
-        registerShareIntegration({
+        registerShareIntegration<TestShareIntegration>({
           id: 'csvReports',
           getShareIntegrationConfig: () => Promise.resolve({}),
           prerequisiteCheck: prerequisiteCheckFn,
@@ -119,7 +127,7 @@ describe('ShareActionsRegistry', () => {
         const { availableIntegrations } = shareRegistry.start(startDeps);
 
         // register a global integration with a groupId
-        registerShareIntegration({
+        registerShareIntegration<TestShareIntegration>({
           id: 'csvReports',
           groupId: 'export',
           getShareIntegrationConfig: () => Promise.resolve({}),
@@ -136,7 +144,7 @@ describe('ShareActionsRegistry', () => {
         const { availableIntegrations } = shareRegistry.start(startDeps);
 
         // register a scoped integration with a groupId
-        registerShareIntegration('scoped', {
+        registerShareIntegration<TestShareIntegration>('scoped', {
           id: 'csvReports',
           groupId: 'export',
           getShareIntegrationConfig: () => Promise.resolve({}),
@@ -205,9 +213,9 @@ describe('ShareActionsRegistry', () => {
           getShareIntegrationConfig: shareAction3ConfigFactory,
         };
 
-        registerFunction(shareAction1);
-        registerFunction(shareAction2);
-        registerFunction(shareAction3);
+        registerFunction<TestShareIntegration>(shareAction1);
+        registerFunction<TestShareIntegration>(shareAction2);
+        registerFunction<TestShareIntegration>(shareAction3);
 
         const context = { objectType: 'anotherRandomShareObjectType' } as ShareContext;
         const isServerless = false;
@@ -279,9 +287,9 @@ describe('ShareActionsRegistry', () => {
           getShareIntegrationConfig: shareAction3ConfigFactory,
         };
 
-        registerFunction(context.objectType, shareAction1);
-        registerFunction('someOtherRandomObjectType', shareAction2);
-        registerFunction(context.objectType, shareAction3);
+        registerFunction<TestShareIntegration>(context.objectType, shareAction1);
+        registerFunction<TestShareIntegration>('someOtherRandomObjectType', shareAction2);
+        registerFunction<TestShareIntegration>(context.objectType, shareAction3);
 
         const { resolveShareItemsForShareContext } = service.start(startDeps);
 

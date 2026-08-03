@@ -112,6 +112,7 @@ export const ProjectPicker = ({
         ownFocus
         panelPaddingSize="none"
         panelProps={{ css: styles.popover }}
+        aria-label={strings.getProjectPickerPopoverTitle()}
       >
         <ProjectPickerContent
           projectRouting={projectRouting}

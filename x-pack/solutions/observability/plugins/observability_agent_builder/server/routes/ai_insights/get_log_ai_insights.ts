@@ -10,22 +10,24 @@ import type { IScopedClusterClient, KibanaRequest } from '@kbn/core/server';
 import { safeJsonStringify } from '@kbn/std';
 import dedent from 'dedent';
 import type { ObservabilityAgentBuilderDataRegistry } from '../../data_registry/data_registry';
-import { getLogDocumentById } from './get_log_document_by_id';
+import { getLogDocumentById, type LogDocument } from './get_log_document_by_id';
 
 export interface GetLogAiInsightsParams {
-  index: string;
-  id: string;
   dataRegistry: ObservabilityAgentBuilderDataRegistry;
   inferenceClient: InferenceClient;
   connectorId: string;
   request: KibanaRequest;
   esClient: IScopedClusterClient;
+  index?: string;
+  id?: string;
+  fields?: Record<string, unknown>;
 }
 
 export async function getLogAiInsights({
   index,
   id,
   request,
+  fields,
   esClient,
   dataRegistry,
   inferenceClient,
@@ -35,23 +37,43 @@ export async function getLogAiInsights({
     You are assisting an SRE who is viewing a log entry in the Kibana Logs UI.
     Using the provided data produce a concise, action-oriented response.`);
 
-  const logEntry = await getLogDocumentById({
-    esClient: esClient.asCurrentUser,
-    index,
-    id,
-  });
+  let logEntry: LogDocument;
 
-  if (!logEntry) {
-    throw new Error('Log entry not found');
+  if (typeof index === 'string' && typeof id === 'string') {
+    const fetchedById = await getLogDocumentById({
+      esClient: esClient.asCurrentUser,
+      index,
+      id,
+    });
+    if (!fetchedById) {
+      throw new Error('Log entry not found');
+    }
+    logEntry = fetchedById;
+    // esql mode, filter out null entries from passed in fields
+  } else {
+    logEntry = Object.fromEntries(
+      Object.entries(fields ?? {}).filter(([, v]) => v != null)
+    ) as LogDocument;
   }
 
-  let context = dedent(`
-    <LogEntryIndex>
-    ${index}
-    </LogEntryIndex>
-    <LogEntryId>
-    ${id}
-    </LogEntryId>
+  let context = '';
+
+  if (index) {
+    context += dedent(`
+      <LogEntryIndex>
+      ${index}
+      </LogEntryIndex>
+    `);
+  }
+  if (id) {
+    context += dedent(`
+      <LogEntryId>
+      ${id}
+      </LogEntryId>
+    `);
+  }
+
+  context += dedent(`
     <LogEntryFields>
     \`\`\`json
     ${safeJsonStringify(logEntry)}

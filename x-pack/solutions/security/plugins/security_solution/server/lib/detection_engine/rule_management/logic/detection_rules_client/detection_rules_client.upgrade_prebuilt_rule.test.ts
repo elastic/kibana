@@ -149,9 +149,21 @@ describe('DetectionRulesClient.upgradePrebuiltRule', () => {
               exceptionsList: installedRule.exceptions_list,
             }),
           }),
-          options: {
+          options: expect.objectContaining({
             id: installedRule.id, // id is maintained
-          },
+          }),
+        })
+      );
+    });
+
+    it('creates a new rule with initialRevision bumped by 1 from the existing rule revision', async () => {
+      await detectionRulesClient.upgradePrebuiltRule({ ruleAsset });
+
+      expect(rulesClient.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          options: expect.objectContaining({
+            initialRevision: installedRule.revision + 1,
+          }),
         })
       );
     });

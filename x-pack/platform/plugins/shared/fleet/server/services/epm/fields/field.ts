@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { load } from 'js-yaml';
+import { parse } from 'yaml';
 
 import type { AssetsMap, PackageInstallContext } from '../../../../common/types';
 import { getAssetsDataFromAssetsMap } from '../packages/assets';
@@ -323,7 +323,7 @@ export const loadDatastreamsFieldsFromYaml = (
   return fieldDefinitionFiles.reduce<Field[]>((acc, file) => {
     // Make sure it is defined as it is optional. Should never happen.
     if (file.buffer) {
-      const tmpFields = load(file.buffer.toString());
+      const tmpFields = parse(file.buffer.toString());
       // load() returns undefined for empty files, we don't want that
       if (tmpFields) {
         acc = acc.concat(tmpFields);
@@ -347,7 +347,7 @@ export const loadTransformFieldsFromYaml = (
   return fieldDefinitionFiles.reduce<Field[]>((acc, file) => {
     // Make sure it is defined as it is optional. Should never happen.
     if (file.buffer) {
-      const tmpFields = load(file.buffer.toString());
+      const tmpFields = parse(file.buffer.toString());
       // load() returns undefined for empty files, we don't want that
       if (tmpFields) {
         acc = acc.concat(tmpFields);

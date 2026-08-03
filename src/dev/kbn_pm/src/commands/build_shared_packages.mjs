@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { run } from '../lib/spawn.mjs';
+import { moonRun } from '../lib/moon.mjs';
 
 /** @type {import('../lib/command').Command} */
 export const command = {
@@ -30,17 +30,12 @@ export const command = {
     const cache = args.getBooleanValue('cache') ?? true;
 
     log.info('building shared packages with webpack');
-    await run(
-      'moon',
-      [':build-webpack'].concat(!cache ? ['-u'] : []).concat(dist ? ['--', '--dist'] : []),
-      {
-        pipe: !quiet,
-        env: {
-          ...process.env,
-          ...(!cache ? { MOON_CACHE: 'off' } : {}),
-        },
-      }
-    );
+    await moonRun(':build-webpack', {
+      pipe: !quiet,
+      noCache: !cache,
+      passAlongArgs: dist ? ['--dist'] : undefined,
+      quiet,
+    });
 
     log.success('shared packages built');
   },

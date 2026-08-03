@@ -8,7 +8,7 @@
  */
 
 import { render, screen, act as rtlAct } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import userEvent, { PointerEventsCheckLevel } from '@testing-library/user-event';
 import { BehaviorSubject } from 'rxjs';
 import type { ReactWrapper } from 'enzyme';
 import { findTestSubject } from '@elastic/eui/lib/test';
@@ -37,6 +37,10 @@ import { DiscoverTestProvider } from '../../../../__mocks__/test_provider';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { UnifiedFieldListRestorableState } from '@kbn/unified-field-list';
 import { internalStateActions } from '../../state_management/redux';
+
+// There are some flaky tests in this file because they render a big DOM tree, which can take some time to run the tests.
+const EXTENDED_TIMEOUT = 60_000;
+jest.setTimeout(EXTENDED_TIMEOUT);
 
 type TestWrapperProps = DiscoverSidebarResponsiveProps & { selectedDataView: DataView };
 
@@ -405,7 +409,10 @@ describe('discover responsive sidebar', function () {
   describe('when the input is focused', () => {
     it('should set a11y attributes for the search input in the field list', async function () {
       // Given
-      const user = userEvent.setup();
+      const user = userEvent.setup({
+        pointerEventsCheck: PointerEventsCheckLevel.Never,
+        skipHover: true,
+      });
 
       // When
       await mountComponent(props, undefined, undefined, true);

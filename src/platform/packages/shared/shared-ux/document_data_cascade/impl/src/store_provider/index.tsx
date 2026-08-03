@@ -20,9 +20,14 @@ import {
 } from './reducers';
 export type { GroupNode, LeafNode, IStoreState } from './reducers';
 
-interface IDataCascadeProviderProps {
+export interface IDataCascadeProviderProps {
   initialGroupColumn?: string[];
   cascadeGroups: string[];
+  /**
+   * Properties to set the initial table state on mount.
+   * Only expanded and rowSelection properties are supported for now.
+   */
+  initialTableState?: Pick<Partial<TableState>, 'expanded' | 'rowSelection'>;
 }
 
 interface IStoreContext<G extends GroupNode, L extends LeafNode> {
@@ -69,6 +74,7 @@ export function useCascadeLeafNode<G extends GroupNode, L extends LeafNode>(cach
 export function DataCascadeProvider<G extends GroupNode, L extends LeafNode>({
   cascadeGroups,
   initialGroupColumn,
+  initialTableState,
   children,
 }: PropsWithChildren<IDataCascadeProviderProps>) {
   const StoreContext = createStoreContext<G, L>();
@@ -81,7 +87,7 @@ export function DataCascadeProvider<G extends GroupNode, L extends LeafNode>({
 
   const { state, actions } = useCreateStore({
     initialState: {
-      table: {} as TableState,
+      table: (initialTableState ?? {}) as TableState,
       groupNodes: [] as G[],
       leafNodes: new Map<string, L[]>(), // TODO: consider externalizing this so the consumer might provide their own external cache
       groupByColumns: cascadeGroups,

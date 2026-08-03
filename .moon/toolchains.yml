@@ -1,0 +1,23 @@
+# https://moonrepo.dev/docs/config/toolchains
+$schema: 'https://moonrepo.dev/schemas/toolchains.json'
+
+javascript:
+  packageManager: yarn
+  inferTasksFromScripts: true # Automatically infer tasks from package.json scripts.
+  dependencyVersionFormat: link
+  rootPackageDependenciesOnly: true # Keep installs rooted at the workspace package.json only.
+  syncPackageManagerField: true
+  dedupeOnLockfileChange: true # Dedupe dependencies when the lockfile changes.
+  syncProjectWorkspaceDependencies: false
+
+node:
+  syncVersionManagerConfig: nvm
+
+yarn:
+  installArgs:
+    - '--non-interactive'
+
+typescript:
+  includeProjectReferenceSources: false # This would add references to tsconfigs
+  syncProjectReferences: false # This would add references to tsconfigs
+  syncProjectReferencesToPaths: false # This would add path mapping to compiler options

@@ -7,6 +7,7 @@
 
 import React, { memo, useState, useMemo, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { EuiContextMenuItem, EuiPortal } from '@elastic/eui';
 
 import type { AgentPolicy } from '../../../types';
@@ -86,6 +87,13 @@ export const AgentPolicyActionMenu = memo<{
         return () => setIsEnrollmentFlyoutOpen(false);
       }
     }, [onCancelEnrollment, setIsEnrollmentFlyoutOpen]);
+
+    const actionsAriaLabel = fullButton
+      ? undefined
+      : i18n.translate('xpack.fleet.agentPolicyActionMenu.actionsAriaLabel', {
+          defaultMessage: 'Actions for {policyName}',
+          values: { policyName: agentPolicy.name },
+        });
 
     return (
       <AgentPolicyCopyProvider>
@@ -349,6 +357,7 @@ export const AgentPolicyActionMenu = memo<{
               <ContextMenuActions
                 isOpen={isContextMenuOpen}
                 onChange={onContextMenuChange}
+                aria-label={actionsAriaLabel}
                 button={
                   fullButton
                     ? {

@@ -14,7 +14,9 @@ const { log: defaultLog } = require('./log');
 export const SYSTEM_INDICES_SUPERUSER =
   process.env.TEST_ES_SYSTEM_INDICES_USER || 'system_indices_superuser';
 
-exports.NativeRealm = class NativeRealm {
+export const SYSTEM_INDICES_SUPERUSER_PASSWORD = process.env.TEST_ES_PASS || 'changeme';
+
+export class NativeRealm {
   constructor({ elasticPassword, log = defaultLog, client }) {
     this._elasticPassword = elasticPassword;
     this._client = client;
@@ -146,4 +148,4 @@ exports.NativeRealm = class NativeRealm {
       roles: [SYSTEM_INDICES_SUPERUSER],
     });
   }
-};
+}

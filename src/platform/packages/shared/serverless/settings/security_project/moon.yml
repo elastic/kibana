@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/serverless-security-settings'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/security-solution'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/serverless-security-settings'
+  title: '@kbn/serverless-security-settings'
   description: Moon project for @kbn/serverless-security-settings
   channel: ''
   owner: '@elastic/security-solution'
-  metadata:
-    sourceRoot: src/platform/packages/shared/serverless/settings/security_project
+  sourceRoot: src/platform/packages/shared/serverless/settings/security_project
 dependsOn:
   - '@kbn/management-settings-ids'
 tags:

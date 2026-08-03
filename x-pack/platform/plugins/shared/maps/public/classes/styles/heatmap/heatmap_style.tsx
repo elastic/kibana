@@ -66,7 +66,7 @@ export class HeatmapStyle implements IStyle {
   }
 
   getIcon() {
-    return <EuiIcon size="m" type="heatmap" />;
+    return <EuiIcon size="m" type="heatmap" aria-hidden={true} />;
   }
 
   setMBPaintProperties({

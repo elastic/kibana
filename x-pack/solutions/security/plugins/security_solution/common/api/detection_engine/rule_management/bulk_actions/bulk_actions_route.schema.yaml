@@ -460,7 +460,7 @@ paths:
                             threat: []
                             to: 'now'
                             references:
-                              - 'https://www.elastic.co/guide/en/security/current/prebuilt-ml-jobs.html'
+                              - 'https://www.elastic.co/docs/reference/machine-learning/ootb-ml-jobs-siem'
                             version: 6
                             exceptions_list: []
                             immutable: false

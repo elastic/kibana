@@ -165,10 +165,16 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                 fetchingDataStreamSettings: {
                   invoke: {
                     src: 'loadDataStreamSettings',
-                    onDone: {
-                      target: 'qualityIssues',
-                      actions: ['storeDataStreamSettings'],
-                    },
+                    onDone: [
+                      {
+                        target: '#DatasetQualityDetailsController.indexNotFound',
+                        cond: 'isDataStreamMissing',
+                      },
+                      {
+                        target: 'qualityIssues',
+                        actions: ['storeDataStreamSettings'],
+                      },
+                    ],
                     onError: [
                       {
                         target: '#DatasetQualityDetailsController.indexNotFound',
@@ -781,6 +787,10 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
               (event.data.originalMessage as string)?.includes('index_not_found_exception')) ??
             false
           );
+        },
+        isDataStreamMissing: (_, event) => {
+          const output = 'data' in event ? (event.data as DataStreamSettings) : undefined;
+          return !output?.lastBackingIndexName;
         },
         shouldOpenFlyout: (context, _event, meta) => {
           return (

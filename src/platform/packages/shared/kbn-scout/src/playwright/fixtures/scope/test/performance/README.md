@@ -19,13 +19,12 @@
   - Frames Per Second (FPS) (fps)
   - DOM Complexity Metrics (nodesCount, documentsCount)
 
-
 ### Usage: capturing JS bundles on page
 
 ```ts
 test.describe(
   'Discover App - Performance Metrics & Bundle Analysis',
-  { tag: [...tags.DEPLOYMENT_AGNOSTIC, ...tags.PERFORMANCE] },
+  { tag: [...tags.deploymentAgnostic, ...tags.performance] },
   () => {
     let cdp: CDPSession;
 
@@ -86,7 +85,7 @@ test.describe(
 ```ts
 test.describe(
   'Discover App - Performance Metrics & Bundle Analysis',
-  { tag: [...tags.DEPLOYMENT_AGNOSTIC, ...tags.PERFORMANCE] },
+  { tag: [...tags.deploymentAgnostic, ...tags.performance] },
   () => {
     let cdp: CDPSession;
 
@@ -105,7 +104,8 @@ test.describe(
 
       // Navigate to Discover app
       await pageObjects.collapsibleNav.clickItem('Discover');
-      await page.waitForLoadingIndicatorHidden();
+      await page.testSubj.waitForSelector('discoverLayoutResizableContainer');
+
       const currentUrl = page.url();
       expect(currentUrl).toContain('app/discover#/');
 

@@ -36,6 +36,17 @@ export interface GeneratorConfig {
      */
     outFile: string;
   };
+  /**
+   * Schema name transformation strategy for generated TypeScript/zod types
+   * - 'pascalCase': Converts names to PascalCase
+   * - undefined: No transformation (preserves original names)
+   * @default undefined
+   */
+  schemaNameTransform?: 'pascalCase';
+  /**
+   * This forces the generator to use the Zod v4 import.
+   */
+  experimentallyImportZodV4?: boolean;
 }
 
 export const generate = async (config: GeneratorConfig) => {
@@ -62,7 +73,10 @@ export const generate = async (config: GeneratorConfig) => {
       return {
         sourcePath,
         generatedPath: getGeneratedFilePath(sourcePath),
-        generationContext: getGenerationContext(parsedSchema),
+        generationContext: getGenerationContext(parsedSchema, {
+          schemaNameTransform: config.schemaNameTransform,
+          experimentallyImportZodV4: config.experimentallyImportZodV4,
+        }),
       };
     })
   );
@@ -105,6 +119,10 @@ export const generate = async (config: GeneratorConfig) => {
       info: {
         title,
         version: 'Bundle (no version)',
+      },
+      config: {
+        schemaNameTransform: config.schemaNameTransform,
+        experimentallyImportZodV4: config.experimentallyImportZodV4,
       },
     });
 

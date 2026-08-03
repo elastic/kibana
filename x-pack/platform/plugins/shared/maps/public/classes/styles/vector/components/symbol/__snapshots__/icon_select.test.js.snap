@@ -4,6 +4,7 @@ exports[`Should render icon select 1`] = `
 <Fragment>
   <EuiPopover
     anchorPosition="downLeft"
+    aria-label="Icon selector"
     button={
       <EuiFieldText
         compressed={true}
@@ -87,6 +88,7 @@ exports[`Should render icon select with custom icons 1`] = `
 <Fragment>
   <EuiPopover
     anchorPosition="downLeft"
+    aria-label="Icon selector"
     button={
       <EuiFieldText
         compressed={true}

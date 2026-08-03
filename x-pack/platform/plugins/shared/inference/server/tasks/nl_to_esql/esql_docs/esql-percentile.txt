@@ -1,6 +1,6 @@
 # PERCENTILE
 
-The `PERCENTILE` function calculates the value at which a specified percentage of observed values occur. For example, the 95th percentile is the value greater than 95% of the observed values, while the 50th percentile corresponds to the `MEDIAN`.
+The PERCENTILE function returns the value at which a specified percentage of observed values occur. For example, the 95th percentile is the value greater than 95% of the observed values, and the 50th percentile is the median.
 
 ## Syntax
 
@@ -8,35 +8,35 @@ The `PERCENTILE` function calculates the value at which a specified percentage o
 
 ### Parameters
 
-#### `number`
+#### number
 
-The numeric field or expression for which the percentile is calculated.
+The column or expression containing the numeric values for which you want to calculate the percentile.
 
-#### `percentile`
+#### percentile
 
-The percentile value to calculate (e.g., 0 for the minimum, 50 for the median, 100 for the maximum).
+The percentile to calculate, specified as a number between 0 and 100.
 
 ## Examples
 
-Basic Percentile Calculation
+Calculates the 0th (minimum), 50th (median), and 99th percentiles of the salary column in the employees dataset.
 
 ```esql
 FROM employees
-| STATS p0 = PERCENTILE(salary, 0), p50 = PERCENTILE(salary, 50), p99 = PERCENTILE(salary, 99)
+| STATS p0 = PERCENTILE(salary,  0)
+     , p50 = PERCENTILE(salary, 50)
+     , p99 = PERCENTILE(salary, 99)
 ```
 
-This example calculates the 0th percentile (minimum), 50th percentile (median), and 99th percentile of the `salary` field.
-
-Using Inline Functions
+Calculates the 80th percentile of the maximum salary change for each employee.
 
 ```esql
 FROM employees
 | STATS p80_max_salary_change = PERCENTILE(MV_MAX(salary_change), 80)
 ```
 
-This example calculates the 80th percentile of the maximum values in a multivalued column `salary_change`. The `MV_MAX` function is used to determine the maximum value per row before applying the `PERCENTILE` function.
+## Limitations
 
-## Notes
-
-- PERCENTILE is usually approximate.
-- PERCENTILE is also non-deterministic. This means you can get slightly different results using the same data.
+- The PERCENTILE function uses the TDigest algorithm, which calculates approximate percentiles to efficiently handle large datasets.
+- Accuracy is proportional to `q(1-q)`, meaning extreme percentiles (such as 99%) are more accurate than less extreme percentiles like the median.
+- For small datasets, percentiles are highly accurate, but as the dataset grows, the algorithm trades accuracy for memory savings.
+- The function is non-deterministic, so repeated queries on the same data may yield slightly different results.

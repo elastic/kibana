@@ -53,16 +53,22 @@ export interface UnknownDocsFound {
  * @param esClient The ES client to perform the search query
  * @param targetIndices The ES indices to target
  * @param query An optional query that can be used to filter
+ * @param options Additional search options
+ * @param options.ignoreUnavailable When true, the search will not fail if any of the named
+ *   `targetIndices` do not exist. Useful when the target list includes indices that may not yet
+ *   have been created (e.g. version-aliased SO indices for plugins that were never loaded).
  * @returns A list of documents with their types
  */
 export async function getAggregatedTypesDocuments(
   esClient: ElasticsearchClient,
   targetIndices: Indices,
-  query?: QueryDslQueryContainer
+  query?: QueryDslQueryContainer,
+  { ignoreUnavailable = false }: { ignoreUnavailable?: boolean } = {}
 ): Promise<DocumentIdAndType[]> {
   const params: SearchRequest = {
     index: targetIndices,
     size: 0,
+    ignore_unavailable: ignoreUnavailable,
     // apply the desired filters (e.g. filter out registered types)
     query,
     // aggregate docs by type, so that we have a sneak peak of all types

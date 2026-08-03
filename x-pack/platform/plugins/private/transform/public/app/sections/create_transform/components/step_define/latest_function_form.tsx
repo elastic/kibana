@@ -106,7 +106,11 @@ export const LatestFunctionForm: FC<LatestFunctionFormProps> = ({
                   id="xpack.transform.stepDefineForm.sortFieldOptionsEmptyError"
                   defaultMessage="No date fields are available to sort on. To use another field type, copy the configuration to the clipboard and continue creating the transform in the Console."
                 />{' '}
-                <EuiCopy beforeMessage={copyToClipboardDescription} textToCopy={copyToClipboard}>
+                <EuiCopy
+                  beforeMessage={copyToClipboardDescription}
+                  textToCopy={copyToClipboard}
+                  tooltipProps={{ disableScreenReaderOutput: true }}
+                >
                   {(copy: () => void) => (
                     <EuiButtonIcon
                       onClick={copy}

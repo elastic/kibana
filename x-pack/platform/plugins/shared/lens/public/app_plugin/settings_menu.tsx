@@ -53,6 +53,9 @@ export function SettingsMenu({
 
   return (
     <EuiWrappingPopover
+      aria-label={i18n.translate('xpack.lens.settings.popoverAriaLabel', {
+        defaultMessage: 'Lens settings',
+      })}
       data-test-subj="lnsApp__settingsMenu"
       ownFocus
       button={anchorElement}

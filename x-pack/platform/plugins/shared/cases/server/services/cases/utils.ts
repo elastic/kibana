@@ -104,7 +104,7 @@ export const constructSearchQuery = ({
 
     if (caseSearchFields?.length) {
       shouldClauses.push({
-        multi_match: {
+        simple_query_string: {
           query: search,
           fields: caseSearchFields,
         },

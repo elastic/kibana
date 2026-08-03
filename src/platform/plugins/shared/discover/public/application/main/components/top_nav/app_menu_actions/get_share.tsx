@@ -12,8 +12,9 @@ import { AppMenuActionId, AppMenuActionType } from '@kbn/discover-utils';
 import { omit } from 'lodash';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import { i18n } from '@kbn/i18n';
-import type { TimeRange } from '@kbn/es-query';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
+import type { SharingData } from '@kbn/share-plugin/public/types';
+import type { ReportingCSVSharingData } from '@kbn/reporting-public/types';
 import type { DiscoverStateContainer } from '../../../state_management/discover_state';
 import type { DataTotalHitsMsg } from '../../../state_management/discover_data_state_container';
 import { getSharingData, showPublicUrlSwitch } from '../../../../../utils/get_sharing_data';
@@ -21,6 +22,11 @@ import type { DiscoverAppLocatorParams } from '../../../../../../common/app_loca
 import type { AppMenuDiscoverParams } from './types';
 import type { DiscoverServices } from '../../../../../build_services';
 import type { TabState } from '../../../state_management/redux/types';
+
+/**
+ * Specifies an explicit type for the sharing data of the Discover app.
+ */
+type DiscoverSharingData = SharingData<DiscoverAppLocatorParams> & ReportingCSVSharingData;
 
 export const getShareAppMenuItem = ({
   discoverParams,
@@ -54,21 +60,27 @@ export const getShareAppMenuItem = ({
   }) => {
     const { dataView, isEsqlMode } = discoverParams;
 
+    const { locator, discoverFeatureFlags } = services;
+    const { timefilter } = services.data.query.timefilter;
+    const timeRange = timefilter.getTime();
+    // Use the absolute time range captured at the most recent on-screen fetch so the export
+    // covers the exact window the user saw, rather than re-resolving "now" at click time.
+    const absoluteTimeRange =
+      currentTab.dataRequestParams.timeRangeAbsolute ?? timefilter.getAbsoluteTime();
+    const refreshInterval = timefilter.getRefreshInterval();
+
     const searchSourceSharingData = await getSharingData(
       stateContainer.savedSearchState.getState().searchSource,
       currentTab.appState,
       services,
-      isEsqlMode
+      isEsqlMode,
+      absoluteTimeRange
     );
 
-    const { locator, discoverFeatureFlags } = services;
-    const { timefilter } = services.data.query.timefilter;
-    const timeRange = timefilter.getTime();
-    const refreshInterval = timefilter.getRefreshInterval();
     const filters = services.filterManager.getFilters();
 
     // Share -> Get links -> Snapshot
-    const params: DiscoverAppLocatorParams & { timeRange: TimeRange | undefined } = {
+    const params: DiscoverSharingData['locatorParams'][number]['params'] = {
       ...omit(currentTab.appState, 'dataSource'),
       ...(persistedDiscoverSession?.id ? { savedSearchId: persistedDiscoverSession.id } : {}),
       ...(dataView?.isPersisted()
@@ -144,7 +156,20 @@ export const getShareAppMenuItem = ({
       },
       sharingData: {
         isTextBased: isEsqlMode,
-        locatorParams: [{ id: locator.id, params }],
+        locatorParams: [
+          {
+            id: locator.id,
+            params:
+              isEsqlMode && currentTab.esqlVariables?.length
+                ? {
+                    ...params,
+                    // Resolved variable values so the reporting server can bind named params (e.g. ?crew_id).
+                    esqlVariables:
+                      currentTab.esqlVariables as DiscoverAppLocatorParams['esqlVariables'],
+                  }
+                : params,
+          },
+        ],
         ...searchSourceSharingData,
         // CSV reports can be generated without a saved search so we provide a fallback title
         title:
@@ -153,6 +178,7 @@ export const getShareAppMenuItem = ({
             defaultMessage: 'Untitled Discover session',
           }),
         totalHits: totalHitsState.result || 0,
+        absoluteTimeRange: isEsqlMode ? absoluteTimeRange : undefined,
       },
       isDirty: !persistedDiscoverSession?.id || hasUnsavedChanges,
       onClose: () => {

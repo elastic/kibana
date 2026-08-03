@@ -301,6 +301,10 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
 
   const selectionConfig = {
     onSelectionChange: setSelection,
+    selectableMessage: () =>
+      i18n.translate('xpack.idxMgmt.dataStreamList.table.selection.selectRowAriaLabel', {
+        defaultMessage: 'Select this row',
+      }),
   };
 
   const dataStreamActions: EuiContextMenuPanelItemDescriptor[] = [];

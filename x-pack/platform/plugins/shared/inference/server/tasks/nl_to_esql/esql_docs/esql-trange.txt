@@ -1,0 +1,67 @@
+# TRANGE
+
+The TRANGE function filters data for a specified time range using the `@timestamp` attribute. It can be used with either a single offset from the current time or with explicit start and end times.
+
+## Syntax
+
+`TRANGE(start_time_or_offset, end_time)`
+
+### Parameters
+
+#### start_time_or_offset
+
+Offset from NOW when used in single parameter mode. In two parameter mode, this is the start time, which can be provided as a date string, date, date_nanos, or epoch milliseconds.
+
+#### end_time
+
+Explicit end time for the range. This can be a date string, date, date_nanos, or epoch milliseconds.
+
+## Examples
+
+Filters data from the last hour based on the `@timestamp` field.
+
+```esql
+FROM k8s
+| WHERE TRANGE(1h)
+| KEEP @timestamp
+```
+
+Filters data between two specific ISO8601 timestamps and returns the first 10 results sorted by `@timestamp`.
+
+```esql
+FROM k8s
+| WHERE TRANGE("2024-05-10T00:17:14.000Z", "2024-05-10T00:18:33.000Z")
+| SORT @timestamp
+| KEEP @timestamp
+| LIMIT 10
+```
+
+Filters data between two specific times by converting ISO8601 strings to datetime objects, sorts by `@timestamp`, and limits the output to 10 results.
+
+```esql
+FROM k8s
+| WHERE TRANGE(to_datetime("2024-05-10T00:17:14Z"), to_datetime("2024-05-10T00:18:33Z"))
+| SORT @timestamp
+| KEEP @timestamp
+| LIMIT 10
+```
+
+Filters data between two specific times with millisecond precision by converting ISO8601 strings to datetime objects, sorts by `@timestamp`, and limits the output to 10 results.
+
+```esql
+FROM k8s
+| WHERE TRANGE(to_datetime("2024-05-10T00:17:14.000Z"), to_datetime("2024-05-10T00:18:33.000Z"))
+| SORT @timestamp
+| KEEP @timestamp
+| LIMIT 10
+```
+
+Filters data between two specific points in time using epoch milliseconds, sorts by `@timestamp`, and limits the output to 10 results.
+
+```esql
+FROM k8s
+| WHERE TRANGE(1715300236000, 1715300282000)
+| SORT @timestamp
+| KEEP @timestamp
+| LIMIT 10
+```

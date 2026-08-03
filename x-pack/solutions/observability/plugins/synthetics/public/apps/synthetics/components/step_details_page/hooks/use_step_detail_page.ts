@@ -10,6 +10,7 @@ import { useMemo } from 'react';
 import { useSelectedLocation } from '../../monitor_details/hooks/use_selected_location';
 import { useSyntheticsSettingsContext } from '../../../contexts';
 import { useJourneySteps } from '../../monitor_details/hooks/use_journey_steps';
+import { useUrlSpaceId } from '../../../hooks/use_url_space_id';
 
 export const useStepDetailPage = () => {
   const {
@@ -25,6 +26,7 @@ export const useStepDetailPage = () => {
   const stepIndex = Number(stepIndexString);
 
   const selectedLocation = useSelectedLocation();
+  const spaceId = useUrlSpaceId();
 
   const { data: journey, stepEnds } = useJourneySteps(checkGroupId);
 
@@ -44,6 +46,7 @@ export const useStepDetailPage = () => {
       checkGroupId,
       stepIndex: stepNo,
       locationId: selectedLocation?.id,
+      spaceId,
     });
 
   return {
@@ -70,6 +73,7 @@ export const useStepDetailLink = ({
   }>();
 
   const selectedLocation = useSelectedLocation();
+  const spaceId = useUrlSpaceId();
 
   if (!checkGroupId) {
     return '';
@@ -81,6 +85,7 @@ export const useStepDetailLink = ({
     monitorId,
     checkGroupId,
     locationId: selectedLocation?.id,
+    spaceId,
   });
 };
 
@@ -90,12 +95,15 @@ const getStepDetailLink = ({
   basePath,
   monitorId,
   locationId,
+  spaceId,
 }: {
   checkGroupId: string;
   locationId?: string;
   stepIndex: number | string;
   basePath: string;
   monitorId: string;
+  spaceId?: string;
 }) => {
-  return `${basePath}/app/synthetics/monitor/${monitorId}/test-run/${checkGroupId}/step/${stepIndex}?locationId=${locationId}`;
+  const spaceIdQuery = spaceId ? `&spaceId=${spaceId}` : '';
+  return `${basePath}/app/synthetics/monitor/${monitorId}/test-run/${checkGroupId}/step/${stepIndex}?locationId=${locationId}${spaceIdQuery}`;
 };

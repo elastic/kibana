@@ -24,6 +24,7 @@ import {
   getWorkflowsConnectorAdapter,
   getConnectorType as getWorkflowsConnectorType,
 } from './connectors/workflows';
+import { validateWorkflowForExecution } from './connectors/workflows/validate_workflow_for_execution';
 import { WorkflowsManagementFeatureConfig } from './features';
 import { WorkflowTaskScheduler } from './tasks/workflow_task_scheduler';
 import type {
@@ -77,19 +78,9 @@ export class WorkflowsPlugin
             throw new Error('Workflows management API not initialized');
           }
 
-          // Get the workflow first
+          // Get the workflow and validate it is in a runnable state
           const workflow = await this.api.getWorkflow(workflowId, spaceId);
-          if (!workflow) {
-            throw new Error(`Workflow not found: ${workflowId}`);
-          }
-
-          if (!workflow.definition) {
-            throw new Error(`Workflow definition not found: ${workflowId}`);
-          }
-
-          if (!workflow.valid) {
-            throw new Error(`Workflow is not valid: ${workflowId}`);
-          }
+          validateWorkflowForExecution(workflow, workflowId);
 
           const workflowToRun: WorkflowExecutionEngineModel = {
             id: workflow.id,
@@ -116,18 +107,9 @@ export class WorkflowsPlugin
             throw new Error('Workflows management API not initialized');
           }
 
+          // Get the workflow and validate it is in a runnable state
           const workflow = await this.api.getWorkflow(workflowId, spaceId);
-          if (!workflow) {
-            throw new Error(`Workflow not found: ${workflowId}`);
-          }
-
-          if (!workflow.definition) {
-            throw new Error(`Workflow definition not found: ${workflowId}`);
-          }
-
-          if (!workflow.valid) {
-            throw new Error(`Workflow is not valid: ${workflowId}`);
-          }
+          validateWorkflowForExecution(workflow, workflowId);
 
           const workflowToSchedule: WorkflowExecutionEngineModel = {
             id: workflow.id,

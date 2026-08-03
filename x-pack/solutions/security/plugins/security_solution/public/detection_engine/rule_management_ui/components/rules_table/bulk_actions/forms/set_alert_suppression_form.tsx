@@ -84,7 +84,7 @@ export const SetAlertSuppressionForm = React.memo(function SetAlertSuppressionFo
   const { uiSettings } = useKibana().services;
   const defaultPatterns = uiSettings.get<string[]>(DEFAULT_INDEX_KEY);
 
-  const [_, { indexPatterns }] = useFetchIndex(defaultPatterns, false);
+  const [isFetchingIndexFields, { indexPatterns }] = useFetchIndex(defaultPatterns, false);
   const suppressibleFields = useTermsAggregationFields(indexPatterns?.fields);
 
   const handleSubmit = async () => {
@@ -129,7 +129,11 @@ export const SetAlertSuppressionForm = React.memo(function SetAlertSuppressionFo
       </EuiFlexGroup>
       <EuiSpacer size="l" />
 
-      <AlertSuppressionEdit suppressibleFields={suppressibleFields} fullWidth />
+      <AlertSuppressionEdit
+        suppressibleFields={suppressibleFields}
+        isLoading={isFetchingIndexFields}
+        fullWidth
+      />
     </BulkEditFormWrapper>
   );
 });

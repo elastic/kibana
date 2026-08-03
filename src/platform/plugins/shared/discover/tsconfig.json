@@ -121,7 +121,8 @@
     "@kbn/shared-ux-link-redirect-app",
     "@kbn/react-query",
     "@kbn/lens-common",
-    "@kbn/shared-ux-error-boundary"
+    "@kbn/shared-ux-error-boundary",
+    "@kbn/reporting-public"
   ],
   "exclude": ["target/**/*"]
 }

@@ -62,7 +62,8 @@ const renderComponent = async () => {
   });
 };
 
-describe('CreateFlyout', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/220116
+describe.skip('CreateFlyout', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 

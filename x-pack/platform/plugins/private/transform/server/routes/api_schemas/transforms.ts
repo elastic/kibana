@@ -26,7 +26,8 @@ export const getTransformsRequestSchema = schema.arrayOf(
   schema.object({
     id: schema.string(),
     state: transformStateSchema,
-  })
+  }),
+  { maxSize: 1000 }
 );
 
 export type GetTransformsRequestSchema = TypeOf<typeof getTransformsRequestSchema>;
@@ -39,8 +40,8 @@ export interface GetTransformsResponseSchema {
 
 // schemas shared by parts of the preview, create and update endpoint
 export const destSchema = schema.object({
-  index: schema.string(),
-  pipeline: schema.maybe(schema.string()),
+  index: schema.string({ maxLength: 1000 }),
+  pipeline: schema.maybe(schema.string({ maxLength: 1000 })),
 });
 
 export const pivotSchema = schema.object({
@@ -50,8 +51,8 @@ export const pivotSchema = schema.object({
 });
 
 export const latestFunctionSchema = schema.object({
-  unique_key: schema.arrayOf(schema.string()),
-  sort: schema.string(),
+  unique_key: schema.arrayOf(schema.string({ maxLength: 1000 }), { maxSize: 1000 }),
+  sort: schema.string({ maxLength: 1000 }),
 });
 
 export type PivotConfig = TypeOf<typeof pivotSchema>;
@@ -60,8 +61,8 @@ export type LatestFunctionConfig = TypeOf<typeof latestFunctionSchema>;
 
 export const retentionPolicySchema = schema.object({
   time: schema.object({
-    field: schema.string(),
-    max_age: schema.string(),
+    field: schema.string({ maxLength: 1000 }),
+    max_age: schema.string({ maxLength: 1000 }),
   }),
 });
 
@@ -78,14 +79,17 @@ export const settingsSchema = schema.object({
 
 export const sourceSchema = schema.object({
   runtime_mappings: runtimeMappingsSchema,
-  index: schema.oneOf([schema.string(), schema.arrayOf(schema.string())]),
-  query: schema.maybe(schema.recordOf(schema.string(), schema.any())),
+  index: schema.oneOf([
+    schema.string({ maxLength: 1000 }),
+    schema.arrayOf(schema.string({ maxLength: 1000 }), { maxSize: 1000 }),
+  ]),
+  query: schema.maybe(schema.recordOf(schema.string({ maxLength: 1000 }), schema.any())),
 });
 
 export const syncSchema = schema.object({
   time: schema.object({
-    delay: schema.maybe(schema.string()),
-    field: schema.string(),
+    delay: schema.maybe(schema.string({ maxLength: 1000 })),
+    field: schema.string({ maxLength: 1000 }),
   }),
 });
 
@@ -110,9 +114,9 @@ export const _metaSchema = schema.object(
 // PUT transforms/{transformId}
 export const putTransformsRequestSchema = schema.object(
   {
-    description: schema.maybe(schema.string()),
+    description: schema.maybe(schema.string({ maxLength: 1000 })),
     dest: destSchema,
-    frequency: schema.maybe(schema.string()),
+    frequency: schema.maybe(schema.string({ maxLength: 1000 })),
     /**
      * Pivot and latest are mutually exclusive, i.e. exactly one must be specified in the transform configuration
      */

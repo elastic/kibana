@@ -7,7 +7,32 @@
 
 import { union } from 'lodash';
 import { ApmRuleType } from '@kbn/rule-data-utils';
-import { SERVICE_ENVIRONMENT, SERVICE_NAME, TRANSACTION_TYPE } from '../es_fields/apm';
+import {
+  SERVICE_ENVIRONMENT,
+  SERVICE_NAME,
+  TRANSACTION_NAME,
+  TRANSACTION_TYPE,
+} from '../es_fields/apm';
+
+export const DEFAULT_GROUP_BY_TRANSACTION_DURATION = [
+  SERVICE_NAME,
+  SERVICE_ENVIRONMENT,
+  TRANSACTION_TYPE,
+  TRANSACTION_NAME,
+] as const;
+
+export const DEFAULT_GROUP_BY_TRANSACTION_ERROR_RATE = [
+  SERVICE_NAME,
+  SERVICE_ENVIRONMENT,
+  TRANSACTION_TYPE,
+  TRANSACTION_NAME,
+] as const;
+
+export const DEFAULT_GROUP_BY_ERROR_COUNT = [
+  SERVICE_NAME,
+  SERVICE_ENVIRONMENT,
+  TRANSACTION_NAME,
+] as const;
 
 export const getAllGroupByFields = (
   ruleType: string,

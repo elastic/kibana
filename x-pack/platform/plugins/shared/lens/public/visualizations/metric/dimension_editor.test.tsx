@@ -1278,7 +1278,8 @@ describe('dimension editor', () => {
       expect(colorModeGroup).not.toBeInTheDocument();
     });
 
-    describe('static color controls', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/253328
+    describe.skip('static color controls', () => {
       it('is hidden when dynamic coloring is enabled', () => {
         const { staticColorPicker } = renderAdditionalSectionEditor({
           state: { ...metricAccessorState, palette },

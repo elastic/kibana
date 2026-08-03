@@ -6,23 +6,14 @@
  */
 
 import type { PartialRule } from '@kbn/alerting-plugin/server';
-import { isEqual, xorWith } from 'lodash';
+import { isEqual } from 'lodash';
 import { stringifyZodError } from '@kbn/zod-helpers';
 import {
-  type ResponseAction,
-  type RuleCreateProps,
-  RuleResponse,
-  type RuleResponseAction,
-  type RuleUpdateProps,
   type RulePatchProps,
+  RuleResponse,
+  type RuleUpdateProps,
 } from '../../../../../common/api/detection_engine';
-import {
-  RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP,
-  RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ,
-} from '../../../../../common/endpoint/service/response_actions/constants';
-import type { SecuritySolutionApiRequestHandlerContext } from '../../../..';
-import { CustomHttpRequestError } from '../../../../utils/custom_http_request_error';
-import { hasValidRuleType, type RuleAlertType, type RuleParams } from '../../rule_schema';
+import { hasValidRuleType, type RuleParams } from '../../rule_schema';
 import { type BulkError, createBulkErrorObject } from '../../routes/utils';
 import { internalRuleToAPIResponse } from '../logic/detection_rules_client/converters/internal_rule_to_api_response';
 import { ClientError } from '../logic/detection_rules_client/utils';
@@ -50,64 +41,6 @@ export const transformValidateBulkError = (
     });
   }
 };
-
-// Temporary functionality until the new System Actions is in place
-// for now we want to make sure that user cannot configure Isolate action if has no RBAC permissions to do so
-export const validateResponseActionsPermissions = async (
-  securitySolution: SecuritySolutionApiRequestHandlerContext,
-  ruleUpdate: RuleCreateProps | RuleUpdateProps,
-  existingRule?: RuleAlertType | null
-): Promise<void> => {
-  if (
-    !rulePayloadContainsResponseActions(ruleUpdate) ||
-    (existingRule && !ruleObjectContainsResponseActions(existingRule))
-  ) {
-    return;
-  }
-
-  if (
-    ruleUpdate.response_actions?.length === 0 &&
-    existingRule?.params?.responseActions?.length === 0
-  ) {
-    return;
-  }
-
-  const endpointAuthz = await securitySolution.getEndpointAuthz();
-
-  // finds elements that are not included in both arrays
-  const symmetricDifference = xorWith<ResponseAction | RuleResponseAction>(
-    ruleUpdate.response_actions,
-    existingRule?.params?.responseActions,
-    isEqual
-  );
-
-  symmetricDifference.forEach((action) => {
-    if (!('command' in action?.params)) {
-      return;
-    }
-    const authzPropName =
-      RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ[
-        RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP[action.params.command]
-      ];
-
-    const isValid = endpointAuthz[authzPropName];
-
-    if (!isValid) {
-      throw new CustomHttpRequestError(
-        `User is not authorized to change ${action.params.command} response actions`,
-        403
-      );
-    }
-  });
-};
-
-function rulePayloadContainsResponseActions(rule: RuleCreateProps | RuleUpdateProps) {
-  return 'response_actions' in rule;
-}
-
-function ruleObjectContainsResponseActions(rule?: RuleAlertType) {
-  return rule != null && 'params' in rule && 'responseActions' in rule?.params;
-}
 
 export const validateNonCustomizableUpdateFields = (
   ruleUpdate: RuleUpdateProps,

@@ -10,6 +10,7 @@ import { useFetcher } from '../../hooks/use_fetcher';
 const INITIAL_STATE = {
   agentName: undefined,
   runtimeName: undefined,
+  runtimeVersion: undefined,
   serverlessType: undefined,
   telemetrySdkName: undefined,
   telemetrySdkLanguage: undefined,

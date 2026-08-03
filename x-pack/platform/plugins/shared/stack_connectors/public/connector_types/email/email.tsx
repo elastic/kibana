@@ -164,17 +164,16 @@ export function getConnectorType(
   };
 }
 
-function getToFields(actionParams: EmailActionParams): string[] {
-  if (!(actionParams.to instanceof Array)) return [];
-  return actionParams.to;
+type EmailRecipientField = 'to' | 'cc' | 'bcc';
+
+function getRecipientFields(actionParams: EmailActionParams, field: EmailRecipientField): string[] {
+  const value = actionParams[field];
+  if (!Array.isArray(value)) return [];
+  return value.filter((email) => email.trim().length > 0);
 }
 
-function getCcFields(actionParams: EmailActionParams): string[] {
-  if (!(actionParams.cc instanceof Array)) return [];
-  return actionParams.cc;
-}
+const getToFields = (actionParams: EmailActionParams) => getRecipientFields(actionParams, 'to');
 
-function getBccFields(actionParams: EmailActionParams): string[] {
-  if (!(actionParams.bcc instanceof Array)) return [];
-  return actionParams.bcc;
-}
+const getCcFields = (actionParams: EmailActionParams) => getRecipientFields(actionParams, 'cc');
+
+const getBccFields = (actionParams: EmailActionParams) => getRecipientFields(actionParams, 'bcc');

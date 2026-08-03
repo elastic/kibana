@@ -17,15 +17,16 @@ import type {
   ObservabilityAgentBuilderPluginStartDependencies,
 } from '../types';
 import type { ObservabilityAgentBuilderDataRegistry } from '../data_registry/data_registry';
+import { MAX_SHORT_STRING_LENGTH } from '../utils/schema_limits';
 
 const GET_ERROR_DETAILS_TOOL_ID = 'get_error_details';
 
 const errorDataSchema = z.object({
-  errorId: z.string(),
-  serviceName: z.string().optional(),
-  environment: z.string().nullable().optional(),
-  start: z.string().optional(),
-  end: z.string().optional(),
+  errorId: z.string().max(MAX_SHORT_STRING_LENGTH),
+  serviceName: z.string().max(MAX_SHORT_STRING_LENGTH).optional(),
+  environment: z.string().max(MAX_SHORT_STRING_LENGTH).nullable().optional(),
+  start: z.string().max(MAX_SHORT_STRING_LENGTH).optional(),
+  end: z.string().max(MAX_SHORT_STRING_LENGTH).optional(),
 });
 
 export type ErrorAttachmentData = z.infer<typeof errorDataSchema>;

@@ -35,6 +35,7 @@ const setup = async ({
     isRelease,
     targetAllPlatforms,
     targetServerlessPlatforms: false,
+    skipServerless: false,
     dockerContextUseLocalArtifact: false,
     dockerCrossCompile: false,
     dockerNamespace: null,

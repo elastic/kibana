@@ -6,9 +6,10 @@
  */
 
 import { expect } from '@kbn/scout-oblt/ui';
+import { tags } from '@kbn/scout-oblt';
 import { test } from '../../fixtures';
 
-test.describe('Agent Configuration', { tag: ['@ess'] }, () => {
+test.describe('Agent Configuration', { tag: tags.stateful.classic }, () => {
   test('Viewer should not be able to modify settings', async ({
     pageObjects: { agentConfigurationsPage },
     browserAuth,

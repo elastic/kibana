@@ -27,6 +27,7 @@ import { operationDefinitionMap } from '../../../datasources/form_based/operatio
 import { getESQLForLayer } from '../../../datasources/form_based/to_esql';
 import { buildExpression } from '../../../editor_frame_service/editor_frame/expression_helpers';
 import { useLensSelector, selectFramePublicAPI, useLensDispatch } from '../../../state_management';
+import { serializeVisualizationToSave } from '../../../state_management/shared_logic';
 import { EXPRESSION_BUILD_ERROR_ID, getAbsoluteDateRange } from '../../../utils';
 import { LayerConfiguration } from './layer_configuration_section';
 import type { EditConfigPanelProps } from './types';
@@ -155,7 +156,7 @@ export function LensEditConfigurationFlyout({
         updateSuggestion?.(previousAttrs);
       }
       if (savedObjectId) {
-        updateByRefInput?.(savedObjectId);
+        updateByRefInput?.(savedObjectId, previousAttrs);
       }
     }
     // Remove the user's preferred chart type from localStorage
@@ -182,13 +183,30 @@ export function LensEditConfigurationFlyout({
     initialAttributes: attributes,
   });
 
-  const onApply = useCallback(() => {
+  const onApply = useCallback(async () => {
     if (visualization.activeId == null || !currentAttributes) {
       return;
     }
+
+    let attributesToSave: TypedLensSerializedState['attributes'];
+    try {
+      // Run the apply callback first so auto-save operations (e.g. linked annotations)
+      // complete before the visualization is persisted via saveByRef.
+      const updatedAttributes = await onApplyCallback?.(currentAttributes);
+      attributesToSave = updatedAttributes ?? currentAttributes;
+    } catch (err) {
+      coreStart.notifications.toasts.addError(err instanceof Error ? err : new Error(String(err)), {
+        title: i18n.translate('xpack.lens.config.applyError', {
+          defaultMessage: 'Failed to apply changes',
+        }),
+      });
+      return;
+    }
+
     if (savedObjectId) {
-      saveByRef?.(currentAttributes);
-      updateByRefInput?.(savedObjectId);
+      const serializedAttrs = serializeVisualizationToSave(attributesToSave, activeVisualization);
+      saveByRef?.(serializedAttrs);
+      updateByRefInput?.(savedObjectId, attributesToSave);
     }
 
     // check if visualization type changed, if it did, don't pass the previous visualization state
@@ -204,8 +222,6 @@ export function LensEditConfigurationFlyout({
       trackSaveUiCounterEvents(telemetryEvents);
     }
 
-    onApplyCallback?.(currentAttributes);
-    // Remove the user's preferred chart type from sessionStorage
     deleteUserChartTypeFromSessionStorage();
     closeFlyout?.();
   }, [
@@ -216,6 +232,7 @@ export function LensEditConfigurationFlyout({
     visualization.state,
     activeVisualization,
     currentAttributes,
+    coreStart.notifications.toasts,
     saveByRef,
     updateByRefInput,
   ]);
@@ -482,20 +499,26 @@ export function LensEditConfigurationFlyout({
         toolbar={toolbar}
         layerTabs={layerTabs}
       >
+        {/* Flex container for the flyout content layout.
+              Enables proper scroll behavior where accordion headers stay fixed
+              and only the accordion content areas scroll independently. */}
         <EuiFlexGroup
           css={css`
             block-size: 100%;
+            /* Reset min-block-size to allow flex items to shrink below content size */
             .euiFlexItem,
             .euiAccordion,
             .euiAccordion__triggerWrapper,
             .euiAccordion__childWrapper {
               min-block-size: 0;
             }
+            /* Make accordions flex containers to enable content scrolling */
             .euiAccordion {
               display: flex;
               flex: 1;
               flex-direction: column;
             }
+            /* When accordion is open, its content area takes remaining space */
             .euiAccordion-isOpen {
               .euiAccordion__childWrapper {
                 // Override euiAccordion__childWrapper blockSize only when ES|QL mode is enabled
@@ -503,6 +526,8 @@ export function LensEditConfigurationFlyout({
                 flex: 1;
               }
             }
+            /* Scrollable accordion content area with custom scrollbar styling.
+                 pointer-events handling allows drag-drop to work outside content bounds. */
             .euiAccordion__childWrapper {
               ${euiScrollBarStyles(euiTheme)}
               overflow-y: auto !important;
@@ -514,6 +539,7 @@ export function LensEditConfigurationFlyout({
                 pointer-events: auto;
               }
             }
+            /* Advanced options nested accordion should not scroll independently */
             .lnsIndexPatternDimensionEditor-advancedOptions {
               .euiAccordion__childWrapper {
                 flex: none;
@@ -524,6 +550,7 @@ export function LensEditConfigurationFlyout({
           direction="column"
           gutterSize="none"
         >
+          {/* Container for ES|QL editor - fixed height, doesn't grow */}
           <EuiFlexItem grow={false}>
             <EuiFlexGroup
               css={css`
@@ -599,6 +626,7 @@ export function LensEditConfigurationFlyout({
             </EuiAccordion>
           </EuiFlexItem>
 
+          {/* Visualization parameters accordion - grows when open to fill available space */}
           <EuiFlexItem
             grow={isSuggestionsAccordionOpen ? 1 : false}
             data-test-subj="InlineEditingSuggestions"

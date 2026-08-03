@@ -54,6 +54,13 @@ export const txtSingleItemCopyActionLabel = i18n.translate(
   }
 );
 
+export const txtTableCaption = i18n.translate(
+  'uiActionsEnhanced.components.DrilldownTemplateTable.tableCaption',
+  {
+    defaultMessage: 'Drilldown templates',
+  }
+);
+
 export const txtCopyButtonLabel = (count: number) =>
   i18n.translate('uiActionsEnhanced.components.DrilldownTemplateTable.copyButtonLabel', {
     defaultMessage: 'Copy ({count})',

@@ -107,6 +107,7 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
         <EuiIcon
           type="popout"
           size="s"
+          aria-hidden={true}
           css={{
             marginLeft: '10px',
           }}
@@ -460,6 +461,9 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
         loading={loading}
         noItemsMessage={loading ? LOADING_SLOS_LABEL : NO_SLOS_FOUND}
         tableLayout="auto"
+        tableCaption={i18n.translate('xpack.slo.sloListCompactView.tableCaption', {
+          defaultMessage: 'Compact SLO list',
+        })}
       />
       {sloToAddRule ? (
         <RuleFormFlyout

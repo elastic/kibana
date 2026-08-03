@@ -57,7 +57,7 @@ export function ValuesGroup<T extends string = string>({
             }}
             data-test-subj={`colorModeKeyPadItem${id}`}
           >
-            <EuiIcon type={icon} size="l" />
+            <EuiIcon type={icon} size="l" aria-hidden={true} />
           </EuiKeyPadMenuItem>
         ))}
       </EuiKeyPadMenu>

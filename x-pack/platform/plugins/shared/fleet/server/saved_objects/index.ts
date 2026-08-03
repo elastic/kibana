@@ -1184,6 +1184,7 @@ export const getSavedObjectTypes = (
             },
           },
           previous_version: { type: 'keyword' },
+          installed_kibana_version: { type: 'keyword', ignore_above: 1024 },
         },
       },
       modelVersions: {
@@ -1231,6 +1232,16 @@ export const getSavedObjectTypes = (
               type: 'mappings_addition',
               addedMappings: {
                 previous_version: { type: 'keyword' },
+              },
+            },
+          ],
+        },
+        '6': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                installed_kibana_version: { type: 'keyword', ignore_above: 1024 },
               },
             },
           ],

@@ -5,6 +5,7 @@
  * 2.0.
  */
 import pMap from 'p-map';
+import semverGt from 'semver/functions/gt';
 import {
   type CoreSetup,
   type ElasticsearchClient,
@@ -239,7 +240,8 @@ export class AutoInstallContentPackagesTask {
       this.discoveryMap!
     ).reduce((acc, [dataset, mapValue]) => {
       const packages = mapValue.packages.filter(
-        (pkg) => !installedPackagesMap[pkg.name] || installedPackagesMap[pkg.name] !== pkg.version
+        (pkg) =>
+          !installedPackagesMap[pkg.name] || semverGt(pkg.version, installedPackagesMap[pkg.name])
       );
       if (packages.length > 0) {
         acc[dataset] = { packages };
@@ -256,7 +258,8 @@ export class AutoInstallContentPackagesTask {
         if (
           mapValue.packages.every(
             (pkg) =>
-              installedPackagesMap[pkg.name] && installedPackagesMap[pkg.name] === pkg.version
+              installedPackagesMap[pkg.name] &&
+              !semverGt(pkg.version, installedPackagesMap[pkg.name])
           )
         ) {
           acc.push(dataset);
@@ -280,7 +283,7 @@ export class AutoInstallContentPackagesTask {
 
       if (hasData) {
         for (const { name, version } of packages) {
-          if (!installedPackagesMap[name] || installedPackagesMap[name] !== version) {
+          if (!installedPackagesMap[name] || semverGt(version, installedPackagesMap[name])) {
             packagesToInstall[name] = version;
           }
         }
@@ -293,12 +296,13 @@ export class AutoInstallContentPackagesTask {
     esClient: ElasticsearchClient,
     datasetsOfInstalledContentPackages: string[]
   ): Promise<string[]> {
-    const allFleetDataStreams = await dataStreamService.getAllFleetDataStreams(esClient);
-    const datasetsWithData: string[] = allFleetDataStreams
-      .map((dataStream: any) => dataStream.name.split('-')[1])
-      .filter((dataset) => !datasetsOfInstalledContentPackages.includes(dataset));
+    const installedSet = new Set(datasetsOfInstalledContentPackages);
+    const allDataStreamNames = await dataStreamService.getAllFleetDataStreamNames(esClient);
+    const datasetsWithData = [
+      ...new Set(allDataStreamNames.map((name) => name.split('-')[1])),
+    ].filter((dataset) => !installedSet.has(dataset));
     this.logger.info(
-      `[AutoInstallContentPackagesTask] Found datasets with data: ${datasetsWithData.join(', ')}`
+      `[AutoInstallContentPackagesTask] Found ${datasetsWithData.length} datasets with data`
     );
     return datasetsWithData;
   }

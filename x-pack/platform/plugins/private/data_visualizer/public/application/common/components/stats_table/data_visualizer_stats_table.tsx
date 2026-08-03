@@ -287,7 +287,11 @@ const UnmemoizedDataVisualizerTable = <T extends DataVisualizerTableItem>({
         name: (
           <div className={'columnHeader__title'}>
             {dimensions.showIcon ? (
-              <EuiIcon type={'visBarVertical'} className={'columnHeader__icon'} />
+              <EuiIcon
+                aria-hidden={true}
+                type={'visBarVertical'}
+                className={'columnHeader__icon'}
+              />
             ) : null}
             {i18n.translate('xpack.dataVisualizer.dataGrid.distributionsColumnName', {
               defaultMessage: 'Distributions',

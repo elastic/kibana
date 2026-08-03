@@ -58,7 +58,7 @@ export const getUserInfo = async ({
         username: displayName,
         full_name: user.full_name ?? null,
         email: user.email ?? null,
-        profile_uid: null,
+        profile_uid: user.profile_uid ?? null,
       };
     }
   } catch (error) {

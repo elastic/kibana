@@ -279,7 +279,7 @@ describe('extractTemplateVariables', () => {
     expect(variables).toEqual(['user.name']);
   });
 
-  it('should handle tablerow tag', () => {
+  it('should reject unsupported tablerow tag', () => {
     const template = `
       {% tablerow item in products %}
         {{ item.name }} - {{ item.price }}
@@ -287,8 +287,7 @@ describe('extractTemplateVariables', () => {
       {{ total }}
     `;
 
-    const variables = extractTemplateVariables(template);
-    expect(variables).toEqual(['products', 'total']);
+    expect(() => extractTemplateVariables(template)).toThrow('tablerow');
   });
 
   it('should handle cycle tag in loops', () => {
@@ -423,15 +422,14 @@ describe('extractTemplateVariables', () => {
     ]);
   });
 
-  it('should handle tablerow with range', () => {
+  it('should reject unsupported tablerow with range', () => {
     const template = `
       {% tablerow i in (1..num) %}
         {{ items[i] }}
       {% endtablerow %}
     `;
 
-    const variables = extractTemplateVariables(template);
-    expect(variables).toEqual(['num', 'items']);
+    expect(() => extractTemplateVariables(template)).toThrow('tablerow');
   });
 
   it('should handle nested captures', () => {

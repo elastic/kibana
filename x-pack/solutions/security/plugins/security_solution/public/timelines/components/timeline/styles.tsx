@@ -20,6 +20,7 @@ export const TimelineContainer = styled.div.attrs(({ className = '' }) => ({
   display: flex;
   flex-direction: column;
   position: relative;
+  overflow: scroll;
 `;
 
 /**

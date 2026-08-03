@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { coreWorkerFixtures } from './core_fixtures';
+import { coreWorkerFixtures } from './saml_auth';
 import type { ApiClientFixture } from './api_client';
 import type { DefaultRolesFixture } from './default_roles';
 import type { ElasticsearchRoleDescriptor, KibanaRole } from '../../../../common';
@@ -64,6 +64,18 @@ export interface RequestAuthFixture {
    * Elasticsearch projects, `editor` for all other deployments and project types.
    */
   getApiKeyForPrivilegedUser: () => Promise<RoleApiCredentials>;
+  /**
+   * Fetches the descriptor of the named ES role and creates an API key scoped
+   * to those privileges. Works for built-in ES roles (e.g. `'kibana_admin'`,
+   * `'superuser'`) without requiring an entry in `roles.yml`.
+   *
+   * The descriptor is embedded inline in the API key — no separate role is
+   * created in Elasticsearch.
+   *
+   * @example
+   * const { apiKeyHeader } = await requestAuth.getApiKeyForBuiltInRole('kibana_admin');
+   */
+  getApiKeyForBuiltInRole: (roleName: string) => Promise<RoleApiCredentials>;
 }
 
 export const requestAuthFixture = coreWorkerFixtures.extend<
@@ -134,27 +146,39 @@ export const requestAuthFixture = coreWorkerFixtures.extend<
       };
 
       const invalidateApiKeys = async (apiKeys: ApiKey[]) => {
-        // Get admin credentials in order to invalidate the API key
-        for (const apiKey of apiKeys) {
-          const adminCookieHeader = await samlAuth.session.getApiCredentialsForRole('admin');
+        if (apiKeys.length === 0) {
+          return;
+        }
 
-          const response = await apiClient.post('internal/security/api_key/invalidate', {
-            headers: {
-              'kbn-xsrf': 'some-xsrf-token',
-              'x-elastic-internal-origin': 'kibana',
-              ...adminCookieHeader,
-            },
-            body: {
-              apiKeys: [{ id: apiKey.id, name: apiKey.name }],
-              isAdmin: true,
-            },
-            responseType: 'json',
-          });
+        // Get admin credentials once for all invalidations
+        const adminCookieHeader = await samlAuth.session.getApiCredentialsForRole('admin');
 
-          if (response.statusCode !== 200) {
-            log.info(`Failed to invalidate API key: ${apiKey.name}`);
-          } else {
-            log.info(`Invalidated API key: ${apiKey.name}`);
+        // Batch invalidate all API keys in a single request (API supports up to 1000 keys)
+        const response = await apiClient.post('internal/security/api_key/invalidate', {
+          headers: {
+            'kbn-xsrf': 'some-xsrf-token',
+            'x-elastic-internal-origin': 'kibana',
+            ...adminCookieHeader,
+          },
+          body: {
+            apiKeys: apiKeys.map((apiKey) => ({ id: apiKey.id, name: apiKey.name })),
+            isAdmin: true,
+          },
+          responseType: 'json',
+        });
+
+        if (response.statusCode !== 200) {
+          log.info(`Failed to invalidate ${apiKeys.length} API keys`);
+        } else {
+          const invalidatedCount = response.body?.itemsInvalidated?.length || 0;
+          const errorCount = response.body?.errors?.length || 0;
+          log.info(
+            `Invalidated ${invalidatedCount} API keys${
+              errorCount > 0 ? ` (${errorCount} errors)` : ''
+            }`
+          );
+          if (errorCount > 0) {
+            log.debug(`API key invalidation errors: ${JSON.stringify(response.body.errors)}`);
           }
         }
       };
@@ -192,12 +216,20 @@ export const requestAuthFixture = coreWorkerFixtures.extend<
         );
       };
 
+      const getApiKeyForBuiltInRole = async (roleName: string): Promise<RoleApiCredentials> => {
+        // Use fetchBuiltInRoleDescriptor (not setBuiltInRole) — the API key embeds
+        // the descriptor inline so no ES role needs to be created.
+        const descriptor = await samlAuth.fetchBuiltInRoleDescriptor(roleName);
+        return createApiKeyWithAdminCredentials(roleName, { [roleName]: descriptor });
+      };
+
       await use({
         getApiKey,
         getApiKeyForCustomRole,
         getApiKeyForAdmin,
         getApiKeyForViewer,
         getApiKeyForPrivilegedUser,
+        getApiKeyForBuiltInRole,
       });
 
       // Invalidate all API Keys after tests

@@ -19,6 +19,7 @@ function createPaginatedMockResponse(totalAgents: number, chunkSize = 9000) {
   return jest.fn(
     ({
       searchAfter,
+      pitId,
     }: {
       searchAfter?: SortResults;
       kuery?: string;
@@ -26,7 +27,7 @@ function createPaginatedMockResponse(totalAgents: number, chunkSize = 9000) {
       pitId?: string;
       perPage?: number;
       page?: number;
-    }): Promise<{ agents: Agent[]; total: number }> => {
+    }): Promise<{ agents: Agent[]; total: number; pit?: string }> => {
       const start = searchAfter ? (searchAfter[0] as number) + 1 : 0;
       const end = Math.min(start + chunkSize, agentIds.length);
       const chunk = agentIds.slice(start, end);
@@ -37,6 +38,7 @@ function createPaginatedMockResponse(totalAgents: number, chunkSize = 9000) {
           sort: [start + index],
         })) as Agent[],
         total: agentIds.length,
+        ...(pitId ? { pit: `${pitId}-next` } : {}),
       });
     }
   );
@@ -63,6 +65,9 @@ function createMockContext(
         perPage?: number;
         page?: number;
       }) => Promise<{ agents: Agent[]; total: number }>
+    >;
+    getByIds: jest.MockedFunction<
+      (agentIds: string[], options?: { ignoreMissing?: boolean }) => Promise<Agent[]>
     >;
   },
   mockPackagePolicyService: {
@@ -137,31 +142,39 @@ describe('aggregateResults', () => {
         results: generateResults(),
         total: 18001,
         searchAfter: ['firstSort'],
+        pitId: 'refreshedPit-1',
       })
       .mockResolvedValueOnce({
         results: generateResults(2),
         total: 18001,
         searchAfter: ['secondSort'],
+        pitId: 'refreshedPit-2',
       })
       .mockResolvedValueOnce({
         results: ['result_18001'],
         total: 18001,
         searchAfter: ['thirdSort'],
+        pitId: 'refreshedPit-3',
       });
 
     const result = await aggregateResults(generatorMock, mockElasticsearchClient, mockContext);
     expect(generatorMock).toHaveBeenCalledWith(1, expect.any(Number));
     expect(generatorMock).toHaveBeenCalledWith(1, expect.any(Number), undefined, 'mockedPitId');
-    expect(generatorMock).toHaveBeenCalledWith(2, expect.any(Number), ['firstSort'], 'mockedPitId');
+    expect(generatorMock).toHaveBeenCalledWith(
+      2,
+      expect.any(Number),
+      ['firstSort'],
+      'refreshedPit-1'
+    );
     expect(generatorMock).toHaveBeenCalledWith(
       3,
       expect.any(Number),
       ['secondSort'],
-      'mockedPitId'
+      'refreshedPit-2'
     );
     expect(mockOpenPointInTime).toHaveBeenCalledTimes(1);
     expect(mockClosePointInTime).toHaveBeenCalledTimes(1);
-    expect(mockClosePointInTime).toHaveBeenCalledWith({ id: 'mockedPitId' });
+    expect(mockClosePointInTime).toHaveBeenCalledWith({ id: 'refreshedPit-3' });
     expect(result.length).toEqual(18001);
   });
 });
@@ -178,6 +191,9 @@ describe('parseAgentSelection', () => {
         perPage?: number;
         page?: number;
       }) => Promise<{ agents: Agent[]; total: number }>
+    >;
+    getByIds: jest.MockedFunction<
+      (agentIds: string[], options?: { ignoreMissing?: boolean }) => Promise<Agent[]>
     >;
   };
   let mockPackagePolicyService: {
@@ -199,6 +215,7 @@ describe('parseAgentSelection', () => {
 
     mockAgentService = {
       listAgents: jest.fn(),
+      getByIds: jest.fn(async (ids: string[]) => ids.map((id) => ({ id } as Agent))),
     };
 
     mockPackagePolicyService = {
@@ -249,11 +266,11 @@ describe('parseAgentSelection', () => {
         index: '.fleet-agents',
         keep_alive: '10m',
       });
-      expect(mockClosePointInTime).toHaveBeenCalledWith({ id: 'mockedPitId' });
+      expect(mockClosePointInTime).toHaveBeenCalledWith({ id: 'mockedPitId-next-next' });
 
       const thirdCall = mockAgentService.listAgents.mock.calls[2][0];
       expect(thirdCall.searchAfter).toBeDefined();
-      expect(thirdCall.pitId).toBe('mockedPitId');
+      expect(thirdCall.pitId).toBe('mockedPitId-next');
     });
 
     it('should continue even if PIT close fails', async () => {
@@ -402,7 +419,7 @@ describe('parseAgentSelection', () => {
       expect(mockAsInternalScopedUser).toHaveBeenCalledWith(spaceId);
     });
 
-    it('should enforce space isolation for explicitly provided agent IDs', async () => {
+    it('should omit explicitly provided agent IDs that the agent service does not return', async () => {
       const spaceId = 'space-A';
       const mockAsInternalScopedUser = jest.fn().mockReturnValue(mockAgentService);
 
@@ -420,6 +437,7 @@ describe('parseAgentSelection', () => {
         agents: [],
         total: 0,
       });
+      mockAgentService.getByIds.mockResolvedValue([]);
 
       const result = await parseAgentSelection(
         mockSoClient,
@@ -428,8 +446,35 @@ describe('parseAgentSelection', () => {
         { agents: ['agent-from-space-B'], spaceId }
       );
 
-      expect(result).toContain('agent-from-space-B');
+      expect(result).not.toContain('agent-from-space-B');
+      expect(result).toEqual([]);
+      expect(mockAgentService.getByIds).toHaveBeenCalledWith(['agent-from-space-B'], {
+        ignoreMissing: true,
+      });
       expect(mockAsInternalScopedUser).toHaveBeenCalledWith(spaceId);
+    });
+
+    it('should keep only the explicitly provided agent IDs returned by the agent service', async () => {
+      const spaceId = 'space-A';
+
+      mockAgentService.listAgents.mockResolvedValue({
+        agents: [],
+        total: 0,
+      });
+      mockAgentService.getByIds.mockResolvedValue([{ id: 'agent-in-space' } as Agent]);
+
+      const result = await parseAgentSelection(
+        mockSoClient,
+        mockElasticsearchClient,
+        mockContextWithServices,
+        { agents: ['agent-in-space', 'agent-from-space-B'], spaceId }
+      );
+
+      expect(result).toEqual(['agent-in-space']);
+      expect(mockAgentService.getByIds).toHaveBeenCalledWith(
+        ['agent-in-space', 'agent-from-space-B'],
+        { ignoreMissing: true }
+      );
     });
   });
 

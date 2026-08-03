@@ -51,6 +51,7 @@ export const Flyout = ({
   return (
     <EuiFlyout
       onClose={handleOnClose}
+      data-test-subj="infraAssetDetailsFlyout"
       data-component-name={ASSET_DETAILS_FLYOUT_COMPONENT_NAME}
       data-asset-type={entity.type}
       data-schema-selected={schema}

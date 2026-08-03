@@ -151,5 +151,34 @@ export default function ({ getService }: FtrProviderContext) {
         singleLineQuery
       );
     });
+
+    describe('404 for non-existent resources', () => {
+      it('returns 404 when reading a non-existent pack', async () => {
+        await supertest
+          .get('/api/osquery/packs/non-existent-id')
+          .set('kbn-xsrf', 'true')
+          .expect(404);
+      });
+
+      it('returns 404 when updating a non-existent pack', async () => {
+        await supertest
+          .put('/api/osquery/packs/non-existent-id')
+          .set('kbn-xsrf', 'true')
+          .send({
+            name: 'Updated Pack',
+            description: 'Updated',
+            enabled: true,
+            queries: { q1: { query: 'select 1;', interval: 3600 } },
+          })
+          .expect(404);
+      });
+
+      it('returns 404 when deleting a non-existent pack', async () => {
+        await supertest
+          .delete('/api/osquery/packs/non-existent-id')
+          .set('kbn-xsrf', 'true')
+          .expect(404);
+      });
+    });
   });
 }

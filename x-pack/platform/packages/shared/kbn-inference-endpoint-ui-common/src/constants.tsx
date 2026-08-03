@@ -96,4 +96,7 @@ export const INTERNAL_OVERRIDE_FIELDS: InternalOverrideFieldsType = {
     ],
     serverlessOnly: true,
   },
+  [ServiceProviderKeys.mistral]: {
+    hidden: ['max_input_tokens'],
+  },
 };

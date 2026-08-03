@@ -11,11 +11,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { DocLinksStart, ThemeServiceStart } from '@kbn/core/public';
 import { hasUnsupportedDownsampledAggregationFailure } from '@kbn/search-response-warnings';
 import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
-import type { TimeRange } from '@kbn/es-query';
+import { escapeQuotes, type TimeRange } from '@kbn/es-query';
 import { EuiLink, EuiSpacer } from '@elastic/eui';
 
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
-import { groupBy, escape, uniq, uniqBy } from 'lodash';
+import { groupBy, uniq, uniqBy } from 'lodash';
 import type { Query } from '@kbn/data-plugin/common';
 
 import {
@@ -747,13 +747,10 @@ function extractQueriesFromTerms(
       }
       if (typeof value !== 'string' && Array.isArray(value.keys)) {
         return value.keys
-          .map(
-            (term: string, index: number) =>
-              `${fields[index]}: ${`"${term === '' ? escape(term) : term}"`}`
-          )
+          .map((term: string, index: number) => `${fields[index]}: "${escapeQuotes(term)}"`)
           .join(' AND ');
       }
-      return `${column.sourceField}: ${`"${value === '' ? escape(value) : value}"`}`;
+      return `${column.sourceField}: "${escapeQuotes(String(value))}"`;
     })
     .filter(Boolean) as string[];
 

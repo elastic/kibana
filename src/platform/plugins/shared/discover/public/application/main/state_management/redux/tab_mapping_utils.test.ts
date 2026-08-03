@@ -9,8 +9,10 @@
 
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
-import { getTabStateMock } from './__mocks__/internal_state.mocks';
+import { dataViewMockWithTimeField } from '@kbn/discover-utils/src/__mocks__';
+import { getPersistedTabMock, getTabStateMock } from './__mocks__/internal_state.mocks';
 import {
+  fromSavedObjectTabToAppState,
   fromSavedObjectTabToTabState,
   fromSavedObjectTabToSavedSearch,
   fromTabStateToSavedObjectTab,
@@ -48,6 +50,34 @@ const tab2 = getTabStateMock({
 });
 
 describe('tab mapping utils', () => {
+  describe('fromSavedObjectTabToAppState', () => {
+    it('should map saved object tab to app state', () => {
+      const persistedTab = getPersistedTabMock({
+        tabId: 'test-tab',
+        dataView: dataViewMockWithTimeField,
+        services,
+        appStateOverrides: {
+          columns: ['column1'],
+          sort: [],
+        },
+      });
+      expect(fromSavedObjectTabToAppState({ tab: persistedTab })).toMatchInlineSnapshot(`
+        Object {
+          "columns": Array [
+            "column1",
+          ],
+          "dataSource": Object {
+            "dataViewId": "the-data-view-id",
+            "type": "dataView",
+          },
+          "grid": Object {},
+          "hideChart": false,
+          "sort": Array [],
+        }
+      `);
+    });
+  });
+
   describe('fromSavedObjectTabToTabState', () => {
     it('should map saved object tab to tab state', () => {
       let tabState = fromSavedObjectTabToTabState({
@@ -57,7 +87,6 @@ describe('tab mapping utils', () => {
       expect(tabState).toMatchInlineSnapshot(`
         Object {
           "appState": Object {
-            "breakdownField": undefined,
             "columns": Array [
               "column2",
             ],
@@ -65,18 +94,9 @@ describe('tab mapping utils', () => {
               "dataViewId": "test-data-view-2",
               "type": "dataView",
             },
-            "density": undefined,
-            "filters": undefined,
             "grid": Object {},
-            "headerRowHeight": undefined,
-            "hideAggregatedPreview": undefined,
             "hideChart": false,
-            "query": undefined,
-            "rowHeight": undefined,
-            "rowsPerPage": undefined,
-            "sampleSize": undefined,
             "sort": Array [],
-            "viewMode": undefined,
           },
           "controlGroupState": undefined,
           "dataRequestParams": Object {
@@ -136,7 +156,6 @@ describe('tab mapping utils', () => {
       expect(tabState).toMatchInlineSnapshot(`
         Object {
           "appState": Object {
-            "breakdownField": undefined,
             "columns": Array [
               "column2",
             ],
@@ -144,18 +163,9 @@ describe('tab mapping utils', () => {
               "dataViewId": "test-data-view-2",
               "type": "dataView",
             },
-            "density": undefined,
-            "filters": undefined,
             "grid": Object {},
-            "headerRowHeight": undefined,
-            "hideAggregatedPreview": undefined,
             "hideChart": false,
-            "query": undefined,
-            "rowHeight": undefined,
-            "rowsPerPage": undefined,
-            "sampleSize": undefined,
             "sort": Array [],
-            "viewMode": undefined,
           },
           "controlGroupState": undefined,
           "dataRequestParams": Object {

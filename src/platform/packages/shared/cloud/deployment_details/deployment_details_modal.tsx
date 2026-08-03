@@ -19,6 +19,7 @@ import {
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { useDeploymentDetails } from './services';
 import { DeploymentDetails } from './deployment_details';
@@ -29,9 +30,11 @@ interface Props {
 
 export const DeploymentDetailsModal: FC<Props> = ({ closeModal }) => {
   const { apiKeysLearnMoreUrl } = useDeploymentDetails();
+  const modalTitleId = useGeneratedHtmlId();
 
   return (
     <EuiModal
+      aria-labelledby={modalTitleId}
       onClose={() => {
         closeModal();
       }}
@@ -39,7 +42,7 @@ export const DeploymentDetailsModal: FC<Props> = ({ closeModal }) => {
       data-test-subj="deploymentDetailsModal"
     >
       <EuiModalHeader>
-        <EuiModalHeaderTitle>
+        <EuiModalHeaderTitle id={modalTitleId}>
           {i18n.translate('cloud.deploymentDetails.helpMenuLinks.connectionDetails', {
             defaultMessage: 'Connection details',
           })}

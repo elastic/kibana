@@ -9,6 +9,7 @@
 
 import React from 'react';
 import { EuiFlyout } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { action } from '@storybook/addon-actions';
 import {
   StoriesProvider,
@@ -21,9 +22,13 @@ export default {
   title: 'Connection Details/Flyout',
 };
 
+const flyoutAriaLabel = i18n.translate('cloud.connectionDetails.flyout.ariaLabel', {
+  defaultMessage: 'Connection details',
+});
+
 export const Default = () => {
   return (
-    <EuiFlyout size="s" onClose={() => {}}>
+    <EuiFlyout size="s" onClose={() => {}} aria-label={flyoutAriaLabel}>
       <StoriesProvider onTelemetryEvent={action('onTelemetryEvent')}>
         <ConnectionDetailsFlyoutContent />
       </StoriesProvider>
@@ -33,7 +38,7 @@ export const Default = () => {
 
 export const CreationError = () => {
   return (
-    <EuiFlyout size="s" onClose={() => {}}>
+    <EuiFlyout size="s" onClose={() => {}} aria-label={flyoutAriaLabel}>
       <StoriesProviderKeyCreationError>
         <ConnectionDetailsFlyoutContent />
       </StoriesProviderKeyCreationError>
@@ -43,7 +48,7 @@ export const CreationError = () => {
 
 export const MissingPermissions = () => {
   return (
-    <EuiFlyout size="s" onClose={() => {}}>
+    <EuiFlyout size="s" onClose={() => {}} aria-label={flyoutAriaLabel}>
       <StoriesProviderNoKeyPermissions>
         <ConnectionDetailsFlyoutContent />
       </StoriesProviderNoKeyPermissions>

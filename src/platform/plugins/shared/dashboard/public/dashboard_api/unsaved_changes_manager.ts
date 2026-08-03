@@ -27,7 +27,7 @@ import {
   tap,
 } from 'rxjs';
 import type { DashboardBackupState } from '../services/dashboard_backup_service';
-import { getDashboardBackupService } from '../services/dashboard_backup_service';
+import { getDashboardBackupService } from '../services/dashboard_api_services';
 import type { initializeLayoutManager } from './layout_manager';
 import type { initializeSettingsManager } from './settings_manager';
 import type { DashboardState } from '../../common';

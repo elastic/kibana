@@ -268,7 +268,7 @@ export const onSave = async ({
         },
       }
     ),
-    text: ((element) =>
+    text: ((element) => {
       render(
         <KibanaRenderContextProvider {...startServices}>
           <FormattedMessage
@@ -292,7 +292,9 @@ export const onSave = async ({
           />
         </KibanaRenderContextProvider>,
         element
-      )) as MountPoint,
+      );
+      return () => unmountComponentAtNode(element);
+    }) as MountPoint,
   });
 };
 

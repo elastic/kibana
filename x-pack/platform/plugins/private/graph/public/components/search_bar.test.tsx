@@ -91,7 +91,8 @@ function wrapSearchBarInContext(testProps: SearchBarProps) {
   );
 }
 
-describe('search_bar', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/229631
+describe.skip('search_bar', () => {
   let dispatchSpy: jest.Mock;
   let instance: ReactWrapper<
     SearchBarProps & { intl: InjectedIntl },

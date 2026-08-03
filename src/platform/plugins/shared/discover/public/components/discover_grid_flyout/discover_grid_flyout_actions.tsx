@@ -199,6 +199,9 @@ function FlyoutActionsPopover({
   return (
     <EuiPopover
       id="docViewerMoreFlyoutActions"
+      aria-label={i18n.translate('discover.grid.tableRow.moreFlyoutActionsPopoverAriaLabel', {
+        defaultMessage: 'More actions',
+      })}
       button={button}
       isOpen={isOpen}
       closePopover={closePopover}

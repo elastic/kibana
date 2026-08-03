@@ -1,0 +1,82 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type { ScoutPage } from '..';
+import { expect } from '..';
+
+interface FilterCreationOptions {
+  field: string;
+  operator: 'is' | 'is not' | 'is one of' | 'is not one of' | 'exists' | 'does not exist';
+  value: string;
+}
+
+interface FilterStateOptions {
+  field: string;
+  value: string;
+  enabled?: boolean;
+  pinned?: boolean;
+  negated?: boolean;
+}
+
+export class FilterBar {
+  constructor(private readonly page: ScoutPage) {}
+
+  async addFilter(options: FilterCreationOptions) {
+    await this.page.testSubj.click('addFilter');
+    await this.page.testSubj.waitForSelector('addFilterPopover');
+    // set field name
+    await this.page.testSubj.typeWithDelay(
+      'filterFieldSuggestionList > comboBoxSearchInput',
+      options.field
+    );
+    await this.page.click(`.euiFilterSelectItem[title="${options.field}"]`);
+    // set operator
+    await expect(this.page.testSubj.locator('filterOperatorList')).not.toHaveClass(
+      /euiComboBox-isDisabled/
+    );
+    await this.page.testSubj.typeWithDelay(
+      'filterOperatorList > comboBoxSearchInput',
+      options.operator
+    );
+    await this.page.click(`.euiFilterSelectItem[title="${options.operator}"]`);
+    // set value
+    const filterParamsInput = this.page.locator('[data-test-subj="filterParams"] input');
+    await expect(filterParamsInput).not.toHaveAttribute('disabled');
+    // await this.page.waitForTimeout(100); // wait for input to be ready
+    await expect(filterParamsInput).toBeEditable();
+    await filterParamsInput.focus();
+    await this.page.typeWithDelay('[data-test-subj="filterParams"] input', options.value);
+    // save filter and wait for popover to close
+    await this.page.testSubj.click('saveFilter');
+    await expect(
+      this.page.testSubj.locator('addFilterPopover'),
+      'Filter popover should close after saving'
+    ).toBeHidden();
+
+    await expect(
+      this.page.testSubj.locator('^filter-badge'),
+      'New filter badge should be displayed'
+    ).toBeVisible();
+  }
+
+  async hasFilter(options: FilterStateOptions) {
+    const testSubjLocator = [
+      '~filter',
+      options.enabled !== undefined && `~filter-${options.enabled ? 'enabled' : 'disabled'}`,
+      options.field && `~filter-key-${options.field}`,
+      options.value && `~filter-value-${options.value}`,
+      options.pinned !== undefined && `~filter-${options.pinned ? 'pinned' : 'unpinned'}`,
+      options.negated !== undefined && (options.negated ? '~filter-negated' : ''),
+    ]
+      .filter(Boolean)
+      .join(' & ');
+
+    return this.page.testSubj.isVisible(testSubjLocator, { strict: true });
+  }
+}

@@ -42,7 +42,9 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
 
   const alertsAsDataIndex = '.alerts-test.patternfiring.alerts-default';
 
-  describe('alerts as data flapping', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/244588
+  // Failing: See https://github.com/elastic/kibana/issues/244340
+  describe.skip('alerts as data flapping', function () {
     this.tags('skipFIPS');
     beforeEach(async () => {
       await es.deleteByQuery({

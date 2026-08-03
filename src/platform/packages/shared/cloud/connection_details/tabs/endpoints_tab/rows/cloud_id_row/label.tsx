@@ -39,6 +39,12 @@ export const Label: React.FC<{ learnMoreUrl?: string }> = ({ learnMoreUrl }) => 
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiPopover
+          aria-label={i18n.translate(
+            'cloud.connectionDetails.tab.endpoints.cloudIdField.helpPopoverAriaLabel',
+            {
+              defaultMessage: 'Cloud ID help',
+            }
+          )}
           button={
             <EuiButtonIcon
               iconType="question"

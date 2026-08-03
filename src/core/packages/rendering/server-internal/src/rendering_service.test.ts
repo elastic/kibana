@@ -140,6 +140,51 @@ function renderTestCases(
       expect(data.legacyMetadata.uiSettings.user).toEqual(userSettings); // user settings are injected
     });
 
+    it('renders page with light color-scheme when dark mode is disabled', async () => {
+      getSettingValueMock.mockImplementation((settingName: string) => {
+        if (settingName === 'theme:darkMode') {
+          return false;
+        }
+        return settingName;
+      });
+
+      const [render] = await getRender();
+      const content = await render(createKibanaRequest(), uiSettings);
+      const dom = load(content);
+
+      expect(dom('meta[name="color-scheme"]').attr('content')).toBe('light');
+    });
+
+    it('renders page with dark color-scheme when dark mode is enabled', async () => {
+      getSettingValueMock.mockImplementation((settingName: string) => {
+        if (settingName === 'theme:darkMode') {
+          return true;
+        }
+        return settingName;
+      });
+
+      const [render] = await getRender();
+      const content = await render(createKibanaRequest(), uiSettings);
+      const dom = load(content);
+
+      expect(dom('meta[name="color-scheme"]').attr('content')).toBe('dark');
+    });
+
+    it('renders page with dual color-scheme when dark mode is set to system', async () => {
+      getSettingValueMock.mockImplementation((settingName: string) => {
+        if (settingName === 'theme:darkMode') {
+          return 'system';
+        }
+        return settingName;
+      });
+
+      const [render] = await getRender();
+      const content = await render(createKibanaRequest(), uiSettings);
+      const dom = load(content);
+
+      expect(dom('meta[name="color-scheme"]').attr('content')).toBe('light dark');
+    });
+
     it('renders "core" page with global settings', async () => {
       const userSettings = { 'foo:bar': { userValue: true } };
       uiSettings.globalClient.getUserProvided.mockResolvedValue(userSettings);
@@ -178,6 +223,42 @@ function renderTestCases(
 
       expect(data).toMatchSnapshot(INJECTED_METADATA);
       expect(data.legacyMetadata.globalUiSettings.user).toEqual({}); // user settings are not injected
+    });
+
+    it('does not call getUserProvided for anonymous pages', async () => {
+      const [render] = await getRender();
+      await render(createKibanaRequest(), uiSettings, {
+        isAnonymousPage: true,
+      });
+
+      expect(uiSettings.client.getUserProvided).not.toHaveBeenCalled();
+      expect(uiSettings.globalClient.getUserProvided).not.toHaveBeenCalled();
+    });
+
+    it('does not resolve async default `getValue` for anonymous pages', async () => {
+      const getValue = jest.fn().mockResolvedValue('async-default');
+      uiSettings.client.getRegistered.mockReturnValue({
+        registered: { name: 'title', getValue },
+      });
+
+      const [render] = await getRender();
+      await render(createKibanaRequest(), uiSettings, {
+        isAnonymousPage: true,
+      });
+
+      expect(getValue).not.toHaveBeenCalled();
+    });
+
+    it('resolves async default `getValue` for non-anonymous pages', async () => {
+      const getValue = jest.fn().mockResolvedValue('async-default');
+      uiSettings.client.getRegistered.mockReturnValue({
+        registered: { name: 'title', getValue },
+      });
+
+      const [render] = await getRender();
+      await render(createKibanaRequest(), uiSettings);
+
+      expect(getValue).toHaveBeenCalledTimes(1);
     });
 
     it('calls `getCommonStylesheetPaths` with the correct parameters', async () => {

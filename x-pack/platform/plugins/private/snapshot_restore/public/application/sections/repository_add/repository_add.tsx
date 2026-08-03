@@ -11,11 +11,10 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { RouteComponentProps } from 'react-router-dom';
 
 import { EuiPageSection, EuiSpacer, EuiPageHeader } from '@elastic/eui';
+import { SectionError } from '@kbn/es-ui-shared-plugin/public';
 import type { Repository, EmptyRepository } from '../../../../common/types';
 
-import { SectionError } from '../../../shared_imports';
-
-import { RepositoryForm } from '../../components';
+import { RepositoryForm } from '../../components/repository_form';
 import type { Section } from '../../constants';
 import { BASE_PATH } from '../../constants';
 import { breadcrumbService, docTitleService } from '../../services/navigation';

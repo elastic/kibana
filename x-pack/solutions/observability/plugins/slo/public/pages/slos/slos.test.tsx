@@ -26,12 +26,16 @@ import { useCreateDataView } from '../../hooks/use_create_data_view';
 import { useCreateSlo } from '../../hooks/use_create_slo';
 import { useDeleteSlo } from '../../hooks/use_delete_slo';
 import { useDeleteSloInstance } from '../../hooks/use_delete_slo_instance';
+import { useFetchActiveAlerts } from '../../hooks/use_fetch_active_alerts';
 import { useFetchHistoricalSummary } from '../../hooks/use_fetch_historical_summary';
+import { useFetchRulesForSlo } from '../../hooks/use_fetch_rules_for_slo';
 import { useFetchSloDefinitions } from '../../hooks/use_fetch_slo_definitions';
 import { useFetchSloList } from '../../hooks/use_fetch_slo_list';
+import { useGetFilteredRuleTypes } from '../../hooks/use_get_filtered_rule_types';
 import { useKibana } from '../../hooks/use_kibana';
 import { useLicense } from '../../hooks/use_license';
 import { usePermissions } from '../../hooks/use_permissions';
+import { useSpace } from '../../hooks/use_space';
 import { render } from '../../utils/test_helper';
 import { transformSloToCloneState } from '../slo_edit/helpers/transform_slo_to_clone_state';
 import { useGetSettings } from '../slo_settings/hooks/use_get_settings';
@@ -56,9 +60,13 @@ jest.mock('../../hooks/use_create_slo');
 jest.mock('../slo_settings/hooks/use_get_settings');
 jest.mock('../../hooks/use_delete_slo');
 jest.mock('../../hooks/use_delete_slo_instance');
+jest.mock('../../hooks/use_fetch_active_alerts');
 jest.mock('../../hooks/use_fetch_historical_summary');
+jest.mock('../../hooks/use_fetch_rules_for_slo');
+jest.mock('../../hooks/use_get_filtered_rule_types');
 jest.mock('../../hooks/use_permissions');
 jest.mock('../../hooks/use_create_data_view');
+jest.mock('../../hooks/use_space');
 jest.mock('./components/slo_list_search_bar');
 jest.mock('@kbn/ebt-tools');
 
@@ -72,6 +80,10 @@ const useDeleteSloMock = useDeleteSlo as jest.Mock;
 const useDeleteSloInstanceMock = useDeleteSloInstance as jest.Mock;
 const useFetchHistoricalSummaryMock = useFetchHistoricalSummary as jest.Mock;
 const usePermissionsMock = usePermissions as jest.Mock;
+const useFetchActiveAlertsMock = useFetchActiveAlerts as jest.Mock;
+const useFetchRulesForSloMock = useFetchRulesForSlo as jest.Mock;
+const useGetFilteredRuleTypesMock = useGetFilteredRuleTypes as jest.Mock;
+const useSpaceMock = useSpace as jest.Mock;
 const useCreateDataViewMock = useCreateDataView as jest.Mock;
 const TagsListMock = TagsList as jest.Mock;
 const usePerformanceContextMock = usePerformanceContext as jest.Mock;
@@ -89,6 +101,10 @@ useCreateSloMock.mockReturnValue({ mutate: mockCreateSlo });
 useDeleteSloMock.mockReturnValue({ mutate: mockDeleteSlo });
 useDeleteSloInstanceMock.mockReturnValue({ mutate: mockDeleteInstance });
 useCreateDataViewMock.mockReturnValue({});
+useFetchActiveAlertsMock.mockReturnValue({ data: new Map() });
+useFetchRulesForSloMock.mockReturnValue({ data: {} });
+useGetFilteredRuleTypesMock.mockReturnValue([]);
+useSpaceMock.mockReturnValue('default');
 
 const mockNavigate = jest.fn();
 const mockAddSuccess = jest.fn();
@@ -292,10 +308,9 @@ describe('SLOs Page', () => {
     });
 
     describe('when API has returned results', () => {
-      it('renders the SLO list with SLO items', async () => {
+      const setupSloListView = async () => {
         useFetchSloDefinitionsMock.mockReturnValue({ isLoading: false, data: sloDefinitionList });
         useFetchSloListMock.mockReturnValue({ isLoading: false, data: sloList });
-
         useFetchHistoricalSummaryMock.mockReturnValue({
           isLoading: false,
           data: historicalSummaryData,
@@ -304,6 +319,25 @@ describe('SLOs Page', () => {
         await act(async () => {
           render(<SlosPage />);
         });
+
+        const compactViewToggle = await screen.findByTestId('compactView');
+        expect(compactViewToggle).toBeTruthy();
+
+        await act(async () => {
+          fireEvent.click(compactViewToggle);
+        });
+      };
+
+      const openRowActionsMenu = async () => {
+        const actionsButton = await screen.findByLabelText('All actions, row 1');
+        await act(async () => {
+          actionsButton.click();
+        });
+        await waitForEuiPopoverOpen();
+      };
+
+      it('renders the SLO list with SLO items', async () => {
+        await setupSloListView();
         expect(await screen.findByTestId('sloListViewButton')).toBeTruthy();
 
         await act(async () => {
@@ -317,30 +351,10 @@ describe('SLOs Page', () => {
       });
 
       it('allows editing an SLO', async () => {
-        useFetchSloDefinitionsMock.mockReturnValue({ isLoading: false, data: sloDefinitionList });
-        useFetchSloListMock.mockReturnValue({ isLoading: false, data: sloList });
+        await setupSloListView();
+        await openRowActionsMenu();
 
-        useFetchHistoricalSummaryMock.mockReturnValue({
-          isLoading: false,
-          data: historicalSummaryData,
-        });
-
-        await act(async () => {
-          render(<SlosPage />);
-        });
-        expect(await screen.findByTestId('compactView')).toBeTruthy();
-
-        await act(async () => {
-          fireEvent.click(screen.getByTestId('compactView'));
-        });
-
-        await act(async () => {
-          (await screen.findByLabelText('All actions, row 1')).click();
-        });
-
-        await waitForEuiPopoverOpen();
-
-        const button = screen.getByTestId('sloActionsEdit');
+        const button = await screen.findByTestId('sloActionsEdit');
 
         expect(button).toBeTruthy();
 
@@ -352,30 +366,10 @@ describe('SLOs Page', () => {
       });
 
       it('allows creating a new rule for an SLO', async () => {
-        useFetchSloDefinitionsMock.mockReturnValue({ isLoading: false, data: sloDefinitionList });
-        useFetchSloListMock.mockReturnValue({ isLoading: false, data: sloList });
+        await setupSloListView();
+        await openRowActionsMenu();
 
-        useFetchHistoricalSummaryMock.mockReturnValue({
-          isLoading: false,
-          data: historicalSummaryData,
-        });
-
-        await act(async () => {
-          render(<SlosPage />);
-        });
-        expect(await screen.findByTestId('compactView')).toBeTruthy();
-
-        await act(async () => {
-          fireEvent.click(screen.getByTestId('compactView'));
-        });
-
-        await act(async () => {
-          screen.getByLabelText('All actions, row 1').click();
-        });
-
-        await waitForEuiPopoverOpen();
-
-        const button = screen.getByTestId('sloActionsCreateRule');
+        const button = await screen.findByTestId('sloActionsCreateRule');
 
         expect(button).toBeTruthy();
 
@@ -383,34 +377,14 @@ describe('SLOs Page', () => {
           button.click();
         });
 
-        expect(screen.getByTestId('add-rule-flyout')).toBeInTheDocument();
+        expect(await screen.findByTestId('add-rule-flyout')).toBeInTheDocument();
       });
 
       it('allows managing rules for an SLO', async () => {
-        useFetchSloDefinitionsMock.mockReturnValue({ isLoading: false, data: sloDefinitionList });
-        useFetchSloListMock.mockReturnValue({ isLoading: false, data: sloList });
+        await setupSloListView();
+        await openRowActionsMenu();
 
-        useFetchHistoricalSummaryMock.mockReturnValue({
-          isLoading: false,
-          data: historicalSummaryData,
-        });
-
-        await act(async () => {
-          render(<SlosPage />);
-        });
-        expect(await screen.findByTestId('compactView')).toBeTruthy();
-
-        await act(async () => {
-          fireEvent.click(screen.getByTestId('compactView'));
-        });
-
-        await act(async () => {
-          screen.getByLabelText('All actions, row 1').click();
-        });
-
-        await waitForEuiPopoverOpen();
-
-        const button = screen.getByTestId('sloActionsManageRules');
+        const button = await screen.findByTestId('sloActionsManageRules');
 
         expect(button).toBeTruthy();
 
@@ -422,31 +396,10 @@ describe('SLOs Page', () => {
       });
 
       it('allows deleting an SLO', async () => {
-        useFetchSloDefinitionsMock.mockReturnValue({ isLoading: false, data: sloDefinitionList });
-        useFetchSloListMock.mockReturnValue({ isLoading: false, data: sloList });
+        await setupSloListView();
+        await openRowActionsMenu();
 
-        useFetchHistoricalSummaryMock.mockReturnValue({
-          isLoading: false,
-          data: historicalSummaryData,
-        });
-
-        await act(async () => {
-          render(<SlosPage />);
-        });
-
-        expect(await screen.findByTestId('compactView')).toBeTruthy();
-
-        await act(async () => {
-          fireEvent.click(screen.getByTestId('compactView'));
-        });
-
-        await act(async () => {
-          screen.getByLabelText('All actions, row 1').click();
-        });
-
-        await waitForEuiPopoverOpen();
-
-        const button = screen.getByTestId('sloActionsDelete');
+        const button = await screen.findByTestId('sloActionsDelete');
 
         expect(button).toBeTruthy();
 
@@ -455,7 +408,7 @@ describe('SLOs Page', () => {
         });
 
         await act(async () => {
-          screen.getByTestId('observabilitySolutionSloDeleteModalConfirmButton').click();
+          (await screen.findByTestId('observabilitySolutionSloDeleteModalConfirmButton')).click();
         });
 
         expect(mockDeleteSlo).toBeCalledWith({
@@ -465,31 +418,10 @@ describe('SLOs Page', () => {
       });
 
       it('allows cloning an SLO', async () => {
-        useFetchSloDefinitionsMock.mockReturnValue({ isLoading: false, data: sloDefinitionList });
-        useFetchSloListMock.mockReturnValue({ isLoading: false, data: sloList });
+        await setupSloListView();
+        await openRowActionsMenu();
 
-        useFetchHistoricalSummaryMock.mockReturnValue({
-          isLoading: false,
-          data: historicalSummaryData,
-        });
-
-        await act(async () => {
-          render(<SlosPage />);
-        });
-
-        expect(await screen.findByTestId('compactView')).toBeTruthy();
-
-        await act(async () => {
-          fireEvent.click(screen.getByTestId('compactView'));
-        });
-
-        await act(async () => {
-          screen.getByLabelText('All actions, row 1').click();
-        });
-
-        await waitForEuiPopoverOpen();
-
-        const button = screen.getByTestId('sloActionsClone');
+        const button = await screen.findByTestId('sloActionsClone');
 
         expect(button).toBeTruthy();
 

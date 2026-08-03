@@ -44,6 +44,9 @@ const Label: FC<{ learnMoreUrl: string }> = ({ learnMoreUrl }) => {
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiPopover
+          aria-label={i18n.translate('cloud.deploymentDetails.cloudIdHelpPopover.ariaLabel', {
+            defaultMessage: 'Cloud ID help',
+          })}
           button={
             <EuiButtonIcon
               iconType="question"

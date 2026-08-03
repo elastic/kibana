@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/stdio-dev-helpers'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-operations'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/stdio-dev-helpers'
+  title: '@kbn/stdio-dev-helpers'
   description: Moon project for @kbn/stdio-dev-helpers
   channel: ''
   owner: '@elastic/kibana-operations'
-  metadata:
-    sourceRoot: src/platform/packages/private/kbn-stdio-dev-helpers
+  sourceRoot: src/platform/packages/private/kbn-stdio-dev-helpers
 tags:
   - shared-common
   - package

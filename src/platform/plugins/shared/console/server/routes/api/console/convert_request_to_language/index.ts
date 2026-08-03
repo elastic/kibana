@@ -17,17 +17,18 @@ import { acceptedHttpVerb, nonEmptyString } from '../proxy/validation_config';
 
 const routeValidationConfig = {
   query: schema.object({
-    language: schema.string(),
-    esHost: schema.string(),
-    kibanaHost: schema.string(),
+    language: schema.string({ maxLength: 100 }),
+    esHost: schema.string({ maxLength: 1000 }),
+    kibanaHost: schema.string({ maxLength: 1000 }),
   }),
   body: schema.maybe(
     schema.arrayOf(
       schema.object({
         method: acceptedHttpVerb,
         url: nonEmptyString,
-        data: schema.arrayOf(schema.string()),
-      })
+        data: schema.arrayOf(schema.string({ maxLength: 10000 }), { maxSize: 1000 }),
+      }),
+      { maxSize: 100 }
     )
   ),
 };

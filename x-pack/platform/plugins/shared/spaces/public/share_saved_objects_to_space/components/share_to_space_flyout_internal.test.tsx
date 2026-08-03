@@ -159,9 +159,10 @@ function changeSpaceSelection(wrapper: ReactWrapper, selectedSpaces: string[]) {
 }
 
 async function clickButton(wrapper: ReactWrapper, button: 'continue' | 'save' | 'copy') {
+  wrapper.update();
   const buttonNode = findTestSubject(wrapper, `sts-${button}-button`);
   await act(async () => {
-    buttonNode.simulate('click');
+    buttonNode.first().simulate('click');
     await nextTick();
     wrapper.update();
   });

@@ -27,7 +27,7 @@ import {
   useDeletePackagePolicyMutation,
   sendDeletePackageDatastreamAssets,
 } from '../hooks';
-import { AGENTS_PREFIX } from '../../common/constants';
+import { AGENTS_PREFIX, FLEET_SERVER_PACKAGE } from '../../common/constants';
 import type { AgentPolicy, PackagePolicyPackage } from '../types';
 import { sendDeleteAgentlessPolicy } from '../hooks/use_request/agentless_policy';
 import { ExperimentalFeaturesService } from '../services';
@@ -81,6 +81,8 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
 
   const hasMultipleAgentPolicies =
     canUseMultipleAgentPolicies && agentPolicies && agentPolicies.length > 1;
+
+  const isDeletingFleetServer = packagePolicyPackage?.name === FLEET_SERVER_PACKAGE;
 
   const fetchAgentsCount = useMemo(
     () => async () => {
@@ -300,6 +302,28 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
         buttonColor="danger"
         confirmButtonDisabled={isLoading || isLoadingAgentsCount}
       >
+        {isDeletingFleetServer && (
+          <>
+            <EuiCallOut
+              announceOnMount={false}
+              color="danger"
+              iconType="warning"
+              title={
+                <FormattedMessage
+                  id="xpack.fleet.deletePackagePolicy.confirmModal.fleetServerWarningTitle"
+                  defaultMessage="This may disconnect agents from Fleet"
+                />
+              }
+              data-test-subj="fleetServerDeleteCallOut"
+            >
+              <FormattedMessage
+                id="xpack.fleet.deletePackagePolicy.confirmModal.fleetServerWarningMessage"
+                defaultMessage="If this policy is assigned to any Fleet Servers, deleting the Fleet Server integration will stop them from running. Agents that depend on those Fleet Servers will lose their connection to Fleet — you won't be able to manage them or send policy updates until you re-enroll each agent individually."
+              />
+            </EuiCallOut>
+            <EuiSpacer size="m" />
+          </>
+        )}
         {packagePolicyPackage?.type === 'input' && (
           <>
             <EuiCallOut

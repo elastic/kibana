@@ -25,6 +25,9 @@
     "@kbn/core-analytics-browser",
     "@kbn/licensing-plugin",
     "@kbn/licensing-types",
-    "@kbn/actions-plugin"
+    "@kbn/actions-plugin",
+    "@kbn/home-plugin",
+    "@kbn/core-security-server",
+    "@kbn/core-http-server"
   ]
 }

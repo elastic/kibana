@@ -65,9 +65,18 @@ export const addSubPipelineToIndexSpecificMlPipeline = async (
     },
   });
 
+  // Remove system-managed properties (dates) that cannot be set during create/update of ingest pipelines
+  const {
+    created_date: _createdDate,
+    created_date_millis: _createdDateMillis,
+    modified_date: _modifiedDate,
+    modified_date_millis: _modifiedDateMillis,
+    ...pipelineWithoutManagedFields
+  } = parentPipeline;
+
   await esClient.ingest.putPipeline({
     id: parentPipelineId,
-    ...parentPipeline,
+    ...pipelineWithoutManagedFields,
   });
 
   return Promise.resolve({

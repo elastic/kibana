@@ -12,6 +12,7 @@ import {
   isClusterShardLimitExceeded,
   isIncompatibleMappingException,
   isIndexNotFoundException,
+  isUnavailableShardsException,
   isWriteBlockException,
 } from './es_errors';
 
@@ -95,6 +96,28 @@ describe('isIndexNotFoundException', () => {
   });
   it('returns false undefined', () => {
     expect(isIndexNotFoundException(undefined)).toEqual(false);
+  });
+});
+
+describe('isUnavailableShardsException', () => {
+  it('returns true for unavailable_shards_exception errors', () => {
+    expect(
+      isUnavailableShardsException({
+        type: 'unavailable_shards_exception',
+        reason: 'Not enough active copies to meet shard count of [ALL]',
+      })
+    ).toEqual(true);
+  });
+  it('returns false for other errors', () => {
+    expect(
+      isUnavailableShardsException({
+        type: 'index_not_found_exception',
+        reason: 'idk',
+      })
+    ).toEqual(false);
+  });
+  it('returns false undefined', () => {
+    expect(isUnavailableShardsException(undefined)).toEqual(false);
   });
 });
 

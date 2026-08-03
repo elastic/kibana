@@ -55,10 +55,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'src/platform/test/functional/fixtures/kbn_archiver/discover.json'
       );
 
-      // and load a set of data
-      await esArchiver.loadIfNeeded(
-        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
-      );
       await esArchiver.load('src/platform/test/functional/fixtures/es_archiver/date_nested');
       await kibanaServer.importExport.load(
         'src/platform/test/functional/fixtures/kbn_archiver/date_nested.json'
@@ -76,9 +72,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'src/platform/test/functional/fixtures/kbn_archiver/date_nested'
       );
       await esArchiver.unload('src/platform/test/functional/fixtures/es_archiver/date_nested');
-      await esArchiver.unload(
-        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
-      );
       await kibanaServer.uiSettings.replace(defaultSettings);
       await kibanaServer.savedObjects.cleanStandardList();
     });

@@ -12,6 +12,7 @@ export interface UseNodeMetricsTableOptions {
   timerange: { from: string; to: string };
   kuery?: string;
   metricsClient: MetricsDataClient;
+  isOtel?: boolean;
 }
 
 export interface SourceProviderProps {

@@ -47,6 +47,10 @@ describe('useAlertPrevalenceFromProcessTree', () => {
       })
     );
 
+    expect(useQuery).toHaveBeenCalledWith(
+      ['getAlertPrevalenceSchema', 'documentId', ''],
+      expect.any(Function)
+    );
     expect(hookResult.result.current.loading).toEqual(true);
     expect(hookResult.result.current.error).toEqual(false);
     expect(hookResult.result.current.id).toEqual(null);
@@ -69,10 +73,14 @@ describe('useAlertPrevalenceFromProcessTree', () => {
     hookResult = renderHook(() =>
       useAlertDocumentAnalyzerSchema({
         documentId: 'documentId',
-        indices: [],
+        indices: ['b', 'a'],
       })
     );
 
+    expect(useQuery).toHaveBeenCalledWith(
+      ['getAlertPrevalenceSchema', 'documentId', 'a,b'],
+      expect.any(Function)
+    );
     expect(hookResult.result.current.loading).toEqual(false);
     expect(hookResult.result.current.error).toEqual(false);
     expect(hookResult.result.current.id).toEqual('id');

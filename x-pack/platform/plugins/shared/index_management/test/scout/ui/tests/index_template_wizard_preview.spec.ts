@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { EuiFieldTextWrapper } from '@kbn/scout';
+import { EuiFieldTextWrapper, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
 
-test.describe('Index template wizard - Preview template', { tag: ['@ess'] }, () => {
+test.describe('Index template wizard - Preview template', { tag: tags.stateful.classic }, () => {
   test.afterEach(async ({ esClient, log }) => {
     try {
       await esClient.indices.deleteIndexTemplate({ name: 'a-star' });

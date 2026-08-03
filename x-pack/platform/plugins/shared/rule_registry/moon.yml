@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/rule-registry-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/response-ops'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/rule-registry-plugin'
+  title: '@kbn/rule-registry-plugin'
   description: Moon project for @kbn/rule-registry-plugin
   channel: ''
   owner: '@elastic/response-ops'
-  metadata:
-    sourceRoot: x-pack/platform/plugins/shared/rule_registry
+  sourceRoot: x-pack/platform/plugins/shared/rule_registry
 dependsOn:
   - '@kbn/core'
   - '@kbn/data-plugin'
@@ -54,16 +53,6 @@ fileGroups:
     - server/**/*.json
     - public/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

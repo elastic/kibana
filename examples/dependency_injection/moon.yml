@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/dependency-injection-example-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-core'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/dependency-injection-example-plugin'
+  title: '@kbn/dependency-injection-example-plugin'
   description: Moon project for @kbn/dependency-injection-example-plugin
   channel: ''
   owner: '@elastic/kibana-core'
-  metadata:
-    sourceRoot: examples/dependency_injection
+  sourceRoot: examples/dependency_injection
 dependsOn:
   - '@kbn/config-schema'
   - '@kbn/core-application-browser'

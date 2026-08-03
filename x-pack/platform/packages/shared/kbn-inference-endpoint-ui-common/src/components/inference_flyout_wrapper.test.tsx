@@ -198,4 +198,38 @@ describe('InferenceFlyout', () => {
     renderComponent({ isEdit: true, inferenceEndpoint: mockEndpoint });
     expect(screen.getByTestId('num_allocations-number')).toBeEnabled();
   });
+
+  it('excludes num_allocations from update payload when adaptive allocations is enabled', async () => {
+    const mockEndpoint = {
+      config: {
+        inferenceId: 'test-id',
+        provider: 'elasticsearch',
+        taskType: 'text_embedding',
+        providerConfig: {
+          model_id: '.elser_model_2',
+          num_allocations: 1,
+          'adaptive_allocations.max_number_of_allocations': 5,
+        },
+      },
+      secrets: {
+        providerSecrets: {},
+      },
+    };
+
+    renderComponent({
+      isEdit: true,
+      enforceAdaptiveAllocations: true,
+      inferenceEndpoint: mockEndpoint,
+    });
+
+    await userEvent.click(screen.getByTestId('inference-endpoint-submit-button'));
+
+    const submittedData = mockMutationFn.mock.calls[0][0];
+    expect(submittedData.config.providerConfig.adaptive_allocations).toEqual({
+      enabled: true,
+      min_number_of_allocations: 0,
+      max_number_of_allocations: 5,
+    });
+    expect(submittedData.config.providerConfig).not.toHaveProperty('num_allocations');
+  });
 });

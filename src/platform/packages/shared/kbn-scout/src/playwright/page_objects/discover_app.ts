@@ -11,29 +11,102 @@ import type { Download } from 'playwright-core';
 import type { Locator } from '../../..';
 import type { ScoutPage } from '..';
 import { expect } from '..';
+import { resolveSelector } from '../utils/locator_helper';
 
 export class DiscoverApp {
   constructor(private readonly page: ScoutPage) {}
 
   async goto() {
     await this.page.gotoApp('discover');
+    await this.waitForDataViewSwitch();
+  }
+
+  private async getVisibleDataViewSwitch() {
+    const discoverSwitch = this.page.testSubj.locator('discover-dataView-switch-link');
+    const fallbackSwitch = this.page.testSubj.locator('dataView-switch-link');
+
+    // There should be exactly one visible data view switch.
+    // If both are visible (bug), fail explicitly instead of picking one
+    await expect(discoverSwitch.or(fallbackSwitch)).toBeVisible();
+
+    const discoverVisible = await discoverSwitch.isVisible();
+    const fallbackVisible = await fallbackSwitch.isVisible();
+
+    if (discoverVisible === fallbackVisible) {
+      throw new Error(
+        `Expected exactly one data view switch link to be visible, but discover=${discoverVisible} fallback=${fallbackVisible}`
+      );
+    }
+
+    return discoverVisible ? discoverSwitch : fallbackSwitch;
+  }
+
+  private async waitForDataViewSwitch() {
+    await this.getVisibleDataViewSwitch();
+  }
+
+  private async clickAppMenuItem(
+    testId: string,
+    { isInOverflowMenu }: { isInOverflowMenu?: boolean } = {}
+  ) {
+    const item = this.page.testSubj.locator(testId);
+    if (!isInOverflowMenu && (await item.isVisible())) {
+      await item.click();
+      return;
+    }
+    const overflowButton = this.page.testSubj.locator('app-menu-overflow-button');
+    const popover = this.page.testSubj.locator('app-menu-popover');
+
+    // Dismiss any stale popovers
+    if (await popover.isVisible()) {
+      await overflowButton.click();
+      await expect(popover).toBeHidden();
+    }
+
+    await expect(overflowButton).toBeVisible();
+    await overflowButton.click();
+
+    // If the click was consumed by closing a stale overlay, the popover won't be open.
+    // Click the overflow button again if needed.
+    const popoverOpened = await popover
+      .waitFor({ state: 'visible', timeout: 2000 })
+      .then(() => true)
+      .catch(() => false);
+    if (!popoverOpened) {
+      await overflowButton.click();
+    }
+
+    await expect(popover).toBeVisible();
+    const menuItem = this.page.testSubj.locator(testId);
+    await expect(menuItem).toBeVisible();
+    await menuItem.click();
   }
 
   async selectDataView(name: string) {
-    const currentValue = await this.page.testSubj.innerText('*dataView-switch-link');
+    const dataViewSwitch = await this.getVisibleDataViewSwitch();
+    const currentValue = await dataViewSwitch.innerText();
     if (currentValue === name) {
       return;
     }
-    await this.page.testSubj.click('*dataView-switch-link');
-    await this.page.testSubj.waitForSelector('indexPattern-switcher');
+    await dataViewSwitch.click();
+    await expect(this.page.testSubj.locator('indexPattern-switcher')).toBeVisible();
     await this.page.testSubj.typeWithDelay('indexPattern-switcher--input', name);
-    await this.page.testSubj.locator('indexPattern-switcher').locator(`[title="${name}"]`).click();
-    await this.page.testSubj.waitForSelector('indexPattern-switcher', { state: 'hidden' });
+    const matchingDataViewLocator = this.page.testSubj
+      .locator('indexPattern-switcher')
+      .locator(`[title="${name}"]`);
+    if (await matchingDataViewLocator.isVisible()) {
+      await matchingDataViewLocator.click();
+    } else {
+      await this.page.testSubj.locator('explore-matching-indices-button').click();
+    }
+    await expect(this.page.testSubj.locator('indexPattern-switcher')).toBeHidden();
     await this.waitUntilFieldListHasCountOfFields();
   }
 
   getSelectedDataView(): Locator {
-    return this.page.testSubj.locator('discover-dataView-switch-link');
+    return this.page.testSubj
+      .locator('discover-dataView-switch-link')
+      .or(this.page.testSubj.locator('dataView-switch-link'));
   }
 
   async clickNewSearch() {
@@ -48,13 +121,46 @@ export class DiscoverApp {
     await this.page.testSubj.fill('savedObjectTitle', name);
     await this.page.testSubj.click('confirmSaveSavedObjectButton');
     await this.page.testSubj.waitForSelector('savedObjectSaveModal', { state: 'hidden' });
-    await this.page.waitForLoadingIndicatorHidden();
+  }
+
+  /**
+   * Save the currently rendered inline visualization (e.g. an ES|QL chart) to a
+   * brand-new dashboard via the "Save visualization" flow in the unified
+   * histogram. Returns once the save modal has closed.
+   */
+  async saveVisualizationToNewDashboard(visName: string) {
+    await this.page.testSubj.click('unifiedHistogramSaveVisualization');
+    await expect(this.page.testSubj.locator('savedObjectSaveModal')).toBeVisible();
+    await this.page.testSubj.fill('savedObjectTitle', visName);
+    // Clicking the EuiRadio wrapper does not toggle the underlying input
+    // reliably; clicking the associated label does.
+    await this.page.locator('label[for="new-dashboard-option"]').click();
+    await this.page.testSubj.click('confirmSaveSavedObjectButton');
+    await expect(this.page.testSubj.locator('savedObjectSaveModal')).toBeHidden();
   }
 
   async waitUntilFieldListHasCountOfFields() {
     await this.page.testSubj.waitForSelector('fieldListGroupedAvailableFields-countLoading', {
       state: 'hidden',
     });
+  }
+
+  /**
+   * Assert that the "Selected fields" sidebar group contains exactly the
+   * fields named in `expected` — no more, no less. Useful for verifying ES|QL
+   * `KEEP` clauses or any explicit column-selection flow.
+   */
+  async expectSelectedSidebarFieldsToEqual(expected: readonly string[]) {
+    await this.waitUntilFieldListHasCountOfFields();
+    const selectedFields = this.page.testSubj.locator('fieldListGroupedSelectedFields');
+    await expect(selectedFields).toBeVisible();
+
+    const entries = selectedFields.getByTestId(/^dscFieldListPanelField-/);
+    await expect(entries).toHaveCount(expected.length);
+
+    for (const field of expected) {
+      await expect(selectedFields.getByTestId(`dscFieldListPanelField-${field}`)).toBeVisible();
+    }
   }
 
   async waitForHistogramRendered() {
@@ -81,7 +187,6 @@ export class DiscoverApp {
   }
 
   async getHitCountInt(): Promise<number> {
-    await this.page.waitForLoadingIndicatorHidden();
     const hitCount = await this.page.testSubj.innerText('discoverQueryHits');
     return parseInt(hitCount.replace(/,/g, ''), 10);
   }
@@ -214,23 +319,16 @@ export class DiscoverApp {
     return headers.join(',');
   }
 
-  async getSharedItemTitleAndDescription(): Promise<{ title: string; description: string }> {
-    const cssSelector = '[data-shared-item][data-title][data-description]';
-    const element = this.page.locator(cssSelector);
-    await element.waitFor({ state: 'visible' });
-
-    const title = (await element.getAttribute('data-title')) || '';
-    const description = (await element.getAttribute('data-description')) || '';
-
-    return { title, description };
-  }
-
   async showChart() {
     await this.page.testSubj.click('dscShowHistogramButton');
   }
 
   async hideChart() {
     await this.page.testSubj.click('dscHideHistogramButton');
+  }
+
+  async expectXYVisChartVisible() {
+    await expect(this.page.testSubj.locator('xyVisChart')).toBeVisible();
   }
 
   async navigateToLensEditor() {
@@ -250,8 +348,10 @@ export class DiscoverApp {
   }
 
   async dragFieldToGrid(fieldName: string[]) {
+    const gridLocator = this.page.testSubj.locator('euiDataGridBody');
     for (const field of fieldName) {
-      await this.page.testSubj.dragTo(`field-${field}`, 'euiDataGridBody');
+      // Fields can appear in both "Popular fields" and the full field list.
+      await resolveSelector(this.page, `field-${field}`).dragTo(gridLocator);
     }
   }
 
@@ -264,8 +364,8 @@ export class DiscoverApp {
   }
 
   async exportAsCsv(): Promise<Download> {
-    // 1. Navigate to the export menu
-    await this.page.testSubj.click('exportTopNavButton');
+    // Export may live in the top nav or the overflow menu depending on viewport / Discover layout.
+    await this.clickAppMenuItem('exportTopNavButton');
     await this.page.testSubj.click('exportMenuItem-CSV');
 
     // 2. Trigger the report generation

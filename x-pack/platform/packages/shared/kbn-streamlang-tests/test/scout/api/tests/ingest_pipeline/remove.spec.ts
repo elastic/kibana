@@ -8,11 +8,11 @@
 import { expect } from '@kbn/scout/api';
 import type { RemoveProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpile } from '@kbn/streamlang/src/transpilers/ingest_pipeline';
-import { streamlangApiTest as apiTest } from '../..';
+import { streamlangApiTest as apiTest, tags } from '../..';
 
 apiTest.describe(
   'Streamlang to Ingest Pipeline - Remove Processor',
-  { tag: ['@ess', '@svlOblt'] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     apiTest('should remove a field', async ({ testBed }) => {
       const indexName = 'streams-e2e-test-remove-basic';

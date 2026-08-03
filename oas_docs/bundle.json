@@ -362,6 +362,72 @@
           "metrics"
         ],
         "type": "object"
+      },
+      "enrollment_api_key": {
+        "additionalProperties": false,
+        "properties": {
+          "active": {
+            "description": "When false, the enrollment API key is revoked and cannot be used for enrolling Elastic Agents.",
+            "type": "boolean"
+          },
+          "api_key": {
+            "description": "The enrollment API key (token) used for enrolling Elastic Agents.",
+            "type": "string"
+          },
+          "api_key_id": {
+            "description": "The ID of the API key in the Security API.",
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string"
+          },
+          "expire_at": {
+            "description": "The expiration date of the enrollment token as an ISO 8601 date string. Absent when the token never expires.",
+            "type": "string"
+          },
+          "hidden": {
+            "type": "boolean"
+          },
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "description": "The name of the enrollment API key.",
+            "type": "string"
+          },
+          "policy_id": {
+            "description": "The ID of the agent policy the Elastic Agent will be enrolled in.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "api_key_id",
+          "api_key",
+          "active",
+          "created_at"
+        ],
+        "type": "object"
+      },
+      "new_enrollment_api_key": {
+        "additionalProperties": false,
+        "properties": {
+          "expiration": {
+            "description": "The expiration time for the enrollment token, expressed as a duration (for example, 30d, 24h, 90m). By default, enrollment tokens never expire.",
+            "maxLength": 20,
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "policy_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "policy_id"
+        ],
+        "type": "object"
       }
     },
     "securitySchemes": {
@@ -871,6 +937,7 @@
             "name": "feature_id",
             "required": false,
             "schema": {
+              "maxLength": 100,
               "type": "string"
             }
           }
@@ -1217,6 +1284,16 @@
         "tags": [
           "agent builder"
         ],
+        "x-codeSamples": [
+          {
+            "lang": "curl",
+            "source": "curl \\\n  -X GET \"${KIBANA_URL}/api/agent_builder/a2a/{agentId}.json\" \\\n  -H \"Authorization: ApiKey ${API_KEY}\"\n"
+          },
+          {
+            "lang": "Console",
+            "source": "GET kbn://api/agent_builder/a2a/{agentId}.json\n"
+          }
+        ],
         "x-state": "Technical Preview; added in 9.2.0"
       }
     },
@@ -1289,6 +1366,16 @@
         "summary": "List agents",
         "tags": [
           "agent builder"
+        ],
+        "x-codeSamples": [
+          {
+            "lang": "curl",
+            "source": "curl \\\n -X GET \"${KIBANA_URL}/api/agent_builder/agents\" \\\n -H \"Authorization: ApiKey ${API_KEY}\"\n"
+          },
+          {
+            "lang": "Console",
+            "source": "GET kbn://api/agent_builder/agents\n"
+          }
         ],
         "x-state": "Added in 9.2.0"
       },
@@ -1460,6 +1547,16 @@
         "tags": [
           "agent builder"
         ],
+        "x-codeSamples": [
+          {
+            "lang": "curl",
+            "source": "curl \\\n  -X POST \"${KIBANA_URL}/api/agent_builder/agents\" \\\n  -H \"Authorization: ApiKey ${API_KEY}\" \\\n  -H \"kbn-xsrf: true\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\n    \"id\": \"new-agent-id\",\n    \"name\": \"Search Index Helper\",\n    \"description\": \"Hi! I can help you search the data within the indices starting with \\\"content-\\\" prefix.\",\n    \"labels\": [\"custom-indices\", \"department-search\"],\n    \"avatar_color\": \"#BFDBFF\",\n    \"avatar_symbol\": \"SI\",\n    \"configuration\": {\n      \"instructions\": \"You are a custom agent that wants to help searching data using all indices starting with prefix \\\"content-\\\".\",\n      \"tools\": [\n        {\n          \"tool_ids\": [\n            \"platform.core.search\",\n            \"platform.core.list_indices\",\n            \"platform.core.get_index_mapping\",\n            \"platform.core.get_document_by_id\"\n          ]\n        }\n      ]\n    }\n}'\n"
+          },
+          {
+            "lang": "Console",
+            "source": "POST kbn://api/agent_builder/agents\n{\n  \"id\": \"new-agent-id\",\n  \"name\": \"Search Index Helper\",\n  \"description\": \"Hi! I can help you search the data within the indices starting with \\\"content-\\\" prefix.\",\n  \"labels\": [\"custom-indices\", \"department-search\"],\n  \"avatar_color\": \"#BFDBFF\",\n  \"avatar_symbol\": \"SI\",\n  \"configuration\": {\n    \"instructions\": \"You are a custom agent that wants to help searching data using all indices starting with prefix \\\"content-\\\".\",\n    \"tools\": [\n      {\n        \"tool_ids\": [\n          \"platform.core.search\",\n          \"platform.core.list_indices\",\n          \"platform.core.get_index_mapping\",\n          \"platform.core.get_document_by_id\"\n        ]\n      }\n    ]\n  }\n}\n"
+          }
+        ],
         "x-state": "Added in 9.2.0"
       }
     },
@@ -1508,6 +1605,16 @@
         "summary": "Delete an agent",
         "tags": [
           "agent builder"
+        ],
+        "x-codeSamples": [
+          {
+            "lang": "curl",
+            "source": "curl \\\n  -X DELETE \"${KIBANA_URL}/api/agent_builder/agents/{id}\" \\\n  -H \"Authorization: ApiKey ${API_KEY}\" \\\n  -H \"kbn-xsrf: true\"\n"
+          },
+          {
+            "lang": "Console",
+            "source": "DELETE kbn://api/agent_builder/agents/{id}\n"
+          }
         ],
         "x-state": "Added in 9.2.0"
       },
@@ -1567,6 +1674,16 @@
         "summary": "Get an agent by ID",
         "tags": [
           "agent builder"
+        ],
+        "x-codeSamples": [
+          {
+            "lang": "curl",
+            "source": "curl \\\n  -X GET \"${KIBANA_URL}/api/agent_builder/agents/{id}\" \\\n  -H \"Authorization: ApiKey ${API_KEY}\"\n"
+          },
+          {
+            "lang": "Console",
+            "source": "GET kbn://api/agent_builder/agents/{id}\n"
+          }
         ],
         "x-state": "Added in 9.2.0"
       },
@@ -1736,6 +1853,16 @@
         "tags": [
           "agent builder"
         ],
+        "x-codeSamples": [
+          {
+            "lang": "curl",
+            "source": "curl \\\n  -X PUT \"${KIBANA_URL}/api/agent_builder/agents/{id}\" \\\n  -H \"Authorization: ApiKey ${API_KEY}\" \\\n  -H \"kbn-xsrf: true\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\n    \"name\": \"Search Index Helper\",\n    \"description\": \"Updated description - Search for anything in \\\"content-*\\\" indices!\",\n    \"labels\": [\"custom-indices\", \"department-search\", \"elastic-employees\"],\n    \"avatar_color\": \"#BFDBFF\",\n    \"avatar_symbol\": \"SI\",\n    \"configuration\": {\n      \"instructions\": \"You are a custom agent that wants to help searching data using all indices starting with prefix \\\"content-\\\".\",\n      \"tools\": [{\n        \"tool_ids\": [\n          \"platform.core.search\",\n          \"platform.core.list_indices\",\n          \"platform.core.get_index_mapping\",\n          \"platform.core.get_document_by_id\"\n        ]\n      }]\n    }\n  }'\n"
+          },
+          {
+            "lang": "Console",
+            "source": "PUT kbn://api/agent_builder/agents/{id}\n{\n  \"name\": \"Search Index Helper\",\n  \"description\": \"Updated description - Search for anything in \\\"content-*\\\" indices!\",\n  \"labels\": [\"custom-indices\", \"department-search\", \"elastic-employees\"],\n  \"avatar_color\": \"#BFDBFF\",\n  \"avatar_symbol\": \"SI\",\n  \"configuration\": {\n    \"instructions\": \"You are a custom agent that wants to help searching data using all indices starting with prefix \\\"content-\\\".\",\n    \"tools\": [{\n      \"tool_ids\": [\n        \"platform.core.search\",\n        \"platform.core.list_indices\",\n        \"platform.core.get_index_mapping\",\n        \"platform.core.get_document_by_id\"\n      ]\n    }]\n  }\n}\n"
+          }
+        ],
         "x-state": "Added in 9.2.0"
       }
     },
@@ -1786,6 +1913,16 @@
         "tags": [
           "agent builder"
         ],
+        "x-codeSamples": [
+          {
+            "lang": "curl",
+            "source": "curl \\\n  -X GET \"${KIBANA_URL}/api/agent_builder/conversations\" \\\n  -H \"Authorization: ApiKey ${API_KEY}\"\n"
+          },
+          {
+            "lang": "Console",
+            "source": "GET kbn://api/agent_builder/conversations\n"
+          }
+        ],
         "x-state": "Added in 9.2.0"
       }
     },
@@ -1834,6 +1971,16 @@
         "summary": "Delete conversation by ID",
         "tags": [
           "agent builder"
+        ],
+        "x-codeSamples": [
+          {
+            "lang": "curl",
+            "source": "curl \\\n  -X DELETE \"${KIBANA_URL}/api/agent_builder/conversations/{conversation_id}\" \\\n  -H \"Authorization: ApiKey ${API_KEY}\" \\\n  -H \"kbn-xsrf: true\"\n"
+          },
+          {
+            "lang": "Console",
+            "source": "DELETE kbn://api/agent_builder/conversations/{conversation_id}\n"
+          }
         ],
         "x-state": "Added in 9.2.0"
       },
@@ -1890,6 +2037,16 @@
         "summary": "Get conversation by ID",
         "tags": [
           "agent builder"
+        ],
+        "x-codeSamples": [
+          {
+            "lang": "curl",
+            "source": "curl \\\n  -X GET \"${KIBANA_URL}/api/agent_builder/conversations/{conversation_id}\" \\\n  -H \"Authorization: ApiKey ${API_KEY}\"\n"
+          },
+          {
+            "lang": "Console",
+            "source": "GET kbn://api/agent_builder/conversations/{conversation_id}\n"
+          }
         ],
         "x-state": "Added in 9.2.0"
       }
@@ -2068,6 +2225,16 @@
         "summary": "Send chat message",
         "tags": [
           "agent builder"
+        ],
+        "x-codeSamples": [
+          {
+            "lang": "curl",
+            "source": "curl \\\n  -X POST \"${KIBANA_URL}/api/agent_builder/converse\" \\\n  -H \"Authorization: ApiKey ${API_KEY}\" \\\n  -H \"kbn-xsrf: true\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\n    \"input\": \"What is Elasticsearch?\",\n    \"agent_id\": \"elastic-ai-agent\"}'\n"
+          },
+          {
+            "lang": "Console",
+            "source": "POST kbn://api/agent_builder/converse\n{\n  \"input\": \"What is Elasticsearch?\",\n  \"agent_id\": \"elastic-ai-agent\"\n}\n"
+          }
         ],
         "x-state": "Added in 9.2.0"
       }
@@ -2275,6 +2442,16 @@
         "summary": "Send chat message (streaming)",
         "tags": [
           "agent builder"
+        ],
+        "x-codeSamples": [
+          {
+            "lang": "curl",
+            "source": "curl \\\n  -X POST \"${KIBANA_URL}/api/agent_builder/converse/async\" \\\n  -H \"Authorization: ApiKey ${API_KEY}\" \\\n  -H \"kbn-xsrf: true\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\n    \"input\": \"Hello again let us have an async chat\",\n    \"agent_id\": \"elastic-ai-agent\",\n    \"conversation_id\": \"<CONVERSATION_ID>\"\n  }'\n"
+          },
+          {
+            "lang": "Console",
+            "source": "POST kbn://api/agent_builder/converse/async\n{\n  \"input\": \"Hello again let's have an async chat\",\n  \"agent_id\": \"elastic-ai-agent\",\n  \"conversation_id\": \"<CONVERSATION_ID>\"\n}\n"
+          }
         ],
         "x-state": "Added in 9.2.0"
       }
@@ -2745,7 +2922,7 @@
     },
     "/api/agent_builder/tools/_execute": {
       "post": {
-        "description": "Execute a tool with parameters. Use this endpoint to run a tool directly with specified inputs and optional external connector integration. To learn more, refer to the [tools documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/tools).<br/><br/>[Required authorization] Route required privileges: read_onechat.",
+        "description": "Run a tool with parameters. Use this endpoint to run a tool directly with specified inputs and optional external connector integration. To learn more, refer to the [tools documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/tools).<br/><br/>[Required authorization] Route required privileges: read_onechat.",
         "operationId": "post-agent-builder-tools-execute",
         "parameters": [
           {
@@ -3041,7 +3218,7 @@
             "description": "Indicates a successful response"
           }
         },
-        "summary": "Execute a Tool",
+        "summary": "Run a tool",
         "tags": [
           "agent builder"
         ],
@@ -10713,7 +10890,7 @@
                               ],
                               "type": "object"
                             },
-                            "maxItems": 10,
+                            "maxItems": 100,
                             "type": "array"
                           },
                           "has_fleet_server": {
@@ -11066,7 +11243,7 @@
                                                   ],
                                                   "type": "object"
                                                 },
-                                                "maxItems": 100,
+                                                "maxItems": 1000,
                                                 "type": "array"
                                               },
                                               "type": {
@@ -11124,13 +11301,13 @@
                                                       "additionalProperties": {
                                                         "anyOf": [
                                                           {
-                                                            "type": "boolean"
-                                                          },
-                                                          {
                                                             "type": "string"
                                                           },
                                                           {
                                                             "type": "number"
+                                                          },
+                                                          {
+                                                            "type": "boolean"
                                                           },
                                                           {
                                                             "items": {
@@ -11178,13 +11355,13 @@
                                                 "additionalProperties": {
                                                   "anyOf": [
                                                     {
-                                                      "type": "boolean"
-                                                    },
-                                                    {
                                                       "type": "string"
                                                     },
                                                     {
                                                       "type": "number"
+                                                    },
+                                                    {
+                                                      "type": "boolean"
                                                     },
                                                     {
                                                       "items": {
@@ -11351,7 +11528,7 @@
                                         ],
                                         "type": "object"
                                       },
-                                      "maxItems": 100,
+                                      "maxItems": 1000,
                                       "type": "array"
                                     },
                                     "spaceIds": {
@@ -11405,13 +11582,13 @@
                                           "additionalProperties": {
                                             "anyOf": [
                                               {
-                                                "type": "boolean"
-                                              },
-                                              {
                                                 "type": "string"
                                               },
                                               {
                                                 "type": "number"
+                                              },
+                                              {
+                                                "type": "boolean"
                                               },
                                               {
                                                 "items": {
@@ -11793,7 +11970,7 @@
                       ],
                       "type": "object"
                     },
-                    "maxItems": 10,
+                    "maxItems": 100,
                     "type": "array"
                   },
                   "has_fleet_server": {
@@ -12130,7 +12307,7 @@
                             ],
                             "type": "object"
                           },
-                          "maxItems": 10,
+                          "maxItems": 100,
                           "type": "array"
                         },
                         "has_fleet_server": {
@@ -12483,7 +12660,7 @@
                                                 ],
                                                 "type": "object"
                                               },
-                                              "maxItems": 100,
+                                              "maxItems": 1000,
                                               "type": "array"
                                             },
                                             "type": {
@@ -12541,13 +12718,13 @@
                                                     "additionalProperties": {
                                                       "anyOf": [
                                                         {
-                                                          "type": "boolean"
-                                                        },
-                                                        {
                                                           "type": "string"
                                                         },
                                                         {
                                                           "type": "number"
+                                                        },
+                                                        {
+                                                          "type": "boolean"
                                                         },
                                                         {
                                                           "items": {
@@ -12595,13 +12772,13 @@
                                               "additionalProperties": {
                                                 "anyOf": [
                                                   {
-                                                    "type": "boolean"
-                                                  },
-                                                  {
                                                     "type": "string"
                                                   },
                                                   {
                                                     "type": "number"
+                                                  },
+                                                  {
+                                                    "type": "boolean"
                                                   },
                                                   {
                                                     "items": {
@@ -12768,7 +12945,7 @@
                                       ],
                                       "type": "object"
                                     },
-                                    "maxItems": 100,
+                                    "maxItems": 1000,
                                     "type": "array"
                                   },
                                   "spaceIds": {
@@ -12822,13 +12999,13 @@
                                         "additionalProperties": {
                                           "anyOf": [
                                             {
-                                              "type": "boolean"
-                                            },
-                                            {
                                               "type": "string"
                                             },
                                             {
                                               "type": "number"
+                                            },
+                                            {
+                                              "type": "boolean"
                                             },
                                             {
                                               "items": {
@@ -13239,7 +13416,7 @@
                               ],
                               "type": "object"
                             },
-                            "maxItems": 10,
+                            "maxItems": 100,
                             "type": "array"
                           },
                           "has_fleet_server": {
@@ -13592,7 +13769,7 @@
                                                   ],
                                                   "type": "object"
                                                 },
-                                                "maxItems": 100,
+                                                "maxItems": 1000,
                                                 "type": "array"
                                               },
                                               "type": {
@@ -13650,13 +13827,13 @@
                                                       "additionalProperties": {
                                                         "anyOf": [
                                                           {
-                                                            "type": "boolean"
-                                                          },
-                                                          {
                                                             "type": "string"
                                                           },
                                                           {
                                                             "type": "number"
+                                                          },
+                                                          {
+                                                            "type": "boolean"
                                                           },
                                                           {
                                                             "items": {
@@ -13704,13 +13881,13 @@
                                                 "additionalProperties": {
                                                   "anyOf": [
                                                     {
-                                                      "type": "boolean"
-                                                    },
-                                                    {
                                                       "type": "string"
                                                     },
                                                     {
                                                       "type": "number"
+                                                    },
+                                                    {
+                                                      "type": "boolean"
                                                     },
                                                     {
                                                       "items": {
@@ -13877,7 +14054,7 @@
                                         ],
                                         "type": "object"
                                       },
-                                      "maxItems": 100,
+                                      "maxItems": 1000,
                                       "type": "array"
                                     },
                                     "spaceIds": {
@@ -13931,13 +14108,13 @@
                                           "additionalProperties": {
                                             "anyOf": [
                                               {
-                                                "type": "boolean"
-                                              },
-                                              {
                                                 "type": "string"
                                               },
                                               {
                                                 "type": "number"
+                                              },
+                                              {
+                                                "type": "boolean"
                                               },
                                               {
                                                 "items": {
@@ -14601,7 +14778,7 @@
                             ],
                             "type": "object"
                           },
-                          "maxItems": 10,
+                          "maxItems": 100,
                           "type": "array"
                         },
                         "has_fleet_server": {
@@ -14954,7 +15131,7 @@
                                                 ],
                                                 "type": "object"
                                               },
-                                              "maxItems": 100,
+                                              "maxItems": 1000,
                                               "type": "array"
                                             },
                                             "type": {
@@ -15012,13 +15189,13 @@
                                                     "additionalProperties": {
                                                       "anyOf": [
                                                         {
-                                                          "type": "boolean"
-                                                        },
-                                                        {
                                                           "type": "string"
                                                         },
                                                         {
                                                           "type": "number"
+                                                        },
+                                                        {
+                                                          "type": "boolean"
                                                         },
                                                         {
                                                           "items": {
@@ -15066,13 +15243,13 @@
                                               "additionalProperties": {
                                                 "anyOf": [
                                                   {
-                                                    "type": "boolean"
-                                                  },
-                                                  {
                                                     "type": "string"
                                                   },
                                                   {
                                                     "type": "number"
+                                                  },
+                                                  {
+                                                    "type": "boolean"
                                                   },
                                                   {
                                                     "items": {
@@ -15239,7 +15416,7 @@
                                       ],
                                       "type": "object"
                                     },
-                                    "maxItems": 100,
+                                    "maxItems": 1000,
                                     "type": "array"
                                   },
                                   "spaceIds": {
@@ -15293,13 +15470,13 @@
                                         "additionalProperties": {
                                           "anyOf": [
                                             {
-                                              "type": "boolean"
-                                            },
-                                            {
                                               "type": "string"
                                             },
                                             {
                                               "type": "number"
+                                            },
+                                            {
+                                              "type": "boolean"
                                             },
                                             {
                                               "items": {
@@ -15681,7 +15858,7 @@
                       ],
                       "type": "object"
                     },
-                    "maxItems": 10,
+                    "maxItems": 100,
                     "type": "array"
                   },
                   "has_fleet_server": {
@@ -16018,7 +16195,7 @@
                             ],
                             "type": "object"
                           },
-                          "maxItems": 10,
+                          "maxItems": 100,
                           "type": "array"
                         },
                         "has_fleet_server": {
@@ -16371,7 +16548,7 @@
                                                 ],
                                                 "type": "object"
                                               },
-                                              "maxItems": 100,
+                                              "maxItems": 1000,
                                               "type": "array"
                                             },
                                             "type": {
@@ -16429,13 +16606,13 @@
                                                     "additionalProperties": {
                                                       "anyOf": [
                                                         {
-                                                          "type": "boolean"
-                                                        },
-                                                        {
                                                           "type": "string"
                                                         },
                                                         {
                                                           "type": "number"
+                                                        },
+                                                        {
+                                                          "type": "boolean"
                                                         },
                                                         {
                                                           "items": {
@@ -16483,13 +16660,13 @@
                                               "additionalProperties": {
                                                 "anyOf": [
                                                   {
-                                                    "type": "boolean"
-                                                  },
-                                                  {
                                                     "type": "string"
                                                   },
                                                   {
                                                     "type": "number"
+                                                  },
+                                                  {
+                                                    "type": "boolean"
                                                   },
                                                   {
                                                     "items": {
@@ -16656,7 +16833,7 @@
                                       ],
                                       "type": "object"
                                     },
-                                    "maxItems": 100,
+                                    "maxItems": 1000,
                                     "type": "array"
                                   },
                                   "spaceIds": {
@@ -16710,13 +16887,13 @@
                                         "additionalProperties": {
                                           "anyOf": [
                                             {
-                                              "type": "boolean"
-                                            },
-                                            {
                                               "type": "string"
                                             },
                                             {
                                               "type": "number"
+                                            },
+                                            {
+                                              "type": "boolean"
                                             },
                                             {
                                               "items": {
@@ -17247,7 +17424,7 @@
                             ],
                             "type": "object"
                           },
-                          "maxItems": 10,
+                          "maxItems": 100,
                           "type": "array"
                         },
                         "has_fleet_server": {
@@ -17600,7 +17777,7 @@
                                                 ],
                                                 "type": "object"
                                               },
-                                              "maxItems": 100,
+                                              "maxItems": 1000,
                                               "type": "array"
                                             },
                                             "type": {
@@ -17658,13 +17835,13 @@
                                                     "additionalProperties": {
                                                       "anyOf": [
                                                         {
-                                                          "type": "boolean"
-                                                        },
-                                                        {
                                                           "type": "string"
                                                         },
                                                         {
                                                           "type": "number"
+                                                        },
+                                                        {
+                                                          "type": "boolean"
                                                         },
                                                         {
                                                           "items": {
@@ -17712,13 +17889,13 @@
                                               "additionalProperties": {
                                                 "anyOf": [
                                                   {
-                                                    "type": "boolean"
-                                                  },
-                                                  {
                                                     "type": "string"
                                                   },
                                                   {
                                                     "type": "number"
+                                                  },
+                                                  {
+                                                    "type": "boolean"
                                                   },
                                                   {
                                                     "items": {
@@ -17885,7 +18062,7 @@
                                       ],
                                       "type": "object"
                                     },
-                                    "maxItems": 100,
+                                    "maxItems": 1000,
                                     "type": "array"
                                   },
                                   "spaceIds": {
@@ -17939,13 +18116,13 @@
                                         "additionalProperties": {
                                           "anyOf": [
                                             {
-                                              "type": "boolean"
-                                            },
-                                            {
                                               "type": "string"
                                             },
                                             {
                                               "type": "number"
+                                            },
+                                            {
+                                              "type": "boolean"
                                             },
                                             {
                                               "items": {
@@ -19785,13 +19962,13 @@
                                 "additionalProperties": {
                                   "anyOf": [
                                     {
-                                      "type": "boolean"
-                                    },
-                                    {
                                       "type": "string"
                                     },
                                     {
                                       "type": "number"
+                                    },
+                                    {
+                                      "type": "boolean"
                                     },
                                     {
                                       "items": {
@@ -19839,13 +20016,13 @@
                           "additionalProperties": {
                             "anyOf": [
                               {
-                                "type": "boolean"
-                              },
-                              {
                                 "type": "string"
                               },
                               {
                                 "type": "number"
+                              },
+                              {
+                                "type": "boolean"
                               },
                               {
                                 "items": {
@@ -19967,13 +20144,13 @@
                     "additionalProperties": {
                       "anyOf": [
                         {
-                          "type": "boolean"
-                        },
-                        {
                           "type": "string"
                         },
                         {
                           "type": "number"
+                        },
+                        {
+                          "type": "boolean"
                         },
                         {
                           "items": {
@@ -20435,7 +20612,7 @@
                                       ],
                                       "type": "object"
                                     },
-                                    "maxItems": 100,
+                                    "maxItems": 1000,
                                     "type": "array"
                                   },
                                   "type": {
@@ -20493,13 +20670,13 @@
                                           "additionalProperties": {
                                             "anyOf": [
                                               {
-                                                "type": "boolean"
-                                              },
-                                              {
                                                 "type": "string"
                                               },
                                               {
                                                 "type": "number"
+                                              },
+                                              {
+                                                "type": "boolean"
                                               },
                                               {
                                                 "items": {
@@ -20547,13 +20724,13 @@
                                     "additionalProperties": {
                                       "anyOf": [
                                         {
-                                          "type": "boolean"
-                                        },
-                                        {
                                           "type": "string"
                                         },
                                         {
                                           "type": "number"
+                                        },
+                                        {
+                                          "type": "boolean"
                                         },
                                         {
                                           "items": {
@@ -20720,7 +20897,7 @@
                             ],
                             "type": "object"
                           },
-                          "maxItems": 100,
+                          "maxItems": 1000,
                           "type": "array"
                         },
                         "spaceIds": {
@@ -20774,13 +20951,13 @@
                               "additionalProperties": {
                                 "anyOf": [
                                   {
-                                    "type": "boolean"
-                                  },
-                                  {
                                     "type": "string"
                                   },
                                   {
                                     "type": "number"
+                                  },
+                                  {
+                                    "type": "boolean"
                                   },
                                   {
                                     "items": {
@@ -21605,6 +21782,9 @@
                                     ],
                                     "type": "string"
                                   },
+                                  "reason": {
+                                    "type": "string"
+                                  },
                                   "retry_error_msg": {
                                     "type": "string"
                                   },
@@ -22320,6 +22500,9 @@
                   "batchSize": {
                     "type": "number"
                   },
+                  "dryRun": {
+                    "type": "boolean"
+                  },
                   "enrollment_token": {
                     "type": "string"
                   },
@@ -22395,16 +22578,32 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": false,
-                  "properties": {
-                    "actionId": {
-                      "type": "string"
+                  "anyOf": [
+                    {
+                      "additionalProperties": false,
+                      "properties": {
+                        "actionId": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "actionId"
+                      ],
+                      "type": "object"
+                    },
+                    {
+                      "additionalProperties": false,
+                      "properties": {
+                        "count": {
+                          "type": "number"
+                        }
+                      },
+                      "required": [
+                        "count"
+                      ],
+                      "type": "object"
                     }
-                  },
-                  "required": [
-                    "actionId"
-                  ],
-                  "type": "object"
+                  ]
                 }
               }
             },
@@ -22499,6 +22698,9 @@
                   "batchSize": {
                     "type": "number"
                   },
+                  "dryRun": {
+                    "type": "boolean"
+                  },
                   "user_info": {
                     "additionalProperties": false,
                     "properties": {
@@ -22535,16 +22737,32 @@
                   }
                 },
                 "schema": {
-                  "additionalProperties": false,
-                  "properties": {
-                    "actionId": {
-                      "type": "string"
+                  "anyOf": [
+                    {
+                      "additionalProperties": false,
+                      "properties": {
+                        "actionId": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "actionId"
+                      ],
+                      "type": "object"
+                    },
+                    {
+                      "additionalProperties": false,
+                      "properties": {
+                        "count": {
+                          "type": "number"
+                        }
+                      },
+                      "required": [
+                        "count"
+                      ],
+                      "type": "object"
                     }
-                  },
-                  "required": [
-                    "actionId"
-                  ],
-                  "type": "object"
+                  ]
                 }
               }
             },
@@ -22635,6 +22853,9 @@
                   "batchSize": {
                     "type": "number"
                   },
+                  "dryRun": {
+                    "type": "boolean"
+                  },
                   "includeInactive": {
                     "default": false,
                     "type": "boolean"
@@ -22657,16 +22878,32 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": false,
-                  "properties": {
-                    "actionId": {
-                      "type": "string"
+                  "anyOf": [
+                    {
+                      "additionalProperties": false,
+                      "properties": {
+                        "actionId": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "actionId"
+                      ],
+                      "type": "object"
+                    },
+                    {
+                      "additionalProperties": false,
+                      "properties": {
+                        "count": {
+                          "type": "number"
+                        }
+                      },
+                      "required": [
+                        "count"
+                      ],
+                      "type": "object"
                     }
-                  },
-                  "required": [
-                    "actionId"
-                  ],
-                  "type": "object"
+                  ]
                 }
               }
             },
@@ -22758,6 +22995,9 @@
                   },
                   "batchSize": {
                     "type": "number"
+                  },
+                  "dryRun": {
+                    "type": "boolean"
                   }
                 },
                 "required": [
@@ -22773,16 +23013,32 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": false,
-                  "properties": {
-                    "actionId": {
-                      "type": "string"
+                  "anyOf": [
+                    {
+                      "additionalProperties": false,
+                      "properties": {
+                        "actionId": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "actionId"
+                      ],
+                      "type": "object"
+                    },
+                    {
+                      "additionalProperties": false,
+                      "properties": {
+                        "count": {
+                          "type": "number"
+                        }
+                      },
+                      "required": [
+                        "count"
+                      ],
+                      "type": "object"
                     }
-                  },
-                  "required": [
-                    "actionId"
-                  ],
-                  "type": "object"
+                  ]
                 }
               }
             },
@@ -22877,6 +23133,9 @@
                   "batchSize": {
                     "type": "number"
                   },
+                  "dryRun": {
+                    "type": "boolean"
+                  },
                   "includeInactive": {
                     "default": false,
                     "type": "boolean"
@@ -22905,20 +23164,37 @@
                   }
                 },
                 "schema": {
-                  "additionalProperties": false,
-                  "properties": {
-                    "actionIds": {
-                      "items": {
-                        "type": "string"
+                  "anyOf": [
+                    {
+                      "additionalProperties": false,
+                      "properties": {
+                        "actionIds": {
+                          "items": {
+                            "maxLength": 36,
+                            "type": "string"
+                          },
+                          "maxItems": 10000,
+                          "type": "array"
+                        }
                       },
-                      "maxItems": 10000,
-                      "type": "array"
+                      "required": [
+                        "actionIds"
+                      ],
+                      "type": "object"
+                    },
+                    {
+                      "additionalProperties": false,
+                      "properties": {
+                        "count": {
+                          "type": "number"
+                        }
+                      },
+                      "required": [
+                        "count"
+                      ],
+                      "type": "object"
                     }
-                  },
-                  "required": [
-                    "actionIds"
-                  ],
-                  "type": "object"
+                  ]
                 }
               }
             },
@@ -23011,6 +23287,9 @@
                   "batchSize": {
                     "type": "number"
                   },
+                  "dryRun": {
+                    "type": "boolean"
+                  },
                   "force": {
                     "description": "Unenrolls hosted agents too",
                     "type": "boolean"
@@ -23037,16 +23316,32 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": false,
-                  "properties": {
-                    "actionId": {
-                      "type": "string"
+                  "anyOf": [
+                    {
+                      "additionalProperties": false,
+                      "properties": {
+                        "actionId": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "actionId"
+                      ],
+                      "type": "object"
+                    },
+                    {
+                      "additionalProperties": false,
+                      "properties": {
+                        "count": {
+                          "type": "number"
+                        }
+                      },
+                      "required": [
+                        "count"
+                      ],
+                      "type": "object"
                     }
-                  },
-                  "required": [
-                    "actionId"
-                  ],
-                  "type": "object"
+                  ]
                 }
               }
             },
@@ -23129,6 +23424,9 @@
                   "batchSize": {
                     "type": "number"
                   },
+                  "dryRun": {
+                    "type": "boolean"
+                  },
                   "includeInactive": {
                     "default": false,
                     "type": "boolean"
@@ -23161,16 +23459,32 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": false,
-                  "properties": {
-                    "actionId": {
-                      "type": "string"
+                  "anyOf": [
+                    {
+                      "additionalProperties": false,
+                      "properties": {
+                        "actionId": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "actionId"
+                      ],
+                      "type": "object"
+                    },
+                    {
+                      "additionalProperties": false,
+                      "properties": {
+                        "count": {
+                          "type": "number"
+                        }
+                      },
+                      "required": [
+                        "count"
+                      ],
+                      "type": "object"
                     }
-                  },
-                  "required": [
-                    "actionId"
-                  ],
-                  "type": "object"
+                  ]
                 }
               }
             },
@@ -23253,6 +23567,9 @@
                   "batchSize": {
                     "type": "number"
                   },
+                  "dryRun": {
+                    "type": "boolean"
+                  },
                   "force": {
                     "type": "boolean"
                   },
@@ -23291,16 +23608,32 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": false,
-                  "properties": {
-                    "actionId": {
-                      "type": "string"
+                  "anyOf": [
+                    {
+                      "additionalProperties": false,
+                      "properties": {
+                        "actionId": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "actionId"
+                      ],
+                      "type": "object"
+                    },
+                    {
+                      "additionalProperties": false,
+                      "properties": {
+                        "count": {
+                          "type": "number"
+                        }
+                      },
+                      "required": [
+                        "count"
+                      ],
+                      "type": "object"
                     }
-                  },
-                  "required": [
-                    "actionId"
-                  ],
-                  "type": "object"
+                  ]
                 }
               }
             },
@@ -24271,6 +24604,9 @@
                                   ],
                                   "type": "string"
                                 },
+                                "reason": {
+                                  "type": "string"
+                                },
                                 "retry_error_msg": {
                                   "type": "string"
                                 },
@@ -24802,6 +25138,9 @@
                                     "UPG_WATCHING",
                                     "UPG_ROLLBACK"
                                   ],
+                                  "type": "string"
+                                },
+                                "reason": {
                                   "type": "string"
                                 },
                                 "retry_error_msg": {
@@ -25583,16 +25922,32 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": false,
-                  "properties": {
-                    "actionId": {
-                      "type": "string"
+                  "anyOf": [
+                    {
+                      "additionalProperties": false,
+                      "properties": {
+                        "actionId": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "actionId"
+                      ],
+                      "type": "object"
+                    },
+                    {
+                      "additionalProperties": false,
+                      "properties": {
+                        "count": {
+                          "type": "number"
+                        }
+                      },
+                      "required": [
+                        "count"
+                      ],
+                      "type": "object"
                     }
-                  },
-                  "required": [
-                    "actionId"
-                  ],
-                  "type": "object"
+                  ]
                 }
               }
             },
@@ -27248,46 +27603,7 @@
                   "properties": {
                     "items": {
                       "items": {
-                        "additionalProperties": false,
-                        "properties": {
-                          "active": {
-                            "description": "When false, the enrollment API key is revoked and cannot be used for enrolling Elastic Agents.",
-                            "type": "boolean"
-                          },
-                          "api_key": {
-                            "description": "The enrollment API key (token) used for enrolling Elastic Agents.",
-                            "type": "string"
-                          },
-                          "api_key_id": {
-                            "description": "The ID of the API key in the Security API.",
-                            "type": "string"
-                          },
-                          "created_at": {
-                            "type": "string"
-                          },
-                          "hidden": {
-                            "type": "boolean"
-                          },
-                          "id": {
-                            "type": "string"
-                          },
-                          "name": {
-                            "description": "The name of the enrollment API key.",
-                            "type": "string"
-                          },
-                          "policy_id": {
-                            "description": "The ID of the agent policy the Elastic Agent will be enrolled in.",
-                            "type": "string"
-                          }
-                        },
-                        "required": [
-                          "id",
-                          "api_key_id",
-                          "api_key",
-                          "active",
-                          "created_at"
-                        ],
-                        "type": "object"
+                        "$ref": "#/components/schemas/enrollment_api_key"
                       },
                       "maxItems": 10000,
                       "type": "array"
@@ -27295,46 +27611,7 @@
                     "list": {
                       "deprecated": true,
                       "items": {
-                        "additionalProperties": false,
-                        "properties": {
-                          "active": {
-                            "description": "When false, the enrollment API key is revoked and cannot be used for enrolling Elastic Agents.",
-                            "type": "boolean"
-                          },
-                          "api_key": {
-                            "description": "The enrollment API key (token) used for enrolling Elastic Agents.",
-                            "type": "string"
-                          },
-                          "api_key_id": {
-                            "description": "The ID of the API key in the Security API.",
-                            "type": "string"
-                          },
-                          "created_at": {
-                            "type": "string"
-                          },
-                          "hidden": {
-                            "type": "boolean"
-                          },
-                          "id": {
-                            "type": "string"
-                          },
-                          "name": {
-                            "description": "The name of the enrollment API key.",
-                            "type": "string"
-                          },
-                          "policy_id": {
-                            "description": "The ID of the agent policy the Elastic Agent will be enrolled in.",
-                            "type": "string"
-                          }
-                        },
-                        "required": [
-                          "id",
-                          "api_key_id",
-                          "api_key",
-                          "active",
-                          "created_at"
-                        ],
-                        "type": "object"
+                        "$ref": "#/components/schemas/enrollment_api_key"
                       },
                       "maxItems": 10000,
                       "type": "array"
@@ -27418,22 +27695,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "additionalProperties": false,
-                "properties": {
-                  "expiration": {
-                    "type": "string"
-                  },
-                  "name": {
-                    "type": "string"
-                  },
-                  "policy_id": {
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "policy_id"
-                ],
-                "type": "object"
+                "$ref": "#/components/schemas/new_enrollment_api_key"
               }
             }
           }
@@ -27452,46 +27714,7 @@
                       "type": "string"
                     },
                     "item": {
-                      "additionalProperties": false,
-                      "properties": {
-                        "active": {
-                          "description": "When false, the enrollment API key is revoked and cannot be used for enrolling Elastic Agents.",
-                          "type": "boolean"
-                        },
-                        "api_key": {
-                          "description": "The enrollment API key (token) used for enrolling Elastic Agents.",
-                          "type": "string"
-                        },
-                        "api_key_id": {
-                          "description": "The ID of the API key in the Security API.",
-                          "type": "string"
-                        },
-                        "created_at": {
-                          "type": "string"
-                        },
-                        "hidden": {
-                          "type": "boolean"
-                        },
-                        "id": {
-                          "type": "string"
-                        },
-                        "name": {
-                          "description": "The name of the enrollment API key.",
-                          "type": "string"
-                        },
-                        "policy_id": {
-                          "description": "The ID of the agent policy the Elastic Agent will be enrolled in.",
-                          "type": "string"
-                        }
-                      },
-                      "required": [
-                        "id",
-                        "api_key_id",
-                        "api_key",
-                        "active",
-                        "created_at"
-                      ],
-                      "type": "object"
+                      "$ref": "#/components/schemas/enrollment_api_key"
                     }
                   },
                   "required": [
@@ -27647,46 +27870,7 @@
                   "additionalProperties": false,
                   "properties": {
                     "item": {
-                      "additionalProperties": false,
-                      "properties": {
-                        "active": {
-                          "description": "When false, the enrollment API key is revoked and cannot be used for enrolling Elastic Agents.",
-                          "type": "boolean"
-                        },
-                        "api_key": {
-                          "description": "The enrollment API key (token) used for enrolling Elastic Agents.",
-                          "type": "string"
-                        },
-                        "api_key_id": {
-                          "description": "The ID of the API key in the Security API.",
-                          "type": "string"
-                        },
-                        "created_at": {
-                          "type": "string"
-                        },
-                        "hidden": {
-                          "type": "boolean"
-                        },
-                        "id": {
-                          "type": "string"
-                        },
-                        "name": {
-                          "description": "The name of the enrollment API key.",
-                          "type": "string"
-                        },
-                        "policy_id": {
-                          "description": "The ID of the agent policy the Elastic Agent will be enrolled in.",
-                          "type": "string"
-                        }
-                      },
-                      "required": [
-                        "id",
-                        "api_key_id",
-                        "api_key",
-                        "active",
-                        "created_at"
-                      ],
-                      "type": "object"
+                      "$ref": "#/components/schemas/enrollment_api_key"
                     }
                   },
                   "required": [
@@ -28479,7 +28663,7 @@
                             "items": {
                               "type": "string"
                             },
-                            "maxItems": 10,
+                            "maxItems": 100,
                             "type": "array"
                           },
                           "conditions": {
@@ -28540,7 +28724,7 @@
                                   ],
                                   "type": "object"
                                 },
-                                "maxItems": 10,
+                                "maxItems": 100,
                                 "type": "array"
                               },
                               "fields": {
@@ -28556,7 +28740,7 @@
                                   ],
                                   "type": "object"
                                 },
-                                "maxItems": 10,
+                                "maxItems": 100,
                                 "type": "array"
                               }
                             },
@@ -28596,7 +28780,7 @@
                               ],
                               "type": "object"
                             },
-                            "maxItems": 10,
+                            "maxItems": 100,
                             "type": "array"
                           },
                           "id": {
@@ -28947,7 +29131,7 @@
                               "additionalProperties": {},
                               "type": "object"
                             },
-                            "maxItems": 100,
+                            "maxItems": 1000,
                             "type": "array"
                           },
                           "readme": {
@@ -30436,7 +30620,7 @@
                               ],
                               "type": "object"
                             },
-                            "maxItems": 10,
+                            "maxItems": 100,
                             "type": "array"
                           },
                           "name": {
@@ -31057,14 +31241,14 @@
                                 "items": {
                                   "type": "string"
                                 },
-                                "maxItems": 100,
+                                "maxItems": 1000,
                                 "type": "array"
                               },
                               "asset_types": {
                                 "items": {
                                   "type": "string"
                                 },
-                                "maxItems": 10,
+                                "maxItems": 100,
                                 "type": "array"
                               },
                               "text": {
@@ -31087,7 +31271,7 @@
                           "items": {
                             "type": "string"
                           },
-                          "maxItems": 10,
+                          "maxItems": 100,
                           "type": "array"
                         },
                         "conditions": {
@@ -31148,7 +31332,7 @@
                                 ],
                                 "type": "object"
                               },
-                              "maxItems": 10,
+                              "maxItems": 100,
                               "type": "array"
                             },
                             "fields": {
@@ -31164,7 +31348,7 @@
                                 ],
                                 "type": "object"
                               },
-                              "maxItems": 10,
+                              "maxItems": 100,
                               "type": "array"
                             }
                           },
@@ -31208,7 +31392,7 @@
                             ],
                             "type": "object"
                           },
-                          "maxItems": 10,
+                          "maxItems": 100,
                           "type": "array"
                         },
                         "installationInfo": {
@@ -31565,7 +31749,7 @@
                             "additionalProperties": {},
                             "type": "object"
                           },
-                          "maxItems": 100,
+                          "maxItems": 1000,
                           "type": "array"
                         },
                         "readme": {
@@ -31607,7 +31791,7 @@
                             ],
                             "type": "object"
                           },
-                          "maxItems": 10,
+                          "maxItems": 100,
                           "type": "array"
                         },
                         "signature_path": {
@@ -32051,14 +32235,14 @@
                                 "items": {
                                   "type": "string"
                                 },
-                                "maxItems": 100,
+                                "maxItems": 1000,
                                 "type": "array"
                               },
                               "asset_types": {
                                 "items": {
                                   "type": "string"
                                 },
-                                "maxItems": 10,
+                                "maxItems": 100,
                                 "type": "array"
                               },
                               "text": {
@@ -32081,7 +32265,7 @@
                           "items": {
                             "type": "string"
                           },
-                          "maxItems": 10,
+                          "maxItems": 100,
                           "type": "array"
                         },
                         "conditions": {
@@ -32142,7 +32326,7 @@
                                 ],
                                 "type": "object"
                               },
-                              "maxItems": 10,
+                              "maxItems": 100,
                               "type": "array"
                             },
                             "fields": {
@@ -32158,7 +32342,7 @@
                                 ],
                                 "type": "object"
                               },
-                              "maxItems": 10,
+                              "maxItems": 100,
                               "type": "array"
                             }
                           },
@@ -32202,7 +32386,7 @@
                             ],
                             "type": "object"
                           },
-                          "maxItems": 10,
+                          "maxItems": 100,
                           "type": "array"
                         },
                         "installationInfo": {
@@ -32559,7 +32743,7 @@
                             "additionalProperties": {},
                             "type": "object"
                           },
-                          "maxItems": 100,
+                          "maxItems": 1000,
                           "type": "array"
                         },
                         "readme": {
@@ -32601,7 +32785,7 @@
                             ],
                             "type": "object"
                           },
-                          "maxItems": 10,
+                          "maxItems": 100,
                           "type": "array"
                         },
                         "signature_path": {
@@ -42970,7 +43154,7 @@
                                         ],
                                         "type": "object"
                                       },
-                                      "maxItems": 100,
+                                      "maxItems": 1000,
                                       "type": "array"
                                     },
                                     "type": {
@@ -43028,13 +43212,13 @@
                                             "additionalProperties": {
                                               "anyOf": [
                                                 {
-                                                  "type": "boolean"
-                                                },
-                                                {
                                                   "type": "string"
                                                 },
                                                 {
                                                   "type": "number"
+                                                },
+                                                {
+                                                  "type": "boolean"
                                                 },
                                                 {
                                                   "items": {
@@ -43082,13 +43266,13 @@
                                       "additionalProperties": {
                                         "anyOf": [
                                           {
-                                            "type": "boolean"
-                                          },
-                                          {
                                             "type": "string"
                                           },
                                           {
                                             "type": "number"
+                                          },
+                                          {
+                                            "type": "boolean"
                                           },
                                           {
                                             "items": {
@@ -43255,7 +43439,7 @@
                               ],
                               "type": "object"
                             },
-                            "maxItems": 100,
+                            "maxItems": 1000,
                             "type": "array"
                           },
                           "spaceIds": {
@@ -43309,13 +43493,13 @@
                                 "additionalProperties": {
                                   "anyOf": [
                                     {
-                                      "type": "boolean"
-                                    },
-                                    {
                                       "type": "string"
                                     },
                                     {
                                       "type": "number"
+                                    },
+                                    {
+                                      "type": "boolean"
                                     },
                                     {
                                       "items": {
@@ -43654,7 +43838,7 @@
                                 ],
                                 "type": "object"
                               },
-                              "maxItems": 100,
+                              "maxItems": 1000,
                               "type": "array"
                             },
                             "type": {
@@ -43883,13 +44067,13 @@
                                     "additionalProperties": {
                                       "anyOf": [
                                         {
-                                          "type": "boolean"
-                                        },
-                                        {
                                           "type": "string"
                                         },
                                         {
                                           "type": "number"
+                                        },
+                                        {
+                                          "type": "boolean"
                                         },
                                         {
                                           "items": {
@@ -43937,13 +44121,13 @@
                               "additionalProperties": {
                                 "anyOf": [
                                   {
-                                    "type": "boolean"
-                                  },
-                                  {
                                     "type": "string"
                                   },
                                   {
                                     "type": "number"
+                                  },
+                                  {
+                                    "type": "boolean"
                                   },
                                   {
                                     "items": {
@@ -44085,13 +44269,13 @@
                         "additionalProperties": {
                           "anyOf": [
                             {
-                              "type": "boolean"
-                            },
-                            {
                               "type": "string"
                             },
                             {
                               "type": "number"
+                            },
+                            {
+                              "type": "boolean"
                             },
                             {
                               "items": {
@@ -44362,7 +44546,7 @@
                                       ],
                                       "type": "object"
                                     },
-                                    "maxItems": 100,
+                                    "maxItems": 1000,
                                     "type": "array"
                                   },
                                   "type": {
@@ -44420,13 +44604,13 @@
                                           "additionalProperties": {
                                             "anyOf": [
                                               {
-                                                "type": "boolean"
-                                              },
-                                              {
                                                 "type": "string"
                                               },
                                               {
                                                 "type": "number"
+                                              },
+                                              {
+                                                "type": "boolean"
                                               },
                                               {
                                                 "items": {
@@ -44474,13 +44658,13 @@
                                     "additionalProperties": {
                                       "anyOf": [
                                         {
-                                          "type": "boolean"
-                                        },
-                                        {
                                           "type": "string"
                                         },
                                         {
                                           "type": "number"
+                                        },
+                                        {
+                                          "type": "boolean"
                                         },
                                         {
                                           "items": {
@@ -44647,7 +44831,7 @@
                             ],
                             "type": "object"
                           },
-                          "maxItems": 100,
+                          "maxItems": 1000,
                           "type": "array"
                         },
                         "spaceIds": {
@@ -44701,13 +44885,13 @@
                               "additionalProperties": {
                                 "anyOf": [
                                   {
-                                    "type": "boolean"
-                                  },
-                                  {
                                     "type": "string"
                                   },
                                   {
                                     "type": "number"
+                                  },
+                                  {
+                                    "type": "boolean"
                                   },
                                   {
                                     "items": {
@@ -45120,7 +45304,7 @@
                                         ],
                                         "type": "object"
                                       },
-                                      "maxItems": 100,
+                                      "maxItems": 1000,
                                       "type": "array"
                                     },
                                     "type": {
@@ -45178,13 +45362,13 @@
                                             "additionalProperties": {
                                               "anyOf": [
                                                 {
-                                                  "type": "boolean"
-                                                },
-                                                {
                                                   "type": "string"
                                                 },
                                                 {
                                                   "type": "number"
+                                                },
+                                                {
+                                                  "type": "boolean"
                                                 },
                                                 {
                                                   "items": {
@@ -45232,13 +45416,13 @@
                                       "additionalProperties": {
                                         "anyOf": [
                                           {
-                                            "type": "boolean"
-                                          },
-                                          {
                                             "type": "string"
                                           },
                                           {
                                             "type": "number"
+                                          },
+                                          {
+                                            "type": "boolean"
                                           },
                                           {
                                             "items": {
@@ -45405,7 +45589,7 @@
                               ],
                               "type": "object"
                             },
-                            "maxItems": 100,
+                            "maxItems": 1000,
                             "type": "array"
                           },
                           "spaceIds": {
@@ -45459,13 +45643,13 @@
                                 "additionalProperties": {
                                   "anyOf": [
                                     {
-                                      "type": "boolean"
-                                    },
-                                    {
                                       "type": "string"
                                     },
                                     {
                                       "type": "number"
+                                    },
+                                    {
+                                      "type": "boolean"
                                     },
                                     {
                                       "items": {
@@ -46347,7 +46531,7 @@
                                               ],
                                               "type": "object"
                                             },
-                                            "maxItems": 100,
+                                            "maxItems": 1000,
                                             "type": "array"
                                           },
                                           "type": {
@@ -46405,13 +46589,13 @@
                                                   "additionalProperties": {
                                                     "anyOf": [
                                                       {
-                                                        "type": "boolean"
-                                                      },
-                                                      {
                                                         "type": "string"
                                                       },
                                                       {
                                                         "type": "number"
+                                                      },
+                                                      {
+                                                        "type": "boolean"
                                                       },
                                                       {
                                                         "items": {
@@ -46459,13 +46643,13 @@
                                             "additionalProperties": {
                                               "anyOf": [
                                                 {
-                                                  "type": "boolean"
-                                                },
-                                                {
                                                   "type": "string"
                                                 },
                                                 {
                                                   "type": "number"
+                                                },
+                                                {
+                                                  "type": "boolean"
                                                 },
                                                 {
                                                   "items": {
@@ -46632,7 +46816,7 @@
                                     ],
                                     "type": "object"
                                   },
-                                  "maxItems": 100,
+                                  "maxItems": 1000,
                                   "type": "array"
                                 },
                                 "spaceIds": {
@@ -46686,13 +46870,13 @@
                                       "additionalProperties": {
                                         "anyOf": [
                                           {
-                                            "type": "boolean"
-                                          },
-                                          {
                                             "type": "string"
                                           },
                                           {
                                             "type": "number"
+                                          },
+                                          {
+                                            "type": "boolean"
                                           },
                                           {
                                             "items": {
@@ -46980,7 +47164,7 @@
                                           ],
                                           "type": "object"
                                         },
-                                        "maxItems": 100,
+                                        "maxItems": 1000,
                                         "type": "array"
                                       },
                                       "type": {
@@ -47143,7 +47327,7 @@
                                     ],
                                     "type": "object"
                                   },
-                                  "maxItems": 100,
+                                  "maxItems": 1000,
                                   "type": "array"
                                 },
                                 "supports_agentless": {
@@ -47595,7 +47779,7 @@
                                       ],
                                       "type": "object"
                                     },
-                                    "maxItems": 100,
+                                    "maxItems": 1000,
                                     "type": "array"
                                   },
                                   "type": {
@@ -47653,13 +47837,13 @@
                                           "additionalProperties": {
                                             "anyOf": [
                                               {
-                                                "type": "boolean"
-                                              },
-                                              {
                                                 "type": "string"
                                               },
                                               {
                                                 "type": "number"
+                                              },
+                                              {
+                                                "type": "boolean"
                                               },
                                               {
                                                 "items": {
@@ -47707,13 +47891,13 @@
                                     "additionalProperties": {
                                       "anyOf": [
                                         {
-                                          "type": "boolean"
-                                        },
-                                        {
                                           "type": "string"
                                         },
                                         {
                                           "type": "number"
+                                        },
+                                        {
+                                          "type": "boolean"
                                         },
                                         {
                                           "items": {
@@ -47880,7 +48064,7 @@
                             ],
                             "type": "object"
                           },
-                          "maxItems": 100,
+                          "maxItems": 1000,
                           "type": "array"
                         },
                         "spaceIds": {
@@ -47934,13 +48118,13 @@
                               "additionalProperties": {
                                 "anyOf": [
                                   {
-                                    "type": "boolean"
-                                  },
-                                  {
                                     "type": "string"
                                   },
                                   {
                                     "type": "number"
+                                  },
+                                  {
+                                    "type": "boolean"
                                   },
                                   {
                                     "items": {
@@ -48287,7 +48471,7 @@
                                 ],
                                 "type": "object"
                               },
-                              "maxItems": 100,
+                              "maxItems": 1000,
                               "type": "array"
                             },
                             "type": {
@@ -48320,7 +48504,7 @@
                           ],
                           "type": "object"
                         },
-                        "maxItems": 100,
+                        "maxItems": 1000,
                         "type": "array"
                       },
                       "is_managed": {
@@ -48513,13 +48697,13 @@
                                     "additionalProperties": {
                                       "anyOf": [
                                         {
-                                          "type": "boolean"
-                                        },
-                                        {
                                           "type": "string"
                                         },
                                         {
                                           "type": "number"
+                                        },
+                                        {
+                                          "type": "boolean"
                                         },
                                         {
                                           "items": {
@@ -48567,13 +48751,13 @@
                               "additionalProperties": {
                                 "anyOf": [
                                   {
-                                    "type": "boolean"
-                                  },
-                                  {
                                     "type": "string"
                                   },
                                   {
                                     "type": "number"
+                                  },
+                                  {
+                                    "type": "boolean"
                                   },
                                   {
                                     "items": {
@@ -48715,13 +48899,13 @@
                         "additionalProperties": {
                           "anyOf": [
                             {
-                              "type": "boolean"
-                            },
-                            {
                               "type": "string"
                             },
                             {
                               "type": "number"
+                            },
+                            {
+                              "type": "boolean"
                             },
                             {
                               "items": {
@@ -48991,7 +49175,7 @@
                                       ],
                                       "type": "object"
                                     },
-                                    "maxItems": 100,
+                                    "maxItems": 1000,
                                     "type": "array"
                                   },
                                   "type": {
@@ -49049,13 +49233,13 @@
                                           "additionalProperties": {
                                             "anyOf": [
                                               {
-                                                "type": "boolean"
-                                              },
-                                              {
                                                 "type": "string"
                                               },
                                               {
                                                 "type": "number"
+                                              },
+                                              {
+                                                "type": "boolean"
                                               },
                                               {
                                                 "items": {
@@ -49103,13 +49287,13 @@
                                     "additionalProperties": {
                                       "anyOf": [
                                         {
-                                          "type": "boolean"
-                                        },
-                                        {
                                           "type": "string"
                                         },
                                         {
                                           "type": "number"
+                                        },
+                                        {
+                                          "type": "boolean"
                                         },
                                         {
                                           "items": {
@@ -49276,7 +49460,7 @@
                             ],
                             "type": "object"
                           },
-                          "maxItems": 100,
+                          "maxItems": 1000,
                           "type": "array"
                         },
                         "spaceIds": {
@@ -49330,13 +49514,13 @@
                               "additionalProperties": {
                                 "anyOf": [
                                   {
-                                    "type": "boolean"
-                                  },
-                                  {
                                     "type": "string"
                                   },
                                   {
                                     "type": "number"
+                                  },
+                                  {
+                                    "type": "boolean"
                                   },
                                   {
                                     "items": {
@@ -53279,6 +53463,7 @@
                           ],
                           "type": "object"
                         },
+                        "maxItems": 100,
                         "type": "array"
                       }
                     ]
@@ -53322,6 +53507,7 @@
                         "items": {
                           "type": "string"
                         },
+                        "maxItems": 100,
                         "type": "array"
                       }
                     ],

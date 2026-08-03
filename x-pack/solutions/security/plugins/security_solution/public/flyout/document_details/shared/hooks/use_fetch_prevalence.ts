@@ -10,6 +10,7 @@ import type { IEsSearchRequest } from '@kbn/search-types';
 import { useQuery } from '@kbn/react-query';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { useSelector } from 'react-redux';
+import { EXCLUDE_COLD_AND_FROZEN_TIERS_IN_PREVALENCE } from '../../../../../common/constants';
 import { createFetchData } from '../utils/fetch_data';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
@@ -100,8 +101,13 @@ export const useFetchPrevalence = ({
   const {
     services: {
       data: { search: searchService },
+      uiSettings,
     },
   } = useKibana();
+
+  const excludeColdAndFrozenTiers = uiSettings.get<boolean>(
+    EXCLUDE_COLD_AND_FROZEN_TIERS_IN_PREVALENCE
+  );
 
   // retrieves detections and non-detections indices (for example, the alert security index from the current space and 'logs-*' indices)
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
@@ -116,7 +122,8 @@ export const useFetchPrevalence = ({
     highlightedFieldsFilters,
     from,
     to,
-    securityDefaultPatterns
+    securityDefaultPatterns,
+    excludeColdAndFrozenTiers
   );
 
   const { data, isLoading, isError } = useQuery(
@@ -139,7 +146,8 @@ const buildSearchRequest = (
   highlightedFieldsFilters: Record<string, QueryDslQueryContainer>,
   from: string,
   to: string,
-  selectedPatterns: string[]
+  selectedPatterns: string[],
+  excludeColdAndFrozenTiers: boolean
 ): IEsSearchRequest => {
   const query = buildEsQuery(
     undefined,
@@ -149,6 +157,7 @@ const buildSearchRequest = (
         query: {
           bool: {
             filter: [
+              ...getExcludeColdAndFrozenTierFilter(excludeColdAndFrozenTiers),
               {
                 range: {
                   '@timestamp': {
@@ -166,6 +175,24 @@ const buildSearchRequest = (
   );
 
   return buildAggregationSearchRequest(query, highlightedFieldsFilters, selectedPatterns);
+};
+
+const getExcludeColdAndFrozenTierFilter = (excludeColdAndFrozenTiers: boolean) => {
+  const filters = [];
+
+  if (excludeColdAndFrozenTiers) {
+    filters.push({
+      bool: {
+        must_not: {
+          terms: {
+            _tier: ['data_frozen', 'data_cold'],
+          },
+        },
+      },
+    });
+  }
+
+  return filters;
 };
 
 const buildAggregationSearchRequest = (

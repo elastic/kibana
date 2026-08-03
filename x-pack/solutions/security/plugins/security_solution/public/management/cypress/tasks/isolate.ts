@@ -12,6 +12,7 @@ import { openAlertDetailsView } from '../screens/alerts';
 import type { ActionDetails } from '../../../../common/endpoint/types';
 import { loadPage } from './common';
 import { waitForActionToSucceed } from './response_actions';
+import { goToAlertsTab } from './alerts';
 
 const API_ENDPOINT_ACTION_PATH = '/api/endpoint/action/*';
 export const interceptActionRequests = (
@@ -73,6 +74,7 @@ export const waitForReleaseOption = (alertId: string): void => {
 export const visitRuleAlerts = (ruleName: string) => {
   loadPage('/app/security/rules');
   cy.contains(ruleName).click();
+  goToAlertsTab();
 };
 
 export const checkFlyoutEndpointIsolation = (): void => {

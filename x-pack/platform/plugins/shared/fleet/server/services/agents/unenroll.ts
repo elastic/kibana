@@ -13,7 +13,7 @@ import type { Agent } from '../../types';
 import { FleetError, HostedAgentPolicyRestrictionRelatedError } from '../../errors';
 import { SO_SEARCH_LIMIT } from '../../constants';
 import { getCurrentNamespace } from '../spaces/get_current_namespace';
-import { agentsKueryNamespaceFilter } from '../spaces/agent_namespaces';
+import { agentsKueryNamespaceFilter, buildFilterWithNamespace } from '../spaces/agent_namespaces';
 
 import { createAgentAction } from './actions';
 import type { GetAgentsOptions } from './crud';
@@ -89,11 +89,16 @@ export async function unenrollAgents(
     revoke?: boolean;
     batchSize?: number;
     showInactive?: boolean;
+    dryRun?: boolean;
   }
-): Promise<{ actionId: string }> {
+): Promise<{ actionId: string } | { count: number }> {
   const spaceId = getCurrentNamespace(soClient);
 
   if ('agentIds' in options) {
+    if (options.dryRun) {
+      const agents = await getAgents(esClient, soClient, options);
+      return { count: agents.length };
+    }
     const givenAgents = await getAgents(esClient, soClient, options);
     return await unenrollBatch(soClient, esClient, givenAgents, {
       ...options,
@@ -103,7 +108,7 @@ export async function unenrollAgents(
 
   const batchSize = options.batchSize ?? SO_SEARCH_LIMIT;
   const namespaceFilter = await agentsKueryNamespaceFilter(spaceId);
-  const kuery = namespaceFilter ? `${namespaceFilter} AND ${options.kuery}` : options.kuery;
+  const kuery = buildFilterWithNamespace(namespaceFilter, options.kuery);
   const res = await getAgentsByKuery(esClient, soClient, {
     kuery,
     showAgentless: options.showAgentless,
@@ -111,6 +116,9 @@ export async function unenrollAgents(
     page: 1,
     perPage: batchSize,
   });
+  if (options.dryRun) {
+    return { count: res.total };
+  }
   if (res.total <= batchSize) {
     return await unenrollBatch(soClient, esClient, res.agents, {
       ...options,

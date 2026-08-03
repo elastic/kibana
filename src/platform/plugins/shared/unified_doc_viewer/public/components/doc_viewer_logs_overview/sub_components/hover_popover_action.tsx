@@ -107,6 +107,10 @@ export const HoverActionPopover = ({
         panelPaddingSize="s"
         panelStyle={{ minWidth: '24px' }}
         display={display}
+        aria-label={i18n.translate(
+          'unifiedDocViewer.observability.traces.details.hoverPopover.ariaLabel',
+          { defaultMessage: 'Field value details' }
+        )}
       >
         {(title as string) && (
           <EuiPopoverTitle

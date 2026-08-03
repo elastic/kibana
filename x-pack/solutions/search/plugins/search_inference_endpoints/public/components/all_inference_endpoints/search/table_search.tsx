@@ -7,6 +7,7 @@
 
 import { EuiFieldSearch } from '@elastic/eui';
 import React, { useCallback } from 'react';
+import { i18n } from '@kbn/i18n';
 
 interface TableSearchComponentProps {
   searchKey: string;
@@ -24,8 +25,14 @@ export const TableSearch: React.FC<TableSearchComponentProps> = ({ searchKey, se
 
   return (
     <EuiFieldSearch
-      aria-label="Search endpoints"
-      placeholder="Search"
+      aria-label={i18n.translate(
+        'xpack.searchInferenceEndpoints.tableSearch.euiFieldSearch.searchEndpointsLabel',
+        { defaultMessage: 'Inference endpoints' }
+      )}
+      placeholder={i18n.translate(
+        'xpack.searchInferenceEndpoints.tableSearch.euiFieldSearch.searchEndpointsPlaceHolder',
+        { defaultMessage: 'Search' }
+      )}
       onChange={(e) => setSearchKey(e.target.value)}
       onSearch={onSearch}
       value={searchKey}

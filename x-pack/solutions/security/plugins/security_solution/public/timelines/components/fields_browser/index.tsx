@@ -63,6 +63,7 @@ export const useFieldBrowserOptions: UseFieldBrowserOptions = ({
   const { indexFieldsSearch } = useDataViewOld();
   const {
     dataViewFieldEditor,
+    notifications,
     data: { dataViews },
   } = useKibana().services;
   const missingPatterns = useSelector((state: State) => {
@@ -83,9 +84,17 @@ export const useFieldBrowserOptions: UseFieldBrowserOptions = ({
         if (experimentalDataView) setDataView(experimentalDataView);
         return;
       }
-      const aDatView = await dataViews.get(dataViewId);
-      if (ignore) return;
-      setDataView(aDatView);
+      // We wrap dataViews.get within a try catch because we've seen errors happening with conflicting ids in the saved object api
+      try {
+        const aDatView = await dataViews.get(dataViewId);
+        if (ignore) return;
+        setDataView(aDatView);
+      } catch (error) {
+        notifications.toasts.addDanger({
+          title: 'Error retrieving data view',
+          text: `Error: ${error instanceof Error ? error.message : 'unknown'}`,
+        });
+      }
     };
     if (selectedDataViewId != null && !missingPatterns.length) {
       fetchAndSetDataView(selectedDataViewId);
@@ -98,6 +107,7 @@ export const useFieldBrowserOptions: UseFieldBrowserOptions = ({
     selectedDataViewId,
     missingPatterns,
     dataViews,
+    notifications,
     newDataViewPickerEnabled,
     experimentalDataView,
   ]);

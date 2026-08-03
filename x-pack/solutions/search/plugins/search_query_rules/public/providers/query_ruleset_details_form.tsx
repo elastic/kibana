@@ -24,7 +24,7 @@ export const QueryRulesetDetailsForm: React.FC<
       mode: 'create',
       rulesetId: '',
       ruleId: '',
-      criteria: [],
+      criteria: [{ type: 'exact', metadata: '', values: [] }],
       type: 'pinned',
       actions: { docs: [], ids: [] },
     },

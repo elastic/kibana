@@ -25,7 +25,7 @@ describe('updateIndices', () => {
     jest.clearAllMocks();
   });
 
-  it(`should update indices`, async () => {
+  it(`should update indices and expand patterns`, async () => {
     const indexName = 'test_index_name-default';
     esClient.indices.get.mockResolvedValueOnce({ [indexName]: {} });
 
@@ -34,6 +34,7 @@ describe('updateIndices', () => {
       logger,
       name,
       totalFieldsLimit,
+      expandIndexPattern: true,
     });
 
     expect(esClient.indices.get).toHaveBeenCalledWith({
@@ -64,6 +65,7 @@ describe('updateIndices', () => {
       logger,
       name,
       totalFieldsLimit,
+      expandIndexPattern: true,
     });
 
     expect(esClient.indices.putSettings).toHaveBeenCalledTimes(2);
@@ -84,6 +86,74 @@ describe('updateIndices', () => {
     expect(esClient.indices.putSettings).not.toHaveBeenCalled();
     expect(esClient.indices.simulateIndexTemplate).not.toHaveBeenCalled();
     expect(esClient.indices.putMapping).not.toHaveBeenCalled();
+  });
+
+  describe('expand Index pattern', () => {
+    it(`should expand index pattern when updating indices`, async () => {
+      const indexName1 = 'test_index_name-1';
+      const indexName2 = 'test_index_name-2';
+      esClient.indices.get.mockResolvedValueOnce({ [indexName1]: {}, [indexName2]: {} });
+
+      await updateIndices({
+        esClient,
+        logger,
+        name: 'test_index_name-*',
+        totalFieldsLimit,
+        expandIndexPattern: true,
+      });
+
+      expect(esClient.indices.get).toHaveBeenCalledWith({
+        index: 'test_index_name-*',
+        expand_wildcards: 'all',
+      });
+
+      expect(esClient.indices.putSettings).toHaveBeenCalledTimes(2);
+
+      expect(esClient.indices.putSettings).toHaveBeenNthCalledWith(2, {
+        index: indexName2,
+        settings: { 'index.mapping.total_fields.limit': 1000 },
+      });
+
+      expect(esClient.indices.putMapping).toHaveBeenCalledTimes(2);
+
+      expect(esClient.indices.putMapping).toHaveBeenNthCalledWith(2, {
+        index: indexName2,
+        write_index_only: undefined,
+      });
+    });
+    it('should not update indices when index pattern does not expand to any existing indices', async () => {
+      const indexName1 = 'test_index_name-1';
+      const indexName2 = 'test_index_name-2';
+      esClient.indices.get.mockResolvedValueOnce({ [indexName1]: {}, [indexName2]: {} });
+
+      await updateIndices({
+        esClient,
+        logger,
+        name: 'test_index_name-*',
+        totalFieldsLimit,
+        expandIndexPattern: false,
+      });
+
+      expect(esClient.indices.get).toHaveBeenCalledWith({
+        index: 'test_index_name-*',
+        expand_wildcards: 'all',
+      });
+
+      expect(esClient.indices.putSettings).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({
+          index: 'test_index_name-*',
+          settings: { 'index.mapping.total_fields.limit': 1000 },
+        })
+      );
+      expect(esClient.indices.putMapping).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({
+          index: 'test_index_name-*',
+          write_index_only: undefined,
+        })
+      );
+    });
   });
 });
 

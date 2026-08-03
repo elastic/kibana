@@ -66,6 +66,7 @@ export class CpsUsageOverridesBadge
         anchorPosition="downCenter"
         panelStyle={{ minWidth: 250 }}
         panelPaddingSize="none"
+        aria-label={strings.badgeLabel}
       >
         <div css={{ padding: euiTheme.size.m }}>
           <EuiFlexGroup alignItems="center">

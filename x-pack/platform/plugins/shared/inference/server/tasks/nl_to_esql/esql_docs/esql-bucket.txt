@@ -1,6 +1,6 @@
 # BUCKET
 
-The `BUCKET` function creates groups of values—buckets—out of a datetime or numeric input. The size of the buckets can either be provided directly or chosen based on a recommended count and values range.
+The BUCKET function creates groups of values, known as buckets, from a datetime or numeric input. Buckets can be sized directly or determined based on a recommended count and value range. This function is useful for generating histograms and time-based aggregations.
 
 ## Syntax
 
@@ -8,139 +8,92 @@ The `BUCKET` function creates groups of values—buckets—out of a datetime or 
 
 ### Parameters
 
-#### `field`
+#### field
 
-A numeric or date expression from which to derive buckets.
+Numeric or date expression from which to derive buckets.
 
-#### `buckets`
+#### buckets
 
-The target number of buckets or the desired bucket size if the `from` and `to` parameters are omitted.
+Target number of buckets, or desired bucket size if `from` and `to` parameters are omitted.
 
-#### `from` (optional)
+#### from
 
-The start of the range. Can be a number, a date, or a date expressed as a string.
+Start of the range. Can be a number, a date, or a date expressed as a string.
 
-#### `to` (optional)
+#### to
 
-The end of the range. Can be a number, a date, or a date expressed as a string.
-
-## Important notes:
-
-BUCKET can operate in two modes:
-- one where the bucket size is computed based on a bucket count recommendation and a range,
-- and another where the bucket size is provided directly.
-
-When the bucket size is provided directly for time interval, it is expressed as a **timespan literal**, e.g.
-- GOOD: `BUCKET(@timestamp, 1 month)`
-- BAD: `BUCKET(@timestamp, "month")`
+End of the range. Can be a number, a date, or a date expressed as a string.
 
 ## Examples
 
-Using a target number of buckets, a start of a range, and an end of a range
-
+Groups employee hire dates within 1985 into 20 monthly buckets and sorts the hire dates within each bucket.
 ```esql
 FROM employees
 | WHERE hire_date >= "1985-01-01T00:00:00Z" AND hire_date < "1986-01-01T00:00:00Z"
 | STATS hire_date = MV_SORT(VALUES(hire_date)) BY month = BUCKET(hire_date, 20, "1985-01-01T00:00:00Z", "1986-01-01T00:00:00Z")
-| SORT hire_date
 ```
-
-This example creates buckets for hire dates in 1985, aiming for 20 buckets. The actual number of buckets may vary depending on the range.
-
-Combine BUCKET with an aggregation to create a histogram
-
+Counts the number of employees hired per month in 1985 by creating 20 monthly buckets and sorting them.
 ```esql
 FROM employees
 | WHERE hire_date >= "1985-01-01T00:00:00Z" AND hire_date < "1986-01-01T00:00:00Z"
 | STATS hires_per_month = COUNT(*) BY month = BUCKET(hire_date, 20, "1985-01-01T00:00:00Z", "1986-01-01T00:00:00Z")
 | SORT month
 ```
-
-This example calculates the number of hires per month in 1985.
-
-Asking for more buckets can result in a smaller range
-
+Counts the number of employees hired per week in 1985 by creating 100 weekly buckets.
 ```esql
 FROM employees
 | WHERE hire_date >= "1985-01-01T00:00:00Z" AND hire_date < "1986-01-01T00:00:00Z"
 | STATS hires_per_week = COUNT(*) BY week = BUCKET(hire_date, 100, "1985-01-01T00:00:00Z", "1986-01-01T00:00:00Z")
-| SORT week
 ```
-
-This example creates weekly buckets for hire dates in 1985, aiming for 100 buckets.
-
-Providing the bucket size directly
-
+Counts the number of employees hired per week in 1985 by specifying a bucket size of one week and sorting the results.
 ```esql
 FROM employees
 | WHERE hire_date >= "1985-01-01T00:00:00Z" AND hire_date < "1986-01-01T00:00:00Z"
 | STATS hires_per_week = COUNT(*) BY week = BUCKET(hire_date, 1 week)
 | SORT week
 ```
-
-This example creates weekly buckets for hire dates in 1985 by directly specifying the bucket size.
-
-Creating a salary histogram
-
+Creates a histogram of employee salaries by dividing the salary range 25324 to 74999 into 20 buckets and counting employees in each bucket.
 ```esql
 FROM employees
-| STATS COUNT(*) BY bs = BUCKET(salary, 20, 25324, 74999)
+| STATS COUNT(*) by bs = BUCKET(salary, 20, 25324, 74999)
 | SORT bs
 ```
-
-This example creates a histogram of salaries, dividing the range into 20 buckets.
-
-Omitting the range when the bucket size is known
-
+Counts the number of employees in each salary bucket of size 5000 for hires in 1985 and sorts the buckets.
 ```esql
 FROM employees
 | WHERE hire_date >= "1985-01-01T00:00:00Z" AND hire_date < "1986-01-01T00:00:00Z"
-| STATS c = COUNT(*) BY b = BUCKET(salary, 5000.)
+| STATS c = COUNT(1) BY b = BUCKET(salary, 5000.)
 | SORT b
 ```
-
-This example creates salary buckets with a fixed size of 5000.
-
-Create hourly buckets for the last 24 hours
-
+Counts the number of events per hour for the last 24 hours by creating 25 hourly buckets.
 ```esql
 FROM sample_data
-| WHERE @timestamp >= NOW() - 1 day AND @timestamp < NOW()
+| WHERE @timestamp >= NOW() - 1 day and @timestamp < NOW()
 | STATS COUNT(*) BY bucket = BUCKET(@timestamp, 25, NOW() - 1 day, NOW())
 ```
-
-This example creates hourly buckets for the last 24 hours.
-
-Create monthly buckets for the year 1985
-
+Calculates the average salary of employees hired in 1985 by grouping them into 20 monthly buckets.
 ```esql
 FROM employees
 | WHERE hire_date >= "1985-01-01T00:00:00Z" AND hire_date < "1986-01-01T00:00:00Z"
 | STATS AVG(salary) BY bucket = BUCKET(hire_date, 20, "1985-01-01T00:00:00Z", "1986-01-01T00:00:00Z")
-| SORT bucket
 ```
-
-This example calculates the average salary for each month in 1985.
-
-Using BUCKET in both aggregating and grouping parts of STATS
-
+Performs advanced bucketing by using BUCKET in both the aggregation and grouping parts of the STATS command, with additional calculations.
 ```esql
 FROM employees
 | STATS s1 = b1 + 1, s2 = BUCKET(salary / 1000 + 999, 50.) + 2 BY b1 = BUCKET(salary / 100 + 99, 50.), b2 = BUCKET(salary / 1000 + 999, 50.)
 | SORT b1, b2
 | KEEP s1, b1, s2, b2
 ```
-
-This example demonstrates advanced usage of `BUCKET` in both aggregation and grouping.
-
-Adjusting bucket start value with an offset
-
+Adjusts the start value of each birth date bucket by adding one hour, then subtracts one hour to align the buckets, and counts the number of dates in each bucket.
 ```esql
 FROM employees
 | STATS dates = MV_SORT(VALUES(birth_date)) BY b = BUCKET(birth_date + 1 HOUR, 1 YEAR) - 1 HOUR
 | EVAL d_count = MV_COUNT(dates)
-| SORT d_count, b
-| LIMIT 3
 ```
 
-This example adjusts the bucket start value by adding and subtracting an offset.
+## Limitations
+
+- BUCKET does not create buckets that do not match any documents; only buckets with matching data are returned.
+- BUCKET does not filter rows outside the provided range; it returns a bucket value for out-of-range values. Use WHERE to filter rows.
+- When specifying the bucket size directly, it must be a time duration or date period, and the reference is epoch (`0001-01-01T00:00:00Z`).
+- For numeric fields, you must manually determine the min and max values for the range, as there is no automatic way to do this.

@@ -41,12 +41,13 @@ export interface AiInsightAttachment {
 }
 
 export interface AiInsightProps {
+  insightType: string;
   title: string;
   fetchInsight: () => Promise<AiInsightResponse>;
   buildAttachments: (summary: string, context: string) => AiInsightAttachment[];
 }
 
-export function AiInsight({ title, fetchInsight, buildAttachments }: AiInsightProps) {
+export function AiInsight({ insightType, title, fetchInsight, buildAttachments }: AiInsightProps) {
   const { euiTheme } = useEuiTheme();
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -164,7 +165,10 @@ export function AiInsight({ title, fetchInsight, buildAttachments }: AiInsightPr
             <EuiSpacer size="m" />
             <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
               <EuiFlexItem grow={false}>
-                <StartConversationButton onClick={handleStartConversation} />
+                <StartConversationButton
+                  insightType={insightType}
+                  onClick={handleStartConversation}
+                />
               </EuiFlexItem>
             </EuiFlexGroup>
           </>

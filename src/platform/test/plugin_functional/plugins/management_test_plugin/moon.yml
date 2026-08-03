@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/management-test-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-management'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/management-test-plugin'
+  title: '@kbn/management-test-plugin'
   description: Moon project for @kbn/management-test-plugin
   channel: ''
   owner: '@elastic/kibana-management'
-  metadata:
-    sourceRoot: src/platform/test/plugin_functional/plugins/management_test_plugin
+  sourceRoot: src/platform/test/plugin_functional/plugins/management_test_plugin
 dependsOn:
   - '@kbn/core'
   - '@kbn/management-plugin'

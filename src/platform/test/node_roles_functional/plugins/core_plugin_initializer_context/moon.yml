@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/core-plugin-initializer-context-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-core'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/core-plugin-initializer-context-plugin'
+  title: '@kbn/core-plugin-initializer-context-plugin'
   description: Moon project for @kbn/core-plugin-initializer-context-plugin
   channel: ''
   owner: '@elastic/kibana-core'
-  metadata:
-    sourceRoot: src/platform/test/node_roles_functional/plugins/core_plugin_initializer_context
+  sourceRoot: src/platform/test/node_roles_functional/plugins/core_plugin_initializer_context
 dependsOn:
   - '@kbn/core'
 tags:

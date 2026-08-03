@@ -8,6 +8,7 @@
 import { z } from '@kbn/zod';
 import { Command } from '@langchain/langgraph';
 import { HumanMessage, SystemMessage } from '@langchain/core/messages';
+import type { BaseChatModel } from '@langchain/core/language_models/chat_models';
 import { mapFieldDescriptorToNestedObject } from '../../../../tools/inspect_index_mapping_tool/inspect_index_utils';
 import type { CreateLlmInstance } from '../../../../utils/common';
 import type { AnalyzeIndexPatternAnnotation } from '../../state';
@@ -41,7 +42,7 @@ export const getAnalyzeCompressedIndexMappingAgent = async ({
     const nestedObject = mapFieldDescriptorToNestedObject(prunedFields);
     const compressedIndexMapping = compressMapping(nestedObject);
 
-    const result = await llm
+    const result = await (llm as BaseChatModel)
       .withStructuredOutput(structuredOutput, { name: 'indexMappingAnalysis' })
       .invoke([
         new SystemMessage({

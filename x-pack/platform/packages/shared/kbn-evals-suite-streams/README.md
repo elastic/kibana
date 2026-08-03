@@ -6,7 +6,7 @@ Evaluation suite for Elastic Streams pattern extraction quality.
 
 ```bash
 # Start Scout server
-node scripts/scout.js start-server --stateful
+node scripts/scout.js start-server --arch stateful --domain classic
 
 # Run evaluations
 node scripts/playwright test --config x-pack/platform/packages/shared/kbn-evals-suite-streams/playwright.config.ts

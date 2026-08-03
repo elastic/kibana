@@ -242,7 +242,5 @@ export function TableCellRender<G extends GroupNode, L extends LeafNode>({
 }: {
   cell: Cell<G, L>;
 }) {
-  return (
-    <React.Fragment>{flexRender(cell.column.columnDef.cell, cell.getContext())}</React.Fragment>
-  );
+  return useMemo(() => flexRender(cell.column.columnDef.cell, cell.getContext()), [cell]);
 }

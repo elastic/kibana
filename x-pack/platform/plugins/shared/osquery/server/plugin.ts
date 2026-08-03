@@ -48,6 +48,7 @@ import { createDataViews } from './create_data_views';
 import { registerFeatures } from './utils/register_features';
 import { CASE_ATTACHMENT_TYPE_ID } from '../common/constants';
 import { createActionService } from './handlers/action/create_action_service';
+import { checkResponseActionAuthz } from './lib/check_response_action_authz';
 
 export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginStart> {
   private readonly logger: Logger;
@@ -111,7 +112,9 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
 
     return {
       createActionService: this.createActionService,
-    };
+      checkResponseActionAuthz: (request, actionParams) =>
+        checkResponseActionAuthz(core, request, actionParams),
+    } satisfies OsqueryPluginSetup;
   }
 
   public start(core: CoreStart, plugins: StartPlugins) {

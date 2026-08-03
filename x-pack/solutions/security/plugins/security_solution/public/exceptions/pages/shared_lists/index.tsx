@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { EuiSearchBarProps } from '@elastic/eui';
 import {
   EuiButton,
@@ -19,6 +19,7 @@ import {
   EuiPageHeader,
   EuiPagination,
   EuiPopover,
+  EuiScreenReaderLive,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
@@ -151,6 +152,7 @@ export const SharedLists = React.memo(() => {
 
   const [exportDownload, setExportDownload] = useState<{ name?: string; blob?: Blob }>({});
   const [displayImportListFlyout, setDisplayImportListFlyout] = useState(false);
+  const [screenReaderMessage, setScreenReaderMessage] = useState('');
   const { addError, addSuccess } = useAppToasts();
 
   // Loading states
@@ -205,7 +207,18 @@ export const SharedLists = React.memo(() => {
   const handleExportSuccess = useCallback(
     (listId: string, name: string) =>
       (blob: Blob): void => {
-        addSuccess(i18n.EXCEPTION_LIST_EXPORTED_SUCCESSFULLY(name));
+        const message = i18n.EXCEPTION_LIST_EXPORTED_SUCCESSFULLY(name);
+        addSuccess(message);
+        // If the same list is exported twice in a row, React won't re-render
+        // since state hasn't changed, so the live region won't re-announce.
+        // Clearing to '' first ensures VoiceOver sees a new change on the next frame.
+        setScreenReaderMessage((current) => {
+          if (current === message) {
+            requestAnimationFrame(() => setScreenReaderMessage(message));
+            return '';
+          }
+          return message;
+        });
         setExportDownload({ name: listId, blob });
       },
     [addSuccess]
@@ -444,6 +457,8 @@ export const SharedLists = React.memo(() => {
   const [displayAddExceptionItemFlyout, setDisplayAddExceptionItemFlyout] = useState(false);
   const [displayCreateSharedListFlyout, setDisplayCreateSharedListFlyout] = useState(false);
 
+  const createButtonRef = useRef<HTMLButtonElement | null>(null);
+
   const onCreateButtonClick = () => setIsCreatePopoverOpen((isOpen) => !isOpen);
   const onCloseCreatePopover = () => {
     setDisplayAddExceptionItemFlyout(false);
@@ -467,6 +482,9 @@ export const SharedLists = React.memo(() => {
 
   return (
     <>
+      <EuiScreenReaderLive aria-live="assertive" aria-atomic="true" focusRegionOnTextChange>
+        {screenReaderMessage}
+      </EuiScreenReaderLive>
       <MissingDetectionsPrivilegesCallOut />
       <EuiPageHeader
         pageTitle={i18n.ALL_EXCEPTIONS}
@@ -502,7 +520,13 @@ export const SharedLists = React.memo(() => {
             data-test-subj="manageExceptionListCreateButton"
             button={
               canEditRules && (
-                <EuiButton iconType={'arrowDown'} onClick={onCreateButtonClick}>
+                <EuiButton
+                  buttonRef={(node: HTMLButtonElement | null) => {
+                    createButtonRef.current = node;
+                  }}
+                  iconType={'arrowDown'}
+                  onClick={onCreateButtonClick}
+                >
                   {i18n.CREATE_BUTTON}
                 </EuiButton>
               )
@@ -553,7 +577,11 @@ export const SharedLists = React.memo(() => {
           http={http}
           addSuccess={addSuccess}
           addError={addError}
-          handleCloseFlyout={() => setDisplayCreateSharedListFlyout(false)}
+          handleCloseFlyout={() => {
+            setDisplayCreateSharedListFlyout(false);
+            // Without requestAnimationFrame, the flyout's cleanup resets focus before we can move it to the button.
+            requestAnimationFrame(() => createButtonRef.current?.focus());
+          }}
         />
       )}
 

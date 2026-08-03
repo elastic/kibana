@@ -9,34 +9,42 @@
 
 import type { ScoutPage } from '..';
 import type { ScoutLogger } from '../../common';
+import type { KibanaUrl } from '../../common/services/kibana_url';
 import type { ScoutTestConfig } from '../../types';
 import { CollapsibleNav } from './collapsible_nav';
 import { DashboardApp } from './dashboard_app';
+import { DataViewsManagementPage } from './data_views_management_page';
 import { DatePicker } from './date_picker';
 import { DiscoverApp } from './discover_app';
-import { FilterBar } from './fiter_bar';
+import { FilterBar } from './filter_bar';
+import { HomePage } from './home_page';
 import { MapsPage } from './maps_page';
 import { RenderablePage } from './renderable_page';
 import { Toasts } from './toasts';
 import { createLazyPageObject } from './utils';
-import { Inspector } from './inspector';
+import { LensApp } from './lens_app';
+import { VisualizeApp } from './visualize_app';
 
 export interface PageObjectsFixtures {
   page: ScoutPage;
   config: ScoutTestConfig;
   log: ScoutLogger;
+  kbnUrl: KibanaUrl;
 }
 
 export interface PageObjects {
   datePicker: DatePicker;
+  dataViewsManagement: DataViewsManagementPage;
   discover: DiscoverApp;
   dashboard: DashboardApp;
   filterBar: FilterBar;
+  home: HomePage;
   maps: MapsPage;
   renderable: RenderablePage;
   collapsibleNav: CollapsibleNav;
   toasts: Toasts;
-  inspector: Inspector;
+  lens: LensApp;
+  visualize: VisualizeApp;
 }
 
 /**
@@ -48,14 +56,16 @@ export interface PageObjects {
 export function createCorePageObjects(fixtures: PageObjectsFixtures): PageObjects {
   return {
     datePicker: createLazyPageObject(DatePicker, fixtures.page),
+    dataViewsManagement: createLazyPageObject(DataViewsManagementPage, fixtures.page),
     dashboard: createLazyPageObject(DashboardApp, fixtures.page),
     discover: createLazyPageObject(DiscoverApp, fixtures.page),
     filterBar: createLazyPageObject(FilterBar, fixtures.page),
+    home: createLazyPageObject(HomePage, fixtures.page),
     maps: createLazyPageObject(MapsPage, fixtures.page),
     renderable: createLazyPageObject(RenderablePage, fixtures.page),
     collapsibleNav: createLazyPageObject(CollapsibleNav, fixtures.page, fixtures.config),
     toasts: createLazyPageObject(Toasts, fixtures.page),
-    inspector: createLazyPageObject(Inspector, fixtures.page),
-    // Add new page objects here
+    lens: createLazyPageObject(LensApp, fixtures.page),
+    visualize: createLazyPageObject(VisualizeApp, fixtures.page),
   };
 }

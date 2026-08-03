@@ -16,9 +16,10 @@ import type {
   ObservabilityAgentBuilderPluginStart,
   ObservabilityAgentBuilderPluginStartDependencies,
 } from '../types';
+import { MAX_SHORT_STRING_LENGTH } from '../utils/schema_limits';
 
 const alertDataSchema = z.object({
-  alertId: z.string(),
+  alertId: z.string().max(MAX_SHORT_STRING_LENGTH),
   attachmentLabel: z.string().optional(),
 });
 

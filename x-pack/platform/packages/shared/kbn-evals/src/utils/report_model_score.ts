@@ -7,7 +7,7 @@
 
 import type { SomeDevLog } from '@kbn/some-dev-log';
 import type { Model } from '@kbn/inference-common';
-import type { RanExperiment } from '@arizeai/phoenix-client/dist/esm/types/experiments';
+import type { RanExperiment } from '@arizeai/phoenix-client/types/experiments';
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import chalk from 'chalk';
 import { hostname } from 'os';

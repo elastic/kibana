@@ -166,6 +166,40 @@ describe('SearchBar', () => {
     });
   });
 
+  it('Should render filter bar when filters exist but no index patterns are provided', async () => {
+    const dslFilter = {
+      meta: {
+        key: 'query',
+        value: '{"wildcard":{"kibana.alert.rule.name":"example*"}}',
+        type: 'custom',
+        disabled: false,
+        negate: false,
+        alias: null,
+      },
+      query: {
+        wildcard: {
+          'kibana.alert.rule.name': 'example*',
+        },
+      },
+    };
+
+    render(
+      wrapSearchBarInContext({
+        indexPatterns: [],
+        showDatePicker: false,
+        showQueryInput: true,
+        showFilterBar: true,
+        onFiltersUpdated: noop,
+        filters: [dslFilter],
+      })
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('globalQueryBar')).toBeInTheDocument();
+      expect(screen.getByTestId('filter-items-group')).toBeInTheDocument();
+    });
+  });
+
   it('Should NOT render filter bar, if disabled', async () => {
     render(
       wrapSearchBarInContext({

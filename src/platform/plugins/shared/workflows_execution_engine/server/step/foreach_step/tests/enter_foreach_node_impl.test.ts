@@ -94,8 +94,6 @@ describe('EnterForeachNodeImpl', () => {
 
         expect(stepExecutionRuntime.setCurrentStepState).toHaveBeenCalledTimes(1);
         expect(stepExecutionRuntime.setCurrentStepState).toHaveBeenCalledWith({
-          items: ['item1', 'item2', 'item3'],
-          item: 'item1',
           index: 0,
           total: 3,
         });
@@ -140,8 +138,6 @@ describe('EnterForeachNodeImpl', () => {
 
         expect(stepExecutionRuntime.setCurrentStepState).toHaveBeenCalledTimes(1);
         expect(stepExecutionRuntime.setCurrentStepState).toHaveBeenCalledWith({
-          items: ['item1', 'item2', 'item3'],
-          item: 'item1',
           index: 0,
           total: 3,
         });
@@ -198,8 +194,6 @@ describe('EnterForeachNodeImpl', () => {
 
         expect(stepExecutionRuntime.setCurrentStepState).toHaveBeenCalledTimes(1);
         expect(stepExecutionRuntime.setCurrentStepState).toHaveBeenCalledWith({
-          items: ['item1', 'item2', 'item3'],
-          item: 'item1',
           index: 0,
           total: 3,
         });
@@ -229,10 +223,9 @@ describe('EnterForeachNodeImpl', () => {
         node.configuration.foreach = JSON.stringify([]);
       });
 
-      it('should set empty items and total to 0', async () => {
+      it('should set total to 0', async () => {
         await underTest.run();
         expect(stepExecutionRuntime.setCurrentStepState).toHaveBeenCalledWith({
-          items: [],
           total: 0,
         });
       });
@@ -286,8 +279,6 @@ describe('EnterForeachNodeImpl', () => {
   describe('on next iterations', () => {
     beforeEach(() => {
       (stepExecutionRuntime.getCurrentStepState as jest.Mock).mockReturnValue({
-        items: ['item1', 'item2', 'item3'],
-        item: 'item1',
         index: 0,
         total: 3,
       });
@@ -311,13 +302,11 @@ describe('EnterForeachNodeImpl', () => {
       expect(stepExecutionRuntime.startStep).not.toHaveBeenCalledWith();
     });
 
-    it('should initialize foreach state', async () => {
+    it('should update foreach state with incremented index', async () => {
       await underTest.run();
 
       expect(stepExecutionRuntime.setCurrentStepState).toHaveBeenCalledTimes(1);
       expect(stepExecutionRuntime.setCurrentStepState).toHaveBeenCalledWith({
-        items: ['item1', 'item2', 'item3'],
-        item: 'item2',
         index: 1,
         total: 3,
       });

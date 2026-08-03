@@ -44,6 +44,7 @@ export const rolesConfig = schema.arrayOf(
   {
     defaultValue: [NODE_WILDCARD_CHAR],
     minSize: 1,
+    maxSize: 10,
     validate: (value) => {
       if (value.length > 1) {
         if (value.includes(NODE_WILDCARD_CHAR)) {

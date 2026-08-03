@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import HttpProxyAgent from 'http-proxy-agent';
+import { HttpProxyAgent } from 'http-proxy-agent';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 
 import { getProxyAgent, getProxyAgentOptions } from './proxy';
@@ -40,7 +40,6 @@ describe('getProxyAgentOptions', () => {
       headers: { Host: 'targethost' },
       host: '12.34.56.78',
       port: 910,
-      protocol: 'https:',
       rejectUnauthorized: undefined,
     });
 
@@ -52,7 +51,6 @@ describe('getProxyAgentOptions', () => {
       headers: { Host: 'example.com' },
       host: '12.34.56.78',
       port: 910,
-      protocol: 'https:',
       rejectUnauthorized: undefined,
     });
 
@@ -65,7 +63,6 @@ describe('getProxyAgentOptions', () => {
       headers: { Host: 'example.com' },
       host: '12.34.56.78',
       port: 910,
-      protocol: 'https:',
       rejectUnauthorized: undefined,
     });
   });
@@ -77,11 +74,11 @@ describe('getProxyAgentOptions', () => {
           targetUrl: 'https://epr.elastic.co/',
         };
         expect(getProxyAgentOptions(httpProxyWithAuth)).toEqual({
-          auth: 'user:pass',
+          username: 'user',
+          password: 'pass',
           headers: { Host: 'epr.elastic.co' },
           host: 'example.com',
           port: 8080,
-          protocol: 'http:',
           rejectUnauthorized: undefined,
         });
       });
@@ -91,11 +88,11 @@ describe('getProxyAgentOptions', () => {
           targetUrl: 'https://epr.elastic.co/',
         };
         expect(getProxyAgentOptions(httpsProxyWithAuth)).toEqual({
-          auth: 'user:pass',
+          username: 'user',
+          password: 'pass',
           headers: { Host: 'epr.elastic.co' },
           host: 'example.com',
           port: 8080,
-          protocol: 'https:',
           rejectUnauthorized: undefined,
         });
       });
@@ -111,7 +108,6 @@ describe('getProxyAgentOptions', () => {
           headers: { Host: 'epr.elastic.co' },
           host: 'example.com',
           port: 8080,
-          protocol: 'http:',
           rejectUnauthorized: undefined,
         });
       });
@@ -124,7 +120,6 @@ describe('getProxyAgentOptions', () => {
           headers: { Host: 'epr.elastic.co' },
           host: 'example.com',
           port: 8080,
-          protocol: 'https:',
           rejectUnauthorized: undefined,
         });
       });

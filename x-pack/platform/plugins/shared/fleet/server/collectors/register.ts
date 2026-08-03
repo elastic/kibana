@@ -29,6 +29,7 @@ import { getAgentsPerOutput } from './agents_per_output';
 import type { IntegrationsDetails } from './integrations_collector';
 import { getIntegrationsDetails } from './integrations_collector';
 import { getModifiedILMs } from './modified_ilms';
+import { getAgentUpgradeRollbacks } from './agent_upgrade_rollbacks';
 
 export interface Usage {
   agents_enabled: boolean;
@@ -52,6 +53,7 @@ export interface FleetUsage extends Usage, AgentData {
   agents_per_output_type: AgentsPerOutputType[];
   integrations_details: IntegrationsDetails[];
   modified_ilms: string[];
+  agent_upgrade_rollbacks: number;
 }
 
 export const fetchFleetUsage = async (
@@ -80,6 +82,7 @@ export const fetchFleetUsage = async (
     integrations_details: await getIntegrationsDetails(soClient),
     agentless_agents: await getAgentUsage(soClient, esClient, true),
     modified_ilms: await getModifiedILMs(),
+    ...(await getAgentUpgradeRollbacks(esClient)),
   };
   return usage;
 };

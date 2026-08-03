@@ -17,7 +17,7 @@ import type {
   PluginInitializerContext,
 } from '@kbn/core/server';
 import type { EsWorkflowExecution, WorkflowExecutionEngineModel } from '@kbn/workflows';
-import { ExecutionStatus, WorkflowRepository } from '@kbn/workflows';
+import { ExecutionStatus, isTerminalStatus, WorkflowRepository } from '@kbn/workflows';
 import { WorkflowExecutionNotFoundError } from '@kbn/workflows/common/errors';
 
 import type { WorkflowsExecutionEngineConfig } from './config';
@@ -639,21 +639,53 @@ export class WorkflowsExecutionEnginePlugin
         throw new WorkflowExecutionNotFoundError(workflowExecutionId);
       }
 
-      if (
-        [ExecutionStatus.CANCELLED, ExecutionStatus.COMPLETED, ExecutionStatus.FAILED].includes(
-          workflowExecution.status
-        )
-      ) {
-        // Already in a terminal state or being canceled
+      if (isTerminalStatus(workflowExecution.status)) {
+        return;
+      }
+
+      const cancelUpdateFields = {
+        cancelRequested: true,
+        cancellationReason: 'Cancelled by user',
+        cancelledAt: new Date().toISOString(),
+        cancelledBy: 'system', // TODO: set user if available
+      };
+
+      if (workflowExecution.status === ExecutionStatus.PENDING) {
+        await workflowExecutionRepository.updateWorkflowExecution({
+          id: workflowExecution.id,
+          status: ExecutionStatus.CANCELLED,
+          ...cancelUpdateFields,
+        });
+        await workflowTaskManager.forceRunIdleTasks(workflowExecution.id);
+        return;
+      }
+
+      let hasActiveTask = true;
+      try {
+        hasActiveTask = await workflowTaskManager.hasActiveTaskForExecution(workflowExecution.id);
+      } catch (err) {
+        // TM/ES issues: preserve legacy behavior (cancelRequested + nudge idle tasks) instead of
+        // failing the API or optimistically terminalizing without a reliable task check.
+        this.logger.warn(
+          `Could not determine active Task Manager tasks for execution ${workflowExecution.id}; ` +
+            `falling back to cancelRequested-only cancel. ${
+              err instanceof Error ? err.message : String(err)
+            }`
+        );
+      }
+
+      if (!hasActiveTask) {
+        await workflowExecutionRepository.updateWorkflowExecution({
+          id: workflowExecution.id,
+          status: ExecutionStatus.CANCELLED,
+          ...cancelUpdateFields,
+        });
         return;
       }
 
       await workflowExecutionRepository.updateWorkflowExecution({
         id: workflowExecution.id,
-        cancelRequested: true,
-        cancellationReason: 'Cancelled by user',
-        cancelledAt: new Date().toISOString(),
-        cancelledBy: 'system', // TODO: set user if available
+        ...cancelUpdateFields,
       });
       await workflowTaskManager.forceRunIdleTasks(workflowExecution.id);
     };

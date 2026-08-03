@@ -30,8 +30,20 @@ export const createPrebuiltRules = (
         });
       },
     });
+
     logger?.debug(
-      `createPrebuiltRules: Creating prebuilt rules - done. Rules created: ${result.results}. Rules failed to create: ${result.errors.length}.`
+      `createPrebuiltRules: Creating prebuilt rules - done. Rules created: ${
+        result.results.length
+      }. Rules failed to create: ${result.errors.length}. Errors: ${JSON.stringify(
+        result.errors.map((e) => ({
+          rule_id: e.item.rule_id,
+          ruleName: e.item.name,
+          error:
+            typeof e.error === 'object' && e.error !== null && 'message' in e.error
+              ? e.error.message
+              : e.error,
+        }))
+      )}`
     );
 
     return result;

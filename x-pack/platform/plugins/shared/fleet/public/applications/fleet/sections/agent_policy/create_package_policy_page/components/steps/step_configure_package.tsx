@@ -17,7 +17,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
   getNormalizedInputs,
-  isIntegrationPolicyTemplate,
+  isInputOnlyPolicyTemplate,
+  getPolicyTemplateDataStreamPaths,
   getRegistryStreamWithDataStreamForInputType,
 } from '../../../../../../../../common/services';
 import { isInputAllowedForDeploymentMode } from '../../../../../../../../common/services/agentless_policy_helper';
@@ -80,12 +81,18 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
                   input.type === packageInput.type &&
                   (hasIntegrations ? input.policy_template === policyTemplate.name : true)
               );
+              // Scope stream resolution to this policy template's own data stream(s) so that
+              // input packages with multiple templates sharing an input type don't duplicate
+              // each template's streams (and stream vars like data_stream.dataset). Single-template
+              // integration packages keep searching all data streams, preserving previous behavior.
+              const dataStreamPaths =
+                isInputOnlyPolicyTemplate(policyTemplate) || hasIntegrations
+                  ? getPolicyTemplateDataStreamPaths(packageInfo, policyTemplate)
+                  : [];
               const packageInputStreams = getRegistryStreamWithDataStreamForInputType(
                 packageInput.type,
                 packageInfo,
-                hasIntegrations && isIntegrationPolicyTemplate(policyTemplate)
-                  ? policyTemplate.data_streams
-                  : []
+                dataStreamPaths
               );
 
               const updatePackagePolicyInput = (updatedInput: Partial<NewPackagePolicyInput>) => {

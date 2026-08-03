@@ -19,6 +19,9 @@ components:
       properties:
         path:
           type: string
+          minLength: 1
+          maxLength: 2048
+          format: nonempty
         auth: 
           $ref: "#/components/schemas/CelAuthType"
         openApiDetails:
@@ -33,10 +36,17 @@ components:
       properties:
         operation:
           type: string
+          minLength: 1
+          maxLength: 65536
+          format: nonempty
         schemas: 
           type: string
+          minLength: 1
+          maxLength: 500000
+          format: nonempty
         auth:
           type: string
+          maxLength: 65536
 
     GeneratedCelDetails:
       type: object
@@ -62,7 +72,7 @@ components:
           type: array
           items:
             type: string
-    
+
     CelInput:
       type: object
       description: Optional CEL input details.
@@ -84,15 +94,20 @@ components:
           type: boolean
         program:
           type: string
+          maxLength: 500000
         stateSettings:
           type: object
           additionalProperties: true
         redactVars:
           type: array
+          maxItems: 100
           items:
             type: string
         url:
           type: string
+          minLength: 1
+          maxLength: 2048
+          format: nonempty
 
     CelAuthType:
       type: string

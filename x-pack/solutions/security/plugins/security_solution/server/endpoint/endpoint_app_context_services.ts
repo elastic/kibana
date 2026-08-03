@@ -461,6 +461,14 @@ export class EndpointAppContextService {
     return this.startDependencies.spacesService.getActiveSpace(httpRequest);
   }
 
+  public getActiveSpaceId(httpRequest: KibanaRequest): string {
+    if (!this.startDependencies?.spacesService) {
+      throw new EndpointAppContentServicesNotStartedError();
+    }
+
+    return this.startDependencies.spacesService.getSpaceId(httpRequest);
+  }
+
   public getReferenceDataClient(): ReferenceDataClientInterface {
     if (!this.startDependencies?.savedObjectsServiceStart) {
       throw new EndpointAppContentServicesNotStartedError();

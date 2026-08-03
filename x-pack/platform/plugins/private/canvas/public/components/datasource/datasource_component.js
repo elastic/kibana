@@ -171,7 +171,11 @@ export class DatasourceComponent extends PureComponent {
             size="s"
             data-test-subj="canvasChangeDatasourceButton"
           >
-            <EuiIcon type={stateDatasource.image} className="canvasDataSource__triggerButtonIcon" />
+            <EuiIcon
+              type={stateDatasource.image}
+              className="canvasDataSource__triggerButtonIcon"
+              aria-hidden
+            />
             {stateDatasource.displayName}
           </EuiButtonEmpty>
           <EuiSpacer size="s" />
@@ -199,7 +203,7 @@ export class DatasourceComponent extends PureComponent {
               </EuiFlexGroup>
             </>
           ) : (
-            <EuiCallOut color="warning">
+            <EuiCallOut announceOnMount={false} color="warning">
               <p>{strings.getExpressionArgDescription()}</p>
             </EuiCallOut>
           )}

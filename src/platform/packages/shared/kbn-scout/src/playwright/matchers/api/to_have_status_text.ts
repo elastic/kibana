@@ -7,52 +7,49 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { expect as baseExpect } from '@playwright/test';
-import { createMatcherError } from './utils';
+import type { ExpectMatcherState, MatcherReturnType } from '@playwright/test';
 
 /**
- * Asserts that the response has the expected status text.
+ * Custom matcher for expect.extend(): asserts the response has the expected status text.
  *
  * @example
  * expect(response).toHaveStatusText('OK');
  * expect(response).not.toHaveStatusText('Not Found');
  */
 export function toHaveStatusText(
-  obj: unknown,
-  expected: string,
-  isNegated = false,
-  message?: string
-): void {
+  this: ExpectMatcherState,
+  received: unknown,
+  expected: string
+): MatcherReturnType {
   if (
-    typeof obj !== 'object' ||
-    obj === null ||
-    (!('statusText' in obj) && !('statusMessage' in obj))
+    typeof received !== 'object' ||
+    received === null ||
+    (!('statusText' in received) && !('statusMessage' in received))
   ) {
-    throw createMatcherError({
-      expected: `${JSON.stringify({ statusText: expected })} or ${JSON.stringify({
-        statusMessage: expected,
-      })}`,
-      matcherName: 'toHaveStatusText',
-      received: obj,
-      isNegated,
-      message,
-    });
+    return {
+      pass: this.isNot,
+      message: () =>
+        this.utils.matcherHint('toHaveStatusText', undefined, undefined, { isNot: this.isNot }) +
+        '\n\n' +
+        `Expected object with ${this.utils.printExpected({
+          statusText: expected,
+        })} or ${this.utils.printExpected({ statusMessage: expected })}\n` +
+        `Received: ${this.utils.printReceived(received)}`,
+    };
   }
 
-  const actual = 'statusText' in obj ? obj.statusText : obj.statusMessage;
-  try {
-    if (isNegated) {
-      baseExpect(actual).not.toBe(expected);
-    } else {
-      baseExpect(actual).toBe(expected);
-    }
-  } catch {
-    throw createMatcherError({
-      expected,
-      matcherName: 'toHaveStatusText',
-      received: actual,
-      isNegated,
-      message,
-    });
-  }
+  const actual = 'statusText' in received ? received.statusText : received.statusMessage;
+  const pass = actual === expected;
+
+  return {
+    pass,
+    message: () =>
+      this.utils.matcherHint('toHaveStatusText', undefined, undefined, { isNot: this.isNot }) +
+      '\n\n' +
+      `Expected: ${this.utils.printExpected(expected)}\n` +
+      `Received: ${this.utils.printReceived(actual)}`,
+    name: 'toHaveStatusText',
+    expected,
+    actual,
+  };
 }

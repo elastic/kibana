@@ -97,7 +97,14 @@ export function OpenTelemetryInstructions({ apmServerUrl, secretToken }: Props) 
 
   return (
     <>
-      <EuiBasicTable items={items} columns={columns} data-test-subj="otel-instructions-table" />
+      <EuiBasicTable
+        items={items}
+        columns={columns}
+        data-test-subj="otel-instructions-table"
+        tableCaption={i18n.translate('xpack.apm.tutorial.configOtel.tableCaption', {
+          defaultMessage: 'OpenTelemetry instructions',
+        })}
+      />
       <EuiSpacer size="m" />
       <EuiText size="xs" color="subdued">
         <FormattedMessage

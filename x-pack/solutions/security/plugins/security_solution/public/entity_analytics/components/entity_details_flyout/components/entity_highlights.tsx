@@ -19,6 +19,7 @@ import {
   EuiText,
   EuiTitle,
   EuiFlexGroup,
+  EuiPanel,
 } from '@elastic/eui';
 import {
   useAssistantContext,
@@ -35,7 +36,6 @@ import { useHasEntityHighlightsLicense } from '../../../../common/hooks/use_has_
 import { useFetchEntityDetailsHighlights } from '../hooks/use_fetch_entity_details_highlights';
 import { EntityHighlightsSettings } from './entity_highlights_settings';
 import { EntityHighlightsResult } from './entity_highlights_result';
-import { useGradientStyles } from './entity_highlights_gradients';
 
 export const EntityHighlightsAccordion: React.FC<{
   entityIdentifier: string;
@@ -59,13 +59,6 @@ export const EntityHighlightsAccordion: React.FC<{
   const { hasAssistantPrivilege, isAssistantEnabled, isAssistantVisible } =
     useAssistantAvailability();
   const hasEntityHighlightsLicense = useHasEntityHighlightsLicense();
-  const {
-    gradientPanelStyle,
-    buttonGradientStyle,
-    iconGradientStyle,
-    gradientSVG,
-    buttonTextGradientStyle,
-  } = useGradientStyles();
 
   const [showAnonymizedValues, setShowAnonymizedValues] = useState(false);
   const onChangeShowAnonymizedValues = useCallback(
@@ -118,7 +111,6 @@ export const EntityHighlightsAccordion: React.FC<{
 
   return (
     <>
-      {gradientSVG}
       <EuiAccordion
         initialIsOpen
         id="entity-highlights"
@@ -129,7 +121,7 @@ export const EntityHighlightsAccordion: React.FC<{
                 id="xpack.securitySolution.flyout.entityDetails.highlights.title"
                 defaultMessage="Entity summary"
               />{' '}
-              <EuiIcon type="sparkles" css={iconGradientStyle} />
+              <EuiIcon type="sparkles" aria-hidden={true} />
             </h3>
           </EuiTitle>
         }
@@ -204,7 +196,7 @@ export const EntityHighlightsAccordion: React.FC<{
         )}
 
         {isChatLoading && (
-          <div css={gradientPanelStyle}>
+          <EuiPanel hasBorder={true}>
             <EuiText size="xs" color="subdued">
               <FormattedMessage
                 id="xpack.securitySolution.flyout.entityDetails.highlights.loadingMessage"
@@ -213,11 +205,11 @@ export const EntityHighlightsAccordion: React.FC<{
               <EuiSpacer size="xs" />
             </EuiText>
             <EuiSkeletonText lines={2} size="xs" />
-          </div>
+          </EuiPanel>
         )}
 
         {!assistantResult && !isLoading && !showErrorBanner && (
-          <div css={gradientPanelStyle}>
+          <EuiPanel hasBorder={true}>
             <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
               <EuiFlexItem grow={4}>
                 <EuiText size="xs" textAlign="left">
@@ -239,20 +231,18 @@ export const EntityHighlightsAccordion: React.FC<{
                   <EuiButton
                     onClick={fetchEntityHighlights}
                     isDisabled={!connectorId}
-                    css={buttonGradientStyle}
+                    color="primary"
                     size="s"
                   >
-                    <div css={buttonTextGradientStyle}>
-                      <FormattedMessage
-                        id="xpack.securitySolution.flyout.entityDetails.highlights.generateButton"
-                        defaultMessage="Generate"
-                      />
-                    </div>
+                    <FormattedMessage
+                      id="xpack.securitySolution.flyout.entityDetails.highlights.generateButton"
+                      defaultMessage="Generate"
+                    />
                   </EuiButton>
                 </EuiFlexItem>
               )}
             </EuiFlexGroup>
-          </div>
+          </EuiPanel>
         )}
       </EuiAccordion>
       <EuiHorizontalRule />

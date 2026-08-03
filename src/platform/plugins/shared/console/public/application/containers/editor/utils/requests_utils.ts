@@ -271,26 +271,31 @@ export const getRequestFromEditor = (
   return { method: upperCaseMethod, url, data };
 };
 
+const requestDataTokensRegex = new RegExp(
+  [
+    /"""[\s\S]*?"""/.source, // Triple-quoted strings
+    /"(?:\\.|[^"\\])*"/.source, // JSON strings
+    /\/\/[^\r\n]*/.source, // // comments
+    /#[^\r\n]*/.source, // # comments
+    /\/\*[\s\S]*?\*\//.source, // Block comments
+  ].join('|'),
+  'g'
+);
+
+const isSlashCommentToken = (token: string) => token.startsWith('//') || token.startsWith('/*');
+const isCommentToken = (token: string) => isSlashCommentToken(token) || token.startsWith('#');
+
 export const containsComments = (requestData: string) => {
-  let insideString = false;
-  let prevChar = '';
-  for (let i = 0; i < requestData.length; i++) {
-    const char = requestData[i];
-    const nextChar = requestData[i + 1];
-
-    if (!insideString && char === '"') {
-      insideString = true;
-    } else if (insideString && char === '"' && prevChar !== '\\') {
-      insideString = false;
-    } else if (!insideString) {
-      if (char === '/' && (nextChar === '/' || nextChar === '*')) {
-        return true;
-      }
+  requestDataTokensRegex.lastIndex = 0;
+  let match = requestDataTokensRegex.exec(requestData);
+  while (match) {
+    if (isCommentToken(match[0])) {
+      requestDataTokensRegex.lastIndex = 0;
+      return true;
     }
-
-    prevChar = char;
+    match = requestDataTokensRegex.exec(requestData);
   }
-
+  requestDataTokensRegex.lastIndex = 0;
   return false;
 };
 
@@ -301,6 +306,40 @@ export const indentData = (dataString: string): string => {
     return JSON.stringify(parsedData, null, 2);
   } catch (e) {
     return dataString;
+  }
+};
+
+const removeCommentsFromDataWithTripleQuotes = (dataString: string): string | null => {
+  const dataWithoutComments = dataString.replace(requestDataTokensRegex, (token) =>
+    isCommentToken(token) ? ' ' : token
+  );
+
+  const { collapsedTripleQuotesData } = collapseTripleQuoteStrings(dataWithoutComments);
+  try {
+    parse(collapsedTripleQuotesData);
+    return dataWithoutComments;
+  } catch {
+    return null;
+  }
+};
+
+/**
+ * This function removes comments from the request data.
+ *
+ * The comment removal is done by parsing the data with hjson and stringifying the result.
+ * Since hjson can't parse multi-line strings in triple quotes, a token-aware fallback removes
+ * comments outside quoted strings and validates the result after collapsing triple-quote strings.
+ * Comments inside triple-quote strings (e.g. Painless comments) are preserved.
+ * If the data can't be parsed at all, it is returned unchanged.
+ */
+export const removeCommentsFromData = (dataString: string): string => {
+  try {
+    return JSON.stringify(parse(dataString), null, 2);
+  } catch {
+    if (!dataString.includes('"""')) {
+      return dataString;
+    }
+    return removeCommentsFromDataWithTripleQuotes(dataString) ?? dataString;
   }
 };
 

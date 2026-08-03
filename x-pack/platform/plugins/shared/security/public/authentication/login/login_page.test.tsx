@@ -15,10 +15,11 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { customBrandingServiceMock } from '@kbn/core-custom-branding-browser-mocks';
 import { nextTick, renderWithI18n } from '@kbn/test-jest-helpers';
 
-import { DisabledLoginForm, LoginForm, LoginFormMessageType } from './components';
+import { DisabledLoginForm, LoginForm } from './components';
 import { LoginPage } from './login_page';
 import { AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER } from '../../../common/constants';
 import type { LoginState } from '../../../common/login_state';
+import { MessageType } from '../components';
 
 const createLoginState = (options?: Partial<LoginState>) => {
   return {
@@ -374,7 +375,7 @@ describe('LoginPage', () => {
       const { authProviderHint, message } = wrapper.find(LoginForm).props();
       expect(authProviderHint).toBe('basic1');
       expect(message).toEqual({
-        type: LoginFormMessageType.Info,
+        type: MessageType.Info,
         content: 'Your session has timed out. Please log in again.',
       });
     });

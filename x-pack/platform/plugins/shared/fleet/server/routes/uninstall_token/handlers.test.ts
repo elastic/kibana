@@ -125,6 +125,40 @@ describe('uninstall token handlers', () => {
       expect(validateResp).toEqual(uninstallTokensResponseFixture);
     });
 
+    it('should exclude managed and agentless policies from uninstall tokens', async () => {
+      const managedPolicy = createAgentPolicyMock({ id: 'managed-policy-id', is_managed: true });
+      const agentlessPolicy = createAgentPolicyMock({
+        id: 'agentless-policy-id',
+        supports_agentless: true,
+      });
+      mockAgentPolicyService.list.mockResolvedValue({
+        items: [managedPolicy, agentlessPolicy],
+        total: 2,
+        page: 1,
+        perPage: 2,
+      });
+      getTokenMetadataMock.mockResolvedValue(uninstallTokensResponseFixture);
+
+      await getUninstallTokensMetadataHandlerWithErrorHandler(context, request, response);
+
+      expect(mockAgentPolicyService.list).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          kuery: expect.stringContaining('is_managed:true'),
+        })
+      );
+      expect(mockAgentPolicyService.list).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          kuery: expect.stringContaining('supports_agentless:true'),
+        })
+      );
+      expect(getTokenMetadataMock).toHaveBeenCalledWith(undefined, undefined, 1, 20, [
+        'managed-policy-id',
+        'agentless-policy-id',
+      ]);
+    });
+
     it('should return internal error when uninstallTokenService throws error', async () => {
       getTokenMetadataMock.mockRejectedValue(Error('something happened'));
 

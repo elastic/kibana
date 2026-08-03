@@ -364,8 +364,15 @@
     "error",
     "filter",
     "integrationName",
+    "integrations",
+    "integrations.syncData",
+    "integrations.syncData.lastFullSync",
+    "integrations.syncData.lastUpdateProcessed",
+    "integrations.syncMarkerIndex",
     "managed",
+    "managedVersion",
     "matchers",
+    "matchersModifiedByUser",
     "name",
     "type"
   ],
@@ -414,6 +421,7 @@
     "installed_es.version",
     "installed_kibana",
     "installed_kibana_space_id",
+    "installed_kibana_version",
     "internal",
     "keep_policies_up_to_date",
     "latest_executed_state",
@@ -927,6 +935,7 @@
     "reportedClusterUuids"
   ],
   "observability-onboarding-state": [
+    "createdBy",
     "progress",
     "state",
     "type"

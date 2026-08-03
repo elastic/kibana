@@ -331,6 +331,106 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
+    describe('Update Agentless Policy', () => {
+      let apiCalls: Array<{
+        url: string;
+        method: string;
+        data?: any;
+      }> = [];
+
+      before(async () => {
+        const mockAgentlessApiService = setupMockServer();
+        mockApiServer = await mockAgentlessApiService.listen(8089);
+        mockApiServer.addListener('request', (request) => {
+          if (request.method === 'POST') {
+            request.on('data', (data) => {
+              apiCalls.push({
+                url: request.url || '',
+                method: request.method || '',
+                data: JSON.parse(data.toString()),
+              });
+            });
+          }
+        });
+      });
+
+      after(async () => {
+        await mockApiServer.close();
+      });
+
+      beforeEach(async () => {
+        await kibanaServer.savedObjects.cleanStandardList();
+        apiCalls = [];
+        await cleanFleetIndices(es);
+        await apiClient.setup();
+      });
+
+      afterEach(async () => {
+        await kibanaServer.savedObjects.cleanStandardList();
+        await cleanFleetIndices(es);
+      });
+
+      it('should only increment the agent policy revision once when the package policy is renamed', async () => {
+        const policyId = uuidv4();
+        const originalName = `test_agentless-${Date.now()}`;
+
+        await apiClient.createAgentlessPolicy({
+          id: policyId,
+          package: {
+            name: 'test_agentless',
+            version: '1.0.0',
+          },
+          name: originalName,
+          description: 'test agentless policy',
+          namespace: 'default',
+          inputs: {
+            'sample-httpjson': {
+              enabled: true,
+              vars: {
+                api_key: 'TEST_VALUE_API_KEY',
+              },
+              streams: {},
+            },
+          },
+        });
+
+        const agentPolicyBeforeUpdate = await apiClient.getAgentPolicy(policyId);
+        const revisionBeforeUpdate = agentPolicyBeforeUpdate.item.revision;
+
+        // Reset API call tracker so we only count calls from the update
+        apiCalls = [];
+
+        await apiClient.updatePackagePolicy(policyId, {
+          name: `test_agentless_renamed-${Date.now()}`,
+          policy_ids: [policyId],
+          package: {
+            name: 'test_agentless',
+            version: '1.0.0',
+          },
+          description: 'test agentless policy',
+          namespace: 'default',
+          inputs: {
+            'sample-httpjson': {
+              enabled: true,
+              vars: {
+                api_key: 'TEST_VALUE_API_KEY',
+              },
+              streams: {},
+            },
+          },
+        });
+
+        // The agentless API should be called exactly once, not twice
+        expect(apiCalls.length).to.be(1);
+        expect(apiCalls[0].url).to.be('/agentless-api/api/v1/ess/deployments');
+        expect(apiCalls[0].method).to.be('POST');
+
+        // The agent policy revision should be incremented exactly once
+        const agentPolicyAfterUpdate = await apiClient.getAgentPolicy(policyId);
+        expect(agentPolicyAfterUpdate.item.revision).to.be(revisionBeforeUpdate + 1);
+      });
+    });
+
     describe('Sync Agentless Policies', () => {
       let apiCalls: Array<{
         url: string;

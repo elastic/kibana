@@ -122,5 +122,13 @@ export function AgentConfigurationTable({
     key,
   }));
 
-  return <EuiBasicTable items={items} columns={columns} />;
+  return (
+    <EuiBasicTable
+      items={items}
+      columns={columns}
+      tableCaption={i18n.translate('xpack.apm.onboarding.agent.table.caption', {
+        defaultMessage: 'Agent configuration settings',
+      })}
+    />
+  );
 }

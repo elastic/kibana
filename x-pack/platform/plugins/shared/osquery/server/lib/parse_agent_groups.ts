@@ -28,7 +28,7 @@ export const aggregateResults = async (
     perPage: number,
     searchAfter?: SortResults,
     pitId?: string
-  ) => Promise<{ results: string[]; total: number; searchAfter?: SortResults }>,
+  ) => Promise<{ results: string[]; total: number; searchAfter?: SortResults; pitId?: string }>,
   esClient: ElasticsearchClient,
   context: OsqueryAppContext
 ) => {
@@ -39,13 +39,19 @@ export const aggregateResults = async (
     // One page only, no need for PIT
     results = initialResults;
   } else {
-    const { id: pitId } = await esClient.openPointInTime({
-      index: AGENTS_INDEX,
-      keep_alive: '10m',
-    });
+    let pitId = (
+      await esClient.openPointInTime({
+        index: AGENTS_INDEX,
+        keep_alive: '10m',
+      })
+    ).id;
     let currentSort: SortResults | undefined;
     // Refetch first page with PIT
-    const { results: pitInitialResults, searchAfter } = await generator(
+    const {
+      results: pitInitialResults,
+      searchAfter,
+      pitId: returnedPitId,
+    } = await generator(
       1,
       PER_PAGE,
       currentSort, // No searchAfter for first page, its built based on first page results
@@ -53,16 +59,17 @@ export const aggregateResults = async (
     );
     results = pitInitialResults;
     currentSort = searchAfter;
+    pitId = returnedPitId ?? pitId;
     let currPage = 2;
     while (currPage <= totalPages) {
-      const { results: additionalResults, searchAfter: additionalSearchAfter } = await generator(
-        currPage++,
-        PER_PAGE,
-        currentSort,
-        pitId
-      );
+      const {
+        results: additionalResults,
+        searchAfter: additionalSearchAfter,
+        pitId: additionalPitId,
+      } = await generator(currPage++, PER_PAGE, currentSort, pitId);
       results.push(...additionalResults);
       currentSort = additionalSearchAfter;
+      pitId = additionalPitId ?? pitId;
     }
 
     try {
@@ -92,26 +99,18 @@ export const aggregateResults = async (
  * @returns Array of unique agent IDs that match the selection criteria
  *
  * @remarks
- * **Validation Safety**: This function does NOT perform an additional validation
- * call to Fleet's `getByIds` after fetching agents. This is intentional and safe because:
+ * **Agent resolution**:
  *
- * 1. **Agents Already Validated During Fetch**: The `aggregateResults` function uses
- *    Fleet's `listAgents` API with proper filters (online status, Osquery policy).
- *    Any agent returned by this API is already validated to exist and meet criteria.
+ * 1. **Filtered selections (all agents / platform / policy)** are resolved through
+ *    Fleet's `listAgents` API (via `asInternalScopedUser(spaceId)`) with filters for
+ *    online status and Osquery policy. These results are not re-validated, which
+ *    avoids Fleet's `getByIds` `max_result_window` limit (default 10,000) on large
+ *    agent sets.
  *
- * 2. **Space Security Enforced**: The `agentService` is created via
- *    `asInternalScopedUser(spaceId)`, ensuring all agent queries are automatically
- *    space-scoped. Agents from other spaces cannot be accessed.
- *
- * 3. **Scalability**: Fleet's `getByIds` does not use pagination and hits
- *    Elasticsearch's `max_result_window` limit (default: 10,000) when validating
- *    large agent sets. This prevents querying 10k+ agents simultaneously.
- *
- * 4. **Implicit Validation**: The filters applied (online status, Osquery policy)
- *    provide implicit validation that agents are valid targets for Osquery actions.
- *
- * For deployments with 10,000+ agents, removing the redundant validation is
- * required for the plugin to function correctly.
+ * 2. **Explicit agent IDs** are resolved through the same `agentService` via
+ *    `getByIds`, consistent with the filtered paths. The lookup is bounded by the
+ *    caller-supplied IDs, so it does not reach the `max_result_window` limit that
+ *    applies to large filtered selections.
  */
 export const parseAgentSelection = async (
   soClient: SavedObjectsClientContract,
@@ -171,6 +170,7 @@ export const parseAgentSelection = async (
               res.agents.length > 0 && res.agents[res.agents.length - 1].sort
                 ? res.agents[res.agents.length - 1].sort
                 : undefined,
+            pitId: res.pit,
           };
         },
         esClient,
@@ -208,6 +208,7 @@ export const parseAgentSelection = async (
                 res.agents.length > 0 && res.agents[res.agents.length - 1].sort
                   ? res.agents[res.agents.length - 1].sort
                   : undefined,
+              pitId: res.pit,
             };
           },
           esClient,
@@ -218,9 +219,13 @@ export const parseAgentSelection = async (
     }
   }
 
-  agents.forEach(addAgent);
+  if (agents.length && agentService) {
+    // Resolve explicitly provided agent IDs through the same agent service used by
+    // the filtered selections above. The lookup is bounded by the caller-supplied
+    // IDs, so it does not reach the result-window limit that applies to large sets.
+    const requestedAgents = await agentService.getByIds(agents, { ignoreMissing: true });
+    requestedAgents.forEach((agent) => addAgent(agent.id));
+  }
 
-  // Note: No additional validation call to Fleet's `getByIds` is performed here.
-  // See JSDoc on `parseAgentSelection` for detailed rationale.
   return Array.from(selectedAgents);
 };

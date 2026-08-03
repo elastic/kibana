@@ -59,6 +59,8 @@ jest.mock('../spaces/get_current_namespace', () => ({
 
 jest.mock('../spaces/agent_namespaces', () => ({
   agentsKueryNamespaceFilter: jest.fn(),
+  buildFilterWithNamespace: jest.requireActual('../spaces/agent_namespaces')
+    .buildFilterWithNamespace,
 }));
 
 jest.mock('../license', () => ({
@@ -586,7 +588,7 @@ describe('rollback', () => {
           agents,
         });
 
-        expect(result.actionIds).toEqual([mockActionId1, mockActionId2]);
+        expect(result).toHaveProperty('actionIds', [mockActionId1, mockActionId2]);
         expect(mockRollbackBatch).toHaveBeenCalledWith(esClient, agents, {}, {}, ['default']);
       });
 
@@ -599,7 +601,7 @@ describe('rollback', () => {
           agents: [],
         });
 
-        expect(result.actionIds).toEqual([]);
+        expect(result).toHaveProperty('actionIds', []);
         expect(mockRollbackBatch).toHaveBeenCalledWith(esClient, [], {}, {}, ['default']);
       });
     });
@@ -633,7 +635,7 @@ describe('rollback', () => {
           agentIds,
         });
 
-        expect(result.actionIds).toEqual([mockActionId1]);
+        expect(result).toHaveProperty('actionIds', [mockActionId1]);
         expect(mockGetAgentsById).toHaveBeenCalledWith(esClient, soClient, agentIds);
         expect(mockRollbackBatch).toHaveBeenCalledWith(esClient, agents, {}, {}, ['default']);
       });
@@ -657,7 +659,7 @@ describe('rollback', () => {
           agentIds,
         });
 
-        expect(result.actionIds).toEqual([mockActionId1]);
+        expect(result).toHaveProperty('actionIds', [mockActionId1]);
         expect(mockRollbackBatch).toHaveBeenCalledWith(
           esClient,
           [agent1],
@@ -695,9 +697,9 @@ describe('rollback', () => {
           kuery,
         });
 
-        expect(result.actionIds).toEqual([mockActionId1]);
+        expect(result).toHaveProperty('actionIds', [mockActionId1]);
         expect(mockGetAgentsByKuery).toHaveBeenCalledWith(esClient, soClient, {
-          kuery,
+          kuery: `(${kuery})`,
           showAgentless: undefined,
           showInactive: false,
           page: 1,
@@ -731,9 +733,9 @@ describe('rollback', () => {
           batchSize,
         });
 
-        expect(result.actionIds).toEqual([mockActionId1, mockActionId2]);
+        expect(result).toHaveProperty('actionIds', [mockActionId1, mockActionId2]);
         expect(mockGetAgentsByKuery).toHaveBeenCalledWith(esClient, soClient, {
-          kuery,
+          kuery: `(${kuery})`,
           showAgentless: undefined,
           showInactive: false,
           page: 1,
@@ -777,7 +779,7 @@ describe('rollback', () => {
           esClient,
           soClient,
           expect.objectContaining({
-            kuery: `${namespaceFilter} AND ${kuery}`,
+            kuery: `(${namespaceFilter}) AND (${kuery})`,
           })
         );
       });

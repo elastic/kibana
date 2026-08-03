@@ -7,7 +7,12 @@
 
 import { i18n } from '@kbn/i18n';
 
-export { SERVICE_PROVIDER, TASK_TYPE } from '../../../../common/translations';
+export {
+  SERVICE_PROVIDER,
+  TASK_TYPE,
+  SERVICE_PROVIDER_ARIA_LABEL,
+  TASK_TYPE_ARIA_LABEL,
+} from '../../../../common/translations';
 
 export const EMPTY_FILTER_MESSAGE = i18n.translate(
   'xpack.searchInferenceEndpoints.filter.emptyMessage',

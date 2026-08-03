@@ -29,10 +29,6 @@ if [[ "$(pwd)" != *"/local-ssd/"* && "$(pwd)" != "/dev/shm"* ]]; then
     mkdir -p ./.moon/cache
     echo "Extracting moon-cache.tar.gz to ./.moon/cache"
     tar -xzf ~/moon-cache.tar.gz -C ./
-  elif [[ -d ~/.kibana-moon-cache ]]; then
-    echo "Using ~/.moon/cache as a starting point"
-    mkdir -p ./.moon/cache
-    mv ~/.kibana-moon-cache/* ./.moon/cache
   fi
 fi
 
@@ -51,4 +47,12 @@ fi
 
 if [[ "$DISABLE_BOOTSTRAP_VALIDATION" != "true" ]]; then
   check_for_changed_files 'yarn kbn bootstrap'
+fi
+
+# Opt-in per job (via CLEAR_YARN_CACHE) to free disk space on disk-constrained agents
+if [[ "${CLEAR_YARN_CACHE:-}" ]]; then
+  echo "Clearing yarn cache at /opt/buildkite-agent/.cache/yar..."
+  rm -rf /opt/buildkite-agent/.cache/yarn
+  echo "Available disk space after clearing yarn cache:"
+  df -h . || echo "Failed to get disk space"
 fi

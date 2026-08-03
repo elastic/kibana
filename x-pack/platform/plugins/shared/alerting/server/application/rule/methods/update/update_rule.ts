@@ -9,7 +9,11 @@ import Boom from '@hapi/boom';
 import { isEqual, omit } from 'lodash';
 import type { SavedObject } from '@kbn/core/server';
 import type { SanitizedRule, RawRule } from '../../../../types';
-import { validateRuleTypeParams, getRuleNotifyWhenType } from '../../../../lib';
+import {
+  validateRuleTypeParams,
+  authorizeRuleTypeParams,
+  getRuleNotifyWhenType,
+} from '../../../../lib';
 import { validateAndAuthorizeSystemActions } from '../../../../lib/validate_authorize_system_actions';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
 import { parseDuration, getRuleCircuitBreakerErrorMessage } from '../../../../../common';
@@ -29,6 +33,7 @@ import {
   createNewAPIKeySet,
   updateMetaAttributes,
   bulkMigrateLegacyActions,
+  migrateLegacyLastRunOutcomeMsg,
 } from '../../../../rules_client/lib';
 import type { RuleParams } from '../../types';
 import type { UpdateRuleData } from './types';
@@ -170,6 +175,10 @@ async function updateWithOCC<Params extends RuleParams = never>(
   const actionsClient = await context.getActionsClient();
 
   const validatedRuleTypeParams = validateRuleTypeParams(data.params, ruleType.validate.params);
+  await authorizeRuleTypeParams(validatedRuleTypeParams, ruleType.authorize?.params, {
+    request: context.request,
+    previousParams: originalRuleSavedObject.attributes.params,
+  });
   await validateActions(context, ruleType, data, allowMissingConnectorSecrets);
   await validateAndAuthorizeSystemActions({
     actionsClient,
@@ -381,26 +390,4 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
   // TODO (http-versioning): Remove this cast, this enables us to move forward
   // without fixing all of other solution types
   return rule as SanitizedRule<Params>;
-}
-
-/**
- * Migrates legacy lastRun.outcomeMsg from string to string[]
- *
- * Rule SO schema forces lastRun.outcomeMsg to be string[].
- * However, some rules may have lastRun.outcomeMsg as string after upgrading from 7.x due to
- * lack of migration. lastRun.outcomeMsg schema change from string to string[] happened after
- * classical migrations were deprecated due to Serverless. And quite often it's not an issue
- * as lastRun is absent.
- */
-function migrateLegacyLastRunOutcomeMsg<LastRun extends { outcomeMsg?: unknown }>(
-  lastRun: LastRun
-): LastRun {
-  if (typeof lastRun.outcomeMsg === 'string') {
-    return {
-      ...lastRun,
-      outcomeMsg: [lastRun.outcomeMsg],
-    };
-  }
-
-  return lastRun;
 }

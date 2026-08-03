@@ -56,6 +56,7 @@ export const AssignFlyoutResultList: FC<AssignFlyoutResultListProps> = ({
             className={`tagAssignFlyout__selectionIcon status-${overriddenStatus}`}
             type={statusIcon}
             data-test-subj="assign-result-status"
+            aria-hidden={true}
           />
           <EuiIcon type={result.icon ?? 'empty'} title={result.type} />
         </>

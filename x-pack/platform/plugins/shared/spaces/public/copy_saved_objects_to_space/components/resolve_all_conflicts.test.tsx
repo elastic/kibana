@@ -88,6 +88,7 @@ describe('ResolveAllConflicts', () => {
     expect(wrapper).toMatchInlineSnapshot(`
       <EuiPopover
         anchorPosition="downLeft"
+        aria-label="Resolve all conflicts"
         button={
           <ResolveAllButton
             onButtonClick={[Function]}

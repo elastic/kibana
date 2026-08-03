@@ -146,7 +146,7 @@ export const ConsoleErrorIndicator: React.FC = () => {
               </EuiNotificationBadge>
             </EuiToolTip>
           ) : (
-            <EuiIcon type={iconType} color={iconColor} size="s" />
+            <EuiIcon type={iconType} color={iconColor} size="s" aria-hidden={true} />
           )}
         </EuiFlexItem>
         <EuiFlexItem

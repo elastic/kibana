@@ -18,6 +18,7 @@ export type {
   CallToolParams,
   CallToolResponse,
   ContentPart,
+  FetchLike,
   ListToolsResponse,
   Tool,
   ToolProviderMetadata,

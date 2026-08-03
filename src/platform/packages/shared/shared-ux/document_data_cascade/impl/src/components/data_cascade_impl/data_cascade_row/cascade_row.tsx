@@ -29,6 +29,7 @@ export { CascadeRowHeaderPrimitive };
  * @description Internal component that is used to render a row in the data cascade.
  */
 export function CascadeRowPrimitive<G extends GroupNode, L extends LeafNode>({
+  isMobile,
   activeStickyRenderSlotRef,
   isActiveSticky,
   innerRef,
@@ -66,6 +67,7 @@ export function CascadeRowPrimitive<G extends GroupNode, L extends LeafNode>({
   const rowHeader = useMemo(() => {
     return (
       <CascadeRowHeaderPrimitive<G, L>
+        isMobile={isMobile}
         isGroupNode={isGroupNode}
         rowHeaderTitleSlot={RowTitleSlot}
         rowHeaderMetaSlots={rowHeaderMetaSlots}
@@ -87,6 +89,7 @@ export function CascadeRowPrimitive<G extends GroupNode, L extends LeafNode>({
     rowHeaderMetaSlots,
     rowInstance,
     size,
+    isMobile,
   ]);
 
   return (

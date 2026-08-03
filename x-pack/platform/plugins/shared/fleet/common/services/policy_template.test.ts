@@ -14,12 +14,16 @@ import type {
   RegistryDataStream,
 } from '../types';
 
+import type { NewPackagePolicy } from '../types';
+
 import {
   isInputOnlyPolicyTemplate,
   isIntegrationPolicyTemplate,
   getNormalizedInputs,
   getNormalizedDataStreams,
+  getPolicyTemplateDataStreamPaths,
   filterPolicyTemplatesTiles,
+  hasMultipleEnabledPolicyTemplates,
 } from './policy_template';
 
 describe('isInputOnlyPolicyTemplate', () => {
@@ -472,5 +476,99 @@ describe('filterPolicyTemplatesTiles', () => {
         status: 'not_installed',
       },
     ]);
+  });
+});
+
+describe('hasMultipleEnabledPolicyTemplates', () => {
+  const makePackagePolicy = (
+    inputs: Array<{ type: string; policy_template?: string; enabled: boolean }>
+  ): NewPackagePolicy => ({
+    name: 'test-policy',
+    namespace: 'default',
+    enabled: true,
+    policy_ids: ['policy-1'],
+    inputs: inputs.map((input) => ({
+      ...input,
+      streams: [],
+    })),
+  });
+
+  it('should return false when all enabled inputs belong to a single policy template', () => {
+    const packagePolicy = makePackagePolicy([
+      { type: 'logfile', policy_template: 'template_a', enabled: true },
+      { type: 'metrics', policy_template: 'template_a', enabled: true },
+    ]);
+    expect(hasMultipleEnabledPolicyTemplates(packagePolicy)).toBe(false);
+  });
+
+  it('should return true when enabled inputs span multiple policy templates', () => {
+    const packagePolicy = makePackagePolicy([
+      { type: 'logfile', policy_template: 'template_a', enabled: true },
+      { type: 'httpjson', policy_template: 'template_b', enabled: true },
+    ]);
+    expect(hasMultipleEnabledPolicyTemplates(packagePolicy)).toBe(true);
+  });
+
+  it('should return false when inputs span multiple templates but only one template is enabled', () => {
+    const packagePolicy = makePackagePolicy([
+      { type: 'logfile', policy_template: 'template_a', enabled: true },
+      { type: 'httpjson', policy_template: 'template_b', enabled: false },
+    ]);
+    expect(hasMultipleEnabledPolicyTemplates(packagePolicy)).toBe(false);
+  });
+
+  it('should return false when there is a single enabled input with no policy_template', () => {
+    const packagePolicy = makePackagePolicy([{ type: 'logfile', enabled: true }]);
+    expect(hasMultipleEnabledPolicyTemplates(packagePolicy)).toBe(false);
+  });
+
+  it('should return false when there are no enabled inputs', () => {
+    const packagePolicy = makePackagePolicy([
+      { type: 'logfile', policy_template: 'template_a', enabled: false },
+      { type: 'httpjson', policy_template: 'template_b', enabled: false },
+    ]);
+    expect(hasMultipleEnabledPolicyTemplates(packagePolicy)).toBe(false);
+  });
+});
+
+describe('getPolicyTemplateDataStreamPaths', () => {
+  it('returns the declared data_streams for integration templates', () => {
+    expect(
+      getPolicyTemplateDataStreamPaths({ name: 'nginx' }, {
+        name: 'nginx',
+        data_streams: ['access', 'error'],
+        inputs: [{ type: 'logfile' }],
+      } as any)
+    ).toEqual(['access', 'error']);
+  });
+
+  it('returns an empty array for integration templates without data_streams', () => {
+    expect(
+      getPolicyTemplateDataStreamPaths({ name: 'nginx' }, {
+        name: 'nginx',
+        inputs: [{ type: 'logfile' }],
+      } as any)
+    ).toEqual([]);
+  });
+
+  it('returns the synthesized data stream path for input-only templates', () => {
+    expect(
+      getPolicyTemplateDataStreamPaths({ name: 'aws_cloudwatch' }, {
+        name: 'ec2',
+        input: 'otelcol',
+        title: 'EC2',
+        description: 'EC2',
+      } as any)
+    ).toEqual(['aws_cloudwatch.ec2']);
+  });
+
+  it('scopes each input-only template to its own data stream path', () => {
+    const packageInfo = { name: 'aws_cloudwatch' };
+    expect(
+      getPolicyTemplateDataStreamPaths(packageInfo, { name: 'rds', input: 'otelcol' } as any)
+    ).toEqual(['aws_cloudwatch.rds']);
+    expect(
+      getPolicyTemplateDataStreamPaths(packageInfo, { name: 'sqs', input: 'otelcol' } as any)
+    ).toEqual(['aws_cloudwatch.sqs']);
   });
 });

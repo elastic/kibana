@@ -27,6 +27,7 @@ import { useLocation } from 'react-router-dom';
 import { css } from '@emotion/react';
 
 import type { TypedLensByValueInput, LensSavedObjectAttributes } from '@kbn/lens-plugin/public';
+import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-plugin/common/constants';
 import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
 import type { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
@@ -38,6 +39,7 @@ import { useLensDraftComment } from './use_lens_draft_comment';
 import { VISUALIZATION } from './translations';
 import { useIsMainApplication } from '../../../../common/hooks';
 import { convertToAbsoluteTimeRange } from '../../../visualizations/actions/convert_to_absolute_time_range';
+import { toLensAttributes } from './to_lens_attributes';
 
 const DEFAULT_TIMERANGE: TimeRange = {
   from: 'now-7d',
@@ -87,7 +89,9 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
   }, [clearDraftComment, currentAppId, embeddable, onCancel]);
 
   const handleAdd = useCallback(
-    (attributes: Record<string, unknown>, timeRange?: TimeRange) => {
+    (_attributes: Record<string, unknown>, timeRange?: TimeRange) => {
+      const attributes = toLensAttributes(_attributes);
+
       onSave(
         `!{${ID}${JSON.stringify({
           timeRange: convertToAbsoluteTimeRange(timeRange),
@@ -105,10 +109,12 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
 
   const handleUpdate = useCallback(
     (
-      attributes: Record<string, unknown>,
+      _attributes: Record<string, unknown>,
       timeRange: TimeRange | undefined,
       position: EuiMarkdownAstNodePosition
     ) => {
+      const attributes = toLensAttributes(_attributes);
+
       markdownContext.replaceNode(
         position,
         `!{${ID}${JSON.stringify({
@@ -241,44 +247,52 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
   }, [currentAppId$]);
 
   useEffect(() => {
-    let incomingEmbeddablePackage;
-
-    if (currentAppId) {
-      incomingEmbeddablePackage = embeddable
-        ?.getStateTransfer()
-        .getIncomingEmbeddablePackage(currentAppId, true);
+    if (!currentAppId) {
+      return;
     }
+    // `draftComment` hydrates asynchronously; wait for it so we don't drain the
+    // package before the draft is ready and drop the edit.
+    if (!draftComment) {
+      return;
+    }
+
+    // Peek first so we only drain when we are committing an add/update.
+    const incomingEmbeddablePackage = embeddable
+      ?.getStateTransfer()
+      .getIncomingEmbeddablePackage(currentAppId, false);
 
     const lensEmbeddablePackage = incomingEmbeddablePackage?.find(
-      (pkg) => pkg.type === 'lens'
+      (pkg) => pkg.type === LENS_EMBEDDABLE_TYPE
     ) as LensIncomingEmbeddablePackage;
 
-    if (lensEmbeddablePackage && lensEmbeddablePackage?.serializedState?.rawState?.attributes) {
-      const lensTime = timefilter.getTime();
-      const newTimeRange =
-        lensTime?.from && lensTime?.to
-          ? {
-              from: lensTime.from,
-              to: lensTime.to,
-              mode: [lensTime.from, lensTime.to].join('').includes('now')
-                ? ('relative' as const)
-                : ('absolute' as const),
-            }
-          : undefined;
-
-      if (draftComment?.position) {
-        handleUpdate(
-          lensEmbeddablePackage.serializedState.rawState.attributes,
-          newTimeRange,
-          draftComment.position
-        );
-        return;
-      }
-
-      if (draftComment) {
-        handleAdd(lensEmbeddablePackage.serializedState.rawState.attributes, newTimeRange);
-      }
+    if (!lensEmbeddablePackage?.serializedState?.rawState?.attributes) {
+      return;
     }
+
+    embeddable?.getStateTransfer().getIncomingEmbeddablePackage(currentAppId, true);
+
+    const lensTime = timefilter.getTime();
+    const newTimeRange =
+      lensTime?.from && lensTime?.to
+        ? {
+            from: lensTime.from,
+            to: lensTime.to,
+            mode: [lensTime.from, lensTime.to].join('').includes('now')
+              ? ('relative' as const)
+              : ('absolute' as const),
+          }
+        : undefined;
+
+    if (draftComment.position) {
+      handleUpdate(
+        lensEmbeddablePackage.serializedState.rawState.attributes,
+        newTimeRange,
+        draftComment.position
+      );
+      return;
+    }
+
+    handleAdd(lensEmbeddablePackage.serializedState.rawState.attributes, newTimeRange);
   }, [embeddable, storage, timefilter, currentAppId, handleAdd, handleUpdate, draftComment]);
 
   const createLensButton = (

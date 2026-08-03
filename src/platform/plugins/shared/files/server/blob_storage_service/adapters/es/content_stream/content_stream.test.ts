@@ -129,6 +129,15 @@ describe('ContentStream', () => {
         expect(request).toHaveProperty('id', 'something.0');
       });
 
+      it('should request uncompressed response to avoid breaking CBOR decoding', async () => {
+        await new Promise((resolve) => stream.once('data', resolve));
+
+        expect(client.get).toHaveBeenCalledTimes(1);
+
+        const [[, options]] = client.get.mock.calls;
+        expect(options).toHaveProperty('headers.accept-encoding', 'identity');
+      });
+
       it('should read the document contents', async () => {
         const data = await new Promise((resolve) => stream.once('data', resolve));
         expect(data).toEqual(Buffer.from('some content'));

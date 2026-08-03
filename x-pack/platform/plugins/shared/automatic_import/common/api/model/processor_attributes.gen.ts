@@ -75,7 +75,10 @@ export const ESProcessorOptions: z.ZodType<
     /**
      * An array of items to execute if the processor fails.
      */
-    on_failure: z.array(z.lazy(() => ESProcessorItem)).optional(),
+    on_failure: z
+      .array(z.lazy(() => ESProcessorItem))
+      .max(50)
+      .optional(),
     /**
      * If true, the processor continues to the next processor if the current processor fails.
      */
@@ -87,11 +90,11 @@ export const ESProcessorOptions: z.ZodType<
     /**
      * Conditionally execute the processor.
      */
-    if: z.string().optional(),
+    if: z.string().max(4096).optional(),
     /**
      * A tag to assign to the document after processing.
      */
-    tag: z.string().optional(),
+    tag: z.string().max(256).optional(),
   })
   .catchall(z.unknown());
 

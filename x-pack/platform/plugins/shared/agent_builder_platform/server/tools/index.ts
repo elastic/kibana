@@ -7,6 +7,7 @@
 
 import type { CoreSetup } from '@kbn/core-lifecycle-server';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
+import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import { productDocumentationTool } from './product_documentation';
 import { integrationKnowledgeTool } from './integration_knowledge';
 import type {
@@ -28,9 +29,11 @@ import { getWorkflowExecutionStatusTool } from './get_workflow_execution_status'
 export const registerTools = ({
   coreSetup,
   setupDeps,
+  getSecurity,
 }: {
   coreSetup: CoreSetup<PluginStartDependencies, AgentBuilderPlatformPluginStart>;
   setupDeps: PluginSetupDependencies;
+  getSecurity: () => SecurityPluginStart | undefined;
 }) => {
   const { onechat } = setupDeps;
 
@@ -50,7 +53,10 @@ export const registerTools = ({
 
   if (setupDeps.workflowsManagement) {
     tools.push(
-      getWorkflowExecutionStatusTool({ workflowsManagement: setupDeps.workflowsManagement })
+      getWorkflowExecutionStatusTool({
+        workflowsManagement: setupDeps.workflowsManagement,
+        getSecurity,
+      })
     );
   }
 

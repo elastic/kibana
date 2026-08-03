@@ -10,6 +10,10 @@
 import { simpleGit, type SimpleGit } from 'simple-git';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { TestCase } from '@playwright/test/reporter';
+import { globSync } from 'fast-glob';
+import path from 'node:path';
+import { SCOUT_CONFIG_MANIFEST_PATH_GLOB } from '@kbn/scout-info';
+import type { ScoutTestChannel } from '@kbn/scout-info';
 
 let git: SimpleGit;
 
@@ -21,8 +25,8 @@ export const getGitSHA1ForPath = async (p: string) => {
 export interface ScoutConfigManifest {
   path: string;
   exists: boolean;
-  lastModified: string;
   sha1: string;
+  testChannels: ScoutTestChannel[];
   tests: {
     id: string;
     title: string;
@@ -31,3 +35,11 @@ export interface ScoutConfigManifest {
     location: TestCase['location'];
   }[];
 }
+
+export const testConfigManifests = {
+  findPaths(): string[] {
+    const pattern = path.join(REPO_ROOT, SCOUT_CONFIG_MANIFEST_PATH_GLOB);
+    const configPaths = globSync(pattern, { onlyFiles: true });
+    return configPaths.map((configPath) => path.relative(REPO_ROOT, configPath));
+  },
+};

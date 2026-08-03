@@ -227,6 +227,12 @@ export const ConnectedServicesPage: React.FC<ConnectedServicesPageProps> = ({
                   closePopover={closeActionsPopover}
                   panelPaddingSize="none"
                   anchorPosition="downRight"
+                  aria-label={i18n.translate(
+                    'xpack.cloudConnect.connectedServices.actionsPopoverAriaLabel',
+                    {
+                      defaultMessage: 'Actions',
+                    }
+                  )}
                 >
                   <EuiContextMenuPanel items={actionsMenuItems} />
                 </EuiPopover>,

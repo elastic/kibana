@@ -21,10 +21,10 @@ import { searchAfterAndBulkCreateSuppressedAlerts } from '../../utils/search_aft
 import { threatEnrichmentFactory } from './threat_enrichment_factory';
 import { FAILED_CREATE_QUERY_MAX_CLAUSE, MANY_NESTED_CLAUSES_ERR } from './utils';
 import { alertSuppressionTypeGuard } from '../../utils/get_is_alert_suppression_active';
+import { createSearchAfterReturnType } from '../../utils/utils';
 
 export const createEventSignal = async ({
   sharedParams,
-  currentResult,
   currentEventList,
   eventsTelemetry,
   filters,
@@ -72,8 +72,9 @@ export const createEventSignal = async ({
       exc.message.includes(MANY_NESTED_CLAUSES_ERR) ||
       exc.message.includes(FAILED_CREATE_QUERY_MAX_CLAUSE)
     ) {
-      currentResult.errors.push(exc.message);
-      return currentResult;
+      const result = createSearchAfterReturnType();
+      result.errors.push(exc.message);
+      return result;
     } else {
       throw exc;
     }
@@ -81,7 +82,7 @@ export const createEventSignal = async ({
 
   const ids = Array.from(signalIdToMatchedQueriesMap.keys());
   if (ids.length === 0) {
-    return currentResult;
+    return createSearchAfterReturnType();
   }
   const indexFilter = {
     query: {

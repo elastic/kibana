@@ -16,10 +16,17 @@ import * as UserProfileImports from './user_profile/user_profile';
 import { UserProfileAPIClient } from './user_profile/user_profile_api_client';
 import type { UserProfileData } from '../../common';
 import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
+import { Breadcrumb } from '../components/breadcrumb';
 import { UserAPIClient } from '../management';
 import { securityMock } from '../mocks';
 
-const UserProfileMock = jest.spyOn(UserProfileImports, 'UserProfile');
+const UserProfileMock = jest
+  .spyOn(UserProfileImports, 'UserProfile')
+  .mockImplementation(({ user }) => (
+    <Breadcrumb text={user.username}>
+      <form aria-label="user profile" />
+    </Breadcrumb>
+  ));
 
 describe('<AccountManagementPage>', () => {
   const coreStart = coreMock.createStart();

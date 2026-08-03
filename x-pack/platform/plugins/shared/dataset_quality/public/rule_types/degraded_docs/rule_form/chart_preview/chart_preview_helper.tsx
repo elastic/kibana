@@ -165,7 +165,13 @@ export function TimeLabelForData({
         <EuiToolTip content={totalGroupsTooltip} position="top">
           <EuiFlexGroup gutterSize="xs">
             {xAxisInfo}
-            <EuiIcon size="s" color="subdued" type="question" className="eui-alignTop" />
+            <EuiIcon
+              size="s"
+              color="subdued"
+              type="question"
+              className="eui-alignTop"
+              aria-hidden={true}
+            />
           </EuiFlexGroup>
         </EuiToolTip>
       ) : (

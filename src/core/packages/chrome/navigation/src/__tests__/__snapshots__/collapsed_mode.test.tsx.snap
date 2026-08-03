@@ -63,7 +63,7 @@ exports[`Collapsed mode should render the side navigation 1`] = `
             class="euiPopover emotion-euiPopover-block"
           >
             <span
-              class="euiToolTipAnchor  emotion-euiToolTipAnchor-inlineBlock-wrapperStyles"
+              class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock-wrapperStyles"
               id="generated-id_euiToolTipAnchor"
             >
               <a
@@ -105,7 +105,7 @@ exports[`Collapsed mode should render the side navigation 1`] = `
             class="euiPopover emotion-euiPopover-block"
           >
             <span
-              class="euiToolTipAnchor  emotion-euiToolTipAnchor-inlineBlock-wrapperStyles"
+              class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock-wrapperStyles"
               id="generated-id_euiToolTipAnchor"
             >
               <a
@@ -202,7 +202,7 @@ exports[`Collapsed mode should render the side navigation 1`] = `
             class="euiPopover emotion-euiPopover-block"
           >
             <span
-              class="euiToolTipAnchor  emotion-euiToolTipAnchor-inlineBlock-wrapperStyles"
+              class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock-wrapperStyles"
               id="generated-id_euiToolTipAnchor"
             >
               <a
@@ -234,7 +234,7 @@ exports[`Collapsed mode should render the side navigation 1`] = `
             class="euiPopover emotion-euiPopover-block"
           >
             <span
-              class="euiToolTipAnchor  emotion-euiToolTipAnchor-inlineBlock-wrapperStyles"
+              class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock-wrapperStyles"
               id="generated-id_euiToolTipAnchor"
             >
               <a
@@ -303,7 +303,7 @@ exports[`Collapsed mode should render the side navigation 1`] = `
             class="euiPopover emotion-euiPopover-block"
           >
             <span
-              class="euiToolTipAnchor  emotion-euiToolTipAnchor-inlineBlock-wrapperStyles"
+              class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock-wrapperStyles"
               id="generated-id_euiToolTipAnchor"
             >
               <a
@@ -334,7 +334,7 @@ exports[`Collapsed mode should render the side navigation 1`] = `
             class="euiPopover emotion-euiPopover-block"
           >
             <span
-              class="euiToolTipAnchor  emotion-euiToolTipAnchor-inlineBlock-wrapperStyles"
+              class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock-wrapperStyles"
               id="generated-id_euiToolTipAnchor"
             >
               <a

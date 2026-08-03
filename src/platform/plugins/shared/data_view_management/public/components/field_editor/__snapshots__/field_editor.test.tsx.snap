@@ -540,6 +540,7 @@ exports[`FieldEditor should show conflict field warning 1`] = `
       helpText={
         <span>
           <eui-icon
+            aria-hidden={true}
             color="warning"
             size="s"
             type="warning"
@@ -833,6 +834,7 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
       helpText={
         <span>
           <eui-icon
+            aria-hidden={true}
             color="warning"
             size="s"
             type="warning"
@@ -1163,6 +1165,7 @@ exports[`FieldEditor should show multiple type field warning with a table contai
       helpText={
         <span>
           <eui-icon
+            aria-hidden={true}
             color="warning"
             size="s"
             type="warning"

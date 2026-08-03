@@ -82,7 +82,7 @@ const AuthorColumn = ({ entry }: { entry: KnowledgeBaseEntryResponse }) => {
   ) : (
     <EuiAvatar
       name={userName}
-      initials={userAvatar?.initials}
+      initials={userAvatar?.initials ?? undefined}
       size={'s'}
       color={userAvatar?.color ?? 'subdued'}
       css={css`

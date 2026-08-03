@@ -123,6 +123,7 @@ export const TableVisControls = memo(
 
     return (
       <EuiPopover
+        aria-label={exportBtnAriaLabel}
         id="dataTableExportData"
         button={downloadButton}
         isOpen={isPopoverOpen}

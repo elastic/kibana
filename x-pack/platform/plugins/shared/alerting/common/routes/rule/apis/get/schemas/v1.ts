@@ -6,9 +6,19 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { MAX_ID_LENGTH } from '../../../../../constants';
 
 export const getRuleRequestParamsSchema = schema.object({
   id: schema.string({
+    meta: {
+      description: 'The identifier for the rule.',
+    },
+  }),
+});
+
+export const getInternalRuleRequestParamsSchema = schema.object({
+  id: schema.string({
+    maxLength: MAX_ID_LENGTH,
     meta: {
       description: 'The identifier for the rule.',
     },

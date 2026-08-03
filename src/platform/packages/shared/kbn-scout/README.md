@@ -107,6 +107,8 @@ export default createPlaywrightConfig({
 
 Scout relies on configuration to determine the test files and opt-in [parallel test execution](https://playwright.dev/docs/test-parallel) against the single Elastic cluster.
 
+When `runGlobalSetup: true` is set, Scout also auto-discovers an optional `global.teardown.ts` next to `global.setup.ts`. Use `globalTeardownHook(...)` in that file to reset shared cluster/Kibana state once after all workers finish (even on failure) — for example, dropping legacy/hand-indexed data ingested by `global.setup.ts` or reverting feature-flag overrides. The teardown surface intentionally excludes `esArchiver`; use `esClient`/`kbnClient`/`apiServices` instead. See [`docs/extend/scout/global-setup-hook.md`](../../../../docs/extend/scout/global-setup-hook.md#global-teardown-hook) for the contract and examples.
+
 The Playwright configuration should only be created this way to ensure compatibility with Scout functionality. For configuration verification, we use a marker `VALID_CONFIG_MARKER`, and Scout will throw an error if the configuration is invalid.
 
 #### Fixtures
@@ -121,6 +123,93 @@ The `fixtures/scope` directory contains core Scout capabilities required for tes
 - `kbnClient`
 - `esArchiver`
 - `samlAuth`
+
+Synthetic APM / logs / infra data via [`@kbn/synthtrace`](https://github.com/elastic/kibana/tree/main/src/platform/packages/shared/kbn-synthtrace) is **not** part of `@kbn/scout`. Use the optional add-on [`@kbn/scout-synthtrace`](../kbn-scout-synthtrace/README.md) and merge its Playwright fixtures where you need `apmSynthtraceEsClient`, `infraSynthtraceEsClient`, or `logsSynthtraceEsClient`. `@kbn/scout-oblt`, `@kbn/scout-search`, and `@kbn/scout-security` do not bundle or re-export it.
+
+#### Optional: wiring Synthtrace
+
+1. **Register the dependency** in your plugin or package `tsconfig.json` (`kbn_references`), then run Moon regeneration if your project uses it:
+
+```jsonc
+"kbn_references": [
+  "@kbn/scout",
+  "@kbn/scout-synthtrace"
+]
+```
+
+For Observability plugins that normally use `@kbn/scout-oblt`, include both `@kbn/scout-oblt` and `@kbn/scout-synthtrace`.
+
+2. **UI tests (platform)** — merge `synthtraceFixture` into the Scout `test` object, then extend with your plugin fixtures. Use `mergeTests` from `@kbn/scout` (not `playwright/test`) so Scout ESLint rules stay satisfied:
+
+```ts
+// e.g. test/scout/ui/fixtures/index.ts
+import type { ScoutTestFixtures, ScoutWorkerFixtures } from '@kbn/scout';
+import { mergeTests, test as scoutTest } from '@kbn/scout';
+import type { SynthtraceFixture } from '@kbn/scout-synthtrace';
+import { synthtraceFixture } from '@kbn/scout-synthtrace';
+
+const base = mergeTests(scoutTest, synthtraceFixture);
+
+export const test = base.extend<MyTestFixtures, ScoutWorkerFixtures & SynthtraceFixture>({
+  // …plugin-specific fixtures
+});
+```
+
+Specs should import `test` from your **local** `fixtures` entry (so they see synthtrace), and `tags` / `expect` from `@kbn/scout` or `@kbn/scout/ui` as usual.
+
+3. **Parallel / `spaceTest`** — same pattern with `spaceTest` from `@kbn/scout`:
+
+```ts
+import { mergeTests, spaceTest as scoutSpaceTest } from '@kbn/scout';
+import { synthtraceFixture } from '@kbn/scout-synthtrace';
+
+export const spaceTest = mergeTests(scoutSpaceTest, synthtraceFixture).extend(/* … */);
+```
+
+4. **Observability (`@kbn/scout-oblt`)** — merge `synthtraceFixture` with the Oblt `test` (or `spaceTest`) you already extend:
+
+```ts
+import type { ScoutPage, ScoutTestFixtures, ScoutWorkerFixtures } from '@kbn/scout-oblt';
+import { mergeTests, test as obltTest } from '@kbn/scout-oblt';
+import type { SynthtraceFixture } from '@kbn/scout-synthtrace';
+import { synthtraceFixture } from '@kbn/scout-synthtrace';
+
+const base = mergeTests(obltTest, synthtraceFixture);
+
+export const test = base.extend<MyTestFixtures, ScoutWorkerFixtures & SynthtraceFixture>({
+  // …
+});
+```
+
+Import `test` from `../fixtures` (or your fixtures barrel) in specs that need synthtrace clients; keep importing `tags` from `@kbn/scout-oblt` if you use Oblt tags.
+
+5. **Parallel `global.setup.ts`** — `@kbn/scout`’s `globalSetupHook` does not include synthtrace. Either use the pre-merged helper from `@kbn/scout-synthtrace`, or merge manually:
+
+```ts
+// Option A — equivalent worker stack (core + esArchiver + synthtrace + apiServices)
+import { globalSetupHookWithSynthtrace } from '@kbn/scout-synthtrace';
+
+globalSetupHookWithSynthtrace('Load data', async ({ logsSynthtraceEsClient, esArchiver, log }) => {
+  await logsSynthtraceEsClient.clean();
+  // …
+});
+```
+
+```ts
+// Option B — you already use a wrapper hook (e.g. @kbn/scout-oblt globalSetupHook)
+import { mergeTests, globalSetupHook as obltGlobalSetupHook } from '@kbn/scout-oblt';
+import { synthtraceFixture } from '@kbn/scout-synthtrace';
+
+const globalSetupHook = mergeTests(obltGlobalSetupHook, synthtraceFixture);
+
+globalSetupHook('Load data', async ({ apmSynthtraceEsClient, log }) => {
+  // …
+});
+```
+
+6. **Setup only (no synthtrace in `test` fixtures)** — if you only need clients inside global setup, import `getSynthtraceClient` from `@kbn/scout-synthtrace` and call it with `esClient`, `log`, `config`, and optional `kbnUrl` (see that package’s README). You do not need to merge `synthtraceFixture` into `test` unless specs use the `*SynthtraceEsClient` fixtures directly.
+
+More detail and edge cases: [kbn-scout-synthtrace README](../kbn-scout-synthtrace/README.md).
 
 ```ts
 test.beforeAll(async ({ kbnClient }) => {
@@ -150,7 +239,13 @@ The `global_hooks` directory contains setup and teardown logic that applies glob
 
 The `page_objects` directory contains all the Page Objects that represent Platform core functionality such as Discover, Dashboard, Index Management, etc.
 
-If a Page Object is likely to be used in more than one plugin, it should be added here. This allows other teams to reuse it, improving collaboration across teams, reducing code duplication, and simplifying support and adoption.
+##### Where should a Page Object live?
+
+`@kbn/scout` is a critical package for Scout: any change to it triggers a full Scout test run. To keep CI fast, only add Page Objects here when they are shared across plugins. Use the following guidance to decide where a Page Object belongs:
+
+- If it is used by a single plugin, keep it in that plugin under `test/scout/ui/fixtures/page_objects/` and register it locally (see ["Registering a plugin-local Page Object"](#registering-a-plugin-local-page-object)). Changes are then scoped to that plugin's tests instead of the whole suite.
+- If it is used by a few plugins that already depend on the owning plugin, keep it in the owning plugin and import it from the others as a test helper (see ["Reusing a Page Object from another plugin"](#reusing-a-page-object-from-another-plugin)).
+- If it represents a core Platform surface with no natural owner (Discover, Dashboard, etc.), add it here so other teams can reuse it.
 
 Page Objects must be registered with the `createLazyPageObject` function, which guarantees its instance is lazy-initialized. This way, we can have all the page objects available in the test context, but only the ones that are called will be actually initialized:
 
@@ -169,6 +264,72 @@ All registered Page Objects are available via the `pageObjects` fixture:
 ```ts
 test.beforeEach(async ({ pageObjects }) => {
   await pageObjects.discover.goto();
+});
+```
+
+###### Registering a plugin-local Page Object
+
+For a Page Object used by a single plugin, keep it next to the tests in `test/scout/ui/fixtures/page_objects/` and extend the base `test` (or `spaceTest`) to add it to the `pageObjects` fixture:
+
+```ts
+import type { PageObjects, ScoutParallelTestFixtures, ScoutParallelWorkerFixtures } from '@kbn/scout';
+import { spaceTest as spaceBaseTest, createLazyPageObject } from '@kbn/scout';
+import { MyPluginPage } from './page_objects';
+
+export interface MyPluginTestFixtures extends ScoutParallelTestFixtures {
+  pageObjects: PageObjects & { myPluginPage: MyPluginPage };
+}
+
+export const spaceTest = spaceBaseTest.extend<MyPluginTestFixtures, ScoutParallelWorkerFixtures>({
+  pageObjects: async ({ pageObjects, page }, use) => {
+    await use({
+      ...pageObjects,
+      myPluginPage: createLazyPageObject(MyPluginPage, page),
+    });
+  },
+});
+```
+
+Tests then import `spaceTest` (or `test`) from the plugin's own fixtures instead of `@kbn/scout`.
+
+###### Reusing a Page Object from another plugin
+
+When a Page Object is owned by one plugin but needed by another that already depends on it, keep it in the owning plugin and import it as a test helper, rather than moving it to `@kbn/scout`. Two prerequisites:
+
+1. The owning plugin exports the Page Object from its `page_objects` barrel, e.g. `unified_search/test/scout/ui/fixtures/page_objects/index.ts`:
+
+```ts
+export { SavedQueryManagementMenu } from './saved_query_management_menu';
+export type { SaveQueryOptions } from './saved_query_management_menu';
+```
+
+2. The consuming plugin already lists the owner in its `tsconfig.json` `kbn_references` (true whenever there is a real plugin dependency, e.g. `discover` → `@kbn/unified-search-plugin`).
+
+The consumer then imports the Page Object via the owner's `@kbn/<plugin>` subpath and registers it on its own `pageObjects` fixture:
+
+```ts
+import type {
+  PageObjects,
+  ScoutParallelTestFixtures,
+  ScoutParallelWorkerFixtures,
+} from '@kbn/scout';
+import { spaceTest as spaceBaseTest, createLazyPageObject } from '@kbn/scout';
+// Page Object owned by the unified_search plugin, reused here as a test helper:
+import { SavedQueryManagementMenu } from '@kbn/unified-search-plugin/test/scout/ui/fixtures/page_objects';
+
+export interface DiscoverTestFixtures extends ScoutParallelTestFixtures {
+  pageObjects: PageObjects & {
+    savedQueryManagementMenu: SavedQueryManagementMenu;
+  };
+}
+
+export const spaceTest = spaceBaseTest.extend<DiscoverTestFixtures, ScoutParallelWorkerFixtures>({
+  pageObjects: async ({ pageObjects, page }, use) => {
+    await use({
+      ...pageObjects,
+      savedQueryManagementMenu: createLazyPageObject(SavedQueryManagementMenu, page),
+    });
+  },
 });
 ```
 
@@ -219,6 +380,8 @@ import { spaceTest as test, expect } from '@kbn/scout';
 
 - **`spaceTest`**: Use for parallel tests that can be isolated by Kibana spaces, allowing faster execution
 - **`test`**: Use for sequential tests that cannot run in parallel
+
+If you need **synthtrace** worker fixtures (`apmSynthtraceEsClient`, `logsSynthtraceEsClient`, etc.), add `@kbn/scout-synthtrace` and follow [Optional: wiring Synthtrace](#optional-wiring-synthtrace) under **Fixtures** above—your specs should import `test` from a local `fixtures` module that merges `synthtraceFixture`, not directly from `@kbn/scout` alone.
 
 **Example UI Test:**
 
@@ -326,40 +489,84 @@ Scout uses Playwright's [projects concept](https://playwright.dev/docs/test-proj
 }
 ```
 
+For `security` and `oblt` MKI projects, `productTier` is **required** (one of `complete | essentials | logs_essentials | search_ai_lake`). Example for an Observability "logs essentials" project:
+
+```json
+{
+  "serverless": true,
+  "projectType": "oblt",
+  "productTier": "logs_essentials",
+  "isCloud": true,
+  "cloudHostName": "elastic_cloud_hostname_qa_staging_prod",
+  "cloudUsersFilePath": "/path_to_your_cloud_users/role_users.json",
+  "hosts": {
+    "kibana": "https://my.oblt.project.kb.co",
+    "elasticsearch": "https://my.oblt.project.es.co"
+  },
+  "auth": {
+    "username": "operator_username",
+    "password": "operator_password"
+  }
+}
+```
+
+#### Cloud config validation
+
+`cloud_ech.json` and `cloud_mki.json` are validated when Scout loads them; errors are reported in a single message with the file path and `'<field>'` paths. Use the examples above as the source of truth for required fields. A few rules worth calling out:
+
+- `projectType` (serverless only) must be one of `es | oblt | security | workplaceai`.
+- Stateful configs (`serverless: false`) must not set `projectType`, `productTier`, `organizationId`, or `linkedProject`.
+- `license` is optional and defaults to `"trial"`.
+- You don't need to set `uiam` or `http2` — Scout manages them; the schema rejects inconsistent values.
+
 #### Starting Servers Only
 
 To start the servers locally without running tests, use the following command:
 
 ```bash
-node scripts/scout.js start-server [--stateful|--serverless=[es|oblt|security]]
+node scripts/scout start-server --arch <arch> --domain <domain>
 ```
 
-- **`--stateful`**: Starts servers in a stateful mode.
-- **`--serverless`**: Starts servers in a serverless mode. You can specify additional options like `es` (Elasticsearch), `oblt` (Observability), or `security`.
+- **`--arch`**: `stateful` or `serverless`.
+- **`--domain`**: e.g. `classic`, `search`, `observability_complete`, `security_complete`. Use `node scripts/scout start-server --help` for the full list.
 
 This command is useful for manual testing or running tests via an IDE.
+
+#### HTTP/2 Mode
+
+Scout can start Kibana with **HTTP/2 over TLS** enabled. From 9.0 onward Kibana defaults to HTTP/2 whenever TLS is configured, so production-like deployments increasingly run on HTTP/2 rather than HTTP/1.1. Some behaviors differ between the two protocols (e.g. search strategies and other streaming response paths), so use this mode to validate plugin behavior under HTTP/2 or to reproduce TLS-only issues locally.
+
+Enable it via the `http2` server config set; tests don't need any changes.
+
+```bash
+node scripts/scout start-server --arch stateful --domain classic --serverConfigSet http2
+node scripts/scout run-tests --arch stateful --domain classic --serverConfigSet http2 \
+  --config <plugin-path>/test/scout/ui/playwright.config.ts
+```
+
+Supported `--arch`/`--domain` combinations are the ones defined under `src/servers/configs/config_sets/http2/`.
 
 #### Running Servers and Tests Locally
 
 To start the servers locally and run tests in one step, use:
 
 ```bash
-node scripts/scout.js run-tests [--stateful|--serverless=[es|oblt|security]] --config <plugin-path>/test/scout/ui/playwright.config.ts
+node scripts/scout run-tests --location local --arch stateful --domain classic --config <plugin-path>/test/scout/ui/playwright.config.ts
 ```
 
 To start the servers locally and run a single test file, use:
 
 ```bash
-node scripts/scout.js run-tests [--stateful|--serverless=[es|oblt|security]] --testFiles <plugin-path>/test/scout/ui/tests/your_test_spec.ts
+node scripts/scout run-tests --location local --arch stateful --domain classic --testFiles <plugin-path>/test/scout/ui/tests/your_test_spec.ts
 ```
 
 To start the servers locally and run a tests sub-directory, use:
 
 ```bash
-node scripts/scout.js run-tests [--stateful|--serverless=[es|oblt|security]] --testFiles <plugin-path>/test/scout/ui/tests/test_sub_directory
+node scripts/scout run-tests --location local --arch stateful --domain classic --testFiles <plugin-path>/test/scout/ui/tests/test_sub_directory
 ```
 
-- **`--stateful`** or **`--serverless`**: Specifies the deployment type.
+- **`--arch`** and **`--domain`**: Specify the test target (e.g. stateful classic, serverless search).
 - **`--config`**: Path to the Playwright configuration file for the plugin.
 
 This command starts the required servers and automatically executes the tests using Playwright.
@@ -384,39 +591,41 @@ To run tests against a Cloud deployment, you can use either the Scout CLI or the
 **Using Scout CLI:**
 
 ```bash
-node scripts/scout.js run-tests \
-  --stateful \
-  --testTarget=cloud \
+node scripts/scout run-tests \
+  --location cloud \
+  --arch stateful \
+  --domain classic \
   --config <plugin-path>/test/scout/ui/playwright.config.ts
 ```
 
 ```bash
-node scripts/scout.js run-tests \
-  --serverless=oblt \
-  --testTarget=cloud \
+node scripts/scout run-tests \
+  --location cloud \
+  --arch serverless \
+  --domain observability_complete \
   --config <plugin-path>/test/scout/ui/playwright.config.ts
 ```
 
-- **`--testTarget=cloud`**: Specifies that tests should run against a Cloud deployment.
+- **`--location cloud`**: Run tests against a Cloud deployment (ECH or MKI).
 
 **Using Playwright CLI:**
 
 ```bash
 npx playwright test \
   --project=ech \
-  --grep=@ess \
+  --grep=stateful-classic \
   --config <plugin-path>/test/scout/ui/playwright.config.ts
 ```
 
 ```bash
 npx playwright test \
   --project=mki \
-  --grep=@svlOblt \
+  --grep=serverless-observability_complete \
   --config <plugin-path>/test/scout/ui/playwright.config.ts
 ```
 
 - **`--project`**: Specifies the test target (`ech` for Stateful or `mki` for Serverless).
-- **`--grep`**: Filters tests by tags (e.g., `@svlSearch` for Elasticsearch or `@svlOblt` for Observability).
+- **`--grep`**: Filters tests by tags (e.g., `serverless-search` for Elasticsearch or `serverless-observability_complete` for Observability).
 
 By following these steps, you can efficiently run tests in various environments using Scout.
 
@@ -535,7 +744,7 @@ export const scoutTestFixtures = mergeTests(coreFixtures, newTestFixture);
 
 #### Best Practices
 
-- **Reusable Code:** When creating Page Objects, API services or Fixtures that apply to more than one plugin, ensure they are added to the `kbn-scout` package.
+- **Reusable Code:** When creating Page Objects, API services or Fixtures that apply to more than one plugin, ensure they are added to the `kbn-scout` package. Single-consumer Page Objects should instead live in the consuming plugin (see ["Where should a Page Object live?"](#where-should-a-page-object-live)), since any change to `kbn-scout` re-runs the whole Scout suite.
 - **Adhere to Existing Structure:** Maintain consistency with the project's architecture.
 - **Keep the Scope of Components Clear** When designing test components, keep in mind naming conventions, scope, maintainability and performance.
   - `Page Objects` should focus exclusively on UI interactions (clicking buttons, filling forms, navigating page). They should not make API calls directly.

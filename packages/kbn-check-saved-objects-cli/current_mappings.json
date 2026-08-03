@@ -72,6 +72,7 @@
             "type": "keyword"
           },
           "params": {
+            "ignore_above": 4096,
             "type": "flattened"
           }
         },
@@ -1215,12 +1216,39 @@
       "integrationName": {
         "type": "keyword"
       },
+      "integrations": {
+        "dynamic": false,
+        "properties": {
+          "syncData": {
+            "dynamic": false,
+            "properties": {
+              "lastFullSync": {
+                "type": "date"
+              },
+              "lastUpdateProcessed": {
+                "type": "date"
+              }
+            },
+            "type": "object"
+          },
+          "syncMarkerIndex": {
+            "type": "keyword"
+          }
+        },
+        "type": "object"
+      },
       "managed": {
         "type": "boolean"
+      },
+      "managedVersion": {
+        "type": "integer"
       },
       "matchers": {
         "dynamic": false,
         "type": "object"
+      },
+      "matchersModifiedByUser": {
+        "type": "boolean"
       },
       "name": {
         "type": "keyword"
@@ -1371,6 +1399,10 @@
         "properties": {}
       },
       "installed_kibana_space_id": {
+        "type": "keyword"
+      },
+      "installed_kibana_version": {
+        "ignore_above": 1024,
         "type": "keyword"
       },
       "internal": {
@@ -3052,6 +3084,10 @@
   },
   "observability-onboarding-state": {
     "properties": {
+      "createdBy": {
+        "ignore_above": 1024,
+        "type": "keyword"
+      },
       "progress": {
         "dynamic": false,
         "type": "object"

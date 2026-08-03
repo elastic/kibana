@@ -62,21 +62,23 @@ steps:
             - exit_status: '*'
               limit: 1
 
-      - command: .buildkite/scripts/steps/test/scout_test_run_builder.sh
+      - command: .buildkite/scripts/steps/test/scout/test_run_builder.sh
         label: 'Scout Test Run Builder'
         agents:
           image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
-          diskSizeGb: 115
+          diskSizeGb: 120
         key: build_scout_tests
         timeout_in_minutes: 15
         depends_on:
           - build
         env:
+          SCOUT_TEST_DISTRIBUTION_STRATEGY: 'configs'
           SERVERLESS_TESTS_ONLY: 'true'
-          SCOUT_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/scout_configs.sh'
+          SCOUT_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/scout/configs.sh'
+          SCOUT_TEST_CHANNELS: ci-on-commit
         retry:
           automatic:
             - exit_status: '*'
@@ -110,7 +112,7 @@ steps:
           preemptible: true
         depends_on: build
         timeout_in_minutes: 60
-        parallelism: 4
+        parallelism: 5
         retry:
           automatic:
             - exit_status: '-1'
@@ -124,10 +126,11 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
+          diskSizeGb: 120
           preemptible: true
         depends_on: build
         timeout_in_minutes: 60
-        parallelism: 10
+        parallelism: 11
         retry:
           automatic:
             - exit_status: '-1'
@@ -141,10 +144,11 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
+          diskSizeGb: 120
           preemptible: true
         depends_on: build
         timeout_in_minutes: 60
-        parallelism: 5
+        parallelism: 6
         retry:
           automatic:
             - exit_status: '-1'
@@ -178,7 +182,7 @@ steps:
           preemptible: true
         depends_on: build
         timeout_in_minutes: 60
-        parallelism: 1
+        parallelism: 2
         retry:
           automatic:
             - exit_status: '-1'
@@ -212,7 +216,7 @@ steps:
           preemptible: true
         depends_on: build
         timeout_in_minutes: 60
-        parallelism: 1
+        parallelism: 2
         retry:
           automatic:
             - exit_status: '-1'
@@ -263,7 +267,7 @@ steps:
           preemptible: true
         depends_on: build
         timeout_in_minutes: 60
-        parallelism: 1
+        parallelism: 2
         retry:
           automatic:
             - exit_status: '-1'
@@ -272,13 +276,15 @@ steps:
       - command: .buildkite/scripts/steps/functional/defend_workflows_serverless.sh
         label: 'Defend Workflows Cypress Tests on Serverless'
         if: "build.env('SKIP_CYPRESS') != '1' && build.env('SKIP_CYPRESS') != 'true'"
+        env:
+          CLEAR_YARN_CACHE: '1'
         agents:
           image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod
           provider: gcp
           enableNestedVirtualization: true
-          machineType: n2-standard-4
-          diskSizeGb: 105
+          machineType: n2-highmem-4
+          diskSizeGb: 125
         depends_on: build
         timeout_in_minutes: 75
         parallelism: 12
@@ -295,6 +301,7 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
+          diskSizeGb: 120
           preemptible: true
         depends_on: build
         timeout_in_minutes: 60

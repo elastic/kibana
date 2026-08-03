@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { load } from 'js-yaml';
-
 import semverGte from 'semver/functions/gte';
 import semverLte from 'semver/functions/lte';
+
+export type YamlParseFn = (value: string) => unknown;
 
 export enum ChangeType {
   Enhancement = 'enhancement',
@@ -40,11 +40,12 @@ export const formatChangelog = (parsedChangelog: Changelog) => {
 };
 
 export const parseYamlChangelog = (
+  parse: YamlParseFn,
   changelogText: string | null | undefined,
   latestVersion: string,
   currentVersion?: string
 ) => {
-  const parsedChangelog: Changelog = changelogText ? load(changelogText) : [];
+  const parsedChangelog: Changelog = changelogText ? (parse(changelogText) as Changelog) : [];
 
   if (!currentVersion) return parsedChangelog.filter((e) => semverLte(e.version, latestVersion));
 

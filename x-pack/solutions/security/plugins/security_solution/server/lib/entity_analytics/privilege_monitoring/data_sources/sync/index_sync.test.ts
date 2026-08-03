@@ -19,7 +19,7 @@ import { createIndexSyncService } from './index_sync';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { AuditLogger } from '@kbn/core/server';
 import type { SearchService } from '../../users/search';
-import type { BulkResponse } from 'elasticsearch-8.x/lib/api/types';
+import type { estypes } from 'elasticsearch-8.x';
 
 const mockList = jest.fn();
 jest.mock('../../saved_objects', () => {
@@ -199,7 +199,7 @@ describe('Privileged User Monitoring: Index Sync Service', () => {
       esClientMock.bulk.mockResolvedValue({
         errors: true,
         items: [{ index: { error: { errorMsg } } }],
-      } as unknown as BulkResponse);
+      } as unknown as estypes.BulkResponse);
 
       await indexSyncService._syncUsernamesFromIndex({
         indexName: 'test-index',

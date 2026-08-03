@@ -10,7 +10,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
 import type { KueryNode } from '@kbn/es-query';
-import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import { fromKueryExpression, toElasticsearchQuery, escapeQuotes } from '@kbn/es-query';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/types';
 
@@ -224,6 +224,7 @@ export async function getAgentsByKuery(
   total: number;
   page: number;
   perPage: number;
+  pit?: string;
   statusSummary?: Record<AgentStatus, number>;
   aggregations?: Record<string, estypes.AggregationsAggregate>;
 }> {
@@ -261,7 +262,9 @@ export async function getAgentsByKuery(
     });
     if (agentlessPolicies.items.length > 0) {
       filters.push(
-        `NOT policy_id: (${agentlessPolicies.items.map((policy) => `"${policy.id}"`).join(' or ')})`
+        `NOT policy_id: (${agentlessPolicies.items
+          .map((policy) => `"${escapeQuotes(policy.id)}"`)
+          .join(' or ')})`
       );
     }
   }
@@ -294,7 +297,9 @@ export async function getAgentsByKuery(
     uninstalled: 0,
   };
 
-  const pitIdToUse = pitId || (openPit ? await openPointInTime(esClient, pitKeepAlive) : undefined);
+  const initialPitId =
+    pitId || (openPit ? await openPointInTime(esClient, pitKeepAlive) : undefined);
+  let currentPitId = initialPitId;
 
   const queryAgents = async (
     queryOptions: { from: number; size: number } | { searchAfter: SortResults; size: number }
@@ -334,10 +339,10 @@ export async function getAgentsByKuery(
       fields: Object.keys(runtimeFields),
       sort,
       query: kueryNode ? toElasticsearchQuery(kueryNode) : undefined,
-      ...(pitIdToUse
+      ...(currentPitId
         ? {
             pit: {
-              id: pitIdToUse,
+              id: currentPitId,
               keep_alive: pitKeepAlive,
             },
           }
@@ -361,6 +366,8 @@ export async function getAgentsByKuery(
     throw err;
   }
 
+  currentPitId = res.pit_id ?? currentPitId;
+
   let agents = res.hits.hits.map(searchHitToAgent);
   let total = res.hits.total as number;
   // filtering for a range on the version string will not work,
@@ -372,6 +379,7 @@ export async function getAgentsByKuery(
     // if there are more than SO_SEARCH_LIMIT agents, the logic falls back to same as before
     if (total < SO_SEARCH_LIMIT) {
       const response = await queryAgents({ from: 0, size: SO_SEARCH_LIMIT });
+      currentPitId = response.pit_id ?? currentPitId;
       agents = response.hits.hits
         .map(searchHitToAgent)
         .filter((agent) => isAgentUpgradeAvailable(agent, latestAgentVersion));
@@ -404,7 +412,7 @@ export async function getAgentsByKuery(
     total,
     ...(searchAfter ? { page: 0 } : { page }),
     perPage,
-    ...(pitIdToUse ? { pit: pitIdToUse } : {}),
+    ...(initialPitId ? { pit: currentPitId } : {}),
     ...(aggregations ? { aggregations: res.aggregations } : {}),
     ...(getStatusSummary ? { statusSummary } : {}),
   };
@@ -736,6 +744,7 @@ export async function updateAgent(
       index: AGENTS_INDEX,
       doc: agentSOAttributesToFleetServerAgentDoc(data),
       refresh: 'wait_for',
+      retry_on_conflict: 5,
     })
   );
 }

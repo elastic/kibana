@@ -355,6 +355,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           '--xpack.alerting.gapAutoFillScheduler.enabled=true',
           `--xpack.actions.allowedHosts=${JSON.stringify([
             'localhost',
+            '127.0.0.1',
             'some.non.existent.com',
             'smtp-mail.outlook.com',
             'slack.com',

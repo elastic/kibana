@@ -54,7 +54,8 @@ export function NoData(props) {
   const [useInternalCollection, setUseInternalCollection] = useState(false);
   const isCloudEnabled = props.isCloudEnabled;
   const { services } = useKibana();
-  const learnMoreLink = services.docLinks.links.cloud.connectToAutoops;
+
+  const cloudConnectStatus = Legacy.shims.useCloudConnectStatus();
   const cloudConnectUrl = services.application.getUrlForApp('cloud_connect');
   const handleConnectClick = (e) => {
     e.preventDefault();
@@ -131,18 +132,19 @@ export function NoData(props) {
           </h1>
         </EuiScreenReaderOnly>
         <EuiPageBody restrictWidth={600}>
-          {Legacy.shims.hasEnterpriseLicense && (
-            <>
-              <AutoOpsPromotionCallout
-                learnMoreLink={learnMoreLink}
-                cloudConnectUrl={cloudConnectUrl}
-                onConnectClick={handleConnectClick}
-                hasCloudConnectPermission={hasCloudConnectPermission}
-                overrideCalloutProps={{ style: { margin: `0 ${euiTheme.size.l}` } }}
-              />
-              <EuiSpacer size="m" />
-            </>
-          )}
+          {!Legacy.shims.isAirGapped &&
+            !cloudConnectStatus.isLoading &&
+            !cloudConnectStatus.isCloudConnectAutoopsEnabled && (
+              <>
+                <AutoOpsPromotionCallout
+                  cloudConnectUrl={cloudConnectUrl}
+                  onConnectClick={handleConnectClick}
+                  hasCloudConnectPermission={hasCloudConnectPermission}
+                  overrideCalloutProps={{ style: { margin: `0 ${euiTheme.size.l}` } }}
+                />
+                <EuiSpacer size="m" />
+              </>
+            )}
           <EuiPageTemplate.EmptyPrompt
             icon={<EuiIcon type="monitoringApp" size="xxl" />}
             body={
@@ -186,18 +188,19 @@ export function NoData(props) {
         </h1>
       </EuiScreenReaderOnly>
       <EuiPageBody restrictWidth={600}>
-        {Legacy.shims.hasEnterpriseLicense && (
-          <>
-            <AutoOpsPromotionCallout
-              learnMoreLink={learnMoreLink}
-              cloudConnectUrl={cloudConnectUrl}
-              onConnectClick={handleConnectClick}
-              hasCloudConnectPermission={hasCloudConnectPermission}
-              overrideCalloutProps={{ style: { margin: `0 ${euiTheme.size.l}` } }}
-            />
-            <EuiSpacer size="m" />
-          </>
-        )}
+        {!Legacy.shims.isAirGapped &&
+          !cloudConnectStatus.isLoading &&
+          !cloudConnectStatus.isCloudConnectAutoopsEnabled && (
+            <>
+              <AutoOpsPromotionCallout
+                cloudConnectUrl={cloudConnectUrl}
+                onConnectClick={handleConnectClick}
+                hasCloudConnectPermission={hasCloudConnectPermission}
+                overrideCalloutProps={{ style: { margin: `0 ${euiTheme.size.l}` } }}
+              />
+              <EuiSpacer size="m" />
+            </>
+          )}
         <EuiPageTemplate.EmptyPrompt
           icon={<EuiIcon type="monitoringApp" size="xxl" />}
           title={

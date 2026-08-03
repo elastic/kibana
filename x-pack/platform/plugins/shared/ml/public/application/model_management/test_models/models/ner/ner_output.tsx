@@ -113,6 +113,7 @@ const Lines: FC<{ result: NerResponse }> = ({ result }) => {
             <div>
               <div>
                 <EuiIcon
+                  aria-hidden={true}
                   size="m"
                   type={getClassIcon(entity.class_name)}
                   style={{ marginRight: ICON_PADDING, verticalAlign: 'text-top' }}
@@ -169,6 +170,7 @@ const EntityBadge = ({
       <EuiFlexGroup gutterSize="none">
         <EuiFlexItem grow={false}>
           <EuiIcon
+            aria-hidden={true}
             size="s"
             type={getClassIcon(entity.class_name)}
             style={{ marginRight: ICON_PADDING, marginTop: ICON_PADDING }}

@@ -32,6 +32,7 @@ import {
   FleetError,
 } from '../errors';
 import { SO_SEARCH_LIMIT } from '../../common';
+import { validateFleetSavedObjectId } from '../../common/services';
 
 import { deleteDownloadSourceSecrets, deleteSecrets, isSecretStorageEnabled } from './secrets';
 
@@ -133,6 +134,8 @@ class DownloadSourceService {
   ): Promise<DownloadSource> {
     const logger = appContextService.getLogger();
     logger.debug(`Creating new download source`);
+
+    validateFleetSavedObjectId(options?.id);
 
     const data: DownloadSourceSOAttributes = { ...omit(downloadSource, ['ssl', 'secrets']) };
 

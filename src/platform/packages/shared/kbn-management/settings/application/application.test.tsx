@@ -9,6 +9,7 @@
 
 import React from 'react';
 import { act, fireEvent, render, waitFor } from '@testing-library/react';
+import { of } from 'rxjs';
 import {
   SettingsApplication,
   DATA_TEST_SUBJ_SETTINGS_TITLE,
@@ -24,9 +25,33 @@ import { DATA_TEST_SUBJ_PREFIX_TAB } from './tab';
 import { DATA_TEST_SUBJ_SETTINGS_CATEGORY } from '@kbn/management-settings-components-field-category/category';
 import { wrap, createSettingsApplicationServicesMock } from './mocks';
 import type { SettingsApplicationServices } from './services';
+import { SettingsApplicationKibanaProvider } from './services';
+import { KibanaRootContextProvider } from '@kbn/react-kibana-context-root';
+import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
+import type { Space } from '@kbn/spaces-plugin/common';
+import {
+  analyticsServiceMock,
+  applicationServiceMock,
+  chromeServiceMock,
+  docLinksServiceMock,
+  i18nServiceMock,
+  notificationServiceMock,
+  scopedHistoryMock,
+  themeServiceMock,
+  uiSettingsServiceMock,
+} from '@kbn/core/public/mocks';
 
 const spaceCategories = ['general', 'dashboard', 'notifications'];
 const globalCategories = ['custom branding'];
+
+const createRootMock = () => {
+  return {
+    analytics: analyticsServiceMock.createAnalyticsServiceStart(),
+    i18n: i18nServiceMock.createStartContract(),
+    theme: themeServiceMock.createStartContract(),
+    userProfile: userProfileServiceMock.createStart(),
+  };
+};
 
 describe('Settings application', () => {
   beforeEach(() => {
@@ -45,18 +70,67 @@ describe('Settings application', () => {
     }
   });
 
-  it('fires addUrlToHistory when a query is typed in the search bar', async () => {
-    const services: SettingsApplicationServices = createSettingsApplicationServicesMock();
+  it('replaces history while typing so browser back does not step through each character', async () => {
+    const history = scopedHistoryMock.create({ pathname: '', search: '' });
+    const activeSpace: Space = {
+      id: 'default',
+      name: 'Default',
+      disabledFeatures: [],
+      solution: 'classic',
+    };
+    const application = applicationServiceMock.createStartContract();
+    application.capabilities = {
+      advancedSettings: { show: true, save: true },
+      globalSettings: { show: true, save: true },
+      filterSettings: { bySolutionView: false },
+    } as any;
 
-    const { getByTestId } = render(wrap(<SettingsApplication />, services));
+    const { getByTestId } = render(
+      <KibanaRootContextProvider {...createRootMock()}>
+        <SettingsApplicationKibanaProvider
+          docLinks={docLinksServiceMock.createStartContract()}
+          notifications={{ toasts: notificationServiceMock.createStartContract().toasts }}
+          userProfile={userProfileServiceMock.createStart()}
+          theme={themeServiceMock.createStartContract()}
+          i18n={i18nServiceMock.createStartContract()}
+          settings={{
+            client: uiSettingsServiceMock.createStartContract(),
+            globalClient: uiSettingsServiceMock.createStartContract(),
+          }}
+          history={history}
+          sectionRegistry={{
+            getSpacesSections: () => [],
+            getGlobalSections: () => [],
+          }}
+          application={application}
+          chrome={chromeServiceMock.createStartContract()}
+          spaces={{
+            getActiveSpace: () => Promise.resolve(activeSpace),
+            getActiveSpace$: () => of(activeSpace),
+          }}
+        >
+          <SettingsApplication />
+        </SettingsApplicationKibanaProvider>
+      </KibanaRootContextProvider>
+    );
 
     const searchBar = getByTestId(DATA_TEST_SUBJ_SETTINGS_SEARCH_BAR);
-    act(() => {
-      fireEvent.change(searchBar, { target: { value: 'test' } });
-    });
+
+    // Simulate typing characters one at a time, as a user would.
+    const valuesByKeystroke = ['t', 'te', 'tes', 'test'];
+    for (const value of valuesByKeystroke) {
+      act(() => {
+        fireEvent.change(searchBar, { target: { value } });
+      });
+    }
 
     await waitFor(() => {
-      expect(services.addUrlToHistory).toHaveBeenCalledWith('?query=test');
+      expect(history.push).not.toHaveBeenCalled();
+      expect(history.replace).toHaveBeenCalledTimes(valuesByKeystroke.length);
+      expect(history.replace).toHaveBeenNthCalledWith(1, { pathname: '', search: '?query=t' });
+      expect(history.replace).toHaveBeenNthCalledWith(2, { pathname: '', search: '?query=te' });
+      expect(history.replace).toHaveBeenNthCalledWith(3, { pathname: '', search: '?query=tes' });
+      expect(history.replace).toHaveBeenNthCalledWith(4, { pathname: '', search: '?query=test' });
     });
   });
 

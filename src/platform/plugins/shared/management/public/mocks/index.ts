@@ -40,6 +40,7 @@ const createSetupContract = (): ManagementSetup => ({
       state: {},
     })),
   },
+  registerAutoOpsStatusHook: jest.fn(),
 });
 
 const createStartContract = (): ManagementStart => ({

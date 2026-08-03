@@ -312,6 +312,11 @@ const CODES = Object.freeze({
     { defaultMessage: 'Response action was canceled' }
   ),
 
+  ra_scan_error_disabled: i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.scan.disabled',
+    { defaultMessage: 'Malware protection is disabled.' }
+  ),
+
   'ra_scan_error_invalid-input': i18n.translate(
     'xpack.securitySolution.endpointActionResponseCodes.scan.invalidInput',
     { defaultMessage: 'Invalid absolute file path provided' }

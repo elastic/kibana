@@ -2,6 +2,7 @@
 
 exports[`ScriptingHelpFlyout should render normally 1`] = `
 <EuiFlyout
+  aria-label="Help"
   data-test-subj="scriptedFieldsHelpFlyout"
   onClose={[Function]}
 >
@@ -43,6 +44,7 @@ exports[`ScriptingHelpFlyout should render normally 1`] = `
 
 exports[`ScriptingHelpFlyout should render nothing if not visible 1`] = `
 <EuiFlyout
+  aria-label="Help"
   data-test-subj="scriptedFieldsHelpFlyout"
   onClose={[Function]}
 >

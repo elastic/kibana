@@ -11,6 +11,7 @@ export { run } from './src/cli';
 export { Cluster } from './src/cluster';
 export {
   SYSTEM_INDICES_SUPERUSER,
+  SYSTEM_INDICES_SUPERUSER_PASSWORD,
   ELASTIC_SERVERLESS_SUPERUSER,
   ELASTIC_SERVERLESS_SUPERUSER_PASSWORD,
   SERVERLESS_NODES,
@@ -18,6 +19,11 @@ export {
   verifyDockerInstalled,
   maybeCreateDockerNetwork,
   type ServerlessProjectType,
+  serverlessProjectTypes,
+  isServerlessProjectType,
+  type ServerlessProductTier,
+  serverlessProductTiers,
+  isServerlessProjectTier,
   readRolesFromResource,
   readRolesDescriptorsFromResource,
 } from './src/utils';

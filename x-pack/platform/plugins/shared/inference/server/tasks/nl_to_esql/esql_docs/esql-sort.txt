@@ -1,6 +1,6 @@
-## SORT
+# SORT
 
-The `SORT` command organizes a table by one or more columns.
+The SORT command arranges the rows of a table based on one or more columns. By default, sorting is in ascending order, but you can specify ascending (ASC) or descending (DESC) order. Additional sort expressions can be used as tie breakers. When sorting multivalued columns, the lowest value is used for ascending order and the highest for descending. Null values are treated as larger than any other value by default, appearing last in ascending order and first in descending order. You can override this behavior with NULLS FIRST or NULLS LAST.
 
 ## Syntax
 
@@ -8,15 +8,13 @@ The `SORT` command organizes a table by one or more columns.
 
 ### Parameters
 
-#### `columnX`
+#### columnX
 
 The column to sort on.
 
 ## Examples
 
-### Basic sorting
-
-Sort the table by the `height` column in ascending order (default behavior):
+Sorts the employees by their height in ascending order.
 
 ```esql
 FROM employees
@@ -24,9 +22,7 @@ FROM employees
 | SORT height
 ```
 
-### Explicitly sorting in descending order with `DESC`
-
-Sort the table by the `height` column in descending order:
+Sorts the employees by their height in descending order.
 
 ```esql
 FROM employees
@@ -34,9 +30,7 @@ FROM employees
 | SORT height DESC
 ```
 
-### Providing additional sort expressions to act as tie breakers
-
-Sort the table by `height` in descending order, and use `first_name` in ascending order as a tie breaker:
+Sorts the employees by height in descending order, and uses first name in ascending order to break ties.
 
 ```esql
 FROM employees
@@ -44,31 +38,10 @@ FROM employees
 | SORT height DESC, first_name ASC
 ```
 
-### Sorting `null` values first using `NULLS FIRST`
-
-Sort the table by `first_name` in ascending order, placing `null` values first:
+Sorts the employees by first name in ascending order, placing any null values at the top of the list.
 
 ```esql
 FROM employees
 | KEEP first_name, last_name, height
 | SORT first_name ASC NULLS FIRST
 ```
-
-## Notes
-
-If SORT is used right after a KEEP command, make sure it only uses column names in KEEP,
-or move the SORT before the KEEP, e.g.
-- not correct: KEEP date | SORT @timestamp,
-- correct: SORT @timestamp | KEEP date)
-
-By default, the sorting order is ascending. You can specify an explicit sort order by using `ASC` for ascending or `DESC` for descending.
-
-If two rows have the same sort key, they are considered equal. You can provide additional sort expressions to act as tie breakers.
-
-When sorting on multivalued columns, the lowest value is used when sorting in ascending order and the highest value is used when sorting in descending order.
-
-By default, `null` values are treated as being larger than any other value. This means that with an ascending sort order, `null` values are sorted last, and with a descending sort order, `null` values are sorted first. You can change this by providing `NULLS FIRST` or `NULLS LAST`.
-
-## Limitations
-- **Multivalued Columns**: When sorting on multivalued columns, the lowest value is used for ascending order and the highest value for descending order.
-- **Null Values**: By default, null values are treated as larger than any other value. This can be changed using `NULLS FIRST` or `NULLS LAST`.

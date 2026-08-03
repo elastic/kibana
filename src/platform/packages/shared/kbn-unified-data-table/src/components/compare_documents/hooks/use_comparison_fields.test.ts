@@ -33,14 +33,14 @@ const renderFields = ({
   props,
   transformHit = (hit) => hit,
 }: {
-  props?: Partial<Omit<UseComparisonFieldsProps, 'getDocById'>>;
+  props?: Partial<Omit<UseComparisonFieldsProps, 'docMap'>>;
   transformHit?: (hit: EsHitRecord) => EsHitRecord;
 } = {}) => {
   const dataView = props?.dataView ?? dataViewWithTimefieldMock;
   const docs = generateEsHits(dataView, 5).map((hit) =>
     buildDataTableRecord(transformHit(hit), dataView)
   );
-  const getDocById = (id: string) => docs.find((doc) => doc.raw._id === id);
+  const docMap = new Map(docs.map((doc, docIndex) => [doc.raw._id ?? doc.id, { doc, docIndex }]));
   const {
     result: {
       current: { comparisonFields, totalFields },
@@ -52,7 +52,7 @@ const renderFields = ({
       selectedDocIds: ['0', '1', '2'],
       showAllFields: true,
       showMatchingValues: true,
-      getDocById,
+      docMap,
       ...props,
     })
   );

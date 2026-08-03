@@ -30,7 +30,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.security.forceLogout();
     });
 
-    it('should attach msg=SESSION_EXPIRED to the redirect URL when redirecting to /login if the session has expired when trying to access a page', async () => {
+    it('should attach msg=SESSION_IDLE_TIMEOUT to the redirect URL when redirecting to /login if the session has expired due to idle timeout', async () => {
       await login();
 
       // Kibana will log the user out automatically 5 seconds before the `xpack.security.session.idleTimeout` timeout.
@@ -49,7 +49,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(currentURL.pathname).to.eql('/login');
 
       expect(await PageObjects.security.loginPage.getInfoMessage()).to.be(
-        'Your session has timed out. Please log in again.'
+        'Your session has timed out due to inactivity. Please log in again.'
       );
     });
 
@@ -81,7 +81,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // accordingly
       const failure = await fetchProtectedAPI();
       expect(failure.statusCode).to.be(401);
-      expect(failure.reason).to.be('SESSION_EXPIRED');
+      expect(failure.reason).to.be('SESSION_IDLE_TIMEOUT');
 
       // Navigate to a page that doesn't require authentication, so that the
       // timer which normally would log the user out 5 seconds before their

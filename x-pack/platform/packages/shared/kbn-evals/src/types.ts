@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { Example } from '@arizeai/phoenix-client/dist/esm/types/datasets';
+import type { Example } from '@arizeai/phoenix-client/types/datasets';
 import type {
   EvaluationResult as PhoenixEvaluationResult,
   Evaluator as PhoenixEvaluator,
   TaskOutput,
-} from '@arizeai/phoenix-client/dist/esm/types/experiments';
+} from '@arizeai/phoenix-client/types/experiments';
 import type { BoundInferenceClient, Model } from '@kbn/inference-common';
 import type { HttpHandler } from '@kbn/core/public';
 import type { AvailableConnectorWithId } from '@kbn/gen-ai-functional-testing';

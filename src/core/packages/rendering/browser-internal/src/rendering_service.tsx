@@ -31,6 +31,7 @@ import { GridLayout } from '@kbn/core-chrome-layout/layouts/grid';
 import { LegacyFixedLayout } from '@kbn/core-chrome-layout/layouts/legacy-fixed';
 import { GlobalRedirectAppLink } from '@kbn/global-redirect-app-links';
 import type { CoreEnv } from '@kbn/core-base-browser-internal';
+import type { CoreAuthenticationService } from '@kbn/core-security-browser';
 
 export interface RenderingServiceContextDeps {
   analytics: AnalyticsServiceStart;
@@ -39,6 +40,7 @@ export interface RenderingServiceContextDeps {
   theme: ThemeServiceStart;
   userProfile: UserProfileService;
   coreEnv: CoreEnv;
+  authc: CoreAuthenticationService;
 }
 
 export interface RenderingServiceRenderCoreDeps {
@@ -139,6 +141,7 @@ export class RenderingService implements IRenderingService {
         theme={deps.theme}
         userProfile={deps.userProfile}
         coreEnv={deps.coreEnv}
+        authc={deps.authc}
       >
         {children}
       </KibanaRenderContextProvider>

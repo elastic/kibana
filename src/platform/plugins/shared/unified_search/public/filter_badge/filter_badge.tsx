@@ -38,10 +38,6 @@ export function FilterBadge({
 }: FilterBadgeProps) {
   const { euiTheme } = useEuiTheme();
 
-  if (!dataViews.length) {
-    return null;
-  }
-
   const prefixText = filter.meta.negate ? ` ${strings.getNotLabel()}` : '';
 
   const prefix =

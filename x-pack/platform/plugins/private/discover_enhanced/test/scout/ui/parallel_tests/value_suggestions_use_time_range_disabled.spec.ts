@@ -11,7 +11,7 @@ import { spaceTest, testData, assertionMessages } from '../fixtures';
 
 spaceTest.describe(
   'Discover app - value suggestions: useTimeRange disabled',
-  { tag: tags.DEPLOYMENT_AGNOSTIC },
+  { tag: tags.deploymentAgnostic },
   () => {
     spaceTest.beforeAll(async ({ scoutSpace }) => {
       await scoutSpace.savedObjects.load(testData.KBN_ARCHIVES.DASHBOARD_DRILLDOWNS);
