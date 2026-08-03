@@ -8,13 +8,12 @@
 import { useEffect } from 'react';
 import type { Logger } from '@kbn/logging';
 import type { IUiSettingsClient } from '@kbn/core/public';
+import type { ProductDocBasePluginStart } from '@kbn/product-doc-base-plugin/public';
 import {
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
 } from '@kbn/management-settings-ids';
 import { ResourceTypes } from '@kbn/product-doc-common';
-import type { SecurityLabsInstallStatusResponse } from '../../common/http_api/installation';
-import type { ProductDocBasePluginStart } from '../types';
 
 // Sentinels that mean no default AI connector/model is configured. Either can
 // appear depending on which settings UI last wrote genAiSettings:defaultAIConnector
@@ -52,14 +51,15 @@ export const ensureSecurityLabsInstalled = async ({
   const inferenceId = await productDocBase.installation.getDefaultInferenceId({
     resourceType: ResourceTypes.securityLabs,
   });
-  const statusResponse = (await productDocBase.installation.getStatus({
+  const statusResponse = await productDocBase.installation.getStatus({
     inferenceId,
     resourceType: ResourceTypes.securityLabs,
-  })) as SecurityLabsInstallStatusResponse;
+  });
 
-  if (statusResponse.status === 'uninstalled') {
+  const status = 'status' in statusResponse ? statusResponse.status : undefined;
+  if (status === 'uninstalled') {
     logger.debug(
-      `Auto-installing Security Labs content for inference ID [${inferenceId}] (status: ${statusResponse.status})`
+      `Auto-installing Security Labs content for inference ID [${inferenceId}] (status: ${status})`
     );
     await productDocBase.installation.install({
       inferenceId,
@@ -69,7 +69,7 @@ export const ensureSecurityLabsInstalled = async ({
   }
 
   logger.debug(
-    `Skipping Security Labs auto-install for inference ID [${inferenceId}] (status: ${statusResponse.status})`
+    `Skipping Security Labs auto-install for inference ID [${inferenceId}] (status: ${status})`
   );
 };
 

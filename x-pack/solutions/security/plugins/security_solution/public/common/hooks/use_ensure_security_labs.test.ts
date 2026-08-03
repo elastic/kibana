@@ -13,7 +13,7 @@ import {
 } from '@kbn/management-settings-ids';
 import { ResourceTypes } from '@kbn/product-doc-common';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
-import type { ProductDocBasePluginStart } from '../types';
+import type { ProductDocBasePluginStart } from '@kbn/product-doc-base-plugin/public';
 import { ensureSecurityLabsInstalled, useEnsureSecurityLabs } from './use_ensure_security_labs';
 
 describe('ensureSecurityLabsInstalled', () => {

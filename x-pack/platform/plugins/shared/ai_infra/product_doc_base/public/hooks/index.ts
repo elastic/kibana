@@ -12,9 +12,4 @@ export {
   type UseUninstallProductDocOptions,
 } from './use_uninstall_product_doc';
 export { useDefaultInferenceId } from './use_default_inference_id';
-export {
-  useEnsureSecurityLabs,
-  ensureSecurityLabsInstalled,
-  type EnsureSecurityLabsServices,
-} from './use_ensure_security_labs';
 export { REACT_QUERY_KEYS } from './constants';
