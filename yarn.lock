@@ -9557,6 +9557,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/significant-events-app-plugin@link:x-pack/platform/plugins/shared/significant_events_app":
+  version "0.0.0"
+  uid ""
+
 "@kbn/significant-events-plugin@link:x-pack/platform/plugins/shared/significant_events":
   version "0.0.0"
   uid ""
