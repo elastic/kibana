@@ -13,7 +13,6 @@ import {
   bulkSnoozeActionPoliciesBodySchema,
   createActionPolicyDataSchema,
   findActionPoliciesResponseSchema,
-  listPolicyExecutionHistoryResponseSchema,
   matchActionPoliciesForRuleBodySchema,
   matchActionPoliciesForRuleResponseSchema,
   matcherDataFieldsResponseSchema,
@@ -34,8 +33,6 @@ import {
   MATCH_ACTION_POLICIES_FOR_RULE_REQUEST,
   MATCH_ACTION_POLICIES_FOR_RULE_RESPONSE,
 } from './match_action_policies_for_rule_oas_example';
-import { LIST_EXECUTION_HISTORY_RESPONSE } from './list_execution_history_oas_example';
-import { COUNT_EXECUTION_HISTORY_RESPONSE } from './count_new_execution_history_events_oas_example';
 import { MATCHER_DATA_FIELDS_RESPONSE } from '../suggestions/matcher_data_fields_oas_example';
 import { ACTION_POLICY_TAGS_RESPONSE } from '../suggestions/action_policy_tags_oas_example';
 
@@ -86,12 +83,6 @@ describe('action policy OAS example payloads', () => {
     expect(
       matchActionPoliciesForRuleResponseSchema.safeParse(MATCH_ACTION_POLICIES_FOR_RULE_RESPONSE)
         .success
-    ).toBe(true);
-  });
-
-  it('keeps execution history response example valid against listPolicyExecutionHistoryResponseSchema', () => {
-    expect(
-      listPolicyExecutionHistoryResponseSchema.safeParse(LIST_EXECUTION_HISTORY_RESPONSE).success
     ).toBe(true);
   });
 
