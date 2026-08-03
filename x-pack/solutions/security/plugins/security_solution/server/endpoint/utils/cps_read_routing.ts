@@ -38,3 +38,14 @@ export const shouldUseInternalSearchClient = (indices: string[], cpsRead: boolea
 
   return indices.some(isFleetIndex) || !indices.some(isEndpointIndex);
 };
+
+/**
+ * Elasticsearch prefixes the index of a hit that came from a linked project with its alias, so a
+ * colon in a hit's `_index` is the only signal that the document did not come from this project.
+ * Verified against a live fanned-in document rather than assumed; the same prefix is what
+ * `expandIndexPatternsForCps` relies on for Lens.
+ *
+ * Read it off a hit only. Whether a *query* on `_index` sees the prefix is a different question and
+ * is not relied on anywhere.
+ */
+export const isFannedInHit = (hitIndex?: string): boolean => Boolean(hitIndex?.includes(':'));

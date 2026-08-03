@@ -52,7 +52,10 @@ export function getMetadataListRequestHandler(
     const endpointMetadataService = endpointAppContext.service.getEndpointMetadataService(spaceId);
 
     try {
-      const { data, total } = await endpointMetadataService.getHostMetadataList(request.query);
+      const { data, total } = await endpointMetadataService.getHostMetadataList(
+        request.query,
+        request
+      );
 
       const body: MetadataListResponse = {
         data,
@@ -86,7 +89,7 @@ export const getMetadataRequestHandler = function (
 
     try {
       return response.ok({
-        body: await endpointMetadataService.getEnrichedHostMetadata(request.params.id),
+        body: await endpointMetadataService.getEnrichedHostMetadata(request.params.id, request),
       });
     } catch (error) {
       return errorHandler(logger, response, error);

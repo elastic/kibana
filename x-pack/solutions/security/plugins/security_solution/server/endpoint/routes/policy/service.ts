@@ -13,6 +13,7 @@ import { catchAndWrapError } from '../../utils';
 import { INITIAL_POLICY_ID } from '.';
 import type { GetHostPolicyResponse, HostPolicyResponse } from '../../../../common/endpoint/types';
 import { prefixIndexPatternsWithCcs } from '../../utils/ccs_utils';
+import { isFannedInHit } from '../../utils/cps_read_routing';
 import type { EndpointAppContextService } from '../../endpoint_app_context_services';
 
 export const getESQueryPolicyResponseByAgentID = (
@@ -93,9 +94,6 @@ export async function getPolicyResponseByAgentId({
 
   return undefined;
 }
-
-/** Elasticsearch prefixes the index of a hit that came from a linked project with its alias */
-const isFannedInHit = (hitIndex?: string): boolean => Boolean(hitIndex?.includes(':'));
 
 /**
  * Ensures the agent whose policy response was found is visible in this space. These documents carry
