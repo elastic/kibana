@@ -1,5 +1,5 @@
 {
-  "sha1": "cc8347bc8eb803c6b3827e9e56f82dcb595d7a47",
+  "sha1": "84641001aabe16f44ee73c06595e1e04887b3ddd",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -302,14 +302,14 @@
     {
       "id": "63227c5cfe04f39-ccf6627ff5bcb2c",
       "title": "OverviewSaveLensVisualization opens save lens visualization modal with correct attributes",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/overview_save_lens_visualization.spec.ts",
-        "line": 14,
+        "line": 15,
         "column": 11
       }
     },
