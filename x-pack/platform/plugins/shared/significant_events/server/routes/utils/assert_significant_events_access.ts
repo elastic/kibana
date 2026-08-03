@@ -34,19 +34,16 @@ type RequirementCheck = (context: SignificantEventsAccessContext) => Promise<Err
 /**
  * Observability serverless projects and classic deployments only. The pricing tier cannot express
  * this: `isFeatureAvailable` returns `true` wherever `pricing.tiers.enabled` is `false`, which is
- * every project type except Observability. `isServerless` is read alongside `cloud` because `cloud`
- * is optional, so a serverless deployment without it is denied rather than read as classic.
+ * every project type except Observability. Classic / non-cloud is allowed when
+ * `cloud.isServerlessEnabled` is false or cloud is absent; serverless always lives in cloud, so
+ * that boolean is authoritative for the classic vs serverless split.
  */
 export const isObservabilityDeployment = ({
   cloud,
-  isServerless,
 }: {
   cloud?: Pick<CloudSetup, 'isServerlessEnabled' | 'serverless'>;
-  isServerless?: boolean;
 }): boolean =>
-  !isServerless && !cloud?.isServerlessEnabled
-    ? true
-    : cloud?.serverless.projectType === 'observability';
+  !cloud?.isServerlessEnabled ? true : cloud.serverless.projectType === 'observability';
 
 // One "plugin must be present" requirement per entry in the shared list, so
 // adding a required plugin there is the only change needed on the server.
@@ -80,7 +77,7 @@ const significantEventsRequirements: Record<SignificantEventsUnavailableReason, 
         ? undefined
         : new FeatureNotEnabledError('Significant events is not available in this environment.'),
     project_type: async ({ server }) =>
-      isObservabilityDeployment({ cloud: server.cloud, isServerless: server.isServerless })
+      isObservabilityDeployment({ cloud: server.cloud })
         ? undefined
         : new FeatureNotEnabledError(
             'Significant events is only available in Observability projects.'

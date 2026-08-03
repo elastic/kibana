@@ -17,8 +17,6 @@ interface ContextOverrides {
   featureFlagAvailable?: boolean;
   /** The serverless project type. Omit for a classic deployment, which has none. */
   projectType?: string;
-  /** Defaults to whether `projectType` was given. Set alone for serverless with no cloud contract. */
-  isServerless?: boolean;
   tierAvailable?: boolean;
   hasEnterpriseLicense?: boolean;
   workflowsExtensionsPlugin?: boolean;
@@ -31,7 +29,6 @@ const buildArgs = (overrides: ContextOverrides = {}) => {
   const {
     featureFlagAvailable = true,
     projectType,
-    isServerless = projectType !== undefined,
     tierAvailable = true,
     hasEnterpriseLicense = true,
     workflowsExtensionsPlugin = true,
@@ -45,7 +42,6 @@ const buildArgs = (overrides: ContextOverrides = {}) => {
       featureFlags: { getBooleanValue: jest.fn().mockResolvedValue(featureFlagAvailable) },
       pricing: { isFeatureAvailable: jest.fn().mockReturnValue(tierAvailable) },
     },
-    isServerless,
     cloud: projectType && { isServerlessEnabled: true, serverless: { projectType } },
     workflowsExtensions: workflowsExtensionsPlugin ? {} : undefined,
     workflowsManagement: workflowsManagementPlugin ? {} : undefined,
@@ -100,12 +96,6 @@ describe('assertSignificantEventsAccess', () => {
     await expect(
       assertSignificantEventsAccess(buildArgs({ projectType: 'observability' }))
     ).resolves.toBeUndefined();
-  });
-
-  it('denies a serverless deployment that exposes no cloud contract', async () => {
-    await expect(
-      assertSignificantEventsAccess(buildArgs({ isServerless: true }))
-    ).rejects.toBeInstanceOf(FeatureNotEnabledError);
   });
 
   it('throws a FeatureNotEnabledError (403) when the pricing tier is unavailable', async () => {
