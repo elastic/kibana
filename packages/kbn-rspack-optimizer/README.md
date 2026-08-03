@@ -69,6 +69,7 @@ yarn start
 
 # Opt out to the legacy webpack optimizer
 KBN_USE_RSPACK=false yarn start
+```
 
 ### CLI Options
 
