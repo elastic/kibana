@@ -7,7 +7,11 @@
 import { uniq } from 'lodash';
 import type { EndpointMetadataServiceTestContextMock } from './mocks';
 import { createEndpointMetadataServiceTestContextMock } from './mocks';
-import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import {
+  elasticsearchServiceMock,
+  httpServerMock,
+  savedObjectsClientMock,
+} from '@kbn/core/server/mocks';
 import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import {
   legacyMetadataSearchResponseMock,
@@ -22,6 +26,7 @@ import {
 } from '../../routes/metadata/query_builders';
 import type { HostMetadata } from '../../../../common/endpoint/types';
 import type { Agent, PackagePolicy } from '@kbn/fleet-plugin/common';
+import { FleetAgentGenerator } from '../../../../common/endpoint/data_generators/fleet_agent_generator';
 import type { AgentPolicyServiceInterface } from '@kbn/fleet-plugin/server/services';
 import { createAppContextStartContractMock as fleetCreateAppContextStartContractMock } from '@kbn/fleet-plugin/server/mocks';
 import { appContextService as fleetAppContextService } from '@kbn/fleet-plugin/server/services';
@@ -376,6 +381,220 @@ describe('EndpointMetadataService', () => {
       expect(esClient.search).toHaveBeenCalledWith(
         expect.objectContaining({ index: expectedQuery.index })
       );
+    });
+  });
+
+  describe('and CPS is enabled', () => {
+    let readEsClientMock: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
+    let request: ReturnType<typeof httpServerMock.createKibanaRequest>;
+
+    beforeEach(() => {
+      readEsClientMock = elasticsearchServiceMock.createElasticsearchClient();
+      request = httpServerMock.createKibanaRequest();
+      testMockedContext.endpointAppContextService.isCpsEnabled.mockReturnValue(true);
+      testMockedContext.endpointAppContextService.getReadEsClient.mockReturnValue(readEsClientMock);
+      // Default: empty search results so tests that only care about client routing don't throw
+      readEsClientMock.search.mockResolvedValue({
+        took: 0,
+        timed_out: false,
+        _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+        hits: { hits: [], total: { value: 0, relation: 'eq' }, max_score: null },
+      } as unknown as Awaited<ReturnType<typeof readEsClientMock.search>>);
+    });
+
+    describe('#getHostMetadataList', () => {
+      it('should read as the request user so the list can fan out to linked projects', async () => {
+        await metadataService.getHostMetadataList(
+          { page: 0, pageSize: 10, kuery: '', hostStatuses: [] },
+          request
+        );
+
+        expect(testMockedContext.endpointAppContextService.getReadEsClient).toHaveBeenCalledWith(
+          request
+        );
+        expect(readEsClientMock.search).toHaveBeenCalled();
+        expect(esClient.search).not.toHaveBeenCalled();
+      });
+
+      it('should fall back to the internal client when no request is available, even with CPS on (flag-off twin)', async () => {
+        esClient.search.mockResolvedValue({
+          took: 0,
+          timed_out: false,
+          _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+          hits: { hits: [], total: { value: 0, relation: 'eq' }, max_score: null },
+        } as unknown as Awaited<ReturnType<typeof esClient.search>>);
+
+        await metadataService.getHostMetadataList({
+          page: 0,
+          pageSize: 10,
+          kuery: '',
+          hostStatuses: [],
+        });
+
+        expect(esClient.search).toHaveBeenCalled();
+        expect(readEsClientMock.search).not.toHaveBeenCalled();
+      });
+
+      it('should pass `ignoreMissing: true` to `agentPolicy.getByIds` so missing linked-project policies do not throw', async () => {
+        testMockedContext.fleetServices.agentPolicy.getByIds.mockResolvedValue([]);
+
+        await metadataService.getHostMetadataList(
+          { page: 0, pageSize: 10, kuery: '', hostStatuses: [] },
+          request
+        );
+
+        expect(testMockedContext.fleetServices.agentPolicy.getByIds).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.anything(),
+          expect.objectContaining({ ignoreMissing: true })
+        );
+      });
+
+      it('should leave the origin-only policy lookup exactly as it was when CPS is off', async () => {
+        testMockedContext.endpointAppContextService.isCpsEnabled.mockReturnValue(false);
+        esClient.search.mockResolvedValue({
+          took: 0,
+          timed_out: false,
+          _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+          hits: { hits: [], total: { value: 0, relation: 'eq' }, max_score: null },
+        } as unknown as Awaited<ReturnType<typeof esClient.search>>);
+        testMockedContext.fleetServices.agentPolicy.getByIds.mockResolvedValue([]);
+
+        await metadataService.getHostMetadataList({
+          page: 0,
+          pageSize: 10,
+          kuery: '',
+          hostStatuses: [],
+        });
+
+        expect(testMockedContext.fleetServices.agentPolicy.getByIds).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.anything()
+        );
+      });
+
+      it('should still return rows when a linked-project agent has no matching policy in the local project', async () => {
+        const endpointMetadataDoc = endpointDocGenerator.generateHostMetadata();
+        const mockAgent = {
+          policy_id: 'unknown-linked-policy-id',
+        } as unknown as Agent;
+        readEsClientMock.search.mockResolvedValue(
+          unitedMetadataSearchResponseMock(endpointMetadataDoc, mockAgent) as unknown as Awaited<
+            ReturnType<typeof readEsClientMock.search>
+          >
+        );
+        testMockedContext.fleetServices.agentPolicy.getByIds.mockResolvedValue([]);
+        // policy.get returns null → getFleetAgentPolicy throws FleetAgentPolicyNotFoundError,
+        // which enrichHostMetadata catches and logs — the row is still produced
+        testMockedContext.fleetServices.agentPolicy.get.mockResolvedValue(null);
+
+        const result = await metadataService.getHostMetadataList(
+          { page: 0, pageSize: 10, kuery: '', hostStatuses: [] },
+          request
+        );
+
+        expect(result.data).toHaveLength(1);
+      });
+    });
+
+    describe('#getHostMetadata()', () => {
+      it('should reject when the agent is not visible in the space and the hit came from a local index', async () => {
+        const endpointMetadataDoc = endpointDocGenerator.generateHostMetadata();
+        // Hit's _index has no colon → classified as local by isFannedInHit
+        readEsClientMock.search.mockResolvedValue({
+          took: 0,
+          timed_out: false,
+          _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+          hits: {
+            total: { value: 1, relation: 'eq' },
+            max_score: null,
+            hits: [
+              {
+                _index: 'metrics-endpoint.metadata-default',
+                _id: 'local-hit-id',
+                _score: null,
+                _source: endpointMetadataDoc,
+                sort: [0],
+              },
+            ],
+          },
+        } as unknown as Awaited<ReturnType<typeof readEsClientMock.search>>);
+        testMockedContext.fleetServices.ensureInCurrentSpace.mockRejectedValue(
+          new Error('agent is not visible in this space')
+        );
+
+        await expect(
+          metadataService.getHostMetadata(endpointMetadataDoc.agent.id, request)
+        ).rejects.toThrow();
+      });
+
+      it('should resolve when the space check fails but the hit came from a linked project and the agent is not enrolled locally', async () => {
+        const endpointMetadataDoc = endpointDocGenerator.generateHostMetadata();
+        // Hit's _index has a colon → classified as fanned-in by isFannedInHit
+        readEsClientMock.search.mockResolvedValue({
+          took: 0,
+          timed_out: false,
+          _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+          hits: {
+            total: { value: 1, relation: 'eq' },
+            max_score: null,
+            hits: [
+              {
+                _index: 'remote-project:metrics-endpoint.metadata-default',
+                _id: 'fanned-in-hit-id',
+                _score: null,
+                _source: endpointMetadataDoc,
+                sort: [0],
+              },
+            ],
+          },
+        } as unknown as Awaited<ReturnType<typeof readEsClientMock.search>>);
+        testMockedContext.fleetServices.ensureInCurrentSpace.mockRejectedValue(
+          new Error('agent is not visible in this space')
+        );
+        // No locally enrolled agent → the document belongs to the linked project
+        (testMockedContext.fleetServices.fetchAgentsById as jest.Mock).mockResolvedValue([]);
+
+        await expect(
+          metadataService.getHostMetadata(endpointMetadataDoc.agent.id, request)
+        ).resolves.toBeDefined();
+      });
+
+      it('should reject when the space check fails, the hit is from a linked project, but the agent IS enrolled locally', async () => {
+        const endpointMetadataDoc = endpointDocGenerator.generateHostMetadata();
+        readEsClientMock.search.mockResolvedValue({
+          took: 0,
+          timed_out: false,
+          _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+          hits: {
+            total: { value: 1, relation: 'eq' },
+            max_score: null,
+            hits: [
+              {
+                _index: 'remote-project:metrics-endpoint.metadata-default',
+                _id: 'fanned-in-hit-id',
+                _score: null,
+                _source: endpointMetadataDoc,
+                sort: [0],
+              },
+            ],
+          },
+        } as unknown as Awaited<ReturnType<typeof readEsClientMock.search>>);
+        testMockedContext.fleetServices.ensureInCurrentSpace.mockRejectedValue(
+          new Error('agent is not visible in this space')
+        );
+        // A locally enrolled agent proves real space isolation — the error must surface
+        const localAgent = new FleetAgentGenerator('seed').generate({
+          id: endpointMetadataDoc.agent.id,
+        });
+        (testMockedContext.fleetServices.fetchAgentsById as jest.Mock).mockResolvedValue([
+          localAgent,
+        ]);
+
+        await expect(
+          metadataService.getHostMetadata(endpointMetadataDoc.agent.id, request)
+        ).rejects.toThrow();
+      });
     });
   });
 

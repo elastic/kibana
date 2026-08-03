@@ -19,7 +19,12 @@ import {
   policyIndexPattern,
   telemetryIndexPattern,
 } from '../../../common/endpoint/constants';
-import { isEndpointIndex, isFleetIndex, shouldUseInternalSearchClient } from './cps_read_routing';
+import {
+  isFannedInHit,
+  isEndpointIndex,
+  isFleetIndex,
+  shouldUseInternalSearchClient,
+} from './cps_read_routing';
 
 describe('CPS read routing classifiers', () => {
   describe('isFleetIndex()', () => {
@@ -92,6 +97,20 @@ describe('CPS read routing classifiers', () => {
 
     it('should keep a read on the internal client when the index list is empty', () => {
       expect(shouldUseInternalSearchClient([], true)).toBe(true);
+    });
+  });
+
+  describe('isFannedInHit()', () => {
+    it('should return true for an index that contains a colon, signalling it came from a linked project', () => {
+      expect(isFannedInHit('remote-project:metrics-endpoint.metadata-default')).toBe(true);
+    });
+
+    it('should return false for a plain local index with no colon', () => {
+      expect(isFannedInHit('metrics-endpoint.metadata-default')).toBe(false);
+    });
+
+    it('should return false when the hit index is undefined', () => {
+      expect(isFannedInHit(undefined)).toBe(false);
     });
   });
 });
