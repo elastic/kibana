@@ -141,6 +141,27 @@ describe('Cribl', () => {
         })
       ).rejects.toThrow('not permitted');
     });
+
+    it('rejects the secrets and certificate stores', async () => {
+      await expect(
+        Cribl.actions.request.handler(mockContext, { method: 'GET', path: '/system/secrets' })
+      ).rejects.toThrow('not permitted');
+
+      await expect(
+        Cribl.actions.request.handler(mockContext, {
+          method: 'GET',
+          path: '/system/certificates/my-cert',
+        })
+      ).rejects.toThrow('not permitted');
+
+      await expect(
+        Cribl.actions.request.handler(mockContext, {
+          method: 'POST',
+          path: '/m/default/system/secrets',
+          body: { id: 'evil', secretType: 'text', value: 'exfiltrated' },
+        })
+      ).rejects.toThrow('not permitted');
+    });
   });
 
   describe('listWorkerGroups', () => {

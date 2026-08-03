@@ -79,8 +79,10 @@ const MAX_ERROR_DETAIL_CHARS = 500;
 /**
  * Endpoints that must never be reachable via the generic `request` escape hatch,
  * regardless of the calling action: API credential management, local user
- * accounts/RBAC, and the initial username/password login exchange. Typed
- * actions cover every other read/write operation this connector supports.
+ * accounts/RBAC, the initial username/password login exchange, and the secrets/
+ * certificate stores (which hold the passwords/tokens/keys and TLS private keys
+ * that Sources and Destinations reference). Typed actions cover every other
+ * read/write operation this connector supports.
  */
 const BLOCKED_PATH_PREFIXES = [
   '/api-credentials',
@@ -88,6 +90,8 @@ const BLOCKED_PATH_PREFIXES = [
   '/system/users',
   '/system/rbac',
   '/auth/login',
+  '/system/secrets',
+  '/system/certificates',
 ] as const;
 
 interface CriblRequestOptions {
@@ -365,7 +369,8 @@ export const Cribl: ConnectorSpec = {
       description:
         'Make an authenticated request to any Cribl API path (relative to /api/v1). Prefer the ' +
         'typed actions (listWorkerGroups, listRoutes, updateRoutes, commitConfig, deployGroup, etc.) ' +
-        'when they fit. API credential management, user accounts, and RBAC endpoints are blocked.',
+        'when they fit. API credential management, user accounts, RBAC, and the secrets/certificate ' +
+        'stores are blocked.',
       input: RequestInputSchema,
       handler: async (ctx, input: RequestInput) => {
         const response = await criblRequest(ctx, {

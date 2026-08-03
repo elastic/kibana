@@ -12,7 +12,7 @@ applies_to:
 The Cribl connector calls the [Cribl API](https://docs.cribl.io/api-reference/) on a Cribl Stream/Edge Leader (Cribl.Cloud, hybrid, or a customer-managed deployment). It exposes a generic `request` action for any API path, plus typed convenience actions for listing Worker Groups/Fleets and Worker Nodes, reading and replacing the routing table, committing and deploying configuration changes, managing pipelines/sources/destinations/lookups, restarting a Worker Group, and running Cribl Search queries. It authenticates with a Cribl API bearer token and can verify the server TLS certificate against a pasted PEM CA.
 
 ::::{warning}
-This connector can perform any operation the configured token is authorized for, including replacing a Worker Group's entire routing table (`updateRoutes` deletes any route you don't include) and deploying configuration changes to live Worker Nodes. There are no additional restrictions in {{kib}}: access is governed entirely by the token's Cribl permissions. API credential management, local user accounts, and RBAC endpoints are blocked on the `request` action.
+This connector can perform any operation the configured token is authorized for, including replacing a Worker Group's entire routing table (`updateRoutes` deletes any route you don't include) and deploying configuration changes to live Worker Nodes. There are no additional restrictions in {{kib}}: access is governed entirely by the token's Cribl permissions. API credential management, local user accounts, RBAC, and the secrets/certificate stores are blocked on the `request` action.
 ::::
 
 ## Create connectors in {{kib}} [define-cribl-ui]
@@ -45,7 +45,7 @@ You can test connectors when you create or edit the connector in {{kib}}. The te
 The Cribl connector has the following actions:
 
 `request`
-:   Make an authenticated request to any Cribl API path (relative to `/api/v1`). Prefer the typed actions below when they fit. API credential management, user accounts, and RBAC endpoints are blocked.
+:   Make an authenticated request to any Cribl API path (relative to `/api/v1`). Prefer the typed actions below when they fit. API credential management, user accounts, RBAC, and the secrets/certificate stores are blocked.
     - `method` (required): One of `GET`, `POST`, `PUT`, `PATCH`, `DELETE`.
     - `path` (required): The API path relative to `/api/v1`, for example `/master/groups` or `/m/myGroup/system/inputs`.
     - `query` (optional): Query parameters.
