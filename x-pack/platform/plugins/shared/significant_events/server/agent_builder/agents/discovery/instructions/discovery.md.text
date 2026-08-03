@@ -105,12 +105,11 @@ Response:
 }
 ```
 
-Example: platform_sig_events_events_write. `event_id` is passed only on continuation of an open event
+Example: platform_sig_events_events_write — new candidate write (dedup_window, no event_id)
 ```json
 {
   "items": [
     {
-      "event_id": "...",
       "status": "pending",
       "dedup_window": "now-24h",
       "title": "...",

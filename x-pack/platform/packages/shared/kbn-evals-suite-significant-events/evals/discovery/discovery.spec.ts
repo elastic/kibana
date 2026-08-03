@@ -435,10 +435,7 @@ evaluate.describe(
                     // Continuation examples must not inherit discoveries or events from a previous
                     // path. The cycles within this task still share state.
                     await Promise.all(
-                      [
-                        SIGNIFICANT_EVENTS_EVENTS_DATA_STREAM,
-                        SIGNIFICANT_EVENTS_EVENTS_DATA_STREAM,
-                      ].map((index) =>
+                      [SIGNIFICANT_EVENTS_EVENTS_DATA_STREAM].map((index) =>
                         esClient
                           .deleteByQuery({
                             index,

@@ -176,7 +176,7 @@ Derive candidates separately per detection. Every feature from the matched query
 2. **From `feature.type: "infrastructure"`**: include only when current evidence, interpreted through the exact-query KI, shows the active condition affects the infrastructure component or its workloads. Hosting the failing service alone is insufficient.
    Entry: `{ type: "infrastructure", feature_id, title?, workloads, stream_name? }`.
 
-3. **From `feature.type: "entity"`** (lost the cause decision — entity is affected by, not the cause of, the failure): include only when current evidence, interpreted through the exact-query KI, shows the active condition affects this entity.
+3. **From `feature.type: "entity"`** (lost the cause decision — entity is affected by, not the cause of, the failure): include only when current evidence, interpreted through the exact-query KI, shows the active condition affects this entity. When the Signal Verdict names a connection failure to a specific host/port, the named target is the causal entity — exclude candidates that appear only as `source` in dependency edges for this connectivity failure (they are callers, not causes).
    Entry: `{ type: "entity", feature_id, name, stream_name }`.
 
 4. **From `feature.type: "technology"`**: include only when the Signal Verdict is `confirms` and the confirmed failure type (connection failure, protocol error, etc.) is the specific concern the technology KI documents (e.g., a connection-pool KI when the verdict confirms a connectivity failure). Derive the owning service from `feature.meta`, `query.evidence[]`, or the matched query KI's context. Use that service as `source` and the technology KI's `id` as `target`.
