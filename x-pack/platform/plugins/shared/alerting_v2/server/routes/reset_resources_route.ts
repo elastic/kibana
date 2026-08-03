@@ -35,6 +35,7 @@ import {
   API_KEY_PENDING_INVALIDATION_TYPE,
   ACTION_POLICY_SAVED_OBJECT_TYPE,
   RULE_SAVED_OBJECT_TYPE,
+  RULE_TEMPLATE_SAVED_OBJECT_TYPE,
 } from '../saved_objects';
 import { AlertingRouteContext } from './alerting_route_context';
 import { BaseAlertingRoute } from './base_alerting_route';
@@ -44,6 +45,7 @@ const RESET_RESOURCES_API_PATH = '/internal/alerting/v2/_reset_resources';
 // Keep in sync with `registerSavedObjects` in `server/saved_objects/index.ts`.
 const ALERTING_V2_SAVED_OBJECT_TYPES = [
   RULE_SAVED_OBJECT_TYPE,
+  RULE_TEMPLATE_SAVED_OBJECT_TYPE,
   ACTION_POLICY_SAVED_OBJECT_TYPE,
   API_KEY_PENDING_INVALIDATION_TYPE,
 ];

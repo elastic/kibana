@@ -12,20 +12,25 @@ import {
   actionPolicyModelVersions,
   apiKeyPendingInvalidationModelVersions,
   ruleModelVersions,
+  ruleTemplateModelVersions,
 } from './model_versions';
 import { apiKeyPendingInvalidationMappings } from './api_key_pending_invalidation_mappings';
 import { actionPolicyMappings } from './action_policy_mappings';
 import { ruleMappings } from './rule_mappings';
+import { ruleTemplateMappings } from './rule_template_mappings';
 import type { ActionPolicySavedObjectAttributes } from './schemas/action_policy_saved_object_attributes';
 import type { RuleSavedObjectAttributes } from './schemas/rule_saved_object_attributes';
+import type { RuleTemplateSavedObjectAttributes } from './schemas/rule_template_saved_object_attributes';
 import {
   ACTION_POLICY_SAVED_OBJECT_TYPE,
   API_KEY_PENDING_INVALIDATION_TYPE,
   RULE_SAVED_OBJECT_TYPE,
+  RULE_TEMPLATE_SAVED_OBJECT_TYPE,
 } from '../../common/saved_object_types';
 
 export {
   RULE_SAVED_OBJECT_TYPE,
+  RULE_TEMPLATE_SAVED_OBJECT_TYPE,
   ACTION_POLICY_SAVED_OBJECT_TYPE,
   API_KEY_PENDING_INVALIDATION_TYPE,
 };
@@ -56,6 +61,22 @@ export function registerSavedObjects({
       },
     },
     modelVersions: ruleModelVersions,
+  });
+
+  savedObjects.registerType({
+    name: RULE_TEMPLATE_SAVED_OBJECT_TYPE,
+    indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
+    hidden: true,
+    namespaceType: 'multiple-isolated',
+    mappings: ruleTemplateMappings,
+    management: {
+      importableAndExportable: false,
+      getTitle(so: SavedObject<RuleTemplateSavedObjectAttributes>) {
+        const rule = so.attributes.rule as { metadata?: { name?: string } };
+        return `Rule Template: [${rule.metadata?.name ?? so.id}]`;
+      },
+    },
+    modelVersions: ruleTemplateModelVersions,
   });
 
   savedObjects.registerType({
@@ -92,3 +113,4 @@ export function registerSavedObjects({
 
 export type { ActionPolicySavedObjectAttributes } from './schemas/action_policy_saved_object_attributes';
 export type { RuleSavedObjectAttributes } from './schemas/rule_saved_object_attributes';
+export type { RuleTemplateSavedObjectAttributes } from './schemas/rule_template_saved_object_attributes';
