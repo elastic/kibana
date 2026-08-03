@@ -309,5 +309,6 @@
     "@kbn/discoveries-schemas",
     "@kbn/chart-icons",
     "@kbn/core-mount-utils-browser",
+    "@kbn/security-mitre-attack-common",
   ]
 }

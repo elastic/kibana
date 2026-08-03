@@ -1,0 +1,7 @@
+{
+  "name": "@kbn/security-mitre-attack-common",
+  "version": "1.0.0",
+  "description": "Shared MITRE ATT&CK types, schema, field map, and bundled artifact for the Security Solution",
+  "license": "Elastic License 2.0",
+  "private": true
+}

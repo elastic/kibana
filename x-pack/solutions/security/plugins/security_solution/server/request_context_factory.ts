@@ -26,6 +26,7 @@ import { RiskScoreDataClient } from './lib/entity_analytics/risk_score/risk_scor
 import { buildMlAuthz } from './lib/machine_learning/authz';
 import type { ProductFeaturesService } from './lib/product_features_service';
 import type { SiemMigrationsService } from './lib/siem_migrations/siem_migrations_service';
+import type { MitreAttackDataService } from './lib/mitre_attack';
 import { buildFrameworkRequest } from './lib/timeline/utils/common';
 import type {
   SecuritySolutionPluginCoreSetupDependencies,
@@ -56,6 +57,7 @@ interface ConstructorOptions {
   endpointAppContextService: EndpointAppContextService;
   ruleMonitoringService: IRuleMonitoringService;
   siemMigrationsService: SiemMigrationsService;
+  mitreAttackDataService: MitreAttackDataService;
   kibanaVersion: string;
   kibanaBranch: string;
   buildFlavor: BuildFlavor;
@@ -81,6 +83,7 @@ export class RequestContextFactory implements IRequestContextFactory {
       endpointAppContextService,
       ruleMonitoringService,
       siemMigrationsService,
+      mitreAttackDataService,
       productFeaturesService,
     } = options;
 
@@ -240,6 +243,16 @@ export class RequestContextFactory implements IRequestContextFactory {
           telemetry: core.analytics,
           experimentalFeatures: options.config.experimentalFeatures,
         },
+      }),
+
+      getMitreAttackDataClient: memoize(() => {
+        if (!options.config.experimentalFeatures.managedMitreSourceEnabled) {
+          return undefined;
+        }
+        return mitreAttackDataService.createClient({
+          spaceId: getSpaceId(),
+          esClient: coreContext.elasticsearch.client.asInternalUser,
+        });
       }),
 
       getInferenceClient: memoize(() => startPlugins.inference.getClient({ request })),

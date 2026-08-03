@@ -32,12 +32,18 @@ import { pciScopeDiscoveryTool } from './pci_scope_discovery_tool';
 import { pciFieldMapperTool } from './pci_field_mapper_tool';
 import { registerSiemReadinessTools } from './siem_readiness';
 import { runRulePreviewTool } from './run_rule_preview_tool';
+import { mitreAttackTool } from './mitre_attack_tool';
 import type { RunRulePreviewDeps } from '../../lib/detection_engine/rule_preview/api/preview_rules/run_rule_preview';
 import type {
   SecuritySolutionPluginCoreSetupDependencies,
   SetupPlugins,
 } from '../../plugin_contract';
 import { SIEM_READINESS_AGENT_BUILDER_ENABLED } from '../siem_readiness_feature_flag';
+import type { MitreAttackDataService } from '../../lib/mitre_attack';
+
+interface RegisterToolsDeps {
+  mitreAttackDataService: MitreAttackDataService;
+}
 
 /**
  * Registers all security agent builder tools with the agentBuilder plugin.
@@ -55,12 +61,17 @@ export const registerTools = (
   rulePreviewDeps: RunRulePreviewDeps,
   isServerless: boolean = false,
   kibanaVersion: string,
-  hasEncryptionKey: boolean = false
+  hasEncryptionKey: boolean = false,
+  deps: RegisterToolsDeps
 ) => {
   agentBuilder.tools.register(entityRiskScoreTool(core, logger));
   agentBuilder.tools.register(attackDiscoverySearchTool(core, logger));
   agentBuilder.tools.register(securityLabsSearchTool(core));
-  agentBuilder.tools.register(createDetectionRuleTool(core, logger, experimentalFeatures));
+  agentBuilder.tools.register(
+    createDetectionRuleTool(core, logger, experimentalFeatures, {
+      mitreAttackDataService: deps.mitreAttackDataService,
+    })
+  );
   agentBuilder.tools.register(alertsTool(core, logger));
   agentBuilder.tools.register(getEntityTool(core, logger, ml, experimentalFeatures));
   agentBuilder.tools.register(addEntitiesToWatchlistTool(core, logger, experimentalFeatures));
@@ -75,6 +86,11 @@ export const registerTools = (
     setAssetCriticalityTool(core, logger, experimentalFeatures, kibanaVersion)
   );
   agentBuilder.tools.register(updateWatchlistTool(core, logger, experimentalFeatures));
+  agentBuilder.tools.register(
+    mitreAttackTool(core, logger, experimentalFeatures, {
+      mitreAttackDataService: deps.mitreAttackDataService,
+    })
+  );
 
   if (experimentalFeatures.rulePreviewAttachmentEnabled) {
     agentBuilder.tools.register(runRulePreviewTool(rulePreviewDeps));

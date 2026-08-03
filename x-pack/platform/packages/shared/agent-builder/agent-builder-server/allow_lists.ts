@@ -73,6 +73,7 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.security}.siem_readiness.get_continuity`,
   `${internalNamespaces.security}.siem_readiness.get_retention`,
   `${internalNamespaces.security}.alert-triage`,
+  `${internalNamespaces.security}.mitre_attack`,
 
   // Streams
   `${internalNamespaces.streams}.inspect_streams`,

@@ -29,6 +29,7 @@ import {
   SECURITY_RULE_ATTACHMENT_ID,
 } from '../../../common/constants';
 import { getBuildAgent } from '../../lib/detection_engine/ai_rule_creation/agent';
+import type { MitreAttackDataService } from '../../lib/mitre_attack';
 import { getAgentBuilderResourceAvailability } from '../utils/get_agent_builder_resource_availability';
 import type { RuleAttachmentData } from '../attachments/rule';
 
@@ -131,10 +132,15 @@ const createDetectionRuleSchema = z.object({
     ),
 });
 
+interface CreateDetectionRuleToolDeps {
+  mitreAttackDataService: MitreAttackDataService;
+}
+
 export function createDetectionRuleTool(
   core: CoreSetup<SecuritySolutionPluginStartDependencies, SecuritySolutionPluginStart>,
   logger: Logger,
-  experimentalFeatures: ExperimentalFeatures
+  experimentalFeatures: ExperimentalFeatures,
+  deps?: CreateDetectionRuleToolDeps
 ): StaticToolRegistration<typeof createDetectionRuleSchema> {
   const toolDefinition: BuiltinToolDefinition<typeof createDetectionRuleSchema> = {
     id: SECURITY_CREATE_DETECTION_RULE_TOOL_ID,
@@ -243,6 +249,15 @@ Limitations: only ES|QL rules are supported; requires relevant data in existing 
         );
 
         const rulesClient = await startPlugins.alerting.getRulesClientWithRequest(request);
+
+        const mitreAttackDataClient =
+          experimentalFeatures?.managedMitreSourceEnabled && deps?.mitreAttackDataService
+            ? deps.mitreAttackDataService.createClient({
+                spaceId: startPlugins.spaces?.spacesService?.getSpaceId(request) ?? 'default',
+                esClient: esClient.asInternalUser,
+              })
+            : undefined;
+
         const iterativeAgent = await getBuildAgent({
           model,
           logger,
@@ -253,6 +268,7 @@ Limitations: only ES|QL rules are supported; requires relevant data in existing 
           savedObjectsClient,
           rulesClient,
           events,
+          mitreAttackDataClient,
         });
 
         // Seed the graph with the existing rule when rewriting a query; otherwise create fresh.

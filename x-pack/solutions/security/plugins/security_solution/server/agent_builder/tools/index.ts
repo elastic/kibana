@@ -41,3 +41,4 @@ export { pciScopeDiscoveryTool, PCI_SCOPE_DISCOVERY_TOOL_ID } from './pci_scope_
 export { pciComplianceTool, PCI_COMPLIANCE_TOOL_ID } from './pci_compliance_tool';
 export { pciFieldMapperTool, PCI_FIELD_MAPPER_TOOL_ID } from './pci_field_mapper_tool';
 export { runRulePreviewTool, SECURITY_RUN_RULE_PREVIEW_TOOL_ID } from './run_rule_preview_tool';
+export { mitreAttackTool, SECURITY_MITRE_ATTACK_TOOL_ID } from './mitre_attack_tool';

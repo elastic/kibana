@@ -9085,6 +9085,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/security-mitre-attack-common@link:x-pack/solutions/security/packages/security-mitre-attack-common":
+  version "0.0.0"
+  uid ""
+
 "@kbn/security-plugin-types-common@link:x-pack/platform/packages/shared/security/plugin_types_common":
   version "0.0.0"
   uid ""
