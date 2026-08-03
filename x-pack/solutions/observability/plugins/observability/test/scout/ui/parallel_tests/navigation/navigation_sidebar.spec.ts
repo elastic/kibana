@@ -10,7 +10,7 @@ import { expect } from '@kbn/scout-oblt/ui';
 
 test.describe(
   'Stateful Observability Navigation - Sidebar',
-  { tag: [...tags.stateful.observability] },
+  { tag: [...tags.stateful.classic] },
   () => {
     test.beforeAll(async ({ scoutSpace }) => {
       await scoutSpace.setSolutionView('oblt');
@@ -180,19 +180,25 @@ test.describe(
       await test.step('Open Cases list', async () => {
         await nav.openMoreMenu();
         await nav.navItemInMoreByDeepLinkId('observability-overview:cases').click();
-        await expect(nav.breadcrumb({ text: 'Cases' })).toBeVisible();
+        await expect(
+          page.testSubj.locator('cases-all-title').or(page.testSubj.locator('appHeaderTitle'))
+        ).toHaveText('Cases');
       });
 
       await test.step('Create case', async () => {
         await page.testSubj.click('createNewCaseBtn');
-        await expect(nav.breadcrumb({ text: 'Create' })).toBeVisible();
+        await expect(page.testSubj.locator('case-creation-form-steps')).toBeVisible();
       });
 
       await test.step('Back to list, then configure', async () => {
         await nav.openMoreMenu();
         await nav.navItemInMoreByDeepLinkId('observability-overview:cases').click();
         await page.testSubj.click('configure-case-button');
-        await expect(nav.breadcrumb({ text: 'Settings' })).toBeVisible();
+        await expect(
+          page.testSubj
+            .locator('case-configure-title')
+            .or(page.testSubj.locator('cases-redesign-settings-panel'))
+        ).toBeVisible();
       });
     });
 
