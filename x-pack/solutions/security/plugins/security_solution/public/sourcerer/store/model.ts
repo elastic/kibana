@@ -115,12 +115,6 @@ export type SourcererUrlState = Partial<{
   };
 }>;
 
-export const initSourcererScope: Omit<SourcererScope, 'id'> = {
-  loading: false,
-  selectedDataViewId: null,
-  selectedPatterns: [],
-};
-
 export const initDataView: SourcererDataView & { id: string; error?: unknown } = {
   browserFields: EMPTY_BROWSER_FIELDS,
   id: '',
