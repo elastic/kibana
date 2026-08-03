@@ -44,6 +44,13 @@ import { FIELD_EVENT_UUID, FIELD_EVENT_ID } from '../field_names';
 
 export type EventDataStreamClient = IDataStreamClient<typeof eventsMappings, StoredEvent>;
 
+/**
+ * Maximum number of distinct active events returned by findLatestActive. With stream+rule
+ * narrowing the result is proportional to the write batch size, so this cap is a safety bound
+ * rather than an operational limit.
+ */
+const MAX_DEDUP_SCAN_LIMIT = 500;
+
 const multiValueContainsAnyFilter = ({
   where,
   field,
@@ -262,6 +269,9 @@ export class EventClient {
    * scan stays proportional to the write batch instead of the whole space. The status and
    * candidate filters are applied after grouping so a closed/dismissed event whose earlier
    * version was pending is correctly excluded.
+   *
+   * Capped at MAX_DEDUP_SCAN_LIMIT distinct active events. With stream+rule narrowing the result
+   * set is proportional to the write batch, so this limit is never approached in practice.
    */
   async findLatestActive(
     options: CommonSearchOptions & { streamNames?: string[]; ruleUuids?: string[] }
@@ -292,7 +302,7 @@ export class EventClient {
 
     const hits = await executeEsqlQuery<SignificantEvent>({
       esClient: this.clients.esClient,
-      query: query.keep('_source'),
+      query: query.keep('_source').limit(MAX_DEDUP_SCAN_LIMIT),
     });
     return { hits };
   }
