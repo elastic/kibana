@@ -218,7 +218,7 @@ export type GetTimeSeriesServiceStatisticsInput = z.infer<
 
 export const GetGroupsInputSchema = lazySchema(() =>
   z.object({
-    nextToken: nextTokenField(100),
+    nextToken: nextTokenField(2000),
   })
 );
 export type GetGroupsInput = z.infer<typeof GetGroupsInputSchema>;
