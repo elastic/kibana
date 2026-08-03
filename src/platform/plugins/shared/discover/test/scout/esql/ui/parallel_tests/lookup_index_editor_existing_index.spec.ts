@@ -110,7 +110,9 @@ spaceTest.describe(
       // Verify the editions took place correctly
       await expect(async () => {
         const { hits } = await esClient.search({ index: indexName });
-        const docs = hits.hits.map((hit) => hit._source);
+        const docs = hits.hits
+          .toSorted((left, right) => (left._id ?? '').localeCompare(right._id ?? ''))
+          .map((hit) => hit._source);
         expect(docs).toStrictEqual([
           {
             customer_first_name: 'Jasmin',

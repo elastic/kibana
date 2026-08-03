@@ -115,8 +115,14 @@ spaceTest.describe(
 
         // Verify the index is created correctly and contains all the data
         await expect(async () => {
-          const { hits } = await esClient.search({ index: indexName });
-          const docs = hits.hits.map((hit) => hit._source);
+          const { hits } = await esClient.search<Record<string, unknown>>({ index: indexName });
+          const docs = hits.hits
+            .map((hit) => hit._source)
+            .toSorted((left, right) =>
+              String(left?.['renamed-column-1'] ?? '').localeCompare(
+                String(right?.['renamed-column-1'] ?? '')
+              )
+            );
           expect(docs).toStrictEqual([
             {
               'renamed-column-1': 'value-1-1',
