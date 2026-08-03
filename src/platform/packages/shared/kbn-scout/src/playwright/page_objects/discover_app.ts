@@ -250,6 +250,51 @@ export class DiscoverApp {
     await this.waitUntilTabIsLoaded();
   }
 
+  async editDataViewFromSearchBar({
+    newIndexPattern,
+    newTimeField,
+  }: {
+    newIndexPattern?: string;
+    newTimeField?: string;
+  }) {
+    await this.openDataViewSwitcher();
+    await this.page.testSubj.click('indexPattern-manage-field');
+
+    const flyout = this.page.testSubj.locator('indexPatternEditorFlyout');
+    await flyout.waitFor({ state: 'visible' });
+
+    if (newIndexPattern) {
+      const titleInput = this.page.testSubj.locator('createIndexPatternTitleInput');
+      await titleInput.fill(newIndexPattern);
+      const form = this.page.testSubj.locator('indexPatternEditorForm');
+      await form
+        .and(this.page.locator('[data-validation-error="0"]'))
+        .waitFor({ state: 'visible' });
+    }
+
+    if (newTimeField) {
+      const timestampField = this.page.testSubj.locator('timestampField');
+      await timestampField
+        .and(this.page.locator('[data-is-loading="0"]'))
+        .waitFor({ state: 'visible', timeout: 30_000 });
+      await this.page.components.comboBox('timestampField').setSelectedOptions([newTimeField]);
+    }
+
+    await this.page.testSubj.click('saveIndexPatternButton');
+
+    const confirmButton = this.page.testSubj.locator('confirmModalConfirmButton');
+    const confirmVisible = await confirmButton
+      .waitFor({ state: 'visible', timeout: 3_000 })
+      .then(() => true)
+      .catch(() => false);
+    if (confirmVisible) {
+      await confirmButton.click();
+    }
+
+    await flyout.waitFor({ state: 'hidden' });
+    await this.waitUntilTabIsLoaded();
+  }
+
   async createRuntimeField(fieldName: string, script: string) {
     await this.openDataViewSwitcher();
     await this.page.testSubj.click('indexPattern-add-field');
