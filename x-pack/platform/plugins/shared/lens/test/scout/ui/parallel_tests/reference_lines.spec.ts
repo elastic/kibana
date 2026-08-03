@@ -91,11 +91,14 @@ spaceTest.describe('Lens reference lines', { tag: '@local-stateful-classic' }, (
         async () => {
           await lens.openDimensionEditor(`${REFERENCE_LINE_LEFT} > lns-dimensionTrigger`, 1);
           await lens.setReferenceLineFillBelow();
+          // Snapshot before close: closing the editor (and applying the fill) must produce a
+          // newer chart render. Settling on the pre-edit count lets the drag land on stale
+          // state and drop the dimension without adding it to the target group.
+          const renderCountBeforeClose = await lens.getVisualizationRenderCount('xyVisChart');
           await lens.closeDimensionEditor();
-          // Lens applies the fill to the chart asynchronously, and a drop that lands before
-          // that is applied to stale state (it removes the dimension from this group without
-          // adding it to the target one), so wait for the re-render first.
-          await lens.waitForVisualization('xyVisChart');
+          await lens.waitForVisualization('xyVisChart', {
+            afterCount: renderCountBeforeClose ?? undefined,
+          });
 
           await lens.dragDimensionToDimension({
             from: `${REFERENCE_LINE_LEFT} > lns-dimensionTrigger`,

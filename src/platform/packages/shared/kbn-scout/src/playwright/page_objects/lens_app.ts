@@ -103,9 +103,15 @@ export class LensApp {
     this.metricTilesLocator = this.page.locator(
       '[data-test-subj="mtrVis"] .echChart li:not([role="presentation"])'
     );
-    this.secondaryMetricBadge = this.page.locator('.echBadge__content');
-    this.secondaryMetricLabel = this.page.locator('.echSecondaryMetric__label');
-    this.metricProgressBar = this.page.locator('.echSingleMetricProgress');
+    // Scope Elastic Charts class selectors to the metric workspace so chrome/other
+    // panels with the same classes can't produce false positives.
+    this.secondaryMetricBadge = this.page.locator('[data-test-subj="mtrVis"] .echBadge__content');
+    this.secondaryMetricLabel = this.page.locator(
+      '[data-test-subj="mtrVis"] .echSecondaryMetric__label'
+    );
+    this.metricProgressBar = this.page.locator(
+      '[data-test-subj="mtrVis"] .echSingleMetricProgress'
+    );
     // Tab `data-test-subj` values use layer ids (not numeric indices); this only ever
     // resolves to elements when there are 2+ layers (EUI hides the tab strip for one).
     this.layerTabsLocator = this.page.testSubj.locator('^unifiedTabs_tab_');
@@ -733,20 +739,55 @@ export class LensApp {
   }
 
   /**
+   * Reads the current Elastic Charts / embeddable render count for a workspace chart, or
+   * `null` when the chart isn't an Elastic Charts visualization (e.g. a data table).
+   * Pair with `waitForVisualization(subj, { afterCount })` when the next action must wait
+   * for a *new* render pass rather than settling on the current one.
+   */
+  async getVisualizationRenderCount(chartSubj: string): Promise<number | null> {
+    return this.page.evaluate((subj) => {
+      const workspaceEl = document.querySelector('[data-test-subj="lnsWorkspace"]');
+      const el = workspaceEl?.querySelector(`[data-test-subj="${subj}"]`);
+      if (!el) {
+        return null;
+      }
+      const chartStatus = el.querySelector('.echChartStatus');
+      const raw =
+        el.getAttribute('data-rendering-count') ??
+        (chartStatus?.getAttribute('data-ech-render-complete') === 'true'
+          ? chartStatus.getAttribute('data-ech-render-count')
+          : null);
+      if (raw === null) {
+        return null;
+      }
+      const count = Number(raw);
+      return Number.isFinite(count) ? count : null;
+    }, chartSubj);
+  }
+
+  /**
    * Waits for the Lens visualization workspace to finish rendering.
    * Polls the render count until it stabilises across two consecutive reads (500 ms apart),
    * reading `data-rendering-count` from the embeddable container where it exists (dashboards)
    * and falling back to the Elastic Charts render count, which is all the Lens editor renders.
+   *
+   * When `options.afterCount` is set, also requires at least one newer completed render than
+   * that baseline before settling — use this after an edit that must land in a subsequent
+   * chart pass (e.g. reference-line style) so a settle on the pre-edit count can't win the race.
    */
-  async waitForVisualization(chartSubj = 'lnsVisualizationContainer') {
+  async waitForVisualization(
+    chartSubj = 'lnsVisualizationContainer',
+    options?: { afterCount?: number }
+  ) {
     const workspace = this.page.testSubj.locator('lnsWorkspace');
     await workspace.waitFor({ state: 'visible', timeout: 20_000 });
 
     const container = workspace.getByTestId(chartSubj);
     await container.waitFor({ state: 'visible' });
 
+    const afterCount = options?.afterCount;
     await this.page.waitForFunction(
-      (subj) => {
+      ({ subj, minExclusive }) => {
         const workspaceEl = document.querySelector('[data-test-subj="lnsWorkspace"]');
         const el = workspaceEl?.querySelector(`[data-test-subj="${subj}"]`);
         if (!el) {
@@ -767,12 +808,15 @@ export class LensApp {
             .__lensScoutPrevRenderCount;
           return false;
         }
+        if (minExclusive != null && Number(count) <= minExclusive) {
+          return false;
+        }
         const win = window as unknown as { __lensScoutPrevRenderCount?: string };
         const prev = win.__lensScoutPrevRenderCount;
         win.__lensScoutPrevRenderCount = count;
         return prev === count;
       },
-      chartSubj,
+      { subj: chartSubj, minExclusive: afterCount ?? null },
       // Chart data + render-count settle often exceeds the 10s actionTimeout; keep below the 60s test timeout.
       { polling: 500, timeout: 30_000 }
     );
