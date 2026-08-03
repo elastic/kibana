@@ -16,9 +16,9 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { PageScope } from '../../../data_view_manager/constants';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { HeaderPage } from '../../../common/components/header_page';
-import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
+import type { UseDataViewReturnValue } from '../../../data_view_manager/hooks/use_data_view';
 import { AlertsPageContent } from './content';
 import { PAGE_TITLE } from '../../pages/alerts/translations';
 
@@ -30,14 +30,19 @@ const DATAVIEW_ERROR = i18n.translate('xpack.securitySolution.alertsPage.dataVie
   defaultMessage: 'Unable to retrieve the data view',
 });
 
+interface WrapperProps {
+  /** the alerts data view, retrieved once by the parent via useDataView(PageScope.alerts) */
+  dataView: DataView;
+  /** the status of the alerts data view retrieval */
+  status: UseDataViewReturnValue['status'];
+}
+
 /**
- * Retrieves the dataView for the alerts page then renders the alerts page when the dataView is valid.
+ * Renders the alerts page when the provided dataView is valid.
  * Shows a loading skeleton while retrieving.
  * Shows an error message if the dataView is invalid.
  */
-export const Wrapper = memo(() => {
-  const { dataView, status } = useDataView(PageScope.alerts);
-
+export const Wrapper = memo(({ dataView, status }: WrapperProps) => {
   const isLoading: boolean = useMemo(() => status === 'loading' || status === 'pristine', [status]);
 
   const isDataViewInvalid: boolean = useMemo(

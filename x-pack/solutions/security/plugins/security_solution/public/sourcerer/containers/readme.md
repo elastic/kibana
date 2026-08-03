@@ -42,11 +42,6 @@ interface SelectedDataView {
 }
 ```
 
-### `useSignalHelpers`
-
-- called on from detections and timelines scopes
-- `signalIndexNeedsInit` - when true, signal index has been initiated but does not exist yet
-
 ### Adding sourcerer to a new page
 
 - In order for the sourcerer to show up on a page, it needs to be added to the array `sourcererPaths`
