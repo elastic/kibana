@@ -18,6 +18,8 @@ export const MonitorListHeader = ({
   setMonitorPendingDeletion,
   setMonitorPendingReset,
   setMonitorPendingStatusUpdate,
+  setIsLocationsFlyoutOpen,
+  setIsScheduleFlyoutOpen,
   setIsMaintenanceWindowsFlyoutOpen,
 }: {
   recordRangeLabel: JSX.Element;
@@ -28,6 +30,8 @@ export const MonitorListHeader = ({
     skippedMonitors: Array<{ id: string; name: string }>;
   }) => void;
   setMonitorPendingStatusUpdate: (val: { ids: string[]; enabled: boolean } | null) => void;
+  setIsLocationsFlyoutOpen: (val: boolean) => void;
+  setIsScheduleFlyoutOpen: (val: boolean) => void;
   setIsMaintenanceWindowsFlyoutOpen: (val: boolean) => void;
 }) => {
   return (
@@ -41,6 +45,8 @@ export const MonitorListHeader = ({
           setMonitorPendingDeletion={setMonitorPendingDeletion}
           setMonitorPendingReset={setMonitorPendingReset}
           setMonitorPendingStatusUpdate={setMonitorPendingStatusUpdate}
+          setIsLocationsFlyoutOpen={setIsLocationsFlyoutOpen}
+          setIsScheduleFlyoutOpen={setIsScheduleFlyoutOpen}
           setIsMaintenanceWindowsFlyoutOpen={setIsMaintenanceWindowsFlyoutOpen}
         />
       </EuiFlexItem>
