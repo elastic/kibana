@@ -2471,10 +2471,10 @@
     handlebars "^4.7.8"
     prettier "^2.8.8"
 
-"@elastic/request-crypto@2.0.3":
-  version "2.0.3"
-  resolved "https://registry.yarnpkg.com/@elastic/request-crypto/-/request-crypto-2.0.3.tgz#7fc070be900503473c6f7c6787df23d789e18169"
-  integrity sha512-B874XQbnhWRCabDM4Si9haiUnUHvfcZdtfjKsCQ89uQCvudtaaiKzyK8e+k7bPiiGRflxoPqgSBXnS4n/E9Trw==
+"@elastic/request-crypto@2.0.4":
+  version "2.0.4"
+  resolved "https://registry.yarnpkg.com/@elastic/request-crypto/-/request-crypto-2.0.4.tgz#9fc59e9c0cf7e6fc81027b1ef8dd26d2a3dc2d0b"
+  integrity sha512-15BH4l6BhHG73WEbeNLghEtAxI/zezFFdiOCx5ubsdxfuXh8tFV2XaRYkWgieTGAXCML9GSlztt1Ewf8WxsoPw==
   dependencies:
     "@elastic/node-crypto" "^1.2.3"
     "@types/node-jose" "1.1.10"
@@ -4392,6 +4392,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/cli@link:src/cli":
+  version "0.0.0"
+  uid ""
+
 "@kbn/client-apps-plugin@link:x-pack/solutions/observability/plugins/client_apps":
   version "0.0.0"
   uid ""
@@ -5685,6 +5689,10 @@
   uid ""
 
 "@kbn/dev-validation-runner@link:src/platform/packages/shared/kbn-dev-validation-runner":
+  version "0.0.0"
+  uid ""
+
+"@kbn/dev@link:src/dev":
   version "0.0.0"
   uid ""
 
@@ -12265,13 +12273,6 @@
   dependencies:
     "@turf/helpers" "6.x"
 
-"@types/adm-zip@0.5.0":
-  version "0.5.0"
-  resolved "https://registry.yarnpkg.com/@types/adm-zip/-/adm-zip-0.5.0.tgz#94c90a837ce02e256c7c665a6a1eb295906333c1"
-  integrity sha512-FCJBJq9ODsQZUNURo5ILAQueuA8WJhRvuihS3ke2iI25mJlfV2LK8jG2Qj2z2AWg8U0FtWWqBHVRetceLskSaw==
-  dependencies:
-    "@types/node" "*"
-
 "@types/archiver@7.0.0":
   version "7.0.0"
   resolved "https://registry.yarnpkg.com/@types/archiver/-/archiver-7.0.0.tgz#475d5aa4076ffc05f2c78dc7540b0ea4ab8c7d7a"
@@ -14526,10 +14527,10 @@ acorn@^8.0.4, acorn@^8.1.0, acorn@^8.11.0, acorn@^8.14.0, acorn@^8.15.0, acorn@^
   resolved "https://registry.yarnpkg.com/acorn/-/acorn-8.15.0.tgz#a360898bc415edaac46c8241f6383975b930b816"
   integrity sha512-NZyJarBfL7nWwIq+FDL6Zp/yHEhePMNnnJ0y3qfieCrmNvYct8uvtiV41UvlSe6apAfk0fY1FbWx+NwfmpvtTg==
 
-adm-zip@0.5.9:
-  version "0.5.9"
-  resolved "https://registry.yarnpkg.com/adm-zip/-/adm-zip-0.5.9.tgz#b33691028333821c0cf95c31374c5462f2905a83"
-  integrity sha512-s+3fXLkeeLjZ2kLjCBwQufpI5fuN+kIGBxu6530nVQZGVol0d7Y/M88/xw9HGGUcJjKf8LutN3VPRUBq6N7Ajg==
+adm-zip@0.6.0:
+  version "0.6.0"
+  resolved "https://registry.yarnpkg.com/adm-zip/-/adm-zip-0.6.0.tgz#bbc5c6c333755e967a06dd98747f431e1d53a3cf"
+  integrity sha512-XleryMhbuksdKtofnWZ9Sk+4CUTbms4Mb/EU32SZwToAyZ5RgVos/ki8n+yr0LWHOGKuakbXTuuYNHLQjhddgg==
 
 after-all-results@^2.0.0:
   version "2.0.0"
@@ -31391,7 +31392,7 @@ utils-merge@1.0.1:
   resolved "https://registry.yarnpkg.com/utils-merge/-/utils-merge-1.0.1.tgz#9f95710f50a267947b2ccc124741c1028427e713"
   integrity sha1-n5VxD1CiZ5R7LMwSR0HBAoQn5xM=
 
-uuid@11.1.1, uuid@^11.1.0:
+uuid@11.1.1, uuid@^11.1.0, uuid@^9.0.0:
   version "11.1.1"
   resolved "https://registry.yarnpkg.com/uuid/-/uuid-11.1.1.tgz#f6d81d2e1c65d00762e5e29b16c5d2d995e208ad"
   integrity sha512-vIYxrBCC/N/K+Js3qSN88go7kIfNPssr/hHCesKCQNAjmgvYS2oqr69kIufEG+O4+PfezOH4EbIeHCfFov8ZgQ==
@@ -31420,11 +31421,6 @@ uuid@^8.0.0, uuid@^8.3.0, uuid@^8.3.2:
   version "8.3.2"
   resolved "https://registry.yarnpkg.com/uuid/-/uuid-8.3.2.tgz#80d5b5ced271bb9af6c445f21a1a04c606cefbe2"
   integrity sha512-+NYs2QeMWy+GWFOEm9xnn6HCDp0l7QBD7ml8zLUmJ+93Q5NF0NocErnwkTkXVFNiX3/fpC6afS8Dhb/gz7R7eg==
-
-uuid@^9.0.0:
-  version "9.0.1"
-  resolved "https://registry.yarnpkg.com/uuid/-/uuid-9.0.1.tgz#e188d4c8853cc722220392c424cd637f32293f30"
-  integrity sha512-b+1eJOlsR9K8HJpow9Ok3fiWOWSIcIzXodvv0rQjVoOVNpWMpxf1wZNpt4y9h10odCNrqnYp1OBzRktckBe3sA==
 
 v8-compile-cache@^2.3.0:
   version "2.3.0"
