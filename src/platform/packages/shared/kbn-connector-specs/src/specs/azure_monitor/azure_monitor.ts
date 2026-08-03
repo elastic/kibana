@@ -772,7 +772,7 @@ export const AzureMonitor: ConnectorSpec = {
           message: `Successfully connected to Azure Monitor: found ${count} action group(s)`,
         };
       } catch (error) {
-        return { ok: false, message: extractAzureErrorMessage(error) };
+        throwAzureError(error);
       }
     },
   },
