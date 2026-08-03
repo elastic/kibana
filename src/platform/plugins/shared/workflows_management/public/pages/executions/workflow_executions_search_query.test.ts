@@ -13,7 +13,6 @@ import {
 } from './workflow_executions_search_query';
 
 describe('workflow_executions_search_query', () => {
-
   describe('isWorkflowExecutionsIndexNotFoundError', () => {
     it('returns true for an EsError-shaped index_not_found_exception', () => {
       const error = {
