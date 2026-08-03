@@ -10,8 +10,6 @@ import {
   EuiBadge,
   EuiButton,
   EuiButtonEmpty,
-  EuiButtonGroup,
-  EuiFieldSearch,
   EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
@@ -26,29 +24,12 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { ServiceRow } from './service_row';
 import { SIGNAL_TYPE_LABELS } from './signal_type_badge';
 import { useServicesStep } from './use_services_step';
-import type { SignalFilter } from './use_services_step';
+import { ServiceSearchFilter } from '../service_search_filter';
 
 interface ServicesStepProps {
   onContinue: () => void;
   onBack?: () => void;
 }
-
-const SIGNAL_FILTER_OPTIONS = [
-  {
-    id: 'all' as SignalFilter,
-    label: i18n.translate('xpack.ingestHub.servicesStep.filter.all', { defaultMessage: 'All' }),
-  },
-  {
-    id: 'logs' as SignalFilter,
-    label: i18n.translate('xpack.ingestHub.servicesStep.filter.logs', { defaultMessage: 'Logs' }),
-  },
-  {
-    id: 'metrics' as SignalFilter,
-    label: i18n.translate('xpack.ingestHub.servicesStep.filter.metrics', {
-      defaultMessage: 'Metrics',
-    }),
-  },
-];
 
 export function ServicesStep({ onContinue, onBack }: ServicesStepProps) {
   const {
@@ -91,32 +72,14 @@ export function ServicesStep({ onContinue, onBack }: ServicesStepProps) {
         </p>
       </EuiText>
       <EuiSpacer size="l" />
-      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-        <EuiFlexItem>
-          <EuiFieldSearch
-            fullWidth
-            compressed
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder={i18n.translate('xpack.ingestHub.servicesStep.searchPlaceholder', {
-              defaultMessage: 'Search services',
-            })}
-            data-test-subj="servicesStep-searchBox"
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonGroup
-            legend={i18n.translate('xpack.ingestHub.servicesStep.filter.legend', {
-              defaultMessage: 'Filter by signal type',
-            })}
-            options={SIGNAL_FILTER_OPTIONS}
-            idSelected={signalFilter}
-            onChange={(id) => setSignalFilter(id as SignalFilter)}
-            buttonSize="compressed"
-            data-test-subj="servicesStep-signalFilter"
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <ServiceSearchFilter
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        signalFilter={signalFilter}
+        onSignalFilterChange={setSignalFilter}
+        searchTestSubj="servicesStep-searchBox"
+        filterTestSubj="servicesStep-signalFilter"
+      />
 
       <EuiSpacer size="s" />
 
