@@ -138,7 +138,7 @@ export const BulkScheduleFlyout = ({
     return [...seconds, ...minutes];
   }, [allowSeconds]);
 
-  const updates = useMemo(() => {
+  const monitorIdsToUpdate = useMemo(() => {
     if (!selectedValue) {
       return [];
     }
@@ -156,7 +156,7 @@ export const BulkScheduleFlyout = ({
     try {
       const next = toSchedule(selectedValue);
       const { result } = await fetchBulkUpdateMonitors({
-        updates: updates.map((id) => ({
+        updates: monitorIdsToUpdate.map((id) => ({
           id,
           attributes: { [ConfigKey.SCHEDULE]: next },
         })),
@@ -186,16 +186,16 @@ export const BulkScheduleFlyout = ({
       reloadPage();
       onClose();
     }
-  }, [updates, selectedValue, spaceId, reloadPage, onClose]);
+  }, [monitorIdsToUpdate, selectedValue, spaceId, reloadPage, onClose]);
 
-  const saveDisabled = updates.length === 0 || !selectedValue;
+  const saveDisabled = monitorIdsToUpdate.length === 0 || !selectedValue;
 
   // Live breakdown so the user can see how many monitors Save will actually
   // touch — monitors already on the chosen frequency are counted as unchanged.
   const hasSelection = Boolean(selectedValue);
-  const unchangedCount = eligibleMonitors.length - updates.length;
+  const unchangedCount = eligibleMonitors.length - monitorIdsToUpdate.length;
   const effectSummary = [
-    getWillChangeSummary(updates.length),
+    getWillChangeSummary(monitorIdsToUpdate.length),
     unchangedCount > 0 ? getUnchangedSummary(unchangedCount) : null,
   ]
     .filter(Boolean)
