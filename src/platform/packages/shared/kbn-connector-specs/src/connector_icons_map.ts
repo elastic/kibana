@@ -94,6 +94,10 @@ export const ConnectorIconsMap: Map<
         import(/* webpackChunkName: "connectorIconJiraCloud" */ './specs/atlassian/jira-cloud/icon')
     ),
   ],
+  [
+    '.databricks',
+    lazy(() => import(/* webpackChunkName: "connectorIconDatabricks" */ './specs/databricks/icon')),
+  ],
   ['.figma', lazy(() => import(/* webpackChunkName: "connectorIconFigma" */ './specs/figma/icon'))],
   [
     '.confluence-cloud',
@@ -109,6 +113,10 @@ export const ConnectorIconsMap: Map<
     lazy(
       () => import(/* webpackChunkName: "connectorIconGoogleDrive" */ './specs/google_drive/icon')
     ),
+  ],
+  [
+    '.graphql',
+    lazy(() => import(/* webpackChunkName: "connectorIconGraphQL" */ './specs/graphql/icon')),
   ],
   [
     '.slack2',
@@ -247,8 +255,16 @@ export const ConnectorIconsMap: Map<
     ),
   ],
   [
+    '.workday',
+    lazy(() => import(/* webpackChunkName: "connectorIconWorkday" */ './specs/workday/icon')),
+  ],
+  [
     '.kubernetes',
     lazy(() => import(/* webpackChunkName: "connectorIconKubernetes" */ './specs/kubernetes/icon')),
+  ],
+  [
+    '.posthog',
+    lazy(() => import(/* webpackChunkName: "connectorIconposthog" */ './specs/posthog/icon')),
   ],
   [
     '.new_relic',
@@ -277,5 +293,23 @@ export const ConnectorIconsMap: Map<
   [
     '.datadog',
     lazy(() => import(/* webpackChunkName: "connectorIconDatadog" */ './specs/datadog/icon')),
+  ],
+
+  [
+    '.jenkins',
+    lazy(() => import(/* webpackChunkName: "connectorIconjenkins" */ './specs/jenkins/icon')),
+  ],
+  [
+    '.aws_x_ray',
+    lazy(() => import(/* webpackChunkName: "connectorIconawsxray" */ './specs/aws_x_ray/icon')),
+  ],
+  [
+    '.prometheus_alertmanager',
+    lazy(
+      () =>
+        import(
+          /* webpackChunkName: "connectorIconPrometheusAlertmanager" */ './specs/prometheus_alertmanager/icon'
+        )
+    ),
   ],
 ]);

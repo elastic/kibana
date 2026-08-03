@@ -5,6 +5,7 @@
   },
   "include": [
     "../../../../../typings/**/*",
+    ".storybook/**/*",
     "common/**/*",
     "public/**/*",
     "server/**/*",
@@ -140,5 +141,6 @@
     "@kbn/user-profile-components",
     "@kbn/telemetry",
     "@kbn/embeddable-plugin",
+    "@kbn/storybook",
   ]
 }
