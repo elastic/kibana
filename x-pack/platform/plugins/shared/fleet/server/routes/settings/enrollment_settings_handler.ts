@@ -22,6 +22,7 @@ import type {
   Output,
   DownloadSource,
 } from '../../../common/types';
+import { isBeatsOutput } from '../../../common/services/output_helpers';
 import type { FleetRequestHandler, GetEnrollmentSettingsRequestSchema } from '../../types';
 import { agentPolicyService, appContextService, downloadSourceService } from '../../services';
 import { isBeatsOutput } from '../../../common/services/output_helpers';
