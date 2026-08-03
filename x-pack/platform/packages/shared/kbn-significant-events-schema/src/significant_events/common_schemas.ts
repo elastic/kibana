@@ -304,7 +304,7 @@ export const significantEventBaseSchema = z.object({
     .max(MAX_ID_LENGTH)
     .optional()
     .describe(
-      'ID of the workflow execution that produced this write; omit when the write did not originate from a workflow execution.'
+      'ID of the workflow execution that produced this specific version, e.g. the triage run that wrote it or the investigation run that changed its severity; omit when the write did not originate from a workflow execution.'
     ),
   conversation_id: z
     .string()
@@ -312,5 +312,3 @@ export const significantEventBaseSchema = z.object({
     .optional()
     .describe('ID of the agent chat conversation this write originated from.'),
 });
-
-export type SigEventBase = z.infer<typeof significantEventBaseSchema>;

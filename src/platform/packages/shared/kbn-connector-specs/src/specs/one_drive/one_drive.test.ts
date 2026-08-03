@@ -47,9 +47,10 @@ describe('OneDrive', () => {
       expect(OneDrive.metadata.minimumLicense).toBe('enterprise');
     });
 
-    it('supports workflows and agentBuilder', () => {
+    it('supports workflows, agentBuilder, and contextEngine', () => {
       expect(OneDrive.metadata.supportedFeatureIds).toContain('workflows');
       expect(OneDrive.metadata.supportedFeatureIds).toContain('agentBuilder');
+      expect(OneDrive.metadata.supportedFeatureIds).toContain('contextEngine');
     });
 
     it('is marked as technical preview', () => {
