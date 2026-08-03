@@ -26,7 +26,7 @@ import { buildCountQuery } from '../../utils/build_count_query';
 import { getEsqlColumnSchema } from '../../utils/get_esql_column_schema';
 import { DEFAULT_ESQL_QUERY_TIMEOUT_MS } from '../../utils/default_esql_query_timeout';
 import { pValueToLabel } from '../../utils/p_value_to_label';
-import { categorizeWithNoiseExclusion, esqlSupportsTwoPass } from '../../utils/esql_categorize';
+import { categorizeWithNoiseExclusion } from '../../utils/esql_categorize';
 
 const MAX_DOCS_TO_SAMPLE = 100_000;
 
@@ -452,8 +452,7 @@ export async function getSigEventsLogPatternsEsql({
   const samplingProbability =
     MAX_DOCS_TO_SAMPLE / totalDocs < 0.5 ? MAX_DOCS_TO_SAMPLE / totalDocs : 1;
 
-  // Cluster property — resolve once, not per field.
-  const twoPassSupported = await esqlSupportsTwoPass(esClient.client);
+  const filter = { bool: { filter: [...kqlQuery(kql), ...dateRangeQuery(start, end)] } };
 
   const perField = await Promise.all(
     eligibleFields.map(async (field) => {
@@ -461,18 +460,12 @@ export async function getSigEventsLogPatternsEsql({
       // views), where `FROM <view> METADATA _index, _id` raises
       // `Unknown column [_index]`.
       const rows = await categorizeWithNoiseExclusion({
+        esClient,
         indices: samplingSource,
         field,
-        kql,
         total: totalDocs,
         samplingProbability,
-        twoPassSupported,
-        run: (query) =>
-          esClient.esql('categorize_sigevents_log_patterns', {
-            query,
-            filter: { bool: { filter: dateRangeQuery(start, end) } },
-            drop_null_columns: true,
-          }) as unknown as Promise<ESQLSearchResponse>,
+        filter,
       });
 
       return rows.map((row) => ({

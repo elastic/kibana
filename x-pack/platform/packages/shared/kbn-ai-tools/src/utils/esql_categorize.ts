@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { esql } from '@elastic/esql';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ESQLSearchResponse } from '@kbn/es-types';
+import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import { orderBy, uniqBy } from 'lodash';
 
 export interface CategorizeWithSampleRow {
@@ -129,7 +131,6 @@ export function buildCategorizeWithSampleQuery({
   field,
   limit,
   samplingProbability,
-  kql,
   outputFormat,
   excludeTokens,
   countThreshold,
@@ -139,7 +140,6 @@ export function buildCategorizeWithSampleQuery({
   field: string;
   limit?: number;
   samplingProbability: number;
-  kql?: string;
   outputFormat?: CategorizeOutputFormat;
   excludeTokens?: string[];
   countThreshold?: number;
@@ -149,12 +149,11 @@ export function buildCategorizeWithSampleQuery({
 
   let query = esql.from(Array.isArray(indices) ? indices : [indices]);
 
-  // Full-text predicates (KQL filter + noise-pattern exclusion) must sit before
-  // SAMPLE and STATS on the indexed field. Combine them into a single WHERE.
+  // Noise-pattern exclusion predicates must sit before SAMPLE and STATS on the
+  // indexed field. Combine them into a single WHERE. The caller applies any KQL
+  // and date-range filtering through the ES|QL request `filter`, which prefilters
+  // the source before this pipeline.
   const whereClauses = [];
-  if (kql) {
-    whereClauses.push(esql.exp`KQL(${esql.str(kql)})`);
-  }
   for (const tokens of excludeTokens ?? []) {
     if (tokens.length > 0) {
       whereClauses.push(esql.exp`NOT MATCH(${fieldCol}, ${esql.str(tokens)}, {"operator": "AND"})`);
@@ -229,116 +228,122 @@ export function parseCategorizeWithSampleRows(
  * the residual (and it re-samples if the residual is still large). Neither pass
  * uses `SORT count DESC | LIMIT`, so neither hits elastic/elasticsearch#154534.
  *
- * Counts are normalized back to population estimates. `run` executes an ES|QL
- * query string against the caller's client (traced or plain) with its own date
- * filter and timeout, returning the raw response.
+ * Counts are normalized back to population estimates. ES|QL queries run through
+ * the traced client with the caller's prefilter applied via the request `filter`.
  */
 export async function categorizeWithNoiseExclusion({
+  esClient,
   indices,
   field,
-  kql,
   total,
   samplingProbability,
+  filter,
   noiseFraction = NOISE_FRACTION_DEFAULT,
   maxDocsToSample = CATEGORIZE_MAX_DOCS_TO_SAMPLE,
-  twoPassSupported = true,
-  run,
+  signal,
 }: {
+  esClient: TracedElasticsearchClient;
   indices: string | string[];
   field: string;
-  kql?: string;
   total: number;
   samplingProbability: number;
+  filter?: QueryDslQueryContainer;
   noiseFraction?: number;
   maxDocsToSample?: number;
-  twoPassSupported?: boolean;
-  run: (query: string) => Promise<ESQLSearchResponse>;
+  signal?: AbortSignal;
 }): Promise<CategorizeWithSampleRow[]> {
   const p1 = samplingProbability;
+  const run = (operationName: string, query: string) =>
+    runCategorizeEsql(esClient, operationName, query, filter);
+
+  const twoPassSupported = await esqlSupportsTwoPass(esClient.client, { signal });
 
   // Legacy single categorize (regex form, no exclusion) — the degraded path when
-  // the two-pass syntax is unsupported or a supported cluster still rejects it.
-  const runLegacySinglePass = async () => {
-    const legacyQuery = buildCategorizeWithSampleQuery({
+  // the cluster does not support the two-pass option syntax. Gated proactively via
+  // `_capabilities`, so no speculative query is ever fired at a pre-capability ES;
+  // every other error propagates rather than silently degrading to this
+  // frequency-biased query.
+  if (!twoPassSupported) {
+    const legacyQuery = buildCategorizeWithSampleQuery({ indices, field, samplingProbability: p1 });
+    return dedupeByPattern(
+      normalizeCounts(
+        parseCategorizeWithSampleRows(await run('categorize_noise_exclusion_legacy', legacyQuery)),
+        p1
+      )
+    );
+  }
+
+  // Threshold in sampled space: a pattern that is `noiseFraction` of the
+  // population appears at `noiseFraction * total * p1` docs in the sample.
+  const sampledThreshold = noiseFraction * total * p1;
+
+  const headQuery = buildCategorizeWithSampleQuery({
+    indices,
+    field,
+    samplingProbability: p1,
+    outputFormat: 'tokens',
+    countThreshold: sampledThreshold,
+  });
+  const headRows = normalizeCounts(
+    parseCategorizeWithSampleRows(await run('categorize_noise_exclusion_head', headQuery)),
+    p1
+  );
+
+  if (headRows.length === 0) {
+    // No dominant pattern to strip. A plain sampled categorize is the best we
+    // can cheaply do — a full-probability scan over the whole population would
+    // risk timing out on busy streams.
+    const plainQuery = buildCategorizeWithSampleQuery({
       indices,
       field,
-      kql,
       samplingProbability: p1,
+      outputFormat: 'tokens',
     });
     return dedupeByPattern(
-      normalizeCounts(parseCategorizeWithSampleRows(await run(legacyQuery)), p1)
+      normalizeCounts(
+        parseCategorizeWithSampleRows(await run('categorize_noise_exclusion_plain', plainQuery)),
+        p1
+      )
     );
-  };
-
-  if (!twoPassSupported) {
-    return runLegacySinglePass();
   }
 
-  try {
-    // Threshold in sampled space: a pattern that is `noiseFraction` of the
-    // population appears at `noiseFraction * total * p1` docs in the sample.
-    const sampledThreshold = noiseFraction * total * p1;
+  const excludeTokens = headRows.map((row) => row.pattern).filter((pattern) => pattern.length > 0);
+  const headDocs = headRows.reduce((sum, row) => sum + row.count, 0);
+  const residual = Math.max(0, total - headDocs);
 
-    const headQuery = buildCategorizeWithSampleQuery({
-      indices,
-      field,
-      kql,
-      samplingProbability: p1,
-      outputFormat: 'tokens',
-      countThreshold: sampledThreshold,
-    });
-    const headRows = normalizeCounts(parseCategorizeWithSampleRows(await run(headQuery)), p1);
-
-    if (headRows.length === 0) {
-      // No dominant pattern to strip. A plain sampled categorize is the best we
-      // can cheaply do — a full-probability scan over the whole population would
-      // risk timing out on busy streams.
-      const plainQuery = buildCategorizeWithSampleQuery({
-        indices,
-        field,
-        kql,
-        samplingProbability: p1,
-        outputFormat: 'tokens',
-      });
-      return dedupeByPattern(
-        normalizeCounts(parseCategorizeWithSampleRows(await run(plainQuery)), p1)
-      );
-    }
-
-    const excludeTokens = headRows
-      .map((row) => row.pattern)
-      .filter((pattern) => pattern.length > 0);
-    const headDocs = headRows.reduce((sum, row) => sum + row.count, 0);
-    const residual = Math.max(0, total - headDocs);
-
-    // Skip pass 2 only when the residual is exactly zero AND pass 1 was unsampled;
-    // a sampled residual is an estimate, so run pass 2 (its exclusion keeps it cheap).
-    if (p1 >= 1 && residual === 0) {
-      return dedupeByPattern(headRows);
-    }
-
-    const p2 = residual > maxDocsToSample ? maxDocsToSample / residual : 1;
-
-    const rareQuery = buildCategorizeWithSampleQuery({
-      indices,
-      field,
-      kql,
-      samplingProbability: p2,
-      outputFormat: 'tokens',
-      excludeTokens,
-    });
-    const rareRows = normalizeCounts(parseCategorizeWithSampleRows(await run(rareQuery)), p2);
-
-    return dedupeByPattern([...headRows, ...rareRows]);
-  } catch (error) {
-    // Only an ES too old for the `output_format`/`operator` option maps justifies
-    // the fallback. Aborts, timeouts and other real failures must propagate, not
-    // be silently masked by the frequency-biased legacy query.
-    if (!isUnsupportedTwoPassError(error)) {
-      throw error;
-    }
-    return runLegacySinglePass();
+  // Skip pass 2 only when the residual is exactly zero AND pass 1 was unsampled;
+  // a sampled residual is an estimate, so run pass 2 (its exclusion keeps it cheap).
+  if (p1 >= 1 && residual === 0) {
+    return dedupeByPattern(headRows);
   }
+
+  const p2 = residual > maxDocsToSample ? maxDocsToSample / residual : 1;
+
+  const rareQuery = buildCategorizeWithSampleQuery({
+    indices,
+    field,
+    samplingProbability: p2,
+    outputFormat: 'tokens',
+    excludeTokens,
+  });
+  const rareRows = normalizeCounts(
+    parseCategorizeWithSampleRows(await run('categorize_noise_exclusion_rare', rareQuery)),
+    p2
+  );
+
+  return dedupeByPattern([...headRows, ...rareRows]);
+}
+
+async function runCategorizeEsql(
+  esClient: TracedElasticsearchClient,
+  operationName: string,
+  query: string,
+  filter?: QueryDslQueryContainer
+): Promise<ESQLSearchResponse> {
+  return esClient.esql(operationName, {
+    query,
+    ...(filter ? { filter } : {}),
+  }) as unknown as Promise<ESQLSearchResponse>;
 }
 
 function normalizeCounts(
@@ -349,39 +354,6 @@ function normalizeCounts(
     return rows;
   }
   return rows.map((row) => ({ ...row, count: Math.round(row.count / samplingProbability) }));
-}
-
-/**
- * Distinguishes the one failure the two-pass flow can recover from — an ES that
- * rejects the `CATEGORIZE` `output_format` / `MATCH` `operator` option maps
- * (predating CATEGORIZE_OPTIONS / MATCH_FUNCTION_OPTIONS) — from every other
- * error. The useful detail lives in the message and, for ES client errors, in
- * `meta.body`, so both are inspected.
- */
-function isUnsupportedTwoPassError(error: unknown): boolean {
-  const parts: string[] = [];
-  if (error instanceof Error) {
-    parts.push(error.message);
-  }
-  const body = (error as { meta?: { body?: unknown } })?.meta?.body;
-  if (body !== undefined) {
-    try {
-      parts.push(typeof body === 'string' ? body : JSON.stringify(body));
-    } catch {
-      // A body that cannot be stringified carries no matchable option name.
-    }
-  }
-  if (parts.length === 0) {
-    parts.push(String(error));
-  }
-  const text = parts.join(' ').toLowerCase();
-  return (
-    text.includes('output_format') ||
-    text.includes('unknown option') ||
-    text.includes('invalid option') ||
-    text.includes('verification_exception') ||
-    text.includes('parsing_exception')
-  );
 }
 
 function dedupeByPattern(rows: CategorizeWithSampleRow[]): CategorizeWithSampleRow[] {

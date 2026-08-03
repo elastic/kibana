@@ -7,6 +7,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ESQLSearchResponse } from '@kbn/es-types';
+import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import {
   buildCategorizeWithSampleQuery,
   categorizeWithNoiseExclusion,
@@ -22,6 +23,15 @@ const categorizeResponse = (values: unknown[][]): ESQLSearchResponse =>
     ],
     values,
   } as unknown as ESQLSearchResponse);
+
+const createTracedEsClient = (
+  esql: jest.Mock,
+  capabilities = jest.fn().mockResolvedValue({ supported: true })
+) =>
+  ({
+    esql,
+    client: { capabilities },
+  } as unknown as TracedElasticsearchClient);
 
 describe('buildCategorizeWithSampleQuery', () => {
   it('defaults to regex CATEGORIZE with no SORT/LIMIT and no SAMPLE at probability 1', () => {
@@ -70,18 +80,17 @@ describe('buildCategorizeWithSampleQuery', () => {
     expect(query).not.toContain('LIMIT');
   });
 
-  it('chains full-text NOT MATCH exclusions before STATS, ANDed with KQL', () => {
+  it('chains full-text NOT MATCH exclusions before STATS', () => {
     const query = buildCategorizeWithSampleQuery({
       indices: 'logs-*',
       field: 'body.text',
       samplingProbability: 1,
-      kql: 'service.name:"checkout"',
       outputFormat: 'tokens',
       excludeTokens: ['request completed', 'metadata updated'],
     });
 
     expect(query).toContain(
-      'WHERE KQL("service.name:\\"checkout\\"") AND NOT MATCH(body.text, "request completed", {"operator": "AND"}) AND NOT MATCH(body.text, "metadata updated", {"operator": "AND"})'
+      'WHERE NOT MATCH(body.text, "request completed", {"operator": "AND"}) AND NOT MATCH(body.text, "metadata updated", {"operator": "AND"})'
     );
     // Exclusion sits before STATS on the indexed field.
     expect(query.indexOf('NOT MATCH')).toBeLessThan(query.indexOf('STATS'));
@@ -114,7 +123,7 @@ describe('buildCategorizeWithSampleQuery', () => {
 
 describe('categorizeWithNoiseExclusion', () => {
   it('excludes the noisy head then recategorizes the residual at full probability', async () => {
-    const run = jest
+    const esql = jest
       .fn()
       .mockResolvedValueOnce(categorizeResponse([[960, 'request completed', 'request completed']]))
       .mockResolvedValueOnce(
@@ -122,23 +131,25 @@ describe('categorizeWithNoiseExclusion', () => {
       );
 
     const rows = await categorizeWithNoiseExclusion({
+      esClient: createTracedEsClient(esql),
       indices: 'logs-*',
       field: 'message',
       total: 1000,
       samplingProbability: 1,
-      run,
     });
 
-    expect(run).toHaveBeenCalledTimes(2);
+    expect(esql).toHaveBeenCalledTimes(2);
     // Pass 1: token categorize + relative threshold (0.01 * 1000 * 1 = 10), no SORT/LIMIT.
-    const pass1 = run.mock.calls[0][0];
+    const pass1 = esql.mock.calls[0][1].query;
     expect(pass1).toContain('CATEGORIZE(message, {"output_format": "tokens"})');
     expect(pass1).toContain('| WHERE count > 10');
     expect(pass1).not.toContain('SORT');
+    expect(esql.mock.calls[0][0]).toBe('categorize_noise_exclusion_head');
     // Pass 2: full-probability (no SAMPLE) recategorize excluding the head.
-    const pass2 = run.mock.calls[1][0];
+    const pass2 = esql.mock.calls[1][1].query;
     expect(pass2).toContain('NOT MATCH(message, "request completed", {"operator": "AND"})');
     expect(pass2).not.toContain('SAMPLE');
+    expect(esql.mock.calls[1][0]).toBe('categorize_noise_exclusion_rare');
     expect(rows).toEqual([
       { count: 960, pattern: 'request completed', sample: 'request completed' },
       { count: 4, pattern: 'disk quota exceeded', sample: 'disk quota exceeded' },
@@ -148,17 +159,17 @@ describe('categorizeWithNoiseExclusion', () => {
   it('normalizes head and tail counts back to population estimates', async () => {
     // p1 = 0.1: head appears at 90 in the sample -> 900 in the population;
     // residual (100) fits under the cap so p2 = 1 and the tail count is exact.
-    const run = jest
+    const esql = jest
       .fn()
       .mockResolvedValueOnce(categorizeResponse([[90, 'noise', 'noise']]))
       .mockResolvedValueOnce(categorizeResponse([[7, 'rare', 'rare']]));
 
     const rows = await categorizeWithNoiseExclusion({
+      esClient: createTracedEsClient(esql),
       indices: 'logs-*',
       field: 'message',
       total: 1000,
       samplingProbability: 0.1,
-      run,
     });
 
     expect(rows).toEqual([
@@ -168,45 +179,46 @@ describe('categorizeWithNoiseExclusion', () => {
   });
 
   it('falls back to a plain sampled categorize when no head clears the threshold', async () => {
-    const run = jest
+    const esql = jest
       .fn()
       .mockResolvedValueOnce(categorizeResponse([]))
       .mockResolvedValueOnce(categorizeResponse([[16, 'error one', 'error']]));
 
     const rows = await categorizeWithNoiseExclusion({
+      esClient: createTracedEsClient(esql),
       indices: 'logs-*',
       field: 'message',
       total: 1_000_000,
       samplingProbability: 0.1,
-      run,
     });
 
-    expect(run).toHaveBeenCalledTimes(2);
-    const plain = run.mock.calls[1][0];
+    expect(esql).toHaveBeenCalledTimes(2);
+    const plain = esql.mock.calls[1][1].query;
     // No exclusion, no post-STATS threshold, but still sampled.
     expect(plain).toContain('| SAMPLE 0.1 |');
     expect(plain).not.toContain('NOT MATCH');
     expect(plain).not.toContain('WHERE count >');
+    expect(esql.mock.calls[1][0]).toBe('categorize_noise_exclusion_plain');
     expect(rows).toEqual([{ count: 160, pattern: 'error', sample: 'error one' }]);
   });
 
   it('re-samples pass 2 when the residual still exceeds the cap', async () => {
     // total 2200, head 200 -> residual 2000 > cap 1000 -> p2 = 0.5.
-    const run = jest
+    const esql = jest
       .fn()
       .mockResolvedValueOnce(categorizeResponse([[200, 'noise', 'noise']]))
       .mockResolvedValueOnce(categorizeResponse([[3, 'rare', 'rare']]));
 
     const rows = await categorizeWithNoiseExclusion({
+      esClient: createTracedEsClient(esql),
       indices: 'logs-*',
       field: 'message',
       total: 2200,
       samplingProbability: 1,
       maxDocsToSample: 1000,
-      run,
     });
 
-    const pass2 = run.mock.calls[1][0];
+    const pass2 = esql.mock.calls[1][1].query;
     expect(pass2).toContain('| SAMPLE 0.5 |');
     expect(pass2).toContain('NOT MATCH(message, "noise", {"operator": "AND"})');
     // Tail count normalized back up by 1 / p2.
@@ -217,24 +229,24 @@ describe('categorizeWithNoiseExclusion', () => {
   });
 
   it('skips pass 2 when counts are exact and the head is the whole population', async () => {
-    const run = jest.fn().mockResolvedValueOnce(categorizeResponse([[100, 'all', 'all']]));
+    const esql = jest.fn().mockResolvedValueOnce(categorizeResponse([[100, 'all', 'all']]));
 
     const rows = await categorizeWithNoiseExclusion({
+      esClient: createTracedEsClient(esql),
       indices: 'logs-*',
       field: 'message',
       total: 100,
       samplingProbability: 1,
-      run,
     });
 
-    expect(run).toHaveBeenCalledTimes(1);
+    expect(esql).toHaveBeenCalledTimes(1);
     expect(rows).toEqual([{ count: 100, pattern: 'all', sample: 'all' }]);
   });
 
   it('sorts by count descending and dedupes head remnants left by approximate exclusion', async () => {
     // Approximate NOT MATCH can leave a smaller-count remnant of a head pattern
     // in pass 2; dedupe keeps the larger head representative.
-    const run = jest
+    const esql = jest
       .fn()
       .mockResolvedValueOnce(categorizeResponse([[500, 'noise', 'noise']]))
       .mockResolvedValueOnce(
@@ -245,11 +257,11 @@ describe('categorizeWithNoiseExclusion', () => {
       );
 
     const rows = await categorizeWithNoiseExclusion({
+      esClient: createTracedEsClient(esql),
       indices: 'logs-*',
       field: 'message',
       total: 1000,
       samplingProbability: 1,
-      run,
     });
 
     expect(rows).toEqual([
@@ -258,46 +270,45 @@ describe('categorizeWithNoiseExclusion', () => {
     ]);
   });
 
-  it('degrades to a legacy single-pass categorize when the two-pass query is rejected', async () => {
-    const run = jest
+  it('propagates two-pass query errors instead of silently degrading', async () => {
+    // Fallback is gated proactively by the capability check, so a runtime
+    // failure (timeout, circuit breaker, shard failure) must surface rather than be
+    // masked by the frequency-biased legacy query.
+    const esql = jest
       .fn()
-      // Pass 1 rejected, e.g. an older ES without CATEGORIZE_OPTIONS/MATCH options.
-      .mockRejectedValueOnce(new Error('verification_exception: Invalid option [output_format]'))
-      // Legacy fallback (regex categorize, no options, no exclusion) succeeds.
-      .mockResolvedValueOnce(categorizeResponse([[7, 'legacy sample', 'legacy']]));
+      .mockRejectedValueOnce(new Error('circuit_breaking_exception: too much data'));
 
-    const rows = await categorizeWithNoiseExclusion({
-      indices: 'logs-*',
-      field: 'message',
-      total: 1000,
-      samplingProbability: 1,
-      run,
-    });
+    await expect(
+      categorizeWithNoiseExclusion({
+        esClient: createTracedEsClient(esql),
+        indices: 'logs-*',
+        field: 'message',
+        total: 1000,
+        samplingProbability: 1,
+      })
+    ).rejects.toThrow('circuit_breaking_exception');
 
-    expect(run).toHaveBeenCalledTimes(2);
-    const fallback = run.mock.calls[1][0];
-    expect(fallback).not.toContain('output_format');
-    expect(fallback).not.toContain('NOT MATCH');
-    expect(rows).toEqual([{ count: 7, pattern: 'legacy', sample: 'legacy sample' }]);
+    expect(esql).toHaveBeenCalledTimes(1);
   });
 
   it('runs a single legacy categorize (no speculative query) when two-pass is unsupported', async () => {
-    const run = jest
+    const capabilities = jest.fn().mockResolvedValue({ supported: false });
+    const esql = jest
       .fn()
       .mockResolvedValueOnce(categorizeResponse([[7, 'legacy sample', 'legacy']]));
 
     const rows = await categorizeWithNoiseExclusion({
+      esClient: createTracedEsClient(esql, capabilities),
       indices: 'logs-*',
       field: 'message',
       total: 1000,
       samplingProbability: 1,
-      twoPassSupported: false,
-      run,
     });
 
     // No head/exclusion round-trip: straight to the legacy regex categorize.
-    expect(run).toHaveBeenCalledTimes(1);
-    const query = run.mock.calls[0][0];
+    expect(esql).toHaveBeenCalledTimes(1);
+    expect(esql.mock.calls[0][0]).toBe('categorize_noise_exclusion_legacy');
+    const query = esql.mock.calls[0][1].query;
     expect(query).not.toContain('output_format');
     expect(query).not.toContain('NOT MATCH');
     expect(query).not.toContain('WHERE count >');

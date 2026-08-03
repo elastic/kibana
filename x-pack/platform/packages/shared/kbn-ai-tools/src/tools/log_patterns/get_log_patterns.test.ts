@@ -6,6 +6,7 @@
  */
 
 import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
+import { kqlQuery, dateRangeQuery } from '@kbn/es-query';
 import { getSigEventsLogPatternsEsql } from './get_log_patterns';
 
 const createEsClient = (
@@ -76,12 +77,16 @@ describe('getSigEventsLogPatternsEsql', () => {
     ]);
     // Pass 1 categorizes in token form and isolates the noisy head with a
     // post-STATS count filter (never SORT count DESC | LIMIT, which trips
-    // elastic/elasticsearch#154534).
+    // elastic/elasticsearch#154534). KQL is no longer inlined in the query — it
+    // rides the ES|QL request `filter` alongside the date range.
     expect(esql.mock.calls[1]).toEqual([
-      'categorize_sigevents_log_patterns',
+      'categorize_noise_exclusion_head',
       expect.objectContaining({
         query:
-          'FROM logs-* | WHERE KQL("service.name:\\"checkout\\"") | STATS count = COUNT(*), `sample` = TOP(body.text::KEYWORD, 1, "desc") BY pattern = CATEGORIZE(body.text, {"output_format": "tokens"}) | WHERE count > 0.1',
+          'FROM logs-* | STATS count = COUNT(*), `sample` = TOP(body.text::KEYWORD, 1, "desc") BY pattern = CATEGORIZE(body.text, {"output_format": "tokens"}) | WHERE count > 0.1',
+        filter: {
+          bool: { filter: [...kqlQuery('service.name:"checkout"'), ...dateRangeQuery(100, 200)] },
+        },
       }),
     ]);
     // Pass 2 was skipped (zero residual), so only count + pass 1 ran.

@@ -7,16 +7,15 @@
 
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { esql } from '@elastic/esql';
-import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import { dateRangeQuery } from '@kbn/es-query';
 import type { Logger } from '@kbn/logging';
+import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import { get } from 'lodash';
 import { getEsqlColumnSchema } from '../../utils/get_esql_column_schema';
 import {
   categorizeWithNoiseExclusion,
   columnPath,
-  esqlSupportsTwoPass,
   type CategorizeWithSampleRow,
 } from '../../utils/esql_categorize';
 import {
@@ -32,7 +31,7 @@ const MAX_DOCS_TO_SAMPLE = 100_000;
 const SOURCE_FETCH_PER_VALUE = 10;
 
 interface GetDiverseSampleDocumentsOptions {
-  esClient: ElasticsearchClient;
+  esClient: TracedElasticsearchClient;
   index: string | string[];
   start: number;
   end: number;
@@ -50,22 +49,14 @@ export async function getDiverseSampleDocuments({
   size = 100,
   iteration,
   logger,
-  requestTimeout,
 }: GetDiverseSampleDocumentsOptions): Promise<{ hits: Array<SearchHit<Record<string, unknown>>> }> {
   const timeRangeFilter = dateRangeQuery(start, end);
   const filter = { bool: { filter: timeRangeFilter } };
   const indices = Array.isArray(index) ? index : [index];
 
-  // One deadline for the whole call: this can issue several sequential
-  // requests (schema/count, categorize, one or more source-fetch rounds), and
-  // a fresh per-request timeout would let `requestTimeout` be exceeded many
-  // times over. Sharing one signal means later requests only get whatever
-  // time earlier ones left.
-  const signal = AbortSignal.timeout(requestTimeout);
-
   const [messageField, totalDocs] = await Promise.all([
-    detectMessageField({ esClient, index, start, end, signal }),
-    runEsqlCount({ esClient, indices, filter, signal }),
+    detectMessageField({ esClient, index, start, end }),
+    runEsqlCount({ esClient, indices, filter }),
   ]);
 
   if (totalDocs === 0 || !messageField) {
@@ -86,16 +77,12 @@ export async function getDiverseSampleDocuments({
   // `$.<name>` views), where `FROM <view> METADATA _index, _id` raises
   // `Unknown column [_index]`.
   const rows = await categorizeWithNoiseExclusion({
+    esClient,
     indices,
     field: messageField,
     total: totalDocs,
     samplingProbability,
-    twoPassSupported: await esqlSupportsTwoPass(esClient, { signal }),
-    run: (query) =>
-      esClient.esql.query(
-        { query, filter, drop_null_columns: true },
-        { signal }
-      ) as unknown as Promise<ESQLSearchResponse>,
+    filter,
   });
 
   const window = selectStratifiedWindow(rows, { iteration, size });
@@ -114,7 +101,6 @@ export async function getDiverseSampleDocuments({
     field: messageField,
     sampleValues,
     filter,
-    signal,
   });
 
   // Emit one document per category, preserving the count-descending window order.
@@ -206,20 +192,18 @@ async function fetchRepresentativeDocuments({
   field,
   sampleValues,
   filter,
-  signal,
 }: {
-  esClient: ElasticsearchClient;
+  esClient: TracedElasticsearchClient;
   indices: string[];
   field: string;
   sampleValues: string[];
   filter: { bool: { filter: ReturnType<typeof dateRangeQuery> } };
-  signal: AbortSignal;
 }): Promise<Map<string, SearchHit<Record<string, unknown>>>> {
   const valueToHit = new Map<string, SearchHit<Record<string, unknown>>>();
   let pending = sampleValues;
 
   while (pending.length > 0) {
-    const fetchQueryParams = {
+    const fetchResponse = (await esClient.esql('diverse_sample_fetch_sources', {
       query: buildSourceFetchQuery({
         indices,
         field,
@@ -227,10 +211,6 @@ async function fetchRepresentativeDocuments({
         limit: pending.length * SOURCE_FETCH_PER_VALUE,
       }),
       filter,
-      drop_null_columns: true,
-    };
-    const fetchResponse = (await esClient.esql.query(fetchQueryParams, {
-      signal,
     })) as unknown as ESQLSearchResponse;
 
     const docs = parseEsqlSourceDocuments(fetchResponse);
@@ -305,15 +285,13 @@ async function detectMessageField({
   index,
   start,
   end,
-  signal,
 }: {
-  esClient: ElasticsearchClient;
+  esClient: TracedElasticsearchClient;
   index: string | string[];
   start: number;
   end: number;
-  signal: AbortSignal;
 }): Promise<string | undefined> {
-  const columns = await getEsqlColumnSchema({ esClient, index, start, end, signal });
+  const columns = await getEsqlColumnSchema({ esClient, index, start, end });
   const textColumnNames = new Set(
     columns.filter((column) => column.type === 'text').map((column) => column.name)
   );
@@ -331,20 +309,14 @@ async function runEsqlCount({
   esClient,
   indices,
   filter,
-  signal,
 }: {
-  esClient: ElasticsearchClient;
+  esClient: TracedElasticsearchClient;
   indices: string[];
   filter: { bool: { filter: ReturnType<typeof dateRangeQuery> } };
-  signal: AbortSignal;
 }): Promise<number> {
-  const countQueryParams = {
+  const response = (await esClient.esql('diverse_sample_count', {
     query: esql.from(indices).pipe`STATS total = COUNT(*)`.print('basic'),
     filter,
-    drop_null_columns: true,
-  };
-  const response = (await esClient.esql.query(countQueryParams, {
-    signal,
   })) as unknown as ESQLSearchResponse;
   const total = response.values[0]?.[0];
 

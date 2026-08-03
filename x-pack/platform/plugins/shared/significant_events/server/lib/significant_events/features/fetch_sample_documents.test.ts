@@ -179,7 +179,7 @@ describe('fetchSampleDocuments', () => {
     );
 
     expect(getDiverseSampleDocumentsMock).toHaveBeenCalledWith({
-      esClient,
+      esClient: expect.objectContaining({ esql: expect.any(Function) }),
       index: 'logs.test-default',
       start: 100,
       end: 200,

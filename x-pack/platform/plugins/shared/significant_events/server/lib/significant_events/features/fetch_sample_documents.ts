@@ -15,6 +15,7 @@ import { conditionToESQLAst } from '@kbn/streamlang';
 import { withSpan } from '@kbn/apm-utils';
 import { getEntityFilters } from './get_entity_filters';
 import { parseError } from '../../streams/parse_error';
+import { createSignificantEventsTracedEsClient } from '../create_significant_events_traced_es_client';
 
 const EMPTY_SAMPLE: { hits: Array<SearchHit<Record<string, unknown>>> } = { hits: [] };
 
@@ -82,6 +83,11 @@ export async function fetchSampleDocuments({
   }
 
   const entityFilters = getEntityFilters(features, maxEntityFilters);
+  const tracedEsClient = createSignificantEventsTracedEsClient({
+    client: esClient,
+    logger,
+    abortSignal: AbortSignal.timeout(samplingTimeoutMs),
+  });
 
   if (entityFilters.length === 0) {
     const diverseSize = Math.round(size * diverseRatio);
@@ -95,7 +101,7 @@ export async function fetchSampleDocuments({
             },
             () =>
               getDiverseSampleDocuments({
-                esClient,
+                esClient: tracedEsClient,
                 index,
                 start,
                 end,
@@ -194,7 +200,7 @@ export async function fetchSampleDocuments({
             },
             () =>
               getDiverseSampleDocuments({
-                esClient,
+                esClient: tracedEsClient,
                 index,
                 start,
                 end,
