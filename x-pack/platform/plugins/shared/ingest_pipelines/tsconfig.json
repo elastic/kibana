@@ -13,7 +13,6 @@
   ],
   "kbn_references": [
     "@kbn/core",
-    "@kbn/file-upload-common",
     "@kbn/licensing-plugin",
     "@kbn/features-plugin",
     "@kbn/security-plugin",

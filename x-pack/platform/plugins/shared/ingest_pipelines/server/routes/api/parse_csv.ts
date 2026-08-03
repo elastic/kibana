@@ -7,18 +7,19 @@
 
 import type { TypeOf, Type } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
-import { ABSOLUTE_MAX_FILE_SIZE_BYTES } from '@kbn/file-upload-common';
 
 import { API_BASE_PATH, APP_CLUSTER_REQUIRED_PRIVILEGES } from '../../../common/constants';
 import type { FieldCopyAction } from '../../../common/types';
 import { csvToIngestPipeline } from '../../lib';
 import type { RouteDependencies } from '../../types';
 
-// The UI accepts files up to the `fileUpload:maxFileSize` setting, which is capped at
-// ABSOLUTE_MAX_FILE_SIZE_BYTES. Use that same ceiling for both the HTTP payload limit and
-// schema maxLength so large CSV uploads are not rejected at the global `server.maxPayload`
-// default before this route's validation runs.
-export const parseCsvMaxFileBytes = ABSOLUTE_MAX_FILE_SIZE_BYTES;
+// This route parses a CSV that *describes* field mappings for a pipeline (not a data file), so
+// even a very large mapping only amounts to a few MB. Cap the body well below the global
+// `server.maxPayload`-vs-file-upload ceilings: authorization here is a manual ES privilege
+// check inside the handler (`authz.enabled: false`), which runs only after the body has been
+// buffered and parsed. A tight limit prevents an authenticated-but-unprivileged caller from
+// forcing large allocations before that check runs, while staying generous for any real CSV.
+export const parseCsvMaxFileBytes = 10 * 1024 * 1024; // 10MB
 
 export const parseCsvBodySchema = schema.object({
   file: schema.string({ maxLength: parseCsvMaxFileBytes }),
