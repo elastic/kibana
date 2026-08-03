@@ -2769,7 +2769,6 @@ x-pack/platform/test/functional/page_objects/search_profiler_page.ts @elastic/se
 /x-pack/platform/test/functional/apps/ingest_pipelines @elastic/kibana-management
 /x-pack/platform/test/functional/apps/license_management @elastic/kibana-management
 /x-pack/platform/test/functional/apps/management @elastic/kibana-management
-/x-pack/platform/test/functional/apps/remote_clusters @elastic/kibana-management
 /x-pack/platform/test/functional/apps/upgrade_assistant @elastic/kibana-management
 /x-pack/platform/test/functional/apps/dev_tools @elastic/kibana-management
 /src/platform/test/plugin_functional/test_suites/management @elastic/kibana-management
@@ -2823,7 +2822,6 @@ x-pack/platform/test/functional/page_objects/search_profiler_page.ts @elastic/se
 /x-pack/platform/test/accessibility/apps/group1/search_profiler.ts @elastic/kibana-management
 /x-pack/platform/test/accessibility/apps/group3/cross_cluster_replication.ts @elastic/kibana-management
 /x-pack/platform/test/accessibility/apps/group3/license_management.ts @elastic/kibana-management
-/x-pack/platform/test/accessibility/apps/group3/remote_clusters.ts @elastic/kibana-management
 /x-pack/platform/test/accessibility/apps/group3/rollup_jobs.ts @elastic/kibana-management
 /x-pack/platform/test/accessibility/apps/group3/upgrade_assistant.ts @elastic/kibana-management
 /x-pack/platform/test/accessibility/apps/group3/watcher.ts @elastic/kibana-management

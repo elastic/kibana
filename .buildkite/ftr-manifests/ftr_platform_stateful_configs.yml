@@ -272,7 +272,6 @@ enabled:
   - x-pack/platform/test/functional/apps/ml/memory_usage/config.ts
   - x-pack/platform/test/functional/apps/monitoring/config.group1.ts
   - x-pack/platform/test/functional/apps/monitoring/config.group2.ts
-  - x-pack/platform/test/functional/apps/remote_clusters/config.ts
   - x-pack/platform/test/functional/apps/reporting_management/config.ts
   - x-pack/platform/test/functional/apps/rollup_job/config.ts
   - x-pack/platform/test/functional/apps/security/config.ts

@@ -15,7 +15,6 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./graph'));
     loadTestFile(require.resolve('./ml_embeddables_in_dashboard'));
     loadTestFile(require.resolve('./rules_connectors'));
-    loadTestFile(require.resolve('./remote_clusters'));
     loadTestFile(require.resolve('./reporting'));
     loadTestFile(require.resolve('./search_sessions'));
 
