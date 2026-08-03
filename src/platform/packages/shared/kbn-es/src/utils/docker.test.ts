@@ -49,6 +49,7 @@ import {
 } from '../paths';
 import * as waitClusterUtil from './wait_until_cluster_ready';
 import * as waitForSecurityIndexUtil from './wait_for_security_index';
+import * as waitForCpsReadyUtil from './wait_for_cps_ready';
 import * as mockIdpPluginUtil from '@kbn/mock-idp-utils';
 
 /**
@@ -85,6 +86,10 @@ jest.mock('./wait_for_security_index', () => ({
   waitForSecurityIndex: jest.fn(),
 }));
 
+jest.mock('./wait_for_cps_ready', () => ({
+  waitForCpsReady: jest.fn(),
+}));
+
 jest.mock('./docker_uiam', () => {
   const originalModule = jest.requireActual('./docker_uiam');
   return {
@@ -110,6 +115,7 @@ const serverlessObjectStorePath = `${baseEsPath}/${serverlessDir}`;
 
 const waitUntilClusterReadyMock = jest.spyOn(waitClusterUtil, 'waitUntilClusterReady');
 const waitForSecurityIndexMock = jest.spyOn(waitForSecurityIndexUtil, 'waitForSecurityIndex');
+const waitForCpsReadyMock = jest.spyOn(waitForCpsReadyUtil, 'waitForCpsReady');
 const ensureSAMLRoleMappingMock = jest.spyOn(mockIdpPluginUtil, 'ensureSAMLRoleMapping');
 const createMockIdpMetadataMock = jest.spyOn(mockIdpPluginUtil, 'createMockIdpMetadata');
 
@@ -1088,6 +1094,36 @@ describe('runServerlessCluster()', () => {
       esArgs: ['xpack.security.enabled=false'],
     });
     expect(waitForSecurityIndexMock).not.toHaveBeenCalled();
+  });
+
+  test(`should wait for the CPS origin project state when cross_project is enabled`, async () => {
+    waitUntilClusterReadyMock.mockResolvedValue();
+    waitForSecurityIndexMock.mockResolvedValue();
+    waitForCpsReadyMock.mockResolvedValue();
+    mockFs({
+      [baseEsPath]: {},
+    });
+    execa.mockImplementation(() => Promise.resolve({ stdout: '' }));
+
+    await runServerlessCluster(log, {
+      projectType,
+      basePath: baseEsPath,
+      waitForReady: true,
+      esArgs: ['serverless.cross_project.enabled=true'],
+    });
+    expect(waitForCpsReadyMock).toHaveBeenCalledTimes(1);
+  });
+
+  test(`should not wait for the CPS origin project state when cross_project is not enabled`, async () => {
+    waitUntilClusterReadyMock.mockResolvedValue();
+    waitForSecurityIndexMock.mockResolvedValue();
+    mockFs({
+      [baseEsPath]: {},
+    });
+    execa.mockImplementation(() => Promise.resolve({ stdout: '' }));
+
+    await runServerlessCluster(log, { projectType, basePath: baseEsPath, waitForReady: true });
+    expect(waitForCpsReadyMock).not.toHaveBeenCalled();
   });
 });
 

@@ -41,6 +41,7 @@ import { initializeUiamContainers, runUiamContainer, getUiamContainers } from '.
 import { getServerlessImageTag, getCommitUrl } from './extract_image_info';
 import { readStringSecrets } from './read_string_secrets';
 import { waitForSecurityIndex } from './wait_for_security_index';
+import { waitForCpsReady } from './wait_for_cps_ready';
 import { createCliError } from '../errors';
 import { shouldPreferCachedSnapshot } from './find_local_cached_snapshot';
 import type { EsClusterExecOptions } from '../cluster_exec_options';
@@ -1122,6 +1123,19 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
       log.info(`[runServerlessCluster] Waiting for security index (${elapsed()})...`);
       await waitForSecurityIndex({ client, log });
       log.info(`[runServerlessCluster] Security index ready (${elapsed()})`);
+    }
+
+    const esArgsList = Array.isArray(options.esArgs)
+      ? options.esArgs
+      : options.esArgs
+      ? [options.esArgs]
+      : [];
+    if (esArgsList.some((arg) => arg === 'serverless.cross_project.enabled=true')) {
+      // In CPS mode the cluster can be green before the origin project routing state is
+      // committed, so wait for it to avoid `No origin project state` on routed requests.
+      log.info(`[runServerlessCluster] Waiting for CPS origin project state (${elapsed()})...`);
+      await waitForCpsReady({ client, log });
+      log.info(`[runServerlessCluster] CPS origin project state ready (${elapsed()})`);
     }
   }
 
