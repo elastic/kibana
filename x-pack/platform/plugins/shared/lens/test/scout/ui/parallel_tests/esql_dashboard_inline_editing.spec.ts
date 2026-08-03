@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { spaceTest, tags, KibanaCodeEditorWrapper } from '@kbn/scout';
+import { spaceTest, KibanaCodeEditorWrapper } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import type { PageObjects, ScoutPage } from '@kbn/scout';
 import { applyLensInlineEditorAndWaitClosed, testData } from '../fixtures';
@@ -24,7 +24,7 @@ const setEsqlQueryAndRun = async (
   await dashboard.waitForRenderComplete();
 };
 
-spaceTest.describe('Lens ESQL dashboard inline editing', { tag: tags.stateful.classic }, () => {
+spaceTest.describe('Lens ESQL dashboard inline editing', { tag: '@local-stateful-classic' }, () => {
   spaceTest.beforeAll(async ({ scoutSpace }) => {
     await scoutSpace.uiSettings.set({
       'dateFormat:tz': 'UTC',
