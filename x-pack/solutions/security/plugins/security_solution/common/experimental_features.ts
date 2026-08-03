@@ -259,6 +259,12 @@ export const allowedExperimentalValues = Object.freeze({
   pciComplianceAgentBuilder: true,
 
   /**
+   * Enables the Endpoint Forensic Analysis Agent Builder skill (DFIR / patient zero / timeline).
+   * Shipped dark by default; enable per environment via config.
+   */
+  endpointForensicAnalysisSkill: false,
+
+  /**
    * Enables the investigate-rule Agent Builder skill.
    * Gates skill registration so the feature can ship dark and be enabled per environment.
    */
