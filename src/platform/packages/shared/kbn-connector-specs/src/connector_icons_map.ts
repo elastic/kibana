@@ -115,6 +115,10 @@ export const ConnectorIconsMap: Map<
     ),
   ],
   [
+    '.graphql',
+    lazy(() => import(/* webpackChunkName: "connectorIconGraphQL" */ './specs/graphql/icon')),
+  ],
+  [
     '.slack2',
     lazy(() => import(/* webpackChunkName: "connectorIconSlack2" */ './specs/slack/icon')),
   ],
@@ -257,6 +261,10 @@ export const ConnectorIconsMap: Map<
   [
     '.kubernetes',
     lazy(() => import(/* webpackChunkName: "connectorIconKubernetes" */ './specs/kubernetes/icon')),
+  ],
+  [
+    '.posthog',
+    lazy(() => import(/* webpackChunkName: "connectorIconposthog" */ './specs/posthog/icon')),
   ],
   [
     '.new_relic',

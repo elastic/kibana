@@ -52,6 +52,7 @@ describe('Slack', () => {
     expect(Slack.metadata.displayName).toBe('Slack (v2)');
     expect(Slack.metadata.minimumLicense).toBe('enterprise');
     expect(Slack.metadata.supportedFeatureIds).toContain('workflows');
+    expect(Slack.metadata.supportedFeatureIds).toContain('contextEngine');
   });
 
   it('should support expected auth types', () => {
