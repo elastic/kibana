@@ -302,15 +302,23 @@ export class CanvasPage {
   }
 
   /**
-   * Deselect any selected workpad element by clicking an empty region of the workpad.
-   * The default panel sits at the top-left, so the bottom-right corner is reliably empty.
+   * Deselect the currently selected workpad element by clicking an empty region of the workpad.
+   *
+   * Adding a panel auto-selects it asynchronously, so a fire-and-forget background click can race
+   * the un-awaited auto-select and re-select the panel. To stay deterministic, first wait for the
+   * selection to settle (the element-settings sidebar renders only while an element is selected),
+   * then click an empty region, then wait for the selection to clear. The default panel sits at
+   * the top-left, so the bottom-right corner is reliably empty.
    */
   async deselectAllElements() {
+    const displayTab = this.page.testSubj.locator('canvasSidebarDisplayTab');
+    await displayTab.waitFor({ state: 'visible' });
     const box = await this.workpadPage.boundingBox();
     if (!box) {
       return;
     }
     await this.page.mouse.click(box.x + box.width * 0.9, box.y + box.height * 0.9);
+    await displayTab.waitFor({ state: 'hidden' });
   }
 
   /** Locator for an embeddable panel heading on the workpad by its space-stripped title id. */
