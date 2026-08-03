@@ -4560,6 +4560,17 @@ paths:
                     nullable: true
                   description: Tool-specific configuration parameters. See examples for details.
                   type: object
+                confirmation:
+                  additionalProperties: false
+                  description: Optional tool call policy to control tool call confirmation behavior
+                  type: object
+                  properties:
+                    askUser:
+                      enum:
+                        - once
+                        - always
+                        - never
+                      type: string
                 description:
                   default: ''
                   description: Description of what the tool does.
@@ -5197,6 +5208,17 @@ paths:
                     nullable: true
                   description: Updated tool-specific configuration parameters. See examples for details.
                   type: object
+                confirmation:
+                  additionalProperties: false
+                  description: Updated tool call policy to control tool call confirmation behavior
+                  type: object
+                  properties:
+                    askUser:
+                      enum:
+                        - once
+                        - always
+                        - never
+                      type: string
                 description:
                   description: Updated description of what the tool does.
                   type: string
@@ -75764,6 +75786,7 @@ paths:
           required: false
           schema:
             type: string
+            x-state: Generally available; added in 9.5.0
         - description: Whether to exclude step-level execution data.
           in: query
           name: omitStepRuns
@@ -75776,12 +75799,14 @@ paths:
           required: false
           schema:
             type: string
+            x-state: Generally available; added in 9.5.0
         - description: Datemath upper bound for filtering executions by finishedAt (inclusive when parsed with roundUp).
           in: query
           name: finishedBefore
           required: false
           schema:
             type: string
+            x-state: Generally available; added in 9.5.0
         - description: Field to collapse execution results by.
           in: query
           name: collapse
@@ -75793,6 +75818,7 @@ paths:
               - executedBy
               - triggeredBy
             type: string
+            x-state: Generally available; added in 9.5.0
         - description: Field to sort executions by.
           in: query
           name: sortField
@@ -75802,6 +75828,7 @@ paths:
               - createdAt
               - finishedAt
             type: string
+            x-state: Generally available; added in 9.5.0
         - description: Sort order.
           in: query
           name: sortOrder
@@ -75811,6 +75838,7 @@ paths:
               - asc
               - desc
             type: string
+            x-state: Generally available; added in 9.5.0
         - description: Page number.
           in: query
           name: page
@@ -75832,12 +75860,14 @@ paths:
           required: false
           schema:
             type: string
+            x-state: Generally available; added in 9.5.0
         - description: Datemath upper bound for filtering executions by startedAt (inclusive when parsed with roundUp).
           in: query
           name: startedBefore
           required: false
           schema:
             type: string
+            x-state: Generally available; added in 9.5.0
       responses:
         '200':
           content:
@@ -132129,6 +132159,7 @@ components:
         - endpoint_events
         - endpoint_host_isolation_exceptions
         - endpoint_blocklists
+        - endpoint_custom_yara_signatures
       type: string
     Security_Detections_API_ExternalRuleCustomizedFields:
       description: An array of customized field names — that is, fields that the user has modified from their base value. Defaults to an empty array.
@@ -132262,6 +132293,37 @@ components:
     Security_Detections_API_ItemsPerSearch:
       minimum: 1
       type: integer
+    Security_Detections_API_KillProcessParams:
+      type: object
+      properties:
+        command:
+          description: 'To run an endpoint response action, specify a value for the command field. Example: "command": "kill-process"'
+          enum:
+            - kill-process
+          type: string
+        comment:
+          description: 'Add a note that explains or describes the action. You can find your comment in the response actions history log. Example: "comment": "Check processes"'
+          type: string
+        config:
+          type: object
+          properties:
+            field:
+              description: Field to use instead of `process.pid`
+              maxLength: 2000
+              type: string
+            kill_descendants:
+              description: Whether to also terminate the descendant processes of the targeted process.
+              type: boolean
+              x-state: Added in 9.6.0
+            overwrite:
+              default: true
+              description: Whether to overwrite field with `process.pid`
+              type: boolean
+          required:
+            - field
+      required:
+        - command
+        - config
     Security_Detections_API_KqlQueryLanguage:
       enum:
         - kuery
@@ -133463,32 +133525,14 @@ components:
         - error
         - message
     Security_Detections_API_ProcessesParams:
-      type: object
-      properties:
-        command:
-          description: 'To run an endpoint response action, specify a value for the command field. Example: "command": "isolate"'
-          enum:
-            - kill-process
-            - suspend-process
-          type: string
-        comment:
-          description: 'Add a note that explains or describes the action. You can find your comment in the response actions history log. Example: "comment": "Check processes"'
-          type: string
-        config:
-          type: object
-          properties:
-            field:
-              description: Field to use instead of process.pid
-              type: string
-            overwrite:
-              default: true
-              description: Whether to overwrite field with process.pid
-              type: boolean
-          required:
-            - field
-      required:
-        - command
-        - config
+      discriminator:
+        mapping:
+          kill-process: '#/components/schemas/Security_Detections_API_KillProcessParams'
+          suspend-process: '#/components/schemas/Security_Detections_API_SuspendProcessParams'
+        propertyName: command
+      oneOf:
+        - $ref: '#/components/schemas/Security_Detections_API_KillProcessParams'
+        - $ref: '#/components/schemas/Security_Detections_API_SuspendProcessParams'
     Security_Detections_API_QueryAlertsBodyParams:
       type: object
       properties:
@@ -135420,6 +135464,33 @@ components:
         - asc
         - desc
       type: string
+    Security_Detections_API_SuspendProcessParams:
+      type: object
+      properties:
+        command:
+          description: 'To run an endpoint response action, specify a value for the command field. Example: "command": "suspend-process"'
+          enum:
+            - suspend-process
+          type: string
+        comment:
+          description: 'Add a note that explains or describes the action. You can find your comment in the response actions history log. Example: "comment": "Check processes"'
+          type: string
+        config:
+          type: object
+          properties:
+            field:
+              description: Field to use instead of process.pid
+              maxLength: 2000
+              type: string
+            overwrite:
+              default: true
+              description: Whether to overwrite field with process.pid
+              type: boolean
+          required:
+            - field
+      required:
+        - command
+        - config
     Security_Detections_API_Threat:
       description: |
         > info
@@ -136733,12 +136804,12 @@ components:
 
         For endpoint artifacts, use one of the following values:
 
-        * `endpoint_list`: [Elastic Endpoint exception list](https://www.elastic.co/docs/solutions/security/detect-and-alert/add-manage-exceptions)
-        * `endpoint_trusted_apps`: [Trusted applications list](https://www.elastic.co/docs/solutions/security/manage-elastic-defend/trusted-applications)
-        * `endpoint_trusted_devices`: [Trusted devices list](https://www.elastic.co/docs/solutions/security/manage-elastic-defend/trusted-devices)
-        * `endpoint_event_filters`: [Event filters list](https://www.elastic.co/docs/solutions/security/manage-elastic-defend/event-filters)
-        * `endpoint_host_isolation_exceptions`: [Host isolation exceptions list](https://www.elastic.co/docs/solutions/security/manage-elastic-defend/host-isolation-exceptions)
-        * `endpoint_blocklists`: [Blocklists list](https://www.elastic.co/docs/solutions/security/manage-elastic-defend/blocklist)
+        * `endpoint_list`: Elastic Endpoint exceptions list
+        * `endpoint_trusted_apps`: Trusted applications list
+        * `endpoint_trusted_devices`: Trusted devices list
+        * `endpoint_event_filters`: Event filters list
+        * `endpoint_host_isolation_exceptions`: Host isolation exceptions list
+        * `endpoint_blocklists`: Blocklist
       example: simple_list
       format: nonempty
       minLength: 1
@@ -137063,6 +137134,7 @@ components:
         - endpoint_events
         - endpoint_host_isolation_exceptions
         - endpoint_blocklists
+        - endpoint_custom_yara_signatures
       type: string
     Security_Endpoint_Exceptions_API_ExceptionListVersion:
       description: The document version, automatically increasd on updates.
@@ -140628,12 +140700,12 @@ components:
 
         For endpoint artifacts, use one of the following values:
 
-        * `endpoint_list`: [Elastic Endpoint exception list](https://www.elastic.co/docs/solutions/security/detect-and-alert/add-manage-exceptions)
-        * `endpoint_trusted_apps`: [Trusted applications list](https://www.elastic.co/docs/solutions/security/manage-elastic-defend/trusted-applications)
-        * `endpoint_trusted_devices`: [Trusted devices list](https://www.elastic.co/docs/solutions/security/manage-elastic-defend/trusted-devices)
-        * `endpoint_event_filters`: [Event filters list](https://www.elastic.co/docs/solutions/security/manage-elastic-defend/event-filters)
-        * `endpoint_host_isolation_exceptions`: [Host isolation exceptions list](https://www.elastic.co/docs/solutions/security/manage-elastic-defend/host-isolation-exceptions)
-        * `endpoint_blocklists`: [Blocklists list](https://www.elastic.co/docs/solutions/security/manage-elastic-defend/blocklist)
+        * `endpoint_list`: Elastic Endpoint exceptions list
+        * `endpoint_trusted_apps`: Trusted applications list
+        * `endpoint_trusted_devices`: Trusted devices list
+        * `endpoint_event_filters`: Event filters list
+        * `endpoint_host_isolation_exceptions`: Host isolation exceptions list
+        * `endpoint_blocklists`: Blocklist
       example: simple_list
       format: nonempty
       minLength: 1
@@ -140983,6 +141055,7 @@ components:
         - endpoint_events
         - endpoint_host_isolation_exceptions
         - endpoint_blocklists
+        - endpoint_custom_yara_signatures
       type: string
     Security_Exceptions_API_ExceptionListVersion:
       description: The document version, automatically increasd on updates.
@@ -146234,6 +146307,11 @@ components:
           description: The interval between checks for changes in the source data. The minimum value is 1m and the maximum is 59m. The default value is 1 minute.
           example: 5m
           type: string
+        preventCrossProjectSearch:
+          default: false
+          description: Pin the L1 rollup transform to the local/origin project only, preventing flat-world (cross-linked-project) reads. Only applies on serverless. Default is false (flat-world).
+          example: true
+          type: boolean
         preventInitialBackfill:
           default: false
           description: Start aggregating data from the time the SLO is created, instead of backfilling data from the beginning of the time window.
