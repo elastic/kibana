@@ -59,13 +59,6 @@ import { UpsertRuleRoute } from '../routes/rules/upsert_rule_route';
 import { UpsertActionPolicyRoute } from '../routes/action_policies/upsert_action_policy_route';
 import { MatchActionPoliciesForRuleRoute } from '../routes/action_policies/match_action_policies_for_rule_route';
 
-/**
- * TODO: https://github.com/elastic/rna-program/issues/426
- * Remove this route and its binding before GA.
- */
-
-import { ResetResourcesRoute } from '../routes/reset_resources_route';
-
 export function bindRoutes({ bind }: ContainerModuleLoadOptions) {
   bind(Route).toConstantValue(CreateRuleRoute);
   bind(Route).toConstantValue(UpdateRuleRoute);
@@ -116,8 +109,6 @@ export function bindRoutes({ bind }: ContainerModuleLoadOptions) {
 
   bind(Route).toConstantValue(ActionPolicyTagsRoute);
   bind(Route).toConstantValue(SuggestUserProfilesRoute);
-  // TODO(rna-program#426): remove this binding before GA.
-  bind(Route).toConstantValue(ResetResourcesRoute);
   bind(Route).toConstantValue(UpsertRuleRoute);
   bind(Route).toConstantValue(UpsertActionPolicyRoute);
   bind(Route).toConstantValue(MatchActionPoliciesForRuleRoute);
