@@ -5,6 +5,8 @@
  * 2.0.
  */
 
-export * from './constants';
-export * from './datasets';
-export * from './log_entry_rate_indices';
+import { createPlaywrightConfig } from '@kbn/scout-oblt';
+
+export default createPlaywrightConfig({
+  testDir: './tests',
+});
