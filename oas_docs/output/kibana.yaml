@@ -132355,6 +132355,7 @@ components:
         - endpoint_events
         - endpoint_host_isolation_exceptions
         - endpoint_blocklists
+        - endpoint_custom_yara_signatures
       type: string
     Security_Detections_API_ExternalRuleCustomizedFields:
       description: An array of customized field names — that is, fields that the user has modified from their base value. Defaults to an empty array.
@@ -136959,12 +136960,12 @@ components:
 
         For endpoint artifacts, use one of the following values:
 
-        * `endpoint_list`: [Elastic Endpoint exception list](https://www.elastic.co/docs/solutions/security/detect-and-alert/add-manage-exceptions)
-        * `endpoint_trusted_apps`: [Trusted applications list](https://www.elastic.co/docs/solutions/security/manage-elastic-defend/trusted-applications)
-        * `endpoint_trusted_devices`: [Trusted devices list](https://www.elastic.co/docs/solutions/security/manage-elastic-defend/trusted-devices)
-        * `endpoint_event_filters`: [Event filters list](https://www.elastic.co/docs/solutions/security/manage-elastic-defend/event-filters)
-        * `endpoint_host_isolation_exceptions`: [Host isolation exceptions list](https://www.elastic.co/docs/solutions/security/manage-elastic-defend/host-isolation-exceptions)
-        * `endpoint_blocklists`: [Blocklists list](https://www.elastic.co/docs/solutions/security/manage-elastic-defend/blocklist)
+        * `endpoint_list`: Elastic Endpoint exceptions list
+        * `endpoint_trusted_apps`: Trusted applications list
+        * `endpoint_trusted_devices`: Trusted devices list
+        * `endpoint_event_filters`: Event filters list
+        * `endpoint_host_isolation_exceptions`: Host isolation exceptions list
+        * `endpoint_blocklists`: Blocklist
       example: simple_list
       format: nonempty
       minLength: 1
@@ -137289,6 +137290,7 @@ components:
         - endpoint_events
         - endpoint_host_isolation_exceptions
         - endpoint_blocklists
+        - endpoint_custom_yara_signatures
       type: string
     Security_Endpoint_Exceptions_API_ExceptionListVersion:
       description: The document version, automatically increasd on updates.
@@ -140854,12 +140856,12 @@ components:
 
         For endpoint artifacts, use one of the following values:
 
-        * `endpoint_list`: [Elastic Endpoint exception list](https://www.elastic.co/docs/solutions/security/detect-and-alert/add-manage-exceptions)
-        * `endpoint_trusted_apps`: [Trusted applications list](https://www.elastic.co/docs/solutions/security/manage-elastic-defend/trusted-applications)
-        * `endpoint_trusted_devices`: [Trusted devices list](https://www.elastic.co/docs/solutions/security/manage-elastic-defend/trusted-devices)
-        * `endpoint_event_filters`: [Event filters list](https://www.elastic.co/docs/solutions/security/manage-elastic-defend/event-filters)
-        * `endpoint_host_isolation_exceptions`: [Host isolation exceptions list](https://www.elastic.co/docs/solutions/security/manage-elastic-defend/host-isolation-exceptions)
-        * `endpoint_blocklists`: [Blocklists list](https://www.elastic.co/docs/solutions/security/manage-elastic-defend/blocklist)
+        * `endpoint_list`: Elastic Endpoint exceptions list
+        * `endpoint_trusted_apps`: Trusted applications list
+        * `endpoint_trusted_devices`: Trusted devices list
+        * `endpoint_event_filters`: Event filters list
+        * `endpoint_host_isolation_exceptions`: Host isolation exceptions list
+        * `endpoint_blocklists`: Blocklist
       example: simple_list
       format: nonempty
       minLength: 1
@@ -141209,6 +141211,7 @@ components:
         - endpoint_events
         - endpoint_host_isolation_exceptions
         - endpoint_blocklists
+        - endpoint_custom_yara_signatures
       type: string
     Security_Exceptions_API_ExceptionListVersion:
       description: The document version, automatically increasd on updates.
