@@ -16,8 +16,10 @@ import { getFormattedError } from '../../util/errors';
 import { useSignificantEventsAppParams } from '../../hooks/use_significant_events_app_params';
 import { useSignificantEventsAppRouter } from '../../hooks/use_significant_events_app_router';
 import { useSignificantEventsPrivileges } from '../../hooks/use_significant_events_privileges';
+import { useSignificantEventsAvailability } from '../../hooks/use_significant_events_availability';
 import { useBlocksNewActivity } from '../../hooks/use_significant_events_maintenance';
 import { RedirectTo } from '../../components/redirect_to';
+import { SignificantEventsNotEnabledPrompt } from '../../components/not_enabled_prompt';
 import {
   SignificantEventsAppHeader,
   SignificantEventsAppPageTemplate,
@@ -80,6 +82,7 @@ export function SignificantEventsPage() {
   } = useSignificantEventsPrivileges();
   const canManageStreams = streamsUiPrivileges.manage;
 
+  const { availability, isLoading: isAvailabilityLoading } = useSignificantEventsAvailability();
   const {
     isBlocked,
     isLoading: isMaintenanceStatusLoading,
@@ -233,11 +236,19 @@ export function SignificantEventsPage() {
     [tab, router]
   );
 
-  if (isPrivilegesLoading || !significantEvents.available) {
-    // Waiting for the gate, or leaving the app when unavailable (see effect above).
+  if (isPrivilegesLoading || isAvailabilityLoading || !significantEvents.available) {
+    // Waiting for the client/server gates, or leaving the app when the client
+    // gate is off (see effect above).
     return <EuiLoadingElastic size="xxl" />;
   }
 
+  if (availability && !availability.available) {
+    return (
+      <SignificantEventsAppPageTemplate.Body grow>
+        <SignificantEventsNotEnabledPrompt reason={availability.reason} />
+      </SignificantEventsAppPageTemplate.Body>
+    );
+  }
 
   if (tab === 'discoveries') {
     return <RedirectTo path="/{tab}" params={{ path: { tab: 'significant_events' } }} />;
