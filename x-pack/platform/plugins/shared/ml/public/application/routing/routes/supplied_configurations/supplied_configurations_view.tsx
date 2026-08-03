@@ -47,20 +47,22 @@ const PageWrapper: FC = () => {
 
   return (
     <PageLoader context={context}>
-      <MlAppHeader
-        title={i18n.translate('xpack.ml.suppliedConfigurations.preconfigurecJobsHeader', {
-          defaultMessage: 'Supplied configurations',
-        })}
-        description={i18n.translate(
-          'xpack.ml.suppliedConfigurations.preconfigurecJobsHeaderDescription',
-          {
-            defaultMessage:
-              'This page lists pre-defined anomaly detection job configurations with related Kibana assets.',
-          }
-        )}
-        back={anomalyDetectionJobsBack}
-      />
-      <SuppliedConfigurations />
+      <div data-test-subj="mlPageSuppliedConfigurations">
+        <MlAppHeader
+          title={i18n.translate('xpack.ml.suppliedConfigurations.preconfigurecJobsHeader', {
+            defaultMessage: 'Supplied configurations',
+          })}
+          description={i18n.translate(
+            'xpack.ml.suppliedConfigurations.preconfigurecJobsHeaderDescription',
+            {
+              defaultMessage:
+                'This page lists pre-defined anomaly detection job configurations with related Kibana assets.',
+            }
+          )}
+          back={anomalyDetectionJobsBack}
+        />
+        <SuppliedConfigurations />
+      </div>
     </PageLoader>
   );
 };
