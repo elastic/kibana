@@ -10,7 +10,7 @@
   "dependencies": {
     "@octokit/rest": "^22.0.1",
     "@slack/web-api": "^7.0.0",
-    "adm-zip": "^0.5.16",
+    "adm-zip": "^0.6.0",
     "axios": "^1.13.4",
     "diff": "^9.0.0",
     "globby": "^11.1.0",
