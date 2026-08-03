@@ -232,6 +232,7 @@ export const MANIFEST_V2: JSONSchema = {
             'functional-tests',
             'test-helper',
             'shared-scss',
+            'tooling',
           ],
         },
       },
