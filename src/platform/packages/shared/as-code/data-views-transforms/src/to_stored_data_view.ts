@@ -41,5 +41,6 @@ export function toStoredDataView(dataView: AsCodeDataView): string | DataViewSpe
     ...(runtimeFieldMap && Object.keys(runtimeFieldMap).length > 0 && { runtimeFieldMap }),
     ...(fieldFormats && Object.keys(fieldFormats).length > 0 && { fieldFormats }),
     ...(fieldAttrs && Object.keys(fieldAttrs).length > 0 && { fieldAttrs }),
+    ...(dataView.name && { name: dataView.name }),
   };
 }
