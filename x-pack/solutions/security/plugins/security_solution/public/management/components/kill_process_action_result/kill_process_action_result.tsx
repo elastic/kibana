@@ -7,7 +7,7 @@
 
 import React, { memo, useMemo } from 'react';
 import type { EuiTextProps } from '@elastic/eui';
-import { EuiTextColor, EuiText, EuiSpacer } from '@elastic/eui';
+import { EuiText, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { ProcessTree } from './components/process_tree';
@@ -124,8 +124,3 @@ export const KillSuspendProcessActionResult = memo<KillSuspendProcessActionResul
   }
 );
 KillSuspendProcessActionResult.displayName = 'KillSuspendProcessActionResult';
-
-const DataSeparator = memo(() => {
-  return <EuiTextColor color="subdued">{' | '}</EuiTextColor>;
-});
-DataSeparator.displayName = 'DataSeparator';
