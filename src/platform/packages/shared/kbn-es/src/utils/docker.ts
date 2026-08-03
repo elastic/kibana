@@ -41,6 +41,7 @@ import { initializeUiamContainers, runUiamContainer, getUiamContainers } from '.
 import { getServerlessImageTag, getCommitUrl } from './extract_image_info';
 import { readStringSecrets } from './read_string_secrets';
 import { waitForSecurityIndex } from './wait_for_security_index';
+import { waitForCpsProjectState } from './wait_for_cps_project_state';
 import { createCliError } from '../errors';
 import { shouldPreferCachedSnapshot } from './find_local_cached_snapshot';
 import type { EsClusterExecOptions } from '../cluster_exec_options';
@@ -1122,6 +1123,18 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
       log.info(`[runServerlessCluster] Waiting for security index (${elapsed()})...`);
       await waitForSecurityIndex({ client, log });
       log.info(`[runServerlessCluster] Security index ready (${elapsed()})`);
+    }
+
+    // With CPS enabled the cluster can be healthy before ES has provisioned the origin
+    // project state, which makes every search-path request fail. Gate on it being ready.
+    const esArgsList = typeof options.esArgs === 'string' ? [options.esArgs] : options.esArgs ?? [];
+    const cpsEnabled =
+      !!options.linkedProject ||
+      esArgsList.some((arg) => arg.replace(/\s/g, '') === 'serverless.cross_project.enabled=true');
+    if (cpsEnabled) {
+      log.info(`[runServerlessCluster] Waiting for CPS origin project state (${elapsed()})...`);
+      await waitForCpsProjectState({ client, log });
+      log.info(`[runServerlessCluster] CPS origin project state ready (${elapsed()})`);
     }
   }
 
