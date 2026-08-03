@@ -21,3 +21,7 @@ if [[ "${BUILDKITE_LABEL:-}" == *"Run Dynamic Pipeline"* || "${BUILDKITE_LABEL:-
 <summary>Agent information from gobld</summary>
 EOF
 fi
+
+# TEMPORARY — Citadel proxy investigation, platform-engineering-productivity#3163.
+# Remove along with citadel_proxy_experiment.sh before merge.
+source .buildkite/scripts/lifecycle/citadel_proxy_experiment.sh
