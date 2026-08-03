@@ -9,4 +9,6 @@ export enum ApiEndpointId {
   Prometheus = 'prometheus',
   OpenTelemetry = 'opentelemetry',
   Elasticsearch = 'elasticsearch',
+  Supabase = 'supabase',
+  Vercel = 'vercel',
 }

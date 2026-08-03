@@ -22,7 +22,6 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
-  EuiToolTip,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -428,16 +427,12 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
                           tooltipProps={{ disableScreenReaderOutput: true }}
                         >
                           {(copy: () => void) => (
-                            <EuiToolTip
-                              content={copyToClipboardSourceDescription}
-                              disableScreenReaderOutput
-                            >
-                              <EuiButtonIcon
-                                onClick={copy}
-                                iconType="copy"
-                                aria-label={copyToClipboardSourceDescription}
-                              />
-                            </EuiToolTip>
+                            /* eslint-disable-next-line @elastic/eui/tooltip-button-icon-wrap */
+                            <EuiButtonIcon
+                              onClick={copy}
+                              iconType="copy"
+                              aria-label={copyToClipboardSourceDescription}
+                            />
                           )}
                         </EuiCopy>
                       </EuiFlexItem>
