@@ -91,7 +91,6 @@ export interface PresentationPanelHoverActionsProps {
   actionPredicate?: (actionId: string) => boolean;
   className?: string;
   viewMode?: ViewMode;
-  showNotifications?: boolean;
   showBorder?: boolean;
 }
 
@@ -103,11 +102,9 @@ export const PresentationPanelHoverActions = ({
   actionPredicate,
   className,
   viewMode,
-  showNotifications = true,
 }: PresentationPanelHoverActionsProps) => {
   const [quickActions, setQuickActions] = useState<Action<EmbeddableApiContext>[]>([]);
   const [contextMenuPanels, setContextMenuPanels] = useState<EuiContextMenuPanelDescriptor[]>([]);
-  const [showNotification, setShowNotification] = useState<boolean>(false);
   const [isContextMenuOpen, setIsContextMenuOpen] = useState<boolean>(false);
   const [notifications, setNotifications] = useState<Action<EmbeddableApiContext>[]>([]);
   const dragHandleRef = useRef<HTMLButtonElement | null>(null);
@@ -239,8 +236,6 @@ export const PresentationPanelHoverActions = ({
   }, [api, quickActionIds]);
 
   useEffect(() => {
-    if (!api) return;
-
     let canceled = false;
     const apiContext = { embeddable: api };
 
@@ -282,7 +277,6 @@ export const PresentationPanelHoverActions = ({
         closeMenu: onClose,
       });
       setContextMenuPanels(menuPanels);
-      setShowNotification(contextMenuActions.some((action) => action.showNotification));
       setQuickActions(
         compatibleActions.filter(({ id }) => (quickActionIds as readonly string[]).includes(id))
       );
@@ -303,7 +297,7 @@ export const PresentationPanelHoverActions = ({
   ]);
 
   const quickActionElements = useMemo(() => {
-    if (!api || quickActions.length < 1) return [];
+    if (quickActions.length < 1) return [];
 
     const apiContext = { embeddable: api, trigger: triggers[ON_OPEN_PANEL_MENU] };
 
@@ -328,7 +322,6 @@ export const PresentationPanelHoverActions = ({
   }, [api, quickActions]);
 
   const notificationElements = useMemo(() => {
-    if (!showNotifications || !api) return [];
     return notifications?.map((notification) => {
       let notificationComponent = notification.MenuItem ? (
         React.createElement(notification.MenuItem, {
@@ -371,12 +364,11 @@ export const PresentationPanelHoverActions = ({
 
       return notificationComponent;
     });
-  }, [api, euiTheme.size.xs, notifications, showNotifications]);
+  }, [api, euiTheme.size.xs, notifications]);
 
   const contextMenuClasses = classNames({
     // eslint-disable-next-line @typescript-eslint/naming-convention
     embPanel__optionsMenuPopover: true,
-    'embPanel__optionsMenuPopover-notification': showNotification,
   });
 
   const ContextMenuButton = (
@@ -447,7 +439,7 @@ export const PresentationPanelHoverActions = ({
           {dragHandle}
           {/* Wrapping all "right actions" in a span so that flex space-between works as expected */}
           <span>
-            {showNotifications && notificationElements}
+            {notificationElements}
             {showDescription && (
               <EuiIconTip
                 size="m"

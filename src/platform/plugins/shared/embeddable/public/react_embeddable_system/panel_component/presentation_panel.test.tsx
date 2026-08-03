@@ -156,20 +156,6 @@ describe('Presentation panel', () => {
       expect(screen.queryByTestId('embeddablePanelBadge-testAction')).not.toBeInTheDocument();
       expect(screen.queryByTestId('embeddablePanelNotification-testAction')).toBeInTheDocument();
     });
-
-    it('does not show notifications when showNotifications is false', async () => {
-      const testAction = mockAction('testAction');
-      const getActions = jest.fn().mockReturnValue([testAction]);
-      await renderPresentationPanel({
-        ...defaultProps,
-        getActions,
-        showNotifications: false,
-      });
-      expect(screen.queryByTestId('embeddablePanelBadge-testAction')).toBeInTheDocument();
-      expect(
-        screen.queryByTestId('embeddablePanelNotification-testAction')
-      ).not.toBeInTheDocument();
-    });
   });
 
   describe('titles', () => {
