@@ -1,9 +1,5 @@
 {
   "sha1": "369b0cb8363b3ae5ec77ca518d2025f4e80412b8",
-  "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
-  ],
   "tests": [
     {
       "id": "a63936a2bb86807-5f465142721259b",
@@ -14,8 +10,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/canvas/test/scout/api/tests/canvas_pdf_report.spec.ts",
-        "line": 85,
-        "column": 22
+        "line": 84,
+        "column": 10
       }
     },
     {
@@ -27,8 +23,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/canvas/test/scout/api/tests/canvas_pdf_report.spec.ts",
-        "line": 101,
-        "column": 18
+        "line": 97,
+        "column": 10
       }
     },
     {
@@ -92,8 +88,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/canvas/test/scout/api/tests/workpad_migrations.spec.ts",
-        "line": 70,
-        "column": 1
+        "line": 68,
+        "column": 12
       }
     },
     {
@@ -105,8 +101,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/canvas/test/scout/api/tests/workpad_migrations.spec.ts",
-        "line": 87,
-        "column": 1
+        "line": 85,
+        "column": 12
       }
     }
   ]
