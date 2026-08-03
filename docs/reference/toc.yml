@@ -99,6 +99,7 @@ toc:
           - file: connectors-kibana/google-cloud-storage-action-type.md
           - file: connectors-kibana/google-drive-action-type.md
           - file: connectors-kibana/grafana-action-type.md
+          - file: connectors-kibana/graphql-action-type.md
           - file: connectors-kibana/greynoise-action-type.md
           - file: connectors-kibana/hubspot-action-type.md
           - file: connectors-kibana/jenkins-action-type.md
