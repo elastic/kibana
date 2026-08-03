@@ -8,9 +8,14 @@
  */
 
 // Monaco languages support
-declare module 'monaco-editor/esm/vs/basic-languages/markdown/markdown';
-declare module 'monaco-editor/esm/vs/basic-languages/css/css';
-declare module 'monaco-editor/esm/vs/basic-languages/yaml/yaml';
+declare module 'monaco-editor/esm/vs/languages/definitions/markdown/markdown.js';
+declare module 'monaco-editor/esm/vs/languages/definitions/css/css.js';
+declare module 'monaco-editor/esm/vs/languages/definitions/yaml/yaml.js';
+
+declare module 'monaco-editor/esm/vs/languages/definitions/javascript/register.js';
+declare module 'monaco-editor/esm/vs/languages/definitions/xml/register.js';
+declare module 'monaco-editor/esm/vs/languages/definitions/yaml/register.js';
+declare module 'monaco-editor/esm/vs/languages/definitions/liquid/register.js';
 
 // Monaco internal services
 declare module 'monaco-editor/esm/vs/editor/standalone/browser/standaloneServices' {

@@ -23,6 +23,14 @@ const MOMENT_SRC = require.resolve('moment/min/moment-with-locales.js');
 const DOMPURIFY_SRC = require.resolve('dompurify/purify.js');
 const { REPO_ROOT } = require('@kbn/repo-info');
 
+const monacoResolvedEntry = require.resolve('monaco-editor');
+const monacoEsmVsDir = monacoResolvedEntry.includes(`${Path.sep}min${Path.sep}vs${Path.sep}index.js`)
+  ? monacoResolvedEntry.replace(
+      `${Path.sep}min${Path.sep}vs${Path.sep}index.js`,
+      `${Path.sep}esm${Path.sep}vs`
+    )
+  : Path.dirname(monacoResolvedEntry);
+
 /** @returns {import('webpack').Configuration} */
 module.exports = {
   externals: {
@@ -93,7 +101,10 @@ module.exports = {
             babelrc: false,
             envName: process.env.NODE_ENV || 'development',
             presets: [require.resolve('@kbn/babel-preset/webpack_preset')],
-            plugins: [require.resolve('@babel/plugin-transform-numeric-separator')],
+            plugins: [
+              require.resolve('@babel/plugin-transform-numeric-separator'),
+              require.resolve('@babel/plugin-transform-class-static-block'),
+            ],
           },
         },
       },
@@ -124,6 +135,10 @@ module.exports = {
         '@elastic/eui/optimize/es/components/provider/nested',
       '@elastic/eui/lib/services/theme/warning$': '@elastic/eui/optimize/es/services/theme/warning',
       moment: MOMENT_SRC,
+      // monaco-editor@0.56.0 blocks deep "esm/vs" imports via package exports.
+      // Alias to on-disk ESM sources so our existing imports keep resolving.
+      'monaco-editor/esm/vs': monacoEsmVsDir,
+      'monaco-editor/esm/vs/': `${monacoEsmVsDir}${Path.sep}`,
       // NOTE: Used to include react profiling on bundles
       // https://gist.github.com/bvaughn/25e6233aeb1b4f0cdb8d8366e54a3977#webpack-4
       'react-dom$': 'react-dom/profiling',
@@ -154,6 +169,19 @@ module.exports = {
     new webpack.DllReferencePlugin({
       context: REPO_ROOT,
       manifest: require(UiSharedDepsNpm.dllManifestPath), // eslint-disable-line import/no-dynamic-require
+    }),
+
+    /**
+     * monaco-editor@0.56.0 blocks deep imports like `monaco-editor/esm/vs/...` via "exports".
+     * Webpack resolves those subpaths through the exports map and ends up looking for
+     * non-existent files (e.g. `esm/vs/esm/vs/...`). Rewrite those requests to the
+     * on-disk ESM sources to keep our existing imports working.
+     */
+    new webpack.NormalModuleReplacementPlugin(/^monaco-editor\/esm\/vs\//, (resource) => {
+      resource.request = resource.request.replace(
+        /^monaco-editor\/esm\/vs\//,
+        `${monacoEsmVsDir}${Path.sep}`
+      );
     }),
 
     // Replace Monaco Editor's bundled DOMPurify 3.0.5 with the project's DOMPurify 3.2.4

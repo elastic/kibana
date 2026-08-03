@@ -8,20 +8,17 @@
  */
 
 /* eslint-disable @kbn/eslint/module_migration */
-import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
-
-import 'monaco-editor/esm/vs/base/common/worker/simpleWorker';
-import 'monaco-editor/esm/vs/base/browser/defaultWorkerFactory';
+import * as monaco from 'monaco-editor';
 
 import 'monaco-editor/esm/vs/editor/browser/coreCommands.js';
-import 'monaco-editor/esm/vs/editor/browser/widget/codeEditorWidget.js';
+import 'monaco-editor/esm/vs/editor/browser/widget/codeEditor/codeEditorWidget.js';
 
 import 'monaco-editor/esm/vs/editor/contrib/wordOperations/browser/wordOperations.js'; // Needed for word-wise char navigation
 import 'monaco-editor/esm/vs/editor/contrib/linesOperations/browser/linesOperations.js'; // Needed for enabling shortcuts of removing/joining/moving lines
 import 'monaco-editor/esm/vs/editor/contrib/folding/browser/folding.js'; // Needed for folding
 import 'monaco-editor/esm/vs/editor/contrib/suggest/browser/suggestController.js'; // Needed for suggestions
 import 'monaco-editor/esm/vs/editor/contrib/inlineCompletions/browser/inlineCompletions.contribution.js'; // Needed for inline completions
-import 'monaco-editor/esm/vs/editor/contrib/hover/browser/hover.js'; // Needed for hover
+import 'monaco-editor/esm/vs/editor/contrib/hover/browser/hoverContribution.js'; // Needed for hover
 import 'monaco-editor/esm/vs/editor/contrib/parameterHints/browser/parameterHints.js'; // Needed for signature
 import 'monaco-editor/esm/vs/editor/contrib/bracketMatching/browser/bracketMatching.js'; // Needed for brackets matching highlight
 import 'monaco-editor/esm/vs/editor/contrib/wordHighlighter/browser/wordHighlighter.js'; // Needed for document highlight (occurrences)
@@ -35,7 +32,7 @@ import 'monaco-editor/esm/vs/editor/contrib/codeAction/browser/codeActionMenu.js
 import 'monaco-editor/esm/vs/editor/contrib/codeAction/browser/codeActionModel.js';
 import 'monaco-editor/esm/vs/editor/contrib/comment/browser/comment.js'; // Needed for CMD+/ comment toggling
 
-import 'monaco-editor/esm/vs/editor/contrib/find/browser/findController'; // Needed for Search bar functionality
+import 'monaco-editor/esm/vs/editor/contrib/find/browser/findController.js'; // Needed for Search bar functionality
 import 'monaco-editor/esm/vs/editor/standalone/browser/inspectTokens/inspectTokens.js'; // Needed for inspect tokens functionality
 import 'monaco-editor/esm/vs/editor/contrib/contextmenu/browser/contextmenu.js'; // Needed for enabling custom Monaco context menu
 
@@ -47,24 +44,24 @@ import 'monaco-editor/esm/vs/editor/contrib/inlayHints/browser/inlayHintsControl
 import 'monaco-editor/esm/vs/editor/common/services/treeViewsDndService.js';
 
 import 'monaco-editor/esm/vs/language/json/monaco.contribution.js';
-import 'monaco-editor/esm/vs/basic-languages/javascript/javascript.contribution.js'; // Needed for basic javascript support
-import 'monaco-editor/esm/vs/basic-languages/xml/xml.contribution.js'; // Needed for basic xml support
-import 'monaco-editor/esm/vs/basic-languages/yaml/yaml.contribution'; // Needed for yaml support
-import 'monaco-editor/esm/vs/basic-languages/liquid/liquid.contribution.js'; // Needed for liquid template support
+import 'monaco-editor/esm/vs/languages/definitions/javascript/register.js'; // Needed for basic javascript support
+import 'monaco-editor/esm/vs/languages/definitions/xml/register.js'; // Needed for basic xml support
+import 'monaco-editor/esm/vs/languages/definitions/yaml/register.js'; // Needed for yaml support
+import 'monaco-editor/esm/vs/languages/definitions/liquid/register.js'; // Needed for liquid template support
 
 // config for supported base languages
 export {
   conf as cssConf,
   language as cssLanguage,
-} from 'monaco-editor/esm/vs/basic-languages/css/css';
+} from 'monaco-editor/esm/vs/languages/definitions/css/css.js';
 export {
   conf as markdownConf,
   language as markdownLanguage,
-} from 'monaco-editor/esm/vs/basic-languages/markdown/markdown';
+} from 'monaco-editor/esm/vs/languages/definitions/markdown/markdown.js';
 export {
   conf as yamlConf,
   language as yamlLanguage,
-} from 'monaco-editor/esm/vs/basic-languages/yaml/yaml';
+} from 'monaco-editor/esm/vs/languages/definitions/yaml/yaml.js';
 
 import type { CustomLangModuleType } from './types';
 
@@ -73,7 +70,7 @@ const languageThemeResolverDefinitions = new Map<
   CustomLangModuleType['languageThemeResolver']
 >();
 
-declare module 'monaco-editor/esm/vs/editor/editor.api' {
+declare module 'monaco-editor' {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   export namespace editor {
     // augment monaco editor types

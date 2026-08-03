@@ -11,6 +11,16 @@
 const path = require('path');
 const { NodeLibsBrowserPlugin } = require('@kbn/node-libs-browser-webpack-plugin');
 
+const monacoResolvedEntry = require.resolve('monaco-editor');
+const monacoEsmVsDir = monacoResolvedEntry.includes(`${path.sep}min${path.sep}vs${path.sep}index.js`)
+  ? monacoResolvedEntry.replace(
+      `${path.sep}min${path.sep}vs${path.sep}index.js`,
+      `${path.sep}esm${path.sep}vs`
+    )
+  : path.dirname(monacoResolvedEntry);
+const monacoEditorWorkerPath = path.resolve(monacoEsmVsDir, 'editor', 'editor.worker.js');
+const monacoJsonWorkerPath = path.resolve(monacoEsmVsDir, 'language', 'json', 'json.worker.js');
+
 /**
  * @typedef {(import('./src/register_globals').LangSpecificWorkerIds)} WorkerType - list of supported languages to build workers for
  */
@@ -55,6 +65,18 @@ const workerConfig = (languages) => ({
     alias: {
       // swap default umd import for the esm one provided in vscode-uri package
       'vscode-uri$': require.resolve('vscode-uri').replace(/\/umd\/index.js/, '/esm/index.mjs'),
+
+      /**
+       * monaco-editor@0.56.0 added an "exports" map which blocks deep imports like
+       * "monaco-editor/esm/vs/...". Some of our worker entrypoints (and transitive
+       * deps like monaco-worker-manager) still import those paths, but the files
+       * still exist on disk. Alias them to absolute paths under the resolved ESM
+       * entrypoint to keep webpack builds working.
+       */
+      'monaco-editor/esm/vs/editor/editor.worker': monacoEditorWorkerPath,
+      'monaco-editor/esm/vs/editor/editor.worker.js': monacoEditorWorkerPath,
+      'monaco-editor/esm/vs/language/json/json.worker': monacoJsonWorkerPath,
+      'monaco-editor/esm/vs/language/json/json.worker.js': monacoJsonWorkerPath,
     },
   },
   plugins: [new NodeLibsBrowserPlugin()],
