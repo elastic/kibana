@@ -1,0 +1,12 @@
+import type { monaco } from '@kbn/code-editor';
+import type { ESQLControlVariable } from '@kbn/esql-types';
+import { ESQLVariableType } from '@kbn/esql-types';
+export declare const updateQueryStringWithVariable: (queryString: string, variable: string, cursorPosition: monaco.Position) => string;
+export declare const getQueryForFields: (queryString: string, cursorPosition?: monaco.Position) => string;
+export declare const areValuesIntervalsValid: (values: string[]) => boolean;
+export declare const getVariableSuggestion: (variableType: ESQLVariableType) => "function" | "values" | "field" | "interval" | "variable";
+export declare const getRecurrentVariableName: (name: string, existingNames: Set<string>) => string;
+export declare const flyoutStyles: import("@emotion/utils").SerializedStyles;
+export declare const validateVariableName: (variableName: string, prefix: "??" | "?") => string;
+export declare const getVariableTypeFromQuery: (str: string, variableType: ESQLVariableType) => ESQLVariableType;
+export declare const checkVariableExistence: (esqlVariables: ESQLControlVariable[], variableName: string) => boolean;

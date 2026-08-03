@@ -1,0 +1,11 @@
+import type { SavedObjectReference } from '@kbn/core/server';
+import type { XYPersistedState, XYDataLayerConfig } from '@kbn/lens-common';
+import type { XYConfig } from '../../../schema';
+import type { DataSourceStateLayer } from '../../utils';
+export declare function buildVisualizationState(config: XYConfig, annotationGroupReferences: SavedObjectReference[]): XYPersistedState;
+export declare function buildVisualizationAPI(config: XYPersistedState, layers: Record<string, DataSourceStateLayer>, adHocDataViews: Record<string, unknown>, references: SavedObjectReference[], internalReferences: SavedObjectReference[]): XYConfig;
+type YAxisMode = 'left' | 'right';
+type YAccessorAxisModeMap = Map<string, YAxisMode>;
+export type ResolveAxisId = (mode: YAxisMode) => 'y' | 'y2';
+export declare function getYAccessorAxisModeMap(layer: XYDataLayerConfig, accessorKey: (accessor: string) => string): YAccessorAxisModeMap;
+export {};

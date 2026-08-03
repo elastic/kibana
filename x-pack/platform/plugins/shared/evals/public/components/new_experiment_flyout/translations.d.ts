@@ -1,0 +1,28 @@
+export declare const newExperimentStrings: {
+    title: string;
+    nameLabel: string;
+    namePlaceholder: string;
+    connectorsLabel: string;
+    connectorsHelp: string;
+    taskTargetLabel: string;
+    agentIdLabel: string;
+    agentIdHelp: string;
+    datasetsLabel: string;
+    evaluatorsLabel: string;
+    judgeConnectorLabel: string;
+    repetitionsLabel: string;
+    concurrencyLabel: string;
+    spacesLabel: string;
+    spacesHelp: string;
+    showYaml: string;
+    compareLabel: string;
+    compareHelp: string;
+    runNow: string;
+    saveAsWorkflow: string;
+    savedBody: string;
+    savedRunIt: string;
+    savedOpen: string;
+    savedClose: string;
+    cancel: string;
+    chooseConnectorTitle: string;
+};

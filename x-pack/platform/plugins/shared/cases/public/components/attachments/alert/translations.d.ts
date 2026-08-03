@@ -1,0 +1,10 @@
+export declare const ALERT_DISPLAY_NAME: string;
+export declare const ALERT_AVATAR_ARIA_LABEL: string;
+export declare const ALERT_COMMENT_LABEL_TITLE: string;
+export declare const MULTIPLE_ALERTS_COMMENT_LABEL_TITLE: (totalAlerts: number) => string;
+export declare const UNKNOWN_RULE: string;
+export declare const REMOVED_ALERT_LABEL_TITLE: string;
+export declare const REMOVED_ALERTS_LABEL_TITLE: (totalAlerts: number) => string;
+export declare const DELETE_ALERTS_SUCCESS_TITLE: (totalAlerts: number) => string;
+export declare const SHOW_ALERT_TOOLTIP: string;
+export declare const ALERTS_EMPTY_DESCRIPTION: string;

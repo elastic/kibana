@@ -1,0 +1,13 @@
+export declare const BANNER_TITLE: string;
+export declare const BANNER_DESCRIPTION: string;
+export declare const BANNER_START_TOUR: string;
+export declare const BANNER_ILLUSTRATION_ALT: string;
+export declare const BANNER_DISMISS: string;
+export declare const STEP_VIEW_TOGGLE_TITLE: string;
+export declare const STEP_VIEW_TOGGLE_DESCRIPTION: string;
+export declare const STEP_FIELDS_TITLE: string;
+export declare const STEP_FIELDS_DESCRIPTION: string;
+export declare const STEP_TEMPLATES_TITLE: string;
+export declare const STEP_TEMPLATES_DESCRIPTION: string;
+export declare const STEP_SETTINGS_TITLE: string;
+export declare const STEP_SETTINGS_DESCRIPTION: string;

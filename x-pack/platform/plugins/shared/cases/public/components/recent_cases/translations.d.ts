@@ -1,0 +1,11 @@
+export declare const COMMENTS: string;
+export declare const MY_RECENTLY_REPORTED_CASES: string;
+export declare const MY_RECENTLY_ASSIGNED_CASES: string;
+export declare const NO_CASES: string;
+export declare const NO_CASES_READ_ONLY: string;
+export declare const NO_CASES_ASSIGNED_TO_ME: string;
+export declare const RECENT_CASES: string;
+export declare const RECENTLY_CREATED_CASES: string;
+export declare const START_A_NEW_CASE: string;
+export declare const VIEW_ALL_CASES: string;
+export declare const CASES_FILTER_CONTROL: string;

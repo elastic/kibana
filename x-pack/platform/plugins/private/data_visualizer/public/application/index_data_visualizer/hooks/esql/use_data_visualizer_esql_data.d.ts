@@ -1,0 +1,35 @@
+import React from 'react';
+import type { AggregateQuery } from '@kbn/es-query';
+import type { FieldVisConfig } from '../../../../../common/types/field_vis_config';
+import type { ItemIdToExpandedRowMap } from '../../../common/components/stats_table';
+import type { MetricFieldsStats, TotalFieldsStats } from '../../../common/components/stats_table/components/field_count_stats';
+import type { NonAggregatableField } from '../../types/overall_stats';
+import { type AggregatableField } from '../../types/esql_data_visualizer';
+import type { ESQLDataVisualizerGridEmbeddableState, ESQLDataVisualizerIndexBasedAppState } from '../../embeddables/grid_embeddable/types';
+export declare const getDefaultESQLDataVisualizerListState: (overrides?: Partial<ESQLDataVisualizerIndexBasedAppState>) => Required<ESQLDataVisualizerIndexBasedAppState>;
+export declare const useESQLDataVisualizerData: (input: ESQLDataVisualizerGridEmbeddableState, dataVisualizerListState: ESQLDataVisualizerIndexBasedAppState) => {
+    totalCount: number | undefined;
+    progress: number;
+    overallStatsProgress: import("../../../../../common/types/field_stats").DataStatsFetchProgress;
+    configs: FieldVisConfig[];
+    extendedColumns: undefined;
+    documentCountStats: import("../../../../../common/types/field_stats").DocumentCountStats | undefined;
+    metricsStats: MetricFieldsStats | undefined;
+    overallStats: {
+        aggregatableExistsFields: AggregatableField[];
+        aggregatableNotExistsFields: AggregatableField[];
+        nonAggregatableExistsFields: NonAggregatableField[];
+        nonAggregatableNotExistsFields: NonAggregatableField[];
+    } | undefined;
+    timefilter: import("@kbn/data-plugin/public").TimefilterContract;
+    setLastRefresh: React.Dispatch<React.SetStateAction<number>>;
+    getItemIdToExpandedRowMap: (itemIds: string[], items: FieldVisConfig[]) => ItemIdToExpandedRowMap;
+    cancelOverallStatsRequest: () => void;
+    cancelFieldStatsRequest: () => void;
+    resetData: (q?: AggregateQuery) => void;
+    limitSize: import("../../embeddables/grid_embeddable/types").ESQLDefaultLimitSizeOption;
+    showEmptyFields: boolean;
+    fieldsCountStats: TotalFieldsStats | undefined;
+    timeFieldName: string | undefined;
+    queryHistoryStatus: boolean | undefined;
+};

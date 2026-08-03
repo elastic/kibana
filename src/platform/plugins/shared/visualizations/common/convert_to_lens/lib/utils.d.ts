@@ -1,0 +1,27 @@
+import type { IAggConfig } from '@kbn/data-plugin/common';
+import { METRIC_TYPES } from '@kbn/data-plugin/common';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
+import type { DataViewFieldBase } from '@kbn/es-query';
+import type { AnyMetricColumn, AnyMetricColumnWithSourceField, ColumnWithMeta } from '../types';
+import type { SchemaConfig } from '../../types';
+import type { AggBasedColumn, MetricsWithoutSpecialParams, ParentPipelineMetric, SiblingPipelineMetric } from './convert';
+export declare const getLabel: (agg: SchemaConfig) => string;
+export declare const getLabelForPercentile: (agg: SchemaConfig) => string;
+export declare const getValidColumns: <T extends AggBasedColumn | null>(columns: T[] | T | undefined) => Array<NonNullable<T>> | null;
+export declare const getFieldNameFromField: (field: DataViewField | DataViewFieldBase | string | undefined) => string | null;
+export declare const isSchemaConfig: (agg: SchemaConfig | IAggConfig) => agg is SchemaConfig;
+export declare const isColumnWithMeta: (column: AggBasedColumn | ColumnWithMeta) => column is ColumnWithMeta;
+export declare const isSiblingPipeline: (metric: SchemaConfig) => metric is SchemaConfig<SiblingPipelineMetric>;
+export declare const isPipeline: (metric: SchemaConfig) => metric is SchemaConfig<METRIC_TYPES.CUMULATIVE_SUM | METRIC_TYPES.DERIVATIVE | METRIC_TYPES.MOVING_FN | METRIC_TYPES.AVG_BUCKET | METRIC_TYPES.MAX_BUCKET | METRIC_TYPES.MIN_BUCKET | METRIC_TYPES.SUM_BUCKET>;
+export declare const isMetricAggWithoutParams: (metric: SchemaConfig) => metric is SchemaConfig<MetricsWithoutSpecialParams>;
+export declare const isPercentileAgg: (metric: SchemaConfig) => metric is SchemaConfig<METRIC_TYPES.PERCENTILES>;
+export declare const isPercentileRankAgg: (metric: SchemaConfig) => metric is SchemaConfig<METRIC_TYPES.PERCENTILE_RANKS>;
+export declare const isStdDevAgg: (metric: SchemaConfig) => metric is SchemaConfig<METRIC_TYPES.STD_DEV>;
+export declare const getCustomBucketsFromSiblingAggs: (metrics: SchemaConfig[]) => {
+    customBucket: IAggConfig;
+    metricIds: string[];
+}[];
+export declare const getMetricFromParentPipelineAgg: (agg: SchemaConfig<ParentPipelineMetric | SiblingPipelineMetric>, aggs: Array<SchemaConfig<METRIC_TYPES>>) => SchemaConfig<METRIC_TYPES> | null;
+export declare const getAggIdAndValue: (aggId?: string) => string[];
+export declare function isColumnMetric(column: unknown): column is AnyMetricColumn;
+export declare function isColumnMetricWithSourceField(column: unknown): column is AnyMetricColumnWithSourceField;

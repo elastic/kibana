@@ -1,0 +1,1 @@
+export { setupLensChoroplethChart } from './setup';

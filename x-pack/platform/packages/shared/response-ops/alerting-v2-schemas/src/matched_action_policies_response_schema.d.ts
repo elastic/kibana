@@ -1,0 +1,105 @@
+import { z } from '@kbn/zod/v4';
+export declare const matchActionPoliciesForRuleBodySchema: z.ZodObject<{
+    rule: z.ZodOptional<z.ZodObject<{
+        id: z.ZodOptional<z.ZodString>;
+        name: z.ZodOptional<z.ZodString>;
+        tags: z.ZodOptional<z.ZodArray<z.ZodString>>;
+    }, z.core.$strict>>;
+}, z.core.$strict>;
+export type MatchActionPoliciesForRuleBody = z.infer<typeof matchActionPoliciesForRuleBodySchema>;
+export declare const matchedActionPolicyCategorySchema: z.ZodEnum<{
+    global: "global";
+    "global-filtered": "global-filtered";
+}>;
+export type MatchedActionPolicyCategory = z.infer<typeof matchedActionPolicyCategorySchema>;
+export declare const matchedActionPolicySchema: z.ZodObject<{
+    actionPolicy: z.ZodObject<{
+        id: z.ZodString;
+        version: z.ZodOptional<z.ZodString>;
+        name: z.ZodString;
+        description: z.ZodString;
+        enabled: z.ZodBoolean;
+        destinations: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
+            type: z.ZodLiteral<"workflow">;
+            id: z.ZodString;
+        }, z.core.$strict>], "type">>;
+        matcher: z.ZodNullable<z.ZodString>;
+        groupBy: z.ZodNullable<z.ZodArray<z.ZodString>>;
+        tags: z.ZodNullable<z.ZodArray<z.ZodString>>;
+        groupingMode: z.ZodNullable<z.ZodEnum<{
+            all: "all";
+            per_episode: "per_episode";
+            per_field: "per_field";
+        }>>;
+        throttle: z.ZodNullable<z.ZodObject<{
+            strategy: z.ZodOptional<z.ZodEnum<{
+                on_status_change: "on_status_change";
+                per_status_interval: "per_status_interval";
+                time_interval: "time_interval";
+                every_time: "every_time";
+            }>>;
+            interval: z.ZodNullable<z.ZodString>;
+        }, z.core.$strip>>;
+        snoozedUntil: z.ZodNullable<z.ZodString>;
+        auth: z.ZodObject<{
+            owner: z.ZodString;
+            createdByUser: z.ZodBoolean;
+        }, z.core.$strip>;
+        createdBy: z.ZodNullable<z.ZodString>;
+        createdAt: z.ZodString;
+        updatedBy: z.ZodNullable<z.ZodString>;
+        updatedAt: z.ZodString;
+    }, z.core.$strip>;
+    category: z.ZodEnum<{
+        global: "global";
+        "global-filtered": "global-filtered";
+    }>;
+}, z.core.$strip>;
+export type MatchedActionPolicy = z.infer<typeof matchedActionPolicySchema>;
+export declare const matchActionPoliciesForRuleResponseSchema: z.ZodObject<{
+    items: z.ZodArray<z.ZodObject<{
+        actionPolicy: z.ZodObject<{
+            id: z.ZodString;
+            version: z.ZodOptional<z.ZodString>;
+            name: z.ZodString;
+            description: z.ZodString;
+            enabled: z.ZodBoolean;
+            destinations: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
+                type: z.ZodLiteral<"workflow">;
+                id: z.ZodString;
+            }, z.core.$strict>], "type">>;
+            matcher: z.ZodNullable<z.ZodString>;
+            groupBy: z.ZodNullable<z.ZodArray<z.ZodString>>;
+            tags: z.ZodNullable<z.ZodArray<z.ZodString>>;
+            groupingMode: z.ZodNullable<z.ZodEnum<{
+                all: "all";
+                per_episode: "per_episode";
+                per_field: "per_field";
+            }>>;
+            throttle: z.ZodNullable<z.ZodObject<{
+                strategy: z.ZodOptional<z.ZodEnum<{
+                    on_status_change: "on_status_change";
+                    per_status_interval: "per_status_interval";
+                    time_interval: "time_interval";
+                    every_time: "every_time";
+                }>>;
+                interval: z.ZodNullable<z.ZodString>;
+            }, z.core.$strip>>;
+            snoozedUntil: z.ZodNullable<z.ZodString>;
+            auth: z.ZodObject<{
+                owner: z.ZodString;
+                createdByUser: z.ZodBoolean;
+            }, z.core.$strip>;
+            createdBy: z.ZodNullable<z.ZodString>;
+            createdAt: z.ZodString;
+            updatedBy: z.ZodNullable<z.ZodString>;
+            updatedAt: z.ZodString;
+        }, z.core.$strip>;
+        category: z.ZodEnum<{
+            global: "global";
+            "global-filtered": "global-filtered";
+        }>;
+    }, z.core.$strip>>;
+    total: z.ZodNumber;
+}, z.core.$strip>;
+export type MatchActionPoliciesForRuleResponse = z.infer<typeof matchActionPoliciesForRuleResponseSchema>;

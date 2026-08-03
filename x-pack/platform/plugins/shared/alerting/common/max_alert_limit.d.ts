@@ -1,0 +1,12 @@
+export declare const ALLOWED_MAX_ALERTS = 5000;
+export declare const MAX_SNOOZED_INSTANCE_CONDITIONS = 10;
+export declare const MAX_SNOOZED_ALERT_INSTANCES = 1000;
+export declare const MAX_ID_LENGTH = 256;
+export declare const MAX_SNOOZED_INSTANCE_ID_LENGTH = 1000;
+export declare const MAX_SNOOZED_BY_LENGTH = 256;
+export declare const MAX_SNOOZED_CONDITION_FIELD_LENGTH = 1000;
+export declare const MAX_SNOOZE_EXPIRES_AT_LENGTH = 30;
+export declare const MAX_KQL_FILTER_LENGTH = 8192;
+export declare const MAX_RESULT_WINDOW = 10000;
+export declare const MAX_ALERTS_PER_PAGE = 100;
+export declare function getMaxAlertLimit(maxAlerts: number): number;

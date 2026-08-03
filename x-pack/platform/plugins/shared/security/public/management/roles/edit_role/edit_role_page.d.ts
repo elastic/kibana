@@ -1,0 +1,34 @@
+import type { FunctionComponent } from 'react';
+import type { BuildFlavor } from '@kbn/config';
+import type { Capabilities, DocLinksStart, FatalErrorsSetup, HttpStart, NotificationsStart, ScopedHistory } from '@kbn/core/public';
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
+import type { FeaturesPluginStart } from '@kbn/features-plugin/public';
+import type { SpacesApiUi } from '@kbn/spaces-plugin/public';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { StartServices } from '../../..';
+import type { SecurityLicense } from '../../../../common';
+import type { UserAPIClient } from '../../users';
+import type { IndicesAPIClient } from '../indices_api_client';
+import type { PrivilegesAPIClient } from '../privileges_api_client';
+import type { RolesAPIClient } from '../roles_api_client';
+export interface Props extends StartServices {
+    action: 'edit' | 'clone';
+    roleName?: string;
+    dataViews?: DataViewsContract;
+    userAPIClient: PublicMethodsOf<UserAPIClient>;
+    indicesAPIClient: PublicMethodsOf<IndicesAPIClient>;
+    rolesAPIClient: PublicMethodsOf<RolesAPIClient>;
+    privilegesAPIClient: PublicMethodsOf<PrivilegesAPIClient>;
+    getFeatures: FeaturesPluginStart['getFeatures'];
+    docLinks: DocLinksStart;
+    http: HttpStart;
+    license: SecurityLicense;
+    uiCapabilities: Capabilities;
+    notifications: NotificationsStart;
+    fatalErrors: FatalErrorsSetup;
+    history: ScopedHistory;
+    spacesApiUi?: SpacesApiUi;
+    buildFlavor: BuildFlavor;
+    cloudOrgUrl?: string;
+}
+export declare const EditRolePage: FunctionComponent<Props>;

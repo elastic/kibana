@@ -1,0 +1,14 @@
+export type { UserProfile, UserProfileUserInfo } from '@kbn/core-user-profile-common';
+export type { UserAvatarProps, UserProfileWithAvatar } from './src/user_avatar';
+export type { UserToolTipProps } from './src/user_tooltip';
+export type { UserProfilesSelectableProps } from './src/user_profiles_selectable';
+export type { UserProfilesPopoverProps } from './src/user_profiles_popover';
+export { UserAvatar } from './src/user_avatar';
+export { UserToolTip } from './src/user_tooltip';
+export { UserProfilesSelectable } from './src/user_profiles_selectable';
+export { UserProfilesPopover } from './src/user_profiles_popover';
+export { getUserDisplayName, isValidUserProfileAvatarColor } from './src/user_profile';
+export type { GetUserDisplayNameParams } from './src/user_profile';
+export type { UserSettingsData, ContrastModeValue, DarkModeValue, LocaleValue, UserProfileAvatarData, UserProfileData, } from './src/types';
+export { useUpdateUserProfile, type UpdateUserProfileHook } from './src/hooks';
+export { UserProfilesKibanaProvider, UserProfilesProvider, type UserProfilesKibanaDependencies, } from './src/services';

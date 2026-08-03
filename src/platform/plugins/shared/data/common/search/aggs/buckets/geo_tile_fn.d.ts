@@ -1,0 +1,10 @@
+import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
+import type { AggExpressionType, AggExpressionFunctionArgs } from '..';
+import { BUCKET_TYPES } from '..';
+export declare const aggGeoTileFnName = "aggGeoTile";
+type Input = any;
+type AggArgs = AggExpressionFunctionArgs<typeof BUCKET_TYPES.GEOTILE_GRID>;
+type Output = AggExpressionType;
+type FunctionDefinition = ExpressionFunctionDefinition<typeof aggGeoTileFnName, Input, AggArgs, Output>;
+export declare const aggGeoTile: () => FunctionDefinition;
+export {};

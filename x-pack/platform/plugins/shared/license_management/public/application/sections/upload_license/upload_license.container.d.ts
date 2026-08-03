@@ -1,0 +1,2 @@
+import { UploadLicense as PresentationComponent } from './upload_license';
+export declare const UploadLicense: import("react-redux-v7").ConnectedComponent<typeof PresentationComponent, import("react-redux-v7").Omit<import("react").ClassAttributes<PresentationComponent> & import("./upload_license").Props, "errorMessage" | "isInvalid" | "messages" | "currentLicenseType" | "applying" | "needsAcknowledgement" | "uploadLicenseStatus" | "setBreadcrumb" | "addUploadErrorMessage" | "uploadLicense">>;

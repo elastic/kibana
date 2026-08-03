@@ -1,0 +1,10 @@
+export declare const PLUGIN_ID = "expressionPartitionVis";
+export declare const PLUGIN_NAME = "expressionPartitionVis";
+export declare const PIE_VIS_EXPRESSION_NAME = "pieVis";
+export declare const TREEMAP_VIS_EXPRESSION_NAME = "treemapVis";
+export declare const MOSAIC_VIS_EXPRESSION_NAME = "mosaicVis";
+export declare const WAFFLE_VIS_EXPRESSION_NAME = "waffleVis";
+export declare const PARTITION_VIS_RENDERER_NAME = "partitionVis";
+export declare const PARTITION_LABELS_VALUE = "partitionLabelsValue";
+export declare const PARTITION_LABELS_FUNCTION = "partitionLabels";
+export declare const DEFAULT_PERCENT_DECIMALS = 2;

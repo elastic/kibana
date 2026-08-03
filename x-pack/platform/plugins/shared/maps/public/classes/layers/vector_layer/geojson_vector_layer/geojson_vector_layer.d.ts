@@ -1,0 +1,32 @@
+import type { Adapters } from '@kbn/inspector-plugin/common/adapters';
+import type { Feature, FeatureCollection } from 'geojson';
+import type { FilterSpecification, Map as MbMap } from '@kbn/mapbox-gl';
+import type { StyleMetaDescriptor, Timeslice, VectorLayerDescriptor } from '../../../../../common/descriptor_types';
+import type { TimesliceMaskConfig } from '../../../util/mb_filter_expressions';
+import type { DataRequestContext } from '../../../../actions';
+import type { IVectorStyle } from '../../../styles/vector/vector_style';
+import type { ISource } from '../../../sources/source';
+import type { IVectorSource } from '../../../sources/vector_source';
+import type { LayerMessage, LayerIcon } from '../../layer';
+import { AbstractVectorLayer } from '../vector_layer';
+export declare class GeoJsonVectorLayer extends AbstractVectorLayer {
+    static createDescriptor(options: Partial<VectorLayerDescriptor>, mapColors?: string[]): VectorLayerDescriptor;
+    isLayerLoading(zoom: number): boolean;
+    _isTiled(): boolean;
+    getBounds(getDataRequestContext: (layerId: string) => DataRequestContext): Promise<import("../../../../../common/descriptor_types").MapExtent | null>;
+    getLayerIcon(isTocIcon: boolean): LayerIcon;
+    getFeatureId(feature: Feature): string | number | undefined;
+    getFeatureById(id: string | number): Feature<import("geojson").Geometry, import("geojson").GeoJsonProperties> | null;
+    getStyleMetaDescriptorFromLocalFeatures(): Promise<StyleMetaDescriptor | null>;
+    getErrors(inspectorAdapters: Adapters): LayerMessage[];
+    _requiresPrevSourceCleanup(mbMap: MbMap): boolean;
+    syncLayerWithMB(mbMap: MbMap, timeslice?: Timeslice): void;
+    _getJoinFilterExpression(): FilterSpecification | undefined;
+    _syncFeatureCollectionWithMb(mbMap: MbMap): void;
+    _getTimesliceMaskConfig(timeslice?: Timeslice): TimesliceMaskConfig | undefined;
+    syncData(syncContext: DataRequestContext): Promise<void>;
+    _isLoadingBounds(): boolean;
+    _syncData(syncContext: DataRequestContext, source: IVectorSource, style: IVectorStyle): Promise<void>;
+    _getSourceFeatureCollection(): FeatureCollection<import("geojson").Geometry, import("geojson").GeoJsonProperties> | null;
+    _getUpdateDueToTimesliceFromSourceRequestMeta(source: ISource, timeslice?: Timeslice): boolean;
+}

@@ -1,0 +1,293 @@
+import { type CatalogFilters } from './filter_catalog';
+/**
+ * Fetches the full Workflow Template Library catalog (cached across callers via
+ * react-query) and applies {@link filterCatalog} client-side. At v1 scale
+ * (dozens to low hundreds of templates) fetching once and filtering in-memory is
+ * comfortable.
+ *
+ * @example
+ * ```tsx
+ * const { templates, isLoading, isError, refetch } = useCatalog({ search, categories });
+ * ```
+ */
+export declare function useCatalog(filters?: CatalogFilters): {
+    templates: {
+        description: string;
+        version: string;
+        name: string;
+        availability: string;
+        categories: string[];
+        slug: string;
+        definitionUrl: string;
+        contentHash: string;
+        stepTypes: string[];
+        triggerTypes: string[];
+        solutions?: string[] | undefined;
+    }[];
+    allTemplates: {
+        description: string;
+        version: string;
+        name: string;
+        availability: string;
+        categories: string[];
+        slug: string;
+        definitionUrl: string;
+        contentHash: string;
+        stepTypes: string[];
+        triggerTypes: string[];
+        solutions?: string[] | undefined;
+    }[];
+    data: {
+        description: string;
+        version: string;
+        name: string;
+        availability: string;
+        categories: string[];
+        slug: string;
+        definitionUrl: string;
+        contentHash: string;
+        stepTypes: string[];
+        triggerTypes: string[];
+        solutions?: string[] | undefined;
+    }[];
+    error: unknown;
+    isError: true;
+    isLoading: false;
+    isLoadingError: false;
+    isRefetchError: true;
+    isSuccess: false;
+    status: "error";
+    dataUpdatedAt: number;
+    errorUpdatedAt: number;
+    failureCount: number;
+    failureReason: unknown;
+    errorUpdateCount: number;
+    isFetched: boolean;
+    isFetchedAfterMount: boolean;
+    isFetching: boolean;
+    isInitialLoading: boolean;
+    isPaused: boolean;
+    isPlaceholderData: boolean;
+    isPreviousData: boolean;
+    isRefetching: boolean;
+    isStale: boolean;
+    refetch: <TPageData>(options?: (import("@tanstack/query-core").RefetchOptions & import("@tanstack/query-core").RefetchQueryFilters<TPageData>) | undefined) => Promise<import("@tanstack/query-core").QueryObserverResult<{
+        description: string;
+        version: string;
+        name: string;
+        availability: string;
+        categories: string[];
+        slug: string;
+        definitionUrl: string;
+        contentHash: string;
+        stepTypes: string[];
+        triggerTypes: string[];
+        solutions?: string[] | undefined;
+    }[], unknown>>;
+    remove: () => void;
+    fetchStatus: import("@tanstack/query-core").FetchStatus;
+} | {
+    templates: {
+        description: string;
+        version: string;
+        name: string;
+        availability: string;
+        categories: string[];
+        slug: string;
+        definitionUrl: string;
+        contentHash: string;
+        stepTypes: string[];
+        triggerTypes: string[];
+        solutions?: string[] | undefined;
+    }[];
+    allTemplates: {
+        description: string;
+        version: string;
+        name: string;
+        availability: string;
+        categories: string[];
+        slug: string;
+        definitionUrl: string;
+        contentHash: string;
+        stepTypes: string[];
+        triggerTypes: string[];
+        solutions?: string[] | undefined;
+    }[];
+    data: {
+        description: string;
+        version: string;
+        name: string;
+        availability: string;
+        categories: string[];
+        slug: string;
+        definitionUrl: string;
+        contentHash: string;
+        stepTypes: string[];
+        triggerTypes: string[];
+        solutions?: string[] | undefined;
+    }[];
+    error: null;
+    isError: false;
+    isLoading: false;
+    isLoadingError: false;
+    isRefetchError: false;
+    isSuccess: true;
+    status: "success";
+    dataUpdatedAt: number;
+    errorUpdatedAt: number;
+    failureCount: number;
+    failureReason: unknown;
+    errorUpdateCount: number;
+    isFetched: boolean;
+    isFetchedAfterMount: boolean;
+    isFetching: boolean;
+    isInitialLoading: boolean;
+    isPaused: boolean;
+    isPlaceholderData: boolean;
+    isPreviousData: boolean;
+    isRefetching: boolean;
+    isStale: boolean;
+    refetch: <TPageData>(options?: (import("@tanstack/query-core").RefetchOptions & import("@tanstack/query-core").RefetchQueryFilters<TPageData>) | undefined) => Promise<import("@tanstack/query-core").QueryObserverResult<{
+        description: string;
+        version: string;
+        name: string;
+        availability: string;
+        categories: string[];
+        slug: string;
+        definitionUrl: string;
+        contentHash: string;
+        stepTypes: string[];
+        triggerTypes: string[];
+        solutions?: string[] | undefined;
+    }[], unknown>>;
+    remove: () => void;
+    fetchStatus: import("@tanstack/query-core").FetchStatus;
+} | {
+    templates: {
+        description: string;
+        version: string;
+        name: string;
+        availability: string;
+        categories: string[];
+        slug: string;
+        definitionUrl: string;
+        contentHash: string;
+        stepTypes: string[];
+        triggerTypes: string[];
+        solutions?: string[] | undefined;
+    }[];
+    allTemplates: {
+        description: string;
+        version: string;
+        name: string;
+        availability: string;
+        categories: string[];
+        slug: string;
+        definitionUrl: string;
+        contentHash: string;
+        stepTypes: string[];
+        triggerTypes: string[];
+        solutions?: string[] | undefined;
+    }[];
+    data: undefined;
+    error: unknown;
+    isError: true;
+    isLoading: false;
+    isLoadingError: true;
+    isRefetchError: false;
+    isSuccess: false;
+    status: "error";
+    dataUpdatedAt: number;
+    errorUpdatedAt: number;
+    failureCount: number;
+    failureReason: unknown;
+    errorUpdateCount: number;
+    isFetched: boolean;
+    isFetchedAfterMount: boolean;
+    isFetching: boolean;
+    isInitialLoading: boolean;
+    isPaused: boolean;
+    isPlaceholderData: boolean;
+    isPreviousData: boolean;
+    isRefetching: boolean;
+    isStale: boolean;
+    refetch: <TPageData>(options?: (import("@tanstack/query-core").RefetchOptions & import("@tanstack/query-core").RefetchQueryFilters<TPageData>) | undefined) => Promise<import("@tanstack/query-core").QueryObserverResult<{
+        description: string;
+        version: string;
+        name: string;
+        availability: string;
+        categories: string[];
+        slug: string;
+        definitionUrl: string;
+        contentHash: string;
+        stepTypes: string[];
+        triggerTypes: string[];
+        solutions?: string[] | undefined;
+    }[], unknown>>;
+    remove: () => void;
+    fetchStatus: import("@tanstack/query-core").FetchStatus;
+} | {
+    templates: {
+        description: string;
+        version: string;
+        name: string;
+        availability: string;
+        categories: string[];
+        slug: string;
+        definitionUrl: string;
+        contentHash: string;
+        stepTypes: string[];
+        triggerTypes: string[];
+        solutions?: string[] | undefined;
+    }[];
+    allTemplates: {
+        description: string;
+        version: string;
+        name: string;
+        availability: string;
+        categories: string[];
+        slug: string;
+        definitionUrl: string;
+        contentHash: string;
+        stepTypes: string[];
+        triggerTypes: string[];
+        solutions?: string[] | undefined;
+    }[];
+    data: undefined;
+    error: null;
+    isError: false;
+    isLoading: true;
+    isLoadingError: false;
+    isRefetchError: false;
+    isSuccess: false;
+    status: "loading";
+    dataUpdatedAt: number;
+    errorUpdatedAt: number;
+    failureCount: number;
+    failureReason: unknown;
+    errorUpdateCount: number;
+    isFetched: boolean;
+    isFetchedAfterMount: boolean;
+    isFetching: boolean;
+    isInitialLoading: boolean;
+    isPaused: boolean;
+    isPlaceholderData: boolean;
+    isPreviousData: boolean;
+    isRefetching: boolean;
+    isStale: boolean;
+    refetch: <TPageData>(options?: (import("@tanstack/query-core").RefetchOptions & import("@tanstack/query-core").RefetchQueryFilters<TPageData>) | undefined) => Promise<import("@tanstack/query-core").QueryObserverResult<{
+        description: string;
+        version: string;
+        name: string;
+        availability: string;
+        categories: string[];
+        slug: string;
+        definitionUrl: string;
+        contentHash: string;
+        stepTypes: string[];
+        triggerTypes: string[];
+        solutions?: string[] | undefined;
+    }[], unknown>>;
+    remove: () => void;
+    fetchStatus: import("@tanstack/query-core").FetchStatus;
+};

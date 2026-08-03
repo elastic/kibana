@@ -1,0 +1,10 @@
+import type { ClickTriggerEvent, MultiClickTriggerEvent, BrushTriggerEvent } from '@kbn/charts-plugin/public';
+import type { ExpressionRendererEvent } from '@kbn/expressions-plugin/public';
+import type { DragDropOperation, LensEditSupportedActions, LensEditEvent, LensTableRowContextMenuEvent, LensAlertRulesEvent } from '@kbn/lens-common';
+export declare function isLensFilterEvent(event: ExpressionRendererEvent): event is ClickTriggerEvent;
+export declare function isLensMultiFilterEvent(event: ExpressionRendererEvent): event is MultiClickTriggerEvent;
+export declare function isLensBrushEvent(event: ExpressionRendererEvent): event is BrushTriggerEvent;
+export declare function isLensEditEvent<T extends LensEditSupportedActions>(event: ExpressionRendererEvent): event is LensEditEvent<T>;
+export declare function isLensTableRowContextMenuClickEvent(event: ExpressionRendererEvent): event is LensTableRowContextMenuEvent;
+export declare function isLensAlertRule(event: ExpressionRendererEvent): event is LensAlertRulesEvent;
+export declare function isOperation(operationCandidate: unknown): operationCandidate is DragDropOperation;

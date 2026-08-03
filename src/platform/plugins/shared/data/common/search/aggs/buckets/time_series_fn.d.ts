@@ -1,0 +1,10 @@
+import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
+import type { AggExpressionType, AggExpressionFunctionArgs } from '..';
+import { BUCKET_TYPES } from '..';
+export declare const aggTimeSeriesFnName = "aggTimeSeries";
+type Input = any;
+type Output = AggExpressionType;
+type AggArgs = AggExpressionFunctionArgs<typeof BUCKET_TYPES.TIME_SERIES>;
+type FunctionDefinition = ExpressionFunctionDefinition<typeof aggTimeSeriesFnName, Input, AggArgs, Output>;
+export declare const aggTimeSeries: () => FunctionDefinition;
+export {};

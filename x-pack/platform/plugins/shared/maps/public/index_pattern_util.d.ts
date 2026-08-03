@@ -1,0 +1,12 @@
+import type { DataViewField, DataView } from '@kbn/data-plugin/common';
+export declare function getIsTimeseries(dataView: DataView): boolean;
+export declare function getGeoTileAggNotSupportedReason(field: DataViewField): string | null;
+export declare function getIndexPatternsFromIds(indexPatternIds?: string[]): Promise<DataView[]>;
+export declare function getTermsFields(fields: DataViewField[]): DataViewField[];
+export declare function getSortFields(fields: DataViewField[]): DataViewField[];
+export declare function getAggregatableGeoFieldTypes(): string[];
+export declare function getGeoFields(fields: DataViewField[]): DataViewField[];
+export declare function getGeoPointFields(fields: DataViewField[]): DataViewField[];
+export declare function getFieldsWithGeoTileAgg(fields: DataViewField[]): DataViewField[];
+export declare function supportsGeoTileAgg(field?: DataViewField): boolean;
+export declare function getSourceFields(fields: DataViewField[]): DataViewField[];

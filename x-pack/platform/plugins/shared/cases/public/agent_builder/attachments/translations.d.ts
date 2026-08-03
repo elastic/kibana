@@ -1,0 +1,18 @@
+export declare const CASE_HEADER: string;
+export declare const GO_TO_CASE: string;
+export declare const SHOW_MORE: string;
+export declare const SHOW_LESS: string;
+export declare const DESCRIPTION: string;
+export declare const CATEGORY: string;
+export declare const TAGS: string;
+export declare const CREATED: string;
+export declare const UPDATED: string;
+export declare const OBSERVABLES: string;
+export declare const CONNECTOR: string;
+export declare const VIEW_ALERTS: string;
+export declare const VIEW_COMMENTS: string;
+export declare const GO_TO_CASES: string;
+export declare const CASES_HEADER: (count: number) => string;
+export declare const CASES_LABEL: (count: number) => string;
+export declare const SHOWING_FOOTER: (visible: number, total: number) => string;
+export declare const NO_CASES: string;

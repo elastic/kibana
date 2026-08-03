@@ -1,0 +1,14 @@
+import type { DocLinksStart } from '@kbn/core/public';
+export declare let skippingDisconnectedClustersUrl: string;
+export declare let remoteClustersUrl: string;
+export declare let transportPortUrl: string;
+export declare let proxyModeUrl: string;
+export declare let proxySettingsUrl: string;
+export declare let cloudSetupTrustUrl: string;
+export declare let apiKeys: string;
+export declare let cloudCreateApiKey: string;
+export declare let onPremPrerequisitesApiKey: string;
+export declare let onPremSecurityApiKey: string;
+export declare let onPremPrerequisitesCert: string;
+export declare let onPremSecurityCert: string;
+export declare function init({ links }: DocLinksStart): void;

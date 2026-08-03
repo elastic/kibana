@@ -1,0 +1,42 @@
+export declare const EVALS_INTERNAL_URL: "/internal/evals";
+export declare const EVALS_EXPERIMENTS_URL: "/internal/evals/experiments";
+export declare const EVALS_EXPERIMENT_URL: "/internal/evals/experiments/{experimentId}";
+export declare const EVALS_EXPERIMENT_SCORES_URL: "/internal/evals/experiments/{experimentId}/scores";
+export declare const EVALS_SCORES_URL: "/internal/evals/scores";
+export declare const EVALS_EXPERIMENTS_COMPARE_URL: "/internal/evals/experiments/compare";
+export declare const EVALS_EXPERIMENTS_RUN_URL: "/internal/evals/experiments/_run";
+export declare const EVALS_EXPERIMENTS_SAVE_WORKFLOW_URL: "/internal/evals/experiments/_save_as_workflow";
+export declare const EVALS_EXPERIMENTS_PREVIEW_URL: "/internal/evals/experiments/_preview";
+export declare const EVALS_EXPERIMENT_TEMPLATES_URL: "/internal/evals/experiments/templates";
+export declare const EVALS_EXPERIMENT_EXECUTION_URL: "/internal/evals/experiments/executions/{workflowExecutionId}";
+export declare const EVALS_EXPERIMENT_EXECUTION_CANCEL_URL: "/internal/evals/experiments/executions/{workflowExecutionId}/_cancel";
+export declare const EVALS_EXPERIMENT_DATASET_EXAMPLES_URL: "/internal/evals/experiments/{experimentId}/datasets/{datasetId}/examples";
+export declare const EVALS_EXAMPLE_SCORES_URL: "/internal/evals/examples/{exampleId}/scores";
+export declare const EVALS_TRACE_URL: "/internal/evals/traces/{traceId}";
+export declare const EVALS_RESOLVE_INSTRUMENTATION_URL: "/internal/evals/traces/_resolve_instrumentation";
+export declare const EVALS_EVALUATORS_URL: "/internal/evals/evaluators";
+export declare const EVALS_VALIDATE_URL: "/internal/evals/evaluators/_validate";
+export declare const EVALS_EVALUATE_URL: "/internal/evals/_evaluate";
+export declare const EVALS_TRACING_PROJECTS_URL: "/internal/evals/tracing/projects";
+export declare const EVALS_TRACING_PROJECT_TRACES_URL: "/internal/evals/tracing/projects/{projectName}/traces";
+export declare const EVALS_DATASETS_URL: "/internal/evals/datasets";
+export declare const EVALS_DATASET_URL: "/internal/evals/datasets/{datasetId}";
+export declare const EVALS_DATASET_EXAMPLES_URL: "/internal/evals/datasets/{datasetId}/examples";
+export declare const EVALS_DATASET_EXAMPLE_URL: "/internal/evals/datasets/{datasetId}/examples/{exampleId}";
+export declare const EVALS_DATASET_UPSERT_URL: "/internal/evals/datasets/_upsert";
+export declare const EvaluationIndices: {
+    readonly SCORES: ".evaluation-scores";
+    readonly DATASETS: ".evaluation-datasets";
+    readonly DATASET_EXAMPLES: ".evaluation-dataset-examples";
+};
+export declare const TRACES_INDEX_PATTERN: "traces-*";
+export declare const LOGS_INDEX_PATTERN: "logs-*";
+export declare const API_VERSIONS: {
+    readonly internal: {
+        readonly v1: "1";
+    };
+};
+export declare const INTERNAL_API_ACCESS: "internal";
+export declare const DATASET_UUID_NAMESPACE: "f77b3ee3-7bc6-4bf8-9e43-d7fca9e69ae0";
+export declare const MAX_EXAMPLES_PER_DATASET: 10000;
+export declare const MAX_SCORES_PER_QUERY: 10000;

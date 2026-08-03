@@ -1,0 +1,11 @@
+import type { CommonTriggerDefinition } from '@kbn/workflows-extensions/common';
+export declare const CaseCreatedTriggerId: "cases.caseCreated";
+export declare const caseCreatedTriggerCommonDefinition: CommonTriggerDefinition;
+export declare const CaseUpdatedTriggerId: "cases.caseUpdated";
+export declare const caseUpdatedTriggerCommonDefinition: CommonTriggerDefinition;
+export declare const CaseStatusUpdatedTriggerId: "cases.caseStatusUpdated";
+export declare const caseStatusUpdatedTriggerCommonDefinition: CommonTriggerDefinition;
+export declare const AttachmentsAddedTriggerId: "cases.attachmentsAdded";
+export declare const attachmentsAddedTriggerCommonDefinition: CommonTriggerDefinition;
+export declare const CommentsAddedTriggerId: "cases.commentsAdded";
+export declare const commentsAddedTriggerCommonDefinition: CommonTriggerDefinition;

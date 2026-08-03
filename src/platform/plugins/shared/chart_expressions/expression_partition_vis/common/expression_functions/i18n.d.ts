@@ -1,0 +1,34 @@
+export declare const strings: {
+    getPieVisFunctionName: () => string;
+    getMetricArgHelp: () => string;
+    getMetricToLabelHelp: () => string;
+    getBucketsArgHelp: () => string;
+    getBucketArgHelp: () => string;
+    getSplitColumnArgHelp: () => string;
+    getSplitRowArgHelp: () => string;
+    getAddTooltipArgHelp: () => string;
+    getLegendDisplayArgHelp: () => string;
+    getLegendPositionArgHelp: () => string;
+    getLegendSizeArgHelp: () => string;
+    getNestedLegendArgHelp: () => string;
+    getTruncateLegendArgHelp: () => string;
+    getLegendStatsArgHelp: () => string;
+    getMaxLegendLinesArgHelp: () => string;
+    getDistinctColorsArgHelp: () => string;
+    getIsDonutArgHelp: () => string;
+    getRespectSourceOrderArgHelp: () => string;
+    getStartFromSecondLargestSliceArgHelp: () => string;
+    getEmptySizeRatioArgHelp: () => string;
+    getPaletteArgHelp: () => string;
+    getLabelsArgHelp: () => string;
+    getAriaLabelHelp: () => string;
+    getSliceSizeHelp: () => string;
+    getSliceHelp: () => string;
+    getColumnSplitHelp: () => string;
+    getRowSplitHelp: () => string;
+    getColorMappingHelp: () => string;
+};
+export declare const errors: {
+    moreThanNBucketsAreNotSupportedError: (maxLength: number) => string;
+    splitRowAndSplitColumnAreSpecifiedError: () => string;
+};
