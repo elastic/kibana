@@ -46,8 +46,7 @@ export const computeContextBudget = (connector: InferenceConnector): ContextBudg
   return { totalBudget, historyBudget, triggerThreshold };
 };
 
-export const sumTokens = (counts: number[]): number =>
-  counts.reduce((total, count) => total + count, 0);
+const sumTokens = (counts: number[]): number => counts.reduce((total, count) => total + count, 0);
 
 /**
  * Determines whether compaction should be triggered given precomputed per-round
