@@ -48,7 +48,7 @@ export {
   OTEL_SERVICE,
 } from './constants';
 export { setupTracesExperience, teardownTracesExperience } from './setup';
-export { expectTracesExperienceEnabled } from './helpers';
+export { openServiceFlyoutFromAboutSection, expectTracesExperienceEnabled } from './helpers';
 export {
   richTrace,
   traceCorrelatedLogs,

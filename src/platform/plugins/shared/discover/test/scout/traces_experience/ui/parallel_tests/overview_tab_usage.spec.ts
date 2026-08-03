@@ -10,6 +10,7 @@
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import type { PageObjects } from '@kbn/scout';
+import { openServiceFlyoutFromAboutSection } from '../fixtures/helpers';
 import {
   spaceTest,
   TRACES,
@@ -58,24 +59,16 @@ spaceTest.describe(
 
     spaceTest(
       'About section - service name link opens service flyout in-place',
-      async ({ pageObjects, page }) => {
+      async ({ pageObjects }) => {
         const { flyout } = pageObjects.tracesExperience;
 
         await spaceTest.step('filter for span and open overview tab', async () => {
           await openOverviewTab(pageObjects, `span.name == "${RICH_TRACE.INTERNAL_SPAN_NAME}"`);
         });
 
-        await spaceTest.step(
-          'click service name link and verify service flyout opens',
-          async () => {
-            await expect(flyout.about.serviceNameLink).toBeVisible();
-            // Move pointer away so the row's hover action buttons don't appear and intercept the click,
-            // then fire a native DOM click without moving the pointer back over the element.
-            await page.mouse.move(0, 0);
-            await flyout.about.serviceNameLink.evaluate((el: HTMLElement) => el.click());
-            await expect(flyout.serviceFlyout.container).toBeVisible();
-          }
-        );
+        await spaceTest.step('open service flyout via service name link', async () => {
+          await openServiceFlyoutFromAboutSection(flyout);
+        });
 
         await spaceTest.step('click back button and verify service flyout closes', async () => {
           await flyout.serviceFlyout.backButton.click();

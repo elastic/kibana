@@ -10,6 +10,7 @@
 import { expect } from '@kbn/scout/ui';
 import type { PageObjects } from '@kbn/scout';
 import type { TracesExperiencePage } from './page_objects';
+import type { TracesFlyout } from './page_objects/flyout';
 
 /**
  * Waits for the traces data-source profile to have engaged before assertions
@@ -34,6 +35,22 @@ async function waitForTracesProfileApplied(
   // Ensure the in-flight search / column swap finished
   await pageObjects.discover.waitUntilSearchingHasFinished();
   await pageObjects.dataGrid.waitForDocTableRendered();
+}
+
+/**
+ * Clicks the service name link and waits for the service flyout to open.
+ *
+ * EuiDataGrid shows hover action buttons when a row is focused or hovered. These buttons
+ * overlay the link and intercept pointer events, and EuiDataGrid cell handling can also
+ * swallow native DOM clicks intermittently. dispatchEvent bypasses pointer events entirely,
+ * and toPass retries until the flyout appears.
+ */
+export async function openServiceFlyoutFromAboutSection(flyout: TracesFlyout): Promise<void> {
+  await expect(flyout.about.serviceNameLink).toBeVisible();
+  await expect(async () => {
+    await flyout.about.serviceNameLink.dispatchEvent('click');
+    await expect(flyout.serviceFlyout.container).toBeVisible();
+  }).toPass({ timeout: 15000 });
 }
 
 export async function expectTracesExperienceEnabled(
