@@ -6753,15 +6753,15 @@
   version "0.0.0"
   uid ""
 
-"@kbn/deferred-init-example-consumer-plugin@link:src/platform/plugins/private/deferred_init_example_consumer":
+"@kbn/deferred-init-example-consumer-plugin@link:examples/deferred_init_example_consumer":
   version "0.0.0"
   uid ""
 
-"@kbn/deferred-init-example-dependency-plugin@link:src/platform/plugins/private/deferred_init_example_dependency":
+"@kbn/deferred-init-example-dependency-plugin@link:examples/deferred_init_example_dependency":
   version "0.0.0"
   uid ""
 
-"@kbn/deferred-init-example-plugin@link:src/platform/plugins/private/deferred_init_example":
+"@kbn/deferred-init-example-plugin@link:examples/deferred_init_example":
   version "0.0.0"
   uid ""
 

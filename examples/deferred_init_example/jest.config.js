@@ -9,12 +9,9 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../../../..',
-  roots: ['<rootDir>/src/platform/plugins/private/deferred_init_example'],
-  coverageDirectory:
-    '<rootDir>/target/kibana-coverage/jest/src/platform/plugins/private/deferred_init_example',
+  rootDir: '../..',
+  roots: ['<rootDir>/examples/deferred_init_example'],
+  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/examples/deferred_init_example',
   coverageReporters: ['text', 'html'],
-  collectCoverageFrom: [
-    '<rootDir>/src/platform/plugins/private/deferred_init_example/{common,server}/**/*.{ts,tsx}',
-  ],
+  collectCoverageFrom: ['<rootDir>/examples/deferred_init_example/{common,server}/**/*.{ts,tsx}'],
 };

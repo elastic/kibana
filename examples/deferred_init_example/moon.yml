@@ -15,7 +15,7 @@ project:
   description: Moon project for @kbn/deferred-init-example-plugin
   channel: ''
   owner: '@elastic/kibana-core'
-  sourceRoot: src/platform/plugins/private/deferred_init_example
+  sourceRoot: examples/deferred_init_example
 dependsOn:
   - '@kbn/core'
   - '@kbn/config-schema'

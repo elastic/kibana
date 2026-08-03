@@ -9,6 +9,9 @@ examples/content_management_examples @elastic/appex-sharedux
 examples/controls_example @elastic/kibana-presentation
 examples/data_streams_example @elastic/kibana-core
 examples/data_view_field_editor_example @elastic/kibana-data-discovery
+examples/deferred_init_example @elastic/kibana-core
+examples/deferred_init_example_consumer @elastic/kibana-core
+examples/deferred_init_example_dependency @elastic/kibana-core
 examples/dependency_injection @elastic/kibana-core
 examples/developer_examples @elastic/appex-sharedux
 examples/discover_customization_examples @elastic/kibana-data-discovery
@@ -834,9 +837,6 @@ src/platform/packages/shared/shared-ux/storybook/mock @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/table_persist @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/toolbar_selector @elastic/obs-exploration-team
 src/platform/plugins/private/advanced_settings @elastic/appex-sharedux @elastic/kibana-management
-src/platform/plugins/private/deferred_init_example @elastic/kibana-core
-src/platform/plugins/private/deferred_init_example_consumer @elastic/kibana-core
-src/platform/plugins/private/deferred_init_example_dependency @elastic/kibana-core
 src/platform/plugins/private/event_annotation @elastic/kibana-visualizations
 src/platform/plugins/private/event_annotation_listing @elastic/kibana-visualizations
 src/platform/plugins/private/files_management @elastic/appex-sharedux
