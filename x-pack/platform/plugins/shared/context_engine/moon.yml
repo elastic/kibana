@@ -42,6 +42,8 @@ dependsOn:
   - '@kbn/workflows-ui'
   - '@kbn/deeplinks-workflows'
   - '@kbn/deeplinks-management'
+  - '@kbn/code-editor'
+  - '@kbn/ui-callout'
 tags:
   - plugin
   - prod
