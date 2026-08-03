@@ -22,6 +22,11 @@ async function waitForTracesProfileApplied(
 ) {
   const { profileSpecificColumns } = pageObjects.tracesExperience.grid;
 
+  // Gate on the search-finished signal first so each per-column visibility
+  // budget below covers rendering only, not the initial (and potentially slow)
+  // profile-resolving fetch.
+  await pageObjects.discover.waitUntilSearchingHasFinished();
+
   // Wait for every profile-specific column before checking render stability.
   // Waiting for only the first column risks calling waitForDocTableRendered
   // while the remaining columns are still being applied, which briefly resets
@@ -32,8 +37,6 @@ async function waitForTracesProfileApplied(
     });
   }
 
-  // Ensure the in-flight search / column swap finished
-  await pageObjects.discover.waitUntilSearchingHasFinished();
   await pageObjects.dataGrid.waitForDocTableRendered();
 }
 
