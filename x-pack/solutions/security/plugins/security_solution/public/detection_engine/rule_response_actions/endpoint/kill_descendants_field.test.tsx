@@ -82,7 +82,7 @@ describe('KillDescendantsField', () => {
     it('should render with the "Kill descendants" label', () => {
       const { getByText } = render();
 
-      expect(getByText('Kill descendants')).toBeInTheDocument();
+      expect(getByText('Kill descendant processes')).toBeInTheDocument();
     });
 
     it('should be unchecked by default', () => {
