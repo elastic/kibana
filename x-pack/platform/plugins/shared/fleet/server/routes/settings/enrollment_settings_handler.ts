@@ -19,10 +19,10 @@ import type {
   EnrollmentSettingsFleetServerPolicy,
   FleetProxy,
   FleetServerHost,
-  NewBeatsOutput,
   Output,
   DownloadSource,
 } from '../../../common/types';
+import { isBeatsOutput } from '../../../common/services/output_helpers';
 import type { FleetRequestHandler, GetEnrollmentSettingsRequestSchema } from '../../types';
 import { agentPolicyService, appContextService, downloadSourceService } from '../../services';
 import { getFleetServerHostsForAgentPolicy } from '../../services/fleet_server_host';
@@ -224,14 +224,14 @@ function sanitizeEnrollmentFleetServerHost(host: FleetServerHost): FleetServerHo
   };
 }
 
-function sanitizeEnrollmentOutput(output: Output): Output {
-  const beatsOutput = output as NewBeatsOutput;
+function sanitizeEnrollmentOutput<T extends Output>(output: T): T {
+  const beatsOutput = isBeatsOutput(output) ? output : undefined;
   return {
     ...omit(output, ['secrets']),
-    ssl: beatsOutput.ssl ? omit(beatsOutput.ssl, ['key']) : beatsOutput.ssl,
+    ssl: beatsOutput?.ssl ? omit(beatsOutput.ssl, ['key']) : beatsOutput?.ssl,
     ...(output.type === 'kafka' ? { password: undefined } : {}),
     ...(output.type === 'remote_elasticsearch' ? { service_token: undefined } : {}),
-  } as Output;
+  } as T;
 }
 
 function sanitizeEnrollmentDownloadSource(downloadSource: DownloadSource): DownloadSource {
