@@ -18,7 +18,6 @@ import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { RulesClientCreateOptions } from '@kbn/alerting-plugin/server';
 import { combineLatest, distinctUntilChanged, filter, skip, switchMap } from 'rxjs';
 import type { Subscription } from 'rxjs';
-import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { StreamsServer } from '@kbn/streams-plugin/server/types';
 import { getRelayAppConnectionSavedObjectType } from './lib/slack_app/saved_object';
 import { getSignificantEventsMaintenanceStateSavedObjectType } from './lib/maintenance/saved_object';
@@ -70,28 +69,18 @@ import {
 } from './lib/workflows/significant_events_scheduled_workflows';
 import { createWorkflowClients } from './lib/workflows/create_workflow_clients';
 import { installInvestigationAgent } from './memory_and_investigation/lib/investigation/install_investigation_agent';
-import {
-  registerInvestigationAgentType,
-  SIGNIFICANT_EVENTS_INVESTIGATION_AGENT_ID,
-} from './memory_and_investigation/agents/investigation';
+import { registerInvestigationAgentType } from './memory_and_investigation/agents/investigation';
 import {
   installDiscoveryAgents,
   registerSignificantEventsDiscoveryAgentTypes,
-  SIGNIFICANT_EVENTS_DISCOVERY_AGENT_ID,
-  SIGNIFICANT_EVENTS_JUDGE_AGENT_ID,
 } from './agent_builder/agents/discovery';
+import { createSignificantEventsAvailability } from './agent_builder/tools/significant_events_availability';
 import { SIGNIFICANT_EVENT_TIERED_FEATURES } from '../common/constants';
 import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '../common/feature_flags';
 import { isSignificantEventsAvailable } from './routes/utils/assert_significant_events_access';
 import type { SignificantEventsKIsOnboardingClient } from './lib/workflows/onboarding_workflow_client';
 
 const SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER = 'significant_events';
-
-const SIGNIFICANT_EVENTS_AGENT_IDS = [
-  SIGNIFICANT_EVENTS_INVESTIGATION_AGENT_ID,
-  SIGNIFICANT_EVENTS_DISCOVERY_AGENT_ID,
-  SIGNIFICANT_EVENTS_JUDGE_AGENT_ID,
-] as const;
 
 export class SignificantEventsPlugin
   implements
@@ -420,30 +409,25 @@ export class SignificantEventsPlugin
       })
     );
 
-    // Editable investigation + discovery/judge agents: installed via agents.ensure when
-    // significant events is available. Per-space installs also happen just-in-time
-    // from triggerInvestigationWorkflow (investigation), scheduled discovery enablement,
-    // and manual discovery execute (discovery/judge).
-    // Pause re-assert runs inside ensureSignificantEventsInstalled after every install.
-    // Subscribes to `available$` rather than `availabilityEnabled$` because, unlike skills, these
-    // profiles are persisted documents: becoming unavailable has to remove them or they keep
-    // advertising the feature in the Agent Builder UI. `this.server` is guarded too, since without
-    // it `isAvailable` reads "unavailable" and would remove rather than skip.
+    // Editable investigation + discovery/judge agents: installed via agents.ensure with the same
+    // availability gate as registered tools. Profiles stay installed; Agent Builder hides them
+    // when significant events is unavailable. Always ensure at start so the in-memory availability
+    // handler is registered even when the feature is currently off (otherwise leftover profiles
+    // from a prior enablement would show as available). Per-space installs also happen
+    // just-in-time from triggerInvestigationWorkflow, scheduled discovery enablement, and manual
+    // discovery execute.
     if (plugins.agentBuilder && this.server) {
       const agentBuilder = plugins.agentBuilder;
-      const installAgents = () =>
-        Promise.all([
-          installInvestigationAgent({ agentBuilder, spaceId: DEFAULT_SPACE_ID }),
-          installDiscoveryAgents({ agentBuilder, spaceId: DEFAULT_SPACE_ID }),
-        ]).catch((error: unknown) => {
-          this.logManagedResourceError('significant events agents', error);
-        });
-
-      this.subscriptions.push(
-        available$.subscribe((enabled) =>
-          enabled ? void installAgents() : void this.removeSignificantEventsAgents(agentBuilder)
-        )
-      );
+      const availability = createSignificantEventsAvailability({
+        server: this.server,
+        logger: this.logger,
+      });
+      void Promise.all([
+        installInvestigationAgent({ agentBuilder, spaceId: DEFAULT_SPACE_ID, availability }),
+        installDiscoveryAgents({ agentBuilder, spaceId: DEFAULT_SPACE_ID, availability }),
+      ]).catch((error: unknown) => {
+        this.logManagedResourceError('significant events agents', error);
+      });
     }
 
     if (plugins.agentBuilder && this.server && this.getScopedClients) {
@@ -512,35 +496,6 @@ export class SignificantEventsPlugin
         .catch((err) => {
           this.logger.error(`Failed to register significant events memory skills: ${err.message}`);
         });
-    }
-  }
-
-  /**
-   * Removes the agent profiles from every space: the just-in-time installers create them in
-   * whichever space the request came from. Agents a user created under the same ids are left alone,
-   * and having nothing to delete is a no-op, so this is safe to run on every boot.
-   */
-  private async removeSignificantEventsAgents(
-    agentBuilder: AgentBuilderPluginStart
-  ): Promise<void> {
-    const results = await Promise.allSettled(
-      SIGNIFICANT_EVENTS_AGENT_IDS.map((agentId) => agentBuilder.agents.remove({ agentId }))
-    );
-
-    let removed = 0;
-    results.forEach((result, index) => {
-      if (result.status === 'fulfilled') {
-        removed += result.value;
-      } else {
-        this.logManagedResourceError(
-          `significant events agent "${SIGNIFICANT_EVENTS_AGENT_IDS[index]}" removal`,
-          result.reason
-        );
-      }
-    });
-
-    if (removed > 0) {
-      this.logger.info(`Removed ${removed} significant events agent profile(s)`);
     }
   }
 

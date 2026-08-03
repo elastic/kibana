@@ -14,9 +14,8 @@ import type {
   SavedObjectsServiceStart,
 } from '@kbn/core/server';
 import { isAllowedBuiltinAgent } from '@kbn/agent-builder-server/allow_lists';
-import type { AgentTypeRegistry } from '@kbn/agent-builder-server/agents';
+import type { AgentAvailabilityConfig, AgentTypeRegistry } from '@kbn/agent-builder-server/agents';
 import { chatAgentTypeId } from '@kbn/agent-builder-common';
-import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { createConfigurationResolver } from './resolve_configuration';
 import { getCurrentSpaceId } from '../../utils/spaces';
@@ -55,6 +54,8 @@ export interface AgentsServiceStartDeps {
 export class AgentsService {
   private builtinRegistry: BuiltinAgentRegistry;
   private typeRegistry: AgentTypeRegistry;
+  /** In-memory availability for persisted agents, keyed by agent id. Filled by `ensure`. */
+  private readonly availabilityByAgentId = new Map<string, AgentAvailabilityConfig>();
 
   private setupDeps?: AgentsServiceSetupDeps;
 
@@ -113,6 +114,7 @@ export class AgentsService {
       security,
       toolsService,
       logger,
+      availabilityByAgentId: this.availabilityByAgentId,
     });
 
     const getAgentClient = async ({ request }: { request: KibanaRequest }) => {
@@ -140,7 +142,7 @@ export class AgentsService {
       });
     };
 
-    const ensure: AgentsServiceStart['ensure'] = async ({ spaceId, agent }) => {
+    const ensure: AgentsServiceStart['ensure'] = async ({ spaceId, agent, availability }) => {
       if (this.builtinRegistry.has(agent.id)) {
         throw new Error(
           `Cannot ensure persisted agent "${agent.id}": a built-in agent uses this id`
@@ -150,18 +152,12 @@ export class AgentsService {
         throw new Error(`Cannot ensure agent "${agent.id}": unknown agent type "${agent.type}"`);
       }
 
+      if (availability) {
+        this.availabilityByAgentId.set(agent.id, availability);
+      }
+
       const systemClient = createSystemClient({ space: spaceId, elasticsearch, logger });
       await systemClient.ensureAgent(agent);
-    };
-
-    const remove: AgentsServiceStart['remove'] = async ({ agentId, spaceId }) => {
-      // The constructor space only scopes `ensureAgent`; `removeAgent` carries its own.
-      const systemClient = createSystemClient({
-        space: spaceId ?? DEFAULT_SPACE_ID,
-        elasticsearch,
-        logger,
-      });
-      return systemClient.removeAgent({ agentId, spaceId });
     };
 
     const resolveAgentConfiguration: AgentsServiceStart['resolveAgentConfiguration'] = ({
@@ -227,7 +223,6 @@ export class AgentsService {
     return {
       getRegistry,
       ensure,
-      remove,
       resolveAgentConfiguration,
       removeToolRefsFromAgents,
       getAgentsUsingTools,

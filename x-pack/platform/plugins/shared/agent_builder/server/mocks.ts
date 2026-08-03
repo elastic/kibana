@@ -52,7 +52,6 @@ const createStartContractMock = (): AgentBuilderPluginStartMock => {
       runAgent: jest.fn(),
       getRegistry: jest.fn().mockImplementation(() => createMockedAgentRegistry()),
       ensure: jest.fn(),
-      remove: jest.fn().mockResolvedValue(0),
     },
     tools: {
       execute: jest.fn(),

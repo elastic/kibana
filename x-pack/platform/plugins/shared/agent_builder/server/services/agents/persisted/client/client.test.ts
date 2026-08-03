@@ -447,38 +447,4 @@ describe('SystemAgentClient', () => {
       );
     });
   });
-
-  describe('removeAgent', () => {
-    const getSearchFilter = () => mockEsClient.search.mock.calls[0][0].query.bool.filter;
-
-    it('deletes every matching document and reports how many', async () => {
-      mockEsClient.search.mockResolvedValue({
-        hits: { hits: [buildDoc(), { ...buildDoc(), _id: `other_${profile.id}` }] },
-      });
-
-      await expect(createSystemAgentClient().removeAgent({ agentId: profile.id })).resolves.toBe(2);
-
-      expect(mockEsClient.bulk).toHaveBeenCalledWith({
-        operations: [
-          { delete: { _id: `default_${profile.id}` } },
-          { delete: { _id: `other_${profile.id}` } },
-        ],
-        throwOnFail: true,
-      });
-    });
-
-    it('matches only system-created agents, and spans every space unless one is given', async () => {
-      mockEsClient.search.mockResolvedValue({ hits: { hits: [] } });
-      const client = createSystemAgentClient();
-
-      await expect(client.removeAgent({ agentId: profile.id })).resolves.toBe(0);
-      expect(mockEsClient.bulk).not.toHaveBeenCalled();
-      expect(getSearchFilter()).toContainEqual({ term: { created_by_name: 'system' } });
-      expect(JSON.stringify(getSearchFilter())).not.toContain('space');
-
-      mockEsClient.search.mockClear();
-      await client.removeAgent({ agentId: profile.id, spaceId: 'space-1' });
-      expect(JSON.stringify(getSearchFilter())).toContain('space-1');
-    });
-  });
 });

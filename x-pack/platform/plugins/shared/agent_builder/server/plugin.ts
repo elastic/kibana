@@ -275,7 +275,6 @@ export class AgentBuilderPlugin
       agents: {
         getRegistry: ({ request }) => agents.getRegistry({ request }),
         ensure: agents.ensure,
-        remove: agents.remove,
         runAgent: runner.runAgent.bind(runner),
       },
       tools: {

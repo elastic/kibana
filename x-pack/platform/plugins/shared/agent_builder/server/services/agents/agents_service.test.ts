@@ -152,13 +152,11 @@ describe('AgentsService', () => {
     let started: AgentsServiceStart;
     let request: KibanaRequest;
     const ensureAgent = jest.fn();
-    const removeAgent = jest.fn();
 
     beforeEach(() => {
       isAllowedBuiltinAgentMock.mockReturnValue(true);
       service.setup({ logger });
       ensureAgent.mockReset();
-      removeAgent.mockReset();
       createClientMock.mockResolvedValue({
         getAgentsUsingTools: (params: { toolIds: string[] }) =>
           runToolRefCleanupMock({
@@ -191,7 +189,7 @@ describe('AgentsService', () => {
             logger: undefined,
           }),
       } as any);
-      createSystemClientMock.mockReturnValue({ ensureAgent, removeAgent });
+      createSystemClientMock.mockReturnValue({ ensureAgent });
       started = service.start(createStartDeps());
       request = httpServerMock.createKibanaRequest();
     });
@@ -219,17 +217,43 @@ describe('AgentsService', () => {
           started.ensure({ spaceId: 'space-1', agent: { ...agent, type: 'unknown' } })
         ).rejects.toThrow('unknown agent type "unknown"');
       });
-    });
 
-    describe('#remove', () => {
-      it('passes the space through to the system client', async () => {
-        removeAgent.mockResolvedValue(1);
+      it('keeps availability out of the persisted agent document', async () => {
+        await started.ensure({
+          spaceId: 'space-1',
+          agent,
+          availability: {
+            cacheMode: 'space',
+            handler: async () => ({ status: 'unavailable' }),
+          },
+        });
 
-        await expect(started.remove({ agentId: 'system-agent', spaceId: 'space-1' })).resolves.toBe(
-          1
-        );
+        expect(ensureAgent).toHaveBeenCalledTimes(1);
+        expect(ensureAgent).toHaveBeenCalledWith(agent);
+      });
 
-        expect(removeAgent).toHaveBeenCalledWith({ agentId: 'system-agent', spaceId: 'space-1' });
+      it('applies ensure-registered availability when reading the agent', async () => {
+        await started.ensure({
+          spaceId: 'default',
+          agent,
+          availability: {
+            cacheMode: 'none',
+            handler: async () => ({ status: 'unavailable', reason: 'off' }),
+          },
+        });
+
+        createClientMock.mockResolvedValue({
+          has: jest.fn().mockResolvedValue(true),
+          getWithAccess: jest.fn().mockResolvedValue({
+            ...agent,
+            access_control: undefined,
+            created_by: undefined,
+            permissions: { update_agent: true, update_access_control: true },
+          }),
+        } as any);
+
+        const registry = await started.getRegistry({ request });
+        await expect(registry.get(agent.id)).rejects.toThrow(`Agent ${agent.id} is not available`);
       });
     });
 
