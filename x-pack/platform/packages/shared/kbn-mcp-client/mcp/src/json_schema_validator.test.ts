@@ -18,20 +18,6 @@ describe('ZodJsonSchemaValidator', () => {
     validator = new ZodJsonSchemaValidator(logger);
   });
 
-  // The Jest preset disables code generation from strings, matching a hardened Kibana
-  // instance (see `@kbn/test`'s `disallow_code_generation` setup). Building a validator is
-  // therefore the assertion that matters here: the SDK's default ajv validator throws at
-  // this point because it compiles schemas via `new Function`.
-  it('builds a validator without generating code from strings', () => {
-    expect(() =>
-      validator.getValidator({
-        type: 'object',
-        properties: { count: { type: 'integer' } },
-        required: ['count'],
-      } as JsonSchemaType)
-    ).not.toThrow();
-  });
-
   it('accepts output matching the schema and returns the parsed data', () => {
     const validate = validator.getValidator<{ count: number }>({
       type: 'object',
