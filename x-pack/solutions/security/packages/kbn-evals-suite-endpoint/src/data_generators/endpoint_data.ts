@@ -23,7 +23,11 @@ const POLL_INTERVAL_MS = 5_000;
  * `prefix` query on `eval-agent-ts-` can never match a forensic agent id (the old
  * shared `eval-agent-` prefix was a strict prefix of `eval-agent-forensic-`, so
  * cleanupTroubleshootingData also deleted the forensic suite's freshly-seeded kill
- * chain when Playwright scheduled the two spec files on different workers).
+ * chain when Playwright scheduled the two spec files on different workers). The
+ * forensic suite also never writes `metrics-endpoint.metadata-*` (its kill chain
+ * is `logs-endpoint.events.*` only), so leftover forensic ids cannot appear in
+ * the transform outputs counted below — the propagation gate always counts
+ * exactly this suite's own seeds.
  */
 const EVAL_AGENT_ID_PREFIX = 'eval-agent-ts-';
 const EVAL_SEEDED_QUERY = { prefix: { 'agent.id': EVAL_AGENT_ID_PREFIX } };
@@ -101,21 +105,15 @@ export async function waitForTransformPropagation(
   esClient: Client,
   log: ToolingLog,
   expectedCounts: { metadataCurrent: number; metadataUnited: number },
-  baselineCounts: { metadataCurrent: number; metadataUnited: number } = {
-    metadataCurrent: 0,
-    metadataUnited: 0,
-  },
   maxWaitMs = 180_000
 ): Promise<void> {
   const start = Date.now();
   let lastCounts = { metadataCurrent: 0, metadataUnited: 0 };
-  // EVAL_SEEDED_QUERY's broad `eval-agent-` count prefix also matches any leftover
-  // forensic seeds (`eval-agent-forensic-*`); `baselineCounts` lets the caller
-  // subtract documents that pre-date this run's seeding.
-  const requiredCounts = {
-    metadataCurrent: expectedCounts.metadataCurrent + baselineCounts.metadataCurrent,
-    metadataUnited: expectedCounts.metadataUnited + baselineCounts.metadataUnited,
-  };
+  // EVAL_SEEDED_QUERY counts only this suite's own seeds: `eval-agent-ts-` is
+  // disjoint from the forensic suite's `eval-agent-forensic-` ids, and forensic
+  // seeding never writes `metrics-endpoint.metadata-*` anyway — so no baseline
+  // compensation is needed (or possible) here.
+  const requiredCounts = expectedCounts;
   log.info(
     `Waiting for transform propagation: metadataCurrent >= ${requiredCounts.metadataCurrent}, metadataUnited >= ${requiredCounts.metadataUnited}`
   );
