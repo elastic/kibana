@@ -12,6 +12,11 @@
 # Every switch is read from the environment, so experiments can be flipped per build
 # from the Buildkite UI without pushing a new commit:
 #
+#   CITADEL_EXP_PROBE_SHASUMS=true   fetch node's SHASUMS256.txt both directly and
+#                                    through the proxy and compare the bytes. Runs
+#                                    before any other switch, so it works in either
+#                                    arm. Diagnoses the build_kibana failure
+#                                    "sha256 checksum of ... not provided".
 #   CITADEL_EXP_UNPROXY_JOB=true     blank HTTP(S)_PROXY for this job, leaving CA
 #                                    trust and all other proxy setup intact. Use this
 #                                    first: it answers whether a failure is
@@ -46,6 +51,37 @@ _citadel_experiment() {
 
   echo "proxy  = configured"
 
+  # --- Probe: does a response body survive the proxy intact? -----------------
+  # Placed before every other switch so it runs in either arm. The build_kibana
+  # failure is "sha256 checksum of <node tarball> not provided": getNodeShasums
+  # fetches SHASUMS256.txt (200 OK, no error), then parses it with
+  # `split('\n')` + `split('  ')`. A body that arrives with CRLF endings, or
+  # altered in any other way, yields keys that no longer match the tarball name.
+  # This dumps enough to tell which.
+  if [[ "${CITADEL_EXP_PROBE_SHASUMS:-}" == "true" ]]; then
+    local nv="24.18.0"
+    if [[ -f .node-version ]]; then
+      nv="$(tr -d '[:space:]' < .node-version)"
+    fi
+    local base="https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache"
+    local expect="node-v${nv}-linux-x64.tar.gz"
+    echo "--- Citadel probe: SHASUMS256.txt (node v${nv}, expecting key '${expect}')"
+    local variant label
+    for variant in "" "node-glibc-217/"; do
+      label="${variant:-plain}"
+      echo "url: ${base}/${variant}dist/v${nv}/SHASUMS256.txt"
+      _citadel_probe_url direct "${label}" "${base}/${variant}dist/v${nv}/SHASUMS256.txt" "${expect}"
+      _citadel_probe_url proxied "${label}" "${base}/${variant}dist/v${nv}/SHASUMS256.txt" "${expect}"
+      if diff -q "/tmp/citadel-probe-direct-${label}.body" \
+                 "/tmp/citadel-probe-proxied-${label}.body" > /dev/null 2>&1; then
+        echo "  => bodies IDENTICAL"
+      else
+        echo "  => bodies DIFFER"
+      fi
+    done
+    applied="${applied}probe-shasums "
+  fi
+
   # --- Is the failure proxy-mediated at all? ---------------------------------
   # Highest-information single run. Everything else about the opted-in job stays
   # identical: CA installed, NODE_EXTRA_CA_CERTS set, NO_PROXY populated.
@@ -58,7 +94,7 @@ _citadel_experiment() {
   if [[ "${CITADEL_EXP_UNPROXY_JOB:-}" == "true" ]]; then
     export HTTP_PROXY="" HTTPS_PROXY="" http_proxy="" https_proxy=""
     echo "proxy variables blanked for this job"
-    _citadel_annotate "unproxy"
+    _citadel_annotate "${applied}unproxy"
     return 0
   fi
 
@@ -117,6 +153,63 @@ _citadel_experiment() {
 
   [[ -n "${applied}" ]] && _citadel_annotate "${applied}"
   return 0
+}
+
+# Fetch one URL direct or via the proxy and report what could explain a body that
+# arrives subtly different.
+#
+# The endpoint 301-redirects to storage.googleapis.com, which is in NO_PROXY — so
+# the chain crosses the proxy boundary: hop 1 goes through Squid, hop 2 goes direct.
+# The 301 carries no Cache-Control and no Expires, which makes it heuristically
+# cacheable, and Squid has caching enabled. So the first thing to compare is the
+# Location of hop 1, not the final body: a stale cached 301 would point at a
+# different GCS object and yield a valid SHASUMS256.txt for the wrong node version,
+# which is exactly what "checksum not provided" looks like.
+#
+# Two requests on purpose: one without -L to capture the redirect, one with -L for
+# the body Axios would actually have parsed. openssl rather than sha256sum so this
+# also runs on a mac while iterating.
+_citadel_probe_url() {
+  local mode="$1" label="$2" url="$3" expect="$4"
+  local body="/tmp/citadel-probe-${mode}-${label}.body"
+  local hdr="/tmp/citadel-probe-${mode}-${label}.hdr"
+  local -a args=(-sS --max-time 60)
+
+  if [[ "${mode}" == "direct" ]]; then
+    args+=(--noproxy '*')
+  else
+    args+=(-x "${HTTPS_PROXY}")
+  fi
+
+  # Hop 1 only — what does the redirect point at?
+  if ! curl "${args[@]}" -o /dev/null -D "${hdr}" "${url}"; then
+    echo "  ${mode}: curl FAILED on hop 1"
+    : > "${body}"
+    return 0
+  fi
+  local status location age xcache
+  status="$(awk 'NR==1 {print $2}' "${hdr}" | tr -d '\r')"
+  location="$(grep -i '^location:' "${hdr}" | tr -d '\r' | cut -d' ' -f2- || echo '<none>')"
+  age="$(grep -i '^age:' "${hdr}" | tr -d '\r' || echo 'age: <none>')"
+  xcache="$(grep -iE '^(x-cache|x-cache-lookup|via):' "${hdr}" | tr -d '\r' | paste -sd' ' - || echo '<no squid headers>')"
+  echo "  ${mode}: hop1_status=${status}"
+  echo "  ${mode}: location=${location}"
+  echo "  ${mode}: ${age} | ${xcache}"
+
+  # Full chain — the body Kibana would have parsed.
+  local final code
+  final="$(curl "${args[@]}" -L -o "${body}" -w '%{url_effective} %{http_code} %{num_redirects}' "${url}" || echo 'FAILED 000 0')"
+  code="$(echo "${final}" | awk '{print $2}')"
+  echo "  ${mode}: final_url=$(echo "${final}" | awk '{print $1}')"
+
+  local size digest crs keymatch
+  size="$(wc -c < "${body}" | tr -d ' ')"
+  digest="$(openssl dgst -sha256 < "${body}" | awk '{print $NF}')"
+  crs="$(tr -cd '\r' < "${body}" | wc -c | tr -d ' ')"
+  if grep -qx "[0-9a-f]\{64\}  ${expect}" "${body}"; then keymatch="MATCH"; else keymatch="MISSING"; fi
+  echo "  ${mode}: final_status=${code} bytes=${size} sha256=${digest:0:16}… cr_bytes=${crs} key=${keymatch}"
+  echo "  ${mode}: first line bytes:"
+  head -1 "${body}" | od -c | head -2 | sed 's/^/    /'
 }
 
 # Warn on the build itself, so nobody mistakes an experiment run for default behaviour.
