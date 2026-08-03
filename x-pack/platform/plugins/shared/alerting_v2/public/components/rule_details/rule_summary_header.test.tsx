@@ -17,7 +17,7 @@ const baseRule = {
   id: 'rule-1',
   kind: 'signal',
   enabled: true,
-  metadata: { name: 'My Rule', tags: ['prod', 'infra'] },
+  metadata: { name: 'My Rule', version: 1, tags: ['prod', 'infra'] },
 } as RuleApiResponse;
 
 const wrap = (ui: React.ReactElement, rule: RuleApiResponse = baseRule) =>
@@ -57,7 +57,7 @@ describe('RuleTagsList', () => {
   it('returns null when tags are empty', () => {
     const { container } = wrap(<RuleTagsList />, {
       ...baseRule,
-      metadata: { name: 'No Tags', tags: [] },
+      metadata: { name: 'No Tags', version: 1, tags: [] },
     } as RuleApiResponse);
     expect(container.innerHTML).toBe('');
   });
