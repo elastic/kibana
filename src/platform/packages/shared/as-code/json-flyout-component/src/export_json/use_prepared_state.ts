@@ -22,7 +22,7 @@ export function usePreparedState<State extends object, PreparedState extends obj
   prepareExportJson,
 }: {
   state: State;
-  prepareExportJson?: PrepareExportJsonFunction<State, PreparedState>;
+  prepareExportJson: PrepareExportJsonFunction<State, PreparedState>;
 }): UsePreparedStateResult<PreparedState> {
   const [status, setStatus] = useState<ExportJsonStatus>('loading');
   const [error, setError] = useState<Error | undefined>(undefined);
@@ -65,14 +65,7 @@ export function usePreparedState<State extends object, PreparedState extends obj
     setData(undefined);
     setWarnings([]);
 
-    const preparation = prepareExportJson
-      ? prepareExportJson(state)
-      : Promise.resolve({
-          data: state as unknown as PreparedState,
-          warnings: [],
-        });
-
-    preparation
+    prepareExportJson(state)
       .then((response) => {
         if (!isMounted) return;
         setWarnings([...response.warnings]);

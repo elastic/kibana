@@ -49,7 +49,10 @@ const flyoutBodyCss = css`
   }
 `;
 
-type ExportJsonFlyoutContentBaseProps<State extends object> = ExportJsonSharingData<State> & {
+type ExportJsonFlyoutContentProps<
+  State extends object,
+  PreparedState extends object
+> = ExportJsonSharingData<State> & {
   objectType: string;
   closeFlyout: () => void;
   dataTestSubjPrefix: string;
@@ -60,30 +63,9 @@ type ExportJsonFlyoutContentBaseProps<State extends object> = ExportJsonSharingD
   headerNotice?: React.ReactNode;
   isTechnicalPreview: boolean;
   openInConsole?: ExportJsonOpenInConsoleConfig;
+  prepareExportJson: PrepareExportJsonFunction<State, PreparedState>;
   titleId?: string;
 };
-
-type AreEquivalentTypes<First, Second> = [First] extends [Second]
-  ? [Second] extends [First]
-    ? true
-    : false
-  : false;
-
-// Require a preparation function when the prepared output differs from the exported state.
-type ExportJsonPreparationProps<State extends object, PreparedState extends object> =
-  | {
-      prepareExportJson: PrepareExportJsonFunction<State, PreparedState>;
-    }
-  | (AreEquivalentTypes<State, PreparedState> extends true
-      ? {
-          prepareExportJson?: undefined;
-        }
-      : never);
-
-type ExportJsonFlyoutContentProps<
-  State extends object,
-  PreparedState extends object
-> = ExportJsonFlyoutContentBaseProps<State> & ExportJsonPreparationProps<State, PreparedState>;
 
 export const ExportJsonFlyoutContent = <
   State extends object,

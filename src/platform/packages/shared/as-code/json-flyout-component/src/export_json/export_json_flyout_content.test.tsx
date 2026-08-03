@@ -31,6 +31,7 @@ describe('ExportJsonFlyoutContent', () => {
         headerActions={<div data-test-subj="headerAction" />}
         headerNotice={<div data-test-subj="headerNotice" />}
         isTechnicalPreview
+        prepareExportJson={async (state) => ({ data: state, warnings: [] })}
         titleId="exportJsonTitle"
       />
     );
@@ -58,6 +59,7 @@ describe('ExportJsonFlyoutContent', () => {
         downloadExportJson={jest.fn()}
         getExportJson={() => ({ title: 'My object' })}
         isTechnicalPreview={false}
+        prepareExportJson={async (state) => ({ data: state, warnings: [] })}
       />
     );
 
@@ -85,6 +87,7 @@ describe('ExportJsonFlyoutContent', () => {
         downloadExportJson={downloadExportJson}
         getExportJson={() => ({ title: 'My/object' })}
         isTechnicalPreview
+        prepareExportJson={async (state) => ({ data: state, warnings: [] })}
       />
     );
 

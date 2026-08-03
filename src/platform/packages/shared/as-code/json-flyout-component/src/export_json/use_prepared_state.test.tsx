@@ -63,8 +63,12 @@ describe('usePreparedState', () => {
     expect(prepareExportJson).toHaveBeenNthCalledWith(2, state);
   });
 
-  test('uses the state as the prepared result when no preparation is provided', async () => {
-    const { result } = renderHook(() => usePreparedState({ state }));
+  test('uses the state returned by the preparation function', async () => {
+    const prepareExportJson = jest.fn(async (currentState) => ({
+      data: currentState,
+      warnings: [],
+    }));
+    const { result } = renderHook(() => usePreparedState({ state, prepareExportJson }));
 
     await waitFor(() => {
       expect(result.current.status).toBe('success');
@@ -72,5 +76,6 @@ describe('usePreparedState', () => {
 
     expect(result.current.data).toBe(state);
     expect(result.current.warnings).toEqual([]);
+    expect(prepareExportJson).toHaveBeenCalledWith(state);
   });
 });
