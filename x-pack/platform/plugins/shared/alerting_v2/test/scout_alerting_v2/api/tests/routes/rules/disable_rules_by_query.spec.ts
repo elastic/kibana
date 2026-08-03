@@ -104,7 +104,7 @@ apiTest.describe('Disable rules by query API', { tag: '@local-stateful-classic' 
       expect(response.body.affected_count).toBe(2);
       expect(response.body.errors).toStrictEqual([]);
 
-      const remaining = await apiServices.alertingV2.rules.find({ perPage: 100 });
+      const remaining = await apiServices.alertingV2.rules.find({ per_page: 100 });
       expect(remaining.items.every((rule) => rule.enabled === false)).toBe(true);
     }
   );
@@ -115,6 +115,7 @@ apiTest.describe('Disable rules by query API', { tag: '@local-stateful-classic' 
       body: {},
     });
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest(
@@ -125,6 +126,7 @@ apiTest.describe('Disable rules by query API', { tag: '@local-stateful-classic' 
         body: { match_all: false },
       });
       expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
     }
   );
 
@@ -134,6 +136,7 @@ apiTest.describe('Disable rules by query API', { tag: '@local-stateful-classic' 
       body: { filter: 'a'.repeat(MAX_KQL_LENGTH + 1) },
     });
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest(
@@ -144,6 +147,7 @@ apiTest.describe('Disable rules by query API', { tag: '@local-stateful-classic' 
         body: { search: 'a'.repeat(MAX_SEARCH_LENGTH + 1) },
       });
       expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
     }
   );
 
@@ -153,6 +157,7 @@ apiTest.describe('Disable rules by query API', { tag: '@local-stateful-classic' 
       body: { unknown: 'value' },
     });
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest(
