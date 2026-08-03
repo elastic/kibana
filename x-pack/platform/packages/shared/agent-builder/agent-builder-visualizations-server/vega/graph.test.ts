@@ -26,7 +26,7 @@ jest.mock('../utils/extract_text_from_message', () => ({
 }));
 
 jest.mock('../shared/esql_instructions', () => ({
-  esqlAdditionalInstructions: 'esql-instructions',
+  buildEsqlAdditionalInstructions: () => 'esql-instructions',
 }));
 
 const mockedGenerateEsql = jest.mocked(generateEsql);

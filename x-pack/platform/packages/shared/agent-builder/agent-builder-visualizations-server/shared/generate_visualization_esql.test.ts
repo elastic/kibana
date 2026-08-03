@@ -16,7 +16,7 @@ jest.mock('@kbn/agent-builder-genai-utils', () => ({
 }));
 
 jest.mock('./esql_instructions', () => ({
-  esqlAdditionalInstructions: 'esql-instructions',
+  buildEsqlAdditionalInstructions: () => 'esql-instructions',
 }));
 
 const mockedGenerateEsql = jest.mocked(generateEsql);
