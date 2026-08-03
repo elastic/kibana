@@ -8,9 +8,14 @@
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import type { SignificantEventsPublicSetupDependencies } from './types';
 import { registerSignificantEventsWorkflowTriggers } from './workflows/triggers';
+import type { SignificantEventsRepositoryClient } from './api';
+import { createSignificantEventsRepositoryClient } from './api';
 
 export type SignificantEventsPublicPluginSetup = Record<string, never>;
-export type SignificantEventsPublicPluginStart = Record<string, never>;
+
+export interface SignificantEventsPublicPluginStart {
+  significantEventsRepositoryClient: SignificantEventsRepositoryClient;
+}
 
 export class SignificantEventsPublicPlugin
   implements
@@ -30,7 +35,9 @@ export class SignificantEventsPublicPlugin
     return {};
   }
 
-  start(_core: CoreStart): SignificantEventsPublicPluginStart {
-    return {};
+  start(core: CoreStart): SignificantEventsPublicPluginStart {
+    return {
+      significantEventsRepositoryClient: createSignificantEventsRepositoryClient(core),
+    };
   }
 }

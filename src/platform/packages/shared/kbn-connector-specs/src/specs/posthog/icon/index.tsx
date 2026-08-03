@@ -6,13 +6,13 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import React from 'react';
 
-export * from './apm';
-export * from './dataset_quality';
-export * from './dataset_quality_details';
-export * from './observability_logs_explorer';
-export * from './observability_onboarding';
-export * from './significant_events';
-export * from './slo';
-export * from './streams';
-export * from './uptime';
+import { EuiIcon } from '@elastic/eui';
+import type { ConnectorIconProps } from '../../../types';
+
+import posthogIcon from './posthog.svg';
+
+export default (props: ConnectorIconProps) => {
+  return <EuiIcon type={posthogIcon} {...props} />;
+};
