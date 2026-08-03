@@ -46,7 +46,7 @@ export const toListExecutionHistoryArgs = ({
 };
 
 @injectable()
-export class ListExecutionHistoryRoute extends BaseAlertingRoute {
+export class ListActionPolicyExecutionsRoute extends BaseAlertingRoute {
   static method = 'get' as const;
   static path = ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_API_PATH;
   static security: RouteSecurity = {
@@ -55,7 +55,7 @@ export class ListExecutionHistoryRoute extends BaseAlertingRoute {
     },
   };
   static routeOptions = {
-    summary: 'List action policy execution history',
+    summary: 'List action policy executions',
     description:
       'Get a paginated list of dispatcher summary events for action policies in the current space.',
   } as const;
@@ -75,7 +75,7 @@ export class ListExecutionHistoryRoute extends BaseAlertingRoute {
     },
   };
 
-  protected readonly routeName = 'list action policy execution history';
+  protected readonly routeName = 'list action policy executions';
 
   constructor(
     @inject(AlertingRouteContext) ctx: AlertingRouteContext,
