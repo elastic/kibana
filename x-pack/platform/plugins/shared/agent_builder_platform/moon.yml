@@ -46,6 +46,7 @@ dependsOn:
   - '@kbn/code-editor'
   - '@kbn/logging-mocks'
   - '@kbn/triggers-actions-ui-plugin'
+  - '@kbn/esql-utils'
   - '@kbn/agent-builder-plugin'
 tags:
   - plugin

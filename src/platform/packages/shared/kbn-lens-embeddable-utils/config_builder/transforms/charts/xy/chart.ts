@@ -14,7 +14,12 @@ import type { XYConfig, XYConfigNoESQL, XYConfigESQL, XYLayer } from '../../../s
 import type { DataSourceStateLayer } from '../../utils';
 import { convertLegendToAPIFormat, convertLegendToStateFormat } from './legend';
 import { buildXYLayer } from './state_layers';
-import { isAPIesqlXYLayer, isLensStateDataLayer } from './helpers';
+import {
+  getIdForLayer,
+  isAPIesqlXYLayer,
+  isAPIAnnotationLayer,
+  isLensStateDataLayer,
+} from './helpers';
 import { nonNullable, isFormBasedLayer, isTextBasedLayer } from '../../utils';
 import { getReversibleMappings, getScaleTypeFromColumnType } from '../utils';
 import {
@@ -168,12 +173,23 @@ function getLayerPresence(dataLayers: XYDataLayerConfig[]): LayerPresence {
   };
 }
 
+type LayerToDataView = Record<string, string>;
+
 export function buildVisualizationState(
   config: XYConfig,
+  usedDataViews: LayerToDataView,
   annotationGroupReferences: SavedObjectReference[]
 ): XYPersistedState {
   const layers = config.layers
-    .map((layer, index) => buildXYLayer(config, layer, index, annotationGroupReferences))
+    .map((layer, index) =>
+      buildXYLayer(
+        config,
+        layer,
+        index,
+        usedDataViews[getIdForLayer(layer, index)],
+        annotationGroupReferences
+      )
+    )
     .filter(nonNullable);
   return {
     preferredSeriesType: layers.filter(isLensStateDataLayer)[0]?.seriesType ?? 'bar_stacked',
@@ -185,11 +201,15 @@ export function buildVisualizationState(
 }
 
 function areAllLayersEsql(apiLayers: XYLayer[]): apiLayers is XYConfigESQL['layers'] {
-  return apiLayers.length > 0 && apiLayers.every(isAPIesqlXYLayer);
+  // Annotation layers without a data source are neutral — classify based on data layers only.
+  const dataLayers = apiLayers.filter((l) => !isAPIAnnotationLayer(l));
+  return dataLayers.length > 0 && dataLayers.every(isAPIesqlXYLayer);
 }
 
 function areAllLayersNoEsql(apiLayers: XYLayer[]): apiLayers is XYConfigNoESQL['layers'] {
-  return apiLayers.length > 0 && apiLayers.every((l) => !isAPIesqlXYLayer(l));
+  // Annotation layers without a data source are neutral — classify based on data layers only.
+  const dataLayers = apiLayers.filter((l) => !isAPIAnnotationLayer(l));
+  return dataLayers.length > 0 && dataLayers.every((l) => !isAPIesqlXYLayer(l));
 }
 
 export function buildVisualizationAPI(
