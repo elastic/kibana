@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { JsonTreeViewer, type TreeExpansionState } from './json_tree_viewer';
 
@@ -89,6 +89,31 @@ describe('JsonTreeViewer', () => {
     unmount();
     render(<JsonTreeViewer json={doc} initialState={lastState} />);
     expect(screen.getByText('"value_11"')).toBeVisible();
+  });
+
+  // Once a list is revealed past its cap but still has hidden items, "Show more" and "Show fewer"
+  // share the same pager row instead of stacking on two lines.
+  it('shows "Show more" and "Show fewer" on the same pager row past the cap', async () => {
+    // 25 fields: after one "show more" (10 → 20) five stay hidden AND it is past the cap, so both
+    // affordances apply at once.
+    const doc = Object.fromEntries(Array.from({ length: 25 }, (_, i) => [`field_${i}`, i]));
+    render(<JsonTreeViewer json={doc} />);
+
+    // At the initial cap only "Show more" is offered.
+    expect(screen.queryByRole('button', { name: /show fewer fields/i })).not.toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole('treeitem', { name: /show 10 more fields/i }));
+
+    // Both affordances now live inside the one pager row (same line).
+    const pager = screen.getByRole('treeitem', { name: /show 5 more fields/i });
+    expect(within(pager).getByText(/show 5 more fields/i)).toBeVisible();
+    const showFewer = within(pager).getByRole('button', { name: /show fewer fields/i });
+    expect(showFewer).toBeVisible();
+
+    // "Show fewer" collapses the list back to the initial cap, leaving only "Show more".
+    await userEvent.click(showFewer);
+    expect(screen.queryByRole('button', { name: /show fewer fields/i })).not.toBeInTheDocument();
+    expect(screen.getByRole('treeitem', { name: /show 10 more fields/i })).toBeVisible();
   });
 
   // Inside an EuiDataGrid cell the tree must let the keyboard reach its controls and hand focus back
