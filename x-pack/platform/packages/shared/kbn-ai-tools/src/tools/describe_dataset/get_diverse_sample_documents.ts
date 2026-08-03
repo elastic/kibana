@@ -114,9 +114,12 @@ export async function getDiverseSampleDocuments({
 // Stable ordering by pattern identity, so sampling jitter on near-equal counts
 // can't change which representative an iteration picks.
 const hashPattern = (value: string): number => {
+  const hashMultiplier = 31;
+  const hashModulus = 2 ** 31 - 1;
+
   let hash = 0;
   for (let i = 0; i < value.length; i++) {
-    hash = (hash * 31 + value.charCodeAt(i)) % 2147483647;
+    hash = (hash * hashMultiplier + value.charCodeAt(i)) % hashModulus;
   }
   return hash;
 };
