@@ -1936,15 +1936,7 @@ x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/memory_an
 
 # Streams — sig events overrides (obs-sig-events-team owns these subtrees)
 # schemas
-x-pack/platform/packages/shared/kbn-streams-schema/src/api/features @elastic/obs-sig-events-team
-x-pack/platform/packages/shared/kbn-streams-schema/src/api/significant_events @elastic/obs-sig-events-team
-x-pack/platform/packages/shared/kbn-streams-schema/src/feature.ts @elastic/obs-sig-events-team
 x-pack/platform/packages/shared/kbn-streams-schema/src/inference_feature_ids.ts @elastic/obs-sig-events-team
-x-pack/platform/packages/shared/kbn-streams-schema/src/queries @elastic/obs-sig-events-team
-x-pack/platform/packages/shared/kbn-streams-schema/src/significant_events @elastic/obs-sig-events-team
-x-pack/platform/packages/shared/kbn-streams-schema/src/insights @elastic/obs-sig-events-team
-x-pack/platform/packages/shared/kbn-streams-schema/src/onboarding @elastic/obs-sig-events-team
-x-pack/platform/packages/shared/kbn-streams-schema/src/feature_accumulator.ts @elastic/obs-sig-events-team
 x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/default_index_patterns.ts @elastic/obs-sig-events-team
 x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/stream_matches_index_patterns.ts @elastic/obs-sig-events-team
 # ai
@@ -1957,30 +1949,7 @@ x-pack/platform/plugins/shared/streams_app/public/hooks/significant_events @elas
 x-pack/platform/plugins/shared/streams_app/public/hooks/use_onboarding_api.ts @elastic/obs-sig-events-team
 x-pack/platform/plugins/shared/streams_app/public/hooks/use_index_patterns_config.ts @elastic/obs-sig-events-team
 # server
-x-pack/platform/plugins/shared/streams/server/lib/significant_events @elastic/obs-sig-events-team
-x-pack/platform/plugins/shared/streams/server/lib/streams/assets/query @elastic/obs-sig-events-team
-x-pack/platform/plugins/shared/streams/server/lib/streams/feature @elastic/obs-sig-events-team
-x-pack/platform/plugins/shared/streams/server/lib/streams/ki @elastic/obs-sig-events-team
-x-pack/platform/plugins/shared/streams/server/lib/tasks @elastic/obs-sig-events-team
-x-pack/platform/plugins/shared/streams/server/lib/memory @elastic/obs-sig-events-team
-x-pack/platform/plugins/shared/streams/server/lib/workflows @elastic/obs-sig-events-team
-x-pack/platform/plugins/shared/streams/server/register_significant_events_inference_features.ts @elastic/obs-sig-events-team
-x-pack/platform/plugins/shared/streams/server/routes/internal/memory @elastic/obs-sig-events-team
-x-pack/platform/plugins/shared/streams/server/routes/internal/streams/onboarding @elastic/obs-sig-events-team
-x-pack/platform/plugins/shared/streams/server/routes/utils/task_helpers.ts @elastic/obs-sig-events-team
-x-pack/platform/plugins/shared/streams/server/routes/utils/assert_significant_events_access.ts @elastic/obs-sig-events-team
-x-pack/platform/plugins/shared/streams/server/routes/utils/query_status.ts @elastic/obs-sig-events-team
-x-pack/platform/plugins/shared/streams/server/routes/utils/search_mode.ts @elastic/obs-sig-events-team
 x-pack/platform/plugins/shared/streams/server/routes/utils/resolve_connector_for_feature.ts @elastic/obs-sig-events-team
-x-pack/platform/plugins/shared/streams/server/agent_builder/tools/search_knowledge_indicators @elastic/obs-sig-events-team
-x-pack/platform/plugins/shared/streams/server/agent_builder/tools/create_feature_knowledge_indicator @elastic/obs-sig-events-team
-x-pack/platform/plugins/shared/streams/server/agent_builder/tools/create_query_knowledge_indicator @elastic/obs-sig-events-team
-x-pack/platform/plugins/shared/streams/server/agent_builder/tools/ki_identification_start @elastic/obs-sig-events-team
-x-pack/platform/plugins/shared/streams/server/agent_builder/tools/ki_identification_cancel @elastic/obs-sig-events-team
-x-pack/platform/plugins/shared/streams/server/agent_builder/tools/ki_identification_status @elastic/obs-sig-events-team
-x-pack/platform/plugins/shared/streams/server/agent_builder/tools/memory @elastic/obs-sig-events-team
-x-pack/platform/plugins/shared/streams/server/routes/significant_events @elastic/obs-sig-events-team
-x-pack/platform/plugins/shared/streams/server/routes/internal/significant_events @elastic/obs-sig-events-team
 x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/significant_events @elastic/obs-sig-events-team
 
 
@@ -2446,15 +2415,17 @@ x-pack/platform/test/plugin_api_integration/test_suites/platform/ @elastic/kiban
 /x-pack/platform/test/api_integration_deployment_agnostic/apis/core/ @elastic/kibana-core
 /x-pack/platform/test/api_integration_deployment_agnostic/apis/saved_objects_management/ @elastic/kibana-core
 /x-pack/platform/test/serverless/functional/configs/security/config.saved_objects_management.ts @elastic/kibana-core
-/config/ @elastic/kibana-core
-/config/serverless.yml @elastic/kibana-core @elastic/kibana-security
-/config/serverless.*.yml @elastic/kibana-core @elastic/kibana-security
-/config/serverless.workplaceai.yml @elastic/kibana-core @elastic/kibana-security @elastic/search-kibana
-/config/serverless.es.yml @elastic/kibana-core @elastic/kibana-security @elastic/search-kibana
-/config/serverless.oblt.yml @elastic/kibana-core @elastic/kibana-security @elastic/observability-ui
-/config/serverless.oblt.complete.yml @elastic/kibana-core @elastic/kibana-security @elastic/observability-ui
-/config/serverless.oblt.logs_essentials.yml @elastic/kibana-core @elastic/kibana-security @elastic/observability-ui
-/config/serverless.security.yml @elastic/kibana-core @elastic/security-solution @elastic/kibana-security
+/config/node.options @elastic/kibana-core
+/config/kibana.yml @elastic/kibana-core
+/config/README.md @elastic/kibana-core
+/config/serverless.yml @elastic/kibana-security
+/config/serverless.*.yml @elastic/kibana-security
+/config/serverless.workplaceai.yml @elastic/kibana-security @elastic/search-kibana
+/config/serverless.es.yml @elastic/kibana-security @elastic/search-kibana
+/config/serverless.oblt.yml @elastic/kibana-security @elastic/observability-ui
+/config/serverless.oblt.complete.yml @elastic/kibana-security @elastic/observability-ui
+/config/serverless.oblt.logs_essentials.yml @elastic/kibana-security @elastic/observability-ui
+/config/serverless.security.yml @elastic/security-solution @elastic/kibana-security
 /config/serverless.security.search_ai_lake.yml @elastic/security-solution @elastic/kibana-security
 /config/serverless.security.essentials.yml @elastic/security-solution @elastic/kibana-security
 /config/serverless.security.complete.yml @elastic/security-solution @elastic/kibana-security
@@ -2685,6 +2656,7 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/gmail/** @elastic/wor
 src/platform/packages/shared/kbn-connector-specs/src/specs/google_calendar/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/google_cloud_storage/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/google_drive/** @elastic/workchat-eng
+src/platform/packages/shared/kbn-connector-specs/src/specs/graphql/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/greynoise/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/hubspot/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/jenkins/** @elastic/workflows-eng
@@ -2698,6 +2670,7 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/argocd/** @elastic/ni
 src/platform/packages/shared/kbn-connector-specs/src/specs/one_password/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/outlook/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/pagerduty/** @elastic/workchat-eng
+src/platform/packages/shared/kbn-connector-specs/src/specs/prometheus_alertmanager/** @elastic/nightshift-context-and-research-team
 src/platform/packages/shared/kbn-connector-specs/src/specs/salesforce/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/servicenow_search/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/sharepoint_online/** @elastic/workchat-eng
@@ -2715,6 +2688,7 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/zoom/** @elastic/work
 
 # Connector Agent Skills
 src/platform/packages/shared/kbn-connector-specs/.claude/skills @elastic/workchat-eng
+src/platform/packages/shared/kbn-connector-specs/src/specs/posthog/** @elastic/nightshift-context-and-research-team
 src/platform/packages/shared/kbn-connector-specs/src/specs/ansible_controller/** @elastic/nightshift-context-and-research-team
 src/platform/packages/shared/kbn-connector-specs/src/specs/new_relic/** @elastic/nightshift-context-and-research-team
 src/platform/packages/shared/kbn-connector-specs/src/specs/grafana/** @elastic/nightshift-context-and-research-team
