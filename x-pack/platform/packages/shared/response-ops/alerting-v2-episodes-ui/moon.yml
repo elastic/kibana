@@ -64,6 +64,8 @@ dependsOn:
   - '@kbn/charts-plugin'
   - '@kbn/core-ui-settings-browser'
   - '@kbn/unified-doc-viewer-plugin'
+  - '@kbn/rule-data-utils'
+  - '@kbn/rule-registry-plugin'
 tags:
   - shared-browser
   - package

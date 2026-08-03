@@ -149,22 +149,24 @@ export const EpisodeRuleCell = ({
           ) : null}
         </EuiFlexGroup>
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiCode
-          color="subdued"
-          css={css`
-            background: none;
-            color: ${euiTheme.colors.mediumShade};
-            font-size: ${euiTheme.font.scale.s};
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            padding: 0;
-          `}
-        >
-          {getBreachEsqlQuery(rule.query)}
-        </EuiCode>
-      </EuiFlexItem>
+      {rule.query ? (
+        <EuiFlexItem grow={false}>
+          <EuiCode
+            color="subdued"
+            css={css`
+              background: none;
+              color: ${euiTheme.colors.mediumShade};
+              font-size: ${euiTheme.font.scale.s};
+              white-space: nowrap;
+              overflow: hidden;
+              text-overflow: ellipsis;
+              padding: 0;
+            `}
+          >
+            {getBreachEsqlQuery(rule.query)}
+          </EuiCode>
+        </EuiFlexItem>
+      ) : null}
     </EuiFlexGroup>
   );
 };

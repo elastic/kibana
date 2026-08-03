@@ -15,6 +15,7 @@ import type { CustomBulkActions } from '@kbn/unified-data-table';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { UnifiedDataTable, getRenderCustomToolbarWithElements } from '@kbn/unified-data-table';
 import { fetchAlertingEpisodes } from '@kbn/alerting-v2-episodes-ui/apis/fetch_alerting_episodes';
+import { fetchV1AlertsAsEpisodes } from '@kbn/alerting-v2-episodes-ui/apis/classic_alerts_api';
 import { useAlertingEpisodesDataView } from '@kbn/alerting-v2-episodes-ui/hooks/use_alerting_episodes_data_view';
 import { useEpisodesKpisQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_episodes_kpis_query';
 import { queryKeys } from '@kbn/alerting-v2-episodes-ui/query_keys';
@@ -64,6 +65,9 @@ jest.mock('@kbn/unified-data-table', () => ({
 }));
 
 jest.mock('@kbn/alerting-v2-episodes-ui/apis/fetch_alerting_episodes');
+// Classic (v1) alerts are a best-effort overlay read via the server route; default
+// to none so the page tests exercise the v2 path only.
+jest.mock('@kbn/alerting-v2-episodes-ui/apis/classic_alerts_api');
 
 // useAlertingEpisodesDataView uses react-use/useAsync internally with getEsqlDataView,
 // which requires heavy Kibana data-view infra. Mock the hook so useFetchAlertingEpisodesQuery
@@ -194,6 +198,7 @@ const mockEpisodes = [
 // return values are set once at module scope and persist across all tests.
 jest.mocked(useAlertingEpisodesDataView).mockReturnValue(mockDataView as any);
 jest.mocked(fetchAlertingEpisodes).mockResolvedValue(mockEpisodes as any);
+jest.mocked(fetchV1AlertsAsEpisodes).mockResolvedValue([]);
 mockHttp.post.mockResolvedValue({ rules: [] });
 
 const mockCreateEpisodeActions = jest.mocked(createEpisodeActions);
@@ -235,6 +240,7 @@ describe('AlertEpisodesListPage', () => {
     mockCreateEpisodeActions.mockReturnValue([]);
     jest.mocked(useAlertingEpisodesDataView).mockReturnValue(mockDataView as any);
     jest.mocked(fetchAlertingEpisodes).mockResolvedValue(mockEpisodes as any);
+    jest.mocked(fetchV1AlertsAsEpisodes).mockResolvedValue([]);
     mockHttp.post.mockResolvedValue({ rules: [] });
     renderPage();
     // Wait for episodes to load so bulk action handlers have access to episode data
@@ -326,6 +332,19 @@ describe('AlertEpisodesListPage', () => {
     expect(node).toBeTruthy();
   });
 
+  it('renderDocumentView returns the V1AlertDetailsFlyout for v1-sourced rows', () => {
+    const lastCall = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
+    const renderDocumentView = lastCall?.renderDocumentView as (hit: {
+      flattened: Record<string, unknown>;
+    }) => React.ReactElement;
+    const node = renderDocumentView({
+      flattened: { 'episode.id': 'v1-alert-id', supports_timeline: false },
+    });
+    expect(node).toBeTruthy();
+    expect(node.type).toBeDefined();
+    expect(node.props.alertId).toBe('v1-alert-id');
+  });
+
   it('passes a renderCustomToolbar to UnifiedDataTable', () => {
     const lastCall = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
     expect(typeof lastCall?.renderCustomToolbar).toBe('function');
@@ -348,6 +367,7 @@ describe('query invalidation', () => {
     mockCreateEpisodeActions.mockReturnValue([]);
     jest.mocked(useAlertingEpisodesDataView).mockReturnValue(mockDataView as any);
     jest.mocked(fetchAlertingEpisodes).mockResolvedValue(mockEpisodes as any);
+    jest.mocked(fetchV1AlertsAsEpisodes).mockResolvedValue([]);
     mockHttp.post.mockResolvedValue({ rules: [] });
   });
 
@@ -422,6 +442,7 @@ describe('episode count + reset filters toolbar', () => {
     mockCreateEpisodeActions.mockReturnValue([]);
     jest.mocked(useAlertingEpisodesDataView).mockReturnValue(mockDataView as any);
     jest.mocked(fetchAlertingEpisodes).mockResolvedValue(mockEpisodes as any);
+    jest.mocked(fetchV1AlertsAsEpisodes).mockResolvedValue([]);
     mockHttp.post.mockResolvedValue({ rules: [] });
     mockedUseEpisodesKpisQuery.mockImplementation(defaultKpisImpl);
   });
@@ -485,6 +506,7 @@ describe('privilege gating', () => {
     jest.clearAllMocks();
     jest.mocked(useAlertingEpisodesDataView).mockReturnValue(mockDataView as any);
     jest.mocked(fetchAlertingEpisodes).mockResolvedValue(mockEpisodes as any);
+    jest.mocked(fetchV1AlertsAsEpisodes).mockResolvedValue([]);
     mockHttp.post.mockResolvedValue({ rules: [] });
     mockedUseEpisodesKpisQuery.mockImplementation(defaultKpisImpl);
     mockCreateEpisodeActions.mockReturnValue([ackAction, discoverAction]);

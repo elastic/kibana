@@ -111,12 +111,14 @@ describe('useAlertingRulesCache', () => {
       id: presentRuleId,
       metadata: { name: 'Fetched Rule' },
     } as unknown as FindRulesResponse['items'][number];
-    mockHttp.get.mockResolvedValue({
-      items: [fetchedRule],
-      total: 1,
-      page: 1,
-      perPage: 1000,
-    } as FindRulesResponse);
+    mockHttp.get
+      .mockResolvedValueOnce({
+        items: [fetchedRule],
+        total: 1,
+        page: 1,
+        perPage: 1000,
+      } as FindRulesResponse)
+      .mockResolvedValueOnce({ data: [] });
 
     const { result, rerender } = renderHook(
       ({ ruleIds }: { ruleIds: string[] } = { ruleIds: [presentRuleId, missingRuleId] }) =>
@@ -137,8 +139,9 @@ describe('useAlertingRulesCache', () => {
       },
     });
 
+    const callsAfterFirstFetch = mockHttp.get.mock.calls.length;
     rerender({ ruleIds: [presentRuleId, missingRuleId] });
 
-    expect(mockHttp.get).toHaveBeenCalledTimes(1);
+    expect(mockHttp.get).toHaveBeenCalledTimes(callsAfterFirstFetch);
   });
 });

@@ -9,17 +9,15 @@ import { useQuery } from '@kbn/react-query';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import { normalizeTags } from '@kbn/alerting-v2-utils';
-import type {
-  AlertEpisodeEsqlRow,
-  EpisodesFilterState,
-  EpisodesSortState,
-} from '@kbn/alerting-v2-common-queries';
+import type { EpisodesFilterState, EpisodesSortState } from '@kbn/alerting-v2-common-queries';
 import type { AlertEpisode } from '@kbn/alerting-v2-schemas';
 import { queryKeys } from '../query_keys';
 import { useSpaceId } from './use_space_id';
 import type { UseAlertingEpisodesDataViewOptions } from './use_alerting_episodes_data_view';
 import { useAlertingEpisodesDataView } from './use_alerting_episodes_data_view';
 import { fetchAlertingEpisodes } from '../apis/fetch_alerting_episodes';
+import { fetchV1AlertsAsEpisodes } from '../apis/classic_alerts_api';
+import { mergeEpisodes } from '../utils/merge_episodes';
 
 export interface UseFetchAlertingEpisodesQueryOptions {
   pageSize: number;
@@ -55,25 +53,43 @@ export const useFetchAlertingEpisodesQuery = ({
     timeRange ?? undefined
   );
 
-  const query = useQuery<AlertEpisodeEsqlRow[], unknown, AlertEpisode[]>({
+  const query = useQuery<AlertEpisode[], unknown, AlertEpisode[]>({
     enabled: dataView != null,
     queryKey,
-    queryFn: ({ signal: abortSignal }) =>
-      fetchAlertingEpisodes({
-        spaceId,
-        abortSignal,
-        pageSize,
-        services,
-        filterState,
-        sortState,
-        timeRange,
-      }),
-    keepPreviousData: true,
-    select: (rows): AlertEpisode[] =>
-      rows.map((ep) => ({
+    queryFn: async ({ signal: abortSignal }) => {
+      // Fetch the v2 episodes and the classic (v1) alerts (reshaped as episodes,
+      // read with RBAC through the authorized RAC alerts API) in parallel, then
+      // merge them into a single sorted, paginated list.
+      const [v2Rows, v1Episodes] = await Promise.all([
+        fetchAlertingEpisodes({
+          spaceId,
+          abortSignal,
+          pageSize,
+          services,
+          filterState,
+          sortState,
+          timeRange,
+        }),
+        // v1 alerts are a best-effort overlay: never let a v1 read failure break
+        // the v2 episodes table.
+        fetchV1AlertsAsEpisodes({
+          abortSignal,
+          pageSize,
+          services,
+          filterState,
+          sortState,
+          timeRange,
+        }).catch(() => [] as AlertEpisode[]),
+      ]);
+
+      const v2Episodes: AlertEpisode[] = v2Rows.map((ep) => ({
         ...ep,
         last_tags: normalizeTags(ep.last_tags),
-      })),
+      }));
+
+      return mergeEpisodes(v2Episodes, v1Episodes, sortState, pageSize);
+    },
+    keepPreviousData: true,
   });
 
   return { ...query, dataView };

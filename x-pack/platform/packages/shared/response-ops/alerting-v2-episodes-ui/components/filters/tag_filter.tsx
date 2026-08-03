@@ -9,6 +9,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { EuiFilterButton, EuiPopover } from '@elastic/eui';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { HttpStart } from '@kbn/core-http-browser';
 import type { TimeRange } from '@kbn/es-query';
 import { useFetchEpisodeTagOptions } from '../../hooks/use_fetch_episode_tag_options';
 import { InlineFilterPopover } from './inline_filter_popover';
@@ -17,7 +18,7 @@ import * as i18n from './translations';
 interface AlertEpisodesTagFilterProps {
   selectedTags?: string[] | null;
   onTagsChange: (tags: string[] | undefined) => void;
-  services: { expressions: ExpressionsStart; spaces: SpacesPluginStart };
+  services: { expressions: ExpressionsStart; spaces: SpacesPluginStart; http: HttpStart };
   timeRange: TimeRange;
   'data-test-subj'?: string;
 }

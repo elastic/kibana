@@ -133,6 +133,7 @@
     "@kbn/content-list",
     "@kbn/content-list-provider",
     "@kbn/content-list-toolbar",
+    "@kbn/rule-data-utils",
     "@kbn/es",
     "@kbn/test-es-server",
     "@kbn/security-authorization-core",

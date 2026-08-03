@@ -9,12 +9,14 @@ import { useQuery } from '@kbn/react-query';
 import type { TimeRange } from '@kbn/es-query';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
+import type { HttpStart } from '@kbn/core-http-browser';
 import type { CoreStart } from '@kbn/core/public';
 import type { EpisodesFilterState } from '@kbn/alerting-v2-common-queries';
 import { useSpaceId } from './use_space_id';
 import { useCurrentUserProfile } from './use_current_user_profile';
 import { buildEpisodesKpisQuery } from '../queries/episodes_query';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
+import { fetchV1AlertsKpis, type V1AlertsKpisRow } from '../apis/classic_alerts_api';
 import { queryKeys } from '../query_keys';
 
 export interface EpisodesKpisData {
@@ -40,6 +42,7 @@ export interface UseEpisodesKpisQueryOptions {
     expressions: ExpressionsStart;
     spaces: SpacesPluginStart;
     userProfile: CoreStart['userProfile'];
+    http: HttpStart;
   };
   filterState?: EpisodesFilterState;
   timeRange?: TimeRange;
@@ -73,18 +76,51 @@ export const useEpisodesKpisQuery = ({
     error,
   } = useQuery<EpisodesKpisRow[], Error, EpisodesKpisData | undefined>({
     queryKey: queryKeys.kpis(spaceId, filterState, timeRange, currentUserUid),
-    queryFn: ({ signal }) => {
-      const query = buildEpisodesKpisQuery(spaceId, currentUserUid, filterState);
-      return executeEsqlQuery<EpisodesKpisRow>({
-        expressions: services.expressions,
-        query,
-        input: {
-          type: 'kibana_context' as const,
-          esqlVariables: [],
-          ...(timeRange ? { timeRange } : {}),
-        },
-        abortSignal: signal,
-      });
+    queryFn: async ({ signal }) => {
+      // Compute v2 and classic (v1) KPI counts in parallel and merge them. The
+      // v1 read (RBAC enforced server-side) is best-effort so it never breaks KPIs.
+      const [v2Rows, v1] = await Promise.all([
+        executeEsqlQuery<EpisodesKpisRow>({
+          expressions: services.expressions,
+          query: buildEpisodesKpisQuery(spaceId, currentUserUid, filterState),
+          input: {
+            type: 'kibana_context' as const,
+            esqlVariables: [],
+            ...(timeRange ? { timeRange } : {}),
+          },
+          abortSignal: signal,
+        }),
+        fetchV1AlertsKpis({
+          services,
+          filterState,
+          timeRange,
+          abortSignal: signal,
+        }).catch(() => undefined as V1AlertsKpisRow | undefined),
+      ]);
+
+      const v2 = v2Rows[0];
+
+      // Preserve the "no rows -> undefined data" contract when neither source
+      // returned counts.
+      if (!v2 && !v1) {
+        return [];
+      }
+
+      const v1AlertsCount = v1?.alerts_count ?? 0;
+
+      const merged: EpisodesKpisRow = {
+        // v1 rule ids are disjoint from v2, so distinct firing-rule counts sum.
+        alerts_count: (v2?.alerts_count ?? 0) + v1AlertsCount,
+        firing_rules: (v2?.firing_rules ?? 0) + (v1?.firing_rules ?? 0),
+        // Classic alerts have no assignee, so all v1 alerts count as unassigned.
+        assigned_to_me: v2?.assigned_to_me ?? 0,
+        unassigned: (v2?.unassigned ?? 0) + v1AlertsCount,
+        // v1 alerts map ack via workflow_status and snooze via muted/snoozed.
+        acknowledged: (v2?.acknowledged ?? 0) + (v1?.acknowledged ?? 0),
+        snoozed: (v2?.snoozed ?? 0) + (v1?.snoozed ?? 0),
+      };
+
+      return [merged];
     },
     select: (rows) => {
       const row = rows[0];

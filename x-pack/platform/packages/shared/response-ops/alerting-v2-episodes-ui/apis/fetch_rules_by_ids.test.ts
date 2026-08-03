@@ -48,7 +48,6 @@ describe('fetchRulesByIds', () => {
 
     await fetchRulesByIds({ http: mockHttp, ids });
 
-    expect(mockHttp.get).toHaveBeenCalledTimes(1);
     expect(mockHttp.get).toHaveBeenCalledWith(ALERTING_V2_RULE_API_PATH, {
       query: {
         filter: expect.not.stringContaining(`rule-${ALERT_EPISODES_LIST_PAGE_SIZE}`),
@@ -56,5 +55,57 @@ describe('fetchRulesByIds', () => {
         page: 1,
       },
     });
+  });
+
+  it('falls back to v1 rules API for IDs not found in v2', async () => {
+    const v2Rule = { id: 'v2-rule', metadata: { name: 'V2 Rule' } };
+    mockHttp.get
+      .mockResolvedValueOnce({ items: [v2Rule], total: 1, page: 1, perPage: 50 })
+      .mockResolvedValueOnce({
+        data: [{ id: 'v1-rule', name: 'V1 Rule' }],
+      });
+
+    const result = await fetchRulesByIds({
+      http: mockHttp,
+      ids: ['v2-rule', 'v1-rule'],
+    });
+
+    expect(mockHttp.get).toHaveBeenCalledTimes(2);
+    expect(mockHttp.get).toHaveBeenNthCalledWith(
+      2,
+      '/api/alerting/rules/_find',
+      expect.objectContaining({
+        query: expect.objectContaining({
+          filter: expect.stringContaining('alert.id: "alert:v1-rule"'),
+        }),
+      })
+    );
+    expect(result).toHaveLength(2);
+    expect(result[0]).toEqual(v2Rule);
+    expect(result[1]).toMatchObject({ id: 'v1-rule', metadata: { name: 'V1 Rule' } });
+  });
+
+  it('skips v1 fallback when all IDs are resolved by v2', async () => {
+    const v2Rule = { id: 'r1', metadata: { name: 'Rule' } };
+    mockHttp.get.mockResolvedValueOnce({ items: [v2Rule], total: 1, page: 1, perPage: 50 });
+
+    const result = await fetchRulesByIds({ http: mockHttp, ids: ['r1'] });
+
+    expect(mockHttp.get).toHaveBeenCalledTimes(1);
+    expect(result).toEqual([v2Rule]);
+  });
+
+  it('returns v2 rules only when v1 fallback fails', async () => {
+    const v2Rule = { id: 'v2-rule', metadata: { name: 'V2 Rule' } };
+    mockHttp.get
+      .mockResolvedValueOnce({ items: [v2Rule], total: 1, page: 1, perPage: 50 })
+      .mockRejectedValueOnce(new Error('v1 API unavailable'));
+
+    const result = await fetchRulesByIds({
+      http: mockHttp,
+      ids: ['v2-rule', 'v1-rule'],
+    });
+
+    expect(result).toEqual([v2Rule]);
   });
 });

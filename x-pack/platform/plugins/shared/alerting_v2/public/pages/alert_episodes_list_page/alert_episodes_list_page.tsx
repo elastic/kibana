@@ -40,6 +40,10 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useService } from '@kbn/core-di-browser';
 import { useFetchAlertingEpisodesQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_alerting_episodes_query';
 import { ALERT_EPISODES_LIST_PAGE_SIZE } from '@kbn/alerting-v2-episodes-ui/constants';
+import {
+  episodeSupportsActions,
+  episodeSupportsTimeline,
+} from '@kbn/alerting-v2-episodes-ui/queries/episodes_query';
 import { useInvalidateEpisodeQueries } from '@kbn/alerting-v2-episodes-ui/hooks/use_invalidate_episode_queries';
 import { useAlertingRulesCache } from '@kbn/alerting-v2-episodes-ui/hooks/use_alerting_rules_cache';
 import { useAlertingRuleSourceDataViews } from '@kbn/alerting-v2-episodes-ui/hooks/use_alerting_rule_source_data_views';
@@ -63,6 +67,7 @@ import * as i18n from './translations';
 import { EpisodesFilterBar } from './components/episodes_filter_bar';
 import { EpisodesKpis } from './components/episodes_kpis';
 import { EpisodesHistogram } from './components/episodes_histogram';
+import { V1AlertDetailsFlyout } from './components/v1_alert_details_flyout';
 import { alertEpisodeToDataTableRecord } from './utils';
 import { dataTableRecordToEpisode } from './utils/data_table_record_to_episode';
 import { getDiscoverHrefForRuleAndEpisodeTimestamp } from '../../utils/discover_href_for_episode';
@@ -213,7 +218,7 @@ export const AlertEpisodesListPage = () => {
   );
 
   const ruleIds = useMemo(
-    () => [...new Set(episodesData?.map((row) => row['rule.id']) ?? [])],
+    () => [...new Set((episodesData ?? []).map((row) => row['rule.id']))],
     [episodesData]
   );
 
@@ -310,24 +315,35 @@ export const AlertEpisodesListPage = () => {
   );
 
   const renderDocumentView = useCallback<RenderDocumentViewCallback>(
-    (hit) => (
-      <AlertEpisodeDetailsFlyout
-        episodeId={hit.flattened['episode.id'] as string}
-        groupHash={hit.flattened.group_hash as string | undefined}
-        onClose={closeFlyout}
-        actions={episodeActions}
-        services={{
-          data: services.data,
-          http: services.http,
-          expressions: services.expressions,
-          userProfile: services.userProfile,
-          spaces: services.spaces,
-          uiSettings: services.uiSettings,
-          unifiedDocViewer: services.unifiedDocViewer,
-          dataViews: services.dataViews,
-        }}
-      />
-    ),
+    (hit) => {
+      if (!episodeSupportsTimeline(dataTableRecordToEpisode(hit))) {
+        return (
+          <V1AlertDetailsFlyout
+            alertId={hit.flattened['episode.id'] as string}
+            onClose={closeFlyout}
+            services={{ http: services.http }}
+          />
+        );
+      }
+      return (
+        <AlertEpisodeDetailsFlyout
+          episodeId={hit.flattened['episode.id'] as string}
+          groupHash={hit.flattened.group_hash as string | undefined}
+          onClose={closeFlyout}
+          actions={episodeActions}
+          services={{
+            data: services.data,
+            http: services.http,
+            expressions: services.expressions,
+            userProfile: services.userProfile,
+            spaces: services.spaces,
+            uiSettings: services.uiSettings,
+            unifiedDocViewer: services.unifiedDocViewer,
+            dataViews: services.dataViews,
+          }}
+        />
+      );
+    },
     [closeFlyout, episodeActions, services]
   );
 
@@ -336,6 +352,7 @@ export const AlertEpisodesListPage = () => {
       episodeActions.map((action) => ({
         id: action.id,
         isAvailable: ({ record }: RowControlRowProps) =>
+          episodeSupportsActions(dataTableRecordToEpisode(record)) &&
           action.isCompatible({ episodes: [dataTableRecordToEpisode(record)] }),
         render: (Control, { record }) => {
           const episodes = [dataTableRecordToEpisode(record)];

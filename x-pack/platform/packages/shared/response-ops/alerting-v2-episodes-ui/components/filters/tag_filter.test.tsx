@@ -10,6 +10,7 @@ import { render, screen, act } from '@testing-library/react';
 import { AlertEpisodesTagFilter } from './tag_filter';
 import * as inlineFilterPopoverModule from './inline_filter_popover';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
+import type { HttpStart } from '@kbn/core-http-browser';
 import { createMockSpaces } from '../../hooks/test_utils';
 import * as useFetchEpisodeTagOptionsModule from '../../hooks/use_fetch_episode_tag_options';
 import userEvent from '@testing-library/user-event';
@@ -28,7 +29,11 @@ describe('TagFilter', () => {
   const defaultProps = {
     selectedTags: null as string[] | null,
     onTagsChange: jest.fn(),
-    services: { expressions: {} as ExpressionsStart, spaces: createMockSpaces() },
+    services: {
+      expressions: {} as ExpressionsStart,
+      spaces: createMockSpaces(),
+      http: {} as HttpStart,
+    },
     timeRange: { from: 'now-24h', to: 'now' },
     'data-test-subj': 'test-tag-filter',
   };

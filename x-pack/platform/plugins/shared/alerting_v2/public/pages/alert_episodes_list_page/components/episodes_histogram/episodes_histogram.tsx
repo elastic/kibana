@@ -85,7 +85,7 @@ export const EpisodesHistogram = ({
     error,
     refetch,
   } = useEpisodesHistogramQuery({
-    services: { expressions: services.expressions, spaces: services.spaces },
+    services: { expressions: services.expressions, spaces: services.spaces, http: services.http },
     filterState,
     timeRange,
     bucketInterval,

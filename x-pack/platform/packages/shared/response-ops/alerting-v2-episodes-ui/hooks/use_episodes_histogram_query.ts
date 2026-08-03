@@ -11,12 +11,14 @@ import { useQuery } from '@kbn/react-query';
 import type { TimeRange } from '@kbn/es-query';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
+import type { HttpStart } from '@kbn/core-http-browser';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import type { EpisodesFilterState } from '@kbn/alerting-v2-common-queries';
 import { useSpaceId } from './use_space_id';
 import { queryKeys } from '../query_keys';
 import { buildEpisodesHistogramQuery } from '../queries/episodes_query';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
+import { fetchV1AlertsHistogram } from '../apis/classic_alerts_api';
 import {
   generateTimeBuckets,
   computeOverlapCounts,
@@ -24,11 +26,18 @@ import {
   type HistogramEpisodeRow,
 } from '../utils/histogram_utils';
 import { HISTOGRAM_EPISODE_LIMIT } from '../constants';
+import { CLASSIC_ALERTS_HISTOGRAM_LIMIT } from '../classic_alerts/constants';
+
+interface HistogramQueryData {
+  rows: HistogramEpisodeRow[];
+  isCapHit: boolean;
+}
 
 export interface UseEpisodesHistogramQueryOptions {
   services: {
     expressions: ExpressionsStart;
     spaces: SpacesPluginStart;
+    http: HttpStart;
   };
   filterState: EpisodesFilterState;
   timeRange?: TimeRange;
@@ -54,31 +63,48 @@ export const useEpisodesHistogramQuery = ({
   const spaceId = useSpaceId(services.spaces);
 
   const {
-    data: rawEpisodes,
+    data: queryResult,
     isLoading,
     error,
     refetch,
-  } = useQuery<HistogramEpisodeRow[], Error>({
+  } = useQuery<HistogramQueryData, Error>({
     // bucketInterval is used for client-side bucketing only — omitted from queryKey intentionally
     queryKey: queryKeys.histogram(spaceId, filterState, timeRange, breakdownField),
     queryFn: async ({ signal }) => {
-      const query = buildEpisodesHistogramQuery(spaceId, filterState, breakdownField).print(
-        'basic'
-      );
-      return executeEsqlQuery<HistogramEpisodeRow>({
-        expressions: services.expressions,
-        query,
-        input: {
-          type: 'kibana_context' as const,
-          esqlVariables: [],
-          ...(timeRange ? { timeRange } : {}),
-        },
-        abortSignal: signal,
-      });
+      // Fetch v2 and classic (v1) histogram rows in parallel and concatenate them
+      // so the histogram reflects both. The v1 read (RBAC enforced server-side) is
+      // best-effort.
+      const [v2Rows, v1Rows] = await Promise.all([
+        executeEsqlQuery<HistogramEpisodeRow>({
+          expressions: services.expressions,
+          query: buildEpisodesHistogramQuery(spaceId, filterState, breakdownField).print('basic'),
+          input: {
+            type: 'kibana_context' as const,
+            esqlVariables: [],
+            ...(timeRange ? { timeRange } : {}),
+          },
+          abortSignal: signal,
+        }),
+        fetchV1AlertsHistogram({
+          services,
+          filterState,
+          timeRange,
+          breakdownField,
+          abortSignal: signal,
+        }).catch(() => [] as HistogramEpisodeRow[]),
+      ]);
+
+      return {
+        rows: [...v2Rows, ...v1Rows],
+        isCapHit:
+          v2Rows.length >= HISTOGRAM_EPISODE_LIMIT ||
+          v1Rows.length >= CLASSIC_ALERTS_HISTOGRAM_LIMIT,
+      };
     },
   });
 
-  const isCapHit = (rawEpisodes?.length ?? 0) >= HISTOGRAM_EPISODE_LIMIT;
+  const rawEpisodes = queryResult?.rows;
+  const isCapHit = queryResult?.isCapHit ?? false;
 
   const table = useMemo<Datatable | undefined>(() => {
     if (!rawEpisodes) return undefined;
