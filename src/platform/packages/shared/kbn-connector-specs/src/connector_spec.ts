@@ -75,6 +75,7 @@ export interface ConnectorMetadata {
     | 'endpointSecurity'
     | 'workflows'
     | 'agentBuilder'
+    | 'contextEngine'
   >;
 }
 
