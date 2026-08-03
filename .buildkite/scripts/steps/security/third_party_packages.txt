@@ -57,3 +57,4 @@ redux-toolkit-v1
 redux-v4
 reselect-v4
 @swc/plugin-emotion
+graphql
