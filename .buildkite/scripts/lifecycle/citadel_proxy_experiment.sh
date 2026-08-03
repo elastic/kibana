@@ -68,12 +68,15 @@ _citadel_experiment() {
     echo "--- Citadel probe: SHASUMS256.txt (node v${nv}, expecting key '${expect}')"
     local variant label
     for variant in "" "node-glibc-217/"; do
-      label="${variant:-plain}"
+      # Strip the trailing slash: it is part of the URL path, but would turn the
+      # temp file name into a non-existent directory.
+      label="${variant%/}"
+      label="${label:-plain}"
       echo "url: ${base}/${variant}dist/v${nv}/SHASUMS256.txt"
-      _citadel_probe_url direct "${label}" "${base}/${variant}dist/v${nv}/SHASUMS256.txt" "${expect}"
-      _citadel_probe_url proxied "${label}" "${base}/${variant}dist/v${nv}/SHASUMS256.txt" "${expect}"
-      if diff -q "/tmp/citadel-probe-direct-${label}.body" \
-                 "/tmp/citadel-probe-proxied-${label}.body" > /dev/null 2>&1; then
+      _citadel_probe_url direct "${label}" "${base}/${variant}dist/v${nv}/SHASUMS256.txt" "${expect}" || true
+      _citadel_probe_url proxied "${label}" "${base}/${variant}dist/v${nv}/SHASUMS256.txt" "${expect}" || true
+      if diff -q "${_CITADEL_PROBE_DIR}/direct-${label}.body" \
+                 "${_CITADEL_PROBE_DIR}/proxied-${label}.body" > /dev/null 2>&1; then
         echo "  => bodies IDENTICAL"
       else
         echo "  => bodies DIFFER"
@@ -169,11 +172,17 @@ _citadel_experiment() {
 # Two requests on purpose: one without -L to capture the redirect, one with -L for
 # the body Axios would actually have parsed. openssl rather than sha256sum so this
 # also runs on a mac while iterating.
+_CITADEL_PROBE_DIR=/tmp/citadel-probe
+
 _citadel_probe_url() {
   local mode="$1" label="$2" url="$3" expect="$4"
-  local body="/tmp/citadel-probe-${mode}-${label}.body"
-  local hdr="/tmp/citadel-probe-${mode}-${label}.hdr"
+  mkdir -p "${_CITADEL_PROBE_DIR}"
+  local body="${_CITADEL_PROBE_DIR}/${mode}-${label}.body"
+  local hdr="${_CITADEL_PROBE_DIR}/${mode}-${label}.hdr"
   local -a args=(-sS --max-time 60)
+
+  : > "${body}" || true
+  : > "${hdr}" || true
 
   if [[ "${mode}" == "direct" ]]; then
     args+=(--noproxy '*')
@@ -184,11 +193,12 @@ _citadel_probe_url() {
   # Hop 1 only — what does the redirect point at?
   if ! curl "${args[@]}" -o /dev/null -D "${hdr}" "${url}"; then
     echo "  ${mode}: curl FAILED on hop 1"
-    : > "${body}"
     return 0
   fi
   local status location age xcache
-  status="$(awk 'NR==1 {print $2}' "${hdr}" | tr -d '\r')"
+  # Last HTTP status line, not the first: through a proxy the dump starts with
+  # curl's own "HTTP/1.1 200 Connection established" CONNECT reply.
+  status="$(grep -E '^HTTP/' "${hdr}" | tail -1 | awk '{print $2}' | tr -d '\r')"
   location="$(grep -i '^location:' "${hdr}" | tr -d '\r' | cut -d' ' -f2- || echo '<none>')"
   age="$(grep -i '^age:' "${hdr}" | tr -d '\r' || echo 'age: <none>')"
   xcache="$(grep -iE '^(x-cache|x-cache-lookup|via):' "${hdr}" | tr -d '\r' | paste -sd' ' - || echo '<no squid headers>')"
