@@ -8,7 +8,7 @@
 import type { ConversationRound } from '@kbn/agent-builder-common';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import { createRound } from '../../../test_utils';
-import { mergeAttachmentsById, upsertRound } from './round_writes';
+import { reconcileAttachments, upsertRound } from './round_writes';
 
 const ids = (rounds: ConversationRound[]) => rounds.map(({ id }) => id);
 
@@ -98,35 +98,92 @@ describe('upsertRound', () => {
   });
 });
 
-describe('mergeAttachmentsById', () => {
-  const attachment = (id: string, description?: string) =>
-    ({ id, description, versions: [], current_version: 1 } as unknown as VersionedAttachment);
+describe('reconcileAttachments', () => {
+  const attachment = (id: string, overrides: Record<string, unknown> = {}) =>
+    ({
+      id,
+      versions: [],
+      current_version: 1,
+      active: true,
+      ...overrides,
+    } as unknown as VersionedAttachment);
 
-  it('keeps attachments only present in the snapshot list', () => {
-    const created = attachment('new');
-
-    expect(mergeAttachmentsById([], [created])).toEqual([created]);
-  });
-
-  it('keeps attachments only present in the latest list', () => {
-    const concurrent = attachment('concurrent');
-
-    expect(mergeAttachmentsById([concurrent], [])).toEqual([concurrent]);
-  });
-
-  it('prefers the latest record so concurrent changes are not reverted', () => {
-    const stale = attachment('shared', 'old name');
-    const renamed = attachment('shared', 'new name');
-
-    expect(mergeAttachmentsById([renamed], [stale])).toEqual([renamed]);
-  });
-
-  it('unions both lists', () => {
-    const concurrent = attachment('concurrent');
+  it('keeps an attachment the operation created', () => {
     const created = attachment('created');
 
-    const result = mergeAttachmentsById([concurrent], [created]);
+    expect(reconcileAttachments({ snapshot: [], stored: [], produced: [created] })).toEqual([
+      created,
+    ]);
+  });
 
-    expect(result.map(({ id }) => id).sort()).toEqual(['concurrent', 'created']);
+  it('keeps an attachment added concurrently', () => {
+    const concurrent = attachment('concurrent');
+
+    expect(reconcileAttachments({ snapshot: [], stored: [concurrent], produced: [] })).toEqual([
+      concurrent,
+    ]);
+  });
+
+  it('keeps an edit the operation made to a pre-existing attachment', () => {
+    // the round updated X in memory; nothing has written it yet, so `stored`
+    // still holds the old record and would otherwise silently win
+    const original = attachment('X', { current_version: 1 });
+    const edited = attachment('X', { current_version: 2 });
+
+    expect(
+      reconcileAttachments({ snapshot: [original], stored: [original], produced: [edited] })
+    ).toEqual([edited]);
+  });
+
+  it('keeps an edit that does not bump the version', () => {
+    // description, hidden, readonly and soft deletes all mutate without bumping
+    const original = attachment('X', { description: 'before' });
+    const renamed = attachment('X', { description: 'after' });
+
+    expect(
+      reconcileAttachments({ snapshot: [original], stored: [original], produced: [renamed] })
+    ).toEqual([renamed]);
+
+    const deleted = attachment('X', { description: 'before', active: false });
+
+    expect(
+      reconcileAttachments({ snapshot: [original], stored: [original], produced: [deleted] })
+    ).toEqual([deleted]);
+  });
+
+  it('yields to a concurrent edit of an attachment the operation only carried along', () => {
+    const original = attachment('X', { description: 'before' });
+    const concurrentlyRenamed = attachment('X', { description: 'renamed by someone else' });
+
+    expect(
+      reconcileAttachments({
+        snapshot: [original],
+        stored: [concurrentlyRenamed],
+        produced: [original],
+      })
+    ).toEqual([concurrentlyRenamed]);
+  });
+
+  it('respects a concurrent removal of an attachment it only carried along', () => {
+    const original = attachment('X');
+
+    expect(
+      reconcileAttachments({ snapshot: [original], stored: [], produced: [original] })
+    ).toEqual([]);
+  });
+
+  it('keeps both an operation edit and a concurrent edit to different attachments', () => {
+    const untouched = attachment('untouched', { description: 'before' });
+    const concurrentlyRenamed = attachment('untouched', { description: 'after' });
+    const original = attachment('edited', { current_version: 1 });
+    const edited = attachment('edited', { current_version: 2 });
+
+    const result = reconcileAttachments({
+      snapshot: [untouched, original],
+      stored: [concurrentlyRenamed, original],
+      produced: [untouched, edited],
+    });
+
+    expect(result).toEqual([concurrentlyRenamed, edited]);
   });
 });

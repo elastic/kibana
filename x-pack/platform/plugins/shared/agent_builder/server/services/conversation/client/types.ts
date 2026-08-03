@@ -49,8 +49,8 @@ export interface PersistRoundRequest {
   /** `action: 'regenerate'` only: id of the round this one supersedes. */
   replacesRoundId?: string;
   state?: ConversationInternalState;
-  /** Merged into the stored list by id; never used to remove attachments. */
-  attachments?: VersionedAttachment[];
+  /** Reconciled into the stored list; `snapshot` is what the round started from. */
+  attachments?: { snapshot: VersionedAttachment[]; produced: VersionedAttachment[] };
   /** Applied only when the stored conversation has no workspace yet. */
   workspaceId?: string;
 }

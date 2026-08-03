@@ -19,7 +19,7 @@ import {
 } from '../../../common/http_api/sml';
 import { AGENT_BUILDER_WRITE_SECURITY } from '../route_security';
 import { applyAttachmentRefsToRounds } from '../../services/conversation/client/migrate_attachments';
-import { mergeAttachmentsById } from '../../services/conversation/client/round_writes';
+import { reconcileAttachments } from '../../services/conversation/client/round_writes';
 
 export function registerInternalSmlRoutes({
   router,
@@ -126,10 +126,11 @@ export function registerInternalSmlRoutes({
             new Map([[lastRoundIndex, newRefs]])
           );
           // Merge attachments to prevent duplication or overwriting older attachments
-          const mergedAttachments = mergeAttachmentsById(
-            latestConversation.attachments ?? [],
-            stateManager.getAll()
-          );
+          const mergedAttachments = reconcileAttachments({
+            snapshot: conversationForAttach.attachments ?? [],
+            stored: latestConversation.attachments ?? [],
+            produced: stateManager.getAll(),
+          });
 
           await conversationClient.update({
             id: conversationId,

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isEqual } from 'lodash';
 import type { ConversationRound } from '@kbn/agent-builder-common';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 
@@ -33,23 +34,31 @@ export const upsertRound = (
 };
 
 /**
- * Merges attachment lists by id, `latestAttachments` winning. Callers pass a list
- * derived from a stale snapshot, so preferring the fresh record keeps concurrent
- * changes while still picking up attachments the operation created.
+ * Reconciles the attachment list an operation produced against the stored one.
+ * Producers carry the whole list, so `snapshot` — what they started from — is what
+ * separates an entry they changed from one they merely carried along.
+ *
+ * Compared structurally, not by `current_version`: `description`, `hidden`,
+ * `readonly` and soft deletes all mutate an attachment without bumping it.
  */
-export const mergeAttachmentsById = (
-  latestAttachments: VersionedAttachment[],
-  snapshotAttachments: VersionedAttachment[]
-): VersionedAttachment[] => {
-  const merged = new Map<string, VersionedAttachment>();
+export const reconcileAttachments = ({
+  snapshot,
+  stored,
+  produced,
+}: {
+  snapshot: VersionedAttachment[];
+  stored: VersionedAttachment[];
+  produced: VersionedAttachment[];
+}): VersionedAttachment[] => {
+  const before = new Map(snapshot.map((attachment) => [attachment.id, attachment]));
+  const reconciled = new Map(stored.map((attachment) => [attachment.id, attachment]));
 
-  for (const attachment of snapshotAttachments) {
-    merged.set(attachment.id, attachment);
+  for (const attachment of produced) {
+    // unequal means created or changed; untouched entries defer to `stored`
+    if (!isEqual(before.get(attachment.id), attachment)) {
+      reconciled.set(attachment.id, attachment);
+    }
   }
 
-  for (const attachment of latestAttachments) {
-    merged.set(attachment.id, attachment);
-  }
-
-  return Array.from(merged.values());
+  return Array.from(reconciled.values());
 };

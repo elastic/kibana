@@ -728,7 +728,7 @@ describe('ConversationClient', () => {
       expect(result.title).toBe('Renamed by user');
     });
 
-    it('merges attachments rather than reverting concurrent changes', async () => {
+    it('keeps a concurrent attachment alongside one the round created', async () => {
       const concurrent = { id: 'attachment-concurrent', versions: [], current_version: 1 };
       const fromRound = { id: 'attachment-from-round', versions: [], current_version: 1 };
 
@@ -739,7 +739,7 @@ describe('ConversationClient', () => {
       await client.persistRound({
         id: 'conversation-1',
         round,
-        attachments: [fromRound] as never,
+        attachments: { snapshot: [], produced: [fromRound] } as never,
       });
 
       const { attachments } = mockEsClient.index.mock.calls[0][0].document;
@@ -747,6 +747,26 @@ describe('ConversationClient', () => {
         'attachment-concurrent',
         'attachment-from-round',
       ]);
+    });
+
+    it('keeps a round edit to an attachment the stored conversation still has at v1', async () => {
+      const stored = { id: 'X', versions: [], current_version: 1 };
+      const edited = { id: 'X', versions: [], current_version: 2 };
+
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [createConversationDocument({ attachments: [stored] })] },
+      });
+
+      await client.persistRound({
+        id: 'conversation-1',
+        round,
+        // the round started from v1 and edited it in memory; nothing has
+        // persisted that yet, so the stored record must not win
+        attachments: { snapshot: [stored], produced: [edited] } as never,
+      });
+
+      const { attachments } = mockEsClient.index.mock.calls[0][0].document;
+      expect(attachments).toEqual([edited]);
     });
 
     it('does not overwrite a workspace already set on the stored conversation', async () => {

@@ -36,7 +36,7 @@ import { createSpaceDslFilter } from '../../../utils/spaces';
 import { isVersionConflictError } from '../../../utils/is_version_conflict_error';
 import type { ConversationStorage } from './storage';
 import { createStorage } from './storage';
-import { mergeAttachmentsById, upsertRound } from './round_writes';
+import { reconcileAttachments, upsertRound } from './round_writes';
 import {
   fromEs,
   fromEsWithoutRounds,
@@ -279,10 +279,14 @@ class ConversationClientImpl implements ConversationClient {
               rounds: upsertRound(current.rounds, round, replacesRoundId),
               status: round.status,
               ...(state ? { state } : {}),
-              // merged, not assigned: the payload predates the agent run, so
-              // assigning it would revert attachment changes made since
               ...(attachments
-                ? { attachments: mergeAttachmentsById(current.attachments ?? [], attachments) }
+                ? {
+                    attachments: reconcileAttachments({
+                      snapshot: attachments.snapshot,
+                      stored: current.attachments ?? [],
+                      produced: attachments.produced,
+                    }),
+                  }
                 : {}),
               // write-once, against stored state so concurrent first rounds agree
               ...(workspaceId && !current.workspace_id ? { workspace_id: workspaceId } : {}),

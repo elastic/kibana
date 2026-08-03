@@ -94,7 +94,14 @@ export const updateConversation$ = ({
           round,
           replacesRoundId,
           state: conversation_state,
-          attachments: roundCompletedEvent.data.attachments,
+          ...(roundCompletedEvent.data.attachments
+            ? {
+                attachments: {
+                  snapshot: conversation.attachments ?? [],
+                  produced: roundCompletedEvent.data.attachments,
+                },
+              }
+            : {}),
           workspaceId: roundCompletedEvent.data.workspace_id,
         },
         { access: 'converse' }
