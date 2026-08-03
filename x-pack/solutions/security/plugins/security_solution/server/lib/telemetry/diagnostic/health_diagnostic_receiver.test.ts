@@ -6,7 +6,7 @@
  */
 
 import { lastValueFrom, toArray } from 'rxjs';
-import { CircuitBreakingQueryExecutorImpl } from './health_diagnostic_receiver';
+import { interpolatePath, CircuitBreakingQueryExecutorImpl } from './health_diagnostic_receiver';
 import { QueryType, PermissionError, NotAllowedError } from './health_diagnostic_service.types';
 import type {
   ApiExecutableQuery,
@@ -839,7 +839,7 @@ describe('Security Solution - Health Diagnostic Queries - CircuitBreakingQueryEx
       ).rejects.toThrow(NotAllowedError);
     });
 
-    it('interpolates pathParams into the api template', async () => {
+    it('interpolates pathParams into the api template when execute query', async () => {
       mockEsClient.transport.request.mockResolvedValue({ transforms: [] });
       const query = buildExecutableApiQuery({
         api: '_transform/{transform_id}/_stats',
@@ -850,6 +850,17 @@ describe('Security Solution - Health Diagnostic Queries - CircuitBreakingQueryEx
       expect(mockEsClient.transport.request).toHaveBeenCalledWith(
         expect.objectContaining({ path: '_transform/my-transform/_stats' }),
         expect.anything()
+      );
+    });
+
+    it('interpolates pathParams into the api template', async () => {
+      const interpolated = interpolatePath('a/{key}/b', { key: 'value' });
+      expect(interpolated).toEqual('a/value/b');
+    });
+
+    it('fail interpolating pathParams into the api template if invalid key', () => {
+      expect(() => interpolatePath('a/{key}/b', { invalid_key: 'value' })).toThrow(
+        "Missing path parameter: 'key'"
       );
     });
 

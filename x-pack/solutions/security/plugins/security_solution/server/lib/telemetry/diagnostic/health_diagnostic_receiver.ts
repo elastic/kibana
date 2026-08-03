@@ -52,8 +52,13 @@ import type { TelemetryLogger } from '../telemetry_logger';
 import { newTelemetryLogger, withErrorMessage } from '../helpers';
 import { telemetryConfiguration } from '../configuration';
 
-function interpolatePath(template: string, params: Record<string, string> = {}): string {
-  return template.replace(/\{([^}]+)\}/g, (_, key) => params[key] ?? key);
+export function interpolatePath(template: string, params: Record<string, string> = {}): string {
+  return template.replace(/\{([^}]+)\}/g, (_, key) => {
+    if (!(key in params)) {
+      throw new Error(`Missing path parameter: '${key}'`);
+    }
+    return params[key];
+  });
 }
 
 function isPathAllowed(resolvedPath: string, allowlist: Array<{ path: string }>): boolean {
