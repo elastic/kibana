@@ -22,10 +22,26 @@ export const ActionPoliciesApp = () => {
     >
       <Routes>
         <Route exact path="/create">
-          <ActionPolicyFormPage />
+          <RequireAlertingPrivilege
+            features={['actionPolicies']}
+            capability="all"
+            pageName={i18n.translate('xpack.alertingV2.actionPoliciesApp.createPageName', {
+              defaultMessage: 'Create action policy',
+            })}
+          >
+            <ActionPolicyFormPage />
+          </RequireAlertingPrivilege>
         </Route>
         <Route exact path="/edit/:id">
-          <ActionPolicyFormPage />
+          <RequireAlertingPrivilege
+            features={['actionPolicies']}
+            capability="all"
+            pageName={i18n.translate('xpack.alertingV2.actionPoliciesApp.editPageName', {
+              defaultMessage: 'Edit action policy',
+            })}
+          >
+            <ActionPolicyFormPage />
+          </RequireAlertingPrivilege>
         </Route>
         <Route exact path="/">
           <ListActionPoliciesPage />

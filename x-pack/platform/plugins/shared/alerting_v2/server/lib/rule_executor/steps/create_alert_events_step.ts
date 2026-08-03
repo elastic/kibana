@@ -7,7 +7,11 @@
 
 import { inject, injectable } from 'inversify';
 import type { PipelineStateStream, RuleExecutionStep } from '../types';
-import { createAlertEventsBatchBuilder, type AlertEventsBatchBuilder } from '../build_alert_events';
+import {
+  createAlertEventsBatchBuilder,
+  resolveAlertEventType,
+  type AlertEventsBatchBuilder,
+} from '../build_alert_events';
 import {
   LoggerServiceToken,
   type LoggerServiceContract,
@@ -25,6 +29,8 @@ export class CreateAlertEventsStep implements RuleExecutionStep {
     let buildBatch: AlertEventsBatchBuilder | undefined;
 
     return guardedExpandStep(streamState, ['rule', 'esqlRowBatch'], async function* (state) {
+      const eventType = resolveAlertEventType(state.rule);
+
       if (!buildBatch) {
         buildBatch = createAlertEventsBatchBuilder({
           ruleId: state.input.ruleId,
@@ -32,6 +38,7 @@ export class CreateAlertEventsStep implements RuleExecutionStep {
           ruleAttributes: state.rule,
           scheduledTimestamp: state.input.scheduledAt,
           ruleVersion: 1,
+          type: eventType,
         });
 
         step.logger.debug({
@@ -41,7 +48,10 @@ export class CreateAlertEventsStep implements RuleExecutionStep {
 
       const alertEventsBatch = buildBatch([...state.esqlRowBatch]);
 
-      yield { type: 'continue', state: { ...state, alertEventsBatch } };
+      yield {
+        type: 'continue',
+        state: { ...state, alertEventsBatch },
+      };
     });
   }
 }

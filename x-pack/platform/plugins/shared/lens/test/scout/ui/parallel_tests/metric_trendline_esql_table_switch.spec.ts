@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { spaceTest, tags } from '@kbn/scout';
+import { spaceTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import {
   applyLensInlineEditorAndWaitClosed,
-  createDashboardWithPanelId,
   openDimensionEditorAndWaitForFlyout,
   openInlineEditorAndWaitVisible,
   testData,
@@ -30,12 +29,12 @@ const expectMetricPanelHasNotCrashed = async (page: import('@kbn/scout').ScoutPa
 
 spaceTest.describe(
   'Lens ES|QL table to metric trendline editing',
-  { tag: tags.stateful.classic },
+  { tag: '@local-stateful-classic' },
   () => {
     let dashboardId: string;
     let panelId: string;
 
-    spaceTest.beforeAll(async ({ scoutSpace, kbnClient }) => {
+    spaceTest.beforeAll(async ({ scoutSpace, apiServices }) => {
       await scoutSpace.uiSettings.set({
         defaultIndex: testData.DATA_VIEW_ID.LOGSTASH,
         'dateFormat:tz': 'UTC',
@@ -66,7 +65,7 @@ spaceTest.describe(
         ],
       };
 
-      const result = await createDashboardWithPanelId(kbnClient, body, scoutSpace.id);
+      const result = await apiServices.dashboard.createWithPanelId(body, scoutSpace.id);
       dashboardId = result.dashboardId;
       panelId = result.panelId;
     });

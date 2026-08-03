@@ -7,9 +7,9 @@
 
 import type { z } from '@kbn/zod/v4';
 import type {
-  CountPolicyExecutionEventsParams,
-  ListPolicyExecutionHistoryParams,
-  getRuleExecutionsQuerySchema,
+  CountPolicyExecutionEventsRequest,
+  ListPolicyExecutionHistoryRequest,
+  getRuleExecutionsRequestSchema,
 } from '@kbn/alerting-v2-schemas';
 import {
   ALERT_API_PATH,
@@ -26,7 +26,7 @@ import {
  * `.default(...)` are optional here, and array-like fields accept either a
  * single value or an array (the schema normalizes them at parse time).
  */
-type GetRuleExecutionsQueryInput = z.input<typeof getRuleExecutionsQuerySchema>;
+type GetRuleExecutionsQueryInput = z.input<typeof getRuleExecutionsRequestSchema>;
 
 /**
  * URL for a single rule resource: `${RULE_API_PATH}/${encodedId}`.
@@ -36,6 +36,8 @@ type GetRuleExecutionsQueryInput = z.input<typeof getRuleExecutionsQuerySchema>;
  * tests that craft pathological ids.
  */
 export const getRuleUrl = (id: string) => `${RULE_API_PATH}/${encodeURIComponent(id)}`;
+export const getEnableRuleUrl = (id: string) => `${getRuleUrl(id)}/_enable`;
+export const getDisableRuleUrl = (id: string) => `${getRuleUrl(id)}/_disable`;
 
 /**
  * URL for a single action policy resource:
@@ -59,9 +61,22 @@ export const getUnsnoozeActionPolicyUrl = (id: string) => `${getActionPolicyUrl(
 export const getUpdateActionPolicyApiKeyUrl = (id: string) =>
   `${getActionPolicyUrl(id)}/_update_api_key`;
 
-export const getBulkActionPoliciesUrl = () => `${ACTION_POLICY_API_PATH}/_bulk`;
+export const getBulkDeleteActionPoliciesUrl = () => `${ACTION_POLICY_API_PATH}/_bulk_delete`;
+
+export const getBulkEnableActionPoliciesUrl = () => `${ACTION_POLICY_API_PATH}/_bulk_enable`;
+
+export const getBulkDisableActionPoliciesUrl = () => `${ACTION_POLICY_API_PATH}/_bulk_disable`;
+
+export const getBulkSnoozeActionPoliciesUrl = () => `${ACTION_POLICY_API_PATH}/_bulk_snooze`;
+
+export const getBulkUnsnoozeActionPoliciesUrl = () => `${ACTION_POLICY_API_PATH}/_bulk_unsnooze`;
+
+export const getBulkUpdateApiKeyActionPoliciesUrl = () =>
+  `${ACTION_POLICY_API_PATH}/_bulk_update_api_key`;
 
 export const getBulkRulesUrl = () => `${RULE_API_PATH}/_bulk_get`;
+
+export const getRunRuleUrl = (id: string) => `${getRuleUrl(id)}/_run`;
 
 /**
  * URL for the list action policies endpoint, optionally with a query string.
@@ -101,7 +116,14 @@ export const getDeactivateAlertActionUrl = (groupHash: string) =>
 
 export const BULK_ALERT_ACTION_URL = `${ALERT_API_PATH}/_bulk_action`;
 
-export const getListExecutionHistoryUrl = (query?: ListPolicyExecutionHistoryParams): string => {
+/** POST /api/alerting/v2/alerts — source in body */
+export const CREATE_ALERT_EVENT_URL = ALERT_API_PATH;
+
+/** POST /api/alerting/v2/alerts/:source — source in path */
+export const getCreateAlertEventBySourceUrl = (source: string) =>
+  `${ALERT_API_PATH}/${encodeURIComponent(source)}`;
+
+export const getListExecutionHistoryUrl = (query?: ListPolicyExecutionHistoryRequest): string => {
   if (!query) return EXECUTION_HISTORY_API_PATH;
   const params = new URLSearchParams();
   for (const [key, value] of Object.entries(query)) {
@@ -113,7 +135,7 @@ export const getListExecutionHistoryUrl = (query?: ListPolicyExecutionHistoryPar
 };
 
 export const getCountNewExecutionHistoryEventsUrl = (
-  query: CountPolicyExecutionEventsParams
+  query: CountPolicyExecutionEventsRequest
 ): string => {
   const params = new URLSearchParams({ since: query.since });
   return `${EXECUTION_HISTORY_COUNT_API_PATH}?${params.toString()}`;

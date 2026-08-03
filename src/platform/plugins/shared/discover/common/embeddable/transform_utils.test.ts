@@ -550,9 +550,6 @@ describe('search embeddable transform utils', () => {
         fieldFormats: {
           rt: { id: 'string' },
         },
-        fieldAttrs: {
-          rt: {},
-        },
         runtimeFieldMap: {
           rt: {
             type: 'keyword',
@@ -907,6 +904,11 @@ describe('search embeddable transform utils', () => {
       const sort = [['field', 'other' as 'desc']];
       const result = fromStoredSort(sort);
       expect(result).toEqual([{ name: 'field', direction: 'desc' }]);
+    });
+
+    it('converts legacy flat sort [field, direction] to a single sort entry', () => {
+      const result = fromStoredSort(['@timestamp', 'desc']);
+      expect(result).toEqual([{ name: '@timestamp', direction: 'desc' }]);
     });
   });
 

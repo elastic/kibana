@@ -21,7 +21,7 @@ import React, { useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useLibraryEnabled } from '@kbn/workflows-ui';
 import { PLUGIN_ID, WORKFLOWS_DOCUMENTATION_URL } from '../../../common';
-import { WorkflowsDeepLinks } from '../../deep_links';
+import { WorkflowsPageName } from '../../deep_links';
 import { useKibana } from '../../hooks/use_kibana';
 import { PrivilegesFooter } from '../workflows_required_priveleges_footer';
 interface WorkflowsEmptyStateProps {
@@ -33,7 +33,7 @@ export function WorkflowsEmptyState({ onCreateWorkflow }: WorkflowsEmptyStatePro
   const isLibraryEnabled = useLibraryEnabled();
 
   const navigateToLibrary = useCallback(
-    () => application.navigateToApp(PLUGIN_ID, { deepLinkId: WorkflowsDeepLinks.library }),
+    () => application.navigateToApp(PLUGIN_ID, { deepLinkId: WorkflowsPageName.library }),
     [application]
   );
 

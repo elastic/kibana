@@ -44,7 +44,7 @@ const DOCUMENT_TYPE_PREFERENCE = ['transactionMetric', 'transactionEvent'];
 // Matches the numBuckets value used by APM's transactions table.
 const NUM_BUCKETS = 20;
 
-function parseIntervalSeconds(rollupInterval: string): number {
+export function parseIntervalSeconds(rollupInterval: string): number {
   if (rollupInterval === 'none') return 0;
   const match = rollupInterval.match(/^(\d+)(m|h)$/);
   if (!match) return 0;

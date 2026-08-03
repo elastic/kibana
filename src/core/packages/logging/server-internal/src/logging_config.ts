@@ -16,13 +16,14 @@ import {
   getParentLoggerContext,
 } from '@kbn/core-logging-common-internal';
 import type { AppenderConfigType, LoggerConfigType } from '@kbn/core-logging-server';
+import type { MetaFilterConfig } from '@kbn/logging';
 import { Appenders } from './appenders/appenders';
 
 // We need this helper for the types to be correct
 // (otherwise it assumes an array of A|B instead of a tuple [A,B])
 const toTuple = <A, B>(a: A, b: B): [A, B] => [a, b];
 
-const levelSchema = schema.oneOf(
+const makeLevelValues = () =>
   [
     schema.literal('all'),
     schema.literal('fatal'),
@@ -32,11 +33,21 @@ const levelSchema = schema.oneOf(
     schema.literal('debug'),
     schema.literal('trace'),
     schema.literal('off'),
-  ],
-  {
-    defaultValue: 'info',
-  }
-);
+  ] as [
+    ReturnType<typeof schema.literal<'all'>>,
+    ReturnType<typeof schema.literal<'fatal'>>,
+    ReturnType<typeof schema.literal<'error'>>,
+    ReturnType<typeof schema.literal<'warn'>>,
+    ReturnType<typeof schema.literal<'info'>>,
+    ReturnType<typeof schema.literal<'debug'>>,
+    ReturnType<typeof schema.literal<'trace'>>,
+    ReturnType<typeof schema.literal<'off'>>
+  ];
+
+const levelSchema = schema.oneOf(makeLevelValues(), { defaultValue: 'info' });
+
+/** Level schema without a default — used in contexts where omitting the level should be a validation error. */
+const requiredLevelSchema = schema.oneOf(makeLevelValues());
 
 // until we have feature parity between browser and server logging, we need to define distinct logger schemas
 const browserLoggerSchema = schema.object({
@@ -54,6 +65,29 @@ const browserConfig = schema.object({
   }),
 });
 
+const metaFilterMatchSchema = schema.recordOf(
+  schema.string({ maxLength: 256 }),
+  schema.oneOf([schema.string({ maxLength: 1024 }), schema.number(), schema.boolean()]),
+  {
+    validate: (value) => {
+      const keys = Object.keys(value);
+      if (keys.length === 0) {
+        return 'match must not be empty';
+      }
+      if (keys.length > 10) {
+        return 'match must not contain more than 10 keys';
+      }
+      return undefined;
+    },
+  }
+);
+
+const metaFilterSchema = schema.object({
+  type: schema.literal('meta'),
+  match: metaFilterMatchSchema,
+  level: requiredLevelSchema,
+});
+
 /**
  * Config schema for validating the `loggers` key in {@link LoggerContextConfigType} or {@link LoggingConfigType}.
  *
@@ -63,6 +97,9 @@ export const loggerSchema = schema.object({
   appenders: schema.arrayOf(schema.string(), { defaultValue: [], maxSize: 25 }),
   name: schema.string(),
   level: levelSchema,
+  filters: schema.oneOf([schema.literal(null), schema.arrayOf(metaFilterSchema, { maxSize: 10 })], {
+    defaultValue: [],
+  }),
 });
 
 export const config = {
@@ -91,6 +128,13 @@ export const config = {
 export type LoggingConfigType = Pick<TypeOf<typeof config.schema>, 'loggers' | 'root'> & {
   appenders: Map<string, AppenderConfigType>;
 };
+
+type LoggingConfigLoggerType = LoggingConfigType['loggers'][number];
+
+const withDefaultFilters = (logger: LoggerConfigType): LoggingConfigLoggerType => ({
+  ...logger,
+  filters: logger.filters === undefined ? [] : logger.filters,
+});
 
 /** @internal */
 export type LoggingConfigWithBrowserType = LoggingConfigType &
@@ -184,7 +228,7 @@ export class LoggingConfig {
 
     const mergedConfig: LoggingConfigType = {
       appenders: new Map([...this.configType.appenders, ...contextConfig.appenders]),
-      loggers: [...mergedLoggers.values()],
+      loggers: [...mergedLoggers.values()].map(withDefaultFilters),
       root: this.configType.root,
     };
 
@@ -200,7 +244,14 @@ export class LoggingConfig {
   private fillLoggersConfig(loggingConfig: LoggingConfigType) {
     // Include `root` logger into common logger list so that it can easily be a part
     // of the logger hierarchy and put all the loggers in map for easier retrieval.
-    const loggers = [{ name: ROOT_CONTEXT_NAME, ...loggingConfig.root }, ...loggingConfig.loggers];
+    const loggers = [
+      {
+        name: ROOT_CONTEXT_NAME,
+        filters: [] as LoggerConfigType['filters'],
+        ...loggingConfig.root,
+      },
+      ...loggingConfig.loggers,
+    ];
 
     const loggerConfigByContext = new Map(
       loggers.map((loggerConfig) => toTuple(loggerConfig.name, loggerConfig))
@@ -219,12 +270,14 @@ export class LoggingConfig {
       }
 
       const appenders = getAppenders(loggerConfig, loggerConfigByContext);
+      const filters = getFilters(withDefaultFilters(loggerConfig), loggerConfigByContext);
 
       // We expect `appenders` to never be empty at this point, since the `root` context config should always
       // have at least one appender that is enforced by the config schema validation.
       this.loggers.set(loggerContext, {
-        ...loggerConfig,
+        ...withDefaultFilters(loggerConfig),
         appenders,
+        filters,
       });
     }
   }
@@ -255,4 +308,42 @@ function getAppenders(
   }
 
   return appenders;
+}
+
+/**
+ * Get filters for logger config.
+ *
+ * If config for current context doesn't define any filters inherit
+ * filters from the parent context config. Set `filters: null` to opt out
+ * of inherited filters without defining any of your own.
+ */
+function getFilters(
+  loggerConfig: LoggingConfigLoggerType,
+  loggerConfigByContext: Map<string, LoggerConfigType>
+): MetaFilterConfig[] {
+  if (loggerConfig.filters === null) {
+    return [];
+  }
+
+  let currentContext = loggerConfig.name;
+  let filters = loggerConfig.filters ?? [];
+
+  while (filters.length === 0) {
+    const parentContext = LoggingConfig.getParentLoggerContext(currentContext);
+    if (parentContext === currentContext) {
+      break;
+    }
+
+    const parentLogger = loggerConfigByContext.get(parentContext);
+    if (parentLogger) {
+      const parentFilters = parentLogger.filters === undefined ? [] : parentLogger.filters;
+      if (parentFilters !== null) {
+        filters = parentFilters;
+      }
+    }
+
+    currentContext = parentContext;
+  }
+
+  return filters;
 }

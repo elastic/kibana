@@ -35,20 +35,35 @@ describe('SubmitErrorCallout', () => {
     expect(screen.getByText('Unknown error')).toBeInTheDocument();
     expect(container.children[0]).toMatchInlineSnapshot(`
       <div
-        class="euiPanel euiPanel--danger euiPanel--paddingMedium euiCallOut euiCallOut--danger emotion-euiPanel-none-m-danger-euiCallOut"
+        class="euiPanel euiPanel--danger euiCallOut euiCallOut--danger emotion-euiPanel-none-danger-euiCallOut-danger"
+        data-size="m"
+        style="--euiCallOutTypeColor: #C61E25;"
       >
-        <p
-          class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader-danger"
-        >
-          Something went wrong
-        </p>
         <div
-          class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
-        />
-        <div
-          class="euiText emotion-euiText-s-euiTextColor-default"
+          class="css-1slkmya-wrapper"
         >
-          Unknown error
+          <div
+            class="css-wlziyu-body"
+          >
+            <span
+              class="css-1qkppnb-icon"
+              data-euiicon-type="errorFill"
+            />
+            <div
+              class="css-ak2bmi-content"
+            >
+              <p
+                class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader"
+              >
+                Something went wrong
+              </p>
+              <div
+                class="euiText euiCallOut__additionalContent emotion-euiText-s-euiTextColor-default"
+              >
+                Unknown error
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     `);
@@ -74,20 +89,35 @@ describe('SubmitErrorCallout', () => {
     expect(screen.getByText('Retry to configure Elastic.')).toBeInTheDocument();
     expect(container.children[0]).toMatchInlineSnapshot(`
       <div
-        class="euiPanel euiPanel--danger euiPanel--paddingMedium euiCallOut euiCallOut--danger emotion-euiPanel-none-m-danger-euiCallOut"
+        class="euiPanel euiPanel--danger euiCallOut euiCallOut--danger emotion-euiPanel-none-danger-euiCallOut-danger"
+        data-size="m"
+        style="--euiCallOutTypeColor: #C61E25;"
       >
-        <p
-          class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader-danger"
-        >
-          Verification required
-        </p>
         <div
-          class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
-        />
-        <div
-          class="euiText emotion-euiText-s-euiTextColor-default"
+          class="css-1slkmya-wrapper"
         >
-          Retry to configure Elastic.
+          <div
+            class="css-wlziyu-body"
+          >
+            <span
+              class="css-1qkppnb-icon"
+              data-euiicon-type="errorFill"
+            />
+            <div
+              class="css-ak2bmi-content"
+            >
+              <p
+                class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader"
+              >
+                Verification required
+              </p>
+              <div
+                class="euiText euiCallOut__additionalContent emotion-euiText-s-euiTextColor-default"
+              >
+                Retry to configure Elastic.
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     `);
@@ -113,36 +143,51 @@ describe('SubmitErrorCallout', () => {
     expect(screen.getByText('Continue to Kibana')).toBeInTheDocument();
     expect(container.children[0]).toMatchInlineSnapshot(`
       <div
-        class="euiPanel euiPanel--primary euiPanel--paddingMedium euiCallOut euiCallOut--primary emotion-euiPanel-none-m-primary-euiCallOut"
+        class="euiPanel euiPanel--primary euiCallOut euiCallOut--primary emotion-euiPanel-none-primary-euiCallOut-primary"
+        data-size="m"
+        style="--euiCallOutTypeColor: #0B64DD;"
       >
-        <p
-          class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader-primary"
-        >
-          Elastic is already configured
-        </p>
         <div
-          class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
-        />
-        <div
-          class="euiText emotion-euiText-s-euiTextColor-default"
+          class="css-1slkmya-wrapper"
         >
-          <button
-            class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-primary"
-            type="button"
+          <div
+            class="css-wlziyu-body"
           >
             <span
-              class="emotion-euiButtonDisplayContent"
+              class="css-1qkppnb-icon"
+              data-euiicon-type="infoFill"
+            />
+            <div
+              class="css-ak2bmi-content"
             >
-              Continue to Kibana
-            </span>
-          </button>
+              <p
+                class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader"
+              >
+                Elastic is already configured
+              </p>
+              <div
+                class="euiText euiCallOut__additionalContent emotion-euiText-s-euiTextColor-default"
+              >
+                <button
+                  class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-primary"
+                  type="button"
+                >
+                  <span
+                    class="emotion-euiButtonDisplayContent"
+                  >
+                    Continue to Kibana
+                  </span>
+                </button>
+              </div>
+            </div>
+          </div>
+          <div
+            aria-atomic="true"
+            aria-live="polite"
+            class="emotion-euiScreenReaderOnly"
+            role="status"
+          />
         </div>
-        <div
-          aria-atomic="true"
-          aria-live="polite"
-          class="emotion-euiScreenReaderOnly"
-          role="status"
-        />
       </div>
     `);
   });
@@ -169,24 +214,39 @@ describe('SubmitErrorCallout', () => {
     expect(screen.getByText('kibana.yml')).toBeInTheDocument();
     expect(container.children[0]).toMatchInlineSnapshot(`
       <div
-        class="euiPanel euiPanel--danger euiPanel--paddingMedium euiCallOut euiCallOut--danger emotion-euiPanel-none-m-danger-euiCallOut"
+        class="euiPanel euiPanel--danger euiCallOut euiCallOut--danger emotion-euiPanel-none-danger-euiCallOut-danger"
+        data-size="m"
+        style="--euiCallOutTypeColor: #C61E25;"
       >
-        <p
-          class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader-danger"
-        >
-          Something went wrong
-        </p>
         <div
-          class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
-        />
-        <div
-          class="euiText emotion-euiText-s-euiTextColor-default"
+          class="css-1slkmya-wrapper"
         >
-          Retry or update the 
-          <strong>
-            kibana.yml
-          </strong>
-           file manually.
+          <div
+            class="css-wlziyu-body"
+          >
+            <span
+              class="css-1qkppnb-icon"
+              data-euiicon-type="errorFill"
+            />
+            <div
+              class="css-ak2bmi-content"
+            >
+              <p
+                class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader"
+              >
+                Something went wrong
+              </p>
+              <div
+                class="euiText euiCallOut__additionalContent emotion-euiText-s-euiTextColor-default"
+              >
+                Retry or update the 
+                <strong>
+                  kibana.yml
+                </strong>
+                 file manually.
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     `);
@@ -213,36 +273,51 @@ describe('SubmitErrorCallout', () => {
     expect(screen.getByText('Continue to Kibana')).toBeInTheDocument();
     expect(container.children[0]).toMatchInlineSnapshot(`
       <div
-        class="euiPanel euiPanel--primary euiPanel--paddingMedium euiCallOut euiCallOut--primary emotion-euiPanel-none-m-primary-euiCallOut"
+        class="euiPanel euiPanel--primary euiCallOut euiCallOut--primary emotion-euiPanel-none-primary-euiCallOut-primary"
+        data-size="m"
+        style="--euiCallOutTypeColor: #0B64DD;"
       >
-        <p
-          class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader-primary"
-        >
-          Elastic is already configured
-        </p>
         <div
-          class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
-        />
-        <div
-          class="euiText emotion-euiText-s-euiTextColor-default"
+          class="css-1slkmya-wrapper"
         >
-          <button
-            class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-primary"
-            type="button"
+          <div
+            class="css-wlziyu-body"
           >
             <span
-              class="emotion-euiButtonDisplayContent"
+              class="css-1qkppnb-icon"
+              data-euiicon-type="infoFill"
+            />
+            <div
+              class="css-ak2bmi-content"
             >
-              Continue to Kibana
-            </span>
-          </button>
+              <p
+                class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader"
+              >
+                Elastic is already configured
+              </p>
+              <div
+                class="euiText euiCallOut__additionalContent emotion-euiText-s-euiTextColor-default"
+              >
+                <button
+                  class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-primary"
+                  type="button"
+                >
+                  <span
+                    class="emotion-euiButtonDisplayContent"
+                  >
+                    Continue to Kibana
+                  </span>
+                </button>
+              </div>
+            </div>
+          </div>
+          <div
+            aria-atomic="true"
+            aria-live="polite"
+            class="emotion-euiScreenReaderOnly"
+            role="status"
+          />
         </div>
-        <div
-          aria-atomic="true"
-          aria-live="polite"
-          class="emotion-euiScreenReaderOnly"
-          role="status"
-        />
       </div>
     `);
   });
@@ -270,20 +345,35 @@ describe('SubmitErrorCallout', () => {
     ).toBeInTheDocument();
     expect(container.children[0]).toMatchInlineSnapshot(`
       <div
-        class="euiPanel euiPanel--danger euiPanel--paddingMedium euiCallOut euiCallOut--danger emotion-euiPanel-none-m-danger-euiCallOut"
+        class="euiPanel euiPanel--danger euiCallOut euiCallOut--danger emotion-euiPanel-none-danger-euiCallOut-danger"
+        data-size="m"
+        style="--euiCallOutTypeColor: #C61E25;"
       >
-        <p
-          class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader-danger"
-        >
-          Something went wrong
-        </p>
         <div
-          class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
-        />
-        <div
-          class="euiText emotion-euiText-s-euiTextColor-default"
+          class="css-1slkmya-wrapper"
         >
-          Generate a new enrollment token or configure manually.
+          <div
+            class="css-wlziyu-body"
+          >
+            <span
+              class="css-1qkppnb-icon"
+              data-euiicon-type="errorFill"
+            />
+            <div
+              class="css-ak2bmi-content"
+            >
+              <p
+                class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader"
+              >
+                Something went wrong
+              </p>
+              <div
+                class="euiText euiCallOut__additionalContent emotion-euiText-s-euiTextColor-default"
+              >
+                Generate a new enrollment token or configure manually.
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     `);
@@ -310,24 +400,39 @@ describe('SubmitErrorCallout', () => {
     expect(screen.getByText(/Retry or update the/)).toBeInTheDocument();
     expect(container.children[0]).toMatchInlineSnapshot(`
       <div
-        class="euiPanel euiPanel--danger euiPanel--paddingMedium euiCallOut euiCallOut--danger emotion-euiPanel-none-m-danger-euiCallOut"
+        class="euiPanel euiPanel--danger euiCallOut euiCallOut--danger emotion-euiPanel-none-danger-euiCallOut-danger"
+        data-size="m"
+        style="--euiCallOutTypeColor: #C61E25;"
       >
-        <p
-          class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader-danger"
-        >
-          Couldn't write to config file
-        </p>
         <div
-          class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
-        />
-        <div
-          class="euiText emotion-euiText-s-euiTextColor-default"
+          class="css-1slkmya-wrapper"
         >
-          Retry or update the 
-          <strong>
-            kibana.yml
-          </strong>
-           file manually.
+          <div
+            class="css-wlziyu-body"
+          >
+            <span
+              class="css-1qkppnb-icon"
+              data-euiicon-type="errorFill"
+            />
+            <div
+              class="css-ak2bmi-content"
+            >
+              <p
+                class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader"
+              >
+                Couldn't write to config file
+              </p>
+              <div
+                class="euiText euiCallOut__additionalContent emotion-euiText-s-euiTextColor-default"
+              >
+                Retry or update the 
+                <strong>
+                  kibana.yml
+                </strong>
+                 file manually.
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     `);
@@ -354,24 +459,39 @@ describe('SubmitErrorCallout', () => {
     expect(screen.getByText(/Check the file permissions/)).toBeInTheDocument();
     expect(container.children[0]).toMatchInlineSnapshot(`
       <div
-        class="euiPanel euiPanel--danger euiPanel--paddingMedium euiCallOut euiCallOut--danger emotion-euiPanel-none-m-danger-euiCallOut"
+        class="euiPanel euiPanel--danger euiCallOut euiCallOut--danger emotion-euiPanel-none-danger-euiCallOut-danger"
+        data-size="m"
+        style="--euiCallOutTypeColor: #C61E25;"
       >
-        <p
-          class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader-danger"
-        >
-          Couldn't write to config file
-        </p>
         <div
-          class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
-        />
-        <div
-          class="euiText emotion-euiText-s-euiTextColor-default"
+          class="css-1slkmya-wrapper"
         >
-          Check the file permissions and ensure 
-          <strong>
-            kibana.yml
-          </strong>
-           is writable by the Kibana process.
+          <div
+            class="css-wlziyu-body"
+          >
+            <span
+              class="css-1qkppnb-icon"
+              data-euiicon-type="errorFill"
+            />
+            <div
+              class="css-ak2bmi-content"
+            >
+              <p
+                class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader"
+              >
+                Couldn't write to config file
+              </p>
+              <div
+                class="euiText euiCallOut__additionalContent emotion-euiText-s-euiTextColor-default"
+              >
+                Check the file permissions and ensure 
+                <strong>
+                  kibana.yml
+                </strong>
+                 is writable by the Kibana process.
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     `);
@@ -398,36 +518,51 @@ describe('SubmitErrorCallout', () => {
     expect(screen.getByText('Continue to Kibana')).toBeInTheDocument();
     expect(container.children[0]).toMatchInlineSnapshot(`
       <div
-        class="euiPanel euiPanel--primary euiPanel--paddingMedium euiCallOut euiCallOut--primary emotion-euiPanel-none-m-primary-euiCallOut"
+        class="euiPanel euiPanel--primary euiCallOut euiCallOut--primary emotion-euiPanel-none-primary-euiCallOut-primary"
+        data-size="m"
+        style="--euiCallOutTypeColor: #0B64DD;"
       >
-        <p
-          class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader-primary"
-        >
-          Elastic is already configured
-        </p>
         <div
-          class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
-        />
-        <div
-          class="euiText emotion-euiText-s-euiTextColor-default"
+          class="css-1slkmya-wrapper"
         >
-          <button
-            class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-primary"
-            type="button"
+          <div
+            class="css-wlziyu-body"
           >
             <span
-              class="emotion-euiButtonDisplayContent"
+              class="css-1qkppnb-icon"
+              data-euiicon-type="infoFill"
+            />
+            <div
+              class="css-ak2bmi-content"
             >
-              Continue to Kibana
-            </span>
-          </button>
+              <p
+                class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader"
+              >
+                Elastic is already configured
+              </p>
+              <div
+                class="euiText euiCallOut__additionalContent emotion-euiText-s-euiTextColor-default"
+              >
+                <button
+                  class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-primary"
+                  type="button"
+                >
+                  <span
+                    class="emotion-euiButtonDisplayContent"
+                  >
+                    Continue to Kibana
+                  </span>
+                </button>
+              </div>
+            </div>
+          </div>
+          <div
+            aria-atomic="true"
+            aria-live="polite"
+            class="emotion-euiScreenReaderOnly"
+            role="status"
+          />
         </div>
-        <div
-          aria-atomic="true"
-          aria-live="polite"
-          class="emotion-euiScreenReaderOnly"
-          role="status"
-        />
       </div>
     `);
   });
@@ -453,20 +588,35 @@ describe('SubmitErrorCallout', () => {
     expect(screen.getByText('Check the address and retry.')).toBeInTheDocument();
     expect(container.children[0]).toMatchInlineSnapshot(`
       <div
-        class="euiPanel euiPanel--danger euiPanel--paddingMedium euiCallOut euiCallOut--danger emotion-euiPanel-none-m-danger-euiCallOut"
+        class="euiPanel euiPanel--danger euiCallOut euiCallOut--danger emotion-euiPanel-none-danger-euiCallOut-danger"
+        data-size="m"
+        style="--euiCallOutTypeColor: #C61E25;"
       >
-        <p
-          class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader-danger"
-        >
-          Couldn't connect to cluster
-        </p>
         <div
-          class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
-        />
-        <div
-          class="euiText emotion-euiText-s-euiTextColor-default"
+          class="css-1slkmya-wrapper"
         >
-          Check the address and retry.
+          <div
+            class="css-wlziyu-body"
+          >
+            <span
+              class="css-1qkppnb-icon"
+              data-euiicon-type="errorFill"
+            />
+            <div
+              class="css-ak2bmi-content"
+            >
+              <p
+                class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader"
+              >
+                Couldn't connect to cluster
+              </p>
+              <div
+                class="euiText euiCallOut__additionalContent emotion-euiText-s-euiTextColor-default"
+              >
+                Check the address and retry.
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     `);

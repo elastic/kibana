@@ -36,6 +36,7 @@ dependsOn:
   - '@kbn/react-kibana-context-render'
   - '@kbn/core-chrome-browser'
   - '@kbn/autoops-promotion-callout'
+  - '@kbn/core-application-browser-mocks'
 tags:
   - plugin
   - prod

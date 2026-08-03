@@ -36,7 +36,9 @@ describe('useGetAttackFlyoutLink', () => {
       })
     );
 
-    const path = `${ATTACK_DETAILS_REDIRECT_PATH}/${attackId}?index=${indexName}&timestamp=${timestamp}`;
+    const path = `${ATTACK_DETAILS_REDIRECT_PATH}/${encodeURIComponent(
+      attackId
+    )}?index=${encodeURIComponent(indexName)}&timestamp=${encodeURIComponent(timestamp)}`;
     expect(result.current).toBe(`http://localhost${path}`);
   });
 

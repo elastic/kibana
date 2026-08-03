@@ -55,6 +55,7 @@ import type {
 import { registerCoreHandlers } from './register_lifecycle_handlers';
 import type { ExternalUrlConfigType } from './external_url';
 import { externalUrlConfig, ExternalUrlConfig } from './external_url';
+import { createInternalHttpSelfClient } from './self_client';
 
 export interface PrebootDeps {
   context: InternalContextPreboot;
@@ -239,10 +240,18 @@ export class HttpService
   // this method exists because we need the start contract to create `CoreStart` used to start
   // the `plugin` and `legacy` services.
   public getStartContract(): InternalHttpServiceStart {
+    const internalSetup = this.internalSetup!;
     return {
-      ...pick(this.internalSetup!, ['auth', 'basePath', 'getServerInfo', 'staticAssets']),
+      ...pick(internalSetup, ['auth', 'basePath', 'getServerInfo', 'staticAssets']),
       generateOas: (args: GenerateOasArgs) => this.generateOas(args),
       isListening: () => this.httpServer.isListening(),
+      selfClient: createInternalHttpSelfClient({
+        authRequestHeaders: internalSetup.authRequestHeaders,
+        basePath: internalSetup.basePath,
+        getServerInfo: internalSetup.getServerInfo,
+        kibanaVersion: this.env.packageInfo.version,
+        target: internalSetup.config.selfHttp.target,
+      }),
       setRedactedSessionIdGetter: (getter) => {
         this.httpServer.setRedactedSessionIdGetter(getter);
       },

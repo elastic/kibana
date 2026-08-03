@@ -24,6 +24,7 @@ import { registerUiSettings } from './infra/feature_flags/register';
 import {
   EngineDescriptorType,
   EntityStoreGlobalStateType,
+  EntityStorePreferencesType,
   LegacyCcsLogExtractionStateType,
   RemoteLogExtractionStateType,
 } from './domain/saved_objects';
@@ -90,6 +91,7 @@ export class EntityStorePlugin
     this.logger.debug('Registering saved objects types');
     core.savedObjects.registerType(EngineDescriptorType);
     core.savedObjects.registerType(EntityStoreGlobalStateType);
+    core.savedObjects.registerType(EntityStorePreferencesType);
     core.savedObjects.registerType(RemoteLogExtractionStateType);
     core.savedObjects.registerType(LegacyCcsLogExtractionStateType);
     core.savedObjects.registerType(EntityResolutionRuleType);

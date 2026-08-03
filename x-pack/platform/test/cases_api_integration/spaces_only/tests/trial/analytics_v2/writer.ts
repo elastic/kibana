@@ -53,11 +53,11 @@ export default ({ getService }: FtrProviderContext): void => {
       await waitForAnalyticsCase(es, created.id);
       const doc = await getAnalyticsCase(es, created.id);
 
-      expect(doc.cases.id).to.eql(created.id);
-      expect(doc.cases.title).to.eql(created.title);
+      expect(doc.case.id).to.eql(created.id);
+      expect(doc.case.title).to.eql(created.title);
       // Doc-builder converts numeric SO enums to human strings.
-      expect(doc.cases.status).to.eql('open');
-      expect(doc.cases.severity).to.eql('low');
+      expect(doc.case.status).to.eql('open');
+      expect(doc.case.severity).to.eql('low');
       // `getAuthWithSuperUser()` defaults to `space1` → case lives in
       // space1 → analytics doc inherits that namespace (non-default
       // propagation). Top-level singular `space_id` (implicit-privileges
@@ -80,13 +80,13 @@ export default ({ getService }: FtrProviderContext): void => {
       await waitForAnalyticsCaseUpdate(
         es,
         created.id,
-        (source) => source.cases.title === 'updated title'
+        (source) => source.case.title === 'updated title'
       );
 
       // Confirm it's still a single doc, not two — the writer
       // upserts on the same `_id`.
       await es.indices.refresh({ index: '.cases' });
-      const countResult = await es.count({ index: '.cases', q: `cases.id:"${created.id}"` });
+      const countResult = await es.count({ index: '.cases', q: `case.id:"${created.id}"` });
       expect(countResult.count).to.eql(1);
     });
 

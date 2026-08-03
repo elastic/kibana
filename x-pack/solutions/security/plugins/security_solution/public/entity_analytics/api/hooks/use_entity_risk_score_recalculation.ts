@@ -14,6 +14,11 @@ import { useCalculateEntityRiskScore } from './use_calculate_entity_risk_score';
 import { useRefetchQueryById } from './use_refetch_query_by_id';
 import { RISK_INPUTS_TAB_QUERY_ID } from '../../components/entity_details_flyout/tabs/risk_inputs/risk_inputs_tab';
 import { RESOLUTION_GROUP_QUERY_KEY } from '../../components/entity_resolution/hooks/use_resolution_group';
+import {
+  QUERY_KEY_ENTITY_ANALYTICS,
+  QUERY_KEY_GRID_DATA,
+  QUERY_KEY_TARGET_METADATA,
+} from '../../components/home/entities_table/constants';
 import { useOnAssetCriticalityToolEvent } from '../../hooks/use_on_asset_criticality_tool_event';
 
 interface UseEntityRiskScoreRecalculationParams<T extends EntityType> {
@@ -57,14 +62,27 @@ export const useEntityRiskScoreRecalculation = <T extends EntityType>({
   const queryClient = useQueryClient();
 
   const onRiskScoreUpdated = useCallback(() => {
+    // Flyout header risk badge: V2 reads from the entity store record, V1 from the risk score API.
     if (entityStoreV2Enabled) {
       entityFromStoreResult.refetch();
     } else {
       riskScoreState.refetch();
     }
+    // Flyout Risk Summary panel (base + resolution scores).
     entityRiskScores.refetch();
+    // Flyout Risk Inputs tab (the alerts/inputs contributing to the score).
     (refetchRiskInputsTab as Refetch | null)?.();
+    // Entity resolution group tab/table shown in the flyout.
     queryClient.invalidateQueries({ queryKey: [RESOLUTION_GROUP_QUERY_KEY] });
+    // Entity analytics home table rows (flat grid + the leaf tables inside expanded groups).
+    queryClient.invalidateQueries({ queryKey: [QUERY_KEY_ENTITY_ANALYTICS, QUERY_KEY_GRID_DATA] });
+    // Risk score on the resolution group accordion headers. We refresh only this
+    // metadata (not the grouping aggregation) so the header badge updates without
+    // re-ordering the buckets, which would collapse any expanded groups.
+    queryClient.invalidateQueries({
+      queryKey: [QUERY_KEY_ENTITY_ANALYTICS, QUERY_KEY_TARGET_METADATA],
+    });
+    // Context-specific extras (e.g. agent-builder attachment cache).
     onRecalculation?.();
   }, [
     entityStoreV2Enabled,

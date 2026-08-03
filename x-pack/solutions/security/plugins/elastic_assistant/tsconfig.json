@@ -58,7 +58,6 @@
     "@kbn/core-saved-objects-api-server-mocks",
     "@kbn/security-ai-prompts",
     "@kbn/datemath",
-    "@kbn/alerts-as-data-utils",
     "@kbn/alerting-plugin",
     "@kbn/rule-data-utils",
     "@kbn/alerting-types",
@@ -106,11 +105,11 @@
     "@kbn/cloud-plugin",
     "@kbn/search-inference-endpoints",
     "@kbn/controls-constants",
-    "@kbn/core-spaces-common",
     "@kbn/ai-assistant-common",
     "@kbn/discoveries",
     "@kbn/attack-discovery-schedules-common",
-    "@kbn/workflows"
+    "@kbn/workflows",
+    "@kbn/workflows-management-plugin"
   ],
   "exclude": [
     "target/**/*",

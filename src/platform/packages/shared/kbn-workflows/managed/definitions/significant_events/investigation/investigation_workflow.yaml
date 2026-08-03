@@ -28,7 +28,7 @@ triggers:
           type: array
           items:
             type: string
-          description: Optional data stream names to scope observability queries.
+          description: Optional logical stream names to scope observability queries.
         context:
           type: object
           additionalProperties: true
@@ -46,10 +46,10 @@ steps:
   # Only runs when a sig-event context was supplied (triage or chat-agent paths).
   - name: attach_pending_to_significant_event
     type: kibana.request
-    if: '${{ inputs.context.event_id != null }}'
+    if: '${{ inputs.context.event_uuid != null }}'
     with:
       method: POST
-      path: '/internal/significant_events/events/{{ inputs.context.event_id }}/investigations'
+      path: '/internal/significant_events/events/{{ inputs.context.event_uuid }}/investigations'
       headers:
         x-elastic-internal-origin: 'kibana'
       body:
@@ -60,7 +60,7 @@ steps:
 
   - name: investigate
     type: ai.agent
-    agent-id: platform.sig_events.investigation
+    agent-id: significant_events.investigation
     # Keep connector-id-by-feature/plugin-id/aggregate-by in sync with @kbn/significant-events-schema
     # inference_feature_ids.ts (SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID /
     # SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID).
@@ -68,6 +68,7 @@ steps:
     plugin-id: 'significant_events_investigation'
     aggregate-by: 'significant_events'
     create-conversation: true
+    public-conversation: true
     with:
       timeout: 1800s
       # Tag the agent execution with the workflow execution id so callers that already know
@@ -82,7 +83,7 @@ steps:
         {{ inputs.message }}
 
         {% if inputs.stream_names and inputs.stream_names.size > 0 %}
-        Data streams (use get_index_info to discover available fields in each):
+        Related streams:
         {% for stream in inputs.stream_names %}- {{ stream }}
         {% endfor %}
         {% endif %}
@@ -140,6 +141,147 @@ steps:
             items:
               type: string
               maxLength: 10000
+          significant_event_updates:
+            type: array
+            description: >
+              Optional list of proposed changes to the significant event's fields based on what the
+              investigation established. Each entry targets one field (severity, summary, or status)
+              with a typed from/to, a one-or-two-sentence reason tied to the confirmed findings, and
+              1–10 evidence items. Omit entries — or the whole array — for fields that do not need
+              changing. Changes are applied automatically via the attach_to_significant_event step; only
+              propose what the listed evidence can defend. When no significant-event context was
+              provided (no event_uuid in inputs.context), omit significant_event_updates entirely.
+            maxItems: 3
+            items:
+              oneOf:
+                - type: object
+                  description: Propose changing the event's severity tier.
+                  properties:
+                    field:
+                      type: string
+                      const: severity
+                    from:
+                      type: string
+                      enum: ['80-critical', '60-high', '40-medium', '20-low']
+                      description: The severity from inputs.context.severity — the value before this investigation ran.
+                    to:
+                      type: string
+                      enum: ['80-critical', '60-high', '40-medium', '20-low']
+                      description: The proposed new severity tier.
+                    reason:
+                      type: string
+                      maxLength: 10000
+                      description: Why the severity should change, referencing the confirmed findings.
+                    evidence:
+                      type: array
+                      minItems: 1
+                      maxItems: 10
+                      items:
+                        type: object
+                        properties:
+                          description:
+                            type: string
+                            maxLength: 10000
+                            description: What was observed and why it bears on the proposed change.
+                          esql_query:
+                            type: string
+                            maxLength: 10000
+                            description: The exact ES|QL query executed to gather this evidence, when one was run.
+                        required:
+                          - description
+                  required:
+                    - field
+                    - from
+                    - to
+                    - reason
+                    - evidence
+                - type: object
+                  description: Propose rewriting the event's summary when the investigation finds it wrong or incomplete.
+                  properties:
+                    field:
+                      type: string
+                      const: summary
+                    from:
+                      type: string
+                      maxLength: 10000
+                      description: The summary from inputs.context.summary — the value before this investigation ran.
+                    to:
+                      type: string
+                      minLength: 1
+                      maxLength: 10000
+                      description: The corrected summary. Objective, self-contained account of the problem and impact.
+                    reason:
+                      type: string
+                      maxLength: 10000
+                      description: Why the summary is being revised and what the investigation found that prompted it.
+                    evidence:
+                      type: array
+                      minItems: 1
+                      maxItems: 10
+                      items:
+                        type: object
+                        properties:
+                          description:
+                            type: string
+                            maxLength: 10000
+                            description: What was observed and why it bears on the proposed change.
+                          esql_query:
+                            type: string
+                            maxLength: 10000
+                            description: The exact ES|QL query executed to gather this evidence, when one was run.
+                        required:
+                          - description
+                  required:
+                    - field
+                    - from
+                    - to
+                    - reason
+                    - evidence
+                - type: object
+                  description: >
+                    Propose changing the event's status. Use "dismissed" when the investigation
+                    establishes this is a false alarm or no longer relevant. Use "closed" when
+                    recovery is confirmed. Use "open" if re-opening a previously closed/dismissed
+                    event based on new evidence.
+                  properties:
+                    field:
+                      type: string
+                      const: status
+                    from:
+                      type: string
+                      enum: ['open', 'closed', 'dismissed']
+                      description: The status from inputs.context.status — the value before this investigation ran.
+                    to:
+                      type: string
+                      enum: ['open', 'closed', 'dismissed']
+                      description: The proposed new status.
+                    reason:
+                      type: string
+                      maxLength: 10000
+                      description: Why the status should change, referencing the confirmed findings.
+                    evidence:
+                      type: array
+                      minItems: 1
+                      maxItems: 10
+                      items:
+                        type: object
+                        properties:
+                          description:
+                            type: string
+                            maxLength: 10000
+                            description: What was observed and why it bears on the proposed change.
+                          esql_query:
+                            type: string
+                            maxLength: 10000
+                            description: The exact ES|QL query executed to gather this evidence, when one was run.
+                        required:
+                          - description
+                  required:
+                    - field
+                    - from
+                    - to
+                    - reason
+                    - evidence
         required:
           - summary
           - hypotheses
@@ -147,32 +289,47 @@ steps:
       continue: true
 
   # Connects this investigation back to the Significant Event that triggered it, so the
-  # UI can surface investigation history and link to the full RCA result. Only runs when
-  # a sig-event context was supplied (i.e. the investigation was triggered from triage or
-  # from the chat agent for a specific event). Other callers (free-form issues, alerts)
-  # that do not supply `inputs.context.event_id` are unaffected.
+  # UI can surface investigation history and link to the full RCA result, and — in the same
+  # append-only version — applies any field changes the agent proposed via
+  # `significant_event_updates` (severity/summary/status). Recording the completed investigation
+  # and its reassessed fields as one write keeps the lifecycle to a single meaningful version
+  # rather than two. Only runs when a sig-event context was supplied (i.e. the investigation was
+  # triggered from triage or from the chat agent for a specific event). Other callers (free-form
+  # issues, alerts) that do not supply `inputs.context.event_uuid` are unaffected.
+  #
+  # The agent only *proposes* field changes; this deterministic step performs the write. Each
+  # attribute the agent didn't reassess resolves to `undefined` (empty `first`) and is dropped from
+  # the request; proposing the current value is a server-side no-op. `reason`/`evidence` stay in the
+  # `investigate` structured output and are intentionally never forwarded to the event document —
+  # the version records only the changed field values plus this execution's id as the audit trail.
+  # `on-failure: continue` so a failed write never fails the overall workflow run.
   - name: attach_to_significant_event
     type: kibana.request
-    if: '${{ inputs.context.event_id != null }}'
+    if: '${{ inputs.context.event_uuid != null }}'
     with:
       method: POST
-      path: '/internal/significant_events/events/{{ inputs.context.event_id }}/investigations'
+      path: '/internal/significant_events/events/{{ inputs.context.event_uuid }}/investigations'
       headers:
         x-elastic-internal-origin: 'kibana'
       body:
         workflow_execution_id: "{{ execution.id }}"
         started_at: '{{ execution.startedAt | date: "%Y-%m-%dT%H:%M:%S%:z" }}'
         completed_at: '{{ "now" | date: "%Y-%m-%dT%H:%M:%S%:z" }}'
+        severity: "${{ steps.investigate.output.structured_output.significant_event_updates | default: [] | where: 'field', 'severity' | map: 'to' | first }}"
+        summary: "${{ steps.investigate.output.structured_output.significant_event_updates | default: [] | where: 'field', 'summary' | map: 'to' | first }}"
+        status: "${{ steps.investigate.output.structured_output.significant_event_updates | default: [] | where: 'field', 'status' | map: 'to' | first }}"
     on-failure:
       continue: true
 
   # Reconcile the gaps this investigation surfaced into the _gaps/overview memory
   # page. Deliberately minimal: a cheap model, memory read/write only, no auditing.
-  # Keep connector-id-by-feature in sync with @kbn/significant-events-schema
-  # inference_feature_ids.ts (SIGNIFICANT_EVENTS_MEMORY_INFERENCE_FEATURE_ID).
+  # connector-id-by-feature: shared memory connector (SIGNIFICANT_EVENTS_MEMORY_INFERENCE_FEATURE_ID).
+  # plugin-id: step-specific cost attribution; aggregate-by: SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID.
   - name: merge_investigation_gaps
     type: ai.agent
     connector-id-by-feature: 'significant_events_memory'
+    plugin-id: 'significant_events_memory_investigation_gaps'
+    aggregate-by: 'significant_events'
     create-conversation: false
     with:
       timeout: 120s

@@ -56,6 +56,10 @@ const PLACEHOLDER_ATTRIBUTES: Record<string, string> = {
   'gen_ai.tool.definitions': '[TOOL_DEFINITIONS]',
   'gen_ai.tool.description': '[TOOL_DESCRIPTION]',
   'gen_ai.tool.call.result': '[TOOL_RESULT]',
+  'gen_ai.input.messages': '[INPUT_MESSAGES]',
+  'gen_ai.output.messages': '[OUTPUT_MESSAGES]',
+  'gen_ai.system_instructions': '[SYSTEM_INSTRUCTIONS]',
+  'elastic.conversation.title': '[CONVERSATION_TITLE]',
 };
 
 interface SpanEvent {
@@ -67,6 +71,11 @@ interface SpanEvent {
 const sanitizeAttributes = (attrs: Record<string, unknown>): Record<string, unknown> => {
   const result: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(attrs)) {
+    // `kibana.*` attributes (e.g. feature-flag `kibana.flag_*` labels) are stamped onto
+    // whatever OTel span is active at that moment, so they leak non-deterministically onto
+    // these spans. Drop them.
+    if (key.startsWith('kibana.')) continue;
+
     if (key in PLACEHOLDER_ATTRIBUTES) {
       if (value != null) {
         result[key] = PLACEHOLDER_ATTRIBUTES[key];
@@ -75,7 +84,7 @@ const sanitizeAttributes = (attrs: Record<string, unknown>): Record<string, unkn
     }
     result[key] = value;
   }
-  return result;
+  return Object.fromEntries(Object.entries(result).sort(([a], [b]) => a.localeCompare(b)));
 };
 
 const sanitizeEvents = (events: SpanEvent[]): Array<{ name: string; attributes?: unknown }> =>

@@ -14,6 +14,12 @@ import type {
   GetAnomalyOverviewResponse,
 } from '../../../../common/api/entity_analytics';
 import { EntityDetailsLeftPanelTab } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
+import {
+  ENTITY_ANOMALY_RECENT_TABLE_EMPTY_MESSAGE,
+  ENTITY_ANOMALY_STATE_ERROR_BODY,
+  ENTITY_ANOMALY_STATE_ERROR_TITLE,
+} from './translations';
+import { ANOMALIES_RECENT_TABLE_TEST_ID } from './test_ids';
 
 jest.mock('../../../common/lib/kibana', () => ({
   useKibana: () => ({
@@ -305,6 +311,122 @@ describe('AnomaliesOverview', () => {
         { wrapper: Wrapper }
       );
       expect(screen.queryByTestId('mock-anomaly-job-name')).not.toBeInTheDocument();
+    });
+
+    it('renders the empty message when totalAnomaliesCount is 0 and recentAnomalies is empty', () => {
+      render(
+        <AnomaliesOverview
+          data={makeData({ totalAnomaliesCount: 0, recentAnomalies: [] })}
+          openDetailsPanel={openDetailsPanel}
+        />,
+        { wrapper: Wrapper }
+      );
+      expect(screen.getByText(ENTITY_ANOMALY_RECENT_TABLE_EMPTY_MESSAGE)).toBeInTheDocument();
+    });
+
+    it('does not render the empty message when totalAnomaliesCount is greater than 0', () => {
+      render(
+        <AnomaliesOverview
+          data={makeData({ totalAnomaliesCount: 5, recentAnomalies: [] })}
+          openDetailsPanel={openDetailsPanel}
+        />,
+        { wrapper: Wrapper }
+      );
+      expect(screen.queryByText(ENTITY_ANOMALY_RECENT_TABLE_EMPTY_MESSAGE)).not.toBeInTheDocument();
+    });
+
+    it('does not render the empty message when recentAnomalies has items', () => {
+      render(
+        <AnomaliesOverview
+          data={makeData({ totalAnomaliesCount: 5, recentAnomalies: [makeHit()] })}
+          openDetailsPanel={openDetailsPanel}
+        />,
+        { wrapper: Wrapper }
+      );
+      expect(screen.queryByText(ENTITY_ANOMALY_RECENT_TABLE_EMPTY_MESSAGE)).not.toBeInTheDocument();
+    });
+  });
+
+  describe('loading state', () => {
+    it('does not show the total anomaly count heading', () => {
+      render(
+        <AnomaliesOverview
+          data={makeData({ totalAnomaliesCount: 5 })}
+          openDetailsPanel={openDetailsPanel}
+          isLoading
+        />,
+        { wrapper: Wrapper }
+      );
+      expect(screen.queryByRole('heading', { level: 3 })).not.toBeInTheDocument();
+    });
+
+    it('renders a loading skeleton in place of the stat count', () => {
+      const { container } = render(
+        <AnomaliesOverview data={makeData()} openDetailsPanel={openDetailsPanel} isLoading />,
+        { wrapper: Wrapper }
+      );
+      expect(container.querySelector('.euiSkeletonRectangle')).toBeInTheDocument();
+    });
+
+    it('renders a loading chart placeholder in place of the MitreAttackChain', () => {
+      const { container } = render(
+        <AnomaliesOverview data={makeData()} openDetailsPanel={openDetailsPanel} isLoading />,
+        { wrapper: Wrapper }
+      );
+      expect(container.querySelector('.euiLoadingChart')).toBeInTheDocument();
+    });
+
+    it('renders a loading skeleton in place of the recent anomalies table', () => {
+      const { container } = render(
+        <AnomaliesOverview data={makeData()} openDetailsPanel={openDetailsPanel} isLoading />,
+        { wrapper: Wrapper }
+      );
+      expect(container.querySelector('.euiSkeletonText')).toBeInTheDocument();
+      expect(screen.queryByTestId(ANOMALIES_RECENT_TABLE_TEST_ID)).not.toBeInTheDocument();
+    });
+
+    it('does not render the empty message while loading', () => {
+      render(
+        <AnomaliesOverview
+          data={makeData({ totalAnomaliesCount: 0, recentAnomalies: [] })}
+          openDetailsPanel={openDetailsPanel}
+          isLoading
+        />,
+        { wrapper: Wrapper }
+      );
+      expect(screen.queryByText(ENTITY_ANOMALY_RECENT_TABLE_EMPTY_MESSAGE)).not.toBeInTheDocument();
+    });
+  });
+
+  describe('error state', () => {
+    it('renders the error prompt title and body', () => {
+      render(<AnomaliesOverview data={makeData()} openDetailsPanel={openDetailsPanel} isError />, {
+        wrapper: Wrapper,
+      });
+      expect(screen.getByText(ENTITY_ANOMALY_STATE_ERROR_TITLE)).toBeInTheDocument();
+      expect(screen.getByText(ENTITY_ANOMALY_STATE_ERROR_BODY)).toBeInTheDocument();
+    });
+
+    it('does not render the stat count, MitreAttackChain, or recent anomalies table', () => {
+      render(<AnomaliesOverview data={makeData()} openDetailsPanel={openDetailsPanel} isError />, {
+        wrapper: Wrapper,
+      });
+      expect(screen.queryByRole('heading', { level: 3 })).not.toBeInTheDocument();
+      expect(screen.queryByTestId('mock-mitre-attack-chain')).not.toBeInTheDocument();
+      expect(screen.queryByTestId(ANOMALIES_RECENT_TABLE_TEST_ID)).not.toBeInTheDocument();
+    });
+
+    it('takes precedence over the loading state when both are set', () => {
+      render(
+        <AnomaliesOverview
+          data={makeData()}
+          openDetailsPanel={openDetailsPanel}
+          isError
+          isLoading
+        />,
+        { wrapper: Wrapper }
+      );
+      expect(screen.getByText(ENTITY_ANOMALY_STATE_ERROR_TITLE)).toBeInTheDocument();
     });
   });
 

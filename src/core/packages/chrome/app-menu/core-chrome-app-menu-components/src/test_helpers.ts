@@ -21,9 +21,13 @@ type AppMenuUser = ReturnType<typeof userEvent.setup>;
 const createUser = (): AppMenuUser => userEvent.setup({ pointerEventsCheck: 0, delay: null });
 
 /**
- * Opens the app menu overflow popover (the "More" button) so its items become queryable. Defaults
- * to a fresh `userEvent` instance; pass your own when the test already has one.
+ * Opens the app menu overflow popover when present. Items rendered inline are already queryable.
+ * Defaults to a fresh `userEvent` instance; pass your own when the test already has one.
  */
 export const openAppMenuOverflow = async (user: AppMenuUser = createUser()): Promise<void> => {
-  await user.click(await screen.findByTestId(APP_MENU_TEST_SUBJECTS.overflowButton));
+  await screen.findByTestId(APP_MENU_TEST_SUBJECTS.root);
+  const overflowButton = screen.queryByTestId(APP_MENU_TEST_SUBJECTS.overflowButton);
+  if (overflowButton) {
+    await user.click(overflowButton);
+  }
 };

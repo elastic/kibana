@@ -17,9 +17,12 @@ export interface UiamOAuthClientLogo {
 export interface UiamOAuthConnectionsSummary {
   active?: string[];
   revoked?: string[];
+  expired?: string[];
 }
 
 export type UiamOAuthClientType = 'public' | 'confidential';
+
+export type UiamOAuthProjectType = 'elasticsearch' | 'observability' | 'security' | 'vectordb';
 
 export interface UiamOAuthClientResponse {
   id: string;
@@ -40,12 +43,15 @@ export interface UiamOAuthClientResponse {
 export interface UiamOAuthConnectionResponse {
   id: string;
   client_id: string;
+  client_name?: string;
   name?: string;
   resource: string;
   creation?: string;
   revoked?: boolean;
   revocation?: string;
   revocation_reason?: string;
+  expired?: boolean;
+  expiration?: string;
   scopes?: string[];
   user_id?: string;
 }
@@ -53,6 +59,7 @@ export interface UiamOAuthConnectionResponse {
 export interface CreateUiamOAuthClientParams {
   resource: string;
   project_id: string;
+  project_type?: UiamOAuthProjectType;
   client_name?: string;
   client_type?: UiamOAuthClientType;
   client_metadata?: Record<string, string>;
@@ -69,6 +76,16 @@ export interface UpdateUiamOAuthClientParams {
 
 export interface UpdateUiamOAuthConnectionParams {
   name: string;
+}
+
+export interface UiamUserInfo {
+  email?: string;
+  first_name?: string;
+  last_name?: string;
+}
+
+export interface UiamResolvedUsersResponse {
+  users: Record<string, UiamUserInfo>;
 }
 
 /**
@@ -122,15 +139,17 @@ export interface UiamOAuthType {
   ): Promise<UiamOAuthClientResponse | null>;
 
   /**
-   * Lists OAuth connections, optionally filtered by client ID and/or connection ID.
+   * Lists OAuth connections, optionally filtered by client ID, connection ID and/or project ID.
    * @param request The Kibana request containing the authorization header.
    * @param clientId Optional client ID filter.
    * @param connectionId Optional connection ID filter.
+   * @param projectId Optional project ID filter.
    */
   listConnections(
     request: KibanaRequest,
     clientId?: string,
-    connectionId?: string
+    connectionId?: string,
+    projectId?: string
   ): Promise<{ connections: UiamOAuthConnectionResponse[] } | null>;
 
   /**
@@ -160,4 +179,14 @@ export interface UiamOAuthType {
     connectionId: string,
     reason?: string
   ): Promise<UiamOAuthConnectionResponse | null>;
+
+  /**
+   * Resolves one or more user IDs into basic user information.
+   * @param request The Kibana request containing the authorization header.
+   * @param userIds The user IDs to resolve.
+   */
+  resolveUsers(
+    request: KibanaRequest,
+    userIds: string[]
+  ): Promise<UiamResolvedUsersResponse | null>;
 }

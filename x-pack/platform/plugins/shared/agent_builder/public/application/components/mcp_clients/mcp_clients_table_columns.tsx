@@ -94,7 +94,7 @@ export const useMcpClientsTableColumns = (): Array<EuiBasicTableColumn<OAuthClie
         <McpClientActionsMenu
           clientId={id}
           clientName={client_name ?? id}
-          connectionCount={connections?.active?.length ?? 0}
+          connectionCount={(connections?.active?.length ?? 0) + (connections?.expired?.length ?? 0)}
           revoked={revoked ?? false}
         />
       ),

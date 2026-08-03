@@ -17,7 +17,7 @@ export const commonRouteConfig = {
     tags: ['oas-tag:Links'],
     availability: {
       stability: 'experimental',
-      since: '9.5.0',
+      since: '9.6.0',
     },
   },
   security: {

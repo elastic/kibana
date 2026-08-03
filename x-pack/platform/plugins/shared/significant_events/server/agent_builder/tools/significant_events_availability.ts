@@ -6,7 +6,6 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type { IUiSettingsClient } from '@kbn/core/server';
 import type { ToolAvailabilityResult } from '@kbn/agent-builder-server';
 import type { StreamsServer } from '@kbn/streams-plugin/server/types';
 import { assertSignificantEventsAccess } from '../../routes/utils/assert_significant_events_access';
@@ -19,16 +18,11 @@ export const createSignificantEventsAvailability = ({
   logger: Logger;
 }) => ({
   cacheMode: 'space' as const,
-  handler: async ({
-    uiSettings,
-  }: {
-    uiSettings: IUiSettingsClient;
-  }): Promise<ToolAvailabilityResult> => {
+  handler: async (): Promise<ToolAvailabilityResult> => {
     try {
       await assertSignificantEventsAccess({
         server,
         licensing: server.licensing,
-        uiSettingsClient: uiSettings,
       });
       return { status: 'available' };
     } catch (error) {

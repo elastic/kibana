@@ -42,6 +42,9 @@ paths:
                         reference_data_schema:
                           type: object
                           additionalProperties: true
+                        evidence_schema:
+                          type: object
+                          additionalProperties: true
                       required:
                         - name
                         - version

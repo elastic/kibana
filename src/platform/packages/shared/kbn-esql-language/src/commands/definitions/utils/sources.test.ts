@@ -449,6 +449,44 @@ describe('getSourceOfJoinTarget', () => {
 
     expect(joinTarget).toBe('lookup_index');
   });
+
+  it('removes the coordinator prefix from the target index', () => {
+    const query = EsqlQuery.fromSrc(
+      'FROM remote_cluster:index | LOOKUP JOIN _coordinator:lookup_index ON id'
+    );
+    const joinCommand = Walker.match(query.ast, {
+      type: 'command',
+      name: 'join',
+    });
+
+    expect(getLookupJoinSource(joinCommand as ESQLAstJoinCommand)).toBe('lookup_index');
+  });
+
+  it('removes the coordinator prefix from an aliased target index', () => {
+    const query = EsqlQuery.fromSrc(
+      'FROM remote_cluster:index | LOOKUP JOIN _coordinator:lookup_index AS lookup ON id'
+    );
+    const joinCommand = Walker.match(query.ast, {
+      type: 'command',
+      name: 'join',
+    });
+
+    expect(getLookupJoinSource(joinCommand as ESQLAstJoinCommand)).toBe('lookup_index');
+  });
+
+  it('keeps unsupported remote prefixes unchanged', () => {
+    const query = EsqlQuery.fromSrc(
+      'FROM remote_cluster:index | LOOKUP JOIN another_cluster:lookup_index ON id'
+    );
+    const joinCommand = Walker.match(query.ast, {
+      type: 'command',
+      name: 'join',
+    });
+
+    expect(getLookupJoinSource(joinCommand as ESQLAstJoinCommand)).toBe(
+      'another_cluster:lookup_index'
+    );
+  });
 });
 
 describe('hasWiredStreamsInQuery', () => {

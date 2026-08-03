@@ -19,14 +19,14 @@ import { WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/workflows';
 import type { TemplateBody } from '@kbn/workflows-library';
 import { TemplateDetail, useLibraryEnabled } from '@kbn/workflows-ui';
 import { PLUGIN_ID } from '../../../common';
-import { WorkflowsDeepLinks } from '../../deep_links';
+import { WorkflowsPageName } from '../../deep_links';
 import { useKibana } from '../../hooks/use_kibana';
 import { useSetWorkflowsBreadcrumbs } from '../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs';
 import { useWorkflowsExperimentalUiSetting } from '../../hooks/use_workflows_experimental_ui_setting';
 
 const libraryBreadcrumbLabel = i18n.translate(
   'workflowsManagement.libraryTemplatePage.libraryBreadcrumb',
-  { defaultMessage: 'Library' }
+  { defaultMessage: 'Template Library' }
 );
 
 const backToLibraryLabel = i18n.translate('workflowsManagement.libraryTemplatePage.backToLibrary', {
@@ -56,13 +56,13 @@ export const LibraryTemplateDetailPage = React.memo<LibraryTemplateDetailPagePro
   );
 
   const goToLibrary = useCallback(() => {
-    application.navigateToApp(PLUGIN_ID, { deepLinkId: WorkflowsDeepLinks.library });
+    application.navigateToApp(PLUGIN_ID, { deepLinkId: WorkflowsPageName.library });
   }, [application]);
 
   const libraryBreadcrumb = useMemo<ChromeBreadcrumb>(
     () => ({
       text: libraryBreadcrumbLabel,
-      href: application.getUrlForApp(PLUGIN_ID, { deepLinkId: WorkflowsDeepLinks.library }),
+      href: application.getUrlForApp(PLUGIN_ID, { deepLinkId: WorkflowsPageName.library }),
       onClick: (event) => {
         if (event) {
           event.preventDefault();
@@ -74,12 +74,9 @@ export const LibraryTemplateDetailPage = React.memo<LibraryTemplateDetailPagePro
   );
 
   const [templateBreadcrumb, setTemplateBreadcrumb] = useState<TemplateBreadcrumb | undefined>();
-  const handleTemplateLoaded = useCallback(
-    (template: TemplateBody) => {
-      setTemplateBreadcrumb({ slug: template.metadata.slug, name: template.metadata.name });
-    },
-    [setTemplateBreadcrumb]
-  );
+  const handleTemplateLoaded = useCallback((template: TemplateBody) => {
+    setTemplateBreadcrumb({ slug: template.metadata.slug, name: template.metadata.name });
+  }, []);
 
   const breadcrumbs = useMemo<ChromeBreadcrumb[]>(() => {
     if (templateBreadcrumb?.slug === slug) {

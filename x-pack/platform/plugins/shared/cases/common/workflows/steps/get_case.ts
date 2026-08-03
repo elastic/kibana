@@ -14,11 +14,14 @@ import { CasesStepCaseIdSchema, CasesStepSingleCaseOutputSchema } from './shared
 export const GetCaseStepTypeId = 'cases.getCase';
 
 const InputSchema = CasesStepCaseIdSchema.extend({
-  include_comments: z
-    .boolean()
-    .optional()
-    .default(false)
-    .describe('Include case comments in the response. Default: false.'),
+  // Deprecated. Behavior is unchanged (comments are still returned when true) so existing
+  // workflows keep working; the flag only marks the field deprecated in docs and the editor.
+  // Prefer the `cases.getAllAttachments` step. Hard removal deferred to v10, gated on telemetry.
+  include_comments: z.boolean().optional().default(false).meta({
+    deprecated: true,
+    description:
+      'Deprecated: use the `cases.getAllAttachments` step to retrieve case attachments. Include case comments in the response. Default: false.',
+  }),
 });
 
 const OutputSchema = CasesStepSingleCaseOutputSchema;
@@ -46,14 +49,6 @@ export const getCaseStepCommonDefinition: CommonStepDefinition<
   with:
     case_id: "abc-123-def-456"
 \`\`\``,
-      `## With comments included
-\`\`\`yaml
-- name: get_case_with_comments
-  type: ${GetCaseStepTypeId}
-  with:
-    case_id: "abc-123-def-456"
-    include_comments: true
-\`\`\``,
       `## Using case from previous step
 \`\`\`yaml
 - name: find_cases
@@ -65,7 +60,6 @@ export const getCaseStepCommonDefinition: CommonStepDefinition<
   type: ${GetCaseStepTypeId}
   with:
     case_id: \${{ steps.find_cases.output.cases[0].id }}
-    include_comments: true
 \`\`\``,
     ],
   },

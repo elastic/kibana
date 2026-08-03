@@ -29,8 +29,10 @@ export type SkillsDirectoryStructure = Directory<{
       'agent-builder': FileDirectory;
       alerting: FileDirectory;
       cases: FileDirectory;
+      'context-engine': FileDirectory;
       dashboard: FileDirectory;
       discover: FileDirectory;
+      evals: FileDirectory;
       streams: FileDirectory;
       visualization: FileDirectory;
       workflows: FileDirectory;
@@ -61,7 +63,7 @@ export type SkillsDirectoryStructure = Directory<{
 /**
  * Base paths where files can be placed (exact paths from the structure)
  */
-type DirectoryPath = FilePathsFromStructure<SkillsDirectoryStructure>;
+export type DirectoryPath = FilePathsFromStructure<SkillsDirectoryStructure>;
 
 /**
  * Server-side definition of a skill type.
@@ -111,6 +113,13 @@ export interface SkillDefinition<
    */
   uiSettingRequired?: string | { key: string; value: unknown };
   /**
+   * When true, this skill is not automatically included on agents that have
+   * `enable_elastic_capabilities` set. It remains available to any agent that
+   * references it explicitly via `skill_ids`.
+   * Defaults to false.
+   */
+  excludeFromElasticCapabilities?: boolean;
+  /**
    * Content of the skill.
    */
   content: string;
@@ -148,11 +157,13 @@ export interface ReferencedContent {
    * Valid relative paths are:
    * - "." - stores reference content in the same directory as the skill
    * - "./[directory]" - stores reference content in the "[directory]" directory
-   * - Avoid multiple levels of directories (such as "./[directory]/[subdirectory]") to keep the structure flat.
+   * - "./[directory]/[subdirectory]" - nested subdirectories are supported; each segment must
+   *   contain only lowercase letters, numbers, underscores, and hyphens. Parent traversal ("../") is not allowed.
    *
    * Examples:
    * - basePath: "skills/security/alerts/rules" & relativePath: "." - stores reference content in the "skills/security/alerts/rules/[name].md" file
    * - basePath: "skills/security/alerts/rules" & relativePath: "./queries" - stores reference content in the "skills/security/alerts/rules/queries/[name].md" file
+   * - basePath: "skills/security/alerts/rules" & relativePath: "./queries/esql" - stores reference content in the "skills/security/alerts/rules/queries/esql/[name].md" file
    */
   relativePath: string;
   /**
@@ -175,8 +186,8 @@ export const referencedContentSchema = z.array(
       .string()
       .min(1, 'Relative path must be non-empty')
       .regex(
-        /^(?:\.|\.\/[a-z0-9-_]+)$/,
-        'Relative path must start with a dot and contain only lowercase letters, numbers, underscores, and hyphens'
+        /^\.(?:\/[a-z0-9-_]+)*$/,
+        'Relative path must start with a dot and may contain "/"-separated segments of lowercase letters, numbers, underscores, and hyphens (no "../")'
       ),
     content: z.string().min(1, 'Content must be non-empty'),
   })

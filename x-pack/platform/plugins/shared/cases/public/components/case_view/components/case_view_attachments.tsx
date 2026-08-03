@@ -36,7 +36,7 @@ import { AttachmentAccordion } from './attachment_accordion';
 import { useGetCaseFileStats } from '../../../containers/use_get_case_file_stats';
 import { getAttachmentItemCount } from './helpers';
 import { NO_SEARCH_RESULTS_TITLE, NO_SEARCH_RESULTS_BODY, CLEAR_FILTERS } from './translations';
-import { SidebarToggleButton } from '../../cases_redesign/case_view/components/sidebar_toggle_button';
+import { SidebarToggleButton } from '../../cases_redesign/case_view/components/sidebar/sidebar_toggle_button';
 
 interface CaseViewAttachmentsProps {
   caseData: CaseUI;
@@ -178,7 +178,7 @@ export const CaseViewAttachments = ({
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <CaseViewAttachButton caseData={caseData} fill />
+            <CaseViewAttachButton caseData={caseData} attachLocation="attachments" fill />
           </EuiFlexItem>
           {detailsRedesignEnabled && (
             <EuiFlexItem grow={false}>

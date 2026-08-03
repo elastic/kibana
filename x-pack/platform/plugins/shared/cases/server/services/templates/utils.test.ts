@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import { toFieldNames, trimFieldDefaults } from './utils';
+import { stringify as yamlStringify } from 'yaml';
+import { toFieldDefinitions, trimFieldDefaults } from './utils';
+import type { FieldDefinition } from '../../../common/types/domain/field_definition/v1';
 
-describe('toFieldNames', () => {
-  it('maps fields to field names with label falling back to name', () => {
+describe('toFieldDefinitions', () => {
+  it('maps fields to field definitions with label falling back to name', () => {
     const fields = [
       {
         name: 'field_one',
@@ -19,14 +21,57 @@ describe('toFieldNames', () => {
       { name: 'field_two', type: 'keyword' as const, control: 'TEXTAREA' as const },
     ];
 
-    expect(toFieldNames(fields)).toEqual([
+    expect(toFieldDefinitions(fields)).toEqual([
       { name: 'field_one', label: 'Field One', type: 'keyword', control: 'INPUT_TEXT' },
       { name: 'field_two', label: 'field_two', type: 'keyword', control: 'TEXTAREA' },
     ]);
   });
 
   it('returns an empty array when given no fields', () => {
-    expect(toFieldNames([])).toEqual([]);
+    expect(toFieldDefinitions([])).toEqual([]);
+  });
+
+  it('resolves $ref fields against the field library', () => {
+    const libraryDefs: FieldDefinition[] = [
+      {
+        fieldDefinitionId: 'fd-1',
+        name: 'severity_level',
+        owner: 'securitySolution',
+        description: '',
+        isGlobal: false,
+        definition: yamlStringify({
+          name: 'severity_level',
+          label: 'Severity Level',
+          type: 'keyword',
+          control: 'SELECT_BASIC',
+          metadata: { options: ['Low', 'High'] },
+        }),
+      },
+    ];
+
+    const fields = [
+      {
+        name: 'inline_notes',
+        label: 'Notes',
+        type: 'keyword' as const,
+        control: 'INPUT_TEXT' as const,
+      },
+      { $ref: 'severity_level' },
+    ];
+
+    expect(toFieldDefinitions(fields, libraryDefs)).toEqual([
+      { name: 'inline_notes', label: 'Notes', type: 'keyword', control: 'INPUT_TEXT' },
+      {
+        name: 'severity_level',
+        label: 'Severity Level',
+        type: 'keyword',
+        control: 'SELECT_BASIC',
+      },
+    ]);
+  });
+
+  it('drops $ref fields whose library definition is missing', () => {
+    expect(toFieldDefinitions([{ $ref: 'missing_field' }], [])).toEqual([]);
   });
 });
 

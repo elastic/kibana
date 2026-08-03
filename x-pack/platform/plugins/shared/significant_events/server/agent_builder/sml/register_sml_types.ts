@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import type { AgentContextLayerPluginSetup } from '@kbn/agent-context-layer-plugin/server';
+import type { AgentBuilderSmlPluginSetup } from '@kbn/agent-builder-sml-plugin/server';
 import type { GetScopedClients } from '../../routes/types';
 import { createSignificantEventSmlType } from './significant_event_sml_type';
 
 export const registerAgentBuilderSmlTypes = ({
-  agentContextLayer,
+  agentBuilderSml,
   getScopedClients,
 }: {
-  agentContextLayer?: AgentContextLayerPluginSetup;
+  agentBuilderSml?: AgentBuilderSmlPluginSetup;
   getScopedClients: GetScopedClients;
 }): void => {
-  agentContextLayer?.registerType(
+  agentBuilderSml?.registerType(
     createSignificantEventSmlType({
       getScopedClients,
     })

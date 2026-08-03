@@ -14,11 +14,13 @@ import {
   EntityPanelKeyByType,
   EntityPanelParamByType,
 } from '../../../../flyout/entity_details/shared/constants';
+import { useIsNewFlyoutEnabled } from '../../../../common/hooks/use_is_new_flyout_enabled';
+import { FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
+import { useFlyoutApi } from '../../../../flyout_v2/use_flyout_api';
 import { getOpenEntityFlyoutLabel, VIEW_ENTITY_DETAILS } from './translations';
 import { getEntityIcon } from './utils';
 
 const ENTITY_BADGE_NAME_CLASS = 'leadEntityBadge__name';
-const ENTITY_BADGE_NAME_MAX_WIDTH = 220;
 
 // Lets the badge shrink below its content width (rather than overflowing the
 // card) when the surrounding card/panel is narrower than the badge's natural
@@ -45,7 +47,9 @@ interface EntityBadgeProps {
  * the Agent Builder chat).
  */
 export const EntityBadge: React.FC<EntityBadgeProps> = ({ entity, scopeId }) => {
+  const enableNewFlyout = useIsNewFlyoutEnabled();
   const { openFlyout } = useExpandableFlyoutApi();
+  const { openEntityFlyout } = useFlyoutApi();
   const { euiTheme } = useEuiTheme();
 
   const badgeContent = (
@@ -67,7 +71,7 @@ export const EntityBadge: React.FC<EntityBadgeProps> = ({ entity, scopeId }) => 
           font-weight: ${euiTheme.font.weight.medium};
           display: inline-block;
           min-width: 0;
-          max-width: min(${ENTITY_BADGE_NAME_MAX_WIDTH}px, 100%);
+          max-width: 100%;
           overflow: hidden;
           text-overflow: ellipsis;
           white-space: nowrap;
@@ -87,10 +91,7 @@ export const EntityBadge: React.FC<EntityBadgeProps> = ({ entity, scopeId }) => 
     );
   }
 
-  const panelKey = EntityPanelKeyByType[entity.type];
-  const panelParam = EntityPanelParamByType[entity.type];
-
-  if (!panelKey || !panelParam) {
+  if (!enableNewFlyout && !EntityPanelKeyByType[entity.type]) {
     return (
       <EuiBadge color="hollow" css={entityBadgeContainerCss}>
         {badgeContent}
@@ -105,18 +106,27 @@ export const EntityBadge: React.FC<EntityBadgeProps> = ({ entity, scopeId }) => 
   // friendly name) — best-effort, but strictly better than a name-only match.
   const entityId = entity.id ?? `${entity.type}:${entity.name}`;
 
-  const openEntityFlyout = () => {
-    openFlyout({
-      right: {
-        id: panelKey,
-        params: {
-          [panelParam]: entity.name,
-          entityId,
-          contextID: scopeId,
-          scopeId,
-        },
-      },
-    });
+  const handleOpenEntityFlyout = () => {
+    const sharedParams = { entityId, contextID: scopeId, scopeId };
+
+    if (enableNewFlyout) {
+      openEntityFlyout({
+        engineType: entity.type,
+        entityName: entity.name,
+        origin: FLYOUT_ORIGIN.THREAT_HUNTING_LEADS,
+        ...sharedParams,
+      });
+      return;
+    }
+
+    const entityType = entity.type as EntityType;
+    const panelKey = EntityPanelKeyByType[entityType];
+    const paramName = EntityPanelParamByType[entityType];
+    if (panelKey && paramName) {
+      openFlyout({
+        right: { id: panelKey, params: { [paramName]: entity.name, ...sharedParams } },
+      });
+    }
   };
 
   // Rendered as a `span[role=button]` (rather than passing `onClick` to
@@ -124,7 +134,16 @@ export const EntityBadge: React.FC<EntityBadgeProps> = ({ entity, scopeId }) => 
   // sit inside other clickable elements (cards/panels) that are themselves
   // rendered as `<button>`, and nested buttons are invalid HTML.
   return (
-    <EuiToolTip content={VIEW_ENTITY_DETAILS} position="top">
+    <EuiToolTip
+      content={VIEW_ENTITY_DETAILS}
+      position="top"
+      // EuiToolTip's anchor wrapper defaults to `display: inline-block`, which
+      // sizes itself to its own preferred content width rather than
+      // respecting the badge's `max-width: 100%` below it, letting long names
+      // overflow their container. `inline` lets it flow within the
+      // surrounding line box instead, so the max-width constraint applies.
+      anchorProps={{ style: { display: 'inline' } }}
+    >
       <span
         role="button"
         tabIndex={0}
@@ -142,13 +161,13 @@ export const EntityBadge: React.FC<EntityBadgeProps> = ({ entity, scopeId }) => 
         `}
         onClick={(e) => {
           e.stopPropagation();
-          openEntityFlyout();
+          handleOpenEntityFlyout();
         }}
         onKeyDown={(e) => {
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
             e.stopPropagation();
-            openEntityFlyout();
+            handleOpenEntityFlyout();
           }
         }}
       >

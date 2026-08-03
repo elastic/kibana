@@ -9,13 +9,12 @@ import expect from '@kbn/expect';
 import { omit, sortBy } from 'lodash';
 import { emptyAssets } from '@kbn/streams-schema';
 import type { Streams } from '@kbn/streams-schema';
+import type { BaseFeature } from '@kbn/significant-events-schema';
 import { v4 } from 'uuid';
-import { STREAMS_ESQL_RULE_TYPE_ID } from '@kbn/rule-data-utils';
-import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS } from '@kbn/management-settings-ids';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import type { SignificantEventsSupertestRepositoryClient } from './helpers/repository_client';
 import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
-import { bulkQueries, getQueries } from './helpers/requests';
+import { bulkQueries, getQueries, deleteFeature, upsertFeature } from './helpers/requests';
 import {
   deleteStream,
   disableStreams,
@@ -24,11 +23,13 @@ import {
 } from '../streams/helpers/requests';
 import type { RoleCredentials } from '../../services';
 
+/** Alerting v2 rule display name for MATCH metric-series rules. */
+const matchCountRuleName = (title: string) => `${title} (match count)`;
+
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
   const alertingApi = getService('alertingApiCommon');
   const samlAuth = getService('samlAuth');
-  const kibanaServer = getService('kibanaServer');
   let roleAuthc: RoleCredentials;
 
   let apiClient: SignificantEventsSupertestRepositoryClient;
@@ -58,19 +59,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
       apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
       await enableStreams(apiClient);
-      await kibanaServer.uiSettings.update({
-        [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS]: true,
-      });
-      await kibanaServer.uiSettings.waitForEventualCacheRefresh();
     });
 
     after(async () => {
       await disableStreams(apiClient);
       await samlAuth.invalidateM2mApiKeyWithRoleScope(roleAuthc);
-      await kibanaServer.uiSettings.update({
-        [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS]: false,
-      });
-      await kibanaServer.uiSettings.waitForEventualCacheRefresh();
     });
 
     beforeEach(async () => {
@@ -98,7 +91,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           title: 'OutOfMemoryError',
           description: '',
           esql: {
-            query: `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("message:'OutOfMemoryError'")`,
+            query: `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE KQL("message:'OutOfMemoryError'")`,
           },
         },
         {
@@ -107,7 +100,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           title: 'cluster_block_exception',
           description: '',
           esql: {
-            query: `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("message:'cluster_block_exception'")`,
+            query: `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE KQL("message:'cluster_block_exception'")`,
           },
         },
       ];
@@ -122,15 +115,18 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const getQueriesResponse = await getQueries(apiClient, STREAM_NAME);
       expect(sortBy(getQueriesResponse.queries, 'id')).to.eql(sortBy(queries, 'id'));
 
-      const rules = await alertingApi.searchRules(
-        roleAuthc,
-        'alert.attributes.name:OutOfMemoryError'
+      const rules = await alertingApi.searchRulesV2(roleAuthc, { search: 'OutOfMemoryError' });
+      expect(rules.body.items).to.have.length(1);
+      expect(rules.body.items[0].kind).to.eql('signal');
+      expect(rules.body.items[0].metadata.name).to.eql(matchCountRuleName('OutOfMemoryError'));
+      // MATCH rules compile to a closed-minute count series (not per-doc copies).
+      const breachQuery = rules.body.items[0].query.breach.query as string;
+      expect(breachQuery).to.contain(`FROM ${STREAM_NAME},${STREAM_NAME}.*`);
+      expect(breachQuery).to.contain(
+        'STATS metric_value = COUNT(*) BY bucket = BUCKET(@timestamp, 1 minute)'
       );
-      expect(rules.body.data).to.have.length(1);
-      expect(rules.body.data[0].rule_type_id).to.eql(STREAMS_ESQL_RULE_TYPE_ID);
-      expect(rules.body.data[0].params.query).to.eql(
-        `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("message:'OutOfMemoryError'")`
-      );
+      expect(breachQuery).to.contain('KEEP bucket, metric_value');
+      expect(breachQuery).to.contain('LIMIT 6');
     });
 
     it('rejects a stray top-level `queries` field on PUT and leaves detections unchanged', async () => {
@@ -148,7 +144,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               id: v4(),
               title: 'stray query',
               esql: {
-                query: `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("message:'stray'")`,
+                query: `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE KQL("message:'stray'")`,
               },
             },
           ],
@@ -168,7 +164,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           title: 'initial title',
           description: '',
           esql: {
-            query: `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("message:'initial query'")`,
+            query: `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE KQL("message:'initial query'")`,
           },
         };
         const upsertQueryResponse = await apiClient
@@ -188,27 +184,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const getQueriesResponse = await getQueries(apiClient, STREAM_NAME);
         expect(getQueriesResponse.queries).to.eql([query]);
 
-        const rules = await alertingApi.searchRules(roleAuthc, '');
-        expect(rules.body.data).to.have.length(1);
-        expect(rules.body.data[0].name).to.eql(query.title);
-      });
-
-      it('returns 400 and does not save when ES|QL query is missing METADATA _id,_source', async () => {
-        const queryId = v4();
-        await apiClient
-          .fetch('PUT /api/streams/{name}/queries/{queryId} 2023-10-31', {
-            params: {
-              path: { name: STREAM_NAME, queryId },
-              body: {
-                title: 'missing metadata',
-                esql: { query: `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE KQL("message:'x'")` },
-              },
-            },
-          })
-          .expect(400);
-
-        const getQueriesResponse = await getQueries(apiClient, STREAM_NAME);
-        expect(getQueriesResponse.queries).to.eql([]);
+        const rules = await alertingApi.searchRulesV2(roleAuthc);
+        expect(rules.body.items).to.have.length(1);
+        expect(rules.body.items[0].metadata.name).to.eql(matchCountRuleName(query.title));
       });
 
       it('returns 400 and does not save when ES|QL query references invalid sources', async () => {
@@ -219,7 +197,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               path: { name: STREAM_NAME, queryId },
               body: {
                 title: 'invalid sources',
-                esql: { query: 'FROM logs.ecs METADATA _id, _source' },
+                esql: { query: 'FROM logs.ecs' },
               },
             },
           })
@@ -229,20 +207,20 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(getQueriesResponse.queries).to.eql([]);
       });
 
-      it('updates the query and create a new rule when updating an existing query esql', async () => {
+      it('updates the query and recreates its rule when updating an existing query ES|QL', async () => {
         const query = {
           id: 'first',
           type: 'match' as const,
           title: 'initial title',
           description: '',
           esql: {
-            query: `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("initial query")`,
+            query: `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE KQL("initial query")`,
           },
         };
         await bulkQueries(apiClient, STREAM_NAME, [{ index: omit(query, 'type') }]);
-        const initialRules = await alertingApi.searchRules(roleAuthc, '');
+        const initialRules = await alertingApi.searchRulesV2(roleAuthc);
 
-        const updatedEsql = `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("updated query")`;
+        const updatedEsql = `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE KQL("updated query")`;
         const upsertQueryResponse = await apiClient
           .fetch('PUT /api/streams/{name}/queries/{queryId} 2023-10-31', {
             params: {
@@ -268,10 +246,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
         ]);
 
-        const updatedRules = await alertingApi.searchRules(roleAuthc, '');
-        expect(updatedRules.body.data).to.have.length(1);
-        expect(updatedRules.body.data[0].name).to.eql(query.title);
-        expect(updatedRules.body.data[0].id).not.to.eql(initialRules.body.data[0].id);
+        const updatedRules = await alertingApi.searchRulesV2(roleAuthc);
+        expect(updatedRules.body.items).to.have.length(1);
+        expect(updatedRules.body.items[0].metadata.name).to.eql(matchCountRuleName(query.title));
+        // The rule id is content-addressed on the ES|QL (computeRuleId hashes
+        // stream/query id/esql), so changing the ES|QL is a breaking change that
+        // recreates the rule under a new id rather than updating it in place.
+        expect(updatedRules.body.items[0].id).not.to.eql(initialRules.body.items[0].id);
       });
 
       it('updates the query and the rule when updating an existing query title', async () => {
@@ -281,11 +262,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           title: 'initial title',
           description: '',
           esql: {
-            query: `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("initial query")`,
+            query: `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE KQL("initial query")`,
           },
         };
         await bulkQueries(apiClient, STREAM_NAME, [{ index: omit(query, 'type') }]);
-        const initialRules = await alertingApi.searchRules(roleAuthc, '');
+        const initialRules = await alertingApi.searchRulesV2(roleAuthc);
 
         const upsertQueryResponse = await apiClient
           .fetch('PUT /api/streams/{name}/queries/{queryId} 2023-10-31', {
@@ -312,10 +293,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
         ]);
 
-        const updatedRules = await alertingApi.searchRules(roleAuthc, '');
-        expect(updatedRules.body.data).to.have.length(1);
-        expect(updatedRules.body.data[0].name).to.eql('updated title');
-        expect(updatedRules.body.data[0].id).to.eql(initialRules.body.data[0].id);
+        const updatedRules = await alertingApi.searchRulesV2(roleAuthc);
+        expect(updatedRules.body.items).to.have.length(1);
+        expect(updatedRules.body.items[0].metadata.name).to.eql(
+          matchCountRuleName('updated title')
+        );
+        expect(updatedRules.body.items[0].id).to.eql(initialRules.body.items[0].id);
       });
     });
 
@@ -328,7 +311,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             title: 'Significant Query',
             description: '',
             esql: {
-              query: `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("message:'query'")`,
+              query: `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE KQL("message:'query'")`,
             },
           },
         },
@@ -345,8 +328,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const getQueriesResponse = await getQueries(apiClient, STREAM_NAME);
       expect(getQueriesResponse.queries).to.eql([]);
 
-      const rules = await alertingApi.searchRules(roleAuthc, '');
-      expect(rules.body.data).to.have.length(0);
+      const rules = await alertingApi.searchRulesV2(roleAuthc);
+      expect(rules.body.items).to.have.length(0);
     });
 
     it('returns a 404 when deleting an inexistant query', async () => {
@@ -358,6 +341,73 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .expect(404);
     });
 
+    it('deletes an already-expired query instead of reporting it as not found', async () => {
+      // The existence check must pass includeExpired, or an expired query looks gone.
+      const queryId = v4();
+      await apiClient
+        .fetch('PUT /api/streams/{name}/queries/{queryId} 2023-10-31', {
+          params: {
+            path: { name: STREAM_NAME, queryId },
+            body: {
+              title: 'already expired',
+              esql: {
+                query: `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE KQL("message:'expired'")`,
+              },
+              expires_at: '2020-01-01T00:00:00.000Z',
+            },
+          },
+        })
+        .expect(200);
+      expect((await getQueries(apiClient, STREAM_NAME)).queries).to.eql([]);
+
+      const deleteQueryResponse = await apiClient
+        .fetch('DELETE /api/streams/{name}/queries/{queryId} 2023-10-31', {
+          params: { path: { name: STREAM_NAME, queryId } },
+        })
+        .expect(200)
+        .then((res) => res.body);
+      expect(deleteQueryResponse.acknowledged).to.be(true);
+
+      const rules = await alertingApi.searchRulesV2(roleAuthc);
+      expect(rules.body.items).to.have.length(0);
+
+      // Repeating the delete on the same id must now 404, proving it was a real
+      // delete and not another silent no-op.
+      await apiClient
+        .fetch('DELETE /api/streams/{name}/queries/{queryId} 2023-10-31', {
+          params: { path: { name: STREAM_NAME, queryId } },
+        })
+        .expect(404);
+    });
+
+    it('cleans up an already-expired query and its rule when the stream itself is deleted', async () => {
+      const queryId = v4();
+      await apiClient
+        .fetch('PUT /api/streams/{name}/queries/{queryId} 2023-10-31', {
+          params: {
+            path: { name: STREAM_NAME, queryId },
+            body: {
+              title: 'lingering expired query',
+              esql: {
+                query: `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE KQL("message:'lingering'")`,
+              },
+              expires_at: '2020-01-01T00:00:00.000Z',
+            },
+          },
+        })
+        .expect(200);
+
+      // Deliberately left in place, expired but never explicitly deleted, so
+      // teardown (deleteStream -> deleteAllQueries) must be the one to catch it.
+      await deleteStream(apiClient, STREAM_NAME);
+
+      const rules = await alertingApi.searchRulesV2(roleAuthc);
+      expect(rules.body.items).to.have.length(0);
+
+      // Recreate so the outer afterEach's deleteStream (expecting 200) doesn't 404.
+      await putStream(apiClient, STREAM_NAME, { stream, ...emptyAssets });
+    });
+
     it('bulks insert and remove queries', async () => {
       const firstQuery = {
         id: 'first',
@@ -365,7 +415,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         title: 'first query',
         description: '',
         esql: {
-          query: `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("query 1")`,
+          query: `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE KQL("query 1")`,
         },
       };
       const secondQuery = {
@@ -374,7 +424,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         title: 'second query',
         description: '',
         esql: {
-          query: `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("query 2")`,
+          query: `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE KQL("query 2")`,
         },
       };
       const thirdQuery = {
@@ -383,7 +433,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         title: 'third query',
         description: '',
         esql: {
-          query: `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("query 3")`,
+          query: `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE KQL("query 3")`,
         },
       };
       await bulkQueries(
@@ -391,14 +441,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         STREAM_NAME,
         [firstQuery, secondQuery, thirdQuery].map((query) => ({ index: omit(query, 'type') }))
       );
-      const initialRules = await alertingApi.searchRules(roleAuthc, '');
+      const initialRules = await alertingApi.searchRulesV2(roleAuthc);
 
       const newQuery = {
         id: 'fourth',
         title: 'fourth query',
         description: '',
         esql: {
-          query: `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("query 4")`,
+          query: `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE KQL("query 4")`,
         },
       };
       const updateThirdQuery = {
@@ -406,7 +456,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         title: 'third query',
         description: '',
         esql: {
-          query: `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("query 3 updated")`,
+          query: `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE KQL("query 3 updated")`,
         },
       };
 
@@ -448,18 +498,22 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       ];
       expect(sortBy(getQueriesResponse.queries, 'id')).to.eql(sortBy(expectedQueries, 'id'));
 
-      const updatedRules = await alertingApi.searchRules(roleAuthc, '');
-      expect(updatedRules.body.data).to.have.length(3);
-      const ruleNames = updatedRules.body.data.map((rule: any) => rule.name);
-      expect(ruleNames.includes(firstQuery.title)).to.be(true);
-      expect(ruleNames.includes(updateThirdQuery.title)).to.be(true);
-      expect(ruleNames.includes(newQuery.title)).to.be(true);
+      const updatedRules = await alertingApi.searchRulesV2(roleAuthc);
+      expect(updatedRules.body.items).to.have.length(3);
+      const ruleNames = updatedRules.body.items.map((rule: any) => rule.metadata.name);
+      expect(ruleNames.includes(matchCountRuleName(firstQuery.title))).to.be(true);
+      expect(ruleNames.includes(matchCountRuleName(updateThirdQuery.title))).to.be(true);
+      expect(ruleNames.includes(matchCountRuleName(newQuery.title))).to.be(true);
 
-      const initialThirdRuleId = initialRules.body.data.find(
-        (rule: any) => rule.name === thirdQuery.title
+      const initialThirdRuleId = initialRules.body.items.find(
+        (rule: any) => rule.metadata.name === matchCountRuleName(thirdQuery.title)
       ).id;
+      // The third query's ES|QL changed in the bulk, so its rule is recreated
+      // under a new (content-addressed) id rather than updated in place.
       expect(initialThirdRuleId).not.to.eql(
-        updatedRules.body.data.find((rule: any) => rule.name === updateThirdQuery.title).id
+        updatedRules.body.items.find(
+          (rule: any) => rule.metadata.name === matchCountRuleName(updateThirdQuery.title)
+        ).id
       );
     });
 
@@ -470,7 +524,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         title: 'first query',
         description: '',
         esql: {
-          query: `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("query 1")`,
+          query: `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE KQL("query 1")`,
         },
       };
       await bulkQueries(apiClient, STREAM_NAME, [{ index: omit(firstQuery, 'type') }]);
@@ -480,11 +534,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         title: 'invalid query',
         description: '',
         esql: {
-          query: `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE KQL("query invalid")`,
+          // Unterminated string literal, so the ES|QL parser reports errors.
+          query: `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE message == "unterminated`,
         },
       };
 
-      await apiClient
+      const response = await apiClient
         .fetch('POST /api/streams/{name}/queries/_bulk 2023-10-31', {
           params: {
             path: { name: STREAM_NAME },
@@ -493,7 +548,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             },
           },
         })
-        .expect(400);
+        .expect(400)
+        .then((res) => res.body);
+      // Pin the rejection to ES|QL validation so the test cannot pass on an unrelated 400.
+      expect((response as unknown as { message: string }).message).to.eql(
+        'One or more ES|QL queries are invalid'
+      );
 
       const getQueriesResponse = await getQueries(apiClient, STREAM_NAME);
       expect(getQueriesResponse.queries).to.eql([firstQuery]);
@@ -516,7 +576,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           title: 'cross-stream bulk delete 1',
           description: '',
           esql: {
-            query: `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("message:'q1'")`,
+            query: `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE KQL("message:'q1'")`,
           },
         };
         const secondQuery = {
@@ -524,7 +584,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           title: 'cross-stream bulk delete 2',
           description: '',
           esql: {
-            query: `FROM ${SECOND_STREAM_NAME},${SECOND_STREAM_NAME}.* METADATA _id, _source | WHERE KQL("message:'q2'")`,
+            query: `FROM ${SECOND_STREAM_NAME},${SECOND_STREAM_NAME}.* | WHERE KQL("message:'q2'")`,
           },
         };
 
@@ -555,6 +615,171 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(response).to.eql({ succeeded: 2, failed: 0, skipped: 0 });
         expect((await getQueries(apiClient, STREAM_NAME)).queries).to.eql([]);
         expect((await getQueries(apiClient, SECOND_STREAM_NAME)).queries).to.eql([]);
+      });
+
+      it('partitions valid and unknown ids within a single request', async () => {
+        const query = {
+          id: v4(),
+          title: 'partition test',
+          description: '',
+          esql: {
+            query: `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE KQL("message:'partition'")`,
+          },
+        };
+        await bulkQueries(apiClient, STREAM_NAME, [{ index: query }]);
+
+        const response = await apiClient
+          .fetch('POST /internal/streams/queries/_bulk_delete', {
+            params: { body: { queryIds: [query.id, 'unknown-id'] } },
+          })
+          .expect(200)
+          .then((res) => res.body);
+
+        expect(response).to.eql({ succeeded: 1, failed: 0, skipped: 1 });
+        expect((await getQueries(apiClient, STREAM_NAME)).queries).to.eql([]);
+      });
+
+      it('actually removes an already-expired query, not just from the default listing', async () => {
+        // Bulk delete's existence lookup must pass includeExpired, or an expired
+        // query is silently skipped instead of deleted.
+        const expiredQuery = {
+          id: v4(),
+          title: 'already expired',
+          description: '',
+          esql: {
+            query: `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE KQL("message:'expired'")`,
+          },
+          expires_at: '2020-01-01T00:00:00.000Z',
+        };
+        await bulkQueries(apiClient, STREAM_NAME, [{ index: expiredQuery }]);
+        expect((await getQueries(apiClient, STREAM_NAME)).queries).to.eql([]);
+
+        const firstDelete = await apiClient
+          .fetch('POST /internal/streams/queries/_bulk_delete', {
+            params: { body: { queryIds: [expiredQuery.id] } },
+          })
+          .expect(200)
+          .then((res) => res.body);
+        expect(firstDelete).to.eql({ succeeded: 1, failed: 0, skipped: 0 });
+
+        // Repeating the delete must report skipped, proving the first call really deleted it.
+        const secondDelete = await apiClient
+          .fetch('POST /internal/streams/queries/_bulk_delete', {
+            params: { body: { queryIds: [expiredQuery.id] } },
+          })
+          .expect(200)
+          .then((res) => res.body);
+        expect(secondDelete).to.eql({ succeeded: 0, failed: 0, skipped: 1 });
+      });
+
+      it('does not touch a surviving sibling query or its rule', async () => {
+        // Regression: deleting one query used to re-diff the whole stream, spuriously
+        // calling updateRule on every other rule-backed query in it.
+        const survivor = {
+          id: v4(),
+          title: 'bulk-delete survivor',
+          description: '',
+          esql: {
+            query: `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE KQL("message:'survivor'")`,
+          },
+        };
+        const target = {
+          id: v4(),
+          title: 'bulk-delete target',
+          description: '',
+          esql: {
+            query: `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE KQL("message:'target'")`,
+          },
+        };
+        await bulkQueries(apiClient, STREAM_NAME, [{ index: survivor }, { index: target }]);
+
+        const rulesBefore = await alertingApi.searchRulesV2(roleAuthc);
+        const survivorRuleBefore = rulesBefore.body.items.find(
+          (rule: any) => rule.metadata.name === matchCountRuleName(survivor.title)
+        );
+        expect(survivorRuleBefore).to.be.ok();
+
+        const response = await apiClient
+          .fetch('POST /internal/streams/queries/_bulk_delete', {
+            params: { body: { queryIds: [target.id] } },
+          })
+          .expect(200)
+          .then((res) => res.body);
+        expect(response).to.eql({ succeeded: 1, failed: 0, skipped: 0 });
+
+        expect((await getQueries(apiClient, STREAM_NAME)).queries).to.eql([
+          { ...survivor, type: 'match' },
+        ]);
+
+        const rulesAfter = await alertingApi.searchRulesV2(roleAuthc);
+        const survivorRuleAfter = rulesAfter.body.items.find(
+          (rule: any) => rule.metadata.name === matchCountRuleName(survivor.title)
+        );
+        expect(survivorRuleAfter.id).to.eql(survivorRuleBefore.id);
+        expect(survivorRuleAfter.updatedAt).to.eql(survivorRuleBefore.updatedAt);
+        expect(survivorRuleAfter.version).to.eql(survivorRuleBefore.version);
+      });
+    });
+
+    describe('feature-grounding survives unrelated query bulk operations', () => {
+      const testFeature: BaseFeature = {
+        id: 'reconcile-ttl-probe',
+        stream_name: STREAM_NAME,
+        type: 'entity',
+        description: 'grounding probe for TTL-preservation regression tests',
+        properties: {},
+        confidence: 90,
+      };
+
+      async function persistGroundedQuery(title: string) {
+        const response = await apiClient
+          .fetch('POST /internal/streams/{streamName}/queries/_persist', {
+            params: {
+              path: { streamName: STREAM_NAME },
+              body: {
+                queries: [
+                  {
+                    type: 'match',
+                    title,
+                    description: '',
+                    esql: {
+                      query: `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE KQL("message:'${title}'")`,
+                    },
+                    severity_score: 10,
+                    features: [{ id: testFeature.id }],
+                  },
+                ],
+              },
+            },
+          })
+          .expect(200)
+          .then((res) => res.body);
+        return response.persistedQueries[0].id as string;
+      }
+
+      it('reconcileStream still tombstones a survivor of the public bulk queries endpoint once its feature is gone', async () => {
+        // Regression: the bulk endpoint's rewrite used to drop expires_at on unrelated
+        // queries, making this survivor durable and immune to the reconciliation below.
+        const { uuid: featureUuid } = await upsertFeature(apiClient, STREAM_NAME, testFeature);
+        const survivorId = await persistGroundedQuery('persist-survivor-public-bulk');
+
+        await bulkQueries(apiClient, STREAM_NAME, [
+          {
+            index: {
+              id: v4(),
+              title: 'public bulk unrelated draft',
+              description: '',
+              esql: {
+                query: `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE KQL("message:'unrelated'")`,
+              },
+            },
+          },
+        ]);
+
+        await deleteFeature(apiClient, STREAM_NAME, featureUuid);
+
+        const { queries } = await getQueries(apiClient, STREAM_NAME);
+        expect(queries.find((q) => q.id === survivorId)).to.be(undefined);
       });
     });
   });

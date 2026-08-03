@@ -7,7 +7,6 @@
 
 import { parse as parseCookie } from 'tough-cookie';
 
-import { AGENT_BUILDER_UIAM_OAUTH_CLIENT_MANAGEMENT_SETTING_ID } from '@kbn/management-settings-ids';
 import { createSAMLResponse } from '@kbn/mock-idp-utils';
 import { apiTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
@@ -22,11 +21,7 @@ apiTest.describe(
   () => {
     let authHeaders: Record<string, string>;
 
-    apiTest.beforeAll(async ({ apiClient, kbnClient, config: { organizationId, projectType } }) => {
-      await kbnClient.uiSettings.update({
-        [AGENT_BUILDER_UIAM_OAUTH_CLIENT_MANAGEMENT_SETTING_ID]: true,
-      });
-
+    apiTest.beforeAll(async ({ apiClient, config: { organizationId, projectType } }) => {
       const samlResponse = await createSAMLResponse({
         username: '1234567890',
         email: 'elastic_admin@elastic.co',
@@ -44,10 +39,6 @@ apiTest.describe(
       const cookie = parseCookie(samlCallback.headers['set-cookie'][0])!.cookieString();
 
       authHeaders = { ...COMMON_UNSAFE_HEADERS, Cookie: cookie };
-    });
-
-    apiTest.afterAll(async ({ kbnClient }) => {
-      await kbnClient.uiSettings.unset(AGENT_BUILDER_UIAM_OAUTH_CLIENT_MANAGEMENT_SETTING_ID);
     });
 
     apiTest(

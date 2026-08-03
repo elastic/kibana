@@ -5,52 +5,41 @@
  * 2.0.
  */
 
+import { MAX_NAME_LENGTH } from '@kbn/alerting-v2-schemas';
 import type { QueryLink } from '@kbn/significant-events-schema';
 import pLimit from 'p-limit';
 import {
-  STREAMS_RULE_CONSUMER,
-  STREAMS_ESQL_RULE_TYPE_ID,
-  type CreateRuleBody,
   type IRulesManagementClient,
-  type UpdateRuleBody,
+  type SignificantEventsRuleDefinition,
 } from './rules/rules_management_client';
 import { TIMESTAMP } from '../fields';
+import { METRIC_SERIES_RULE_NAME_SUFFIX } from '../../significant_events/rules/metric_series_contract';
+import { getMetricSeriesRuleSchedule } from '../../significant_events/rules/schedule';
 
 const RULE_INSTALL_CONCURRENCY = 10;
-const RULE_TAG = 'streams';
-const RULE_SCHEDULE_INTERVAL = '1m';
 
-export function toCreateRuleBody(queryLink: QueryLink): CreateRuleBody {
-  const { query } = queryLink;
-  return {
-    name: query.title,
-    consumer: STREAMS_RULE_CONSUMER,
-    alertTypeId: STREAMS_ESQL_RULE_TYPE_ID,
-    actions: [] as never[],
-    params: {
-      timestampField: TIMESTAMP,
-      query: query.esql.query,
-    },
-    enabled: true,
-    tags: [RULE_TAG, queryLink.stream_name],
-    schedule: {
-      interval: RULE_SCHEDULE_INTERVAL,
-    },
-  };
+/**
+ * KI titles are uncapped but Alerting v2 rejects a `metadata.name` over
+ * {@link MAX_NAME_LENGTH}, so a long title would 400 on rule creation — and
+ * {@link installQueries} runs as a `Promise.all`, taking the rest of the batch
+ * with it. Trim the title, never the suffix: the suffix is how these rules are
+ * recognised as metric-series rules.
+ */
+function toRuleName(title: string): string {
+  const maxTitleLength = MAX_NAME_LENGTH - METRIC_SERIES_RULE_NAME_SUFFIX.length;
+  return `${title.slice(0, maxTitleLength)}${METRIC_SERIES_RULE_NAME_SUFFIX}`;
 }
 
-export function toUpdateRuleBody(queryLink: QueryLink): UpdateRuleBody {
+export function toRuleDefinition(queryLink: QueryLink): SignificantEventsRuleDefinition {
   const { query } = queryLink;
+  const { every } = getMetricSeriesRuleSchedule();
   return {
-    name: query.title,
-    actions: [] as never[],
-    params: {
-      timestampField: TIMESTAMP,
-      query: query.esql.query,
-    },
-    tags: [RULE_TAG, queryLink.stream_name],
+    name: toRuleName(query.title),
+    streamName: queryLink.stream_name,
+    timestampField: TIMESTAMP,
+    esqlQuery: query.esql.query,
     schedule: {
-      interval: RULE_SCHEDULE_INTERVAL,
+      interval: every,
     },
   };
 }
@@ -64,10 +53,10 @@ export async function installQueries(
 
   await Promise.all([
     ...queriesToCreate.map((queryLink) =>
-      limiter(() => client.createRule(queryLink.rule_id, toCreateRuleBody(queryLink)))
+      limiter(() => client.createRule(queryLink.rule_id, toRuleDefinition(queryLink)))
     ),
     ...queriesToUpdate.map((queryLink) =>
-      limiter(() => client.updateRule(queryLink.rule_id, toUpdateRuleBody(queryLink)))
+      limiter(() => client.updateRule(queryLink.rule_id, toRuleDefinition(queryLink)))
     ),
   ]);
 }

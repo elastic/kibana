@@ -9,7 +9,6 @@ import expect from '@kbn/expect';
 import type { Streams } from '@kbn/streams-schema';
 import type { BaseFeature } from '@kbn/significant-events-schema';
 import { emptyAssets } from '@kbn/streams-schema';
-import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS } from '@kbn/management-settings-ids';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import type { SignificantEventsSupertestRepositoryClient } from './helpers/repository_client';
 import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
@@ -54,25 +53,16 @@ const testFeature: BaseFeature = {
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
-  const kibanaServer = getService('kibanaServer');
   let apiClient: SignificantEventsSupertestRepositoryClient;
 
   describe('Features', function () {
     before(async () => {
       apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
       await enableStreams(apiClient);
-      await kibanaServer.uiSettings.update({
-        [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS]: true,
-      });
-      await kibanaServer.uiSettings.waitForEventualCacheRefresh();
     });
 
     after(async () => {
       await disableStreams(apiClient);
-      await kibanaServer.uiSettings.update({
-        [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS]: false,
-      });
-      await kibanaServer.uiSettings.waitForEventualCacheRefresh();
     });
 
     describe('Exclude and restore', () => {

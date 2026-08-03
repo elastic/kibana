@@ -71,6 +71,7 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
       body: invalidBody,
     });
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest(
@@ -84,6 +85,7 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
         body,
       });
       expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
     }
   );
 
@@ -100,6 +102,24 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
         body: invalidBody,
       });
       expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
+    }
+  );
+
+  apiTest(
+    'validation: rejects body with unknown top-level keys (strict schema)',
+    async ({ apiClient }) => {
+      const body = buildCreateRuleData();
+      const invalidBody = {
+        ...body,
+        unknown_field: { name: 'typo field' },
+      };
+      const response = await apiClient.post(testData.RULE_API_PATH, {
+        headers: writerHeaders,
+        body: invalidBody,
+      });
+      expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
     }
   );
 
@@ -110,6 +130,7 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
       body: rest,
     });
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest('validation: rejects body with empty metadata.name', async ({ apiClient }) => {
@@ -119,6 +140,7 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
       body,
     });
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest(
@@ -132,6 +154,7 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
         body,
       });
       expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
     }
   );
 
@@ -146,6 +169,7 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
         body,
       });
       expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
     }
   );
 
@@ -156,6 +180,7 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
       body,
     });
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest(
@@ -167,6 +192,7 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
         body,
       });
       expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
     }
   );
 
@@ -179,6 +205,7 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
       body,
     });
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest('validation: rejects state_transition for non-alert kinds', async ({ apiClient }) => {
@@ -191,6 +218,7 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
       body,
     });
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest(
@@ -211,6 +239,7 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
         body,
       });
       expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
     }
   );
 
@@ -232,6 +261,7 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
         body,
       });
       expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
     }
   );
 
@@ -253,6 +283,7 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
         body,
       });
       expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
     }
   );
 
@@ -273,6 +304,7 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
         body,
       });
       expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
     }
   );
 
@@ -476,6 +508,7 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
       body: rest,
     });
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest('validation: rejects body with missing schedule', async ({ apiClient }) => {
@@ -487,6 +520,7 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
       body: rest,
     });
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest('validation: rejects body with missing query', async ({ apiClient }) => {
@@ -498,6 +532,7 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
       body: rest,
     });
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest(

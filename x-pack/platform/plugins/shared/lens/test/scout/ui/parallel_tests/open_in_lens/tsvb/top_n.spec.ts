@@ -63,14 +63,6 @@ spaceTest.describe('TSVB Top N - Open in Lens', { tag: tags.deploymentAgnostic }
         expect(hasAction).toBe(false);
       }
     );
-
-    await spaceTest.step('count aggregation has Convert to Lens action', async () => {
-      const hasAction = await dashboard.panelHasAction(
-        testData.DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION,
-        'Top N - Basic'
-      );
-      expect(hasAction).toBe(true);
-    });
   });
 
   spaceTest('should convert to horizontal bar', async ({ page, pageObjects }) => {

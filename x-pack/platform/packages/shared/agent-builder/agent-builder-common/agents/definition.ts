@@ -10,8 +10,13 @@ import type { UserIdAndName } from '../base/users';
 import type { AgentAccessControl } from './access_control';
 
 /**
- * The type of an agent.
- * Only one type for now, this enum is mostly here for future-proofing.
+ * Id of the default agent type
+ */
+export const chatAgentTypeId = 'chat';
+
+/**
+ * @deprecated agent types are now an open set of registered type ids. Use plain strings
+ * (e.g. {@link chatAgentTypeId}) instead.
  */
 export enum AgentType {
   chat = 'chat',
@@ -31,9 +36,10 @@ export interface AgentDefinition {
    */
   id: string;
   /**
-   * The type of the agent (only for type for now, here for future-proofing)
+   * Id of the agent type this agent derives from.
+   * Defaults to {@link chatAgentTypeId}, whose base is empty.
    */
-  type: AgentType;
+  type: string;
   /**
    * Human-readable name for the agent.
    */
@@ -90,7 +96,7 @@ export interface AgentConfiguration {
 
   /**
    * Optional list of skill IDs exposed to the agent.
-   * When undefined, all skills are available (backward compatibility).
+   * When undefined, no additional skills are granted beyond enable_elastic_capabilities/plugin_ids.
    */
   skill_ids?: string[];
 
@@ -127,7 +133,7 @@ export type AgentConfigurationOverrides = Partial<AgentConfiguration>;
 
 /**
  * Runtime configuration overrides exposed via the public API and persisted on conversation rounds.
- * Limited to `instructions` and `tools` - other fields from AgentConfigurationOverrides
+ * Limited to `instructions`, `tools`, `skill_ids` and `enable_elastic_capabilities` - other fields from AgentConfigurationOverrides
  * are internal implementation details.
  *
  * This type is used for:
@@ -136,5 +142,5 @@ export type AgentConfigurationOverrides = Partial<AgentConfiguration>;
  */
 export type RuntimeAgentConfigurationOverrides = Pick<
   AgentConfigurationOverrides,
-  'instructions' | 'tools'
+  'instructions' | 'tools' | 'skill_ids' | 'enable_elastic_capabilities'
 >;
