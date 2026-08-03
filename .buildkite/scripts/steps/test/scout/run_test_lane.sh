@@ -13,6 +13,8 @@ PASSED=()
 FAILED=()
 SKIPPED=()
 RETRY_SPEC_FILES=()
+# Sum of Playwright's `stats.flaky` (tests that failed then passed on retry) across the lane.
+TOTAL_FLAKY=0
 
 # Fail early if any of the given environment variable names are unset or empty
 check_required_env_vars() {
@@ -48,6 +50,15 @@ failed_specs_artifact_path() {
 # against this script's cwd rather than the config's directory.
 json_report_path() {
   echo ".scout/test-results-${1}.json"
+}
+
+# Reads stats.flaky from a config's JSON report. Echoes 0 if the report is missing or
+# malformed — this is a display-only nicety and must never affect the lane.
+flaky_count() {
+  local idx="$1" report
+  report="$(json_report_path "$idx")"
+  [[ -f "$report" ]] || { echo 0; return; }
+  jq -r '.stats.flaky // 0' "$report" 2>/dev/null || echo 0
 }
 
 # After a config fails, persist its failed spec files so the next attempt can re-run only those.
@@ -256,7 +267,14 @@ run_scout_tests() {
     0)
       upload_report_events "$config_path"
       mark_index_passed "$idx"
-      PASSED+=("$config_path ($duration)")
+      local flaky
+      flaky="$(flaky_count "$idx")"
+      if [[ "$flaky" -gt 0 ]]; then
+        TOTAL_FLAKY=$(( TOTAL_FLAKY + flaky ))
+        PASSED+=("$config_path ($duration, ⚠️ $flaky flaky)")
+      else
+        PASSED+=("$config_path ($duration)")
+      fi
       ;;
     *)
       upload_report_events "$config_path"
@@ -336,6 +354,7 @@ print_summary() {
   [[ ${#PASSED[@]}   -gt 0 ]] && echo "✅  Passed: ${#PASSED[@]}"
   [[ ${#FAILED[@]}   -gt 0 ]] && echo "❌  Failed: ${#FAILED[@]}"
   [[ ${#SKIPPED[@]}  -gt 0 ]] && echo "⏩️ Skipped: ${#SKIPPED[@]}"
+  [[ "$TOTAL_FLAKY" -gt 0 ]] && echo "⚠️  Flaky: $TOTAL_FLAKY"
   echo ""
   echo "Test loads ran in the following order:"
   echo ""

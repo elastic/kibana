@@ -13,6 +13,8 @@ if [[ "$IS_TEST_EXECUTION_STEP" == "true" ]]; then
 
   ARTIFACT_PATTERNS=(
     '{examples,packages,src,x-pack}/**/.scout/test-artifacts/**/*.png'
+    # trace.zip files from failed attempts (Scout's trace mode is 'retain-on-failure').
+    '{examples,packages,src,x-pack}/**/.scout/test-artifacts/**/trace.zip'
     '.scout/reports/scout-playwright-test-failures-*/**/*'
     '.scout/reports/scout-playwright-test-failures-*/scout-failures-*.ndjson'
     'target/junit/**/*'

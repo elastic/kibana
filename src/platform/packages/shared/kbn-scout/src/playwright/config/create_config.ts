@@ -19,6 +19,27 @@ import { SCOUT_SERVERS_ROOT } from '@kbn/scout-info';
 import type { ScoutPlaywrightOptions, ScoutTestOptions } from '../types';
 import { VALID_CONFIG_MARKER } from '../types';
 
+const DEFAULT_CI_RETRIES = 1;
+
+/**
+ * Number of Playwright retries: 1 on CI, 0 locally. `SCOUT_TEST_RETRIES` overrides both —
+ * e.g. the flaky-test runner sets it to 0.
+ */
+const resolveRetries = (): number => {
+  const override = process.env.SCOUT_TEST_RETRIES;
+
+  if (override === undefined) {
+    return process.env.CI ? DEFAULT_CI_RETRIES : 0;
+  }
+
+  const parsed = Number.parseInt(override, 10);
+  if (Number.isNaN(parsed) || parsed < 0) {
+    throw new Error(`SCOUT_TEST_RETRIES must be a non-negative integer, got '${override}'`);
+  }
+
+  return parsed;
+};
+
 export function createPlaywrightConfig(options: ScoutPlaywrightOptions): PlaywrightTestConfig {
   /**
    * Playwright loads the config file multiple times, so we need to generate a unique run id
@@ -97,8 +118,8 @@ export function createPlaywrightConfig(options: ScoutPlaywrightOptions): Playwri
     fullyParallel: false,
     /* Fail the build on CI if you accidentally left test.only in the source code. */
     forbidOnly: !!process.env.CI,
-    /* Retry on CI only */
-    retries: 0, // disable retry for Playwright runner
+    /* Retries happen immediately, in a fresh worker. See resolveRetries(). */
+    retries: resolveRetries(),
     /* Opt out of parallel tests on CI. */
     workers: options.workers ?? 1,
     /* Reporter to use. See https://playwright.dev/docs/test-reporters */
@@ -121,8 +142,9 @@ export function createPlaywrightConfig(options: ScoutPlaywrightOptions): Playwri
       /* Base URL to use in actions like `await page.goto('/')`. */
       // baseURL: 'http://127.0.0.1:3000',
 
-      /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
-      trace: 'on-first-retry',
+      /* Keep a trace for any failed attempt, including one later recovered by a retry.
+       * See https://playwright.dev/docs/trace-viewer */
+      trace: 'retain-on-failure',
       screenshot: 'only-on-failure',
       // video: 'retain-on-failure',
       // storageState: './output/reports/state.json', // Store session state (like cookies)

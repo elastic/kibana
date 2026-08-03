@@ -7,7 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FullConfig, Suite, TestCase, TestResult } from '@playwright/test/reporter';
+import type {
+  FullConfig,
+  FullResult,
+  Suite,
+  TestCase,
+  TestResult,
+} from '@playwright/test/reporter';
 import { BROWSER_CONSOLE_ERRORS_ATTACHMENT } from '@kbn/scout-info';
 import { ScoutReportEventAction } from '../../report';
 import { ScoutPlaywrightReporter } from './playwright_reporter';
@@ -21,7 +27,8 @@ jest.mock('@kbn/code-owners', () => ({
 const createMockConfig = (): FullConfig =>
   ({ configFile: undefined, fullyParallel: false } as unknown as FullConfig);
 
-const createMockSuite = (): Suite => ({} as Suite);
+const createMockSuite = (tests: TestCase[] = []): Suite =>
+  ({ allTests: () => tests } as unknown as Suite);
 
 const createMockTest = (): TestCase =>
   ({
@@ -38,13 +45,43 @@ const createMockTest = (): TestCase =>
     },
   } as unknown as TestCase);
 
+/** A `TestCase` with a fixed `outcome()` and one `TestResult` per given status. */
+const createMockTestCase = (overrides: {
+  outcome: ReturnType<TestCase['outcome']>;
+  statuses: Array<TestResult['status']>;
+  title?: string;
+  filePath?: string;
+}): TestCase => {
+  const { outcome, statuses, title = 'should work', filePath = 'path/to/file.spec.ts' } = overrides;
+
+  return {
+    titlePath: () => ['', 'local', filePath, 'My Suite', title],
+    title,
+    tags: [],
+    annotations: [],
+    expectedStatus: 'passed',
+    location: { file: `/repo-root/${filePath}`, line: 42, column: 0 },
+    parent: {
+      title: 'My Suite',
+      type: 'describe',
+      titlePath: () => ['', 'local', filePath, 'My Suite'],
+    },
+    outcome: () => outcome,
+    results: statuses.map((status) => ({ status, duration: 100 })),
+  } as unknown as TestCase;
+};
+
+const createMockFullResult = (status: FullResult['status'] = 'passed'): FullResult =>
+  ({ status, duration: 1000 } as FullResult);
+
 const createMockResult = (
-  overrides: { attachments?: TestResult['attachments'] } = {}
+  overrides: { attachments?: TestResult['attachments']; retry?: number } = {}
 ): TestResult =>
   ({
     status: 'failed',
     startTime: new Date(),
     duration: 1000,
+    retry: overrides.retry ?? 0,
     attachments: overrides.attachments ?? [],
     error: undefined,
     stdout: [],
@@ -58,13 +95,24 @@ describe('ScoutPlaywrightReporter', () => {
   beforeEach(() => {
     reporter = new ScoutPlaywrightReporter({ runId: 'test-run-id' });
     logEventSpy = jest.spyOn((reporter as any).report, 'logEvent').mockImplementation(() => {});
+    // `onEnd` also calls save()/conclude(), which otherwise touch the filesystem for real.
+    jest.spyOn((reporter as any).report, 'save').mockImplementation(() => {});
+    jest.spyOn((reporter as any).report, 'conclude').mockImplementation(() => {});
     reporter.onBegin(createMockConfig(), createMockSuite());
   });
 
+  const getLoggedEvents = () => logEventSpy.mock.calls.map(([event]) => event);
+
   const getTestEndEvent = () =>
-    logEventSpy.mock.calls
-      .map(([event]) => event)
-      .find((event) => event.event?.action === ScoutReportEventAction.TEST_END);
+    getLoggedEvents().find((event) => event.event?.action === ScoutReportEventAction.TEST_END);
+
+  const getTestOutcomeEvents = () =>
+    getLoggedEvents().filter(
+      (event) => event.event?.action === ScoutReportEventAction.TEST_OUTCOME
+    );
+
+  const getRunEndEvent = () =>
+    getLoggedEvents().find((event) => event.event?.action === ScoutReportEventAction.RUN_END);
 
   describe('getScoutConfigInfo', () => {
     const getInfo = (configPath: string) => (reporter as any).getScoutConfigInfo(configPath);
@@ -135,6 +183,108 @@ describe('ScoutPlaywrightReporter', () => {
       reporter.onTestEnd(createMockTest(), createMockResult());
 
       expect(getTestEndEvent()?.test?.console_errors).toBeUndefined();
+    });
+
+    it('sets attempt to result.retry', () => {
+      reporter.onTestEnd(createMockTest(), createMockResult({ retry: 1 }));
+
+      expect(getTestEndEvent()?.test?.attempt).toBe(1);
+    });
+
+    it('does not emit a test-begin event (dropped to keep event volume neutral)', () => {
+      reporter.onTestEnd(createMockTest(), createMockResult());
+
+      expect(
+        getLoggedEvents().some((event) => event.event?.action === ScoutReportEventAction.TEST_BEGIN)
+      ).toBe(false);
+    });
+  });
+
+  describe('onEnd', () => {
+    const expectedTest = createMockTestCase({
+      outcome: 'expected',
+      statuses: ['passed'],
+      title: 'passes first time',
+    });
+    const flakyTest = createMockTestCase({
+      outcome: 'flaky',
+      statuses: ['failed', 'passed'],
+      title: 'flaky test',
+    });
+    const unexpectedTest = createMockTestCase({
+      outcome: 'unexpected',
+      statuses: ['failed', 'failed'],
+      title: 'hard fail',
+    });
+    const skippedTest = createMockTestCase({
+      outcome: 'skipped',
+      statuses: ['skipped'],
+      title: 'statically skipped',
+    });
+
+    it('emits one test-outcome event per test, with the outcome and attempt count', async () => {
+      reporter.onBegin(
+        createMockConfig(),
+        createMockSuite([expectedTest, flakyTest, unexpectedTest, skippedTest])
+      );
+
+      await reporter.onEnd(createMockFullResult('failed'));
+
+      const outcomeByTitle = Object.fromEntries(
+        getTestOutcomeEvents().map((event) => [event.test?.title, event.test])
+      );
+
+      expect(outcomeByTitle['passes first time']).toMatchObject({
+        outcome: 'expected',
+        attempts: 1,
+      });
+      expect(outcomeByTitle['flaky test']).toMatchObject({ outcome: 'flaky', attempts: 2 });
+      expect(outcomeByTitle['hard fail']).toMatchObject({ outcome: 'unexpected', attempts: 2 });
+      expect(outcomeByTitle['statically skipped']).toMatchObject({
+        outcome: 'skipped',
+        attempts: 1,
+      });
+      expect(getTestOutcomeEvents()).toHaveLength(4);
+    });
+
+    it('derives run-end stats from final outcomes, counting a flaky test as a pass', async () => {
+      reporter.onBegin(
+        createMockConfig(),
+        createMockSuite([expectedTest, flakyTest, unexpectedTest, skippedTest])
+      );
+
+      await reporter.onEnd(createMockFullResult('failed'));
+
+      expect(getRunEndEvent()?.test_run?.tests).toEqual({
+        passes: 2,
+        failures: 1,
+        pending: 1,
+        flaky: 1,
+        total: 4,
+      });
+    });
+
+    it('produces empty stats when the suite was never captured (no onBegin)', async () => {
+      // Reporter constructed but onBegin never called — should not throw.
+      const freshReporter = new ScoutPlaywrightReporter({ runId: 'no-begin' });
+      const freshLogEventSpy: jest.SpyInstance = jest
+        .spyOn((freshReporter as any).report, 'logEvent')
+        .mockImplementation(() => {});
+      jest.spyOn((freshReporter as any).report, 'save').mockImplementation(() => {});
+      jest.spyOn((freshReporter as any).report, 'conclude').mockImplementation(() => {});
+
+      await freshReporter.onEnd(createMockFullResult('passed'));
+
+      const runEndEvent = freshLogEventSpy.mock.calls
+        .map(([event]) => event)
+        .find((event) => event.event?.action === ScoutReportEventAction.RUN_END);
+      expect(runEndEvent?.test_run?.tests).toEqual({
+        passes: 0,
+        failures: 0,
+        pending: 0,
+        flaky: 0,
+        total: 0,
+      });
     });
   });
 });
