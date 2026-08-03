@@ -25,7 +25,11 @@ function getSpacesManager(spaces: Space[] = []) {
 }
 
 const renderScreen = (props: SpaceSelectorProps) => {
-  const queryClient = new QueryClient();
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: { retry: false },
+    },
+  });
 
   return renderWithI18n(
     <QueryClientProvider client={queryClient}>
@@ -189,6 +193,49 @@ describe('initial solution setup', () => {
   it('loads spaces when enabled and setup is not required', async () => {
     const spacesManager = getSpacesManager(spaces);
     spacesManager.getInitialSolutionSetup = jest.fn().mockResolvedValue({ required: false });
+
+    renderScreen({
+      spacesManager,
+      serverBasePath: '/server-base-path',
+      customBranding$,
+      initialSolutionSetupEnabled: true,
+    });
+
+    await waitFor(() => {
+      expect(spacesManager.getInitialSolutionSetup).toHaveBeenCalledTimes(1);
+      expect(spacesManager.getSpaces).toHaveBeenCalledTimes(1);
+    });
+    expect(screen.getByRole('heading', { name: 'Select your space' })).toBeInTheDocument();
+    expect(screen.getByText('Space 1')).toBeInTheDocument();
+  });
+
+  it('loads spaces when setup-state check is unauthorized', async () => {
+    const spacesManager = getSpacesManager(spaces);
+    spacesManager.getInitialSolutionSetup = jest
+      .fn()
+      .mockRejectedValue(Object.assign(new Error('Forbidden'), { response: { status: 403 } }));
+
+    renderScreen({
+      spacesManager,
+      serverBasePath: '/server-base-path',
+      customBranding$,
+      initialSolutionSetupEnabled: true,
+    });
+
+    await waitFor(() => {
+      expect(spacesManager.getInitialSolutionSetup).toHaveBeenCalledTimes(1);
+      expect(spacesManager.getSpaces).toHaveBeenCalledTimes(1);
+    });
+    expect(screen.getByRole('heading', { name: 'Select your space' })).toBeInTheDocument();
+    expect(screen.getByText('Space 1')).toBeInTheDocument();
+    expect(
+      screen.queryByTestId('initialSolutionSetup-solutionViewEsOption')
+    ).not.toBeInTheDocument();
+  });
+
+  it('loads spaces when setup-state check fails transiently', async () => {
+    const spacesManager = getSpacesManager(spaces);
+    spacesManager.getInitialSolutionSetup = jest.fn().mockRejectedValue(new Error('boom'));
 
     renderScreen({
       spacesManager,

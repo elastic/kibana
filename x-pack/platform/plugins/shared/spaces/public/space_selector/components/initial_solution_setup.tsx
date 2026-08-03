@@ -23,7 +23,7 @@ import { isHttpFetchError } from '@kbn/core-http-browser';
 import { i18n } from '@kbn/i18n';
 import { parseNextURL } from '@kbn/std';
 
-import type { SolutionView } from '../../../common';
+import type { InitialSolutionSetupView } from '../../../common';
 import { ENTER_SPACE_PATH } from '../../../common';
 import { SOLUTION_VIEW_OPTIONS } from '../../solution_view_options';
 import type { SpacesManager } from '../../spaces_manager';
@@ -35,7 +35,7 @@ interface Props {
 
 export const InitialSolutionSetup = ({ spacesManager, serverBasePath }: Props) => {
   const { euiTheme } = useEuiTheme();
-  const [selectedSolution, setSelectedSolution] = useState<SolutionView>();
+  const [selectedSolution, setSelectedSolution] = useState<InitialSolutionSetupView>();
   const [error, setError] = useState<Error>();
 
   const continueToSpace = () => {
@@ -46,7 +46,7 @@ export const InitialSolutionSetup = ({ spacesManager, serverBasePath }: Props) =
       parsed === '/' ? enterUrl : `${enterUrl}?next=${encodeURIComponent(parsed)}`;
   };
 
-  const completeSetup = async (solution: SolutionView) => {
+  const completeSetup = async (solution: InitialSolutionSetupView) => {
     setSelectedSolution(solution);
     setError(undefined);
 
@@ -75,13 +75,14 @@ export const InitialSolutionSetup = ({ spacesManager, serverBasePath }: Props) =
 
   return (
     <>
-      <EuiFlexGroup gutterSize="l" justifyContent="center" wrap responsive={false}>
+      <EuiFlexGroup gutterSize="l" justifyContent="center" wrap>
         {SOLUTION_VIEW_OPTIONS.map(
           ({ value, initialSetupName, description, icon, dataTestSubj }) => (
-            <EuiFlexItem key={value} grow={false}>
+            <EuiFlexItem key={value} grow={false} css={{ maxWidth: '100%' }}>
               <EuiCard
                 css={css`
-                  width: calc(${euiTheme.size.l} * 13) !important;
+                  width: calc(${euiTheme.size.l} * 13);
+                  max-width: 100%;
                   min-height: calc(${euiTheme.size.base} * 15);
 
                   .euiCard__content {

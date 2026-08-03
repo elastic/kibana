@@ -121,6 +121,15 @@ export const SpaceSelector = ({
     enabled: initialSolutionSetupEnabled,
   });
 
+  const isSetupRequired =
+    initialSolutionSetupEnabled &&
+    !initialSolutionSetupError &&
+    initialSolutionSetup?.required === true;
+  const canLoadSpaces =
+    !initialSolutionSetupEnabled ||
+    Boolean(initialSolutionSetupError) ||
+    initialSolutionSetup?.required === false;
+
   const {
     data: spaces,
     isLoading: areSpacesLoading,
@@ -128,15 +137,13 @@ export const SpaceSelector = ({
   } = useQuery<Space[], Error>({
     queryKey: ['spaces_list'],
     queryFn: () => spacesManager.getSpaces(),
-    enabled:
-      (!initialSolutionSetupEnabled || initialSolutionSetup?.required === false) && !searchTerm,
+    enabled: canLoadSpaces && !searchTerm,
   });
-  const isInitialSolutionSetup =
-    initialSolutionSetupEnabled && initialSolutionSetup?.required === true;
+  const isInitialSolutionSetup = isSetupRequired;
   const isLoading =
     (initialSolutionSetupEnabled && isInitialSolutionSetupLoading) ||
     (!isInitialSolutionSetup && areSpacesLoading);
-  const error = (initialSolutionSetupEnabled && initialSolutionSetupError) || spacesError;
+  const error = spacesError;
 
   useEffect(() => {
     setCurrentViewMode((spaces?.length ?? 0) > VIEW_MODE_THRESHOLD ? 'table' : 'grid');

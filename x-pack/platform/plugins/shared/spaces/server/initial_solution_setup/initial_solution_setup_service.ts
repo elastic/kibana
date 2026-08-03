@@ -9,7 +9,7 @@ import Boom from '@hapi/boom';
 
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
-import type { SolutionView } from '../../common';
+import type { InitialSolutionSetupView } from '../../common';
 import type { ISpacesClient } from '../spaces_client';
 
 interface Deps {
@@ -38,7 +38,7 @@ export class InitialSolutionSetupService {
     }
   }
 
-  public async complete(spacesClient: ISpacesClient, solution: SolutionView) {
+  public async complete(spacesClient: ISpacesClient, solution: InitialSolutionSetupView) {
     if (!this.deps.enabled) {
       throw Boom.forbidden('Initial solution setup is disabled');
     }

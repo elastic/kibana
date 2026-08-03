@@ -544,7 +544,9 @@ describe('SecureSpacesClientWrapper', () => {
       } as CheckPrivilegesResponse);
       authorization.checkPrivilegesWithRequest.mockReturnValue({ globally: checkPrivileges });
 
-      await expect(wrapper.isInitialSolutionSetupRequired()).rejects.toThrowErrorMatchingInlineSnapshot(
+      await expect(
+        wrapper.isInitialSolutionSetupRequired()
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
         `"Unauthorized to get initial solution setup state"`
       );
 

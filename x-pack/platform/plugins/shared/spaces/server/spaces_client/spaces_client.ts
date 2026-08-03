@@ -23,7 +23,7 @@ import type { KibanaFeature } from '@kbn/features-plugin/common';
 import type { FeaturesPluginStart } from '@kbn/features-plugin/server';
 
 import { isReservedSpace } from '../../common';
-import type { SolutionView, spaceV1 as v1 } from '../../common';
+import type { InitialSolutionSetupView, spaceV1 as v1 } from '../../common';
 import type { ConfigType } from '../config';
 import { withSpaceSolutionDisabledFeatures } from '../lib/utils/space_solution_disabled_features';
 import type { SpaceSavedObjectAttributes } from '../types';
@@ -68,7 +68,7 @@ export interface ISpacesClient {
    * Completes one-time initial solution setup for the default space.
    * @param solution the selected solution view.
    */
-  completeInitialSolutionSetup(solution: SolutionView): Promise<void>;
+  completeInitialSolutionSetup(solution: InitialSolutionSetupView): Promise<void>;
 
   /**
    * Creates a space.
@@ -176,7 +176,7 @@ export class SpacesClient implements ISpacesClient {
     return spaceObject.attributes.solutionSetupRequired === true;
   }
 
-  public async completeInitialSolutionSetup(solution: SolutionView) {
+  public async completeInitialSolutionSetup(solution: InitialSolutionSetupView) {
     if (this.isServerless) {
       throw Boom.badRequest(
         'Unable to complete initial solution setup, solution property is forbidden in serverless'

@@ -20,7 +20,7 @@ import {
   type GetAllSpacesOptions,
   type GetInitialSolutionSetupResponse,
   type GetSpaceResult,
-  type SolutionView,
+  type InitialSolutionSetupView,
   type Space,
 } from '../../common';
 import type { CopySavedObjectsToSpaceResponse } from '../copy_saved_objects_to_space/types';
@@ -232,7 +232,7 @@ export class SpacesManager {
   }
 
   public completeInitialSolutionSetup(
-    solution: SolutionView
+    solution: InitialSolutionSetupView
   ): Promise<CompleteInitialSolutionSetupResponse> {
     const body: CompleteInitialSolutionSetupRequest = { solution };
     return this.http.post<CompleteInitialSolutionSetupResponse>(

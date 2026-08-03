@@ -30,11 +30,11 @@ export type {
 export type {
   Space,
   SolutionView,
+  InitialSolutionSetupView,
   GetAllSpacesOptions,
   GetAllSpacesPurpose,
   GetSpaceResult,
 } from '../common';
-
 export const config: PluginConfigDescriptor = {
   schema: ConfigSchema,
   exposeToBrowser: {

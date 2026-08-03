@@ -24,21 +24,31 @@ const createHttpFetchError = (message: string, status: number) =>
 describe('InitialSolutionSetup', () => {
   const originalLocation = window.location;
   const serverBasePath = '/server-base-path';
+  let locationHref = 'http://localhost/spaces/space_selector';
 
   beforeAll(() => {
-    // @ts-expect-error override window.location for navigation assertions
-    delete window.location;
-    // @ts-expect-error partial Location mock
-    window.location = { href: 'http://localhost/spaces/space_selector' };
+    Object.defineProperty(window, 'location', {
+      configurable: true,
+      value: {
+        get href() {
+          return locationHref;
+        },
+        set href(value: string) {
+          locationHref = value;
+        },
+      },
+    });
   });
 
   afterAll(() => {
-    // @ts-expect-error restore window.location
-    window.location = originalLocation;
+    Object.defineProperty(window, 'location', {
+      configurable: true,
+      value: originalLocation,
+    });
   });
 
   beforeEach(() => {
-    window.location.href = 'http://localhost/spaces/space_selector';
+    locationHref = 'http://localhost/spaces/space_selector';
     jest.clearAllMocks();
   });
 
@@ -50,9 +60,7 @@ describe('InitialSolutionSetup', () => {
   };
 
   it('continues to space preserving next after successful completion', async () => {
-    window.location.href = `http://localhost/spaces/space_selector?next=${encodeURIComponent(
-      '/app/home'
-    )}`;
+    locationHref = `http://localhost/spaces/space_selector?next=${encodeURIComponent('/app/home')}`;
     const user = userEvent.setup();
     const spacesManager = spacesManagerMock.create();
     spacesManager.completeInitialSolutionSetup = jest.fn().mockResolvedValue(undefined);
@@ -62,14 +70,14 @@ describe('InitialSolutionSetup', () => {
 
     await waitFor(() => {
       expect(spacesManager.completeInitialSolutionSetup).toHaveBeenCalledWith('es');
-      expect(window.location.href).toBe(
+      expect(locationHref).toBe(
         `${serverBasePath}${ENTER_SPACE_PATH}?next=${encodeURIComponent('/app/home')}`
       );
     });
   });
 
   it('preserves hash fragments from the current page when forwarding next', async () => {
-    window.location.href = `http://localhost/spaces/space_selector?next=${encodeURIComponent(
+    locationHref = `http://localhost/spaces/space_selector?next=${encodeURIComponent(
       '/app/home'
     )}#/discover/foo`;
     const user = userEvent.setup();
@@ -80,14 +88,14 @@ describe('InitialSolutionSetup', () => {
     await user.click(screen.getByRole('button', { name: 'Select Elasticsearch' }));
 
     await waitFor(() => {
-      expect(window.location.href).toBe(
+      expect(locationHref).toBe(
         `${serverBasePath}${ENTER_SPACE_PATH}?next=${encodeURIComponent('/app/home#/discover/foo')}`
       );
     });
   });
 
   it('omits next when the continuation URL is external', async () => {
-    window.location.href = `http://localhost/spaces/space_selector?next=${encodeURIComponent(
+    locationHref = `http://localhost/spaces/space_selector?next=${encodeURIComponent(
       'https://evil.com'
     )}`;
     const user = userEvent.setup();
@@ -98,7 +106,7 @@ describe('InitialSolutionSetup', () => {
     await user.click(screen.getByRole('button', { name: 'Select Elasticsearch' }));
 
     await waitFor(() => {
-      expect(window.location.href).toBe(`${serverBasePath}${ENTER_SPACE_PATH}`);
+      expect(locationHref).toBe(`${serverBasePath}${ENTER_SPACE_PATH}`);
     });
   });
 
@@ -114,7 +122,7 @@ describe('InitialSolutionSetup', () => {
 
     await waitFor(() => {
       expect(spacesManager.getInitialSolutionSetup).toHaveBeenCalledTimes(1);
-      expect(window.location.href).toBe(`${serverBasePath}${ENTER_SPACE_PATH}`);
+      expect(locationHref).toBe(`${serverBasePath}${ENTER_SPACE_PATH}`);
     });
     expect(screen.queryByTestId('initialSolutionSetupError')).not.toBeInTheDocument();
   });
@@ -132,6 +140,6 @@ describe('InitialSolutionSetup', () => {
     expect(await screen.findByTestId('initialSolutionSetupError')).toHaveTextContent(
       'Setup conflict'
     );
-    expect(window.location.href).toBe('http://localhost/spaces/space_selector');
+    expect(locationHref).toBe('http://localhost/spaces/space_selector');
   });
 });

@@ -23,6 +23,10 @@ jest.mock('./default_space/create_default_space');
 
 describe('Spaces plugin', () => {
   describe('#setup', () => {
+    beforeEach(() => {
+      jest.mocked(createDefaultSpace).mockClear();
+    });
+
     it('can setup with all optional plugins disabled, exposing the expected contract', () => {
       const initializerContext = coreMock.createPluginInitializerContext({});
       const core = coreMock.createSetup() as CoreSetup<SpacesPluginStartDeps>;
@@ -135,7 +139,7 @@ describe('Spaces plugin', () => {
         const plugin = new SpacesPlugin(initializerContext);
         plugin.setup(core, { features, licensing });
 
-        expect(createDefaultSpace).toHaveBeenCalledWith(
+        expect(createDefaultSpace).toHaveBeenLastCalledWith(
           expect.objectContaining({ solutionSetupRequired })
         );
       }

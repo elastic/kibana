@@ -5,14 +5,18 @@
  * 2.0.
  */
 
-import type { SolutionView } from './latest';
+/**
+ * Solutions offered by initial solution setup.
+ * Narrower than {@link SolutionView}, which also includes serverless-only values.
+ */
+export type InitialSolutionSetupView = 'classic' | 'es' | 'oblt' | 'security';
 
 export interface GetInitialSolutionSetupResponse {
   required: boolean;
 }
 
 export interface CompleteInitialSolutionSetupRequest {
-  solution: SolutionView;
+  solution: InitialSolutionSetupView;
 }
 
 export type CompleteInitialSolutionSetupResponse = CompleteInitialSolutionSetupRequest;

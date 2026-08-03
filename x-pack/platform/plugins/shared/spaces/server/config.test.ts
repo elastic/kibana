@@ -124,6 +124,13 @@ describe('config schema', () => {
     ).not.toThrow();
   });
 
+  it('should accept initialSolutionSetup.enabled false in development mode', () => {
+    expect(
+      ConfigSchema.validate({ initialSolutionSetup: { enabled: false } }, { dev: true })
+        .initialSolutionSetup
+    ).toEqual({ enabled: false });
+  });
+
   it('should keep initial solution setup disabled in serverless development', () => {
     const serverlessConfig = {
       allowFeatureVisibility: false,

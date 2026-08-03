@@ -19,8 +19,8 @@ import type {
   GetAllSpacesOptions,
   GetAllSpacesPurpose,
   GetSpaceResult,
+  InitialSolutionSetupView,
   ISpacesClient,
-  SolutionView,
   Space,
 } from '@kbn/spaces-plugin/server';
 
@@ -254,7 +254,7 @@ export class SecureSpacesClientWrapper implements ISpacesClient {
     return this.spacesClient.isInitialSolutionSetupRequired();
   }
 
-  public async completeInitialSolutionSetup(solution: SolutionView) {
+  public async completeInitialSolutionSetup(solution: InitialSolutionSetupView) {
     if (this.useRbac) {
       try {
         await this.ensureAuthorizedGlobally(

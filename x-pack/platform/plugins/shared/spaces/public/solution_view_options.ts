@@ -7,10 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 
-import type { SolutionView } from '../common';
+import type { InitialSolutionSetupView } from '../common';
 
 export const SOLUTION_VIEW_OPTIONS: Array<{
-  value: SolutionView;
+  value: InitialSolutionSetupView;
   name: string;
   initialSetupName: string;
   description: string;
@@ -19,9 +19,12 @@ export const SOLUTION_VIEW_OPTIONS: Array<{
 }> = [
   {
     value: 'es',
-    name: i18n.translate('xpack.spaces.solutionViewOptions.esLabel', {
-      defaultMessage: 'Elasticsearch',
-    }),
+    name: i18n.translate(
+      'xpack.spaces.management.manageSpacePage.solutionViewSelect.searchOptionLabel',
+      {
+        defaultMessage: 'Elasticsearch',
+      }
+    ),
     initialSetupName: i18n.translate('xpack.spaces.solutionViewOptions.esInitialSetupLabel', {
       defaultMessage: 'Elasticsearch',
     }),
@@ -33,9 +36,12 @@ export const SOLUTION_VIEW_OPTIONS: Array<{
   },
   {
     value: 'oblt',
-    name: i18n.translate('xpack.spaces.solutionViewOptions.obltLabel', {
-      defaultMessage: 'Observability',
-    }),
+    name: i18n.translate(
+      'xpack.spaces.management.manageSpacePage.solutionViewSelect.obltOptionLabel',
+      {
+        defaultMessage: 'Observability',
+      }
+    ),
     initialSetupName: i18n.translate('xpack.spaces.solutionViewOptions.obltInitialSetupLabel', {
       defaultMessage: 'Elastic for Observability',
     }),
@@ -47,9 +53,12 @@ export const SOLUTION_VIEW_OPTIONS: Array<{
   },
   {
     value: 'security',
-    name: i18n.translate('xpack.spaces.solutionViewOptions.securityLabel', {
-      defaultMessage: 'Security',
-    }),
+    name: i18n.translate(
+      'xpack.spaces.management.manageSpacePage.solutionViewSelect.securityOptionLabel',
+      {
+        defaultMessage: 'Security',
+      }
+    ),
     initialSetupName: i18n.translate('xpack.spaces.solutionViewOptions.securityInitialSetupLabel', {
       defaultMessage: 'Elastic for Security',
     }),
@@ -61,9 +70,12 @@ export const SOLUTION_VIEW_OPTIONS: Array<{
   },
   {
     value: 'classic',
-    name: i18n.translate('xpack.spaces.solutionViewOptions.classicLabel', {
-      defaultMessage: 'Classic',
-    }),
+    name: i18n.translate(
+      'xpack.spaces.management.manageSpacePage.solutionViewSelect.classicOptionLabel',
+      {
+        defaultMessage: 'Classic',
+      }
+    ),
     initialSetupName: i18n.translate('xpack.spaces.solutionViewOptions.classicInitialSetupLabel', {
       defaultMessage: 'Classic (legacy)',
     }),

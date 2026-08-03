@@ -20,6 +20,10 @@ const spaceCreateSchemaWithSolution = SpacesSavedObjectSchemas['8.8.0'].extends(
   solution: schema.maybe(solutionSchema),
 });
 
+const spaceCreateSchemaWithSolutionSetup = spaceCreateSchemaWithSolution.extends({
+  solutionSetupRequired: schema.maybe(schema.boolean()),
+});
+
 interface SetupDeps {
   core: Pick<CoreSetup, 'savedObjects' | 'getStartServices'>;
   getSpacesService: () => SpacesServiceStart;
@@ -63,9 +67,11 @@ export class SpacesSavedObjectsService {
         3: {
           changes: [],
           schemas: {
-            create: spaceCreateSchemaWithSolution.extends({
-              solutionSetupRequired: schema.maybe(schema.boolean()),
-            }),
+            create: spaceCreateSchemaWithSolutionSetup,
+            forwardCompatibility: spaceCreateSchemaWithSolutionSetup.extends(
+              {},
+              { unknowns: 'ignore' }
+            ),
           },
         },
       },

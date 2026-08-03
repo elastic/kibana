@@ -25,4 +25,5 @@ export type {
   CompleteInitialSolutionSetupRequest,
   CompleteInitialSolutionSetupResponse,
   GetInitialSolutionSetupResponse,
+  InitialSolutionSetupView,
 } from './types/initial_solution_setup';
