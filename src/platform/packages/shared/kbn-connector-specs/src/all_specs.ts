@@ -65,3 +65,4 @@ export * from './specs/dynatrace/dynatrace';
 export * from './specs/datadog/datadog';
 export * from './specs/jenkins/jenkins';
 export * from './specs/cribl/cribl';
+export * from './specs/prometheus_alertmanager/prometheus_alertmanager';
