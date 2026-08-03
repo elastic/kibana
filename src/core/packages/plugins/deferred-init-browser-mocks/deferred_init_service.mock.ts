@@ -20,6 +20,7 @@ const createSetupContractMock = () => {
 const createStartContractMock = () => {
   return lazyObject({
     getStatus$: jest.fn().mockReturnValue(of({ status: 'available' })),
+    refresh: jest.fn(),
   });
 };
 
