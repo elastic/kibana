@@ -20,7 +20,7 @@ export const APP_HEADER_TEST_SUBJECTS = {
   titleButton: 'appHeaderTitleButton',
   titleActions: 'appHeaderTitleActions',
   sharePrefix: 'appHeaderShare',
-  /** Stable share control id for FTR / Scout (title + overflow menu). */
+  /** Stable share control id for FTR / Scout (title action). */
   shareButton: 'shareTopNavButton',
   favorite: 'appHeaderFavorite',
   favoriteButton: 'appHeaderFavoriteButton',

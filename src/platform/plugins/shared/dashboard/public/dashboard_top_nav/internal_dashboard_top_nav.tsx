@@ -398,14 +398,13 @@ export function InternalDashboardTopNav({
     [redirectTo]
   );
 
-  const shareAction = useDashboardShareAction();
+  const shareAction = useDashboardShareAction({ maybeRedirect });
 
   const { viewModeTopNavConfig, editModeTopNavConfig } = useDashboardMenuItems({
     isLabsShown,
     setIsLabsShown,
     maybeRedirect,
     showResetChange,
-    includeShareInMenu: headerMode === 'legacy',
     shareAction,
   });
 

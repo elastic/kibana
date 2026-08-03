@@ -8,6 +8,7 @@
  */
 
 import { AppMenuActionId, type DiscoverAppMenuItemType } from '@kbn/discover-utils';
+import type { AppHeaderShareAction } from '@kbn/app-header';
 import { omit } from 'lodash';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -276,6 +277,7 @@ const getExportItems = (
 };
 
 export const getShareAppMenuItem = ({
+  shareAction,
   discoverParams,
   services,
   hasIntegrations,
@@ -286,6 +288,7 @@ export const getShareAppMenuItem = ({
   totalHitsState,
   intl,
 }: {
+  shareAction?: AppHeaderShareAction;
   discoverParams: AppMenuDiscoverParams;
   services: DiscoverServices;
   hasIntegrations: boolean;
@@ -296,40 +299,36 @@ export const getShareAppMenuItem = ({
   totalHitsState: DataTotalHitsMsg;
   intl: IntlShape;
 }): DiscoverAppMenuItemType[] => {
-  if (!services.share) {
-    return [];
-  }
+  const menuItems: DiscoverAppMenuItemType[] = [];
 
-  const shareExecutor = async () => {
-    const shareOptions = await buildShareOptions({
-      discoverParams,
-      services,
-      currentTab,
-      runtimeStateManager,
-      persistedDiscoverSession,
-      totalHitsState,
-      hasUnsavedChanges,
-    });
-    services.share?.toggleShareContextMenu(shareOptions);
-  };
-
-  const menuItems: DiscoverAppMenuItemType[] = [
-    {
+  if (shareAction) {
+    menuItems.push({
       id: AppMenuActionId.share,
       order: 1,
       label: i18n.translate('discover.localMenu.shareTitle', {
         defaultMessage: 'Share',
       }),
-      tooltipContent: i18n.translate('discover.localMenu.shareTooltip', {
-        defaultMessage: 'Share session',
-      }),
+      tooltipContent:
+        shareAction.tooltip?.content ??
+        i18n.translate('discover.localMenu.shareTooltip', {
+          defaultMessage: 'Share session',
+        }),
+      tooltipTitle: shareAction.tooltip?.title,
       iconType: 'share',
       testId: 'shareTopNavButton',
-      run: () => {
-        shareExecutor();
+      disableButton: shareAction.isDisabled,
+      run: (params) => {
+        const triggerElement = params?.triggerElement;
+        if (!triggerElement) {
+          return;
+        }
+        void shareAction.onClick({
+          triggerElement,
+          returnFocus: params.returnFocus ?? (() => triggerElement.focus()),
+        });
       },
-    },
-  ];
+    });
+  }
 
   if (hasIntegrations) {
     const exportItems = getExportItems(

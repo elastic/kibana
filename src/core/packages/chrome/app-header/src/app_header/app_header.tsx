@@ -22,7 +22,7 @@ import { AppMenu } from './app_menu';
 import { AppHeaderMetadata } from './app_header_metadata';
 import { AppHeaderDescription } from './app_header_description';
 import { APP_HEADER_TEST_SUBJECTS } from './test_subjects';
-import { useCanAccessIntegrations, useResolvedBadges, useShareAction } from './hooks';
+import { useCanAccessIntegrations, useResolvedBadges } from './hooks';
 
 export type AppHeaderViewProps = DistributiveOmit<AppHeaderConfig, 'back' | 'spacing'> & {
   back?: AppHeaderBack | AppHeaderBack[];
@@ -99,8 +99,6 @@ const AppHeaderViewInternal = React.memo<AppHeaderViewInternalProps>(
     showAddIntegrations,
   }) => {
     const hasLegacyActionMenu = useHasLegacyActionMenu();
-    const shareFromMenu = useShareAction(share ? undefined : menu);
-    const shareAction = share ?? shareFromMenu;
     const resolvedBadges = useResolvedBadges(badges);
     const canAccessIntegrations = useCanAccessIntegrations();
     const showIntegrations = !!showAddIntegrations && canAccessIntegrations;
@@ -116,7 +114,7 @@ const AppHeaderViewInternal = React.memo<AppHeaderViewInternalProps>(
       !metadata?.length &&
       !titleAppend &&
       !favorite &&
-      !shareAction;
+      !share;
     const resolvedSpacing = spacing ?? (isSparse ? 'compact' : 'standard');
 
     // Match the title size to the spacing: the shorter `compact` header uses an `xs` title, while the
@@ -130,7 +128,7 @@ const AppHeaderViewInternal = React.memo<AppHeaderViewInternalProps>(
       !!resolvedBadges?.length ||
       !!menu?.items?.length ||
       !!titleAppend ||
-      !!shareAction ||
+      !!share ||
       !!favorite ||
       !!description ||
       !!metadata?.length ||
@@ -146,15 +144,10 @@ const AppHeaderViewInternal = React.memo<AppHeaderViewInternalProps>(
       <AppHeaderShell
         title={<TitleArea title={title} back={back} size={titleSize} />}
         badges={<AppBadges badges={resolvedBadges} />}
-        titleActions={<TitleActions shareAction={shareAction} favorite={favorite} />}
+        titleActions={<TitleActions shareAction={share} favorite={favorite} />}
         titleAppend={titleAppend}
         trailing={
-          <AppMenu
-            menu={menu}
-            share={share}
-            docLink={docLink}
-            showAddIntegrations={showAddIntegrations}
-          />
+          <AppMenu menu={menu} docLink={docLink} showAddIntegrations={showAddIntegrations} />
         }
         secondaryContent={
           description ? (

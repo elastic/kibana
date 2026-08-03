@@ -236,8 +236,8 @@ export interface AppHeaderFavoriteAction {
 }
 
 /**
- * Share action for the app-header title-actions area and overflow menu.
- * Apps own behavior; App Header owns presentation and placement.
+ * Share action for the app-header title-actions area.
+ * Apps own behavior and menu placement; App Header owns title presentation.
  *
  * @public
  */
@@ -248,7 +248,7 @@ export interface AppHeaderShareAction {
   }) => void | Promise<void>;
   isDisabled?: boolean;
   tooltip?: {
-    content: string;
+    content?: string;
     title?: string;
   };
 }

@@ -10,6 +10,7 @@
 import { useCallback, useMemo, useState } from 'react';
 import type { AppHeaderShareAction } from '@kbn/app-header';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import type { SaveDashboardReturn } from '../../dashboard_api/save_modal/types';
 import { getAccessControlClient } from '../../services/access_control_service';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { shareService } from '../../services/kibana_services';
@@ -18,10 +19,14 @@ import { ShowShareModal } from './share/show_share_modal';
 import { useShareOptions } from './share/use_share_options';
 
 /**
- * Dashboard-owned Share action for Chrome Next App Header.
+ * Dashboard-owned Share action for App Header title placement and menu adaptation.
  * Returns `undefined` when the Share plugin is unavailable.
  */
-export const useDashboardShareAction = (): AppHeaderShareAction | undefined => {
+export const useDashboardShareAction = ({
+  maybeRedirect,
+}: {
+  maybeRedirect: (result?: SaveDashboardReturn) => void;
+}): AppHeaderShareAction | undefined => {
   const accessControlClient = getAccessControlClient();
   const dashboardApi = useDashboardApi();
   const [isSaveInProgress, setIsSaveInProgress] = useState(false);
@@ -54,9 +59,10 @@ export const useDashboardShareAction = (): AppHeaderShareAction | undefined => {
         setIsSaveInProgress(false);
       }, 100);
     } else {
-      await dashboardApi.runInteractiveSave();
+      const result = await dashboardApi.runInteractiveSave();
+      maybeRedirect(result);
     }
-  }, [dashboardApi, lastSavedId]);
+  }, [dashboardApi, lastSavedId, maybeRedirect]);
 
   const showShare = useCallback(() => {
     ShowShareModal({
@@ -101,13 +107,16 @@ export const useDashboardShareAction = (): AppHeaderShareAction | undefined => {
         showShare();
       },
       isDisabled: disableTopNav,
-      tooltip:
-        tooltipContent || topNavStrings.share.tooltipTitle
-          ? {
-              content: tooltipContent ?? topNavStrings.share.label,
-              title: topNavStrings.share.tooltipTitle,
-            }
-          : undefined,
+      // With permission text: title + content. Without: content-only "Share"
+      // (EUI `title` is a header above body — title alone looks empty/odd).
+      tooltip: tooltipContent
+        ? {
+            title: topNavStrings.share.tooltipTitle,
+            content: tooltipContent,
+          }
+        : {
+            content: topNavStrings.share.tooltipTitle,
+          },
     };
   }, [disableTopNav, showShare, tooltipContent]);
 };

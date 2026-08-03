@@ -41,16 +41,13 @@ export const useDashboardMenuItems = ({
   setIsLabsShown,
   maybeRedirect,
   showResetChange,
-  includeShareInMenu = true,
   shareAction,
 }: {
   isLabsShown: boolean;
   setIsLabsShown: Dispatch<SetStateAction<boolean>>;
   maybeRedirect: (result?: SaveDashboardReturn) => void;
   showResetChange?: boolean;
-  /** When false, Share is omitted from menu.items (Chrome Next owns title + overflow placement). */
-  includeShareInMenu?: boolean;
-  /** Used to build the legacy menu Share item when `includeShareInMenu` is true. */
+  /** Used to build the menu Share item from the same action passed to App Header. */
   shareAction?: AppHeaderShareAction;
 }) => {
   const isMounted = useMountedState();
@@ -258,7 +255,7 @@ export const useDashboardMenuItems = ({
         order: viewMode === 'edit' ? 3 : 1,
         label: topNavStrings.share.label,
         tooltipContent: shareAction?.tooltip?.content,
-        tooltipTitle: shareAction?.tooltip?.title ?? topNavStrings.share.tooltipTitle,
+        tooltipTitle: shareAction?.tooltip?.title,
         id: 'share',
         iconType: 'share',
         testId: 'shareTopNavButton',
@@ -435,7 +432,7 @@ export const useDashboardMenuItems = ({
       items.push(menuItems.duplicate);
     }
 
-    if (shareAction && includeShareInMenu) {
+    if (shareAction) {
       items.push(menuItems.share);
       if (hasExportMenuItems) {
         // only render the export button if we have integrations
@@ -479,7 +476,6 @@ export const useDashboardMenuItems = ({
     showResetChange,
     isLabsEnabled,
     hasExportMenuItems,
-    includeShareInMenu,
     shareAction,
   ]);
 
@@ -492,7 +488,7 @@ export const useDashboardMenuItems = ({
       menuItems.settings,
     ];
 
-    if (shareAction && includeShareInMenu) {
+    if (shareAction) {
       items.push(menuItems.share);
       if (hasExportMenuItems) {
         // only render the export button if we have integrations
@@ -527,7 +523,6 @@ export const useDashboardMenuItems = ({
     menuItems.add,
     hasExportMenuItems,
     isLabsEnabled,
-    includeShareInMenu,
     shareAction,
   ]);
 

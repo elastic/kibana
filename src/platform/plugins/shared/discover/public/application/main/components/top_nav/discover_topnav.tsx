@@ -357,7 +357,7 @@ export const DiscoverTopNav = ({
     [esqlModeErrors]
   );
 
-  const { topNavBadges, topNavMenu } = useDiscoverTopNav({
+  const { topNavBadges, topNavMenu, shareAction } = useDiscoverTopNav({
     onOpenSaveModal,
     onOpenSaveAsModal,
     persistedDiscoverSession,
@@ -368,7 +368,11 @@ export const DiscoverTopNav = ({
 
   return (
     <span>
-      <DiscoverTopNavMenu topNavBadges={topNavBadges} topNavMenu={topNavMenu} />
+      <DiscoverTopNavMenu
+        topNavBadges={topNavBadges}
+        topNavMenu={topNavMenu}
+        shareAction={shareAction}
+      />
       <SearchBar
         useBackgroundSearchButton={
           customizationContext.displayMode !== 'embedded' &&

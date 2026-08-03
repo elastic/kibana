@@ -73,15 +73,16 @@ export const TitleActions = React.memo<TitleActionsProps>(({ shareAction, favori
     return null;
   }
 
-  const shareTooltipContent = shareAction?.tooltip?.content ?? SHARE_ARIA_LABEL;
-  const hasCustomShareTooltip = !!shareAction?.tooltip?.content || !!shareAction?.tooltip?.title;
+  const shareTooltipContent = shareAction?.tooltip?.content;
+  const shareTooltipTitle = shareAction?.tooltip?.title;
+  const hasCustomShareTooltip = !!shareTooltipContent || !!shareTooltipTitle;
 
   return (
     <div css={styles.root} data-test-subj={APP_HEADER_TEST_SUBJECTS.titleActions}>
       {shareAction ? (
         <EuiToolTip
-          content={shareTooltipContent}
-          title={shareAction.tooltip?.title}
+          content={shareTooltipContent ?? SHARE_ARIA_LABEL}
+          title={shareTooltipTitle}
           {...(!hasCustomShareTooltip && { disableScreenReaderOutput: true })}
         >
           <EuiButtonIcon

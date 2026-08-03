@@ -44,9 +44,10 @@ export const TabsView = (props: SingleTabViewProps) => {
   const isChromeNextProjectHeader = useIsChromeNextProjectHeader();
   const { euiTheme } = useEuiTheme();
 
-  const { getTopTabMenuItems, getAdditionalTabMenuItems, topNavMenuItems } = useAppMenuData({
-    currentDataView,
-  });
+  const { getTopTabMenuItems, getAdditionalTabMenuItems, topNavMenuItems, shareAction } =
+    useAppMenuData({
+      currentDataView,
+    });
 
   const onEvent: UnifiedTabsProps['onEBTEvent'] = useCallback(
     (event) => {
@@ -95,10 +96,10 @@ export const TabsView = (props: SingleTabViewProps) => {
             )}
           </>
         );
-        return <ChromeAppHeader menu={topNavMenuItems} tabsBar={tabsBarWithDelimiter} />;
+        return <ChromeAppHeader menu={topNavMenuItems} share={shareAction} tabsBar={tabsBarWithDelimiter} />;
       };
     }
-  }, [isChromeNextProjectHeader, topNavMenuItems, euiTheme]);
+  }, [isChromeNextProjectHeader, topNavMenuItems, shareAction, euiTheme]);
 
   const appendRight = useMemo(() => {
     if (!isChromeNextProjectHeader) {
