@@ -15,6 +15,7 @@ import {
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiToolTip,
   EuiHorizontalRule,
   EuiLoadingSpinner,
   EuiPanel,
@@ -150,15 +151,17 @@ const BriefCard: React.FC<{
               </EuiButton>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                aria-label={i18n.OPEN_CHAT}
-                iconType="comment"
-                color="text"
-                onClick={(event: React.MouseEvent) => {
-                  event.stopPropagation();
-                  onOpenChat();
-                }}
-              />
+              <EuiToolTip content={i18n.OPEN_CHAT} disableScreenReaderOutput>
+                <EuiButtonIcon
+                  aria-label={i18n.OPEN_CHAT}
+                  iconType="comment"
+                  color="text"
+                  onClick={(event: React.MouseEvent) => {
+                    event.stopPropagation();
+                    onOpenChat();
+                  }}
+                />
+              </EuiToolTip>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
