@@ -182,8 +182,14 @@ actual documented behavior — flag them even without live access to the API, ba
   (a new connector cannot have been available before any feature it references). Flag any doc where it
   is missing or where the version is lower than another version referenced in the same file.
 - `docs/reference/toc.yml` entry exists in the correct section and matches alphabetical order in that section.
-- **Icon**: Connector has an icon (ConnectorIconsMap entry and icon component or asset). No
-  placeholder icons or generated icons. If a brand icon does not exist elsewhere in the repo, prompt the user to provide one.
+- **Icon**: Connector has an icon (ConnectorIconsMap entry and icon component or asset). The SVG
+  must be the vendor's official brand mark — sourced from the vendor's press kit, brand guidelines
+  site, or a curated icon set like [Simple Icons](https://simpleicons.org/) (which tracks official
+  sources). Flag SVGs that look AI-generated or hand-drawn: telltale signs are polygon-based
+  approximations, inline comments describing the shape (e.g. `<!-- Top triangle -->`), non-standard
+  brand colors, or a viewBox that doesn't match the vendor's standard. If a genuine brand icon is
+  not yet available, prompt the user to obtain one from the vendor — do not accept a generated
+  placeholder.
 
 #### Docs quality checks
 
