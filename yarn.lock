@@ -3439,10 +3439,10 @@
   resolved "https://registry.yarnpkg.com/@hapi/hoek/-/hoek-9.3.0.tgz#8368869dcb735be2e7f5cb7647de78e167a251fb"
   integrity sha512-/c6rf4UJlmHlC9b5BaNvzAcFv7HZ2QHaV0D4/HNlBdvFnvQq8RI4kYdhyPCl7Xj+oWvTWQ8ujhqS53LIgAe6KQ==
 
-"@hapi/inert@7.1.1":
-  version "7.1.1"
-  resolved "https://registry.yarnpkg.com/@hapi/inert/-/inert-7.1.1.tgz#ea974c2462e5762c5eaa979a05d45eccbb7cd6ba"
-  integrity sha512-vKSTXYbk1cDt7sLdmRIj8CofJRCcjAH9fUCUJViVzqb7Vi+ajUSfz+pAdwwY315BddwGdoXk0H3i94S0JWEKGQ==
+"@hapi/inert@7.1.2":
+  version "7.1.2"
+  resolved "https://registry.yarnpkg.com/@hapi/inert/-/inert-7.1.2.tgz#b5b72448824e97247d31dcc3970c2e8e40e04f48"
+  integrity sha512-fr0XmsYTUhahIbioBemFlc+o4ro4bj1HPMKN3dG9m6XC+UkF9fdVYfb7uNoDj0vO+HdXendbKk6YEfZG9ToeTQ==
   dependencies:
     "@hapi/ammo" "^6.0.1"
     "@hapi/boom" "^10.0.1"
@@ -13227,13 +13227,6 @@
   dependencies:
     "@turf/helpers" "6.x"
 
-"@types/adm-zip@0.5.7":
-  version "0.5.7"
-  resolved "https://registry.yarnpkg.com/@types/adm-zip/-/adm-zip-0.5.7.tgz#eec10b6f717d3948beb64aca0abebc4b344ac7e9"
-  integrity sha512-DNEs/QvmyRLurdQPChqq0Md4zGvPwHerAJYWk9l2jCbD1VPpnzRJorOdiq4zsw09NFbYnhfsoEhWtxIzXpn2yw==
-  dependencies:
-    "@types/node" "*"
-
 "@types/archiver@7.0.0":
   version "7.0.0"
   resolved "https://registry.yarnpkg.com/@types/archiver/-/archiver-7.0.0.tgz#475d5aa4076ffc05f2c78dc7540b0ea4ab8c7d7a"
@@ -15378,15 +15371,10 @@ acorn@^8.0.4, acorn@^8.1.0, acorn@^8.11.0, acorn@^8.14.0, acorn@^8.15.0, acorn@^
   resolved "https://registry.yarnpkg.com/acorn/-/acorn-8.15.0.tgz#a360898bc415edaac46c8241f6383975b930b816"
   integrity sha512-NZyJarBfL7nWwIq+FDL6Zp/yHEhePMNnnJ0y3qfieCrmNvYct8uvtiV41UvlSe6apAfk0fY1FbWx+NwfmpvtTg==
 
-adm-zip@0.5.16:
-  version "0.5.16"
-  resolved "https://registry.yarnpkg.com/adm-zip/-/adm-zip-0.5.16.tgz#0b5e4c779f07dedea5805cdccb1147071d94a909"
-  integrity sha512-TGw5yVi4saajsSEgz25grObGHEUaDrniwvA2qwSC060KfqGPdglhvPMA2lPIoxs3PQIItj2iag35fONcQqgUaQ==
-
-adm-zip@^0.5.17:
-  version "0.5.17"
-  resolved "https://registry.yarnpkg.com/adm-zip/-/adm-zip-0.5.17.tgz#5c0b65f37aeec5c2a94995c024f931f62e4bbc5a"
-  integrity sha512-+Ut8d9LLqwEvHHJl1+PIHqoyDxFgVN847JTVM3Izi3xHDWPE4UtzzXysMZQs64DMcrJfBeS/uoEP4AD3HQHnQQ==
+adm-zip@0.6.0, adm-zip@^0.5.17:
+  version "0.6.0"
+  resolved "https://registry.yarnpkg.com/adm-zip/-/adm-zip-0.6.0.tgz#bbc5c6c333755e967a06dd98747f431e1d53a3cf"
+  integrity sha512-XleryMhbuksdKtofnWZ9Sk+4CUTbms4Mb/EU32SZwToAyZ5RgVos/ki8n+yr0LWHOGKuakbXTuuYNHLQjhddgg==
 
 after-all-results@^2.0.0:
   version "2.0.0"
@@ -24366,10 +24354,10 @@ joi-to-json@5.0.0:
     combinations "^1.0.0"
     lodash "^4.17.21"
 
-joi@18.2.1:
-  version "18.2.1"
-  resolved "https://registry.yarnpkg.com/joi/-/joi-18.2.1.tgz#a022e39496e25b010a6d4649975c160a4315bd79"
-  integrity sha512-2/OKlogiESf2Nh3TFCrRjrr9z1DRHeW0I+KReF67+4J0Ns+8hBtHRmoWAZ2OFU6I5+TWLEe6sVlSdXPjHm5UbQ==
+joi@18.2.3:
+  version "18.2.3"
+  resolved "https://registry.yarnpkg.com/joi/-/joi-18.2.3.tgz#efdd1311496cd585730633fc57253a45641a3e85"
+  integrity sha512-N5A3KTWQpPWT4ExxxPlUx7WmykGXRzhNidWhV41d6Abu9YfI2NyWCJuxdPnslJCPWtbRpSVOWSnSS6GakLM/Rg==
   dependencies:
     "@hapi/address" "^5.1.1"
     "@hapi/formula" "^3.0.2"

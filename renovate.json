@@ -3338,8 +3338,7 @@
     {
       "groupName": "adm-zip",
       "matchDepNames": [
-        "adm-zip",
-        "@types/adm-zip"
+        "adm-zip"
       ],
       "reviewers": [
         "team:security-solution"
