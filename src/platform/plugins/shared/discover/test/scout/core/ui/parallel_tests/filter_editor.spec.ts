@@ -28,7 +28,7 @@ const runFilterTest = async ({
   await unifiedFieldList.clickFieldListItemAdd('extension');
 
   await expect(dataGrid.getCell(0, 'extension')).toContainText('jpg');
-  expect(await discover.getHitCount()).toBe('14,004');
+  await expect.poll(() => discover.getHitCountInt()).toBe(14_004);
 
   await filterBar.addFilter({
     field: 'extension.raw',
@@ -44,7 +44,7 @@ const runFilterTest = async ({
     await filterBar.hasFilter({ field: 'extension.raw', value: 'css', enabled: true, pinned })
   ).toBe(true);
   await expect(dataGrid.getCell(0, 'extension')).toContainText('css');
-  expect(await discover.getHitCount()).toBe('2,159');
+  await expect.poll(() => discover.getHitCountInt()).toBe(2_159);
 
   await page.reload();
   await discover.waitUntilTabIsLoaded();
@@ -52,7 +52,7 @@ const runFilterTest = async ({
   expect(
     await filterBar.hasFilter({ field: 'extension.raw', value: 'css', enabled: true, pinned })
   ).toBe(true);
-  expect(await discover.getHitCount()).toBe('2,159');
+  await expect.poll(() => discover.getHitCountInt()).toBe(2_159);
   await expect(dataGrid.getCell(0, 'extension')).toContainText('css');
 };
 
@@ -113,7 +113,7 @@ spaceTest.describe('Discover filter editor', { tag: '@local-stateful-classic' },
       await filterBar.hasFilter({ field: 'nestedField.child', value: 'nestedValue', enabled: true })
     ).toBe(true);
     await discover.waitUntilSearchingHasFinished();
-    expect(await discover.getHitCount()).toBe('1');
+    await expect.poll(() => discover.getHitCountInt()).toBe(1);
   });
 
   spaceTest(
@@ -166,18 +166,18 @@ spaceTest.describe('Discover filter editor', { tag: '@local-stateful-classic' },
           spaceId: scoutSpace.id,
         });
 
-        await pageObjects.discover.selectDataView(VERSION_INDEX);
+        await discover.selectDataView(VERSION_INDEX);
         await filterBar.addFilter({
           field: 'version',
           operator: 'is between',
           value: { from: '2.0.0', to: '3.0.0' },
         });
-        await pageObjects.discover.waitUntilTabIsLoaded();
+        await discover.waitUntilTabIsLoaded();
 
         expect(
           await filterBar.hasFilter({ field: 'version', value: '2.0.0 to 3.0.0', enabled: true })
         ).toBe(true);
-        expect(await discover.getHitCount()).toBe('1');
+        await expect.poll(() => discover.getHitCountInt()).toBe(1);
       } finally {
         await apiServices.dataViews.delete(VERSION_INDEX, scoutSpace.id);
         await esClient.indices.delete({ index: VERSION_INDEX, ignore_unavailable: true });
