@@ -12738,14 +12738,6 @@
   resolved "https://registry.yarnpkg.com/@protobufjs/utf8/-/utf8-1.1.1.tgz#eaee5900122c110a3dbcb728c0597014a2621774"
   integrity sha512-oOAWABowe8EAbMyWKM0tYDKi8Yaox52D+HWZhAIJqQXbqe0xI/GV7FhLWqlEKreMkfDjshR5FKgi3mnle0h6Eg==
 
-"@puppeteer/browsers@3.0.4":
-  version "3.0.4"
-  resolved "https://registry.yarnpkg.com/@puppeteer/browsers/-/browsers-3.0.4.tgz#79fa2e450f9e54f758f806d4cfc6202795c9284f"
-  integrity sha512-HGM8iAmGTf+Y7t0373szVbTmt3d7vPkYL/1bpOkOFO0YUYLgSeuYBCzESklogNPvOBnZ/MRD5f07OkpqH1trtA==
-  dependencies:
-    modern-tar "^0.7.6"
-    yargs "^17.7.2"
-
 "@puppeteer/browsers@3.0.6":
   version "3.0.6"
   resolved "https://registry.yarnpkg.com/@puppeteer/browsers/-/browsers-3.0.6.tgz#6b772e0fc11deb255c8a3c14219e34a16a2ab23d"
@@ -13206,17 +13198,17 @@
   dependencies:
     "@sinonjs/commons" "^3.0.0"
 
-"@sinonjs/fake-timers@^15.1.0":
-  version "15.1.0"
-  resolved "https://registry.yarnpkg.com/@sinonjs/fake-timers/-/fake-timers-15.1.0.tgz#f42e713425d4eb1a7bc88ef5d7f76c4546586c25"
-  integrity sha512-cqfapCxwTGsrR80FEgOoPsTonoefMBY7dnUEbQ+GRcved0jvkJLzvX6F4WtN+HBqbPX/SiFsIRUp+IrCW/2I2w==
+"@sinonjs/fake-timers@^15.4.0":
+  version "15.4.0"
+  resolved "https://registry.yarnpkg.com/@sinonjs/fake-timers/-/fake-timers-15.4.0.tgz#5d40c151a9e66075fe4520bec40bccfe54931962"
+  integrity sha512-DsG+8/LscQIQg68J6Ef3dv10u6nVyetYn923s3/sus5eaGfTo1of5WMZSLf0UJc9KDuKPilPH0UDJCjvNbDNCA==
   dependencies:
     "@sinonjs/commons" "^3.0.1"
 
-"@sinonjs/samsam@^8.0.3":
-  version "8.0.3"
-  resolved "https://registry.yarnpkg.com/@sinonjs/samsam/-/samsam-8.0.3.tgz#eb6ffaef421e1e27783cc9b52567de20cb28072d"
-  integrity sha512-hw6HbX+GyVZzmaYNh82Ecj1vdGZrqVIn/keDTg63IgAwiQPO+xCz99uG6Woqgb4tM0mUiFENKZ4cqd7IX94AXQ==
+"@sinonjs/samsam@^10.0.2":
+  version "10.0.2"
+  resolved "https://registry.yarnpkg.com/@sinonjs/samsam/-/samsam-10.0.2.tgz#d2cb34f0bcddb955b6971585c2f0334e68a9e66d"
+  integrity sha512-8lVwD1Df1BmzoaOLhMcGGcz/Jyr5QY2KSB75/YK1QgKzoabTeLdIVyhXNZK9ojfSKSdirbXqdbsXXqP9/Ve8+A==
   dependencies:
     "@sinonjs/commons" "^3.0.1"
     type-detect "^4.1.0"
@@ -15865,10 +15857,10 @@
   resolved "https://registry.yarnpkg.com/@types/shimmer/-/shimmer-1.2.0.tgz#9b706af96fa06416828842397a70dfbbf1c14ded"
   integrity sha512-UE7oxhQLLd9gub6JKIAhDq06T0F6FnztwMNRvYgjeQSBeMc1ZG/tA47EwfduvkuQS8apbkM/lpLpWsaCeYsXVg==
 
-"@types/sinon@21.0.0":
-  version "21.0.0"
-  resolved "https://registry.yarnpkg.com/@types/sinon/-/sinon-21.0.0.tgz#3a598a29b3aec0512a21e57ae0fd4c09aa013ca9"
-  integrity sha512-+oHKZ0lTI+WVLxx1IbJDNmReQaIsQJjN2e7UUrJHEeByG7bFeKJYsv1E75JxTQ9QKJDp21bAa/0W2Xo4srsDnw==
+"@types/sinon@22.0.0":
+  version "22.0.0"
+  resolved "https://registry.yarnpkg.com/@types/sinon/-/sinon-22.0.0.tgz#396af07c4452efb57950ec260d450acedf025508"
+  integrity sha512-TDbVpbccc2HfiqHR09Argj3mHV1KMW7sCCKj52fsl8lbRLkEn7fB1966EWhOKWUBcqfBueZuPoA7/OK1CKiy3g==
   dependencies:
     "@types/sinonjs__fake-timers" "*"
 
@@ -18649,10 +18641,10 @@ chromedriver@149.0.3:
     proxy-from-env "^2.0.0"
     tcp-port-used "^1.0.2"
 
-chromium-bidi@16.0.1:
-  version "16.0.1"
-  resolved "https://registry.yarnpkg.com/chromium-bidi/-/chromium-bidi-16.0.1.tgz#0c6b0e55065468fc777d62032b63b73f614b1d88"
-  integrity sha512-J63PGu/9PpeCwLIcKYyzWP6yaVL5pxuBc0shlYCYM8BaAkmlwiQboXO1iNbOgSDbVklEyYFfNEcHD8oOAWacUA==
+chromium-bidi@17.0.2:
+  version "17.0.2"
+  resolved "https://registry.yarnpkg.com/chromium-bidi/-/chromium-bidi-17.0.2.tgz#921a586deecd0c2d8b9242c4c1b73c3aa39ff77c"
+  integrity sha512-5v9GQFhTktFvotn/OFNJBmKLKRAb6n9r0bVCwf7sHgWc3/JryK0bj1nn93L3pHFrfgcsu6Be6EWsDi+1XHTGDg==
   dependencies:
     mitt "^3.0.1"
     zod "^3.24.1"
@@ -20673,15 +20665,10 @@ devlop@^1.0.0, devlop@^1.1.0:
   dependencies:
     dequal "^2.0.0"
 
-devtools-protocol@0.0.1624250:
-  version "0.0.1624250"
-  resolved "https://registry.yarnpkg.com/devtools-protocol/-/devtools-protocol-0.0.1624250.tgz#b1dc2ad512c049a8dc2f4e2de42000045a5d749d"
-  integrity sha512-YFAat/lOiIk0ARmBweG+ygrEcbZrq5B9urRyUoeQKp53MlidHXE2TmTbxKcaXoQj7u/aX+jebDO4BW55rs0WwA==
-
-devtools-protocol@0.0.1638949:
-  version "0.0.1638949"
-  resolved "https://registry.yarnpkg.com/devtools-protocol/-/devtools-protocol-0.0.1638949.tgz#206eb6ecc1c35d2dbc833256c37655a110fbdba1"
-  integrity sha512-mXwg4Fqnv0WR4iuAT/gYUmctNkjILwXFHyZ+m7Ty1dfr0ezZt2U3gnrrJTfRobJTHoXf+IbuFvFITzLrLFjwJA==
+devtools-protocol@0.0.1653615:
+  version "0.0.1653615"
+  resolved "https://registry.yarnpkg.com/devtools-protocol/-/devtools-protocol-0.0.1653615.tgz#c600e0c619612156b2422a66d958ba188d87dbe8"
+  integrity sha512-pGVkY3T/qXxAp2nFPodwYqOevk6ncNMSmvL8QfRCx5ZWGd6Vor7AFNmyaA8Zs6uJyP1QAfjuLandCgvSix1BNA==
 
 devtools-protocol@0.0.1663043:
   version "0.0.1663043"
@@ -20721,7 +20708,7 @@ diff-sequences@^29.6.3:
   resolved "https://registry.yarnpkg.com/diff-sequences/-/diff-sequences-29.6.3.tgz#4deaf894d11407c51efc8418012f9e70b84ea921"
   integrity sha512-EjePK1srD3P08o2j4f0ExnylqRs5B9tJjcp9t1krH2qRi8CCdsYfwe9JgSLurFBWwq4uOlipzfk5fHNvwFKr8Q==
 
-diff@9.0.0:
+diff@9.0.0, diff@^9.0.0:
   version "9.0.0"
   resolved "https://registry.yarnpkg.com/diff/-/diff-9.0.0.tgz#297c31cd7c280f13dfe335791ec2063bd4a73a6f"
   integrity sha512-svtcdpS8CgJyqAjEQIXdb3OjhFVVYjzGAPO8WGCmRbrml64SPw/jJD4GoE98aR7r25A0XcgrK3F02yw9R/vhQw==
@@ -30092,40 +30079,28 @@ punycode@^2.1.0, punycode@^2.1.1:
   resolved "https://registry.yarnpkg.com/punycode/-/punycode-2.3.1.tgz#027422e2faec0b25e1549c3e1bd8309b9133b6e5"
   integrity sha512-vYt7UD1U9Wg6138shLtLOvdAu+8DsC/ilFtEVHcH+wydcSpNE20AfSOduf6MkRFahL5FY7X1oU7nKVZFtfq8Fg==
 
-puppeteer-core@25.1.0:
-  version "25.1.0"
-  resolved "https://registry.yarnpkg.com/puppeteer-core/-/puppeteer-core-25.1.0.tgz#5e2510eff3c3a166e0e9a436d307eb6ed06da44c"
-  integrity sha512-jKzy5y4WG6uNuFbTWgW1D7mqoT9o0nllc/6a1DGF775T1mPmgw3scdFEtEq67yVFikavQmbYq6NLfbTfxHSlqQ==
-  dependencies:
-    "@puppeteer/browsers" "3.0.4"
-    chromium-bidi "16.0.1"
-    devtools-protocol "0.0.1624250"
-    typed-query-selector "^2.12.2"
-    webdriver-bidi-protocol "0.4.2"
-    ws "^8.21.0"
-
-puppeteer-core@^25.3.0:
-  version "25.3.0"
-  resolved "https://registry.yarnpkg.com/puppeteer-core/-/puppeteer-core-25.3.0.tgz#f32555f3ac64af2cc44f8d632ddf2fa5f2fad95f"
-  integrity sha512-fm+wpUr2oigH1PXZvwgATrM2tYWHMDG8ASzTEe9uukCye4X5Ldx1K5BTHPFKITrIWvQQAQ256d1NpbEveBcKjA==
+puppeteer-core@25.4.0, puppeteer-core@^25.3.0:
+  version "25.4.0"
+  resolved "https://registry.yarnpkg.com/puppeteer-core/-/puppeteer-core-25.4.0.tgz#2fcba53a9ab94d55f196e1e42dbe794bbadf8759"
+  integrity sha512-K1plkLOdeoUnGeT1OvdqF3qxl33v+Ra/uH5VyPEhXdMcpvGiEskHzxxEU3fgpccJpJLIipB/rPUsvkZRWeKqOA==
   dependencies:
     "@puppeteer/browsers" "3.0.6"
-    chromium-bidi "16.0.1"
-    devtools-protocol "0.0.1638949"
+    chromium-bidi "17.0.2"
+    devtools-protocol "0.0.1653615"
     typed-query-selector "^2.12.2"
     webdriver-bidi-protocol "0.4.2"
-    ws "^8.21.0"
+    ws "^8.21.1"
 
-puppeteer@25.1.0:
-  version "25.1.0"
-  resolved "https://registry.yarnpkg.com/puppeteer/-/puppeteer-25.1.0.tgz#7660e4d3373821f48debc774c0c84c9e13a72dbf"
-  integrity sha512-7L6/0JM7XStK99lIL4xQySyNEXNfII6pk0BxkI5kKBTOhR7AsoQiv067YTsE/rIXxQiq9ajlO4WcqBjS/FWK1A==
+puppeteer@25.4.0:
+  version "25.4.0"
+  resolved "https://registry.yarnpkg.com/puppeteer/-/puppeteer-25.4.0.tgz#87b549a666ffc4f68fee2f195c42d67eba9b8168"
+  integrity sha512-xfQp8dFBcGaLc1hEMaVr7s+oW4ZkAurr8Y9H81ilKhu6QoLfSTkZjU7IavnyJ/VWpB9ni3KNJUQHUatslLWyGw==
   dependencies:
-    "@puppeteer/browsers" "3.0.4"
-    chromium-bidi "16.0.1"
-    devtools-protocol "0.0.1624250"
+    "@puppeteer/browsers" "3.0.6"
+    chromium-bidi "17.0.2"
+    devtools-protocol "0.0.1653615"
     lilconfig "^3.1.3"
-    puppeteer-core "25.1.0"
+    puppeteer-core "25.4.0"
     typed-query-selector "^2.12.2"
 
 pure-rand@^6.0.0:
@@ -32436,16 +32411,15 @@ simple-statistics@7.8.8:
   resolved "https://registry.yarnpkg.com/simple-statistics/-/simple-statistics-7.8.8.tgz#8acf4f78ba5a111e7c8424ffda2ac32fe353198c"
   integrity sha512-CUtP0+uZbcbsFpqEyvNDYjJCl+612fNgjT8GaVuvMG7tBuJg8gXGpsP5M7X658zy0IcepWOZ6nPBu1Qb9ezA1w==
 
-sinon@21.0.1:
-  version "21.0.1"
-  resolved "https://registry.yarnpkg.com/sinon/-/sinon-21.0.1.tgz#36b9126065a44906f7ba4a47b723b99315a8c356"
-  integrity sha512-Z0NVCW45W8Mg5oC/27/+fCqIHFnW8kpkFOq0j9XJIev4Ld0mKmERaZv5DMLAb9fGCevjKwaEeIQz5+MBXfZcDw==
+sinon@22.0.0:
+  version "22.0.0"
+  resolved "https://registry.yarnpkg.com/sinon/-/sinon-22.0.0.tgz#01cea95c919468f6ef01e21d406397e5c02aad9b"
+  integrity sha512-sq/6DpdXOrLyfbKlXLg/Usc7xu8YXPeLkOFZRvA3bNUSA2lhbrZ06yuXbH1fkzBPCbz9O10+7hznzUsjaYNm0Q==
   dependencies:
     "@sinonjs/commons" "^3.0.1"
-    "@sinonjs/fake-timers" "^15.1.0"
-    "@sinonjs/samsam" "^8.0.3"
-    diff "^8.0.2"
-    supports-color "^7.2.0"
+    "@sinonjs/fake-timers" "^15.4.0"
+    "@sinonjs/samsam" "^10.0.2"
+    diff "^9.0.0"
 
 sirv@^2.0.3:
   version "2.0.4"
@@ -33442,7 +33416,7 @@ supports-color@^5.3.0, supports-color@^5.5.0:
   dependencies:
     has-flag "^3.0.0"
 
-supports-color@^7.0.0, supports-color@^7.1.0, supports-color@^7.2.0:
+supports-color@^7.0.0, supports-color@^7.1.0:
   version "7.2.0"
   resolved "https://registry.yarnpkg.com/supports-color/-/supports-color-7.2.0.tgz#1b7dcdcb32b8138801b3e478ba6a51caa89648da"
   integrity sha512-qpCAvRl9stuOHveKsn7HncJRvv501qIacKzQlO/+Lwxc9+0q2wLyv4Dfvt80/DPn2pqOBsJdDiogXGR9+OvwRw==
@@ -36002,7 +35976,7 @@ ws@^7.0.0, ws@^7.2.0, ws@^7.3.1:
   resolved "https://registry.yarnpkg.com/ws/-/ws-7.5.12.tgz#4ca2c04966db4dcd2f9bc4d1419d23cd1e4a18db"
   integrity sha512-1xGnbYN3zbog9CwuNDQULNRrTCLIn46/WmpR1f0w6PsCYQHkylZr5vkd6kfMZYV6pRnQkcPNRyiA8LsrNKyhpg==
 
-ws@^8.18.0, ws@^8.2.3, ws@^8.20.1, ws@^8.21.0, ws@^8.9.0, ws@~8.21.0:
+ws@^8.18.0, ws@^8.2.3, ws@^8.20.1, ws@^8.21.1, ws@^8.9.0, ws@~8.21.0:
   version "8.21.1"
   resolved "https://registry.yarnpkg.com/ws/-/ws-8.21.1.tgz#045650cd4b1207809e7547146223c3814a9af586"
   integrity sha512-+0NTnW77fFN/DjQi6k/Sq/Yvk4Sgajw7urW8V+asjXnRgDs9gyGkdb7EzgfhA4goXsRIZKE28fzIXBHEzhuiWw==
