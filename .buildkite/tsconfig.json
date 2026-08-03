@@ -1,12 +1,24 @@
 {
   "extends": "../tsconfig.base.json",
   "compilerOptions": {
+<<<<<<< HEAD
     "outDir": "target/types",
     "types": ["node", "jest"],
     "paths": {
       "#pipeline-utils": [".buildkite/pipeline-utils/index.ts"],
       "#pipeline-utils/*": [".buildkite/pipeline-utils/*"]
     }
+=======
+    "module": "commonjs",
+    // Only needed by ts-jest, which hardcodes `moduleResolution: Node10` when it
+    // transpiles regardless of what is configured here, and whose peer range is
+    // still `typescript: >=4.3 <7`. Drop this once ts-jest supports TS7; `tsc`
+    // itself no longer needs it under either TS6 or TS7.
+    "ignoreDeprecations": "6.0",
+    "moduleResolution": "bundler",
+    "outDir": "target/types",
+    "types": ["node", "jest"]
+>>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
   },
   "include": [
     "pipeline-utils/**/*",

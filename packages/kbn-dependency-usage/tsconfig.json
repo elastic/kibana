@@ -1,8 +1,12 @@
 {
   "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
+<<<<<<< HEAD
     "module": "esnext",
     "moduleResolution": "node",
+=======
+    "moduleResolution": "bundler",
+>>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
     "outDir": "target/types",
     "esModuleInterop": true,
     "strict": true,
