@@ -94,6 +94,10 @@ export const ConnectorIconsMap: Map<
         import(/* webpackChunkName: "connectorIconJiraCloud" */ './specs/atlassian/jira-cloud/icon')
     ),
   ],
+  [
+    '.databricks',
+    lazy(() => import(/* webpackChunkName: "connectorIconDatabricks" */ './specs/databricks/icon')),
+  ],
   ['.figma', lazy(() => import(/* webpackChunkName: "connectorIconFigma" */ './specs/figma/icon'))],
   [
     '.confluence-cloud',
@@ -221,6 +225,19 @@ export const ConnectorIconsMap: Map<
     lazy(() => import(/* webpackChunkName: "connectorIconOneDrive" */ './specs/one_drive/icon')),
   ],
   [
+    '.ansible_controller',
+    lazy(
+      () =>
+        import(
+          /* webpackChunkName: "connectorIconAnsibleController" */ './specs/ansible_controller/icon'
+        )
+    ),
+  ],
+  [
+    '.argocd',
+    lazy(() => import(/* webpackChunkName: "connectorIconArgocd" */ './specs/argocd/icon')),
+  ],
+  [
     '.monday_com',
     lazy(() => import(/* webpackChunkName: "connectorIconMondayCom" */ './specs/monday_com/icon')),
   ],
@@ -234,12 +251,44 @@ export const ConnectorIconsMap: Map<
     ),
   ],
   [
+    '.workday',
+    lazy(() => import(/* webpackChunkName: "connectorIconWorkday" */ './specs/workday/icon')),
+  ],
+  [
     '.kubernetes',
     lazy(() => import(/* webpackChunkName: "connectorIconKubernetes" */ './specs/kubernetes/icon')),
   ],
-
+  [
+    '.new_relic',
+    lazy(() => import(/* webpackChunkName: "connectorIconNewRelic" */ './specs/new_relic/icon')),
+  ],
+  [
+    '.grafana',
+    lazy(() => import(/* webpackChunkName: "connectorIconGrafana" */ './specs/grafana/icon')),
+  ],
+  [
+    '.rootly',
+    lazy(() => import(/* webpackChunkName: "connectorIconRootly" */ './specs/rootly/icon')),
+  ],
   [
     '.sentry',
     lazy(() => import(/* webpackChunkName: "connectorIconSentry" */ './specs/sentry/icon')),
+  ],
+  [
+    '.buildkite',
+    lazy(() => import(/* webpackChunkName: "connectorIconBuildkite" */ './specs/buildkite/icon')),
+  ],
+  [
+    '.dynatrace',
+    lazy(() => import(/* webpackChunkName: "connectorIconDynatrace" */ './specs/dynatrace/icon')),
+  ],
+  [
+    '.datadog',
+    lazy(() => import(/* webpackChunkName: "connectorIconDatadog" */ './specs/datadog/icon')),
+  ],
+
+  [
+    '.jenkins',
+    lazy(() => import(/* webpackChunkName: "connectorIconjenkins" */ './specs/jenkins/icon')),
   ],
 ]);

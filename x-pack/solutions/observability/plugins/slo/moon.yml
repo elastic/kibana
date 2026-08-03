@@ -138,6 +138,8 @@ dependsOn:
   - '@kbn/core-spaces-common'
   - '@kbn/inspector-plugin'
   - '@kbn/core-feature-flags-server'
+  - '@kbn/cps'
+  - '@kbn/cps-server-utils'
 tags:
   - plugin
   - prod
