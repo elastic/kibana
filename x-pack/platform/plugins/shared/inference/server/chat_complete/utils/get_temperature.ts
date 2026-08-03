@@ -64,6 +64,10 @@ const shouldExcludeTemperature = ({
   const model =
     modelName ?? connector?.config?.providerConfig?.model_id ?? connector?.config?.defaultModel;
 
+  if (!connector && !modelId?.trim() && !model?.trim()) {
+    return true;
+  }
+
   if (
     (connector?.type === InferenceConnectorType.OpenAI ||
       connector?.type === InferenceConnectorType.Inference) &&

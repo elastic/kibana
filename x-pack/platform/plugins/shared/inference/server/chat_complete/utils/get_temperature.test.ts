@@ -115,10 +115,8 @@ describe('getTemperatureIfValid', () => {
     });
   });
 
-  it('keeps temperature when endpoint model metadata is missing', () => {
-    expect(getTemperatureIfValid(0.7)).toEqual({
-      temperature: 0.7,
-    });
+  it('omits temperature when model metadata is missing', () => {
+    expect(getTemperatureIfValid(0.7)).toEqual({});
   });
 
   it('keeps connector-config temperature even for excluded models (escape hatch)', () => {

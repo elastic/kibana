@@ -119,7 +119,7 @@ const createEndpointRequest = ({
   endpointModelId?: string;
 }): OpenAIRequest => {
   const temperatureOptions = getTemperatureIfValid(temperature, {
-    modelId: endpointModelId,
+    modelId: endpointModelId ?? modelName,
   });
 
   if (simulatedFunctionCalling) {

@@ -174,6 +174,7 @@ describe('inferenceEndpointAdapter', () => {
           ...defaultArgs,
           messages: [{ role: MessageRole.User, content: 'question' }],
           temperature: 0.4,
+          modelName: 'gpt-4o',
         })
         .subscribe(noop);
 
@@ -182,6 +183,28 @@ describe('inferenceEndpointAdapter', () => {
         expect.objectContaining({
           body: expect.objectContaining({
             temperature: 0.4,
+          }),
+        })
+      );
+    });
+
+    it('omits temperature when model metadata is missing', () => {
+      executorMock.invoke.mockResolvedValue(
+        observableIntoEventSourceStream(of(createOpenAIChunk({ delta: { content: '' } })), logger)
+      );
+
+      inferenceEndpointAdapter
+        .chatComplete({
+          ...defaultArgs,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          temperature: 0.4,
+        })
+        .subscribe(noop);
+
+      expect(executorMock.invoke).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: expect.not.objectContaining({
+            temperature: expect.anything(),
           }),
         })
       );
@@ -197,6 +220,28 @@ describe('inferenceEndpointAdapter', () => {
           ...defaultArgs,
           messages: [{ role: MessageRole.User, content: 'question' }],
           endpointModelId: 'claude-sonnet-5',
+        })
+        .subscribe(noop);
+
+      expect(executorMock.invoke).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: expect.not.objectContaining({
+            temperature: expect.anything(),
+          }),
+        })
+      );
+    });
+
+    it('falls back to the request model when endpoint model metadata is missing', () => {
+      executorMock.invoke.mockResolvedValue(
+        observableIntoEventSourceStream(of(createOpenAIChunk({ delta: { content: '' } })), logger)
+      );
+
+      inferenceEndpointAdapter
+        .chatComplete({
+          ...defaultArgs,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          modelName: 'claude-sonnet-5',
         })
         .subscribe(noop);
 
