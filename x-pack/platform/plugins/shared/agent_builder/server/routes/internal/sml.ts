@@ -17,17 +17,11 @@ import { getHandlerWrapper } from '../wrap_handler';
 import { internalApiPath } from '../../../common/constants';
 import {
   SML_HTTP_ATTACH_ITEMS_MAX,
-  SML_HTTP_SEARCH_QUERY_MAX_LENGTH,
   type SmlAttachHttpResponse,
   type SmlAttachHttpResultItem,
-  type SmlSearchHttpResponse,
 } from '../../../common/http_api/sml';
-import { AGENT_BUILDER_READ_SECURITY, AGENT_BUILDER_WRITE_SECURITY } from '../route_security';
-import { resolveSmlAttachItems } from '../../services/sml/execute_sml_attach_items';
+import { AGENT_BUILDER_WRITE_SECURITY } from '../route_security';
 import { applyAttachmentRefsToRounds } from '../../services/conversation/client/migrate_attachments';
-
-/** Max page size for SML HTTP search (separate from default UI size). */
-const SML_SEARCH_SIZE_MAX = 1000;
 
 const mergeAttachmentsById = (
   latestAttachments: VersionedAttachment[],
@@ -56,60 +50,11 @@ export function registerInternalSmlRoutes({
 
   router.post(
     {
-      path: `${internalApiPath}/sml/_search`,
-      validate: {
-        body: schema.object({
-          query: schema.string({ minLength: 1, maxLength: SML_HTTP_SEARCH_QUERY_MAX_LENGTH }),
-          size: schema.maybe(schema.number({ min: 1, max: SML_SEARCH_SIZE_MAX })),
-          skip_content: schema.maybe(schema.boolean()),
-        }),
-      },
-      options: { access: 'internal' },
-      security: AGENT_BUILDER_READ_SECURITY,
-    },
-    wrapHandler(
-      async (ctx, request, response) => {
-        const { sml } = getInternalServices();
-        const { query, size, skip_content: skipContent } = request.body;
-        const esClient = (await ctx.core).elasticsearch.client.asCurrentUser;
-        const spaceId = (await ctx.agentBuilder).spaces.getSpaceId();
-
-        const { results, total } = await sml.search({
-          query,
-          size,
-          spaceId,
-          esClient,
-          request,
-          skipContent,
-        });
-
-        const body: SmlSearchHttpResponse = {
-          total,
-          results: results.map(({ id, type, origin_id, title, score, content }) => ({
-            id,
-            type,
-            origin_id,
-            title,
-            score,
-            ...(skipContent ? {} : { content }),
-          })),
-        };
-
-        return response.ok({ body });
-      },
-      {
-        featureFlag: AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
-      }
-    )
-  );
-
-  router.post(
-    {
       path: `${internalApiPath}/sml/_attach`,
       validate: {
         body: schema.object({
           conversation_id: schema.string(),
-          chunk_ids: schema.arrayOf(schema.string(), {
+          entry_ids: schema.arrayOf(schema.string(), {
             minSize: 1,
             maxSize: SML_HTTP_ATTACH_ITEMS_MAX,
           }),
@@ -120,15 +65,13 @@ export function registerInternalSmlRoutes({
     },
     wrapHandler(
       async (ctx, request, response) => {
-        const {
-          sml,
-          conversations: conversationsService,
-          attachments: attachmentsService,
-        } = getInternalServices();
-        const { conversation_id: conversationId, chunk_ids: chunkIds } = request.body;
-        const [coreStart] = await coreSetup.getStartServices();
+        const { conversations: conversationsService, attachments: attachmentsService } =
+          getInternalServices();
+        const { conversation_id: conversationId, entry_ids: entryIds } = request.body;
+        const [coreStart, startDeps] = await coreSetup.getStartServices();
+        const agentBuilderSml = startDeps.agentBuilderSml;
         const spaceId = (await ctx.agentBuilder).spaces.getSpaceId();
-        const esClient = (await ctx.core).elasticsearch.client.asCurrentUser;
+        const esClient = (await ctx.core).elasticsearch.client;
         const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
         const conversationClient = await conversationsService.getScopedClient({ request });
 
@@ -141,9 +84,8 @@ export function registerInternalSmlRoutes({
           });
         }
 
-        const resolvedItems = await resolveSmlAttachItems({
-          chunkIds,
-          sml,
+        const resolvedItems = await agentBuilderSml.resolveSmlAttachItems({
+          entryIds,
           esClient,
           request,
           spaceId,
@@ -161,7 +103,7 @@ export function registerInternalSmlRoutes({
             if (!r.success) {
               return {
                 success: false,
-                chunk_id: r.chunk_id,
+                entry_id: r.entry_id,
                 attachment_type: r.attachment_type,
                 message: r.message,
               };
@@ -176,15 +118,15 @@ export function registerInternalSmlRoutes({
 
               return {
                 success: true,
-                chunk_id: r.chunk_id,
+                entry_id: r.entry_id,
                 conversation_attachment_id: added.id,
                 attachment_type: r.attachment.type,
-                message: `Attachment '${added.id}' of type '${r.attachment.type}' created from SML item '${r.chunk_id}'`,
+                message: `Attachment '${added.id}' of type '${r.attachment.type}' created from SML item '${r.entry_id}'`,
               };
             } catch (e) {
               return {
                 success: false,
-                chunk_id: r.chunk_id,
+                entry_id: r.entry_id,
                 attachment_type: r.attachment.type,
                 message: e instanceof Error ? e.message : String(e),
               };
@@ -220,6 +162,8 @@ export function registerInternalSmlRoutes({
         return response.ok({ body });
       },
       {
+        // SML lives inside Agent Builder, so the route requires only the Agent
+        // Builder experimental flag.
         featureFlag: AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
       }
     )

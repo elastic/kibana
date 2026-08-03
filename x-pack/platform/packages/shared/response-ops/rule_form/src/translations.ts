@@ -296,6 +296,20 @@ export const ADD_ACTION_DESCRIPTION_TEXT = i18n.translate(
   }
 );
 
+export const ADD_ACTION_MESSAGE_LABEL = i18n.translate(
+  'responseOpsRuleForm.ruleForm.ruleActions.addActionMessageLabel',
+  {
+    defaultMessage: 'Message',
+  }
+);
+
+export const ADD_ACTION_SETTINGS_LABEL = i18n.translate(
+  'responseOpsRuleForm.ruleForm.ruleActions.addActionSettingsLabel',
+  {
+    defaultMessage: 'Settings',
+  }
+);
+
 export const RULE_NAME_INPUT_TITLE = i18n.translate(
   'responseOpsRuleForm.ruleForm.ruleDetails.ruleNameInputTitle',
   {
@@ -321,6 +335,13 @@ export const RULE_TAG_PLACEHOLDER = i18n.translate(
   'responseOpsRuleForm.ruleForm.ruleDetails.ruleTagsPlaceholder',
   {
     defaultMessage: 'Add tags',
+  }
+);
+
+export const RULE_TAG_COPY_LABEL = i18n.translate(
+  'responseOpsRuleForm.ruleForm.ruleDetails.ruleTagsCopyLabel',
+  {
+    defaultMessage: 'Copy tags',
   }
 );
 
@@ -764,13 +785,6 @@ export const ACTION_UNABLE_TO_LOAD_CONNECTOR_DESCRIPTION = i18n.translate(
   }
 );
 
-export const ACTION_USE_AAD_TEMPLATE_FIELDS_LABEL = i18n.translate(
-  'responseOpsRuleForm.ruleActionsItem.actionUseAadTemplateFieldsLabel',
-  {
-    defaultMessage: 'Use template fields from alerts index',
-  }
-);
-
 export const TECH_PREVIEW_LABEL = i18n.translate('responseOpsRuleForm.technicalPreviewBadgeLabel', {
   defaultMessage: 'Technical preview',
 });
@@ -861,3 +875,32 @@ export const DEFAULT_RULE_NAME = (ruleTypeName: string) =>
     defaultMessage: `{ruleTypeName} rule`,
     values: { ruleTypeName },
   });
+
+export const DEPRECATED_LABEL = i18n.translate(
+  'responseOpsRuleForm.deprecatedConnectorBadgeLabel',
+  {
+    defaultMessage: 'Deprecated',
+  }
+);
+
+export const DEPRECATED_CONNECTOR_TOOLTIP_CONTENT = i18n.translate(
+  'responseOpsRuleForm.deprecatedConnectorTooltipLabel',
+  {
+    defaultMessage: 'This connector type is deprecated and may be removed in future versions.',
+  }
+);
+
+export const DEPRECATED_LLM_CONNECTOR_INFO = i18n.translate(
+  'responseOpsRuleForm.deprecatedLLMConnectorInfo',
+  {
+    defaultMessage:
+      'Use Elasticsearch inference endpoints to connect to large language models instead.',
+  }
+);
+
+export const DEPRECATED_LLM_CONNECTOR_CALLOUT_TITLE = i18n.translate(
+  'responseOpsRuleForm.deprecatedLLMConnectorCalloutTitle',
+  {
+    defaultMessage: 'This connector type is deprecated',
+  }
+);

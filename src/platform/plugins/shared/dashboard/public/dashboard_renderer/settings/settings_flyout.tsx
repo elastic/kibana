@@ -13,7 +13,6 @@ import useMountedState from 'react-use/lib/useMountedState';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -30,11 +29,12 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { cpsService, savedObjectsTaggingService } from '../../services/kibana_services';
 import type { DashboardSettings } from '../../dashboard_api/settings_manager';
-import { checkForDuplicateDashboardTitle } from '../../dashboard_client';
+import { hasLibraryItemWithTitle } from '../../dashboard_client';
 
 interface DashboardSettingsProps {
   onClose: () => void;
@@ -54,30 +54,31 @@ export const DashboardSettingsFlyout = ({ onClose, ariaLabelledBy }: DashboardSe
 
   const isMounted = useMountedState();
 
-  const onTitleDuplicate = () => {
-    if (!isMounted()) return;
-    setIsTitleDuplicate(true);
-    setIsTitleDuplicateConfirmed(true);
-  };
-
   const onApply = async () => {
     setIsApplying(true);
-    const validTitle = await checkForDuplicateDashboardTitle({
-      title: localSettings.title,
-      copyOnSave: false,
-      lastSavedTitle: dashboardApi.title$.value ?? '',
-      onTitleDuplicate,
-      isTitleDuplicateConfirmed,
-    });
 
-    if (!isMounted()) return;
+    const hasSameTitle = localSettings.title === dashboardApi.title$.value;
+    const checkForDuplicateTitle = isTitleDuplicateConfirmed ? false : !hasSameTitle;
 
-    setIsApplying(false);
-
-    if (validTitle) {
-      dashboardApi.setSettings(localSettings);
-      onClose();
+    if (checkForDuplicateTitle) {
+      try {
+        const hasTitleDuplicate = await hasLibraryItemWithTitle(localSettings.title);
+        if (!isMounted()) return;
+        if (hasTitleDuplicate) {
+          setIsTitleDuplicate(true);
+          setIsTitleDuplicateConfirmed(true);
+          setIsApplying(false);
+          return;
+        }
+      } catch (error) {
+        if (!isMounted()) return;
+        // Unable to determine if there is a duplicate title
+        // ignore error and apply settings
+      }
     }
+
+    dashboardApi.setSettings(localSettings);
+    onClose();
   };
 
   const updateDashboardSetting = useCallback((newSettings: Partial<DashboardSettings>) => {
@@ -95,18 +96,14 @@ export const DashboardSettingsFlyout = ({ onClose, ariaLabelledBy }: DashboardSe
     }
 
     return (
-      <EuiCallOut
+      <KbnWarningCallout
         title={
           <FormattedMessage
             id="dashboard.embeddableApi.showSettings.flyout.form.duplicateTitleLabel"
             defaultMessage="This dashboard already exists"
           />
         }
-        color="warning"
-        data-test-subj="duplicateTitleWarningMessage"
-        id={DUPLICATE_TITLE_CALLOUT_ID}
-      >
-        <p>
+        text={
           <FormattedMessage
             id="dashboard.embeddableApi.showSettings.flyout.form.duplicateTitleDescription"
             defaultMessage="Saving ''{title}'' creates a duplicate title."
@@ -114,8 +111,10 @@ export const DashboardSettingsFlyout = ({ onClose, ariaLabelledBy }: DashboardSe
               title: localSettings.title,
             }}
           />
-        </p>
-      </EuiCallOut>
+        }
+        data-test-subj="duplicateTitleWarningMessage"
+        id={DUPLICATE_TITLE_CALLOUT_ID}
+      />
     );
   };
 

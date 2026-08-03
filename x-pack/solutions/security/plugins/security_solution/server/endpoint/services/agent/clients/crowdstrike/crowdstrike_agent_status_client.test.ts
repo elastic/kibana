@@ -289,12 +289,33 @@ describe('CrowdstrikeAgentStatusClient', () => {
         },
       });
     });
-    it('should handle error and log it', async () => {
+    it('should log errors and return default response', async () => {
       const agentIds = ['agent1', 'agent2'];
       const error = new Error('ES search failed');
       constructorOptions.esClient.search.mockRejectedValue(error);
 
-      await expect(client.getAgentStatuses(agentIds)).rejects.toThrow(AgentStatusClientError);
+      await expect(client.getAgentStatuses(agentIds)).resolves.toEqual({
+        agent1: {
+          agentId: 'agent1',
+          agentType: 'crowdstrike',
+          error: 'ES search failed',
+          found: false,
+          isolated: false,
+          lastSeen: '',
+          pendingActions: {},
+          status: 'offline',
+        },
+        agent2: {
+          agentId: 'agent2',
+          agentType: 'crowdstrike',
+          error: 'ES search failed',
+          found: false,
+          isolated: false,
+          lastSeen: '',
+          pendingActions: {},
+          status: 'offline',
+        },
+      });
 
       // @ts-expect-error private method
       expect(client.log.error).toHaveBeenCalledWith(expect.any(AgentStatusClientError));

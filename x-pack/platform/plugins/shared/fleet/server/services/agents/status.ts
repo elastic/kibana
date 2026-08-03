@@ -8,7 +8,7 @@
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { toElasticsearchQuery } from '@kbn/es-query';
 import { fromKueryExpression } from '@kbn/es-query';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type {
   AggregationsTermsAggregateBase,
   AggregationsTermsBucketBase,
@@ -23,6 +23,11 @@ import { FleetError, FleetUnauthorizedError } from '../../errors';
 import { appContextService } from '../app_context';
 import { isSpaceAwarenessEnabled } from '../spaces/helpers';
 import { retryTransientEsErrors } from '../epm/elasticsearch/retry';
+
+import {
+  buildPolicyBaseIdWithFallbackEsFilter,
+  buildPolicyBaseIdsWithFallbackEsFilter,
+} from '../../../common/services/version_specific_policies_utils';
 
 import { DEFAULT_NAMESPACES_FILTER } from '../spaces/agent_namespaces';
 
@@ -86,19 +91,10 @@ export async function getAgentStatusForAgentPolicy(
     );
     clauses.push(kueryAsElasticsearchQuery);
   }
-  // If agentPolicyIds is provided, we filter by those, otherwise we filter by depreciated agentPolicyId
   if (agentPolicyIds) {
-    clauses.push({
-      terms: {
-        policy_id: agentPolicyIds,
-      },
-    });
+    clauses.push(buildPolicyBaseIdsWithFallbackEsFilter(agentPolicyIds));
   } else if (agentPolicyId) {
-    clauses.push({
-      term: {
-        policy_id: agentPolicyId,
-      },
-    });
+    clauses.push(buildPolicyBaseIdWithFallbackEsFilter(agentPolicyId));
   }
 
   const query =
@@ -229,7 +225,7 @@ export async function getIncomingDataByAgentsId({
                 },
                 {
                   range: {
-                    '@timestamp': {
+                    'event.ingested': {
                       gte: 'now-5m',
                       lte: 'now',
                     },

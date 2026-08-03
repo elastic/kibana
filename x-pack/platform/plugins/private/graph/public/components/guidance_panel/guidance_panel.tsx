@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { connect } from 'react-redux';
+import { connect } from 'react-redux-v7';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { IUnifiedSearchPluginServices } from '@kbn/unified-search-plugin/public/types';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
@@ -61,7 +61,7 @@ function ListItem({
     >
       {!isDisabled && (
         <span css={[styles.itemIcon, state === 'done' && styles.doneIcon]} aria-hidden={true}>
-          <EuiIcon type={state === 'active' ? 'sortRight' : 'check'} />
+          <EuiIcon type={state === 'active' ? 'sortRight' : 'check'} aria-hidden={true} />
         </span>
       )}
       <EuiText>{children}</EuiText>
@@ -97,7 +97,7 @@ function GuidancePanelComponent(props: GuidancePanelProps) {
     <EuiPanel data-test-subj="graphGuidancePanel">
       <EuiFlexGroup direction="column" alignItems="center">
         <EuiFlexItem grow={false}>
-          <EuiIcon type="graphApp" size="xxl" />
+          <EuiIcon type="graphApp" size="xxl" aria-hidden={true} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText>

@@ -100,6 +100,13 @@ export const SEARCH_PLACEHOLDER = i18n.translate('xpack.cases.caseTable.searchPl
   defaultMessage: 'Search cases',
 });
 
+export const SEARCH_PLACEHOLDER_TEMPLATES_V2 = i18n.translate(
+  'xpack.cases.caseTable.searchPlaceholderTemplatesV2',
+  {
+    defaultMessage: 'Search by text, field label, or field:value',
+  }
+);
+
 export const CLOSED = i18n.translate('xpack.cases.caseTable.closed', {
   defaultMessage: 'Closed',
 });
@@ -113,6 +120,13 @@ export const ALREADY_ATTACHED = i18n.translate('xpack.cases.caseTable.alreadyAtt
   description:
     'In this context, "Added" is letting the user know that all of their selected alerts were previously added to the case in question, and the "Add to case" button is disabled',
 });
+
+export const ALREADY_ATTACHED_TOOLTIP = i18n.translate(
+  'xpack.cases.caseTable.alreadyAttachedTooltip',
+  {
+    defaultMessage: 'This item is already added to this case',
+  }
+);
 
 export const REQUIRES_UPDATE = i18n.translate('xpack.cases.caseTable.requiresUpdate', {
   defaultMessage: ' requires update',
@@ -331,3 +345,7 @@ export const CLOSE_CASE_MODAL_REASON_OTHER = i18n.translate(
     defaultMessage: 'Other',
   }
 );
+
+export const TABLE_CAPTION = i18n.translate('xpack.cases.caseTable.tableCaption', {
+  defaultMessage: 'Cases',
+});

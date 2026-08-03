@@ -10,15 +10,18 @@
 import {
   buildDatasourceStates,
   buildReferences,
-  getDatasetIndex,
+  getDataSourceIndex,
+  getAdHocDataViewSpec,
+  generateAdHocDataViewId,
   addLayerColumn,
-  getDefaultReferences,
   operationFromColumn,
-  buildDatasetState,
+  buildDataSourceState,
   isSingleLayer,
   generateLayer,
+  generateApiLayer,
   filtersAndQueryToLensState,
   filtersAndQueryToApiFormat,
+  buildDataSourceStateNoESQL,
 } from './utils';
 import type {
   GenericIndexPatternColumn,
@@ -27,7 +30,8 @@ import type {
   ReferenceBasedIndexPatternColumn,
 } from '@kbn/lens-common';
 import type { TextBasedLayer } from '@kbn/lens-common';
-import type { LensApiState, MetricState } from '../schema';
+import { AS_CODE_DATA_VIEW_SPEC_TYPE } from '@kbn/as-code-data-views-schema';
+import type { LensApiConfig, MetricConfig } from '../schema';
 import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import type { LensAttributes } from '../types';
 
@@ -54,11 +58,35 @@ test('build references correctly builds references', () => {
   `);
 });
 
+test('build references uses the xy annotation prefix for annotation layer ids', () => {
+  const results = buildReferences(
+    {
+      layer1: dataView,
+      annotations_1: dataView,
+    },
+    new Set(['annotations_1'])
+  );
+  expect(results).toMatchInlineSnapshot(`
+    Array [
+      Object {
+        "id": "test-dataview",
+        "name": "indexpattern-datasource-layer-layer1",
+        "type": "index-pattern",
+      },
+      Object {
+        "id": "test-dataview",
+        "name": "xy-visualization-layer-annotations_1",
+        "type": "index-pattern",
+      },
+    ]
+  `);
+});
+
 describe('getDatasetIndex', () => {
   test('returns index if provided', () => {
-    const result = getDatasetIndex({
-      type: 'index',
-      index: 'test',
+    const result = getDataSourceIndex({
+      type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+      index_pattern: 'test',
       time_field: '@timestamp',
     });
     expect(result).toMatchInlineSnapshot(`
@@ -70,7 +98,7 @@ describe('getDatasetIndex', () => {
   });
 
   test('extracts index from esql query', () => {
-    const result = getDatasetIndex({
+    const result = getDataSourceIndex({
       type: 'esql',
       query: 'from test_index | limit 10',
     });
@@ -83,15 +111,50 @@ describe('getDatasetIndex', () => {
     `);
   });
 
-  test('returns undefined if no query or iundex provided', () => {
-    const result = getDatasetIndex({
-      type: 'table',
-      table: {
-        columns: [],
-        rows: [],
-      },
+  test('threads allow_hidden_indices into allowHidden when set', () => {
+    const result = getDataSourceIndex({
+      type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+      index_pattern: 'my-hidden-*',
+      time_field: '@timestamp',
+      allow_hidden_indices: true,
     });
-    expect(result).toMatchInlineSnapshot(`undefined`);
+    expect(result).toEqual({
+      index: 'my-hidden-*',
+      timeFieldName: '@timestamp',
+      allowHidden: true,
+    });
+  });
+
+  test('omits allowHidden when allow_hidden_indices is not set', () => {
+    const result = getDataSourceIndex({
+      type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+      index_pattern: 'logs-*',
+      time_field: '@timestamp',
+    });
+    expect(result).not.toHaveProperty('allowHidden');
+  });
+
+  test('threads name into the adhoc dataview index when set', () => {
+    const result = getDataSourceIndex({
+      type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+      index_pattern: 'logs-*',
+      time_field: '@timestamp',
+      name: 'My logs',
+    });
+    expect(result).toEqual({
+      index: 'logs-*',
+      timeFieldName: '@timestamp',
+      name: 'My logs',
+    });
+  });
+
+  test('omits name when not set', () => {
+    const result = getDataSourceIndex({
+      type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+      index_pattern: 'logs-*',
+      time_field: '@timestamp',
+    });
+    expect(result).not.toHaveProperty('name');
   });
 });
 
@@ -236,7 +299,7 @@ describe('buildDatasourceStates', () => {
       {
         type: 'metric',
         title: 'test',
-        dataset: {
+        data_source: {
           type: 'esql',
           query: 'from test | limit 10',
         },
@@ -245,13 +308,15 @@ describe('buildDatasourceStates', () => {
             type: 'primary',
             label: 'test',
             column: 'test',
-            fit: false,
-            labels: { alignment: 'left' },
-            value: { alignment: 'left' },
           },
         ],
+        styling: {
+          primary: {
+            value: { sizing: 'auto' },
+          },
+        },
         sampling: 1,
-        ignore_global_filters: false,
+        ignore_global_filters: true,
       },
       undefined as any,
       () => [{ columnId: 'test', fieldName: 'test' }]
@@ -268,6 +333,7 @@ describe('buildDatasourceStates', () => {
                     "fieldName": "test",
                   },
                 ],
+                "ignoreGlobalFilters": true,
                 "index": "test-ef03ee470d96c0a475dca463e351acd1ad966fa7997b95884750639034d53f21",
                 "query": Object {
                   "esql": "from test | limit 10",
@@ -291,18 +357,19 @@ describe('buildDatasourceStates', () => {
   });
 });
 
-describe('getDefaultReferences', () => {
-  test('generates correct references for index and layer id', () => {
-    const result = getDefaultReferences('my-index', 'layer_1');
-    expect(result).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "id": "my-index",
-          "name": "indexpattern-datasource-layer-layer_1",
-          "type": "index-pattern",
-        },
-      ]
-    `);
+describe('generateApiLayer', () => {
+  test('returns text based ignore_global_filters from layer state', () => {
+    const result = generateApiLayer({
+      index: 'test-index',
+      query: { esql: 'FROM test-index' },
+      columns: [],
+      ignoreGlobalFilters: true,
+    });
+
+    expect(result).toEqual({
+      sampling: 1,
+      ignore_global_filters: true,
+    });
   });
 });
 
@@ -359,8 +426,8 @@ describe('operationFromColumn', () => {
   });
 });
 
-describe('buildDatasetState', () => {
-  test('builds esql dataset state', () => {
+describe('buildDataSourceState', () => {
+  test('builds esql data_source state', () => {
     const textBasedLayer = {
       index: 'my-index',
       query: { esql: 'from my-index | limit 10' },
@@ -368,7 +435,7 @@ describe('buildDatasetState', () => {
       allColumns: [],
     } as TextBasedLayer;
 
-    const result = buildDatasetState(
+    const result = buildDataSourceState(
       textBasedLayer,
       'layer_0',
       {},
@@ -389,30 +456,30 @@ describe('buildDatasetState', () => {
     `);
   });
 
-  test('builds dataView dataset state', () => {
+  test('builds dataView data_source state', () => {
     const formBasedLayer = {
       indexPatternId: 'my-dataview-id',
       columns: {},
       columnOrder: [],
     } as FormBasedLayer;
 
-    const result = buildDatasetState(formBasedLayer, 'layer_0', {}, [], []);
+    const result = buildDataSourceState(formBasedLayer, 'layer_0', {}, [], []);
     expect(result).toMatchInlineSnapshot(`
       Object {
-        "id": "my-dataview-id",
-        "type": "dataView",
+        "ref_id": "my-dataview-id",
+        "type": "data_view_reference",
       }
     `);
   });
 
-  test('builds index dataset state', () => {
+  test('builds index data_source state', () => {
     const formBasedLayer = {
       indexPatternId: 'my-adhoc-dataview-id',
       columns: {},
       columnOrder: [],
     } as FormBasedLayer;
 
-    const result = buildDatasetState(
+    const result = buildDataSourceState(
       formBasedLayer,
       'layer_1',
       {
@@ -433,11 +500,175 @@ describe('buildDatasetState', () => {
     );
     expect(result).toMatchInlineSnapshot(`
       Object {
-        "index": "my-adhoc-dataview-id",
+        "index_pattern": "my-adhoc-dataview-id",
         "time_field": "@timestamp",
-        "type": "index",
+        "type": "data_view_spec",
       }
     `);
+  });
+});
+
+describe('buildDataSourceStateNoESQL', () => {
+  const formBasedLayer = {
+    indexPatternId: 'my-adhoc-dataview-id',
+    columns: {},
+    columnOrder: [],
+  } as FormBasedLayer;
+
+  test('emits allow_hidden_indices for an adhoc dataview with allowHidden', () => {
+    const result = buildDataSourceStateNoESQL(
+      formBasedLayer,
+      'layer_1',
+      {
+        'my-adhoc-dataview-id': {
+          index: 'test-id',
+          title: 'my-hidden-*',
+          timeFieldName: '@timestamp',
+          allowHidden: true,
+        },
+      },
+      [],
+      [
+        {
+          type: 'index-pattern',
+          id: 'my-adhoc-dataview-id',
+          name: 'indexpattern-datasource-layer-layer_1',
+        },
+      ]
+    );
+    expect(result).toEqual({
+      type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+      index_pattern: 'my-hidden-*',
+      time_field: '@timestamp',
+      allow_hidden_indices: true,
+    });
+  });
+
+  test('omits allow_hidden_indices for an adhoc dataview without allowHidden', () => {
+    const result = buildDataSourceStateNoESQL(
+      formBasedLayer,
+      'layer_1',
+      {
+        'my-adhoc-dataview-id': {
+          index: 'test-id',
+          title: 'logs-*',
+          timeFieldName: '@timestamp',
+        },
+      },
+      [],
+      [
+        {
+          type: 'index-pattern',
+          id: 'my-adhoc-dataview-id',
+          name: 'indexpattern-datasource-layer-layer_1',
+        },
+      ]
+    );
+    expect(result).not.toHaveProperty('allow_hidden_indices');
+  });
+
+  test('emits name for an adhoc dataview with a name', () => {
+    const result = buildDataSourceStateNoESQL(
+      formBasedLayer,
+      'layer_1',
+      {
+        'my-adhoc-dataview-id': {
+          index: 'test-id',
+          title: 'logs-*',
+          name: 'My logs',
+          timeFieldName: '@timestamp',
+        },
+      },
+      [],
+      [
+        {
+          type: 'index-pattern',
+          id: 'my-adhoc-dataview-id',
+          name: 'indexpattern-datasource-layer-layer_1',
+        },
+      ]
+    );
+    expect(result).toEqual({
+      type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+      index_pattern: 'logs-*',
+      name: 'My logs',
+      time_field: '@timestamp',
+    });
+  });
+
+  test('omits name for an adhoc dataview without a name', () => {
+    const result = buildDataSourceStateNoESQL(
+      formBasedLayer,
+      'layer_1',
+      {
+        'my-adhoc-dataview-id': {
+          index: 'test-id',
+          title: 'logs-*',
+          timeFieldName: '@timestamp',
+        },
+      },
+      [],
+      [
+        {
+          type: 'index-pattern',
+          id: 'my-adhoc-dataview-id',
+          name: 'indexpattern-datasource-layer-layer_1',
+        },
+      ]
+    );
+    expect(result).not.toHaveProperty('name');
+  });
+});
+
+describe('getAdHocDataViewSpec', () => {
+  test('preserves allowHidden when true', () => {
+    const spec = getAdHocDataViewSpec({
+      type: 'adHocDataView',
+      index: 'my-hidden-*',
+      timeFieldName: '@timestamp',
+      allowHidden: true,
+    });
+    expect(spec).toHaveProperty('allowHidden', true);
+  });
+
+  test('omits allowHidden when not provided', () => {
+    const spec = getAdHocDataViewSpec({
+      type: 'adHocDataView',
+      index: 'logs-*',
+      timeFieldName: '@timestamp',
+    });
+    expect(spec).not.toHaveProperty('allowHidden');
+  });
+
+  test('preserves name when provided', () => {
+    const spec = getAdHocDataViewSpec({
+      type: 'adHocDataView',
+      index: 'logs-*',
+      name: 'My logs',
+      timeFieldName: '@timestamp',
+    });
+    expect(spec).toHaveProperty('name', 'My logs');
+  });
+
+  test('defaults name to the index when not provided', () => {
+    const spec = getAdHocDataViewSpec({
+      type: 'adHocDataView',
+      index: 'logs-*',
+      timeFieldName: '@timestamp',
+    });
+    expect(spec).toHaveProperty('name', 'logs-*');
+  });
+
+  test('derives name from the index for ES|QL adhoc dataviews (no name field on the esql source)', () => {
+    const spec = getAdHocDataViewSpec({
+      type: 'adHocDataView',
+      index: 'kibana_sample_data_logs',
+      dataSourceType: 'esql',
+      esqlQuery: 'FROM kibana_sample_data_logs',
+      timeFieldName: undefined,
+    });
+    expect(spec).toHaveProperty('name', 'kibana_sample_data_logs');
+    expect(spec).toHaveProperty('title', 'kibana_sample_data_logs');
   });
 });
 
@@ -468,7 +699,7 @@ describe('generateLayer', () => {
       type: 'metric',
       sampling: 0.5,
       ignore_global_filters: true,
-    } as MetricState;
+    } as MetricConfig;
 
     const result = generateLayer('layer_1', options);
 
@@ -487,7 +718,7 @@ describe('generateLayer', () => {
   test('generates layer with default values', () => {
     const options = {
       type: 'metric',
-    } as MetricState;
+    } as MetricConfig;
 
     const result = generateLayer('layer_0', options);
 
@@ -506,10 +737,10 @@ describe('generateLayer', () => {
 
 describe('filtersAndQueryToLensState', () => {
   test('converts API filters and query to Lens state format', () => {
-    const apiState: LensApiState = {
+    const apiState: LensApiConfig = {
       type: 'metric',
       title: 'test metric',
-      dataset: {
+      data_source: {
         type: 'esql',
         query: 'from test | limit 10',
       },
@@ -518,11 +749,13 @@ describe('filtersAndQueryToLensState', () => {
           type: 'primary',
           label: 'test',
           column: 'test',
-          fit: false,
-          labels: { alignment: 'left' },
-          value: { alignment: 'left' },
         },
       ],
+      styling: {
+        primary: {
+          value: { sizing: 'auto' },
+        },
+      },
       sampling: 1,
       ignore_global_filters: false,
       filters: [
@@ -557,10 +790,10 @@ describe('filtersAndQueryToLensState', () => {
   });
 
   test('handles missing filters and query gracefully', () => {
-    const apiState: LensApiState = {
+    const apiState: LensApiConfig = {
       type: 'metric',
       title: 'test metric',
-      dataset: {
+      data_source: {
         type: 'esql',
         query: 'from test | limit 10',
       },
@@ -569,11 +802,14 @@ describe('filtersAndQueryToLensState', () => {
           type: 'primary',
           label: 'test',
           column: 'test',
-          fit: false,
-          labels: { alignment: 'left' },
-          value: { alignment: 'left' },
         },
       ],
+      styling: {
+        primary: {
+          value: { sizing: 'auto', alignment: 'left' },
+          labels: { alignment: 'left' },
+        },
+      },
       sampling: 1,
       ignore_global_filters: false,
     };
@@ -586,21 +822,24 @@ describe('filtersAndQueryToLensState', () => {
   });
 
   test('extracts filter data view references when applicable', () => {
-    const apiState: LensApiState = {
+    const apiState: LensApiConfig = {
       type: 'metric',
       title: 'test metric',
-      dataset: {
+      data_source: {
         type: 'esql',
         query: 'from test | limit 10',
+      },
+      styling: {
+        primary: {
+          value: { sizing: 'auto' },
+          labels: { alignment: 'left' },
+        },
       },
       metrics: [
         {
           type: 'primary',
           label: 'test',
           column: 'test',
-          fit: false,
-          labels: { alignment: 'left' },
-          value: { alignment: 'left' },
         },
       ],
       sampling: 1,
@@ -715,5 +954,140 @@ describe('filtersAndQueryToApiFormat', () => {
     const result = filtersAndQueryToApiFormat(lensState);
 
     expect(result).toEqual({});
+  });
+});
+
+describe('generateAdHocDataViewId', () => {
+  test('form-based data views differing only in name get distinct ids', () => {
+    const idA = generateAdHocDataViewId({
+      index: 'logs-*',
+      timeFieldName: '@timestamp',
+      name: 'Logs A',
+    });
+    const idB = generateAdHocDataViewId({
+      index: 'logs-*',
+      timeFieldName: '@timestamp',
+      name: 'Logs B',
+    });
+
+    expect(idA).not.toBe(idB);
+    // Both keep the readable `index-timeField` base
+    expect(idA.startsWith('logs-*-@timestamp-')).toBe(true);
+    expect(idB.startsWith('logs-*-@timestamp-')).toBe(true);
+  });
+
+  test('identical form-based data views share the same base-<hash> id', () => {
+    const idA = generateAdHocDataViewId({
+      index: 'logs-*',
+      timeFieldName: '@timestamp',
+      name: 'Logs',
+    });
+    const idB = generateAdHocDataViewId({
+      index: 'logs-*',
+      timeFieldName: '@timestamp',
+      name: 'Logs',
+    });
+
+    expect(idA).toBe(idB);
+  });
+
+  test('form-based data views over the same index+timeField but different field settings get distinct ids', () => {
+    const base = {
+      index: 'logs-*',
+      timeFieldName: '@timestamp',
+    };
+    const withoutRuntimeField = generateAdHocDataViewId(base);
+    const withRuntimeField = generateAdHocDataViewId({
+      ...base,
+      fieldSettings: {
+        my_runtime_field: { type: 'keyword', script: "emit('x')" },
+      },
+    });
+
+    expect(withoutRuntimeField).not.toBe(withRuntimeField);
+  });
+
+  test('form-based data views over the same index+timeField but different allowHidden get distinct ids', () => {
+    const base = {
+      index: 'logs-*',
+      timeFieldName: '@timestamp',
+    };
+    const withoutAllowHidden = generateAdHocDataViewId(base);
+    const withAllowHidden = generateAdHocDataViewId({
+      ...base,
+      allowHidden: true,
+    });
+
+    expect(withoutAllowHidden).not.toBe(withAllowHidden);
+  });
+
+  test('form-based data views with name undefined === name === index, get the same id', () => {
+    const noName = generateAdHocDataViewId({
+      index: 'logs-*',
+      timeFieldName: '@timestamp',
+    });
+    const nameEqualsIndex = generateAdHocDataViewId({
+      index: 'logs-*',
+      timeFieldName: '@timestamp',
+      name: 'logs-*',
+    });
+
+    expect(noName).toBe(nameEqualsIndex);
+  });
+
+  test('form-based data views with allowHidden false === allowHidden omitted, get the same id', () => {
+    const omitted = generateAdHocDataViewId({
+      index: 'logs-*',
+      timeFieldName: '@timestamp',
+    });
+    const explicitFalse = generateAdHocDataViewId({
+      index: 'logs-*',
+      timeFieldName: '@timestamp',
+      allowHidden: false,
+    });
+
+    expect(explicitFalse).toBe(omitted);
+  });
+
+  test('form-based data views with empty field settings === no field settings, get the same id', () => {
+    const noFieldSettings = generateAdHocDataViewId({
+      index: 'logs-*',
+      timeFieldName: '@timestamp',
+    });
+    const emptyFieldSettings = generateAdHocDataViewId({
+      index: 'logs-*',
+      timeFieldName: '@timestamp',
+      fieldSettings: {},
+    });
+
+    expect(emptyFieldSettings).toBe(noFieldSettings);
+  });
+
+  test('ES|QL data views with an explicit time field keep the readable base id (no canonical hash)', () => {
+    const id = generateAdHocDataViewId({
+      index: 'logs-*',
+      timeFieldName: '@timestamp',
+      dataSourceType: 'esql',
+      esqlQuery: 'FROM logs-*',
+    });
+
+    expect(id).toBe('logs-*-@timestamp');
+  });
+
+  test('ES|QL data views without an explicit time field disambiguate distinct queries by query hash', () => {
+    const idA = generateAdHocDataViewId({
+      index: 'logs-*',
+      timeFieldName: undefined,
+      dataSourceType: 'esql',
+      esqlQuery: 'FROM logs-* | LIMIT 10',
+    });
+    const idB = generateAdHocDataViewId({
+      index: 'logs-*',
+      timeFieldName: undefined,
+      dataSourceType: 'esql',
+      esqlQuery: 'FROM logs-* | LIMIT 20',
+    });
+
+    expect(idA).not.toBe(idB);
   });
 });

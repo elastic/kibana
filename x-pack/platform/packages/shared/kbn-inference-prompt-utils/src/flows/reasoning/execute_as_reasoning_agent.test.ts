@@ -440,4 +440,116 @@ describe('executeAsReasoningAgent', () => {
     // Without maxDurationMs we are not forced to complete, so toolChoice is auto (continuation)
     expect(secondCall.toolChoice).toEqual('auto');
   });
+
+  test('throws when abortSignal is already aborted before starting', async () => {
+    const prompt = makePrompt();
+    const inferenceClient = {
+      prompt: jest.fn().mockResolvedValue({ content: 'final', toolCalls: [], tokens: 1 }),
+    } as Partial<jest.Mocked<BoundInferenceClient>> as jest.Mocked<BoundInferenceClient>;
+
+    const abortController = new AbortController();
+    abortController.abort();
+
+    await expect(
+      executeAsReasoningAgent({
+        inferenceClient,
+        prompt,
+        maxSteps: 1,
+        abortSignal: abortController.signal,
+        toolCallbacks: { fetch_data: jest.fn(), complete: jest.fn() },
+        input: { foo: '' },
+      })
+    ).rejects.toThrow('Request was aborted');
+
+    expect(inferenceClient.prompt).not.toHaveBeenCalled();
+  });
+
+  test('throws when abortSignal is aborted between steps', async () => {
+    const prompt = makePrompt();
+    const abortController = new AbortController();
+
+    let callCount = 0;
+    const inferenceClient = {
+      prompt: jest.fn().mockImplementation(() => {
+        callCount++;
+        if (callCount === 1) {
+          return {
+            content: 'call tool',
+            toolCalls: [
+              {
+                type: 'function',
+                function: { name: 'fetch_data', arguments: {} },
+                toolCallId: 'x',
+              },
+            ],
+            tokens: 1,
+          };
+        }
+        abortController.abort();
+        return { content: 'final', toolCalls: [], tokens: 1 };
+      }),
+    } as Partial<jest.Mocked<BoundInferenceClient>> as jest.Mocked<BoundInferenceClient>;
+
+    const fetchData = jest.fn().mockResolvedValue({ response: { result: 'ok' } });
+
+    await expect(
+      executeAsReasoningAgent({
+        inferenceClient,
+        prompt,
+        maxSteps: 3,
+        abortSignal: abortController.signal,
+        toolCallbacks: { fetch_data: fetchData, complete: jest.fn() },
+        input: { foo: '' },
+      })
+    ).rejects.toThrow('Request was aborted');
+
+    expect(callCount).toBeGreaterThanOrEqual(1);
+  });
+
+  test('skips tool callbacks when abortSignal is already aborted', async () => {
+    const prompt = makePrompt();
+    const abortController = new AbortController();
+    abortController.abort();
+
+    const inferenceClient = {
+      prompt: jest.fn().mockResolvedValue({ content: 'final', toolCalls: [], tokens: 1 }),
+    } as Partial<jest.Mocked<BoundInferenceClient>> as jest.Mocked<BoundInferenceClient>;
+
+    const fetchData = jest.fn();
+
+    await expect(
+      executeAsReasoningAgent({
+        inferenceClient,
+        prompt,
+        maxSteps: 2,
+        abortSignal: abortController.signal,
+        toolCallbacks: { fetch_data: fetchData, complete: jest.fn() },
+        input: { foo: '' },
+      })
+    ).rejects.toThrow('Request was aborted');
+
+    expect(fetchData).not.toHaveBeenCalled();
+    expect(inferenceClient.prompt).not.toHaveBeenCalled();
+  });
+
+  test('forwards abortSignal to inferenceClient.prompt calls', async () => {
+    const prompt = makePrompt();
+    const abortController = new AbortController();
+
+    const inferenceClient = {
+      prompt: jest.fn().mockResolvedValue({ content: 'final', toolCalls: [], tokens: 1 }),
+    } as Partial<jest.Mocked<BoundInferenceClient>> as jest.Mocked<BoundInferenceClient>;
+
+    await executeAsReasoningAgent({
+      inferenceClient,
+      prompt,
+      maxSteps: 1,
+      abortSignal: abortController.signal,
+      toolCallbacks: { fetch_data: jest.fn(), complete: jest.fn() },
+      input: { foo: '' },
+    });
+
+    const callArgs = inferenceClient.prompt.mock.calls[0][0];
+    expect(callArgs.abortSignal).toBe(abortController.signal);
+  });
 });

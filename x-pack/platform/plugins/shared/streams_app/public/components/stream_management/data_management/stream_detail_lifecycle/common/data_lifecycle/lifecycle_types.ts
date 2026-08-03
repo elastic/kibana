@@ -6,8 +6,13 @@
  */
 
 import type { EuiFlexItemProps } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { splitSizeAndUnits } from '@kbn/failure-store-modal/src/components/utils';
 import type { DownsampleStep } from '@kbn/streams-schema/src/models/ingest/lifecycle';
+
+/** Shared translated label for the frozen phase. Import this instead of calling i18n.translate inline. */
+export const getFrozenPhaseLabel = () =>
+  i18n.translate('xpack.streams.streamDetailLifecycle.frozen', { defaultMessage: 'Frozen' });
 
 interface BaseLifecyclePhase {
   color: string;
@@ -21,6 +26,7 @@ interface BaseLifecyclePhase {
   label: string;
   min_age?: string;
   name: string;
+  isFrozen?: boolean;
   searchableSnapshot?: string;
   sizeInBytes?: number;
   timelineValue?: string;
@@ -43,6 +49,13 @@ export function buildLifecyclePhases({
   color,
   deletePhaseColor,
   deletePhaseDescription,
+  frozenAfter,
+  frozenLabel,
+  frozenColor,
+  frozenDescription,
+  frozenSize,
+  frozenSizeInBytes,
+  frozenDocsCount,
   description,
   isReadOnly,
   retentionPeriod,
@@ -53,6 +66,13 @@ export function buildLifecyclePhases({
   docsCount?: number;
   deletePhaseColor: string;
   deletePhaseDescription?: string;
+  frozenAfter?: string;
+  frozenLabel?: string;
+  frozenColor?: string;
+  frozenDescription?: string;
+  frozenSize?: string;
+  frozenSizeInBytes?: number;
+  frozenDocsCount?: number;
   description?: string;
   isReadOnly?: boolean;
   label: string;
@@ -78,6 +98,23 @@ export function buildLifecyclePhases({
       isReadOnly,
     },
   ];
+
+  // A configured frozen phase (including `0d`, i.e. "freeze immediately") is shown; an unconfigured
+  // one is signalled by `frozenAfter === undefined`.
+  if (frozenAfter !== undefined && frozenLabel !== undefined && frozenColor !== undefined) {
+    phases.push({
+      name: 'frozen',
+      isFrozen: true,
+      color: frozenColor,
+      label: frozenLabel,
+      grow: true,
+      min_age: frozenAfter,
+      description: frozenDescription,
+      size: frozenSize,
+      sizeInBytes: frozenSizeInBytes,
+      docsCount: frozenDocsCount,
+    });
+  }
 
   // Only add delete phase if retention is not infinite
   if (retentionPeriod !== undefined) {

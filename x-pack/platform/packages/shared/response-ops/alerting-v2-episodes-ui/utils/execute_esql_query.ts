@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import type { Datatable, ExpressionsStart } from '@kbn/expressions-plugin/public';
+import type { Datatable, DatatableRow, ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { lastValueFrom, map } from 'rxjs';
+import { TIME_FIELD } from '../constants';
 
 export interface ExecuteEsqlQueryOptions<Input> {
   expressions: ExpressionsStart;
@@ -17,22 +18,21 @@ export interface ExecuteEsqlQueryOptions<Input> {
   noCache?: boolean;
 }
 
-/** Time field used for the time range filter (must match the expression's timeField argument). */
-const ESQL_TIME_FIELD = '@timestamp';
-
 /**
  * Executes an ES|QL query through the expressions plugin, using Discover's `esql` function,
  * which also transforms the tabular result into a datatable-ready data structure.
  * Passes timeField so that input.timeRange is applied as a filter on @timestamp.
+ *
+ * Pass a row type parameter to get typed rows instead of `DatatableRow`.
  */
-export const executeEsqlQuery = <Input = unknown>({
+export const executeEsqlQuery = <TRow extends object = DatatableRow, Input = unknown>({
   expressions,
   query,
   input,
   abortSignal,
   noCache,
-}: ExecuteEsqlQueryOptions<Input>) => {
-  const expression = `esql '${query.replace(/'/g, "\\'")}' timeField='${ESQL_TIME_FIELD}'`;
+}: ExecuteEsqlQueryOptions<Input>): Promise<TRow[]> => {
+  const expression = `esql '${query.replace(/'/g, "\\'")}' timeField='${TIME_FIELD}'`;
   const options = noCache ? { allowCache: false } : undefined;
   const executionContract = expressions.execute<Input, Datatable>(expression, input, options);
   abortSignal?.addEventListener('abort', (e) => {
@@ -44,7 +44,7 @@ export const executeEsqlQuery = <Input = unknown>({
         if (result.type === 'error') {
           throw result.error;
         }
-        return result;
+        return result.rows as TRow[];
       })
     )
   );

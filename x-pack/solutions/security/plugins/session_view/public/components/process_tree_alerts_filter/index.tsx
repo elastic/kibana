@@ -163,7 +163,6 @@ export const ProcessTreeAlertsFilter = ({
             >
               <EuiContextMenuPanel
                 data-test-subj="sessionView:sessionViewAlertDetailsFilterSelectorContainerMenu"
-                size="s"
                 className={'filterMenu'}
                 items={alertEventCategoryFilterMenuItems}
               />

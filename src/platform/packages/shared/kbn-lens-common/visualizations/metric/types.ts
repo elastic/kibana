@@ -17,6 +17,9 @@ export type ValueFontMode = Exclude<MetricStyle['valueFontSize'], number>;
 export type PrimaryMetricFontSize = ValueFontMode;
 
 export type PrimaryMetricPosition = MetricStyle['valuePosition'];
+export type MetricDensity = 'compact' | 'default';
+export type MetricStyleTemplateId = 'top' | 'middle' | 'bottom' | 'custom';
+export type MetricStyleTemplatePresetId = Exclude<MetricStyleTemplateId, 'custom'>;
 
 export type SecondaryTrendType = 'none' | 'static' | 'dynamic';
 
@@ -30,8 +33,6 @@ export type SecondaryTrend =
       reversed: boolean;
       baselineValue: number | 'primary';
     };
-
-type TitleFontWeightString = Extract<TitleFontWeight, string>;
 
 export interface MetricVisualizationState {
   layerId: string;
@@ -63,7 +64,12 @@ export interface MetricVisualizationState {
   primaryAlign?: MetricStyle['valueTextAlign'];
   iconAlign?: MetricStyle['iconAlign'];
   valueFontMode?: ValueFontMode;
-  titleWeight?: TitleFontWeightString;
+  density?: MetricDensity;
+  /**
+   * legacy state property
+   * @deprecated
+   */
+  titleWeight?: Extract<MetricStyle['titleWeight'], string>;
   primaryPosition?: PrimaryMetricPosition;
   secondaryLabelPosition?: SecondaryMetricProps['labelPosition'];
   color?: string;
@@ -93,8 +99,8 @@ export type MetricStateOptinalsWithDefault = Pick<
   | 'secondaryAlign'
   | 'iconAlign'
   | 'valueFontMode'
+  | 'density'
   | 'primaryPosition'
-  | 'titleWeight'
   | 'secondaryLabelPosition'
   | 'applyColorTo'
 >;
@@ -102,13 +108,10 @@ export type MetricStateOptinalsWithDefault = Pick<
 export type MetricStateDefaults = Required<MetricStateOptinalsWithDefault>;
 
 export type MetricLayoutWithDefault = Required<
-  Pick<MetricStateOptinalsWithDefault, 'titlesTextAlign' | 'titleWeight' | 'primaryAlign'>
+  Pick<MetricStateOptinalsWithDefault, 'titlesTextAlign' | 'primaryAlign' | 'primaryPosition'>
 > & {
-  iconAlign?: MetricStateOptinalsWithDefault['iconAlign'];
   secondaryAlign?: MetricStateOptinalsWithDefault['secondaryAlign'];
 };
-
-export type TitleFontWeight = MetricStyle['titleWeight'];
 
 export type IconPosition = MetricStyle['iconAlign'];
 

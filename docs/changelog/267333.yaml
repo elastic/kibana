@@ -1,0 +1,10 @@
+prs:
+- https://github.com/elastic/kibana/pull/267333
+type: enhancement
+products:
+- product: cloud-serverless
+  target: 2026-05-12
+areas:
+- AI and machine Learning
+title: Add connector-specific access control for Agent Builder agents
+description: 'Agents can now be configured to access only specific connectors using the `connector_ids` setting. If unset, agents have access to all configured Kibana connectors.'

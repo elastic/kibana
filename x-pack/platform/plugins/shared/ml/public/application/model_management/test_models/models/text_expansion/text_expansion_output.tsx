@@ -78,7 +78,7 @@ export const DocumentResult: FC<{
               <EuiTextColor color={statInfo.color}>
                 <span>
                   {statInfo.icon !== null ? (
-                    <EuiIcon type={statInfo.icon} color={statInfo.color} />
+                    <EuiIcon aria-hidden={true} type={statInfo.icon} color={statInfo.color} />
                   ) : null}
                   {statInfo.text}
                 </span>
@@ -122,7 +122,7 @@ export const DocumentResultWithTokens: FC<{
               <EuiTextColor color={statInfo.color}>
                 <span>
                   {statInfo.icon !== null ? (
-                    <EuiIcon type={statInfo.icon} color={statInfo.color} />
+                    <EuiIcon aria-hidden={true} type={statInfo.icon} color={statInfo.color} />
                   ) : null}
                   {statInfo.text}
                 </span>
@@ -159,6 +159,10 @@ export const DocumentResultWithTokens: FC<{
             </EuiCallOut>
             <EuiSpacer size="s" />
             <EuiInMemoryTable
+              tableCaption={i18n.translate(
+                'xpack.ml.trainedModels.testModelsFlyout.textExpansion.tableCaption',
+                { defaultMessage: 'Text expansion results' }
+              )}
               items={tokens}
               columns={[
                 {

@@ -7,37 +7,43 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
+import type {
+  CoreSetup,
+  CoreStart,
+  Logger,
+  Plugin,
+  PluginInitializerContext,
+} from '@kbn/core/server';
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
 import { registerRoutes } from './api/register_routes';
-import { MARKDOWN_EMBEDDABLE_TYPE, MARKDOWN_SAVED_OBJECT_TYPE } from '../common/constants';
-import { markdownEmbeddableSchema } from './schemas';
-import type { MarkdownAttributes } from './markdown_saved_object';
-import { markdownSavedObjectType } from './markdown_saved_object';
-import { MarkdownStorage } from './content_management';
+import { MARKDOWN_EMBEDDABLE_TYPE } from '../common/constants';
+import { markdownEmbeddableSchema } from './embeddable/schemas';
+import { markdownSavedObjectType, type StoredMarkdownState } from './markdown_saved_object';
 import type { SetupDeps, StartDeps } from './types';
 import { getTransforms } from './embeddable';
 
 export class MarkdownPlugin implements Plugin<void, void, SetupDeps, StartDeps> {
+  private readonly logger: Logger;
+  private apiUsageCounter?: UsageCounter;
+
+  constructor(initializerContext: PluginInitializerContext) {
+    this.logger = initializerContext.logger.get();
+  }
+
   setup(core: CoreSetup<StartDeps>, plugins: SetupDeps) {
-    plugins.embeddable.registerTransforms(MARKDOWN_EMBEDDABLE_TYPE, {
+    plugins.embeddable.registerEmbeddableServerDefinition(MARKDOWN_EMBEDDABLE_TYPE, {
+      title: 'Markdown',
       getSchema: () => markdownEmbeddableSchema,
       getTransforms,
     });
 
-    // Registering the markdown saved object type with content management
-    // to support "Add from library" flyout in dashboard
-    // Only 'mSearch' implemented to support markdown saved objects in 'api/content_management/rpc/mSearch' route
-    // CRUD content management routes not implemented and throw
-    plugins.contentManagement.register({
-      id: MARKDOWN_SAVED_OBJECT_TYPE,
-      storage: new MarkdownStorage(),
-      version: { latest: 1 },
-    });
+    core.savedObjects.registerType<StoredMarkdownState>(markdownSavedObjectType);
 
-    core.savedObjects.registerType<MarkdownAttributes>(markdownSavedObjectType);
-
-    registerRoutes(core.http);
+    if (plugins.usageCollection) {
+      this.apiUsageCounter = plugins.usageCollection.createUsageCounter('markdowns_api');
+    }
+    registerRoutes(core.http, this.apiUsageCounter, this.logger);
   }
 
   start(core: CoreStart, plugins: StartDeps) {}

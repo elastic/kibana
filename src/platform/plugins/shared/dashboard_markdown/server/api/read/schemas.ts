@@ -9,10 +9,15 @@
 
 import { schema } from '@kbn/config-schema';
 import { asCodeMetaSchema } from '@kbn/as-code-shared-schemas';
-import { markdownAttributesSchema } from '../../markdown_saved_object/schema/v1';
+import { markdownLibraryItemSchema } from '../schema';
 
 export const readResponseBodySchema = schema.object({
-  id: schema.string(),
-  data: markdownAttributesSchema,
+  id: schema.string({
+    meta: {
+      description:
+        'The unique ID of the markdown library item, as returned by the create or search endpoints.',
+    },
+  }),
+  data: markdownLibraryItemSchema,
   meta: asCodeMetaSchema,
 });

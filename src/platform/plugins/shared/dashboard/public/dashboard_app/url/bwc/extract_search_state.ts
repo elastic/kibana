@@ -9,12 +9,14 @@
 
 import type { AsCodeFilter } from '@kbn/as-code-filters-schema';
 import { fromStoredFilter, isAsCodeFilter } from '@kbn/as-code-filters-transforms';
+import { toAsCodeQuery } from '@kbn/as-code-shared-transforms';
+import { isQuery } from '@kbn/data-plugin/public';
 import type { DashboardState } from '../../../../common';
 import { migrateLegacyQuery } from '../../../../common';
 
 type DashboardSearchState = Pick<
   DashboardState,
-  'filters' | 'query' | 'refresh_interval' | 'time_range'
+  'filters' | 'query' | 'refresh_interval' | 'time_range' | 'esql_approximation'
 >;
 
 export function extractSearchState(state: {
@@ -35,7 +37,23 @@ export function extractSearchState(state: {
   }
 
   if (state.query && typeof state.query === 'object') {
-    searchState.query = migrateLegacyQuery(state.query);
+    const maybeQuery = state.query as Record<string, unknown>;
+
+    // New as-code/API query format
+    if (typeof maybeQuery.expression === 'string' && typeof maybeQuery.language === 'string') {
+      const expression = maybeQuery.expression;
+      const language = maybeQuery.language === 'lucene' ? 'lucene' : 'kql';
+      searchState.query = { expression, language };
+    }
+
+    // Legacy query format
+    if (isQuery(state.query)) {
+      const storedQuery = migrateLegacyQuery(state.query);
+      const asCodeQuery = toAsCodeQuery(storedQuery);
+      if (asCodeQuery) {
+        searchState.query = asCodeQuery;
+      }
+    }
   }
 
   // Refresh interval could be passed in with snake_case or camelCase
@@ -54,6 +72,10 @@ export function extractSearchState(state: {
 
   if (state.time_range && typeof state.time_range === 'object') {
     searchState.time_range = state.time_range as DashboardState['time_range'];
+  }
+
+  if (typeof state.esql_approximation === 'boolean') {
+    searchState.esql_approximation = state.esql_approximation;
   }
 
   return searchState;

@@ -33,7 +33,7 @@ const mockEncryptedSoClient = mockEncryptedSO();
 
 const mockSyntheticsMonitorClient = {
   privateLocationAPI: {
-    editMonitors: jest.fn(),
+    editMonitors: jest.fn().mockResolvedValue({ failedUpdates: [], failedCreates: [] }),
   },
   syntheticsService: {
     getSyntheticsParams: jest.fn(),

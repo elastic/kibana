@@ -10,7 +10,7 @@ import { action } from '@storybook/addon-actions';
 import { createKibanaReactContext, type KibanaServices } from '@kbn/kibana-react-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
-import { of } from 'rxjs';
+import { EMPTY, of } from 'rxjs';
 import {
   WEB_STORAGE_CLEAR_ACTION,
   WEB_STORAGE_GET_ITEM_ACTION,
@@ -120,6 +120,15 @@ const uiSettings: Record<string, unknown> = {
 const services: Partial<KibanaServices> = {
   appName: 'test',
   application: applicationServiceMock.createStartContract(),
+  featureFlags: {
+    appendContext: () => Promise.resolve(),
+    getBooleanValue: (_flagName, fallback) => fallback,
+    getStringValue: (_flagName, fallback) => fallback,
+    getNumberValue: (_flagName, fallback) => fallback,
+    getBooleanValue$: (_flagName, fallback) => of(fallback),
+    getStringValue$: (_flagName, fallback) => of(fallback),
+    getNumberValue$: (_flagName, fallback) => of(fallback),
+  },
   kql: {
     autocomplete: {
       getQuerySuggestions: () => [],
@@ -160,6 +169,11 @@ const services: Partial<KibanaServices> = {
             queries: [],
           }),
       },
+      timefilter: {
+        timefilter: {
+          getAutoRefreshFetch$: () => EMPTY,
+        },
+      },
     },
     autocomplete: {
       hasQuerySuggestions: () => Promise.resolve(false),
@@ -172,6 +186,13 @@ const services: Partial<KibanaServices> = {
       session: {
         state$: of({}),
       },
+    },
+    dateRangePickerPresets: {
+      getDefaultPresets: () => [],
+      getPresets$: () => of([]),
+      getCanWrite$: () => of(false),
+      savePreset: () => Promise.resolve('saved'),
+      deletePreset: () => Promise.resolve(),
     },
   },
   dataViewEditor: {

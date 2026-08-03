@@ -74,7 +74,7 @@ describe('Data stream routes - upload samples', () => {
   describe('when body has samples (file upload)', () => {
     it('calls addSamplesToDataStream with provided samples and originalSource', async () => {
       const request = {
-        params: { integration_id: 'int-1', data_stream_id: 'ds-1' },
+        params: { integration_id: 'int_1', data_stream_id: 'ds_1' },
         body: {
           samples: ['line1', 'line2'],
           originalSource: { sourceType: 'file' as const, sourceValue: 'app.log' },
@@ -87,8 +87,8 @@ describe('Data stream routes - upload samples', () => {
       expect(mockAddSamplesToDataStream).toHaveBeenCalledTimes(1);
       expect(mockAddSamplesToDataStream).toHaveBeenCalledWith(
         expect.objectContaining({
-          integrationId: 'int-1',
-          dataStreamId: 'ds-1',
+          integrationId: 'int_1',
+          dataStreamId: 'ds_1',
           rawSamples: ['line1', 'line2'],
           originalSource: { sourceType: 'file', sourceValue: 'app.log' },
           createdBy: 'test-user',
@@ -111,7 +111,7 @@ describe('Data stream routes - upload samples', () => {
       });
 
       const request = {
-        params: { integration_id: 'int-1', data_stream_id: 'ds-1' },
+        params: { integration_id: 'int_1', data_stream_id: 'ds_1' },
         body: {
           sourceIndex: 'logs-*',
           originalSource: { sourceType: 'index' as const, sourceValue: 'logs-*' },
@@ -137,8 +137,8 @@ describe('Data stream routes - upload samples', () => {
       expect(mockAddSamplesToDataStream).toHaveBeenCalledTimes(1);
       expect(mockAddSamplesToDataStream).toHaveBeenCalledWith(
         expect.objectContaining({
-          integrationId: 'int-1',
-          dataStreamId: 'ds-1',
+          integrationId: 'int_1',
+          dataStreamId: 'ds_1',
           rawSamples: ['log line one', 'log line two'],
           originalSource: { sourceType: 'index', sourceValue: 'logs-*' },
           createdBy: 'test-user',
@@ -148,11 +148,32 @@ describe('Data stream routes - upload samples', () => {
       expect(mockResponse.badRequest).not.toHaveBeenCalled();
     });
 
+    it('rejects sourceIndex starting with a dot (system indices)', async () => {
+      const request = {
+        params: { integration_id: 'int_1', data_stream_id: 'ds_1' },
+        body: {
+          sourceIndex: '.kibana_task_manager',
+          originalSource: { sourceType: 'index' as const, sourceValue: '.kibana_task_manager' },
+        },
+      };
+
+      await routeHandler!(createMockContext(), request, mockResponse);
+
+      expect(mockEsSearch).not.toHaveBeenCalled();
+      expect(mockAddSamplesToDataStream).not.toHaveBeenCalled();
+      expect(mockResponse.badRequest).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: 'Reading from system indices is not allowed.',
+        })
+      );
+      expect(mockResponse.ok).not.toHaveBeenCalled();
+    });
+
     it('returns badRequest when index has no documents with event.original', async () => {
       mockEsSearch.mockResolvedValue({ hits: { hits: [] } });
 
       const request = {
-        params: { integration_id: 'int-1', data_stream_id: 'ds-1' },
+        params: { integration_id: 'int_1', data_stream_id: 'ds_1' },
         body: {
           sourceIndex: 'empty-index',
           originalSource: { sourceType: 'index' as const, sourceValue: 'empty-index' },
@@ -184,7 +205,7 @@ describe('Data stream routes - upload samples', () => {
       });
 
       const request = {
-        params: { integration_id: 'int-1', data_stream_id: 'ds-1' },
+        params: { integration_id: 'int_1', data_stream_id: 'ds_1' },
         body: {
           sourceIndex: 'logs-*',
           originalSource: { sourceType: 'index' as const, sourceValue: 'logs-*' },

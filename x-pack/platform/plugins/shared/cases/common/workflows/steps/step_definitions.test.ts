@@ -9,6 +9,7 @@ import { AddAlertsStepTypeId, addAlertsStepCommonDefinition } from './add_alerts
 import { AddEventsStepTypeId, addEventsStepCommonDefinition } from './add_events';
 import { AddObservablesStepTypeId, addObservablesStepCommonDefinition } from './add_observables';
 import { AddTagsStepTypeId, addTagsStepCommonDefinition } from './add_tags';
+import { RemoveTagsStepTypeId, removeTagsStepCommonDefinition } from './remove_tags';
 import { AssignCaseStepTypeId, assignCaseStepCommonDefinition } from './assign_case';
 import { CloseCaseStepTypeId, closeCaseStepCommonDefinition } from './close_case';
 import { DeleteCasesStepTypeId, deleteCasesStepCommonDefinition } from './delete_cases';
@@ -22,6 +23,24 @@ import { SetSeverityStepTypeId, setSeverityStepCommonDefinition } from './set_se
 import { SetStatusStepTypeId, setStatusStepCommonDefinition } from './set_status';
 import { SetTitleStepTypeId, setTitleStepCommonDefinition } from './set_title';
 import { UnassignCaseStepTypeId, unassignCaseStepCommonDefinition } from './unassign_case';
+import {
+  GetCasesByAlertIdStepTypeId,
+  getCasesByAlertIdStepCommonDefinition,
+} from './get_cases_by_alert_id';
+import {
+  GetAllAttachmentsStepTypeId,
+  getAllAttachmentsStepCommonDefinition,
+} from './get_all_attachments';
+import {
+  UpdateObservableStepTypeId,
+  updateObservableStepCommonDefinition,
+} from './update_observable';
+import {
+  DeleteObservableStepTypeId,
+  deleteObservableStepCommonDefinition,
+} from './delete_observable';
+import { GetCasesStepTypeId, getCasesStepCommonDefinition } from './get_cases';
+import { PushCasesStepTypeId, pushCasesStepCommonDefinition } from './push_cases';
 import {
   addAlertsInputFixture,
   addCategoryInputFixture,
@@ -40,6 +59,17 @@ import {
   setStatusInputFixture,
   setTitleInputFixture,
   unassignCaseInputFixture,
+  getCasesByAlertIdInputFixture,
+  getCasesByAlertIdOutputFixture,
+  getAllAttachmentsInputFixture,
+  getAllAttachmentsOutputFixture,
+  updateObservableInputFixture,
+  deleteObservableInputFixture,
+  deleteObservableOutputFixture,
+  getCasesInputFixture,
+  getCasesOutputFixture,
+  pushCasesInputFixture,
+  pushCasesOutputFixture,
 } from './test_fixtures';
 
 const singleCaseOutput = { case: createCaseResponseFixture };
@@ -124,10 +154,52 @@ const stepDefinitions = [
     output: singleCaseOutput,
   },
   {
+    typeId: RemoveTagsStepTypeId,
+    definition: removeTagsStepCommonDefinition,
+    input: addTagInputFixture,
+    output: singleCaseOutput,
+  },
+  {
     typeId: SetCategoryStepTypeId,
     definition: setCategoryStepCommonDefinition,
     input: addCategoryInputFixture,
     output: singleCaseOutput,
+  },
+  {
+    typeId: GetCasesByAlertIdStepTypeId,
+    definition: getCasesByAlertIdStepCommonDefinition,
+    input: getCasesByAlertIdInputFixture,
+    output: getCasesByAlertIdOutputFixture,
+  },
+  {
+    typeId: GetAllAttachmentsStepTypeId,
+    definition: getAllAttachmentsStepCommonDefinition,
+    input: getAllAttachmentsInputFixture,
+    output: getAllAttachmentsOutputFixture,
+  },
+  {
+    typeId: UpdateObservableStepTypeId,
+    definition: updateObservableStepCommonDefinition,
+    input: updateObservableInputFixture,
+    output: singleCaseOutput,
+  },
+  {
+    typeId: DeleteObservableStepTypeId,
+    definition: deleteObservableStepCommonDefinition,
+    input: deleteObservableInputFixture,
+    output: deleteObservableOutputFixture,
+  },
+  {
+    typeId: GetCasesStepTypeId,
+    definition: getCasesStepCommonDefinition,
+    input: getCasesInputFixture,
+    output: getCasesOutputFixture,
+  },
+  {
+    typeId: PushCasesStepTypeId,
+    definition: pushCasesStepCommonDefinition,
+    input: pushCasesInputFixture,
+    output: pushCasesOutputFixture,
   },
 ] as const;
 
@@ -142,5 +214,14 @@ describe('cases common step definitions', () => {
 
   it.each(stepDefinitions)('accepts valid output payload for $typeId', ({ definition, output }) => {
     expect(definition.outputSchema.safeParse(output).success).toBe(true);
+  });
+
+  it('rejects non built-in observable type keys for addObservables', () => {
+    expect(
+      addObservablesStepCommonDefinition.inputSchema.safeParse({
+        ...addObservablesInputFixture,
+        observables: [{ typeKey: 'ip', value: '10.0.0.8' }],
+      }).success
+    ).toBe(false);
   });
 });

@@ -24,11 +24,14 @@ if [[ "$(pwd)" != *"/local-ssd/"* && "$(pwd)" != "/dev/shm"* ]]; then
     mv ~/.kibana/.yarn-local-mirror ./
   fi
   # Check if there's a cache artifact uploaded from a previous step
-  if (buildkite-agent artifact download --step "store_cache" "moon-cache.tar.gz" ~/); then
-    echo "Found moon-cache.tar.gz artifact, extracting to ./.moon/cache"
-    mkdir -p ./.moon/cache
-    echo "Extracting moon-cache.tar.gz to ./.moon/cache"
-    tar -xzf ~/moon-cache.tar.gz -C ./
+  if [[ -z "${KBN_BOOTSTRAP_NO_PREBUILT:-}" ]]; then
+    if download_tmp_artifact moon-cache.tar.zst "$HOME" "$BUILDKITE_BUILD_ID" false; then
+      echo "Found moon-cache.tar.zst artifact, extracting to ./.moon/cache"
+      mkdir -p ./.moon/cache
+      echo "Extracting moon-cache.tar.zst to ./.moon/cache"
+      tar -xf ~/moon-cache.tar.zst -I zstd -C ./
+    fi
+    .buildkite/scripts/common/activate_service_account.sh --unset-impersonation
   fi
 fi
 
@@ -47,4 +50,12 @@ fi
 
 if [[ "$DISABLE_BOOTSTRAP_VALIDATION" != "true" ]]; then
   check_for_changed_files 'yarn kbn bootstrap'
+fi
+
+# Opt-in per job (via CLEAR_YARN_CACHE) to free disk space on disk-constrained agents
+if [[ "${CLEAR_YARN_CACHE:-}" ]]; then
+  echo "Clearing yarn cache at /opt/buildkite-agent/.cache/yar..."
+  rm -rf /opt/buildkite-agent/.cache/yarn
+  echo "Available disk space after clearing yarn cache:"
+  df -h . || echo "Failed to get disk space"
 fi

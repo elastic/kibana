@@ -14,7 +14,6 @@ import {
   EuiSpacer,
   EuiTab,
   EuiTabs,
-  EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useHistory, useParams } from 'react-router-dom';
@@ -28,19 +27,23 @@ import { RiskScoreTab } from '../components/risk_score_management/risk_score_tab
 import { AssetCriticalityTab } from '../components/asset_criticality/asset_criticality_tab';
 import { WatchlistsTab } from '../components/watchlists/watchlists_tab';
 import { EntityResolutionTab } from '../components/entity_resolution';
-import { useUiSetting$ } from '../../common/lib/kibana';
 import { EntityStoreMissingPrivilegesCallout } from '../components/entity_store/components/entity_store_missing_privileges_callout';
+import { EntityStoreMissingStopPrivilegesCallout } from '../components/entity_store/components/entity_store_missing_stop_privileges_callout';
 import { EngineStatus } from '../components/entity_store/components/engines_status';
 import { ClearEntityDataButton } from '../components/entity_store/components/clear_entity_data_button';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
+import { useHasEntityResolutionLicense } from '../../common/hooks/use_has_entity_resolution_license';
 import {
   useDeleteEntityStoreMutation,
   useEntityStoreStatus,
 } from '../components/entity_store/hooks/use_entity_store';
 import { useEntityEnginePrivileges } from '../components/entity_store/hooks/use_entity_engine_privileges';
-import { useEntityStoreTypes } from '../hooks/use_enabled_entity_types';
 import { ENTITY_ANALYTICS_MANAGEMENT_PATH } from '../../../common/constants';
-import { userHasRiskEngineReadPermissions, safeErrorMessage } from '../common';
+import {
+  userHasRiskEngineReadPermissions,
+  userHasEntityStoreStopPrivileges,
+  safeErrorMessage,
+} from '../common';
 import {
   ENTITY_ANALYTICS_MANAGEMENT_PAGE_TEST_ID,
   ENTITY_ANALYTICS_MANAGEMENT_PAGE_TITLE_TEST_ID,
@@ -49,7 +52,6 @@ import {
   ASSET_CRITICALITY_TAB_TEST_ID,
   WATCHLISTS_TAB_TEST_ID,
   ENGINE_STATUS_TAB_TEST_ID,
-  ENTITY_STORE_FEATURE_FLAG_CALLOUT_TEST_ID,
 } from '../test_ids';
 
 export enum TabId {
@@ -90,23 +92,29 @@ export const EntityAnalyticsManagementPage = () => {
     }
   }, [selectedRiskEngineSettings, saveSelectedSettingsMutation]);
 
-  const isEntityStoreFeatureFlagDisabled = useIsExperimentalFeatureEnabled('entityStoreDisabled');
   const isWatchlistsEnabled = useIsExperimentalFeatureEnabled('entityAnalyticsWatchlistEnabled');
-  const [isEntityStoreV2Enabled] = useUiSetting$<boolean>('securitySolution:entityStoreEnableV2');
+  const hasEntityResolutionLicense = useHasEntityResolutionLicense();
 
   const entityStoreStatus = useEntityStoreStatus();
-  const entityTypes = useEntityStoreTypes();
   const { data: entityEnginePrivileges, isLoading: isLoadingPrivileges } =
     useEntityEnginePrivileges();
-  const deleteEntityStoreMutation = useDeleteEntityStoreMutation({ entityTypes });
+  const deleteEntityStoreMutation = useDeleteEntityStoreMutation();
 
   const userHasRiskEnginePrivileges =
     !riskEnginePrivileges.isLoading &&
     'hasAllRequiredPrivileges' in riskEnginePrivileges &&
     riskEnginePrivileges.hasAllRequiredPrivileges;
 
-  const userHasEntityStorePrivileges = entityEnginePrivileges?.has_all_required ?? false;
-  const hasAllRequiredPrivileges = userHasRiskEnginePrivileges || userHasEntityStorePrivileges;
+  const userHasEntityStoreInstallPrivileges =
+    entityEnginePrivileges?.has_install_permissions ?? false;
+
+  const hasStopPrivileges = userHasEntityStoreStopPrivileges(entityEnginePrivileges);
+
+  // Turning ON enables BOTH the risk score maintainer and the Entity Store in one action (see
+  // useToggleEntityAnalytics), so enablement requires both privilege sets. With an OR the toggle
+  // would look enabled while the half the user isn't privileged for fails server-side.
+  const hasEnablementPrivileges =
+    userHasRiskEnginePrivileges && userHasEntityStoreInstallPrivileges;
 
   const canRunEngine =
     (!riskEnginePrivileges.isLoading &&
@@ -144,18 +152,26 @@ export const EntityAnalyticsManagementPage = () => {
     if (selectedTabId === TabId.Status && !isStatusDataLoading && !shouldDisplayEngineStatusTab) {
       history.replace(`${ENTITY_ANALYTICS_MANAGEMENT_PATH}/${TabId.RiskScore}`);
     }
-    if (selectedTabId === TabId.EntityResolution && !isEntityStoreV2Enabled) {
+    if (selectedTabId === TabId.EntityResolution && !hasEntityResolutionLicense) {
       history.replace(`${ENTITY_ANALYTICS_MANAGEMENT_PATH}/${TabId.RiskScore}`);
     }
   }, [
     shouldDisplayEngineStatusTab,
     isStatusDataLoading,
-    isEntityStoreV2Enabled,
+    hasEntityResolutionLicense,
     selectedTabId,
     history,
   ]);
 
   const deleteError = safeErrorMessage(deleteEntityStoreMutation.error);
+
+  const isEntityAnalyticsOn = entityStoreStatus.data?.status === 'running' || false;
+  const showEntityStoreEnablementCallout =
+    !isEntityAnalyticsOn &&
+    !!entityEnginePrivileges &&
+    !entityEnginePrivileges.has_install_permissions;
+  const showStopPrivilegesCallout =
+    isEntityAnalyticsOn && !isLoadingPrivileges && !hasStopPrivileges;
 
   return (
     <>
@@ -177,8 +193,9 @@ export const EntityAnalyticsManagementPage = () => {
                   selectedSettingsMatchSavedSettings={selectedSettingsMatchSavedSettings}
                   onSaveSettings={handleSaveToggleSettings}
                   isSavingSettings={saveSelectedSettingsMutation.isLoading}
-                  hasAllRequiredPrivileges={hasAllRequiredPrivileges}
-                  isPrivilegesLoading={riskEnginePrivileges.isLoading}
+                  hasEnablementPrivileges={hasEnablementPrivileges}
+                  hasStopPrivileges={hasStopPrivileges}
+                  isPrivilegesLoading={riskEnginePrivileges.isLoading || isLoadingPrivileges}
                 />
               </EuiFlexGroup>
             </EuiFlexItem>
@@ -186,11 +203,18 @@ export const EntityAnalyticsManagementPage = () => {
         }
       />
 
-      {isEntityStoreFeatureFlagDisabled && <EntityStoreFeatureFlagNotAvailableCallout />}
-      {!entityEnginePrivileges || entityEnginePrivileges.has_all_required ? null : (
+      {showEntityStoreEnablementCallout && (
         <>
           <EuiSpacer size="l" />
           <EntityStoreMissingPrivilegesCallout privileges={entityEnginePrivileges} />
+          <EuiSpacer size="l" />
+        </>
+      )}
+
+      {showStopPrivilegesCallout && entityEnginePrivileges && (
+        <>
+          <EuiSpacer size="l" />
+          <EntityStoreMissingStopPrivilegesCallout privileges={entityEnginePrivileges} />
           <EuiSpacer size="l" />
         </>
       )}
@@ -269,7 +293,7 @@ export const EntityAnalyticsManagementPage = () => {
             />
           </EuiTab>
         )}
-        {isEntityStoreV2Enabled && (
+        {hasEntityResolutionLicense && (
           <EuiTab
             key={TabId.EntityResolution}
             isSelected={selectedTabId === TabId.EntityResolution}
@@ -329,7 +353,7 @@ export const EntityAnalyticsManagementPage = () => {
         </div>
       )}
 
-      {isEntityStoreV2Enabled && (
+      {hasEntityResolutionLicense && (
         <div hidden={selectedTabId !== TabId.EntityResolution}>
           <EntityResolutionTab />
         </div>
@@ -345,29 +369,3 @@ export const EntityAnalyticsManagementPage = () => {
 };
 
 EntityAnalyticsManagementPage.displayName = 'EntityAnalyticsManagementPage';
-
-const EntityStoreFeatureFlagNotAvailableCallout: React.FC = () => {
-  return (
-    <>
-      <EuiSpacer size="m" />
-      <EuiCallOut
-        title={
-          <FormattedMessage
-            id="xpack.securitySolution.entityAnalytics.entityAnalyticsManagementPage.featureFlagDisabled"
-            defaultMessage="Entity Store capabilities not available"
-          />
-        }
-        color="primary"
-        iconType="info"
-        data-test-subj={ENTITY_STORE_FEATURE_FLAG_CALLOUT_TEST_ID}
-      >
-        <EuiText size="s">
-          <FormattedMessage
-            id="xpack.securitySolution.entityAnalytics.entityAnalyticsManagementPage.featureFlagDisabledDescription"
-            defaultMessage="The full capabilities of the Entity Store have been disabled in this environment. Contact your administrator for further assistance."
-          />
-        </EuiText>
-      </EuiCallOut>
-    </>
-  );
-};

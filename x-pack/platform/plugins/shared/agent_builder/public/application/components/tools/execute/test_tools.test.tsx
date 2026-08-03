@@ -177,7 +177,7 @@ describe('ToolTestFlyout date-time picker', () => {
     jest.clearAllMocks();
     mockUseAgentBuilderServices.mockReturnValue({
       docLinksService: {
-        tools: 'https://example.com/docs',
+        agentBuilderTools: 'https://example.com/docs',
       },
     });
     mockUseTool.mockReturnValue({
@@ -272,7 +272,7 @@ describe('ToolTestFlyout array combo box', () => {
     jest.clearAllMocks();
     mockUseAgentBuilderServices.mockReturnValue({
       docLinksService: {
-        tools: 'https://example.com/docs',
+        agentBuilderTools: 'https://example.com/docs',
       },
     });
     mockUseTool.mockReturnValue({
@@ -348,7 +348,7 @@ describe('ToolTestFlyout numeric field', () => {
     jest.clearAllMocks();
     mockUseAgentBuilderServices.mockReturnValue({
       docLinksService: {
-        tools: 'https://example.com/docs',
+        agentBuilderTools: 'https://example.com/docs',
       },
     });
     mockUseTool.mockReturnValue({

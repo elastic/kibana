@@ -390,7 +390,6 @@ Type guards for each type of error are exposed from the `@kbn/inference-common` 
 - `isInferenceRequestError`
 - ...`isXXXError`
 
-
 ## Anonymization
 
 To avoid sending personally identifiable or other sensitive information to LLMs, the anonymization pipeline built into the Inference plugin replaces selected pieces of text with deterministic masks before the messages are sent and restores (de-anonymises) the original values in the responses.
@@ -434,14 +433,14 @@ There are **two** kinds of rules and both share the common `{ enabled: boolean }
   The referenced inference model is executed server-side to find entities in free text.  Only classes
   listed in `allowedEntityClasses` are taken into account (omit the field to accept all).
 
-> Currently this feature has only been validated with Elastic’s publicly hosted NER model [`elastic/distilbert-base-uncased-finetuned-conll03-english`](https://huggingface.co/elastic/distilbert-base-uncased-finetuned-conll03-english).  
+> Currently this feature has only been validated with Elastic's publicly hosted NER model [`elastic/distilbert-base-uncased-finetuned-conll03-english`](https://huggingface.co/elastic/distilbert-base-uncased-finetuned-conll03-english).  
 
 Rules are evaluated **top-to-bottom**. If two rules overlap on the same entity, the first matching rule wins and later ones are skipped for that entity. 
 
 ### Configuring rules
 
 1.  Navigate to **Management ➜ Advanced Settings** and search for
-    **“Anonymization Settings”** (category *Observability*).
+    **"Anonymization Settings"** (category *Observability*).
 2.  Paste a JSON object with a `rules` array similar to the examples above.  The default template that
     ships with the plugin looks like:
     ```jsonc

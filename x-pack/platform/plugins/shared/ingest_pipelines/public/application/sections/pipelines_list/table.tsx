@@ -117,6 +117,18 @@ export const PipelineTable: FunctionComponent<Props> = ({
   onDeletePipelineClick,
   openFlyout,
 }) => {
+  const editActionText = i18n.translate('xpack.ingestPipelines.list.table.editActionDescription', {
+    defaultMessage: 'Edit this pipeline',
+  });
+  const duplicateActionText = i18n.translate(
+    'xpack.ingestPipelines.list.table.cloneActionDescription',
+    { defaultMessage: 'Duplicate this pipeline' }
+  );
+  const deleteActionText = i18n.translate(
+    'xpack.ingestPipelines.list.table.deleteActionDescription',
+    { defaultMessage: 'Delete this pipeline' }
+  );
+
   const [queryText, setQueryText] = useState<string>('');
   const [filterOptions, setFilterOptions] = useState<EuiSelectableOption[]>(defaultFilterOptions);
 
@@ -225,15 +237,21 @@ export const PipelineTable: FunctionComponent<Props> = ({
     </EuiFilterButton>
   );
 
+  const reloadButtonLabel = i18n.translate(
+    'xpack.ingestPipelines.list.table.reloadButtonAriaLabel',
+    { defaultMessage: 'Refresh' }
+  );
+
   const tableProps: EuiInMemoryTableProps<Pipeline> = {
-    itemId: 'name',
     'data-test-subj': 'pipelinesTable',
-    tableCaption: i18n.translate('xpack.ingestPipelines.list.table.tableCaption', {
-      defaultMessage: 'List of ingest pipelines',
-    }),
+    itemId: 'name',
     sorting,
     selection: {
       onSelectionChange: setSelection,
+      selectableMessage: () =>
+        i18n.translate('xpack.ingestPipelines.list.table.selection.selectRowAriaLabel', {
+          defaultMessage: 'Select this row',
+        }),
     },
     rowProps: () => ({
       'data-test-subj': 'pipelineTableRow',
@@ -267,18 +285,18 @@ export const PipelineTable: FunctionComponent<Props> = ({
           </EuiButton>
         ) : undefined,
       toolsRight: [
-        <EuiButtonIcon
-          key="reloadButton"
-          iconType="refresh"
-          color="success"
-          aria-label={i18n.translate('xpack.ingestPipelines.list.table.reloadButtonAriaLabel', {
-            defaultMessage: 'refresh',
-          })}
-          data-test-subj="reloadButton"
-          size="m"
-          display="base"
-          onClick={onReloadClick}
-        />,
+        <EuiToolTip content={reloadButtonLabel} disableScreenReaderOutput>
+          <EuiButtonIcon
+            key="reloadButton"
+            iconType="refresh"
+            color="success"
+            aria-label={reloadButtonLabel}
+            data-test-subj="reloadButton"
+            size="m"
+            display="base"
+            onClick={onReloadClick}
+          />
+        </EuiToolTip>,
       ],
       box: {
         incremental: true,
@@ -292,10 +310,14 @@ export const PipelineTable: FunctionComponent<Props> = ({
               <EuiFilterGroup>
                 <EuiPopover
                   id="popoverID"
+                  aria-label={i18n.translate(
+                    'xpack.ingestPipelines.list.table.filtersPopoverAriaLabel',
+                    { defaultMessage: 'Filters' }
+                  )}
                   button={button}
                   isOpen={isPopoverOpen}
                   closePopover={closePopover}
-                  panelPaddingSize="none"
+                  panelPaddingSize="s"
                 >
                   <EuiSelectable
                     allowExclusions
@@ -400,36 +422,23 @@ export const PipelineTable: FunctionComponent<Props> = ({
         actions: [
           {
             isPrimary: true,
-            name: i18n.translate('xpack.ingestPipelines.list.table.editActionLabel', {
-              defaultMessage: 'Edit',
-            }),
-            description: i18n.translate('xpack.ingestPipelines.list.table.editActionDescription', {
-              defaultMessage: 'Edit this pipeline',
-            }),
+            name: editActionText,
+            description: editActionText,
             type: 'icon',
             icon: 'pencil',
             onClick: ({ name }) => onEditPipelineClick(name),
           },
           {
-            name: i18n.translate('xpack.ingestPipelines.list.table.cloneActionLabel', {
-              defaultMessage: 'Duplicate',
-            }),
-            description: i18n.translate('xpack.ingestPipelines.list.table.cloneActionDescription', {
-              defaultMessage: 'Duplicate this pipeline',
-            }),
+            name: duplicateActionText,
+            description: duplicateActionText,
             type: 'icon',
             icon: 'copy',
             onClick: ({ name }) => onClonePipelineClick(name),
           },
           {
             isPrimary: true,
-            name: i18n.translate('xpack.ingestPipelines.list.table.deleteActionLabel', {
-              defaultMessage: 'Delete',
-            }),
-            description: i18n.translate(
-              'xpack.ingestPipelines.list.table.deleteActionDescription',
-              { defaultMessage: 'Delete this pipeline' }
-            ),
+            name: deleteActionText,
+            description: deleteActionText,
             type: 'icon',
             icon: 'trash',
             color: 'danger',
@@ -442,5 +451,12 @@ export const PipelineTable: FunctionComponent<Props> = ({
     loading: isLoading,
   };
 
-  return <EuiInMemoryTable {...tableProps} />;
+  return (
+    <EuiInMemoryTable
+      {...tableProps}
+      tableCaption={i18n.translate('xpack.ingestPipelines.list.table.tableCaption', {
+        defaultMessage: 'List of ingest pipelines',
+      })}
+    />
+  );
 };

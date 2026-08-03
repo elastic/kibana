@@ -8,8 +8,8 @@
  */
 
 import { EuiPanel } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo } from 'react';
-import { useDispatch } from 'react-redux';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useDispatch } from 'react-redux-v7';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 
 import { useQueryClient } from '@kbn/react-query';
@@ -22,6 +22,7 @@ import {
 import type { WorkflowStepExecutionDto } from '@kbn/workflows';
 import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
 import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
+import type { ApprovalLabels } from './resume_execution_button';
 import { WorkflowExecutionPanel } from './workflow_execution_panel';
 import {
   buildOverviewStepExecutionFromContext,
@@ -86,7 +87,9 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
       if (
         !selectedStepExecutionId &&
         executionId === workflowExecution?.id &&
-        (workflowExecution?.stepExecutions?.length || isTerminalStatus(workflowExecution?.status))
+        (workflowExecution?.stepExecutions?.length ||
+          isTerminalStatus(workflowExecution?.status) ||
+          workflowExecution?.status === ExecutionStatus.QUEUED)
       ) {
         setSelectedStepExecution(PSEUDO_STEP_OVERVIEW);
       }
@@ -109,8 +112,8 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
     const { childExecutions, isLoading: isLoadingChildExecutions } =
       useChildWorkflowExecutions(workflowExecution);
 
-    // Find the lightweight paused step (polling uses includeInput: false)
-    const pausedStepId = useMemo(() => {
+    // Step execution row id for the active waitForInput pause (polling uses includeInput: false)
+    const waitingStepExecutionId = useMemo(() => {
       if (!workflowExecution || workflowExecution.status !== ExecutionStatus.WAITING_FOR_INPUT) {
         return undefined;
       }
@@ -124,19 +127,52 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
     // consistent with every other step types
     const { data: pausedStepFullData } = useStepExecution(
       executionId,
-      pausedStepId,
+      waitingStepExecutionId,
       ExecutionStatus.WAITING_FOR_INPUT
     );
 
-    const { resumeMessage, resumeSchema } = useMemo<{
+    const prevWaitingStepExecutionIdRef = useRef<string | undefined>();
+    useEffect(() => {
+      const previousWaitingStepExecutionId = prevWaitingStepExecutionIdRef.current;
+      if (previousWaitingStepExecutionId && !waitingStepExecutionId) {
+        // Execution left WAITING_FOR_INPUT — nudge full step I/O fetches so output
+        // appears without a manual page refresh (same lazy-load path as waitForInput).
+        void queryClient.invalidateQueries({ queryKey: ['stepExecution', executionId] });
+      }
+      prevWaitingStepExecutionIdRef.current = waitingStepExecutionId;
+    }, [waitingStepExecutionId, executionId, queryClient]);
+
+    const { resumeMessage, resumeSchema, approvalLabels } = useMemo<{
       resumeMessage: string | undefined;
       resumeSchema: JsonModelSchemaType | undefined;
+      approvalLabels: ApprovalLabels | undefined;
     }>(() => {
+      if (!waitingStepExecutionId) {
+        return {
+          resumeMessage: undefined,
+          resumeSchema: undefined,
+          approvalLabels: undefined,
+        };
+      }
+
       const stepInput = pausedStepFullData?.input as
-        | { message?: string; schema?: JsonModelSchemaType }
+        | {
+            message?: string;
+            schema?: JsonModelSchemaType;
+            approveLabel?: string;
+            rejectLabel?: string;
+          }
         | undefined;
-      return { resumeMessage: stepInput?.message, resumeSchema: stepInput?.schema };
-    }, [pausedStepFullData]);
+      const labels =
+        typeof stepInput?.approveLabel === 'string' && typeof stepInput?.rejectLabel === 'string'
+          ? { approveLabel: stepInput.approveLabel, rejectLabel: stepInput.rejectLabel }
+          : undefined;
+      return {
+        resumeMessage: stepInput?.message,
+        resumeSchema: stepInput?.schema,
+        approvalLabels: labels,
+      };
+    }, [pausedStepFullData, waitingStepExecutionId]);
 
     // For pseudo-steps (overview, trigger), build from execution context directly
     const isPseudoStep =
@@ -282,11 +318,14 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
               workflowExecutionId={executionId}
               stepExecution={selectedStepExecution}
               workflowExecutionDuration={workflowExecution?.duration ?? undefined}
+              workflowExecutionUsage={workflowExecution?.usage}
               isLoadingStepData={isLoadingStepData && !isPseudoStep}
               workflowExecutionStatus={workflowExecution?.status}
               resumeMessage={resumeMessage}
               resumeSchema={resumeSchema}
+              approvalLabels={approvalLabels}
               shouldAutoResume={shouldAutoResume}
+              waitingStepExecutionId={waitingStepExecutionId}
               childWorkflowExecution={selectedStepChildExecution}
               parentWorkflowExecution={parentWorkflowExecution}
             />

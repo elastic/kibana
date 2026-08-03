@@ -172,7 +172,8 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
     transformConfigQuery,
     requestPayload,
     runtimeMappings,
-    isDatePickerApplyEnabled ? timeRangeMs : undefined
+    isDatePickerApplyEnabled ? timeRangeMs : undefined,
+    props.overrides?.projectRouting
   );
 
   const copyToClipboardPivot = getTransformPreviewDevConsoleStatement(
@@ -192,7 +193,8 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
       validationStatus,
       requestPayload,
       runtimeMappings,
-      timeRangeMs
+      timeRangeMs,
+      props.overrides?.projectRouting
     ),
     dataTestSubj: 'transformPivotPreview',
     toastNotifications,
@@ -422,8 +424,10 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
                         <EuiCopy
                           beforeMessage={copyToClipboardSourceDescription}
                           textToCopy={copyToClipboardSource}
+                          tooltipProps={{ disableScreenReaderOutput: true }}
                         >
                           {(copy: () => void) => (
+                            /* eslint-disable-next-line @elastic/eui/tooltip-button-icon-wrap */
                             <EuiButtonIcon
                               onClick={copy}
                               iconType="copy"

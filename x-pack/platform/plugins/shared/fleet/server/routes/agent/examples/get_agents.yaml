@@ -1,0 +1,32 @@
+responses:
+  200:
+    description: 'Successful response'
+    content:
+      application/json:
+        examples:
+          getAgentsExample:
+            description: 'List of agents'
+            value:
+              items:
+                - id: 'agent-id-1'
+                  active: true
+                  status: 'online'
+                  type: 'PERMANENT'
+                  enrolled_at: '2024-01-01T00:00:00.000Z'
+                  updated_at: '2024-01-01T00:00:00.000Z'
+                  policy_id: 'agent-policy-id-1'
+                  policy_revision: 1
+              total: 1
+              page: 1
+              perPage: 20
+  400:
+    description: 'Bad Request'
+    content:
+      application/json:
+        examples:
+          genericErrorResponseExample:
+            description: 'Example of a generic error response'
+            value:
+              statusCode: 400
+              error: 'Bad Request'
+              message: 'An error message describing what went wrong'

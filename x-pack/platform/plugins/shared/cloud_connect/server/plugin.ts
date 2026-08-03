@@ -58,6 +58,7 @@ export class CloudConnectedPlugin
   private readonly logger: Logger;
   private readonly config: CloudConnectConfig;
   private licenseSubscription?: Subscription;
+  private isEss = false;
   private cloudApiUrl?: string;
 
   constructor(initializerContext: PluginInitializerContext) {
@@ -72,14 +73,22 @@ export class CloudConnectedPlugin
   ): CloudConnectedPluginSetup {
     this.logger.debug('cloudConnected: Setup');
 
+    // Always register the SO type and its encryption params so that migrations never fail
+    // on clusters that accumulated cloud-connect-api-key documents (e.g. ESS 9.3.x clusters
+    // upgrading to 9.4.0+ where the type would otherwise not be registered).
+    core.savedObjects.registerType(CloudConnectApiKeyType);
+    plugins.encryptedSavedObjects.registerType(CloudConnectApiKeyEncryptionParams);
+
+    // Skip the rest of plugin registration if running on ESS.
+    // CCM is enabled for ECE deployments and self-managed clusters.
+    if (plugins.cloud?.isCloudEnabled && !plugins.cloud?.isEce) {
+      this.logger.debug('cloudConnected: Skipping setup - running on ESS');
+      this.isEss = true;
+      return {};
+    }
+
     // Register the feature with privileges
     plugins.features.registerKibanaFeature(cloudConnectedFeature);
-
-    // Register the saved object type for API key storage
-    core.savedObjects.registerType(CloudConnectApiKeyType);
-
-    // Register encryption for the API key saved object
-    plugins.encryptedSavedObjects.registerType(CloudConnectApiKeyEncryptionParams);
 
     // Register HTTP routes
     const router = core.http.createRouter();
@@ -96,6 +105,11 @@ export class CloudConnectedPlugin
 
   public start(core: CoreStart, plugins: CloudConnectedStartDeps): CloudConnectedPluginStart {
     this.logger.debug('cloudConnected: Started');
+
+    // No-op if running on ESS (plugin is effectively disabled there).
+    if (this.isEss) {
+      return {};
+    }
 
     this.licenseSubscription = registerCloudConnectLicenseSync({
       savedObjects: core.savedObjects,

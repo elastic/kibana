@@ -313,7 +313,7 @@ describe('SelectInferenceId', () => {
 
       const newEndpoint = await screen.findByTestId('custom-inference_newly-created-endpoint');
       expect(newEndpoint).toBeInTheDocument();
-      expect(newEndpoint).toHaveAttribute('aria-checked', 'true');
+      expect(newEndpoint).toHaveAttribute('aria-selected', 'true');
     });
   });
 

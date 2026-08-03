@@ -36,12 +36,13 @@ export const ConfigFieldsComponent = (props: AdditionalConfigFieldProps) => {
       <>
         <EuiSpacer />
         <OverwriteField
-          path={`${basePath}.config.overwrite`}
+          path={overWritePath}
           disabled={disabled}
           readDefaultValueOnForm={readDefaultValueOnForm}
         />
         <EuiSpacer />
         <FieldNameField
+          basePath={basePath}
           path={`${basePath}.config.field`}
           disabled={disabled}
           readDefaultValueOnForm={readDefaultValueOnForm}

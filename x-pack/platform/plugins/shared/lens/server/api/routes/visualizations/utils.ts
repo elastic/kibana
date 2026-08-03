@@ -6,11 +6,12 @@
  */
 
 import { LENS_UNKNOWN_VIS } from '@kbn/lens-common';
-import type { LensConfigBuilder } from '@kbn/lens-embeddable-utils';
+import { isLensDSLConfig, type LensConfigBuilder } from '@kbn/lens-embeddable-utils';
 import { getMeta, type AsCodeMeta } from '@kbn/as-code-shared-schemas';
 
 import type { LensSavedObject, LensUpdateIn } from '../../../content_management';
 import type { LensCreateRequestBody, LensResponseItem, LensUpdateRequestBody } from './types';
+import { toLegacyDurationUnits } from '../../../../common/transforms/ga_schema_validator';
 
 /**
  * Converts Lens request data to Lens Config
@@ -27,16 +28,21 @@ export function getLensRequestConfig(
 }
 
 /**
- * Converts Lens Saved Object to Lens Response Item
+ * Converts Lens Saved Object to Lens Response Item.
+ *
+ * The `LensConfigBuilder` always emits GA duration unit names. When `useGASchemas` is `false`
+ * (the `asCode.useGASchemas` feature flag is disabled), duration units are down-converted to their
+ * legacy names so the response is consistent with the legacy input the route accepts.
  */
 export function getLensResponseItem(
   builder: LensConfigBuilder,
-  item: LensSavedObject
+  item: LensSavedObject,
+  useGASchemas: boolean
 ): LensResponseItem {
   const { id, references, attributes } = item;
   const meta = getLensResponseItemMeta(item);
 
-  const data = builder.toAPIFormat({
+  const apiFormat = builder.toAPIFormat({
     references,
     ...attributes,
 
@@ -44,11 +50,18 @@ export function getLensResponseItem(
     state: attributes.state!,
     visualizationType: attributes.visualizationType ?? LENS_UNKNOWN_VIS,
   });
-  return {
-    id,
-    data,
-    meta,
-  } satisfies LensResponseItem;
+
+  const data = useGASchemas ? apiFormat : toLegacyDurationUnits(apiFormat);
+
+  if (isLensDSLConfig(data)) {
+    return {
+      id,
+      data,
+      meta,
+    } satisfies LensResponseItem;
+  }
+
+  throw new Error('ES|QL charts are not supported in by-ref Lens');
 }
 
 /**

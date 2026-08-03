@@ -18,6 +18,7 @@ import {
   EuiPanel,
   EuiButtonEmpty,
   EuiFlyoutFooter,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import styled from 'styled-components';
 
@@ -63,12 +64,8 @@ export const AgentActivityFlyout: React.FunctionComponent<{
   const defaultNActions = 20;
   const [nActions, setNActions] = useState(defaultNActions);
   const [dateFilter, setDateFilter] = useState<moment.Moment | null>(null);
-  const { currentActions, abortUpgrade, isFirstLoading, areActionsFullyLoaded } = useActionStatus(
-    onAbortSuccess,
-    refreshAgentActivity,
-    nActions,
-    dateFilter
-  );
+  const { currentActions, abortUpgrade, abortUnenroll, isFirstLoading, areActionsFullyLoaded } =
+    useActionStatus(onAbortSuccess, refreshAgentActivity, nActions, dateFilter);
 
   const getAgentPolicyName = useCallback(
     (policyId: string) => {
@@ -123,6 +120,8 @@ export const AgentActivityFlyout: React.FunctionComponent<{
     setNActions(defaultNActions);
   };
 
+  const flyoutTitleId = useGeneratedHtmlId();
+
   return (
     <>
       <EuiFlyout
@@ -134,13 +133,14 @@ export const AgentActivityFlyout: React.FunctionComponent<{
         }}
         paddingSize="none"
         maxWidth={MAX_FLYOUT_WIDTH}
+        aria-labelledby={flyoutTitleId}
       >
-        <EuiFlyoutHeader aria-labelledby="FleetAgentActivityFlyoutTitle">
+        <EuiFlyoutHeader>
           <EuiPanel borderRadius="none" hasShadow={false} hasBorder={true}>
             <EuiFlexGroup direction="column" gutterSize="m">
               <EuiFlexItem>
                 <EuiTitle size="l">
-                  <h1>
+                  <h1 id={flyoutTitleId}>
                     <FormattedMessage
                       id="xpack.fleet.agentActivityFlyout.title"
                       defaultMessage="Agent activity"
@@ -165,6 +165,7 @@ export const AgentActivityFlyout: React.FunctionComponent<{
           isFirstLoading={isFirstLoading}
           currentActions={currentActionsEnriched}
           abortUpgrade={abortUpgrade}
+          abortUnenroll={abortUnenroll}
           onClickViewAgents={onClickViewAgents}
           onClickManageAutoUpgradeAgents={onClickManageAutoUpgradeAgents}
           areActionsFullyLoaded={areActionsFullyLoaded}

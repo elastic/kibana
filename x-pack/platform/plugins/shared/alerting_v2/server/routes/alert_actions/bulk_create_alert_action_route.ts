@@ -7,10 +7,11 @@
 
 import { Request } from '@kbn/core-di-server';
 import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { inject, injectable } from 'inversify';
 import {
   bulkCreateAlertActionBodySchema,
+  bulkResponseSchema,
+  errorResponseSchema,
   type BulkCreateAlertActionBody,
 } from '@kbn/alerting-v2-schemas';
 import { AlertActionsClient } from '../../lib/alert_actions_client';
@@ -18,11 +19,13 @@ import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { ALERTING_V2_ALERT_API_PATH } from '../constants';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { BaseAlertingRoute } from '../base_alerting_route';
+import { bulkCreateAlertActionOasExamples } from './bulk_create_alert_action_oas_example';
+import { INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION } from '../route_descriptions';
 
 @injectable()
 export class BulkCreateAlertActionRoute extends BaseAlertingRoute {
   static method = 'post' as const;
-  static path = `${ALERTING_V2_ALERT_API_PATH}/action/_bulk`;
+  static path = `${ALERTING_V2_ALERT_API_PATH}/_bulk_action`;
   static security: RouteSecurity = {
     authz: {
       requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.alerts.write],
@@ -31,12 +34,24 @@ export class BulkCreateAlertActionRoute extends BaseAlertingRoute {
   static routeOptions = {
     summary: 'Bulk create alert actions',
     description: 'Create actions for multiple alert groups in a single request.',
+    oasOperationObject: bulkCreateAlertActionOasExamples,
   } as const;
-  static validate = {
+  static schemas = {
     request: {
-      body: buildRouteValidationWithZod(bulkCreateAlertActionBodySchema),
+      body: bulkCreateAlertActionBodySchema,
     },
-  } as const;
+    response: {
+      200: {
+        body: () => bulkResponseSchema,
+        description:
+          'Returns the number of created actions and per-item errors for actions that were not created.',
+      },
+      400: {
+        body: () => errorResponseSchema,
+        description: INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
+      },
+    },
+  };
 
   protected readonly routeName = 'bulk create alert action';
 
@@ -50,13 +65,8 @@ export class BulkCreateAlertActionRoute extends BaseAlertingRoute {
   }
 
   protected async execute() {
-    const { processed, total } = await this.alertActionsClient.createBulkActions(this.request.body);
+    const result = await this.alertActionsClient.createBulkActions(this.request.body);
 
-    return this.ctx.response.ok({
-      body: {
-        processed,
-        total,
-      },
-    });
+    return this.ctx.response.ok({ body: result });
   }
 }

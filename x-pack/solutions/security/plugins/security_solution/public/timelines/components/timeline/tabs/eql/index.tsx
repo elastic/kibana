@@ -9,8 +9,8 @@ import type { EuiDataGridControlColumn } from '@elastic/eui';
 import { EuiFlexGroup } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import type { ConnectedProps } from 'react-redux';
-import { connect } from 'react-redux';
+import type { ConnectedProps } from 'react-redux-v7';
+import { connect } from 'react-redux-v7';
 import deepEqual from 'fast-deep-equal';
 import { InPortal } from 'react-reverse-portal';
 import { DataLoadingState } from '@kbn/unified-data-table';
@@ -26,14 +26,12 @@ import {
   DocumentDetailsRightPanelKey,
 } from '../../../../../flyout/document_details/shared/constants/panel_keys';
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { timelineSelectors } from '../../../../store';
 import { useTimelineEvents } from '../../../../containers';
 import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
 import type { inputsModel, State } from '../../../../../common/store';
 import { inputsSelectors } from '../../../../../common/store';
 import { timelineDefaults } from '../../../../store/defaults';
-import { useSourcererDataView } from '../../../../../sourcerer/containers';
 import { useEqlEventsCountPortal } from '../../../../../common/hooks/use_timeline_events_count';
 import type { TimelineModel } from '../../../../store/model';
 import { useTimelineFullScreen } from '../../../../../common/containers/use_full_screen';
@@ -45,7 +43,13 @@ import { EqlTabHeader } from './header';
 import { useTimelineColumns } from '../shared/use_timeline_columns';
 import { useTimelineControlColumn } from '../shared/use_timeline_control_columns';
 import { LeftPanelNotesTab } from '../../../../../flyout/document_details/left';
-import { DocumentEventTypes, NotesEventTypes } from '../../../../../common/lib/telemetry';
+import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
+import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_flyout_enabled';
+import {
+  DocumentEventTypes,
+  FLYOUT_ORIGIN,
+  NotesEventTypes,
+} from '../../../../../common/lib/telemetry';
 import { TimelineRefetch } from '../../refetch_timeline';
 import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
 import { useSelectedPatterns } from '../../../../../data_view_manager/hooks/use_selected_patterns';
@@ -79,40 +83,19 @@ export const EqlTabContentComponent: React.FC<Props> = ({
    */
   const [pageIndex, setPageIndex] = useState(0);
   const { telemetry } = useKibana().services;
+  const enableNewFlyout = useIsNewFlyoutEnabled();
+  const { openNotes } = useFlyoutApi();
   const { query: eqlQuery = '', ...restEqlOption } = eqlOptions;
   const { portalNode: eqlEventsCountPortalNode } = useEqlEventsCountPortal();
   const { setTimelineFullScreen, timelineFullScreen } = useTimelineFullScreen();
 
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const {
-    dataViewId: oldDataViewId,
-    loading: oldSourcererLoading,
-    selectedPatterns: oldSelectedPatterns,
-    sourcererDataView: oldSourcererDataViewSpec,
-  } = useSourcererDataView(PageScope.timeline);
-
   const { dataView: experimentalDataView, status } = useDataView(PageScope.timeline);
-  const experimentalSelectedPatterns = useSelectedPatterns(PageScope.timeline);
-  const experimentalDataViewId = experimentalDataView.id ?? null;
-
-  const dataViewId = useMemo(
-    () => (newDataViewPickerEnabled ? experimentalDataViewId : oldDataViewId),
-    [experimentalDataViewId, newDataViewPickerEnabled, oldDataViewId]
-  );
-  const dataViewLoading = useMemo(
-    () => (newDataViewPickerEnabled ? status !== 'ready' : oldSourcererLoading),
-    [newDataViewPickerEnabled, oldSourcererLoading, status]
-  );
-
-  const runtimeMappings = useMemo(() => {
-    return newDataViewPickerEnabled
-      ? (experimentalDataView.getRuntimeMappings() as RunTimeMappings)
-      : (oldSourcererDataViewSpec.runtimeFieldMap as RunTimeMappings);
-  }, [newDataViewPickerEnabled, experimentalDataView, oldSourcererDataViewSpec.runtimeFieldMap]);
-
-  const selectedPatterns = useMemo(
-    () => (newDataViewPickerEnabled ? experimentalSelectedPatterns : oldSelectedPatterns),
-    [experimentalSelectedPatterns, newDataViewPickerEnabled, oldSelectedPatterns]
+  const selectedPatterns = useSelectedPatterns(experimentalDataView);
+  const dataViewId = experimentalDataView.id ?? null;
+  const dataViewLoading = useMemo(() => status !== 'ready', [status]);
+  const runtimeMappings = useMemo(
+    () => experimentalDataView.getRuntimeMappings() as RunTimeMappings,
+    [experimentalDataView]
   );
 
   const { augmentedColumnHeaders, timelineQueryFieldsFromColumns } = useTimelineColumns(columns);
@@ -189,7 +172,9 @@ export const EqlTabContentComponent: React.FC<Props> = ({
       const isAttackRow = eventData != null && isAttackDiscoveryRow(eventData);
       const indexName = selectedPatterns.join(',');
 
-      if (isAttackRow) {
+      if (enableNewFlyout && eventData) {
+        openNotes({ hit: eventData, origin: FLYOUT_ORIGIN.TIMELINE });
+      } else if (isAttackRow) {
         openFlyout({
           right: {
             id: AttackDetailsRightPanelKey,
@@ -240,7 +225,7 @@ export const EqlTabContentComponent: React.FC<Props> = ({
         panel: 'left',
       });
     },
-    [openFlyout, selectedPatterns, telemetry, timelineId]
+    [enableNewFlyout, openNotes, openFlyout, selectedPatterns, telemetry, timelineId]
   );
 
   const leadingControlColumns = useTimelineControlColumn({
@@ -267,11 +252,10 @@ export const EqlTabContentComponent: React.FC<Props> = ({
           setTimelineFullScreen={setTimelineFullScreen}
           timelineFullScreen={timelineFullScreen}
           timelineId={timelineId}
-          newDataViewPickerEnabled={newDataViewPickerEnabled}
         />
       </EuiFlexGroup>
     ),
-    [activeTab, newDataViewPickerEnabled, setTimelineFullScreen, timelineFullScreen, timelineId]
+    [activeTab, setTimelineFullScreen, timelineFullScreen, timelineId]
   );
 
   return (

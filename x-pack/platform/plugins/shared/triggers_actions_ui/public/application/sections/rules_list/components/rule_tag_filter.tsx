@@ -282,6 +282,10 @@ export const RuleTagFilter = memo((props: RuleTagFilterProps) => {
         data-test-subj={dataTestSubj}
         isOpen={isPopoverOpen}
         closePopover={onClosePopover}
+        aria-label={i18n.translate(
+          'xpack.triggersActionsUI.sections.rulesList.ruleTagFilterPopoverAriaLabel',
+          { defaultMessage: 'Filter by tags' }
+        )}
         button={
           <RuleTagFilterPopoverButton
             isSelected={isPopoverOpen}

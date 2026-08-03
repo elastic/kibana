@@ -14,22 +14,24 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { ResolvedTimeline } from '../model/components.gen';
 
+export const ResolveTimelineRequestQuery = lazySchema(() =>
+  z.object({
+    /**
+     * The ID of the template timeline to resolve
+     */
+    template_timeline_id: z.string().optional(),
+    /**
+     * The ID of the timeline to resolve
+     */
+    id: z.string().optional(),
+  })
+);
 export type ResolveTimelineRequestQuery = z.infer<typeof ResolveTimelineRequestQuery>;
-export const ResolveTimelineRequestQuery = z.object({
-  /**
-   * The ID of the template timeline to resolve
-   */
-  template_timeline_id: z.string().optional(),
-  /**
-   * The ID of the timeline to resolve
-   */
-  id: z.string().optional(),
-});
 export type ResolveTimelineRequestQueryInput = z.input<typeof ResolveTimelineRequestQuery>;
 
+export const ResolveTimelineResponse = lazySchema(() => ResolvedTimeline);
 export type ResolveTimelineResponse = z.infer<typeof ResolveTimelineResponse>;
-export const ResolveTimelineResponse = ResolvedTimeline;

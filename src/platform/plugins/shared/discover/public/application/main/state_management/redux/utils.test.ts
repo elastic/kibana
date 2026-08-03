@@ -11,6 +11,7 @@ import {
   createTabItem,
   extractEsqlVariables,
   getSerializedSearchSourceDataViewDetails,
+  parseControlGroupJson,
 } from './utils';
 import { type TabState } from './types';
 import { getTabStateMock } from './__mocks__/internal_state.mocks';
@@ -124,7 +125,6 @@ describe('extractEsqlVariables', () => {
     width: 'medium',
     grow: false,
     control_type: EsqlControlType.STATIC_VALUES,
-    esql_query: '',
   });
 
   it('should extract variables from control panels', () => {
@@ -157,5 +157,55 @@ describe('extractEsqlVariables', () => {
         value: ['1', '2', '3'],
       },
     ]);
+  });
+
+  it('should extract variables from legacy parsed control panels', () => {
+    const panels = parseControlGroupJson(
+      JSON.stringify({
+        panel1: {
+          ...createMockESQLControlPanel('legacyVar', ESQLVariableType.VALUES, ['legacyValue']),
+          type: 'esqlControl',
+        },
+      })
+    );
+
+    expect(panels.panel1?.type).toBe(ESQL_CONTROL);
+    expect(extractEsqlVariables(panels)).toEqual([
+      {
+        key: 'legacyVar',
+        type: ESQLVariableType.VALUES,
+        value: 'legacyValue',
+      },
+    ]);
+  });
+});
+
+describe('parseControlGroupJson', () => {
+  it('should normalize legacy esqlControl panel types', () => {
+    expect(
+      parseControlGroupJson(
+        JSON.stringify({
+          panel1: {
+            type: 'esqlControl',
+            variable_name: 'legacyVar',
+          },
+          panel2: {
+            type: 'options_list_control',
+          },
+        })
+      )
+    ).toEqual({
+      panel1: {
+        type: ESQL_CONTROL,
+        variable_name: 'legacyVar',
+      },
+      panel2: {
+        type: 'options_list_control',
+      },
+    });
+  });
+
+  it('should return an empty object for invalid JSON', () => {
+    expect(parseControlGroupJson('{')).toEqual({});
   });
 });

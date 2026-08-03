@@ -6,29 +6,58 @@
  */
 
 export { generateStreamDescription } from './src/description/generate_description';
+export { overviewDescriptionPrompt } from './src/description/prompt';
 export { partitionStream } from './workflows/partition_stream';
 export {
   suggestProcessingPipeline,
+  mergeSeedParsingProcessorIntoSuggestedPipeline,
+  buildDocumentStructureOverviewForPipelinePrompt,
+  formatUpstreamSeedParsingContextForPromptMarkdown,
+  fetchMappedFieldsForStreamProcessingSuggestions,
+  getPipelineDefinitionJsonSchema,
+  pipelineDefinitionSchema,
+  postParsePipelineDefinitionSchema,
+  formatZodPipelineErrors,
+  buildSimulationFeedback,
+  detectTemporaryFields,
   type SuggestProcessingPipelineResult,
+  type SuggestPipelineAgentSchema,
+  type SimulationFeedback,
 } from './workflows/suggest_processing_pipeline';
-export { generateSignificantEvents } from './src/significant_events/generate_significant_events';
+export {
+  identifyKIQueries,
+  DEFAULT_MAX_EXISTING_QUERIES_FOR_CONTEXT,
+  type ExistingQuerySummary,
+} from './src/significant_events/identify_ki_queries';
 export {
   createDefaultSignificantEventsToolUsage,
   type SignificantEventsToolUsage,
 } from './src/significant_events/tools/tool_usage';
-export { sumTokens } from './src/helpers/sum_tokens';
+export { QUERY_GENERATION_EXCLUDED_FEATURE_TYPES } from './src/significant_events/tools/features_tool';
+export { EMPTY_TOKENS, sumTokens } from './src/helpers/sum_tokens';
 export {
   identifyFeatures,
+  toPreviouslyIdentifiedFeature,
   type IdentifyFeaturesOptions,
   type PreviouslyIdentifiedFeature,
   type ExcludedFeatureSummary,
   type IgnoredFeature,
+  type SearchSimilarFeaturesArguments,
+  type SimilarFeatureHit,
 } from './src/features/identify_features';
 export { generateAllComputedFeatures } from './src/features/computed';
+export {
+  CODE_ANALYSIS_PROVIDER_KEY,
+  codeAnalysisGenerator,
+} from './src/features/computed/code_analysis';
+export type {
+  ComputedFeatureProvider,
+  ComputedFeatureGeneratorOptions,
+} from './src/features/computed/types';
 
 export {
   searchKnowledgeIndicators,
-  DEFAULT_SEARCH_KNOWLEDGE_INDICATORS_LIMIT,
+  DEFAULT_SEARCH_KNOWLEDGE_INDICATORS_PER_PAGE,
 } from './src/knowledge_indicators/search';
 export {
   featureToKnowledgeIndicatorFeature,

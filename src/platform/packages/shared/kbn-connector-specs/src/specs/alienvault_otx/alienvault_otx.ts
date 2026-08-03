@@ -19,7 +19,7 @@
  * MVP implementation focusing on core community intelligence actions.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { i18n } from '@kbn/i18n';
 import type { ConnectorSpec } from '../../connector_spec';
 
@@ -41,22 +41,24 @@ export const AlienVaultOTXConnector: ConnectorSpec = {
   actions: {
     getIndicator: {
       isTool: true,
-      input: z.object({
-        indicatorType: z
-          .enum([
-            'IPv4',
-            'IPv6',
-            'domain',
-            'hostname',
-            'url',
-            'FileHash-MD5',
-            'FileHash-SHA1',
-            'FileHash-SHA256',
-          ])
-          .describe('Indicator type'),
-        indicator: z.string().describe('Indicator value'),
-        section: z.string().optional().describe('Specific section to retrieve'),
-      }),
+      input: lazySchema(() =>
+        z.object({
+          indicatorType: z
+            .enum([
+              'IPv4',
+              'IPv6',
+              'domain',
+              'hostname',
+              'url',
+              'FileHash-MD5',
+              'FileHash-SHA1',
+              'FileHash-SHA256',
+            ])
+            .describe('Indicator type'),
+          indicator: z.string().describe('Indicator value'),
+          section: z.string().optional().describe('Specific section to retrieve'),
+        })
+      ),
       handler: async (ctx, input) => {
         const typedInput = input as { indicatorType: string; indicator: string; section?: string };
         const section = typedInput.section || 'general';
@@ -73,11 +75,20 @@ export const AlienVaultOTXConnector: ConnectorSpec = {
 
     searchPulses: {
       isTool: true,
-      input: z.object({
-        query: z.string().optional().describe('Search query'),
-        page: z.number().int().min(1).optional().default(1).describe('Page number'),
-        limit: z.number().int().min(1).max(100).optional().default(20).describe('Results per page'),
-      }),
+      input: lazySchema(() =>
+        z.object({
+          query: z.string().optional().describe('Search query'),
+          page: z.number().int().min(1).optional().default(1).describe('Page number'),
+          limit: z
+            .number()
+            .int()
+            .min(1)
+            .max(100)
+            .optional()
+            .default(20)
+            .describe('Results per page'),
+        })
+      ),
       handler: async (ctx, input) => {
         const typedInput = input as { query?: string; page?: number; limit?: number };
         const response = await ctx.client.get(
@@ -100,9 +111,11 @@ export const AlienVaultOTXConnector: ConnectorSpec = {
 
     getPulse: {
       isTool: true,
-      input: z.object({
-        pulseId: z.string().describe('Pulse ID'),
-      }),
+      input: lazySchema(() =>
+        z.object({
+          pulseId: z.string().describe('Pulse ID'),
+        })
+      ),
       handler: async (ctx, input) => {
         const typedInput = input as { pulseId: string };
         const response = await ctx.client.get(
@@ -123,21 +136,23 @@ export const AlienVaultOTXConnector: ConnectorSpec = {
 
     getRelatedPulses: {
       isTool: true,
-      input: z.object({
-        indicatorType: z
-          .enum([
-            'IPv4',
-            'IPv6',
-            'domain',
-            'hostname',
-            'url',
-            'FileHash-MD5',
-            'FileHash-SHA1',
-            'FileHash-SHA256',
-          ])
-          .describe('Indicator type'),
-        indicator: z.string().describe('Indicator value'),
-      }),
+      input: lazySchema(() =>
+        z.object({
+          indicatorType: z
+            .enum([
+              'IPv4',
+              'IPv6',
+              'domain',
+              'hostname',
+              'url',
+              'FileHash-MD5',
+              'FileHash-SHA1',
+              'FileHash-SHA256',
+            ])
+            .describe('Indicator type'),
+          indicator: z.string().describe('Indicator value'),
+        })
+      ),
       handler: async (ctx, input) => {
         const typedInput = input as { indicatorType: string; indicator: string };
         const response = await ctx.client.get(

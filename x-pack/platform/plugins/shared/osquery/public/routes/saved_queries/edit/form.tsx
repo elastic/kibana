@@ -47,6 +47,7 @@ const EditSavedQueryFormComponent: React.FC<EditSavedQueryFormProps> = ({
   const {
     serializer,
     idSet,
+    isLoadingIds,
     handleSubmit: formSubmit,
     formState: { isSubmitting, isDirty },
   } = hooksForm;
@@ -87,6 +88,7 @@ const EditSavedQueryFormComponent: React.FC<EditSavedQueryFormProps> = ({
                     <EuiButton
                       data-test-subj="update-query-button"
                       isLoading={isSubmitting}
+                      isDisabled={isLoadingIds}
                       color="primary"
                       fill
                       size="m"

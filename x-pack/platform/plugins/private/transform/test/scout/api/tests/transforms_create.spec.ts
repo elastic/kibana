@@ -163,6 +163,36 @@ apiTest.describe(
       }
     );
 
+    apiTest('should create a transform with deferValidation', async ({ apiClient }) => {
+      const transformId = 'test_transform_id_create_defer_validation';
+
+      const { statusCode, body } = await apiClient.put(
+        `internal/transform/transforms/${transformId}?deferValidation=true`,
+        {
+          headers: {
+            ...COMMON_HEADERS,
+            ...transformManagerCookieHeader,
+          },
+          body: generateTransformConfig(transformId),
+          responseType: 'json',
+        }
+      );
+      const createResponse = body as PutTransformsResponseSchema;
+
+      expect(statusCode).toBe(200);
+
+      expect(createResponse).toMatchObject({
+        dataViewsCreated: [],
+        dataViewsErrors: [],
+        errors: [],
+        transformsCreated: [
+          {
+            transform: transformId,
+          },
+        ],
+      });
+    });
+
     apiTest('should ensure if pivot or latest is provided', async ({ apiClient }) => {
       const transformId = 'test_transform_id_fail';
 

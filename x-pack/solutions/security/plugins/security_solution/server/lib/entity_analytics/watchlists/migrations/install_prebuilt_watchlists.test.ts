@@ -13,7 +13,7 @@ import {
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { installPrebuiltWatchlists } from './install_prebuilt_watchlists';
 import {
-  PRIVILEGED_USER_WATCHLIST_ID,
+  getPrivilegedUserWatchlistSavedObjectId,
   PRIVILEGED_USER_WATCHLIST_NAME,
 } from '../../../../../common/entity_analytics/watchlists/constants';
 import type { ExperimentalFeatures } from '../../../../../common/experimental_features';
@@ -69,6 +69,7 @@ describe('installPrebuiltWatchlists', function () {
   const mockLogger = loggingSystemMock.createLogger();
   const mockEsClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
   const mockSoClient = mockSavedObjectsClient.create();
+  let mockCreateInternalRepository: jest.Mock;
 
   const callInstall = () =>
     installPrebuiltWatchlists({
@@ -76,6 +77,7 @@ describe('installPrebuiltWatchlists', function () {
       logger: mockLogger,
       getStartServices: mockGetStartServices,
       kibanaVersion: '9.0.0',
+      hasEncryptionKey: true,
       experimentalFeatures: {
         entityAnalyticsWatchlistEnabled: true,
       } as ExperimentalFeatures,
@@ -83,14 +85,33 @@ describe('installPrebuiltWatchlists', function () {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockWatchlistCreate.mockResolvedValue({ id: PRIVILEGED_USER_WATCHLIST_ID });
+    mockWatchlistCreate.mockImplementation(async (_attrs, opts?: { id?: string }) => {
+      if (!opts?.id) {
+        throw new Error('Prebuilt watchlist creation must always pass a deterministic id');
+      }
+
+      return { id: opts.id };
+    });
     mockEntitySourceCreate.mockResolvedValue({ id: 'entity-source-id' });
     mockEntitySourceList.mockResolvedValue({ sources: [] });
     mockAddEntitySourceReference.mockResolvedValue(undefined);
+    // Mirror core `find` behavior: the hidden `space` type is only queryable when
+    // it is explicitly passed via `includedHiddenTypes`; otherwise `find` returns
+    // an empty result. This guards against regressing back to an un-scoped repo.
+    mockCreateInternalRepository = jest
+      .fn()
+      .mockImplementation((includedHiddenTypes?: string[]) => {
+        if (includedHiddenTypes?.includes('space')) {
+          return mockSoClient;
+        }
+        const repoWithoutSpaceAccess = mockSavedObjectsClient.create();
+        repoWithoutSpaceAccess.find.mockResolvedValue(buildEmptySpacesResponse());
+        return repoWithoutSpaceAccess;
+      });
     mockGetStartServices.mockResolvedValue([
       {
         savedObjects: {
-          createInternalRepository: jest.fn().mockReturnValue(mockSoClient),
+          createInternalRepository: mockCreateInternalRepository,
         },
         elasticsearch: {
           client: {
@@ -99,6 +120,17 @@ describe('installPrebuiltWatchlists', function () {
         },
       },
     ]);
+  });
+
+  it('requests the hidden space saved object type so custom spaces are discovered', async () => {
+    mockSoClient.find.mockResolvedValue(buildSpacesResponse(['default', 'custom-space']));
+    mockWatchlistGet.mockRejectedValue(new Error('Saved object not found'));
+
+    await callInstall();
+
+    expect(mockCreateInternalRepository).toHaveBeenCalledWith(['space']);
+    // default + custom-space
+    expect(mockWatchlistCreate).toHaveBeenCalledTimes(2);
   });
 
   it('should install in default namespace even when no spaces are found', async () => {
@@ -115,11 +147,15 @@ describe('installPrebuiltWatchlists', function () {
 
   it('should skip creation when the prebuilt watchlist already exists', async () => {
     mockSoClient.find.mockResolvedValue(buildSpacesResponse(['default']));
-    mockWatchlistGet.mockResolvedValue({ id: PRIVILEGED_USER_WATCHLIST_ID });
+    mockWatchlistGet.mockResolvedValue({
+      id: getPrivilegedUserWatchlistSavedObjectId('default'),
+    });
 
     await callInstall();
 
-    expect(mockWatchlistGet).toHaveBeenCalledWith(PRIVILEGED_USER_WATCHLIST_ID);
+    expect(mockWatchlistGet).toHaveBeenCalledWith(
+      getPrivilegedUserWatchlistSavedObjectId('default')
+    );
     expect(mockWatchlistCreate).not.toHaveBeenCalled();
   });
 
@@ -135,7 +171,7 @@ describe('installPrebuiltWatchlists', function () {
         description: 'System-managed watchlist for tracking privileged users',
         managed: true,
       }),
-      { id: PRIVILEGED_USER_WATCHLIST_ID }
+      { id: getPrivilegedUserWatchlistSavedObjectId('default') }
     );
     expect(mockLogger.info).toHaveBeenCalledWith(
       expect.stringContaining(`Prebuilt watchlist '${PRIVILEGED_USER_WATCHLIST_NAME}' initialized.`)
@@ -163,6 +199,54 @@ describe('installPrebuiltWatchlists', function () {
     await callInstall();
 
     expect(mockWatchlistCreate).toHaveBeenCalledTimes(2);
+  });
+
+  it('should create integration entity sources with managed: true', async () => {
+    mockSoClient.find.mockResolvedValue(buildSpacesResponse(['default']));
+    mockWatchlistGet.mockRejectedValue(new Error('Saved object not found'));
+
+    await callInstall();
+
+    // Both okta and ad entity sources should be created with managed: true
+    expect(mockEntitySourceCreate).toHaveBeenCalledTimes(2);
+    expect(mockEntitySourceCreate).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'okta', managed: true })
+    );
+    expect(mockEntitySourceCreate).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'ad', managed: true })
+    );
+  });
+
+  it('entity source index patterns use each space namespace', async () => {
+    mockSoClient.find.mockResolvedValue(buildSpacesResponse(['space-2']));
+    mockWatchlistGet.mockRejectedValue(new Error('Saved object not found'));
+
+    await callInstall();
+
+    expect(mockEntitySourceCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: 'okta',
+        indexPattern: 'logs-entityanalytics_okta.user-default',
+      })
+    );
+    expect(mockEntitySourceCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: 'ad',
+        indexPattern: 'logs-entityanalytics_ad.user-default',
+      })
+    );
+    expect(mockEntitySourceCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: 'okta',
+        indexPattern: 'logs-entityanalytics_okta.user-space-2',
+      })
+    );
+    expect(mockEntitySourceCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: 'ad',
+        indexPattern: 'logs-entityanalytics_ad.user-space-2',
+      })
+    );
   });
 
   it('should deduplicate default namespace when it appears in spaces response', async () => {

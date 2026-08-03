@@ -12,7 +12,9 @@ import type {
   ExpressionAstExpression,
   ExpressionAstFunction,
 } from '@kbn/expressions-plugin/common';
-import { euiLightVars, euiThemeVars } from '@kbn/ui-theme';
+// Static EUI token values for assertions
+// eslint-disable-next-line @elastic/eui/no-restricted-eui-imports
+import { euiThemeVars } from '@kbn/ui-theme';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import type { FrameMock } from '../../mocks';
 import { createMockDatasource, createMockFramePublicAPI, generateActiveData } from '../../mocks';
@@ -77,6 +79,7 @@ describe('metric visualization', () => {
       | 'secondaryColor'
       | 'secondaryPrefix'
       | 'valuesTextAlign'
+      | 'titleWeight'
     >
   > = {
     layerId: 'first',
@@ -98,18 +101,24 @@ describe('metric visualization', () => {
     primaryAlign: 'right',
     secondaryAlign: 'right',
     primaryPosition: 'bottom',
-    titleWeight: 'bold',
     iconAlign: 'right',
     valueFontMode: 'default',
+    density: 'compact',
     secondaryTrend: { type: 'none' },
     secondaryLabelPosition: 'before',
     applyColorTo: 'background',
   };
 
+  const getLegacyStateWithoutDensity = (): MetricVisualizationState => {
+    const legacyState: MetricVisualizationState = { ...fullState };
+    delete legacyState.density;
+    return legacyState;
+  };
+
   const fullStateWTrend: Required<
     Omit<
       MetricVisualizationState,
-      'secondaryTrend' | 'secondaryColor' | 'secondaryPrefix' | 'valuesTextAlign'
+      'secondaryTrend' | 'secondaryColor' | 'secondaryPrefix' | 'valuesTextAlign' | 'titleWeight'
     >
   > = {
     ...fullState,
@@ -123,11 +132,45 @@ describe('metric visualization', () => {
       expect(visualization.initialize(() => 'some-id')).toEqual({
         layerId: 'some-id',
         layerType: LayerTypes.DATA,
+        titlesTextAlign: 'left',
+        primaryPosition: 'bottom',
+        primaryAlign: 'right',
+        secondaryAlign: 'right',
+        density: 'default',
       });
     });
 
     test('returns persisted state', () => {
       expect(visualization.initialize(() => fullState.layerId, fullState)).toEqual(fullState);
+    });
+
+    test('sets compact density for persisted state without density', () => {
+      expect(
+        visualization.initialize(() => fullState.layerId, getLegacyStateWithoutDensity())
+      ).toEqual(fullState);
+    });
+
+    test('preserves explicit persisted density', () => {
+      const stateWithDefaultDensity: MetricVisualizationState = {
+        ...fullState,
+        density: 'default',
+      };
+      expect(visualization.initialize(() => fullState.layerId, stateWithDefaultDensity)).toEqual(
+        stateWithDefaultDensity
+      );
+    });
+
+    test('removes legacy state property titleWeight', () => {
+      const stateWithLegacyTitleWeight: MetricVisualizationState = {
+        ...fullState,
+        titleWeight: 'bold',
+      };
+      expect(
+        visualization.initialize(
+          () => stateWithLegacyTitleWeight.layerId,
+          stateWithLegacyTitleWeight
+        )
+      ).toEqual(fullState);
     });
 
     test('migrates legacy state properties secondaryPrefix and valuesTextAlign', () => {
@@ -519,6 +562,9 @@ describe('metric visualization', () => {
                 "color": Array [
                   "static-color",
                 ],
+                "density": Array [
+                  "compact",
+                ],
                 "iconAlign": Array [
                   "right",
                 ],
@@ -571,9 +617,6 @@ describe('metric visualization', () => {
                 "subtitle": Array [
                   "subtitle",
                 ],
-                "titleWeight": Array [
-                  "bold",
-                ],
                 "titlesTextAlign": Array [
                   "left",
                 ],
@@ -591,6 +634,21 @@ describe('metric visualization', () => {
       `);
     });
 
+    it('keeps legacy persisted metrics on compact density when building an expression', () => {
+      const initializedState = visualization.initialize(() => fullState.layerId, {
+        ...getLegacyStateWithoutDensity(),
+        breakdownByAccessor: undefined,
+        collapseFn: undefined,
+      });
+
+      const expression = visualization.toExpression(
+        initializedState,
+        datasourceLayers
+      ) as ExpressionAstExpression;
+
+      expect(expression.chain[0].arguments.density).toEqual(['compact']);
+    });
+
     it('builds breakdown by metric', () => {
       expect(visualization.toExpression({ ...fullState, collapseFn: undefined }, datasourceLayers))
         .toMatchInlineSnapshot(`
@@ -606,6 +664,9 @@ describe('metric visualization', () => {
                 ],
                 "color": Array [
                   "static-color",
+                ],
+                "density": Array [
+                  "compact",
                 ],
                 "iconAlign": Array [
                   "right",
@@ -661,9 +722,6 @@ describe('metric visualization', () => {
                 ],
                 "subtitle": Array [
                   "subtitle",
-                ],
-                "titleWeight": Array [
-                  "bold",
                 ],
                 "titlesTextAlign": Array [
                   "left",
@@ -950,6 +1008,9 @@ describe('metric visualization', () => {
               "color": Array [
                 "static-color",
               ],
+              "density": Array [
+                "compact",
+              ],
               "iconAlign": Array [
                 "right",
               ],
@@ -965,7 +1026,6 @@ describe('metric visualization', () => {
               "metric": Array [
                 "metric-col-id",
               ],
-              "palette": Array [],
               "primaryAlign": Array [
                 "right",
               ],
@@ -983,9 +1043,6 @@ describe('metric visualization', () => {
               ],
               "subtitle": Array [
                 "subtitle",
-              ],
-              "titleWeight": Array [
-                "bold",
               ],
               "titlesTextAlign": Array [
                 "left",
@@ -1048,13 +1105,14 @@ describe('metric visualization', () => {
             visualization.toExpression(
               {
                 ...fullState,
+                applyColorTo: undefined,
                 showBar: true,
                 color: undefined,
               },
               datasourceLayers
             ) as ExpressionAstExpression
           ).chain[1].arguments.color[0]
-        ).toBe(euiLightVars.euiColorPrimary);
+        ).toBe(euiThemeVars.euiColorVis2);
 
         expect(
           (
@@ -1067,7 +1125,7 @@ describe('metric visualization', () => {
               datasourceLayers
             ) as ExpressionAstExpression
           ).chain[1].arguments.color[0]
-        ).toBe(euiLightVars.euiColorEmptyShade);
+        ).toBe(euiThemeVars.euiColorEmptyShade);
 
         expect(
           (
@@ -1081,7 +1139,7 @@ describe('metric visualization', () => {
               datasourceLayers
             ) as ExpressionAstExpression
           ).chain[1].arguments.color[0]
-        ).toBe(euiLightVars.euiColorEmptyShade);
+        ).toBe(euiThemeVars.euiColorEmptyShade);
 
         // this case isn't currently relevant because other parts of the code don't allow showBar to be
         // set when there isn't a max dimension but this test covers the branch anyhow
@@ -1177,14 +1235,14 @@ describe('metric visualization', () => {
           expect(secondaryMetricAST.secondaryColor).toEqual(undefined);
           expect(secondaryMetricAST.secondaryTrendBaseline).toEqual([0]);
           expect(secondaryMetricAST.secondaryTrendPalette).toEqual([
-            euiLightVars.euiColorBackgroundLightDanger,
-            euiLightVars.euiColorBackgroundLightText,
-            euiLightVars.euiColorBackgroundLightSuccess,
+            euiThemeVars.euiColorBackgroundLightDanger,
+            euiThemeVars.euiColorBackgroundLightText,
+            euiThemeVars.euiColorBackgroundLightSuccess,
           ]);
           expect(secondaryMetricAST.secondaryTrendTextPalette).toEqual([
-            euiLightVars.euiColorTextDanger,
-            euiLightVars.euiColorTextParagraph,
-            euiLightVars.euiColorTextSuccess,
+            euiThemeVars.euiColorTextDanger,
+            euiThemeVars.euiColorTextParagraph,
+            euiThemeVars.euiColorTextSuccess,
           ]);
         } else {
           fail('AST is not an object');
@@ -1222,6 +1280,7 @@ describe('metric visualization', () => {
     expect(visualization.clearLayer(fullState, 'some-id', 'indexPattern1')).toMatchInlineSnapshot(`
       Object {
         "applyColorTo": "background",
+        "density": "compact",
         "icon": "empty",
         "iconAlign": "right",
         "layerId": "first",
@@ -1229,7 +1288,6 @@ describe('metric visualization', () => {
         "primaryAlign": "right",
         "primaryPosition": "bottom",
         "secondaryAlign": "right",
-        "titleWeight": "bold",
         "titlesTextAlign": "left",
         "valueFontMode": "default",
       }
@@ -1716,8 +1774,6 @@ describe('metric visualization', () => {
             type: 'static',
             color: LENS_METRIC_SECONDARY_DEFAULT_STATIC_COLOR,
           },
-          secondaryLabel: undefined,
-          secondaryLabelPosition: 'before',
         })
       );
     });
@@ -1750,8 +1806,6 @@ describe('metric visualization', () => {
             paletteId: 'compare_to',
             baselineValue: 0,
           },
-          secondaryLabel: undefined,
-          secondaryLabelPosition: 'before',
         })
       );
     });

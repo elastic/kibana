@@ -511,7 +511,23 @@ export const formattedSearchStrategyResponse = {
           query: {
             bool: {
               filter: [
-                { term: { 'host.name': 'bastion00.siem.estc.dev' } },
+                {
+                  bool: {
+                    must: [],
+                    filter: [
+                      { match_all: {} },
+                      {
+                        match_phrase: {
+                          'host.name': {
+                            query: 'bastion00.siem.estc.dev',
+                          },
+                        },
+                      },
+                    ],
+                    should: [],
+                    must_not: [],
+                  },
+                },
                 {
                   range: {
                     '@timestamp': {
@@ -799,8 +815,22 @@ export const expectedDsl = {
     bool: {
       filter: [
         {
-          term: {
-            'host.name': 'bastion00.siem.estc.dev',
+          bool: {
+            filter: [
+              {
+                match_all: {},
+              },
+              {
+                match_phrase: {
+                  'host.name': {
+                    query: 'bastion00.siem.estc.dev',
+                  },
+                },
+              },
+            ],
+            must: [],
+            must_not: [],
+            should: [],
           },
         },
         {

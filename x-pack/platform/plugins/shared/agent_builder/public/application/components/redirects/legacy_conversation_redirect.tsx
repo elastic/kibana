@@ -15,7 +15,6 @@ import { useQuery } from '@kbn/react-query';
 import { useLastAgentId } from '../../hooks/use_last_agent_id';
 import { useAgentBuilderServices } from '../../hooks/use_agent_builder_service';
 import { appPaths } from '../../utils/app_paths';
-import { newConversationId } from '../../utils/new_conversation';
 
 export const LegacyConversationRedirect: React.FC = () => {
   const { conversationId } = useParams<{ conversationId?: string }>();
@@ -23,7 +22,7 @@ export const LegacyConversationRedirect: React.FC = () => {
   const lastAgentId = useLastAgentId();
   const { conversationsService } = useAgentBuilderServices();
 
-  const isNewConversation = !conversationId || conversationId === newConversationId;
+  const isNewConversation = !conversationId || conversationId === 'new';
 
   const {
     data: conversation,

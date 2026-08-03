@@ -202,8 +202,15 @@ export const createAppContextStartContractMock = (
     autoInstallContentPackagesTask: {} as any,
     alertingStart: {
       getRulesClientWithRequest: jest.fn(),
+      getRulesClientWithRequestInSpace: jest.fn(),
     } as any,
     reportingStart: reportingMock.createStart(),
+    lockManagerService: {
+      withLock: jest
+        .fn()
+        .mockImplementation((_lockId: string, callback: () => Promise<unknown>) => callback()),
+      getLock: jest.fn().mockResolvedValue(undefined),
+    } as any,
   };
 };
 
@@ -314,7 +321,14 @@ export const createMockAgentPolicyService = (): jest.Mocked<AgentPolicyServiceIn
 export const createMockAgentlessPoliciesService = (): jest.Mocked<AgentlessPoliciesService> => {
   return {
     createAgentlessPolicy: jest.fn().mockReturnValue(Promise.resolve()),
+    updateAgentlessPolicy: jest.fn().mockReturnValue(Promise.resolve()),
     deleteAgentlessPolicy: jest.fn().mockReturnValue(Promise.resolve()),
+    getAgentlessPolicy: jest.fn().mockReturnValue(Promise.resolve(null)),
+    listAgentlessPolicies: jest
+      .fn()
+      .mockReturnValue(Promise.resolve({ items: [], total: 0, page: 1, perPage: 20 })),
+    bulkUpgradeAgentlessPolicies: jest.fn().mockReturnValue(Promise.resolve([])),
+    getAgentlessPolicyUpgradeDryRunDiff: jest.fn().mockReturnValue(Promise.resolve([])),
   };
 };
 

@@ -8,8 +8,12 @@
 import React, { memo } from 'react';
 import { EuiSpacer, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { FieldsMap } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { useFormContext, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import {
+  FIELD_TYPES,
+  type FieldsMap,
+  useFormContext,
+  useFormData,
+} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 
 export interface EncryptedFieldsCalloutProps {
   isEdit: boolean;
@@ -30,7 +34,12 @@ const isEmpty = (value: string | undefined): value is string => value != null ||
 
 const getSecretFields = (fields: FieldsMap): FieldsMap =>
   Object.keys(fields)
-    .filter((fieldPath) => fieldPath.includes('secrets') && fields[fieldPath].label)
+    .filter(
+      (fieldPath) =>
+        fieldPath.includes('secrets') &&
+        fields[fieldPath].label &&
+        fields[fieldPath].type !== FIELD_TYPES.HIDDEN
+    )
     .reduce((filteredFields, path) => ({ ...filteredFields, [path]: fields[path] }), {});
 
 const getLabelsFromFields = (fields: FieldsMap): string[] =>

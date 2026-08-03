@@ -6,6 +6,7 @@
  */
 
 import { createMockStore, mockTimelineData, TestProviders } from '../../../../../common/mock';
+import type { ComponentProps } from 'react';
 import React from 'react';
 import { TimelineDataTable } from '.';
 import { TimelineId, TimelineTabs } from '../../../../../../common/types';
@@ -13,18 +14,20 @@ import { DataLoadingState } from '@kbn/unified-data-table';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
-import { useSourcererDataView } from '../../../../../sourcerer/containers';
-import type { ComponentProps } from 'react';
 import { getColumnHeaders } from '../../body/column_headers/helpers';
 import { mockSourcererScope } from '../../../../../sourcerer/containers/mocks';
 import * as timelineActions from '../../../../store/actions';
 import { defaultUdtHeaders } from '../../body/column_headers/default_headers';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
+import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_flyout_enabled';
+import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
+import { createFlyoutApiMock } from '../../../../../flyout_v2/use_flyout_api.mock';
+import { PageScope } from '../../../../../data_view_manager/constants';
 
-jest.mock('../../../../../sourcerer/containers');
-jest.mock('../../../../../common/hooks/use_experimental_features');
-
+jest.mock('../../../../../common/hooks/use_is_new_flyout_enabled', () => ({
+  useIsNewFlyoutEnabled: jest.fn().mockReturnValue(false),
+}));
+jest.mock('../../../../../flyout_v2/use_flyout_api');
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useLocation: jest.fn(() => ({
@@ -39,6 +42,7 @@ const onFetchMoreRecordsMock = jest.fn();
 
 const openFlyoutMock = jest.fn();
 const mockOpenSystemFlyout = jest.fn();
+const mockUiSettingsGet = jest.fn().mockReturnValue(false);
 const mockDocumentFlyoutWrapper = jest.fn((_props?: unknown) => (
   <div>{'MockDocumentFlyoutWrapper'}</div>
 ));
@@ -49,7 +53,7 @@ jest.mock('@kbn/expandable-flyout');
 jest.mock('../../../../../flyout_v2/shared/components/flyout_provider', () => ({
   flyoutProviders: ({ children }: { children: React.ReactNode }) => children,
 }));
-jest.mock('../../../../../flyout_v2/document/document_flyout_wrapper', () => ({
+jest.mock('../../../../../flyout_v2/document/main/document_flyout_wrapper', () => ({
   DocumentFlyoutWrapper: (props: unknown) => mockDocumentFlyoutWrapper(props),
 }));
 jest.mock('../../../../../common/lib/kibana', () => {
@@ -64,6 +68,10 @@ jest.mock('../../../../../common/lib/kibana', () => {
         overlays: {
           ...original.useKibana().services.overlays,
           openSystemFlyout: mockOpenSystemFlyout,
+        },
+        uiSettings: {
+          ...original.useKibana().services.uiSettings,
+          get: mockUiSettingsGet,
         },
       },
     }),
@@ -107,7 +115,6 @@ const mockDataView = new DataView({
 
 const TestComponent = (props: TestComponentProps) => {
   const { store = createMockStore(), ...restProps } = props;
-  useSourcererDataView();
   return (
     <TestProviders store={store}>
       <TimelineDataTable
@@ -144,13 +151,17 @@ const getTimelineFromStore = (
 };
 
 describe('unified data table', () => {
+  let flyoutApi: ReturnType<typeof createFlyoutApiMock>;
+
   beforeEach(() => {
-    (useSourcererDataView as jest.Mock).mockReturnValue(mockSourcererScope);
     (useExpandableFlyoutApi as jest.Mock).mockReturnValue({
       openFlyout: openFlyoutMock,
       closeFlyout: jest.fn(),
     });
-    jest.mocked(useIsExperimentalFeatureEnabled).mockReturnValue(false);
+    mockUiSettingsGet.mockReturnValue(false);
+    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
+    flyoutApi = createFlyoutApiMock();
+    jest.mocked(useFlyoutApi).mockReturnValue(flyoutApi);
   });
   afterEach(() => {
     updateSampleSizeSpy.mockClear();
@@ -190,9 +201,9 @@ describe('unified data table', () => {
   );
 
   it(
-    'opens the system flyout with the existing hit when newFlyoutSystemEnabled is enabled',
+    'opens the new document flyout (from index) when enableNewFlyout setting is enabled and row is not an attack',
     async () => {
-      jest.mocked(useIsExperimentalFeatureEnabled).mockReturnValue(true);
+      jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
 
       render(<TestComponent />);
       expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
@@ -200,13 +211,74 @@ describe('unified data table', () => {
       fireEvent.click(screen.getAllByTestId('docTableExpandToggleColumn')[0]);
 
       await waitFor(() => {
-        expect(mockOpenSystemFlyout).toHaveBeenCalled();
+        expect(flyoutApi.openDocumentFlyoutFromIndex).toHaveBeenCalledWith(
+          expect.objectContaining({
+            documentId: mockTimelineData[0]._id,
+            indexName: mockTimelineData[0].ecs._index,
+          })
+        );
       });
 
-      const flyoutElement = mockOpenSystemFlyout.mock.calls[0][0];
-      expect(flyoutElement.props.documentId).toBe(mockTimelineData[0]._id);
-      expect(flyoutElement.props.indexName).toBe(mockTimelineData[0].ecs._index);
-      expect(flyoutElement.props.onAlertUpdated).toBe(refetchMock);
+      // the document (non-attack) new flyout no longer goes through the inline system flyout
+      expect(mockOpenSystemFlyout).not.toHaveBeenCalled();
+    },
+    SPECIAL_TEST_TIMEOUT
+  );
+
+  it(
+    'opens the new document flyout with a cell-action renderer bound to the timeline scope',
+    async () => {
+      jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
+
+      render(<TestComponent />);
+      expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
+
+      fireEvent.click(screen.getAllByTestId('docTableExpandToggleColumn')[0]);
+
+      await waitFor(() => {
+        expect(flyoutApi.openDocumentFlyoutFromIndex).toHaveBeenCalled();
+      });
+
+      const { renderCellActions } = jest.mocked(flyoutApi.openDocumentFlyoutFromIndex).mock
+        .calls[0][0];
+
+      // Even when a cell passes an empty scopeId, the bound timeline scope must win so Filter
+      // In/Out target the timeline's own filter manager instead of the page behind it.
+      const cellAction = renderCellActions?.({
+        field: 'host.name',
+        value: ['host-1'],
+        scopeId: '',
+        children: null,
+      }) as React.ReactElement;
+
+      expect(cellAction.props.metadata).toEqual({ scopeId: TimelineId.test });
+      expect(cellAction.props.sourcererScopeId).toEqual(PageScope.timeline);
+    },
+    SPECIAL_TEST_TIMEOUT
+  );
+
+  it(
+    'opens the new attack flyout when enableNewFlyout setting is enabled and row is an attack discovery alert',
+    async () => {
+      jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
+
+      render(<TestComponent events={mockAttackTimelineData} />);
+      expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
+
+      fireEvent.click(screen.getByTestId('docTableExpandToggleColumn'));
+
+      await waitFor(() => {
+        expect(flyoutApi.openAttackFlyout).toHaveBeenCalledWith(
+          expect.objectContaining({
+            attackId: 'attack-1',
+            indexName: 'attack-index',
+          })
+        );
+      });
+
+      // attack rows no longer go through the inline system flyout or the document flyout api
+      expect(mockOpenSystemFlyout).not.toHaveBeenCalled();
+      expect(mockDocumentFlyoutWrapper).not.toHaveBeenCalled();
     },
     SPECIAL_TEST_TIMEOUT
   );

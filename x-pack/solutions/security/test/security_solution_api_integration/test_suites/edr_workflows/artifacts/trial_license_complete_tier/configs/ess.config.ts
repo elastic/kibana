@@ -16,6 +16,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     'trustedAppsAdvancedMode',
     'filterProcessDescendantsForTrustedAppsEnabled',
     'trustedDevices',
+    'endpointExceptionsMovedUnderManagement',
   ];
 
   return {

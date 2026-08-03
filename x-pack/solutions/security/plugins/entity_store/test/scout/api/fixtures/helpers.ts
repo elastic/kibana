@@ -6,15 +6,34 @@
  */
 
 import type { EsClient } from '@kbn/scout-security';
+import type { apiTest } from '@kbn/scout-security';
+import { expect } from '@kbn/scout-security/api';
+import type { EntityStoreStatusResponseBody } from '../../../../server/routes/apis/status';
 import { hashEuid } from '../../../../common/domain/euid';
 import type { EntityType } from '../../../../common';
 
 import {
   ENTITY_STORE_ROUTES,
   HISTORY_INDEX_PATTERN,
+  LATEST_ALIAS,
   LATEST_INDEX,
   UPDATES_INDEX,
+  ENTRA_SOURCE_INDEX,
 } from './constants';
+
+type ApiWorkerFixtures = Parameters<Parameters<typeof apiTest>[2]>[0];
+export type ApiClientFixture = ApiWorkerFixtures['apiClient'];
+type ApiClientResponse = Awaited<ReturnType<ApiClientFixture['get']>>; // ApiClientResponse is the same for all methods
+/**
+ * Normalizes values that may be stored as a single keyword or as keyword[] after
+ * log extraction (e.g. `entity.relationships.*` bags).
+ */
+export const normalizeKeywordList = (value: unknown): string[] => {
+  if (value == null) {
+    return [];
+  }
+  return Array.isArray(value) ? value.map((v) => String(v)) : [String(value)];
+};
 
 /**
  * Deletes all Entity Store data indices: latest, updates, and history snapshots.
@@ -52,9 +71,9 @@ export const ingestDoc = async (esClient: EsClient, body: Record<string, unknown
   });
 
 export const searchDocById = async (esClient: EsClient, id: string) => {
-  await esClient.indices.refresh({ index: LATEST_INDEX });
+  await esClient.indices.refresh({ index: LATEST_ALIAS });
   return await esClient.search({
-    index: LATEST_INDEX,
+    index: LATEST_ALIAS,
     version: true,
     query: {
       bool: {
@@ -71,6 +90,7 @@ interface SeedUserEntityOptions {
   entityId: string;
   namespace: string;
   email: string | string[];
+  userName?: string;
   timestamp?: string;
 }
 
@@ -85,10 +105,11 @@ interface SeedUserEntityOptions {
  */
 export const seedUserEntity = async (
   esClient: EsClient,
-  { entityId, namespace, email, timestamp }: SeedUserEntityOptions
+  { entityId, namespace, email, userName, timestamp }: SeedUserEntityOptions
 ) => {
+  const ts = timestamp ?? new Date().toISOString();
   await esClient.index({
-    index: LATEST_INDEX,
+    index: LATEST_ALIAS,
     id: hashEuid(entityId),
     refresh: 'wait_for',
     pipeline: '_none',
@@ -98,17 +119,70 @@ export const seedUserEntity = async (
         name: entityId,
         EngineMetadata: { Type: 'user' },
         namespace,
+        lifecycle: {
+          first_seen: ts,
+          last_seen: ts,
+        },
       },
       user: {
         email,
-        name: entityId,
+        name: userName ?? entityId,
       },
-      '@timestamp': timestamp ?? new Date().toISOString(),
+      '@timestamp': ts,
+    },
+  });
+};
+
+interface SeedEntityAnalyticsSourceOptions {
+  email: string;
+  relatedUsers: string[];
+  timestamp?: string;
+}
+
+export const seedEntityAnalyticsSource = async (
+  esClient: EsClient,
+  { email, relatedUsers, timestamp }: SeedEntityAnalyticsSourceOptions
+) => {
+  const ts = timestamp ?? new Date().toISOString();
+  await esClient.index({
+    index: ENTRA_SOURCE_INDEX,
+    refresh: 'wait_for',
+    body: {
+      '@timestamp': ts,
+      event: {
+        kind: 'asset',
+        module: 'entityanalytics_entra_id',
+      },
+      user: {
+        email,
+        name: email,
+      },
+      related: {
+        user: relatedUsers,
+      },
     },
   });
 };
 
 const RESOLVED_TO_PATH = 'entity.relationships.resolution.resolved_to';
+
+const readResolvedTo = (source: Record<string, unknown>): unknown =>
+  // Check both nested path and flat dotted key (ES update stores as flat key)
+  getNestedValue(source, RESOLVED_TO_PATH) ?? source[RESOLVED_TO_PATH];
+
+const fetchEntitySource = async (
+  esClient: EsClient,
+  entityId: string
+): Promise<Record<string, unknown> | undefined> => {
+  await esClient.indices.refresh({ index: LATEST_ALIAS });
+  const response = await esClient.search({
+    index: LATEST_ALIAS,
+    query: { bool: { filter: [{ term: { 'entity.id': entityId } }] } },
+    size: 1,
+  });
+
+  return response.hits.hits[0]?._source as Record<string, unknown> | undefined;
+};
 
 /**
  * Polls the LATEST index until an entity's `resolved_to` field matches the
@@ -120,39 +194,38 @@ export const waitForResolution = async (
   expectedTarget: string,
   timeoutMs = 30_000
 ): Promise<Record<string, unknown>> => {
-  const start = Date.now();
-  let lastSource: Record<string, unknown> | undefined;
+  let matchedSource: Record<string, unknown> | undefined;
 
-  while (Date.now() - start < timeoutMs) {
-    await esClient.indices.refresh({ index: LATEST_INDEX });
-    const response = await esClient.search({
-      index: LATEST_INDEX,
-      query: { bool: { filter: [{ term: { 'entity.id': entityId } }] } },
-      size: 1,
-    });
+  await expect
+    .poll(
+      async () => {
+        const source = await fetchEntitySource(esClient, entityId);
+        if (!source) {
+          return undefined;
+        }
 
-    const source = response.hits.hits[0]?._source as Record<string, unknown> | undefined;
-    lastSource = source;
-    if (source) {
-      // Check both nested path and flat dotted key (ES update stores as flat key)
-      const resolvedTo = getNestedValue(source, RESOLVED_TO_PATH) ?? source[RESOLVED_TO_PATH];
-      if (resolvedTo === expectedTarget) {
-        return source;
+        const resolvedTo = readResolvedTo(source);
+        if (resolvedTo === expectedTarget) {
+          matchedSource = source;
+        }
+
+        return resolvedTo;
+      },
+      {
+        timeout: timeoutMs,
+        intervals: [200],
+        message: `Timed out waiting for entity '${entityId}' to resolve to '${expectedTarget}'`,
       }
-    }
+    )
+    .toBe(expectedTarget);
 
-    await new Promise((resolve) => setTimeout(resolve, 200));
+  if (!matchedSource) {
+    throw new Error(
+      `Resolved entity '${entityId}' to '${expectedTarget}' but could not read its _source`
+    );
   }
 
-  // eslint-disable-next-line no-console
-  console.log(
-    `[DEBUG] waitForResolution timeout for '${entityId}'. Last _source:`,
-    JSON.stringify(lastSource, null, 2)
-  );
-
-  throw new Error(
-    `Timed out waiting for entity '${entityId}' to resolve to '${expectedTarget}' after ${timeoutMs}ms`
-  );
+  return matchedSource;
 };
 
 /**
@@ -167,17 +240,9 @@ export const assertNotResolved = async (
   const start = Date.now();
 
   while (Date.now() - start < timeoutMs) {
-    await esClient.indices.refresh({ index: LATEST_INDEX });
-    const response = await esClient.search({
-      index: LATEST_INDEX,
-      query: { bool: { filter: [{ term: { 'entity.id': entityId } }] } },
-      size: 1,
-    });
-
-    const source = response.hits.hits[0]?._source as Record<string, unknown> | undefined;
+    const source = await fetchEntitySource(esClient, entityId);
     if (source) {
-      // Check both nested path and flat dotted key (ES update stores as flat key)
-      const resolvedTo = getNestedValue(source, RESOLVED_TO_PATH) ?? source[RESOLVED_TO_PATH];
+      const resolvedTo = readResolvedTo(source);
       if (resolvedTo != null) {
         throw new Error(
           `Entity '${entityId}' unexpectedly resolved to '${resolvedTo}' — expected it to stay unresolved`
@@ -201,17 +266,19 @@ export const triggerMaintainerRun = async (
   apiClient: ForceLogExtractionApiClient,
   headers: Record<string, string>,
   maintainerId = 'automated-resolution',
-  { maxRetries = 5, retryDelayMs = 2000 } = {}
+  { maxRetries = 5, retryDelayMs = 2000, sync = false } = {}
 ) => {
+  // Use `sync: true` in tests that need a settled watermark before proceeding.
+  const runUrl = `${ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_RUN(
+    maintainerId
+  )}?sync=${sync}`;
+
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
-    const response = await apiClient.post(
-      ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_RUN(maintainerId),
-      {
-        headers,
-        responseType: 'json',
-        body: {},
-      }
-    );
+    const response = await apiClient.post(runUrl, {
+      headers,
+      responseType: 'json',
+      body: {},
+    });
 
     if (response.statusCode === 200) {
       return response;
@@ -248,4 +315,75 @@ export const forceLogExtraction = async (
     headers,
     responseType: 'json',
     body: { fromDateISO, toDateISO },
+  });
+
+export const installAllEntityTypes = (
+  apiClient: ApiClientFixture,
+  headers: Record<string, string>
+) =>
+  apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
+    headers,
+    responseType: 'json',
+    body: {},
+  });
+
+export const uninstallAllEntityTypes = (
+  apiClient: ApiClientFixture,
+  headers: Record<string, string>
+) =>
+  apiClient.post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
+    headers,
+    responseType: 'json',
+    body: {},
+  });
+
+export const getStatus = (
+  apiClient: ApiClientFixture,
+  headers: Record<string, string>,
+  { includeComponents = false } = {}
+): Promise<Omit<ApiClientResponse, 'body'> & { body: EntityStoreStatusResponseBody }> =>
+  apiClient.get(
+    includeComponents
+      ? `${ENTITY_STORE_ROUTES.public.STATUS}?include_components=true`
+      : ENTITY_STORE_ROUTES.public.STATUS,
+    {
+      headers,
+      responseType: 'json',
+    }
+  );
+
+export const startEntityTypes = (
+  apiClient: ApiClientFixture,
+  headers: Record<string, string>,
+  entityTypes: EntityType[]
+) =>
+  apiClient.put(ENTITY_STORE_ROUTES.public.START, {
+    headers,
+    responseType: 'json',
+    body: { entityTypes },
+  });
+
+export const stopEntityTypes = (
+  apiClient: ApiClientFixture,
+  headers: Record<string, string>,
+  entityTypes: EntityType[]
+) =>
+  apiClient.put(ENTITY_STORE_ROUTES.public.STOP, {
+    headers,
+    responseType: 'json',
+    body: { entityTypes },
+  });
+
+export const startAllEntityTypes = (apiClient: ApiClientFixture, headers: Record<string, string>) =>
+  apiClient.put(ENTITY_STORE_ROUTES.public.START, {
+    headers,
+    responseType: 'json',
+    body: {},
+  });
+
+export const stopAllEntityTypes = (apiClient: ApiClientFixture, headers: Record<string, string>) =>
+  apiClient.put(ENTITY_STORE_ROUTES.public.STOP, {
+    headers,
+    responseType: 'json',
+    body: {},
   });

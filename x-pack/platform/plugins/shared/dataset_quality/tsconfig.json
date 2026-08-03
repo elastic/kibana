@@ -33,6 +33,7 @@
     "@kbn/deeplinks-observability",
     "@kbn/discover-plugin",
     "@kbn/ebt-tools",
+    "@kbn/es-errors",
     "@kbn/es-query",
     "@kbn/es-types",
     "@kbn/field-formats-plugin",

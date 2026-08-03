@@ -4,41 +4,43 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
+import { z } from '@kbn/zod';
 import {
-  occurrencesBudgetingMethodSchema,
-  rollingTimeWindowSchema,
-  targetSchema,
-} from '../../../schema';
-import { sloIdSchema, tagsSchema } from '../../../schema/slo';
-import {
-  compositeSloMemberSchema,
+  compositeSloIdSchema,
+  compositeTagsSchema,
+  compositeTargetSchema,
+  compositeOccurrencesBudgetingMethodSchema,
+  compositeRollingTimeWindowSchema,
+  compositeSloMembersSchema,
   compositeMethodSchema,
-  compositeSloDefinitionSchema,
 } from '../../../schema/composite_slo';
 
-const updateCompositeSLOParamsSchema = t.type({
-  path: t.type({
-    id: sloIdSchema,
-  }),
-  body: t.partial({
-    name: t.string,
-    description: t.string,
-    members: t.array(compositeSloMemberSchema),
-    compositeMethod: compositeMethodSchema,
-    timeWindow: rollingTimeWindowSchema,
-    budgetingMethod: occurrencesBudgetingMethodSchema,
-    objective: targetSchema,
-    tags: tagsSchema,
-    enabled: t.boolean,
-  }),
+const updateCompositeSLOBodySchema = z.object({
+  name: z.string().optional(),
+  description: z.string().optional(),
+  members: compositeSloMembersSchema.optional(),
+  compositeMethod: compositeMethodSchema.optional(),
+  timeWindow: compositeRollingTimeWindowSchema.optional(),
+  budgetingMethod: compositeOccurrencesBudgetingMethodSchema.optional(),
+  objective: compositeTargetSchema.optional(),
+  tags: compositeTagsSchema.optional(),
+  enabled: z.boolean().optional(),
 });
 
-const updateCompositeSLOResponseSchema = compositeSloDefinitionSchema;
+const updateCompositeSLOParamsSchema = z.object({
+  path: z.object({
+    id: compositeSloIdSchema,
+  }),
+  body: updateCompositeSLOBodySchema,
+});
 
-type UpdateCompositeSLOInput = t.OutputOf<typeof updateCompositeSLOParamsSchema.props.body>;
-type UpdateCompositeSLOParams = t.TypeOf<typeof updateCompositeSLOParamsSchema.props.body>;
-type UpdateCompositeSLOResponse = t.OutputOf<typeof updateCompositeSLOResponseSchema>;
+const updateCompositeSLOInputSchema = updateCompositeSLOBodySchema.extend({
+  id: compositeSloIdSchema,
+  spaceId: z.string(),
+  userId: z.string(),
+});
 
-export { updateCompositeSLOParamsSchema, updateCompositeSLOResponseSchema };
-export type { UpdateCompositeSLOInput, UpdateCompositeSLOParams, UpdateCompositeSLOResponse };
+type UpdateCompositeSLOInput = z.input<typeof updateCompositeSLOInputSchema>;
+
+export type { UpdateCompositeSLOInput };
+export { updateCompositeSLOParamsSchema };

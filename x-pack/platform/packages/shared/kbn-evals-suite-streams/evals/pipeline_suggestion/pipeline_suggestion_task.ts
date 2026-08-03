@@ -107,6 +107,13 @@ const prepareSampleDocuments = async (
       );
     }
 
+    if (documents.length < input.sample_document_count) {
+      throw new Error(
+        `Stream ${input.stream_name} returned ${documents.length} documents; ` +
+          `sample_document_count is ${input.sample_document_count}. Re-run synthtrace seeding with higher rpm or a longer time window.`
+      );
+    }
+
     return documents;
   }
 

@@ -12,13 +12,13 @@ import type {
   ESQLAstAllCommands,
   ESQLAstCommand,
   ESQLCommandOption,
-  ESQLMessage,
   ESQLSource,
 } from '@elastic/esql/types';
 import { errors, getMessageFromId } from '../../definitions/utils/errors';
 import { validateCommandArguments } from '../../definitions/utils/validation';
 import type { ESQLPolicy, ICommandCallbacks, ICommandContext } from '../types';
 import { ENRICH_MODES } from './util';
+import type { ESQLMessage } from '../../definitions/types';
 
 export const validate = (
   command: ESQLAstAllCommands,

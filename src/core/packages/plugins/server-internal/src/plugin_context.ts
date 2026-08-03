@@ -315,6 +315,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
     security: {
       registerSecurityDelegate: (api) => deps.security.registerSecurityDelegate(api),
       fips: deps.security.fips,
+      acquireFakeRequestEnricher: () => deps.security.acquireFakeRequestEnricher(),
     },
     userProfile: {
       registerUserProfileDelegate: (delegate) =>
@@ -325,6 +326,9 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
     },
     dataStreams: {
       registerDataStream: (dataStream) => deps.dataStreams.registerDataStream(dataStream),
+    },
+    userStorage: {
+      register: deps.userStorage.register,
     },
   };
 }
@@ -380,6 +384,7 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>({
       auth: deps.http.auth,
       basePath: deps.http.basePath,
       getServerInfo: deps.http.getServerInfo,
+      selfClient: deps.http.selfClient,
       staticAssets: {
         prependPublicUrl: (pathname: string) => deps.http.staticAssets.prependPublicUrl(pathname),
         getPluginAssetHref: (assetPath: string) =>
@@ -428,6 +433,9 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>({
     },
     dataStreams: {
       initializeClient: (dataStream) => deps.dataStreams.initializeClient(dataStream),
+    },
+    userStorage: {
+      asScoped: deps.userStorage.asScoped,
     },
   };
 }

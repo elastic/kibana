@@ -37,41 +37,18 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
         application: {
           capabilities: {
             cloudConnect: { show: true, configure: true },
+            searchInferenceEndpoints: { show: true, manage: true },
           },
           navigateToApp: jest.fn(),
-        },
-        uiSettings: {
-          get: jest.fn(),
         },
       },
     })),
   };
 });
 
-const { useQueryInferenceEndpoints } = jest.requireMock('../hooks/use_inference_endpoints');
-const { useKibana } = jest.requireMock('@kbn/kibana-react-plugin/public');
+const mockUseKibana = jest.requireMock('@kbn/kibana-react-plugin/public').useKibana as jest.Mock;
 
-const setEisFeatureFlag = (enabled: boolean) => {
-  useKibana.mockReturnValue({
-    services: {
-      cloud: { isCloudEnabled: false },
-      application: {
-        capabilities: {
-          cloudConnect: { show: true, configure: true },
-        },
-        navigateToApp: jest.fn(),
-      },
-      uiSettings: {
-        get: jest.fn((key: string, defaultValue: boolean) => {
-          if (key === 'searchInferenceEndpoints:elasticInferenceServiceEnabled') {
-            return enabled;
-          }
-          return defaultValue;
-        }),
-      },
-    },
-  });
-};
+const { useQueryInferenceEndpoints } = jest.requireMock('../hooks/use_inference_endpoints');
 
 const mixedEndpoints: InferenceAPIConfigResponse[] = [
   {
@@ -134,88 +111,154 @@ describe('InferenceEndpoints', () => {
     jest.clearAllMocks();
   });
 
-  describe('with EIS feature flag disabled', () => {
-    beforeEach(() => {
-      setEisFeatureFlag(false);
+  it('shows loading spinner while data is loading', () => {
+    useQueryInferenceEndpoints.mockReturnValue({
+      data: undefined,
+      isLoading: true,
+      refetch: mockRefetch,
     });
 
-    it('renders all endpoints including elastic and preconfigured', () => {
-      useQueryInferenceEndpoints.mockReturnValue({
-        data: mixedEndpoints,
-        isLoading: false,
-        refetch: mockRefetch,
-      });
+    renderComponent();
 
-      renderComponent();
-
-      expect(screen.getByTestId('allInferenceEndpointsPage')).toBeInTheDocument();
-      expect(screen.queryByTestId('externalInferenceEmptyPrompt')).not.toBeInTheDocument();
-    });
-
-    it('shows loading spinner while data is loading', () => {
-      useQueryInferenceEndpoints.mockReturnValue({
-        data: undefined,
-        isLoading: true,
-        refetch: mockRefetch,
-      });
-
-      renderComponent();
-
-      expect(screen.getByTestId('inferenceEndpointsLoading')).toBeInTheDocument();
-      expect(screen.queryByTestId('externalInferenceEmptyPrompt')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('allInferenceEndpointsPage')).not.toBeInTheDocument();
-    });
-
-    it('does not show empty prompt when no endpoints exist', () => {
-      useQueryInferenceEndpoints.mockReturnValue({
-        data: [],
-        isLoading: false,
-        refetch: mockRefetch,
-      });
-
-      renderComponent();
-
-      expect(screen.getByTestId('allInferenceEndpointsPage')).toBeInTheDocument();
-      expect(screen.queryByTestId('externalInferenceEmptyPrompt')).not.toBeInTheDocument();
-    });
+    expect(screen.getByTestId('inferenceEndpointsLoading')).toBeInTheDocument();
+    expect(screen.queryByTestId('externalInferenceEmptyPrompt')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('allInferenceEndpointsPage')).not.toBeInTheDocument();
   });
 
-  describe('with EIS feature flag enabled', () => {
+  it('shows empty prompt when only elastic and preconfigured endpoints exist', () => {
+    useQueryInferenceEndpoints.mockReturnValue({
+      data: onlyElasticEndpoints,
+      isLoading: false,
+      refetch: mockRefetch,
+    });
+
+    renderComponent();
+
+    expect(screen.getByTestId('externalInferenceEmptyPrompt')).toBeInTheDocument();
+    expect(screen.getByText('Connect to external model providers')).toBeInTheDocument();
+    expect(screen.getByTestId('addEndpointButton')).toBeInTheDocument();
+    expect(screen.getByTestId('viewDocumentationLink')).toBeInTheDocument();
+    expect(screen.queryByTestId('allInferenceEndpointsPage')).not.toBeInTheDocument();
+  });
+
+  it('shows tabular view when third-party endpoints exist', () => {
+    useQueryInferenceEndpoints.mockReturnValue({
+      data: mixedEndpoints,
+      isLoading: false,
+      refetch: mockRefetch,
+    });
+
+    renderComponent();
+
+    expect(screen.getByTestId('externalInferenceHeader')).toBeInTheDocument();
+    expect(screen.queryByTestId('externalInferenceEmptyPrompt')).not.toBeInTheDocument();
+  });
+
+  it('filters out elastic service endpoints', () => {
+    useQueryInferenceEndpoints.mockReturnValue({
+      data: mixedEndpoints,
+      isLoading: false,
+      refetch: mockRefetch,
+    });
+
+    renderComponent();
+
+    expect(screen.queryByText('.rerank-v1-elastic')).not.toBeInTheDocument();
+  });
+
+  it('filters out preconfigured endpoints', () => {
+    useQueryInferenceEndpoints.mockReturnValue({
+      data: mixedEndpoints,
+      isLoading: false,
+      refetch: mockRefetch,
+    });
+
+    renderComponent();
+
+    expect(screen.queryByText('.elser-2-elasticsearch')).not.toBeInTheDocument();
+  });
+
+  it('keeps user-created third-party endpoints', () => {
+    useQueryInferenceEndpoints.mockReturnValue({
+      data: mixedEndpoints,
+      isLoading: false,
+      refetch: mockRefetch,
+    });
+
+    renderComponent();
+
+    expect(screen.getByText('my-openai-endpoint')).toBeInTheDocument();
+  });
+
+  it('filters out elasticsearch service endpoints', () => {
+    useQueryInferenceEndpoints.mockReturnValue({
+      data: mixedEndpoints,
+      isLoading: false,
+      refetch: mockRefetch,
+    });
+
+    renderComponent();
+
+    expect(screen.queryByText('user-elasticsearch-endpoint')).not.toBeInTheDocument();
+  });
+
+  it('renders clickable Add Endpoint button in empty prompt', () => {
+    useQueryInferenceEndpoints.mockReturnValue({
+      data: onlyElasticEndpoints,
+      isLoading: false,
+      refetch: mockRefetch,
+    });
+
+    renderComponent();
+
+    const addButton = screen.getByTestId('addEndpointButton');
+    expect(addButton).toBeInTheDocument();
+    expect(addButton).toBeEnabled();
+  });
+
+  it('shows External Inference as page title', () => {
+    useQueryInferenceEndpoints.mockReturnValue({
+      data: mixedEndpoints,
+      isLoading: false,
+      refetch: mockRefetch,
+    });
+
+    renderComponent();
+
+    expect(screen.getByText('External Inference')).toBeInTheDocument();
+  });
+
+  it('shows only API documentation link in header', () => {
+    useQueryInferenceEndpoints.mockReturnValue({
+      data: mixedEndpoints,
+      isLoading: false,
+      refetch: mockRefetch,
+    });
+
+    renderComponent();
+
+    expect(screen.queryByTestId('eis-documentation')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('view-your-models')).not.toBeInTheDocument();
+    expect(screen.getByTestId('api-documentation')).toBeInTheDocument();
+  });
+
+  describe('read-only mode (manage: false)', () => {
     beforeEach(() => {
-      setEisFeatureFlag(true);
-    });
-
-    it('shows loading spinner while data is loading', () => {
-      useQueryInferenceEndpoints.mockReturnValue({
-        data: undefined,
-        isLoading: true,
-        refetch: mockRefetch,
+      mockUseKibana.mockReturnValue({
+        services: {
+          cloud: { isCloudEnabled: false },
+          application: {
+            capabilities: {
+              cloudConnect: { show: true, configure: true },
+              searchInferenceEndpoints: { show: true, manage: false },
+            },
+            navigateToApp: jest.fn(),
+          },
+        },
       });
-
-      renderComponent();
-
-      expect(screen.getByTestId('inferenceEndpointsLoading')).toBeInTheDocument();
-      expect(screen.queryByTestId('externalInferenceEmptyPrompt')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('allInferenceEndpointsPage')).not.toBeInTheDocument();
     });
 
-    it('shows empty prompt when only elastic and preconfigured endpoints exist', () => {
-      useQueryInferenceEndpoints.mockReturnValue({
-        data: onlyElasticEndpoints,
-        isLoading: false,
-        refetch: mockRefetch,
-      });
-
-      renderComponent();
-
-      expect(screen.getByTestId('externalInferenceEmptyPrompt')).toBeInTheDocument();
-      expect(screen.getByText('Connect to external model providers')).toBeInTheDocument();
-      expect(screen.getByTestId('addEndpointButton')).toBeInTheDocument();
-      expect(screen.getByTestId('viewDocumentationLink')).toBeInTheDocument();
-      expect(screen.queryByTestId('allInferenceEndpointsPage')).not.toBeInTheDocument();
-    });
-
-    it('shows tabular view when third-party endpoints exist', () => {
+    it('hides the Add endpoint button in the header when third-party endpoints exist', () => {
       useQueryInferenceEndpoints.mockReturnValue({
         data: mixedEndpoints,
         isLoading: false,
@@ -224,59 +267,11 @@ describe('InferenceEndpoints', () => {
 
       renderComponent();
 
+      expect(screen.queryByTestId('add-inference-endpoint-header-button')).not.toBeInTheDocument();
       expect(screen.getByTestId('externalInferenceHeader')).toBeInTheDocument();
-      expect(screen.queryByTestId('externalInferenceEmptyPrompt')).not.toBeInTheDocument();
     });
 
-    it('filters out elastic service endpoints', () => {
-      useQueryInferenceEndpoints.mockReturnValue({
-        data: mixedEndpoints,
-        isLoading: false,
-        refetch: mockRefetch,
-      });
-
-      renderComponent();
-
-      expect(screen.queryByText('.rerank-v1-elastic')).not.toBeInTheDocument();
-    });
-
-    it('filters out preconfigured endpoints', () => {
-      useQueryInferenceEndpoints.mockReturnValue({
-        data: mixedEndpoints,
-        isLoading: false,
-        refetch: mockRefetch,
-      });
-
-      renderComponent();
-
-      expect(screen.queryByText('.elser-2-elasticsearch')).not.toBeInTheDocument();
-    });
-
-    it('keeps user-created third-party endpoints', () => {
-      useQueryInferenceEndpoints.mockReturnValue({
-        data: mixedEndpoints,
-        isLoading: false,
-        refetch: mockRefetch,
-      });
-
-      renderComponent();
-
-      expect(screen.getByText('my-openai-endpoint')).toBeInTheDocument();
-    });
-
-    it('filters out elasticsearch service endpoints', () => {
-      useQueryInferenceEndpoints.mockReturnValue({
-        data: mixedEndpoints,
-        isLoading: false,
-        refetch: mockRefetch,
-      });
-
-      renderComponent();
-
-      expect(screen.queryByText('user-elasticsearch-endpoint')).not.toBeInTheDocument();
-    });
-
-    it('renders clickable Add Endpoint button in empty prompt', () => {
+    it('hides the Add endpoint button in the empty prompt', () => {
       useQueryInferenceEndpoints.mockReturnValue({
         data: onlyElasticEndpoints,
         isLoading: false,
@@ -285,35 +280,9 @@ describe('InferenceEndpoints', () => {
 
       renderComponent();
 
-      const addButton = screen.getByTestId('addEndpointButton');
-      expect(addButton).toBeInTheDocument();
-      expect(addButton).toBeEnabled();
-    });
-
-    it('shows External Inference as page title', () => {
-      useQueryInferenceEndpoints.mockReturnValue({
-        data: mixedEndpoints,
-        isLoading: false,
-        refetch: mockRefetch,
-      });
-
-      renderComponent();
-
-      expect(screen.getByText('External Inference')).toBeInTheDocument();
-    });
-
-    it('hides EIS documentation and ML Trained Models links', () => {
-      useQueryInferenceEndpoints.mockReturnValue({
-        data: mixedEndpoints,
-        isLoading: false,
-        refetch: mockRefetch,
-      });
-
-      renderComponent();
-
-      expect(screen.queryByTestId('eis-documentation')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('view-your-models')).not.toBeInTheDocument();
-      expect(screen.getByTestId('api-documentation')).toBeInTheDocument();
+      expect(screen.queryByTestId('addEndpointButton')).not.toBeInTheDocument();
+      expect(screen.getByTestId('externalInferenceEmptyPrompt')).toBeInTheDocument();
+      expect(screen.getByTestId('viewDocumentationLink')).toBeInTheDocument();
     });
   });
 });

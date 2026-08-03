@@ -33,7 +33,7 @@ import type {
 } from '@kbn/rule-registry-plugin/server';
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { spaceIdToNamespace } from '@kbn/spaces-plugin/server/lib/utils/namespace';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import type { FilesStart } from '@kbn/files-plugin/server';
@@ -48,6 +48,7 @@ import {
   AttachmentService,
   AlertService,
   TemplatesService,
+  FieldDefinitionsService,
 } from '../services';
 
 import { AuthorizationAuditLogger } from '../authorization';
@@ -60,7 +61,14 @@ import type { CasesServices } from './types';
 import { LicensingService } from '../services/licensing';
 import { EmailNotificationService } from '../services/notifications/email_notification_service';
 import type { ConfigType } from '../config';
+import type { CasesEventBus } from '../events/event_bus';
 import { getSavedObjectsTypes } from '../../common';
+import type {
+  CasesActivityV2WriterContract,
+  CasesAnalyticsV2DataViewRefresher,
+  CasesAnalyticsV2WriterContract,
+  CasesAttachmentsV2WriterContract,
+} from '../cases_analytics_v2';
 
 interface CasesClientFactoryArgs {
   securityPluginSetup: SecurityPluginSetup;
@@ -80,11 +88,38 @@ interface CasesClientFactoryArgs {
   filesPluginStart: FilesStart;
   usageCounter?: IUsageCounter;
   config: ConfigType;
+  casesEventBus?: CasesEventBus;
   closeReasonValidator?: (
     closeReason: string,
     owner: string,
     request: KibanaRequest
   ) => Promise<boolean>;
+  /**
+   * Stable proxy returned by `CasesAnalyticsV2Service.getWriter()`. Always
+   * resolvable — when v2 is disabled, the proxy delegates to a no-op writer
+   * and SO-service hooks compile down to nothing.
+   */
+  analyticsV2Writer: CasesAnalyticsV2WriterContract;
+  /**
+   * Stable proxy returned by `CasesAnalyticsV2Service.getActivityWriter()`.
+   * Same lifetime + semantics as `analyticsV2Writer`; consumed by the
+   * user-actions SO service to mirror writes to `.cases-activity`.
+   */
+  analyticsV2ActivityWriter: CasesActivityV2WriterContract;
+  /**
+   * Stable proxy returned by `CasesAnalyticsV2Service.getAttachmentsWriter()`.
+   * Same lifetime + semantics as `analyticsV2Writer`; consumed by the
+   * AttachmentService for create / patch / delete mirrors and by the
+   * CasesService for cascade-on-case-delete.
+   */
+  analyticsV2AttachmentsWriter: CasesAttachmentsV2WriterContract;
+  /**
+   * Stable callback returned by `CasesAnalyticsV2Service.getDataViewRefresher()`.
+   * Always resolvable — when v2 is disabled, defaults to
+   * `V2_NOOP_DATA_VIEW_REFRESHER` so the templates service can call it
+   * unconditionally.
+   */
+  analyticsV2DataViewRefresher: CasesAnalyticsV2DataViewRefresher;
 }
 
 /**
@@ -162,6 +197,8 @@ export class CasesClientFactory {
 
     const userInfo = await this.getUserInfo(request);
 
+    const spaceId =
+      this.options.spacesPluginStart?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
     const fileService = this.options.filesPluginStart.fileServiceFactory.asScoped(request);
     const { closeReasonValidator } = this.options;
     const boundCloseReasonValidator = closeReasonValidator
@@ -181,12 +218,13 @@ export class CasesClientFactory {
       unifiedAttachmentTypeRegistry: this.options.unifiedAttachmentTypeRegistry,
       securityStartPlugin: this.options.securityPluginStart,
       publicBaseUrl: this.options.publicBaseUrl,
-      spaceId:
-        this.options.spacesPluginStart?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID,
+      spaceId,
       savedObjectsSerializer,
       fileService,
       usageCounter: this.options.usageCounter,
       config: this.options.config,
+      casesEventBus: this.options.casesEventBus,
+      request,
       closeReasonValidator: boundCloseReasonValidator,
     });
   }
@@ -218,26 +256,50 @@ export class CasesClientFactory {
 
     const attachmentService = new AttachmentService({
       log: this.logger,
-      persistableStateAttachmentTypeRegistry: this.options.persistableStateAttachmentTypeRegistry,
       unsecuredSavedObjectsClient,
       config: this.options.config,
+      analyticsV2AttachmentsWriter: this.options.analyticsV2AttachmentsWriter,
     });
 
     const spaceId =
       this.options.spacesPluginStart?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
     const namespace = spaceIdToNamespace(spaceId) ?? DEFAULT_NAMESPACE_STRING;
 
+    // Bound, parameterless callback handed to the templates service. The v2
+    // service handles the no-op-when-disabled case internally; the
+    // templates service only needs to fire-and-forget after every template
+    // mutation.
+    const refreshAnalyticsV2DataView = () =>
+      this.options.analyticsV2DataViewRefresher({
+        spaceId,
+        request,
+        savedObjectsClient: unsecuredSavedObjectsClient,
+      });
+
+    const fieldDefinitionsService = new FieldDefinitionsService({
+      unsecuredSavedObjectsClient,
+      refreshAnalyticsV2DataView,
+    });
+
     const templatesService = new TemplatesService({
       unsecuredSavedObjectsClient,
       savedObjectsSerializer,
       esClient,
       namespace,
+      refreshAnalyticsV2DataView,
+      getFieldDefinitionsForOwner: (owner) =>
+        fieldDefinitionsService
+          .getFieldDefinitions(owner)
+          .then(({ fieldDefinitions }) => fieldDefinitions),
     });
 
     const caseService = new CasesService({
       log: this.logger,
       unsecuredSavedObjectsClient,
       attachmentService,
+      analyticsV2Writer: this.options.analyticsV2Writer,
+      analyticsV2ActivityWriter: this.options.analyticsV2ActivityWriter,
+      analyticsV2AttachmentsWriter: this.options.analyticsV2AttachmentsWriter,
     });
 
     const licensingService = new LicensingService(
@@ -261,17 +323,17 @@ export class CasesClientFactory {
 
     return {
       templatesService,
+      fieldDefinitionsService,
       alertsService: new AlertService(esClient, this.logger, alertsClient),
       caseService,
       caseConfigureService: new CaseConfigureService(this.logger),
       connectorMappingsService: new ConnectorMappingsService(this.logger),
       userActionService: new CaseUserActionService({
         log: this.logger,
-        persistableStateAttachmentTypeRegistry: this.options.persistableStateAttachmentTypeRegistry,
         unsecuredSavedObjectsClient,
         savedObjectsSerializer,
         auditLogger,
-        isCasesAttachmentsEnabled: this.options.config.attachments?.enabled === true,
+        analyticsV2ActivityWriter: this.options.analyticsV2ActivityWriter,
       }),
       attachmentService,
       licensingService,

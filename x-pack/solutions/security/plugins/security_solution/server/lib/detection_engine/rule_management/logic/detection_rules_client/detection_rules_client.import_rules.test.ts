@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { userProfileServiceMock } from '@kbn/core-user-profile-server-mocks';
 import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
 import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
@@ -19,6 +20,7 @@ import { createRuleImportErrorObject } from '../import/errors';
 import { checkRuleExceptionReferences } from '../import/check_rule_exception_references';
 import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 import { createProductFeaturesServiceMock } from '../../../../product_features_service/mocks';
+import { getMockRulesAuthz } from '../../__mocks__/authz';
 
 jest.mock('./methods/import_rule');
 jest.mock('../import/check_rule_exception_references');
@@ -27,12 +29,15 @@ describe('detectionRulesClient.importRules', () => {
   let subject: ReturnType<typeof createDetectionRulesClient>;
   let ruleToImport: ReturnType<typeof getImportRulesSchemaMock>;
   let mockRuleSourceImporter: ReturnType<typeof ruleSourceImporterMock.create>;
+  const rulesAuthz = getMockRulesAuthz();
 
   beforeEach(() => {
     subject = createDetectionRulesClient({
       actionsClient: actionsClientMock.create(),
       rulesClient: rulesClientMock.create(),
+      userProfile: userProfileServiceMock.createStart(),
       mlAuthz: buildMlAuthz(),
+      rulesAuthz,
       savedObjectsClient: savedObjectsClientMock.create(),
       license: licenseMock.createLicenseMock(),
       productFeaturesService: createProductFeaturesServiceMock(),

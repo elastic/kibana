@@ -19,13 +19,13 @@ paths:
           required: true
           description: The integration identifier
           schema:
-            $ref: "../../../model/primitive.schema.yaml#/components/schemas/NonEmptyString"
+            $ref: "../../../model/primitive.schema.yaml#/components/schemas/SafeIdentifier"
         - name: data_stream_id
           in: path
           required: true
           description: The data stream identifier
           schema:
-            $ref: "../../../model/primitive.schema.yaml#/components/schemas/NonEmptyString"
+            $ref: "../../../model/primitive.schema.yaml#/components/schemas/SafeIdentifier"
       requestBody:
         required: true
         content:
@@ -93,13 +93,13 @@ paths:
           required: true
           description: The integration identifier
           schema:
-            $ref: "../../../model/primitive.schema.yaml#/components/schemas/NonEmptyString"
+            $ref: "../../../model/primitive.schema.yaml#/components/schemas/SafeIdentifier"
         - name: data_stream_id
           in: path
           required: true
           description: The data stream identifier
           schema:
-            $ref: "../../../model/primitive.schema.yaml#/components/schemas/NonEmptyString"
+            $ref: "../../../model/primitive.schema.yaml#/components/schemas/SafeIdentifier"
       responses:
         200:
           description: The data stream is deleted successfully.
@@ -123,13 +123,13 @@ paths:
           required: true
           description: The integration identifier
           schema:
-            $ref: "../../../model/primitive.schema.yaml#/components/schemas/NonEmptyString"
+            $ref: "../../../model/primitive.schema.yaml#/components/schemas/SafeIdentifier"
         - name: data_stream_id
           in: path
           required: true
           description: The data stream identifier
           schema:
-            $ref: "../../../model/primitive.schema.yaml#/components/schemas/NonEmptyString"
+            $ref: "../../../model/primitive.schema.yaml#/components/schemas/SafeIdentifier"
       requestBody:
         required: true
         content:
@@ -147,9 +147,11 @@ paths:
                     Log lines to upload when the source is a file (omit when using sourceIndex).
                   items:
                     type: string
+                    maxLength: 100000
                 sourceIndex:
                   type: string
                   minLength: 1
+                  maxLength: 100
                   description: Index name to pick samples from.
                 originalSource:
                   description: The original source of the samples (file name or index name)
@@ -189,13 +191,13 @@ paths:
           required: true
           description: The integration identifier
           schema:
-            $ref: "../../../model/primitive.schema.yaml#/components/schemas/NonEmptyString"
+            $ref: "../../../model/primitive.schema.yaml#/components/schemas/SafeIdentifier"
         - name: data_stream_id
           in: path
           required: true
           description: The data stream identifier
           schema:
-            $ref: "../../../model/primitive.schema.yaml#/components/schemas/NonEmptyString"
+            $ref: "../../../model/primitive.schema.yaml#/components/schemas/SafeIdentifier"
       responses:
         200:
           description: The data stream is stopped.
@@ -217,13 +219,13 @@ paths:
           required: true
           description: The integration identifier
           schema:
-            $ref: "../../../model/primitive.schema.yaml#/components/schemas/NonEmptyString"
+            $ref: "../../../model/primitive.schema.yaml#/components/schemas/SafeIdentifier"
         - name: data_stream_id
           in: path
           required: true
           description: The data stream identifier
           schema:
-            $ref: "../../../model/primitive.schema.yaml#/components/schemas/NonEmptyString"
+            $ref: "../../../model/primitive.schema.yaml#/components/schemas/SafeIdentifier"
       responses:
         200:
           description: The data stream results are returned successfully.
@@ -237,8 +239,8 @@ paths:
                   - results
                 properties:
                   ingest_pipeline:
-                    description: The ingest pipeline as a JSON string.
-                    $ref: "../../../model/primitive.schema.yaml#/components/schemas/NonEmptyString"
+                    description: The ingest pipeline as a JSON string up to 10MiB.
+                    $ref: "../../../model/primitive.schema.yaml#/components/schemas/NonEmptyIngestPipeline"
                   results:
                     description: Results array as JSON objects.
                     type: array
@@ -268,13 +270,13 @@ paths:
           required: true
           description: The integration identifier
           schema:
-            $ref: "../../../model/primitive.schema.yaml#/components/schemas/NonEmptyString"
+            $ref: "../../../model/primitive.schema.yaml#/components/schemas/SafeIdentifier"
         - name: data_stream_id
           in: path
           required: true
           description: The data stream identifier
           schema:
-            $ref: "../../../model/primitive.schema.yaml#/components/schemas/NonEmptyString"
+            $ref: "../../../model/primitive.schema.yaml#/components/schemas/SafeIdentifier"
       requestBody:
         required: true
         additionalProperties: false

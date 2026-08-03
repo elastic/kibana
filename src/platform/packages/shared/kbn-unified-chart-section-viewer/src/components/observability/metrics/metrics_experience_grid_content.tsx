@@ -18,7 +18,7 @@ import {
   useEuiTheme,
   type EuiFlexGridProps,
 } from '@elastic/eui';
-import type { ParsedMetricItem, UnifiedMetricsGridProps } from '../../../types';
+import type { Dimension, ParsedMetricItem, UnifiedMetricsGridProps } from '../../../types';
 import { getEsqlQuery } from './utils/get_esql_query';
 import { PAGE_SIZE } from '../../../common/constants';
 import { isLegacyHistogram } from '../../../common/utils/legacy_histogram';
@@ -30,6 +30,7 @@ import { MetricsGridLoadingProgress } from '../../empty_state/empty_state';
 import { useMetricsExperienceState } from './context/metrics_experience_state_provider';
 import { firstNonNullable } from '../../../common/utils';
 import { extractWhereCommand } from '../../../utils/extract_where_command';
+import { getDuplicateMetricNames } from './utils/get_duplicate_metric_names';
 
 export interface MetricsExperienceGridContentProps
   extends Pick<
@@ -38,11 +39,14 @@ export interface MetricsExperienceGridContentProps
   > {
   discoverFetch$: UnifiedMetricsGridProps['fetch$'];
   metricItems: ParsedMetricItem[];
+  activeDimensions: Dimension[];
   isDiscoverLoading?: boolean;
+  isTabSelected: boolean;
 }
 
 export const MetricsExperienceGridContent = ({
   metricItems,
+  activeDimensions,
   services,
   discoverFetch$,
   fetchParams,
@@ -51,6 +55,7 @@ export const MetricsExperienceGridContent = ({
   actions,
   histogramCss,
   isDiscoverLoading = false,
+  isTabSelected,
 }: MetricsExperienceGridContentProps) => {
   const { query } = fetchParams;
   const euiThemeContext = useEuiTheme();
@@ -60,7 +65,7 @@ export const MetricsExperienceGridContent = ({
 
   const whereStatements = useMemo(() => extractWhereCommand(esqlQuery), [esqlQuery]);
 
-  const { searchTerm, currentPage, selectedDimensions, onPageChange } = useMetricsExperienceState();
+  const { searchTerm, currentPage, onPageChange } = useMetricsExperienceState();
 
   const {
     currentPageItems: currentPageFields = [],
@@ -86,6 +91,20 @@ export const MetricsExperienceGridContent = ({
         ? LEGACY_HISTOGRAM_USER_MESSAGES
         : undefined,
     []
+  );
+
+  const duplicateMetricNames = useMemo(() => getDuplicateMetricNames(metricItems), [metricItems]);
+
+  const getDescription = useCallback(
+    (metricItem: ParsedMetricItem) =>
+      duplicateMetricNames.has(metricItem.metricName)
+        ? i18n.translate('metricsExperience.grid.duplicateMetricIndexDescription', {
+            defaultMessage:
+              'This metric exists in multiple data streams. This chart shows data from {indexName} only.',
+            values: { indexName: metricItem.indexName },
+          })
+        : undefined,
+    [duplicateMetricNames]
   );
 
   return (
@@ -117,7 +136,7 @@ export const MetricsExperienceGridContent = ({
         {isDiscoverLoading && <MetricsGridLoadingProgress />}
         <MetricsGrid
           columns={columns}
-          dimensions={selectedDimensions}
+          dimensions={activeDimensions}
           services={services}
           metricItems={currentPageFields}
           onBrushEnd={onBrushEnd}
@@ -128,6 +147,8 @@ export const MetricsExperienceGridContent = ({
           searchTerm={searchTerm}
           whereStatements={whereStatements}
           getUserMessages={getUserMessages}
+          getDescription={getDescription}
+          isTabSelected={isTabSelected}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>

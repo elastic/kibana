@@ -188,7 +188,7 @@ export const SavedElementsModal: FunctionComponent<Props> = ({
 
   let customElementContent = (
     <EuiEmptyPrompt
-      iconType="vector"
+      iconType="vectorSquare"
       title={<h2>{strings.getAddNewElementTitle()}</h2>}
       body={<p>{strings.getAddNewElementDescription()}</p>}
       titleSize="s"
@@ -215,6 +215,7 @@ export const SavedElementsModal: FunctionComponent<Props> = ({
         maxWidth="1000px"
         initialFocus=".canvasElements__filter input"
         aria-labelledby={modalTitleId}
+        data-test-subj="saved-elements-modal"
       >
         <EuiModalHeader className="canvasAssetManager__modalHeader">
           <EuiModalHeaderTitle id={modalTitleId} className="canvasAssetManager__modalHeaderTitle">

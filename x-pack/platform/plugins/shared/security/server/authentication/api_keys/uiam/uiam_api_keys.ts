@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
+
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { HTTPAuthorizationHeader, isUiamCredential } from '@kbn/core-security-server';
 import type {
@@ -134,6 +136,10 @@ export class UiamAPIKeys implements UiamAPIKeysType {
       const errorMessage = `Failed to invalidate API key ${id}: ${getDetailedErrorMessage(e)}`;
       this.logger.error(errorMessage);
 
+      const code = Boom.isBoom(e)
+        ? (e.output.payload as Record<string, any>)?.error?.code
+        : undefined;
+
       return {
         invalidated_api_keys: [],
         previously_invalidated_api_keys: [],
@@ -142,6 +148,7 @@ export class UiamAPIKeys implements UiamAPIKeysType {
           {
             type: 'exception',
             reason: errorMessage,
+            ...(code ? { code } : {}),
           },
         ],
       };
@@ -167,6 +174,14 @@ export class UiamAPIKeys implements UiamAPIKeysType {
       this.logger.error(`Failed to convert API keys: ${getDetailedErrorMessage(e)}`);
       throw e;
     }
+  }
+
+  /**
+   * Returns the header(s) trusted loopback callers stamp on real requests carrying an internal
+   * UIAM (`essu_`) credential (see {@link UiamAPIKeysType.getInternalCallerAttestationHeaders}).
+   */
+  getInternalCallerAttestationHeaders(credential: HTTPAuthorizationHeader) {
+    return this.uiam.getInternalCallerAttestationHeaders(credential);
   }
 
   /**

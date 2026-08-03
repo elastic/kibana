@@ -437,6 +437,8 @@ export class SentinelOneDataGenerator extends EndpointActionGenerator {
    * integration into `logs-sentinel_one.agent-`
    */
   generateAgentEsDoc(overrides: DeepPartial<SentinelOneAgentEsDoc> = {}): SentinelOneAgentEsDoc {
+    const agentId = overrides?.sentinel_one?.agent?.agent?.id ?? 's1-agent-1';
+
     return merge(
       {
         agent: {
@@ -447,8 +449,14 @@ export class SentinelOneDataGenerator extends EndpointActionGenerator {
         sentinel_one: {
           agent: {
             agent: {
-              id: 's1-agent-1',
+              id: agentId,
             },
+            uuid: agentId,
+            network_status: 'connected',
+            last_active_date: '2023-06-15T12:00:00Z',
+            is_active: true,
+            is_pending_uninstall: false,
+            is_uninstalled: false,
           },
         },
       },
@@ -459,10 +467,22 @@ export class SentinelOneDataGenerator extends EndpointActionGenerator {
   generateAgentEsSearchHit(
     overrides: DeepPartial<SentinelOneAgentEsDoc> = {}
   ): SearchHit<SentinelOneAgentEsDoc> {
-    return this.toEsSearchHit(
-      this.generateAgentEsDoc(overrides),
+    const doc = this.generateAgentEsDoc(overrides);
+    const hit = this.toEsSearchHit(
+      doc,
       buildIndexNameWithNamespace(SENTINEL_ONE_AGENT_INDEX_PATTERN, 'default')
     );
+
+    hit.fields = { 'sentinel_one.agent.agent.id': [doc.sentinel_one.agent.agent.id] };
+    hit.inner_hits = {
+      most_recent: {
+        hits: {
+          hits: [this.toEsSearchHit(doc, hit._index)],
+        },
+      },
+    };
+
+    return hit;
   }
 
   generateAgentEsSearchResponse(

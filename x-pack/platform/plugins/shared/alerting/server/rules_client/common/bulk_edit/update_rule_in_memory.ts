@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import { omit } from 'lodash';
 import type { SavedObjectsBulkUpdateObject, SavedObjectsFindResult } from '@kbn/core/server';
 import {
+  authorizeRuleTypeParams,
   getRuleNotifyWhenType,
   validateMutatedRuleTypeParams,
   validateRuleTypeParams,
@@ -16,6 +18,7 @@ import {
   injectReferencesIntoActions,
   injectReferencesIntoArtifacts,
   addMissingUiamKeyTagIfNeeded,
+  API_KEY_ATTRIBUTES_TO_STRIP,
 } from '..';
 import { createNewAPIKeySet, extractReferences, updateMeta } from '../../lib';
 import type {
@@ -151,6 +154,10 @@ export async function updateRuleInMemory<Params extends RuleParams>(
     rule.attributes.params,
     ruleType.validate.params
   );
+  await authorizeRuleTypeParams(validatedMutatedAlertTypeParams, ruleType.authorize?.params, {
+    request: context.request,
+    previousParams: rule.attributes.params,
+  });
 
   const {
     references,
@@ -216,6 +223,7 @@ async function prepareApiKeys(
     username,
     shouldUpdateApiKey: attributes.enabled || hasUpdateApiKeyOperation,
     errorMessage: 'Error updating rule: could not create API key',
+    apiKeyOwnership: { apiKeyCreatedByUser: rule.attributes.apiKeyCreatedByUser },
   });
 
   // collect generated API keys
@@ -267,10 +275,13 @@ async function updateAttributes({
   );
 
   // TODO (http-versioning) Remove casts when updateMeta has been converted
-  const castedAttributes = attributes;
   const updatedAttributes = updateMeta(context, {
-    ...castedAttributes,
-    ...(apiKeyAttributes ? { ...apiKeyAttributes } : {}),
+    ...(apiKeyAttributes
+      ? {
+          ...omit(attributes, [...API_KEY_ATTRIBUTES_TO_STRIP]),
+          ...apiKeyAttributes,
+        }
+      : attributes),
     tags: tagsWithUiamCheck,
     params: updatedParams,
     actions: rawAlertActions,

@@ -7,8 +7,6 @@
 
 import { useMemo } from 'react';
 
-import { RiskEngineStatusEnum } from '../../../common/api/entity_analytics/risk_engine/engine_status_route.gen';
-import type { RiskEngineStatus } from '../../../common/api/entity_analytics/risk_engine/engine_status_route.gen';
 import type { StoreStatus } from '../../../common/api/entity_analytics';
 
 export type EntityAnalyticsStatus =
@@ -20,79 +18,50 @@ export type EntityAnalyticsStatus =
   | 'error';
 
 interface UseEntityAnalyticsStatusParams {
-  riskEngineStatus?: RiskEngineStatus | null;
   entityStoreStatus?: StoreStatus;
-  isEntityStoreFeatureFlagDisabled: boolean;
   isMutationLoading?: boolean;
 }
 
+const isStoreInstalled = (status?: StoreStatus): boolean => !!status && status !== 'not_installed';
+
+const deriveEntityStoreOnlyStatus = (entityStoreStatus?: StoreStatus): EntityAnalyticsStatus => {
+  if (!isStoreInstalled(entityStoreStatus)) {
+    return 'not_installed';
+  }
+  if (entityStoreStatus === 'error') {
+    return 'error';
+  }
+  return entityStoreStatus === 'running' ? 'enabled' : 'disabled';
+};
+
 export const deriveEntityAnalyticsStatus = ({
-  riskEngineStatus,
   entityStoreStatus,
-  isEntityStoreFeatureFlagDisabled,
   isMutationLoading,
 }: UseEntityAnalyticsStatusParams): EntityAnalyticsStatus => {
   if (isMutationLoading) {
     return 'enabling';
   }
 
-  if (isEntityStoreFeatureFlagDisabled) {
-    if (!riskEngineStatus || riskEngineStatus === RiskEngineStatusEnum.NOT_INSTALLED) {
-      return 'not_installed';
-    }
-    return riskEngineStatus === RiskEngineStatusEnum.ENABLED ? 'enabled' : 'disabled';
-  }
-
   if (entityStoreStatus === 'installing') {
     return 'enabling';
   }
-
   if (entityStoreStatus === 'error') {
     return 'error';
   }
-
-  const riskOff =
-    !riskEngineStatus ||
-    riskEngineStatus === RiskEngineStatusEnum.NOT_INSTALLED ||
-    riskEngineStatus === RiskEngineStatusEnum.DISABLED;
-  const storeOff =
-    !entityStoreStatus || entityStoreStatus === 'not_installed' || entityStoreStatus === 'stopped';
-
-  const riskOn = riskEngineStatus === RiskEngineStatusEnum.ENABLED;
-  const storeOn = entityStoreStatus === 'running';
-
-  if (riskOn && storeOn) {
-    return 'enabled';
-  }
-
-  if (riskOff && storeOff) {
-    const neitherInstalled =
-      (!riskEngineStatus || riskEngineStatus === RiskEngineStatusEnum.NOT_INSTALLED) &&
-      (!entityStoreStatus || entityStoreStatus === 'not_installed');
-    return neitherInstalled ? 'not_installed' : 'disabled';
-  }
-
-  return 'partially_enabled';
+  return deriveEntityStoreOnlyStatus(entityStoreStatus);
 };
 
 export const useEntityAnalyticsStatus = (
   params: UseEntityAnalyticsStatusParams
 ): EntityAnalyticsStatus => {
-  const {
-    riskEngineStatus,
-    entityStoreStatus,
-    isEntityStoreFeatureFlagDisabled,
-    isMutationLoading,
-  } = params;
+  const { entityStoreStatus, isMutationLoading } = params;
 
   return useMemo(
     () =>
       deriveEntityAnalyticsStatus({
-        riskEngineStatus,
         entityStoreStatus,
-        isEntityStoreFeatureFlagDisabled,
         isMutationLoading,
       }),
-    [riskEngineStatus, entityStoreStatus, isEntityStoreFeatureFlagDisabled, isMutationLoading]
+    [entityStoreStatus, isMutationLoading]
   );
 };

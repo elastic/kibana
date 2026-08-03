@@ -26,7 +26,7 @@ describe('Suggestion Ordering', () => {
 
       const metadataIndex = suggestions.findIndex((s) => s.text === 'METADATA ');
 
-      expect(metadataIndex).toBe(2);
+      expect(metadataIndex).toBe(3);
     });
   });
 
@@ -58,6 +58,21 @@ describe('Suggestion Ordering', () => {
       const hasFunctions = suggestions.some((s) => s.kind === 'Function');
 
       expect(hasFunctions).toBe(true);
+    });
+  });
+
+  describe('FUSE command', () => {
+    it('should start with next actions before the rest of the fuse suggestions', async () => {
+      const { suggest } = await setup();
+      const suggestions = await suggest('FROM a | FUSE /');
+      const orderedTexts = suggestions.map((s) => s.text);
+
+      expect(orderedTexts[0]).toBe('WITH { $0 }');
+      expect(orderedTexts[1]).toBe('\n');
+      expect(orderedTexts[2]).toBe('| ');
+      expect(orderedTexts[3]).toBe('linear ');
+      expect(orderedTexts[4]).toBe('rrf ');
+      expect(orderedTexts.indexOf('SCORE BY ')).toBeGreaterThan(4);
     });
   });
 });

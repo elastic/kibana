@@ -12,6 +12,7 @@ export enum SecurityPageName {
   alerts = 'alerts',
   attacks = 'attacks',
   aiValue = 'ai_value',
+  artifacts = 'artifacts',
   assetInventory = 'asset_inventory',
   attackDiscovery = 'attack_discovery',
   blocklist = 'blocklist',
@@ -58,6 +59,7 @@ export enum SecurityPageName {
   hostsUncommonProcesses = 'hosts-uncommon_processes',
   kubernetes = 'kubernetes',
   landing = 'get_started',
+  launchpad = 'launchpad',
   network = 'network',
   networkAnomalies = 'network-anomalies',
   networkDns = 'network-dns',
@@ -71,6 +73,7 @@ export enum SecurityPageName {
   responseActionsHistory = 'response_actions_history',
   rules = 'rules',
   rulesAdd = 'rules-add',
+  rulesChangesHistory = 'rules-changes-history',
   rulesCreate = 'rules-create',
   rulesLanding = 'rules-landing',
   rulesManagement = 'rules-management',
@@ -79,6 +82,7 @@ export enum SecurityPageName {
   siemMigrationsLanding = 'siem_migrations',
   siemMigrationsRules = 'siem_migrations-rules',
   siemMigrationsDashboards = 'siem_migrations-dashboards',
+  siemMigrationsManage = 'siem_migrations-manage',
   /*
    * Warning: Computed values are not permitted in an enum with string valued members
    * All threat intelligence page names must match `TIPageId` in x-pack/solutions/security/plugins/threat_intelligence/public/common/navigation/types.ts
@@ -104,6 +108,7 @@ export enum SecurityPageName {
   coverageOverview = 'coverage-overview',
   notes = 'notes',
   alertSummary = 'alert_summary',
+  alertAnalysisWorkflow = 'alert_analysis_workflow',
   configurations = 'configurations',
   configurationsIntegrations = 'configurations-integrations',
   configurationsAiSettings = 'configurations-ai_settings',
@@ -114,4 +119,16 @@ export enum SecurityPageName {
    */
   spaceRulesHealth = 'space-rules-health',
   ruleHealth = 'rule-health',
+
+  /**
+   * external links
+   */
+  externalLinkAgentBuilder = 'external_link-agent_builder',
+  externalLinkDiscover = 'external_link-discover',
+  externalLinkWorkflows = 'external_link-workflows',
+
+  /**
+   * Ingest Hub Onboarding
+   */
+  onboarding = 'onboarding',
 }

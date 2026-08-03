@@ -55,12 +55,9 @@ export const legacyCreatePrepackagedRules = async (
     await exceptionsListClient.createEndpointList();
   }
 
-  const latestPrebuiltRules = await ensureLatestRulesPackageInstalled(
-    ruleAssetsClient,
-    context,
-    logger
-  );
+  await ensureLatestRulesPackageInstalled(ruleAssetsClient, context, logger);
 
+  const latestPrebuiltRules = await ruleAssetsClient.fetchLatestAssets();
   const installedPrebuiltRules = rulesToMap(
     await getExistingPrepackagedRules({ rulesClient, logger })
   );
@@ -75,9 +72,15 @@ export const legacyCreatePrepackagedRules = async (
     mlAuthz
   );
 
+  const installChangeTracking = {
+    metadata: {
+      bulkCount: rulesToInstall.length,
+    },
+  };
   const ruleCreationResult = await createPrebuiltRules(
     detectionRulesClient,
     rulesToInstall,
+    installChangeTracking,
     logger
   );
 
@@ -87,7 +90,12 @@ export const legacyCreatePrepackagedRules = async (
 
   const { result: timelinesResult } = await performTimelinesInstallation(context);
 
-  await upgradePrebuiltRules(detectionRulesClient, rulesToUpdate, logger);
+  const upgradeChangeTracking = {
+    metadata: {
+      bulkCount: rulesToUpdate.length,
+    },
+  };
+  await upgradePrebuiltRules(detectionRulesClient, rulesToUpdate, upgradeChangeTracking, logger);
 
   return {
     rules_installed: rulesToInstall.length,

@@ -1,0 +1,185 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type { LayoutConfigType } from '../layout';
+
+/**
+ * TLS / mTLS options for the OTLP log appender.
+ *
+ * Values may be **filesystem paths** to PEM files (recommended for production) or **inline PEM strings**
+ * (strings containing `-----BEGIN`).
+ *
+ * Maps to Node.js TLS options for `http` / `proto` (via `https.Agent`) and to `grpc.credentials.createSsl`
+ * for `grpc`.
+ *
+ * @public
+ */
+export interface OtelAppenderTlsConfig {
+  /**
+   * PEM-encoded certificate authority bundle(s) used to verify the OTLP endpoint.
+   * Use a single string, or an array when multiple CA files are required.
+   */
+  certificateAuthorities?: string | string[];
+  /** Client certificate for mutual TLS (requires {@link OtelAppenderTlsConfig.key}). */
+  certificate?: string;
+  /** Private key for the client certificate (requires {@link OtelAppenderTlsConfig.certificate}). */
+  key?: string;
+  /** Passphrase for {@link OtelAppenderTlsConfig.key} when the key is encrypted. */
+  keyPassphrase?: string;
+  /**
+   * How strictly to verify the server certificate (aligned with Elasticsearch client semantics).
+   * Defaults to `full`.
+   */
+  verificationMode: 'none' | 'certificate' | 'full';
+  /**
+   * Whether to allow partial trust chain verification.
+   * Defaults to `true`.
+   */
+  allowPartialTrustChain?: boolean;
+}
+
+/**
+ * Configuration of an OpenTelemetry (OTLP) log appender.
+ * Ships log records to an OTLP-compatible endpoint over HTTP.
+ *
+ * @example
+ * ```yaml
+ * logging:
+ *   appenders:
+ *     otel:
+ *       type: otel
+ *       url: https://collector:4318/v1/logs
+ *       headers:
+ *         Authorization: "ApiKey <base64>"
+ *       # layout defaults to pattern - body.text is aliased to the ECS `message` field
+ * ```
+ * @public
+ */
+export interface OtelAppenderConfig {
+  /** Discriminator for this appender type. */
+  type: 'otel';
+  /**
+   * The protocol to use for the OTLP exporter.
+   * Defaults to `proto`.
+   */
+  protocol: 'http' | 'proto' | 'grpc';
+  /** OTLP HTTP endpoint URL, e.g. https://collector:4318/v1/logs */
+  url: string;
+  /**
+   * Optional HTTP headers sent with every request, e.g. for authentication.
+   * Defaults to an empty object.
+   */
+  headers?: Record<string, string>;
+  /**
+   * Controls how the log record body is serialised.
+   *
+   * - `pattern` (**default**): the message is formatted to a human-readable string
+   *   and indexed as `body.text` in Elastic. Elastic's ingest aliases `body.text`
+   *   to the ECS `message` field, so records are visible in Logs Explorer.
+   *   When no explicit `pattern` string is provided, the appender uses
+   *   `%message %error` - level, timestamp, and logger name are omitted because
+   *   they are already captured as dedicated top-level OTLP fields.
+   *   Meta fields are included as a `log.meta` attribute.
+   *
+   * - `json`: the full `LogRecord` is sent as a structured object and indexed as
+   *   `body.structured`. **Note**: the ECS `message` field will be empty in Logs
+   *   Explorer because it aliases `body.text`, which JSON layout does not populate.
+   *   Use this only when the consuming backend natively handles `body.structured`.
+   *   Meta fields are part of the body (not repeated in attributes).
+   */
+  layout?: LayoutConfigType;
+  /**
+   * Additional resource attributes merged on top of the auto-detected host,
+   * process, OS and service attributes. Can be used to override defaults such
+   * as `service.name`. Because Kibana expands dotted YAML keys into nested
+   * objects, wrap dotted attribute names in `[brackets]`:
+   * `"[service.name]": my-kibana`
+   *
+   * These attributes are merged into the resource; when {@link OtelAppenderConfig.includeResources}
+   * narrows the resource, they supply the values for the included keys (e.g. `service.name`).
+   */
+  attributes?: Record<string, string>;
+  /**
+   * Allowlist of resource-attribute keys to include in the OTLP resource. Defaults to `['*']`
+   * (include every auto-detected and configured attribute — the standard OTel resource).
+   *
+   * When set to an explicit list (anything not containing `'*'`), the resource is filtered to
+   * only those keys. Filtering is applied to the fully-resolved resource (auto-detected host/OS/
+   * process/env attributes plus {@link OtelAppenderConfig.attributes}), so
+   * `['service.name', 'service.type']` ships a deliberately minimal resource with the
+   * cloud/k8s/process/host fields excluded.
+   *
+   * An explicit allowlist fully governs the resource: a listed key is kept even if
+   * {@link OtelAppenderConfig.fieldDrops} also names it (`fieldDrops` still removes that key from
+   * the per-record attributes). `fieldDrops` only shapes the resource in the default `['*']` case.
+   */
+  includeResources?: string[];
+  /**
+   * Resource-attribute keys to also emit as per-record log attributes. Each value is captured once
+   * (at appender construction) from the resolved resource — before {@link OtelAppenderConfig.includeResources}
+   * narrows it — and added to every log record's attributes. Use when a value that arrives as a
+   * resource attribute (e.g. `project.id`, promoted from an APM global label) belongs per-record;
+   * pair with `includeResources` to keep it out of the resource and only on records. Only
+   * synchronously-resolved values are promoted; async-detected ones (e.g. `host.id`) are skipped.
+   */
+  promoteResourceAttributes?: string[];
+  /**
+   * Optional TLS settings for HTTPS/gRPC to the OTLP endpoint, including mutual TLS (client certificates).
+   */
+  ssl?: OtelAppenderTlsConfig;
+  /**
+   * Optional map of source attribute paths to target attribute path(s) applied after meta fields are
+   * flattened into OTel attributes. Use this to rename or fan-out fields without changing the
+   * upstream `AuditEvent` / `LogRecord` shape.
+   *
+   * - Single target: `{ 'kibana.space_id': 'kibana.space.id' }` — rename in place.
+   * - Multiple targets: `{ 'client.ip': ['source.address', 'source.ip'] }` — copy value to all
+   *   listed keys and remove the original.
+   *
+   * Keys absent from the log record are silently skipped. With JSON layout, meta-sourced keys
+   * (e.g. `kibana.*`, `client.ip`) are part of the structured body and not repeated as individual
+   * attributes, so renames targeting those fields have no effect under that layout.
+   */
+  fieldRenames?: Record<string, string | string[]>;
+  /**
+   * Optional list of attribute keys to remove from the OTLP output. Always applied to the per-record
+   * log attributes. Also applied to the resource attributes **only** when
+   * {@link OtelAppenderConfig.includeResources} is `['*']` (the default) — an explicit
+   * `includeResources` allowlist takes precedence for the resource. Keys absent from the output are
+   * silently skipped. Injected programmatically (e.g. by the audit service to satisfy Serverless
+   * field exclusions).
+   */
+  fieldDrops?: string[];
+  /**
+   * Optional default attribute values written only when the key is not already present in the log
+   * record attributes. Applied after `fieldRenames`, `fieldAdditions`, and `fieldDrops`. Use to fill
+   * in fields that are absent from some event types (e.g. `event.type` on authentication events).
+   * Values may be a string or an array of strings.
+   */
+  fieldDefaults?: Record<string, string | string[]>;
+  /**
+   * Optional list of attribute keys whose string values should be uppercased at emit time.
+   * Applied after all other field transforms. Use for fields where OTel semantic conventions
+   * require uppercase but the upstream event carries lowercase (e.g. `http.request.method`).
+   * Non-string values and absent keys are silently skipped.
+   */
+  fieldUppercase?: string[];
+  /**
+   * Optional map of target attribute key → template string used to add derived attributes at emit
+   * time. Templates reference other flattened attributes with `{field.path}` placeholders, resolved
+   * from the current record attributes. Applied after `fieldRenames` and before `fieldDrops`, so a
+   * template may reference fields that are subsequently dropped (e.g. build `url.original` from
+   * `url.scheme`/`url.domain`/`url.path`, then drop those components).
+   *
+   * Templates may only reference scalar fields. The addition is skipped when any referenced field is
+   * missing/nullish/empty or array/object-valued, so events that do not carry the source fields (e.g.
+   * non-http events) don't receive a degenerate value, and array attributes aren't silently joined.
+   */
+  fieldAdditions?: Record<string, string>;
+}

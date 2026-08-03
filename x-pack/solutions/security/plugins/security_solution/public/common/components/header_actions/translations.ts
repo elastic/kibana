@@ -62,7 +62,7 @@ export const SEND_ALERT_TO_TIMELINE_FOR_ROW = ({
 }) =>
   i18n.translate('xpack.securitySolution.hoverActions.sendAlertToTimelineForRowAriaLabel', {
     values: { ariaRowindex, columnValues },
-    defaultMessage: 'Send the alert in row {ariaRowindex} to timeline, with columns {columnValues}',
+    defaultMessage: 'Send the alert in row {ariaRowindex} to Timeline, with columns {columnValues}',
   });
 
 export const ADD_NOTES_FOR_ROW = ({
@@ -75,7 +75,7 @@ export const ADD_NOTES_FOR_ROW = ({
   i18n.translate('xpack.securitySolution.hoverActions.addNotesForRowAriaLabel', {
     values: { ariaRowindex, columnValues },
     defaultMessage:
-      'Add notes for the event in row {ariaRowindex} to timeline, with columns {columnValues}',
+      'Add notes for the event in row {ariaRowindex} to Timeline, with columns {columnValues}',
   });
 
 export const MORE_ACTIONS_FOR_ROW = ({
@@ -102,7 +102,7 @@ export const PIN_EVENT_FOR_ROW = ({
 }) =>
   i18n.translate('xpack.securitySolution.hoverActions.pinEventForRowAriaLabel', {
     defaultMessage:
-      '{isPinned, select, true {Unpin} other {Pin} } the event in row {ariaRowindex} to timeline, with columns {columnValues}',
+      '{isPinned, select, true {Unpin} other {Pin} } the event in row {ariaRowindex} to Timeline, with columns {columnValues}',
     values: { ariaRowindex, columnValues, isPinned },
   });
 
@@ -122,7 +122,7 @@ export const DISABLE_PIN = (isAlert: boolean) =>
   i18n.translate('xpack.securitySolution.timeline.body.pinning.disablePinnnedTooltip', {
     values: { isAlert },
     defaultMessage:
-      'This {isAlert, select, true{alert} other{event}} may not be pinned while editing a template timeline',
+      'This {isAlert, select, true{alert} other{event}} may not be pinned while editing a template Timeline',
   });
 
 export const PINNED_WITH_NOTES = (isAlert: boolean) =>

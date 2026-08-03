@@ -32,7 +32,17 @@ exports[`should not render fields-editor when there is no layername 1`] = `
       </span>
     }
     max={24}
+    maxInputProps={
+      Object {
+        "aria-label": "Available levels maximum zoom",
+      }
+    }
     min={0}
+    minInputProps={
+      Object {
+        "aria-label": "Available levels minimum zoom",
+      }
+    }
     onChange={[Function]}
     prepend="Zoom"
     showInput="inputWithPopover"
@@ -79,7 +89,17 @@ exports[`should render with fields 1`] = `
       </span>
     }
     max={24}
+    maxInputProps={
+      Object {
+        "aria-label": "Available levels maximum zoom",
+      }
+    }
     min={0}
+    minInputProps={
+      Object {
+        "aria-label": "Available levels minimum zoom",
+      }
+    }
     onChange={[Function]}
     prepend="Zoom"
     showInput="inputWithPopover"
@@ -156,7 +176,17 @@ exports[`should render without fields 1`] = `
       </span>
     }
     max={24}
+    maxInputProps={
+      Object {
+        "aria-label": "Available levels maximum zoom",
+      }
+    }
     min={0}
+    minInputProps={
+      Object {
+        "aria-label": "Available levels minimum zoom",
+      }
+    }
     onChange={[Function]}
     prepend="Zoom"
     showInput="inputWithPopover"

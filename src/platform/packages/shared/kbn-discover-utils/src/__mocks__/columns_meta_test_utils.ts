@@ -109,23 +109,23 @@ export const columnsMetaWithCustomField: DataTableColumnsMeta = {
 };
 
 /**
- * Creates a spy on formatFieldValue that returns 'formatted'.
+ * Creates a spy on formatFieldValueReact that returns 'formatted'.
  * Remember to call mockRestore() in afterEach.
  */
-export const createFormatFieldValueSpy = () => {
-  return jest.spyOn(formatValueModule, 'formatFieldValue').mockReturnValue('formatted');
+export const createFormatFieldValueReactSpy = () => {
+  return jest.spyOn(formatValueModule, 'formatFieldValueReact').mockReturnValue('formatted');
 };
 
 /**
- * Finds a call to formatFieldValue for a specific field name.
- * The field is passed as the 5th argument (index 4) to formatFieldValue.
+ * Finds a call to formatFieldValueReact for a specific field name.
+ * The field is passed as part of the object parameter.
  */
 export const findFieldCallInSpy = (spy: jest.SpyInstance, fieldName: string) => {
-  return spy.mock.calls.find((call) => call[4]?.name === fieldName);
+  return spy.mock.calls.find((call) => call[0]?.field?.name === fieldName);
 };
 
 /**
- * Asserts that formatFieldValue was called with a field matching the expected properties.
+ * Asserts that formatFieldValueReact was called with a field matching the expected properties.
  */
 export const expectFieldCallToMatch = (
   spy: jest.SpyInstance,
@@ -135,7 +135,7 @@ export const expectFieldCallToMatch = (
 ) => {
   const fieldCall = findFieldCallInSpy(spy, fieldName);
   expect(fieldCall).toBeDefined();
-  expect(fieldCall![4]).toMatchObject({
+  expect(fieldCall![0].field).toMatchObject({
     name: fieldName,
     type: expectedType,
     ...(expectedEsTypes && { esTypes: expectedEsTypes }),

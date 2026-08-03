@@ -47,7 +47,10 @@ export class WorkflowExecutionPage {
    * @param status - The execution status to wait for ('completed' or 'failed')
    * @param timeout - The timeout in milliseconds
    */
-  async waitForExecutionStatus(status: 'completed' | 'failed', timeout: number) {
+  async waitForExecutionStatus(
+    status: 'completed' | 'failed' | 'running' | 'cancelled',
+    timeout: number
+  ) {
     await this.waitForExecutionView();
     const withStatus = (s: string) =>
       this.executionPanel.and(this.page.locator(`[data-execution-status="${s}"]`));

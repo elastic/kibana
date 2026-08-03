@@ -1,0 +1,21 @@
+openapi: 3.0.0
+info:
+  title: response_only_no_flag
+  version: '1'
+paths:
+  /api/test:
+    get:
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Body'
+components:
+  schemas:
+    Body:
+      type: object
+      properties:
+        a:
+          type: string

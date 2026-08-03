@@ -1,0 +1,10 @@
+# summary:
+description: An example of a successful response from `GET /api/apm/settings/agent-configuration/environments`.
+value:
+  environments:
+    - name: "production"
+      alreadyConfigured: true
+    - name: "development"
+      alreadyConfigured: false
+    - name: "ALL_OPTION_VALUE"
+      alreadyConfigured: false

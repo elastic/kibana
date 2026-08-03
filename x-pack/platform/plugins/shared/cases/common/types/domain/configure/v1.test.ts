@@ -8,6 +8,15 @@
 import { PathReporter } from 'io-ts/lib/PathReporter';
 import { CaseSeverity } from '../case/v1';
 import { ConnectorTypes } from '../connector/v1';
+import {
+  ConfigurationAttributesSchema,
+  ConfigurationSchema,
+  CustomFieldConfigurationWithoutTypeSchema,
+  TemplateConfigurationSchema,
+  TextCustomFieldConfigurationSchema,
+  ToggleCustomFieldConfigurationSchema,
+  NumberCustomFieldConfigurationSchema,
+} from '../../domain_zod/configure/v1';
 import { CustomFieldTypes } from '../custom_field/v1';
 import {
   ConfigurationAttributesRt,
@@ -168,6 +177,18 @@ describe('configure', () => {
         },
       });
     });
+
+    it('zod: has expected attributes in request', () => {
+      const result = ConfigurationAttributesSchema.safeParse(defaultRequest);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
+    });
+
+    it('zod: strips unknown fields', () => {
+      const result = ConfigurationAttributesSchema.safeParse({ ...defaultRequest, foo: 'bar' });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
+    });
   });
 
   describe('ConfigurationRt', () => {
@@ -232,6 +253,18 @@ describe('configure', () => {
         right: defaultRequest,
       });
     });
+
+    it('zod: has expected attributes in request', () => {
+      const result = ConfigurationSchema.safeParse(defaultRequest);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
+    });
+
+    it('zod: strips unknown fields', () => {
+      const result = ConfigurationSchema.safeParse({ ...defaultRequest, foo: 'bar' });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
+    });
   });
 
   describe('CustomFieldConfigurationWithoutTypeRt', () => {
@@ -257,6 +290,21 @@ describe('configure', () => {
         _tag: 'Right',
         right: { ...defaultRequest },
       });
+    });
+
+    it('zod: has expected attributes in request', () => {
+      const result = CustomFieldConfigurationWithoutTypeSchema.safeParse(defaultRequest);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
+    });
+
+    it('zod: strips unknown fields', () => {
+      const result = CustomFieldConfigurationWithoutTypeSchema.safeParse({
+        ...defaultRequest,
+        foo: 'bar',
+      });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
   });
 
@@ -314,6 +362,44 @@ describe('configure', () => {
         right: { ...defaultRequest },
       });
     });
+
+    it('zod: has expected attributes with required: false', () => {
+      const result = TextCustomFieldConfigurationSchema.safeParse(defaultRequest);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
+    });
+
+    it('zod: has expected attributes with defaultValue', () => {
+      const result = TextCustomFieldConfigurationSchema.safeParse({
+        ...defaultRequest,
+        required: true,
+        defaultValue: 'foobar',
+      });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual({
+        ...defaultRequest,
+        required: true,
+        defaultValue: 'foobar',
+      });
+    });
+
+    it('zod: fails if defaultValue is not string', () => {
+      const result = TextCustomFieldConfigurationSchema.safeParse({
+        ...defaultRequest,
+        required: true,
+        defaultValue: false,
+      });
+      expect(result.success).toBe(false);
+    });
+
+    it('zod: strips unknown fields', () => {
+      const result = TextCustomFieldConfigurationSchema.safeParse({
+        ...defaultRequest,
+        foo: 'bar',
+      });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
+    });
   });
 
   describe('ToggleCustomFieldConfigurationRt', () => {
@@ -370,6 +456,40 @@ describe('configure', () => {
         right: { ...defaultRequest },
       });
     });
+
+    it('zod: has expected attributes with required: false', () => {
+      const result = ToggleCustomFieldConfigurationSchema.safeParse(defaultRequest);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
+    });
+
+    it('zod: has expected attributes with defaultValue', () => {
+      const result = ToggleCustomFieldConfigurationSchema.safeParse({
+        ...defaultRequest,
+        required: true,
+        defaultValue: false,
+      });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual({ ...defaultRequest, required: true, defaultValue: false });
+    });
+
+    it('zod: fails if defaultValue is not boolean', () => {
+      const result = ToggleCustomFieldConfigurationSchema.safeParse({
+        ...defaultRequest,
+        required: true,
+        defaultValue: 'foobar',
+      });
+      expect(result.success).toBe(false);
+    });
+
+    it('zod: strips unknown fields', () => {
+      const result = ToggleCustomFieldConfigurationSchema.safeParse({
+        ...defaultRequest,
+        foo: 'bar',
+      });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
+    });
   });
 
   describe('NumberCustomFieldConfigurationRt', () => {
@@ -425,6 +545,40 @@ describe('configure', () => {
         _tag: 'Right',
         right: { ...defaultRequest },
       });
+    });
+
+    it('zod: has expected attributes with required: false', () => {
+      const result = NumberCustomFieldConfigurationSchema.safeParse(defaultRequest);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
+    });
+
+    it('zod: has expected attributes with defaultValue', () => {
+      const result = NumberCustomFieldConfigurationSchema.safeParse({
+        ...defaultRequest,
+        required: true,
+        defaultValue: 0,
+      });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual({ ...defaultRequest, required: true, defaultValue: 0 });
+    });
+
+    it('zod: fails if defaultValue is not number', () => {
+      const result = NumberCustomFieldConfigurationSchema.safeParse({
+        ...defaultRequest,
+        required: true,
+        defaultValue: 'foobar',
+      });
+      expect(result.success).toBe(false);
+    });
+
+    it('zod: strips unknown fields', () => {
+      const result = NumberCustomFieldConfigurationSchema.safeParse({
+        ...defaultRequest,
+        foo: 'bar',
+      });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
   });
 
@@ -492,6 +646,30 @@ describe('configure', () => {
         _tag: 'Right',
         right: { ...defaultRequest, caseFields: {} },
       });
+    });
+
+    it('zod: has expected attributes in request', () => {
+      const result = TemplateConfigurationSchema.safeParse(defaultRequest);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
+    });
+
+    it('zod: strips unknown fields', () => {
+      const result = TemplateConfigurationSchema.safeParse({
+        ...defaultRequest,
+        foo: 'bar',
+      });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
+    });
+
+    it('zod: accepts null for caseFields', () => {
+      const result = TemplateConfigurationSchema.safeParse({
+        ...defaultRequest,
+        caseFields: null,
+      });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual({ ...defaultRequest, caseFields: null });
     });
   });
 });

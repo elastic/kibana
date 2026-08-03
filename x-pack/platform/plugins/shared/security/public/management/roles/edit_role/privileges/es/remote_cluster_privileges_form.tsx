@@ -15,6 +15,7 @@ import {
   EuiFormRow,
   EuiPanel,
   EuiSpacer,
+  EuiToolTip,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { Fragment, useCallback } from 'react';
@@ -165,16 +166,24 @@ export const RemoteClusterPrivilegesForm: React.FunctionComponent<Props> = ({
         </EuiFlexItem>
         {!isRoleReadOnly && (
           <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              aria-label={i18n.translate(
+            <EuiToolTip
+              content={i18n.translate(
                 'xpack.security.management.editRole.remoteClusterPrivilegeForm.deleteRemoteClusterPrivilegeAriaLabel',
                 { defaultMessage: 'Delete remote cluster privilege' }
               )}
-              color="danger"
-              onClick={onDelete}
-              iconType="trash"
-              data-test-subj={`deleteRemoteClusterPrivilegesButton${formIndex}`}
-            />
+              disableScreenReaderOutput
+            >
+              <EuiButtonIcon
+                aria-label={i18n.translate(
+                  'xpack.security.management.editRole.remoteClusterPrivilegeForm.deleteRemoteClusterPrivilegeAriaLabel',
+                  { defaultMessage: 'Delete remote cluster privilege' }
+                )}
+                color="danger"
+                onClick={onDelete}
+                iconType="trash"
+                data-test-subj={`deleteRemoteClusterPrivilegesButton${formIndex}`}
+              />
+            </EuiToolTip>
           </EuiFlexItem>
         )}
       </EuiFlexGroup>

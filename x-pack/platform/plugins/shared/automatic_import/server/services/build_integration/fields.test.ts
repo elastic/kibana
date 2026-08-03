@@ -268,6 +268,91 @@ describe('fields', () => {
       expect(fieldNames).not.toContain('__proto__.bad');
     });
 
+    it('uses agent field mappings to override inferred types for non-ECS fields', async () => {
+      const docs = [
+        {
+          my_app: {
+            created_at: '2024-01-15T10:30:00.000Z',
+            updated_at: '2024-01-16T12:00:00.000Z',
+            name: 'test',
+            count: 5,
+          },
+        },
+      ];
+      const agentFieldMappings = [
+        { name: 'my_app.created_at', type: 'date' as const },
+        { name: 'my_app.updated_at', type: 'date' as const },
+        { name: 'my_app.name', type: 'keyword' as const },
+      ];
+      const fields = await generateFieldMappings(docs, fieldsMetadataClient, agentFieldMappings);
+
+      expect(fields).toContainEqual({
+        name: 'my_app.created_at',
+        type: 'date',
+        is_ecs: false,
+      });
+      expect(fields).toContainEqual({
+        name: 'my_app.updated_at',
+        type: 'date',
+        is_ecs: false,
+      });
+      expect(fields).toContainEqual({
+        name: 'my_app.name',
+        type: 'keyword',
+        is_ecs: false,
+      });
+      expect(fields).toContainEqual({
+        name: 'my_app.count',
+        type: 'long',
+        is_ecs: false,
+      });
+    });
+
+    it('ECS types take precedence over agent field mappings', async () => {
+      const docs = [
+        {
+          '@timestamp': '2024-01-01T00:00:00.000Z',
+          source: { ip: '10.0.0.1' },
+        },
+      ];
+      const agentFieldMappings = [
+        { name: '@timestamp', type: 'keyword' as const },
+        { name: 'source.ip', type: 'keyword' as const },
+      ];
+      const fields = await generateFieldMappings(docs, fieldsMetadataClient, agentFieldMappings);
+
+      expect(fields).toContainEqual({ name: '@timestamp', type: 'date', is_ecs: true });
+      expect(fields).toContainEqual({ name: 'source.ip', type: 'ip', is_ecs: true });
+    });
+
+    it('falls back to inferred type when agent field mappings are not provided', async () => {
+      const docs = [
+        {
+          my_app: {
+            timestamp: '2024-01-01T00:00:00.000Z',
+          },
+        },
+      ];
+      const fields = await generateFieldMappings(docs, fieldsMetadataClient);
+
+      expect(fields).toContainEqual({
+        name: 'my_app.timestamp',
+        type: 'keyword',
+        is_ecs: false,
+      });
+    });
+
+    it('handles empty agent field mappings array', async () => {
+      const docs = [{ my_app: { value: 'test' } }];
+      const fields = await generateFieldMappings(docs, fieldsMetadataClient, []);
+
+      expect(fields).toContainEqual({
+        name: 'my_app.value',
+        type: 'keyword',
+        is_ecs: false,
+      });
+    });
+
     it('produces correct types for a realistic pipeline output', async () => {
       const docs = [
         {

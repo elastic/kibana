@@ -8,7 +8,14 @@
  */
 import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonIcon, EuiPopover, EuiPopoverTitle, EuiSwitch } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiPopover,
+  EuiPopoverTitle,
+  EuiSwitch,
+  EuiToolTip,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 
 interface LastValueModePopoverProps {
@@ -21,23 +28,32 @@ export const LastValueModePopover = ({
   toggleIndicatorDisplay,
 }: LastValueModePopoverProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const popoverTitleId = useGeneratedHtmlId();
   const onButtonClick = useCallback(() => setIsPopoverOpen((isOpen) => !isOpen), []);
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
 
   return (
     <EuiPopover
+      aria-labelledby={popoverTitleId}
       className="tvbLastValueModePopover"
       css={css`
         height: auto;
       `}
       button={
-        <EuiButtonIcon
-          iconType={'gear'}
-          onClick={onButtonClick}
-          aria-label={i18n.translate('visTypeTimeseries.lastValueModePopover.gearButton', {
+        <EuiToolTip
+          content={i18n.translate('visTypeTimeseries.lastValueModePopover.gearButton', {
             defaultMessage: 'Change last value indicator display option',
           })}
-        />
+          disableScreenReaderOutput
+        >
+          <EuiButtonIcon
+            iconType={'gear'}
+            onClick={onButtonClick}
+            aria-label={i18n.translate('visTypeTimeseries.lastValueModePopover.gearButton', {
+              defaultMessage: 'Change last value indicator display option',
+            })}
+          />
+        </EuiToolTip>
       }
       isOpen={isPopoverOpen}
       closePopover={closePopover}
@@ -48,7 +64,7 @@ export const LastValueModePopover = ({
           width: 360px;
         `}
       >
-        <EuiPopoverTitle>
+        <EuiPopoverTitle id={popoverTitleId}>
           {i18n.translate('visTypeTimeseries.lastValueModePopover.title', {
             defaultMessage: 'Last value options',
           })}

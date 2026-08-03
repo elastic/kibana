@@ -9,13 +9,20 @@ import React from 'react';
 import { EuiIcon, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
-interface SidebarLinkProps {
+type SidebarLinkProps = {
   label: string;
   href: string;
   onClick: (e: React.MouseEvent<HTMLAnchorElement>) => void;
-}
+  hideIcon?: boolean;
+} & Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, 'href' | 'onClick'>;
 
-export const SidebarLink: React.FC<SidebarLinkProps> = ({ label, href, onClick }) => {
+export const SidebarLink: React.FC<SidebarLinkProps> = ({
+  label,
+  href,
+  onClick,
+  hideIcon = false,
+  ...rest
+}) => {
   const { euiTheme } = useEuiTheme();
 
   const wrapperStyles = css`
@@ -48,16 +55,18 @@ export const SidebarLink: React.FC<SidebarLinkProps> = ({ label, href, onClick }
 
   return (
     <div css={wrapperStyles}>
-      <a href={href} onClick={onClick} css={linkStyles}>
+      <a href={href} onClick={onClick} css={linkStyles} {...rest}>
         <EuiText size="s">{label}</EuiText>
-        <EuiIcon
-          type="arrowRight"
-          size="s"
-          aria-hidden={true}
-          css={css`
-            color: ${euiTheme.colors.textDisabled};
-          `}
-        />
+        {!hideIcon && (
+          <EuiIcon
+            type="arrowRight"
+            size="s"
+            aria-hidden={true}
+            css={css`
+              color: ${euiTheme.colors.textDisabled};
+            `}
+          />
+        )}
       </a>
     </div>
   );

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, within } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { DataStreamsTable } from './data_steams_table';
 import type { DataStreamResponse } from '../../../../../../common';
@@ -36,8 +36,10 @@ const mockDeleteDataStreamMutation = {
 };
 
 const mockReanalyzeMutate = jest.fn();
+const mockReanalyzeMutateAsync = jest.fn().mockResolvedValue(undefined);
 const mockReanalyzeDataStreamMutation = {
   mutate: mockReanalyzeMutate,
+  mutateAsync: mockReanalyzeMutateAsync,
   isLoading: false,
   variables: undefined as
     | { dataStreamId: string; integrationId: string; connectorId: string }
@@ -266,7 +268,7 @@ describe('DataStreamsTable', () => {
       renderWithProvider(<DataStreamsTable {...defaultProps} items={items} />);
 
       const deleteButton = screen.getByTestId('deleteDataStreamButton');
-      expect(deleteButton).toBeDisabled();
+      expect(deleteButton).toHaveAttribute('aria-disabled', 'true');
     });
 
     it('should pass isDeleting to Status when server status is deleting', () => {
@@ -283,7 +285,7 @@ describe('DataStreamsTable', () => {
       renderWithProvider(<DataStreamsTable {...defaultProps} items={items} />);
 
       const deleteButton = screen.getByTestId('deleteDataStreamButton');
-      expect(deleteButton).toBeDisabled();
+      expect(deleteButton).toHaveAttribute('aria-disabled', 'true');
     });
 
     it('should disable refresh button when server status is deleting', () => {
@@ -292,7 +294,7 @@ describe('DataStreamsTable', () => {
       renderWithProvider(<DataStreamsTable {...defaultProps} items={items} />);
 
       const refreshButton = screen.getByTestId('refreshDataStreamButton');
-      expect(refreshButton).toBeDisabled();
+      expect(refreshButton).toHaveAttribute('aria-disabled', 'true');
     });
 
     it('should disable expand button when server status is deleting', () => {
@@ -301,7 +303,7 @@ describe('DataStreamsTable', () => {
       renderWithProvider(<DataStreamsTable {...defaultProps} items={items} />);
 
       const expandButton = screen.getByTestId('expandDataStreamButton');
-      expect(expandButton).toBeDisabled();
+      expect(expandButton).toHaveAttribute('aria-disabled', 'true');
     });
   });
 
@@ -345,10 +347,12 @@ describe('DataStreamsTable', () => {
       const confirmButton = screen.getByRole('button', { name: /Re-Analyze/i });
       await userEvent.click(confirmButton);
 
-      expect(mockReanalyzeMutate).toHaveBeenCalledWith({
-        integrationId: 'integration-123',
-        dataStreamId: 'ds-1',
-        connectorId: 'test-connector-id',
+      await waitFor(() => {
+        expect(mockReanalyzeMutateAsync).toHaveBeenCalledWith({
+          integrationId: 'integration-123',
+          dataStreamId: 'ds-1',
+          connectorId: 'test-connector-id',
+        });
       });
     });
 
@@ -363,7 +367,7 @@ describe('DataStreamsTable', () => {
       renderWithProvider(<DataStreamsTable {...defaultProps} />);
 
       const refreshButton = screen.getByTestId('refreshDataStreamButton');
-      expect(refreshButton).toBeDisabled();
+      expect(refreshButton).toHaveAttribute('aria-disabled', 'true');
     });
 
     it('should not disable refresh button for other items when reanalyze is in progress', () => {
@@ -388,7 +392,7 @@ describe('DataStreamsTable', () => {
       renderWithProvider(<DataStreamsTable {...defaultProps} items={items} />);
 
       const expandButton = screen.getByTestId('expandDataStreamButton');
-      expect(expandButton).toBeDisabled();
+      expect(expandButton).toHaveAttribute('aria-disabled', 'true');
     });
 
     it('should enable expand button for completed data streams', () => {
@@ -406,7 +410,7 @@ describe('DataStreamsTable', () => {
       renderWithProvider(<DataStreamsTable {...defaultProps} items={items} />);
 
       const refreshButton = screen.getByTestId('refreshDataStreamButton');
-      expect(refreshButton).toBeDisabled();
+      expect(refreshButton).toHaveAttribute('aria-disabled', 'true');
     });
 
     it('should enable refresh button for completed data streams', () => {

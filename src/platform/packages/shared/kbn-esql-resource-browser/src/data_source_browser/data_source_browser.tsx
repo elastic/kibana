@@ -25,7 +25,7 @@ import type { CoreStart } from '@kbn/core/public';
 import type { ESQLSourceResult } from '@kbn/esql-types';
 import type { ILicense } from '@kbn/licensing-types';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { getESQLSources, getTimeseriesIndices } from '@kbn/esql-utils';
+import { getDatasets, getESQLSources, getTimeseriesIndices } from '@kbn/esql-utils';
 import { BrowserPopoverWrapper } from '../browser_popover_wrapper';
 import { getSourceTypeKey, getSourceTypeLabel } from './utils';
 import { DATA_SOURCE_BROWSER_I18N_KEYS } from './i18n';
@@ -38,7 +38,10 @@ const FILTER_PANEL_MAX_HEIGHT = 250; // Maximum height in pixels for the filter 
 
 interface DataSourceBrowserKibanaServices {
   core: Pick<CoreStart, 'application' | 'http'>;
-  esql?: { getLicense?: () => Promise<ILicense | undefined> };
+  esql?: {
+    getLicense?: () => Promise<ILicense | undefined>;
+    enrichSources?: (sources: ESQLSourceResult[]) => Promise<ESQLSourceResult[]>;
+  };
 }
 
 interface DataSourceBrowserProps {
@@ -51,6 +54,7 @@ interface DataSourceBrowserProps {
   preloadedSources?: ESQLSourceResult[];
   selectedSources?: string[];
   onClose: () => void;
+  onCloseComplete?: () => void;
   onSelect: (sourceName: string, change: DataSourceSelectionChange) => void;
   position?: { top?: number; left?: number };
 }
@@ -61,6 +65,7 @@ export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
   preloadedSources,
   selectedSources = [],
   onClose,
+  onCloseComplete,
   onSelect,
   position,
 }) => {
@@ -68,20 +73,24 @@ export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
   const { core } = kibana.services;
   const { http, application } = core;
   const getLicense = kibana.services?.esql?.getLicense;
+  const enrichSources = kibana.services?.esql?.enrichSources;
 
   const getTimeseriesIndicesCallback = useCallback(async () => {
     return await getTimeseriesIndices(http);
   }, [http]);
 
   const getSourcesCallback = useCallback(async () => {
-    return await getESQLSources({ http, application }, getLicense);
-  }, [application, getLicense, http]);
+    return await getESQLSources({ http, application }, getLicense, enrichSources);
+  }, [application, enrichSources, getLicense, http]);
+
+  const getDatasetsCallback = useCallback(() => getDatasets(http), [http]);
 
   const { allSources, isLoading } = useAllSources({
     isOpen,
     preloadedSources,
     getSources: getSourcesCallback,
     getTimeseriesIndices: getTimeseriesIndicesCallback,
+    getDatasets: getDatasetsCallback,
     isTimeseries,
   });
   const { euiTheme } = useEuiTheme();
@@ -280,7 +289,7 @@ export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
                   </EuiFlexItem>
                 )}
                 <EuiFlexItem grow={false}>
-                  <EuiIcon type="chevronSingleRight" />
+                  <EuiIcon type="chevronSingleRight" aria-hidden={true} />
                 </EuiFlexItem>
               </EuiFlexGroup>
             ) : (
@@ -303,7 +312,7 @@ export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
   const filterPanel = isIntegrationPopoverOpen ? (
     <>
       <EuiPopoverTitle paddingSize="s" onClick={() => setIsIntegrationPopoverOpen(false)}>
-        <EuiIcon type="chevronSingleLeft" />
+        <EuiIcon type="chevronSingleLeft" aria-hidden={true} />
         <EuiLink
           color="text"
           css={css`
@@ -344,6 +353,7 @@ export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
         }
         listProps={{
           bordered: false, // Doesn't work so we overwrite the border style with filterListStyles
+          paddingSize: 's',
         }}
       >
         {(list) => (
@@ -369,6 +379,7 @@ export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
       filterPanel={filterPanel}
       isOpen={isOpen}
       onClose={onClose}
+      onCloseComplete={onCloseComplete}
       onSelect={handleSelectionChange}
       isFilterOpen={isFilterPopoverOpen}
       setIsFilterOpen={setIsFilterPopoverOpen}
@@ -378,6 +389,7 @@ export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
       isLoading={isLoading}
       searchValue={searchValue}
       setSearchValue={setSearchValue}
+      dataTestSubj="esqlDataSourceBrowser"
     />
   );
 };

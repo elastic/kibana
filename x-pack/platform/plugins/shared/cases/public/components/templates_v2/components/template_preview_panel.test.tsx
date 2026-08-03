@@ -30,6 +30,13 @@ describe('TemplatePreviewPanel', () => {
     sourceFileName: 'test.yaml',
     documentIndex: 0,
     existsOnServer: false,
+    caseDefaults: {
+      title: 'Case default title',
+      description: 'Case default description',
+      tags: ['case-tag'],
+      severity: 'high',
+      category: 'Security',
+    },
     definition: {
       fields: [
         { name: 'field1', control: 'INPUT_TEXT', type: 'keyword' },
@@ -120,7 +127,7 @@ describe('TemplatePreviewPanel', () => {
     expect(TemplateFieldRenderer).toHaveBeenCalledWith(
       expect.objectContaining({
         parsedTemplate: expect.objectContaining({
-          name: 'Test Template',
+          name: 'Case default title',
           fields: expect.any(Array),
         }),
       }),

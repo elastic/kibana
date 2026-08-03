@@ -527,14 +527,14 @@ const createThresholdTimeline = async (
       toastMessage: i18n.translate(
         'xpack.securitySolution.detectionEngine.alerts.createThresholdTimelineFailure',
         {
-          defaultMessage: 'Failed to create timeline for document _id: {id}',
+          defaultMessage: 'Failed to create Timeline for document _id: {id}',
           values: { id: ecsData._id },
         }
       ),
       title: i18n.translate(
         'xpack.securitySolution.detectionEngine.alerts.createThresholdTimelineFailureTitle',
         {
-          defaultMessage: 'Failed to create threshold alert timeline',
+          defaultMessage: 'Failed to create threshold alert Timeline',
         }
       ),
     });
@@ -682,14 +682,14 @@ const createNewTermsTimeline = async (
       toastMessage: i18n.translate(
         'xpack.securitySolution.detectionEngine.alerts.createNewTermsTimelineFailure',
         {
-          defaultMessage: 'Failed to create timeline for document _id: {id}',
+          defaultMessage: 'Failed to create Timeline for document _id: {id}',
           values: { id: ecsData._id },
         }
       ),
       title: i18n.translate(
         'xpack.securitySolution.detectionEngine.alerts.createNewTermsTimelineFailureTitle',
         {
-          defaultMessage: 'Failed to create new terms alert timeline',
+          defaultMessage: 'Failed to create new terms alert Timeline',
         }
       ),
     });
@@ -811,7 +811,7 @@ const createSuppressedTimeline = async (
     const indexNames = getField(alertDoc, ALERT_RULE_INDICES) ?? alertDoc.signal?.rule?.index ?? [];
 
     const { from, to, dataProviders } = getSuppressedAlertData(alertDoc);
-    const exceptionsFilter = await getExceptionFilter(ecsData);
+    const exceptionsFilter = await getExceptionFilter(alertDoc);
 
     const allFilters = (templateValues.filters ?? augmentedFilters).concat(
       !exceptionsFilter ? [] : [exceptionsFilter]
@@ -853,14 +853,14 @@ const createSuppressedTimeline = async (
       toastMessage: i18n.translate(
         'xpack.securitySolution.detectionEngine.alerts.createSuppressedTimelineFailure',
         {
-          defaultMessage: 'Failed to create timeline for document _id: {id}',
+          defaultMessage: 'Failed to create Timeline for document _id: {id}',
           values: { id: ecsData._id },
         }
       ),
       title: i18n.translate(
         'xpack.securitySolution.detectionEngine.alerts.createSuppressedTimelineFailureTitle',
         {
-          defaultMessage: 'Failed to create suppressed alert timeline',
+          defaultMessage: 'Failed to create suppressed alert Timeline',
         }
       ),
     });

@@ -9,8 +9,8 @@
 
 import YAML from 'yaml';
 import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
+import { parseWorkflowYamlForAutocomplete } from '@kbn/workflows-yaml';
 import { validateWorkflowOutputsInYaml } from './validate_workflow_outputs_in_yaml';
-import { parseWorkflowYamlForAutocomplete } from '../../../../common/lib/yaml';
 import { createFakeMonacoModel } from '../../../../common/mocks/monaco_model';
 
 describe('validateWorkflowOutputsInYaml', () => {

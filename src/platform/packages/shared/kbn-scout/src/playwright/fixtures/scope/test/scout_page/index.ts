@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { EuiComboBoxObject, ObjectScope } from '@elastic/eui-test-helpers';
 import type { Page } from '@playwright/test';
 import type { RunA11yScanOptions } from '../../../../utils';
 import type { PathOptions } from '../../../../../common/services/kibana_url';
@@ -27,12 +28,6 @@ export type ScoutPage = Page & {
    * @returns A Promise resolving to a Playwright `Response` or `null`.
    */
   gotoApp: (appName: string, pathOptions?: PathOptions) => ReturnType<Page['goto']>;
-  /**
-   * Waits for the Kibana loading spinner indicator to disappear.
-   * @deprecated This method is flaky on CI. We strongly recommend waiting for specific elements instead: page.testSubj.waitForSelector('table-is-ready', { state: 'visible' })
-   * @returns A Promise resolving when the indicator is hidden.
-   */
-  waitForLoadingIndicatorHidden: () => ReturnType<Page['waitForSelector']>;
   /**
    * Presses a key until the element with the css selector is in focus. If multiple elements match it will
    * press the key until the first occurrence of the element is focused.
@@ -138,6 +133,21 @@ export type ScoutPage = Page & {
      * @returns A Promise that resolves once the drag operation is complete.
      */
     dragTo: (sourceSelector: string, targetSelector: string) => Promise<void>;
+  };
+
+  /**
+   * Factory accessors for EUI Component Objects from `@elastic/eui-test-helpers`,
+   * pre-bound to this page. By default a Component Object is scoped to the whole
+   * page; pass an optional `scope` (a `Locator` or another Component Object) to
+   * target an instance inside a specific subtree — e.g. one combo box in a flyout
+   * when several share the same `data-test-subj`.
+   *
+   * @example
+   * await page.components.comboBox('dataViewSelector').setSelectedOptions(['logs-*']);
+   * await page.components.comboBox('roleComboBox', flyout).clear();
+   */
+  components: {
+    comboBox: (testSubj: string, scope?: ObjectScope) => EuiComboBoxObject;
   };
 };
 

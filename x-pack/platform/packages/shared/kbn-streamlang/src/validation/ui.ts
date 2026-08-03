@@ -46,6 +46,12 @@ const violatesConditionDepth = (
         return true;
       }
     }
+
+    if (condition.else && condition.else.length > 0) {
+      if (violatesConditionDepth(condition.else, newDepth)) {
+        return true;
+      }
+    }
   }
 
   return false;

@@ -11,8 +11,15 @@ import type {
   SavedObject,
   SavedObjectsClientContract,
   SavedObjectReference,
+  SecurityServiceStart,
 } from '@kbn/core/server';
+import { isSavedObjectErrorResult } from '@kbn/core-saved-objects-server';
 import type { SetOptional } from 'type-fest';
+import type {
+  AggregationsFilterAggregate,
+  AggregationsStringTermsAggregate,
+  AggregationsStringTermsBucket,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { WatchlistObject } from '../../../../../common/api/entity_analytics/watchlists/management/common.gen';
 import type { MonitoringEntitySource } from '../../../../../common/api/entity_analytics/watchlists/data_source/common.gen';
 import { validateWatchlistUpdate } from './validation';
@@ -21,19 +28,36 @@ import { generateWatchlistEntityIndexMappings } from '../entities/mappings';
 import { watchlistConfigTypeName } from './saved_object/watchlist_config_type';
 import { createOrUpdateIndex } from '../../utils/create_or_update_index';
 import { watchlistEntitySourceTypeName } from '../entity_sources/infra';
+import { invalidateEntitySourceApiKey } from '../entity_sources/entity_source_api_key';
+import { MANUAL_SOURCE_ID } from '../entity_sources/manual/constants';
 
 export const MAX_PER_PAGE = 10_000;
 
 interface WatchlistConfigClientDeps {
   soClient: SavedObjectsClientContract;
   esClient: ElasticsearchClient;
+  /**
+   * Used for system index operations (e.g. creating the watchlist backing index).
+   * Hidden indices require the `x-elastic-product-origin: kibana` header which is
+   * only attached when using the internal client.
+   */
+  internalEsClient?: ElasticsearchClient;
+  securityServiceStart?: SecurityServiceStart;
   namespace: string;
   logger: Logger;
 }
 
-type WatchlistSavedObjectAttributes = Omit<WatchlistObject, 'id' | 'createdAt' | 'updatedAt'>;
+type WatchlistSavedObjectAttributes = Omit<
+  WatchlistObject,
+  'id' | 'createdAt' | 'updatedAt' | 'hasManualEntities'
+>;
 type WatchlistUpdateAttrs = Partial<WatchlistSavedObjectAttributes>;
 type WatchlistObjectWithId = WatchlistObject & { id: string };
+
+interface WatchlistEntityMetadata {
+  entityCount: number;
+  hasManualEntities: boolean;
+}
 
 const omitWatchlistMeta = (
   watchlist: Partial<WatchlistObject>
@@ -42,6 +66,7 @@ const omitWatchlistMeta = (
     id: _ignoredId,
     createdAt: _ignoredCreatedAt,
     updatedAt: _ignoredUpdatedAt,
+    hasManualEntities: _ignoredHasManualEntities,
     ...attrs
   } = watchlist;
   return attrs;
@@ -90,12 +115,17 @@ export class WatchlistConfigClient {
       { id: options?.id, refresh: 'wait_for' }
     );
 
+    if (!this.deps.internalEsClient) {
+      throw new Error('internalEsClient is required to create a watchlist index');
+    }
+
     await createOrUpdateIndex({
-      esClient: this.deps.esClient,
+      esClient: this.deps.internalEsClient,
       logger: this.deps.logger,
       options: {
         index: getIndexForWatchlist(this.deps.namespace),
         mappings: generateWatchlistEntityIndexMappings(),
+        settings: { hidden: true },
       },
     });
 
@@ -122,16 +152,29 @@ export class WatchlistConfigClient {
     return this.get(id);
   }
 
+  /**
+   * List all watchlists and populate entity counts for each watchlist
+   * @returns List of watchlists with entity counts
+   */
   async list(limit: number = MAX_PER_PAGE): Promise<WatchlistObjectWithId[]> {
-    return this.deps.soClient
-      .find<WatchlistObject>({
-        type: watchlistConfigTypeName,
-        namespaces: [this.deps.namespace],
-        perPage: limit,
-      })
-      .then((response) => {
-        return response.saved_objects.map((so) => toWatchlistObject(so) as WatchlistObjectWithId);
-      });
+    const response = await this.deps.soClient.find<WatchlistObject>({
+      type: watchlistConfigTypeName,
+      namespaces: [this.deps.namespace],
+      perPage: limit,
+    });
+    const watchlists = response.saved_objects.map(
+      (so) => toWatchlistObject(so) as WatchlistObjectWithId
+    );
+    const watchlistIds = watchlists.map((w) => w.id);
+    if (watchlistIds.length > 0) {
+      const entityMetadata = await this.getEntityMetadata(watchlistIds);
+      for (const w of watchlists) {
+        const metadata = entityMetadata[w.id];
+        w.entityCount = metadata?.entityCount ?? 0;
+        w.hasManualEntities = metadata?.hasManualEntities ?? false;
+      }
+    }
+    return watchlists;
   }
 
   async get(id: string) {
@@ -140,7 +183,9 @@ export class WatchlistConfigClient {
         watchlistConfigTypeName,
         id
       );
-      return toWatchlistObject(so);
+      const watchlist = toWatchlistObject(so);
+      watchlist.entityCount = await this.getEntityCount(id);
+      return watchlist;
     } catch (e) {
       if (e.output && e.output.statusCode === 404) {
         throw new Error(`Watchlist config '${id}' not found`);
@@ -150,8 +195,28 @@ export class WatchlistConfigClient {
   }
 
   async delete(id: string) {
-    // Cascade-delete linked entity sources to prevent orphans
+    const securityServiceStart = this.deps.securityServiceStart;
+
+    // Step 1: Fetch all entity source linked to the watchlist
     const entitySourceIds = await this.getEntitySourceIds(id);
+    const indexSourcesApiKeyIdMap = new Map<string, string>();
+    if (securityServiceStart && entitySourceIds.length > 0) {
+      const soResults = await this.deps.soClient.bulkGet<MonitoringEntitySource>(
+        entitySourceIds.map((sourceId) => ({ type: watchlistEntitySourceTypeName, id: sourceId }))
+      );
+
+      soResults.saved_objects.forEach((so) => {
+        if (
+          !isSavedObjectErrorResult(so) &&
+          so.attributes.type === 'index' &&
+          !!so.attributes.apiKeyId
+        ) {
+          indexSourcesApiKeyIdMap.set(so.id, so.attributes.apiKeyId);
+        }
+      });
+    }
+
+    // Step 2: Cascade-delete linked entity sources to prevent orphans
     const results = await Promise.allSettled(
       entitySourceIds.map((sourceId) =>
         this.deps.soClient.delete(watchlistEntitySourceTypeName, sourceId, {
@@ -160,12 +225,28 @@ export class WatchlistConfigClient {
       )
     );
 
+    const successfullyDeletedSourceIds: string[] = [];
     for (const [i, result] of results.entries()) {
+      const sourceId = entitySourceIds[i];
       if (result.status === 'rejected') {
         this.deps.logger.warn(
-          `Failed to delete entity source '${entitySourceIds[i]}' while deleting watchlist '${id}': ${result.reason.message}`
+          `Failed to delete entity source '${sourceId}' while deleting watchlist '${id}': ${result.reason.message}`
         );
+      } else {
+        successfullyDeletedSourceIds.push(sourceId);
       }
+    }
+
+    // Step 3: Invalidate API keys for successfully deleted entity sources
+    if (securityServiceStart && successfullyDeletedSourceIds.length > 0) {
+      await Promise.allSettled(
+        successfullyDeletedSourceIds.flatMap((sourceId) => {
+          const apiKeyId = indexSourcesApiKeyIdMap.get(sourceId);
+          return apiKeyId
+            ? [invalidateEntitySourceApiKey(securityServiceStart, apiKeyId, this.deps.logger)]
+            : [];
+        })
+      );
     }
 
     return this.deps.soClient.delete(watchlistConfigTypeName, id, { refresh: 'wait_for' });
@@ -209,10 +290,6 @@ export class WatchlistConfigClient {
       watchlistId
     );
 
-    if (so.attributes.managed === true) {
-      throw createWatchlistValidationError(400, `Cannot modify managed watchlist '${watchlistId}'`);
-    }
-
     if (source.managed === true) {
       throw createWatchlistValidationError(
         400,
@@ -249,5 +326,83 @@ export class WatchlistConfigClient {
     );
 
     return extractEntitySourceIds(so.references ?? []);
+  }
+
+  async getEntityCount(id: string): Promise<number> {
+    const counts = await this.getEntityCounts([id]);
+    return counts[id] ?? 0;
+  }
+
+  /**
+   * Bulk fetch entity counts for a list of watchlists
+   * @param ids List of watchlist IDs to fetch entity counts for
+   * @returns Map of watchlist IDs to entity counts
+   */
+  async getEntityCounts(ids: string[]): Promise<Record<string, number>> {
+    const metadata = await this.getEntityMetadata(ids);
+    return Object.fromEntries(ids.map((id) => [id, metadata[id]?.entityCount ?? 0])) as Record<
+      string,
+      number
+    >;
+  }
+
+  /**
+   * Bulk fetch entity counts and manual-assignment state for a list of watchlists.
+   */
+  private async getEntityMetadata(ids: string[]): Promise<Record<string, WatchlistEntityMetadata>> {
+    if (ids.length === 0) return {};
+
+    const index = getIndexForWatchlist(this.deps.namespace);
+    const metadata: Record<string, WatchlistEntityMetadata> = {};
+
+    for (const id of ids) {
+      metadata[id] = { entityCount: 0, hasManualEntities: false };
+    }
+
+    try {
+      const response = await this.deps.esClient.search({
+        index,
+        ignore_unavailable: true,
+        size: 0,
+        query: {
+          terms: {
+            'watchlist.id': ids,
+          },
+        },
+        aggs: {
+          watchlist_counts: {
+            terms: {
+              field: 'watchlist.id',
+              size: ids.length,
+            },
+            aggs: {
+              manual_entities: {
+                filter: {
+                  term: {
+                    'labels.source_ids': MANUAL_SOURCE_ID,
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+
+      const watchlistCountsAgg = response.aggregations?.watchlist_counts as
+        | AggregationsStringTermsAggregate
+        | undefined;
+      const buckets = (watchlistCountsAgg?.buckets as AggregationsStringTermsBucket[]) ?? [];
+      for (const bucket of buckets) {
+        const manualEntities = bucket.manual_entities as AggregationsFilterAggregate | undefined;
+        metadata[String(bucket.key)] = {
+          entityCount: bucket.doc_count,
+          hasManualEntities: (manualEntities?.doc_count ?? 0) > 0,
+        };
+      }
+    } catch (err) {
+      this.deps.logger.warn(`Failed to fetch watchlist entity metadata: ${(err as Error).message}`);
+    }
+
+    return metadata;
   }
 }

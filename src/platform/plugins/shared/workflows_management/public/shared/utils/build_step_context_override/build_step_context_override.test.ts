@@ -1098,7 +1098,7 @@ describe('buildContextOverrideFromExecution', () => {
       version: '1' as const,
       name: 'test',
       enabled: true,
-      triggers: [{ type: 'manual' as const, enabled: true }],
+      triggers: [{ type: 'manual' as const }],
       steps: [
         {
           name: 'meta_step',

@@ -5,91 +5,30 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
-import {
-  EuiButton,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFlyoutFooter,
-  EuiPanel,
-  EuiPopover,
-} from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { AttacksGroupTakeActionItems } from '../../detections/components/attacks/table/attacks_group_take_action_items';
-import {
-  FLYOUT_FOOTER_TAKE_ACTION_BUTTON_TEST_ID,
-  FLYOUT_FOOTER_TEST_ID,
-} from './constants/test_ids';
+import React, { useMemo } from 'react';
+import { EuiFlyoutFooter } from '@elastic/eui';
+import { buildDataTableRecord } from '@kbn/discover-utils';
+import type { EsHitRecord } from '@kbn/discover-utils';
+import { Footer } from '../../flyout_v2/attack/main/footer';
 import { useAttackDetailsContext } from './context';
+import { FLYOUT_FOOTER_TEST_ID } from './constants/test_ids';
 
 export { FLYOUT_FOOTER_TEST_ID };
 
 /**
- * Bottom section of the flyout that contains the take action button
+ * Bottom section of the legacy attack details flyout. Delegates to the v2 Footer,
+ * supplying props from context.
  */
 export const PanelFooter = () => {
-  const { attack, refetch } = useAttackDetailsContext();
+  const { attack, searchHit, refetch } = useAttackDetailsContext();
 
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const hit = useMemo(() => buildDataTableRecord(searchHit as EsHitRecord), [searchHit]);
 
-  const closePopover = useCallback(() => {
-    setIsPopoverOpen(false);
-  }, []);
-
-  const onActionSuccess = useCallback(() => {
-    /* Update the attack details context after an action is taken */
-    refetch();
-  }, [refetch]);
-
-  const togglePopover = useCallback(() => {
-    setIsPopoverOpen((open) => !open);
-  }, []);
-
-  const takeActionButton = useMemo(
-    () => (
-      <EuiButton
-        data-test-subj={FLYOUT_FOOTER_TAKE_ACTION_BUTTON_TEST_ID}
-        fill
-        iconSide="right"
-        iconType="arrowDown"
-        onClick={togglePopover}
-      >
-        <FormattedMessage
-          id="xpack.securitySolution.flyout.attackDetails.footer.takeActionButtonLabel"
-          defaultMessage="Take action"
-        />
-      </EuiButton>
-    ),
-    [togglePopover]
-  );
+  if (!attack) return null;
 
   return (
     <EuiFlyoutFooter data-test-subj={FLYOUT_FOOTER_TEST_ID}>
-      <EuiPanel color="transparent">
-        <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
-          <EuiFlexItem grow={false}>
-            {attack ? (
-              <EuiPopover
-                id="AttackDetailsTakeActionPanel"
-                button={takeActionButton}
-                isOpen={isPopoverOpen}
-                closePopover={closePopover}
-                panelPaddingSize="none"
-                anchorPosition="downLeft"
-                repositionOnScroll
-              >
-                <AttacksGroupTakeActionItems
-                  attack={attack}
-                  onActionSuccess={onActionSuccess}
-                  closePopover={closePopover}
-                  size="s"
-                  telemetrySource="attacks_page_flyout_take_action"
-                />
-              </EuiPopover>
-            ) : null}
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPanel>
+      <Footer attack={attack} hit={hit} onAttackUpdated={refetch} />
     </EuiFlyoutFooter>
   );
 };

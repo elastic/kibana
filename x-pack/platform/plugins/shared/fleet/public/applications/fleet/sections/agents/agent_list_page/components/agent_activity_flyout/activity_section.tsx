@@ -12,15 +12,24 @@ import { EuiText, EuiPanel, EuiHealth, EuiFlexGroup, EuiFlexItem } from '@elasti
 import type { ActionStatus } from '../../../../../types';
 
 import { UpgradeInProgressActivityItem } from './upgrade_in_progress_activity_item';
+import { UnenrollInProgressActivityItem } from './unenroll_in_progress_activity_item';
 import { ActivityItem } from './activity_item';
 
 export const ActivitySection: React.FunctionComponent<{
   title: ReactNode;
   actions: ActionStatus[];
   abortUpgrade: (action: ActionStatus) => Promise<void>;
+  abortUnenroll: (action: ActionStatus) => Promise<void>;
   onClickViewAgents: (action: ActionStatus) => void;
   onClickManageAutoUpgradeAgents: (action: ActionStatus) => void;
-}> = ({ title, actions, abortUpgrade, onClickViewAgents, onClickManageAutoUpgradeAgents }) => {
+}> = ({
+  title,
+  actions,
+  abortUpgrade,
+  abortUnenroll,
+  onClickViewAgents,
+  onClickManageAutoUpgradeAgents,
+}) => {
   return (
     <>
       <EuiPanel color="subdued" hasBorder={true} borderRadius="none">
@@ -37,24 +46,46 @@ export const ActivitySection: React.FunctionComponent<{
           </EuiFlexGroup>
         </EuiText>
       </EuiPanel>
-      {actions.map((currentAction) =>
-        currentAction.type === 'UPGRADE' && currentAction.status === 'IN_PROGRESS' ? (
-          <UpgradeInProgressActivityItem
-            action={currentAction}
-            abortUpgrade={abortUpgrade}
-            key={currentAction.actionId}
-            onClickViewAgents={onClickViewAgents}
-            onClickManageAutoUpgradeAgents={onClickManageAutoUpgradeAgents}
-          />
-        ) : (
+      {actions.map((currentAction) => {
+        if (currentAction.type === 'UPGRADE' && currentAction.status === 'IN_PROGRESS') {
+          return (
+            <UpgradeInProgressActivityItem
+              action={currentAction}
+              abortUpgrade={abortUpgrade}
+              key={currentAction.actionId}
+              onClickViewAgents={onClickViewAgents}
+              onClickManageAutoUpgradeAgents={onClickManageAutoUpgradeAgents}
+            />
+          );
+        }
+        // Show the cancellable scheduled unenrollment item only while the grace period
+        // is still active (start_time in the future). Once start_time has passed the
+        // execute phase will have picked up the action, so cancellation is no longer
+        // meaningful and we fall through to the standard activity item rendering.
+        if (
+          currentAction.type === 'UNENROLL' &&
+          currentAction.status === 'IN_PROGRESS' &&
+          currentAction.startTime &&
+          new Date(currentAction.startTime).getTime() > Date.now()
+        ) {
+          return (
+            <UnenrollInProgressActivityItem
+              action={currentAction}
+              abortUnenroll={abortUnenroll}
+              key={currentAction.actionId}
+              onClickViewAgents={onClickViewAgents}
+            />
+          );
+        }
+        return (
           <ActivityItem
             action={currentAction}
             key={currentAction.actionId}
             onClickViewAgents={onClickViewAgents}
             onClickManageAutoUpgradeAgents={onClickManageAutoUpgradeAgents}
           />
-        )
-      )}
+        );
+      })}
     </>
   );
 };

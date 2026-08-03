@@ -7,6 +7,11 @@
 
 import { isBoom, boomify } from '@hapi/boom';
 
+import {
+  AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG,
+  AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG_DEFAULT,
+} from '@kbn/as-code-shared-schemas';
+import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
 import type { TypeOf } from '@kbn/config-schema';
 import { LENS_CONTENT_TYPE } from '@kbn/lens-common/content_management/constants';
 import {
@@ -22,18 +27,19 @@ import { getLensResponseItem } from './utils';
 
 export const registerLensVisualizationsSearchAPIRoute: RegisterAPIRouteFn = (
   router,
-  { contentManagement, builder }
+  { contentManagement, builder, usageCounter }
 ) => {
   const searchRoute = router.get({
     path: LENS_VIS_API_PATH,
     access: LENS_API_ACCESS,
-    enableQueryVersion: true,
     summary: 'Search visualizations',
-    description: 'Get list of visualizations.',
+    description:
+      'Returns a paginated list of Lens visualizations matching the optional `query` text.',
     options: {
       tags: [LENS_API_TAG],
       availability: {
-        stability: 'experimental',
+        stability: 'stable',
+        since: '9.5.0',
       },
     },
     security: {
@@ -47,6 +53,10 @@ export const registerLensVisualizationsSearchAPIRoute: RegisterAPIRouteFn = (
   searchRoute.addVersion(
     {
       version: LENS_API_VERSION,
+      options: {
+        oasOperationObject: async () =>
+          (await import('./oas_examples')).searchLensVisualizationOASOperationObject,
+      },
       validate: {
         request: {
           query: lensSearchRequestQuerySchema,
@@ -71,52 +81,59 @@ export const registerLensVisualizationsSearchAPIRoute: RegisterAPIRouteFn = (
         },
       },
     },
-    async (ctx, req, res) => {
-      // TODO fix IContentClient to type this client based on the actual
-      const client = contentManagement.contentClient
-        .getForRequest({ request: req, requestHandlerContext: ctx })
-        .for<LensSavedObject>(LENS_CONTENT_TYPE);
+    async (ctx, req, res) =>
+      telemetryHandler(req, { usageCounter, trackAgentic: true }, async () => {
+        const { core } = await ctx.resolve(['core']);
+        const useGASchemas = await core.featureFlags.getBooleanValue(
+          AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG,
+          AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG_DEFAULT
+        );
 
-      const { query: q, page, per_page: perPage, ...reqOptions } = req.query;
+        // TODO fix IContentClient to type this client based on the actual
+        const client = contentManagement.contentClient
+          .getForRequest({ request: req, requestHandlerContext: ctx })
+          .for<LensSavedObject>(LENS_CONTENT_TYPE);
 
-      try {
-        // Note: these types are to enforce loose param typings of client methods
-        const query: LensSearchIn['query'] = {
-          text: q,
-          cursor: page.toString(),
-          limit: perPage,
-        };
-        const options: LensSearchIn['options'] = reqOptions;
+        const { query: q, page, per_page: perPage, ...reqOptions } = req.query;
 
-        const {
-          result: { hits, pagination },
-        } = await client.search(query, options);
+        try {
+          // Note: these types are to enforce loose param typings of client methods
+          const query: LensSearchIn['query'] = {
+            text: q,
+            cursor: page.toString(),
+            limit: perPage,
+          };
+          const options: LensSearchIn['options'] = reqOptions;
 
-        // TODO: see if this check is actually needed
-        const error = hits.find((item) => item.error);
-        if (error) {
-          throw error;
-        }
+          const {
+            result: { hits, pagination },
+          } = await client.search(query, options);
 
-        return res.ok<TypeOf<typeof lensSearchResponseBodySchema>>({
-          body: {
-            data: hits.map((item) => {
-              return getLensResponseItem(builder, item);
-            }),
-            meta: {
-              page,
-              per_page: perPage,
-              total: pagination.total,
+          // TODO: see if this check is actually needed
+          const error = hits.find((item) => item.error);
+          if (error) {
+            throw error;
+          }
+
+          return res.ok<TypeOf<typeof lensSearchResponseBodySchema>>({
+            body: {
+              data: hits.map((item) => {
+                return getLensResponseItem(builder, item, useGASchemas);
+              }),
+              meta: {
+                page,
+                per_page: perPage,
+                total: pagination.total,
+              },
             },
-          },
-        });
-      } catch (error) {
-        if (isBoom(error) && error.output.statusCode === 403) {
-          return res.forbidden();
-        }
+          });
+        } catch (error) {
+          if (isBoom(error) && error.output.statusCode === 403) {
+            return res.forbidden();
+          }
 
-        return boomify(error); // forward unknown error
-      }
-    }
+          return boomify(error); // forward unknown error
+        }
+      })
   );
 };

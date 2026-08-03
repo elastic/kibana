@@ -29,13 +29,16 @@ export const createObservabilityTracesDocumentProfileProvider = ({
   profileId: OBSERVABILITY_TRACES_SPAN_DOCUMENT_PROFILE_ID,
   restrictedToProductFeature: TRACES_PRODUCT_FEATURE_ID,
   profile: {
-    getDocViewer: createGetDocViewer({
-      apm: {
-        errors: apmContextService.errorsService.getErrorsIndexPattern(),
-        traces: apmContextService.tracesService.getAllTracesIndexPattern(),
+    getDocViewer: createGetDocViewer(
+      {
+        apm: {
+          errors: apmContextService.errorsService.getErrorsIndexPattern(),
+          traces: apmContextService.tracesService.getAllTracesIndexPattern(),
+        },
+        logs: logsContextService.getAllLogsIndexPattern(),
       },
-      logs: logsContextService.getAllLogsIndexPattern(),
-    }),
+      OBSERVABILITY_TRACES_SPAN_DOCUMENT_PROFILE_ID
+    ),
   },
   resolve: ({ record, rootContext }) => {
     const isObservabilitySolutionView = rootContext.solutionType === SolutionType.Observability;

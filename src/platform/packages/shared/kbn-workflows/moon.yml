@@ -23,6 +23,8 @@ dependsOn:
   - '@kbn/utility-types'
   - '@kbn/core'
   - '@kbn/repo-info'
+  - '@kbn/human-readable-id'
+  - '@kbn/std'
 tags:
   - shared-common
   - package

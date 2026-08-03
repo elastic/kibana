@@ -11,6 +11,8 @@ import { v4 as uuid } from 'uuid';
 import { defineConfig } from 'cypress';
 import wp from '@cypress/webpack-preprocessor';
 import { NodeLibsBrowserPlugin } from '@kbn/node-libs-browser-webpack-plugin';
+import './peggy_setup';
+
 import {
   SCOUT_REPORT_OUTPUT_ROOT,
   SCOUT_REPORTER_ENABLED,
@@ -167,6 +169,10 @@ export function defineCypressConfig(options?: Cypress.ConfigOptions<any>) {
                         presets: [require.resolve('@kbn/babel-preset/webpack_preset')],
                       },
                     },
+                  },
+                  {
+                    test: /\.peggy$/,
+                    use: [require.resolve('@kbn/peggy-loader')],
                   },
                 ],
               },

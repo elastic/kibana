@@ -111,7 +111,7 @@ const BulkActionsComponent: React.FC<Props> = ({
       isOpen={isPopoverOpen}
       panelPaddingSize="none"
     >
-      <EuiContextMenu initialPanelId={PRIMARY_PANEL_ID} panels={panels} size="s" />
+      <EuiContextMenu initialPanelId={PRIMARY_PANEL_ID} panels={panels} />
     </EuiPopover>
   );
 };

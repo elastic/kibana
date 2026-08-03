@@ -9,21 +9,26 @@
 
 import { schema } from '@kbn/config-schema';
 import { timeRangeSchema } from '@kbn/es-query-server';
-import { asCodeMetaSchema } from '@kbn/as-code-shared-schemas';
+import {
+  asCodeMetaSchema,
+  asCodePaginationResponseMetaSchema,
+  getAsCodeTagsSchema,
+  PAGINATION_MAX_SIZE,
+} from '@kbn/as-code-shared-schemas';
 import { accessControlSchema } from '../dashboard_state_schemas';
 
-export const searchRequestParamsSchema = schema.object({
+export const legacySearchRequestParamsSchema = schema.object({
   page: schema.maybe(
     schema.number({
       meta: {
-        description: 'The page of dashboards to return',
+        description: 'The page of results to return. Defaults to `1`.',
       },
     })
   ),
   per_page: schema.maybe(
     schema.number({
       meta: {
-        description: 'The number of dashboards to return per page',
+        description: 'The number of results to return per page. Defaults to `20`.',
       },
     })
   ),
@@ -31,7 +36,7 @@ export const searchRequestParamsSchema = schema.object({
     schema.string({
       meta: {
         description:
-          'An Elasticsearch simple_query_string query that filters the dashboards in the response by "title" and "description"',
+          'Filters results by `title` and `description` using Elasticsearch [`simple_query_string`](https://www.elastic.co/docs/reference/query-languages/query-dsl/simple-query-string-query) syntax. Multi-word terms require all words to match.',
       },
     })
   ),
@@ -39,7 +44,7 @@ export const searchRequestParamsSchema = schema.object({
     schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { maxSize: 100 })], {
       meta: {
         description:
-          'A tag ID to include. Accepts a single tag ID or multiple tag IDs. When multiple are specified, dashboards matching ANY of the tag IDs are included.',
+          'A tag ID to include. Accepts a single tag ID or multiple tag IDs. When multiple are specified, dashboards matching any of the tag IDs are included.',
       },
     })
   ),
@@ -47,26 +52,90 @@ export const searchRequestParamsSchema = schema.object({
     schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { maxSize: 100 })], {
       meta: {
         description:
-          'A tag ID to exclude. Accepts a single tag ID or multiple tag IDs. When multiple are specified, dashboards matching ANY of the tag IDs are excluded.',
+          'A tag ID to exclude. Accepts a single tag ID or multiple tag IDs. When multiple are specified, dashboards matching any of the tag IDs are excluded.',
+      },
+    })
+  ),
+  tag_names: schema.maybe(
+    schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { maxSize: 100 })], {
+      meta: {
+        availability: { stability: 'stable', since: '9.6.0' },
+        description:
+          'A tag name to include. Accepts a single tag name or multiple tag names. When multiple are specified, dashboards matching any of the tag names are included. If the same name is shared by multiple tags, dashboards matching any of those tags are included.',
+      },
+    })
+  ),
+  excluded_tag_names: schema.maybe(
+    schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { maxSize: 100 })], {
+      meta: {
+        availability: { stability: 'stable', since: '9.6.0' },
+        description:
+          'A tag name to exclude. Accepts a single tag name or multiple tag names. When multiple are specified, dashboards matching any of the tag names are excluded. If the same name is shared by multiple tags, dashboards matching any of those tags are excluded.',
       },
     })
   ),
 });
 
-export const searchResponseBodySchema = schema.object({
+export const legacySearchResponseBodySchema = schema.object({
   dashboards: schema.arrayOf(
     schema.object({
-      id: schema.string(),
+      id: schema.string({
+        meta: { description: 'The dashboard ID.' },
+      }),
       data: schema.object({
-        description: schema.maybe(schema.string()),
-        tags: schema.maybe(schema.arrayOf(schema.string())),
+        description: schema.maybe(
+          schema.string({ meta: { description: 'A short description of the dashboard.' } })
+        ),
+        tags: schema.maybe(getAsCodeTagsSchema('Tag IDs associated with this dashboard.')),
         time_range: schema.maybe(timeRangeSchema),
-        title: schema.string(),
+        title: schema.string({ meta: { description: 'The dashboard title.' } }),
         access_control: accessControlSchema,
       }),
       meta: asCodeMetaSchema,
-    })
+    }),
+    {
+      meta: {
+        description:
+          'List of dashboards matching the query. Each entry includes summary fields but not the full panel layout.',
+      },
+    }
   ),
-  total: schema.number(),
-  page: schema.number(),
+  page: schema.number({
+    meta: {
+      description: 'The page of results returned.',
+    },
+  }),
+  total: schema.number({
+    meta: {
+      description: 'The total number of dashboards matching the query.',
+    },
+  }),
+});
+
+export const searchResponseBodySchema = schema.object({
+  data: schema.arrayOf(
+    schema.object({
+      id: schema.string({
+        meta: { description: 'The dashboard ID.' },
+      }),
+      data: schema.object({
+        description: schema.maybe(
+          schema.string({ meta: { description: 'A short description of the dashboard.' } })
+        ),
+        tags: schema.maybe(getAsCodeTagsSchema('Tag IDs associated with this dashboard.', 100)),
+        time_range: schema.maybe(timeRangeSchema),
+        title: schema.string({ meta: { description: 'The dashboard title.' } }),
+        access_control: accessControlSchema,
+      }),
+      meta: asCodeMetaSchema,
+    }),
+    {
+      maxSize: PAGINATION_MAX_SIZE,
+      meta: {
+        description:
+          'List of dashboards matching the query. Each entry includes summary fields but not the full panel layout.',
+      },
+    }
+  ),
+  meta: asCodePaginationResponseMetaSchema,
 });

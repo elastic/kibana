@@ -15,6 +15,7 @@ import {
   EuiTitle,
   EuiSpacer,
   EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -48,6 +49,7 @@ export function LayerControl({
   showAllLayers,
   zoom,
 }: Props) {
+  const { euiTheme } = useEuiTheme();
   if (!isLayerTOCOpen) {
     if (isScreenshotMode()) {
       return null;
@@ -61,7 +63,6 @@ export function LayerControl({
 
     return (
       <EuiToolTip
-        delay="long"
         content={i18n.translate('xpack.maps.layerControl.openLayerTOCButtonAriaLabel', {
           defaultMessage: 'Expand layers panel',
         })}
@@ -124,7 +125,6 @@ export function LayerControl({
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiToolTip
-                delay="long"
                 content={i18n.translate('xpack.maps.layerControl.hideAllLayersButton', {
                   defaultMessage: 'Hide all layers',
                 })}
@@ -132,7 +132,7 @@ export function LayerControl({
               >
                 <EuiButtonIcon
                   onClick={hideAllLayers}
-                  iconType="eyeClosed"
+                  iconType="eyeSlash"
                   color="text"
                   aria-label={i18n.translate('xpack.maps.layerControl.hideAllLayersButton', {
                     defaultMessage: 'Hide all layers',
@@ -142,7 +142,6 @@ export function LayerControl({
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiToolTip
-                delay="long"
                 content={i18n.translate('xpack.maps.layerControl.showAllLayersButton', {
                   defaultMessage: 'Show all layers',
                 })}
@@ -160,13 +159,13 @@ export function LayerControl({
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiToolTip
-                delay="long"
                 content={i18n.translate('xpack.maps.layerControl.closeLayerTOCButtonAriaLabel', {
                   defaultMessage: 'Collapse layers panel',
                 })}
               >
                 <EuiButtonIcon
                   className="mapLayerControl__closeLayerTOCButton"
+                  css={{ backgroundColor: `${euiTheme.colors.emptyShade} !important` }}
                   onClick={closeLayerTOC}
                   iconType="menuRight"
                   color="text"

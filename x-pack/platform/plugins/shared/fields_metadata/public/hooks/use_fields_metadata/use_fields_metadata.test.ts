@@ -29,7 +29,7 @@ const fields: FindFieldsMetadataResponsePayload['fields'] = {
   },
 };
 
-const mockedFieldsMetadataResponse = { fields };
+const mockedFieldsMetadataResponse = { fields, streamFields: {} };
 
 const fieldsMetadataService = createFieldsMetadataServiceStartMock();
 

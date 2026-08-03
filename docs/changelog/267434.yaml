@@ -1,0 +1,9 @@
+prs:
+- https://github.com/elastic/kibana/pull/267434
+type: enhancement
+products:
+- product: cloud-serverless
+  target: 2026-05-12
+areas:
+- Search and data
+title: Add cloud navigation links to Search homepage

@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useCallback, useMemo, useState } from 'react';
-import { useDispatch, useSelector, useStore } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type {
   UnifiedDataTableProps,
@@ -20,10 +20,9 @@ import type {
   EuiDataGridProps,
 } from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { useHistory } from 'react-router-dom';
 import { SECURITY_CELL_ACTIONS_DEFAULT } from '@kbn/ui-actions-plugin/common/trigger_ids';
-import { cellActionRenderer } from '../../../../../flyout_v2/shared/components/cell_actions';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
+import { createCellActionRenderer } from '../../../../../flyout_v2/shared/components/cell_actions';
+import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
 import { JEST_ENVIRONMENT } from '../../../../../../common/constants';
 import { useOnExpandableFlyoutClose } from '../../../../../flyout/shared/hooks/use_on_expandable_flyout_close';
 import { DocumentDetailsRightPanelKey } from '../../../../../flyout/document_details/shared/constants/panel_keys';
@@ -34,6 +33,7 @@ import { EmptyComponent } from '../../../../../common/lib/cell_actions/helpers';
 import { StatefulEventContext } from '../../../../../common/components/events_viewer/stateful_event_context';
 import type { TimelineItem } from '../../../../../../common/search_strategy';
 import { useKibana } from '../../../../../common/lib/kibana';
+import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_flyout_enabled';
 import type {
   ColumnHeaderOptions,
   OnFetchMoreRecords,
@@ -53,11 +53,11 @@ import { transformTimelineItemToUnifiedRows } from '../utils';
 import { TimelineEventDetailRow } from './timeline_event_detail_row';
 import { CustomTimelineDataGridBody } from './custom_timeline_data_grid_body';
 import { TIMELINE_EVENT_DETAIL_ROW_ID } from '../../body/constants';
-import { DocumentEventTypes } from '../../../../../common/lib/telemetry/types';
+import { DocumentEventTypes, FLYOUT_ORIGIN } from '../../../../../common/lib/telemetry/types';
 import { getTimelineRowTypeIndicator } from './get_row_indicator';
 import { isAttackDiscoveryRow } from './is_attack_discovery_row';
-import { DocumentFlyoutWrapper } from '../../../../../flyout_v2/document/document_flyout_wrapper';
-import { flyoutProviders } from '../../../../../flyout_v2/shared/components/flyout_provider';
+import { getDocumentHistoryTitle } from '../../../../../flyout_v2/document/main/utils/get_header_title';
+import { getAttackTitleValue } from '../../../../../flyout_v2/attack/utils/get_attack_title';
 
 const DataGridMemoized = React.memo(UnifiedDataTable);
 
@@ -120,10 +120,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
     leadingControlColumns,
     onUpdatePageIndex,
   }) {
-    const newFlyoutSystemEnabled = useIsExperimentalFeatureEnabled('newFlyoutSystemEnabled');
     const dispatch = useDispatch();
-    const store = useStore();
-    const history = useHistory();
 
     // Store context in state rather than creating object in provider value={} to prevent re-renders caused by a new object being created
     const [activeStatefulEventContext] = useState({
@@ -143,8 +140,10 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
       telemetry,
       theme,
       data: dataPluginContract,
-      overlays,
     } = services;
+
+    const enableNewFlyout = useIsNewFlyoutEnabled();
+    const { openAttackFlyout, openDocumentFlyoutFromIndex } = useFlyoutApi();
 
     const [expandedDoc, setExpandedDoc] = useState<DataTableRecord & TimelineItem>();
 
@@ -182,30 +181,33 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
       [events, dataView]
     );
 
+    const timelineCellActionRenderer = useMemo(
+      () => createCellActionRenderer(timelineId),
+      [timelineId]
+    );
+
     const handleOnEventDetailPanelOpened = useCallback(
       (eventData: DataTableRecord & TimelineItem) => {
-        if (newFlyoutSystemEnabled) {
-          overlays.openSystemFlyout(
-            flyoutProviders({
-              services,
-              store,
-              history,
-              children: (
-                <DocumentFlyoutWrapper
-                  documentId={eventData._id}
-                  indexName={eventData.ecs._index}
-                  renderCellActions={cellActionRenderer}
-                  onAlertUpdated={refetch}
-                />
-              ),
-            }),
-            {
-              ownFocus: false,
-              resizable: true,
-              size: 's',
-              type: 'overlay',
-            }
-          );
+        if (enableNewFlyout) {
+          const isAttackRow = isAttackDiscoveryRow(eventData);
+          if (isAttackRow) {
+            openAttackFlyout({
+              attackId: eventData._id,
+              indexName: eventData.ecs._index ?? '',
+              onAttackUpdated: refetch,
+              origin: FLYOUT_ORIGIN.TIMELINE,
+              attackTitle: getAttackTitleValue(eventData),
+            });
+          } else {
+            openDocumentFlyoutFromIndex({
+              documentId: eventData._id,
+              indexName: eventData.ecs._index,
+              renderCellActions: timelineCellActionRenderer,
+              onAlertUpdated: refetch,
+              origin: FLYOUT_ORIGIN.TIMELINE,
+              title: getDocumentHistoryTitle(eventData),
+            });
+          }
         } else {
           const isAttackRow = isAttackDiscoveryRow(eventData);
           const indexName = eventData.ecs._index ?? '';
@@ -235,13 +237,12 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
         }
       },
       [
-        newFlyoutSystemEnabled,
-        overlays,
-        services,
-        store,
-        history,
-        timelineId,
+        enableNewFlyout,
+        openAttackFlyout,
+        openDocumentFlyoutFromIndex,
+        timelineCellActionRenderer,
         refetch,
+        timelineId,
         openFlyout,
         telemetry,
       ]

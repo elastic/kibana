@@ -14,15 +14,6 @@ import { getKpiTotalUsersAreaLensAttributes } from './kpi_total_users_area';
 import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
 import { withIndices } from '../../../../../data_view_manager/hooks/__mocks__/use_data_view';
 
-jest.mock('../../../../../sourcerer/containers', () => ({
-  useSourcererDataView: jest.fn().mockReturnValue({
-    selectedPatterns: ['auditbeat-mytest-*'],
-    dataViewId: 'security-solution-my-test',
-    indicesExist: true,
-    sourcererDataView: {},
-  }),
-}));
-
 jest.mock('../../../../utils/route/use_route_spy', () => ({
   useRouteSpy: jest.fn().mockReturnValue([
     {
@@ -68,7 +59,7 @@ describe('getKpiTotalUsersAreaLensAttributes', () => {
     expect(attrs?.references).toEqual([]);
     expect(attrs?.state.internalReferences).toHaveLength(2);
     const spec = Object.values(attrs?.state.adHocDataViews ?? {})[0];
-    expect(spec?.title).toBe('.entities.v2.latest.security_my_space');
+    expect(spec?.title).toBe('.entities.v2.latest.security_my_space-00001');
     const userTypeFilter = attrs?.state.filters?.find(
       (f) => f.meta?.key === 'entity.EngineMetadata.Type'
     );

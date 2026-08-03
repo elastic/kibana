@@ -34,7 +34,7 @@ import {
 } from '@kbn/rule-data-utils';
 import type { ObservabilityApmAlert } from '@kbn/alerts-as-data-utils';
 import { getParsedFilterQuery, termQuery } from '@kbn/observability-plugin/server';
-import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
+import { addSpaceIdToPath } from '@kbn/core-spaces-common';
 import { asyncForEach } from '@kbn/std';
 import { errorCountParamsSchema } from '@kbn/response-ops-rule-params/error_count';
 import { unflattenObject } from '@kbn/object-utils';

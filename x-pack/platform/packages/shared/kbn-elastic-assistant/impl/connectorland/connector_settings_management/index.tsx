@@ -26,7 +26,7 @@ const ConnectorsSettingsManagementComponent: React.FC = () => {
   const onClick = useCallback(
     () =>
       navigateToApp('management', {
-        path: 'insightsAndAlerting/triggersActionsConnectors/connectors',
+        path: 'modelManagement/model_settings',
       }),
     [navigateToApp]
   );

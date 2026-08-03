@@ -45,7 +45,7 @@ import type {
 } from '../../common/types/domain';
 import { NO_ASSIGNEES_FILTERING_KEYWORD } from '../../common/constants';
 import { throwErrors } from '../../common/api';
-import type { CaseUI, FilterOptions, UpdateByKey } from './types';
+import type { CaseUI, ExtendedFieldFilter, FilterOptions, UpdateByKey } from './types';
 import * as i18n from './translations';
 import type { CustomFieldFactoryFilterOption } from '../components/custom_fields/types';
 
@@ -237,6 +237,56 @@ export const constructCustomFieldsFilter = (
         customFields: valuesByCustomFieldKey,
       }
     : {};
+};
+
+export interface ParsedExtendedFieldSearch {
+  extendedFieldFilters: ExtendedFieldFilter[];
+  freeText: string;
+}
+
+/**
+ * Parses a search string to extract field:value pairs for extended field filtering.
+ *
+ * Label syntax:
+ * - Single-word label:  `priority:high`
+ * - Multi-word label:   `"Effort Level":high`  (quoted label)
+ *
+ * Value syntax:
+ * - Unquoted value:     `priority:high`
+ * - Quoted value:       `notes:"value:with:colons"` (colons inside quotes are not separators)
+ *
+ * Multiple pairs: `priority:high region:emea` -> AND semantics
+ * Mixed with free text: `priority:high some text` -> filter + free text "some text"
+ */
+export const parseExtendedFieldSearch = (search: string): ParsedExtendedFieldSearch => {
+  const extendedFieldFilters: ExtendedFieldFilter[] = [];
+  // Matches:
+  //   "quoted label":value
+  //   "quoted label":"quoted value"
+  //   unquoted_label:value
+  //   unquoted_label:"quoted value"
+  const FIELD_VALUE_REGEX = /(?:"([^"]+)"|(\w+)):\s*(?:"([^"]*)"|([\S]+))/g;
+
+  const freeText = search
+    .replace(
+      FIELD_VALUE_REGEX,
+      (
+        _match,
+        quotedLabel?: string,
+        rawLabel?: string,
+        quotedValue?: string,
+        rawValue?: string
+      ) => {
+        const label = quotedLabel ?? rawLabel ?? '';
+        const value = quotedValue ?? rawValue ?? '';
+        extendedFieldFilters.push({ label, value });
+        return '';
+      }
+    )
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  return { extendedFieldFilters, freeText };
 };
 
 export const getIncrementalIdSearchOverrides = (search: string) => {

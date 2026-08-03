@@ -6,9 +6,9 @@
  */
 
 import type React from 'react';
-import type { AnyAction, Dispatch, Middleware, Store } from 'redux';
+import type { AnyAction, Dispatch, Middleware, Store } from 'redux-v4';
 import type { BBox } from 'rbush';
-import type { Provider } from 'react-redux';
+import type { Provider } from 'react-redux-v7';
 import type { CellActionRenderer } from '../flyout_v2/shared/components/cell_actions';
 import type {
   NewResolverTree,
@@ -856,6 +856,10 @@ export interface ResolverProps {
    * Optional callback invoked after alert mutations in nested flyouts.
    */
   onAlertUpdated?: () => void;
+  /**
+   * Use the legacy expandable flyout behavior for resolver panels.
+   */
+  useLegacyExpandableFlyout?: boolean;
 }
 
 /**

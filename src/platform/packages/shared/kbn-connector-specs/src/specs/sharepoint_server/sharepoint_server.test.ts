@@ -79,7 +79,9 @@ describe('SharepointServer', () => {
       expect(mockClient.get).toHaveBeenCalledWith(`${SITE_URL}/_api/web/lists`, {
         headers: ODATA_HEADERS,
         params: {
-          $select: 'Id,Title,ItemCount,Description,Created,LastItemModifiedDate',
+          $select:
+            'Id,Title,ItemCount,Description,Created,LastItemModifiedDate,RootFolder/ServerRelativeUrl',
+          $expand: 'RootFolder',
         },
       });
       expect(result).toEqual(mockResponse.data);
@@ -375,6 +377,34 @@ describe('SharepointServer', () => {
 
       expect(result.ok).toBe(false);
       expect(result.message).toBe('Network timeout');
+    });
+  });
+
+  describe('siteUrl normalization', () => {
+    it('should strip a trailing slash from siteUrl so URLs do not double-slash', async () => {
+      mockClient.get.mockResolvedValue({ data: {} });
+
+      const trailingSlashContext = {
+        ...mockContext,
+        config: { siteUrl: `${SITE_URL}/` },
+      } as unknown as ActionContext;
+
+      await SharepointServer.actions.getWeb.handler(trailingSlashContext, {});
+
+      expect(mockClient.get).toHaveBeenCalledWith(`${SITE_URL}/_api/web`, expect.any(Object));
+    });
+
+    it('should strip multiple trailing slashes', async () => {
+      mockClient.get.mockResolvedValue({ data: [] });
+
+      const manySlashesContext = {
+        ...mockContext,
+        config: { siteUrl: `${SITE_URL}///` },
+      } as unknown as ActionContext;
+
+      await SharepointServer.actions.getLists.handler(manySlashesContext, {});
+
+      expect(mockClient.get).toHaveBeenCalledWith(`${SITE_URL}/_api/web/lists`, expect.any(Object));
     });
   });
 });

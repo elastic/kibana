@@ -1,0 +1,29 @@
+responses:
+  200:
+    description: 'Successful response'
+    content:
+      application/json:
+        examples:
+          getActionStatusExample:
+            description: 'Status of recent agent actions'
+            value:
+              items:
+                - actionId: 'action-id-1'
+                  type: 'UPGRADE'
+                  status: 'COMPLETE'
+                  creationTime: '2024-01-01T00:00:00.000Z'
+                  completionTime: '2024-01-01T00:05:00.000Z'
+                  nbAgentsActioned: 2
+                  nbAgentsAck: 2
+                  nbAgentsFailed: 0
+  400:
+    description: 'Bad Request'
+    content:
+      application/json:
+        examples:
+          genericErrorResponseExample:
+            description: 'Example of a generic error response'
+            value:
+              statusCode: 400
+              error: 'Bad Request'
+              message: 'An error message describing what went wrong'

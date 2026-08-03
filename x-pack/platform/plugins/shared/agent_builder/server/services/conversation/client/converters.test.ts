@@ -6,7 +6,12 @@
  */
 
 import type { Conversation } from '@kbn/agent-builder-common';
-import { ConversationRoundStatus } from '@kbn/agent-builder-common';
+import {
+  ConversationAccessControlMode,
+  ConversationRoundStatus,
+  ConversationOriginType,
+  ToolOrigin,
+} from '@kbn/agent-builder-common';
 import {
   isToolCallStep,
   ConversationRoundStepType,
@@ -30,7 +35,7 @@ const createTestState = () => ({
   prompt: {
     responses: {
       'tools.my-tool.confirmation': {
-        type: AgentPromptType.confirmation,
+        type: AgentPromptType.confirmation as const,
         response: { allow: true },
       },
     },
@@ -103,6 +108,9 @@ describe('conversation model converters', () => {
           id: 'user_id',
           username: 'user_name',
         },
+        access_control: {
+          access_mode: ConversationAccessControlMode.Private,
+        },
         created_at: '2024-09-04T06:44:17.944Z',
         updated_at: '2025-08-04T06:44:19.123Z',
         rounds: [
@@ -168,6 +176,9 @@ describe('conversation model converters', () => {
           id: 'user_id',
           username: 'user_name',
         },
+        access_control: {
+          access_mode: ConversationAccessControlMode.Private,
+        },
         created_at: '2024-09-04T06:44:17.944Z',
         updated_at: '2025-08-04T06:44:19.123Z',
         rounds: [
@@ -232,6 +243,7 @@ describe('conversation model converters', () => {
               data: { someData: 'someValue' },
             },
           ],
+          tool_origin: undefined,
         },
         {
           type: ConversationRoundStepType.reasoning,
@@ -315,6 +327,79 @@ describe('conversation model converters', () => {
       expect(results[1].type).toBe(ToolResultType.query);
     });
 
+    it('infers tool_origin as internal for attachment tools missing the field', () => {
+      const serialized = documentBase();
+      serialized._source!.conversation_rounds[0].steps = [
+        {
+          type: ConversationRoundStepType.toolCall,
+          tool_call_id: 'call-1',
+          tool_id: 'attachments.read',
+          params: {},
+          results: '[]',
+        },
+      ];
+
+      const deserialized = fromEs(serialized);
+
+      const step = deserialized.rounds[0].steps.filter(isToolCallStep)[0];
+      expect(step.tool_origin).toBe(ToolOrigin.internal);
+    });
+
+    it('infers tool_origin as internal for filestore tools missing the field', () => {
+      const serialized = documentBase();
+      serialized._source!.conversation_rounds[0].steps = [
+        {
+          type: ConversationRoundStepType.toolCall,
+          tool_call_id: 'call-1',
+          tool_id: 'filestore.read',
+          params: {},
+          results: '[]',
+        },
+      ];
+
+      const deserialized = fromEs(serialized);
+
+      const step = deserialized.rounds[0].steps.filter(isToolCallStep)[0];
+      expect(step.tool_origin).toBe(ToolOrigin.internal);
+    });
+
+    it('leaves tool_origin undefined for unknown tools missing the field', () => {
+      const serialized = documentBase();
+      serialized._source!.conversation_rounds[0].steps = [
+        {
+          type: ConversationRoundStepType.toolCall,
+          tool_call_id: 'call-1',
+          tool_id: 'some.custom.tool',
+          params: {},
+          results: '[]',
+        },
+      ];
+
+      const deserialized = fromEs(serialized);
+
+      const step = deserialized.rounds[0].steps.filter(isToolCallStep)[0];
+      expect(step.tool_origin).toBeUndefined();
+    });
+
+    it('preserves existing tool_origin when already set', () => {
+      const serialized = documentBase();
+      serialized._source!.conversation_rounds[0].steps = [
+        {
+          type: ConversationRoundStepType.toolCall,
+          tool_call_id: 'call-1',
+          tool_id: 'my.registry.tool',
+          params: {},
+          results: '[]',
+          tool_origin: ToolOrigin.registry,
+        },
+      ];
+
+      const deserialized = fromEs(serialized);
+
+      const step = deserialized.rounds[0].steps.filter(isToolCallStep)[0];
+      expect(step.tool_origin).toBe(ToolOrigin.registry);
+    });
+
     it('deserializes conversation with attachments', () => {
       const serialized = documentBase();
       serialized._source!.attachments = [
@@ -381,6 +466,65 @@ describe('conversation model converters', () => {
       const deserialized = fromEs(serialized);
 
       expect(deserialized.state).toBeUndefined();
+    });
+
+    it('defaults access control to private for legacy conversations', () => {
+      const serialized = documentBase();
+
+      const deserialized = fromEs(serialized);
+
+      expect(deserialized.access_control).toEqual({
+        access_mode: ConversationAccessControlMode.Private,
+      });
+    });
+
+    it('deserializes conversation access control', () => {
+      const serialized = documentBase();
+      serialized._source!.access_control = {
+        access_mode: ConversationAccessControlMode.Public,
+      };
+
+      const deserialized = fromEs(serialized);
+
+      expect(deserialized.access_control).toEqual({
+        access_mode: ConversationAccessControlMode.Public,
+      });
+    });
+
+    it('deserializes first-class origin', () => {
+      const serialized = documentBase();
+      serialized._source!.origin = {
+        external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
+      };
+
+      const deserialized = fromEs(serialized);
+
+      expect(deserialized.origin).toEqual({
+        external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
+      });
+    });
+
+    it('deserializes round origin and author', () => {
+      const serialized = documentBase();
+      serialized._source!.conversation_rounds[0].author = {
+        id: 'U123',
+        full_name: 'Jane Doe',
+        username: 'jane',
+      };
+      serialized._source!.conversation_rounds[0].origin = {
+        type: ConversationOriginType.Slack,
+      };
+
+      const deserialized = fromEs(serialized);
+
+      expect(deserialized.rounds[0].origin).toEqual({
+        type: 'slack',
+      });
+      expect(deserialized.rounds[0].author).toEqual({
+        id: 'U123',
+        full_name: 'Jane Doe',
+        username: 'jane',
+      });
     });
   });
 
@@ -456,6 +600,9 @@ describe('conversation model converters', () => {
         attachments: [],
         // Legacy field explicitly set to undefined
         rounds: undefined,
+        access_control: {
+          access_mode: ConversationAccessControlMode.Private,
+        },
       });
       // Verify rounds is not present
       expect(serialized.rounds).toBeUndefined();
@@ -552,6 +699,55 @@ describe('conversation model converters', () => {
 
       expect(serialized.state).toBeUndefined();
     });
+
+    it('serializes conversation access control', () => {
+      const conversation = conversationBase();
+      conversation.access_control = {
+        access_mode: ConversationAccessControlMode.Public,
+      };
+
+      const serialized = toEs(conversation, 'space');
+
+      expect(serialized.access_control).toEqual({
+        access_mode: ConversationAccessControlMode.Public,
+      });
+    });
+
+    it('serializes first-class origin', () => {
+      const conversation = conversationBase();
+      conversation.origin = {
+        external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
+      };
+
+      const serialized = toEs(conversation, 'space');
+
+      expect(serialized.origin).toEqual({
+        external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
+      });
+    });
+
+    it('serializes round origin and author', () => {
+      const conversation = conversationBase();
+      conversation.rounds[0].author = {
+        id: 'U123',
+        full_name: 'Jane Doe',
+        username: 'jane',
+      };
+      conversation.rounds[0].origin = {
+        type: ConversationOriginType.Slack,
+      };
+
+      const serialized = toEs(conversation, 'space');
+
+      expect(serialized.conversation_rounds[0].origin).toEqual({
+        type: 'slack',
+      });
+      expect(serialized.conversation_rounds[0].author).toEqual({
+        id: 'U123',
+        full_name: 'Jane Doe',
+        username: 'jane',
+      });
+    });
   });
 
   describe('createRequestToEs', () => {
@@ -588,6 +784,69 @@ describe('conversation model converters', () => {
       });
 
       expect(serialized.state).toBeUndefined();
+    });
+
+    it('defaults access control to private when creating a conversation', () => {
+      const conversation = {
+        agent_id: 'agent_id',
+        title: 'conv_title',
+        rounds: [],
+      };
+
+      const serialized = createRequestToEs({
+        conversation,
+        space: 'space',
+        currentUser: { id: 'user_id', username: 'user_name' },
+        creationDate: new Date(creationDate),
+      });
+
+      expect(serialized.access_control).toEqual({
+        access_mode: ConversationAccessControlMode.Private,
+      });
+    });
+
+    it('serializes explicit access control when creating a conversation', () => {
+      const conversation = {
+        agent_id: 'agent_id',
+        title: 'conv_title',
+        rounds: [],
+        access_control: {
+          access_mode: ConversationAccessControlMode.Public,
+        },
+      };
+
+      const serialized = createRequestToEs({
+        conversation,
+        space: 'space',
+        currentUser: { id: 'user_id', username: 'user_name' },
+        creationDate: new Date(creationDate),
+      });
+
+      expect(serialized.access_control).toEqual({
+        access_mode: ConversationAccessControlMode.Public,
+      });
+    });
+
+    it('serializes first-class origin when creating a conversation', () => {
+      const conversation = {
+        agent_id: 'agent_id',
+        title: 'conv_title',
+        rounds: [],
+        origin: {
+          external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
+        },
+      };
+
+      const serialized = createRequestToEs({
+        conversation,
+        space: 'space',
+        currentUser: { id: 'user_id', username: 'user_name' },
+        creationDate: new Date(creationDate),
+      });
+
+      expect(serialized.origin).toEqual({
+        external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
+      });
     });
   });
 });

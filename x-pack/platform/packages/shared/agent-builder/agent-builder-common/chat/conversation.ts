@@ -6,15 +6,24 @@
  */
 
 import type { UserIdAndName } from '../base/users';
+import type { ToolOrigin, ToolType } from '../tools/definition';
 import type { ToolResult } from '../tools/tool_result';
+import type { ExecutionStatus, SerializedExecutionError } from '../agents/execution_status';
 import type {
   Attachment,
   VersionedAttachment,
   AttachmentInput,
   AttachmentVersionRef,
 } from '../attachments';
-import type { PromptRequest, PromptResponse, PromptStorageState } from '../agents/prompts';
+import type {
+  PromptRequest,
+  PromptResponse,
+  PromptStorageState,
+  AskUserQuestionItem,
+  AskUserQuestionAnswer,
+} from '../agents/prompts';
 import type { RuntimeAgentConfigurationOverrides } from '../agents/definition';
+import type { ConversationAccessControl } from './access_control';
 import type { RoundState } from './round_state';
 
 /**
@@ -34,6 +43,10 @@ export interface RoundInput {
    * References to versioned conversation-level attachments.
    */
   attachment_refs?: AttachmentVersionRef[];
+  /**
+   * Pre-rendered, immutable prompt context for attachments created/updated in this round
+   */
+  attachment_context?: string;
 }
 
 /**
@@ -75,6 +88,9 @@ export enum ConversationRoundStepType {
   toolCall = 'tool_call',
   reasoning = 'reasoning',
   compaction = 'compaction',
+  backgroundAgentComplete = 'background_agent_complete',
+  updateTodos = 'update_todos',
+  askUserQuestion = 'ask_user_question',
 }
 
 // tool call step
@@ -91,6 +107,10 @@ export interface ToolCallProgress {
    * The full text message
    */
   message: string;
+  /**
+   * Optional structured metadata attached to this progress event.
+   */
+  metadata?: Record<string, string>;
 }
 
 /**
@@ -121,6 +141,8 @@ export interface ToolCallWithResult {
    * Optional group ID shared by tool calls that were executed in parallel from the same LLM response
    */
   tool_call_group_id?: string;
+  tool_origin?: ToolOrigin;
+  tool_type?: ToolType;
 }
 
 export type ToolCallStep = ConversationRoundStepMixin<
@@ -151,6 +173,10 @@ export interface ReasoningStepData {
   reasoning: string;
   /** if true, will not be displayed in the thinking panel, only used as "current thinking" **/
   transient?: boolean;
+  /** when reasoning is bound to a tool call, the corresponding tool call ID */
+  tool_call_id?: string;
+  /** when reasoning is bound to a tool call group, the corresponding tool call group ID */
+  tool_call_group_id?: string;
 }
 
 export type ReasoningStep = ConversationRoundStepMixin<
@@ -185,7 +211,87 @@ export const isCompactionStep = (step: ConversationRoundStep): step is Compactio
   return step.type === ConversationRoundStepType.compaction;
 };
 
-export type ConversationRoundStep = ToolCallStep | ReasoningStep | CompactionStep;
+export type BackgroundAgentCompleteStep = ConversationRoundStepMixin<
+  ConversationRoundStepType.backgroundAgentComplete,
+  BackgroundExecutionState
+>;
+
+export const isBackgroundAgentCompleteStep = (
+  step: ConversationRoundStep
+): step is BackgroundAgentCompleteStep => {
+  return step.type === ConversationRoundStepType.backgroundAgentComplete;
+};
+
+export interface TodosStepData {
+  todos: TodoItem[];
+  /** True when todos were inherited from the previous round, not written by the agent this round */
+  carried_over?: boolean;
+}
+
+export type TodosStep = ConversationRoundStepMixin<
+  ConversationRoundStepType.updateTodos,
+  TodosStepData
+>;
+
+export const isTodosStep = (step: ConversationRoundStep): step is TodosStep => {
+  return step.type === ConversationRoundStepType.updateTodos;
+};
+
+// ask_user_question step
+
+export interface AskUserQuestionStepData {
+  /** Id of the prompt that produced this step. Matches the entry in `state.prompt.responses` and the prompt request's `id`. */
+  prompt_id: string;
+  /** The questions presented to the user. */
+  questions: AskUserQuestionItem[];
+  /** Undefined while the step is pending; populated on resume back-fill. */
+  answers?: AskUserQuestionAnswer[];
+}
+
+export type AskUserQuestionStep = ConversationRoundStepMixin<
+  ConversationRoundStepType.askUserQuestion,
+  AskUserQuestionStepData
+>;
+
+export const createAskUserQuestionStep = (data: AskUserQuestionStepData): AskUserQuestionStep => {
+  return {
+    type: ConversationRoundStepType.askUserQuestion,
+    ...data,
+  };
+};
+
+export const isAskUserQuestionStep = (step: ConversationRoundStep): step is AskUserQuestionStep => {
+  return step.type === ConversationRoundStepType.askUserQuestion;
+};
+
+/**
+ * Returns the (single) todos step from a list of steps, if present.
+ * A round only ever has at most one todos step, which is updated in place.
+ */
+export const findTodosStep = (
+  steps: ConversationRoundStep[] | undefined
+): TodosStep | undefined => {
+  return steps?.find(isTodosStep);
+};
+
+/**
+ * Returns the todo list to carry over from the previous round, or undefined if nothing should carry over.
+ * Carryover only happens when at least one item is still incomplete (pending / in_progress).
+ * When carried over, both complete and incomplete items are included so the full plan is visible.
+ */
+export const carriedOverTodos = (todos: TodoItem[] | undefined): TodoItem[] | undefined => {
+  if (!todos?.length) return undefined;
+  const hasIncomplete = todos.some((t) => t.status !== 'completed' && t.status !== 'cancelled');
+  return hasIncomplete ? todos : undefined;
+};
+
+export type ConversationRoundStep =
+  | ToolCallStep
+  | ReasoningStep
+  | CompactionStep
+  | BackgroundAgentCompleteStep
+  | TodosStep
+  | AskUserQuestionStep;
 
 export enum ConversationRoundStatus {
   /** round is currently being processed */
@@ -194,6 +300,24 @@ export enum ConversationRoundStatus {
   completed = 'completed',
   /** round has been interrupted and is awaiting user input */
   awaitingPrompt = 'awaiting_prompt',
+}
+
+/**
+ * Frontend-only derived status for a conversation in the sidebar list.
+ * Computed client-side from the backend `read` flag, `ConversationRoundStatus`,
+ * and the active-streams map — never returned directly by any API endpoint.
+ */
+export enum ConversationDisplayStatus {
+  /** conversation has been read, no pending activity */
+  read = 'read',
+  /** conversation has new content the user hasn't seen */
+  unread = 'unread',
+  /** agent is actively streaming a response */
+  inProgress = 'in_progress',
+  /** agent is paused and waiting for user confirmation (HITL) */
+  awaitingPrompt = 'awaiting_prompt',
+  /** last round ended with an error */
+  error = 'error',
 }
 
 /**
@@ -207,10 +331,14 @@ export interface ConversationRound {
   status: ConversationRoundStatus;
   /** persisted state to resume interrupted states */
   state?: RoundState;
-  /** if status is awaiting_prompt, contains the current prompt request*/
-  pending_prompt?: PromptRequest;
+  /** if status is awaiting_prompt, contains the current prompt requests */
+  pending_prompts?: PromptRequest[];
   /** The user input that initiated the round */
   input: RoundInput;
+  /** Origin metadata for the user input that initiated this round. */
+  origin?: ConversationRoundOrigin;
+  /** Author attribution for the round input, when known (an external system like Slack or GitHub, or a Kibana user). */
+  author?: ConversationRoundAuthor;
   /** List of intermediate steps before the end result, such as tool calls */
   steps: ConversationRoundStep[];
   /** The final response from the assistant */
@@ -227,6 +355,30 @@ export interface ConversationRound {
   trace_id?: string | string[];
   /** Runtime configuration overrides that were applied to this round */
   configuration_overrides?: RuntimeAgentConfigurationOverrides;
+}
+
+export interface ConversationOrigin {
+  /** Stable external conversation key, for example a Slack team/channel/thread identifier. */
+  external_conversation_id: string;
+}
+
+export interface ConversationRoundAuthor {
+  /** Stable author identifier (from the external system like Slack or GitHub, or the Kibana user). */
+  id: string;
+  /** Optional username / handle. */
+  username?: string;
+  /** Optional display name. */
+  full_name?: string;
+}
+
+/** External system the message comes from, for example Slack or GitHub. */
+export enum ConversationOriginType {
+  Slack = 'slack',
+}
+
+export interface ConversationRoundOrigin {
+  /** External system the round input came from. */
+  type: ConversationOriginType;
 }
 
 export interface RoundModelUsageStats {
@@ -246,6 +398,11 @@ export interface RoundModelUsageStats {
    * Total number of output tokens received this round.
    */
   output_tokens: number;
+  /**
+   * Number of input tokens served from cache this round, when reported by the provider.
+   * Subset of `input_tokens` (cache reads), not additive.
+   */
+  cached_input_tokens?: number;
   /**
    * Model identifier from the provider response, if available.
    */
@@ -280,6 +437,28 @@ export interface Conversation {
    * Keeps track of which prompts have been answered and the response.
    */
   state?: ConversationInternalState;
+  /**
+   * Whether the conversation has been marked as read.
+   * Any new or updated conversation has `read` set to `false` by default
+   */
+  read?: boolean;
+  /** current status of the conversation */
+  status?: ConversationRoundStatus;
+  /**
+   * Identifier of the bash/VFS workspace for this conversation.
+   */
+  workspace_id?: string;
+  /** Access mode for the conversation. Missing values are treated as private. */
+  access_control?: ConversationAccessControl;
+  /** External origin used to resolve conversations submitted from an external system like Slack or GitHub. */
+  origin?: ConversationOrigin;
+}
+
+export type TodoStatus = 'pending' | 'in_progress' | 'completed' | 'cancelled';
+
+export interface TodoItem {
+  content: string;
+  status: TodoStatus;
 }
 
 /**
@@ -299,6 +478,30 @@ export interface ConversationInternalState {
    * Reused across rounds until regeneration is needed.
    */
   compaction_summary?: CompactionSummary;
+  /** Background sub-agent executions keyed by execution ID. */
+  background_executions?: Record<string, BackgroundExecutionState>;
+  /** Active todo list for the current conversation. Replaced wholesale on each write. */
+  todos?: TodoItem[];
+}
+
+export interface BackgroundExecutionCompletedAt {
+  /** The round it was completed at. */
+  round_id: string;
+  /** If completion was resolved inside a round, the last tool call group ID before completion. */
+  tool_call_group_id?: string;
+}
+
+export interface BackgroundExecutionState {
+  /** The execution ID of the background sub-agent. */
+  execution_id: string;
+  /** Current status of the execution. */
+  status: ExecutionStatus;
+  /** The sub-agent's response, present when status is 'completed'. */
+  response?: AssistantResponse;
+  /** Error details, present when status is 'failed'. */
+  error?: SerializedExecutionError;
+  /** When and where the execution completed, for positioning the notification. */
+  completed_at?: BackgroundExecutionCompletedAt;
 }
 
 export type ConversationWithoutRounds = Omit<Conversation, 'rounds'>;

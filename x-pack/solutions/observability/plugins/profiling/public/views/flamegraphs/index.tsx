@@ -12,6 +12,7 @@ import { RedirectTo } from '../../components/redirect_to';
 import { useProfilingParams } from '../../hooks/use_profiling_params';
 import { useProfilingRouter } from '../../hooks/use_profiling_router';
 import { useProfilingRoutePath } from '../../hooks/use_profiling_route_path';
+import { DifferentialFlameGraphSearchPanel } from './differential_flamegraphs/differential_flame_graph_search_panel';
 
 export function FlameGraphsView({ children }: { children: React.ReactElement }) {
   const { query } = useProfilingParams('/flamegraphs/*');
@@ -50,7 +51,13 @@ export function FlameGraphsView({ children }: { children: React.ReactElement }) 
   ];
 
   return (
-    <ProfilingAppPageTemplate tabs={tabs} hideSearchBar={isDifferentialView}>
+    <ProfilingAppPageTemplate
+      tabs={tabs}
+      customSearchBar={isDifferentialView ? <DifferentialFlameGraphSearchPanel /> : undefined}
+      pageTitle={i18n.translate('xpack.profiling.flameGraphsView.pageTitle', {
+        defaultMessage: 'Flamegraphs',
+      })}
+    >
       {children}
     </ProfilingAppPageTemplate>
   );

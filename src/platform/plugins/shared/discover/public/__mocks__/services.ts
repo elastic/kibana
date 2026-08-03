@@ -10,12 +10,10 @@
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, of } from 'rxjs';
 import type { DiscoverServices, HistoryLocationState } from '../build_services';
-import type { ProjectRouting } from '@kbn/es-query';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
 import { savedSearchPluginMock } from '@kbn/saved-search-plugin/public/mocks';
-import { ProjectRoutingAccess } from '@kbn/cps-utils';
 import {
   analyticsServiceMock,
   coreMock,
@@ -24,6 +22,7 @@ import {
   scopedHistoryMock,
   themeServiceMock,
 } from '@kbn/core/public/mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 import {
   CONTEXT_STEP_SETTING,
   DEFAULT_COLUMNS_SETTING,
@@ -48,10 +47,12 @@ import type { SearchSourceDependencies } from '@kbn/data-plugin/common';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { createElement } from 'react';
 import { createContextAwarenessMocks } from '../context_awareness/__mocks__';
+import { ProfileStateRegistry } from '../../common/context_awareness';
 import { DiscoverEBTManager } from '../ebt_manager';
 import { discoverSharedPluginMock } from '@kbn/discover-shared-plugin/public/mocks';
 import { createUrlTrackerMock } from './url_tracker.mock';
 import { createBrowserHistory } from 'history';
+import { cpsPluginMock } from '@kbn/cps/public/mocks';
 
 export function createDiscoverServicesMock(): DiscoverServices {
   const dataPlugin = dataPluginMock.createStartContract();
@@ -192,8 +193,6 @@ export function createDiscoverServicesMock(): DiscoverServices {
   history.push('/');
 
   const { profilesManagerMock } = createContextAwarenessMocks();
-  const projectPickerAccess$ = new BehaviorSubject(ProjectRoutingAccess.EDITABLE);
-  const projectRouting$ = new BehaviorSubject<ProjectRouting>(undefined);
 
   return {
     analytics: analyticsServiceMock.createAnalyticsServiceStart(),
@@ -225,7 +224,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
       },
       management: {
         insightsAndAlerting: {
-          triggersActions: true,
+          triggersActionsRules: true,
         },
       },
       indexPatterns: {
@@ -239,9 +238,10 @@ export function createDiscoverServicesMock(): DiscoverServices {
     },
     uiActions: uiActionsPluginMock.createStartContract(),
     uiSettings: uiSettingsMock,
+    settings: corePluginMock.settings,
     http: {
       basePath: '/',
-      get: jest.fn((path: string) => {
+      post: jest.fn((path: string) => {
         // Mock ES|QL timefield endpoint so an ES|QL data view can be created
         if (path.startsWith('/internal/esql/get_timefield')) {
           return Promise.resolve({ timeField: '@timestamp' });
@@ -266,6 +266,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
     },
     metadata: {
       branch: 'test',
+      version: 'major.minor.patch',
     },
     theme,
     storage: new LocalStorageMock({}) as unknown as Storage,
@@ -308,42 +309,31 @@ export function createDiscoverServicesMock(): DiscoverServices {
     singleDocLocator: { getRedirectUrl: jest.fn(() => '') },
     urlTracker: createUrlTrackerMock(),
     profilesManager: profilesManagerMock,
+    profileStateRegistry: new ProfileStateRegistry(),
     ebtManager: new DiscoverEBTManager(),
-    cps: {
-      cpsManager: {
-        whenReady: jest.fn().mockResolvedValue(undefined),
-        fetchProjects: jest.fn().mockResolvedValue(null),
-        getTotalProjectCount: jest.fn().mockReturnValue(0),
-        getProjectRouting$: jest.fn().mockReturnValue(projectRouting$),
-        setProjectRouting: jest.fn((projectRouting: ProjectRouting) => {
-          projectRouting$.next(projectRouting);
-        }),
-        getProjectRouting: jest.fn((overrideValue?: ProjectRouting) => overrideValue),
-        getDefaultProjectRouting: jest.fn().mockReturnValue(undefined),
-        updateDefaultProjectRouting: jest.fn(),
-        getProjectPickerAccess$: jest.fn().mockReturnValue(projectPickerAccess$),
-        registerAppAccess: jest.fn(),
-      },
-    },
+    cps: cpsPluginMock.createStartContract(),
     setHeaderActionMenu: jest.fn(),
     discoverShared: discoverSharedPluginMock.createStartContract(),
     discoverFeatureFlags: {
       getCascadeLayoutEnabled: jest.fn(() => false),
       getIsEsqlDefault: jest.fn(() => false),
-      getEmbeddableTransformsEnabled: jest.fn(() => false),
+      getEmbeddableTransformsEnabled: jest.fn(() => true),
     },
     embeddableEditor: {
       isByValueEditor: jest.fn(() => false),
       isEmbeddedEditor: jest.fn(() => false),
       canSaveToDashboard: jest.fn(() => false),
       transferBackToEditor: jest.fn(),
-      getByValueInput: jest.fn(),
+      getByValueTab: jest.fn(),
+      getEmbeddableId: jest.fn(() => undefined),
+      getOriginatingPath: jest.fn(() => undefined),
       clearEditorState: jest.fn(),
     },
     alertingVTwo: {
-      DynamicRuleFormFlyout: jest.fn(() => null),
+      CreateRuleOptionsFlyout: jest.fn(() => null),
     },
     trackUiMetric: jest.fn(),
+    logger: { get: jest.fn(() => loggerMock.create()) },
   } as unknown as DiscoverServices;
 }
 

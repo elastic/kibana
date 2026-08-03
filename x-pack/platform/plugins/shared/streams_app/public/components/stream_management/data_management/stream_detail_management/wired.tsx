@@ -6,32 +6,39 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { type Streams, isRoot, LOGS_ROOT_STREAM_NAME } from '@kbn/streams-schema';
-import { EuiBadgeGroup, EuiCallOut, EuiFlexGroup, EuiToolTip } from '@elastic/eui';
+import { type Streams, isRoot, isDraftStream, LOGS_ROOT_STREAM_NAME } from '@kbn/streams-schema';
+import { EuiCallOut } from '@elastic/eui';
+import type { AppHeaderBadge } from '@kbn/app-header';
 import { useStreamsAppParams } from '../../../../hooks/use_streams_app_params';
-import { useStreamsPrivileges } from '../../../../hooks/use_streams_privileges';
+import { useStreamsAppRouter } from '../../../../hooks/use_streams_app_router';
+import { useTimeRange } from '../../../../hooks/use_time_range';
 import { RedirectTo } from '../../../redirect_to';
 import { StreamDetailRouting } from '../stream_detail_routing';
 import { StreamDetailSchemaEditor } from '../stream_detail_schema_editor';
 import { StreamDetailLifecycle } from '../stream_detail_lifecycle';
+import { StreamDetailEnrichment } from '../stream_detail_enrichment';
 import { StreamOverview } from '../../../stream_detail_overview';
 import { Wrapper } from './wrapper';
 import { MissingDataStreamCallout } from './missing_data_stream_callout';
-import { useStreamsDetailManagementTabs } from './use_streams_detail_management_tabs';
-import { WiredAdvancedView } from './advanced_view/wired_advanced_view';
+import { PendingRootDataStreamCallout } from './pending_root_data_stream_callout';
 import { StreamDetailDataQuality } from '../../../stream_data_quality';
-import { StreamsAppPageTemplate } from '../../../streams_app_page_template';
+import { StreamsAppHeader, StreamsAppPageTemplate } from '../../../streams_app_page_template';
 import { WiredStreamBadge } from '../../../stream_badges';
 import { StreamDetailAttachments } from '../../../stream_detail_attachments';
+import { useKibana } from '../../../../hooks/use_kibana';
+import { useStreamsPrivileges } from '../../../../hooks/use_streams_privileges';
+import { buildLifecycleTabActions } from './lifecycle_tab_label_with_actions';
+import {
+  ImportLifecycleFlyoutProvider,
+  useImportLifecycleFlyoutContext,
+} from '../stream_detail_lifecycle/import_from_stream';
 
 const wiredStreamManagementSubTabs = [
   'overview',
   'partitioning',
   'processing',
   'schema',
-  'retention',
-  'advanced',
-  'significantEvents',
+  'lifecycle',
   'dataQuality',
   'attachments',
 ] as const;
@@ -39,18 +46,13 @@ const wiredStreamManagementSubTabs = [
 type WiredStreamManagementSubTab = (typeof wiredStreamManagementSubTabs)[number];
 
 const tabRedirects: Record<string, { newTab: WiredStreamManagementSubTab }> = {
+  advanced: { newTab: 'overview' },
   schemaEditor: { newTab: 'schema' },
-  lifecycle: { newTab: 'retention' },
+  retention: { newTab: 'lifecycle' },
   route: { newTab: 'partitioning' },
   enrich: { newTab: 'processing' },
 };
-function isValidManagementSubTab(
-  value: string,
-  overviewPageEnabled: boolean
-): value is WiredStreamManagementSubTab {
-  if (value === 'overview' && !overviewPageEnabled) {
-    return false;
-  }
+function isValidManagementSubTab(value: string): value is WiredStreamManagementSubTab {
   return wiredStreamManagementSubTabs.includes(value as WiredStreamManagementSubTab);
 }
 
@@ -61,32 +63,61 @@ export function WiredStreamDetailManagement({
   definition: Streams.WiredStream.GetResponse;
   refreshDefinition: () => void;
 }) {
+  return (
+    <ImportLifecycleFlyoutProvider>
+      <WiredStreamDetailManagementContent
+        definition={definition}
+        refreshDefinition={refreshDefinition}
+      />
+    </ImportLifecycleFlyoutProvider>
+  );
+}
+
+function WiredStreamDetailManagementContent({
+  definition,
+  refreshDefinition,
+}: {
+  definition: Streams.WiredStream.GetResponse;
+  refreshDefinition: () => void;
+}) {
+  const {
+    core: { notifications },
+    dependencies: {
+      start: { share },
+    },
+  } = useKibana();
   const {
     path: { key, tab },
   } = useStreamsAppParams('/{key}/management/{tab}');
+  const router = useStreamsAppRouter();
+  const { rangeFrom, rangeTo } = useTimeRange();
+  const importLifecycleFlyout = useImportLifecycleFlyoutContext();
 
+  const isProcessingEnabled = !definition.replicated;
   const {
-    features: { attachments, overviewPage },
+    features: { significantEvents },
+    isLoading: isPrivilegesLoading,
   } = useStreamsPrivileges();
 
-  const { processing, isLoading, ...otherTabs } = useStreamsDetailManagementTabs({
-    definition,
-    refreshDefinition,
+  const backToStreamsLabel = i18n.translate('xpack.streams.streamDetailView.backToStreamsLabel', {
+    defaultMessage: 'Streams',
   });
+  const wiredBadges: AppHeaderBadge[] = [
+    {
+      label: i18n.translate('xpack.streams.entityDetailViewWithoutParams.managedBadgeLabel', {
+        defaultMessage: 'Wired',
+      }),
+      renderCustomBadge: () => <WiredStreamBadge />,
+    },
+  ];
 
   if (!definition.privileges.view_index_metadata) {
     return (
       <>
-        <StreamsAppPageTemplate.Header
-          bottomBorder="extended"
-          pageTitle={
-            <EuiFlexGroup gutterSize="s" alignItems="center">
-              {key}
-              <EuiBadgeGroup gutterSize="s">
-                <WiredStreamBadge />
-              </EuiBadgeGroup>
-            </EuiFlexGroup>
-          }
+        <StreamsAppHeader
+          title={key}
+          back={{ href: router.link('/'), label: backToStreamsLabel }}
+          badges={wiredBadges}
         />
         <StreamsAppPageTemplate.Body>
           <EuiCallOut
@@ -109,19 +140,18 @@ export function WiredStreamDetailManagement({
     );
   }
 
-  if (!definition.data_stream_exists) {
+  const isNewRootStream =
+    isRoot(definition.stream.name) && definition.stream.name !== LOGS_ROOT_STREAM_NAME;
+
+  const isDraft = isDraftStream(definition.stream);
+
+  if (!definition.data_stream_exists && !isNewRootStream && !isDraft) {
     return (
       <>
-        <StreamsAppPageTemplate.Header
-          bottomBorder="extended"
-          pageTitle={
-            <EuiFlexGroup gutterSize="s" alignItems="center">
-              {key}
-              <EuiBadgeGroup gutterSize="s">
-                <WiredStreamBadge />
-              </EuiBadgeGroup>
-            </EuiFlexGroup>
-          }
+        <StreamsAppHeader
+          title={key}
+          back={{ href: router.link('/'), label: backToStreamsLabel }}
+          badges={wiredBadges}
         />
         <StreamsAppPageTemplate.Body>
           <MissingDataStreamCallout
@@ -137,37 +167,61 @@ export function WiredStreamDetailManagement({
     );
   }
 
+  if (!definition.data_stream_exists && isNewRootStream) {
+    return (
+      <>
+        <StreamsAppHeader
+          title={key}
+          back={{ href: router.link('/'), label: backToStreamsLabel }}
+          badges={wiredBadges}
+        />
+        <StreamsAppPageTemplate.Body>
+          <PendingRootDataStreamCallout
+            streamName={definition.stream.name}
+            canManage={definition.privileges.manage}
+            refreshDefinition={refreshDefinition}
+          />
+        </StreamsAppPageTemplate.Body>
+      </>
+    );
+  }
+
   const tabs = {
-    ...(overviewPage.enabled
+    overview: {
+      content: <StreamOverview />,
+      label: i18n.translate('xpack.streams.streamDetailView.overviewTab', {
+        defaultMessage: 'Overview',
+      }),
+    },
+    ...(!isDraft
       ? {
-          overview: {
-            content: <StreamOverview />,
-            label: i18n.translate('xpack.streams.streamDetailView.overviewTab', {
-              defaultMessage: 'Overview',
+          lifecycle: {
+            content: (
+              <StreamDetailLifecycle
+                definition={definition}
+                refreshDefinition={refreshDefinition}
+              />
+            ),
+            label: i18n.translate('xpack.streams.streamDetailView.lifecycleTab', {
+              defaultMessage: 'Data lifecycle',
+            }),
+            toolTipContent: i18n.translate('xpack.streams.managementTab.lifecycle.tooltip', {
+              defaultMessage:
+                'Control how long data stays in this stream. Set a custom duration or apply a shared policy.',
+            }),
+            'data-test-subj': 'retentionTab',
+            actions: buildLifecycleTabActions({
+              definition,
+              notifications,
+              share,
+              router,
+              timeRange: { rangeFrom, rangeTo },
+              onImportFromStream: importLifecycleFlyout?.open,
+              isImportFromStreamDisabled: importLifecycleFlyout?.isDisabled,
             }),
           },
         }
       : {}),
-    retention: {
-      content: (
-        <StreamDetailLifecycle definition={definition} refreshDefinition={refreshDefinition} />
-      ),
-      label: (
-        <EuiToolTip
-          position="top"
-          content={i18n.translate('xpack.streams.managementTab.lifecycle.tooltip', {
-            defaultMessage:
-              'Control how long data stays in this stream. Set a custom duration or apply a shared policy.',
-          })}
-        >
-          <span data-test-subj="retentionTab" tabIndex={0}>
-            {i18n.translate('xpack.streams.streamDetailView.lifecycleTab', {
-              defaultMessage: 'Retention',
-            })}
-          </span>
-        </EuiToolTip>
-      ),
-    },
     partitioning: {
       content: (
         <StreamDetailRouting definition={definition} refreshDefinition={refreshDefinition} />
@@ -176,7 +230,21 @@ export function WiredStreamDetailManagement({
         defaultMessage: 'Partitioning',
       }),
     },
-    ...(processing ? { processing } : {}),
+    ...(isProcessingEnabled
+      ? {
+          processing: {
+            content: (
+              <StreamDetailEnrichment
+                definition={definition}
+                refreshDefinition={refreshDefinition}
+              />
+            ),
+            label: i18n.translate('xpack.streams.streamDetailView.processingTab', {
+              defaultMessage: 'Processing',
+            }),
+          },
+        }
+      : {}),
     schema: {
       content: (
         <StreamDetailSchemaEditor definition={definition} refreshDefinition={refreshDefinition} />
@@ -185,47 +253,34 @@ export function WiredStreamDetailManagement({
         defaultMessage: 'Schema',
       }),
     },
-    dataQuality: {
-      content: (
-        <StreamDetailDataQuality definition={definition} refreshDefinition={refreshDefinition} />
-      ),
-      label: (
-        <EuiToolTip
-          content={i18n.translate('xpack.streams.managementTab.dataQuality.wired.tooltip', {
-            defaultMessage: 'View details about this stream’s data quality',
-          })}
-        >
-          <span data-test-subj="dataQualityTab" tabIndex={0}>
-            {i18n.translate('xpack.streams.streamDetailView.qualityTab', {
-              defaultMessage: 'Data quality',
-            })}
-          </span>
-        </EuiToolTip>
-      ),
-    },
-    ...(attachments.enabled
+    ...(!isDraft
       ? {
-          attachments: {
-            content: <StreamDetailAttachments definition={definition} />,
-            label: i18n.translate('xpack.streams.streamDetailView.attachmentsTab', {
-              defaultMessage: 'Attachments',
-            }),
-          },
-        }
-      : {}),
-    ...otherTabs,
-    ...(definition.privileges.manage
-      ? {
-          advanced: {
+          dataQuality: {
             content: (
-              <WiredAdvancedView definition={definition} refreshDefinition={refreshDefinition} />
+              <StreamDetailDataQuality
+                definition={definition}
+                refreshDefinition={refreshDefinition}
+              />
             ),
-            label: i18n.translate('xpack.streams.streamDetailView.advancedTab', {
-              defaultMessage: 'Advanced',
+            label: i18n.translate('xpack.streams.streamDetailView.qualityTab', {
+              defaultMessage: 'Data quality',
             }),
+            toolTipContent: i18n.translate(
+              'xpack.streams.managementTab.dataQuality.wired.tooltip',
+              {
+                defaultMessage: "View details about this stream's data quality",
+              }
+            ),
+            'data-test-subj': 'dataQualityTab',
           },
         }
       : {}),
+    attachments: {
+      content: <StreamDetailAttachments definition={definition} />,
+      label: i18n.translate('xpack.streams.streamDetailView.attachmentsTab', {
+        defaultMessage: 'Attachments',
+      }),
+    },
   };
 
   const redirectConfig = tabRedirects[tab];
@@ -238,20 +293,34 @@ export function WiredStreamDetailManagement({
     );
   }
 
-  if (tab === 'overview' && !overviewPage.enabled) {
+  if (tab === 'significantEvents') {
+    if (isPrivilegesLoading) {
+      return null;
+    }
+
+    if (significantEvents?.available) {
+      return (
+        <RedirectTo
+          path="/_discovery/{tab}"
+          params={{ path: { tab: 'knowledge_indicators' }, query: { stream: key } }}
+        />
+      );
+    }
+
     return (
-      <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: 'retention' } }} />
+      <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: 'overview' } }} />
     );
   }
 
-  if (isValidManagementSubTab(tab, overviewPage.enabled)) {
+  if (isValidManagementSubTab(tab) && tabs[tab]?.content) {
     return <Wrapper tabs={tabs} streamId={key} tab={tab} />;
   }
 
-  if (isLoading) {
-    return null;
+  if (isDraft && (tab === 'lifecycle' || tab === 'dataQuality')) {
+    return (
+      <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: 'partitioning' } }} />
+    );
   }
 
-  const defaultTab = overviewPage.enabled ? 'overview' : 'retention';
-  return <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: defaultTab } }} />;
+  return <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: 'overview' } }} />;
 }

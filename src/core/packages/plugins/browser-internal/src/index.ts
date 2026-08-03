@@ -14,3 +14,7 @@ export type {
   PluginsServiceSetupDeps,
   PluginsServiceStartDeps,
 } from './plugins_service';
+
+// Plugin reader exports
+export { read } from './plugin_reader';
+export type { PluginDefinition, UnknownPluginInitializer, CoreWindow } from './plugin_reader';

@@ -8,6 +8,7 @@
 import type { SavedObjectsType } from '@kbn/core/server';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { CASE_ATTACHMENT_SAVED_OBJECT } from '../../../common/constants';
+import { modelVersion1 } from './model_versions/model_version_1';
 
 /**
  * Saved object type for unified attachments
@@ -22,18 +23,20 @@ export const createCaseAttachmentSavedObjectType = (): SavedObjectsType => ({
   indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
   hidden: true,
   namespaceType: 'multiple-isolated',
-  convertToMultiNamespaceTypeVersion: '8.0.0',
   mappings: {
     dynamic: false,
     properties: {
       type: {
         type: 'keyword',
+        ignore_above: 1024,
       },
       attachmentId: {
         type: 'keyword',
+        ignore_above: 1024,
       },
       owner: {
         type: 'keyword',
+        ignore_above: 1024,
       },
       data: {
         properties: {
@@ -41,18 +44,11 @@ export const createCaseAttachmentSavedObjectType = (): SavedObjectsType => ({
             type: 'text',
           },
           /*
-          persistableState: {
+          state: {
             dynamic: false,
             properties: {},
           },
            */
-        },
-      },
-      metadata: {
-        properties: {
-          actionType: {
-            type: 'keyword',
-          },
         },
       },
       created_at: {
@@ -73,6 +69,7 @@ export const createCaseAttachmentSavedObjectType = (): SavedObjectsType => ({
            */
           username: {
             type: 'keyword',
+            ignore_above: 1024,
           },
         },
       },
@@ -121,7 +118,9 @@ export const createCaseAttachmentSavedObjectType = (): SavedObjectsType => ({
     },
   },
   migrations: () => ({}),
-  modelVersions: {},
+  modelVersions: {
+    1: modelVersion1,
+  },
   management: {
     importableAndExportable: true,
     visibleInManagement: false,

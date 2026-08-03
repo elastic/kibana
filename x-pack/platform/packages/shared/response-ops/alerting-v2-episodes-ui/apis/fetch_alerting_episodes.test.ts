@@ -8,28 +8,32 @@
 import { ESQLVariableType } from '@kbn/esql-types';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
-import { buildEpisodesQuery } from '../utils/build_episodes_esql_query';
+import { buildEpisodesQuery } from '../queries/episodes_query';
 import { fetchAlertingEpisodes } from './fetch_alerting_episodes';
 
 jest.mock('../utils/execute_esql_query');
 
 const mockExecuteEsqlQuery = jest.mocked(executeEsqlQuery);
 
+const SPACE_ID = 'default';
+
 describe('fetchAlertingEpisodes', () => {
   const mockExpressions = {} as ExpressionsStart;
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockExecuteEsqlQuery.mockResolvedValue([]);
   });
 
-  it('should call executeEsqlQuery with correct parameters', () => {
+  it('should call executeEsqlQuery with correct parameters', async () => {
     const pageSize = 10;
-    const expectedQuery = buildEpisodesQuery({
+    const expectedQuery = buildEpisodesQuery(SPACE_ID, {
       sortField: '@timestamp',
       sortDirection: 'desc',
     }).print('basic');
 
-    fetchAlertingEpisodes({
+    await fetchAlertingEpisodes({
+      spaceId: SPACE_ID,
       pageSize,
       services: { expressions: mockExpressions },
     });
@@ -52,14 +56,15 @@ describe('fetchAlertingEpisodes', () => {
     });
   });
 
-  it('should call executeEsqlQuery with different page size', () => {
+  it('should call executeEsqlQuery with different page size', async () => {
     const pageSize = 20;
-    const expectedQuery = buildEpisodesQuery({
+    const expectedQuery = buildEpisodesQuery(SPACE_ID, {
       sortField: '@timestamp',
       sortDirection: 'desc',
     }).print('basic');
 
-    fetchAlertingEpisodes({
+    await fetchAlertingEpisodes({
+      spaceId: SPACE_ID,
       pageSize,
       services: { expressions: mockExpressions },
     });
@@ -82,16 +87,17 @@ describe('fetchAlertingEpisodes', () => {
     });
   });
 
-  it('should call executeEsqlQuery with abort signal when provided', () => {
+  it('should call executeEsqlQuery with abort signal when provided', async () => {
     const pageSize = 15;
     const abortController = new AbortController();
     const abortSignal = abortController.signal;
-    const expectedQuery = buildEpisodesQuery({
+    const expectedQuery = buildEpisodesQuery(SPACE_ID, {
       sortField: '@timestamp',
       sortDirection: 'desc',
     }).print('basic');
 
-    fetchAlertingEpisodes({
+    await fetchAlertingEpisodes({
+      spaceId: SPACE_ID,
       pageSize,
       abortSignal,
       services: { expressions: mockExpressions },
@@ -115,15 +121,16 @@ describe('fetchAlertingEpisodes', () => {
     });
   });
 
-  it('should call executeEsqlQuery with custom sort parameters', () => {
+  it('should call executeEsqlQuery with custom sort parameters', async () => {
     const pageSize = 25;
     const sortState = {
       sortField: 'episode.status',
       sortDirection: 'asc' as const,
     };
-    const expectedQuery = buildEpisodesQuery(sortState).print('basic');
+    const expectedQuery = buildEpisodesQuery(SPACE_ID, sortState).print('basic');
 
-    fetchAlertingEpisodes({
+    await fetchAlertingEpisodes({
+      spaceId: SPACE_ID,
       pageSize,
       sortState,
       services: { expressions: mockExpressions },

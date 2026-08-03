@@ -9,19 +9,27 @@
 
 import Path from 'path';
 import type { Node } from 'ts-morph';
-import { Project } from 'ts-morph';
+import { Project, SyntaxKind } from 'ts-morph';
 import {
   getJSDocParamComment,
   getJSDocReturnTagComment,
   getJSDocTags,
   getJSDocs,
   getCommentsFromNode,
+  type PluginContext,
 } from './js_doc_utils';
 
 import { isNamedNode } from '../tsmorph_utils';
+import { ApiScope } from '../types';
 
 let project: Project;
 let sourceFile: ReturnType<Project['getSourceFile']>;
+let pluginSourceFile: ReturnType<Project['getSourceFile']>;
+const pluginContext: PluginContext = {
+  pluginId: 'pluginA',
+  scope: ApiScope.CLIENT,
+  docId: 'kibPluginAPluginApi',
+};
 
 function getNodeByName(name: string): Node | undefined {
   if (!sourceFile) return undefined;
@@ -41,6 +49,14 @@ function getNodeByName(name: string): Node | undefined {
   return undefined;
 }
 
+function getInterfaceMemberNode(interfaceName: string, memberName: string): Node | undefined {
+  if (!pluginSourceFile) {
+    return undefined;
+  }
+
+  return pluginSourceFile.getInterface(interfaceName)?.getProperty(memberName);
+}
+
 beforeAll(() => {
   const tsConfigFilePath = Path.resolve(
     __dirname,
@@ -53,7 +69,11 @@ beforeAll(() => {
   sourceFile = project.getSourceFile(
     Path.resolve(__dirname, '../integration_tests/__fixtures__/src/plugin_a/public/fns.ts')
   );
+  pluginSourceFile = project.getSourceFile(
+    Path.resolve(__dirname, '../integration_tests/__fixtures__/src/plugin_a/public/plugin.ts')
+  );
   expect(sourceFile).toBeDefined();
+  expect(pluginSourceFile).toBeDefined();
 });
 
 describe('getJSDocParamComment', () => {
@@ -208,6 +228,23 @@ describe('getJSDocReturnTagComment', () => {
     expect(comment).toBeDefined();
     expect(comment.length).toBeGreaterThan(0);
   });
+
+  it('renders local JSDoc links with the existing doc id helper format', () => {
+    const node = getInterfaceMemberNode('Start', 'getSearchLanguage');
+    expect(node).toBeDefined();
+
+    const comment = getJSDocReturnTagComment(node!, pluginContext);
+    expect(comment).toEqual([
+      'The currently selected ',
+      {
+        pluginId: 'pluginA',
+        scope: 'public',
+        docId: 'kibPluginAPluginApi',
+        section: 'def-public.SearchLanguage',
+        text: 'SearchLanguage',
+      },
+    ]);
+  });
 });
 
 describe('getJSDocTags', () => {
@@ -259,6 +296,80 @@ describe('getJSDocTags', () => {
   });
 });
 
+describe('getCommentsFromNode link parsing', () => {
+  it('renders local identifier links as local references', () => {
+    const node = getInterfaceMemberNode('Setup', 'getSearchService2');
+    expect(node).toBeDefined();
+
+    const comment = getCommentsFromNode(node!, pluginContext);
+    expect(comment).toEqual([
+      '\nThis uses an inlined object type rather than referencing an exported type, which is discouraged.\nprefer the way ',
+      {
+        pluginId: 'pluginA',
+        scope: 'public',
+        docId: 'kibPluginAPluginApi',
+        section: 'def-public.getSearchService',
+        text: 'getSearchService',
+      },
+      ' is typed.\n',
+    ]);
+  });
+
+  it('keeps external url links as plain text labels', () => {
+    const testProject = new Project({
+      useInMemoryFileSystem: true,
+    });
+
+    const testSourceFile = testProject.createSourceFile(
+      'test.ts',
+      `
+      /**
+       * A {@link https://example.com/docs helper-function} type.
+       */
+      export interface HelperDelegate {}
+      `
+    );
+
+    const node = testSourceFile.getInterface('HelperDelegate');
+    expect(node).toBeDefined();
+
+    const comment = getCommentsFromNode(node!, pluginContext);
+    expect(comment).toEqual(['\nA ', 'helper-function', ' type.']);
+  });
+
+  it('supports the space-delimited display text form for local links', () => {
+    const testProject = new Project({
+      useInMemoryFileSystem: true,
+    });
+
+    const testSourceFile = testProject.createSourceFile(
+      'test.ts',
+      `
+      /**
+       * {@link RecentlyAccessed APIs} for recently accessed history.
+       */
+      export interface RecentlyAccessed {}
+      `
+    );
+
+    const node = testSourceFile.getInterface('RecentlyAccessed');
+    expect(node).toBeDefined();
+
+    const comment = getCommentsFromNode(node!, pluginContext);
+    expect(comment).toEqual([
+      '\n',
+      {
+        pluginId: 'pluginA',
+        scope: 'public',
+        docId: 'kibPluginAPluginApi',
+        section: 'def-public.RecentlyAccessed',
+        text: 'APIs',
+      },
+      ' for recently accessed history.',
+    ]);
+  });
+});
+
 describe('getJSDocs', () => {
   it('extracts JSDoc from function declaration', () => {
     const node = getNodeByName('notAnArrowFn');
@@ -295,6 +406,93 @@ describe('getJSDocs', () => {
     const jsDocs = getJSDocs(arrowFnVar!);
     expect(jsDocs).toBeDefined();
     expect(jsDocs!.length).toBeGreaterThan(0);
+  });
+
+  it('handles property assignments by inheriting variable statement JSDoc when they have no own comment', () => {
+    const testProject = new Project({
+      useInMemoryFileSystem: true,
+    });
+
+    const testSourceFile = testProject.createSourceFile(
+      'test.ts',
+      `
+      /**
+       * Parent docs.
+       * @param input Parent input.
+       * @returns Parent result.
+       */
+      export const api = {
+        run: (input: string) => input,
+      };
+      `
+    );
+
+    const property = testSourceFile
+      .getVariableDeclarationOrThrow('api')
+      .getInitializerIfKindOrThrow(SyntaxKind.ObjectLiteralExpression)
+      .getPropertyOrThrow('run')
+      .asKindOrThrow(SyntaxKind.PropertyAssignment);
+
+    const jsDocs = getJSDocs(property);
+    expect(jsDocs).toBeDefined();
+    expect(jsDocs!.length).toBeGreaterThan(0);
+  });
+
+  it('does not inherit variable statement JSDoc when property assignment has its own comment', () => {
+    const testProject = new Project({
+      useInMemoryFileSystem: true,
+    });
+
+    const testSourceFile = testProject.createSourceFile(
+      'test.ts',
+      `
+      /**
+       * Parent docs.
+       */
+      export const api = {
+        /** Child docs. */
+        run: (input: string) => input,
+      };
+      `
+    );
+
+    const property = testSourceFile
+      .getVariableDeclarationOrThrow('api')
+      .getInitializerIfKindOrThrow(SyntaxKind.ObjectLiteralExpression)
+      .getPropertyOrThrow('run')
+      .asKindOrThrow(SyntaxKind.PropertyAssignment);
+
+    const jsDocs = getJSDocs(property);
+    expect(jsDocs).toBeUndefined();
+
+    const comments = getCommentsFromNode(property!, pluginContext);
+    expect(comments).toBeDefined();
+    expect(comments![0]).toContain('Child docs');
+  });
+
+  it('does not fall through to line comments for JSDocable nodes without JSDoc', () => {
+    const testProject = new Project({
+      useInMemoryFileSystem: true,
+    });
+
+    const testSourceFile = testProject.createSourceFile(
+      'test.ts',
+      `
+      // stray line comment
+      export function noJsDoc(): string {
+        return 'ok';
+      }
+      `
+    );
+
+    const func = testSourceFile.getFunction('noJsDoc');
+    expect(func).toBeDefined();
+
+    const jsDocs = getJSDocs(func!);
+    expect(jsDocs).toEqual([]);
+
+    const comments = getCommentsFromNode(func!, pluginContext);
+    expect(comments).toEqual([]);
   });
 
   it('handles variable declaration with grandparent JSDoc (line 39 coverage)', () => {

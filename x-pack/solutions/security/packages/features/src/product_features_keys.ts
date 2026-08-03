@@ -69,6 +69,10 @@ export enum ProductFeatureSecurityKey {
    */
   endpointHostIsolationExceptions = 'endpoint_host_isolation_exceptions',
   /**
+   * Enables custom YARA signature management for Elastic Defend.
+   */
+  endpointCustomYaraSignatures = 'endpoint_custom_yara_signatures',
+  /**
    * Enables all of endpoint's supported response actions - like host isolation, file operations,
    * process operations, command execution, etc.
    */
@@ -194,6 +198,11 @@ export enum ProductFeatureAlertsKey {
   externalDetections = 'external_detections',
 }
 
+export enum ProductFeatureWorkflowsKey {
+  /** Enables Workflows feature in a general sense */
+  workflows = 'workflows',
+}
+
 // Merges the two enums.
 export const ProductFeatureKey = {
   ...ProductFeatureSecurityKey,
@@ -205,6 +214,7 @@ export const ProductFeatureKey = {
   ...ProductFeatureNotesKey,
   ...ProductFeatureRulesKey,
   ...ProductFeatureAlertsKey,
+  ...ProductFeatureWorkflowsKey,
 };
 // We need to merge the value and the type and export both to replicate how enum works.
 export type ProductFeatureKeyType =
@@ -216,7 +226,8 @@ export type ProductFeatureKeyType =
   | ProductFeatureTimelineKey
   | ProductFeatureNotesKey
   | ProductFeatureRulesKey
-  | ProductFeatureAlertsKey;
+  | ProductFeatureAlertsKey
+  | ProductFeatureWorkflowsKey;
 
 export const ALL_PRODUCT_FEATURE_KEYS = Object.freeze(Object.values(ProductFeatureKey));
 
@@ -229,6 +240,7 @@ export enum SecuritySubFeatureId {
   hostIsolationExceptionsBasic = 'hostIsolationExceptionsBasicSubFeature',
   blocklist = 'blocklistSubFeature',
   eventFilters = 'eventFiltersSubFeature',
+  customYaraSignatures = 'customYaraSignaturesSubFeature',
   globalArtifactManagement = 'globalArtifactManagementSubFeature',
   policyManagement = 'policyManagementSubFeature',
   scriptsManagement = 'scriptsManagementSubFeature',
@@ -266,4 +278,9 @@ export enum AttackDiscoverySubFeatureId {
 /** Sub-features IDs for Security Rules */
 export enum RulesSubFeatureId {
   exceptions = 'exceptionsSubFeature',
+  investigationGuide = 'investigationGuideSubFeature',
+  customHighlightedFields = 'customHighlightedFieldsSubFeature',
+  enableDisableRules = 'enableDisableRulesSubFeature',
+  manualRunRules = 'manualRunRulesSubFeature',
+  rulesManagementSettings = 'rulesManagementSettingsSubFeature',
 }

@@ -6,10 +6,11 @@
  */
 
 import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
+import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { DATA_SOURCES_SHORT_TITLE } from '@kbn/data-sources-plugin/common';
+import { getWorkflowsNavPanel } from '@kbn/deeplinks-workflows';
 
-export const createNavigationTree = (): NavigationTreeDefinition => {
+export const createNavigationTree = (core: CoreStart): NavigationTreeDefinition => {
   return {
     body: [
       {
@@ -22,15 +23,7 @@ export const createNavigationTree = (): NavigationTreeDefinition => {
         icon: 'productAgent',
         link: 'agent_builder',
       },
-      {
-        link: 'data_sources',
-        title: DATA_SOURCES_SHORT_TITLE,
-        icon: 'plugs',
-        badgeType: 'techPreview',
-      },
-      {
-        link: 'workflows',
-      },
+      ...getWorkflowsNavPanel(core),
       {
         link: 'dashboards',
         icon: 'productDashboard',

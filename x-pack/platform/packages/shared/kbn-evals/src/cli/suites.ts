@@ -9,7 +9,7 @@ import Fs from 'fs';
 import Path from 'path';
 import type { ToolingLog } from '@kbn/tooling-log';
 
-const METADATA_RELATIVE_PATH = 'x-pack/platform/packages/shared/kbn-evals/evals.suites.json';
+const METADATA_RELATIVE_PATH = '.buildkite/pipelines/evals/evals.suites.json';
 
 const SKIP_DIRS = new Set([
   '.git',

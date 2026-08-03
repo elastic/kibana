@@ -25,7 +25,11 @@ import type {
   XYByReferenceAnnotationLayerConfig,
 } from '@kbn/lens-common';
 import { LENS_UNKNOWN_VIS } from '@kbn/lens-common';
-import type { LensByValueSerializedAPIConfig, LensSerializedAPIConfig } from '@kbn/lens-common-2';
+import type {
+  LensByValueSerializedAPIConfig,
+  LensSerializedAPIConfig,
+  LensWireAPIConfig,
+} from '@kbn/lens-common-2';
 import type { ViewMode } from '@kbn/presentation-publishing';
 import {
   apiHasExecutionContext,
@@ -38,13 +42,15 @@ import { isObject } from 'lodash';
 import { BehaviorSubject } from 'rxjs';
 
 import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
-import { isLensAPIFormat } from '@kbn/lens-embeddable-utils/config_builder/utils';
+import { isLensAPIFormat } from '@kbn/lens-embeddable-utils';
 
 import type { StrippedLensState } from '../../common/transforms/helpers';
+import { isFlattenedAPIConfig, unflattenAPIConfig } from '../../common/transforms/utils';
 import { getLensBuilder } from '../lazy_builder';
 import type { ESQLStartServices } from './esql';
 import { loadESQLAttributes } from './esql';
 import type { LensEmbeddableStartServices } from './types';
+import type { FlattenedLensByValuePanelSchema } from '../../server/types';
 
 export function createEmptyLensState(
   visualizationType: null | string = null,
@@ -82,8 +88,9 @@ export async function deserializeState(
     attributeService,
     ...services
   }: Pick<LensEmbeddableStartServices, 'attributeService'> & ESQLStartServices,
-  state: LensSerializedAPIConfig
+  rawState: LensWireAPIConfig
 ): Promise<LensRuntimeState> {
+  const state = isFlattenedAPIConfig(rawState) ? unflattenAPIConfig(rawState) : rawState;
   const fallbackAttributes = createEmptyLensState().attributes;
   const refId = 'ref_id' in state ? state.ref_id : undefined;
 
@@ -104,7 +111,7 @@ export async function deserializeState(
     }
   }
 
-  const newState = transformFromApiConfig(state as LensSerializedAPIConfig) as LensRuntimeState;
+  const newState = transformFromApiConfig(state) as LensRuntimeState;
 
   if (newState.isNewPanel) {
     try {
@@ -177,7 +184,14 @@ export function getStructuredDatasourceStates(
   };
 }
 
-export function transformFromApiConfig(state: LensSerializedAPIConfig): LensSerializedState {
+export function transformFromApiConfig(
+  rawState: LensWireAPIConfig | FlattenedLensByValuePanelSchema
+): LensSerializedState {
+  // The dashboard may provide state in the flat API format (from server-side transforms)
+  // where chart props sit at the top level without an `attributes` wrapper.
+  // Normalize to the nested format before proceeding.
+  const state = isFlattenedAPIConfig(rawState) ? unflattenAPIConfig(rawState) : rawState;
+
   const builder = getLensBuilder();
 
   if (!builder?.isEnabled) {
@@ -199,7 +213,6 @@ export function transformFromApiConfig(state: LensSerializedAPIConfig): LensSeri
   }
 
   if (!state.attributes) {
-    // Not sure if this is possible
     throw new Error('attributes are missing');
   }
 
@@ -243,7 +256,6 @@ export function transformToApiConfig(state: StrippedLensState): LensSerializedAP
   }
 
   if (!attributes) {
-    // This should only ever handle by-value state.
     throw new Error('attributes are missing');
   }
 
@@ -278,8 +290,8 @@ export function updateAttributesWithAnnotation(
   const { attributes } = state;
   if (attributes.visualizationType !== 'lnsXY') return undefined;
 
-  const vizState = attributes.state.visualization as XYVisualizationState | undefined;
-  if (!vizState?.layers) return undefined;
+  const visState = attributes.state.visualization as XYVisualizationState | undefined;
+  if (!visState?.layers) return undefined;
 
   // In the persisted form, annotation layers use annotationGroupRef (a reference name)
   // instead of annotationGroupId. Build a lookup to resolve these via the references array.
@@ -291,7 +303,7 @@ export function updateAttributesWithAnnotation(
   }
 
   let changed = false;
-  const layers = vizState.layers.map((layer) => {
+  const layers = visState.layers.map((layer) => {
     // Hydrated form: annotationGroupId is directly on the layer during inline editing
     // and on saved dashboards after injection.
     if ('annotationGroupId' in layer && layer.annotationGroupId === groupId) {
@@ -331,7 +343,7 @@ export function updateAttributesWithAnnotation(
         ...state,
         attributes: {
           ...attributes,
-          state: { ...attributes.state, visualization: { ...vizState, layers } },
+          state: { ...attributes.state, visualization: { ...visState, layers } },
         },
       }
     : undefined;
@@ -347,11 +359,11 @@ export function updateAttributesWithAnnotation(
  * "linked with local changes" layers.
  */
 export async function saveUpdatedLinkedAnnotationsToLibrary(
-  vizState: unknown,
+  visState: unknown,
   eventAnnotationService: EventAnnotationServiceType
 ): Promise<unknown> {
-  const XYVisualizationState = vizState as XYVisualizationState | undefined;
-  if (!XYVisualizationState?.layers) return vizState;
+  const XYVisualizationState = visState as XYVisualizationState | undefined;
+  if (!XYVisualizationState?.layers) return visState;
 
   let updatedLayers: XYVisualizationState['layers'] | undefined;
 
@@ -394,7 +406,7 @@ export async function saveUpdatedLinkedAnnotationsToLibrary(
     }
   }
 
-  if (!updatedLayers) return vizState;
+  if (!updatedLayers) return visState;
 
   return { ...XYVisualizationState, layers: updatedLayers };
 }

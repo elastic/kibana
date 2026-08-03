@@ -9,59 +9,68 @@ import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { searchConfigurationSchema } from '../common/search_configuration_schema';
 
-export const errorCountParamsSchema = schema.object({
-  windowSize: schema.number({
-    meta: {
-      description:
-        'The time frame in which the errors must occur (in `windowUnit` units). Generally it should be a value higher than the rule check interval to avoid gaps in detection.',
-    },
-  }),
-  windowUnit: schema.string({
-    meta: { description: 'The type of units for the time window: minutes, hours, or days.' },
-  }),
-  threshold: schema.number({
-    meta: { description: 'The number of errors, which is the threshold for alerts.' },
-  }),
-  serviceName: schema.maybe(
-    schema.string({
+export const errorCountParamsSchema = schema.object(
+  {
+    windowSize: schema.number({
       meta: {
         description:
-          'Filter the errors coming from your application to apply the rule to a specific service.',
+          'The time frame in which the errors must occur (in `windowUnit` units). Generally it should be a value higher than the rule check interval to avoid gaps in detection.',
       },
-    })
-  ),
-  environment: schema.string({
-    meta: {
-      description:
-        'Filter the errors coming from your application to apply the rule to a specific environment.',
-    },
-  }),
-  groupBy: schema.maybe(
-    schema.arrayOf(
+    }),
+    windowUnit: schema.string({
+      meta: { description: 'The type of units for the time window: minutes, hours, or days.' },
+    }),
+    threshold: schema.number({
+      meta: { description: 'The number of errors, which is the threshold for alerts.' },
+    }),
+    serviceName: schema.maybe(
       schema.string({
         meta: {
           description:
-            'Perform a composite aggregation against the selected fields. When any of these groups match the selected rule conditions, an alert is triggered per group.',
+            'Filter the errors coming from your application to apply the rule to a specific service.',
         },
       })
-    )
-  ),
-  errorGroupingKey: schema.maybe(
-    schema.string({
+    ),
+    environment: schema.string({
       meta: {
         description:
-          'Filter the errors coming from your application to apply the rule to a specific error grouping key, which is a hash of the stack trace and other properties.',
+          'Filter the errors coming from your application to apply the rule to a specific environment.',
       },
-    })
-  ),
-  useKqlFilter: schema.maybe(
-    schema.boolean({
-      meta: {
-        description: 'A filter in Kibana Query Language (KQL) that limits the scope of the rule.',
-      },
-    })
-  ),
-  searchConfiguration: schema.maybe(searchConfigurationSchema),
-});
+    }),
+    groupBy: schema.maybe(
+      schema.arrayOf(
+        schema.string({
+          meta: {
+            description:
+              'Perform a composite aggregation against the selected fields. When any of these groups match the selected rule conditions, an alert is triggered per group.',
+          },
+        })
+      )
+    ),
+    errorGroupingKey: schema.maybe(
+      schema.string({
+        meta: {
+          description:
+            'Filter the errors coming from your application to apply the rule to a specific error grouping key, which is a hash of the stack trace and other properties.',
+        },
+      })
+    ),
+    useKqlFilter: schema.maybe(
+      schema.boolean({
+        meta: {
+          description: 'A filter in Kibana Query Language (KQL) that limits the scope of the rule.',
+        },
+      })
+    ),
+    searchConfiguration: schema.maybe(searchConfigurationSchema),
+  },
+  {
+    meta: {
+      title: 'Error Count Rule Params',
+      description:
+        'The parameters for the error count rule. These parameters are appropriate when `rule_type_id` is `apm.error_rate`.',
+    },
+  }
+);
 
 export type ErrorCountRuleParams = TypeOf<typeof errorCountParamsSchema>;

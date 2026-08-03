@@ -28,24 +28,21 @@ import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR } from '@kbn/management-settings-i
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
-import { useLoadConnectors } from '@kbn/inference-connectors';
+import { useLoadConnectors, type AIConnector } from '@kbn/inference-connectors';
 import { useAuthorization } from '../hooks/use_authorization';
 import { useKibana } from '..';
 import { ConnectorSetup } from './connector_setup';
 import * as i18n from './translations';
 
-const ELASTIC_LLM_CONNECTOR_ID = 'Elastic-Managed-LLM';
-
 /**
- * Returns the default connector with priority:
+ * Returns the default connector with priority based on available connectors:
  * 1. User's settings default (if set and exists)
- * 2. Elastic Managed LLM
- * 3. First available connector
+ * 2. First available connector (recommended ones are sorted to the top)
  */
 const getDefaultConnector = (
-  connectors: ActionConnector[] | undefined,
+  connectors: AIConnector[] | undefined,
   settingsDefaultConnectorId: string | undefined
-): ActionConnector | undefined => {
+): AIConnector | undefined => {
   if (!connectors?.length) {
     return undefined;
   }
@@ -60,13 +57,7 @@ const getDefaultConnector = (
     }
   }
 
-  // 2. Elastic Managed LLM
-  const elasticLLM = validConnectors.find((c) => c.id === ELASTIC_LLM_CONNECTOR_ID);
-  if (elasticLLM) {
-    return elasticLLM;
-  }
-
-  // 3. First available connector
+  // 2. First available connector (recommended ones are sorted to the top from inference connectors)
   return validConnectors[0];
 };
 
@@ -78,7 +69,7 @@ export interface ConnectorSelectorProps {
 }
 
 interface ConnectorData {
-  connectors: ActionConnector[] | undefined;
+  connectors: AIConnector[] | undefined;
   customConnectors: ConnectorSelectableComponentProps['customConnectors'];
   preConfiguredConnectors: ConnectorSelectableComponentProps['preConfiguredConnectors'];
   defaultConnectorId: string | undefined;
@@ -322,7 +313,7 @@ export const ConnectorSelector: React.FC<ConnectorSelectorProps> = ({
     GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR
   );
 
-  // Get default connector using priority: settings default > Elastic LLM > OpenAI/Azure > others
+  // Get default connector using priority: settings default > first available (recommended sorted first)
   const defaultConnector = useMemo(
     () => getDefaultConnector(connectors, settingsDefaultConnectorId),
     [connectors, settingsDefaultConnectorId]
@@ -365,7 +356,7 @@ export const ConnectorSelector: React.FC<ConnectorSelectorProps> = ({
   const handleManageConnectorsClick = useCallback(() => {
     setIsPopoverOpen(false);
     application.navigateToApp('management', {
-      path: '/insightsAndAlerting/triggersActionsConnectors/connectors',
+      path: '/modelManagement/model_settings',
     });
   }, [application]);
 

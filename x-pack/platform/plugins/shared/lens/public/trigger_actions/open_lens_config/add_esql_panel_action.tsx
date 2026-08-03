@@ -14,6 +14,7 @@ import { apiIsPresentationContainer } from '@kbn/presentation-publishing';
 import { ADD_PANEL_VISUALIZATION_GROUP } from '@kbn/embeddable-plugin/public';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
 import type { LensApi } from '@kbn/lens-common-2';
+import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { ACTION_CREATE_ESQL_CHART } from './constants';
 import { generateId } from '../../id_generator';
 import { mountInlinePanel } from '../../react_embeddable/mount';
@@ -29,20 +30,26 @@ export class AddESQLPanelAction implements Action<EmbeddableApiContext> {
 
   public getDisplayName(): string {
     return i18n.translate('xpack.lens.app.createVisualizationLabel', {
-      defaultMessage: 'ES|QL',
+      defaultMessage: 'Visualization (query)',
+    });
+  }
+
+  public getDisplayNameTooltip() {
+    return i18n.translate('xpack.lens.app.createVisualizationDescription', {
+      defaultMessage: 'Build charts, metrics, and tables with ES|QL.',
     });
   }
 
   public getIconType() {
     // need to create a new one
-    return 'esqlVis';
+    return 'editorCodeBlock';
   }
 
   public async isCompatible({ embeddable }: EmbeddableApiContext) {
     return apiIsPresentationContainer(embeddable) && this.core.uiSettings.get(ENABLE_ESQL);
   }
 
-  public async execute({ embeddable: api }: EmbeddableApiContext) {
+  public async execute({ embeddable: api, returnFocus }: EmbeddableApiContext) {
     if (!apiIsPresentationContainer(api)) throw new IncompatibleActionError();
     if (!api || !apiHasAppContext(api)) {
       return;
@@ -55,7 +62,7 @@ export class AddESQLPanelAction implements Action<EmbeddableApiContext> {
       loadContent: async ({ closeFlyout } = { closeFlyout: () => {} }) => {
         const embeddable = await api.addNewPanel<object, LensApi>({
           maybePanelId: uuid,
-          panelType: 'lens',
+          panelType: LENS_EMBEDDABLE_TYPE,
           serializedState: {
             id: uuid,
             isNewPanel: true,
@@ -69,7 +76,7 @@ export class AddESQLPanelAction implements Action<EmbeddableApiContext> {
           closeFlyout,
         });
       },
-      options: { uuid },
+      options: { uuid, returnFocus },
     });
   }
 }

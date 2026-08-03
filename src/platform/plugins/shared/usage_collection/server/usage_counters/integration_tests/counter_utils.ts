@@ -109,18 +109,18 @@ async function incrementCounter(
 }
 
 async function modifyUpdatedAt(esClient: ElasticsearchClient, ids: string[], updatedAt: string) {
-  await esClient.updateByQuery({
-    index: USAGE_COUNTERS_SAVED_OBJECT_INDEX,
-    query: {
-      ids: {
-        values: ids,
-      },
-    },
+  // Refresh first so the documents written by incrementCounter are visible to
+  // the subsequent bulk search/update.
+  await esClient.indices.refresh({ index: USAGE_COUNTERS_SAVED_OBJECT_INDEX });
+
+  // Use the bulk doc-update API instead of updateByQuery + Painless. Painless
+  // script parameter injection can behave differently under FIPS-compliant JVMs,
+  // causing silent no-ops.
+  await esClient.bulk({
     refresh: true,
-    script: {
-      lang: 'painless',
-      params: { updatedAt },
-      source: `ctx._source.updated_at = params.updatedAt;`,
-    },
+    operations: ids.flatMap((id) => [
+      { update: { _index: USAGE_COUNTERS_SAVED_OBJECT_INDEX, _id: id } },
+      { doc: { updated_at: updatedAt } },
+    ]),
   });
 }

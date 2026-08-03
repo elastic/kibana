@@ -8,7 +8,7 @@
  */
 
 import { once } from 'lodash';
-import { enableMapSet } from 'immer';
+import { enableMapSet } from 'immer-v9';
 import React, {
   createContext,
   useContext,
@@ -106,8 +106,8 @@ export function DataCascadeProvider<G extends GroupNode, L extends LeafNode>({
   const initialTableState = useMemo(
     () =>
       ({
-        expanded: initialState?.expanded,
-        rowSelection: initialState?.rowSelection,
+        expanded: initialState?.expanded ?? {},
+        rowSelection: initialState?.rowSelection ?? {},
       } as TableState),
     [initialState?.expanded, initialState?.rowSelection]
   );

@@ -24,7 +24,6 @@ import {
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import { toMountPoint } from '@kbn/react-kibana-mount';
 
 import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
 
@@ -40,7 +39,7 @@ import { getTransformProgress } from '../../../../common';
 import { useCreateTransform, useGetTransformStats, useStartTransforms } from '../../../../hooks';
 import { useAppDependencies, useToastNotifications } from '../../../../app_dependencies';
 import { RedirectToTransformManagement } from '../../../../common/navigation';
-import { ToastNotificationText } from '../../../../components';
+import { useToastNotificationText } from '../../../../components';
 import { isContinuousTransform } from '../../../../../../common/types/transform';
 import { TransformAlertFlyout } from '../../../../../alerting/transform_alerting_flyout';
 
@@ -60,6 +59,7 @@ export function getDefaultStepCreateState(): StepDetailsExposedState {
 
 export interface StepCreateFormProps {
   createDataView: boolean;
+  deferValidation?: boolean;
   transformId: string;
   transformConfig: PutTransformsPivotRequestSchema | PutTransformsLatestRequestSchema;
   overrides: StepDetailsExposedState;
@@ -68,7 +68,15 @@ export interface StepCreateFormProps {
 }
 
 export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
-  ({ createDataView, transformConfig, transformId, onChange, overrides, timeFieldName }) => {
+  ({
+    createDataView,
+    deferValidation,
+    transformConfig,
+    transformId,
+    onChange,
+    overrides,
+    timeFieldName,
+  }) => {
     const defaults = { ...getDefaultStepCreateState(), ...overrides };
 
     const [redirectToTransformManagement, setRedirectToTransformManagement] = useState(false);
@@ -84,7 +92,8 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
     const [discoverLink, setDiscoverLink] = useState<string>();
 
     const toastNotifications = useToastNotifications();
-    const { application, share, ...startServices } = useAppDependencies();
+    const { application, share } = useAppDependencies();
+    const getToastNotificationText = useToastNotificationText();
     const isDiscoverAvailable = application.capabilities.discover_v2?.show ?? false;
 
     useEffect(() => {
@@ -124,7 +133,7 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
       setLoading(true);
 
       createTransform(
-        { transformId, transformConfig, createDataView, timeFieldName },
+        { transformId, transformConfig, createDataView, timeFieldName, deferValidation },
         {
           onError: () => setCreated(false),
           onSuccess: (resp) => {
@@ -200,13 +209,10 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
           title: i18n.translate('xpack.transform.stepCreateForm.progressErrorMessage', {
             defaultMessage: 'An error occurred getting the progress percentage:',
           }),
-          text: toMountPoint(
-            <ToastNotificationText text={getErrorMessage(stats)} />,
-            startServices
-          ),
+          ...getToastNotificationText(getErrorMessage(stats)),
         });
       }
-    }, [stats, toastNotifications, transformConfig, transformId, startServices]);
+    }, [getToastNotificationText, stats, toastNotifications, transformConfig, transformId]);
 
     function getTransformConfigDevConsoleStatement() {
       return `PUT _transform/${transformId}\n${JSON.stringify(transformConfig, null, 2)}\n\n`;
@@ -384,7 +390,7 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
               <EuiFlexGroup gutterSize="l">
                 <EuiFlexItem style={PANEL_ITEM_STYLE} grow={false}>
                   <EuiCard
-                    icon={<EuiIcon size="xxl" type="listBullet" />}
+                    icon={<EuiIcon size="xxl" type="listBullet" aria-hidden={true} />}
                     title={i18n.translate('xpack.transform.stepCreateForm.transformListCardTitle', {
                       defaultMessage: 'Transforms',
                     })}
@@ -418,7 +424,7 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
                 {isDiscoverAvailable && discoverLink !== undefined && (
                   <EuiFlexItem style={PANEL_ITEM_STYLE} grow={false}>
                     <EuiCard
-                      icon={<EuiIcon size="xxl" type="discoverApp" />}
+                      icon={<EuiIcon size="xxl" type="discoverApp" aria-hidden={true} />}
                       title={i18n.translate('xpack.transform.stepCreateForm.discoverCardTitle', {
                         defaultMessage: 'Discover',
                       })}

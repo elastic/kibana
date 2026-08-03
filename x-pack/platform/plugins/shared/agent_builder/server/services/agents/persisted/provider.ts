@@ -14,12 +14,12 @@ import {
   createBadRequestError,
   isAgentNotFoundError,
 } from '@kbn/agent-builder-common';
-import type { WritableAgentProvider, AgentProviderFn } from '../agent_source';
+import type { GetAgentOptions, WritableAgentProvider, AgentProviderFn } from '../agent_source';
 import type { ToolsServiceStart } from '../../tools';
 import { createClient } from './client';
 import type { AgentClient } from './client';
 import type { InternalAgentDefinition } from '../agent_registry';
-import type { PersistedAgentDefinition } from './types';
+import type { PersistedAgentDefinitionWithPermissions } from './types';
 import { getDefaultAgentCreateRequest } from '../default_agent_definition';
 
 export const createPersistedProviderFn =
@@ -37,7 +37,9 @@ export const createPersistedProviderFn =
     });
   };
 
-const ensureDefaultAgent = async (client: AgentClient): Promise<PersistedAgentDefinition> => {
+const ensureDefaultAgent = async (
+  client: AgentClient
+): Promise<PersistedAgentDefinitionWithPermissions> => {
   return client.ensureDefaultAgent(getDefaultAgentCreateRequest());
 };
 
@@ -76,9 +78,10 @@ const createPersistedProvider = async ({
       }
       return exists;
     },
-    get: async (agentId: string) => {
+    get: async (agentId: string, opts?: GetAgentOptions) => {
+      const access = opts?.access ?? 'read';
       try {
-        const definition = await client.get(agentId);
+        const definition = await client.getWithAccess(agentId, access);
         return toInternalDefinition({ definition });
       } catch (e) {
         if (agentId === agentBuilderDefaultAgentId && isAgentNotFoundError(e)) {
@@ -90,12 +93,24 @@ const createPersistedProvider = async ({
     },
     list: async (opts) => {
       const definitions = await client.list(opts);
-      const hasDefault = definitions.some((def) => def.id === agentBuilderDefaultAgentId);
-      if (!hasDefault) {
+      const ids = definitions.map(({ id }) => id);
+
+      if (!ids.includes(agentBuilderDefaultAgentId)) {
         const defaultAgent = await ensureDefaultAgent(client);
         definitions.push(defaultAgent);
       }
+
       return definitions.map((definition) => toInternalDefinition({ definition }));
+    },
+    getIds: async (opts) => {
+      const ids = await client.getIds(opts);
+
+      if (!ids.includes(agentBuilderDefaultAgentId)) {
+        const defaultAgent = await ensureDefaultAgent(client);
+        ids.push(defaultAgent.id);
+      }
+
+      return ids;
     },
     create: async (createRequest) => {
       if (createRequest.id === agentBuilderDefaultAgentId) {
@@ -111,13 +126,20 @@ const createPersistedProvider = async ({
     delete: (agentId: string) => {
       return client.delete({ id: agentId });
     },
+    getAccessControl: async (agentId: string) => {
+      const result = await client.getAccessControl(agentId);
+      return result;
+    },
+    updateAccessControl: async (agentId, update) => {
+      return client.updateAccessControl(agentId, update);
+    },
   };
 };
 
 export const toInternalDefinition = ({
   definition,
 }: {
-  definition: PersistedAgentDefinition;
+  definition: PersistedAgentDefinitionWithPermissions;
 }): InternalAgentDefinition => {
   return {
     ...definition,

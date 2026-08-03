@@ -27,12 +27,15 @@ import {
   modelVersion7,
   modelVersion8,
   modelVersion9,
+  modelVersion10,
 } from './model_versions';
 import { handleImport } from '../import_export/import';
+import type { ConfigType } from '../../config';
 
 export const createCaseSavedObjectType = (
   coreSetup: CoreSetup,
-  logger: Logger
+  logger: Logger,
+  config: ConfigType
 ): SavedObjectsType => ({
   name: CASE_SAVED_OBJECT,
   indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
@@ -46,6 +49,18 @@ export const createCaseSavedObjectType = (
         properties: {
           uid: {
             type: 'keyword',
+          },
+          username: {
+            type: 'keyword',
+            ignore_above: 1024,
+          },
+          full_name: {
+            type: 'keyword',
+            ignore_above: 1024,
+          },
+          email: {
+            type: 'keyword',
+            ignore_above: 1024,
           },
         },
       },
@@ -299,6 +314,7 @@ export const createCaseSavedObjectType = (
     7: modelVersion7,
     8: modelVersion8,
     9: modelVersion9,
+    10: modelVersion10,
   },
   management: {
     importableAndExportable: true,
@@ -308,7 +324,7 @@ export const createCaseSavedObjectType = (
     onExport: async (
       context: SavedObjectsExportTransformContext,
       objects: Array<SavedObject<CasePersistedAttributes>>
-    ) => handleExport({ context, objects, coreSetup, logger }),
+    ) => handleExport({ context, objects, coreSetup, logger, config }),
     onImport: (objects: Array<SavedObject<CasePersistedAttributes>>) => handleImport({ objects }),
   },
 });

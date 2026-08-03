@@ -50,12 +50,6 @@ export const HOST_DETAILS_RELATED_USERS_IP_LINK_TEST_ID =
   `${HOST_DETAILS_TEST_ID}RelatedUsersIPLink` as const;
 export const HOST_DETAILS_INFO_TEST_ID = 'host-overview' as const;
 
-/* Response */
-
-const RESPONSE_TEST_ID = `${PREFIX}Response` as const;
-export const RESPONSE_DETAILS_TEST_ID = `${RESPONSE_TEST_ID}Details` as const;
-export const RESPONSE_NO_DATA_TEST_ID = `${RESPONSE_TEST_ID}NoData` as const;
-
 /* Investigation */
 
 export const INVESTIGATION_GUIDE_TEST_ID = `${PREFIX}InvestigationGuide` as const;

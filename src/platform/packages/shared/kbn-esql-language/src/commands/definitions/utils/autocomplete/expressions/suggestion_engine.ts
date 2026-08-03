@@ -58,12 +58,13 @@ export async function suggestForExpression(
     };
   }
 
-  const partialSuggestions = await trySuggestForPartialOperators(baseCtx);
+  const clonedCtx = { ...baseCtx };
+  const partialSuggestions = await trySuggestForPartialOperators(clonedCtx);
 
   if (partialSuggestions !== null) {
     return {
       suggestions: partialSuggestions,
-      computed,
+      computed: computeDerivedState(clonedCtx),
     };
   }
 

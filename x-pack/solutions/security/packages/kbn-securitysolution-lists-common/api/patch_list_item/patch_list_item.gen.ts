@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import {
   ListItemId,
@@ -24,18 +24,20 @@ import {
 } from '../model/list_common.gen';
 import { ListItem } from '../model/list_schemas.gen';
 
+export const PatchListItemRequestBody = lazySchema(() =>
+  z.object({
+    id: ListItemId,
+    value: ListItemValue.optional(),
+    meta: ListItemMetadata.optional(),
+    _version: ListVersionId.optional(),
+    /**
+     * Determines when changes made by the request are made visible to search.
+     */
+    refresh: z.enum(['true', 'false', 'wait_for']).optional(),
+  })
+);
 export type PatchListItemRequestBody = z.infer<typeof PatchListItemRequestBody>;
-export const PatchListItemRequestBody = z.object({
-  id: ListItemId,
-  value: ListItemValue.optional(),
-  meta: ListItemMetadata.optional(),
-  _version: ListVersionId.optional(),
-  /**
-   * Determines when changes made by the request are made visible to search.
-   */
-  refresh: z.enum(['true', 'false', 'wait_for']).optional(),
-});
 export type PatchListItemRequestBodyInput = z.input<typeof PatchListItemRequestBody>;
 
+export const PatchListItemResponse = lazySchema(() => ListItem);
 export type PatchListItemResponse = z.infer<typeof PatchListItemResponse>;
-export const PatchListItemResponse = ListItem;

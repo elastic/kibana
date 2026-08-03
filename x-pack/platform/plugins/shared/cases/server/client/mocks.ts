@@ -7,6 +7,7 @@
 
 import type { PublicContract, PublicMethodsOf } from '@kbn/utility-types';
 import {
+  httpServerMock,
   loggingSystemMock,
   savedObjectsClientMock,
   securityServiceMock,
@@ -36,6 +37,7 @@ import type { ConfigureSubClient, InternalConfigureSubClient } from './configure
 import type { CasesClientFactory } from './factory';
 import type { MetricsSubClient } from './metrics/client';
 import type { TemplatesSubClient } from './templates/client';
+import type { FieldDefinitionsSubClient } from './field_definitions/client';
 import type { UserActionsSubClient } from './user_actions/client';
 
 import { CaseSeverity, CaseStatuses } from '../../common/types/domain';
@@ -56,8 +58,28 @@ import {
   createUserActionServiceMock,
   createNotificationServiceMock,
   createTemplatesServiceMock,
+  createFieldDefinitionsServiceMock,
 } from '../services/mocks';
 import { ConfigSchema } from '../config';
+import {
+  V2_NOOP_ACTIVITY_WRITER,
+  V2_NOOP_ATTACHMENTS_WRITER,
+  V2_NOOP_DATA_VIEW_REFRESHER,
+  V2_NOOP_WRITER,
+} from '../cases_analytics_v2';
+import { CasesEventBus } from '../events/event_bus';
+
+const createCasesEventBusMock = (): CasesEventBus => {
+  return {
+    ...new CasesEventBus(),
+    emitCaseCreated: jest.fn(),
+    emitCaseUpdated: jest.fn(),
+    emitAttachmentsAdded: jest.fn(),
+    onCaseCreated: jest.fn(),
+    onCaseUpdated: jest.fn(),
+    onAttachmentsAdded: jest.fn(),
+  };
+};
 
 type CasesSubClientMock = jest.Mocked<CasesSubClient>;
 
@@ -83,6 +105,7 @@ const createCasesSubClientMock = (): CasesSubClientMock => {
     updateObservable: jest.fn(),
     deleteObservable: jest.fn(),
     bulkAddObservables: jest.fn(),
+    getApplicableFields: jest.fn(),
   });
 };
 
@@ -152,6 +175,18 @@ const createTemplatesSubClientMock = (): TemplatesSubClientMock => {
   });
 };
 
+type FieldDefinitionsSubClientMock = jest.Mocked<FieldDefinitionsSubClient>;
+
+const createFieldDefinitionsSubClientMock = (): FieldDefinitionsSubClientMock => {
+  return lazyObject({
+    getFieldDefinitions: jest.fn(),
+    getFieldDefinition: jest.fn(),
+    createFieldDefinition: jest.fn(),
+    updateFieldDefinition: jest.fn(),
+    deleteFieldDefinition: jest.fn(),
+  });
+};
+
 type InternalConfigureSubClientMock = jest.Mocked<InternalConfigureSubClient>;
 
 const createInternalConfigureSubClientMock = (): InternalConfigureSubClientMock => {
@@ -167,6 +202,7 @@ export interface CasesClientMock extends CasesClient {
   attachments: AttachmentsSubClientMock;
   userActions: UserActionsSubClientMock;
   templates: TemplatesSubClientMock;
+  fieldDefinitions: FieldDefinitionsSubClientMock;
 }
 
 export const createCasesClientMock = (): CasesClientMock => {
@@ -177,6 +213,7 @@ export const createCasesClientMock = (): CasesClientMock => {
     configure: createConfigureSubClientMock(),
     metrics: createMetricsSubClientMock(),
     templates: createTemplatesSubClientMock(),
+    fieldDefinitions: createFieldDefinitionsSubClientMock(),
   });
   return client as unknown as CasesClientMock;
 };
@@ -228,6 +265,7 @@ export const createCasesClientMockArgs = () => {
       licensingService: createLicensingServiceMock(),
       notificationService: createNotificationServiceMock(),
       templatesService: createTemplatesServiceMock(),
+      fieldDefinitionsService: createFieldDefinitionsServiceMock(),
     },
     authorization: createAuthorizationMock(),
     logger: loggingSystemMock.createLogger(),
@@ -253,7 +291,14 @@ export const createCasesClientMockArgs = () => {
     ),
     savedObjectsSerializer: createSavedObjectsSerializerMock(),
     fileService: createFileServiceMock(),
-    config: ConfigSchema.validate({}),
+    // Assignee-identity population is opt-in per test; keep it off by default so
+    // the broad create/update suites keep asserting uid-only assignees.
+    config: {
+      ...ConfigSchema.validate({}),
+      assigneeIdentity: { enabled: false },
+    },
+    casesEventBus: createCasesEventBusMock(),
+    request: httpServerMock.createKibanaRequest(),
   };
 };
 
@@ -281,6 +326,15 @@ export const createCasesClientFactoryMockArgs = () => {
     persistableStateAttachmentTypeRegistry: createPersistableStateAttachmentTypeRegistryMock(),
     config: ConfigSchema.validate({}),
     unifiedAttachmentTypeRegistry: createUnifiedAttachmentTypeRegistryMock(),
+    casesEventBus: createCasesEventBusMock(),
+    // Tests don't drive analytics v2; the no-op writers keep every hook
+    // invoked through the factory a tight no-op. The data view refresher
+    // gets the same treatment so the templates service is happy without
+    // any wiring.
+    analyticsV2Writer: V2_NOOP_WRITER,
+    analyticsV2ActivityWriter: V2_NOOP_ACTIVITY_WRITER,
+    analyticsV2AttachmentsWriter: V2_NOOP_ATTACHMENTS_WRITER,
+    analyticsV2DataViewRefresher: V2_NOOP_DATA_VIEW_REFRESHER,
   };
 };
 

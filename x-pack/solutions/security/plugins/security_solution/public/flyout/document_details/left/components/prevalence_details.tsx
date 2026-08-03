@@ -7,26 +7,26 @@
 
 import React, { useMemo } from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { buildDataTableRecord, type EsHitRecord } from '@kbn/discover-utils';
 import {
   PREVALENCE_DETAILS_TABLE_PREVIEW_LINK_CELL_TEST_ID,
   PREVALENCE_DETAILS_TABLE_VALUE_CELL_TEST_ID,
-} from '../../../../flyout_v2/prevalence/test_ids';
+} from '../../../../flyout_v2/document/tools/prevalence/test_ids';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { PreviewLink } from '../../../shared/components/preview_link';
 import { CellActions } from '../../shared/components/cell_actions';
 import type { IdentityFields } from '../../shared/utils';
-import { PrevalenceDetails as PrevalenceDetailsContent } from '../../../../flyout_v2/prevalence/prevalence';
-import type { PrevalenceDetailsRow } from '../../../../flyout_v2/prevalence/utils/get_columns';
+import { PrevalenceDetailsView } from '../../../../flyout_v2/document/tools/prevalence/components/prevalence_details_view';
+import type { PrevalenceDetailsRow } from '../../../../flyout_v2/document/tools/prevalence/utils/get_columns';
 import {
   alertCountColumn,
   documentCountColumn,
   fieldColumn,
   hostPrevalenceColumn,
   userPrevalenceColumn,
-} from '../../../../flyout_v2/prevalence/utils/get_columns';
+} from '../../../../flyout_v2/document/tools/prevalence/utils/get_columns';
 
 export const PREVALENCE_TAB_ID = 'prevalence';
 
@@ -86,12 +86,14 @@ export const PrevalenceDetails: React.FC = () => {
   const hit = useMemo(() => buildDataTableRecord(searchHit as EsHitRecord), [searchHit]);
 
   return (
-    <PrevalenceDetailsContent
-      hit={hit}
-      investigationFields={investigationFields}
-      scopeId={scopeId}
-      columns={columns}
-    />
+    <EuiPanel hasBorder={false} hasShadow={false}>
+      <PrevalenceDetailsView
+        hit={hit}
+        investigationFields={investigationFields}
+        scopeId={scopeId}
+        columns={columns}
+      />
+    </EuiPanel>
   );
 };
 

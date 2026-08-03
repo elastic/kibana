@@ -61,7 +61,7 @@ describe('DeleteTimelineModal', () => {
     );
 
     expect(wrapper.find('[data-test-subj="confirmModalTitleText"]').first().text()).toEqual(
-      'Delete "Untitled timeline"?'
+      'Delete "Untitled Timeline"?'
     );
   });
 
@@ -71,7 +71,7 @@ describe('DeleteTimelineModal', () => {
     );
 
     expect(wrapper.find('[data-test-subj="confirmModalTitleText"]').first().text()).toEqual(
-      'Delete "Untitled timeline"?'
+      'Delete "Untitled Timeline"?'
     );
   });
 
@@ -81,7 +81,7 @@ describe('DeleteTimelineModal', () => {
     );
 
     expect(wrapper.find('[data-test-subj="confirmModalTitleText"]').first().text()).toEqual(
-      'Delete "Untitled timeline"?'
+      'Delete "Untitled Timeline"?'
     );
   });
 

@@ -36,13 +36,17 @@ export function HeaderControl() {
 
   return (
     <EuiPopover
+      aria-label={i18n.translate('xpack.slo.sloManagementHeaderControl.popoverAriaLabel', {
+        defaultMessage: 'SLO management actions',
+      })}
       data-test-subj="headerControlPopover"
+      panelPaddingSize="none"
       button={
         <EuiButton
           data-test-subj="headerControlActionsButton"
           fill
           iconSide="right"
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           iconSize="s"
           onClick={handleActionsClick}
         >
@@ -55,7 +59,6 @@ export function HeaderControl() {
       closePopover={closePopover}
     >
       <EuiContextMenuPanel
-        size="m"
         items={[
           <EuiContextMenuItem
             key="healthScan"

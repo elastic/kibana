@@ -30,7 +30,10 @@ export function validateSchemaChanges({ baselineSha, roots, reporter }: TaskCont
       return [
         {
           task: async () => {
-            root.configChanged = await isTelemetrySchemaModified({ path });
+            if (!baselineSha) {
+              throw new Error('Cannot determine changed files for comparison, no SHA specified.');
+            }
+            root.configChanged = await isTelemetrySchemaModified({ path, baselineSha });
           },
           title: `Checking if ${path} telemetry schema has changed`,
           enabled: (_) => isPullRequestPipeline,
@@ -45,12 +48,8 @@ export function validateSchemaChanges({ baselineSha, roots, reporter }: TaskCont
               ref: baselineSha,
             });
           },
-          title: `Downloading /${baselineSha}/${path} from Github`,
+          title: `Reading /${baselineSha}/${path} from git`,
           enabled: (_) => Boolean(!isPullRequestPipeline || root.configChanged),
-          retry: {
-            delay: 2000,
-            tries: 5,
-          },
         },
         {
           task: async () => {

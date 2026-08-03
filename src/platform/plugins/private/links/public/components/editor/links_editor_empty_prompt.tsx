@@ -28,7 +28,7 @@ export const LinksEditorEmptyPrompt = ({ addLink }: { addLink: () => Promise<voi
               <EuiButton
                 size="s"
                 onClick={addLink}
-                iconType="plusInCircle"
+                iconType="plusCircle"
                 data-test-subj="links--panelEditor--addLinkBtn"
               >
                 {LinksStrings.editor.getAddButtonLabel()}

@@ -167,4 +167,48 @@ describe('bulkCreate', () => {
       })
     );
   });
+
+  it('emits attachmentAdded event per attachment after bulk creating', async () => {
+    if (!clientArgs.unifiedAttachmentTypeRegistry.has(commentAttachmentType.id)) {
+      clientArgs.unifiedAttachmentTypeRegistry.register(commentAttachmentType);
+    }
+    userActionService.getMultipleCasesUserActionsTotal.mockResolvedValue({ [caseId]: 0 });
+
+    const theCase = { ...mockCases[0], id: caseId };
+    caseService.getCase.mockResolvedValue(theCase);
+    caseService.patchCase.mockResolvedValue(theCase);
+    caseService.getAllCaseComments.mockResolvedValue({
+      saved_objects: [],
+      total: 2,
+      per_page: 2,
+      page: 1,
+    });
+    attachmentService.getter.getCaseAttatchmentStats.mockResolvedValue(
+      new Map([[caseId, { alerts: 0, userComments: 0, events: 0 }]])
+    );
+    attachmentService.bulkCreate.mockResolvedValue({
+      saved_objects: [
+        mockCaseUnifiedAttachments[0],
+        { ...mockCaseUnifiedAttachments[0], id: 'comment-2' },
+      ],
+    });
+
+    const unifiedAttachments = [
+      { type: 'comment' as const, data: { content: 'first' }, owner: SECURITY_SOLUTION_OWNER },
+      { type: 'comment' as const, data: { content: 'second' }, owner: SECURITY_SOLUTION_OWNER },
+    ];
+
+    await bulkCreate({ attachments: unifiedAttachments, caseId }, clientArgs);
+
+    expect(clientArgs.casesEventBus.emitAttachmentsAdded).toHaveBeenCalledTimes(1);
+    expect(clientArgs.casesEventBus.emitAttachmentsAdded).toHaveBeenCalledWith(
+      clientArgs.request,
+      expect.objectContaining({
+        caseId,
+        attachmentIds: expect.arrayContaining([expect.any(String), expect.any(String)]),
+        attachmentType: 'comment',
+        owner: SECURITY_SOLUTION_OWNER,
+      })
+    );
+  });
 });

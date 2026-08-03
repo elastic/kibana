@@ -7,13 +7,14 @@
 
 import { css } from '@emotion/react';
 import type { EuiThemeComputed } from '@elastic/eui';
+import { ConversationDisplayStatus } from '@kbn/agent-builder-common';
 
 export const createConversationListItemStyles = (euiTheme: EuiThemeComputed) => css`
   text-decoration: none;
   padding: 6px ${euiTheme.size.s};
   border-radius: ${euiTheme.border.radius.small};
   color: ${euiTheme.colors.textParagraph};
-  font-size: ${euiTheme.font.scale.s}${euiTheme.font.defaultUnits};
+  font-size: ${euiTheme.font.scale.m}${euiTheme.font.defaultUnits};
   cursor: pointer;
   background: none;
   border: none;
@@ -31,3 +32,35 @@ export const createActiveConversationListItemStyles = (euiTheme: EuiThemeCompute
   background-color: ${euiTheme.colors.backgroundLightPrimary};
   color: ${euiTheme.colors.textPrimary};
 `;
+
+export const createStatusLinkStyles = (
+  status: ConversationDisplayStatus | undefined,
+  euiTheme: EuiThemeComputed
+) => {
+  if (!status) return undefined;
+
+  switch (status) {
+    case ConversationDisplayStatus.unread:
+    case ConversationDisplayStatus.awaitingPrompt:
+      return css`
+        color: ${euiTheme.colors.textParagraph};
+        font-weight: ${euiTheme.font.weight.medium};
+      `;
+
+    case ConversationDisplayStatus.read:
+    case ConversationDisplayStatus.inProgress:
+      return css`
+        color: ${euiTheme.colors.textDisabled};
+        font-weight: ${euiTheme.font.weight.regular};
+      `;
+
+    case ConversationDisplayStatus.error:
+      return css`
+        color: ${euiTheme.colors.textParagraph};
+        font-weight: ${euiTheme.font.weight.regular};
+      `;
+
+    default:
+      return undefined;
+  }
+};

@@ -16,3 +16,4 @@ export { SERVICE_PROVIDERS } from './src/components/providers/render_service_pro
 
 export * from './src/types/types';
 export * from './src/constants';
+export { TASK_TYPE_DESCRIPTIONS } from './src/translations';

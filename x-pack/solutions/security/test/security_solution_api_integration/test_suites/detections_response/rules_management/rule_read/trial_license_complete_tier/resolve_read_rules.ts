@@ -12,27 +12,116 @@ import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common
 import { deleteAllRules, withSpaceUrl } from '@kbn/detections-response-ftr-services';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 
-// Kibana space ID and ES archive with a legacy rule to be migrated on read.
+// Kibana space ID that hosts the legacy rule to be migrated on read.
 const SPACE_ID = '714-space';
-const ES_ARCHIVE =
-  'x-pack/solutions/security/test/fixtures/es_archives/security_solution/resolve_read_rules/7_14';
+// The pre-8.0.0 space-scoped alert ID (used as the "old" ID in legacy-url-alias lookups).
+const OLD_RULE_ID = '90e3ca0e-71f7-513a-b60a-ac678efd8887';
+// The new alert SO ID that replaces OLD_RULE_ID after the 8.0.0 namespace conversion.
+const NEW_RULE_ID = '74f3e6d7-b7bb-477d-ac28-92ee22728e6e';
+// legacy-url-alias SO ID: `${targetNamespace}:${targetType}:${sourceId}`
+const LEGACY_ALIAS_ID = `${SPACE_ID}:alert:${OLD_RULE_ID}`;
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const es = getService('es');
-  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
   const log = getService('log');
 
   describe('@ess resolve_read_rules', () => {
     describe('reading rules', () => {
       beforeEach(async () => {
         await deleteAllRules(supertest, log);
-        await esArchiver.load(ES_ARCHIVE, { skipExisting: true });
+
+        // Create the test space.
+        await supertest
+          .post('/api/spaces/space')
+          .set('kbn-xsrf', 'true')
+          .send({ id: SPACE_ID, name: SPACE_ID, disabledFeatures: [] });
+
+        // Create the alert in the test space with pre-8.0.0 alert migrationVersion so that
+        // DocumentMigrator upgrades it to the current version on creation.
+        await kibanaServer.savedObjects.create({
+          type: 'alert',
+          id: NEW_RULE_ID,
+          space: SPACE_ID,
+          overwrite: true,
+          attributes: {
+            actions: [],
+            alertTypeId: 'siem.queryRule',
+            consumer: 'siem',
+            createdAt: '2020-06-17T15:35:38.497Z',
+            createdBy: 'elastic',
+            enabled: true,
+            muteAll: false,
+            mutedInstanceIds: [],
+            name: 'always-firing-alert',
+            params: {
+              author: [],
+              description: 'test',
+              ruleId: '82747bb8-bae0-4b59-8119-7f65ac564e14',
+              falsePositives: [],
+              from: 'now-3615s',
+              immutable: false,
+              license: '',
+              outputIndex: '',
+              maxSignals: 100,
+              riskScore: 21,
+              riskScoreMapping: [],
+              severity: 'low',
+              severityMapping: [],
+              threat: [],
+              to: 'now',
+              references: [],
+              version: 1,
+              exceptionsList: [],
+              type: 'query',
+              language: 'kuery',
+              index: ['auditbeat-*', 'filebeat-*', 'logs-*', 'packetbeat-*', 'winlogbeat-*'],
+              query: '*:*',
+              filters: [],
+            },
+            schedule: { interval: '1m' },
+            tags: [],
+            throttle: null,
+            updatedBy: 'elastic',
+          },
+          migrationVersion: { alert: '7.8.0' },
+          references: [],
+        });
+
+        // Create a legacy-url-alias mapping OLD_RULE_ID → NEW_RULE_ID with
+        // purpose 'savedObjectConversion', replicating what the 8.0.0 namespace migration
+        // would have produced from the pre-8.0.0 space-prefixed alert document.
+        await kibanaServer.savedObjects.create({
+          type: 'legacy-url-alias',
+          id: LEGACY_ALIAS_ID,
+          overwrite: true,
+          attributes: {
+            sourceId: OLD_RULE_ID,
+            targetNamespace: SPACE_ID,
+            targetType: 'alert',
+            targetId: NEW_RULE_ID,
+            purpose: 'savedObjectConversion',
+          },
+          migrationVersion: { 'legacy-url-alias': '8.2.0' },
+          references: [],
+        });
       });
 
       afterEach(async () => {
         await deleteAllRules(supertest, log);
-        await esArchiver.unload(ES_ARCHIVE);
+        // Clean up the directly-inserted conflicting alert doc from the second test (if present).
+        await es
+          .delete({
+            index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+            id: `alert:${OLD_RULE_ID}`,
+            refresh: true,
+          })
+          .catch(() => undefined);
+        await kibanaServer.savedObjects
+          .delete({ type: 'legacy-url-alias', id: LEGACY_ALIAS_ID })
+          .catch(() => undefined);
+        await supertest.delete(`/api/spaces/space/${SPACE_ID}`).set('kbn-xsrf', 'true');
       });
 
       it('should create a "migrated" rule where querying for the new SO _id will resolve the new object and not return the outcome field when outcome === exactMatch', async () => {

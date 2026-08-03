@@ -8,10 +8,13 @@
  */
 
 import { useCallback, useMemo } from 'react';
+import { EBT_CLICK_ACTIONS, type EbtClickAttrs } from '@kbn/ebt-click';
 import type { Action } from '../../components/content_framework/section/section_actions';
 import {
   OPEN_IN_DISCOVER_LABEL,
   OPEN_IN_DISCOVER_ARIA_LABEL,
+  OPEN_IN_A_DISCOVER_TAB_LABEL,
+  OPEN_IN_A_DISCOVER_TAB_ARIA_LABEL,
 } from '../../components/observability/traces/common/constants';
 import { useDocViewerExtensionActionsContext } from '../use_doc_viewer_extension_actions';
 
@@ -20,12 +23,13 @@ interface UseOpenInDiscoverSectionActionParams {
   dataTestSubj: string;
   href?: string;
   esql?: string;
+  ebt: Omit<EbtClickAttrs, 'action'>;
 }
 
 export function useOpenInDiscoverSectionAction(
   params: UseOpenInDiscoverSectionActionParams
 ): Action | undefined {
-  const { href, esql, tabLabel, dataTestSubj } = params;
+  const { href, esql, tabLabel, dataTestSubj, ebt } = params;
   const actions = useDocViewerExtensionActionsContext();
   const openInNewTab = actions?.openInNewTab;
   const canOpenInNewTab = openInNewTab && esql;
@@ -46,9 +50,14 @@ export function useOpenInDiscoverSectionAction(
 
     const actionBase = {
       dataTestSubj,
-      label: OPEN_IN_DISCOVER_LABEL,
-      icon: 'discoverApp',
-      ariaLabel: OPEN_IN_DISCOVER_ARIA_LABEL,
+      label: canOpenInNewTab ? OPEN_IN_A_DISCOVER_TAB_LABEL : OPEN_IN_DISCOVER_LABEL,
+      icon: canOpenInNewTab ? 'productDiscover' : 'discoverApp',
+      ariaLabel: canOpenInNewTab ? OPEN_IN_A_DISCOVER_TAB_ARIA_LABEL : OPEN_IN_DISCOVER_ARIA_LABEL,
+      ebt: {
+        action: EBT_CLICK_ACTIONS.OPEN_IN_DISCOVER,
+        element: ebt?.element,
+        detail: ebt?.detail,
+      },
     };
 
     if (href) {
@@ -67,5 +76,5 @@ export function useOpenInDiscoverSectionAction(
       ...actionBase,
       onClick,
     };
-  }, [canOpenInNewTab, dataTestSubj, href, onClick]);
+  }, [canOpenInNewTab, dataTestSubj, href, onClick, ebt.element, ebt.detail]);
 }

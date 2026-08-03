@@ -11,7 +11,7 @@ export const legacyMetricVis: ElementFactory = () => ({
   displayName: 'Legacy metric Vis',
   type: 'chart',
   help: 'Legacy metric visualization',
-  icon: 'visMetric',
+  icon: 'chartMetric',
   expression: `kibana
 | selectFilter
 | demodata

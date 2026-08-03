@@ -7,14 +7,32 @@
 
 export const EVALS_INTERNAL_URL = '/internal/evals' as const;
 
-export const EVALS_RUNS_URL = `${EVALS_INTERNAL_URL}/runs` as const;
-export const EVALS_RUN_URL = `${EVALS_INTERNAL_URL}/runs/{runId}` as const;
-export const EVALS_RUN_SCORES_URL = `${EVALS_INTERNAL_URL}/runs/{runId}/scores` as const;
-export const EVALS_RUN_DATASET_EXAMPLES_URL =
-  `${EVALS_INTERNAL_URL}/runs/{runId}/datasets/{datasetId}/examples` as const;
+export const EVALS_EXPERIMENTS_URL = `${EVALS_INTERNAL_URL}/experiments` as const;
+export const EVALS_EXPERIMENT_URL = `${EVALS_INTERNAL_URL}/experiments/{experimentId}` as const;
+export const EVALS_EXPERIMENT_SCORES_URL =
+  `${EVALS_INTERNAL_URL}/experiments/{experimentId}/scores` as const;
+export const EVALS_SCORES_URL = `${EVALS_INTERNAL_URL}/scores` as const;
+export const EVALS_EXPERIMENTS_COMPARE_URL = `${EVALS_INTERNAL_URL}/experiments/compare` as const;
+export const EVALS_EXPERIMENTS_RUN_URL = `${EVALS_INTERNAL_URL}/experiments/_run` as const;
+export const EVALS_EXPERIMENTS_SAVE_WORKFLOW_URL =
+  `${EVALS_INTERNAL_URL}/experiments/_save_as_workflow` as const;
+export const EVALS_EXPERIMENTS_PREVIEW_URL = `${EVALS_INTERNAL_URL}/experiments/_preview` as const;
+export const EVALS_EXPERIMENT_TEMPLATES_URL =
+  `${EVALS_INTERNAL_URL}/experiments/templates` as const;
+export const EVALS_EXPERIMENT_EXECUTION_URL =
+  `${EVALS_INTERNAL_URL}/experiments/executions/{workflowExecutionId}` as const;
+export const EVALS_EXPERIMENT_EXECUTION_CANCEL_URL =
+  `${EVALS_INTERNAL_URL}/experiments/executions/{workflowExecutionId}/_cancel` as const;
+export const EVALS_EXPERIMENT_DATASET_EXAMPLES_URL =
+  `${EVALS_INTERNAL_URL}/experiments/{experimentId}/datasets/{datasetId}/examples` as const;
 export const EVALS_EXAMPLE_SCORES_URL =
   `${EVALS_INTERNAL_URL}/examples/{exampleId}/scores` as const;
 export const EVALS_TRACE_URL = `${EVALS_INTERNAL_URL}/traces/{traceId}` as const;
+export const EVALS_RESOLVE_INSTRUMENTATION_URL =
+  `${EVALS_INTERNAL_URL}/traces/_resolve_instrumentation` as const;
+export const EVALS_EVALUATORS_URL = `${EVALS_INTERNAL_URL}/evaluators` as const;
+export const EVALS_VALIDATE_URL = `${EVALS_INTERNAL_URL}/evaluators/_validate` as const;
+export const EVALS_EVALUATE_URL = `${EVALS_INTERNAL_URL}/_evaluate` as const;
 export const EVALS_TRACING_PROJECTS_URL = `${EVALS_INTERNAL_URL}/tracing/projects` as const;
 export const EVALS_TRACING_PROJECT_TRACES_URL =
   `${EVALS_INTERNAL_URL}/tracing/projects/{projectName}/traces` as const;
@@ -24,8 +42,16 @@ export const EVALS_DATASET_EXAMPLES_URL = `${EVALS_DATASET_URL}/examples` as con
 export const EVALS_DATASET_EXAMPLE_URL = `${EVALS_DATASET_EXAMPLES_URL}/{exampleId}` as const;
 export const EVALS_DATASET_UPSERT_URL = `${EVALS_DATASETS_URL}/_upsert` as const;
 
-export const EVALUATIONS_INDEX_PATTERN = 'kibana-evaluations*' as const;
+const EVALUATION_INDEX_PREFIX = '.evaluation' as const;
+
+export const EvaluationIndices = {
+  SCORES: `${EVALUATION_INDEX_PREFIX}-scores`,
+  DATASETS: `${EVALUATION_INDEX_PREFIX}-datasets`,
+  DATASET_EXAMPLES: `${EVALUATION_INDEX_PREFIX}-dataset-examples`,
+} as const;
+
 export const TRACES_INDEX_PATTERN = 'traces-*' as const;
+export const LOGS_INDEX_PATTERN = 'logs-*' as const;
 
 export const API_VERSIONS = {
   internal: {

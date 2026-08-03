@@ -14,25 +14,31 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
+export const PrivmonUserCsvUploadErrorItem = lazySchema(() =>
+  z.object({
+    message: z.string(),
+    username: z.string().nullable(),
+    index: z.number().int().nullable(),
+  })
+);
 export type PrivmonUserCsvUploadErrorItem = z.infer<typeof PrivmonUserCsvUploadErrorItem>;
-export const PrivmonUserCsvUploadErrorItem = z.object({
-  message: z.string(),
-  username: z.string().nullable(),
-  index: z.number().int().nullable(),
-});
 
+export const PrivmonUserCsvUploadStats = lazySchema(() =>
+  z.object({
+    successfulOperations: z.number().int(),
+    uploaded: z.number().int(),
+    failedOperations: z.number().int(),
+    totalOperations: z.number().int(),
+  })
+);
 export type PrivmonUserCsvUploadStats = z.infer<typeof PrivmonUserCsvUploadStats>;
-export const PrivmonUserCsvUploadStats = z.object({
-  successfulOperations: z.number().int(),
-  uploaded: z.number().int(),
-  failedOperations: z.number().int(),
-  totalOperations: z.number().int(),
-});
 
+export const PrivmonBulkUploadUsersCSVResponse = lazySchema(() =>
+  z.object({
+    errors: z.array(PrivmonUserCsvUploadErrorItem),
+    stats: PrivmonUserCsvUploadStats,
+  })
+);
 export type PrivmonBulkUploadUsersCSVResponse = z.infer<typeof PrivmonBulkUploadUsersCSVResponse>;
-export const PrivmonBulkUploadUsersCSVResponse = z.object({
-  errors: z.array(PrivmonUserCsvUploadErrorItem),
-  stats: PrivmonUserCsvUploadStats,
-});

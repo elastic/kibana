@@ -271,6 +271,14 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
       const failedSpecFilePaths: string[] = [];
       const infraFailedSpecFilePaths: string[] = [];
 
+      const isCypressFailedRunResult = (
+        runResult:
+          | CypressCommandLine.CypressRunResult
+          | CypressCommandLine.CypressFailedRunResult
+          | undefined
+      ): runResult is CypressCommandLine.CypressFailedRunResult =>
+        Boolean(runResult && 'status' in runResult && runResult.status === 'failed');
+
       const isTestAssertionFailure = (
         runResult:
           | CypressCommandLine.CypressRunResult
@@ -420,9 +428,24 @@ ${JSON.stringify(
           let fleetServer: StartedFleetServer | undefined;
           let shutdownEs;
 
+          // `CYPRESS_ES_FROM` must only override the *stateful* ES provisioning path.
+          // Serverless Cypress suites require the `kibana-ci/elasticsearch-serverless`
+          // Docker image and will fail to boot when run against a stateful snapshot
+          // tar.gz (e.g. `unknown setting [xpack.security.authc.native_roles.enabled]`
+          // or `unknown setting [serverless.search.enable_replicas_for_instant_failover]`).
+          //
+          // Stateful default differs by environment:
+          //   - CI: `snapshot` — the `kibana-ci-es-snapshots-daily` manifest is
+          //     resolved in `.buildkite/scripts/lifecycle/pre_build.sh` before any
+          //     job runs, so the version is always in lockstep with Kibana. Avoids
+          //     the post-version-bump window where the ES Docker image isn't
+          //     published yet, and avoids a Docker registry pull on every agent.
+          //   - Local: `docker` — matches what we ship, multi-arch, and warm starts
+          //     are fast once the image is cached on the developer's machine.
           const esFromEnv = process.env.CYPRESS_ES_FROM;
           const configEsFrom = config.get('esTestCluster.from');
-          const esFrom = esFromEnv || (configEsFrom === 'serverless' ? 'serverless' : 'docker');
+          const defaultEsFrom = process.env.CI ? 'snapshot' : 'docker';
+          const esFrom = configEsFrom === 'serverless' ? 'serverless' : esFromEnv || defaultEsFrom;
 
           try {
             shutdownEs = await pRetry(
@@ -573,7 +596,9 @@ ${JSON.stringify(cyCustomEnv, null, 2)}
 
                 results.push(runResult);
 
-                if (!(runResult as CypressCommandLine.CypressRunResult)?.totalFailed) {
+                if (isCypressFailedRunResult(runResult)) {
+                  infraFailedSpecFilePaths.push(filePath);
+                } else if (runResult.totalFailed === 0) {
                   _.pull(failedSpecFilePaths, filePath);
                   if (!isOpen && isInBuildkite()) {
                     markSpecCompleted(filePath).catch(() => {});

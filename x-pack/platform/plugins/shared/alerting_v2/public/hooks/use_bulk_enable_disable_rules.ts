@@ -7,9 +7,47 @@
 
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
+import type { IHttpFetchError, IToasts } from '@kbn/core/public';
 import { useService, CoreStart } from '@kbn/core-di-browser';
-import { RulesApi, type BulkOperationParams } from '../services/rules_api';
+import { RulesApi, type BulkResponse } from '../services/rules_api';
+import type { BulkSelection } from './use_bulk_select';
 import { ruleKeys } from './query_key_factory';
+
+const getHttpFetchErrorMessage = (error: unknown): string | undefined => {
+  const httpError = error as IHttpFetchError<{ message?: string }>;
+  return httpError.body?.message;
+};
+
+const addBulkMutationDangerToast = (
+  toasts: Pick<IToasts, 'addDanger'>,
+  title: string,
+  error: unknown
+) => {
+  const serverMessage = getHttpFetchErrorMessage(error);
+  if (serverMessage) {
+    toasts.addDanger({ title, text: serverMessage });
+  } else {
+    toasts.addDanger(title);
+  }
+};
+
+/** Dispatches to the by-ID or by-query enable endpoint based on the selection mode. */
+const dispatchBulkEnable = (rulesApi: RulesApi, params: BulkSelection): Promise<BulkResponse> => {
+  if (params.mode === 'by_ids') {
+    return rulesApi.bulkEnableRules({ ids: params.ids });
+  }
+  const { mode: _mode, ...query } = params;
+  return rulesApi.enableRulesByQuery({ ...query, force: true });
+};
+
+/** Dispatches to the by-ID or by-query disable endpoint based on the selection mode. */
+const dispatchBulkDisable = (rulesApi: RulesApi, params: BulkSelection): Promise<BulkResponse> => {
+  if (params.mode === 'by_ids') {
+    return rulesApi.bulkDisableRules({ ids: params.ids });
+  }
+  const { mode: _mode, ...query } = params;
+  return rulesApi.disableRulesByQuery({ ...query, force: true });
+};
 
 export const useBulkEnableRules = () => {
   const rulesApi = useService(RulesApi);
@@ -17,7 +55,7 @@ export const useBulkEnableRules = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (params: BulkOperationParams) => rulesApi.bulkEnableRules(params),
+    mutationFn: (params: BulkSelection) => dispatchBulkEnable(rulesApi, params),
     onSuccess: (data) => {
       if (data.errors.length > 0) {
         toasts.addWarning(
@@ -30,17 +68,21 @@ export const useBulkEnableRules = () => {
       } else {
         toasts.addSuccess(
           i18n.translate('xpack.alertingV2.hooks.useBulkEnableRules.successMessage', {
-            defaultMessage: 'Rules enabled successfully',
+            defaultMessage:
+              '{affectedCount, plural, one {# rule} other {# rules}} enabled successfully',
+            values: { affectedCount: data.affected_count },
           })
         );
       }
       queryClient.invalidateQueries(ruleKeys.lists());
     },
-    onError: () => {
-      toasts.addDanger(
-        i18n.translate('xpack.alertingV2.hooks.useBulkEnableRules.errorMessage', {
+    onError: (error) => {
+      addBulkMutationDangerToast(
+        toasts,
+        i18n.translate('xpack.alertingV2.hooks.useBulkEnableRules.errorTitle', {
           defaultMessage: 'Failed to enable rules',
-        })
+        }),
+        error
       );
     },
   });
@@ -52,7 +94,7 @@ export const useBulkDisableRules = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (params: BulkOperationParams) => rulesApi.bulkDisableRules(params),
+    mutationFn: (params: BulkSelection) => dispatchBulkDisable(rulesApi, params),
     onSuccess: (data) => {
       if (data.errors.length > 0) {
         toasts.addWarning(
@@ -65,17 +107,21 @@ export const useBulkDisableRules = () => {
       } else {
         toasts.addSuccess(
           i18n.translate('xpack.alertingV2.hooks.useBulkDisableRules.successMessage', {
-            defaultMessage: 'Rules disabled successfully',
+            defaultMessage:
+              '{affectedCount, plural, one {# rule} other {# rules}} disabled successfully',
+            values: { affectedCount: data.affected_count },
           })
         );
       }
       queryClient.invalidateQueries(ruleKeys.lists());
     },
-    onError: () => {
-      toasts.addDanger(
-        i18n.translate('xpack.alertingV2.hooks.useBulkDisableRules.errorMessage', {
+    onError: (error) => {
+      addBulkMutationDangerToast(
+        toasts,
+        i18n.translate('xpack.alertingV2.hooks.useBulkDisableRules.errorTitle', {
           defaultMessage: 'Failed to disable rules',
-        })
+        }),
+        error
       );
     },
   });

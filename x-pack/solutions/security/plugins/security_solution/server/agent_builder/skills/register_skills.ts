@@ -6,16 +6,25 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
+import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { ExperimentalFeatures } from '../../../common/experimental_features';
 import type { EndpointAppContextService } from '../../endpoint/endpoint_app_context_services';
 import { createAutomaticTroubleshootingSkill } from './automatic_troubleshooting';
 import { getDetectionRuleEditSkill } from './detection_rule_edit';
 import { getEntityAnalyticsSkill } from './entity_analytics';
+import { manageWatchlistsSkill } from './manage_watchlists';
+import { pciComplianceSkill } from './pci_compliance';
 import { threatHuntingSkill } from './threat_hunting';
 import { alertAnalysisSkill } from './alert_analysis';
+import { alertTriageSkill } from './alert_triage';
 import type { EntityAnalyticsRoutesDeps } from '../../lib/entity_analytics/types';
-import { getSecurityMlJobsSkill } from './security_ml_jobs';
+import { findSecurityMlJobsSkill } from './find_security_ml_jobs';
+import { createInvestigateRuleSkill } from './investigate_rule';
+import { createFindRulesSkill } from './find_rules';
+import { siemReadinessSkill } from './siem_readiness';
+import { entityAnalyticsLeadsSkill } from './entity_analytics_leads';
+import { createRecommendPrebuiltRulesSkill } from './recommend_prebuilt_rules';
+import { SIEM_READINESS_AGENT_BUILDER_ENABLED } from '../siem_readiness_feature_flag';
 
 interface RegisterSkillsOpts {
   agentBuilder: AgentBuilderPluginSetup;
@@ -52,11 +61,44 @@ export const registerSkills = async ({
     getEntityAnalyticsSkill({ getStartServices, isEntityStoreV2Enabled, kibanaVersion, logger })
   );
 
-  agentBuilder.skills.register(getDetectionRuleEditSkill());
+  if (experimentalFeatures.entityAnalyticsWatchlistEnabled) {
+    agentBuilder.skills.register(manageWatchlistsSkill);
+  }
+
+  agentBuilder.skills.register(
+    getDetectionRuleEditSkill({
+      rulePreviewEnabled: experimentalFeatures.rulePreviewAttachmentEnabled,
+    })
+  );
+  if (experimentalFeatures.dexAiSkillRecommendPrebuiltRules) {
+    await agentBuilder.skills.register(
+      createRecommendPrebuiltRulesSkill({ getStartServices, logger, ml })
+    );
+  }
+
   await agentBuilder.skills.register(
-    getSecurityMlJobsSkill({ getStartServices, isEntityStoreV2Enabled, logger, ml })
+    findSecurityMlJobsSkill({ getStartServices, isEntityStoreV2Enabled, logger, ml })
   );
 
   await agentBuilder.skills.register(threatHuntingSkill);
   await agentBuilder.skills.register(alertAnalysisSkill);
+  await agentBuilder.skills.register(alertTriageSkill);
+  if (experimentalFeatures.dexAiSkillFindRules) {
+    await agentBuilder.skills.register(createFindRulesSkill({ getStartServices, logger }));
+  }
+  if (SIEM_READINESS_AGENT_BUILDER_ENABLED) {
+    await agentBuilder.skills.register(siemReadinessSkill);
+  }
+
+  if (experimentalFeatures.leadGenerationEnabled) {
+    agentBuilder.skills.register(entityAnalyticsLeadsSkill);
+  }
+
+  if (experimentalFeatures.pciComplianceAgentBuilder) {
+    agentBuilder.skills.register(pciComplianceSkill);
+  }
+
+  if (experimentalFeatures.investigateRuleSkill) {
+    await agentBuilder.skills.register(createInvestigateRuleSkill());
+  }
 };

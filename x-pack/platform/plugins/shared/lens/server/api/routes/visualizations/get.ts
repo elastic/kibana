@@ -7,6 +7,11 @@
 
 import { boomify, isBoom } from '@hapi/boom';
 
+import {
+  AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG,
+  AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG_DEFAULT,
+} from '@kbn/as-code-shared-schemas';
+import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
 import type { TypeOf } from '@kbn/config-schema';
 
 import { LENS_CONTENT_TYPE } from '@kbn/lens-common/content_management/constants';
@@ -23,18 +28,18 @@ import type { RegisterAPIRouteFn } from '../../types';
 
 export const registerLensVisualizationsGetAPIRoute: RegisterAPIRouteFn = (
   router,
-  { contentManagement, builder }
+  { contentManagement, builder, usageCounter }
 ) => {
   const getRoute = router.get({
     path: `${LENS_VIS_API_PATH}/{id}`,
     access: LENS_API_ACCESS,
-    enableQueryVersion: true,
     summary: 'Get visualization',
-    description: 'Get a visualization from id.',
+    description: 'Returns a single Lens visualization by its ID.',
     options: {
       tags: [LENS_API_TAG],
       availability: {
-        stability: 'experimental',
+        stability: 'stable',
+        since: '9.5.0',
       },
     },
     security: {
@@ -48,6 +53,10 @@ export const registerLensVisualizationsGetAPIRoute: RegisterAPIRouteFn = (
   getRoute.addVersion(
     {
       version: LENS_API_VERSION,
+      options: {
+        oasOperationObject: async () =>
+          (await import('./oas_examples')).readLensVisualizationOASOperationObject,
+      },
       validate: {
         request: {
           params: lensGetRequestParamsSchema,
@@ -75,34 +84,43 @@ export const registerLensVisualizationsGetAPIRoute: RegisterAPIRouteFn = (
         },
       },
     },
-    async (ctx, req, res) => {
-      const client = contentManagement.contentClient
-        .getForRequest({ request: req, requestHandlerContext: ctx })
-        .for<LensSavedObject>(LENS_CONTENT_TYPE);
+    async (ctx, req, res) =>
+      telemetryHandler(req, { usageCounter, trackAgentic: true }, async () => {
+        const { core } = await ctx.resolve(['core']);
+        // Fallback is `true` so on-prem stacks (which have no remote feature-flag service)
+        // enforce GA schemas by default. Serverless sets the flag explicitly via phased rollout.
+        const useGASchemas = await core.featureFlags.getBooleanValue(
+          AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG,
+          AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG_DEFAULT
+        );
 
-      try {
-        const { result } = await client.get(req.params.id);
-        const responseItem = getLensResponseItem(builder, result.item);
+        const client = contentManagement.contentClient
+          .getForRequest({ request: req, requestHandlerContext: ctx })
+          .for<LensSavedObject>(LENS_CONTENT_TYPE);
 
-        return res.ok<TypeOf<typeof lensGetResponseBodySchema>>({
-          body: responseItem,
-        });
-      } catch (error) {
-        if (isBoom(error)) {
-          if (error.output.statusCode === 404) {
-            return res.notFound({
-              body: {
-                message: `A visualization with id [${req.params.id}] was not found.`,
-              },
-            });
+        try {
+          const { result } = await client.get(req.params.id);
+          const responseItem = getLensResponseItem(builder, result.item, useGASchemas);
+
+          return res.ok<TypeOf<typeof lensGetResponseBodySchema>>({
+            body: responseItem,
+          });
+        } catch (error) {
+          if (isBoom(error)) {
+            if (error.output.statusCode === 404) {
+              return res.notFound({
+                body: {
+                  message: `A visualization with id [${req.params.id}] was not found.`,
+                },
+              });
+            }
+            if (error.output.statusCode === 403) {
+              return res.forbidden();
+            }
           }
-          if (error.output.statusCode === 403) {
-            return res.forbidden();
-          }
+
+          return boomify(error); // forward unknown error
         }
-
-        return boomify(error); // forward unknown error
-      }
-    }
+      })
   );
 };

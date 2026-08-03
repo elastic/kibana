@@ -13,6 +13,7 @@ import type { BehaviorSubject } from 'rxjs';
 import type { DiscoverStartPlugins } from '../types';
 import type { DiscoverEBTContextProps } from './types';
 import { cascadeEventType } from '../application/main/components/layout/cascaded_documents/telemetry/event_definition';
+import { discoverInDashboardEventType } from './discover_in_dashboard_event_definition';
 
 /**
  * Field usage events i.e. when a field is selected in the data table, removed from the data table, or a filter is added
@@ -23,6 +24,18 @@ export const FIELD_USAGE_EVENT_NAME = 'eventName';
 export const FIELD_USAGE_FIELD_NAME = 'fieldName';
 export const QUERY_FIELDS_USAGE_FIELD_NAMES = 'fieldNames';
 export const FIELD_USAGE_FILTER_OPERATION = 'filterOperation';
+
+/**
+ * Query performance events i.e. when Discover fetches data from Elasticsearch
+ */
+export const QUERY_PERFORMANCE_EVENT_TYPE = 'discover_query_performance';
+export const QUERY_PERFORMANCE_EVENT_NAME = 'eventName';
+export const QUERY_PERFORMANCE_DURATION = 'duration';
+export const QUERY_PERFORMANCE_QUERY_RANGE_SECONDS = 'queryRangeSeconds';
+export const QUERY_PERFORMANCE_PHRASE_QUERY_COUNT = 'phraseQueryCount';
+export const QUERY_PERFORMANCE_MULTI_MATCH_TYPES = 'multiMatchTypes';
+export const QUERY_PERFORMANCE_FETCH_TYPE = 'fetchType';
+export const QUERY_PERFORMANCE_QUERY_SOURCE_COMMAND = 'querySourceCommand';
 
 /**
  * Contextual profile resolved event i.e. when a different contextual profile is resolved at root, data source, or document level
@@ -113,6 +126,62 @@ export const registerDiscoverEBTManagerAnalytics = (
   });
 
   core.analytics.registerEventType({
+    eventType: QUERY_PERFORMANCE_EVENT_TYPE,
+    schema: {
+      [QUERY_PERFORMANCE_EVENT_NAME]: {
+        type: 'keyword',
+        _meta: {
+          description:
+            'The name of the query performance event that is tracked i.e. discoverFetchAll, discoverFetchMore',
+        },
+      },
+      [QUERY_PERFORMANCE_DURATION]: {
+        type: 'integer',
+        _meta: {
+          description: 'The event duration in milliseconds',
+        },
+      },
+      [QUERY_PERFORMANCE_QUERY_RANGE_SECONDS]: {
+        type: 'long',
+        _meta: {
+          description: 'The query time range in seconds',
+        },
+      },
+      [QUERY_PERFORMANCE_PHRASE_QUERY_COUNT]: {
+        type: 'integer',
+        _meta: {
+          description: 'The number of phrase queries found in the Elasticsearch requests',
+        },
+      },
+      [QUERY_PERFORMANCE_MULTI_MATCH_TYPES]: {
+        type: 'array',
+        items: {
+          type: 'keyword',
+          _meta: {
+            description: 'Multi-match query types found in the Elasticsearch requests',
+          },
+        },
+        _meta: {
+          description: 'Multi-match query types found in the Elasticsearch requests',
+        },
+      },
+      [QUERY_PERFORMANCE_FETCH_TYPE]: {
+        type: 'keyword',
+        _meta: {
+          description: 'The fetch implementation used for the query request',
+        },
+      },
+      [QUERY_PERFORMANCE_QUERY_SOURCE_COMMAND]: {
+        type: 'keyword',
+        _meta: {
+          description: 'The ES|QL source command used by the query i.e. FROM, TS, PROMQL',
+          optional: true,
+        },
+      },
+    },
+  });
+
+  core.analytics.registerEventType({
     eventType: CONTEXTUAL_PROFILE_RESOLVED_EVENT_TYPE,
     schema: {
       [CONTEXTUAL_PROFILE_LEVEL]: {
@@ -194,4 +263,6 @@ export const registerDiscoverEBTManagerAnalytics = (
   });
 
   core.analytics.registerEventType(cascadeEventType);
+
+  core.analytics.registerEventType(discoverInDashboardEventType);
 };

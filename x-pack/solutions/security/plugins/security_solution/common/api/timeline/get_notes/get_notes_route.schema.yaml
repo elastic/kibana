@@ -8,84 +8,151 @@ paths:
       x-labels: [serverless, ess]
       x-codegen-enabled: true
       operationId: GetNotes
-      description: Get all notes for a given document.
       summary: Get notes
+      description: |
+        Returns Security Timeline notes as saved objects.
+
+        **Query modes (mutually exclusive branches on the server):**
+
+        1. **`documentIds` is set** — Returns notes whose `eventId` matches the given Elasticsearch document `_id` (single string or array). Pagination query parameters (`page`, `perPage`, etc.) are **not** applied; the server uses a fixed page size (up to 10000 notes).
+
+        2. **`savedObjectIds` is set** — Returns notes linked to the given Timeline saved object id(s). Same fixed cap as above; list-mode query parameters are **not** applied.
+
+        3. **Neither `documentIds` nor `savedObjectIds`** — Lists notes using saved-objects find semantics: `page` (default 1), `perPage` (default 10), optional `search`, `sortField`, `sortOrder`, `filter`, `createdByFilter`, and `associatedFilter`.
+
+        Requires the **Timeline and Notes** read privilege (`notes_read`).
       tags:
         - access:securitySolution
       parameters:
         - name: documentIds
           in: query
+          description: >
+            Event document `_id` values to match against each note's `eventId`. When this parameter is present,
+            the response is all matching notes (up to the server's hard limit), not a paged list using `page`/`perPage`.
           schema:
             $ref: '#/components/schemas/DocumentIds'
+          examples:
+            single:
+              summary: Single document id
+              value: d3a1d35a3e84a81b2f8f3859e064c224cdee1b4bcbf66f57d124dcc739c98e6b
+            multiple:
+              summary: Multiple document ids (array)
+              value: ['id-one', 'id-two']
         - name: savedObjectIds
           in: query
+          description: >
+            Timeline `savedObjectId` value(s). Returns notes that reference those timelines. When present,
+            list-mode pagination parameters are not used; up to the server's hard limit of notes may be returned.
           schema:
             $ref: '#/components/schemas/SavedObjectIds'
+          examples:
+            singleTimeline:
+              summary: Single timeline id
+              value: 15c1929b-0af7-42bd-85a8-56e234cc7c4e
         - name: page
           in: query
+          description: >
+            Page number for list mode (when `documentIds` and `savedObjectIds` are omitted). Passed as a string; default 1.
           schema:
             type: string
             nullable: true
+          example: '1'
         - name: perPage
           in: query
+          description: >
+            Page size for list mode (when `documentIds` and `savedObjectIds` are omitted). Passed as a string; default 10.
           schema:
             type: string
             nullable: true
+          example: '20'
         - name: search
           in: query
+          description: Search string for saved-objects find (list mode only).
           schema:
             type: string
             nullable: true
         - name: sortField
           in: query
+          description: Field to sort by for saved-objects find (list mode only).
           schema:
             type: string
             nullable: true
         - name: sortOrder
           in: query
+          description: Sort order (`asc` or `desc`) for saved-objects find (list mode only).
           schema:
             type: string
             nullable: true
+          example: desc
         - name: filter
           in: query
+          description: >
+            Kuery filter string combined with other list-mode filters (for example `createdByFilter` or `associatedFilter`).
+            Typed as a string for API compatibility; interpreted by the saved-objects layer (list mode only).
           schema:
             type: string
             nullable: true
-        - in: query
-          name: createdByFilter
+        - name: createdByFilter
+          in: query
+          description: >
+            Kibana user profile **UID** (UUID). The server resolves the user's display identifiers and returns notes
+            whose `createdBy` matches any of them (list mode only).
           schema:
             nullable: true
             type: string
+          example: 'f1c2d3e4-5b6a-7890-abcd-ef1234567890'
         - name: associatedFilter
           in: query
+          description: >
+            Restricts notes by how they relate to a Timeline and/or an event document (list mode only).
+            Some values apply extra filtering after the query. Ignored when `documentIds` or `savedObjectIds` is used.
           schema:
             $ref: '#/components/schemas/AssociatedFilterType'
       responses:
         '200':
-          description: Indicates the requested notes were returned.
+          description: Notes and total count for the requested mode.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/GetNotesResult'
+              examples:
+                notesPage:
+                  summary: Paged notes for a timeline
+                  value:
+                    totalCount: 1
+                    notes:
+                      - noteId: 709f99c6-89b6-4953-9160-35945c8e174e
+                        version: WzQ2LDFd
+                        timelineId: 15c1929b-0af7-42bd-85a8-56e234cc7c4e
+                        note: Escalated to tier-2 analyst
+                        eventId: d3a1d35a3e84a81b2f8f3859e064c224cdee1b4bc
 
 components:
   schemas:
     AssociatedFilterType:
-        type: string
-        enum:
-          - all
-          - document_only
-          - saved_object_only
-          - document_and_saved_object
-          - orphan
-        description: Filter notes based on their association with a document or saved object.
+      type: string
+      enum:
+        - all
+        - document_only
+        - saved_object_only
+        - document_and_saved_object
+        - orphan
+      description: >
+        How the note is associated with a Timeline saved object and/or an event (`eventId`). `all`: no association-based
+        restriction from this parameter. `document_only`: document-linked notes (non-empty `eventId`) without timeline
+        association in the API's internal sense; post-filtering drops notes without a usable `eventId`. `saved_object_only`:
+        timeline notes with no linked event (`eventId` empty or absent); post-filtering keeps timeline-only notes.
+        `document_and_saved_object`: notes on a timeline and linked to an event; post-filtering enforces a real `eventId`.
+        `orphan`: not on a timeline and `eventId` is empty (stricter than missing `eventId` in some cases).
     DocumentIds:
+      description: One document ID or an array of IDs (Elasticsearch `_id` of the event).
       oneOf:
         - type: array
           items:
             type: string
         - type: string
     SavedObjectIds:
+      description: One Timeline saved object ID or an array of IDs.
       oneOf:
         - type: array
           items:
@@ -97,6 +164,7 @@ components:
       properties:
         totalCount:
           type: number
+          description: Number of notes returned (may be adjusted after the query when `associatedFilter` applies post-filtering).
         notes:
           type: array
           items:

@@ -7,7 +7,45 @@
 
 import type { Condition } from '@kbn/streamlang';
 import type { EntityType, EntityField, FieldEvaluation } from './entity_schema';
-import { collectValues, newestValue, oldestValue } from './field_retention_operations';
+import {
+  collectValues,
+  newestValue,
+  oldestValue,
+  managedValue,
+} from './field_retention_operations';
+
+/**
+ * Dotted ECS paths collected into `entity.relationships.*.raw_identifiers.<path>`.
+ * Keep `EntityRelationship.raw_identifiers` in `entity.schema.yaml` in sync (same paths plus
+ * `entity.id` on the schema for target hints; ingest maps canonical EUIDs via `.entity.id` → `ids`).
+ */
+export const ENTITY_RELATIONSHIP_IDENTIFIER_FIELDS = [
+  'host.id',
+  'user.id',
+  'user.email',
+  'host.name',
+  'user.name',
+  'service.name',
+] as const;
+
+/**
+ * Closed enum of every relationship-type identifier the entity store stores under
+ * `entity.relationships.<key>`. Also consumed by maintainers (e.g. the relationship
+ * engine in security_solution) so they can declare which keys their pipeline writes
+ * to without re-stating the schema.
+ */
+export const ENTITY_RELATIONSHIP_COLLECT_LEAVES = [
+  'administers',
+  'communicates_with',
+  'depends_on',
+  'owns_inferred',
+  'accesses_infrequently',
+  'accesses_frequently',
+  'owns',
+  'supervises',
+] as const;
+
+export type EntityRelationshipKey = (typeof ENTITY_RELATIONSHIP_COLLECT_LEAVES)[number];
 
 export const ENTITY_ID_FIELD = 'entity.id';
 export const ENTITY_SOURCE_FIELD = 'entity.source';
@@ -25,23 +63,16 @@ export const getCommonFieldDescriptions = (
   newestValue({ source: 'asset.environment' }),
   newestValue({ source: 'asset.criticality' }),
   newestValue({ source: 'asset.business_unit' }),
-  newestValue({
-    source: `${ecsField}.risk.calculated_level`,
+  managedValue({
     destination: 'entity.risk.calculated_level',
   }),
-  newestValue({
-    source: `${ecsField}.risk.calculated_score`,
+  managedValue({
     destination: 'entity.risk.calculated_score',
-    mapping: {
-      type: 'float',
-    },
+    mapping: { type: 'float' },
   }),
-  newestValue({
-    source: `${ecsField}.risk.calculated_score_norm`,
+  managedValue({
     destination: 'entity.risk.calculated_score_norm',
-    mapping: {
-      type: 'float',
-    },
+    mapping: { type: 'float' },
   }),
 ];
 
@@ -51,15 +82,14 @@ export const getEntityFieldsDescriptions = (rootField?: EntityType) => {
   return [
     collectValues({ source: 'event.module' }),
     collectValues({ source: 'event.dataset' }),
-    collectValues({ source: 'data_stream.dataset', fieldHistoryLength: 50 }),
-    collectValues({ source: ENTITY_SOURCE_FIELD, fieldHistoryLength: 50 }),
+    collectValues({ source: 'data_stream.dataset' }),
+    collectValues({ source: ENTITY_SOURCE_FIELD }),
     newestValue({ source: `${prefix}.type`, destination: 'entity.type' }),
     newestValue({ source: `${prefix}.sub_type`, destination: 'entity.sub_type' }),
     newestValue({ source: `${prefix}.url`, destination: 'entity.url' }),
 
     // ATTRIBUTES ------------------------------------------------------------
-    collectValues({
-      source: `${prefix}.attributes.watchlists`,
+    managedValue({
       destination: 'entity.attributes.watchlists',
       mapping: { type: 'keyword' },
       allowAPIUpdate: true,
@@ -82,6 +112,36 @@ export const getEntityFieldsDescriptions = (rootField?: EntityType) => {
       mapping: { type: 'boolean' },
       allowAPIUpdate: true,
     }),
+    newestValue({
+      source: `${prefix}.attributes.storage_class`,
+      destination: 'entity.attributes.storage_class',
+      mapping: { type: 'keyword' },
+      allowAPIUpdate: true,
+    }),
+    collectValues({
+      source: `${prefix}.attributes.permissions`,
+      destination: 'entity.attributes.permissions',
+      mapping: { type: 'keyword' },
+      allowAPIUpdate: true,
+    }),
+    collectValues({
+      source: `${prefix}.attributes.known_redirects`,
+      destination: 'entity.attributes.known_redirects',
+      mapping: { type: 'keyword' },
+      allowAPIUpdate: true,
+    }),
+    newestValue({
+      source: `${prefix}.attributes.oauth_consent_restriction`,
+      destination: 'entity.attributes.oauth_consent_restriction',
+      mapping: { type: 'keyword' },
+      allowAPIUpdate: true,
+    }),
+    /*
+     * NOTE: the AI summary is not an entity field. It persists to the entity metadata
+     * datastream (.entities.v2.metadata.security_{namespace}) via EntityMetadataClient
+     * as an immutable `ai_summary_generated` document, and is read back from there — it
+     * is never stored on the latest-index entity document.
+     */
 
     // LIFECYCLE ------------------------------------------------------------
     oldestValue({
@@ -105,84 +165,52 @@ export const getEntityFieldsDescriptions = (rootField?: EntityType) => {
     // Behaviors are reset periodically by the history snapshot feature
     // The current reset implementation only resets lists and strings
     // if we ever add a boolean, reset via snapshot needs to be updated
-    collectValues({
-      source: `${prefix}.behaviors.rule_names`,
+    managedValue({
       destination: 'entity.behaviors.rule_names',
       mapping: { type: 'keyword' },
-      fieldHistoryLength: 100,
       allowAPIUpdate: true,
     }),
-    collectValues({
-      source: `${prefix}.behaviors.anomaly_job_ids`,
+    managedValue({
       destination: 'entity.behaviors.anomaly_job_ids',
       mapping: { type: 'keyword' },
-      fieldHistoryLength: 100,
       allowAPIUpdate: true,
     }),
 
     // RELATIONSHIPS ------------------------------------------------------------
-    collectValues({
-      source: `${prefix}.relationships.communicates_with`,
-      destination: 'entity.relationships.communicates_with',
-      mapping: { type: 'keyword' },
-      fieldHistoryLength: 50,
-      allowAPIUpdate: true,
-    }),
-    collectValues({
-      source: `${prefix}.relationships.depends_on`,
-      destination: 'entity.relationships.depends_on',
-      mapping: { type: 'keyword' },
-      allowAPIUpdate: true,
-    }),
-    collectValues({
-      source: `${prefix}.relationships.owns_inferred`,
-      destination: 'entity.relationships.owns_inferred',
-      mapping: { type: 'keyword' },
-    }),
-    collectValues({
-      source: `${prefix}.relationships.accesses_infrequently`,
-      destination: 'entity.relationships.accesses_infrequently',
-      mapping: { type: 'keyword' },
-      allowAPIUpdate: true,
-    }),
-    collectValues({
-      source: `${prefix}.relationships.accesses_frequently`,
-      destination: 'entity.relationships.accesses_frequently',
-      mapping: { type: 'keyword' },
-      allowAPIUpdate: true,
-    }),
-    collectValues({
-      source: `${prefix}.relationships.owns`,
-      destination: 'entity.relationships.owns',
-      mapping: { type: 'keyword' },
-      allowAPIUpdate: true,
-    }),
-    collectValues({
-      source: `${prefix}.relationships.supervises`,
-      destination: 'entity.relationships.supervises',
-      mapping: { type: 'keyword' },
-      allowAPIUpdate: true,
-    }),
-    newestValue({
-      source: `${prefix}.relationships.resolution.resolved_to`,
+    // Source logs use flat `host.entity.relationships.<relationship>.<identifier>`; the entity index
+    // stores raw bags under `raw_identifiers` and canonical EUIDs under `ids`.
+    ...ENTITY_RELATIONSHIP_COLLECT_LEAVES.flatMap((relationship) => [
+      ...ENTITY_RELATIONSHIP_IDENTIFIER_FIELDS.map((idField) =>
+        collectValues({
+          source: `${prefix}.relationships.${relationship}.${idField}`,
+          destination: `entity.relationships.${relationship}.raw_identifiers.${idField}`,
+          mapping: { type: 'keyword' },
+          allowAPIUpdate: true,
+        })
+      ),
+      collectValues({
+        source: `${prefix}.relationships.${relationship}.entity.id`,
+        destination: `entity.relationships.${relationship}.ids`,
+        mapping: { type: 'keyword' },
+        allowAPIUpdate: true,
+      }),
+    ]),
+    managedValue({
       destination: 'entity.relationships.resolution.resolved_to',
       mapping: { type: 'keyword' },
       allowAPIUpdate: true,
     }),
-    newestValue({
-      source: `${prefix}.relationships.resolution.risk.calculated_level`,
+    managedValue({
       destination: 'entity.relationships.resolution.risk.calculated_level',
       mapping: { type: 'keyword' },
       allowAPIUpdate: true,
     }),
-    newestValue({
-      source: `${prefix}.relationships.resolution.risk.calculated_score`,
+    managedValue({
       destination: 'entity.relationships.resolution.risk.calculated_score',
       mapping: { type: 'float' },
       allowAPIUpdate: true,
     }),
-    newestValue({
-      source: `${prefix}.relationships.resolution.risk.calculated_score_norm`,
+    managedValue({
       destination: 'entity.relationships.resolution.risk.calculated_score_norm',
       mapping: { type: 'float' },
       allowAPIUpdate: true,

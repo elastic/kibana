@@ -8,21 +8,18 @@
 import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ALL_VALUE } from '@kbn/slo-schema';
-import { ApmRuleType } from '@kbn/rule-data-utils';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
-import type { ApmIndicatorType } from '../../../../../common/slo_indicator_types';
 import { APM_SLO_INDICATOR_TYPES } from '../../../../../common/slo_indicator_types';
 import type { ApmPluginStartDeps } from '../../../../plugin';
-import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useManageSlosUrl } from '../../../../hooks/use_manage_slos_url';
 import { useServiceName } from '../../../../hooks/use_service_name';
-import { getAlertingCapabilities } from '../../../alerting/utils/get_alerting_capabilities';
+import { useAlertSloActions, type ApmFlyoutState } from '../../../../hooks/use_alert_slo_actions';
 import { AlertingFlyout } from '../../../alerting/ui_components/alerting_flyout';
-import type { ActionGroups } from '../../../shared/actions_context_menu';
 import { ActionsContextMenu } from '../../../shared/actions_context_menu';
+import { resolveTableActions } from '../../../shared/managed_table';
 
 const actionsLabel = i18n.translate('xpack.apm.home.actionsMenu.actions', {
   defaultMessage: 'Actions',
@@ -32,167 +29,68 @@ const ACTIONS_MENU_BUTTON_MIN_WIDTH = 118; // match Unified Search submit button
 
 export function ActionsMenu() {
   const { slo: sloPlugin } = useKibana<ApmPluginStartDeps>().services;
-  const { core, plugins } = useApmPluginContext();
-  const { capabilities } = core.application;
   const { query } = useApmParams('/*');
 
-  const [ruleType, setRuleType] = useState<ApmRuleType | null>(null);
-  const [sloFlyoutState, setSloFlyoutState] = useState<{
-    isOpen: boolean;
-    indicatorType: ApmIndicatorType | null;
-  }>({
-    isOpen: false,
-    indicatorType: null,
-  });
-
-  const canReadMlJobs = !!capabilities.ml?.canGetJobs;
-  const { isAlertingAvailable, canSaveAlerts } = getAlertingCapabilities(plugins, capabilities);
-  const canSaveApmAlerts = !!capabilities.apm.save && canSaveAlerts;
-  const canReadSlos = !!capabilities.slo?.read;
-  const canWriteSlos = !!capabilities.slo?.write;
+  const [flyoutState, setFlyoutState] = useState<ApmFlyoutState>({ type: 'closed' });
 
   const serviceName = useServiceName();
   const apmEnvironment = ('environment' in query && query.environment) || ENVIRONMENT_ALL.value;
   const sloEnvironment = apmEnvironment === ENVIRONMENT_ALL.value ? ALL_VALUE : apmEnvironment;
   const manageSlosUrl = useManageSlosUrl();
 
-  const openSloFlyout = useCallback((indicatorType: ApmIndicatorType) => {
-    setSloFlyoutState({ isOpen: true, indicatorType });
-  }, []);
+  const { getAlertActionGroup, getSloActionGroup } = useAlertSloActions();
 
-  const closeSloFlyout = useCallback(() => {
-    setSloFlyoutState({ isOpen: false, indicatorType: null });
-  }, []);
+  const actionGroups = useMemo(() => {
+    const tableActionGroups = [];
 
-  const actionGroups: ActionGroups = useMemo(() => {
-    const groups: ActionGroups = [];
-
-    if (isAlertingAvailable && canSaveApmAlerts) {
-      groups.push({
-        id: 'alerts',
-        groupLabel: i18n.translate('xpack.apm.home.actionsMenu.alertsGroup', {
-          defaultMessage: 'Alerts',
-        }),
-        actions: [
-          {
-            id: 'createThresholdRule',
-            name: i18n.translate('xpack.apm.home.actionsMenu.createThresholdRule', {
-              defaultMessage: 'Create threshold rule',
-            }),
-            items: [
-              {
-                id: 'createLatencyRule',
-                name: i18n.translate('xpack.apm.home.actionsMenu.latency', {
-                  defaultMessage: 'Latency',
-                }),
-                onClick: () => setRuleType(ApmRuleType.TransactionDuration),
-              },
-              {
-                id: 'createFailedTransactionRateRule',
-                name: i18n.translate('xpack.apm.home.actionsMenu.failedTransactionRate', {
-                  defaultMessage: 'Failed transaction rate',
-                }),
-                onClick: () => setRuleType(ApmRuleType.TransactionErrorRate),
-              },
-            ],
-          },
-          ...(canReadMlJobs
-            ? [
-                {
-                  id: 'createAnomalyRule',
-                  name: i18n.translate('xpack.apm.home.actionsMenu.createAnomalyRule', {
-                    defaultMessage: 'Create anomaly rule',
-                  }),
-                  onClick: () => setRuleType(ApmRuleType.Anomaly),
-                },
-              ]
-            : []),
-          {
-            id: 'createErrorCountRule',
-            name: i18n.translate('xpack.apm.home.actionsMenu.createErrorCountRule', {
-              defaultMessage: 'Create error count rule',
-            }),
-            onClick: () => setRuleType(ApmRuleType.ErrorCount),
-          },
-        ],
-      });
+    const alertGroup = getAlertActionGroup<void>({
+      onAlertClick: (_item, apmRuleType) =>
+        setFlyoutState({ type: 'alert', ruleType: apmRuleType }),
+    });
+    if (alertGroup) {
+      tableActionGroups.push(alertGroup);
     }
 
-    if (canWriteSlos || canReadSlos) {
-      groups.push({
-        id: 'slos',
-        groupLabel: i18n.translate('xpack.apm.home.actionsMenu.slosGroup', {
-          defaultMessage: 'SLOs',
-        }),
-        actions: [
-          ...(canWriteSlos
-            ? [
-                {
-                  id: 'createLatencySlo',
-                  name: i18n.translate('xpack.apm.home.actionsMenu.createLatencySlo', {
-                    defaultMessage: 'Create APM latency SLO',
-                  }),
-                  onClick: () => openSloFlyout('sli.apm.transactionDuration'),
-                },
-                {
-                  id: 'createAvailabilitySlo',
-                  name: i18n.translate('xpack.apm.home.actionsMenu.createAvailabilitySlo', {
-                    defaultMessage: 'Create APM availability SLO',
-                  }),
-                  onClick: () => openSloFlyout('sli.apm.transactionErrorRate'),
-                },
-              ]
-            : []),
-          ...(canReadSlos
-            ? [
-                {
-                  id: 'manageSlos',
-                  name: i18n.translate('xpack.apm.home.actionsMenu.manageSlos', {
-                    defaultMessage: 'Manage SLOs',
-                  }),
-                  href: manageSlosUrl,
-                  icon: 'tableOfContents',
-                },
-              ]
-            : []),
-        ],
-      });
+    const sloGroup = getSloActionGroup<void>({
+      onSloClick: (_item, indicatorType) => setFlyoutState({ type: 'slo', indicatorType }),
+      getManageSlosHref: manageSlosUrl ? () => manageSlosUrl : undefined,
+    });
+    if (sloGroup) {
+      tableActionGroups.push(sloGroup);
     }
 
-    return groups;
-  }, [
-    isAlertingAvailable,
-    canSaveApmAlerts,
-    canReadMlJobs,
-    canWriteSlos,
-    canReadSlos,
-    manageSlosUrl,
-    openSloFlyout,
-  ]);
+    return resolveTableActions(tableActionGroups, undefined as void);
+  }, [getAlertActionGroup, getSloActionGroup, manageSlosUrl]);
+
+  const sloIndicatorType = flyoutState.type === 'slo' ? flyoutState.indicatorType : null;
+
+  const CreateSloFlyout = useMemo(() => {
+    if (!sloIndicatorType) {
+      return null;
+    }
+    return (
+      sloPlugin?.getCreateSLOFormFlyout({
+        initialValues: {
+          ...(serviceName && { name: `APM SLO for ${serviceName}` }),
+          indicator: {
+            type: sloIndicatorType,
+            params: {
+              ...(serviceName && { service: serviceName }),
+              environment: sloEnvironment,
+            },
+          },
+        },
+        onClose: () => setFlyoutState({ type: 'closed' }),
+        formSettings: {
+          allowedIndicatorTypes: [...APM_SLO_INDICATOR_TYPES],
+        },
+      }) ?? null
+    );
+  }, [sloPlugin, sloIndicatorType, serviceName, sloEnvironment]);
 
   if (actionGroups.length === 0) {
     return null;
   }
-
-  const CreateSloFlyout =
-    sloFlyoutState.isOpen && sloFlyoutState.indicatorType
-      ? sloPlugin?.getCreateSLOFormFlyout({
-          initialValues: {
-            ...(serviceName && { name: `APM SLO for ${serviceName}` }),
-            indicator: {
-              type: sloFlyoutState.indicatorType,
-              params: {
-                ...(serviceName && { service: serviceName }),
-                environment: sloEnvironment,
-              },
-            },
-          },
-          onClose: closeSloFlyout,
-          formSettings: {
-            allowedIndicatorTypes: [...APM_SLO_INDICATOR_TYPES],
-          },
-        })
-      : null;
 
   return (
     <>
@@ -213,11 +111,11 @@ export function ActionsMenu() {
         }
       />
       <AlertingFlyout
-        ruleType={ruleType}
-        addFlyoutVisible={!!ruleType}
+        ruleType={flyoutState.type === 'alert' ? flyoutState.ruleType : null}
+        addFlyoutVisible={flyoutState.type === 'alert'}
         setAddFlyoutVisibility={(visible) => {
           if (!visible) {
-            setRuleType(null);
+            setFlyoutState({ type: 'closed' });
           }
         }}
       />

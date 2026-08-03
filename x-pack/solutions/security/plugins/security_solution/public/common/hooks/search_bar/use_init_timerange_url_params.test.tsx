@@ -7,17 +7,15 @@
 
 import { renderHook } from '@testing-library/react';
 import { useInitTimerangeFromUrlParam } from './use_init_timerange_url_params';
-import * as redux from 'react-redux';
-import * as experimentalFeatures from '../use_experimental_features';
+import * as redux from 'react-redux-v7';
 import * as globalQueryString from '../../utils/global_query_string';
 import { TestProviders } from '../../mock';
 
-jest.mock('react-redux', () => ({
-  ...jest.requireActual('react-redux'),
+jest.mock('react-redux-v7', () => ({
+  ...jest.requireActual('react-redux-v7'),
   useDispatch: jest.fn(),
 }));
 jest.mock('../../lib/kibana');
-jest.mock('../use_experimental_features', () => ({ useIsExperimentalFeatureEnabled: jest.fn() }));
 jest.mock('../../utils/global_query_string', () => ({ useInitializeUrlParam: jest.fn() }));
 
 describe('useInitTimerangeFromUrlParam', () => {
@@ -25,7 +23,6 @@ describe('useInitTimerangeFromUrlParam', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (redux.useDispatch as jest.Mock).mockReturnValue(dispatch);
-    (experimentalFeatures.useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
   });
 
   it('should call useInitializeUrlParam with correct params', () => {
@@ -45,25 +42,6 @@ describe('useInitTimerangeFromUrlParam', () => {
     const callback = (globalQueryString.useInitializeUrlParam as jest.Mock).mock.calls[0][1];
     callback({ valueReport: { timerange: { kind: 'absolute' } } });
     expect(dispatch).toHaveBeenCalledTimes(3);
-  });
-
-  it('should call dispatch 6 times on init url params when valueReport exists, and isSocTrendsEnabled=true', () => {
-    (experimentalFeatures.useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
-    renderHook(() => useInitTimerangeFromUrlParam(), {
-      wrapper: TestProviders,
-    });
-    // Extract the callback passed to useInitializeUrlParam
-    const callback = (globalQueryString.useInitializeUrlParam as jest.Mock).mock.calls[0][1];
-    // Call the callback with a mock state
-    callback({
-      valueReport: { timerange: { kind: 'absolute' } },
-      socTrends: { timerange: { kind: 'absolute' } },
-    });
-    // No assertion here, but you could spy on internal helpers if exported
-    expect(experimentalFeatures.useIsExperimentalFeatureEnabled).toHaveBeenCalledWith(
-      'socTrendsEnabled'
-    );
-    expect(dispatch).toHaveBeenCalledTimes(6);
   });
 
   it('should not throw if initialState is null', () => {

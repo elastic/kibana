@@ -13,12 +13,16 @@ import { RUNNING_MAINTENANCE_WINDOW_1 } from '@kbn/alerts-ui-shared/src/maintena
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { TimeBuckets } from '@kbn/data-plugin/common';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { act, render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { useLocation } from 'react-router-dom';
+import { BehaviorSubject } from 'rxjs';
 import * as dataContext from '../../hooks/use_has_data';
 import * as pluginContext from '../../hooks/use_plugin_context';
 import type { ObservabilityPublicPluginsStart } from '../../plugin';
@@ -33,6 +37,12 @@ jest.mock('react-router-dom', () => ({
 }));
 
 const mockUseKibanaReturnValue = kibanaStartMock.startContract();
+const license$ = new BehaviorSubject(
+  licensingMock.createLicense({
+    license: { type: 'platinum', mode: 'platinum' },
+  })
+);
+mockUseKibanaReturnValue.services.licensing.license$ = license$;
 mockUseKibanaReturnValue.services.application.capabilities = {
   ...mockUseKibanaReturnValue.services.application.capabilities,
   [MAINTENANCE_WINDOW_FEATURE_ID]: {
@@ -133,6 +143,14 @@ jest.mock('../../hooks/use_get_available_rules_with_descriptions');
 
 jest.mock('@kbn/triggers-actions-ui-plugin/public');
 
+jest.mock('@kbn/alerts-ui-shared/src/common/hooks', () => ({
+  ...jest.requireActual('@kbn/alerts-ui-shared/src/common/hooks'),
+  useGetRuleTypesPermissions: jest.fn(() => ({
+    authorizedToReadAnyRules: true,
+    authorizedToReadRuleType: () => true,
+  })),
+}));
+
 const ruleDescriptions = [
   {
     id: 'observability.rules.custom_threshold',
@@ -155,7 +173,9 @@ function AllTheProviders({ children }: { children: any }) {
   return (
     <ThemeProvider>
       <IntlProvider locale="en">
-        <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+        <MockAppHeaderProvider>
+          <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+        </MockAppHeaderProvider>
       </IntlProvider>
     </ThemeProvider>
   );
@@ -200,6 +220,11 @@ describe('AlertsPage with all capabilities', () => {
 
   beforeEach(() => {
     fetchActiveMaintenanceWindowsMock.mockClear();
+    license$.next(
+      licensingMock.createLicense({
+        license: { type: 'platinum', mode: 'platinum' },
+      })
+    );
     useTimeBuckets.mockReturnValue(timeBuckets);
     useLocationMock.mockReturnValue({ pathname: '/alerts', search: '', state: '', hash: '' });
   });
@@ -207,7 +232,7 @@ describe('AlertsPage with all capabilities', () => {
   it('should render an alerts page template', async () => {
     const wrapper = await setup();
     await waitFor(() => {
-      expect(wrapper.getByText('Alerts')).toBeInTheDocument();
+      expect(wrapper.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Alerts');
     });
   });
 
@@ -223,6 +248,20 @@ describe('AlertsPage with all capabilities', () => {
     await waitFor(() => {
       expect(wrapper.getByTestId('maintenanceWindowCallout')).toBeInTheDocument();
       expect(fetchActiveMaintenanceWindowsMock).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  it('does not fetch maintenance windows on a basic license', async () => {
+    license$.next(
+      licensingMock.createLicense({
+        license: { type: 'basic', mode: 'basic' },
+      })
+    );
+
+    await setup();
+
+    await waitFor(() => {
+      expect(fetchActiveMaintenanceWindowsMock).not.toHaveBeenCalled();
     });
   });
 

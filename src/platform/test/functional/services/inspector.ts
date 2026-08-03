@@ -25,6 +25,7 @@ export class InspectorService extends FtrService {
   private readonly find = this.ctx.getService('find');
   private readonly comboBox = this.ctx.getService('comboBox');
   private readonly monacoEditor = this.ctx.getService('monacoEditor');
+  private readonly browser = this.ctx.getService('browser');
 
   private async getIsEnabled(): Promise<boolean> {
     const ariaDisabled = await this.testSubjects.getAttribute('openInspectorButton', 'disabled');
@@ -195,11 +196,20 @@ export class InspectorService extends FtrService {
   public async openInspectorView(viewId: string): Promise<void> {
     this.log.debug(`Open Inspector view ${viewId}`);
     const dtsViewId = 'inspectorViewChooser' + viewId;
+    const cssSelector = this.testSubjects.getCssSelector(dtsViewId);
     await this.retry.try(async () => {
-      await this.testSubjects.click('inspectorViewChooser');
-      // check whether popover menu opens, if not, fail and retry opening
-      await this.testSubjects.existOrFail(dtsViewId, { timeout: 2000 });
-      await this.testSubjects.click(dtsViewId);
+      if (!(await this.testSubjects.exists(dtsViewId, { timeout: 1000 }))) {
+        await this.testSubjects.click('inspectorViewChooser');
+      }
+      const clicked = await this.browser.execute((sel: string) => {
+        const el = document.querySelector(sel) as HTMLElement | null;
+        if (!el) return false;
+        el.click();
+        return true;
+      }, cssSelector);
+      if (!clicked) {
+        throw new Error(`View chooser item '${dtsViewId}' not found`);
+      }
       const selection = await this.testSubjects.getVisibleText('inspectorViewChooser');
       this.log.debug(`inspector view selection = ${selection}`);
       expect(selection.includes(viewId)).to.be(true);

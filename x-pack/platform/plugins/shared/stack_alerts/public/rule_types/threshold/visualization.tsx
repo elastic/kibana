@@ -41,6 +41,16 @@ import type { GetThresholdRuleVisualizationDataParams } from './index_threshold_
 import { getThresholdRuleVisualizationData } from './index_threshold_api';
 import type { IndexThresholdRuleParams } from './types';
 
+interface KibanaThresholdVizServices {
+  http: HttpSetup;
+  uiSettings: IUiSettingsClient;
+  cps?: {
+    cpsManager?: {
+      getProjectRouting: () => string | undefined;
+    };
+  };
+}
+
 const chartThemeOverrides = (): PartialTheme => {
   return {
     lineSeriesStyle: {
@@ -130,7 +140,8 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({
     groupBy,
     threshold,
   } = ruleParams;
-  const { http, uiSettings } = useKibana().services;
+  const { http, uiSettings, cps } = useKibana<KibanaThresholdVizServices>().services;
+  const projectRouting = cps?.cpsManager?.getProjectRouting();
   const [loadingState, setLoadingState] = useState<LoadingStateType | null>(null);
   const [hasError, setHasError] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<undefined | string>(undefined);
@@ -152,7 +163,7 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({
       try {
         setLoadingState(loadingState ? LoadingStateType.Refresh : LoadingStateType.FirstLoad);
         setVisualizationData(
-          await getVisualizationData(alertWithoutActions, visualizeOptions, http!)
+          await getVisualizationData(alertWithoutActions, visualizeOptions, http!, projectRouting)
         );
         setHasError(false);
         setErrorMessage(undefined);
@@ -177,6 +188,7 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({
     groupBy,
     threshold,
     startVisualizationAt,
+    projectRouting,
   ]);
 
   if (!charts || !uiSettings || !dataFieldsFormats) {
@@ -340,12 +352,14 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({
 async function getVisualizationData(
   model: IndexThresholdRuleParams,
   visualizeOptions: GetThresholdRuleVisualizationDataParams['visualizeOptions'],
-  http: HttpSetup
+  http: HttpSetup,
+  projectRouting?: string
 ) {
   const vizData = await getThresholdRuleVisualizationData({
     model,
     visualizeOptions,
     http,
+    projectRouting,
   });
   const result: Record<string, Array<[number, number]>> = {};
 

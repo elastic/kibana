@@ -32,8 +32,8 @@ import {
 import { useMappingsState } from '../../../../../components/mappings_editor/mappings_state_context';
 import { documentationService } from '../../../../../services';
 import { updateIndexMappings } from '../../../../../services/api';
-import { notificationService } from '../../../../../services/notification';
 import type { NormalizedFields } from '../../../../../components/mappings_editor/types';
+import { useServices } from '../../../../../app_context';
 
 export interface MappingsOptionData {
   name: string;
@@ -54,6 +54,7 @@ export function UpdateElserMappingsModal({
   hasUpdatePrivileges,
   modalId,
 }: UpdateElserMappingsModalProps) {
+  const { notificationService } = useServices();
   const state = useMappingsState();
   const [options, setOptions] = useState<EuiSelectableOption<MappingsOptionData>[]>([]);
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
@@ -84,25 +85,31 @@ export function UpdateElserMappingsModal({
     );
   }, []);
 
-  const handleError = (error: string | undefined) => {
-    const errorToastTitle = i18n.translate(
-      'xpack.idxMgmt.indexDetails.updateElserMappingsModal.error.title',
-      {
-        defaultMessage: 'Error updating mappings',
-      }
-    );
+  const handleError = useCallback(
+    (error: string | undefined) => {
+      const errorToastTitle = i18n.translate(
+        'xpack.idxMgmt.indexDetails.updateElserMappingsModal.error.title',
+        {
+          defaultMessage: 'Error updating mappings',
+        }
+      );
 
-    const errorMessage = error
-      ? i18n.translate('xpack.idxMgmt.indexDetails.updateElserMappingsModal.error.message', {
-          defaultMessage: '{error}',
-          values: { error },
-        })
-      : i18n.translate('xpack.idxMgmt.indexDetails.updateElserMappingsModal.error.defaultMessage', {
-          defaultMessage: 'Mappings could not be updated. Please try again.',
-        });
+      const errorMessage = error
+        ? i18n.translate('xpack.idxMgmt.indexDetails.updateElserMappingsModal.error.message', {
+            defaultMessage: '{error}',
+            values: { error },
+          })
+        : i18n.translate(
+            'xpack.idxMgmt.indexDetails.updateElserMappingsModal.error.defaultMessage',
+            {
+              defaultMessage: 'Mappings could not be updated. Please try again.',
+            }
+          );
 
-    notificationService.showDangerToast(errorToastTitle, errorMessage);
-  };
+      notificationService.showDangerToast(errorToastTitle, errorMessage);
+    },
+    [notificationService]
+  );
 
   const handleApply = useCallback(async () => {
     setIsUpdating(true);
@@ -138,7 +145,15 @@ export function UpdateElserMappingsModal({
       setIsUpdating(false);
       setIsModalOpen(false);
     }
-  }, [indexName, refetchMapping, options, setIsModalOpen, state.mappingViewFields]);
+  }, [
+    indexName,
+    refetchMapping,
+    options,
+    setIsModalOpen,
+    state.mappingViewFields,
+    handleError,
+    notificationService,
+  ]);
 
   useEffect(() => {
     const elserOptions = buildElserOptions(state.mappingViewFields);

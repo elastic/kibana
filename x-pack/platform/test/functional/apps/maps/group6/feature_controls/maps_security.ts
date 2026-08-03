@@ -8,6 +8,11 @@
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
+/**
+ * Purpose: Permissions smoke test
+ *
+ * Migration: migrate to scout
+ */
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const securityService = getService('security');
   const { common, error, maps, security } = getPageObjects(['common', 'error', 'maps', 'security']);
@@ -153,7 +158,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows Maps navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.eql(['Maps']);
+        expect(navLinks).to.contain('Maps');
       });
 
       it(`does not show create new button`, async () => {

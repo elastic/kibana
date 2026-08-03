@@ -41,9 +41,7 @@ const filterRuleIdsWithGaps = async ({
 }> => {
   // Split rule IDs into batches to avoid exceeding ES max clause limits
   const batches = chunk(ruleIdsWithGaps, maxRuleIds);
-
   const allMatchingRuleIds: string[] = [];
-
   // Process batches sequentially so we can stop once we have enough results to know
   // whether the response should be truncated.
   for (const batch of batches) {

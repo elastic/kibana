@@ -50,8 +50,7 @@ export class HttpMonacoConnectorStepHandler extends BaseMonacoConnectorHandler {
         return null;
       }
 
-      // Create basic hover content
-      const content = [
+      const bodyLines = [
         `**Workflow Connector**: \`${connectorType}\``,
         '',
         this.createConnectorOverview(
@@ -68,9 +67,14 @@ export class HttpMonacoConnectorStepHandler extends BaseMonacoConnectorHandler {
         this.generateParameterHelp(connectorType),
         '',
         '_💡 Tip: Use configured connectors to securely manage authentication credentials_',
-      ].join('\n');
+      ];
 
-      return this.createMarkdownContent(content);
+      return this.createMarkdownContent(
+        this.prependStabilityBadgeToContent(
+          this.getConnectorStabilityFromCache(connectorType),
+          bodyLines
+        )
+      );
     } catch (error) {
       // console.warn('HttpMonacoConnectorStepHandler: Error generating hover content', error);
       return null;
@@ -199,13 +203,13 @@ ${Object.entries(httpExamples?.params || {})
       "- `path` (string, required): API endpoint path appended to the connector's base URL",
       '- `method` (string, required): HTTP method (GET, POST, PUT, DELETE, etc.)',
       '- `headers` (object, optional): Additional HTTP headers',
-      '- `body` (string/object, optional): Request body for POST/PUT requests',
+      '- `body` (string/object/array, optional): Request body for POST/PUT requests',
       '',
       '**When using direct URL (legacy):**',
       '- `url` (string, required): Full URL including protocol and domain',
       '- `method` (string, required): HTTP method (GET, POST, PUT, DELETE, etc.)',
       '- `headers` (object, optional): HTTP headers including authentication',
-      '- `body` (string/object, optional): Request body for POST/PUT requests',
+      '- `body` (string/object/array, optional): Request body for POST/PUT requests',
       '',
       '**Common:**',
       '- Use template variables like `{{ inputs.value }}` for dynamic values',

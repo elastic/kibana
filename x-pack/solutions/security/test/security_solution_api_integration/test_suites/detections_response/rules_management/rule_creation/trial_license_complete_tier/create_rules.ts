@@ -41,7 +41,6 @@ import {
   fetchRule,
   waitForAlertToComplete,
   refreshIndex,
-  rulesAllPreviewIndexRole,
   createExceptionListItem,
 } from '../../../utils';
 import { createUserAndRole, deleteUserAndRole } from '../../../../../config/services/common';
@@ -705,13 +704,64 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('with endpoint response actions', () => {
       let superTestResponseActionsNoAuthz: TestAgent;
+      let superTestResponseActionsAuthz: TestAgent;
       let apiCreatePayload: ReturnType<typeof getCustomQueryRuleParams>;
+
+      // Internal (camelCase) query-rule params, in the shape the generic Alerting API expects.
+      const alertingQueryRuleParams = {
+        author: [],
+        description: 'response action authz test',
+        exceptionsList: [],
+        falsePositives: [],
+        filters: [],
+        from: 'now-3600s',
+        immutable: false,
+        index: ['logs-*'],
+        language: 'kuery',
+        license: '',
+        maxSignals: 100,
+        outputIndex: '',
+        query: '*:*',
+        references: [],
+        relatedIntegrations: [],
+        riskScore: 21,
+        riskScoreMapping: [],
+        setup: '',
+        severity: 'low',
+        severityMapping: [],
+        threat: [],
+        to: 'now',
+        type: 'query',
+        version: 1,
+        responseActions: [
+          {
+            actionTypeId: '.endpoint',
+            params: { command: 'kill-process', config: { field: '', overwrite: true } },
+          },
+        ],
+      };
+
+      const buildAlertingCreateBody = (params: Record<string, unknown>) => ({
+        rule_type_id: 'siem.queryRule',
+        consumer: 'siem',
+        name: `alerting-api-${uuidV4()}`,
+        enabled: false,
+        schedule: { interval: '5m' },
+        actions: [],
+        params: { ...params, ruleId: uuidV4() },
+      });
 
       before(async () => {
         superTestResponseActionsNoAuthz = await utils.createSuperTestWithCustomRole({
           name: ROLE.endpoint_response_actions_no_access,
           privileges: rolesUsersProvider.loader.getPreDefinedRole(
             ROLE.endpoint_response_actions_no_access
+          ),
+        });
+        superTestResponseActionsAuthz = await utils.createSuperTestWithCustomRole({
+          name: ROLE.endpoint_response_actions_access,
+          privileges: rolesUsersProvider.loader.getPreDefinedRole(
+            ROLE.endpoint_response_actions_access
           ),
         });
       });
@@ -751,16 +801,38 @@ export default ({ getService }: FtrProviderContext) => {
           'User is not authorized to create/update kill-process response action'
         );
       });
+
+      it('should create rule with response actions via the Alerting API when user has authz', async () => {
+        await superTestResponseActionsAuthz
+          .post('/api/alerting/rule')
+          .set('kbn-xsrf', 'true')
+          .send(buildAlertingCreateBody(alertingQueryRuleParams))
+          .expect(200);
+      });
+
+      it('should error creating rule with response actions via the Alerting API when user DOES NOT have authz', async () => {
+        const { body } = await superTestResponseActionsNoAuthz
+          .post('/api/alerting/rule')
+          .set('kbn-xsrf', 'true')
+          .on('error', createSupertestErrorLogger(log).ignoreCodes([403]))
+          .send(buildAlertingCreateBody(alertingQueryRuleParams))
+          .expect(403);
+
+        expect(body.message).toEqual(
+          'User is not authorized to create/update kill-process response action'
+        );
+      });
     });
 
     describe('@skipInServerless as a user with only the Rules feature', () => {
+      const role = ROLES.rules_all_preview_index;
       beforeEach(async () => {
         await deleteAllRules(supertest, log);
-        await utils.createSuperTestWithCustomRole(rulesAllPreviewIndexRole);
+        await createUserAndRole(getService, role);
       });
 
       afterEach(async () => {
-        await utils.cleanUpCustomRoles();
+        await deleteUserAndRole(getService, role);
         await deleteAllRules(supertest, log);
         await deleteAllExceptions(supertest, log);
       });
@@ -798,10 +870,8 @@ export default ({ getService }: FtrProviderContext) => {
           ],
         });
 
-        const restrictedApis = detectionsApi.withUser({
-          username: rulesAllPreviewIndexRole.name,
-          password: 'changeme',
-        });
+        const restrictedUser = { username: role, password: 'changeme' };
+        const restrictedApis = detectionsApi.withUser(restrictedUser);
 
         const { body: createdRule } = await restrictedApis
           .createRule({ body: ruleParams })

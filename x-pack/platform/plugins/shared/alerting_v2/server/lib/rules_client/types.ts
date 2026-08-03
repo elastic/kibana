@@ -6,21 +6,40 @@
  */
 
 import type {
+  BulkByIdsParams,
+  BulkByQueryParams,
+  BulkByQueryResult,
+  BulkResponse,
   CreateRuleData,
-  UpdateRuleData,
-  RuleResponse,
+  DryRunResponse,
+  FindRulesResponse,
   FindRulesSortField,
+  RuleResponse,
+  UpdateRuleData,
 } from '@kbn/alerting-v2-schemas';
 
 /** Re-exported from the shared schemas package. */
-export type { CreateRuleData, UpdateRuleData, RuleResponse, FindRulesSortField };
+export type {
+  BulkByIdsParams,
+  BulkByQueryParams,
+  BulkByQueryResult,
+  BulkResponse,
+  CreateRuleData,
+  DryRunResponse,
+  FindRulesResponse,
+  FindRulesSortField,
+  RuleResponse,
+  UpdateRuleData,
+};
+
+export type BulkOperationError = BulkResponse['errors'][number];
 
 export interface CreateRuleParams {
   data: CreateRuleData;
   options?: { id?: string };
 }
 
-export interface FindRulesParams {
+export interface FindRulesArgs {
   page?: number;
   perPage?: number;
   filter?: string;
@@ -29,23 +48,8 @@ export interface FindRulesParams {
   sortOrder?: 'asc' | 'desc';
 }
 
-export interface FindRulesResponse {
-  items: RuleResponse[];
-  total: number;
-  page: number;
-  perPage: number;
-}
-
-export type BulkRulesParams =
-  | { ids: string[]; filter?: undefined }
-  | { filter: string; ids?: undefined };
-
-export interface BulkOperationError {
+export interface UpdateRuleParams {
   id: string;
-  error: { message: string; statusCode: number };
-}
-
-export interface BulkOperationResponse {
-  rules: RuleResponse[];
-  errors: BulkOperationError[];
+  data: UpdateRuleData;
+  options?: { version?: string };
 }

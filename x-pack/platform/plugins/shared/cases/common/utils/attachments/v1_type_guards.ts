@@ -6,6 +6,8 @@
  */
 import type { AttachmentRequest, AttachmentRequestV2 } from '../../types/api';
 import type {
+  AlertAttachmentPayload,
+  EventAttachmentPayload,
   ExternalReferenceAttachmentPayload,
   PersistableStateAttachmentPayload,
   UnifiedAttachmentPayload,
@@ -43,3 +45,11 @@ export const isLegacyAttachmentRequest = (
 export const isLegacyCommentAttachment = (
   attachment: AttachmentRequestV2
 ): attachment is UserCommentAttachmentPayload => attachment.type === AttachmentType.user;
+
+export const isLegacyEventAttachment = (
+  attachment: AttachmentRequestV2
+): attachment is EventAttachmentPayload => attachment.type === AttachmentType.event;
+
+export const isLegacyAlertAttachment = (
+  attachment: AttachmentRequestV2
+): attachment is AlertAttachmentPayload => attachment.type === AttachmentType.alert;

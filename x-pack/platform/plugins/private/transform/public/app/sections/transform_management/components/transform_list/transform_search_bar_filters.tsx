@@ -15,6 +15,7 @@ import {
   TRANSFORM_MODE,
   TRANSFORM_STATE,
   TRANSFORM_HEALTH_STATUS,
+  TRANSFORM_HEALTH_STATUS_COLOR_LABEL,
 } from '../../../../../../common/constants';
 import { isLatestTransform, isPivotTransform } from '../../../../../../common/types/transform';
 import type { TransformListRow } from '../../../../common';
@@ -55,7 +56,7 @@ export const transformFilters: SearchFilterConfig[] = [
     multiSelect: false,
     options: Object.values(TRANSFORM_HEALTH_STATUS).map((val) => ({
       value: val,
-      name: val,
+      name: TRANSFORM_HEALTH_STATUS_COLOR_LABEL[val],
       view: <TransformHealthColoredDot compact={true} showToolTip={false} healthStatus={val} />,
     })),
   },

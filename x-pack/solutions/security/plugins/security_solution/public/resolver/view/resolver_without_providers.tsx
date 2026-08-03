@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useContext } from 'react';
-import { useSelector, useStore } from 'react-redux';
+import { useSelector, useStore } from 'react-redux-v7';
 import { EuiLoadingSpinner, EuiPanel } from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -34,8 +34,11 @@ import { useAutotuneTimerange } from './use_autotune_timerange';
 import type { State } from '../../common/store/types';
 import { DocumentDetailsAnalyzerPanelKey } from '../../flyout/document_details/shared/constants/panel_keys';
 import { flyoutProviders } from '../../flyout_v2/shared/components/flyout_provider';
-import { DocumentFlyoutWrapper } from '../../flyout_v2/document/document_flyout_wrapper';
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
+import { useFlyoutApi } from '../../flyout_v2/use_flyout_api';
+import { useDefaultDocumentFlyoutProperties } from '../../flyout_v2/shared/hooks/use_default_flyout_properties';
+import { FLYOUT_ORIGIN } from '../../common/lib/telemetry';
+import { buildFlyoutNavTitle } from '../../flyout_v2/shared/utils/build_flyout_nav_title';
+import { ANALYZER_PREVIEW_TITLE } from '../../flyout_v2/shared/constants/flyout_titles';
 
 export const ANALYZER_PREVIEW_BANNER = {
   title: i18n.translate(
@@ -65,16 +68,17 @@ export const ResolverWithoutProviders = React.memo(
       filters,
       renderCellActions,
       onAlertUpdated,
+      useLegacyExpandableFlyout = false,
     }: ResolverProps,
     refToForward
   ) {
-    const newFlyoutSystemEnabled = useIsExperimentalFeatureEnabled('newFlyoutSystemEnabled');
-
     const { services } = useKibana();
     const { overlays } = services;
     const store = useStore();
     const history = useHistory();
+    const defaultFlyoutProperties = useDefaultDocumentFlyoutProperties();
     const { openPreviewPanel } = useExpandableFlyoutApi();
+    const { openDocumentFlyoutFromIndexAsChild } = useFlyoutApi();
 
     useResolverQueryParamCleaner(resolverComponentInstanceID);
     /**
@@ -143,32 +147,20 @@ export const ResolverWithoutProviders = React.memo(
     const onShowEvent = useCallback<NodeEventOnClick>(
       ({ documentId, indexName }) =>
         () =>
-          overlays?.openSystemFlyout(
-            flyoutProviders({
-              services,
-              store,
-              history,
-              children: (
-                <DocumentFlyoutWrapper
-                  documentId={documentId}
-                  indexName={indexName}
-                  renderCellActions={renderCellActions}
-                  onAlertUpdated={handleAlertUpdated}
-                />
-              ),
-            }),
-            {
-              ownFocus: false,
-              resizable: true,
-              session: 'inherit',
-              size: 's',
-            }
-          ),
-      [handleAlertUpdated, history, overlays, renderCellActions, services, store]
+          openDocumentFlyoutFromIndexAsChild({
+            documentId: documentId ?? '',
+            indexName,
+            renderCellActions,
+            onAlertUpdated: handleAlertUpdated,
+            origin: FLYOUT_ORIGIN.RESOLVER_NODE,
+          }),
+      [openDocumentFlyoutFromIndexAsChild, renderCellActions, handleAlertUpdated]
     );
 
     const onShowPanel = useCallback(() => {
-      if (newFlyoutSystemEnabled) {
+      const shouldUseSystemFlyout = !useLegacyExpandableFlyout;
+
+      if (shouldUseSystemFlyout) {
         overlays.openSystemFlyout(
           flyoutProviders({
             services,
@@ -185,10 +177,9 @@ export const ResolverWithoutProviders = React.memo(
             ),
           }),
           {
-            ownFocus: false,
-            resizable: true,
+            ...defaultFlyoutProperties,
             session: 'inherit',
-            size: 's',
+            title: buildFlyoutNavTitle(ANALYZER_PREVIEW_TITLE),
           }
         );
       } else {
@@ -201,8 +192,8 @@ export const ResolverWithoutProviders = React.memo(
         });
       }
     }, [
+      defaultFlyoutProperties,
       history,
-      newFlyoutSystemEnabled,
       onShowEvent,
       openPreviewPanel,
       overlays,
@@ -210,6 +201,7 @@ export const ResolverWithoutProviders = React.memo(
       resolverComponentInstanceID,
       services,
       store,
+      useLegacyExpandableFlyout,
     ]);
 
     return (

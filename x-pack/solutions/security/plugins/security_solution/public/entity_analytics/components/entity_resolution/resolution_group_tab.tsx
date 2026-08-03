@@ -6,8 +6,18 @@
  */
 
 import React, { useState, useCallback, useMemo } from 'react';
-import { EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import type { EntityType } from '@kbn/entity-store/public';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { API_VERSIONS } from '../../../../common/entity_analytics/constants';
+import {
+  EntityPanelKeyByType,
+  EntityPanelParamByType,
+} from '../../../flyout/entity_details/shared/constants';
+import { useIsNewFlyoutEnabled } from '../../../common/hooks/use_is_new_flyout_enabled';
+import { FLYOUT_ORIGIN } from '../../../common/lib/telemetry';
+import { useFlyoutApi } from '../../../flyout_v2/use_flyout_api';
+import type { EntityType as SecurityEntityType } from '../../../../common/entity_analytics/types';
 import { useKibana } from '../../../common/lib/kibana/kibana_react';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import { useResolutionGroup, RESOLUTION_GROUP_ROUTE } from './hooks/use_resolution_group';
@@ -17,24 +27,53 @@ import { useUnlinkEntities } from './hooks/use_unlink_entities';
 import { ResolutionGroupTable } from './resolution_group_table';
 import { AddEntitiesSection } from './add_entities_section';
 import { ConfirmResolutionModal } from './confirm_resolution_modal';
-import { getEntityId } from './helpers';
+import { getEntityId, getEntityName, getResolutionRiskScore } from './helpers';
 import {
   RESOLUTION_GROUP_LINK_TITLE,
   RESOLUTION_ERROR_TITLE,
   ENTITY_HAS_ALIASES_ERROR,
+  GROUP_RISK_SCORE_LABEL,
+  RISK_SCORE_NOT_AVAILABLE,
+  RESOLUTION_GROUP_CREATED_TOAST,
+  RESOLUTION_GROUP_CREATED_TOAST_TEXT,
 } from './translations';
 import { RESOLUTION_GROUP_TAB_CONTENT_TEST_ID } from './test_ids';
+import { RiskScoreCell } from '../home/entities_table/risk_score_cell';
 
 interface ResolutionGroupTabProps {
   entityId: string;
   entityType: EntityType;
+  scopeId: string;
+  /**
+   * When provided, clicking a related entity name is delegated to this callback (used by the
+   * new EUI system flyout). When omitted, the legacy expandable-flyout `openFlyout` is used.
+   */
+  onShowEntity?: (params: {
+    engineType: string | undefined;
+    entityId: string;
+    entityName: string | undefined;
+  }) => void;
 }
 
-export const ResolutionGroupTab: React.FC<ResolutionGroupTabProps> = ({ entityId, entityType }) => {
+export const ResolutionGroupTab: React.FC<ResolutionGroupTabProps> = ({
+  entityId,
+  entityType,
+  scopeId,
+  onShowEntity,
+}) => {
   const { http } = useKibana().services;
   const { addError } = useAppToasts();
+  const enableNewFlyout = useIsNewFlyoutEnabled();
+  const { openFlyout } = useExpandableFlyoutApi();
+  const { openEntityFlyout } = useFlyoutApi();
   const { data: group, isLoading, isFetching, isError } = useResolutionGroup(entityId);
   const linkEntities = useLinkEntities();
+  const createGroup = useLinkEntities({
+    successToast: {
+      title: RESOLUTION_GROUP_CREATED_TOAST,
+      text: RESOLUTION_GROUP_CREATED_TOAST_TEXT,
+    },
+  });
   const unlinkEntities = useUnlinkEntities();
 
   const [modalState, setModalState] = useState<{
@@ -46,6 +85,7 @@ export const ResolutionGroupTab: React.FC<ResolutionGroupTabProps> = ({ entityId
 
   const targetEntityId = group?.target ? getEntityId(group.target) : undefined;
   const hasGroup = group && group.group_size > 1;
+  const resolutionRiskScore = hasGroup ? getResolutionRiskScore(group.target) : undefined;
 
   const excludeEntityIds = useMemo(() => {
     if (!group) return [entityId];
@@ -55,6 +95,44 @@ export const ResolutionGroupTab: React.FC<ResolutionGroupTabProps> = ({ entityId
     }
     return ids;
   }, [group, entityId]);
+
+  const handleEntityNameClick = useCallback(
+    (entity: Record<string, unknown>) => {
+      const clickedEntityId = getEntityId(entity);
+      const clickedEntityName = getEntityName(entity);
+
+      if (onShowEntity) {
+        onShowEntity({
+          engineType: entityType as string,
+          entityId: clickedEntityId,
+          entityName: clickedEntityName,
+        });
+        return;
+      }
+
+      const secEntityType = entityType as SecurityEntityType;
+      const sharedParams = { entityId: clickedEntityId, contextID: scopeId, scopeId };
+
+      if (enableNewFlyout) {
+        openEntityFlyout({
+          engineType: secEntityType,
+          entityName: clickedEntityName,
+          origin: FLYOUT_ORIGIN.RESOLUTION_ENTITY_LINK,
+          ...sharedParams,
+        });
+        return;
+      }
+
+      const panelKey = EntityPanelKeyByType[secEntityType];
+      const paramName = EntityPanelParamByType[secEntityType];
+      if (panelKey && paramName) {
+        openFlyout({
+          right: { id: panelKey, params: { [paramName]: clickedEntityName, ...sharedParams } },
+        });
+      }
+    },
+    [onShowEntity, enableNewFlyout, openFlyout, openEntityFlyout, entityType, scopeId]
+  );
 
   const handleRemoveEntity = useCallback(
     (removeEntityId: string) => {
@@ -77,7 +155,7 @@ export const ResolutionGroupTab: React.FC<ResolutionGroupTabProps> = ({ entityId
       try {
         // Pre-flight: check if the entity being added already has its own resolution group
         const newEntityGroup = await http.fetch<ResolutionGroup>(RESOLUTION_GROUP_ROUTE, {
-          version: '2',
+          version: API_VERSIONS.public.v1,
           method: 'GET',
           query: { entity_id: newEntityId },
         });
@@ -107,7 +185,7 @@ export const ResolutionGroupTab: React.FC<ResolutionGroupTabProps> = ({ entityId
 
   const handleConfirmResolution = useCallback(
     (targetId: string, aliasId: string) => {
-      linkEntities.mutate(
+      createGroup.mutate(
         { target_id: targetId, entity_ids: [aliasId] },
         {
           onSuccess: () => {
@@ -116,7 +194,7 @@ export const ResolutionGroupTab: React.FC<ResolutionGroupTabProps> = ({ entityId
         }
       );
     },
-    [linkEntities]
+    [createGroup]
   );
 
   const handleCancelModal = useCallback(() => {
@@ -130,9 +208,31 @@ export const ResolutionGroupTab: React.FC<ResolutionGroupTabProps> = ({ entityId
   return (
     <>
       <div data-test-subj={RESOLUTION_GROUP_TAB_CONTENT_TEST_ID}>
-        <EuiTitle size="xs">
-          <h3>{RESOLUTION_GROUP_LINK_TITLE}</h3>
-        </EuiTitle>
+        <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="xs">
+              <h3>{RESOLUTION_GROUP_LINK_TITLE}</h3>
+            </EuiTitle>
+          </EuiFlexItem>
+          {hasGroup && (
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiText size="xs">{GROUP_RISK_SCORE_LABEL}</EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  {resolutionRiskScore != null ? (
+                    <RiskScoreCell riskScore={resolutionRiskScore} />
+                  ) : (
+                    <EuiBadge>
+                      <EuiText size="xs">{RISK_SCORE_NOT_AVAILABLE}</EuiText>
+                    </EuiBadge>
+                  )}
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
         <EuiSpacer size="m" />
         <ResolutionGroupTable
           group={group ?? null}
@@ -142,12 +242,15 @@ export const ResolutionGroupTab: React.FC<ResolutionGroupTabProps> = ({ entityId
           onRemoveEntity={handleRemoveEntity}
           targetEntityId={targetEntityId}
           removingEntityId={removingEntityId}
+          onEntityNameClick={handleEntityNameClick}
+          currentEntityId={entityId}
         />
         <EuiSpacer size="l" />
         <AddEntitiesSection
           entityType={entityType}
           excludeEntityIds={excludeEntityIds}
           onAddEntity={handleAddEntity}
+          onEntityNameClick={handleEntityNameClick}
           addingEntityId={addingEntityId}
           disabled={!groupQueryReady}
         />
@@ -158,7 +261,7 @@ export const ResolutionGroupTab: React.FC<ResolutionGroupTabProps> = ({ entityId
           newEntity={modalState.newEntity}
           onConfirm={handleConfirmResolution}
           onCancel={handleCancelModal}
-          isLoading={linkEntities.isLoading}
+          isLoading={createGroup.isLoading}
         />
       )}
     </>

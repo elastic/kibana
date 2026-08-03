@@ -13,6 +13,7 @@ import {
   getTestSubActionConnector,
   getTestSubActionConnectorWithoutSubActions,
 } from './sub_action_connector';
+import { getOAuthExecutorActionType } from './oauth_executor_connector';
 
 export function defineActionTypes(
   core: CoreSetup<FixtureStartDeps>,
@@ -110,6 +111,7 @@ export function defineActionTypes(
     },
   };
   actions.registerType(oauthTestConnector);
+  actions.registerType(getOAuthExecutorActionType(actions));
 
   /**
    * System actions

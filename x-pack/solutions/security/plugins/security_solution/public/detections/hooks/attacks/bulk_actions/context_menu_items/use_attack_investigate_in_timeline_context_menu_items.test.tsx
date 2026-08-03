@@ -23,7 +23,7 @@ describe('useAttackInvestigateInTimelineContextMenuItems', () => {
     mockUseBulkAttackInvestigateInTimelineItems.mockReturnValue({
       items: [
         {
-          label: 'Investigate in timeline',
+          label: 'Investigate in Timeline',
           key: 'attack-investigate-in-timeline-action-item',
           'data-test-subj': 'attack-investigate-in-timeline-action-item',
           disableOnQuery: true,
@@ -46,7 +46,7 @@ describe('useAttackInvestigateInTimelineContextMenuItems', () => {
         Object {
           "data-test-subj": "attack-investigate-in-timeline-action-item",
           "key": "attack-investigate-in-timeline-action-item",
-          "name": "Investigate in timeline",
+          "name": "Investigate in Timeline",
           "onClick": [Function],
           "panel": undefined,
         },

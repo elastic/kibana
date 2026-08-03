@@ -53,7 +53,13 @@ describe('EnhancedAlertFlyoutFooter', () => {
       </IntlProvider>
     );
 
-    expect(renderFooterFeature).toHaveBeenCalledWith(hit);
+    expect(renderFooterFeature).toHaveBeenCalledWith(
+      expect.objectContaining({
+        hit,
+        dataView: dataViewMock,
+        onAlertUpdated: expect.any(Function),
+      })
+    );
     expect(screen.getByText('Footer')).toBeInTheDocument();
   });
 

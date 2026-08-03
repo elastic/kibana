@@ -14,10 +14,10 @@
  *   version: not applicable
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
+export const LogLevel = lazySchema(() => z.enum(['trace', 'debug', 'info', 'warn', 'error']));
 export type LogLevel = z.infer<typeof LogLevel>;
-export const LogLevel = z.enum(['trace', 'debug', 'info', 'warn', 'error']);
 export type LogLevelEnum = typeof LogLevel.enum;
 export const LogLevelEnum = LogLevel.enum;
 
@@ -27,8 +27,10 @@ export const LogLevelEnum = LogLevel.enum;
 - status-change: We log an event of this type each time a rule changes its status during an execution.
 - execution-metrics: We log an event of this type at the end of a rule execution. It contains various execution metrics such as search and indexing durations.
   */
+export const RuleExecutionEventType = lazySchema(() =>
+  z.enum(['message', 'status-change', 'execution-metrics'])
+);
 export type RuleExecutionEventType = z.infer<typeof RuleExecutionEventType>;
-export const RuleExecutionEventType = z.enum(['message', 'status-change', 'execution-metrics']);
 export type RuleExecutionEventTypeEnum = typeof RuleExecutionEventType.enum;
 export const RuleExecutionEventTypeEnum = RuleExecutionEventType.enum;
 
@@ -37,16 +39,18 @@ export const RuleExecutionEventTypeEnum = RuleExecutionEventType.enum;
 
 NOTE: This is a read model of rule execution events and it is pretty generic. It contains only a subset of their fields: only those fields that are common to all types of execution events.
   */
+export const RuleExecutionEvent = lazySchema(() =>
+  z.object({
+    timestamp: z.string().datetime(),
+    sequence: z.number().int(),
+    level: LogLevel,
+    type: RuleExecutionEventType,
+    execution_id: z.string().min(1),
+    message: z.string(),
+    /**
+     * Event details. The details vary per event type.
+     */
+    details: z.object({}).catchall(z.unknown()).optional(),
+  })
+);
 export type RuleExecutionEvent = z.infer<typeof RuleExecutionEvent>;
-export const RuleExecutionEvent = z.object({
-  timestamp: z.string().datetime(),
-  sequence: z.number().int(),
-  level: LogLevel,
-  type: RuleExecutionEventType,
-  execution_id: z.string().min(1),
-  message: z.string(),
-  /**
-   * Event details. The details vary per event type.
-   */
-  details: z.object({}).catchall(z.unknown()).optional(),
-});

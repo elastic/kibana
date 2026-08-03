@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { freeze, produce } from 'immer';
+import { freeze, produce } from 'immer-v9';
 
 import type {
   ColorByValueStep,
@@ -15,7 +15,10 @@ import type {
   ColorMappingCategoricalType,
   ColorMappingType,
 } from './color';
-import { allColoringTypeSchema, colorByValueStepsSchema } from './color';
+import { allColoringTypeSchema, colorByValueStepsSchema, AUTO_COLOR, NO_COLOR } from './color';
+import { PALETTE_IDS } from './constants';
+
+type ColorByValueRangeType = Extract<ColorByValueType, { type: 'dynamic' }>;
 
 describe('Color Schema', () => {
   describe('colorByValue schema', () => {
@@ -78,10 +81,10 @@ describe('Color Schema', () => {
       });
     });
 
-    describe.each<ColorByValueType['range']>(['absolute', 'percentage'])(
+    describe.each<ColorByValueRangeType['range']>(['absolute', 'percentage'])(
       'range type - %s',
       (range) => {
-        const baseConfig = freeze<ColorByValueType>({
+        const baseConfig = freeze<ColorByValueRangeType>({
           type: 'dynamic',
           range,
           steps: [
@@ -207,6 +210,49 @@ describe('Color Schema', () => {
         });
       }
     );
+
+    describe('colorByValuePalette schema', () => {
+      it.each(PALETTE_IDS)(
+        'validates a distributed_palette configuration for the "%s" palette',
+        (palette) => {
+          const input = {
+            type: 'distributed_palette',
+            palette,
+          };
+
+          const validated = allColoringTypeSchema.validate(input);
+          expect(validated).toEqual(input);
+        }
+      );
+
+      describe('validation errors', () => {
+        it('throws when the palette name is missing', () => {
+          const input = {
+            type: 'distributed_palette',
+          };
+
+          expect(() => allColoringTypeSchema.validate(input)).toThrow();
+        });
+
+        it('throws for an unknown palette id', () => {
+          const input = {
+            type: 'distributed_palette',
+            palette: 'test',
+          };
+
+          expect(() => allColoringTypeSchema.validate(input)).toThrow();
+        });
+
+        it('throws for a categorical (non dynamic-coloring) palette id', () => {
+          const input = {
+            type: 'distributed_palette',
+            palette: 'default',
+          };
+
+          expect(() => allColoringTypeSchema.validate(input)).toThrow();
+        });
+      });
+    });
   });
 
   describe('staticColor schema', () => {
@@ -393,6 +439,20 @@ describe('Color Schema', () => {
 
         expect(() => allColoringTypeSchema.validate(input)).toThrow();
       });
+    });
+  });
+
+  describe('noColor schema', () => {
+    it('validates via allColoringTypeSchema', () => {
+      const validated = allColoringTypeSchema.validate(NO_COLOR);
+      expect(validated).toEqual({ type: 'none' });
+    });
+  });
+
+  describe('autoColor schema', () => {
+    it('validates via allColoringTypeSchema', () => {
+      const validated = allColoringTypeSchema.validate(AUTO_COLOR);
+      expect(validated).toEqual({ type: 'auto' });
     });
   });
 });

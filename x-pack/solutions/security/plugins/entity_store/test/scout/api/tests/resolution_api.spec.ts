@@ -13,6 +13,7 @@ import {
   PUBLIC_HEADERS,
   ENTITY_STORE_ROUTES,
   ENTITY_STORE_TAGS,
+  LATEST_ALIAS,
   LATEST_INDEX,
   UPDATES_INDEX,
 } from '../fixtures/constants';
@@ -262,14 +263,14 @@ apiTest.describe('Entity Store Resolution API tests', { tag: ENTITY_STORE_TAGS }
     expect(response.statusCode).toBe(400);
   });
 
-  apiTest('Link: should return 404 for non-existent entities', async ({ apiClient }) => {
+  apiTest('Link: should return 400 for non-existent entities', async ({ apiClient }) => {
     const response = await apiClient.post(ENTITY_STORE_ROUTES.public.RESOLUTION_LINK, {
       headers: defaultHeaders,
       responseType: 'json',
       body: { target_id: 'nonexistent-target-9', entity_ids: ['nonexistent-alias-9'] },
     });
 
-    expect(response.statusCode).toBe(404);
+    expect(response.statusCode).toBe(400);
   });
 
   apiTest('Link: should return 400 for chain resolution', async ({ apiClient }) => {
@@ -324,14 +325,14 @@ apiTest.describe('Entity Store Resolution API tests', { tag: ENTITY_STORE_TAGS }
     expect(hasAliasesLink.statusCode).toBe(400);
   });
 
-  apiTest('Unlink: should return 404 for non-existent entities', async ({ apiClient }) => {
+  apiTest('Unlink: should return 400 for non-existent entities', async ({ apiClient }) => {
     const response = await apiClient.post(ENTITY_STORE_ROUTES.public.RESOLUTION_UNLINK, {
       headers: defaultHeaders,
       responseType: 'json',
       body: { entity_ids: ['nonexistent-12'] },
     });
 
-    expect(response.statusCode).toBe(404);
+    expect(response.statusCode).toBe(400);
   });
 
   apiTest('Group: should return 404 for non-existent entity', async ({ apiClient }) => {
@@ -366,9 +367,9 @@ async function getEntitySource(
   esClient: Client,
   entityId: string
 ): Promise<Record<string, unknown>> {
-  await esClient.indices.refresh({ index: LATEST_INDEX });
+  await esClient.indices.refresh({ index: LATEST_ALIAS });
   const response = await esClient.search({
-    index: LATEST_INDEX,
+    index: LATEST_ALIAS,
     query: {
       bool: {
         filter: [{ term: { 'entity.id': entityId } }],
@@ -378,7 +379,7 @@ async function getEntitySource(
   });
 
   if (response.hits.hits.length === 0) {
-    throw new Error(`Entity '${entityId}' not found in ${LATEST_INDEX}`);
+    throw new Error(`Entity '${entityId}' not found in ${LATEST_ALIAS}`);
   }
 
   return response.hits.hits[0]._source as Record<string, unknown>;

@@ -1,0 +1,38 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        putCloudConnectorRequestExample:
+          description: 'Update a Fleet cloud connector'
+          value:
+            name: 'Updated AWS connector'
+            vars: {}
+responses:
+  200:
+    description: 'Successful response'
+    content:
+      application/json:
+        examples:
+          putCloudConnectorExample:
+            description: 'The updated Fleet cloud connector'
+            value:
+              item:
+                id: 'cloud-connector-id-1'
+                name: 'Updated AWS connector'
+                cloudProvider: 'aws'
+                accountType: 'single-account'
+                vars: {}
+                packagePolicyCount: 2
+                created_at: '2024-01-15T10:00:00.000Z'
+                updated_at: '2024-01-15T11:00:00.000Z'
+  400:
+    description: 'Bad Request'
+    content:
+      application/json:
+        examples:
+          genericErrorResponseExample:
+            description: 'Example of a generic error response'
+            value:
+              statusCode: 400
+              error: 'Bad Request'
+              message: 'An error message describing what went wrong'

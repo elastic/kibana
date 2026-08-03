@@ -36,6 +36,12 @@ paths:
                   127.0.0.7
                   127.0.0.8
                   127.0.0.9
+              examples:
+                ipLines:
+                  value: |
+                    127.0.0.1
+                    127.0.0.2
+                    127.0.0.3
         400:
           description: Invalid input data response
           content:
@@ -79,6 +85,11 @@ paths:
             application/json:
               schema:
                 $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+              examples:
+                notFound:
+                  value:
+                    message: 'list id: "unknown_list" not found'
+                    status_code: 404
         500:
           description: Internal server error response
           content:

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// Serverless test (remove during Scout migration): x-pack/platform/test/serverless/functional/test_suites/discover/esql/_esql_view.ts
+
 import expect from '@kbn/expect';
 import kbnRison from '@kbn/rison';
 import { NULL_LABEL } from '@kbn/field-formats-common';
@@ -30,16 +32,25 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const elasticChart = getService('elasticChart');
   const filterBar = getService('filterBar');
 
-  const { common, discover, dashboard, header, timePicker, unifiedFieldList, unifiedSearch } =
-    getPageObjects([
-      'common',
-      'discover',
-      'dashboard',
-      'header',
-      'timePicker',
-      'unifiedFieldList',
-      'unifiedSearch',
-    ]);
+  const {
+    appMenu,
+    common,
+    discover,
+    dashboard,
+    header,
+    timePicker,
+    unifiedFieldList,
+    unifiedSearch,
+  } = getPageObjects([
+    'appMenu',
+    'common',
+    'discover',
+    'dashboard',
+    'header',
+    'timePicker',
+    'unifiedFieldList',
+    'unifiedSearch',
+  ]);
 
   const defaultSettings = {
     defaultIndex: 'logstash-*',
@@ -90,7 +101,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await unifiedFieldList.waitUntilSidebarHasLoaded();
 
         expect(await testSubjects.exists('showQueryBarMenu')).to.be(true);
-        expect(await testSubjects.exists('superDatePickerToggleQuickMenuButton')).to.be(true);
+        expect(await timePicker.timePickerExists()).to.be(true);
         expect(await testSubjects.exists('addFilter')).to.be(true);
         expect(await testSubjects.exists('dscViewModeDocumentButton')).to.be(true);
         expect(await testSubjects.exists('unifiedHistogramChart')).to.be(true);
@@ -98,7 +109,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.click('app-menu-overflow-button');
         expect(await testSubjects.exists('discoverAlertsButton')).to.be(true);
         await testSubjects.click('app-menu-overflow-button');
-        expect(await testSubjects.exists('shareTopNavButton')).to.be(true);
+        expect(await appMenu.menuItemExists('shareTopNavButton')).to.be(true);
         expect(await testSubjects.exists('docTableExpandToggleColumn')).to.be(true);
         expect(await testSubjects.exists('dataGridColumnSortingButton')).to.be(true);
         expect(await testSubjects.exists('fieldListFiltersFieldSearch')).to.be(true);
@@ -112,7 +123,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         expect(await testSubjects.exists('fieldListFiltersFieldSearch')).to.be(true);
         expect(await testSubjects.exists('ESQLEditor')).to.be(true);
-        expect(await testSubjects.exists('superDatePickerToggleQuickMenuButton')).to.be(true);
+        expect(await timePicker.timePickerExists()).to.be(true);
 
         expect(await testSubjects.exists('showQueryBarMenu')).to.be(false);
         expect(await testSubjects.exists('addFilter')).to.be(false);
@@ -123,7 +134,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.click('app-menu-overflow-button');
         expect(await testSubjects.exists('discoverAlertsButton')).to.be(true);
         await testSubjects.click('app-menu-overflow-button');
-        expect(await testSubjects.exists('shareTopNavButton')).to.be(true);
+        expect(await appMenu.menuItemExists('shareTopNavButton')).to.be(true);
         // we don't sort for the Document view
         expect(await testSubjects.exists('dataGridColumnSortingButton')).to.be(false);
         expect(await testSubjects.exists('docTableExpandToggleColumn')).to.be(true);
@@ -274,9 +285,35 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await filterBar.getFilterCount()).to.be(0);
         // chart and time picker updated
         await elasticChart.waitForRenderingCount(renderingCount + 1);
-        const updatedTimeConfig = await timePicker.getTimeConfigAsAbsoluteTimes();
-        expect(updatedTimeConfig.start).to.be('Sep 20, 2015 @ 08:23:44.196');
-        expect(updatedTimeConfig.end).to.be('Sep 21, 2015 @ 02:32:51.702');
+        const newDurationHours = await timePicker.getTimeDurationInHours();
+        expect(Math.round(newDurationHours)).to.be(17);
+      });
+    });
+
+    describe('resource browser', () => {
+      it('returns focus to the editor when the data source picker is closed via Escape', async () => {
+        await discover.selectTextBaseLang();
+        await discover.waitUntilTabIsLoaded();
+
+        await monacoEditor.setCodeEditorValue('from logstash-*');
+
+        await retry.try(async () => {
+          const badge = await find.byCssSelector('.esqlSourcesBadge');
+          await badge.click();
+          await testSubjects.existOrFail('esqlDataSourceBrowser');
+        });
+
+        await browser.pressKeys(browser.keys.ESCAPE);
+
+        await retry.waitFor('data source picker to close', async () => {
+          return !(await testSubjects.exists('esqlDataSourceBrowser'));
+        });
+
+        const isEditorFocused = await browser.execute(() => {
+          const textarea = document.querySelector('[data-test-subj="ESQLEditor"] textarea');
+          return document.activeElement === textarea;
+        });
+        expect(isEditorFocused).to.be(true);
       });
     });
 
@@ -541,7 +578,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await discover.waitUntilTabIsLoaded();
 
         await retry.waitFor('first cell contains an initial value', async () => {
-          const cell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
+          const cell = await dataGrid.getCellElementExcludingControlColumns(0, 1);
           const text = await cell.getVisibleText();
           return text === '1,623';
         });
@@ -555,7 +592,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await discover.waitUntilTabIsLoaded();
 
         await retry.waitFor('first cell contains the highest value', async () => {
-          const cell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
+          const cell = await dataGrid.getCellElementExcludingControlColumns(0, 1);
           const text = await cell.getVisibleText();
           return text === '17,966';
         });
@@ -569,7 +606,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await discover.waitUntilTabIsLoaded();
 
         await retry.waitFor('first cell contains the same highest value', async () => {
-          const cell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
+          const cell = await dataGrid.getCellElementExcludingControlColumns(0, 1);
           const text = await cell.getVisibleText();
           return text === '17,966';
         });
@@ -579,7 +616,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await discover.waitUntilTabIsLoaded();
 
         await retry.waitFor('first cell contains the same highest value after reload', async () => {
-          const cell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
+          const cell = await dataGrid.getCellElementExcludingControlColumns(0, 1);
           const text = await cell.getVisibleText();
           return text === '17,966';
         });
@@ -595,7 +632,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.waitFor(
           'first cell contains the same highest value after reopening',
           async () => {
-            const cell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
+            const cell = await dataGrid.getCellElementExcludingControlColumns(0, 1);
             const text = await cell.getVisibleText();
             return text === '17,966';
           }
@@ -606,7 +643,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await discover.waitUntilTabIsLoaded();
 
         await retry.waitFor('first cell contains the lowest value', async () => {
-          const cell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
+          const cell = await dataGrid.getCellElementExcludingControlColumns(0, 1);
           const text = await cell.getVisibleText();
           return text === '0';
         });
@@ -622,7 +659,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dataGrid.clickDocSortDesc('extension', 'Sort A-Z');
 
         await retry.waitFor('first cell contains the lowest value for extension', async () => {
-          const cell = await dataGrid.getCellElementExcludingControlColumns(0, 1);
+          const cell = await dataGrid.getCellElementExcludingControlColumns(0, 2);
           const text = await cell.getVisibleText();
           return text === 'css';
         });
@@ -636,7 +673,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await discover.waitUntilTabIsLoaded();
 
         await retry.waitFor('first cell contains the same lowest value after reload', async () => {
-          const cell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
+          const cell = await dataGrid.getCellElementExcludingControlColumns(0, 1);
           const text = await cell.getVisibleText();
           return text === '0';
         });
@@ -644,7 +681,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.waitFor(
           'first cell contains the same lowest value for extension after reload',
           async () => {
-            const cell = await dataGrid.getCellElementExcludingControlColumns(0, 1);
+            const cell = await dataGrid.getCellElementExcludingControlColumns(0, 2);
             const text = await cell.getVisibleText();
             return text === 'css';
           }
@@ -663,7 +700,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.waitFor(
           'first cell contains the same lowest value as dashboard panel',
           async () => {
-            const cell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
+            const cell = await dataGrid.getCellElementExcludingControlColumns(0, 1);
             const text = await cell.getVisibleText();
             return text === '0';
           }
@@ -672,7 +709,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.waitFor(
           'first cell contains the lowest value for extension as dashboard panel',
           async () => {
-            const cell = await dataGrid.getCellElementExcludingControlColumns(0, 1);
+            const cell = await dataGrid.getCellElementExcludingControlColumns(0, 2);
             const text = await cell.getVisibleText();
             return text === 'css';
           }

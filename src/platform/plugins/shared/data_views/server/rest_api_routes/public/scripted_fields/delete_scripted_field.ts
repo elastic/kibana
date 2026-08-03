@@ -28,6 +28,9 @@ export const registerDeleteScriptedFieldRoute = (
     .delete({
       path: '/api/index_patterns/index_pattern/{id}/scripted_field/{name}',
       access: 'public',
+      summary: 'Delete a scripted field',
+      description:
+        'Deprecated. Scripted fields are superseded by runtime fields. Use the runtime field endpoints instead.',
       security: {
         authz: {
           requiredPrivileges: ['indexPatterns:manage'],

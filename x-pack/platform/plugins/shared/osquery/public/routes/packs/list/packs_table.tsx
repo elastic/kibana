@@ -114,7 +114,7 @@ const updatedAtCss = {
 };
 
 const PackName = ({ id, name }: { id: string; name: string }) => (
-  <EuiLink {...useRouterNavigate(`packs/${id}`)}>{name}</EuiLink>
+  <EuiLink {...useRouterNavigate(`packs/${id}/edit`)}>{name}</EuiLink>
 );
 
 const PacksTableComponent = ({ hasAssetsToInstall }: { hasAssetsToInstall?: boolean }) => {
@@ -387,6 +387,7 @@ const PacksTableComponent = ({ hasAssetsToInstall }: { hasAssetsToInstall?: bool
             {...newPackLinkProps}
             iconType="plusInCircle"
             isDisabled={!permissions.writePacks}
+            data-test-subj="add-pack-button"
           >
             <FormattedMessage
               id="xpack.osquery.packList.createPackButtonLabel"

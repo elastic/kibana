@@ -5,21 +5,25 @@
  * 2.0.
  */
 
-import type { RuleFormServices } from '@kbn/alerting-v2-rule-form';
+import type { AlertingV2KibanaServices } from './kibana_services';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { applicationServiceMock } from '@kbn/core/public/mocks';
+import { applicationServiceMock, uiSettingsServiceMock } from '@kbn/core/public/mocks';
 import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
 
-const createMockServices = (): RuleFormServices => ({
+const createMockServices = (): AlertingV2KibanaServices => ({
   http: httpServiceMock.createStartContract(),
   data: dataPluginMock.createStartContract(),
   dataViews: dataViewPluginMocks.createStartContract(),
   notifications: notificationServiceMock.createStartContract(),
   application: applicationServiceMock.createStartContract(),
   lens: lensPluginMock.createStartContract(),
+  expressions: {} as AlertingV2KibanaServices['expressions'],
+  uiActions: {} as AlertingV2KibanaServices['uiActions'],
+  uiSettings: uiSettingsServiceMock.createStartContract(),
+  container: {} as AlertingV2KibanaServices['container'],
 });
 
 describe('kibana_services', () => {

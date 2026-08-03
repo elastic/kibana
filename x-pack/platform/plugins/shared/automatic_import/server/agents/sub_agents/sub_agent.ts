@@ -12,6 +12,7 @@ import { Command, getCurrentTaskInput } from '@langchain/langgraph';
 import { createReactAgent } from '@langchain/langgraph/prebuilt';
 import { z } from '@kbn/zod/v4';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
+import { MAX_STRING_LENGTH } from '../../../common';
 import { TASK_TOOL_DESCRIPTION } from '../prompts';
 import { AutomaticImportAgentState } from '../state';
 import type { AutomaticImportAgentStateType } from '../state';
@@ -62,12 +63,22 @@ const buildAnalyzerContext: ContextBuilder = (taskDescription, _state, samples) 
   );
 };
 
-const buildGeneratorContext: ContextBuilder = (taskDescription, state) => {
+const buildGeneratorContext: ContextBuilder = (taskDescription, state, samples) => {
   const isReviewIteration = Boolean(state.review);
   const parts: string[] = ['<task>', taskDescription, '</task>'];
 
   if (!isReviewIteration && state.analysis) {
     parts.push('', '<log_format_analysis>', state.analysis, '</log_format_analysis>');
+  }
+
+  if (!isReviewIteration && samples && samples.length > 0) {
+    const slice = samples.slice(0, MAX_INJECTED_SAMPLES);
+    parts.push(
+      '',
+      `<log_samples count="${slice.length}" total_available="${samples.length}">`,
+      slice.map((s, i) => `### Sample ${i + 1}\n\`\`\`\n${s}\n\`\`\``).join('\n\n'),
+      '</log_samples>'
+    );
   }
 
   if (isReviewIteration && state.review) {
@@ -273,6 +284,7 @@ export const createTaskTool = (params: TaskToolParams) => {
           'pipeline_generation_results',
           'pipeline_validation_results',
           'failure_count',
+          'field_mappings',
         ] as const;
         for (const field of propagatedFields) {
           if (parentState[field] != null) {
@@ -282,7 +294,10 @@ export const createTaskTool = (params: TaskToolParams) => {
       }
 
       try {
-        const result = await subAgent.invoke(modifiedState);
+        const result = await subAgent.invoke(modifiedState, {
+          callbacks: config?.callbacks,
+          signal: config?.signal,
+        });
 
         return new Command({
           update: {
@@ -315,9 +330,13 @@ export const createTaskTool = (params: TaskToolParams) => {
         subagents.map((a) => `- ${a.name}: ${a.description}`).join('\n')
       ),
       schema: z.object({
-        description: z.string().describe('The task to execute with the selected agent'),
+        description: z
+          .string()
+          .max(MAX_STRING_LENGTH.description)
+          .describe('The task to execute with the selected agent'),
         subagent_name: z
           .string()
+          .max(MAX_STRING_LENGTH.name)
           .describe(
             `Name of the agent to use. Available: ${subagents.map((a) => a.name).join(', ')}`
           ),

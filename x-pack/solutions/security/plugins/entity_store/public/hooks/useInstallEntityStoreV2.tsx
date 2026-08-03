@@ -10,7 +10,7 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { HttpFetchOptionsWithPath, HttpSetup, IUiSettingsClient } from '@kbn/core/public';
 import { useEffect } from 'react';
 import { EntityStoreStatus } from '../../common';
-import { ENTITY_STORE_ROUTES, FF_ENABLE_ENTITY_STORE_V2 } from '../../common';
+import { ENTITY_STORE_ROUTES } from '../../common';
 import type { StatusRequestQuery } from '../../server/routes/apis/status';
 
 export interface Services {
@@ -20,9 +20,8 @@ export interface Services {
   spaces: SpacesPluginStart;
 }
 
-interface EntityStoreV1StatusResponse {
-  status: EntityStoreStatus;
-}
+const LEGACY_ENTITY_ENGINE_SO_TYPE = 'entity-engine-status';
+const SAVED_OBJECTS_FIND_PATH = '/api/saved_objects/_find';
 
 const statusRequestQuery = {
   include_components: false,
@@ -31,10 +30,6 @@ const statusRequestQuery = {
 const getStatusRequest: HttpFetchOptionsWithPath = {
   path: ENTITY_STORE_ROUTES.public.STATUS,
   query: statusRequestQuery,
-};
-
-const getStatusV1Request: HttpFetchOptionsWithPath = {
-  path: '/api/entity_store/status',
 };
 
 const installAllEntitiesRequest: HttpFetchOptionsWithPath = {
@@ -48,6 +43,36 @@ const initEntityMaintainersRequest: HttpFetchOptionsWithPath = {
   query: { apiVersion: '2' },
 };
 
+const getPreferencesRequest: HttpFetchOptionsWithPath = {
+  path: ENTITY_STORE_ROUTES.internal.PREFERENCES,
+  query: { apiVersion: '2' },
+};
+
+const getPrivilegesRequest: HttpFetchOptionsWithPath = {
+  path: ENTITY_STORE_ROUTES.internal.CHECK_PRIVILEGES,
+  query: { apiVersion: '2' },
+};
+
+// Detects whether the legacy v1 Entity Store was installed in this space by
+// looking up the legacy `entity-engine-status` saved object. Used to decide
+// whether to auto-install v2 in non-default spaces (only for users who had v1).
+export const isEntityStoreV1Installed = async (http: HttpSetup): Promise<boolean> => {
+  const response = await http.fetch<{ total: number }>(SAVED_OBJECTS_FIND_PATH, {
+    method: 'GET',
+    query: { type: LEGACY_ENTITY_ENGINE_SO_TYPE, per_page: 0 },
+  });
+  return response.total > 0;
+};
+
+// Gate auto-install / maintainers-init on the same privilege set the install and
+// entity_maintainers/init routes enforce server-side (read + manage on the target
+// alias, manage_index_templates cluster, saved-object create, and read/
+// view_index_metadata on source indices) — surfaced as `has_install_permissions`.
+const hasEntityStoreInstallPrivileges = async (http: HttpSetup): Promise<boolean> => {
+  const privileges = await http.get<{ has_install_permissions?: boolean }>(getPrivilegesRequest);
+  return privileges.has_install_permissions === true;
+};
+
 /**
  * Hook to install Entity Store V2. Should be called from the root Security Solution app component.
  * @param services - Kibana services required to install Entity Store V2
@@ -56,25 +81,35 @@ export const useInstallEntityStoreV2 = (services: Services) => {
   useEffect(() => {
     async function install() {
       try {
-        const isEntityStoreV2Enabled = services.uiSettings.get(FF_ENABLE_ENTITY_STORE_V2);
-        if (!isEntityStoreV2Enabled) return;
-
         const space = await services.spaces.getActiveSpace();
-        // Install v2 and remove v1 in default namespace AND every namespace where v1 is currently installed
-        if (space.id !== 'default' && !(await isEntityStoreV1Installed(services.http))) return;
-
         const statusResponse = await services.http.get<{ status: EntityStoreStatus }>(
           getStatusRequest
         );
         const isEntityStoreV2Installed = isEntityStoreInstalled(statusResponse.status);
+
         // Entity store already installed → init entity maintainers only.
         if (isEntityStoreV2Installed) {
+          if (!(await hasEntityStoreInstallPrivileges(services.http))) return;
           await services.http.post(initEntityMaintainersRequest);
           return;
         }
-        // Entity store not installed → install entity store, then init entity maintainers.
+
+        // In non-default spaces auto-install only happens for users migrating
+        // from v1; everyone else has to opt in manually.
+        if (space.id !== 'default') {
+          const hadV1 = await isEntityStoreV1Installed(services.http);
+          if (!hadV1) return;
+        }
+
+        // Skip preferences + install for users without install privileges
+        if (!(await hasEntityStoreInstallPrivileges(services.http))) return;
+
+        const { autoInstall } = await services.http.get<{ autoInstall: boolean }>(
+          getPreferencesRequest
+        );
+        if (!autoInstall) return;
+        // Entity store not installed → install entity store (init entity maintainers is already done by the install API).
         await services.http.post(installAllEntitiesRequest);
-        await services.http.post(initEntityMaintainersRequest);
       } catch (e) {
         services.logger.error('Failed to initialize Entity Store V2');
         services.logger.error(e);
@@ -86,9 +121,3 @@ export const useInstallEntityStoreV2 = (services: Services) => {
 
 const isEntityStoreInstalled = (status: EntityStoreStatus): boolean =>
   status !== EntityStoreStatus.enum.not_installed;
-
-export const isEntityStoreV1Installed = async (http: HttpSetup): Promise<boolean> => {
-  const response = await http.get<EntityStoreV1StatusResponse>(getStatusV1Request);
-
-  return isEntityStoreInstalled(response.status);
-};

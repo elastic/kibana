@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CommonCorrelationsQueryParams } from '../../../common/correlations/types';
+import type { CommonCorrelationsQueryParams, EntityType } from '../../../common/correlations/types';
 import type { LatencyDistributionChartType } from '../../../common/latency_distribution_chart_types';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { fetchDurationPercentiles } from '../correlations/queries/fetch_duration_percentiles';
@@ -13,6 +13,7 @@ import { fetchDurationPercentiles } from '../correlations/queries/fetch_duration
 export async function getPercentileThresholdValue({
   apmEventClient,
   chartType,
+  entityType,
   start,
   end,
   environment,
@@ -23,21 +24,23 @@ export async function getPercentileThresholdValue({
   isOtel,
 }: CommonCorrelationsQueryParams & {
   apmEventClient: APMEventClient;
-  chartType: LatencyDistributionChartType;
+  chartType?: LatencyDistributionChartType;
+  entityType?: EntityType;
   percentileThreshold: number;
-  searchMetrics: boolean;
-  isOtel: boolean;
+  searchMetrics?: boolean;
+  isOtel?: boolean;
 }) {
   const durationPercentiles = await fetchDurationPercentiles({
     apmEventClient,
-    chartType,
     start,
     end,
     environment,
     kuery,
     query,
-    searchMetrics,
-    isOtel,
+    isOtel: isOtel ?? false,
+    ...(entityType !== undefined
+      ? { entityType }
+      : { chartType: chartType!, searchMetrics: searchMetrics! }),
   });
 
   return durationPercentiles.percentiles[`${percentileThreshold}.0`];

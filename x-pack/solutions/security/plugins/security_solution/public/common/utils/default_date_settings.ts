@@ -8,15 +8,13 @@
 import dateMath from '@kbn/datemath';
 import moment from 'moment';
 import { isBoolean, isNumber, isString } from 'lodash/fp';
-
-import { getPreviousTimeRange } from './get_time_range';
 import {
-  DEFAULT_APP_TIME_RANGE,
   DEFAULT_APP_REFRESH_INTERVAL,
+  DEFAULT_APP_TIME_RANGE,
   DEFAULT_FROM,
-  DEFAULT_TO,
   DEFAULT_INTERVAL_TYPE,
   DEFAULT_INTERVAL_VALUE,
+  DEFAULT_TO,
 } from '../../../common/constants';
 import { KibanaServices } from '../lib/kibana';
 import type { Policy } from '../store/inputs/model';
@@ -54,7 +52,6 @@ export const getTimeRangeSettings = (uiSettings = true) => {
   const from = parseDateWithDefault(fromStr, DEFAULT_FROM_MOMENT).toISOString();
   const to = parseDateWithDefault(toStr, DEFAULT_TO_MOMENT, true).toISOString();
 
-  const socTrends = getPreviousTimeRange({ to, from });
   const valueReport = {
     kind: 'relative' as const,
     fromStr: 'now-1M',
@@ -63,7 +60,7 @@ export const getTimeRangeSettings = (uiSettings = true) => {
     to: parseDateWithDefault('now', DEFAULT_TO_MOMENT, true).toISOString(),
   };
 
-  return { from, fromStr, to, toStr, valueReport, socTrends };
+  return { from, fromStr, to, toStr, valueReport };
 };
 
 /**

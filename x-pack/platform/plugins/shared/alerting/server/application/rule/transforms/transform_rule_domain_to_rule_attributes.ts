@@ -55,6 +55,7 @@ export const transformRuleDomainToRuleAttributes = ({
     ...(rule.notifyWhen !== undefined ? { notifyWhen: rule.notifyWhen } : {}),
     muteAll: rule.muteAll,
     mutedInstanceIds: rule.mutedInstanceIds,
+    ...(rule.snoozedInstances !== undefined ? { snoozedInstances: rule.snoozedInstances } : {}),
     ...(meta ? { meta } : {}),
     ...(rule.executionStatus
       ? {

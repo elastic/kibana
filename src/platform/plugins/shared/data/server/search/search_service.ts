@@ -28,6 +28,7 @@ import type {
   ISearchOptions,
   IEsSearchRequest,
   IEsSearchResponse,
+  ISearchGeneric,
 } from '@kbn/search-types';
 import type { ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
@@ -35,6 +36,7 @@ import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { KbnServerError } from '@kbn/kibana-utils-plugin/server';
 import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import type { AsScopedOptions } from '@kbn/core-elasticsearch-server';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type {
   DataRequestHandlerContext,
   IScopedSearchClient,
@@ -85,6 +87,7 @@ import {
   SQL_SEARCH_STRATEGY,
   ESQL_SEARCH_STRATEGY,
   ESQL_ASYNC_SEARCH_STRATEGY,
+  SearchMethodsService,
 } from '../../common/search';
 import { getEsaggs, getEsdsl, getEssql, getEql, getEsql } from './expressions';
 import {
@@ -100,7 +103,6 @@ import {
 } from './strategies/ese_search';
 import { eqlSearchStrategyProvider } from './strategies/eql_search';
 import { NoSearchIdInSessionError } from './errors/no_search_id_in_session';
-import { CachedUiSettingsClient } from './services';
 import { sqlSearchStrategyProvider } from './strategies/sql_search';
 import { searchSessionSavedObjectType } from './saved_objects';
 import { esqlSearchStrategyProvider } from './strategies/esql_search';
@@ -118,6 +120,7 @@ export interface SearchServiceSetupDependencies {
 export interface SearchServiceStartDependencies {
   fieldFormats: FieldFormatsStart;
   indexPatterns: DataViewsServerPluginStart;
+  licensing?: LicensingPluginStart;
 }
 
 /** @internal */
@@ -272,7 +275,7 @@ export class SearchService {
 
   public start(
     core: CoreStart,
-    { fieldFormats, indexPatterns }: SearchServiceStartDependencies
+    { fieldFormats, indexPatterns, licensing }: SearchServiceStartDependencies
   ): ISearchStart {
     const { elasticsearch, savedObjects, uiSettings } = core;
 
@@ -284,7 +287,7 @@ export class SearchService {
       indexPatterns,
     });
 
-    this.asScoped = this.asScopedProvider(core, this.rollupsEnabled);
+    this.asScoped = this.asScopedProvider(core, this.rollupsEnabled, licensing);
     return {
       aggs,
       searchAsInternalUser: this.searchAsInternalUser,
@@ -374,7 +377,12 @@ export class SearchService {
           return request;
         } else {
           try {
-            const id = await deps.searchSessionsClient.getId(request, options);
+            const id = await deps.searchSessionsClient.getId(
+              request,
+              options,
+              // The search route uses minimal auth for performance, which doesn't include realm information.
+              true
+            );
             this.logger.debug(`Found search session id for request ${id}`);
             return {
               ...request,
@@ -417,7 +425,14 @@ export class SearchService {
                     isStored: true,
                   });
                 } else {
-                  return from(deps.searchSessionsClient.trackId(response.id, options)).pipe(
+                  return from(
+                    deps.searchSessionsClient.trackId(
+                      response.id,
+                      options,
+                      // The search route uses minimal auth for performance, which doesn't include realm information.
+                      true
+                    )
+                  ).pipe(
                     tap(() => {
                       isInternalSearchStored = true;
                     }),
@@ -537,7 +552,11 @@ export class SearchService {
     return deps.searchSessionsClient.extend(sessionId, expires);
   };
 
-  private asScopedProvider = (core: CoreStart, rollupsEnabled: boolean = false) => {
+  private asScopedProvider = (
+    core: CoreStart,
+    rollupsEnabled: boolean = false,
+    licensing?: LicensingPluginStart
+  ) => {
     const { elasticsearch, savedObjects, uiSettings } = core;
     const getSessionAsScoped = this.sessionService.asScopedProvider(core);
     return (request: KibanaRequest, opts?: AsScopedOptions): IScopedSearchClient => {
@@ -547,21 +566,29 @@ export class SearchService {
         searchSessionsClient,
         savedObjectsClient,
         esClient: this.createScopedEsClient({ client: elasticsearch.client, request, opts }),
-        uiSettingsClient: new CachedUiSettingsClient(
-          uiSettings.asScopedToClient(savedObjectsClient)
-        ),
+        uiSettingsClient: uiSettings.asScopedToClient(savedObjectsClient),
+
         request,
         rollupsEnabled,
+        licensing,
       };
+      const search = <
+        SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest,
+        SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse
+      >(
+        searchRequest: SearchStrategyRequest,
+        options: ISearchOptions = {}
+      ) => this.search<SearchStrategyRequest, SearchStrategyResponse>(deps, searchRequest, options);
+
+      const searchMethodsService = new SearchMethodsService(search as ISearchGeneric);
+
       return {
-        search: <
-          SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest,
-          SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse
-        >(
-          searchRequest: SearchStrategyRequest,
-          options: ISearchOptions = {}
-        ) =>
-          this.search<SearchStrategyRequest, SearchStrategyResponse>(deps, searchRequest, options),
+        search,
+        dsl: (params, options) => searchMethodsService.dsl(params, options),
+        dslPaginated: (params, options) => searchMethodsService.dslPaginated(params, options),
+        esql: (params, options) => searchMethodsService.esql(params, options),
+        eql: (params, options) => searchMethodsService.eql(params, options),
+        sql: (params, options) => searchMethodsService.sql(params, options),
         cancel: this.cancel.bind(this, deps),
         extend: this.extend.bind(this, deps),
         saveSession: searchSessionsClient.save,

@@ -14,46 +14,48 @@
  *   version: 1
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { AfterKeys, EntityRiskScoreRecord } from '../common/common.gen';
 
+export const RiskScoresCalculationResponse = lazySchema(() =>
+  z.object({
+    /**
+     * Used to obtain the next "page" of risk scores. See also the `after_keys` key in a risk scores request. If this key is empty, the calculation is complete.
+     */
+    after_keys: AfterKeys,
+    /**
+     * A list of errors encountered during the calculation.
+     */
+    errors: z.array(z.string()),
+    /**
+     * The number of risk scores persisted to elasticsearch.
+     */
+    scores_written: z.number(),
+    scores: z
+      .object({
+        /**
+         * A list of host risk scores
+         */
+        host: z.array(EntityRiskScoreRecord).optional(),
+        /**
+         * A list of user risk scores
+         */
+        user: z.array(EntityRiskScoreRecord).optional(),
+        /**
+         * A list of service risk scores
+         */
+        service: z.array(EntityRiskScoreRecord).optional(),
+        /**
+         * A list of generic risk scores
+         */
+        generic: z.array(EntityRiskScoreRecord).optional(),
+        /**
+         * If 'wait_for' the request will wait for the index refresh.
+         */
+        refresh: z.literal('wait_for').optional(),
+      })
+      .optional(),
+  })
+);
 export type RiskScoresCalculationResponse = z.infer<typeof RiskScoresCalculationResponse>;
-export const RiskScoresCalculationResponse = z.object({
-  /**
-   * Used to obtain the next "page" of risk scores. See also the `after_keys` key in a risk scores request. If this key is empty, the calculation is complete.
-   */
-  after_keys: AfterKeys,
-  /**
-   * A list of errors encountered during the calculation.
-   */
-  errors: z.array(z.string()),
-  /**
-   * The number of risk scores persisted to elasticsearch.
-   */
-  scores_written: z.number(),
-  scores: z
-    .object({
-      /**
-       * A list of host risk scores
-       */
-      host: z.array(EntityRiskScoreRecord).optional(),
-      /**
-       * A list of user risk scores
-       */
-      user: z.array(EntityRiskScoreRecord).optional(),
-      /**
-       * A list of service risk scores
-       */
-      service: z.array(EntityRiskScoreRecord).optional(),
-      /**
-       * A list of generic risk scores
-       */
-      generic: z.array(EntityRiskScoreRecord).optional(),
-      /**
-       * If 'wait_for' the request will wait for the index refresh.
-       */
-      refresh: z.literal('wait_for').optional(),
-    })
-    .optional(),
-});

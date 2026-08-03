@@ -402,20 +402,28 @@ export function initRoutes(
         esClient.openPointInTime = async function (params, options) {
           const { index } = params;
           if (index.includes('kibana_security_session')) {
-            return {
+            // Throw a ResponseError to match the real ES client behaviour: the client never
+            // returns a plain 503 response object; it always throws for non-ignored status codes.
+            // `cleanUp` in session_index.ts catches ResponseError with statusCode 503 and
+            // message matching 'no_shard_available_action_exception' to increment the counter.
+            throw new errors.ResponseError({
               statusCode: 503,
-              meta: {},
               body: {
                 error: {
+                  root_cause: [
+                    {
+                      type: 'no_shard_available_action_exception',
+                      reason: 'no shard available for [open]',
+                    },
+                  ],
                   type: 'no_shard_available_action_exception',
                   reason: 'no shard available for [open]',
                 },
+                status: 503,
               },
-            };
-            return {
-              statusCode: 503,
-              message: 'no_shard_available_action_exception',
-            } as unknown as DiagnosticResult;
+              warnings: null,
+              headers: {},
+            } as DiagnosticResult);
           }
           return originalOpenPointInTime.call(this, params, options);
         };
@@ -448,6 +456,73 @@ export function initRoutes(
       const res = await taskManager.get(SESSION_INDEX_CLEANUP_TASK_NAME);
       const { attempts, state, status } = res;
       return response.ok({ body: { attempts, state, status } });
+    }
+  );
+
+  router.get(
+    {
+      path: '/internal/test_endpoints/self_client/fake_request',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Security test endpoint verifies API key authentication.',
+        },
+      },
+      validate: false,
+      options: { access: 'internal' },
+    },
+    async (context, _request, response) => {
+      const { elasticsearch, security } = await context.core;
+      const { has_all_requested: hasManage } =
+        await elasticsearch.client.asCurrentUser.security.hasPrivileges({ cluster: ['manage'] });
+
+      return response.ok({
+        body: {
+          username: security.authc.getCurrentUser()?.username,
+          hasManage,
+        },
+      });
+    }
+  );
+
+  router.post(
+    {
+      path: '/test_endpoints/self_client/fake_request',
+      security: {
+        authc: {
+          enabled: false,
+          reason: 'Security test endpoint constructs its own fake request credentials.',
+        },
+        authz: { enabled: false, reason: 'Security test endpoint verifies target authorization.' },
+      },
+      validate: { body: schema.object({ apiKey: schema.maybe(schema.string()) }) },
+    },
+    async (_context, request, response) => {
+      const [coreStart] = await core.getStartServices();
+      const fakeRequest = kibanaRequestFactory({
+        headers: request.body.apiKey ? { authorization: `ApiKey ${request.body.apiKey}` } : {},
+      });
+
+      try {
+        const body = await coreStart.http.selfClient
+          .asScoped(fakeRequest)
+          .fetch<{ username?: string; hasManage: boolean }>(
+            '/internal/test_endpoints/self_client/fake_request',
+            { access: 'internal' }
+          );
+        return response.ok({ body });
+      } catch (error) {
+        if (error instanceof Error && 'response' in error) {
+          const { response: targetResponse } = error as Error & { response?: Response };
+          if (targetResponse) {
+            return response.custom({
+              statusCode: targetResponse.status,
+              body: targetResponse.statusText,
+            });
+          }
+        }
+        throw error;
+      }
     }
   );
 

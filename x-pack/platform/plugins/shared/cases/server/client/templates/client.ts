@@ -25,7 +25,11 @@ import { Operations } from '../../authorization';
  */
 export interface TemplatesSubClient {
   getAllTemplates(params: TemplatesFindRequest): Promise<TemplatesFindResponse>;
-  getTemplate(templateId: string, version?: string): Promise<SavedObject<Template> | undefined>;
+  getTemplate(
+    templateId: string,
+    version?: string,
+    options?: { includeDeleted?: boolean }
+  ): Promise<SavedObject<Template> | undefined>;
   createTemplate(input: CreateTemplateInput): Promise<SavedObject<Template>>;
   updateTemplate(templateId: string, input: UpdateTemplateInput): Promise<SavedObject<Template>>;
   deleteTemplate(templateId: string): Promise<void>;
@@ -43,10 +47,45 @@ export const createTemplatesSubClient = (clientArgs: CasesClientArgs): Templates
   const { templatesService } = services;
 
   const templatesSubClient: TemplatesSubClient = {
-    getAllTemplates: (params: TemplatesFindRequest) => templatesService.getAllTemplates(params),
+    getAllTemplates: async (params: TemplatesFindRequest) => {
+      const { authorizedOwners } = await authorization.getAuthorizationFilter(
+        Operations.findTemplates
+      );
 
-    getTemplate: (templateId: string, version?: string) =>
-      templatesService.getTemplate(templateId, version),
+      // authorizedOwners is undefined when security is disabled, so no owner restriction applies.
+      if (!authorizedOwners) {
+        return templatesService.getAllTemplates(params);
+      }
+
+      const owner =
+        params.owner.length > 0
+          ? params.owner.filter((requestedOwner) => authorizedOwners.includes(requestedOwner))
+          : authorizedOwners;
+
+      if (owner.length === 0) {
+        return { templates: [], page: params.page, perPage: params.perPage, total: 0 };
+      }
+
+      return templatesService.getAllTemplates({ ...params, owner });
+    },
+
+    getTemplate: async (
+      templateId: string,
+      version?: string,
+      options?: { includeDeleted?: boolean }
+    ) => {
+      const template = await templatesService.getTemplate(templateId, version, options);
+      if (!template) {
+        return undefined;
+      }
+
+      await authorization.ensureAuthorized({
+        operation: Operations.getTemplate,
+        entities: [{ owner: template.attributes.owner, id: template.id }],
+      });
+
+      return template;
+    },
 
     createTemplate: async (input: CreateTemplateInput) => {
       const id = uuidv4();

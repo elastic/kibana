@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { getInputsFromDefinition } from '@kbn/workflows/spec/lib/field_conversion';
 import type { WorkflowYaml } from '@kbn/workflows/spec/schema';
 
 /**
@@ -184,8 +185,9 @@ export function extractWorkflowMetadata(
   const hasScheduledTriggersValue = triggers.some((trigger) => trigger?.type === 'scheduled');
   const hasAlertTriggers = triggers.some((trigger) => trigger?.type === 'alert');
 
-  // Workflow definitions from management are normalized to JSON Schema (`properties`).
-  const inputCount = Object.keys(workflow.inputs?.properties ?? {}).length;
+  // Count inputs
+  const inputs = getInputsFromDefinition(workflow);
+  const inputCount = !inputs ? 0 : Object.keys(inputs.properties ?? {}).length;
 
   // Extract settings
   const enabled = Boolean(workflow.enabled);

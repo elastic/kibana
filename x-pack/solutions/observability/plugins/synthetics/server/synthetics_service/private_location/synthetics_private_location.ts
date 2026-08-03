@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { NewPackagePolicy } from '@kbn/fleet-plugin/common';
+import type { NewPackagePolicy, UpdatePackagePolicyWithId } from '@kbn/fleet-plugin/common';
 import type { NewPackagePolicyWithId } from '@kbn/fleet-plugin/server/services/package_policy';
 import { cloneDeep } from 'lodash';
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
@@ -237,6 +237,7 @@ export class SyntheticsPrivateLocation {
               }
             : {}),
           ...(runOnce ? { run_once: runOnce } : {}),
+          ...(config.fields?.kibanaUrl ? { kibanaUrl: config.fields.kibanaUrl } : {}),
         },
         globalParams,
         maintenanceWindows
@@ -400,7 +401,7 @@ export class SyntheticsPrivateLocation {
       ),
     ]);
 
-    const policiesToUpdate: NewPackagePolicyWithId[] = [];
+    const policiesToUpdate: UpdatePackagePolicyWithId[] = [];
     const policiesToCreate: NewPackagePolicyWithId[] = [];
     const policiesToDelete: string[] = [];
 
@@ -432,7 +433,7 @@ export class SyntheticsPrivateLocation {
             }
 
             if (hasNewFormatPolicyId) {
-              policiesToUpdate.push({ ...newPolicy, id: newId } as NewPackagePolicyWithId);
+              policiesToUpdate.push({ ...newPolicy, id: newId } as UpdatePackagePolicyWithId);
               policiesToDelete.push(...legacyPolicyIds);
             } else if (hasAnyLegacyPolicyId) {
               policiesToDelete.push(...legacyPolicyIds);
@@ -456,14 +457,32 @@ export class SyntheticsPrivateLocation {
     const uniqueToDelete = [...new Set(policiesToDelete)];
 
     this.server.logger.debug(
-      `[editingMonitors] Creating ${policiesToCreate.length} policies, updating ${policiesToUpdate.length} policies, deleting ${uniqueToDelete.length} policies`
+      `[editingMonitors] Creating ${policiesToCreate.length} policies (${policiesToCreate
+        .map((p) => p.id)
+        .join(', ')}), updating ${policiesToUpdate.length} policies, deleting ${
+        uniqueToDelete.length
+      } policies (${uniqueToDelete.join(', ')})`
     );
 
-    const [_createResponse, failedUpdatesRes, _deleteResponse] = await Promise.all([
-      this.packagePolicyService.bulkCreate({
-        newPolicies: policiesToCreate,
-        spaceId,
-      }),
+    const createResponse = await this.packagePolicyService.bulkCreate({
+      newPolicies: policiesToCreate,
+      spaceId,
+    });
+
+    if (createResponse.failed.length > 0) {
+      this.server.logger.error(
+        `[editingMonitors] Failed to create ${
+          createResponse.failed.length
+        } package policies: ${JSON.stringify(
+          createResponse.failed.map(({ packagePolicy, error }) => ({
+            id: (packagePolicy as NewPackagePolicyWithId).id,
+            error: error?.message ?? error,
+          }))
+        )}`
+      );
+    }
+
+    const [failedUpdatesRes] = await Promise.all([
       this.packagePolicyService.bulkUpdate({
         policiesToUpdate,
         spaceId,
@@ -493,6 +512,7 @@ export class SyntheticsPrivateLocation {
 
     return {
       failedUpdates,
+      failedCreates: createResponse.failed,
     };
   }
 

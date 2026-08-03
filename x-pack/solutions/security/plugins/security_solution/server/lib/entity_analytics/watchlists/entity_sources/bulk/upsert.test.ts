@@ -20,7 +20,7 @@ describe('bulkUpsertOperationsFactory', () => {
     jest.clearAllMocks();
   });
 
-  it('generates index operations for new entities (no existingEntityId)', () => {
+  it('generates scripted upsert operations for new entities', () => {
     const entities: WatchlistBulkEntity[] = [
       { euid: 'user:alice', type: 'user', name: 'alice', sourceId: 'source-1' },
       { euid: 'user:bob', type: 'user', name: 'bob', sourceId: 'source-1' },
@@ -28,83 +28,59 @@ describe('bulkUpsertOperationsFactory', () => {
 
     const ops = buildOps({ entities, sourceLabel: 'index', targetIndex });
 
-    // Two entities → 4 elements (action + doc pairs)
+    // Two entities → 4 elements (action + body pairs)
     expect(ops).toHaveLength(4);
 
-    // First entity — index action
-    expect(ops[0]).toEqual({ index: { _index: targetIndex, _id: 'user:alice' } });
-    // First entity — doc body
+    // First entity — update action with deterministic _id
+    expect(ops[0]).toEqual({ update: { _index: targetIndex, _id: 'watchlist-1:user:alice' } });
+    // First entity — scripted upsert body
     expect(ops[1]).toEqual(
       expect.objectContaining({
-        entity: { id: 'user:alice', name: 'alice', type: 'user' },
-        labels: { sources: ['index'], source_ids: ['source-1'] },
-        watchlist,
+        script: expect.objectContaining({
+          source: UPDATE_SCRIPT_SOURCE,
+          params: expect.objectContaining({ source_id: 'source-1', source_type: 'index' }),
+        }),
+        upsert: expect.objectContaining({
+          entity: { id: 'user:alice', name: 'alice', type: 'user' },
+          labels: { sources: ['index'], source_ids: ['source-1'] },
+          watchlist,
+        }),
       })
     );
 
-    // Second entity — index action
-    expect(ops[2]).toEqual({ index: { _index: targetIndex, _id: 'user:bob' } });
+    // Second entity
+    expect(ops[2]).toEqual({ update: { _index: targetIndex, _id: 'watchlist-1:user:bob' } });
     expect(ops[3]).toEqual(
       expect.objectContaining({
-        entity: { id: 'user:bob', name: 'bob', type: 'user' },
-        labels: { sources: ['index'], source_ids: ['source-1'] },
-        watchlist,
+        script: expect.objectContaining({ source: UPDATE_SCRIPT_SOURCE }),
+        upsert: expect.objectContaining({
+          entity: { id: 'user:bob', name: 'bob', type: 'user' },
+        }),
       })
     );
   });
 
-  it('generates update operations for existing entities (with existingEntityId)', () => {
+  it('generates scripted upsert operations for existing entities, merging source labels', () => {
     const entities: WatchlistBulkEntity[] = [
-      {
-        euid: 'user:alice',
-        type: 'user',
-        name: 'alice',
-        existingEntityId: 'doc-123',
-        sourceId: 'source-2',
-      },
+      { euid: 'user:alice', type: 'user', name: 'alice', sourceId: 'source-2' },
     ];
 
     const ops = buildOps({ entities, sourceLabel: 'index', targetIndex });
 
     expect(ops).toHaveLength(2);
 
-    // Update action
-    expect(ops[0]).toEqual({ update: { _index: targetIndex, _id: 'doc-123' } });
-    // Script body
+    expect(ops[0]).toEqual({ update: { _index: targetIndex, _id: 'watchlist-1:user:alice' } });
     expect(ops[1]).toEqual(
       expect.objectContaining({
         script: expect.objectContaining({
           source: UPDATE_SCRIPT_SOURCE,
-          params: expect.objectContaining({
-            source_id: 'source-2',
-            source_type: 'index',
-          }),
+          params: expect.objectContaining({ source_id: 'source-2', source_type: 'index' }),
+        }),
+        upsert: expect.objectContaining({
+          labels: expect.objectContaining({ source_ids: ['source-2'] }),
         }),
       })
     );
-  });
-
-  it('generates mixed operations for a mix of new and existing entities', () => {
-    const entities: WatchlistBulkEntity[] = [
-      { euid: 'user:new-user', type: 'user', name: 'new-user', sourceId: 'src-1' },
-      {
-        euid: 'user:existing-user',
-        type: 'user',
-        name: 'existing-user',
-        existingEntityId: 'doc-456',
-        sourceId: 'src-1',
-      },
-    ];
-
-    const ops = buildOps({ entities, sourceLabel: 'index', targetIndex });
-
-    expect(ops).toHaveLength(4);
-
-    // First is an index op
-    expect(ops[0]).toEqual({ index: { _index: targetIndex, _id: 'user:new-user' } });
-
-    // Second pair is an update op
-    expect(ops[2]).toEqual({ update: { _index: targetIndex, _id: 'doc-456' } });
   });
 
   it('returns an empty array when no entities are provided', () => {

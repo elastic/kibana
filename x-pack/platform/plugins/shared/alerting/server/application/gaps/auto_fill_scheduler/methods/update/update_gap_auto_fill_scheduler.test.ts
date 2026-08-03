@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { ActionsAuthorization } from '@kbn/actions-plugin/server';
 import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
@@ -47,6 +48,7 @@ const eventLogClient = eventLogClientMock.create();
 const backfillClient = backfillClientMock.create();
 
 const rulesClientParamsBase: jest.Mocked<ConstructorOptions> = {
+  request: httpServerMock.createKibanaRequest(),
   taskManager,
   ruleTypeRegistry,
   unsecuredSavedObjectsClient,
@@ -56,6 +58,7 @@ const rulesClientParamsBase: jest.Mocked<ConstructorOptions> = {
   namespace: 'default',
   getUserName: jest.fn().mockResolvedValue('elastic'),
   createAPIKey: jest.fn(),
+  cloneAPIKey: jest.fn(),
   logger: loggingSystemMock.create().get() as Logger,
   internalSavedObjectsRepository,
   encryptedSavedObjectsClient: encryptedSavedObjects,

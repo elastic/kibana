@@ -8,14 +8,20 @@
 import { compact, uniqBy } from 'lodash';
 import type { Logger } from '@kbn/core/server';
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
-import type { BoundInferenceClient, ChatCompletionTokenCount } from '@kbn/inference-common';
+import type {
+  BoundInferenceClient,
+  ChatCompletionTokenCount,
+  ToolCallback,
+  ToolDefinition,
+} from '@kbn/inference-common';
 import {
   type BaseFeature,
   type IgnoredFeature,
   identifiedFeatureSchema,
   ignoredFeatureSchema,
-} from '@kbn/streams-schema';
+} from '@kbn/significant-events-schema';
 import { withSpan } from '@kbn/apm-utils';
+import { executeAsReasoningAgent } from '@kbn/inference-prompt-utils';
 import { conditionSchema, isConditionComplete, type Condition } from '@kbn/streamlang';
 import { createIdentifyFeaturesPrompt } from './prompt';
 import { formatRawDocument } from './utils/format_raw_document';
@@ -29,7 +35,18 @@ export interface PreviouslyIdentifiedFeature {
   description?: string;
   properties: Record<string, unknown>;
 }
-export type { IgnoredFeature } from '@kbn/streams-schema';
+
+export const toPreviouslyIdentifiedFeature = (
+  feature: BaseFeature
+): PreviouslyIdentifiedFeature => ({
+  id: feature.id,
+  type: feature.type,
+  subtype: feature.subtype,
+  title: feature.title,
+  description: feature.description,
+  properties: feature.properties,
+});
+export type { IgnoredFeature } from '@kbn/significant-events-schema';
 
 export interface ExcludedFeatureSummary {
   id: string;
@@ -38,6 +55,20 @@ export interface ExcludedFeatureSummary {
   title?: string;
   description?: string;
   properties: Record<string, unknown>;
+}
+
+export interface SearchSimilarFeaturesArguments {
+  candidate_id: string;
+  title: string;
+  description: string;
+  type: string;
+}
+
+export interface SimilarFeatureHit {
+  id: string;
+  title: string;
+  description: string;
+  confidence: number;
 }
 
 export interface IdentifyFeaturesOptions {
@@ -49,6 +80,10 @@ export interface IdentifyFeaturesOptions {
   logger: Logger;
   signal: AbortSignal;
   previouslyIdentifiedFeatures?: PreviouslyIdentifiedFeature[];
+  knownFeatureIds?: string;
+  searchSimilarFeatures?: (args: SearchSimilarFeaturesArguments) => Promise<SimilarFeatureHit[]>;
+  additionalTools?: Record<string, ToolDefinition>;
+  additionalToolCallbacks?: Record<string, ToolCallback>;
 }
 
 export async function identifyFeatures({
@@ -57,8 +92,13 @@ export async function identifyFeatures({
   excludedFeatures,
   systemPrompt,
   inferenceClient,
+  logger,
   signal,
   previouslyIdentifiedFeatures = [],
+  knownFeatureIds = '',
+  searchSimilarFeatures,
+  additionalTools,
+  additionalToolCallbacks,
 }: IdentifyFeaturesOptions): Promise<{
   features: BaseFeature[];
   ignoredFeatures: IgnoredFeature[];
@@ -79,47 +119,96 @@ export async function identifyFeatures({
     previouslyIdentifiedFeatures.length > 0 ? JSON.stringify(previouslyIdentifiedFeatures) : '';
 
   const response = await withSpan('invoke_prompt', () =>
-    inferenceClient.prompt({
+    executeAsReasoningAgent({
       input: {
         sample_documents: JSON.stringify(formattedDocuments),
         previously_identified_features: previousFeaturesContext,
+        known_feature_ids: knownFeatureIds,
         excluded_features: excludedFeatures?.length ? JSON.stringify(excludedFeatures) : '',
       },
-      prompt: createIdentifyFeaturesPrompt({ systemPrompt }),
+      prompt: createIdentifyFeaturesPrompt({ systemPrompt, additionalTools }),
+      inferenceClient,
+      maxSteps: additionalToolCallbacks ? 6 : 4,
+      toolCallbacks: {
+        ...(additionalToolCallbacks ?? {}),
+        search_similar_features: async (toolCall) => {
+          if (!searchSimilarFeatures) {
+            return {
+              response: {
+                features: [],
+                count: 0,
+                error: 'Semantic feature search is unavailable.',
+              },
+            };
+          }
+
+          try {
+            const features = await searchSimilarFeatures(toolCall.function.arguments);
+            return {
+              response: {
+                features,
+                count: features.length,
+              },
+            };
+          } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : String(error);
+            logger.warn(`Failed to search similar features: ${errorMessage}`);
+            return {
+              response: {
+                features: [],
+                count: 0,
+                error: errorMessage,
+              },
+            };
+          }
+        },
+        finalize_features: async () => ({ response: { finalized: true } }),
+      },
+      finalToolChoice: {
+        type: 'function',
+        function: 'finalize_features',
+      },
       abortSignal: signal,
     })
   );
 
-  const features = uniqBy(
-    response.toolCalls
-      .flatMap((toolCall) => toolCall.function.arguments.features)
-      .map((feature) => {
-        return {
-          ...feature,
-          stream_name: streamName,
-          filter: tryParseFilter(feature.filter),
-        };
-      })
-      .filter((feature) => {
-        const result = identifiedFeatureSchema.safeParse(feature);
-        if (!result.success) {
-          return false;
-        }
+  if (response.toolCalls.length === 0) {
+    throw new Error('Feature identification did not call finalize_features');
+  }
 
-        // ensure that the feature has at least one stable identifying property
-        return Object.keys(feature.properties).length > 0;
-      }),
-    (feature) => feature.id
-  );
+  const finalizedFeatures: BaseFeature[] = [];
+  const ignoredFeatures: IgnoredFeature[] = [];
+  for (const toolCall of response.toolCalls) {
+    const { features, ignored_features: ignored = [] } = toolCall.function.arguments;
+    if (!Array.isArray(features)) {
+      throw new Error('Feature identification returned invalid finalize_features output');
+    }
 
-  const ignoredFeatures = response.toolCalls
-    .flatMap((toolCall) => toolCall.function.arguments.ignored_features ?? [])
-    .filter((item): item is IgnoredFeature => ignoredFeatureSchema.safeParse(item).success);
+    for (const feature of features) {
+      const candidate = {
+        ...feature,
+        stream_name: streamName,
+        filter: tryParseFilter(feature.filter),
+      };
+      const result = identifiedFeatureSchema.safeParse(candidate);
+      if (!result.success || Object.keys(result.data.properties).length === 0) {
+        continue;
+      }
+      finalizedFeatures.push(result.data);
+    }
+
+    for (const item of Array.isArray(ignored) ? ignored : []) {
+      const result = ignoredFeatureSchema.safeParse(item);
+      if (result.success) {
+        ignoredFeatures.push(result.data);
+      }
+    }
+  }
 
   return {
-    features,
+    features: uniqBy(finalizedFeatures, (feature) => feature.id),
     ignoredFeatures,
-    tokensUsed: sumTokens({ prompt: 0, completion: 0, total: 0, cached: 0 }, response.tokens),
+    tokensUsed: sumTokens({ added: response.tokens }),
   };
 }
 

@@ -5,22 +5,24 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 import { isEqual } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import type { ScopedHistory } from '@kbn/core-application-browser';
 import type { CPSPluginStart } from '@kbn/cps/public';
+import { isCustomProjectRouting } from '@kbn/cps-common';
 import type { KibanaFeature } from '@kbn/features-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 
 import { EditSpaceTabFooter } from './footer';
 import { useEditSpaceServices } from './provider';
 import type { Space } from '../../../common';
 import { SOLUTION_VIEW_CLASSIC } from '../../../common/constants';
-import { getSpaceInitials } from '../../space_avatar';
+import { getSpaceColor, getSpaceInitials } from '../../space_avatar';
 import { ConfirmDeleteModal } from '../components';
 import { ConfirmAlterActiveSpaceModal } from '../components/confirm_alter_active_space_modal';
 import { CustomizeAvatar } from '../components/customize_avatar';
@@ -130,7 +132,7 @@ export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history
   );
 
   const onChangeFeatures = useCallback(
-    (updatedSpace: Partial<Space>) => {
+    (updatedSpace: CustomizeSpaceFormValues) => {
       setFormValues({ ...formValues, ...updatedSpace });
       setIsDirty(true);
       setShowUserImpactWarning(true);
@@ -139,7 +141,7 @@ export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history
   );
 
   const onSolutionViewChange = useCallback(
-    (updatedSpace: Partial<Space>) => {
+    (updatedSpace: CustomizeSpaceFormValues) => {
       setSolution(updatedSpace.solution);
 
       const storedFeatureVisibility = storedFeatureVisibilityRef.current;
@@ -160,7 +162,7 @@ export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history
   );
 
   const onProjectRoutingChange = useCallback(
-    (updatedSpace: Partial<Space>) => {
+    (updatedSpace: CustomizeSpaceFormValues) => {
       onChangeSpaceSettings(updatedSpace);
     },
     [onChangeSpaceSettings]
@@ -182,7 +184,13 @@ export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history
   }, []);
 
   const canReadProjectRouting = (): boolean => {
-    return capabilities?.project_routing?.read_space_default === true;
+    if (capabilities?.project_routing?.read_space_default !== true) {
+      return false;
+    }
+    // Show the section either when the project is on a CPS-eligible tier, or
+    // when the space already has a non-default project routing value so users
+    // who downgraded can still unset any custom routing expression.
+    return cps?.isTierEligible === true || isCustomProjectRouting(space.projectRouting);
   };
 
   const updateProjectPicker = useCallback(
@@ -208,6 +216,11 @@ export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history
       } = formValues;
 
       const spaceClone = structuredClone(partialSpace as Partial<Space>);
+
+      // Auto-generate color if needed
+      if (!spaceClone.color && !spaceClone.imageUrl) {
+        spaceClone.color = getSpaceColor(spaceClone);
+      }
       const { id, name } = spaceClone;
 
       if (!id) {
@@ -334,10 +347,9 @@ export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history
       showUserImpactWarning && (
         <>
           <EuiSpacer />
-          <EuiCallOut
+          <KbnWarningCallout
             announceOnMount
-            color="warning"
-            iconType="info"
+            size="s"
             title={i18n.translate(
               'xpack.spaces.management.spaceDetails.spaceChangesWarning.impactAllUsersInSpace',
               {

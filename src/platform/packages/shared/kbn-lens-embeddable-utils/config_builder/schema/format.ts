@@ -9,17 +9,22 @@
 
 import { schema } from '@kbn/config-schema';
 import { LENS_FORMAT_NUMBER_DECIMALS_DEFAULT, LENS_FORMAT_COMPACT_DEFAULT } from './constants';
+import { durationFormatSchema, legacyDurationFormatSchema } from './duration_units';
 
 const numericFormatSchema = schema.object(
   {
-    type: schema.oneOf([schema.literal('number'), schema.literal('percent')]),
+    type: schema.oneOf([schema.literal('number'), schema.literal('percent')], {
+      meta: {
+        description: 'Value format type: `number` for plain numbers, `percent` for percentages.',
+      },
+    }),
     /**
      * Number of decimals
      */
     decimals: schema.number({
       defaultValue: LENS_FORMAT_NUMBER_DECIMALS_DEFAULT,
       meta: {
-        description: 'Number of decimals',
+        description: 'Number of decimal places to display.',
       },
     }),
     /**
@@ -28,7 +33,7 @@ const numericFormatSchema = schema.object(
     suffix: schema.maybe(
       schema.string({
         meta: {
-          description: 'Suffix',
+          description: 'Suffix appended to the formatted value.',
         },
       })
     ),
@@ -38,23 +43,33 @@ const numericFormatSchema = schema.object(
     compact: schema.boolean({
       defaultValue: LENS_FORMAT_COMPACT_DEFAULT,
       meta: {
-        description: 'Whether to use compact notation',
+        description:
+          'When `true`, uses compact notation (for example, 1.2k instead of 1,200). Defaults to `false`.',
       },
     }),
   },
-  { meta: { id: 'numericFormat', title: 'Numeric Format' } }
+  {
+    meta: {
+      id: 'numericFormat',
+      title: 'Numeric Format',
+      description:
+        'Number or percentage format with optional decimal places, suffix, and compact notation.',
+    },
+  }
 );
 
 const byteFormatSchema = schema.object(
   {
-    type: schema.oneOf([schema.literal('bits'), schema.literal('bytes')]),
+    type: schema.oneOf([schema.literal('bits'), schema.literal('bytes')], {
+      meta: { description: 'Data size unit: `bits` or `bytes`.' },
+    }),
     /**
      * Number of decimals
      */
     decimals: schema.number({
       defaultValue: LENS_FORMAT_NUMBER_DECIMALS_DEFAULT,
       meta: {
-        description: 'Number of decimals',
+        description: 'Number of decimal places to display.',
       },
     }),
     /**
@@ -63,45 +78,18 @@ const byteFormatSchema = schema.object(
     suffix: schema.maybe(
       schema.string({
         meta: {
-          description: 'Suffix',
+          description: 'Suffix appended to the formatted value.',
         },
       })
     ),
   },
-  { meta: { id: 'byteFormat', title: 'Byte Format' } }
-);
-
-const durationFormatSchema = schema.object(
   {
-    type: schema.literal('duration'),
-    /**
-     * From
-     */
-    from: schema.string({
-      meta: {
-        description: 'From',
-      },
-    }),
-    /**
-     * To
-     */
-    to: schema.string({
-      meta: {
-        description: 'To',
-      },
-    }),
-    /**
-     * Suffix
-     */
-    suffix: schema.maybe(
-      schema.string({
-        meta: {
-          description: 'Suffix',
-        },
-      })
-    ),
-  },
-  { meta: { id: 'durationFormat', title: 'Duration Format' } }
+    meta: {
+      id: 'byteFormat',
+      title: 'Byte Format',
+      description: 'Data size format in bits or bytes, with optional decimal places and suffix.',
+    },
+  }
 );
 
 const customFormatSchema = schema.object(
@@ -112,19 +100,40 @@ const customFormatSchema = schema.object(
      */
     pattern: schema.string({
       meta: {
-        description: 'Pattern',
+        description: 'Kibana field format pattern string.',
       },
     }),
   },
-  { meta: { id: 'customFormat', title: 'Custom Format' } }
+  {
+    meta: {
+      id: 'customFormat',
+      title: 'Custom Format',
+      description: 'Custom format using a Kibana field format pattern string.',
+    },
+  }
 );
 
 /**
- * Format configuration
+ * Format configuration for dimension values.
+ * Accepts both GA and legacy unit names for the `duration` type so that neither is rejected at
+ * the HTTP validation layer. The route handlers enforce exactly one set at runtime based on the
+ * `asCode.useGASchemas` feature flag.
  */
 export const formatTypeSchema = schema.oneOf(
-  [numericFormatSchema, byteFormatSchema, durationFormatSchema, customFormatSchema],
-  { meta: { id: 'formatType', title: 'Format Type' } }
+  [
+    numericFormatSchema,
+    byteFormatSchema,
+    durationFormatSchema,
+    legacyDurationFormatSchema,
+    customFormatSchema,
+  ],
+  {
+    meta: {
+      id: 'formatType',
+      title: 'Format Type',
+      description: 'Number display format for the dimension value.',
+    },
+  }
 );
 
 export const formatSchema = {

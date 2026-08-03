@@ -13,7 +13,7 @@ import { labels } from '../utils/i18n';
 import { ConnectorsProvider } from '../context/connectors_provider';
 
 export const AgentBuilderConnectorsPage: React.FC = () => {
-  useBreadcrumb([{ text: labels.connectors.title, path: appPaths.connectors.list }]);
+  useBreadcrumb([{ text: labels.connectors.libraryTitle, path: appPaths.connectors.list }]);
   return (
     <ConnectorsProvider>
       <AgentBuilderConnectors />

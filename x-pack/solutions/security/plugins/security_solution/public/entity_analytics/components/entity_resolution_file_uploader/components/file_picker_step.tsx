@@ -97,13 +97,13 @@ export const EntityResolutionFilePickerStep: React.FC<FilePickerStepProps> = Rea
                 id="xpack.securitySolution.entityAnalytics.entityResolutionUpload.typeColumn"
                 values={{
                   type: <b>{'type'}</b>,
-                  values: 'user, host, service, generic',
+                  values: 'user, host, service',
                 }}
               />
             </li>
             <li>
               <FormattedMessage
-                defaultMessage="{resolvedTo}: The {entityId} of the target entity"
+                defaultMessage="{resolvedTo}: The {entityId} of the primary entity"
                 id="xpack.securitySolution.entityAnalytics.entityResolutionUpload.resolvedToColumn"
                 values={{
                   resolvedTo: <b>{'resolved_to'}</b>,

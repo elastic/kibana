@@ -5,8 +5,33 @@
  * 2.0.
  */
 
-import { charOffsetToDomPosition } from './command_badge';
+import { charOffsetToDomPosition, isElementCommandBadge } from './command_badge';
 import type { ActiveCommand } from './command_menu';
+
+/**
+ * Browsers cannot place a caret before a non-editable element (`contentEditable="false"`)
+ * that is the first child of a contentEditable container.
+ * A zero-width space provides an invisible caret target without affecting layout.
+ */
+export const ZERO_WIDTH_SPACE = '\u200B';
+
+/**
+ * Converts a plain text string into a DocumentFragment, preserving line breaks
+ * as <br> elements. Text nodes alone cannot render \n in a contenteditable div.
+ */
+export const createTextFragment = (text: string): DocumentFragment => {
+  const fragment = document.createDocumentFragment();
+  const parts = text.split('\n');
+  parts.forEach((part, i) => {
+    if (part) {
+      fragment.appendChild(document.createTextNode(part));
+    }
+    if (i < parts.length - 1) {
+      fragment.appendChild(document.createElement('br'));
+    }
+  });
+  return fragment;
+};
 
 /**
  * Creates a DOM Range spanning the full command text (sequence + query)
@@ -97,4 +122,51 @@ export const insertNodeAtCursor = (node: Node): void => {
   range.collapse(false);
   sel.removeAllRanges();
   sel.addRange(range);
+};
+
+/**
+ * Ensures the browser can place a caret before the first child when it is a
+ * non-editable command badge. Inserts a zero-width space text node if needed.
+ *
+ * Also cleans up browser-inserted artifacts (`<br>`, empty text nodes) that
+ * appear before a leading badge after the user deletes text — browsers add
+ * these to preserve cursor position in contentEditable.
+ *
+ * @returns `true` if the DOM was modified (callers may need to restore cursor position).
+ */
+export const ensureCaretTargetBeforeFirstBadge = (container: HTMLElement): boolean => {
+  let node = container.firstChild;
+  const nodesToRemove: Node[] = [];
+
+  while (node) {
+    if (node.nodeType === Node.ELEMENT_NODE && isElementCommandBadge(node as HTMLElement)) {
+      for (const n of nodesToRemove) {
+        container.removeChild(n);
+      }
+      container.insertBefore(document.createTextNode(ZERO_WIDTH_SPACE), node);
+      return true;
+    }
+
+    if (node.nodeType === Node.TEXT_NODE) {
+      const text = node.textContent ?? '';
+      if (text.includes(ZERO_WIDTH_SPACE)) return false;
+      if (stripZeroWidthSpaces(text).length > 0) return false;
+      nodesToRemove.push(node);
+    } else if (node.nodeType === Node.ELEMENT_NODE && (node as HTMLElement).tagName === 'BR') {
+      nodesToRemove.push(node);
+    } else {
+      return false;
+    }
+
+    node = node.nextSibling;
+  }
+
+  return false;
+};
+
+/**
+ * Strips zero-width space characters used as caret targets.
+ */
+export const stripZeroWidthSpaces = (text: string): string => {
+  return text.replaceAll(ZERO_WIDTH_SPACE, '');
 };

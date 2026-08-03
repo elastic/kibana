@@ -17,6 +17,7 @@ import {
   EuiFlexItem,
   EuiInlineEditTitle,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -115,7 +116,7 @@ export const GridSectionTitle = React.memo(
             aria-label={i18n.translate('kbnGridLayout.section.toggleCollapse', {
               defaultMessage: 'Toggle collapse',
             })}
-            iconType={'arrowDown'}
+            iconType="chevronSingleDown"
             onKeyDown={handleKeyDown}
             size="m"
             id={`kbnGridSectionTitle-${sectionId}`}
@@ -160,16 +161,23 @@ export const GridSectionTitle = React.memo(
           <>
             {!readOnly && (
               <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  data-no-drag
-                  iconType="pencil"
-                  onClick={() => setEditTitleOpen(true)}
-                  color="text"
-                  aria-label={i18n.translate('kbnGridLayout.section.editTitleAriaLabel', {
+                <EuiToolTip
+                  content={i18n.translate('kbnGridLayout.section.editTitleAriaLabel', {
                     defaultMessage: 'Edit section title',
                   })}
-                  data-test-subj={`kbnGridSectionTitle-${sectionId}--edit`}
-                />
+                  disableScreenReaderOutput
+                >
+                  <EuiButtonIcon
+                    data-no-drag
+                    iconType="pencil"
+                    onClick={() => setEditTitleOpen(true)}
+                    color="text"
+                    aria-label={i18n.translate('kbnGridLayout.section.editTitleAriaLabel', {
+                      defaultMessage: 'Edit section title',
+                    })}
+                    data-test-subj={`kbnGridSectionTitle-${sectionId}--edit`}
+                  />
+                </EuiToolTip>
               </EuiFlexItem>
             )}
           </>

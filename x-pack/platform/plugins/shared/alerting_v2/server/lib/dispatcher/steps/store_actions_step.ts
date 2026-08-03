@@ -12,13 +12,13 @@ import {
 } from '../../../resources/datastreams/alert_actions';
 import type {
   AlertEpisode,
-  NotificationGroup,
   DispatcherStep,
   DispatcherPipelineState,
   DispatcherStepOutput,
 } from '../types';
 import type { StorageServiceContract } from '../../services/storage_service/storage_service';
 import { StorageServiceInternalToken } from '../../services/storage_service/tokens';
+import { getUnmatchedEpisodes } from './unmatched_episodes';
 
 @injectable()
 export class StoreActionsStep implements DispatcherStep {
@@ -48,7 +48,13 @@ export class StoreActionsStep implements DispatcherStep {
       index: ALERT_ACTIONS_DATA_STREAM,
       docs: [
         ...suppressed.map((episode) =>
-          toAction({ episode, actionType: 'suppress', now, reason: episode.reason })
+          toAction({
+            episode,
+            actionType: 'suppress',
+            now,
+            reason: episode.reason,
+            spaceId: episode.space_id,
+          })
         ),
         ...throttled.flatMap((group) =>
           group.episodes.map((episode) =>
@@ -57,6 +63,7 @@ export class StoreActionsStep implements DispatcherStep {
               actionType: 'suppress',
               now,
               reason: `suppressed by throttled policy ${group.policyId}`,
+              spaceId: episode.space_id,
             })
           )
         ),
@@ -67,24 +74,28 @@ export class StoreActionsStep implements DispatcherStep {
               actionType: 'fire',
               now,
               reason: `dispatched by policy ${group.policyId}`,
+              spaceId: episode.space_id,
             })
           )
         ),
         ...dispatch.map((group) => {
           const groupingMode = policies?.get(group.policyId)?.groupingMode ?? 'per_episode';
+          const firstEpisode = group.episodes[0];
+          const spaceId = firstEpisode?.space_id ?? 'default';
           const action: AlertAction = {
             '@timestamp': now.toISOString(),
             actor: 'system',
             action_type: 'notified',
-            rule_id: group.episodes[0]?.rule_id ?? 'unknown',
-            group_hash: group.episodes[0]?.group_hash ?? 'unknown',
+            rule_id: firstEpisode?.rule_id ?? null,
+            group_hash: firstEpisode?.group_hash ?? 'unknown',
             last_series_event_timestamp: now.toISOString(),
-            notification_group_id: group.id,
-            source: 'internal',
+            action_group_id: group.id,
+            source: firstEpisode?.source,
             reason: `notified by policy ${group.policyId}`,
+            space_id: spaceId,
           };
           if (groupingMode === 'per_episode') {
-            action.episode_status = group.episodes[0]?.episode_status;
+            action.episode_status = firstEpisode?.episode_status;
           }
           return action;
         }),
@@ -93,7 +104,8 @@ export class StoreActionsStep implements DispatcherStep {
             episode,
             actionType: 'unmatched',
             now,
-            reason: 'no matching notification policy',
+            reason: 'no matching action policy',
+            spaceId: episode.space_id,
           })
         ),
       ],
@@ -103,33 +115,18 @@ export class StoreActionsStep implements DispatcherStep {
   }
 }
 
-function getUnmatchedEpisodes(
-  dispatchable: readonly AlertEpisode[],
-  dispatch: readonly NotificationGroup[],
-  throttled: readonly NotificationGroup[]
-): AlertEpisode[] {
-  const handledEpisodeKeys = new Set<string>();
-  for (const group of [...dispatch, ...throttled]) {
-    for (const episode of group.episodes) {
-      handledEpisodeKeys.add(`${episode.rule_id}:${episode.group_hash}:${episode.episode_id}`);
-    }
-  }
-
-  return dispatchable.filter(
-    (ep) => !handledEpisodeKeys.has(`${ep.rule_id}:${ep.group_hash}:${ep.episode_id}`)
-  );
-}
-
 function toAction({
   episode,
   actionType,
   now,
   reason,
+  spaceId,
 }: {
   episode: AlertEpisode;
   actionType: 'suppress' | 'fire' | 'notified' | 'unmatched';
   now: Date;
   reason?: string;
+  spaceId: string;
 }): AlertAction {
   return {
     '@timestamp': now.toISOString(),
@@ -138,7 +135,8 @@ function toAction({
     actor: 'system',
     action_type: actionType,
     rule_id: episode.rule_id,
-    source: 'internal',
+    source: episode.source,
     reason,
+    space_id: spaceId,
   };
 }

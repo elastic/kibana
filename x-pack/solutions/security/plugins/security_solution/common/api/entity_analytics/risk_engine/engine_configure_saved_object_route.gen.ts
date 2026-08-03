@@ -14,53 +14,64 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
+export const ConfigureRiskEngineSavedObjectErrorResponse = lazySchema(() =>
+  z.object({
+    risk_engine_saved_object_configured: z.boolean(),
+    errors: z.array(
+      z.object({
+        seq: z.number().int(),
+        error: z.string(),
+      })
+    ),
+  })
+);
 export type ConfigureRiskEngineSavedObjectErrorResponse = z.infer<
   typeof ConfigureRiskEngineSavedObjectErrorResponse
 >;
-export const ConfigureRiskEngineSavedObjectErrorResponse = z.object({
-  risk_engine_saved_object_configured: z.boolean(),
-  errors: z.array(
-    z.object({
-      seq: z.number().int(),
-      error: z.string(),
-    })
-  ),
-});
 
+export const ConfigureRiskEngineSavedObjectRequestBody = lazySchema(() =>
+  z.object({
+    exclude_alert_statuses: z.array(z.string()).optional(),
+    range: z
+      .object({
+        start: z.string().optional(),
+        end: z.string().optional(),
+      })
+      .optional(),
+    exclude_alert_tags: z.array(z.string()).optional(),
+    enable_reset_to_zero: z.boolean().optional(),
+    filters: z
+      .array(
+        z.object({
+          entity_types: z.array(z.enum(['host', 'user', 'service'])),
+          /**
+           * KQL filter string
+           */
+          filter: z.string(),
+        })
+      )
+      .optional(),
+    /**
+      * Number of entities to score per page. Higher values reduce total scoring time by reducing the number of alert-index scans, but cannot exceed the ES|QL result limit (10,000 by default).
+
+      */
+    page_size: z.number().int().min(100).max(10000).optional(),
+  })
+);
 export type ConfigureRiskEngineSavedObjectRequestBody = z.infer<
   typeof ConfigureRiskEngineSavedObjectRequestBody
 >;
-export const ConfigureRiskEngineSavedObjectRequestBody = z.object({
-  exclude_alert_statuses: z.array(z.string()).optional(),
-  range: z
-    .object({
-      start: z.string().optional(),
-      end: z.string().optional(),
-    })
-    .optional(),
-  exclude_alert_tags: z.array(z.string()).optional(),
-  enable_reset_to_zero: z.boolean().optional(),
-  filters: z
-    .array(
-      z.object({
-        entity_types: z.array(z.enum(['host', 'user', 'service'])),
-        /**
-         * KQL filter string
-         */
-        filter: z.string(),
-      })
-    )
-    .optional(),
-});
 export type ConfigureRiskEngineSavedObjectRequestBodyInput = z.input<
   typeof ConfigureRiskEngineSavedObjectRequestBody
 >;
 
+export const ConfigureRiskEngineSavedObjectResponse = lazySchema(() =>
+  z.object({
+    risk_engine_saved_object_configured: z.boolean().optional(),
+  })
+);
 export type ConfigureRiskEngineSavedObjectResponse = z.infer<
   typeof ConfigureRiskEngineSavedObjectResponse
 >;
-export const ConfigureRiskEngineSavedObjectResponse = z.object({
-  risk_engine_saved_object_configured: z.boolean().optional(),
-});

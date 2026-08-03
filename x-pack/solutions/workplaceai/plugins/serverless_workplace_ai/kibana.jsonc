@@ -19,9 +19,9 @@
     ],
     "requiredPlugins": [
       "serverless",
+      "navigation",
       "agentBuilder",
-      "workflowsManagement",
-      "dataSources"
+      "workflowsManagement"
     ],
     "optionalPlugins": [],
     "requiredBundles": []

@@ -161,6 +161,10 @@ export const PolicyRetentionSchedule: React.FunctionComponent<Props> = ({
                   return (
                     <EuiPopover
                       id="retentionActionMenu"
+                      aria-label={i18n.translate(
+                        'xpack.snapshotRestore.policyRetentionSchedulePanel.retentionActionMenuAriaLabel',
+                        { defaultMessage: 'Retention options' }
+                      )}
                       button={
                         <EuiButton
                           data-test-subj="retentionActionMenuButton"

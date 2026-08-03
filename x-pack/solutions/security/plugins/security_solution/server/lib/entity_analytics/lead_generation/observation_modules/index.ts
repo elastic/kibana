@@ -16,4 +16,13 @@ export { ObservationModuleRegistry } from './observation_module_registry';
 export { createRiskScoreModule } from './risk_score_module';
 export { createTemporalStateModule } from './temporal_state_module';
 export { createBehavioralAnalysisModule } from './behavioral_analysis_module';
-export { entityToKey, extractIsPrivileged, groupEntitiesByType, makeObservation } from './utils';
+export { createEntityProfileModule } from './entity_profile_module';
+export { createAnomalyDetectionModule } from './anomaly_detection_module';
+export { registerObservationModules, type ObservationModuleDeps } from './register_modules';
+export { OBSERVATION_MODULE_WEIGHTS } from './weights';
+export {
+  extractIsPrivileged,
+  groupEntitiesByType,
+  makeObservation,
+  matchesPrivilegedWatchlist,
+} from './utils';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FAILURE_STORE_SELECTOR } from '../../../../../util/constants';
+import { FAILURE_STORE_SELECTOR } from '@kbn/streams-plugin/common';
 
 export const getFailureStoreIndexName = (streamName: string) => {
   return streamName + FAILURE_STORE_SELECTOR;

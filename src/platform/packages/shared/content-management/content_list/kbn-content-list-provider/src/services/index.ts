@@ -7,4 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { ContentListServices } from './types';
+export type {
+  ContentListServices,
+  ContentListUserProfilesServices,
+  UserProfileEntry,
+} from './types';
+export { ProfileCache } from './profile_cache';
+export {
+  ProfileCacheContext,
+  useProfileCache,
+  useProfileCacheVersion,
+  useProfile,
+} from './use_profile_cache';

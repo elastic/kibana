@@ -12,7 +12,7 @@ import {
   ELASTIC_AI_ASSISTANT_ANONYMIZATION_FIELDS_URL_FIND,
   API_VERSIONS,
 } from '@kbn/elastic-assistant-common';
-import { useAssistantContext } from '../../../assistant_context';
+import { useMaybeAssistantContext } from '../../../assistant_context';
 
 export interface UseFetchAnonymizationFieldsParams {
   page?: number; // API uses 1-based index
@@ -85,13 +85,15 @@ export const useFetchAnonymizationFields = (
     filter,
   } = params || {};
 
-  const {
-    http,
-    assistantAvailability: { isAssistantEnabled },
-  } = useAssistantContext();
+  const assistantContext = useMaybeAssistantContext();
+  const http = assistantContext?.http;
+  const isAssistantEnabled = assistantContext?.assistantAvailability.isAssistantEnabled ?? false;
 
   const fetchPage = useCallback(
     async ({ pageParam = { page, perPage, sortField, sortOrder, filter, all } }) => {
+      if (!http) {
+        throw new Error('useFetchAnonymizationFields requires AssistantProvider when fetching');
+      }
       const {
         page: p = page,
         perPage: pp = perPage,
@@ -121,6 +123,8 @@ export const useFetchAnonymizationFields = (
     },
     [page, perPage, sortField, sortOrder, filter, all, http, signal]
   );
+
+  const queryEnabled = Boolean(http) && isAssistantEnabled;
 
   // Next page param: include current sorting in next request
   const getNextPageParam = useCallback(
@@ -155,7 +159,7 @@ export const useFetchAnonymizationFields = (
     FindAnonymizationFieldsResponse
   >(CACHING_KEYS, fetchPage, {
     getNextPageParam,
-    enabled: isAssistantEnabled,
+    enabled: queryEnabled,
     refetchOnWindowFocus: true,
   });
 

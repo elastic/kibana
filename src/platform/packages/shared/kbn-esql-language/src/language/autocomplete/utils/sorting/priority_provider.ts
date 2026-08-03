@@ -20,9 +20,11 @@ const CATEGORY_PRIORITIES: Record<SuggestionCategory, number> = {
 
   [SuggestionCategory.TIME_PARAM]: 100,
 
+  [SuggestionCategory.NEW_LINE]: 199,
   [SuggestionCategory.PIPE]: 200,
   [SuggestionCategory.COMMA]: 201,
   [SuggestionCategory.VALUE]: 202,
+  [SuggestionCategory.SUBQUERY]: 203, // (FROM ...) after Browse data sources
 
   [SuggestionCategory.CONSTANT_VALUE]: 250, // Prompt text, query text constants
 
@@ -39,6 +41,8 @@ const CATEGORY_PRIORITIES: Record<SuggestionCategory, number> = {
   [SuggestionCategory.FUNCTION_AGG]: 500,
   [SuggestionCategory.FUNCTION_SCALAR]: 500,
 
+  [SuggestionCategory.COMMAND]: 550, // Source commands (FROM, SET)
+
   [SuggestionCategory.RECOMMENDED_QUERY_WITH_PRIORITY]: 590, // Search query (higher priority)
   [SuggestionCategory.RECOMMENDED_QUERY]: 600,
 
@@ -50,7 +54,7 @@ const CONTEXT_BOOSTS: Partial<Record<Location, Partial<Record<SuggestionCategory
   [Location.STATS]: {
     [SuggestionCategory.LANGUAGE_KEYWORD]: -40, // From 50 to 10 (after CUSTOM_ACTION)
     [SuggestionCategory.FUNCTION_AGG]: -100, // From 500 to 400
-    [SuggestionCategory.FUNCTION_TIME_SERIES_AGG]: -151, // From 500 to 349 (before fields at 350)
+    [SuggestionCategory.FUNCTION_TIME_SERIES_AGG]: -201, // From 500 to 299 (before all fields)
   },
   [Location.STATS_BY]: {
     [SuggestionCategory.USER_DEFINED_COLUMN]: -300, // From 300 to 0
@@ -61,6 +65,7 @@ const CONTEXT_BOOSTS: Partial<Record<Location, Partial<Record<SuggestionCategory
   [Location.PROMQL]: {
     // Push language keywords (e.g. "by") after pipe but before operators.
     [SuggestionCategory.LANGUAGE_KEYWORD]: 100, // From 50 to 150
+    [SuggestionCategory.NEW_LINE]: -151, // From 199 to 48 (top, just before PIPE)
     [SuggestionCategory.PIPE]: -150, // From 200 to 50 (top)
   },
 };

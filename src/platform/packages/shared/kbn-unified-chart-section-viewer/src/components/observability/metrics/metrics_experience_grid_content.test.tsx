@@ -18,6 +18,8 @@ import type {
 } from '@kbn/unified-histogram/types';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import type { ParsedMetricItem, MetricUnit, Dimension } from '../../../types';
+import { METRICS_GRID_SETTINGS_DEFAULTS } from '@kbn/discover-utils';
+import { DEFAULT_METRICS_SORT } from '../../../common/constants';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import * as metricsExperienceStateProvider from './context/metrics_experience_state_provider';
 import { getFetch$Mock, getFetchParamsMock } from '@kbn/unified-histogram/__mocks__/fetch_params';
@@ -27,6 +29,16 @@ jest.mock('./context/metrics_experience_state_provider');
 jest.mock('./hooks');
 jest.mock('../../chart', () => ({
   Chart: jest.fn(() => <div data-test-subj="metric-chart" />),
+}));
+
+jest.mock('./metrics_grid', () => ({
+  MetricsGrid: jest.fn((props: { metricItems: any[] }) =>
+    props.metricItems.length === 0 ? (
+      <div data-test-subj="metricsExperienceNoData" />
+    ) : (
+      <div data-test-subj="unifiedMetricsExperienceGrid" />
+    )
+  ),
 }));
 
 /**
@@ -52,7 +64,7 @@ const dimensions: Dimension[] = [{ name: 'foo' }, { name: 'qux' }];
 const metricItems: ParsedMetricItem[] = [
   {
     metricName: 'field1',
-    dataStream: 'metrics-*',
+    indexName: 'metrics-*',
     units: ['ms'],
     metricTypes: ['counter'],
     fieldTypes: [ES_FIELD_TYPES.LONG],
@@ -60,7 +72,7 @@ const metricItems: ParsedMetricItem[] = [
   },
   {
     metricName: 'field2',
-    dataStream: 'metrics-*',
+    indexName: 'metrics-*',
     units: ['ms'],
     metricTypes: ['counter'],
     fieldTypes: [ES_FIELD_TYPES.LONG],
@@ -89,6 +101,7 @@ describe('MetricsExperienceGridContent', () => {
 
     defaultProps = {
       metricItems,
+      activeDimensions: [],
       services: {} as any,
       discoverFetch$: fetch$,
       fetchParams,
@@ -99,6 +112,7 @@ describe('MetricsExperienceGridContent', () => {
         updateESQLQuery: jest.fn(),
       },
       histogramCss: { name: '', styles: '' },
+      isTabSelected: true,
     };
 
     useMetricsExperienceStateMock.mockReturnValue({
@@ -110,6 +124,15 @@ describe('MetricsExperienceGridContent', () => {
       searchTerm: '',
       onSearchTermChange: jest.fn(),
       onToggleFullscreen: jest.fn(),
+      flyoutState: undefined,
+      onFlyoutStateChange: jest.fn(),
+      onFlyoutSelectedTabChange: jest.fn(),
+      metricsSort: DEFAULT_METRICS_SORT,
+      onMetricsSortChange: jest.fn(),
+      profileId: 'test-profile-id',
+      gridSettings: METRICS_GRID_SETTINGS_DEFAULTS,
+      recentlyExploredMetrics: [],
+      onGridSettingsChange: jest.fn(),
     });
 
     usePaginationMock.mockReturnValue({
@@ -154,7 +177,7 @@ describe('MetricsExperienceGridContent', () => {
     const allFieldsSomeWithCpu = Array.from({ length: 20 }, (_, i) => ({
       metricName: i % 2 === 0 ? `cpu_field_${i}` : `mem_field_${i}`,
       dimensionFields: [dimensions[0]],
-      dataStream: 'metrics-*',
+      indexName: 'metrics-*',
       units: ['ms'] as MetricUnit[],
       metricTypes: ['counter'] as MappingTimeSeriesMetricType[],
       fieldTypes: [ES_FIELD_TYPES.LONG] as ES_FIELD_TYPES[],
@@ -169,6 +192,15 @@ describe('MetricsExperienceGridContent', () => {
       searchTerm: 'cpu',
       onSearchTermChange: jest.fn(),
       onToggleFullscreen: jest.fn(),
+      flyoutState: undefined,
+      onFlyoutStateChange: jest.fn(),
+      onFlyoutSelectedTabChange: jest.fn(),
+      metricsSort: DEFAULT_METRICS_SORT,
+      onMetricsSortChange: jest.fn(),
+      profileId: 'test-profile-id',
+      gridSettings: METRICS_GRID_SETTINGS_DEFAULTS,
+      recentlyExploredMetrics: [],
+      onGridSettingsChange: jest.fn(),
     });
 
     const cpuMetricItems = allFieldsSomeWithCpu.filter((f) => f.metricName.includes('cpu'));
@@ -206,5 +238,18 @@ describe('MetricsExperienceGridContent', () => {
     );
 
     expect(getByTestId('metricsExperienceProgressBar')).toBeInTheDocument();
+  });
+
+  it('passes activeDimensions prop to MetricsGrid', () => {
+    const { MetricsGrid } = jest.requireMock('./metrics_grid');
+
+    render(<MetricsExperienceGridContent {...defaultProps} activeDimensions={[dimensions[0]]} />, {
+      wrapper: IntlProvider,
+    });
+
+    const lastCall = (MetricsGrid as jest.Mock).mock.calls[
+      (MetricsGrid as jest.Mock).mock.calls.length - 1
+    ][0];
+    expect(lastCall.dimensions).toEqual([dimensions[0]]);
   });
 });

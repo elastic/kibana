@@ -258,7 +258,7 @@ describe('DashboardGrid', () => {
             title: 'Empty section',
             collapsed: false,
             grid: { y: 8 },
-            uid: 'emptySection',
+            id: 'emptySection',
             panels: [],
           },
         ],

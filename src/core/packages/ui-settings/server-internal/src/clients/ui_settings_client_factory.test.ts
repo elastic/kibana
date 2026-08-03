@@ -24,6 +24,7 @@ describe('ui settings factory', () => {
       buildNum: 1337,
       savedObjectsClient,
       log: logger.get(),
+      namespace: 'default',
     };
   };
 

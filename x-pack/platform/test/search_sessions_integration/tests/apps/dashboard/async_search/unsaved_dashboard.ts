@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+/**
+ * Migration recommendation: MIGRATE TO SCOUT. Important edge case.
+ */
+
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
@@ -16,21 +20,30 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const monacoEditor = getService('monacoEditor');
 
-  const { common, home, timePicker, header, discover, dashboard, searchSessionsManagement } =
-    getPageObjects([
-      'common',
-      'timePicker',
-      'header',
-      'home',
-      'discover',
-      'dashboard',
-      'dashboardControls',
-      'searchSessionsManagement',
-    ]);
+  const {
+    appMenu,
+    common,
+    home,
+    timePicker,
+    header,
+    discover,
+    dashboard,
+    searchSessionsManagement,
+  } = getPageObjects([
+    'appMenu',
+    'common',
+    'timePicker',
+    'header',
+    'home',
+    'discover',
+    'dashboard',
+    'dashboardControls',
+    'searchSessionsManagement',
+  ]);
 
   async function addFromLibrary() {
-    await testSubjects.click('dashboardAddTopNavButton');
-    await testSubjects.click('dashboardAddFromLibraryButton');
+    await appMenu.clickMenuItem('dashboardAddTopNavButton');
+    await testSubjects.click('addToDashboardTab-library');
     await testSubjects.setValue('savedObjectFinderSearchInput', 'Unsaved dashboard slow query');
     await testSubjects.click('savedObjectTitleUnsaved-dashboard-slow-query');
   }

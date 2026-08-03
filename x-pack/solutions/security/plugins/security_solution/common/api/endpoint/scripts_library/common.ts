@@ -10,25 +10,17 @@ import { SCRIPT_TAGS } from '../../../endpoint/service/script_library/constants'
 import { validateNoDuplicateValues, validateNonEmptyString } from '../schema_utils';
 import { SUPPORTED_HOST_OS_TYPE } from '../../../endpoint/constants';
 
-export const ScriptNameSchema = schema.string({ minLength: 1, validate: validateNonEmptyString });
+export const ScriptNameSchema = schema.string({
+  minLength: 1,
+  maxLength: 256,
+  validate: validateNonEmptyString,
+});
 export const ScriptFileSchema = schema.stream();
 export const ScriptFileTypeSchema = schema.oneOf([
   schema.literal('archive'),
   schema.literal('script'),
 ]);
 export const ScriptRequiresInputSchema = schema.boolean({ defaultValue: false });
-export const ScriptDescriptionSchema = schema.string({
-  minLength: 1,
-  validate: validateNonEmptyString,
-});
-export const ScriptInstructionsSchema = schema.string({
-  minLength: 1,
-  validate: validateNonEmptyString,
-});
-export const ScriptExampleSchema = schema.string({
-  minLength: 1,
-  validate: validateNonEmptyString,
-});
 export const ScriptPlatformSchema = schema.arrayOf(
   // @ts-expect-error TS2769: No overload matches this call. (due to now `oneOf()` type is defined)
   schema.oneOf(SUPPORTED_HOST_OS_TYPE.map((osType) => schema.literal(osType))),
@@ -37,6 +29,7 @@ export const ScriptPlatformSchema = schema.arrayOf(
 
 export const ScriptPathToExecutableSchema = schema.string({
   minLength: 1,
+  maxLength: 4096,
   validate: validateNonEmptyString,
 });
 

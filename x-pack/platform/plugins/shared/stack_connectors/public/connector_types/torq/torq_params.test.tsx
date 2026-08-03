@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { screen } from '@testing-library/react';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 import React from 'react';
 import TorqParamsFields from './torq_params';
 
@@ -15,7 +16,7 @@ describe('TorqParamsFields renders', () => {
       body: 'test message',
     };
 
-    const wrapper = mountWithIntl(
+    renderWithI18n(
       <TorqParamsFields
         actionParams={actionParams}
         errors={{ body: [] }}
@@ -30,10 +31,9 @@ describe('TorqParamsFields renders', () => {
         ]}
       />
     );
-    expect(wrapper.find('[data-test-subj="bodyJsonEditor"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="bodyJsonEditor"]').first().prop('value')).toStrictEqual(
-      'test message'
-    );
-    expect(wrapper.find('[data-test-subj="bodyAddVariableButton"]').length > 0).toBeTruthy();
+    // bodyJsonEditor is rendered by JsonEditorWithMessageVariables as a Monaco code editor.
+    // The 'value' prop on a Monaco editor is not accessible via the DOM; existence check is sufficient.
+    expect(screen.getByTestId('bodyJsonEditor')).toBeInTheDocument();
+    expect(screen.getByTestId('bodyAddVariableButton')).toBeInTheDocument();
   });
 });

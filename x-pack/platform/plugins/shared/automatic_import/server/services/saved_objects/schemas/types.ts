@@ -6,9 +6,9 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import type { changelogEntrySchema, integrationSchemaV2 } from './integration_schema';
+import type { changelogEntrySchema, integrationSchemaV3 } from './integration_schema';
 import type { dataStreamSchemaV1 } from './data_stream_schema';
 
-export type IntegrationAttributes = TypeOf<typeof integrationSchemaV2>;
+export type IntegrationAttributes = TypeOf<typeof integrationSchemaV3>;
 export type DataStreamAttributes = TypeOf<typeof dataStreamSchemaV1>;
 export type ChangelogEntry = TypeOf<typeof changelogEntrySchema>;

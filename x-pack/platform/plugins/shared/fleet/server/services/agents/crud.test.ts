@@ -32,6 +32,7 @@ import {
   getByIds,
   getAgentsById,
   fetchAllAgentsByKuery,
+  getAgentVersionsForAgentPolicyIds,
 } from './crud';
 
 jest.mock('../audit_logging');
@@ -643,6 +644,18 @@ describe('Agents CRUD test', () => {
         message: 'User updated agent [id=test-agent-id]',
       });
     });
+
+    it('should use retry_on_conflict', async () => {
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      esClient.update.mockResolvedValueOnce({} as any);
+
+      await updateAgent(esClient, 'test-agent-id', { tags: ['new-tag'] });
+
+      expect(esClient.update).toHaveBeenCalledWith(
+        expect.objectContaining({ retry_on_conflict: 5 })
+      );
+    });
   });
 
   describe('openPointInTime', () => {
@@ -792,5 +805,81 @@ describe('Agents CRUD test', () => {
 
       expect(searchMock).toHaveBeenCalledTimes(3);
     });
+  });
+});
+
+describe('getAgentVersionsForAgentPolicyIds', () => {
+  it('returns an empty array when no policy ids are provided', async () => {
+    const searchMock = jest.fn();
+    const esClientMock = { search: searchMock } as unknown as ElasticsearchClient;
+
+    const result = await getAgentVersionsForAgentPolicyIds(
+      esClientMock,
+      savedObjectsClientMock.create(),
+      []
+    );
+
+    expect(result).toEqual([]);
+    expect(searchMock).not.toHaveBeenCalled();
+  });
+
+  it('queries with a term-or-variant filter and rolls up version-specific variants under their base policy id', async () => {
+    const searchMock = jest.fn().mockResolvedValue({
+      hits: {
+        hits: [
+          {
+            _source: {
+              policy_id: 'policy-a',
+              local_metadata: { elastic: { agent: { version: '8.15.0' } } },
+            },
+          },
+          {
+            // version-specific variant of policy-a — must roll up under 'policy-a'
+            _source: {
+              policy_id: 'policy-a#8.16',
+              local_metadata: { elastic: { agent: { version: '8.16.0' } } },
+            },
+          },
+          {
+            _source: {
+              policy_id: 'policy-b',
+              local_metadata: { elastic: { agent: { version: '8.15.0' } } },
+            },
+          },
+        ],
+      },
+    });
+    const esClientMock = { search: searchMock } as unknown as ElasticsearchClient;
+
+    const result = await getAgentVersionsForAgentPolicyIds(
+      esClientMock,
+      savedObjectsClientMock.create(),
+      ['policy-a', 'policy-b']
+    );
+
+    expect(searchMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: {
+          bool: {
+            filter: [
+              expect.objectContaining({
+                bool: expect.objectContaining({
+                  should: expect.arrayContaining([
+                    { terms: { policy_base_id: ['policy-a', 'policy-b'] } },
+                  ]),
+                }),
+              }),
+            ],
+          },
+        },
+      })
+    );
+
+    expect(result).toEqual(
+      expect.arrayContaining([
+        { policyId: 'policy-a', versionCounts: { '8.15.0': 1, '8.16.0': 1 } },
+        { policyId: 'policy-b', versionCounts: { '8.15.0': 1 } },
+      ])
+    );
   });
 });

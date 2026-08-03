@@ -31,5 +31,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         '--serverless=security',
       ],
     },
+    uiSettings: {
+      globalDefaults: {
+        hideAnnouncements: true,
+      },
+    },
   };
 }

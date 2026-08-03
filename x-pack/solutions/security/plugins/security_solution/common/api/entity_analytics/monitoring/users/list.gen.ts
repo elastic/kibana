@@ -14,18 +14,20 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { MonitoredUserDoc } from './common.gen';
 
+export const ListPrivMonUsersRequestQuery = lazySchema(() =>
+  z.object({
+    /**
+     * KQL query to filter the list of monitored users
+     */
+    kql: z.string().optional(),
+  })
+);
 export type ListPrivMonUsersRequestQuery = z.infer<typeof ListPrivMonUsersRequestQuery>;
-export const ListPrivMonUsersRequestQuery = z.object({
-  /**
-   * KQL query to filter the list of monitored users
-   */
-  kql: z.string().optional(),
-});
 export type ListPrivMonUsersRequestQueryInput = z.input<typeof ListPrivMonUsersRequestQuery>;
 
+export const ListPrivMonUsersResponse = lazySchema(() => z.array(MonitoredUserDoc));
 export type ListPrivMonUsersResponse = z.infer<typeof ListPrivMonUsersResponse>;
-export const ListPrivMonUsersResponse = z.array(MonitoredUserDoc);

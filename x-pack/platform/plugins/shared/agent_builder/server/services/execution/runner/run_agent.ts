@@ -1,0 +1,180 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type {
+  AgentHandlerContext,
+  ScopedRunnerRunAgentParams,
+  RunAgentReturn,
+} from '@kbn/agent-builder-server';
+import { getConnectorProvider } from '@kbn/inference-common';
+import { getCurrentSpaceId } from '../../../utils/spaces';
+import { withAgentSpan } from '../../../tracing';
+import { createAgentHandler } from '../run_agent/create_handler';
+import {
+  createAgentEventEmitter,
+  forkContextForAgentRun,
+  createAttachmentsService,
+  createToolProvider,
+  createSkillsService,
+  createFilesystemServices,
+} from './utils';
+import { createPluginsService } from './utils/plugins';
+import type { RunnerManager } from './runner';
+
+export const createAgentHandlerContext = async <TParams = Record<string, unknown>>({
+  agentExecutionParams,
+  manager,
+}: {
+  agentExecutionParams: ScopedRunnerRunAgentParams;
+  manager: RunnerManager;
+}): Promise<AgentHandlerContext> => {
+  const { onEvent } = agentExecutionParams;
+  const {
+    request,
+    spaces,
+    elasticsearch,
+    savedObjects,
+    modelProvider,
+    toolsService,
+    attachmentsService,
+    renderersService,
+    resultStore,
+    skillsStore,
+    attachmentStateManager,
+    todoStateManager,
+    logger,
+    promptManager,
+    stateManager,
+    skillServiceStart,
+    pluginsServiceStart,
+    toolManager,
+    analyticsService,
+    trackingService,
+    experimentalFeatures,
+  } = manager.deps;
+
+  const spaceId = getCurrentSpaceId({ request, spaces });
+  const toolRegistry = await toolsService.getRegistry({ request });
+
+  const { filesystemService, bashService } = await createFilesystemServices({
+    manager,
+    experimentalFeatures,
+    workspaceId: agentExecutionParams.agentParams?.conversation?.workspace_id,
+    spaceId,
+  });
+
+  return {
+    request,
+    spaceId,
+    defaultConnectorId: manager.deps.defaultConnectorId,
+    logger,
+    modelProvider,
+    esClient: elasticsearch.client.asScoped(request, { projectRouting: 'space' }),
+    savedObjectsClient: savedObjects.getScopedClient(request),
+    runner: manager.getRunner(),
+    toolRegistry,
+    toolProvider: createToolProvider({
+      registry: toolRegistry,
+      runner: manager.getRunner(),
+      request,
+    }),
+    resultStore,
+    skillsStore,
+    attachmentStateManager,
+    todoStateManager,
+    stateManager,
+    promptManager,
+    attachments: createAttachmentsService({
+      attachmentsStart: attachmentsService,
+      toolsStart: toolsService,
+      request,
+      spaceId,
+      runner: manager.getRunner(),
+    }),
+    skills: await createSkillsService({
+      skillServiceStart,
+      toolsServiceStart: toolsService,
+      request,
+      spaceId,
+      runner: manager.getRunner(),
+    }),
+    renderers: renderersService,
+    plugins: createPluginsService({ pluginsServiceStart, request }),
+    toolManager,
+    events: createAgentEventEmitter({ eventHandler: onEvent, context: manager.context }),
+    hooks: manager.deps.hooks,
+    experimentalFeatures,
+    executionMode: manager.deps.executionMode,
+    subAgentExecutor: manager.deps.subAgentExecutor,
+    analyticsService,
+    trackingService,
+    filesystemService,
+    bashService,
+  };
+};
+
+export const runAgent = async ({
+  agentExecutionParams,
+  parentManager,
+}: {
+  agentExecutionParams: ScopedRunnerRunAgentParams;
+  parentManager: RunnerManager;
+}): Promise<RunAgentReturn> => {
+  const { agentId, agentParams, executionId } = agentExecutionParams;
+
+  const forkedContext = forkContextForAgentRun({
+    parentContext: parentManager.context,
+    agentId,
+    executionId,
+    conversationId: agentParams.conversation?.id,
+  });
+  const manager = parentManager.createChild(forkedContext);
+
+  const { agentsService, request } = manager.deps;
+  const agentRegistry = await agentsService.getRegistry({ request });
+  const agent = await agentRegistry.get(agentId, { access: 'use' });
+
+  // Layer runtime overrides onto the agent's own config first, then merge with the type base.
+  const agentWithOverrides = {
+    ...agent,
+    configuration: {
+      ...agent.configuration,
+      ...(agentParams.configurationOverrides || {}),
+    },
+  };
+  const effectiveConfiguration = await agentsService.resolveAgentConfiguration({
+    agent: agentWithOverrides,
+    request,
+  });
+  manager.deps.agentConfiguration = effectiveConfiguration;
+
+  const chatModel = (await manager.deps.modelProvider.getDefaultModel()).chatModel;
+  const providerName = getConnectorProvider(chatModel.getConnector());
+
+  const agentResult = await withAgentSpan(
+    { agent, conversationId: agentParams.conversation?.id, providerName },
+    async () => {
+      const agentHandler = createAgentHandler({ agent, effectiveConfiguration });
+      const agentHandlerContext = await createAgentHandlerContext({
+        agentExecutionParams,
+        manager,
+      });
+      return await agentHandler(
+        {
+          runId: manager.context.runId,
+          agentParams,
+          abortSignal: manager.deps.abortSignal,
+        },
+        agentHandlerContext
+      );
+    }
+  );
+
+  return {
+    result: agentResult.result,
+  };
+};

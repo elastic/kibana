@@ -22,9 +22,10 @@ const approximation = {
     "{name='rows', values=[], description='Number of sampled rows used for approximating the query. Must be at least 10,000. Null uses the system default.', type=[integer]}, {name='confidence_level', values=[], description='Confidence level of the computed confidence intervals. Default is 0.90. Null disables computing confidence intervals.', type=[double]}",
   serverlessOnly: false,
   preview: false,
-  snapshotOnly: true,
-  description: 'Enables query approximation if possible for the query.',
-  ignoreAsSuggestion: true,
+  snapshotOnly: false,
+  description:
+    'Enables [query approximation](https://www.elastic.co/docs/reference/query-languages/esql/esql-query-approximation) if possible for the query. A boolean value `false` (default) disables query approximation and `true` enables it with default settings. Map values enable query approximation with custom settings.',
+  ignoreAsSuggestion: false,
 };
 
 const projectRouting = {
@@ -32,9 +33,9 @@ const projectRouting = {
   type: ['keyword'],
   serverlessOnly: true,
   preview: true,
-  snapshotOnly: true,
+  snapshotOnly: false,
   description:
-    'A project routing expression, used to define which projects to route the query to. Only supported if Cross-Project Search is enabled.',
+    'Limits the scope of a [cross-project search (CPS)](https://www.elastic.co/docs/reference/query-languages/esql/esql-cross-serverless-projects) to specific projects before query execution, based on a [Lucene query expression](docs-content://explore-analyze/cross-project-search/cross-project-search-project-routing.md) evaluated against project tags. Excluded projects are not queried, which can reduce cost and latency. ',
   ignoreAsSuggestion: true,
 };
 
@@ -56,7 +57,7 @@ const unmappedFields = {
   preview: true,
   snapshotOnly: false,
   description:
-    'Defines how unmapped fields are treated. Possible values are: "DEFAULT" (default) - standard ESQL queries fail when referencing unmapped fields, while other query types (e.g. PromQL) may treat them differently; "NULLIFY" - treats unmapped fields as null values. ',
+    "Determines how unmapped fields are treated. Possible values are:\n\n- `DEFAULT` : Standard ESQL queries fail when referencing unmapped fields.\n- `NULLIFY` : Treats unmapped fields as null values.\n- `LOAD` : Loads unmapped fields from the stored [`_source`](https://www.elastic.co/docs/reference/elasticsearch/mapping-reference/mapping-source-field)\nwith type `keyword`. Or nullifies them if absent from `_source`. \n\nAn `unmapped field` is a field referenced in a query that does not exist in the mapping of the index being queried.\nWhen querying multiple indices, a field is considered `partially unmapped` if it exists in the mapping of some\nindices but not others.\n\nUnmapped fields are different from\n[runtime fields](docs-content://manage-data/data-store/mapping/runtime-fields.md).\nRuntime fields are computed fields defined in the index\nmapping that {{esql}} treats like regular mapped fields.\nYou cannot define new runtime fields at search time in\n{{esql}}, but you can use the\n[`EVAL`](https://www.elastic.co/docs/reference/query-languages/esql/commands/eval)\ncommand to create computed columns instead.\n\n[`PROMQL`](https://www.elastic.co/docs/reference/query-languages/esql/commands/promql) queries have their own specific semantics for unmapped fields.\n\nSpecial notes about the `LOAD` option:\n- `FORK`, `LOOKUP JOIN`, subqueries, and views are not yet supported anywhere in the query.\n- Referencing subfields of `flattened` parents is not supported.\n- [Full-text search functions](https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/search-functions) are supported.\n  \n  - Full-text search functions are not supported anywhere in the query. \n- [`KNN`](https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/dense-vector-functions/knn) on partially unmapped\n  `dense_vector` fields is not yet supported.\n- Partially unmapped non-`keyword` fields can be used in expressions. If the field is mapped to a single type and there's an\n  available conversion from `keyword` to that type, the implicit conversion is applied. If there's no available conversion,\n  and an explicit one has not been provided by the user, values remain typed where mapped and are `null` for rows from\n  indices where the field is unmapped. \n  - Partially unmapped non-`keyword` fields must be referenced inside a cast or conversion function (e.g. `::TYPE` or `TO_TYPE`),\n    unless referenced in `KEEP` or `DROP`. \n",
   ignoreAsSuggestion: false,
 };
 

@@ -80,6 +80,11 @@ compare_with_baseline() {
     echo "Tool will find relevant baseline automatically"
   fi
 
+  # Entity Store V2 / ESQL: omit transform-only metrics from comparison report
+  if [ "${PERF_NO_TRANSFORMS:-false}" = "true" ]; then
+    COMPARISON_CMD="$COMPARISON_CMD --noTransforms"
+  fi
+
   # Run comparison
   COMPARISON_FILE=$(mktemp)
   set +e

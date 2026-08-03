@@ -14,38 +14,36 @@
  *   version: 1
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
+export const RiskEngineStatus = lazySchema(() => z.enum(['NOT_INSTALLED', 'DISABLED', 'ENABLED']));
 export type RiskEngineStatus = z.infer<typeof RiskEngineStatus>;
-export const RiskEngineStatus = z.enum(['NOT_INSTALLED', 'DISABLED', 'ENABLED']);
 export type RiskEngineStatusEnum = typeof RiskEngineStatus.enum;
 export const RiskEngineStatusEnum = RiskEngineStatus.enum;
 
+export const RiskEngineTaskStatusValues = lazySchema(() =>
+  z.enum(['idle', 'claiming', 'running', 'failed', 'should_delete', 'unrecognized', 'dead_letter'])
+);
 export type RiskEngineTaskStatusValues = z.infer<typeof RiskEngineTaskStatusValues>;
-export const RiskEngineTaskStatusValues = z.enum([
-  'idle',
-  'claiming',
-  'running',
-  'failed',
-  'should_delete',
-  'unrecognized',
-  'dead_letter',
-]);
 export type RiskEngineTaskStatusValuesEnum = typeof RiskEngineTaskStatusValues.enum;
 export const RiskEngineTaskStatusValuesEnum = RiskEngineTaskStatusValues.enum;
 
+export const RiskEngineTaskStatus = lazySchema(() =>
+  z.object({
+    status: RiskEngineTaskStatusValues,
+    runAt: z.string().datetime(),
+    startedAt: z.string().datetime().optional(),
+  })
+);
 export type RiskEngineTaskStatus = z.infer<typeof RiskEngineTaskStatus>;
-export const RiskEngineTaskStatus = z.object({
-  status: RiskEngineTaskStatusValues,
-  runAt: z.string().datetime(),
-  startedAt: z.string().datetime().optional(),
-});
 
+export const RiskEngineStatusResponse = lazySchema(() =>
+  z.object({
+    risk_engine_status: RiskEngineStatus,
+    risk_engine_task_status: RiskEngineTaskStatus.optional(),
+  })
+);
 export type RiskEngineStatusResponse = z.infer<typeof RiskEngineStatusResponse>;
-export const RiskEngineStatusResponse = z.object({
-  risk_engine_status: RiskEngineStatus,
-  risk_engine_task_status: RiskEngineTaskStatus.optional(),
-});
 
+export const GetRiskEngineStatusResponse = lazySchema(() => RiskEngineStatusResponse);
 export type GetRiskEngineStatusResponse = z.infer<typeof GetRiskEngineStatusResponse>;
-export const GetRiskEngineStatusResponse = RiskEngineStatusResponse;

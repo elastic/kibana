@@ -5,6 +5,7 @@
  * 2.0.
  */
 import type { SavedObjectsUpdateResponse, SavedObjectsClientContract } from '@kbn/core/server';
+import { isSavedObjectErrorResult } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { syntheticsMonitorSavedObjectType } from '../../../common/types/saved_objects';
 import { getSavedObjectKqlFilter } from '../../routes/common';
@@ -229,10 +230,15 @@ export class ProjectMonitorFormatter {
 
       return decodedMonitor;
     } catch (e) {
-      this.server.logger.error(e);
+      const isInvalidLocation = e instanceof InvalidLocationError;
 
-      const reason =
-        e instanceof InvalidLocationError ? INVALID_CONFIGURATION_ERROR : FAILED_TO_UPDATE_MONITOR;
+      // Invalid locations are a user input error that we surface in the API response via
+      // `failedMonitors`; don't log them as a server error (see issue #221378).
+      if (!isInvalidLocation) {
+        this.server.logger.error(e);
+      }
+
+      const reason = isInvalidLocation ? INVALID_CONFIGURATION_ERROR : FAILED_TO_UPDATE_MONITOR;
 
       this.failedMonitors.push({
         reason,
@@ -280,23 +286,22 @@ export class ProjectMonitorFormatter {
 
         if (newMonitors.length > 0) {
           newMonitors.forEach((monitor) => {
-            const journeyId = monitor.attributes[ConfigKey.JOURNEY_ID];
-            if (journeyId && !monitor.error) {
-              this.createdMonitors.push(journeyId);
-            } else if (monitor.error) {
+            if (isSavedObjectErrorResult(monitor)) {
               this.failedMonitors.push({
                 reason: i18n.translate(
                   'xpack.synthetics.service.projectMonitors.failedToCreateMonitors',
                   {
-                    defaultMessage: 'Failed to create monitor: {journeyId}',
-                    values: {
-                      journeyId,
-                    },
+                    defaultMessage: 'Failed to create monitor',
                   }
                 ),
                 details: monitor.error.message,
                 payload: monitor,
               });
+              return;
+            }
+            const journeyId = monitor.attributes[ConfigKey.JOURNEY_ID];
+            if (journeyId) {
+              this.createdMonitors.push(journeyId);
             }
           });
         }
@@ -432,10 +437,25 @@ export class ProjectMonitorFormatter {
         );
       }
 
+      const successfulMonitors = (editedMonitors ?? []).reduce<
+        Array<SavedObjectsUpdateResponse<EncryptedSyntheticsMonitorAttributes>>
+      >((acc, monitor) => {
+        if (isSavedObjectErrorResult(monitor)) {
+          this.failedMonitors.push({
+            reason: FAILED_TO_UPDATE_MONITOR,
+            details: monitor.error.message,
+            payload: monitor,
+          });
+        } else {
+          acc.push(monitor);
+        }
+        return acc;
+      }, []);
+
       return {
         errors: [],
-        editedMonitors: editedMonitors ?? [],
-        updatedCount: monitorsToUpdate.length,
+        editedMonitors: successfulMonitors,
+        updatedCount: successfulMonitors.length,
       };
     } catch (e) {
       this.server.logger.error(e);

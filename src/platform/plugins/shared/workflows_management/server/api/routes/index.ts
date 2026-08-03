@@ -7,37 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Logger } from '@kbn/core/server';
-import type { SecurityServiceStart } from '@kbn/core-security-server';
-import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
-import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
 import { registerExecutionRoutes } from './executions';
 import { registerInternalRoutes } from './internal';
+import { registerLibraryRoutes } from './library';
 import type { RouteDependencies } from './types';
-import { WorkflowManagementAuditLog } from './utils/workflow_audit_logging';
 import { registerWorkflowRoutes } from './workflows';
-import type { WorkflowsRouter } from '../../types';
-import type { WorkflowsManagementApi } from '../workflows_management_api';
 
-export function defineRoutes(
-  router: WorkflowsRouter,
-  api: WorkflowsManagementApi,
-  logger: Logger,
-  spaces: SpacesServiceStart,
-  getWorkflowExecutionEngine: () => Promise<WorkflowsExecutionEnginePluginStart>,
-  getSecurityServiceStart: () => SecurityServiceStart | undefined
-) {
-  const audit = new WorkflowManagementAuditLog({ getSecurityServiceStart });
-
-  const deps: RouteDependencies = {
-    router,
-    api,
-    logger,
-    spaces,
-    audit,
-  };
-
+export function defineRoutes(deps: RouteDependencies): void {
   registerWorkflowRoutes(deps);
   registerExecutionRoutes(deps);
-  registerInternalRoutes({ router, getWorkflowExecutionEngine });
+  registerInternalRoutes(deps);
+  registerLibraryRoutes(deps);
 }

@@ -24,6 +24,7 @@ import {
   SERVICE_KEY,
   SERVICE_KEY_LEGACY,
   INITIAL_REST_VERSION,
+  GET_DATA_VIEW_SUMMARY,
   GET_DATA_VIEW_DESCRIPTION,
 } from '../../constants';
 import { toApiSpec } from './util/to_api_spec';
@@ -46,7 +47,7 @@ export const getDataView = async ({
 };
 
 const getDataViewRouteFactory =
-  (path: string, serviceKey: string, description?: string) =>
+  (path: string, serviceKey: string, summary?: string, description?: string) =>
   (
     router: IRouter,
     getStartServices: StartServicesAccessor<
@@ -59,6 +60,7 @@ const getDataViewRouteFactory =
       .get({
         path,
         access: 'public',
+        summary,
         description,
         security: {
           authz: {
@@ -77,6 +79,7 @@ const getDataViewRouteFactory =
                   id: schema.string({
                     minLength: 1,
                     maxLength: 1_000,
+                    meta: { description: 'The unique identifier of the data view to retrieve.' },
                   }),
                 },
                 { unknowns: 'allow' }
@@ -133,10 +136,13 @@ const getDataViewRouteFactory =
 export const registerGetDataViewRoute = getDataViewRouteFactory(
   SPECIFIC_DATA_VIEW_PATH,
   SERVICE_KEY,
+  GET_DATA_VIEW_SUMMARY,
   GET_DATA_VIEW_DESCRIPTION
 );
 
 export const registerGetDataViewRouteLegacy = getDataViewRouteFactory(
   SPECIFIC_DATA_VIEW_PATH_LEGACY,
-  SERVICE_KEY_LEGACY
+  SERVICE_KEY_LEGACY,
+  GET_DATA_VIEW_SUMMARY,
+  'Deprecated in 8.0.0. Use the data_views/data_view/{id} endpoint instead.'
 );

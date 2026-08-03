@@ -6,18 +6,15 @@
  */
 
 import { type KibanaUrl, type Locator, type ScoutPage } from '@kbn/scout-oblt';
+import { expect } from '@kbn/scout-oblt/ui';
 import {
   EXTENDED_TIMEOUT,
   KUBERNETES_TOUR_STORAGE_KEY,
   KUBERNETES_CARD_DISMISSED_STORAGE_KEY,
-  KUBERNETES_TOAST_STORAGE_KEY,
 } from '../constants';
 import type { SavedViews } from './saved_views';
 
 export class InventoryPage {
-  public readonly feedbackLink: Locator;
-  public readonly k8sFeedbackLink: Locator;
-
   public readonly datePickerInput: Locator;
 
   public readonly inventorySwitcherButton: Locator;
@@ -27,6 +24,8 @@ export class InventoryPage {
 
   public readonly metricSwitcherButton: Locator;
   public readonly metricsContextMenu: Locator;
+
+  public readonly schemaSelect: Locator;
 
   public readonly k8sTourText: Locator;
   public readonly k8sTourDismissButton: Locator;
@@ -67,9 +66,6 @@ export class InventoryPage {
     private readonly kbnUrl: KibanaUrl,
     private readonly savedViews: SavedViews
   ) {
-    this.feedbackLink = this.page.getByTestId('infraInventoryFeedbackLink');
-    this.k8sFeedbackLink = this.page.getByTestId('infra-kubernetes-feedback-link');
-
     this.datePickerInput = this.page.getByTestId('waffleDatePicker').getByRole('textbox');
 
     this.inventorySwitcherButton = this.page.getByTestId('openInventorySwitcher');
@@ -79,6 +75,8 @@ export class InventoryPage {
 
     this.metricSwitcherButton = this.page.getByTestId('infraInventoryMetricDropdown');
     this.metricsContextMenu = this.page.getByTestId('infraInventoryMetricsContextMenu');
+
+    this.schemaSelect = this.page.getByTestId('infraSchemaSelect');
 
     this.k8sTourText = this.page.getByTestId('infra-kubernetesTour-text');
     this.k8sTourDismissButton = this.page.getByTestId('infra-kubernetesTour-dismiss');
@@ -131,6 +129,15 @@ export class InventoryPage {
       .waitFor({ state: 'hidden', timeout: EXTENDED_TIMEOUT });
   }
 
+  /**
+   * Waits for the snapshot "Loading data" panel (`infraNodesOverviewLoadingPanel`) to finish,
+   * then for the onboarding empty state (`kbnNoDataPage`).
+   */
+  public async waitForOnboardingNoDataPage() {
+    await this.waitForNodesToLoad();
+    await this.noDataPage.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+  }
+
   private async waitForPageToLoad() {
     await this.page.getByTestId('infraMetricsPage').waitFor({ timeout: EXTENDED_TIMEOUT });
     await this.waitForNodesToLoad();
@@ -141,6 +148,7 @@ export class InventoryPage {
     await this.page.goto(`${this.kbnUrl.app('metrics')}/inventory`);
     if (!opts.skipLoadWait) {
       await this.waitForPageToLoad();
+      await this.waitForNodesToLoad();
     }
   }
 
@@ -222,20 +230,13 @@ export class InventoryPage {
     );
   }
 
-  public async addDismissK8sToastInitScript() {
-    // Dismiss k8s tour if it's present to avoid interference with other test assertions
-    await this.page.addInitScript(
-      ([k8sToastStorageKey]) => {
-        window.localStorage.setItem(k8sToastStorageKey, 'true');
-      },
-      [KUBERNETES_TOAST_STORAGE_KEY]
-    );
-  }
-
   public async goToTime(time: string) {
+    await this.datePickerInput.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
     await this.datePickerInput.fill(time);
-    await this.datePickerInput.press('Escape');
+    await this.datePickerInput.press('Enter', { delay: 50 });
+    await this.datePickerInput.press('Escape', { delay: 50 });
     await this.waitForNodesToLoad();
+    await this.waitForPageToLoad();
   }
 
   public async getWaffleNode(nodeName: string) {
@@ -277,8 +278,12 @@ export class InventoryPage {
 
   public async filterByQueryBar(query: string) {
     const queryBar = this.page.getByTestId('queryInput');
+    await queryBar.waitFor();
     await queryBar.clear();
+    await expect(queryBar).toHaveValue('');
     await queryBar.fill(query);
+    await expect(queryBar).toHaveValue(query);
+    await queryBar.press('Escape');
     await queryBar.press('Enter');
     await this.waitForNodesToLoad();
   }
@@ -297,7 +302,14 @@ export class InventoryPage {
 
   public async selectMetric(metricName: string) {
     await this.metricSwitcherButton.click();
-    await this.metricsContextMenu.getByRole('button', { name: metricName }).click();
+    await this.metricsContextMenu.getByRole('menuitem', { name: metricName }).click();
+    await this.waitForNodesToLoad();
+  }
+
+  public async selectSchema(schema: 'OpenTelemetry' | string) {
+    await this.schemaSelect.click();
+    await this.page.getByRole('option', { name: schema }).waitFor();
+    await this.page.getByRole('option', { name: schema }).click();
     await this.waitForNodesToLoad();
   }
 }

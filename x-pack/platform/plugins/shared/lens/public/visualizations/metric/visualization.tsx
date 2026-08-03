@@ -8,10 +8,10 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { PaletteRegistry } from '@kbn/coloring';
-import { getOverridePaletteStops } from '@kbn/coloring';
+import { getOverridePaletteColors } from '@kbn/coloring';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 // eslint-disable-next-line @elastic/eui/no-restricted-eui-imports
-import { euiLightVars, euiThemeVars } from '@kbn/ui-theme';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { IconChartMetric } from '@kbn/chart-icons';
 import type { AccessorConfig } from '@kbn/visualization-ui-components';
 import type { ThemeServiceStart } from '@kbn/core/public';
@@ -31,8 +31,10 @@ import {
   LENS_LAYER_TYPES as layerTypes,
   LENS_METRIC_ID,
   LENS_METRIC_GROUP_ID,
+  LENS_METRIC_DEFAULT_STYLE_TEMPLATE_CONFIG,
+  LENS_METRIC_STATE_DEFAULTS,
 } from '@kbn/lens-common';
-import { getUpdatedMetricState } from '../../../common/content_management/v1/transforms/metric';
+import { convertToRuntimeState } from './runtime_state';
 import { isNumericFieldForDatatable } from '../../../common/expressions/impl/datatable/utils';
 import { getSuggestions } from './suggestions';
 import {
@@ -60,7 +62,7 @@ export const showingBar = (
 
 export const getDefaultColor = (state: MetricVisualizationState, isMetricNumeric?: boolean) => {
   if (showingBar(state) && isMetricNumeric) {
-    return euiLightVars.euiColorPrimary;
+    return euiThemeVars.euiColorVis2;
   }
   if (state.applyColorTo === 'value') {
     return euiThemeVars.euiColorVisText0;
@@ -99,14 +101,20 @@ const getMetricLayerConfiguration = (
   );
 
   const getPrimaryAccessorDisplayConfig = (): Partial<AccessorConfig> => {
+    if (props.state.applyColorTo === undefined) {
+      return {
+        triggerIconType: 'none',
+      };
+    }
+
     const hasDynamicColoring = Boolean(isPrimaryMetricNumeric && props.state.palette);
 
     if (hasDynamicColoring) {
-      const stops = getOverridePaletteStops(paletteService, props.state.palette);
+      const colors = getOverridePaletteColors(paletteService, props.state.palette);
 
       return {
         triggerIconType: 'colorBy',
-        palette: stops?.map(({ color }) => color),
+        palette: colors,
       };
     }
 
@@ -394,9 +402,7 @@ const cleanupMetricState = (
   ) {
     return {
       ...updatedState,
-      secondaryLabel: undefined,
       secondaryTrend: getDefaultConfigForMode(colorMode),
-      secondaryLabelPosition: 'before',
     };
   }
 
@@ -453,13 +459,19 @@ export const getMetricVisualization = ({
   getSuggestions,
 
   initialize(addNewLayer, state, mainPalette) {
-    if (state) return getUpdatedMetricState(state);
+    if (state) return convertToRuntimeState(state);
 
     return {
       layerId: addNewLayer(),
       layerType: layerTypes.DATA,
+      ...LENS_METRIC_DEFAULT_STYLE_TEMPLATE_CONFIG,
+      density: LENS_METRIC_STATE_DEFAULTS.density,
       palette: mainPalette?.type === 'legacyPalette' ? mainPalette.value : undefined,
     };
+  },
+
+  convertToRuntimeState(state) {
+    return convertToRuntimeState(state);
   },
 
   triggers: [VIS_EVENT_TO_TRIGGER.filter],
@@ -788,7 +800,9 @@ export const getMetricVisualization = ({
       });
     }
 
-    const stops = state.palette?.params?.stops || [];
+    // Named palettes may carry only a band count (empty `stops`); resolve their colors from the
+    // palette service so the preview matches the rendered chart.
+    const colors = getOverridePaletteColors(paletteService, state.palette) ?? [];
     const hasStaticColoring = !!state.color;
     const hasDynamicColoring = !!state.palette;
 
@@ -811,7 +825,7 @@ export const getMetricVisualization = ({
           ...this.getDescription(state),
           dimensions,
           palette: (hasDynamicColoring
-            ? stops.map(({ color }) => color)
+            ? colors
             : hasStaticColoring
             ? [state.color]
             : [getDefaultColor(state, isMetricNumeric)]

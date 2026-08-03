@@ -1,4 +1,5 @@
 summary: Set the default data view identifier.
+description: Set the default data view, using the force flag to overwrite an existing default.
 value:
   {
     "data_view_id": "ff959d40-b880-11e8-a6d9-e546fe2bba5f", 

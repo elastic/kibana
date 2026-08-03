@@ -1,0 +1,12 @@
+prs:
+- https://github.com/elastic/kibana/pull/265883
+issues:
+- https://github.com/elastic/search-team/issues/14414
+type: feature
+products:
+- product: cloud-serverless
+  target: 2026-06-01
+areas:
+- AI and machine Learning
+title: Add ability to create skills via Agent Builder chat
+description: Adds the ability to create skills directly in the Agent Builder chat interface.

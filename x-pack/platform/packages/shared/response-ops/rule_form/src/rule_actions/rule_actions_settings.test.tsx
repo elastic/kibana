@@ -20,6 +20,7 @@ jest.mock('./rule_actions_notify_when', () => ({
   RuleActionsNotifyWhen: ({
     showMinimumThrottleUnitWarning,
     showMinimumThrottleWarning,
+    isRecoveredActionGroup,
     onChange,
     onUseDefaultMessage,
   }: RuleActionsNotifyWhenProps) => (
@@ -27,6 +28,7 @@ jest.mock('./rule_actions_notify_when', () => ({
       RuleActionsNotifyWhen
       {showMinimumThrottleUnitWarning && <div>showMinimumThrottleUnitWarning</div>}
       {showMinimumThrottleWarning && <div>showMinimumThrottleWarning</div>}
+      {isRecoveredActionGroup && <div>isRecoveredActionGroup</div>}
       <button
         onClick={() =>
           onChange({
@@ -417,6 +419,74 @@ describe('ruleActionsSettings', () => {
     );
 
     expect(screen.queryByText('filter query error')).toBeInTheDocument();
+  });
+
+  test('should pass isRecoveredActionGroup as true when action group is the recovery group', () => {
+    const ruleTypeWithRecoveryObject = {
+      ...ruleType,
+      recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
+    };
+
+    useRuleFormState.mockReturnValue({
+      plugins: {
+        settings: {},
+      },
+      formData: {
+        consumer: 'stackAlerts',
+        schedule: { interval: '5m' },
+      },
+      actionErrors: {},
+      validConsumers: ['stackAlerts', 'logs'],
+      selectedRuleType: ruleTypeWithRecoveryObject,
+      selectedRuleTypeModel: ruleModel,
+    });
+
+    render(
+      <RuleActionsSettings
+        action={getAction('1', { group: 'recovered' })}
+        onUseDefaultMessageChange={mockOnUseDefaultMessageChange}
+        onNotifyWhenChange={mockOnNotifyWhenChange}
+        onActionGroupChange={mockOnActionGroupChange}
+        onAlertsFilterChange={mockOnAlertsFilterChange}
+        onTimeframeChange={mockOnTimeframeChange}
+      />
+    );
+
+    expect(screen.getByText('isRecoveredActionGroup')).toBeInTheDocument();
+  });
+
+  test('should pass isRecoveredActionGroup as false when action group is not the recovery group', () => {
+    const ruleTypeWithRecoveryObject = {
+      ...ruleType,
+      recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
+    };
+
+    useRuleFormState.mockReturnValue({
+      plugins: {
+        settings: {},
+      },
+      formData: {
+        consumer: 'stackAlerts',
+        schedule: { interval: '5m' },
+      },
+      actionErrors: {},
+      validConsumers: ['stackAlerts', 'logs'],
+      selectedRuleType: ruleTypeWithRecoveryObject,
+      selectedRuleTypeModel: ruleModel,
+    });
+
+    render(
+      <RuleActionsSettings
+        action={getAction('1', { group: 'testActionGroup' })}
+        onUseDefaultMessageChange={mockOnUseDefaultMessageChange}
+        onNotifyWhenChange={mockOnNotifyWhenChange}
+        onActionGroupChange={mockOnActionGroupChange}
+        onAlertsFilterChange={mockOnAlertsFilterChange}
+        onTimeframeChange={mockOnTimeframeChange}
+      />
+    );
+
+    expect(screen.queryByText('isRecoveredActionGroup')).not.toBeInTheDocument();
   });
 
   test('should show the rule actions filter for siem rule types', () => {

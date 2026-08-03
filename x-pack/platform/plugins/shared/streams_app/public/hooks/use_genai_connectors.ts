@@ -5,20 +5,16 @@
  * 2.0.
  */
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import type { IUiSettingsClient } from '@kbn/core/public';
-import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
-import type { InferenceConnector } from '@kbn/inference-common';
-import {
-  GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
-  GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
-} from '@kbn/management-settings-ids';
+import type { HttpSetup } from '@kbn/core-http-browser';
+import type { SettingsStart } from '@kbn/core-ui-settings-browser';
+import type { InferenceConnector, InferenceConnectorType } from '@kbn/inference-common';
+import { useLoadConnectors, type AIConnector } from '@kbn/inference-connectors';
+import { STREAMS_INFERENCE_PARENT_FEATURE_ID } from '@kbn/streams-schema';
 
 const STREAMS_CONNECTOR_STORAGE_KEY = 'xpack.streamsApp.lastUsedConnector';
 const OLD_STORAGE_KEY = 'xpack.observabilityAiAssistant.lastUsedConnector';
-// TODO: Import from gen-ai-settings-plugin (package) once available
-const NO_DEFAULT_CONNECTOR = 'NO_DEFAULT_CONNECTOR';
 
 export interface UseGenAIConnectorsResult {
   connectors: InferenceConnector[] | undefined;
@@ -28,104 +24,57 @@ export interface UseGenAIConnectorsResult {
   selectConnector: (id: string) => void;
   reloadConnectors: () => Promise<void>;
   isConnectorSelectionRestricted: boolean;
-  defaultConnector: string | undefined;
 }
 
+const toInferenceConnector = (c: AIConnector): InferenceConnector => ({
+  connectorId: c.id,
+  name: c.name,
+  type: c.actionTypeId as InferenceConnectorType,
+  config: 'config' in c ? (c.config as Record<string, unknown>) : {},
+  capabilities: {},
+  isPreconfigured: c.isPreconfigured,
+  isInferenceEndpoint: false,
+  isEis: c.isEis,
+  isDeprecated: c.isDeprecated,
+  isMissingSecrets: c.isMissingSecrets,
+});
+
 export function useGenAIConnectors({
-  streamsRepositoryClient,
-  uiSettings,
+  http,
+  settings,
 }: {
-  streamsRepositoryClient: StreamsRepositoryClient;
-  uiSettings: IUiSettingsClient;
+  http: HttpSetup;
+  settings: SettingsStart;
 }): UseGenAIConnectorsResult {
-  const [connectors, setConnectors] = useState<InferenceConnector[] | undefined>();
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | undefined>();
+  const {
+    data: aiConnectors,
+    isLoading,
+    error: queryError,
+    refetch,
+    soEntryFound,
+  } = useLoadConnectors({
+    http,
+    featureId: STREAMS_INFERENCE_PARENT_FEATURE_ID,
+    settings,
+  });
 
-  // Read settings
-  const defaultConnector = uiSettings.get<string>(GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR);
-  const genAISettingsDefaultOnly = uiSettings.get<boolean>(
-    GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
-    false
-  );
+  const connectors = useMemo(() => aiConnectors?.map(toInferenceConnector), [aiConnectors]);
 
-  const isConnectorSelectionRestricted =
-    genAISettingsDefaultOnly && defaultConnector !== NO_DEFAULT_CONNECTOR;
+  const isConnectorSelectionRestricted = soEntryFound;
 
-  // Read old localStorage key (for backward compatibility, don't modify it)
   const [oldConnector] = useLocalStorage<string>(OLD_STORAGE_KEY);
-
-  // Use old connector as initial value for new key (only if new key doesn't exist yet)
   const [lastUsedConnector, setLastUsedConnector] = useLocalStorage<string | undefined>(
     STREAMS_CONNECTOR_STORAGE_KEY,
     oldConnector
   );
 
-  const fetchConnectors = useCallback(async () => {
-    setLoading(true);
-    setError(undefined);
-
-    try {
-      const controller = new AbortController();
-      const response = await streamsRepositoryClient.fetch('GET /internal/streams/connectors', {
-        signal: controller.signal,
-      });
-      let results = response.connectors;
-
-      // If connector selection is restricted, only return the default connector
-      if (isConnectorSelectionRestricted) {
-        const defaultC = results.find((con) => con.connectorId === defaultConnector);
-        results = defaultC ? [defaultC] : [];
-      }
-
-      setConnectors(results);
-
-      // Clear lastUsedConnector if it's no longer in the list
-      setLastUsedConnector((connectorId) => {
-        if (
-          connectorId &&
-          results.findIndex((result) => result.connectorId === connectorId) === -1
-        ) {
-          return undefined;
-        }
-        return connectorId;
-      });
-    } catch (err) {
-      setError(err as Error);
-      setConnectors(undefined);
-    } finally {
-      setLoading(false);
-    }
-  }, [
-    streamsRepositoryClient,
-    isConnectorSelectionRestricted,
-    defaultConnector,
-    setLastUsedConnector,
-  ]);
-
-  useEffect(() => {
-    fetchConnectors();
-  }, [fetchConnectors]);
-
-  // Determine selected connector (follows observability pattern)
   const selectedConnector = useMemo(() => {
-    // If restricted, always use default
-    if (isConnectorSelectionRestricted) {
-      return defaultConnector;
-    }
-
-    // Priority 1: User's explicit choice (localStorage)
-    if (lastUsedConnector) {
+    const ids = connectors?.map((c) => c.connectorId);
+    if (lastUsedConnector && ids?.includes(lastUsedConnector)) {
       return lastUsedConnector;
     }
-
-    // Priority 2: Global AI default setting
-    if (defaultConnector !== NO_DEFAULT_CONNECTOR) {
-      return defaultConnector;
-    }
-
-    return undefined;
-  }, [isConnectorSelectionRestricted, defaultConnector, lastUsedConnector]);
+    return connectors?.[0]?.connectorId;
+  }, [lastUsedConnector, connectors]);
 
   const selectConnector = useCallback(
     (id: string) => {
@@ -135,30 +84,16 @@ export function useGenAIConnectors({
   );
 
   const reloadConnectors = useCallback(async () => {
-    await fetchConnectors();
-  }, [fetchConnectors]);
-
-  // If the selected connector is no longer available, select the first available connector
-  useEffect(() => {
-    const availableConnectors = connectors?.map((connector) => connector.connectorId);
-
-    if (
-      selectedConnector &&
-      availableConnectors &&
-      !availableConnectors.includes(selectedConnector)
-    ) {
-      setLastUsedConnector(availableConnectors[0]); // First or undefined if empty
-    }
-  }, [connectors, setLastUsedConnector, selectedConnector]);
+    await refetch();
+  }, [refetch]);
 
   return {
     connectors,
-    selectedConnector: selectedConnector || connectors?.[0]?.connectorId,
-    loading,
-    error,
+    selectedConnector,
+    loading: isLoading,
+    error: queryError ?? undefined,
     selectConnector,
     reloadConnectors,
     isConnectorSelectionRestricted,
-    defaultConnector: defaultConnector === NO_DEFAULT_CONNECTOR ? undefined : defaultConnector,
   };
 }

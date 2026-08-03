@@ -39,7 +39,7 @@ export const addBadgeToAppChrome = (chrome: ChromeStart) => {
     tooltip: i18n.translate('visualizations.badge.readOnly.tooltip', {
       defaultMessage: 'Unable to save visualizations to the library',
     }),
-    iconType: 'glasses',
+    iconType: 'readOnly',
   });
 };
 
@@ -94,7 +94,7 @@ export const redirectToSavedObjectPage = (
   })(error);
 };
 
-export function getVizEditorOriginatingAppUrl(history: History) {
+export function getVisEditorOriginatingAppUrl(history: History) {
   return `#/${history.location.pathname}${history.location.search}`;
 }
 

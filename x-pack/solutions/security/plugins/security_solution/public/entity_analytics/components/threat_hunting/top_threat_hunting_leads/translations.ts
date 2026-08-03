@@ -6,20 +6,54 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { LEADS_INDEX_PATTERN } from '../../../../../common/entity_analytics/lead_generation/constants';
 
-export const TOP_HUNTING_LEADS_TITLE = i18n.translate(
+export const TOP_THREAT_HUNTING_LEADS_TITLE = i18n.translate(
   'xpack.securitySolution.entityAnalytics.threatHunting.leads.title',
-  { defaultMessage: 'Top Hunting Leads' }
+  { defaultMessage: 'Top threat hunting leads' }
 );
 
-export const SEE_ALL_LEADS = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.threatHunting.leads.seeAll',
-  { defaultMessage: 'See all' }
+export const THREAT_HUNTING_LEADS_BANNER_TITLE = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.threatHunting.leads.bannerTitle',
+  { defaultMessage: 'Threat hunting leads' }
+);
+
+export const EXPERIMENTAL_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.threatHunting.leads.experimentalTooltip',
+  {
+    defaultMessage:
+      'This functionality is experimental and not supported. It may change or be removed at any time.',
+  }
 );
 
 export const GENERATE_LEADS = i18n.translate(
   'xpack.securitySolution.entityAnalytics.threatHunting.leads.generate',
   { defaultMessage: 'Generate' }
+);
+
+export const REGENERATE = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.threatHunting.leads.regenerate',
+  { defaultMessage: 'Regenerate' }
+);
+
+export const OPTIONS = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.threatHunting.leads.options',
+  { defaultMessage: 'Options' }
+);
+
+export const COLLAPSE = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.threatHunting.leads.collapse',
+  { defaultMessage: 'Collapse' }
+);
+
+export const EXPAND = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.threatHunting.leads.expand',
+  { defaultMessage: 'Expand' }
+);
+
+export const AUTO_GENERATE_LABEL = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.threatHunting.leads.autoGenerate',
+  { defaultMessage: 'Auto-generate every 24 hours' }
 );
 
 export const GENERATING_LEADS = i18n.translate(
@@ -29,13 +63,19 @@ export const GENERATING_LEADS = i18n.translate(
 
 export const GENERATING_LEADS_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.entityAnalytics.threatHunting.leads.generatingDescription',
-  { defaultMessage: 'Analyzing entities, risk scores, and alerts to surface hunting leads...' }
+  { defaultMessage: 'Generating leads. This may take up to two minutes.' }
 );
 
-export const HUNT_IN_CHAT = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.threatHunting.leads.huntInChat',
-  { defaultMessage: 'Hunt in Chat' }
+export const HUNT_WITH_AI = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.threatHunting.leads.huntWithAi',
+  { defaultMessage: 'Hunt with AI' }
 );
+
+export const getSeeAllLeadsLabel = (count: number) =>
+  i18n.translate('xpack.securitySolution.entityAnalytics.threatHunting.leads.seeAllCount', {
+    defaultMessage: 'See recent leads ({count})',
+    values: { count },
+  });
 
 export const NO_LEADS_TITLE = i18n.translate(
   'xpack.securitySolution.entityAnalytics.threatHunting.leads.emptyTitle',
@@ -50,54 +90,30 @@ export const NO_LEADS_DESCRIPTION = i18n.translate(
   }
 );
 
+export const NO_DATA_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.threatHunting.leads.noDataDescription',
+  {
+    defaultMessage:
+      'No entities, risk scores, or alerts were found in the Entity Store. Check that your entity data is available and try again.',
+  }
+);
+
 export const ALL_HUNTING_LEADS_TITLE = i18n.translate(
   'xpack.securitySolution.entityAnalytics.threatHunting.leads.flyout.title',
-  { defaultMessage: 'All Hunting Leads' }
+  { defaultMessage: 'Recent threat hunting leads' }
 );
 
-export const LEAD_PROVENANCE_TITLE = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.threatHunting.leads.provenance.title',
-  { defaultMessage: 'Lead Details' }
+export const ALL_HUNTING_LEADS_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.threatHunting.leads.flyout.description',
+  {
+    defaultMessage:
+      "Explore personalized hypotheses defined and prioritized by AI based on your environment's entity data. Select a hunting lead to start an investigation in the Agent Builder chat.",
+  }
 );
 
-export const DESCRIPTION_SECTION = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.threatHunting.leads.provenance.description',
-  { defaultMessage: 'Description' }
-);
-
-export const ENTITIES_SECTION = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.threatHunting.leads.provenance.entities',
-  { defaultMessage: 'Entities' }
-);
-
-export const OBSERVATIONS_SECTION = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.threatHunting.leads.provenance.observations',
-  { defaultMessage: 'Observations' }
-);
-
-export const TAGS_SECTION = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.threatHunting.leads.provenance.tags',
-  { defaultMessage: 'Tags' }
-);
-
-export const CHAT_RECOMMENDATIONS_SECTION = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.threatHunting.leads.provenance.chatRecommendations',
-  { defaultMessage: 'Chat Recommendations' }
-);
-
-export const INVESTIGATE_IN_CHAT = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.threatHunting.leads.provenance.investigateInChat',
-  { defaultMessage: 'Investigate in Chat' }
-);
-
-export const DISMISS = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.threatHunting.leads.dismiss',
-  { defaultMessage: 'Dismiss' }
-);
-
-export const CLOSE = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.threatHunting.leads.close',
-  { defaultMessage: 'Close' }
+export const NO_MATCHING_LEADS = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.threatHunting.leads.flyout.noMatchingLeads',
+  { defaultMessage: 'No hunting leads match your filter criteria' }
 );
 
 export const GENERATE_SUCCESS = i18n.translate(
@@ -108,6 +124,14 @@ export const GENERATE_SUCCESS = i18n.translate(
 export const GENERATE_ERROR = i18n.translate(
   'xpack.securitySolution.entityAnalytics.threatHunting.leads.generateError',
   { defaultMessage: 'Failed to generate leads' }
+);
+
+export const GENERATE_TIMEOUT = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.threatHunting.leads.generateTimeout',
+  {
+    defaultMessage:
+      'Lead generation is taking longer than expected. Results will appear when ready.',
+  }
 );
 
 export const STALENESS_FRESH = i18n.translate(
@@ -145,52 +169,67 @@ export const LOADING = i18n.translate(
   { defaultMessage: 'Loading...' }
 );
 
-export const VIEW_LEAD_DETAILS = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.threatHunting.leads.viewLeadDetails',
-  { defaultMessage: 'View lead details' }
+export const FETCH_LEADS_ERROR = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.threatHunting.leads.fetchLeadsError',
+  { defaultMessage: 'Failed to fetch hunting leads' }
 );
 
-export const MODULE_RISK_ANALYSIS = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.threatHunting.leads.module.riskAnalysis',
-  { defaultMessage: 'Risk Analysis' }
+export const FETCH_STATUS_ERROR = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.threatHunting.leads.fetchStatusError',
+  { defaultMessage: 'Failed to fetch lead generation status' }
 );
 
-export const MODULE_TEMPORAL_STATE = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.threatHunting.leads.module.temporalState',
-  { defaultMessage: 'Temporal State Analysis' }
+export const SETTINGS = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.threatHunting.leads.settings',
+  { defaultMessage: 'Settings' }
 );
 
-export const MODULE_BEHAVIORAL = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.threatHunting.leads.module.behavioral',
-  { defaultMessage: 'Alert Analysis' }
+export const CONNECTOR_LABEL = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.threatHunting.leads.connectorLabel',
+  { defaultMessage: 'Connector' }
 );
 
-export const getModuleLabel = (moduleId: string): string => {
-  switch (moduleId) {
-    case 'risk_analysis':
-      return MODULE_RISK_ANALYSIS;
-    case 'temporal_state_analysis':
-      return MODULE_TEMPORAL_STATE;
-    case 'behavioral_analysis':
-      return MODULE_BEHAVIORAL;
-    default:
-      return moduleId;
+export const OPTIONS_LABEL = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.threatHunting.leads.optionsLabel',
+  { defaultMessage: 'Options' }
+);
+
+export const OPEN_GENAI_SETTINGS = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.threatHunting.openGenAiSettings',
+  { defaultMessage: 'Open GenAI settings' }
+);
+
+export const NO_AGENT_CHAT_EXPERIENCE_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.threatHunting.noAgentChatExperienceDescription',
+  {
+    defaultMessage: 'Enable AI Agent as your default chat experience to start generating leads',
   }
-};
-
-export const AUTO_REFRESH = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.threatHunting.leads.autoRefresh',
-  { defaultMessage: 'Auto-refresh' }
 );
 
-export const SCHEDULE_TOOLTIP = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.threatHunting.leads.scheduleTooltip',
-  { defaultMessage: 'When enabled, leads are automatically regenerated every 24 hours' }
+export const NO_CONNECTOR_SELECTED_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.threatHunting.noConnectorSelectedDescription',
+  {
+    defaultMessage:
+      'No AI connector configured. Add a connector in Options to start generating leads',
+  }
 );
 
 export const SCHEDULE_UPDATE_ERROR = i18n.translate(
   'xpack.securitySolution.entityAnalytics.threatHunting.leads.scheduleUpdateError',
   { defaultMessage: 'Failed to update schedule' }
+);
+
+export const GENERATE_DISABLED_NO_WRITE_PERMISSION_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.threatHunting.leads.generateDisabledNoWritePermissionTooltip',
+  {
+    defaultMessage: "You don't have write access to the {index} index",
+    values: { index: LEADS_INDEX_PATTERN },
+  }
+);
+
+export const GENERATE_DISABLED_NO_CONNECTOR_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.threatHunting.leads.generateDisabledNoConnectorTooltip',
+  { defaultMessage: 'Add a connector in Options to enable lead generation' }
 );
 
 export const getStalenessLabel = (staleness: string): string => {
@@ -208,22 +247,16 @@ export const getStalenessLabel = (staleness: string): string => {
 
 export const SEARCH_LEADS_PLACEHOLDER = i18n.translate(
   'xpack.securitySolution.entityAnalytics.threatHunting.leads.searchPlaceholder',
-  { defaultMessage: 'Search leads...' }
+  { defaultMessage: 'Filter hunting leads by keywords' }
 );
 
-export const RELATIVE_TIME_JUST_NOW = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.threatHunting.leads.relativeTime.justNow',
-  { defaultMessage: 'Just now' }
+export const getOpenEntityFlyoutLabel = (name: string) =>
+  i18n.translate('xpack.securitySolution.entityAnalytics.threatHunting.leads.openEntityFlyout', {
+    defaultMessage: 'Open details for {name}',
+    values: { name },
+  });
+
+export const VIEW_ENTITY_DETAILS = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.threatHunting.leads.viewEntityDetails',
+  { defaultMessage: 'View entity details' }
 );
-
-export const getRelativeTimeHours = (hours: number) =>
-  i18n.translate(
-    'xpack.securitySolution.entityAnalytics.threatHunting.leads.relativeTime.hoursAgo',
-    { defaultMessage: '{hours}h ago', values: { hours } }
-  );
-
-export const getRelativeTimeDays = (days: number) =>
-  i18n.translate(
-    'xpack.securitySolution.entityAnalytics.threatHunting.leads.relativeTime.daysAgo',
-    { defaultMessage: '{days}d ago', values: { days } }
-  );

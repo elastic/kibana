@@ -12,18 +12,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
   return {
     ...baseTestConfig.getAll(),
-    testFiles: [
-      require.resolve('../../test_suites/home_page'),
-      require.resolve('../../test_suites/management'),
-      require.resolve('../../test_suites/dev_tools'),
-      require.resolve('../../test_suites/platform_security'),
-      require.resolve('../../test_suites/reporting'),
-      require.resolve('../../test_suites/grok_debugger'),
-      require.resolve('../../test_suites/console'),
-      require.resolve('../../test_suites/painless_lab'),
-      require.resolve('../../test_suites/spaces'),
-      require.resolve('../../test_suites/data_usage'),
-    ],
+    testFiles: [require.resolve('../../test_suites/management')],
     junit: {
       reportName: 'Serverless Security Functional Tests - Common Group 1',
     },

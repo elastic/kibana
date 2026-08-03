@@ -13,6 +13,7 @@ import {
 } from '@kbn/task-manager-plugin/server';
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core/server';
+import { parseDurationToMs } from '../infra/time';
 import { TasksConfig } from './config';
 import { EntityStoreTaskType } from './constants';
 import type { EntityStoreCoreSetup } from '../types';
@@ -27,7 +28,7 @@ export const getHistorySnapshotTaskId = (namespace: string): string =>
 
 interface RunHistorySnapshotTaskParams {
   taskInstance: { state: Record<string, unknown>; id: string };
-  abortController: AbortController;
+  signal: AbortSignal;
   fakeRequest: KibanaRequest | null | undefined;
   core: EntityStoreCoreSetup;
   logger: Logger;
@@ -35,7 +36,7 @@ interface RunHistorySnapshotTaskParams {
 
 async function runHistorySnapshotTask({
   taskInstance,
-  abortController,
+  signal,
   fakeRequest,
   core,
   logger,
@@ -64,7 +65,7 @@ async function runHistorySnapshotTask({
   });
 
   await historySnapshotClient.runHistorySnapshot({
-    abortSignal: abortController.signal,
+    abortSignal: signal,
   });
 
   return { state: taskInstance.state };
@@ -95,7 +96,7 @@ export function registerHistorySnapshotTask({
           }),
         },
       },
-      createTaskRunner: ({ taskInstance, abortController, fakeRequest }) => ({
+      createTaskRunner: ({ taskInstance, signal, fakeRequest }) => ({
         run: () =>
           wrapTaskRun({
             spanName: 'entityStore.task.history_snapshot.run',
@@ -107,7 +108,7 @@ export function registerHistorySnapshotTask({
             run: () =>
               runHistorySnapshotTask({
                 taskInstance,
-                abortController,
+                signal,
                 fakeRequest,
                 core,
                 logger,
@@ -116,6 +117,20 @@ export function registerHistorySnapshotTask({
       }),
     },
   });
+}
+
+export async function stopHistorySnapshotTask({
+  logger,
+  taskManager,
+  namespace,
+}: {
+  logger: Logger;
+  taskManager: TaskManagerStartContract;
+  namespace: string;
+}): Promise<void> {
+  const taskId = getHistorySnapshotTaskId(namespace);
+  await taskManager.removeIfExists(taskId);
+  logger.debug(`Stopped history snapshot task ${taskId}`);
 }
 
 export async function scheduleHistorySnapshotTasks({
@@ -133,10 +148,13 @@ export async function scheduleHistorySnapshotTasks({
 }): Promise<void> {
   try {
     const taskId = getHistorySnapshotTaskId(namespace);
+    // Delay the first run by the frequency interval (24h by default).
+    const firstRunAt = new Date(Date.now() + parseDurationToMs(frequency));
     await taskManager.ensureScheduled(
       {
         id: taskId,
         taskType: config.type,
+        runAt: firstRunAt,
         schedule: { interval: frequency },
         state: { namespace },
         params: {},

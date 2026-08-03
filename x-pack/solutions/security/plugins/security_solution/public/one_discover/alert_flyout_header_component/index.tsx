@@ -6,14 +6,44 @@
  */
 
 import type { DataTableRecord } from '@kbn/discover-utils';
+import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
+import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
+import { i18n } from '@kbn/i18n';
+import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
+import type { CellActionRenderer } from '../../flyout_v2/shared/components/cell_actions';
+import { useDefaultToolsFlyoutProperties } from '../../flyout_v2/shared/hooks/use_default_flyout_properties';
+import { RemoteDocumentCallout } from '../../flyout_v2/document/main/components/remote_document_callout';
 import type { SecurityAppStore } from '../../common/store/types';
 import type { StartServices } from '../../types';
-import { Header } from '../../flyout_v2/document/header';
-import { NotesDetails } from '../../flyout_v2/notes';
-import { noopCellActionRenderer } from '../../flyout_v2/shared/components/cell_actions';
+import { Header } from '../../flyout_v2/document/main/header';
+import { documentFlyoutHistoryKey } from '../../flyout_v2/shared/constants/flyout_history';
+import { NotesDetails } from '../../flyout_v2/shared/tools/notes';
 import { flyoutProviders } from '../../flyout_v2/shared/components/flyout_provider';
+import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
+import { DiscoverCellActions } from '../cell_actions';
+import { formatFlyoutTitle, NOTES_TITLE } from '../../flyout_v2/shared/constants/flyout_titles';
+import { getDocumentTitle } from '../../flyout_v2/document/main/utils/get_header_title';
+import {
+  FLYOUT_ORIGIN,
+  FLYOUT_SESSION_KIND,
+  FLYOUT_SURFACE,
+  FLYOUT_TOOL,
+  FLYOUT_TYPE,
+} from '../../common/lib/telemetry';
+import {
+  trackFlyoutMounted,
+  trackFlyoutOpen,
+} from '../../flyout_v2/shared/hooks/use_flyout_telemetry';
+
+export const MISSING_METADATA_CALLOUT = i18n.translate(
+  'xpack.securitySolution.flyout.document.header.missingMetadataCallout',
+  {
+    defaultMessage:
+      'Some of the content below might not be loading correctly. To ensure the best experience, please add `METADATA _id,_index` to your query.',
+  }
+);
 
 export interface AlertFlyoutHeaderProps {
   /**
@@ -32,6 +62,22 @@ export interface AlertFlyoutHeaderProps {
    * Callback invoked after alert mutations to refresh the Discover table.
    */
   onAlertUpdated: () => void;
+  /**
+   * Current Discover columns shown in the doc viewer.
+   */
+  columns?: DocViewRenderProps['columns'];
+  /**
+   * Discover filter callback used by flyout cell actions.
+   */
+  filter?: DocViewRenderProps['filter'];
+  /**
+   * Callback used to add a column to the Discover table.
+   */
+  onAddColumn?: DocViewRenderProps['onAddColumn'];
+  /**
+   * Callback used to remove a column from the Discover table.
+   */
+  onRemoveColumn?: DocViewRenderProps['onRemoveColumn'];
 }
 
 export const AlertFlyoutHeader = ({
@@ -39,16 +85,36 @@ export const AlertFlyoutHeader = ({
   servicesPromise,
   storePromise,
   onAlertUpdated,
+  columns,
+  filter,
+  onAddColumn,
+  onRemoveColumn,
 }: AlertFlyoutHeaderProps) => {
   const history = useHistory();
   const [services, setServices] = useState<StartServices | null>(null);
   const [store, setStore] = useState<SecurityAppStore | null>(null);
+  const isSecurityApp = useIsInSecurityApp();
+  const historyKey = isSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
+  const defaultToolsFlyoutProperties = useDefaultToolsFlyoutProperties();
+  const renderCellActions = useCallback<CellActionRenderer>(
+    (props) => (
+      <DiscoverCellActions
+        {...props}
+        columns={columns}
+        filter={filter}
+        onAddColumn={onAddColumn}
+        onRemoveColumn={onRemoveColumn}
+      />
+    ),
+    [columns, filter, onAddColumn, onRemoveColumn]
+  );
+
   const openNotesFlyout = useCallback(() => {
     if (!services || !store) {
       return;
     }
 
-    services.overlays?.openSystemFlyout(
+    const ref = services.overlays?.openSystemFlyout(
       flyoutProviders({
         services,
         store,
@@ -56,13 +122,35 @@ export const AlertFlyoutHeader = ({
         children: <NotesDetails hit={hit} />,
       }),
       {
-        ownFocus: false,
-        resizable: true,
-        size: 'm',
-        type: 'overlay',
+        ...defaultToolsFlyoutProperties,
+        historyKey,
+        session: FLYOUT_SESSION_KIND.START,
+        title: formatFlyoutTitle(NOTES_TITLE, getDocumentTitle(hit)),
       }
     );
-  }, [history, hit, services, store]);
+    if (ref) {
+      trackFlyoutOpen(services.telemetry, ref, {
+        surface: FLYOUT_SURFACE.TOOL,
+        flyoutType: FLYOUT_TYPE.DOCUMENT,
+        tool: FLYOUT_TOOL.NOTES,
+        session: FLYOUT_SESSION_KIND.START,
+        origin: FLYOUT_ORIGIN.FLYOUT_HEADER,
+      });
+    }
+  }, [defaultToolsFlyoutProperties, history, historyKey, hit, services, store]);
+
+  useEffect(() => {
+    if (!services) {
+      return;
+    }
+
+    return trackFlyoutMounted(services.telemetry, {
+      surface: FLYOUT_SURFACE.FLYOUT,
+      flyoutType: FLYOUT_TYPE.DOCUMENT,
+      session: FLYOUT_SESSION_KIND.START,
+      origin: FLYOUT_ORIGIN.DISCOVER_TABLE,
+    });
+  }, [hit.id, services]);
 
   useEffect(() => {
     let isCanceled = false;
@@ -92,16 +180,33 @@ export const AlertFlyoutHeader = ({
     return null;
   }
 
-  return flyoutProviders({
-    services,
-    store,
-    children: (
-      <Header
-        hit={hit}
-        renderCellActions={noopCellActionRenderer}
-        onAlertUpdated={onAlertUpdated}
-        onShowNotes={openNotesFlyout}
-      />
-    ),
-  });
+  const isMissingMetadata = !hit.raw._id || !hit.raw._index;
+
+  return (
+    <>
+      {isMissingMetadata ? (
+        <>
+          <EuiCallOut announceOnMount size="s" title={MISSING_METADATA_CALLOUT} />
+          <EuiSpacer size="s" />
+        </>
+      ) : null}
+      {flyoutProviders({
+        services,
+        store,
+        children: (
+          <>
+            <RemoteDocumentCallout hit={hit}>
+              <EuiSpacer size="s" />
+            </RemoteDocumentCallout>
+            <Header
+              hit={hit}
+              renderCellActions={renderCellActions}
+              onAlertUpdated={onAlertUpdated}
+              onShowNotes={openNotesFlyout}
+            />
+          </>
+        ),
+      })}
+    </>
+  );
 };

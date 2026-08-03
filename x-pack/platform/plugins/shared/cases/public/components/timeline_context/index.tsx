@@ -29,6 +29,11 @@ interface TimelineProcessingPluginRendererProps {
   [key: string]: string | null | undefined;
 }
 
+export interface SelectTimelineModalProps {
+  onSelect: (args: { savedObjectId: string; title: string }) => void;
+  onClose: () => void;
+}
+
 export interface CasesTimelineIntegration {
   editor_plugins: {
     parsingPlugin: Plugin;
@@ -42,6 +47,9 @@ export interface CasesTimelineIntegration {
       value: string,
       onChange: (newValue: string) => void
     ) => UseInsertTimelineReturn;
+  };
+  components?: {
+    SelectTimelineModal: React.ComponentType<SelectTimelineModalProps>;
   };
 }
 

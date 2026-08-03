@@ -7,14 +7,15 @@
 
 import React, { useCallback, useState } from 'react';
 import {
-  EuiButtonIcon,
   EuiButtonEmpty,
+  EuiButtonIcon,
   EuiConfirmModal,
-  EuiIcon,
   EuiContextMenuItem,
   EuiContextMenuPanel,
+  EuiIcon,
   EuiPopover,
   EuiTextColor,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -35,29 +36,35 @@ export type { ReviewIntegrationDetails } from './review_approve_modal';
 export const ManageIntegrationActions: React.FC<{
   integration: CreatedIntegrationRow;
   isPackageReady: boolean;
+  installedVersion?: string;
   inlineActionType?: 'reviewApprove' | 'editIntegration';
   showMenuButton?: boolean;
   onEdit: (integrationId: string) => void;
   onDelete: (integrationId: string) => Promise<void>;
   DataStreamResultsFlyoutComponent?: DataStreamResultsFlyoutComponent;
   onFetchReviewDetails: (integrationId: string) => Promise<ReviewIntegrationDetails>;
-  onApproveAndDeploy: (
+  onApproveAndInstall: (
     integrationId: string,
     version: string,
-    categories: string[]
+    categories: string[],
+    autoInstallAfterApproval: boolean
   ) => Promise<void>;
   onDownloadZip?: (integrationId: string) => Promise<void>;
-  onInstallToCluster?: (integrationId: string) => Promise<void>;
+  onInstallToCluster?: (
+    integrationId: string,
+    options?: { skipSuccessToast?: boolean }
+  ) => Promise<void>;
 }> = ({
   integration,
   isPackageReady,
+  installedVersion,
   inlineActionType,
   showMenuButton = true,
   onEdit,
   onDelete,
   DataStreamResultsFlyoutComponent,
   onFetchReviewDetails,
-  onApproveAndDeploy,
+  onApproveAndInstall,
   onDownloadZip,
   onInstallToCluster,
 }) => {
@@ -117,13 +124,30 @@ export const ManageIntegrationActions: React.FC<{
     setShowReviewModal(true);
     (automaticImport?.telemetry as AutomaticImportTelemetry)?.reportEvent(
       'automatic_import_review_approve_menu_clicked',
-      {}
+      { integrationId: integration.integrationId, version: integration.version ?? '' }
     );
-  }, [automaticImport]);
+  }, [automaticImport, integration.integrationId, integration.version]);
 
   const closeReviewModal = useCallback(() => {
     setShowReviewModal(false);
   }, []);
+
+  const isSameVersionInstalled =
+    installedVersion !== undefined && installedVersion === integration.version;
+
+  const getInstallToClusterTooltip = () => {
+    if (isSameVersionInstalled) {
+      return i18n.translate(
+        'xpack.fleet.epmList.manageIntegrations.actions.installAlreadyInstalledHelp',
+        { defaultMessage: 'This integration is already installed.' }
+      );
+    }
+    if (!isApproved) {
+      return i18n.translate('xpack.fleet.epmList.manageIntegrations.actions.installDisabledHelp', {
+        defaultMessage: 'Install is available only for approved integrations.',
+      });
+    }
+  };
 
   const reviewApproveDisabled = !isPackageReady || isApproved;
   const reviewApproveTooltip = isApproved
@@ -184,23 +208,30 @@ export const ManageIntegrationActions: React.FC<{
           anchorPosition="downRight"
           panelPaddingSize="none"
           button={
-            <EuiButtonIcon
-              iconType="boxesVertical"
-              color="text"
-              style={{ color: euiTheme.colors.textSubdued }}
-              aria-label={i18n.translate(
+            <EuiToolTip
+              content={i18n.translate(
                 'xpack.fleet.epmList.manageIntegrations.actions.openMenuLabel',
                 { defaultMessage: 'Open actions menu' }
               )}
-              onClick={togglePopover}
-              data-test-subj="manageIntegrationActionsBtn"
-            />
+              disableScreenReaderOutput
+            >
+              <EuiButtonIcon
+                iconType="boxesVertical"
+                color="text"
+                style={{ color: euiTheme.colors.textSubdued }}
+                aria-label={i18n.translate(
+                  'xpack.fleet.epmList.manageIntegrations.actions.openMenuLabel',
+                  { defaultMessage: 'Open actions menu' }
+                )}
+                onClick={togglePopover}
+                data-test-subj="manageIntegrationActionsBtn"
+              />
+            </EuiToolTip>
           }
           isOpen={isPopoverOpen}
           closePopover={closePopover}
         >
           <EuiContextMenuPanel
-            size="s"
             items={[
               <EuiContextMenuItem
                 key="review"
@@ -218,18 +249,9 @@ export const ManageIntegrationActions: React.FC<{
               <EuiContextMenuItem
                 key="installToCluster"
                 icon="exportAction"
-                disabled={!isApproved || isInstalling}
+                disabled={!isApproved || isInstalling || isSameVersionInstalled}
                 data-test-subj="manageIntegrationInstallMenuItem"
-                toolTipContent={
-                  isApproved
-                    ? undefined
-                    : i18n.translate(
-                        'xpack.fleet.epmList.manageIntegrations.actions.installDisabledHelp',
-                        {
-                          defaultMessage: 'Install is available only for approved integrations.',
-                        }
-                      )
-                }
+                toolTipContent={getInstallToClusterTooltip()}
                 onClick={handleInstallToCluster}
               >
                 <FormattedMessage
@@ -336,7 +358,8 @@ export const ManageIntegrationActions: React.FC<{
         onClose={closeReviewModal}
         onEdit={onEdit}
         onFetchReviewDetails={onFetchReviewDetails}
-        onApproveAndDeploy={onApproveAndDeploy}
+        onApproveAndInstall={onApproveAndInstall}
+        onInstallToCluster={onInstallToCluster}
         DataStreamResultsFlyoutComponent={DataStreamResultsFlyoutComponent}
       />
     </>

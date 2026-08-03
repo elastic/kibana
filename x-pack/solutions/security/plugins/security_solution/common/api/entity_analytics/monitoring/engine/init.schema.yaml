@@ -10,6 +10,7 @@ paths:
       x-codegen-enabled: true
       operationId: InitMonitoringEngine
       summary: Initialize the Privilege Monitoring Engine
+      description: Initializes the Privilege Monitoring Engine, setting up the required resources and starting the engine.
 
       responses:
         "200":
@@ -18,9 +19,21 @@ paths:
             application/json:
               schema:
                 $ref: "../common.schema.yaml#/components/schemas/MonitoringEngineDescriptor"
+              examples:
+                InitMonitoringEngineResponse:
+                  summary: Engine initialized successfully
+                  value:
+                    status: started
         "500":
           description: Internal Server Error
           content:
             application/json:
               schema:
                 $ref: "../common.schema.yaml#/components/schemas/MonitoringEngineDescriptor"
+              examples:
+                InitMonitoringEngineError:
+                  summary: Internal server error during engine initialization
+                  value:
+                    status: error
+                    error:
+                      message: "Failed to initialize monitoring engine"

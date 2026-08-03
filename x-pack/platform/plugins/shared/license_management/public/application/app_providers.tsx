@@ -6,12 +6,11 @@
  */
 
 import React from 'react';
-import { Provider } from 'react-redux';
+import { Provider } from 'react-redux-v7';
 
 import { KibanaRenderContextProvider } from '../shared_imports';
 import type { AppDependencies } from './app_context';
 import { AppContextProvider } from './app_context';
-// @ts-ignore
 import { licenseManagementStore } from './store';
 
 interface Props {

@@ -84,7 +84,7 @@ export const ConfirmResolutionModal: React.FC<ConfirmResolutionModalProps> = ({
         <EuiText size="s">
           {i18n.translate('xpack.securitySolution.entityResolution.confirmModal.description', {
             defaultMessage:
-              'Both entity records will be maintained, but one will become the target entity for this resolution group.',
+              'Both entity records will be maintained, but one will become the primary entity for this resolution group.',
           })}
         </EuiText>
         <EuiSpacer size="m" />

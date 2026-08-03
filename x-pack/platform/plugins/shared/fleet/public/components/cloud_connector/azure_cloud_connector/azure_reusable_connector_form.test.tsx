@@ -93,7 +93,7 @@ describe('AzureReusableConnectorForm', () => {
       expect(screen.getByText(/To streamline your Azure integration process/i)).toBeInTheDocument();
 
       // Verify the combo box label is present
-      expect(screen.getByText('Cloud Connector Name')).toBeInTheDocument();
+      expect(screen.getByText('Federated Identity Name')).toBeInTheDocument();
 
       // Verify combo box is rendered
       const comboBox = screen.getByTestId(AZURE_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ);

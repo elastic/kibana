@@ -14,70 +14,80 @@
  *   version: not applicable
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { AlertSuppressionDuration } from '../common_attributes.gen';
 
 /**
  * The field on which the cardinality is applied.
  */
-export type ThresholdCardinality = z.infer<typeof ThresholdCardinality>;
-export const ThresholdCardinality = z.array(
-  z.object({
-    /**
-     * The field on which to calculate and compare the cardinality.
-     */
-    field: z.string(),
-    /**
-     * The threshold value from which an alert is generated based on unique number of values of cardinality.field.
-     */
-    value: z.number().int().min(0),
-  })
+export const ThresholdCardinality = lazySchema(() =>
+  z.array(
+    z.object({
+      /**
+       * The field on which to calculate and compare the cardinality.
+       */
+      field: z.string(),
+      /**
+       * The threshold value from which an alert is generated based on unique number of values of cardinality.field.
+       */
+      value: z.number().int().min(0),
+    })
+  )
 );
+export type ThresholdCardinality = z.infer<typeof ThresholdCardinality>;
 
 /**
  * The threshold value from which an alert is generated.
  */
+export const ThresholdValue = lazySchema(() => z.number().int().min(1));
 export type ThresholdValue = z.infer<typeof ThresholdValue>;
-export const ThresholdValue = z.number().int().min(1);
 
 /**
  * The field on which the threshold is applied. If you specify an empty array ([]), alerts are generated when the query returns at least the number of results specified in the value field.
  */
+export const ThresholdField = lazySchema(() => z.union([z.string(), z.array(z.string()).max(5)]));
 export type ThresholdField = z.infer<typeof ThresholdField>;
-export const ThresholdField = z.union([z.string(), z.array(z.string()).max(5)]);
 
 /**
  * Field to aggregate on
  */
+export const ThresholdFieldNormalized = lazySchema(() => z.array(z.string()));
 export type ThresholdFieldNormalized = z.infer<typeof ThresholdFieldNormalized>;
-export const ThresholdFieldNormalized = z.array(z.string());
 
+export const Threshold = lazySchema(() =>
+  z.object({
+    field: ThresholdField,
+    value: ThresholdValue,
+    cardinality: ThresholdCardinality.optional(),
+  })
+);
 export type Threshold = z.infer<typeof Threshold>;
-export const Threshold = z.object({
-  field: ThresholdField,
-  value: ThresholdValue,
-  cardinality: ThresholdCardinality.optional(),
-});
 
+export const ThresholdNormalized = lazySchema(() =>
+  z.object({
+    field: ThresholdFieldNormalized,
+    value: ThresholdValue,
+    cardinality: ThresholdCardinality.optional(),
+  })
+);
 export type ThresholdNormalized = z.infer<typeof ThresholdNormalized>;
-export const ThresholdNormalized = z.object({
-  field: ThresholdFieldNormalized,
-  value: ThresholdValue,
-  cardinality: ThresholdCardinality.optional(),
-});
 
+export const ThresholdWithCardinality = lazySchema(() =>
+  z.object({
+    field: ThresholdFieldNormalized,
+    value: ThresholdValue,
+    cardinality: ThresholdCardinality,
+  })
+);
 export type ThresholdWithCardinality = z.infer<typeof ThresholdWithCardinality>;
-export const ThresholdWithCardinality = z.object({
-  field: ThresholdFieldNormalized,
-  value: ThresholdValue,
-  cardinality: ThresholdCardinality,
-});
 
 /**
  * Defines alert suppression configuration.
  */
+export const ThresholdAlertSuppression = lazySchema(() =>
+  z.object({
+    duration: AlertSuppressionDuration,
+  })
+);
 export type ThresholdAlertSuppression = z.infer<typeof ThresholdAlertSuppression>;
-export const ThresholdAlertSuppression = z.object({
-  duration: AlertSuppressionDuration,
-});

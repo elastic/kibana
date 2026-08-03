@@ -164,6 +164,7 @@ describe('virtualizer', () => {
         options: {
           scrollMargin,
           paddingStart,
+          count: measurementsCache.length,
           scrollToFn: jest.fn(),
         },
         measurementsCache,
@@ -195,7 +196,10 @@ describe('virtualizer', () => {
       });
     };
 
+    const flushRaf = () => jest.advanceTimersByTime(16);
+
     beforeEach(() => {
+      jest.useFakeTimers();
       Object.defineProperty(window, 'performance', {
         value: {
           mark: jest.fn(),
@@ -204,6 +208,10 @@ describe('virtualizer', () => {
         },
         writable: true,
       });
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
     });
 
     it('should not scroll when itemIndex is 0', () => {
@@ -229,7 +237,10 @@ describe('virtualizer', () => {
       } as React.MutableRefObject<boolean>;
 
       renderHook(() =>
-        useAnchorVirtualizerToItemIndex(virtualizer, 2, ref, { skipCorrections: true })
+        useAnchorVirtualizerToItemIndex(virtualizer, 2, {
+          hasRestoredScrollPositionRef: ref,
+          skipCorrections: true,
+        })
       );
 
       expect(virtualizer.options.scrollToFn).not.toHaveBeenCalled();
@@ -331,7 +342,9 @@ describe('virtualizer', () => {
         measurementsCache: buildMeasurementsCache([60, 60, 60], scrollMargin),
       });
 
-      renderHook(() => useAnchorVirtualizerToItemIndex(virtualizer, 2, ref));
+      renderHook(() =>
+        useAnchorVirtualizerToItemIndex(virtualizer, 2, { hasRestoredScrollPositionRef: ref })
+      );
 
       expect(ref.current).toBe(true);
     });
@@ -363,7 +376,9 @@ describe('virtualizer', () => {
         measurementsCache: buildMeasurementsCache([60, 60, 60], scrollMargin),
       });
 
-      const { rerender } = renderHook(() => useAnchorVirtualizerToItemIndex(virtualizer, 2, ref));
+      const { rerender } = renderHook(() =>
+        useAnchorVirtualizerToItemIndex(virtualizer, 2, { hasRestoredScrollPositionRef: ref })
+      );
 
       expect(virtualizer.options.scrollToFn).toHaveBeenCalledTimes(1);
       expect(ref.current).toBe(true);
@@ -419,6 +434,90 @@ describe('virtualizer', () => {
         virtualizer
       );
       expect(virtualizer.scrollOffset).toBe(expectedTarget);
+    });
+
+    describe('rAF correction loop', () => {
+      it('should correct scroll offset via rAF when measurements drift after initial restore', () => {
+        const scrollMargin = 100;
+        const scrollOffset = 100;
+        const measurementsCache = buildMeasurementsCache([60, 60, 60], scrollMargin);
+        const targetIndex = 2;
+
+        const virtualizer = createMockVirtualizer({
+          scrollMargin,
+          scrollOffset,
+          measurementsCache,
+        });
+
+        renderHook(() => useAnchorVirtualizerToItemIndex(virtualizer, targetIndex));
+
+        // useLayoutEffect restore fires synchronously — 1 call
+        expect(virtualizer.options.scrollToFn).toHaveBeenCalledTimes(1);
+
+        // Simulate measurements drifting (e.g. item 0 was remeasured larger)
+        const driftedCache = buildMeasurementsCache([90, 60, 60], scrollMargin);
+        (virtualizer as any).measurementsCache = driftedCache;
+
+        // Flush one rAF frame — correction should fire
+        flushRaf();
+
+        expect(virtualizer.options.scrollToFn).toHaveBeenCalledTimes(2);
+        expect(virtualizer.scrollOffset).toBe(driftedCache[targetIndex].start);
+      });
+
+      it('should stabilize when drift is within 1px', () => {
+        const scrollMargin = 100;
+        const measurementsCache = buildMeasurementsCache([60, 60, 60], scrollMargin);
+        const targetIndex = 2;
+        const scrollOffset = measurementsCache[targetIndex].start;
+
+        const stabilizedRef = { current: false };
+        const virtualizer = createMockVirtualizer({
+          scrollMargin,
+          scrollOffset,
+          measurementsCache,
+        });
+
+        renderHook(() =>
+          useAnchorVirtualizerToItemIndex(virtualizer, targetIndex, {
+            hasStabilizedRef: stabilizedRef,
+          })
+        );
+
+        // rAF fires, sees drift is 0 → stabilizes
+        flushRaf();
+        expect(stabilizedRef.current).toBe(true);
+      });
+
+      it('should skip corrections when skipCorrections is true and mark stabilized immediately', () => {
+        const scrollMargin = 100;
+        const measurementsCache = buildMeasurementsCache([60, 60, 60], scrollMargin);
+        const targetIndex = 2;
+
+        const stabilizedRef = { current: false };
+        const virtualizer = createMockVirtualizer({
+          scrollMargin,
+          scrollOffset: 100,
+          measurementsCache,
+        });
+
+        renderHook(() =>
+          useAnchorVirtualizerToItemIndex(virtualizer, targetIndex, {
+            hasStabilizedRef: stabilizedRef,
+            skipCorrections: true,
+          })
+        );
+
+        // useLayoutEffect still fires the initial restore
+        expect(virtualizer.options.scrollToFn).toHaveBeenCalledTimes(1);
+
+        // stabilized immediately (useEffect marks it without rAF)
+        expect(stabilizedRef.current).toBe(true);
+
+        // No additional calls from rAF
+        flushRaf();
+        expect(virtualizer.options.scrollToFn).toHaveBeenCalledTimes(1);
+      });
     });
   });
 

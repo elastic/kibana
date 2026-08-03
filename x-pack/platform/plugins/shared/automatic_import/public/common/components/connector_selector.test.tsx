@@ -218,27 +218,17 @@ describe('ConnectorSelector', () => {
       expect(result!.getByTestId('addNewConnectorButtonDisabled')).toBeDisabled();
     });
 
-    it('should display the selected connector name on the button', async () => {
+    it('should display the first connector name on the button', async () => {
       const { getByTestId } = await renderConnectorSelector();
 
       await waitFor(() => {
-        expect(getByTestId('connector-selector')).toHaveTextContent('Elastic Managed LLM');
+        expect(getByTestId('connector-selector')).toHaveTextContent('My OpenAI Connector');
       });
     });
   });
 
   describe('default connector selection', () => {
-    it('should select Elastic Managed LLM as default when available', async () => {
-      const { getByTestId } = await renderConnectorSelector();
-
-      await waitFor(() => {
-        expect(getByTestId('connector-selector')).toHaveTextContent('Elastic Managed LLM');
-      });
-    });
-
-    it('should select user settings default connector when set', async () => {
-      mockSettingsGet.mockReturnValue('connector-1');
-
+    it('should select first available connector as default', async () => {
       const { getByTestId } = await renderConnectorSelector();
 
       await waitFor(() => {
@@ -246,12 +236,18 @@ describe('ConnectorSelector', () => {
       });
     });
 
-    it('should select first available connector when no default is set and no Elastic LLM', async () => {
-      mockUseLoadConnectors.mockReturnValue({
-        data: [mockConnectors[0], mockConnectors[1]], // No Elastic Managed LLM
-        isLoading: false,
-        refetch: mockRefetch,
+    it('should select user settings default connector when set', async () => {
+      mockSettingsGet.mockReturnValue('connector-2');
+
+      const { getByTestId } = await renderConnectorSelector();
+
+      await waitFor(() => {
+        expect(getByTestId('connector-selector')).toHaveTextContent('My Bedrock Connector');
       });
+    });
+
+    it('should fall back to first available connector when settings default is not found', async () => {
+      mockSettingsGet.mockReturnValue('non-existent-id');
 
       const { getByTestId } = await renderConnectorSelector();
 

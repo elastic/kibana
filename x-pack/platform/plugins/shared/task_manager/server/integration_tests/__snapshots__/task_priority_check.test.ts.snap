@@ -12,7 +12,7 @@ Array [
   },
   Object {
     "priority": 1,
-    "taskType": "agent_builder:sml_crawler",
+    "taskType": "agent_builder_sml:sml_crawler",
   },
   Object {
     "priority": 40,

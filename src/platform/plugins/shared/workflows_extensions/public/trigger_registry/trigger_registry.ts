@@ -17,7 +17,8 @@ import type { PublicTriggerDefinitionOrLoader } from '../types';
  */
 export class PublicTriggerRegistry {
   private readonly registry = new Map<string, PublicTriggerDefinition>();
-  private readonly pending = new Set<Promise<void>>();
+  private readonly pending: Array<() => Promise<void>> = [];
+  private whenReadyPromise: Promise<void> | undefined;
 
   /**
    * Register a trigger definition.
@@ -28,14 +29,13 @@ export class PublicTriggerRegistry {
     definitionOrLoader: PublicTriggerDefinitionOrLoader<EventSchema>
   ): void {
     if (typeof definitionOrLoader === 'function') {
-      const promise = definitionOrLoader().then((definition) => {
+      this.pending.push(async () => {
+        const definition = await definitionOrLoader();
         if (!definition) {
           throw new Error('Trigger definition is not loaded correctly');
         }
         this.addToRegistry(definition);
-        this.pending.delete(promise);
       });
-      this.pending.add(promise);
     } else {
       this.addToRegistry(definitionOrLoader);
     }
@@ -63,9 +63,16 @@ export class PublicTriggerRegistry {
    * Use before reading the registry if you need to guarantee all async registrations are complete.
    */
   public async whenReady(): Promise<void> {
-    if (this.pending.size > 0) {
-      await Promise.all(Array.from(this.pending));
-    }
+    if (this.whenReadyPromise) return this.whenReadyPromise;
+    this.whenReadyPromise = new Promise(async (resolve, reject) => {
+      try {
+        await Promise.all(this.pending.map((loader) => loader()));
+        resolve();
+      } catch (error) {
+        reject(error);
+      }
+    });
+    return this.whenReadyPromise;
   }
 
   /**

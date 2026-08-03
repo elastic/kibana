@@ -9,9 +9,18 @@
 
 import type { RefObject } from 'react';
 
-import type { DATE_TYPE_ABSOLUTE, DATE_TYPE_RELATIVE, DATE_TYPE_NOW } from './constants';
+import type {
+  DATE_TYPE_ABSOLUTE,
+  DATE_TYPE_RELATIVE,
+  DATE_TYPE_NOW,
+  MODIFICATION_INCREASE,
+  MODIFICATION_DECREASE,
+} from './constants';
 
 export type DateType = typeof DATE_TYPE_ABSOLUTE | typeof DATE_TYPE_RELATIVE | typeof DATE_TYPE_NOW;
+
+/** Direction an arrow key steps a selected range part. */
+export type ModificationAction = typeof MODIFICATION_INCREASE | typeof MODIFICATION_DECREASE;
 
 /** Canonical date-math time units */
 export type TimeUnit = 'ms' | 's' | 'm' | 'h' | 'd' | 'w' | 'M' | 'y';
@@ -66,13 +75,13 @@ export interface TimeRangeTransformOptions {
    */
   dateFormat?: string;
   /**
-   * Controls rounding of the start bound for relative time ranges.
-   * Only affects relative `start` bounds (strings containing `now`);
-   * future ranges where start is bare `now` are unaffected.
-   * - `true`: keep existing rounding; if absent, infer it from the offset
-   *   unit (`/d` for day-and-above, next-unit-up for sub-day units).
-   * - `false`: strip any rounding suffix.
-   * - `undefined`: leave the start string as-is.
+   * Controls rounding of relative time range bounds (strings containing
+   * `now`); bare `now` bounds are unaffected.
+   * - `true`: keep existing rounding; if absent, infer it for each bound
+   *   from its own offset unit (`/d` for week-and-above, next finer unit
+   *   otherwise).
+   * - `false` / `undefined`: leave the bounds as-is, preserving any
+   *   rounding the user or a preset provided.
    * @default undefined
    */
   roundRelativeTime?: boolean;
@@ -81,6 +90,14 @@ export interface TimeRangeTransformOptions {
    * @default 's'
    */
   timePrecision?: TimePrecision;
+  /**
+   * Locale used to recognise and generate named ranges, natural-language
+   * durations/instants, and delimiters. English is always recognised
+   * alongside the active locale. Shorthand datemath, unix timestamps, and
+   * absolute dates are unaffected (locale-invariant).
+   * @default `i18n.getLocale()`
+   */
+  locale?: string;
 }
 
 /** Time unit for the auto-refresh interval. */
@@ -97,16 +114,13 @@ export interface AutoRefreshSettings {
    * When `isEnabled` is true, whether the refresh interval timer is running (`false`) or paused (`true`).
    */
   isPaused: boolean;
-  /**
-   * Refresh interval in milliseconds.
-   * @default 10000
-   */
-  interval: number;
+  /** Refresh interval in milliseconds. */
+  intervalMs: number;
   /**
    * The unit used to display the interval count in the Settings panel.
-   * Auto-determined from `interval` when absent.
+   * Auto-determined from `intervalMs` when absent.
    */
-  intervalUnit?: AutoRefreshIntervalUnit;
+  intervalDisplayUnit: AutoRefreshIntervalUnit;
 }
 
 /** Controls sub-minute precision shown in absolute timestamps. */
@@ -115,9 +129,9 @@ export type TimePrecision = 's' | 'ms' | 'none';
 /** User-facing settings exposed by the date range picker settings panel. */
 export interface DateRangePickerSettings {
   /**
-   * When true, relative time ranges round to the nearest full unit
-   * (e.g. minute, hour, day).
-   * @default true
+   * When true, relative time range bounds round to a full unit one step
+   * finer than their offset unit (e.g. `now-1h` → `now-1h/m`).
+   * @default false
    */
   roundRelativeTime: boolean;
   /**

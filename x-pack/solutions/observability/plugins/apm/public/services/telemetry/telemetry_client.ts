@@ -8,7 +8,12 @@
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
 import type {
   ITelemetryClient,
+  MetricsCalloutDateRangeSelectedParams,
+  MetricsCalloutLoadedParams,
   SearchQuerySubmittedParams,
+  ServiceFlyoutViewedParams,
+  ServiceMapAddedToDashboardParams,
+  ServiceMapDagreLayoutFallbackParams,
   SloOverviewFlyoutSearchQueriedParams,
   SloOverviewFlyoutStatusFilteredParams,
 } from './types';
@@ -37,5 +42,29 @@ export class TelemetryClient implements ITelemetryClient {
 
   public reportSloInfoShown = (): void => {
     this.analytics.reportEvent(TelemetryEventTypes.SLO_INFO_SHOWN, {});
+  };
+
+  public reportServiceMapDagreLayoutFallback = (
+    params: ServiceMapDagreLayoutFallbackParams
+  ): void => {
+    this.analytics.reportEvent(TelemetryEventTypes.SERVICE_MAP_DAGRE_LAYOUT_FALLBACK, params);
+  };
+
+  public reportServiceMapAddedToDashboard = (params: ServiceMapAddedToDashboardParams): void => {
+    this.analytics.reportEvent(TelemetryEventTypes.SERVICE_MAP_ADDED_TO_DASHBOARD, params);
+  };
+
+  public reportMetricsCalloutDateRangeSelected = (
+    params: MetricsCalloutDateRangeSelectedParams
+  ): void => {
+    this.analytics.reportEvent(TelemetryEventTypes.METRICS_CALLOUT_DATE_RANGE_SELECTED, params);
+  };
+
+  public reportMetricsCalloutLoaded = (params: MetricsCalloutLoadedParams): void => {
+    this.analytics.reportEvent(TelemetryEventTypes.METRICS_CALLOUT_LOADED, params);
+  };
+
+  public reportServiceFlyoutViewed = (params: ServiceFlyoutViewedParams): void => {
+    this.analytics.reportEvent(TelemetryEventTypes.SERVICE_FLYOUT_VIEWED, params);
   };
 }

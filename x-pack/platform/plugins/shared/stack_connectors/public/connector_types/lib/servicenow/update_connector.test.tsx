@@ -6,18 +6,16 @@
  */
 
 import React from 'react';
-import { I18nProvider } from '@kbn/i18n-react';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 import userEvent from '@testing-library/user-event';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
 import type { Props } from './update_connector';
 import { UpdateConnector } from './update_connector';
-import { act } from 'react-dom/test-utils';
-import { render, waitFor } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
 
-const mountUpdateConnector = (props: Partial<Props> = {}, isOAuth: boolean = false) => {
-  return mountWithIntl(
+const renderUpdateConnector = (props: Partial<Props> = {}, isOAuth: boolean = false) => {
+  return renderWithI18n(
     <UpdateConnector
       actionTypeId=".servicenow"
       isOAuth={isOAuth}
@@ -34,217 +32,120 @@ const mountUpdateConnector = (props: Partial<Props> = {}, isOAuth: boolean = fal
 // FLAKY: https://github.com/elastic/kibana/issues/209007
 describe.skip('UpdateConnector renders', () => {
   it('should render update connector fields', () => {
-    const wrapper = mountUpdateConnector();
+    renderUpdateConnector();
 
-    expect(wrapper.find('[data-test-subj="snUpdateInstallationCallout"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="updateConnectorForm"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="credentialsApiUrlFromInput"]').exists()).toBeTruthy();
-    expect(
-      wrapper.find('[data-test-subj="connector-servicenow-username-form-input"]').exists()
-    ).toBeTruthy();
-    expect(
-      wrapper.find('[data-test-subj="connector-servicenow-password-form-input"]').exists()
-    ).toBeTruthy();
+    expect(screen.getByTestId('snUpdateInstallationCallout')).toBeInTheDocument();
+    expect(screen.getByTestId('updateConnectorForm')).toBeInTheDocument();
+    expect(screen.getByTestId('credentialsApiUrlFromInput')).toBeInTheDocument();
+    expect(screen.getByTestId('connector-servicenow-username-form-input')).toBeInTheDocument();
+    expect(screen.getByTestId('connector-servicenow-password-form-input')).toBeInTheDocument();
   });
 
   it('should render update connector fields for OAuth', () => {
-    const wrapper = mountUpdateConnector({}, true);
-    expect(
-      wrapper.find('[data-test-subj="connector-servicenow-client-id-form-input"]').exists()
-    ).toBeTruthy();
-    expect(
-      wrapper.find('[data-test-subj="connector-servicenow-client-secret-form-input"]').exists()
-    ).toBeTruthy();
+    renderUpdateConnector({}, true);
 
+    expect(screen.getByTestId('connector-servicenow-client-id-form-input')).toBeInTheDocument();
+    expect(screen.getByTestId('connector-servicenow-client-secret-form-input')).toBeInTheDocument();
     expect(
-      wrapper.find('[data-test-subj="connector-servicenow-user-identifier-form-input"]').exists()
-    ).toBeTruthy();
-
+      screen.getByTestId('connector-servicenow-user-identifier-form-input')
+    ).toBeInTheDocument();
+    expect(screen.getByTestId('connector-servicenow-jwt-key-id-form-input')).toBeInTheDocument();
+    expect(screen.getByTestId('connector-servicenow-private-key-form-input')).toBeInTheDocument();
     expect(
-      wrapper.find('[data-test-subj="connector-servicenow-jwt-key-id-form-input"]').exists()
-    ).toBeTruthy();
-
-    expect(
-      wrapper.find('[data-test-subj="connector-servicenow-private-key-form-input"]').exists()
-    ).toBeTruthy();
-
-    expect(
-      wrapper
-        .find('[data-test-subj="connector-servicenow-private-key-password-form-input"]')
-        .exists()
-    ).toBeTruthy();
+      screen.getByTestId('connector-servicenow-private-key-password-form-input')
+    ).toBeInTheDocument();
   });
 
   it('should disable inputs on loading', async () => {
-    const wrapper = mountUpdateConnector({ isLoading: true });
+    renderUpdateConnector({ isLoading: true });
 
-    expect(
-      wrapper.find('[data-test-subj="credentialsApiUrlFromInput"]').first().prop('disabled')
-    ).toBeTruthy();
-    expect(
-      wrapper
-        .find('[data-test-subj="connector-servicenow-username-form-input"]')
-        .first()
-        .prop('disabled')
-    ).toBeTruthy();
-    expect(
-      wrapper
-        .find('[data-test-subj="connector-servicenow-password-form-input"]')
-        .first()
-        .prop('disabled')
-    ).toBeTruthy();
+    expect(screen.getByTestId('credentialsApiUrlFromInput')).toBeDisabled();
+    expect(screen.getByTestId('connector-servicenow-username-form-input')).toBeDisabled();
+    expect(screen.getByTestId('connector-servicenow-password-form-input')).toBeDisabled();
   });
 
   it('should disable inputs on loading for OAuth', () => {
-    const wrapper = mountUpdateConnector({ isLoading: true }, true);
+    renderUpdateConnector({ isLoading: true }, true);
 
+    expect(screen.getByTestId('connector-servicenow-client-id-form-input')).toBeDisabled();
+    expect(screen.getByTestId('connector-servicenow-client-secret-form-input')).toBeDisabled();
+    expect(screen.getByTestId('connector-servicenow-user-identifier-form-input')).toBeDisabled();
+    expect(screen.getByTestId('connector-servicenow-jwt-key-id-form-input')).toBeDisabled();
+    expect(screen.getByTestId('connector-servicenow-private-key-form-input')).toBeDisabled();
     expect(
-      wrapper
-        .find('[data-test-subj="connector-servicenow-client-id-form-input"]')
-        .first()
-        .prop('disabled')
-    ).toBeTruthy();
-    expect(
-      wrapper
-        .find('[data-test-subj="connector-servicenow-client-secret-form-input"]')
-        .first()
-        .prop('disabled')
-    ).toBeTruthy();
-
-    expect(
-      wrapper
-        .find('[data-test-subj="connector-servicenow-user-identifier-form-input"]')
-        .first()
-        .prop('disabled')
-    ).toBeTruthy();
-
-    expect(
-      wrapper
-        .find('[data-test-subj="connector-servicenow-jwt-key-id-form-input"]')
-        .first()
-        .prop('disabled')
-    ).toBeTruthy();
-
-    expect(
-      wrapper
-        .find('[data-test-subj="connector-servicenow-private-key-form-input"]')
-        .first()
-        .prop('disabled')
-    ).toBeTruthy();
-
-    expect(
-      wrapper
-        .find('[data-test-subj="connector-servicenow-private-key-password-form-input"]')
-        .first()
-        .prop('disabled')
-    ).toBeTruthy();
+      screen.getByTestId('connector-servicenow-private-key-password-form-input')
+    ).toBeDisabled();
   });
 
   it('should set inputs as read-only', () => {
-    const wrapper = mountUpdateConnector({ readOnly: true });
+    renderUpdateConnector({ readOnly: true });
 
-    expect(
-      wrapper.find('[data-test-subj="credentialsApiUrlFromInput"]').first().prop('readOnly')
-    ).toBeTruthy();
-    expect(
-      wrapper
-        .find('[data-test-subj="connector-servicenow-username-form-input"]')
-        .first()
-        .prop('readOnly')
-    ).toBeTruthy();
-    expect(
-      wrapper
-        .find('[data-test-subj="connector-servicenow-password-form-input"]')
-        .first()
-        .prop('readOnly')
-    ).toBeTruthy();
+    expect(screen.getByTestId('credentialsApiUrlFromInput')).toHaveAttribute('readOnly');
+    expect(screen.getByTestId('connector-servicenow-username-form-input')).toHaveAttribute(
+      'readOnly'
+    );
+    expect(screen.getByTestId('connector-servicenow-password-form-input')).toHaveAttribute(
+      'readOnly'
+    );
   });
 
   it('should set inputs as read-only for OAuth', () => {
-    const wrapper = mountUpdateConnector({ readOnly: true }, true);
+    renderUpdateConnector({ readOnly: true }, true);
 
+    expect(screen.getByTestId('connector-servicenow-client-id-form-input')).toHaveAttribute(
+      'readOnly'
+    );
+    expect(screen.getByTestId('connector-servicenow-client-secret-form-input')).toHaveAttribute(
+      'readOnly'
+    );
+    expect(screen.getByTestId('connector-servicenow-user-identifier-form-input')).toHaveAttribute(
+      'readOnly'
+    );
+    expect(screen.getByTestId('connector-servicenow-jwt-key-id-form-input')).toHaveAttribute(
+      'readOnly'
+    );
+    expect(screen.getByTestId('connector-servicenow-private-key-form-input')).toHaveAttribute(
+      'readOnly'
+    );
     expect(
-      wrapper
-        .find('[data-test-subj="connector-servicenow-client-id-form-input"]')
-        .first()
-        .prop('readOnly')
-    ).toBeTruthy();
-    expect(
-      wrapper
-        .find('[data-test-subj="connector-servicenow-client-secret-form-input"]')
-        .first()
-        .prop('readOnly')
-    ).toBeTruthy();
-
-    expect(
-      wrapper
-        .find('[data-test-subj="connector-servicenow-user-identifier-form-input"]')
-        .first()
-        .prop('readOnly')
-    ).toBeTruthy();
-
-    expect(
-      wrapper
-        .find('[data-test-subj="connector-servicenow-jwt-key-id-form-input"]')
-        .first()
-        .prop('readOnly')
-    ).toBeTruthy();
-
-    expect(
-      wrapper
-        .find('[data-test-subj="connector-servicenow-private-key-form-input"]')
-        .first()
-        .prop('readOnly')
-    ).toBeTruthy();
-
-    expect(
-      wrapper
-        .find('[data-test-subj="connector-servicenow-private-key-password-form-input"]')
-        .first()
-        .prop('readOnly')
-    ).toBeTruthy();
+      screen.getByTestId('connector-servicenow-private-key-password-form-input')
+    ).toHaveAttribute('readOnly');
   });
 
   it('should disable submit button on form errors', async () => {
-    const wrapper = mountUpdateConnector();
+    renderUpdateConnector();
 
-    await act(async () => {
-      wrapper.find('button[data-test-subj="snUpdateInstallationSubmit"]').first().simulate('click');
-      wrapper.update();
-    });
+    await userEvent.click(screen.getByTestId('snUpdateInstallationSubmit'));
 
-    expect(
-      wrapper.find('[data-test-subj="snUpdateInstallationSubmit"]').first().prop('disabled')
-    ).toBeTruthy();
+    expect(screen.getByTestId('snUpdateInstallationSubmit')).toBeDisabled();
   });
 
   it('should confirm the update when submit button clicked', async () => {
     const onConfirm = jest.fn();
 
-    const { getByTestId } = render(
-      <I18nProvider>
-        <UpdateConnector
-          actionTypeId=".servicenow"
-          isOAuth={false}
-          updateErrorMessage={null}
-          readOnly={false}
-          isLoading={false}
-          onConfirm={onConfirm}
-          onCancel={() => {}}
-        />
-      </I18nProvider>
+    renderWithI18n(
+      <UpdateConnector
+        actionTypeId=".servicenow"
+        isOAuth={false}
+        updateErrorMessage={null}
+        readOnly={false}
+        isLoading={false}
+        onConfirm={onConfirm}
+        onCancel={() => {}}
+      />
     );
 
     expect(onConfirm).not.toHaveBeenCalled();
 
-    const urlInput = getByTestId('credentialsApiUrlFromInput');
-    const usernameInput = getByTestId('connector-servicenow-username-form-input');
-    const passwordInput = getByTestId('connector-servicenow-password-form-input');
+    const urlInput = screen.getByTestId('credentialsApiUrlFromInput');
+    const usernameInput = screen.getByTestId('connector-servicenow-username-form-input');
+    const passwordInput = screen.getByTestId('connector-servicenow-password-form-input');
+    const submitButton = screen.getByTestId('snUpdateInstallationSubmit');
 
     await userEvent.type(urlInput, 'https://example.com', { delay: 100 });
     await userEvent.type(usernameInput, 'user', { delay: 100 });
     await userEvent.type(passwordInput, 'pass', { delay: 100 });
-    await userEvent.click(getByTestId('snUpdateInstallationSubmit'));
+    await userEvent.click(submitButton);
 
     // Wait for click event to be processed
     await waitFor(() => expect(onConfirm).toHaveBeenCalled(), { timeout: 3000 });
@@ -260,24 +161,21 @@ describe.skip('UpdateConnector renders', () => {
     });
   });
 
-  it('should cancel the update when cancel button clicked', () => {
+  it('should cancel the update when cancel button clicked', async () => {
     const onCancel = jest.fn();
-    const wrapper = mountUpdateConnector({ onCancel });
+    renderUpdateConnector({ onCancel });
 
     expect(onCancel).not.toHaveBeenCalled();
-    wrapper.find('[data-test-subj="snUpdateInstallationCancel"]').first().simulate('click');
+    await userEvent.click(screen.getByTestId('snUpdateInstallationCancel'));
     expect(onCancel).toHaveBeenCalled();
   });
 
   it('should show error message if present', () => {
     const updateErrorMessage = 'some application error';
-    const wrapper = mountUpdateConnector({
-      updateErrorMessage,
-    });
+    renderUpdateConnector({ updateErrorMessage });
+    const applicationCallout = screen.getByTestId('snApplicationCallout');
 
-    expect(wrapper.find('[data-test-subj="snApplicationCallout"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="snApplicationCallout"]').first().text()).toContain(
-      updateErrorMessage
-    );
+    expect(applicationCallout).toBeInTheDocument();
+    expect(applicationCallout).toHaveTextContent(updateErrorMessage);
   });
 });

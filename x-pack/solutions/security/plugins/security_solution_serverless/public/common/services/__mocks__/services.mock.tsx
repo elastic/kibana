@@ -6,10 +6,12 @@
  */
 import { coreMock } from '@kbn/core/public/mocks';
 import { serverlessMock } from '@kbn/serverless/public/mocks';
+import { navigationPluginMock } from '@kbn/navigation-plugin/public/mocks';
 import { securityMock } from '@kbn/security-plugin/public/mocks';
 import { securitySolutionMock } from '@kbn/security-solution-plugin/public/mocks';
 import { managementPluginMock } from '@kbn/management-plugin/public/mocks';
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
+import { workflowsManagementMocks } from '@kbn/workflows-management-plugin/public/mocks';
 import type { Services } from '..';
 import { allowedExperimentalValues as genericAllowedExperimentalValues } from '@kbn/security-solution-plugin/common';
 import { allowedExperimentalValues } from '../../../../common/experimental_features';
@@ -18,8 +20,10 @@ export const mockServices: Services = {
   ...coreMock.createStart(),
   experimentalFeatures: { ...allowedExperimentalValues, ...genericAllowedExperimentalValues },
   serverless: serverlessMock.createStart(),
+  navigation: navigationPluginMock.createStartContract(),
   security: securityMock.createStart(),
   securitySolution: securitySolutionMock.createStart(),
   management: managementPluginMock.createStartContract(),
   cloud: cloudMock.createStart(),
+  workflowsManagement: workflowsManagementMocks.createStart(),
 };

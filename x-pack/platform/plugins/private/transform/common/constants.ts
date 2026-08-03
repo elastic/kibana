@@ -143,6 +143,19 @@ export const TRANSFORM_HEALTH_LABEL = {
   }),
 } as const;
 
+/**
+ * Used in the Health filter options (EuiSelectable) where the option `name`
+ * becomes the DOM `title` attribute and is announced by some screen readers.
+ */
+export const TRANSFORM_HEALTH_STATUS_COLOR_LABEL: Record<TransformHealthStatus, string> = {
+  green: TRANSFORM_HEALTH_STATUS.green,
+  yellow: TRANSFORM_HEALTH_STATUS.yellow,
+  red: TRANSFORM_HEALTH_STATUS.red,
+  unknown: i18n.translate('xpack.transform.transformHealth.unknownColorLabel', {
+    defaultMessage: 'grey',
+  }),
+} as const;
+
 export const TRANSFORM_HEALTH_DESCRIPTION = {
   green: i18n.translate('xpack.transform.transformHealth.greenDescription', {
     defaultMessage: 'The transform is running as expected.',
@@ -228,6 +241,7 @@ export const DEFAULT_CONTINUOUS_MODE_DELAY = '60s';
 export const DEFAULT_TRANSFORM_FREQUENCY = '1m';
 export const DEFAULT_TRANSFORM_SETTINGS_DOCS_PER_SECOND = null;
 export const DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE = 500;
+export const DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE_LATEST = 5000;
 
 // Used in the transform list's expanded row for the messages and issues table.
 export const TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';

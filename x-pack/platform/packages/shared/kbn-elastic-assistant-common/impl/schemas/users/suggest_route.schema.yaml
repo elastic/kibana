@@ -6,6 +6,15 @@ paths:
   /internal/elastic_assistant/users/_suggest:
     post:
       x-codegen-enabled: true
+      x-codeSamples:
+        - lang: curl
+          label: Example request
+          source: |
+            curl \
+             --request POST 'http://localhost:5601/internal/elastic_assistant/users/_suggest' \
+             --header "Authorization: $API_KEY" \
+             --header "Content-Type: application/json" \
+             --data '{"searchTerm":"James","size":10}'
       x-labels: [ess, serverless]
       operationId: SuggestUsers
       description: Suggest users
@@ -74,7 +83,7 @@ paths:
                           description: The email address of the user.
                           example: "james@elastic.co"
         400:
-          description: Generic Error
+          description: Bad Request response.
           content:
             application/json:
               schema:

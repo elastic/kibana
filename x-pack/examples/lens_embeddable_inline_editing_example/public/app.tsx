@@ -21,7 +21,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
-import { LensConfigBuilder } from '@kbn/lens-embeddable-utils/config_builder/config_builder';
+import { LensConfigBuilder } from '@kbn/lens-embeddable-utils';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { StartDependencies } from './plugin';

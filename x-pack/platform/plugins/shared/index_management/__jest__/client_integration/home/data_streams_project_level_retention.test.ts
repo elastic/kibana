@@ -7,17 +7,16 @@
 
 import { screen } from '@testing-library/react';
 import { within } from '@testing-library/react';
-import { notificationServiceMock } from '@kbn/core/public/mocks';
 
 import { breadcrumbService } from '../../../public/application/services/breadcrumbs';
 import { MAX_DATA_RETENTION } from '../../../common/constants';
 import { setupEnvironment } from '../helpers/setup_environment';
 import { renderHome } from '../helpers/render_home';
-import { notificationService } from '../../../public/application/services/notification';
 
 import {
   createDataStreamTabActions,
   createDataStreamPayload,
+  createDataRetentionFormActions,
 } from '../helpers/actions/data_stream_actions';
 
 const urlServiceMock = {
@@ -41,8 +40,6 @@ describe('Data Streams - Project level max retention', () => {
   let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
   let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
   jest.spyOn(breadcrumbService, 'setBreadcrumbs');
-
-  const notificationsServiceMock = notificationServiceMock.createStartContract();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -68,8 +65,6 @@ describe('Data Streams - Project level max retention', () => {
     httpRequestsMockHelpers.setLoadDataStreamResponse(ds1.name, ds1);
     httpRequestsMockHelpers.setLoadTemplatesResponse({ templates: [], legacyTemplates: [] });
 
-    notificationService.setup(notificationsServiceMock);
-
     await renderHome(httpSetup, {
       initialEntries: ['/data_streams'],
       appServicesContext: {
@@ -82,18 +77,20 @@ describe('Data Streams - Project level max retention', () => {
 
     await screen.findByTestId('dataStreamTable');
     const actions = createDataStreamTabActions();
+    const formActions = createDataRetentionFormActions();
 
-    await actions.clickNameAt(0);
-    await screen.findByTestId('dataStreamDetailPanel');
-
-    actions.clickEditDataRetentionButton();
+    // The single data stream detail panel now edits the lifecycle via a flyout that does not
+    // enforce the project level max retention. That validation lives in the (bulk) edit data
+    // retention modal, so the check is exercised through the bulk edit flow here.
+    actions.selectDataStream('dataStream1', true);
+    await actions.clickBulkEditDataRetentionButton();
 
     await screen.findByTestId('dataRetentionValue');
 
+    await formActions.setDataRetentionValue('25');
+
     const form = screen.getByTestId('editDataRetentionModal');
     // Assert the specific validation message (do not rely on non-unique attributes like `aria-live`).
-    expect(
-      within(form).getByText(/Maximum data retention period on this project is 20 days\./)
-    ).toBeInTheDocument();
+    await within(form).findByText(/Maximum data retention period on this project is 20 days\./);
   });
 });

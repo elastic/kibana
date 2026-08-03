@@ -5,20 +5,22 @@
  * 2.0.
  */
 import React from 'react';
-import { load } from 'js-yaml';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { z } from '@kbn/zod/v4';
 
 import type { DocLinks } from '@kbn/doc-links';
 
+import { loadYaml } from '@kbn/yaml-loader';
+
 import { AGENT_LOG_LEVELS, DEFAULT_LOG_LEVEL } from '../constants';
+import { isValidDuration } from '../services/validate_duration';
 
 import type { SettingsConfig } from './types';
 
 export const zodStringWithDurationValidation = z
   .string()
-  .refine((val) => val.match(/^(\d+[s|m|h])?$/), {
+  .refine((val) => !val || isValidDuration(val), {
     message: i18n.translate(
       'xpack.fleet.settings.agentPolicyAdvanced.downloadTimeoutValidationMessage',
       {
@@ -28,11 +30,12 @@ export const zodStringWithDurationValidation = z
   });
 
 export const zodStringWithYamlValidation = z.string().refine(
-  (val) => {
+  async (val) => {
+    const yaml = await loadYaml();
     try {
-      load(val);
+      yaml.parse(val);
       return true;
-    } catch (error) {
+    } catch {
       return false;
     }
   },
@@ -284,6 +287,26 @@ export const getAgentPolicyAdvancedSettings = (docLinks?: DocLinks['fleet']): Se
     checkboxLabel: i18n.translate(
       'xpack.fleet.settings.agentPolicyAdvanced.disablePolicyChangeAcksCheckboxLabel',
       { defaultMessage: 'Disable' }
+    ),
+  },
+  {
+    name: 'agent.features.include_tags_in_events.enabled',
+    title: i18n.translate('xpack.fleet.settings.agentPolicyAdvanced.includeTagsInEventsTitle', {
+      defaultMessage: 'Include agent tags in events',
+    }),
+    description: () =>
+      i18n.translate('xpack.fleet.settings.agentPolicyAdvanced.includeTagsInEventsDescription', {
+        defaultMessage:
+          'When enabled, agent tags are forwarded to all event documents collected by the agent, allowing filtering by tags in Discover, dashboards, and alerts.',
+      }),
+    api_field: {
+      name: 'agent_features_include_tags_in_events_enabled',
+    },
+    schema: z.boolean().default(false),
+    example_value: true,
+    checkboxLabel: i18n.translate(
+      'xpack.fleet.settings.agentPolicyAdvanced.includeTagsInEventsCheckboxLabel',
+      { defaultMessage: 'Enable' }
     ),
   },
   {

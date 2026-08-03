@@ -88,6 +88,10 @@ export interface SelectableFilterPopoverProps<T extends object = Record<string, 
   panelMinWidth?: number;
   /** Optional footer content (rendered below {@link ModifierKeyTip}). */
   footerContent?: React.ReactNode;
+  /** Optional header content rendered above the selectable list (e.g. a search input). */
+  headerContent?: React.ReactNode;
+  /** Called when the popover opens or closes. */
+  onToggle?: (isOpen: boolean) => void;
   /** `data-test-subj` attribute for testing. */
   'data-test-subj'?: string;
 }
@@ -156,9 +160,23 @@ export const SelectableFilterPopover = <T extends object = Record<string, unknow
   panelWidth,
   panelMinWidth,
   footerContent,
+  headerContent,
+  onToggle: onToggleProp,
   'data-test-subj': dataTestSubj = 'selectableFilterPopover',
 }: SelectableFilterPopoverProps<T>) => {
-  const { isOpen, toggle, close } = useFilterPopover();
+  const { isOpen, toggle: rawToggle, close: rawClose } = useFilterPopover();
+
+  const toggle = useCallback(() => {
+    rawToggle();
+    onToggleProp?.(!isOpen);
+  }, [rawToggle, onToggleProp, isOpen]);
+
+  const close = useCallback(() => {
+    rawClose();
+    if (isOpen) {
+      onToggleProp?.(false);
+    }
+  }, [rawClose, onToggleProp, isOpen]);
   const {
     selection,
     toggle: toggleValue,
@@ -179,19 +197,30 @@ export const SelectableFilterPopover = <T extends object = Record<string, unknow
     lastModifierRef.current = isExcludeModifier(e);
   }, []);
 
-  // Only count values that match an available option so the badge doesn't
-  // reflect unresolved or stale query clauses (e.g. `tag:NonExistent`).
-  const validOptionValues = useMemo(() => new Set(options.map((o) => o.value ?? o.key)), [options]);
-  const activeCount = useMemo(
-    () => Object.keys(selection).filter((value) => validOptionValues.has(value)).length,
-    [selection, validOptionValues]
+  // The badge count is derived from the parsed query (`selection`), so it must
+  // be available before `options` resolves — facets are typically fetched
+  // lazily on first popover open. Until that happens, show the raw count of
+  // active clauses so URL-hydrated filters render immediately on page load.
+  // Once `options` is non-empty, drop unresolved or stale clauses (e.g.
+  // `tag:NonExistent`) so the badge matches what the popover actually shows.
+  const validOptionValues = useMemo(
+    () => new Set(options.flatMap((option) => [option.key, option.value ?? option.key])),
+    [options]
   );
+  const activeCount = useMemo(() => {
+    const selectedKeys = Object.keys(selection);
+    if (options.length === 0) {
+      return selectedKeys.length;
+    }
+    return selectedKeys.filter((value) => validOptionValues.has(value)).length;
+  }, [selection, validOptionValues, options.length]);
 
   // Build selectable options with view rendering.
   const selectableOptions = useMemo((): Array<InternalSelectableOption<T>> => {
     return options.map((option) => {
-      const value = option.value ?? option.key;
-      const state: FilterType | undefined = selection[value];
+      const queryValue = option.value ?? option.key;
+      const selectedValue = selection[queryValue] ? queryValue : option.key;
+      const state: FilterType | undefined = selection[queryValue] ?? selection[option.key];
       const checked = getCheckedState(state);
       const isActive = checked !== undefined;
       const count = option.count ?? 0;
@@ -199,7 +228,7 @@ export const SelectableFilterPopover = <T extends object = Record<string, unknow
       return {
         key: option.key,
         label: option.label,
-        value,
+        value: isActive ? selectedValue : queryValue,
         checked,
         data: option.data,
         count,
@@ -220,7 +249,8 @@ export const SelectableFilterPopover = <T extends object = Record<string, unknow
   // `lastModifierRef` to support Cmd/Ctrl+click for exclude.
   const handleSelectChange = useCallback(
     (updatedOptions: Array<InternalSelectableOption<T>>) => {
-      const filterType: FilterType = lastModifierRef.current ? 'exclude' : 'include';
+      const filterType: FilterType =
+        !singleSelection && lastModifierRef.current ? 'exclude' : 'include';
 
       if (singleSelection) {
         const newlyChecked = updatedOptions.find(
@@ -254,6 +284,7 @@ export const SelectableFilterPopover = <T extends object = Record<string, unknow
   return (
     <FilterPopover
       title={title}
+      totalCount={isLoading ? undefined : options.length}
       activeCount={displayActiveCount}
       isOpen={isOpen}
       onToggle={toggle}
@@ -294,6 +325,11 @@ export const SelectableFilterPopover = <T extends object = Record<string, unknow
                 />
               )}
               <EuiHorizontalRule margin="none" />
+              {headerContent && (
+                <EuiPanel hasShadow={false} paddingSize="s" style={{ paddingBottom: 0 }}>
+                  {headerContent}
+                </EuiPanel>
+              )}
               {list}
             </>
           )}

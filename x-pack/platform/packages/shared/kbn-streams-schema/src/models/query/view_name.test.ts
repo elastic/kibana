@@ -41,28 +41,28 @@ describe('getStreamNameFromViewName', () => {
 });
 
 describe('getWiredStreamViewQuery', () => {
-  it('returns FROM with only the stream when there are no children', () => {
-    expect(getWiredStreamViewQuery('logs.otel', [])).toBe('FROM logs.otel');
+  it('returns FROM with METADATA _source when there are no children', () => {
+    expect(getWiredStreamViewQuery('logs.otel', [])).toBe('FROM logs.otel METADATA _source');
   });
 
-  it('returns FROM with only the stream when children is omitted', () => {
-    expect(getWiredStreamViewQuery('logs.otel')).toBe('FROM logs.otel');
+  it('returns FROM with METADATA _source when children is omitted', () => {
+    expect(getWiredStreamViewQuery('logs.otel')).toBe('FROM logs.otel METADATA _source');
   });
 
-  it('includes a single child view reference', () => {
+  it('includes a single child view reference with METADATA _source', () => {
     expect(getWiredStreamViewQuery('logs.otel', ['logs.otel.nginx'])).toBe(
-      'FROM logs.otel, $.logs.otel.nginx'
+      'FROM logs.otel, $.logs.otel.nginx METADATA _source'
     );
   });
 
-  it('includes multiple child view references', () => {
+  it('includes multiple child view references with METADATA _source', () => {
     expect(getWiredStreamViewQuery('logs.otel', ['logs.otel.nginx', 'logs.otel.apache'])).toBe(
-      'FROM logs.otel, $.logs.otel.nginx, $.logs.otel.apache'
+      'FROM logs.otel, $.logs.otel.nginx, $.logs.otel.apache METADATA _source'
     );
   });
 
   it('preserves child ordering from the input array', () => {
     const result = getWiredStreamViewQuery('logs.otel', ['logs.otel.postgres', 'logs.otel.nginx']);
-    expect(result).toBe('FROM logs.otel, $.logs.otel.postgres, $.logs.otel.nginx');
+    expect(result).toBe('FROM logs.otel, $.logs.otel.postgres, $.logs.otel.nginx METADATA _source');
   });
 });

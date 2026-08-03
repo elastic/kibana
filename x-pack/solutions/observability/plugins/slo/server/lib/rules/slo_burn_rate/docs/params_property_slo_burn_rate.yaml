@@ -4,40 +4,85 @@ description: >
   The parameters for the SLO burn rate rule.
   These parameters are appropriate when `rule_type_id` is `slo.rules.burnRate`.
 type: object
+required:
+  - sloId
+  - windows
 properties:
   sloId:
     description: The SLO identifier used by the rule
     type: string
     example: 8853df00-ae2e-11ed-90af-09bb6422b258
-  burnRateThreshold:
-    description: The burn rate threshold used to trigger the alert
-    type: number
-    example: 14.4
-  maxBurnRateThreshold:
-    description: The maximum burn rate threshold value defined by the SLO error budget
-    type: number
-    example: 168
-  longWindow:
-    description: The duration of the long window used to compute the burn rate
-    type: object
-    properties:
-      value:
-        description: The duration value
-        type: number
-        example: 6
-      unit:
-        description: The duration unit
-        type: string
-        example: 'h'
-  shortWindow:
-    description: The duration of the short window used to compute the burn rate
-    type: object
-    properties:
-      value:
-        description: The duration value
-        type: number
-        example: 30
-      unit:
-        description: The duration unit
-        type: string
-        example: 'm'
+  windows:
+    description: The list of burn rate windows used to detect alert conditions
+    type: array
+    items:
+      type: object
+      required:
+        - id
+        - burnRateThreshold
+        - longWindow
+        - shortWindow
+        - actionGroup
+      properties:
+        id:
+          description: A unique identifier for the window
+          type: string
+        burnRateThreshold:
+          description: The burn rate threshold used to trigger the alert
+          type: number
+          example: 14.4
+        maxBurnRateThreshold:
+          description: The maximum burn rate threshold value; null indicates no upper bound
+          type: number
+          nullable: true
+          example: 168
+        longWindow:
+          description: The duration of the long window used to compute the burn rate
+          type: object
+          required:
+            - value
+            - unit
+          properties:
+            value:
+              description: The duration value
+              type: number
+              example: 6
+            unit:
+              description: The duration unit
+              type: string
+              example: 'h'
+        shortWindow:
+          description: The duration of the short window used to compute the burn rate
+          type: object
+          required:
+            - value
+            - unit
+          properties:
+            value:
+              description: The duration value
+              type: number
+              example: 30
+            unit:
+              description: The duration unit
+              type: string
+              example: 'm'
+        actionGroup:
+          description: The action group to use when this window triggers an alert
+          type: string
+  dependencies:
+    description: An optional list of rule dependencies used for alert suppression
+    type: array
+    items:
+      type: object
+      required:
+        - ruleId
+        - actionGroupsToSuppressOn
+      properties:
+        ruleId:
+          description: The identifier of the rule this rule depends on
+          type: string
+        actionGroupsToSuppressOn:
+          description: The action groups of the dependency rule that will suppress alerts in this rule
+          type: array
+          items:
+            type: string

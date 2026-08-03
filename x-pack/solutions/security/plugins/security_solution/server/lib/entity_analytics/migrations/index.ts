@@ -12,6 +12,7 @@ import { scheduleAssetCriticalityEcsCompliancyMigration } from '../asset_critica
 import { updateAssetCriticalityMappings } from '../asset_criticality/migrations/update_asset_criticality_mappings';
 import { updateRiskScoreMappings } from '../risk_engine/migrations/update_risk_score_mappings';
 import { renameRiskScoreComponentTemplate } from '../risk_engine/migrations/rename_risk_score_component_templates';
+import { cleanupLegacyRiskEngine } from '../risk_engine/migrations/cleanup_previous_risk_engine';
 import { createEventIngestedPipelineInAllNamespaces } from '../utils/event_ingested_pipeline';
 import { updatePrivilegedMonitoringSourceIndex } from '../privilege_monitoring/migrations/update_source_index';
 import { upsertPrivilegedMonitoringEntitySource } from '../privilege_monitoring/migrations/upsert_entity_source';
@@ -25,6 +26,7 @@ export interface EntityAnalyticsMigrationsParams {
   auditLogger: AuditLogger | undefined;
   kibanaVersion: string;
   experimentalFeatures?: ExperimentalFeatures;
+  hasEncryptionKey: boolean;
 }
 
 /**
@@ -69,5 +71,9 @@ export const scheduleEntityAnalyticsMigration = async (params: EntityAnalyticsMi
 
   if (paramsWithScopedLogger.experimentalFeatures?.entityAnalyticsWatchlistEnabled) {
     await installPrebuiltWatchlists(paramsWithScopedLogger);
+  }
+
+  if (paramsWithScopedLogger.experimentalFeatures?.entityAnalyticsEntityStoreV2) {
+    await cleanupLegacyRiskEngine(paramsWithScopedLogger);
   }
 };

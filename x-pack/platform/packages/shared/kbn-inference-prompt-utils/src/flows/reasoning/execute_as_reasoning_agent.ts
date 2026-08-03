@@ -19,8 +19,12 @@ import type {
   UnboundPromptOptions,
 } from '@kbn/inference-common';
 import { MessageRole, ToolChoiceType, type Prompt } from '@kbn/inference-common';
-import { withActiveInferenceSpan, withExecuteToolSpan } from '@kbn/inference-tracing';
-import { trace } from '@opentelemetry/api';
+import {
+  withActiveInferenceSpan,
+  withExecuteToolSpan,
+  markToolSpanAsError,
+} from '@kbn/inference-tracing';
+
 import { omit, partition } from 'lodash';
 import { z } from '@kbn/zod/v4';
 import {
@@ -94,6 +98,7 @@ export async function executeAsReasoningAgent(
     maxSteps = 10,
     power = 'medium',
     toolCallbacks,
+    abortSignal,
   } = options;
   const startTime = Date.now();
 
@@ -102,6 +107,15 @@ export async function executeAsReasoningAgent(
       toolCalls.map(async (toolCall): Promise<ToolMessage> => {
         if (isPlanningToolName(toolCall.function.name)) {
           throw new Error(`Unexpected planning tool call ${toolCall.function.name}`);
+        }
+
+        if (abortSignal?.aborted) {
+          return {
+            response: { error: new Error('Request was aborted'), data: undefined },
+            name: toolCall.function.name,
+            toolCallId: toolCall.toolCallId,
+            role: MessageRole.Tool,
+          };
         }
 
         const callback = toolCallbacks[toolCall.function.name];
@@ -114,13 +128,16 @@ export async function executeAsReasoningAgent(
               toolCallId: toolCall.toolCallId,
             },
           },
-          () => callback(toolCall)
-        ).catch((error): ToolCallbackResult => {
-          trace.getActiveSpan()?.recordException(error);
-          return {
-            response: { error, data: undefined },
-          };
-        });
+          (span) =>
+            callback(toolCall).catch((error): ToolCallbackResult => {
+              if (span) {
+                markToolSpanAsError(span, { error });
+              }
+              return {
+                response: { error, data: undefined },
+              };
+            })
+        );
 
         return {
           response: response.response,
@@ -142,6 +159,10 @@ export async function executeAsReasoningAgent(
     stepsLeft: number;
     temperature?: number;
   }): Promise<ReasoningPromptResponse> {
+    if (abortSignal?.aborted) {
+      throw new Error('Request was aborted');
+    }
+
     const lastAssistantMessage = givenMessages.findLast(
       (msg): msg is AssistantMessage => msg.role === MessageRole.Assistant
     );
@@ -241,6 +262,7 @@ export async function executeAsReasoningAgent(
       stream: false,
       temperature,
       toolChoice,
+      abortSignal,
       prevMessages: formatMessages({
         messages: prevMessages,
         power,

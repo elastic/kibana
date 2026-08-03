@@ -14,7 +14,7 @@ import {
   type LensAttributes,
   type LensConfig,
   LensConfigBuilder,
-} from '@kbn/lens-embeddable-utils/config_builder';
+} from '@kbn/lens-embeddable-utils';
 
 import { useKibanaContextForPlugin } from './use_kibana';
 

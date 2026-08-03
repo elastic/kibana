@@ -1,0 +1,19 @@
+{
+  "sha1": "f8f65de506c712431287188196f6b03b65ba80da",
+  "tests": [
+    {
+      "id": "8380fa3824c5a8c-14bbaf7f48e4d44",
+      "title": "ES|QL Async Polling - HTTP/2 loads dashboard with 5s async ES|QL query and polls exactly twice",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data/test/scout_http2/ui/tests/esql_async_polling.spec.ts",
+        "line": 45,
+        "column": 7
+      }
+    }
+  ]
+}

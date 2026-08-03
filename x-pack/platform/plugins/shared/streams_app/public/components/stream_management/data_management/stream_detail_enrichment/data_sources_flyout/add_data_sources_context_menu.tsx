@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EuiButton, EuiContextMenu, EuiPopover } from '@elastic/eui';
 import { useBoolean } from '@kbn/react-hooks';
+import { isDraftStream } from '@kbn/streams-schema';
 import { DATA_SOURCES_I18N } from './translations';
 import {
   createDefaultCustomSamplesDataSource,
@@ -20,20 +21,29 @@ import {
 
 export const AddDataSourcesContextMenu = () => {
   const { addDataSource } = useStreamEnrichmentEvents();
-  const streamName = useStreamEnrichmentSelector((state) => state.context.definition.stream.name);
+  const definition = useStreamEnrichmentSelector((state) => state.context.definition);
+  const streamName = definition.stream.name;
+
+  const isDraft = isDraftStream(definition.stream);
+
   const [isOpen, { toggle: toggleMenu, off: closeMenu }] = useBoolean();
 
-  const menuItems = [
-    {
-      name: DATA_SOURCES_I18N.contextMenu.addKqlDataSource,
-      icon: 'magnify',
-      'data-test-subj': 'streamsAppProcessingAddKqlDataSource',
-      onClick: () => {
-        addDataSource(defaultKqlSamplesDataSource);
-        closeMenu();
-      },
-    },
-    {
+  const menuItems = useMemo(() => {
+    const items = [];
+
+    if (!isDraft) {
+      items.push({
+        name: DATA_SOURCES_I18N.contextMenu.addKqlDataSource,
+        icon: 'magnify',
+        'data-test-subj': 'streamsAppProcessingAddKqlDataSource',
+        onClick: () => {
+          addDataSource(defaultKqlSamplesDataSource);
+          closeMenu();
+        },
+      });
+    }
+
+    items.push({
       name: DATA_SOURCES_I18N.contextMenu.addCustomSamples,
       icon: 'text',
       'data-test-subj': 'streamsAppProcessingAddCustomDataSource',
@@ -41,8 +51,10 @@ export const AddDataSourcesContextMenu = () => {
         addDataSource(createDefaultCustomSamplesDataSource(streamName));
         closeMenu();
       },
-    },
-  ];
+    });
+
+    return items;
+  }, [isDraft, addDataSource, closeMenu, streamName]);
 
   return (
     <EuiPopover

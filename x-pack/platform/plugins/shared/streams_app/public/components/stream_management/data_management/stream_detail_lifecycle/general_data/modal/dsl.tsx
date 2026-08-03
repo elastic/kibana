@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useBoolean } from '@kbn/react-hooks';
-import { parseDuration } from '../../helpers/helpers';
+import { parseDuration } from '../../../../../../util/parse_duration';
 
 interface Props {
   initialValue: IngestStreamLifecycleAll;
@@ -38,10 +38,10 @@ export const DEFAULT_RETENTION_UNIT = { name: 'Days', value: 'd' };
 
 export function DslField({ initialValue, isDisabled, setLifecycle, setSaveButtonDisabled }: Props) {
   const timeUnits = [
-    { name: 'Days', value: 'd' },
-    { name: 'Hours', value: 'h' },
-    { name: 'Minutes', value: 'm' },
     { name: 'Seconds', value: 's' },
+    { name: 'Minutes', value: 'm' },
+    { name: 'Hours', value: 'h' },
+    { name: 'Days', value: 'd' },
   ];
 
   const existingRetention = isDslLifecycle(initialValue)
@@ -111,7 +111,6 @@ export function DslField({ initialValue, isDisabled, setLifecycle, setSaveButton
             }
           >
             <EuiContextMenuPanel
-              size="s"
               items={timeUnits.map((unit) => (
                 <EuiContextMenuItem
                   key={unit.value}

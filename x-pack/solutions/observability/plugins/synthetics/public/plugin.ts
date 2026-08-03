@@ -68,16 +68,14 @@ import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type { KqlPluginStart } from '@kbn/kql/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import { registerSyntheticsEmbeddables } from './apps/embeddables/register_embeddables';
 import { kibanaService } from './utils/kibana_service';
 import { PLUGIN } from '../common/constants/plugin';
 import { OVERVIEW_ROUTE } from '../common/constants/ui';
 import { locators } from './apps/locators';
 import { syntheticsAlertTypeInitializers } from './apps/synthetics/lib/alert_types';
-import { SYNTHETICS_MONITORS_EMBEDDABLE } from '../common/embeddables/monitors_overview/constants';
 import { registerSyntheticsUiActions } from './apps/embeddables/ui_actions/register_ui_actions';
-import { SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE } from '../common/embeddables/stats_overview/constants';
 
 export interface ClientPluginsSetup {
   home?: HomePublicPluginSetup;
@@ -171,6 +169,7 @@ export class SyntheticsPlugin
         startPlugins: clientPluginsStart,
         isDev: this.initContext.env.mode.dev,
         isServerless: this._isServerless,
+        isCCSEnabled: !this._isServerless,
       });
     });
 
@@ -211,6 +210,7 @@ export class SyntheticsPlugin
                 defaultMessage: 'Monitors',
               }),
           path: '/',
+          visibleIn: ['globalSearch', 'projectSideNav'],
         },
         {
           id: 'certificates',
@@ -218,6 +218,7 @@ export class SyntheticsPlugin
             defaultMessage: 'TLS Certificates',
           }),
           path: '/certificates',
+          visibleIn: ['globalSearch', 'projectSideNav'],
         },
       ],
       mount: async (params: AppMountParameters) => {
@@ -234,19 +235,6 @@ export class SyntheticsPlugin
 
   public start(coreStart: CoreStart, pluginsStart: ClientPluginsStart): void {
     const { triggersActionsUi } = pluginsStart;
-
-    pluginsStart.presentationUtil.registerPanelPlacementSettings(
-      SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE,
-      () => {
-        return { placementSettings: { width: 10, height: 8 } };
-      }
-    );
-    pluginsStart.presentationUtil.registerPanelPlacementSettings(
-      SYNTHETICS_MONITORS_EMBEDDABLE,
-      () => {
-        return { placementSettings: { width: 30, height: 12 } };
-      }
-    );
 
     registerSyntheticsUiActions(coreStart, pluginsStart);
 

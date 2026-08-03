@@ -8,6 +8,7 @@
  */
 
 import type { ListrTaskWrapper, DefaultRenderer, SimpleRenderer } from 'listr2';
+import type { TranslationInput } from '@kbn/i18n';
 import type { TaskReporter } from './utils/task_reporter';
 
 export interface MessageDescriptor {
@@ -25,6 +26,7 @@ export interface MessageDescriptor {
 export interface I18nCheckTaskContext {
   config?: I18nConfig;
   messages: Map<string, MessageDescriptor[]>;
+  localizedMessages?: TranslationInput;
   taskReporter: TaskReporter;
 }
 

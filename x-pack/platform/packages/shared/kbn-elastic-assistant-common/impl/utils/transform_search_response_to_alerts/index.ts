@@ -8,7 +8,7 @@
 import type { estypes } from '@elastic/elasticsearch';
 import type { Logger } from '@kbn/core/server';
 
-import { isMissingRequiredFields } from './is_missing_required_fields';
+import { getMissingFields, isMissingRequiredFields } from './is_missing_required_fields';
 import type { AttackDiscoveryApiAlert } from '../../schemas';
 import type { AttackDiscoveryAlertDocument } from '../../schedules/types';
 import { transformAttackDiscoveryAlertDocumentToApi } from './transform_attack_discovery_alert_document_to_api';
@@ -50,11 +50,27 @@ export const transformSearchResponseToAlerts = ({
   response: estypes.SearchResponse<AttackDiscoveryAlertDocument>;
   withReplacements: boolean;
 }): TransformSearchResponseToAlerts => {
+  logger.debug(
+    () =>
+      `[TRANSFORM] Processing ${response.hits.hits.length} raw hits from Elasticsearch (total: ${
+        typeof response.hits.total === 'number'
+          ? response.hits.total
+          : response.hits.total?.value ?? 'unknown'
+      })`
+  );
+
+  let skippedCount = 0;
   const data = response.hits.hits.flatMap((hit) => {
     if (hit._source == null || isMissingRequiredFields(hit)) {
+      const missingFields = getMissingFields(hit);
+      skippedCount++;
       logger.warn(
         () =>
-          `Skipping Attack discovery alert document with id ${hit._id} in transformSearchResponseToAlerts because it's missing required fields.`
+          `Skipping Attack discovery alert document with id ${
+            hit._id
+          } in transformSearchResponseToAlerts because it's missing required fields: ${missingFields.join(
+            ', '
+          )}`
       );
 
       return []; // skip this hit
@@ -70,6 +86,11 @@ export const transformSearchResponseToAlerts = ({
       withReplacements,
     });
   });
+
+  logger.debug(
+    () =>
+      `[TRANSFORM] Transformation complete: ${data.length} valid discoveries, ${skippedCount} skipped`
+  );
 
   const uniqueAlertIdsCountAggregation = response.aggregations?.unique_alert_ids_count;
 

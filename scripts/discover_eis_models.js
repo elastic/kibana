@@ -8,4 +8,4 @@
  */
 
 require('@kbn/setup-node-env');
-require('@kbn/test-suites-xpack-platform/agent_builder/scripts/discover_eis_models');
+require('@kbn/gen-ai-functional-testing/src/discover_eis_models');

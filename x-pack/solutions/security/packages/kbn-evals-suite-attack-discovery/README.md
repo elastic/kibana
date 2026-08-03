@@ -11,7 +11,7 @@ It's designed to:
 
 - **`attack-discovery`**
 
-Registered in `x-pack/platform/packages/shared/kbn-evals/evals.suites.json`.
+Registered in `.buildkite/pipelines/evals/evals.suites.json`.
 
 ---
 

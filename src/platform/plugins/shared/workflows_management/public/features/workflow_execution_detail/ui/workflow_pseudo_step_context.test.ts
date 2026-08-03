@@ -10,6 +10,7 @@
 import type { WorkflowExecutionDto } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import {
+  buildOverviewStepExecutionFromContext,
   buildTriggerContextFromExecution,
   buildTriggerStepExecutionFromContext,
 } from './workflow_pseudo_step_context';
@@ -132,5 +133,154 @@ describe('buildTriggerStepExecutionFromContext', () => {
     });
     expect(result?.stepId).toBe('event');
     expect(result?.stepType).toBe('trigger_event');
+  });
+});
+
+describe('buildOverviewStepExecutionFromContext', () => {
+  const baseOverviewExecution: WorkflowExecutionDto = {
+    spaceId: 'default',
+    id: 'exec-overview',
+    status: ExecutionStatus.FAILED,
+    error: { type: 'TaskRecoveryError', message: 'Resume interrupted' },
+    isTestRun: false,
+    startedAt: '2024-01-01T00:00:00Z',
+    finishedAt: '2024-01-01T00:01:00Z',
+    workflowId: 'wf-1',
+    workflowName: 'Test',
+    workflowDefinition: {} as WorkflowExecutionDto['workflowDefinition'],
+    stepExecutions: [{ id: 's1' } as WorkflowExecutionDto['stepExecutions'][number]],
+    duration: 60000,
+    yaml: '',
+    context: { inputs: {}, workflowRunId: 'run-1' },
+  };
+
+  it('adds executionError when execution.error is set and steps ran (no duplicate of trigger-only path)', () => {
+    const overview = buildOverviewStepExecutionFromContext(baseOverviewExecution);
+    const input = overview.input as Record<string, unknown>;
+    expect(input.executionError).toEqual({
+      type: 'TaskRecoveryError',
+      message: 'Resume interrupted',
+    });
+    expect(input.workflowRunId).toBe('run-1');
+  });
+
+  it('omits executionError when failed before steps (trigger row carries execution.error)', () => {
+    const overview = buildOverviewStepExecutionFromContext({
+      ...baseOverviewExecution,
+      stepExecutions: [],
+    });
+    const input = overview.input as Record<string, unknown>;
+    expect(input.executionError).toBeUndefined();
+  });
+
+  it('omits executionError when error is null', () => {
+    const overview = buildOverviewStepExecutionFromContext({
+      ...baseOverviewExecution,
+      error: null,
+    });
+    const input = overview.input as Record<string, unknown>;
+    expect(input.executionError).toBeUndefined();
+  });
+
+  it('merges executionError with trace when both present', () => {
+    const overview = buildOverviewStepExecutionFromContext({
+      ...baseOverviewExecution,
+      traceId: 'trace-abc',
+      entryTransactionId: 'txn-xyz',
+    });
+    const input = overview.input as Record<string, unknown>;
+    expect(input.trace).toEqual({
+      traceId: 'trace-abc',
+      entryTransactionId: 'txn-xyz',
+    });
+    expect(input.executionError).toEqual({
+      type: 'TaskRecoveryError',
+      message: 'Resume interrupted',
+    });
+  });
+
+  it('surfaces skipReason on Overview when execution was skipped before steps ran', () => {
+    const overview = buildOverviewStepExecutionFromContext({
+      ...baseOverviewExecution,
+      status: ExecutionStatus.SKIPPED,
+      error: null,
+      stepExecutions: [],
+      context: { spaceId: 'default' },
+      cancellationReason: 'Queue wait exceeded (queue-ttl: 1s)',
+    } as WorkflowExecutionDto & { cancellationReason: string });
+    const input = overview.input as Record<string, unknown>;
+    expect(input.skipReason).toBe('Queue wait exceeded (queue-ttl: 1s)');
+    expect(input.spaceId).toBe('default');
+  });
+
+  it('omits skipReason on Overview when status is not skipped', () => {
+    const overview = buildOverviewStepExecutionFromContext({
+      ...baseOverviewExecution,
+      cancellationReason: 'Cancelled by user',
+    } as WorkflowExecutionDto & { cancellationReason: string });
+    const input = overview.input as Record<string, unknown>;
+    expect(input.skipReason).toBeUndefined();
+  });
+
+  it('includes workflow.version in overview input when present on the execution', () => {
+    const overview = buildOverviewStepExecutionFromContext({
+      ...baseOverviewExecution,
+      version: 4,
+      context: {
+        workflow: {
+          id: 'wf-1',
+          name: 'Test',
+          enabled: false,
+          spaceId: 'default',
+        },
+      },
+    });
+    const input = overview.input as Record<string, unknown>;
+    expect(input.workflow).toEqual({
+      id: 'wf-1',
+      name: 'Test',
+      enabled: false,
+      spaceId: 'default',
+      version: 4,
+    });
+  });
+
+  it('omits workflow.version from overview input when absent on the execution', () => {
+    const overview = buildOverviewStepExecutionFromContext({
+      ...baseOverviewExecution,
+      context: {
+        workflow: {
+          id: 'wf-1',
+          name: 'Test',
+          enabled: false,
+          spaceId: 'default',
+        },
+      },
+    });
+    const input = overview.input as Record<string, unknown>;
+    expect(input.workflow).toEqual({
+      id: 'wf-1',
+      name: 'Test',
+      enabled: false,
+      spaceId: 'default',
+    });
+  });
+
+  it('preserves workflow.version already stored in execution context', () => {
+    const overview = buildOverviewStepExecutionFromContext({
+      ...baseOverviewExecution,
+      version: 9,
+      context: {
+        workflow: {
+          id: 'wf-1',
+          name: 'Test',
+          enabled: false,
+          spaceId: 'default',
+          version: 2,
+        },
+      },
+    });
+    const input = overview.input as Record<string, unknown>;
+    expect((input.workflow as Record<string, unknown>).version).toBe(2);
   });
 });

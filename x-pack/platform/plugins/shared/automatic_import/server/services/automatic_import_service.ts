@@ -53,6 +53,7 @@ import { validateFieldMappings } from './build_integration/validate_fields';
 
 /**
  * Derives the integration status from its data streams.
+ * - 'failed' if integration previously had data streams but all were deleted
  * - 'approved' if all data streams are completed and there is at least one
  * - 'completed' if all data streams are completed
  * - 'failed' if any data stream has failed
@@ -64,7 +65,7 @@ function deriveIntegrationStatus(
   dataStreams: DataStreamAttributes[]
 ): TaskStatus {
   if (dataStreams.length === 0) {
-    return 'pending' as TaskStatus;
+    return 'failed' as TaskStatus;
   }
 
   const statuses = dataStreams.map((ds) => ds.job_info?.status);
@@ -82,6 +83,17 @@ function deriveIntegrationStatus(
     return 'completed' as TaskStatus;
   }
   return 'pending' as TaskStatus;
+}
+
+/**
+ * The job phase is only meaningful while a data stream is still being generated. For terminal
+ * statuses (completed, failed, cancelled) the stored phase is stale, so we filter it out here in
+ * code rather than mutating the saved object to clear it.
+ */
+function getInProgressPhase(jobInfo: DataStreamAttributes['job_info']): string | undefined {
+  const isInProgress =
+    jobInfo.status === TASK_STATUSES.pending || jobInfo.status === TASK_STATUSES.processing;
+  return isInProgress ? jobInfo.phase : undefined;
 }
 
 interface ElasticsearchErrorDetails {
@@ -131,7 +143,6 @@ export class AutomaticImportService {
   private taskManagerSetup: TaskManagerSetupContract;
   private taskManagerService: TaskManagerService;
   private logger: Logger;
-
   constructor(
     loggerFactory: LoggerFactory,
     savedObjectsServiceSetup: SavedObjectsServiceSetup,
@@ -196,6 +207,9 @@ export class AutomaticImportService {
           last_updated_by: authenticatedUser.username,
           last_updated_at: new Date().toISOString(),
           status: wasApproved ? TASK_STATUSES.completed : existing.status,
+          ...(integrationParams.connectorId != null
+            ? { connector_id: integrationParams.connectorId }
+            : {}),
           metadata: {
             ...existing.metadata,
             version: newVersion,
@@ -224,13 +238,17 @@ export class AutomaticImportService {
       integrationId
     );
 
-    const dataStreamsResponses: DataStreamResponse[] = dataStreamsSO.map((dataStream) => ({
-      dataStreamId: dataStream.data_stream_id,
-      title: dataStream.title,
-      description: dataStream.description,
-      inputTypes: dataStream.input_types.map((type) => ({ name: type })) as InputType[],
-      status: dataStream.job_info.status as TaskStatus,
-    }));
+    const dataStreamsResponses: DataStreamResponse[] = dataStreamsSO.map((dataStream) => {
+      const phase = getInProgressPhase(dataStream.job_info);
+      return {
+        dataStreamId: dataStream.data_stream_id,
+        title: dataStream.title,
+        description: dataStream.description,
+        inputTypes: dataStream.input_types.map((type) => ({ name: type })) as InputType[],
+        status: dataStream.job_info.status as TaskStatus,
+        ...(phase ? { phase } : {}),
+      };
+    });
 
     const integrationResponse: IntegrationResponse = {
       integrationId: integrationSO.integration_id,
@@ -238,10 +256,12 @@ export class AutomaticImportService {
       logo: integrationSO.metadata.logo,
       description: integrationSO.metadata.description,
       version: integrationSO.metadata.version,
+      connectorId: integrationSO.connector_id,
       createdBy: integrationSO.created_by,
       createdByProfileUid: integrationSO.created_by_profile_uid,
       status: deriveIntegrationStatus(integrationSO, dataStreamsSO),
       dataStreams: dataStreamsResponses,
+      categories: integrationSO.metadata.categories,
     };
     return integrationResponse;
   }
@@ -255,19 +275,24 @@ export class AutomaticImportService {
     return Promise.all(
       integrations.map(async (integration) => {
         const dataStreams = await savedObjectService.getAllDataStreams(integration.integration_id);
-        const dataStreamsResponses: DataStreamResponse[] = dataStreams.map((dataStream) => ({
-          dataStreamId: dataStream.data_stream_id,
-          title: dataStream.title,
-          description: dataStream.description,
-          inputTypes: dataStream.input_types.map((type) => ({ name: type })) as InputType[],
-          status: dataStream.job_info.status as TaskStatus,
-        }));
+        const dataStreamsResponses: DataStreamResponse[] = dataStreams.map((dataStream) => {
+          const phase = getInProgressPhase(dataStream.job_info);
+          return {
+            dataStreamId: dataStream.data_stream_id,
+            title: dataStream.title,
+            description: dataStream.description,
+            inputTypes: dataStream.input_types.map((type) => ({ name: type })) as InputType[],
+            status: dataStream.job_info.status as TaskStatus,
+            ...(phase ? { phase } : {}),
+          };
+        });
         return {
           integrationId: integration.integration_id,
           title: integration.metadata.title,
           logo: integration.metadata.logo,
           description: integration.metadata.description,
           version: integration.metadata.version,
+          connectorId: integration.connector_id,
           createdBy: integration.created_by,
           createdByProfileUid: integration.created_by_profile_uid,
           status: deriveIntegrationStatus(integration, dataStreams),
@@ -333,17 +358,7 @@ export class AutomaticImportService {
     }
 
     const title = existing.metadata?.title ?? integrationId;
-    const isInitialRelease = !existing.changelog || existing.changelog.length === 0;
-    const changelogEntry: ChangelogEntry = {
-      version,
-      changes: [
-        {
-          description: isInitialRelease ? `Initial release of ${title}` : `Updated ${title}`,
-          type: 'enhancement',
-          link: '',
-        },
-      ],
-    };
+    const changelogEntry = this.createChangelogEntry(version, title, existing.changelog);
 
     const updateData: IntegrationAttributes = {
       ...existing,
@@ -472,6 +487,8 @@ export class AutomaticImportService {
     }
 
     await this.savedObjectService.deleteDataStream(dataStreamId, integrationId, options);
+
+    await this.resetApprovedStatus(integrationId);
   }
 
   public async reanalyzeDataStream(
@@ -587,15 +604,14 @@ export class AutomaticImportService {
     integrationId: string;
     dataStreamId: string;
     ingestPipeline: string | Record<string, unknown>;
-    internalEsClient: ElasticsearchClient;
+    esClient: ElasticsearchClient;
     fieldsMetadataClient: IFieldsMetadataClient;
   }): Promise<{
     ingest_pipeline: Record<string, unknown>;
     results: Array<Record<string, unknown>>;
   }> {
     assert(this.savedObjectService, 'Saved Objects service not initialized.');
-    const { integrationId, dataStreamId, ingestPipeline, internalEsClient, fieldsMetadataClient } =
-      params;
+    const { integrationId, dataStreamId, ingestPipeline, esClient, fieldsMetadataClient } = params;
 
     let parsedPipeline: Pipeline;
     try {
@@ -622,7 +638,7 @@ export class AutomaticImportService {
 
     let simulateResponse: estypes.IngestSimulateResponse;
     try {
-      simulateResponse = await internalEsClient.ingest.simulate({
+      simulateResponse = await esClient.ingest.simulate({
         pipeline: parsedPipeline as unknown as estypes.IngestPipeline,
         docs: samples.map((sample) => ({
           _source: { message: sample },
@@ -648,11 +664,7 @@ export class AutomaticImportService {
       fieldsMetadataClient
     );
 
-    const validationResult = await validateFieldMappings(
-      internalEsClient,
-      fieldMapping,
-      this.logger
-    );
+    const validationResult = await validateFieldMappings(esClient, fieldMapping, this.logger);
     if (!validationResult.valid) {
       this.logger.warn(
         `Field mapping validation warnings for ${dataStreamId}: ${validationResult.errors.join(
@@ -670,7 +682,50 @@ export class AutomaticImportService {
       status: TASK_STATUSES.completed,
     });
 
+    await this.resetApprovedStatus(integrationId);
+
     return this.getDataStreamResults(integrationId, dataStreamId);
+  }
+
+  private async resetApprovedStatus(integrationId: string): Promise<void> {
+    assert(this.savedObjectService, 'Saved Objects service not initialized.');
+    const integration = await this.savedObjectService.getIntegration(integrationId);
+    if (integration.status === TASK_STATUSES.approved) {
+      const currentVersion = integration.metadata?.version || '0.1.0';
+      const parts = currentVersion.split('.');
+      const newVersion =
+        parts.length === 3 ? `${parts[0]}.${parseInt(parts[1], 10) + 1}.0` : currentVersion;
+      const title = integration.metadata?.title ?? integrationId;
+      const changelogEntry = this.createChangelogEntry(newVersion, title, integration.changelog);
+      const updateData: IntegrationAttributes = {
+        ...integration,
+        status: TASK_STATUSES.completed,
+        changelog: [changelogEntry, ...(integration.changelog ?? [])],
+      };
+
+      await this.savedObjectService.updateIntegration(updateData, newVersion);
+      this.logger.debug(
+        `Integration ${integrationId} status reset from approved to completed after data stream mutation`
+      );
+    }
+  }
+
+  private createChangelogEntry(
+    version: string,
+    title: string,
+    existingChangelog?: ChangelogEntry[]
+  ): ChangelogEntry {
+    const isInitialRelease = !existingChangelog || existingChangelog.length === 0;
+    return {
+      version,
+      changes: [
+        {
+          description: isInitialRelease ? `Initial release of ${title}` : `Updated ${title}`,
+          type: 'enhancement',
+          link: '',
+        },
+      ],
+    };
   }
 
   public stop() {

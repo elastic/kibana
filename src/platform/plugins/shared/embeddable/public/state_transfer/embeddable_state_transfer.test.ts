@@ -127,6 +127,29 @@ describe('embeddable state transfer', () => {
     expect(stateTransfer.isTransferInProgress).toEqual(false);
   });
 
+  it('emits to incomingPackagesState$ after navigateToEditor for same-page transfers', async () => {
+    const received: unknown[] = [];
+    stateTransfer
+      .onTransferEmbeddablePackage$(destinationApp)
+      .subscribe((val) => received.push(val));
+
+    await stateTransfer.navigateToEditor(destinationApp, { state: { originatingApp } });
+    expect(received).toHaveLength(1);
+  });
+
+  it('does not emit to incomingPackagesState$ when openInNewTab is true', async () => {
+    const received: unknown[] = [];
+    stateTransfer
+      .onTransferEmbeddablePackage$(destinationApp)
+      .subscribe((val) => received.push(val));
+
+    await stateTransfer.navigateToEditor(destinationApp, {
+      state: { originatingApp },
+      openInNewTab: true,
+    });
+    expect(received).toHaveLength(0);
+  });
+
   it('can send an outgoing embeddable package state', async () => {
     await stateTransfer.navigateToWithEmbeddablePackages(destinationApp, {
       state: [{ type: 'coolestType', serializedState: { savedObjectId: '150' } }],

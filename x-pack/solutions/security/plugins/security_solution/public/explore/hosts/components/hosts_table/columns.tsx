@@ -7,6 +7,7 @@
 
 import { EuiIcon, EuiLink, EuiText, EuiToolTip } from '@elastic/eui';
 import React from 'react';
+import type { SyntheticEvent } from 'react';
 import { SECURITY_CELL_ACTIONS_DEFAULT } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { CriticalityLevelWithUnassigned } from '../../../../../common/entity_analytics/asset_criticality/types';
 import { AssetCriticalityBadge } from '../../../../entity_analytics/components/asset_criticality';
@@ -24,7 +25,8 @@ import { ENTITY_RISK_LEVEL } from '../../../../entity_analytics/components/risk_
 
 export const getHostsColumns = (
   showRiskColumn: boolean,
-  dispatchSeverityUpdate: (s: RiskSeverity) => void
+  dispatchSeverityUpdate: (s: RiskSeverity) => void,
+  openHostFlyout: (hostName: string, entityId: string) => void
 ): HostsTableColumns => {
   const columns: HostsTableColumns = [
     {
@@ -34,24 +36,29 @@ export const getHostsColumns = (
       mobileOptions: { show: true },
       sortable: true,
       render: (hostName, hostEdge) => {
-        if (hostName != null && hostName.length > 0) {
-          const name = hostName[0];
-          return (
-            <SecurityCellActions
-              mode={CellActionsMode.HOVER_DOWN}
-              visibleCellActions={5}
-              showActionTooltips
-              triggerId={SECURITY_CELL_ACTIONS_DEFAULT}
-              data={{
-                value: name,
-                field: 'host.name',
-              }}
-            >
-              <HostDetailsLink hostName={name} entityId={hostEdge.node.entityId ?? undefined} />
-            </SecurityCellActions>
-          );
-        }
-        return getEmptyTagValue();
+        if (hostName == null || hostName.length === 0) return getEmptyTagValue();
+        const name = hostName[0];
+        const entityId = hostEdge.node.entityId ?? undefined;
+        const onClick = entityId
+          ? (e: SyntheticEvent) => {
+              e.preventDefault();
+              openHostFlyout(name, entityId);
+            }
+          : undefined;
+        return (
+          <SecurityCellActions
+            mode={CellActionsMode.HOVER_DOWN}
+            visibleCellActions={5}
+            showActionTooltips
+            triggerId={SECURITY_CELL_ACTIONS_DEFAULT}
+            data={{
+              value: name,
+              field: 'host.name',
+            }}
+          >
+            <HostDetailsLink hostName={name} entityId={entityId} onClick={onClick} />
+          </SecurityCellActions>
+        );
       },
       width: '35%',
     },

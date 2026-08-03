@@ -1630,9 +1630,11 @@ describe('utils', () => {
           } as FileJSON,
         })
       ).toStrictEqual({
-        externalReferenceAttachmentTypeId: '.files',
-        externalReferenceId: 'file-id',
-        externalReferenceMetadata: {
+        owner: 'theOwner',
+        type: 'file',
+        attachmentId: 'file-id',
+        metadata: {
+          soType: 'file',
           files: [
             {
               created: 'created',
@@ -1642,12 +1644,6 @@ describe('utils', () => {
             },
           ],
         },
-        externalReferenceStorage: {
-          soType: 'file',
-          type: 'savedObject',
-        },
-        owner: 'theOwner',
-        type: 'externalReference',
       });
     });
   });

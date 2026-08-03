@@ -11,7 +11,8 @@ import { expect } from '@kbn/scout-security/ui';
 const ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING =
   'securitySolution:enableAlertsAndAttacksAlignment';
 
-spaceTest.describe(
+// Failing: See https://github.com/elastic/kibana/issues/266341
+spaceTest.describe.skip(
   'Attacks navigation',
   { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
   () => {

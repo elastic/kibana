@@ -132,6 +132,11 @@ export const createKbnFieldTypes = (): KbnFieldType[] => [
     esTypes: [ES_FIELD_TYPES.TDIGEST],
   }),
   new KbnFieldType({
+    name: KBN_FIELD_TYPES.FLATTENED,
+    filterable: false,
+    esTypes: [ES_FIELD_TYPES.FLATTENED],
+  }),
+  new KbnFieldType({
     name: KBN_FIELD_TYPES.CONFLICT,
   }),
   new KbnFieldType({

@@ -44,16 +44,16 @@ exports[`renders without crashing 1`] = `
     />
   </EuiFormRow>
   <EuiFormRow
-    error="Select a background color."
     fullWidth={true}
-    isInvalid={true}
+    isInvalid={false}
     label="Background color"
   >
     <EuiColorPicker
       color=""
       fullWidth={true}
-      isInvalid={true}
+      isInvalid={false}
       onChange={[Function]}
+      placeholder="Auto-generated"
     />
   </EuiFormRow>
 </form>

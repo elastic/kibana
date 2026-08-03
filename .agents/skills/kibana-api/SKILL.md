@@ -30,3 +30,20 @@ Tries these permutations automatically:
 - Auth: `elastic:changeme`, `elastic_serverless:changeme`
 
 Override with environment variables `KIBANA_URL` and/or `KIBANA_AUTH` before sourcing.
+
+## Session Auth (Acting as a Browser User)
+
+By default, `kibana_curl` authenticates via HTTP Basic auth, which uses the `__http__` auth provider.
+This is a different auth realm than the browser, which uses the `basic` provider. 
+Any per-user state tied to a browser session (e.g. OAuth tokens, user-specific settings) will not be visible to API calls made with HTTP Basic auth.
+
+To authenticate in the same auth realm as a browser user, set `KIBANA_USE_SESSION=true` before sourcing:
+
+```bash
+export KIBANA_USE_SESSION=true
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+source "$REPO_ROOT/scripts/kibana_api_common.sh"
+```
+
+This logs in via the `basic` auth provider and uses a session cookie for all subsequent `kibana_curl` calls. 
+The default behavior is unchanged when the variable is unset or `false`.

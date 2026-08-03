@@ -8,26 +8,30 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { EVENT_KIND } from '@kbn/rule-data-utils';
 import { ATTACK_PREVIEW_BANNER, AttackDetailsPreviewPanel, AttackDetailsRightPanel } from '.';
 import { AttackDetailsPreviewPanelKey, AttackDetailsRightPanelKey } from './constants/panel_keys';
 import { useAttackDetailsContext } from './context';
-import { useTabs } from './hooks/use_tabs';
+import { useTabs } from '../../flyout_v2/shared/hooks/use_tabs';
 import { useNavigateToAttackDetailsLeftPanel } from './hooks/use_navigate_to_attack_details_left_panel';
 import { useKibana } from '../../common/lib/kibana';
 
-const mockFlyoutNavigation = jest.fn((props: unknown) => (
-  <div data-test-subj="flyoutNavigation">{JSON.stringify(props)}</div>
+const mockFlyoutNavigation = jest.fn((_props?: unknown) => (
+  <div data-test-subj="flyoutNavigation" />
 ));
 
 jest.mock('@kbn/expandable-flyout');
 jest.mock('./context');
-jest.mock('./hooks/use_tabs');
+jest.mock('../../flyout_v2/shared/hooks/use_tabs');
 jest.mock('./hooks/use_navigate_to_attack_details_left_panel');
 jest.mock('../../common/lib/kibana');
 jest.mock('./content', () => ({ PanelContent: () => <div data-test-subj="panelContent" /> }));
 jest.mock('./footer', () => ({ PanelFooter: () => <div data-test-subj="panelFooter" /> }));
 jest.mock('../shared/components/flyout_navigation', () => ({
   FlyoutNavigation: (props: unknown) => mockFlyoutNavigation(props),
+}));
+jest.mock('./components/header_actions', () => ({
+  AttackHeaderActions: () => <span data-test-subj="attackHeaderActionsMock" />,
 }));
 jest.mock('./header', () => ({
   PanelHeader: ({
@@ -75,8 +79,8 @@ describe('AttackDetailsPanel', () => {
       refetch: jest.fn(),
     } as unknown as ReturnType<typeof useAttackDetailsContext>);
     jest.mocked(useTabs).mockReturnValue({
-      tabsDisplayed: [],
       selectedTabId: 'overview',
+      setSelectedTabId: jest.fn(),
     });
     jest.mocked(useNavigateToAttackDetailsLeftPanel).mockReturnValue(jest.fn());
     jest.mocked(useKibana).mockReturnValue({
@@ -97,7 +101,10 @@ describe('AttackDetailsPanel', () => {
     getByTestId('switchTabButton').click();
 
     expect(mockFlyoutNavigation.mock.calls[0][0]).toEqual(
-      expect.objectContaining({ flyoutIsExpandable: true })
+      expect.objectContaining({
+        flyoutIsExpandable: true,
+        actions: expect.any(Object),
+      })
     );
     expect(openRightPanel).toHaveBeenCalledWith({
       id: AttackDetailsRightPanelKey,
@@ -138,6 +145,31 @@ describe('AttackDetailsPanel', () => {
       },
     });
     expect(openRightPanel).not.toHaveBeenCalled();
+  });
+
+  it('shows the remote document callout when searchHit._index is a CCS remote index', () => {
+    jest.mocked(useAttackDetailsContext).mockReturnValue({
+      attackId: 'attack-1',
+      indexName: 'remote-cluster:.alerts-security.alerts-default',
+      attack: null,
+      scopeId: 'scope',
+      isPreviewMode: false,
+      getFieldsData: jest.fn(),
+      browserFields: {},
+      dataFormattedForFieldBrowser: [],
+      searchHit: {
+        _id: 'attack-1',
+        _index: 'remote-cluster:.alerts-security.alerts-default',
+        _source: { [EVENT_KIND]: 'signal' },
+      },
+      refetch: jest.fn(),
+    } as unknown as ReturnType<typeof useAttackDetailsContext>);
+
+    const { getByText } = render(<AttackDetailsRightPanel />);
+
+    expect(
+      getByText('This alert originates from a remote cluster. Some features may not be available.')
+    ).toBeInTheDocument();
   });
 
   it('uses default preview banner', () => {

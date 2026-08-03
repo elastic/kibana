@@ -8,5 +8,14 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { stackMonitoringCommonSchema } from '../common';
 
-export const licenseExpirationParamsSchema = stackMonitoringCommonSchema.extends({});
+export const licenseExpirationParamsSchema = stackMonitoringCommonSchema.extends(
+  {},
+  {
+    meta: {
+      title: 'License Expiration Rule Params',
+      description:
+        'The parameters for the license expiration rule. These parameters are appropriate when `rule_type_id` is `monitoring_alert_license_expiration`.',
+    },
+  }
+);
 export type LicenseExpirationParams = TypeOf<typeof licenseExpirationParamsSchema>;

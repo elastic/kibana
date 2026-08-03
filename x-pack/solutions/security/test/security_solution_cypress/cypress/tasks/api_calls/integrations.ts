@@ -56,25 +56,33 @@ export function installIntegrations({
       packages,
       force: true,
     },
-  });
+  })
+    .then(() => {
+      // Wait for each package to reach 'installed' status before proceeding
+      packages.forEach(({ name }) => waitForPackageInstalled(name));
+    })
+    .then(() =>
+      rootRequest<CreateAgentPolicyResponse>({
+        method: 'POST',
+        url: `${AGENT_POLICY_API_ROUTES.CREATE_PATTERN}?sys_monitoring=true`,
+        body: agentPolicy,
+        // Fleet Agent Policies API is known to be slow.
+        // Set 1 minute timeout, default is 30 seconds.
+        timeout: 60000,
+      })
+    )
+    .then((response) => {
+      const packagePolicyWithAgentPolicyId: PackagePolicy = {
+        ...packagePolicy,
+        policy_id: response.body.item.id,
+      };
 
-  // Install agent and package policies
-  rootRequest<CreateAgentPolicyResponse>({
-    method: 'POST',
-    url: `${AGENT_POLICY_API_ROUTES.CREATE_PATTERN}?sys_monitoring=true`,
-    body: agentPolicy,
-  }).then((response) => {
-    const packagePolicyWithAgentPolicyId: PackagePolicy = {
-      ...packagePolicy,
-      policy_id: response.body.item.id,
-    };
-
-    rootRequest({
-      method: 'POST',
-      url: PACKAGE_POLICY_API_ROUTES.CREATE_PATTERN,
-      body: packagePolicyWithAgentPolicyId,
+      rootRequest({
+        method: 'POST',
+        url: PACKAGE_POLICY_API_ROUTES.CREATE_PATTERN,
+        body: packagePolicyWithAgentPolicyId,
+      });
     });
-  });
 }
 
 /**

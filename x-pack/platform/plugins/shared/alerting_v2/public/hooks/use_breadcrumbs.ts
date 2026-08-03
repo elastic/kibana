@@ -32,8 +32,13 @@ export function useBreadcrumbs(
       href: '/',
     };
 
-    const notificationPoliciesListBreadcrumb: ChromeBreadcrumb = {
-      ...getAlertingV2Breadcrumb('notification_policies_list'),
+    const actionPoliciesListBreadcrumb: ChromeBreadcrumb = {
+      ...getAlertingV2Breadcrumb('action_policies_list'),
+      href: '/',
+    };
+
+    const episodesListBreadcrumb: ChromeBreadcrumb = {
+      ...getAlertingV2Breadcrumb('episodes_list'),
       href: '/',
     };
 
@@ -42,12 +47,6 @@ export function useBreadcrumbs(
     switch (page) {
       case 'rules_list':
         breadcrumbs = [rootBreadcrumb, { ...getAlertingV2Breadcrumb('rules_list') }];
-        break;
-      case 'create':
-        breadcrumbs = [rootBreadcrumb, rulesListBreadcrumb, getAlertingV2Breadcrumb('create')];
-        break;
-      case 'edit':
-        breadcrumbs = [rootBreadcrumb, rulesListBreadcrumb, getAlertingV2Breadcrumb('edit')];
         break;
       case 'rule_details':
         breadcrumbs = [
@@ -58,25 +57,37 @@ export function useBreadcrumbs(
           }),
         ];
         break;
-      case 'notification_policies_list':
+      case 'action_policies_list':
+        breadcrumbs = [rootBreadcrumb, { ...getAlertingV2Breadcrumb('action_policies_list') }];
+        break;
+      case 'action_policy_create':
         breadcrumbs = [
           rootBreadcrumb,
-          { ...getAlertingV2Breadcrumb('notification_policies_list') },
+          actionPoliciesListBreadcrumb,
+          getAlertingV2Breadcrumb('action_policy_create'),
         ];
         break;
-      case 'notification_policy_create':
+      case 'action_policy_edit':
         breadcrumbs = [
           rootBreadcrumb,
-          notificationPoliciesListBreadcrumb,
-          getAlertingV2Breadcrumb('notification_policy_create'),
+          actionPoliciesListBreadcrumb,
+          getAlertingV2Breadcrumb('action_policy_edit'),
         ];
         break;
-      case 'notification_policy_edit':
+      case 'episodes_list':
+        breadcrumbs = [rootBreadcrumb, { ...getAlertingV2Breadcrumb('episodes_list') }];
+        break;
+      case 'episode_details':
         breadcrumbs = [
           rootBreadcrumb,
-          notificationPoliciesListBreadcrumb,
-          getAlertingV2Breadcrumb('notification_policy_edit'),
+          episodesListBreadcrumb,
+          getAlertingV2Breadcrumb('episode_details', {
+            ruleName: options.ruleName ?? '',
+          }),
         ];
+        break;
+      case 'execution_history_list':
+        breadcrumbs = [rootBreadcrumb, { ...getAlertingV2Breadcrumb('execution_history_list') }];
         break;
       default:
         breadcrumbs = [rootBreadcrumb, { ...getAlertingV2Breadcrumb('rules_list') }];

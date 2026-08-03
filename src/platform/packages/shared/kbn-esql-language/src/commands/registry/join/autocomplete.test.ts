@@ -125,7 +125,6 @@ describe('JOIN Autocomplete', () => {
           incomplete: true,
           kind: 'Issue',
           label: 'Create lookup index',
-          sortText: '0',
           text: '',
         })
       );
@@ -202,9 +201,32 @@ describe('JOIN Autocomplete', () => {
           end: 37,
           start: 23,
         },
-        sortText: '0',
         text: 'new_join_index',
       });
+    });
+
+    test('strips the coordinator prefix from the create index command', async () => {
+      const suggestions = await suggest(
+        'FROM index | LOOKUP JOIN _coordinator:new_join_index',
+        mockContext,
+        'join',
+        mockCallbacks,
+        autocomplete
+      );
+
+      expect(
+        suggestions.find(
+          (suggestion) => suggestion.label === 'Create lookup index "new_join_index"'
+        )
+      ).toEqual(
+        expect.objectContaining({
+          command: expect.objectContaining({
+            arguments: [{ indexName: 'new_join_index' }],
+          }),
+          filterText: 'new_join_index',
+          text: 'new_join_index',
+        })
+      );
     });
 
     test('discriminates between indices and aliases', async () => {

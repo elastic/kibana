@@ -12,6 +12,6 @@ import { appPaths } from '../utils/app_paths';
 import { labels } from '../utils/i18n';
 
 export const AgentBuilderSkillsPage = () => {
-  useBreadcrumb([{ text: labels.skills.title, path: appPaths.skills.list }]);
+  useBreadcrumb([{ text: labels.skills.libraryTitle, path: appPaths.skills.list }]);
   return <AgentBuilderSkills />;
 };

@@ -10,18 +10,23 @@ import { isFunctionExpression, within, isAssignment, isColumn } from '@elastic/e
 import type { ESQLAstAllCommands, ESQLAstField } from '@elastic/esql/types';
 import {
   getNewUserDefinedColumnSuggestion,
+  newLineCompleteItem,
   pipeCompleteItem,
   commaCompleteItem,
   assignCompletionItem,
 } from '../../../registry/complete_items';
-import type { Location } from '../../../registry/types';
-import type { ICommandCallbacks, ICommandContext, ISuggestionItem } from '../../../registry/types';
+import {
+  type ICommandCallbacks,
+  type ICommandContext,
+  type ISuggestionItem,
+  type Location,
+} from '../../../registry/types';
+import { ReplacementRangeStrategyKind } from '../../../../language/autocomplete/utils/prefix_range';
 import { getAssignmentExpressionRoot } from '../expressions';
 import { suggestForExpression } from './expressions';
 import { withAutoSuggest } from './helpers';
+import { endsWithComma, endsWithWhitespace } from '../regex';
 import type { ExpressionContextOptions } from './expressions/types';
-
-const ENDS_WITH_WHITESPACE_REGEX = /\s$/;
 
 export async function suggestFieldsList(
   query: string,
@@ -33,7 +38,7 @@ export async function suggestFieldsList(
   cursorPosition: number = query.length,
   options?: {
     /** Listed functions will not be suggested in expressions */
-    functionsToIgnore?: ExpressionContextOptions['functionsToIgnore'];
+    getFunctionsToIgnore?: ExpressionContextOptions['getFunctionsToIgnore'];
     /** Suggestions to show after a complete field expression */
     afterCompleteSuggestions?: ISuggestionItem[];
     /** Include pipe/comma suggestions after a complete field expression */
@@ -54,10 +59,10 @@ export async function suggestFieldsList(
   const innerText = query.substring(0, cursorPosition);
   const lastField = fieldList[fieldList.length - 1];
 
-  const endsWithComma = /,\s*$/.test(innerText);
+  const hasTrailingComma = endsWithComma(innerText);
   const withinFunction =
     lastField && isFunctionExpression(lastField) && within(innerText.length, lastField);
-  const startingNewExpression = endsWithComma && !withinFunction;
+  const startingNewExpression = hasTrailingComma && !withinFunction;
 
   let expressionRoot = startingNewExpression ? undefined : lastField;
   let insideAssignment = false;
@@ -77,7 +82,7 @@ export async function suggestFieldsList(
     callbacks,
     options: {
       preferredExpressionType: options?.preferredExpressionType,
-      functionsToIgnore: options?.functionsToIgnore,
+      getFunctionsToIgnore: options?.getFunctionsToIgnore,
       ignoredColumnsForEmptyExpression: options?.ignoredColumnsForEmptyExpression,
     },
   });
@@ -103,14 +108,13 @@ export async function suggestFieldsList(
     if (options?.includePipeAndCommaSuggestions !== false) {
       const commaSuggestion = withAutoSuggest({ ...commaCompleteItem, text: ', ' });
 
-      if (ENDS_WITH_WHITESPACE_REGEX.test(innerText)) {
-        commaSuggestion.rangeToReplace = {
-          start: innerText.length - 1,
-          end: innerText.length,
+      if (endsWithWhitespace(innerText)) {
+        commaSuggestion.replacementRangeStrategy = {
+          kind: ReplacementRangeStrategyKind.TRAILING_WHITESPACE,
         };
       }
 
-      suggestions.push(pipeCompleteItem, commaSuggestion);
+      suggestions.push(newLineCompleteItem, pipeCompleteItem, commaSuggestion);
     }
 
     if (options?.afterCompleteSuggestions) {

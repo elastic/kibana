@@ -14,92 +14,92 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ArrayFromString, BooleanFromString } from '@kbn/zod-helpers/v4';
 
 import { SortOrder } from '../common_attributes.gen';
 import { AnonymizationFieldResponse } from './bulk_crud_anonymization_fields_route.gen';
 
+export const FindAnonymizationFieldsSortField = lazySchema(() =>
+  z.enum(['created_at', 'anonymized', 'allowed', 'field', 'updated_at'])
+);
 export type FindAnonymizationFieldsSortField = z.infer<typeof FindAnonymizationFieldsSortField>;
-export const FindAnonymizationFieldsSortField = z.enum([
-  'created_at',
-  'anonymized',
-  'allowed',
-  'field',
-  'updated_at',
-]);
 export type FindAnonymizationFieldsSortFieldEnum = typeof FindAnonymizationFieldsSortField.enum;
 export const FindAnonymizationFieldsSortFieldEnum = FindAnonymizationFieldsSortField.enum;
 
+export const FindAnonymizationFieldsRequestQuery = lazySchema(() =>
+  z.object({
+    /**
+     * Fields to return
+     */
+    fields: ArrayFromString(z.string()).optional(),
+    /**
+     * Search query
+     */
+    filter: z.string().optional(),
+    /**
+     * Field to sort by
+     */
+    sort_field: FindAnonymizationFieldsSortField.optional(),
+    /**
+     * Sort order
+     */
+    sort_order: SortOrder.optional(),
+    /**
+     * Page number
+     */
+    page: z.coerce.number().int().min(1).optional().default(1),
+    /**
+     * AnonymizationFields per page
+     */
+    per_page: z.coerce.number().int().min(0).optional().default(20),
+    /**
+     * If true, additionally fetch all anonymization fields, otherwise fetch only the provided page
+     */
+    all_data: BooleanFromString.optional(),
+  })
+);
 export type FindAnonymizationFieldsRequestQuery = z.infer<
   typeof FindAnonymizationFieldsRequestQuery
 >;
-export const FindAnonymizationFieldsRequestQuery = z.object({
-  /**
-   * Fields to return
-   */
-  fields: ArrayFromString(z.string()).optional(),
-  /**
-   * Search query
-   */
-  filter: z.string().optional(),
-  /**
-   * Field to sort by
-   */
-  sort_field: FindAnonymizationFieldsSortField.optional(),
-  /**
-   * Sort order
-   */
-  sort_order: SortOrder.optional(),
-  /**
-   * Page number
-   */
-  page: z.coerce.number().int().min(1).optional().default(1),
-  /**
-   * AnonymizationFields per page
-   */
-  per_page: z.coerce.number().int().min(0).optional().default(20),
-  /**
-   * If true, additionally fetch all anonymization fields, otherwise fetch only the provided page
-   */
-  all_data: BooleanFromString.optional(),
-});
 export type FindAnonymizationFieldsRequestQueryInput = z.input<
   typeof FindAnonymizationFieldsRequestQuery
 >;
 
+export const FindAnonymizationFieldsResponse = lazySchema(() =>
+  z.object({
+    page: z.number().int(),
+    perPage: z.number().int(),
+    total: z.number().int(),
+    data: z.array(AnonymizationFieldResponse),
+    all: z.array(AnonymizationFieldResponse).optional(),
+    aggregations: z
+      .object({
+        field_status: z
+          .object({
+            buckets: z
+              .object({
+                anonymized: z
+                  .object({
+                    doc_count: z.number().int().optional().default(0),
+                  })
+                  .optional(),
+                allowed: z
+                  .object({
+                    doc_count: z.number().int().optional().default(0),
+                  })
+                  .optional(),
+                denied: z
+                  .object({
+                    doc_count: z.number().int().optional().default(0),
+                  })
+                  .optional(),
+              })
+              .optional(),
+          })
+          .optional(),
+      })
+      .optional(),
+  })
+);
 export type FindAnonymizationFieldsResponse = z.infer<typeof FindAnonymizationFieldsResponse>;
-export const FindAnonymizationFieldsResponse = z.object({
-  page: z.number().int(),
-  perPage: z.number().int(),
-  total: z.number().int(),
-  data: z.array(AnonymizationFieldResponse),
-  all: z.array(AnonymizationFieldResponse).optional(),
-  aggregations: z
-    .object({
-      field_status: z
-        .object({
-          buckets: z
-            .object({
-              anonymized: z
-                .object({
-                  doc_count: z.number().int().optional().default(0),
-                })
-                .optional(),
-              allowed: z
-                .object({
-                  doc_count: z.number().int().optional().default(0),
-                })
-                .optional(),
-              denied: z
-                .object({
-                  doc_count: z.number().int().optional().default(0),
-                })
-                .optional(),
-            })
-            .optional(),
-        })
-        .optional(),
-    })
-    .optional(),
-});

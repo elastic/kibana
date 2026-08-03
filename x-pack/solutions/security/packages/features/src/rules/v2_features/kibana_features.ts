@@ -26,16 +26,20 @@ import {
   RULES_API_ALL,
   RULES_API_READ,
   RULES_FEATURE_ID_V2,
-  RULES_FEATURE_ID_V3,
   RULES_UI_EDIT,
   RULES_UI_READ,
   SECURITY_SOLUTION_RULES_APP_ID,
   SERVER_APP_ID,
   USERS_API_READ,
   ALERTS_FEATURE_ID,
+  RULES_FEATURE_ID_V4,
+  INVESTIGATION_GUIDE_SUBFEATURE_EDIT_ID,
+  CUSTOM_HIGHLIGHTED_FIELDS_SUBFEATURE_EDIT_ID,
+  ENABLE_DISABLE_RULES_SUBFEATURE_ID,
+  MANUAL_RUN_RULES_SUBFEATURE_ID,
   ALERTS_API_UPDATE_DEPRECATED_PRIVILEGE,
   ALERTS_UI_UPDATE_DEPRECATED_PRIVILEGE,
-  EXCEPTIONS_SUBFEATURE_ALL,
+  RULES_MANAGEMENT_SETTINGS_SUBFEATURE_ID,
 } from '../../constants';
 import { type BaseKibanaFeatureConfig } from '../../types';
 import type { SecurityFeatureParams } from '../../security/types';
@@ -57,7 +61,7 @@ export const getRulesV2BaseKibanaFeature = (
         defaultMessage: 'The {currentId} permissions are deprecated, please see {latestId}.',
         values: {
           currentId: RULES_FEATURE_ID_V2,
-          latestId: RULES_FEATURE_ID_V3,
+          latestId: RULES_FEATURE_ID_V4,
         },
       }
     ),
@@ -75,19 +79,26 @@ export const getRulesV2BaseKibanaFeature = (
   catalogue: [APP_ID],
   alerting: alertingFeatures,
   management: {
-    insightsAndAlerting: ['triggersActions'], // Access to the stack rules management UI
+    insightsAndAlerting: ['triggersActionsRules', 'triggersActionsAlerts'], // Access to the stack rules management UI
   },
   privileges: {
     all: {
       replacedBy: {
         default: [
-          { feature: RULES_FEATURE_ID_V3, privileges: ['all'] },
+          { feature: RULES_FEATURE_ID_V4, privileges: ['all'] },
           { feature: ALERTS_FEATURE_ID, privileges: ['all'] },
         ],
         minimal: [
           {
-            feature: RULES_FEATURE_ID_V3,
-            privileges: ['minimal_all', EXCEPTIONS_SUBFEATURE_ALL],
+            feature: RULES_FEATURE_ID_V4,
+            privileges: [
+              'minimal_all',
+              INVESTIGATION_GUIDE_SUBFEATURE_EDIT_ID,
+              CUSTOM_HIGHLIGHTED_FIELDS_SUBFEATURE_EDIT_ID,
+              ENABLE_DISABLE_RULES_SUBFEATURE_ID,
+              MANUAL_RUN_RULES_SUBFEATURE_ID,
+              RULES_MANAGEMENT_SETTINGS_SUBFEATURE_ID,
+            ],
           },
           { feature: ALERTS_FEATURE_ID, privileges: ['minimal_all'] },
         ],
@@ -108,7 +119,7 @@ export const getRulesV2BaseKibanaFeature = (
         alert: { all: alertingFeatures },
       },
       management: {
-        insightsAndAlerting: ['triggersActions'], // Access to the stack rules management UI
+        insightsAndAlerting: ['triggersActionsRules', 'triggersActionsAlerts'], // Access to the stack rules management UI
       },
       ui: [RULES_UI_READ, RULES_UI_EDIT, EXCEPTIONS_UI_READ],
       api: [
@@ -128,12 +139,12 @@ export const getRulesV2BaseKibanaFeature = (
     read: {
       replacedBy: {
         default: [
-          { feature: RULES_FEATURE_ID_V3, privileges: ['read'] },
+          { feature: RULES_FEATURE_ID_V4, privileges: ['read'] },
           { feature: ALERTS_FEATURE_ID, privileges: ['read'] },
         ],
         minimal: [
           {
-            feature: RULES_FEATURE_ID_V3,
+            feature: RULES_FEATURE_ID_V4,
             privileges: ['minimal_read'],
           },
           { feature: ALERTS_FEATURE_ID, privileges: ['minimal_read'] },
@@ -150,7 +161,7 @@ export const getRulesV2BaseKibanaFeature = (
         alert: { all: alertingFeatures },
       },
       management: {
-        insightsAndAlerting: ['triggersActions'], // Access to the stack rules management UI
+        insightsAndAlerting: ['triggersActionsRules', 'triggersActionsAlerts'], // Access to the stack rules management UI
       },
       ui: [RULES_UI_READ, EXCEPTIONS_UI_READ, ALERTS_UI_UPDATE_DEPRECATED_PRIVILEGE],
       api: [

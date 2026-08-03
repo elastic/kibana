@@ -23,12 +23,10 @@ const PUBLIC_HEADERS = {
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const es = getService('es');
+  const retry = getService('retry');
 
   describe('streams APIs with security disabled', () => {
     before(async () => {
-      // Enable streams
-      await supertest.post('/api/streams/_enable').set(PUBLIC_HEADERS).expect(200);
-
       // Index a document into a classic stream to test classic-specific endpoints
       await es.index({
         index: 'logs-test.security-disabled',
@@ -52,25 +50,54 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('GET /api/streams/_status returns status', async () => {
-      const { body } = await supertest.get('/api/streams/_status').set(PUBLIC_HEADERS).expect(200);
+      // can take a while to settle
+      await retry.tryForTime(
+        120_000,
+        async () => {
+          const { body } = await supertest
+            .get('/api/streams/_status')
+            .set(PUBLIC_HEADERS)
+            .expect(200);
 
-      expect(body).to.have.property('logs');
-      expect(body).to.have.property('can_manage');
+          expect(body).to.have.property('logs');
+          expect(body).to.have.property('can_manage');
+        },
+        undefined,
+        500
+      );
     });
 
     it('GET /api/streams returns list of streams', async () => {
-      const { body } = await supertest.get('/api/streams').set(PUBLIC_HEADERS).expect(200);
+      await retry.tryForTime(
+        120_000,
+        async () => {
+          const { body } = await supertest.get('/api/streams').set(PUBLIC_HEADERS).expect(200);
 
-      expect(body).to.have.property('streams');
-      expect(body.streams).to.be.an('array');
-      expect(body.streams.length).to.be.greaterThan(0);
+          expect(body).to.have.property('streams');
+          expect(body.streams).to.be.an('array');
+          expect(body.streams.length).to.be.greaterThan(0);
+        },
+        undefined,
+        500
+      );
     });
 
     it('GET /api/streams/logs.ecs returns the root stream', async () => {
-      const { body } = await supertest.get('/api/streams/logs.ecs').set(PUBLIC_HEADERS).expect(200);
+      // Wired root may materialize after _status; avoid 404 flakes on deferred startup.
+      await retry.tryForTime(
+        120_000,
+        async () => {
+          const { body } = await supertest
+            .get('/api/streams/logs.ecs')
+            .set(PUBLIC_HEADERS)
+            .expect(200);
 
-      expect(body).to.have.property('stream');
-      expect(body.stream).to.have.property('name', 'logs.ecs');
+          expect(body).to.have.property('stream');
+          expect(body.stream).to.have.property('name', 'logs.ecs');
+        },
+        undefined,
+        500
+      );
     });
 
     it('GET /internal/streams/_classic_status returns can_manage: true', async () => {

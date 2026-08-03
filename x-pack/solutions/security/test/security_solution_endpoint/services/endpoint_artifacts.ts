@@ -27,7 +27,7 @@ import { BLOCKLISTS_LIST_DEFINITION } from '@kbn/security-solution-plugin/public
 import { TRUSTED_DEVICES_EXCEPTION_LIST_DEFINITION } from '@kbn/security-solution-plugin/public/management/pages/trusted_devices/constants';
 import { ManifestConstants } from '@kbn/security-solution-plugin/server/endpoint/lib/artifacts';
 import type TestAgent from 'supertest/lib/agent';
-import { addSpaceIdToPath, DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { addSpaceIdToPath, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { isArtifactGlobal } from '@kbn/security-solution-plugin/common/endpoint/service/artifacts';
 import { ENDPOINT_EXCEPTIONS_LIST_DEFINITION } from '@kbn/security-solution-plugin/public/management/pages/endpoint_exceptions/constants';
 import type { FtrProviderContext } from '../configs/ftr_provider_context';
@@ -47,11 +47,13 @@ export function EndpointArtifactsTestResourcesProvider({ getService }: FtrProvid
   const supertestSv = getService('supertest');
   const log = getService('log');
   const esClient = getService('es');
+  const kibanaServer = getService('kibanaServer');
 
-  return new (class EndpointTelemetryTestResources {
+  return new (class EndpointArtifactsTestResources {
     readonly supertest = supertestSv;
     readonly log = log;
     readonly esClient = esClient;
+    readonly kibanaServer = kibanaServer;
     readonly exceptionsGenerator = new ExceptionsListItemGenerator();
 
     getHttpResponseFailureHandler(
@@ -68,15 +70,24 @@ export function EndpointArtifactsTestResourcesProvider({ getService }: FtrProvid
 
     /**
      * Deletes an artifact list along with all of its items (if any).
+     *
+     * Uses the SO client to perform deletion in order to reduce test flakiness, in case
+     * a race condition or any other weird scenario results in having multiple lists with the same list_id.
+     * In those cases, exception_list API would delete only one of the lists.
+     *
      * @param listId
      * @param supertest
      */
-    async deleteList(listId: string, supertest: TestAgent = this.supertest): Promise<void> {
-      await supertest
-        .delete(`${EXCEPTION_LIST_URL}?list_id=${listId}&namespace_type=agnostic`)
-        .set('kbn-xsrf', 'true')
-        .send()
-        .then(this.getHttpResponseFailureHandler([404]));
+    async deleteList(listId: string): Promise<void> {
+      const allExceptionListObjects = await kibanaServer.savedObjects.find({
+        type: 'exception-list-agnostic',
+      });
+
+      const listObjectsToDelete = allExceptionListObjects.saved_objects.filter(
+        (obj) => obj.attributes.list_id === listId
+      );
+
+      await kibanaServer.savedObjects.bulkDelete({ objects: listObjectsToDelete });
     }
 
     async ensureListExists(

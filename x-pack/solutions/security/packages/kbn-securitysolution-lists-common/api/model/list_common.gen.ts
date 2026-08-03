@@ -14,14 +14,14 @@
  *   version: not applicable
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { isNonEmptyString } from '@kbn/zod-helpers/v4';
 
 /**
  * Value list's identifier.
  */
+export const ListId = lazySchema(() => z.string().min(1).superRefine(isNonEmptyString));
 export type ListId = z.infer<typeof ListId>;
-export const ListId = z.string().min(1).superRefine(isNonEmptyString);
 
 /**
   * Specifies the Elasticsearch data type of excludes the list container holds. Some common examples:
@@ -31,86 +31,90 @@ export const ListId = z.string().min(1).superRefine(isNonEmptyString);
 - `ip_range`: Range of IP addresses (supports IPv4, IPv6, and CIDR notation)
 
   */
+export const ListType = lazySchema(() =>
+  z.enum([
+    'binary',
+    'boolean',
+    'byte',
+    'date',
+    'date_nanos',
+    'date_range',
+    'double',
+    'double_range',
+    'float',
+    'float_range',
+    'geo_point',
+    'geo_shape',
+    'half_float',
+    'integer',
+    'integer_range',
+    'ip',
+    'ip_range',
+    'keyword',
+    'long',
+    'long_range',
+    'shape',
+    'short',
+    'text',
+  ])
+);
 export type ListType = z.infer<typeof ListType>;
-export const ListType = z.enum([
-  'binary',
-  'boolean',
-  'byte',
-  'date',
-  'date_nanos',
-  'date_range',
-  'double',
-  'double_range',
-  'float',
-  'float_range',
-  'geo_point',
-  'geo_shape',
-  'half_float',
-  'integer',
-  'integer_range',
-  'ip',
-  'ip_range',
-  'keyword',
-  'long',
-  'long_range',
-  'shape',
-  'short',
-  'text',
-]);
 export type ListTypeEnum = typeof ListType.enum;
 export const ListTypeEnum = ListType.enum;
 
 /**
  * Value list's name.
  */
+export const ListName = lazySchema(() => z.string().min(1).superRefine(isNonEmptyString));
 export type ListName = z.infer<typeof ListName>;
-export const ListName = z.string().min(1).superRefine(isNonEmptyString);
 
 /**
  * Describes the value list.
  */
+export const ListDescription = lazySchema(() => z.string().min(1).superRefine(isNonEmptyString));
 export type ListDescription = z.infer<typeof ListDescription>;
-export const ListDescription = z.string().min(1).superRefine(isNonEmptyString);
 
 /**
  * Placeholder for metadata about the value list.
  */
+export const ListMetadata = lazySchema(() => z.object({}).catchall(z.unknown()));
 export type ListMetadata = z.infer<typeof ListMetadata>;
-export const ListMetadata = z.object({}).catchall(z.unknown());
 
 /**
  * The document version number.
  */
+export const ListVersion = lazySchema(() => z.number().int().min(1));
 export type ListVersion = z.infer<typeof ListVersion>;
-export const ListVersion = z.number().int().min(1);
 
 /**
   * The version id, normally returned by the API when the document is retrieved. Use it ensure updates are done against the latest version.
 
   */
+export const ListVersionId = lazySchema(() => z.string());
 export type ListVersionId = z.infer<typeof ListVersionId>;
-export const ListVersionId = z.string();
 
 /**
  * Value list item's identifier.
  */
+export const ListItemId = lazySchema(() => z.string().min(1).superRefine(isNonEmptyString));
 export type ListItemId = z.infer<typeof ListItemId>;
-export const ListItemId = z.string().min(1).superRefine(isNonEmptyString);
 
 /**
  * The value used to evaluate exceptions.
  */
+export const ListItemValue = lazySchema(() => z.string().min(1).superRefine(isNonEmptyString));
 export type ListItemValue = z.infer<typeof ListItemValue>;
-export const ListItemValue = z.string().min(1).superRefine(isNonEmptyString);
 
 /**
  * Describes the value list item.
  */
+export const ListItemDescription = lazySchema(() =>
+  z.string().min(1).superRefine(isNonEmptyString)
+);
 export type ListItemDescription = z.infer<typeof ListItemDescription>;
-export const ListItemDescription = z.string().min(1).superRefine(isNonEmptyString);
 
 /**
  * Placeholder for metadata about the value list item.
  */
+export const ListItemMetadata = lazySchema(() => z.object({}).catchall(z.unknown()));
 export type ListItemMetadata = z.infer<typeof ListItemMetadata>;
-export const ListItemMetadata = z.object({}).catchall(z.unknown());

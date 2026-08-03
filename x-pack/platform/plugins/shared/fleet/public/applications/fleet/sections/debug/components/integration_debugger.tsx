@@ -224,7 +224,7 @@ export const IntegrationDebugger: React.FunctionComponent = () => {
             }
             renderOption={(option, searchValue, contentClassName) => (
               <span className={contentClassName}>
-                <EuiIcon type={(option as any).icon} />
+                <EuiIcon type={(option as any).icon} aria-hidden={true} />
                 &nbsp;
                 <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>
               </span>

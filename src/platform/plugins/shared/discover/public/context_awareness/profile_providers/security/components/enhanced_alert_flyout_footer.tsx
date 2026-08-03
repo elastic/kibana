@@ -11,23 +11,29 @@ import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import type { ReactElement } from 'react';
 import type { ProfileProviderServices } from '../../profile_provider_services';
 
+const noop = () => {};
+
 export interface EnhancedAlertFlyoutFooterProps extends DocViewRenderProps {
   providerServices: ProfileProviderServices;
+  refreshData?: () => void;
   fallbackRenderFooter?: (props: DocViewRenderProps) => ReactElement | undefined;
 }
 
 export const EnhancedAlertFlyoutFooter = ({
   hit,
   providerServices,
+  refreshData,
   fallbackRenderFooter,
   ...docViewProps
 }: EnhancedAlertFlyoutFooterProps) => {
   const alertFlyoutFooterFeature = providerServices.discoverShared.features.registry.getById(
     'security-solution-alert-flyout-footer'
   );
+  const handleAlertUpdated = refreshData ?? noop;
 
   const renderFooter = alertFlyoutFooterFeature?.renderFooter;
+
   return renderFooter
-    ? renderFooter(hit)
+    ? renderFooter({ hit, ...docViewProps, onAlertUpdated: handleAlertUpdated })
     : fallbackRenderFooter?.({ hit, ...docViewProps }) ?? null;
 };

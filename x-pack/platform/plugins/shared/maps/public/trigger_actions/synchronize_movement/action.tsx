@@ -33,7 +33,7 @@ export const synchronizeMovementAction = createAction<EmbeddableApiContext>({
       defaultMessage:
         'Synchronize maps, so that if you zoom and pan in one map, the movement is reflected in other maps',
     }),
-  getIconType: () => 'crosshairs',
+  getIconType: () => 'crosshair',
   isCompatible: async ({ embeddable }: EmbeddableApiContext) => {
     return (
       mapEmbeddablesSingleton.hasMultipleMaps() &&

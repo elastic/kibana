@@ -45,6 +45,7 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import { AuthenticationResult } from './authentication_result';
 import { AuthenticationService } from './authentication_service';
 import type { AuthenticatedUser, SecurityLicense } from '../../common';
+import { KIBANA_AUTH_FULL_HEADER } from '../../common/constants';
 import { licenseMock } from '../../common/licensing/index.mock';
 import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
 import { auditServiceMock } from '../audit/mocks';
@@ -53,7 +54,7 @@ import { ConfigSchema, createConfig } from '../config';
 import type { SecurityFeatureUsageServiceStart } from '../feature_usage';
 import { securityFeatureUsageServiceMock } from '../feature_usage/index.mock';
 import { securityMock } from '../mocks';
-import { ROUTE_TAG_AUTH_FLOW } from '../routes/tags';
+import { ROUTE_TAG_ACCEPT_UIAM_OAUTH, ROUTE_TAG_AUTH_FLOW } from '../routes/tags';
 import type { Session } from '../session_management';
 import { sessionMock } from '../session_management/session.mock';
 import { userProfileServiceMock } from '../user_profile/user_profile_service.mock';
@@ -590,7 +591,7 @@ describe('AuthenticationService', () => {
         expect(reauthenticate).toHaveBeenCalledWith(mockRequest);
       });
 
-      it('filters out and recovers `Authorization` header when provider cannot handle error.', async () => {
+      it('filters out and recovers `Authorization` header and enforces full authentication when provider cannot handle error.', async () => {
         const failureReason = new errors.ResponseError(
           securityMock.createApiResponse({
             statusCode: 401,
@@ -615,12 +616,12 @@ describe('AuthenticationService', () => {
 
         expect(reauthenticate).toHaveBeenCalledTimes(1);
         expect(reauthenticate).toHaveBeenCalledWith(mockRequest);
-        expect(modifiedHeaders).toEqual({ Random: 'random' });
+        expect(modifiedHeaders).toEqual({ Random: 'random', [KIBANA_AUTH_FULL_HEADER]: 'true' });
 
         expect(mockRequest.headers).toEqual({ Authorization: 'Basic xxx', Random: 'random' });
       });
 
-      it('filters out and recovers `Authorization` header when provider can handle error.', async () => {
+      it('filters out and recovers `Authorization` header and enforces full authentication when provider can handle error.', async () => {
         const failureReason = new errors.ResponseError(
           securityMock.createApiResponse({
             statusCode: 401,
@@ -649,12 +650,12 @@ describe('AuthenticationService', () => {
 
         expect(reauthenticate).toHaveBeenCalledTimes(1);
         expect(reauthenticate).toHaveBeenCalledWith(mockRequest);
-        expect(modifiedHeaders).toEqual({ Random: 'random' });
+        expect(modifiedHeaders).toEqual({ Random: 'random', [KIBANA_AUTH_FULL_HEADER]: 'true' });
 
         expect(mockRequest.headers).toEqual({ Authorization: 'Basic xxx', Random: 'random' });
       });
 
-      it('filters out and recovers `Authorization` header when provider fails with unexpected error.', async () => {
+      it('filters out and recovers `Authorization` header and enforces full authentication when provider fails with unexpected error.', async () => {
         const failureReason = new errors.ResponseError(
           securityMock.createApiResponse({
             statusCode: 401,
@@ -681,7 +682,7 @@ describe('AuthenticationService', () => {
 
         expect(reauthenticate).toHaveBeenCalledTimes(1);
         expect(reauthenticate).toHaveBeenCalledWith(mockRequest);
-        expect(modifiedHeaders).toEqual({ Random: 'random' });
+        expect(modifiedHeaders).toEqual({ Random: 'random', [KIBANA_AUTH_FULL_HEADER]: 'true' });
 
         expect(mockRequest.headers).toEqual({ Authorization: 'Basic xxx', Random: 'random' });
       });
@@ -809,6 +810,141 @@ describe('AuthenticationService', () => {
           mockOnPreResponseToolkit
         )
       ).resolves.toBe(mockReturnedValue);
+    });
+
+    describe('UIAM OAuth WWW-Authenticate header', () => {
+      it('returns JSON-RPC error with WWW-Authenticate header for 401 on routes tagged with ROUTE_TAG_ACCEPT_UIAM_OAUTH', async () => {
+        const mockReturnedValue = { type: 'render' as any };
+        const mockOnPreResponseToolkit = httpServiceMock.createOnPreResponseToolkit();
+        mockOnPreResponseToolkit.render.mockReturnValue(mockReturnedValue);
+
+        mockSetupAuthenticationParams.config = createConfig(
+          ConfigSchema.validate(
+            {
+              mcp: {
+                oauth2: {
+                  metadata: {
+                    authorization_servers: ['https://localhost:9200'],
+                    resource: 'http://localhost:5620',
+                  },
+                },
+              },
+            },
+            { serverless: true }
+          ),
+          loggingSystemMock.create().get(),
+          { isTLSEnabled: false }
+        );
+
+        const { onPreResponseHandler } = getService();
+
+        await expect(
+          onPreResponseHandler(
+            httpServerMock.createKibanaRequest({
+              routeTags: [ROUTE_TAG_ACCEPT_UIAM_OAUTH],
+            }),
+            { statusCode: 401 },
+            mockOnPreResponseToolkit
+          )
+        ).resolves.toBe(mockReturnedValue);
+
+        expect(mockOnPreResponseToolkit.render).toHaveBeenCalledWith({
+          body: JSON.stringify({
+            jsonrpc: '2.0',
+            id: null,
+            error: { code: -32000, message: 'Unauthorized' },
+          }),
+          headers: {
+            'WWW-Authenticate': expect.stringContaining('Bearer resource_metadata="'),
+            'Content-Type': 'application/json',
+          },
+        });
+      });
+
+      it('does not add WWW-Authenticate header when mcp config is not set', async () => {
+        const mockReturnedValue = { type: 'next' as any };
+        const mockOnPreResponseToolkit = httpServiceMock.createOnPreResponseToolkit();
+        mockOnPreResponseToolkit.next.mockReturnValue(mockReturnedValue);
+
+        const { onPreResponseHandler } = getService();
+        await onPreResponseHandler(
+          httpServerMock.createKibanaRequest({
+            routeTags: [ROUTE_TAG_ACCEPT_UIAM_OAUTH],
+          }),
+          { statusCode: 401 },
+          mockOnPreResponseToolkit
+        );
+
+        expect(mockOnPreResponseToolkit.next).toHaveBeenCalledWith();
+      });
+
+      it('does not add WWW-Authenticate header for non-401 responses on tagged routes', async () => {
+        const mockReturnedValue = { type: 'next' as any };
+        const mockOnPreResponseToolkit = httpServiceMock.createOnPreResponseToolkit();
+        mockOnPreResponseToolkit.next.mockReturnValue(mockReturnedValue);
+
+        mockSetupAuthenticationParams.config = createConfig(
+          ConfigSchema.validate(
+            {
+              mcp: {
+                oauth2: {
+                  metadata: {
+                    authorization_servers: ['https://localhost:9200'],
+                    resource: 'http://localhost:5620',
+                  },
+                },
+              },
+            },
+            { serverless: true }
+          ),
+          loggingSystemMock.create().get(),
+          { isTLSEnabled: false }
+        );
+
+        const { onPreResponseHandler } = getService();
+        await onPreResponseHandler(
+          httpServerMock.createKibanaRequest({
+            routeTags: [ROUTE_TAG_ACCEPT_UIAM_OAUTH],
+          }),
+          { statusCode: 200 },
+          mockOnPreResponseToolkit
+        );
+
+        expect(mockOnPreResponseToolkit.next).toHaveBeenCalledWith();
+      });
+
+      it('does not add WWW-Authenticate header for 401 on routes without the tag', async () => {
+        const mockReturnedValue = { type: 'next' as any };
+        const mockOnPreResponseToolkit = httpServiceMock.createOnPreResponseToolkit();
+        mockOnPreResponseToolkit.next.mockReturnValue(mockReturnedValue);
+
+        mockSetupAuthenticationParams.config = createConfig(
+          ConfigSchema.validate(
+            {
+              mcp: {
+                oauth2: {
+                  metadata: {
+                    authorization_servers: ['https://localhost:9200'],
+                    resource: 'http://localhost:5620',
+                  },
+                },
+              },
+            },
+            { serverless: true }
+          ),
+          loggingSystemMock.create().get(),
+          { isTLSEnabled: false }
+        );
+
+        const { onPreResponseHandler } = getService();
+        await onPreResponseHandler(
+          httpServerMock.createKibanaRequest(),
+          { statusCode: 401 },
+          mockOnPreResponseToolkit
+        );
+
+        expect(mockOnPreResponseToolkit.next).toHaveBeenCalledWith();
+      });
     });
 
     it('ignores responses if authenticator is not initialized', async () => {

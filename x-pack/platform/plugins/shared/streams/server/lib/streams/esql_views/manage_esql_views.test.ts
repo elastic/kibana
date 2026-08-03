@@ -34,9 +34,27 @@ describe('manage_esql_views', () => {
       expect(esClient.transport.request).toHaveBeenCalledTimes(1);
       expect(esClient.transport.request).toHaveBeenCalledWith({
         method: 'GET',
-        path: '/_query/view/$.my-query-stream',
+        path: '/_query/view/%24.my-query-stream',
       });
       expect(result).toEqual(expectedView);
+    });
+
+    it('URL-encodes non-ASCII characters in the view name', async () => {
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.transport.request.mockResolvedValueOnce({
+        views: [{ name: '$.logs.ecs.android.—x', query: 'FROM logs-*' }],
+      });
+
+      await getEsqlView({
+        esClient,
+        logger,
+        name: '$.logs.ecs.android.—x',
+      });
+
+      expect(esClient.transport.request).toHaveBeenCalledWith({
+        method: 'GET',
+        path: '/_query/view/%24.logs.ecs.android.%E2%80%94x',
+      });
     });
   });
 

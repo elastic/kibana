@@ -17,6 +17,7 @@ import type { DataStreamDefinition } from '../types';
 import type { GetFieldsOf } from '@kbn/es-mappings';
 import { mappings, type MappingsDefinition } from '@kbn/es-mappings';
 import { initialize } from '../initialize';
+import { DataStreamClient } from '../client';
 
 describe('Data streams initialize function', () => {
   let esServer: EsTestCluster;
@@ -425,6 +426,189 @@ describe('Data streams initialize function', () => {
       expect(
         indexTemplateUpdated.index_template.template?.mappings?.properties?.mappedFieldRequired
       ).toBeDefined();
+    });
+  });
+
+  describe('template-only initialization (DataStreamClient.initializeTemplate)', () => {
+    it('creates the index template without creating the data stream', async () => {
+      const esClient = esServer.getClient();
+
+      await DataStreamClient.initializeTemplate({
+        logger,
+        elasticsearchClient: esClient,
+        dataStream: testDataStream,
+      });
+
+      const {
+        index_templates: [indexTemplate],
+      } = await esClient.indices.getIndexTemplate({ name: testDataStream.name });
+      expect(indexTemplate.name).toEqual(testDataStream.name);
+      expect(indexTemplate.index_template._meta?.version).toEqual(1);
+
+      await expect(esClient.indices.getDataStream({ name: testDataStream.name })).rejects.toThrow();
+    });
+
+    it('is idempotent and updates the template when the version is incremented', async () => {
+      const esClient = esServer.getClient();
+
+      await DataStreamClient.initializeTemplate({
+        logger,
+        elasticsearchClient: esClient,
+        dataStream: testDataStream,
+      });
+
+      // No-op call with the same definition.
+      await DataStreamClient.initializeTemplate({
+        logger,
+        elasticsearchClient: esClient,
+        dataStream: testDataStream,
+      });
+
+      const nextMappings = {
+        ...myTestDocMappings,
+        properties: {
+          ...myTestDocMappings.properties,
+          mappedFieldRequired: mappings.keyword(),
+        },
+      } satisfies MappingsDefinition;
+
+      const nextDefinition: DataStreamDefinition<typeof nextMappings, MyTestDoc> = {
+        ...testDataStream,
+        version: 2,
+        template: { mappings: nextMappings },
+      };
+
+      await DataStreamClient.initializeTemplate({
+        logger,
+        elasticsearchClient: esClient,
+        dataStream: nextDefinition,
+      });
+
+      const {
+        index_templates: [indexTemplate],
+      } = await esClient.indices.getIndexTemplate({ name: nextDefinition.name });
+      expect(indexTemplate.index_template._meta?.version).toEqual(2);
+      expect(indexTemplate.index_template._meta?.previousVersions).toContain(1);
+      expect(
+        indexTemplate.index_template.template?.mappings?.properties?.mappedFieldRequired
+      ).toBeDefined();
+
+      await expect(esClient.indices.getDataStream({ name: testDataStream.name })).rejects.toThrow();
+    });
+
+    it('lets a subsequent DataStreamClient.initialize create the data stream from the installed template', async () => {
+      const esClient = esServer.getClient();
+
+      await DataStreamClient.initializeTemplate({
+        logger,
+        elasticsearchClient: esClient,
+        dataStream: testDataStream,
+      });
+
+      const client = await DataStreamClient.initialize({
+        logger,
+        elasticsearchClient: esClient,
+        dataStream: testDataStream,
+      });
+
+      expect(client).toBeDefined();
+
+      const {
+        data_streams: [dataStream],
+      } = await esClient.indices.getDataStream({ name: testDataStream.name });
+      expect(dataStream).toBeDefined();
+      expect(dataStream.generation).toEqual(1);
+    });
+
+    it('migrates mappings on the existing write index when the version is bumped', async () => {
+      const esClient = esServer.getClient();
+
+      // Create both template and data stream at version 1.
+      await initialize({
+        logger,
+        elasticsearchClient: esClient,
+        dataStream: testDataStream,
+        lazyCreation: false,
+      });
+
+      const {
+        data_streams: [originalDataStream],
+      } = await esClient.indices.getDataStream({ name: testDataStream.name });
+      const writeIndex = originalDataStream.indices[originalDataStream.indices.length - 1];
+      expect(writeIndex).toBeDefined();
+
+      // Bump the version with new mappings and run template-only initialization.
+      const nextMappings = {
+        ...myTestDocMappings,
+        properties: {
+          ...myTestDocMappings.properties,
+          mappedFieldRequired: mappings.keyword(),
+        },
+      } satisfies MappingsDefinition;
+
+      const nextDefinition: DataStreamDefinition<typeof nextMappings, MyTestDoc> = {
+        ...testDataStream,
+        version: 2,
+        template: { mappings: nextMappings },
+      };
+
+      await DataStreamClient.initializeTemplate({
+        logger,
+        elasticsearchClient: esClient,
+        dataStream: nextDefinition,
+      });
+
+      // Index template is bumped.
+      const {
+        index_templates: [indexTemplate],
+      } = await esClient.indices.getIndexTemplate({ name: nextDefinition.name });
+      expect(indexTemplate.index_template._meta?.version).toEqual(2);
+
+      // New mapping is applied to the existing write index, not just future rollovers.
+      const writeIndexMappings = await esClient.indices.getMapping({
+        index: writeIndex.index_name,
+      });
+      expect(
+        writeIndexMappings[writeIndex.index_name].mappings.properties?.mappedFieldRequired
+      ).toEqual({ type: 'keyword', ignore_above: 1024 });
+    });
+
+    it('allows a DataStreamClient.fromDefinition-built client to write through ES auto-creation', async () => {
+      const esClient = esServer.getClient();
+
+      await DataStreamClient.initializeTemplate({
+        logger,
+        elasticsearchClient: esClient,
+        dataStream: testDataStream,
+      });
+
+      // Data stream still does not exist after template-only setup.
+      await expect(esClient.indices.getDataStream({ name: testDataStream.name })).rejects.toThrow();
+
+      const client = DataStreamClient.fromDefinition<typeof myTestDocMappings, MyTestDoc>({
+        dataStream: testDataStream,
+        elasticsearchClient: esClient,
+      });
+
+      // Writing through the client triggers ES to auto-create the data stream from our template.
+      await client.create({
+        documents: [
+          {
+            '@timestamp': new Date().toISOString(),
+            mappedFieldRequired: 'value',
+            nestedField: { mappedFieldRequired: 'nested-value' },
+            arrayField: ['a', 'b'],
+            unmappedFieldRequired: 'unmapped',
+          } as MyTestDoc,
+        ],
+        refresh: true,
+      });
+
+      const {
+        data_streams: [dataStream],
+      } = await esClient.indices.getDataStream({ name: testDataStream.name });
+      expect(dataStream).toBeDefined();
+      expect(dataStream.generation).toEqual(1);
     });
   });
 });

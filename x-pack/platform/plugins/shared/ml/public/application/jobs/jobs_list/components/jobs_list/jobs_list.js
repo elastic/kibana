@@ -35,7 +35,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { AnomalyDetectionJobIdLink } from './job_id_link';
 import { isManagedJob } from '../../../jobs_utils';
 import { MLSavedObjectsSpacesList } from '../../../../components/ml_saved_objects_spaces_list';
-import { ANOMALY_DETECTOR_SAVED_OBJECT_TYPE } from '../../../../../../common/types/saved_objects';
+import { ANOMALY_DETECTOR_SAVED_OBJECT_TYPE } from '@kbn/ml-common-types/saved_objects';
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50];
 
@@ -147,29 +147,32 @@ export class JobsListUI extends Component {
           </EuiScreenReaderOnly>
         ),
         'data-test-subj': 'mlJobListColumnExpand',
-        render: (item) => (
-          <EuiButtonIcon
-            onClick={() => this.toggleRow(item)}
-            iconType={
-              this.state.itemIdToExpandedRowMap[item.id]
-                ? 'chevronSingleDown'
-                : 'chevronSingleRight'
-            }
-            aria-label={
-              this.state.itemIdToExpandedRowMap[item.id]
-                ? i18n.translate('xpack.ml.jobsList.collapseJobDetailsAriaLabel', {
-                    defaultMessage: 'Hide details for {itemId}',
-                    values: { itemId: item.id },
-                  })
-                : i18n.translate('xpack.ml.jobsList.expandJobDetailsAriaLabel', {
-                    defaultMessage: 'Show details for {itemId}',
-                    values: { itemId: item.id },
-                  })
-            }
-            data-row-id={item.id}
-            data-test-subj="mlJobListRowDetailsToggle"
-          />
-        ),
+        render: (item) => {
+          const toggleLabel = this.state.itemIdToExpandedRowMap[item.id]
+            ? i18n.translate('xpack.ml.jobsList.collapseJobDetailsAriaLabel', {
+                defaultMessage: 'Hide details for {itemId}',
+                values: { itemId: item.id },
+              })
+            : i18n.translate('xpack.ml.jobsList.expandJobDetailsAriaLabel', {
+                defaultMessage: 'Show details for {itemId}',
+                values: { itemId: item.id },
+              });
+          return (
+            <EuiToolTip content={toggleLabel} disableScreenReaderOutput>
+              <EuiButtonIcon
+                onClick={() => this.toggleRow(item)}
+                iconType={
+                  this.state.itemIdToExpandedRowMap[item.id]
+                    ? 'chevronSingleDown'
+                    : 'chevronSingleRight'
+                }
+                aria-label={toggleLabel}
+                data-row-id={item.id}
+                data-test-subj="mlJobListRowDetailsToggle"
+              />
+            </EuiToolTip>
+          );
+        },
         width: '3%',
       },
       {

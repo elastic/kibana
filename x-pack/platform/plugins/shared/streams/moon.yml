@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/streams-plugin'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/obs-onboarding-team @elastic/obs-sig-events-team'
+  defaultOwner: '@elastic/streams-ui @elastic/obs-sig-events-team'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/streams-plugin'
   description: Moon project for @kbn/streams-plugin
   channel: ''
-  owner: '@elastic/obs-onboarding-team @elastic/obs-sig-events-team'
+  owner: '@elastic/streams-ui @elastic/obs-sig-events-team'
   sourceRoot: x-pack/platform/plugins/shared/streams
 dependsOn:
   - '@kbn/config-schema'
@@ -30,13 +30,14 @@ dependsOn:
   - '@kbn/storage-adapter'
   - '@kbn/object-utils'
   - '@kbn/alerting-plugin'
-  - '@kbn/alerts-as-data-utils'
+  - '@kbn/alerting-v2-plugin'
   - '@kbn/rule-registry-plugin'
   - '@kbn/es-types'
   - '@kbn/licensing-plugin'
   - '@kbn/rule-data-utils'
   - '@kbn/zod'
   - '@kbn/streams-schema'
+  - '@kbn/significant-events-schema'
   - '@kbn/server-route-repository'
   - '@kbn/es-errors'
   - '@kbn/lock-manager'
@@ -45,7 +46,6 @@ dependsOn:
   - '@kbn/features-plugin'
   - '@kbn/server-route-repository-utils'
   - '@kbn/es-query'
-  - '@kbn/traced-es-client'
   - '@kbn/zod-helpers'
   - '@kbn/inference-common'
   - '@kbn/std'
@@ -54,12 +54,9 @@ dependsOn:
   - '@kbn/encrypted-saved-objects-plugin'
   - '@kbn/inference-plugin'
   - '@kbn/security-plugin'
-  - '@kbn/task-manager-plugin'
-  - '@kbn/ai-tools'
   - '@kbn/grok-heuristics'
   - '@kbn/dissect-heuristics'
   - '@kbn/streamlang'
-  - '@kbn/licensing-types'
   - '@kbn/core-elasticsearch-server-utils'
   - '@kbn/safer-lodash-set'
   - '@kbn/sse-utils'
@@ -76,18 +73,23 @@ dependsOn:
   - '@kbn/core-http-common'
   - '@kbn/scout'
   - '@kbn/esql-language'
-  - '@kbn/core-elasticsearch-server-mocks'
-  - '@kbn/core-logging-server-mocks'
+  - '@kbn/esql-types'
+  - '@kbn/esql'
   - '@kbn/logging-mocks'
-  - '@kbn/core-ui-settings-server'
-  - '@kbn/agent-builder-plugin'
   - '@kbn/search-inference-endpoints'
   - '@kbn/agent-builder-server'
   - '@kbn/agent-builder-common'
   - '@kbn/datemath'
   - '@kbn/setup-node-env'
+  - '@kbn/synthtrace'
+  - '@kbn/synthtrace-client'
   - '@kbn/workflows-management-plugin'
-  - '@kbn/workflows'
+  - '@kbn/agent-builder-plugin'
+  - '@kbn/core-spaces-common'
+  - '@kbn/elastic-agent-utils'
+  - '@kbn/sample-log-parser'
+  - '@kbn/workflows-extensions'
+  - '@kbn/agent-builder-sml-plugin'
 tags:
   - plugin
   - prod
@@ -98,7 +100,6 @@ fileGroups:
   src:
     - common/**/*
     - docs/**/*
-    - scripts/**/*
     - server/**/*
     - public/**/*
     - types/**/*

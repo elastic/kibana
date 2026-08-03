@@ -137,8 +137,10 @@ export const calculateScoresWithESQLV2 = async ({
         entityIds,
         logger,
         errorContext:
-          'Error fetching entities for preview modifier application. Scoring will proceed without modifiers',
+          'Error fetching entities for preview scoring. Scores for entities that cannot be resolved from the store will be discarded',
       });
+      const knownEntityIds = new Set(entities.keys());
+      const inStoreBaseScores = baseScores.filter((score) => knownEntityIds.has(score.entity_id));
 
       const scores = applyScoreModifiersFromEntities({
         now,
@@ -146,8 +148,8 @@ export const calculateScoresWithESQLV2 = async ({
         scoreType: 'base',
         weights,
         page: {
-          scores: baseScores,
-          identifierField: 'entity_id',
+          scores: inStoreBaseScores,
+          identifierField: 'entity.id',
         },
         entities,
         watchlistConfigs,

@@ -6,9 +6,10 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import styled from 'styled-components';
+import { isNonLocalIndexName } from '@kbn/es-query';
 import {
   makeSelectDocumentNotesBySavedObjectId,
   makeSelectNotesByDocumentId,
@@ -34,6 +35,9 @@ import * as i18n from './translations';
 import { DEFAULT_ACTION_BUTTON_WIDTH, isAlert } from './helpers';
 import { useNavigateToAnalyzer } from '../../../flyout/document_details/shared/hooks/use_navigate_to_analyzer';
 import { useNavigateToSessionView } from '../../../flyout/document_details/shared/hooks/use_navigate_to_session_view';
+import { useIsNewFlyoutEnabled } from '../../hooks/use_is_new_flyout_enabled';
+import { useFlyoutApi } from '../../../flyout_v2/use_flyout_api';
+import { FLYOUT_ORIGIN } from '../../lib/telemetry';
 
 const ActionsContainer = styled.div`
   align-items: center;
@@ -85,6 +89,8 @@ const ActionsComponent: React.FC<ActionsComponentProps> = ({
   );
 
   const { startTransaction } = useStartTransaction();
+  const enableNewFlyout = useIsNewFlyoutEnabled();
+  const { openAnalyzer, openSessionView: openSessionViewFlyout } = useFlyoutApi();
 
   const eventType = getEventType(ecsData);
 
@@ -104,8 +110,12 @@ const ActionsComponent: React.FC<ActionsComponentProps> = ({
 
   const handleClick = useCallback(() => {
     startTransaction({ name: ALERTS_ACTIONS.OPEN_ANALYZER });
-    navigateToAnalyzer();
-  }, [startTransaction, navigateToAnalyzer]);
+    if (enableNewFlyout && hit) {
+      openAnalyzer({ hit, onAlertUpdated: () => refetch?.(), origin: FLYOUT_ORIGIN.ROW_ACTION });
+    } else {
+      navigateToAnalyzer();
+    }
+  }, [startTransaction, navigateToAnalyzer, enableNewFlyout, hit, openAnalyzer, refetch]);
 
   const sessionViewConfig = useMemo(() => {
     const { process, _id, _index, timestamp, kibana } = ecsData;
@@ -134,8 +144,25 @@ const ActionsComponent: React.FC<ActionsComponentProps> = ({
 
   const openSessionView = useCallback(() => {
     startTransaction({ name: ALERTS_ACTIONS.OPEN_SESSION_VIEW });
-    navigateToSessionView();
-  }, [navigateToSessionView, startTransaction]);
+    if (enableNewFlyout && hit) {
+      openSessionViewFlyout({
+        hit,
+        jumpToCursor: sessionViewConfig?.jumpToCursor,
+        jumpToEntityId: sessionViewConfig?.jumpToEntityId,
+        onAlertUpdated: () => refetch?.(),
+      });
+    } else {
+      navigateToSessionView();
+    }
+  }, [
+    startTransaction,
+    navigateToSessionView,
+    enableNewFlyout,
+    hit,
+    openSessionViewFlyout,
+    sessionViewConfig,
+    refetch,
+  ]);
 
   const onExpandEvent = useCallback(() => {
     onEventDetailsPanelOpened();
@@ -172,6 +199,11 @@ const ActionsComponent: React.FC<ActionsComponentProps> = ({
     () => sessionViewConfig !== null && isEnterprisePlus,
 
     [isEnterprisePlus, sessionViewConfig]
+  );
+
+  const isRemoteDocument = useMemo(
+    () => isNonLocalIndexName(ecsData._index ?? ''),
+    [ecsData._index]
   );
 
   return (
@@ -232,7 +264,7 @@ const ActionsComponent: React.FC<ActionsComponentProps> = ({
           key="alert-context-menu"
           ecsRowData={ecsData}
           scopeId={timelineId}
-          disabled={false}
+          disabled={isRemoteDocument}
           onRuleChange={onRuleChange}
           refetch={refetch}
         />

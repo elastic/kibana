@@ -5,34 +5,26 @@
  * 2.0.
  */
 
+import { hostname as osHostname } from 'os';
+import { execFileSync } from 'child_process';
 import type { InferenceConnectorType, InferenceConnector, Model } from '@kbn/inference-common';
 import { getConnectorModel, getConnectorFamily, getConnectorProvider } from '@kbn/inference-common';
 import { createRestClient } from '@kbn/inference-plugin/common';
-import {
-  DATASET_UUID_NAMESPACE,
-  EVALS_DATASET_UPSERT_URL,
-  EVALS_DATASET_URL,
-  GetEvaluationDatasetResponse,
-} from '@kbn/evals-common';
-import { v5 as uuidv5 } from 'uuid';
 import { test as base } from '@kbn/scout';
 import { createEsClientForTesting } from '@kbn/test-es-server';
 import type { AvailableConnectorWithId } from '@kbn/gen-ai-functional-testing';
 import { KibanaEvalsClient } from './kibana_evals_executor/client';
-import type { EvaluationTestOptions } from './config/create_playwright_eval_config';
 import { httpHandlerFromKbnClient } from './utils/http_handler_from_kbn_client';
 import { wrapKbnClientWithRetries } from './utils/kbn_client_with_retries';
-import {
-  getEvaluationsKbnClient,
-  checkEvaluationsPluginEnabled,
-} from './utils/evaluations_kbn_client';
+import { getEvaluationsKbnClient } from './utils/evaluations_kbn_client';
 import { createCriteriaEvaluator } from './evaluators/criteria';
-import { mapToEvaluationScoreDocuments, exportEvaluations } from './utils/report_model_score';
+import { getGitMetadata } from './utils/git_metadata';
+import { buildExecutionId } from './utils/build_execution_id';
 import { createDefaultTerminalReporter } from './utils/reporting/evaluation_reporter';
 import { createConnectorFixture, resolveConnectorId } from './utils/create_connector_fixture';
 import { wrapInferenceClientWithEisConnectorTelemetry } from './utils/wrap_inference_client_with_connector_telemetry';
+import { createAgentBuilderClient } from './utils/agent_builder_client';
 import { createCorrectnessAnalysisEvaluator } from './evaluators/correctness';
-import { EvaluationScoreRepository } from './utils/score_repository';
 import { createGroundednessAnalysisEvaluator } from './evaluators/groundedness';
 import {
   createCachedTokensEvaluator,
@@ -42,27 +34,17 @@ import {
   createToolCallsEvaluator,
 } from './evaluators/trace_based';
 import { ESQL_EQUIVALENCE_EVALUATOR_NAME } from './evaluators/esql';
+import { EvalsClient } from './utils/evals_client';
+import { EvaluatorApiClient } from './utils/evaluator_api_client';
+import { getBuildkiteCiMetadataFromEnv } from './utils/ci_metadata';
+import { buildIngestRequest } from './utils/build_ingest_request';
 import type {
   DefaultEvaluators,
   EvaluationDataset,
-  EvaluationDatasetWithId,
   EvaluationSpecificWorkerFixtures,
   Example,
 } from './types';
-
-function isElasticCloudEsUrl(esUrl: string): boolean {
-  try {
-    const withProtocol = /^[a-zA-Z][a-zA-Z0-9+.-]*:\/\//.test(esUrl) ? esUrl : `https://${esUrl}`;
-    const hostname = new URL(withProtocol).hostname.replace(/\.$/, '').toLowerCase();
-    return (
-      hostname === 'elastic-cloud.com' ||
-      hostname.endsWith('.elastic-cloud.com') ||
-      hostname.endsWith('elastic.cloud')
-    );
-  } catch {
-    return false;
-  }
-}
+import { isElasticCloudEsUrl } from './utils/es_url';
 
 function isObjectRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -99,46 +81,74 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
     },
     { scope: 'worker' },
   ],
-  evaluationsKbnClient: [
+  evalsClient: [
     async ({ kbnClient, log }, use) => {
-      await use(getEvaluationsKbnClient({ kbnClient, log }));
+      const evaluationsKbnClient = getEvaluationsKbnClient({ kbnClient, log });
+      const evalsClient = new EvalsClient(evaluationsKbnClient, log);
+      await evalsClient.assertPluginEnabled();
+      await use(evalsClient);
     },
     { scope: 'worker' },
   ],
-  evaluationsPluginEnabled: [
-    async ({ evaluationsKbnClient, log }, use) => {
-      await use(await checkEvaluationsPluginEnabled({ kbnClient: evaluationsKbnClient, log }));
+  evaluatorClient: [
+    async ({ kbnClient, log }, use) => {
+      const evaluationsKbnClient = getEvaluationsKbnClient({ kbnClient, log });
+      const evaluatorClient = new EvaluatorApiClient(evaluationsKbnClient, log);
+      await use(evaluatorClient);
+    },
+    { scope: 'worker' },
+  ],
+  workerExecutionId: [
+    async ({}, use) => {
+      await use({ current: undefined as string | undefined });
+    },
+    { scope: 'worker' },
+  ],
+  workerExperimentId: [
+    async ({}, use) => {
+      await use({ current: undefined as string | undefined });
     },
     { scope: 'worker' },
   ],
   fetch: [
-    async ({ kbnClient, log }, use) => {
-      // add a HttpHandler as a fixture, so consumers can use
-      // modules that depend on it (like the inference client)
-      const fetch = httpHandlerFromKbnClient({ kbnClient, log });
+    async ({ kbnClient, log, workerExecutionId, workerExperimentId }, use) => {
+      const fetch = httpHandlerFromKbnClient({
+        kbnClient,
+        log,
+        getExecutionId: () => workerExecutionId.current,
+        getExperimentId: () => workerExperimentId.current,
+      });
       await use(fetch);
     },
     { scope: 'worker' },
   ],
   connector: [
-    async ({ fetch, log }, use, testInfo) => {
-      const predefinedConnector = (testInfo.project.use as Pick<EvaluationTestOptions, 'connector'>)
-        .connector;
-
-      await createConnectorFixture({ predefinedConnector, fetch, log, use });
+    async ({ fetch, log, connectorParam }, use) => {
+      if (!connectorParam) {
+        throw new Error(
+          'The `connectorParam` option must be set per-project in the Playwright config.'
+        );
+      }
+      await createConnectorFixture({ predefinedConnector: connectorParam, fetch, log, use });
     },
     {
       scope: 'worker',
     },
   ],
   evaluationConnector: [
-    async ({ fetch, log, connector }, use, testInfo) => {
-      const predefinedConnector = (
-        testInfo.project.use as Pick<EvaluationTestOptions, 'evaluationConnector'>
-      ).evaluationConnector;
-
-      if (resolveConnectorId(predefinedConnector.id) !== connector.id) {
-        await createConnectorFixture({ predefinedConnector, fetch, log, use });
+    async ({ fetch, log, connector, evaluationConnectorParam }, use) => {
+      if (!evaluationConnectorParam) {
+        throw new Error(
+          'The `evaluationConnectorParam` option must be set per-project in the Playwright config.'
+        );
+      }
+      if (resolveConnectorId(evaluationConnectorParam.id) !== connector.id) {
+        await createConnectorFixture({
+          predefinedConnector: evaluationConnectorParam,
+          fetch,
+          log,
+          use,
+        });
       } else {
         // If the evaluation connector is the same as the main connector, reuse it
         await use(connector);
@@ -162,6 +172,21 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
       log.serviceLoaded?.('inferenceClient');
 
       await use(wrappedInferenceClient);
+    },
+    { scope: 'worker' },
+  ],
+
+  agentBuilderClient: [
+    async ({ fetch, log, connector }, use) => {
+      const agentBuilderClient = createAgentBuilderClient({
+        fetch,
+        log,
+        connectorId: connector.id,
+      });
+
+      log.serviceLoaded?.('agentBuilderClient');
+
+      await use(agentBuilderClient);
     },
     { scope: 'worker' },
   ],
@@ -231,13 +256,13 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
     async (
       {
         log,
-        evaluationsKbnClient,
-        evaluationsPluginEnabled,
+        evalsClient,
         connector,
         evaluationConnector,
         repetitions,
-        evaluationsEsClient,
         reportModelScore,
+        workerExecutionId,
+        workerExperimentId,
       },
       use
     ) => {
@@ -265,107 +290,118 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
 
       const model = buildModelFromConnector(connector);
       const evaluatorModel = buildModelFromConnector(evaluationConnector);
-
-      const scoreRepository = new EvaluationScoreRepository(evaluationsEsClient, log);
-
-      const currentRunId = process.env.TEST_RUN_ID;
-      if (!currentRunId) {
-        throw new Error('runId must be provided via TEST_RUN_ID environment variable');
-      }
-
-      const shouldPreflightExport =
-        process.env.KBN_EVALS_SKIP_PREFLIGHT_EXPORT !== 'true' &&
-        Boolean(process.env.EVALUATIONS_ES_URL || process.env.EVALUATIONS_ES_API_KEY);
-      if (shouldPreflightExport) {
-        try {
-          log.info('Running evaluations Elasticsearch export preflight');
-          await scoreRepository.preflightExport();
-        } catch (error) {
-          throw new Error('Evaluation results export preflight failed', { cause: error });
-        }
-      }
-
-      const upsertDataset = evaluationsPluginEnabled
-        ? async (dataset: EvaluationDataset) => {
-            await evaluationsKbnClient.request({
-              path: EVALS_DATASET_UPSERT_URL,
-              method: 'POST',
-              body: {
-                name: dataset.name,
-                description: dataset.description,
-                examples: dataset.examples.map(toDatasetRouteExample),
-              },
-              retries: 0,
-            });
-          }
+      const suiteId = process.env.EVAL_SUITE_ID;
+      const buildkiteMetadata = getBuildkiteCiMetadataFromEnv();
+      // Optional space assignment for offline runs. Comma-separated so a run can
+      // target several spaces; omitted means the target Kibana's default space.
+      const spaceIds = process.env.EVAL_SPACE_ID
+        ? process.env.EVAL_SPACE_ID.split(',')
+            .map((id) => id.trim())
+            .filter(Boolean)
         : undefined;
 
-      const getDatasetByName = evaluationsPluginEnabled
-        ? async (datasetName: string): Promise<EvaluationDatasetWithId | null> => {
-            const datasetId = uuidv5(datasetName, DATASET_UUID_NAMESPACE);
-            const response = await evaluationsKbnClient.request({
-              path: EVALS_DATASET_URL.replace('{datasetId}', encodeURIComponent(datasetId)),
-              method: 'GET',
-              retries: 0,
-            });
-            const datasetResponse = GetEvaluationDatasetResponse.parse(response.data);
+      const executionId = buildExecutionId({
+        baseExecutionId: process.env.TEST_RUN_ID,
+        suiteId,
+        modelId: model.id,
+      });
 
-            return {
-              id: datasetResponse.id,
-              name: datasetResponse.name,
-              description: datasetResponse.description,
-              examples: datasetResponse.examples.map(({ id, input, output, metadata }) => ({
-                id,
-                input,
-                output,
-                metadata,
-              })),
-            };
-          }
-        : undefined;
+      workerExecutionId.current = executionId;
+
+      const gitMetadata = getGitMetadata();
+      const hostName = osHostname();
 
       const executorClient = new KibanaEvalsClient({
         log,
         model,
-        runId: currentRunId,
+        executionId,
         repetitions,
-        upsertDataset,
-        getDatasetByName,
+        upsertDataset: async (dataset: EvaluationDataset) => {
+          await evalsClient.upsertDataset({
+            name: dataset.name,
+            description: dataset.description,
+            examples: dataset.examples.map(toDatasetRouteExample),
+          });
+        },
+        getDatasetByName: (datasetName: string) => evalsClient.getDatasetByName(datasetName),
+        onExperimentStart: async ({ experimentId }) => {
+          workerExperimentId.current = experimentId;
+        },
+        onEvaluationComplete: async (event) => {
+          try {
+            const ingestRequests = buildIngestRequest({
+              taskModel: model,
+              evaluatorModel,
+              repetitions,
+              hostName,
+              gitMetadata,
+              suiteId,
+              executionId,
+              buildkiteMetadata,
+              spaceIds,
+              source: { kind: 'event', event },
+              log,
+            });
+            const results = await Promise.all(
+              ingestRequests.map((ingestRequest) => evalsClient.ingestScores(ingestRequest))
+            );
+            for (const result of results) {
+              if (result.failed.length > 0) {
+                log.warning(
+                  `Score ingest partially failed for example ${event.exampleId}: ${result.failed
+                    .map((f) => f.reason)
+                    .join(', ')}`
+                );
+              }
+            }
+          } catch (error) {
+            log.warning(`Score ingest failed for example ${event.exampleId}: ${error}`);
+          }
+        },
       });
 
       await use(executorClient);
 
-      if (!currentRunId) {
-        throw new Error(
-          'runId must be provided via TEST_RUN_ID environment variable before exporting scores'
-        );
+      const datasetRunResults = await executorClient.getDatasetRunResults();
+      if (datasetRunResults.length > 0 && executionId) {
+        await reportModelScore(evalsClient, datasetRunResults[0].id, log, {
+          taskModelId: model.id,
+          suiteId,
+          executionId,
+        });
+      } else {
+        for (const result of datasetRunResults) {
+          await reportModelScore(evalsClient, result.id, log, {
+            taskModelId: model.id,
+            suiteId,
+          });
+        }
       }
 
-      const experiments = await executorClient.getRanExperiments();
-      const documents = await mapToEvaluationScoreDocuments({
-        experiments,
-        taskModel: model,
-        evaluatorModel,
-        runId: currentRunId,
-        totalRepetitions: repetitions,
-      });
-
-      try {
-        await exportEvaluations(documents, scoreRepository, log);
-      } catch (error) {
-        log.error(
-          new Error(
-            `Failed to export evaluation results to Elasticsearch for run ID: ${currentRunId}.`,
-            { cause: error }
-          )
-        );
-        throw error;
+      // Publish the full composite execution ID to Buildkite metadata so the
+      // post-comparison step can retrieve it without querying the experiments API.
+      // Per-connector key (kbn-evals:execution-id:<suite>:<connector>) is the primary
+      // path for multi-model fanout builds; the per-suite key is a fallback for single
+      // runs where EVAL_PROJECT is not set.
+      if (executionId && suiteId && process.env.BUILDKITE_BUILD_ID) {
+        const connectorId = process.env.EVAL_PROJECT;
+        try {
+          if (connectorId) {
+            execFileSync(
+              'buildkite-agent',
+              ['meta-data', 'set', `kbn-evals:execution-id:${suiteId}:${connectorId}`, executionId],
+              { stdio: 'ignore' }
+            );
+          }
+          execFileSync(
+            'buildkite-agent',
+            ['meta-data', 'set', `kbn-evals:execution-id:${suiteId}`, executionId],
+            { stdio: 'ignore' }
+          );
+        } catch {
+          // Not running inside Buildkite; skip silently.
+        }
       }
-
-      await reportModelScore(scoreRepository, currentRunId, log, {
-        taskModelId: model.id,
-        suiteId: process.env.EVAL_SUITE_ID,
-      });
     },
     {
       scope: 'worker',
@@ -441,27 +477,10 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
     },
     { scope: 'worker' },
   ],
-  evaluationsEsClient: [
-    async ({ esClient }, use) => {
-      const esUrl = process.env.EVALUATIONS_ES_URL;
-      const apiKey = process.env.EVALUATIONS_ES_API_KEY;
-      const evaluationsEsClient = esUrl
-        ? createEsClientForTesting({
-            esUrl,
-            isCloud: isElasticCloudEsUrl(esUrl),
-            ...(apiKey ? { auth: { apiKey } } : {}),
-          })
-        : esClient;
-      await use(evaluationsEsClient);
-    },
-    { scope: 'worker' },
-  ],
-  repetitions: [
-    async ({}, use, testInfo) => {
-      // Get repetitions from test options (set in playwright config)
-      const repetitions = (testInfo.project.use as any).repetitions || 1;
-      await use(repetitions);
-    },
-    { scope: 'worker' },
-  ],
+  // User-selected execution parameters, set per-project in the Playwright config.
+  // Playwright >=1.61 requires anything set in a project's `use` to be declared as an
+  // `{ option: true }` fixture, so these carry the selected values into the fixtures above.
+  connectorParam: [undefined, { option: true, scope: 'worker' }],
+  evaluationConnectorParam: [undefined, { option: true, scope: 'worker' }],
+  repetitions: [1, { option: true, scope: 'worker' }],
 });

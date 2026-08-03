@@ -66,7 +66,12 @@ ___security_solution_serverless/public/plugin.ts___
 export class Plugin {
 
     public start(core: CoreStart, deps: SecuritySolutionServerlessStartDeps) {
-        deps.securitySolution.setUsersUrl(deps.cloud.usersAndRolesUrl);
+        // Note: usersAndRolesUrl is a privileged URL that requires the manage_security
+        // cluster privilege. It must be retrieved via getPrivilegedUrls() rather than
+        // accessed directly on the cloud contract.
+        deps.cloud.getPrivilegedUrls().then((privilegedUrls) => {
+            deps.securitySolution.setUsersUrl(privilegedUrls.usersAndRolesUrl);
+        });
     }
 }
 ```

@@ -27,6 +27,7 @@ import { verifyAccessAndContext } from './verify_access_and_context';
 import { OAUTH_API_TAG } from '../feature';
 import { OAuthStateClient } from '../lib/oauth_state_client';
 import { requestOAuthAuthorizationCodeToken } from '../lib/request_oauth_authorization_code_token';
+import { buildTokenResponseOptions } from '../lib/request_oauth_token';
 import { requestEarsToken } from '../lib/ears/request_ears_token';
 import type { OAuthRateLimiter } from '../lib/oauth_rate_limiter';
 import { UserConnectorTokenClient } from '../lib/user_connector_token_client';
@@ -93,6 +94,9 @@ interface OAuthConnectorSecrets {
   clientSecret?: string;
   tokenUrl?: string;
   useBasicAuth?: boolean;
+  accessTokenPath?: string;
+  tokenTypePath?: string;
+  tokenType?: string;
 }
 
 interface OAuthConnectorConfig {
@@ -405,6 +409,9 @@ export const oauthCallbackRoute = (
       },
       options: {
         access: 'public',
+        availability: {
+          since: '9.4.0',
+        },
         summary: i18n.translate('xpack.actions.oauthCallback.routeSummary', {
           defaultMessage: 'Handle OAuth callback',
         }),
@@ -577,10 +584,10 @@ export const oauthCallbackRoute = (
           const config = rawAction.attributes.config;
           const secrets = rawAction.attributes.secrets;
           const authType = secrets.authType || config?.authType;
+          const provider = secrets.provider;
 
           let tokenResult;
           if (authType === 'ears') {
-            const provider = secrets.provider;
             if (!provider) {
               throw new Error('Connector missing required OAuth configuration (provider)');
             }
@@ -610,6 +617,12 @@ export const oauthCallbackRoute = (
               coreStart.http.basePath.publicBaseUrl
             );
 
+            const tokenResponseOptions = buildTokenResponseOptions({
+              accessTokenPath: secrets.accessTokenPath,
+              tokenTypePath: secrets.tokenTypePath,
+              tokenType: secrets.tokenType,
+            });
+
             tokenResult = await requestOAuthAuthorizationCodeToken(
               tokenUrl,
               logger,
@@ -621,7 +634,8 @@ export const oauthCallbackRoute = (
                 clientSecret,
               },
               configurationUtilities,
-              useBasicAuth
+              useBasicAuth,
+              tokenResponseOptions
             );
           }
           routeLogger.debug(
@@ -636,12 +650,17 @@ export const oauthCallbackRoute = (
               includedHiddenTypes: ['user_connector_token'],
             }),
             logger: routeLogger,
+            configurationUtilities,
           });
 
+          // skipRevocation: we just minted a fresh token above; the new token
+          // shares the same provider grant, so revoking it here would
+          // invalidate the token we are about to store.
           await userConnectorTokenClient.deleteConnectorTokens({
             connectorId: stateConnectorId,
             tokenType: 'access_token',
             profileUid,
+            skipRevocation: true,
           });
           const formattedToken = `${tokenResult.tokenType} ${tokenResult.accessToken}`;
           await userConnectorTokenClient.createWithRefreshToken({
@@ -661,6 +680,7 @@ export const oauthCallbackRoute = (
             returnUrl: kibanaReturnUrl,
           });
         } catch (err) {
+          // Log the underlying cause for operators; return a generic message to the client.
           routeLogger.error(`OAuth callback failed: ${getErrorMessage(err)}`);
           if (err instanceof Error && err.stack) {
             routeLogger.debug(`OAuth callback error stack: ${err.stack}`);
@@ -720,6 +740,9 @@ export const oauthCallbackScriptRoute = (router: IRouter<ActionsRequestHandlerCo
       security: DEFAULT_ACTION_ROUTE_SECURITY,
       options: {
         access: 'public',
+        availability: {
+          since: '9.4.0',
+        },
         description: i18n.translate('xpack.actions.oauthCallbackScript.routeDescription', {
           defaultMessage: 'Returns the OAuth callback script',
         }),

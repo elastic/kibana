@@ -7,21 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * Migration recommendation: MIGRATE TO SCOUT.
+ */
+
+// Serverless test (remove during Scout migration): x-pack/platform/test/serverless/functional/test_suites/discover/group4/_adhoc_data_views.ts
+
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dataGrid = getService('dataGrid');
-  const toasts = getService('toasts');
-  const esArchiver = getService('esArchiver');
-  const filterBar = getService('filterBar');
   const fieldEditor = getService('fieldEditor');
+  const filterBar = getService('filterBar');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const kibanaServer = getService('kibanaServer');
-  const retry = getService('retry');
-  const queryBar = getService('queryBar');
   const testSubjects = getService('testSubjects');
-  const browser = getService('browser');
   const { common, discover, timePicker, header, context, dashboard, unifiedFieldList } =
     getPageObjects([
       'common',
@@ -32,7 +33,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       'dashboard',
       'unifiedFieldList',
     ]);
-  const find = getService('find');
   const security = getService('security');
   const dataViews = getService('dataViews');
 
@@ -48,9 +48,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.importExport.load(
         'src/platform/test/functional/fixtures/kbn_archiver/discover.json'
       );
-      await esArchiver.loadIfNeeded(
-        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
-      );
 
       await timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await common.navigateToApp('discover');
@@ -58,7 +55,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
-      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/logstash_functional');
     });
 
     it('should navigate back correctly from to surrounding and single views', async () => {
@@ -99,41 +95,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await dataViews.getSelectedName()).to.be('logstash*');
     });
 
-    it('should support query and filtering', async () => {
-      await filterBar.addFilter({
-        field: 'nestedField.child',
-        operation: 'is',
-        value: 'nestedValue',
-      });
-
-      await header.waitUntilLoadingHasFinished();
-      await discover.waitUntilSearchingHasFinished();
-
-      expect(await filterBar.hasFilter('nestedField.child', 'nestedValue')).to.be(true);
-      await retry.try(async function () {
-        expect(await discover.getHitCount()).to.be('1');
-      });
-      await filterBar.removeFilter('nestedField.child');
-
-      await header.waitUntilLoadingHasFinished();
-      await discover.waitUntilSearchingHasFinished();
-
-      await queryBar.setQuery('test');
-      await queryBar.submitQuery();
-
-      await header.waitUntilLoadingHasFinished();
-      await discover.waitUntilSearchingHasFinished();
-
-      await retry.try(async () => expect(await discover.getHitCount()).to.be('22'));
-
-      await queryBar.clearQuery();
-      await queryBar.submitQuery();
-
-      await header.waitUntilLoadingHasFinished();
-      await discover.waitUntilSearchingHasFinished();
-    });
-
-    it('should not update data view id when saving search first time', async () => {
+    it('should save Discover session with ad-hoc data view first time', async () => {
       const prevDataViewId = await discover.getCurrentDataViewId();
 
       await discover.saveSearch('logstash*-ss');
@@ -144,7 +106,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(prevDataViewId).to.equal(newDataViewId);
     });
 
-    it('should update data view id when saving new search copy', async () => {
+    it('should save new Discover session copy with ad-hoc data view', async () => {
       const prevDataViewId = await discover.getCurrentDataViewId();
 
       await discover.saveSearch('logstash*-ss-new', true);
@@ -215,34 +177,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(+second).to.equal(+first * 2);
     });
 
-    it('should open saved search by navigation to context from embeddable', async () => {
-      // navigate to context view
-      await dataGrid.clickRowToggle({ rowIndex: 0 });
-      const [, surrDocs] = await dataGrid.getRowActions();
-      await surrDocs.click();
-
-      // close popup
-      const alert = await browser.getAlert();
-      await alert?.accept();
-      if (await testSubjects.exists('confirmModalConfirmButton')) {
-        await testSubjects.click('confirmModalConfirmButton');
-      }
-      await context.waitUntilContextLoadingHasFinished();
-
-      // open saved search
-      await testSubjects.click('~breadcrumb & ~first');
-      await header.waitUntilLoadingHasFinished();
-
-      const savedSearch = await find.byCssSelector(`[data-test-subj="breadcrumb last"]`);
-      const savedSearchName = await savedSearch.getVisibleText();
-      expect(savedSearchName).to.be.equal('logst*-ss-_bytes-runtimefield');
-
-      // test the header now
-      const headerFields = await dataGrid.getHeaderFields();
-      expect(headerFields.join(' ')).to.have.string('_bytes-runtimefield');
-    });
-
     it('should update id after data view field edit', async () => {
+      await discover.navigateToApp();
       await discover.loadSavedSearch('logst*-ss-_bytes-runtimefield');
       await header.waitUntilLoadingHasFinished();
 
@@ -257,49 +193,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       const newDataViewId = await discover.getCurrentDataViewId();
       expect(prevDataViewId).not.to.equal(newDataViewId);
-    });
-
-    it('should notify about invalid filter reffs', async () => {
-      await dataViews.createFromSearchBar({
-        name: 'logstas',
-        adHoc: true,
-        hasTimeField: true,
-      });
-      await discover.waitUntilSearchingHasFinished();
-      await filterBar.addFilter({
-        field: 'nestedField.child',
-        operation: 'is',
-        value: 'nestedValue',
-      });
-      await header.waitUntilLoadingHasFinished();
-
-      await filterBar.addFilter({ field: 'extension', operation: 'is', value: 'jpg' });
-      await header.waitUntilLoadingHasFinished();
-
-      const first = await discover.getCurrentDataViewId();
-      // trigger data view id update
-      await discover.addRuntimeField(
-        '_bytes-runtimefield',
-        `emit((doc["bytes"].value * 2).toString())`
-      );
-      await header.waitUntilLoadingHasFinished();
-
-      const second = await discover.getCurrentDataViewId();
-      expect(first).not.equal(second);
-
-      await toasts.dismissAll();
-
-      await browser.goBack();
-      await header.waitUntilLoadingHasFinished();
-
-      const [firstToast, secondToast] = await toasts.getAll();
-
-      expect([await firstToast.getVisibleText(), await secondToast.getVisibleText()].sort()).to.eql(
-        [
-          `"${first}" is not a configured data view ID\nShowing the saved data view: "logstas*" (${second})`,
-          `Different index references\nData view id references in some of the applied filters differ from the current data view.`,
-        ].sort()
-      );
     });
   });
 }

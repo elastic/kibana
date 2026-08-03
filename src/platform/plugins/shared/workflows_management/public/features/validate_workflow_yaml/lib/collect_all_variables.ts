@@ -10,9 +10,9 @@
 import type { Document } from 'yaml';
 import { visit } from 'yaml';
 import type { monaco } from '@kbn/monaco';
+import { getPathFromAncestors } from '@kbn/workflows/common/utils/yaml';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
-import { VARIABLE_REGEX_GLOBAL } from '../../../../common/lib/regex';
-import { getPathFromAncestors } from '../../../../common/lib/yaml';
+import { VARIABLE_REGEX_GLOBAL } from '@kbn/workflows-yaml';
 import type { VariableItem } from '../model/types';
 
 interface ScalarEntry {

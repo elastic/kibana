@@ -44,11 +44,14 @@ interface ZodSafeParseable<Output = any> {
 export function buildRouteValidationWithZod<Output>(
   schema: ZodSafeParseable<Output>
 ): RouteValidationFunction<Output> {
-  return (inputValue: unknown, validationResult: RouteValidationResultFactory) => {
+  const fn = (inputValue: unknown, validationResult: RouteValidationResultFactory) => {
     const decoded = schema.safeParse(inputValue);
 
     return decoded.success
       ? validationResult.ok(decoded.data)
       : validationResult.badRequest(stringifyZodError(decoded.error as any));
   };
+  // Expose the original Zod schema so the OAS generator can detect and convert it.
+  (fn as RouteValidationFunction<Output> & { _sourceSchema: unknown })._sourceSchema = schema;
+  return fn;
 }

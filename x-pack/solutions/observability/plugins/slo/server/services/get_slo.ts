@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import { addTransactionLabels } from '@kbn/apm-utils';
 import type { GetSLOParams, GetSLOResponse } from '@kbn/slo-schema';
 import { ALL_VALUE, getSLOResponseSchema } from '@kbn/slo-schema';
 import type { SLODefinitionClient } from './slo_definition_client';
 import type { SummaryClient } from './summary_client';
+import { getSloApmLabels } from './utils';
 
 export class GetSLO {
   constructor(
@@ -24,6 +26,7 @@ export class GetSLO {
     const instanceId = params.instanceId ?? ALL_VALUE;
     const remoteName = params.remoteName;
     const { slo, remote } = await this.definitionClient.execute(sloId, spaceId, remoteName);
+    addTransactionLabels(getSloApmLabels(slo));
     const { summary, groupings, meta } = await this.summaryClient.computeSummary({
       slo,
       instanceId,

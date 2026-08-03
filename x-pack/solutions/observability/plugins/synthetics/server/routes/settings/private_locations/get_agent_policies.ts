@@ -36,7 +36,8 @@ export const getAgentPoliciesAsInternalUser = async ({
     perPage: 10000,
     sortField: 'name',
     sortOrder: 'asc',
-    kuery: 'ingest-agent-policies.is_managed : false',
+    kuery:
+      'ingest-agent-policies.is_managed : false and not ingest-agent-policies.supports_agentless : true',
     esClient,
     withAgentCount,
     spaceId,

@@ -5,27 +5,51 @@
  * 2.0.
  */
 
-import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { PLUGIN_ID, PLUGIN_NAME } from '../common';
-import { TraceWaterfall } from './components/trace_waterfall';
+import React from 'react';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import { PLUGIN_ID, PLUGIN_NAME, EVALS_UI_PRIVILEGES } from '../common';
 import type {
+  AddToDatasetAction,
+  AddToDatasetActionConfig,
+  AddToDatasetFlyoutOpenOptions,
   EvalsPublicSetup,
   EvalsPublicStart,
   EvalsSetupDependencies,
   EvalsStartDependencies,
 } from './types';
+import { registerEvalsPublicWorkflowSteps } from './workflows';
 
 const MANAGEMENT_KEYWORDS = ['evals', 'evaluations', 'ai', 'llm', 'trace', 'tracing'] as const;
+
+const DEFAULT_ADD_TO_DATASET_LABEL = i18n.translate('xpack.evals.addToDatasetAction.label', {
+  defaultMessage: 'Add to dataset',
+});
+
+/** Browser-exposed subset of the evals config (see `exposeToBrowser` in `server/config.ts`). */
+interface EvalsPublicConfig {
+  enabled: boolean;
+}
 
 export class EvalsPublicPlugin
   implements
     Plugin<EvalsPublicSetup, EvalsPublicStart, EvalsSetupDependencies, EvalsStartDependencies>
 {
+  private readonly config: EvalsPublicConfig;
+
+  constructor(initializerContext: PluginInitializerContext) {
+    this.config = initializerContext.config.get<EvalsPublicConfig>();
+  }
+
   public setup(
     coreSetup: CoreSetup<EvalsStartDependencies>,
-    { management }: EvalsSetupDependencies
+    { management, workflowsExtensions }: EvalsSetupDependencies
   ): EvalsPublicSetup {
+    if (this.config.enabled && workflowsExtensions) {
+      registerEvalsPublicWorkflowSteps(workflowsExtensions);
+    }
+
     if (management) {
       management.sections.section.ai.registerApp({
         id: PLUGIN_ID,
@@ -45,8 +69,64 @@ export class EvalsPublicPlugin
     return {};
   }
 
-  start(_core: CoreStart, _plugins: EvalsStartDependencies): EvalsPublicStart {
-    return { TraceWaterfall };
+  start(core: CoreStart, _plugins: EvalsStartDependencies): EvalsPublicStart {
+    const canAddToDataset =
+      !!core.application.capabilities?.[PLUGIN_ID]?.[EVALS_UI_PRIVILEGES.manage];
+
+    const openAddToDatasetFlyout = (options: AddToDatasetFlyoutOpenOptions) => {
+      if (!canAddToDataset) {
+        return;
+      }
+
+      void (async () => {
+        const { AddToDatasetFlyout } = await import('./components/add_to_dataset_flyout');
+        const overlayRef = core.overlays.openFlyout(
+          toMountPoint(
+            <AddToDatasetFlyout
+              coreStart={core}
+              options={options}
+              onClose={() => overlayRef.close()}
+            />,
+            core
+          ),
+          {
+            ownFocus: true,
+            size: 'm',
+            resizable: true,
+            minWidth: 480,
+            maxWidth: 920,
+          }
+        );
+      })();
+    };
+
+    const getAddToDatasetAction = (config: AddToDatasetActionConfig): AddToDatasetAction | null => {
+      if (!canAddToDataset) {
+        return null;
+      }
+
+      const {
+        label = DEFAULT_ADD_TO_DATASET_LABEL,
+        ariaLabel = label,
+        iconType = 'beaker',
+        stopPropagation = false,
+        onBeforeOpen,
+        ...options
+      } = config;
+
+      return {
+        label,
+        ariaLabel,
+        iconType,
+        onClick: (event) => {
+          if (stopPropagation) event?.stopPropagation?.();
+          onBeforeOpen?.();
+          openAddToDatasetFlyout(options);
+        },
+      };
+    };
+
+    return { canAddToDataset, openAddToDatasetFlyout, getAddToDatasetAction };
   }
 
   stop() {}

@@ -1,0 +1,6 @@
+summary: Field metadata was updated successfully.
+description: The acknowledged flag confirms that the field metadata changes were applied to the data view.
+value:
+  {
+    "acknowledged": true
+  }

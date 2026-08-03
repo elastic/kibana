@@ -34,7 +34,7 @@ import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { EXCLUDED_GAP_REASONS_KEY } from '../../../../../common/constants';
 import * as i18n from './translations';
 import type { Gap, GapReasonType, GapStatus } from '../../types';
-import { getStatusLabel, getReasonLabel } from './utils';
+import { getStatusLabel, getReasonLabel, getExcludedReasons } from './utils';
 import { GapStatusFilter } from './status_filter';
 import { GapReasonFilter, GAP_REASON_FILTER_ITEMS } from './reason_filter';
 import { useFindGapsForRule } from '../../api/hooks/use_find_gaps_for_rule';
@@ -48,15 +48,16 @@ const DatePickerEuiFlexItem = styled(EuiFlexItem)`
 `;
 
 const getGapsTableColumns = (
-  hasCRUDPermissions: boolean,
   ruleId: string,
   enabled: boolean,
+  canManualRunRules: boolean,
   gapReasonDetectionEnabled: boolean
 ) => {
   const fillActions = {
     name: i18n.GAPS_TABLE_ACTIONS_LABEL,
     align: 'right' as const,
-    render: (gap: Gap) => <FillGap isRuleEnabled={enabled} ruleId={ruleId} gap={gap} />,
+    render: (gap: Gap) =>
+      canManualRunRules ? <FillGap isRuleEnabled={enabled} ruleId={ruleId} gap={gap} /> : null,
     width: '15%',
   };
 
@@ -197,7 +198,7 @@ const getGapsTableColumns = (
     },
   ];
 
-  if (hasCRUDPermissions) {
+  if (canManualRunRules) {
     columns.push(fillActions);
   }
 
@@ -215,7 +216,11 @@ export const RuleGaps = ({ ruleId, enabled }: { ruleId: string; enabled: boolean
   });
   const { timelines, uiSettings } = useKibana().services;
   const excludedReasonsFromAdvancedSettings = uiSettings.get<string[]>(EXCLUDED_GAP_REASONS_KEY);
-  const canEditRules = useUserPrivileges().rulesPrivileges.rules.edit;
+  const {
+    rulesPrivileges: {
+      manualRun: { edit: canManualRunRules },
+    },
+  } = useUserPrivileges();
   const gapReasonDetectionEnabled = useIsExperimentalFeatureEnabled('gapReasonDetectionEnabled');
   const [refreshInterval, setRefreshInterval] = useState(1000);
   const [isPaused, setIsPaused] = useState(true);
@@ -229,9 +234,7 @@ export const RuleGaps = ({ ruleId, enabled }: { ruleId: string; enabled: boolean
     field: '@timestamp',
     direction: 'desc',
   });
-  const excludedReasons = GAP_REASON_FILTER_ITEMS.filter(
-    (reason) => !selectedReasonTypes.includes(reason)
-  );
+  const excludedReasons = getExcludedReasons(selectedReasonTypes, GAP_REASON_FILTER_ITEMS);
 
   const getSortField = (field: keyof Gap) => {
     if (field === '@timestamp' || !field) {
@@ -260,7 +263,12 @@ export const RuleGaps = ({ ruleId, enabled }: { ruleId: string; enabled: boolean
     totalItemCount: Math.min(totalItemCount, MaxItemCount),
   };
 
-  const columns = getGapsTableColumns(canEditRules, ruleId, enabled, gapReasonDetectionEnabled);
+  const columns = getGapsTableColumns(
+    ruleId,
+    enabled,
+    canManualRunRules,
+    gapReasonDetectionEnabled
+  );
 
   const onRefreshCallback = () => {
     refetch();
@@ -352,7 +360,7 @@ export const RuleGaps = ({ ruleId, enabled }: { ruleId: string; enabled: boolean
                 />
               </DatePickerEuiFlexItem>
             </EuiFlexItem>
-            {canEditRules && (
+            {canManualRunRules && (
               <EuiFlexItem grow={false}>
                 <FillRuleGapsButton ruleId={ruleId} />
               </EuiFlexItem>

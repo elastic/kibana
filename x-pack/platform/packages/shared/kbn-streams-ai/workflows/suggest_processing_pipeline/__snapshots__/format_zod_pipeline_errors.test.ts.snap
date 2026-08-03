@@ -1,0 +1,77 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[
+  `formatZodPipelineErrors falls back to pipeline-level issues when steps cannot be extracted 1`
+] = `
+Array [
+  Object {
+    "action": "pipeline",
+    "message": "steps: Invalid input: expected array, received undefined",
+    "stepIndex": -1,
+  },
+]
+`;
+
+exports[
+  `formatZodPipelineErrors narrows errors to the date processor schema when action is date 1`
+] = `
+Array [
+  Object {
+    "action": "date",
+    "message": "from: Invalid input: expected string, received number",
+    "stepIndex": 0,
+  },
+  Object {
+    "action": "date",
+    "message": "formats: Invalid input: expected array, received undefined",
+    "stepIndex": 0,
+  },
+]
+`;
+
+exports[`formatZodPipelineErrors reports disallowed action when allowedActions excludes it 1`] = `
+Array [
+  Object {
+    "action": "grok",
+    "message": "Processor action \\"grok\\" is not allowed in this pipeline schema. Allowed actions: date, remove, rename, convert",
+    "stepIndex": 0,
+  },
+]
+`;
+
+exports[
+  `formatZodPipelineErrors reports unknown action when action is not in ACTION_TO_SCHEMA 1`
+] = `
+Array [
+  Object {
+    "action": "nonexistent",
+    "message": "Unknown processor action \\"nonexistent\\"",
+    "stepIndex": 0,
+  },
+]
+`;
+
+exports[`formatZodPipelineErrors returns separate errors for each invalid step 1`] = `
+Array [
+  Object {
+    "action": "date",
+    "message": "from: Invalid input: expected string, received number",
+    "stepIndex": 0,
+  },
+  Object {
+    "action": "date",
+    "message": "formats: Invalid input: expected array, received undefined",
+    "stepIndex": 0,
+  },
+  Object {
+    "action": "remove",
+    "message": "from: Too small: expected string to have >=1 characters",
+    "stepIndex": 1,
+  },
+  Object {
+    "action": "remove",
+    "message": "from: No empty strings allowed",
+    "stepIndex": 1,
+  },
+]
+`;

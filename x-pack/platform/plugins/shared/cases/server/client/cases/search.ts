@@ -11,8 +11,8 @@ import Boom from '@hapi/boom';
 import { spaceIdToNamespace } from '@kbn/spaces-plugin/server/lib/utils/namespace';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import type { CustomFieldsConfiguration } from '../../../common/types/domain';
-import type { CasesSearchRequest, CasesFindResponse } from '../../../common/types/api';
-import { CasesSearchRequestRt, CasesFindResponseRt } from '../../../common/types/api';
+import type { CasesSearchRequest, CasesSearchResponse } from '../../../common/types/api';
+import { CasesSearchRequestRt, CasesSearchResponseRt } from '../../../common/types/api';
 import { decodeWithExcessOrThrow, decodeOrThrow } from '../../common/runtime_types';
 
 import { createCaseError } from '../../common/error';
@@ -23,6 +23,13 @@ import type { CasesClient, CasesClientArgs } from '..';
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
 import type { CasesSearchParams } from '../types';
 import { validateSearchCasesCustomFields } from './validators';
+import {
+  resolveExtendedFieldFilters,
+  tokenizeSearchForLabels,
+  resolveFieldLabelSearch,
+} from '../../services/cases/extended_field_search_utils';
+import { enrichCasesWithFieldLabels } from './utils';
+import { parseFieldDefinitionsToInlineFields } from '../../../common/utils';
 
 /**
  * Retrieves a case and optionally its comments.
@@ -33,12 +40,13 @@ export const search = async (
   params: CasesSearchRequest,
   clientArgs: CasesClientArgs,
   casesClient: CasesClient
-): Promise<CasesFindResponse> => {
+): Promise<CasesSearchResponse> => {
   const {
-    services: { caseService, licensingService },
+    services: { caseService, licensingService, templatesService, fieldDefinitionsService },
     authorization,
     logger,
     spaceId,
+    config,
   } = clientArgs;
 
   try {
@@ -46,7 +54,7 @@ export const search = async (
     const configArgs = paramArgs.owner ? { owner: paramArgs.owner } : {};
     const configurations = await casesClient.configure.get(configArgs);
     const customFieldsConfiguration: CustomFieldsConfiguration = configurations
-      .map((config) => config.customFields)
+      .map((configuration) => configuration.customFields)
       .flat();
 
     /**
@@ -109,6 +117,7 @@ export const search = async (
       status: undefined,
       customFieldsConfiguration,
       authorizationFilter,
+      searchType: 'search',
     });
 
     const caseQueryOptions = constructQueryOptions({
@@ -120,19 +129,71 @@ export const search = async (
 
     const namespaces = [spaceIdToNamespace(spaceId) ?? DEFAULT_NAMESPACE_STRING];
 
-    const [cases, statusStats] = await Promise.all([
-      caseService.searchCasesGroupedByID({
-        caseOptions: {
-          ...paramArgs,
-          ...caseQueryOptions,
-          searchFields: asArray(paramArgs.searchFields),
-        },
-        namespaces,
-      }),
-      caseService.getCaseStatusStats({
-        searchOptions: statusStatsOptions,
-      }),
-    ]);
+    const ownerArray = asArray(paramArgs.owner).filter(Boolean);
+
+    /**
+     * Fetch ALL template versions upfront. This single fetch serves two purposes:
+     * 1. Extended field filter resolution — we need all versions (not just isLatest) to
+     *    correctly match cases created with older template versions where fields may differ.
+     * 2. Label enrichment — enrichCasesWithFieldLabels uses the same SOs to populate
+     *    extended_fields_labels on returned cases, avoiding redundant fetches.
+     *
+     */
+    const [templateSOs, globalFieldDefs] = config.templates.enabled
+      ? await Promise.all([
+          templatesService.getTemplateVersionsForExtendedFieldSearch({
+            owner: ownerArray.length > 0 ? ownerArray : undefined,
+          }),
+          fieldDefinitionsService.getGlobalFieldDefinitionsForSearch({
+            owner: ownerArray.length > 0 ? ownerArray : undefined,
+          }),
+        ])
+      : [[], []];
+
+    const templateMetadata = templateSOs.map((so) => ({
+      templateId: so.attributes.templateId,
+      templateVersion: so.attributes.templateVersion,
+      fieldDefinitions: so.attributes.fieldDefinitions,
+    }));
+
+    const globalFields = parseFieldDefinitionsToInlineFields(globalFieldDefs);
+
+    const rawFilters = paramArgs.extendedFieldFilters;
+    const resolvedExtendedFieldFilters =
+      rawFilters && rawFilters.length > 0
+        ? resolveExtendedFieldFilters(rawFilters, templateMetadata, globalFields)
+        : undefined;
+
+    const fieldLabelResults = paramArgs.search
+      ? resolveFieldLabelSearch(
+          tokenizeSearchForLabels(paramArgs.search),
+          templateMetadata,
+          globalFields
+        )
+      : [];
+    const resolvedFieldLabelFilters = fieldLabelResults.length > 0 ? fieldLabelResults : undefined;
+
+    const cases = await caseService.searchCasesGroupedByID({
+      caseOptions: {
+        ...paramArgs,
+        ...caseQueryOptions,
+        searchFields: asArray(paramArgs.searchFields),
+      },
+      namespaces,
+      extendedFieldFilters: resolvedExtendedFieldFilters,
+      fieldLabelFilters: resolvedFieldLabelFilters,
+      // Status counts and MTTR are computed with the full search query (free-text search,
+      // extended field filters, attachment matches) so the metrics shown next to the list
+      // always reflect it; only the status clause is stripped (statusStatsOptions) so all
+      // three status counts stay populated.
+      statsOptions: { filter: statusStatsOptions.filter },
+    });
+
+    const statusStats = cases.searchStats?.statusStats ?? {
+      open: 0,
+      'in-progress': 0,
+      closed: 0,
+    };
 
     ensureSavedObjectsAreAuthorized([...cases.casesMap.values()]);
 
@@ -144,9 +205,12 @@ export const search = async (
       countOpenCases: statusStats.open,
       countInProgressCases: statusStats['in-progress'],
       countClosedCases: statusStats.closed,
+      mttr: cases.searchStats?.mttr ?? null,
     });
 
-    return decodeOrThrow(CasesFindResponseRt)(res);
+    res.cases = enrichCasesWithFieldLabels(res.cases, templateSOs, globalFields);
+
+    return decodeOrThrow(CasesSearchResponseRt)(res);
   } catch (error) {
     throw createCaseError({
       message: `Failed to find cases: ${JSON.stringify(params)}: ${error}`,

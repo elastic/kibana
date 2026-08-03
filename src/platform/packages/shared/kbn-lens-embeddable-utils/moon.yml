@@ -19,6 +19,8 @@ project:
 dependsOn:
   - '@kbn/core'
   - '@kbn/as-code-filters-schema'
+  - '@kbn/as-code-data-views-schema'
+  - '@kbn/as-code-data-views-transforms'
   - '@kbn/as-code-filters-transforms'
   - '@kbn/data-views-plugin'
   - '@kbn/event-annotation-common'
@@ -32,10 +34,10 @@ dependsOn:
   - '@kbn/lens-common'
   - '@kbn/chart-expressions-common'
   - '@kbn/expression-xy-plugin'
-  - '@kbn/utility-types'
   - '@kbn/transpose-utils'
   - '@kbn/palettes'
   - '@kbn/crypto-browser'
+  - '@kbn/std'
 tags:
   - shared-common
   - package
@@ -46,6 +48,7 @@ tags:
 fileGroups:
   src:
     - '**/*.ts'
+    - config_builder/tests/integrations/download_integrations_panels.js
     - '!target/**/*'
   jest-config:
     - jest.config.js

@@ -14,93 +14,99 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 /**
  * Execution metadata resolved from the pack saved object.
  */
+export const ScheduledExecutionMetadata = lazySchema(() =>
+  z.object({
+    /**
+     * The schedule ID for the scheduled query.
+     */
+    scheduleId: z.string().optional(),
+    /**
+     * The execution count for this scheduled query run.
+     */
+    executionCount: z.number().int().optional(),
+    /**
+     * The ID of the pack containing the query.
+     */
+    packId: z.string().optional(),
+    /**
+     * The name of the pack containing the query.
+     */
+    packName: z.string().optional(),
+    /**
+     * The name of the query within the pack.
+     */
+    queryName: z.string().optional(),
+    /**
+     * The SQL query that was executed.
+     */
+    queryText: z.string().optional(),
+    /**
+     * The timestamp of the most recent response for this execution.
+     */
+    timestamp: z.string().optional(),
+  })
+);
 export type ScheduledExecutionMetadata = z.infer<typeof ScheduledExecutionMetadata>;
-export const ScheduledExecutionMetadata = z.object({
-  /**
-   * The schedule ID for the scheduled query.
-   */
-  scheduleId: z.string().optional(),
-  /**
-   * The execution count for this scheduled query run.
-   */
-  executionCount: z.number().int().optional(),
-  /**
-   * The ID of the pack containing the query.
-   */
-  packId: z.string().optional(),
-  /**
-   * The name of the pack containing the query.
-   */
-  packName: z.string().optional(),
-  /**
-   * The name of the query within the pack.
-   */
-  queryName: z.string().optional(),
-  /**
-   * The SQL query that was executed.
-   */
-  queryText: z.string().optional(),
-  /**
-   * The timestamp of the most recent response for this execution.
-   */
-  timestamp: z.string().optional(),
-});
 
+export const ScheduledActionResultsAggregations = lazySchema(() =>
+  z.object({
+    /**
+     * The total number of result rows across all agents.
+     */
+    totalRowCount: z.number().int().optional(),
+    /**
+     * The total number of agents that responded.
+     */
+    totalResponded: z.number().int().optional(),
+    /**
+     * The number of agents that completed successfully.
+     */
+    successful: z.number().int().optional(),
+    /**
+     * The number of agents that returned errors.
+     */
+    failed: z.number().int().optional(),
+    /**
+     * The number of agents with pending responses.
+     */
+    pending: z.number().int().optional(),
+  })
+);
 export type ScheduledActionResultsAggregations = z.infer<typeof ScheduledActionResultsAggregations>;
-export const ScheduledActionResultsAggregations = z.object({
-  /**
-   * The total number of result rows across all agents.
-   */
-  totalRowCount: z.number().int().optional(),
-  /**
-   * The total number of agents that responded.
-   */
-  totalResponded: z.number().int().optional(),
-  /**
-   * The number of agents that completed successfully.
-   */
-  successful: z.number().int().optional(),
-  /**
-   * The number of agents that returned errors.
-   */
-  failed: z.number().int().optional(),
-  /**
-   * The number of agents with pending responses.
-   */
-  pending: z.number().int().optional(),
-});
 
+export const GetScheduledActionResultsResponse = lazySchema(() =>
+  z.object({
+    metadata: ScheduledExecutionMetadata.optional(),
+    /**
+     * The paginated list of per-agent action results.
+     */
+    edges: z.array(z.object({})).optional(),
+    /**
+     * The total number of action results.
+     */
+    total: z.number().int().optional(),
+    /**
+     * The current page number (zero-based).
+     */
+    currentPage: z.number().int().optional(),
+    /**
+     * The number of results per page.
+     */
+    pageSize: z.number().int().optional(),
+    /**
+     * The total number of pages.
+     */
+    totalPages: z.number().int().optional(),
+    aggregations: ScheduledActionResultsAggregations.optional(),
+    /**
+     * Debug/inspection data for the search query.
+     */
+    inspect: z.object({}).optional(),
+  })
+);
 export type GetScheduledActionResultsResponse = z.infer<typeof GetScheduledActionResultsResponse>;
-export const GetScheduledActionResultsResponse = z.object({
-  metadata: ScheduledExecutionMetadata.optional(),
-  /**
-   * The paginated list of per-agent action results.
-   */
-  edges: z.array(z.object({})).optional(),
-  /**
-   * The total number of action results.
-   */
-  total: z.number().int().optional(),
-  /**
-   * The current page number (zero-based).
-   */
-  currentPage: z.number().int().optional(),
-  /**
-   * The number of results per page.
-   */
-  pageSize: z.number().int().optional(),
-  /**
-   * The total number of pages.
-   */
-  totalPages: z.number().int().optional(),
-  aggregations: ScheduledActionResultsAggregations.optional(),
-  /**
-   * Debug/inspection data for the search query.
-   */
-  inspect: z.object({}).optional(),
-});

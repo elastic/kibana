@@ -22,6 +22,8 @@ import {
   type ChatCompletionChunkEvent,
   MessageRole,
   isChatCompletionChunkEvent,
+  createInferenceProviderError,
+  InferenceTaskErrorCode,
 } from '@kbn/inference-common';
 import {
   createInferenceConnectorAdapterMock,
@@ -155,6 +157,20 @@ describe('createChatCompleteApi', () => {
       temperature: 0.7,
       modelName: 'gpt-4o',
     });
+  });
+
+  it('forwards `maxContentLength` down to `inferenceAdapter.chatComplete`', async () => {
+    await chatComplete({
+      connectorId: 'connectorId',
+      messages: [{ role: MessageRole.User, content: 'question' }],
+      maxContentLength: 10 * 1024 * 1024,
+      maxRetries: 0,
+    });
+
+    expect(inferenceAdapter.chatComplete).toHaveBeenCalledTimes(1);
+    expect(inferenceAdapter.chatComplete).toHaveBeenCalledWith(
+      expect.objectContaining({ maxContentLength: 10 * 1024 * 1024 })
+    );
   });
 
   it('throws if the connector is not compatible', async () => {
@@ -443,6 +459,29 @@ describe('createChatCompleteApi', () => {
 
         expect(caughtError).toBeInstanceOf(Error);
         expect(caughtError.message).toContain('Request was aborted');
+      });
+    });
+  });
+
+  describe('upstream provider 404 errors', () => {
+    it('does not rewrite upstream provider 404 errors as connector-not-found errors', async () => {
+      const providerError = createInferenceProviderError(
+        'API Error: Not Found - No endpoints found for google/gemini-3-pro-preview',
+        { status: 404 }
+      );
+      inferenceAdapter.chatComplete.mockImplementation(() => {
+        throw providerError;
+      });
+
+      await expect(
+        chatComplete({
+          connectorId: 'connectorId',
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          maxRetries: 0,
+        })
+      ).rejects.toMatchObject({
+        code: InferenceTaskErrorCode.providerError,
+        message: expect.stringContaining('No endpoints found for google/gemini-3-pro-preview'),
       });
     });
   });

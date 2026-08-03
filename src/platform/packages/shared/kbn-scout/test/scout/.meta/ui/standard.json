@@ -1,5 +1,9 @@
 {
-  "sha1": "4dd4954c9438502d5b3a7547a1b1579aa45dd894",
+  "sha1": "418a40415aeeff1ca4348be2039153946d03f4bc",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
   "tests": [
     {
       "id": "c6ec4a747994e21-5b82e5b7ac2b08c",
@@ -46,38 +50,6 @@
       "location": {
         "file": "src/platform/packages/shared/kbn-scout/test/scout/ui/tests/eui_wrappers/check_box.spec.ts",
         "line": 23,
-        "column": 9
-      }
-    },
-    {
-      "id": "017789e0b431bee-3428dc06d0d6721",
-      "title": "EUI testing wrapper: EuiComboBox with multiple selections (pills)",
-      "expectedStatus": "skipped",
-      "tags": [
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete",
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "src/platform/packages/shared/kbn-scout/test/scout/ui/tests/eui_wrappers/combo_box.spec.ts",
-        "line": 19,
-        "column": 9
-      }
-    },
-    {
-      "id": "017789e0b431bee-5331af19c193bbb",
-      "title": "EUI testing wrapper: EuiComboBox with the single selection",
-      "expectedStatus": "skipped",
-      "tags": [
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete",
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "src/platform/packages/shared/kbn-scout/test/scout/ui/tests/eui_wrappers/combo_box.spec.ts",
-        "line": 68,
         "column": 9
       }
     },
@@ -141,6 +113,44 @@
       ],
       "location": {
         "file": "src/platform/packages/shared/kbn-scout/test/scout/ui/tests/eui_wrappers/toast.spec.ts",
+        "line": 19,
+        "column": 9
+      }
+    },
+    {
+      "id": "da0a20cc4229212-735f7785c6b4e10",
+      "title": "Serverless project should successfully load home page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-security_essentials",
+        "@cloud-serverless-security_essentials",
+        "@local-serverless-security_ease",
+        "@cloud-serverless-security_ease",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-scout/test/scout/ui/tests/sanity_check/home_serverless.spec.ts",
+        "line": 23,
+        "column": 9
+      }
+    },
+    {
+      "id": "31538f49b81b123-000d9e84f929c5d",
+      "title": "Stateful deployment should successfully load home page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-scout/test/scout/ui/tests/sanity_check/home_stateful.spec.ts",
         "line": 19,
         "column": 9
       }

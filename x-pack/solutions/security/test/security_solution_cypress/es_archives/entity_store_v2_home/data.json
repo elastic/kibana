@@ -2,7 +2,7 @@
   "type": "doc",
   "value": {
     "id": "user-1",
-    "index": ".entities.v2.latest.security_default",
+    "index": ".entities.v2.latest.security_default-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "entity": {
@@ -41,7 +41,7 @@
   "type": "doc",
   "value": {
     "id": "user-2",
-    "index": ".entities.v2.latest.security_default",
+    "index": ".entities.v2.latest.security_default-00001",
     "source": {
       "@timestamp": "2025-07-20T16:00:00.000Z",
       "entity": {
@@ -67,7 +67,7 @@
   "type": "doc",
   "value": {
     "id": "host-1",
-    "index": ".entities.v2.latest.security_default",
+    "index": ".entities.v2.latest.security_default-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "entity": {
@@ -99,7 +99,7 @@
   "type": "doc",
   "value": {
     "id": "host-2",
-    "index": ".entities.v2.latest.security_default",
+    "index": ".entities.v2.latest.security_default-00001",
     "source": {
       "@timestamp": "2025-07-20T15:00:00.000Z",
       "entity": {
@@ -125,7 +125,7 @@
   "type": "doc",
   "value": {
     "id": "service-1",
-    "index": ".entities.v2.latest.security_default",
+    "index": ".entities.v2.latest.security_default-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "entity": {
@@ -157,7 +157,7 @@
   "type": "doc",
   "value": {
     "id": "service-2",
-    "index": ".entities.v2.latest.security_default",
+    "index": ".entities.v2.latest.security_default-00001",
     "source": {
       "@timestamp": "2025-07-20T14:00:00.000Z",
       "entity": {
@@ -183,7 +183,7 @@
   "type": "doc",
   "value": {
     "id": "user-4",
-    "index": ".entities.v2.latest.security_default",
+    "index": ".entities.v2.latest.security_default-00001",
     "source": {
       "@timestamp": "2025-07-20T16:30:00.000Z",
       "entity": {
@@ -214,7 +214,7 @@
   "type": "doc",
   "value": {
     "id": "user-5",
-    "index": ".entities.v2.latest.security_default",
+    "index": ".entities.v2.latest.security_default-00001",
     "source": {
       "@timestamp": "2025-07-20T16:30:00.000Z",
       "entity": {
@@ -236,6 +236,149 @@
       "user": {
         "id": "user-alice-entra",
         "name": "alice.j@entra.com"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "user-dora-target",
+    "index": ".entities.v2.latest.security_default-00001",
+    "source": {
+      "@timestamp": "2026-05-08T12:00:00.000Z",
+      "entity": {
+        "EngineMetadata": {
+          "Type": "user"
+        },
+        "id": "user-dora-resolved-target",
+        "name": "Dora Resolved",
+        "source": "logs-endpoint.events.process-default"
+      },
+      "event": {
+        "ingested": "2026-05-08T12:00:00.000Z"
+      },
+      "user": {
+        "id": "user-dora-resolved-target",
+        "name": "Dora Resolved"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "user-dora-alias",
+    "index": ".entities.v2.latest.security_default-00001",
+    "source": {
+      "@timestamp": "2026-05-08T12:00:00.000Z",
+      "entity": {
+        "EngineMetadata": {
+          "Type": "user"
+        },
+        "id": "user-dora-alias-entity",
+        "name": "dora.alias@example.test",
+        "source": "logs-entityanalytics_okta.user-default",
+        "relationships": {
+          "resolution": {
+            "resolved_to": "user-dora-resolved-target"
+          }
+        }
+      },
+      "event": {
+        "ingested": "2026-05-08T12:00:00.000Z"
+      },
+      "user": {
+        "id": "user-dora-alias-entity",
+        "name": "dora.alias@example.test"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "user-solo-fallback",
+    "index": ".entities.v2.latest.security_default-00001",
+    "source": {
+      "@timestamp": "2026-05-08T12:00:00.000Z",
+      "entity": {
+        "EngineMetadata": {
+          "Type": "user"
+        },
+        "id": "user-solo-risk-fallback",
+        "name": "Solo Risk Fallback Cy",
+        "source": "logs-endpoint.events.process-default",
+        "risk": {
+          "calculated_score_norm": 45.0
+        }
+      },
+      "event": {
+        "ingested": "2026-05-08T12:00:00.000Z"
+      },
+      "user": {
+        "id": "user-solo-risk-fallback",
+        "name": "Solo Risk Fallback Cy"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "user-na-target",
+    "index": ".entities.v2.latest.security_default-00001",
+    "source": {
+      "@timestamp": "2026-05-08T12:00:00.000Z",
+      "entity": {
+        "EngineMetadata": {
+          "Type": "user"
+        },
+        "id": "user-na-risk-group-target",
+        "name": "Na Risk Group Target Cy",
+        "source": "logs-endpoint.events.process-default"
+      },
+      "event": {
+        "ingested": "2026-05-08T12:00:00.000Z"
+      },
+      "user": {
+        "id": "user-na-risk-group-target",
+        "name": "Na Risk Group Target Cy"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "user-na-alias",
+    "index": ".entities.v2.latest.security_default-00001",
+    "source": {
+      "@timestamp": "2026-05-08T12:00:00.000Z",
+      "entity": {
+        "EngineMetadata": {
+          "Type": "user"
+        },
+        "id": "user-na-risk-alias",
+        "name": "na.alias.cy@example.test",
+        "source": "logs-entityanalytics_entra_id.user-default",
+        "relationships": {
+          "resolution": {
+            "resolved_to": "user-na-risk-group-target"
+          }
+        }
+      },
+      "event": {
+        "ingested": "2026-05-08T12:00:00.000Z"
+      },
+      "user": {
+        "id": "user-na-risk-alias",
+        "name": "na.alias.cy@example.test"
       }
     }
   }

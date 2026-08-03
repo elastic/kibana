@@ -6,5 +6,6 @@
  */
 
 import { getRunAgentStepDefinition } from './run_agent_step';
+import { rerankStepDefinition } from './rerank_step';
 
-export { getRunAgentStepDefinition };
+export { getRunAgentStepDefinition, rerankStepDefinition };

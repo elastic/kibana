@@ -11,9 +11,11 @@ import type {
   EuiComboBoxOptionOption,
   EuiComboBoxSingleSelectionShape,
   EuiSelectableOption,
+  UseEuiTheme,
 } from '@elastic/eui';
 import { EuiFlexItem, EuiSelectable, htmlIdGenerator } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { type DropDownLabel } from './types';
 import { useFieldStatsFlyoutContext } from '../use_field_stats_flyout_context';
 import { OptionsListPopoverFooter } from './option_list_popover_footer';
@@ -112,6 +114,11 @@ export const OptionsListPopover = ({
   );
   const id = useMemo(() => htmlIdGenerator()(), []);
 
+  const styles = useMemoCss({
+    optionsListAvailableOptions: ({ euiTheme }: UseEuiTheme) =>
+      css({ width: '100%', height: '100%', padding: euiTheme.size.s }),
+  });
+
   const filteredOptions = useMemo(() => {
     return showEmptyFields
       ? options
@@ -140,7 +147,7 @@ export const OptionsListPopover = ({
     >
       <EuiFlexItem
         data-test-subj={`optionsListControlAvailableOptions`}
-        css={css({ width: '100%', height: '100%' })}
+        css={styles.optionsListAvailableOptions}
       >
         <OptionsListPopoverSuggestions
           renderOption={renderOption}

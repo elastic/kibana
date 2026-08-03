@@ -7,7 +7,7 @@
 
 import React, { memo } from 'react';
 import styled, { css } from 'styled-components';
-import { EuiButton, EuiEmptyPrompt, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiEmptyPrompt, EuiSpacer } from '@elastic/eui';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { ManagementEmptyStateWrapper } from '../../management_empty_state_wrapper';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
@@ -71,25 +71,27 @@ export const NoDataEmptyState = memo<{
               </div>
             }
             actions={[
-              <EuiFlexGroup>
-                <EuiButton
-                  fill
-                  isDisabled={isAddDisabled}
-                  onClick={onAdd}
-                  data-test-subj={getTestId('addButton')}
-                >
-                  {primaryButtonLabel}
-                </EuiButton>
-                {isEndpointExceptionsMovedUnderManagementFFEnabled && (
-                  <EuiButton
-                    isDisabled={isAddDisabled}
-                    onClick={onImport}
-                    data-test-subj={getTestId('importButton')}
-                  >
-                    {importButtonLabel}
-                  </EuiButton>
-                )}
-              </EuiFlexGroup>,
+              <EuiButton
+                fill
+                isDisabled={isAddDisabled}
+                onClick={onAdd}
+                data-test-subj={getTestId('addButton')}
+              >
+                {primaryButtonLabel}
+              </EuiButton>,
+
+              ...(isEndpointExceptionsMovedUnderManagementFFEnabled
+                ? [
+                    <EuiButtonEmpty
+                      isDisabled={isAddDisabled}
+                      onClick={onImport}
+                      data-test-subj={getTestId('importButton')}
+                    >
+                      {importButtonLabel}
+                    </EuiButtonEmpty>,
+                  ]
+                : []),
+
               ...(backComponent ? [backComponent] : []),
             ]}
           />

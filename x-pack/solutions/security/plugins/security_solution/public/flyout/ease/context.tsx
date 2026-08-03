@@ -15,9 +15,9 @@ import { useDocumentDetails } from './hooks/use_document_details';
 import { useRuleWithFallback } from '../../detection_engine/rule_management/logic/use_rule_with_fallback';
 import { useSpaceId } from '../../common/hooks/use_space_id';
 import type { GetFieldsData } from '../document_details/shared/hooks/use_get_fields_data';
-import { FlyoutLoading } from '../shared/components/flyout_loading';
+import { FlyoutLoading } from '../../flyout_v2/shared/components/flyout_loading';
 import type { EaseDetailsProps } from './types';
-import { FlyoutError } from '../shared/components/flyout_error';
+import { FlyoutError } from '../../flyout_v2/shared/components/flyout_error';
 import { useBasicDataFromDetailsData } from '../document_details/shared/hooks/use_basic_data_from_details_data';
 
 export interface EaseDetailsContext {

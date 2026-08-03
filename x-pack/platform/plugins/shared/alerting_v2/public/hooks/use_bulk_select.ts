@@ -7,7 +7,17 @@
 
 import { useReducer, useMemo, useCallback } from 'react';
 import { escapeQuotes } from '@kbn/es-query';
-import type { BulkOperationParams } from '../services/rules_api';
+import type { BulkByIdsParams, BulkByQueryParams } from '../services/rules_api';
+
+/**
+ * Discriminated union returned by {@link useBulkSelect}'s `getBulkParams`.
+ * `mode: 'by_ids'` targets the by-ID endpoints; `mode: 'by_query'` targets
+ * the by-query endpoints (which the caller must invoke with `force: true`
+ * when executing rather than previewing).
+ */
+export type BulkSelection =
+  | ({ mode: 'by_ids' } & BulkByIdsParams)
+  | ({ mode: 'by_query' } & Omit<BulkByQueryParams, 'force'>);
 
 interface BulkSelectState {
   /**
@@ -73,9 +83,13 @@ interface UseBulkSelectProps {
   totalItemCount: number;
   /** The visible page of items. */
   items: Array<{ id: string }>;
+  /** Facet filter KQL, same as list-rules `filter` query param. */
+  filter?: string;
+  /** Debounced search string, same as list-rules `search` query param. */
+  search?: string;
 }
 
-export const useBulkSelect = ({ totalItemCount, items }: UseBulkSelectProps) => {
+export const useBulkSelect = ({ totalItemCount, items, filter, search }: UseBulkSelectProps) => {
   const [state, dispatch] = useReducer(reducer, {
     ...initialState,
     selectedIds: new Set<string>(),
@@ -88,7 +102,6 @@ export const useBulkSelect = ({ totalItemCount, items }: UseBulkSelectProps) => 
       return 0;
     }
     if (state.isAllSelected) {
-      // All selected minus the exclusion set
       return totalItemCount - state.selectedIds.size;
     }
     // Only IDs that are actually on the current page count
@@ -165,27 +178,42 @@ export const useBulkSelect = ({ totalItemCount, items }: UseBulkSelectProps) => 
   }, []);
 
   /**
-   * Returns the appropriate `BulkOperationParams` for the current selection state.
+   * Returns a {@link BulkSelection} describing the current selection.
    *
-   * When `isAllSelected` is true, sends a filter (or empty filter for "match all")
-   * with an exclusion clause for deselected IDs. When false, sends explicit IDs.
+   * - `mode: 'by_ids'` — explicit selection; caller invokes the by-ID endpoint.
+   * - `mode: 'by_query'` — select-all mode; caller invokes the by-query
+   *   endpoint (must set `force: true` to execute rather than preview).
    *
-   * Filters use clean API field names (e.g. `id`), which the server
-   * translates to the saved-object KQL format before querying.
+   * In select-all mode with excluded IDs, the exclusion set is folded into
+   * the KQL filter as a `NOT (id: ...)` clause so the server does not need
+   * to know about exclusion lists.
    */
-  const getBulkParams = useCallback((): BulkOperationParams => {
-    if (state.isAllSelected) {
-      const excludedIds = [...state.selectedIds];
-      if (excludedIds.length === 0) {
-        // Select all, no exclusions → match-all filter
-        return { filter: '' };
-      }
-      const exclusionClauses = excludedIds.map((id) => `id: "${escapeQuotes(id)}"`).join(' or ');
-      return { filter: `NOT (${exclusionClauses})` };
+  const getBulkParams = useCallback((): BulkSelection => {
+    if (!state.isAllSelected) {
+      return { mode: 'by_ids', ids: [...state.selectedIds] };
     }
 
-    return { ids: [...state.selectedIds] };
-  }, [state]);
+    const excludedIds = [...state.selectedIds];
+    const exclusionClauses =
+      excludedIds.length > 0
+        ? excludedIds.map((id) => `id: "${escapeQuotes(id)}"`).join(' or ')
+        : undefined;
+
+    const wrappedFilter = filter ? `(${filter})` : undefined;
+    const combinedFilter = [
+      wrappedFilter,
+      exclusionClauses ? `NOT (${exclusionClauses})` : undefined,
+    ]
+      .filter(Boolean)
+      .join(' AND ');
+
+    return {
+      mode: 'by_query',
+      ...(combinedFilter ? { filter: combinedFilter } : {}),
+      ...(search ? { search } : {}),
+      ...(!combinedFilter && !search ? { match_all: true as const } : {}),
+    };
+  }, [state, filter, search]);
 
   return useMemo(
     () => ({

@@ -19,6 +19,8 @@ Preconfigured connectors offer the following benefits:
 * Cannot be edited or deleted.
 
 
+{applies_to}`stack: ga 9.4+`Each entry’s key in `xpack.actions.preconfigured` is the connector’s ID. That ID must not match a connector that's already stored in {{kib}}, for example, a user-created connector with the same ID. If there is a conflict, {{kib}} logs an error at startup, skips loading the preconfigured connector, and shows a warning in the UI.
+
 ## Create preconfigured connectors [create-preconfigured-connectors]
 
 Add `xpack.actions.preconfigured` settings to your `kibana.yml` file. The settings vary depending on which type of connector you’re adding. Refer to [Preconfigured connector settings](/reference/configuration-reference/alerting-settings.md#preconfigured-connector-settings).

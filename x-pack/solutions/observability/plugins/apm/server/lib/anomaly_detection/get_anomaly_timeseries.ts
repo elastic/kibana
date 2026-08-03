@@ -45,6 +45,37 @@ function getBoundedX(value: number | null, start: number, end: number) {
   return value;
 }
 
+/**
+ * Anomaly queries pad the selected range by one ML bucket so expected bounds
+ * render at the edges. Drop score/actual for buckets outside the selected
+ * range so chart legends don't advertise markers that would plot off-canvas.
+ */
+export function toAnomalyChartPoint({
+  x,
+  recordScore,
+  actual,
+  start,
+  end,
+  divider,
+}: {
+  x: number;
+  recordScore: number | null | undefined;
+  actual: number | null | undefined;
+  start: number;
+  end: number;
+  divider: number;
+}): { x: number; y: number | null; actual: number | null } {
+  if (x < start || x > end) {
+    return { x, y: null, actual: null };
+  }
+
+  return {
+    x,
+    y: recordScore ?? null,
+    actual: divide(actual ?? null, divider),
+  };
+}
+
 export async function getAnomalyTimeseries({
   serviceName,
   transactionType,
@@ -217,21 +248,17 @@ export async function getAnomalyTimeseries({
         environment: job.environment,
         transactionType: bucket.key.transactionType as string,
         version: job.version,
-        anomalies: bucket.timeseries.buckets.map((dateBucket) => ({
-          x: dateBucket.key as number,
-          y:
-            (dateBucket.record_results.top_anomaly.top[0]?.metrics.record_score as
-              | number
-              | null
-              | undefined) ?? null,
-          actual: divide(
-            (dateBucket.record_results.top_anomaly.top[0]?.metrics.actual as
-              | number
-              | null
-              | undefined) ?? null,
-            divider
-          ),
-        })),
+        anomalies: bucket.timeseries.buckets.map((dateBucket) => {
+          const metrics = dateBucket.record_results.top_anomaly.top[0]?.metrics;
+          return toAnomalyChartPoint({
+            x: dateBucket.key as number,
+            recordScore: metrics?.record_score as number | null | undefined,
+            actual: metrics?.actual as number | null | undefined,
+            start,
+            end,
+            divider,
+          });
+        }),
         bounds: bucket.timeseries.buckets.map((dateBucket) => {
           return {
             x: getBoundedX(dateBucket.key, start, end) as number,

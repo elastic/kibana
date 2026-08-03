@@ -19,7 +19,6 @@
   - Frames Per Second (FPS) (fps)
   - DOM Complexity Metrics (nodesCount, documentsCount)
 
-
 ### Usage: capturing JS bundles on page
 
 ```ts
@@ -105,7 +104,8 @@ test.describe(
 
       // Navigate to Discover app
       await pageObjects.collapsibleNav.clickItem('Discover');
-      await page.waitForLoadingIndicatorHidden();
+      await page.testSubj.waitForSelector('discoverLayoutResizableContainer');
+
       const currentUrl = page.url();
       expect(currentUrl).toContain('app/discover#/');
 

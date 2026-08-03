@@ -11,16 +11,21 @@ import { z } from '@kbn/zod/v4';
 import type { AuthMode, ConnectorSpec } from '../connector_spec';
 import * as authTypeSpecs from '../all_auth_types';
 import { getSchemaForAuthType } from '.';
+import { isEarsExperimentalAuthType } from './ears_experimental_utils';
 
 interface GenerateOptions {
   isPfxEnabled?: boolean;
+  isEarsEnabled?: boolean;
+  isEarsExperimentalEnabled?: boolean;
   authMode?: AuthMode | '';
 }
 
 export const generateSecretsSchemaFromSpec = (
   authSpec: ConnectorSpec['auth'],
-  { isPfxEnabled, authMode }: GenerateOptions = {
+  { isPfxEnabled, isEarsEnabled, isEarsExperimentalEnabled, authMode }: GenerateOptions = {
     isPfxEnabled: true,
+    isEarsEnabled: false,
+    isEarsExperimentalEnabled: false,
   }
 ) => {
   const secretSchemas: z.core.$ZodTypeDiscriminable[] = [];
@@ -28,6 +33,14 @@ export const generateSecretsSchemaFromSpec = (
     const schema = getSchemaForAuthType(authType);
     if (schema.id === 'pfx_certificate' && !isPfxEnabled) {
       continue;
+    }
+    if (schema.id === 'ears') {
+      if (!isEarsEnabled) {
+        continue;
+      }
+      if (isEarsExperimentalAuthType(authType) && !isEarsExperimentalEnabled) {
+        continue;
+      }
     }
 
     const authTypeSpec = Object.values(authTypeSpecs).find((spec) => spec.id === schema.id);

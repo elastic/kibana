@@ -6,14 +6,20 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type {
+  AnalyticsServiceStart,
+  ElasticsearchClient,
+  KibanaRequest,
+  Logger,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
+import type { InferenceChatModel } from '@kbn/inference-langchain';
+import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 
 import type { LeadGenerationMode } from '../../../../common/entity_analytics/lead_generation/constants';
-import { getAlertsIndex } from '../../../../common/entity_analytics/utils';
+import { LEAD_GENERATION_EXECUTION_EVENT } from '../../telemetry/event_based/events';
 import { createLeadGenerationEngine } from './engine/lead_generation_engine';
-import { createRiskScoreModule } from './observation_modules/risk_score_module';
-import { createTemporalStateModule } from './observation_modules/temporal_state_module';
-import { createBehavioralAnalysisModule } from './observation_modules/behavioral_analysis_module';
+import { registerObservationModules } from './observation_modules/register_modules';
 import { createLeadDataClient } from './lead_data_client';
 import type { RiskScoreDataClient } from '../risk_score/risk_score_data_client';
 import type { LeadEntity } from './types';
@@ -26,6 +32,12 @@ export interface RunPipelineParams {
   readonly riskScoreDataClient: RiskScoreDataClient;
   readonly executionId?: string;
   readonly sourceType: LeadGenerationMode;
+  readonly analytics?: AnalyticsServiceStart;
+  readonly chatModel: InferenceChatModel;
+  /** Optional ML deps; when present the anomaly module is enabled. */
+  readonly ml?: MlPluginSetup;
+  readonly request?: KibanaRequest;
+  readonly soClient?: SavedObjectsClientContract;
 }
 
 export interface RunPipelineResult {
@@ -44,6 +56,11 @@ export const runLeadGenerationPipeline = async ({
   riskScoreDataClient,
   executionId: providedExecutionId,
   sourceType,
+  analytics,
+  chatModel,
+  ml,
+  request,
+  soClient,
 }: RunPipelineParams): Promise<RunPipelineResult> => {
   const executionId = providedExecutionId ?? uuidv4();
   const pipelineStart = Date.now();
@@ -53,7 +70,7 @@ export const runLeadGenerationPipeline = async ({
   logger.info(
     `[LeadGeneration][Telemetry] Entity fetch: ${Date.now() - fetchStart}ms (${
       leadEntities.length
-    } records)`
+    } candidates)`
   );
 
   if (leadEntities.length === 0) {
@@ -64,18 +81,18 @@ export const runLeadGenerationPipeline = async ({
   }
 
   const engine = createLeadGenerationEngine({ logger });
-  engine.registerModule(createRiskScoreModule({ riskScoreDataClient, logger }));
-  engine.registerModule(createTemporalStateModule({ esClient, logger, spaceId }));
-  engine.registerModule(
-    createBehavioralAnalysisModule({
-      esClient,
-      logger,
-      alertsIndexPattern: getAlertsIndex(spaceId),
-    })
-  );
+  registerObservationModules(engine, {
+    logger,
+    esClient,
+    spaceId,
+    riskScoreDataClient,
+    ml,
+    request,
+    soClient,
+  });
 
   const generateStart = Date.now();
-  const leads = await engine.generateLeads(leadEntities);
+  const leads = await engine.generateLeads(leadEntities, { chatModel });
   logger.info(
     `[LeadGeneration][Telemetry] Engine pipeline: ${Date.now() - generateStart}ms (${
       leads.length
@@ -108,6 +125,12 @@ export const runLeadGenerationPipeline = async ({
       Date.now() - pipelineStart
     }ms (executionId=${executionId})`
   );
+
+  analytics?.reportEvent(LEAD_GENERATION_EXECUTION_EVENT.eventType, {
+    spaceId,
+    leadsGenerated: leads.length,
+    sourceType,
+  });
 
   return { total: leads.length };
 };

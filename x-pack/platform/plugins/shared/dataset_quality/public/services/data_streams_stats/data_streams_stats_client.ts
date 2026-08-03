@@ -87,7 +87,7 @@ export class DataStreamsStatsClient implements IDataStreamsStatsClient {
     params: GetDataStreamsStatsQuery
   ): Promise<DataStreamStatServiceResponse> {
     const types =
-      'types' in params
+      'types' in params && params.types
         ? rison.encodeArray(params.types.length === 0 ? KNOWN_TYPES : params.types)
         : undefined;
     const response = await this.http

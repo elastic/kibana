@@ -8,7 +8,8 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import { useDocumentFlyoutData, type DocumentType } from './use_document_flyout_data';
+import { useDocumentFlyoutData } from './use_document_flyout_data';
+import type { TraceDocFlyoutType } from '../../../common/types';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 
@@ -34,12 +35,10 @@ const mockUseSpanFlyoutData = jest.fn();
 const mockUseLogFlyoutData = jest.fn();
 
 jest.mock('./span_flyout', () => ({
-  spanFlyoutId: 'spanDetailFlyout',
   useSpanFlyoutData: (params: any) => mockUseSpanFlyoutData(params),
 }));
 
 jest.mock('./logs_flyout', () => ({
-  logsFlyoutId: 'logsFlyout',
   useLogFlyoutData: (params: any) => mockUseLogFlyoutData(params),
 }));
 
@@ -69,7 +68,7 @@ describe('useDocumentFlyoutData', () => {
 
   describe('span type', () => {
     it('should call useSpanFlyoutData with docId and useLogFlyoutData with empty id', () => {
-      renderHook(() => useDocumentFlyoutData({ type: 'spanDetailFlyout', docId, traceId }));
+      renderHook(() => useDocumentFlyoutData({ type: 'span', docId, traceId }));
 
       expect(mockUseSpanFlyoutData).toHaveBeenCalledWith({ spanId: docId, traceId });
       expect(mockUseLogFlyoutData).toHaveBeenCalledWith({ id: '', index: undefined });
@@ -83,11 +82,9 @@ describe('useDocumentFlyoutData', () => {
         error: null,
       });
 
-      const { result } = renderHook(() =>
-        useDocumentFlyoutData({ type: 'spanDetailFlyout', docId, traceId })
-      );
+      const { result } = renderHook(() => useDocumentFlyoutData({ type: 'span', docId, traceId }));
 
-      expect(result.current.type).toBe('spanDetailFlyout');
+      expect(result.current.type).toBe('span');
       expect(result.current.hit).toBe(mockSpanHit);
       expect(result.current.title).toBe('Span document');
     });
@@ -100,9 +97,7 @@ describe('useDocumentFlyoutData', () => {
         error: null,
       });
 
-      const { result } = renderHook(() =>
-        useDocumentFlyoutData({ type: 'spanDetailFlyout', docId, traceId })
-      );
+      const { result } = renderHook(() => useDocumentFlyoutData({ type: 'span', docId, traceId }));
 
       expect(result.current.loading).toBe(true);
     });
@@ -115,9 +110,7 @@ describe('useDocumentFlyoutData', () => {
         error: null,
       });
 
-      const { result } = renderHook(() =>
-        useDocumentFlyoutData({ type: 'spanDetailFlyout', docId, traceId })
-      );
+      const { result } = renderHook(() => useDocumentFlyoutData({ type: 'span', docId, traceId }));
 
       expect(result.current).not.toHaveProperty('logDataView');
     });
@@ -131,9 +124,7 @@ describe('useDocumentFlyoutData', () => {
         error: errorMessage,
       });
 
-      const { result } = renderHook(() =>
-        useDocumentFlyoutData({ type: 'spanDetailFlyout', docId, traceId })
-      );
+      const { result } = renderHook(() => useDocumentFlyoutData({ type: 'span', docId, traceId }));
 
       expect(result.current.error).toBe(errorMessage);
     });
@@ -141,7 +132,7 @@ describe('useDocumentFlyoutData', () => {
 
   describe('log type', () => {
     it('should call useLogFlyoutData with docId and useSpanFlyoutData with empty spanId', () => {
-      renderHook(() => useDocumentFlyoutData({ type: 'logsFlyout', docId, traceId, docIndex }));
+      renderHook(() => useDocumentFlyoutData({ type: 'log', docId, traceId, docIndex }));
 
       expect(mockUseSpanFlyoutData).toHaveBeenCalledWith({ spanId: '', traceId });
       expect(mockUseLogFlyoutData).toHaveBeenCalledWith({ id: docId, index: docIndex });
@@ -156,11 +147,9 @@ describe('useDocumentFlyoutData', () => {
         error: null,
       });
 
-      const { result } = renderHook(() =>
-        useDocumentFlyoutData({ type: 'logsFlyout', docId, traceId })
-      );
+      const { result } = renderHook(() => useDocumentFlyoutData({ type: 'log', docId, traceId }));
 
-      expect(result.current.type).toBe('logsFlyout');
+      expect(result.current.type).toBe('log');
       expect(result.current.hit).toBe(mockLogHit);
       expect(result.current.title).toBe('Log document');
       expect(result.current.logDataView).toBe(dataViewMock);
@@ -175,9 +164,7 @@ describe('useDocumentFlyoutData', () => {
         error: null,
       });
 
-      const { result } = renderHook(() =>
-        useDocumentFlyoutData({ type: 'logsFlyout', docId, traceId })
-      );
+      const { result } = renderHook(() => useDocumentFlyoutData({ type: 'log', docId, traceId }));
 
       expect(result.current.loading).toBe(true);
     });
@@ -192,9 +179,7 @@ describe('useDocumentFlyoutData', () => {
         error: errorMessage,
       });
 
-      const { result } = renderHook(() =>
-        useDocumentFlyoutData({ type: 'logsFlyout', docId, traceId })
-      );
+      const { result } = renderHook(() => useDocumentFlyoutData({ type: 'log', docId, traceId }));
 
       expect(result.current.error).toBe(errorMessage);
     });
@@ -218,16 +203,16 @@ describe('useDocumentFlyoutData', () => {
       });
 
       const { result, rerender } = renderHook(
-        ({ type }: { type: DocumentType }) => useDocumentFlyoutData({ type, docId, traceId }),
-        { initialProps: { type: 'spanDetailFlyout' as DocumentType } }
+        ({ type }: { type: TraceDocFlyoutType }) => useDocumentFlyoutData({ type, docId, traceId }),
+        { initialProps: { type: 'span' } }
       );
 
-      expect(result.current.type).toBe('spanDetailFlyout');
+      expect(result.current.type).toBe('span');
       expect(result.current.hit).toBe(mockSpanHit);
 
-      rerender({ type: 'logsFlyout' });
+      rerender({ type: 'log' });
 
-      expect(result.current.type).toBe('logsFlyout');
+      expect(result.current.type).toBe('log');
       expect(result.current.hit).toBe(mockLogHit);
     });
   });

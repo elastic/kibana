@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState, type ReactNode } from 'react';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/src/services/types';
 import type { EuiDataGridCellPopoverElementProps } from '@elastic/eui';
 import { EuiSpacer, EuiText, useEuiTheme, useResizeObserver } from '@elastic/eui';
@@ -28,7 +28,7 @@ export type FieldConfigValue = string | number | undefined;
 
 export interface FieldConfiguration {
   title: string;
-  formatter?: (value: FieldConfigValue, formattedValue: string) => React.ReactNode;
+  formatter?: (value: FieldConfigValue, formattedValue: ReactNode) => ReactNode;
   description?: string;
 }
 

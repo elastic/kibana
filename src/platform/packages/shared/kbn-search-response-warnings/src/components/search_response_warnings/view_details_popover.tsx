@@ -8,7 +8,7 @@
  */
 
 import React, { useState } from 'react';
-import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
+import type { EuiContextMenuPanelDescriptor, EuiCallOutProps } from '@elastic/eui';
 import { EuiButton, EuiIcon, EuiLink, EuiContextMenu, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { viewDetailsLabel } from './i18n_utils';
@@ -29,7 +29,7 @@ export const ViewDetailsPopover = (props: Props) => {
   if (props.warnings.length === 1) {
     return props.displayAsLink ? (
       <EuiLink
-        color="primary"
+        color="warning"
         onClick={props.warnings[0].openInInspector}
         data-test-subj="searchResponseWarningsViewDetails"
       >
@@ -37,7 +37,7 @@ export const ViewDetailsPopover = (props: Props) => {
       </EuiLink>
     ) : (
       <EuiButton
-        color="primary"
+        color="warning"
         onClick={props.warnings[0].openInInspector}
         data-test-subj="searchResponseWarningsViewDetails"
       >
@@ -77,17 +77,17 @@ export const ViewDetailsPopover = (props: Props) => {
       button={
         props.displayAsLink ? (
           <EuiLink
-            color="primary"
+            color="warning"
             onClick={() => setIsPopoverOpen(!isPopoverOpen)}
             data-test-subj="searchResponseWarningsViewDetails"
           >
             <>
-              {viewDetailsLabel} <EuiIcon type="chevronSingleRight" size="s" />
+              {viewDetailsLabel} <EuiIcon type="chevronSingleRight" size="s" aria-hidden={true} />
             </>
           </EuiLink>
         ) : (
           <EuiButton
-            color="primary"
+            color="warning"
             onClick={() => setIsPopoverOpen(!isPopoverOpen)}
             iconSide="right"
             iconType="chevronSingleRight"
@@ -105,4 +105,66 @@ export const ViewDetailsPopover = (props: Props) => {
       <EuiContextMenu initialPanelId={0} panels={panels} data-test-subj="viewDetailsContextMenu" />
     </EuiPopover>
   );
+};
+
+export const useViewDetailsActionProps = (
+  warnings: SearchResponseWarning[]
+): NonNullable<EuiCallOutProps['actionProps']>['primary'] => {
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+
+  if (!warnings.length) return undefined;
+
+  const dataTestSubj = 'searchResponseWarningsViewDetails';
+
+  if (warnings.length === 1) {
+    return {
+      children: viewDetailsLabel,
+      onClick: warnings[0].openInInspector,
+      'data-test-subj': dataTestSubj,
+    };
+  }
+
+  const requestNameMap = new Map<string, number>();
+  const panels: EuiContextMenuPanelDescriptor[] = [
+    {
+      id: 0,
+      items: warnings.map((warning) => {
+        const count = (requestNameMap.get(warning.requestName) ?? 0) + 1;
+        const uniqueRequestName =
+          count > 1 ? `${warning.requestName} (${count})` : warning.requestName;
+        requestNameMap.set(warning.requestName, count);
+        return {
+          name: uniqueRequestName,
+          onClick: () => {
+            setIsPopoverOpen(false);
+            warning.openInInspector();
+          },
+        };
+      }),
+    },
+  ];
+
+  return {
+    children: viewDetailsLabel,
+    iconSide: 'right',
+    iconType: 'chevronSingleRight',
+    'data-test-subj': dataTestSubj,
+    onClick: () => setIsPopoverOpen((open) => !open),
+    popoverProps: {
+      'aria-label': i18n.translate('searchResponseWarnings.viewDetailsPopoverAriaLabel', {
+        defaultMessage: 'View details',
+      }),
+      isOpen: isPopoverOpen,
+      closePopover: () => setIsPopoverOpen(false),
+      panelPaddingSize: 'none',
+      anchorPosition: 'downCenter',
+      children: (
+        <EuiContextMenu
+          initialPanelId={0}
+          panels={panels}
+          data-test-subj="viewDetailsContextMenu"
+        />
+      ),
+    },
+  };
 };

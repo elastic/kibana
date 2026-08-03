@@ -1,0 +1,85 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        createHostEntityExample:
+          summary: "Create a host entity"
+          description: "Create a new host entity record with basic host and entity fields. The entity identifier must match the auto-generated format for the entity type."
+          value:
+            entity:
+              id: "host:web-server-prod-01"
+              name: "web-server-prod-01"
+              type: "host"
+              source:
+                - "manual"
+              attributes:
+                asset: true
+                managed: true
+            host:
+              name: "web-server-prod-01"
+              hostname:
+                - "web-server-prod-01.example.com"
+              ip:
+                - "10.0.1.42"
+            asset:
+              environment: "production"
+              criticality: "high_impact"
+              business_unit: "Engineering"
+responses:
+  200:
+    description: "Indicates the entity was successfully created."
+    content:
+      application/json:
+        examples:
+          createSuccessExample:
+            summary: "Entity created"
+            description: "The entity record was successfully created in the Entity Store."
+            value:
+              ok: true
+  400:
+    description: "Bad request."
+    content:
+      application/json:
+        examples:
+          euidMismatchExample:
+            summary: "Entity identifier mismatch"
+            description: "The supplied entity identifier does not match the auto-generated identifier derived from the entity fields."
+            value:
+              statusCode: 400
+              error: "Bad Request"
+              message: "Bad request: Supplied ID my-custom-id does not match generated EUID host:web-server-prod-01"
+  409:
+    description: "Conflict."
+    content:
+      application/json:
+        examples:
+          conflictExample:
+            summary: "Entity already exists"
+            description: "An entity with the specified identifier already exists."
+            value:
+              statusCode: 409
+              error: "Conflict"
+              message: "Entity ID 'host:web-server-prod-01' already exists"
+x-codeSamples:
+  - lang: curl
+    source: |
+      curl -X POST -H "kbn-xsrf: true" -H "Authorization: ApiKey ${API_KEY}" \
+        -H "Content-Type: application/json" \
+        -d '{"entity":{"id":"host:web-server-prod-01","name":"web-server-prod-01","type":"host","source":["manual"],"attributes":{"asset":true}},"host":{"name":"web-server-prod-01","ip":["10.0.1.42"]}}' \
+        "${KIBANA_URL}/api/security/entity_store/entities/host"
+  - lang: Console
+    source: |
+      POST kbn://api/security/entity_store/entities/host
+      {
+        "entity": {
+          "id": "host:web-server-prod-01",
+          "name": "web-server-prod-01",
+          "type": "host",
+          "source": ["manual"],
+          "attributes": { "asset": true }
+        },
+        "host": {
+          "name": "web-server-prod-01",
+          "ip": ["10.0.1.42"]
+        }
+      }

@@ -16,6 +16,8 @@ project:
   channel: ''
   owner: '@elastic/kibana-core'
   sourceRoot: src/core/packages/i18n/server
+dependsOn:
+  - '@kbn/i18n'
 tags:
   - shared-server
   - package

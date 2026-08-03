@@ -27,6 +27,7 @@ const mockUseRunWorkflow = jest.fn(() => ({ mutate: mockMutate }));
 const mockUseWorkflowsCapabilities = jest.fn(() => ({
   canCreateWorkflow: true,
   canReadWorkflow: true,
+  canReadManagedWorkflow: true,
   canUpdateWorkflow: true,
   canDeleteWorkflow: true,
   canExecuteWorkflow: true,
@@ -34,6 +35,7 @@ const mockUseWorkflowsCapabilities = jest.fn(() => ({
   canCancelWorkflowExecution: true,
 }));
 const mockUseWorkflowsUIEnabledSetting = jest.fn(() => true);
+const mockUseWorkflows = jest.fn((_params: unknown) => ({ data: { results: [] } }));
 jest.mock('@kbn/kibana-react-plugin/public', () => {
   const actual = jest.requireActual('@kbn/kibana-react-plugin/public');
   return {
@@ -46,6 +48,7 @@ jest.mock('@kbn/workflows-ui', () => ({
   useRunWorkflow: () => mockUseRunWorkflow(),
   useWorkflowsCapabilities: () => mockUseWorkflowsCapabilities(),
   useWorkflowsUIEnabledSetting: () => mockUseWorkflowsUIEnabledSetting(),
+  useWorkflows: (params: unknown) => mockUseWorkflows(params),
   WorkflowSelector: ({ onWorkflowChange }: { onWorkflowChange: (id: string) => void }) => (
     <div data-test-subj="workflow-selector-mock">
       {'Workflow selector'}
@@ -107,13 +110,14 @@ const renderContextMenu = (
   const panelsToRender = [{ id: 0, items }, ...panels];
   return render(
     <EuiPopover
+      aria-label="Context menu"
       isOpen={true}
       panelPaddingSize="none"
       anchorPosition="downLeft"
       closePopover={() => {}}
       button={<></>}
     >
-      <EuiContextMenu size="s" initialPanelId={panels[0]?.id ?? 1} panels={panelsToRender} />
+      <EuiContextMenu initialPanelId={panels[0]?.id ?? 1} panels={panelsToRender} />
     </EuiPopover>
   );
 };
@@ -124,6 +128,7 @@ describe('useRunAlertWorkflowPanel', () => {
     mockUseWorkflowsCapabilities.mockReturnValue({
       canCreateWorkflow: true,
       canReadWorkflow: true,
+      canReadManagedWorkflow: true,
       canUpdateWorkflow: true,
       canDeleteWorkflow: true,
       canExecuteWorkflow: true,
@@ -174,6 +179,7 @@ describe('useRunAlertWorkflowPanel', () => {
       mockUseWorkflowsCapabilities.mockReturnValue({
         canCreateWorkflow: true,
         canReadWorkflow: true,
+        canReadManagedWorkflow: true,
         canUpdateWorkflow: true,
         canDeleteWorkflow: true,
         canExecuteWorkflow: false,
@@ -243,6 +249,21 @@ describe('AlertWorkflowsPanel', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
+  });
+
+  it('requests managed workflows tagged with the rule_action visibility context', () => {
+    const { result } = renderHook(() => useRunAlertWorkflowPanel(defaultProps), {
+      wrapper: TestProviders,
+    });
+    const panels = result.current.runAlertWorkflowPanel;
+    render(<TestProviders>{panels[0].content}</TestProviders>);
+
+    expect(mockUseWorkflows).toHaveBeenCalledWith(
+      expect.objectContaining({
+        managed: 'all',
+        visibilityContext: ['selector:rule_action'],
+      })
+    );
   });
 
   it('execute button is disabled when no workflow is selected', () => {

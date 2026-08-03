@@ -15,7 +15,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import React from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import type { IKbnPalette, KbnPalettes } from '@kbn/palettes';
@@ -71,6 +71,9 @@ export const ColorSwatch = ({
   const euiTheme = useEuiTheme();
   return assignmentColor.type !== 'gradient' ? (
     <EuiPopover
+      aria-label={i18n.translate('coloring.colorMapping.colorPicker.popoverAriaLabel', {
+        defaultMessage: 'Color picker',
+      })}
       panelPaddingSize="none"
       isOpen={colorPickerVisible}
       repositionOnScroll={true}

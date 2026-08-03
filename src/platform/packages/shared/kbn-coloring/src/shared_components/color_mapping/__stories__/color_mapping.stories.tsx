@@ -13,6 +13,7 @@ import { getKbnPalettes } from '@kbn/palettes';
 import { EuiFlyout, EuiForm, EuiPage, isColorDark } from '@elastic/eui';
 import type { StoryFn } from '@storybook/react';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 import type { RawValue } from '@kbn/data-plugin/common';
 import { deserializeField } from '@kbn/data-plugin/common';
 import type { ColorMappingProps } from '../categorical_color_mapping';
@@ -70,6 +71,9 @@ const Template: StoryFn<FC<ColorMappingProps>> = (args) => {
           })}
       </ol>
       <EuiFlyout
+        aria-label={i18n.translate('coloring.colorMapping.stories.flyoutAriaLabel', {
+          defaultMessage: 'Color mapping',
+        })}
         style={{ width: 350, minInlineSize: 366, padding: '8px', overflow: 'auto' }}
         onClose={() => {}}
         hideCloseButton

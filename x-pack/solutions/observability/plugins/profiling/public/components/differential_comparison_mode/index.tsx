@@ -43,14 +43,14 @@ export function DifferentialComparisonMode({ comparisonMode, onChange }: Props) 
                 id: ComparisonMode.Absolute,
                 label: i18n.translate(
                   'xpack.profiling.differentialComparisonMode.absoluteButtonLabel',
-                  { defaultMessage: 'Abs' }
+                  { defaultMessage: 'Absolute' }
                 ),
               },
               {
                 id: ComparisonMode.Relative,
                 label: i18n.translate(
                   'xpack.profiling.differentialComparisonMode.relativeButtonLabel',
-                  { defaultMessage: 'Rel' }
+                  { defaultMessage: 'Relative' }
                 ),
               },
             ]}

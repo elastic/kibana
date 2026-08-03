@@ -16,6 +16,7 @@ paths-ignore:
   - '**/*.mock.*'
   - '**/*.mocks.*'
   - '**/*.test.*'
+  - '**/*.spec.*'
   - '**/cypress/**'
   - '**/e2e/**'
   - '**/ftr_e2e/**'
@@ -112,6 +113,7 @@ paths-ignore:
   - src/platform/packages/shared/kbn-es
   - src/platform/packages/shared/kbn-es-archiver
   - src/platform/packages/shared/kbn-expect
+  - src/platform/packages/shared/kbn-kbn-client
   - src/platform/packages/shared/kbn-openapi-*
   - src/platform/packages/shared/kbn-scout
   - src/platform/packages/shared/kbn-storybook
@@ -121,6 +123,7 @@ paths-ignore:
   - typings
   - x-pack/examples
   - x-pack/packages/ai-infra/product-doc-artifact-builder
+  - x-pack/packages/ai-infra/security-labs-artifact-builder
   - x-pack/packages/kbn-synthetics-private-location
   - x-pack/platform/packages/shared/kbn-ai-tools-cli
   - x-pack/platform/packages/shared/kbn-data-forge

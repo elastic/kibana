@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiSuperDatePicker } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSuperDatePicker } from '@elastic/eui';
 import React from 'react';
 import { useTimeRange } from '../../hooks/use_time_range';
 import { useTimeRangeUpdate } from '../../hooks/use_time_range_update';
@@ -17,13 +17,22 @@ export function OverviewTimeFilter() {
   const { refresh } = useTimefilter();
 
   return (
-    <EuiSuperDatePicker
-      start={rangeFrom}
-      end={rangeTo}
-      onTimeChange={({ start, end }) => updateTimeRange({ from: start, to: end })}
-      onRefresh={() => refresh()}
-      width="full"
-      showUpdateButton="iconOnly"
-    />
+    <EuiFlexGroup gutterSize="xs">
+      <EuiFlexItem>
+        <EuiSuperDatePicker
+          start={rangeFrom}
+          end={rangeTo}
+          compressed
+          onRefresh={() => refresh()}
+          width="full"
+          showUpdateButton="iconOnly"
+          updateButtonProps={{
+            size: 's',
+            fill: false,
+          }}
+          onTimeChange={({ start, end }) => updateTimeRange({ from: start, to: end })}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }

@@ -14,7 +14,9 @@ import { useDeleteRule } from '../../hooks/use_delete_rule';
 import { useBulkDeleteRules } from '../../hooks/use_bulk_delete_rules';
 import { useBulkEnableRules, useBulkDisableRules } from '../../hooks/use_bulk_enable_disable_rules';
 import { useToggleRuleEnabled } from '../../hooks/use_toggle_rule_enabled';
+import { useRunRule } from '../../hooks/use_run_rule';
 import { DeleteConfirmationModal } from '../../components/rule/modals/delete_confirmation_modal';
+import { RuleSummaryFlyout } from '../../components/rule/flyouts';
 import { paths } from '../../constants';
 import { RulesListTable, type RulesListTableSortField } from './rules_list_table';
 
@@ -24,11 +26,17 @@ export interface RulesListTableContainerProps {
   page: number;
   perPage: number;
   search: string;
+  /** Facet filter KQL passed to list-rules; scopes select-all bulk actions. */
+  filter?: string;
   hasActiveFilters: boolean;
   sortField?: RulesListTableSortField;
   sortDirection?: 'asc' | 'desc';
   isLoading: boolean;
+  /** When false, write affordances (create/edit/clone/delete/enable/bulk) are hidden. */
+  canWrite: boolean;
   onTableChange: (criteria: Criteria<RuleApiResponse>) => void;
+  onEditInFlyout: (rule: RuleApiResponse) => void;
+  onCloneInFlyout: (rule: RuleApiResponse) => void;
 }
 
 export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = ({
@@ -37,23 +45,31 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
   page,
   perPage,
   search,
+  filter,
   hasActiveFilters,
   sortField,
   sortDirection,
   isLoading,
+  canWrite,
   onTableChange,
+  onEditInFlyout,
+  onCloneInFlyout,
 }) => {
   const { navigateToUrl } = useService(CoreStart('application'));
   const { basePath } = useService(CoreStart('http'));
 
   const [ruleToDelete, setRuleToDelete] = useState<RuleApiResponse | null>(null);
+  const [expandedRuleId, setExpandedRuleId] = useState<string | null>(null);
   const [showBulkDeleteConfirm, setShowBulkDeleteConfirm] = useState(false);
+
+  const expandedRule = expandedRuleId ? items.find((r) => r.id === expandedRuleId) ?? null : null;
 
   const deleteRuleMutation = useDeleteRule();
   const bulkDeleteMutation = useBulkDeleteRules();
   const bulkEnableMutation = useBulkEnableRules();
   const bulkDisableMutation = useBulkDisableRules();
   const toggleEnabledMutation = useToggleRuleEnabled();
+  const runRuleMutation = useRunRule();
 
   const {
     isAllSelected,
@@ -65,7 +81,12 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
     onSelectPage,
     onClearSelection,
     getBulkParams,
-  } = useBulkSelect({ totalItemCount, items });
+  } = useBulkSelect({
+    totalItemCount,
+    items,
+    filter,
+    search: search || undefined,
+  });
 
   const handleBulkDelete = () => {
     setShowBulkDeleteConfirm(true);
@@ -95,9 +116,15 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
     if (!ruleToDelete) {
       return;
     }
-    deleteRuleMutation.mutate(ruleToDelete.id, {
-      onSettled: () => setRuleToDelete(null),
-    });
+    deleteRuleMutation.mutate(
+      { id: ruleToDelete.id, name: ruleToDelete.metadata.name },
+      {
+        onSettled: () => {
+          setRuleToDelete(null);
+          setExpandedRuleId(null);
+        },
+      }
+    );
   };
 
   return (
@@ -112,6 +139,7 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
         sortField={sortField}
         sortDirection={sortDirection}
         isLoading={isLoading}
+        canWrite={canWrite}
         selectedCount={selectedCount}
         isAllSelected={isAllSelected}
         isPageSelected={isPageSelected}
@@ -124,16 +152,41 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
         onBulkDisable={handleBulkDisable}
         onBulkDelete={handleBulkDelete}
         onNavigateToDetails={(r) => navigateToUrl(basePath.prepend(paths.ruleDetails(r.id)))}
-        onEdit={(r) => navigateToUrl(basePath.prepend(paths.ruleEdit(r.id)))}
-        onClone={(r) =>
-          navigateToUrl(
-            basePath.prepend(`${paths.ruleCreate}?cloneFrom=${encodeURIComponent(r.id)}`)
-          )
-        }
+        onExpand={(r) => setExpandedRuleId(r.id)}
+        onQuickEdit={(r) => onEditInFlyout(r)}
+        onEdit={(r) => onEditInFlyout(r)}
+        onClone={(r) => onCloneInFlyout(r)}
         onDelete={(r) => setRuleToDelete(r)}
         onToggleEnabled={(r) => toggleEnabledMutation.mutate({ id: r.id, enabled: !r.enabled })}
+        onRun={(r) => runRuleMutation.mutate({ id: r.id })}
+        togglingRuleId={
+          toggleEnabledMutation.isLoading ? toggleEnabledMutation.variables?.id : undefined
+        }
+        isBulkTogglingEnabled={bulkEnableMutation.isLoading || bulkDisableMutation.isLoading}
         onTableChange={onTableChange}
       />
+      {expandedRule ? (
+        <RuleSummaryFlyout
+          rule={expandedRule}
+          canWrite={canWrite}
+          onClose={() => setExpandedRuleId(null)}
+          onQuickEdit={(r) => {
+            setExpandedRuleId(null);
+            onEditInFlyout(r);
+          }}
+          onEdit={(r) => {
+            setExpandedRuleId(null);
+            onEditInFlyout(r);
+          }}
+          onClone={(r) => {
+            setExpandedRuleId(null);
+            onCloneInFlyout(r);
+          }}
+          onDelete={(r) => setRuleToDelete(r)}
+          onToggleEnabled={(r) => toggleEnabledMutation.mutate({ id: r.id, enabled: !r.enabled })}
+          onRun={(r) => runRuleMutation.mutate({ id: r.id })}
+        />
+      ) : null}
       {ruleToDelete ? (
         <DeleteConfirmationModal
           ruleName={ruleToDelete.metadata?.name ?? ruleToDelete.id}

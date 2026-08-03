@@ -21,7 +21,13 @@ import {
   connectorFromEndpoint,
   filterPreconfiguredEndpoints,
   findEndpointsWithoutConnectors,
+  findStaleDynamicConnectorIds,
 } from '../utils/in_memory_connectors';
+
+interface DynamicConnectorSync {
+  connectorsToAdd: InMemoryConnector[];
+  connectorIdsToRemove: string[];
+}
 
 export class DynamicConnectorsPoller {
   private readonly logger: Logger;
@@ -69,8 +75,8 @@ export class DynamicConnectorsPoller {
       Rx.mergeMap(this.fetchInferenceEndpoints.bind(this)),
       Rx.map(this.handleInferenceEndpointsResponse.bind(this)),
       Rx.map(filterPreconfiguredEndpoints),
-      Rx.map(this.generateConnectorsForEndpoints.bind(this)),
-      Rx.tap(this.updateDynamicConnectors.bind(this)),
+      Rx.map(this.resolveDynamicConnectorSync.bind(this)),
+      Rx.tap(this.applyDynamicConnectorSync.bind(this)),
       Rx.delay(this.pollingIntervalMs),
       Rx.repeat(),
       Rx.catchError(this.handleError.bind(this)),
@@ -97,25 +103,43 @@ export class DynamicConnectorsPoller {
     throw response;
   }
 
-  private generateConnectorsForEndpoints(
+  private resolveDynamicConnectorSync(
     preconfiguredEISEndpoints: InferenceInferenceEndpointInfo[]
-  ): InMemoryConnector[] {
+  ): DynamicConnectorSync {
     const inMemoryConnectors = [...this.actions.inMemoryConnectors];
     const inferenceEndpointsWithoutConnectors = findEndpointsWithoutConnectors(
       preconfiguredEISEndpoints,
       inMemoryConnectors
     );
+    const connectorIdsToRemove = findStaleDynamicConnectorIds(
+      preconfiguredEISEndpoints,
+      inMemoryConnectors
+    );
 
-    return inferenceEndpointsWithoutConnectors.map(connectorFromEndpoint);
+    return {
+      connectorsToAdd: inferenceEndpointsWithoutConnectors.map(connectorFromEndpoint),
+      connectorIdsToRemove,
+    };
   }
 
-  private updateDynamicConnectors(connectorsToAdd: InMemoryConnector[]) {
+  private applyDynamicConnectorSync({
+    connectorsToAdd,
+    connectorIdsToRemove,
+  }: DynamicConnectorSync) {
     if (connectorsToAdd.length > 0) {
       this.logger.debug(
         `Found ${connectorsToAdd.length} preconfigured EIS endpoints to register as inMemoryConnectors`
       );
       for (const connector of connectorsToAdd) {
         this.actions.registerDynamicConnector(connector);
+      }
+    }
+    if (connectorIdsToRemove.length > 0) {
+      this.logger.debug(
+        `Found ${connectorIdsToRemove.length} stale dynamic connectors to unregister`
+      );
+      for (const connectorId of connectorIdsToRemove) {
+        this.actions.unregisterDynamicConnector(connectorId);
       }
     }
   }

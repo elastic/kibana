@@ -141,8 +141,8 @@ export class DataViewsApiClient implements IDataViewsApiClient {
       includeEmptyFields,
       abortSignal,
     } = options;
-    const projectRouting = options.projectRouting || this.getGlobalProjectRouting?.();
-    const body = getFieldsForWildcardRequestBody({ projectRouting, ...options });
+    const projectRouting = options.projectRouting ?? this.getGlobalProjectRouting?.();
+    const body = getFieldsForWildcardRequestBody({ ...options, projectRouting });
     // Use internal path when we have a body (indexFilter, runtimeMappings, or projectRouting)
     const hasBody = Boolean(body);
     const path = hasBody ? FIELDS_FOR_WILDCARD_PATH : FIELDS_PATH;

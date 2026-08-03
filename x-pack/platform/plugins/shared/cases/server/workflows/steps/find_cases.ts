@@ -10,7 +10,7 @@ import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { findCasesStepCommonDefinition } from '../../../common/workflows/steps/find_cases';
 import type { CasesFindRequestWithCustomFields } from '../../../common/types/api';
 import type { CasesClient } from '../../client';
-import { getCasesClientFromStepsContext } from './utils';
+import { getCasesClientFromStepsContext, safeParseCaseForWorkflowOutput } from './utils';
 
 export const findCasesStepDefinition = (
   getCasesClient: (request: KibanaRequest) => Promise<CasesClient>
@@ -19,8 +19,8 @@ export const findCasesStepDefinition = (
     ...findCasesStepCommonDefinition,
     handler: async (context) => {
       try {
-        const casesClient = await getCasesClientFromStepsContext(context, getCasesClient);
         const input = findCasesStepCommonDefinition.inputSchema.parse(context.input);
+        const casesClient = await getCasesClientFromStepsContext(context, getCasesClient);
 
         const findRequest: CasesFindRequestWithCustomFields = {
           ...input,
@@ -28,7 +28,10 @@ export const findCasesStepDefinition = (
           severity: input.severity as CasesFindRequestWithCustomFields['severity'],
         };
         const response = await casesClient.cases.find(findRequest);
-        const output = findCasesStepCommonDefinition.outputSchema.parse(response);
+        const output = safeParseCaseForWorkflowOutput(
+          findCasesStepCommonDefinition.outputSchema,
+          response
+        );
 
         return { output };
       } catch (error) {

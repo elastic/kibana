@@ -8,19 +8,24 @@
  */
 
 import type { VersionedRouter } from '@kbn/core-http-server';
-import type { RequestHandlerContext } from '@kbn/core/server';
+import type { Logger, RequestHandlerContext } from '@kbn/core/server';
 import { once } from 'lodash';
+import { logRequest } from '@kbn/as-code-utils';
 import { DASHBOARD_INTERNAL_API_PATH } from '../../../common/constants';
-import { getSanitizeRequestBodySchema, getSanitizeResponseBodySchema } from './schemas';
+import { getSanitizeResponseBodySchema } from './schemas';
 import { getDashboardStateSchema } from '../dashboard_state_schemas';
 import { sanitize } from './sanitize';
+import { getUseGASchemas } from '../get_use_ga_schemas';
 
 /**
  * Register the sanitize dashboard route.
  * This route uses an internal API path because it is not intended for public use.
  * It is currently used by the dashboard app to sanitize a dashboard for the export share integration.
  */
-export function registerSanitizeRoute(router: VersionedRouter<RequestHandlerContext>) {
+export function registerSanitizeRoute(
+  router: VersionedRouter<RequestHandlerContext>,
+  logger: Logger
+) {
   const sanitizeRoute = router.post({
     path: `${DASHBOARD_INTERNAL_API_PATH}/_sanitize`,
     summary: 'Sanitize a dashboard',
@@ -45,7 +50,7 @@ export function registerSanitizeRoute(router: VersionedRouter<RequestHandlerCont
       version: '1',
       validate: () => ({
         request: {
-          body: getSanitizeRequestBodySchema(),
+          body: getDashboardStateSchema(true),
         },
         response: {
           200: {
@@ -54,15 +59,17 @@ export function registerSanitizeRoute(router: VersionedRouter<RequestHandlerCont
         },
       }),
     },
-    async (_ctx, req, res) => {
+    async (ctx, req, res) => {
       try {
-        const result = await sanitize(_ctx, getCachedDashboardStateSchema(), req.body);
+        const { core } = await ctx.resolve(['core']);
+        const useGASchemas = await getUseGASchemas(core);
+        const result = await sanitize(getCachedDashboardStateSchema(), req.body, useGASchemas);
         return res.ok({ body: result });
       } catch (e) {
-        const message = e instanceof Error ? e.message : 'Unknown error';
-        return res.badRequest({
-          body: { message },
-        });
+        const message = e.stack ?? e.message;
+        logRequest(logger, req, 'error', message);
+        // Throw so Kibana returns a 500 HTTP response on any uncaught errors.
+        throw e;
       }
     }
   );

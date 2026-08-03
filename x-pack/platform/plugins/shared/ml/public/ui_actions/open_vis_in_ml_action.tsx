@@ -11,8 +11,10 @@ import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { isLensApi } from '@kbn/lens-plugin/public';
 import { isMapApi } from '@kbn/maps-plugin/public';
 import { isOfAggregateQueryType } from '@kbn/es-query';
+import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import type { ActionApi } from './types';
 import type { MlCoreSetup } from '../plugin';
+import { checkPermissionAsync } from '../application/capabilities/check_capabilities';
 
 export const CREATE_LENS_VIS_TO_ML_AD_JOB_ACTION = 'createMLADJobAction';
 
@@ -56,9 +58,10 @@ export function createVisToADJobAction(
       }
     },
     async isCompatible({ embeddable }: EmbeddableApiContext) {
+      if (!(await checkPermissionAsync(getStartServices, 'canGetJobs'))) return false;
       if (
         !isApiCompatible(embeddable) ||
-        !(apiIsOfType(embeddable, 'lens') || apiIsOfType(embeddable, 'map'))
+        !(apiIsOfType(embeddable, LENS_EMBEDDABLE_TYPE) || apiIsOfType(embeddable, 'map'))
       )
         return false;
 

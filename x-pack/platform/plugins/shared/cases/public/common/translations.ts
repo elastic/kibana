@@ -29,6 +29,48 @@ export const COPY_ID_ACTION_SUCCESS = i18n.translate('xpack.cases.caseView.copyI
   defaultMessage: 'Copied case ID to clipboard',
 });
 
+export const APPLY_TEMPLATE_ACTION_LABEL = i18n.translate(
+  'xpack.cases.caseView.applyTemplateAction',
+  {
+    defaultMessage: 'Apply template',
+  }
+);
+
+export const APPLY_TEMPLATE_MODAL_TITLE = i18n.translate(
+  'xpack.cases.caseView.applyTemplateModal.title',
+  {
+    defaultMessage: 'Apply template',
+  }
+);
+
+export const APPLY_TEMPLATE_MODAL_TEMPLATE_LABEL = i18n.translate(
+  'xpack.cases.caseView.applyTemplateModal.templateLabel',
+  {
+    defaultMessage: 'Template',
+  }
+);
+
+export const APPLY_TEMPLATE_MODAL_TEMPLATE_PLACEHOLDER = i18n.translate(
+  'xpack.cases.caseView.applyTemplateModal.templatePlaceholder',
+  {
+    defaultMessage: 'Select a template',
+  }
+);
+
+export const APPLY_TEMPLATE_MODAL_APPLY = i18n.translate(
+  'xpack.cases.caseView.applyTemplateModal.apply',
+  {
+    defaultMessage: 'Apply',
+  }
+);
+
+export const APPLY_TEMPLATE_MODAL_CONNECTOR_NOTICE = i18n.translate(
+  'xpack.cases.caseView.applyTemplateModal.connectorNotice',
+  {
+    defaultMessage: "Applying a template does not change this case's connector.",
+  }
+);
+
 export const NAME = i18n.translate('xpack.cases.caseView.name', {
   defaultMessage: 'Name',
 });
@@ -99,6 +141,10 @@ export const EDIT = i18n.translate('xpack.cases.caseView.edit', {
 
 export const OPTIONAL = i18n.translate('xpack.cases.caseView.optional', {
   defaultMessage: 'Optional',
+});
+
+export const REQUIRED_ON_CLOSE = i18n.translate('xpack.cases.caseView.requiredOnClose', {
+  defaultMessage: 'Required on close',
 });
 
 export const PAGE_TITLE = i18n.translate('xpack.cases.pageTitle', {
@@ -202,6 +248,10 @@ export const TITLE_REQUIRED = i18n.translate('xpack.cases.createCase.titleFieldR
 
 export const CONFIGURE_CASES_BUTTON = i18n.translate('xpack.cases.configureCasesButton', {
   defaultMessage: 'Settings',
+});
+
+export const TEMPLATES_BUTTON = i18n.translate('xpack.cases.templatesButton', {
+  defaultMessage: 'Templates',
 });
 
 export const ADD_COMMENT = i18n.translate('xpack.cases.caseView.comment.addComment', {

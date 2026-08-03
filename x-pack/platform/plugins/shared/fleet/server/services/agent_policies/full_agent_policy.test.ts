@@ -1694,6 +1694,25 @@ describe('getFullAgentPolicy', () => {
     });
   });
 
+  it('should set agent.features.include_tags_in_events.enabled from advanced_settings', async () => {
+    mockAgentPolicy({
+      advanced_settings: {
+        agent_features_include_tags_in_events_enabled: true,
+      },
+    });
+    const agentPolicy = await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy');
+
+    expect(agentPolicy).toMatchObject({
+      agent: {
+        features: {
+          include_tags_in_events: {
+            enabled: true,
+          },
+        },
+      },
+    });
+  });
+
   it('should have ssl options in outputs when fleet server host has es ssl options', async () => {
     const fleetServerHostWithSSL = {
       name: 'default Fleet Server',
@@ -1832,11 +1851,10 @@ describe('getFullAgentPolicy', () => {
       await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy');
 
       expect(mockedGenerateOtelcolConfig).toHaveBeenCalled();
-      const callArgs = mockedGenerateOtelcolConfig.mock.calls[0];
+      const callArgs = mockedGenerateOtelcolConfig.mock.calls[0][0];
       expect(callArgs).toBeDefined();
-      // Third argument should be the packageInfoCache Map
-      expect(callArgs[2]).toBeInstanceOf(Map);
-      const packageInfoCache = callArgs[2] as Map<string, PackageInfo>;
+      expect(callArgs.packageInfoCache).toBeInstanceOf(Map);
+      const packageInfoCache = callArgs.packageInfoCache as Map<string, PackageInfo>;
       expect(packageInfoCache.has('otelpackage-1.0.0')).toBe(true);
       expect(packageInfoCache.get('otelpackage-1.0.0')).toEqual(packageInfo);
     });
@@ -1961,6 +1979,341 @@ describe('getFullAgentPolicy', () => {
       await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy');
 
       expect(mockedGenerateOtelcolConfig).not.toHaveBeenCalled();
+    });
+
+    it('should pass the resolved proxy to generateOtelcolConfig when dataOutput has a proxy_id', async () => {
+      const proxy = {
+        id: 'proxy-1',
+        name: 'my-proxy',
+        url: 'http://proxy.example.com:3128',
+        proxy_headers: { 'X-Custom': 'value' },
+        is_preconfigured: false,
+      };
+
+      mockedFetchRelatedSavedObjects.mockResolvedValue({
+        outputs: [
+          {
+            id: 'test-id',
+            is_default: true,
+            is_default_monitoring: true,
+            name: 'default',
+            type: 'elasticsearch',
+            hosts: ['http://127.0.0.1:9201'],
+            proxy_id: 'proxy-1',
+          },
+        ],
+        proxies: [proxy],
+        dataOutput: {
+          id: 'test-id',
+          is_default: true,
+          is_default_monitoring: true,
+          name: 'default',
+          type: 'elasticsearch',
+          hosts: ['http://127.0.0.1:9201'],
+          proxy_id: 'proxy-1',
+        },
+        monitoringOutput: {
+          id: 'test-id',
+          is_default: true,
+          is_default_monitoring: true,
+          name: 'default',
+          type: 'elasticsearch',
+          hosts: ['http://127.0.0.1:9201'],
+        },
+        downloadSource: {
+          id: 'default-download-source-id',
+          is_default: true,
+          name: 'Default host',
+          host: 'http://default-registry.co',
+        },
+        downloadSourceProxy: undefined,
+        fleetServerHost: {
+          name: 'default Fleet Server',
+          id: '93f74c0-e876-11ea-b7d3-8b2acec6f75c',
+          is_default: true,
+          host_urls: ['http://fleetserver:8220'],
+          is_preconfigured: false,
+        },
+      });
+
+      mockAgentPolicy({ package_policies: [] });
+
+      await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy');
+
+      expect(mockedGenerateOtelcolConfig).toHaveBeenCalled();
+      const callArgs = mockedGenerateOtelcolConfig.mock.calls[0][0];
+      // proxy should be the resolved proxy
+      expect(callArgs.proxy).toEqual(proxy);
+    });
+
+    it('should pass undefined proxy to generateOtelcolConfig when dataOutput has no proxy_id', async () => {
+      mockAgentPolicy({ package_policies: [] });
+
+      await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy');
+
+      expect(mockedGenerateOtelcolConfig).toHaveBeenCalled();
+      const callArgs = mockedGenerateOtelcolConfig.mock.calls[0][0];
+      // proxy should be undefined when no proxy_id
+      expect(callArgs.proxy).toBeUndefined();
+    });
+
+    it('should pass undefined proxy to generateOtelcolConfig when proxy_id does not match any proxy', async () => {
+      mockedFetchRelatedSavedObjects.mockResolvedValue({
+        outputs: [
+          {
+            id: 'test-id',
+            is_default: true,
+            is_default_monitoring: true,
+            name: 'default',
+            type: 'elasticsearch',
+            hosts: ['http://127.0.0.1:9201'],
+            proxy_id: 'nonexistent-proxy',
+          },
+        ],
+        proxies: [],
+        dataOutput: {
+          id: 'test-id',
+          is_default: true,
+          is_default_monitoring: true,
+          name: 'default',
+          type: 'elasticsearch',
+          hosts: ['http://127.0.0.1:9201'],
+          proxy_id: 'nonexistent-proxy',
+        },
+        monitoringOutput: {
+          id: 'test-id',
+          is_default: true,
+          is_default_monitoring: true,
+          name: 'default',
+          type: 'elasticsearch',
+          hosts: ['http://127.0.0.1:9201'],
+        },
+        downloadSource: {
+          id: 'default-download-source-id',
+          is_default: true,
+          name: 'Default host',
+          host: 'http://default-registry.co',
+        },
+        downloadSourceProxy: undefined,
+        fleetServerHost: {
+          name: 'default Fleet Server',
+          id: '93f74c0-e876-11ea-b7d3-8b2acec6f75c',
+          is_default: true,
+          host_urls: ['http://fleetserver:8220'],
+          is_preconfigured: false,
+        },
+      });
+
+      mockAgentPolicy({ package_policies: [] });
+
+      await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy');
+
+      expect(mockedGenerateOtelcolConfig).toHaveBeenCalled();
+      const callArgs = mockedGenerateOtelcolConfig.mock.calls[0][0];
+      // proxy should be undefined when proxy_id doesn't match
+      expect(callArgs.proxy).toBeUndefined();
+    });
+
+    it('should pass remote_elasticsearch dataOutput to generateOtelcolConfig', async () => {
+      mockedFetchRelatedSavedObjects.mockResolvedValue({
+        outputs: [
+          {
+            id: 'remote-output-id',
+            is_default: true,
+            is_default_monitoring: true,
+            name: 'remote-output',
+            type: 'remote_elasticsearch',
+            hosts: ['https://remote-es.example.com:9200'],
+          },
+        ],
+        proxies: [],
+        dataOutput: {
+          id: 'remote-output-id',
+          is_default: true,
+          is_default_monitoring: true,
+          name: 'remote-output',
+          type: 'remote_elasticsearch',
+          hosts: ['https://remote-es.example.com:9200'],
+        },
+        monitoringOutput: {
+          id: 'remote-output-id',
+          is_default: true,
+          is_default_monitoring: true,
+          name: 'remote-output',
+          type: 'remote_elasticsearch',
+          hosts: ['https://remote-es.example.com:9200'],
+        },
+        downloadSource: {
+          id: 'default-download-source-id',
+          is_default: true,
+          name: 'Default host',
+          host: 'http://default-registry.co',
+        },
+        downloadSourceProxy: undefined,
+        fleetServerHost: {
+          name: 'default Fleet Server',
+          id: '93f74c0-e876-11ea-b7d3-8b2acec6f75c',
+          is_default: true,
+          host_urls: ['http://fleetserver:8220'],
+          is_preconfigured: false,
+        },
+      });
+
+      mockAgentPolicy({ package_policies: [] });
+
+      await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy');
+
+      expect(mockedGenerateOtelcolConfig).toHaveBeenCalled();
+      const callArgs = mockedGenerateOtelcolConfig.mock.calls[0][0];
+      expect(callArgs.dataOutput).toMatchObject({
+        type: 'remote_elasticsearch',
+        hosts: ['https://remote-es.example.com:9200'],
+      });
+    });
+
+    it('should pass packageOutputs with override entry when package policy has output_id', async () => {
+      const overrideOutputId = 'override-output-id';
+      mockedFetchRelatedSavedObjects.mockResolvedValue({
+        outputs: [
+          {
+            id: 'test-id',
+            is_default: true,
+            is_default_monitoring: true,
+            name: 'default',
+            type: 'elasticsearch',
+            hosts: ['http://127.0.0.1:9201'],
+          },
+          {
+            id: overrideOutputId,
+            is_default: false,
+            is_default_monitoring: false,
+            name: 'override',
+            type: 'elasticsearch',
+            hosts: ['http://override-es:9201'],
+          },
+        ],
+        proxies: [],
+        dataOutput: {
+          id: 'test-id',
+          is_default: true,
+          is_default_monitoring: true,
+          name: 'default',
+          type: 'elasticsearch',
+          hosts: ['http://127.0.0.1:9201'],
+        },
+        monitoringOutput: {
+          id: 'test-id',
+          is_default: true,
+          is_default_monitoring: true,
+          name: 'default',
+          type: 'elasticsearch',
+          hosts: ['http://127.0.0.1:9201'],
+        },
+        downloadSource: {
+          id: 'default-download-source-id',
+          is_default: true,
+          name: 'Default host',
+          host: 'http://default-registry.co',
+        },
+        downloadSourceProxy: undefined,
+        fleetServerHost: {
+          name: 'default Fleet Server',
+          id: '93f74c0-e876-11ea-b7d3-8b2acec6f75c',
+          is_default: true,
+          host_urls: ['http://fleetserver:8220'],
+          is_preconfigured: false,
+        },
+      });
+
+      mockAgentPolicy({
+        package_policies: [
+          {
+            id: 'pkg-policy-1',
+            name: 'otel-policy',
+            namespace: 'default',
+            enabled: true,
+            output_id: overrideOutputId,
+            package: { name: 'otelpackage', version: '1.0.0', title: 'OTel Package' },
+            inputs: [{ type: 'otelcol', enabled: true, streams: [] }],
+            created_at: '',
+            updated_at: '',
+            created_by: '',
+            updated_by: '',
+            revision: 1,
+            policy_id: '',
+            policy_ids: [''],
+          },
+        ],
+      });
+
+      await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy');
+
+      expect(mockedGenerateOtelcolConfig).toHaveBeenCalled();
+      const callArgs = mockedGenerateOtelcolConfig.mock.calls[0][0];
+      expect(callArgs.packageOutputs).toBeInstanceOf(Map);
+      const packageOutputs = callArgs.packageOutputs as Map<string, Output>;
+      expect(packageOutputs.size).toBe(1);
+      expect(packageOutputs.get('pkg-policy-1')).toBeDefined();
+      expect(packageOutputs.get('pkg-policy-1')!.id).toBe(overrideOutputId);
+    });
+
+    it('should pass empty packageOutputs when no package policies have output_id', async () => {
+      mockAgentPolicy({
+        package_policies: [
+          {
+            id: 'pkg-policy-1',
+            name: 'otel-policy',
+            namespace: 'default',
+            enabled: true,
+            package: { name: 'otelpackage', version: '1.0.0', title: 'OTel Package' },
+            inputs: [{ type: 'otelcol', enabled: true, streams: [] }],
+            created_at: '',
+            updated_at: '',
+            created_by: '',
+            updated_by: '',
+            revision: 1,
+            policy_id: '',
+            policy_ids: [''],
+          },
+        ],
+      });
+
+      await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy');
+
+      expect(mockedGenerateOtelcolConfig).toHaveBeenCalled();
+      const callArgs = mockedGenerateOtelcolConfig.mock.calls[0][0];
+      expect(callArgs.packageOutputs).toBeInstanceOf(Map);
+      expect((callArgs.packageOutputs as Map<string, Output>).size).toBe(0);
+    });
+
+    it('should omit a packageOutputs entry when the output_id references a non-existent output', async () => {
+      mockAgentPolicy({
+        package_policies: [
+          {
+            id: 'pkg-policy-1',
+            name: 'otel-policy',
+            namespace: 'default',
+            enabled: true,
+            output_id: 'nonexistent-output-id',
+            package: { name: 'otelpackage', version: '1.0.0', title: 'OTel Package' },
+            inputs: [{ type: 'otelcol', enabled: true, streams: [] }],
+            created_at: '',
+            updated_at: '',
+            created_by: '',
+            updated_by: '',
+            revision: 1,
+            policy_id: '',
+            policy_ids: [''],
+          },
+        ],
+      });
+
+      await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy');
+
+      expect(mockedGenerateOtelcolConfig).toHaveBeenCalled();
+      const callArgs = mockedGenerateOtelcolConfig.mock.calls[0][0];
+      expect(callArgs.packageOutputs).toBeInstanceOf(Map);
+      expect((callArgs.packageOutputs as Map<string, Output>).size).toBe(0);
     });
   });
 });
@@ -2415,6 +2768,39 @@ ssl.test: 123
       }
     `);
   });
+
+  it('should redact proxy_headers and ssl.key when redactProxySecrets=true', () => {
+    const proxy = {
+      id: 'proxy-1',
+      name: 'proxy1',
+      url: 'https://proxy.fr',
+      certificate_authorities: '/tmp/ssl/ca.crt',
+      proxy_headers: { Authorization: 'Bearer SECRET' },
+      certificate: 'my-cert',
+      certificate_key: 'PRIVATE_KEY',
+      is_preconfigured: false,
+    } as any;
+
+    const policyOutput = transformOutputToFullPolicyOutput(
+      {
+        id: 'id123',
+        proxy_id: 'proxy-1',
+        hosts: ['http://host.fr'],
+        is_default: false,
+        is_default_monitoring: false,
+        name: 'test output',
+        type: 'elasticsearch',
+      } as any,
+      proxy,
+      false,
+      true // redactProxySecrets
+    );
+
+    expect(policyOutput.proxy_url).toBe('https://proxy.fr');
+    expect(policyOutput).not.toHaveProperty('proxy_headers');
+    expect(policyOutput.ssl?.certificate).toBe('my-cert');
+    expect(policyOutput.ssl).not.toHaveProperty('key');
+  });
 });
 
 describe('generateFleetConfig', () => {
@@ -2568,6 +2954,49 @@ describe('generateFleetConfig', () => {
         },
       },
     });
+  });
+
+  it('should redact proxy_headers and ssl.key when redactProxySecrets=true', () => {
+    const res = generateFleetConfig(
+      {
+        host_urls: ['https://test.fr'],
+        proxy_id: 'proxy-1',
+      } as any,
+      [
+        {
+          id: 'proxy-1',
+          url: 'https://proxy.fr',
+          certificate_authorities: ['/tmp/ssl/ca.crt'],
+          proxy_headers: { Authorization: 'Bearer SECRET' },
+          certificate: 'my-cert',
+          certificate_key: 'PRIVATE_KEY',
+        } as any,
+      ],
+      true // redactProxySecrets
+    );
+
+    expect(res).toMatchInlineSnapshot(`
+      Object {
+        "hosts": Array [
+          "https://test.fr",
+        ],
+        "proxy_url": "https://proxy.fr",
+        "ssl": Object {
+          "certificate": "my-cert",
+          "certificate_authorities": Array [
+            Array [
+              "/tmp/ssl/ca.crt",
+            ],
+          ],
+          "renegotiation": "never",
+          "verification_mode": "",
+        },
+      }
+    `);
+    expect(res).not.toHaveProperty('proxy_headers');
+    if (res && 'hosts' in res) {
+      expect(res.ssl).not.toHaveProperty('key');
+    }
   });
 });
 
@@ -2893,6 +3322,20 @@ describe('getBinarySourceSettings', () => {
           key: 'PROXY_KEY1',
         },
       });
+    });
+
+    it('should redact proxy_headers and ssl.key when redactProxySecrets=true', () => {
+      const result = getBinarySourceSettings(downloadSource, proxy, true);
+      expect(result).toEqual({
+        proxy_url: 'http://proxy_uri.it',
+        sourceURI: 'http://custom-registry-test',
+        ssl: {
+          certificate: 'proxy_cert',
+          certificate_authorities: ['PROXY_CA'],
+        },
+      });
+      expect(result).not.toHaveProperty('proxy_headers');
+      expect(result.ssl).not.toHaveProperty('key');
     });
   });
 

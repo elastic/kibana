@@ -72,30 +72,31 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import type { KqlPluginStart } from '@kbn/kql/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { StreamsPluginStart, StreamsPluginSetup } from '@kbn/streams-plugin/public';
+import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '@kbn/significant-events-plugin/common';
 import type { IngestHubStart } from '@kbn/ingest-hub-plugin/public';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
 import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
 import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
+import type { GlobalSearchPluginSetup } from '@kbn/global-search-plugin/public';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
-import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { ObservabilityAgentBuilderPluginPublicStart } from '@kbn/observability-agent-builder-plugin/public';
 import type { CPSPluginStart } from '@kbn/cps/public/types';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { observabilityAppId, observabilityFeatureId } from '../common';
+import { getObservabilityAlertType } from './cases/attachments/alert';
 import {
   ALERTS_PATH,
-  ALERTING_V2_PATH,
   CASES_PATH,
+  NIGHTSHIFT_PATH,
   OBSERVABILITY_BASE_PATH,
   OVERVIEW_PATH,
   RULES_PATH,
 } from '../common/locators/paths';
 import { registerDataHandler } from './context/has_data_context/data_handler';
 import { createUseRulesLink } from './hooks/create_use_rules_link';
-import { RuleDetailsLocatorDefinition } from './locators/rule_details';
-import { RulesLocatorDefinition } from './locators/rules';
 import type { ObservabilityRuleTypeRegistry } from './rules/create_observability_rule_type_registry';
 import { createObservabilityRuleTypeRegistry } from './rules/create_observability_rule_type_registry';
 import { registerObservabilityRuleTypes } from './rules/register_observability_rule_types';
@@ -104,6 +105,11 @@ import {
   CasesOverviewLocatorDefinition,
 } from '../common/locators/cases';
 import { TelemetryService } from './services/telemetry/telemetry_service';
+import { createNightshiftGlobalSearchProvider } from './pages/nightshift/app/nightshift_global_search_provider';
+
+const nightshiftTitle = i18n.translate('xpack.observability.nightshiftLinkTitle', {
+  defaultMessage: 'Nightshift',
+});
 
 export interface ConfigSchema {
   unsafe: {
@@ -144,6 +150,7 @@ export interface ObservabilityPublicPluginsSetup {
   presentationUtil?: PresentationUtilPluginStart;
   streams?: StreamsPluginSetup;
   cases?: CasesPublicSetup;
+  globalSearch?: GlobalSearchPluginSetup;
 }
 export interface ObservabilityPublicPluginsStart {
   actionTypeRegistry: ActionTypeRegistryContract;
@@ -207,6 +214,7 @@ export class Plugin
   private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
   private observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry =
     {} as ObservabilityRuleTypeRegistry;
+  private significantEventsAvailable = false;
   private telemetry: TelemetryService;
 
   // Define deep links as constant and hidden. Whether they are shown or hidden
@@ -219,18 +227,16 @@ export class Plugin
       }),
       order: 8001,
       path: ALERTS_PATH,
-      visibleIn: [],
+      visibleIn: ['projectSideNav'],
       keywords: ['alerts', 'rules'],
     },
     {
-      id: 'alerts_v2',
-      title: i18n.translate('xpack.observability.alertsV2LinkTitle', {
-        defaultMessage: 'Alerts v2',
-      }),
+      id: 'nightshift',
+      title: nightshiftTitle,
       order: 8002,
-      path: ALERTING_V2_PATH,
+      path: NIGHTSHIFT_PATH,
       visibleIn: [],
-      keywords: ['alerts_v2'],
+      keywords: ['nightshift', 'significant events'],
     },
   ];
 
@@ -259,17 +265,18 @@ export class Plugin
           extend: {
             [CasesDeepLinkId.cases]: {
               order: 8003,
-              visibleIn: [],
+              visibleIn: ['projectSideNav'],
             },
             [CasesDeepLinkId.casesCreate]: {
-              visibleIn: [],
+              visibleIn: ['projectSideNav'],
             },
             [CasesDeepLinkId.casesConfigure]: {
-              visibleIn: [],
+              visibleIn: ['projectSideNav'],
             },
           },
         })
       );
+      pluginsSetup.cases.attachmentFramework.registerUnified(getObservabilityAlertType());
     }
     const category = DEFAULT_APP_CATEGORIES.observability;
     const euiIconType = 'logoObservability';
@@ -281,13 +288,8 @@ export class Plugin
       pluginsSetup.triggersActionsUi.ruleTypeRegistry
     );
 
-    const rulesLocator = pluginsSetup.share.url.locators.create(new RulesLocatorDefinition());
     pluginsSetup.share.url.locators.create(CaseDetailsLocatorDefinition());
     pluginsSetup.share.url.locators.create(CasesOverviewLocatorDefinition());
-
-    const ruleDetailsLocator = pluginsSetup.share.url.locators.create(
-      new RuleDetailsLocatorDefinition()
-    );
 
     const logsLocator =
       pluginsSetup.share.url.locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR);
@@ -365,11 +367,17 @@ export class Plugin
         'experience',
       ],
       visibleIn: Boolean(pluginsSetup.serverless)
-        ? ['home', 'kibanaOverview']
-        : ['globalSearch', 'home', 'kibanaOverview', 'sideNav'],
+        ? ['projectSideNav', 'home', 'kibanaOverview']
+        : ['globalSearch', 'classicSideNav', 'projectSideNav', 'home', 'kibanaOverview'],
     };
 
     coreSetup.application.register(app);
+    pluginsSetup.globalSearch?.registerResultProvider(
+      createNightshiftGlobalSearchProvider({
+        isAvailable: () => this.significantEventsAvailable,
+        title: nightshiftTitle,
+      })
+    );
 
     registerObservabilityRuleTypes(
       this.observabilityRuleTypeRegistry,
@@ -424,8 +432,6 @@ export class Plugin
               const isAiAssistantEnabled =
                 pluginsStart.observabilityAIAssistant?.service.isEnabled();
 
-              const isAlertingV2Enabled = Boolean(coreStart.application.capabilities.alertingVTwo);
-
               const chatExperience$ =
                 coreStart.settings.client.get$<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE);
 
@@ -473,10 +479,7 @@ export class Plugin
                   // See https://github.com/elastic/kibana/issues/103325.
                   const otherLinks = deepLinks.filter((link) => (link.visibleIn ?? []).length > 0);
                   const alertsLinks: NavigationEntry[] = otherLinks
-                    .filter(
-                      (link) =>
-                        link.id === 'alerts' || (isAlertingV2Enabled && link.id === 'alerts_v2')
-                    )
+                    .filter((link) => link.id === 'alerts')
                     .map((link) => ({
                       app: observabilityAppId,
                       label: link.title,
@@ -549,8 +552,6 @@ export class Plugin
       dashboard: { register: registerDataHandler },
       observabilityRuleTypeRegistry: this.observabilityRuleTypeRegistry,
       useRulesLink: createUseRulesLink(),
-      rulesLocator,
-      ruleDetailsLocator,
       config,
     };
   }
@@ -558,10 +559,22 @@ export class Plugin
   public start(coreStart: CoreStart, pluginsStart: ObservabilityPublicPluginsStart) {
     const { application } = coreStart;
     const config = this.initContext.config.get();
+    this.significantEventsAvailable = coreStart.featureFlags.getBooleanValue(
+      STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG,
+      false
+    );
+    const deepLinks = this.deepLinks.map<AppDeepLink>((deepLink) =>
+      deepLink.id === 'nightshift'
+        ? {
+            ...deepLink,
+            visibleIn: this.significantEventsAvailable ? ['projectSideNav'] : [],
+          }
+        : deepLink
+    );
 
     pluginsStart.observabilityShared.updateGlobalNavigation({
       capabilities: application.capabilities,
-      deepLinks: this.deepLinks,
+      deepLinks,
       updater$: this.appUpdater$,
       pricing: coreStart.pricing,
     });
@@ -571,6 +584,19 @@ export class Plugin
         createDefinition(coreStart, pluginsStart)
       );
     });
+
+    const agentBuilder = pluginsStart.agentBuilder;
+    if (agentBuilder) {
+      void import('./pages/nightshift/chat/agent_builder/significant_event_attachments')
+        .then(({ registerNightshiftAgentBuilderAttachments }) => {
+          registerNightshiftAgentBuilderAttachments({ agentBuilder });
+        })
+        .catch((error) => {
+          this.initContext.logger
+            .get('nightshiftAgentBuilderAttachments')
+            .error(`Failed to register agent builder attachments: ${error}`);
+        });
+    }
 
     return {
       config,

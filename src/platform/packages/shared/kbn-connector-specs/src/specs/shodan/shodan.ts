@@ -19,7 +19,7 @@
  * MVP implementation focusing on core asset discovery actions.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { i18n } from '@kbn/i18n';
 import type { ConnectorSpec } from '../../connector_spec';
 
@@ -41,10 +41,12 @@ export const ShodanConnector: ConnectorSpec = {
   actions: {
     searchHosts: {
       isTool: true,
-      input: z.object({
-        query: z.string().describe('Search query'),
-        page: z.number().int().min(1).optional().default(1).describe('Page number'),
-      }),
+      input: lazySchema(() =>
+        z.object({
+          query: z.string().describe('Search query'),
+          page: z.number().int().min(1).optional().default(1).describe('Page number'),
+        })
+      ),
       handler: async (ctx, input) => {
         const typedInput = input as { query: string; page?: number };
         const apiKey = ctx.secrets?.authType === 'api_key_header' ? ctx.secrets['X-Api-Key'] : '';
@@ -65,9 +67,11 @@ export const ShodanConnector: ConnectorSpec = {
 
     getHostInfo: {
       isTool: true,
-      input: z.object({
-        ip: z.ipv4().describe('IP address'),
-      }),
+      input: lazySchema(() =>
+        z.object({
+          ip: z.ipv4().describe('IP address'),
+        })
+      ),
       handler: async (ctx, input) => {
         const typedInput = input as { ip: string };
         const apiKey = ctx.secrets?.authType === 'api_key_header' ? ctx.secrets['X-Api-Key'] : '';
@@ -91,10 +95,12 @@ export const ShodanConnector: ConnectorSpec = {
 
     countResults: {
       isTool: true,
-      input: z.object({
-        query: z.string().describe('Search query'),
-        facets: z.string().optional().describe('Facets to include'),
-      }),
+      input: lazySchema(() =>
+        z.object({
+          query: z.string().describe('Search query'),
+          facets: z.string().optional().describe('Facets to include'),
+        })
+      ),
       handler: async (ctx, input) => {
         const typedInput = input as { query: string; facets?: string };
         const apiKey = ctx.secrets?.authType === 'api_key_header' ? ctx.secrets['X-Api-Key'] : '';
@@ -114,7 +120,7 @@ export const ShodanConnector: ConnectorSpec = {
 
     getServices: {
       isTool: true,
-      input: z.object({}),
+      input: lazySchema(() => z.object({})),
       handler: async (ctx) => {
         const apiKey = ctx.secrets?.authType === 'api_key_header' ? ctx.secrets['X-Api-Key'] : '';
         const response = await ctx.client.get('https://api.shodan.io/shodan/services', {

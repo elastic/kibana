@@ -10,6 +10,7 @@ import type {
   SavedObjectsFindResponse,
   SavedObjectsResolveResponse,
 } from '@kbn/core/server';
+import { isSavedObjectErrorResult } from '@kbn/core/server';
 import type {
   AttachmentAttributes,
   AttachmentTotals,
@@ -37,7 +38,7 @@ import {
   GetTagsResponseRt,
 } from '../../../common/types/api';
 import { decodeWithExcessOrThrow, decodeOrThrow } from '../../common/runtime_types';
-import { createCaseError } from '../../common/error';
+import { createCaseError, isSOError } from '../../common/error';
 import {
   countAlertsForID,
   flattenCaseSavedObject,
@@ -46,6 +47,8 @@ import {
 } from '../../common/utils';
 import type { CasesClientArgs } from '..';
 import { Operations } from '../../authorization';
+import { getOwnersFilter } from '../../authorization/utils';
+import { CASE_ATTACHMENT_SAVED_OBJECT } from '../../../common/constants';
 import { combineAuthorizedAndOwnerFilter } from '../utils';
 import { CasesService } from '../../services';
 import type {
@@ -53,6 +56,7 @@ import type {
   CaseTransformedAttributes,
 } from '../../common/types/case';
 import { CaseRt } from '../../../common/types/domain';
+import type { AttachmentMode } from '../../../common/types/domain/attachment/v2';
 
 /**
  * Parameters for finding cases IDs using an alert ID
@@ -87,8 +91,11 @@ export const getCasesByAlertID = async (
   try {
     const queryParams = decodeWithExcessOrThrow(CasesByAlertIDRequestRt)(options);
 
-    const { filter: authorizationFilter, ensureSavedObjectsAreAuthorized } =
-      await authorization.getAuthorizationFilter(Operations.getCaseIDsByAlertID);
+    const {
+      filter: authorizationFilter,
+      ensureSavedObjectsAreAuthorized,
+      authorizedOwners,
+    } = await authorization.getAuthorizationFilter(Operations.getCaseIDsByAlertID);
 
     const filter = combineAuthorizedAndOwnerFilter(
       queryParams.owner,
@@ -96,11 +103,27 @@ export const getCasesByAlertID = async (
       Operations.getCaseIDsByAlertID.savedObjectType
     );
 
+    /**
+     * The authorization filter above is scoped to `cases-comments` (the operation's saved object
+     * type). We also query `cases-attachments`, so build an equivalent owner-scoped filter for
+     * that type using the same authorized owners.
+     */
+    const unifiedAuthorizationFilter =
+      authorizedOwners && authorizedOwners.length > 0
+        ? getOwnersFilter(CASE_ATTACHMENT_SAVED_OBJECT, authorizedOwners)
+        : undefined;
+    const unifiedFilter = combineAuthorizedAndOwnerFilter(
+      queryParams.owner,
+      unifiedAuthorizationFilter,
+      CASE_ATTACHMENT_SAVED_OBJECT
+    );
+
     // This will likely only return one comment saved object, the response aggregation will contain
     // the keys we need to retrieve the cases
     const commentsWithAlert = await caseService.getCaseIdsByAlertId({
       alertId: alertID,
       filter,
+      unifiedFilter,
     });
 
     // make sure the comments returned have the right owner
@@ -129,7 +152,7 @@ export const getCasesByAlertID = async (
     // if there was an error retrieving one of the cases (maybe it was deleted, but the alert comment still existed)
     // just ignore it
     const validCasesInfo = casesInfo.saved_objects.filter(
-      (caseInfo): caseInfo is SavedObject<CaseTransformedAttributes> => caseInfo.error === undefined
+      (caseInfo): caseInfo is SavedObject<CaseTransformedAttributes> => !isSOError(caseInfo)
     );
 
     ensureSavedObjectsAreAuthorized(
@@ -184,6 +207,11 @@ export interface GetParams {
    * Whether to include the attachments for a case in the response
    */
   includeComments?: boolean;
+  /**
+   * Attachment format: 'legacy' (eventId/index) or 'unified' (attachmentId/metadata).
+   * Use 'unified' when consuming from the attachment registry (e.g. EventTabContent).
+   */
+  mode?: AttachmentMode;
 }
 
 /**
@@ -192,7 +220,7 @@ export interface GetParams {
  * @ignore
  */
 export const get = async (
-  { id, includeComments }: GetParams,
+  { id, includeComments, mode = 'legacy' }: GetParams,
   clientArgs: CasesClientArgs
 ): Promise<Case> => {
   const {
@@ -235,6 +263,7 @@ export const get = async (
         sortField: 'created_at',
         sortOrder: 'asc',
       },
+      mode,
     })) as SavedObjectsFindResponse<AttachmentAttributes>;
 
     const res = flattenCaseSavedObject({
@@ -257,7 +286,7 @@ export const get = async (
  * @experimental
  */
 export const resolve = async (
-  { id, includeComments }: GetParams,
+  { id, includeComments, mode = 'legacy' }: GetParams,
   clientArgs: CasesClientArgs
 ): Promise<CaseResolveResponse> => {
   const {
@@ -273,6 +302,10 @@ export const resolve = async (
     }: SavedObjectsResolveResponse<CaseAttributes> = await caseService.getResolveCase({
       id,
     });
+
+    if (isSavedObjectErrorResult(resolvedSavedObject)) {
+      throw new Error(resolvedSavedObject.error.message);
+    }
 
     await authorization.ensureAuthorized({
       operation: Operations.resolveCase,
@@ -299,6 +332,7 @@ export const resolve = async (
         sortField: 'created_at',
         sortOrder: 'asc',
       },
+      mode,
     })) as SavedObjectsFindResponse<AttachmentAttributes>;
 
     const res = {

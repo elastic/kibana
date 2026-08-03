@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import type { ESQLCallbacks } from '@kbn/esql-types';
 import { uniqBy } from 'lodash';
 import type { ParameterHint, ParameterHintEntityType } from '../../..';
@@ -90,8 +89,8 @@ async function inferenceEndpointContextResolver(
     }
 
     const inferenceEnpoints =
-      (await callbacks?.getInferenceEndpoints?.(hint.constraints?.task_type as InferenceTaskType))
-        ?.inferenceEndpoints || [];
+      (await callbacks?.getInferenceEndpoints?.(hint.constraints?.task_type))?.inferenceEndpoints ||
+      [];
 
     return {
       inferenceEndpoints: uniqBy(

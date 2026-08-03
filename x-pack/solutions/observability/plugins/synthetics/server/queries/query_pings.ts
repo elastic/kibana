@@ -17,6 +17,9 @@ import type {
   PingsResponse,
 } from '../../common/runtime_types';
 import type { SyntheticsEsClient } from '../lib';
+import { getRemoteMonitorInfo } from '../lib/remote_result_utils';
+import { getSyntheticsScopedIndex } from '../../common/get_synthetics_indices';
+import { getHeartbeatLocationsPostFilter } from '../../common/lib';
 import { SUMMARY_FILTER } from '../../common/constants/client_defaults';
 
 const DEFAULT_PAGE_SIZE = 25;
@@ -52,10 +55,14 @@ export async function queryPings<F>(
     pageIndex,
     locations,
     excludedLocations,
+    remoteName,
   } = params;
   const size = sizeParam ?? DEFAULT_PAGE_SIZE;
 
+  const locationsPostFilter = getHeartbeatLocationsPostFilter((locations ?? []) as string[]);
+
   const searchBody = {
+    index: getSyntheticsScopedIndex(remoteName, syntheticsEsClient.heartbeatIndices),
     size,
     from: pageIndex !== undefined ? pageIndex * size : 0,
     ...(index ? { from: index * size } : {}),
@@ -70,9 +77,7 @@ export async function queryPings<F>(
       },
     },
     sort: [{ '@timestamp': { order: (sort ?? 'desc') as 'asc' | 'desc' } }],
-    ...((locations ?? []).length > 0
-      ? { post_filter: { terms: { 'observer.geo.name': locations as unknown as string[] } } }
-      : {}),
+    ...(locationsPostFilter ? { post_filter: locationsPostFilter } : {}),
     _source: true,
     fields: [] as QueryFields,
   };
@@ -117,7 +122,7 @@ export async function queryPings<F>(
   } = await syntheticsEsClient.search(searchBody);
 
   const pings: Ping[] = hits.map((doc: any) => {
-    const { _id, _source } = doc;
+    const { _id, _index, _source } = doc;
     // Calculate here the length of the content string in bytes, this is easier than in client JS, where
     // we don't have access to Buffer.byteLength. There are some hacky ways to do this in the
     // client but this is cleaner.
@@ -126,7 +131,9 @@ export async function queryPings<F>(
       httpBody.content_bytes = Buffer.byteLength(httpBody.content);
     }
 
-    return { ..._source, timestamp: _source['@timestamp'], docId: _id };
+    const remote = getRemoteMonitorInfo(_index, _source?.kibanaUrl);
+
+    return { ..._source, timestamp: _source['@timestamp'], docId: _id, ...(remote && { remote }) };
   });
 
   return {

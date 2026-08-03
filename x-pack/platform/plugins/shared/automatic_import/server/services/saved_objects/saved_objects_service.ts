@@ -28,6 +28,7 @@ import {
 } from './constants';
 import type { IntegrationParams, DataStreamParams } from '../../routes/types';
 import { IntegrationAlreadyExistsError } from '../../errors';
+import type { DataStreamPhase } from '../../../common';
 
 export interface FieldMappingEntry {
   name: string;
@@ -72,6 +73,7 @@ export class AutomaticImportSavedObjectService {
         integration_id: integrationId,
         created_by: authenticatedUser.username,
         created_by_profile_uid: authenticatedUser.profile_uid,
+        connector_id: integrationParams.connectorId,
         metadata: {
           title: integrationParams.title,
           description: integrationParams.description,
@@ -134,11 +136,13 @@ export class AutomaticImportSavedObjectService {
         last_updated_by: data.last_updated_by ?? existingIntegration.last_updated_by,
         last_updated_at: new Date().toISOString(),
         status: data.status ?? existingIntegration.status,
+        connector_id: data.connector_id ?? existingIntegration.connector_id,
         metadata: {
           ...existingIntegration.metadata,
           ...data.metadata,
           version: newVersion,
         },
+        changelog: data.changelog ?? existingIntegration.changelog,
       };
 
       return await this.savedObjectsClient.update<IntegrationAttributes>(
@@ -510,6 +514,43 @@ export class AutomaticImportSavedObjectService {
       this.logger.debug(`Data stream ${dataStreamId} status updated to ${status}`);
     } catch (error) {
       this.logger.error(`Failed to update data stream ${dataStreamId} status: ${error}`);
+      throw error;
+    }
+  }
+
+  /**
+   * Updates only the phase of a data stream's job_info.
+   * @param dataStreamId - The ID of the data stream
+   * @param integrationId - The ID of the integration
+   * @param phase - The new phase to set
+   */
+  public async updateDataStreamPhase(
+    dataStreamId: string,
+    integrationId: string,
+    phase: DataStreamPhase
+  ): Promise<void> {
+    try {
+      const dataStream = await this.getDataStream(dataStreamId, integrationId);
+      const compositeId = this.getDataStreamCompositeId(integrationId, dataStreamId);
+
+      const updatedAttributes: Partial<DataStreamAttributes> = {
+        job_info: {
+          ...dataStream.attributes.job_info,
+          phase,
+        },
+      };
+
+      await this.savedObjectsClient.update(
+        DATA_STREAM_SAVED_OBJECT_TYPE,
+        compositeId,
+        updatedAttributes
+      );
+
+      this.logger.debug(
+        `[ProgressBar] Data stream "${dataStreamId}" (integration "${integrationId}") phase updated to "${phase}"`
+      );
+    } catch (error) {
+      this.logger.error(`Failed to update data stream ${dataStreamId} phase: ${error}`);
       throw error;
     }
   }

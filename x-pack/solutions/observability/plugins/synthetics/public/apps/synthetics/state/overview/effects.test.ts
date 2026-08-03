@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import sagaHelper from 'redux-saga-testing';
 import { call, put, select } from 'redux-saga/effects';
 import type {
   GetTrendPayload,
@@ -19,18 +18,35 @@ import { fetchOverviewTrendStats as trendsApi } from './api';
 import { selectOverviewTrends } from '.';
 import { selectOverviewStatus } from '../overview_status';
 
+/**
+ * Minimal step-through saga test helper (replaces the `redux-saga-testing` package).
+ *
+ * Returns a wrapper around Jest's `it` that lazily advances the generator on each
+ * step: the yielded effect is passed to the callback, and the callback's return
+ * value is fed back into the generator on the next step.
+ */
+const sagaHelper = <T>(generator: IterableIterator<T>) => {
+  let input: unknown;
+  return (title: string, fn: (result: T) => unknown): void => {
+    it(title, () => {
+      const { value } = generator.next(input);
+      input = fn(value);
+    });
+  };
+};
+
 const TEST_TRENDS_LENGTH = 300;
 
 const generateTrendRequests = () => {
   const ar: TrendRequest[] = [];
   for (let i = 0; i < TEST_TRENDS_LENGTH; i++)
-    ar.push({ configId: `configId${i}`, locationId: 'location', schedule: '3' });
+    ar.push({ configId: `configId${i}`, locationIds: ['location'], schedule: '3' });
   return ar;
 };
 
 const responseReducer = (acc: Record<string, null>, curr: TrendKey) => ({
   ...acc,
-  [curr.configId + curr.locationId]: null,
+  [curr.configId + curr.locationIds[0]]: null,
 });
 
 describe('overview effects', () => {
@@ -98,7 +114,7 @@ describe('overview effects', () => {
     const table: TrendTable = {
       monitor1: {
         configId: 'monitor1',
-        locationId: 'location',
+        locationIds: ['location'],
         data: [{ x: 0, y: 1 }],
         count: 1,
         median: 1,
@@ -110,7 +126,7 @@ describe('overview effects', () => {
       monitor2: null,
       monitor3: {
         configId: 'monitor3',
-        locationId: 'location',
+        locationIds: ['location'],
         data: [{ x: 0, y: 1 }],
         count: 1,
         median: 1,
@@ -122,13 +138,13 @@ describe('overview effects', () => {
     };
 
     const batch = [
-      { configId: 'monitor1', locationId: 'location', schedule: '3' },
-      { configId: 'monitor3', locationId: 'location', schedule: '3' },
+      { configId: 'monitor1', locationIds: ['location'], schedule: '3' },
+      { configId: 'monitor3', locationIds: ['location'], schedule: '3' },
     ];
     const apiResponse: TrendTable = {
       monitor1: {
         configId: 'monitor1',
-        locationId: 'location',
+        locationIds: ['location'],
         data: [
           { x: 0, y: 1 },
           { x: 1, y: 2 },
@@ -142,7 +158,7 @@ describe('overview effects', () => {
       },
       monitor2: {
         configId: 'monitor2',
-        locationId: 'location',
+        locationIds: ['location'],
         data: [
           { x: 0, y: 1 },
           { x: 1, y: 2 },

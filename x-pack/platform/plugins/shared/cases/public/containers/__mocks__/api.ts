@@ -94,6 +94,7 @@ export const getCases = async ({
     owner: [],
     category: [],
     customFields: {},
+    extendedFieldFilters: [],
     from: DEFAULT_FROM_DATE,
     to: DEFAULT_TO_DATE,
   },
@@ -197,6 +198,5 @@ export const getSimilarCases = async () => allCasesSnake;
 export const postObservable = jest.fn();
 export const patchObservable = jest.fn();
 export const deleteObservable = jest.fn();
-export const bulkPostObservables = jest.fn();
 
 export const searchEvents = jest.fn();

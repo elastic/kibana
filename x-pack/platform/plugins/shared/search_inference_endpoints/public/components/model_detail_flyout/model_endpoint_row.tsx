@@ -11,20 +11,21 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiScreenReaderOnly,
   EuiSplitPanel,
   EuiText,
   EuiToolTip,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
-
+import type { EisInferenceEndpoint } from '../../../common/types';
 import { isEndpointPreconfigured } from '../../utils/preconfigured_endpoint_helper';
 
 export interface ModelEndpointRowProps {
-  endpoint: InferenceAPIConfigResponse;
-  onView: (endpoint: InferenceAPIConfigResponse) => void;
+  endpoint: EisInferenceEndpoint;
+  onView: (endpoint: EisInferenceEndpoint) => void;
   onCopy: (id: string) => void;
-  onDelete?: (endpoint: InferenceAPIConfigResponse) => void;
+  onDelete?: (endpoint: EisInferenceEndpoint) => void;
 }
 
 export const ModelEndpointRow: React.FC<ModelEndpointRowProps> = ({
@@ -34,11 +35,24 @@ export const ModelEndpointRow: React.FC<ModelEndpointRowProps> = ({
   onDelete,
 }) => {
   const preconfigured = isEndpointPreconfigured(endpoint.inference_id);
+  const preconfiguredEndpointAriaLabel = i18n.translate(
+    'xpack.searchInferenceEndpoints.modelDetailFlyout.preconfiguredAriaLabel',
+    { defaultMessage: 'Preconfigured endpoint' }
+  );
+  const preconfiguredTooltipContent = i18n.translate(
+    'xpack.searchInferenceEndpoints.modelDetailFlyout.preconfiguredTooltip',
+    {
+      defaultMessage: 'Preconfigured endpoints are system generated and can not be edited',
+    }
+  );
+  const preconfiguredTooltipDescriptionId = useGeneratedHtmlId({
+    prefix: 'searchInferenceEndpointsPreconfiguredTooltip',
+  });
 
   return (
     <EuiSplitPanel.Inner paddingSize="s" data-test-subj={`endpoint-row-${endpoint.inference_id}`}>
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem>
           <EuiFlexGroup alignItems="center" gutterSize="xs">
             <EuiFlexItem grow={false}>
               <EuiToolTip
@@ -48,6 +62,7 @@ export const ModelEndpointRow: React.FC<ModelEndpointRowProps> = ({
                 )}
               >
                 <EuiButtonIcon
+                  data-test-subj="searchInferenceEndpointsModelEndpointRowViewButton"
                   iconType="eye"
                   size="xs"
                   color="primary"
@@ -70,6 +85,7 @@ export const ModelEndpointRow: React.FC<ModelEndpointRowProps> = ({
                 )}
               >
                 <EuiButtonIcon
+                  data-test-subj="searchInferenceEndpointsModelEndpointRowCopyButton"
                   iconType="copyClipboard"
                   size="xs"
                   color="text"
@@ -81,54 +97,60 @@ export const ModelEndpointRow: React.FC<ModelEndpointRowProps> = ({
                 />
               </EuiToolTip>
             </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup alignItems="center" gutterSize="xs">
             <EuiFlexItem grow={false}>
               <EuiBadge>{endpoint.task_type}</EuiBadge>
             </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false} style={{ minWidth: 24 }}>
-          {preconfigured ? (
-            <EuiToolTip
-              content={i18n.translate(
-                'xpack.searchInferenceEndpoints.modelDetailFlyout.preconfiguredTooltip',
-                {
-                  defaultMessage:
-                    'Preconfigured endpoints are system generated and can not be edited',
-                }
-              )}
-            >
-              <span tabIndex={0}>
-                <EuiButtonIcon
-                  iconType="lock"
-                  size="xs"
-                  isDisabled
-                  aria-label={i18n.translate(
-                    'xpack.searchInferenceEndpoints.modelDetailFlyout.preconfiguredAriaLabel',
-                    { defaultMessage: 'Preconfigured endpoint' }
+            <EuiFlexItem grow={false} style={{ minWidth: 24 }}>
+              {preconfigured ? (
+                <>
+                  <EuiScreenReaderOnly>
+                    <span id={preconfiguredTooltipDescriptionId}>
+                      {preconfiguredTooltipContent}
+                    </span>
+                  </EuiScreenReaderOnly>
+                  <EuiToolTip content={preconfiguredTooltipContent}>
+                    <span
+                      tabIndex={0}
+                      aria-label={preconfiguredEndpointAriaLabel}
+                      aria-describedby={preconfiguredTooltipDescriptionId}
+                    >
+                      {/* eslint-disable-next-line @elastic/eui/no-unnamed-interactive-element */}
+                      <EuiButtonIcon
+                        data-test-subj="searchInferenceEndpointsModelEndpointRowLockButton"
+                        iconType="lock"
+                        size="xs"
+                        isDisabled
+                        aria-hidden
+                      />
+                    </span>
+                  </EuiToolTip>
+                </>
+              ) : onDelete ? (
+                <EuiToolTip
+                  content={i18n.translate(
+                    'xpack.searchInferenceEndpoints.modelDetailFlyout.deleteEndpointTooltip',
+                    { defaultMessage: 'Delete endpoint' }
                   )}
-                />
-              </span>
-            </EuiToolTip>
-          ) : onDelete ? (
-            <EuiToolTip
-              content={i18n.translate(
-                'xpack.searchInferenceEndpoints.modelDetailFlyout.deleteEndpointTooltip',
-                { defaultMessage: 'Delete endpoint' }
-              )}
-            >
-              <EuiButtonIcon
-                iconType="trash"
-                size="xs"
-                color="danger"
-                aria-label={i18n.translate(
-                  'xpack.searchInferenceEndpoints.modelDetailFlyout.deleteEndpointAriaLabel',
-                  { defaultMessage: 'Delete endpoint' }
-                )}
-                onClick={() => onDelete(endpoint)}
-                data-test-subj={`deleteEndpointButton-${endpoint.inference_id}`}
-              />
-            </EuiToolTip>
-          ) : null}
+                >
+                  <EuiButtonIcon
+                    iconType="trash"
+                    size="xs"
+                    color="danger"
+                    aria-label={i18n.translate(
+                      'xpack.searchInferenceEndpoints.modelDetailFlyout.deleteEndpointAriaLabel',
+                      { defaultMessage: 'Delete endpoint' }
+                    )}
+                    onClick={() => onDelete(endpoint)}
+                    data-test-subj={`deleteEndpointButton-${endpoint.inference_id}`}
+                  />
+                </EuiToolTip>
+              ) : null}
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiSplitPanel.Inner>

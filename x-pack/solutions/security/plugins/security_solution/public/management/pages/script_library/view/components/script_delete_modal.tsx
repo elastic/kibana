@@ -43,7 +43,10 @@ export const EndpointScriptDeleteModal = memo<EndpointScriptDeleteModalProps>(
         onSuccess();
       },
       onError: (error) => {
-        toasts.addError(error, {
+        // `addError()` seems to have special code to handle `HTTPFetchErrors`, which
+        // ends up showing information on the UI that is really not useful to the user.
+        // To get around this, we just create a new non-http fetch error here
+        toasts.addError(new Error(error.body?.message ?? error.message), {
           title: i18n.deleteModal.errorToastTitle,
           toastMessage: error?.body?.message ?? error.message,
         });

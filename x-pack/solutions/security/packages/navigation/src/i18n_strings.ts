@@ -41,12 +41,6 @@ export const i18nStrings = {
       defaultMessage: 'Explore',
     }),
   },
-  workflows: {
-    badgeTooltip: i18n.translate('securitySolutionPackages.navLinks.workflows.badgeTooltip', {
-      defaultMessage:
-        'This functionality is experimental and not supported. It may change or be removed at any time.',
-    }),
-  },
   assets: {
     title: i18n.translate('securitySolutionPackages.navLinks.assets', {
       defaultMessage: 'Assets',
@@ -62,6 +56,11 @@ export const i18nStrings = {
     endpoints: {
       title: i18n.translate('securitySolutionPackages.navLinks.assets.endpoints', {
         defaultMessage: 'Endpoints',
+      }),
+    },
+    artifacts: {
+      title: i18n.translate('securitySolutionPackages.navLinks.assets.artifacts', {
+        defaultMessage: 'Artifacts',
       }),
     },
     integrationsCallout: {
@@ -110,6 +109,12 @@ export const i18nStrings = {
       jobs: i18n.translate('securitySolutionPackages.navLinks.ml.anomalyDetection.jobs', {
         defaultMessage: 'Jobs',
       }),
+      manageJobs: i18n.translate(
+        'securitySolutionPackages.navLinks.ml.anomalyDetection.manageJobs',
+        {
+          defaultMessage: 'Manage jobs',
+        }
+      ),
       anomalyExplorer: i18n.translate(
         'securitySolutionPackages.navLinks.ml.anomalyDetection.anomalyExplorer',
         { defaultMessage: 'Anomaly explorer' }
@@ -326,12 +331,6 @@ export const i18nStrings = {
       title: i18n.translate('securitySolutionPackages.navLinks.stackManagement_v2.kibana', {
         defaultMessage: 'Kibana',
       }),
-    },
-    v2AlertingPreview: {
-      title: i18n.translate(
-        'securitySolutionPackages.navLinks.stackManagement_v2.v2AlertingPreview',
-        { defaultMessage: 'V2 Alerting Preview' }
-      ),
     },
     // serverless only
     access: {

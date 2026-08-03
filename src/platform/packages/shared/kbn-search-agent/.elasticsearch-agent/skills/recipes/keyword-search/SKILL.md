@@ -7,6 +7,12 @@ description: Guide for building keyword/full-text search with Elasticsearch. Use
 
 Guide developers through building full-text keyword search with Elasticsearch. Use this guide when they need text matching, filters, faceting, autocomplete, or traditional search-bar behavior.
 
+## Conversation flow — return to onboarding
+
+This skill provides deep implementation detail for keyword search. It is **not** the main conversation driver.
+
+After applying the guidance here, **re-read `/elasticsearch-onboarding`** to resume the structured onboarding playbook (Steps 1–7: intent → data → mapping → build → test → iterate). That playbook controls sequencing, the one-question-at-a-time rule, and the Dev Tools API-snippet workflow. If `/elasticsearch-onboarding` has not been loaded yet in this conversation, load it now — it is the primary conversation flow for all Elasticsearch search onboarding.
+
 ## 1. When to Use This Guide
 
 Apply this guide when the developer signals:
@@ -18,7 +24,7 @@ Apply this guide when the developer signals:
 - **Autocomplete / typeahead** — suggest completions as user types
 - **No semantic intent** — "red shoes" should match documents containing "red" and "shoes", not "crimson sneakers"
 
-Do **not** use this guide when: natural language queries return poor results, user expects meaning-based matching, or multilingual semantic similarity is needed. Point them to the semantic-search approach instead.
+Do **not** use this guide when: natural language queries return poor results, user expects meaning-based matching, or multilingual semantic similarity is needed. Point them to the vector-hybrid-search approach instead.
 
 ## 2. Index Mapping
 
@@ -340,4 +346,4 @@ Suggest hybrid or semantic search when:
 - **"Find similar"** — user wants items similar to a selected item, not just keyword overlap.
 - **Synonyms and paraphrasing** — synonym lists are too large or maintenance-heavy.
 
-Direct the developer to the semantic-search guide for vector search, or to hybrid search (combining keyword + vector with RRF).
+Direct the developer to the vector-hybrid-search guide for vector or hybrid search (combining keyword + vector with RRF).

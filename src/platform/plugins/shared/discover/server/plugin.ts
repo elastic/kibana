@@ -14,8 +14,12 @@ import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/common';
 import type { SharePluginSetup } from '@kbn/share-plugin/server';
+import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { PluginInitializerContext } from '@kbn/core/server';
+import type { Logger } from '@kbn/logging';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
+import { registerRoutes } from './api/register_routes';
 import { getDiscoverSessionEmbeddableSchema } from './embeddable/schema';
 import type { DiscoverServerPluginStart, DiscoverServerPluginStartDeps } from '.';
 import { DISCOVER_APP_LOCATOR } from '../common';
@@ -24,6 +28,8 @@ import { createSearchEmbeddableFactory } from './embeddable';
 import { initializeLocatorServices } from './locator';
 import { registerSampleData } from './sample_data';
 import { getUiSettings } from './ui_settings';
+import { registerAttachments } from './agent_builder/register_attachments';
+import { registerSkill } from './agent_builder/register_skill';
 import type { ConfigSchema } from './config';
 import { appLocatorGetLocationCommon } from '../common/app_locator_get_location';
 import {
@@ -32,29 +38,42 @@ import {
   TRACES_PRODUCT_FEATURE_ID,
 } from '../common/constants';
 import { getSearchEmbeddableTransforms } from '../common/embeddable';
+import { createProfileStateRegistry } from '../common/context_awareness';
 
 export class DiscoverServerPlugin
   implements Plugin<object, DiscoverServerPluginStart, object, DiscoverServerPluginStartDeps>
 {
   private readonly config: ConfigSchema;
+  private readonly logger: Logger;
+  private readonly profileStateRegistry = createProfileStateRegistry();
   private subscriptions: Subscription[] = [];
-  private embeddableTransformsEnabled = false;
+  private embeddableTransformsEnabled = true;
 
   constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.config = initializerContext.config.get();
+    this.logger = initializerContext.logger.get();
   }
 
   public setup(
     core: CoreSetup,
     plugins: {
+      agentBuilder?: AgentBuilderPluginSetup;
       data: DataPluginSetup;
       embeddable: EmbeddableSetup;
       home?: HomeServerPluginSetup;
       share?: SharePluginSetup;
+      usageCollection?: UsageCollectionSetup;
     }
   ) {
     core.capabilities.registerProvider(capabilitiesProvider);
     core.uiSettings.register(getUiSettings(core.docLinks, this.config.enableUiSettingsValidations));
+
+    registerRoutes(
+      core.http,
+      core.userActivity,
+      this.logger,
+      plugins.usageCollection?.createUsageCounter('discover_sessions_api')
+    );
 
     if (plugins.home) {
       registerSampleData(plugins.home.sampleData);
@@ -64,13 +83,21 @@ export class DiscoverServerPlugin
       plugins.share.url.locators.create({
         id: DISCOVER_APP_LOCATOR,
         getLocation: (params) => {
-          return appLocatorGetLocationCommon({ useHash: false, setStateToKbnUrl }, params);
+          return appLocatorGetLocationCommon(
+            {
+              useHash: false,
+              setStateToKbnUrl,
+              profileStateRegistry: this.profileStateRegistry,
+            },
+            params
+          );
         },
       });
     }
 
     plugins.embeddable.registerEmbeddableFactory(createSearchEmbeddableFactory());
-    plugins.embeddable.registerTransforms(SEARCH_EMBEDDABLE_TYPE, {
+    plugins.embeddable.registerEmbeddableServerDefinition(SEARCH_EMBEDDABLE_TYPE, {
+      title: 'Discover session',
       getTransforms: (drilldownTransforms) =>
         getSearchEmbeddableTransforms(drilldownTransforms, () => this.embeddableTransformsEnabled),
       getSchema: (getDrilldownsSchema) =>
@@ -78,6 +105,11 @@ export class DiscoverServerPlugin
           ? getDiscoverSessionEmbeddableSchema(getDrilldownsSchema)
           : undefined,
     });
+
+    if (plugins.agentBuilder) {
+      registerAttachments(plugins.agentBuilder);
+      registerSkill(plugins.agentBuilder);
+    }
 
     core.pricing.registerProductFeatures([
       {

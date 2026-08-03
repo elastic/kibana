@@ -12,8 +12,10 @@ import type { TimeRange } from '@kbn/es-query';
 import type { CascadeQueryArgs } from '@kbn/esql-utils/src/utils/cascaded_documents_helpers';
 import { apm } from '@elastic/apm-rum';
 import { i18n } from '@kbn/i18n';
-import type { DataTableRecord } from '@kbn/discover-utils';
+import { isEqual } from 'lodash';
+import type { DataTableColumnsMeta, DataTableRecord } from '@kbn/discover-utils';
 import { RequestAdapter } from '@kbn/inspector-plugin/public';
+import { getTextBasedColumnsMeta } from '@kbn/unified-data-table';
 import type { DiscoverServices } from '../../../build_services';
 import { fetchEsql } from './fetch_esql';
 import type { ScopedProfilesManager } from '../../../context_awareness';
@@ -21,12 +23,15 @@ import type { ScopedProfilesManager } from '../../../context_awareness';
 export interface FetchCascadedDocumentsParams extends CascadeQueryArgs {
   nodeId: string;
   timeRange: TimeRange | undefined;
+  isApproximate: boolean;
 }
 
 export interface CascadedDocumentsStateManager {
   getIsActiveInstance(): boolean;
   getCascadedDocuments(nodeId: string): DataTableRecord[] | undefined;
+  getColumnsMeta(): DataTableColumnsMeta;
   setCascadedDocuments(nodeId: string, records: DataTableRecord[]): void;
+  setColumnsMeta(columnsMeta: DataTableColumnsMeta): void;
 }
 
 export class CascadedDocumentsFetcher {
@@ -52,6 +57,7 @@ export class CascadedDocumentsFetcher {
     esqlVariables,
     dataView,
     timeRange,
+    isApproximate,
   }: FetchCascadedDocumentsParams) {
     this.cancelFetch(nodeId);
 
@@ -83,7 +89,7 @@ export class CascadedDocumentsFetcher {
         return [];
       }
 
-      ({ records } = await fetchEsql({
+      const { esqlQueryColumns, records: fetchedRecords } = await fetchEsql({
         query: cascadeQuery,
         esqlVariables,
         dataView,
@@ -93,6 +99,7 @@ export class CascadedDocumentsFetcher {
         timeRange,
         scopedProfilesManager: this.scopedProfilesManager,
         inspectorAdapters: { requests: this.requestAdapter },
+        isApproximate,
         inspectorConfig: {
           title: i18n.translate('discover.dataCascade.inspector.cascadeQueryTitle', {
             defaultMessage: 'Cascade Row Data Query',
@@ -102,9 +109,16 @@ export class CascadedDocumentsFetcher {
               'This request queries Elasticsearch to fetch the documents matching the value of the expanded cascade row.',
           }),
         },
-      }));
+      });
 
+      records = fetchedRecords;
       this.stateManager.setCascadedDocuments(nodeId, records);
+
+      const columnsMeta = esqlQueryColumns ? getTextBasedColumnsMeta(esqlQueryColumns) : {};
+      const previousColumnsMeta = this.stateManager.getColumnsMeta();
+      if (!isEqual(previousColumnsMeta, columnsMeta)) {
+        this.stateManager.setColumnsMeta(columnsMeta);
+      }
     } finally {
       this.abortControllers.delete(nodeId);
     }

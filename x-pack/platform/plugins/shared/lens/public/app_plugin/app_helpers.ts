@@ -19,12 +19,29 @@ import type {
   LensAppLocatorParams,
   LensDocument,
 } from '@kbn/lens-common';
-// Avoid importing Dashboard public constants here to prevent lens -> dashboard cycles.
-const DASHBOARDS_APP_ID = 'dashboards';
-const DASHBOARDS_VISUALIZATIONS_TAB_PATH = '#/list/visualizations';
+import type {
+  EmbeddableEditorBreadcrumb,
+  EmbeddableEditorState,
+} from '@kbn/embeddable-plugin/public';
 import type { RedirectToOriginProps } from './types';
 
 const VISUALIZE_APP_ID = 'visualize';
+
+/**
+ * Returns true when the user navigated to Lens from an active container view (e.g. a Dashboard panel),
+ * as opposed to a library listing page (e.g. the Dashboard Visualizations tab or the Visualize library).
+ * Used to determine whether "Save and Return" should be shown and whether `isLinkedToOriginatingApp`
+ * should be set on initial load.
+ */
+export function isComingFromContainerView(
+  incomingState: EmbeddableEditorState | undefined
+): boolean {
+  return Boolean(
+    incomingState?.originatingApp &&
+      incomingState?.originatingPath &&
+      !incomingState.originatingPath.includes('/list/')
+  );
+}
 
 export function isLegacyEditorEmbeddable(
   initialContext: VisualizeEditorContext | VisualizeFieldContext | undefined
@@ -71,43 +88,43 @@ export function setBreadcrumbsTitle(
     chrome: ChromeStart;
   },
   {
-    isByValueMode,
     originatingAppName,
+    incomingBreadcrumbs,
     redirectToOrigin,
-    isFromLegacyEditor,
     currentDocTitle,
   }: {
-    isByValueMode: boolean;
     originatingAppName: string | undefined;
+    incomingBreadcrumbs: EmbeddableEditorBreadcrumb[] | undefined;
     redirectToOrigin: ((props?: RedirectToOriginProps | undefined) => void) | undefined;
-    isFromLegacyEditor: boolean;
     currentDocTitle: string;
   }
 ) {
   const breadcrumbs: EuiBreadcrumb[] = [];
-  if ((isFromLegacyEditor || originatingAppName) && originatingAppName && redirectToOrigin) {
+
+  if (incomingBreadcrumbs?.length) {
+    breadcrumbs.push(...incomingBreadcrumbs);
+  } else if (originatingAppName && redirectToOrigin) {
     breadcrumbs.push({
       onClick: () => {
         redirectToOrigin();
       },
       text: originatingAppName,
     });
-  }
-  if (!isByValueMode && !originatingAppName) {
-    breadcrumbs.push({
-      href: application.getUrlForApp(DASHBOARDS_APP_ID, {
-        path: DASHBOARDS_VISUALIZATIONS_TAB_PATH,
-      }),
-      onClick: (e) => {
-        application.navigateToApp(DASHBOARDS_APP_ID, {
-          path: DASHBOARDS_VISUALIZATIONS_TAB_PATH,
-        });
-        e.preventDefault();
+  } else if (!originatingAppName) {
+    breadcrumbs.push(
+      {
+        text: i18n.translate('xpack.lens.breadcrumbsDashboards', {
+          defaultMessage: 'Dashboards',
+        }),
+        href: application.getUrlForApp('dashboards', { path: '#/list' }),
       },
-      text: i18n.translate('xpack.lens.breadcrumbsDashboardsTitle', {
-        defaultMessage: 'Dashboards',
-      }),
-    });
+      {
+        text: i18n.translate('xpack.lens.breadcrumbsVisualizations', {
+          defaultMessage: 'Visualizations',
+        }),
+        href: application.getUrlForApp('dashboards', { path: '#/list/visualizations' }),
+      }
+    );
   }
 
   const currentDocBreadcrumb: EuiBreadcrumb = { text: currentDocTitle };
@@ -172,9 +189,9 @@ export function useNavigateBackToApp({
   persistedDoc,
   isLensEqual,
 }: UseNavigateBackToAppProps) {
-  const [shouldShowGoBackToVizEditorModal, setIsGoBackToVizEditorModalVisible] = useState(false);
+  const [shouldShowGoBackToVisEditorModal, setIsGoBackToVisEditorModalVisible] = useState(false);
   /** Shared logic to navigate back to the originating viz editor app */
-  const navigateBackToVizEditor = useCallback(() => {
+  const navigateBackToVisEditor = useCallback(() => {
     if (legacyEditorAppUrl) {
       onAppLeave((actions) => {
         return actions.default();
@@ -190,9 +207,9 @@ export function useNavigateBackToApp({
   const goBackToOriginatingApp = useCallback(() => {
     if (legacyEditorAppUrl) {
       if ([initialDocFromContext, persistedDoc].some(isLensEqual)) {
-        navigateBackToVizEditor();
+        navigateBackToVisEditor();
       } else {
-        setIsGoBackToVizEditorModalVisible(true);
+        setIsGoBackToVisEditorModalVisible(true);
       }
     }
   }, [
@@ -200,20 +217,20 @@ export function useNavigateBackToApp({
     initialDocFromContext,
     persistedDoc,
     isLensEqual,
-    navigateBackToVizEditor,
-    setIsGoBackToVizEditorModalVisible,
+    navigateBackToVisEditor,
+    setIsGoBackToVisEditorModalVisible,
   ]);
 
   // Used for Saving Modal
-  const navigateToVizEditor = useCallback(() => {
-    setIsGoBackToVizEditorModalVisible(false);
-    navigateBackToVizEditor();
-  }, [navigateBackToVizEditor, setIsGoBackToVizEditorModalVisible]);
+  const navigateToVisEditor = useCallback(() => {
+    setIsGoBackToVisEditorModalVisible(false);
+    navigateBackToVisEditor();
+  }, [navigateBackToVisEditor, setIsGoBackToVisEditorModalVisible]);
 
   return {
-    shouldShowGoBackToVizEditorModal,
+    shouldShowGoBackToVisEditorModal,
     goBackToOriginatingApp,
-    navigateToVizEditor,
-    closeGoBackToVizEditorModal: () => setIsGoBackToVizEditorModalVisible(false),
+    navigateToVisEditor,
+    closeGoBackToVisEditorModal: () => setIsGoBackToVisEditorModalVisible(false),
   };
 }

@@ -11,13 +11,15 @@ import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import {
   buildEpisodesQuery,
+  type AlertEpisodeEsqlRow,
   type EpisodesFilterState,
   type EpisodesSortState,
-} from '../utils/build_episodes_esql_query';
+} from '../queries/episodes_query';
 import { PAGE_SIZE_ESQL_VARIABLE } from '../constants';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
 
 export interface FetchAlertingEpisodesOptions {
+  spaceId: string;
   pageSize: number;
   timeRange?: TimeRange | null;
   filterState?: EpisodesFilterState;
@@ -31,14 +33,15 @@ export interface FetchAlertingEpisodesOptions {
  * Uses the timestamp of the last episode from the previous page as a cursor for pagination.
  */
 export const fetchAlertingEpisodes = ({
+  spaceId,
   abortSignal,
   pageSize,
   services: { expressions },
   filterState,
   sortState = { sortField: '@timestamp', sortDirection: 'desc' },
   timeRange,
-}: FetchAlertingEpisodesOptions) => {
-  const query = buildEpisodesQuery(sortState, filterState);
+}: FetchAlertingEpisodesOptions): Promise<AlertEpisodeEsqlRow[]> => {
+  const query = buildEpisodesQuery(spaceId, sortState, filterState);
 
   const input: {
     type: 'kibana_context';
@@ -55,7 +58,7 @@ export const fetchAlertingEpisodes = ({
     input.timeRange = timeRange;
   }
 
-  return executeEsqlQuery({
+  return executeEsqlQuery<AlertEpisodeEsqlRow>({
     expressions,
     query: query.print('basic'),
     input,

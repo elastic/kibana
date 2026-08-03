@@ -37,6 +37,7 @@ import type {
 } from '../constants';
 
 export type AvailableMetricIcon = $Values<typeof AvailableMetricIcons>;
+export type MetricDensity = 'compact' | 'default';
 
 export interface MetricArguments {
   metric: ExpressionValueVisDimension | string;
@@ -57,7 +58,7 @@ export interface MetricArguments {
   secondaryAlign: MetricStyle['extraTextAlign'];
   iconAlign: MetricStyle['iconAlign'];
   valueFontSize: MetricStyle['valueFontSize'];
-  titleWeight: MetricStyle['titleWeight'];
+  density: MetricDensity;
   primaryPosition: MetricStyle['valuePosition'];
   color?: string;
   icon?: string;
@@ -66,7 +67,7 @@ export interface MetricArguments {
   minTiles?: number;
   inspectorTableId: string;
   secondaryLabelPosition: SecondaryMetricProps['labelPosition'];
-  applyColorTo: 'background' | 'value';
+  applyColorTo?: 'background' | 'value';
 }
 
 export type MetricInput = Datatable;

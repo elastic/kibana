@@ -235,6 +235,7 @@ export interface LensSharedProps {
   viewMode?: ViewMode;
   forceDSL?: boolean;
   esqlVariables?: ESQLControlVariable[];
+  isApproximate?: boolean;
 }
 
 export interface LensRequestHandlersProps {
@@ -415,10 +416,7 @@ export interface ExpressionWrapperProps {
   searchContext: ExecutionContextSearch;
   searchSessionId?: string;
   handleEvent: (event: ExpressionRendererEvent) => void;
-  onData$: (
-    data: unknown,
-    inspectorAdapters?: Partial<DefaultInspectorAdapters> | undefined
-  ) => void;
+  onData$: ReactExpressionRendererProps['onData$'];
   onRender$: (count: number) => void;
   renderMode?: RenderMode;
   syncColors?: boolean;
@@ -454,7 +452,7 @@ export interface StructuredDatasourceStates {
 
 /** Utility type to build typed version for each chart */
 type TypedLensAttributes<TVisType, TVisState> = Simplify<
-  Omit<LensDocument, 'savedObjectId' | 'type' | 'state' | 'visualizationType'> & {
+  Omit<LensDocument, 'savedObjectId' | 'state' | 'visualizationType'> & {
     visualizationType: TVisType;
     state: Simplify<
       Omit<LensDocument['state'], 'datasourceStates' | 'visualization'> & {

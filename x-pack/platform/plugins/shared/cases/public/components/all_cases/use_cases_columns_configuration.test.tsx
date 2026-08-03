@@ -37,6 +37,10 @@ describe('useCasesColumnsConfiguration ', () => {
     useGetCaseConfigurationMock.mockImplementation(() => useCaseConfigureResponse);
   });
 
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
   it('returns all columns correctly', async () => {
     const { result } = renderHook(() => useCasesColumnsConfiguration(), {
       wrapper: (props) => <TestProviders {...props} license={license} />,

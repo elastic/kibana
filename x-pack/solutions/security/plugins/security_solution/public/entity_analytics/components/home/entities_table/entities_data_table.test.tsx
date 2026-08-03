@@ -7,49 +7,76 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import type { CustomCellRenderer } from '@kbn/unified-data-table';
+import type { RowControlColumn } from '@kbn/discover-utils';
 import { EntitiesDataTable } from './entities_data_table';
-import { DataViewContext } from '.';
+import { DataViewContext, DEFAULT_ENTITIES_TABLE_CONFIG } from '.';
 import { TestProviders } from '../../../../common/mock';
 import { useFetchGridData } from './hooks/use_fetch_grid_data';
 import { useInvestigateInTimeline } from '../../../../common/hooks/timeline/use_investigate_in_timeline';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
+import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
-import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use_agent_builder_availability';
 import { useKibana } from '../../../../common/lib/kibana';
 import type { EntityURLStateResult } from './hooks/use_entity_url_state';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import {
-  TEST_SUBJ_DATA_GRID,
-  TEST_SUBJ_EMPTY_STATE,
-  DEFAULT_VISIBLE_ROWS_PER_PAGE,
-} from './constants';
+import { TEST_SUBJ_DATA_GRID, TEST_SUBJ_EMPTY_STATE } from './constants';
 
 const mockUseFetchGridData = jest.mocked(useFetchGridData);
 const mockUseInvestigateInTimeline = jest.mocked(useInvestigateInTimeline);
 const mockUseUserPrivileges = jest.mocked(useUserPrivileges);
+const mockUseAlertsPrivileges = jest.mocked(useAlertsPrivileges);
 const mockUseGlobalTime = jest.mocked(useGlobalTime);
-const mockUseAgentBuilderAvailability = jest.mocked(useAgentBuilderAvailability);
 const mockUseKibana = jest.mocked(useKibana);
+
+const capturedProps: {
+  externalCustomRenderers?: CustomCellRenderer;
+  columns?: string[];
+  rowAdditionalLeadingControls?: RowControlColumn[];
+  onFilter?: unknown;
+} = {};
 
 jest.mock('@kbn/unified-data-table', () => {
   const actual = jest.requireActual('@kbn/unified-data-table');
   return {
     ...actual,
-    UnifiedDataTable: () => <div data-test-subj="unifiedDataTable" />,
+    UnifiedDataTable: (props: {
+      externalCustomRenderers?: CustomCellRenderer;
+      columns?: string[];
+      rowAdditionalLeadingControls?: RowControlColumn[];
+      onFilter?: unknown;
+    }) => {
+      capturedProps.externalCustomRenderers = props.externalCustomRenderers;
+      capturedProps.columns = props.columns;
+      capturedProps.rowAdditionalLeadingControls = props.rowAdditionalLeadingControls;
+      capturedProps.onFilter = props.onFilter;
+      return <div data-test-subj="unifiedDataTable" />;
+    },
   };
 });
 
 jest.mock('@kbn/expandable-flyout', () => ({
   useExpandableFlyoutApi: jest.fn(() => ({
     openRightPanel: jest.fn(),
+    openFlyout: jest.fn(),
     closeFlyout: jest.fn(),
   })),
 }));
 
+jest.mock('../../../../common/hooks/use_is_new_flyout_enabled', () => ({
+  useIsNewFlyoutEnabled: () => false,
+}));
+
+jest.mock('../../../../flyout_v2/use_flyout_api', () => ({
+  useFlyoutApi: () => ({
+    openEntityFlyout: jest.fn(),
+  }),
+}));
+
 jest.mock('../../../../common/hooks/timeline/use_investigate_in_timeline');
 jest.mock('../../../../common/components/user_privileges');
+jest.mock('../../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
 jest.mock('../../../../common/containers/use_global_time');
-jest.mock('../../../../agent_builder/hooks/use_agent_builder_availability');
 jest.mock('./hooks/use_fetch_grid_data');
 jest.mock('./hooks/use_styles', () => ({
   useStyles: () => ({
@@ -68,7 +95,7 @@ jest.mock('react-use/lib/useLocalStorage', () => ({
       return [{ columns: {} }, jest.fn()];
     }
     if (key.includes('columns')) {
-      return [['entity.name', 'entity.id', 'entity.source'], jest.fn()];
+      return [['entity.name', 'entity.id', 'entity.source', 'alerts'], jest.fn()];
     }
     return [initial, jest.fn()];
   }),
@@ -77,7 +104,7 @@ jest.mock('react-use/lib/useLocalStorage', () => ({
 const mockDataView: DataView = {
   id: 'test-data-view',
   title: 'test-index',
-  getIndexPattern: () => '.entities.v2.latest.security_default',
+  getIndexPattern: () => 'entities-latest-default',
   timeFieldName: '@timestamp',
   fields: {
     getByName: () => undefined,
@@ -98,14 +125,8 @@ const createMockState = (overrides: Partial<EntityURLStateResult> = {}): EntityU
     onSort: jest.fn(),
     setUrlQuery: jest.fn(),
     filters: [],
-    pageFilters: [],
     pageIndex: 0,
-    urlQuery: {},
-    setTableOptions: jest.fn(),
-    handleUpdateQuery: jest.fn(),
-    setPageSize: jest.fn(),
     onChangePage: jest.fn(),
-    columnsLocalStorageKey: 'entityAnalytics:columns',
     ...overrides,
   } as EntityURLStateResult);
 
@@ -131,12 +152,13 @@ const defaultKibanaServices = {
 const renderWithProviders = (
   state: EntityURLStateResult,
   dataView: DataView = mockDataView,
-  dataViewIsLoading = false
+  dataViewIsLoading = false,
+  config = DEFAULT_ENTITIES_TABLE_CONFIG
 ) =>
   render(
     <TestProviders>
       <DataViewContext.Provider value={{ dataView, dataViewIsLoading }}>
-        <EntitiesDataTable state={state} />
+        <EntitiesDataTable state={state} config={config} />
       </DataViewContext.Provider>
     </TestProviders>
   );
@@ -151,7 +173,13 @@ describe('EntitiesDataTable', () => {
 
     mockUseUserPrivileges.mockReturnValue({
       timelinePrivileges: { crud: true, read: true },
+      alertsPrivileges: { alerts: { read: true, edit: false, legacyUpdate: false } },
     } as unknown as ReturnType<typeof useUserPrivileges>);
+
+    mockUseAlertsPrivileges.mockReturnValue({
+      loading: false,
+      hasIndexRead: true,
+    } as unknown as ReturnType<typeof useAlertsPrivileges>);
 
     mockUseGlobalTime.mockReturnValue({
       setQuery: jest.fn(),
@@ -159,13 +187,6 @@ describe('EntitiesDataTable', () => {
       isInitializing: false,
       from: 'now-15m',
       to: 'now',
-    });
-
-    mockUseAgentBuilderAvailability.mockReturnValue({
-      isAgentBuilderEnabled: false,
-      hasAgentBuilderPrivilege: false,
-      isAgentChatExperienceEnabled: false,
-      hasValidAgentBuilderLicense: false,
     });
 
     mockUseKibana.mockReturnValue({
@@ -241,8 +262,151 @@ describe('EntitiesDataTable', () => {
         query: { bool: { filter: [{ term: { test: true } }], must: [], must_not: [], should: [] } },
         sort: [['entity.name', 'asc']],
         enabled: true,
-        pageSize: DEFAULT_VISIBLE_ROWS_PER_PAGE,
       })
     );
+  });
+
+  describe('entity.source column renderer', () => {
+    const renderCell = (value: unknown) => {
+      const state = createMockState();
+      (state.getRowsFromPages as jest.Mock).mockReturnValue([
+        { flattened: { 'entity.source': value } },
+      ]);
+
+      renderWithProviders(state);
+
+      const renderer = capturedProps.externalCustomRenderers?.['entity.source'];
+      if (!renderer) throw new Error('entity.source renderer was not registered');
+
+      const row = { flattened: { 'entity.source': value } } as never;
+      // The renderer only consumes `row`, so we can pass minimal stubs for the other props.
+      return render(
+        <TestProviders>
+          {renderer({
+            row,
+            columnId: 'entity.source',
+            rowIndex: 0,
+            colIndex: 0,
+            setCellProps: jest.fn(),
+            isDetails: false,
+            isExpanded: false,
+            isExpandable: false,
+            dataView: mockDataView,
+            fieldFormats: {},
+          } as never)}
+        </TestProviders>
+      );
+    };
+
+    it('renders the empty placeholder when entity.source is missing', () => {
+      const { container } = renderCell(undefined);
+      expect(container.textContent).toContain('—');
+    });
+
+    it('renders a single source formatted (capitalized) without the "+N" overflow badge', () => {
+      const { getByText, queryByText, queryByTestId } = renderCell('entityanalytics_okta');
+      expect(getByText('Entityanalytics Okta')).toBeInTheDocument();
+      expect(queryByText('entityanalytics_okta')).not.toBeInTheDocument();
+      expect(queryByTestId('entitySourceValue-more')).not.toBeInTheDocument();
+    });
+
+    it('renders the first formatted source and a "+N" overflow badge for array values', () => {
+      const { getByText, queryByText, getByTestId } = renderCell(['okta', 'entityanalytics_okta']);
+      expect(getByText('Okta')).toBeInTheDocument();
+      expect(queryByText('okta')).not.toBeInTheDocument();
+      expect(getByTestId('entitySourceValue-more')).toHaveTextContent('+1');
+    });
+  });
+
+  describe('alerts column privilege', () => {
+    it('includes the alerts column when the user has alerts read access', () => {
+      const state = createMockState();
+      (state.getRowsFromPages as jest.Mock).mockReturnValue([]);
+
+      renderWithProviders(state);
+
+      expect(capturedProps.columns).toContain('alerts');
+    });
+
+    it('hides the alerts column when the user has no RBAC alerts read access', () => {
+      mockUseUserPrivileges.mockReturnValue({
+        timelinePrivileges: { crud: true, read: true },
+        alertsPrivileges: { alerts: { read: false, edit: false, legacyUpdate: false } },
+      } as unknown as ReturnType<typeof useUserPrivileges>);
+
+      const state = createMockState();
+      (state.getRowsFromPages as jest.Mock).mockReturnValue([]);
+
+      renderWithProviders(state);
+
+      expect(capturedProps.columns).not.toContain('alerts');
+    });
+
+    it('hides the alerts column when the user has no index-level alerts read access', () => {
+      mockUseAlertsPrivileges.mockReturnValue({
+        loading: false,
+        hasIndexRead: false,
+      } as unknown as ReturnType<typeof useAlertsPrivileges>);
+
+      const state = createMockState();
+      (state.getRowsFromPages as jest.Mock).mockReturnValue([]);
+
+      renderWithProviders(state);
+
+      expect(capturedProps.columns).not.toContain('alerts');
+    });
+  });
+
+  describe('supportsFieldFiltering', () => {
+    it('passes onFilter to UnifiedDataTable when supportsFieldFiltering is not set', () => {
+      const state = createMockState();
+      (state.getRowsFromPages as jest.Mock).mockReturnValue([]);
+
+      renderWithProviders(state);
+
+      expect(capturedProps.onFilter).toBeDefined();
+    });
+
+    it('passes undefined onFilter to UnifiedDataTable when supportsFieldFiltering is false', () => {
+      const state = createMockState();
+      (state.getRowsFromPages as jest.Mock).mockReturnValue([]);
+
+      renderWithProviders(state, mockDataView, false, {
+        ...DEFAULT_ENTITIES_TABLE_CONFIG,
+        supportsFieldFiltering: false,
+      });
+
+      expect(capturedProps.onFilter).toBeUndefined();
+    });
+  });
+
+  describe('actions (leading control) column', () => {
+    it('gives the timeline action an explicit width so the "Actions" header renders as text', () => {
+      const state = createMockState();
+      (state.getRowsFromPages as jest.Mock).mockReturnValue([]);
+
+      renderWithProviders(state);
+
+      const timelineControl = capturedProps.rowAdditionalLeadingControls?.find(
+        (control) => control.id === 'entity-analytics-timeline-action'
+      );
+      expect(timelineControl).toBeDefined();
+      // Wide enough that UnifiedDataTable's ActionsHeader shows the label instead of the icon.
+      expect(timelineControl?.width).toBe(48);
+    });
+
+    it('omits the timeline action when the user cannot read timeline', () => {
+      mockUseUserPrivileges.mockReturnValue({
+        timelinePrivileges: { crud: false, read: false },
+        alertsPrivileges: { alerts: { read: true, edit: false, legacyUpdate: false } },
+      } as unknown as ReturnType<typeof useUserPrivileges>);
+
+      const state = createMockState();
+      (state.getRowsFromPages as jest.Mock).mockReturnValue([]);
+
+      renderWithProviders(state);
+
+      expect(capturedProps.rowAdditionalLeadingControls).toEqual([]);
+    });
   });
 });

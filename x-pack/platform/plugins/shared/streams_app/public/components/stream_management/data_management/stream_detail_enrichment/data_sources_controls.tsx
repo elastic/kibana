@@ -127,7 +127,6 @@ const DataSourceSelector = () => {
         width: 210px;
       `}
       data-test-subj="streamsAppProcessingDataSourceSelector"
-      hasDividers
       options={options}
       valueOfSelected={selectedDataSourceRef?.id}
       onChange={(id) => selectDataSource(id)}

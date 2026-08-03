@@ -78,3 +78,21 @@ export function sortByField<C extends BaseIndexPatternColumn>(columns: C[]) {
     return column1.operationType.localeCompare(column2.operationType);
   });
 }
+
+/**
+ * Returns the single value from a Set if it has exactly one element, otherwise undefined.
+ * Useful when auto-selecting the only available option.
+ */
+export function getSingleValue<T>(set: Set<T> | undefined): T | undefined {
+  if (!set || set.size !== 1) return undefined;
+  return set.values().next().value;
+}
+
+/**
+ * Returns the first value from a non-empty Set, or undefined if the Set is empty/undefined.
+ * Useful as a fallback when any available option will do.
+ */
+export function getFirstValue<T>(set: Set<T> | undefined): T | undefined {
+  if (!set || set.size === 0) return undefined;
+  return set.values().next().value;
+}

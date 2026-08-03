@@ -16,9 +16,10 @@
       "observabilityShared",
       "management",
       "discover",
-      "security"
+      "security",
+      "navigation"
     ],
-    "optionalPlugins": ["cases","streams", "observabilityAIAssistant"],
-    "requiredBundles": []
+    "optionalPlugins": ["cases", "streams", "observabilityAIAssistant", "workflowsManagement"],
+    "requiredBundles": ["significant_events"]
   }
 }

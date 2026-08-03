@@ -12,8 +12,8 @@ export const buildPrompt = (environment: Environment): string => {
     case 'cli':
       return joinLines(INSTALL_LINES_CLI, AGENT_ONBOARDING_MESSAGE);
     case 'agent-builder':
-      // Agent builder already has the full instructions (except skills) registered server-side
-      // via registerSearchAgent, so we only send the use-case message.
+      // Search skills (including elasticsearch-onboarding) are registered server-side via
+      // registerSearchAgent; the default agent uses the initial message to load that playbook.
       return AGENT_ONBOARDING_MESSAGE;
     default:
       throw new Error(`Unsupported environment: ${environment}`);

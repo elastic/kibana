@@ -43,7 +43,7 @@
     "@kbn/shared-ux-link-redirect-app",
     "@kbn/dev-cli-runner",
     "@kbn/tooling-log",
-    "@kbn/babel-register",
+    "@kbn/swc-register",
     "@kbn/expect",
     "@kbn/synthtrace-client",
     "@kbn/alerting-plugin",
@@ -83,14 +83,14 @@
     "@kbn/i18n-react",
     "@kbn/utility-types",
     "@kbn/alerts-ui-shared",
-    "@kbn/traced-es-client",
-    "@kbn/licensing-types",
     "@kbn/utility-types-jest",
     "@kbn/zod",
     "@kbn/connector-schemas",
-    "@kbn/agent-builder-plugin",
+    "@kbn/agent-builder-browser",
     "@kbn/object-utils",
     "@kbn/shared-ux-ai-components",
+    "@kbn/react-query",
+    "@kbn/search-inference-endpoints"
   ],
   "exclude": ["target/**/*"]
 }

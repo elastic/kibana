@@ -16,7 +16,6 @@ export enum AttachmentType {
   screenContext = 'screen_context',
   text = 'text',
   esql = 'esql',
-  visualization = 'visualization',
   connector = 'connector',
 }
 
@@ -24,7 +23,6 @@ interface AttachmentDataMap {
   [AttachmentType.esql]: EsqlAttachmentData;
   [AttachmentType.text]: TextAttachmentData;
   [AttachmentType.screenContext]: ScreenContextAttachmentData;
-  [AttachmentType.visualization]: VisualizationAttachmentData;
   [AttachmentType.connector]: ConnectorAttachmentData;
 }
 
@@ -101,55 +99,16 @@ export interface ScreenContextAttachmentData {
   additional_data?: Record<string, string>;
 }
 
-export const visualizationTimeRangeSchema = z.object({
-  from: z.string(),
-  to: z.string(),
-});
-
-export const visualizationAttachmentDataSchema = z.object({
-  query: z.string(),
-  visualization: z.record(z.string(), z.unknown()),
-  chart_type: z.string(),
-  esql: z.string(),
-  time_range: visualizationTimeRangeSchema.optional(),
-});
-
-/**
- * Data for a visualization attachment.
- * Same shape for both by-value and resolved by-ref attachments.
- */
-export interface VisualizationAttachmentData {
-  /** The display query */
-  query: string;
-  /** Lens API configuration */
-  visualization: Record<string, unknown>;
-  /** Chart type identifier */
-  chart_type: string;
-  /** The ES|QL query */
-  esql: string;
-  /** Optional time range for the visualization (e.g., { from: 'now-24h', to: 'now' }) */
-  time_range?: { from: string; to: string };
-}
-
 /**
  * Tag prefix used to associate tools with their parent connector instance.
  * A tool tagged `connector:<connectorId>` belongs to that connector.
  */
 export const CONNECTOR_TAG_PREFIX = 'connector:';
 
-export const connectorAttachmentToolSchema = z.object({
-  tool_id: z.string(),
-  description: z.string(),
-  configuration: z.object({
-    workflow_id: z.string(),
-  }),
-});
-
 export const connectorAttachmentDataSchema = z.object({
   connector_id: z.string(),
   connector_name: z.string(),
   connector_type: z.string(),
-  tools: z.array(connectorAttachmentToolSchema),
 });
 
 /**
@@ -162,18 +121,6 @@ export interface ConnectorAttachmentData {
   connector_name: string;
   /** Action type ID (e.g., ".slack2", ".mcp") */
   connector_type: string;
-  /** Workflow tools for this connector instance */
-  tools: Array<{
-    /** Tool ID */
-    tool_id: string;
-    /** Tool description from workflow YAML */
-    description: string;
-    /** Tool configuration */
-    configuration: {
-      /** The workflow ID */
-      workflow_id: string;
-    };
-  }>;
 }
 
 export type AttachmentDataOf<Type extends AttachmentType> = AttachmentDataMap[Type];

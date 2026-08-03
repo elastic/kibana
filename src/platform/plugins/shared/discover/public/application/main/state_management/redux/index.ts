@@ -42,8 +42,10 @@ export const internalStateActions = {
   ...omit(
     internalStateSlice.actions,
     'setTabs',
+    'disconnectTab',
     'setDefaultProfileAdHocDataViewIds',
     'setAppState',
+    'setProfileState',
     'syncProfileStateSnapshot'
   ),
   ...actions,
@@ -67,6 +69,8 @@ export {
 export {
   selectAllTabs,
   selectRecentlyClosedTabs,
+  selectPersistedDiscoverSession,
+  selectSavedDataViews,
   selectTab,
   selectTabAppState,
   selectTabCombinedFilters,
@@ -74,6 +78,7 @@ export {
   selectHasUnsavedChanges,
   searchSourceComparator,
   selectTabSavedSearch,
+  selectTabSavedSearchByValueAttributes,
 } from './selectors';
 
 export {
@@ -86,6 +91,9 @@ export {
   useRuntimeState,
   selectTabRuntimeState,
   selectDataSourceProfileId,
+  selectCurrentProfileStateDefinition,
+  selectCurrentProfileUrlState,
+  selectCurrentProfileLocatorState,
   selectIsDataViewUsedInMultipleRuntimeTabStates,
   selectInitialUnifiedHistogramLayoutPropsMap,
   useCurrentTabRuntimeState,
@@ -108,6 +116,7 @@ export {
 
 export {
   fromSavedObjectTabToSearchSource,
+  fromSavedObjectTabToAppState,
   fromSavedObjectTabToTabState,
   fromSavedObjectTabToSavedSearch,
   fromTabStateToSavedObjectTab,

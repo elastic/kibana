@@ -6,8 +6,10 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
+import { withSpan } from '@kbn/apm-utils';
 import { get } from 'lodash';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import { BURN_RATE_EXECUTOR_SPAN_NAMES } from '../constants';
 import type { SLODefinition } from '../../../../domain/models';
 import { Duration, toDurationUnit } from '../../../../domain/models';
 import type { BurnRateRuleParams } from '../types';
@@ -76,14 +78,20 @@ async function queryAllResults(
   slo: SLODefinition,
   params: BurnRateRuleParams,
   startedAt: Date,
+  projectRouting?: string,
   buckets: EvaluationBucket[] = [],
   lastAfterKey?: { instanceId: string }
 ): Promise<EvaluationBucket[]> {
   const queryAndAggs = buildQuery(startedAt, slo, params, lastAfterKey);
-  const results = await esClient.search<undefined, EvalutionAggResults>({
-    index: SLI_DESTINATION_INDEX_PATTERN,
-    ...queryAndAggs,
-  });
+  const results = await withSpan(
+    { name: BURN_RATE_EXECUTOR_SPAN_NAMES.ES_QUERY, type: 'rule' },
+    () =>
+      esClient.search<undefined, EvalutionAggResults>({
+        index: SLI_DESTINATION_INDEX_PATTERN,
+        ...(projectRouting ? { project_routing: projectRouting } : {}),
+        ...queryAndAggs,
+      })
+  );
 
   if (!results.aggregations) {
     throw new Error('Elasticsearch query failed to return a valid aggregation');
@@ -97,6 +105,7 @@ async function queryAllResults(
     slo,
     params,
     startedAt,
+    projectRouting,
     [...buckets, ...results.aggregations.instances.buckets],
     results.aggregations.instances.after_key
   );
@@ -106,9 +115,10 @@ export async function evaluate(
   esClient: ElasticsearchClient,
   slo: SLODefinition,
   params: BurnRateRuleParams,
-  startedAt: Date
+  startedAt: Date,
+  projectRouting?: string
 ) {
-  const buckets = await queryAllResults(esClient, slo, params, startedAt);
+  const buckets = await queryAllResults(esClient, slo, params, startedAt, projectRouting);
   return transformBucketToResults(buckets, params);
 }
 

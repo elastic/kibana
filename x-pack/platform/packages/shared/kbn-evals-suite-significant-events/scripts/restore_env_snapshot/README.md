@@ -1,25 +1,26 @@
 # Restore Environment Snapshot
 
-Restores a Streams/SigEvents environment from a GCS snapshot. Automates the full four-step restore workflow: restoring system indices with rename, enabling streams, replaying data indices with timestamp transformation, and recreating `.kibana` system aliases.
+Restores a Streams/Significant Events environment from a GCS snapshot. Automates enabling Streams, restoring the Significant Events data streams, replaying data indices with timestamp transformation, recreating alert aliases, and repromoting query rules.
 
 ## Prerequisites
 
 - Local Elasticsearch running.
 - Access to the GCS bucket containing the snapshot (credentials available in your environment or keystore).
-- A user with `manage` privilege on the `.kibana_*` system indices (see [Creating a user with the required privileges](#creating-a-user-with-the-required-privileges)).
+- Credentials with `manage_security` privilege (see [Required privileges](#required-privileges)).
 
-> **Dirty environment?** If you have existing `logs.otel`, `.internal.alerts-streams.*`, or `.kibana_streams*` indices, the script will detect them and prompt you to delete them before proceeding. Pass `--clean` to skip the prompt and delete automatically.
+> **Dirty environment?** If you have existing `logs.otel`, `.internal.alerts-streams.*`, or `.significant_events-*` indices, the script will detect them and prompt you to delete them before proceeding. Pass `--clean` to skip the prompt and delete automatically.
 
 ## Why
 
-Restoring a SigEvents snapshot involves four distinct steps that previously had to be run manually in sequence:
+Restoring a Significant Events snapshot involves several distinct steps that previously had to be run manually in sequence:
 
-1. **Restore** system indices (e.g. `.kibana_streams_features-*`) — renames them back from `snapshot-*` to `.*`.
-2. **Enable streams** — calls the Kibana Streams API to ensure streams are enabled before replaying data.
+1. **Enable streams** — calls the Kibana Streams API to ensure streams are enabled before replaying data.
+2. **Restore the Significant Events data streams** (`.significant_events-knowledge_indicators`, `.significant_events-discoveries`, `.significant_events-detections`) — each reindexed into its data stream so it is not left as a plain index squatting the data-stream name. No-op for any data stream absent from an older snapshot.
 3. **Replay** data indices (e.g. `logs.otel`) — restores with timestamp transformation so alerts fire on current data.
-4. **Recreate** `.kibana_*` aliases — system index aliases cannot be baked into the snapshot; they must be recreated after restore.
+4. **Recreate** alert-index aliases.
+5. **Repromote** query rules so the Streams rule engine reflects the restored state.
 
-This script automates all four steps in a single invocation.
+This script automates all steps in a single invocation.
 
 ## Usage
 
@@ -37,8 +38,6 @@ node scripts/restore_sigevents_env_snapshot.js \
   --gcs-bucket significant-events-datasets \
   --gcs-base-path 2026-03-22/otel-demo \
   --logs-index logs.otel \
-  --system-indices .kibana_streams_features-* \
-  --system-indices .kibana_streams_assets-* \
   --es-username elastic \
   --es-password changeme
 ```
@@ -52,7 +51,6 @@ node scripts/restore_sigevents_env_snapshot.js \
 | `--gcs-bucket` | GCS bucket containing the snapshot. | `significant-events-datasets` |
 | `--logs-index` | Logs index to replay. | `logs.otel` |
 | `--alert-indices` | Alert index to replay. Can be repeated. | `.internal.alerts-streams.alerts-default-*` |
-| `--system-indices` | `.kibana` system index pattern to restore. Can be repeated. | `.kibana_streams_features-*` `.kibana_streams_assets-*` `.kibana_streams_insights-*` `.kibana_streams_tasks-*` |
 | `--clean` | Delete conflicting indices before restoring without prompting | `false` |
 | `--es-url` | Elasticsearch URL | from `config/kibana.dev.yml` |
 | `--es-username` | Elasticsearch username | from `config/kibana.dev.yml` |
@@ -60,13 +58,17 @@ node scripts/restore_sigevents_env_snapshot.js \
 
 ## How it works
 
-1. **Step 1/4 — Restore system indices**: calls `restoreSnapshot` with rename pattern `snapshot-(.*)` → `.$1`. System indices were captured as `snapshot-kibana_streams_features-000001` and are restored back to `.kibana_streams_features-000001`. Missing indices are a hard error (no `allowNoMatches`).
+All steps run inside a temporary-user context: the script creates `restore_sigevents_env_snapshot_tmp` with the `system_indices_superuser` role before Step 1 and deletes it after Step 5 (or on any failure).
 
-2. **Step 2/4 — Enable streams**: calls `ensureStreamsEnabled` to enable Streams via the Kibana API (`POST /api/streams/_enable`). This must happen before replaying data so that Streams-managed data streams are properly configured.
+1. **Step 1/5 — Enable streams**: calls `ensureStreamsEnabled` to enable Streams via the Kibana API (`POST /api/streams/_enable`). This must happen before replaying data so that Streams-managed data streams are properly configured.
 
-3. **Step 3/4 — Replay data indices**: calls `replaySnapshot` from `@kbn/es-snapshot-loader` with a GCS repository and the resolved `--patterns`. This restores data streams (e.g. `logs.otel`) with timestamp transformation so timestamps are shifted to the current time window.
+2. **Step 2/5 — Restore the Significant Events data streams**: each stream is restored from its `snapshot-*` plain index and reindexed into the data-stream name — ES auto-creates the stream from the always-present template. Discoveries and detections are skipped silently when not in the snapshot (the user chose not to run the discovery workflow at capture time).
 
-4. **Step 4/4 — Recreate aliases**: calls `ensureKnownAliases` with the system and alert index patterns. Uses a known alias configuration (`INDEX_ALIAS_CONFIG`) to recreate aliases for each restored system index pattern. Creates each alias with `is_write_index: true` and `is_hidden: true`. Idempotent — skips aliases that already exist.
+3. **Step 3/5 — Replay data indices**: calls `replaySnapshot` from `@kbn/es-snapshot-loader` with a GCS repository and the resolved `--patterns`. This restores data streams (e.g. `logs.otel`) with timestamp transformation so timestamps are shifted to the current time window.
+
+4. **Step 4/5 — Ensure alert-index aliases**: calls `ensureKnownAliases` for the replayed alert indices.
+
+5. **Step 5/5 — Repromote queries**: the snapshot captures KI query docs (`rule_backed: true`) but not the alerting rule saved objects, so the restored docs claim to be rule-backed while no rules exist. This step resets `rule_backed` to `false` and then re-promotes, so `_promote` re-creates the rules (with the same deterministic `rule_id`); otherwise it would skip the phantom-backed queries and no alerts would fire.
 
 ## Relationship to capture
 
@@ -74,25 +76,6 @@ The capture script (`capture_sigevents_env_snapshot.js`) prints the exact restor
 
 See [`capture_env_snapshot/README.md`](../capture_env_snapshot/README.md) for the capture workflow.
 
-## Creating a user with the required privileges
+## Required privileges
 
-Both capture and restore scripts need `manage` privilege on `.kibana_*` system indices with `allow_restricted_indices`. The simplest approach is to create a user with the built-in `system_indices_superuser` role:
-
-```bash
-# Create a user "test" with the system_indices_superuser role
-curl -u elastic:changeme -X POST "http://localhost:9200/_security/user/<username>" \
-  -H 'Content-Type: application/json' -d '{
-  "password": "<password>",
-  "roles": ["system_indices_superuser"]
-}'
-```
-
-Then pass the credentials to the script:
-
-```bash
-node scripts/restore_sigevents_env_snapshot.js \
-  --snapshot-name my-snapshot \
-  --gcs-base-path <run-id>/<base-path> \
-  --es-username <username> \
-  --es-password <password>
-```
+The script automatically creates and deletes a temporary `system_indices_superuser` user. On self-managed Elasticsearch the `system_indices_superuser` role may not exist; the script creates it automatically on first run (it is a built-in on Elastic Cloud). The credentials you pass (`--es-username` / `--es-password`) only need the `manage_security` cluster privilege — the built-in `elastic` superuser works out of the box.

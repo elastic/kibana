@@ -92,7 +92,7 @@ export const ReferenceLineAnnotations: FC<Props> = ({
   const dataValues = {
     dataValue: value,
     header: name,
-    details: formatter?.convert(value) || value?.toString(),
+    details: formatter?.convertToText(value) || value?.toString(),
   };
 
   const line = (

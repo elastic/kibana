@@ -9,7 +9,6 @@ import type { Plugin, CoreSetup, CoreStart, AppMountParameters } from '@kbn/core
 import type { CasesPublicSetup, CasesPublicStart } from '@kbn/cases-plugin/public/types';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import { getExternalReferenceAttachmentRegular } from './attachments/external_reference';
-import { getPersistableStateAttachmentRegular } from './attachments/persistable_state';
 
 export type Setup = void;
 export type Start = void;
@@ -30,12 +29,6 @@ export class CasesFixturePlugin
     plugins.cases.attachmentFramework.registerExternalReference(
       getExternalReferenceAttachmentRegular()
     );
-
-    core.getStartServices().then(([_, depsStart]) => {
-      plugins.cases.attachmentFramework.registerPersistableState(
-        getPersistableStateAttachmentRegular(depsStart.lens.EmbeddableComponent)
-      );
-    });
 
     core.application.register({
       id: 'cases_fixture',

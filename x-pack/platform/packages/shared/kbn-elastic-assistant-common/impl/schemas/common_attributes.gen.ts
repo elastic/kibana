@@ -14,104 +14,114 @@
  *   version: not applicable
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { isNonEmptyString } from '@kbn/zod-helpers/v4';
 
 /**
  * A string that does not contain only whitespace characters.
  */
+export const NonEmptyString = lazySchema(() => z.string().min(1).superRefine(isNonEmptyString));
 export type NonEmptyString = z.infer<typeof NonEmptyString>;
-export const NonEmptyString = z.string().min(1).superRefine(isNonEmptyString);
 
 /**
  * A string that represents a timestamp in ISO 8601 format and does not contain only whitespace characters.
  */
+export const NonEmptyTimestamp = lazySchema(() => z.string().min(1).superRefine(isNonEmptyString));
 export type NonEmptyTimestamp = z.infer<typeof NonEmptyTimestamp>;
-export const NonEmptyTimestamp = z.string().min(1).superRefine(isNonEmptyString);
 
 /**
  * A universally unique identifier.
  */
+export const UUID = lazySchema(() => z.string().uuid());
 export type UUID = z.infer<typeof UUID>;
-export const UUID = z.string().uuid();
 
 /**
  * Could be any string, not necessarily a UUID.
  */
+export const User = lazySchema(() =>
+  z.object({
+    /**
+     * User id.
+     */
+    id: z.string().optional(),
+    /**
+     * User name.
+     */
+    name: z.string().optional(),
+  })
+);
 export type User = z.infer<typeof User>;
-export const User = z.object({
-  /**
-   * User id.
-   */
-  id: z.string().optional(),
-  /**
-   * User name.
-   */
-  name: z.string().optional(),
-});
 
 /**
  * The order in which results are sorted.
  */
+export const SortOrder = lazySchema(() => z.enum(['asc', 'desc']));
 export type SortOrder = z.infer<typeof SortOrder>;
-export const SortOrder = z.enum(['asc', 'desc']);
 export type SortOrderEnum = typeof SortOrder.enum;
 export const SortOrderEnum = SortOrder.enum;
 
 /**
  * User screen context.
  */
+export const ScreenContext = lazySchema(() =>
+  z.object({
+    /**
+     * The local timezone of the user.
+     */
+    timeZone: z.string().optional(),
+  })
+);
 export type ScreenContext = z.infer<typeof ScreenContext>;
-export const ScreenContext = z.object({
-  /**
-   * The local timezone of the user.
-   */
-  timeZone: z.string().optional(),
-});
 
+export const BulkCrudActionSummary = lazySchema(() =>
+  z.object({
+    /**
+     * The number of failed actions.
+     */
+    failed: z.number().int(),
+    /**
+     * The number of skipped actions.
+     */
+    skipped: z.number().int(),
+    /**
+     * The number of successfully performed actions.
+     */
+    succeeded: z.number().int(),
+    /**
+     * The total number of actions attempted.
+     */
+    total: z.number().int(),
+  })
+);
 export type BulkCrudActionSummary = z.infer<typeof BulkCrudActionSummary>;
-export const BulkCrudActionSummary = z.object({
-  /**
-   * The number of failed actions.
-   */
-  failed: z.number().int(),
-  /**
-   * The number of skipped actions.
-   */
-  skipped: z.number().int(),
-  /**
-   * The number of successfully performed actions.
-   */
-  succeeded: z.number().int(),
-  /**
-   * The total number of actions attempted.
-   */
-  total: z.number().int(),
-});
 
+export const BulkActionBase = lazySchema(() =>
+  z.object({
+    /**
+     * Query to filter the bulk action.
+     */
+    query: z.string().optional(),
+    /**
+     * Array of IDs to apply the action to.
+     */
+    ids: z.array(z.string()).min(1).optional(),
+  })
+);
 export type BulkActionBase = z.infer<typeof BulkActionBase>;
-export const BulkActionBase = z.object({
-  /**
-   * Query to filter the bulk action.
-   */
-  query: z.string().optional(),
-  /**
-   * Array of IDs to apply the action to.
-   */
-  ids: z.array(z.string()).min(1).optional(),
-});
 
 /**
  * IDs for a specific prompt within a group of prompts.
  */
+export const PromptIds = lazySchema(() =>
+  z.object({
+    /**
+     * The unique identifier for a specific prompt.
+     */
+    promptId: z.string(),
+    /**
+     * The unique identifier for a group of prompts.
+     */
+    promptGroupId: z.string(),
+  })
+);
 export type PromptIds = z.infer<typeof PromptIds>;
-export const PromptIds = z.object({
-  /**
-   * The unique identifier for a specific prompt.
-   */
-  promptId: z.string(),
-  /**
-   * The unique identifier for a group of prompts.
-   */
-  promptGroupId: z.string(),
-});

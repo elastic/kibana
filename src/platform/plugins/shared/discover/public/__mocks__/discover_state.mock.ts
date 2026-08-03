@@ -54,6 +54,7 @@ import { buildDataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import type { SaveDiscoverSessionThunkParams } from '../application/main/state_management/redux/actions';
 import { filter, firstValueFrom, timeout } from 'rxjs';
 import { FetchStatus } from '../application/types';
+import type { ProfileStateMap } from '../../common/context_awareness';
 
 interface CreateInternalStateStoreMockOptions {
   runtimeStateManager?: RuntimeStateManager;
@@ -94,6 +95,7 @@ function createInternalStateStoreMock({
   const tabsStorageManager = createTabsStorageManager({
     urlStateStorage: stateStorageContainer,
     storage: services.storage,
+    profileStateRegistry: services.profileStateRegistry,
   });
   const searchSessionManager = new DiscoverSearchSessionManager({
     history: services.history,
@@ -254,9 +256,11 @@ export function getDiscoverInternalStateMock({
       async ({
         tabId,
         skipWaitForDataFetching,
+        profileState,
       }: {
         tabId: string;
         skipWaitForDataFetching?: boolean;
+        profileState?: ProfileStateMap;
       }) => {
         await toolkit.switchToTab({ tabId });
 
@@ -283,6 +287,7 @@ export function getDiscoverInternalStateMock({
           searchSessionManager,
           internalState,
           runtimeStateManager,
+          urlStateStorage: stateStorageContainer,
           injectCurrentTab,
           getCurrentTab,
         });
@@ -296,6 +301,7 @@ export function getDiscoverInternalStateMock({
               dataViewSpec: undefined,
               esqlControls: undefined,
               defaultUrlState: undefined,
+              profileState,
             },
           })
         );
@@ -399,8 +405,6 @@ export function getDiscoverInternalStateMock({
                 persistedDiscoverSession?.tabs.some((tab) => tab.timeRestore) ?? false,
               newDescription: persistedDiscoverSession?.description ?? 'new description',
               newTags: persistedDiscoverSession?.tags ?? [],
-              isTitleDuplicateConfirmed: false,
-              onTitleDuplicate: jest.fn(),
               ...params,
             })
           )
@@ -525,16 +529,18 @@ export function getDiscoverStateMock({
   );
 
   const currentTabId = internalState.getState().tabs.unsafeCurrentId;
+  const currentTab = selectTab(internalState.getState(), currentTabId);
 
   internalState.dispatch(
-    internalStateActions.resetAppState({
+    internalStateActions.initializeTabState({
       tabId: currentTabId,
-      appState: getInitialAppState({
+      initialAppState: getInitialAppState({
         initialUrlState: getCurrentUrlState(stateStorageContainer, services),
         persistedTab: persistedDiscoverSession?.tabs[0],
         dataView: finalSavedSearch?.searchSource.getField('index'),
         services,
       }),
+      initialProfileState: currentTab.profileState,
     })
   );
 
@@ -599,6 +605,7 @@ export function createDataStateContainer(
     services,
     searchSessionManager: stateContainer.searchSessionManager,
     runtimeStateManager: stateContainer.runtimeStateManager,
+    urlStateStorage: stateContainer.stateStorage,
     injectCurrentTab: stateContainer.injectCurrentTab,
     getCurrentTab: stateContainer.getCurrentTab,
   });

@@ -56,4 +56,27 @@ describe('fetchConnector', () => {
       ]
     `);
   });
+
+  it('should map auth_mode from the API response to authMode', async () => {
+    const apiResponseValue = {
+      id: 'test-connector',
+      name: 'Test',
+      connector_type_id: 'test',
+      is_preconfigured: false,
+      is_deprecated: false,
+      is_missing_secrets: false,
+      is_system_action: false,
+      referenced_by_count: 0,
+      is_connector_type_deprecated: false,
+      auth_mode: 'per-user',
+      secrets: {},
+      config: {},
+    };
+
+    http.get.mockResolvedValueOnce(apiResponseValue);
+
+    const result = await fetchConnector('test-connector', { http });
+
+    expect(result).toMatchObject({ authMode: 'per-user' });
+  });
 });

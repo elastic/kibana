@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createAction, createReducer, current } from '@reduxjs/toolkit';
+import { createAction, createReducer, current } from 'redux-toolkit-v1';
 import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { mapValues, uniq } from 'lodash';
 import type { Filter, Query } from '@kbn/es-query';
@@ -33,6 +33,7 @@ import type {
   LensEditContextMapping,
 } from '@kbn/lens-common';
 import { getInitialDatasourceId, getResolvedDateRange, getRemoveOperation } from '../utils';
+import { isComingFromContainerView } from '../app_plugin/app_helpers';
 import { generateId } from '../id_generator';
 import { getVisualizeFieldSuggestions } from '../editor_frame_service/editor_frame/suggestion_helpers';
 import { selectDataViews, selectFramePublicAPI } from './selectors';
@@ -124,9 +125,6 @@ export const getPreloadedState = ({
     ? data.query.queryString.getDefaultQuery()
     : getQueryFromContext(initialContext, data);
 
-  const isDashboardListingOrigin =
-    embeddableEditorIncomingState?.originatingApp === 'dashboards' &&
-    Boolean(embeddableEditorIncomingState?.originatingPath?.includes('/list/'));
   const state: LensAppState = {
     ...initialState,
     isLoading: true,
@@ -141,7 +139,7 @@ export const getPreloadedState = ({
     searchSessionId: data.search.session.getSessionId() ?? '',
     resolvedDateRange: getResolvedDateRange(data.query.timefilter.timefilter),
     isLinkedToOriginatingApp: Boolean(
-      (embeddableEditorIncomingState?.originatingApp && !isDashboardListingOrigin) ??
+      isComingFromContainerView(embeddableEditorIncomingState) ||
         (initialContext && 'isEmbeddable' in initialContext && initialContext.isEmbeddable)
     ),
     activeDatasourceId: initialDatasourceId,
@@ -829,14 +827,14 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
         const activeVisualization =
           payload.visualizationId && visualizationMap[payload.visualizationId];
         const visualization = state.visualization;
-        let newVizState = visualization.state;
+        let newVisState = visualization.state;
         const ids: string[] = [];
         if (activeVisualization && activeVisualization.getLayerIds) {
           const layerIds = activeVisualization.getLayerIds(visualization.state);
           ids.push(...Object.values(layerIds));
-          newVizState = activeVisualization.initialize(() => ids[0]);
+          newVisState = activeVisualization.initialize(() => ids[0]);
         }
-        const currentVizId = ids[0];
+        const currentVisId = ids[0];
 
         const datasourceState = current(state).datasourceStates[payload.newDatasourceId]
           ? current(state).datasourceStates[payload.newDatasourceId]?.state
@@ -845,7 +843,7 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
             );
         const updatedState = datasourceMap[payload.newDatasourceId].insertLayer(
           datasourceState,
-          currentVizId
+          currentVisId
         );
 
         return {
@@ -859,7 +857,7 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
           activeDatasourceId: payload.newDatasourceId,
           visualization: {
             ...visualization,
-            state: newVizState,
+            state: newVisState,
           },
         };
       })
@@ -1125,6 +1123,10 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
             targetLayerDimensionGroups: groups,
             dropType,
             indexPatterns: framePublicAPI.dataViews.indexPatterns,
+            activeVisualizationTypeId: activeVisualization.getVisualizationTypeId?.(
+              state.visualization.state,
+              target.layerId
+            ),
           });
           if (!newDatasourceState) {
             return;
@@ -1309,6 +1311,10 @@ function addInitialValueIfAvailable({
                 frame: framePublicAPI,
                 state: activeVisualizationState,
               }).groups,
+              activeVisualizationTypeId: activeVisualization.getVisualizationTypeId?.(
+                activeVisualizationState,
+                layerId
+              ),
             }
           ),
           activeVisualizationState,

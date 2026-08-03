@@ -7,14 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type MouseEvent } from 'react';
+import React, { useRef, type MouseEvent } from 'react';
 import { EuiHeaderLink, EuiHideFor, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { upperFirst } from 'lodash';
 import { css } from '@emotion/react';
 import { getRouterLinkProps } from '@kbn/router-utils';
-import { getIsSelectedColor, getTooltip, isDisabled } from '../utils';
+import { createReturnFocus, getIsSelectedColor, getTooltip, isDisabled } from '../utils';
 import { AppMenuPopover } from './app_menu_popover';
 import type { AppMenuItemType } from '../types';
+import { getAppMenuItemTestSubj } from '../test_subjects';
 
 type AppMenuItemProps = AppMenuItemType & {
   isPopoverOpen: boolean;
@@ -33,6 +34,7 @@ export const AppMenuItem = ({
   href,
   target,
   isLoading,
+  isSelected,
   tooltipContent,
   tooltipTitle,
   items,
@@ -49,23 +51,31 @@ export const AppMenuItem = ({
   const { title, content } = getTooltip({ tooltipContent, tooltipTitle });
   const showTooltip = Boolean(content || title);
   const hasItems = items && items.length > 0;
+  const anchorDomElementRef = useRef<HTMLElement | null>(null);
 
   const handleClick = (event: MouseEvent<HTMLButtonElement | HTMLAnchorElement>) => {
     if (isDisabled(disableButton)) return;
 
     if (hasItems) {
+      anchorDomElementRef.current = event.currentTarget;
       onPopoverToggle();
       return;
     }
 
-    run?.({ triggerElement: event.currentTarget });
+    const triggerElement = event.currentTarget;
+    run?.({
+      triggerElement,
+      returnFocus: createReturnFocus(triggerElement),
+    });
   };
 
   const routerLinkProps =
     href && run ? getRouterLinkProps({ href, onClick: handleClick }) : { onClick: handleClick };
 
+  const showAsSelected = hasItems ? isPopoverOpen : Boolean(isSelected);
+
   const buttonCss = css`
-    background-color: ${isPopoverOpen
+    background-color: ${showAsSelected
       ? getIsSelectedColor({
           color: 'text',
           euiTheme,
@@ -78,7 +88,7 @@ export const AppMenuItem = ({
     <EuiHideFor sizes={hidden ?? 'none'}>
       <EuiHeaderLink
         id={htmlId}
-        data-test-subj={testId || `app-menu-item-${id}`}
+        data-test-subj={testId || getAppMenuItemTestSubj(id)}
         iconType={iconType}
         isDisabled={isDisabled(disableButton)}
         href={href}
@@ -89,7 +99,7 @@ export const AppMenuItem = ({
         iconSize="m"
         color="text"
         aria-haspopup={hasItems ? 'menu' : undefined}
-        isSelected={hasItems ? isPopoverOpen : undefined}
+        isSelected={showAsSelected}
         css={buttonCss}
         {...routerLinkProps}
       >
@@ -105,7 +115,7 @@ export const AppMenuItem = ({
    */
   const button =
     showTooltip && !hasItems ? (
-      <EuiToolTip content={content} title={title} delay="long">
+      <EuiToolTip content={content} title={title}>
         {buttonComponent}
       </EuiToolTip>
     ) : (
@@ -117,6 +127,7 @@ export const AppMenuItem = ({
       <AppMenuPopover
         items={items}
         anchorElement={button}
+        anchorDomElement={anchorDomElementRef.current ?? undefined}
         tooltipContent={content}
         tooltipTitle={title}
         isOpen={isPopoverOpen}

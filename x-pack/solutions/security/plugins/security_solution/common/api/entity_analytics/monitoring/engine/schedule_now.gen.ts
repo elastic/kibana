@@ -14,12 +14,14 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
+export const ScheduleMonitoringEngineResponse = lazySchema(() =>
+  z.object({
+    /**
+     * Indicates the scheduling was successful
+     */
+    success: z.boolean().optional(),
+  })
+);
 export type ScheduleMonitoringEngineResponse = z.infer<typeof ScheduleMonitoringEngineResponse>;
-export const ScheduleMonitoringEngineResponse = z.object({
-  /**
-   * Indicates the scheduling was successful
-   */
-  success: z.boolean().optional(),
-});

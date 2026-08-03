@@ -45,6 +45,15 @@ describe('getAgentUpgradeRollbacks', () => {
     expect(result).toEqual({ agent_upgrade_rollbacks: 0 });
   });
 
+  it('returns 0 when .fleet-actions index does not exist (404 ignored)', async () => {
+    const esClientMock = {
+      search: jest.fn().mockResolvedValue(undefined),
+    } as unknown as ElasticsearchClient;
+
+    const result = await getAgentUpgradeRollbacks(esClientMock);
+    expect(result).toEqual({ agent_upgrade_rollbacks: 0 });
+  });
+
   it('queries .fleet-actions with type:UPGRADE and 1h time range', async () => {
     const searchMock = jest.fn().mockResolvedValue({ hits: { hits: [] } });
     const esClientMock = { search: searchMock } as unknown as ElasticsearchClient;

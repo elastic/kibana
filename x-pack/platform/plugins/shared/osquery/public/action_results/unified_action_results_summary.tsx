@@ -201,8 +201,10 @@ const UnifiedActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> 
     [getFleetAppUrl]
   );
 
-  // Pagination
-  const totalItemCount = agentIds?.length ?? 0;
+  // Pagination — `data.total` covers both Live (agentIds.length) and Scheduled
+  // (server hits.total). Scheduled queries have no `agentIds`, so deriving the
+  // count from `agentIds.length` would yield pageCount=0 and leave Next enabled.
+  const totalItemCount = data.total;
   const totalPages = Math.ceil(totalItemCount / pageSize);
 
   const handlePageChange = useCallback((newPageIndex: number) => {
@@ -229,6 +231,14 @@ const UnifiedActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> 
     currentAgentCountRef.current = agentIds?.length;
   }, [agentIds?.length, data.aggregations.totalResponded, error, expired]);
 
+  // Remount the grid on fullscreen exit to reset internal EuiDataGrid column widths that persist from the wider viewport.
+  const [gridKey, setGridKey] = useState(0);
+  const handleFullScreenChange = useCallback((isFullScreen: boolean) => {
+    if (!isFullScreen) {
+      setGridKey((k) => k + 1);
+    }
+  }, []);
+
   if (!dataView) {
     return null;
   }
@@ -241,6 +251,7 @@ const UnifiedActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> 
         <div css={tableWrapperCss} data-test-subj="osqueryStatusTable">
           <CellActionsProvider getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}>
             <UnifiedDataTable
+              key={gridKey}
               ariaLabelledBy="osquery-status-results"
               dataView={dataView}
               columns={DEFAULT_COLUMNS}
@@ -250,6 +261,7 @@ const UnifiedActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> 
               sort={EMPTY_SORT}
               showTimeCol={false}
               showFullScreenButton={appName === OSQUERY_PLUGIN_NAME}
+              onFullScreenChange={handleFullScreenChange}
               canDragAndDropColumns={false}
               isSortEnabled={false}
               isPaginationEnabled={false}

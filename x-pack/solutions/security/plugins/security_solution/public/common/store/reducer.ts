@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { AnyAction, Reducer } from 'redux';
-import { combineReducers } from 'redux';
+import type { AnyAction, Reducer } from 'redux-v4';
+import { combineReducers } from 'redux-v4';
 
 import type { DataTableState } from '@kbn/securitysolution-data-table';
 import { dataTableReducer } from '@kbn/securitysolution-data-table';
-import { enableMapSet } from 'immer';
+import { enableMapSet } from 'immer-v9';
 import { PageScope } from '../../data_view_manager/constants';
 import { appReducer, initialAppState } from './app';
 import { dragAndDropReducer, initialDragAndDropState } from './drag_and_drop';
@@ -101,7 +101,7 @@ export const createInitialState = (
     ...pluginsInitState,
     app: { ...initialAppState, enableExperimental },
     dragAndDrop: initialDragAndDropState,
-    inputs: createInitialInputsState(enableExperimental.socTrendsEnabled),
+    inputs: createInitialInputsState(),
     sourcerer: {
       ...sourcererModel.initialSourcererState,
       sourcererScopes: {

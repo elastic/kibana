@@ -1,0 +1,19 @@
+// Scout test helpers shared between the APM `api/` and `ui/` suites:
+// constants, synth-generation helpers, and the single
+// `ingestApmMetricsFixtures()` global-setup helper. Both `api/tsconfig.json`
+// and `ui/tsconfig.json` reference this project so neither suite has to
+// reach across into the other.
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": ["**/*"],
+  "kbn_references": [
+    "@kbn/synthtrace-client",
+    "@kbn/synthtrace",
+    "@kbn/scout-oblt",
+    "@kbn/scout-synthtrace"
+  ],
+  "exclude": ["target/**/*"]
+}

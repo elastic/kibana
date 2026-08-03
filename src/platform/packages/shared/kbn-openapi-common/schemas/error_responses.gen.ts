@@ -16,17 +16,21 @@
  *   version: not applicable
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
+export const PlatformErrorResponse = lazySchema(() =>
+  z.object({
+    statusCode: z.number().int(),
+    error: z.string(),
+    message: z.string(),
+  })
+);
 export type PlatformErrorResponse = z.infer<typeof PlatformErrorResponse>;
-export const PlatformErrorResponse = z.object({
-  statusCode: z.number().int(),
-  error: z.string(),
-  message: z.string(),
-});
 
+export const SiemErrorResponse = lazySchema(() =>
+  z.object({
+    status_code: z.number().int(),
+    message: z.string(),
+  })
+);
 export type SiemErrorResponse = z.infer<typeof SiemErrorResponse>;
-export const SiemErrorResponse = z.object({
-  status_code: z.number().int(),
-  message: z.string(),
-});

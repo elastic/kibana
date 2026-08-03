@@ -17,4 +17,4 @@ export type {
   ContentListQueryData,
   ContentListStateContextValue,
 } from './types';
-export { CONTENT_LIST_ACTIONS, DEFAULT_FILTERS } from './types';
+export { CONTENT_LIST_ACTIONS } from './types';

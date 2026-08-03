@@ -13,6 +13,7 @@
   ],
   "kbn_references": [
     "@kbn/core",
+    "@kbn/human-readable-id",
     "@kbn/alerting-plugin",
     "@kbn/features-plugin",
     "@kbn/rule-registry-plugin",
@@ -50,7 +51,6 @@
     "@kbn/core-ui-settings-common",
     "@kbn/licensing-plugin",
     "@kbn/expressions-plugin",
-    "@kbn/core-saved-objects-api-server",
     "@kbn/serverless",
     "@kbn/field-formats-plugin",
     "@kbn/triggers-actions-ui-types",
@@ -72,6 +72,7 @@
     "@kbn/charts-theme",
     "@kbn/rrule",
     "@kbn/core-notifications-browser-mocks",
+    "@kbn/core-spaces-common",
     "@kbn/response-ops-rule-params",
     "@kbn/response-ops-rules-apis",
     "@kbn/fields-metadata-plugin",
@@ -97,7 +98,12 @@
     "@kbn/cps-utils",
     "@kbn/cps",
     "@kbn/security-plugin",
-    "@kbn/std"
+    "@kbn/std",
+    "@kbn/lens-common",
+    "@kbn/inspector-plugin",
+    "@kbn/connector-specs",
+    "@kbn/app-header",
+    "@kbn/core-chrome-app-menu-components"
   ],
   "exclude": ["target/**/*"]
 }

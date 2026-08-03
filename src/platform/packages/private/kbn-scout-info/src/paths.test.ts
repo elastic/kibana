@@ -7,7 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import mm from 'micromatch';
+import fs from 'node:fs';
+import path from 'node:path';
+import picomatch from 'picomatch';
+import { REPO_ROOT } from '@kbn/repo-info';
 import {
   TESTABLE_COMPONENT_SCOUT_ROOT_PATH_GLOB,
   SCOUT_CONFIG_PATH_GLOB,
@@ -16,6 +19,9 @@ import {
   SCOUT_EXAMPLES_PLAYWRIGHT_CONFIG_REGEX,
   SCOUT_UNIFIED_CONFIG_PATH_REGEX,
   TESTABLE_COMPONENT_SCOUT_ROOT_PATH_REGEX,
+  SCOUT_TESTS_ONLY_IGNORE_PATTERNS,
+  SCOUT_TESTS_ONLY_SCOPE_GLOBS,
+  SCOUT_TESTS_ONLY_EXCLUDE_GLOBS,
 } from './paths';
 
 describe('Scout path globs', () => {
@@ -26,6 +32,8 @@ describe('Scout path globs', () => {
       'src/platform/packages/shared/my_package/test/scout',
       'src/platform/packages/private/my_package/test/scout',
       'src/core/packages/my_package/test/scout',
+      'src/core/test/scout',
+      'src/core/test/scout_custom',
       'x-pack/platform/plugins/shared/my_plugin/test/scout',
       'x-pack/solutions/security/plugins/my_plugin/test/scout',
       'x-pack/solutions/observability/plugins/my_plugin/test/scout',
@@ -44,11 +52,11 @@ describe('Scout path globs', () => {
     ];
 
     it.each(shouldMatch)('matches: %s', (testPath) => {
-      expect(mm.isMatch(testPath, TESTABLE_COMPONENT_SCOUT_ROOT_PATH_GLOB)).toBe(true);
+      expect(picomatch.isMatch(testPath, TESTABLE_COMPONENT_SCOUT_ROOT_PATH_GLOB)).toBe(true);
     });
 
     it.each(shouldNotMatch)('does not match: %s', (testPath) => {
-      expect(mm.isMatch(testPath, TESTABLE_COMPONENT_SCOUT_ROOT_PATH_GLOB)).toBe(false);
+      expect(picomatch.isMatch(testPath, TESTABLE_COMPONENT_SCOUT_ROOT_PATH_GLOB)).toBe(false);
     });
   });
 
@@ -60,10 +68,16 @@ describe('Scout path globs', () => {
       'x-pack/solutions/security/plugins/my_plugin/test/scout/api/playwright.config.ts',
       'x-pack/solutions/security/plugins/my_plugin/test/scout_custom/ui/playwright.config.ts',
       'src/core/packages/my_package/test/scout/api/playwright.config.ts',
+      'src/core/test/scout/api/playwright.config.ts',
+      'src/core/test/scout_custom/api/playwright.config.ts',
       'examples/hello_world/test/scout_examples/api/playwright.config.ts',
       'examples/hello_world/test/scout_examples/ui/playwright.config.ts',
       'x-pack/examples/hello_world/test/scout_examples/api/playwright.config.ts',
       'x-pack/examples/hello_world/test/scout/ui/parallel.playwright.config.ts',
+      // namespace variants
+      'x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/ui/parallel.playwright.config.ts',
+      'x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/playwright.config.ts',
+      'src/platform/plugins/shared/my_plugin/test/scout/my_area/api/playwright.config.ts',
     ];
 
     const shouldNotMatch = [
@@ -73,11 +87,11 @@ describe('Scout path globs', () => {
     ];
 
     it.each(shouldMatch)('matches: %s', (testPath) => {
-      expect(mm.isMatch(testPath, SCOUT_CONFIG_PATH_GLOB)).toBe(true);
+      expect(picomatch.isMatch(testPath, SCOUT_CONFIG_PATH_GLOB)).toBe(true);
     });
 
     it.each(shouldNotMatch)('does not match: %s', (testPath) => {
-      expect(mm.isMatch(testPath, SCOUT_CONFIG_PATH_GLOB)).toBe(false);
+      expect(picomatch.isMatch(testPath, SCOUT_CONFIG_PATH_GLOB)).toBe(false);
     });
   });
 
@@ -88,6 +102,9 @@ describe('Scout path globs', () => {
       'x-pack/solutions/security/plugins/my_plugin/test/scout/.meta/api/standard.json',
       'examples/hello_world/test/scout_examples/.meta/api/standard.json',
       'x-pack/examples/hello_world/test/scout_examples/.meta/ui/standard.json',
+      // namespace variants
+      'x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/.meta/ui/parallel.json',
+      'src/platform/plugins/shared/my_plugin/test/scout/my_area/.meta/api/standard.json',
     ];
 
     const shouldNotMatch = [
@@ -96,11 +113,50 @@ describe('Scout path globs', () => {
     ];
 
     it.each(shouldMatch)('matches: %s', (testPath) => {
-      expect(mm.isMatch(testPath, SCOUT_CONFIG_MANIFEST_PATH_GLOB)).toBe(true);
+      expect(picomatch.isMatch(testPath, SCOUT_CONFIG_MANIFEST_PATH_GLOB)).toBe(true);
     });
 
     it.each(shouldNotMatch)('does not match: %s', (testPath) => {
-      expect(mm.isMatch(testPath, SCOUT_CONFIG_MANIFEST_PATH_GLOB)).toBe(false);
+      expect(picomatch.isMatch(testPath, SCOUT_CONFIG_MANIFEST_PATH_GLOB)).toBe(false);
+    });
+  });
+
+  describe('SCOUT_TESTS_ONLY_EXCLUDE_GLOBS', () => {
+    const shouldMatch = [
+      // fixtures directly under the category
+      'src/platform/plugins/shared/my_plugin/test/scout/ui/fixtures/index.ts',
+      'src/platform/plugins/shared/my_plugin/test/scout/api/fixtures/params.ts',
+      // page objects (live under fixtures/)
+      'src/platform/plugins/shared/inspector/test/scout/ui/fixtures/page_objects/inspector.ts',
+      // namespace nested under fixtures
+      'src/platform/plugins/shared/discover/test/scout/ui/fixtures/traces_experience/page_objects/apm.ts',
+      // namespace before the category (matches the second glob form)
+      'x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/ui/fixtures/data.ts',
+      // custom scout_<server> scope
+      'src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/fixtures/page_objects/workflow_list_page.ts',
+    ];
+
+    const shouldNotMatch = [
+      // non-fixtures files inside a scope stay on the tests-only fast path
+      'src/platform/plugins/shared/my_plugin/test/scout/ui/tests/a.spec.ts',
+      'src/platform/plugins/shared/my_plugin/test/scout/ui/parallel_tests/b.spec.ts',
+      'src/platform/plugins/shared/my_plugin/test/scout/ui/helpers/foo.ts',
+      'src/platform/plugins/shared/my_plugin/test/scout/ui/playwright.config.ts',
+      'src/platform/plugins/shared/my_plugin/test/scout/.meta/ui/standard.json',
+      // fixtures outside any scout scope must not match
+      'src/platform/plugins/shared/my_plugin/public/fixtures/foo.ts',
+    ];
+
+    it.each(shouldMatch)('matches: %s', (testPath) => {
+      expect(picomatch.isMatch(testPath, [...SCOUT_TESTS_ONLY_EXCLUDE_GLOBS], { dot: true })).toBe(
+        true
+      );
+    });
+
+    it.each(shouldNotMatch)('does not match: %s', (testPath) => {
+      expect(picomatch.isMatch(testPath, [...SCOUT_TESTS_ONLY_EXCLUDE_GLOBS], { dot: true })).toBe(
+        false
+      );
     });
   });
 });
@@ -184,8 +240,9 @@ describe('Scout path regexes', () => {
       expect(match![1]).toBe('examples');
       expect(match![2]).toBe('hello_world');
       expect(match![3]).toBe('examples');
-      expect(match![4]).toBe('api');
-      expect(match![5]).toBe('');
+      expect(match![4]).toBeUndefined();
+      expect(match![5]).toBe('api');
+      expect(match![6]).toBe('');
     });
 
     it('matches x-pack/examples/ plugin config', () => {
@@ -196,7 +253,8 @@ describe('Scout path regexes', () => {
       expect(match![1]).toBe('x-pack/examples');
       expect(match![2]).toBe('hello_world');
       expect(match![3]).toBe('examples');
-      expect(match![4]).toBe('ui');
+      expect(match![4]).toBeUndefined();
+      expect(match![5]).toBe('ui');
     });
 
     it('matches examples/ with bare scout/ (no custom config set)', () => {
@@ -214,7 +272,17 @@ describe('Scout path regexes', () => {
           SCOUT_EXAMPLES_PLAYWRIGHT_CONFIG_REGEX
         );
       expect(match).not.toBeNull();
-      expect(match![5]).toBe('parallel');
+      expect(match![6]).toBe('parallel');
+    });
+
+    it('matches examples/ plugin config with namespace', () => {
+      const match = 'examples/hello_world/test/scout/my_area/ui/playwright.config.ts'.match(
+        SCOUT_EXAMPLES_PLAYWRIGHT_CONFIG_REGEX
+      );
+      expect(match).not.toBeNull();
+      expect(match![3]).toBeUndefined();
+      expect(match![4]).toBe('my_area');
+      expect(match![5]).toBe('ui');
     });
 
     it('does not match platform plugin paths', () => {
@@ -257,6 +325,36 @@ describe('Scout path regexes', () => {
           platformOrCore: 'core',
           moduleKind: 'packages',
           moduleName: 'my_package',
+          testCategory: 'api',
+        })
+      );
+    });
+
+    it('matches src/core root path (no sub-package) with correct named groups', () => {
+      const match = 'src/core/test/scout/api/playwright.config.ts'.match(
+        SCOUT_UNIFIED_CONFIG_PATH_REGEX
+      );
+      expect(match?.groups).toEqual(
+        expect.objectContaining({
+          coreRoot: 'src/core',
+          platformOrCore: undefined,
+          moduleKind: undefined,
+          moduleName: undefined,
+          serverConfigSet: undefined,
+          testCategory: 'api',
+          testConfigType: '',
+        })
+      );
+    });
+
+    it('matches src/core root path with custom server config set', () => {
+      const match = 'src/core/test/scout_custom/api/playwright.config.ts'.match(
+        SCOUT_UNIFIED_CONFIG_PATH_REGEX
+      );
+      expect(match?.groups).toEqual(
+        expect.objectContaining({
+          coreRoot: 'src/core',
+          serverConfigSet: 'custom',
           testCategory: 'api',
         })
       );
@@ -356,6 +454,61 @@ describe('Scout path regexes', () => {
       );
     });
 
+    it('captures namespace when a sub-directory is present between scout root and category', () => {
+      const match =
+        'x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/ui/parallel.playwright.config.ts'.match(
+          SCOUT_UNIFIED_CONFIG_PATH_REGEX
+        );
+      expect(match?.groups).toEqual(
+        expect.objectContaining({
+          solution: 'security',
+          moduleName: 'security_solution',
+          serverConfigSet: undefined,
+          namespace: 'detection_engine',
+          testCategory: 'ui',
+          testConfigType: 'parallel',
+        })
+      );
+    });
+
+    it('leaves namespace undefined for paths without a namespace segment', () => {
+      const match =
+        'x-pack/solutions/security/plugins/security_solution/test/scout/ui/parallel.playwright.config.ts'.match(
+          SCOUT_UNIFIED_CONFIG_PATH_REGEX
+        );
+      expect(match?.groups?.namespace).toBeUndefined();
+    });
+
+    it('does not capture api or ui as namespace (backtracking)', () => {
+      const uiMatch =
+        'src/platform/plugins/shared/my_plugin/test/scout/ui/playwright.config.ts'.match(
+          SCOUT_UNIFIED_CONFIG_PATH_REGEX
+        );
+      expect(uiMatch?.groups?.namespace).toBeUndefined();
+      expect(uiMatch?.groups?.testCategory).toBe('ui');
+
+      const apiMatch =
+        'src/platform/plugins/shared/my_plugin/test/scout/api/playwright.config.ts'.match(
+          SCOUT_UNIFIED_CONFIG_PATH_REGEX
+        );
+      expect(apiMatch?.groups?.namespace).toBeUndefined();
+      expect(apiMatch?.groups?.testCategory).toBe('api');
+    });
+
+    it('captures namespace together with custom serverConfigSet', () => {
+      const match =
+        'src/platform/plugins/shared/my_plugin/test/scout_custom/my_area/api/playwright.config.ts'.match(
+          SCOUT_UNIFIED_CONFIG_PATH_REGEX
+        );
+      expect(match?.groups).toEqual(
+        expect.objectContaining({
+          serverConfigSet: 'custom',
+          namespace: 'my_area',
+          testCategory: 'api',
+        })
+      );
+    });
+
     it('does not match random paths', () => {
       expect(
         SCOUT_UNIFIED_CONFIG_PATH_REGEX.test('random/path/test/scout/api/playwright.config.ts')
@@ -370,4 +523,44 @@ describe('Scout path regexes', () => {
       ).toBe(false);
     });
   });
+});
+
+/**
+ * `selective_scout.ts` (under `.buildkite/pipeline-utils/`) can't import from
+ * `@kbn/*` packages, so it keeps its own copy of these patterns. This test
+ * reads that file and checks each pattern is still present, so the two
+ * copies stay in sync.
+ */
+describe('Scout tests-only patterns duplicated in pipeline-utils/selective_scout', () => {
+  const duplicatePath = path.resolve(
+    REPO_ROOT,
+    '.buildkite/pipeline-utils/ci-stats/pick_test_group_run_order/selective_scout.ts'
+  );
+  const duplicateSource = fs.readFileSync(duplicatePath, 'utf-8');
+
+  // Match the pattern whether it's written with single or double quotes,
+  // so reformatting selective_scout.ts can't accidentally break this test.
+  const containsPatternLiteral = (source: string, pattern: string): boolean =>
+    source.includes(`'${pattern}'`) || source.includes(`"${pattern}"`);
+
+  it.each(SCOUT_TESTS_ONLY_IGNORE_PATTERNS)(
+    'selective_scout.ts contains ignore pattern verbatim: %s',
+    (pattern) => {
+      expect(containsPatternLiteral(duplicateSource, pattern)).toBe(true);
+    }
+  );
+
+  it.each(SCOUT_TESTS_ONLY_SCOPE_GLOBS)(
+    'selective_scout.ts contains scope glob verbatim: %s',
+    (pattern) => {
+      expect(containsPatternLiteral(duplicateSource, pattern)).toBe(true);
+    }
+  );
+
+  it.each(SCOUT_TESTS_ONLY_EXCLUDE_GLOBS)(
+    'selective_scout.ts contains exclude glob verbatim: %s',
+    (pattern) => {
+      expect(containsPatternLiteral(duplicateSource, pattern)).toBe(true);
+    }
+  );
 });

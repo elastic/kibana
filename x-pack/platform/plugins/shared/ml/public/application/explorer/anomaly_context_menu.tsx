@@ -22,8 +22,8 @@ import {
   EuiPanel,
   EuiPopover,
   EuiSpacer,
+  EuiToolTip,
   formatDate,
-  htmlIdGenerator,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -34,20 +34,18 @@ import { useTimeRangeUpdates } from '@kbn/ml-date-picker';
 import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
 import type { EuiContextMenuProps } from '@elastic/eui/src/components/context_menu/context_menu';
 import type { SaveModalDashboardProps } from '@kbn/presentation-util-plugin/public';
-import {
-  LazySavedObjectSaveModalDashboard,
-  withSuspense,
-} from '@kbn/presentation-util-plugin/public';
+import { SavedObjectSaveModalDashboard } from '@kbn/presentation-util-plugin/public';
 import type { TimeRangeBounds } from '@kbn/ml-time-buckets';
+import type { JobId } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
+import { ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE } from '@kbn/ml-common-types/embeddables/anomaly_charts';
+import type { AnomalyChartsEmbeddableState } from '@kbn/ml-server-schemas/embeddables/anomaly_charts';
+import type { AnomalyChartsAttachmentState } from '../../embeddables';
 import { useTableSeverity } from '../components/controls/select_severity';
-import type { JobId } from '../../../common/types/anomaly_detection_jobs';
 import { MAX_ANOMALY_CHARTS_ALLOWED } from '../../embeddables/anomaly_charts/anomaly_charts_initializer';
 import { useAnomalyExplorerContext } from './anomaly_explorer_context';
 import { escapeKueryForEmbeddableFieldValuePair } from '../util/string_utils';
 import { useCasesModal } from '../contexts/kibana/use_cases_modal';
 import { DEFAULT_MAX_SERIES_TO_PLOT } from '../services/anomaly_explorer_charts_service';
-import type { AnomalyChartsEmbeddableState } from '../../embeddables';
-import { ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE } from '../../embeddables';
 import { useMlKibana } from '../contexts/kibana';
 import type { AppStateSelectedCells, ExplorerJob } from './explorer_utils';
 import { getSelectionInfluencers, getSelectionTimeRange } from './explorer_utils';
@@ -63,11 +61,8 @@ interface AnomalyContextMenuProps {
   mergedGroupsAndJobsIds: string[];
 }
 
-const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
-
 function getDefaultEmbeddablePanelConfig(jobIds: JobId[], queryString?: string) {
   return {
-    id: htmlIdGenerator()(),
     title: getDefaultExplorerChartsPanelTitle(jobIds).concat(queryString ? `- ${queryString}` : ''),
   };
 }
@@ -144,33 +139,34 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
     maxSeriesToPlot <= MAX_ANOMALY_CHARTS_ALLOWED;
 
   const getEmbeddableInput = useCallback(
-    (timeRange?: TimeRange) => {
-      // Respect the query and the influencers selected
-      // If no query or filter set, filter out to the lanes the selected cells
-      // And if no selected cells, show everything
+    (timeRange?: TimeRange): Partial<AnomalyChartsEmbeddableState> => {
+      const config = getDefaultEmbeddablePanelConfig(mergedGroupsAndJobsIds, queryString);
 
+      return {
+        ...config,
+        ...(timeRange ? { time_range: timeRange } : {}),
+        job_ids: mergedGroupsAndJobsIds,
+        max_series_to_plot: maxSeriesToPlot ?? DEFAULT_MAX_SERIES_TO_PLOT,
+        severity_threshold: severity.val,
+      };
+    },
+    [mergedGroupsAndJobsIds, queryString, maxSeriesToPlot, severity.val]
+  );
+
+  const getCaseAttachmentInput = useCallback(
+    (timeRange?: TimeRange): Partial<AnomalyChartsAttachmentState> => {
+      // Cases preserve the originating query as wrapper state; dashboard panels rely on parent search.
       const selectionInfluencers = getSelectionInfluencers(
         selectedCells,
         selectedCells?.viewByFieldName!
       );
-
-      const influencers = selectionInfluencers ?? [];
-      const config = getDefaultEmbeddablePanelConfig(mergedGroupsAndJobsIds, queryString);
-
-      const queryFromSelectedCells = influencers
+      const queryFromSelectedCells = (selectionInfluencers ?? [])
         .map((s) => escapeKueryForEmbeddableFieldValuePair(s.fieldName, s.fieldValue))
         .join(' or ');
 
-      // When adding anomaly charts to Dashboard, we want to respect the Dashboard's time range
-      // so we are not passing the time range here
       return {
-        ...config,
-        ...(timeRange ? { time_range: timeRange } : {}),
-        jobIds: mergedGroupsAndJobsIds,
-        maxSeriesToPlot: maxSeriesToPlot ?? DEFAULT_MAX_SERIES_TO_PLOT,
-        severityThreshold: severity.val,
-        ...((isDefined(queryString) && queryString !== '') ||
-        (queryFromSelectedCells !== undefined && queryFromSelectedCells !== '')
+        ...getEmbeddableInput(timeRange),
+        ...((isDefined(queryString) && queryString !== '') || queryFromSelectedCells !== ''
           ? {
               query: {
                 query: queryString === '' ? queryFromSelectedCells : queryString,
@@ -180,7 +176,7 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
           : {}),
       };
     },
-    [selectedCells, mergedGroupsAndJobsIds, queryString, maxSeriesToPlot, severity.val]
+    [getEmbeddableInput, queryString, selectedCells]
   );
 
   const onSaveCallback: SaveModalDashboardProps['onSave'] = useCallback(
@@ -188,6 +184,7 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
       const stateTransfer = embeddable!.getStateTransfer();
 
       const embeddableInput: Partial<AnomalyChartsEmbeddableState> = {
+        // Dashboard panels should inherit the dashboard time range, so do not serialize time_range.
         ...getEmbeddableInput(),
         title: newTitle,
         description: newDescription,
@@ -277,7 +274,6 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
 
       menuPanels.push({
         id: 'addToDashboardPanel',
-        size: 's',
         title: i18n.translate('xpack.ml.explorer.anomalies.addToDashboardLabel', {
           defaultMessage: 'Add to dashboard',
         }),
@@ -299,14 +295,13 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
 
       menuPanels.push({
         id: 'addToCasePanel',
-        size: 's',
         title: i18n.translate('xpack.ml.explorer.attachToCaseLabel', {
           defaultMessage: 'Add to case',
         }),
         content: getContent(
           closePopoverOnAction.bind(
             null,
-            openCasesModal.bind(null, getEmbeddableInput(timeRangeToPlot))
+            openCasesModal.bind(null, getCaseAttachmentInput(timeRangeToPlot))
           )
         ),
       });
@@ -314,7 +309,7 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
 
     return menuPanels;
   }, [
-    getEmbeddableInput,
+    getCaseAttachmentInput,
     canEditDashboards,
     casesPrivileges,
     maxSeriesToPlot,
@@ -330,23 +325,33 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
         <EuiFlexItem grow={false} css={{ marginLeft: 'auto', alignSelf: 'baseline' }}>
           <EuiPopover
             button={
-              <EuiButtonIcon
-                size="s"
-                aria-label={i18n.translate('xpack.ml.explorer.anomalies.actionsAriaLabel', {
+              <EuiToolTip
+                content={i18n.translate('xpack.ml.explorer.anomalies.actionsAriaLabel', {
                   defaultMessage: 'Actions',
                 })}
-                color="text"
-                display="base"
-                iconType="boxesVertical"
-                onClick={setIsMenuOpen.bind(null, !isMenuOpen)}
-                data-test-subj="mlExplorerAnomalyPanelMenu"
-                disabled={chartsCount < 1}
-              />
+                disableScreenReaderOutput
+              >
+                <EuiButtonIcon
+                  size="s"
+                  aria-label={i18n.translate('xpack.ml.explorer.anomalies.actionsAriaLabel', {
+                    defaultMessage: 'Actions',
+                  })}
+                  color="text"
+                  display="base"
+                  iconType="boxesVertical"
+                  onClick={setIsMenuOpen.bind(null, !isMenuOpen)}
+                  data-test-subj="mlExplorerAnomalyPanelMenu"
+                  disabled={chartsCount < 1}
+                />
+              </EuiToolTip>
             }
             isOpen={isMenuOpen}
             closePopover={setIsMenuOpen.bind(null, false)}
             panelPaddingSize="none"
             anchorPosition="downLeft"
+            aria-label={i18n.translate('xpack.ml.explorer.anomalies.actionsPopoverAriaLabel', {
+              defaultMessage: 'Anomaly actions menu',
+            })}
           >
             <EuiContextMenu panels={panels} initialPanelId={'panelActions'} />
           </EuiPopover>

@@ -7,12 +7,15 @@
 
 import { useMemo } from 'react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { EntityType } from '../../../../common/entity_analytics/types';
 import {
   getRiskInputTab,
   getInsightsInputTab,
   getResolutionGroupTab,
+  getAnomaliesTab,
 } from '../../../entity_analytics/components/entity_details_flyout';
+import { useAnomalyPrivileges } from '../../../entity_analytics/api/hooks/use_anomaly_privileges';
 import type {
   LeftPanelTabsType,
   EntityDetailsLeftPanelTab,
@@ -21,6 +24,7 @@ import { getGraphViewTab } from '../shared/components/left';
 
 import type { HostDetailsPanelProps } from '.';
 import { HostDetailsPanelKey } from '.';
+import { useHasEntityResolutionLicense } from '../../../common/hooks/use_has_entity_resolution_license';
 
 export const useSelectedTab = (params: HostDetailsPanelProps, tabs: LeftPanelTabsType) => {
   const { openLeftPanel } = useExpandableFlyoutApi();
@@ -58,10 +62,23 @@ export const useTabs = ({
   hasNonClosedAlerts,
   entityStoreEntityId,
 }: HostDetailsPanelProps): LeftPanelTabsType => {
+  const hasEntityResolutionLicense = useHasEntityResolutionLicense();
+  const isAnomalyDetailsEnabled = useIsExperimentalFeatureEnabled('entityAnalyticsAnomalyDetails');
+  const { data: anomalyPrivilegesData } = useAnomalyPrivileges(isAnomalyDetailsEnabled);
+  const hasAnomalyPrivileges = anomalyPrivilegesData?.has_all_required ?? false;
+  const loadAnomalies = isAnomalyDetailsEnabled && hasAnomalyPrivileges && !!entityStoreEntityId;
+
   return useMemo(() => {
-    const isRiskScoreTabAvailable = isRiskScoreExist && hostName;
+    const isRiskScoreTabAvailable = (isRiskScoreExist || entityStoreEntityId) && hostName;
     const riskScoreTab = isRiskScoreTabAvailable
-      ? [getRiskInputTab({ entityName: hostName ?? '', entityType: EntityType.host, scopeId })]
+      ? [
+          getRiskInputTab({
+            entityName: hostName ?? '',
+            entityType: EntityType.host,
+            scopeId,
+            entityId: entityStoreEntityId,
+          }),
+        ]
       : [];
 
     // Determine if the Insights tab should be included
@@ -82,19 +99,37 @@ export const useTabs = ({
       ? [getGraphViewTab({ entityId: entityStoreEntityId, scopeId })]
       : [];
 
-    const resolutionTab = entityStoreEntityId
-      ? [getResolutionGroupTab({ entityId: entityStoreEntityId, entityType: EntityType.host })]
+    const resolutionTab =
+      entityStoreEntityId && hasEntityResolutionLicense
+        ? [
+            getResolutionGroupTab({
+              entityId: entityStoreEntityId,
+              entityType: EntityType.host,
+              scopeId,
+            }),
+          ]
+        : [];
+
+    const anomaliesTab = loadAnomalies
+      ? [
+          getAnomaliesTab({
+            entityId: entityStoreEntityId,
+            entityType: EntityType.host,
+          }),
+        ]
       : [];
 
-    return [...riskScoreTab, ...insightsTab, ...graphViewTab, ...resolutionTab];
+    return [...riskScoreTab, ...anomaliesTab, ...insightsTab, ...graphViewTab, ...resolutionTab];
   }, [
     isRiskScoreExist,
+    entityStoreEntityId,
     hostName,
-    entityId,
     scopeId,
     hasMisconfigurationFindings,
     hasVulnerabilitiesFindings,
     hasNonClosedAlerts,
-    entityStoreEntityId,
+    entityId,
+    hasEntityResolutionLicense,
+    loadAnomalies,
   ]);
 };

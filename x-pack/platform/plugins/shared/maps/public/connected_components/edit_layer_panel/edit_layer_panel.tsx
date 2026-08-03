@@ -214,7 +214,10 @@ export class EditLayerPanel extends Component<Props, State> {
           <EuiFlyoutHeader hasBorder className="mapLayerPanel__header">
             <EuiFlexGroup responsive={false} alignItems="center" gutterSize="s">
               <EuiFlexItem grow={false}>
-                <EuiIcon type={this.props.selectedLayer.getLayerTypeIconName()} />
+                <EuiIcon
+                  type={this.props.selectedLayer.getLayerTypeIconName()}
+                  aria-hidden={true}
+                />
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiTitle size="s">

@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
 import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 import useAsync from 'react-use/lib/useAsync';
+import { DEFAULT_SCHEMA } from '../../../../common/constants';
 import type { HostMetricTypes } from '../charts/types';
 import {
   AVG_OR_AVERAGE_AS_FIRST_FUNCTION_PATTERN,
@@ -31,7 +32,7 @@ export const useHostCharts = ({
     const hostCharts = await getHostsCharts({
       metric,
       overview,
-      schema: schema ?? 'ecs',
+      schema: schema ?? DEFAULT_SCHEMA,
     });
 
     return hostCharts.map((chart) => ({
@@ -122,7 +123,7 @@ export const useHostKpiCharts = ({
   const { value: charts = [] } = useAsync(async () => {
     const model = findInventoryModel('host');
     const { cpu, memory, disk } = await model.metrics.getCharts({
-      schema: schema ?? 'ecs',
+      schema: schema ?? DEFAULT_SCHEMA,
     });
 
     const hostKpiCharts = [
@@ -160,7 +161,7 @@ const getHostsCharts = async ({
   const model = findInventoryModel('host');
 
   const { cpu, memory, network, disk, logs } = await model.metrics.getCharts({
-    schema: schema ?? 'ecs',
+    schema: schema ?? DEFAULT_SCHEMA,
   });
 
   switch (metric) {

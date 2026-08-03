@@ -279,10 +279,11 @@ export const EsqlQueryExpression: React.FC<
           });
           const indexPattern: string = esqlDataView.getIndexPattern();
 
+          const projectRouting = getProjectRoutingFromEsqlQuery(queryObj.esql);
           const fieldSpecs = await dataViews.getFieldsForWildcard({
             pattern: indexPattern,
             allowNoIndex: true,
-            projectRouting: getProjectRoutingFromEsqlQuery(queryObj.esql),
+            ...(projectRouting ? { projectRouting } : {}),
           });
 
           const currentEsFields = convertFieldSpecToFieldOption(fieldSpecs, false);
@@ -417,7 +418,12 @@ export const EsqlQueryExpression: React.FC<
           </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiFormRow id="timeWindowUnit">
+          <EuiFormRow
+            id="timeWindowUnit"
+            aria-label={i18n.translate('xpack.stackAlerts.esQuery.ui.timeWindowUnitAriaLabel', {
+              defaultMessage: 'Time window unit',
+            })}
+          >
             <EuiSelect
               name="timeWindowUnit"
               data-test-subj="timeWindowUnitSelect"

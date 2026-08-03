@@ -29,6 +29,7 @@ import {
   deleteIngestPipeline,
   upsertIngestPipeline,
 } from '../../ingest_pipelines/manage_ingest_pipelines';
+import { ATTACHMENT_TYPES } from '../../attachments/types';
 import { getErrorMessage } from '../../errors/parse_error';
 import { upsertEsqlView, deleteEsqlView } from '../../esql_views/manage_esql_views';
 import { retryTransientEsErrors } from '../../helpers/retry';
@@ -278,8 +279,15 @@ export class ExecutionPlan {
       return;
     }
 
+    const { getKnowledgeIndicatorClient } = this.dependencies;
+    if (!getKnowledgeIndicatorClient) {
+      throw new Error(
+        'knowledgeIndicatorClient is required for deleteQueries but was not provided'
+      );
+    }
+    const kiClient = await getKnowledgeIndicatorClient();
     return Promise.all(
-      actions.map((action) => this.dependencies.queryClient.deleteAll(action.request.definition))
+      actions.map((action) => kiClient.deleteAllQueries(action.request.definition.name))
     );
   }
 
@@ -288,11 +296,13 @@ export class ExecutionPlan {
       return;
     }
 
-    return Promise.all(
-      actions.flatMap((action) => [
-        this.dependencies.attachmentClient.syncAttachmentList(action.request.name, [], 'dashboard'),
-        this.dependencies.attachmentClient.syncAttachmentList(action.request.name, [], 'rule'),
-      ])
+    // syncAttachmentList with an empty list clears all attachments of that type for the stream.
+    await Promise.all(
+      actions.flatMap((action) =>
+        ATTACHMENT_TYPES.map((type) =>
+          this.dependencies.attachmentClient.syncAttachmentList(action.request.name, [], type)
+        )
+      )
     );
   }
 
@@ -306,8 +316,18 @@ export class ExecutionPlan {
       return;
     }
 
+    const { getKnowledgeIndicatorClient } = this.dependencies;
+    if (!getKnowledgeIndicatorClient) {
+      throw new Error(
+        'knowledgeIndicatorClient is required for unlinkFeatures but was not provided'
+      );
+    }
+    const kiClient = await getKnowledgeIndicatorClient();
     return Promise.all(
-      actions.map((action) => this.dependencies.featureClient.deleteFeatures(action.request.name))
+      actions.map(async (action) => {
+        await kiClient.deleteAllQueries(action.request.name);
+        await kiClient.deleteIndicators(action.request.name);
+      })
     );
   }
 

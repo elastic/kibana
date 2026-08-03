@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { UUID, NonEmptyString } from '@kbn/openapi-common/schemas/primitives.gen';
 import {
@@ -30,58 +30,68 @@ import {
 } from '../model/exception_list_common.gen';
 import { ExceptionListItemEntryArray } from '../model/exception_list_item_entry.gen';
 
+export const RuleId = lazySchema(() => UUID);
 export type RuleId = z.infer<typeof RuleId>;
-export const RuleId = UUID;
 
+export const CreateRuleExceptionListItemComment = lazySchema(() =>
+  z.object({
+    comment: NonEmptyString,
+  })
+);
 export type CreateRuleExceptionListItemComment = z.infer<typeof CreateRuleExceptionListItemComment>;
-export const CreateRuleExceptionListItemComment = z.object({
-  comment: NonEmptyString,
-});
 
+export const CreateRuleExceptionListItemCommentArray = lazySchema(() =>
+  z.array(CreateRuleExceptionListItemComment)
+);
 export type CreateRuleExceptionListItemCommentArray = z.infer<
   typeof CreateRuleExceptionListItemCommentArray
 >;
-export const CreateRuleExceptionListItemCommentArray = z.array(CreateRuleExceptionListItemComment);
 
+export const CreateRuleExceptionListItemProps = lazySchema(() =>
+  z.object({
+    item_id: ExceptionListItemHumanId.optional(),
+    type: ExceptionListItemType,
+    name: ExceptionListItemName,
+    description: ExceptionListItemDescription,
+    entries: ExceptionListItemEntryArray,
+    namespace_type: ExceptionNamespaceType.optional().default('single'),
+    os_types: ExceptionListItemOsTypeArray.optional().default([]),
+    tags: ExceptionListItemTags.optional().default([]),
+    meta: ExceptionListItemMeta.optional(),
+    expire_time: z.string().datetime().optional(),
+    comments: CreateRuleExceptionListItemCommentArray.optional().default([]),
+  })
+);
 export type CreateRuleExceptionListItemProps = z.infer<typeof CreateRuleExceptionListItemProps>;
-export const CreateRuleExceptionListItemProps = z.object({
-  item_id: ExceptionListItemHumanId.optional(),
-  type: ExceptionListItemType,
-  name: ExceptionListItemName,
-  description: ExceptionListItemDescription,
-  entries: ExceptionListItemEntryArray,
-  namespace_type: ExceptionNamespaceType.optional().default('single'),
-  os_types: ExceptionListItemOsTypeArray.optional().default([]),
-  tags: ExceptionListItemTags.optional().default([]),
-  meta: ExceptionListItemMeta.optional(),
-  expire_time: z.string().datetime().optional(),
-  comments: CreateRuleExceptionListItemCommentArray.optional().default([]),
-});
 
+export const CreateRuleExceptionListItemsRequestParams = lazySchema(() =>
+  z.object({
+    /**
+     * Detection rule's identifier
+     */
+    id: RuleId,
+  })
+);
 export type CreateRuleExceptionListItemsRequestParams = z.infer<
   typeof CreateRuleExceptionListItemsRequestParams
 >;
-export const CreateRuleExceptionListItemsRequestParams = z.object({
-  /**
-   * Detection rule's identifier
-   */
-  id: RuleId,
-});
 export type CreateRuleExceptionListItemsRequestParamsInput = z.input<
   typeof CreateRuleExceptionListItemsRequestParams
 >;
 
+export const CreateRuleExceptionListItemsRequestBody = lazySchema(() =>
+  z.object({
+    items: z.array(CreateRuleExceptionListItemProps),
+  })
+);
 export type CreateRuleExceptionListItemsRequestBody = z.infer<
   typeof CreateRuleExceptionListItemsRequestBody
 >;
-export const CreateRuleExceptionListItemsRequestBody = z.object({
-  items: z.array(CreateRuleExceptionListItemProps),
-});
 export type CreateRuleExceptionListItemsRequestBodyInput = z.input<
   typeof CreateRuleExceptionListItemsRequestBody
 >;
 
+export const CreateRuleExceptionListItemsResponse = lazySchema(() => z.array(ExceptionListItem));
 export type CreateRuleExceptionListItemsResponse = z.infer<
   typeof CreateRuleExceptionListItemsResponse
 >;
-export const CreateRuleExceptionListItemsResponse = z.array(ExceptionListItem);

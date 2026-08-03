@@ -10,11 +10,11 @@ import React from 'react';
 import { EuiButton, EuiButtonEmpty, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import type { SerializedStyles } from '@emotion/serialize';
 import dfaImage from './analysis_monitors.svg';
 import { mlNodesAvailable } from '../../../../../ml_nodes_check';
 import { useMlKibana, useMlManagementLocator } from '../../../../../contexts/kibana';
-import { ML_PAGES } from '../../../../../../../common/constants/locator';
 import { usePermissionCheck } from '../../../../../capabilities/check_capabilities';
 import { MLEmptyPromptCard } from '../../../../../components/overview/ml_empty_prompt_card';
 

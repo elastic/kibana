@@ -31,7 +31,6 @@ dependsOn:
   - '@kbn/ui-actions-plugin'
   - '@kbn/usage-collection-plugin'
   - '@kbn/features-plugin'
-  - '@kbn/lens-plugin'
   - '@kbn/maps-plugin'
   - '@kbn/reporting-plugin'
   - '@kbn/spaces-plugin'
@@ -75,6 +74,10 @@ dependsOn:
   - '@kbn/saved-search-plugin'
   - '@kbn/lens-common'
   - '@kbn/core-http-browser'
+  - '@kbn/scout'
+  - '@kbn/rison'
+  - '@kbn/as-code-shared-schemas'
+  - '@kbn/ui-callout'
 tags:
   - plugin
   - prod
@@ -92,6 +95,7 @@ fileGroups:
     - server/**/*
     - storybook/**/*
     - tasks/mocks/*
+    - test/scout/**/*
     - types/**/*
     - '!target/**/*'
   jest-config:

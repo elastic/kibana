@@ -5,15 +5,23 @@
  * 2.0.
  */
 
-import type { RouteSecurity } from '@kbn/core-http-server';
+import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
 import { inject, injectable } from 'inversify';
-import { ruleTagsResponseSchema } from '@kbn/alerting-v2-schemas';
+import { Request } from '@kbn/core-di-server';
+import type { z } from '@kbn/zod/v4';
+import {
+  errorResponseSchema,
+  ruleTagsParamsSchema,
+  ruleTagsResponseSchema,
+} from '@kbn/alerting-v2-schemas';
 
 import { RulesClient } from '../../lib/rules_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { ALERTING_V2_RULE_API_PATH } from '../constants';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
+import { INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION } from '../route_descriptions';
+import { ruleTagsOasExamples } from './get_rule_tags_oas_example';
 
 @injectable()
 export class GetRuleTagsRoute extends BaseAlertingRoute {
@@ -26,16 +34,20 @@ export class GetRuleTagsRoute extends BaseAlertingRoute {
   };
   static routeOptions = {
     summary: 'Get rule tags',
+    oasOperationObject: ruleTagsOasExamples,
   } as const;
-  static validate = {
-    request: {},
+  static schemas = {
+    request: {
+      query: ruleTagsParamsSchema,
+    },
     response: {
       200: {
         body: () => ruleTagsResponseSchema,
-        description: 'Indicates a successful call.',
+        description: 'Returns the requested rule tags.',
       },
       400: {
-        description: 'Indicates an invalid schema or parameters.',
+        body: () => errorResponseSchema,
+        description: INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
       },
     },
   };
@@ -44,13 +56,15 @@ export class GetRuleTagsRoute extends BaseAlertingRoute {
 
   constructor(
     @inject(AlertingRouteContext) ctx: AlertingRouteContext,
+    @inject(Request)
+    private readonly request: KibanaRequest<unknown, z.infer<typeof ruleTagsParamsSchema>, unknown>,
     @inject(RulesClient) private readonly rulesClient: RulesClient
   ) {
     super(ctx);
   }
 
   protected async execute() {
-    const tags = await this.rulesClient.getTags();
+    const tags = await this.rulesClient.getTags({ filter: this.request.query.filter });
     return this.ctx.response.ok({ body: { tags } });
   }
 }

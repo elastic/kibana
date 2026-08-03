@@ -7,13 +7,14 @@
 
 import { schema } from '@kbn/config-schema';
 import type { IRouter, Logger } from '@kbn/core/server';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 
 import { PLUGIN_ID } from '../../../common';
 import {
   API_VERSIONS,
   ACTIONS_INDEX,
   ACTION_RESPONSES_DATA_STREAM_INDEX,
+  OSQUERY_INTEGRATION_NAME,
 } from '../../../common/constants';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
@@ -24,6 +25,7 @@ import type {
 } from '../../../common/api/unified_history/types';
 import { buildLiveActionsQuery } from './query_live_actions_dsl';
 import { buildScheduledResponsesQuery } from './query_scheduled_responses_dsl';
+import { hasConnectedRemoteClusters, prefixIndexPatternsWithCcs } from '../../utils/ccs_utils';
 import { mergeRows } from './merge_rows';
 import { decodeCursor, encodeCursor, computePaginationCursors } from './cursor_utils';
 import { processLiveHistory } from './process_live_history';
@@ -34,6 +36,8 @@ import {
   type ScheduledAggregations,
 } from './process_scheduled_history';
 import type { LiveActionHit } from './map_live_hit_to_row';
+
+import { unifiedHistoryResponseSchema } from './response_schemas';
 
 const VALID_SOURCE_FILTERS = new Set(['live', 'rule', 'scheduled']);
 
@@ -80,12 +84,18 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
               }),
             }),
           },
+          response: {
+            200: {
+              body: () => unifiedHistoryResponseSchema,
+            },
+          },
         },
       },
       async (context, request, response) => {
         try {
           const coreContext = await context.core;
           const esClient = coreContext.elasticsearch.client.asInternalUser;
+          const ccsEnabled = await hasConnectedRemoteClusters(esClient);
 
           const spaceId = osqueryContext?.service?.getActiveSpace
             ? (await osqueryContext.service.getActiveSpace(request))?.id || DEFAULT_SPACE_ID
@@ -137,6 +147,24 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
           // Fetch all packs once — used for both kuery filtering and
           // resolving query names on scheduled rows.
           const packSOs = includeScheduled ? await getPacksForSpace(spaceScopedClient) : [];
+          let integrationNamespaces: string[] | undefined;
+
+          if (includeLive && osqueryContext?.service?.getIntegrationNamespaces) {
+            try {
+              const namespaceMap = await osqueryContext.service.getIntegrationNamespaces(
+                [OSQUERY_INTEGRATION_NAME],
+                spaceScopedClient,
+                logger
+              );
+              const osqueryNamespaces = namespaceMap[OSQUERY_INTEGRATION_NAME];
+              integrationNamespaces =
+                osqueryNamespaces && osqueryNamespaces.length > 0 ? osqueryNamespaces : undefined;
+
+              logger.debug(`Retrieved integration namespaces: ${JSON.stringify(namespaceMap)}`);
+            } catch (err) {
+              logger.warn(`Failed to resolve integration namespaces: ${(err as Error).message}`);
+            }
+          }
 
           let packIdsForQuery: string[] | undefined;
           let scheduleIdsForQuery: string[] | undefined;
@@ -183,7 +211,7 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
             actionsQuery
               ? esClient.search(
                   {
-                    index: `${ACTIONS_INDEX}*`,
+                    index: prefixIndexPatternsWithCcs(`${ACTIONS_INDEX}*`, ccsEnabled),
                     ...actionsQuery,
                   },
                   { ignore: [404] }
@@ -193,7 +221,10 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
               ? esClient
                   .search(
                     {
-                      index: `${ACTION_RESPONSES_DATA_STREAM_INDEX}-*`,
+                      index: prefixIndexPatternsWithCcs(
+                        `${ACTION_RESPONSES_DATA_STREAM_INDEX}-*`,
+                        ccsEnabled
+                      ),
                       ...scheduledQuery,
                     },
                     { ignore: [404] }
@@ -218,6 +249,8 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
             liveHits,
             osqueryContext,
             spaceId,
+            integrationNamespaces,
+            ccsEnabled,
             logger,
           });
 

@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import React, { useMemo, useState, useEffect, useRef } from 'react';
-import { useParams } from 'react-router-dom';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -19,41 +17,46 @@ import {
   EuiPopover,
   EuiSpacer,
   EuiText,
-  EuiIcon,
   EuiTitle,
 } from '@elastic/eui';
-import type { PublicSkillDefinition, PublicSkillSummary } from '@kbn/agent-builder-common';
-import { useMutation, useQueryClient } from '@kbn/react-query';
-import { searchParamNames } from '../../../search_param_names';
-import { useQueryState } from '../../../hooks/use_query_state';
-import { labels } from '../../../utils/i18n';
-import { appPaths } from '../../../utils/app_paths';
-import { useNavigation } from '../../../hooks/use_navigation';
-import { useSkillsService } from '../../../hooks/skills/use_skills';
+import type { PublicSkillSummary } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
+import { useQueryClient } from '@kbn/react-query';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { useParams } from 'react-router-dom';
 import { useAgentBuilderAgentById } from '../../../hooks/agents/use_agent_by_id';
-import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
-import { useToasts } from '../../../hooks/use_toasts';
-import { queryKeys } from '../../../query_keys';
+import { useCanUpdateAgent } from '../../../hooks/agents/use_can_update_agent';
+import { useSkillsService } from '../../../hooks/skills/use_skills';
 import { useFlyoutState } from '../../../hooks/use_flyout_state';
-import { SkillLibraryPanel } from './skill_library_panel';
+import { useNavigation } from '../../../hooks/use_navigation';
+import { useQueryState } from '../../../hooks/use_query_state';
+import { useUiPrivileges } from '../../../hooks/use_ui_privileges';
+import { queryKeys } from '../../../query_keys';
+import { searchParamNames } from '../../../search_param_names';
+import { appPaths } from '../../../utils/app_paths';
+import { labels } from '../../../utils/i18n';
+import { getActiveSkills, isSkillAutoIncluded } from '../../../utils/tool_selection_utils';
+import { PageWrapper } from '../common/page_wrapper';
+import { useListDetailPageStyles } from '../common/styles';
 import { ActiveSkillRow } from './active_skill_row';
+import { SkillCreateFlyout } from './skill_create_flyout';
 import { SkillDetailPanel } from './skill_detail_panel';
 import { SkillEditFlyout } from './skill_edit_flyout';
-import { SkillCreateFlyout } from './skill_create_flyout';
-import { PageWrapper } from '../common/page_wrapper';
-import { ICON_DIMENSIONS } from '../common/constants';
-import { useListDetailPageStyles } from '../common/styles';
+import { SkillLibraryPanel } from './skill_library_panel';
+import { SkillsCustomizeEmptyState } from './skills_customize_empty_state';
+import { useSkillsMutation } from './use_skills_mutation';
 
 export const AgentSkills: React.FC = () => {
   const { agentId } = useParams<{ agentId: string }>();
   const styles = useListDetailPageStyles();
   const { createAgentBuilderUrl } = useNavigation();
-  const { agentService } = useAgentBuilderServices();
-  const { addSuccessToast, addErrorToast } = useToasts();
   const queryClient = useQueryClient();
 
   const { agent, isLoading: agentLoading } = useAgentBuilderAgentById(agentId);
   const { skills: allSkills, isLoading: skillsLoading } = useSkillsService();
+  const { manageSkills } = useUiPrivileges();
+  const canEditAgent = useCanUpdateAgent({ agent });
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSkillId, setSelectedSkillId] = useQueryState<string>(searchParamNames.skillId);
@@ -61,7 +64,7 @@ export const AgentSkills: React.FC = () => {
   const [editingSkillId, setEditingSkillId] = useState<string | null>(null);
   const [isCreateFlyoutOpen, setIsCreateFlyoutOpen] = useState(false);
   const [isAddMenuOpen, setIsAddMenuOpen] = useState(false);
-  const [mutatingSkillId, setMutatingSkillId] = useState<string | null>(null);
+  const { handleAddSkill, handleRemoveSkill } = useSkillsMutation({ agent });
   const {
     isOpen: isLibraryOpen,
     openFlyout: openLibrary,
@@ -90,23 +93,24 @@ export const AgentSkills: React.FC = () => {
 
   const enableElasticCapabilities = agent?.configuration?.enable_elastic_capabilities ?? false;
 
-  const builtinSkills = useMemo(() => allSkills.filter((s) => s.readonly), [allSkills]);
+  const autoIncludedBuiltinSkills = useMemo(
+    () => allSkills.filter((skill) => isSkillAutoIncluded(skill, enableElasticCapabilities)),
+    [allSkills, enableElasticCapabilities]
+  );
 
-  const builtinSkillIdSet = useMemo(() => new Set(builtinSkills.map((s) => s.id)), [builtinSkills]);
+  const builtinSkillIdSet = useMemo(
+    () => new Set(autoIncludedBuiltinSkills.map((skill) => skill.id)),
+    [autoIncludedBuiltinSkills]
+  );
 
   const activeSkills = useMemo(() => {
-    if (!agentSkillIdSet) return allSkills;
-    if (enableElasticCapabilities) {
-      const explicitSkills = allSkills.filter((s) => agentSkillIdSet.has(s.id));
-      const builtinNotExplicit = builtinSkills.filter((s) => !agentSkillIdSet.has(s.id));
-      return [...explicitSkills, ...builtinNotExplicit];
-    }
-    return allSkills.filter((s) => agentSkillIdSet.has(s.id));
-  }, [allSkills, agentSkillIdSet, enableElasticCapabilities, builtinSkills]);
+    return getActiveSkills(allSkills, agentSkillIds, enableElasticCapabilities);
+  }, [allSkills, agentSkillIds, enableElasticCapabilities]);
 
   useEffect(() => {
     if (agentLoading || skillsLoading) return;
 
+    // When a newly added skill is pending to be selected. Once it is active, select it.
     if (pendingSelectSkillIdRef.current) {
       const pendingInActive = activeSkills.some((s) => s.id === pendingSelectSkillIdRef.current);
       if (pendingInActive) {
@@ -116,15 +120,18 @@ export const AgentSkills: React.FC = () => {
       }
     }
 
+    // Select first skill when no skill is currently selected, like on first render
     if (!selectedSkillId) {
       if (activeSkills.length > 0) {
         setSelectedSkillId(activeSkills[0].id);
       }
-    } else {
-      const stillActive = activeSkills.some((s) => s.id === selectedSkillId);
-      if (!stillActive) {
-        setSelectedSkillId(activeSkills[0]?.id ?? null);
-      }
+      return;
+    }
+
+    // Selected skill is no longer active, for example after deleting a skill
+    const selectedSkillNotActive = activeSkills.every((s) => s.id !== selectedSkillId);
+    if (selectedSkillNotActive) {
+      setSelectedSkillId(activeSkills[0]?.id ?? null);
     }
   }, [activeSkills, selectedSkillId, setSelectedSkillId, agentLoading, skillsLoading]);
 
@@ -136,52 +143,16 @@ export const AgentSkills: React.FC = () => {
     );
   }, [activeSkills, searchQuery]);
 
-  const updateSkillsMutation = useMutation({
-    mutationFn: (newSkillIds: string[]) => {
-      return agentService.update(agentId!, { configuration: { skill_ids: newSkillIds } });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.agentProfiles.byId(agentId) });
-    },
-    onError: () => {
-      addErrorToast({ title: labels.agentSkills.updateSkillsErrorToast });
-    },
-  });
-
-  const handleAddSkill = (
-    skill: PublicSkillSummary | PublicSkillDefinition,
-    { selectOnSuccess = false }: { selectOnSuccess?: boolean } = {}
-  ) => {
-    const currentIds = agentSkillIds ?? allSkills.map((s) => s.id);
-    if (currentIds.includes(skill.id)) return;
-    const newIds = [...currentIds, skill.id];
-    setMutatingSkillId(skill.id);
-    updateSkillsMutation.mutate(newIds, {
-      onSuccess: () => {
-        if (selectOnSuccess) {
-          pendingSelectSkillIdRef.current = skill.id;
-        }
-        addSuccessToast({ title: labels.agentSkills.addSkillSuccessToast(skill.name) });
-      },
-      onSettled: () => setMutatingSkillId(null),
-    });
+  const handleSelectSkill = (skillId: string) => {
+    setSelectedSkillId(skillId);
   };
 
-  const handleRemoveSkill = (skill: PublicSkillSummary) => {
-    const currentIds = agentSkillIds ?? allSkills.map((s) => s.id);
-    const newIds = currentIds.filter((id) => id !== skill.id);
-    setMutatingSkillId(skill.id);
-    updateSkillsMutation.mutate(newIds, {
-      onSuccess: () => {
-        setSelectedSkillId(null);
-        addSuccessToast({ title: labels.agentSkills.removeSkillSuccessToast(skill.name) });
-      },
-      onSettled: () => setMutatingSkillId(null),
-    });
+  const handleRemoveSkillWithReport = (skill: PublicSkillSummary) => {
+    handleRemoveSkill(skill);
   };
 
   const handleToggleSkill = (skill: PublicSkillSummary, isActive: boolean) => {
-    if (enableElasticCapabilities && skill.readonly) return;
+    if (isSkillAutoIncluded(skill, enableElasticCapabilities)) return;
     if (isActive) {
       handleAddSkill(skill);
     } else {
@@ -193,16 +164,20 @@ export const AgentSkills: React.FC = () => {
     if (!selectedSkillId) return;
     const skill = activeSkills.find((s) => s.id === selectedSkillId);
     if (skill) {
-      if (enableElasticCapabilities && skill.readonly) return;
-      handleRemoveSkill(skill);
+      if (isSkillAutoIncluded(skill, enableElasticCapabilities)) return;
+      handleRemoveSkillWithReport(skill);
     }
   };
 
   const libraryActiveSkillIdSet = useMemo(() => {
-    if (!agentSkillIdSet) return new Set(allSkills.map((s) => s.id));
+    if (!agentSkillIdSet) {
+      return enableElasticCapabilities ? builtinSkillIdSet : new Set<string>();
+    }
     if (enableElasticCapabilities) return new Set([...agentSkillIdSet, ...builtinSkillIdSet]);
     return agentSkillIdSet;
-  }, [agentSkillIdSet, allSkills, enableElasticCapabilities, builtinSkillIdSet]);
+  }, [agentSkillIdSet, enableElasticCapabilities, builtinSkillIdSet]);
+
+  const showCustomizeEmptyState = activeSkills.length === 0 && !searchQuery.trim();
 
   const isLoading = agentLoading || skillsLoading;
 
@@ -214,152 +189,19 @@ export const AgentSkills: React.FC = () => {
     );
   }
 
-  return (
-    <PageWrapper>
-      <div css={styles.header}>
-        <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup alignItems="center" gutterSize="s">
-              <EuiFlexItem grow={false}>
-                <EuiIcon type="bolt" aria-hidden={true} css={ICON_DIMENSIONS} />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiTitle size="l">
-                  <h1>{labels.skills.title}</h1>
-                </EuiTitle>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty href={createAgentBuilderUrl(appPaths.manage.skills)}>
-                  {labels.agentSkills.manageAllSkills}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiPopover
-                  aria-label={labels.agentSkills.addSkillButton}
-                  button={
-                    <EuiButton
-                      fill
-                      iconType="plusInCircle"
-                      iconSide="left"
-                      onClick={() => setIsAddMenuOpen((prev) => !prev)}
-                    >
-                      {labels.agentSkills.addSkillButton}
-                    </EuiButton>
-                  }
-                  isOpen={isAddMenuOpen}
-                  closePopover={() => setIsAddMenuOpen(false)}
-                  anchorPosition="downLeft"
-                  panelPaddingSize="none"
-                >
-                  <EuiContextMenuPanel
-                    items={[
-                      <EuiContextMenuItem
-                        key="importFromLibrary"
-                        icon="importAction"
-                        onClick={handleImportFromLibrary}
-                      >
-                        {labels.agentSkills.importFromLibraryMenuItem}
-                      </EuiContextMenuItem>,
-                      <EuiContextMenuItem
-                        key="createSkill"
-                        icon="pencil"
-                        onClick={handleOpenCreateFlyout}
-                      >
-                        {labels.agentSkills.createSkillMenuItem}
-                      </EuiContextMenuItem>,
-                    ]}
-                  />
-                </EuiPopover>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-
-        <EuiSpacer size="s" />
-        <EuiText size="s" color="subdued">
-          {labels.agentSkills.pageDescription}
-        </EuiText>
-      </div>
-
-      <EuiFlexGroup gutterSize="none" responsive={false} css={styles.body}>
-        <EuiFlexItem grow={false} css={styles.searchColumn}>
-          <div css={styles.searchInputWrapper}>
-            <EuiFieldSearch
-              placeholder={labels.agentSkills.searchActiveSkillsPlaceholder}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              incremental
-              fullWidth
-            />
-          </div>
-
-          <div css={styles.scrollableList}>
-            {filteredActiveSkills.length === 0 ? (
-              <EuiText size="s" color="subdued" textAlign="center">
-                <p>
-                  {searchQuery.trim()
-                    ? labels.agentSkills.noActiveSkillsMatchMessage
-                    : labels.agentSkills.noActiveSkillsMessage}
-                </p>
-              </EuiText>
-            ) : (
-              filteredActiveSkills.map((skill) => (
-                <ActiveSkillRow
-                  key={skill.id}
-                  skill={skill}
-                  isSelected={selectedSkillId === skill.id}
-                  onSelect={(s) => setSelectedSkillId(s.id)}
-                  onRemove={handleRemoveSkill}
-                  isRemoving={mutatingSkillId === skill.id}
-                  readOnly={enableElasticCapabilities && skill.readonly}
-                />
-              ))
-            )}
-          </div>
-        </EuiFlexItem>
-
-        <EuiFlexItem css={styles.detailPanelWrapper}>
-          {selectedSkillId ? (
-            <SkillDetailPanel
-              skillId={selectedSkillId}
-              onEdit={() => setEditingSkillId(selectedSkillId)}
-              onRemove={handleRemoveSelectedSkill}
-              isReadOnly={
-                enableElasticCapabilities &&
-                (activeSkills.find((s) => s.id === selectedSkillId)?.readonly ?? false)
-              }
-            />
-          ) : (
-            <EuiFlexGroup
-              justifyContent="center"
-              alignItems="center"
-              css={styles.noSelectionPlaceholder}
-            >
-              <EuiText size="s" color="subdued">
-                {labels.agentSkills.noSkillSelectedMessage}
-              </EuiText>
-            </EuiFlexGroup>
-          )}
-        </EuiFlexItem>
-      </EuiFlexGroup>
-
-      {isLibraryOpen && (
+  const skillModals = (
+    <>
+      {isLibraryOpen ? (
         <SkillLibraryPanel
           onClose={closeLibrary}
           allSkills={allSkills}
           activeSkillIdSet={libraryActiveSkillIdSet}
           onToggleSkill={handleToggleSkill}
-          mutatingSkillId={mutatingSkillId}
           enableElasticCapabilities={enableElasticCapabilities}
           builtinSkillIdSet={builtinSkillIdSet}
         />
-      )}
-
-      {editingSkillId && (
+      ) : null}
+      {editingSkillId ? (
         <SkillEditFlyout
           skillId={editingSkillId}
           onClose={() => setEditingSkillId(null)}
@@ -368,14 +210,179 @@ export const AgentSkills: React.FC = () => {
             setSelectedSkillId(editingSkillId);
           }}
         />
-      )}
-
-      {isCreateFlyoutOpen && (
+      ) : null}
+      {isCreateFlyoutOpen ? (
         <SkillCreateFlyout
           onClose={() => setIsCreateFlyoutOpen(false)}
-          onSkillCreated={(skill) => handleAddSkill(skill, { selectOnSuccess: true })}
+          onSkillCreated={(skill) =>
+            handleAddSkill(skill, {
+              onSuccess: () => {
+                pendingSelectSkillIdRef.current = skill.id;
+              },
+            })
+          }
         />
+      ) : null}
+    </>
+  );
+
+  return (
+    <PageWrapper>
+      {showCustomizeEmptyState ? (
+        <SkillsCustomizeEmptyState canEditAgent={canEditAgent} onOpenLibrary={openLibrary} />
+      ) : (
+        <>
+          <div css={styles.header}>
+            <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+              <EuiFlexItem grow={false}>
+                <EuiTitle size="l">
+                  <h1>{labels.skills.title}</h1>
+                </EuiTitle>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonEmpty href={createAgentBuilderUrl(appPaths.manage.skills)}>
+                      {labels.agentSkills.manageAllSkills}
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                  {canEditAgent && (
+                    <EuiFlexItem grow={false}>
+                      <EuiPopover
+                        aria-label={labels.agentSkills.addSkillButton}
+                        button={
+                          <EuiButton
+                            fill
+                            iconType="plusInCircle"
+                            iconSide="left"
+                            onClick={() => setIsAddMenuOpen((prev) => !prev)}
+                          >
+                            {labels.agentSkills.addSkillButton}
+                          </EuiButton>
+                        }
+                        isOpen={isAddMenuOpen}
+                        closePopover={() => setIsAddMenuOpen(false)}
+                        anchorPosition="downLeft"
+                        panelPaddingSize="none"
+                      >
+                        <EuiContextMenuPanel
+                          items={[
+                            <EuiContextMenuItem
+                              key="importFromLibrary"
+                              icon="importAction"
+                              onClick={handleImportFromLibrary}
+                              {...getEbtProps({
+                                element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                                action:
+                                  AGENT_BUILDER_UI_EBT.action.agentCustomization
+                                    .ENTITY_ADD_FROM_LIBRARY,
+                                detail: AGENT_BUILDER_UI_EBT.entity.SKILL,
+                              })}
+                            >
+                              {labels.agentSkills.importFromLibraryMenuItem}
+                            </EuiContextMenuItem>,
+                            ...(manageSkills
+                              ? [
+                                  <EuiContextMenuItem
+                                    key="createSkill"
+                                    icon="pencil"
+                                    onClick={handleOpenCreateFlyout}
+                                    {...getEbtProps({
+                                      element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                                      action:
+                                        AGENT_BUILDER_UI_EBT.action.agentCustomization
+                                          .ENTITY_CREATE_NEW,
+                                      detail: AGENT_BUILDER_UI_EBT.entity.SKILL,
+                                    })}
+                                  >
+                                    {labels.agentSkills.createSkillMenuItem}
+                                  </EuiContextMenuItem>,
+                                ]
+                              : []),
+                          ]}
+                        />
+                      </EuiPopover>
+                    </EuiFlexItem>
+                  )}
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+
+            <EuiSpacer size="m" />
+            <EuiText size="m" color="default">
+              {labels.agentSkills.pageDescription}
+            </EuiText>
+          </div>
+
+          <EuiFlexGroup gutterSize="none" responsive={false} css={styles.body}>
+            <EuiFlexItem grow={false} css={styles.searchColumn}>
+              <div css={styles.searchInputWrapper}>
+                <EuiFieldSearch
+                  placeholder={labels.agentSkills.searchActiveSkillsPlaceholder}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  incremental
+                  fullWidth
+                />
+              </div>
+
+              <EuiFlexGroup direction="column" gutterSize="xs" css={styles.scrollableList}>
+                {filteredActiveSkills.length === 0 ? (
+                  <EuiText size="s" color="subdued" textAlign="center">
+                    <p>
+                      {searchQuery.trim()
+                        ? labels.agentSkills.noActiveSkillsMatchMessage
+                        : labels.agentSkills.noActiveSkillsMessage}
+                    </p>
+                  </EuiText>
+                ) : (
+                  filteredActiveSkills.map((skill) => (
+                    <EuiFlexItem key={skill.id} grow={false}>
+                      <ActiveSkillRow
+                        skill={skill}
+                        isSelected={selectedSkillId === skill.id}
+                        onSelect={(s) => handleSelectSkill(s.id)}
+                        onRemove={handleRemoveSkillWithReport}
+                        isAutoIncluded={isSkillAutoIncluded(skill, enableElasticCapabilities)}
+                        canEditAgent={canEditAgent}
+                      />
+                    </EuiFlexItem>
+                  ))
+                )}
+              </EuiFlexGroup>
+            </EuiFlexItem>
+
+            <EuiFlexItem css={styles.detailPanelWrapper}>
+              {selectedSkillId ? (
+                <SkillDetailPanel
+                  skillId={selectedSkillId}
+                  onEdit={() => setEditingSkillId(selectedSkillId)}
+                  onRemove={handleRemoveSelectedSkill}
+                  isAutoIncluded={activeSkills.some(
+                    (skill) =>
+                      skill.id === selectedSkillId &&
+                      isSkillAutoIncluded(skill, enableElasticCapabilities)
+                  )}
+                  canEditAgent={canEditAgent}
+                  canManageSkills={manageSkills}
+                />
+              ) : (
+                <EuiFlexGroup
+                  justifyContent="center"
+                  alignItems="center"
+                  css={styles.noSelectionPlaceholder}
+                >
+                  <EuiText size="s" color="subdued">
+                    {labels.agentSkills.noSkillSelectedMessage}
+                  </EuiText>
+                </EuiFlexGroup>
+              )}
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </>
       )}
+
+      {skillModals}
     </PageWrapper>
   );
 };

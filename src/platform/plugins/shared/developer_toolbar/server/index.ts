@@ -20,8 +20,8 @@ const configSchema = schema.object({
     schema.boolean(),
     /** When not in dev, only false is allowed. */
     schema.literal(false),
-    /** Default to false, even in dev */
-    { defaultValue: false }
+    /** Default to true in dev */
+    { defaultValue: schema.contextRef('dev') }
   ),
 });
 

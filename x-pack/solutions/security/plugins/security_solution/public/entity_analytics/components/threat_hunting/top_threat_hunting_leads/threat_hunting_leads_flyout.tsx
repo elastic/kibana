@@ -7,55 +7,56 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import {
-  EuiBadge,
-  EuiButtonIcon,
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiFlyoutResizable,
-  EuiIcon,
+  EuiNotificationBadge,
   EuiPanel,
+  EuiSkeletonText,
+  EuiSkeletonTitle,
   EuiSpacer,
-  EuiTablePagination,
   EuiText,
   EuiTitle,
+  EuiToolTip,
+  useEuiFontSize,
+  useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { useQuery } from '@kbn/react-query';
 import { useEntityAnalyticsRoutes } from '../../../api/api';
 import type { HuntingLead } from './types';
 import { fromApiLead } from './types';
+import { GeneratedOnLabel } from './generated_on_label';
 import * as i18n from './translations';
-import { getEntityIcon } from './utils';
-
-const PAGE_SIZE_OPTIONS = [10, 20, 50];
+import { renderTextWithEntities } from './shared_lead_components';
+import { MAX_RECENT_LEADS, THREAT_HUNTING_LEADS_SCOPE_ID } from './utils';
 
 interface ThreatHuntingLeadsFlyoutProps {
   onClose: () => void;
   onSelectLead: (lead: HuntingLead) => void;
-  onInfoClick?: (lead: HuntingLead) => void;
+  lastRunTimestamp?: string | null;
 }
 
 export const ThreatHuntingLeadsFlyout: React.FC<ThreatHuntingLeadsFlyoutProps> = ({
   onClose,
   onSelectLead,
-  onInfoClick,
+  lastRunTimestamp,
 }) => {
-  const [pageIndex, setPageIndex] = useState(0);
-  const [pageSize, setPageSize] = useState(20);
   const [searchQuery, setSearchQuery] = useState('');
 
   const { fetchLeads } = useEntityAnalyticsRoutes();
 
   const { data, isLoading } = useQuery({
-    queryKey: ['hunting-leads-flyout', pageIndex, pageSize],
+    queryKey: ['hunting-leads-flyout'],
     queryFn: ({ signal }) =>
       fetchLeads({
         signal,
         params: {
-          page: pageIndex + 1,
-          perPage: pageSize,
+          page: 1,
+          perPage: MAX_RECENT_LEADS,
           sortField: 'priority',
           sortOrder: 'desc',
         },
@@ -63,7 +64,6 @@ export const ThreatHuntingLeadsFlyout: React.FC<ThreatHuntingLeadsFlyoutProps> =
   });
 
   const leads: HuntingLead[] = useMemo(() => data?.leads?.map(fromApiLead) ?? [], [data?.leads]);
-  const totalCount = data?.total ?? 0;
 
   const filteredLeads = useMemo(() => {
     if (!searchQuery) return leads;
@@ -76,12 +76,6 @@ export const ThreatHuntingLeadsFlyout: React.FC<ThreatHuntingLeadsFlyoutProps> =
     );
   }, [leads, searchQuery]);
 
-  const handlePageChange = useCallback((page: number) => setPageIndex(page), []);
-  const handlePageSizeChange = useCallback((size: number) => {
-    setPageSize(size);
-    setPageIndex(0);
-  }, []);
-
   return (
     <EuiFlyoutResizable
       onClose={onClose}
@@ -91,49 +85,74 @@ export const ThreatHuntingLeadsFlyout: React.FC<ThreatHuntingLeadsFlyoutProps> =
       data-test-subj="threatHuntingLeadsFlyout"
     >
       <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="m">
-          <h2>{i18n.ALL_HUNTING_LEADS_TITLE}</h2>
-        </EuiTitle>
+        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="s">
+              <h2>{i18n.ALL_HUNTING_LEADS_TITLE}</h2>
+            </EuiTitle>
+          </EuiFlexItem>
+          {!isLoading && leads.length > 0 && (
+            <EuiFlexItem grow={false}>
+              <EuiNotificationBadge color="subdued" size="m" data-test-subj="leadsCountBadge">
+                {leads.length}
+              </EuiNotificationBadge>
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+        <EuiSpacer size="s" />
+        <EuiText size="s" color="subdued">
+          {i18n.ALL_HUNTING_LEADS_DESCRIPTION}
+        </EuiText>
+        {lastRunTimestamp && (
+          <>
+            <EuiSpacer size="s" />
+            <EuiText size="xs" color="subdued" data-test-subj="leadsFlyoutGeneratedTimestamp">
+              <GeneratedOnLabel timestamp={lastRunTimestamp} />
+            </EuiText>
+          </>
+        )}
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
         <EuiFieldSearch
           placeholder={i18n.SEARCH_LEADS_PLACEHOLDER}
           value={searchQuery}
-          onChange={(e) => {
-            setSearchQuery(e.target.value);
-            setPageIndex(0);
-          }}
+          onChange={(e) => setSearchQuery(e.target.value)}
           fullWidth
           data-test-subj="leadSearchField"
         />
         <EuiSpacer size="m" />
 
         {isLoading ? (
-          <EuiText textAlign="center" color="subdued">
-            {i18n.LOADING}
-          </EuiText>
+          <EuiFlexGroup
+            direction="column"
+            gutterSize="s"
+            data-test-subj="leadsFlyoutLoadingSkeleton"
+          >
+            {Array.from({ length: 4 }, (_, index) => (
+              <EuiFlexItem key={index}>
+                <EuiPanel hasBorder paddingSize="s">
+                  <EuiSkeletonTitle size="xs" />
+                  <EuiSpacer size="s" />
+                  <EuiSkeletonText lines={2} size="s" />
+                </EuiPanel>
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGroup>
+        ) : filteredLeads.length === 0 ? (
+          <EuiPanel color="subdued" data-test-subj="noMatchingLeads">
+            <EuiText size="s" color="subdued" textAlign="center">
+              {i18n.NO_MATCHING_LEADS}
+            </EuiText>
+          </EuiPanel>
         ) : (
-          <>
-            <EuiFlexGroup direction="column" gutterSize="s">
-              {filteredLeads.map((lead) => (
-                <EuiFlexItem key={lead.id}>
-                  <LeadListItem lead={lead} onClick={onSelectLead} onInfoClick={onInfoClick} />
-                </EuiFlexItem>
-              ))}
-            </EuiFlexGroup>
-
-            <EuiSpacer size="m" />
-            <EuiTablePagination
-              pageCount={Math.ceil((searchQuery ? filteredLeads.length : totalCount) / pageSize)}
-              activePage={pageIndex}
-              onChangePage={handlePageChange}
-              itemsPerPage={pageSize}
-              onChangeItemsPerPage={handlePageSizeChange}
-              itemsPerPageOptions={PAGE_SIZE_OPTIONS}
-              data-test-subj="leadsPagination"
-            />
-          </>
+          <EuiFlexGroup direction="column" gutterSize="s">
+            {filteredLeads.map((lead) => (
+              <EuiFlexItem key={lead.id}>
+                <LeadListItem lead={lead} onClick={onSelectLead} />
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGroup>
         )}
       </EuiFlyoutBody>
     </EuiFlyoutResizable>
@@ -143,28 +162,16 @@ export const ThreatHuntingLeadsFlyout: React.FC<ThreatHuntingLeadsFlyoutProps> =
 interface LeadListItemProps {
   lead: HuntingLead;
   onClick: (lead: HuntingLead) => void;
-  onInfoClick?: (lead: HuntingLead) => void;
 }
 
-const LeadListItem: React.FC<LeadListItemProps> = ({ lead, onClick, onInfoClick }) => {
+const LeadListItem: React.FC<LeadListItemProps> = ({ lead, onClick }) => {
+  const { euiTheme } = useEuiTheme();
+  const fontSizeM = useEuiFontSize('m');
   const handleClick = useCallback(() => onClick(lead), [onClick, lead]);
-  const handleInfoClick = useCallback(
-    (e: React.MouseEvent) => {
-      e.stopPropagation();
-      onInfoClick?.(lead);
-    },
-    [onInfoClick, lead]
+  const renderedByline = useMemo(
+    () => renderTextWithEntities(lead.byline, lead.entities, THREAT_HUNTING_LEADS_SCOPE_ID),
+    [lead.byline, lead.entities]
   );
-
-  const relativeTime = useMemo(() => {
-    const diff = Date.now() - new Date(lead.timestamp).getTime();
-    const hours = Math.floor(diff / (1000 * 60 * 60));
-    if (hours < 1) return i18n.RELATIVE_TIME_JUST_NOW;
-    if (hours < 24) return i18n.getRelativeTimeHours(hours);
-    const days = Math.floor(hours / 24);
-    return i18n.getRelativeTimeDays(days);
-  }, [lead.timestamp]);
-
   return (
     <EuiPanel
       hasBorder
@@ -172,42 +179,32 @@ const LeadListItem: React.FC<LeadListItemProps> = ({ lead, onClick, onInfoClick 
       onClick={handleClick}
       data-test-subj={`leadListItem-${lead.id}`}
     >
-      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-        <EuiFlexItem>
-          <EuiText size="s">
-            <strong>{lead.title}</strong>
-          </EuiText>
-          <EuiText size="xs" color="subdued">
-            {lead.byline}
-          </EuiText>
-        </EuiFlexItem>
+      <EuiFlexGroup direction="column" gutterSize="xs">
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
-            {lead.entities.slice(0, 2).map((entity) => (
-              <EuiFlexItem grow={false} key={`${entity.type}-${entity.name}`}>
-                <EuiBadge color="hollow">
-                  <EuiIcon type={getEntityIcon(entity.type)} size="s" aria-hidden={true} />{' '}
-                  {entity.name}
-                </EuiBadge>
-              </EuiFlexItem>
-            ))}
+          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+            <EuiFlexItem style={{ minWidth: 0 }}>
+              <h4
+                css={css`
+                  ${fontSizeM}
+                  font-weight: ${euiTheme.font.weight.semiBold};
+                  overflow: hidden;
+                  text-overflow: ellipsis;
+                  display: -webkit-box;
+                  -webkit-line-clamp: 1;
+                  -webkit-box-orient: vertical;
+                `}
+              >
+                <EuiToolTip content={lead.title} anchorClassName="eui-textTruncate" display="block">
+                  <span tabIndex={0}>{lead.title}</span>
+                </EuiToolTip>
+              </h4>
+            </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
+
         <EuiFlexItem grow={false}>
-          <EuiText size="xs" color="subdued">
-            {relativeTime}
-          </EuiText>
+          <EuiText size="xs">{renderedByline}</EuiText>
         </EuiFlexItem>
-        {onInfoClick && (
-          <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              iconType="iInCircle"
-              aria-label={i18n.VIEW_LEAD_DETAILS}
-              onClick={handleInfoClick}
-              data-test-subj={`leadListInfoButton-${lead.id}`}
-            />
-          </EuiFlexItem>
-        )}
       </EuiFlexGroup>
     </EuiPanel>
   );

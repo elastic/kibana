@@ -25,7 +25,7 @@ const labelStyles = css`
 
 export interface DateRangePickerAutoRefreshButtonProps {
   disabled: boolean;
-  interval: number;
+  intervalMs: number;
   isPaused: boolean;
   onClick: () => void;
   secondsRemaining: number | null;
@@ -36,12 +36,12 @@ export interface DateRangePickerAutoRefreshButtonProps {
  */
 export function DateRangePickerAutoRefreshButton({
   disabled,
-  interval,
+  intervalMs,
   isPaused,
   onClick,
   secondsRemaining,
 }: DateRangePickerAutoRefreshButtonProps) {
-  const intervalSeconds = msToSeconds(interval);
+  const intervalSeconds = msToSeconds(intervalMs);
   const countdownLabel =
     secondsRemaining !== null
       ? formatAutoRefreshCountdown(secondsRemaining)

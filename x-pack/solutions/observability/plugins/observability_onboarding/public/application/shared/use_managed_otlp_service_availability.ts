@@ -14,6 +14,7 @@ export function useManagedOtlpServiceAvailability() {
     services: {
       featureFlags,
       observability,
+      cloud,
       context: { isServerless },
     },
   } = useKibana<ObservabilityOnboardingAppServices>();
@@ -26,7 +27,10 @@ export function useManagedOtlpServiceAvailability() {
   }
 
   const isFeatureEnabled = featureFlags.getBooleanValue(IS_MANAGED_OTLP_SERVICE_ENABLED, false);
-  const managedOtlpServiceUrl = observability.config.managedOtlpServiceUrl;
+  // Prefer the cloud-provided URL; fall back to the deprecated observability config for
+  // deployments whose cloud control plane has not yet migrated to `xpack.cloud.managed_otlp.url`.
+  const managedOtlpServiceUrl =
+    cloud?.managedOtlp?.url || observability.config.managedOtlpServiceUrl;
 
   return isFeatureEnabled && Boolean(managedOtlpServiceUrl);
 }

@@ -83,7 +83,7 @@ export const TableCell: React.FC<TableCellProps> = React.memo(
       return (
         <TableFieldValue
           field={name}
-          formattedValue={row.formattedAsHtml ?? ''}
+          formattedValue={row.formattedAsReact}
           rawValue={flattenedValue}
           ignoreReason={ignoredReason}
           isDetails={isDetails}

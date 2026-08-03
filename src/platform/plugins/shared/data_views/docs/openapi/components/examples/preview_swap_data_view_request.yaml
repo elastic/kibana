@@ -1,4 +1,5 @@
 summary: Preview swapping references from data view ID "abcd-efg" to "xyz-123".
+description: Preview the saved objects that would be affected by swapping references from one data view to another.
 value:
   {
     "fromId" : "abcd-efg",

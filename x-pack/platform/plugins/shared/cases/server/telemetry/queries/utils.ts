@@ -7,14 +7,24 @@
 
 import { get } from 'lodash';
 import type { KueryNode } from '@kbn/es-query';
+import type { SavedObjectsRawDocSource } from '@kbn/core-saved-objects-api-server';
 import {
+  CASE_ATTACHMENT_SAVED_OBJECT,
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
   FILE_ATTACHMENT_TYPE,
+  LEGACY_FILE_ATTACHMENT_TYPE,
   MAX_OBSERVABLES_PER_CASE,
+  OBSERVABILITY_ALERT_ATTACHMENT_TYPE,
+  OWNERS,
+  SECURITY_ALERT_ATTACHMENT_TYPE,
+  STACK_ALERT_ATTACHMENT_TYPE,
 } from '../../../common/constants';
-import { OBSERVABLE_TYPES_BUILTIN_KEYS } from '../../../common/constants/observables';
+import {
+  AUTO_EXTRACT_OBSERVABLE_DESCRIPTION,
+  OBSERVABLE_TYPES_BUILTIN_KEYS,
+} from '../../../common/constants/observables';
 import type {
   CaseAggregationResult,
   Buckets,
@@ -30,7 +40,6 @@ import type {
   AttachmentFrameworkAggsResult,
   CustomFieldsTelemetry,
   AlertBuckets,
-  CasesTelemetryWithAlertsAggsByOwnerResults,
   ObservablesAggregationResult,
   ObservablesTelemetry,
   TotalWithMaxObservablesAggregationResult,
@@ -55,10 +64,13 @@ export const getCountsAggregationQuery = (savedObjectType: string) => ({
   },
 });
 
-export const getAlertsCountsAggregationQuery = () => ({
+export const getAlertsCountsAggregationQuery = (
+  savedObjectType: string = CASE_COMMENT_SAVED_OBJECT,
+  alertField: string = 'alertId'
+) => ({
   counts: {
     date_range: {
-      field: `${CASE_COMMENT_SAVED_OBJECT}.attributes.created_at`,
+      field: `${savedObjectType}.attributes.created_at`,
       format: 'dd/MM/yyyy',
       ranges: [
         { from: 'now-1d', to: 'now' },
@@ -69,7 +81,7 @@ export const getAlertsCountsAggregationQuery = () => ({
     aggregations: {
       topAlertsPerBucket: {
         cardinality: {
-          field: `${CASE_COMMENT_SAVED_OBJECT}.attributes.alertId`,
+          field: `${savedObjectType}.attributes.${alertField}`,
         },
       },
     },
@@ -105,51 +117,13 @@ export const getMaxBucketOnCaseAggregationQuery = (savedObjectType: string) => (
   },
 });
 
-export const getAlertsMaxBucketOnCaseAggregationQuery = () => ({
-  references: {
-    nested: {
-      path: `${CASE_COMMENT_SAVED_OBJECT}.references`,
-    },
-    aggregations: {
-      cases: {
-        filter: {
-          term: {
-            [`${CASE_COMMENT_SAVED_OBJECT}.references.type`]: CASE_SAVED_OBJECT,
-          },
-        },
-        aggregations: {
-          ids: {
-            terms: {
-              field: `${CASE_COMMENT_SAVED_OBJECT}.references.id`,
-            },
-            aggregations: {
-              reverse: {
-                reverse_nested: {},
-                aggregations: {
-                  topAlerts: {
-                    cardinality: {
-                      field: `${CASE_COMMENT_SAVED_OBJECT}.attributes.alertId`,
-                    },
-                  },
-                },
-              },
-            },
-          },
-          max: {
-            max_bucket: {
-              buckets_path: 'ids>reverse.topAlerts',
-            },
-          },
-        },
-      },
-    },
-  },
-});
-
-export const getUniqueAlertCommentsCountQuery = () => ({
+export const getUniqueAlertCommentsCountQuery = (
+  savedObjectType: string = CASE_COMMENT_SAVED_OBJECT,
+  alertField: string = 'alertId'
+) => ({
   uniqueAlertCommentsCount: {
     cardinality: {
-      field: `${CASE_COMMENT_SAVED_OBJECT}.attributes.alertId`,
+      field: `${savedObjectType}.attributes.${alertField}`,
     },
   },
 });
@@ -205,6 +179,21 @@ export const getAlertsCountsFromBuckets = (buckets: AlertBuckets['buckets']) => 
   monthly: buckets?.[0]?.topAlertsPerBucket?.value ?? 0,
 });
 
+/**
+ * Reduces owner-keyed aggregation buckets into a `Record<Owner, number>` seeded
+ * with zeros, so every solution is represented even when a bucket is missing.
+ */
+export const bucketsToOwnerRecord = <T extends { key: string }>(
+  buckets: T[] | undefined,
+  getValue: (bucket: T) => number
+): Record<Owner, number> => {
+  const record: Record<Owner, number> = { securitySolution: 0, observability: 0, cases: 0 };
+  buckets?.forEach((bucket) => {
+    record[bucket.key as Owner] = getValue(bucket);
+  });
+  return record;
+};
+
 export const getObservablesTotalsByType = (
   observablesAggs?: ObservablesAggregationResult
 ): ObservablesTelemetry => {
@@ -225,7 +214,7 @@ export const getObservablesTotalsByType = (
       const type = OBSERVABLE_TYPES_BUILTIN_KEYS.includes(typeBucket.key) ? 'default' : 'custom';
       const count = typeBucket.doc_count;
 
-      if (description === 'Auto extract observables') {
+      if (description === AUTO_EXTRACT_OBSERVABLE_DESCRIPTION) {
         result.auto[type] += count;
       } else {
         result.manual[type] += count;
@@ -250,98 +239,86 @@ export const getTotalWithMaxObservables = (
   }, 0);
 };
 
-interface CountsAndMaxAlertsAggRes {
-  by_owner: {
-    buckets: Array<{
-      key: string;
-      doc_count: number;
-      counts: AlertBuckets;
-      references: MaxBucketOnCaseAggregation['references'];
-      uniqueAlertCommentsCount: {
-        value: number;
-      };
-    }>;
+interface MaxCounterAggs {
+  maxCounter: { value: number | null };
+  byOwner?: {
+    buckets: Array<{ key: string; maxCounter: { value: number | null } }>;
   };
 }
-export const getCountsAndMaxAlertsData = async ({
-  savedObjectsClient,
-}: {
-  savedObjectsClient: TelemetrySavedObjectsClient;
-}) => {
-  const filter = getOnlyAlertsCommentsFilter();
 
-  const res = await savedObjectsClient.find<unknown, CountsAndMaxAlertsAggRes>({
-    page: 0,
-    perPage: 0,
-    filter,
-    type: CASE_COMMENT_SAVED_OBJECT,
+const clampCounter = (value?: number | null) => Math.max(value ?? 0, 0);
+
+/**
+ * Max value of a denormalized case counter (e.g. `total_alerts`, `total_comments`),
+ * which already combines legacy and unified attachments (so a mixed case isn't
+ * split). The `-1` sentinel from unmigrated pre-8.7 cases is clamped to 0.
+ * `byOwner` optionally adds the per-solution breakdown.
+ */
+export const getMaxCounterOnACase = async (
+  savedObjectsClient: TelemetrySavedObjectsClient,
+  counterField: 'total_alerts' | 'total_comments',
+  { byOwner = false }: { byOwner?: boolean } = {}
+): Promise<{ all: number; byOwner: Record<Owner, number> }> => {
+  const field = `${CASE_SAVED_OBJECT}.${counterField}`;
+  const res = await savedObjectsClient.search<SavedObjectsRawDocSource, MaxCounterAggs>({
+    type: [CASE_SAVED_OBJECT],
     namespaces: ['*'],
+    size: 0,
     aggs: {
-      by_owner: {
-        terms: {
-          field: `${CASE_COMMENT_SAVED_OBJECT}.attributes.owner`,
-          size: 3,
-          include: ['securitySolution', 'observability', 'cases'],
-        },
-        aggs: {
-          ...getAlertsCountsAggregationQuery(),
-          ...getAlertsMaxBucketOnCaseAggregationQuery(),
-          ...getUniqueAlertCommentsCountQuery(),
-        },
-      },
+      maxCounter: { max: { field } },
+      ...(byOwner
+        ? {
+            byOwner: {
+              terms: {
+                field: `${CASE_SAVED_OBJECT}.owner`,
+                size: OWNERS.length,
+                include: [...OWNERS],
+              },
+              aggs: { maxCounter: { max: { field } } },
+            },
+          }
+        : {}),
     },
   });
 
-  const sec = getSolutionStats('securitySolution', res?.aggregations);
-  const obs = getSolutionStats('observability', res?.aggregations);
-  const main = getSolutionStats('cases', res?.aggregations);
-  const all = getTotalStats(res?.aggregations);
+  const { aggregations: aggs } = res;
   return {
-    all,
-    sec,
-    obs,
-    main,
+    all: clampCounter(aggs?.maxCounter?.value),
+    byOwner: bucketsToOwnerRecord(aggs?.byOwner?.buckets, ({ maxCounter }) =>
+      clampCounter(maxCounter?.value)
+    ),
   };
 };
 
-export const getSolutionStats = (
-  owner: Owner,
-  countsAndMaxAlertsAggRes?: CountsAndMaxAlertsAggRes
-) => {
-  const bucket = countsAndMaxAlertsAggRes?.by_owner?.buckets?.find((b) => b?.key === owner);
-  if (!bucket) {
-    return {
-      total: 0,
-      daily: 0,
-      weekly: 0,
-      monthly: 0,
-      maxOnACase: 0,
-    };
-  }
+/**
+ * Time-bucketed counts (total/daily/weekly/monthly) for a saved object type.
+ * Unlike `getCountsAndMaxData`, it skips the expensive nested max-per-case
+ * aggregation — use it when `maxOnACase` comes from a denormalized case counter.
+ */
+export const getCountsData = async ({
+  savedObjectsClient,
+  savedObjectType,
+  filter,
+}: {
+  savedObjectsClient: TelemetrySavedObjectsClient;
+  savedObjectType: string;
+  filter?: KueryNode;
+}): Promise<{ all: { total: number; daily: number; weekly: number; monthly: number } }> => {
+  const res = await savedObjectsClient.find<unknown, { counts: Buckets }>({
+    page: 0,
+    perPage: 0,
+    filter,
+    type: savedObjectType,
+    namespaces: ['*'],
+    aggs: { ...getCountsAggregationQuery(savedObjectType) },
+  });
 
   return {
-    total: bucket?.uniqueAlertCommentsCount?.value ?? 0,
-    ...getAlertsCountsFromBuckets(bucket?.counts?.buckets ?? []),
-    maxOnACase: bucket?.references?.cases?.max?.value ?? 0,
-  };
-};
-export const getTotalStats = (countsAndMaxAlertsAggRes?: CountsAndMaxAlertsAggRes) => {
-  const buckets = countsAndMaxAlertsAggRes?.by_owner?.buckets ?? [];
-  return buckets.reduce(
-    (acc, bucket) => {
-      acc.total += bucket?.uniqueAlertCommentsCount?.value ?? 0;
-      const counts = getAlertsCountsFromBuckets(bucket?.counts?.buckets ?? []);
-      acc.daily += counts.daily;
-      acc.weekly += counts.weekly;
-      acc.monthly += counts.monthly;
-      const maxCaseVal = bucket?.references?.cases?.max?.value ?? 0;
-      if (maxCaseVal > acc.maxOnACase) {
-        acc.maxOnACase = maxCaseVal;
-      }
-      return acc;
+    all: {
+      total: res.total,
+      ...getCountsFromBuckets(res.aggregations?.counts?.buckets ?? []),
     },
-    { total: 0, daily: 0, weekly: 0, monthly: 0, maxOnACase: 0 }
-  );
+  };
 };
 
 export const getCountsAndMaxData = async ({
@@ -395,13 +372,13 @@ export const getSolutionValues = ({
   caseAggregations,
   attachmentAggregations,
   filesAggregations,
-  casesTotalWithAlerts,
+  totalWithAlertsByOwner,
   owner,
 }: {
   caseAggregations?: CaseAggregationResult;
   attachmentAggregations?: AttachmentAggregationResult;
   filesAggregations?: FileAttachmentAggregationResults;
-  casesTotalWithAlerts?: CasesTelemetryWithAlertsAggsByOwnerResults;
+  totalWithAlertsByOwner?: Record<Owner, number>;
   owner: Owner;
 }): SolutionTelemetry => {
   const aggregationsBuckets = getAggregationsBuckets({
@@ -417,7 +394,6 @@ export const getSolutionValues = ({
   const totalCasesForOwner = findValueInBuckets(aggregationsBuckets.totalsByOwner, owner);
   const attachmentsAggsForOwner = attachmentAggregations?.[owner];
   const fileAttachmentsForOwner = filesAggregations?.[owner];
-  const totalWithAlerts = processWithAlertsByOwner(casesTotalWithAlerts);
   return {
     total: totalCasesForOwner,
     ...getCountsFromBuckets(aggregationsBuckets[`${owner}.counts`]),
@@ -441,7 +417,7 @@ export const getSolutionValues = ({
     totalWithMaxObservables: getTotalWithMaxObservables(
       caseAggregations?.[owner]?.totalWithMaxObservables?.buckets ?? []
     ),
-    totalWithAlerts: totalWithAlerts[owner],
+    totalWithAlerts: totalWithAlertsByOwner?.[owner] ?? 0,
     assignees: {
       total: caseAggregations?.[owner].totalAssignees.value ?? 0,
       totalWithZero: caseAggregations?.[owner].assigneeFilters.buckets.zero.doc_count ?? 0,
@@ -573,7 +549,19 @@ const getFileAttachmentStats = ({
   totalCasesForOwner: number;
   topMimeTypes?: Buckets<string>;
 }): FileAttachmentStats => {
-  const fileBucket = registryResults.buckets.find((bucket) => bucket.key === FILE_ATTACHMENT_TYPE);
+  const fileBuckets = registryResults.buckets.filter(
+    (bucket) => bucket.key === FILE_ATTACHMENT_TYPE || bucket.key === LEGACY_FILE_ATTACHMENT_TYPE
+  );
+
+  const totalDocCount = fileBuckets.reduce((sum, bucket) => sum + bucket.doc_count, 0);
+  // TODO(post-migration): once `.files` rows are gone, drop the legacy bucket.
+  // While both keys coexist, `maxOnACase` reports `max(legacyMax, unifiedMax)`
+  // — a case with mixed legacy + unified files under-reports the true max-on-a-case;
+  // the underlying agg is per-bucket so cross-bucket max can't be reconstructed here.
+  const maxOnACase = fileBuckets.reduce(
+    (max, bucket) => Math.max(max, bucket.references.cases.max.value ?? 0),
+    0
+  );
 
   const mimeTypes =
     topMimeTypes?.buckets.map((mimeType) => ({
@@ -583,9 +571,9 @@ const getFileAttachmentStats = ({
 
   return {
     averageSize: averageFileSize ?? 0,
-    average: calculateTypePerCaseAverage(fileBucket?.doc_count, totalCasesForOwner),
-    maxOnACase: fileBucket?.references.cases.max.value ?? 0,
-    total: fileBucket?.doc_count ?? 0,
+    average: calculateTypePerCaseAverage(totalDocCount, totalCasesForOwner),
+    maxOnACase,
+    total: totalDocCount,
     topMimeTypes: mimeTypes,
   };
 };
@@ -596,6 +584,18 @@ export const getOnlyAlertsCommentsFilter = () =>
     field: 'type',
     operator: 'or',
     type: CASE_COMMENT_SAVED_OBJECT,
+  });
+
+export const getOnlyUnifiedAlertsFilter = () =>
+  buildFilter({
+    filters: [
+      SECURITY_ALERT_ATTACHMENT_TYPE,
+      OBSERVABILITY_ALERT_ATTACHMENT_TYPE,
+      STACK_ALERT_ATTACHMENT_TYPE,
+    ],
+    field: 'type',
+    operator: 'or',
+    type: CASE_ATTACHMENT_SAVED_OBJECT,
   });
 
 export const getOnlyConnectorsFilter = () =>
@@ -621,19 +621,3 @@ const emptyFileAttachment = (): FileAttachmentStats => ({
   total: 0,
   topMimeTypes: [],
 });
-
-export const processWithAlertsByOwner = (
-  aggregations?: CasesTelemetryWithAlertsAggsByOwnerResults
-): Record<Owner, number> => {
-  const result: Record<Owner, number> = {
-    securitySolution: 0,
-    observability: 0,
-    cases: 0,
-  };
-  if (aggregations) {
-    aggregations.by_owner?.buckets.forEach((item) => {
-      result[item.key as Owner] = item.references.referenceType.referenceAgg.value;
-    });
-  }
-  return result;
-};

@@ -60,13 +60,6 @@ export const EXECUTION_RESULTS_TAB = i18n.translate(
   }
 );
 
-export const EXECUTION_EVENTS_TAB = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.ruleExecutionEventsTab',
-  {
-    defaultMessage: 'Execution events',
-  }
-);
-
 export const DELETED_RULE = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.deletedRule',
   {

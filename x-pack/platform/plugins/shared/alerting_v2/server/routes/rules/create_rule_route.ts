@@ -8,27 +8,24 @@
 import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
 import { inject, injectable } from 'inversify';
 import { Request } from '@kbn/core-di-server';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
-import { z } from '@kbn/zod/v4';
-import { createRuleDataSchema, ruleResponseSchema } from '@kbn/alerting-v2-schemas';
+import {
+  createRuleDataSchema,
+  errorResponseSchema,
+  ruleResponseSchema,
+} from '@kbn/alerting-v2-schemas';
 import type { CreateRuleData, RuleResponse } from '@kbn/alerting-v2-schemas';
 import { RulesClient } from '../../lib/rules_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { ALERTING_V2_RULE_API_PATH } from '../constants';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
-
-const createRuleParamsSchema = z.object({
-  id: z
-    .string()
-    .optional()
-    .describe('An optional identifier for the rule. If omitted, an ID is generated automatically.'),
-});
+import { INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION } from '../route_descriptions';
+import { createRuleOasExamples } from './create_rule_oas_example';
 
 @injectable()
 export class CreateRuleRoute extends BaseAlertingRoute {
   static method = 'post' as const;
-  static path = `${ALERTING_V2_RULE_API_PATH}/{id?}`;
+  static path = `${ALERTING_V2_RULE_API_PATH}`;
   static security: RouteSecurity = {
     authz: {
       requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.rules.write],
@@ -36,19 +33,22 @@ export class CreateRuleRoute extends BaseAlertingRoute {
   };
   static routeOptions = {
     summary: 'Create a rule',
+    description:
+      'Creates a rule with a server-generated identifier. To create or replace a rule with a client-supplied identifier, use PUT /api/alerting/v2/rules/.',
+    oasOperationObject: createRuleOasExamples,
   } as const;
-  static validate = {
+  static schemas = {
     request: {
-      body: buildRouteValidationWithZod(createRuleDataSchema),
-      params: buildRouteValidationWithZod(createRuleParamsSchema),
+      body: createRuleDataSchema,
     },
     response: {
-      200: {
+      201: {
         body: () => ruleResponseSchema,
-        description: 'Indicates a successful call.',
+        description: 'Returns the newly created rule.',
       },
       400: {
-        description: 'Indicates an invalid schema or parameters.',
+        body: () => errorResponseSchema,
+        description: INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
       },
     },
   };
@@ -58,11 +58,7 @@ export class CreateRuleRoute extends BaseAlertingRoute {
   constructor(
     @inject(AlertingRouteContext) ctx: AlertingRouteContext,
     @inject(Request)
-    private readonly request: KibanaRequest<
-      z.infer<typeof createRuleParamsSchema>,
-      unknown,
-      CreateRuleData
-    >,
+    private readonly request: KibanaRequest<unknown, unknown, CreateRuleData>,
     @inject(RulesClient) private readonly rulesClient: RulesClient
   ) {
     super(ctx);
@@ -71,9 +67,8 @@ export class CreateRuleRoute extends BaseAlertingRoute {
   protected async execute() {
     const created: RuleResponse = await this.rulesClient.createRule({
       data: this.request.body,
-      options: { id: this.request.params.id },
     });
 
-    return this.ctx.response.ok({ body: created });
+    return this.ctx.response.created({ body: created });
   }
 }

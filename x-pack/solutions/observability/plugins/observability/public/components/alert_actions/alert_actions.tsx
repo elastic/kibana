@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiButtonIcon,
-  EuiFlexItem,
-  EuiContextMenuPanel,
-  EuiPopover,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexItem, EuiPopover, EuiToolTip } from '@elastic/eui';
 
 import React, { useMemo, useState, useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
@@ -20,6 +14,10 @@ import { SLO_ALERTS_TABLE_ID } from '@kbn/observability-shared-plugin/common';
 import { getRulesAppDetailsRoute, rulesAppRoute } from '@kbn/rule-data-utils';
 import { DefaultAlertActions } from '@kbn/response-ops-alerts-table/components/default_alert_actions';
 import { useCaseAlertActionItems } from '@kbn/response-ops-alerts-table/hooks/use_case_alert_action_items';
+import { ExpandableContextMenuPanel } from '@kbn/response-ops-alerts-table/components/expandable_context_menu_panel';
+import { useKibana } from '../../utils/kibana_react';
+import { useCanModifyAlerts } from '../../hooks/use_can_modify_alerts';
+import { useAuthorizedToReadRuleType } from '../../hooks/use_authorized_to_read_rule_type';
 import { RULE_DETAILS_PAGE_ID } from '../../pages/rule_details/constants';
 import { SLO_DETAIL_PATH } from '../../../common/locators/paths';
 import { parseAlert } from '../../pages/alerts/helpers/parse_alert';
@@ -45,11 +43,17 @@ export function AlertActions(
     },
     cases,
   } = services;
+
+  const canModifyAlerts = useCanModifyAlerts();
+
+  const { authorizedToReadRuleForAlert } = useAuthorizedToReadRuleType();
+
+  const canReadAlertRule = authorizedToReadRuleForAlert(alert);
+  const { telemetryClient } = useKibana().services;
   const isSLODetailsPage = useRouteMatch(SLO_DETAIL_PATH);
 
   const isInApp = Boolean(tableId === SLO_ALERTS_TABLE_ID && isSLODetailsPage);
 
-  const userCasesPermissions = cases?.helpers.canUseCases([observabilityFeatureId]);
   const [viewInAppUrl, setViewInAppUrl] = useState<string>();
 
   const parseObservabilityAlert = useMemo(
@@ -58,6 +62,8 @@ export function AlertActions(
   );
 
   const observabilityAlert = parseObservabilityAlert(alert);
+
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const closeActionsPopover = useCallback(() => {
     setIsPopoverOpen(false);
@@ -71,6 +77,14 @@ export function AlertActions(
     alert,
     cases,
     refresh,
+    onAddToCase({ isNewCase }) {
+      telemetryClient.reportAlertAddedToCase(
+        isNewCase,
+        tableId || 'unknown',
+        observabilityAlert.fields['kibana.alert.rule.rule_type_id']
+      );
+      refresh?.();
+    },
     onActionExecuted: closeActionsPopover,
     owner: [observabilityFeatureId],
   });
@@ -94,12 +108,8 @@ export function AlertActions(
     }
   }, [observabilityAlert.link, observabilityAlert.hasBasePath, prepend]);
 
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-
   const actionsMenuItems = [
-    ...(userCasesPermissions?.createComment && userCasesPermissions?.read
-      ? caseAlertActionItems
-      : []),
+    ...caseAlertActionItems,
 
     useMemo(
       () => (
@@ -107,14 +117,15 @@ export function AlertActions(
           {...props}
           key="defaultRowActions"
           onActionExecuted={closeActionsPopover}
+          canModifyAlerts={canModifyAlerts}
           resolveRulePagePath={(ruleId, currentPageId) =>
-            currentPageId !== RULE_DETAILS_PAGE_ID
+            canReadAlertRule && currentPageId !== RULE_DETAILS_PAGE_ID
               ? `${rulesAppRoute}${getRulesAppDetailsRoute(ruleId)}`
               : null
           }
         />
       ),
-      [closeActionsPopover, props]
+      [closeActionsPopover, props, canModifyAlerts, canReadAlertRule]
     ),
   ];
 
@@ -144,7 +155,7 @@ export function AlertActions(
           >
             <EuiButtonIcon
               data-test-subj="expand-event"
-              iconType="expand"
+              iconType="maximize"
               onClick={onExpandEvent}
               size="s"
               color="text"
@@ -183,7 +194,8 @@ export function AlertActions(
         grow={parentAlert ? false : undefined}
       >
         <EuiPopover
-          anchorPosition="downLeft"
+          aria-label={actionsToolTip}
+          anchorPosition="rightCenter"
           button={
             <EuiToolTip content={actionsToolTip} disableScreenReaderOutput>
               <EuiButtonIcon
@@ -191,7 +203,7 @@ export function AlertActions(
                 color="text"
                 data-test-subj="alertsTableRowActionMore"
                 display="empty"
-                iconType="boxesHorizontal"
+                iconType="boxesVertical"
                 onClick={toggleActionsPopover}
                 size="s"
               />
@@ -200,12 +212,9 @@ export function AlertActions(
           closePopover={closeActionsPopover}
           isOpen={isPopoverOpen}
           panelPaddingSize="none"
+          panelStyle={{ maxHeight: '80vh', overflowY: 'auto' }}
         >
-          <EuiContextMenuPanel
-            size="s"
-            items={actionsMenuItems}
-            data-test-subj="alertsTableActionsMenu"
-          />
+          <ExpandableContextMenuPanel items={actionsMenuItems} />
         </EuiPopover>
       </EuiFlexItem>
     </>

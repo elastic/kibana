@@ -1,0 +1,8 @@
+prs:
+- https://github.com/elastic/kibana/pull/261927
+type: feature
+products:
+- product: cloud-serverless
+  target: 2026-05-14
+title: "Improve dashboard migration accuracy with data sampling"
+description: "Enhances the dashboard migration process by sampling actual data records to produce more accurate visualizations and configurations in the migrated dashboards."

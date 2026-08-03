@@ -65,7 +65,7 @@ export const USER_TS_EXTRACTION_CASES: readonly UserTsExtractionCase[] = [
     expectedMeta: { namespace: 'okta', confidence: ENTITY_CONFIDENCE.High, entityName: 'john.doe' },
   },
   {
-    id: 'idp-asset-azure-user-name',
+    id: 'non-idp-asset-azure-user-name',
     query: {
       bool: {
         must: [{ term: { 'user.name': 'jane.smith' } }, { term: { 'host.id': 'host-456' } }],
@@ -76,10 +76,10 @@ export const USER_TS_EXTRACTION_CASES: readonly UserTsExtractionCase[] = [
       event: { kind: 'asset', module: 'azure' },
       host: { id: 'host-456' },
     },
-    expectedEuid: 'user:jane.smith@entra_id',
+    expectedEuid: 'user:jane.smith@host-456@local',
     expectedMeta: {
-      namespace: 'entra_id',
-      confidence: ENTITY_CONFIDENCE.High,
+      namespace: 'local',
+      confidence: ENTITY_CONFIDENCE.Medium,
       entityName: 'jane.smith',
     },
   },
@@ -221,10 +221,10 @@ export const USER_TS_EXTRACTION_CASES: readonly UserTsExtractionCase[] = [
       event: { kind: 'asset', module: 'o365' },
       host: { entity: { id: '' }, id: 'host-404' },
     },
-    expectedEuid: 'user:eve.martin@microsoft_365',
+    expectedEuid: 'user:eve.martin@host-404@local',
     expectedMeta: {
-      namespace: 'microsoft_365',
-      confidence: ENTITY_CONFIDENCE.High,
+      namespace: 'local',
+      confidence: ENTITY_CONFIDENCE.Medium,
       entityName: 'eve.martin',
     },
   },
@@ -305,6 +305,100 @@ export const USER_TS_EXTRACTION_CASES: readonly UserTsExtractionCase[] = [
       namespace: 'gcp',
       confidence: ENTITY_CONFIDENCE.High,
       entityName: 'jack.white',
+    },
+  },
+  // --- Asset + cloud.provider (user.ts fieldEvaluations): namespace from cloud, not event.module ---
+  {
+    id: 'asset-cloud-provider-aws-no-host',
+    query: { term: { 'user.name': 'scout.asset.cloud.aws.user' } },
+    dslFilterSource: {
+      user: { name: 'scout.asset.cloud.aws.user' },
+      event: { kind: 'asset', module: 'asset_discovery', outcome: 'success' },
+      cloud: { provider: 'aws' },
+    },
+    expectedEuid: 'user:scout.asset.cloud.aws.user@aws',
+    expectedMeta: {
+      namespace: 'aws',
+      confidence: ENTITY_CONFIDENCE.High,
+      entityName: 'scout.asset.cloud.aws.user',
+    },
+    ingestSource: {
+      '@timestamp': '2026-01-21T10:00:00.000Z',
+      user: { name: 'scout.asset.cloud.aws.user' },
+      event: { kind: 'asset', module: 'asset_discovery', outcome: 'success' },
+      cloud: { provider: 'aws' },
+    },
+  },
+  {
+    id: 'asset-cloud-provider-gcp-no-host',
+    query: { term: { 'user.name': 'scout.asset.cloud.gcp.user' } },
+    dslFilterSource: {
+      user: { name: 'scout.asset.cloud.gcp.user' },
+      event: { kind: 'asset', module: 'asset_discovery', outcome: 'success' },
+      cloud: { provider: 'gcp' },
+    },
+    expectedEuid: 'user:scout.asset.cloud.gcp.user@gcp',
+    expectedMeta: {
+      namespace: 'gcp',
+      confidence: ENTITY_CONFIDENCE.High,
+      entityName: 'scout.asset.cloud.gcp.user',
+    },
+    ingestSource: {
+      '@timestamp': '2026-01-21T10:01:00.000Z',
+      user: { name: 'scout.asset.cloud.gcp.user' },
+      event: { kind: 'asset', module: 'asset_discovery', outcome: 'success' },
+      cloud: { provider: 'gcp' },
+    },
+  },
+  {
+    id: 'asset-cloud-provider-azure-no-host',
+    query: { term: { 'user.name': 'scout.asset.cloud.azure.user' } },
+    dslFilterSource: {
+      user: { name: 'scout.asset.cloud.azure.user' },
+      event: { kind: 'asset', module: 'asset_discovery', outcome: 'success' },
+      cloud: { provider: 'azure' },
+    },
+    expectedEuid: 'user:scout.asset.cloud.azure.user@entra_id',
+    expectedMeta: {
+      namespace: 'entra_id',
+      confidence: ENTITY_CONFIDENCE.High,
+      entityName: 'scout.asset.cloud.azure.user',
+    },
+    ingestSource: {
+      '@timestamp': '2026-01-21T10:02:00.000Z',
+      user: { name: 'scout.asset.cloud.azure.user' },
+      event: { kind: 'asset', module: 'asset_discovery', outcome: 'success' },
+      cloud: { provider: 'azure' },
+    },
+  },
+  {
+    id: 'asset-cloud-provider-aws-with-host-local',
+    query: {
+      bool: {
+        must: [
+          { term: { 'user.name': 'scout.asset.cloud.aws.local.user' } },
+          { term: { 'host.id': 'scout-host-cloud-aws-local' } },
+        ],
+      },
+    },
+    dslFilterSource: {
+      user: { name: 'scout.asset.cloud.aws.local.user' },
+      host: { id: 'scout-host-cloud-aws-local' },
+      event: { kind: 'asset', module: 'asset_discovery', outcome: 'success' },
+      cloud: { provider: 'aws' },
+    },
+    expectedEuid: 'user:scout.asset.cloud.aws.local.user@scout-host-cloud-aws-local@local',
+    expectedMeta: {
+      namespace: 'local',
+      confidence: ENTITY_CONFIDENCE.Medium,
+      entityName: 'scout.asset.cloud.aws.local.user',
+    },
+    ingestSource: {
+      '@timestamp': '2026-01-21T10:03:00.000Z',
+      user: { name: 'scout.asset.cloud.aws.local.user' },
+      host: { id: 'scout-host-cloud-aws-local' },
+      event: { kind: 'asset', module: 'asset_discovery', outcome: 'success' },
+      cloud: { provider: 'aws' },
     },
   },
   // --- IDP: IAM event types (idpEventTypeCondition), not asset kind ---
@@ -553,7 +647,7 @@ export const USER_SCOUT_INVALID_PER_DOCUMENT_FILTER_EXAMPLES: readonly UserScout
 /**
  * Expected number of user documents in `es_archives/updates` that pass
  * `getEuidDslDocumentsContainsIdFilter('user')` (documentsFilter ∧ postAggFilter).
- * Keep in sync: archive user docs with defined EUID = 25; this table lists archive-backed cases with EUID + cases without; ingested-only
+ * Keep in sync: archive user docs with defined EUID; this table lists archive-backed cases with EUID + cases without; ingested-only
  * case is excluded here.
  */
-export const USER_TS_ARCHIVE_EXPECTED_CONTAINS_ID_COUNT = 25;
+export const USER_TS_ARCHIVE_EXPECTED_CONTAINS_ID_COUNT = 29;

@@ -217,8 +217,7 @@ export class Metric extends Component {
             className="tvbVisMetric__value--secondary"
             css={valueSecondaryStyle}
           >
-            {/* eslint-disable-next-line react/no-danger */}
-            <span dangerouslySetInnerHTML={{ __html: secondaryValue }} />
+            <span>{secondaryValue}</span>
           </div>
         </div>
       );
@@ -269,8 +268,7 @@ export class Metric extends Component {
                       className="tvbVisMetric__value--primary"
                       css={valuePrimaryStyle}
                     >
-                      {/* eslint-disable-next-line react/no-danger */}
-                      <span dangerouslySetInnerHTML={{ __html: primaryValue }} />
+                      <span>{primaryValue}</span>
                     </div>
                   </div>
                   {secondarySnippet}

@@ -138,6 +138,62 @@ export const OAUTH_AUTHORIZATION_URL_LABEL = i18n.translate(
   }
 );
 
+export const OAUTH_CLIENT_CREDENTIALS_PRIVATE_KEY_JWT_LABEL = i18n.translate(
+  'connectorSpecs.oauthClientCredentialsPrivateKeyJwt.label',
+  { defaultMessage: 'OAuth Client Credentials (Private Key JWT)' }
+);
+
+export const OAUTH_CLIENT_CREDENTIALS_PRIVATE_KEY_JWT_ALGORITHM_LABEL = i18n.translate(
+  'connectorSpecs.oauthClientCredentialsPrivateKeyJwt.algorithm.label',
+  { defaultMessage: 'Signing algorithm' }
+);
+
+export const OAUTH_CLIENT_CREDENTIALS_PRIVATE_KEY_JWT_BINDING_LABEL = i18n.translate(
+  'connectorSpecs.oauthClientCredentialsPrivateKeyJwt.certificateBinding.label',
+  { defaultMessage: 'Certificate binding header' }
+);
+
+export const OAUTH_CLIENT_CREDENTIALS_PRIVATE_KEY_JWT_KEY_ID_LABEL = i18n.translate(
+  'connectorSpecs.oauthClientCredentialsPrivateKeyJwt.keyId.label',
+  { defaultMessage: 'Key ID' }
+);
+
+export const OAUTH_CLIENT_CREDENTIALS_PRIVATE_KEY_JWT_CERTIFICATE_LABEL = i18n.translate(
+  'connectorSpecs.oauthClientCredentialsPrivateKeyJwt.certificate.label',
+  { defaultMessage: 'Certificate (PEM)' }
+);
+
+export const OAUTH_CLIENT_CREDENTIALS_PRIVATE_KEY_JWT_CERTIFICATE_INVALID_PEM_MESSAGE =
+  i18n.translate(
+    'connectorSpecs.oauthClientCredentialsPrivateKeyJwt.certificate.invalidPemMessage',
+    {
+      defaultMessage: 'Certificate must be a PEM-encoded X.509 certificate.',
+    }
+  );
+
+export const OAUTH_CLIENT_CREDENTIALS_PRIVATE_KEY_JWT_PRIVATE_KEY_LABEL = i18n.translate(
+  'connectorSpecs.oauthClientCredentialsPrivateKeyJwt.privateKey.label',
+  { defaultMessage: 'Private key (PEM)' }
+);
+
+export const OAUTH_CLIENT_CREDENTIALS_PRIVATE_KEY_JWT_PRIVATE_KEY_REQUIRED_MESSAGE = i18n.translate(
+  'connectorSpecs.oauthClientCredentialsPrivateKeyJwt.privateKey.requiredMessage',
+  { defaultMessage: 'Private key is required.' }
+);
+
+export const OAUTH_CLIENT_CREDENTIALS_PRIVATE_KEY_JWT_PRIVATE_KEY_INVALID_PEM_MESSAGE =
+  i18n.translate(
+    'connectorSpecs.oauthClientCredentialsPrivateKeyJwt.privateKey.invalidPemMessage',
+    {
+      defaultMessage: 'Private key must be a PEM-encoded RSA or PKCS#8 key.',
+    }
+  );
+
+export const OAUTH_CLIENT_CREDENTIALS_PRIVATE_KEY_JWT_PASSPHRASE_LABEL = i18n.translate(
+  'connectorSpecs.oauthClientCredentialsPrivateKeyJwt.passphrase.label',
+  { defaultMessage: 'Private key passphrase' }
+);
+
 export const CRT_AUTH_LABEL = i18n.translate('connectorSpecs.crt.label', {
   defaultMessage: 'SSL CRT and Key authentication',
 });
@@ -188,6 +244,41 @@ export const PFX_AUTH_VERIFICATION_MODE_LABEL = i18n.translate(
   }
 );
 
+export const AZURE_SHARED_KEY_AUTH_LABEL = i18n.translate(
+  'connectorSpecs.azureSharedKeyAuth.label',
+  {
+    defaultMessage: 'Azure Shared Key',
+  }
+);
+
+export const AZURE_SHARED_KEY_ACCOUNT_NAME_LABEL = i18n.translate(
+  'connectorSpecs.azureSharedKeyAuth.accountName.label',
+  {
+    defaultMessage: 'Storage account name',
+  }
+);
+
+export const AZURE_SHARED_KEY_ACCOUNT_NAME_REQUIRED_MESSAGE = i18n.translate(
+  'connectorSpecs.azureSharedKeyAuth.accountName.requiredMessage',
+  {
+    defaultMessage: 'Enter a storage account name.',
+  }
+);
+
+export const AZURE_SHARED_KEY_ACCOUNT_KEY_LABEL = i18n.translate(
+  'connectorSpecs.azureSharedKeyAuth.accountKey.label',
+  {
+    defaultMessage: 'Storage account key',
+  }
+);
+
+export const AZURE_SHARED_KEY_ACCOUNT_KEY_REQUIRED_MESSAGE = i18n.translate(
+  'connectorSpecs.azureSharedKeyAuth.accountKey.requiredMessage',
+  {
+    defaultMessage: 'Enter a storage account key.',
+  }
+);
+
 export const AWS_CREDENTIALS_LABEL = i18n.translate('connectorSpecs.awsCredentials.label', {
   defaultMessage: 'AWS Credentials',
 });
@@ -221,5 +312,249 @@ export const AWS_SECRET_ACCESS_KEY_REQUIRED_MESSAGE = i18n.translate(
 );
 
 export const EARS_LABEL = i18n.translate('connectorSpecs.ears.label', {
-  defaultMessage: 'OAuth 2.0 via Elastic-owned apps',
+  defaultMessage: 'Quick Connect OAuth 2.0',
 });
+
+export const GCP_SERVICE_ACCOUNT_LABEL = i18n.translate('connectorSpecs.gcpServiceAccount.label', {
+  defaultMessage: 'GCP Service Account',
+});
+
+export const GCP_SERVICE_ACCOUNT_JSON_LABEL = i18n.translate(
+  'connectorSpecs.gcpServiceAccount.json.label',
+  {
+    defaultMessage: 'Service Account JSON',
+  }
+);
+
+export const GCP_SERVICE_ACCOUNT_JSON_REQUIRED_MESSAGE = i18n.translate(
+  'connectorSpecs.gcpServiceAccount.json.requiredMessage',
+  {
+    defaultMessage: 'Service Account JSON is required',
+  }
+);
+
+export const GCP_SERVICE_ACCOUNT_JSON_HELP_TEXT = i18n.translate(
+  'connectorSpecs.gcpServiceAccount.json.helpText',
+  {
+    defaultMessage:
+      'Paste the contents of your GCP service account JSON key file. You can download this from the GCP Console under IAM & Admin > Service Accounts.',
+  }
+);
+
+export const GCP_SERVICE_ACCOUNT_SCOPE_LABEL = i18n.translate(
+  'connectorSpecs.gcpServiceAccount.scope.label',
+  {
+    defaultMessage: 'OAuth Scope',
+  }
+);
+
+export const GCP_SERVICE_ACCOUNT_SCOPE_HELP_TEXT = i18n.translate(
+  'connectorSpecs.gcpServiceAccount.scope.helpText',
+  {
+    defaultMessage:
+      'OAuth scope for the access token. Defaults to https://www.googleapis.com/auth/cloud-platform.',
+  }
+);
+
+export const BEARER_WITH_TLS_AUTH_LABEL = i18n.translate('connectorSpecs.bearerWithTlsAuth.label', {
+  defaultMessage: 'API token',
+});
+
+export const BEARER_WITH_TLS_AUTH_TOKEN_LABEL = i18n.translate(
+  'connectorSpecs.bearerWithTlsAuth.token.label',
+  {
+    defaultMessage: 'Token',
+  }
+);
+
+export const BEARER_WITH_TLS_AUTH_TOKEN_REQUIRED_MESSAGE = i18n.translate(
+  'connectorSpecs.bearerWithTlsAuth.token.requiredMessage',
+  {
+    defaultMessage: 'An API token is required.',
+  }
+);
+
+export const BEARER_WITH_TLS_AUTH_CA_LABEL = i18n.translate(
+  'connectorSpecs.bearerWithTlsAuth.ca.label',
+  {
+    defaultMessage: 'CA certificate (PEM)',
+  }
+);
+
+export const BEARER_WITH_TLS_AUTH_CA_HELP_TEXT = i18n.translate(
+  'connectorSpecs.bearerWithTlsAuth.ca.helpText',
+  {
+    defaultMessage:
+      'Paste the PEM-encoded certificate authority used to verify the server. Leave empty to rely on the system trust store or to disable verification.',
+  }
+);
+
+export const BEARER_WITH_TLS_AUTH_VERIFICATION_MODE_LABEL = i18n.translate(
+  'connectorSpecs.bearerWithTlsAuth.verificationMode.label',
+  {
+    defaultMessage: 'Verification mode',
+  }
+);
+
+export const BEARER_WITH_TLS_AUTH_VERIFICATION_MODE_HELP_TEXT = i18n.translate(
+  'connectorSpecs.bearerWithTlsAuth.verificationMode.helpText',
+  {
+    defaultMessage:
+      'How to verify the server TLS certificate. "full" verifies the certificate and hostname, "certificate" verifies the certificate only, and "none" disables verification (not recommended).',
+  }
+);
+
+export const KUBERNETES_GKE_AUTH_LABEL = i18n.translate('connectorSpecs.kubernetesGkeAuth.label', {
+  defaultMessage: 'Google Kubernetes Engine (GKE)',
+});
+
+export const KUBERNETES_GKE_SERVICE_ACCOUNT_JSON_LABEL = i18n.translate(
+  'connectorSpecs.kubernetesGkeAuth.serviceAccountJson.label',
+  {
+    defaultMessage: 'GCP service account key (JSON)',
+  }
+);
+
+export const KUBERNETES_GKE_SERVICE_ACCOUNT_JSON_REQUIRED_MESSAGE = i18n.translate(
+  'connectorSpecs.kubernetesGkeAuth.serviceAccountJson.requiredMessage',
+  {
+    defaultMessage: 'A GCP service account JSON key is required.',
+  }
+);
+
+export const KUBERNETES_GKE_SERVICE_ACCOUNT_JSON_HELP_TEXT = i18n.translate(
+  'connectorSpecs.kubernetesGkeAuth.serviceAccountJson.helpText',
+  {
+    defaultMessage:
+      'Upload the JSON key of a GCP service account that is authorized to access the cluster (for example via the Kubernetes Engine Viewer or Developer IAM role, or an in-cluster RBAC binding for the service account email). The connector exchanges the key for short-lived access tokens.',
+  }
+);
+
+export const KUBERNETES_EKS_AUTH_LABEL = i18n.translate('connectorSpecs.kubernetesEksAuth.label', {
+  defaultMessage: 'Amazon EKS',
+});
+
+export const KUBERNETES_EKS_ACCESS_KEY_ID_LABEL = i18n.translate(
+  'connectorSpecs.kubernetesEksAuth.accessKeyId.label',
+  {
+    defaultMessage: 'Access key ID',
+  }
+);
+
+export const KUBERNETES_EKS_ACCESS_KEY_ID_REQUIRED_MESSAGE = i18n.translate(
+  'connectorSpecs.kubernetesEksAuth.accessKeyId.requiredMessage',
+  {
+    defaultMessage: 'An AWS access key ID is required.',
+  }
+);
+
+export const KUBERNETES_EKS_SECRET_ACCESS_KEY_LABEL = i18n.translate(
+  'connectorSpecs.kubernetesEksAuth.secretAccessKey.label',
+  {
+    defaultMessage: 'Secret access key',
+  }
+);
+
+export const KUBERNETES_EKS_SECRET_ACCESS_KEY_REQUIRED_MESSAGE = i18n.translate(
+  'connectorSpecs.kubernetesEksAuth.secretAccessKey.requiredMessage',
+  {
+    defaultMessage: 'An AWS secret access key is required.',
+  }
+);
+
+export const KUBERNETES_EKS_REGION_LABEL = i18n.translate(
+  'connectorSpecs.kubernetesEksAuth.region.label',
+  {
+    defaultMessage: 'AWS region',
+  }
+);
+
+export const KUBERNETES_EKS_REGION_REQUIRED_MESSAGE = i18n.translate(
+  'connectorSpecs.kubernetesEksAuth.region.requiredMessage',
+  {
+    defaultMessage: 'The AWS region of the EKS cluster is required.',
+  }
+);
+
+export const KUBERNETES_EKS_REGION_HELP_TEXT = i18n.translate(
+  'connectorSpecs.kubernetesEksAuth.region.helpText',
+  {
+    defaultMessage: 'The AWS region the EKS cluster runs in, for example us-east-1.',
+  }
+);
+
+export const KUBERNETES_EKS_CLUSTER_NAME_LABEL = i18n.translate(
+  'connectorSpecs.kubernetesEksAuth.clusterName.label',
+  {
+    defaultMessage: 'EKS cluster name',
+  }
+);
+
+export const KUBERNETES_EKS_CLUSTER_NAME_REQUIRED_MESSAGE = i18n.translate(
+  'connectorSpecs.kubernetesEksAuth.clusterName.requiredMessage',
+  {
+    defaultMessage: 'The EKS cluster name is required.',
+  }
+);
+
+export const KUBERNETES_EKS_CLUSTER_NAME_HELP_TEXT = i18n.translate(
+  'connectorSpecs.kubernetesEksAuth.clusterName.helpText',
+  {
+    defaultMessage:
+      'The name of the EKS cluster as shown in AWS. Authentication tokens are bound to this cluster name, and the IAM principal must be granted cluster access (for example via an EKS access entry).',
+  }
+);
+
+export const KUBERNETES_AKS_AUTH_LABEL = i18n.translate('connectorSpecs.kubernetesAksAuth.label', {
+  defaultMessage: 'Azure Kubernetes Service (AKS)',
+});
+
+export const KUBERNETES_AKS_TENANT_ID_LABEL = i18n.translate(
+  'connectorSpecs.kubernetesAksAuth.tenantId.label',
+  {
+    defaultMessage: 'Tenant ID',
+  }
+);
+
+export const KUBERNETES_AKS_TENANT_ID_REQUIRED_MESSAGE = i18n.translate(
+  'connectorSpecs.kubernetesAksAuth.tenantId.requiredMessage',
+  {
+    defaultMessage: 'The Microsoft Entra tenant ID is required.',
+  }
+);
+
+export const KUBERNETES_AKS_CLIENT_ID_LABEL = i18n.translate(
+  'connectorSpecs.kubernetesAksAuth.clientId.label',
+  {
+    defaultMessage: 'Client ID',
+  }
+);
+
+export const KUBERNETES_AKS_CLIENT_ID_REQUIRED_MESSAGE = i18n.translate(
+  'connectorSpecs.kubernetesAksAuth.clientId.requiredMessage',
+  {
+    defaultMessage: 'The application (client) ID of the service principal is required.',
+  }
+);
+
+export const KUBERNETES_AKS_CLIENT_SECRET_LABEL = i18n.translate(
+  'connectorSpecs.kubernetesAksAuth.clientSecret.label',
+  {
+    defaultMessage: 'Client secret',
+  }
+);
+
+export const KUBERNETES_AKS_CLIENT_SECRET_REQUIRED_MESSAGE = i18n.translate(
+  'connectorSpecs.kubernetesAksAuth.clientSecret.requiredMessage',
+  {
+    defaultMessage: 'The client secret of the service principal is required.',
+  }
+);
+
+export const KUBERNETES_AKS_HELP_TEXT = i18n.translate(
+  'connectorSpecs.kubernetesAksAuth.helpText',
+  {
+    defaultMessage:
+      'Requires an AKS cluster with Microsoft Entra ID integration. The service principal must be authorized on the cluster, for example via Azure RBAC for Kubernetes or an in-cluster RBAC binding.',
+  }
+);

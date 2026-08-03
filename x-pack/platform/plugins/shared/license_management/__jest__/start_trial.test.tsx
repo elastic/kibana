@@ -19,8 +19,8 @@ describe('StartTrial component when trial is allowed', () => {
       StartTrial
     );
 
-    await waitFor(() => expect(rendered.services.http.get).toHaveBeenCalled());
-    await rendered.services.http.get.mock.results[0].value;
+    await waitFor(() => expect(rendered.http.get).toHaveBeenCalled());
+    await rendered.http.get.mock.results[0].value;
 
     expect(rendered.renderResult.asFragment()).toMatchSnapshot();
   });
@@ -33,8 +33,8 @@ describe('StartTrial component when trial is allowed', () => {
       StartTrial
     );
 
-    await waitFor(() => expect(rendered.services.http.get).toHaveBeenCalled());
-    await rendered.services.http.get.mock.results[0].value;
+    await waitFor(() => expect(rendered.http.get).toHaveBeenCalled());
+    await rendered.http.get.mock.results[0].value;
 
     expect(rendered.renderResult.asFragment()).toMatchSnapshot();
   });
@@ -48,8 +48,8 @@ describe('StartTrial component when trial is allowed', () => {
       StartTrial
     );
 
-    await waitFor(() => expect(rendered.services.http.get).toHaveBeenCalled());
-    await rendered.services.http.get.mock.results[0].value;
+    await waitFor(() => expect(rendered.http.get).toHaveBeenCalled());
+    await rendered.http.get.mock.results[0].value;
 
     expect(rendered.renderResult.container).toBeEmptyDOMElement();
   });
@@ -62,8 +62,8 @@ describe('StartTrial component when trial is allowed', () => {
       StartTrial
     );
 
-    await waitFor(() => expect(rendered.services.http.get).toHaveBeenCalled());
-    await rendered.services.http.get.mock.results[0].value;
+    await waitFor(() => expect(rendered.http.get).toHaveBeenCalled());
+    await rendered.http.get.mock.results[0].value;
 
     expect(rendered.renderResult.container).toBeEmptyDOMElement();
   });
@@ -76,8 +76,8 @@ describe('StartTrial component when trial is allowed', () => {
       StartTrial
     );
 
-    await waitFor(() => expect(rendered.services.http.get).toHaveBeenCalled());
-    await rendered.services.http.get.mock.results[0].value;
+    await waitFor(() => expect(rendered.http.get).toHaveBeenCalled());
+    await rendered.http.get.mock.results[0].value;
 
     expect(rendered.renderResult.asFragment()).toMatchSnapshot();
   });
@@ -90,8 +90,8 @@ describe('StartTrial component when trial is allowed', () => {
       StartTrial
     );
 
-    await waitFor(() => expect(rendered.services.http.get).toHaveBeenCalled());
-    await rendered.services.http.get.mock.results[0].value;
+    await waitFor(() => expect(rendered.http.get).toHaveBeenCalled());
+    await rendered.http.get.mock.results[0].value;
 
     expect(rendered.renderResult.container).toBeEmptyDOMElement();
   });
@@ -104,8 +104,8 @@ describe('StartTrial component when trial is allowed', () => {
       StartTrial
     );
 
-    await waitFor(() => expect(rendered.services.http.get).toHaveBeenCalled());
-    await rendered.services.http.get.mock.results[0].value;
+    await waitFor(() => expect(rendered.http.get).toHaveBeenCalled());
+    await rendered.http.get.mock.results[0].value;
 
     expect(rendered.renderResult.asFragment()).toMatchSnapshot();
   });
@@ -121,8 +121,8 @@ describe('StartTrial component when trial is not available', () => {
       StartTrial
     );
 
-    await waitFor(() => expect(rendered.services.http.get).toHaveBeenCalled());
-    await rendered.services.http.get.mock.results[0].value;
+    await waitFor(() => expect(rendered.http.get).toHaveBeenCalled());
+    await rendered.http.get.mock.results[0].value;
 
     expect(rendered.renderResult.container).toBeEmptyDOMElement();
   });
@@ -135,8 +135,8 @@ describe('StartTrial component when trial is not available', () => {
       StartTrial
     );
 
-    await waitFor(() => expect(rendered.services.http.get).toHaveBeenCalled());
-    await rendered.services.http.get.mock.results[0].value;
+    await waitFor(() => expect(rendered.http.get).toHaveBeenCalled());
+    await rendered.http.get.mock.results[0].value;
 
     expect(rendered.renderResult.container).toBeEmptyDOMElement();
   });
@@ -149,8 +149,8 @@ describe('StartTrial component when trial is not available', () => {
       StartTrial
     );
 
-    await waitFor(() => expect(rendered.services.http.get).toHaveBeenCalled());
-    await rendered.services.http.get.mock.results[0].value;
+    await waitFor(() => expect(rendered.http.get).toHaveBeenCalled());
+    await rendered.http.get.mock.results[0].value;
 
     expect(rendered.renderResult.container).toBeEmptyDOMElement();
   });
@@ -163,8 +163,8 @@ describe('StartTrial component when trial is not available', () => {
       StartTrial
     );
 
-    await waitFor(() => expect(rendered.services.http.get).toHaveBeenCalled());
-    await rendered.services.http.get.mock.results[0].value;
+    await waitFor(() => expect(rendered.http.get).toHaveBeenCalled());
+    await rendered.http.get.mock.results[0].value;
 
     expect(rendered.renderResult.container).toBeEmptyDOMElement();
   });
@@ -178,8 +178,8 @@ describe('StartTrial component when trial is not available', () => {
       StartTrial
     );
 
-    await waitFor(() => expect(rendered.services.http.get).toHaveBeenCalled());
-    await rendered.services.http.get.mock.results[0].value;
+    await waitFor(() => expect(rendered.http.get).toHaveBeenCalled());
+    await rendered.http.get.mock.results[0].value;
 
     expect(rendered.renderResult.container).toBeEmptyDOMElement();
   });

@@ -5,16 +5,9 @@
  * 2.0.
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import type { EuiSearchBarProps, EuiInMemoryTableProps } from '@elastic/eui';
-import {
-  EuiButtonEmpty,
-  EuiLink,
-  EuiInMemoryTable,
-  EuiToolTip,
-  EuiFlexItem,
-  EuiSwitch,
-} from '@elastic/eui';
+import { EuiButtonEmpty, EuiLink, EuiInMemoryTable, EuiToolTip } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
@@ -23,7 +16,6 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import { useHistory } from 'react-router-dom';
 import type { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { useEuiTablePersist } from '@kbn/shared-ux-table-persist';
 import { hasLinkedIndices } from '../../../lib/policies';
 import { useStateWithLocalStorage } from '../../../lib/settings_local_storage';
@@ -53,15 +45,42 @@ const actionTooltips = {
   ),
 };
 
+/** Full labels for row icon actions: EuiBasicTable sets tooltip SR output off only when name === description (string). */
+const editPolicyRowActionText = i18n.translate(
+  'xpack.indexLifecycleMgmt.policyTable.editActionDescription',
+  {
+    defaultMessage: 'Edit this policy',
+  }
+);
+const addPolicyToTemplateRowActionText = i18n.translate(
+  'xpack.indexLifecycleMgmt.policyTable.addToIndexTemplateActionDescription',
+  { defaultMessage: 'Add policy to index template' }
+);
+const deletePolicyDisabledText = i18n.translate(
+  'xpack.indexLifecycleMgmt.policyTable.deletePolicyButtonDisabledTooltip',
+  {
+    defaultMessage: 'You cannot delete a policy that is being used by an index',
+  }
+);
+const deletePolicyEnabledText = i18n.translate(
+  'xpack.indexLifecycleMgmt.policyTable.deleteActionDescription',
+  {
+    defaultMessage: 'Delete this policy',
+  }
+);
+const getDeletePolicyRowActionText = (policy: PolicyFromES) =>
+  hasLinkedIndices(policy) ? deletePolicyDisabledText : deletePolicyEnabledText;
+
 interface Props {
   policies: PolicyFromES[];
 }
 
 const SHOW_MANAGED_POLICIES_BY_DEFAULT = 'ILM_SHOW_MANAGED_POLICIES_BY_DEFAULT';
+const MANAGED_FILTER_FIELD = 'policy._meta.managed';
+const MANAGED_FILTER_CLAUSE = `is:${MANAGED_FILTER_FIELD}`;
 const PAGE_SIZE_OPTIONS = [10, 25, 50];
 
 export const PolicyTable: React.FunctionComponent<Props> = ({ policies }) => {
-  const [query, setQuery] = useState('');
   const isReadOnly = useIsReadOnly();
   const history = useHistory();
   const {
@@ -71,6 +90,8 @@ export const PolicyTable: React.FunctionComponent<Props> = ({ policies }) => {
     SHOW_MANAGED_POLICIES_BY_DEFAULT,
     false
   );
+  const [deprecatedPoliciesVisible, setDeprecatedPoliciesVisible] = useState(false);
+  const [query, setQuery] = useState(managedPoliciesVisible ? MANAGED_FILTER_CLAUSE : '');
   const { setListAction } = usePolicyListContext();
 
   const { pageSize, sorting, onTableChange } = useEuiTablePersist<PolicyFromES>({
@@ -83,11 +104,22 @@ export const PolicyTable: React.FunctionComponent<Props> = ({ policies }) => {
     pageSizeOptions: PAGE_SIZE_OPTIONS,
   });
 
-  const handleOnChange: EuiSearchBarProps['onChange'] = ({ queryText, error }) => {
-    if (!error) {
-      setQuery(queryText);
-    }
-  };
+  const handleOnChange = useCallback<NonNullable<EuiSearchBarProps['onChange']>>(
+    ({ query: parsedQuery, queryText, error }) => {
+      if (!error) {
+        setQuery(queryText);
+        // Use the parsed AST to check clause polarity so that "not is:field" (match: 'must_not')
+        // is not treated as the filter being active.
+        setManagedPoliciesVisible(
+          parsedQuery?.ast.getIsClause(MANAGED_FILTER_FIELD)?.match === 'must'
+        );
+        setDeprecatedPoliciesVisible(
+          parsedQuery?.ast.getIsClause('policy.deprecated')?.match === 'must'
+        );
+      }
+    },
+    [setManagedPoliciesVisible]
+  );
 
   const searchOptions = useMemo(
     () => ({
@@ -102,42 +134,33 @@ export const PolicyTable: React.FunctionComponent<Props> = ({ policies }) => {
             defaultMessage: 'Deprecated',
           }),
         },
+        {
+          type: 'is',
+          field: MANAGED_FILTER_FIELD,
+          name: i18n.translate('xpack.indexLifecycleMgmt.policyTable.isManagedFilterLabel', {
+            defaultMessage: 'Managed',
+          }),
+        },
       ],
-      toolsRight: (
-        <EuiFlexItem grow={false}>
-          <EuiSwitch
-            id="checkboxShowHiddenIndices"
-            data-test-subj="includeHiddenPoliciesSwitch"
-            checked={managedPoliciesVisible}
-            onChange={(event) => setManagedPoliciesVisible(event.target.checked)}
-            label={
-              <FormattedMessage
-                id="xpack.indexLifecycleMgmt.policyTable.hiddenPoliciesSwitchLabel"
-                defaultMessage="Include managed system policies"
-              />
-            }
-          />
-        </EuiFlexItem>
-      ),
     }),
-    [managedPoliciesVisible, setManagedPoliciesVisible, query]
+    [query, handleOnChange]
   );
 
   const filteredPolicies = useMemo(() => {
+    // When the filter is active (positive must clause), show only matching policies.
+    // Otherwise hide those policies (they are off by default).
     let result = managedPoliciesVisible
-      ? policies
+      ? policies.filter((item) => item.policy?._meta?.managed)
       : policies.filter((item) => !item.policy?._meta?.managed);
 
-    // When the query includes 'is:policy.deprecated', we want to show deprecated policies.
-    // Otherwise hide them all since they wont be supported in the future.
-    if (query.includes('is:policy.deprecated')) {
+    if (deprecatedPoliciesVisible) {
       result = result.filter((item) => item.policy?.deprecated);
     } else {
       result = result.filter((item) => !item.policy?.deprecated);
     }
 
     return result;
-  }, [policies, managedPoliciesVisible, query]);
+  }, [policies, managedPoliciesVisible, deprecatedPoliciesVisible]);
 
   const columns: Array<EuiBasicTableColumn<PolicyFromES>> = [
     {
@@ -239,15 +262,8 @@ export const PolicyTable: React.FunctionComponent<Props> = ({ policies }) => {
       actions: [
         {
           isPrimary: true,
-          name: i18n.translate('xpack.indexLifecycleMgmt.policyTable.editActionLabel', {
-            defaultMessage: 'Edit',
-          }),
-          description: i18n.translate(
-            'xpack.indexLifecycleMgmt.policyTable.editActionDescription',
-            {
-              defaultMessage: 'Edit this policy',
-            }
-          ),
+          name: editPolicyRowActionText,
+          description: editPolicyRowActionText,
           type: 'icon',
           icon: 'pencil',
           onClick: ({ name }) => history.push(getPolicyEditPath(name)),
@@ -255,16 +271,8 @@ export const PolicyTable: React.FunctionComponent<Props> = ({ policies }) => {
         },
 
         {
-          name: i18n.translate(
-            'xpack.indexLifecycleMgmt.policyTable.addToIndexTemplateActionLabel',
-            {
-              defaultMessage: 'Add to index template',
-            }
-          ),
-          description: i18n.translate(
-            'xpack.indexLifecycleMgmt.policyTable.addToIndexTemplateActionDescription',
-            { defaultMessage: 'Add policy to index template' }
-          ),
+          name: addPolicyToTemplateRowActionText,
+          description: addPolicyToTemplateRowActionText,
           type: 'icon',
           icon: 'plusCircle',
           onClick: (policy) =>
@@ -274,21 +282,8 @@ export const PolicyTable: React.FunctionComponent<Props> = ({ policies }) => {
 
         {
           isPrimary: true,
-          name: i18n.translate('xpack.indexLifecycleMgmt.policyTable.deleteActionLabel', {
-            defaultMessage: 'Delete',
-          }),
-          description: (policy) => {
-            return hasLinkedIndices(policy)
-              ? i18n.translate(
-                  'xpack.indexLifecycleMgmt.policyTable.deletePolicyButtonDisabledTooltip',
-                  {
-                    defaultMessage: 'You cannot delete a policy that is being used by an index',
-                  }
-                )
-              : i18n.translate('xpack.indexLifecycleMgmt.policyTable.deleteActionDescription', {
-                  defaultMessage: 'Delete this policy',
-                });
-          },
+          name: getDeletePolicyRowActionText,
+          description: getDeletePolicyRowActionText,
           type: 'icon',
           icon: 'trash',
           color: 'danger',

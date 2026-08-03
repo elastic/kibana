@@ -22,10 +22,13 @@ import {
   EuiSpacer,
   EuiSwitch,
   EuiText,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { PublicSkillSummary } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import { Controller } from 'react-hook-form';
 import type { Control } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
@@ -34,12 +37,14 @@ import type { AgentFormData } from '../agent_form';
 import { labels } from '../../../../utils/i18n';
 import { useNavigation } from '../../../../hooks/use_navigation';
 import { appPaths } from '../../../../utils/app_paths';
+import { isSkillAutoIncluded as getIsSkillAutoIncluded } from '../../../../utils/tool_selection_utils';
 
 interface SkillsTabProps {
   control: Control<AgentFormData>;
   skills: PublicSkillSummary[];
   isLoading: boolean;
   isFormDisabled: boolean;
+  areElasticCapabilitiesEnabled: boolean;
 }
 
 export const SkillsTab: React.FC<SkillsTabProps> = ({
@@ -47,6 +52,7 @@ export const SkillsTab: React.FC<SkillsTabProps> = ({
   skills,
   isLoading,
   isFormDisabled,
+  areElasticCapabilitiesEnabled,
 }) => {
   const [showActiveOnly, setShowActiveOnly] = useState(false);
   const showActiveOnlyChangeHandler = !isFormDisabled ? setShowActiveOnly : undefined;
@@ -66,6 +72,7 @@ export const SkillsTab: React.FC<SkillsTabProps> = ({
             disabled={isFormDisabled}
             showActiveOnly={showActiveOnly || isFormDisabled}
             onShowActiveOnlyChange={showActiveOnlyChangeHandler}
+            areElasticCapabilitiesEnabled={areElasticCapabilitiesEnabled}
           />
         )}
       />
@@ -81,6 +88,7 @@ interface SkillsSelectionProps {
   disabled?: boolean;
   showActiveOnly: boolean;
   onShowActiveOnlyChange?: (showActiveOnly: boolean) => void;
+  areElasticCapabilitiesEnabled: boolean;
 }
 
 const SkillsSelection: React.FC<SkillsSelectionProps> = ({
@@ -91,6 +99,7 @@ const SkillsSelection: React.FC<SkillsSelectionProps> = ({
   disabled = false,
   showActiveOnly,
   onShowActiveOnlyChange,
+  areElasticCapabilitiesEnabled,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [pageIndex, setPageIndex] = useState(0);
@@ -98,9 +107,14 @@ const SkillsSelection: React.FC<SkillsSelectionProps> = ({
 
   const selectedIdSet = useMemo(() => new Set(selectedSkills ?? []), [selectedSkills]);
 
+  const isSkillAutoIncluded = useCallback(
+    (skill: PublicSkillSummary) => getIsSkillAutoIncluded(skill, areElasticCapabilitiesEnabled),
+    [areElasticCapabilitiesEnabled]
+  );
+
   const isSkillActive = useCallback(
-    (skill: PublicSkillSummary) => selectedIdSet.has(skill.id),
-    [selectedIdSet]
+    (skill: PublicSkillSummary) => selectedIdSet.has(skill.id) || isSkillAutoIncluded(skill),
+    [selectedIdSet, isSkillAutoIncluded]
   );
 
   const displaySkills = useMemo(() => {
@@ -126,6 +140,8 @@ const SkillsSelection: React.FC<SkillsSelectionProps> = ({
 
   const handleToggleSkill = useCallback(
     (skillId: string) => {
+      const skill = skills.find((s) => s.id === skillId);
+      if (skill && isSkillAutoIncluded(skill)) return;
       const currentIds = selectedSkills ?? [];
       if (currentIds.includes(skillId)) {
         onSkillsChange(currentIds.filter((id) => id !== skillId));
@@ -133,7 +149,7 @@ const SkillsSelection: React.FC<SkillsSelectionProps> = ({
         onSkillsChange([...currentIds, skillId]);
       }
     },
-    [selectedSkills, onSkillsChange]
+    [selectedSkills, onSkillsChange, skills, isSkillAutoIncluded]
   );
 
   const handleSearchChange = useCallback((query: string) => {
@@ -159,7 +175,7 @@ const SkillsSelection: React.FC<SkillsSelectionProps> = ({
   }
 
   const columns = [
-    createCheckboxColumn(isSkillActive, handleToggleSkill, disabled),
+    createCheckboxColumn(isSkillActive, isSkillAutoIncluded, handleToggleSkill, disabled),
     createSkillDetailsColumn(),
     createTypeColumn(),
   ];
@@ -218,6 +234,7 @@ const SkillsSelection: React.FC<SkillsSelectionProps> = ({
       </EuiFlexGroup>
 
       <EuiInMemoryTable
+        tableCaption={labels.skills.skillsTableCaption(filteredSkills.length)}
         columns={columns}
         items={filteredSkills}
         itemId="id"
@@ -230,7 +247,7 @@ const SkillsSelection: React.FC<SkillsSelectionProps> = ({
         onTableChange={handleTableChange}
         sorting={{
           sort: {
-            field: 'id',
+            field: 'name',
             direction: 'asc',
           },
         }}
@@ -259,7 +276,7 @@ const ActiveSkillsStatus: React.FC<{ activeSkillsCount: number; totalSkills: num
             <EuiFlexItem>
               <EuiFlexGroup direction="row" gutterSize="s" alignItems="center" responsive={false}>
                 <EuiFlexItem grow={false}>
-                  <EuiIcon type={iconType} color={statusColor} size="m" />
+                  <EuiIcon type={iconType} color={statusColor} size="m" aria-hidden={true} />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiText size="m" color={statusColor}>
@@ -281,7 +298,14 @@ const ActiveSkillsStatus: React.FC<{ activeSkillsCount: number; totalSkills: num
                   defaultMessage="{skillsLink} provide specialized knowledge and instructions that guide agents on specific tasks."
                   values={{
                     skillsLink: (
-                      <EuiLink href={createAgentBuilderUrl(appPaths.skills.list)}>
+                      <EuiLink
+                        href={createAgentBuilderUrl(appPaths.skills.list)}
+                        {...getEbtProps({
+                          element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                          action: AGENT_BUILDER_UI_EBT.action.agentEdit.MANAGE_ALL,
+                          detail: AGENT_BUILDER_UI_EBT.entity.SKILL,
+                        })}
+                      >
                         {labels.skills.title}
                       </EuiLink>
                     ),
@@ -319,7 +343,7 @@ const SkillDetailsColumn: React.FC<{ skill: PublicSkillSummary }> = ({ skill }) 
           font-weight: ${euiTheme.font.weight.semiBold};
         `}
       >
-        {skill.id}
+        {skill.name}
       </EuiText>
       <EuiText size="s" color="subdued">
         {skill.description}
@@ -330,23 +354,34 @@ const SkillDetailsColumn: React.FC<{ skill: PublicSkillSummary }> = ({ skill }) 
 
 const createCheckboxColumn = (
   isSkillActive: (skill: PublicSkillSummary) => boolean,
+  isSkillAutoIncluded: (skill: PublicSkillSummary) => boolean,
   onToggle: (skillId: string) => void,
   disabled: boolean
 ) => ({
   width: '40px',
-  render: (skill: PublicSkillSummary) => (
-    <EuiCheckbox
-      id={`skill-${skill.id}`}
-      checked={isSkillActive(skill)}
-      onChange={() => onToggle(skill.id)}
-      disabled={disabled}
-    />
-  ),
+  render: (skill: PublicSkillSummary) => {
+    const autoIncluded = isSkillAutoIncluded(skill);
+    const checkbox = (
+      <EuiCheckbox
+        id={`skill-${skill.id}`}
+        checked={isSkillActive(skill)}
+        onChange={() => onToggle(skill.id)}
+        disabled={disabled || autoIncluded}
+      />
+    );
+    return autoIncluded ? (
+      <EuiToolTip content={labels.agentSkills.elasticCapabilitiesManagedTooltip}>
+        {checkbox}
+      </EuiToolTip>
+    ) : (
+      checkbox
+    );
+  },
 });
 
 const createSkillDetailsColumn = () => ({
-  name: labels.skills.skillIdLabel,
-  sortable: (item: PublicSkillSummary) => item.id,
+  name: labels.skills.nameLabel,
+  sortable: (item: PublicSkillSummary) => item.name,
   width: '60%',
   render: (item: PublicSkillSummary) => <SkillDetailsColumn skill={item} />,
 });

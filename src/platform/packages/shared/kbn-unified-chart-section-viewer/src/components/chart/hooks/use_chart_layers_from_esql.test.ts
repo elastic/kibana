@@ -15,6 +15,7 @@ import type { UnifiedHistogramServices } from '@kbn/unified-histogram/types';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import type { TimeRange } from '@kbn/data-plugin/common';
 import type { UnifiedMetricsGridProps } from '../../../types';
+import { ESQLVariableType } from '@kbn/esql-types';
 
 jest.mock('@kbn/esql-utils', () => ({
   ...jest.requireActual('@kbn/esql-utils'),
@@ -236,6 +237,41 @@ describe('useChartLayers', () => {
 
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
+    });
+  });
+
+  it('passes variables to getESQLQueryColumns', async () => {
+    getESQLQueryColumnsMock.mockResolvedValue([]);
+
+    useEsqlQueryInfoMock.mockReturnValue({
+      dimensions: [],
+      columns: [],
+      metricField: '',
+      indices: [],
+      filters: [],
+      metadataFields: [],
+    });
+
+    const variables = [
+      {
+        key: 'event_type',
+        value: 'Good',
+        type: ESQLVariableType.VALUES,
+      },
+    ];
+
+    renderHook(() =>
+      useChartLayersFromEsql({
+        query: 'FROM traces-apm*',
+        timeRange,
+        seriesType: 'line',
+        services: mockServices.services,
+        variables,
+      })
+    );
+
+    await waitFor(() => {
+      expect(getESQLQueryColumnsMock).toHaveBeenCalledWith(expect.objectContaining({ variables }));
     });
   });
 

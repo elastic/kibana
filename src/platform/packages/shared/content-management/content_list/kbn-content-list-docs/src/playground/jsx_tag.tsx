@@ -10,7 +10,7 @@
 import React from 'react';
 import type { ReactNode, CSSProperties } from 'react';
 import { css } from '@emotion/react';
-import { EuiButtonIcon, useEuiTheme } from '@elastic/eui';
+import { EuiButtonIcon, EuiToolTip, useEuiTheme } from '@elastic/eui';
 
 // =============================================================================
 // Shared styles
@@ -109,14 +109,16 @@ export const JsxTag = ({
   if (collapsible && collapsed) {
     return (
       <div css={[baseFontCss, rowCss, indentCss]}>
-        <EuiButtonIcon
-          iconType="arrowRight"
-          size="xs"
-          color="text"
-          aria-label={`Expand ${name}`}
-          onClick={onToggleCollapsed}
-          css={collapseButtonCss}
-        />
+        <EuiToolTip content={`Expand ${name}`} disableScreenReaderOutput>
+          <EuiButtonIcon
+            iconType="arrowRight"
+            size="xs"
+            color="text"
+            aria-label={`Expand ${name}`}
+            onClick={onToggleCollapsed}
+            css={collapseButtonCss}
+          />
+        </EuiToolTip>
         <span css={styles.bracket}>{'<'}</span>
         <span css={styles.tag}>{name}</span>
         <span css={styles.bracket}>{' ... >'}</span>
@@ -138,14 +140,16 @@ export const JsxTag = ({
     <div css={[baseFontCss, indentCss]}>
       <div css={rowCss}>
         {collapsible && (
-          <EuiButtonIcon
-            iconType="arrowDown"
-            size="xs"
-            color="text"
-            aria-label={`Collapse ${name}`}
-            onClick={onToggleCollapsed}
-            css={collapseButtonCss}
-          />
+          <EuiToolTip content={`Collapse ${name}`} disableScreenReaderOutput>
+            <EuiButtonIcon
+              iconType="arrowDown"
+              size="xs"
+              color="text"
+              aria-label={`Collapse ${name}`}
+              onClick={onToggleCollapsed}
+              css={collapseButtonCss}
+            />
+          </EuiToolTip>
         )}
         <span css={styles.bracket}>{'<'}</span>
         <span css={styles.tag}>{name}</span>

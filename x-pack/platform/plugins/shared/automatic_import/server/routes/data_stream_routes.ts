@@ -9,7 +9,7 @@ import type { IRouter } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import type { AutomaticImportPluginRequestHandlerContext } from '../types';
-import { buildAutomaticImportResponse } from './utils';
+import { buildAutomaticImportResponse, isSecurityExceptionError } from './utils';
 import { withAvailability } from './with_availability';
 import { AUTOMATIC_IMPORT_API_PRIVILEGES } from '../feature';
 import {
@@ -20,21 +20,6 @@ import {
   UploadSamplesToDataStreamRequestBody,
   UpdateDataStreamPipelineRequestBody,
 } from '../../common';
-
-const isSecurityExceptionError = (err: unknown): boolean => {
-  if (!(err instanceof Error)) {
-    return false;
-  }
-
-  const elasticsearchError = err as Error & {
-    meta?: { body?: { error?: { type?: string } } };
-  };
-
-  return (
-    elasticsearchError.meta?.body?.error?.type === 'security_exception' ||
-    err.message.includes('security_exception')
-  );
-};
 
 export const registerDataStreamRoutes = (
   router: IRouter<AutomaticImportPluginRequestHandlerContext>,
@@ -82,6 +67,12 @@ const uploadSamplesRoute = (
 
           let rawSamples: string[];
           if (sourceIndex) {
+            if (sourceIndex.startsWith('.')) {
+              return response.badRequest({
+                body: 'Reading from system indices is not allowed.',
+              });
+            }
+
             const searchResult = await esClient.search({
               index: sourceIndex,
               size: 100,
@@ -132,7 +123,6 @@ const uploadSamplesRoute = (
           }
           return automaticImportResponse.error({
             statusCode: 500,
-            body: err,
           });
         }
       })
@@ -173,7 +163,6 @@ const deleteDataStreamRoute = (
           const automaticImportResponse = buildAutomaticImportResponse(response);
           return automaticImportResponse.error({
             statusCode: 500,
-            body: err,
           });
         }
       })
@@ -214,7 +203,7 @@ const updateDataStreamPipelineRoute = (
             integrationId,
             dataStreamId,
             ingestPipeline,
-            internalEsClient: automaticImport.internalEsClient,
+            esClient: automaticImport.esClient,
             fieldsMetadataClient: automaticImport.fieldsMetadataClient,
           });
 
@@ -222,16 +211,34 @@ const updateDataStreamPipelineRoute = (
         } catch (err) {
           logger.error(`updateDataStreamPipelineRoute: Caught error: ${err}`);
           const automaticImportResponse = buildAutomaticImportResponse(response);
-          const message = err instanceof Error ? err.message : String(err);
-          const isBadRequestError =
-            message.includes('Invalid ingest pipeline') ||
-            message.includes('No samples found') ||
-            message.includes('Unexpected token');
 
-          return automaticImportResponse.error({
-            statusCode: isBadRequestError ? 400 : 500,
-            body: message,
-          });
+          if (isSecurityExceptionError(err)) {
+            return automaticImportResponse.error({
+              statusCode: 403,
+              body: 'Missing required Elasticsearch privileges. This action requires the manage_ingest_pipelines and manage_index_templates cluster privileges.',
+            });
+          }
+          const rawMessage = err instanceof Error ? err.message : String(err);
+
+          if (rawMessage.includes('Invalid ingest pipeline')) {
+            return automaticImportResponse.error({
+              statusCode: 400,
+              body: 'Invalid ingest pipeline',
+            });
+          }
+          if (rawMessage.includes('No samples found')) {
+            return automaticImportResponse.error({
+              statusCode: 400,
+              body: 'No samples found for data stream',
+            });
+          }
+          if (rawMessage.includes('Unexpected token')) {
+            return automaticImportResponse.error({
+              statusCode: 400,
+              body: 'Invalid JSON in pipeline definition',
+            });
+          }
+          return automaticImportResponse.error({ statusCode: 500 });
         }
       })
     );
@@ -272,13 +279,21 @@ const getDataStreamResultsRoute = (
         } catch (err) {
           logger.error(`getDataStreamResultsRoute: Caught error:`, err);
           const automaticImportResponse = buildAutomaticImportResponse(response);
-          const message = err instanceof Error ? err.message : String(err);
-          const statusCode =
-            message.includes('has not completed yet') ||
-            message.includes('failed and has no results')
-              ? 400
-              : 500;
-          return automaticImportResponse.error({ statusCode, body: err });
+          const rawMessage = err instanceof Error ? err.message : String(err);
+
+          if (rawMessage.includes('has not completed yet')) {
+            return automaticImportResponse.error({
+              statusCode: 400,
+              body: 'Data stream analysis has not completed yet',
+            });
+          }
+          if (rawMessage.includes('failed and has no results')) {
+            return automaticImportResponse.error({
+              statusCode: 400,
+              body: 'Data stream analysis failed and has no results',
+            });
+          }
+          return automaticImportResponse.error({ statusCode: 500 });
         }
       })
     );
@@ -330,7 +345,6 @@ const reanalyzeDataStreamRoute = (
           const automaticImportResponse = buildAutomaticImportResponse(response);
           return automaticImportResponse.error({
             statusCode: 500,
-            body: err,
           });
         }
       })

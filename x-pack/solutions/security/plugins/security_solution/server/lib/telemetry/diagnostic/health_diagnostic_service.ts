@@ -36,6 +36,7 @@ import {
   fieldNames,
   shouldExecute as isDueForExecution,
   applyFilterlist,
+  mergeByPriority,
 } from './health_diagnostic_utils';
 import { parseHealthDiagnosticQueries } from './health_diagnostic_query_parser';
 import { type CircuitBreaker, ValidationError } from './health_diagnostic_circuit_breakers.types';
@@ -45,7 +46,7 @@ import {
   TELEMETRY_HEALTH_DIAGNOSTIC_QUERY_RESULT_EVENT,
   TELEMETRY_HEALTH_DIAGNOSTIC_QUERY_STATS_EVENT,
 } from '../event_based/events';
-import { artifactService } from '../artifact';
+import { artifactService, type Manifest } from '../artifact';
 import { newTelemetryLogger, withErrorMessage } from '../helpers';
 import { telemetryConfiguration } from '../configuration';
 import { RssGrowthCircuitBreaker } from './circuit_breakers/rss_growth_circuit_breaker';
@@ -63,7 +64,8 @@ const TASK_TYPE = 'security:health-diagnostic';
 const TASK_ID = `${TASK_TYPE}:1.0.0`;
 const INTERVAL = '1h';
 const TIMEOUT = '10m';
-const QUERY_ARTIFACT_ID = 'health-diagnostic-queries-v2';
+const QUERY_ARTIFACT_ID_V1 = 'health-diagnostic-queries-v1';
+const QUERY_ARTIFACT_ID_V2 = 'health-diagnostic-queries-v2';
 
 export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
   private readonly salt = 'c2a5d101-d0ef-49cc-871e-6ee55f9546f8';
@@ -399,12 +401,28 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
   }
 
   private async healthQueries(): Promise<HealthDiagnosticQuery[]> {
-    try {
-      const artifact = await artifactService.getArtifact(QUERY_ARTIFACT_ID);
-      return parseHealthDiagnosticQueries(artifact.data);
-    } catch (error) {
-      this.logger.warn('Error getting health diagnostic queries', withErrorMessage(error));
-      return [];
-    }
+    const [v1Result, v2Result] = await Promise.allSettled([
+      artifactService.getArtifact(QUERY_ARTIFACT_ID_V1),
+      artifactService.getArtifact(QUERY_ARTIFACT_ID_V2),
+    ]);
+
+    const toQueries = (
+      result: PromiseSettledResult<Manifest>,
+      artifactId: string
+    ): HealthDiagnosticQuery[] => {
+      if (result.status === 'rejected') {
+        this.logger.warn(
+          'Error getting health diagnostic queries',
+          withErrorMessage(result.reason, { artifactId } as LogMeta)
+        );
+        return [];
+      }
+      return parseHealthDiagnosticQueries(result.value.data);
+    };
+
+    return mergeByPriority(
+      toQueries(v1Result, QUERY_ARTIFACT_ID_V1),
+      toQueries(v2Result, QUERY_ARTIFACT_ID_V2)
+    );
   }
 }

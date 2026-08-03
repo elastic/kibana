@@ -8,7 +8,7 @@
 import { filter, some } from 'lodash';
 
 import { type IRouter, SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
 import { buildRouteValidation } from '../../utils/build_validation/route_validation';
 import { API_VERSIONS } from '../../../common/constants';
@@ -28,6 +28,7 @@ import {
   updateSavedQueryRequestParamsSchema,
 } from '../../../common/api/saved_query/update_saved_query_route';
 import { getUserInfo } from '../../lib/get_user_info';
+import { updateSavedQueryResponseSchema } from './response_schemas';
 
 export const updateSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.versioned
@@ -53,6 +54,11 @@ export const updateSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
               typeof updateSavedQueryRequestBodySchema,
               UpdateSavedQueryRequestBodySchema
             >(updateSavedQueryRequestBodySchema),
+          },
+          response: {
+            200: {
+              body: () => updateSavedQueryResponseSchema,
+            },
           },
         },
       },

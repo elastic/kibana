@@ -66,6 +66,7 @@ export const getConnectorType = (): SubActionConnectorType<Config, Secrets> => (
     WorkflowsConnectorFeatureId,
   ],
   minimumLicenseRequired: 'enterprise' as const,
+  isDeprecated: true,
   preSaveHook: async ({ config, secrets, logger, services, isUpdate }) => {
     const esClient = services.scopedClusterClient.asInternalUser;
 

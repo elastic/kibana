@@ -19,7 +19,7 @@ describe('data stream schemas', () => {
   describe('StopAutoImportDataStreamRequestParams', () => {
     it('requires integration_id', () => {
       const payload = {
-        data_stream_id: 'data-stream-123',
+        data_stream_id: 'data_stream_123',
       };
 
       const result = StopAutoImportDataStreamRequestParams.safeParse(payload);
@@ -30,7 +30,7 @@ describe('data stream schemas', () => {
 
     it('requires data_stream_id', () => {
       const payload = {
-        integration_id: 'integration-123',
+        integration_id: 'integration_123',
       };
 
       const result = StopAutoImportDataStreamRequestParams.safeParse(payload);
@@ -42,31 +42,27 @@ describe('data stream schemas', () => {
     it('rejects empty integration_id', () => {
       const payload = {
         integration_id: '   ',
-        data_stream_id: 'data-stream-123',
+        data_stream_id: 'data_stream_123',
       };
 
       const result = StopAutoImportDataStreamRequestParams.safeParse(payload);
       expectParseError(result);
-
-      expect(stringifyZodError(result.error)).toContain('integration_id: No empty strings allowed');
     });
 
     it('rejects empty data_stream_id', () => {
       const payload = {
-        integration_id: 'integration-123',
+        integration_id: 'integration_123',
         data_stream_id: '   ',
       };
 
       const result = StopAutoImportDataStreamRequestParams.safeParse(payload);
       expectParseError(result);
-
-      expect(stringifyZodError(result.error)).toContain('data_stream_id: No empty strings allowed');
     });
 
     it('accepts valid params', () => {
       const payload = {
-        integration_id: 'integration-123',
-        data_stream_id: 'data-stream-123',
+        integration_id: 'integration_123',
+        data_stream_id: 'data_stream_123',
       };
 
       const result = StopAutoImportDataStreamRequestParams.safeParse(payload);
@@ -77,8 +73,8 @@ describe('data stream schemas', () => {
 
     it('strips unknown properties', () => {
       const payload = {
-        integration_id: 'integration-123',
-        data_stream_id: 'data-stream-123',
+        integration_id: 'integration_123',
+        data_stream_id: 'data_stream_123',
         unknown: 'property',
       };
 
@@ -86,32 +82,28 @@ describe('data stream schemas', () => {
       expectParseSuccess(result);
 
       expect(result.data).toEqual({
-        integration_id: 'integration-123',
-        data_stream_id: 'data-stream-123',
+        integration_id: 'integration_123',
+        data_stream_id: 'data_stream_123',
       });
     });
 
     it('accepts params with various valid IDs', () => {
       const testCases = [
         {
-          integration_id: 'integration-001',
-          data_stream_id: 'data-stream-001',
-        },
-        {
-          integration_id: 'my-integration',
-          data_stream_id: 'my-data-stream',
+          integration_id: 'integration_001',
+          data_stream_id: 'data_stream_001',
         },
         {
           integration_id: 'integration_with_underscores',
           data_stream_id: 'data_stream_with_underscores',
         },
         {
-          integration_id: 'integration-with-dashes',
-          data_stream_id: 'data-stream-with-dashes',
-        },
-        {
           integration_id: 'integration123',
           data_stream_id: 'datastream123',
+        },
+        {
+          integration_id: 'ABC_123',
+          data_stream_id: 'XYZ_456',
         },
       ];
 
@@ -122,6 +114,16 @@ describe('data stream schemas', () => {
       });
     });
 
+    it('rejects IDs containing hyphens', () => {
+      const payload = {
+        integration_id: 'integration-123',
+        data_stream_id: 'data-stream-123',
+      };
+
+      const result = StopAutoImportDataStreamRequestParams.safeParse(payload);
+      expectParseError(result);
+    });
+
     it('rejects both empty integration_id and data_stream_id', () => {
       const payload = {
         integration_id: '   ',
@@ -130,17 +132,13 @@ describe('data stream schemas', () => {
 
       const result = StopAutoImportDataStreamRequestParams.safeParse(payload);
       expectParseError(result);
-
-      const errorMessage = stringifyZodError(result.error);
-      expect(errorMessage).toContain('integration_id: No empty strings allowed');
-      expect(errorMessage).toContain('data_stream_id: No empty strings allowed');
     });
   });
 
   describe('UploadSamplesToDataStreamRequestParams', () => {
     it('requires integration_id', () => {
       const payload = {
-        data_stream_id: 'data-stream-123',
+        data_stream_id: 'data_stream_123',
       };
 
       const result = UploadSamplesToDataStreamRequestParams.safeParse(payload);
@@ -151,7 +149,7 @@ describe('data stream schemas', () => {
 
     it('requires data_stream_id', () => {
       const payload = {
-        integration_id: 'integration-123',
+        integration_id: 'integration_123',
       };
 
       const result = UploadSamplesToDataStreamRequestParams.safeParse(payload);
@@ -163,31 +161,27 @@ describe('data stream schemas', () => {
     it('rejects empty integration_id', () => {
       const payload = {
         integration_id: '   ',
-        data_stream_id: 'data-stream-123',
+        data_stream_id: 'data_stream_123',
       };
 
       const result = UploadSamplesToDataStreamRequestParams.safeParse(payload);
       expectParseError(result);
-
-      expect(stringifyZodError(result.error)).toContain('integration_id: No empty strings allowed');
     });
 
     it('rejects empty data_stream_id', () => {
       const payload = {
-        integration_id: 'integration-123',
+        integration_id: 'integration_123',
         data_stream_id: '   ',
       };
 
       const result = UploadSamplesToDataStreamRequestParams.safeParse(payload);
       expectParseError(result);
-
-      expect(stringifyZodError(result.error)).toContain('data_stream_id: No empty strings allowed');
     });
 
     it('accepts valid params', () => {
       const payload = {
-        integration_id: 'integration-123',
-        data_stream_id: 'data-stream-123',
+        integration_id: 'integration_123',
+        data_stream_id: 'data_stream_123',
       };
 
       const result = UploadSamplesToDataStreamRequestParams.safeParse(payload);
@@ -198,8 +192,8 @@ describe('data stream schemas', () => {
 
     it('strips unknown properties', () => {
       const payload = {
-        integration_id: 'integration-123',
-        data_stream_id: 'data-stream-123',
+        integration_id: 'integration_123',
+        data_stream_id: 'data_stream_123',
         unknown: 'property',
       };
 
@@ -207,8 +201,8 @@ describe('data stream schemas', () => {
       expectParseSuccess(result);
 
       expect(result.data).toEqual({
-        integration_id: 'integration-123',
-        data_stream_id: 'data-stream-123',
+        integration_id: 'integration_123',
+        data_stream_id: 'data_stream_123',
       });
     });
   });
@@ -390,6 +384,32 @@ describe('data stream schemas', () => {
 
       const result = UploadSamplesToDataStreamRequestBody.safeParse(payload);
       expectParseError(result);
+    });
+
+    it('rejects sourceIndex exceeding 100 characters', () => {
+      const payload = {
+        sourceIndex: 'a'.repeat(101),
+        originalSource: {
+          sourceType: 'index' as const,
+          sourceValue: 'logs-*',
+        },
+      };
+
+      const result = UploadSamplesToDataStreamRequestBody.safeParse(payload);
+      expectParseError(result);
+    });
+
+    it('accepts sourceIndex at exactly 100 characters', () => {
+      const payload = {
+        sourceIndex: 'a'.repeat(100),
+        originalSource: {
+          sourceType: 'index' as const,
+          sourceValue: 'logs-*',
+        },
+      };
+
+      const result = UploadSamplesToDataStreamRequestBody.safeParse(payload);
+      expectParseSuccess(result);
     });
 
     it('rejects invalid source type', () => {

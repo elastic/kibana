@@ -18,6 +18,7 @@ import type { PhaseExceptDelete } from '../../../../../../common/types';
 
 import type { PhaseAgeInMilliseconds, AbsoluteTimings } from '../../lib';
 import { calculateRelativeFromAbsoluteMilliseconds } from '../../lib';
+import { PHASE_TITLES } from '../../../../lib';
 
 import { InfinityIcon, LearnMoreLink } from '..';
 
@@ -51,18 +52,6 @@ const i18nTexts = {
   }),
   description: i18n.translate('xpack.indexLifecycleMgmt.timeline.description', {
     defaultMessage: 'This policy moves data through the following phases.',
-  }),
-  hotPhase: i18n.translate('xpack.indexLifecycleMgmt.timeline.hotPhaseSectionTitle', {
-    defaultMessage: 'Hot phase',
-  }),
-  warmPhase: i18n.translate('xpack.indexLifecycleMgmt.timeline.warmPhaseSectionTitle', {
-    defaultMessage: 'Warm phase',
-  }),
-  coldPhase: i18n.translate('xpack.indexLifecycleMgmt.timeline.coldPhaseSectionTitle', {
-    defaultMessage: 'Cold phase',
-  }),
-  frozenPhase: i18n.translate('xpack.indexLifecycleMgmt.timeline.frozenPhaseSectionTitle', {
-    defaultMessage: 'Frozen phase',
   }),
   deleteIcon: {
     toolTipContent: i18n.translate('xpack.indexLifecycleMgmt.timeline.deleteIconToolTipContent', {
@@ -201,7 +190,7 @@ export const Timeline: FunctionComponent<Props> = memo(
                     >
                       <div css={styles.hotColorBar} />
                       <TimelinePhaseText
-                        phaseName={i18nTexts.hotPhase}
+                        phaseName={PHASE_TITLES.hot}
                         durationInPhase={getDurationInPhaseContent('hot')}
                       />
                     </div>
@@ -213,7 +202,7 @@ export const Timeline: FunctionComponent<Props> = memo(
                     >
                       <div css={styles.warmColorBar} />
                       <TimelinePhaseText
-                        phaseName={i18nTexts.warmPhase}
+                        phaseName={PHASE_TITLES.warm}
                         durationInPhase={getDurationInPhaseContent('warm')}
                       />
                     </div>
@@ -225,7 +214,7 @@ export const Timeline: FunctionComponent<Props> = memo(
                     >
                       <div css={styles.coldColorBar} />
                       <TimelinePhaseText
-                        phaseName={i18nTexts.coldPhase}
+                        phaseName={PHASE_TITLES.cold}
                         durationInPhase={getDurationInPhaseContent('cold')}
                       />
                     </div>
@@ -237,7 +226,7 @@ export const Timeline: FunctionComponent<Props> = memo(
                     >
                       <div css={styles.frozenColorBar} />
                       <TimelinePhaseText
-                        phaseName={i18nTexts.frozenPhase}
+                        phaseName={PHASE_TITLES.frozen}
                         durationInPhase={getDurationInPhaseContent('frozen')}
                       />
                     </div>

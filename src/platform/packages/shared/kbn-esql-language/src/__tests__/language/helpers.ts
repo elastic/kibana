@@ -13,8 +13,8 @@ import type {
   ESQLCallbacks,
   ESQLFieldWithMetadata,
   InferenceEndpointAutocompleteItem,
+  EsqlDataset,
 } from '@kbn/esql-types';
-import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import { METADATA_FIELDS } from '../../..';
 
 export const metadataFields: ESQLFieldWithMetadata[] = METADATA_FIELDS.map((field) => ({
@@ -44,6 +44,16 @@ export const unsupported_field: ESQLFieldWithMetadata[] = [
   { name: 'unsupported_field', type: 'unsupported', userDefined: false },
 ];
 
+export const conflictingFields: ESQLFieldWithMetadata[] = [
+  {
+    name: 'conflictingField',
+    type: 'unsupported',
+    hasConflict: true,
+    originalTypes: ['text', 'keyword'],
+    userDefined: false,
+  },
+];
+
 export const indexes = [
   'a_index',
   'index',
@@ -51,6 +61,7 @@ export const indexes = [
   '.secret_index',
   'my-index',
   'unsupported_index',
+  'conflict_index',
 ];
 
 export const policies = [
@@ -115,6 +126,19 @@ export const views = [
   },
 ];
 
+export const datasets: EsqlDataset[] = [
+  {
+    name: 'dataset_1',
+    data_source: 'data_source_1',
+    resource: 's3://bucket/path/**/*.parquet',
+  },
+  {
+    name: 'dataset_2',
+    data_source: 'data_source_2',
+    resource: 'db.schema.table',
+  },
+];
+
 export const editorExtensions = {
   recommendedQueries: [
     {
@@ -154,6 +178,9 @@ export function getCallbackMocks(): ESQLCallbacks {
       if (/unsupported_index/.test(query)) {
         return unsupported_field;
       }
+      if (/conflict_index/.test(query)) {
+        return conflictingFields;
+      }
       if (/join_index/.test(query)) {
         const field: ESQLFieldWithMetadata = {
           name: 'keywordField',
@@ -179,6 +206,7 @@ export function getCallbackMocks(): ESQLCallbacks {
     getJoinIndices: jest.fn(async () => ({ indices: joinIndices })),
     getTimeseriesIndices: jest.fn(async () => ({ indices: timeseriesIndices })),
     getViews: jest.fn(async () => ({ views })),
+    getDatasets: jest.fn(async () => ({ datasets })),
     getEditorExtensions: jest.fn(async (queryString: string) => {
       if (queryString.includes('logs*')) {
         return {
@@ -188,7 +216,9 @@ export function getCallbackMocks(): ESQLCallbacks {
       }
       return { recommendedQueries: [], recommendedFields: [] };
     }),
-    getInferenceEndpoints: jest.fn(async (taskType: InferenceTaskType) => ({ inferenceEndpoints })),
+    getInferenceEndpoints: jest.fn(async (taskType: string) => ({
+      inferenceEndpoints,
+    })),
   };
 }
 

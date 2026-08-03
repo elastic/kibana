@@ -348,7 +348,13 @@ describe('mappingFromFieldMap', () => {
                     },
                   },
                 },
+                severity: {
+                  type: 'keyword',
+                },
                 severity_improving: {
+                  type: 'boolean',
+                },
+                snoozed: {
                   type: 'boolean',
                 },
                 start: {
@@ -394,6 +400,16 @@ describe('mappingFromFieldMap', () => {
                 },
                 workflow_assignee_ids: {
                   type: 'keyword',
+                },
+              },
+            },
+            cps_scope: {
+              properties: {
+                expression: {
+                  type: 'keyword',
+                },
+                linked_projects: {
+                  type: 'flattened',
                 },
               },
             },

@@ -14,7 +14,7 @@ import {
   UPDATES_INDEX,
 } from '../fixtures/constants';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common';
-import { clearEntityStoreIndices } from '../fixtures/helpers';
+import { clearEntityStoreIndices, ingestDoc } from '../fixtures/helpers';
 import {
   getEuidDslFilterBasedOnDocument,
   getEuidDslDocumentsContainsIdFilter,
@@ -204,6 +204,46 @@ apiTest.describe('DSL query translation', { tag: ENTITY_STORE_TAGS }, () => {
     );
   }
 
+  const userTsAssetCloudIngestedScenarios = USER_TS_EXTRACTION_CASES.filter(
+    (c) =>
+      c.id.startsWith('asset-cloud-provider-') &&
+      c.ingestSource !== undefined &&
+      c.expectedEuid !== undefined &&
+      !c.expectNoPerDocumentDsl
+  );
+
+  for (const scenario of userTsAssetCloudIngestedScenarios) {
+    apiTest(
+      `user.ts DSL (ingested asset + cloud.provider): single hit for scenario "${scenario.id}"`,
+      async ({ esClient }) => {
+        await ingestDoc(esClient, scenario.ingestSource!);
+        const dsl = getEuidDslFilterBasedOnDocument('user', scenario.dslFilterSource);
+        expect(dsl).toBeDefined();
+
+        const result = await searchWithFilter(esClient, dsl, 10);
+
+        expect(getTotal(result.hits)).toBe(1);
+        expect(result.hits.hits).toHaveLength(1);
+        expect(result.hits.hits[0]._source).toMatchObject(scenario.dslFilterSource);
+        expect(getEuidFromObject('user', result.hits.hits[0])).toBe(scenario.expectedEuid);
+
+        expect(scenario.expectedMeta).toBeDefined();
+        const expectedMeta = scenario.expectedMeta!;
+        expect(deriveUserEntityPreAggMetadata(result.hits.hits[0])).toStrictEqual({
+          namespace: expectedMeta.namespace,
+          confidence: expectedMeta.confidence,
+          entityName: expectedMeta.entityName,
+        });
+
+        await esClient.deleteByQuery({
+          index: UPDATES_INDEX,
+          refresh: true,
+          query: scenario.query as object,
+        });
+      }
+    );
+  }
+
   apiTest(
     'should return exactly the mailchimp document when service DSL is built from service.name',
     async ({ esClient }) => {
@@ -270,7 +310,7 @@ apiTest.describe('DSL query translation', { tag: ENTITY_STORE_TAGS }, () => {
         const subset = hits.filter((h) =>
           docMatchesQuery((getDocSource(h) ?? {}) as Record<string, unknown>, scenario.query)
         );
-        expect(subset).toHaveLength(1);
+        expect(subset, `scenario "${scenario.id}"`).toHaveLength(1);
         expect(getEuidFromObject('user', subset[0])).toBe(scenario.expectedEuid);
         expect(scenario.expectedMeta).toBeDefined();
         const expectedMeta = scenario.expectedMeta!;
@@ -286,8 +326,11 @@ apiTest.describe('DSL query translation', { tag: ENTITY_STORE_TAGS }, () => {
         hasDocWith(hits, (s) => s.user?.name === 'alice.local' && s.host?.id === 'host-nonidp-001')
       ).toBe(true);
 
-      expect(hasDocWith(hits, (s) => s.user?.email === 'invalid-idp-illegal@test.com')).toBe(false);
-      expect(hasDocWith(hits, (s) => s.user?.name === 'not-captured-no-event')).toBe(false);
+      // All these documents could potentially be a contributor to the EUID, so we should include them.
+      expect(hasDocWith(hits, (s) => s.user?.email === 'invalid-idp-illegal@test.com')).toBe(true);
+      expect(hasDocWith(hits, (s) => s.user?.name === 'not-captured-no-event')).toBe(true);
+
+      // Outcome failure should never be present
       expect(hasDocWith(hits, (s) => s.user?.name === 'ignored-outcome-failure')).toBe(false);
 
       const bareOnlyTimestamp = hasDocWith(hits, (s) => {

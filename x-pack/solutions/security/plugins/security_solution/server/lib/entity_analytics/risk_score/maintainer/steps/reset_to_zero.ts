@@ -81,6 +81,7 @@ export const resetToZero = async ({
         ? 'score_type IS NULL OR score_type == "base"'
         : 'score_type == "resolution"';
     const esql = /* sql */ `
+    SET unmapped_fields="nullify";
     FROM ${alias}
     | EVAL id_value = TO_STRING(${entityField})
     | EVAL score = TO_DOUBLE(${scoreField})

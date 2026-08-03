@@ -18,6 +18,8 @@ jest.doMock('./get_plugin_bundle_paths', () => ({
 }));
 
 export const getJsDependencyPathsMock = jest.fn();
+export const getRspackDependencyPathsMock = jest.fn();
 jest.doMock('./get_js_dependency_paths', () => ({
   getJsDependencyPaths: getJsDependencyPathsMock,
+  getRspackDependencyPaths: getRspackDependencyPathsMock,
 }));

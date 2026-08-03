@@ -8,19 +8,32 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
+import { userEvent } from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
 import { EuiThemeProvider } from '@elastic/eui';
 import './welcome.test.mocks';
 import { Welcome } from './welcome';
 
-test('should render a Welcome screen', () => {
-  const { getByText } = render(
+const renderWelcome = (onSkip = jest.fn()) => {
+  render(
     <I18nProvider>
       <EuiThemeProvider>
-        <Welcome urlBasePath="" onSkip={() => {}} />
+        <Welcome urlBasePath="" onSkip={onSkip} />
       </EuiThemeProvider>
     </I18nProvider>
   );
-  expect(getByText('Welcome to Elastic')).toBeInTheDocument();
+  return { onSkip };
+};
+
+test('should render a Welcome screen', () => {
+  renderWelcome();
+  expect(screen.getByText('Welcome to Elastic')).toBeInTheDocument();
+});
+
+test('clicking "Explore on my own" calls onSkip', async () => {
+  const user = userEvent.setup();
+  const { onSkip } = renderWelcome();
+  await user.click(screen.getByTestId('skipWelcomeScreen'));
+  expect(onSkip).toHaveBeenCalledTimes(1);
 });

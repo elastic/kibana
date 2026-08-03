@@ -14,26 +14,28 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { IdField, AssetCriticalityRecord } from './common.gen';
 
+export const GetAssetCriticalityRecordRequestQuery = lazySchema(() =>
+  z.object({
+    /**
+     * The ID value of the asset.
+     */
+    id_value: z.string(),
+    /**
+     * The field representing the ID.
+     */
+    id_field: IdField,
+  })
+);
 export type GetAssetCriticalityRecordRequestQuery = z.infer<
   typeof GetAssetCriticalityRecordRequestQuery
 >;
-export const GetAssetCriticalityRecordRequestQuery = z.object({
-  /**
-   * The ID value of the asset.
-   */
-  id_value: z.string(),
-  /**
-   * The field representing the ID.
-   */
-  id_field: IdField,
-});
 export type GetAssetCriticalityRecordRequestQueryInput = z.input<
   typeof GetAssetCriticalityRecordRequestQuery
 >;
 
+export const GetAssetCriticalityRecordResponse = lazySchema(() => AssetCriticalityRecord);
 export type GetAssetCriticalityRecordResponse = z.infer<typeof GetAssetCriticalityRecordResponse>;
-export const GetAssetCriticalityRecordResponse = AssetCriticalityRecord;

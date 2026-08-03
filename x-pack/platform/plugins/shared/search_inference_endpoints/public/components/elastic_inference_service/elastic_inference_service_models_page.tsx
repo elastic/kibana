@@ -21,6 +21,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useQueryClient } from '@kbn/react-query';
+import { EisCloudConnectPromoCallout, useCloudConnectStatus } from '@kbn/search-api-panels';
+import { CLOUD_CONNECT_NAV_ID } from '@kbn/deeplinks-management/constants';
 import { INFERENCE_ENDPOINTS_QUERY_KEY } from '../../../common/constants';
 import { useEisModels } from '../../hooks/use_eis_models';
 import { useEndpointActions } from '../../hooks/use_endpoint_actions';
@@ -36,10 +38,19 @@ import {
   type TaskTypeCategory,
 } from '../../utils/eis_utils';
 import { ModelFamilyFilter } from './model_family_filter';
+import { useKibana } from '../../hooks/use_kibana';
+import { useInferenceCapabilities } from '../../hooks/use_inference_capabilities';
 
 export const ElasticInferenceServiceModelsPage = () => {
+  const {
+    services: { application, cloud, cloudConnect },
+  } = useKibana();
+  const { isLoading: isCloudConnectStatusLoading, isCloudConnected } = useCloudConnectStatus(
+    cloudConnect?.hooks.useCloudConnectStatus
+  );
   const queryClient = useQueryClient();
   const { data: endpoints, isLoading, isError } = useEisModels();
+  const { canManage } = useInferenceCapabilities();
   const {
     showDeleteAction,
     selectedInferenceEndpoint,
@@ -104,6 +115,17 @@ export const ElasticInferenceServiceModelsPage = () => {
 
   return (
     <>
+      {!isCloudConnectStatusLoading && !isCloudConnected && (
+        <EisCloudConnectPromoCallout
+          promoId="elasticInferencePage"
+          isSelfManaged={!cloud?.isCloudEnabled}
+          direction="row"
+          navigateToApp={() =>
+            application.navigateToApp(CLOUD_CONNECT_NAV_ID, { openInNewTab: true })
+          }
+          addSpacer="top"
+        />
+      )}
       <EuiSpacer size="l" />
       <EuiFlexGroup direction="column">
         <EuiFlexItem grow={false}>
@@ -112,7 +134,7 @@ export const ElasticInferenceServiceModelsPage = () => {
               <EuiFieldSearch
                 placeholder={i18n.translate(
                   'xpack.searchInferenceEndpoints.eisModelspage.searchPlaceholder',
-                  { defaultMessage: 'Search models...' }
+                  { defaultMessage: 'Search Elastic Inference Service models...' }
                 )}
                 value={searchQuery}
                 fullWidth={true}
@@ -120,9 +142,10 @@ export const ElasticInferenceServiceModelsPage = () => {
                 aria-label={i18n.translate(
                   'xpack.searchInferenceEndpoints.eisModelspage.searchbar',
                   {
-                    defaultMessage: 'Find Elastic Inference Service models',
+                    defaultMessage: 'Search Elastic Inference Service models',
                   }
                 )}
+                data-test-subj="eisModelsSearchBar"
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -145,6 +168,7 @@ export const ElasticInferenceServiceModelsPage = () => {
                     isSelected={selectedTaskTypes.has(category)}
                     isToggle
                     onClick={() => toggleTaskType(category)}
+                    data-test-subj={`eisTaskTypeFilter-${category}`}
                   >
                     {label}
                   </EuiFilterButton>
@@ -156,6 +180,7 @@ export const ElasticInferenceServiceModelsPage = () => {
         <EuiFlexItem>
           {filtered.length === 0 ? (
             <EuiEmptyPrompt
+              data-test-subj="eisNoModelsFound"
               title={
                 <h3>
                   {i18n.translate('xpack.searchInferenceEndpoints.eisModelspage.noResults', {
@@ -165,7 +190,7 @@ export const ElasticInferenceServiceModelsPage = () => {
               }
             />
           ) : (
-            <EuiFlexGrid columns={breakpoint === 'xl' ? 4 : 3}>
+            <EuiFlexGrid columns={breakpoint === 'xl' ? 4 : 3} data-test-subj="eisModelCards">
               {filtered.map((m) => (
                 <EuiFlexItem key={`${m.service}::${m.modelName}`}>
                   <ModelCard
@@ -196,8 +221,9 @@ export const ElasticInferenceServiceModelsPage = () => {
           allEndpoints={endpoints}
           onClose={onModelDetailFlyoutClose}
           onSaveEndpoint={() => queryClient.invalidateQueries([INFERENCE_ENDPOINTS_QUERY_KEY])}
-          onDeleteEndpoint={displayDeleteActionItem}
+          onDeleteEndpoint={canManage ? displayDeleteActionItem : undefined}
           onCopyEndpointId={copyContent}
+          canManage={canManage}
         />
       )}
     </>

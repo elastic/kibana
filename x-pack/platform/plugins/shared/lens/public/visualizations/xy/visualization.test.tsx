@@ -1217,6 +1217,7 @@ describe('xy_visualization', () => {
           annotations: [
             exampleAnnotation,
             {
+              color: 'auto',
               icon: 'triangle',
               type: 'manual',
               id: 'newCol',
@@ -1481,6 +1482,7 @@ describe('xy_visualization', () => {
             annotations: [
               exampleAnnotation2,
               {
+                color: 'auto',
                 filter: {
                   language: 'kuery',
                   query: 'agent.keyword: *',
@@ -1540,6 +1542,7 @@ describe('xy_visualization', () => {
             indexPatternId: 'indexPattern1',
             annotations: [
               {
+                color: 'auto',
                 filter: {
                   language: 'kuery',
                   query: 'agent.keyword: *',
@@ -2714,7 +2717,7 @@ describe('xy_visualization', () => {
         });
         expect(config.groups[0].accessors).toEqual([
           {
-            color: '#BC1E70',
+            color: '#2B394F',
             columnId: 'an1',
             customIcon: IconCircle,
             triggerIconType: 'custom',
@@ -3411,6 +3414,29 @@ describe('xy_visualization', () => {
             })
           );
         });
+        it('should return a data view not found error instead of throwing when the annotation data view is missing', () => {
+          // Regression test for https://github.com/elastic/kibana/issues/268821:
+          // when the annotation layer references an index-pattern that does not
+          // exist in the current space, getUserMessages must not throw.
+          const xyState = createStateWithAnnotationProps({});
+          const annotationLayer = xyState.layers.find(
+            (layer) => layer.layerType === layerTypes.ANNOTATIONS
+          )!;
+          // Point the annotation layer at a data view that is not loaded.
+          (annotationLayer as { indexPatternId: string }).indexPatternId = 'missing-data-view';
+
+          let errors: ReturnType<typeof getErrorMessages>;
+          expect(() => {
+            errors = getErrorMessages(xyVisualization, xyState, getFrameMock());
+          }).not.toThrow();
+          expect(errors!).toHaveLength(1);
+          expect(errors![0]).toEqual(
+            expect.objectContaining({
+              shortMessage: 'Data view missing-data-view not found',
+            })
+          );
+        });
+
         it('should return error if current annotation contains non existent field as textField', () => {
           const xyState = createStateWithAnnotationProps({
             textField: 'non-existent',
@@ -4183,7 +4209,7 @@ describe('xy_visualization', () => {
                 "description": "Saves the annotation group as a part of the Lens Saved Object",
                 "displayName": "Unlink from library",
                 "execute": [Function],
-                "icon": "unlink",
+                "icon": "linkSlash",
                 "isCompatible": true,
                 "order": 300,
               },
@@ -4193,7 +4219,7 @@ describe('xy_visualization', () => {
                 "disabled": true,
                 "displayName": "Revert changes",
                 "execute": [Function],
-                "icon": "editorUndo",
+                "icon": "undo",
                 "isCompatible": true,
                 "order": 200,
               },

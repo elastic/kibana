@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { dump } from 'js-yaml';
+import { stringify } from 'yaml';
 import type AdmZip from 'adm-zip';
 import path from 'path';
 import type { Pipeline } from '@kbn/ingest-pipelines-plugin/common/types';
@@ -19,7 +19,7 @@ export const addManifestToZip = (
   rootDir: string,
   manifest: IntegrationManifest
 ): void => {
-  const yamlContent = dump(manifest, { lineWidth: -1 });
+  const yamlContent = stringify(manifest, { lineWidth: 0 });
   zip.addFile(path.join(rootDir, 'manifest.yml'), Buffer.from(yamlContent));
 };
 
@@ -30,7 +30,7 @@ export const addDataStreamToZip = (
   dataStreamManifest: DataStreamManifest
 ): void => {
   const dataStreamDir = path.join(rootDir, 'data_stream', dataStreamName);
-  const yamlContent = dump(dataStreamManifest, { lineWidth: -1 });
+  const yamlContent = stringify(dataStreamManifest, { lineWidth: 0 });
   zip.addFile(path.join(dataStreamDir, 'manifest.yml'), Buffer.from(yamlContent));
 };
 
@@ -48,7 +48,7 @@ export const addIngestPipelineToZip = (
     'ingest_pipeline',
     'default.yml'
   );
-  const yamlContent = `---\n${dump(pipeline, { sortKeys: false, lineWidth: -1 })}`;
+  const yamlContent = `---\n${stringify(pipeline, { lineWidth: 0 })}`;
   zip.addFile(pipelinePath, Buffer.from(yamlContent));
 };
 
@@ -108,13 +108,7 @@ const buildNestedFieldStructure = (flatFields: FieldMappingEntry[]): FieldYamlEn
       }
 
       if (!isLeaf) {
-        let children = existing.fields;
-        if (!children) {
-          existing.type = 'group';
-          children = [];
-          existing.fields = children;
-        }
-        currentLevel = children;
+        currentLevel = existing.fields ?? [];
       }
     }
   }
@@ -156,15 +150,15 @@ const buildBaseFieldsYaml = (integrationName: string, dataStreamName: string): s
     return entry;
   });
 
-  return dump(yamlEntries, { lineWidth: -1 });
+  return stringify(yamlEntries, { lineWidth: 0 });
 };
 
 const buildCustomFieldsYaml = (fieldMappings: FieldMappingEntry[]): string => {
   const customFields = fieldMappings.filter((f) => !f.is_ecs);
-  if (customFields.length === 0) return dump([], { lineWidth: -1 });
+  if (customFields.length === 0) return stringify([], { lineWidth: 0 });
 
   const nested = buildNestedFieldStructure(customFields);
-  return dump(nested, { sortKeys: false, lineWidth: -1 });
+  return stringify(nested, { lineWidth: 0 });
 };
 
 export const addFieldsToZip = (
@@ -190,10 +184,15 @@ export const addChangelogToZip = (
 ): void => {
   if (changelog.length === 0) return;
 
-  const yamlContent = dump(changelog, { lineWidth: -1, quotingType: '"', forceQuotes: true });
+  const yamlContent = stringify(changelog, { lineWidth: 0, defaultStringType: 'QUOTE_DOUBLE' });
   zip.addFile(path.join(rootDir, 'changelog.yml'), Buffer.from(yamlContent));
 };
 
 export const addReadmeToZip = (zip: AdmZip, rootDir: string, readmeContent: string): void => {
   zip.addFile(path.join(rootDir, 'docs', 'README.md'), Buffer.from(readmeContent));
+};
+
+export const addLogoToZip = (zip: AdmZip, rootDir: string, logoBase64: string): void => {
+  const logoBuffer = Buffer.from(logoBase64, 'base64');
+  zip.addFile(path.join(rootDir, 'img', 'logo.svg'), logoBuffer);
 };

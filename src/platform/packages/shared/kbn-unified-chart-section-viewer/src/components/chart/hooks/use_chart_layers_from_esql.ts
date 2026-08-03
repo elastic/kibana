@@ -12,6 +12,7 @@ import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { useEffect, useMemo } from 'react';
 import type { TimeRange } from '@kbn/data-plugin/common';
 import { getESQLQueryColumns } from '@kbn/esql-utils';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { NullableMetricUnit } from '../../../types';
 import { useEsqlQueryInfo } from '../../../hooks';
 import { getLensMetricFormat } from '../../../common/utils';
@@ -25,6 +26,7 @@ interface ChartLayersFromEsqlProps {
   seriesType: LensSeriesLayer['seriesType'];
   services: UnifiedMetricsGridProps['services'];
   abortController?: AbortController;
+  variables?: ESQLControlVariable[];
 }
 
 export interface ChartLayersFromEsqlResult {
@@ -41,6 +43,7 @@ export const useChartLayersFromEsql = ({
   services,
   unit,
   abortController,
+  variables,
 }: ChartLayersFromEsqlProps): ChartLayersFromEsqlResult => {
   const queryInfo = useEsqlQueryInfo({ query });
 
@@ -51,8 +54,9 @@ export const useChartLayersFromEsql = ({
         search: services.data.search.search,
         signal,
         timeRange,
+        variables,
       }),
-    [query, services.data.search, timeRange]
+    [query, services.data.search, timeRange, variables]
   );
 
   useEffect(() => {

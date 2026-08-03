@@ -47,11 +47,14 @@ export class EnterIfNodeImpl implements NodeImplementation {
     const elseNode = successors?.find(
       (node) => !Object.hasOwn(node, 'condition')
     ) as EnterConditionBranchNode;
-    const renderedCondition =
-      this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(thenNode.condition);
+    const context = this.stepExecutionRuntime.contextManager.getContext();
+    const renderedCondition = this.stepExecutionRuntime.contextManager.renderValueWithContext(
+      thenNode.condition,
+      context
+    );
     const evaluatedConditionResult = evaluateCondition(
       renderedCondition,
-      this.stepExecutionRuntime.contextManager.getContext(),
+      context,
       this.node.stepId
     );
     this.stepExecutionRuntime.setInput({

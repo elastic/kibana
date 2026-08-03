@@ -20,12 +20,17 @@ spec:
     spec:
       env:
         SLACK_NOTIFICATIONS_CHANNEL: '#kibana-mission-control'
-        ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'true'
+        KIBANA_SLACK_NOTIFICATIONS_ENABLED: 'true'
       allow_rebuilds: true
       branch_configuration: deploy-fix@*
       default_branch: main
       repository: elastic/kibana
       pipeline_file: .buildkite/pipelines/es_serverless/emergency_release_branch_testing.yml
+      initial_step_plugins:
+        - sparse-checkout#v1.6.0:
+            paths:
+              - .buildkite/pipelines/es_serverless/emergency_release_branch_testing.yml
+            cleanup_sparse_state: true
       provider_settings:
         build_branches: true
         build_pull_requests: false

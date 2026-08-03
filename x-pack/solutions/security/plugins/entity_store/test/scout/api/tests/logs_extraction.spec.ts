@@ -12,6 +12,7 @@ import {
   INTERNAL_HEADERS,
   ENTITY_STORE_ROUTES,
   ENTITY_STORE_TAGS,
+  LATEST_ALIAS,
 } from '../fixtures/constants';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common';
 import {
@@ -19,6 +20,7 @@ import {
   USER_ENTITY_NAMESPACE,
 } from '../../../../common/domain/definitions/user_entity_constants';
 import {
+  assertEntitiesEqual,
   expectedGenericEntities,
   expectedHostEntities,
   expectedServiceEntities,
@@ -28,8 +30,10 @@ import {
   clearEntityStoreIndices,
   forceLogExtraction,
   ingestDoc,
+  normalizeKeywordList,
   searchDocById,
 } from '../fixtures/helpers';
+import { LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT } from '../../../../server/domain/saved_objects';
 
 apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }, () => {
   let defaultHeaders: Record<string, string>;
@@ -50,6 +54,26 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
     await kbnClient.uiSettings.update({
       [FF_ENABLE_ENTITY_STORE_V2]: true,
     });
+
+    // Pre-create the `security-solution-default` data view. In API-only test
+    // environments the Security Solution sourcerer (which normally creates it
+    // from the browser flow) never runs, so the entity store's data-view
+    // lookup in `logs_extraction_client.ts#getAllIndexPatternsIncludingRemote`
+    // always misses and takes its `logs-*` fallback branch.
+    const dataViewResponse = await apiClient.post('/api/data_views/data_view', {
+      headers: defaultHeaders,
+      responseType: 'json',
+      body: {
+        override: true,
+        data_view: {
+          id: 'security-solution-default',
+          name: 'security-solution-default',
+          title: 'logs-*',
+          timeFieldName: '@timestamp',
+        },
+      },
+    });
+    expect(dataViewResponse.statusCode).toBe(200);
 
     // Install the entity store
     const response = await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
@@ -74,9 +98,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
     await clearEntityStoreIndices(esClient);
   });
 
-  apiTest('Should extract properly extract host', async ({ apiClient, esClient }) => {
-    const expectedResultCount = 20;
-
+  apiTest('Should extract properly extract host', async ({ apiClient, esClient, log }) => {
     const extractionResponse = await apiClient.post(
       ENTITY_STORE_ROUTES.internal.FORCE_LOG_EXTRACTION('host'),
       {
@@ -91,10 +113,10 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
     expect(extractionResponse.statusCode).toBe(200);
     expect(extractionResponse.body.success).toBe(true);
     expect(extractionResponse.body.pages).toBe(1);
-    expect(extractionResponse.body.count).toBe(expectedResultCount);
+    expect(extractionResponse.body.count).toBe(expectedHostEntities.length);
 
     const entities = await esClient.search({
-      index: '.entities.v2.latest.security_default',
+      index: LATEST_ALIAS,
       query: {
         bool: {
           filter: {
@@ -102,18 +124,13 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
           },
         },
       },
-      sort: '@timestamp:asc,entity.id:asc',
       size: 1000, // a lot just to be sure we are not capping it
     });
 
-    expect(entities.hits.hits).toHaveLength(expectedResultCount);
-    // it's deterministic because of the SHA-256 id;
-    expect(entities.hits.hits).toMatchObject(expectedHostEntities);
+    assertEntitiesEqual(expectedHostEntities, entities.hits.hits, (msg) => log.error(msg));
   });
 
-  apiTest('Should extract properly extract user', async ({ apiClient, esClient }) => {
-    const expectedResultCount = 25;
-
+  apiTest('Should extract properly extract user', async ({ apiClient, esClient, log }) => {
     const extractionResponse = await apiClient.post(
       ENTITY_STORE_ROUTES.internal.FORCE_LOG_EXTRACTION('user'),
       {
@@ -128,10 +145,10 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
     expect(extractionResponse.statusCode).toBe(200);
     expect(extractionResponse.body.success).toBe(true);
     expect(extractionResponse.body.pages).toBe(1);
-    expect(extractionResponse.body.count).toBe(expectedResultCount);
+    expect(extractionResponse.body.count).toBe(expectedUserEntities.length);
 
     const entities = await esClient.search({
-      index: '.entities.v2.latest.security_default',
+      index: LATEST_ALIAS,
       query: {
         bool: {
           filter: {
@@ -139,14 +156,11 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
           },
         },
       },
-      sort: '@timestamp:asc,entity.id:asc',
       size: 1000, // a lot just to be sure we are not capping it
     });
 
-    expect(entities.hits.hits).toHaveLength(expectedResultCount);
-    // it's deterministic because of the SHA-256 id
-    // manually checking object until we have a snapshot matcher
-    expect(entities.hits.hits).toMatchObject(expectedUserEntities);
+    assertEntitiesEqual(expectedUserEntities, entities.hits.hits, (msg) => log.error(msg));
+
     // All user entities must have entity.namespace (from fieldEvaluations) and entity.confidence (from whenConditionTrueSetFieldsAfterStats)
     for (const hit of entities.hits.hits) {
       const source = hit._source as Record<string, unknown>;
@@ -174,7 +188,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
     expect(extractionResponse.body.count).toBe(2);
 
     const entities = await esClient.search({
-      index: '.entities.v2.latest.security_default',
+      index: LATEST_ALIAS,
       query: {
         bool: {
           filter: {
@@ -182,14 +196,10 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
           },
         },
       },
-      sort: '@timestamp:asc,entity.id:asc',
       size: 1000, // a lot just to be sure we are not capping it
     });
 
-    expect(entities.hits.hits).toHaveLength(2);
-    // it's deterministic because of the SHA-256 id
-    // manually checking object until we have a snapshot matcher
-    expect(entities.hits.hits).toMatchObject(expectedServiceEntities);
+    assertEntitiesEqual(expectedServiceEntities, entities.hits.hits);
   });
 
   apiTest('Should extract properly extract generic', async ({ apiClient, esClient }) => {
@@ -210,7 +220,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
     expect(extractionResponse.body.count).toBe(1);
 
     const entities = await esClient.search({
-      index: '.entities.v2.latest.security_default',
+      index: LATEST_ALIAS,
       query: {
         bool: {
           filter: {
@@ -218,14 +228,10 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
           },
         },
       },
-      sort: '@timestamp:asc,entity.id:asc',
       size: 1000, // a lot just to be sure we are not capping it
     });
 
-    expect(entities.hits.hits).toHaveLength(1);
-    // it's deterministic because of the SHA-256 id
-    // manually checking object until we have a snapshot matcher
-    expect(entities.hits.hits).toMatchObject(expectedGenericEntities);
+    assertEntitiesEqual(expectedGenericEntities, entities.hits.hits);
   });
 
   apiTest('Should properly handle field retention strategies', async ({ apiClient, esClient }) => {
@@ -300,7 +306,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
         namespace: 'okta',
         confidence: ENTITY_CONFIDENCE.High,
       },
-      user: { hash: ['hash-1', 'hash-2'] },
+      user: { hash: expect.arrayContaining(['hash-1', 'hash-2']) },
     });
 
     // Update sub_type in between documents with null values
@@ -374,7 +380,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
         namespace: 'okta',
         confidence: ENTITY_CONFIDENCE.High,
       },
-      user: { hash: ['hash-1', 'hash-3', 'hash-4', 'hash-5', 'hash-2'] },
+      user: { hash: expect.arrayContaining(['hash-1', 'hash-2', 'hash-3', 'hash-4', 'hash-5']) },
     });
 
     // Make sure latest is not overwritten from the document if not changed
@@ -412,21 +418,27 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
         confidence: ENTITY_CONFIDENCE.High,
       },
       user: {
-        hash: [
+        hash: expect.arrayContaining([
           'hash-1',
-          'hash-10',
-          'hash-11',
+          'hash-2',
           'hash-3',
           'hash-4',
           'hash-5',
           'hash-6',
           'hash-7',
           'hash-8',
-          'hash-2',
-        ],
+          'hash-9',
+          'hash-10',
+          'hash-11',
+        ]),
         domain: 'example.com',
       },
     });
+    // With cap=100 all 11 distinct hashes must be collected (exercises the raised cap).
+    const userHash = (
+      updatedLatestDomain.hits.hits[0]._source as Record<string, Record<string, unknown>>
+    ).user.hash;
+    expect(normalizeKeywordList(userHash)).toHaveLength(11);
   });
 
   apiTest(
@@ -553,7 +565,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
         entity: {
           id: 'user:postagg-idp-iam-ad-inlatest@active_directory',
           type: 'Identity',
-          name: 'IDP IAM AD InLatest',
+          name: 'IDP IAM AD InLatest Updated',
           namespace: 'active_directory',
           confidence: ENTITY_CONFIDENCE.High,
         },
@@ -641,7 +653,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
   );
 
   apiTest(
-    'Should set entity.namespace to local and entity.name to user.name@host.name for non-IDP documents',
+    'Should set entity.namespace to local and entity.name to user.name and host.name for non-IDP documents',
     async ({ apiClient, esClient }) => {
       // Non-IDP: user.name + host.id present, user.name not in excluded list.
       // Event must NOT be asset/iam so identity fieldEvaluations (condition whenClause) set entity.namespace = 'local'.
@@ -991,7 +1003,9 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
   apiTest(
     'Should omit documents at logs extraction when they do not match documentsFilter or postAggFilter',
     async ({ apiClient, esClient }) => {
-      const from = '2026-03-18T11:00:00Z';
+      // from is 1 second past the timestamp used by the "entity.name" test to avoid
+      // cross-test data leaking in with the now always-inclusive >= boundary.
+      const from = '2026-03-18T11:00:01Z';
       const to = '2026-03-18T12:00:00Z';
 
       // 1. event.outcome = 'failure' → documentsFilter omits (pre-agg)
@@ -1065,7 +1079,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
       expect(extractionResponse.body.success).toBe(true);
 
       const entities = await esClient.search({
-        index: '.entities.v2.latest.security_default',
+        index: LATEST_ALIAS,
         query: { bool: { filter: { term: { 'entity.EngineMetadata.Type': 'host' } } } },
         size: 5,
       });
@@ -1079,6 +1093,392 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
         const topLevelKeys = Object.keys(source);
         const dottedKeys = topLevelKeys.filter((k) => k.includes('.'));
         expect(dottedKeys).toHaveLength(0);
+      }
+    }
+  );
+
+  apiTest(
+    'Should extract all entities when all documents share the same timestamp as fromDateISO (timestamp collision at slice boundary)',
+    async ({ apiClient, esClient }) => {
+      // Regression test for the log-slice boundary bug.
+      //
+      // Root cause: buildLogPageProbeSourceClause used `@timestamp > fromDateISO` (exclusive)
+      // when logsPageCursorStart was set. When all remaining docs share @timestamp = fromDateISO,
+      // the exclusive base filter drops them before the compound _id cursor can apply — the second
+      // outer iteration finds 0 documents and the entities are permanently lost.
+      //
+      // Fix: always use `@timestamp >= fromDateISO`. The compound cursor
+      // `(@timestamp > T OR (@timestamp = T AND _id > lastId))` owns the exclusive lower bound.
+      const SHARED_TIMESTAMP = '2026-05-01T10:00:00.000Z';
+      const from = SHARED_TIMESTAMP; // intentionally equal to all doc timestamps
+      const to = '2026-05-01T11:00:00.000Z';
+      const MAX_LOGS_PER_PAGE = 3;
+      const TOTAL_DOCS = 6; // > MAX_LOGS_PER_PAGE so a second outer iteration is required
+
+      // Shrink the log-slice window to force multiple outer loop iterations within one run.
+      const updateResponse = await apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE, {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: { logExtraction: { maxLogsPerPage: MAX_LOGS_PER_PAGE } },
+      });
+      expect(updateResponse.statusCode).toBe(200);
+
+      try {
+        // Ingest TOTAL_DOCS host documents all sharing @timestamp = fromDateISO.
+        // Outer iteration 1 processes the first MAX_LOGS_PER_PAGE docs and sets
+        // logsPageCursorStart = (SHARED_TIMESTAMP, lastId). Outer iteration 2 must
+        // find the remaining docs via the compound cursor — the fix makes this work.
+        for (let i = 1; i <= TOTAL_DOCS; i++) {
+          await ingestDoc(esClient, {
+            '@timestamp': SHARED_TIMESTAMP,
+            host: { name: `ts-collision-host-${i}` },
+          });
+        }
+
+        const extractionResponse = await forceLogExtraction(
+          apiClient,
+          internalHeaders,
+          'host',
+          from,
+          to
+        );
+        expect(extractionResponse.statusCode).toBe(200);
+        expect(extractionResponse.body).toMatchObject({ success: true, count: TOTAL_DOCS });
+
+        for (let i = 1; i <= TOTAL_DOCS; i++) {
+          const hit = await searchDocById(esClient, `host:ts-collision-host-${i}`);
+          expect(hit.hits.hits).toHaveLength(1);
+        }
+      } finally {
+        // Restore default so subsequent tests are not affected.
+        await apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE, {
+          headers: defaultHeaders,
+          responseType: 'json',
+          body: { logExtraction: { maxLogsPerPage: LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT } },
+        });
+      }
+    }
+  );
+
+  apiTest(
+    'Should merge entity.relationships.* identifier from host.entity on source documents',
+    async ({ apiClient, esClient }) => {
+      const fromIso = '2026-04-10T09:00:00Z';
+      const toIso = '2026-04-10T11:00:00Z';
+      const ts = '2026-04-10T10:00:00Z';
+      const hostName = 'relationship-bag-smoke-host';
+      const entityId = `host:${hostName}`;
+
+      await ingestDoc(esClient, {
+        '@timestamp': ts,
+        host: {
+          name: hostName,
+          entity: {
+            relationships: {
+              owns: {
+                user: {
+                  email: ['owner-rel-test@example.com'],
+                  id: ['00u_rel_test'],
+                },
+                host: {
+                  name: ['asset-rel-01'],
+                },
+              },
+              supervises: {
+                user: {
+                  email: ['supervisee@example.com'],
+                  name: ['supervisor_login'],
+                },
+              },
+            },
+          },
+        },
+      });
+
+      const extractionResponse = await forceLogExtraction(
+        apiClient,
+        internalHeaders,
+        'host',
+        fromIso,
+        toIso
+      );
+      expect(extractionResponse.statusCode).toBe(200);
+      expect(extractionResponse.body).toMatchObject({
+        success: true,
+        count: 1,
+      });
+
+      const hitResponse = await searchDocById(esClient, entityId);
+      expect(hitResponse.hits.hits).toHaveLength(1);
+      const source = hitResponse.hits.hits[0]._source as Record<string, unknown>;
+      const entity = source.entity as Record<string, unknown>;
+      expect(entity).toBeDefined();
+
+      const relationships = entity.relationships as Record<string, unknown> | undefined;
+      expect(relationships).toBeDefined();
+
+      const owns = relationships!.owns as Record<string, unknown> | undefined;
+      expect(owns).toBeDefined();
+      const ownsRawIdentifiers = owns!.raw_identifiers as Record<string, unknown> | undefined;
+      expect(ownsRawIdentifiers).toBeDefined();
+      const ownsUser = ownsRawIdentifiers!.user as Record<string, unknown> | undefined;
+      const ownsHost = ownsRawIdentifiers!.host as Record<string, unknown> | undefined;
+      expect(normalizeKeywordList(ownsUser?.email)).toStrictEqual(['owner-rel-test@example.com']);
+      expect(normalizeKeywordList(ownsUser?.id)).toStrictEqual(['00u_rel_test']);
+      expect(normalizeKeywordList(ownsHost?.name)).toStrictEqual(['asset-rel-01']);
+
+      const supervises = relationships!.supervises as Record<string, unknown> | undefined;
+      expect(supervises).toBeDefined();
+      const supervisesRawIdentifiers = supervises!.raw_identifiers as
+        | Record<string, unknown>
+        | undefined;
+      expect(supervisesRawIdentifiers).toBeDefined();
+      const supervisesUser = supervisesRawIdentifiers!.user as Record<string, unknown> | undefined;
+      expect(normalizeKeywordList(supervisesUser?.email)).toStrictEqual(['supervisee@example.com']);
+      expect(normalizeKeywordList(supervisesUser?.name)).toStrictEqual(['supervisor_login']);
+    }
+  );
+
+  apiTest(
+    'Should route cloud asset users to the correct namespace based on cloud.provider',
+    async ({ apiClient, esClient }) => {
+      const from = '2026-06-01T10:00:00Z';
+      const to = '2026-06-01T12:00:00Z';
+
+      // 1. cloud.provider=aws → namespace aws
+      await ingestDoc(esClient, {
+        '@timestamp': '2026-06-01T10:01:00Z',
+        event: { kind: 'asset', module: 'asset_discovery' },
+        user: { id: 'cloud-aws-user' },
+        cloud: { provider: 'aws' },
+      });
+      // 2. cloud.provider=gcp → namespace gcp
+      await ingestDoc(esClient, {
+        '@timestamp': '2026-06-01T10:02:00Z',
+        event: { kind: 'asset', module: 'asset_discovery' },
+        user: { id: 'cloud-gcp-user' },
+        cloud: { provider: 'gcp' },
+      });
+      // 3. cloud.provider=azure → namespace entra_id (normalised by the mapping)
+      await ingestDoc(esClient, {
+        '@timestamp': '2026-06-01T10:03:00Z',
+        event: { kind: 'asset', module: 'asset_discovery' },
+        user: { id: 'cloud-azure-user' },
+        cloud: { provider: 'azure' },
+      });
+      // 4. cloud.provider not in mapping (ibm) → falls through to source value (event.module)
+      await ingestDoc(esClient, {
+        '@timestamp': '2026-06-01T10:04:00Z',
+        event: { kind: 'asset', module: 'asset_discovery' },
+        user: { id: 'cloud-ibm-user' },
+        cloud: { provider: 'ibm' },
+      });
+      // 5. cloud.provider absent → falls through to source value (event.module)
+      await ingestDoc(esClient, {
+        '@timestamp': '2026-06-01T10:05:00Z',
+        event: { kind: 'asset', module: 'asset_discovery' },
+        user: { id: 'cloud-no-provider-user' },
+      });
+      // 6. event.kind is not 'asset' → field-mapping condition does not fire;
+      //    cloud.provider=aws and event.module=custom-module produce different namespaces so
+      //    the wrong path would yield 'aws' while the correct path yields 'custom-module'.
+      //    IAM event so postAggFilter passes via idpGate (event.category=iam + event.type=user).
+      await ingestDoc(esClient, {
+        '@timestamp': '2026-06-01T10:06:00Z',
+        event: { category: 'iam', type: 'user', module: 'custom-module' },
+        user: { id: 'cloud-non-asset-user' },
+        cloud: { provider: 'aws' },
+      });
+      // 7. event.kind=asset but event.module ≠ 'asset_discovery' → defensive guard fires;
+      //    cloud.provider mapping does NOT apply; namespace comes from event.module ('other_integration').
+      //    Verifies that only the Cloud Asset Discovery integration triggers the cloud.provider routing.
+      await ingestDoc(esClient, {
+        '@timestamp': '2026-06-01T10:07:00Z',
+        event: { kind: 'asset', module: 'other_integration' },
+        user: { id: 'cloud-other-module-user' },
+        cloud: { provider: 'aws' },
+      });
+
+      const extractionResponse = await forceLogExtraction(
+        apiClient,
+        internalHeaders,
+        'user',
+        from,
+        to
+      );
+      expect(extractionResponse.statusCode).toBe(200);
+      expect(extractionResponse.body).toMatchObject({ success: true, count: 7 });
+
+      // 1. aws → namespace aws
+      const awsHit = await searchDocById(esClient, 'user:cloud-aws-user@aws');
+      expect(awsHit.hits.hits).toHaveLength(1);
+      expect(awsHit.hits.hits[0]._source).toMatchObject({
+        entity: {
+          id: 'user:cloud-aws-user@aws',
+          namespace: 'aws',
+          confidence: ENTITY_CONFIDENCE.High,
+        },
+        cloud: { provider: 'aws' },
+      });
+
+      // 2. gcp → namespace gcp
+      const gcpHit = await searchDocById(esClient, 'user:cloud-gcp-user@gcp');
+      expect(gcpHit.hits.hits).toHaveLength(1);
+      expect(gcpHit.hits.hits[0]._source).toMatchObject({
+        entity: {
+          id: 'user:cloud-gcp-user@gcp',
+          namespace: 'gcp',
+          confidence: ENTITY_CONFIDENCE.High,
+        },
+      });
+
+      // 3. azure → namespace entra_id
+      const azureHit = await searchDocById(esClient, 'user:cloud-azure-user@entra_id');
+      expect(azureHit.hits.hits).toHaveLength(1);
+      expect(azureHit.hits.hits[0]._source).toMatchObject({
+        entity: {
+          id: 'user:cloud-azure-user@entra_id',
+          namespace: 'entra_id',
+          confidence: ENTITY_CONFIDENCE.High,
+        },
+        cloud: { provider: 'azure' },
+      });
+
+      // 4. ibm not in mapping → source value (event.module = asset_discovery) used as namespace
+      const ibmHit = await searchDocById(esClient, 'user:cloud-ibm-user@asset_discovery');
+      expect(ibmHit.hits.hits).toHaveLength(1);
+      expect(ibmHit.hits.hits[0]._source).toMatchObject({
+        entity: {
+          id: 'user:cloud-ibm-user@asset_discovery',
+          namespace: 'asset_discovery',
+          confidence: ENTITY_CONFIDENCE.High,
+        },
+        cloud: { provider: 'ibm' },
+      });
+
+      // 5. cloud.provider absent → source value used as namespace
+      const noProviderHit = await searchDocById(
+        esClient,
+        'user:cloud-no-provider-user@asset_discovery'
+      );
+      expect(noProviderHit.hits.hits).toHaveLength(1);
+      expect(noProviderHit.hits.hits[0]._source).toMatchObject({
+        entity: {
+          id: 'user:cloud-no-provider-user@asset_discovery',
+          namespace: 'asset_discovery',
+          confidence: ENTITY_CONFIDENCE.High,
+        },
+      });
+
+      // 6. event.kind ≠ 'asset' → cloud.provider mapping condition does not fire;
+      //    namespace comes from event.module ('custom-module'), not from cloud.provider ('aws')
+      const nonAssetHit = await searchDocById(esClient, 'user:cloud-non-asset-user@custom-module');
+      expect(nonAssetHit.hits.hits).toHaveLength(1);
+      expect(nonAssetHit.hits.hits[0]._source).toMatchObject({
+        entity: {
+          id: 'user:cloud-non-asset-user@custom-module',
+          namespace: 'custom-module',
+          confidence: ENTITY_CONFIDENCE.High,
+        },
+        cloud: { provider: 'aws' },
+      });
+
+      // 7. event.kind=asset but event.module ≠ 'asset_discovery' → defensive: cloud.provider mapping
+      //    does NOT fire; namespace comes from event.module ('other_integration'), not 'aws'.
+      const otherModuleHit = await searchDocById(
+        esClient,
+        'user:cloud-other-module-user@other_integration'
+      );
+      expect(otherModuleHit.hits.hits).toHaveLength(1);
+      expect(otherModuleHit.hits.hits[0]._source).toMatchObject({
+        entity: {
+          id: 'user:cloud-other-module-user@other_integration',
+          namespace: 'other_integration',
+          confidence: ENTITY_CONFIDENCE.High,
+        },
+        cloud: { provider: 'aws' },
+      });
+    }
+  );
+
+  apiTest(
+    'Should succeed when a data stream matched by the data view has a closed backing index',
+    async ({ apiClient, esClient }) => {
+      const DATA_STREAM = 'logs-closed-smoke';
+      const FROM = '2026-06-24T09:59:00Z';
+      const TO = '2026-06-24T11:00:00Z';
+      const TS = '2026-06-24T10:00:00Z';
+
+      try {
+        // Create a composable index template so the data stream can be created.
+        await esClient.indices.putIndexTemplate({
+          name: 'logs-closed-smoke-template',
+          index_patterns: [`${DATA_STREAM}*`],
+          data_stream: {},
+          priority: 500,
+        });
+
+        // First ingest creates the data stream and its first (soon-to-be-closed) backing index.
+        await esClient.index({
+          index: DATA_STREAM,
+          refresh: 'wait_for',
+          body: { '@timestamp': TS, host: { name: 'closed-backing-host' } },
+        });
+
+        // Discover the first backing index name before rolling over.
+        const beforeRollover = await esClient.indices.resolveIndex({
+          name: DATA_STREAM,
+          expand_wildcards: ['open', 'closed', 'hidden'] as Array<'open' | 'closed' | 'hidden'>,
+        });
+        const firstBacking = ([] as string[]).concat(
+          beforeRollover.data_streams[0]?.backing_indices ?? []
+        )[0];
+
+        // Roll over to create a second (open) backing index.
+        await esClient.indices.rollover({ alias: DATA_STREAM });
+
+        // The entity we will assert on lands in the new open backing index.
+        await esClient.index({
+          index: DATA_STREAM,
+          refresh: 'wait_for',
+          body: { '@timestamp': TS, host: { name: 'open-smoke-host' } },
+        });
+
+        // Simulate the production scenario: close the older backing index.
+        await esClient.indices.close({ index: firstBacking });
+
+        // Extraction must not throw cluster_block_exception and must succeed.
+        const extractionResponse = await forceLogExtraction(
+          apiClient,
+          internalHeaders,
+          'host',
+          FROM,
+          TO
+        );
+        expect(extractionResponse.statusCode).toBe(200);
+        expect(extractionResponse.body).toMatchObject({ success: true });
+
+        // The entity from the open backing index must be extracted.
+        const hit = await searchDocById(esClient, 'host:open-smoke-host');
+        expect(hit.hits.hits).toHaveLength(1);
+      } finally {
+        // Re-open closed backing indices before deleting the data stream (ES rejects
+        // deleteDataStream when backing indices are closed).
+        const resolved = await esClient.indices.resolveIndex({
+          name: DATA_STREAM,
+          expand_wildcards: ['open', 'closed', 'hidden'] as Array<'open' | 'closed' | 'hidden'>,
+        });
+        if (resolved.data_streams.length > 0) {
+          const allBacking = resolved.data_streams.flatMap((ds) =>
+            ([] as string[]).concat(ds.backing_indices)
+          );
+          await esClient.indices.open({ index: allBacking, ignore_unavailable: true });
+        }
+        await esClient.indices.deleteDataStream({ name: DATA_STREAM }, { ignore: [404] });
+        await esClient.indices.deleteIndexTemplate(
+          { name: 'logs-closed-smoke-template' },
+          { ignore: [404] }
+        );
       }
     }
   );

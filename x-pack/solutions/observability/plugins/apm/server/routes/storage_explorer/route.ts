@@ -7,40 +7,35 @@
 
 import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
-import * as t from 'io-ts';
-import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
+import { IndexLifecyclePhaseSelectOption } from '@kbn/apm-types';
 import {
-  indexLifecyclePhaseRt,
-  IndexLifecyclePhaseSelectOption,
-} from '../../../common/storage_explorer_types';
+  routeDefinitions,
+  type StorageExplorerRouteResponse,
+  type StorageDetailsResponse,
+  type StorageChartRouteResponse,
+  type StorageExplorerPrivilegesResponse,
+  type StorageExplorerSummaryStatisticsResponse,
+  type StorageExplorerIsCrossClusterResponse,
+  type StorageExplorerGetServicesResponse,
+} from '@kbn/apm-api-shared';
+import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import { getRandomSampler } from '../../lib/helpers/get_random_sampler';
 import { getSearchTransactionsEvents } from '../../lib/helpers/transactions';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
-import { environmentRt, kueryRt, probabilityRt, rangeRt } from '../default_api_types';
 import { getServiceNamesFromTermsEnum } from '../services/get_services/get_service_names_from_terms_enum';
-import type { StorageExplorerServiceStatisticsResponse } from './get_service_statistics';
 import { getServiceStatistics } from './get_service_statistics';
-import type { SizeTimeseriesResponse } from './get_size_timeseries';
 import { getSizeTimeseries } from './get_size_timeseries';
-import type { StorageDetailsResponse } from './get_storage_details';
 import { getStorageDetails } from './get_storage_details';
-import type { StorageExplorerSummaryStatisticsResponse } from './get_summary_statistics';
 import { getSummaryStatistics } from './get_summary_statistics';
 import { hasStorageExplorerPrivileges } from './has_storage_explorer_privileges';
 import { isCrossClusterSearch } from './is_cross_cluster_search';
 
 const storageExplorerRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/storage_explorer',
+  endpoint: routeDefinitions.storageExplorer.storageExplorer.endpoint,
+  params: routeDefinitions.storageExplorer.storageExplorer.params,
   security: { authz: { requiredPrivileges: ['apm'] } },
-  params: t.type({
-    query: t.intersection([indexLifecyclePhaseRt, probabilityRt, environmentRt, kueryRt, rangeRt]),
-  }),
-  handler: async (
-    resources
-  ): Promise<{
-    serviceStatistics: StorageExplorerServiceStatisticsResponse;
-  }> => {
+  handler: async (resources): Promise<StorageExplorerRouteResponse> => {
     const { config, params, context, request, core } = resources;
 
     const {
@@ -78,14 +73,9 @@ const storageExplorerRoute = createApmServerRoute({
 });
 
 const storageExplorerServiceDetailsRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/services/{serviceName}/storage_details',
+  endpoint: routeDefinitions.storageExplorer.serviceDetails.endpoint,
+  params: routeDefinitions.storageExplorer.serviceDetails.params,
   security: { authz: { requiredPrivileges: ['apm'] } },
-  params: t.type({
-    path: t.type({
-      serviceName: t.string,
-    }),
-    query: t.intersection([indexLifecyclePhaseRt, probabilityRt, environmentRt, kueryRt, rangeRt]),
-  }),
   handler: async (resources): Promise<StorageDetailsResponse> => {
     const { params, context, request, core } = resources;
 
@@ -115,16 +105,10 @@ const storageExplorerServiceDetailsRoute = createApmServerRoute({
 });
 
 const storageChartRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/storage_chart',
+  endpoint: routeDefinitions.storageExplorer.chart.endpoint,
+  params: routeDefinitions.storageExplorer.chart.params,
   security: { authz: { requiredPrivileges: ['apm'] } },
-  params: t.type({
-    query: t.intersection([indexLifecyclePhaseRt, probabilityRt, environmentRt, kueryRt, rangeRt]),
-  }),
-  handler: async (
-    resources
-  ): Promise<{
-    storageTimeSeries: SizeTimeseriesResponse;
-  }> => {
+  handler: async (resources): Promise<StorageChartRouteResponse> => {
     const { config, params, context, request, core } = resources;
 
     const {
@@ -160,10 +144,9 @@ const storageChartRoute = createApmServerRoute({
 });
 
 const storageExplorerPrivilegesRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/storage_explorer/privileges',
+  endpoint: routeDefinitions.storageExplorer.privileges.endpoint,
   security: { authz: { requiredPrivileges: ['apm'] } },
-
-  handler: async (resources): Promise<{ hasPrivileges: boolean }> => {
+  handler: async (resources): Promise<StorageExplorerPrivilegesResponse> => {
     const {
       plugins: { security },
       context,
@@ -184,11 +167,9 @@ const storageExplorerPrivilegesRoute = createApmServerRoute({
 });
 
 const storageExplorerSummaryStatsRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/storage_explorer_summary_stats',
+  endpoint: routeDefinitions.storageExplorer.summaryStats.endpoint,
+  params: routeDefinitions.storageExplorer.summaryStats.params,
   security: { authz: { requiredPrivileges: ['apm'] } },
-  params: t.type({
-    query: t.intersection([indexLifecyclePhaseRt, probabilityRt, environmentRt, kueryRt, rangeRt]),
-  }),
   handler: async (resources): Promise<StorageExplorerSummaryStatisticsResponse> => {
     const { config, params, context, request, core } = resources;
 
@@ -223,27 +204,19 @@ const storageExplorerSummaryStatsRoute = createApmServerRoute({
 });
 
 const storageExplorerIsCrossClusterSearchRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/storage_explorer/is_cross_cluster_search',
+  endpoint: routeDefinitions.storageExplorer.isCrossCluster.endpoint,
   security: { authz: { requiredPrivileges: ['apm'] } },
-  handler: async (resources): Promise<{ isCrossClusterSearch: boolean }> => {
+  handler: async (resources): Promise<StorageExplorerIsCrossClusterResponse> => {
     const apmEventClient = await getApmEventClient(resources);
     return { isCrossClusterSearch: isCrossClusterSearch(apmEventClient) };
   },
 });
 
 const storageExplorerGetServices = createApmServerRoute({
-  endpoint: 'GET /internal/apm/storage_explorer/get_services',
+  endpoint: routeDefinitions.storageExplorer.getServices.endpoint,
+  params: routeDefinitions.storageExplorer.getServices.params,
   security: { authz: { requiredPrivileges: ['apm'] } },
-  params: t.type({
-    query: t.intersection([indexLifecyclePhaseRt, environmentRt, kueryRt, rangeRt]),
-  }),
-  handler: async (
-    resources
-  ): Promise<{
-    services: Array<{
-      serviceName: string;
-    }>;
-  }> => {
+  handler: async (resources): Promise<StorageExplorerGetServicesResponse> => {
     const {
       query: { environment, kuery, indexLifecyclePhase, start, end },
     } = resources.params;

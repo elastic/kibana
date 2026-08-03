@@ -27,13 +27,15 @@ import {
   renderChart,
   waitForRenderComplete,
 } from '@kbn/chart-test-jest-helpers';
+// Static EUI token values for assertions
+// eslint-disable-next-line @elastic/eui/no-restricted-eui-imports
 import { euiThemeVars } from '@kbn/ui-theme';
 
 import * as secondaryMetricInfoModule from './secondary_metric_info';
 
 const mockDeserialize = jest.fn(({ id }: { id: string }) => {
   const convertFn = (v: unknown) => `${id}-${v === null ? NaN : v}`;
-  return { getConverterFor: () => convertFn };
+  return { convertToText: convertFn };
 });
 
 const mockGetColorForValue = jest.fn<undefined | string, any>(() => undefined);
@@ -85,13 +87,13 @@ const defaultMetricParams: MetricVisParam = {
   secondaryAlign: 'right',
   iconAlign: 'left',
   valueFontSize: 'default',
+  density: 'compact',
   secondaryTrend: {
     visuals: undefined,
     baseline: undefined,
     palette: undefined,
   },
   primaryPosition: 'bottom',
-  titleWeight: 'bold',
   secondaryLabelPosition: 'before',
   applyColorTo: 'background',
 };
@@ -534,7 +536,37 @@ describe('MetricVisComponent', function () {
     expect(screen.getByText('N/A')).toBeInTheDocument();
   });
 
-  // do not test with undefined as it relies on a Kibana formatter behaviour which is mocked here
+  it('should convert undefined primary metric to NaN', async () => {
+    const metricId = faker.lorem.word();
+
+    const tableWMissingCell: Datatable = {
+      type: 'datatable',
+      columns: [
+        {
+          id: metricId,
+          name: metricId,
+          meta: {
+            type: 'number',
+          },
+        },
+      ],
+      rows: [{ [metricId]: undefined }],
+    };
+    await renderMetricChart({
+      config: {
+        metric: {
+          ...defaultMetricParams,
+        },
+        dimensions: {
+          metric: metricId,
+        },
+      },
+      data: tableWMissingCell,
+    });
+
+    expect(screen.getByTitle(metricId)).toBeInTheDocument();
+    expect(screen.getByText('N/A')).toBeInTheDocument();
+  });
 
   describe('metric grid', () => {
     const config: Props['config'] = {
@@ -766,11 +798,11 @@ describe('MetricVisComponent', function () {
         maxDimensions: {
           x: {
             unit: 'pixels',
-            value: 310,
+            value: 300,
           },
           y: {
             unit: 'pixels',
-            value: 310,
+            value: 160,
           },
         },
       },
@@ -921,6 +953,44 @@ describe('MetricVisComponent', function () {
         expect(screen.getByRole('figure')).toHaveStyle({ backgroundColor: colorFromPalette });
       });
 
+      it('applies no value color when applyColorTo is "value" and the value is outside the palette range', async () => {
+        // a value outside the palette range yields no color, so the palette color falls back to the default
+        mockGetColorForValue.mockReturnValue(undefined);
+
+        const { container } = await renderMetricChart({
+          config: {
+            dimensions: {
+              metric: basePriceColumnId,
+            },
+            metric: {
+              ...defaultMetricParams,
+              applyColorTo: 'value',
+              color: undefined,
+              palette: {
+                type: 'palette',
+                name: 'default',
+                params: {
+                  colors: [],
+                  gradient: true,
+                  stops: [],
+                  range: 'number',
+                  rangeMin: 2,
+                  rangeMax: 10,
+                },
+              },
+            },
+          },
+        });
+
+        // background stays the default and the value text has no explicit (custom) color
+        expect(screen.getByRole('figure')).toHaveStyle({
+          backgroundColor: euiThemeVars.euiColorEmptyShade,
+        });
+        const valueEl = container.querySelector<HTMLElement>('.echMetricText__value');
+        expect(valueEl).not.toBeNull();
+        expect(valueEl?.style.color).toBe('');
+      });
+
       describe('percent-based', () => {
         const renderWithPalette = async (
           palette: PaletteOutput<CustomPaletteState>,
@@ -992,6 +1062,27 @@ describe('MetricVisComponent', function () {
     });
 
     describe('by static color', () => {
+      it('uses the default when applyColorTo and color is not set', async () => {
+        const colorFromPalette = faker.color.rgb();
+        mockGetColorForValue.mockReturnValue(colorFromPalette);
+        const { applyColorTo, ...metricWithoutApplyColorTo } = defaultMetricParams;
+        await renderMetricChart({
+          config: {
+            dimensions: {
+              metric: basePriceColumnId,
+            },
+            metric: {
+              ...metricWithoutApplyColorTo,
+              color: undefined,
+            } as unknown as MetricVisParam,
+          },
+        });
+        expect(mockGetColorForValue).not.toHaveBeenCalled();
+        expect(screen.getByRole('figure')).toHaveStyle({
+          backgroundColor: euiThemeVars.euiColorEmptyShade,
+        });
+      });
+
       it('uses static color if no palette', async () => {
         const staticColor = faker.color.rgb();
 
@@ -1214,10 +1305,10 @@ describe('MetricVisComponent', function () {
             maxCols: 3,
             titlesTextAlign: 'left',
             valueFontSize: 'default',
+            density: 'compact',
             primaryAlign: 'right',
             secondaryAlign: 'right',
             primaryPosition: 'bottom',
-            titleWeight: 'bold',
             secondaryTrend: {
               visuals: undefined,
               baseline: undefined,

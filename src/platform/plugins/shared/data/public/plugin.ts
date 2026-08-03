@@ -25,7 +25,9 @@ import type {
 } from './types';
 import { SearchService } from './search/search_service';
 import { QueryService } from './query';
+import { DateRangePickerPresetsService } from './date_range_picker_presets';
 import {
+  setHttp,
   setIndexPatterns,
   setOverlays,
   setSearchService,
@@ -146,15 +148,22 @@ export class DataPublicPlugin
       cps,
     }: DataStartDependencies
   ): DataPublicPluginStart {
-    const { uiSettings, overlays } = core;
+    const { uiSettings, overlays, http } = core;
     setOverlays(overlays);
     setUiSettings(uiSettings);
+    setHttp(http);
     setIndexPatterns(dataViews);
 
     const query = this.queryService.start({
       storage: this.storage,
       http: core.http,
       uiSettings,
+    });
+
+    const dateRangePickerPresets = new DateRangePickerPresetsService({
+      userStorage: core.userStorage,
+      uiSettings,
+      userProfile: core.userProfile,
     });
 
     const search = this.searchService.start(core, {
@@ -217,6 +226,7 @@ export class DataPublicPlugin
       dataViews,
       query,
       search,
+      dateRangePickerPresets,
       nowProvider: this.nowProvider,
     };
 

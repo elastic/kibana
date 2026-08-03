@@ -125,6 +125,7 @@ export const formatAction = (action: Action, withoutToolCalls = true): BaseMessa
                 hasMistakes: action.wasCorrected,
                 output: action.output,
               },
+              wrapToolResult: false,
             }),
           ];
     case 'execute_query':
@@ -156,6 +157,7 @@ Can you fix the query?`
                 success: action.success,
                 error: action.error,
               },
+              wrapToolResult: false,
             }),
           ];
     case 'validate_query':
@@ -187,6 +189,7 @@ Can you fix the query?`
                 success: action.success,
                 error: action.error,
               },
+              wrapToolResult: false,
             }),
           ];
     case 'request_documentation':
@@ -203,6 +206,7 @@ Can you fix the query?`
           content: {
             documentation: action.fetchedDoc,
           },
+          wrapToolResult: false,
         }),
       ];
   }

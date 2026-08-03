@@ -17,8 +17,6 @@ import {
   GRAPH_RELATIONSHIP_NODE_SHAPE_ID,
   GRAPH_RELATIONSHIP_NODE_HANDLE_ID,
   GRAPH_RELATIONSHIP_NODE_HOVER_OUTLINE_ID,
-  GRAPH_RELATIONSHIP_NODE_TOOLTIP_ID,
-  GRAPH_RELATIONSHIP_NODE_LABEL_TEXT_ID,
 } from '../../test_ids';
 import { RelationshipNode } from './relationship_node';
 
@@ -116,71 +114,6 @@ describe('RelationshipNode', () => {
     });
   });
 
-  describe('Tooltip', () => {
-    test('shows tooltip when text is truncated', async () => {
-      const props = {
-        ...baseProps,
-        data: {
-          ...baseProps.data,
-          label: 'This relationship label is too long so it will be truncated for sure',
-        },
-      };
-
-      render(
-        <ReactFlow>
-          <RelationshipNode {...props} />
-        </ReactFlow>
-      );
-
-      await userEvent.hover(screen.getByTestId(GRAPH_RELATIONSHIP_NODE_LABEL_TEXT_ID));
-
-      await waitFor(() => {
-        expect(screen.queryByTestId(GRAPH_RELATIONSHIP_NODE_TOOLTIP_ID)).toBeInTheDocument();
-      });
-    });
-
-    test('tooltip shows full text content', async () => {
-      const longText =
-        'This is a very long relationship label that exceeds twenty-seven characters';
-      const props = {
-        ...baseProps,
-        data: {
-          ...baseProps.data,
-          label: longText,
-        },
-      };
-
-      render(
-        <ReactFlow>
-          <RelationshipNode {...props} />
-        </ReactFlow>
-      );
-
-      await userEvent.hover(screen.getByTestId(GRAPH_RELATIONSHIP_NODE_LABEL_TEXT_ID));
-
-      await waitFor(() => {
-        expect(screen.queryByTestId(GRAPH_RELATIONSHIP_NODE_TOOLTIP_ID)).toBeInTheDocument();
-        expect(screen.queryByTestId(GRAPH_RELATIONSHIP_NODE_TOOLTIP_ID)).toHaveTextContent(
-          longText
-        );
-      });
-    });
-
-    test('does not show tooltip for short text', async () => {
-      render(
-        <ReactFlow>
-          <RelationshipNode {...baseProps} />
-        </ReactFlow>
-      );
-
-      await userEvent.hover(screen.getByTestId(GRAPH_RELATIONSHIP_NODE_LABEL_TEXT_ID));
-
-      await waitFor(() => {
-        expect(screen.queryByTestId(GRAPH_RELATIONSHIP_NODE_TOOLTIP_ID)).not.toBeInTheDocument();
-      });
-    });
-  });
-
   describe('Shape colors', () => {
     const mockEuiTheme = {
       colors: {
@@ -189,6 +122,8 @@ describe('RelationshipNode', () => {
         borderStrongPrimary: '#0000DD',
         textInverse: '#FFFFFF',
         textPrimary: '#000000',
+        textParagraph: '#DDDDDD',
+        backgroundLightText: '#a1b2c3',
         backgroundFilledText: '#333333',
         borderBaseProminent: '#CCCCCC',
       },
@@ -197,9 +132,9 @@ describe('RelationshipNode', () => {
     it('should return relationship colors with dark background and light text', () => {
       const colors = getRelationshipColors(mockEuiTheme as EuiThemeComputed);
       expect(colors).toEqual({
-        backgroundColor: mockEuiTheme.colors.backgroundFilledText,
+        backgroundColor: mockEuiTheme.colors.backgroundLightText,
         borderColor: mockEuiTheme.colors.borderBaseProminent,
-        textColor: mockEuiTheme.colors.textInverse,
+        textColor: mockEuiTheme.colors.textParagraph,
       });
     });
 

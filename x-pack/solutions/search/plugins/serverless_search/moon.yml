@@ -49,7 +49,6 @@ dependsOn:
   - '@kbn/react-kibana-context-render'
   - '@kbn/search-inference-endpoints'
   - '@kbn/security-plugin-types-common'
-  - '@kbn/search-indices'
   - '@kbn/search-homepage'
   - '@kbn/core-http-server'
   - '@kbn/logging'
@@ -61,6 +60,10 @@ dependsOn:
   - '@kbn/react-query'
   - '@kbn/ai-assistant-common'
   - '@kbn/management-settings-ids'
+  - '@kbn/alerting-v2-utils'
+  - '@kbn/deeplinks-workflows'
+  - '@kbn/features-plugin'
+  - '@kbn/navigation-plugin'
 tags:
   - plugin
   - prod

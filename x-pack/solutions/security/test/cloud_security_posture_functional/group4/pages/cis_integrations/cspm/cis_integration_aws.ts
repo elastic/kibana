@@ -128,6 +128,7 @@ export default function (providerContext: FtrProviderContext) {
         const roleArn = 'RoleArnTestValue';
         await cisIntegration.clickOptionButton(AWS_PROVIDER_TEST_SUBJ);
         await cisIntegration.clickOptionButton(AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJECTS.MANUAL);
+        await pageObjects.header.waitUntilLoadingHasFinished();
         await cisIntegration.fillInTextField(AWS_INPUT_TEST_SUBJECTS.ROLE_ARN, roleArn);
         await cisIntegration.inputUniqueIntegrationName();
         await cisIntegration.clickSaveButton();

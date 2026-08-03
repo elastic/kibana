@@ -1,0 +1,7 @@
+spec_id: .brave-search
+name: "Brave Search (testing)"
+auth_type: api_key_header
+secrets:
+  X-Subscription-Token:
+    vault: secret/ent-search-team/connectors-sources/brave-search-api
+    field: api_key

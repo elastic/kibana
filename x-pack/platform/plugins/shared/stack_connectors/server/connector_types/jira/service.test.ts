@@ -18,10 +18,13 @@ import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
 interface ResponseError extends Error {
-  response?: { data: { errors: Record<string, string>; errorMessages?: string[] } };
+  response?: {
+    status?: number;
+    data: { errors: Record<string, string>; errorMessages?: string[] };
+  };
 }
 
-jest.mock('axios');
+jest.mock('axios', () => jest.requireActual<typeof import('axios')>('axios'));
 jest.mock('@kbn/actions-plugin/server/lib/axios_utils', () => {
   const originalUtils = jest.requireActual('@kbn/actions-plugin/server/lib/axios_utils');
   return {

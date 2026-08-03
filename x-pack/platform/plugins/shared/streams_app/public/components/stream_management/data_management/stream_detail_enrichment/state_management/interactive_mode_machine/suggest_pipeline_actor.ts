@@ -12,8 +12,9 @@ import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import { streamlangDSLSchema, type StreamlangDSL } from '@kbn/streamlang';
 import type { FlattenRecord } from '@kbn/streams-schema';
 import { flattenObjectNestedLast } from '@kbn/object-utils';
-
 import { i18n } from '@kbn/i18n';
+import { stripMetadataFields } from '../simulation_state_machine/utils';
+
 import { getFormattedError } from '../../../../../../util/errors';
 import type { StreamsTelemetryClient } from '../../../../../../telemetry/client';
 import {
@@ -37,8 +38,8 @@ export interface SuggestPipelineInput extends SuggestPipelineInputMinimal {
 }
 
 export async function suggestPipelineLogic(input: SuggestPipelineInput): Promise<StreamlangDSL> {
-  const documents: FlattenRecord[] = input.documents.map(
-    (doc) => flattenObjectNestedLast(doc.document) as FlattenRecord
+  const documents: FlattenRecord[] = stripMetadataFields(
+    input.documents.map((doc) => flattenObjectNestedLast(doc.document) as FlattenRecord)
   );
 
   const pipeline = await lastValueFrom(
@@ -55,8 +56,7 @@ export async function suggestPipelineLogic(input: SuggestPipelineInput): Promise
       })
       .pipe(
         map((event) => {
-          // Handle case where LLM couldn't generate suggestions
-          if (event.pipeline === null) {
+          if (event.pipeline === null || event.pipeline.steps.length === 0) {
             throw new NoSuggestionsError(
               i18n.translate(
                 'xpack.streams.streamDetailView.managementTab.enrichment.noSuggestionsError',

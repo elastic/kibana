@@ -10,7 +10,6 @@ import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const apmApiClient = getService('apmApi');
-  const nodeAgentName = 'nodejs';
   const unlistedAgentName = 'unlistedAgent';
 
   async function callApi() {
@@ -19,16 +18,22 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     });
   }
 
+  // The latest agent versions are fetched live from an external service
+  // (`xpack.apm.latestAgentVersionsUrl`). This deployment-agnostic suite runs on
+  // Cloud lanes too and cannot override that URL, so the assertions below verify
+  // only the route contract (always 200 with a well-formed `data` object) and
+  // never the externally sourced version content, which is covered by the
+  // `fetch_agents_latest_version` unit test. Asserting on the external payload
+  // here made the test flaky whenever the upstream service was briefly degraded.
+  // See https://github.com/elastic/kibana/issues/264146
   describe('Agent latest versions when configuration is defined', () => {
-    it('returns a version when agent is listed in the file', async () => {
+    it('returns a well-formed response', async () => {
       const { status, body } = await callApi();
       expect(status).to.be(200);
-      const agents = body.data;
-      const nodeAgent = agents[nodeAgentName] as ElasticApmAgentLatestVersion;
-      expect(nodeAgent?.latest_version).not.to.be(undefined);
+      expect(body.data).to.be.an('object');
     });
 
-    it('returns undefined when agent is not listed in the file', async () => {
+    it('does not return a version for an agent that is not listed', async () => {
       const { status, body } = await callApi();
       expect(status).to.be(200);
 

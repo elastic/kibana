@@ -18,14 +18,13 @@ import {
 } from '@kbn/core-http-router-server-internal';
 import type {
   ScopeableRequest,
-  ScopeableUrlRequest,
   UnauthorizedErrorHandler,
   ICustomClusterClient,
   IScopedClusterClient,
   ElasticsearchClientConfig,
   AsScopedOptions,
 } from '@kbn/core-elasticsearch-server';
-import { HTTPAuthorizationHeader, isUiamCredential } from '@kbn/core-security-server';
+import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
 import type { InternalSecurityServiceSetup } from '@kbn/core-security-server-internal';
 import { configureClient } from './configure_client';
 import { ScopedClusterClient } from './scoped_cluster_client';
@@ -48,20 +47,30 @@ const noop = () => undefined;
 
 interface CommonFactoryRoutingOpts {
   logger: Logger;
-  request?: ScopeableUrlRequest;
+  request?: ScopeableRequest;
 }
 
-interface ScopedFactoryRoutingOpts extends CommonFactoryRoutingOpts {
+interface SpaceFactoryRoutingOpts extends CommonFactoryRoutingOpts {
   projectRouting: 'space';
-  request: ScopeableUrlRequest;
+  request: ScopeableRequest;
+}
+
+interface ExpressionFactoryRoutingOpts extends CommonFactoryRoutingOpts {
+  projectRouting: 'expression';
+  value: string;
 }
 
 /**
  * Union of routing options passed to {@link OnRequestHandlerFactory}.
- * The scoped variant carries the request so the factory can extract the space NPRE.
+ * The `'space'` variant carries the request so the factory can extract the space NPRE.
+ * The `'expression'` variant carries a caller-supplied `project_routing` expression that is
+ * injected verbatim.
  * @internal
  */
-export type FactoryRoutingOpts = CommonFactoryRoutingOpts | ScopedFactoryRoutingOpts;
+export type FactoryRoutingOpts =
+  | CommonFactoryRoutingOpts
+  | SpaceFactoryRoutingOpts
+  | ExpressionFactoryRoutingOpts;
 /**
  * A factory that produces an {@link OnRequestHandler}, which can be bound to a request context.
  * @internal
@@ -136,9 +145,7 @@ export class ClusterClient implements ICustomClusterClient {
     });
   }
 
-  asScoped(request: ScopeableRequest): IScopedClusterClient;
-  asScoped(request: ScopeableUrlRequest, opts: AsScopedOptions): IScopedClusterClient;
-  asScoped(request: ScopeableUrlRequest, opts?: AsScopedOptions): IScopedClusterClient {
+  asScoped(request: ScopeableRequest, opts?: AsScopedOptions): IScopedClusterClient {
     const createScopedClient = () => {
       const scopedHeaders = this.getScopedHeaders(request);
       const factoryOpts: FactoryRoutingOpts = opts
@@ -200,8 +207,9 @@ export class ClusterClient implements ICustomClusterClient {
 
   private getScopedHeaders(request: ScopeableRequest): Headers {
     let scopedHeaders: Headers;
+    let requestHeaders: Headers | undefined;
     if (isRealRequest(request)) {
-      const requestHeaders = ensureRawRequest(request).headers ?? {};
+      requestHeaders = ensureRawRequest(request).headers ?? {};
       const requestIdHeaders = isKibanaRequest(request) ? { 'x-opaque-id': request.id } : {};
       const authHeaders = this.authHeaders?.get(request) ?? {};
 
@@ -212,27 +220,28 @@ export class ClusterClient implements ICustomClusterClient {
       };
     } else {
       scopedHeaders = filterHeaders(request?.headers ?? {}, this.config.requestHeadersWhitelist);
+    }
 
-      // If we're creating scoped headers for a fake request, we need to check if we're in UIAM mode
-      // and if the credentials in the headers are UIAM credentials. If so, we need to add the shared
-      // secret to the headers, so that ES can forward it to UIAM service for validation.
-      if (this.security?.uiam) {
-        const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest({
-          headers: scopedHeaders,
-        });
-        if (authorizationHeader && isUiamCredential(authorizationHeader)) {
-          scopedHeaders = {
-            ...scopedHeaders,
-            [ES_CLIENT_AUTHENTICATION_HEADER]: this.security.uiam.sharedSecret,
-          };
-        }
-      }
+    // The effective credential is whatever ends up in `scopedHeaders`: for real requests the auth
+    // provider's post-authentication headers override the one that came in on the wire. If the
+    // credential is an internal UIAM credential, it might require client authentication.
+    let clientAuthentication: string | undefined | null;
+    if (this.security?.uiam) {
+      const credential = HTTPAuthorizationHeader.parseFromRequest({ headers: scopedHeaders });
+      clientAuthentication =
+        credential &&
+        this.security.uiam.getElasticsearchClientAuthentication(
+          requestHeaders
+            ? { credentialSource: 'inbound', credential, requestHeaders }
+            : { credentialSource: 'internal', credential }
+        );
     }
 
     return {
       ...getDefaultHeaders(this.kibanaVersion),
       ...this.config.customHeaders,
       ...scopedHeaders,
+      ...(clientAuthentication ? { [ES_CLIENT_AUTHENTICATION_HEADER]: clientAuthentication } : {}),
     };
   }
 
@@ -246,15 +255,21 @@ export class ClusterClient implements ICustomClusterClient {
       );
     }
 
+    // If the credential is an internal UIAM credential, it might require client authentication.
+    // Use `internal` regardless of the request shape: unlike `getScopedHeaders`, this never reads a
+    // credential off the wire. For a real request it takes the auth provider's post-authentication
+    // headers (Kibana already vouched for that credential), and for a fake one the credential was
+    // minted by Kibana itself, so neither needs an attestation to be trusted.
+    const clientAuthentication = this.security?.uiam?.getElasticsearchClientAuthentication({
+      credentialSource: 'internal',
+      credential: authorizationHeader,
+    });
+
     return {
       ...getDefaultHeaders(this.kibanaVersion),
       ...this.config.customHeaders,
       [ES_SECONDARY_AUTH_HEADER]: authorizationHeader.toString(),
-      // If the credentials in the authorization header are UIAM credentials, we need to pass the
-      // shared secret to ES as well, so that ES can forward it to UIAM service for validation.
-      ...(this.security?.uiam && isUiamCredential(authorizationHeader)
-        ? { [ES_SECONDARY_CLIENT_AUTH_HEADER]: this.security.uiam.sharedSecret }
-        : {}),
+      ...(clientAuthentication ? { [ES_SECONDARY_CLIENT_AUTH_HEADER]: clientAuthentication } : {}),
     };
   }
 }

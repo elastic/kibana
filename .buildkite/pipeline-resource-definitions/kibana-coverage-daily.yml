@@ -23,12 +23,17 @@ spec:
         GITHUB_COMMIT_STATUS_CONTEXT: kibana-code-coverage-main
         CODE_COVERAGE: '1'
         FTR_CONFIGS_RETRY_COUNT: '0'
-        ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'true'
+        KIBANA_SLACK_NOTIFICATIONS_ENABLED: 'true'
       allow_rebuilds: false
       branch_configuration: main
       default_branch: main
       repository: elastic/kibana
       pipeline_file: .buildkite/pipelines/code_coverage/daily.yml
+      initial_step_plugins:
+        - sparse-checkout#v1.6.0:
+            paths:
+              - .buildkite/pipelines/code_coverage/daily.yml
+            cleanup_sparse_state: true
       provider_settings:
         prefix_pull_request_fork_branch_names: false
         skip_pull_request_builds_for_existing_commits: true

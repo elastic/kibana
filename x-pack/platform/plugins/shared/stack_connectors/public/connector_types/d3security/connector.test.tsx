@@ -6,10 +6,9 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
 import D3SecurityConnectorFields from './connector';
 import { ConnectorFormTestProvider } from '../lib/test_utils';
-import { render, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
@@ -34,7 +33,7 @@ describe('D3ActionConnectorFields renders', () => {
       isDeprecated: false,
     };
 
-    const wrapper = mountWithIntl(
+    render(
       <ConnectorFormTestProvider connector={actionConnector}>
         <D3SecurityConnectorFields
           readOnly={false}
@@ -44,8 +43,8 @@ describe('D3ActionConnectorFields renders', () => {
       </ConnectorFormTestProvider>
     );
 
-    expect(wrapper.find('[data-test-subj="config.url-input"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="secrets.token-input"]').length > 0).toBeTruthy();
+    expect(screen.getByTestId('config.url-input')).toBeInTheDocument();
+    expect(screen.getByTestId('secrets.token-input')).toBeInTheDocument();
   });
 
   describe('Validation', () => {
@@ -73,7 +72,7 @@ describe('D3ActionConnectorFields renders', () => {
         isDeprecated: false,
       };
 
-      const { getByTestId } = render(
+      render(
         <ConnectorFormTestProvider connector={actionConnector} onSubmit={onSubmit}>
           <D3SecurityConnectorFields
             readOnly={false}
@@ -83,7 +82,7 @@ describe('D3ActionConnectorFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
-      await userEvent.click(getByTestId('form-test-provide-submit'));
+      await userEvent.click(screen.getByTestId('form-test-provide-submit'));
 
       await waitFor(() => {
         expect(onSubmit).toBeCalledWith({

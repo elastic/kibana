@@ -1,0 +1,13 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        updateMaintenanceWindowRequest:
+          $ref: './update_maintenance_window_request.yaml'
+responses:
+  200:
+    content:
+      application/json:
+        examples:
+          updateMaintenanceWindowResponse:
+            $ref: './update_maintenance_window_response.yaml'

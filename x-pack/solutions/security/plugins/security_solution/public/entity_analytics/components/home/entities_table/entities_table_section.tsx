@@ -8,13 +8,9 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import type { Filter } from '@kbn/es-query';
 import { GroupWrapper } from '@kbn/cloud-security-posture';
 import type { EntityURLStateResult } from './hooks/use_entity_url_state';
-import {
-  DEFAULT_TABLE_SECTION_HEIGHT,
-  ENTITY_FIELDS,
-  TEST_SUBJ_GROUPING,
-  TEST_SUBJ_GROUPING_LOADING,
-} from './constants';
+import { ENTITY_FIELDS, TEST_SUBJ_GROUPING, TEST_SUBJ_GROUPING_LOADING } from './constants';
 import { useEntityGrouping } from './grouping/use_entity_grouping';
+import { type EntitiesTableConfig } from '.';
 
 const ENTITY_ANALYTICS_TEST_SUBJECTS = {
   grouping: TEST_SUBJ_GROUPING,
@@ -24,14 +20,30 @@ import { EntitiesDataTable } from './entities_data_table';
 
 export interface EntitiesTableSectionProps {
   state: EntityURLStateResult;
+  /**
+   * Per-instance identifiers/localStorage keys. Required so each shared mount
+   * (EA home page, case attachments accordion, …) declares its own and never
+   * silently reuses another surface's keys.
+   */
+  config: EntitiesTableConfig;
 }
 
-export const EntitiesTableSection = ({ state }: EntitiesTableSectionProps) => {
-  const { grouping } = useEntityGrouping({ state });
+const EntitiesTableSectionComponent = ({ state, config }: EntitiesTableSectionProps) => {
+  const { grouping } = useEntityGrouping({
+    state,
+    tableId: config.tableId,
+    groupingId: config.groupingLocalStorageKey,
+  });
   const selectedGroup = grouping.selectedGroups[0];
 
   if (selectedGroup === 'none') {
-    return <EntitiesDataTable state={state} groupSelectorComponent={grouping.groupSelector} />;
+    return (
+      <EntitiesDataTable
+        state={state}
+        groupSelectorComponent={grouping.groupSelector}
+        config={config}
+      />
+    );
   }
 
   return (
@@ -40,15 +52,22 @@ export const EntitiesTableSection = ({ state }: EntitiesTableSectionProps) => {
       selectedGroup={selectedGroup}
       selectedGroupOptions={grouping.selectedGroups}
       groupSelectorComponent={grouping.groupSelector}
+      config={config}
     />
   );
 };
+
+// Memoized so an unrelated URL change (e.g. the `timeline` param written when
+// Investigate-in-Timeline opens the timeline) does not reconcile the entities
+// grid. Relies on `useEntityURLState` returning a stable `state` reference.
+export const EntitiesTableSection = React.memo(EntitiesTableSectionComponent);
 
 interface GroupWithURLPaginationProps {
   state: EntityURLStateResult;
   selectedGroup: string;
   selectedGroupOptions: string[];
   groupSelectorComponent?: JSX.Element;
+  config: EntitiesTableConfig;
 }
 
 const GroupWithURLPagination = ({
@@ -56,6 +75,7 @@ const GroupWithURLPagination = ({
   selectedGroup,
   selectedGroupOptions,
   groupSelectorComponent,
+  config,
 }: GroupWithURLPaginationProps) => {
   const onChangePageRef = useRef(state.onChangePage);
   onChangePageRef.current = state.onChangePage;
@@ -64,6 +84,8 @@ const GroupWithURLPagination = ({
     state,
     selectedGroup,
     groupFilters: [],
+    tableId: config.tableId,
+    groupingId: config.groupingLocalStorageKey,
   });
 
   useEffect(() => {
@@ -82,6 +104,7 @@ const GroupWithURLPagination = ({
           selectedGroup={selectedGroup}
           selectedGroupOptions={selectedGroupOptions}
           groupSelectorComponent={groupSelectorComponent}
+          config={config}
         />
       )}
       activePageIndex={state.pageIndex}
@@ -105,6 +128,7 @@ interface GroupContentProps {
   selectedGroupOptions: string[];
   parentGroupFilters?: string;
   groupSelectorComponent?: JSX.Element;
+  config: EntitiesTableConfig;
 }
 
 const mergeCurrentAndParentFilters = (
@@ -191,6 +215,7 @@ const GroupContent = ({
   selectedGroupOptions,
   parentGroupFilters,
   groupSelectorComponent,
+  config,
 }: GroupContentProps) => {
   if (groupingLevel < selectedGroupOptions.length) {
     const nextGroupingLevel = groupingLevel + 1;
@@ -207,6 +232,7 @@ const GroupContent = ({
         selectedGroupOptions={selectedGroupOptions}
         parentGroupFilters={JSON.stringify(newParentGroupFilters)}
         groupSelectorComponent={groupSelectorComponent}
+        config={config}
       />
     );
   }
@@ -216,6 +242,8 @@ const GroupContent = ({
       state={state}
       currentGroupFilters={currentGroupFilters}
       parentGroupFilters={parentGroupFilters}
+      selectedGroup={selectedGroup}
+      config={config}
     />
   );
 };
@@ -232,6 +260,7 @@ const GroupWithLocalPagination = ({
   selectedGroup,
   selectedGroupOptions,
   groupSelectorComponent,
+  config,
 }: GroupWithLocalPaginationProps) => {
   const [subgroupPageIndex, setSubgroupPageIndex] = useState(0);
   const [subgroupPageSize, setSubgroupPageSize] = useState(10);
@@ -242,6 +271,8 @@ const GroupWithLocalPagination = ({
     state: { ...state, pageIndex: subgroupPageIndex, pageSize: subgroupPageSize },
     selectedGroup,
     groupFilters,
+    tableId: config.tableId,
+    groupingId: config.groupingLocalStorageKey,
   });
 
   useEffect(() => {
@@ -261,6 +292,7 @@ const GroupWithLocalPagination = ({
           selectedGroupOptions={selectedGroupOptions}
           groupSelectorComponent={groupSelectorComponent}
           parentGroupFilters={JSON.stringify(groupFilters)}
+          config={config}
         />
       )}
       activePageIndex={subgroupPageIndex}
@@ -280,12 +312,16 @@ interface DataTableWithLocalPaginationProps {
   state: EntityURLStateResult;
   currentGroupFilters: Filter[];
   parentGroupFilters?: string;
+  selectedGroup?: string;
+  config: EntitiesTableConfig;
 }
 
 const DataTableWithLocalPagination = ({
   state,
   currentGroupFilters,
   parentGroupFilters,
+  selectedGroup,
+  config,
 }: DataTableWithLocalPaginationProps) => {
   const [tablePageIndex, setTablePageIndex] = useState(0);
   const [tablePageSize, setTablePageSize] = useState(10);
@@ -313,5 +349,5 @@ const DataTableWithLocalPagination = ({
     onChangeItemsPerPage: setTablePageSize,
   };
 
-  return <EntitiesDataTable state={newState} height={DEFAULT_TABLE_SECTION_HEIGHT} />;
+  return <EntitiesDataTable state={newState} selectedGroup={selectedGroup} config={config} />;
 };

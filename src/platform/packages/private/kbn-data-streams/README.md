@@ -106,10 +106,52 @@ This approach works across all backing indices in the data stream, unlike Elasti
 
 All CRUD operations (`create`, `search`) accept an optional `space` parameter:
 
-* **When provided**: Documents are space-bound. IDs are prefixed as `{space}::{id}` (e.g. `myspace::abc123`). Documents are decorated with `kibana.space_ids: [space]`. Searches are filtered to that space. The system property `kibana.space_ids` is stripped from responses.
-* **When undefined**: Documents are space-agnostic. No ID prefixing or `kibana.space_ids` decoration. Searches return only space-agnostic documents. IDs containing the `::` separator are rejected (reserved for system use).
+* **When provided** (including `'default'`): Documents are space-bound. IDs are prefixed as `{space}::{id}` (e.g. `myspace::abc123`, `default::abc123`). Documents are decorated with `kibana.space_ids: [space]`. Searches are filtered strictly to documents belonging to that space. The system property `kibana.space_ids` is stripped from `_source` in all responses.
+* **When undefined**: Documents are space-agnostic. No ID prefixing or `kibana.space_ids` decoration. Searches return only space-agnostic documents (those without `kibana.space_ids`). IDs containing the `::` separator are rejected (reserved for system use).
+
+**Important distinctions:**
+* `space: undefined` and `space: 'default'` are **not** equivalent. Space-agnostic documents (created without a space) are **not** returned when searching with `space: 'default'`, and vice versa. Teams that need both during a migration from space-agnostic to space-aware mode should issue two separate queries.
+* `kibana.space_ids` is a system-managed field. It is stored in Elasticsearch but stripped from all `search` responses — callers do not need to account for it in their document types.
 
 Data streams can contain both space-bound and space-agnostic documents. The package does not handle RBAC; higher-level repositories should wrap these APIs for access control.
+
+## System data streams
+
+`@kbn/data-streams` (and Core `registerDataStream`) can create **hidden** data streams (`hidden` defaults to `true`). That is **not** the same as an Elasticsearch **system** data stream.
+
+| Flag | Who sets it | What it means |
+|------|-------------|----------------|
+| `hidden: true` | Kibana definition / index template | Stream and backing indices are hidden from normal listings |
+| `system: true` | Elasticsearch only | Stream is registered as a system data stream (security / restricted-index semantics, product origin, DLM treatment, etc.) |
+
+Kibana **cannot** mark a stream as system. That requires a matching [`SystemDataStreamDescriptor`](https://javadoc.io/doc/org.elasticsearch/elasticsearch/latest/org/elasticsearch/indices/SystemDataStreamDescriptor.html) in the Elasticsearch Kibana plugin (or equivalent ES registration). If you only call `registerDataStream` / `DataStreamClient.initialize` without that ES registration, `GET _data_stream/<name>` typically reports `system: false` even when the stream is hidden and named `.kibana_*` / `.workflows-*`.
+
+### Why this matters
+
+`@kbn/data-streams` are **not** system data streams by default. This means data is readable across spaces by default (leading to the class of bug behind [security-team#18291](https://github.com/elastic/security-team/issues/18291)). Treat any stream that holds privileged or cross-space-sensitive data as needing ES `system: true` — `hidden` alone is not enough.
+
+This package does **not** currently fail boot or roll back when Elasticsearch reports `system: false`. Developers must land the ES descriptor and verify the runtime flag themselves. Core is tracking stronger platform guidance / checks in [kibana-team#3797](https://github.com/elastic/kibana-team/issues/3797).
+
+### Landing order
+
+Ship the Elasticsearch `SystemDataStreamDescriptor` **with or before** enabling Kibana writes for that stream. Examples:
+
+| Stream | ES registration |
+|--------|-----------------|
+| `.workflows-events`, `.workflows-execution-data-stream-logs` | [elastic/elasticsearch#145822](https://github.com/elastic/elasticsearch/pull/145822) |
+| `.kibana_change_history` | [elastic/elasticsearch#154113](https://github.com/elastic/elasticsearch/pull/154113) |
+
+### How to verify
+
+After Kibana has created the stream (local `yarn es snapshot` + Kibana boot, or a stack that includes the descriptor):
+
+```http
+GET _data_stream/<name>
+```
+
+Confirm `system: true` and `hidden: true` for privileged streams. There is no Elasticsearch API that lists all registered `SystemIndexDescriptor` / `SystemDataStreamDescriptor` patterns — those live in ES plugin code.
+
+When writing integration tests that touch system streams, use a client that sends `x-elastic-product-origin: kibana` (see [kibana#279803](https://github.com/elastic/kibana/pull/279803)).
 
 ## Mapping Validation
 

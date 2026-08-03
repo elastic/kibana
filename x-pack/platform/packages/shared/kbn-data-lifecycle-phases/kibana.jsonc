@@ -1,0 +1,9 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/data-lifecycle-phases",
+  "owner": [
+    "@elastic/kibana-management"
+  ],
+  "group": "platform",
+  "visibility": "shared"
+}

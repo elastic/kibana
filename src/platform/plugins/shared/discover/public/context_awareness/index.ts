@@ -8,6 +8,14 @@
  */
 
 export type * from './types';
+export type * from './toolkit';
+export { EMPTY_CONTEXT_AWARENESS_TOOLKIT } from './toolkit';
+export { createInMemoryContextAwarenessToolkit } from './in_memory_toolkit';
+export {
+  createProfileStateAdapterFactory,
+  type ProfileStateAdapter,
+  type ProfileStateMutationOptions,
+} from './profile_state_adapter';
 export * from './profiles';
 export { getMergedAccessor } from './composable_profile';
 export {

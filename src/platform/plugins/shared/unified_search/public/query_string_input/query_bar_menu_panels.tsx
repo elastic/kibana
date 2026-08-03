@@ -488,7 +488,7 @@ export function useQueryBarMenuPanels({
         {
           name: strings.getDisableAllFiltersButtonLabel(),
           'data-test-subj': 'filter-sets-disableAllFilters',
-          icon: 'eyeClosed',
+          icon: 'eyeSlash',
           onClick: () => {
             closePopover();
             onDisableAll();
@@ -497,7 +497,7 @@ export function useQueryBarMenuPanels({
         {
           name: strings.getInvertNegatedFiltersButtonLabel(),
           'data-test-subj': 'filter-sets-invertAllFilters',
-          icon: 'invert',
+          icon: 'contrast',
           onClick: () => {
             closePopover();
             onToggleAllNegated();

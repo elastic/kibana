@@ -426,10 +426,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       beforeEach(async () => {
-        await endpointArtifactTestResources.deleteList(
-          'endpoint_list',
-          endpointPolicyManagerSupertest
-        );
+        await endpointArtifactTestResources.deleteList('endpoint_list');
       });
 
       it('should return 404 when endpoint list does not exist', async () => {

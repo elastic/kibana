@@ -12,5 +12,6 @@
     "@kbn/i18n",
     "@kbn/alerting-comparators",
     "@kbn/es-query",
+    "@kbn/std",
   ]
 }

@@ -235,13 +235,13 @@ describe('getPinTooltipContent', () => {
 
   it('should indicate the event is disabled if timelineType is template', () => {
     expect(getPinTooltipContent(false, false, [], TimelineTypeEnum.template)).toEqual(
-      'This event may not be pinned while editing a template timeline'
+      'This event may not be pinned while editing a template Timeline'
     );
   });
 
   it('should indicate the alert is disabled if timelineType is template', () => {
     expect(getPinTooltipContent(true, false, [], TimelineTypeEnum.template)).toEqual(
-      'This alert may not be pinned while editing a template timeline'
+      'This alert may not be pinned while editing a template Timeline'
     );
   });
 });

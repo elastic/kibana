@@ -11,6 +11,7 @@ import type {
   StreamlangProcessorDefinition,
   StreamlangStepWithUIAttributes,
   StreamlangConditionBlockWithUIAttributes,
+  StreamlangUIBranch,
 } from '@kbn/streamlang';
 
 export type StepToParentEvent =
@@ -35,6 +36,7 @@ export type StepParentActor = Omit<AnyActorRef, 'send'> & {
 
 export interface StepContext {
   parentRef: StepParentActor;
+  originalStep: StreamlangStepWithUIAttributes;
   previousStep: StreamlangStepWithUIAttributes;
   step: StreamlangStepWithUIAttributes;
   isNew: boolean;
@@ -59,6 +61,7 @@ export type StepEvent =
   | {
       type: 'step.changeParent';
       parentId: string | null;
+      branch?: StreamlangUIBranch;
     }
   | { type: 'step.delete' }
   | { type: 'step.edit' }

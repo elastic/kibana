@@ -10,11 +10,12 @@
 import type { EuiPopoverProps } from '@elastic/eui';
 import {
   EuiButtonIcon,
+  EuiOutsideClickDetector,
   EuiPopover,
   EuiPopoverTitle,
   EuiSpacer,
   EuiText,
-  EuiOutsideClickDetector,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
@@ -84,19 +85,22 @@ export const RuleSettingsFlappingTitleTooltip = (props: RuleSettingsFlappingTitl
         repositionOnScroll
         isOpen={isOpen}
         anchorPosition={anchorPosition}
+        aria-label={alertFlappingTitleInfo}
         panelStyle={{
           width: 500,
         }}
         closePopover={() => setIsPopoverOpen(false)}
         button={
-          <EuiButtonIcon
-            data-test-subj="ruleSettingsFlappingTitleTooltipButton"
-            display="empty"
-            color="primary"
-            iconType="question"
-            aria-label={alertFlappingTitleInfo}
-            onClick={() => setIsPopoverOpen(!isOpen)}
-          />
+          <EuiToolTip content={alertFlappingTitleInfo} disableScreenReaderOutput>
+            <EuiButtonIcon
+              data-test-subj="ruleSettingsFlappingTitleTooltipButton"
+              display="empty"
+              color="primary"
+              iconType="question"
+              aria-label={alertFlappingTitleInfo}
+              onClick={() => setIsPopoverOpen(!isOpen)}
+            />
+          </EuiToolTip>
         }
       >
         <EuiPopoverTitle data-test-subj="ruleSettingsFlappingTooltipTitle">

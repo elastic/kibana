@@ -22,11 +22,13 @@ export const actionsColumn = ({
   core,
   onActionComplete,
   allowedActions,
+  isWithinFlyout = false,
 }: {
   core: CoreStart;
   api: SearchSessionsMgmtAPI;
   onActionComplete: OnActionComplete;
   allowedActions?: UISession['actions'];
+  isWithinFlyout?: boolean;
 }): EuiBasicTableColumn<UISession> => ({
   field: 'actions',
   name: i18n.translate('data.mgmt.searchSessions.table.headerActions', {
@@ -47,6 +49,7 @@ export const actionsColumn = ({
             core={core}
             allowedActions={allowedActions}
             onActionComplete={onActionComplete}
+            isWithinFlyout={isWithinFlyout}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

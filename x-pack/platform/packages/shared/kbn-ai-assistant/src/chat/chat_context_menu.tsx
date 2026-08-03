@@ -127,7 +127,7 @@ export function ChatContextMenu({
           color: ${euiTheme.colors.danger};
           padding: ${euiTheme.size.s};
         `}
-        icon={<EuiIcon type="trash" size="m" color="danger" />}
+        icon={<EuiIcon type="trash" size="m" color="danger" aria-hidden={true} />}
         onClick={() => {
           confirmDeleteCallback().then((confirmed) => {
             if (!confirmed) {
@@ -149,6 +149,9 @@ export function ChatContextMenu({
   return (
     <>
       <EuiPopover
+        aria-label={i18n.translate('xpack.aiAssistant.chatHeader.contextMenu.popoverAriaLabel', {
+          defaultMessage: 'Conversation actions',
+        })}
         button={
           <EuiToolTip
             content={i18n.translate('xpack.aiAssistant.chatHeader.contextMenu.chatActionsTooltip', {
@@ -173,7 +176,7 @@ export function ChatContextMenu({
         anchorPosition="downCenter"
         panelPaddingSize="xs"
       >
-        <EuiContextMenuPanel size="s" items={menuItems} />
+        <EuiContextMenuPanel items={menuItems} />
       </EuiPopover>
       {confirmDeleteElement}
     </>
