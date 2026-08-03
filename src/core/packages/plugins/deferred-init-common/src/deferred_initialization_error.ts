@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { DeferredInitState } from './deferred_init_status_route';
+
 /**
  * Thrown when a lazy plugin's wrapped `start()` contract function is called and the plugin's
  * deferred initialization has not (yet) succeeded. If this error escapes an HTTP route handler,
@@ -24,10 +26,16 @@ export class DeferredInitializationError extends Error {
    * something that cannot self-heal.
    */
   public readonly retriable: boolean;
+  /**
+   * The plugin's deferred-init state at the moment this error was thrown. Lets core's central
+   * error handler report the *real* state in its `503` body instead of a hardcoded string.
+   * `undefined` when the thrower didn't have a state to attach.
+   */
+  public readonly status?: DeferredInitState;
 
   constructor(
     pluginId: string,
-    options?: { message?: string; cause?: unknown; retriable?: boolean }
+    options?: { message?: string; cause?: unknown; retriable?: boolean; status?: DeferredInitState }
   ) {
     super(
       options?.message ?? `Plugin "${pluginId}" is not yet available; retry later.`,
@@ -36,6 +44,7 @@ export class DeferredInitializationError extends Error {
     this.name = 'DeferredInitializationError';
     this.pluginId = pluginId;
     this.retriable = options?.retriable ?? true;
+    this.status = options?.status;
     // Restores the prototype chain so `instanceof` keeps working across transpilation targets.
     Object.setPrototypeOf(this, DeferredInitializationError.prototype);
   }

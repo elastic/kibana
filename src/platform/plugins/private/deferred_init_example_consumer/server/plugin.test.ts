@@ -14,10 +14,9 @@ import { DeferredInitExampleConsumerServerPlugin } from './plugin';
 const createPlugin = () =>
   new DeferredInitExampleConsumerServerPlugin(coreMock.createPluginInitializerContext());
 
-// `start()` calls `core.plugins.loadPluginContract` directly -- the pattern
-// `PluginsSystem.startPluginWithRetry` retries wholesale on a retriable
-// `DeferredInitializationError`. These tests simulate that retry by calling `start()` more than
-// once on the same plugin instance, the way core would.
+// `start()` must NOT call `core.plugins.loadPluginContract` for a lazy plugin directly — core's
+// start-cycle guard rejects that. Instead it returns a `getDeferredInitExample()` function that
+// callers invoke post-boot. These tests exercise that function-in-contract pattern.
 describe('DeferredInitExampleConsumerServerPlugin', () => {
   const dependencyContract: DeferredInitExampleStartContract = {
     getDoc: async () => ({
@@ -27,48 +26,35 @@ describe('DeferredInitExampleConsumerServerPlugin', () => {
     }),
   };
 
-  it('resolves deferredInitExample from start() and returns its contract', async () => {
+  it('does not call loadPluginContract during start() itself', () => {
     const plugin = createPlugin();
     const core = coreMock.createStart();
     core.plugins.loadPluginContract.mockResolvedValue(dependencyContract);
 
-    await expect(plugin.start(core)).resolves.toEqual({});
+    plugin.start(core);
+
+    // The whole point of the function-in-contract pattern: nothing is loaded until the returned
+    // function is called post-boot.
+    expect(core.plugins.loadPluginContract).not.toHaveBeenCalled();
+  });
+
+  it('resolves deferredInitExample when the returned function is invoked post-boot', async () => {
+    const plugin = createPlugin();
+    const core = coreMock.createStart();
+    core.plugins.loadPluginContract.mockResolvedValue(dependencyContract);
+
+    const { getDeferredInitExample } = plugin.start(core);
+    await expect(getDeferredInitExample()).resolves.toBe(dependencyContract);
     expect(core.plugins.loadPluginContract).toHaveBeenCalledWith('deferredInitExample');
   });
 
-  it('does not re-fetch the contract if start() is called again after already succeeding', async () => {
-    const plugin = createPlugin();
-    const core = coreMock.createStart();
-    core.plugins.loadPluginContract.mockResolvedValue(dependencyContract);
-
-    await plugin.start(core);
-    await plugin.start(core);
-
-    // Idempotency guard: a retry that gets this far again must not repeat the fetch.
-    expect(core.plugins.loadPluginContract).toHaveBeenCalledTimes(1);
-  });
-
-  it('propagates a rejection out of start(), leaving it retriable', async () => {
+  it('propagates a rejection out of the returned function (e.g. deferred init failed)', async () => {
     const plugin = createPlugin();
     const core = coreMock.createStart();
     const failure = new Error('deferredInitExample contract unavailable');
     core.plugins.loadPluginContract.mockRejectedValueOnce(failure);
 
-    await expect(plugin.start(core)).rejects.toBe(failure);
-    expect(core.plugins.loadPluginContract).toHaveBeenCalledTimes(1);
-  });
-
-  it('succeeds on a later start() call after an earlier one failed', async () => {
-    const plugin = createPlugin();
-    const core = coreMock.createStart();
-    const failure = new Error('deferredInitExample contract unavailable');
-    core.plugins.loadPluginContract
-      .mockRejectedValueOnce(failure)
-      .mockResolvedValueOnce(dependencyContract);
-
-    await expect(plugin.start(core)).rejects.toBe(failure);
-    // Simulates core recalling the whole `start()` function on retry.
-    await expect(plugin.start(core)).resolves.toEqual({});
-    expect(core.plugins.loadPluginContract).toHaveBeenCalledTimes(2);
+    const { getDeferredInitExample } = plugin.start(core);
+    await expect(getDeferredInitExample()).rejects.toBe(failure);
   });
 });

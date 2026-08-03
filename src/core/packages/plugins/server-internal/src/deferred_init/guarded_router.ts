@@ -22,6 +22,7 @@ import type {
   VersionedRouter,
 } from '@kbn/core-http-server';
 import type { InitState } from '@kbn/core-plugins-server';
+import type { DeferredInitUnavailableBody } from '@kbn/core-deferred-init-common';
 import type { DeferredInitEngine } from './deferred_init_engine';
 
 const GATED_METHODS: ReadonlySet<string> = new Set(['get', 'post', 'put', 'patch', 'delete']);
@@ -29,16 +30,21 @@ const GATED_METHODS: ReadonlySet<string> = new Set(['get', 'post', 'put', 'patch
 /** The 503 response returned while a plugin's deferred init is not yet `available`. */
 const initializingResponse = (
   response: KibanaResponseFactory,
+  pluginId: string,
   status: InitState
-): IKibanaResponse =>
-  response.custom({
+): IKibanaResponse => {
+  // Both 503 trigger paths (here and the central handler for an escaped
+  // DeferredInitializationError) send this same `{ pluginId, status }` body so clients read one
+  // stable shape. Not the default error envelope. The UI's real status channel is the un-gated
+  // core state endpoint.
+  const body: DeferredInitUnavailableBody = { pluginId, status };
+  return response.custom({
     statusCode: 503,
     headers: { 'retry-after': '1' },
-    // Send the raw `{ status }` body (not the default error envelope) so the client reads
-    // a stable shape. The UI's real status channel is the un-gated core state endpoint.
     bypassErrorFormat: true,
-    body: { status },
+    body,
   });
+};
 
 /**
  * Wrap a plugin's router so that, while the plugin's deferred init is not `available`, every
@@ -59,10 +65,13 @@ export function createGuardedRouter<Context extends RequestHandlerContextBase>(
   const gate = <P, Q, B, Method extends RouteMethod>(
     handler: RequestHandler<P, Q, B, Context, Method>
   ): RequestHandler<P, Q, B, Context, Method> => {
+    // The gate runs inside the route handler, i.e. after Hapi has already run authentication and
+    // authorization for the route. A gated 503 is therefore only ever returned to a request that
+    // already passed auth — this is not an auth bypass.
     return (context, request, response) => {
       const status = engine.ensureInitialized(pluginId);
       if (status !== 'available') {
-        return initializingResponse(response, status);
+        return initializingResponse(response, pluginId, status);
       }
       return handler(context, request, response);
     };
@@ -104,7 +113,7 @@ function createGuardedVersionedRouter<Context extends RequestHandlerContextBase>
         route.addVersion(options, (context, request, response): MaybePromise<IKibanaResponse> => {
           const status = engine.ensureInitialized(pluginId);
           if (status !== 'available') {
-            return initializingResponse(response, status);
+            return initializingResponse(response, pluginId, status);
           }
           return handler(context, request, response);
         })

@@ -17,12 +17,27 @@ import type {
 import type { DeferredInitExampleStartContract } from '@kbn/deferred-init-example-plugin/server';
 import { DATA_ROUTE } from '../common/constants';
 
-export class DeferredInitExampleConsumerServerPlugin implements Plugin<object, object> {
+/**
+ * Start contract of the consumer. Demonstrates the "function-in-contract" pattern: `start()`
+ * returns a function that loads a lazy dependency's contract, rather than loading it during
+ * `start()` itself.
+ */
+export interface DeferredInitExampleConsumerStartContract {
+  /**
+   * Resolves `deferredInitExample`'s start contract, triggering (and waiting for) its deferred
+   * init on the way.
+   *
+   * MUST be called post-boot (from a route handler, task runner, etc.). Core's start-cycle guard
+   * rejects `loadPluginContract` for a lazy plugin during the `start()` lifecycle, so another
+   * plugin must NOT call this from inside its own `start()`.
+   */
+  getDeferredInitExample: () => Promise<DeferredInitExampleStartContract>;
+}
+
+export class DeferredInitExampleConsumerServerPlugin
+  implements Plugin<object, DeferredInitExampleConsumerStartContract>
+{
   private readonly logger: Logger;
-  // Set once `start()` has resolved `deferredInitExample`'s contract. Guards the fetch (and its
-  // log line) from repeating if `start()` gets called again — see `start()` below for why that
-  // can happen.
-  private deferredInitExample?: DeferredInitExampleStartContract;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
@@ -45,10 +60,10 @@ export class DeferredInitExampleConsumerServerPlugin implements Plugin<object, o
         validate: false,
       },
       async (_context, _request, response) => {
-        // The third trigger path: this plugin never touches `deferredInitExample`'s own
-        // routes, yet loading its start contract here still (1) kicks its deferred init if
-        // nobody has triggered it yet, (2) waits for it, and (3) throws
-        // DeferredInitializationError (-> 503 via core's central handler) on failure.
+        // Correct pattern #1 — call `loadPluginContract` from a route handler (post-boot). This
+        // plugin never touches `deferredInitExample`'s own routes, yet loading its start contract
+        // here still (1) kicks its deferred init if nobody has triggered it yet, (2) waits for it,
+        // and (3) throws DeferredInitializationError (-> 503 via core's central handler) on failure.
         const deferredInitExample =
           await core.plugins.loadPluginContract<DeferredInitExampleStartContract>(
             'deferredInitExample'
@@ -61,27 +76,18 @@ export class DeferredInitExampleConsumerServerPlugin implements Plugin<object, o
     return {};
   }
 
-  public async start(core: CoreStart): Promise<object> {
+  public start(core: CoreStart): DeferredInitExampleConsumerStartContract {
     this.logger.debug('deferredInitExampleConsumer: Started');
 
-    // Same third trigger path as the route handler above, but called from this plugin's OWN
-    // `start()` instead of a route handler — the pattern Fleet's real dependents use to resolve
-    // `fleetSetupCompleted()`. If this rejects with
-    // a *retriable* `DeferredInitializationError`, core retries this whole `start()` call with
-    // backoff (`PluginsSystem.startPluginWithRetry`) — so everything in `start()` has to tolerate
-    // running again from scratch. Guarding on `this.deferredInitExample` is what makes that safe
-    // here: a retry that gets this far again won't re-fetch or re-log.
-    if (!this.deferredInitExample) {
-      this.deferredInitExample =
-        await core.plugins.loadPluginContract<DeferredInitExampleStartContract>(
-          'deferredInitExample'
-        );
-      this.logger.info(
-        'deferredInitExampleConsumer: resolved deferredInitExample contract from start()'
-      );
-    }
-
-    return {};
+    // Correct pattern #2 — the "function-in-contract" pattern Fleet's real dependents use to
+    // resolve things like `fleetSetupCompleted()`. `start()` returns a function that loads the
+    // lazy dependency; it is only ever invoked post-boot by whoever consumes this contract.
+    // Doing the `loadPluginContract` call *here in `start()`* instead would be rejected by core's
+    // start-cycle guard, because awaiting a lazy plugin's deferred init blocks boot.
+    return {
+      getDeferredInitExample: () =>
+        core.plugins.loadPluginContract<DeferredInitExampleStartContract>('deferredInitExample'),
+    };
   }
 
   public stop(): void {}

@@ -57,8 +57,30 @@ type GuardedRunOutcome = 'available' | 'retry';
 export class DeferredInitEngine {
   private readonly records = new Map<string, DeferredInitRecord>();
   private readonly retryAttempts = new Map<string, number>();
+  /**
+   * True only while the standard plugins' `start()` loop is running. While set,
+   * {@link waitUntilAvailable} refuses to block (see the guard there): awaiting a lazy plugin's
+   * deferred init during `start()` would stall the boot loop past its watchdog and defeat the
+   * whole point of deferring the work.
+   */
+  private startCycleActive = false;
 
   constructor(private readonly log: Logger, private readonly kibanaVersion: string) {}
+
+  /**
+   * Mark the standard `start()` loop as in progress. Called by
+   * {@link PluginsSystem.startPlugins} before the loop begins; every path that would block on
+   * deferred init ({@link waitUntilAvailable}, and therefore `loadPluginContract` / `waitForInit`)
+   * throws instead until {@link endStartCycle} clears it.
+   */
+  public beginStartCycle(): void {
+    this.startCycleActive = true;
+  }
+
+  /** Clear the {@link beginStartCycle} flag once the `start()` loop has finished (or thrown). */
+  public endStartCycle(): void {
+    this.startCycleActive = false;
+  }
 
   /**
    * Reserve a slot for a plugin id and set its state to `idle`. Called during setup so
@@ -203,6 +225,21 @@ export class DeferredInitEngine {
    * a lazy plugin's `start()` contract.
    */
   public async waitUntilAvailable(pluginId: string): Promise<void> {
+    // Guard against being awaited during the plugin `start()` loop. Blocking here would hold the
+    // boot loop until this plugin's (deliberately expensive) deferred init finished, tripping the
+    // per-plugin start watchdog and defeating lazy initialization. This is the enforcement point
+    // for both cross-plugin `loadPluginContract` and a plugin's own `waitForInit` — the fix is to
+    // move the call out of `start()` into a route handler, task runner, `lazyInitialize`, or a
+    // function returned from `start()` that runs post-boot.
+    if (this.startCycleActive) {
+      throw new Error(
+        `Cannot wait for deferred initialization of "${pluginId}" during the plugin start ` +
+          `lifecycle: doing so blocks boot and defeats lazy initialization. Move this ` +
+          `loadPluginContract()/waitForInit() call into a route handler, a task runner, your own ` +
+          `lazyInitialize(), or a function returned from start() that is invoked post-boot.`
+      );
+    }
+
     const record = this.ensureRecord(pluginId);
 
     while (true) {
@@ -217,6 +254,7 @@ export class DeferredInitEngine {
         throw new DeferredInitializationError(pluginId, {
           message: `Deferred init for "${pluginId}" has no runner attached.`,
           retriable: false,
+          status: record.state$.value,
         });
       }
       if (state === 'idle' || state === 'failed') {
@@ -229,7 +267,10 @@ export class DeferredInitEngine {
         return;
       }
       if (settled === 'failed') {
-        throw new DeferredInitializationError(pluginId, { cause: record.lastError });
+        throw new DeferredInitializationError(pluginId, {
+          cause: record.lastError,
+          status: 'failed',
+        });
       }
       // `settled === 'initializing'`: lost the cross-instance lock race. Wait past the
       // cooldown (which flips this back to `idle`) before looping to retry.
@@ -265,6 +306,10 @@ export class DeferredInitEngine {
     }
 
     try {
+      // No explicit `LockManagerService.setup()` is needed before the first deferred-init trigger:
+      // `withLock` acquires via `LockManager.acquire`, which lazily and idempotently bootstraps the
+      // `.kibana_locks` index (`runSetupIndexAssetOnce`) on first use. So the very first trigger on
+      // a fresh cluster creates the index itself. (See kbn-lock-manager's setup_lock_manager_index.)
       await withLock(
         { esClient: elasticsearch.client, logger, lockId: LOCK_ID_PREFIX + pluginId },
         () => runner(ctx)

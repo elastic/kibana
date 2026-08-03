@@ -14,6 +14,7 @@ import type { PluginName } from '@kbn/core-base-common';
  * `enableLazyInitialize: true` in its manifest.
  *
  * @public
+ * @experimental
  */
 export interface LazyInitPluginsSetup {
   /**
@@ -24,6 +25,11 @@ export interface LazyInitPluginsSetup {
    * `taskManager.addMiddleware` `beforeRun` hook) to gate task execution until the plugin is
    * ready. The task manager timeout still applies, so tasks that wait longer than their timeout
    * will be retried automatically.
+   *
+   * @remarks
+   * Do NOT `await` this from your own `start()`: it would block boot on the very deferred
+   * initialization it is meant to gate, so core rejects it during the start lifecycle. Use it
+   * post-boot only (task runners, route handlers, etc.).
    *
    * @example
    * ```ts
@@ -126,13 +132,22 @@ export interface PluginsServiceSetup {
    * The dependency must be declared in the calling plugin's manifest (required, optional, or
    * `runtimePluginDependencies`), otherwise the API throws at call time.
    *
+   * @remarks
+   * Do NOT `await` this from your own `setup()`/`start()` for a lazy dependency: blocking a
+   * lifecycle on another plugin's deferred initialization stalls boot, so core rejects it. Call it
+   * post-boot instead — from a route handler, a task runner, your own `lazyInitialize()`, or a
+   * function returned from `start()` that consumers invoke later.
+   *
    * @example
    * ```ts
-   * setup(core) {
-   *   const fleetContract = await core.plugins.loadPluginContract<FleetStartContract>('fleet');
-   *   await fleetContract.fleetSetupCompleted();
-   * }
+   * // In a route handler (post-boot):
+   * router.get({ path, validate }, async (ctx, req, res) => {
+   *   const fleet = await core.plugins.loadPluginContract<FleetStartContract>('fleet');
+   *   return res.ok({ body: await fleet.getSomething() });
+   * });
    * ```
+   *
+   * @experimental
    */
   loadPluginContract: LoadPluginContract;
   /**
@@ -140,6 +155,8 @@ export interface PluginsServiceSetup {
    * `undefined` for plugins without deferred initialization.
    *
    * @see {@link LazyInitPluginsSetup}
+   *
+   * @experimental
    */
   lazyInit?: LazyInitPluginsSetup;
 }
@@ -193,13 +210,23 @@ export interface PluginsServiceStart {
    * The dependency must be declared in the calling plugin's manifest (required, optional, or
    * `runtimePluginDependencies`), otherwise the API throws at call time.
    *
+   * @remarks
+   * Do NOT `await` this from your own `start()` for a lazy dependency: blocking `start()` on
+   * another plugin's deferred initialization stalls boot, so core rejects it. Call it post-boot
+   * instead — from a route handler, a task runner, your own `lazyInitialize()`, or a function
+   * returned from `start()` that consumers invoke later.
+   *
    * @example
    * ```ts
    * start(core) {
-   *   const fleetContract = await core.plugins.loadPluginContract<FleetStartContract>('fleet');
-   *   await fleetContract.fleetSetupCompleted();
+   *   // Return a function; consumers call it post-boot, never from their own start().
+   *   return {
+   *     getFleet: () => core.plugins.loadPluginContract<FleetStartContract>('fleet'),
+   *   };
    * }
    * ```
+   *
+   * @experimental
    */
   loadPluginContract: LoadPluginContract;
 }
@@ -270,5 +297,6 @@ export type PluginContractResolver = <T extends PluginContractMap>(
  * {@link PluginsServiceStart.loadPluginContract} for documentation and examples.
  *
  * @public
+ * @experimental
  */
 export type LoadPluginContract = <T>(pluginName: PluginName) => Promise<T>;

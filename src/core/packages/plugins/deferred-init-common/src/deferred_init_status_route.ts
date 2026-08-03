@@ -48,3 +48,15 @@ export interface DeferredInitStatusResponse {
   /** Present only when `status === 'failed'`: how many consecutive attempts have failed. */
   attempts?: number;
 }
+
+/**
+ * Body of the `503` a gated route returns while a plugin's deferred init is not yet `available`.
+ * Both trigger paths (the guarded router and the central error handler for an escaped
+ * {@link DeferredInitializationError}) return this exact shape so clients read one stable body.
+ *
+ * @internal
+ */
+export interface DeferredInitUnavailableBody {
+  pluginId: string;
+  status: DeferredInitState;
+}

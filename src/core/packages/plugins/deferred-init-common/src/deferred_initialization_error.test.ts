@@ -46,6 +46,11 @@ describe('DeferredInitializationError', () => {
 
     expect(error.retriable).toBe(false);
   });
+
+  it('carries the deferred-init state when provided, and is undefined otherwise', () => {
+    expect(new DeferredInitializationError('myPlugin').status).toBeUndefined();
+    expect(new DeferredInitializationError('myPlugin', { status: 'failed' }).status).toBe('failed');
+  });
 });
 
 describe('isDeferredInitializationError', () => {

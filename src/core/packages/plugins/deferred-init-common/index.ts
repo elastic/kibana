@@ -19,4 +19,5 @@ export {
 export type {
   DeferredInitState,
   DeferredInitStatusResponse,
+  DeferredInitUnavailableBody,
 } from './src/deferred_init_status_route';

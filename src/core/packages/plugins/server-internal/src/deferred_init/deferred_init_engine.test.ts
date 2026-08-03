@@ -60,6 +60,38 @@ describe('DeferredInitEngine', () => {
     });
   });
 
+  describe('start-cycle guard', () => {
+    it('throws (without running the runner) when waitUntilAvailable is called during the start cycle', async () => {
+      const runner = jest.fn().mockResolvedValue(undefined);
+      engine.register(PLUGIN_ID);
+      engine.setRunner(PLUGIN_ID, runner, createCtx());
+      withLockMock.mockImplementation((_opts, cb) => cb());
+
+      engine.beginStartCycle();
+
+      await expect(engine.waitUntilAvailable(PLUGIN_ID)).rejects.toThrow(
+        /during the plugin start lifecycle/
+      );
+      // The point of the guard: it must not kick (or block on) the deferred work at boot.
+      expect(runner).not.toHaveBeenCalled();
+      expect(engine.getState(PLUGIN_ID)).toBe('idle');
+    });
+
+    it('resolves normally once the start cycle has ended', async () => {
+      const runner = jest.fn().mockResolvedValue(undefined);
+      engine.register(PLUGIN_ID);
+      engine.setRunner(PLUGIN_ID, runner, createCtx());
+      withLockMock.mockImplementation((_opts, cb) => cb());
+
+      engine.beginStartCycle();
+      engine.endStartCycle();
+
+      await expect(engine.waitUntilAvailable(PLUGIN_ID)).resolves.toBeUndefined();
+      expect(runner).toHaveBeenCalledTimes(1);
+      expect(engine.getState(PLUGIN_ID)).toBe('available');
+    });
+  });
+
   describe('waitUntilAvailable', () => {
     it('resolves immediately if already available', async () => {
       engine.register(PLUGIN_ID);

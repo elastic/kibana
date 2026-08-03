@@ -24,7 +24,6 @@ import { Env } from '@kbn/config';
 import { configServiceMock, getEnvOptions } from '@kbn/config-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
-import { DeferredInitializationError } from '@kbn/core-deferred-init-common';
 import { PluginWrapper } from './plugin';
 import { findCircularDependencies, normalizeCycle, PluginsSystem } from './plugins_system';
 import { coreInternalLifecycleMock } from '@kbn/core-lifecycle-server-mocks';
@@ -778,40 +777,47 @@ describe('start', () => {
   });
 });
 
-describe('start - retrying on deferred-init failures', () => {
-  it('retries the whole start() call on a retriable DeferredInitializationError until it succeeds', async () => {
-    jest.useFakeTimers();
-    try {
-      const plugin = createPlugin('retryable-start');
-      jest.spyOn(plugin, 'setup').mockResolvedValue({});
-      jest
-        .spyOn(plugin, 'start')
-        .mockRejectedValueOnce(new DeferredInitializationError('someDependency'))
-        .mockResolvedValueOnce('contract');
+describe('start - deferred-init start-cycle guard', () => {
+  it('brackets the start loop with begin/endStartCycle on the engine', async () => {
+    const engine = new DeferredInitEngine(logger.get(), '9.0.0');
+    jest.spyOn(engine, 'beginStartCycle');
+    jest.spyOn(engine, 'endStartCycle');
+    const localPluginsSystem = new PluginsSystem(coreContext, PluginType.standard, engine);
 
-      pluginsSystem.addPlugin(plugin);
-      mockCreatePluginSetupContext.mockImplementation(() => ({}));
-      mockCreatePluginStartContext.mockImplementation(() => ({}));
+    const plugin = createPlugin('somePlugin');
+    jest.spyOn(plugin, 'setup').mockReturnValue({});
+    jest.spyOn(plugin, 'start').mockReturnValue('contract');
+    localPluginsSystem.addPlugin(plugin);
 
-      await pluginsSystem.setupPlugins(setupDeps);
-      const startPromise = pluginsSystem.startPlugins(startDeps);
+    await localPluginsSystem.setupPlugins(setupDeps);
+    await localPluginsSystem.startPlugins(startDeps);
 
-      // Flush the failed attempt's jittered cooldown (capped at 60s) so the retry fires.
-      await jest.advanceTimersByTimeAsync(60_000);
-
-      const contracts = await startPromise;
-      expect(contracts.get('retryable-start')).toBe('contract');
-      expect(plugin.start).toHaveBeenCalledTimes(2);
-
-      const log = logger.get.mock.results[0].value as jest.Mocked<Logger>;
-      expect(log.warn).toHaveBeenCalledWith(expect.stringContaining('Retrying because'));
-    } finally {
-      jest.useRealTimers();
-    }
+    expect(engine.beginStartCycle).toHaveBeenCalledTimes(1);
+    expect(engine.endStartCycle).toHaveBeenCalledTimes(1);
+    expect((engine.beginStartCycle as jest.Mock).mock.invocationCallOrder[0]).toBeLessThan(
+      (engine.endStartCycle as jest.Mock).mock.invocationCallOrder[0]
+    );
   });
 
-  it('aborts immediately, without retrying, on an error unrelated to deferred init', async () => {
-    const plugin = createPlugin('non-retriable-start');
+  it('clears the start cycle even when a plugin start() throws', async () => {
+    const engine = new DeferredInitEngine(logger.get(), '9.0.0');
+    jest.spyOn(engine, 'endStartCycle');
+    const localPluginsSystem = new PluginsSystem(coreContext, PluginType.standard, engine);
+
+    const plugin = createPlugin('boom-plugin');
+    jest.spyOn(plugin, 'setup').mockReturnValue({});
+    const error = new Error('boom');
+    jest.spyOn(plugin, 'start').mockRejectedValueOnce(error);
+    localPluginsSystem.addPlugin(plugin);
+
+    await localPluginsSystem.setupPlugins(setupDeps);
+    await expect(localPluginsSystem.startPlugins(startDeps)).rejects.toBe(error);
+
+    expect(engine.endStartCycle).toHaveBeenCalledTimes(1);
+  });
+
+  it('propagates a start() error immediately, without retrying', async () => {
+    const plugin = createPlugin('failing-start');
     jest.spyOn(plugin, 'setup').mockResolvedValue({});
     const error = new Error('boom');
     jest.spyOn(plugin, 'start').mockRejectedValueOnce(error);
@@ -824,53 +830,6 @@ describe('start - retrying on deferred-init failures', () => {
 
     await expect(pluginsSystem.startPlugins(startDeps)).rejects.toBe(error);
     expect(plugin.start).toHaveBeenCalledTimes(1);
-  });
-
-  it('aborts immediately on a non-retriable DeferredInitializationError (e.g. no runner attached)', async () => {
-    const plugin = createPlugin('misconfigured-start');
-    jest.spyOn(plugin, 'setup').mockResolvedValue({});
-    const error = new DeferredInitializationError('someDependency', {
-      message: 'no runner attached',
-      retriable: false,
-    });
-    jest.spyOn(plugin, 'start').mockRejectedValueOnce(error);
-
-    pluginsSystem.addPlugin(plugin);
-    mockCreatePluginSetupContext.mockImplementation(() => ({}));
-    mockCreatePluginStartContext.mockImplementation(() => ({}));
-
-    await pluginsSystem.setupPlugins(setupDeps);
-
-    await expect(pluginsSystem.startPlugins(startDeps)).rejects.toBe(error);
-    expect(plugin.start).toHaveBeenCalledTimes(1);
-  });
-
-  it('rethrows the original error once the retry budget is exhausted', async () => {
-    jest.useFakeTimers();
-    try {
-      const plugin = createPlugin('exhausted-start');
-      jest.spyOn(plugin, 'setup').mockResolvedValue({});
-      const error = new DeferredInitializationError('someDependency');
-      jest.spyOn(plugin, 'start').mockRejectedValue(error);
-
-      pluginsSystem.addPlugin(plugin);
-      mockCreatePluginSetupContext.mockImplementation(() => ({}));
-      mockCreatePluginStartContext.mockImplementation(() => ({}));
-
-      await pluginsSystem.setupPlugins(setupDeps);
-      const startPromise = pluginsSystem.startPlugins(startDeps);
-      const rejection = expect(startPromise).rejects.toBe(error);
-
-      // One retriable failure per attempt; flush every cooldown (each capped at 60s).
-      for (let i = 0; i < 8; i++) {
-        await jest.advanceTimersByTimeAsync(60_000);
-      }
-
-      await rejection;
-      expect(plugin.start).toHaveBeenCalledTimes(9); // 1 initial attempt + 8 retries
-    } finally {
-      jest.useRealTimers();
-    }
   });
 });
 

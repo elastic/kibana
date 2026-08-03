@@ -20,6 +20,7 @@ import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server
  * - `failed`: the deferred work threw. May be re-triggered.
  *
  * @public
+ * @experimental
  */
 export type InitState = 'idle' | 'initializing' | 'available' | 'failed';
 
@@ -29,13 +30,22 @@ export type InitState = 'idle' | 'initializing' | 'available' | 'failed';
  * request-triggered and programmatic triggers (no incoming request required).
  *
  * @public
+ * @experimental
  */
 export interface LazyInitContext {
   elasticsearch: {
     /** Internal-user Elasticsearch client. */
     client: ElasticsearchClient;
   };
-  /** Internal-user saved objects repository. */
+  /**
+   * Internal-user saved objects repository.
+   *
+   * @remarks
+   * This is an internal-user repository: it bypasses space restrictions and can read/write any
+   * registered saved object type. Prefer the {@link LazyInitContext.elasticsearch} client for most
+   * initialization work; reach for this only when you genuinely need saved-object semantics
+   * (references, migrations, encryption) during deferred init.
+   */
   savedObjects: ISavedObjectsRepository;
   /** Logger scoped to the plugin's deferred initialization. */
   logger: Logger;

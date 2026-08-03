@@ -523,7 +523,35 @@ describe('Router', () => {
           },
         },
         () => {
+          // No `status` on the error -> falls back to `failed`, the only state waitUntilAvailable
+          // rejects on.
           throw new DeferredInitializationError('myPlugin');
+        }
+      );
+      const [{ handler }] = router.getRoutes();
+
+      await handler(createRequestMock(), mockResponseToolkit);
+
+      expect(mockResponseToolkit.response).toHaveBeenCalledWith({
+        pluginId: 'myPlugin',
+        status: 'failed',
+      });
+      expect(mockResponse.code).toHaveBeenCalledWith(503);
+      expect(mockResponse.header).toHaveBeenCalledWith('retry-after', '1');
+    });
+
+    it('reports the real state carried on the DeferredInitializationError in the 503 body', async () => {
+      const router = new Router('', logger, enhanceWithContext, routerOptions);
+      router.get(
+        {
+          path: '/',
+          validate: false,
+          security: {
+            authz: { enabled: false, reason: 'test' },
+          },
+        },
+        () => {
+          throw new DeferredInitializationError('myPlugin', { status: 'initializing' });
         }
       );
       const [{ handler }] = router.getRoutes();
@@ -535,7 +563,6 @@ describe('Router', () => {
         status: 'initializing',
       });
       expect(mockResponse.code).toHaveBeenCalledWith(503);
-      expect(mockResponse.header).toHaveBeenCalledWith('retry-after', '1');
     });
   });
 });
