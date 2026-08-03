@@ -9209,8 +9209,6 @@
     "uiActions.triggers.onSelectRange.title": "范围选择",
     "uiActions.triggers.panelBadgeTrigger.description": "可嵌入对象在面板加载后，操作便显示在标题栏中。",
     "uiActions.triggers.panelBadgeTrigger.title": "面板徽章",
-    "uiActions.triggers.panelNotificationTrigger.description": "操作显示在面板右上角。",
-    "uiActions.triggers.panelNotificationTrigger.title": "面板通知",
     "uiActions.triggers.updateEsqlQueryTrigger": "更新 ES|QL 查询",
     "uiActions.triggers.updateEsqlQueryTriggerDescription": "使用新查询更新 ES|QL 查询",
     "uiActions.triggers.updateFilterReferencesTrigger": "更新筛选参考",
