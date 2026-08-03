@@ -68,7 +68,6 @@ export const indexTemplates: {
       settings: {
         default_pipeline: 'logs@default-pipeline',
       },
-      // @ts-expect-error
       data_stream_options: {
         failure_store: {
           enabled: false,
