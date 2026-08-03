@@ -136,7 +136,7 @@ export const PostHogUpdateFeatureFlagInputSchema = lazySchema(() =>
       .max(100)
       .optional()
       .describe(
-        "Set the rollout percentage (0-100) for the flag's first release-condition group. Overwrites existing group targeting properties."
+        "Set the rollout percentage (0-100). Applied to each of the flag's existing release-condition groups, preserving their targeting properties; if the flag has no groups, a single group matching all users is created with this percentage."
       ),
   })
 );
