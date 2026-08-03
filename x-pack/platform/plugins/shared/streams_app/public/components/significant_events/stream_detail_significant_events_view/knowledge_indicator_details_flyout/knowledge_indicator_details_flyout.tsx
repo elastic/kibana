@@ -16,7 +16,7 @@ import {
   EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiHealth,
-  EuiLink,
+  EuiPagination,
   EuiPopover,
   EuiSpacer,
   EuiTitle,
@@ -60,8 +60,9 @@ interface Props {
   occurrencesByQueryId: Record<string, Array<{ x: number; y: number }>>;
   onClose: () => void;
   features: Feature[];
-  onSelectPrevious?: () => void;
-  onSelectNext?: () => void;
+  pageIndex?: number;
+  pageCount?: number;
+  onSelectPage?: (pageIndex: number) => void;
 }
 
 export function KnowledgeIndicatorDetailsFlyout({
@@ -69,8 +70,9 @@ export function KnowledgeIndicatorDetailsFlyout({
   occurrencesByQueryId,
   onClose,
   features,
-  onSelectPrevious,
-  onSelectNext,
+  pageIndex,
+  pageCount,
+  onSelectPage,
 }: Props) {
   const {
     dependencies: {
@@ -94,12 +96,13 @@ export function KnowledgeIndicatorDetailsFlyout({
   const featureFilter =
     knowledgeIndicator.kind === 'feature' ? knowledgeIndicator.feature.filter : undefined;
   const discoverLocator = share.url.locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR);
-  const discoverHref =
-    featureFilter && discoverLocator
-      ? discoverLocator.getRedirectUrl(
-          buildFeatureDiscoverParams(streamName, featureFilter, timeState)
-        )
-      : undefined;
+  const openFeatureInDiscover = useMemo(() => {
+    if (!featureFilter || !discoverLocator) {
+      return undefined;
+    }
+    return () =>
+      discoverLocator.navigate(buildFeatureDiscoverParams(streamName, featureFilter, timeState));
+  }, [discoverLocator, featureFilter, streamName, timeState]);
 
   const streamFeatures = useMemo(
     () => features.filter((f) => f.stream_name === streamName),
@@ -132,6 +135,25 @@ export function KnowledgeIndicatorDetailsFlyout({
       await deleteKnowledgeIndicatorsInBulk([knowledgeIndicator]);
     }
   }, [knowledgeIndicator, demoteRules, deleteKnowledgeIndicatorsInBulk]);
+
+  const openInDiscoverActionItems = useMemo(() => {
+    if (!openFeatureInDiscover) {
+      return [];
+    }
+
+    return [
+      <EuiContextMenuItem
+        key="open-in-discover"
+        icon="discoverApp"
+        onClick={() => {
+          setIsActionsMenuOpen(false);
+          openFeatureInDiscover();
+        }}
+      >
+        {OPEN_IN_DISCOVER_LABEL}
+      </EuiContextMenuItem>,
+    ];
+  }, [openFeatureInDiscover]);
 
   const featureActionItems = useMemo(() => {
     if (knowledgeIndicator.kind !== 'feature') {
@@ -238,6 +260,13 @@ export function KnowledgeIndicatorDetailsFlyout({
       ? knowledgeIndicator.feature.title ?? knowledgeIndicator.feature.id
       : knowledgeIndicator.query.title ?? knowledgeIndicator.query.id;
 
+  const hasPagination =
+    pageCount !== undefined &&
+    pageCount > 1 &&
+    pageIndex !== undefined &&
+    pageIndex >= 0 &&
+    onSelectPage !== undefined;
+
   return (
     <>
       <EuiFlyout
@@ -250,28 +279,17 @@ export function KnowledgeIndicatorDetailsFlyout({
       >
         <FlyoutToolbarHeader
           leftContent={
-            <>
+            hasPagination ? (
               <EuiFlexItem grow={false}>
-                <EuiToolTip content={PREVIOUS_BUTTON_ARIA_LABEL} disableScreenReaderOutput>
-                  <EuiButtonIcon
-                    iconType="arrowLeft"
-                    aria-label={PREVIOUS_BUTTON_ARIA_LABEL}
-                    isDisabled={!onSelectPrevious}
-                    onClick={onSelectPrevious}
-                  />
-                </EuiToolTip>
+                <EuiPagination
+                  aria-label={PAGINATION_ARIA_LABEL}
+                  pageCount={pageCount}
+                  activePage={pageIndex}
+                  onPageClick={onSelectPage}
+                  compressed
+                />
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiToolTip content={NEXT_BUTTON_ARIA_LABEL} disableScreenReaderOutput>
-                  <EuiButtonIcon
-                    iconType="arrowRight"
-                    aria-label={NEXT_BUTTON_ARIA_LABEL}
-                    isDisabled={!onSelectNext}
-                    onClick={onSelectNext}
-                  />
-                </EuiToolTip>
-              </EuiFlexItem>
-            </>
+            ) : undefined
           }
         >
           <EuiFlexItem grow={false}>
@@ -293,7 +311,13 @@ export function KnowledgeIndicatorDetailsFlyout({
               panelPaddingSize="none"
               anchorPosition="downRight"
             >
-              <EuiContextMenuPanel items={[...featureActionItems, ...queryActionItems]} />
+              <EuiContextMenuPanel
+                items={[
+                  ...openInDiscoverActionItems,
+                  ...featureActionItems,
+                  ...queryActionItems,
+                ]}
+              />
             </EuiPopover>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -308,20 +332,9 @@ export function KnowledgeIndicatorDetailsFlyout({
         </FlyoutToolbarHeader>
 
         <EuiFlyoutHeader hasBorder>
-          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiTitle size="s">
-                <h2 id={flyoutTitleId}>{title}</h2>
-              </EuiTitle>
-            </EuiFlexItem>
-            {discoverHref ? (
-              <EuiFlexItem grow={false}>
-                <EuiLink external href={discoverHref} target="_blank">
-                  {OPEN_IN_DISCOVER_LABEL}
-                </EuiLink>
-              </EuiFlexItem>
-            ) : null}
-          </EuiFlexGroup>
+          <EuiTitle size="s">
+            <h2 id={flyoutTitleId}>{title}</h2>
+          </EuiTitle>
           <EuiSpacer size="m" />
           <EuiFlexGroup gutterSize="s" responsive={false} wrap>
             {knowledgeIndicator.kind === 'feature' ? (
@@ -367,7 +380,10 @@ export function KnowledgeIndicatorDetailsFlyout({
 
         <EuiFlyoutBody>
           {knowledgeIndicator.kind === 'feature' ? (
-            <KnowledgeIndicatorFeatureDetailsContent feature={knowledgeIndicator.feature} />
+            <KnowledgeIndicatorFeatureDetailsContent
+              feature={knowledgeIndicator.feature}
+              onOpenInDiscover={openFeatureInDiscover}
+            />
           ) : (
             <KnowledgeIndicatorQueryDetailsContent
               query={knowledgeIndicator.query}
@@ -397,22 +413,15 @@ const CLOSE_BUTTON_ARIA_LABEL = i18n.translate(
   }
 );
 
-const PREVIOUS_BUTTON_ARIA_LABEL = i18n.translate(
-  'xpack.streams.knowledgeIndicatorDetailsFlyout.previousButtonAriaLabel',
+const PAGINATION_ARIA_LABEL = i18n.translate(
+  'xpack.streams.knowledgeIndicatorDetailsFlyout.paginationAriaLabel',
   {
-    defaultMessage: 'Previous',
-  }
-);
-
-const NEXT_BUTTON_ARIA_LABEL = i18n.translate(
-  'xpack.streams.knowledgeIndicatorDetailsFlyout.nextButtonAriaLabel',
-  {
-    defaultMessage: 'Next',
+    defaultMessage: 'Knowledge indicator pagination',
   }
 );
 
 const OPEN_IN_DISCOVER_LABEL = i18n.translate(
-  'xpack.streams.knowledgeIndicatorDetailsFlyout.openInDiscoverLabel',
+  'xpack.streams.knowledgeIndicatorDetailsFlyout.openInDiscoverActionLabel',
   {
     defaultMessage: 'Open in Discover',
   }

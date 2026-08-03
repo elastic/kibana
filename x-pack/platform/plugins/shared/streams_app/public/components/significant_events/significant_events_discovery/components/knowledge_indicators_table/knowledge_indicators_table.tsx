@@ -166,12 +166,6 @@ export function KnowledgeIndicatorsTable() {
   const currentIndex = filteredKnowledgeIndicators.findIndex(
     (ki) => getKnowledgeIndicatorItemId(ki) === selectedKnowledgeIndicatorId
   );
-  const previousKnowledgeIndicator =
-    currentIndex > 0 ? filteredKnowledgeIndicators[currentIndex - 1] : undefined;
-  const nextKnowledgeIndicator =
-    currentIndex >= 0 && currentIndex < filteredKnowledgeIndicators.length - 1
-      ? filteredKnowledgeIndicators[currentIndex + 1]
-      : undefined;
 
   const columns = useKnowledgeIndicatorsColumns({
     occurrencesByQueryId,
@@ -351,22 +345,16 @@ export function KnowledgeIndicatorsTable() {
           occurrencesByQueryId={occurrencesByQueryId}
           onClose={closeFlyout}
           features={features}
-          onSelectPrevious={
-            previousKnowledgeIndicator
-              ? () => {
-                  goToPageForItemIndex(currentIndex - 1);
-                  selectKnowledgeIndicator(previousKnowledgeIndicator);
-                }
-              : undefined
-          }
-          onSelectNext={
-            nextKnowledgeIndicator
-              ? () => {
-                  goToPageForItemIndex(currentIndex + 1);
-                  selectKnowledgeIndicator(nextKnowledgeIndicator);
-                }
-              : undefined
-          }
+          pageIndex={currentIndex}
+          pageCount={filteredKnowledgeIndicators.length}
+          onSelectPage={(nextIndex) => {
+            const ki = filteredKnowledgeIndicators[nextIndex];
+            if (!ki) {
+              return;
+            }
+            goToPageForItemIndex(nextIndex);
+            selectKnowledgeIndicator(ki);
+          }}
         />
       ) : null}
       {knowledgeIndicatorsToDelete.length > 0 ? (
