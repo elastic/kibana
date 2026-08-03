@@ -12,9 +12,6 @@ import {
   StreamableHTTPError,
 } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
 import type { ServerCapabilities } from '@modelcontextprotocol/sdk/types.js';
-// Imported by real file path rather than via the SDK's `./validation/cfworker` export alias:
-// Kibana's import resolver does not support `exports` maps and rewrites this specifier
-// straight to `dist/esm/<path>` (see `@kbn/import-resolver`), so the alias is unresolvable.
 import { CfWorkerJsonSchemaValidator } from '@modelcontextprotocol/sdk/validation/cfworker-provider.js';
 import type { Logger } from '@kbn/core/server';
 import type {
@@ -92,16 +89,6 @@ export class McpClient {
         version: clientDetails.version,
       },
       {
-        // The SDK validates tool output against a tool's `outputSchema` and defaults to
-        // an ajv-backed validator, which compiles schemas into functions via `new Function`.
-        // Kibana can run with `--disallow-code-generation-from-strings`, which blocks that,
-        // so we opt into the SDK's interpreted validator instead. It is reached from
-        // `listTools()`, meaning any server advertising a tool with an `outputSchema` would
-        // otherwise fail outright. For context on the flag itself, see
-        // https://github.com/elastic/kibana/issues/272315
-        //
-        // `shortcircuit: false` reports every validation error, matching the `allErrors: true`
-        // behaviour of the ajv instance it replaces.
         jsonSchemaValidator: new CfWorkerJsonSchemaValidator({ shortcircuit: false }),
       }
     );
