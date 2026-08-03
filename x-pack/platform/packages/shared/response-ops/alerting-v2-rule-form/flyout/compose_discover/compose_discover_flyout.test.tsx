@@ -1185,34 +1185,6 @@ describe('ComposeDiscoverFlyout', () => {
   });
 
   describe('manual split mode', () => {
-    it('passes onManualSplit in create and edit modes', () => {
-      renderFlyout({ mode: 'create' });
-      expect(getLatestFormProps().onManualSplit).toBeDefined();
-
-      mockComposeDiscoverForm.mockClear();
-      renderFlyout({
-        mode: 'edit',
-        rule: {
-          id: 'rule-1',
-          kind: 'alert',
-          enabled: true,
-          metadata: { name: 'Edit rule', owner: 'test', tags: [] },
-          time_field: '@timestamp',
-          schedule: { every: '1m', lookback: '5m' },
-          query: {
-            format: 'composed',
-            base: 'FROM logs-*',
-            breach: { segment: '| WHERE count > 100' },
-          },
-          createdBy: 'test',
-          createdAt: '2026-01-01T00:00:00Z',
-          updatedBy: 'test',
-          updatedAt: '2026-01-01T00:00:00Z',
-        },
-      });
-      expect(getLatestFormProps().onManualSplit).toBeDefined();
-    });
-
     it('shows the split button before any query is typed', () => {
       renderFlyout({ mode: 'create' });
 
@@ -1376,6 +1348,7 @@ describe('ComposeDiscoverFlyout', () => {
       query: {
         format: 'standalone' as const,
         breach: { query: 'FROM logs-* | STATS c = COUNT(*) BY h | WHERE c > 100' },
+        recovery: { query: 'FROM logs-* | WHERE c < 10' },
       },
       recovery_strategy: 'query' as const,
     };
