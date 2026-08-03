@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import type { ObjectType } from '@kbn/config-schema';
+import { schema, type ObjectType } from '@kbn/config-schema';
 import type { SavedObjectsModelVersionMap } from '@kbn/core-saved-objects-server';
 import {
+  alertingV1RawRuleTemplateSchemaV4,
+  alertingV2RawRuleTemplateSchemaV4,
   rawRuleTemplateSchemaV1,
   rawRuleTemplateSchemaV2,
   rawRuleTemplateSchemaV3,
@@ -46,7 +48,7 @@ export const ruleTemplateModelVersions: SavedObjectsModelVersionMap = {
     },
   },
   /**
-   * Adds top-level `engine`, accepts Fleet (engine v1) or `{ engine: "v2", rule }`
+   * Adds top-level `engine`, accepts either engine v1 or v2
    * shapes, and backfills `engine` so existing values become searchable under the
    * new mapping.
    *
@@ -76,8 +78,11 @@ export const ruleTemplateModelVersions: SavedObjectsModelVersionMap = {
       },
     ],
     schemas: {
-      // oneOf schemas do not support .extends(); each branch already constrains fields.
-      forwardCompatibility: rawRuleTemplateSchemaV4 as unknown as ObjectType,
+      // oneOf schemas do not support .extends(); apply unknowns: 'ignore' per branch.
+      forwardCompatibility: schema.oneOf([
+        alertingV1RawRuleTemplateSchemaV4.extends({}, { unknowns: 'ignore' }),
+        alertingV2RawRuleTemplateSchemaV4.extends({}, { unknowns: 'ignore' }),
+      ]) as unknown as ObjectType,
       create: rawRuleTemplateSchemaV4 as unknown as ObjectType,
     },
   },
