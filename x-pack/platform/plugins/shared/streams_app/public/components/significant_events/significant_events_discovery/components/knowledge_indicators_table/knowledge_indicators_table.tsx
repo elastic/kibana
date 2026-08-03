@@ -19,6 +19,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { KnowledgeIndicator } from '@kbn/streams-ai';
+import type { Streams } from '@kbn/streams-schema';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useAIFeatures } from '../../../../../hooks/use_ai_features';
 import { getFeaturesFromKIs } from '../../../stream_detail_significant_events_view/utils/get_features_from_kis';
@@ -27,6 +28,7 @@ import { LoadingPanel } from '../../../../loading_panel';
 import { KnowledgeIndicatorDetailsFlyout } from '../../../stream_detail_significant_events_view/knowledge_indicator_details_flyout';
 import { DeleteTableItemsModal } from '../../../stream_detail_significant_events_view/delete_table_items_modal';
 import { getKnowledgeIndicatorItemId } from '../../../stream_detail_significant_events_view/utils/get_knowledge_indicator_item_id';
+import { getKnowledgeIndicatorStreamName } from '../../../stream_detail_significant_events_view/utils/get_knowledge_indicator_stream_name';
 import { GenerateSplitButton } from '../shared/generate_split_button';
 import { StreamPicker } from '../shared/stream_picker';
 import { useBlocksNewActivity } from '../../../../../hooks/significant_events/use_significant_events_maintenance';
@@ -162,6 +164,12 @@ export function KnowledgeIndicatorsTable() {
   }, [isGenerating, refetch]);
 
   const features = useMemo(() => getFeaturesFromKIs(knowledgeIndicators), [knowledgeIndicators]);
+
+  const streamsByName = useMemo(() => {
+    const map = new Map<string, Streams.all.Definition>();
+    filteredStreams?.forEach(({ stream }) => map.set(stream.name, stream));
+    return map;
+  }, [filteredStreams]);
 
   const currentIndex = filteredKnowledgeIndicators.findIndex(
     (ki) => getKnowledgeIndicatorItemId(ki) === selectedKnowledgeIndicatorId
@@ -345,6 +353,7 @@ export function KnowledgeIndicatorsTable() {
           occurrencesByQueryId={occurrencesByQueryId}
           onClose={closeFlyout}
           features={features}
+          stream={streamsByName.get(getKnowledgeIndicatorStreamName(selectedKnowledgeIndicator))}
           pageIndex={currentIndex}
           pageCount={filteredKnowledgeIndicators.length}
           onSelectPage={(nextIndex) => {

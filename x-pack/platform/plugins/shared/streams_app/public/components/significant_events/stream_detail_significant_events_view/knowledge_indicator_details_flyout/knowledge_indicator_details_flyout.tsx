@@ -27,6 +27,7 @@ import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { i18n } from '@kbn/i18n';
 import type { KnowledgeIndicator } from '@kbn/streams-ai';
+import type { Streams } from '@kbn/streams-schema';
 import { isComputedFeature, QUERY_TYPE_STATS } from '@kbn/significant-events-schema';
 import type { Feature } from '@kbn/significant-events-schema';
 import { upperFirst } from 'lodash';
@@ -60,6 +61,7 @@ interface Props {
   occurrencesByQueryId: Record<string, Array<{ x: number; y: number }>>;
   onClose: () => void;
   features: Feature[];
+  stream?: Streams.all.Definition;
   pageIndex?: number;
   pageCount?: number;
   onSelectPage?: (pageIndex: number) => void;
@@ -70,6 +72,7 @@ export function KnowledgeIndicatorDetailsFlyout({
   occurrencesByQueryId,
   onClose,
   features,
+  stream,
   pageIndex,
   pageCount,
   onSelectPage,
@@ -97,12 +100,12 @@ export function KnowledgeIndicatorDetailsFlyout({
     knowledgeIndicator.kind === 'feature' ? knowledgeIndicator.feature.filter : undefined;
   const discoverLocator = share.url.locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR);
   const openFeatureInDiscover = useMemo(() => {
-    if (!featureFilter || !discoverLocator) {
+    if (!featureFilter || !discoverLocator || !stream) {
       return undefined;
     }
     return () =>
-      discoverLocator.navigate(buildFeatureDiscoverParams(streamName, featureFilter, timeState));
-  }, [discoverLocator, featureFilter, streamName, timeState]);
+      discoverLocator.navigate(buildFeatureDiscoverParams(stream, featureFilter, timeState));
+  }, [discoverLocator, featureFilter, stream, timeState]);
 
   const streamFeatures = useMemo(
     () => features.filter((f) => f.stream_name === streamName),
