@@ -9,7 +9,7 @@ import { useCallback } from 'react';
 
 import { useKibana } from '../../../../../common/lib/kibana';
 import { AttacksEventTypes } from '../../../../../common/lib/telemetry';
-import { useSetUnifiedAlertsTags } from '../../../../../common/containers/unified_alerts/hooks/use_set_unified_alerts_tags';
+import { useSetAttacksTags } from '../../../../../common/containers/attacks/hooks/use_set_attacks_tags';
 
 import { useUpdateAttacksModal } from '../confirmation_modal/use_update_attacks_modal';
 import type { BaseApplyAttackProps } from '../types';
@@ -28,7 +28,7 @@ interface ApplyAttackTagsReturn {
  * Shows a confirmation modal to let users choose whether to update only attacks or both attacks and related alerts.
  */
 export const useApplyAttackTags = (): ApplyAttackTagsReturn => {
-  const { mutateAsync: setUnifiedAlertsTags } = useSetUnifiedAlertsTags();
+  const { mutateAsync: setAttacksTags } = useSetAttacksTags();
   const showModalIfNeeded = useUpdateAttacksModal();
   const {
     services: { telemetry },
@@ -62,19 +62,17 @@ export const useApplyAttackTags = (): ApplyAttackTagsReturn => {
 
       setIsLoading?.(true);
       try {
-        // Combine IDs based on user choice
-        const allIds = result.updateAlerts ? [...attackIds, ...relatedAlertIds] : attackIds;
-
-        await setUnifiedAlertsTags({
+        await setAttacksTags({
+          ids: attackIds,
           tags,
-          ids: allIds,
+          update_related_alerts: result.updateAlerts,
         });
         onSuccess?.();
       } finally {
         setIsLoading?.(false);
       }
     },
-    [setUnifiedAlertsTags, showModalIfNeeded, telemetry]
+    [setAttacksTags, showModalIfNeeded, telemetry]
   );
 
   return { applyTags };

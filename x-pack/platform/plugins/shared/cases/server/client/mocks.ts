@@ -105,6 +105,7 @@ const createCasesSubClientMock = (): CasesSubClientMock => {
     updateObservable: jest.fn(),
     deleteObservable: jest.fn(),
     bulkAddObservables: jest.fn(),
+    getApplicableFields: jest.fn(),
   });
 };
 
@@ -290,7 +291,12 @@ export const createCasesClientMockArgs = () => {
     ),
     savedObjectsSerializer: createSavedObjectsSerializerMock(),
     fileService: createFileServiceMock(),
-    config: ConfigSchema.validate({}),
+    // Assignee-identity population is opt-in per test; keep it off by default so
+    // the broad create/update suites keep asserting uid-only assignees.
+    config: {
+      ...ConfigSchema.validate({}),
+      assigneeIdentity: { enabled: false },
+    },
     casesEventBus: createCasesEventBusMock(),
     request: httpServerMock.createKibanaRequest(),
   };

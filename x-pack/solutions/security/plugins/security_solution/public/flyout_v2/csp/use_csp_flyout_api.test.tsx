@@ -19,6 +19,10 @@ jest.mock('../shared/components/flyout_provider', () => ({
   flyoutProviders: ({ children }: { children: unknown }) => children,
 }));
 
+jest.mock('../shared/utils/build_flyout_nav_title', () => ({
+  buildFlyoutNavTitle: (title: string) => title,
+}));
+
 jest.mock('../shared/hooks/use_default_flyout_properties', () => ({
   useDefaultDocumentFlyoutProperties: () => ({ size: 's' }),
 }));
@@ -28,9 +32,15 @@ jest.mock('./vulnerability/main', () => ({ Vulnerability: () => null }));
 
 const mockFlyoutRef = { close: jest.fn(), onClose: Promise.resolve() };
 const mockOpenSystemFlyout = jest.fn().mockReturnValue(mockFlyoutRef);
+const mockReportEvent = jest.fn();
 
 jest.mock('../../common/lib/kibana', () => ({
-  useKibana: () => ({ services: { overlays: { openSystemFlyout: mockOpenSystemFlyout } } }),
+  useKibana: () => ({
+    services: {
+      overlays: { openSystemFlyout: mockOpenSystemFlyout },
+      telemetry: { reportEvent: mockReportEvent },
+    },
+  }),
 }));
 
 const useIsInSecurityAppMock = useIsInSecurityApp as jest.Mock;

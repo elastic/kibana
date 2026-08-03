@@ -549,7 +549,7 @@ describe('EditIlmPhasesFlyout', () => {
       );
     });
 
-    it('hides and unmounts readonly while downsampling is enabled, and re-adds it when disabled', async () => {
+    it('shows readonly as checked and disabled while downsampling is enabled, and preserves the previous readonly state when disabled', async () => {
       const onChange = jest.fn();
       renderFlyout(
         {
@@ -565,20 +565,26 @@ describe('EditIlmPhasesFlyout', () => {
       await tick();
       const warmPanel = withinPhase('warm');
 
-      // Initially visible.
-      expect(warmPanel.getByTestId(`${DATA_TEST_SUBJ}ReadOnlyCheckbox`)).toBeInTheDocument();
+      // Initially visible, enabled and unchecked.
+      const initialCheckbox = warmPanel.getByTestId(`${DATA_TEST_SUBJ}ReadOnlyCheckbox`);
+      expect(initialCheckbox).toBeInTheDocument();
+      expect(initialCheckbox).toBeEnabled();
+      expect(initialCheckbox).not.toBeChecked();
 
       // Set it to true.
-      fireEvent.click(warmPanel.getByTestId(`${DATA_TEST_SUBJ}ReadOnlyCheckbox`));
+      fireEvent.click(initialCheckbox);
       await tick();
 
-      // Enable downsampling -> readonly should be cleared and hidden.
+      // Enable downsampling -> readonly stays visible but becomes checked and disabled.
       fireEvent.click(warmPanel.getByTestId(`${DATA_TEST_SUBJ}DownsamplingSwitch`));
       await tick();
 
-      expect(warmPanel.queryByTestId(`${DATA_TEST_SUBJ}ReadOnlyCheckbox`)).not.toBeInTheDocument();
+      const downsamplingCheckbox = warmPanel.getByTestId(`${DATA_TEST_SUBJ}ReadOnlyCheckbox`);
+      expect(downsamplingCheckbox).toBeInTheDocument();
+      expect(downsamplingCheckbox).toBeChecked();
+      expect(downsamplingCheckbox).toBeDisabled();
 
-      // Ensure output does not include warm.readonly even if it was previously enabled.
+      // The previously enabled readonly state is preserved in the output alongside downsample.
       expect(onChange).toHaveBeenLastCalledWith(
         {
           hot: { name: 'hot', size_in_bytes: 0, rollover: {} },
@@ -586,19 +592,21 @@ describe('EditIlmPhasesFlyout', () => {
             name: 'warm',
             size_in_bytes: 0,
             min_age: '30d',
+            readonly: true,
             downsample: { after: '30d', fixed_interval: '1d' },
           },
         },
         { invalidPhases: [] }
       );
 
-      // Disable downsampling -> readonly should re-appear (re-mounted).
+      // Disable downsampling -> readonly should be enabled again and keep its previous checked state.
       fireEvent.click(warmPanel.getByTestId(`${DATA_TEST_SUBJ}DownsamplingSwitch`));
       await tick();
 
       const checkbox = warmPanel.getByTestId(`${DATA_TEST_SUBJ}ReadOnlyCheckbox`);
       expect(checkbox).toBeInTheDocument();
-      expect(checkbox).not.toBeChecked();
+      expect(checkbox).toBeEnabled();
+      expect(checkbox).toBeChecked();
     });
 
     it('revalidates cold downsampling interval when re-enabling cold (warm interval changed while cold disabled)', async () => {

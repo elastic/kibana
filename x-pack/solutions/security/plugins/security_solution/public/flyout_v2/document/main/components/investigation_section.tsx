@@ -6,7 +6,6 @@
  */
 
 import React, { memo, useCallback, useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { getFieldValue } from '@kbn/discover-utils';
 import { isNonLocalIndexName } from '@kbn/es-query';
@@ -27,15 +26,10 @@ import {
   LEGACY_SIGNAL_RULE_NAME_FIELD_NAME,
   SIGNAL_RULE_NAME_FIELD_NAME,
 } from '../../../../timelines/components/timeline/body/renderers/constants';
+import { FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
+import { INVESTIGATION_SECTION_TITLE } from '../../../shared/constants/flyout_titles';
 
 export const INVESTIGATION_SECTION_TEST_ID = `${PREFIX}InvestigationSection` as const;
-
-export const INVESTIGATION_SECTION_TITLE = i18n.translate(
-  'xpack.securitySolution.flyout.document.investigation.sectionTitle',
-  {
-    defaultMessage: 'Investigation',
-  }
-);
 
 const LOCAL_STORAGE_SECTION_KEY = 'investigation';
 
@@ -91,7 +85,7 @@ export const InvestigationSection = memo(
     });
 
     const onShowInvestigationGuide = useCallback(() => {
-      openDocumentInvestigationGuide({ hit });
+      openDocumentInvestigationGuide({ hit, origin: FLYOUT_ORIGIN.INVESTIGATION_GUIDE });
     }, [openDocumentInvestigationGuide, hit]);
 
     const renderFlyoutLink = useCallback(

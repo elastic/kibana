@@ -149,6 +149,37 @@ describe('createVisualizationGraph', () => {
     );
   });
 
+  it('finalizes with the esql error without generating a config when esql generation fails', async () => {
+    mockedGenerateEsql.mockResolvedValue({
+      error: 'no such index [metrics-system.load]',
+    } as Awaited<ReturnType<typeof generateEsql>>);
+
+    const model = createMockModel();
+    const graph = await createVisualizationGraph(model as never, logger, events, esClient, false);
+
+    const finalState = await graph.invoke({
+      nlQuery: '5-minute load average',
+      index: 'metrics-*',
+      chartType: SupportedChartType.Metric,
+      schema: {},
+      existingConfig: undefined,
+      parsedExistingConfig: null,
+      esqlQuery: '',
+      currentAttempt: 0,
+      actions: [],
+      validatedConfig: null,
+      error: null,
+    });
+
+    expect(finalState.validatedConfig).toBeNull();
+    expect(finalState.error).toBe(
+      'Could not resolve a valid ES|QL query for the visualization: no such index [metrics-system.load]'
+    );
+    // Config generation must not run without a query: the prompt forbids the
+    // model from emitting data_source, so validation could never succeed.
+    expect((await model.getDefaultModel()).chatModel.invoke as jest.Mock).not.toHaveBeenCalled();
+  });
+
   it('injects the validated esql query, overwriting any query emitted by the config LLM', async () => {
     const canonicalQuery = 'TS metrics-* | STATS avg = AVG(cpu) BY host';
     // The config LLM corrupts the query (TS -> FROM) in the data_source it emits.

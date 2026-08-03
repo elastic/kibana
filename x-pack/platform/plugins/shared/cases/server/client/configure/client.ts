@@ -58,6 +58,7 @@ import {
   validateTemplatesCustomFieldsInRequest,
 } from './validators';
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
+import { ensureGlobalFieldDefinitions } from './ensure_field_definitions';
 
 /**
  * Defines the internal helper functions.
@@ -296,7 +297,7 @@ export async function update(
   casesClientInternal: CasesClientInternal
 ): Promise<Configuration> {
   const {
-    services: { caseConfigureService },
+    services: { caseConfigureService, fieldDefinitionsService },
     logger,
     unsecuredSavedObjectsClient,
     user,
@@ -401,6 +402,18 @@ export async function update(
       originalConfiguration: configuration,
     });
 
+    if (clientArgs.config.templates.enabled) {
+      // Mirror new custom fields into global field definitions. Uses the effective post-patch set
+      // so a patch that omits customFields falls back to the existing configuration's fields
+      // (all names will already exist → cheap no-op). Non-fatal: logged and swallowed.
+      await ensureGlobalFieldDefinitions({
+        owner: configuration.attributes.owner,
+        customFields: request.customFields ?? configuration.attributes.customFields,
+        fieldDefinitionsService,
+        logger,
+      });
+    }
+
     const res = {
       ...configuration.attributes,
       ...patch.attributes,
@@ -428,7 +441,7 @@ export async function create(
 ): Promise<Configuration> {
   const {
     unsecuredSavedObjectsClient,
-    services: { caseConfigureService },
+    services: { caseConfigureService, fieldDefinitionsService },
     logger,
     user,
     authorization,
@@ -536,6 +549,16 @@ export async function create(
       },
       id: savedObjectID,
     });
+
+    if (clientArgs.config.templates.enabled) {
+      // Mirror new custom fields into global field definitions. Non-fatal: logged and swallowed.
+      await ensureGlobalFieldDefinitions({
+        owner: validatedConfigurationRequest.owner,
+        customFields: validatedConfigurationRequest.customFields ?? [],
+        fieldDefinitionsService,
+        logger,
+      });
+    }
 
     const res = {
       ...post.attributes,

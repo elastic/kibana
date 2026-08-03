@@ -16,7 +16,6 @@ import type {
   AttachmentAggregationResult,
   AttachmentFrameworkAggsResult,
   CaseAggregationResult,
-  CasesTelemetryWithAlertsAggsByOwnerResults,
   FileAttachmentAggregationResults,
 } from '../types';
 import {
@@ -27,7 +26,6 @@ import {
   getBucketFromAggregation,
   getConnectorsCardinalityAggregationQuery,
   getCountsAggregationQuery,
-  getCountsAndMaxAlertsData,
   getCountsAndMaxData,
   getCountsFromBuckets,
   getCustomFieldsTelemetry,
@@ -37,7 +35,6 @@ import {
   getReferencesAggregationQuery,
   getSolutionValues,
   getUniqueAlertCommentsCountQuery,
-  processWithAlertsByOwner,
   getObservablesTotalsByType,
   getTotalWithMaxObservables,
 } from './utils';
@@ -218,9 +215,6 @@ describe('utils', () => {
       securitySolution: { ...attachmentFramework },
       observability: { ...attachmentFramework },
       cases: { ...attachmentFramework },
-      participants: {
-        value: 5,
-      },
       ...attachmentFramework,
     };
 
@@ -284,45 +278,6 @@ describe('utils', () => {
         ],
       },
     };
-    const withAlertsByOwnerResults: CasesTelemetryWithAlertsAggsByOwnerResults = {
-      by_owner: {
-        buckets: [
-          {
-            key: 'cases',
-            doc_count: 10,
-            references: {
-              referenceType: {
-                referenceAgg: {
-                  value: 10,
-                },
-              },
-            },
-          },
-          {
-            key: 'observability',
-            doc_count: 8,
-            references: {
-              referenceType: {
-                referenceAgg: {
-                  value: 5,
-                },
-              },
-            },
-          },
-          {
-            key: 'securitySolution',
-            doc_count: 10,
-            references: {
-              referenceType: {
-                referenceAgg: {
-                  value: 20,
-                },
-              },
-            },
-          },
-        ],
-      },
-    };
     it('constructs the solution values correctly', () => {
       expect(
         getSolutionValues({
@@ -330,7 +285,7 @@ describe('utils', () => {
           attachmentAggregations: attachmentAggsResult,
           filesAggregations: filesRes,
           owner: 'securitySolution',
-          casesTotalWithAlerts: withAlertsByOwnerResults,
+          totalWithAlertsByOwner: { securitySolution: 20, observability: 5, cases: 10 },
         })
       ).toMatchInlineSnapshot(`
         Object {
@@ -414,7 +369,7 @@ describe('utils', () => {
           caseAggregations: caseAggsResult,
           attachmentAggregations: attachmentAggsResult,
           filesAggregations: filesRes,
-          casesTotalWithAlerts: withAlertsByOwnerResults,
+          totalWithAlertsByOwner: { securitySolution: 20, observability: 5, cases: 10 },
           owner: 'cases',
         })
       ).toMatchInlineSnapshot(`
@@ -499,7 +454,7 @@ describe('utils', () => {
           caseAggregations: caseAggsResult,
           attachmentAggregations: attachmentAggsResult,
           filesAggregations: filesRes,
-          casesTotalWithAlerts: withAlertsByOwnerResults,
+          totalWithAlertsByOwner: { securitySolution: 20, observability: 5, cases: 10 },
           owner: 'observability',
         })
       ).toMatchInlineSnapshot(`
@@ -1330,305 +1285,6 @@ describe('utils', () => {
     });
   });
 
-  describe('getCountsAndMaxAlertsData', () => {
-    const savedObjectsClient = savedObjectsRepositoryMock.create();
-    savedObjectsClient.find.mockResolvedValue({
-      total: 3,
-      saved_objects: [],
-      per_page: 1,
-      page: 1,
-      aggregations: {
-        by_owner: {
-          doc_count_error_upper_bound: 0,
-          sum_other_doc_count: 0,
-          buckets: [
-            {
-              key: 'cases',
-              doc_count: 4,
-              counts: {
-                buckets: [
-                  {
-                    doc_count: 4,
-                    topAlertsPerBucket: { value: 4 },
-                  },
-                  {
-                    doc_count: 4,
-                    topAlertsPerBucket: { value: 4 },
-                  },
-                  {
-                    doc_count: 4,
-                    topAlertsPerBucket: { value: 4 },
-                  },
-                ],
-              },
-              uniqueAlertCommentsCount: {
-                value: 4,
-              },
-              references: {
-                cases: {
-                  max: {
-                    value: 2,
-                  },
-                },
-              },
-            },
-            {
-              key: 'securitySolution',
-              doc_count: 4,
-              counts: {
-                buckets: [
-                  {
-                    doc_count: 4,
-                    topAlertsPerBucket: { value: 4 },
-                  },
-                  {
-                    doc_count: 4,
-                    topAlertsPerBucket: { value: 4 },
-                  },
-                  {
-                    doc_count: 4,
-                    topAlertsPerBucket: { value: 4 },
-                  },
-                ],
-              },
-              uniqueAlertCommentsCount: {
-                value: 4,
-              },
-              references: {
-                cases: {
-                  max: {
-                    value: 1,
-                  },
-                },
-              },
-            },
-            {
-              key: 'observability',
-              doc_count: 4,
-              counts: {
-                buckets: [
-                  {
-                    doc_count: 4,
-                    topAlertsPerBucket: { value: 4 },
-                  },
-                  {
-                    doc_count: 4,
-                    topAlertsPerBucket: { value: 4 },
-                  },
-                  {
-                    doc_count: 4,
-                    topAlertsPerBucket: { value: 4 },
-                  },
-                ],
-              },
-              uniqueAlertCommentsCount: {
-                value: 4,
-              },
-            },
-          ],
-        },
-      },
-    });
-
-    beforeEach(() => {
-      jest.clearAllMocks();
-    });
-
-    it('returns the correct counts and max data', async () => {
-      const telemetrySavedObjectsClient = new TelemetrySavedObjectsClient(savedObjectsClient);
-
-      const res = await getCountsAndMaxAlertsData({
-        savedObjectsClient: telemetrySavedObjectsClient,
-      });
-      expect(res).toEqual({
-        all: {
-          total: 12,
-          daily: 12,
-          weekly: 12,
-          monthly: 12,
-          maxOnACase: 2,
-        },
-        obs: {
-          total: 4,
-          daily: 4,
-          weekly: 4,
-          monthly: 4,
-          maxOnACase: 0,
-        },
-        sec: {
-          total: 4,
-          daily: 4,
-          weekly: 4,
-          monthly: 4,
-          maxOnACase: 1,
-        },
-        main: {
-          total: 4,
-          daily: 4,
-          weekly: 4,
-          monthly: 4,
-          maxOnACase: 2,
-        },
-      });
-    });
-
-    it('returns zero data if the response aggregation is not as expected', async () => {
-      const telemetrySavedObjectsClient = new TelemetrySavedObjectsClient(savedObjectsClient);
-      savedObjectsClient.find.mockResolvedValue({
-        total: 5,
-        saved_objects: [],
-        per_page: 1,
-        page: 1,
-      });
-
-      const res = await getCountsAndMaxAlertsData({
-        savedObjectsClient: telemetrySavedObjectsClient,
-      });
-      expect(res).toEqual({
-        all: {
-          total: 0,
-          daily: 0,
-          weekly: 0,
-          monthly: 0,
-          maxOnACase: 0,
-        },
-        main: {
-          total: 0,
-          daily: 0,
-          weekly: 0,
-          monthly: 0,
-          maxOnACase: 0,
-        },
-        obs: {
-          total: 0,
-          daily: 0,
-          weekly: 0,
-          monthly: 0,
-          maxOnACase: 0,
-        },
-        sec: {
-          total: 0,
-          daily: 0,
-          weekly: 0,
-          monthly: 0,
-          maxOnACase: 0,
-        },
-      });
-    });
-
-    it('should call find with correct arguments', async () => {
-      const telemetrySavedObjectsClient = new TelemetrySavedObjectsClient(savedObjectsClient);
-
-      await getCountsAndMaxAlertsData({
-        savedObjectsClient: telemetrySavedObjectsClient,
-      });
-
-      expect(savedObjectsClient.find).toBeCalledWith({
-        aggs: {
-          by_owner: {
-            aggs: {
-              counts: {
-                date_range: {
-                  field: 'cases-comments.attributes.created_at',
-                  format: 'dd/MM/yyyy',
-                  ranges: [
-                    {
-                      from: 'now-1d',
-                      to: 'now',
-                    },
-                    {
-                      from: 'now-1w',
-                      to: 'now',
-                    },
-                    {
-                      from: 'now-1M',
-                      to: 'now',
-                    },
-                  ],
-                },
-                aggregations: {
-                  topAlertsPerBucket: {
-                    cardinality: {
-                      field: 'cases-comments.attributes.alertId',
-                    },
-                  },
-                },
-              },
-              references: {
-                aggregations: {
-                  cases: {
-                    aggregations: {
-                      ids: {
-                        terms: {
-                          field: 'cases-comments.references.id',
-                        },
-                        aggregations: {
-                          reverse: {
-                            reverse_nested: {},
-                            aggregations: {
-                              topAlerts: {
-                                cardinality: {
-                                  field: 'cases-comments.attributes.alertId',
-                                },
-                              },
-                            },
-                          },
-                        },
-                      },
-                      max: {
-                        max_bucket: {
-                          buckets_path: 'ids>reverse.topAlerts',
-                        },
-                      },
-                    },
-                    filter: {
-                      term: {
-                        'cases-comments.references.type': 'cases',
-                      },
-                    },
-                  },
-                },
-                nested: {
-                  path: 'cases-comments.references',
-                },
-              },
-              uniqueAlertCommentsCount: {
-                cardinality: {
-                  field: 'cases-comments.attributes.alertId',
-                },
-              },
-            },
-            terms: {
-              field: 'cases-comments.attributes.owner',
-              include: ['securitySolution', 'observability', 'cases'],
-              size: 3,
-            },
-          },
-        },
-        filter: {
-          arguments: [
-            {
-              isQuoted: false,
-              type: 'literal',
-              value: 'cases-comments.attributes.type',
-            },
-            {
-              isQuoted: false,
-              type: 'literal',
-              value: 'alert',
-            },
-          ],
-          function: 'is',
-          type: 'function',
-        },
-        page: 0,
-        perPage: 0,
-        type: 'cases-comments',
-        namespaces: ['*'],
-      });
-    });
-  });
-
   describe('getBucketFromAggregation', () => {
     it('returns the buckets', () => {
       expect(
@@ -1777,53 +1433,6 @@ describe('utils', () => {
         totalsByType: {},
         totals: 0,
         required: 0,
-      });
-    });
-
-    it('parses and returns the correct cases with alerts by owner', () => {
-      const withAlertsByOwnerResults: CasesTelemetryWithAlertsAggsByOwnerResults = {
-        by_owner: {
-          buckets: [
-            {
-              key: 'cases',
-              doc_count: 10,
-              references: {
-                referenceType: {
-                  referenceAgg: {
-                    value: 10,
-                  },
-                },
-              },
-            },
-            {
-              key: 'observability',
-              doc_count: 8,
-              references: {
-                referenceType: {
-                  referenceAgg: {
-                    value: 5,
-                  },
-                },
-              },
-            },
-            {
-              key: 'securitySolution',
-              doc_count: 10,
-              references: {
-                referenceType: {
-                  referenceAgg: {
-                    value: 20,
-                  },
-                },
-              },
-            },
-          ],
-        },
-      };
-      expect(processWithAlertsByOwner(withAlertsByOwnerResults)).toEqual({
-        securitySolution: 20,
-        observability: 5,
-        cases: 10,
       });
     });
   });

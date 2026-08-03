@@ -10,7 +10,7 @@ import { INFERENCE_PREFERENCES_FEATURE_FLAG_ID } from '../common/constants';
 
 export const useInferencePreferencesEnabled = (): boolean => {
   try {
-    return useUiSetting<boolean>(INFERENCE_PREFERENCES_FEATURE_FLAG_ID, false);
+    return useUiSetting<boolean>(INFERENCE_PREFERENCES_FEATURE_FLAG_ID, true);
   } catch {
     return false;
   }

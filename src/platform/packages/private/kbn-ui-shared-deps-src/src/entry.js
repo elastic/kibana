@@ -130,3 +130,4 @@ export const KbnVisualizationsCommon = require('@kbn/visualizations-common');
 export const KbnCoreDi = require('@kbn/core-di-browser');
 export const KbnCoreSidebarContext = require('@kbn/core-chrome-sidebar-context');
 export const KbnCoreChromeBrowserContext = require('@kbn/core-chrome-browser-context');
+export const KbnCoreUserProfileBrowserContext = require('@kbn/core-user-profile-browser-context');

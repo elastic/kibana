@@ -122,6 +122,7 @@ function WorkflowGraphEdgeInner(props: EdgeProps) {
             }}
           >
             <EuiToolTip content={fullLabel} position="top">
+              {/* eslint-disable-next-line @elastic/eui/tooltip-focusable-anchor */}
               <span>{truncated}</span>
             </EuiToolTip>
           </div>

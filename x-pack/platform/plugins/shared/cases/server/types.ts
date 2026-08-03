@@ -139,6 +139,12 @@ export interface CasesServerSetup {
    * Cases with the given owner will be allowed to use any close reason accepted by the validator.
    */
   registerCloseReasonValidator: (owner: string, validator: CloseReasonValidator) => void;
+  /**
+   * Registers an owner's unified-attachment prefix so its legacy `alert`/`event`
+   * attachments resolve to a valid unified type (e.g. `security.alert`). For
+   * dynamically registered owners (e.g. FTR fixtures); built-in solutions are pre-registered.
+   */
+  registerOwnerPrefix: (owner: string, prefix: string) => void;
 }
 
 export type PartialField<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;

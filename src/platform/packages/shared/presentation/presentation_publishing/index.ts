@@ -227,9 +227,15 @@ export {
   type HasSerializedChildState,
 } from './interfaces/containers/child_state';
 
-export { childrenUnsavedChanges$ } from './interfaces/containers/container_state/children_unsaved_changes';
+export {
+  childrenUnsavedChanges$,
+  DEBOUNCE_TIME as CHILDREN_UNSAVED_CHANGES_DEBOUNCE,
+} from './interfaces/containers/container_state/children_unsaved_changes';
 
-export { initializeStateApi } from './interfaces/containers/container_state/initialize_state_api';
+export {
+  initializeStateApi,
+  UNSAVED_CHANGES_DEBOUNCE,
+} from './interfaces/containers/container_state/initialize_state_api';
 
 export {
   apiCanDuplicatePanels,

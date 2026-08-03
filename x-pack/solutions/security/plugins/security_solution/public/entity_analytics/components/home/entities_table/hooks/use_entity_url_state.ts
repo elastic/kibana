@@ -240,36 +240,59 @@ export const useEntityURLState = ({
     query: urlQuery.query,
   });
 
-  const getRowsFromPages = (data: Array<{ page: DataTableRecord[] }> | undefined) =>
-    data
-      ?.map(({ page }: { page: DataTableRecord[] }) => {
-        return page;
-      })
-      .flat() || [];
+  const getRowsFromPages = useCallback(
+    (data: Array<{ page: DataTableRecord[] }> | undefined) =>
+      data
+        ?.map(({ page }: { page: DataTableRecord[] }) => {
+          return page;
+        })
+        .flat() || [],
+    []
+  );
 
   const queryError = baseEsQuery instanceof Error ? baseEsQuery : undefined;
 
-  return {
-    setUrlQuery,
-    sort: urlQuery.sort as SortOrder[],
-    filters: urlQuery.filters || [],
-    query: baseEsQuery.query
-      ? baseEsQuery.query
-      : {
-          bool: {
-            must: [],
-            filter: [],
-            should: [],
-            must_not: [],
+  // Return a referentially stable object so consumers memoized against `state`
+  // (e.g. `EntitiesTableSection`) don't reconcile when an unrelated URL param
+  // (like the `timeline` param written when Investigate-in-Timeline opens the
+  // timeline) changes `useLocation` without touching the `cspq` state.
+  return useMemo(
+    () => ({
+      setUrlQuery,
+      sort: urlQuery.sort as SortOrder[],
+      filters: urlQuery.filters || [],
+      query: baseEsQuery.query
+        ? baseEsQuery.query
+        : {
+            bool: {
+              must: [],
+              filter: [],
+              should: [],
+              must_not: [],
+            },
           },
-        },
-    queryError,
-    pageIndex: getPageIndexOrDefault(urlQuery.pageIndex),
-    pageSize,
-    onChangeItemsPerPage,
-    onChangePage,
-    onSort,
-    onResetFilters,
-    getRowsFromPages,
-  };
+      queryError,
+      pageIndex: getPageIndexOrDefault(urlQuery.pageIndex),
+      pageSize,
+      onChangeItemsPerPage,
+      onChangePage,
+      onSort,
+      onResetFilters,
+      getRowsFromPages,
+    }),
+    [
+      setUrlQuery,
+      urlQuery.sort,
+      urlQuery.filters,
+      urlQuery.pageIndex,
+      baseEsQuery,
+      queryError,
+      pageSize,
+      onChangeItemsPerPage,
+      onChangePage,
+      onSort,
+      onResetFilters,
+      getRowsFromPages,
+    ]
+  );
 };

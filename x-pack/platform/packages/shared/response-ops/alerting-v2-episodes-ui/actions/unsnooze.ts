@@ -12,6 +12,7 @@ import type { EpisodeAction, EpisodeActionContext } from './types';
 import { bulkCreateAlertActions } from './bulk_create_alert_actions';
 import { uniqueByGroup, successOrPartialToast } from './helpers';
 import * as i18n from './translations';
+import { isEpisodeSnoozed } from '../utils/is_episode_snoozed';
 
 export interface UnsnoozeActionDeps {
   http: HttpStart;
@@ -24,7 +25,8 @@ export const createUnsnoozeAction = (deps: UnsnoozeActionDeps): EpisodeAction =>
   displayName: i18n.UNSNOOZE,
   iconType: 'bell',
   isCompatible: ({ episodes }: EpisodeActionContext) =>
-    episodes.length > 0 && episodes.some((ep) => ep.last_snooze_action === 'snooze'),
+    episodes.length > 0 &&
+    episodes.some((ep) => isEpisodeSnoozed(ep.last_snooze_action, ep.snooze_expiry)),
   execute: async ({ episodes, onSuccess }: EpisodeActionContext) => {
     const items = uniqueByGroup(episodes).map((ep) => ({
       group_hash: ep.group_hash,

@@ -110,7 +110,6 @@ dependsOn:
   - '@kbn/as-code-filters-schema'
   - '@kbn/as-code-filters-transforms'
   - '@kbn/scout'
-  - '@kbn/test'
   - '@kbn/core-chrome-app-menu-components'
   - '@kbn/core-chrome-app-menu'
   - '@kbn/test-jest-helpers'

@@ -22,7 +22,6 @@ import {
   useEuiMaxBreakpoint,
   useEuiTheme,
 } from '@elastic/eui';
-import type { AppHeaderMetadataItems } from '@kbn/app-header';
 import { AppHeader } from '@kbn/app-header';
 import { useQueryClient } from '@kbn/react-query';
 import { getBreachEsqlQuery } from '@kbn/alerting-v2-schemas';
@@ -217,8 +216,6 @@ export function EpisodeDetailsPage() {
     [applicableActions, episode, invalidateEpisodeQueries]
   );
 
-  const ruleDescription = showRuleDependentUi ? ruleState.rule.metadata.description : undefined;
-
   const episodesListHref = services.http.basePath.prepend(paths.alertEpisodesList);
 
   const isLoading = isLoadingEpisode;
@@ -360,20 +357,6 @@ export function EpisodeDetailsPage() {
     </EuiSplitPanel.Inner>
   );
 
-  // AppHeaderMetadata bolds `label` (it's meant to be the key of a label/value pair) and renders
-  // `value` at a lighter weight, so the description is passed as `value` with an empty `label`
-  // to get the lighter weight without touching the shared app-header component.
-  const metadata = ruleDescription
-    ? ([
-        {
-          type: 'text',
-          label: '',
-          value: ruleDescription,
-          'data-test-subj': 'alertingV2EpisodeDetailsHeaderDescription',
-        },
-      ] as AppHeaderMetadataItems)
-    : undefined;
-
   return (
     <KibanaPageTemplate
       paddingSize="none"
@@ -390,7 +373,6 @@ export function EpisodeDetailsPage() {
       <AppHeader
         sticky={false}
         title={episodeBreadcrumbTitle}
-        metadata={metadata}
         back={{
           href: episodesListHref,
           label: i18n.EPISODES_LIST_BACK_LABEL,

@@ -207,6 +207,28 @@ export interface RuleTypeParamsValidator<Params extends RuleTypeParams> {
   validateMutatedParams?: (mutatedOject: Params, origObject?: Params) => Params;
 }
 
+/**
+ * Context passed to a rule type's params authorizer. Provides the request that
+ * initiated the write (so authorization can be resolved against the acting
+ * user's privileges) and, on updates, the rule's previous params (so the
+ * authorizer can restrict its checks to params that actually changed).
+ */
+export interface RuleTypeParamsAuthorizerContext<Params extends RuleTypeParams> {
+  request: KibanaRequest;
+  previousParams?: Params;
+}
+
+/**
+ * Optional, rule-type-defined authorization gate for privileged params.
+ *
+ * An async guard that authorizes the params against the acting user's privileges
+ * and throws when the user is not allowed to set them. It is invoked on rule write paths
+ * (create/update/bulk) after params have been validated.
+ */
+export interface RuleTypeParamsAuthorizer<Params extends RuleTypeParams> {
+  authorize: (params: Params, context: RuleTypeParamsAuthorizerContext<Params>) => Promise<void>;
+}
+
 export type AlertHit = Alert & {
   _id: string;
   _index: string;
@@ -329,6 +351,15 @@ export interface RuleType<
   name: string;
   validate: {
     params: RuleTypeParamsValidator<Params>;
+  };
+  /**
+   * Optional, rule-type-defined authorization for privileged params. When
+   * provided, `authorize.params` is invoked on rule write paths after the
+   * params validator runs, and may throw to reject the write. Rule types with
+   * no privileged params simply omit this.
+   */
+  authorize?: {
+    params?: RuleTypeParamsAuthorizer<Params>;
   };
   schemas?: {
     params?:

@@ -22,6 +22,7 @@ import {
 import { FormProvider, useForm, useFormState, useWatch } from 'react-hook-form';
 
 import { FrozenEnterpriseRequiredCallout } from '@kbn/data-lifecycle-phases';
+import { getTimingBoundHelpText } from '@kbn/data-lifecycle-phases';
 import type { EditDlmPhasesFlyoutProps } from './types';
 import type { EditDataPhasesFlyoutChangeMeta } from '../shared';
 import { DlmSearchableSnapshotInfoSection } from './sections/dlm_searchable_snapshot_info_section';
@@ -33,7 +34,6 @@ import { useDataPhasesFlyoutStyles } from '../shared';
 import { useIlmPhasesColorAndDescription } from '../../hooks/use_ilm_phases_color_and_description';
 import {
   formatDuration,
-  getTimingBoundHelpText,
   getDoubledDurationFromPrevious,
   parseIntervalWithDefaultUnit,
   type PreservedTimeUnit,

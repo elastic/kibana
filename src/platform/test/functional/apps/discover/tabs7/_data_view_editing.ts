@@ -48,7 +48,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const editRuntimeField = async (oldName: string, newName: string) => {
     await discover.editField(oldName);
-    await fieldEditor.setName(newName);
+    await fieldEditor.setName(newName, true);
     await fieldEditor.save();
     await fieldEditor.confirmSave();
     await fieldEditor.waitUntilClosed();

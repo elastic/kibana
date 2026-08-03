@@ -44,6 +44,7 @@ export const getMetadataIndexMappings = (): MappingTypeMapping => ({
     // never collide with ECS fields (always lowercase) or other doc types in the stream.
     'entity.type': { type: 'keyword' },
     'Ai_summary.generated_by': { type: 'keyword' },
+    'Ai_summary.author_profile_uid': { type: 'keyword' },
     'Ai_summary.generated_at': { type: 'date', format: 'epoch_millis' },
     'Ai_summary.highlights': { type: 'object', enabled: false },
     'Ai_summary.recommended_actions': { type: 'keyword', index: false, doc_values: false },

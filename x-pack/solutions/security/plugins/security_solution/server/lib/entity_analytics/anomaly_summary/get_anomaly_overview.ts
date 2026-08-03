@@ -195,12 +195,20 @@ export const getEntityAnomalyOverview = async ({
   const anomalyByTimeBucket: AnomalyOverviewEntry[] = (aggs?.by_time?.buckets ?? [])
     .filter((b) => b.doc_count > 0 && b.max_score.value !== null)
     .map((b) => {
-      const bucketJobIds = b.jobs.buckets.map((j) => j.key);
+      const jobsBucket = b?.jobs?.buckets ?? [];
+      const bucketJobIds = jobsBucket.map((j) => j.key);
       const tactics = [...new Set(bucketJobIds.flatMap((id) => tacticsByJob.get(id) ?? []))];
+      const tacticCounts = jobsBucket.reduce<Record<string, number>>((acc, { key, doc_count }) => {
+        for (const tactic of tacticsByJob.get(key) ?? []) {
+          acc[tactic] = (acc[tactic] ?? 0) + doc_count;
+        }
+        return acc;
+      }, {});
       return {
         timestamp: new Date(b.key).toISOString(),
         maxScore: b.max_score.value as number,
         threatTactics: tactics,
+        tacticCounts,
       };
     });
 

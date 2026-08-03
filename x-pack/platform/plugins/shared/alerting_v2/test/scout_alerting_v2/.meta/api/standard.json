@@ -1,5 +1,9 @@
 {
-  "sha1": "5318ab86b84e5275078ff39dd949d2ef9007bbfa",
+  "sha1": "b27aab42453cccb0b7335b5698d9025e5dbe4791",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
   "tests": [
     {
       "id": "9932666685095b3-d8099f4a61f66f4",
@@ -7375,7 +7379,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
-        "line": 1739,
+        "line": 1740,
         "column": 10
       }
     },
@@ -7389,7 +7393,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
-        "line": 1790,
+        "line": 1791,
         "column": 10
       }
     },
@@ -7403,7 +7407,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
-        "line": 1855,
+        "line": 1856,
         "column": 10
       }
     },
@@ -7417,7 +7421,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
-        "line": 1898,
+        "line": 1899,
         "column": 10
       }
     },
@@ -7431,7 +7435,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
-        "line": 1920,
+        "line": 1921,
         "column": 10
       }
     },
@@ -7445,7 +7449,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
-        "line": 1978,
+        "line": 1979,
         "column": 10
       }
     },
@@ -7459,7 +7463,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
-        "line": 2055,
+        "line": 2056,
         "column": 10
       }
     },
@@ -7473,7 +7477,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
-        "line": 2113,
+        "line": 2114,
         "column": 10
       }
     },
@@ -7487,7 +7491,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
-        "line": 2178,
+        "line": 2179,
         "column": 10
       }
     },
@@ -7501,7 +7505,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
-        "line": 2226,
+        "line": 2227,
         "column": 10
       }
     },
@@ -7515,7 +7519,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
-        "line": 2283,
+        "line": 2284,
         "column": 10
       }
     },
@@ -7529,7 +7533,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/telemetry.spec.ts",
-        "line": 113,
+        "line": 156,
         "column": 10
       }
     }

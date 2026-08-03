@@ -269,6 +269,7 @@ describe('ChangeTrackingService', () => {
             action: 'rule_update',
             spaceId: 'default',
             correlationId: expect.any(String),
+            spanLabels: { solution: 'stack', action: 'write' },
           })
         );
       });
@@ -360,6 +361,14 @@ describe('ChangeTrackingService', () => {
 
         expect(stackClient.logBulk).toHaveBeenCalledTimes(1);
         expect(securityClient.logBulk).toHaveBeenCalledTimes(1);
+        expect(stackClient.logBulk).toHaveBeenCalledWith(
+          expect.any(Array),
+          expect.objectContaining({ spanLabels: { solution: 'stack', action: 'write' } })
+        );
+        expect(securityClient.logBulk).toHaveBeenCalledWith(
+          expect.any(Array),
+          expect.objectContaining({ spanLabels: { solution: 'security', action: 'write' } })
+        );
 
         const stackOpts = stackClient.logBulk.mock.calls[0]![1] as { correlationId: string };
         const securityOpts = securityClient.logBulk.mock.calls[0]![1] as { correlationId: string };
@@ -438,7 +447,7 @@ describe('ChangeTrackingService', () => {
           'default',
           RULE_SAVED_OBJECT_TYPE,
           'rule-1',
-          opts
+          expect.objectContaining({ size: 10, spanLabels: { solution: 'stack', action: 'read' } })
         );
       });
 

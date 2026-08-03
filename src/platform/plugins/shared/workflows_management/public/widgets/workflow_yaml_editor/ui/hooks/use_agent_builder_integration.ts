@@ -7,14 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { v4 } from 'uuid';
 import { isConversationIdSetEvent } from '@kbn/agent-builder-common/chat/events';
 import type { monaco } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
-import { useUiSetting } from '@kbn/kibana-react-plugin/public';
-import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
 import { setAiAssisted } from '../../../../entities/workflows/store/workflow_detail/slice';
 import {
@@ -67,11 +65,9 @@ export const useAgentBuilderIntegration = ({
   workflowName,
   validationErrors,
 }: UseAgentBuilderIntegrationParams): UseAgentBuilderIntegrationReturn => {
-  const { workflowsManagement } = useKibana().services;
+  const { workflowsManagement, application } = useKibana().services;
   const agentBuilder = workflowsManagement?.agentBuilder;
-  const isExperimentalEnabled = useUiSetting<boolean>(
-    AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID
-  );
+  const hasShowPrivilege = application.capabilities.agentBuilder?.show === true;
   const telemetry = useTelemetry();
   const dispatch = useDispatch();
   const proposalManagerRef = useRef<ProposalManager | null>(null);
@@ -87,12 +83,39 @@ export const useAgentBuilderIntegration = ({
   const unsavedWorkflowIdRef = useRef<string>(v4());
   const workflowNameRef = useRef(workflowName);
   workflowNameRef.current = workflowName;
+  const [isChatAccessible, setIsChatAccessible] = useState(false);
 
   const attachmentId = workflowId ?? unsavedWorkflowIdRef.current;
 
   useEffect(() => {
+    if (!agentBuilder || !hasShowPrivilege) {
+      setIsChatAccessible(false);
+      return;
+    }
+
+    let cancelled = false;
+
+    void agentBuilder
+      .getAgentBuilderAccess()
+      .then((access) => {
+        if (!cancelled) {
+          setIsChatAccessible(access.hasRequiredLicense && access.hasLlmConnector);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setIsChatAccessible(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [agentBuilder, hasShowPrivilege]);
+
+  useEffect(() => {
     const editor = editorRef.current;
-    if (!isEditorMounted || !editor || !agentBuilder || !isExperimentalEnabled) {
+    if (!isEditorMounted || !editor || !agentBuilder || !hasShowPrivilege || !isChatAccessible) {
       return;
     }
 
@@ -298,7 +321,8 @@ export const useAgentBuilderIntegration = ({
     isEditorMounted,
     editorRef,
     agentBuilder,
-    isExperimentalEnabled,
+    hasShowPrivilege,
+    isChatAccessible,
     attachmentId,
     workflowId,
     telemetry,
@@ -307,7 +331,7 @@ export const useAgentBuilderIntegration = ({
 
   const openAgentChat = useCallback(
     (options?: OpenAgentChatOptions) => {
-      if (!agentBuilder || !isExperimentalEnabled) {
+      if (!agentBuilder || !isChatAccessible) {
         return;
       }
 
@@ -345,7 +369,7 @@ export const useAgentBuilderIntegration = ({
     },
     [
       agentBuilder,
-      isExperimentalEnabled,
+      isChatAccessible,
       editorRef,
       attachmentId,
       workflowId,
@@ -359,7 +383,7 @@ export const useAgentBuilderIntegration = ({
   // the save thunk requested we restore. Never on an existing workflow the
   // user navigated to directly. Guarded per-mount so a manual close stays.
   useEffect(() => {
-    if (!isEditorMounted || !agentBuilder || !isExperimentalEnabled) return;
+    if (!isEditorMounted || !agentBuilder || !isChatAccessible) return;
     if (hasAutoOpenedRef.current) return;
 
     const shouldRestoreForSavedWorkflow =
@@ -369,7 +393,7 @@ export const useAgentBuilderIntegration = ({
 
     hasAutoOpenedRef.current = true;
     openAgentChat({ isAutoOpen: true });
-  }, [isEditorMounted, agentBuilder, isExperimentalEnabled, workflowId, openAgentChat]);
+  }, [isEditorMounted, agentBuilder, isChatAccessible, workflowId, openAgentChat]);
 
   // Close the sidebar on unmount (leaving the workflow scope). Empty deps so
   // it does not fire on prop changes. `application.navigateToApp` remounts
@@ -385,7 +409,7 @@ export const useAgentBuilderIntegration = ({
 
   return {
     openAgentChat,
-    isAgentBuilderAvailable: agentBuilder != null && isExperimentalEnabled,
+    isAgentBuilderAvailable: agentBuilder != null && isChatAccessible,
     proposalManager: proposalManagerRef.current,
   };
 };
