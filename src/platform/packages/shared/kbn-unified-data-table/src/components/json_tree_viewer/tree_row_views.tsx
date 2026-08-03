@@ -14,7 +14,7 @@
  * supplied by the container.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useEffect, useRef, useState } from 'react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -30,6 +30,7 @@ import {
   CHILDREN_INCREMENT,
   CLOSE_BRACKET,
   OPEN_BRACKET,
+  nodeToJsonString,
   type ClosingRow,
   type CollectionNode,
   type CollectionType,
@@ -238,29 +239,70 @@ const Comma = memo(function Comma() {
   return <span css={styles.punctuation}>,</span>;
 });
 
-const ValueCopyButton = memo(function ValueCopyButton({ value }: { value: JsonPrimitive }) {
+// How long the copy button shows its "Copied" confirmation before reverting.
+const COPIED_FEEDBACK_DURATION = 1200;
+
+// A copy-to-clipboard button that confirms the copy in place: it briefly swaps to a success check
+// and a "Copied" tooltip. `getText` is read lazily on click, so copying a large subtree only
+// serializes it when actually invoked. Revealed on row hover/focus via `jsonSyntaxTreeCopyButton`.
+const CopyButton = function CopyButton({
+  getText,
+  label,
+}: {
+  getText: () => string;
+  label: string;
+}) {
   const styles = useMemoCss(treeStyles);
-  const label = i18n.translate('unifiedDataTable.jsonSyntaxTree.copyValue', {
-    defaultMessage: 'Copy value',
+  const [copied, setCopied] = useState(false);
+  const resetTimer = useRef<ReturnType<typeof setTimeout>>();
+  useEffect(() => () => clearTimeout(resetTimer.current), []);
+
+  const copiedLabel = i18n.translate('unifiedDataTable.jsonSyntaxTree.copied', {
+    defaultMessage: 'Copied',
   });
+
   return (
-    <EuiToolTip content={label} disableScreenReaderOutput>
+    <EuiToolTip content={copied ? copiedLabel : label} disableScreenReaderOutput>
       <EuiButtonIcon
         aria-label={label}
         className="jsonSyntaxTreeCopyButton"
-        color="text"
+        color={copied ? 'success' : 'text'}
         css={styles.copyButton}
         iconSize="s"
-        iconType="copy"
+        iconType={copied ? 'check' : 'copy'}
         onClick={(event: React.MouseEvent) => {
           event.stopPropagation();
-          copyToClipboard(value === null ? 'null' : String(value));
+          copyToClipboard(getText());
+          setCopied(true);
+          clearTimeout(resetTimer.current);
+          resetTimer.current = setTimeout(() => setCopied(false), COPIED_FEEDBACK_DURATION);
         }}
         onKeyDown={nestedControlKeyDown}
         size="xs"
       />
     </EuiToolTip>
   );
+};
+
+// Copies a single primitive leaf as its raw text (e.g. `hello`, `1024`, `null`).
+const ValueCopyButton = memo(function ValueCopyButton({ value }: { value: JsonPrimitive }) {
+  const label = i18n.translate('unifiedDataTable.jsonSyntaxTree.copyValue', {
+    defaultMessage: 'Copy value',
+  });
+  return <CopyButton getText={() => (value === null ? 'null' : String(value))} label={label} />;
+});
+
+// Copies a whole object/array subtree as pretty-printed JSON.
+const SubtreeCopyButton = memo(function SubtreeCopyButton({ node }: { node: CollectionNode }) {
+  const label =
+    node.collectionType === 'array'
+      ? i18n.translate('unifiedDataTable.jsonSyntaxTree.copyArray', {
+          defaultMessage: 'Copy array',
+        })
+      : i18n.translate('unifiedDataTable.jsonSyntaxTree.copyObject', {
+          defaultMessage: 'Copy object',
+        });
+  return <CopyButton getText={() => nodeToJsonString(node)} label={label} />;
 });
 
 // The body of a node row (everything after the caret): key prefix + value/brackets + comma.
@@ -304,6 +346,7 @@ const NodeLabel = memo(function NodeLabel({ row }: { row: NodeRow }) {
       <span css={styles.label}>
         <KeyPrefix name={node.key} isArrayItem={node.isArrayItem} />
         <span css={styles.bracket}>{open}</span>
+        <SubtreeCopyButton node={node} />
       </span>
     );
   }
@@ -316,6 +359,7 @@ const NodeLabel = memo(function NodeLabel({ row }: { row: NodeRow }) {
       <span css={styles.count}>{collectionCountLabel(node)}</span>
       <span css={styles.bracket}>{close}</span>
       {trailingComma && <Comma />}
+      <SubtreeCopyButton node={node} />
     </span>
   );
 });

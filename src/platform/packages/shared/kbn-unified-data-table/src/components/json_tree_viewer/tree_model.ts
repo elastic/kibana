@@ -170,6 +170,40 @@ export const collectExpandableIds = (nodes: JsonNode[]): string[] =>
     return node.children.length > 0 ? [node.id, ...childIds] : childIds;
   });
 
+// ---- Serialize a subtree back to JSON (drives the copy-value / copy-subtree affordances) ----
+
+// A search-highlighted leaf keeps its raw value only in its rendered React node (matched terms
+// wrapped in `<mark>`), so recover the text by walking the node and concatenating its strings.
+const reactNodeToText = (node: React.ReactNode): string => {
+  if (typeof node === 'string') return node;
+  if (typeof node === 'number') return String(node);
+  if (Array.isArray(node)) return node.map(reactNodeToText).join('');
+  if (React.isValidElement<{ children?: React.ReactNode }>(node)) {
+    return reactNodeToText(node.props.children);
+  }
+  return '';
+};
+
+// Reconstruct the plain JSON value a node stands for, so a leaf or a whole collection can be
+// copied. Mirrors the shape the tree was built from (array items positional, object fields keyed).
+export const nodeToJsonValue = (node: JsonNode): JsonValue => {
+  if (node.kind === 'leaf') {
+    return node.rendered != null ? reactNodeToText(node.rendered) : node.value;
+  }
+  if (node.collectionType === 'array') {
+    return node.children.map(nodeToJsonValue);
+  }
+  const object: Record<string, JsonValue> = {};
+  for (const child of node.children) {
+    object[child.key] = nodeToJsonValue(child);
+  }
+  return object;
+};
+
+// Pretty-printed JSON for the copy-subtree affordance.
+export const nodeToJsonString = (node: JsonNode): string =>
+  JSON.stringify(nodeToJsonValue(node), null, 2);
+
 // The root's bracket pair and list type, derived once. `brackets` is null for a primitive
 // document (rendered as a single bare value, with no enclosing braces).
 export interface RootLayout {

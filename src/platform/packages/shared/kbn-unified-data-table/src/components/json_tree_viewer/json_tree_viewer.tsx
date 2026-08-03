@@ -26,7 +26,7 @@ export type { TreeExpansionState } from './use_tree_interaction';
 
 export interface JsonTreeViewerProps {
   json: JsonValue;
-  /** Seed expand/reveal state on mount — e.g. restored after in-table search remounts the cell. */
+  /** Seed expand/reveal state on mount — e.g. restored after a virtualized containers remounts. */
   initialState?: TreeExpansionState;
   /** Fires whenever expand/reveal state changes, so a host can persist it across remounts. */
   onStateChange?: (state: TreeExpansionState) => void;

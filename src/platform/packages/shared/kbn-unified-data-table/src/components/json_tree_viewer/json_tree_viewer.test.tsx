@@ -10,7 +10,15 @@
 import React from 'react';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { copyToClipboard } from '@elastic/eui';
 import { JsonTreeViewer, type TreeExpansionState } from './json_tree_viewer';
+
+// Keep every real EUI component; only stub the clipboard side-effect so copies are assertable.
+jest.mock('@elastic/eui', () => ({
+  ...jest.requireActual('@elastic/eui'),
+  copyToClipboard: jest.fn(),
+}));
+const copyToClipboardMock = jest.mocked(copyToClipboard);
 
 describe('JsonTreeViewer', () => {
   it('renders the top-level keys and values of an object', () => {
@@ -192,6 +200,64 @@ describe('JsonTreeViewer', () => {
       expect(screen.getByText('"Berlin"')).toBeVisible();
       // …but the persisted user state stays empty — the search expansion is transient.
       expect(states[states.length - 1].expanded.size).toBe(0);
+    });
+  });
+
+  // Every leaf value can be copied as raw text, and every collection can be copied as JSON — the
+  // whole subtree, not just the currently-revealed slice — with in-place "Copied" confirmation.
+  describe('copying values and subtrees', () => {
+    beforeEach(() => copyToClipboardMock.mockClear());
+
+    it('copies a collapsed object subtree as pretty-printed JSON', async () => {
+      render(<JsonTreeViewer json={{ user: { name: 'Alice', city: 'Berlin' } }} />);
+
+      await userEvent.click(screen.getByRole('button', { name: 'Copy object' }));
+
+      expect(copyToClipboardMock).toHaveBeenCalledWith(
+        JSON.stringify({ name: 'Alice', city: 'Berlin' }, null, 2)
+      );
+    });
+
+    it('copies an array subtree as pretty-printed JSON', async () => {
+      render(<JsonTreeViewer json={{ tags: ['authentication', 'security'] }} />);
+
+      await userEvent.click(screen.getByRole('button', { name: 'Copy array' }));
+
+      expect(copyToClipboardMock).toHaveBeenCalledWith(
+        JSON.stringify(['authentication', 'security'], null, 2)
+      );
+    });
+
+    it('copies a single leaf value as its raw text', async () => {
+      render(<JsonTreeViewer json={{ message: 'hello' }} />);
+
+      await userEvent.click(screen.getByRole('button', { name: 'Copy value' }));
+
+      expect(copyToClipboardMock).toHaveBeenCalledWith('hello');
+    });
+
+    it('confirms a copy in place by swapping the icon to a success check', async () => {
+      render(<JsonTreeViewer json={{ user: { name: 'Alice' } }} />);
+      const button = screen.getByRole('button', { name: 'Copy object' });
+      expect(button.querySelector('[data-euiicon-type="copy"]')).toBeInTheDocument();
+
+      await userEvent.click(button);
+
+      expect(button.querySelector('[data-euiicon-type="check"]')).toBeInTheDocument();
+      expect(button.querySelector('[data-euiicon-type="copy"]')).not.toBeInTheDocument();
+    });
+
+    it('does not expand the collection when its copy button is clicked', async () => {
+      render(<JsonTreeViewer json={{ user: { name: 'Alice' } }} />);
+
+      await userEvent.click(screen.getByRole('button', { name: 'Copy object' }));
+
+      // `user` starts collapsed; copying the subtree must not toggle it open.
+      expect(screen.queryByText('"Alice"')).not.toBeInTheDocument();
+      expect(screen.getByRole('treeitem', { name: /user/i })).toHaveAttribute(
+        'aria-expanded',
+        'false'
+      );
     });
   });
 });

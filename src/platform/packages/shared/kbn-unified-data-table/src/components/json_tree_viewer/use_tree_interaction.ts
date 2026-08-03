@@ -28,7 +28,7 @@ import {
 } from './tree_model';
 
 // The tree's expand/collapse and "show N more" state, lifted out so a host can persist it across
-// remounts (in-table search remounts every cell via a search-term-keyed React `key`).
+// remounts (in-table search remounts every cell on key strokes, data table rows virtualization also unmounts the cells).
 export interface TreeExpansionState {
   expanded: ReadonlySet<string>;
   revealed: ReadonlyMap<string, number>;
