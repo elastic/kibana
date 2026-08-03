@@ -132,6 +132,8 @@ export {
   getUnsnoozeAlertActionUrl,
   getActivateAlertActionUrl,
   getDeactivateAlertActionUrl,
+  CREATE_ALERT_EVENT_URL,
+  getCreateAlertEventBySourceUrl,
   getRuleUrl,
   getRunRuleUrl,
   getEnableRuleUrl,
@@ -151,8 +153,7 @@ export {
   getUnsnoozeActionPolicyUrl,
   getUpdateActionPolicyApiKeyUrl,
   getListExecutionHistoryUrl,
-  getCountNewExecutionHistoryEventsUrl,
-  getRuleExecutionsUrl,
+  listRuleExecutionsUrl,
 } from '../../common/urls';
 export {
   ACTION_POLICY_PER_PAGE_MAX,
