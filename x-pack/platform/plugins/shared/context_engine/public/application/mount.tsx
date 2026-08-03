@@ -31,6 +31,7 @@ export const mountApp = ({
   const services: ContextEngineServices = {
     ...core,
     share: plugins.share,
+    triggersActionsUi: plugins.triggersActionsUi,
     console: plugins.console,
   };
 
