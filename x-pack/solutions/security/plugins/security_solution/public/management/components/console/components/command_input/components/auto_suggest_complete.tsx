@@ -6,13 +6,18 @@
  */
 
 import React, { memo, useEffect } from 'react';
-import { EuiTextColor } from '@elastic/eui';
+import { EuiTextColor, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useWithCommandList } from '../../../hooks/state_selectors/use_with_command_list';
 import { useInputSuggestion } from '../hooks/use_input_suggestion';
 import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
 import { useWithInputTextEntered } from '../../../hooks/state_selectors/use_with_input_text_entered';
 import { useConsoleStateDispatch } from '../../../hooks/state_selectors/use_console_state_dispatch';
+
+const STYLES = css`
+  user-select: none;
+  opacity: 0.7;
+`;
 
 export interface AutoSuggestCompleteProps {
   'data-test-subj'?: string;
@@ -29,6 +34,7 @@ export const AutoSuggestComplete = memo<AutoSuggestCompleteProps>(
     const { value: suggestionValue } = useInputSuggestion();
     const dispatch = useConsoleStateDispatch();
     const commandDefinitions = useWithCommandList();
+    const { euiTheme } = useEuiTheme();
 
     useEffect(() => {
       // If user has not entered anything, or the text to the left of the cursor is not a space, then reset the suggestion (if any)
@@ -116,12 +122,7 @@ export const AutoSuggestComplete = memo<AutoSuggestCompleteProps>(
     }
 
     return (
-      <span
-        data-test-subj={getTestId()}
-        css={css`
-          user-select: none;
-        `}
-      >
+      <span data-test-subj={getTestId()} css={STYLES}>
         <EuiTextColor color="subdued">{suggestionValue}</EuiTextColor>
       </span>
     );
