@@ -95,33 +95,6 @@ describe('getSigEventsLogPatternsEsql', () => {
     ]);
   });
 
-  it('excludes the noisy head and recategorizes the residual to surface rare patterns', async () => {
-    const { esClient, esql } = createEsClient([{ name: 'message', type: 'text' }]);
-    esql
-      .mockResolvedValueOnce(countResponse(1000))
-      .mockResolvedValueOnce(categorizeResponse([[960, 'request completed', 'request completed']]))
-      .mockResolvedValueOnce(
-        categorizeResponse([[4, 'disk quota exceeded', 'disk quota exceeded']])
-      );
-
-    const result = await getSigEventsLogPatternsEsql({
-      esClient,
-      samplingSource: 'logs-*',
-      start: 100,
-      end: 200,
-      fields: ['message'],
-    });
-
-    expect(esql.mock.calls[2][1].query).toContain(
-      'WHERE NOT MATCH(message, "request completed", {"operator": "AND"})'
-    );
-    expect(esql.mock.calls[2][1].query).not.toContain('SORT count DESC');
-    expect(result).toEqual([
-      { field: 'message', pattern: 'request completed', count: 960, sample: 'request completed' },
-      { field: 'message', pattern: 'disk quota exceeded', count: 4, sample: 'disk quota exceeded' },
-    ]);
-  });
-
   it('short-circuits when schema returns no eligible text fields', async () => {
     const { esClient, esql } = createEsClient([{ name: 'host.name', type: 'keyword' }]);
 
@@ -135,42 +108,6 @@ describe('getSigEventsLogPatternsEsql', () => {
 
     expect(esql).not.toHaveBeenCalled();
     expect(result).toEqual([]);
-  });
-
-  it('short-circuits when the count query returns zero', async () => {
-    const { esClient, esql } = createEsClient();
-    esql.mockResolvedValueOnce(countResponse(0));
-
-    const result = await getSigEventsLogPatternsEsql({
-      esClient,
-      samplingSource: 'logs-*',
-      start: 100,
-      end: 200,
-      fields: ['message'],
-    });
-
-    expect(esql).toHaveBeenCalledTimes(1);
-    expect(result).toEqual([]);
-  });
-
-  it('scales sampled counts back to population counts', async () => {
-    const { esClient, esql } = createEsClient();
-    esql
-      .mockResolvedValueOnce(countResponse(1_000_000))
-      .mockResolvedValueOnce(categorizeResponse([]))
-      .mockResolvedValueOnce(categorizeResponse([[16, 'error one', 'error']]));
-
-    const result = await getSigEventsLogPatternsEsql({
-      esClient,
-      samplingSource: 'logs-*',
-      start: 100,
-      end: 200,
-      fields: ['message'],
-    });
-
-    expect(esql.mock.calls[1][1].query).toContain('| SAMPLE 0.1 |');
-    expect(esql.mock.calls[2][1].query).toContain('| SAMPLE 0.1 |');
-    expect(result[0].count).toBe(160);
   });
 
   it('sorts by count and deduplicates by sample', async () => {

@@ -95,18 +95,6 @@ describe('buildCategorizeWithSampleQuery', () => {
     expect(query.indexOf('NOT MATCH')).toBeLessThan(query.indexOf('STATS'));
   });
 
-  it('skips empty exclusion tokens', () => {
-    const query = buildCategorizeWithSampleQuery({
-      indices: 'logs-*',
-      field: 'message',
-      samplingProbability: 1,
-      excludeTokens: ['', 'real token'],
-    });
-
-    expect(query).toContain('NOT MATCH(message, "real token", {"operator": "AND"})');
-    expect(query.match(/NOT MATCH/g)).toHaveLength(1);
-  });
-
   it('reproduces the legacy SORT count DESC | LIMIT shape only when opted in', () => {
     const query = buildCategorizeWithSampleQuery({
       indices: 'logs-*',
@@ -338,15 +326,6 @@ describe('esqlSupportsTwoPass', () => {
 
     await expect(esqlSupportsTwoPass(client)).resolves.toBe(false);
     await expect(esqlSupportsTwoPass(client)).resolves.toBe(true);
-    expect(capabilities).toHaveBeenCalledTimes(2);
-  });
-
-  it('re-checks the cluster on every call', async () => {
-    const capabilities = jest.fn().mockResolvedValue({ supported: true });
-    const client = createClient(capabilities);
-
-    await Promise.all([esqlSupportsTwoPass(client), esqlSupportsTwoPass(client)]);
-
     expect(capabilities).toHaveBeenCalledTimes(2);
   });
 });

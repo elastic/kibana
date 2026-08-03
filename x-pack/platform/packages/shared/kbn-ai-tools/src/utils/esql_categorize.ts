@@ -18,28 +18,25 @@ export interface CategorizeWithSampleRow {
   sample: string;
 }
 
-// Token form is directly usable as a `MATCH(field, tokens, {operator: "AND"})`
-// predicate, which is what makes the two-pass noise exclusion below possible.
+// Token form feeds `MATCH(field, tokens, {operator: "AND"})` exclusion in the two-pass flow.
 export type CategorizeOutputFormat = 'regex' | 'tokens';
 
 // Caps both passes so neither falls back to a full-population scan on a busy stream.
 export const CATEGORIZE_MAX_DOCS_TO_SAMPLE = 100_000;
 
-// Fraction of the stream above which a pattern is "noise" and excluded from the
-// rare pass. Relative (scale-free), enforced as a post-`STATS` `WHERE count >`
-// rather than `SORT count | LIMIT` to avoid the CATEGORIZE+TopN pushdown crash
-// (elastic/elasticsearch#154534).
+// Stream fraction above which a pattern is "noise", excluded from the rare pass.
+// Enforced as post-`STATS` `WHERE count >`, not `SORT | LIMIT`, which triggers the
+// CATEGORIZE+TopN pushdown crash (elastic/elasticsearch#154534).
 export const NOISE_FRACTION_DEFAULT = 0.01;
 
 // Capabilities the two-pass flow depends on (`CATEGORIZE`/`MATCH` option maps).
 export const TWO_PASS_ESQL_CAPABILITIES = ['categorize_options', 'match_function_options'];
 
 /**
- * Resolves whether the cluster can run the two-pass syntax so callers can branch
- * to legacy single-pass without speculatively firing a query a pre-capability ES
- * would reject. `false` (partial cluster) and `null` (node too old to answer)
- * both map to unsupported, so a rolling upgrade never runs a doomed query. A
- * transient failure maps to `false` for this call only, never latched.
+ * Capability-gates the two-pass syntax so callers branch to legacy single-pass
+ * instead of firing a query a pre-capability ES would reject. Anything but an
+ * explicit `supported: true` (partial cluster, old node, transient error) maps to
+ * false, and nothing is latched — a rolling upgrade re-checks every call.
  */
 export const esqlSupportsTwoPass = async (
   esClient: ElasticsearchClient,
@@ -62,15 +59,11 @@ export function columnPath(field: string): string | string[] {
 }
 
 /**
- * Per-pattern document count + one representative sample value. `TOP` needs an
- * aggregatable field, hence the `::keyword` cast on the text field. Uses no
- * `_index`/`_id`/`_source` metadata, so it also works on ES|QL views (query
- * streams' `$.<name>` views), where `FROM <view> METADATA _index` raises
- * `Unknown column [_index]`.
- *
- * `sortByCountDesc` + `limit` reproduce the legacy `SORT count DESC | LIMIT n`
- * shape and are opt-in: that shape triggers elastic/elasticsearch#154534 once the
- * category count exceeds the limit, so callers should prefer client-side ordering.
+ * Per-pattern doc count + one representative sample. `::keyword` cast because `TOP`
+ * needs an aggregatable field. Metadata-free (no `_index`/`_id`/`_source`) so it
+ * also runs on ES|QL views, where `METADATA _index` raises `Unknown column`.
+ * `sortByCountDesc`+`limit` reproduce the legacy shape but trigger
+ * elastic/elasticsearch#154534, so prefer client-side ordering.
  */
 export function buildCategorizeWithSampleQuery({
   indices,
@@ -190,8 +183,7 @@ export async function categorizeWithNoiseExclusion({
 
   const twoPassSupported = await esqlSupportsTwoPass(esClient.client, { signal });
 
-  // Degraded path for clusters without the two-pass option syntax; gated on
-  // `_capabilities` so it is reached deliberately, never via a failed query.
+  // Degraded path for pre-capability clusters; reached via the gate, never a failed query.
   if (!twoPassSupported) {
     const legacyQuery = buildCategorizeWithSampleQuery({ indices, field, samplingProbability: p1 });
     return dedupeByPattern(

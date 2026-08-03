@@ -154,11 +154,10 @@ export const selectStratifiedWindow = (
 };
 
 /**
- * Maps each representative value to its full document. The join key is the field
- * value, not `_id`, so views (which drop `_source`) work too via
- * `parseEsqlSourceDocuments`. Since a value is not a unique key, one round's
- * `LIMIT` can starve some values, so re-query only the still-missing ones each
- * round until none resolve. `pending` strictly shrinks, so this terminates.
+ * Maps each representative value to its full document. Join key is the field value,
+ * not `_id`, so views that drop `_source` work via `parseEsqlSourceDocuments`. A
+ * value isn't unique, so one round's `LIMIT` can starve some; re-query the still
+ * missing ones each round until none resolve (`pending` shrinks, so it terminates).
  */
 async function fetchRepresentativeDocuments({
   esClient,

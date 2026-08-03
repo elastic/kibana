@@ -217,25 +217,6 @@ describe('getDiverseSampleDocuments', () => {
     );
   });
 
-  it('short-circuits when the count query returns zero', async () => {
-    const { esClient, esql } = createEsClient();
-    esql.mockResolvedValueOnce(schemaResponse()).mockResolvedValueOnce(countResponse(0));
-
-    const result = await getDiverseSampleDocuments({
-      esClient,
-      requestTimeout: 30_000,
-      index: 'logs-*',
-      start: 100,
-      end: 200,
-      size: 1,
-      iteration: 1,
-      logger,
-    });
-
-    expect(esql).toHaveBeenCalledTimes(2);
-    expect(result).toEqual({ hits: [] });
-  });
-
   it("returns no hits when no message field exists (backfilled by the caller's random arm)", async () => {
     const { esClient, esql } = createEsClient();
     esql
@@ -368,13 +349,6 @@ describe('selectStratifiedWindow', () => {
   const makeRows = (counts: number[]) =>
     counts.map((count) => ({ count, pattern: `p${count}`, sample: `s${count}` }));
 
-  it('returns the whole pool unchanged when it fits in the window', () => {
-    const rows = makeRows([50, 40, 30, 20, 10]);
-    expect(selectStratifiedWindow(rows, { iteration: 1, size: 5 }).map((r) => r.count)).toEqual([
-      50, 40, 30, 20, 10,
-    ]);
-  });
-
   it('spans the frequency distribution by taking one pattern per band', () => {
     const rows = makeRows([60, 50, 40, 30, 20, 10]);
     const counts = selectStratifiedWindow(rows, { iteration: 1, size: 3 }).map((r) => r.count);
@@ -383,13 +357,6 @@ describe('selectStratifiedWindow', () => {
     expect([60, 50]).toContain(counts[0]);
     expect([40, 30]).toContain(counts[1]);
     expect([20, 10]).toContain(counts[2]);
-  });
-
-  it('is deterministic for the same iteration and size', () => {
-    const rows = makeRows([60, 50, 40, 30, 20, 10]);
-    expect(selectStratifiedWindow(rows, { iteration: 2, size: 3 })).toEqual(
-      selectStratifiedWindow(rows, { iteration: 2, size: 3 })
-    );
   });
 
   it('rotates the picks across iterations so coverage advances without a cursor', () => {

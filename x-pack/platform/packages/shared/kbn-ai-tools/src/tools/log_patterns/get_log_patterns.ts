@@ -475,8 +475,7 @@ export async function getSigEventsLogPatternsEsql({
   );
 
   return uniqBy(
-    // Sorted desc and deduped by sample so `message` and `body.text` don't repeat
-    // the same representative line — the DSL helper's downstream contract.
+    // Dedupe by sample so `message` and `body.text` don't repeat the same representative line.
     perField.flat().sort((a, b) => b.count - a.count),
     (pattern) => pattern.sample
   );
