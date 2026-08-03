@@ -48,7 +48,7 @@ import {
 } from './converters';
 
 const OCC_MAX_RETRIES = 5;
-const OCC_RETRY_DELAY_MS = 250;
+const OCC_RETRY_DELAY_MS = 400;
 
 export interface ConversationClient {
   get(conversationId: string): Promise<Conversation>;

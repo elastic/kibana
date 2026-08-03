@@ -46,6 +46,8 @@ apiTest.describe(
       'keeps both rounds when two clients converse with the same conversation at once',
       async ({ apiClient }) => {
         const FIRST_ROUND = 'First round';
+        const QUESTION_A = 'Question A';
+        const QUESTION_B = 'Question B';
         const CONCURRENT_A = 'Concurrent answer A';
         const CONCURRENT_B = 'Concurrent answer B';
 
@@ -66,29 +68,30 @@ apiTest.describe(
         conversationIds.push(conversationId);
         await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
 
-        // Held interceptors, consumed in registration order, so each concurrent
-        // request gets its own and neither can answer until both are in flight.
-        const answerA = llmProxy.intercept({
-          name: 'concurrent-answer-a',
-          when: () => true,
-          responseMock: CONCURRENT_A,
-        });
-        const answerB = llmProxy.intercept({
-          name: 'concurrent-answer-b',
-          when: () => true,
-          responseMock: CONCURRENT_B,
-        });
+        // Matched on the prompt rather than on registration order, so each request
+        // deterministically gets its own interceptor. A `when: () => true` pair
+        // would let either request consume either — and would silently swallow an
+        // unexpected extra LLM call, leaving the other request hung on its wait.
+        const answerFor = (question: string, answer: string) =>
+          llmProxy.intercept({
+            name: `concurrent-answer-${question}`,
+            when: (body) => JSON.stringify(body.messages).includes(question),
+            responseMock: answer,
+          });
+
+        const answerA = answerFor(QUESTION_A, CONCURRENT_A);
+        const answerB = answerFor(QUESTION_B, CONCURRENT_B);
 
         const requestA = postConverse(
           apiClient,
           adminCredentials.apiKeyHeader,
-          { input: 'Question A', conversation_id: conversationId, connector_id: connectorId },
+          { input: QUESTION_A, conversation_id: conversationId, connector_id: connectorId },
           'local'
         );
         const requestB = postConverse(
           apiClient,
           adminCredentials.apiKeyHeader,
-          { input: 'Question B', conversation_id: conversationId, connector_id: connectorId },
+          { input: QUESTION_B, conversation_id: conversationId, connector_id: connectorId },
           'local'
         );
 
@@ -101,6 +104,8 @@ apiTest.describe(
         await answerB.completeAfterIntercept();
 
         const [responseA, responseB] = await Promise.all([requestA, requestB]);
+        // A 409 here means the losing writer exhausted its conflict retries rather
+        // than the test being wrong — see OCC_RETRY_DELAY_MS in the conversation client.
         expect(responseA).toHaveStatusCode(200);
         expect(responseB).toHaveStatusCode(200);
 
@@ -113,6 +118,7 @@ apiTest.describe(
         expect(conversation.rounds).toHaveLength(3);
 
         const messages = conversation.rounds.map(({ response }) => response.message);
+        // asserted as a set: which request got which answer is not pinned
         expect(messages).toContain(FIRST_ROUND);
         expect(messages).toContain(CONCURRENT_A);
         expect(messages).toContain(CONCURRENT_B);
