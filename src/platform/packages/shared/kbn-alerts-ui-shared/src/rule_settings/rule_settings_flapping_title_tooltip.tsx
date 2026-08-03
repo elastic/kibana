@@ -66,7 +66,8 @@ const flappingOffContentSettings = i18n.translate(
 const alertFlappingTitleInfo = i18n.translate(
   'alertsUIShared.ruleSettingsFlappingTitleTooltip.alertFlappingTitleInfo',
   {
-    defaultMessage: 'Rule settings flapping title info',
+    defaultMessage:
+      'Alert flapping detection: Detect alerts that switch quickly between active and recovered states and reduce unwanted noise for these flapping alerts',
   }
 );
 
