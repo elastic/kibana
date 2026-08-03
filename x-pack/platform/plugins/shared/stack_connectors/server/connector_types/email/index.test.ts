@@ -33,7 +33,7 @@ import type {
   ConnectorTypeConfigType,
   ConnectorTypeSecretsType,
 } from '@kbn/connector-schemas/email';
-import { getConnectorType } from '.';
+import { getConnectorType, ELASTIC_CLOUD_TRIAL_SUBJECT_PREFIX } from '.';
 import type { ValidateEmailAddressesOptions } from '@kbn/actions-plugin/common';
 import { ActionExecutionSourceType } from '@kbn/actions-plugin/server/types';
 import { AdditionalEmailServices } from '../../../common';
@@ -2267,6 +2267,116 @@ describe('execute()', () => {
 
     const routing = sendEmailMock.mock.calls[0][1].routing;
     expect(routing).not.toHaveProperty('replyTo');
+  });
+});
+
+describe('execute() Elastic Cloud trial subject prefix', () => {
+  const secrets: ConnectorTypeSecretsType = {
+    user: 'bob',
+    password: 'supersecret',
+    clientSecret: null,
+  };
+  const params: ActionParamsType = {
+    to: ['jim@example.com'],
+    cc: [],
+    bcc: [],
+    subject: 'the subject',
+    message: 'a message to you',
+    messageHTML: null,
+    kibanaFooterLink: {
+      path: '/',
+      text: 'Go to Elastic',
+    },
+  };
+  const connectorUsageCollector = new ConnectorUsageCollector({
+    logger: mockedLogger,
+    connectorId: 'test-connector-id',
+  });
+
+  const buildExecutorOptions = (
+    config: ConnectorTypeConfigType
+  ): EmailConnectorTypeExecutorOptions => ({
+    actionId: 'some-id',
+    config,
+    params,
+    secrets,
+    services,
+    configurationUtilities: actionsConfigMock.create(),
+    logger: mockedLogger,
+    connectorUsageCollector,
+  });
+
+  const elasticCloudConfig: ConnectorTypeConfigType = {
+    service: AdditionalEmailServices.ELASTIC_CLOUD,
+    host: null,
+    port: null,
+    secure: null,
+    from: 'bob@example.com',
+    hasAuth: true,
+    clientId: null,
+    tenantId: null,
+    oauthTokenUrl: null,
+  };
+
+  beforeEach(() => {
+    sendEmailMock.mockReset();
+  });
+
+  test('prefixes the subject when the deployment is a trial and service is elastic_cloud', async () => {
+    const trialConnectorType = getConnectorType({
+      isElasticCloudTrial: () => Promise.resolve(true),
+    });
+
+    await trialConnectorType.executor(buildExecutorOptions(elasticCloudConfig));
+
+    expect(sendEmailMock.mock.calls[0][1].content.subject).toBe(
+      `${ELASTIC_CLOUD_TRIAL_SUBJECT_PREFIX} the subject`
+    );
+  });
+
+  test('does not prefix the subject when the deployment is not a trial', async () => {
+    const nonTrialConnectorType = getConnectorType({
+      isElasticCloudTrial: () => Promise.resolve(false),
+    });
+
+    await nonTrialConnectorType.executor(buildExecutorOptions(elasticCloudConfig));
+
+    expect(sendEmailMock.mock.calls[0][1].content.subject).toBe('the subject');
+  });
+
+  test('does not prefix the subject for non elastic_cloud services even on a trial', async () => {
+    const trialConnectorType = getConnectorType({
+      isElasticCloudTrial: () => Promise.resolve(true),
+    });
+
+    await trialConnectorType.executor(
+      buildExecutorOptions({ ...elasticCloudConfig, service: '__json' })
+    );
+
+    expect(sendEmailMock.mock.calls[0][1].content.subject).toBe('the subject');
+  });
+
+  test('does not prefix the subject when trial detection is unavailable (self-managed)', async () => {
+    const selfManagedConnectorType = getConnectorType({});
+
+    await selfManagedConnectorType.executor(buildExecutorOptions(elasticCloudConfig));
+
+    expect(sendEmailMock.mock.calls[0][1].content.subject).toBe('the subject');
+  });
+
+  test('does not add a duplicate prefix when the subject already carries it', async () => {
+    const trialConnectorType = getConnectorType({
+      isElasticCloudTrial: () => Promise.resolve(true),
+    });
+
+    await trialConnectorType.executor({
+      ...buildExecutorOptions(elasticCloudConfig),
+      params: { ...params, subject: `${ELASTIC_CLOUD_TRIAL_SUBJECT_PREFIX} the subject` },
+    });
+
+    expect(sendEmailMock.mock.calls[0][1].content.subject).toBe(
+      `${ELASTIC_CLOUD_TRIAL_SUBJECT_PREFIX} the subject`
+    );
   });
 });
 

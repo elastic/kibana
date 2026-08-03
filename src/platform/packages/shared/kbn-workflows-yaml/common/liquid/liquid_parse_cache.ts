@@ -15,7 +15,7 @@
  */
 
 import type { Liquid, Template } from 'liquidjs';
-import { createWorkflowLiquidEngine, pickObjectFields } from '@kbn/workflows';
+import { createWorkflowLiquidEngine } from '@kbn/workflows';
 
 let liquidInstance: Liquid | null = null;
 
@@ -28,26 +28,6 @@ export function getLiquidInstance(): Liquid {
     liquidInstance = createWorkflowLiquidEngine({
       strictFilters: true,
       strictVariables: false,
-    });
-    liquidInstance.registerFilter('json_parse', (value: unknown): unknown => {
-      if (typeof value !== 'string') {
-        return value;
-      }
-      try {
-        return JSON.parse(value);
-      } catch {
-        return value;
-      }
-    });
-    liquidInstance.registerFilter('entries', (value: unknown): unknown => {
-      return value;
-    });
-    liquidInstance.registerFilter('pick', (value: unknown, ...args: unknown[]): unknown => {
-      const paths = args.length === 1 && Array.isArray(args[0]) ? args[0] : args;
-      return pickObjectFields(
-        value,
-        paths.filter((path): path is string => typeof path === 'string')
-      );
     });
   }
   return liquidInstance;
