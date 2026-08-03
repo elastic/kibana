@@ -356,7 +356,8 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
               });
             });
 
-            const executeEvent = events[1];
+            const executeEvents = events.filter((event) => event?.event?.action === 'execute');
+            const executeEvent = executeEvents[executeEvents.length - 1];
             expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.be(145);
           });
 
@@ -403,7 +404,8 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
               });
             });
 
-            const executeEvent = events[3];
+            const executeEvents = events.filter((event) => event?.event?.action === 'execute');
+            const executeEvent = executeEvents[executeEvents.length - 1];
             expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.be(145);
           });
 
@@ -475,7 +477,8 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
               });
             });
 
-            const executeEvent = events[5];
+            const executeEvents = events.filter((event) => event?.event?.action === 'execute');
+            const executeEvent = executeEvents[executeEvents.length - 1];
             expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.be(256);
           });
 
