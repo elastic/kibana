@@ -191,6 +191,10 @@ function createServerlessES({
       });
       const client = getServerlessESClient({ port: esPort, ssl: enableCPS });
 
+      if (enableCPS) {
+        await waitForOriginProjectRoutingState(client, log);
+      }
+
       return {
         getClient: () => client,
         stop: async () => {
@@ -209,6 +213,47 @@ const getServerlessESClient = ({ port, ssl = false }: { port: number; ssl?: bool
     auth: { ...systemIndicesSuperuser },
     ...(ssl ? { tls: { rejectUnauthorized: false } } : {}),
   });
+};
+
+const ORIGIN_PROJECT_STATE_READY_TIMEOUT = 60_000;
+
+// With CPS enabled, ES rejects reads with `illegal_state_exception: No origin project state`
+// until the operator settings (bind-mounted settings.json) are applied by ES's FileSettingsService,
+// which happens asynchronously after the cluster already reports green. Waiting on cluster health
+// alone therefore lets `beforeAll` fire searches before the origin routing state lands. Poll a
+// minimal origin-routed read so `startES` only resolves once reads actually succeed.
+const waitForOriginProjectRoutingState = async (
+  client: Client,
+  log: ToolingLog,
+  timeout = ORIGIN_PROJECT_STATE_READY_TIMEOUT
+) => {
+  const start = Date.now();
+  let attempt = 0;
+
+  log.info('waiting for ES origin project routing state to be applied (CPS)');
+
+  while (true) {
+    attempt += 1;
+    try {
+      await client.transport.request({
+        method: 'POST',
+        path: '/_count',
+        body: { project_routing: '_alias:_origin', query: { match_all: {} } },
+      });
+      log.success('ES origin project routing state is ready');
+      return;
+    } catch (error) {
+      if (Date.now() - start > timeout) {
+        throw new Error(
+          `ES origin project routing state was not applied within ${timeout / 1000}s: ${
+            error?.message
+          }`
+        );
+      }
+      const waitSec = Math.min(attempt * 1.5, 5);
+      await new Promise((resolve) => setTimeout(resolve, waitSec * 1000));
+    }
+  }
 };
 
 const getServerlessDefault = () => {
