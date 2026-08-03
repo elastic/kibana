@@ -276,7 +276,8 @@ type DetectionAlertSchema = {
           | 'endpoint_trusted_devices'
           | 'endpoint_events'
           | 'endpoint_host_isolation_exceptions'
-          | 'endpoint_blocklists';
+          | 'endpoint_blocklists'
+          | 'endpoint_custom_yara_signatures';
         version: Version800;
       };
     };

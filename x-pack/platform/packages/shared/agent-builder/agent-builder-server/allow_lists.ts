@@ -153,6 +153,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
 
   // Platform – Alerting
   'rule-management',
+  'action-policy-management',
 
   // Platform – Dashboard
   'dashboard-management',
@@ -178,6 +179,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
 
   // Platform – Context Engine
   'ki-automation-generation',
+  'ki-retrieval',
 
   // Platform – Workflows
   'workflow-authoring',
