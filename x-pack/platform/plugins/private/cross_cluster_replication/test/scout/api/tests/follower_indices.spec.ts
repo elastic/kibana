@@ -7,10 +7,10 @@
 
 import type { ApiClientFixture, EsClient, RoleApiCredentials } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
+import { FOLLOWER_INDEX_ADVANCED_SETTINGS } from '@kbn/cross-cluster-replication-plugin/common/constants';
 import { apiTest, testData, registerSelfReferentialRemote, removeRemote } from '../fixtures';
 
-const { API_BASE_PATH, FOLLOWER_REMOTE_CLUSTER, COMMON_HEADERS, FOLLOWER_INDEX_ADVANCED_SETTINGS } =
-  testData;
+const { API_BASE_PATH, FOLLOWER_REMOTE_CLUSTER, COMMON_HEADERS } = testData;
 
 // Non-overlapping prefixes so cleanup only sweeps this suite's indices on the
 // shared cluster, and the follower sweep can't also match leaders.

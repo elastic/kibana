@@ -18,17 +18,3 @@ export const COMMON_HEADERS = {
   'x-elastic-internal-origin': 'kibana',
   'Content-Type': 'application/json;charset=UTF-8',
 };
-
-// Local copy of the plugin's `FOLLOWER_INDEX_ADVANCED_SETTINGS`; keep in sync.
-export const FOLLOWER_INDEX_ADVANCED_SETTINGS = {
-  maxReadRequestOperationCount: 5120,
-  maxOutstandingReadRequests: 12,
-  maxReadRequestSize: '32mb',
-  maxWriteRequestOperationCount: 5120,
-  maxWriteRequestSize: '9223372036854775807b',
-  maxOutstandingWriteRequests: 9,
-  maxWriteBufferCount: 2147483647,
-  maxWriteBufferSize: '512mb',
-  maxRetryDelay: '500ms',
-  readPollTimeout: '1m',
-};
