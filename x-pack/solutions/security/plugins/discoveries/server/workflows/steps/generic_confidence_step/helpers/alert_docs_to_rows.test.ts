@@ -69,4 +69,91 @@ describe('alertDocsToRows', () => {
     expect(row['event.category']).toBe('process');
     expect(row['host.name']).toBe('host-1');
   });
+
+  describe('MITRE tactic / technique ids', () => {
+    it('reads ids from a nested threat object', () => {
+      const [row] = alertDocsToRows([
+        {
+          threat: {
+            framework: 'MITRE ATT&CK',
+            tactic: { id: 'TA0006', name: 'Credential Access' },
+            technique: [{ id: 'T1056', name: 'Input Capture' }],
+          },
+        },
+      ]);
+
+      expect(row['threat.tactic.id']).toBe('TA0006');
+      expect(row['threat.technique.id']).toBe('T1056');
+    });
+
+    it('recovers ids from reference URLs when the id fields are absent', () => {
+      const [row] = alertDocsToRows([
+        {
+          threat: {
+            framework: 'MITRE ATT&CK',
+            tactic: { reference: 'https://attack.mitre.org/tactics/TA0006/' },
+            technique: {
+              reference: 'https://attack.mitre.org/techniques/T1056/',
+              subtechnique: { reference: 'https://attack.mitre.org/techniques/T1056/002/' },
+            },
+          },
+        },
+      ]);
+
+      expect(row['threat.tactic.id']).toBe('TA0006');
+      // The sub-technique reference resolves to the technique-level id (deduped).
+      expect(row['threat.technique.id']).toBe('T1056');
+    });
+
+    it('recovers ids from flattened reference dotted keys', () => {
+      const [row] = alertDocsToRows([
+        {
+          'threat.framework': 'MITRE ATT&CK',
+          'threat.tactic.reference': 'https://attack.mitre.org/tactics/TA0006/',
+          'threat.technique.reference': 'https://attack.mitre.org/techniques/T1056/',
+          'threat.technique.subtechnique.reference':
+            'https://attack.mitre.org/techniques/T1056/002/',
+        },
+      ]);
+
+      expect(row['threat.tactic.id']).toBe('TA0006');
+      expect(row['threat.technique.id']).toBe('T1056');
+    });
+
+    it('handles threat as an array of threat objects, deduping ids', () => {
+      const [row] = alertDocsToRows([
+        {
+          threat: [
+            {
+              tactic: { id: 'TA0002' },
+              technique: [{ id: 'T1059' }, { id: 'T1059' }],
+            },
+            {
+              tactic: { reference: 'https://attack.mitre.org/tactics/TA0011/' },
+              technique: [{ reference: 'https://attack.mitre.org/techniques/T1071/' }],
+            },
+          ],
+        },
+      ]);
+
+      expect(row['threat.tactic.id']).toBe('TA0002,TA0011');
+      expect(row['threat.technique.id']).toBe('T1059,T1071');
+    });
+
+    it('does not cross-contaminate tactic and technique patterns', () => {
+      const [row] = alertDocsToRows([
+        { threat: { tactic: { id: 'TA0006' }, technique: [{ id: 'T1056' }] } },
+      ]);
+
+      // A tactic id (TA####) must never leak into the technique field, nor vice-versa.
+      expect(row['threat.tactic.id']).toBe('TA0006');
+      expect(row['threat.technique.id']).toBe('T1056');
+    });
+
+    it('omits MITRE fields entirely when the alert carries no threat data', () => {
+      const [row] = alertDocsToRows([{ host: { name: 'host-1' } }]);
+      expect('threat.tactic.id' in row).toBe(false);
+      expect('threat.technique.id' in row).toBe(false);
+    });
+  });
 });
