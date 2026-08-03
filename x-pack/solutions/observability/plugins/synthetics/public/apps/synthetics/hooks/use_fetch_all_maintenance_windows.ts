@@ -23,7 +23,13 @@ export const useFetchAllMaintenanceWindows = () => {
   return useQuery(['synthetics', 'allMaintenanceWindows'], ({ signal }) =>
     apiService.get<FindMaintenanceWindowsResult>(
       FIND_MAINTENANCE_WINDOWS_API,
-      { version: INITIAL_REST_VERSION },
+      {
+        version: INITIAL_REST_VERSION,
+        // Request the route's max page size so monitors attached to windows beyond the
+        // default first page (10) still resolve their titles in the details panel and the
+        // add/edit picker, instead of falling back to the raw window ID.
+        per_page: 100,
+      },
       undefined,
       { signal }
     )
