@@ -8,6 +8,7 @@
 import { dataStreamServiceMock } from '@kbn/core-data-streams-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { queryNotifications, NOTIFICATION_QUERY_RESULT_LIMIT } from './query_notifications';
+import { severityTTLBoundary } from './severity_ttl_query';
 
 const doc = (id: string, ts: string, overrides: Record<string, unknown> = {}) => ({
   '@timestamp': ts,
@@ -60,7 +61,7 @@ describe('queryNotifications', () => {
             bool: {
               filter: [
                 { terms: { severity: ['info'] } },
-                { range: { '@timestamp': { gte: 'now-30d/d' } } },
+                { range: { '@timestamp': { gte: severityTTLBoundary(30) } } },
               ],
             },
           },
@@ -68,7 +69,7 @@ describe('queryNotifications', () => {
             bool: {
               filter: [
                 { terms: { severity: ['warning'] } },
-                { range: { '@timestamp': { gte: 'now-60d' } } },
+                { range: { '@timestamp': { gte: severityTTLBoundary(60) } } },
               ],
             },
           },
@@ -76,7 +77,7 @@ describe('queryNotifications', () => {
             bool: {
               filter: [
                 { terms: { severity: ['error', 'critical'] } },
-                { range: { '@timestamp': { gte: 'now-180d' } } },
+                { range: { '@timestamp': { gte: severityTTLBoundary(180) } } },
               ],
             },
           },
@@ -84,7 +85,7 @@ describe('queryNotifications', () => {
           {
             bool: {
               must_not: { terms: { severity: ['info', 'warning', 'error', 'critical'] } },
-              filter: [{ range: { '@timestamp': { gte: 'now-180d' } } }],
+              filter: [{ range: { '@timestamp': { gte: severityTTLBoundary(180) } } }],
             },
           },
         ],

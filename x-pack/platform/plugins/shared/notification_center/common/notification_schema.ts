@@ -54,6 +54,9 @@ export const SEVERITY_TTL_GROUPS: ReadonlyMap<number, Severity[]> = SEVERITIES.r
   new Map<number, Severity[]>()
 );
 
+/** Longest severity TTL. Unknown/future tiers fall back to it so they are never hidden early. */
+export const MAX_SEVERITY_TTL_DAYS = Math.max(...Object.values(SEVERITY_TTL_DAYS));
+
 /** Call-to-action: an internal link and its display text. */
 export const ctaSchema = z
   .object({

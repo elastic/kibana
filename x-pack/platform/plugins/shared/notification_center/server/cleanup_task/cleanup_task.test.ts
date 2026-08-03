@@ -13,8 +13,11 @@ import {
   registerNotificationCleanupTask,
   scheduleNotificationCleanupTask,
 } from './cleanup_task';
-import { NOTIFICATION_DATA_STREAM_NAME } from '../storage/notification_data_stream';
-import { SEVERITY_TTL_DAYS } from '../../common/notification_schema';
+import {
+  NOTIFICATION_DATA_RETENTION,
+  NOTIFICATION_DATA_STREAM_NAME,
+} from '../storage/notification_data_stream';
+import { MAX_SEVERITY_TTL_DAYS, SEVERITY_TTL_DAYS } from '../../common/notification_schema';
 
 describe('cleanup_task', () => {
   describe('SEVERITY_TTL_DAYS', () => {
@@ -23,11 +26,14 @@ describe('cleanup_task', () => {
       expect(SEVERITY_TTL_DAYS.warning).toBe(60);
       expect(SEVERITY_TTL_DAYS.error).toBe(180);
       expect(SEVERITY_TTL_DAYS.critical).toBe(180);
+      expect(MAX_SEVERITY_TTL_DAYS).toBe(180);
     });
 
-    it('all TTLs stay within the 180d ILM ceiling', () => {
+    it('all TTLs stay within the data stream ILM ceiling', () => {
+      const ceilingDays = Number(NOTIFICATION_DATA_RETENTION.replace('d', ''));
+
       for (const days of Object.values(SEVERITY_TTL_DAYS)) {
-        expect(days).toBeLessThanOrEqual(180);
+        expect(days).toBeLessThanOrEqual(ceilingDays);
       }
     });
   });

@@ -45,6 +45,7 @@ const buildFilters = (params: NotificationQueryParams): QueryDslQueryContainer[]
     filters.push({ terms: { severity } });
   }
   if (from || to) {
+    // Caller-supplied instants, passed through unrounded
     filters.push({
       range: { '@timestamp': { ...(from && { gte: from }), ...(to && { lte: to }) } },
     });

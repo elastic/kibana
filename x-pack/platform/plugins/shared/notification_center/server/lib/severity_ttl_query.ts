@@ -6,10 +6,20 @@
  */
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { SEVERITIES, SEVERITY_TTL_GROUPS } from '../../common/notification_schema';
+import {
+  MAX_SEVERITY_TTL_DAYS,
+  SEVERITIES,
+  SEVERITY_TTL_GROUPS,
+} from '../../common/notification_schema';
 
-/** Longest severity TTL; unknown/future tiers fall back to it so they are never hidden early. */
-const MAX_TTL_DAYS = Math.max(...SEVERITY_TTL_GROUPS.keys());
+/**
+ * The single `@timestamp` boundary for a severity TTL window, as ES date math.
+ *
+ * Rounding to the start of the day keeps `visible` and `expired` as complements
+ * an unrounded read bound would leave docs between `now-Nd/d` and `now-Nd`
+ * neither visible nor eligible for cleanup.
+ */
+export const severityTTLBoundary = (days: number): string => `now-${days}d/d`;
 
 /**
  * Build the severity-TTL windows shared by the read query and the cleanup task, so the two don't drift.
@@ -21,11 +31,12 @@ const MAX_TTL_DAYS = Math.max(...SEVERITY_TTL_GROUPS.keys());
  * cleanup leaves them to the data stream's ILM retention.
  */
 export const severityTTLQuery = (bound: 'visible' | 'expired'): QueryDslQueryContainer => {
-  const timestampRange = (days: number): QueryDslQueryContainer => ({
-    range: {
-      '@timestamp': bound === 'visible' ? { gte: `now-${days}d/d` } : { lt: `now-${days}d/d` },
-    },
-  });
+  const timestampRange = (days: number): QueryDslQueryContainer => {
+    const boundary = severityTTLBoundary(days);
+    return {
+      range: { '@timestamp': bound === 'visible' ? { gte: boundary } : { lt: boundary } },
+    };
+  };
 
   const should: QueryDslQueryContainer[] = [...SEVERITY_TTL_GROUPS.entries()].map(
     ([days, severities]) => ({
@@ -37,7 +48,7 @@ export const severityTTLQuery = (bound: 'visible' | 'expired'): QueryDslQueryCon
     should.push({
       bool: {
         must_not: { terms: { severity: [...SEVERITIES] } },
-        filter: [timestampRange(MAX_TTL_DAYS)],
+        filter: [timestampRange(MAX_SEVERITY_TTL_DAYS)],
       },
     });
   }
