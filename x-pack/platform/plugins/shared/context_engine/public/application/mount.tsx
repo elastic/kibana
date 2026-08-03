@@ -11,7 +11,7 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { Router } from '@kbn/shared-ux-router';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import type { ContextEngineStartDependencies } from '../types';
+import type { ChatOpener, ContextEngineStartDependencies } from '../types';
 import type { ContextEngineServices } from './hooks/use_kibana';
 import { ContextEngineRoutes } from './routes';
 
@@ -22,16 +22,20 @@ export const mountApp = ({
   plugins,
   element,
   history,
+  getChatOpener,
 }: {
   core: CoreStart;
   plugins: ContextEngineStartDependencies;
   element: HTMLElement;
   history: ScopedHistory;
+  getChatOpener: () => ChatOpener | undefined;
 }) => {
   const services: ContextEngineServices = {
     ...core,
     share: plugins.share,
+    data: plugins.data,
     console: plugins.console,
+    getChatOpener,
   };
 
   ReactDOM.render(

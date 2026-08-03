@@ -10,4 +10,12 @@ export const contextEngineQueryKeys = {
     list: () => ['context_engine', 'ai_index', 'list'] as const,
     detail: (aiIndexId: string) => ['context_engine', 'ai_index', aiIndexId] as const,
   },
+  traceIndices: () => ['context_engine', 'trace_indices'] as const,
+  patterns: {
+    list: (aiIndexId: string) => ['context_engine', 'patterns', aiIndexId] as const,
+    cases: (aiIndexId: string, patternKey: string) =>
+      ['context_engine', 'patterns', 'cases', aiIndexId, patternKey] as const,
+    improvements: (aiIndexId: string, patternKey: string) =>
+      ['context_engine', 'patterns', 'improvements', aiIndexId, patternKey] as const,
+  },
 };

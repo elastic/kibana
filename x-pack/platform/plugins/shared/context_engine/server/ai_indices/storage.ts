@@ -11,6 +11,7 @@ import { StorageIndexAdapter, types } from '@kbn/storage-adapter';
 import type {
   AiIndexAutomation,
   AiIndexDest,
+  AiIndexSelfImprovement,
   AiIndexSource,
 } from '../../common/http_api/ai_indices';
 
@@ -28,10 +29,18 @@ const storageSettings = {
         properties: { type: types.keyword({}), value: types.keyword({}) },
       }),
       automations: types.object({
-        properties: { type: types.keyword({}), value: types.keyword({}) },
+        properties: {
+          type: types.keyword({}),
+          value: types.keyword({}),
+          role: types.keyword({}),
+          managed: types.boolean({}),
+        },
       }),
       sources: types.object({
         properties: { type: types.keyword({}), value: types.keyword({}) },
+      }),
+      self_improvement: types.object({
+        properties: { enabled: types.boolean({}), traces_index: types.keyword({}) },
       }),
     },
   },
@@ -47,6 +56,7 @@ export interface AiIndexDocument {
   dest: AiIndexDest;
   automations: AiIndexAutomation[];
   sources: AiIndexSource[];
+  self_improvement?: AiIndexSelfImprovement;
 }
 
 export type AiIndexStorageSettings = typeof storageSettings;

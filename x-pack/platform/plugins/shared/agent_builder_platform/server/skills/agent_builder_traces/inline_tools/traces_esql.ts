@@ -31,7 +31,7 @@ const tracesEsqlSchema = z.object({
 const buildTracesQueryRules = (tracesIndex: string) =>
   `
 This is a set of rules that you must follow strictly when generating ES|QL for Agent Builder trace spans:
-* Use ONLY this index: ${tracesIndex} — do not use a traces-agent_builder.otel-* wildcard or query any other index.
+* Use ONLY this index pattern: ${tracesIndex} — it already covers every agent in this space. Never broaden it (no traces-agent_builder.otel-* and no traces-*) and never query any other index.
 * Always constrain the time range with @timestamp to the window the user asked about (default to the last 24 hours when they do not specify one).
 * LLM / token usage spans: span.name LIKE "chat *"
 * Tool call spans: span.name LIKE "execute_tool *"
@@ -40,7 +40,7 @@ This is a set of rules that you must follow strictly when generating ES|QL for A
 * Token fields live on chat spans only — filter with span.name LIKE "chat *" before aggregating attributes.gen_ai.usage.input_tokens / attributes.gen_ai.usage.output_tokens (wrap in TO_LONG(...) before SUM).
 * Model: attributes.gen_ai.request.model
 * Provider: attributes.gen_ai.provider.name (do not use attributes.gen_ai.system)
-* Agent id: attributes.gen_ai.agent.id
+* Agent id: attributes.gen_ai.agent.id — each agent writes to its own data stream within the pattern above, so break down per agent with this field rather than by index name
 * Conversation id: attributes.gen_ai.conversation.id
 * duration is in nanoseconds — divide by 1000000000.0 for seconds
 * status.code == "Error" marks failed spans

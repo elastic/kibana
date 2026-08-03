@@ -18,6 +18,7 @@ import {
   MAX_AI_INDEX_ID_LENGTH,
   MAX_AI_INDEX_SOURCE_VALUE_LENGTH,
   MAX_AI_INDEX_SOURCES,
+  MAX_AI_INDEX_TRACES_INDEX_LENGTH,
   MAX_AI_INDICES,
   aiIndexByIdPath,
   aiIndexPath,
@@ -86,6 +87,8 @@ const aiIndexPropertiesSchema = {
     schema.object({
       type: schema.literal('workflow'),
       value: schema.string({ minLength: 0, maxLength: MAX_AI_INDEX_AUTOMATION_LENGTH }),
+      role: schema.maybe(schema.literal('ki_creation')),
+      managed: schema.maybe(schema.boolean()),
     }),
     {
       maxSize: MAX_AI_INDEX_AUTOMATIONS,
@@ -105,6 +108,12 @@ const aiIndexPropertiesSchema = {
       maxSize: MAX_AI_INDEX_SOURCES,
       meta: { description: 'Additional sources that provide context for the AI index.' },
     }
+  ),
+  self_improvement: schema.maybe(
+    schema.object({
+      enabled: schema.boolean(),
+      traces_index: schema.string({ maxLength: MAX_AI_INDEX_TRACES_INDEX_LENGTH }),
+    })
   ),
 };
 

@@ -17,7 +17,12 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { AutomationsPanel, DescriptionPanel, SourcesPanel } from '../components/ai_index_detail';
+import {
+  AutomationsPanel,
+  DescriptionPanel,
+  PatternsPanel,
+  SourcesPanel,
+} from '../components/ai_index_detail';
 import { EditSourcesFlyout } from '../components/edit_sources_flyout';
 import { useAiIndex } from '../hooks/use_ai_index';
 import { useNavigation } from '../hooks/use_navigation';
@@ -100,6 +105,8 @@ export const AiIndexDetailPage = () => {
         />
         <EuiSpacer size="l" />
         <AutomationsPanel isLoading={isLoading} aiIndex={aiIndex} onSaved={refetch} />
+        <EuiSpacer size="l" />
+        <PatternsPanel isLoading={isLoading} aiIndex={aiIndex} />
       </KibanaPageTemplate.Section>
       {isEditingSources && aiIndex && (
         <EditSourcesFlyout

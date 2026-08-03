@@ -14,6 +14,7 @@ import type {
 } from './types';
 
 export type { ContextEnginePluginSetup, ContextEnginePluginStart } from './types';
+export { registerContextEngineAgentBuilder } from './agent_builder';
 
 export const plugin: PluginInitializer<
   ContextEnginePluginSetup,

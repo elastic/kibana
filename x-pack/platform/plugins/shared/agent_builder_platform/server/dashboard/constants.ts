@@ -9,8 +9,8 @@
 export const AGENT_BUILDER_OVERVIEW_DASHBOARD_ID = 'agent-builder-overview';
 
 /** Version of the Agent Builder overview dashboard. */
-export const AGENT_BUILDER_OVERVIEW_DASHBOARD_VERSION = 2;
-/** Placeholder in dashboard ES|QL queries replaced with the Kibana space namespace at install time. */
+export const AGENT_BUILDER_OVERVIEW_DASHBOARD_VERSION = 3;
+/** Placeholder in dashboard ES|QL queries replaced with the traces namespace pattern at install time. */
 export const AGENT_BUILDER_TRACES_NAMESPACE_PLACEHOLDER = '__AGENT_BUILDER_TRACES_NAMESPACE__';
 
 /**

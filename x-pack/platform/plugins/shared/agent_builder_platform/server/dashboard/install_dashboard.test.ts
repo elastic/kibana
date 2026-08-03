@@ -87,7 +87,7 @@ describe('setAgentBuilderDashboard', () => {
     expect(importerMock.import).not.toHaveBeenCalled();
   });
 
-  it('replaces the namespace placeholder with the space id in imported objects', async () => {
+  it('points queries at every agent data stream in the space', async () => {
     const { coreStart, importerMock } = buildCoreStart();
 
     await setAgentBuilderDashboard(coreStart as any, true, 'my-space', logger);
@@ -100,6 +100,9 @@ describe('setAgentBuilderDashboard', () => {
 
     const stringified = JSON.stringify(objects);
     expect(stringified).not.toContain(AGENT_BUILDER_TRACES_NAMESPACE_PLACEHOLDER);
+    expect(stringified).toContain('traces-agent_builder.otel-my-space.*');
+    // A space-only pattern would miss the per-agent data streams entirely.
+    expect(stringified).not.toContain('traces-agent_builder.otel-my-space\\"');
   });
 
   it('sets the dashboard id to the space-scoped id in the imported object', async () => {

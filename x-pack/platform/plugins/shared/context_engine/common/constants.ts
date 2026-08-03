@@ -38,3 +38,25 @@ export const MAX_AI_INDEX_AUTOMATION_LENGTH = 1024;
 export const MAX_AI_INDEX_SOURCE_VALUE_LENGTH = 10240;
 export const MAX_AI_INDEX_AUTOMATIONS = 100;
 export const MAX_AI_INDEX_SOURCES = 100;
+export const MAX_AI_INDEX_TRACES_INDEX_LENGTH = 1024;
+
+/**
+ * Self-improvement: the route that enables/disables it, and the Task Manager
+ * task types + per-AI-index task ids for the case_builder / trace_classifier
+ * tasks. Scheduled recurring on enable, removed on disable.
+ */
+export const aiIndexSelfImprovementPath = `${aiIndexByIdPath}/self_improvement`;
+export const CASE_BUILDER_TASK_TYPE = 'contextEngine:caseBuilder';
+export const TRACE_CLASSIFIER_TASK_TYPE = 'contextEngine:traceClassifier';
+export const SELF_IMPROVEMENT_SCHEDULE_INTERVAL = '1h';
+export const caseBuilderTaskId = (aiIndexId: string) => `contextengine-case-builder-${aiIndexId}`;
+export const traceClassifierTaskId = (aiIndexId: string) =>
+  `contextengine-trace-classifier-${aiIndexId}`;
+
+/** Lists candidate trace indices/data streams (matching `traces-*`) for the self-improvement picker. */
+export const traceIndicesPath = `${publicApiPath}/trace_indices`;
+
+/** Patterns & improvements read API. Cases/improvements take a `pattern_key` query param. */
+export const aiIndexPatternsPath = `${aiIndexByIdPath}/patterns`;
+export const aiIndexPatternCasesPath = `${aiIndexByIdPath}/patterns/cases`;
+export const aiIndexPatternImprovementsPath = `${aiIndexByIdPath}/patterns/improvements`;

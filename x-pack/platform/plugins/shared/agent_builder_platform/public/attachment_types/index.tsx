@@ -24,6 +24,14 @@ import { screenContextAttachmentDefinition } from './screen_context_attachment';
 import { graphAttachmentDefinition } from './graph_attachment/graph_attachment';
 import { createSkillAttachmentDefinition } from './skill_attachment/skill_attachment';
 import { createConnectorSetupAttachmentDefinition } from './connector_setup/connector_setup_attachment';
+import {
+  AI_INDEX_ATTACHMENT_TYPE,
+  PATTERN_ATTACHMENT_TYPE,
+  CASE_ATTACHMENT_TYPE,
+  aiIndexAttachmentDefinition,
+  patternAttachmentDefinition,
+  caseAttachmentDefinition,
+} from './context_engine';
 
 export const registerAttachmentUiDefinitions = ({
   attachments,
@@ -58,4 +66,9 @@ export const registerAttachmentUiDefinitions = ({
       application: core.application,
     })
   );
+
+  // Context Engine attachment UIs (server-side behaviour lives in the context_engine plugin).
+  attachments.addAttachmentType(AI_INDEX_ATTACHMENT_TYPE, aiIndexAttachmentDefinition);
+  attachments.addAttachmentType(PATTERN_ATTACHMENT_TYPE, patternAttachmentDefinition);
+  attachments.addAttachmentType(CASE_ATTACHMENT_TYPE, caseAttachmentDefinition);
 };

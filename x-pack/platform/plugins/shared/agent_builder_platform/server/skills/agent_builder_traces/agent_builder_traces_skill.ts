@@ -55,14 +55,15 @@ Do **not** use this skill when:
 
 ## Data Source
 
-Agent Builder ships all OTel data — span telemetry **and** captured message content — to a single
-per-space traces index: \`traces-agent_builder.otel-<space-id>\`.
+Agent Builder ships all OTel data — span telemetry **and** captured message content — to one
+traces data stream per agent: \`traces-agent_builder.otel-<space-id>.<agent-id>\`.
 
 Always use \`${AGENT_BUILDER_TRACES_ESQL_INLINE_TOOL_ID}\` for trace questions. It resolves the
-current space's index automatically. Do not use a \`traces-agent_builder.otel-*\` wildcard, which
-would mix in other spaces' data.
+pattern covering every agent in the current space automatically. Do not broaden it to a
+\`traces-agent_builder.otel-*\` wildcard, which would mix in other spaces' data.
 
-If you need to run ES|QL manually, use the exact index returned by the inline tool.
+If you need to run ES|QL manually, use the exact index pattern returned by the inline tool, and
+break results down per agent with \`attributes.gen_ai.agent.id\` rather than by index name.
 
 Always constrain the time range with \`@timestamp\` to the window the user asked about (default to
 the last 24 hours when they do not specify one).

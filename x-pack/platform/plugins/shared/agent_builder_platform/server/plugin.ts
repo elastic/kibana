@@ -14,6 +14,7 @@ import type {
   AgentBuilderPlatformPluginSetup,
   AgentBuilderPlatformPluginStart,
 } from './types';
+import { registerContextEngineAgentBuilder } from '@kbn/context-engine-plugin/server';
 import { registerTools } from './tools';
 import { registerAttachmentTypes } from './attachment_types';
 import { registerSkills } from './skills';
@@ -73,6 +74,16 @@ export class AgentBuilderPlatformPlugin
       onPostCreate: connectorLifecycleHandler.onPostCreate,
       onPostDelete: connectorLifecycleHandler.onPostDelete,
     });
+
+    // Context Engine registers its agent-builder surface here: it loads before
+    // Agent Builder and so cannot register directly without a dependency cycle.
+    if (setupDeps.contextEngine) {
+      registerContextEngineAgentBuilder({
+        agentBuilder: setupDeps.agentBuilder,
+        getAiIndexService: setupDeps.contextEngine.getAiIndexService,
+        getWorkflowsApi: setupDeps.contextEngine.getWorkflowsApi,
+      });
+    }
 
     return {};
   }

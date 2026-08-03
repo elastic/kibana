@@ -25,9 +25,35 @@ export interface AiIndexSource {
 
 export type AiIndexAutomationType = 'workflow';
 
+/**
+ * The job an automation performs for the AI index. Only `ki_creation` today:
+ * these workflows populate the backing store with knowledge items. The
+ * self-improvement loop (case building + trace classification) runs as Task
+ * Manager tasks, not automations, so it has no role here.
+ */
+export type AiIndexAutomationRole = 'ki_creation';
+
+export const aiIndexAutomationRoles: readonly AiIndexAutomationRole[] = ['ki_creation'] as const;
+
 export interface AiIndexAutomation {
   type: AiIndexAutomationType;
   value: string;
+  role?: AiIndexAutomationRole;
+  /**
+   * Marks an automation the management agent owns and may rewrite. Hand-written
+   * automations stay unmanaged and are never modified for the user.
+   */
+  managed?: boolean;
+}
+
+/**
+ * Self-improvement configuration. When enabled, the plugin schedules the
+ * `case_builder` and `trace_classifier` Task Manager tasks against `traces_index`
+ * to build cases from agent traces and classify them into patterns.
+ */
+export interface AiIndexSelfImprovement {
+  enabled: boolean;
+  traces_index: string;
 }
 
 export interface AiIndexProperties {
@@ -35,6 +61,7 @@ export interface AiIndexProperties {
   dest: AiIndexDest;
   automations: AiIndexAutomation[];
   sources: AiIndexSource[];
+  self_improvement?: AiIndexSelfImprovement;
 }
 
 export interface AiIndexHttpItem extends AiIndexProperties {

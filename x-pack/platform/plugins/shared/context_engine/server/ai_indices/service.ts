@@ -36,6 +36,7 @@ const toAiIndexItem = (id: string, document: AiIndexDocument): AiIndexHttpItem =
   dest: document.dest,
   automations: document.automations,
   sources: document.sources,
+  ...(document.self_improvement !== undefined && { self_improvement: document.self_improvement }),
   date_created: document.date_created,
   date_modified: document.date_modified,
 });
@@ -114,6 +115,38 @@ export class AiIndexService {
       throw new AiIndexIdConflictError(aiIndexId);
     }
     return this.writeDocument(aiIndexId, { ...properties, managed: true }, existing);
+  }
+
+  /**
+   * Partially updates an AI index: provided top-level fields replace wholesale,
+   * omitted fields are preserved. Used by the self-improvement enable flow and by
+   * the management agent when it links a generated automation. Managed entries are
+   * immutable via this method, like {@link put}.
+   */
+  async patch(
+    aiIndexId: string,
+    properties: Partial<AiIndexProperties>
+  ): Promise<AiIndexHttpItem> {
+    if (properties.dest) {
+      await this.assertValidDest(properties.dest);
+    }
+
+    const existing = await this.findDocument(aiIndexId);
+    if (!existing) {
+      throw new AiIndexNotFoundError(aiIndexId);
+    }
+    if (existing.document.managed) {
+      throw new AiIndexManagedError(aiIndexId);
+    }
+
+    const { date_created: _created, date_modified: _modified, ...rest } = existing.document;
+    const merged: Omit<AiIndexDocument, 'date_created' | 'date_modified'> = {
+      ...rest,
+      ...properties,
+    };
+
+    await this.writeDocument(aiIndexId, merged, existing);
+    return this.get(aiIndexId);
   }
 
   private async writeDocument(

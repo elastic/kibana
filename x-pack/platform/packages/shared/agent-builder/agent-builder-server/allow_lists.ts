@@ -25,6 +25,11 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   // Streams / Significant Events
   ...Object.values(platformSignificantEventsTools),
 
+  // Platform – Context Engine
+  'platform.context_engine.get_ai_index',
+  'platform.context_engine.update_ai_index',
+  'platform.context_engine.save_automation',
+
   // Alerting
   `${internalNamespaces.platformAlerting}.manage_rule`,
 
@@ -104,6 +109,7 @@ export type AgentBuilderBuiltinTool = (typeof AGENT_BUILDER_BUILTIN_TOOLS)[numbe
 export const AGENT_BUILDER_BUILTIN_AGENTS = [
   `${internalNamespaces.search}.agent`,
   `${internalNamespaces.security}.agent`,
+  'platform.context_engine.agent',
 ] as const;
 
 export type AgentBuilderBuiltinAgent = (typeof AGENT_BUILDER_BUILTIN_AGENTS)[number];
@@ -175,6 +181,8 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
 
   // Platform – Context Engine
   'ki-automation-generation',
+  'context-engine-setup',
+  'propose-improvement',
 
   // Platform – Workflows
   'workflow-authoring',
@@ -263,6 +271,11 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
 
   // Platform – Discover
   'esql.query_results',
+
+  // Platform – Context Engine
+  'platform.context_engine.ai_index',
+  'platform.context_engine.pattern',
+  'platform.context_engine.case',
 
   // Platform – Workflows
   'workflow.yaml',

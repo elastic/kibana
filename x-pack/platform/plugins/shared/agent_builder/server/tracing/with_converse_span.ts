@@ -67,6 +67,6 @@ export function withConverseSpan(
           return cb(span);
         }
       ),
-    { spaceId, conversationId }
+    { spaceId, agentId, conversationId }
   );
 }

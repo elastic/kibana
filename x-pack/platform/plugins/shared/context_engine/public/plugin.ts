@@ -21,6 +21,7 @@ import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids'
 import { from, map, switchMap } from 'rxjs';
 import { CONTEXT_ENGINE_APP_ID, CONTEXT_ENGINE_APP_PATH } from '../common/features';
 import type {
+  ChatOpener,
   ContextEnginePluginSetup,
   ContextEnginePluginStart,
   ContextEngineSetupDependencies,
@@ -46,10 +47,15 @@ export class ContextEnginePlugin
       ContextEngineStartDependencies
     >
 {
+  // Set by a downstream plugin (agent_builder_platform) at start via the
+  // `registerChatOpener` start-contract method; read lazily by the app at mount time.
+  private chatOpener?: ChatOpener;
+
   constructor(_context: PluginInitializerContext) {}
 
   setup(core: CoreSetup<ContextEngineStartDependencies>): ContextEnginePluginSetup {
     const startServices = core.getStartServices();
+    const getChatOpener = () => this.chatOpener;
 
     core.application.register({
       id: CONTEXT_ENGINE_APP_ID,
@@ -85,6 +91,7 @@ export class ContextEnginePlugin
           plugins: pluginsStart,
           element: params.element,
           history: params.history,
+          getChatOpener,
         });
       },
     });
@@ -93,7 +100,13 @@ export class ContextEnginePlugin
   }
 
   start(_core: CoreStart): ContextEnginePluginStart {
-    return {};
+    return {
+      registerChatOpener: (opener: ChatOpener) => {
+        // eslint-disable-next-line no-console
+        console.info('[ce:chat-bridge] context_engine.registerChatOpener called — opener stored');
+        this.chatOpener = opener;
+      },
+    };
   }
 
   stop() {}

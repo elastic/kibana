@@ -16,11 +16,15 @@ import type {
 } from '@kbn/actions-plugin/server';
 import type { LlmTasksPluginStart } from '@kbn/llm-tasks-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { ContextEnginePluginSetup } from '@kbn/context-engine-plugin/server';
 
 export interface PluginSetupDependencies {
   agentBuilder: AgentBuilderPluginSetup;
   agentBuilderSml: AgentBuilderSmlPluginSetup;
   actions: ActionsPluginSetup;
+  // Context Engine loads before Agent Builder, so it cannot register its own
+  // agent-builder surface. This downstream plugin does it on its behalf.
+  contextEngine?: ContextEnginePluginSetup;
 }
 
 export interface PluginStartDependencies {

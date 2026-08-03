@@ -63,7 +63,7 @@ describe('useTraceExists', () => {
     expect(mockSearch).toHaveBeenCalledWith(
       expect.objectContaining({
         params: expect.objectContaining({
-          index: 'traces-agent_builder.otel-test-space',
+          index: 'traces-agent_builder.otel-test-space.*',
           body: expect.objectContaining({
             query: { term: { trace_id: 'trace-123' } },
           }),
@@ -131,7 +131,7 @@ describe('useTraceExists', () => {
     expect(mockSearch).toHaveBeenCalledWith(
       expect.objectContaining({
         params: expect.objectContaining({
-          index: 'traces-agent_builder.otel-marketing',
+          index: 'traces-agent_builder.otel-marketing.*',
         }),
       })
     );

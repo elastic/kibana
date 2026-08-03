@@ -21,6 +21,11 @@
     "@kbn/i18n",
     "@kbn/core-http-server",
     "@kbn/features-plugin",
+    "@kbn/task-manager-plugin",
+    "@kbn/agent-builder-common",
+    "@kbn/agent-builder-server",
+    "@kbn/agent-builder-browser",
+    "@kbn/zod",
     "@kbn/storage-adapter",
     "@kbn/es-errors",
     "@kbn/management-settings-ids",
@@ -33,6 +38,8 @@
     "@kbn/share-plugin",
     "@kbn/console-plugin",
     "@kbn/workflows-ui",
-    "@kbn/deeplinks-workflows"
+    "@kbn/deeplinks-workflows",
+    "@kbn/data-plugin",
+    "@kbn/llm-trace-waterfall"
   ]
 }

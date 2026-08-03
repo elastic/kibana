@@ -10,3 +10,5 @@ export { AutomationsPanel } from './automations_panel';
 export { DescriptionPanel } from './description_panel';
 export { SourcesPanel } from './sources_panel';
 export { SourceRow } from './source_row';
+export { PatternsPanel } from './patterns_panel';
+export { PatternRow } from './pattern_row';
