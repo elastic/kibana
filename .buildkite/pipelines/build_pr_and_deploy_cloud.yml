@@ -72,6 +72,11 @@ steps:
               limit: 3
 
       - command: .buildkite/scripts/steps/cloud/build_and_deploy.sh
+        # TEMPORARY perf-test override — do not merge. Bumps the PR's ECH
+        # Kibana node from the 2GB default to 8GB for the alerting v2 ES|QL
+        # streaming saturation test. Remove this `env` block before merging.
+        env:
+          KIBANA_MEMORY_SIZE: 8192
         label: 'Build and Deploy to Cloud'
         agents:
           provider: gcp
