@@ -275,6 +275,8 @@ steps:
                               event_uuid: '{{ foreach.item.event_uuid }}'
                               event_id: '{{ foreach.item.event_id }}'
                               status: '{{ foreach.item.status }}'
+                              severity: '{{ foreach.item.severity }}'
+                              summary: '{{ foreach.item.summary }}'
 
   - name: output_result
     type: workflow.output

@@ -42,7 +42,7 @@ const triage = parse(SIGNIFICANT_EVENTS_TRIAGE_WORKFLOW.yaml) as ParsedWorkflow;
 describe('significant events persistence workflow contracts', () => {
   it('bumps managed workflow versions for the bulk persistence contract', () => {
     expect(SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW.version).toBe(13);
-    expect(SIGNIFICANT_EVENTS_TRIAGE_WORKFLOW.version).toBe(14);
+    expect(SIGNIFICANT_EVENTS_TRIAGE_WORKFLOW.version).toBe(15);
   });
 
   it('stamps discovery detections only from confirmed write outcomes', () => {

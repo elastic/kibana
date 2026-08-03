@@ -46,7 +46,12 @@ export {
 export {
   INVESTIGATION_PROGRESS_UI_EVENT,
   INVESTIGATE_STEP_ID,
+  MAX_SIGNIFICANT_EVENT_UPDATE_EVIDENCE,
+  MAX_SIGNIFICANT_EVENT_UPDATES,
+  significantEventUpdateSchema,
   investigationStateSchema,
+  type SignificantEventUpdate,
+  type SignificantEventUpdateEvidence,
   type InvestigationHypothesis,
   type InvestigationState,
 } from './investigation_state';
