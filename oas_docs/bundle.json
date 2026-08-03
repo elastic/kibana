@@ -362,6 +362,72 @@
           "metrics"
         ],
         "type": "object"
+      },
+      "enrollment_api_key": {
+        "additionalProperties": false,
+        "properties": {
+          "active": {
+            "description": "When false, the enrollment API key is revoked and cannot be used for enrolling Elastic Agents.",
+            "type": "boolean"
+          },
+          "api_key": {
+            "description": "The enrollment API key (token) used for enrolling Elastic Agents.",
+            "type": "string"
+          },
+          "api_key_id": {
+            "description": "The ID of the API key in the Security API.",
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string"
+          },
+          "expire_at": {
+            "description": "The expiration date of the enrollment token as an ISO 8601 date string. Absent when the token never expires.",
+            "type": "string"
+          },
+          "hidden": {
+            "type": "boolean"
+          },
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "description": "The name of the enrollment API key.",
+            "type": "string"
+          },
+          "policy_id": {
+            "description": "The ID of the agent policy the Elastic Agent will be enrolled in.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "api_key_id",
+          "api_key",
+          "active",
+          "created_at"
+        ],
+        "type": "object"
+      },
+      "new_enrollment_api_key": {
+        "additionalProperties": false,
+        "properties": {
+          "expiration": {
+            "description": "The expiration time for the enrollment token, expressed as a duration (for example, 30d, 24h, 90m). By default, enrollment tokens never expire.",
+            "maxLength": 20,
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "policy_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "policy_id"
+        ],
+        "type": "object"
       }
     },
     "securitySchemes": {
@@ -27537,46 +27603,7 @@
                   "properties": {
                     "items": {
                       "items": {
-                        "additionalProperties": false,
-                        "properties": {
-                          "active": {
-                            "description": "When false, the enrollment API key is revoked and cannot be used for enrolling Elastic Agents.",
-                            "type": "boolean"
-                          },
-                          "api_key": {
-                            "description": "The enrollment API key (token) used for enrolling Elastic Agents.",
-                            "type": "string"
-                          },
-                          "api_key_id": {
-                            "description": "The ID of the API key in the Security API.",
-                            "type": "string"
-                          },
-                          "created_at": {
-                            "type": "string"
-                          },
-                          "hidden": {
-                            "type": "boolean"
-                          },
-                          "id": {
-                            "type": "string"
-                          },
-                          "name": {
-                            "description": "The name of the enrollment API key.",
-                            "type": "string"
-                          },
-                          "policy_id": {
-                            "description": "The ID of the agent policy the Elastic Agent will be enrolled in.",
-                            "type": "string"
-                          }
-                        },
-                        "required": [
-                          "id",
-                          "api_key_id",
-                          "api_key",
-                          "active",
-                          "created_at"
-                        ],
-                        "type": "object"
+                        "$ref": "#/components/schemas/enrollment_api_key"
                       },
                       "maxItems": 10000,
                       "type": "array"
@@ -27584,46 +27611,7 @@
                     "list": {
                       "deprecated": true,
                       "items": {
-                        "additionalProperties": false,
-                        "properties": {
-                          "active": {
-                            "description": "When false, the enrollment API key is revoked and cannot be used for enrolling Elastic Agents.",
-                            "type": "boolean"
-                          },
-                          "api_key": {
-                            "description": "The enrollment API key (token) used for enrolling Elastic Agents.",
-                            "type": "string"
-                          },
-                          "api_key_id": {
-                            "description": "The ID of the API key in the Security API.",
-                            "type": "string"
-                          },
-                          "created_at": {
-                            "type": "string"
-                          },
-                          "hidden": {
-                            "type": "boolean"
-                          },
-                          "id": {
-                            "type": "string"
-                          },
-                          "name": {
-                            "description": "The name of the enrollment API key.",
-                            "type": "string"
-                          },
-                          "policy_id": {
-                            "description": "The ID of the agent policy the Elastic Agent will be enrolled in.",
-                            "type": "string"
-                          }
-                        },
-                        "required": [
-                          "id",
-                          "api_key_id",
-                          "api_key",
-                          "active",
-                          "created_at"
-                        ],
-                        "type": "object"
+                        "$ref": "#/components/schemas/enrollment_api_key"
                       },
                       "maxItems": 10000,
                       "type": "array"
@@ -27707,22 +27695,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "additionalProperties": false,
-                "properties": {
-                  "expiration": {
-                    "type": "string"
-                  },
-                  "name": {
-                    "type": "string"
-                  },
-                  "policy_id": {
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "policy_id"
-                ],
-                "type": "object"
+                "$ref": "#/components/schemas/new_enrollment_api_key"
               }
             }
           }
@@ -27741,46 +27714,7 @@
                       "type": "string"
                     },
                     "item": {
-                      "additionalProperties": false,
-                      "properties": {
-                        "active": {
-                          "description": "When false, the enrollment API key is revoked and cannot be used for enrolling Elastic Agents.",
-                          "type": "boolean"
-                        },
-                        "api_key": {
-                          "description": "The enrollment API key (token) used for enrolling Elastic Agents.",
-                          "type": "string"
-                        },
-                        "api_key_id": {
-                          "description": "The ID of the API key in the Security API.",
-                          "type": "string"
-                        },
-                        "created_at": {
-                          "type": "string"
-                        },
-                        "hidden": {
-                          "type": "boolean"
-                        },
-                        "id": {
-                          "type": "string"
-                        },
-                        "name": {
-                          "description": "The name of the enrollment API key.",
-                          "type": "string"
-                        },
-                        "policy_id": {
-                          "description": "The ID of the agent policy the Elastic Agent will be enrolled in.",
-                          "type": "string"
-                        }
-                      },
-                      "required": [
-                        "id",
-                        "api_key_id",
-                        "api_key",
-                        "active",
-                        "created_at"
-                      ],
-                      "type": "object"
+                      "$ref": "#/components/schemas/enrollment_api_key"
                     }
                   },
                   "required": [
@@ -27936,46 +27870,7 @@
                   "additionalProperties": false,
                   "properties": {
                     "item": {
-                      "additionalProperties": false,
-                      "properties": {
-                        "active": {
-                          "description": "When false, the enrollment API key is revoked and cannot be used for enrolling Elastic Agents.",
-                          "type": "boolean"
-                        },
-                        "api_key": {
-                          "description": "The enrollment API key (token) used for enrolling Elastic Agents.",
-                          "type": "string"
-                        },
-                        "api_key_id": {
-                          "description": "The ID of the API key in the Security API.",
-                          "type": "string"
-                        },
-                        "created_at": {
-                          "type": "string"
-                        },
-                        "hidden": {
-                          "type": "boolean"
-                        },
-                        "id": {
-                          "type": "string"
-                        },
-                        "name": {
-                          "description": "The name of the enrollment API key.",
-                          "type": "string"
-                        },
-                        "policy_id": {
-                          "description": "The ID of the agent policy the Elastic Agent will be enrolled in.",
-                          "type": "string"
-                        }
-                      },
-                      "required": [
-                        "id",
-                        "api_key_id",
-                        "api_key",
-                        "active",
-                        "created_at"
-                      ],
-                      "type": "object"
+                      "$ref": "#/components/schemas/enrollment_api_key"
                     }
                   },
                   "required": [

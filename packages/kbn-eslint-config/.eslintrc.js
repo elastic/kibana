@@ -20,51 +20,56 @@
 const { USES_STYLED_COMPONENTS } = require('@kbn/babel-preset/styled_components_files');
 
 /**
+ * Compile an exact, kibana-root-relative file path (forward slashes) into an
+ * anchored regex. A regex is required because the `module_migration` rule matches
+ * each `exclude` with `RegExp.test()` against a path that uses the OS-native
+ * separator, so each `/` is matched as `[\/\\]` to also work on Windows.
+ */
+const exactFilePathMatcher = (relativePath) =>
+  new RegExp(
+    `^${relativePath.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\//g, '[\\/\\\\]')}$`
+  );
+
+/**
  * Files that already import js-yaml. New js-yaml imports must not be added here;
  * this list is expected to shrink as consumers migrate to the `yaml` package.
- * Each entry is an anchored regex tested against the kibana-root-relative file path.
+ * Each entry is an exact file path, so adding a new js-yaml import (even in an
+ * already-listed directory) is flagged until that file is migrated or added here.
  * The `module_migration` rule evaluates each mapping independently, so this list
  * does not interact with other allowlists (e.g. AXIOS_LEGACY_CONSUMERS in .eslintrc.js).
  */
 const JS_YAML_LEGACY_CONSUMERS = [
-  /^packages[\/\\]kbn-rspack-optimizer[\/\\]/,
-  /^src[\/\\]platform[\/\\]kbn-ui[\/\\]_tooling[\/\\]/,
-  /^src[\/\\]platform[\/\\]packages[\/\\]private[\/\\]kbn-gen-ai-functional-testing[\/\\]/,
-  /^src[\/\\]platform[\/\\]packages[\/\\]shared[\/\\]kbn-connector-cli[\/\\]/,
-  /^src[\/\\]platform[\/\\]packages[\/\\]shared[\/\\]kbn-edot-collector[\/\\]/,
-  /^src[\/\\]platform[\/\\]packages[\/\\]shared[\/\\]kbn-otel-demo[\/\\]/,
-  /^src[\/\\]platform[\/\\]packages[\/\\]shared[\/\\]kbn-scout[\/\\]/,
-  /^src[\/\\]platform[\/\\]packages[\/\\]shared[\/\\]kbn-synthtrace[\/\\]src[\/\\]cli[\/\\]/,
-  /^src[\/\\]platform[\/\\]packages[\/\\]shared[\/\\]kbn-test[\/\\]src[\/\\]functional_test_runner[\/\\]/,
-  /^src[\/\\]platform[\/\\]plugins[\/\\]private[\/\\]interactive_setup[\/\\]server[\/\\]/,
-  /^x-pack[\/\\]packages[\/\\]kbn-synthetics-private-location[\/\\]/,
-  /^x-pack[\/\\]platform[\/\\]packages[\/\\]shared[\/\\]kbn-data-forge[\/\\]/,
-  /^x-pack[\/\\]platform[\/\\]packages[\/\\]shared[\/\\]kbn-inference-cli[\/\\]src[\/\\]eis[\/\\]get_eis_gateway_config\.ts$/,
-  /^x-pack[\/\\]platform[\/\\]packages[\/\\]shared[\/\\]kbn-inference-cli[\/\\]src[\/\\]eis[\/\\]get_service_configuration\.ts$/,
-  /^x-pack[\/\\]platform[\/\\]packages[\/\\]shared[\/\\]kbn-inference-cli[\/\\]src[\/\\]util[\/\\]write_kibana_config\.ts$/,
-  /^x-pack[\/\\]platform[\/\\]packages[\/\\]shared[\/\\]response-ops[\/\\]alerting-v2-rule-form[\/\\]/,
-  /^x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]agent_builder[\/\\]server[\/\\]services[\/\\]/,
-  /^x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]automatic_import[\/\\]public[\/\\]components[\/\\]create_integration[\/\\]create_automatic_import[\/\\]flyout[\/\\]cel_configuration[\/\\]steps[\/\\]upload_spec_step[\/\\]api_definition_input\.tsx$/,
-  /^x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]automatic_import[\/\\]server[\/\\]graphs[\/\\]ecs[\/\\]pipeline\.ts$/,
-  /^x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]automatic_import[\/\\]server[\/\\]integration_builder[\/\\]build_integration\.test\.ts$/,
-  /^x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]automatic_import[\/\\]server[\/\\]integration_builder[\/\\]build_integration\.ts$/,
-  /^x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]automatic_import[\/\\]server[\/\\]integration_builder[\/\\]data_stream\.ts$/,
-  /^x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]automatic_import[\/\\]server[\/\\]integration_builder[\/\\]fields\.ts$/,
-  /^x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]automatic_import[\/\\]server[\/\\]integration_builder[\/\\]pipeline\.ts$/,
-  /^x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]automatic_import[\/\\]server[\/\\]util[\/\\]processors\.ts$/,
-  /^x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]automatic_import[\/\\]server[\/\\]util[\/\\]samples\.ts$/,
-  /^x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]fleet[\/\\]/,
-  /^x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]inference[\/\\]scripts[\/\\]/,
-  /^x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]rule_registry[\/\\]scripts[\/\\]/,
-  /^x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]streams[\/\\]scripts[\/\\]/,
-  /^x-pack[\/\\]solutions[\/\\]observability[\/\\]packages[\/\\]synthetics-test-data[\/\\]/,
-  /^x-pack[\/\\]solutions[\/\\]observability[\/\\]plugins[\/\\]apm[\/\\]scripts[\/\\]/,
-  /^x-pack[\/\\]solutions[\/\\]observability[\/\\]plugins[\/\\]apm[\/\\]server[\/\\]routes[\/\\]fleet[\/\\]/,
-  /^x-pack[\/\\]solutions[\/\\]observability[\/\\]plugins[\/\\]observability_ai_assistant_app[\/\\]scripts[\/\\]/,
-  /^x-pack[\/\\]solutions[\/\\]observability[\/\\]plugins[\/\\]observability_onboarding[\/\\]server[\/\\]routes[\/\\]flow[\/\\]/,
-  /^x-pack[\/\\]solutions[\/\\]observability[\/\\]plugins[\/\\]synthetics[\/\\]public[\/\\]/,
-  /^x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]cloud_defend[\/\\]/,
-];
+  'src/platform/packages/private/kbn-gen-ai-functional-testing/src/connectors.ts',
+  'src/platform/packages/shared/kbn-edot-collector/src/get_edot_collector_configuration.ts',
+  'src/platform/packages/shared/kbn-edot-collector/src/read_kibana_config.ts',
+  'src/platform/packages/shared/kbn-scout/src/cli/create_test_tracks.ts',
+  'src/platform/packages/shared/kbn-scout/src/tests_discovery/search_configs.test.ts',
+  'src/platform/packages/shared/kbn-scout/src/tests_discovery/search_configs.ts',
+  'src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/config/ftr_configs_manifest.ts',
+  'src/platform/plugins/private/interactive_setup/server/kibana_config_writer.ts',
+  'x-pack/platform/packages/shared/kbn-data-forge/src/lib/create_config.ts',
+  'x-pack/platform/packages/shared/kbn-inference-cli/src/eis/get_eis_gateway_config.ts',
+  'x-pack/platform/packages/shared/kbn-inference-cli/src/eis/get_service_configuration.ts',
+  'x-pack/platform/packages/shared/kbn-inference-cli/src/util/write_kibana_config.ts',
+  'x-pack/platform/plugins/shared/automatic_import/public/components/create_integration/create_automatic_import/flyout/cel_configuration/steps/upload_spec_step/api_definition_input.tsx',
+  'x-pack/platform/plugins/shared/automatic_import/server/graphs/ecs/pipeline.ts',
+  'x-pack/platform/plugins/shared/automatic_import/server/integration_builder/build_integration.test.ts',
+  'x-pack/platform/plugins/shared/automatic_import/server/integration_builder/build_integration.ts',
+  'x-pack/platform/plugins/shared/automatic_import/server/integration_builder/data_stream.ts',
+  'x-pack/platform/plugins/shared/automatic_import/server/integration_builder/fields.ts',
+  'x-pack/platform/plugins/shared/automatic_import/server/integration_builder/pipeline.ts',
+  'x-pack/platform/plugins/shared/automatic_import/server/util/processors.ts',
+  'x-pack/platform/plugins/shared/automatic_import/server/util/samples.ts',
+  'x-pack/platform/plugins/shared/inference/scripts/util/read_kibana_config.ts',
+  'x-pack/platform/plugins/shared/rule_registry/scripts/generate_ecs_fieldmap/index.js',
+  'x-pack/solutions/observability/packages/synthetics-test-data/src/e2e/tasks/read_kibana_config.ts',
+  'x-pack/solutions/observability/plugins/apm/scripts/shared/read_kibana_config.ts',
+  'x-pack/solutions/observability/plugins/apm/server/routes/fleet/get_apm_package_policy_definition.ts',
+  'x-pack/solutions/observability/plugins/observability_ai_assistant_app/scripts/evaluation/read_kibana_config.ts',
+  'x-pack/solutions/observability/plugins/synthetics/public/apps/synthetics/components/common/components/monitor_inspect.tsx',
+  'x-pack/solutions/security/plugins/cloud_defend/common/utils/helpers.ts',
+  'x-pack/solutions/security/plugins/cloud_defend/public/components/control_general_view/index.test.tsx',
+].map(exactFilePathMatcher);
 
 const USES_ELASTIC_APM_AGENT = [
   // Core platform APM integration & agent infrastructure
