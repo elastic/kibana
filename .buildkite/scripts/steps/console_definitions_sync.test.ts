@@ -114,14 +114,14 @@ printf '%s\\n' "$*" > "\${TEST_ROOT}/buildkite-agent-args"
 };
 
 describe('WHEN Console definitions are synchronized', () => {
-  it('SHOULD open a PR with override conflict runbook and enable auto-merge', () => {
+  it('SHOULD open a PR with override-conflict instructions in the body and without auto-merge', () => {
     const result = runSync();
     try {
       expect(result.status).toBe(0);
       expect(result.prCreateArgs).toContain('If override conflict CI fails');
       expect(result.prCreateArgs).toContain('--updateOverrideAudit');
       expect(result.prCreateArgs).toContain('override_conflict_baseline.json');
-      expect(result.autoMergeCalled).toBe(true);
+      expect(result.autoMergeCalled).toBe(false);
       expect(result.prCreateArgs).toContain('--label backport:skip');
     } finally {
       result.cleanup();
@@ -136,7 +136,7 @@ describe('WHEN Console definitions are synchronized', () => {
     try {
       expect(result.status).toBe(0);
       expect(result.prCreateArgs).toContain('[Console] Update console definitions (main)');
-      expect(result.autoMergeCalled).toBe(true);
+      expect(result.autoMergeCalled).toBe(false);
     } finally {
       result.cleanup();
     }

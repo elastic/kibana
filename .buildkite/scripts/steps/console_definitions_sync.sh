@@ -39,6 +39,9 @@ main() {
     --emptyDest \
     --skipOverrideAudit
 
+  # Generated definitions need human review before merge.
+  local auto_merge=false
+
   create_sync_pr \
     "$GIT_SCOPE" \
     "[Console] Update console definitions (${BUILDKITE_BRANCH})" \
@@ -46,7 +49,7 @@ main() {
     "console_definitions_sync" \
     "Update console definitions" \
     "console_defs_existing_pr" \
-    true \
+    "$auto_merge" \
     'backport:skip' 'release_note:skip' 'Feature:Console' 'Team:Kibana Management'
 }
 
