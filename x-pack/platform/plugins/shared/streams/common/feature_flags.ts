@@ -6,7 +6,7 @@
  */
 
 /**
- * Backward-compat export for consumers that still import from `@kbn/streams-plugin/common`.
- * The canonical definition lives in `@kbn/significant-events-plugin/common/feature_flags`.
+ * Internal use only — NOT exported from @kbn/streams-plugin/common.
+ * Canonical definition: @kbn/significant-events-plugin/common/feature_flags.
  */
 export const STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG = 'streams.significantEventsAvailable';
