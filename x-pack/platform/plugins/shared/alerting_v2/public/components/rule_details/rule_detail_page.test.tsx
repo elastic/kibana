@@ -60,6 +60,11 @@ jest.mock('../../hooks/use_toggle_rule_enabled', () => ({
   useToggleRuleEnabled: () => ({ mutate: mockToggleRuleEnabled, isLoading: mockIsToggling }),
 }));
 
+const mockRunRule = jest.fn();
+jest.mock('../../hooks/use_run_rule', () => ({
+  useRunRule: () => ({ mutate: mockRunRule, isLoading: false }),
+}));
+
 const mockOpenEditFlyout = jest.fn();
 const mockOpenCloneFlyout = jest.fn();
 jest.mock('../../hooks/use_compose_discover_flyout', () => ({
@@ -258,7 +263,6 @@ describe('RuleDetailPage', () => {
     expect(mockToggleRuleEnabled).toHaveBeenCalledWith({
       id: 'rule-1',
       enabled: false,
-      name: 'Test Signal Rule',
     });
   });
 
@@ -270,7 +274,6 @@ describe('RuleDetailPage', () => {
     expect(mockToggleRuleEnabled).toHaveBeenCalledWith({
       id: 'rule-1',
       enabled: true,
-      name: 'Test Signal Rule',
     });
   });
 

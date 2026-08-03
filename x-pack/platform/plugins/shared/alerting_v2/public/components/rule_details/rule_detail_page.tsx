@@ -28,6 +28,7 @@ import { useRuleAuditMetadata } from '../../hooks/use_rule_audit_metadata';
 import { useDeleteRule } from '../../hooks/use_delete_rule';
 import { useComposeDiscoverFlyout } from '../../hooks/use_compose_discover_flyout';
 import { useToggleRuleEnabled } from '../../hooks/use_toggle_rule_enabled';
+import { useRunRule } from '../../hooks/use_run_rule';
 import { paths } from '../../constants';
 import { DeleteConfirmationModal } from '../rule/modals/delete_confirmation_modal';
 import { RuleKindBadge } from './rule_summary_header';
@@ -69,6 +70,7 @@ const getRuleDetailMenu = ({
   isToggleLoading,
   onClone,
   onDelete,
+  onRun,
 }: {
   rule: RuleApiResponse;
   onEdit: () => void;
@@ -76,6 +78,7 @@ const getRuleDetailMenu = ({
   isToggleLoading: boolean;
   onClone: () => void;
   onDelete: () => void;
+  onRun: () => void;
 }): AppHeaderMenu => ({
   primaryActionItem: {
     id: 'editRule',
@@ -103,12 +106,29 @@ const getRuleDetailMenu = ({
   },
   items: [
     {
+      id: 'runRule',
+      label: i18n.translate('xpack.alertingV2.ruleDetails.runRuleButtonLabel', {
+        defaultMessage: 'Run rule',
+      }),
+      iconType: 'play',
+      order: 0,
+      run: onRun,
+      testId: 'ruleDetailsRunButton',
+      overflow: true,
+      disableButton: !rule.enabled,
+      tooltipContent: rule.enabled
+        ? undefined
+        : i18n.translate('xpack.alertingV2.ruleDetails.runRuleDisabledTooltip', {
+            defaultMessage: 'Enable the rule to run it',
+          }),
+    },
+    {
       id: 'cloneRule',
       label: i18n.translate('xpack.alertingV2.ruleDetails.cloneRuleButtonLabel', {
         defaultMessage: 'Clone rule',
       }),
       iconType: 'copy',
-      order: 0,
+      order: 1,
       run: onClone,
       testId: 'ruleDetailsCloneButton',
       overflow: true,
@@ -119,7 +139,7 @@ const getRuleDetailMenu = ({
         defaultMessage: 'Delete rule',
       }),
       iconType: 'trash',
-      order: 1,
+      order: 2,
       run: onDelete,
       testId: 'ruleDetailsDeleteButton',
       overflow: true,
@@ -140,6 +160,7 @@ export const RuleDetailPage: React.FunctionComponent = () => {
   const history = useHistory();
   const { mutate: deleteRule, isLoading: isDeleting } = useDeleteRule();
   const { mutate: toggleRuleEnabled, isLoading: isToggling } = useToggleRuleEnabled();
+  const { mutate: runRule } = useRunRule();
   const { flyout, openEditFlyout, openCloneFlyout } = useComposeDiscoverFlyout();
   const [showDeleteConfirmation, setShowDeleteConfirmation] = React.useState(false);
 
@@ -161,9 +182,9 @@ export const RuleDetailPage: React.FunctionComponent = () => {
 
   const handleToggleEnabled = React.useCallback(
     (enabled: boolean) => {
-      toggleRuleEnabled({ id: rule.id, enabled, name: rule.metadata.name });
+      toggleRuleEnabled({ id: rule.id, enabled });
     },
-    [toggleRuleEnabled, rule.id, rule.metadata.name]
+    [toggleRuleEnabled, rule.id]
   );
 
   const onEdit = React.useCallback(() => {
@@ -173,6 +194,10 @@ export const RuleDetailPage: React.FunctionComponent = () => {
   const onClone = React.useCallback(() => {
     openCloneFlyout(rule);
   }, [openCloneFlyout, rule]);
+
+  const handleRunRule = React.useCallback(() => {
+    runRule({ id: rule.id });
+  }, [runRule, rule.id]);
 
   const { createdByDisplay, createdAtFormatted, updatedByDisplay, updatedAtFormatted } =
     useRuleAuditMetadata(rule);
@@ -216,8 +241,17 @@ export const RuleDetailPage: React.FunctionComponent = () => {
         isToggleLoading: isToggling,
         onClone,
         onDelete: showDeleteConfirmationModal,
+        onRun: handleRunRule,
       }),
-    [rule, onEdit, handleToggleEnabled, isToggling, onClone, showDeleteConfirmationModal]
+    [
+      rule,
+      onEdit,
+      handleToggleEnabled,
+      isToggling,
+      onClone,
+      showDeleteConfirmationModal,
+      handleRunRule,
+    ]
   );
 
   return (
