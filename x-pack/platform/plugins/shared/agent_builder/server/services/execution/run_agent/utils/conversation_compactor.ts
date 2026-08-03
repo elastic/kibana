@@ -8,6 +8,7 @@
 import type { Logger } from '@kbn/core/server';
 import type { BaseMessageLike } from '@langchain/core/messages';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
+import { sumTokens } from './context_budget';
 import type {
   CompactionSummary,
   CompactionStructuredData,
@@ -246,8 +247,6 @@ export const compactConversation = async ({
     summarizedRoundCount: summarizationResult.summary?.summarized_round_count ?? 0,
   };
 };
-
-const sumTokens = (counts: number[]): number => counts.reduce((total, count) => total + count, 0);
 
 // ---------------------------------------------------------------------------
 // Internal helpers
