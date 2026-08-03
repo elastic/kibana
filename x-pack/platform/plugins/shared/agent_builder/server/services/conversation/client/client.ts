@@ -263,15 +263,7 @@ class ConversationClientImpl implements ConversationClient {
     request: PersistRoundRequest,
     options: { access: ConversationAccess } = { access: 'converse' }
   ): Promise<Conversation> {
-    const {
-      id: conversationId,
-      round,
-      replaces_round_id: replacesRoundId,
-      state,
-      status,
-      attachments,
-      workspace_id: workspaceId,
-    } = request;
+    const { id: conversationId, round, replacesRoundId, state, attachments, workspaceId } = request;
     const { access } = options;
 
     try {
@@ -284,7 +276,7 @@ class ConversationClientImpl implements ConversationClient {
             update: {
               id: conversationId,
               rounds: upsertRound(current.rounds, round, replacesRoundId),
-              ...(status ? { status } : {}),
+              status: round.status,
               ...(state ? { state } : {}),
               // merged, not assigned: the payload predates the agent run, so
               // assigning it would revert attachment changes made since

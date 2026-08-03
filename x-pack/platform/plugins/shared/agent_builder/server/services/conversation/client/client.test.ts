@@ -757,7 +757,7 @@ describe('ConversationClient', () => {
       await client.persistRound({
         id: 'conversation-1',
         round,
-        workspace_id: 'workspace-new',
+        workspaceId: 'workspace-new',
       });
 
       expect(mockEsClient.index).toHaveBeenCalledWith(
@@ -775,7 +775,7 @@ describe('ConversationClient', () => {
       await client.persistRound({
         id: 'conversation-1',
         round,
-        workspace_id: 'workspace-new',
+        workspaceId: 'workspace-new',
       });
 
       expect(mockEsClient.index).toHaveBeenCalledWith(

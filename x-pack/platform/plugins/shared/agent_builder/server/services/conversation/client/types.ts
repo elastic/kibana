@@ -17,10 +17,7 @@ import type {
   ConversationRoundStepType,
   Conversation,
 } from '@kbn/agent-builder-common/chat/conversation';
-import type {
-  ConversationInternalState,
-  ConversationRoundStatus,
-} from '@kbn/agent-builder-common/chat';
+import type { ConversationInternalState } from '@kbn/agent-builder-common/chat';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import type { PromptRequest } from '@kbn/agent-builder-common/agents/prompts';
 import type { AgentNodeState } from '@kbn/agent-builder-common/chat/round_state';
@@ -50,13 +47,12 @@ export interface PersistRoundRequest {
   /** Upserted by `round.id`: appended if new, replaced in place if present (HITL resume). */
   round: ConversationRound;
   /** `action: 'regenerate'` only: id of the round this one supersedes. */
-  replaces_round_id?: string;
+  replacesRoundId?: string;
   state?: ConversationInternalState;
-  status?: ConversationRoundStatus;
   /** Merged into the stored list by id; never used to remove attachments. */
   attachments?: VersionedAttachment[];
   /** Applied only when the stored conversation has no workspace yet. */
-  workspace_id?: string;
+  workspaceId?: string;
 }
 
 export interface ConversationListOptions {

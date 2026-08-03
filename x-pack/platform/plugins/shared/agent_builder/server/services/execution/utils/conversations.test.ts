@@ -233,8 +233,7 @@ describe('conversations utils', () => {
         expect(conversationClient.persistRound).toHaveBeenCalledWith(
           expect.objectContaining({
             round: newRound,
-            replaces_round_id: 'round-1',
-            status: newRound.status,
+            replacesRoundId: 'round-1',
           }),
           { access: 'converse' }
         );
@@ -259,12 +258,11 @@ describe('conversations utils', () => {
         expect(conversationClient.persistRound).toHaveBeenCalledWith(
           expect.objectContaining({
             round: newRound,
-            status: newRound.status,
           }),
           { access: 'converse' }
         );
         expect(conversationClient.persistRound).not.toHaveBeenCalledWith(
-          expect.objectContaining({ replaces_round_id: expect.anything() }),
+          expect.objectContaining({ replacesRoundId: expect.anything() }),
           expect.anything()
         );
       });
@@ -289,12 +287,11 @@ describe('conversations utils', () => {
         expect(conversationClient.persistRound).toHaveBeenCalledWith(
           expect.objectContaining({
             round: newRound,
-            status: newRound.status,
           }),
           { access: 'converse' }
         );
         expect(conversationClient.persistRound).not.toHaveBeenCalledWith(
-          expect.objectContaining({ replaces_round_id: expect.anything() }),
+          expect.objectContaining({ replacesRoundId: expect.anything() }),
           expect.anything()
         );
       });

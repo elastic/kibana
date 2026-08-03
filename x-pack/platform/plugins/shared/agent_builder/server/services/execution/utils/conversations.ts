@@ -92,15 +92,10 @@ export const updateConversation$ = ({
         {
           id: conversation.id,
           round,
-          ...(replacesRoundId ? { replaces_round_id: replacesRoundId } : {}),
+          replacesRoundId,
           state: conversation_state,
-          status: round.status,
-          ...(roundCompletedEvent.data.attachments !== undefined
-            ? { attachments: roundCompletedEvent.data.attachments }
-            : {}),
-          ...(roundCompletedEvent.data.workspace_id
-            ? { workspace_id: roundCompletedEvent.data.workspace_id }
-            : {}),
+          attachments: roundCompletedEvent.data.attachments,
+          workspaceId: roundCompletedEvent.data.workspace_id,
         },
         { access: 'converse' }
       );
