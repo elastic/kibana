@@ -85,7 +85,12 @@ describe('EventFlyoutChatFooter', () => {
     expect(screen.getByTestId('nightshiftEventFlyoutChatMenuPanel')).toBeInTheDocument();
     expect(screen.getByText('Investigations')).toBeInTheDocument();
 
-    fireEvent.click(screen.getByTestId('nightshiftEventFlyoutOpenInvestigationChatItem'));
+    const investigationChatItem = screen.getByTestId(
+      'nightshiftEventFlyoutOpenInvestigationChatItem'
+    );
+    expect(investigationChatItem).toHaveAttribute('data-ebt-action', 'openInChat');
+    expect(investigationChatItem).toHaveAttribute('data-ebt-detail', 'existingConversation');
+    fireEvent.click(investigationChatItem);
     expect(mockOpenChat).toHaveBeenCalledWith({ conversationId: 'conv-123' });
   });
 
@@ -97,6 +102,9 @@ describe('EventFlyoutChatFooter', () => {
 
     fireEvent.click(screen.getByTestId('nightshiftEventFlyoutChatButton'));
     expect(screen.getByTestId('nightshiftEventFlyoutChatMenuPanel')).toBeInTheDocument();
+    const newChatItem = screen.getByTestId('nightshiftEventFlyoutStartNewChatItem');
+    expect(newChatItem).toHaveAttribute('data-ebt-action', 'openInChat');
+    expect(newChatItem).toHaveAttribute('data-ebt-detail', 'newConversation');
   });
 
   it('uses a plain button while the latest investigation is still running', () => {
@@ -105,7 +113,10 @@ describe('EventFlyoutChatFooter', () => {
       status: 'running',
     });
 
-    fireEvent.click(screen.getByTestId('nightshiftEventFlyoutChatButton'));
+    const chatButton = screen.getByTestId('nightshiftEventFlyoutChatButton');
+    expect(chatButton).toHaveAttribute('data-ebt-action', 'openInChat');
+    expect(chatButton).toHaveAttribute('data-ebt-detail', 'newConversation');
+    fireEvent.click(chatButton);
     expect(screen.queryByTestId('nightshiftEventFlyoutChatMenuPanel')).not.toBeInTheDocument();
     expect(mockOpenChat).toHaveBeenCalledWith(expect.objectContaining({ newConversation: true }));
   });
