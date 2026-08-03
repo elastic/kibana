@@ -40,7 +40,17 @@ This keeps gold and candidate structurally parallel so the equivalence evaluator
 
 `src/fixtures/replay.ts` uses `@kbn/es-snapshot-loader` to replay a GCS snapshot (same pattern as `@kbn/evals-suite-observability-ai`) into `logs-*`, `metrics-*`, and `traces-*` data streams. The CPU-load examples specifically guard against the failure where the agent leaves the `.1m` / `.5m` / `.15m` field paths unquoted (Elasticsearch lexes `.1m` as a numeric literal → `parsing_exception`).
 
-To create or refresh the snapshot: spin up ES + an OTel collector, ingest representative data, then call `createSnapshot` from `@kbn/es-snapshot-loader` targeting the `agent-builder-datasets` GCS bucket at path `viz-evals/otel-host-metrics`.
+To create or refresh the snapshot, run the one-off script against a local ES cluster:
+
+```bash
+ELASTICSEARCH_URL=http://localhost:9200 \
+ELASTICSEARCH_USERNAME=elastic \
+ELASTICSEARCH_PASSWORD=changeme \
+GOOGLE_APPLICATION_CREDENTIALS=/path/to/keyfile.json \
+npx ts-node scripts/create_snapshot.ts
+```
+
+The script seeds synthetic `system.cpu.load_average.*` documents, verifies the `TS` query works, then snapshots `metrics-hostmetricsreceiver.otel-default` to `obs-ai-datasets/viz-evals/otel-host-metrics`. Temporary templates are cleaned up on exit. GCS write access to `obs-ai-datasets` is required (use the same service account as the obs-ai team).
 
 ## Notes
 

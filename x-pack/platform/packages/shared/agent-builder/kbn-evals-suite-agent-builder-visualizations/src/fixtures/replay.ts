@@ -16,10 +16,9 @@ import type { ToolingLog } from '@kbn/tooling-log';
 
 export type { LoadResult };
 
-// GCS snapshot containing OTel host-metrics (and eventually logs/traces) for viz eval fixtures.
-// To create: spin up an OTel collector writing to `metrics-hostmetricsreceiver.otel-default`,
-// then run `createSnapshot` from `@kbn/es-snapshot-loader` and upload to this bucket/path.
-const GCS_BUCKET = 'agent-builder-datasets';
+// GCS snapshot in the shared obs-ai bucket, under a viz-evals-specific path.
+// Run scripts/create_viz_evals_snapshot.js once to capture the snapshot.
+const GCS_BUCKET = 'obs-ai-datasets';
 const GCS_BASE_PATH = 'viz-evals/otel-host-metrics';
 const SNAPSHOT_NAME = 'otel-host-metrics';
 
