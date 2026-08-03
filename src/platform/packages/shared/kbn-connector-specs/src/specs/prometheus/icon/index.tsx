@@ -11,8 +11,8 @@ import React from 'react';
 import { EuiIcon } from '@elastic/eui';
 import type { ConnectorIconProps } from '../../../types';
 
-import prometheusAlertManagerIcon from './prometheus_alertmanager.svg';
+import prometheusIcon from './prometheus.svg';
 
 export default (props: ConnectorIconProps) => {
-  return <EuiIcon type={prometheusAlertManagerIcon} {...props} />;
+  return <EuiIcon type={prometheusIcon} {...props} />;
 };

@@ -8,16 +8,18 @@
  */
 
 /**
- * Prometheus Alertmanager Connector
+ * Prometheus Connector
  *
- * Talks to a self-hosted Prometheus Alertmanager's HTTP API v2 so a workflow
- * can read alerts and drive the silence lifecycle (create, expire, list, get)
- * to mute noise during maintenance or a known incident. Optionally also talks
- * to the Prometheus server HTTP API (a separate, related service) to enrich
- * an alert with a live metric value or inspect the rules that produce alerts.
+ * Spans two related self-hosted services under one connector: the Prometheus
+ * server HTTP API for PromQL reads (query, queryRange, series, label values,
+ * rules, targets), and the Alertmanager HTTP API v2 for the actionable alert
+ * lifecycle (list alerts/alert groups, create, expire, list, and get silences)
+ * to mute noise during maintenance or drive a known incident. Prometheus has
+ * no incident object of its own, so the lifecycle is Alertmanager silences
+ * plus alert-state reads.
  *
- * https://github.com/prometheus/alertmanager/blob/main/api/v2/openapi.yaml
  * https://prometheus.io/docs/prometheus/latest/querying/api/
+ * https://github.com/prometheus/alertmanager/blob/main/api/v2/openapi.yaml
  */
 
 import { i18n } from '@kbn/i18n';
@@ -37,6 +39,10 @@ import {
   QueryPrometheusInputSchema,
   ListPrometheusAlertsInputSchema,
   ListPrometheusRulesInputSchema,
+  QueryRangePrometheusInputSchema,
+  ListPrometheusTargetsInputSchema,
+  GetPrometheusSeriesInputSchema,
+  ListPrometheusLabelValuesInputSchema,
 } from './types';
 import type {
   ListAlertsInput,
@@ -48,6 +54,10 @@ import type {
   CreateAlertsInput,
   QueryPrometheusInput,
   ListPrometheusRulesInput,
+  QueryRangePrometheusInput,
+  ListPrometheusTargetsInput,
+  GetPrometheusSeriesInput,
+  ListPrometheusLabelValuesInput,
   AlertmanagerStatus,
 } from './types';
 
@@ -66,7 +76,7 @@ const buildBaseUrl = (ctx: ActionContext): string => {
   const baseUrl = ((ctx.config?.baseUrl as string | undefined) ?? '').trim();
   if (!baseUrl) {
     throw new Error(
-      'Prometheus Alertmanager connector is missing the required Alertmanager URL configuration field.'
+      'Prometheus connector is missing the required Alertmanager URL configuration field.'
     );
   }
   return baseUrl.replace(/\/+$/, '');
@@ -107,17 +117,14 @@ function formatPrometheusError(action: string, error: unknown): Error {
   );
 }
 
-export const PrometheusAlertmanager: ConnectorSpec = {
+export const Prometheus: ConnectorSpec = {
   metadata: {
-    id: '.prometheus_alertmanager',
-    displayName: 'Prometheus Alertmanager',
-    description: i18n.translate(
-      'core.kibanaConnectorSpecs.prometheusAlertmanager.metadata.description',
-      {
-        defaultMessage:
-          'Read Alertmanager alerts and alert groups, and create, list, and expire silences to mute noise',
-      }
-    ),
+    id: '.prometheus',
+    displayName: 'Prometheus',
+    description: i18n.translate('core.kibanaConnectorSpecs.prometheus.metadata.description', {
+      defaultMessage:
+        'Run PromQL queries against Prometheus, and read, silence, and manage Alertmanager alerts',
+    }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
     supportedFeatureIds: ['workflows', 'agentBuilder'],
@@ -130,14 +137,17 @@ export const PrometheusAlertmanager: ConnectorSpec = {
         isRecommended: true,
         defaults: {},
         overrides: {
+          label: i18n.translate('core.kibanaConnectorSpecs.prometheus.auth.basic.label', {
+            defaultMessage: 'Username and password',
+          }),
           meta: {
             username: {
               label: i18n.translate(
-                'core.kibanaConnectorSpecs.prometheusAlertmanager.auth.basic.usernameLabel',
+                'core.kibanaConnectorSpecs.prometheus.auth.basic.usernameLabel',
                 { defaultMessage: 'Username' }
               ),
               helpText: i18n.translate(
-                'core.kibanaConnectorSpecs.prometheusAlertmanager.auth.basic.usernameHelpText',
+                'core.kibanaConnectorSpecs.prometheus.auth.basic.usernameHelpText',
                 {
                   defaultMessage:
                     'The username configured for HTTP basic auth on the Alertmanager instance (basic_auth_users in its web.config.file, or a reverse proxy in front of it).',
@@ -146,13 +156,36 @@ export const PrometheusAlertmanager: ConnectorSpec = {
             },
             password: {
               label: i18n.translate(
-                'core.kibanaConnectorSpecs.prometheusAlertmanager.auth.basic.passwordLabel',
+                'core.kibanaConnectorSpecs.prometheus.auth.basic.passwordLabel',
                 { defaultMessage: 'Password' }
               ),
               helpText: i18n.translate(
-                'core.kibanaConnectorSpecs.prometheusAlertmanager.auth.basic.passwordHelpText',
+                'core.kibanaConnectorSpecs.prometheus.auth.basic.passwordHelpText',
                 {
                   defaultMessage: 'The password for the account above.',
+                }
+              ),
+            },
+          },
+        },
+      },
+      {
+        type: 'bearer',
+        defaults: {},
+        overrides: {
+          label: i18n.translate('core.kibanaConnectorSpecs.prometheus.auth.bearer.label', {
+            defaultMessage: 'Bearer token',
+          }),
+          meta: {
+            token: {
+              label: i18n.translate('core.kibanaConnectorSpecs.prometheus.auth.bearer.tokenLabel', {
+                defaultMessage: 'Bearer token',
+              }),
+              helpText: i18n.translate(
+                'core.kibanaConnectorSpecs.prometheus.auth.bearer.tokenHelpText',
+                {
+                  defaultMessage:
+                    'A bearer token accepted by a reverse proxy or gateway placed in front of Alertmanager and Prometheus (neither has built-in bearer token support).',
                 }
               ),
             },
@@ -167,34 +200,29 @@ export const PrometheusAlertmanager: ConnectorSpec = {
       baseUrl: UISchemas.url('https://alertmanager.example.com')
         .describe('The base URL of the Alertmanager instance.')
         .meta({
-          label: i18n.translate(
-            'core.kibanaConnectorSpecs.prometheusAlertmanager.config.baseUrl.label',
-            { defaultMessage: 'Alertmanager URL' }
-          ),
-          helpText: i18n.translate(
-            'core.kibanaConnectorSpecs.prometheusAlertmanager.config.baseUrl.helpText',
-            {
-              defaultMessage:
-                'The base URL of your self-hosted Alertmanager instance, e.g. https://alertmanager.example.com. Must be reachable from Kibana.',
-            }
-          ),
+          label: i18n.translate('core.kibanaConnectorSpecs.prometheus.config.baseUrl.label', {
+            defaultMessage: 'Alertmanager URL',
+          }),
+          helpText: i18n.translate('core.kibanaConnectorSpecs.prometheus.config.baseUrl.helpText', {
+            defaultMessage:
+              'The base URL of your self-hosted Alertmanager instance, e.g. https://alertmanager.example.com. Must be reachable from Kibana.',
+          }),
           validate: { allowedHosts: true },
         }),
       prometheusUrl: UISchemas.url('https://prometheus.example.com')
         .optional()
         .describe(
-          'Optional Prometheus server URL, for the queryPrometheus, listPrometheusAlerts, and listPrometheusRules actions.'
+          'Optional Prometheus server URL, for the queryPrometheus, queryRangePrometheus, listPrometheusAlerts, listPrometheusRules, listPrometheusTargets, getPrometheusSeries, and listPrometheusLabelValues actions.'
         )
         .meta({
-          label: i18n.translate(
-            'core.kibanaConnectorSpecs.prometheusAlertmanager.config.prometheusUrl.label',
-            { defaultMessage: 'Prometheus server URL (optional)' }
-          ),
+          label: i18n.translate('core.kibanaConnectorSpecs.prometheus.config.prometheusUrl.label', {
+            defaultMessage: 'Prometheus server URL (optional)',
+          }),
           helpText: i18n.translate(
-            'core.kibanaConnectorSpecs.prometheusAlertmanager.config.prometheusUrl.helpText',
+            'core.kibanaConnectorSpecs.prometheus.config.prometheusUrl.helpText',
             {
               defaultMessage:
-                'Optional. The base URL of the Prometheus server associated with this Alertmanager, e.g. https://prometheus.example.com. Only required to enrich alerts with live metric data or inspect alerting/recording rules — reuses the same username and password as Alertmanager. Leave empty if not needed.',
+                'Optional. The base URL of the Prometheus server associated with this Alertmanager, e.g. https://prometheus.example.com. Only required for the PromQL query/queryRange actions and to inspect rules, targets, series, or label values — reuses the same credential as Alertmanager. Leave empty if not needed.',
             }
           ),
           validate: { allowedHosts: true },
@@ -407,16 +435,17 @@ export const PrometheusAlertmanager: ConnectorSpec = {
       handler: async (ctx, input: ListPrometheusRulesInput) => {
         const params: Record<string, string | string[]> = {};
         if (input.type) params.type = input.type;
-        if (input.ruleName) params['rule_name[]'] = input.ruleName;
-        if (input.ruleGroup) params['rule_group[]'] = input.ruleGroup;
+        if (input.ruleName) params.rule_name = input.ruleName;
+        if (input.ruleGroup) params.rule_group = input.ruleGroup;
         try {
           const response = await ctx.client.get(`${buildPrometheusUrl(ctx)}/api/v1/rules`, {
             params,
-            // Prometheus expects the literal repeated key `rule_name[]=a&rule_name[]=b`
-            // (the brackets are part of the parameter name itself, per the Prometheus
-            // HTTP API docs), so the keys above already include `[]` and must not be
-            // further bracketed/indexed by the serializer.
-            paramsSerializer: { indexes: null },
+            // Prometheus expects the literal repeated key `rule_name[]=a&rule_name[]=b` for
+            // array params (confirmed live: axios's `indexes: null` form drops the brackets
+            // entirely, producing `rule_name=a&rule_name=b`, which Prometheus silently ignores
+            // as an unrecognized param — `indexes: false` is what actually reproduces the
+            // `[]`-suffixed repeated-key form Prometheus's HTTP API expects).
+            paramsSerializer: { indexes: false },
           });
           return response.data;
         } catch (error) {
@@ -424,16 +453,98 @@ export const PrometheusAlertmanager: ConnectorSpec = {
         }
       },
     },
+
+    queryRangePrometheus: {
+      isTool: true,
+      description:
+        'Run a PromQL range query against the configured Prometheus server and return a series of samples between a start and end time at a given step interval. Use this for trend checks, before-and-after comparisons, or attaching a metric window to an incident. Requires the optional "Prometheus server URL" connector field.',
+      input: QueryRangePrometheusInputSchema,
+      handler: async (ctx, input: QueryRangePrometheusInput) => {
+        try {
+          const response = await ctx.client.get(`${buildPrometheusUrl(ctx)}/api/v1/query_range`, {
+            params: { query: input.query, start: input.start, end: input.end, step: input.step },
+          });
+          return response.data;
+        } catch (error) {
+          throw formatPrometheusError('queryRangePrometheus', error);
+        }
+      },
+    },
+
+    listPrometheusTargets: {
+      isTool: true,
+      description:
+        'List Prometheus scrape targets with their up/down health and last scrape error. Use this to diagnose a missing-metric or stale-data alert by checking whether the source is being scraped successfully. Requires the optional "Prometheus server URL" connector field.',
+      input: ListPrometheusTargetsInputSchema,
+      handler: async (ctx, input: ListPrometheusTargetsInput) => {
+        const params: Record<string, string> = {};
+        if (input.state) params.state = input.state;
+        try {
+          const response = await ctx.client.get(`${buildPrometheusUrl(ctx)}/api/v1/targets`, {
+            params,
+          });
+          return response.data;
+        } catch (error) {
+          throw formatPrometheusError('listPrometheusTargets', error);
+        }
+      },
+    },
+
+    getPrometheusSeries: {
+      isTool: true,
+      description:
+        'Find Prometheus time series matching one or more series selector expressions, without returning their sample values. Use this to discover which series exist for an entity (e.g. a job or instance) before querying them with queryPrometheus. Requires the optional "Prometheus server URL" connector field.',
+      input: GetPrometheusSeriesInputSchema,
+      handler: async (ctx, input: GetPrometheusSeriesInput) => {
+        const params: Record<string, string | string[]> = { match: input.match };
+        if (input.start) params.start = input.start;
+        if (input.end) params.end = input.end;
+        try {
+          const response = await ctx.client.get(`${buildPrometheusUrl(ctx)}/api/v1/series`, {
+            params,
+            // Prometheus expects the literal repeated key `match[]=a&match[]=b` (confirmed
+            // live). `indexes: false` produces that `[]`-suffixed repeated-key form;
+            // `indexes: null` drops the brackets and Prometheus rejects the request with
+            // "no match[] parameter provided".
+            paramsSerializer: { indexes: false },
+          });
+          return response.data;
+        } catch (error) {
+          throw formatPrometheusError('getPrometheusSeries', error);
+        }
+      },
+    },
+
+    listPrometheusLabelValues: {
+      isTool: true,
+      description:
+        'List the known values of a Prometheus label (for example all "instance" or "job" values), optionally restricted to series matching a selector. Use this to enumerate hosts, services, or environments to drive a fan-out step, or to discover valid values before building a PromQL query. Requires the optional "Prometheus server URL" connector field.',
+      input: ListPrometheusLabelValuesInputSchema,
+      handler: async (ctx, input: ListPrometheusLabelValuesInput) => {
+        const params: Record<string, string | string[]> = {};
+        if (input.match) params.match = input.match;
+        if (input.start) params.start = input.start;
+        if (input.end) params.end = input.end;
+        try {
+          const response = await ctx.client.get(
+            `${buildPrometheusUrl(ctx)}/api/v1/label/${encodeURIComponent(input.label)}/values`,
+            // `indexes: false` produces the `[]`-suffixed repeated-key form (`match[]=a&match[]=b`)
+            // Prometheus's HTTP API expects for array params (confirmed live).
+            { params, paramsSerializer: { indexes: false } }
+          );
+          return response.data;
+        } catch (error) {
+          throw formatPrometheusError('listPrometheusLabelValues', error);
+        }
+      },
+    },
   },
 
   test: {
     enabled: true,
-    description: i18n.translate(
-      'core.kibanaConnectorSpecs.prometheusAlertmanager.test.description',
-      {
-        defaultMessage: 'Verifies the connection by reading the Alertmanager instance status',
-      }
-    ),
+    description: i18n.translate('core.kibanaConnectorSpecs.prometheus.test.description', {
+      defaultMessage: 'Verifies the connection by reading the Alertmanager instance status',
+    }),
     handler: async (ctx) => {
       try {
         const response = await ctx.client.get(`${buildBaseUrl(ctx)}/api/v2/status`);
@@ -451,10 +562,12 @@ export const PrometheusAlertmanager: ConnectorSpec = {
   },
 
   skill: [
-    '## Prometheus Alertmanager Connector',
+    '## Prometheus Connector',
     '',
-    "Alertmanager's core lifecycle primitive is the silence: mute a set of matching alerts for a time",
-    'window, then let it expire (or expire it early) to allow them to fire again.',
+    'This connector spans two related services: the Prometheus server (PromQL reads) and Alertmanager',
+    '(the alert lifecycle). Prometheus has no incident object of its own, so the lifecycle is Alertmanager',
+    "silences plus alert-state reads. Alertmanager's core lifecycle primitive is the silence: mute a set of",
+    'matching alerts for a time window, then let it expire (or expire it early) to allow them to fire again.',
     '',
     '### Reading alerts',
     'Use listAlerts as the primary read path for current alerts, filterable by active/silenced/inhibited/',
@@ -477,12 +590,20 @@ export const PrometheusAlertmanager: ConnectorSpec = {
     'Alertmanager so they follow normal routing and notification — e.g. to page on a condition your',
     'workflow observed that Prometheus itself cannot evaluate as a rule.',
     '',
-    '### Prometheus enrichment (optional)',
-    'queryPrometheus, listPrometheusAlerts, and listPrometheusRules talk to the Prometheus server directly',
-    '(not Alertmanager) and require the connector\'s optional "Prometheus server URL" field to be set. Use',
-    'queryPrometheus with a PromQL expression to pull a live metric value while triaging an alert — for',
+    '### Prometheus server reads',
+    'queryPrometheus, queryRangePrometheus, listPrometheusAlerts, listPrometheusRules, listPrometheusTargets,',
+    'getPrometheusSeries, and listPrometheusLabelValues talk to the Prometheus server directly (not',
+    'Alertmanager) and require the connector\'s "Prometheus server URL" field to be set.',
+    '',
+    'Use queryPrometheus with a PromQL expression to pull a live metric value while triaging an alert — for',
     'example, before silencing a "DiskSpaceLow" alert, query the current disk usage to confirm it is still',
-    'a real problem. Use listPrometheusRules to see the rule (and its PromQL condition) that produced an',
-    'alert in the first place.',
+    'a real problem. Use queryRangePrometheus instead when you need a series of samples over a window, e.g.',
+    'a trend check or a before-and-after comparison around a deploy.',
+    '',
+    'Use listPrometheusRules to see the rule (and its PromQL condition) that produced an alert in the first',
+    'place, and listPrometheusTargets to check whether the underlying scrape target is healthy — useful when',
+    'triaging a "missing metric" or "stale data" alert. Use getPrometheusSeries to discover which series',
+    'exist for an entity before querying them, and listPrometheusLabelValues to enumerate the values of a',
+    'label (e.g. all "instance" or "job" values) to drive a fan-out step or validate a query filter.',
   ].join('\n'),
 };
