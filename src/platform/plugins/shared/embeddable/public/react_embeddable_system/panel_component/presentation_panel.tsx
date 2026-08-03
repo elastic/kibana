@@ -132,7 +132,6 @@ const PresentationPanelChrome = <
             hideTitle={hideTitle}
             showBadges={showBadges}
             getActions={getActions}
-            showNotifications={showNotifications}
             panelTitle={panelTitle ?? defaultPanelTitle}
             panelDescription={panelDescription ?? defaultPanelDescription}
             titleHighlight={titleHighlight}
