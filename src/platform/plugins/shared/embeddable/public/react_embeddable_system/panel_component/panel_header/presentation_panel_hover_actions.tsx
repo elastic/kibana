@@ -18,7 +18,6 @@ import {
   EuiContextMenu,
   EuiIcon,
   EuiIconTip,
-  EuiNotificationBadge,
   EuiPopover,
   EuiToolTip,
   useEuiTheme,
@@ -32,10 +31,7 @@ import { apiCanLockHoverActions, useBatchedPublishingSubjects } from '@kbn/prese
 import { getPanelContextMenuTriggerId } from '@kbn/presentation-util';
 import type { ActionWithContext } from '@kbn/ui-actions-plugin/public/context_menu/build_eui_context_menu_panels';
 import { BehaviorSubject, Subscription, switchMap } from 'rxjs';
-import {
-  ON_OPEN_PANEL_MENU,
-  PANEL_NOTIFICATION_TRIGGER,
-} from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { uiActions } from '../../../kibana_services';
 import type { DefaultPresentationPanelApi, PresentationPanelProps } from '../types';
 import {
@@ -60,8 +56,6 @@ const getContextMenuAriaLabel = (title?: string, index?: number) => {
     defaultMessage: 'Panel menu',
   });
 };
-
-const ALLOWED_NOTIFICATIONS = ['ACTION_FILTERS_NOTIFICATION'] as const;
 
 const getQuickActionElementId = (actionId: string, uuid: string) =>
   `presentationPanelQuickAction-${actionId}-${uuid}`;
@@ -106,7 +100,6 @@ export const PresentationPanelHoverActions = ({
   const [quickActions, setQuickActions] = useState<Action<EmbeddableApiContext>[]>([]);
   const [contextMenuPanels, setContextMenuPanels] = useState<EuiContextMenuPanelDescriptor[]>([]);
   const [isContextMenuOpen, setIsContextMenuOpen] = useState<boolean>(false);
-  const [notifications, setNotifications] = useState<Action<EmbeddableApiContext>[]>([]);
   const dragHandleRef = useRef<HTMLButtonElement | null>(null);
 
   const { euiTheme } = useEuiTheme();
@@ -152,12 +145,11 @@ export const PresentationPanelHoverActions = ({
     const apiContext = { embeddable: api };
     const subscriptions = new Subscription();
     const handleActionCompatibilityChange = (
-      type: 'quickActions' | 'notifications',
       isCompatible: boolean,
       action: Action<EmbeddableApiContext>
     ) => {
       if (canceled) return;
-      (type === 'quickActions' ? setQuickActions : setNotifications)((currentActions) => {
+      setQuickActions((currentActions) => {
         const newActions = currentActions?.filter((current) => current.id !== action.id);
         if (isCompatible) return [...newActions, action];
         return newActions;
@@ -186,42 +178,8 @@ export const PresentationPanelHoverActions = ({
             )
             .subscribe(async (isCompatible) => {
               handleActionCompatibilityChange(
-                'quickActions',
                 isCompatible,
                 frequentlyChangingAction as Action<EmbeddableApiContext>
-              );
-            });
-          subscriptions.add(compatibilitySubscription);
-        }
-      }
-
-      // subscribe to any frequently changing notification actions
-      const frequentlyChangingNotifications =
-        await uiActions.getFrequentlyChangingActionsForTrigger(
-          PANEL_NOTIFICATION_TRIGGER,
-          apiContext
-        );
-      if (canceled) return;
-
-      for (const frequentlyChangingNotification of frequentlyChangingNotifications) {
-        if (
-          (ALLOWED_NOTIFICATIONS as readonly string[]).includes(frequentlyChangingNotification.id)
-        ) {
-          const compatibilitySubscription = frequentlyChangingNotification
-            .getCompatibilityChangesSubject(apiContext)
-            ?.pipe(
-              switchMap(async () => {
-                return await frequentlyChangingNotification.isCompatible({
-                  ...apiContext,
-                  trigger: triggers[PANEL_NOTIFICATION_TRIGGER],
-                });
-              })
-            )
-            .subscribe(async (isCompatible) => {
-              handleActionCompatibilityChange(
-                'notifications',
-                isCompatible,
-                frequentlyChangingNotification as Action<EmbeddableApiContext>
               );
             });
           subscriptions.add(compatibilitySubscription);
@@ -313,6 +271,7 @@ export const PresentationPanelHoverActions = ({
 
         return {
           iconType,
+          MenuItem: action.MenuItem ? <action.MenuItem context={apiContext} /> : undefined,
           'data-test-subj': `embeddablePanelAction-${action.id}`,
           onClick: createClickHandler(action, apiContext),
           name,
@@ -320,51 +279,6 @@ export const PresentationPanelHoverActions = ({
         };
       });
   }, [api, quickActions]);
-
-  const notificationElements = useMemo(() => {
-    return notifications?.map((notification) => {
-      let notificationComponent = notification.MenuItem ? (
-        React.createElement(notification.MenuItem, {
-          key: notification.id,
-          context: {
-            embeddable: api,
-            trigger: triggers[PANEL_NOTIFICATION_TRIGGER],
-          },
-        })
-      ) : (
-        <EuiNotificationBadge
-          data-test-subj={`embeddablePanelNotification-${notification.id}`}
-          key={notification.id}
-          css={{ marginTop: euiTheme.size.xs, marginRight: euiTheme.size.xs }}
-          onClick={() =>
-            notification.execute({ embeddable: api, trigger: triggers[PANEL_NOTIFICATION_TRIGGER] })
-          }
-        >
-          {notification.getDisplayName({
-            embeddable: api,
-            trigger: triggers[PANEL_NOTIFICATION_TRIGGER],
-          })}
-        </EuiNotificationBadge>
-      );
-
-      if (notification.getDisplayNameTooltip) {
-        const tooltip = notification.getDisplayNameTooltip({
-          embeddable: api,
-          trigger: triggers[PANEL_NOTIFICATION_TRIGGER],
-        });
-
-        if (tooltip) {
-          notificationComponent = (
-            <EuiToolTip position="top" content={tooltip} key={notification.id}>
-              {notificationComponent}
-            </EuiToolTip>
-          );
-        }
-      }
-
-      return notificationComponent;
-    });
-  }, [api, euiTheme.size.xs, notifications]);
 
   const contextMenuClasses = classNames({
     // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -439,7 +353,6 @@ export const PresentationPanelHoverActions = ({
           {dragHandle}
           {/* Wrapping all "right actions" in a span so that flex space-between works as expected */}
           <span>
-            {notificationElements}
             {showDescription && (
               <EuiIconTip
                 size="m"
@@ -456,22 +369,26 @@ export const PresentationPanelHoverActions = ({
               />
             )}
             {quickActionElements.map(
-              ({ iconType, 'data-test-subj': dataTestSubj, onClick, name, id }) => (
-                <EuiToolTip
-                  key={`main_action_${dataTestSubj}_${api?.uuid}`}
-                  content={name}
-                  disableScreenReaderOutput
-                >
-                  <EuiButtonIcon
-                    id={api?.uuid ? getQuickActionElementId(id, api.uuid) : undefined}
-                    iconType={iconType}
-                    color="text"
-                    onClick={onClick as MouseEventHandler}
-                    data-test-subj={dataTestSubj}
-                    aria-label={name as string}
-                  />
-                </EuiToolTip>
-              )
+              ({ iconType, 'data-test-subj': dataTestSubj, MenuItem, onClick, name, id }) => {
+                return MenuItem ? (
+                  MenuItem
+                ) : (
+                  <EuiToolTip
+                    key={`main_action_${dataTestSubj}_${api?.uuid}`}
+                    content={name}
+                    disableScreenReaderOutput
+                  >
+                    <EuiButtonIcon
+                      id={api?.uuid ? getQuickActionElementId(id, api.uuid) : undefined}
+                      iconType={iconType}
+                      color="text"
+                      onClick={onClick as MouseEventHandler}
+                      data-test-subj={dataTestSubj}
+                      aria-label={name as string}
+                    />
+                  </EuiToolTip>
+                );
+              }
             )}
             {showContextMenu ? (
               <EuiPopover

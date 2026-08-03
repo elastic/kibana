@@ -11,9 +11,7 @@ import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import React, { useEffect, useMemo, useState } from 'react';
 import { Subscription, switchMap } from 'rxjs';
 
-import {
-  PANEL_BADGE_TRIGGER,
-} from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { PANEL_BADGE_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import { triggers } from '@kbn/ui-actions-plugin/public';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
@@ -28,7 +26,7 @@ export const useBadges = <
   getActions: PresentationPanelProps['getActions']
 ) => {
   const [badges, setBadges] = useState<Action<EmbeddableApiContext>[]>([]);
-  
+
   /**
    * Get all actions once on mount of the panel. Any actions that are Frequent Compatibility
    * Change Actions need to be subscribed to so they can change over the lifetime of this panel.
@@ -90,10 +88,7 @@ export const useBadges = <
             })
           )
           .subscribe(async (isCompatible) => {
-            handleActionCompatibilityChange(
-              isCompatible,
-              badge as Action<EmbeddableApiContext>
-            );
+            handleActionCompatibilityChange(isCompatible, badge as Action<EmbeddableApiContext>);
           });
         subscriptions.add(compatibilitySubject);
       }

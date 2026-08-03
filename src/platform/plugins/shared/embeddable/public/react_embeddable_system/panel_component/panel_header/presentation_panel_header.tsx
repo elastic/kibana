@@ -23,10 +23,7 @@ export type PresentationPanelHeaderProps<ApiType extends DefaultPresentationPane
   panelTitle?: string;
   panelDescription?: string;
   setDragHandle: (id: string, ref: HTMLDivElement | null) => void;
-} & Pick<
-  PresentationPanelProps,
-  'showBadges' | 'getActions' | 'titleHighlight'
->;
+} & Pick<PresentationPanelProps, 'showBadges' | 'getActions' | 'titleHighlight'>;
 
 export const PresentationPanelHeader = <
   ApiType extends DefaultPresentationPanelApi = DefaultPresentationPanelApi
@@ -44,11 +41,7 @@ export const PresentationPanelHeader = <
 }: PresentationPanelHeaderProps<ApiType>) => {
   const { euiTheme } = useEuiTheme();
 
-  const badges = useBadges<ApiType>(
-    showBadges,
-    api,
-    getActions
-  );
+  const badges = useBadges<ApiType>(showBadges, api, getActions);
 
   const memoizedSetDragHandle = useCallback(
     // memoize the ref callback so that we don't call `setDragHandle` on every render
@@ -86,8 +79,7 @@ export const PresentationPanelHeader = <
     };
   }, [euiTheme.size, euiTheme.colors]);
 
-  const showPanelBar =
-    (!hideTitle && panelTitle) || badges.length > 0;
+  const showPanelBar = (!hideTitle && panelTitle) || badges.length > 0;
 
   if (!showPanelBar) return null;
 
