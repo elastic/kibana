@@ -1078,7 +1078,7 @@ export const getTemplateUserActions = ({
   payload,
 }: {
   isMock: boolean;
-  payload: { id: string; version: number } | null;
+  payload: { id: string; version: number; name?: string } | null;
 }): UserActionsDict => ({
   '1': [
     {

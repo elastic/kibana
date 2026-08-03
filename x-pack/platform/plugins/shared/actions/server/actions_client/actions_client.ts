@@ -17,6 +17,7 @@ import type {
   KibanaRequest,
   Logger,
 } from '@kbn/core/server';
+import { isSavedObjectErrorResult } from '@kbn/core/server';
 import type { AuditLogger } from '@kbn/security-plugin/server';
 import type { IEventLogClient } from '@kbn/event-log-plugin/server';
 import type { KueryNode } from '@kbn/es-query';
@@ -345,19 +346,19 @@ export class ActionsClient {
       bulkGetOpts
     );
 
-    bulkGetResult.saved_objects.forEach(({ id, error }) => {
-      if (!error && this.context.auditLogger) {
+    bulkGetResult.saved_objects.forEach((so) => {
+      if (!isSavedObjectErrorResult(so) && this.context.auditLogger) {
         this.context.auditLogger.log(
           connectorAuditEvent({
             action: ConnectorAuditAction.GET,
-            savedObject: { type: 'action', id },
+            savedObject: { type: 'action', id: so.id },
           })
         );
       }
     });
 
     for (const action of bulkGetResult.saved_objects) {
-      if (action.error) {
+      if (isSavedObjectErrorResult(action)) {
         throw Boom.badRequest(
           `Failed to load action ${action.id} (${action.error.statusCode}): ${action.error.message}`
         );
@@ -583,6 +584,9 @@ export class ActionsClient {
       );
     }
 
+    // Must run before the delete below — needs the connector's secrets to revoke its OAuth grant.
+    await this.deleteConnectorAuthTokens(id, authMode);
+
     const result = await this.context.unsecuredSavedObjectsClient.delete('action', id);
 
     const hookServices: HookServices = {
@@ -621,18 +625,18 @@ export class ActionsClient {
       this.context.logger
     );
 
+    return result;
+  }
+
+  private async deleteConnectorAuthTokens(id: string, authMode?: AuthMode) {
     try {
       await this.context.connectorTokenClient.deleteConnectorTokens({
         connectorId: id,
         authMode,
       });
     } catch (e) {
-      this.context.logger.error(
-        `Failed to delete auth tokens for connector "${id}" after delete: ${e.message}`
-      );
+      this.context.logger.error(`Failed to delete auth tokens for connector "${id}": ${e.message}`);
     }
-
-    return result;
   }
 
   public async execute(

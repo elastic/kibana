@@ -12,8 +12,6 @@ import type { ESQLAstCommand, ESQLColumn } from '@elastic/esql/types';
 import type { ESQLCommandSummary } from '@kbn/esql-language/src/commands/registry/types';
 import { getSummaryPerCommand } from './get_query_summary';
 
-const COMMANDS_THAT_ALLOW_RENAMING = new Set(['rename', 'stats', 'inline stats']);
-
 interface CommandWithSummary {
   cmd: ESQLAstCommand;
   summary: ESQLCommandSummary;
@@ -134,7 +132,7 @@ function buildContext(query: string): RenameResolutionContext {
       droppedColumnNamesByIndex[i] = new Set(getDroppedColumnNamesFromArgs(cmd));
     }
 
-    if (COMMANDS_THAT_ALLOW_RENAMING.has(cmd.name) && summary.renamedColumnsPairs?.size) {
+    if (summary.renamedColumnsPairs?.size) {
       const pairMap = new Map<string, string>();
       for (const [newName, oldName] of summary.renamedColumnsPairs) {
         if (!pairMap.has(newName)) {

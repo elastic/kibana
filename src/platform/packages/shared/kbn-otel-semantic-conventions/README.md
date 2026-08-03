@@ -202,7 +202,7 @@ DEBUG=* node scripts/generate_otel_semconv.js
 
 ## Contributing
 
-This package is maintained by the `@elastic/obs-onboarding-team`. When contributing:
+This package is maintained by the `@elastic/streams-ui`. When contributing:
 
 1. Add tests for new functionality
 2. Update type definitions as needed

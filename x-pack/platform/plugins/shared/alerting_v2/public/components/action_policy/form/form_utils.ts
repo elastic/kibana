@@ -34,6 +34,7 @@ export const toFormState = (response: ActionPolicyResponse): ActionPolicyFormSta
     throttleStrategy: response.throttle?.strategy ?? DEFAULT_STRATEGY_FOR_MODE[groupingMode],
     throttleInterval: response.throttle?.interval ?? '',
     destinations: response.destinations.map((d) => ({ type: d.type, id: d.id })),
+    inlineActions: [],
   };
 };
 
@@ -41,7 +42,6 @@ export const toCreatePayload = (state: ActionPolicyFormState): CreateActionPolic
   return {
     name: state.name,
     description: state.description,
-    type: 'global',
     groupingMode: state.groupingMode,
     ...(state.tags.length > 0 ? { tags: state.tags } : {}),
     ...(state.matcher ? { matcher: state.matcher } : {}),

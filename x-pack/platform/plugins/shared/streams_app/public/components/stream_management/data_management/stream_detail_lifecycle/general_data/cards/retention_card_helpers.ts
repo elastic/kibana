@@ -107,8 +107,12 @@ export const getRetentionSubtitles = ({
     }
 
     if (isDslLifecycle(lifecycle)) {
-      // DSL currently has a required hot/default phase and an optional delete phase (`data_retention`).
-      return lifecycle.dsl.data_retention ? 2 : 1;
+      // DSL always has the required hot/default phase, plus an optional frozen phase
+      // (`frozen_after`) and an optional delete phase (`data_retention`).
+      let count = 1;
+      if (lifecycle.dsl.frozen_after !== undefined) count += 1;
+      if (lifecycle.dsl.data_retention) count += 1;
+      return count;
     }
 
     if (isDisabledLifecycle(lifecycle)) {

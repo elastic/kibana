@@ -10,6 +10,7 @@ import type {
   ISavedObjectTypeRegistry,
   SavedObjectsType,
 } from '@kbn/core/server';
+import { isSavedObjectErrorResult } from '@kbn/core/server';
 
 import type { AssetSOObject, KibanaSavedObjectType, SimpleSOAssetType } from '../../../../common';
 import { ElasticsearchAssetType } from '../../../../common';
@@ -47,6 +48,11 @@ const getKibanaLinkForESAsset = (type: ElasticsearchAssetType, id: string): stri
   }
 };
 
+const getAppLinkForESAssetType = (type: string, id: string): string =>
+  Object.values(ElasticsearchAssetType).includes(type as ElasticsearchAssetType)
+    ? getKibanaLinkForESAsset(type as ElasticsearchAssetType, id)
+    : '';
+
 export async function getBulkAssets(
   soClient: SavedObjectsClientContract,
   soTypeRegistry: ISavedObjectTypeRegistry,
@@ -60,9 +66,20 @@ export async function getBulkAssets(
     .map(({ saved_object: savedObject }) => savedObject)
     .filter(
       (savedObject) =>
-        savedObject?.error?.statusCode !== 404 && displayedAssetTypesLookup.has(savedObject.type)
+        (!isSavedObjectErrorResult(savedObject) || savedObject.error.statusCode !== 404) &&
+        displayedAssetTypesLookup.has(savedObject.type)
     )
     .map((obj) => {
+      if (isSavedObjectErrorResult(obj)) {
+        // Elasticsearch assets aren't saved objects, so `bulkResolve` reports them as
+        // unsupported types. They still need their Kibana links.
+        return {
+          id: obj.id,
+          type: obj.type as unknown as ElasticsearchAssetType | KibanaSavedObjectType,
+          attributes: {},
+          appLink: getAppLinkForESAssetType(obj.type, obj.id),
+        };
+      }
       // Kibana SOs are registered with an app URL getter, so try to use that
       // for retrieving links to assets whenever possible
       if (!types[obj.type]) {
@@ -86,9 +103,7 @@ export async function getBulkAssets(
 
       // If we still don't have an app link at this point, manually map them (only ES types)
       if (!appLink) {
-        if (Object.values(ElasticsearchAssetType).includes(obj.type as ElasticsearchAssetType)) {
-          appLink = getKibanaLinkForESAsset(obj.type as ElasticsearchAssetType, obj.id);
-        }
+        appLink = getAppLinkForESAssetType(obj.type, obj.id);
       }
 
       const title =

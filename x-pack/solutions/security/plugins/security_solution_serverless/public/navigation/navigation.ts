@@ -42,18 +42,16 @@ export const registerSolutionNavigation = async (
   const workflowsUiEnabled$ = services.settings.client.get$<boolean>(WORKFLOWS_UI_SETTING_ID);
   const workflowsUiEnabled = await firstValueFrom(workflowsUiEnabled$);
 
-  const showAlertingV2 = Boolean(services.application.capabilities.alertingVTwo);
-
   const navigationTree = shouldUseAINavigation
     ? createAiNavigationTree(
+        services,
         initialChatExperience,
         workflowsUiEnabled,
-        showAlertingV2,
         agentBuilderNavAtTop
       )
     : await createNavigationTree(services, initialChatExperience);
 
   services.securitySolution.setSolutionNavigationTree(navigationTree);
 
-  services.serverless.initNavigation('security', Rx.of(navigationTree));
+  services.navigation.initNavigation('security', Rx.of(navigationTree));
 };

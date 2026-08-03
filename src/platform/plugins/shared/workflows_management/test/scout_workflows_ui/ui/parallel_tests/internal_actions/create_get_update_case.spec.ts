@@ -78,9 +78,7 @@ test.describe.skip(
       );
 
       // Run workflow with unsaved changes
-      await page.testSubj.click('runWorkflowHeaderButton');
-      await page.testSubj.waitForSelector('runWorkflowWithUnsavedChangesConfirmationModal');
-      await page.testSubj.click('confirmModalConfirmButton');
+      await pageObjects.workflowEditor.runWorkflowWithUnsavedChanges();
 
       // Set workflow inputs in the execute modal
       await page.testSubj.waitForSelector('workflowExecuteModal', { state: 'visible' });

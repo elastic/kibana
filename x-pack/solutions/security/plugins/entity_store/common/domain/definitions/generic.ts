@@ -13,6 +13,10 @@ import {
   getEntityFieldsDescriptions,
 } from './common_fields';
 
+// Generic entities represent cloud and orchestrator resources (e.g. AWS ARNs, Azure Resource IDs,
+// GCP Resource Names, Kubernetes pods) sourced from CSP integrations that populate `entity.id`.
+// They are consumed by Graph (entity and event flyout visualizations) and Asset Inventory.
+// Customers without CSP integrations will not produce any generic entities.
 export const genericEntityDefinition = {
   type: 'generic',
   name: `Security 'generic' Entity Store Definition`,
@@ -20,7 +24,7 @@ export const genericEntityDefinition = {
   indexPatterns: [],
   fieldEvaluations: [ENTITY_SOURCE_FIELD_EVALUATION],
   fields: [
-    // We want this to make sure it's also extracted on CCS logs extraction
+    // We want this to make sure it's also extracted on remote log extraction
     newestValue({ source: 'entity.id' }),
     newestValue({ source: 'entity.name' }),
     ...getEntityFieldsDescriptions(),

@@ -31,6 +31,7 @@ export const EVENT_SUCCESS_COUNT = 'event.success_count';
 
 export const SERVICE = 'service';
 export const SERVICE_NAME = 'service.name';
+export const SERVICE_NAMESPACE = 'service.namespace';
 export const SERVICE_ENVIRONMENT = 'service.environment';
 export const SERVICE_FRAMEWORK_NAME = 'service.framework.name';
 export const SERVICE_FRAMEWORK_VERSION = 'service.framework.version';
@@ -127,6 +128,7 @@ export const ERROR_CODE = 'error.code';
 
 // ANOMALY
 export const ANOMALY_DETECTOR_TYPE = 'anomaly.detector_type';
+export const ANOMALY_TIMESTAMP = 'anomaly.timestamp';
 
 // METRICS
 export const METRIC_SYSTEM_FREE_MEMORY = 'system.memory.actual.free';
@@ -168,7 +170,6 @@ export const CONTAINER_IMAGE = 'container.image.name';
 
 export const KUBERNETES = 'kubernetes';
 export const KUBERNETES_POD_NAME = 'kubernetes.pod.name';
-export const KUBERNETES_POD_NAME_OTEL = 'k8s.pod.name';
 export const KUBERNETES_POD_UID = 'kubernetes.pod.uid';
 export const KUBERNETES_NAMESPACE = 'kubernetes.namespace';
 export const KUBERNETES_NODE_NAME = 'kubernetes.node.name';
@@ -184,6 +185,10 @@ export const FAAS_TRIGGER_TYPE = 'faas.trigger.type';
 export const FAAS_DURATION = 'faas.duration';
 export const FAAS_COLDSTART_DURATION = 'faas.coldstart_duration';
 export const FAAS_BILLED_DURATION = 'faas.billed_duration';
+
+// ECS Gen AI fields — https://www.elastic.co/docs/reference/ecs/ecs-gen_ai
+export const GEN_AI_USAGE_INPUT_TOKENS = 'gen_ai.usage.input_tokens';
+export const GEN_AI_USAGE_OUTPUT_TOKENS = 'gen_ai.usage.output_tokens';
 
 // OpenTelemetry Metrics
 export const METRIC_OTEL_SYSTEM_CPU_UTILIZATION = 'system.cpu.utilization';

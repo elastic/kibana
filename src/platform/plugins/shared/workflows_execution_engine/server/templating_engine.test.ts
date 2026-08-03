@@ -11,6 +11,8 @@ import { WorkflowTemplatingEngine } from './templating_engine';
 
 describe('WorkflowTemplatingEngine', () => {
   let templatingEngine: WorkflowTemplatingEngine;
+  const liquidLimitErrorMessage =
+    'Liquid template rendering exceeded a workflow limit. Reduce the template size, simplify loops or filters, reduce the rendered output size, or override the limit in workflow settings and try again.';
 
   beforeEach(() => {
     templatingEngine = new WorkflowTemplatingEngine();
@@ -322,6 +324,43 @@ describe('WorkflowTemplatingEngine', () => {
       const context = { data: { a: 1, b: 2 } };
       const result = templatingEngine.render({ out: template }, context);
       expect(result.out).toEqual({ key: 'a', value: 1 });
+    });
+  });
+
+  describe('custom pick filter', () => {
+    it('should keep only the requested dotted-path fields, preserving structure and types', () => {
+      const template = '${{ alert | pick: fields }}';
+      const context = {
+        alert: {
+          host: { name: 'h1', ip: '10.0.0.1' },
+          event: { action: 'login' },
+          risk_score: 73,
+        },
+        fields: ['host.name', 'risk_score'],
+      };
+      const result = templatingEngine.render({ out: template }, context);
+      expect(result.out).toEqual({ host: { name: 'h1' }, risk_score: 73 });
+    });
+
+    it('should accept several string args instead of an array', () => {
+      const template = '${{ alert | pick: "a", "b" }}';
+      const context = { alert: { a: 1, b: 2, c: 3 } };
+      const result = templatingEngine.render({ out: template }, context);
+      expect(result.out).toEqual({ a: 1, b: 2 });
+    });
+
+    it('should skip absent paths', () => {
+      const template = '${{ alert | pick: fields }}';
+      const context = { alert: { a: 1 }, fields: ['a', 'x.y'] };
+      const result = templatingEngine.render({ out: template }, context);
+      expect(result.out).toEqual({ a: 1 });
+    });
+
+    it('should return a non-object value as-is', () => {
+      const template = '{{ value | pick: fields }}';
+      const context = { value: 'hello', fields: ['a'] };
+      const result = templatingEngine.render(template, context);
+      expect(result).toBe('hello');
     });
   });
 
@@ -833,13 +872,36 @@ describe('WorkflowTemplatingEngine', () => {
       it('should reject templates exceeding parse limit', () => {
         expect(() => {
           templatingEngine.render('x'.repeat(200_000), {});
-        }).toThrow('parse length limit exceeded');
+        }).toThrow(liquidLimitErrorMessage);
       });
 
       it('should reject templates that allocate too much memory', () => {
         expect(() => {
           templatingEngine.render('{% for i in (1..20000000) %}{{ i }}{% endfor %}', {});
-        }).toThrow('memory alloc limit exceeded');
+        }).toThrow(liquidLimitErrorMessage);
+      });
+
+      it('should reject templates exceeding render limit', () => {
+        const engine = new WorkflowTemplatingEngine({
+          liquidSettings: {
+            renderLimit: 1,
+          },
+        });
+
+        expect(() => {
+          engine.render('{% for i in (1..1000000) %}{% assign value = i %}{% endfor %}', {});
+        }).toThrow(liquidLimitErrorMessage);
+      });
+
+      it('should use workflow liquid settings when provided', () => {
+        const template = 'x'.repeat(160_000);
+        const engine = new WorkflowTemplatingEngine({
+          liquidSettings: {
+            parseLimit: 200_000,
+          },
+        });
+
+        expect(engine.render(template, {})).toBe(template);
       });
     });
 

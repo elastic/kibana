@@ -45,9 +45,17 @@ export const useEsqlAutocomplete = (services: RuleFormServices) => {
     const stableCallbacks: ESQLCallbacks = {
       getSources: (...args) => callbacksRef.current.getSources?.(...args) ?? [],
       getColumnsFor: (...args) => callbacksRef.current.getColumnsFor?.(...args) ?? [],
+      getDatasets: (...args) =>
+        callbacksRef.current.getDatasets?.(...args) ?? Promise.resolve({ datasets: [] }),
+      getViews: (...args) =>
+        callbacksRef.current.getViews?.(...args) ?? Promise.resolve({ views: [] }),
     };
 
     const disposables: monaco.IDisposable[] = [];
+
+    if (!ESQLLang) {
+      return () => {};
+    }
 
     const suggestion = ESQLLang.getSuggestionProvider?.(stableCallbacks);
     if (suggestion) {

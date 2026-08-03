@@ -6,7 +6,15 @@
  */
 
 import { usePerformanceContext } from '@kbn/ebt-tools';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiPanel, useEuiTheme } from '@elastic/eui';
+import {
+  EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
+  EuiPanel,
+  useEuiTheme,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type { ReactNode } from 'react';
 import React, { useLayoutEffect, useMemo, useRef, useState, useCallback } from 'react';
 import useWindowSize from 'react-use/lib/useWindowSize';
@@ -27,8 +35,7 @@ import { EmptyPrompt } from './empty_prompt';
 import { TimeoutPrompt } from './timeout_prompt';
 import { useRefDimensions } from './use_ref_dimensions';
 import { useServiceName } from '../../../hooks/use_service_name';
-import { useApmParams, useAnyOfApmParams } from '../../../hooks/use_apm_params';
-import { useApmRouter } from '../../../hooks/use_apm_router';
+import { useApmParams } from '../../../hooks/use_apm_params';
 import type { Environment } from '../../../../common/environment_rt';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { DisabledPrompt } from './disabled_prompt';
@@ -70,30 +77,8 @@ export function ServiceMapHome() {
       rangeFrom={rangeFrom}
       rangeTo={rangeTo}
       serviceGroupId={serviceGroup}
-      esQuery={esQuery ?? undefined}
-    />
-  );
-}
-
-export function ServiceMapServiceDetail() {
-  const {
-    query: { environment, kuery, rangeFrom, rangeTo },
-  } = useAnyOfApmParams(
-    '/services/{serviceName}/service-map',
-    '/mobile-services/{serviceName}/service-map'
-  );
-  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
-  const { esQuery } = useServiceMapSearchContext();
-
-  return (
-    <ServiceMap
-      environment={environment}
-      kuery={kuery}
-      start={start}
-      end={end}
-      rangeFrom={rangeFrom}
-      rangeTo={rangeTo}
-      esQuery={esQuery ?? undefined}
+      // Pass `null` through — `esQuery ?? undefined` would defeat search-bar fetch gating.
+      esQuery={esQuery}
     />
   );
 }
@@ -116,33 +101,21 @@ export function ServiceMap({
   rangeFrom?: string;
   rangeTo?: string;
   serviceGroupId?: string;
-  esQuery?: { bool: BoolQuery };
+  /**
+   * `null` = search bar not ready yet (gate fetch).
+   * `undefined` = no search provider (embeddable).
+   */
+  esQuery?: { bool: BoolQuery } | null;
 }) {
   const license = useLicenseContext();
   const serviceName = useServiceName();
-  const apmRouter = useApmRouter();
-  const { query } = useAnyOfApmParams(
-    '/service-map',
-    '/services/{serviceName}/service-map',
-    '/mobile-services/{serviceName}/service-map'
-  );
-
-  const fullMapHref =
-    serviceName && 'rangeFrom' in query && 'rangeTo' in query && query.rangeFrom && query.rangeTo
-      ? apmRouter.link('/service-map', {
-          query: {
-            rangeFrom: query.rangeFrom,
-            rangeTo: query.rangeTo,
-            environment: query.environment,
-            // Drop kuery when navigating to the full map — filtering moves to
-            // the Controls API / filter bar on the destination page.
-            kuery: '',
-            comparisonEnabled: query.comparisonEnabled,
-            offset: query.offset,
-            serviceGroup: 'serviceGroup' in query ? query.serviceGroup ?? '' : '',
-          },
-        })
-      : undefined;
+  const { highlightedServiceNames: highlightedFromControls } = useServiceMapSearchContext();
+  const highlightedServiceNames = useMemo(() => {
+    if (highlightedFromControls.length > 0) {
+      return highlightedFromControls;
+    }
+    return serviceName ? [serviceName] : [];
+  }, [highlightedFromControls, serviceName]);
 
   const { config } = useApmPluginContext();
   const { onPageReady } = usePerformanceContext();
@@ -259,6 +232,31 @@ export function ServiceMap({
     );
   }
 
+  // Any other fetch failure: surface a real error instead of falling through to an empty graph,
+  // which reads as "no data" (review #2). Mirrors the embeddable's error callout.
+  if (status === FETCH_STATUS.FAILURE) {
+    return (
+      <PromptContainer>
+        <EuiCallOut
+          announceOnMount
+          color="danger"
+          iconType="warning"
+          title={i18n.translate('xpack.apm.serviceMap.errorTitle', {
+            defaultMessage: 'Unable to load service map',
+          })}
+          data-test-subj="serviceMapError"
+        >
+          <p>
+            {i18n.translate('xpack.apm.serviceMap.errorDescription', {
+              defaultMessage:
+                'There was a problem loading the service map. Try refreshing the view.',
+            })}
+          </p>
+        </EuiCallOut>
+      </PromptContainer>
+    );
+  }
+
   if (status === FETCH_STATUS.SUCCESS) {
     onPageReady({
       customMetrics: {
@@ -298,7 +296,7 @@ export function ServiceMap({
               nodes={isLoading ? [] : nodesForGraph}
               edges={isLoading ? [] : data.edges}
               serviceName={serviceName}
-              highlightedServiceName={serviceName}
+              highlightedServiceNames={highlightedServiceNames}
               environment={environment}
               kuery={kuery}
               start={start}
@@ -308,7 +306,6 @@ export function ServiceMap({
               serviceGroupId={serviceGroupId}
               isFullscreen={isFullscreen}
               onToggleFullscreen={onToggleFullscreen}
-              fullMapHref={fullMapHref}
             />
           </div>
         </EuiPanel>

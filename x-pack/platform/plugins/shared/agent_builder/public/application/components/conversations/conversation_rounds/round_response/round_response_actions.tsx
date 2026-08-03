@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { css } from '@emotion/react';
 import copy from 'copy-to-clipboard';
 import React, { useCallback, useMemo } from 'react';
@@ -17,6 +17,7 @@ import { useToasts } from '../../../../hooks/use_toasts';
 import { useConversationStream } from '../../../../hooks/use_conversation_stream';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useExperimentalFeatures } from '../../../../hooks/use_experimental_features';
+import { useTracingEnabled } from '../../../../hooks/use_tracing_enabled';
 import { RoundMetadataPopover } from './round_metadata_popover';
 import { RoundTraceButton } from './round_trace_button';
 
@@ -51,6 +52,7 @@ export const RoundResponseActions: React.FC<RoundResponseActionsProps> = ({
   const { regenerate, isRegenerating, isResponseLoading } = useConversationStream();
   const { services } = useKibana();
   const isExperimentalEnabled = useExperimentalFeatures();
+  const isTracingEnabled = useTracingEnabled();
 
   const handleCopy = useCallback(() => {
     const isSuccess = copy(content);
@@ -90,7 +92,7 @@ export const RoundResponseActions: React.FC<RoundResponseActionsProps> = ({
     });
   }, [rawRound, services.plugins.evals, traceId]);
 
-  const showTraceButton = isExperimentalEnabled && Boolean(traceId);
+  const showTraceButton = isTracingEnabled && Boolean(traceId);
   const showAddToDatasetButton = isExperimentalEnabled && addToDatasetAction !== null;
 
   return (
@@ -105,35 +107,39 @@ export const RoundResponseActions: React.FC<RoundResponseActionsProps> = ({
       `}
     >
       <EuiFlexItem grow={false}>
-        <EuiButtonIcon
-          iconType="copy"
-          aria-label={labels.copy}
-          onClick={handleCopy}
-          color="text"
-          data-test-subj="roundResponseCopyButton"
-          {...getEbtProps({
-            element: AGENT_BUILDER_UI_EBT.element.pageContent,
-            action: AGENT_BUILDER_UI_EBT.action.conversation.COPY_RESPONSE,
-            detail: 'conversation',
-          })}
-        />
-      </EuiFlexItem>
-      {isLastRound && (
-        <EuiFlexItem grow={false}>
+        <EuiToolTip content={labels.copy} disableScreenReaderOutput>
           <EuiButtonIcon
-            iconType="refresh"
-            aria-label={labels.regenerate}
-            onClick={handleResend}
+            iconType="copy"
+            aria-label={labels.copy}
+            onClick={handleCopy}
             color="text"
-            isDisabled={isRegenerateDisabled}
-            isLoading={isRegenerating}
-            data-test-subj="roundResponseRegenerateButton"
+            data-test-subj="roundResponseCopyButton"
             {...getEbtProps({
               element: AGENT_BUILDER_UI_EBT.element.pageContent,
-              action: AGENT_BUILDER_UI_EBT.action.conversation.REGENERATE,
+              action: AGENT_BUILDER_UI_EBT.action.conversation.COPY_RESPONSE,
               detail: 'conversation',
             })}
           />
+        </EuiToolTip>
+      </EuiFlexItem>
+      {isLastRound && (
+        <EuiFlexItem grow={false}>
+          <EuiToolTip content={labels.regenerate} disableScreenReaderOutput>
+            <EuiButtonIcon
+              iconType="refresh"
+              aria-label={labels.regenerate}
+              onClick={handleResend}
+              color="text"
+              isDisabled={isRegenerateDisabled}
+              isLoading={isRegenerating}
+              data-test-subj="roundResponseRegenerateButton"
+              {...getEbtProps({
+                element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                action: AGENT_BUILDER_UI_EBT.action.conversation.REGENERATE,
+                detail: 'conversation',
+              })}
+            />
+          </EuiToolTip>
         </EuiFlexItem>
       )}
       {showTraceButton && traceId && (

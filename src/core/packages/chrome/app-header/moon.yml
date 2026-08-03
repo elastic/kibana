@@ -17,11 +17,14 @@ project:
   owner: '@elastic/appex-sharedux'
   sourceRoot: src/core/packages/chrome/app-header
 dependsOn:
+  - '@kbn/core-capabilities-common'
   - '@kbn/core-chrome-app-menu-components'
   - '@kbn/core-chrome-browser'
   - '@kbn/core-chrome-browser-context'
+  - '@kbn/core-chrome-browser-context-mocks'
   - '@kbn/core-http-browser'
   - '@kbn/core-mount-utils-browser'
+  - '@kbn/favorite-button'
   - '@kbn/i18n'
   - '@kbn/use-observable'
   - '@kbn/core-chrome-browser-internal-types'

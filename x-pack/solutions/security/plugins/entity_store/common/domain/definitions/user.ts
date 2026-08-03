@@ -126,7 +126,18 @@ export const userEntityDefinition: EntityDefinitionWithoutId = {
             },
             then: USER_ENTITY_NAMESPACE.Local,
           },
-
+          {
+            condition: {
+              and: [
+                { field: 'event.kind', includes: 'asset' },
+                { field: 'event.module', includes: 'asset_discovery' },
+              ],
+            },
+            then: {
+              field: 'cloud.provider',
+              mapping: { aws: 'aws', gcp: 'gcp', azure: 'entra_id' },
+            },
+          },
           { sourceMatchesAny: ['okta', 'entityanalytics_okta'], then: 'okta' },
           { sourceMatchesAny: ['azure', 'entityanalytics_entra_id'], then: 'entra_id' },
           { sourceMatchesAny: ['o365', 'o365_metrics'], then: 'microsoft_365' },
@@ -228,6 +239,8 @@ export const userEntityDefinition: EntityDefinitionWithoutId = {
     collect({ source: 'event.category' }),
     collect({ source: 'event.type' }),
     collect({ source: 'event.outcome' }),
+
+    newestValue({ source: 'cloud.provider' }),
 
     newestValue({ source: 'entity.namespace' }),
     oldestValue({ source: 'entity.confidence' }),

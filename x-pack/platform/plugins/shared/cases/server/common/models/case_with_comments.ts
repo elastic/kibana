@@ -13,6 +13,7 @@ import type {
   SavedObjectsUpdateResponse,
   SavedObjectsFindResponse,
 } from '@kbn/core/server';
+import { isSavedObjectErrorResult } from '@kbn/core/server';
 import {
   isLegacyAttachmentRequest,
   isUnifiedAttachmentRequest,
@@ -37,6 +38,7 @@ import {
 import { CASE_SAVED_OBJECT, MAX_DOCS_PER_PAGE } from '../../../common/constants';
 import type { CasesClientArgs } from '../../client';
 import type { RefreshSetting } from '../../services/types';
+import type { AttachmentSavedObjectType } from '../../services/user_actions/types';
 import { createCaseError } from '../error';
 import { AttachmentLimitChecker } from '../limiter_checker';
 import type { AlertInfo } from '../types';
@@ -255,6 +257,7 @@ export class CaseCommentModel {
         action: UserActionActions.update,
         caseId: this.caseInfo.id,
         savedObjectId: comment.id,
+        savedObjectType: comment.type as AttachmentSavedObjectType,
         payload: { attachment: queryRestAttributes },
         user: this.params.user,
         owner,
@@ -599,6 +602,7 @@ export class CaseCommentModel {
         action: UserActionActions.create,
         caseId: this.caseInfo.id,
         savedObjectId: comment.id,
+        savedObjectType: comment.type as AttachmentSavedObjectType,
         payload: {
           attachment: req,
         },
@@ -609,14 +613,17 @@ export class CaseCommentModel {
   }
 
   private async bulkCreateCommentUserAction(
-    attachments: Array<{ id: string } & AttachmentRequestV2>
+    attachments: Array<
+      { id: string; savedObjectType: AttachmentSavedObjectType } & AttachmentRequestV2
+    >
   ) {
     await this.params.services.userActionService.creator.bulkCreateAttachmentCreation({
       caseId: this.caseInfo.id,
-      attachments: attachments.map(({ id, ...attachment }) => ({
+      attachments: attachments.map(({ id, savedObjectType, ...attachment }) => ({
         id,
         owner: attachment.owner,
         attachment,
+        savedObjectType,
       })),
       user: this.params.user,
     });
@@ -705,12 +712,21 @@ export class CaseCommentModel {
       });
 
       const savedObjectsWithoutErrors = newlyCreatedAttachments.saved_objects.filter(
-        (attachment) => attachment.error == null
+        (attachment) => !isSavedObjectErrorResult(attachment)
       );
 
-      const attachmentsWithoutErrors = attachments.filter((attachment) =>
-        savedObjectsWithoutErrors.some((so) => so.id === attachment.id)
-      );
+      const attachmentsWithoutErrors = attachments.flatMap((attachment) => {
+        const savedObject = savedObjectsWithoutErrors.find((so) => so.id === attachment.id);
+
+        return savedObject
+          ? [
+              {
+                ...attachment,
+                savedObjectType: savedObject.type as AttachmentSavedObjectType,
+              },
+            ]
+          : [];
+      });
 
       await Promise.all([
         commentableCase.handleAlertComments(attachmentsWithoutErrors),

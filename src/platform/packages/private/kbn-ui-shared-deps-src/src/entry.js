@@ -93,6 +93,10 @@ export const ReactRedux = require('react-redux');
 export const Redux = require('redux');
 export const Immer = require('immer');
 export const Reselect = require('reselect');
+export const ReduxjsToolkitV1 = require('redux-toolkit-v1');
+export const ReactReduxV7 = require('react-redux-v7');
+export const ReduxV4 = require('redux-v4');
+export const ReselectV4 = require('reselect-v4');
 
 export const Lodash = require('lodash');
 export const LodashFp = require('lodash/fp');
@@ -101,6 +105,7 @@ export const ChromaJs = require('chroma-js');
 // runtime deps which don't need to be copied across all bundles
 export const TsLib = require('tslib');
 export const Uuid = require('uuid');
+export const Inversify = require('inversify');
 export const KbnAnalytics = require('@kbn/analytics');
 export const KbnCryptoBrowser = require('@kbn/crypto-browser');
 export const KbnEsQuery = require('@kbn/es-query');
@@ -130,3 +135,4 @@ export const KbnVisualizationsCommon = require('@kbn/visualizations-common');
 export const KbnCoreDi = require('@kbn/core-di-browser');
 export const KbnCoreSidebarContext = require('@kbn/core-chrome-sidebar-context');
 export const KbnCoreChromeBrowserContext = require('@kbn/core-chrome-browser-context');
+export const KbnCoreUserProfileBrowserContext = require('@kbn/core-user-profile-browser-context');

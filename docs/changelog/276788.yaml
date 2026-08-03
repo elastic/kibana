@@ -1,0 +1,8 @@
+prs:
+- https://github.com/elastic/kibana/pull/276788
+type: enhancement
+products:
+- product: cloud-serverless
+  target: 2026-07-14
+title: "Improve alert analysis workflow licensing, search, and auto-close controls"
+description: "Alert analysis is gated to Enterprise with an upsell for other licenses, rule-name search supports substrings, and auto-close confidence inputs are disabled when auto-close is off."

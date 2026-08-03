@@ -68,7 +68,10 @@ test.describe.serial(
       page,
     }) => {
       await pageObjects.host.gotoPath('/host/linux');
-      await pageObjects.host.ingestionSelector().waitFor({ state: 'visible' });
+      // The ingestion selector's visibility depends on wiredStreamsStatus.isLoading, an async
+      // status check that can exceed the default 10s under serverless parallel load. Wait
+      // explicitly (matching the 30s wait later in this test).
+      await pageObjects.host.ingestionSelector().waitFor({ state: 'visible', timeout: 30_000 });
 
       await test.step('select Wired Streams ingestion', async () => {
         await pageObjects.onboarding.selectWiredStreams();
@@ -82,6 +85,10 @@ test.describe.serial(
       });
 
       await test.step('ingestion mode survives the collection method switch', async () => {
+        // The auto-detect page re-creates the flow; the ingestion selector lives inside the
+        // install step, which renders a skeleton until POST /flow resolves. Wait for it first,
+        // mirroring the wait used earlier in this test.
+        await pageObjects.host.ingestionSelector().waitFor({ state: 'visible', timeout: 30_000 });
         await expect(pageObjects.onboarding.wiredStreamsOption).toHaveAttribute(
           'aria-pressed',
           'true'

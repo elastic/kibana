@@ -108,9 +108,9 @@ interface AddLayerButtonProps<T> {
   isInlineEditing?: boolean;
 }
 
-interface VisualizationStateFromContextChangeProps {
-  suggestions: Suggestion[];
-  context: VisualizeEditorContext;
+interface VisualizationStateFromContextChangeProps<T = unknown> {
+  suggestions: Array<Suggestion<T>>;
+  context: VisualizeEditorContext<T extends LensConfiguration ? T : LensConfiguration>;
 }
 
 export type AddLayerFunction<T = unknown> = (
@@ -516,7 +516,7 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
   getRenderEventCounters?: (state: T) => string[];
 
   getSuggestionFromConvertToLensContext?: (
-    props: VisualizationStateFromContextChangeProps
+    props: VisualizationStateFromContextChangeProps<T>
   ) => Suggestion<T> | undefined;
 
   isEqual?: (

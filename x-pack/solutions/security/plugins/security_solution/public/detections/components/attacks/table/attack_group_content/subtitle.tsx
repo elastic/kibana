@@ -6,7 +6,8 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiAvatar, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiAvatar, EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
+import { css } from '@emotion/react';
 import {
   replaceAnonymizedValuesWithOriginalValues,
   type AttackDiscoveryAlert,
@@ -15,6 +16,9 @@ import {
 import { i18n } from '@kbn/i18n';
 import { TableId } from '@kbn/securitysolution-data-table';
 
+import { UserAvatar } from '@kbn/user-profile-components';
+import { useBulkGetUserProfiles } from '../../../../../common/components/user_profiles/use_bulk_get_user_profiles';
+import { getOriginalAlertIds } from '../../../../../attack_discovery/helpers';
 import { getFormattedDate } from '../../../../../attack_discovery/pages/loading_callout/loading_messages/get_formatted_time';
 import { useDateFormat } from '../../../../../common/lib/kibana';
 import { AttackDiscoveryMarkdownFormatter } from '../../../../../attack_discovery/pages/results/attack_discovery_markdown_formatter';
@@ -38,6 +42,33 @@ export const UNKNOWN_USER_LABEL = i18n.translate(
     defaultMessage: 'Unknown',
   }
 );
+
+/**
+ * Converts attack discovery field markdown (`{{ field.value }}`) to plain text for tooltips.
+ */
+export const getSummaryPlainText = (markdown: string): string =>
+  markdown.replace(/\{\{\s*\S+\s+(.*?)\s*\}\}/g, '$1');
+
+const truncatedSummaryCss = css`
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  .euiMarkdownFormat {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    > * {
+      display: inline;
+    }
+
+    p {
+      margin: 0;
+    }
+  }
+`;
 
 export interface SubtitleProps {
   /**
@@ -68,6 +99,11 @@ export const Subtitle = React.memo<SubtitleProps>(({ attack, showAnonymized = fa
       : null;
   }, [attack.entitySummaryMarkdown, attack.replacements, showAnonymized]);
 
+  const summaryPlainText = useMemo(
+    () => (summary != null ? getSummaryPlainText(summary) : null),
+    [summary]
+  );
+
   const formattedTimestamp = useMemo(() => {
     return getFormattedDate({
       date: attack.timestamp,
@@ -79,12 +115,21 @@ export const Subtitle = React.memo<SubtitleProps>(({ attack, showAnonymized = fa
   const separator = '|';
   const userName = attack.userName || UNKNOWN_USER_LABEL;
 
+  const originalAlertIds = useMemo(
+    () => getOriginalAlertIds(attack.alertIds, attack.replacements),
+    [attack.alertIds, attack.replacements]
+  );
+
+  const uids = useMemo(() => new Set(attack.userId ? [attack.userId] : []), [attack.userId]);
+  const { data: userProfiles } = useBulkGetUserProfiles({ uids });
+  const runByProfile = userProfiles?.[0];
+
   return (
     <EuiFlexGroup
       alignItems="center"
       gutterSize="s"
       responsive={false}
-      wrap={true}
+      wrap={false}
       data-test-subj="attack-subtitle"
     >
       {formattedTimestamp && (
@@ -112,14 +157,23 @@ export const Subtitle = React.memo<SubtitleProps>(({ attack, showAnonymized = fa
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiAvatar size="s" name={userName} data-test-subj="attack-run-by-avatar" />
+                {attack.userId ? (
+                  <UserAvatar
+                    user={runByProfile?.user}
+                    avatar={runByProfile?.data?.avatar}
+                    size="s"
+                    data-test-subj="attack-run-by-avatar"
+                  />
+                ) : (
+                  <EuiAvatar size="s" name={userName} data-test-subj="attack-run-by-avatar" />
+                )}
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
         </>
       )}
 
-      {summary && (
+      {summary && summaryPlainText && (
         <>
           {(formattedTimestamp || isManual) && (
             <EuiFlexItem grow={false}>
@@ -128,12 +182,23 @@ export const Subtitle = React.memo<SubtitleProps>(({ attack, showAnonymized = fa
               </EuiText>
             </EuiFlexItem>
           )}
-          <EuiFlexItem grow={false}>
-            <AttackDiscoveryMarkdownFormatter
-              scopeId={TableId.alertsOnAttacksPage}
-              disableActions={showAnonymized}
-              markdown={summary}
-            />
+          <EuiFlexItem
+            grow
+            css={css`
+              min-width: 0;
+            `}
+            data-test-subj="attack-subtitle-summary"
+          >
+            <EuiToolTip content={summaryPlainText} display="block" anchorClassName="eui-fullWidth">
+              <div css={truncatedSummaryCss} tabIndex={0}>
+                <AttackDiscoveryMarkdownFormatter
+                  scopeId={TableId.alertsOnAttacksPage}
+                  disableActions={showAnonymized}
+                  markdown={summary}
+                  alertIds={originalAlertIds}
+                />
+              </div>
+            </EuiToolTip>
           </EuiFlexItem>
         </>
       )}

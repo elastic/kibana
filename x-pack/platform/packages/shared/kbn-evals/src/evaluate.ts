@@ -6,6 +6,7 @@
  */
 
 import { hostname as osHostname } from 'os';
+import { execFileSync } from 'child_process';
 import type { InferenceConnectorType, InferenceConnector, Model } from '@kbn/inference-common';
 import { getConnectorModel, getConnectorFamily, getConnectorProvider } from '@kbn/inference-common';
 import { createRestClient } from '@kbn/inference-plugin/common';
@@ -13,15 +14,16 @@ import { test as base } from '@kbn/scout';
 import { createEsClientForTesting } from '@kbn/test-es-server';
 import type { AvailableConnectorWithId } from '@kbn/gen-ai-functional-testing';
 import { KibanaEvalsClient } from './kibana_evals_executor/client';
-import type { EvaluationTestOptions } from './config/create_playwright_eval_config';
 import { httpHandlerFromKbnClient } from './utils/http_handler_from_kbn_client';
 import { wrapKbnClientWithRetries } from './utils/kbn_client_with_retries';
 import { getEvaluationsKbnClient } from './utils/evaluations_kbn_client';
 import { createCriteriaEvaluator } from './evaluators/criteria';
 import { getGitMetadata } from './utils/git_metadata';
+import { buildExecutionId } from './utils/build_execution_id';
 import { createDefaultTerminalReporter } from './utils/reporting/evaluation_reporter';
 import { createConnectorFixture, resolveConnectorId } from './utils/create_connector_fixture';
 import { wrapInferenceClientWithEisConnectorTelemetry } from './utils/wrap_inference_client_with_connector_telemetry';
+import { createAgentBuilderClient } from './utils/agent_builder_client';
 import { createCorrectnessAnalysisEvaluator } from './evaluators/correctness';
 import { createGroundednessAnalysisEvaluator } from './evaluators/groundedness';
 import {
@@ -33,6 +35,7 @@ import {
 } from './evaluators/trace_based';
 import { ESQL_EQUIVALENCE_EVALUATOR_NAME } from './evaluators/esql';
 import { EvalsClient } from './utils/evals_client';
+import { EvaluatorApiClient } from './utils/evaluator_api_client';
 import { getBuildkiteCiMetadataFromEnv } from './utils/ci_metadata';
 import { buildIngestRequest } from './utils/build_ingest_request';
 import type {
@@ -41,20 +44,7 @@ import type {
   EvaluationSpecificWorkerFixtures,
   Example,
 } from './types';
-
-function isElasticCloudEsUrl(esUrl: string): boolean {
-  try {
-    const withProtocol = /^[a-zA-Z][a-zA-Z0-9+.-]*:\/\//.test(esUrl) ? esUrl : `https://${esUrl}`;
-    const hostname = new URL(withProtocol).hostname.replace(/\.$/, '').toLowerCase();
-    return (
-      hostname === 'elastic-cloud.com' ||
-      hostname.endsWith('.elastic-cloud.com') ||
-      hostname.endsWith('elastic.cloud')
-    );
-  } catch {
-    return false;
-  }
-}
+import { isElasticCloudEsUrl } from './utils/es_url';
 
 function isObjectRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -100,6 +90,14 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
     },
     { scope: 'worker' },
   ],
+  evaluatorClient: [
+    async ({ kbnClient, log }, use) => {
+      const evaluationsKbnClient = getEvaluationsKbnClient({ kbnClient, log });
+      const evaluatorClient = new EvaluatorApiClient(evaluationsKbnClient, log);
+      await use(evaluatorClient);
+    },
+    { scope: 'worker' },
+  ],
   workerExecutionId: [
     async ({}, use) => {
       await use({ current: undefined as string | undefined });
@@ -125,24 +123,32 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
     { scope: 'worker' },
   ],
   connector: [
-    async ({ fetch, log }, use, testInfo) => {
-      const predefinedConnector = (testInfo.project.use as Pick<EvaluationTestOptions, 'connector'>)
-        .connector;
-
-      await createConnectorFixture({ predefinedConnector, fetch, log, use });
+    async ({ fetch, log, connectorParam }, use) => {
+      if (!connectorParam) {
+        throw new Error(
+          'The `connectorParam` option must be set per-project in the Playwright config.'
+        );
+      }
+      await createConnectorFixture({ predefinedConnector: connectorParam, fetch, log, use });
     },
     {
       scope: 'worker',
     },
   ],
   evaluationConnector: [
-    async ({ fetch, log, connector }, use, testInfo) => {
-      const predefinedConnector = (
-        testInfo.project.use as Pick<EvaluationTestOptions, 'evaluationConnector'>
-      ).evaluationConnector;
-
-      if (resolveConnectorId(predefinedConnector.id) !== connector.id) {
-        await createConnectorFixture({ predefinedConnector, fetch, log, use });
+    async ({ fetch, log, connector, evaluationConnectorParam }, use) => {
+      if (!evaluationConnectorParam) {
+        throw new Error(
+          'The `evaluationConnectorParam` option must be set per-project in the Playwright config.'
+        );
+      }
+      if (resolveConnectorId(evaluationConnectorParam.id) !== connector.id) {
+        await createConnectorFixture({
+          predefinedConnector: evaluationConnectorParam,
+          fetch,
+          log,
+          use,
+        });
       } else {
         // If the evaluation connector is the same as the main connector, reuse it
         await use(connector);
@@ -166,6 +172,21 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
       log.serviceLoaded?.('inferenceClient');
 
       await use(wrappedInferenceClient);
+    },
+    { scope: 'worker' },
+  ],
+
+  agentBuilderClient: [
+    async ({ fetch, log, connector }, use) => {
+      const agentBuilderClient = createAgentBuilderClient({
+        fetch,
+        log,
+        connectorId: connector.id,
+      });
+
+      log.serviceLoaded?.('agentBuilderClient');
+
+      await use(agentBuilderClient);
     },
     { scope: 'worker' },
   ],
@@ -271,10 +292,19 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
       const evaluatorModel = buildModelFromConnector(evaluationConnector);
       const suiteId = process.env.EVAL_SUITE_ID;
       const buildkiteMetadata = getBuildkiteCiMetadataFromEnv();
+      // Optional space assignment for offline runs. Comma-separated so a run can
+      // target several spaces; omitted means the target Kibana's default space.
+      const spaceIds = process.env.EVAL_SPACE_ID
+        ? process.env.EVAL_SPACE_ID.split(',')
+            .map((id) => id.trim())
+            .filter(Boolean)
+        : undefined;
 
-      const baseExecutionId = process.env.TEST_RUN_ID;
-      const executionId =
-        baseExecutionId && model.id ? `${baseExecutionId}::${model.id}` : baseExecutionId;
+      const executionId = buildExecutionId({
+        baseExecutionId: process.env.TEST_RUN_ID,
+        suiteId,
+        modelId: model.id,
+      });
 
       workerExecutionId.current = executionId;
 
@@ -308,6 +338,7 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
               suiteId,
               executionId,
               buildkiteMetadata,
+              spaceIds,
               source: { kind: 'event', event },
               log,
             });
@@ -332,11 +363,44 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
       await use(executorClient);
 
       const datasetRunResults = await executorClient.getDatasetRunResults();
-      for (const result of datasetRunResults) {
-        await reportModelScore(evalsClient, result.id, log, {
+      if (datasetRunResults.length > 0 && executionId) {
+        await reportModelScore(evalsClient, datasetRunResults[0].id, log, {
           taskModelId: model.id,
           suiteId,
+          executionId,
         });
+      } else {
+        for (const result of datasetRunResults) {
+          await reportModelScore(evalsClient, result.id, log, {
+            taskModelId: model.id,
+            suiteId,
+          });
+        }
+      }
+
+      // Publish the full composite execution ID to Buildkite metadata so the
+      // post-comparison step can retrieve it without querying the experiments API.
+      // Per-connector key (kbn-evals:execution-id:<suite>:<connector>) is the primary
+      // path for multi-model fanout builds; the per-suite key is a fallback for single
+      // runs where EVAL_PROJECT is not set.
+      if (executionId && suiteId && process.env.BUILDKITE_BUILD_ID) {
+        const connectorId = process.env.EVAL_PROJECT;
+        try {
+          if (connectorId) {
+            execFileSync(
+              'buildkite-agent',
+              ['meta-data', 'set', `kbn-evals:execution-id:${suiteId}:${connectorId}`, executionId],
+              { stdio: 'ignore' }
+            );
+          }
+          execFileSync(
+            'buildkite-agent',
+            ['meta-data', 'set', `kbn-evals:execution-id:${suiteId}`, executionId],
+            { stdio: 'ignore' }
+          );
+        } catch {
+          // Not running inside Buildkite; skip silently.
+        }
       }
     },
     {
@@ -413,12 +477,10 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
     },
     { scope: 'worker' },
   ],
-  repetitions: [
-    async ({}, use, testInfo) => {
-      // Get repetitions from test options (set in playwright config)
-      const repetitions = (testInfo.project.use as any).repetitions || 1;
-      await use(repetitions);
-    },
-    { scope: 'worker' },
-  ],
+  // User-selected execution parameters, set per-project in the Playwright config.
+  // Playwright >=1.61 requires anything set in a project's `use` to be declared as an
+  // `{ option: true }` fixture, so these carry the selected values into the fixtures above.
+  connectorParam: [undefined, { option: true, scope: 'worker' }],
+  evaluationConnectorParam: [undefined, { option: true, scope: 'worker' }],
+  repetitions: [1, { option: true, scope: 'worker' }],
 });

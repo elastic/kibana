@@ -26,6 +26,9 @@ export const registerReadRoute = (router: TagsPluginRouter, usageCounter?: Usage
   readRoute.addVersion(
     {
       version: routeVersion,
+      options: {
+        oasOperationObject: async () => (await import('../oas_examples')).readTagOASOperationObject,
+      },
       validate: {
         request: {
           params: tagIdParamSchema,
@@ -45,7 +48,7 @@ export const registerReadRoute = (router: TagsPluginRouter, usageCounter?: Usage
       },
     },
     async (ctx, req, res) =>
-      telemetryHandler(req, usageCounter, async () => {
+      telemetryHandler(req, { usageCounter }, async () => {
         const { id } = req.params;
         try {
           const body = await read(ctx, id);

@@ -8,13 +8,14 @@ import React, { useCallback, useState, useEffect } from 'react';
 import type { FunctionComponent, ChangeEvent } from 'react';
 
 import {
+  EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiFieldPassword,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonEmpty,
-  EuiFieldText,
-  EuiFieldPassword,
-  EuiButtonIcon,
   EuiSpacer,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -96,19 +97,30 @@ const Row: FunctionComponent<RowProps> = ({
       </EuiFlexItem>
       {isMultiRow && (
         <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            color="text"
-            onClick={onDeleteHandler}
-            iconType="cross"
-            disabled={isDisabled}
-            aria-label={i18n.translate('xpack.fleet.multiTextInput.deleteRowButton', {
+          <EuiToolTip
+            content={i18n.translate('xpack.fleet.multiTextInput.deleteRowButton', {
               defaultMessage: 'Delete "{fieldLabel}" input {index}',
               values: {
                 fieldLabel,
                 index: index + 1,
               },
             })}
-          />
+            disableScreenReaderOutput
+          >
+            <EuiButtonIcon
+              color="text"
+              onClick={onDeleteHandler}
+              iconType="cross"
+              disabled={isDisabled}
+              aria-label={i18n.translate('xpack.fleet.multiTextInput.deleteRowButton', {
+                defaultMessage: 'Delete "{fieldLabel}" input {index}',
+                values: {
+                  fieldLabel,
+                  index: index + 1,
+                },
+              })}
+            />
+          </EuiToolTip>
         </EuiFlexItem>
       )}
     </EuiFlexGroup>

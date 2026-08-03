@@ -6,17 +6,16 @@
  */
 
 import type {
+  ActionPolicy,
   AlertEpisode,
   AlertEpisodeSuppression,
   DispatcherPipelineInput,
   DispatcherPipelineState,
   DispatcherStep,
   DispatcherStepOutput,
-  GlobalActionPolicy,
   MatchedPair,
   ActionGroup,
   Rule,
-  SingleRuleActionPolicy,
 } from '../types';
 
 export function createDispatcherPipelineInput(
@@ -43,6 +42,8 @@ export function createAlertEpisode(overrides: Partial<AlertEpisode> = {}): Alert
   return {
     last_event_timestamp: '2026-01-22T07:10:00.000Z',
     rule_id: 'rule-1',
+    source: 'internal',
+    space_id: 'default',
     group_hash: 'hash-1',
     episode_id: 'episode-1',
     episode_status: 'active',
@@ -55,6 +56,8 @@ export function createAlertEpisodeSuppression(
 ): AlertEpisodeSuppression {
   return {
     rule_id: 'rule-1',
+    source: 'internal',
+    space_id: 'default',
     group_hash: 'hash-1',
     episode_id: 'episode-1',
     should_suppress: false,
@@ -72,15 +75,12 @@ export function createRule(overrides: Partial<Rule> = {}): Rule {
   };
 }
 
-export function createActionPolicy(
-  overrides: Partial<GlobalActionPolicy> = {}
-): GlobalActionPolicy {
+export function createActionPolicy(overrides: Partial<ActionPolicy> = {}): ActionPolicy {
   return {
     id: 'policy-1',
     spaceId: 'default',
     name: 'Test policy',
     enabled: true,
-    type: 'global',
     destinations: [{ type: 'workflow' as const, id: 'workflow-1' }],
     groupBy: [],
     tags: [],
@@ -88,22 +88,15 @@ export function createActionPolicy(
   };
 }
 
-export function createSingleRuleActionPolicy(
+export function createRuleScopedActionPolicy(
   ruleId: string,
-  overrides: Partial<Omit<SingleRuleActionPolicy, 'type' | 'ruleId'>> = {}
-): SingleRuleActionPolicy {
-  return {
-    id: 'policy-1',
-    spaceId: 'default',
-    name: 'Test single_rule policy',
-    enabled: true,
-    type: 'single_rule',
-    ruleId,
-    destinations: [{ type: 'workflow' as const, id: 'workflow-1' }],
-    groupBy: [],
-    tags: [],
+  overrides: Partial<ActionPolicy> = {}
+): ActionPolicy {
+  return createActionPolicy({
+    name: 'Test rule-scoped policy',
+    matcher: `rule.id: "${ruleId}"`,
     ...overrides,
-  };
+  });
 }
 
 export function createMatchedPair(overrides: Partial<MatchedPair> = {}): MatchedPair {

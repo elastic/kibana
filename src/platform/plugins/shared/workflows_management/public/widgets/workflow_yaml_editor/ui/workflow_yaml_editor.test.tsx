@@ -36,6 +36,10 @@ jest.mock('../../../shared/ui/yaml_editor', () => ({
           const editorMock = {
             getModel: jest.fn(),
             dispose: jest.fn(),
+            onDidScrollChange: jest.fn(() => ({ dispose: jest.fn() })),
+            onDidChangeCursorPosition: jest.fn(() => ({ dispose: jest.fn() })),
+            getPosition: jest.fn(),
+            revealLineInCenter: jest.fn(),
           } as unknown as monaco.editor.IStandaloneCodeEditor;
           if (el) {
             editorDidMount?.(editorMock);

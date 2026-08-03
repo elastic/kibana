@@ -7,10 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 import { EDOT_AGENT_NAMES, OTEL_AGENT_NAMES } from '@kbn/elastic-agent-utils/src/agent_names';
-import { captureBodyRt } from '../runtime_types/capture_body_rt';
-import { logLevelRt } from '../runtime_types/log_level_rt';
-import { logEcsReformattingRt } from '../runtime_types/log_ecs_reformatting_rt';
-import { traceContinuationStrategyRt } from '../runtime_types/trace_continuation_strategy_rt';
+import { captureBodySchema } from '../runtime_types/capture_body_rt';
+import { logLevelSchema } from '../runtime_types/log_level_rt';
+import { logEcsReformattingSchema } from '../runtime_types/log_ecs_reformatting_rt';
+import { traceContinuationStrategySchema } from '../runtime_types/trace_continuation_strategy_rt';
 import type { RawSettingDefinition } from './types';
 
 export const generalSettings: RawSettingDefinition[] = [
@@ -69,7 +69,7 @@ export const generalSettings: RawSettingDefinition[] = [
   // Capture body
   {
     key: 'capture_body',
-    validation: captureBodyRt,
+    validation: captureBodySchema,
     type: 'select',
     defaultValue: 'off',
     label: i18n.translate('apmCommon.agentConfig.captureBody.label', {
@@ -228,7 +228,7 @@ export const generalSettings: RawSettingDefinition[] = [
 
   {
     key: 'log_ecs_reformatting',
-    validation: logEcsReformattingRt,
+    validation: logEcsReformattingSchema,
     type: 'select',
     defaultValue: 'off',
     label: i18n.translate('apmCommon.agentConfig.logEcsReformatting.label', {
@@ -252,7 +252,7 @@ export const generalSettings: RawSettingDefinition[] = [
   // LOG_LEVEL
   {
     key: 'log_level',
-    validation: logLevelRt,
+    validation: logLevelSchema,
     type: 'select',
     defaultValue: 'info',
     label: i18n.translate('apmCommon.agentConfig.logLevel.label', {
@@ -450,7 +450,7 @@ export const generalSettings: RawSettingDefinition[] = [
 
   {
     key: 'trace_continuation_strategy',
-    validation: traceContinuationStrategyRt,
+    validation: traceContinuationStrategySchema,
     type: 'select',
     defaultValue: 'continue',
     label: i18n.translate('apmCommon.agentConfig.traceContinuationStrategy.label', {

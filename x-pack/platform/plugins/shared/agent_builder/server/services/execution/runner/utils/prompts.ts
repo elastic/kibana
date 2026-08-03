@@ -6,7 +6,10 @@
  */
 
 import type { Conversation, ConverseInput } from '@kbn/agent-builder-common';
-import { ConversationRoundStatus } from '@kbn/agent-builder-common';
+import {
+  ConversationRoundStatus,
+  type ToolConfirmationPolicyMode,
+} from '@kbn/agent-builder-common';
 import type {
   PromptManager,
   ToolPromptManager,
@@ -25,11 +28,11 @@ import {
   AgentPromptType,
   AuthorizationStatus,
   ConfirmationStatus,
+  isAskUserQuestionPromptResponse,
   isAuthorizationPromptResponse,
   isConfirmationPromptResponse,
 } from '@kbn/agent-builder-common/agents/prompts';
 import type { InternalToolDefinition } from '@kbn/agent-builder-server';
-import type { ToolConfirmationPolicyMode } from '@kbn/agent-builder-server/tools';
 import type { ToolPolicyConfirmationDefinition } from '@kbn/agent-builder-server/tools/builtin';
 import { i18nBundles } from '../i18n';
 
@@ -100,6 +103,9 @@ export const createPromptManager = ({
     get: (promptId) => {
       return promptMap.get(promptId);
     },
+    delete: (promptId) => {
+      promptMap.delete(promptId);
+    },
     getConfirmationStatus: (promptId) => {
       return checkConfirmationStatus(promptId);
     },
@@ -160,6 +166,11 @@ export const getAgentPromptStorageState = ({
       } else if (isAuthorizationPromptResponse(response)) {
         state.responses[promptId] = {
           type: AgentPromptType.authorization,
+          response,
+        };
+      } else if (isAskUserQuestionPromptResponse(response)) {
+        state.responses[promptId] = {
+          type: AgentPromptType.ask_user_question,
           response,
         };
       }

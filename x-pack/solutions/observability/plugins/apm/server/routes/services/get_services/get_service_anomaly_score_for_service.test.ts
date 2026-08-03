@@ -27,6 +27,7 @@ describe('getServiceAnomalyScoreForService', () => {
           jobId: 'apm-job',
           transactionType: 'request',
           actualValue: 1,
+          anomalyEnvironment: 'development',
         },
         {
           serviceName: 'my-service',
@@ -34,6 +35,7 @@ describe('getServiceAnomalyScoreForService', () => {
           jobId: 'apm-job',
           transactionType: 'request',
           actualValue: 2,
+          anomalyEnvironment: 'production',
         },
       ],
     });
@@ -46,7 +48,7 @@ describe('getServiceAnomalyScoreForService', () => {
       serviceName: 'my-service',
     });
 
-    expect(result).toEqual({ anomalyScore: 88.5 });
+    expect(result).toEqual({ anomalyScore: 88.5, anomalyEnvironment: 'production' });
     expect(getServiceAnomaliesModule.getServiceAnomalies).toHaveBeenCalledWith(
       expect.objectContaining({
         exactServiceName: 'my-service',
@@ -64,6 +66,7 @@ describe('getServiceAnomalyScoreForService', () => {
           jobId: 'apm-job',
           transactionType: 'request',
           actualValue: 1,
+          anomalyEnvironment: 'production',
         },
       ],
     });

@@ -1,0 +1,26 @@
+responses:
+  '200':
+    description: Updated entity resolution rule.
+    content:
+      application/json:
+        examples:
+          ruleDisabledExample:
+            summary: Rule disabled
+            description: The related user alias resolution rule was disabled in the current space.
+            value:
+              id: related_user_alias_resolution
+              kind: related_user_alias_resolution
+              managed: true
+              enabled: false
+  '404':
+    description: Unknown entity resolution rule.
+    content:
+      application/json:
+        examples:
+          notFoundExample:
+            summary: Unknown rule
+            description: The requested entity resolution rule does not exist.
+            value:
+              statusCode: 404
+              error: Not Found
+              message: Saved object [entity-resolution-rule/unknown] not found

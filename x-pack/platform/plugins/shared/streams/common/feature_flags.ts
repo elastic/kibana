@@ -6,7 +6,7 @@
  */
 
 /**
- * Enables the Streams memory feature for accumulating knowledge from significant events discovery.
+ * Backward-compat export for consumers that still import from `@kbn/streams-plugin/common`.
+ * The canonical definition lives in `@kbn/significant-events-plugin/common/feature_flags`.
  */
-export const STREAMS_SIGNIFICANT_EVENTS_MEMORY_ENABLED_FLAG =
-  'streams.significantEventsMemoryEnabled';
+export const STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG = 'streams.significantEventsAvailable';

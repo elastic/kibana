@@ -7,15 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const { join } = require('path');
-const { name, build } = require('../../../package.json');
+const { REPO_ROOT, kibanaPackageJson, isKibanaDistributable } = require('@kbn/repo-info');
 const { initApm } = require('@kbn/apm-config-loader');
 const { initTelemetry } = require('@kbn/telemetry');
 
-const rootDir = join(__dirname, '../../..');
-const isKibanaDistributable = Boolean(build && build.distributable === true);
+const distributable = isKibanaDistributable();
 
-module.exports = function (serviceName = name, argv = process.argv) {
-  initApm(argv, rootDir, isKibanaDistributable, serviceName);
-  initTelemetry(argv, rootDir, isKibanaDistributable, serviceName);
+module.exports = function (serviceName = kibanaPackageJson.name, argv = process.argv) {
+  initApm(argv, REPO_ROOT, distributable, serviceName);
+  initTelemetry(argv, REPO_ROOT, distributable, serviceName);
 };

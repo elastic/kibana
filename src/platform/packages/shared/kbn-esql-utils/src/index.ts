@@ -8,14 +8,14 @@
  */
 
 export { getESQLAdHocDataview, getIndexForESQLQuery } from './utils/get_esql_adhoc_dataview';
-export { getESQLTimeFieldFromQuery } from './utils/get_esql_time_field_from_query';
+export { getESQLTimeField } from './utils/get_time_field';
 export { getInitialESQLQuery } from './utils/get_initial_esql_query';
 export { getESQLWithSafeLimit } from './utils/get_esql_with_safe_limit';
 export {
   getLimitFromESQLQuery,
   removeDropCommandsFromESQLQuery,
   hasTransformationalCommand,
-  getTimeFieldFromESQLQuery,
+  parseTimeFieldFromESQLQuery,
   prettifyQuery,
   retrieveMetadataColumns,
   getQueryColumnsFromESQLQuery,
@@ -44,10 +44,19 @@ export {
 } from './utils/change_point_helpers';
 export {
   getIndexPatternFromESQLQuery,
+  getIndexPatternsFromESQLQuery,
   getSourceCommandFromESQLQuery,
+  getAnySourceCommandFromESQLQuery,
 } from './utils/get_index_pattern_from_query';
+export type { ESQLIndexPatterns } from './utils/get_index_pattern_from_query';
+export { classifyESQLSource, isSingleSource } from './utils/classify_esql_source';
+export type { ESQLSourceKind } from './utils/classify_esql_source';
 export { queryCannotBeSampled } from './utils/query_cannot_be_sampled';
-export { appendToESQLQuery } from './utils/append_to_query/utils';
+export {
+  appendToESQLQuery,
+  escapeStringValue,
+  buildJoinedFilter,
+} from './utils/append_to_query/utils';
 export { appendStatsByToQuery } from './utils/append_to_query/append_stats_by';
 export { appendWhereClauseToESQLQuery } from './utils/append_to_query/append_where';
 export { appendLimitToQuery } from './utils/append_to_query/append_limit';
@@ -68,6 +77,7 @@ export {
   isESQLFieldGroupable,
 } from './utils/esql_fields_utils';
 export { sanitazeESQLInput } from './utils/sanitaze_input';
+export { escapeEsqlColumnName } from '@kbn/esql-language';
 export { replaceESQLQueryIndexPattern } from './utils/replace_index_pattern';
 export { extractCategorizeTokens } from './utils/extract_categorize_tokens';
 export { getLookupIndicesFromQuery } from './utils/get_lookup_indices';
@@ -83,16 +93,18 @@ export {
 } from './utils/cascaded_documents_helpers/utils';
 export { getProjectRoutingFromEsqlQuery } from './utils/set_instructions_helpers';
 export { isComputedColumn, getQuerySummary } from './utils/get_query_summary';
+export { getEsqlControls, getAllEsqlControls, getVariableNamePrefix } from './utils/controls';
 export {
   getColumnsWithHighlights,
   type ESQLColumnsWithHighlights,
   type ESQLHighlightTags,
 } from './utils/get_columns_with_highlights';
 export { buildRenameSourceFieldMap } from './utils/build_rename_source_field_map';
-export { getAllEsqlControls, getEsqlControls } from './utils/get_esql_controls';
 export { convertFiltersToESQLExpression } from './utils/convert_filters_to_esql';
 export { convertQueryToESQLExpression } from './utils/convert_query_to_esql';
 export { injectWhereClauseAfterSourceCommand } from './utils/inject_where_after_source';
 
 // Callback functions
 export * from './utils/callbacks';
+
+export { ensureApproximationLicense } from './utils/ensure_approximation_license';

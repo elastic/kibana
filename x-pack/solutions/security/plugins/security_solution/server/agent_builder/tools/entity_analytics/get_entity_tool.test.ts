@@ -14,6 +14,7 @@ import {
 import { executeEsql } from '@kbn/agent-builder-genai-utils';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
 import type { coreMock } from '@kbn/core/server/mocks';
+import { EnrichEntityService } from '../../../lib/entity_analytics/enriched_entity';
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
 import {
   createToolAvailabilityContext,
@@ -27,6 +28,8 @@ import { SecurityAgentBuilderAttachments } from '../../../../common/constants';
 import { ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT } from '../../../lib/telemetry/event_based/events';
 import { buildRenderAttachmentTag, buildSingleEntityAttachmentId } from './entity_attachment_utils';
 import { getEntityTool, SECURITY_GET_ENTITY_TOOL_ID } from './get_entity_tool';
+import { fetchRiskScoreGrounding } from './risk_score_grounding';
+import type { SharedServices } from '@kbn/ml-plugin/server/shared_services';
 
 jest.mock('../../utils/get_agent_builder_resource_availability', () => ({
   getAgentBuilderResourceAvailability: jest.fn(),
@@ -36,7 +39,20 @@ jest.mock('@kbn/agent-builder-genai-utils', () => ({
   executeEsql: jest.fn(),
 }));
 
+jest.mock('../../../lib/entity_analytics/enriched_entity', () => ({
+  EnrichEntityService: jest.fn(),
+}));
+
+jest.mock('./risk_score_grounding', () => {
+  const actual = jest.requireActual('./risk_score_grounding');
+  return {
+    ...actual,
+    fetchRiskScoreGrounding: jest.fn().mockResolvedValue(undefined),
+  };
+});
+
 const mockGetAgentBuilderResourceAvailability = getAgentBuilderResourceAvailability as jest.Mock;
+const mockFetchRiskScoreGrounding = fetchRiskScoreGrounding as jest.Mock;
 
 const mockExperimentalFeatures = {
   entityAnalyticsEntityStoreV2: true,
@@ -54,15 +70,26 @@ const buildEmptyRiskSearchResponse = () => ({
 
 describe('getEntityTool', () => {
   const { mockCore, mockLogger, mockEsClient, mockRequest } = createToolTestMocks();
-  const tool = getEntityTool(mockCore, mockLogger, mockExperimentalFeatures);
+  const tool = getEntityTool(
+    mockCore,
+    mockLogger,
+    null as unknown as SharedServices,
+    mockExperimentalFeatures
+  );
   let mockCoreStart: ReturnType<typeof coreMock.createStart>;
+  const mockGetEnrichedEntities = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
     mockCoreStart = setupMockCoreStartServices(mockCore, mockEsClient);
+    (EnrichEntityService as jest.Mock).mockImplementation(() => ({
+      getEnrichedEntities: mockGetEnrichedEntities,
+    }));
+    mockGetEnrichedEntities.mockResolvedValue({ entities: [] });
     mockGetAgentBuilderResourceAvailability.mockResolvedValue({
       status: 'available',
     });
+    mockFetchRiskScoreGrounding.mockResolvedValue(null);
     // Default to an empty risk index so existing tests that don't care
     // about the attachment payload's risk enrichment still pass. The
     // risk enrichment path issues `esClient.asCurrentUser.search` against
@@ -102,7 +129,7 @@ describe('getEntityTool', () => {
     });
 
     it('returns unavailable when entity store v2 experimental feature is disabled', async () => {
-      const disabledTool = getEntityTool(mockCore, mockLogger, {
+      const disabledTool = getEntityTool(mockCore, mockLogger, null as unknown as SharedServices, {
         ...mockExperimentalFeatures,
         entityAnalyticsEntityStoreV2: false,
       });
@@ -180,55 +207,33 @@ describe('getEntityTool', () => {
     });
 
     it('merges alert data as risk_score_inputs column into entity result', async () => {
-      (executeEsql as jest.Mock)
-        // 1. Entity lookup: entity has a risk score
-        .mockResolvedValueOnce({
-          columns: [
-            { name: 'entity.id', type: 'keyword' },
-            { name: 'entity.name', type: 'keyword' },
-            { name: 'entity.EngineMetadata.Type', type: 'keyword' },
-            { name: 'entity.risk.calculated_score_norm', type: 'double' },
-          ],
-          values: [['host:server1', 'server1', 'host', 75.5]],
-        })
-        // 2. Risk score inputs lookup: returns multi-value alert IDs
-        .mockResolvedValueOnce({
-          columns: [{ name: 'host.risk.inputs.id', type: 'keyword' }],
-          values: [[['alert-1', 'alert-2']]],
-        })
-        // 3. Alerts lookup: two alert rows
-        .mockResolvedValueOnce({
-          columns: [
-            { name: '_id', type: 'keyword' },
-            { name: 'kibana.alert.rule.name', type: 'keyword' },
-          ],
-          values: [
-            ['alert-1', 'Rule A'],
-            ['alert-2', 'Rule B'],
-          ],
-        });
+      (executeEsql as jest.Mock).mockResolvedValueOnce({
+        columns: [
+          { name: 'entity.id', type: 'keyword' },
+          { name: 'entity.name', type: 'keyword' },
+          { name: 'entity.EngineMetadata.Type', type: 'keyword' },
+          { name: 'entity.risk.calculated_score_norm', type: 'double' },
+        ],
+        values: [['host:server1', 'server1', 'host', 75.5]],
+      });
+      mockGetEnrichedEntities.mockResolvedValueOnce({
+        entities: [
+          {
+            entity: {} as never,
+            alertDocuments: [
+              { _id: 'alert-1', 'kibana.alert.rule.name': 'Rule A' },
+              { _id: 'alert-2', 'kibana.alert.rule.name': 'Rule B' },
+            ],
+          },
+        ],
+      });
 
       const result = (await tool.handler(
         { entityType: 'host', entityId: 'server1' },
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
       )) as ToolHandlerStandardReturn;
 
-      expect(executeEsql).toHaveBeenCalledTimes(3);
-
-      expect((executeEsql as jest.Mock).mock.calls[1][0].query).toContain(
-        'risk-score.risk-score-default'
-      );
-      expect((executeEsql as jest.Mock).mock.calls[1][0].query).toContain(
-        'WHERE host.name == "host:server1"'
-      );
-
-      // Alerts query uses the IDs extracted from the risk score inputs
-      expect((executeEsql as jest.Mock).mock.calls[2][0].query).toContain(
-        'FROM .alerts-security.alerts-default'
-      );
-      expect((executeEsql as jest.Mock).mock.calls[2][0].query).toContain(
-        'WHERE _id IN ("alert-1", "alert-2")'
-      );
+      expect(executeEsql).toHaveBeenCalledTimes(1);
 
       // Single merged esqlResults result
       expect(result.results).toHaveLength(1);
@@ -340,23 +345,7 @@ describe('getEntityTool', () => {
           ],
           values: [['host:server1', 'server1', 'host', 75.5]],
         })
-        // 2. Risk score inputs IDs lookup
-        .mockResolvedValueOnce({
-          columns: [{ name: 'host.risk.inputs.id', type: 'keyword' }],
-          values: [[['alert-1', 'alert-2']]],
-        })
-        // 3. Alerts lookup
-        .mockResolvedValueOnce({
-          columns: [
-            { name: '_id', type: 'keyword' },
-            { name: 'kibana.alert.rule.name', type: 'keyword' },
-          ],
-          values: [
-            ['alert-1', 'Rule A'],
-            ['alert-2', 'Rule B'],
-          ],
-        })
-        // 4. Snapshot lookup
+        // 2. Snapshot lookup
         .mockResolvedValueOnce({
           columns: [
             { name: '@timestamp', type: 'date' },
@@ -367,13 +356,24 @@ describe('getEntityTool', () => {
             ['2024-01-01T00:00:00Z', 70.0],
           ],
         });
+      mockGetEnrichedEntities.mockResolvedValueOnce({
+        entities: [
+          {
+            entity: {} as never,
+            alertDocuments: [
+              { _id: 'alert-1', 'kibana.alert.rule.name': 'Rule A' },
+              { _id: 'alert-2', 'kibana.alert.rule.name': 'Rule B' },
+            ],
+          },
+        ],
+      });
 
       const result = (await tool.handler(
         { entityType: 'host', entityId: 'server1', interval: '7d' },
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
       )) as ToolHandlerStandardReturn;
 
-      expect(executeEsql).toHaveBeenCalledTimes(4);
+      expect(executeEsql).toHaveBeenCalledTimes(2);
 
       expect(result.results).toHaveLength(1);
       const esqlResult = result.results[0] as EsqlResults;
@@ -837,19 +837,16 @@ describe('getEntityTool', () => {
     });
 
     it('returns unenriched entity result when enrichment query fails', async () => {
-      (executeEsql as jest.Mock)
-        // 1. Entity lookup: entity has a risk score (triggers enrichment path)
-        .mockResolvedValueOnce({
-          columns: [
-            { name: 'entity.id', type: 'keyword' },
-            { name: 'entity.name', type: 'keyword' },
-            { name: 'entity.EngineMetadata.Type', type: 'keyword' },
-            { name: 'entity.risk.calculated_score_norm', type: 'double' },
-          ],
-          values: [['host:server1', 'server1', 'host', 75.5]],
-        })
-        // 2. Risk score inputs query: fails
-        .mockRejectedValueOnce(new Error('risk index unavailable'));
+      (executeEsql as jest.Mock).mockResolvedValueOnce({
+        columns: [
+          { name: 'entity.id', type: 'keyword' },
+          { name: 'entity.name', type: 'keyword' },
+          { name: 'entity.EngineMetadata.Type', type: 'keyword' },
+          { name: 'entity.risk.calculated_score_norm', type: 'double' },
+        ],
+        values: [['host:server1', 'server1', 'host', 75.5]],
+      });
+      mockGetEnrichedEntities.mockRejectedValueOnce(new Error('risk index unavailable'));
 
       const result = (await tool.handler(
         { entityType: 'host', entityId: 'server1' },
@@ -884,7 +881,7 @@ describe('getEntityTool', () => {
     });
 
     describe('telemetry', () => {
-      it('reports success=true and entitiesReturned=1 when an entity is found', async () => {
+      it('reports success=true and resultCount=1 when an entity is found', async () => {
         (executeEsql as jest.Mock).mockResolvedValueOnce({
           columns: [{ name: 'entity.id', type: 'keyword' }],
           values: [['host:server1']],
@@ -899,16 +896,18 @@ describe('getEntityTool', () => {
           ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT.eventType,
           {
             toolId: SECURITY_GET_ENTITY_TOOL_ID,
+            actionType: 'read',
             entityTypes: ['host'],
             spaceId: 'default',
             success: true,
-            entitiesReturned: 1,
+            resultCount: 1,
             errorMessage: undefined,
+            userConfirmationOutcome: undefined,
           }
         );
       });
 
-      it('reports success=true and entitiesReturned=0 when no entity is found', async () => {
+      it('reports success=true and resultCount=0 when no entity is found', async () => {
         (executeEsql as jest.Mock)
           .mockResolvedValueOnce({ columns: [], values: [] })
           .mockResolvedValueOnce({ columns: [], values: [] })
@@ -924,11 +923,13 @@ describe('getEntityTool', () => {
           ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT.eventType,
           {
             toolId: SECURITY_GET_ENTITY_TOOL_ID,
+            actionType: 'read',
             entityTypes: ['host'],
             spaceId: 'default',
             success: true,
-            entitiesReturned: 0,
+            resultCount: 0,
             errorMessage: undefined,
+            userConfirmationOutcome: undefined,
           }
         );
       });
@@ -945,11 +946,13 @@ describe('getEntityTool', () => {
           ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT.eventType,
           {
             toolId: SECURITY_GET_ENTITY_TOOL_ID,
+            actionType: 'read',
             entityTypes: ['host'],
             spaceId: 'default',
             success: false,
-            entitiesReturned: 0,
+            resultCount: 0,
             errorMessage: 'ES|QL failure',
+            userConfirmationOutcome: undefined,
           }
         );
       });
@@ -970,6 +973,58 @@ describe('getEntityTool', () => {
           expect.objectContaining({ entityTypes: [] })
         );
       });
+    });
+  });
+
+  describe('risk score grounding', () => {
+    const groundingOtherResult: OtherResult = {
+      tool_result_id: 'grounding-result-id',
+      type: ToolResultType.other,
+      data: {
+        riskScoreGrounding: { status: 'stopped', lastScoreTimeAgo: '2 days ago' },
+      },
+    };
+
+    const setupSuccessfulEntityLookup = () => {
+      (executeEsql as jest.Mock).mockResolvedValueOnce({
+        columns: [{ name: 'entity.id', type: 'keyword' }],
+        values: [['host:server1']],
+      });
+    };
+
+    it('omits the grounding result when the lookup fails', async () => {
+      mockFetchRiskScoreGrounding.mockResolvedValueOnce(undefined);
+      setupSuccessfulEntityLookup();
+
+      const result = (await tool.handler(
+        { entityType: 'host', entityId: 'server1' },
+        createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
+      )) as ToolHandlerStandardReturn;
+
+      expect(result.results.some((r) => r.type === ToolResultType.other)).toBe(false);
+      // The main esql result is still present — grounding failure must never block the answer.
+      expect(result.results.some((r) => r.type === ToolResultType.esqlResults)).toBe(true);
+    });
+
+    it('still appends grounding when the entity lookup returns no rows so the agent can explain why', async () => {
+      mockFetchRiskScoreGrounding.mockResolvedValueOnce(groundingOtherResult);
+      // Every fallback query resolves empty so we hit the "No entity found" branch.
+      (executeEsql as jest.Mock)
+        .mockResolvedValueOnce({ columns: [], values: [] })
+        .mockResolvedValueOnce({ columns: [], values: [] })
+        .mockResolvedValueOnce({ columns: [], values: [] })
+        .mockResolvedValueOnce({ columns: [], values: [] });
+
+      const result = (await tool.handler(
+        { entityType: 'host', entityId: 'server1' },
+        createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
+      )) as ToolHandlerStandardReturn;
+
+      const errorResult = result.results.find(
+        (r): r is ErrorResult => r.type === ToolResultType.error
+      );
+      expect(errorResult).toBeDefined();
+      expect(result.results).toContainEqual(groundingOtherResult);
     });
   });
 
@@ -1484,19 +1539,16 @@ describe('getEntityTool', () => {
     });
 
     it('keeps the other result when enrichment fails on the happy path', async () => {
-      (executeEsql as jest.Mock)
-        // 1. Entity lookup with a risk score (triggers enrichment)
-        .mockResolvedValueOnce({
-          columns: [
-            { name: 'entity.id', type: 'keyword' },
-            { name: 'entity.name', type: 'keyword' },
-            { name: 'entity.EngineMetadata.Type', type: 'keyword' },
-            { name: 'entity.risk.calculated_score_norm', type: 'double' },
-          ],
-          values: [['host:server1', 'server1', 'host', 75.5]],
-        })
-        // 2. Risk score inputs query fails
-        .mockRejectedValueOnce(new Error('risk index unavailable'));
+      (executeEsql as jest.Mock).mockResolvedValueOnce({
+        columns: [
+          { name: 'entity.id', type: 'keyword' },
+          { name: 'entity.name', type: 'keyword' },
+          { name: 'entity.EngineMetadata.Type', type: 'keyword' },
+          { name: 'entity.risk.calculated_score_norm', type: 'double' },
+        ],
+        values: [['host:server1', 'server1', 'host', 75.5]],
+      });
+      mockGetEnrichedEntities.mockRejectedValueOnce(new Error('risk index unavailable'));
 
       const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
       (context.attachments.getAttachmentRecord as jest.Mock).mockReturnValueOnce(undefined);
@@ -1573,6 +1625,7 @@ describe('getEntityTool', () => {
         group_size: number;
         target: Record<string, unknown>;
       }) => ({
+        createCRUDClient: jest.fn().mockReturnValue({}),
         createResolutionClient: jest.fn().mockReturnValue({
           getResolutionGroup: jest.fn().mockResolvedValue(group),
         }),
@@ -1828,6 +1881,7 @@ describe('getEntityTool', () => {
         );
 
         const entityStoreStart = {
+          createCRUDClient: jest.fn().mockReturnValue({}),
           createResolutionClient: jest.fn().mockReturnValue({
             getResolutionGroup: jest
               .fn()

@@ -31,6 +31,8 @@ export interface DeleteJobsOptions {
 }
 
 export interface MlADJobsApi {
+  /** Create an anomaly detection job via the Kibana API (registers in current space) */
+  createViaKibana: (jobConfig: Partial<estypes.MlJob>) => Promise<void>;
   /** Delete anomaly detection jobs via the Kibana API */
   delete: (options: DeleteJobsOptions) => Promise<void>;
   /** Get all anomaly detection jobs via the Elasticsearch API */
@@ -87,6 +89,8 @@ export interface MlCalendarsApi {
 }
 
 export interface MlFiltersApi {
+  /** Create an ML filter via the Elasticsearch API */
+  create: (filter: estypes.MlFilter) => Promise<void>;
   /** Get all ML filters via the Elasticsearch API */
   getAll: () => Promise<estypes.MlFilter[]>;
   /** Get an ML filter by ID via the Elasticsearch API */
@@ -365,6 +369,13 @@ export const getMlApiHelper = (
       });
     },
 
+    async create({ filter_id, ...body }: estypes.MlFilter): Promise<void> {
+      await measurePerformanceAsync(log, `mlApi.filters.create [${filter_id}]`, async () => {
+        await esClient.ml.putFilter({ filter_id, ...body });
+        await this.waitForFilterToExist(filter_id);
+      });
+    },
+
     async delete(filterId: string): Promise<void> {
       await measurePerformanceAsync(log, `mlApi.filters.delete [${filterId}]`, async () => {
         const existing = await this.getById(filterId);
@@ -480,6 +491,24 @@ export const getMlApiHelper = (
   };
 
   const anomalyDetection: MlADJobsApi = {
+    async createViaKibana(jobConfig: Partial<estypes.MlJob>): Promise<void> {
+      const { job_id: jobId, ...body } = jobConfig;
+      if (!jobId) throw new Error('jobConfig.job_id is required');
+      await measurePerformanceAsync(
+        log,
+        `mlApi.anomalyDetection.createViaKibana [${jobId}]`,
+        async () => {
+          await kbnClient.request({
+            method: 'PUT',
+            path: `/internal/ml/anomaly_detectors/${jobId}`,
+            headers: ML_INTERNAL_HEADERS,
+            body,
+          });
+          await this.waitForJobToExist(jobId);
+        }
+      );
+    },
+
     async delete({
       jobIds,
       deleteUserAnnotations = false,

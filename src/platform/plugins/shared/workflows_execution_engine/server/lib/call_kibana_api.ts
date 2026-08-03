@@ -7,14 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { CoreStart, KibanaRequest } from '@kbn/core/server';
+import { HTTPAuthorizationHeader, isUiamCredential } from '@kbn/core-security-server';
+import { applySpacePrefix } from '@kbn/workflows';
 import {
   getOutboundEventChainHeaders,
+  KibanaApiCallError,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/workflows-extensions/server';
-import { getKibanaUrl } from '../utils/get_kibana_url';
 import { isTextContentType, readResponseStream } from '../utils/http_response';
+
+export { KibanaApiCallError } from '@kbn/workflows-extensions/server';
 
 /**
  * Default cap on the response body size (bytes) when no per-step limit is supplied.
@@ -24,10 +27,11 @@ import { isTextContentType, readResponseStream } from '../utils/http_response';
 const DEFAULT_MAX_RESPONSE_BYTES = 10 * 1024 * 1024;
 
 /**
- * Maximum bytes captured from an error response body before being truncated and
- * appended to the thrown error message.
+ * Maximum number of characters of the (stringified) error body appended to the thrown
+ * error's `message`. This only caps the human-readable log string; the full parsed body
+ * (up to `maxResponseBytes`) is preserved on {@link KibanaApiCallError.body} for recovery.
  */
-const ERROR_BODY_TRUNCATION_BYTES = 1024 * 1024;
+const ERROR_MESSAGE_BODY_MAX_CHARS = 1024 * 1024;
 
 /**
  * Thrown by {@link callKibanaApi} when the response body exceeds the configured
@@ -44,13 +48,16 @@ export class CallKibanaApiResponseTooLargeError extends Error {
 }
 
 /**
- * Public input for `callKibanaApi`. Kept intentionally minimal so the implementation
- * can later swap from `global.fetch` to an in-process Kibana HTTP API without changing
- * the caller-visible API.
+ * Public input for `callKibanaApi`. Kept intentionally minimal: the transport (Core's HTTP
+ * self client) is an implementation detail the caller-visible API does not expose.
  */
 export interface CallKibanaApiParams {
   method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
-  /** Route path starting with `/`, e.g. `/api/cases`. Space prefix is added automatically. */
+  /**
+   * Space-relative route path starting with `/`, e.g. `/api/cases`. When `deps.spaceId`
+   * is a non-default space, it is prefixed with `/s/{spaceId}` automatically; pass the
+   * path without a space segment.
+   */
   path: string;
   body?: unknown;
   query?: Record<string, string | number | boolean | undefined>;
@@ -76,18 +83,16 @@ export interface CallKibanaApiDeps {
   fakeRequest: KibanaRequest;
   workflowRunId?: string;
   coreStart: CoreStart;
-  cloudSetup?: CloudSetup;
+  /**
+   * Space the workflow is running in. When set to a non-default space, the request path is
+   * prefixed with `/s/{spaceId}`. When omitted or `'default'`, the path is used as-is.
+   */
+  spaceId?: string;
   /**
    * Cap on the size of the response body in bytes. `0` disables the limit. When omitted,
    * `DEFAULT_MAX_RESPONSE_BYTES` is used.
    */
   maxResponseBytes?: number;
-  /**
-   * Optional override for the base Kibana URL. When supplied, this is used verbatim
-   * instead of going through {@link getKibanaUrl} resolution. Used by callers that
-   * already resolved a custom URL (e.g. with `use_server_info` / `use_localhost`).
-   */
-  baseUrlOverride?: string;
 }
 
 /**
@@ -117,29 +122,6 @@ const stripReservedHeaders = (
     }
   }
   return out;
-};
-
-const buildQueryString = (query: CallKibanaApiParams['query']): string => {
-  if (!query) return '';
-  const params = new URLSearchParams();
-  for (const [key, value] of Object.entries(query)) {
-    if (value !== undefined) {
-      params.append(key, String(value));
-    }
-  }
-  const serialized = params.toString();
-  return serialized === '' ? '' : `?${serialized}`;
-};
-
-const getAuthorizationHeader = (request: KibanaRequest): string => {
-  const value = request.headers?.authorization;
-  if (typeof value === 'string' && value !== '') {
-    return value;
-  }
-  if (Array.isArray(value) && value[0]) {
-    return value[0];
-  }
-  throw new Error('callKibanaApi: missing Authorization header on the workflow fake request');
 };
 
 const headersToRecord = (headers: Headers | undefined): Record<string, string> => {
@@ -182,57 +164,115 @@ const parseResponseBody = async (
   }
 };
 
-const readErrorBody = async (response: Response): Promise<string> => {
-  if (!response.body) return '';
-  const { buffer, truncated } = await readResponseStream(response, ERROR_BODY_TRUNCATION_BYTES);
-  const text = buffer.toString('utf-8');
-  return truncated ? `${text}... [truncated]` : text;
+/**
+ * Builds the human-readable body fragment appended to {@link KibanaApiCallError.message}.
+ * Mirrors the previous `HTTP <status>: <body>` shape: objects are JSON-stringified, strings
+ * are used verbatim, Buffers are decoded as UTF-8. The result is capped at
+ * {@link ERROR_MESSAGE_BODY_MAX_CHARS} characters for log-safety; the full parsed value is
+ * still available on {@link KibanaApiCallError.body}.
+ */
+const stringifyErrorBodyForMessage = (body: unknown): string => {
+  if (body == null) return '';
+  let text: string;
+  if (typeof body === 'string') {
+    text = body;
+  } else if (Buffer.isBuffer(body)) {
+    text = body.toString('utf-8');
+  } else {
+    try {
+      text = JSON.stringify(body);
+    } catch {
+      text = String(body);
+    }
+  }
+  return text.length > ERROR_MESSAGE_BODY_MAX_CHARS
+    ? `${text.slice(0, ERROR_MESSAGE_BODY_MAX_CHARS)}... [truncated]`
+    : text;
 };
 
 /**
  * Calls a Kibana HTTP route on the running Kibana instance using the workflow's fake request
- * for authentication and origin marking. Throws on non-2xx responses (the thrown Error message
- * has the shape `HTTP <status>: <body>`).
+ * for authentication and origin marking. Throws a {@link KibanaApiCallError} on non-2xx
+ * responses (other than 304). Its `message` keeps the previous `HTTP <status>: <body>` shape,
+ * and it additionally exposes the parsed `status`, `headers`, and `body` so callers can recover
+ * a structured partial-success response via `try/catch` + `instanceof KibanaApiCallError`.
  *
  * This helper backs both the `kibana.request` YAML step (for its JSON-body / connector-definition
  * branches) and the `callKibanaApi` tool exposed to custom step handlers. Behavior is intentionally
- * kept narrow (no multipart, no fetcher options, no streaming) so the underlying transport can be
- * swapped to an in-process Kibana HTTP API later without changing observable behavior.
+ * kept narrow (no multipart, no fetcher options, no streaming).
+ *
+ * Transport is Core's HTTP self client (`coreStart.http.selfClient`): it owns URL resolution,
+ * forwarding the scoped request's `authorization`, and stamping `x-elastic-internal-origin` /
+ * `kbn-version`, so this helper only supplies the headers Core does not manage (custom + event-chain
+ * + the UIAM attestation) and keeps its own response-shaping contract (size cap, binary handling,
+ * structured {@link KibanaApiCallError}).
  */
 export async function callKibanaApi<T = unknown>(
   deps: CallKibanaApiDeps,
   params: CallKibanaApiParams
 ): Promise<CallKibanaApiResult<T>> {
-  const { fakeRequest, workflowRunId, coreStart, cloudSetup, baseUrlOverride } = deps;
+  const { fakeRequest, workflowRunId, coreStart, spaceId } = deps;
   const maxResponseBytes = deps.maxResponseBytes ?? DEFAULT_MAX_RESPONSE_BYTES;
 
-  const baseUrl = baseUrlOverride ?? getKibanaUrl(coreStart, cloudSetup);
-  const url = `${baseUrl}${params.path}${buildQueryString(params.query)}`;
+  const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(fakeRequest);
+  if (!authorizationHeader) {
+    throw new Error('callKibanaApi: missing Authorization header on the workflow fake request');
+  }
 
-  const callerHeaders = stripReservedHeaders(params.headers);
+  // Only the headers Core's self client does not manage for us: caller-supplied custom headers
+  // (reserved ones stripped) plus the engine's event-chain propagation. Authorization, Content-Type,
+  // x-elastic-internal-origin, and kbn-version/xsrf are set by the self client itself.
   const outboundHeaders: Record<string, string> = {
-    ...callerHeaders,
-    Authorization: getAuthorizationHeader(fakeRequest),
-    'Content-Type': 'application/json',
-    'kbn-xsrf': 'true',
-    [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'Kibana',
+    ...stripReservedHeaders(params.headers),
     ...getOutboundEventChainHeaders(fakeRequest, workflowRunId),
   };
 
-  const requestInit: RequestInit = {
+  // Internal UIAM (essu_) keys need the shared secret attached once this loopback request re-enters
+  // Kibana. We must never hold the secret here, so instead we present a non-reversible attestation
+  // of it, bound to this very credential, fetched right before the call and never stored, to
+  // authorize Kibana to attach the secret on our behalf. Spread last, so a step author cannot
+  // override it.
+  // Stamping for any essu_ credential is safe because the workflow identity is always an internal
+  // granted key. If the engine ever proxies an *external* UIAM key over a loopback, gate this on an
+  // explicit internal flag: Elasticsearch rejects an external key presented with the shared secret.
+  if (isUiamCredential(authorizationHeader)) {
+    Object.assign(
+      outboundHeaders,
+      coreStart.security.authc.apiKeys.uiam?.getInternalCallerAttestationHeaders(
+        authorizationHeader
+      )
+    );
+  }
+
+  // The workflow's fake request carries no space, so the space has to be encoded in the path.
+  const path = applySpacePrefix(params.path, spaceId);
+  const { response } = await coreStart.http.selfClient.asScoped(fakeRequest).fetch(path, {
     method: params.method,
     headers: outboundHeaders,
-    body: params.body != null ? JSON.stringify(params.body) : undefined,
+    query: params.query,
+    body: params.body ?? undefined,
+    // Mark the loopback as Kibana-internal so internal routes stay reachable.
+    access: 'internal',
+    asResponse: true,
+    rawResponse: true,
+    // The workflow fake request has no base path, and any space is already encoded in `path`.
+    prependBasePath: false,
     signal: params.signal,
-  };
-
-  const response = await fetch(url, requestInit);
+  });
 
   // `Response.ok` is true only for 2xx; treat 304 Not Modified as a successful response with no body
   // so callers using conditional GETs see the same shape as a 204.
   if (!response.ok && response.status !== 304) {
-    const errorBody = await readErrorBody(response);
-    throw new Error(`HTTP ${response.status}: ${errorBody}`);
+    // Parse the error body via the same path (and size limit) as success so step authors can
+    // recover a structured partial-success response without string-parsing the message and
+    // without the previous separate 1 MB cap.
+    const errorBody = await parseResponseBody(response, maxResponseBytes);
+    throw new KibanaApiCallError({
+      status: response.status,
+      headers: headersToRecord(response.headers),
+      body: errorBody,
+      message: `HTTP ${response.status}: ${stringifyErrorBodyForMessage(errorBody)}`,
+    });
   }
 
   const body = (await parseResponseBody(response, maxResponseBytes)) as T;

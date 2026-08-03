@@ -206,8 +206,8 @@ describe('ContentListTable', () => {
     });
   });
 
-  describe('hasNoResults — renders EuiBasicTable with default empty row', () => {
-    it("renders the table with EUI's built-in empty row when a search yields no results", async () => {
+  describe('hasNoResults — renders the table with the default no-items message', () => {
+    it('renders the default `contentListNoResults` empty-state when a search yields no results', async () => {
       const emptyFindItems = createFindItems([]);
       const Wrapper = ({ children }: { children: React.ReactNode }) => (
         <ContentListProvider
@@ -228,9 +228,9 @@ describe('ContentListTable', () => {
 
       // The table must be present (hasNoResults renders an empty table, not null).
       expect(await screen.findByTestId('results-table')).toBeInTheDocument();
-      // EuiBasicTable's built-in empty row is rendered when items is empty and
-      // no custom `noItemsMessage` is provided.
-      expect(await screen.findByText('No items found')).toBeInTheDocument();
+      // `ContentListTable` renders a default empty-state message (with
+      // `data-test-subj="contentListNoResults"`) when no custom one is provided.
+      expect(await screen.findByTestId('contentListNoResults')).toHaveTextContent('No items found');
     });
 
     it('renders a custom noItemsMessage prop when provided', async () => {

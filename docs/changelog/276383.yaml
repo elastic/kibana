@@ -1,0 +1,8 @@
+prs:
+- https://github.com/elastic/kibana/pull/276383
+type: enhancement
+products:
+- product: cloud-serverless
+  target: 2026-07-09
+title: Add workflow graph visualization in the workflow editor
+description: "Adds a read-only workflow graph that visualizes your workflow as an interactive node graph in the workflow editor. Available when Elastic Workflows experimental features are enabled in Advanced Settings."

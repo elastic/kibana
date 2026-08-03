@@ -105,6 +105,7 @@ export const mockState: SyntheticsAppState = {
       order: 'asc',
     },
     view: 'cardView',
+    showLastRun: false,
   },
   syntheticsEnablement: { loading: false, error: null, enablement: null },
   monitorDetails: getMonitorDetailsMockSlice(),
@@ -142,6 +143,7 @@ export const mockState: SyntheticsAppState = {
     loading: false,
     status: null,
     error: null,
+    settled: false,
     isInitialLoad: true,
   },
   globalParams: {

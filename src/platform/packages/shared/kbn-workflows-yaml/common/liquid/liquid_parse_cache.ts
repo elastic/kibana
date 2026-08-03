@@ -29,19 +29,6 @@ export function getLiquidInstance(): Liquid {
       strictFilters: true,
       strictVariables: false,
     });
-    liquidInstance.registerFilter('json_parse', (value: unknown): unknown => {
-      if (typeof value !== 'string') {
-        return value;
-      }
-      try {
-        return JSON.parse(value);
-      } catch {
-        return value;
-      }
-    });
-    liquidInstance.registerFilter('entries', (value: unknown): unknown => {
-      return value;
-    });
   }
   return liquidInstance;
 }

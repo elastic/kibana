@@ -743,14 +743,20 @@ export const getAlertingApiHelper = (
 
             const connectorsData = connectors.data as any;
             await Promise.all(
-              connectorsData.map(async (connector: any) => {
-                await kbnClient.request({
-                  method: 'DELETE',
-                  path: `${buildSpacePath(spaceId)}/api/actions/connector/${connector.id}`,
-                  retries: 3,
-                  ignoreErrors: [404],
-                });
-              })
+              connectorsData
+                // Preconfigured and system connectors cannot be deleted via the API
+                // (the DELETE endpoint returns 400), so only remove user-created ones.
+                .filter(
+                  (connector: any) => !connector.is_preconfigured && !connector.is_system_action
+                )
+                .map(async (connector: any) => {
+                  await kbnClient.request({
+                    method: 'DELETE',
+                    path: `${buildSpacePath(spaceId)}/api/actions/connector/${connector.id}`,
+                    retries: 3,
+                    ignoreErrors: [404],
+                  });
+                })
             );
           }
         );

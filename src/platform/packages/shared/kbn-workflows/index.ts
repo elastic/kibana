@@ -21,6 +21,13 @@ export {
   builtInTriggerDefinitions,
   getBuiltInTriggerDefinition,
 } from './spec/builtin_trigger_definitions';
+export {
+  builtinWorkflowInputDefinitions,
+  builtinWorkflowInputDefinitionRefValuesForZod,
+  KIBANA_WORKFLOW_INPUT_DEFINITION_REF_PREFIX,
+  ALERTING_V2_NOTIFICATION_GROUP_INPUT_DEFINITION_ID,
+  mergeKibanaBuiltinWorkflowInputDefinitionsIntoRootSchema,
+} from './spec/builtin_workflow_input_definitions';
 export type {
   BaseTriggerDefinition,
   TriggerDocumentation,
@@ -39,6 +46,7 @@ export * from './spec/deprecated_step_metadata';
 export * from './types/latest';
 export * from './types/utils';
 export * from './common/constants';
+export * from './common/validate_step_names';
 export * from './common/workflows_events';
 export type * from './common/event_trigger_replay';
 export * from './common/well_known_trigger_sources';
@@ -46,7 +54,25 @@ export type { WorkflowExecutionEventDispatchMetadata } from './common/workflow_e
 export * from './common/privileges';
 export * from './common/utils';
 export * from './common/step_types';
+export * from './common/hitl';
+export * from './common/wait_for_approval';
+export {
+  getManagedWorkflowSelectorVisibilityContext,
+  getManagedWorkflowSolutionVisibilityContext,
+  getManagedWorkflowVisibilityContexts,
+  MANAGED_WORKFLOW_SELECTORS,
+  MANAGED_WORKFLOW_SOLUTIONS,
+} from './managed/types';
+export type {
+  ManagedWorkflowSelector,
+  ManagedWorkflowSelectorVisibilityContext,
+  ManagedWorkflowSolution,
+  ManagedWorkflowSolutionVisibilityContext,
+  ManagedWorkflowVisibility,
+  ManagedWorkflowVisibilityContext,
+} from './managed/types';
 export * from './definition';
+export * from './graph_layout';
 export * from './common/elasticsearch_request_builder';
 export * from './common/kibana_request_builder';
 export * from './server/constants';

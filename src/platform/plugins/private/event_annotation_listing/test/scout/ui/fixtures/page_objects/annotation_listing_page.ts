@@ -48,8 +48,7 @@ export class AnnotationListingPage {
     await this.contentList.searchBox.waitFor({ state: 'visible' });
   }
 
-  async selectTag(tagId: string) {
-    await this.contentList.tagsFilterButton.click();
-    await this.page.testSubj.locator(`tag-searchbar-option-${tagId}`).click();
+  async selectTag(tagName: string) {
+    await this.contentList.selectTag(tagName);
   }
 }

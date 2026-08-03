@@ -14,12 +14,16 @@ import type { CasesApiService } from './cases';
 import { getCasesApiHelper } from './cases';
 import type { CoreApiService } from './core';
 import { getCoreApiHelper } from './core';
+import type { DashboardApiService } from './dashboard';
+import { getDashboardApiHelper } from './dashboard';
 import type { DataViewsApiService } from './data_views';
 import { getDataViewsApiHelper } from './data_views';
 import type { FleetApiService } from './fleet';
 import { getFleetApiHelper } from './fleet';
 import type { SampleDataApiService } from './sample_data';
 import { getSampleDataApiHelper } from './sample_data';
+import type { SavedObjectsApiService } from './saved_objects';
+import { getSavedObjectsApiHelper } from './saved_objects';
 import type { SpacesApiService } from './spaces';
 import { getSpacesApiHelper } from './spaces';
 import type { StreamsApiService } from './streams';
@@ -30,10 +34,12 @@ import { getMlApiHelper } from './ml';
 export interface ApiServicesFixture {
   alerting: AlertingApiService;
   cases: CasesApiService;
+  dashboard: DashboardApiService;
   dataViews: DataViewsApiService;
   fleet: FleetApiService;
   ml: MlApiService;
   sampleData: SampleDataApiService;
+  savedObjects: SavedObjectsApiService;
   spaces: SpacesApiService;
   streams: StreamsApiService;
   core: CoreApiService;
@@ -52,10 +58,12 @@ export const apiServicesFixture = coreWorkerFixtures.extend<
       const services = {
         alerting: getAlertingApiHelper(log, kbnClient),
         cases: getCasesApiHelper(log, kbnClient),
+        dashboard: getDashboardApiHelper(log, kbnClient),
         dataViews: getDataViewsApiHelper(log, kbnClient),
         fleet: getFleetApiHelper(log, kbnClient),
         ml: getMlApiHelper(log, kbnClient, esClient),
         sampleData: getSampleDataApiHelper(log, kbnClient),
+        savedObjects: getSavedObjectsApiHelper(log, kbnClient),
         spaces: getSpacesApiHelper(log, kbnClient),
         streams: getStreamsApiService({ kbnClient, log }),
         core: getCoreApiHelper(log, kbnClient),

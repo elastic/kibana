@@ -34,6 +34,7 @@ import { useUserPrivileges } from '../../../../../common/components/user_privile
 import { prepareToCloseAlerts } from '../../../../../detection_engine/rule_exceptions/components/add_exception_flyout/helpers';
 import { useCloseAlertsFromExceptions } from '../../../../../detection_engine/rule_exceptions/logic/use_close_alerts';
 import { ExceptionItemsFlyoutAlertsActions } from '../../../../../detection_engine/rule_exceptions/components/flyout_components/alerts_actions';
+import { useSignalIndexPatterns } from '../../../../../detection_engine/rule_exceptions/components/flyout_components/alerts_actions/use_signal_index_patterns';
 import { ARTIFACT_FLYOUT_LABELS } from '../../../../components/artifact_list_page/components/artifact_flyout';
 import type { AddExceptionFlyoutProps } from '../../../../../detection_engine/rule_exceptions/components/add_exception_flyout';
 import { ArtifactConfirmModal } from '../../../../components/artifact_list_page/components/artifact_confirm_modal';
@@ -94,6 +95,12 @@ export const EndpointExceptionsFlyout: React.FC<EndpointExceptionsFlyoutProps> =
   const [disableBulkClose, setDisableBulkCloseAlerts] = useState(false);
   const [bulkCloseIndex, setBulkCloseIndex] = useState<string[] | undefined>();
   const { hasAlertsUpdate } = useAlertsPrivileges();
+  const {
+    isSignalIndexLoading,
+    signalIndexNames,
+    isSignalIndexPatternLoading,
+    signalIndexPatterns,
+  } = useSignalIndexPatterns();
   const { canManageGlobalArtifacts } = useUserPrivileges().endpointPrivileges;
 
   useEffect(() => {
@@ -181,8 +188,84 @@ export const EndpointExceptionsFlyout: React.FC<EndpointExceptionsFlyoutProps> =
     }
   }, [confirmModalLabels, submitException]);
 
+  const bodyContent = (
+    <>
+      {exception && (
+        <EndpointExceptionsForm
+          allowSelectOs={!alertData}
+          error={undefined}
+          disabled={false}
+          item={exception}
+          additionalEntries={additionalEntries}
+          mode="create"
+          onChange={handleOnChange}
+        />
+      )}
+
+      {hasAlertsUpdate && (
+        <>
+          <EuiHorizontalRule />
+
+          <ExceptionItemsFlyoutAlertsActions
+            exceptionListType="endpoint"
+            shouldCloseSingleAlert={closeSingleAlert}
+            onSingleAlertCloseCheckboxChange={setCloseSingleAlert}
+            shouldBulkCloseAlert={bulkCloseAlerts}
+            onBulkCloseCheckboxChange={setBulkCloseAlerts}
+            disableBulkClose={disableBulkClose}
+            onDisableBulkClose={setDisableBulkCloseAlerts}
+            exceptionListItems={exceptionArrayWrapper}
+            onUpdateBulkCloseIndex={setBulkCloseIndex}
+            isSignalIndexLoading={isSignalIndexLoading}
+            signalIndexNames={signalIndexNames}
+            isSignalIndexPatternLoading={isSignalIndexPatternLoading}
+            signalIndexPatterns={signalIndexPatterns}
+            alertData={alertData}
+            isAlertDataLoading={isAlertDataLoading ?? false}
+            alertStatus={alertStatus}
+          />
+        </>
+      )}
+    </>
+  );
+
+  const footerContent = (
+    <EuiFlexGroup
+      justifyContent="spaceBetween"
+      css={css`
+        padding: ${euiTheme.size.s};
+      `}
+    >
+      <EuiButtonEmpty
+        data-test-subj="add-endpoint-exception-cancel-button"
+        onClick={handleCloseFlyout}
+      >
+        {ARTIFACT_FLYOUT_LABELS.flyoutCancelButtonLabel}
+      </EuiButtonEmpty>
+
+      <EuiButton
+        data-test-subj="add-endpoint-exception-confirm-button"
+        fill
+        disabled={isAlertDataLoading || !isFormValid || isSubmittingData || isClosingAlerts}
+        onClick={handleOnSubmit}
+      >
+        {ENDPOINT_EXCEPTIONS_PAGE_LABELS.flyoutCreateSubmitButtonLabel}
+      </EuiButton>
+    </EuiFlexGroup>
+  );
+
+  const confirmModal = showConfirmModal && confirmModalLabels && (
+    <ArtifactConfirmModal
+      labels={confirmModalLabels}
+      onSuccess={submitException}
+      onCancel={() => setShowConfirmModal(false)}
+      data-test-subj="endpointExceptionConfirmModal"
+    />
+  );
+
   return (
     <EuiFlyout
+      session="never"
       size="l"
       onClose={handleCloseFlyout}
       aria-labelledby={endpointExceptionsFlyoutTitleId}
@@ -197,74 +280,11 @@ export const EndpointExceptionsFlyout: React.FC<EndpointExceptionsFlyoutProps> =
         </EuiTitle>
       </EuiFlyoutHeader>
 
-      <EuiFlyoutBody>
-        {exception && (
-          <EndpointExceptionsForm
-            allowSelectOs={!alertData}
-            error={undefined}
-            disabled={false}
-            item={exception}
-            additionalEntries={additionalEntries}
-            mode="create"
-            onChange={handleOnChange}
-          />
-        )}
+      <EuiFlyoutBody>{bodyContent}</EuiFlyoutBody>
 
-        {hasAlertsUpdate && (
-          <>
-            <EuiHorizontalRule />
+      <EuiFlyoutFooter>{footerContent}</EuiFlyoutFooter>
 
-            <ExceptionItemsFlyoutAlertsActions
-              exceptionListType="endpoint"
-              shouldCloseSingleAlert={closeSingleAlert}
-              onSingleAlertCloseCheckboxChange={setCloseSingleAlert}
-              shouldBulkCloseAlert={bulkCloseAlerts}
-              onBulkCloseCheckboxChange={setBulkCloseAlerts}
-              disableBulkClose={disableBulkClose}
-              onDisableBulkClose={setDisableBulkCloseAlerts}
-              exceptionListItems={exceptionArrayWrapper}
-              onUpdateBulkCloseIndex={setBulkCloseIndex}
-              alertData={alertData}
-              isAlertDataLoading={isAlertDataLoading ?? false}
-              alertStatus={alertStatus}
-            />
-          </>
-        )}
-      </EuiFlyoutBody>
-
-      <EuiFlyoutFooter>
-        <EuiFlexGroup
-          justifyContent="spaceBetween"
-          css={css`
-            padding: ${euiTheme.size.s};
-          `}
-        >
-          <EuiButtonEmpty
-            data-test-subj="add-endpoint-exception-cancel-button"
-            onClick={handleCloseFlyout}
-          >
-            {ARTIFACT_FLYOUT_LABELS.flyoutCancelButtonLabel}
-          </EuiButtonEmpty>
-
-          <EuiButton
-            data-test-subj="add-endpoint-exception-confirm-button"
-            fill
-            disabled={isAlertDataLoading || !isFormValid || isSubmittingData || isClosingAlerts}
-            onClick={handleOnSubmit}
-          >
-            {ENDPOINT_EXCEPTIONS_PAGE_LABELS.flyoutCreateSubmitButtonLabel}
-          </EuiButton>
-        </EuiFlexGroup>
-      </EuiFlyoutFooter>
-
-      {showConfirmModal && confirmModalLabels && (
-        <ArtifactConfirmModal
-          labels={confirmModalLabels}
-          onSuccess={submitException}
-          onCancel={() => setShowConfirmModal(false)}
-          data-test-subj="endpointExceptionConfirmModal"
-        />
-      )}
+      {confirmModal}
     </EuiFlyout>
   );
 };

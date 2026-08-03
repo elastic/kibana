@@ -8,31 +8,7 @@
 import type { IRouter, Logger } from '@kbn/core/server';
 import { AuthzDisabled } from '@kbn/core-security-server';
 import { DEPLOYMENT_STATS_PATH } from '../../common/constants';
-
-interface MappingProperty {
-  type?: string;
-  properties?: Record<string, MappingProperty>;
-}
-
-interface MeteringIndexStat {
-  name: string;
-  num_docs: number;
-  size_in_bytes: number;
-}
-
-interface MeteringStatsResponse {
-  _total: { num_docs: number; size_in_bytes: number };
-  indices: MeteringIndexStat[];
-}
-
-export const containsVectorField = (properties?: Record<string, MappingProperty>): boolean => {
-  if (!properties) return false;
-  for (const value of Object.values(properties)) {
-    if (value.type === 'dense_vector' || value.type === 'semantic_text') return true;
-    if (value.properties && containsVectorField(value.properties)) return true;
-  }
-  return false;
-};
+import { fetchDashboardsCount, fetchIndexStats } from '../lib/deployment_stats';
 
 export const registerDeploymentStatsRoute = (router: IRouter, logger: Logger) => {
   router.get(
@@ -47,63 +23,13 @@ export const registerDeploymentStatsRoute = (router: IRouter, logger: Logger) =>
       try {
         const core = await context.core;
         const client = core.elasticsearch.client;
+        const savedObjectsClient = core.savedObjects.getClient();
 
-        // Serverless-only `_metering/stats` returns docs + size for all user indices.
-        // Requires asSecondaryAuthUser.
-        const meteringStats =
-          await client.asSecondaryAuthUser.transport.request<MeteringStatsResponse>({
-            method: 'GET',
-            path: '/_metering/stats',
-          });
-
-        const userIndices = (meteringStats.indices ?? []).filter(
-          (index) => !index.name.startsWith('.')
-        );
-
-        const indicesCount = userIndices.length;
-        const storeSizeBytes = userIndices.reduce(
-          (sum, index) => sum + (index.size_in_bytes ?? 0),
-          0
-        );
-
-        let vectorDocsCount = 0;
-        if (indicesCount > 0) {
-          const indexNames = userIndices.map((i) => i.name);
-
-          try {
-            const mappings = await client.asCurrentUser.indices.getMapping({
-              index: indexNames,
-            });
-            const vectorIndexNames = new Set(
-              Object.entries(mappings)
-                .filter(([, mapping]) =>
-                  containsVectorField(
-                    mapping.mappings?.properties as Record<string, MappingProperty>
-                  )
-                )
-                .map(([name]) => name)
-            );
-
-            vectorDocsCount = userIndices
-              .filter((i) => vectorIndexNames.has(i.name))
-              .reduce((sum, i) => sum + (i.num_docs ?? 0), 0);
-          } catch (error) {
-            logger.warn(
-              `Failed to fetch mappings for vectordb deployment stats. Returning partial stats: ${error.message}`
-            );
-          }
-        }
-
-        let dashboardsCount = 0;
-        try {
-          const savedObjectsClient = core.savedObjects.getClient();
-          const result = await savedObjectsClient.find({ type: 'dashboard', perPage: 0 });
-          dashboardsCount = result.total;
-        } catch (dashboardError) {
-          logger.warn(
-            `Failed to fetch dashboard count for vectordb deployment stats: ${dashboardError.message}`
-          );
-        }
+        const [{ indicesCount, storeSizeBytes, vectorDocsCount }, dashboardsCount] =
+          await Promise.all([
+            fetchIndexStats(client, logger),
+            fetchDashboardsCount(savedObjectsClient, logger),
+          ]);
 
         return response.ok({
           body: {
