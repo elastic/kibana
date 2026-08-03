@@ -83,7 +83,7 @@ describe('createPlaywrightConfig', () => {
       navigationTimeout: 20000,
       screenshot: 'only-on-failure',
       testIdAttribute: 'data-test-subj',
-      trace: 'retain-on-failure',
+      trace: 'off',
       timezoneId: 'GMT',
       ignoreHTTPSErrors: true,
     });

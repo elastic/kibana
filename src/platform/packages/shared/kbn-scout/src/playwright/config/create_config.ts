@@ -142,9 +142,10 @@ export function createPlaywrightConfig(options: ScoutPlaywrightOptions): Playwri
       /* Base URL to use in actions like `await page.goto('/')`. */
       // baseURL: 'http://127.0.0.1:3000',
 
-      /* Keep a trace for any failed attempt, including one later recovered by a retry.
-       * See https://playwright.dev/docs/trace-viewer */
-      trace: 'retain-on-failure',
+      /* Tracing adds per-test overhead (screenshots, DOM snapshots, network/console capture)
+       * for every attempt, which can push already-marginal tests over their timeout in a
+       * shared CI lane. Keep it off, as it was before retries existed. */
+      trace: 'off',
       screenshot: 'only-on-failure',
       // video: 'retain-on-failure',
       // storageState: './output/reports/state.json', // Store session state (like cookies)
