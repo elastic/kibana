@@ -204,6 +204,8 @@ export const BulkOperations = ({
         values: { monitorCount: selectedItems.length },
       }),
       icon: 'trash',
+      disabled: isActionDisabled,
+      toolTipContent: disabledTooltip,
       'data-test-subj': 'syntheticsBulkDeleteMonitorsItem',
       onClick: () => {
         closePopover();
