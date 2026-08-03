@@ -7,7 +7,7 @@ applies_to:
   serverless: preview
 ---
 
-# Azure monitor connector [azure-monitor-action-type]
+# Azure Monitor connector [azure-monitor-action-type]
 
 The Azure Monitor connector connects directly to the Azure Resource Manager (ARM) and Log Analytics REST APIs. It lets a workflow or agent triage an Azure Monitor alert without leaving Elastic: list and inspect fired or resolved alerts, change an alert's state, query the metrics or logs behind it, correlate it with Activity Log events, and mute noisy alert rules during a maintenance window.
 
