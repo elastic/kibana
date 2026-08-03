@@ -7,6 +7,26 @@
 
 import * as t from 'io-ts';
 
+/**
+ * A vault-backed param resolves its value from HashiCorp Vault at runtime,
+ * inside Heartbeat. Kibana only stores this reference (path + field); it never
+ * fetches or stores the plaintext secret. The effective param `value` is the
+ * edge-resolved token `${vault/<path>#<field>}`.
+ */
+export const SyntheticsParamVaultSourceCodec = t.intersection([
+  t.type({
+    type: t.literal('vault'),
+    path: t.string,
+    field: t.string,
+  }),
+  t.partial({
+    // Name of the Vault connection to resolve against (omit = default connection).
+    connection: t.string,
+  }),
+]);
+
+export type SyntheticsParamVaultSource = t.TypeOf<typeof SyntheticsParamVaultSourceCodec>;
+
 export const SyntheticsParamsReadonlyCodec = t.intersection([
   t.interface({
     id: t.string,
@@ -16,6 +36,7 @@ export const SyntheticsParamsReadonlyCodec = t.intersection([
     description: t.string,
     tags: t.array(t.string),
     namespaces: t.array(t.string),
+    source: SyntheticsParamVaultSourceCodec,
   }),
 ]);
 
@@ -47,9 +68,11 @@ export type DeleteParamsResponse = t.TypeOf<typeof DeleteParamsResponseCodec>;
 export const SyntheticsParamRequestCodec = t.intersection([
   t.interface({
     key: t.string,
-    value: t.string,
   }),
   t.partial({
+    // Either `value` (literal) or `source` (vault-backed) must be provided.
+    value: t.string,
+    source: SyntheticsParamVaultSourceCodec,
     description: t.string,
     tags: t.array(t.string),
     share_across_spaces: t.boolean,

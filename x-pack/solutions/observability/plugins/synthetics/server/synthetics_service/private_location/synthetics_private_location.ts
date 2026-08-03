@@ -24,6 +24,7 @@ import {
 import { scheduleCleanUpTask } from './clean_up_task';
 import type { SyntheticsServerSetup } from '../../types';
 import { formatSyntheticsPolicy } from '../formatters/private_formatters/format_synthetics_policy';
+import { getVaultConnectionConfigs, type HeartbeatVaultConfig } from '../get_vault_connection';
 import type {
   HeartbeatConfig,
   MonitorFields,
@@ -196,7 +197,8 @@ export class SyntheticsPrivateLocation {
     globalParams: Record<string, string>,
     maintenanceWindows: MaintenanceWindow[],
     testRunId?: string,
-    runOnce?: boolean
+    runOnce?: boolean,
+    vaultConnections?: HeartbeatVaultConfig[]
   ): Promise<NewPackagePolicy | null> {
     const { label: locName } = privateLocation;
 
@@ -216,6 +218,17 @@ export class SyntheticsPrivateLocation {
 
       newPolicy.namespace = await this.getPolicyNamespace(configNamespace);
 
+      // `vaultConnections` is fetched ONCE per space by the caller
+      // (createPackagePolicies / editMonitors) — E1 — and formatSyntheticsPolicy
+      // attaches only the ones THIS monitor references (A2), as a single Fleet
+      // secret. It is undefined on the inspect path (A1): Fleet's inspect()
+      // compiles vars verbatim (no secret-ization), so attaching them would return
+      // plaintext credentials to the caller.
+      //
+      // A3 (residual): when Fleet secret storage is disabled the persist path
+      // stores the blob in plaintext rather than as a Fleet secret; hard-failing
+      // in that case needs Fleet to expose `isSecretStorageEnabled` (tracked on the
+      // meta issue). The Private Locations UI warns when this is the case.
       const { formattedPolicy } = formatSyntheticsPolicy(
         newPolicy,
         config.type,
@@ -240,7 +253,9 @@ export class SyntheticsPrivateLocation {
           ...(config.fields?.kibanaUrl ? { kibanaUrl: config.fields.kibanaUrl } : {}),
         },
         globalParams,
-        maintenanceWindows
+        maintenanceWindows,
+        undefined,
+        vaultConnections
       );
 
       return formattedPolicy;
@@ -263,6 +278,9 @@ export class SyntheticsPrivateLocation {
     }
     const newPolicies: NewPackagePolicyWithId[] = [];
     const newPolicyTemplate = await this.buildNewPolicy(spaceId);
+    // E1: fetch the space's vault connections ONCE (they're decrypted), not per
+    // monitor × location.
+    const vaultConnections = await getVaultConnectionConfigs(this.server, spaceId);
 
     for (const { config, globalParams } of configs) {
       try {
@@ -285,7 +303,8 @@ export class SyntheticsPrivateLocation {
             globalParams,
             maintenanceWindows,
             testRunId,
-            runOnce
+            runOnce,
+            vaultConnections
           );
 
           if (!newPolicy) {
@@ -363,6 +382,8 @@ export class SyntheticsPrivateLocation {
         spaceId,
         globalParams,
         maintenanceWindows
+        // vaultConnections omitted (A1): never attach vault credentials to inspect
+        // output — Fleet's inspect() compiles vars verbatim, with no secret-ization.
       );
 
       const pkgPolicy = {
@@ -392,14 +413,17 @@ export class SyntheticsPrivateLocation {
       };
     }
 
-    const [newPolicyTemplate, { policies: existingPolicies, allSpaces }] = await Promise.all([
-      this.buildNewPolicy(spaceId),
-      this.getExistingPolicies(
-        configs.map(({ config }) => config),
-        allPrivateLocations,
-        spaceId
-      ),
-    ]);
+    // E1: fetch the space's vault connections ONCE, not per monitor × location.
+    const [newPolicyTemplate, { policies: existingPolicies, allSpaces }, vaultConnections] =
+      await Promise.all([
+        this.buildNewPolicy(spaceId),
+        this.getExistingPolicies(
+          configs.map(({ config }) => config),
+          allPrivateLocations,
+          spaceId
+        ),
+        getVaultConnectionConfigs(this.server, spaceId),
+      ]);
 
     const policiesToUpdate: UpdatePackagePolicyWithId[] = [];
     const policiesToCreate: NewPackagePolicyWithId[] = [];
@@ -425,7 +449,10 @@ export class SyntheticsPrivateLocation {
               newPolicyTemplate,
               spaceId,
               globalParams,
-              maintenanceWindows
+              maintenanceWindows,
+              undefined,
+              undefined,
+              vaultConnections
             );
 
             if (!newPolicy) {

@@ -28,6 +28,7 @@ import type { SyntheticsParams } from '../../../../../../common/runtime_types';
 import { useParamsList } from '../hooks/use_params_list';
 import { AddParamFlyout } from './add_param_flyout';
 import { DeleteParam } from './delete_param';
+import { VaultConnectionPanel } from './vault_connection_panel';
 
 export interface ListParamItem extends SyntheticsParams {
   id: string;
@@ -64,7 +65,16 @@ export const ParamsList = () => {
       name: i18n.translate('xpack.synthetics.settingsRoute.params.value', {
         defaultMessage: 'Value',
       }),
-      render: (item: ListParamItem) => <ParamsText text={item.value ?? ''} />,
+      render: (item: ListParamItem) =>
+        item.source?.type === 'vault' ? (
+          <EuiBadge color="hollow" iconType="lock" data-test-subj="syntheticsParamVaultBadge">
+            {`vault: ${item.source.connection ? `${item.source.connection}@` : ''}${
+              item.source.path
+            }#${item.source.field}`}
+          </EuiBadge>
+        ) : (
+          <ParamsText text={item.value ?? ''} />
+        ),
     },
     {
       name: i18n.translate('xpack.synthetics.settingsRoute.params.description', {
@@ -242,6 +252,8 @@ export const ParamsList = () => {
         />
       </EuiText>
       <EuiSpacer size="m" />
+      <VaultConnectionPanel />
+      <EuiSpacer size="l" />
       <EuiInMemoryTable<ListParamItem>
         data-test-subj={
           isLoading ? 'syntheticsParamsTable-loading' : 'syntheticsParamsTable-loaded'

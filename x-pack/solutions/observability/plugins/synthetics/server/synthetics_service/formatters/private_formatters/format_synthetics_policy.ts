@@ -18,8 +18,44 @@ import {
   handleMultilineStringFormatter,
   replaceStringWithParams,
 } from '../formatting_utils';
+import { referencedConnectionNames } from '../vault_param_formatter';
+import type { HeartbeatVaultConfig } from '../../get_vault_connection';
 import { syntheticsPolicyFormatters } from './formatters';
 import { PARAMS_KEYS_TO_SKIP } from '../common';
+
+/**
+ * Selects only the Vault connections a monitor actually references (by name;
+ * undefined = the default connection), so an agent never receives credentials for
+ * connections the monitor does not use. Fails closed: a reference to a connection
+ * that is not configured throws rather than silently shipping nothing (or all).
+ */
+export const scopeVaultConnections = (
+  all: HeartbeatVaultConfig[],
+  referenced: Set<string | undefined>,
+  monitorName?: string
+): HeartbeatVaultConfig[] => {
+  const byName = new Map(all.map((c) => [c.name, c]));
+  const scoped = new Map<string, HeartbeatVaultConfig>();
+  for (const name of referenced) {
+    if (name === undefined) {
+      // The default connection is only well-defined when exactly one exists. With
+      // several, an unqualified ${vault/..} has no default — don't over-ship; the
+      // agent reports the unresolved reference at runtime.
+      if (all.length === 1) scoped.set(all[0].name, all[0]);
+      continue;
+    }
+    const conn = byName.get(name);
+    if (!conn) {
+      throw new Error(
+        `Monitor "${
+          monitorName ?? ''
+        }" references Vault connection "${name}", which is not configured`
+      );
+    }
+    scoped.set(conn.name, conn);
+  }
+  return [...scoped.values()];
+};
 
 export interface ProcessorFields {
   location_name: string;
@@ -39,7 +75,8 @@ export const formatSyntheticsPolicy = (
   config: Partial<MonitorFields & ProcessorFields>,
   params: Record<string, string>,
   mws: MaintenanceWindow[],
-  isLegacy?: boolean
+  isLegacy?: boolean,
+  vaultConnections?: HeartbeatVaultConfig[]
 ) => {
   const configKeys = Object.keys(config) as ConfigKey[];
 
@@ -92,6 +129,15 @@ export const formatSyntheticsPolicy = (
     }
   });
 
+  // Collect the vault connection names this monitor references BEFORE any value is
+  // transformed below — the browser inline script is base64-encoded a few lines
+  // down, which would otherwise hide a ${vault/..} token inside it from detection
+  // (C3). Empty when the monitor references no vault-backed secret.
+  const referencedVaultConnections = new Set<string | undefined>();
+  Object.values(dataStream?.vars ?? {}).forEach((v) => {
+    referencedConnectionNames(v?.value).forEach((n) => referencedVaultConnections.add(n));
+  });
+
   // This field is NOT in the monitor config, but needs to be set in the policy
   // so Heartbeat knows to decode the base64-encoded script
   const encodingVar = dataStream?.vars?.['source.inline.encoding'];
@@ -128,6 +174,24 @@ export const formatSyntheticsPolicy = (
   const throttling = dataStream?.vars?.[LegacyConfigKey.THROTTLING_CONFIG];
   if (throttling) {
     throttling.value = throttlingFormatter?.(config, ConfigKey.THROTTLING_CONFIG);
+  }
+
+  // Vault connections: when this monitor references a vault-backed secret
+  // (${vault/[<name>@]<path>#<field>} in any resolved field) attach ONLY the
+  // referenced connections (not every connection in the space) to the `vault` var,
+  // base64-encoded. That var is `secret: true` in the package, so Fleet stores it
+  // as a single Fleet secret and the compiled policy carries only a
+  // $co.elastic.secret{...} reference.
+  const vaultItem = dataStream?.vars?.vault;
+  if (vaultItem && vaultConnections?.length && referencedVaultConnections.size > 0) {
+    const scoped = scopeVaultConnections(
+      vaultConnections,
+      referencedVaultConnections,
+      config[ConfigKey.NAME]
+    );
+    if (scoped.length > 0) {
+      vaultItem.value = Buffer.from(JSON.stringify(scoped)).toString('base64');
+    }
   }
 
   return { formattedPolicy, hasDataStream: Boolean(dataStream), hasInput: Boolean(currentInput) };
