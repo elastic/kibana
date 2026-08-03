@@ -105,49 +105,12 @@ Response:
 }
 ```
 
-Example: platform_sig_events_events_write — single new discovery (still wrapped in `items`)
-```json
-{
-  "items": [
-    {
-      "status": "pending",
-      "dedup_window": "now-24h",
-      "title": "...",
-      "symptom_hypothesis": "...",
-      "summary": "...",
-      "severity": "...",
-      "confidence": 0.6,
-      "stream_names": ["..."],
-      "signals": [{ "type": "detection", "stream_name": "...", "description": "...", "confirmed": true, "evidence": { "esql_query": "...", "result": "found" }, "metadata": { "detection_id": "...", "rule_name": "...", "rule_uuid": "...", "change_point_type": "spike", "p_value": 0.01 } }]
-    }
-  ]
-}
-```
-
-Example: platform_sig_events_events_write — continuation of an open event (reuse `event_id` from `platform_sig_events_event_search`)
+Example: platform_sig_events_events_write. `event_id` is passed only on continuation of an open event
 ```json
 {
   "items": [
     {
       "event_id": "...",
-      "status": "open",
-      "title": "...",
-      "symptom_hypothesis": "...",
-      "summary": "...",
-      "severity": "...",
-      "confidence": 0.7,
-      "stream_names": ["..."],
-      "signals": [{ "type": "detection", "stream_name": "...", "description": "...", "confirmed": true, "evidence": { "esql_query": "...", "result": "found" }, "metadata": { "detection_id": "...", "rule_name": "...", "rule_uuid": "...", "change_point_type": "spike", "p_value": 0.01 } }]
-    }
-  ]
-}
-```
-
-Example: platform_sig_events_events_write — two grouped detections in one item, one standalone in another
-```json
-{
-  "items": [
-    {
       "status": "pending",
       "dedup_window": "now-24h",
       "title": "...",
@@ -215,7 +178,6 @@ For the remaining pairs, match if at least one criterion holds:
      - one side’s `blast_radius` dependency edge touches the other side’s `causal_features` node (`source` or `target` equals that node), or
      - both sides have dependency edges with the same `source` and different `target` nodes (shared caller / fan-out), or
      - both sides share at least one entity node in `blast_radius` (`feature_id` or normalized `name`).
-
    - Timing, **Alert symptom**, or mechanism may support a causal chain for the root cause, but topology is the primary signal; **Current evidence** is only used to reject contradictions
 2. **Evidence convergence**
    - Each side's **Current evidence**, **Alert Symptom**, description, mechanism, or failure keyword must converge on a compatible incident correlation or root cause.
@@ -286,9 +248,7 @@ Assign each matched detection to at most one accepted event continuation. The co
 
 ### Step 4: Group remaining detections into Discoveries
 
-1. Without prior bias, partition all remaining detections rules that are not in `matched_rule_uuids`, or were not included in open events, into discoveries using `<incident_matching>` pairwise for every unordered pair in this set, then apply cascade closure from `<incident_matching>`.
-  - One root-cause cascade = one discovery for all failure rules sharing the same mechanism, even when symptoms appear on different user paths (balances, transaction history, payments, deposits).
-  - Authentication volume spikes (successful logins, new account creations) without failure evidence are standalone discoveries — never merge with infrastructure or database cascades.
+1. Without prior bias, partition all remaining detections rules that are not in `matched_rule_uuids`, or were not included in open events, into discoveries using `<incident_matching>` pairwise for every unordered pair in this set. Record the matches, then form discoveries as connected components of the match graph; do not form service-scoped groups incrementally.
   - Do not merge groups with different onset times unless you find an explicit causal chain. 
   - Keep detections in standalone discoveries when there is no match to justify grouping into a discovery.
   - Rules whose onset coincides are candidates for the same discovery; detection arrival time and batch boundaries are not incident boundaries.
