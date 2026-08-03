@@ -177,17 +177,7 @@ export class SpacesClient implements ISpacesClient {
   }
 
   public async completeInitialSolutionSetup(solution: InitialSolutionSetupView) {
-    if (this.isServerless) {
-      throw Boom.badRequest(
-        'Unable to complete initial solution setup, solution property is forbidden in serverless'
-      );
-    }
-
-    if (Boolean(solution) && !this.config.allowSolutionVisibility) {
-      throw Boom.badRequest(
-        'Unable to complete initial solution setup, the solution property can not be set when xpack.spaces.allowSolutionVisibility setting is disabled'
-      );
-    }
+    this.assertSolutionWriteAllowed(solution, 'complete initial solution setup');
 
     const spaceObject = await this.repository.get<SpaceSavedObjectAttributes>(
       'space',
@@ -227,19 +217,11 @@ export class SpacesClient implements ISpacesClient {
       );
     }
 
-    if (Boolean(space.solution) && !this.config.allowSolutionVisibility) {
-      throw Boom.badRequest(
-        'Unable to create Space, the solution property can not be set when xpack.spaces.allowSolutionVisibility setting is disabled'
-      );
-    }
-
-    if (this.isServerless && Object.hasOwn(space, 'solution')) {
-      throw Boom.badRequest('Unable to create Space, solution property is forbidden in serverless');
-    }
-
-    if (Object.hasOwn(space, 'solution') && !space.solution) {
-      throw Boom.badRequest('Unable to create Space, solution property cannot be empty');
-    }
+    this.assertSolutionWriteAllowed(
+      Object.hasOwn(space, 'solution') ? space.solution : undefined,
+      'create Space',
+      { requirePresent: Object.hasOwn(space, 'solution') }
+    );
 
     let projectRoutingExpression: string | undefined;
     if (Object.hasOwn(space, 'projectRouting')) {
@@ -288,19 +270,11 @@ export class SpacesClient implements ISpacesClient {
       );
     }
 
-    if (Boolean(space.solution) && !this.config.allowSolutionVisibility) {
-      throw Boom.badRequest(
-        'Unable to update Space, the solution property can not be set when xpack.spaces.allowSolutionVisibility setting is disabled'
-      );
-    }
-
-    if (this.isServerless && Object.hasOwn(space, 'solution')) {
-      throw Boom.badRequest('Unable to update Space, solution property is forbidden in serverless');
-    }
-
-    if (Object.hasOwn(space, 'solution') && !space.solution) {
-      throw Boom.badRequest('Unable to update Space, solution property cannot be empty');
-    }
+    this.assertSolutionWriteAllowed(
+      Object.hasOwn(space, 'solution') ? space.solution : undefined,
+      'update Space',
+      { requirePresent: Object.hasOwn(space, 'solution') }
+    );
 
     const npreName = getSpaceDefaultNpreName(id);
     if (Object.hasOwn(space, 'projectRouting')) {
@@ -339,7 +313,12 @@ export class SpacesClient implements ISpacesClient {
     // but trim if a new name is being set to prevent introducing new whitespace.
     const existingName = existingSpaceSavedObject.attributes.name as string;
     const resolvedName = space.name === existingName ? space.name : space.name.trim();
-    const attributes = this.generateSpaceAttributes({ ...spaceToPersist, name: resolvedName });
+    const attributes = {
+      ...this.generateSpaceAttributes({ ...spaceToPersist, name: resolvedName }),
+      ...(id === DEFAULT_SPACE_ID && Boolean(space.solution)
+        ? { solutionSetupRequired: false }
+        : {}),
+    };
     await this.repository.update('space', id, attributes);
     const updatedSpace = this.transformSavedObjectToSpace({
       id,
@@ -433,6 +412,28 @@ export class SpacesClient implements ISpacesClient {
       ...(!this.isServerless && space.solution ? { solution: space.solution } : {}),
     };
   };
+
+  private assertSolutionWriteAllowed(
+    solution: v1.Space['solution'] | undefined,
+    action: string,
+    options: { requirePresent?: boolean } = {}
+  ) {
+    const { requirePresent = false } = options;
+
+    if (this.isServerless && (requirePresent || Boolean(solution))) {
+      throw Boom.badRequest(`Unable to ${action}, solution property is forbidden in serverless`);
+    }
+
+    if (Boolean(solution) && !this.config.allowSolutionVisibility) {
+      throw Boom.badRequest(
+        `Unable to ${action}, the solution property can not be set when xpack.spaces.allowSolutionVisibility setting is disabled`
+      );
+    }
+
+    if (requirePresent && !solution) {
+      throw Boom.badRequest(`Unable to ${action}, solution property cannot be empty`);
+    }
+  }
 
   /**
    * Collects a map of all deprecated feature IDs and the feature IDs that replace them.

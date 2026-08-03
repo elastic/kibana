@@ -9,6 +9,7 @@ import type { CoreSetup, Logger } from '@kbn/core/server';
 import { addSpaceIdToPath, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { CoreUserProfileDelegateContract } from '@kbn/core-user-profile-server';
 
+import { maybeRedirectForInitialSolutionSetup } from './maybe_redirect_for_initial_solution_setup';
 import type { Space } from '../../../common';
 import { ENTER_SPACE_PATH } from '../../../common/constants';
 import type { InitialSolutionSetupService } from '../../initial_solution_setup/initial_solution_setup_service';
@@ -53,29 +54,16 @@ export function initSpacesOnPostAuthRequestInterceptor({
     const isRequestingApplication = path.startsWith('/app');
     const isEnteringSpace = path === '/spaces/enter';
 
-    if (
-      request.auth.isAuthenticated &&
-      spaceId === DEFAULT_SPACE_ID &&
-      (isRequestingKibanaRoot || isRequestingApplication || isEnteringSpace)
-    ) {
-      try {
-        const spacesClient = spacesService.createSpacesClient(request);
-        if (await initialSolutionSetup.isRequired(spacesClient)) {
-          const next = isRequestingApplication
-            ? `${request.url.pathname}${request.url.search}`
-            : request.url.searchParams.get('next') ?? undefined;
-          return response.redirected({
-            headers: { location: getSpaceSelectorUrl(serverBasePath, next) },
-          });
-        }
-      } catch (error) {
-        const wrappedError = wrapError(error);
-        if (wrappedError.statusCode === 403) {
-          log.debug(`Skipping initial solution setup redirect; unauthorized. ${error}`);
-        } else {
-          log.warn(`Failed to check initial solution setup state: ${error}`);
-        }
-      }
+    const setupRedirect = await maybeRedirectForInitialSolutionSetup({
+      request,
+      response,
+      spacesService,
+      initialSolutionSetup,
+      serverBasePath,
+      log,
+    });
+    if (setupRedirect) {
+      return setupRedirect;
     }
 
     // When the user deliberately selects a space from any entry point, they all navigate to /spaces/enter within

@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-/**
- * Solutions offered by initial solution setup.
- * Narrower than {@link SolutionView}, which also includes serverless-only values.
- */
-export type InitialSolutionSetupView = 'classic' | 'es' | 'oblt' | 'security';
+import type { TraditionalSolutionView } from './space/v1';
+
+export type InitialSolutionSetupView = TraditionalSolutionView;
 
 export interface GetInitialSolutionSetupResponse {
   required: boolean;

@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import type { InitialSolutionSetupView } from '../common';
+import type { InitialSolutionSetupView, TraditionalSolutionView } from '../common';
 
 export const SOLUTION_VIEW_OPTIONS: Array<{
   value: InitialSolutionSetupView;
@@ -86,3 +86,9 @@ export const SOLUTION_VIEW_OPTIONS: Array<{
     dataTestSubj: 'solutionViewClassicOption',
   },
 ];
+
+type MissingSolutionViewOptions = Exclude<
+  TraditionalSolutionView,
+  (typeof SOLUTION_VIEW_OPTIONS)[number]['value']
+>;
+true satisfies [MissingSolutionViewOptions] extends [never] ? true : never;

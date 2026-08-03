@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { InitialSolutionSetupRouteDeps, InternalRouteDeps } from '.';
+import type { InitialSolutionSetupRouteDeps } from '.';
 import type { GetInitialSolutionSetupResponse } from '../../../../common';
 import { wrapError } from '../../../lib/errors';
 import { createLicensedRouteHandler } from '../../lib';
@@ -14,7 +14,7 @@ export function initGetInitialSolutionSetupApi({
   router,
   getSpacesService,
   initialSolutionSetup,
-}: InternalRouteDeps & InitialSolutionSetupRouteDeps) {
+}: InitialSolutionSetupRouteDeps) {
   router.get(
     {
       path: '/internal/spaces/_initial_solution_setup',

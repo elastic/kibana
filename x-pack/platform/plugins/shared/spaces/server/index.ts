@@ -30,6 +30,7 @@ export type {
 export type {
   Space,
   SolutionView,
+  TraditionalSolutionView,
   InitialSolutionSetupView,
   GetAllSpacesOptions,
   GetAllSpacesPurpose,
@@ -42,6 +43,7 @@ export const config: PluginConfigDescriptor = {
     allowFeatureVisibility: true,
     allowSolutionVisibility: true,
     initialSolutionSetup: true,
+    defaultSolution: true,
   },
 };
 

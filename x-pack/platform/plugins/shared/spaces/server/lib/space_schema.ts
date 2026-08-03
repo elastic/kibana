@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { MAX_SPACE_INITIALS } from '../../common';
+import { MAX_SPACE_INITIALS, TRADITIONAL_SOLUTION_VIEWS } from '../../common';
 
 export const SPACE_ID_REGEX = /^[a-z0-9_\-]+$/;
 
@@ -86,11 +86,13 @@ const spaceSchema = schema.object({
   ),
 });
 
+const [es, oblt, security, classic] = TRADITIONAL_SOLUTION_VIEWS;
+
 export const solutionSchema = schema.oneOf([
-  schema.literal('security'),
-  schema.literal('oblt'),
-  schema.literal('es'),
-  schema.literal('classic'),
+  schema.literal(es),
+  schema.literal(oblt),
+  schema.literal(security),
+  schema.literal(classic),
 ]);
 
 export const getSpaceSchema = (isServerless: boolean) => {

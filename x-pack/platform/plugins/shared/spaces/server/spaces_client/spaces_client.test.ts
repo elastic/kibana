@@ -1066,6 +1066,55 @@ describe('#update', () => {
     expect(mockCallWithRequestRepository.get).toHaveBeenCalledWith('space', id);
   });
 
+  test(`clears solutionSetupRequired when updating the default space solution`, async () => {
+    const mockDebugLogger = createMockDebugLogger();
+    const mockConfig = createMockConfig();
+    const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
+    mockCallWithRequestRepository.get.mockResolvedValue({
+      id: 'default',
+      type: 'space',
+      references: [],
+      attributes: {
+        name: 'Default',
+        description: '',
+        color: '#FFFFFF',
+        initials: 'D',
+        disabledFeatures: [],
+        solutionSetupRequired: true,
+      },
+    });
+    featuresStart.getKibanaFeatures.mockReturnValue([...features]);
+
+    const client = new SpacesClient(
+      mockDebugLogger,
+      mockConfig,
+      mockCallWithRequestRepository,
+      [],
+      'traditional',
+      featuresStart,
+      undefined
+    );
+
+    await client.update('default', {
+      id: 'default',
+      name: 'Default',
+      description: '',
+      color: '#FFFFFF',
+      initials: 'D',
+      disabledFeatures: [],
+      solution: 'oblt',
+    });
+
+    expect(mockCallWithRequestRepository.update).toHaveBeenCalledWith(
+      'space',
+      'default',
+      expect.objectContaining({
+        solution: 'oblt',
+        solutionSetupRequired: false,
+      })
+    );
+  });
+
   test(`preserves existing leading/trailing whitespace in name when updating a space with the same name`, async () => {
     const mockDebugLogger = createMockDebugLogger();
     const mockConfig = createMockConfig();

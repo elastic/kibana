@@ -11,6 +11,8 @@ export {
   SPACE_SEARCH_COUNT_THRESHOLD,
   ENTER_SPACE_PATH,
   API_VERSIONS,
+  SOLUTION_VIEW_CLASSIC,
+  TRADITIONAL_SOLUTION_VIEWS,
 } from './constants';
 export { getRouteUrlForSpace } from './get_spaced_route_url';
 export type {
@@ -19,6 +21,7 @@ export type {
   GetAllSpacesPurpose,
   GetSpaceResult,
   SolutionView,
+  TraditionalSolutionView,
 } from './types/latest';
 export type { spaceV1 } from './types';
 export type {

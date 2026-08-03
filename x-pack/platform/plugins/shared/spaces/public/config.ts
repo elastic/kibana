@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { SolutionView } from '../common';
+
 export interface ConfigType {
   maxSpaces: number;
   allowFeatureVisibility: boolean;
@@ -12,4 +14,5 @@ export interface ConfigType {
   initialSolutionSetup?: {
     enabled: boolean;
   };
+  defaultSolution?: Extract<SolutionView, 'es' | 'oblt' | 'security'>;
 }

@@ -37,7 +37,7 @@ import { KibanaSolutionAvatar } from '@kbn/shared-ux-avatar-solution';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
 import { SpaceCards, SpaceTable } from './components';
-import { InitialSolutionSetup } from './components/initial_solution_setup';
+import { InitialSolutionSetupPage } from './components/initial_solution_setup_page';
 import * as styles from './space_selector.styles';
 import type { GetInitialSolutionSetupResponse, Space } from '../../common';
 import { SPACE_SEARCH_COUNT_THRESHOLD } from '../../common/constants';
@@ -119,6 +119,8 @@ export const SpaceSelector = ({
     queryKey: ['initial_solution_setup'],
     queryFn: () => spacesManager.getInitialSolutionSetup(),
     enabled: initialSolutionSetupEnabled,
+    // Fail open immediately; retries would leave non-managers on a spinner for seconds.
+    retry: false,
   });
 
   const isSetupRequired =
@@ -139,10 +141,7 @@ export const SpaceSelector = ({
     queryFn: () => spacesManager.getSpaces(),
     enabled: canLoadSpaces && !searchTerm,
   });
-  const isInitialSolutionSetup = isSetupRequired;
-  const isLoading =
-    (initialSolutionSetupEnabled && isInitialSolutionSetupLoading) ||
-    (!isInitialSolutionSetup && areSpacesLoading);
+  const isLoading = areSpacesLoading;
   const error = spacesError;
 
   useEffect(() => {
@@ -228,6 +227,29 @@ export const SpaceSelector = ({
     [headerRef]
   );
 
+  if (initialSolutionSetupEnabled && isInitialSolutionSetupLoading) {
+    return (
+      <KibanaPageTemplate css={styles.pageTemplateStyles} data-test-subj="kibanaSpaceSelector">
+        <BackgroundPortal />
+        <KibanaPageTemplate.Section color="transparent" paddingSize="xl">
+          <div css={styles.spacesLoadingSpinnerStyles} data-test-subj="spacesLoadingSpinner">
+            <EuiLoadingSpinner size="xl" />
+          </div>
+        </KibanaPageTemplate.Section>
+      </KibanaPageTemplate>
+    );
+  }
+
+  if (isSetupRequired) {
+    return (
+      <InitialSolutionSetupPage
+        spacesManager={spacesManager}
+        serverBasePath={serverBasePath}
+        customLogo={customLogo}
+      />
+    );
+  }
+
   return (
     <KibanaPageTemplate css={styles.pageTemplateStyles} data-test-subj="kibanaSpaceSelector">
       <BackgroundPortal />
@@ -248,30 +270,16 @@ export const SpaceSelector = ({
           <EuiSpacer size="xxl" />
           <EuiTextColor color="subdued">
             <h1 css={styles.headerStyles} tabIndex={-1} ref={focusHeaderOnMount}>
-              {isInitialSolutionSetup ? (
-                <FormattedMessage
-                  id="xpack.spaces.spaceSelector.initialSolutionSetupTitle"
-                  defaultMessage="Select a solution view for your space"
-                />
-              ) : (
-                <FormattedMessage
-                  id="xpack.spaces.spaceSelector.selectSpacesTitle"
-                  defaultMessage="Select your space"
-                />
-              )}
+              <FormattedMessage
+                id="xpack.spaces.spaceSelector.selectSpacesTitle"
+                defaultMessage="Select your space"
+              />
             </h1>
             <p>
-              {isInitialSolutionSetup ? (
-                <FormattedMessage
-                  id="xpack.spaces.spaceSelector.initialSolutionSetupDescription"
-                  defaultMessage="Solution views offer focused, solution-based navigation. You can change the solution view in space settings later."
-                />
-              ) : (
-                <FormattedMessage
-                  id="xpack.spaces.spaceSelector.changeSpaceAnytimeAvailabilityText"
-                  defaultMessage="You can change your space at anytime."
-                />
-              )}
+              <FormattedMessage
+                id="xpack.spaces.spaceSelector.changeSpaceAnytimeAvailabilityText"
+                defaultMessage="You can change your space at anytime."
+              />
             </p>
           </EuiTextColor>
         </EuiText>
@@ -283,8 +291,6 @@ export const SpaceSelector = ({
               <div css={styles.spacesLoadingSpinnerStyles} data-test-subj="spacesLoadingSpinner">
                 <EuiLoadingSpinner size="xl" />
               </div>
-            ) : isInitialSolutionSetup ? (
-              <InitialSolutionSetup spacesManager={spacesManager} serverBasePath={serverBasePath} />
             ) : (
               <Fragment>
                 {!error ? (

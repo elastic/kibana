@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
+
 import { schema } from '@kbn/config-schema';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
-import type { InitialSolutionSetupRouteDeps, InternalRouteDeps } from '.';
+import type { InitialSolutionSetupRouteDeps } from '.';
 import type { CompleteInitialSolutionSetupResponse } from '../../../../common';
 import { wrapError } from '../../../lib/errors';
 import { solutionSchema } from '../../../lib/space_schema';
@@ -18,7 +20,7 @@ export function initCompleteInitialSolutionSetupApi({
   router,
   getSpacesService,
   initialSolutionSetup,
-}: InternalRouteDeps & InitialSolutionSetupRouteDeps) {
+}: InitialSolutionSetupRouteDeps) {
   router.post(
     {
       path: '/internal/spaces/_complete_initial_solution_setup',
@@ -37,8 +39,13 @@ export function initCompleteInitialSolutionSetupApi({
     },
     createLicensedRouteHandler(async (_context, request, response) => {
       try {
+        if (!initialSolutionSetup.isEligible()) {
+          throw Boom.forbidden('Initial solution setup is disabled');
+        }
+
         const spacesClient = getSpacesService().createSpacesClient(request);
-        await initialSolutionSetup.complete(spacesClient, request.body.solution);
+        await spacesClient.completeInitialSolutionSetup(request.body.solution);
+        initialSolutionSetup.markComplete();
         const body: CompleteInitialSolutionSetupResponse = {
           solution: request.body.solution,
         };

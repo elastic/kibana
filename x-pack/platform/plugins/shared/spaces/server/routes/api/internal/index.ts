@@ -20,12 +20,11 @@ export interface InternalRouteDeps {
   getSpacesService: () => SpacesServiceStart;
 }
 
-export interface InitialSolutionSetupRouteDeps {
-  router: SpacesRouter;
+export interface InitialSolutionSetupRouteDeps extends InternalRouteDeps {
   initialSolutionSetup: InitialSolutionSetupService;
 }
 
-export function initInternalSpacesApi(deps: InternalRouteDeps & InitialSolutionSetupRouteDeps) {
+export function initInternalSpacesApi(deps: InitialSolutionSetupRouteDeps) {
   initCompleteInitialSolutionSetupApi(deps);
   initGetActiveSpaceApi(deps);
   initGetSpaceContentSummaryApi(deps);

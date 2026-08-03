@@ -158,11 +158,9 @@ export class SpacesPlugin
 
     const solution = plugins.cloud?.onboarding?.defaultSolution || defaultSolution;
     const isServerless = this.initializerContext.env.packageInfo.buildFlavor === 'serverless';
-    const isInitialSolutionSetupEnabled = initialSolutionSetupEnabled && !solution && !isServerless;
+    const eligible = initialSolutionSetupEnabled && !solution && !isServerless;
+    const initialSolutionSetup = new InitialSolutionSetupService(eligible);
     const getSavedObjects = async () => (await core.getStartServices())[0].savedObjects;
-    const initialSolutionSetup = new InitialSolutionSetupService({
-      enabled: isInitialSolutionSetupEnabled,
-    });
     this.defaultSpaceService = new DefaultSpaceService();
     this.defaultSpaceService.setup({
       coreStatus: core.status,
@@ -171,7 +169,7 @@ export class SpacesPlugin
       spacesLicense: license,
       logger: this.log,
       solution,
-      solutionSetupRequired: isInitialSolutionSetupEnabled,
+      solutionSetupRequired: eligible,
     });
 
     initSpacesViewsRoutes({

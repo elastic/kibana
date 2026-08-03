@@ -5,32 +5,35 @@
  * 2.0.
  */
 
-import { kibanaResponseFactory } from '@kbn/core/server';
+import { kibanaResponseFactory, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 
-import type { InitialSolutionSetupRouteDeps, InternalRouteDeps } from '.';
+import type { InitialSolutionSetupRouteDeps } from '.';
 import { initGetInitialSolutionSetupApi } from './get_initial_solution_setup';
-import type { InitialSolutionSetupService } from '../../../initial_solution_setup/initial_solution_setup_service';
+import { InitialSolutionSetupService } from '../../../initial_solution_setup/initial_solution_setup_service';
 import { spacesClientMock } from '../../../spaces_client/spaces_client.mock';
 import { mockRouteContext, mockRouteContextWithInvalidLicense } from '../__fixtures__';
 
 describe('GET /internal/spaces/_initial_solution_setup', () => {
-  const setup = (isRequired: boolean) => {
+  const setup = (isRequired: boolean | Error = true) => {
     const router = httpServiceMock.createRouter();
     const spacesClient = spacesClientMock.create();
     const getSpacesService = jest.fn().mockReturnValue({
       createSpacesClient: jest.fn().mockReturnValue(spacesClient),
     });
-    const initialSolutionSetup = {
-      isRequired: jest.fn().mockResolvedValue(isRequired),
-      complete: jest.fn(),
-    } as unknown as InitialSolutionSetupService;
+    const initialSolutionSetup = new InitialSolutionSetupService(true);
+    jest
+      .spyOn(initialSolutionSetup, 'isRequired')
+      .mockImplementation(() =>
+        isRequired instanceof Error ? Promise.reject(isRequired) : Promise.resolve(isRequired)
+      );
 
     initGetInitialSolutionSetupApi({
       router,
       getSpacesService,
       initialSolutionSetup,
-    } as InternalRouteDeps & InitialSolutionSetupRouteDeps);
+    } as InitialSolutionSetupRouteDeps);
 
     return {
       routeHandler: router.get.mock.calls[0][1],
@@ -80,5 +83,46 @@ describe('GET /internal/spaces/_initial_solution_setup', () => {
       message: 'License is invalid for spaces',
     });
     expect(initialSolutionSetup.isRequired).not.toHaveBeenCalled();
+  });
+
+  it('propagates non-not-found errors from the service', async () => {
+    const { routeHandler } = setup(new Error('setup check failed'));
+
+    const response = await routeHandler(
+      mockRouteContext,
+      httpServerMock.createKibanaRequest({ method: 'get' }),
+      kibanaResponseFactory
+    );
+
+    expect(response.status).toEqual(500);
+  });
+
+  it('returns http/200 with required false when service soft-fails not-found', async () => {
+    // Service handles not-found; route should receive false from isRequired.
+    const router = httpServiceMock.createRouter();
+    const spacesClient = spacesClientMock.create();
+    spacesClient.isInitialSolutionSetupRequired.mockRejectedValue(
+      SavedObjectsErrorHelpers.createGenericNotFoundError('space', DEFAULT_SPACE_ID)
+    );
+    const getSpacesService = jest.fn().mockReturnValue({
+      createSpacesClient: jest.fn().mockReturnValue(spacesClient),
+    });
+    const initialSolutionSetup = new InitialSolutionSetupService(true);
+
+    initGetInitialSolutionSetupApi({
+      router,
+      getSpacesService,
+      initialSolutionSetup,
+    } as InitialSolutionSetupRouteDeps);
+
+    const routeHandler = router.get.mock.calls[0][1];
+    const response = await routeHandler(
+      mockRouteContext,
+      httpServerMock.createKibanaRequest({ method: 'get' }),
+      kibanaResponseFactory
+    );
+
+    expect(response.status).toEqual(200);
+    expect(response.payload).toEqual({ required: false });
   });
 });

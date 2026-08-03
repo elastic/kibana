@@ -5,32 +5,32 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
-
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
-import type { InitialSolutionSetupView } from '../../common';
 import type { ISpacesClient } from '../spaces_client';
-
-interface Deps {
-  enabled: boolean;
-}
 
 export class InitialSolutionSetupService {
   private setupComplete = false;
 
-  constructor(private readonly deps: Deps) {}
+  constructor(private readonly eligible: boolean) {}
 
-  public async isRequired(spacesClient: ISpacesClient) {
-    if (!this.deps.enabled || this.setupComplete) {
+  public isEligible(): boolean {
+    return this.eligible;
+  }
+
+  public async isRequired(spacesClient: ISpacesClient): Promise<boolean> {
+    if (!this.eligible || this.setupComplete) {
       return false;
     }
 
     try {
-      const isRequired = await spacesClient.isInitialSolutionSetupRequired();
-      this.setupComplete = !isRequired;
-      return isRequired;
+      const required = await spacesClient.isInitialSolutionSetupRequired();
+      if (!required) {
+        this.setupComplete = true;
+      }
+      return required;
     } catch (error) {
+      // Startup race: default space may not exist yet. Soft-fail without caching.
       if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
         return false;
       }
@@ -38,12 +38,7 @@ export class InitialSolutionSetupService {
     }
   }
 
-  public async complete(spacesClient: ISpacesClient, solution: InitialSolutionSetupView) {
-    if (!this.deps.enabled) {
-      throw Boom.forbidden('Initial solution setup is disabled');
-    }
-
-    await spacesClient.completeInitialSolutionSetup(solution);
+  public markComplete(): void {
     this.setupComplete = true;
   }
 }
