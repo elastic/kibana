@@ -24,7 +24,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./enrich_policies'));
     loadTestFile(require.resolve('./create_enrich_policy'));
     loadTestFile(require.resolve('./data_enrichers'));
-    loadTestFile(require.resolve('./searchprofiler'));
     loadTestFile(require.resolve('./snapshot_repositories'));
   });
 }
