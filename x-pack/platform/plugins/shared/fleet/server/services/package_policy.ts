@@ -558,11 +558,14 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       return p;
     });
 
-    const packageInfosandAssetsMap = await getPkgInfoAssetsMap({
-      logger,
-      packageInfos: [...packageInfos.values()],
-      savedObjectsClient: soClient,
-    });
+    const [packageInfosandAssetsMap, secretStorageEnabled] = await Promise.all([
+      getPkgInfoAssetsMap({
+        logger,
+        packageInfos: [...packageInfos.values()],
+        savedObjectsClient: soClient,
+      }),
+      isSecretStorageEnabled(esClient, soClient),
+    ]);
 
     await pMap(packagePoliciesWithIds, async (packagePolicy) => {
       try {
@@ -571,9 +574,11 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
         let inputs = getInputsWithStreamIds(packagePolicy, packagePolicyId);
 
-        const { id, ...pkgPolicyWithoutId } = packagePolicy;
+        // eslint-disable-next-line prefer-const
+        let { id, ...pkgPolicyWithoutId } = packagePolicy;
 
         let elasticsearch: PackagePolicy['elasticsearch'];
+        let secretReferences: PolicySecretReference[] | undefined;
         if (packagePolicy.package) {
           const packageInfoAndAsset = packageInfosandAssetsMap.get(
             `${packagePolicy.package.name}-${packagePolicy.package.version}`
@@ -587,10 +592,22 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           const { pkgInfo, assetsMap } = packageInfoAndAsset;
           validatePackagePolicyOrThrow(packagePolicy, pkgInfo);
 
+          if (secretStorageEnabled) {
+            const secretsRes = await extractAndWriteSecrets({
+              packagePolicy: { ...pkgPolicyWithoutId, inputs },
+              packageInfo: pkgInfo,
+              esClient,
+            });
+
+            pkgPolicyWithoutId = secretsRes.packagePolicy;
+            secretReferences = secretsRes.secretReferences;
+            inputs = pkgPolicyWithoutId.inputs as PackagePolicyInput[];
+          }
+
           inputs = pkgInfo
             ? await _compilePackagePolicyInputs(
                 pkgInfo,
-                packagePolicy.vars || {},
+                pkgPolicyWithoutId.vars || {},
                 inputs,
                 assetsMap
               )
@@ -619,6 +636,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
             elasticsearch,
             policy_id: agentPolicyIdsOfPackagePolicy[0],
             policy_ids: agentPolicyIdsOfPackagePolicy,
+            ...(secretReferences?.length && { secret_references: secretReferences }),
             revision: 1,
             created_at: isoDate,
             created_by: options?.user?.username ?? 'system',
