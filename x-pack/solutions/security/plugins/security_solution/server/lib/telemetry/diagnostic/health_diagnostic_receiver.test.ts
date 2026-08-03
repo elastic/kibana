@@ -864,6 +864,16 @@ describe('Security Solution - Health Diagnostic Queries - CircuitBreakingQueryEx
       );
     });
 
+    it.each([
+      ['..', '_transform/{id}/_stats', { id: '..' }],
+      ['.', '_transform/{id}/_stats', { id: '.' }],
+      ['value with /', '_transform/{id}/_stats', { id: 'a/b' }],
+      ['value with backslash', '_transform/{id}/_stats', { id: 'a\\b' }],
+      ['traversal prefix', '_transform/{id}/_stats', { id: '../other' }],
+    ])('rejects path traversal attempt: %s', (_, template, pathParams) => {
+      expect(() => interpolatePath(template, pathParams)).toThrow('Invalid path parameter value');
+    });
+
     it('passes an AbortSignal to transport.request', async () => {
       mockEsClient.transport.request.mockResolvedValue({ transforms: [] });
       const query = buildExecutableApiQuery({

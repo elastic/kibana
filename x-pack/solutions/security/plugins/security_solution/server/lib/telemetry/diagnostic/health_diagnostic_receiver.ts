@@ -57,7 +57,11 @@ export function interpolatePath(template: string, params: Record<string, string>
     if (!(key in params)) {
       throw new Error(`Missing path parameter: '${key}'`);
     }
-    return params[key];
+    const value = params[key];
+    if (/[/\\]/.test(value) || value === '..' || value === '.') {
+      throw new Error(`Invalid path parameter value for '${key}': '${value}'`);
+    }
+    return value;
   });
 }
 
