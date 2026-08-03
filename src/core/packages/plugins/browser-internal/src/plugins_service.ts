@@ -18,7 +18,6 @@ import {
   createPluginStartContext,
 } from './plugin_context';
 import { RuntimePluginContractResolver } from './plugin_contract_resolver';
-import { exposeNavDependenciesSnapshot } from './nav_dependencies_snapshot';
 
 /** @internal */
 export type PluginsServiceSetupDeps = InternalCoreSetup;
@@ -158,7 +157,9 @@ export class PluginsService
     // Test-only: expose an inert snapshot of cross-plugin navigation dependencies on `window`
     // for the navigation-dependency enforcement test. Gated behind the internal
     // `plugins.exposeNavDependencies` config (off by default); never enforces anything at runtime.
+    // Loaded lazily so the snapshot module is kept out of the default page-load bundle.
     if (this.coreContext.env.exposeNavDependencies) {
+      const { exposeNavDependenciesSnapshot } = await import('./nav_dependencies_snapshot');
       exposeNavDependenciesSnapshot({
         application: deps.application,
         opaqueIdToPluginId: new Map<PluginOpaqueId, PluginName>(

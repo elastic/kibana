@@ -35,8 +35,9 @@ export interface NavDependencyTreeInfo {
 
 /**
  * Inert snapshot of the browser-side data needed to reconstruct cross-plugin navigation edges.
- * Exposed on `window` in development builds only and consumed by the navigation-dependency
- * enforcement test. It never enforces anything by itself.
+ * Exposed on `window` only when the internal `plugins.exposeNavDependencies` config is enabled
+ * (off by default) and consumed by the navigation-dependency enforcement test. It never enforces
+ * anything by itself.
  *
  * @internal
  */
@@ -45,15 +46,15 @@ export interface NavDependenciesSnapshot {
   navTrees: NavDependencyTreeInfo[];
 }
 
-/** Name of the `window` global exposing {@link NavDependenciesSnapshot} in dev builds. */
+/** Name of the `window` global exposing {@link NavDependenciesSnapshot} when enabled. */
 export const NAV_DEPENDENCIES_GLOBAL = '__kbnNavDependencies__' as const;
 
 declare global {
   interface Window {
     /**
      * Dev/test-only accessor returning the cross-plugin navigation dependency snapshot.
-     * Present only in development builds; consumed by the navigation-dependency enforcement
-     * test (see https://github.com/elastic/kibana/issues/66682).
+     * Present only when the internal `plugins.exposeNavDependencies` config is enabled; consumed by
+     * the navigation-dependency enforcement test (see https://github.com/elastic/kibana/issues/66682).
      * @internal
      */
     __kbnNavDependencies__?: () => NavDependenciesSnapshot;
@@ -89,7 +90,8 @@ export const buildNavDependenciesSnapshot = ({
 
 /**
  * Attaches the dev/test-only navigation-dependency accessor to `window`. No-op outside a browser
- * environment. Callers are responsible for gating this to development builds.
+ * environment. Callers are responsible for gating this behind the internal
+ * `plugins.exposeNavDependencies` config (off by default).
  *
  * @internal
  */
