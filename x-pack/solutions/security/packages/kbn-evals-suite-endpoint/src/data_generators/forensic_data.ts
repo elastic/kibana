@@ -9,25 +9,10 @@ import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 
 /**
- * Forensic timeline seed for the endpoint-forensic-analysis smoke suite.
- *
- * The troubleshooting SCENARIOS in ./endpoint_data.ts stamp every document with a
- * single `now`, so they cannot exercise a chronological reconstruction. The forensic
- * skill's happy-path examples (patient zero, lateral movement, host timeline) require
- * an ORDERED kill-chain: `execute_esql` must return rows the model can sort by
- * `@timestamp` into a timeline. Without seeded events the "produces a chronological
- * narrative or ordered event list for the named host" criterion is unsatisfiable and
- * pins the timeline example at partial credit.
- *
- * One coherent narrative covers all three happy-path examples:
- *   WKSTN-RECV01 (patient zero, phishing) → lateral SMB/WMI hop → SRV-DC01 (domain
- *   controller ransomware + shadow-copy deletion). Every event carries a distinct
- *   `@timestamp` so an ascending sort is a real timeline.
- *
- * Agent ids use the dedicated `eval-agent-forensic-` prefix so cleanupForensicData()
- * reclaims them without touching the troubleshooting suite's `eval-agent-ts-*` seeds
- * (the two namespaces are disjoint, so neither suite's cleanup can match the other's
- * ids regardless of Playwright worker scheduling).
+ * Ordered kill chain: WKSTN-RECV01 (patient zero, phishing) → lateral SMB/WMI hop →
+ * SRV-DC01 (ransomware + shadow-copy deletion). Every event carries a distinct
+ * `@timestamp`, unlike the troubleshooting SCENARIOS which stamp a single `now`,
+ * so the timeline/patient-zero/lateral-movement examples have something to sort.
  */
 
 const FORENSIC_AGENT_PREFIX = 'eval-agent-forensic-';

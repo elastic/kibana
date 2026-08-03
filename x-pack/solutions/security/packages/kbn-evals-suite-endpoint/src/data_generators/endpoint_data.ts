@@ -17,18 +17,7 @@ import {
 
 const POLL_INTERVAL_MS = 5_000;
 
-/**
- * Troubleshooting scenarios use the dedicated `eval-agent-ts-` namespace so the
- * id set is DISJOINT from the forensic suite's `eval-agent-forensic-*` ids: an ES
- * `prefix` query on `eval-agent-ts-` can never match a forensic agent id (the old
- * shared `eval-agent-` prefix was a strict prefix of `eval-agent-forensic-`, so
- * cleanupTroubleshootingData also deleted the forensic suite's freshly-seeded kill
- * chain when Playwright scheduled the two spec files on different workers). The
- * forensic suite also never writes `metrics-endpoint.metadata-*` (its kill chain
- * is `logs-endpoint.events.*` only), so leftover forensic ids cannot appear in
- * the transform outputs counted below — the propagation gate always counts
- * exactly this suite's own seeds.
- */
+/** Disjoint from the forensic suite's `eval-agent-forensic-` ids (see cleanup.ts). */
 const EVAL_AGENT_ID_PREFIX = 'eval-agent-ts-';
 const EVAL_SEEDED_QUERY = { prefix: { 'agent.id': EVAL_AGENT_ID_PREFIX } };
 
@@ -109,13 +98,8 @@ export async function waitForTransformPropagation(
 ): Promise<void> {
   const start = Date.now();
   let lastCounts = { metadataCurrent: 0, metadataUnited: 0 };
-  // EVAL_SEEDED_QUERY counts only this suite's own seeds: `eval-agent-ts-` is
-  // disjoint from the forensic suite's `eval-agent-forensic-` ids, and forensic
-  // seeding never writes `metrics-endpoint.metadata-*` anyway — so no baseline
-  // compensation is needed (or possible) here.
-  const requiredCounts = expectedCounts;
   log.info(
-    `Waiting for transform propagation: metadataCurrent >= ${requiredCounts.metadataCurrent}, metadataUnited >= ${requiredCounts.metadataUnited}`
+    `Waiting for transform propagation: metadataCurrent >= ${expectedCounts.metadataCurrent}, metadataUnited >= ${expectedCounts.metadataUnited}`
   );
 
   while (Date.now() - start < maxWaitMs) {
@@ -138,12 +122,12 @@ export async function waitForTransformPropagation(
       };
 
       log.debug(
-        `Transform propagation: metadataCurrent=${currentCount.count}/${requiredCounts.metadataCurrent}, metadataUnited=${unitedCount.count}/${requiredCounts.metadataUnited}`
+        `Transform propagation: metadataCurrent=${currentCount.count}/${expectedCounts.metadataCurrent}, metadataUnited=${unitedCount.count}/${expectedCounts.metadataUnited}`
       );
 
       if (
-        currentCount.count >= requiredCounts.metadataCurrent &&
-        unitedCount.count >= requiredCounts.metadataUnited
+        currentCount.count >= expectedCounts.metadataCurrent &&
+        unitedCount.count >= expectedCounts.metadataUnited
       ) {
         log.info('Transform propagation complete');
         return;
@@ -157,7 +141,7 @@ export async function waitForTransformPropagation(
 
   throw new Error(
     `Timed out waiting for transform propagation after ${maxWaitMs}ms. ` +
-      `Expected metadataCurrent >= ${requiredCounts.metadataCurrent}, metadataUnited >= ${requiredCounts.metadataUnited}; ` +
+      `Expected metadataCurrent >= ${expectedCounts.metadataCurrent}, metadataUnited >= ${expectedCounts.metadataUnited}; ` +
       `last observed metadataCurrent=${lastCounts.metadataCurrent}, metadataUnited=${lastCounts.metadataUnited}`
   );
 }

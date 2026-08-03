@@ -213,20 +213,9 @@ evaluate.describe('Automatic Troubleshooting', { tag: tags.stateful.classic }, (
     }
 
     const clients = { esClient, internalEsClient };
-    // Reclaim only this suite's own seeds. Each suite cleans up exactly its own
-    // disjoint id namespace (see cleanup.ts): the forensic smoke suite owns
-    // `eval-agent-forensic-` and re-seeds in its own beforeAll, so this suite
-    // must NOT run cleanupForensicData — Playwright gives no cross-worker
-    // beforeAll ordering guarantee, so a cross-suite wipe can delete the
-    // forensic suite's freshly-seeded kill chain mid-run.
     await cleanupTroubleshootingData(clients);
 
-    // waiting for transforms takes a while so seed all scenarios here. The
-    // transform-propagation gate counts only `eval-agent-ts-` docs, which the
-    // forensic suite can never produce (disjoint id namespace, and its kill
-    // chain is `logs-endpoint.events.*` only — it never writes
-    // `metrics-endpoint.metadata-*`), so the gate always waits for exactly the
-    // fresh troubleshooting seeds with no baseline compensation.
+    // Seeding is batched here because transform propagation is slow.
     for (const scenario of Object.values(SCENARIOS)) {
       await seedScenario(clients, scenario);
     }
