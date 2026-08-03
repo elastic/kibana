@@ -1,5 +1,5 @@
 {
-  "sha1": "84641001aabe16f44ee73c06595e1e04887b3ddd",
+  "sha1": "cd4b3a030fcd31ce6195029607864cb0e62efe0d",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -288,14 +288,14 @@
     {
       "id": "0ffb4babb4c147d-1128db6b7fad457",
       "title": "OverviewCompactView switches to compact view and persists the selection",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/overview_compact_view.spec.ts",
-        "line": 15,
+        "line": 14,
         "column": 11
       }
     },
