@@ -41,6 +41,7 @@ import { initializeUiamContainers, runUiamContainer, getUiamContainers } from '.
 import { getServerlessImageTag, getCommitUrl } from './extract_image_info';
 import { readStringSecrets } from './read_string_secrets';
 import { waitForSecurityIndex } from './wait_for_security_index';
+import { waitForCrossProjectReady } from './wait_for_cross_project_ready';
 import { createCliError } from '../errors';
 import { shouldPreferCachedSnapshot } from './find_local_cached_snapshot';
 import type { EsClusterExecOptions } from '../cluster_exec_options';
@@ -1122,6 +1123,14 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
       log.info(`[runServerlessCluster] Waiting for security index (${elapsed()})...`);
       await waitForSecurityIndex({ client, log });
       log.info(`[runServerlessCluster] Security index ready (${elapsed()})`);
+    }
+    if (options.esArgs && options.esArgs.includes('serverless.cross_project.enabled=true')) {
+      // With CPS enabled the cluster can be green and writable before the origin project state is
+      // registered; searches fail with `No origin project state` until then. Gate on it so startES()
+      // is a true readiness signal for CPS callers.
+      log.info(`[runServerlessCluster] Waiting for CPS origin project state (${elapsed()})...`);
+      await waitForCrossProjectReady({ client, log });
+      log.info(`[runServerlessCluster] CPS origin project state ready (${elapsed()})`);
     }
   }
 
