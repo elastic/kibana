@@ -65,6 +65,9 @@ export type {
 // Tagging utility
 export { tags } from './tags';
 
+// Generic test utilities
+export { scrollContainerUntilTargetIsVisible } from './utils';
+
 // Test entrypoints
 export { test, spaceTest, lighthouseTest, globalSetupHook, globalTeardownHook } from './test/ui';
 export { apiTest } from './test/api';

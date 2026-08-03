@@ -8,3 +8,4 @@
  */
 
 export { expect } from './src/playwright/matchers/ui';
+export { scrollContainerUntilTargetIsVisible } from './src/playwright/utils';
