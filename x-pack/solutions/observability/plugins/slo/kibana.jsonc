@@ -43,6 +43,7 @@
     "optionalPlugins": [
       "cases",
       "cloud",
+      "cps",
       "discover",
       "observabilityAIAssistant",
       "security",
