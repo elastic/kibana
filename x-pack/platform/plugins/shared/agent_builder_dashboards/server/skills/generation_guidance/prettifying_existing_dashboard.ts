@@ -30,11 +30,11 @@ When panels in the tool result's \`data.dashboard\` carry an \`authoring_note\`,
 
 If the user's request does not make the scope clear, call \`ask_user_question\` alone before \`generate_dashboard\` and ask **How should I enhance this dashboard?** with two options: **Improve existing charts and layout and add useful new panels** and **Improve existing charts and layout without adding panels**. Do not ask when the user already specified either scope.
 
-## Grid layout pass (always required)
+## Layout pass (both scopes)
 
-Every prettify request includes a full grid layout pass, regardless of whether the user allows new panels. Classify existing visualizations by their Lens chart type (\`config.type\` on the panel in the dashboard attachment), apply the chart-type size table from the generation guidance, and pack the complete 48-column grid left-to-right and top-to-bottom without gaps, overlaps, or inconsistent row heights.
+Check the existing layout against the panel layout rules (grid packing and chart-type sizes) and the panel ordering from the dashboard composition guidelines. If any panel violates them, use \`update_panel_layouts\` to emit a corrected grid for the affected panels, recomputing neighboring \`x\` and downstream \`y\` positions rather than patching one panel in isolation. Reordering existing panels is a layout change: apply it in both scopes, including when the user disallows new panels.
 
-Use \`update_panel_layouts\` to emit the complete final grid for every surviving existing panel. Do this even when the current layout already appears acceptable or no composition changes are warranted; never send empty \`operations\` for a prettify request. When the user chooses the existing-panels-only option, do not add or remove panels.
+If the layout already conforms, do not emit layout operations — \`prettifyPanelConfigs: true\` with empty \`operations\` is the correct call for a config-only prettify. When the user chooses the existing-panels-only option, do not add or remove panels or restructure sections.
 
 ## Composition pass (only when new panels are allowed)
 
@@ -45,7 +45,7 @@ When a redesign is warranted:
 1. Infer the dashboard's purpose and intended audience from its title, description, panel titles, \`config.type\` values, and ES|QL queries. Determine the important questions this dashboard should answer.
 2. Design the ideal dashboard from that purpose as if starting from scratch: choose the valuable overview metrics, trends, breakdowns/distributions, contextual markdown, controls, ordering, and sections called for by the generation guidance. Do not anchor on the existing number or mix of panels, and do not accept a sparse dashboard just because the input is sparse.
 3. Compare the ideal design with the existing inventory. Preserve useful panels, proactively add every missing high-value visualization with \`add_panels\`, and remove panels that are clearly redundant or unrelated with \`remove_panels\`. Every addition must answer a distinct purpose-relevant question, and uncertain removals should remain recommendations.
-4. Give new panels their final \`grid\` in \`add_panels\`, then include them when planning the complete grid layout pass.
+4. Give new panels their final \`grid\` in \`add_panels\`, then re-check the full grid (surviving plus new panels) against the layout rules and fix any violations with \`update_panel_layouts\`.
 
 Set \`prettifyPanelConfigs: true\` in the same batched call so surviving pre-existing ES|QL Lens configs are refreshed by the inner visualization agent.
 `,
