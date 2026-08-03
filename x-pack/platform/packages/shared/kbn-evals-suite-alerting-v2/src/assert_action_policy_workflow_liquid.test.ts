@@ -7,40 +7,50 @@
 
 import {
   assertActionPolicyWorkflowLiquid,
-  isAllowedActionPolicyLiquidPath,
+  getInvalidActionPolicyPayloadField,
+  isActionPolicyPayloadLiquidPath,
 } from './assert_action_policy_workflow_liquid';
 
-describe('isAllowedActionPolicyLiquidPath', () => {
+describe('isActionPolicyPayloadLiquidPath', () => {
   it.each([
-    'inputs',
     'inputs.payload',
     'inputs.payload.policyId',
     'inputs.payload.episodes',
     'inputs.payload.episodes[0].data.host.name',
     'inputs.payload.rules',
-    'triggeredBy',
-    'spaceId',
-    'execution.url',
-    'execution.id',
-    'workflow.name',
-    'kibanaUrl',
-    'now',
-  ])('allows %s', (path) => {
-    expect(isAllowedActionPolicyLiquidPath(path)).toBe(true);
+  ])('matches %s', (path) => {
+    expect(isActionPolicyPayloadLiquidPath(path)).toBe(true);
+  });
+
+  it.each(['inputs', 'inputs.other', 'event.alerts', 'execution.url'])(
+    'does not match %s',
+    (path) => {
+      expect(isActionPolicyPayloadLiquidPath(path)).toBe(false);
+    }
+  );
+});
+
+describe('getInvalidActionPolicyPayloadField', () => {
+  it.each([
+    '',
+    'id',
+    'policyId',
+    'groupKey',
+    'episodes',
+    'episodes[0].episode_status',
+    'episodes[0].data.host.name',
+    'rules',
+    'rules[ep.rule_id].name',
+  ])('accepts %s', (relativePath) => {
+    expect(getInvalidActionPolicyPayloadField(relativePath)).toBeNull();
   });
 
   it.each([
-    'event.alerts',
-    'event.rule.name',
-    'event.spaceId',
-    'inputs.other',
-    'context.payload',
-  ])('rejects %s', (path) => {
-    expect(isAllowedActionPolicyLiquidPath(path)).toBe(false);
-  });
-
-  it('allows steps.* for prior step outputs', () => {
-    expect(isAllowedActionPolicyLiquidPath('steps.send_email.output')).toBe(true);
+    ['foo', 'foo'],
+    ['episodes[0].bogus', 'bogus'],
+    ['policy_id', 'policy_id'],
+  ])('rejects %s', (relativePath, invalidSegment) => {
+    expect(getInvalidActionPolicyPayloadField(relativePath)).toBe(invalidSegment);
   });
 });
 
@@ -68,13 +78,12 @@ steps:
         View: {{ execution.url }}
 `;
 
-  it('accepts a valid action-policy notification workflow', () => {
+  it('accepts a workflow with valid inputs.payload.* fields', () => {
     const { variables } = assertActionPolicyWorkflowLiquid(validWorkflowYaml);
 
     expect(variables).toEqual(
       expect.arrayContaining(['inputs.payload.episodes', 'execution.url'])
     );
-    expect(variables.every(isAllowedActionPolicyLiquidPath)).toBe(true);
   });
 
   it('rejects invalid Liquid syntax', () => {
@@ -89,33 +98,38 @@ steps:
     expect(() => assertActionPolicyWorkflowLiquid(yaml)).toThrow(/invalid Liquid/i);
   });
 
-  it('rejects v1 event.* Liquid variables', () => {
+  it('rejects unknown inputs.payload fields', () => {
     const yaml = `
 steps:
   - name: send_email
     type: email
     with:
-      message: "{{ event.alerts | size }} — {{ event.rule.name }}"
+      message: "{{ inputs.payload.policy_id }} {{ inputs.payload.alerts }}"
 `;
 
-    expect(() => assertActionPolicyWorkflowLiquid(yaml)).toThrow(/disallowed variables/i);
+    expect(() => assertActionPolicyWorkflowLiquid(yaml)).toThrow(/unknown `inputs\.payload` fields/i);
+    expect(() => assertActionPolicyWorkflowLiquid(yaml)).toThrow(/inputs\.payload\.policy_id/);
+    expect(() => assertActionPolicyWorkflowLiquid(yaml)).toThrow(/inputs\.payload\.alerts/);
+  });
+
+  it('rejects workflows with no inputs.payload references', () => {
+    const yaml = `
+version: '1'
+name: Static
+triggers:
+  - type: manual
+steps:
+  - name: send_email
+    type: email
+    with:
+      message: "{{ execution.url }} {{ event.alerts }}"
+`;
+
+    expect(() => assertActionPolicyWorkflowLiquid(yaml)).toThrow(/inputs\.payload/);
     expect(() => assertActionPolicyWorkflowLiquid(yaml)).toThrow(/event\.alerts/);
   });
 
-  it('rejects other unknown Liquid roots', () => {
-    const yaml = `
-steps:
-  - name: send_email
-    type: email
-    with:
-      message: "{{ context.payload.episodes }}"
-`;
-
-    expect(() => assertActionPolicyWorkflowLiquid(yaml)).toThrow(/disallowed variables/i);
-    expect(() => assertActionPolicyWorkflowLiquid(yaml)).toThrow(/context\.payload\.episodes/);
-  });
-
-  it('allows workflows with no Liquid', () => {
+  it('rejects workflows with no Liquid', () => {
     const yaml = `
 version: '1'
 name: Static
@@ -128,6 +142,8 @@ steps:
       message: plain text
 `;
 
-    expect(assertActionPolicyWorkflowLiquid(yaml)).toEqual({ variables: [] });
+    expect(() => assertActionPolicyWorkflowLiquid(yaml)).toThrow(/inputs\.payload/);
+    expect(() => assertActionPolicyWorkflowLiquid(yaml)).toThrow(/\(none\)/);
   });
 });
+

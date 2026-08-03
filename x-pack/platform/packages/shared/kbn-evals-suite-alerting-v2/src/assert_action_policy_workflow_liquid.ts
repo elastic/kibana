@@ -5,37 +5,139 @@
  * 2.0.
  */
 
-import { scanForTemplateVariables } from '@kbn/workflows';
+import { builtinWorkflowInputDefinitions, scanForTemplateVariables } from '@kbn/workflows';
 import { parse as parseYaml } from 'yaml';
 
+const PAYLOAD_PREFIX = 'inputs.payload';
+
 /**
- * Liquid roots available when an action policy dispatches a workflow.
- * - `inputs.payload.*` mirrors `ActionPolicyWorkflowPayload`
- * - engine context vars (see action-policy-management skill)
- * - `steps.*` for referencing prior step outputs in multi-step workflows
+ * Minimal JSON Schema shape needed to walk `inputs.payload.*` Liquid paths.
+ * Kept local (not `typeof builtinWorkflowInputDefinitions[string]`) so
+ * `items` / `properties` access does not create circular inference.
  */
-const ALLOWED_ROOTS = [
-  'triggeredBy',
-  'spaceId',
-  'execution',
-  'workflow',
-  'kibanaUrl',
-  'now',
-  'steps',
-] as const;
+interface WalkableJsonSchema {
+  type?: string | string[];
+  properties?: Record<string, WalkableJsonSchema>;
+  additionalProperties?: boolean | WalkableJsonSchema;
+  items?: WalkableJsonSchema | WalkableJsonSchema[];
+}
+
+const getPayloadSchema = (): WalkableJsonSchema =>
+  builtinWorkflowInputDefinitions.alertingV2NotificationGroup;
 
 const isUnderPrefix = (path: string, prefix: string): boolean =>
   path === prefix || path.startsWith(`${prefix}.`) || path.startsWith(`${prefix}[`);
 
 /**
- * Returns true when `path` is a known-good Liquid variable for action-policy
- * workflow dispatch (payload fields, engine context, or step outputs).
+ * Returns true when `path` references the action-policy dispatch payload
+ * (`ActionPolicyWorkflowPayload` via `inputs.payload.*`).
  */
-export const isAllowedActionPolicyLiquidPath = (path: string): boolean => {
-  if (path === 'inputs' || isUnderPrefix(path, 'inputs.payload')) {
-    return true;
+export const isActionPolicyPayloadLiquidPath = (path: string): boolean =>
+  isUnderPrefix(path, PAYLOAD_PREFIX);
+
+/**
+ * Split a Liquid path into segments, treating `[...]` as its own segment.
+ * e.g. `rules[ep.rule_id].name` → `['rules', '[ep.rule_id]', 'name']`
+ */
+const splitPathSegments = (path: string): string[] => {
+  const segments: string[] = [];
+  let current = '';
+
+  for (let i = 0; i < path.length; i += 1) {
+    const char = path[i];
+    if (char === '.' && !current.startsWith('[')) {
+      if (current) segments.push(current);
+      current = '';
+      continue;
+    }
+    if (char === '[') {
+      if (current) {
+        segments.push(current);
+        current = '';
+      }
+      const close = path.indexOf(']', i);
+      if (close === -1) {
+        segments.push(path.slice(i));
+        return segments;
+      }
+      segments.push(path.slice(i, close + 1));
+      i = close;
+      continue;
+    }
+    current += char;
   }
-  return ALLOWED_ROOTS.some((root) => isUnderPrefix(path, root));
+
+  if (current) segments.push(current);
+  return segments;
+};
+
+const isBracketSegment = (segment: string): boolean =>
+  segment.startsWith('[') && segment.endsWith(']');
+
+const resolveArrayItemSchema = (
+  items: WalkableJsonSchema | WalkableJsonSchema[] | undefined
+): WalkableJsonSchema | undefined => {
+  if (!items) return undefined;
+  // Tuple schemas use WalkableJsonSchema[]; Liquid index access can't pick a
+  // specific slot, so walk the first item schema.
+  return Array.isArray(items) ? items[0] : items;
+};
+
+/**
+ * Walk `relativePath` (everything after `inputs.payload`) against the
+ * alertingV2NotificationGroup JSON Schema. Returns null when valid, or the
+ * first invalid segment.
+ */
+export const getInvalidActionPolicyPayloadField = (
+  relativePath: string,
+  schema: WalkableJsonSchema = getPayloadSchema()
+): string | null => {
+  if (!relativePath) return null;
+
+  let current: WalkableJsonSchema | undefined = schema;
+  for (const segment of splitPathSegments(relativePath)) {
+    if (!current) {
+      return relativePath;
+    }
+
+    if (isBracketSegment(segment)) {
+      if (current.type === 'array') {
+        current = resolveArrayItemSchema(current.items);
+        continue;
+      }
+      // Object key access like rules[ep.rule_id]
+      if (current.type === 'object' && current.additionalProperties) {
+        current =
+          typeof current.additionalProperties === 'object'
+            ? current.additionalProperties
+            : { type: 'object', additionalProperties: true };
+        continue;
+      }
+      return relativePath;
+    }
+
+    if (current.type !== 'object') {
+      return relativePath;
+    }
+
+    const next: WalkableJsonSchema | undefined = current.properties?.[segment];
+    if (next) {
+      current = next;
+      continue;
+    }
+
+    if (current.additionalProperties) {
+      current =
+        typeof current.additionalProperties === 'object'
+          ? current.additionalProperties
+          : { type: 'object', additionalProperties: true };
+      continue;
+    }
+
+    return segment;
+  }
+
+  return null;
 };
 
 export interface AssertActionPolicyWorkflowLiquidResult {
@@ -44,11 +146,12 @@ export interface AssertActionPolicyWorkflowLiquidResult {
 }
 
 /**
- * Asserts that every Liquid expression in an action-policy notification workflow:
- * 1. Parses as valid Liquid (via `@kbn/workflows` `scanForTemplateVariables`)
- * 2. Only references allowed dispatch/engine paths (`inputs.payload.*`, `execution.*`, etc.)
- *
- * Intended for eval `expectAttachmentData` checks on generated `workflow.yaml`.
+ * Asserts that an action-policy notification workflow:
+ * 1. Parses as valid YAML
+ * 2. Contains valid Liquid (via `@kbn/workflows` `scanForTemplateVariables`)
+ * 3. References `inputs.payload.*` at least once
+ * 4. Those `inputs.payload.*` paths use fields from the
+ *    `alertingV2NotificationGroup` payload schema
  */
 export const assertActionPolicyWorkflowLiquid = (
   yaml: string
@@ -71,13 +174,37 @@ export const assertActionPolicyWorkflowLiquid = (
     );
   }
 
-  const disallowed = variables.filter((path) => !isAllowedActionPolicyLiquidPath(path));
-  if (disallowed.length > 0) {
+  const payloadVariables = variables.filter(isActionPolicyPayloadLiquidPath);
+  if (payloadVariables.length === 0) {
     throw new Error(
-      `Generated workflow Liquid references disallowed variables for action-policy dispatch: ` +
-        `${disallowed.map((path) => `\`${path}\``).join(', ')}. ` +
-        `Allowed roots: \`inputs.payload.*\`, ${ALLOWED_ROOTS.map((r) => `\`${r}\``).join(', ')}. ` +
-        `Do not use v1 paths like \`event.alerts\` / \`event.rule.name\`.`
+      `Generated workflow Liquid does not reference \`inputs.payload.*\`. ` +
+        `Action-policy dispatch exposes alert data as \`inputs.payload\` ` +
+        `(mirrors \`ActionPolicyWorkflowPayload\`). ` +
+        `Found variables: ${
+          variables.length > 0
+            ? variables.map((path) => `\`${path}\``).join(', ')
+            : '(none)'
+        }.`
+    );
+  }
+
+  const payloadSchema = getPayloadSchema();
+  const invalidPayloadPaths = payloadVariables.filter((path) => {
+    const relative =
+      path === PAYLOAD_PREFIX
+        ? ''
+        : path.startsWith(`${PAYLOAD_PREFIX}.`)
+          ? path.slice(PAYLOAD_PREFIX.length + 1)
+          : path.slice(PAYLOAD_PREFIX.length); // inputs.payload[...]
+    return getInvalidActionPolicyPayloadField(relative, payloadSchema) !== null;
+  });
+
+  if (invalidPayloadPaths.length > 0) {
+    const allowedTopLevel = Object.keys(payloadSchema.properties ?? {}).join(', ');
+    throw new Error(
+      `Generated workflow Liquid references unknown \`inputs.payload\` fields: ` +
+        `${invalidPayloadPaths.map((path) => `\`${path}\``).join(', ')}. ` +
+        `Allowed top-level payload fields: ${allowedTopLevel}.`
     );
   }
 
