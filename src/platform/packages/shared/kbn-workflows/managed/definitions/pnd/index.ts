@@ -47,7 +47,7 @@ export const PND_WATCH_OFFICER_WORKFLOW = {
   id: PND_WATCH_OFFICER_WORKFLOW_ID,
   management: MANAGEMENT,
   pluginId: PLUGIN_ID,
-  version: 4,
+  version: 5,
   visibility: VISIBILITY,
   yaml: WATCH_OFFICER_YAML,
 } as const satisfies ManagedWorkflowDefinition;

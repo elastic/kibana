@@ -56,4 +56,17 @@ describe('alertDocsToRows', () => {
     const [row] = alertDocsToRows([{ host: { name: { first: 'a' } } }]);
     expect('host.name' in row).toBe(false);
   });
+
+  it('unwraps an elasticsearch.search hit (fields under _source)', () => {
+    const [row] = alertDocsToRows([
+      {
+        _id: 'a1',
+        _index: '.alerts-security.alerts-default',
+        _source: { event: { category: ['process'] }, host: { name: 'host-1' } },
+      },
+    ]);
+
+    expect(row['event.category']).toBe('process');
+    expect(row['host.name']).toBe('host-1');
+  });
 });

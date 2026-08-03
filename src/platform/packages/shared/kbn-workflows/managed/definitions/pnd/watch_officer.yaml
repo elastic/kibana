@@ -1,14 +1,23 @@
 version: "1"
 name: Watch Officer
 description: >
-  Tier-2 Security Watch Officer skeleton. Escalates criticals, drafts briefs,
-  and stages gated response proposals for human approval.
+  Tier-2 Security Watch Officer. Triggered by a detection alert OR an attack
+  discovery, it computes a calibrated confidence for the finding, has an AI
+  agent produce a verdict and — only when confidence is high — a proposal of
+  containment actions, then stages the proposal for human approval (propose-only).
 enabled: true
 tags:
   - watch
   - watch-officer
 triggers:
-  - type: manual
+  # SINGLE trigger. An attack discovery is ALSO an alert document, so both
+  # detection alerts and (scheduled) attack-discovery alerts arrive here; the
+  # workflow branches on the rule type below. NOTE: a `type: alert` workflow only
+  # fires for rules that have the `.workflows` system action attached, so this
+  # stays inert until that action is wired to the rules you want watched
+  # (detection rules and/or the attack-discovery schedule rule). Ad-hoc attack
+  # discoveries (the `_generate` route) bypass alerting and are out of scope.
+  - type: alert
 consts:
   watch_policy:
     mandate: Escalation & briefs
@@ -36,19 +45,194 @@ consts:
     # Capabilities are projected from executable steps (see Floor). Add
     # ai.agent skill://… or workflow.execute targets, then optional overrides here.
     callables: []
+  # Optional connector for LLM confidence synthesis. Left empty, the confidence
+  # step computes a deterministic-only score; set it to an LLM connector id to
+  # add model synthesis. The verdict agent (run_agent) uses the space's default
+  # AI connector, like the Watch Floor.
+  confidence_connector_id: ""
 steps:
-  - name: draft_proposal
+  # Is the triggering alert an attack discovery? Scheduled attack-discovery
+  # alerts carry the `attack-discovery` rule type id.
+  - name: classify_trigger
     type: data.set
     with:
+      is_attack_discovery: "${{ event.rule.ruleTypeId == 'attack-discovery' }}"
+
+  # Initialise the shared subject (the bundle of alerts to score + optional
+  # narrative context), then populate it per branch below.
+  - name: init_subject
+    type: data.set
+    with:
+      subject_alerts: []
+      subject_context: {}
+
+  - name: route_by_type
+    type: if
+    condition: "${{ variables.is_attack_discovery }}"
+    steps:
+      # --- Attack-discovery branch: the alert doc IS the discovery. Gather its
+      # constituent detection alerts by id and pass the discovery narrative as
+      # context so the confidence + verdict reason over the whole attack. ---
+      - name: fetch_related_alerts
+        type: elasticsearch.search
+        with:
+          index: ".alerts-security.alerts-*"
+          size: 100
+          query:
+            ids:
+              values: "${{ event.alerts[0].kibana.alert.attack_discovery.alert_ids }}"
+      - name: set_ad_subject
+        type: data.set
+        with:
+          subject_alerts: "${{ steps.fetch_related_alerts.output.hits.hits }}"
+          subject_context:
+            title: "{{ event.alerts[0].kibana.alert.attack_discovery.title }}"
+            summary_markdown: "{{ event.alerts[0].kibana.alert.attack_discovery.summary_markdown }}"
+            details_markdown: "{{ event.alerts[0].kibana.alert.attack_discovery.details_markdown }}"
+            mitre_attack_tactics: "${{ event.alerts[0].kibana.alert.attack_discovery.mitre_attack_tactics }}"
+    else:
+      # --- Detection-alerts branch: score the triggering alerts directly. ---
+      - name: set_detection_subject
+        type: data.set
+        with:
+          subject_alerts: "${{ event.alerts }}"
+
+  # Compute ONE calibrated confidence for the bundle (generic reusable step).
+  - name: score_confidence
+    type: security.confidence
+    with:
+      alerts: "${{ variables.subject_alerts }}"
+      context: "${{ variables.subject_context }}"
+      api_config:
+        connector_id: "{{ consts.confidence_connector_id }}"
+      execution_id: "{{ execution.id }}"
+
+  # Verdict + confidence-gated containment proposal. Uses the space's default AI
+  # connector (no explicit connector-id), like the Watch Floor.
+  - name: run_agent
+    type: ai.agent
+    timeout: "10m"
+    create-conversation: true
+    with:
+      message: |
+        <role>
+        You are a Tier-2 Security Watch Officer. Decide whether the finding below
+        is a real attack, and — only if you are confident and it is a true
+        positive — propose containment actions for a human to approve. You never
+        execute actions; you only propose them.
+        </role>
+
+        <confidence>
+        A calibrated confidence has already been computed for this finding (how
+        sure it is REAL, orthogonal to severity):
+        - Score: {{ steps.score_confidence.output.confidence.score }} (band: {{ steps.score_confidence.output.confidence.band | default: "n/a" }})
+        - Rationale: {{ steps.score_confidence.output.confidence.rationale }}
+        - Alerts scored: {{ steps.score_confidence.output.alert_count }}
+        </confidence>
+
+        {% if variables.subject_context.title != blank -%}
+        <attack_discovery>
+        Title: {{ variables.subject_context.title }}
+
+        {{ variables.subject_context.summary_markdown }}
+
+        {{ variables.subject_context.details_markdown }}
+        </attack_discovery>
+        {%- endif %}
+
+        <evidence>
+        {{ variables.subject_alerts | json }}
+        </evidence>
+
+        <instructions>
+        1. Return a verdict: true_positive, false_positive, or inconclusive.
+        2. Propose containment actions ONLY when the confidence band is "high"
+           AND your verdict is true_positive. Otherwise return an EMPTY
+           proposed_actions array.
+        3. Each proposed action must name a concrete target (host.name,
+           agent.id, or process.entity_id drawn from the evidence) and a short
+           justification. Prefer the least-disruptive effective action.
+        </instructions>
+      schema:
+        type: object
+        properties:
+          verdict:
+            type: string
+            enum:
+              - true_positive
+              - false_positive
+              - inconclusive
+            description: Whether the finding describes a real attack
+          confidence_score:
+            type: number
+            minimum: 0
+            maximum: 1
+            description: Your own confidence in the verdict, 0.0–1.0
+          rationale:
+            type: string
+            description: Brief human-readable explanation of the verdict
+          proposed_actions:
+            type: array
+            description: Containment proposals; empty unless confidence is high and verdict is true_positive
+            items:
+              type: object
+              properties:
+                action:
+                  type: string
+                  enum:
+                    - isolate
+                    - kill-process
+                    - suspend-process
+                    - runscript
+                target:
+                  type: string
+                  description: host.name / agent.id / process.entity_id the action applies to
+                justification:
+                  type: string
+              required:
+                - action
+                - target
+                - justification
+        required:
+          - verdict
+          - confidence_score
+          - rationale
+          - proposed_actions
+
+  # Assemble the proposal (Daybreak-style: verdict + evidence + confidence +
+  # gated actions) and a short reasoning brief for the reviewer.
+  - name: stage_proposal
+    type: data.set
+    with:
+      proposal:
+        verdict: "${{ steps.run_agent.output.structured_output.verdict }}"
+        confidence: "${{ steps.score_confidence.output.confidence }}"
+        proposed_actions: "${{ steps.run_agent.output.structured_output.proposed_actions }}"
+        is_attack_discovery: "${{ variables.is_attack_discovery }}"
       reasoning:
-        summary: "Watch Officer skeleton — staged a gated proposal for review."
+        summary: >-
+          {{ steps.run_agent.output.structured_output.rationale
+          | default: "Watch Officer review completed." }}
         sections:
-          - title: NEXT
-            body: "Replace with investigation / proposal skills and real evidence."
+          - title: Verdict
+            body: >-
+              {{ steps.run_agent.output.structured_output.verdict | default: "inconclusive" }}
+              (confidence {{ steps.score_confidence.output.confidence.score }},
+              band {{ steps.score_confidence.output.confidence.band | default: "n/a" }})
+          - title: Proposed containment
+            body: >-
+              {% assign actions = steps.run_agent.output.structured_output.proposed_actions -%}
+              {% if actions and actions.size > 0 -%}
+              {% for a in actions %}- {{ a.action }} → {{ a.target }}: {{ a.justification }}
+              {% endfor -%}
+              {% else -%}
+              None proposed (confidence not high enough, or not a true positive).
+              {%- endif %}
+
   - name: await_approval
     type: waitForInput
     with:
-      message: "Approve the Watch Officer draft proposal?"
+      message: "Approve the Watch Officer proposal?"
       schema:
         type: object
         properties:

@@ -71,12 +71,20 @@ const getField = (doc: Record<string, unknown>, path: string): string | undefine
  * Project raw ECS alert documents down to the flat, scoreable field-maps the
  * reusable confidence core consumes — the raw-alert counterpart of
  * `parseAnonymizedAlertsCsv`.
+ *
+ * Accepts both shapes an alert arrives in: an alert-trigger `event.alerts` item
+ * (ECS fields at the top level) or an `elasticsearch.search` hit (ECS fields
+ * nested under `_source`), so a workflow can pass either through unchanged.
  */
 export const alertDocsToRows = (docs: Array<Record<string, unknown>>): ParsedAlertFields[] =>
   docs.map((doc) => {
+    const source =
+      doc._source != null && typeof doc._source === 'object' && !Array.isArray(doc._source)
+        ? (doc._source as Record<string, unknown>)
+        : doc;
     const row: ParsedAlertFields = {};
     for (const field of SCORED_FIELDS) {
-      const value = getField(doc, field);
+      const value = getField(source, field);
       if (value != null) {
         row[field] = value;
       }
