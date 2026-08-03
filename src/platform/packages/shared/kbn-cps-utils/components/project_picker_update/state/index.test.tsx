@@ -11,6 +11,7 @@ import '@testing-library/jest-dom';
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import type { ProjectRouting } from '@kbn/es-query';
 import type { CPSProject } from '../../../types';
 import { ProjectPickerList } from '../blocks/list/list';
 import { FilterOperator, type FilterExpressionValue } from '../utils/filter_input_codec';
@@ -54,6 +55,7 @@ const defaultProviderProps: Omit<ProjectPickerStateProviderProps, 'children'> = 
   availableProjects,
   originProjectId: originProject._id,
   defaultProjectRoutingGetter: () => '',
+  currentProjectRoutingGetter: () => '',
   onProjectRoutingChange: jest.fn(),
 };
 
@@ -114,16 +116,17 @@ describe('ProjectPickerStateProvider', () => {
 
   describe('projectRoutingStrategy', () => {
     describe('dynamic', () => {
-      it('calls onProjectRoutingChange with no routing when the default is empty', async () => {
+      it('does not call onProjectRoutingChange on mount when routing is already in sync', async () => {
         const { onProjectRoutingChange } = renderProjectPicker();
 
         await waitFor(() => {
-          expect(onProjectRoutingChange).toHaveBeenCalledWith('');
+          expect(onProjectRoutingChange).not.toHaveBeenCalled();
         });
       });
 
       it('prefills the default tag filter on mount', async () => {
         const onProjectRoutingChange = jest.fn();
+        const onStateChange = jest.fn();
 
         render(
           <ProjectPickerStateProvider
@@ -134,25 +137,32 @@ describe('ProjectPickerStateProvider', () => {
               linkedProjectTwo,
             ]}
             defaultProjectRoutingGetter={() => '_alias:origin'}
+            currentProjectRoutingGetter={() => '_alias:origin'}
             onProjectRoutingChange={onProjectRoutingChange}
           >
+            <ReadPickerState onChange={onStateChange} />
             <ProjectPickerList />
           </ProjectPickerStateProvider>
         );
 
         await waitFor(() => {
-          expect(onProjectRoutingChange).toHaveBeenCalledWith('_alias:origin');
+          expect(onStateChange).toHaveBeenLastCalledWith(
+            expect.objectContaining({ currentProjectRouting: '_alias:origin' })
+          );
         });
+        expect(onProjectRoutingChange).not.toHaveBeenCalled();
       });
 
       it('calls onProjectRoutingChange with exclusions when a project is deselected', async () => {
         const user = userEvent.setup();
-        const { onProjectRoutingChange } = renderProjectPicker({
-          projectRoutingStrategy: 'dynamic',
+        let currentRouting: ProjectRouting = '';
+        const onProjectRoutingChange = jest.fn((routing: ProjectRouting) => {
+          currentRouting = routing;
         });
-
-        await waitFor(() => {
-          expect(onProjectRoutingChange).toHaveBeenCalledWith('');
+        renderProjectPicker({
+          projectRoutingStrategy: 'dynamic',
+          onProjectRoutingChange,
+          currentProjectRoutingGetter: () => currentRouting,
         });
 
         await user.click(screen.getByTestId('projectPickerListItemSwitch-linked1'));
@@ -164,7 +174,10 @@ describe('ProjectPickerStateProvider', () => {
 
       it('includes encoded filter expressions without _id clauses until a project is excluded', async () => {
         const user = userEvent.setup();
-        const onProjectRoutingChange = jest.fn();
+        let currentRouting: ProjectRouting = '';
+        const onProjectRoutingChange = jest.fn((routing: ProjectRouting) => {
+          currentRouting = routing;
+        });
         const securityTypeFilter = {
           operator: FilterOperator.EQUALS,
           tagName: '_type',
@@ -176,15 +189,12 @@ describe('ProjectPickerStateProvider', () => {
             {...defaultProviderProps}
             projectRoutingStrategy="dynamic"
             onProjectRoutingChange={onProjectRoutingChange}
+            currentProjectRoutingGetter={() => currentRouting}
           >
             <AddFilterExpression expression={securityTypeFilter} />
             <ProjectPickerList />
           </ProjectPickerStateProvider>
         );
-
-        await waitFor(() => {
-          expect(onProjectRoutingChange).toHaveBeenCalledWith('');
-        });
 
         await user.click(screen.getByTestId('addFilterExpression'));
 
@@ -196,23 +206,25 @@ describe('ProjectPickerStateProvider', () => {
 
     describe('snapshot', () => {
       it('calls onProjectRoutingChange with no id clauses when there are no exclusions', async () => {
-        const { onProjectRoutingChange } = renderProjectPicker({
+        const onProjectRoutingChange = jest.fn();
+        renderProjectPicker({
           projectRoutingStrategy: 'snapshot',
+          onProjectRoutingChange,
         });
 
-        await waitFor(() => {
-          expect(onProjectRoutingChange).toHaveBeenCalledWith('');
-        });
+        expect(onProjectRoutingChange).not.toHaveBeenCalled();
       });
 
       it('omits deselected projects from the explicit id clauses once exclusions exist', async () => {
         const user = userEvent.setup();
-        const { onProjectRoutingChange } = renderProjectPicker({
-          projectRoutingStrategy: 'snapshot',
+        let currentRouting: ProjectRouting = '';
+        const onProjectRoutingChange = jest.fn((routing: ProjectRouting) => {
+          currentRouting = routing;
         });
-
-        await waitFor(() => {
-          expect(onProjectRoutingChange).toHaveBeenCalledWith('');
+        renderProjectPicker({
+          projectRoutingStrategy: 'snapshot',
+          onProjectRoutingChange,
+          currentProjectRoutingGetter: () => currentRouting,
         });
 
         await user.click(screen.getByTestId('projectPickerListItemSwitch-linked1'));
@@ -224,7 +236,10 @@ describe('ProjectPickerStateProvider', () => {
 
       it('includes encoded filter expressions without explicit id clauses until a project is excluded', async () => {
         const user = userEvent.setup();
-        const onProjectRoutingChange = jest.fn();
+        let currentRouting: ProjectRouting = '';
+        const onProjectRoutingChange = jest.fn((routing: ProjectRouting) => {
+          currentRouting = routing;
+        });
         const securityTypeFilter = {
           operator: FilterOperator.EQUALS,
           tagName: '_type',
@@ -236,15 +251,12 @@ describe('ProjectPickerStateProvider', () => {
             {...defaultProviderProps}
             projectRoutingStrategy="snapshot"
             onProjectRoutingChange={onProjectRoutingChange}
+            currentProjectRoutingGetter={() => currentRouting}
           >
             <AddFilterExpression expression={securityTypeFilter} />
             <ProjectPickerList />
           </ProjectPickerStateProvider>
         );
-
-        await waitFor(() => {
-          expect(onProjectRoutingChange).toHaveBeenCalledWith('');
-        });
 
         await user.click(screen.getByTestId('addFilterExpression'));
 

@@ -27,6 +27,7 @@ export const ProjectPickerFilterBoxStory: StoryObj<
     ProjectPickerStateProviderProps,
     | 'availableProjects'
     | 'defaultProjectRoutingGetter'
+    | 'currentProjectRoutingGetter'
     | 'onProjectRoutingChange'
     | 'originProjectId'
   > &
@@ -43,6 +44,7 @@ export const ProjectPickerFilterBoxStory: StoryObj<
       _provider: faker.helpers.arrayElement(['AWS', 'Azure', 'GCP']),
     })),
     defaultProjectRoutingGetter: () => '_alias:origin',
+    currentProjectRoutingGetter: () => '_alias:origin',
     onProjectRoutingChange: action('onProjectRoutingChange'),
     get originProjectId(): string {
       return this.availableProjects![0]._id;
@@ -51,6 +53,7 @@ export const ProjectPickerFilterBoxStory: StoryObj<
   render: ({
     availableProjects,
     defaultProjectRoutingGetter,
+    currentProjectRoutingGetter,
     onProjectRoutingChange,
     originProjectId,
     ...props
@@ -58,6 +61,7 @@ export const ProjectPickerFilterBoxStory: StoryObj<
     <ProjectPickerStateProvider
       availableProjects={availableProjects}
       defaultProjectRoutingGetter={defaultProjectRoutingGetter}
+      currentProjectRoutingGetter={currentProjectRoutingGetter}
       onProjectRoutingChange={onProjectRoutingChange}
       originProjectId={originProjectId}
     >

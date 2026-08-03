@@ -58,6 +58,10 @@ const ActiveProjectPicker: React.FC<ActiveProjectPickerProps> = ({
     return cpsManager.getDefaultProjectRouting();
   }, [cpsManager]);
 
+  const currentProjectRoutingGetter = useCallback(() => {
+    return cpsManager.getProjectRouting();
+  }, [cpsManager]);
+
   const updateProjectRouting = useCallback(
     (newRouting: ProjectRouting) => {
       cpsManager.setProjectRouting(newRouting);
@@ -71,6 +75,7 @@ const ActiveProjectPicker: React.FC<ActiveProjectPickerProps> = ({
 
   return (
     <ProjectPicker
+      currentProjectRoutingGetter={currentProjectRoutingGetter}
       defaultProjectRoutingGetter={defaultProjectRoutingGetter}
       onProjectRoutingChange={updateProjectRouting}
       getActiveRouteProjects$={getActiveRouteProjects$}

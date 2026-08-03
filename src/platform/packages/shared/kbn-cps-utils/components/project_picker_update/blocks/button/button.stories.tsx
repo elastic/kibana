@@ -33,6 +33,7 @@ export const ProjectPickerButtonStory: StoryObj<
     ProjectPickerStateProviderProps,
     | 'availableProjects'
     | 'defaultProjectRoutingGetter'
+    | 'currentProjectRoutingGetter'
     | 'onProjectRoutingChange'
     | 'originProjectId'
   > &
@@ -51,6 +52,7 @@ export const ProjectPickerButtonStory: StoryObj<
   render: ({
     availableProjects,
     defaultProjectRoutingGetter,
+    currentProjectRoutingGetter,
     onProjectRoutingChange,
     originProjectId,
     ...props
@@ -59,6 +61,7 @@ export const ProjectPickerButtonStory: StoryObj<
       availableProjects={availableProjects}
       originProjectId={originProjectId}
       defaultProjectRoutingGetter={defaultProjectRoutingGetter}
+      currentProjectRoutingGetter={currentProjectRoutingGetter}
       onProjectRoutingChange={onProjectRoutingChange}
     >
       <ProjectPickerButton {...props} />
@@ -71,6 +74,7 @@ export const ProjectPickerButtonDisabledStory: StoryObj<
     ProjectPickerStateProviderProps,
     | 'availableProjects'
     | 'defaultProjectRoutingGetter'
+    | 'currentProjectRoutingGetter'
     | 'onProjectRoutingChange'
     | 'originProjectId'
   > &
@@ -89,6 +93,7 @@ export const ProjectPickerButtonDisabledStory: StoryObj<
       _csp: faker.helpers.arrayElement(['AWS', 'Azure', 'GCP']),
     })),
     defaultProjectRoutingGetter: () => '_alias:origin',
+    currentProjectRoutingGetter: () => '_alias:origin',
     onProjectRoutingChange: action('onProjectRoutingChange'),
     get originProjectId(): string {
       return this.availableProjects![0]._id;
@@ -96,6 +101,7 @@ export const ProjectPickerButtonDisabledStory: StoryObj<
   },
   render: ({
     defaultProjectRoutingGetter,
+    currentProjectRoutingGetter,
     onProjectRoutingChange,
     availableProjects,
     originProjectId,
@@ -105,6 +111,7 @@ export const ProjectPickerButtonDisabledStory: StoryObj<
       availableProjects={availableProjects}
       originProjectId={originProjectId}
       defaultProjectRoutingGetter={defaultProjectRoutingGetter}
+      currentProjectRoutingGetter={currentProjectRoutingGetter}
       onProjectRoutingChange={onProjectRoutingChange}
     >
       <ProjectPickerButton {...props} />

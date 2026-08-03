@@ -25,6 +25,7 @@ export const ProjectPickerListItemStory: StoryObj<
     | 'availableProjects'
     | 'isReadOnly'
     | 'defaultProjectRoutingGetter'
+    | 'currentProjectRoutingGetter'
     | 'onProjectRoutingChange'
     | 'originProjectId'
   > &
@@ -49,6 +50,7 @@ export const ProjectPickerListItemStory: StoryObj<
       _csp: faker.helpers.arrayElement(['AWS', 'Azure', 'GCP']),
     })),
     defaultProjectRoutingGetter: () => '_alias:origin',
+    currentProjectRoutingGetter: () => '_alias:origin',
     onProjectRoutingChange: action('onProjectRoutingChange'),
     get originProjectId(): string {
       return this.availableProjects![0]._id;
@@ -58,6 +60,7 @@ export const ProjectPickerListItemStory: StoryObj<
     availableProjects,
     isReadOnly,
     defaultProjectRoutingGetter,
+    currentProjectRoutingGetter,
     onProjectRoutingChange,
     originProjectId,
     ...props
@@ -67,6 +70,7 @@ export const ProjectPickerListItemStory: StoryObj<
       isReadOnly={isReadOnly}
       originProjectId={originProjectId}
       defaultProjectRoutingGetter={defaultProjectRoutingGetter}
+      currentProjectRoutingGetter={currentProjectRoutingGetter}
       onProjectRoutingChange={onProjectRoutingChange}
     >
       <ProjectPickerList {...props} />

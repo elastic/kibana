@@ -68,6 +68,7 @@ const defaultProps = {
   })),
   originProjectId: 'p1',
   defaultProjectRoutingGetter: () => '',
+  currentProjectRoutingGetter: () => '',
   onProjectRoutingChange: jest.fn(),
 };
 

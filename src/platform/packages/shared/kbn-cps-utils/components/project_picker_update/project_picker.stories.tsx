@@ -64,6 +64,7 @@ export const ProjectPickerStory: StoryObj<ComponentProps<typeof ProjectPicker>> 
     projectRoutingStrategy: 'dynamic',
     availableProjects: createProjects(),
     defaultProjectRoutingGetter: () => '_alias:origin',
+    currentProjectRoutingGetter: () => '_alias:origin',
     onProjectRoutingChange: action('onProjectRoutingChange'),
     get originProjectId(): string {
       return this.availableProjects![0]._id;
@@ -85,6 +86,7 @@ export const ProjectPickerReadOnlyStory: StoryObj<ComponentProps<typeof ProjectP
     isReadOnly: true,
     availableProjects: createProjects(100),
     defaultProjectRoutingGetter: () => '_alias:origin',
+    currentProjectRoutingGetter: () => '_alias:origin',
     onProjectRoutingChange: action('onProjectRoutingChange'),
     get originProjectId(): string {
       return this.availableProjects![0]._id;

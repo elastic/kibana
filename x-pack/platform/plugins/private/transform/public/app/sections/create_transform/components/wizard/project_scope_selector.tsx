@@ -132,6 +132,7 @@ export const ProjectScopeSelector = ({
     fetchProjects,
     PROJECT_ROUTING.ALL
   );
+
   const availableProjects = useMemo(
     () => (originProject ? [originProject, ...linkedProjects] : linkedProjects),
     [linkedProjects, originProject]
@@ -185,7 +186,8 @@ export const ProjectScopeSelector = ({
             availableProjects={availableProjects}
             onProjectRoutingChange={onProjectRoutingChange}
             originProjectId={originProjectId}
-            projectRouting={effectiveProjectRouting}
+              defaultProjectRoutingGetter={() => effectiveProjectRouting}
+              currentProjectRoutingGetter={() => effectiveProjectRouting}
           />
         )}
       </EuiPopover>

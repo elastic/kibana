@@ -12,6 +12,7 @@ import React from 'react';
 import { render, screen, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { EuiThemeProvider } from '@elastic/eui';
+import type { ProjectRouting } from '@kbn/es-query';
 import { I18nProvider } from '@kbn/i18n-react';
 import { of, Subject } from 'rxjs';
 import { ProjectPicker, type ProjectPickerProps } from './project_picker';
@@ -51,6 +52,7 @@ describe('ProjectPicker', () => {
   const defaultProps: ProjectPickerProps = {
     getActiveRouteProjects$: () => of(mockProjectsData),
     defaultProjectRoutingGetter: () => undefined,
+    currentProjectRoutingGetter: () => '',
     onProjectRoutingChange: jest.fn(),
   };
 
@@ -128,16 +130,46 @@ describe('ProjectPicker', () => {
     expect(screen.getByText('Linked CPSProject 2')).toBeInTheDocument();
   });
 
-  it('should call onProjectRoutingChange with the default routing on mount', async () => {
+  it('does not call onProjectRoutingChange on mount when routing is already in sync', async () => {
     const onProjectRoutingChange = jest.fn();
     await renderProjectPicker({ onProjectRoutingChange });
 
-    expect(onProjectRoutingChange).toHaveBeenCalledWith('');
+    expect(onProjectRoutingChange).not.toHaveBeenCalled();
+  });
+
+  it('should persist selection after closing the popover', async () => {
+    let currentRouting: ProjectRouting = '';
+    const onProjectRoutingChange = jest.fn((routing: ProjectRouting) => {
+      currentRouting = routing;
+    });
+
+    await renderProjectPicker({
+      onProjectRoutingChange,
+      currentProjectRoutingGetter: () => currentRouting,
+    });
+
+    await userEvent.click(screen.getByTestId('cps-project-picker-button'));
+    await userEvent.click(screen.getByTestId('projectPickerListItemSwitch-linked1'));
+
+    expect(screen.getByTestId('cps-project-picker-button-label')).toHaveTextContent('2/3');
+    const callsAfterSelection = onProjectRoutingChange.mock.calls.length;
+
+    await userEvent.keyboard('{Escape}');
+
+    expect(screen.getByTestId('cps-project-picker-button-label')).toHaveTextContent('2/3');
+    expect(onProjectRoutingChange.mock.calls.length).toBe(callsAfterSelection);
   });
 
   it('should update project routing when a project is excluded', async () => {
-    const onProjectRoutingChange = jest.fn();
-    await renderProjectPicker({ onProjectRoutingChange });
+    let currentRouting: ProjectRouting = '';
+    const onProjectRoutingChange = jest.fn((routing: ProjectRouting) => {
+      currentRouting = routing;
+    });
+
+    await renderProjectPicker({
+      onProjectRoutingChange,
+      currentProjectRoutingGetter: () => currentRouting,
+    });
 
     await userEvent.click(screen.getByTestId('cps-project-picker-button'));
 

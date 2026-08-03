@@ -34,9 +34,9 @@ interface ProjectPickerContext {
 
 export interface ProjectPickerStateProviderProps extends Pick<ProjectPickerState, 'isReadOnly'> {
   children: React.ReactNode;
-  availableProjects: CPSProject[];
-  initialProjectRouting?: ProjectRouting;
   originProjectId: string;
+  availableProjects: CPSProject[];
+  currentProjectRoutingGetter: () => ProjectRouting | undefined;
   defaultProjectRoutingGetter: () => ProjectRouting;
   /**
    * Controls how project IDs are encoded into the routing string.
@@ -79,19 +79,21 @@ export const useProjectPickerState = () => {
 
 const createInitialPickerState = ({
   availableProjects,
+  currentProjectRouting,
   defaultProjectRouting,
   isReadOnly,
   originProjectId,
   projectRoutingStrategy,
 }: {
   availableProjects: CPSProject[];
+  currentProjectRouting: ProjectRouting;
   defaultProjectRouting: ProjectRouting;
   isReadOnly?: boolean;
   originProjectId: string;
   projectRoutingStrategy: NonNullable<ProjectPickerStateProviderProps['projectRoutingStrategy']>;
 }): ProjectPickerState => {
   const availableProjectIds = availableProjects.map((project) => project._id);
-  const parsed = parseDefaultProjectRouting(defaultProjectRouting, availableProjectIds);
+  const parsed = parseDefaultProjectRouting(currentProjectRouting, availableProjectIds);
 
   return {
     isReadOnly,
@@ -118,6 +120,7 @@ export const ProjectPickerStateProvider = ({
   onProjectRoutingChange,
   projectRoutingStrategy = 'dynamic',
   defaultProjectRoutingGetter,
+  currentProjectRoutingGetter,
 }: PropsWithChildren<ProjectPickerStateProviderProps>) => {
   const ProjectPickerContext = useMemo(() => createProjectPickerContext(), []);
   const projectPickerReducers = useMemo(() => createStoreReducers(), []);
@@ -125,6 +128,7 @@ export const ProjectPickerStateProvider = ({
   const store = useCreateStore<ProjectPickerState, typeof projectPickerReducers>({
     initialState: createInitialPickerState({
       availableProjects,
+      currentProjectRouting: currentProjectRoutingGetter() ?? '',
       defaultProjectRouting: defaultProjectRoutingGetter() ?? '',
       isReadOnly,
       originProjectId,
@@ -135,9 +139,10 @@ export const ProjectPickerStateProvider = ({
   });
 
   useEffect(() => {
+    const currentProjectRouting = currentProjectRoutingGetter() ?? '';
     const defaultProjectRouting = defaultProjectRoutingGetter() ?? '';
     const parsed = parseDefaultProjectRouting(
-      defaultProjectRouting,
+      currentProjectRouting,
       availableProjects.map((project) => project._id)
     );
 
@@ -148,11 +153,20 @@ export const ProjectPickerStateProvider = ({
       filterExpressions: parsed.filterExpressions,
       excludedOverrides: parsed.excludedOverrides,
     });
-  }, [availableProjects, defaultProjectRoutingGetter, isReadOnly, store.actions]);
+  }, [
+    availableProjects,
+    currentProjectRoutingGetter,
+    defaultProjectRoutingGetter,
+    isReadOnly,
+    store.actions,
+  ]);
 
   useEffect(() => {
-    onProjectRoutingChange(store.state.currentProjectRouting);
-  }, [store.state.currentProjectRouting, onProjectRoutingChange]);
+    const routing = store.state.currentProjectRouting;
+    if (routing !== (currentProjectRoutingGetter() ?? '')) {
+      onProjectRoutingChange(routing);
+    }
+  }, [store.state.currentProjectRouting, onProjectRoutingChange, currentProjectRoutingGetter]);
 
   return <ProjectPickerContext.Provider value={store}>{children}</ProjectPickerContext.Provider>;
 };

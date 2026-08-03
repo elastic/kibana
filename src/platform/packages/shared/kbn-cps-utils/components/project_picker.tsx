@@ -27,7 +27,7 @@ import type { CPSProject, ProjectsData } from '../types';
 export interface ProjectPickerProps
   extends Pick<
     ComponentProps<typeof ProjectPickerStateProvider>,
-    'defaultProjectRoutingGetter' | 'onProjectRoutingChange'
+    'defaultProjectRoutingGetter' | 'onProjectRoutingChange' | 'currentProjectRoutingGetter'
   > {
   getActiveRouteProjects$: () => Observable<ProjectsData | null>;
   isReadonly?: boolean;
@@ -41,6 +41,7 @@ export const ProjectPicker = ({
   isDisabled = false,
   getActiveRouteProjects$,
   defaultProjectRoutingGetter,
+  currentProjectRoutingGetter,
 }: ProjectPickerProps) => {
   const [showPopover, setShowPopover] = useState(false);
   const styles = useMemoCss(projectPickerStyles);
@@ -63,19 +64,31 @@ export const ProjectPicker = ({
     data: null,
   });
 
+  const availableProjects = useMemo((): CPSProject[] | undefined => {
+    if (!projects?.origin || projects.linkedProjects.length === 0) {
+      return undefined;
+    }
+
+    return [
+      projects.origin,
+      ...projects.linkedProjects.sort((a, b) => a._alias.localeCompare(b._alias)),
+    ];
+  }, [projects?.origin, projects?.linkedProjects]);
+
   if (isLoading) {
     return <ProjectPickerSkeleton />;
   }
 
-  if (!projects?.origin || projects.linkedProjects.length === 0) {
+  if (!availableProjects) {
     return null;
   }
 
-  const { origin: originProject, linkedProjects } = projects;
+  const originProject = projects!.origin!;
 
   const projectPickerPopoverTriggerButton = (
     <ProjectPickerButton
-      size="s"
+      // @ts-expect-error - EuiButtonProps xs size is supported, types just say otherwise
+      size="xs"
       onClick={() => setShowPopover(!showPopover)}
       isDisabled={isDisabled}
     />
@@ -83,9 +96,10 @@ export const ProjectPicker = ({
 
   const projectPickerPopover = (
     <ProjectPickerStateProvider
+      currentProjectRoutingGetter={currentProjectRoutingGetter}
       defaultProjectRoutingGetter={defaultProjectRoutingGetter}
       originProjectId={originProject._id}
-      availableProjects={([] as CPSProject[]).concat(originProject, linkedProjects)}
+      availableProjects={availableProjects}
       onProjectRoutingChange={onProjectRoutingChange}
       isReadOnly={isReadonly}
     >
