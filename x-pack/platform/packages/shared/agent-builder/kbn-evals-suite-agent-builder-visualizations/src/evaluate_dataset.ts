@@ -119,10 +119,13 @@ export function createEvaluateDataset({
   // work shows up as a discrete span on the task's trace (mirrors the
   // security ES|QL regression suite), making per-evaluator latency and
   // failures observable in the golden cluster.
+  // Every example in this suite expects a visualization ES|QL query. Score
+  // empty extracts as 0 so Validity tracks "produced a syntactically valid
+  // query" rather than the framework default of 1 ("nothing to validate").
   const baseValidityEvaluator = createEsqlValidityEvaluator<
     VisualizationDatasetExample,
     VisualizationAgentTaskOutput
-  >({ queryExtractor });
+  >({ queryExtractor, scoreOnEmptyQueries: 0 });
 
   const esqlValidityEvaluator: VisualizationAgentEvaluator = {
     ...baseValidityEvaluator,
