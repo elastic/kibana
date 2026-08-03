@@ -70,11 +70,6 @@ const mockKibana = () => {
         },
       },
       observabilityAIAssistant: mockObservabilityAIAssistant,
-      unifiedSearch: {
-        ui: {
-          SearchBar: () => <div data-test-subj="sloTemplatesSearchBar" />,
-        },
-      },
     },
   });
 };
@@ -226,19 +221,13 @@ describe('SLOs Welcome Page', () => {
           render(<SlosWelcomePage />);
         });
 
-        const createFromTemplateButton = screen.queryByTestId(
-          'o11ySloListWelcomePromptCreateFromTemplateButton'
-        );
-        expect(createFromTemplateButton).toBeTruthy();
         expect(screen.queryByTestId('sloTemplatesFlyout')).toBeFalsy();
 
         await act(async () => {
-          createFromTemplateButton?.click();
+          screen.getByTestId('o11ySloListWelcomePromptCreateFromTemplateButton').click();
         });
 
-        await waitFor(() => {
-          expect(screen.queryByTestId('sloTemplatesFlyout')).toBeTruthy();
-        });
+        expect(screen.getByTestId('sloTemplatesFlyout')).toBeTruthy();
       });
     });
 

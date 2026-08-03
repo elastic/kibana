@@ -49,11 +49,17 @@ export function SlosWelcomePage() {
 
   const { hasSlos, isLoading } = useHasSlos();
 
+  const isDisabled = !permissions?.hasAllWriteRequested;
+
   const hasSlosAndPermissions =
     !isLoading && hasSlos && hasRightLicense && permissions?.hasAllReadRequested === true;
 
   const handleClickCreateSlo = () => {
     navigateToUrl(basePath.prepend(paths.sloCreate));
+  };
+
+  const handleClickCreateFromTemplate = () => {
+    setIsTemplatesFlyoutOpen(true);
   };
 
   useEffect(() => {
@@ -138,7 +144,7 @@ export function SlosWelcomePage() {
                         fill
                         color="primary"
                         onClick={handleClickCreateSlo}
-                        disabled={!permissions?.hasAllWriteRequested}
+                        disabled={isDisabled}
                       >
                         {i18n.translate('xpack.slo.sloList.welcomePrompt.buttonLabel', {
                           defaultMessage: 'Create SLO',
@@ -150,9 +156,9 @@ export function SlosWelcomePage() {
                       <EuiButton
                         data-test-subj="o11ySloListWelcomePromptCreateFromTemplateButton"
                         color="primary"
-                        iconType="document"
-                        onClick={() => setIsTemplatesFlyoutOpen(true)}
-                        disabled={!permissions?.hasAllWriteRequested}
+                        iconType="pagesSelect"
+                        onClick={handleClickCreateFromTemplate}
+                        disabled={isDisabled}
                       >
                         {i18n.translate(
                           'xpack.slo.sloList.welcomePrompt.createFromTemplateButtonLabel',
