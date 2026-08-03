@@ -7,16 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 
-import type { InitialSolutionSetupView, TraditionalSolutionView } from '../common';
+import type { InitialSolutionSetupView } from '../common';
 
-export const SOLUTION_VIEW_OPTIONS: Array<{
-  value: InitialSolutionSetupView;
-  name: string;
-  initialSetupName: string;
-  description: string;
-  icon: string;
-  dataTestSubj: string;
-}> = [
+export const SOLUTION_VIEW_OPTIONS = [
   {
     value: 'es',
     name: i18n.translate(
@@ -85,10 +78,11 @@ export const SOLUTION_VIEW_OPTIONS: Array<{
     icon: 'logoElasticStack',
     dataTestSubj: 'solutionViewClassicOption',
   },
-];
-
-type MissingSolutionViewOptions = Exclude<
-  TraditionalSolutionView,
-  (typeof SOLUTION_VIEW_OPTIONS)[number]['value']
->;
-true satisfies [MissingSolutionViewOptions] extends [never] ? true : never;
+] satisfies Array<{
+  value: InitialSolutionSetupView;
+  name: string;
+  initialSetupName: string;
+  description: string;
+  icon: string;
+  dataTestSubj: string;
+}>;

@@ -10,19 +10,12 @@ import type { Observable } from 'rxjs';
 import type { TypeOf } from '@kbn/config-schema';
 import { offeringBasedSchema, schema } from '@kbn/config-schema';
 import type { PluginInitializerContext } from '@kbn/core/server';
+import type { SolutionId } from '@kbn/core-chrome-browser';
 
-import { TRADITIONAL_SOLUTION_VIEWS } from '../common';
+const solutions = ['es', 'oblt', 'security'] as const;
 
-const [es, oblt, security] = TRADITIONAL_SOLUTION_VIEWS;
-
-const solutionSchemaLiterals = [
-  schema.literal(es),
-  schema.literal(oblt),
-  schema.literal(security),
-] as [
-  ReturnType<typeof schema.literal<'es'>>,
-  ReturnType<typeof schema.literal<'oblt'>>,
-  ReturnType<typeof schema.literal<'security'>>
+const solutionSchemaLiterals = [...solutions].map((s) => schema.literal(s)) as [
+  ReturnType<typeof schema.literal<Exclude<SolutionId, 'workplaceai' | 'vectordb'>>>
 ];
 
 export const ConfigSchema = schema.object({

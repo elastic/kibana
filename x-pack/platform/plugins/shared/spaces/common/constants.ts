@@ -35,8 +35,6 @@ export const ENTER_SPACE_PATH = '/spaces/enter';
  */
 export const SOLUTION_VIEW_CLASSIC = 'classic' as const;
 
-export const TRADITIONAL_SOLUTION_VIEWS = ['es', 'oblt', 'security', SOLUTION_VIEW_CLASSIC] as const;
-
 /**
  * The feature privileges constants are used to identify the granularity of the configured feature visibility
  */

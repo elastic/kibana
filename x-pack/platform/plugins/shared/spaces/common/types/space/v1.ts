@@ -8,11 +8,9 @@
 import type { SolutionId } from '@kbn/core-chrome-browser';
 import type { ProjectRouting } from '@kbn/es-query';
 
-import type { SOLUTION_VIEW_CLASSIC, TRADITIONAL_SOLUTION_VIEWS } from '../../constants';
+import type { SOLUTION_VIEW_CLASSIC } from '../../constants';
 
 export type SolutionView = SolutionId | typeof SOLUTION_VIEW_CLASSIC;
-
-export type TraditionalSolutionView = (typeof TRADITIONAL_SOLUTION_VIEWS)[number];
 
 /**
  * A Space.

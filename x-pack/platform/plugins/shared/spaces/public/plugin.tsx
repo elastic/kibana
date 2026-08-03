@@ -159,15 +159,11 @@ export class SpacesPlugin
         });
       }
 
-      const solution = plugins.cloud?.onboarding?.defaultSolution || this.config.defaultSolution;
-      const initialSolutionSetupEligible =
-        (this.config.initialSolutionSetup?.enabled ?? false) && !solution && !this.isServerless;
-
       spaceSelectorApp.create({
         getStartServices: core.getStartServices,
         application: core.application,
         spacesManager: this.spacesManager,
-        initialSolutionSetupEnabled: initialSolutionSetupEligible,
+        initialSolutionSetupEnabled: this.config.initialSolutionSetup?.enabled ?? false,
       });
     }
 

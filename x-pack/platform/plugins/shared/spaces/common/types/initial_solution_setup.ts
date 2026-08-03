@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import type { TraditionalSolutionView } from './space/v1';
-
-export type InitialSolutionSetupView = TraditionalSolutionView;
+export type InitialSolutionSetupView = 'classic' | 'es' | 'oblt' | 'security';
 
 export interface GetInitialSolutionSetupResponse {
   required: boolean;
