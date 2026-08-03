@@ -219,7 +219,7 @@ export class DocumentationManager implements DocumentationManagerAPI {
       `Ensuring Security Labs content for default inference ID [${inferenceId}] (status: ${status})`
     );
 
-    if (status === 'uninstalled') {
+    if (status === 'uninstalled' || status === 'error') {
       const license = await this.licensing.getLicense();
       if (!checkLicense(license)) {
         this.logger.debug(
@@ -238,9 +238,9 @@ export class DocumentationManager implements DocumentationManagerAPI {
       return;
     }
 
-    // 'installed' / 'error' — updateSecurityLabsAll() on startup handles updates for installed IDs
+    // 'installed' — updateSecurityLabsAll() on startup handles updates for installed IDs
     this.logger.debug(
-      `Security Labs for inference ID [${inferenceId}] is already present or not eligible for auto-install (status: ${status})`
+      `Security Labs for inference ID [${inferenceId}] is already installed; update will be handled by updateSecurityLabsAll`
     );
   }
 

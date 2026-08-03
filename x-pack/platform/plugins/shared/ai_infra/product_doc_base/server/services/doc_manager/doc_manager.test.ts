@@ -349,7 +349,7 @@ describe('DocumentationManager', () => {
       await docManager.ensureDefaultSecurityLabs();
 
       expect(packageInstaller.installSecurityLabs).toHaveBeenCalledWith({
-        inferenceId: defaultInferenceEndpoints.ELSER,
+        inferenceId: defaultInferenceEndpoints.JINAv5,
         version: undefined,
       });
     });
@@ -363,12 +363,15 @@ describe('DocumentationManager', () => {
       expect(scheduleEnsureSecurityLabsUpToDateTaskMock).not.toHaveBeenCalled();
     });
 
-    it('skips when Security Labs is in error state', async () => {
+    it('installs when Security Labs is in error state', async () => {
       packageInstaller.getSecurityLabsStatus.mockResolvedValue({ status: 'error' });
 
       await docManager.ensureDefaultSecurityLabs();
 
-      expect(packageInstaller.installSecurityLabs).not.toHaveBeenCalled();
+      expect(packageInstaller.installSecurityLabs).toHaveBeenCalledWith({
+        inferenceId: defaultInferenceEndpoints.JINAv5,
+        version: undefined,
+      });
     });
 
     it('skips when Security Labs is currently installing', async () => {

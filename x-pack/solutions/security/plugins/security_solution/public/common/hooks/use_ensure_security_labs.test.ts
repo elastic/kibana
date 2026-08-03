@@ -52,6 +52,7 @@ describe('ensureSecurityLabsInstalled', () => {
         typeof ensureSecurityLabsInstalled
       >[0]['uiSettings'],
       logger,
+      hasManagePrivilege: true,
     });
 
     expect(productDocBase.installation.getDefaultInferenceId).toHaveBeenCalledWith({
@@ -80,6 +81,7 @@ describe('ensureSecurityLabsInstalled', () => {
         typeof ensureSecurityLabsInstalled
       >[0]['uiSettings'],
       logger,
+      hasManagePrivilege: true,
     });
 
     expect(productDocBase.installation.install).not.toHaveBeenCalled();
@@ -98,9 +100,32 @@ describe('ensureSecurityLabsInstalled', () => {
         typeof ensureSecurityLabsInstalled
       >[0]['uiSettings'],
       logger,
+      hasManagePrivilege: true,
     });
 
     expect(productDocBase.installation.install).not.toHaveBeenCalled();
+  });
+
+  it('installs Security Labs when in error state', async () => {
+    (productDocBase.installation.getStatus as jest.Mock).mockResolvedValue({
+      inferenceId,
+      resourceType: ResourceTypes.securityLabs,
+      status: 'error',
+    });
+
+    await ensureSecurityLabsInstalled({
+      productDocBase,
+      uiSettings: uiSettings as unknown as Parameters<
+        typeof ensureSecurityLabsInstalled
+      >[0]['uiSettings'],
+      logger,
+      hasManagePrivilege: true,
+    });
+
+    expect(productDocBase.installation.install).toHaveBeenCalledWith({
+      inferenceId,
+      resourceType: ResourceTypes.securityLabs,
+    });
   });
 
   it('skips install when installation is in progress', async () => {
@@ -116,8 +141,24 @@ describe('ensureSecurityLabsInstalled', () => {
         typeof ensureSecurityLabsInstalled
       >[0]['uiSettings'],
       logger,
+      hasManagePrivilege: true,
     });
 
+    expect(productDocBase.installation.install).not.toHaveBeenCalled();
+  });
+
+  it('skips install when user lacks manage privilege', async () => {
+    await ensureSecurityLabsInstalled({
+      productDocBase,
+      uiSettings: uiSettings as unknown as Parameters<
+        typeof ensureSecurityLabsInstalled
+      >[0]['uiSettings'],
+      logger,
+      hasManagePrivilege: false,
+    });
+
+    expect(productDocBase.installation.getDefaultInferenceId).not.toHaveBeenCalled();
+    expect(productDocBase.installation.getStatus).not.toHaveBeenCalled();
     expect(productDocBase.installation.install).not.toHaveBeenCalled();
   });
 
@@ -136,6 +177,7 @@ describe('ensureSecurityLabsInstalled', () => {
           typeof ensureSecurityLabsInstalled
         >[0]['uiSettings'],
         logger,
+        hasManagePrivilege: true,
       });
 
       expect(productDocBase.installation.getStatus).not.toHaveBeenCalled();
@@ -145,7 +187,7 @@ describe('ensureSecurityLabsInstalled', () => {
 });
 
 describe('useEnsureSecurityLabs', () => {
-  it('triggers ensureSecurityLabsInstalled on mount', async () => {
+  const createServices = () => {
     const productDocBase = {
       installation: {
         getDefaultInferenceId: jest.fn().mockResolvedValue(defaultInferenceEndpoints.ELSER),
@@ -166,6 +208,11 @@ describe('useEnsureSecurityLabs', () => {
       }),
     };
     const logger = loggerMock.create();
+    return { productDocBase, uiSettings, logger };
+  };
+
+  it('triggers ensureSecurityLabsInstalled on mount when privileged', async () => {
+    const { productDocBase, uiSettings, logger } = createServices();
 
     renderHook(() =>
       useEnsureSecurityLabs({
@@ -174,6 +221,7 @@ describe('useEnsureSecurityLabs', () => {
           typeof useEnsureSecurityLabs
         >[0]['uiSettings'],
         logger,
+        hasManagePrivilege: true,
       })
     );
 
@@ -183,5 +231,50 @@ describe('useEnsureSecurityLabs', () => {
       inferenceId: defaultInferenceEndpoints.ELSER,
       resourceType: ResourceTypes.securityLabs,
     });
+  });
+
+  it('does not call product-doc APIs when user lacks manage privilege', async () => {
+    const { productDocBase, uiSettings, logger } = createServices();
+
+    renderHook(() =>
+      useEnsureSecurityLabs({
+        productDocBase,
+        uiSettings: uiSettings as unknown as Parameters<
+          typeof useEnsureSecurityLabs
+        >[0]['uiSettings'],
+        logger,
+        hasManagePrivilege: false,
+      })
+    );
+
+    await new Promise((resolve) => setImmediate(resolve));
+
+    expect(productDocBase.installation.getDefaultInferenceId).not.toHaveBeenCalled();
+    expect(productDocBase.installation.install).not.toHaveBeenCalled();
+    expect(logger.error).not.toHaveBeenCalled();
+  });
+
+  it('logs 403 failures at warn instead of error', async () => {
+    const { productDocBase, uiSettings, logger } = createServices();
+    (productDocBase.installation.getDefaultInferenceId as jest.Mock).mockRejectedValue({
+      response: { status: 403 },
+      body: { statusCode: 403 },
+    });
+
+    renderHook(() =>
+      useEnsureSecurityLabs({
+        productDocBase,
+        uiSettings: uiSettings as unknown as Parameters<
+          typeof useEnsureSecurityLabs
+        >[0]['uiSettings'],
+        logger,
+        hasManagePrivilege: true,
+      })
+    );
+
+    await new Promise((resolve) => setImmediate(resolve));
+
+    expect(logger.error).not.toHaveBeenCalled();
+    expect(logger.warn).toHaveBeenCalled();
   });
 });

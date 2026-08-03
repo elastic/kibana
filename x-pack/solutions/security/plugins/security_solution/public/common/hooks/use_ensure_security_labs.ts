@@ -24,6 +24,8 @@ export interface EnsureSecurityLabsServices {
   productDocBase: ProductDocBasePluginStart;
   uiSettings: IUiSettingsClient;
   logger: Logger;
+  /** True when the user can manage product docs (Agent Builder manageAgents / llm_product_doc). */
+  hasManagePrivilege: boolean;
 }
 
 const isAiFeaturesDisabled = (uiSettings: IUiSettingsClient): boolean => {
@@ -34,15 +36,37 @@ const isAiFeaturesDisabled = (uiSettings: IUiSettingsClient): boolean => {
   return AI_DISABLED_SENTINELS.has(defaultAIConnector) && defaultAIConnectorOnly === true;
 };
 
+const isForbiddenError = (error: unknown): boolean => {
+  if (!error || typeof error !== 'object') {
+    return false;
+  }
+  const err = error as {
+    response?: { status?: number };
+    body?: { statusCode?: number; status_code?: number };
+  };
+  return (
+    err.response?.status === 403 || err.body?.statusCode === 403 || err.body?.status_code === 403
+  );
+};
+
 /**
  * Ensures Security Labs content is installed for the default inference ID.
- * No-op when AI features are disabled, already installed, in error, or in progress.
+ * No-op when the user lacks manage privilege, AI features are disabled,
+ * already installed, or in progress. Retries when in error state.
  */
 export const ensureSecurityLabsInstalled = async ({
   productDocBase,
   uiSettings,
   logger,
+  hasManagePrivilege,
 }: EnsureSecurityLabsServices): Promise<void> => {
+  if (!hasManagePrivilege) {
+    logger.debug(
+      'Skipping Security Labs auto-install: user lacks product documentation manage privilege'
+    );
+    return;
+  }
+
   if (isAiFeaturesDisabled(uiSettings)) {
     logger.debug('Skipping Security Labs auto-install: Use AI features is disabled');
     return;
@@ -57,7 +81,7 @@ export const ensureSecurityLabsInstalled = async ({
   });
 
   const status = 'status' in statusResponse ? statusResponse.status : undefined;
-  if (status === 'uninstalled') {
+  if (status === 'uninstalled' || status === 'error') {
     logger.debug(
       `Auto-installing Security Labs content for inference ID [${inferenceId}] (status: ${status})`
     );
@@ -75,16 +99,28 @@ export const ensureSecurityLabsInstalled = async ({
 
 /**
  * Auto-installs Security Labs when Security Solution mounts (e.g. navigating to a
- * space with the security solution view). Safe to call repeatedly; skips when
- * already installed, in progress, or AI features are disabled.
+ * space with the security solution view). Safe to call repeatedly; skips when the
+ * user lacks manage privilege, already installed, in progress, or AI features are disabled.
  */
 export const useEnsureSecurityLabs = (services: EnsureSecurityLabsServices): void => {
-  const { productDocBase, uiSettings, logger } = services;
+  const { productDocBase, uiSettings, logger, hasManagePrivilege } = services;
 
   useEffect(() => {
-    ensureSecurityLabsInstalled({ productDocBase, uiSettings, logger }).catch((error) => {
+    ensureSecurityLabsInstalled({
+      productDocBase,
+      uiSettings,
+      logger,
+      hasManagePrivilege,
+    }).catch((error) => {
+      if (isForbiddenError(error)) {
+        logger.warn(
+          'Security Labs auto-install returned 403 — privilege check may be stale or incorrect'
+        );
+        logger.warn(error);
+        return;
+      }
       logger.error('Failed to auto-install Security Labs content');
       logger.error(error);
     });
-  }, [productDocBase, uiSettings, logger]);
+  }, [productDocBase, uiSettings, logger, hasManagePrivilege]);
 };

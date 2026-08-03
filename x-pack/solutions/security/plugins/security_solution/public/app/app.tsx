@@ -122,6 +122,8 @@ const SecurityAppComponent: React.FC<SecurityAppComponentProps> = ({
     productDocBase: services.productDocBase,
     uiSettings: services.uiSettings,
     logger: services.logger,
+    // Product-doc install routes require manage llm_product_doc (Agent Builder All / manageAgents).
+    hasManagePrivilege: services.application.capabilities.agentBuilder?.manageAgents === true,
   });
 
   // Set conversation flyout active config on mount, clear on unmount.
