@@ -23,7 +23,7 @@ jest.mock('./chart_type_registry', () => ({
     {
       get: () => ({
         schema: {
-          validate: (config: unknown) => config,
+          parse: (config: unknown) => config,
         },
         prompt: {
           selection: {

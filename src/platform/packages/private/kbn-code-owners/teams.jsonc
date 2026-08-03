@@ -628,6 +628,24 @@
     ]
   },
   {
+    "id": "obs-signals-logs",
+    "name": "Obs UX: Signals & Logs",
+    "areas": [
+      "observability"
+    ],
+    "github": {
+      "team": "elastic/obs-signals-logs-team",
+      "label": "Team:obs-signals-logs"
+    },
+    "responsibilities": [
+      "Logs Analytics and Skills",
+      "Logs Explorer / Logs Stream (legacy)",
+      "Left Nav & Classic Overview Page",
+      "Synthetics (Synthetics UI, Synthetics Recorder, Synthetics Service and Heartbeat)",
+      "eBPF + Profiling OTel"
+    ]
+  },
+  {
     "id": "obs-signals-traces",
     "name": "Obs UX: Signals & Traces",
     "areas": [
