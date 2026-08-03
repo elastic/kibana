@@ -49,8 +49,14 @@ export interface CoreStart {
   chrome: ChromeStart;
   /** {@link CustomBrandingStart} */
   customBranding: CustomBrandingStart;
-  /** {@link DeferredInitStart} */
-  deferredInit: DeferredInitStart;
+  /**
+   * {@link DeferredInitStart}
+   *
+   * Optional in the public type: Core always provides this at runtime, but it is typed as
+   * optional so the many hand-built `CoreStart` literals across plugins and tests don't all
+   * need to construct it. Access it with optional chaining (`core.deferredInit?.`).
+   */
+  deferredInit?: DeferredInitStart;
   /** {@link DocLinksStart} */
   docLinks: DocLinksStart;
   /** {@link ExecutionContextStart} */
