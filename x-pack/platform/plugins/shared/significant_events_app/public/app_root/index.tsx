@@ -30,7 +30,8 @@ export function AppRoot({
   pluginsStart: SignificantEventsAppStartDependencies;
   services: SignificantEventsAppServices;
   isServerless: boolean;
-} & { appMountParameters: AppMountParameters }) {
+  appMountParameters: AppMountParameters;
+}) {
   const { history } = appMountParameters;
 
   const context = useMemo(

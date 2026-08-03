@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { SignificantEventsApplication } from '../application';
+import { AppRoot } from '.';
 import type { SignificantEventsAppServices } from '../services/types';
 import type { SignificantEventsAppStartDependencies } from '../types';
 
@@ -30,13 +31,15 @@ export function renderApp({
   element.style.overflow = 'auto';
 
   ReactDOM.render(
-    <SignificantEventsApplication
-      coreStart={coreStart}
-      pluginsStart={pluginsStart}
-      services={services}
-      isServerless={isServerless}
-      appMountParameters={appMountParameters}
-    />,
+    coreStart.rendering.addContext(
+      <AppRoot
+        coreStart={coreStart}
+        pluginsStart={pluginsStart}
+        services={services}
+        isServerless={isServerless}
+        appMountParameters={appMountParameters}
+      />
+    ),
     element
   );
 

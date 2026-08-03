@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useLayoutEffect, useEffect, useCallback } from 'react';
+import React, { useLayoutEffect, useEffect, useCallback, useMemo } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { useKibana } from '../hooks/use_kibana';
 
@@ -23,8 +23,7 @@ function useDateRangeRedirect() {
     },
   } = useKibana();
 
-  // Parse URL params synchronously during render
-  const searchParams = new URLSearchParams(location.search);
+  const searchParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
   const isDateRangeSet = searchParams.has('rangeFrom') && searchParams.has('rangeTo');
   const rangeFrom = searchParams.get('rangeFrom');
   const rangeTo = searchParams.get('rangeTo');
@@ -40,7 +39,7 @@ function useDateRangeRedirect() {
     const defaultFrom = 'now-24h';
     const defaultTo = 'now';
 
-    const nextParams = new URLSearchParams(location.search);
+    const nextParams = new URLSearchParams(searchParams);
     nextParams.set('rangeFrom', isTimeTouched ? timePickerSharedState.from : defaultFrom);
     nextParams.set('rangeTo', isTimeTouched ? timePickerSharedState.to : defaultTo);
 
@@ -48,7 +47,7 @@ function useDateRangeRedirect() {
       ...location,
       search: nextParams.toString(),
     });
-  }, [history, location, queryService]);
+  }, [history, location, queryService, searchParams]);
 
   return { isDateRangeSet, rangeFrom, rangeTo, redirect, queryService };
 }

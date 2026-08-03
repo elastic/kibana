@@ -18,19 +18,14 @@ export function useSignificantEventsPrivileges() {
         capabilities: { streams },
       },
     },
-    dependencies: {
-      start: { licensing },
-    },
     services: { availability$ },
   } = useKibana();
-
-  const license = useObservable(licensing.license$);
 
   // The composite gate (rollout flag × Enterprise license × pricing tier) is computed
   // once in the plugin's start() and multicast through the services context — every
   // feature-flag evaluation POSTs a usage counter, so components must not recreate
-  // the observable.
-  const significantEventsAvailable = useObservable(availability$, false);
+  // the observable. undefined means the first emission hasn't arrived yet (loading).
+  const significantEventsAvailable = useObservable(availability$);
 
   return {
     /**
@@ -42,8 +37,8 @@ export function useSignificantEventsPrivileges() {
       [STREAMS_UI_PRIVILEGES.show]: boolean;
     },
     significantEvents: {
-      available: significantEventsAvailable,
+      available: significantEventsAvailable ?? false,
     },
-    isLoading: !license,
+    isLoading: significantEventsAvailable === undefined,
   };
 }

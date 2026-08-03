@@ -25,8 +25,7 @@ const DEFAULT_TO = 'now';
 export function useTimeRange() {
   const location = useLocation();
 
-  // DateRangeRedirect ensures rangeFrom/rangeTo are always present
-  const searchParams = new URLSearchParams(location.search);
+  const searchParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
   const rangeFrom = searchParams.get('rangeFrom') ?? DEFAULT_FROM;
   const rangeTo = searchParams.get('rangeTo') ?? DEFAULT_TO;
 

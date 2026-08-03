@@ -8,7 +8,7 @@
 import React from 'react';
 import type { EuiPageSectionProps } from '@elastic/eui';
 import { EuiPageTemplate } from '@elastic/eui';
-import { css } from '@emotion/css';
+import { css, cx } from '@emotion/css';
 
 const templateClassName = css`
   height: 0;
@@ -18,22 +18,14 @@ const bodyClassName = css`
   overflow-y: auto;
 `;
 
-const bodyNoPaddingClassName = css`
-  overflow-y: auto;
-  padding: 0px;
-`;
-
 const bodyContentClassName = css`
   display: flex;
   flex-direction: column;
   height: 100%;
 `;
 
-const bodyContentNoPaddingClassName = css`
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  padding: 0px;
+const noPaddingClassName = css`
+  padding: 0;
 `;
 
 export function SignificantEventsAppPageTemplate({ children }: { children: React.ReactNode }) {
@@ -52,9 +44,9 @@ SignificantEventsAppPageTemplate.Body = ({
 }: EuiPageSectionProps & { noPadding?: boolean }) => (
   <EuiPageTemplate.Section
     grow
-    className={noPadding ? bodyNoPaddingClassName : bodyClassName}
+    className={noPadding ? cx(bodyClassName, noPaddingClassName) : bodyClassName}
     contentProps={{
-      className: noPadding ? bodyContentNoPaddingClassName : bodyContentClassName,
+      className: noPadding ? cx(bodyContentClassName, noPaddingClassName) : bodyContentClassName,
     }}
     {...props}
   />
