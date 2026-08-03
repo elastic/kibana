@@ -15,7 +15,7 @@ import {
   seedScenario,
   SCENARIOS,
 } from '../../src/data_generators/endpoint_data';
-import { cleanupForensicData, cleanupTroubleshootingData } from '../../src/data_generators/cleanup';
+import { cleanupTroubleshootingData } from '../../src/data_generators/cleanup';
 
 const SKILL_PATH = 'skills/security/endpoint/elastic-defend-configuration-troubleshooting/SKILL.md';
 const UNITED_TRANSFORM_WILDCARD = `${METADATA_UNITED_TRANSFORM}*`;
@@ -213,12 +213,13 @@ evaluate.describe('Automatic Troubleshooting', { tag: tags.stateful.classic }, (
     }
 
     const clients = { esClient, internalEsClient };
+    // Reclaim only this suite's own seeds. Each suite cleans up exactly its own
+    // disjoint id namespace (see cleanup.ts): the forensic smoke suite owns
+    // `eval-agent-forensic-` and re-seeds in its own beforeAll, so this suite
+    // must NOT run cleanupForensicData — Playwright gives no cross-worker
+    // beforeAll ordering guarantee, so a cross-suite wipe can delete the
+    // forensic suite's freshly-seeded kill chain mid-run.
     await cleanupTroubleshootingData(clients);
-    // Also reclaim any stale forensic seeds a crashed prior run left behind (its
-    // afterAll never ran). In normal concurrent operation this is a no-op — the
-    // live forensic suite re-seeds in its own beforeAll — and it keeps this
-    // suite's transform-propagation counts and evidence queries free of leftovers.
-    await cleanupForensicData(clients);
 
     // waiting for transforms takes a while so seed all scenarios here. The
     // transform-propagation gate counts only `eval-agent-ts-` docs, which the
