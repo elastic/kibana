@@ -34,38 +34,26 @@ export const NOISE_FRACTION_DEFAULT = 0.01;
 // Capabilities the two-pass flow depends on (`CATEGORIZE`/`MATCH` option maps).
 export const TWO_PASS_ESQL_CAPABILITIES = ['categorize_options', 'match_function_options'];
 
-const twoPassSupportByClient = new WeakMap<ElasticsearchClient, Promise<boolean>>();
-
 /**
  * Resolves whether the cluster can run the two-pass syntax so callers can branch
  * to legacy single-pass without speculatively firing a query a pre-capability ES
  * would reject. `false` (partial cluster) and `null` (node too old to answer)
- * both map to unsupported, so a rolling upgrade never runs a doomed query.
+ * both map to unsupported, so a rolling upgrade never runs a doomed query. A
+ * transient failure maps to `false` for this call only, never latched.
  */
-export const esqlSupportsTwoPass = (
+export const esqlSupportsTwoPass = async (
   esClient: ElasticsearchClient,
   options?: { signal?: AbortSignal }
 ): Promise<boolean> => {
-  const cached = twoPassSupportByClient.get(esClient);
-  if (cached) {
-    return cached;
-  }
-
-  const check = esClient
-    .capabilities(
+  try {
+    const response = await esClient.capabilities(
       { method: 'POST', path: '/_query', capabilities: TWO_PASS_ESQL_CAPABILITIES },
       options
-    )
-    .then((response) => response.supported === true)
-    .catch(() => {
-      // Not cached: a transient failure must not disable two-pass for the
-      // lifetime of a long-lived client.
-      twoPassSupportByClient.delete(esClient);
-      return false;
-    });
-
-  twoPassSupportByClient.set(esClient, check);
-  return check;
+    );
+    return response.supported === true;
+  } catch {
+    return false;
+  }
 };
 
 // Dotted paths become column-segment arrays, which `esql.col(...)` needs for nesting.

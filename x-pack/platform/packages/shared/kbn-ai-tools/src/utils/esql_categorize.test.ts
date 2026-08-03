@@ -329,7 +329,7 @@ describe('esqlSupportsTwoPass', () => {
     ).resolves.toBe(false);
   });
 
-  it('resolves false without caching when the capabilities check fails', async () => {
+  it('resolves false when the capabilities check fails, without latching the result', async () => {
     const capabilities = jest
       .fn()
       .mockRejectedValueOnce(new Error('capabilities unavailable'))
@@ -341,12 +341,12 @@ describe('esqlSupportsTwoPass', () => {
     expect(capabilities).toHaveBeenCalledTimes(2);
   });
 
-  it('memoizes a successful result per client', async () => {
+  it('re-checks the cluster on every call', async () => {
     const capabilities = jest.fn().mockResolvedValue({ supported: true });
     const client = createClient(capabilities);
 
     await Promise.all([esqlSupportsTwoPass(client), esqlSupportsTwoPass(client)]);
 
-    expect(capabilities).toHaveBeenCalledTimes(1);
+    expect(capabilities).toHaveBeenCalledTimes(2);
   });
 });
