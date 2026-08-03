@@ -271,7 +271,7 @@ export const PresentationPanelHoverActions = ({
 
         return {
           iconType,
-          MenuItem: action.MenuItem ? <action.MenuItem context={apiContext} /> : undefined,
+          MenuItem: action.MenuItem ? <action.MenuItem key={id} context={apiContext} /> : undefined,
           'data-test-subj': `embeddablePanelAction-${action.id}`,
           onClick: createClickHandler(action, apiContext),
           name,
