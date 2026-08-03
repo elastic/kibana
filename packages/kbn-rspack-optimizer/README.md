@@ -64,9 +64,11 @@ node scripts/build_rspack_bundles.js --dist
 # Development with watch mode
 node scripts/build_rspack_bundles.js --watch
 
-# Or via environment variable (dev mode)
-KBN_USE_RSPACK=true yarn start
-```
+# Rspack is the default dev-mode optimizer
+yarn start
+
+# Opt out to the legacy webpack optimizer
+KBN_USE_RSPACK=false yarn start
 
 ### CLI Options
 
@@ -242,7 +244,7 @@ if (result.success) {
 
 | Variable | Description |
 |----------|-------------|
-| `KBN_USE_RSPACK=true` | Use RSPack optimizer in dev mode instead of webpack |
+| `KBN_USE_RSPACK=false` | Use the legacy webpack optimizer instead of the default Rspack optimizer in dev mode and distributable builds |
 | `KBN_HMR=false` | Disable HMR (RSPack only, alternative to `--no-hmr`) |
 | `KBN_HMR_PORT=5678` | Override the HMR SSE server port (RSPack only, default: 5678) |
 
