@@ -93,7 +93,6 @@ export const AwsCloudwatch: ConnectorSpec = {
       region: z
         .string()
         .min(1)
-        .min(1)
         .max(64)
         .regex(/^[a-z0-9-]+$/, 'Must be a valid AWS region name, e.g. "us-east-1".')
         .describe(
