@@ -27,7 +27,7 @@ Alertmanager URL
 :   The base URL of the Alertmanager instance, for example `https://alertmanager.example.com`. This host must be permitted by the [`xpack.actions.allowedHosts`](/reference/configuration-reference/alerting-settings.md#action-settings) setting.
 
 Prometheus server URL (optional)
-:   The base URL of the Prometheus server associated with this Alertmanager, for example `https://prometheus.example.com`. Only required for the `queryPrometheus`, `listPrometheusAlerts`, and `listPrometheusRules` actions — leave empty if you don't need Prometheus enrichment. Reuses the same username and password configured below. This host must also be permitted by `xpack.actions.allowedHosts` when set.
+:   The base URL of the Prometheus server associated with this Alertmanager, for example `https://prometheus.example.com`. Only required for the `queryPrometheus`, `listPrometheusAlerts`, and `listPrometheusRules` actions — leave empty if you don't need Prometheus enrichment. Reuses the username and password configured in the following section. This host must also be permitted by `xpack.actions.allowedHosts` when set.
 
 ### Authentication [prometheus-alertmanager-connector-authentication]
 
@@ -48,7 +48,7 @@ You can test connectors when you create or edit the connector in {{kib}}. The te
 The Prometheus Alertmanager connector has the following actions:
 
 `listAlerts`
-:   List current alerts. Optional filters: `active`, `silenced`, `inhibited`, `unprocessed` (booleans, all default to `true`), `filter` (an array of label matcher expressions, e.g. `alertname="HighCPU"` or `severity=~"critical|warning"`), and `receiver` (a regular expression matching receiver names).
+:   List current alerts. Optional filters: `active`, `silenced`, `inhibited`, `unprocessed` (booleans, all default to `true`), `filter` (an array of label matcher expressions, for example `alertname="HighCPU"` or `severity=~"critical|warning"`), and `receiver` (a regular expression matching receiver names).
 
 `listSilences`
 :   List silences (pending, active, and expired). Optional `filter`, an array of label matcher expressions, same format as `listAlerts`.
