@@ -161,33 +161,28 @@ export const ProjectPickerSkeleton = () => (
 
 export const DisabledProjectPicker = ({
   totalProjectCount,
-  displayTooltip = true,
+  customTooltipContent,
 }: {
   totalProjectCount: number;
-  displayTooltip?: boolean;
+  customTooltipContent?: string;
 }) => {
   const styles = useMemoCss(projectPickerStyles);
   if (totalProjectCount <= 1) {
     return null;
   }
-
-  const buttonIcon = (
-    <EuiButtonIcon
-      css={styles.disabledButton}
-      aria-label={strings.projectPickerButtonAriaLabel}
-      data-test-subj="project-picker-button-disabled"
-      size="xs"
-      isDisabled
-      display="fill"
-      iconType={CPSIconDisabled}
-    />
+  return (
+    <EuiToolTip content={customTooltipContent ?? strings.getProjectPickerDisabledTooltip()}>
+      <EuiButtonIcon
+        css={styles.disabledButton}
+        aria-label={strings.projectPickerButtonAriaLabel}
+        data-test-subj="project-picker-button-disabled"
+        size="xs"
+        isDisabled
+        display="fill"
+        iconType={CPSIconDisabled}
+      />
+    </EuiToolTip>
   );
-
-  if (!displayTooltip) {
-    return buttonIcon;
-  }
-
-  return <EuiToolTip content={strings.getProjectPickerDisabledTooltip()}>{buttonIcon}</EuiToolTip>;
 };
 
 const projectPickerStyles = {

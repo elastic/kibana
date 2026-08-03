@@ -11,6 +11,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
 import type { ProjectRouting } from '@kbn/es-query';
 import { ProjectPicker, DisabledProjectPicker, type UseFetchProjectsResult } from '@kbn/cps-utils';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 
 export interface MlProjectPickerPanelProps {
   projectRouting?: ProjectRouting;
@@ -48,7 +49,13 @@ export const MlProjectPickerPanel: FC<MlProjectPickerPanelProps> = ({
           {isDisabled ? (
             <DisabledProjectPicker
               totalProjectCount={totalProjectCount}
-              displayTooltip={displayDisabledTooltip}
+              customTooltipContent={
+                displayDisabledTooltip
+                  ? i18n.translate('xpack.ml.projectPicker.disabledTooltip', {
+                      defaultMessage: 'Cross-project search selection currently not available.',
+                    })
+                  : undefined
+              }
             />
           ) : (
             <ProjectPicker
