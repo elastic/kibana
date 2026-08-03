@@ -31,8 +31,10 @@ type OasOperationObject = Exclude<
 type OasResponse = NonNullable<NonNullable<OasOperationObject['responses']>[string]>;
 type OasRequestBody = NonNullable<OasOperationObject['requestBody']>;
 
-// `responses` entries and `requestBody` are `ReferenceObject | ResponseObject`
-// unions; only the latter carries `content`.
+/*
+ * `responses` entries and `requestBody` are `ReferenceObject | ResponseObject`
+ * unions; only the latter carries `content`.
+ */
 const jsonExamples = (container: OasResponse | OasRequestBody | undefined) =>
   container && 'content' in container
     ? container.content?.['application/json']?.examples

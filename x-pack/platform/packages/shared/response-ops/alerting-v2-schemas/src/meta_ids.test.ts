@@ -125,7 +125,7 @@ const EXPECTED_IDS: ReadonlyArray<readonly [z.ZodType, string]> = [
   [listRuleExecutionsResponseSchema, 'alerting_v2_rule_executions_response'],
   [policyExecutionHistoryItemSchema, 'alerting_v2_policy_execution_history_item'],
   [listPolicyExecutionHistoryResponseSchema, 'alerting_v2_policy_execution_history_response'],
-  // shared bulk primitives, reused by every by-ID / by-query bulk endpoint
+  /* shared bulk primitives, reused by every by-ID / by-query bulk endpoint */
   [bulkByIdsSchema, 'alerting_v2_bulk_by_ids_request'],
   [bulkByQuerySchema, 'alerting_v2_bulk_by_query_request'],
   [bulkResponseSchema, 'alerting_v2_bulk_operation_response'],
