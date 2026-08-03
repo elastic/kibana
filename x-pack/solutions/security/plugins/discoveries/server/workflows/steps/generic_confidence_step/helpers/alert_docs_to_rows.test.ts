@@ -156,4 +156,36 @@ describe('alertDocsToRows', () => {
       expect('threat.technique.id' in row).toBe(false);
     });
   });
+
+  describe('entity identity, risk, and criticality', () => {
+    it('extracts strong identifiers and cloud principals', () => {
+      const [row] = alertDocsToRows([
+        {
+          host: { id: 'H-1' },
+          user: { id: 'U-1' },
+          aws: { cloudtrail: { user_identity: { arn: 'arn:aws:iam::1:user/x' } } },
+        },
+      ]);
+
+      expect(row['host.id']).toBe('H-1');
+      expect(row['user.id']).toBe('U-1');
+      expect(row['aws.cloudtrail.user_identity.arn']).toBe('arn:aws:iam::1:user/x');
+    });
+
+    it('extracts entity risk scores and asset criticality', () => {
+      const [row] = alertDocsToRows([
+        {
+          host: {
+            risk: { calculated_score_norm: 92 },
+            asset: { criticality: 'high_impact' },
+          },
+          user: { risk: { calculated_score_norm: 40 } },
+        },
+      ]);
+
+      expect(row['host.risk.calculated_score_norm']).toBe('92');
+      expect(row['user.risk.calculated_score_norm']).toBe('40');
+      expect(row['host.asset.criticality']).toBe('high_impact');
+    });
+  });
 });

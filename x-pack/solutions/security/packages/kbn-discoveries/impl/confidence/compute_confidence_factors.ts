@@ -29,6 +29,30 @@ const TACTIC_ORDER: readonly string[] = [
   'TA0040', // Impact
 ];
 
+/**
+ * Identity fields used for entity cohesion, strongest identifiers first. Cohesion
+ * is the max single-field agreement across the bundle, so a shared strong id
+ * (host.id / user.id / a cloud principal) naturally outweighs a shared display
+ * name.
+ */
+const ENTITY_FIELDS: readonly string[] = [
+  'host.id',
+  'host.name',
+  'user.id',
+  'aws.cloudtrail.user_identity.arn',
+  'azure.auditlogs.properties.initiated_by.user.user_principal_name',
+  'gcp.audit.authentication_info.principal_email',
+  'user.name',
+];
+
+/** Asset-criticality levels mapped to a 0-1 impact weight (surfaced, not scored). */
+const CRITICALITY_WEIGHTS: Readonly<Record<string, number>> = {
+  low_impact: 0.25,
+  medium_impact: 0.5,
+  high_impact: 0.75,
+  extreme_impact: 1,
+};
+
 const clamp01 = (value: number): number => Math.max(0, Math.min(1, value));
 
 const maxSharedFraction = (rows: ParsedAlertFields[], field: string): number => {
@@ -120,9 +144,11 @@ export const computeConfidenceFactors = ({
             (TACTIC_ORDER.length - 1)
         )
       : 0;
+  // Entity cohesion: strongest single-identifier agreement across the bundle
+  // (host.id / user.id / cloud principal outrank a shared display name).
   const entityCohesion = Math.max(
-    maxSharedFraction(rows, 'host.name'),
-    maxSharedFraction(rows, 'user.name')
+    0,
+    ...ENTITY_FIELDS.map((field) => maxSharedFraction(rows, field))
   );
   const coherence = clamp01(progression * 0.55 + entityCohesion * 0.45);
   factors.push({
@@ -131,6 +157,41 @@ export const computeConfidenceFactors = ({
     } kill-chain stages spanned, entity cohesion ${entityCohesion.toFixed(2)}`,
     name: 'chain_coherence_structural',
     weight: coherence,
+  });
+
+  // --- Entity risk (bonus): peak risk-engine score across the involved hosts /
+  // users. The risk score aggregates prior suspicious activity, so it correlates
+  // with the finding being REAL and gently lifts confidence. Asset criticality is
+  // captured for the audit trail / LLM but is pure impact (severity), so it is
+  // NOT folded into the score — confidence stays orthogonal to severity. ---
+  let peakRiskNorm = 0;
+  let peakCriticality = 0;
+  for (const row of rows) {
+    for (const field of ['host.risk.calculated_score_norm', 'user.risk.calculated_score_norm']) {
+      const raw = row[field];
+      if (raw != null && raw.length > 0) {
+        const numeric = Number(raw);
+        if (Number.isFinite(numeric)) {
+          peakRiskNorm = Math.max(peakRiskNorm, clamp01(numeric / 100));
+        }
+      }
+    }
+    for (const field of ['host.asset.criticality', 'user.asset.criticality']) {
+      const weight = CRITICALITY_WEIGHTS[(row[field] ?? '').toLowerCase()];
+      if (weight != null) {
+        peakCriticality = Math.max(peakCriticality, weight);
+      }
+    }
+  }
+  const entityRisk = clamp01(peakRiskNorm);
+  factors.push({
+    assessment: `peak entity risk ${(peakRiskNorm * 100).toFixed(0)}/100${
+      peakCriticality > 0
+        ? `, peak asset criticality ${peakCriticality.toFixed(2)} (impact only, not scored)`
+        : ''
+    }`,
+    name: 'entity_risk',
+    weight: entityRisk,
   });
 
   // --- Counter-evidence (penalty): benign signals in the alerts ---
@@ -156,7 +217,12 @@ export const computeConfidenceFactors = ({
     weight: -counterStrength,
   });
 
-  const baseScore = clamp01(((breadth + mitre + coherence) / 3) * (1 - 0.5 * counterStrength));
+  // Entity risk is an additive bonus (max +0.15), so present-and-high risk lifts
+  // confidence while absent risk data leaves the score unchanged.
+  const entityRiskBonus = 0.15 * entityRisk;
+  const baseScore = clamp01(
+    ((breadth + mitre + coherence) / 3) * (1 - 0.5 * counterStrength) + entityRiskBonus
+  );
 
   return { baseScore, counterStrength, factors, matchedAlertCount };
 };

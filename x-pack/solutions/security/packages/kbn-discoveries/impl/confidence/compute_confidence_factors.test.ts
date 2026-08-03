@@ -36,6 +36,7 @@ describe('computeConfidenceFactors (generic alert bundle)', () => {
       'evidence_breadth',
       'mitre_completeness',
       'chain_coherence_structural',
+      'entity_risk',
       'counter_evidence',
     ]);
     expect(result.matchedAlertCount).toBe(2);
@@ -85,6 +86,80 @@ describe('computeConfidenceFactors (generic alert bundle)', () => {
     expect(result.matchedAlertCount).toBe(0);
     expect(result.counterStrength).toBe(0);
     expect(result.baseScore).toBeGreaterThanOrEqual(0);
+  });
+
+  describe('entity cohesion (strong identifiers)', () => {
+    it('scores cohesion off host.id / user.id, not just names', () => {
+      const strongId = computeConfidenceFactors({
+        alertRows: rows(
+          { 'event.category': 'process', 'host.id': 'H-1' },
+          { 'event.category': 'network', 'host.id': 'H-1' }
+        ),
+      });
+      const noEntity = computeConfidenceFactors({
+        alertRows: rows({ 'event.category': 'process' }, { 'event.category': 'network' }),
+      });
+      const coherence = (r: ReturnType<typeof computeConfidenceFactors>) =>
+        r.factors.find((f) => f.name === 'chain_coherence_structural')?.weight ?? 0;
+      expect(coherence(strongId)).toBeGreaterThan(coherence(noEntity));
+    });
+
+    it('recognizes a shared cloud principal', () => {
+      const result = computeConfidenceFactors({
+        alertRows: rows(
+          { 'aws.cloudtrail.user_identity.arn': 'arn:aws:iam::1:user/x' },
+          { 'aws.cloudtrail.user_identity.arn': 'arn:aws:iam::1:user/x' }
+        ),
+      });
+      // Full agreement on the principal → cohesion contributes to coherence.
+      expect(
+        result.factors.find((f) => f.name === 'chain_coherence_structural')?.weight ?? 0
+      ).toBeGreaterThan(0);
+    });
+  });
+
+  describe('entity risk (bonus, not severity)', () => {
+    it('always emits an entity_risk factor', () => {
+      const result = computeConfidenceFactors({ alertRows: rows({ 'event.category': 'process' }) });
+      expect(result.factors.find((f) => f.name === 'entity_risk')).toBeDefined();
+    });
+
+    it('lifts the score when an involved entity is high-risk', () => {
+      const base = rows({
+        'event.category': 'process',
+        'event.dataset': 'endpoint.events.process',
+      });
+      const risky = rows({
+        'event.category': 'process',
+        'event.dataset': 'endpoint.events.process',
+        'host.risk.calculated_score_norm': '95',
+      });
+      const withRisk = computeConfidenceFactors({ alertRows: risky });
+      const without = computeConfidenceFactors({ alertRows: base });
+      expect(withRisk.factors.find((f) => f.name === 'entity_risk')?.weight ?? 0).toBeGreaterThan(
+        0.9
+      );
+      expect(withRisk.baseScore).toBeGreaterThan(without.baseScore);
+    });
+
+    it('does not let asset criticality (impact) change the score', () => {
+      const plain = rows({
+        'event.category': 'process',
+        'event.dataset': 'endpoint.events.process',
+      });
+      const critical = rows({
+        'event.category': 'process',
+        'event.dataset': 'endpoint.events.process',
+        'host.asset.criticality': 'extreme_impact',
+      });
+      const withCriticality = computeConfidenceFactors({ alertRows: critical });
+      const without = computeConfidenceFactors({ alertRows: plain });
+      // Criticality is surfaced in the assessment but must not move the number.
+      expect(withCriticality.baseScore).toBe(without.baseScore);
+      expect(withCriticality.factors.find((f) => f.name === 'entity_risk')?.assessment).toContain(
+        'asset criticality'
+      );
+    });
   });
 });
 

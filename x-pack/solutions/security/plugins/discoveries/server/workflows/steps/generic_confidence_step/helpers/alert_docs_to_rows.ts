@@ -16,11 +16,22 @@ import type { ParsedAlertFields } from '@kbn/discoveries/impl/confidence';
 const SCORED_FIELDS: readonly string[] = [
   'event.category',
   'event.dataset',
-  'host.name',
-  'user.name',
   'process.code_signature.trusted',
   'kibana.alert.severity',
   'kibana.alert.workflow_status',
+  // Entity identity (cohesion), strongest identifiers first.
+  'host.id',
+  'host.name',
+  'user.id',
+  'user.name',
+  'aws.cloudtrail.user_identity.arn',
+  'azure.auditlogs.properties.initiated_by.user.user_principal_name',
+  'gcp.audit.authentication_info.principal_email',
+  // Entity risk / asset criticality (read straight off the alert; no extra query).
+  'host.risk.calculated_score_norm',
+  'user.risk.calculated_score_norm',
+  'host.asset.criticality',
+  'user.asset.criticality',
 ];
 
 // MITRE ids. A tactic id is `TA` + 4 digits (`TA0006`); a technique id is `T` +
