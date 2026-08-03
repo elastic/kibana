@@ -277,7 +277,7 @@ export const BulkScheduleFlyout = ({
               fill
               onClick={handleSave}
               isLoading={isUpdating}
-              disabled={saveDisabled}
+              isDisabled={saveDisabled}
               data-test-subj="syntheticsBulkScheduleSave"
             >
               {SAVE_LABEL}

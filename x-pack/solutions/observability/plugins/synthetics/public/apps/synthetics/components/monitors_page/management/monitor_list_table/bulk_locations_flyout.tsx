@@ -309,7 +309,7 @@ export const BulkLocationsFlyout = ({
               fill
               onClick={handleSave}
               isLoading={isUpdating}
-              disabled={saveDisabled}
+              isDisabled={saveDisabled}
               data-test-subj="syntheticsBulkLocationsSave"
             >
               {SAVE_LABEL}
