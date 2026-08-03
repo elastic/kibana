@@ -12,7 +12,7 @@
 - We decided to load the data view patternList and fields on demand, we know that will only have to load this data view
   on default and timeline scope. We will use two conditions to see if we need to fetch and initialize the data view
   selected. First, we will make sure that we did not already fetch them by using `searchedIds` and then we will init
-  them if `selectedPatterns` and `missingPatterns` are empty.
+  them if `selectedPatterns` is empty.
 - onSignalIndexUpdated
     - called when signal index first has data in order to add it to the defaultDataView and refresh the index fields
 
