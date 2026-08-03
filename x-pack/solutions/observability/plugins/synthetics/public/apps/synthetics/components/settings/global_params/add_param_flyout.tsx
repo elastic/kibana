@@ -46,14 +46,21 @@ const toFormData = (item: ListParamItem | null): ParamFormData => {
       description: '',
       value: '',
       sourceType: 'value',
-      source: { type: 'vault', path: '', field: '' },
+      source: { type: 'vault', path: '', field: '', connection: undefined },
     };
   }
   const { id: _id, source, ...rest } = item;
   return {
     ...rest,
     sourceType: source?.type === 'vault' ? 'vault' : 'value',
-    source: { type: 'vault', path: source?.path ?? '', field: source?.field ?? '' },
+    // Preserve the selected connection — dropping it here silently rewrites a
+    // named reference (${vault/staging@..}) to the default connection on any edit.
+    source: {
+      type: 'vault',
+      path: source?.path ?? '',
+      field: source?.field ?? '',
+      connection: source?.connection,
+    },
   };
 };
 

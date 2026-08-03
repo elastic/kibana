@@ -7,6 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import type { TypeOf } from '@kbn/config-schema';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { request as httpsRequest } from 'https';
 import { request as httpRequest } from 'http';
 import type { SyntheticsServerSetup } from '../../../types';
@@ -20,6 +21,7 @@ import { SECRET_PROVIDER_HASHICORP_VAULT } from '../../../../common/runtime_type
 import { syntheticsVaultConnectionType } from '../../../../common/types/saved_objects';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import { vaultConnectionId } from '../../../saved_objects/synthetics_vault_connection';
+import { VAULT_CONNECTION_NAME_REGEX } from '../../../synthetics_service/formatters/vault_param_formatter';
 import { asyncGlobalParamsPropagation } from '../../../tasks/sync_global_params_task';
 
 // Whether the connection has its provider secret stored, so the UI can render
@@ -93,7 +95,14 @@ const HashiCorpVaultSecretsSchema = schema.object({
 });
 
 const SaveBodySchema = schema.object({
-  name: schema.string({ minLength: 1 }),
+  name: schema.string({
+    minLength: 1,
+    maxLength: 1024,
+    validate: (v) =>
+      VAULT_CONNECTION_NAME_REGEX.test(v)
+        ? undefined
+        : 'must contain only letters, numbers, and . _ -',
+  }),
   type: schema.maybe(schema.literal('hashicorp_vault')),
   secretRefreshInterval: schema.maybe(schema.string()),
   config: HashiCorpVaultConfigSchema,
@@ -118,7 +127,7 @@ export const saveVaultConnectionRoute: SyntheticsRestApiRouteFactory<
       return response.badRequest({ body: { message: 'approle auth requires a role_id' } });
     }
 
-    const id = vaultConnectionId(body.name);
+    const id = vaultConnectionId(body.name, spaceId);
     const encryptedClient = server.encryptedSavedObjects.getClient();
     let existing: SyntheticsVaultConnection | undefined;
     try {
@@ -129,15 +138,45 @@ export const saveVaultConnectionRoute: SyntheticsRestApiRouteFactory<
       );
       existing = decrypted.attributes;
     } catch (e) {
+      // Only a genuine "not found" means this is a brand-new connection. Any other
+      // error (decrypt failure, ES outage, key rotation) must NOT be swallowed:
+      // treating it as "new" would let a blank-secret edit overwrite the stored
+      // credential with `undefined` and silently destroy it.
+      if (!SavedObjectsErrorHelpers.isNotFoundError(e)) {
+        throw e;
+      }
       existing = undefined;
     }
 
-    // Preserve stored secrets when the client submits blanks (editing a connection
-    // without re-entering its secret).
-    const secrets = {
-      token: body.secrets?.token || existing?.secrets?.token,
-      secretId: body.secrets?.secretId || existing?.secrets?.secretId,
-    };
+    // A5: re-pointing an existing connection is credential-sensitive. If the
+    // address or auth method changes, require the secret to be re-entered rather
+    // than silently reusing the stored one — otherwise a write-capable user could
+    // aim an existing connection at an attacker-controlled endpoint (leaving the
+    // secret blank to preserve it) and have private agents authenticate there with
+    // the real credential.
+    const providedSecret =
+      body.config.authMethod === 'token' ? body.secrets?.token : body.secrets?.secretId;
+    const credentialSensitiveChange =
+      !!existing &&
+      (existing.config.address !== body.config.address ||
+        existing.config.authMethod !== body.config.authMethod);
+    if (credentialSensitiveChange && !providedSecret) {
+      return response.badRequest({
+        body: {
+          message:
+            'The Vault secret must be re-entered when changing the connection address or auth method.',
+        },
+      });
+    }
+
+    // Preserve the stored secret on a blank edit ONLY when the endpoint and auth
+    // method are unchanged (see A5 above).
+    const secrets = credentialSensitiveChange
+      ? { token: body.secrets?.token, secretId: body.secrets?.secretId }
+      : {
+          token: body.secrets?.token || existing?.secrets?.token,
+          secretId: body.secrets?.secretId || existing?.secrets?.secretId,
+        };
     // Non-secret marker so the (non-decrypting) list read can report "secret saved".
     const hasSecret =
       body.config.authMethod === 'token' ? Boolean(secrets.token) : Boolean(secrets.secretId);
@@ -169,11 +208,14 @@ export const deleteVaultConnectionRoute: SyntheticsRestApiRouteFactory<
 > = () => ({
   method: 'DELETE',
   path: SYNTHETICS_API_URLS.VAULT_CONNECTION + '/{name}',
-  validate: { params: schema.object({ name: schema.string() }) },
+  validate: { params: schema.object({ name: schema.string({ minLength: 1, maxLength: 1024 }) }) },
   writeAccess: true,
   handler: async ({ request, savedObjectsClient, server, spaceId }) => {
     const { name } = request.params as { name: string };
-    await savedObjectsClient.delete(syntheticsVaultConnectionType, vaultConnectionId(name));
+    await savedObjectsClient.delete(
+      syntheticsVaultConnectionType,
+      vaultConnectionId(name, spaceId)
+    );
     await propagate(server, spaceId);
     return { deleted: true };
   },
@@ -386,7 +428,7 @@ export const testVaultConnectionRoute: SyntheticsRestApiRouteFactory<TestResult>
           .getClient()
           .getDecryptedAsInternalUser<SyntheticsVaultConnection>(
             syntheticsVaultConnectionType,
-            vaultConnectionId(body.name),
+            vaultConnectionId(body.name, spaceId),
             { namespace: spaceId }
           );
         token = token || decrypted.attributes.secrets?.token;

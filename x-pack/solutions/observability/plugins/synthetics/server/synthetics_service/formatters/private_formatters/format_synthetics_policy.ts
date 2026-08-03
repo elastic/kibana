@@ -18,9 +18,44 @@ import {
   handleMultilineStringFormatter,
   replaceStringWithParams,
 } from '../formatting_utils';
-import { valueContainsVaultReference } from '../vault_param_formatter';
+import { referencedConnectionNames } from '../vault_param_formatter';
+import type { HeartbeatVaultConfig } from '../../get_vault_connection';
 import { syntheticsPolicyFormatters } from './formatters';
 import { PARAMS_KEYS_TO_SKIP } from '../common';
+
+/**
+ * Selects only the Vault connections a monitor actually references (by name;
+ * undefined = the default connection), so an agent never receives credentials for
+ * connections the monitor does not use. Fails closed: a reference to a connection
+ * that is not configured throws rather than silently shipping nothing (or all).
+ */
+export const scopeVaultConnections = (
+  all: HeartbeatVaultConfig[],
+  referenced: Set<string | undefined>,
+  monitorName?: string
+): HeartbeatVaultConfig[] => {
+  const byName = new Map(all.map((c) => [c.name, c]));
+  const scoped = new Map<string, HeartbeatVaultConfig>();
+  for (const name of referenced) {
+    if (name === undefined) {
+      // The default connection is only well-defined when exactly one exists. With
+      // several, an unqualified ${vault/..} has no default — don't over-ship; the
+      // agent reports the unresolved reference at runtime.
+      if (all.length === 1) scoped.set(all[0].name, all[0]);
+      continue;
+    }
+    const conn = byName.get(name);
+    if (!conn) {
+      throw new Error(
+        `Monitor "${
+          monitorName ?? ''
+        }" references Vault connection "${name}", which is not configured`
+      );
+    }
+    scoped.set(conn.name, conn);
+  }
+  return [...scoped.values()];
+};
 
 export interface ProcessorFields {
   location_name: string;
@@ -41,7 +76,7 @@ export const formatSyntheticsPolicy = (
   params: Record<string, string>,
   mws: MaintenanceWindow[],
   isLegacy?: boolean,
-  vaultConfigB64?: string
+  vaultConnections?: HeartbeatVaultConfig[]
 ) => {
   const configKeys = Object.keys(config) as ConfigKey[];
 
@@ -132,18 +167,23 @@ export const formatSyntheticsPolicy = (
     throttling.value = throttlingFormatter?.(config, ConfigKey.THROTTLING_CONFIG);
   }
 
-  // Vault connection: when this monitor references a vault-backed secret
-  // (${vault/<path>#<field>} in any field) and a connection is configured, set
-  // the base64 connection on the `vault` var. That var is `secret: true` in the
-  // package, so Fleet stores the whole connection as a single Fleet secret and
-  // the compiled policy carries only a $co.elastic.secret{...} reference.
+  // Vault connections: when this monitor references a vault-backed secret
+  // (${vault/[<name>@]<path>#<field>} in any resolved field) attach ONLY the
+  // referenced connections (not every connection in the space) to the `vault` var,
+  // base64-encoded. That var is `secret: true` in the package, so Fleet stores it
+  // as a single Fleet secret and the compiled policy carries only a
+  // $co.elastic.secret{...} reference.
   const vaultItem = dataStream?.vars?.vault;
-  if (vaultItem && vaultConfigB64) {
-    const usesVault = Object.values(dataStream?.vars ?? {}).some((v) =>
-      valueContainsVaultReference(v?.value)
-    );
-    if (usesVault) {
-      vaultItem.value = vaultConfigB64;
+  if (vaultItem && vaultConnections?.length) {
+    const referenced = new Set<string | undefined>();
+    Object.values(dataStream?.vars ?? {}).forEach((v) => {
+      referencedConnectionNames(v?.value).forEach((n) => referenced.add(n));
+    });
+    if (referenced.size > 0) {
+      const scoped = scopeVaultConnections(vaultConnections, referenced, config[ConfigKey.NAME]);
+      if (scoped.length > 0) {
+        vaultItem.value = Buffer.from(JSON.stringify(scoped)).toString('base64');
+      }
     }
   }
 

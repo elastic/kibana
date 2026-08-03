@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { schema } from '@kbn/config-schema';
+
 /**
  * HashiCorp Vault reference support (POC).
  *
@@ -32,8 +34,26 @@
  * helpers the UI can use to detect/annotate Vault-backed fields.
  */
 
-// Matches ${vault/<path>#<field>} anywhere in a string.
+// Matches ${vault/[<connection>@]<path>#<field>} anywhere in a string.
 export const VAULT_REF_REGEX = /\$\{vault\/[^#{}]+#[^{}]+\}/g;
+
+// Charset allowlists for the parts of a ${vault/[<connection>@]<path>#<field>}
+// reference. These keep the token opaque and un-injectable: without them a field
+// like `f}${otherParam` would close the token early and let the trailing fragment
+// match SHELL_PARAMS_REGEX (substituted with another global param's value), and
+// `@`, `#`, `{`, `}` would corrupt parsing/delivery.
+export const VAULT_PATH_REGEX = /^[A-Za-z0-9._/-]+$/;
+export const VAULT_FIELD_REGEX = /^[A-Za-z0-9._-]+$/;
+export const VAULT_CONNECTION_NAME_REGEX = /^[A-Za-z0-9._-]+$/;
+
+// Generous upper bound for any single reference part (path/field/connection).
+const MAX_REF_PART = 1024;
+
+const stripSlashes = (p: string) => p.replace(/^\/+|\/+$/g, '');
+
+export const isValidVaultPath = (p: string) => VAULT_PATH_REGEX.test(stripSlashes(p));
+export const isValidVaultField = (f: string) => VAULT_FIELD_REGEX.test(f);
+export const isValidVaultConnectionName = (c: string) => VAULT_CONNECTION_NAME_REGEX.test(c);
 
 /**
  * Builds the edge-resolved reference token stored as a vault-backed param's
@@ -43,7 +63,25 @@ export const VAULT_REF_REGEX = /\$\{vault\/[^#{}]+#[^{}]+\}/g;
  * at runtime.
  */
 export const buildVaultReference = (path: string, field: string, connection?: string): string => {
-  const cleanPath = path.replace(/^\/+|\/+$/g, '');
+  const cleanPath = stripSlashes(path);
+  // Defense in depth: routes validate the same charset via config-schema, but a
+  // bad token here would silently corrupt the compiled agent policy, so refuse to
+  // build one rather than emit something injectable.
+  if (!VAULT_PATH_REGEX.test(cleanPath)) {
+    throw new Error(
+      `Invalid Vault path "${path}": allowed characters are letters, numbers, and . _ - /`
+    );
+  }
+  if (!VAULT_FIELD_REGEX.test(field)) {
+    throw new Error(
+      `Invalid Vault field "${field}": allowed characters are letters, numbers, and . _ -`
+    );
+  }
+  if (connection && !VAULT_CONNECTION_NAME_REGEX.test(connection)) {
+    throw new Error(
+      `Invalid Vault connection name "${connection}": allowed characters are letters, numbers, and . _ -`
+    );
+  }
   const prefix = connection ? `vault/${connection}@` : 'vault/';
   return '${' + prefix + cleanPath + '#' + field + '}';
 };
@@ -75,12 +113,17 @@ export const valueContainsVaultReference = (value: unknown): boolean => {
 };
 
 /**
- * Extracts the { path, field } pairs referenced in a string. Intended for UI
- * annotation / validation; not used for resolution (Kibana never resolves).
+ * Extracts the { connection?, path, field } tuples referenced in a string.
+ * Understands both the default form (${vault/<path>#<field>}) and the named form
+ * (${vault/<connection>@<path>#<field>}). Used to annotate the UI and — crucially
+ * — to ship only the referenced connections to the agent (not every connection in
+ * the space). Kibana never resolves the reference.
  */
-export const extractVaultReferences = (strVal: string): Array<{ path: string; field: string }> => {
+export const extractVaultReferences = (
+  strVal: string
+): Array<{ connection?: string; path: string; field: string }> => {
   VAULT_REF_REGEX.lastIndex = 0;
-  const refs: Array<{ path: string; field: string }> = [];
+  const refs: Array<{ connection?: string; path: string; field: string }> = [];
   const matches = strVal.match(VAULT_REF_REGEX) ?? [];
   for (const match of matches) {
     // strip `${vault/` prefix and trailing `}`
@@ -89,7 +132,61 @@ export const extractVaultReferences = (strVal: string): Array<{ path: string; fi
     if (hashIdx <= 0 || hashIdx === inner.length - 1) {
       continue;
     }
-    refs.push({ path: inner.slice(0, hashIdx), field: inner.slice(hashIdx + 1) });
+    let spec = inner.slice(0, hashIdx);
+    const field = inner.slice(hashIdx + 1);
+    // Split an optional `<connection>@` prefix off the path.
+    let connection: string | undefined;
+    const atIdx = spec.indexOf('@');
+    if (atIdx >= 0) {
+      connection = spec.slice(0, atIdx) || undefined;
+      spec = spec.slice(atIdx + 1);
+    }
+    refs.push({ connection, path: spec, field });
   }
   return refs;
 };
+
+/**
+ * The distinct connection names referenced in a value (undefined = the default
+ * connection). Used to scope which connections are delivered to an agent.
+ */
+export const referencedConnectionNames = (value: unknown): Set<string | undefined> => {
+  const names = new Set<string | undefined>();
+  const scan = (s: string) => extractVaultReferences(s).forEach((r) => names.add(r.connection));
+  if (typeof value === 'string') {
+    scan(value);
+  } else if (value && typeof value === 'object') {
+    scan(JSON.stringify(value));
+  }
+  return names;
+};
+
+/**
+ * Shared request schema for a vault-backed param `source`, with the charset +
+ * length validation the reference grammar depends on. Used by both the add and
+ * edit param routes so the two never drift.
+ */
+export const VaultParamSourceSchema = schema.object({
+  type: schema.literal('vault'),
+  path: schema.string({
+    minLength: 1,
+    maxLength: MAX_REF_PART,
+    validate: (v) =>
+      isValidVaultPath(v) ? undefined : 'must contain only letters, numbers, and . _ - /',
+  }),
+  field: schema.string({
+    minLength: 1,
+    maxLength: MAX_REF_PART,
+    validate: (v) =>
+      VAULT_FIELD_REGEX.test(v) ? undefined : 'must contain only letters, numbers, and . _ -',
+  }),
+  connection: schema.maybe(
+    schema.string({
+      maxLength: MAX_REF_PART,
+      validate: (v) =>
+        v === '' || VAULT_CONNECTION_NAME_REGEX.test(v)
+          ? undefined
+          : 'must contain only letters, numbers, and . _ -',
+    })
+  ),
+});

@@ -197,7 +197,8 @@ export class SyntheticsPrivateLocation {
     globalParams: Record<string, string>,
     maintenanceWindows: MaintenanceWindow[],
     testRunId?: string,
-    runOnce?: boolean
+    runOnce?: boolean,
+    forInspect?: boolean
   ): Promise<NewPackagePolicy | null> {
     const { label: locName } = privateLocation;
 
@@ -217,13 +218,21 @@ export class SyntheticsPrivateLocation {
 
       newPolicy.namespace = await this.getPolicyNamespace(configNamespace);
 
-      // Assemble the vault connections (base64 JSON array) so vault-backed
-      // monitors can resolve ${vault/..} refs at the edge. Fleet stores it as a
-      // single Fleet secret.
-      const vaultConnections = await getVaultConnectionConfigs(this.server, spaceId);
-      const vaultConfigB64 = vaultConnections.length
-        ? Buffer.from(JSON.stringify(vaultConnections)).toString('base64')
-        : undefined;
+      // Assemble the vault connections so vault-backed monitors can resolve
+      // ${vault/..} refs at the edge; formatSyntheticsPolicy attaches only the
+      // ones THIS monitor references (A2), as a single Fleet secret. Skipped on the
+      // inspect path (A1): Fleet's inspect() compiles vars verbatim (no
+      // secret-ization), so attaching them would return plaintext credentials to
+      // the caller.
+      //
+      // A3 (residual): the `vault` var is `secret: true` in the package, so on the
+      // persist path Fleet stores it as a Fleet secret WHEN secret storage is
+      // enabled. Hard-failing when it is NOT (old/absent Fleet Server) requires
+      // Fleet to expose `isSecretStorageEnabled` to consumers — it is not on
+      // FleetStartContract today. Tracked on the meta issue as a Fleet dependency.
+      const vaultConnections = forInspect
+        ? undefined
+        : await getVaultConnectionConfigs(this.server, spaceId);
 
       const { formattedPolicy } = formatSyntheticsPolicy(
         newPolicy,
@@ -251,7 +260,7 @@ export class SyntheticsPrivateLocation {
         globalParams,
         maintenanceWindows,
         undefined,
-        vaultConfigB64
+        vaultConnections
       );
 
       return formattedPolicy;
@@ -373,7 +382,10 @@ export class SyntheticsPrivateLocation {
         newPolicyTemplate,
         spaceId,
         globalParams,
-        maintenanceWindows
+        maintenanceWindows,
+        undefined,
+        undefined,
+        true // forInspect: never attach vault credentials to inspect output
       );
 
       const pkgPolicy = {

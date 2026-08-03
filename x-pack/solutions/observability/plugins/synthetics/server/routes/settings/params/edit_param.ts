@@ -16,7 +16,10 @@ import type { SyntheticsParamRequest, SyntheticsParams } from '../../../../commo
 import { syntheticsParamType } from '../../../../common/types/saved_objects';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import { asyncGlobalParamsPropagation } from '../../../tasks/sync_global_params_task';
-import { buildVaultReference } from '../../../synthetics_service/formatters/vault_param_formatter';
+import {
+  buildVaultReference,
+  VaultParamSourceSchema,
+} from '../../../synthetics_service/formatters/vault_param_formatter';
 
 const RequestParamsSchema = schema.object({
   id: schema.string(),
@@ -45,14 +48,7 @@ export const editSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
             minLength: 1,
           })
         ),
-        source: schema.maybe(
-          schema.object({
-            type: schema.literal('vault'),
-            path: schema.string({ minLength: 1 }),
-            field: schema.string({ minLength: 1 }),
-            connection: schema.maybe(schema.string()),
-          })
-        ),
+        source: schema.maybe(VaultParamSourceSchema),
         description: schema.maybe(schema.string()),
         tags: schema.maybe(schema.arrayOf(schema.string())),
       }),
@@ -86,6 +82,7 @@ export const editSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
       // For a vault-backed edit, derive the effective value from the source and
       // persist the structured source. When switching (back) to a literal value,
       // drop any previously-stored vault source.
+      let clearingSource = false;
       if (data.source) {
         newParam.value = buildVaultReference(
           data.source.path,
@@ -96,9 +93,15 @@ export const editSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
       } else if (data.value) {
         newParam.value = data.value;
         delete newParam.source;
+        clearingSource = true;
       }
 
       const { key: existingKey } = existingParam.attributes;
+
+      // A merge update never removes an absent key, so clearing `source` (vault →
+      // literal) would leave a stale `source` on the stored doc — the UI would keep
+      // showing the Vault badge and the param would still look vault-backed. Replace
+      // the full attribute set in that case so `source` is actually dropped.
       const {
         id: responseId,
         attributes: { key, tags, description, value, source },
@@ -106,7 +109,8 @@ export const editSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
       } = (await savedObjectsClient.update<SyntheticsParams>(
         syntheticsParamType,
         paramId,
-        newParam
+        newParam,
+        clearingSource ? { mergeAttributes: false } : undefined
       )) as SavedObject<SyntheticsParams>;
 
       // Include both old and new key if the key was renamed

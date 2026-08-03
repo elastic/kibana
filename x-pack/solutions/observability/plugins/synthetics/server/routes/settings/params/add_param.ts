@@ -19,18 +19,15 @@ import type {
 import { syntheticsParamType } from '../../../../common/types/saved_objects';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import { asyncGlobalParamsPropagation } from '../../../tasks/sync_global_params_task';
-import { buildVaultReference } from '../../../synthetics_service/formatters/vault_param_formatter';
-
-const VaultSourceSchema = schema.object({
-  type: schema.literal('vault'),
-  path: schema.string({ minLength: 1 }),
-  field: schema.string({ minLength: 1 }),
-  connection: schema.maybe(schema.string()),
-});
+import {
+  buildVaultReference,
+  VaultParamSourceSchema,
+} from '../../../synthetics_service/formatters/vault_param_formatter';
 
 const ParamsObjectSchema = schema.object({
   key: schema.string({
     minLength: 1,
+    maxLength: 1024,
   }),
   // Either `value` (literal) or `source` (vault-backed) must be provided.
   value: schema.maybe(
@@ -38,7 +35,7 @@ const ParamsObjectSchema = schema.object({
       minLength: 1,
     })
   ),
-  source: schema.maybe(VaultSourceSchema),
+  source: schema.maybe(VaultParamSourceSchema),
   description: schema.maybe(schema.string()),
   tags: schema.maybe(schema.arrayOf(schema.string())),
   share_across_spaces: schema.maybe(schema.boolean()),

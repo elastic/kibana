@@ -9,10 +9,16 @@ import { v5 as uuidv5 } from 'uuid';
 import { syntheticsVaultConnectionType } from '../../common/types/saved_objects';
 
 // Encrypted saved objects require predefined ids to be UUIDs. We derive a stable
-// UUID per connection name so the name is the key (upsert by name) while the SO
-// id stays a valid UUID.
+// UUID per (space, connection name) so the name is the key (upsert by name) while
+// the SO id stays a valid UUID.
+//
+// The space MUST be part of the id: the type is `namespaceType: 'multiple'` (a
+// single global id space), so deriving from the name alone collides across spaces
+// — creating "prod" in one space would fail with an unresolvable-conflict when
+// another space already has it, and the 409 would leak which names exist elsewhere.
 const VAULT_CONNECTION_NAMESPACE = '5efab9a0-0000-4000-8000-000000000001';
-export const vaultConnectionId = (name: string) => uuidv5(name, VAULT_CONNECTION_NAMESPACE);
+export const vaultConnectionId = (name: string, spaceId: string) =>
+  uuidv5(`${spaceId}:${name}`, VAULT_CONNECTION_NAMESPACE);
 
 // The provider-specific secret fields live under a single `secrets` attribute,
 // which is encrypted as one blob. This is what keeps the encryption model stable
