@@ -6,14 +6,11 @@
  */
 
 import { evaluate as evalsBase } from '@kbn/evals';
-import { withPhoenixExecutor } from '@kbn/evals-phoenix-executor';
 import { VisualizationAgentEvaluationChatClient } from './chat_client';
 import type { EvaluateDataset } from './evaluate_dataset';
 import { createEvaluateDataset } from './evaluate_dataset';
 
-const base = withPhoenixExecutor(evalsBase);
-
-export const evaluate = base.extend<
+export const evaluate = evalsBase.extend<
   {},
   {
     chatClient: VisualizationAgentEvaluationChatClient;

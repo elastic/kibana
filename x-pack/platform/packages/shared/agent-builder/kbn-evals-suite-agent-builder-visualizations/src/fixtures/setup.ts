@@ -9,6 +9,7 @@ import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { buildOtelMetricsBulkOperations } from './documents';
 import {
+  OTEL_METRICS_INDEX,
   OTEL_METRICS_OVERRIDE_TEMPLATE_NAME,
   buildOtelMetricsIndexCreateRequest,
   otelMetricsFixtureIndexWildcards,
@@ -38,6 +39,13 @@ export async function setupOtelMetricsFixtures({
   // timestamps consistent (both are now-relative).
   const now = Date.now();
   const indexCreateRequest = buildOtelMetricsIndexCreateRequest(now);
+
+  // Local / reused clusters often already have this name as a managed OTel
+  // *data stream*. Our override template intentionally has no `data_stream`
+  // block (we need a plain TSDB index), so ES rejects the put when an
+  // existing data stream would lose its matching data-stream template.
+  // Drop any prior data stream/index first — cleanup is idempotent.
+  await cleanupOtelMetricsFixtures({ esClient, log });
 
   // Register the override template first: the managed `metrics-otel@template`
   // (priority 120) matches our index name and only creates data streams, so
@@ -111,6 +119,30 @@ export async function cleanupOtelMetricsFixtures({
     })
   );
 
+  const dataStreamsToDelete = Array.from(
+    new Set(
+      resolveResponses
+        .flatMap((response) => response?.data_streams ?? [])
+        .map((dataStream) => dataStream.name)
+    )
+  );
+
+  if (dataStreamsToDelete.length > 0) {
+    try {
+      await esClient.indices.deleteDataStream({ name: dataStreamsToDelete });
+      log.debug(`[viz-evals] deleted data streams: ${dataStreamsToDelete.join(', ')}`);
+    } catch (err) {
+      log.warning(
+        new Error(
+          `[viz-evals] cleanup failed to delete data streams ${dataStreamsToDelete.join(
+            ', '
+          )} — continuing`,
+          { cause: err instanceof Error ? err : new Error(String(err)) }
+        )
+      );
+    }
+  }
+
   const indicesToDelete = Array.from(
     new Set(
       resolveResponses.flatMap((response) => response?.indices ?? []).map((index) => index.name)
@@ -129,6 +161,14 @@ export async function cleanupOtelMetricsFixtures({
         )
       );
     }
+  }
+
+  // Also try the exact fixture name in case resolve missed a data stream
+  // (e.g. closed / hidden) that still blocks the override template put.
+  try {
+    await esClient.indices.deleteDataStream({ name: OTEL_METRICS_INDEX });
+  } catch {
+    // missing is fine
   }
 
   try {
