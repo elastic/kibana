@@ -359,7 +359,7 @@ describe('Execution Routes', () => {
           kql: 'status: completed',
           sortField: 'startedAt',
           sortOrder: 'desc',
-          from: 25,
+          page: 2,
           size: 25,
           trackTotalHits: true,
         },
@@ -369,9 +369,10 @@ describe('Execution Routes', () => {
 
       expect(mockApi.searchExecutionsView).toHaveBeenCalledWith(
         expect.objectContaining({
-          query: expect.objectContaining({ term: { status: 'completed' } }),
-          sort: [{ startedAt: { order: 'desc' } }],
-          from: 25,
+          query: expect.objectContaining({ bool: expect.any(Object) }),
+          sortField: 'startedAt',
+          sortOrder: 'desc',
+          page: 2,
           size: 25,
           trackTotalHits: true,
         }),
@@ -390,10 +391,10 @@ describe('Execution Routes', () => {
         total: 0,
       });
       const h = handler('GET', path)!;
-      await h(mockContext, { query: { from: 0, size: 25 } } as any, mockResponse as any);
+      await h(mockContext, { query: { page: 1, size: 25 } } as any, mockResponse as any);
 
       expect(mockApi.searchExecutionsView).toHaveBeenCalledWith(
-        expect.objectContaining({ query: undefined, sort: undefined }),
+        expect.objectContaining({ query: undefined, sortField: undefined, sortOrder: undefined }),
         'default'
       );
     });
