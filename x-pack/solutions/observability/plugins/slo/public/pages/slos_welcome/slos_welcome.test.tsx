@@ -11,6 +11,8 @@ import { paths } from '@kbn/slo-shared-plugin/common/locators/paths';
 import { act, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import Router from 'react-router-dom';
+import { useFetchSloTemplates } from '../../hooks/use_fetch_slo_templates';
+import { useFetchSloTemplateTags } from '../../hooks/use_fetch_slo_template_tags';
 import { useHasSlos } from '../../hooks/use_has_slos';
 import { useKibana } from '../../hooks/use_kibana';
 import { useLicense } from '../../hooks/use_license';
@@ -32,6 +34,8 @@ jest.mock('../../hooks/use_kibana');
 jest.mock('../../hooks/use_license');
 jest.mock('../../hooks/use_has_slos');
 jest.mock('../../hooks/use_permissions');
+jest.mock('../../hooks/use_fetch_slo_templates');
+jest.mock('../../hooks/use_fetch_slo_template_tags');
 
 const HeaderMenuPortalMock = HeaderMenuPortal as jest.Mock;
 HeaderMenuPortalMock.mockReturnValue(<div>Portal node</div>);
@@ -40,6 +44,8 @@ const useKibanaMock = useKibana as jest.Mock;
 const useLicenseMock = useLicense as jest.Mock;
 const useHasSlosMock = useHasSlos as jest.Mock;
 const usePermissionsMock = usePermissions as jest.Mock;
+const useFetchSloTemplatesMock = useFetchSloTemplates as jest.Mock;
+const useFetchSloTemplateTagsMock = useFetchSloTemplateTags as jest.Mock;
 
 const mockNavigate = jest.fn();
 
@@ -64,6 +70,11 @@ const mockKibana = () => {
         },
       },
       observabilityAIAssistant: mockObservabilityAIAssistant,
+      unifiedSearch: {
+        ui: {
+          SearchBar: () => <div data-test-subj="sloTemplatesSearchBar" />,
+        },
+      },
     },
   });
 };
@@ -81,6 +92,16 @@ describe('SLOs Welcome Page', () => {
       location: { pathname: '/slos/welcome', search: '', hash: '', state: undefined },
     });
     mockKibana();
+    useFetchSloTemplatesMock.mockReturnValue({
+      data: { total: 0, page: 1, perPage: 20, results: [] },
+      isLoading: false,
+      isError: false,
+    });
+    useFetchSloTemplateTagsMock.mockReturnValue({
+      data: { tags: [] },
+      isLoading: false,
+      isError: false,
+    });
     jest
       .spyOn(Router, 'useLocation')
       .mockReturnValue({ pathname: '/slos/welcome', search: '', state: '', hash: '' });
@@ -143,6 +164,9 @@ describe('SLOs Welcome Page', () => {
         const createNewSloButton = screen.queryByTestId('o11ySloListWelcomePromptCreateSloButton');
 
         expect(createNewSloButton).toBeDisabled();
+        expect(
+          screen.queryByTestId('o11ySloListWelcomePromptCreateFromTemplateButton')
+        ).toBeDisabled();
       });
 
       it('disables the create slo button when no cluster permissions capabilities', async () => {
@@ -186,6 +210,34 @@ describe('SLOs Welcome Page', () => {
 
         await waitFor(() => {
           expect(mockNavigate).toBeCalledWith(paths.sloCreate);
+        });
+      });
+
+      it('should display a Create from template button which should open the templates flyout', async () => {
+        usePermissionsMock.mockReturnValue({
+          isLoading: false,
+          data: {
+            hasAllWriteRequested: true,
+            hasAllReadRequested: true,
+          },
+        });
+
+        await act(async () => {
+          render(<SlosWelcomePage />);
+        });
+
+        const createFromTemplateButton = screen.queryByTestId(
+          'o11ySloListWelcomePromptCreateFromTemplateButton'
+        );
+        expect(createFromTemplateButton).toBeTruthy();
+        expect(screen.queryByTestId('sloTemplatesFlyout')).toBeFalsy();
+
+        await act(async () => {
+          createFromTemplateButton?.click();
+        });
+
+        await waitFor(() => {
+          expect(screen.queryByTestId('sloTemplatesFlyout')).toBeTruthy();
         });
       });
     });

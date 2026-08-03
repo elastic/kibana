@@ -18,11 +18,12 @@ import {
 import { i18n } from '@kbn/i18n';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import { paths, SLOS_PATH } from '@kbn/slo-shared-plugin/common/locators/paths';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { HeaderMenu } from '../../components/header_menu/header_menu';
 import { SloOutdatedCallout } from '../../components/slo/slo_outdated_callout';
 import { SloPermissionsCallout } from '../../components/slo/slo_permissions_callout';
+import { SloTemplatesFlyout } from '../../components/slo/slo_templates/slo_templates_flyout';
 import { useHasSlos } from '../../hooks/use_has_slos';
 import { useKibana } from '../../hooks/use_kibana';
 import { useLicense } from '../../hooks/use_license';
@@ -44,6 +45,7 @@ export function SlosWelcomePage() {
   const { hasAtLeast } = useLicense();
   const hasRightLicense = hasAtLeast('platinum');
   const history = useHistory();
+  const [isTemplatesFlyoutOpen, setIsTemplatesFlyoutOpen] = useState(false);
 
   const { hasSlos, isLoading } = useHasSlos();
 
@@ -129,19 +131,36 @@ export function SlosWelcomePage() {
                 </EuiFlexItem>
 
                 <EuiFlexItem>
-                  <span>
-                    <EuiButton
-                      data-test-subj="o11ySloListWelcomePromptCreateSloButton"
-                      fill
-                      color="primary"
-                      onClick={handleClickCreateSlo}
-                      disabled={!permissions?.hasAllWriteRequested}
-                    >
-                      {i18n.translate('xpack.slo.sloList.welcomePrompt.buttonLabel', {
-                        defaultMessage: 'Create SLO',
-                      })}
-                    </EuiButton>
-                  </span>
+                  <EuiFlexGroup direction="row" gutterSize="s">
+                    <EuiFlexItem grow={false}>
+                      <EuiButton
+                        data-test-subj="o11ySloListWelcomePromptCreateSloButton"
+                        fill
+                        color="primary"
+                        onClick={handleClickCreateSlo}
+                        disabled={!permissions?.hasAllWriteRequested}
+                      >
+                        {i18n.translate('xpack.slo.sloList.welcomePrompt.buttonLabel', {
+                          defaultMessage: 'Create SLO',
+                        })}
+                      </EuiButton>
+                    </EuiFlexItem>
+
+                    <EuiFlexItem grow={false}>
+                      <EuiButton
+                        data-test-subj="o11ySloListWelcomePromptCreateFromTemplateButton"
+                        color="primary"
+                        iconType="document"
+                        onClick={() => setIsTemplatesFlyoutOpen(true)}
+                        disabled={!permissions?.hasAllWriteRequested}
+                      >
+                        {i18n.translate(
+                          'xpack.slo.sloList.welcomePrompt.createFromTemplateButtonLabel',
+                          { defaultMessage: 'Create from template' }
+                        )}
+                      </EuiButton>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
                 </EuiFlexItem>
               </EuiFlexGroup>
             ) : (
@@ -211,6 +230,9 @@ export function SlosWelcomePage() {
           </>
         }
       />
+      {isTemplatesFlyoutOpen && (
+        <SloTemplatesFlyout onClose={() => setIsTemplatesFlyoutOpen(false)} />
+      )}
     </ObservabilityPageTemplate>
   );
 }
