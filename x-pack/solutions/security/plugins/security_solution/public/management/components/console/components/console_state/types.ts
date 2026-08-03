@@ -89,6 +89,10 @@ export interface ConsoleDataState {
      * The Suggestion to be presented to the user
      */
     suggestion: {
+      /**
+       * Suggestion value to display in the UI. It likely will be a subset (the ending) to
+       * whatever the user already typed
+       */
       value: string;
     };
   };

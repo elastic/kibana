@@ -19,6 +19,7 @@ import styled from '@emotion/styled';
 import classNames from 'classnames';
 import type { EuiResizeObserverProps } from '@elastic/eui/src/components/observer/resize_observer/resize_observer';
 import { useIsMounted } from '@kbn/securitysolution-hook-utils';
+import { useInputSuggestion } from './hooks/use_input_suggestion';
 import { InputDisplay } from './components/input_display';
 import type { ConsoleDataState, ExecuteCommandPayload } from '../console_state/types';
 import { useWithInputShowPopover } from '../../hooks/state_selectors/use_with_input_show_popover';
@@ -103,6 +104,7 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
     useWithInputTextEntered();
   const visibleState = useWithInputVisibleState();
   const isPopoverOpen = !!useWithInputShowPopover();
+  const { value: suggestionValue } = useInputSuggestion();
 
   const [isKeyInputBeingCaptured, setIsKeyInputBeingCaptured] = useState(false);
   const [commandToExecute, setCommandToExecute] = useState<ExecuteCommandPayload | undefined>(
@@ -201,6 +203,11 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
         }
       }
 
+      // If key is `tab` and we have a suggestionValue, then prevent the default behavior of `tab`ing
+      if (key === 'Tab' && suggestionValue) {
+        eventDetails.preventDefault();
+      }
+
       // Update the store with the updated text that was entered
       dispatch({
         type: 'updateInputTextEnteredState',
@@ -252,6 +259,13 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
               }
               break;
 
+            // TAB
+            case 'Tab':
+              if (suggestionValue) {
+                inputText.addValue(suggestionValue);
+              }
+              break;
+
             // ARROW LEFT
             case 'ArrowLeft':
               inputText.moveCursorTo('left');
@@ -284,7 +298,7 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
         },
       });
     },
-    [commands, dispatch, isMounted]
+    [commands, dispatch, isMounted, suggestionValue]
   );
 
   // Execute the command if one was ENTER'd.
