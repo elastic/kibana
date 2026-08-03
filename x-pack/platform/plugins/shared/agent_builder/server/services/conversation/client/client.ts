@@ -44,12 +44,11 @@ import {
   createRequestToEs,
   updateConversation,
   type Document,
+  type VersionedDocument,
 } from './converters';
 
 const OCC_MAX_RETRIES = 5;
 const OCC_RETRY_DELAY_MS = 250;
-
-type VersionedDocument = Document & Required<Pick<Document, '_seq_no' | '_primary_term'>>;
 
 export interface ConversationClient {
   get(conversationId: string): Promise<Conversation>;
@@ -178,6 +177,7 @@ class ConversationClientImpl implements ConversationClient {
     });
 
     const hit = response.hits.hits[0] as Document | undefined;
+
     if (!hit || !hit._id) {
       return undefined;
     }
@@ -344,7 +344,7 @@ class ConversationClientImpl implements ConversationClient {
       },
     });
 
-    const hit = response.hits.hits[0] as Document | undefined;
+    const hit = response.hits.hits[0];
 
     if (!hit) {
       return undefined;
@@ -356,7 +356,7 @@ class ConversationClientImpl implements ConversationClient {
       throw createInternalError(`Conversation ${conversationId} was read without version metadata`);
     }
 
-    return { ...hit, _seq_no: seqNo, _primary_term: primaryTerm };
+    return { ...(hit as Document), _seq_no: seqNo, _primary_term: primaryTerm };
   }
 
   /**
@@ -438,7 +438,6 @@ class ConversationClientImpl implements ConversationClient {
           occ: { seqNo: document._seq_no, primaryTerm: document._primary_term },
         };
       },
-      // `refresh` stays at the adapter's `wait_for` default so a retry's re-read sees the winner
       index: async ({ id, document, ifSeqNo, ifPrimaryTerm }) => {
         const response = await this.storage.getClient().index({
           id,
