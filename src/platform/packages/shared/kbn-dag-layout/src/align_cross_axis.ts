@@ -300,6 +300,130 @@ export const alignDagreCrossAxisInPlace = (
   }
 };
 
+interface PavaBlock {
+  sum: number;
+  count: number;
+  value: number;
+}
+
+/**
+ * Resolve overlaps among a set of same-rank node centers on the cross axis,
+ * preserving their left-to-right order.
+ *
+ * A rank is only adjusted when two neighbours actually overlap (center distance
+ * < `(widthA + widthB) / 2`), so ranks that are merely tighter than the desired
+ * separation are left untouched. When a rank does overlap, it is spread to a
+ * minimum center-to-center gap of `(widthA + widthB) / 2 + nodeSep` between
+ * neighbours using the minimal-total-displacement solution (isotonic regression
+ * / pool-adjacent-violators), so pooled violators keep their average position and
+ * the arrangement expands symmetrically around its own centre of mass rather than
+ * drifting to one side.
+ *
+ * @param centers Current cross-axis centers, sorted ascending.
+ * @param widths Cross-axis extent of each node (index-aligned with `centers`).
+ * @param nodeSep Desired gap between node borders once an overlap is resolved.
+ * @returns New centers, or the original `centers` reference when nothing overlaps.
+ */
+const resolveCrossAxisOverlaps = (
+  centers: number[],
+  widths: number[],
+  nodeSep: number
+): number[] => {
+  const n = centers.length;
+  if (n < 2) return centers;
+
+  const overlapGap = (i: number): number => (widths[i] + widths[i + 1]) / 2;
+  const targetGap = (i: number): number => overlapGap(i) + nodeSep;
+
+  let overlaps = false;
+  for (let i = 0; i < n - 1; i++) {
+    if (centers[i + 1] - centers[i] < overlapGap(i) - 1e-6) {
+      overlaps = true;
+      break;
+    }
+  }
+  if (!overlaps) return centers;
+
+  // Shift into a space where the min-gap constraints become "non-decreasing":
+  // x_i = c_i - sum_{k<i} targetGap(k). Solving isotonic regression on x and
+  // shifting back yields the minimal-movement feasible arrangement.
+  const prefix = new Array<number>(n).fill(0);
+  for (let i = 1; i < n; i++) prefix[i] = prefix[i - 1] + targetGap(i - 1);
+  const shifted = centers.map((c, i) => c - prefix[i]);
+
+  const blocks: PavaBlock[] = [];
+  for (const value of shifted) {
+    let current: PavaBlock = { sum: value, count: 1, value };
+    while (blocks.length > 0 && blocks[blocks.length - 1].value > current.value) {
+      const prev = blocks.pop() as PavaBlock;
+      const sum = prev.sum + current.sum;
+      const count = prev.count + current.count;
+      current = { sum, count, value: sum / count };
+    }
+    blocks.push(current);
+  }
+
+  const resolved = new Array<number>(n);
+  let idx = 0;
+  for (const block of blocks) {
+    for (let k = 0; k < block.count; k++) {
+      resolved[idx] = block.value + prefix[idx];
+      idx++;
+    }
+  }
+  return resolved;
+};
+
+/**
+ * Restore dagre's non-overlap guarantee after the barycenter pass. The barycenter
+ * recentring only edits the cross axis and can pull a wide subtree's head across
+ * its rank until it overlaps a sibling; it never changes the main-axis (rank)
+ * coordinate, so grouping by main-axis centre and separating within each rank on
+ * the cross axis is sufficient. No-op when nothing overlaps.
+ */
+export const separateRankOverlapsInPlace = (
+  g: graphlib.Graph,
+  crossAxis: CrossAxis,
+  nodeSep: number
+): void => {
+  const cross = (id: string): number => (crossAxis === 'x' ? getNode(g, id).x : getNode(g, id).y);
+  const main = (id: string): number => (crossAxis === 'x' ? getNode(g, id).y : getNode(g, id).x);
+  const crossSpan = (id: string): number =>
+    crossAxis === 'x' ? getNode(g, id).width : getNode(g, id).height;
+  const setCross = (id: string, value: number): void => {
+    const node = getNode(g, id);
+    if (crossAxis === 'x') {
+      node.x = value;
+    } else {
+      node.y = value;
+    }
+  };
+
+  const ranks = new Map<number, string[]>();
+  for (const nodeId of g.nodes()) {
+    if (!g.node(nodeId)) continue;
+    const rankKey = Math.round(main(nodeId));
+    const bucket = ranks.get(rankKey);
+    if (bucket) {
+      bucket.push(nodeId);
+    } else {
+      ranks.set(rankKey, [nodeId]);
+    }
+  }
+
+  for (const rankIds of ranks.values()) {
+    if (rankIds.length < 2) continue;
+    rankIds.sort((a, b) => cross(a) - cross(b));
+    const centers = rankIds.map(cross);
+    const widths = rankIds.map(crossSpan);
+    const resolved = resolveCrossAxisOverlaps(centers, widths, nodeSep);
+    if (resolved === centers) continue;
+    for (let i = 0; i < rankIds.length; i++) {
+      setCross(rankIds[i], roundCross(resolved[i]));
+    }
+  }
+};
+
 export const snapshotDagreNodeCenters = (
   g: graphlib.Graph,
   nodeIds: string[]
