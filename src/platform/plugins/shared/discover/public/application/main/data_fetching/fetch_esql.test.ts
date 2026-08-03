@@ -136,9 +136,13 @@ describe('fetchEsql', () => {
       } as unknown as ExecutionContract);
 
     const expressionsExecuteSpy = jest.spyOn(discoverServiceMock.expressions, 'execute');
+
+    jest.setSystemTime(new Date(2026, 4, 7, 22, 34, 46));
     expressionsExecuteSpy.mockReturnValueOnce(mockExecute());
     const { records: firstFetch } = await fetchEsql(fetchEsqlMockProps);
 
+    // Advance time to simulate a later refresh
+    jest.setSystemTime(new Date(2026, 4, 7, 22, 34, 47));
     expressionsExecuteSpy.mockReturnValueOnce(mockExecute());
     const { records: secondFetch } = await fetchEsql(fetchEsqlMockProps);
 
