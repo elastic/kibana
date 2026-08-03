@@ -152,9 +152,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ingestPipelines: {
         pathname: '/app/management/ingest/ingest_pipelines',
       },
-      snapshotRestore: {
-        pathname: '/app/management/data/snapshot_restore',
-      },
       spacesManagement: {
         pathname: '/app/management/kibana/spaces',
       },
@@ -627,32 +624,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         index_management_user: {
           elasticsearch: {
             cluster: ['monitor', 'manage_index_templates', 'manage_enrich'],
-            indices: [
-              {
-                names: ['*'],
-                privileges: ['all'],
-              },
-            ],
-          },
-          kibana: [
-            {
-              feature: {
-                advancedSettings: ['read'],
-              },
-              spaces: ['*'],
-            },
-          ],
-        },
-        // https://www.elastic.co/guide/en/elasticsearch/reference/master/snapshots-register-repository.html#snapshot-repo-prereqs
-        snapshot_restore_user: {
-          elasticsearch: {
-            cluster: [
-              'monitor',
-              'manage_slm',
-              'cluster:admin/snapshot',
-              'cluster:admin/repository',
-              'manage_index_templates',
-            ],
             indices: [
               {
                 names: ['*'],
