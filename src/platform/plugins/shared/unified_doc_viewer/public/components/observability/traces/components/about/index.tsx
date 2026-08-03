@@ -79,34 +79,36 @@ export const About = ({
   columns,
 }: AboutProps) => {
   const isSpan = !isTransaction(hit);
-  const flattenedHit = getFlattenedTraceDocumentOverview(hit);
+  const flattenedHit = useMemo(() => getFlattenedTraceDocumentOverview(hit), [hit]);
   const traceRootSpan = useFetchTraceRootSpanContext();
 
-  const aboutFieldConfigurations = useMemo(
-    () => ({
+  const traceRootSpanDuration = traceRootSpan?.span?.duration;
+
+  const aboutFieldConfigurations = useMemo(() => {
+    const configurations = {
       ...getSharedFieldConfigurations(flattenedHit),
       ...(isSpan
         ? getSpanFieldConfigurations(flattenedHit)
         : getTransactionFieldConfigurations(flattenedHit)),
-    }),
-    [flattenedHit, isSpan]
-  );
+    };
 
-  const durationField = isSpan ? SPAN_DURATION ?? DURATION : TRANSACTION_DURATION;
+    const durationField = isSpan ? SPAN_DURATION ?? DURATION : TRANSACTION_DURATION;
+    configurations[durationField] = {
+      ...configurations[durationField],
+      formatter: (value: unknown) => (
+        <Duration
+          duration={value as number}
+          size="xs"
+          parent={{
+            duration: traceRootSpanDuration,
+            type: 'trace',
+          }}
+        />
+      ),
+    };
 
-  aboutFieldConfigurations[durationField] = {
-    ...aboutFieldConfigurations[durationField],
-    formatter: (value: unknown) => (
-      <Duration
-        duration={value as number}
-        size="xs"
-        parent={{
-          duration: traceRootSpan?.span?.duration,
-          type: 'trace',
-        }}
-      />
-    ),
-  };
+    return configurations;
+  }, [flattenedHit, isSpan, traceRootSpanDuration]);
 
   return (
     <EuiPanel hasBorder={true} hasShadow={false} paddingSize="s">
