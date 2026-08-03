@@ -17,21 +17,13 @@ project:
   owner: '@elastic/kibana-core'
   sourceRoot: src/core/packages/di/browser
 dependsOn:
-  - '@kbn/core-analytics-browser'
   - '@kbn/core-application-browser'
   - '@kbn/core-chrome-browser'
-  - '@kbn/core-doc-links-browser'
-  - '@kbn/core-execution-context-browser'
-  - '@kbn/core-feature-flags-browser'
   - '@kbn/core-lifecycle-browser'
   - '@kbn/core-notifications-browser'
-  - '@kbn/core-overlays-browser'
   - '@kbn/core-plugins-browser'
-  - '@kbn/core-pricing-browser'
   - '@kbn/core-security-browser'
-  - '@kbn/core-theme-browser'
   - '@kbn/core-ui-settings-browser'
-  - '@kbn/core-user-profile-browser'
   - '@kbn/core-di-internal'
   - '@kbn/core-di'
 tags:

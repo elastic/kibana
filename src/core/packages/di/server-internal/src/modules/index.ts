@@ -8,32 +8,20 @@
  */
 
 import { ContainerModule } from 'inversify';
-import { loadAnalytics } from './analytics';
 import { loadCapabilities } from './capabilities';
-import { loadDocLinks } from './doc_links';
 import { loadElasticsearch } from './elasticsearch';
-import { loadExecutionContext } from './execution_context';
-import { loadFeatureFlags } from './feature_flags';
 import { loadHttp } from './http';
-import { loadPricing } from './pricing';
 import { loadSavedObjects } from './saved_objects';
 import { loadSecurity } from './security';
 import { loadUiSettings } from './ui_settings';
-import { loadUserActivity } from './user_activity';
 import { loadUserProfile } from './user_profile';
 
 export const core = new ContainerModule((options) => {
-  loadAnalytics(options);
   loadCapabilities(options);
-  loadDocLinks(options);
   loadElasticsearch(options);
-  loadExecutionContext(options);
-  loadFeatureFlags(options);
   loadHttp(options);
-  loadPricing(options);
   loadSavedObjects(options);
   loadSecurity(options);
   loadUiSettings(options);
-  loadUserActivity(options);
   loadUserProfile(options);
 });
