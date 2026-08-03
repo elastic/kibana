@@ -85,7 +85,7 @@ describe('discover session API transforms', () => {
     ],
   };
 
-  const expectedControlGroupJson = JSON.stringify({
+  const expectedControlGroup = {
     'control-1': {
       order: 0,
       type: ESQL_CONTROL,
@@ -98,7 +98,7 @@ describe('discover session API transforms', () => {
       selected_options: ['bar'],
       single_select: true,
     },
-  });
+  };
 
   describe('transform out', () => {
     it('maps saved object attributes to API data', () => {
@@ -273,7 +273,10 @@ describe('discover session API transforms', () => {
           state: { foo: 'bar' },
         },
       });
-      expect(attributes.tabs[1].attributes.controlGroupJson).toBe(expectedControlGroupJson);
+      // Order of the control group JSON is not guaranteed, so we need to parse it and compare the objects
+      expect(JSON.parse(attributes.tabs[1].attributes.controlGroupJson!)).toEqual(
+        expectedControlGroup
+      );
       expect(references).toContainEqual({
         name: 'tab_tab-classic.kibanaSavedObjectMeta.searchSourceJSON.index',
         type: 'index-pattern',
@@ -464,8 +467,22 @@ describe('discover session API transforms', () => {
       ).attributes;
       const expected = transformDiscoverSessionIn(discoverSessionApiData).attributes;
 
-      expect(reverted).toEqual(expected);
+      // `controlGroupJson` is a serialized string whose key order isn't guaranteed,
+      // so ignore it on each tab for the structural comparison.
+      const omitTabsControlGroupJson = (attributes: typeof reverted) => ({
+        ...attributes,
+        tabs: attributes.tabs.map(({ attributes: { controlGroupJson, ...tabAttrs }, ...tab }) => ({
+          ...tab,
+          attributes: tabAttrs,
+        })),
+      });
+
+      expect(omitTabsControlGroupJson(reverted)).toEqual(omitTabsControlGroupJson(expected));
       expect(reverted.tabs[0].attributes.controlGroupJson).toBeUndefined();
+      // Order of the control group JSON is not guaranteed, so we need to parse it and compare the objects
+      expect(JSON.parse(reverted.tabs[1].attributes.controlGroupJson!)).toEqual(
+        JSON.parse(expected.tabs[1].attributes.controlGroupJson!)
+      );
       expect(reverted.tabs[1].attributes.usesAdHocDataView).toBe(false);
     });
   });
@@ -504,7 +521,10 @@ describe('discover session API transforms', () => {
         state: { foo: 'bar' },
       },
     });
-    expect(reverted.attributes.tabs[1].attributes.controlGroupJson).toBe(expectedControlGroupJson);
+    // Order of the control group JSON is not guaranteed, so we need to parse it and compare the objects
+    expect(JSON.parse(reverted.attributes.tabs[1].attributes.controlGroupJson!)).toEqual(
+      expectedControlGroup
+    );
     expect(reverted.references).toEqual(references);
   });
 });

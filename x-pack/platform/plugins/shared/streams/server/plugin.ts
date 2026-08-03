@@ -14,6 +14,7 @@ import type {
   PluginInitializerContext,
 } from '@kbn/core/server';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
+import { SIGNIFICANT_EVENTS_APP_ID } from '@kbn/deeplinks-observability';
 import { i18n } from '@kbn/i18n';
 import { OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS } from '@kbn/management-settings-ids';
 import { registerRoutes } from '@kbn/server-route-repository';
@@ -242,10 +243,10 @@ export class StreamsPlugin
       }),
       order: 600,
       category: DEFAULT_APP_CATEGORIES.management,
-      app: [STREAMS_FEATURE_ID],
+      app: [STREAMS_FEATURE_ID, SIGNIFICANT_EVENTS_APP_ID],
       privileges: {
         all: {
-          app: [STREAMS_FEATURE_ID],
+          app: [STREAMS_FEATURE_ID, SIGNIFICANT_EVENTS_APP_ID],
           savedObject: {
             all: [],
             read: [],
@@ -254,7 +255,7 @@ export class StreamsPlugin
           ui: [STREAMS_UI_PRIVILEGES.show, STREAMS_UI_PRIVILEGES.manage],
         },
         read: {
-          app: [STREAMS_FEATURE_ID],
+          app: [STREAMS_FEATURE_ID, SIGNIFICANT_EVENTS_APP_ID],
           savedObject: {
             all: [],
             read: [],
