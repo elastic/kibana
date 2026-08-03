@@ -6,7 +6,7 @@
  */
 
 import { of, lastValueFrom } from 'rxjs';
-import { AGENT_ACTIONS_INDEX } from '@kbn/fleet-plugin/common';
+import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
 import { OsqueryQueries } from '../../../common/search_strategy/osquery';
 import type { StrategyRequestType } from '../../../common/search_strategy/osquery';
 import { Direction } from '../../../common/search_strategy';
@@ -422,19 +422,35 @@ describe('osquerySearchStrategyProvider space scoping', () => {
       expect(response.edges).toEqual([{ _id: 'legacy' }]);
     });
 
-    it('queries the new data stream when CPS is enabled even if the origin index is absent', async () => {
-      const { provider, searchMock } = setup({ cpsEnabled: true, newDataStreamIndexExists: false });
-      searchMock
-        .mockReturnValueOnce(of({ rawResponse: { hits: { total: 0, hits: [] } } }))
-        .mockReturnValueOnce(
+    it('queries the new data stream as the request user when CPS is enabled even if the origin index is absent', async () => {
+      const enhancedSearchMock = jest
+        .fn()
+        .mockReturnValue(
           of({ rawResponse: { hits: { total: 5, hits: [{ _id: 'data-stream' }] } } })
         );
+      const { provider, searchMock, getSearchStrategy } = setup({
+        cpsEnabled: true,
+        newDataStreamIndexExists: false,
+      });
+      getSearchStrategy.mockReturnValue({ search: enhancedSearchMock, cancel: jest.fn() });
+      searchMock.mockReturnValue(of({ rawResponse: { hits: { total: 0, hits: [] } } }));
 
       const response = (await lastValueFrom(
         provider.search(actionResultsRequest, {} as never, { request: {} } as never)
       )) as ActionResultsStrategyResponse;
 
-      expect(searchMock).toHaveBeenCalledTimes(2);
+      // With no osquery actions index on the origin, the legacy read resolves to the Fleet
+      // results index and is therefore pinned to the internal client. The data-stream read
+      // must still be selected independently, or reusing the legacy client would cancel
+      // fan-out for every result on a managing project.
+      expect(searchMock).toHaveBeenCalledTimes(1);
+      expect(String(searchMock.mock.calls[0][0].params.index)).toContain(
+        AGENT_ACTIONS_RESULTS_INDEX
+      );
+      expect(enhancedSearchMock).toHaveBeenCalledTimes(1);
+      expect(String(enhancedSearchMock.mock.calls[0][0].params.index)).toContain(
+        ACTION_RESPONSES_DATA_STREAM_INDEX
+      );
       expect(response.edges).toEqual([{ _id: 'data-stream' }]);
     });
 

@@ -117,14 +117,25 @@ export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
             spaceScopeOptions
           );
 
-          const indices = Array.isArray(dsl.index) ? dsl.index : dsl.index ? [dsl.index] : [];
-          const useInternalSearchClient = shouldUseInternalSearchClient(
-            indices,
-            osqueryContext.cpsEnabled
-          );
-          const es = useInternalSearchClient
-            ? data.search.searchAsInternalUser
-            : data.search.getSearchStrategy(ENHANCED_ES_SEARCH_STRATEGY);
+          // Client selection is per search, not per request: the legacy and data-stream
+          // reads below target different index families, so a single decision taken from
+          // the legacy DSL would silently apply the wrong client to the other. On a project
+          // without the osquery integration installed the legacy read resolves to
+          // `.fleet-actions-results*`, which pins that read to the internal client, and
+          // reusing it for the data-stream read would cancel fan-out for every result.
+          const selectSearchClient = (searchDsl: typeof dsl) => {
+            const indices = Array.isArray(searchDsl.index)
+              ? searchDsl.index
+              : searchDsl.index
+              ? [searchDsl.index]
+              : [];
+
+            return shouldUseInternalSearchClient(indices, osqueryContext.cpsEnabled)
+              ? data.search.searchAsInternalUser
+              : data.search.getSearchStrategy(ENHANCED_ES_SEARCH_STRATEGY);
+          };
+
+          const es = selectSearchClient(dsl);
 
           lastUsedEs = es;
 
@@ -173,8 +184,12 @@ export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
                   spaceScopeOptions
                 );
 
+                const dataStreamEs = selectSearchClient(dataStreamDsl);
+
+                lastUsedEs = dataStreamEs;
+
                 return from(
-                  es.search(
+                  dataStreamEs.search(
                     {
                       ...strictRequest,
                       params: dataStreamDsl,
