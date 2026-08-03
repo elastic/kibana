@@ -7,9 +7,9 @@
 
 import type { CoreSetup } from '@kbn/core/server';
 import { dataStreamServiceMock } from '@kbn/core-data-streams-server-mocks';
-import { NOTIFICATION_TYPES, SEVERITY } from '../common';
+import { NOTIFICATION_TYPES, SEVERITY } from '../../common';
 import { buildForType, buildIdAndTimestamp, NotificationValidationError } from './submit';
-import type { NotificationCenterPluginStart, NotificationCenterStartDependencies } from './types';
+import type { NotificationCenterPluginStart, NotificationCenterStartDependencies } from '../types';
 
 const modelStatus = NOTIFICATION_TYPES.inference.modelStatus;
 
@@ -91,7 +91,7 @@ describe('buildForType', () => {
     // Isolate a module graph where the type carries no flag, instead of mutating the
     // shared registry-derived flag map (which would leak across tests).
     await jest.isolateModulesAsync(async () => {
-      jest.doMock('../common/feature_flags', () => ({
+      jest.doMock('../../common/feature_flags', () => ({
         NOTIFICATION_TYPE_FLAGS: {},
         NOTIFICATION_TYPE_ENABLED_DEFAULT: false,
       }));
