@@ -68,7 +68,12 @@ export interface CaseAnalyticsDoc {
     category?: string | null;
     status: CaseStatusString;
     severity: CaseSeverityString;
-    assignees?: Array<{ uid: string }>;
+    assignees?: Array<{
+      uid: string;
+      username?: string | null;
+      full_name?: string | null;
+      email?: string | null;
+    }>;
     created_at: string;
     updated_at?: string | null;
     closed_at?: string | null;

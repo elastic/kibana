@@ -67,6 +67,7 @@ import {
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   DATA_STREAM_TYPE_VAR_NAME,
   OTEL_COLLECTOR_INPUT_TYPE,
+  FLEET_SYNTHETICS_PACKAGE,
 } from '../../common/constants';
 import type {
   PostDeletePackagePoliciesResponse,
@@ -1023,11 +1024,14 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       return p;
     });
 
-    const packageInfosandAssetsMap = await getPkgInfoAssetsMap({
-      logger,
-      packageInfos: [...packageInfos.values()],
-      savedObjectsClient: soClient,
-    });
+    const [packageInfosandAssetsMap, secretStorageEnabled] = await Promise.all([
+      getPkgInfoAssetsMap({
+        logger,
+        packageInfos: [...packageInfos.values()],
+        savedObjectsClient: soClient,
+      }),
+      isSecretStorageEnabled(esClient, soClient),
+    ]);
 
     await pMap(packagePoliciesWithIds, async (packagePolicy) => {
       try {
@@ -1040,7 +1044,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           );
         }
 
-        const { id, ...pkgPolicyWithoutId } = packagePolicy;
+        // eslint-disable-next-line prefer-const
+        let { id, ...pkgPolicyWithoutId } = packagePolicy;
 
         const packageInfoAndAsset = packageInfosandAssetsMap.get(
           `${packagePolicy.package.name}-${packagePolicy.package.version}`
@@ -1065,8 +1070,26 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           );
         }
 
+        let secretReferences: SecretReference[] | undefined;
+        if (secretStorageEnabled) {
+          const secretsRes = await extractAndWriteSecrets({
+            packagePolicy: { ...pkgPolicyWithoutId, inputs },
+            packageInfo: pkgInfo,
+            esClient,
+          });
+
+          pkgPolicyWithoutId = secretsRes.packagePolicy;
+          secretReferences = secretsRes.secretReferences;
+          inputs = pkgPolicyWithoutId.inputs as PackagePolicyInput[];
+        }
+
         inputs = pkgInfo
-          ? await _compilePackagePolicyInputs(pkgInfo, packagePolicy.vars || {}, inputs, assetsMap)
+          ? await _compilePackagePolicyInputs(
+              pkgInfo,
+              pkgPolicyWithoutId.vars || {},
+              inputs,
+              assetsMap
+            )
           : inputs;
 
         const elasticsearch = pkgInfo?.elasticsearch;
@@ -1092,6 +1115,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
             elasticsearch,
             policy_id: agentPolicyIdsOfPackagePolicy[0],
             policy_ids: agentPolicyIdsOfPackagePolicy,
+            ...(secretReferences?.length && { secret_references: secretReferences }),
             latest_revision: true,
             revision: 1,
             created_at: isoDate,
@@ -4149,6 +4173,14 @@ export function updatePackageInputs(
     // take the override value from the new package as-is. This case typically
     // occurs when inputs or package policy templates are added/removed between versions.
     if (originalInput === undefined) {
+      // The Synthetics app persists only the single active input and drops the disabled ones. As a
+      // `keep_policies_up_to_date` package, a version bump auto-upgrades every policy through here;
+      // re-adding the omitted inputs would re-bloat the saved object. Skip them so the app's input
+      // list stays authoritative on upgrade.
+      if (packageInfo.name === FLEET_SYNTHETICS_PACKAGE) {
+        continue;
+      }
+
       const originalInputToMigrate = applyInputLevelMigration(
         update,
         basePackagePolicy.inputs,
