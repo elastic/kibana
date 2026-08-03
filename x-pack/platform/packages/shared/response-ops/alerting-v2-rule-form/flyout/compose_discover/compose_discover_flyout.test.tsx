@@ -84,6 +84,7 @@ jest.mock('./compose_discover_form', () => {
       const { setValue, getValues } = useFormContext<FormValues>();
       readCommittedQuery = () => getValues('query');
       readRecoveryStrategy = () => getValues('recoveryStrategy');
+      readNoDataStrategy = () => getValues('noDataStrategy');
       readTimeField = () => getValues('timeField');
       return (
         <div data-test-subj="composeDiscoverFormMock">
@@ -124,6 +125,7 @@ interface SandboxFlyoutMockProps {
 let sandboxFlyoutProps: SandboxFlyoutMockProps | undefined;
 let readCommittedQuery: (() => RuleQuery) | undefined;
 let readRecoveryStrategy: (() => FormValues['recoveryStrategy']) | undefined;
+let readNoDataStrategy: (() => FormValues['noDataStrategy']) | undefined;
 let readTimeField: (() => FormValues['timeField']) | undefined;
 
 jest.mock('./query_sandbox_flyout', () => ({
@@ -315,6 +317,7 @@ describe('ComposeDiscoverFlyout', () => {
     sandboxFlyoutProps = undefined;
     readCommittedQuery = undefined;
     readRecoveryStrategy = undefined;
+    readNoDataStrategy = undefined;
     readTimeField = undefined;
     mockParseYamlToFormValues = (yaml) => ({
       values: yaml ? defaultYamlFormValues : null,
@@ -1027,6 +1030,37 @@ describe('ComposeDiscoverFlyout', () => {
       });
 
       expect(readCommittedQuery?.()).toEqual(manualSplitQuery);
+    });
+
+    it('falls back to conditionless standalone when manual split is applied with an empty alert condition', () => {
+      renderFlyout({ mode: 'create' });
+      openSandbox();
+
+      act(() => {
+        sandboxFlyoutProps?.onQueryChange?.({
+          format: 'standalone',
+          breach: { query: 'FROM logs-* | STATS count = COUNT(*) BY host.name' },
+        });
+      });
+      clickSplitBaseAndAlert();
+
+      // Simulate user leaving alert condition tab empty
+      act(() => {
+        sandboxFlyoutProps?.onQueryChange?.({
+          format: 'composed',
+          base: 'FROM logs-* | STATS count = COUNT(*) BY host.name',
+          breach: { segment: '' },
+        });
+      });
+      act(() => {
+        fireEvent.click(screen.getByTestId('mockSandboxApply'));
+      });
+
+      expect(readCommittedQuery?.()).toEqual({
+        format: 'standalone',
+        breach: { query: 'FROM logs-* | STATS count = COUNT(*) BY host.name' },
+      });
+      expect(readNoDataStrategy?.()).toBe('none');
     });
 
     it('preserves custom recovery when applying manual split edits', () => {
