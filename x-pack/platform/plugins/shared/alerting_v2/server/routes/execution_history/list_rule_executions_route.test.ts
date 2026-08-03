@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { toGetRuleExecutionsArgs } from './get_rule_executions_route';
+import { toListRuleExecutionsArgs } from './list_rule_executions_route';
 
-describe('toGetRuleExecutionsArgs', () => {
+describe('toListRuleExecutionsArgs', () => {
   it('maps the snake_case request to camelCase client args and translates the sort value', () => {
     expect(
-      toGetRuleExecutionsArgs({
-        rule_id: ['rule-1'],
+      toListRuleExecutionsArgs({
+        rule_ids: ['rule-1'],
         outcome: ['success'],
         from: '2026-01-01T00:00:00.000Z',
         to: '2026-01-02T00:00:00.000Z',
