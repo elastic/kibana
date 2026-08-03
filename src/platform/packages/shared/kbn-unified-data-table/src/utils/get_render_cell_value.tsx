@@ -33,6 +33,7 @@ import {
   getTreeExpansion,
   setTreeExpansion,
 } from '../components/json_tree_viewer/tree_expansion_store';
+import { InTableSearchTermContext } from '../components/json_tree_viewer/in_table_search_context';
 import { buildDocumentTree } from './build_document_tree';
 
 export const CELL_CLASS = 'unifiedDataTable__cellValue';
@@ -70,10 +71,7 @@ export const getRenderCellValueFn = ({
     colIndex,
     isExpandable,
     isExpanded,
-    // Delivered via `cellContext` (see data_table.tsx), so only visible cells receive it — the
-    // offscreen match counter renders without `cellContext` and skips the tree's match scan.
-    jsonTreeSearchTerm,
-  }: EuiDataGridCellValueElementProps & { jsonTreeSearchTerm?: string }) => {
+  }: EuiDataGridCellValueElementProps) => {
     const row = rows ? rows[rowIndex] : undefined;
     const field = getDataViewFieldOrCreateFromColumnMeta({
       dataView,
@@ -81,6 +79,7 @@ export const getRenderCellValueFn = ({
       columnMeta: columnsMeta?.[columnId],
     });
     const ctx = useContext(UnifiedDataTableContext);
+    const inTableSearchTerm = useContext(InTableSearchTermContext);
     const internalCellProps = useRef<EuiDataGridSetCellProps>({});
     const customCellProps = useRef<EuiDataGridSetCellProps>({});
     const CustomCellRenderer = externalCustomRenderers?.[columnId];
@@ -205,7 +204,7 @@ export const getRenderCellValueFn = ({
               json={documentTree}
               initialState={getTreeExpansion(row.raw)}
               onStateChange={(state) => setTreeExpansion(row.raw, state)}
-              searchTerm={jsonTreeSearchTerm}
+              searchTerm={inTableSearchTerm}
             />
           </span>
         );

@@ -91,6 +91,7 @@ import {
 } from './data_table_columns';
 import type { DataTableContext } from '../table_context';
 import { UnifiedDataTableContext } from '../table_context';
+import { InTableSearchTermContext } from './json_tree_viewer/in_table_search_context';
 import { getSchemaDetectors } from './data_table_schema';
 import { DataTableDocumentToolbarBtn } from './data_table_document_selection';
 import { useRowHeightsOptions } from '../hooks/use_row_heights_options';
@@ -919,21 +920,14 @@ const InternalUnifiedDataTable = React.forwardRef<
       onInitialStateChange: onInTableSearchInitialStateChange,
     });
 
-    // The in-table search wrapper strips the term from the cell's props. Re-expose it under a
-    // distinct key so the JSON tree cell can flag collapsed matches — but keyed through `cellContext`
-    // so it reaches only the VISIBLE cells. The offscreen match counter renders every row's cell
-    // WITHOUT `cellContext`, so keying it here keeps that per-keystroke pass free of the tree's
-    // per-row match scan. `cellContext` is EUI's untyped bag, so read the term defensively.
+    // The in-table search wrapper strips the term from the cell's props, so surface it to the JSON
+    // tree cell through context (see InTableSearchTermContext). It must reach BOTH the visible cells
+    // and the offscreen match counter (a portal that inherits this context) — the counter expands the
+    // same matches too, or its total would omit them. `cellContext` is EUI's untyped bag, so read the
+    // term defensively.
     const inTableSearchTermValue = cellContextWithInTableSearchSupport?.inTableSearchTerm;
     const inTableSearchTerm =
       typeof inTableSearchTermValue === 'string' ? inTableSearchTermValue : '';
-    const cellContextWithJsonTreeSearchTerm = useMemo(
-      () =>
-        inTableSearchTerm
-          ? { ...cellContextWithInTableSearchSupport, jsonTreeSearchTerm: inTableSearchTerm }
-          : cellContextWithInTableSearchSupport,
-      [cellContextWithInTableSearchSupport, inTableSearchTerm]
-    );
 
     const renderCustomPopover = useMemo(() => {
       if (disableCellPopover) {
@@ -1480,32 +1474,34 @@ const InternalUnifiedDataTable = React.forwardRef<
                 setIsCompareActive={setIsCompareActive}
               />
             ) : (
-              <EuiDataGridMemoized
-                id={dataGridId}
-                aria-describedby={randomId}
-                aria-labelledby={ariaLabelledBy}
-                columns={euiGridColumns}
-                columnVisibility={columnsVisibility}
-                data-test-subj="docTable"
-                leadingControlColumns={leadingControlColumns}
-                onColumnResize={onResize}
-                pagination={paginationMode === 'multiPage' ? paginationObj : undefined}
-                renderCellValue={renderCellValueWithInTableSearchSupport}
-                ref={dataGridRef}
-                rowCount={rowCount}
-                schemaDetectors={schemaDetectors}
-                sorting={sorting as EuiDataGridSorting}
-                toolbarVisibility={toolbarVisibility}
-                rowHeightsOptions={rowHeightsOptions}
-                gridStyle={gridStyle}
-                renderCustomGridBody={renderCustomGridBody}
-                renderCustomToolbar={renderCustomToolbarFn}
-                trailingControlColumns={trailingControlColumns}
-                cellContext={cellContextWithJsonTreeSearchTerm}
-                renderCellPopover={renderCustomPopover}
-                virtualizationOptions={virtualizationOptions}
-                onFullScreenChange={onFullScreenChange}
-              />
+              <InTableSearchTermContext.Provider value={inTableSearchTerm}>
+                <EuiDataGridMemoized
+                  id={dataGridId}
+                  aria-describedby={randomId}
+                  aria-labelledby={ariaLabelledBy}
+                  columns={euiGridColumns}
+                  columnVisibility={columnsVisibility}
+                  data-test-subj="docTable"
+                  leadingControlColumns={leadingControlColumns}
+                  onColumnResize={onResize}
+                  pagination={paginationMode === 'multiPage' ? paginationObj : undefined}
+                  renderCellValue={renderCellValueWithInTableSearchSupport}
+                  ref={dataGridRef}
+                  rowCount={rowCount}
+                  schemaDetectors={schemaDetectors}
+                  sorting={sorting as EuiDataGridSorting}
+                  toolbarVisibility={toolbarVisibility}
+                  rowHeightsOptions={rowHeightsOptions}
+                  gridStyle={gridStyle}
+                  renderCustomGridBody={renderCustomGridBody}
+                  renderCustomToolbar={renderCustomToolbarFn}
+                  trailingControlColumns={trailingControlColumns}
+                  cellContext={cellContextWithInTableSearchSupport}
+                  renderCellPopover={renderCustomPopover}
+                  virtualizationOptions={virtualizationOptions}
+                  onFullScreenChange={onFullScreenChange}
+                />
+              </InTableSearchTermContext.Provider>
             )}
           </div>
           {loadingState !== DataLoadingState.loading &&

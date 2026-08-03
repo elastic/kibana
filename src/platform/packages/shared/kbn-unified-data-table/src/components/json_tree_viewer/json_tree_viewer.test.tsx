@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { render, screen, within } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { JsonTreeViewer, type TreeExpansionState } from './json_tree_viewer';
 
@@ -70,34 +70,35 @@ describe('JsonTreeViewer', () => {
     expect(screen.getByText('"value_11"')).toBeVisible();
   });
 
-  // In-table search only sees rendered DOM text, so it can't reach values inside collapsed nodes.
-  // The tree flags those collapsed nodes as a hint to expand there.
-  describe('in-table search hidden-match indicator', () => {
+  // In-table search only sees rendered DOM text, so a value inside a collapsed node is invisible to
+  // it. With a search term the tree auto-expands every collection that contains a match so the value
+  // renders — and the grid's counter/highlight/navigation then pick it up.
+  describe('in-table search auto-expand', () => {
     const doc = { user: { city: 'Berlin' }, org: { name: 'Acme' } };
 
-    it('flags a collapsed container whose hidden subtree contains the term, and only that one', () => {
+    it('expands a collapsed container so a hidden match renders, leaving non-matches collapsed', () => {
       render(<JsonTreeViewer json={doc} searchTerm="berl" />);
 
-      const userRow = screen.getByRole('treeitem', { name: /user/i });
-      expect(within(userRow).getByTestId('jsonTreeViewerHiddenMatch')).toBeVisible();
-
-      const orgRow = screen.getByRole('treeitem', { name: /org/i });
-      expect(within(orgRow).queryByTestId('jsonTreeViewerHiddenMatch')).not.toBeInTheDocument();
-    });
-
-    it('flags nothing without a search term', () => {
-      render(<JsonTreeViewer json={doc} />);
-      expect(screen.queryByTestId('jsonTreeViewerHiddenMatch')).not.toBeInTheDocument();
-    });
-
-    it('drops the flag once the container is expanded, where the match renders normally', async () => {
-      render(<JsonTreeViewer json={doc} searchTerm="berl" />);
-      expect(screen.getByTestId('jsonTreeViewerHiddenMatch')).toBeVisible();
-
-      await userEvent.click(screen.getByRole('treeitem', { name: /user/i }));
-
-      expect(screen.queryByTestId('jsonTreeViewerHiddenMatch')).not.toBeInTheDocument();
+      // `user` was collapsed; the match forces it open.
       expect(screen.getByText('"Berlin"')).toBeVisible();
+      // `org` has no match and stays collapsed.
+      expect(screen.queryByText('"Acme"')).not.toBeInTheDocument();
+    });
+
+    it('does not auto-expand anything without a search term', () => {
+      render(<JsonTreeViewer json={doc} />);
+      expect(screen.queryByText('"Berlin"')).not.toBeInTheDocument();
+      expect(screen.queryByText('"Acme"')).not.toBeInTheDocument();
+    });
+
+    it('keeps the search-driven expansion out of the persisted host state', () => {
+      const states: TreeExpansionState[] = [];
+      render(<JsonTreeViewer json={doc} searchTerm="berl" onStateChange={(s) => states.push(s)} />);
+
+      // The match is visible (auto-expanded)…
+      expect(screen.getByText('"Berlin"')).toBeVisible();
+      // …but the persisted user state stays empty — the search expansion is transient.
+      expect(states[states.length - 1].expanded.size).toBe(0);
     });
   });
 });

@@ -61,8 +61,8 @@ export interface JsonTreeViewerProps {
   /** Fires whenever expand/reveal state changes, so a host can persist it across remounts. */
   onStateChange?: (state: TreeExpansionState) => void;
   /**
-   * The active in-table search term. Collapsed collections whose hidden subtree contains it are
-   * flagged, so the user knows to expand there (in-table search can only see rendered DOM text).
+   * The active in-table search term. Every collection whose subtree contains it is auto-expanded so
+   * the match renders — in-table search can only count/highlight rendered DOM text.
    */
   searchTerm?: string;
 }
@@ -446,14 +446,6 @@ const treeStyles = {
   bracket: ({ euiTheme }: UseEuiTheme) => css({ color: euiTheme.colors.textParagraph }),
   count: ({ euiTheme }: UseEuiTheme) =>
     css({ color: euiTheme.colors.textSubdued, marginInline: euiTheme.size.xs }),
-  // A collapsed preview whose hidden subtree holds an in-table search match: tinted like a search hit.
-  hiddenMatch: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      color: euiTheme.colors.textParagraph,
-      backgroundColor: euiTheme.colors.highlight,
-      borderRadius: euiTheme.border.radius.small,
-      paddingInline: euiTheme.size.xxs,
-    }),
   copyButton: ({ euiTheme }: UseEuiTheme) =>
     css({ opacity: 0, marginInlineStart: euiTheme.size.xs, '&:focus-visible': { opacity: 1 } }),
   // The inline "Show N more" affordance: muted, sitting where the JSON would continue.
@@ -540,13 +532,7 @@ const ValueCopyButton = memo(function ValueCopyButton({ value }: { value: JsonPr
 });
 
 // The body of a node row (everything after the caret): key prefix + value/brackets + comma.
-const NodeLabel = memo(function NodeLabel({
-  row,
-  hasHiddenMatch = false,
-}: {
-  row: NodeRow;
-  hasHiddenMatch?: boolean;
-}) {
+const NodeLabel = memo(function NodeLabel({ row }: { row: NodeRow }) {
   const styles = useMemoCss(treeStyles);
   const { node, isExpanded, hasChildren, trailingComma } = row;
 
@@ -590,46 +576,74 @@ const NodeLabel = memo(function NodeLabel({
     );
   }
 
-  // Collapsed: a one-line preview, e.g. `"user": { 2 fields }`. When the hidden subtree contains an
-  // in-table search match, mark the preview so the user knows to expand here. The cue is style + a
-  // `title`/`data-test-subj` attribute only — never extra text — so the grid's DOM-based match
-  // counter can't miscount it.
+  // Collapsed: a one-line preview, e.g. `"user": { 2 fields }`.
   return (
     <span css={styles.label}>
       <KeyPrefix name={node.key} isArrayItem={node.isArrayItem} />
       <span css={styles.bracket}>{open}</span>
-      <span
-        css={hasHiddenMatch ? [styles.count, styles.hiddenMatch] : styles.count}
-        title={
-          hasHiddenMatch
-            ? i18n.translate('unifiedDataTable.jsonSyntaxTree.hiddenMatch', {
-                defaultMessage: 'Contains a search match',
-              })
-            : undefined
-        }
-        data-test-subj={hasHiddenMatch ? 'jsonTreeViewerHiddenMatch' : undefined}
-      >
-        {collectionCountLabel(node)}
-      </span>
+      <span css={styles.count}>{collectionCountLabel(node)}</span>
       <span css={styles.bracket}>{close}</span>
       {trailingComma && <Comma />}
     </span>
   );
 });
 
-// A collapsed collection is flagged when its hidden subtree contains the active in-table search
-// term. `collectContainersWithMatch` returns the ids of every collection with such a match. It scans
-// raw primitive leaf values only; a leaf already rendered as a React node (an ES-query highlight)
-// carries no raw text here and is skipped (rare — that field's match is usually visible anyway).
+// ---- In-table search: auto-expand nodes that contain a match ----
+//
+// In-table search only sees rendered DOM text, so a value inside a collapsed node is never counted,
+// highlighted, or reachable by next/prev. When a term is active we expand every collection whose
+// subtree contains it, so the match renders and the grid's own search machinery picks it up. A match
+// hidden past a collection's "show more" cap isn't surfaced — a deliberate simplification that keeps
+// the rendered DOM bounded by the existing caps rather than tracking per-collection reveal budgets.
+//
+// The grid counts matches by rendering EVERY row's cell in an offscreen pass on every keystroke, so
+// the per-row work must stay cheap. `getDocScan` memoises the built node tree plus a lowercased blob
+// of all leaf text in a module WeakMap keyed by the (stable, per-row) document, so the tree is built
+// once (not per keystroke) and a single substring check rules out a non-matching document before any
+// tree walk — only a matching document pays for `collectContainersWithMatch`.
 const EMPTY_ID_SET: ReadonlySet<string> = new Set();
 
+interface DocScan {
+  nodes: JsonNode[];
+  text: string;
+}
+
+const docScanCache = new WeakMap<object, DocScan>();
+
+const buildDocScan = (json: JsonValue): DocScan => {
+  const nodes = buildNodes(json);
+  const parts: string[] = [];
+  const collectText = (node: JsonNode) => {
+    // Raw primitive leaves only; a React-node leaf (an ES-query highlight) has no raw text here.
+    if (node.kind === 'leaf') {
+      if (!node.rendered) parts.push(String(node.value).toLowerCase());
+    } else {
+      node.children.forEach(collectText);
+    }
+  };
+  nodes.forEach(collectText);
+  return { nodes, text: parts.join('\n') };
+};
+
+const getDocScan = (json: JsonValue): DocScan => {
+  if (typeof json !== 'object' || json === null) {
+    return { nodes: buildNodes(json), text: '' };
+  }
+  const cached = docScanCache.get(json);
+  if (cached) return cached;
+  const scan = buildDocScan(json);
+  docScanCache.set(json, scan);
+  return scan;
+};
+
+// The ids of every collection whose subtree contains the term — i.e. the nodes to force-open.
 const collectContainersWithMatch = (nodes: JsonNode[], termLower: string): ReadonlySet<string> => {
   const matched = new Set<string>();
   const visit = (node: JsonNode): boolean => {
     if (node.kind === 'leaf') {
       return !node.rendered && String(node.value).toLowerCase().includes(termLower);
     }
-    // Visit every child (no early return) so nested collapsed collections are all recorded.
+    // Visit every child (no early return) so all matching collections are recorded.
     let hasMatch = false;
     for (const child of node.children) {
       if (visit(child)) hasMatch = true;
@@ -653,14 +667,18 @@ export const JsonTreeViewer = memo(function JsonTreeViewer({
   const { euiTheme } = useEuiTheme();
   const codeFontCss = css(useEuiFontSize('xs'));
 
-  const nodes = useMemo(() => buildNodes(json), [json]);
+  const { nodes, text } = useMemo(() => getDocScan(json), [json]);
   const expandableIds = useMemo(() => collectExpandableIds(nodes), [nodes]);
   const rootType: CollectionType = Array.isArray(json) ? 'array' : 'object';
 
+  // Collections to force-open for the active search term (empty unless the document has a match).
   const searchTermLower = searchTerm?.trim().toLowerCase() ?? '';
-  const containersWithMatch = useMemo(
-    () => (searchTermLower ? collectContainersWithMatch(nodes, searchTermLower) : EMPTY_ID_SET),
-    [nodes, searchTermLower]
+  const searchExpanded = useMemo(
+    () =>
+      searchTermLower && text.includes(searchTermLower)
+        ? collectContainersWithMatch(nodes, searchTermLower)
+        : EMPTY_ID_SET,
+    [nodes, text, searchTermLower]
   );
 
   const { openBracket, closeBracket } = useMemo(() => {
@@ -688,9 +706,17 @@ export const JsonTreeViewer = memo(function JsonTreeViewer({
     onStateChangeRef.current?.({ expanded, revealed });
   }, [expanded, revealed]);
 
+  // The user's own expansion unioned with the search-driven set. The search set is never persisted
+  // (the write-through effect above only mirrors `expanded`/`revealed`), so a query never pollutes
+  // the user's expand/collapse state.
+  const effectiveExpanded = useMemo(
+    () => (searchExpanded.size ? new Set([...expanded, ...searchExpanded]) : expanded),
+    [expanded, searchExpanded]
+  );
+
   const rows = useMemo(
-    () => flattenRows(nodes, ROOT_ID, rootType, expanded, revealed, 0, null, []),
-    [nodes, rootType, expanded, revealed]
+    () => flattenRows(nodes, ROOT_ID, rootType, effectiveExpanded, revealed, 0, null, []),
+    [nodes, rootType, effectiveExpanded, revealed]
   );
 
   const orderedIds = useMemo(() => rows.filter(isFocusable).map(rowKey), [rows]);
@@ -713,8 +739,8 @@ export const JsonTreeViewer = memo(function JsonTreeViewer({
   }, []);
 
   const toggle = useCallback(
-    (id: string) => setExpandedFor(id, !expanded.has(id)),
-    [expanded, setExpandedFor]
+    (id: string) => setExpandedFor(id, !effectiveExpanded.has(id)),
+    [effectiveExpanded, setExpandedFor]
   );
 
   const revealMore = useCallback((id: string) => {
@@ -915,10 +941,7 @@ export const JsonTreeViewer = memo(function JsonTreeViewer({
                 ) : (
                   <span css={styles.caret} aria-hidden />
                 )}
-                <NodeLabel
-                  row={row}
-                  hasHiddenMatch={hasChildren && !isExpanded && containersWithMatch.has(node.id)}
-                />
+                <NodeLabel row={row} />
               </div>
             );
           })}
