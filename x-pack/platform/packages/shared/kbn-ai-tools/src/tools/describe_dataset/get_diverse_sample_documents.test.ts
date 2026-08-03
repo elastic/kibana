@@ -41,7 +41,6 @@ const schemaResponse = (
   values: [],
 });
 
-// Categorize result: count, representative sample value, pattern (token form).
 const categorizeResponse = (
   values: unknown[][] = [
     [10, 'error one', 'error'],
@@ -56,7 +55,6 @@ const categorizeResponse = (
   values,
 });
 
-// Concrete index source fetch (METADATA _id, _source survives).
 const concreteFetchResponse = (
   values: unknown[][] = [
     ['doc-1', { message: 'error one' }],
@@ -70,7 +68,6 @@ const concreteFetchResponse = (
   values,
 });
 
-// ES|QL view source fetch: _id/_source dropped, only projected columns remain.
 const viewFetchResponse = (
   values: unknown[][] = [
     ['2026-06-18T00:00:00Z', 'error one'],
@@ -84,9 +81,6 @@ const viewFetchResponse = (
   values,
 });
 
-// Concrete index where the categorized field is an ES|QL alias/runtime field
-// (here `message` aliases `body.text`): the field is a queryable column but is
-// absent from `_source` (OTel logs). The join must use the column, not _source.
 const aliasFetchResponse = (
   values: unknown[][] = [
     ['error one', 'doc-1', { 'body.text': 'error one' }],
@@ -108,8 +102,6 @@ describe('getDiverseSampleDocuments', () => {
 
   it('categorizes and fetches sources without _index/_id metadata (concrete indices)', async () => {
     const { esClient, esql } = createEsClient();
-    // total=10 -> p1=1 (exact counts), head accounts for the whole population,
-    // so pass 2 is skipped: schema, count, pass-1 categorize, source fetch.
     esql
       .mockResolvedValueOnce(schemaResponse())
       .mockResolvedValueOnce(countResponse(10))
@@ -132,8 +124,6 @@ describe('getDiverseSampleDocuments', () => {
     expect(categorizeQuery).toContain(
       'STATS count = COUNT(*), `sample` = TOP(message::KEYWORD, 1, "desc") BY pattern = CATEGORIZE(message, {"output_format": "tokens"})'
     );
-    // Head detection is a post-STATS count filter, never SORT count DESC | LIMIT
-    // (that shape trips elastic/elasticsearch#154534).
     expect(categorizeQuery).toContain('WHERE count >');
     expect(categorizeQuery).not.toContain('SORT count DESC');
     expect(categorizeQuery).not.toContain('LIMIT');
@@ -168,8 +158,6 @@ describe('getDiverseSampleDocuments', () => {
       logger,
     });
 
-    // Views expose no `_id`, so a stable content hash is synthesized so the doc
-    // can be deduped across the diverse/random buckets in mergeDocuments.
     const firstSource = { '@timestamp': '2026-06-18T00:00:00Z', message: 'error one' };
     const secondSource = { '@timestamp': '2026-06-18T00:01:00Z', message: 'warn two' };
     expect(result.hits).toEqual([
@@ -197,8 +185,6 @@ describe('getDiverseSampleDocuments', () => {
       logger,
     });
 
-    // `_source` has no `message` (it lives under `body.text`); reading the join
-    // value from the `message` column still resolves both representatives.
     expect(result.hits).toEqual([
       { _index: '', _id: 'doc-1', _source: { 'body.text': 'error one' } },
       { _index: '', _id: 'doc-2', _source: { 'body.text': 'warn two' } },
@@ -207,8 +193,6 @@ describe('getDiverseSampleDocuments', () => {
 
   it('adds SAMPLE to both passes when the population is large', async () => {
     const { esClient, esql } = createEsClient();
-    // total=10M -> p1=0.01. Pass 1 is sampled, so its residual estimate is
-    // untrusted and pass 2 still runs (here over an empty, head-excluded set).
     esql
       .mockResolvedValueOnce(schemaResponse())
       .mockResolvedValueOnce(countResponse(10_000_000))
@@ -227,9 +211,7 @@ describe('getDiverseSampleDocuments', () => {
       logger,
     });
 
-    // Pass 1 samples the population to find the noisy head.
     expect(esql.mock.calls[2][1].query).toContain('| SAMPLE 0.01 |');
-    // Pass 2 excludes the head via full-text NOT MATCH before recategorizing.
     expect(esql.mock.calls[3][1].query).toContain(
       'NOT MATCH(message, "error", {"operator": "AND"})'
     );
@@ -344,8 +326,6 @@ describe('getDiverseSampleDocuments', () => {
     const first = await runIteration(1);
     const second = await runIteration(2);
 
-    // The single band's pick rotates by iteration, so two iterations cover the
-    // whole pool with no positional cursor. Window is client-side, no ES LIMIT.
     expect(esql.mock.calls[2][1].query).not.toContain('LIMIT');
     expect(first).toHaveLength(1);
     expect(second).toHaveLength(1);
@@ -359,9 +339,7 @@ describe('getDiverseSampleDocuments', () => {
       .mockResolvedValueOnce(schemaResponse())
       .mockResolvedValueOnce(countResponse(10))
       .mockResolvedValueOnce(categorizeResponse())
-      // Round 1 resolves only "error one"; "warn two" is crowded out / missing.
       .mockResolvedValueOnce(concreteFetchResponse([['doc-1', { message: 'error one' }]]))
-      // Round 2 re-queries just "warn two" and finds nothing → loop stops.
       .mockResolvedValueOnce(concreteFetchResponse([]));
 
     const result = await getDiverseSampleDocuments({
@@ -401,7 +379,6 @@ describe('selectStratifiedWindow', () => {
     const rows = makeRows([60, 50, 40, 30, 20, 10]);
     const counts = selectStratifiedWindow(rows, { iteration: 1, size: 3 }).map((r) => r.count);
 
-    // Three bands of two: one representative from each, ordered common→rare.
     expect(counts).toHaveLength(3);
     expect([60, 50]).toContain(counts[0]);
     expect([40, 30]).toContain(counts[1]);
@@ -421,8 +398,6 @@ describe('selectStratifiedWindow', () => {
     const second = selectStratifiedWindow(rows, { iteration: 2, size: 3 }).map((r) => r.pattern);
 
     expect(first).not.toEqual(second);
-    // Each of the three bands has two members; the two iterations together cover
-    // all six patterns.
     expect(new Set([...first, ...second]).size).toBe(6);
   });
 });

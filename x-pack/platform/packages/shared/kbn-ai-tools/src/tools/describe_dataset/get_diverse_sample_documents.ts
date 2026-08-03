@@ -25,9 +25,7 @@ import {
 
 const MESSAGE_FIELD_CANDIDATES = ['message', 'body.text'];
 const MAX_DOCS_TO_SAMPLE = 100_000;
-// Over-fetch factor for each metadata-free source-fetch round: a representative
-// value is not a unique key, so we pull several docs per value and keep the
-// first. Combined with the re-query-missing loop below this guarantees coverage.
+// A representative value is not a unique key, so over-fetch per value and keep the first.
 const SOURCE_FETCH_PER_VALUE = 10;
 
 interface GetDiverseSampleDocumentsOptions {
@@ -60,22 +58,13 @@ export async function getDiverseSampleDocuments({
   ]);
 
   if (totalDocs === 0 || !messageField) {
-    // No message-like text field to categorize by: the caller's own random
-    // sampling arm already covers this case as a backfill, so there's nothing
-    // useful for this arm to contribute.
+    // Nothing to categorize; the caller's random sampling arm backfills this case.
     return { hits: [] };
   }
 
-  // The SAMPLE probability mirrors the previous DSL random_sampler cap:
-  // categorizing every document in a busy stream is expensive, and this helper
-  // only needs representative document diversity, not exact category counts.
   const samplingProbability =
     MAX_DOCS_TO_SAMPLE / totalDocs < 0.5 ? MAX_DOCS_TO_SAMPLE / totalDocs : 1;
 
-  // Rare patterns surfaced here become candidate representative documents. The
-  // categorize stays metadata-free, so it works on ES|QL views (query streams'
-  // `$.<name>` views), where `FROM <view> METADATA _index, _id` raises
-  // `Unknown column [_index]`.
   const rows = await categorizeWithNoiseExclusion({
     esClient,
     indices,
@@ -103,7 +92,6 @@ export async function getDiverseSampleDocuments({
     filter,
   });
 
-  // Emit one document per category, preserving the count-descending window order.
   const hits: Array<SearchHit<Record<string, unknown>>> = [];
   const emittedValues = new Set<string>();
   for (const row of window) {
@@ -123,9 +111,8 @@ export async function getDiverseSampleDocuments({
   return { hits };
 }
 
-// Orders a pattern by its own identity, not its sampling-jittered count, so
-// re-sampling near-equal counts can't change which representative an iteration
-// picks. Modulo stays in safe-integer range without bitwise ops.
+// Stable ordering by pattern identity, so sampling jitter on near-equal counts
+// can't change which representative an iteration picks.
 const hashPattern = (value: string): number => {
   let hash = 0;
   for (let i = 0; i < value.length; i++) {
@@ -135,14 +122,10 @@ const hashPattern = (value: string): number => {
 };
 
 /**
- * Selects a diverse, cursor-free window of patterns for one identify iteration.
- *
- * Rank by frequency, cut into `size` equal bands, and take one pattern per band
- * so every window spans common→rare — a head+mid+tail cross-section helps
- * entity/dependency discovery and keeps the arm useful when the loop terminates
- * early. `iteration` rotates the within-band pick, so consecutive iterations
- * surface different members and coverage advances without a positional cursor.
- * Within-band order is by {@link hashPattern} to stay stable under sampling jitter.
+ * Cursor-free window of patterns for one iteration: rank by frequency, cut into
+ * `size` bands, take one pattern per band so the window spans common→rare.
+ * `iteration` rotates the within-band pick, advancing coverage without a
+ * positional cursor; within-band order is {@link hashPattern} for jitter stability.
  */
 export const selectStratifiedWindow = (
   rows: CategorizeWithSampleRow[],
@@ -171,20 +154,11 @@ export const selectStratifiedWindow = (
 };
 
 /**
- * Fetches the full document for each representative value, returning a map from
- * representative value to its hit.
- *
- * Keeping `METADATA _id, _source` means concrete indices return the real nested
- * `_source`, while views silently drop it and `parseEsqlSourceDocuments`
- * reconstructs the source from the projected columns. The join key is the
- * representative field value (not `_id`), so this is metadata-free too.
- *
- * A representative value is not a unique key, so a single `WHERE field IN
- * (values) | LIMIT n` lets one high-frequency value crowd others out of the
- * budget. To guarantee every value resolves, re-query only the still-missing
- * values each round — their per-value budget grows as the set shrinks — until
- * all are resolved or a round resolves nothing (the rest have no live document).
- * `pending` strictly shrinks each iteration, so this terminates.
+ * Maps each representative value to its full document. The join key is the field
+ * value, not `_id`, so views (which drop `_source`) work too via
+ * `parseEsqlSourceDocuments`. Since a value is not a unique key, one round's
+ * `LIMIT` can starve some values, so re-query only the still-missing ones each
+ * round until none resolve. `pending` strictly shrinks, so this terminates.
  */
 async function fetchRepresentativeDocuments({
   esClient,
@@ -234,9 +208,6 @@ async function fetchRepresentativeDocuments({
   return valueToHit;
 }
 
-/**
- * Resolves the categorized field value for each parsed document.
- */
 function resolveFieldValues({
   response,
   docs,

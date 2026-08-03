@@ -54,8 +54,6 @@ describe('getSigEventsLogPatternsEsql', () => {
 
   it('builds ES|QL count and two-pass categorize queries', async () => {
     const { esClient, esql, rawEsqlQuery } = createEsClient([{ name: 'body.text', type: 'text' }]);
-    // total=10 -> p1=1 (exact counts); the single head pattern accounts for the
-    // whole population, so the residual is zero and pass 2 is skipped.
     esql
       .mockResolvedValueOnce(countResponse(10))
       .mockResolvedValueOnce(categorizeResponse([[10, 'error one', 'error']]));
@@ -75,10 +73,6 @@ describe('getSigEventsLogPatternsEsql', () => {
         query: 'FROM logs-* | WHERE KQL("service.name:\\"checkout\\"") | STATS total = COUNT(*)',
       }),
     ]);
-    // Pass 1 categorizes in token form and isolates the noisy head with a
-    // post-STATS count filter (never SORT count DESC | LIMIT, which trips
-    // elastic/elasticsearch#154534). KQL is no longer inlined in the query — it
-    // rides the ES|QL request `filter` alongside the date range.
     expect(esql.mock.calls[1]).toEqual([
       'categorize_noise_exclusion_head',
       expect.objectContaining({
@@ -89,7 +83,6 @@ describe('getSigEventsLogPatternsEsql', () => {
         },
       }),
     ]);
-    // Pass 2 was skipped (zero residual), so only count + pass 1 ran.
     expect(esql).toHaveBeenCalledTimes(2);
     expect(rawEsqlQuery).toHaveBeenCalledTimes(1);
     expect(rawEsqlQuery.mock.calls[0][0]).toEqual(
@@ -104,8 +97,6 @@ describe('getSigEventsLogPatternsEsql', () => {
 
   it('excludes the noisy head and recategorizes the residual to surface rare patterns', async () => {
     const { esClient, esql } = createEsClient([{ name: 'message', type: 'text' }]);
-    // total=1000 -> p1=1. Head "request completed" is ~all traffic; pass 2
-    // excludes it and counts the 4-doc rare pattern exactly in the residual.
     esql
       .mockResolvedValueOnce(countResponse(1000))
       .mockResolvedValueOnce(categorizeResponse([[960, 'request completed', 'request completed']]))
@@ -121,7 +112,6 @@ describe('getSigEventsLogPatternsEsql', () => {
       fields: ['message'],
     });
 
-    // Pass 2 drops the head via full-text NOT MATCH on the token pattern.
     expect(esql.mock.calls[2][1].query).toContain(
       'WHERE NOT MATCH(message, "request completed", {"operator": "AND"})'
     );
@@ -165,8 +155,6 @@ describe('getSigEventsLogPatternsEsql', () => {
 
   it('scales sampled counts back to population counts', async () => {
     const { esClient, esql } = createEsClient();
-    // total=1M -> p1=0.1. No pattern clears the noise threshold (empty head), so
-    // a plain sampled categorize runs and its counts are scaled back by 1/p1.
     esql
       .mockResolvedValueOnce(countResponse(1_000_000))
       .mockResolvedValueOnce(categorizeResponse([]))
@@ -190,9 +178,6 @@ describe('getSigEventsLogPatternsEsql', () => {
       { name: 'message', type: 'text' },
       { name: 'body.text', type: 'text' },
     ]);
-    // Per field the two passes run in order: both pass-1 head queries fire before
-    // either pass-2 (each pass 2 awaits its pass 1), so the mock queue is
-    // count, message-pass1, body.text-pass1, message-pass2, body.text-pass2.
     esql
       .mockResolvedValueOnce(countResponse(10))
       .mockResolvedValueOnce(categorizeResponse([[2, 'same', 'message low']]))

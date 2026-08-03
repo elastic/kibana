@@ -427,8 +427,7 @@ export async function getSigEventsLogPatternsEsql({
     end,
     signal: AbortSignal.timeout(DEFAULT_ESQL_QUERY_TIMEOUT_MS),
   });
-  // ES|QL normalizes the `text` family in `column.type`: both `text` and
-  // `match_only_text` mappings report as `text`.
+  // Both `text` and `match_only_text` mappings report as `text` in `column.type`.
   const textColumnNames = new Set(
     columns.filter((column) => column.type === 'text').map((column) => column.name)
   );
@@ -456,9 +455,7 @@ export async function getSigEventsLogPatternsEsql({
 
   const perField = await Promise.all(
     eligibleFields.map(async (field) => {
-      // Metadata-free, so it works on ES|QL views (query streams' `$.<name>`
-      // views), where `FROM <view> METADATA _index, _id` raises
-      // `Unknown column [_index]`.
+      // Metadata-free, so it works on ES|QL views as well as concrete indices.
       const rows = await categorizeWithNoiseExclusion({
         esClient,
         indices: samplingSource,
@@ -478,9 +475,8 @@ export async function getSigEventsLogPatternsEsql({
   );
 
   return uniqBy(
-    // Preserve the DSL helper's downstream contract: sorted descending by count
-    // and deduped by sample so `message` and `body.text` do not show the same
-    // representative log line twice.
+    // Sorted desc and deduped by sample so `message` and `body.text` don't repeat
+    // the same representative line — the DSL helper's downstream contract.
     perField.flat().sort((a, b) => b.count - a.count),
     (pattern) => pattern.sample
   );

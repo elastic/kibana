@@ -92,7 +92,6 @@ describe('buildCategorizeWithSampleQuery', () => {
     expect(query).toContain(
       'WHERE NOT MATCH(body.text, "request completed", {"operator": "AND"}) AND NOT MATCH(body.text, "metadata updated", {"operator": "AND"})'
     );
-    // Exclusion sits before STATS on the indexed field.
     expect(query.indexOf('NOT MATCH')).toBeLessThan(query.indexOf('STATS'));
   });
 
@@ -139,13 +138,11 @@ describe('categorizeWithNoiseExclusion', () => {
     });
 
     expect(esql).toHaveBeenCalledTimes(2);
-    // Pass 1: token categorize + relative threshold (0.01 * 1000 * 1 = 10), no SORT/LIMIT.
     const pass1 = esql.mock.calls[0][1].query;
     expect(pass1).toContain('CATEGORIZE(message, {"output_format": "tokens"})');
     expect(pass1).toContain('| WHERE count > 10');
     expect(pass1).not.toContain('SORT');
     expect(esql.mock.calls[0][0]).toBe('categorize_noise_exclusion_head');
-    // Pass 2: full-probability (no SAMPLE) recategorize excluding the head.
     const pass2 = esql.mock.calls[1][1].query;
     expect(pass2).toContain('NOT MATCH(message, "request completed", {"operator": "AND"})');
     expect(pass2).not.toContain('SAMPLE');
@@ -157,8 +154,6 @@ describe('categorizeWithNoiseExclusion', () => {
   });
 
   it('normalizes head and tail counts back to population estimates', async () => {
-    // p1 = 0.1: head appears at 90 in the sample -> 900 in the population;
-    // residual (100) fits under the cap so p2 = 1 and the tail count is exact.
     const esql = jest
       .fn()
       .mockResolvedValueOnce(categorizeResponse([[90, 'noise', 'noise']]))
@@ -194,7 +189,6 @@ describe('categorizeWithNoiseExclusion', () => {
 
     expect(esql).toHaveBeenCalledTimes(2);
     const plain = esql.mock.calls[1][1].query;
-    // No exclusion, no post-STATS threshold, but still sampled.
     expect(plain).toContain('| SAMPLE 0.1 |');
     expect(plain).not.toContain('NOT MATCH');
     expect(plain).not.toContain('WHERE count >');
@@ -203,7 +197,6 @@ describe('categorizeWithNoiseExclusion', () => {
   });
 
   it('re-samples pass 2 when the residual still exceeds the cap', async () => {
-    // total 2200, head 200 -> residual 2000 > cap 1000 -> p2 = 0.5.
     const esql = jest
       .fn()
       .mockResolvedValueOnce(categorizeResponse([[200, 'noise', 'noise']]))
@@ -221,7 +214,6 @@ describe('categorizeWithNoiseExclusion', () => {
     const pass2 = esql.mock.calls[1][1].query;
     expect(pass2).toContain('| SAMPLE 0.5 |');
     expect(pass2).toContain('NOT MATCH(message, "noise", {"operator": "AND"})');
-    // Tail count normalized back up by 1 / p2.
     expect(rows).toEqual([
       { count: 200, pattern: 'noise', sample: 'noise' },
       { count: 6, pattern: 'rare', sample: 'rare' },
@@ -244,8 +236,6 @@ describe('categorizeWithNoiseExclusion', () => {
   });
 
   it('sorts by count descending and dedupes head remnants left by approximate exclusion', async () => {
-    // Approximate NOT MATCH can leave a smaller-count remnant of a head pattern
-    // in pass 2; dedupe keeps the larger head representative.
     const esql = jest
       .fn()
       .mockResolvedValueOnce(categorizeResponse([[500, 'noise', 'noise']]))
@@ -271,9 +261,6 @@ describe('categorizeWithNoiseExclusion', () => {
   });
 
   it('propagates two-pass query errors instead of silently degrading', async () => {
-    // Fallback is gated proactively by the capability check, so a runtime
-    // failure (timeout, circuit breaker, shard failure) must surface rather than be
-    // masked by the frequency-biased legacy query.
     const esql = jest
       .fn()
       .mockRejectedValueOnce(new Error('circuit_breaking_exception: too much data'));
@@ -305,7 +292,6 @@ describe('categorizeWithNoiseExclusion', () => {
       samplingProbability: 1,
     });
 
-    // No head/exclusion round-trip: straight to the legacy regex categorize.
     expect(esql).toHaveBeenCalledTimes(1);
     expect(esql.mock.calls[0][0]).toBe('categorize_noise_exclusion_legacy');
     const query = esql.mock.calls[0][1].query;
@@ -351,7 +337,6 @@ describe('esqlSupportsTwoPass', () => {
     const client = createClient(capabilities);
 
     await expect(esqlSupportsTwoPass(client)).resolves.toBe(false);
-    // A transient failure is not cached, so a later call can recover.
     await expect(esqlSupportsTwoPass(client)).resolves.toBe(true);
     expect(capabilities).toHaveBeenCalledTimes(2);
   });
