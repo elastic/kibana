@@ -9,6 +9,7 @@
 
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
+import { of } from 'rxjs';
 import { ChangeHistoryModalContext } from '@kbn/change-history-ui';
 import { useWorkflowsCapabilities, type WorkflowsManagementCapabilities } from '@kbn/workflows-ui';
 import { createMockWorkflowsCapabilities } from '@kbn/workflows-ui/mocks';
@@ -157,6 +158,12 @@ describe('WorkflowDetailHeader', () => {
       services: {
         application: {
           navigateToApp: mockNavigateToApp,
+          getUrlForApp: jest.fn(
+            (appId: string, options?: { path?: string }) => `/app/${appId}${options?.path ?? ''}`
+          ),
+          applications$: of(
+            new Map([['context_engine', { id: 'context_engine', title: 'Context Engine' }]])
+          ),
         },
         settings: {
           client: {
@@ -189,7 +196,11 @@ describe('WorkflowDetailHeader', () => {
   beforeAll(async () => {
     mockUseKibana.mockReturnValue({
       services: {
-        application: { navigateToApp: jest.fn() },
+        application: {
+          navigateToApp: jest.fn(),
+          getUrlForApp: jest.fn(),
+          applications$: of(new Map()),
+        },
         settings: { client: { get: () => '' } },
       },
     });
@@ -229,6 +240,43 @@ describe('WorkflowDetailHeader', () => {
     expect(mockNavigateToApp).toHaveBeenCalledWith(PLUGIN_ID, {
       path: '?tags=prod&enabled=true',
     });
+  });
+
+  it('navigates back to the originating app when returnApp/returnPath query params are present', () => {
+    const result = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />, {
+      routerHistory: [
+        {
+          pathname: '/test-123',
+          search: '?returnApp=context_engine&returnPath=%2Fai_index%2F1',
+        },
+      ],
+    });
+
+    expect(result.getByTestId('appHeaderBack')).toHaveAttribute(
+      'aria-label',
+      'Back to Context Engine'
+    );
+
+    fireEvent.click(result.getByTestId('appHeaderBack'));
+
+    expect(mockNavigateToApp).toHaveBeenCalledWith('context_engine', {
+      path: '/ai_index/1',
+    });
+  });
+
+  it('falls back to the workflows list when returnApp is not a known app', () => {
+    const result = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />, {
+      routerHistory: [
+        {
+          pathname: '/test-123',
+          search: '?returnApp=unknown_app&returnPath=%2Fsomewhere',
+        },
+      ],
+    });
+
+    fireEvent.click(result.getByTestId('appHeaderBack'));
+
+    expect(mockNavigateToApp).toHaveBeenCalledWith(PLUGIN_ID, undefined);
   });
 
   it('shows saved status when no changes', () => {
