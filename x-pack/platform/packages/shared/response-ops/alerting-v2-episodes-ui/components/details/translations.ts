@@ -278,6 +278,20 @@ export const METADATA_LIST_TAGS_LABEL = i18n.translate(
   }
 );
 
+export const METADATA_LIST_SOURCE_URL_LABEL = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.metadataList.sourceUrlLabel',
+  {
+    defaultMessage: 'Source',
+  }
+);
+
+export const METADATA_LIST_SOURCE_URL_LINK = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.metadataList.sourceUrlLink',
+  {
+    defaultMessage: 'View in source system',
+  }
+);
+
 export const formatMetadataListDuration = (ms: number): string => {
   if (ms < 1000) {
     return i18n.translate('xpack.alertingV2EpisodesUi.details.metadataList.durationMs', {
