@@ -26,10 +26,6 @@ test.describe(
       });
     });
 
-    test.beforeEach(async ({ pageObjects }) => {
-      await pageObjects.discover.setQueryMode('classic');
-    });
-
     test.afterAll(async ({ apiServices, logsSynthtraceEsClient }) => {
       await apiServices.streams.deleteStream(CLASSIC_STREAM_NAME);
       await logsSynthtraceEsClient.clean();
@@ -49,12 +45,12 @@ test.describe(
 
       await pageObjects.discover.selectDataView('All logs');
       await pageObjects.discover.waitUntilSearchingHasFinished();
-      await pageObjects.discover.waitForDocTableRendered();
+      await pageObjects.dataGrid.waitForDocTableRendered();
 
-      await pageObjects.discover.openDocumentDetails({ rowIndex: 0 });
+      await pageObjects.dataGrid.openDocumentDetails({ rowIndex: 0 });
 
       // Verify the doc viewer flyout is open
-      await pageObjects.discover.waitForDocViewerFlyoutOpen();
+      await pageObjects.docViewer.waitForFlyoutOpen();
 
       // Click on the Log Overview tab
       const logOverviewTab = page.getByTestId('docViewerTab-doc_view_logs_overview');
@@ -98,12 +94,12 @@ test.describe(
 
       // Wait for ES|QL results to load
       await pageObjects.discover.waitUntilSearchingHasFinished();
-      await pageObjects.discover.waitForDocTableRendered();
+      await pageObjects.dataGrid.waitForDocTableRendered();
 
-      await pageObjects.discover.openDocumentDetails({ rowIndex: 0 });
+      await pageObjects.dataGrid.openDocumentDetails({ rowIndex: 0 });
 
       // Verify the doc viewer flyout is open
-      await pageObjects.discover.waitForDocViewerFlyoutOpen();
+      await pageObjects.docViewer.waitForFlyoutOpen();
 
       // Click on the Log Overview tab
       const logOverviewTab = page.getByTestId('docViewerTab-doc_view_logs_overview');

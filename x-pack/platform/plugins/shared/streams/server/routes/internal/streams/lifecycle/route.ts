@@ -15,7 +15,9 @@ import {
   Streams,
   findInheritedLifecycle,
   isIlmLifecycle,
+  TIER_TO_PHASE,
   type IlmPolicyWithUsage,
+  type PhaseName,
 } from '@kbn/streams-schema';
 import { processAsyncInChunks } from '../../../../utils/process_async_in_chunks';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
@@ -27,6 +29,10 @@ import {
   simulateClassicStreamTemplate,
 } from '../../../../lib/streams/data_streams/manage_data_streams';
 import {
+  getDataStreamGlobalRetention,
+  type DataStreamGlobalRetention,
+} from '../../../../lib/streams/lifecycle/global_retention';
+import {
   buildPolicyUsage,
   normalizeIlmPhases,
   type IlmPoliciesResponse,
@@ -37,6 +43,119 @@ import {
   assertPolicyNameIsValid,
 } from '../../../../lib/streams/lifecycle/ilm_policy_validation';
 import { StatusError } from '../../../../lib/streams/errors/status_error';
+
+type PhaseNameWithoutDelete = Exclude<PhaseName, 'delete'>;
+
+const MAX_BACKING_INDICES = 1000;
+
+export interface DslPhaseStat {
+  size_in_bytes: number;
+  docs_count: number;
+}
+
+// Resolves the phase of a backing index from its `_tier_preference` setting (the first preferred
+// tier that maps to a known phase). Used for indices that the document-level `_tier` aggregation
+// cannot see — e.g. an empty backing index has no documents and therefore no `_tier` bucket, yet it
+// still holds store overhead that should be attributed to its phase (matching ILM, which maps every
+// managed index regardless of doc count).
+const phaseFromTierPreference = (
+  tierPreference: string | undefined
+): PhaseNameWithoutDelete | undefined => {
+  if (!tierPreference) {
+    return undefined;
+  }
+  for (const tier of tierPreference.split(',')) {
+    const phase = TIER_TO_PHASE[tier.trim()];
+    if (phase) {
+      return phase;
+    }
+  }
+  return undefined;
+};
+
+// Per-phase storage size and document count for a DSL stream. Each backing index is attributed to a
+// phase, preferring its runtime `_tier` allocation (authoritative, and the only way to place frozen
+// searchable-snapshot indices) and falling back to the `_tier_preference` setting so that empty
+// indices — which contribute no documents to the `_tier` aggregation — are still counted.
+const getDslPhaseStats = async (
+  scopedClusterClient: IScopedClusterClient,
+  name: string,
+  dataStreamName: string
+): Promise<Partial<Record<PhaseNameWithoutDelete, DslPhaseStat>>> => {
+  // `ignore_unavailable: true` on the search prevents index_not_found_exception for streams with
+  // no backing indices yet (e.g. freshly created streams with no data), returning empty results.
+  const [searchResponse, statsResponse, settingsResponse] = await Promise.all([
+    scopedClusterClient.asCurrentUser.search({
+      index: name,
+      size: 0,
+      ignore_unavailable: true,
+      track_total_hits: false,
+      aggs: {
+        tiers: {
+          filters: {
+            filters: Object.fromEntries(
+              Object.keys(TIER_TO_PHASE).map((tier) => [tier, { term: { _tier: tier } }])
+            ),
+          },
+          aggs: {
+            indices: {
+              terms: { field: '_index', size: MAX_BACKING_INDICES },
+            },
+          },
+        },
+      },
+    }),
+    scopedClusterClient.asCurrentUser.indices.stats({
+      index: dataStreamName,
+      metric: ['store', 'docs'],
+    }),
+    scopedClusterClient.asCurrentUser.indices.getSettings({
+      index: dataStreamName,
+      filter_path: ['*.settings.index.routing.allocation.include._tier_preference'],
+    }),
+  ]);
+  const { aggregations } = searchResponse;
+  const indicesStats = statsResponse.indices ?? {};
+
+  const tierBuckets =
+    (
+      aggregations?.tiers as
+        | { buckets: Record<string, { indices: { buckets: Array<{ key: string }> } }> }
+        | undefined
+    )?.buckets ?? {};
+
+  // Authoritative runtime allocation: map each index that actually holds documents to its `_tier`.
+  const indexToTierPhase: Record<string, PhaseNameWithoutDelete> = {};
+  for (const [tier, tierBucket] of Object.entries(tierBuckets)) {
+    const phase = TIER_TO_PHASE[tier];
+    if (!phase) {
+      continue;
+    }
+    for (const indexBucket of tierBucket.indices?.buckets ?? []) {
+      indexToTierPhase[indexBucket.key] = phase;
+    }
+  }
+
+  const phaseStats: Partial<Record<PhaseNameWithoutDelete, DslPhaseStat>> = {};
+  // Iterate over every backing index from the stats response (includes empty indices). Prefer its
+  // runtime `_tier`, else fall back to the `_tier_preference` setting; skip indices we can't place.
+  for (const [indexName, stats] of Object.entries(indicesStats)) {
+    const tierPreference =
+      settingsResponse[indexName]?.settings?.index?.routing?.allocation?.include?._tier_preference;
+    const phase = indexToTierPhase[indexName] ?? phaseFromTierPreference(tierPreference);
+    if (!phase) {
+      continue;
+    }
+    const entry = (phaseStats[phase] ??= { size_in_bytes: 0, docs_count: 0 });
+    // Size uses `total` (primaries + replicas) to match the metric ILM phase stats report (see
+    // `ilmPhases`) and the dataset-quality summary card. Docs use `primaries` to avoid counting the
+    // same document once per replica.
+    entry.size_in_bytes += stats?.total?.store?.total_data_set_size_in_bytes ?? 0;
+    entry.docs_count += stats?.primaries?.docs?.count ?? 0;
+  }
+
+  return phaseStats;
+};
 
 const getDataStreamByBackingIndices = async (
   scopedClusterClient: IScopedClusterClient,
@@ -125,6 +244,57 @@ const lifecycleStatsRoute = createServerRoute({
       phases: ilmPhases({ policy, indicesIlmDetails, indicesStats }),
       policy_missing: false,
     };
+  },
+});
+
+const lifecycleDslPhaseStatsRoute = createServerRoute({
+  endpoint: 'GET /internal/streams/{name}/lifecycle/_dsl_phase_stats',
+  options: {
+    access: 'internal',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+    },
+  },
+  params: z.object({
+    path: z.object({ name: z.string().max(MAX_STREAM_NAME_LENGTH) }),
+  }),
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    logger,
+  }): Promise<{ phases: Partial<Record<PhaseNameWithoutDelete, DslPhaseStat>> | undefined }> => {
+    const { scopedClusterClient, streamsClient } = await getScopedClients({ request });
+    const name = params.path.name;
+
+    const definition = await streamsClient.getStream(name);
+    if (!Streams.ingest.all.Definition.is(definition)) {
+      throw new StatusError('Lifecycle phase stats are only available for ingest streams', 400);
+    }
+
+    const dataStream = await streamsClient.getDataStream(name);
+    const lifecycle = await getEffectiveLifecycle({ definition, streamsClient, dataStream });
+    if (isIlmLifecycle(lifecycle)) {
+      throw new StatusError(
+        'DSL phase stats are only available for data stream lifecycle (DSL) streams',
+        400
+      );
+    }
+
+    // Degrade gracefully on any unexpected ES error rather than returning a 500. We return
+    // `phases: undefined` (not `{}`) so the client can distinguish "stats unavailable" from
+    // "resolved, but no data in any phase". An empty object would be treated as authoritative and
+    // render hot/frozen as 0 B / 0 docs (real-looking lifecycle data); `undefined` instead lets the
+    // client treat the per-phase split as unavailable.
+    try {
+      const phases = await getDslPhaseStats(scopedClusterClient, name, dataStream.name);
+      return { phases };
+    } catch (error) {
+      logger.warn('Failed to fetch DSL phase stats', { error: error as Error });
+      return { phases: undefined };
+    }
   },
 });
 
@@ -312,23 +482,71 @@ const lifecycleSnapshotRepositoriesRoute = createServerRoute({
   handler: async ({
     request,
     getScopedClients,
-  }): Promise<{ repositories: Array<{ name: string; type: string }> }> => {
+  }): Promise<{
+    repositories: Array<{ name: string; type: string }>;
+    default_repository?: string;
+  }> => {
     const { scopedClusterClient } = await getScopedClients({ request });
-    const repositoriesByName = await scopedClusterClient.asCurrentUser.snapshot.getRepository({
-      name: '*',
-    });
+    const [repositoriesByName, clusterSettings] = await Promise.all([
+      scopedClusterClient.asCurrentUser.snapshot.getRepository({ name: '*' }),
+      scopedClusterClient.asCurrentUser.cluster.getSettings({
+        filter_path: 'persistent.repositories.default_repository',
+      }),
+    ]);
 
     const repositories = Object.entries(repositoriesByName).map(([name, { type }]) => ({
       name,
       type: type ?? '',
     }));
 
-    return { repositories };
+    // The frozen data stream lifecycle phase relies on the cluster's default snapshot repository
+    // (`persistent.repositories.default_repository`) for its searchable snapshots.
+    const rawDefaultRepository = (
+      clusterSettings.persistent?.repositories as { default_repository?: unknown } | undefined
+    )?.default_repository;
+    const defaultRepository =
+      typeof rawDefaultRepository === 'string' && rawDefaultRepository.trim().length > 0
+        ? rawDefaultRepository
+        : undefined;
+
+    return { repositories, default_repository: defaultRepository };
+  },
+});
+
+const lifecycleGlobalRetentionRoute = createServerRoute({
+  endpoint: 'GET /internal/streams/{name}/lifecycle/_global_retention',
+  options: {
+    access: 'internal',
+    summary: 'Get data stream global retention',
+    description:
+      'Gets the cluster-wide default and maximum data retention that apply to a stream lifecycle',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+    },
+  },
+  params: z.object({
+    path: z.object({ name: z.string().max(MAX_STREAM_NAME_LENGTH) }),
+  }),
+  handler: async ({ params, request, getScopedClients }): Promise<DataStreamGlobalRetention> => {
+    const { scopedClusterClient, streamsClient } = await getScopedClients({ request });
+    const { name } = params.path;
+
+    // Verifies read privileges and that the stream exists.
+    await streamsClient.getStream(name);
+
+    return getDataStreamGlobalRetention({
+      esClient: scopedClusterClient.asCurrentUser,
+      name,
+    });
   },
 });
 
 export const internalLifecycleRoutes = {
   ...lifecycleStatsRoute,
+  ...lifecycleGlobalRetentionRoute,
+  ...lifecycleDslPhaseStatsRoute,
   ...lifecycleIlmExplainRoute,
   ...lifecycleInheritedRoute,
   ...lifecycleIlmPoliciesRoute,

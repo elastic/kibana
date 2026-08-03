@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -13,6 +13,7 @@ import {
   EuiButtonEmpty,
   EuiButtonGroup,
   EuiButtonIcon,
+  EuiCallOut,
   EuiComboBox,
   EuiFieldNumber,
   EuiFieldText,
@@ -20,6 +21,7 @@ import {
   EuiFlexItem,
   EuiFormErrorText,
   EuiFormRow,
+  EuiHorizontalRule,
   EuiPanel,
   EuiSelect,
   EuiSpacer,
@@ -27,7 +29,10 @@ import {
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
+import { useDebouncedValue } from '@kbn/react-hooks';
+import { getDatasets } from '@kbn/esql-utils';
 import type { FormValues } from '../../../../form/types';
+import { useResolveTimeField } from '../../use_resolve_time_field';
 import { useDataFields } from '../../../../form/hooks/use_data_fields';
 import { useIndexSources } from '../../../../form/hooks/use_index_sources';
 import type { RuleBuilderStepProps } from '../types';
@@ -53,8 +58,10 @@ import {
   isStatLabelValid,
   isStatFieldValid,
   generateId,
+  getAvailableMetricLabels,
 } from './form_types';
 import { buildThresholdEsql, buildRecoveryBlock } from './build_esql';
+import { EvaluationExpressionField } from './evaluation_expression_field';
 import { splitQuery } from '../../use_heuristic_split';
 import {
   AGGREGATION_OPTIONS,
@@ -63,6 +70,7 @@ import {
   STAT_FIELD_REQUIRED_ERROR,
   STAT_LABEL_REQUIRED_ERROR,
 } from './translations';
+import { getInvalidExpressionReferences } from './validate_metric_references';
 
 export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
   state,
@@ -71,20 +79,28 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
 }) => {
   const { state: thresholdValues, setState: onThresholdValuesChange } =
     useBuilderState<ThresholdFormValues>();
+  const thresholdValuesRef = useRef(thresholdValues);
+  thresholdValuesRef.current = thresholdValues;
   const { setValue, watch } = useFormContext<FormValues>();
   const isAlert = watch('kind') === 'alert';
 
   const { data: indexOptions, isLoading: isLoadingIndices } = useIndexSources({
     http: services.http,
     application: services.application,
+    getDatasets: () => getDatasets(services.http),
   });
 
   const fromQuery = thresholdValues.indexPattern ? `FROM ${thresholdValues.indexPattern}` : '';
 
-  const { data: fieldMap } = useDataFields({
+  const {
+    data: fieldMap,
+    isError: isFieldMapError,
+    isLoading: isLoadingFieldMap,
+  } = useDataFields({
     query: fromQuery,
     http: services.http,
     dataViews: services.dataViews,
+    search: services.data.search.search,
   });
 
   const numericFields = useMemo(
@@ -108,20 +124,25 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
     [fieldMap]
   );
 
-  const dateFields = useMemo(() => {
-    const dates = Object.values(fieldMap)
-      .filter((f) => f.type === 'date')
-      .map((f) => f.name)
-      .sort();
-    if (dates.length === 0) return ['@timestamp'];
-    return dates;
-  }, [fieldMap]);
+  const handleTimeFieldChange = useCallback(
+    (field: string) => {
+      onThresholdValuesChange({ ...thresholdValuesRef.current, timeField: field });
+    },
+    [onThresholdValuesChange]
+  );
 
-  useEffect(() => {
-    if (dateFields.length > 0 && !dateFields.includes(thresholdValues.timeField)) {
-      onThresholdValuesChange({ ...thresholdValues, timeField: dateFields[0] });
-    }
-  }, [dateFields, thresholdValues, onThresholdValuesChange]);
+  // Two-step time-field resolution: ES|QL column introspection first, then the
+  // getESQLTimeFieldFromQuery API fallback when introspection yields no date columns.
+  // This mirrors the compose/discover flow and correctly handles federated sources
+  // whose temporal column might not appear in a standard field-caps response.
+  const { timeFieldOptions } = useResolveTimeField({
+    query: fromQuery,
+    timeField: thresholdValues.timeField,
+    onTimeFieldChange: handleTimeFieldChange,
+    http: services.http,
+    dataViews: services.dataViews,
+    search: services.data.search.search,
+  });
 
   const esqlQuery = useMemo(() => buildThresholdEsql(thresholdValues), [thresholdValues]);
   const recoveryBlock = useMemo(() => buildRecoveryBlock(thresholdValues), [thresholdValues]);
@@ -199,10 +220,24 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
         next,
         thresholdValues.evaluations
       );
+      const updatedRecoveryConditions = thresholdValues.recovery
+        ? syncConditionsForLabelChange(
+            thresholdValues.recovery.conditions,
+            statLabels,
+            index,
+            oldLabel,
+            newLabel,
+            next,
+            thresholdValues.evaluations
+          )
+        : undefined;
       onThresholdValuesChange({
         ...thresholdValues,
         stats: next,
         alertConditions: updatedConditions,
+        ...(thresholdValues.recovery && {
+          recovery: { ...thresholdValues.recovery, conditions: updatedRecoveryConditions! },
+        }),
       });
     },
     [thresholdValues, onThresholdValuesChange]
@@ -232,10 +267,25 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
         remainingStats,
         thresholdValues.evaluations
       );
+      const cleanedRecoveryConditions = thresholdValues.recovery
+        ? reconcileAlertConditionMetrics(
+            clearConditionsForRemovedMetric(
+              thresholdValues.recovery.conditions,
+              removedLabel,
+              remainingStats,
+              thresholdValues.evaluations
+            ),
+            remainingStats,
+            thresholdValues.evaluations
+          )
+        : undefined;
       onThresholdValuesChange({
         ...thresholdValues,
         stats: remainingStats,
         alertConditions: cleanedConditions,
+        ...(thresholdValues.recovery && {
+          recovery: { ...thresholdValues.recovery, conditions: cleanedRecoveryConditions! },
+        }),
       });
     },
     [thresholdValues, onThresholdValuesChange]
@@ -269,10 +319,24 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
         thresholdValues.stats,
         next
       );
+      const updatedRecoveryConditions = thresholdValues.recovery
+        ? syncConditionsForLabelChange(
+            thresholdValues.recovery.conditions,
+            evalLabels,
+            index,
+            oldLabel,
+            newLabel,
+            thresholdValues.stats,
+            next
+          )
+        : undefined;
       onThresholdValuesChange({
         ...thresholdValues,
         evaluations: next,
         alertConditions: updatedConditions,
+        ...(thresholdValues.recovery && {
+          recovery: { ...thresholdValues.recovery, conditions: updatedRecoveryConditions! },
+        }),
       });
     },
     [thresholdValues, onThresholdValuesChange]
@@ -292,10 +356,25 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
         thresholdValues.stats,
         remainingEvaluations
       );
+      const cleanedRecoveryConditions = thresholdValues.recovery
+        ? reconcileAlertConditionMetrics(
+            clearConditionsForRemovedMetric(
+              thresholdValues.recovery.conditions,
+              removedLabel,
+              thresholdValues.stats,
+              remainingEvaluations
+            ),
+            thresholdValues.stats,
+            remainingEvaluations
+          )
+        : undefined;
       onThresholdValuesChange({
         ...thresholdValues,
         evaluations: remainingEvaluations,
         alertConditions: cleanedConditions,
+        ...(thresholdValues.recovery && {
+          recovery: { ...thresholdValues.recovery, conditions: cleanedRecoveryConditions! },
+        }),
       });
     },
     [thresholdValues, onThresholdValuesChange]
@@ -303,12 +382,22 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
 
   // ── Alert condition helpers ──
   const metricOptions = useMemo(() => {
-    const statLabels = thresholdValues.stats.filter((s) => s.label.trim()).map((s) => s.label);
-    const evalLabels = thresholdValues.evaluations
-      .filter((e) => e.label.trim())
-      .map((e) => e.label);
-    return [...statLabels, ...evalLabels];
+    return getAvailableMetricLabels(thresholdValues.stats, thresholdValues.evaluations);
   }, [thresholdValues.stats, thresholdValues.evaluations]);
+
+  // Debounced so warnings don't flash on every keystroke while the user is still typing.
+  const debouncedEvaluations = useDebouncedValue(thresholdValues.evaluations, 500);
+
+  const evaluationInvalidRefs = useMemo(() => {
+    const map = new Map<string, string[]>();
+    debouncedEvaluations.forEach((evaluation) => {
+      const invalidRefs = getInvalidExpressionReferences(evaluation.expression, metricOptions);
+      if (invalidRefs.length > 0) {
+        map.set(evaluation.id, invalidRefs);
+      }
+    });
+    return map;
+  }, [debouncedEvaluations, metricOptions]);
 
   const updateCondition = useCallback(
     (index: number, updates: Partial<AlertCondition>) => {
@@ -375,10 +464,32 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
       </EuiFlexGroup>
       <EuiSpacer size="m" />
 
+      {/* ── Field-load error ── */}
+      {isFieldMapError && !isLoadingFieldMap && (
+        <>
+          <EuiCallOut
+            announceOnMount
+            size="s"
+            color="warning"
+            title={i18n.translate('xpack.alertingV2.ruleBuilder.fieldLoadErrorTitle', {
+              defaultMessage: 'Could not load fields for this data source',
+            })}
+          >
+            <p>
+              <FormattedMessage
+                id="xpack.alertingV2.ruleBuilder.fieldLoadErrorBody"
+                defaultMessage="Field suggestions for group-by, stat field, and time field are unavailable. You can still configure the rule manually."
+              />
+            </p>
+          </EuiCallOut>
+          <EuiSpacer size="m" />
+        </>
+      )}
+
       {/* ── Data Source ── */}
       <EuiFormRow
-        label={i18n.translate('xpack.alertingV2.ruleBuilder.indexLabel', {
-          defaultMessage: 'Index',
+        label={i18n.translate('xpack.alertingV2.ruleBuilder.dataSourceLabel', {
+          defaultMessage: 'Data source',
         })}
         fullWidth
       >
@@ -396,14 +507,14 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
             return true;
           }}
           onChange={(opts) => update('indexPattern', opts[0]?.label ?? '')}
-          customOptionText={i18n.translate('xpack.alertingV2.ruleBuilder.indexCustomOption', {
-            defaultMessage: 'Use {searchValue} as an index pattern',
+          customOptionText={i18n.translate('xpack.alertingV2.ruleBuilder.dataSourceCustomOption', {
+            defaultMessage: 'Use {searchValue} as a data source',
             // EuiComboBox replaces {searchValue} at render time; pass the literal token through
             // i18n so FormatJS does not treat it as an ICU variable without a value.
             values: { searchValue: '{searchValue}' },
           })}
-          placeholder={i18n.translate('xpack.alertingV2.ruleBuilder.indexPlaceholder', {
-            defaultMessage: 'Enter index pattern (e.g. logs-*)',
+          placeholder={i18n.translate('xpack.alertingV2.ruleBuilder.dataSourcePlaceholder', {
+            defaultMessage: 'Select a data source or enter an index pattern',
           })}
           data-test-subj="ruleBuilderIndexField"
         />
@@ -419,7 +530,7 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
         <EuiSelect
           fullWidth
           compressed
-          options={dateFields.map((name) => ({ value: name, text: name }))}
+          options={timeFieldOptions}
           value={thresholdValues.timeField}
           onChange={(e) => update('timeField', e.target.value)}
           data-test-subj="ruleBuilderTimeField"
@@ -472,7 +583,7 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
       </EuiFormRow>
 
       {/* ── Stats ── */}
-      <EuiSpacer size="m" />
+      <EuiHorizontalRule margin="m" />
       <EuiTitle size="xxs">
         <h4>
           <FormattedMessage id="xpack.alertingV2.ruleBuilder.statsTitle" defaultMessage="Stats" />
@@ -663,7 +774,7 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
       {thresholdValues.evaluations.map((ev, idx) => (
         <React.Fragment key={ev.id}>
           <EuiPanel paddingSize="s" hasBorder>
-            <EuiFlexGroup gutterSize="s" alignItems="flexEnd">
+            <EuiFlexGroup gutterSize="s">
               <EuiFlexItem grow={2}>
                 <EuiFormRow
                   label={i18n.translate('xpack.alertingV2.ruleBuilder.evaluations.labelLabel', {
@@ -681,27 +792,16 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
                 </EuiFormRow>
               </EuiFlexItem>
               <EuiFlexItem grow={4}>
-                <EuiFormRow
-                  label={i18n.translate(
-                    'xpack.alertingV2.ruleBuilder.evaluations.expressionLabel',
-                    { defaultMessage: 'Expression' }
-                  )}
-                  fullWidth
-                >
-                  <EuiFieldText
-                    fullWidth
-                    compressed
-                    value={ev.expression}
-                    onChange={(e) => updateEvaluation(idx, { expression: e.target.value })}
-                    placeholder={i18n.translate(
-                      'xpack.alertingV2.ruleBuilder.evaluations.expressionPlaceholder',
-                      { defaultMessage: 'e.g. errors / total * 100' }
-                    )}
-                    data-test-subj={`ruleBuilderEvalExpression-${idx}`}
-                  />
-                </EuiFormRow>
+                <EvaluationExpressionField
+                  index={idx}
+                  currentEvaluation={ev}
+                  onChange={(expression) => updateEvaluation(idx, { expression })}
+                  stats={thresholdValues.stats}
+                  evaluations={thresholdValues.evaluations}
+                  evaluationInvalidRefs={evaluationInvalidRefs}
+                />
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
+              <EuiFlexItem grow={false} style={{ justifyContent: 'center' }}>
                 <EuiToolTip
                   content={i18n.translate(
                     'xpack.alertingV2.ruleBuilder.evaluations.removeEvaluation',

@@ -12,6 +12,8 @@ import {
   EuiBadgeGroup,
   EuiBadge,
   EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiLink,
   EuiIcon,
   EuiToolTip,
@@ -37,7 +39,6 @@ import { AssigneesColumn } from '../../../all_cases/assignees_column';
 import { builderMap as customFieldsBuilderMap } from '../../../custom_fields/builder';
 import { useGetCaseConfiguration } from '../../../../containers/configure/use_get_case_configuration';
 import { IncrementalIdText } from '../../../incremental_id';
-import { ExtendedFieldsColumnCell } from '../../../all_cases/extended_fields_column_cell';
 import { severities } from '../../../severity/config';
 
 type CasesColumns = EuiBasicTableColumn<CaseUI>;
@@ -103,7 +104,7 @@ export const useCasesColumns = ({
         field: casesColumnsConfig.title.field,
         name: casesColumnsConfig.title.name,
         sortable: true,
-        minWidth: '16em',
+        minWidth: '12em',
         render: (_: string, theCase: CaseUI) => {
           if (theCase.id == null || theCase.title == null) {
             return getEmptyCellValue();
@@ -114,14 +115,18 @@ export const useCasesColumns = ({
           }
 
           return (
-            <div>
-              <CaseDetailsLink detailName={theCase.id} title={theCase.title}>
-                <TruncatedText text={theCase.title} />
-              </CaseDetailsLink>
+            <EuiFlexGroup gutterSize="s" alignItems="baseline" responsive={false} wrap={false}>
               {typeof theCase.incrementalId === 'number' && (
-                <IncrementalIdText incrementalId={theCase.incrementalId} />
+                <EuiFlexItem grow={false}>
+                  <IncrementalIdText incrementalId={theCase.incrementalId} />
+                </EuiFlexItem>
               )}
-            </div>
+              <EuiFlexItem grow={false}>
+                <CaseDetailsLink detailName={theCase.id} title={theCase.title}>
+                  <TruncatedText text={theCase.title} />
+                </CaseDetailsLink>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           );
         },
       },
@@ -137,8 +142,8 @@ export const useCasesColumns = ({
       tags: {
         field: casesColumnsConfig.tags.field,
         name: casesColumnsConfig.tags.name,
-        width: '10em',
-        minWidth: '4em',
+        width: '14em',
+        minWidth: '8em',
         render: (tags: CaseUI['tags']) => {
           if (tags != null && tags.length > 0) {
             const clampedBadges = (
@@ -283,17 +288,6 @@ export const useCasesColumns = ({
 
           return getEmptyCellValue();
         },
-      },
-      extendedFields: {
-        minWidth: '10em',
-        width: '14em',
-        name: casesColumnsConfig.extendedFields.name,
-        render: (theCase: CaseUI) => (
-          <ExtendedFieldsColumnCell
-            extendedFields={theCase.extendedFields}
-            extendedFieldsLabels={theCase.extendedFieldsLabels}
-          />
-        ),
       },
       severity: {
         width: '6em',

@@ -23,6 +23,7 @@ import {
   ALERT_EVALUATION_VALUES,
   ALERT_FLAPPING,
   ALERT_RULE_CATEGORY,
+  ALERT_RULE_CONSUMER,
   ALERT_RULE_NAME,
   ALERT_RULE_TYPE_ID,
   ALERT_RULE_UUID,
@@ -39,6 +40,7 @@ import type { TopAlert } from '../../typings/alerts';
 import { useFetchBulkCases } from '../../hooks/use_fetch_bulk_cases';
 import { useCaseViewNavigation } from '../../hooks/use_case_view_navigation';
 import { useKibana } from '../../utils/kibana_react';
+import { useAuthorizedToReadRuleType } from '../../hooks/use_authorized_to_read_rule_type';
 import type { FlyoutThresholdData } from './helpers/map_rules_params_with_flyout';
 import { mapRuleParamsWithFlyout } from './helpers/map_rules_params_with_flyout';
 import { ColumnIDs, overviewColumns } from './overview_columns';
@@ -61,6 +63,7 @@ export const AlertOverview = memo(
         basePath: { prepend },
       },
     } = useKibana().services;
+    const { authorizedToReadRuleType } = useAuthorizedToReadRuleType();
     const { cases, isLoading } = useFetchBulkCases({ ids: alert.fields[ALERT_CASE_IDS] || [] });
     const dateFormat = useUiSetting<string>('dateFormat');
 
@@ -72,8 +75,13 @@ export const AlertOverview = memo(
     const alertEnd = alert.fields[ALERT_END];
     const ruleId = get(alert.fields, ALERT_RULE_UUID) ?? null;
 
+    const canReadAlertRule = authorizedToReadRuleType(
+      alertRuleTypeId,
+      alert.fields[ALERT_RULE_CONSUMER]
+    );
+
     const linkToRule =
-      pageId !== RULE_DETAILS_PAGE_ID && ruleId
+      canReadAlertRule && pageId !== RULE_DETAILS_PAGE_ID && ruleId
         ? prepend(paths.observability.ruleDetails(ruleId))
         : null;
 
@@ -164,6 +172,7 @@ export const AlertOverview = memo(
           value: alert.fields[ALERT_RULE_NAME],
           meta: {
             ruleLink:
+              canReadAlertRule &&
               alert.fields[ALERT_RULE_UUID] &&
               prepend(paths.observability.ruleDetails(alert.fields[ALERT_RULE_UUID])),
           },
@@ -200,6 +209,7 @@ export const AlertOverview = memo(
       cases,
       navigateToCaseView,
       isLoading,
+      canReadAlertRule,
     ]);
 
     return (

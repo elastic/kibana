@@ -10,8 +10,6 @@ import { PREFIX } from '../test_ids';
 export const FLYOUT_PREVIEW_LINK_TEST_ID = `${PREFIX}PreviewLink` as const;
 export const FLYOUT_LINK_TEST_ID = `${PREFIX}Link` as const;
 
-export const GRAPH_VISUALIZATION_TEST_ID = `${PREFIX}GraphVisualization` as const;
-
 /* Header Navigation */
 
 const FLYOUT_NAVIGATION_TEST_ID = `${PREFIX}Navigation` as const;

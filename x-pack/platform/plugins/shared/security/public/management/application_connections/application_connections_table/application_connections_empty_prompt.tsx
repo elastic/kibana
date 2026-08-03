@@ -11,6 +11,9 @@ import { css } from '@emotion/react';
 import type { FC } from 'react';
 import React from 'react';
 
+import type { CoreStart } from '@kbn/core/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+
 import illustrationEmptyState from '../assets/illustration_empty_state.svg';
 import { labels } from '../constants/i18n';
 
@@ -25,6 +28,10 @@ export interface ApplicationConnectionsEmptyPromptProps {
 export const ApplicationConnectionsEmptyPrompt: FC<ApplicationConnectionsEmptyPromptProps> = ({
   createClientUrl,
 }) => {
+  const {
+    services: { docLinks },
+  } = useKibana<CoreStart>();
+
   return (
     <EuiEmptyPrompt
       data-test-subj="applicationConnectionsEmptyPrompt"
@@ -47,10 +54,9 @@ export const ApplicationConnectionsEmptyPrompt: FC<ApplicationConnectionsEmptyPr
         >
           {labels.emptyPrompt.addButton}
         </EuiButton>,
-        // TODO: Documentation link when available.
         <EuiLink
           external
-          href="#"
+          href={docLinks.links.applicationConnections.oauthClients}
           data-test-subj="applicationConnectionsEmptyPromptLearnMoreLink"
           target="_blank"
         >

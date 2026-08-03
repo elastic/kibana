@@ -71,4 +71,48 @@ export class RuleDetailsPage {
     await this.alertsQueryInput.fill(query);
     await this.alertsQuerySubmitButton.click();
   }
+
+  /**
+   * Opens the first alert row's actions menu and clicks Snooze. Callers assert the
+   * inline snooze panel visibility in the spec (Playwright clicks auto-wait).
+   */
+  async openAlertSnoozePanel() {
+    await this.page.testSubj.click('alertsTableRowActionMore');
+    await this.page.testSubj.click('snooze-alert-action-snooze');
+  }
+
+  /**
+   * Opens the first alert row's actions menu and clicks Unsnooze.
+   */
+  async unsnoozeAlert() {
+    await this.page.testSubj.click('alertsTableRowActionMore');
+    await this.page.testSubj.click('snooze-alert-action-unsnooze');
+  }
+
+  /**
+   * Switches the open snooze panel to the "Condition based" tab.
+   */
+  async openConditionBasedSnoozeTab() {
+    await this.page.testSubj.locator('alertSnoozeTabs').getByText('Condition based').click();
+  }
+
+  /**
+   * Adds a `severity_equals` data condition at position `index` (1-based, matching
+   * the `dc-<index>` test subjects) and confirms it. Pass `value` to override the
+   * default severity.
+   */
+  async addSeverityDataCondition(index: number, value?: string) {
+    await this.page.testSubj.click('addDataCondition');
+    await this.page.testSubj
+      .locator(`dataConditionType-dc-${index}`)
+      .selectOption('severity_equals');
+    if (value) {
+      await this.page.testSubj.locator(`dataConditionValue-dc-${index}`).selectOption(value);
+    }
+    await this.page.testSubj.click(`confirmDataCondition-dc-${index}`);
+  }
+
+  async applySnooze() {
+    await this.page.testSubj.click('alertSnoozeApplyButton');
+  }
 }

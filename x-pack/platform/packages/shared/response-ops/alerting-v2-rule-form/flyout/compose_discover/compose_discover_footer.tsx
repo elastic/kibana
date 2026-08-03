@@ -6,21 +6,14 @@
  */
 
 import React from 'react';
-import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFlyoutFooter,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiFlyoutFooter, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useWatch } from 'react-hook-form';
 import type { ComposeDiscoverAction, ComposeDiscoverState, StepDefinition } from './types';
 import { isAlertConditionStepId, isBuilderConditionStepId } from './types';
 import type { FormValues } from '../../form/types';
-import { getBreachQuery } from '../../form/utils/query_helpers';
 import { getEsqlSummaryState } from './compose_discover_form/esql_query_summary_section';
+import { isCommittedQueryValid } from './validation/committed_query_validation';
 
 const CREATE_RULE_BUTTON_LABEL = i18n.translate(
   'xpack.alertingV2.composeDiscover.flyout.createButtonLabel',
@@ -30,11 +23,6 @@ const CREATE_RULE_BUTTON_LABEL = i18n.translate(
 const SAVE_RULE_BUTTON_LABEL = i18n.translate(
   'xpack.alertingV2.composeDiscover.flyout.saveButtonLabel',
   { defaultMessage: 'Save rule' }
-);
-
-const CANCEL_BUTTON_LABEL = i18n.translate(
-  'xpack.alertingV2.composeDiscover.flyout.cancelButtonLabel',
-  { defaultMessage: 'Cancel' }
 );
 
 const BACK_BUTTON_LABEL = i18n.translate(
@@ -70,6 +58,11 @@ const VALIDATION_ERRORS_NEXT_TOOLTIP = i18n.translate(
   { defaultMessage: 'Resolve ES|QL control placeholders before continuing' }
 );
 
+const TIME_FIELD_UNRESOLVED_NEXT_TOOLTIP = i18n.translate(
+  'xpack.alertingV2.composeDiscover.flyout.timeFieldUnresolvedNextTooltip',
+  { defaultMessage: 'Select a time field before continuing' }
+);
+
 export interface ComposeDiscoverFooterProps {
   uiState: ComposeDiscoverState;
   dispatch: React.Dispatch<ComposeDiscoverAction>;
@@ -84,8 +77,6 @@ export interface ComposeDiscoverFooterProps {
   onNext: () => void;
   onFinalSubmit: () => void;
   onYamlSave: () => void;
-  onRequestClose: () => void;
-  closeSourceRef: React.MutableRefObject<'button' | 'eui'>;
 }
 
 export const ComposeDiscoverFooter = ({
@@ -102,14 +93,21 @@ export const ComposeDiscoverFooter = ({
   onNext,
   onFinalSubmit,
   onYamlSave,
-  onRequestClose,
-  closeSourceRef,
 }: ComposeDiscoverFooterProps): React.ReactElement => {
   const isAlert = useWatch<FormValues, 'kind'>({ name: 'kind' }) === 'alert';
   const watchedQuery = useWatch<FormValues, 'query'>({ name: 'query' });
+  const watchedTimeField = useWatch<FormValues, 'timeField'>({ name: 'timeField' });
 
   const isBuilderStep = currentStep ? isBuilderConditionStepId(currentStep.id) : false;
   const isConditionStep = currentStep ? isAlertConditionStepId(currentStep.id) : false;
+
+  /*
+   * The Alert Condition form step exposes the time-field select. When the source
+   * index has no resolvable date field, resolution clears the
+   * value, so an empty `timeField` means the rule can't run its lookback window —
+   * block Next until one is selected.
+   */
+  const timeFieldUnresolved = currentStep?.id === 'alertCondition' && !watchedTimeField;
 
   /*
    * Per #621/#623: when authoring an alert via the heuristic-split flow, step 1
@@ -135,7 +133,8 @@ export const ComposeDiscoverFooter = ({
     hasValidationErrors ||
     (isConditionStep && !isBuilderStep && !uiState.queryCommitted) ||
     (isBuilderStep && !isBuilderStepValid) ||
-    invalidAlertCondition;
+    invalidAlertCondition ||
+    timeFieldUnresolved;
 
   const getNextTooltip = (): string | undefined => {
     if (hasValidationErrors) return VALIDATION_ERRORS_NEXT_TOOLTIP;
@@ -143,20 +142,13 @@ export const ComposeDiscoverFooter = ({
     if (alertConditionState === 'no_alert_condition') return NO_ALERT_CONDITION_NEXT_TOOLTIP;
     if (alertConditionState === 'split_failed') return SPLIT_FAILED_NEXT_TOOLTIP;
     if (invalidAlertCondition) return NEXT_DISABLED_TOOLTIP;
+    if (timeFieldUnresolved) return TIME_FIELD_UNRESOLVED_NEXT_TOOLTIP;
     return undefined;
   };
 
-  const isQueryValidForSubmit = (): boolean => {
-    if (!uiState.queryCommitted) {
-      return false;
-    }
-    if (isAlert) {
-      return getEsqlSummaryState(uiState.queryCommitted, watchedQuery) === 'success';
-    }
-    return getBreachQuery(watchedQuery).trim().length > 0;
-  };
-
-  const submitDisabled = hasValidationErrors || !isQueryValidForSubmit();
+  const submitDisabled =
+    hasValidationErrors ||
+    !isCommittedQueryValid(watchedQuery, isAlert ? 'alert' : 'signal', uiState.queryCommitted);
   const submitLabel = isCreate ? CREATE_RULE_BUTTON_LABEL : SAVE_RULE_BUTTON_LABEL;
 
   if (uiState.yamlMode) {
@@ -194,59 +186,46 @@ export const ComposeDiscoverFooter = ({
 
   return (
     <EuiFlyoutFooter>
-      <EuiFlexGroup justifyContent="spaceBetween">
+      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
+        {/* Back sits far-left; when absent (step 0) the empty item keeps Next flush-right. */}
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            onClick={() => {
-              closeSourceRef.current = 'button';
-              onRequestClose();
-            }}
-            data-test-subj="composeDiscoverCancel"
-          >
-            {CANCEL_BUTTON_LABEL}
-          </EuiButtonEmpty>
+          {uiState.step > 0 && (
+            <EuiButton
+              color="text"
+              iconType="arrowLeft"
+              isDisabled={!isBuilderMode && uiState.childOpen}
+              onClick={() => dispatch({ type: 'GO_BACK', isBuilderMode })}
+              data-test-subj="composeDiscoverBack"
+            >
+              {BACK_BUTTON_LABEL}
+            </EuiButton>
+          )}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup gutterSize="s" responsive={false}>
-            {uiState.step > 0 && (
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  iconType="arrowLeft"
-                  isDisabled={!isBuilderMode && uiState.childOpen}
-                  onClick={() => dispatch({ type: 'GO_BACK', isBuilderMode })}
-                  data-test-subj="composeDiscoverBack"
-                >
-                  {BACK_BUTTON_LABEL}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-            )}
-            <EuiFlexItem grow={false}>
-              {isLastStep ? (
-                <EuiButton
-                  fill
-                  isLoading={isSaving}
-                  isDisabled={submitDisabled}
-                  onClick={onFinalSubmit}
-                  data-test-subj="composeDiscoverSubmit"
-                >
-                  {submitLabel}
-                </EuiButton>
-              ) : (
-                <EuiToolTip content={getNextTooltip()}>
-                  <EuiButton
-                    fill
-                    iconType="arrowRight"
-                    iconSide="right"
-                    isDisabled={nextDisabled}
-                    onClick={onNext}
-                    data-test-subj="composeDiscoverNext"
-                  >
-                    {NEXT_BUTTON_LABEL}
-                  </EuiButton>
-                </EuiToolTip>
-              )}
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          {isLastStep ? (
+            <EuiButton
+              fill
+              isLoading={isSaving}
+              isDisabled={submitDisabled}
+              onClick={onFinalSubmit}
+              data-test-subj="composeDiscoverSubmit"
+            >
+              {submitLabel}
+            </EuiButton>
+          ) : (
+            <EuiToolTip content={getNextTooltip()}>
+              <EuiButton
+                color="text"
+                iconType="arrowRight"
+                iconSide="right"
+                isDisabled={nextDisabled}
+                onClick={onNext}
+                data-test-subj="composeDiscoverNext"
+              >
+                {NEXT_BUTTON_LABEL}
+              </EuiButton>
+            </EuiToolTip>
+          )}
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFlyoutFooter>

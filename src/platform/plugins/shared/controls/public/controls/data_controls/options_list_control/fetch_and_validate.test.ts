@@ -23,14 +23,17 @@ const phraseFilter = (field: string, value: string) =>
 const buildApi = ({
   filters$,
   parentQuery$,
+  projectRouting$,
 }: {
   filters$: BehaviorSubject<unknown>;
   parentQuery$: BehaviorSubject<unknown>;
+  projectRouting$?: BehaviorSubject<string | undefined>;
 }) => {
   const parentApi = {
     filters$,
     query$: parentQuery$,
     timeRange$: new BehaviorSubject({ from: 'now-15m', to: 'now' }),
+    ...(projectRouting$ ? { projectRouting$ } : {}),
   };
   return {
     parentApi,
@@ -97,6 +100,36 @@ describe('fetchAndValidate$ ES|QL filter wiring', () => {
     const secondBody = JSON.parse(fetchSpy.mock.calls[1][1].body);
     expect(secondBody.filter).toBeDefined();
     expect(JSON.stringify(secondBody.filter)).toContain('mainframe');
+
+    subscription.unsubscribe();
+  }, 10000);
+
+  it('forwards the parent CPS project routing into the fetch request body', async () => {
+    const filters$ = new BehaviorSubject<unknown>([]);
+    const parentQuery$ = new BehaviorSubject<unknown>(undefined);
+    const projectRouting$ = new BehaviorSubject<string | undefined>('_alias:*');
+    const api = buildApi({ filters$, parentQuery$, projectRouting$ });
+
+    const requestSize$ = new BehaviorSubject<number>(10);
+    const runPastTimeout$ = new BehaviorSubject<boolean>(false);
+    const selectedOptions$ = new BehaviorSubject<unknown[]>([]);
+    const searchTechnique$ = new BehaviorSubject<'wildcard' | 'prefix' | 'exact'>('wildcard');
+    const sort$ = new BehaviorSubject<unknown>({ by: '_count', direction: 'desc' });
+
+    const subscription = fetchAndValidate$({
+      api,
+      requestSize$: requestSize$ as any,
+      runPastTimeout$: runPastTimeout$ as any,
+      selectedOptions$: selectedOptions$ as any,
+      searchTechnique$: searchTechnique$ as any,
+      sort$: sort$ as any,
+    }).subscribe(() => {});
+
+    await new Promise((resolve) => setTimeout(resolve, 200));
+
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    const body = JSON.parse(fetchSpy.mock.calls[0][1].body);
+    expect(body.projectRouting).toBe('_alias:*');
 
     subscription.unsubscribe();
   }, 10000);

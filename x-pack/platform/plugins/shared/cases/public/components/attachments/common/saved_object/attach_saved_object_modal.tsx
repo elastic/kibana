@@ -25,6 +25,8 @@ import {
 import type { CaseUI } from '../../../../../common/ui/types';
 import { useCasesContext } from '../../../cases_context/use_cases_context';
 import { KibanaServices, useKibana } from '../../../../common/lib/kibana';
+import { LENS_SO_TYPE } from '../../../../../common/constants/attachments';
+import { useOpenLensForAttach } from '../../lens/lens_return/use_open_lens_for_attach';
 import { SavedObjectRow } from './saved_object_row';
 import { useFindSavedObjects } from './use_find_saved_objects';
 import { useAttachSavedObject } from './use_attach_saved_object';
@@ -117,8 +119,20 @@ export const AttachSavedObjectModal: React.FC<AttachSavedObjectModalProps> = ({
     onAttached: onClose,
   });
 
+  // Open Lens for the chosen id, and let the user adjust time/state, and auto-attach on "Save and return".
+  const openLensForAttach = useOpenLensForAttach({ caseId: caseData.id, caseOwner });
+
   const handleAttach = useCallback(
     async (savedObject: FoundSavedObject) => {
+      if (savedObject.type === LENS_SO_TYPE) {
+        try {
+          await openLensForAttach(savedObject);
+        } finally {
+          onClose();
+        }
+        return;
+      }
+
       try {
         await attach(savedObject);
       } catch {
@@ -137,7 +151,7 @@ export const AttachSavedObjectModal: React.FC<AttachSavedObjectModalProps> = ({
         return next;
       });
     },
-    [attach]
+    [attach, onClose, openLensForAttach]
   );
 
   const availableSoTypes = useMemo<SupportedSavedObjectType[]>(
@@ -210,6 +224,7 @@ export const AttachSavedObjectModal: React.FC<AttachSavedObjectModalProps> = ({
           ? http.basePath.prepend(inAppPath)
           : undefined;
 
+      const isLens = savedObject.type === LENS_SO_TYPE;
       return (
         <SavedObjectRow
           key={savedObjectKey}
@@ -222,6 +237,8 @@ export const AttachSavedObjectModal: React.FC<AttachSavedObjectModalProps> = ({
           isAttachingAny={isAttaching}
           taggingApi={taggingApi}
           onAttach={handleAttach}
+          actionLabel={isLens ? i18n.OPEN_IN_LENS_ACTION : undefined}
+          actionIconType={isLens ? 'lensApp' : undefined}
         />
       );
     },

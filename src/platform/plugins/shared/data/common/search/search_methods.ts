@@ -257,6 +257,7 @@ export class SearchMethodsService implements ISearchMethods {
         locale: params.locale,
         dropNullColumns: options?.dropNullColumns,
         include_execution_metadata: options?.includeExecutionMetadata,
+        ...(options?.columnMetadata ? { settings: { column_metadata: true } } : {}),
       },
     };
   }
@@ -345,6 +346,7 @@ export class SearchMethodsService implements ISearchMethods {
       sessionId: options.sessionId,
       executionContext: options.executionContext,
       projectRouting: options.projectRouting,
+      approximation: options.approximation,
     };
   }
 }

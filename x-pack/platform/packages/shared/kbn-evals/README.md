@@ -6,7 +6,10 @@ Offline evaluation framework for LLM-based workflows in Kibana. Requires the `ev
 
 - **Local** - `node scripts/evals start` (interactive CLI, see [CLI.md](./CLI.md) for the full command reference)
 - **CI on PRs** - GitHub labels (`evals:<suite-id>`, `models:<model-group>`)
-- **On-demand** - [Buildkite pipeline](https://buildkite.com/elastic/kibana-evals-on-demand)
+- **On-demand** - [Buildkite pipeline](https://buildkite.com/elastic/kibana-evals-on-demand-llm-evals)
+- **UI** - the "New experiment" form on the Experiments tab runs experiments server-side via Kibana Workflows, no CLI required (see [From the UI](../../../plugins/shared/evals/README.md#from-the-ui))
+- **Agent Builder** - the `eval-experiment-authoring` skill composes, previews, saves, and runs experiments from a chat (see [From Agent Builder](../../../plugins/shared/evals/README.md#from-agent-builder))
+- **Workflow YAML** - a version-controlled experiment workflow file, run via Workflows Management (see [From YAML](../../../plugins/shared/evals/README.md#from-yaml))
 
 ---
 
@@ -197,8 +200,18 @@ Add GitHub labels to trigger evals in PR CI:
 | `models:<model-group>`        | Select model(s) to evaluate (required -- evals skip without this) |
 | `models:judge:<connector-id>` | Override the judge connector                                      |
 | `models:weekly-eis-models`    | Per-suite EIS model alias (resolves from `evals.suites.json`)     |
+| `evals:skip-<suite-id>`       | Skip a suite, e.g. `evals:skip-smoke-tests`                       |
 
 Model groups follow the pattern `eis/<modelId>` for EIS or `llm-gateway/<model>` for LiteLLM.
+
+PRs touching the eval framework get `evals:smoke-tests` automatically
+([`.github/paths-labeller.yml`](../../../../../.github/paths-labeller.yml)). Add
+`evals:skip-smoke-tests` to skip it.
+
+When the labels match, PR CI triggers the dedicated
+[`kibana-evals-pr-llm-evals`](https://buildkite.com/elastic/kibana-evals-pr-llm-evals) pipeline. Results
+surface on the PR as a separate `kibana-evals` commit status — open its build for per-suite/per-model
+results and triage.
 
 ---
 
@@ -206,27 +219,54 @@ Model groups follow the pattern `eis/<modelId>` for EIS or `llm-gateway/<model>`
 
 Run a suite on any branch without a PR:
 
-1. Open [kibana-evals-on-demand](https://buildkite.com/elastic/kibana-evals-on-demand)
+1. Open [kibana-evals-on-demand-llm-evals](https://buildkite.com/elastic/kibana-evals-on-demand-llm-evals)
 2. Click **New build**, select branch/commit
 3. Add environment variables:
 
-| Variable                  | Required           | Description                                                                 |
-| ------------------------- | ------------------ | --------------------------------------------------------------------------- |
-| `EVAL_SUITE_ID`           | yes                | Suite id from `evals.suites.json`                                           |
-| `EVAL_MODEL_GROUPS`       | yes                | Comma-separated model groups, e.g. `eis/openai-gpt-5.4,llm-gateway/gpt-5.2` |
-| `EVAL_INCLUDE_EIS_MODELS` | for `eis/*` models | Set to `1` when using EIS models or an EIS judge                            |
-| `EVALUATION_CONNECTOR_ID` | no                 | LLM-as-judge connector override                                             |
-| `EVAL_SERVER_CONFIG_SET`  | some suites        | From `serverConfigSet` in `evals.suites.json`                               |
-| `KIBANA_BUILD_ID`         | no                 | Reuse a Kibana build from another job (skips build step)                    |
-| `EVAL_GREP`               | no                 | Playwright test name filter (same as `node scripts/evals run --grep`)       |
-| `EVALUATION_REPETITIONS`  | no                 | Repeat each example N times (same as `--repetitions`)                       |
+| Variable                          | Required           | Description                                                                                                  |
+| --------------------------------- | ------------------ | ------------------------------------------------------------------------------------------------------------ |
+| `EVAL_SUITE_ID`                   | yes                | Suite id from `evals.suites.json`. Comma-separate to run several suites                                      |
+| `EVAL_MODEL_GROUPS`               | yes                | Comma-separated model groups, e.g. `eis/openai-gpt-5.4,llm-gateway/gpt-5.2`                                  |
+| `EVAL_INCLUDE_EIS_MODELS`         | for `eis/*` models | Set to `1` when using EIS models or an EIS judge                                                             |
+| `EVALUATION_CONNECTOR_ID`         | no                 | LLM-as-judge connector override                                                                              |
+| `EVAL_SERVER_CONFIG_SET`          | some suites        | From `serverConfigSet` in `evals.suites.json`                                                                |
+| `KIBANA_BUILD_ID`                 | no                 | Reuse a Kibana build from another job (skips build step)                                                     |
+| `EVAL_GREP`                       | no                 | Playwright test name filter (same as `node scripts/evals run --grep`)                                        |
+| `EVALUATION_REPETITIONS`          | no                 | Repeat each example N times (same as `--repetitions`)                                                        |
+| `EVAL_SLACK_NOTIFICATION_CHANNEL` | no                 | Slack channel or member ID to send the triage to. If unset, no Slack notification is sent for on-demand runs |
 
-Example:
+Example (single suite):
 
 ```text
 EVAL_SUITE_ID=agent-builder
 EVAL_MODEL_GROUPS=eis/openai-gpt-5.4
 EVAL_INCLUDE_EIS_MODELS=1
+```
+
+Example (multiple suites):
+
+```text
+EVAL_SUITE_ID=agent-builder,observability-ai,streams
+EVAL_MODEL_GROUPS=eis/openai-gpt-5.4
+EVAL_INCLUDE_EIS_MODELS=1
+```
+
+#### Where the triage summary is sent (on-demand)
+
+On-demand triage routing is "branch OR PR" (never both), plus an independent Slack opt-in:
+
+- Run a **branch**: set the New Build **Branch** to branch (e.g. `main`). No PR comment is posted.
+- Run a **PR**: set the New Build **Branch** to `refs/pull/<N>/head` (e.g. `refs/pull/123/head`), Commit `HEAD`.
+- **Slack** is independent: set `EVAL_SLACK_NOTIFICATION_CHANNEL` to send the triage to a Slack channel.
+
+Example (PR run + Slack)
+Set Branch to `refs/pull/<N>/head`, Commit `HEAD`, then under Options -> Environment Variables:
+
+```text
+EVAL_SUITE_ID=observability-ai
+EVAL_MODEL_GROUPS=eis/openai-gpt-5.4
+EVAL_INCLUDE_EIS_MODELS=1
+EVAL_SLACK_NOTIFICATION_CHANNEL=#my-test-channel
 ```
 
 ---

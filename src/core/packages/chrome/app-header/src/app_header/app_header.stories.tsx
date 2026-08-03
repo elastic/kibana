@@ -11,7 +11,7 @@ import React, { useMemo, useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { css } from '@emotion/react';
-import { EuiButtonIcon, EuiPageTemplate, EuiToolTip } from '@elastic/eui';
+import { EuiPageTemplate } from '@elastic/eui';
 import { ChromeServiceProvider } from '@kbn/core-chrome-browser-context';
 import { createChromeStorybookStart } from '@kbn/core-chrome-browser-mocks';
 import type {
@@ -20,18 +20,18 @@ import type {
   AppHeaderTab,
 } from '@kbn/core-chrome-browser';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
-import type { AppHeaderPadding } from '../types';
+import type { AppHeaderSpacing } from '../types';
 import { AppHeaderView } from './app_header';
 
 interface ComposedHeaderStoryProps {
   title: string;
   editable: boolean;
-  padding: 'none' | 's' | 'm' | 'bleed-l';
+  spacing: AppHeaderSpacing;
   width: number;
   showBack: boolean;
   showTabs: boolean;
   showBadges: boolean;
-  showMetadata: boolean;
+  secondaryContent: 'description' | 'metadata' | 'none';
   showFavorite: boolean;
   showMenu: boolean;
 }
@@ -42,7 +42,29 @@ const badges: AppHeaderBadge[] = [
 ];
 
 const tabs: AppHeaderTab[] = [
-  { id: 'overview', label: 'Overview', isSelected: true, onClick: action('tab-overview') },
+  {
+    id: 'overview',
+    label: 'Overview',
+    isSelected: true,
+    onClick: action('tab-overview'),
+    actions: {
+      ariaLabel: 'More actions',
+      items: [
+        {
+          id: 'copy',
+          label: 'Copy API request',
+          iconType: 'copy',
+          onClick: action('tab-overview-copy'),
+        },
+        {
+          id: 'edit',
+          label: 'Edit configuration',
+          iconType: 'gear',
+          onClick: action('tab-overview-edit'),
+        },
+      ],
+    },
+  },
   { id: 'alerts', label: 'Alerts', badge: 3, onClick: action('tab-alerts') },
   {
     id: 'insights',
@@ -61,10 +83,15 @@ const tabs: AppHeaderTab[] = [
 ];
 
 const metadata: AppHeaderMetadataItems = [
-  { type: 'text', label: 'Created by: analyst' },
   { type: 'health', label: 'Healthy', color: 'success' },
-  { type: 'button', label: 'Updated 2 minutes ago', onClick: action('metadata-clicked') },
+  { type: 'text', label: 'Created by', value: 'analyst' },
+  { type: 'button', label: 'View details', onClick: action('view-details-clicked') },
 ];
+
+const description = {
+  text: 'Query and analyze data stored across multiple Elasticsearch clusters.',
+  learnMoreUrl: 'https://www.elastic.co/docs',
+};
 
 // Six items so the menu overflows the visible limit into the "More" popover.
 const menu: AppMenuConfig = {
@@ -80,12 +107,12 @@ const menu: AppMenuConfig = {
 const ComposedHeader = ({
   title: initialTitle,
   editable,
-  padding,
+  spacing,
   width,
   showBack,
   showTabs,
   showBadges,
-  showMetadata,
+  secondaryContent,
   showFavorite,
   showMenu,
 }: ComposedHeaderStoryProps) => {
@@ -99,8 +126,12 @@ const ComposedHeader = ({
       setTitle(nextTitle);
     },
   };
-
-  const paddingProp: AppHeaderPadding = padding === 'bleed-l' ? { bleed: 'l' } : padding;
+  const secondaryContentProps =
+    secondaryContent === 'description'
+      ? { description }
+      : secondaryContent === 'metadata'
+      ? { metadata }
+      : {};
 
   return (
     <ChromeServiceProvider value={{ chrome }}>
@@ -114,21 +145,18 @@ const ComposedHeader = ({
           back={showBack ? { href: '/app/management', label: 'Stack Management' } : undefined}
           tabs={showTabs ? tabs : undefined}
           badges={showBadges ? badges : undefined}
-          metadata={showMetadata ? metadata : undefined}
+          {...secondaryContentProps}
           menu={showMenu ? menu : undefined}
           favorite={
-            showFavorite ? (
-              <EuiToolTip content="Favorite" disableScreenReaderOutput>
-                <EuiButtonIcon
-                  aria-label="Favorite"
-                  iconType="starEmpty"
-                  onClick={action('favorite')}
-                />
-              </EuiToolTip>
-            ) : undefined
+            showFavorite
+              ? {
+                  status: 'unfavorited',
+                  onToggle: action('favorite'),
+                }
+              : undefined
           }
           sticky={false}
-          padding={paddingProp}
+          spacing={spacing}
         />
       </div>
     </ChromeServiceProvider>
@@ -150,27 +178,32 @@ const meta: Meta<ComposedHeaderStoryProps> = {
       description: {
         component:
           'The composed Chrome Next app header. Toggle the regions (back navigation, tabs, ' +
-          'badges, metadata, app menu, favorite) to see how they lay out together. For ' +
+          'badges, description or metadata, app menu, favorite) to see how they lay out together. For ' +
           'title-specific states see the "App Header Editable Title" story.',
       },
     },
   },
   argTypes: {
-    padding: {
+    spacing: {
       control: 'inline-radio',
-      options: ['none', 's', 'm', 'bleed-l'],
-      description: "Horizontal padding. `bleed-l` cancels a padded container (`{ bleed: 'l' }`).",
+      options: ['standard', 'compact', 'flush', 'bleed', 'largeBleed'],
+      description:
+        'Outer spacing. Standard uses a 16px symmetric gutter; bleed matches the same 16px inside a padded parent and largeBleed a 24px one.',
+    },
+    secondaryContent: {
+      control: 'inline-radio',
+      options: ['description', 'metadata', 'none'],
     },
   },
   args: {
     title: 'System Shells via Services',
     editable: true,
-    padding: 'm',
+    spacing: 'standard',
     width: 900,
     showBack: true,
     showTabs: true,
     showBadges: true,
-    showMetadata: true,
+    secondaryContent: 'metadata',
     showFavorite: true,
     showMenu: true,
   },
@@ -182,12 +215,18 @@ type Story = StoryObj<ComposedHeaderStoryProps>;
 
 export const FullHeader: Story = {};
 
+export const FullHeaderWithDescription: Story = {
+  args: {
+    secondaryContent: 'description',
+  },
+};
+
 export const TitleOnly: Story = {
   args: {
     showBack: false,
     showTabs: false,
     showBadges: false,
-    showMetadata: false,
+    secondaryContent: 'none',
     showFavorite: false,
     showMenu: false,
   },

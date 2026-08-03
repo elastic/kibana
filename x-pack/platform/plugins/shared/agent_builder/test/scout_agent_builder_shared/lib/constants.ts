@@ -13,7 +13,7 @@ export const COMMON_HEADERS = {
 
 export const API_AGENT_BUILDER = '/api/agent_builder';
 export const INTERNAL_AGENT_BUILDER = '/internal/agent_builder';
-export const INTERNAL_AGENT_CONTEXT_LAYER = '/internal/agent_context_layer';
+export const INTERNAL_AGENT_BUILDER_SML = '/internal/agent_builder_sml';
 
 /** Public Agent Builder HTTP APIs use this Elastic API version header. */
 export const ELASTIC_API_VERSION = '2023-10-31';

@@ -81,6 +81,13 @@ import type { ExperimentalFeatures } from '../../common/experimental_features';
 import type { ProductFeaturesService } from '../lib/product_features_service/product_features_service';
 import type { ResponseActionAgentType } from '../../common/endpoint/service/response_actions/constants';
 import { ScopedEndpointArtifactListClient } from './services/scoped_endpoint_artifact_list_client';
+import { SimpleMemCache } from './lib/simple_mem_cache';
+import { hasConnectedRemoteClusters } from './utils/ccs_utils';
+
+/** Time-to-live (seconds) for the cached connected-remote-clusters check backing `isCcsEnabled` */
+const CCS_CACHE_TTL_SECONDS = 60;
+/** Single cache key used by `isCcsEnabled` (the cache only ever holds this one entry) */
+const CCS_CACHE_KEY = 'hasConnectedRemoteClusters';
 
 export interface EndpointAppContextServiceSetupContract {
   securitySolutionRequestContextFactory: IRequestContextFactory;
@@ -121,6 +128,7 @@ export class EndpointAppContextService {
   private startDependencies: EndpointAppContextServiceStartContract | null = null;
   private fleetServicesFactory: EndpointFleetServicesFactoryInterface | null = null;
   private savedObjectsFactoryService: SavedObjectsClientFactory | null = null;
+  private readonly ccsCache = new SimpleMemCache({ ttl: CCS_CACHE_TTL_SECONDS });
 
   public security: SecurityServiceStart | undefined;
 
@@ -267,6 +275,43 @@ export class EndpointAppContextService {
     return Boolean(this.setupDependencies.cloud.isServerlessEnabled);
   }
 
+  /**
+   * Returns `true` when Cross-Cluster Search (CCS) for Elastic Defend should be applied — i.e. the
+   * `defendRemoteOutputCcs` feature flag is enabled AND the cluster currently has at least one
+   * connected remote cluster. The remote-cluster check is cached (see `CCS_CACHE_TTL_SECONDS`) so
+   * callers can derive this at every index-pattern build site without repeatedly hitting
+   * `_remote/info` — keeping CCS awareness transparent to the services that read endpoint indices.
+   *
+   * A transient `remoteInfo()` failure resolves to `false` but is NOT cached, so the next call
+   * retries instead of serving a stale `false` that would hide remote endpoints.
+   */
+  public async isCcsEnabled(): Promise<boolean> {
+    if (!this.experimentalFeatures.defendRemoteOutputCcs) {
+      return false;
+    }
+
+    const cached = this.ccsCache.get<boolean>(CCS_CACHE_KEY);
+    if (cached !== undefined) {
+      return cached;
+    }
+
+    try {
+      const hasRemoteClusters = await hasConnectedRemoteClusters(this.getInternalEsClient());
+      this.ccsCache.set(CCS_CACHE_KEY, hasRemoteClusters);
+      return hasRemoteClusters;
+    } catch (error) {
+      // Don't cache the failure (so a transient error retries next call), but leave a breadcrumb —
+      // otherwise a persistent `_remote/info` failure (e.g. missing privileges on the internal user)
+      // is indistinguishable from "no remotes connected" for an operator debugging missing endpoints.
+      this.createLogger('isCcsEnabled').debug(
+        `Failed to check connected remote clusters; treating CCS as disabled: ${
+          error?.stack ?? error
+        }`
+      );
+      return false;
+    }
+  }
+
   public getInternalEsClient(): ElasticsearchClient {
     if (!this.startDependencies?.esClient) {
       throw new EndpointAppContentServicesNotStartedError();
@@ -318,12 +363,7 @@ export class EndpointAppContextService {
       throw new EndpointAppContentServicesNotStartedError();
     }
 
-    return new EndpointMetadataService(
-      this.startDependencies.esClient,
-      this.savedObjects.createInternalScopedSoClient({ readonly: false, spaceId }),
-      this.getInternalFleetServices(spaceId),
-      this.createLogger('endpointMetadata')
-    );
+    return new EndpointMetadataService(this, spaceId);
   }
 
   /**

@@ -157,7 +157,7 @@ describe('Embeddable helpers', () => {
       };
     }
 
-    function makeVizState(layers: XYVisualizationState['layers']): XYVisualizationState {
+    function makeVisState(layers: XYVisualizationState['layers']): XYVisualizationState {
       return {
         preferredSeriesType: 'bar_stacked',
         legend: { isVisible: true, position: 'right' },
@@ -171,13 +171,13 @@ describe('Embeddable helpers', () => {
 
     it('should handle frozen (immutable) visualization state without throwing', async () => {
       const byRefLayer = makeByRefLayer();
-      const vizState = makeVizState([byRefLayer]);
+      const visState = makeVisState([byRefLayer]);
 
       // Simulate immer/Redux frozen state
-      const frozenVizState = deepFreeze(vizState);
+      const frozenVisState = deepFreeze(visState);
 
       await expect(
-        saveUpdatedLinkedAnnotationsToLibrary(frozenVizState, mockEventAnnotationService)
+        saveUpdatedLinkedAnnotationsToLibrary(frozenVisState, mockEventAnnotationService)
       ).resolves.not.toThrow();
 
       expect(mockEventAnnotationService.updateAnnotationGroup).toHaveBeenCalledTimes(1);
@@ -185,9 +185,9 @@ describe('Embeddable helpers', () => {
 
     it('should save modified by-reference annotation layers to the library', async () => {
       const byRefLayer = makeByRefLayer();
-      const vizState = makeVizState([byRefLayer]);
+      const visState = makeVisState([byRefLayer]);
 
-      await saveUpdatedLinkedAnnotationsToLibrary(vizState, mockEventAnnotationService);
+      await saveUpdatedLinkedAnnotationsToLibrary(visState, mockEventAnnotationService);
 
       expect(mockEventAnnotationService.updateAnnotationGroup).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -203,9 +203,9 @@ describe('Embeddable helpers', () => {
       const unchangedLayer = makeByRefLayer({
         annotations: lastSavedConfig.annotations,
       });
-      const vizState = makeVizState([unchangedLayer]);
+      const visState = makeVisState([unchangedLayer]);
 
-      await saveUpdatedLinkedAnnotationsToLibrary(vizState, mockEventAnnotationService);
+      await saveUpdatedLinkedAnnotationsToLibrary(visState, mockEventAnnotationService);
 
       expect(mockEventAnnotationService.updateAnnotationGroup).not.toHaveBeenCalled();
     });
@@ -217,19 +217,19 @@ describe('Embeddable helpers', () => {
         seriesType: 'bar',
         accessors: ['col-1'],
       } as XYDataLayerConfig;
-      const vizState = makeVizState([dataLayer]);
+      const visState = makeVisState([dataLayer]);
 
-      await saveUpdatedLinkedAnnotationsToLibrary(vizState, mockEventAnnotationService);
+      await saveUpdatedLinkedAnnotationsToLibrary(visState, mockEventAnnotationService);
 
       expect(mockEventAnnotationService.updateAnnotationGroup).not.toHaveBeenCalled();
     });
 
-    it('should return updated viz state with synced __lastSaved', async () => {
+    it('should return updated vis state with synced __lastSaved', async () => {
       const byRefLayer = makeByRefLayer();
-      const vizState = makeVizState([byRefLayer]);
+      const visState = makeVisState([byRefLayer]);
 
       const result = await saveUpdatedLinkedAnnotationsToLibrary(
-        vizState,
+        visState,
         mockEventAnnotationService
       );
 
@@ -244,9 +244,9 @@ describe('Embeddable helpers', () => {
       } as Partial<EventAnnotationServiceType> as EventAnnotationServiceType;
 
       const byRefLayer = makeByRefLayer();
-      const vizState = makeVizState([byRefLayer]);
+      const visState = makeVisState([byRefLayer]);
 
-      await expect(saveUpdatedLinkedAnnotationsToLibrary(vizState, failingService)).rejects.toThrow(
+      await expect(saveUpdatedLinkedAnnotationsToLibrary(visState, failingService)).rejects.toThrow(
         'Not Found'
       );
     });

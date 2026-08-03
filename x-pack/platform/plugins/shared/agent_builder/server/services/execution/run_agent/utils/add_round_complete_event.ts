@@ -12,6 +12,7 @@ import type {
   RoundCompleteEvent,
   RoundInput,
   ConversationRound,
+  ConversationRoundAuthor,
   ConversationRoundStep,
   ReasoningEvent,
   ToolCallEvent,
@@ -26,6 +27,7 @@ import type {
   TodosStep,
   UserQuestionAskedEvent,
 } from '@kbn/agent-builder-common';
+import type { ExecutionConversationOrigin } from '@kbn/agent-builder-server/execution';
 import type { AttachmentVersionRef } from '@kbn/agent-builder-common/attachments';
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import { isAskUserQuestionPrompt } from '@kbn/agent-builder-common/agents/prompts';
@@ -67,6 +69,7 @@ import { getCurrentTraceId } from '../../../../tracing';
 import type { ConvertedEvents } from '../convert_graph_events';
 import { isFinalStateEvent } from '../events';
 import type { CompactedConversation } from './conversation_compactor';
+import { formatAttachmentsMetadata } from './attachment_presentation';
 
 type SourceEvents = ConvertedEvents;
 
@@ -88,6 +91,8 @@ const isStepEvent = (event: SourceEvents): event is StepEvents => {
 export const addRoundCompleteEvent = ({
   pendingRound,
   userInput,
+  origin,
+  author,
   startTime,
   endTime,
   getConversationState,
@@ -102,6 +107,16 @@ export const addRoundCompleteEvent = ({
 }: {
   pendingRound: ConversationRound | undefined;
   userInput: RoundInput;
+  /**
+   * External origin that initiated this execution. Stamps `origin.type` on newly created
+   * rounds; resumed rounds keep their original origin.
+   */
+  origin?: ExecutionConversationOrigin;
+  /**
+   * Resolved author for the round input (external author, or the Kibana user for public
+   * conversations). Stamped on newly created rounds; resumed rounds keep their original author.
+   */
+  author?: ConversationRoundAuthor;
   startTime: Date;
   modelProvider: ModelProvider;
   stateManager: ConversationStateManager;
@@ -142,6 +157,8 @@ export const addRoundCompleteEvent = ({
                 roundId: providedRoundId,
                 events,
                 input: userInput,
+                origin,
+                author,
                 startTime,
                 endTime,
                 modelProvider,
@@ -152,6 +169,16 @@ export const addRoundCompleteEvent = ({
               });
 
           round.state = buildRoundState({ round, events, stateManager });
+
+          if (round.input.attachment_refs && round.input.attachment_refs.length > 0) {
+            const attachmentContext = formatAttachmentsMetadata(
+              round.input.attachment_refs,
+              attachmentStateManager
+            );
+            if (attachmentContext) {
+              round.input = { ...round.input, attachment_context: attachmentContext };
+            }
+          }
 
           const workspaceId = getWorkspaceId?.();
           const event: RoundCompleteEvent = {
@@ -265,6 +292,8 @@ const mergeRounds = (previous: ConversationRound, next: ConversationRound): Conv
     time_to_last_token: previous.time_to_last_token + next.time_to_last_token,
     model_usage: mergeModelUsage(previous.model_usage, next.model_usage),
     response: next.response,
+    origin: previous.origin,
+    author: previous.author,
     configuration_overrides: next.configuration_overrides ?? previous.configuration_overrides,
   };
 
@@ -281,7 +310,7 @@ const mergeRoundInput = (previous: RoundInput, next: RoundInput): RoundInput => 
   };
 };
 
-const mergeAttachmentRefs = (
+export const mergeAttachmentRefs = (
   previous?: AttachmentVersionRef[],
   next?: AttachmentVersionRef[]
 ): AttachmentVersionRef[] | undefined => {
@@ -306,6 +335,8 @@ const createRound = ({
   roundId: providedRoundId,
   events,
   input,
+  origin,
+  author,
   startTime,
   endTime = new Date(),
   modelProvider,
@@ -317,6 +348,8 @@ const createRound = ({
   roundId?: string;
   events: SourceEvents[];
   input: RoundInput;
+  origin?: ExecutionConversationOrigin;
+  author?: ConversationRoundAuthor;
   startTime: Date;
   endTime?: Date;
   modelProvider: ModelProvider;
@@ -424,9 +457,13 @@ const createRound = ({
     state: undefined,
     input: {
       ...input,
-      ...(attachmentRefs.length > 0 ? { attachment_refs: attachmentRefs } : {}),
+      ...(attachmentRefs.length > 0
+        ? { attachment_refs: mergeAttachmentRefs(input.attachment_refs, attachmentRefs) }
+        : {}),
     },
     steps,
+    ...(origin ? { origin: { type: origin.type } } : {}),
+    ...(author ? { author } : {}),
     trace_id: getCurrentTraceId(),
     started_at: startTime.toISOString(),
     time_to_first_token: timeToFirstToken,
@@ -490,9 +527,15 @@ const createToolCallStep = ({
 const getModelUsage = (stats: ModelProviderStats): RoundModelUsageStats => {
   let inputTokens = 0;
   let outputTokens = 0;
+  let cachedInputTokens = 0;
+  let hasCachedInputTokens = false;
   for (const call of stats.calls) {
     inputTokens += call.tokens?.prompt ?? 0;
     outputTokens += call.tokens?.completion ?? 0;
+    if (call.tokens?.cached !== undefined) {
+      cachedInputTokens += call.tokens.cached;
+      hasCachedInputTokens = true;
+    }
   }
   const modelFromResponse = stats.calls.find((call) => call.model)?.model;
 
@@ -502,6 +545,7 @@ const getModelUsage = (stats: ModelProviderStats): RoundModelUsageStats => {
     llm_calls: stats.calls.length,
     input_tokens: inputTokens,
     output_tokens: outputTokens,
+    ...(hasCachedInputTokens ? { cached_input_tokens: cachedInputTokens } : {}),
     ...(modelFromResponse ? { model: modelFromResponse } : {}),
   };
 };
@@ -571,6 +615,9 @@ const mergeModelUsage = (
     llm_calls: a.llm_calls + b.llm_calls,
     input_tokens: a.input_tokens + b.input_tokens,
     output_tokens: a.output_tokens + b.output_tokens,
+    ...(a.cached_input_tokens !== undefined || b.cached_input_tokens !== undefined
+      ? { cached_input_tokens: (a.cached_input_tokens ?? 0) + (b.cached_input_tokens ?? 0) }
+      : {}),
     model: a.model ?? b.model,
   };
 };

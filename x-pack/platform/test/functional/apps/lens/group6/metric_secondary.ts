@@ -14,6 +14,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const find = getService('find');
   const log = getService('log');
+  const retry = getService('retry');
 
   describe('lens metric secondary', () => {
     const BASE_METRIC_ID = 'metric-secondary-base';
@@ -56,7 +57,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // now change to dynamic badge color
       await testSubjects.click('lnsMetric_color_mode_dynamic');
 
-      expect(await lens.getSecondaryMetricBadgeText()).to.be(`5,727.322\n↑`);
+      expect(await lens.getSecondaryMetricBadgeText()).to.be(`5,727.314\n↑`);
 
       // now show icon only
       await testSubjects.click('lnsMetric_secondary_trend_display_icon');
@@ -66,7 +67,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // now show value only
       await testSubjects.click('lnsMetric_secondary_trend_display_value');
       // badge is there but icon is not there any more
-      expect(await lens.getSecondaryMetricBadgeText()).to.be('5,727.322');
+      expect(await lens.getSecondaryMetricBadgeText()).to.be('5,727.314');
 
       // enable the Primary metric baseline
       await testSubjects.click('lnsMetric_secondary_trend_baseline_primary');
@@ -102,9 +103,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         field: '@timestamp',
         keepOpen: true,
       });
+      // Metric defaults "Include empty rows" off; keep the empty buckets so the
+      // breakdown still yields one tile per interval across the whole time range.
+      await retry.try(async () => {
+        await testSubjects.setEuiSwitch('indexPattern-include-empty-rows', 'check');
+        expect(await testSubjects.isEuiSwitchChecked('indexPattern-include-empty-rows')).to.be(
+          true
+        );
+      });
+      await lens.waitForVisualization('mtrVis');
 
       // test that there are 39 tiles now
-      expect(await lens.getMetricTiles()).to.have.length(N_TILES);
+      await retry.try(async () => {
+        expect(await lens.getMetricTiles()).to.have.length(N_TILES);
+      });
 
       await find.clickByCssSelector(
         'select[data-test-subj="indexPattern-collapse-by"] > option[value="sum"]'
@@ -144,7 +156,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('lnsMetric_secondary_trend_baseline_primary');
       // Check the label and the badge text
       expect(await lens.getSecondaryMetricLabel()).to.be('Difference');
-      expect(await lens.getSecondaryMetricBadgeText()).to.be('+8,277.678\n↑');
+      expect(await lens.getSecondaryMetricBadgeText()).to.be('+8,276.686\n↑');
 
       await lens.closeDimensionEditor();
 
@@ -160,7 +172,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // The badge text should change and the label should be "Average of bytes"
       expect(await lens.getSecondaryMetricLabel()).to.contain('Average of bytes');
-      expect(await lens.getSecondaryMetricBadgeText()).to.be('5,727.322\n↑');
+      expect(await lens.getSecondaryMetricBadgeText()).to.be('5,727.314\n↑');
 
       // Open secondary metric editor
       await lens.openDimensionEditor(

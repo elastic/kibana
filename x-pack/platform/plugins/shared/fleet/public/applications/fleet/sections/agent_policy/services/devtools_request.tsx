@@ -12,16 +12,19 @@ import {
   formatInputs,
   formatVars,
 } from '../../../../../../common/services/simplified_package_policy_helper';
-import { detectTargetCsp } from '../../../../../../common/services/cloud_connectors';
 import type {
   NewAgentPolicy,
   NewPackagePolicy,
   UpdatePackagePolicy,
   UpdateAgentPolicyRequest,
   RegistryVarGroup,
+  PackageInfo,
 } from '../../../types';
 import { canUseMultipleAgentPolicies } from '../../../hooks';
-import { agentlessPolicyRouteService } from '../../../../../../common/services';
+import {
+  agentlessPolicyRouteService,
+  toNewAgentlessPolicy,
+} from '../../../../../../common/services';
 
 function generateKibanaDevToolsRequest(method: string, path: string, body: any) {
   return `${method} kbn:${path}\n${JSON.stringify(body, null, 2)}\n`;
@@ -67,51 +70,41 @@ export function generateCreatePackagePolicyDevToolsRequest(
   });
 }
 
-// TODO: Replace this omit-based approach with a pick-based toNewAgentlessPolicy()
-// mapper shared with form.tsx.
 export function generateCreateAgentlessPolicyDevToolsRequest(
   packagePolicy: NewPackagePolicy & { force?: boolean; create_dataset_templates?: boolean },
-  varGroups?: RegistryVarGroup[]
+  varGroups?: RegistryVarGroup[],
+  packageInfo?: PackageInfo
 ) {
-  // Mirror the form submission path: detect the target cloud provider from
-  // var_groups or inputs so the generated request matches the actual UI request
-  // (target_csp is required for var_groups-based cloud connector creation).
-  const targetCsp = detectTargetCsp(packagePolicy, varGroups);
+  return generateKibanaDevToolsRequest(
+    'POST',
+    agentlessPolicyRouteService.getCreatePath(),
+    // Pass `packageInfo` so the preview matches the request the form actually sends (template-aware
+    // input allow-check), mirroring the read path (`agentlessPolicyToPackagePolicy`).
+    toNewAgentlessPolicy(packagePolicy, varGroups, packageInfo)
+  );
+}
 
-  return generateKibanaDevToolsRequest('POST', agentlessPolicyRouteService.getCreatePath(), {
-    package: formatPackage(packagePolicy.package),
-    ...omit(
-      packagePolicy,
-      'policy_ids',
-      'policy_id',
-      'package',
-      'enabled',
-      'inputs',
-      'vars',
-      'id',
-      'condition',
-      'supports_agentless',
-      'supports_cloud_connector',
-      'cloud_connector_id',
-      'cloud_connector_name'
-    ),
-    id: packagePolicy.id ? String(packagePolicy.id) : undefined,
-    inputs: formatInputs(packagePolicy.inputs, true),
-    vars: formatVars(packagePolicy.vars),
-    ...(packagePolicy.supports_cloud_connector && {
-      cloud_connector: {
-        enabled: true,
-        ...(targetCsp && { target_csp: targetCsp }),
-        ...(packagePolicy.cloud_connector_id && {
-          cloud_connector_id: packagePolicy.cloud_connector_id,
-        }),
-        ...(!packagePolicy.cloud_connector_id &&
-          packagePolicy.cloud_connector_name && {
-            name: packagePolicy.cloud_connector_name,
-          }),
-      },
-    }),
-  });
+/**
+ * Generate a request to update an agentless policy that can be used in Kibana Dev tools
+ * @param policyId
+ * @param packagePolicy
+ * @param varGroups
+ * @param packageInfo
+ * @returns
+ */
+export function generateUpdateAgentlessPolicyDevToolsRequest(
+  policyId: string,
+  packagePolicy: NewPackagePolicy & { force?: boolean; create_dataset_templates?: boolean },
+  varGroups?: RegistryVarGroup[],
+  packageInfo?: PackageInfo
+) {
+  return generateKibanaDevToolsRequest(
+    'PUT',
+    agentlessPolicyRouteService.getUpdatePath(policyId),
+    // Pass `packageInfo` so the preview matches the PUT the edit form actually sends (template-aware
+    // input allow-check), mirroring the read path (`agentlessPolicyToPackagePolicy`).
+    toNewAgentlessPolicy(packagePolicy, varGroups, packageInfo)
+  );
 }
 
 /**

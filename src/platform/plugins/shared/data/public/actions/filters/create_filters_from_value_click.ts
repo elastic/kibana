@@ -166,8 +166,13 @@ const createFilterFromRawColumnsESQL = async (
     return [];
   }
 
-  // Avoid index phrase filter when output column name collides with an index field
-  if (column.isComputedColumn === true && column.name === fieldName) {
+  // A computed column (e.g. EVAL bytes = bytes * 2) can have the same name as a real,
+  // filterable field, so the check above isn't enough: fieldName would resolve to that
+  // unrelated field, but the value shown is the computed one, not the raw field's value.
+  if (
+    column.isComputedColumn === true &&
+    column.meta?.sourceParams?.isSourceFieldFilterable !== true
+  ) {
     return [];
   }
 

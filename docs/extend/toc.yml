@@ -59,7 +59,6 @@ toc:
           - file: anatomy-of-a-plugin.md
           - file: scoped-services.md
           - file: routing-navigation-and-url.md
-          - file: api-documentation.md
       - folder: security
         children:
           - file: overview.md
@@ -181,7 +180,7 @@ toc:
               - file: api-best-practices.md
               - file: api-auth.md
           - file: migrate-tests.md
+          - file: eui-test-helpers.md
       - file: ftr.md
-      - file: writing-stable-functional-tests.md
   - file: plugin-list.md
   - file: dependencies-versions.md

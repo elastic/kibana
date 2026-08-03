@@ -59,6 +59,18 @@ export function registerSnapshotRepositoriesRoute({
           persistent?.repositories?.default_repository
         );
 
+        // Listing repositories is a separate operation from reading the default-repository
+        // setting and can fail independently (e.g. insufficient privileges). Isolate its
+        // failure so it only defaults hasRepositories to false rather than failing the
+        // whole endpoint and dropping the other signals.
+        let hasRepositories = false;
+        try {
+          const repositories = await client.asCurrentUser.snapshot.getRepository();
+          hasRepositories = Object.keys(repositories).length > 0;
+        } catch {
+          // Leave hasRepositories as false when repositories cannot be listed.
+        }
+
         const canCreateRepository = await getCanCreateRepository(
           client,
           config.isSecurityEnabled()
@@ -68,6 +80,7 @@ export function registerSnapshotRepositoriesRoute({
           body: {
             hasDefaultRepository: defaultRepository !== undefined,
             defaultRepository,
+            hasRepositories,
             canCreateRepository,
           },
         });

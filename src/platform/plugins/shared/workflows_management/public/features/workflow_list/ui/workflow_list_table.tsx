@@ -35,7 +35,6 @@ import {
   StatusBadge,
   WorkflowStatus,
 } from '../../../shared/ui';
-import { NextExecutionTime } from '../../../shared/ui/next_execution_time';
 import { getWorkflowDetailRouteState } from '../../../shared/utils/workflow_navigation';
 import { WORKFLOWS_TABLE_PAGE_SIZE_OPTIONS } from '../constants';
 
@@ -203,16 +202,7 @@ export const WorkflowListTable = ({
           const steps = item.definition?.steps ?? [];
           const history = item.history ?? [];
 
-          const cell = <WorkflowTriggersAndSteps triggers={triggers} steps={steps} />;
-
-          if (history.length > 0 && triggers.length > 0) {
-            return (
-              <NextExecutionTime triggers={triggers} history={history}>
-                {cell}
-              </NextExecutionTime>
-            );
-          }
-          return cell;
+          return <WorkflowTriggersAndSteps triggers={triggers} steps={steps} history={history} />;
         },
       },
       {
@@ -306,16 +296,21 @@ export const WorkflowListTable = ({
             onClick: (item: WorkflowListItemDto) => onRequestRun(item),
           },
           {
-            enabled: () => canUpdateWorkflow,
+            enabled: (item) => canUpdateWorkflow && item.managed !== true,
             type: 'icon',
             color: 'text',
             isPrimary: true,
             name: i18n.translate('workflows.workflowList.edit', { defaultMessage: 'Edit' }),
             'data-test-subj': 'editWorkflowAction',
             icon: 'pencil',
-            description: i18n.translate('workflows.workflowList.edit', {
-              defaultMessage: 'Edit workflow',
-            }),
+            description: (item: WorkflowListItemDto) =>
+              item.managed === true
+                ? i18n.translate('workflows.workflowList.editManagedDisabled', {
+                    defaultMessage: 'Managed workflows cannot be edited',
+                  })
+                : i18n.translate('workflows.workflowList.edit', {
+                    defaultMessage: 'Edit workflow',
+                  }),
             onClick: (item: WorkflowListItemDto) => onEditWorkflow(item),
           },
           {

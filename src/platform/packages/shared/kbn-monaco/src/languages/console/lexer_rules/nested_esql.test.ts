@@ -95,5 +95,14 @@ describe('Console nested ES|QL lexer rules', () => {
       expect(esqlLanguageAttributes.keywords).toEqual(keywords);
       expect(esqlLanguageAttributes.builtinFunctions).toEqual(builtinFunctions);
     });
+
+    it('includes source commands and other commands missing from the generated command list', () => {
+      // These are registered in @kbn/esql-language's command registry but are absent from the
+      // auto-generated EsqlCommandNames enum (which is derived from Elasticsearch definitions
+      // and omits source commands). See https://github.com/elastic/kibana/issues/265521.
+      expect(keywords).toEqual(
+        expect.arrayContaining(['from', 'row', 'show', 'ts', 'promql', 'join', 'set', 'fuse'])
+      );
+    });
   });
 });

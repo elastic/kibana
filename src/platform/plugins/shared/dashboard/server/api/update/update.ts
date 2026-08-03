@@ -20,6 +20,7 @@ import type { DashboardCreateResponseBody } from '../create';
 import { create } from '../create';
 import type { getDashboardStateSchema } from '../dashboard_state_schemas';
 import { getDashboardCRUResponseBody } from '../get_cru_response_body';
+import { getUseGASchemas } from '../get_use_ga_schemas';
 import { transformDashboardIn } from '../transforms';
 import type { DashboardState, Operation } from '../types';
 import type { DashboardUpdateResponseBody } from './types';
@@ -48,10 +49,12 @@ export async function update(
   const { core } = await requestCtx.resolve(['core']);
 
   const { access_control: accessControl, ...restOfBody } = updateBody;
+  const useGASchemas = await getUseGASchemas(core);
   const { attributes: soAttributes, references: soReferences } = transformDashboardIn(
     restOfBody,
     isDashboardAppRequest,
-    serverTiming
+    serverTiming,
+    useGASchemas
   );
 
   const supportsAccessControl = core.savedObjects.typeRegistry.supportsAccessControl(
@@ -153,7 +156,8 @@ export async function update(
       'update',
       strictValidationSchema,
       isDashboardAppRequest,
-      serverTiming
+      serverTiming,
+      useGASchemas
     ),
     operation: 'update',
   };

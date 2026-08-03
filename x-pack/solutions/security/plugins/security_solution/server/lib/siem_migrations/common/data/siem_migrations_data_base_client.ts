@@ -10,6 +10,8 @@ import type {
   SearchRequest,
   SearchResponse,
   Duration,
+  IndicesGetMappingRequest,
+  IndicesGetMappingResponse,
 } from '@elastic/elasticsearch/lib/api/types';
 import type {
   AuthenticatedUser,
@@ -51,6 +53,11 @@ export class SiemMigrationsDataBaseClient {
       this.logger.error(`Error getting profile_uid for user ${username}: ${error}`);
       return username;
     }
+  }
+
+  /** Fetches index mappings as the current user. */
+  public async getMapping(params: IndicesGetMappingRequest): Promise<IndicesGetMappingResponse> {
+    return this.esScopedClient.asCurrentUser.indices.getMapping(params);
   }
 
   protected processHit<T extends object>(hit: SearchHit<T>, override: Partial<T> = {}): Stored<T> {

@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
-import { useFormContext } from 'react-hook-form';
+import React, { useMemo } from 'react';
+import { Controller, useFormContext } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
-import { EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
-import { ActionForm, createInitialActionFormValue, isActionValid } from '../../../actions_form';
+import { EuiFormRow, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { ActionForm, createInitialActionFormValue } from '../../../actions_form';
 import type { FormValues } from '../../../form/types';
+import { validateNotifications } from '../validation/notifications_validation';
 
 const notificationsTitle = i18n.translate(
   'xpack.responseOps.alertingV2RuleForm.composeDiscover.notifications.title',
@@ -26,13 +27,8 @@ const notificationsSubtext = i18n.translate(
 );
 
 export const NotificationsStep = () => {
-  const { watch, setValue } = useFormContext<FormValues>();
-  const notifications = watch('notifications');
-  const [touched, setTouched] = useState(false);
-
+  const { control } = useFormContext<FormValues>();
   const defaultWorkflows = useMemo(() => createInitialActionFormValue(), []);
-  const workflows = notifications?.workflows ?? defaultWorkflows;
-  const isWorkflowInvalid = touched && !workflows.every(isActionValid);
 
   return (
     <>
@@ -44,18 +40,30 @@ export const NotificationsStep = () => {
         <p>{notificationsSubtext}</p>
       </EuiText>
       <EuiSpacer size="m" />
-
-      <div
-        onBlur={(e) => {
-          if (!e.currentTarget.contains(e.relatedTarget as Node)) setTouched(true);
-        }}
-      >
-        <ActionForm
-          value={workflows}
-          onChange={(next) => setValue('notifications', { workflows: next }, { shouldDirty: true })}
-          isInvalid={isWorkflowInvalid}
-        />
-      </div>
+      <Controller
+        name="notifications"
+        control={control}
+        rules={{ validate: validateNotifications }}
+        render={({ field, fieldState: { error } }) => (
+          <div
+            data-test-subj="composeDiscoverNotificationsField"
+            onBlur={(e) => {
+              // Form mode is `onBlur`; leaving the field runs rules.
+              if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+                field.onBlur();
+              }
+            }}
+          >
+            <EuiFormRow fullWidth isInvalid={!!error} error={error?.message}>
+              <ActionForm
+                value={field.value?.workflows ?? defaultWorkflows}
+                onChange={(next) => field.onChange({ workflows: next })}
+                isInvalid={!!error}
+              />
+            </EuiFormRow>
+          </div>
+        )}
+      />
     </>
   );
 };

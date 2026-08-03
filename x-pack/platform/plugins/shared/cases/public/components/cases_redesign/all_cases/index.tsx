@@ -9,6 +9,7 @@ import React from 'react';
 import { CasesDeepLinkId } from '../../../common/navigation';
 import { CaseCallouts } from '../../callouts/case_callouts';
 import { useCasesBreadcrumbs } from '../../use_breadcrumbs';
+import { CasesPageBody } from '../../app/cases_page_body';
 import { AllCasesList } from './all_cases_list';
 import { CasesListAppHeader } from './components/cases_list_app_header';
 
@@ -17,9 +18,11 @@ export const AllCases: React.FC = () => {
 
   return (
     <>
-      <CaseCallouts />
       <CasesListAppHeader />
-      <AllCasesList />
+      <CasesPageBody>
+        <CaseCallouts />
+        <AllCasesList />
+      </CasesPageBody>
     </>
   );
 };

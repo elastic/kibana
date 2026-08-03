@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import moment from 'moment';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
@@ -17,6 +18,7 @@ import type { MLSavedObjectService } from '../../saved_objects';
 import type { MlClient } from '../../lib/ml_client';
 
 const SIZE = 1000;
+const ML_NOTIFICATIONS_INDEX_PREFIX = '.ml-notifications-';
 const LEVEL = { system_info: -1, info: 0, warning: 1, error: 2 } as const;
 
 type LevelName = keyof typeof LEVEL;
@@ -188,6 +190,9 @@ export function jobAuditMessagesProvider(
    * @param jobIds
    */
   async function getAuditMessagesSummary(jobIds: string[]): Promise<AuditMessage[]> {
+    // check that the jobs exist and the user has permission to access them
+    await mlClient.getJobs({ job_id: jobIds.join(',') });
+
     // TODO This is the current default value of the cluster setting `search.max_buckets`.
     // This should possibly consider the real settings in a future update.
     const maxBuckets = 10000;
@@ -363,6 +368,15 @@ export function jobAuditMessagesProvider(
     jobId: string,
     notificationIndices: string[]
   ): Promise<{ success: boolean; last_cleared: number }> {
+    notificationIndices.forEach((index) => {
+      if (!index.startsWith(ML_NOTIFICATIONS_INDEX_PREFIX) || index.includes(',')) {
+        throw Boom.badRequest(`Invalid notification index: ${index}`);
+      }
+    });
+
+    // check that the job exists and the user has permission to access it
+    await mlClient.getJobs({ job_id: jobId });
+
     const newClearedMessage = {
       job_id: jobId,
       job_type: 'anomaly_detection',
@@ -434,6 +448,9 @@ export function jobAuditMessagesProvider(
     jobIds: string[],
     earliestMs?: number
   ): Promise<JobsErrorsResponse> {
+    // check that the jobs exist and the user has permission to access them
+    await mlClient.getJobs({ job_id: jobIds.join(',') });
+
     const body = await asInternalUser.search(
       {
         index: ML_NOTIFICATION_INDEX_PATTERN,

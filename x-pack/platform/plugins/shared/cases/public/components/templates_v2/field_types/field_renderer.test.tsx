@@ -7,14 +7,20 @@
 
 import React from 'react';
 import { parse as parseYaml } from 'yaml';
-import { render, renderHook, screen, waitFor, act } from '@testing-library/react';
+import { render, renderHook, screen, waitFor, act, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import { useForm, FormProvider } from 'react-hook-form';
+import { useForm, FormProvider, useFormContext } from 'react-hook-form';
 import { ParsedTemplateDefinitionSchema } from '../../../../common/types/domain/template/latest';
 import { CASE_EXTENDED_FIELDS } from '../../../../common/constants';
-import { isInlineField } from '../../../../common/types/domain/template/fields';
-import { FieldsRenderer, TemplateFieldRenderer } from './field_renderer';
+import {
+  FieldType,
+  type InlineField,
+  isInlineField,
+} from '../../../../common/types/domain/template/fields';
+import { getFieldSnakeKey } from '../../../../common/utils';
+import { buildInitialDefaultValues, FieldsRenderer, TemplateFieldRenderer } from './field_renderer';
+import { controlRegistry } from './field_types_registry';
 
 jest.mock('../../field_library/hooks/use_resolved_fields', () => ({
   useResolvedFields: (fields: Array<Record<string, unknown>>) => ({
@@ -133,6 +139,39 @@ const useStableFields = (fields: ReturnType<typeof parseParsedTemplate>['fields'
   }
   return stableFieldsRef.current;
 };
+
+describe('buildInitialDefaultValues', () => {
+  it('seeds a default for each value-holding field', () => {
+    const fields = [
+      { name: 'priority', type: 'keyword', control: 'INPUT_TEXT', metadata: { default: 'low' } },
+      { name: 'score', type: 'long', control: 'INPUT_NUMBER', metadata: { default: 3 } },
+    ] as unknown as InlineField[];
+
+    const defaults = buildInitialDefaultValues(fields);
+
+    expect(defaults[CASE_EXTENDED_FIELDS]).toEqual({
+      priority_as_keyword: 'low',
+      score_as_long: '3',
+    });
+  });
+
+  it('excludes display-only (MARKDOWN) fields so they never seed an extended_fields key', () => {
+    const fields = [
+      {
+        name: 'instructions',
+        type: 'keyword',
+        control: 'MARKDOWN',
+        metadata: { content: 'Follow these steps.' },
+      },
+      { name: 'priority', type: 'keyword', control: 'INPUT_TEXT', metadata: { default: 'low' } },
+    ] as unknown as InlineField[];
+
+    const defaults = buildInitialDefaultValues(fields);
+
+    expect(defaults[CASE_EXTENDED_FIELDS]).not.toHaveProperty('instructions_as_keyword');
+    expect(defaults[CASE_EXTENDED_FIELDS]).toEqual({ priority_as_keyword: 'low' });
+  });
+});
 
 describe('TemplateFieldRenderer — stable fields reference', () => {
   it('returns the same reference when re-rendered with a new but identical fields array', () => {
@@ -279,5 +318,120 @@ describe('FieldsRenderer — hidden required fields', () => {
     await waitFor(() => {
       expect(onSubmitResult).toHaveBeenCalledWith(false);
     });
+  });
+});
+
+describe('FieldsRenderer — field isolation', () => {
+  const fields: InlineField[] = [
+    { name: 'first', control: FieldType.INPUT_TEXT, type: 'keyword' },
+    { name: 'second', control: FieldType.INPUT_TEXT, type: 'keyword' },
+  ];
+  const renderCounts: Record<string, number> = {};
+  const originalInputText = controlRegistry[FieldType.INPUT_TEXT];
+
+  const TestControl: React.FC<{
+    name: string;
+    type: string;
+    onConfirm?: () => void;
+  }> = ({ name, type, onConfirm }) => {
+    renderCounts[name] = (renderCounts[name] ?? 0) + 1;
+    const { register } = useFormContext();
+    const path = `${CASE_EXTENDED_FIELDS}.${getFieldSnakeKey(name, type)}`;
+
+    return (
+      <>
+        <input aria-label={name} {...register(path)} />
+        {onConfirm && (
+          <button type="button" onClick={onConfirm}>
+            {`Confirm ${name}`}
+          </button>
+        )}
+      </>
+    );
+  };
+
+  const TestForm: React.FC<{
+    onFieldConfirm?: (fieldName: string, fieldType: string) => void;
+  }> = ({ onFieldConfirm }) => {
+    const form = useForm({
+      defaultValues: {
+        [CASE_EXTENDED_FIELDS]: {
+          first_as_keyword: '',
+          second_as_keyword: '',
+        },
+      },
+    });
+
+    return (
+      <FormProvider {...form}>
+        <FieldsRenderer resolvedFields={fields} onFieldConfirm={onFieldConfirm} />
+      </FormProvider>
+    );
+  };
+
+  beforeEach(() => {
+    renderCounts.first = 0;
+    renderCounts.second = 0;
+    controlRegistry[FieldType.INPUT_TEXT] = TestControl as typeof originalInputText;
+  });
+
+  afterEach(() => {
+    controlRegistry[FieldType.INPUT_TEXT] = originalInputText;
+  });
+
+  it('does not re-render a sibling control when a field value changes', async () => {
+    render(<TestForm />);
+    renderCounts.first = 0;
+    renderCounts.second = 0;
+
+    await userEvent.type(screen.getByRole('textbox', { name: 'first' }), 'updated');
+
+    expect(renderCounts.first).toBeGreaterThan(0);
+    expect(renderCounts.second).toBe(0);
+  });
+
+  it('binds confirmation to the field name and type', async () => {
+    const onFieldConfirm = jest.fn();
+    render(<TestForm onFieldConfirm={onFieldConfirm} />);
+
+    await userEvent.click(screen.getByRole('button', { name: 'Confirm second' }));
+
+    expect(onFieldConfirm).toHaveBeenCalledWith('second', 'keyword');
+  });
+
+  it('does not expose confirmation when no handler is provided', () => {
+    render(<TestForm />);
+
+    expect(screen.queryByRole('button', { name: /Confirm/ })).not.toBeInTheDocument();
+  });
+});
+
+describe('FieldsRenderer — required-on-close label', () => {
+  const templateWithRequirementLabels = `
+name: Test
+fields:
+  - name: optional_field
+    control: INPUT_TEXT
+    type: keyword
+    label: Optional Field
+  - name: close_field
+    control: INPUT_TEXT
+    type: keyword
+    label: Close Field
+    validation:
+      required_on_close: true
+`;
+
+  it('labels a required_on_close field "Required on close" instead of "Optional"', () => {
+    render(<FormWrapper templateDef={templateWithRequirementLabels} onSubmitResult={jest.fn()} />);
+
+    // The plain optional field keeps the "Optional" label.
+    const optionalField = within(screen.getByTestId('template-field-optional_field'));
+    expect(optionalField.getByTestId('form-optional-field-label')).toBeInTheDocument();
+
+    // The required-on-close field shows "Required on close" and NOT "Optional".
+    const closeField = within(screen.getByTestId('template-field-close_field'));
+    expect(closeField.getByTestId('form-required-on-close-field-label')).toBeInTheDocument();
+    expect(closeField.queryByTestId('form-optional-field-label')).not.toBeInTheDocument();
   });
 });

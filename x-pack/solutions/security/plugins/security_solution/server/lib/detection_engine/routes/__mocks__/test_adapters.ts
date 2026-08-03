@@ -48,6 +48,11 @@ const buildResponses = (method: Method, calls: MockCall[]): ResponseCall[] => {
         status: 403,
         body: call.body,
       }));
+    case 'conflict':
+      return calls.map(([call]) => ({
+        status: 409,
+        body: call.body,
+      }));
     default:
       throw new Error(`Encountered unexpected call to response.${method}`);
   }

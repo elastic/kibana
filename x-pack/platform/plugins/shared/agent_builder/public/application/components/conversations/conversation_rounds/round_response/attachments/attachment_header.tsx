@@ -143,15 +143,7 @@ export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
                   <EuiIcon type={icon} color="subdued" size="l" aria-hidden={true} />
                 </EuiFlexItem>
               )}
-              <EuiFlexItem
-                grow={true}
-                style={{
-                  minWidth: 0,
-                  borderLeft: euiTheme.border.thin,
-                  borderColor: euiTheme.colors.borderBaseSubdued,
-                  paddingLeft: euiTheme.size.s,
-                }}
-              >
+              <EuiFlexItem grow={true} style={{ minWidth: 0 }}>
                 <EuiFlexGroup
                   direction="column"
                   gutterSize="none"

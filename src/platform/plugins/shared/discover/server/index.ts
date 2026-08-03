@@ -51,17 +51,14 @@ export type {
   DiscoverSessionEmbeddableByReferenceState,
   DiscoverSessionEmbeddableState,
 } from './embeddable';
-export {
-  discoverSessionApiRequestBodySchema,
-  discoverSessionApiResponseSchema,
-  discoverSessionDataSchema,
-} from './api/schema';
+export { discoverSessionApiResponseSchema, discoverSessionApiDataSchema } from './api/schema';
+export { transformDiscoverSessionIn, transformDiscoverSessionOut } from './api/transforms';
 export type {
   DiscoverSessionApiClassicTab,
   DiscoverSessionApiEsqlTab,
   DiscoverSessionApiResponse,
   DiscoverSessionApiTab,
-  DiscoverSessionData,
+  DiscoverSessionApiData,
 } from './api/schema';
 
 export const plugin = async (context: PluginInitializerContext) => {

@@ -9,13 +9,16 @@ import type { MaybePromise } from '@kbn/utility-types';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import {
   createAgentNotFoundError,
+  createAgentUnavailableError,
   createBadRequestError,
+  chatAgentTypeId,
   type AgentAccessControl,
 } from '@kbn/agent-builder-common';
 import { validateAgentId } from '@kbn/agent-builder-common/agents';
 import type {
   AgentAvailabilityContext,
   AgentAvailabilityResult,
+  AgentTypeRegistry,
 } from '@kbn/agent-builder-server/agents';
 import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
@@ -52,6 +55,7 @@ export interface AgentRegistry {
    */
   get(agentId: string, opts?: GetAgentOptions): Promise<InternalAgentDefinition>;
   list(opts?: AgentListOptions): Promise<InternalAgentDefinition[]>;
+  getIds(opts?: AgentListOptions): Promise<string[]>;
   create(createRequest: AgentCreateRequest): Promise<InternalAgentDefinition>;
   update(agentId: string, update: AgentUpdateRequest): Promise<InternalAgentDefinition>;
   delete(args: AgentDeleteRequest): Promise<boolean>;
@@ -69,10 +73,20 @@ interface CreateAgentRegistryOpts {
   builtinProvider: ReadonlyAgentProvider;
   uiSettings: UiSettingsServiceStart;
   savedObjects: SavedObjectsServiceStart;
+  typeRegistry: AgentTypeRegistry;
 }
 
 export const createAgentRegistry = (opts: CreateAgentRegistryOpts): AgentRegistry => {
   return new AgentRegistryImpl(opts);
+};
+
+/**
+ * Whether an agent should surface in default listings (agent management page, pickers, ...).
+ * Read-only managed built-ins (a non-chat type)
+ * Chat agents and editable (persisted) agents always show, so the admin-editable managed agent stays visible.
+ */
+const isVisibleAgent = (agent: InternalAgentDefinition): boolean => {
+  return agent.type === chatAgentTypeId || !agent.readonly;
 };
 
 class AgentRegistryImpl implements AgentRegistry {
@@ -82,6 +96,7 @@ class AgentRegistryImpl implements AgentRegistry {
   private readonly builtinProvider: ReadonlyAgentProvider;
   private readonly uiSettings: UiSettingsServiceStart;
   private readonly savedObjects: SavedObjectsServiceStart;
+  private readonly typeRegistry: AgentTypeRegistry;
 
   constructor({
     request,
@@ -90,6 +105,7 @@ class AgentRegistryImpl implements AgentRegistry {
     builtinProvider,
     uiSettings,
     savedObjects,
+    typeRegistry,
   }: CreateAgentRegistryOpts) {
     this.request = request;
     this.spaceId = spaceId;
@@ -97,6 +113,7 @@ class AgentRegistryImpl implements AgentRegistry {
     this.builtinProvider = builtinProvider;
     this.uiSettings = uiSettings;
     this.savedObjects = savedObjects;
+    this.typeRegistry = typeRegistry;
   }
 
   private get orderedProviders() {
@@ -117,7 +134,7 @@ class AgentRegistryImpl implements AgentRegistry {
       if (await provider.has(agentId)) {
         const agent = await provider.get(agentId, opts);
         if (!(await this.isAvailable(agent))) {
-          throw createBadRequestError(`Agent ${agentId} is not available`);
+          throw createAgentUnavailableError({ agentId });
         }
         return agent;
       }
@@ -125,17 +142,21 @@ class AgentRegistryImpl implements AgentRegistry {
     throw createAgentNotFoundError({ agentId });
   }
 
-  async list(opts: AgentListOptions): Promise<InternalAgentDefinition[]> {
+  async list(opts: AgentListOptions = {}): Promise<InternalAgentDefinition[]> {
     const allAgents: InternalAgentDefinition[] = [];
+
     for (const provider of this.orderedProviders) {
-      const providerAgents = await provider.list(opts);
-      for (const agent of providerAgents) {
-        if (await this.isAvailable(agent)) {
-          allAgents.push(agent);
-        }
-      }
+      allAgents.push(...(await this.getAvailableAgents(provider, opts)));
     }
-    return allAgents;
+
+    return opts.includeManaged ? allAgents : allAgents.filter(isVisibleAgent);
+  }
+
+  async getIds(opts: AgentListOptions = {}): Promise<string[]> {
+    const builtinAgents = await this.getAvailableAgents(this.builtinProvider, opts);
+    const persistedAgentIds = await this.persistedProvider.getIds(opts);
+
+    return [...builtinAgents.map(({ id }) => id), ...persistedAgentIds];
   }
 
   async create(createRequest: AgentCreateRequest): Promise<InternalAgentDefinition> {
@@ -144,6 +165,10 @@ class AgentRegistryImpl implements AgentRegistry {
     const validationError = validateAgentId({ agentId, builtIn: false });
     if (validationError) {
       throw createBadRequestError(`Invalid agent id: "${agentId}": ${validationError}`);
+    }
+
+    if (createRequest.type !== undefined && !this.typeRegistry.has(createRequest.type)) {
+      throw createBadRequestError(`Unknown agent type: "${createRequest.type}"`);
     }
 
     if (await this.has(agentId)) {
@@ -222,5 +247,21 @@ class AgentRegistryImpl implements AgentRegistry {
 
     const status = await agent.isAvailable(context);
     return status.status === 'available';
+  }
+
+  private async getAvailableAgents(
+    provider: ReadonlyAgentProvider | WritableAgentProvider,
+    opts: AgentListOptions
+  ): Promise<InternalAgentDefinition[]> {
+    const availableAgents: InternalAgentDefinition[] = [];
+    const providerAgents = await provider.list(opts);
+
+    for (const agent of providerAgents) {
+      if (await this.isAvailable(agent)) {
+        availableAgents.push(agent);
+      }
+    }
+
+    return availableAgents;
   }
 }

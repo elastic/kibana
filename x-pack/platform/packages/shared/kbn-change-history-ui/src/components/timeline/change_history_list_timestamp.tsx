@@ -6,7 +6,7 @@
  */
 
 import React, { memo } from 'react';
-import { FormattedDate, FormattedTime } from '@kbn/i18n-react';
+import { FormattedDate, FormattedRelative, FormattedTime } from '@kbn/i18n-react';
 
 export interface ChangeHistoryListTimestampProps {
   value: Date;
@@ -17,16 +17,15 @@ export const ChangeHistoryListTimestamp = memo(function ChangeHistoryListTimesta
   value,
   withSeconds = false,
 }: ChangeHistoryListTimestampProps): JSX.Element {
-  return (
-    <>
-      <FormattedDate value={value} year="numeric" month="short" day="numeric" />
-      {' @ '}
-      <FormattedTime
-        value={value}
-        hour="numeric"
-        minute="2-digit"
-        {...(withSeconds ? { second: '2-digit' } : {})}
-      />
-    </>
-  );
+  if (withSeconds) {
+    return (
+      <>
+        <FormattedDate value={value} year="numeric" month="short" day="numeric" />
+        {' @ '}
+        <FormattedTime value={value} hour="numeric" minute="2-digit" second="2-digit" />
+      </>
+    );
+  }
+
+  return <FormattedRelative value={value} />;
 });

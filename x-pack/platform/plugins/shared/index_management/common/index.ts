@@ -29,6 +29,7 @@ export type {
   DataStream,
   DataStreamIndex,
   DataRetention,
+  EsDataRetention,
   IndexMode,
   ComponentTemplateSerialized,
   ComponentTemplateDeserialized,

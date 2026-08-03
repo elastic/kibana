@@ -10,8 +10,10 @@
 import type {
   EsWorkflowExecution,
   EsWorkflowStepExecution,
+  WorkflowStepTokenUsage,
   WorkflowTokenUsage,
 } from '@kbn/workflows';
+import { isTerminalStatus } from '@kbn/workflows';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 import { sumTokenUsage } from '../utils';
 
@@ -164,6 +166,16 @@ export class WorkflowExecutionState {
     }
   }
 
+  /**
+   * Appends one step's usage entry to the per-execution list in finish order.
+   * Unlike `accumulateUsage`, entries are never merged, so two steps on the
+   * same connector stay attributable to the step that produced each.
+   */
+  public recordStepUsage(stepUsage: WorkflowStepTokenUsage): void {
+    const stepUsages = [...(this.workflowExecution.stepUsage ?? []), stepUsage];
+    this.updateWorkflowExecution({ stepUsage: stepUsages });
+  }
+
   public getAllStepExecutions(): StepExecutionMetadata[] {
     return Array.from(this.stepExecutions.values());
   }
@@ -259,10 +271,20 @@ export class WorkflowExecutionState {
     const changes = this.workflowDocumentChanges;
     this.workflowDocumentChanges = undefined;
 
-    await this.workflowExecutionRepository.updateWorkflowExecution({
-      ...changes,
-      id: this.workflowExecution.id,
-    });
+    const queueConcurrencyStrategy =
+      this.workflowExecution.workflowDefinition?.settings?.concurrency?.strategy === 'queue';
+    const refreshForQueueDrainAfterTerminal =
+      Boolean(this.workflowExecution.concurrencyGroupKey) &&
+      queueConcurrencyStrategy &&
+      isTerminalStatus(this.workflowExecution.status);
+
+    await this.workflowExecutionRepository.updateWorkflowExecution(
+      {
+        ...changes,
+        id: this.workflowExecution.id,
+      },
+      refreshForQueueDrainAfterTerminal ? { refresh: 'wait_for' } : {}
+    );
   }
 
   private createStep(step: CreateStepInput) {

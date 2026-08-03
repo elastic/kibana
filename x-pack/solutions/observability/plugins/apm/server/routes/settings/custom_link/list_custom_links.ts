@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type * as t from 'io-ts';
+import type { z } from '@kbn/zod/v4';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { APM_CUSTOM_LINK_INDEX } from '@kbn/apm-sources-access-plugin/server';
 import type { CustomLink, CustomLinkES } from '../../../../common/custom_link/custom_link_types';
 import { fromESFormat } from './helper';
-import type { filterOptionsRt } from './custom_link_types';
+import type { filterOptionsSchema } from './custom_link_types';
 import type { APMInternalESClient } from '../../../lib/helpers/create_es_client/create_internal_es_client';
 
 export async function listCustomLinks({
@@ -18,7 +18,7 @@ export async function listCustomLinks({
   filters = {},
 }: {
   internalESClient: APMInternalESClient;
-  filters?: t.TypeOf<typeof filterOptionsRt>;
+  filters?: z.infer<typeof filterOptionsSchema>;
 }): Promise<CustomLink[]> {
   const esFilters = Object.entries(filters).map(([key, value]) => {
     return {

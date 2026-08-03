@@ -10,7 +10,7 @@
 import { renderHook } from '@testing-library/react';
 import {
   WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID,
-  WORKFLOWS_UI_VISUAL_EDITOR_SETTING_ID,
+  WORKFLOWS_UI_SHOW_EXECUTOR_SETTING_ID,
 } from '@kbn/workflows/common/constants';
 import { useWorkflowsExperimentalUiSetting } from './use_workflows_experimental_ui_setting';
 
@@ -35,7 +35,7 @@ describe('useWorkflowsExperimentalUiSetting', () => {
     });
 
     const { result } = renderHook(() =>
-      useWorkflowsExperimentalUiSetting(WORKFLOWS_UI_VISUAL_EDITOR_SETTING_ID)
+      useWorkflowsExperimentalUiSetting(WORKFLOWS_UI_SHOW_EXECUTOR_SETTING_ID)
     );
 
     expect(result.current).toBe(false);
@@ -50,7 +50,7 @@ describe('useWorkflowsExperimentalUiSetting', () => {
     });
 
     const { result } = renderHook(() =>
-      useWorkflowsExperimentalUiSetting(WORKFLOWS_UI_VISUAL_EDITOR_SETTING_ID)
+      useWorkflowsExperimentalUiSetting(WORKFLOWS_UI_SHOW_EXECUTOR_SETTING_ID)
     );
 
     expect(result.current).toBe(false);
@@ -60,7 +60,7 @@ describe('useWorkflowsExperimentalUiSetting', () => {
     mockUseUiSetting.mockReturnValue(true);
 
     const { result } = renderHook(() =>
-      useWorkflowsExperimentalUiSetting(WORKFLOWS_UI_VISUAL_EDITOR_SETTING_ID)
+      useWorkflowsExperimentalUiSetting(WORKFLOWS_UI_SHOW_EXECUTOR_SETTING_ID)
     );
 
     expect(result.current).toBe(true);

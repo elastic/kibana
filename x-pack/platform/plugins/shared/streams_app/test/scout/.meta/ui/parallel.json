@@ -1,5 +1,9 @@
 {
-  "sha1": "292df33ef35e77d6fc10a358fc2d84627b13527d",
+  "sha1": "f3320bb3b772d3ab00eec388edf8ac171f2608bc",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
   "tests": [
     {
       "id": "b26b2efa27acfba-7132d4e40af07dc",
@@ -8,8 +12,8 @@
       "tags": [],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/global.teardown.ts",
-        "line": 10,
-        "column": 19
+        "line": 5,
+        "column": 1
       }
     },
     {
@@ -19,8 +23,8 @@
       "tags": [],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/global.setup.ts",
-        "line": 10,
-        "column": 16
+        "line": 5,
+        "column": 1
       }
     },
     {
@@ -35,8 +39,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/attachments/attachments.spec.ts",
-        "line": 130,
-        "column": 9
+        "line": 118,
+        "column": 7
       }
     },
     {
@@ -51,8 +55,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/attachments/attachments.spec.ts",
-        "line": 137,
-        "column": 9
+        "line": 122,
+        "column": 26
       }
     },
     {
@@ -67,8 +71,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/attachments/attachments.spec.ts",
-        "line": 152,
-        "column": 9
+        "line": 134,
+        "column": 25
       }
     },
     {
@@ -83,8 +87,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/attachments/attachments.spec.ts",
-        "line": 192,
-        "column": 9
+        "line": 163,
+        "column": 7
       }
     },
     {
@@ -99,8 +103,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/data_management/data_processing/condition_filtering.spec.ts",
-        "line": 35,
-        "column": 9
+        "line": 27,
+        "column": 25
       }
     },
     {
@@ -115,8 +119,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/data_management/data_processing/condition_filtering.spec.ts",
-        "line": 56,
-        "column": 9
+        "line": 40,
+        "column": 25
       }
     },
     {
@@ -131,8 +135,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/data_management/data_processing/condition_filtering.spec.ts",
-        "line": 74,
-        "column": 9
+        "line": 52,
+        "column": 7
       }
     },
     {
@@ -147,8 +151,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/data_management/data_processing/condition_filtering.spec.ts",
-        "line": 92,
-        "column": 9
+        "line": 65,
+        "column": 7
       }
     },
     {
@@ -163,8 +167,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/data_management/data_processing/condition_filtering.spec.ts",
-        "line": 119,
-        "column": 9
+        "line": 87,
+        "column": 13
       }
     },
     {
@@ -179,8 +183,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/data_management/data_processing/condition_filtering.spec.ts",
-        "line": 141,
-        "column": 9
+        "line": 107,
+        "column": 24
       }
     },
     {
@@ -197,8 +201,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/data_management/data_processing/create_steps.spec.ts",
-        "line": 39,
-        "column": 9
+        "line": 31,
+        "column": 25
       }
     },
     {
@@ -215,8 +219,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/data_management/data_processing/create_steps.spec.ts",
-        "line": 56,
-        "column": 9
+        "line": 46,
+        "column": 22
       }
     },
     {
@@ -233,8 +237,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/data_management/data_processing/create_steps.spec.ts",
-        "line": 67,
-        "column": 9
+        "line": 53,
+        "column": 13
       }
     },
     {
@@ -251,8 +255,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/data_management/data_processing/create_steps.spec.ts",
-        "line": 75,
-        "column": 9
+        "line": 60,
+        "column": 25
       }
     },
     {
@@ -269,8 +273,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/data_management/data_processing/create_steps.spec.ts",
-        "line": 96,
-        "column": 9
+        "line": 68,
+        "column": 25
       }
     },
     {
@@ -287,8 +291,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/data_management/data_processing/create_steps.spec.ts",
-        "line": 118,
-        "column": 9
+        "line": 96,
+        "column": 10
       }
     },
     {
@@ -305,8 +309,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/data_management/data_processing/create_steps.spec.ts",
-        "line": 137,
-        "column": 9
+        "line": 105,
+        "column": 24
       }
     },
     {
@@ -323,8 +327,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/data_management/data_processing/create_steps.spec.ts",
-        "line": 160,
-        "column": 9
+        "line": 128,
+        "column": 7
       }
     },
     {
@@ -341,8 +345,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/data_management/data_processing/create_steps.spec.ts",
-        "line": 176,
-        "column": 9
+        "line": 143,
+        "column": 25
       }
     },
     {
@@ -359,8 +363,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/data_management/data_processing/create_steps.spec.ts",
-        "line": 196,
-        "column": 9
+        "line": 154,
+        "column": 53
       }
     },
     {
@@ -377,8 +381,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/data_management/data_processing/create_steps.spec.ts",
-        "line": 211,
-        "column": 9
+        "line": 164,
+        "column": 24
       }
     },
     {
@@ -393,8 +397,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/data_management/data_processing/data_sources_management.spec.ts",
-        "line": 36,
-        "column": 9
+        "line": 25,
+        "column": 7
       }
     },
     {
@@ -409,8 +413,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/data_management/data_processing/data_sources_management.spec.ts",
-        "line": 42,
-        "column": 9
+        "line": 31,
+        "column": 39
       }
     },
     {
@@ -425,7 +429,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/data_management/data_processing/data_sources_management.spec.ts",
-        "line": 77,
+        "line": 56,
         "column": 9
       }
     },
@@ -441,8 +445,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/data_management/data_processing/data_sources_management.spec.ts",
-        "line": 91,
-        "column": 9
+        "line": 69,
+        "column": 26
       }
     },
     {
@@ -457,8 +461,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/data_management/data_processing/edit_steps.spec.ts",
-        "line": 53,
-        "column": 9
+        "line": 50,
+        "column": 13
       }
     },
     {
@@ -473,8 +477,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/data_management/data_processing/edit_steps.spec.ts",
-        "line": 66,
-        "column": 9
+        "line": 60,
+        "column": 25
       }
     },
     {
@@ -489,8 +493,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/data_management/data_processing/edit_steps.spec.ts",
-        "line": 77,
-        "column": 9
+        "line": 67,
+        "column": 13
       }
     },
     {
@@ -505,8 +509,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/data_management/data_processing/edit_steps.spec.ts",
-        "line": 87,
-        "column": 9
+        "line": 74,
+        "column": 13
       }
     },
     {
@@ -521,8 +525,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/data_management/data_processing/edit_steps.spec.ts",
-        "line": 106,
-        "column": 9
+        "line": 87,
+        "column": 56
       }
     },
     {
@@ -537,8 +541,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/data_management/data_processing/edit_steps.spec.ts",
-        "line": 116,
-        "column": 9
+        "line": 96,
+        "column": 7
       }
     },
     {
@@ -553,8 +557,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/data_management/data_processing/error_handling.spec.ts",
-        "line": 34,
-        "column": 9
+        "line": 26,
+        "column": 25
       }
     },
     {
@@ -569,8 +573,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/data_management/data_processing/error_handling.spec.ts",
-        "line": 74,
-        "column": 9
+        "line": 60,
+        "column": 24
       }
     },
     {
@@ -585,8 +589,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/data_management/data_processing/grok_highlighting.spec.ts",
-        "line": 37,
-        "column": 9
+        "line": 30,
+        "column": 10
       }
     },
     {
@@ -601,8 +605,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/data_management/data_processing/grok_highlighting.spec.ts",
-        "line": 64,
-        "column": 9
+        "line": 47,
+        "column": 25
       }
     },
     {
@@ -617,8 +621,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/data_management/data_processing/grok_highlighting.spec.ts",
-        "line": 89,
-        "column": 9
+        "line": 66,
+        "column": 7
       }
     },
     {
@@ -633,8 +637,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/data_management/data_processing/outdated_documents.spec.ts",
-        "line": 105,
-        "column": 24
+        "line": 98,
+        "column": 25
       }
     },
     {
@@ -649,8 +653,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/data_management/data_processing/outdated_documents.spec.ts",
-        "line": 115,
-        "column": 24
+        "line": 103,
+        "column": 7
       }
     },
     {
@@ -665,8 +669,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/data_management/data_processing/outdated_documents.spec.ts",
-        "line": 142,
-        "column": 24
+        "line": 126,
+        "column": 15
       }
     },
     {
@@ -681,8 +685,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/data_management/data_processing/outdated_documents.spec.ts",
-        "line": 150,
-        "column": 24
+        "line": 130,
+        "column": 25
       }
     },
     {
@@ -697,8 +701,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/data_management/data_processing/outdated_documents.spec.ts",
-        "line": 175,
-        "column": 24
+        "line": 153,
+        "column": 7
       }
     },
     {
@@ -713,8 +717,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/data_management/data_processing/outdated_documents.spec.ts",
-        "line": 183,
-        "column": 24
+        "line": 159,
+        "column": 7
       }
     },
     {
@@ -729,8 +733,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/data_management/data_processing/outdated_documents.spec.ts",
-        "line": 201,
-        "column": 24
+        "line": 172,
+        "column": 11
       }
     },
     {
@@ -746,7 +750,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/data_management/data_processing/permissions_editor.spec.ts",
         "line": 60,
-        "column": 9
+        "column": 10
       }
     },
     {
@@ -761,8 +765,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/data_management/data_processing/permissions_editor.spec.ts",
-        "line": 70,
-        "column": 9
+        "line": 67,
+        "column": 13
       }
     },
     {
@@ -777,8 +781,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/data_management/data_processing/permissions_editor.spec.ts",
-        "line": 81,
-        "column": 9
+        "line": 74,
+        "column": 24
       }
     },
     {
@@ -793,8 +797,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/data_management/data_processing/permissions_editor.spec.ts",
-        "line": 92,
-        "column": 9
+        "line": 83,
+        "column": 11
       }
     },
     {
@@ -809,8 +813,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/data_management/data_processing/permissions_editor.spec.ts",
-        "line": 109,
-        "column": 9
+        "line": 97,
+        "column": 14
       }
     },
     {
@@ -825,8 +829,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/data_management/data_processing/permissions_editor.spec.ts",
-        "line": 117,
-        "column": 9
+        "line": 102,
+        "column": 87
       }
     },
     {
@@ -841,8 +845,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/data_management/data_processing/permissions_editor.spec.ts",
-        "line": 128,
-        "column": 9
+        "line": 110,
+        "column": 7
       }
     },
     {
@@ -857,8 +861,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/data_management/data_processing/permissions_editor.spec.ts",
-        "line": 144,
-        "column": 9
+        "line": 119,
+        "column": 11
       }
     },
     {
@@ -873,8 +877,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/data_management/data_processing/permissions_viewer.spec.ts",
-        "line": 55,
-        "column": 9
+        "line": 53,
+        "column": 7
       }
     },
     {
@@ -889,8 +893,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/data_management/data_processing/permissions_viewer.spec.ts",
-        "line": 65,
-        "column": 9
+        "line": 59,
+        "column": 13
       }
     },
     {
@@ -905,8 +909,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/data_management/data_processing/permissions_viewer.spec.ts",
-        "line": 76,
-        "column": 9
+        "line": 69,
+        "column": 14
       }
     },
     {
@@ -921,8 +925,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/data_management/data_processing/permissions_viewer.spec.ts",
-        "line": 87,
-        "column": 9
+        "line": 77,
+        "column": 7
       }
     },
     {
@@ -937,8 +941,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/data_management/data_processing/permissions_viewer.spec.ts",
-        "line": 104,
-        "column": 9
+        "line": 91,
+        "column": 7
       }
     },
     {
@@ -953,8 +957,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/data_management/data_processing/permissions_viewer.spec.ts",
-        "line": 114,
-        "column": 9
+        "line": 96,
+        "column": 13
       }
     },
     {
@@ -969,8 +973,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/data_management/data_processing/permissions_viewer.spec.ts",
-        "line": 122,
-        "column": 9
+        "line": 101,
+        "column": 13
       }
     },
     {
@@ -985,8 +989,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/data_management/data_processing/permissions_viewer.spec.ts",
-        "line": 133,
-        "column": 9
+        "line": 111,
+        "column": 13
       }
     },
     {
@@ -1001,8 +1005,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/data_management/data_processing/permissions_viewer.spec.ts",
-        "line": 149,
-        "column": 9
+        "line": 120,
+        "column": 7
       }
     },
     {
@@ -1015,8 +1019,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/data_management/data_processing/pipeline_suggestions.spec.ts",
-        "line": 69,
-        "column": 9
+        "line": 57,
+        "column": 54
       }
     },
     {
@@ -1029,8 +1033,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/data_management/data_processing/pipeline_suggestions.spec.ts",
-        "line": 95,
-        "column": 9
+        "line": 76,
+        "column": 7
       }
     },
     {
@@ -1043,8 +1047,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/data_management/data_processing/pipeline_suggestions.spec.ts",
-        "line": 122,
-        "column": 9
+        "line": 95,
+        "column": 77
       }
     },
     {
@@ -1059,8 +1063,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/data_management/data_processing/processing_simulation_preview.spec.ts",
-        "line": 39,
-        "column": 9
+        "line": 31,
+        "column": 25
       }
     },
     {
@@ -1075,8 +1079,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/data_management/data_processing/processing_simulation_preview.spec.ts",
-        "line": 54,
-        "column": 9
+        "line": 42,
+        "column": 26
       }
     },
     {
@@ -1091,8 +1095,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/data_management/data_processing/processing_simulation_preview.spec.ts",
-        "line": 87,
-        "column": 9
+        "line": 69,
+        "column": 19
       }
     },
     {
@@ -1107,8 +1111,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/data_management/data_processing/processing_simulation_preview.spec.ts",
-        "line": 122,
-        "column": 9
+        "line": 101,
+        "column": 23
       }
     },
     {
@@ -1123,8 +1127,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/data_management/data_processing/processing_simulation_preview.spec.ts",
-        "line": 176,
-        "column": 9
+        "line": 151,
+        "column": 19
       }
     },
     {
@@ -1139,8 +1143,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/data_management/data_processing/processing_simulation_preview.spec.ts",
-        "line": 220,
-        "column": 9
+        "line": 191,
+        "column": 25
       }
     },
     {
@@ -1153,8 +1157,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/data_management/data_processing/processing_without_ai.spec.ts",
-        "line": 33,
-        "column": 9
+        "line": 22,
+        "column": 25
       }
     },
     {
@@ -1167,8 +1171,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/data_management/data_processing/processing_without_ai.spec.ts",
-        "line": 46,
-        "column": 9
+        "line": 28,
+        "column": 39
       }
     },
     {
@@ -1183,8 +1187,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/data_management/streams_header.spec.ts",
-        "line": 40,
-        "column": 9
+        "line": 33,
+        "column": 25
       }
     },
     {
@@ -1199,7 +1203,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/data_management/streams_header.spec.ts",
-        "line": 60,
+        "line": 44,
         "column": 9
       }
     },
@@ -1215,8 +1219,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/data_management/streams_header.spec.ts",
-        "line": 65,
-        "column": 9
+        "line": 56,
+        "column": 26
       }
     },
     {
@@ -1231,8 +1235,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/discover_integration_classic.spec.ts",
-        "line": 38,
-        "column": 9
+        "line": 27,
+        "column": 7
       }
     },
     {
@@ -1247,8 +1251,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/discover_integration_classic.spec.ts",
-        "line": 81,
-        "column": 9
+        "line": 56,
+        "column": 13
       }
     },
     {
@@ -1263,7 +1267,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/discover_integration_wired.spec.ts",
-        "line": 41,
+        "line": 29,
         "column": 9
       }
     },
@@ -1279,8 +1283,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/discover_integration_wired.spec.ts",
-        "line": 87,
-        "column": 9
+        "line": 66,
+        "column": 24
       }
     },
     {
@@ -1297,8 +1301,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/esql_source_enrichment.spec.ts",
-        "line": 34,
-        "column": 9
+        "line": 26,
+        "column": 28
       }
     },
     {
@@ -1311,8 +1315,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/query_streams/create_query_stream.spec.ts",
-        "line": 42,
-        "column": 7
+        "line": 33,
+        "column": 70
       }
     },
     {
@@ -1325,8 +1329,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/query_streams/create_query_stream.spec.ts",
-        "line": 51,
-        "column": 7
+        "line": 42,
+        "column": 8
       }
     },
     {
@@ -1339,8 +1343,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/query_streams/create_query_stream.spec.ts",
-        "line": 75,
-        "column": 7
+        "line": 56,
+        "column": 23
       }
     },
     {
@@ -1353,8 +1357,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/query_streams/create_query_stream.spec.ts",
-        "line": 110,
-        "column": 7
+        "line": 82,
+        "column": 23
       }
     },
     {
@@ -1367,8 +1371,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/query_streams/delete_query_stream.spec.ts",
-        "line": 45,
-        "column": 7
+        "line": 29,
+        "column": 11
       }
     },
     {
@@ -1381,8 +1385,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/query_streams/edit_query_stream_classic_partitioning.spec.ts",
-        "line": 64,
-        "column": 9
+        "line": 52,
+        "column": 39
       }
     },
     {
@@ -1395,8 +1399,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/query_streams/edit_query_stream_classic_partitioning.spec.ts",
-        "line": 101,
-        "column": 9
+        "line": 76,
+        "column": 26
       }
     },
     {
@@ -1409,8 +1413,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/query_streams/edit_query_stream_partitioning.spec.ts",
-        "line": 52,
-        "column": 9
+        "line": 35,
+        "column": 13
       }
     },
     {
@@ -1423,7 +1427,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/query_streams/edit_query_stream_partitioning.spec.ts",
-        "line": 91,
+        "line": 69,
         "column": 9
       }
     },
@@ -1437,8 +1441,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/query_streams/edit_query_stream.spec.ts",
-        "line": 47,
-        "column": 7
+        "line": 30,
+        "column": 11
       }
     },
     {
@@ -1451,8 +1455,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/query_streams/query_stream_nesting_delete.spec.ts",
-        "line": 51,
-        "column": 9
+        "line": 43,
+        "column": 72
       }
     },
     {
@@ -1465,8 +1469,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/query_streams/query_stream_nesting_error.spec.ts",
-        "line": 49,
-        "column": 9
+        "line": 41,
+        "column": 62
       }
     },
     {
@@ -1479,8 +1483,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/query_streams/query_stream_nesting_ingest_parent.spec.ts",
-        "line": 51,
-        "column": 9
+        "line": 43,
+        "column": 62
       }
     },
     {
@@ -1493,8 +1497,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/query_streams/query_stream_nesting_query_parent.spec.ts",
-        "line": 51,
-        "column": 9
+        "line": 43,
+        "column": 72
       }
     },
     {
@@ -1507,8 +1511,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/query_streams/query_streams_feature_flag.spec.ts",
-        "line": 23,
-        "column": 7
+        "line": 15,
+        "column": 23
       }
     },
     {
@@ -1521,8 +1525,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/query_streams/query_streams_feature_flag.spec.ts",
-        "line": 36,
-        "column": 7
+        "line": 21,
+        "column": 5
       }
     },
     {
@@ -1535,8 +1539,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/query_streams/view_query_stream.spec.ts",
-        "line": 45,
-        "column": 7
+        "line": 29,
+        "column": 11
       }
     },
     {
@@ -1553,8 +1557,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/streams_list_view/classic_stream_creation.spec.ts",
-        "line": 96,
-        "column": 9
+        "line": 92,
+        "column": 14
       }
     },
     {
@@ -1569,8 +1573,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/streams_list_view/streams_collapsible_rows.spec.ts",
-        "line": 46,
-        "column": 9
+        "line": 39,
+        "column": 16
       }
     },
     {
@@ -1585,8 +1589,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/streams_list_view/streams_table_values.spec.ts",
-        "line": 117,
-        "column": 9
+        "line": 111,
+        "column": 28
       }
     },
     {
@@ -1601,8 +1605,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/streams_list_view/streams_table_values.spec.ts",
-        "line": 142,
-        "column": 9
+        "line": 139,
+        "column": 60
       }
     },
     {
@@ -1618,7 +1622,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/streams_list_view/streams_table_values.spec.ts",
         "line": 167,
-        "column": 9
+        "column": 10
       }
     },
     {
@@ -1634,7 +1638,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/streams_list_view/streams_table_values.spec.ts",
         "line": 177,
-        "column": 9
+        "column": 80
       }
     },
     {
@@ -1651,8 +1655,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/tsdb_discover_links.spec.ts",
-        "line": 141,
-        "column": 9
+        "line": 128,
+        "column": 36
       }
     },
     {
@@ -1669,7 +1673,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/tsdb_discover_links.spec.ts",
-        "line": 162,
+        "line": 136,
         "column": 9
       }
     },
@@ -1687,8 +1691,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/tsdb_discover_links.spec.ts",
-        "line": 183,
-        "column": 9
+        "line": 150,
+        "column": 10
       }
     },
     {
@@ -1705,8 +1709,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/tsdb_discover_links.spec.ts",
-        "line": 204,
-        "column": 9
+        "line": 165,
+        "column": 11
       }
     }
   ]

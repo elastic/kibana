@@ -29,7 +29,7 @@ test.describe(
       });
 
       await test.step('Click on android mobile service', async () => {
-        await serviceInventoryPage.clickServiceLink(testData.SERVICE_MOBILE_ANDROID);
+        await serviceInventoryPage.clickServiceLink(testData.SERVICE_MOBILE_ANDROID, true);
       });
 
       await test.step('Verify redirected to mobile service overview', async () => {
@@ -52,7 +52,7 @@ test.describe(
       });
 
       await test.step('Click on iOS mobile service', async () => {
-        await serviceInventoryPage.clickServiceLink(testData.SERVICE_MOBILE_IOS);
+        await serviceInventoryPage.clickServiceLink(testData.SERVICE_MOBILE_IOS, true);
       });
 
       await test.step('Verify redirected to mobile service overview', async () => {
@@ -84,6 +84,32 @@ test.describe(
 
       await test.step('Verify throughput chart is visible', async () => {
         await expect(serviceDetailsPage.overviewTab.throughputChart).toBeVisible();
+      });
+    });
+
+    test('mobile service overview header renders the environment filter', async ({
+      page,
+      pageObjects: { serviceDetailsPage },
+    }) => {
+      await serviceDetailsPage.goToMobileServiceOverview(testData.SERVICE_MOBILE_ANDROID, {
+        rangeFrom: testData.START_DATE,
+        rangeTo: testData.END_DATE,
+      });
+
+      await test.step('Verify the environment filter is visible in the header', async () => {
+        await expect(serviceDetailsPage.overviewTab.getEnvironmentFilter()).toBeVisible({
+          timeout: EXTENDED_TIMEOUT,
+        });
+      });
+
+      await test.step('Selecting an environment updates the environment query param', async () => {
+        await serviceDetailsPage.overviewTab.selectEnvironment(PRODUCTION_ENVIRONMENT);
+
+        await page.waitForURL(
+          (url) => url.searchParams.get('environment') === PRODUCTION_ENVIRONMENT,
+          { timeout: EXTENDED_TIMEOUT }
+        );
+        expect(page.url()).toContain(`environment=${PRODUCTION_ENVIRONMENT}`);
       });
     });
 

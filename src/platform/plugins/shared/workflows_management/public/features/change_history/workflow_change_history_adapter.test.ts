@@ -46,11 +46,33 @@ const sampleWorkflowHistoryResponse: WorkflowChangesHistoryResponse = {
   items: [currentHistoryItem, previousHistoryItem],
 };
 
-const createHttpMock = (get: jest.Mock): Pick<HttpSetup, 'get'> => ({
+const createHttpMock = (
+  get: jest.Mock,
+  post: jest.Mock = jest.fn().mockResolvedValue({})
+): Pick<HttpSetup, 'get' | 'post'> => ({
   get,
+  post,
 });
 
 describe('createWorkflowChangeHistoryAdapter', () => {
+  it('yields to requestAnimationFrame between list rows when computing changes', async () => {
+    const rafSpy = jest.spyOn(window, 'requestAnimationFrame').mockImplementation((callback) => {
+      callback(0);
+      return 1;
+    });
+    const http = createHttpMock(jest.fn().mockResolvedValue(sampleWorkflowHistoryResponse));
+
+    const adapter = createWorkflowChangeHistoryAdapter(http as HttpSetup);
+
+    await adapter.listChanges({
+      objectId: SAMPLE_WORKFLOW_ID,
+      page: { index: 0, size: 20 },
+    });
+
+    expect(rafSpy).toHaveBeenCalledTimes(1);
+    rafSpy.mockRestore();
+  });
+
   it('fetches paginated history with 1-based API page numbers', async () => {
     const http = createHttpMock(jest.fn().mockResolvedValue(sampleWorkflowHistoryResponse));
 
@@ -74,8 +96,84 @@ describe('createWorkflowChangeHistoryAdapter', () => {
       id: 'evt-current',
       isCurrent: true,
       metadata: { version: 3 },
+      changes: { count: 1 },
     });
     expect(result.items[1]?.isCurrent).toBeUndefined();
+    expect(result.items[1]?.changes).toBeUndefined();
+  });
+
+  it('omits changes for a page tail until the next page is loaded', async () => {
+    const http = createHttpMock(
+      jest.fn().mockResolvedValue({
+        page: 1,
+        perPage: 1,
+        total: 3,
+        items: [currentHistoryItem],
+      })
+    );
+
+    const adapter = createWorkflowChangeHistoryAdapter(http as HttpSetup);
+
+    const result = await adapter.listChanges({
+      objectId: SAMPLE_WORKFLOW_ID,
+      page: { index: 0, size: 1 },
+    });
+
+    expect(http.get).toHaveBeenCalledTimes(1);
+    expect(result.items[0]?.id).toBe('evt-current');
+    expect(result.items[0]?.changes).toBeUndefined();
+  });
+
+  it('patches the previous page tail when the next page loads', async () => {
+    const http = createHttpMock(
+      jest.fn().mockImplementation((_url, options) => {
+        const apiPage = options?.query?.page;
+
+        if (apiPage === 1) {
+          return Promise.resolve({
+            page: 1,
+            perPage: 1,
+            total: 3,
+            items: [currentHistoryItem],
+          });
+        }
+
+        return Promise.resolve({
+          page: 2,
+          perPage: 1,
+          total: 3,
+          items: [previousHistoryItem],
+        });
+      })
+    );
+
+    const adapter = createWorkflowChangeHistoryAdapter(http as HttpSetup);
+
+    await adapter.listChanges({
+      objectId: SAMPLE_WORKFLOW_ID,
+      page: { index: 0, size: 1 },
+    });
+
+    const pageTwoResult = await adapter.listChanges({
+      objectId: SAMPLE_WORKFLOW_ID,
+      page: { index: 1, size: 1 },
+    });
+
+    expect(http.get).toHaveBeenCalledTimes(2);
+    expect(pageTwoResult.updatedItems).toEqual([
+      expect.objectContaining({
+        id: 'evt-current',
+        changes: expect.objectContaining({
+          count: 1,
+          summary: [
+            {
+              title: 'Settings:',
+              lines: ['1 updated'],
+            },
+          ],
+        }),
+      }),
+    ]);
   });
 
   it('does not mark isCurrent on page 2 and appends to cache without clearing', async () => {
@@ -225,5 +323,105 @@ describe('createWorkflowChangeHistoryAdapter', () => {
         changeId: 'missing-event',
       })
     ).rejects.toThrow('Workflow change "missing-event" is not loaded');
+  });
+
+  it('posts restore without clearing cached history rows before list refetch', async () => {
+    const post = jest.fn().mockResolvedValue({});
+    const http = createHttpMock(jest.fn().mockResolvedValue(sampleWorkflowHistoryResponse), post);
+    const adapter = createWorkflowChangeHistoryAdapter(http as HttpSetup);
+
+    await adapter.listChanges({
+      objectId: SAMPLE_WORKFLOW_ID,
+      page: { index: 0, size: 20 },
+    });
+
+    await adapter.restoreChange!({
+      objectId: SAMPLE_WORKFLOW_ID,
+      changeId: 'evt-previous',
+    });
+
+    expect(post).toHaveBeenCalledWith(
+      `/internal/workflows/workflow/${SAMPLE_WORKFLOW_ID}/history/evt-previous/restore`,
+      {
+        version: INTERNAL_API_VERSION,
+        signal: undefined,
+      }
+    );
+
+    await expect(
+      adapter.getChange({
+        objectId: SAMPLE_WORKFLOW_ID,
+        changeId: 'evt-previous',
+      })
+    ).resolves.toMatchObject({ id: 'evt-previous' });
+  });
+
+  it('reloads the workflow detail after a successful restore', async () => {
+    const onWorkflowRestored = jest.fn().mockResolvedValue(undefined);
+    const post = jest.fn().mockResolvedValue({});
+    const adapter = createWorkflowChangeHistoryAdapter(
+      createHttpMock(jest.fn(), post) as HttpSetup,
+      {
+        onWorkflowRestored,
+      }
+    );
+
+    await adapter.restoreChange!({
+      objectId: SAMPLE_WORKFLOW_ID,
+      changeId: 'evt-previous',
+    });
+
+    expect(onWorkflowRestored).toHaveBeenCalledWith(SAMPLE_WORKFLOW_ID);
+  });
+
+  it('does not reload the workflow detail when restore fails', async () => {
+    const onWorkflowRestored = jest.fn();
+    const post = jest.fn().mockRejectedValue({
+      response: { status: 409 },
+      body: { message: 'Workflow was updated by another user.' },
+      message: 'Conflict',
+    });
+    const adapter = createWorkflowChangeHistoryAdapter(
+      createHttpMock(jest.fn(), post) as HttpSetup,
+      {
+        onWorkflowRestored,
+      }
+    );
+
+    await expect(
+      adapter.restoreChange!({
+        objectId: SAMPLE_WORKFLOW_ID,
+        changeId: 'evt-previous',
+      })
+    ).rejects.toMatchObject({
+      body: {
+        code: 'RESTORE_CONFLICT',
+      },
+    });
+
+    expect(onWorkflowRestored).not.toHaveBeenCalled();
+  });
+
+  it('maps HTTP restore errors to structured change-history codes', async () => {
+    const post = jest.fn().mockRejectedValue({
+      response: { status: 409 },
+      body: { message: 'Workflow was updated by another user.' },
+      message: 'Conflict',
+    });
+    const adapter = createWorkflowChangeHistoryAdapter(
+      createHttpMock(jest.fn(), post) as HttpSetup
+    );
+
+    await expect(
+      adapter.restoreChange!({
+        objectId: SAMPLE_WORKFLOW_ID,
+        changeId: 'evt-previous',
+      })
+    ).rejects.toMatchObject({
+      body: {
+        code: 'RESTORE_CONFLICT',
+        message: 'Workflow was updated by another user.',
+      },
+    });
   });
 });

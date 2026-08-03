@@ -10,6 +10,7 @@ import { EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { EsHitRecord } from '@kbn/discover-utils';
+import type { CellActionRenderer } from '../../shared/components/cell_actions';
 import { FlyoutLoading } from '../../shared/components/flyout_loading';
 import { useAttackDetails } from '../../../flyout/attack_details/hooks/use_attack_details';
 import { AttackFlyout } from '.';
@@ -34,18 +35,22 @@ export interface AttackFlyoutWrapperProps {
    * having to close and re-open it.
    */
   onAttackUpdated: () => void;
+  /**
+   * Renderer for cell actions in nested alert flyouts opened from attack tools.
+   */
+  renderCellActions?: CellActionRenderer;
 }
 
 /**
  * Wrapper for AttackFlyout that owns the single fetch of the attack document
- * for the flyout. It builds the `hit` from the fetched search hit, and exposes
- * a refreshing `onAttackUpdated` callback to children so that any in-flyout
- * mutation (status, assignees, tags, ...) is reflected without re-opening
- * the flyout.
+ * for the v2 flyout. It builds the `hit` and resolves the `attack` from the
+ * same fetched search hit, and exposes a refreshing `onAttackUpdated` callback
+ * to children so that any in-flyout mutation (status, assignees, tags, ...)
+ * is reflected without re-opening the flyout.
  */
 export const AttackFlyoutWrapper = memo(
-  ({ attackId, indexName, onAttackUpdated }: AttackFlyoutWrapperProps) => {
-    const { loading, searchHit, refetch } = useAttackDetails({ attackId, indexName });
+  ({ attackId, indexName, onAttackUpdated, renderCellActions }: AttackFlyoutWrapperProps) => {
+    const { loading, searchHit, attack, refetch } = useAttackDetails({ attackId, indexName });
 
     const hit = useMemo(
       () => (searchHit ? buildDataTableRecord(searchHit as EsHitRecord) : null),
@@ -65,7 +70,7 @@ export const AttackFlyoutWrapper = memo(
       return <FlyoutLoading data-test-subj="attack-flyout-wrapper-loading" />;
     }
 
-    if (!hit) {
+    if (!hit || !attack) {
       return (
         <EuiCallOut
           announceOnMount
@@ -77,7 +82,14 @@ export const AttackFlyoutWrapper = memo(
       );
     }
 
-    return <AttackFlyout hit={hit} onAttackUpdated={handleAttackUpdated} />;
+    return (
+      <AttackFlyout
+        hit={hit}
+        attack={attack}
+        onAttackUpdated={handleAttackUpdated}
+        renderCellActions={renderCellActions}
+      />
+    );
   }
 );
 

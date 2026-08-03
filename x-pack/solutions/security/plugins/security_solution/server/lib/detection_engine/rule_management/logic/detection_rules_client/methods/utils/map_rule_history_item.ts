@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import { mapKeys, snakeCase } from 'lodash';
 import type { RuleChangeHistoryDocument } from '@kbn/alerting-plugin/server';
 import type { SanitizedRule } from '@kbn/alerting-types';
+import type { UserProfile } from '@kbn/core-user-profile-common';
 import type { RuleHistoryItem } from '../../../../../../../../common/api/detection_engine/rule_management';
 import { convertAlertingRuleToRuleResponse } from '../../converters/convert_alerting_rule_to_rule_response';
 import { computeOldValues } from './compute_old_values';
@@ -14,7 +16,8 @@ import type { RuleParams } from '../../../../../rule_schema';
 
 export function mapRuleHistoryItem(
   current: RuleChangeHistoryDocument,
-  previous?: RuleChangeHistoryDocument
+  previous?: RuleChangeHistoryDocument,
+  userProfilesById: Map<string, UserProfile> = new Map()
 ): RuleHistoryItem {
   const rule = convertAlertingRuleToRuleResponse(current.rule as SanitizedRule<RuleParams>);
   const previousRule = previous
@@ -24,7 +27,7 @@ export function mapRuleHistoryItem(
   return {
     timestamp: current['@timestamp'],
     id: current.event.id,
-    user: current.user ? { id: current.user.id, name: current.user.name } : null,
+    user: { id: current.user.id, name: resolveUserName(current.user, userProfilesById) },
     action: current.event.action,
     rule,
     old_values: computeOldValues(rule, previousRule),
@@ -32,11 +35,21 @@ export function mapRuleHistoryItem(
   };
 }
 
+function resolveUserName(
+  user: RuleChangeHistoryDocument['user'],
+  userProfilesById: Map<string, UserProfile>
+): string {
+  const profile = user.id ? userProfilesById.get(user.id) : undefined;
+
+  return profile?.user.full_name || profile?.user.email || user.name;
+}
+
 function normalizeMetadata(
   metadata: RuleChangeHistoryDocument['metadata']
 ): Record<string, unknown> | undefined {
-  if (metadata == null) return undefined;
-  const { bulkCount, ...rest } = metadata;
+  if (metadata == null) {
+    return undefined;
+  }
 
-  return bulkCount !== undefined ? { ...rest, bulk_count: bulkCount } : rest;
+  return mapKeys(metadata, (_, key) => snakeCase(key));
 }

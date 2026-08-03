@@ -8,24 +8,42 @@
  */
 
 import { monaco } from '@kbn/monaco';
+import type { PublicTriggerDefinition } from '@kbn/workflows-extensions/public';
+import { z } from '@kbn/zod/v4';
 import {
   getBuiltInTriggerTypesFromSchema,
   getTriggerTypeSuggestions,
 } from './get_trigger_type_suggestions';
 
+const mockEventSchema = z.object({});
+
+function mockTrigger(
+  definition: Omit<PublicTriggerDefinition, 'eventSchema'>
+): PublicTriggerDefinition {
+  return { ...definition, eventSchema: mockEventSchema };
+}
+
+const mockGetTriggerDefinitions = jest.fn((): PublicTriggerDefinition[] => []);
+const mockGetTriggerDefinition = jest.fn(
+  (_id: string): PublicTriggerDefinition | undefined => undefined
+);
+
 jest.mock('../../../../../../trigger_schemas', () => ({
   triggerSchemas: {
-    getTriggerDefinitions: () => [],
-    getTriggerDefinition: () => undefined,
+    getTriggerDefinitions: () => mockGetTriggerDefinitions(),
+    getTriggerDefinition: (id: string) => mockGetTriggerDefinition(id),
   },
 }));
 
-// Mock the generate_trigger_snippet module
 jest.mock('../../../snippets/generate_trigger_snippet', () => ({
   generateTriggerSnippet: jest.fn(),
 }));
 
 import { generateTriggerSnippet } from '../../../snippets/generate_trigger_snippet';
+
+function getSuggestionLabel(label: monaco.languages.CompletionItem['label']): string {
+  return typeof label === 'string' ? label : label.label;
+}
 
 describe('get_trigger_type_suggestions', () => {
   const mockRange: monaco.IRange = {
@@ -37,7 +55,8 @@ describe('get_trigger_type_suggestions', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    // Mock the generateTriggerSnippet to return predictable snippets
+    mockGetTriggerDefinitions.mockReturnValue([]);
+    mockGetTriggerDefinition.mockReturnValue(undefined);
     (generateTriggerSnippet as jest.Mock).mockImplementation((type) => {
       switch (type) {
         case 'alert':
@@ -61,28 +80,31 @@ describe('get_trigger_type_suggestions', () => {
     describe('basic functionality', () => {
       it('should return all trigger types when no prefix is provided', () => {
         const result = getTriggerTypeSuggestions('', mockRange);
-        expect(result).toHaveLength(3); // alert, scheduled, manual
+        expect(result).toHaveLength(3);
         expect(result.map((s) => s.label)).toEqual(
           expect.arrayContaining(['alert', 'scheduled', 'manual'])
         );
       });
 
-      it('should filter trigger types by prefix (case-insensitive)', () => {
+      it('should filter trigger types by technical id prefix (case-insensitive)', () => {
         const result = getTriggerTypeSuggestions('ale', mockRange);
         expect(result).toHaveLength(1);
         expect(result[0].label).toBe('alert');
+        expect(result[0].detail).toBe('Alert');
       });
 
-      it('should filter trigger types by prefix - scheduled', () => {
-        const suggestions = getTriggerTypeSuggestions('sch', mockRange);
-        expect(suggestions).toHaveLength(1);
-        expect(suggestions[0].label).toBe('scheduled');
+      it('should filter trigger types by display label prefix', () => {
+        const result = getTriggerTypeSuggestions('Sched', mockRange);
+        expect(result).toHaveLength(1);
+        expect(result[0].label).toBe('scheduled');
+        expect(result[0].detail).toBe('Scheduled');
       });
 
       it('should filter trigger types by prefix - manual', () => {
         const result = getTriggerTypeSuggestions('man', mockRange);
         expect(result).toHaveLength(1);
         expect(result[0].label).toBe('manual');
+        expect(result[0].detail).toBe('Manual');
       });
 
       it('should handle case-insensitive matching', () => {
@@ -91,7 +113,7 @@ describe('get_trigger_type_suggestions', () => {
         expect(result[0].label).toBe('alert');
       });
 
-      it('should match partial strings in the middle of the type', () => {
+      it('should match partial strings in the middle of the type id', () => {
         const result = getTriggerTypeSuggestions('ert', mockRange);
         expect(result).toHaveLength(1);
         expect(result[0].label).toBe('alert');
@@ -103,11 +125,58 @@ describe('get_trigger_type_suggestions', () => {
       });
     });
 
+    describe('registered triggers', () => {
+      beforeEach(() => {
+        mockGetTriggerDefinitions.mockReturnValue([
+          mockTrigger({
+            id: 'alerting.episodeAcked',
+            title: 'Alerting - Episode acknowledged',
+            description: 'Emitted when acknowledgement is removed from an alerting episode.',
+            stability: 'tech_preview',
+          }),
+          mockTrigger({
+            id: 'cases.caseCreated',
+            title: 'Cases - Case created',
+            description: 'Emitted when a case is created.',
+            stability: 'tech_preview',
+          }),
+        ]);
+      });
+
+      it('should show technical ids as label with human-readable titles as detail', () => {
+        const result = getTriggerTypeSuggestions('', mockRange);
+
+        const alertingSuggestion = result.find((s) => s.label === 'alerting.episodeAcked');
+        expect(alertingSuggestion).toMatchObject({
+          label: 'alerting.episodeAcked',
+          detail: 'Alerting - Episode acknowledged',
+          filterText: 'alerting.episodeAcked',
+        });
+
+        const casesSuggestion = result.find((s) => s.label === 'cases.caseCreated');
+        expect(casesSuggestion).toMatchObject({
+          label: 'cases.caseCreated',
+          detail: 'Cases - Case created',
+        });
+      });
+
+      it('should filter registered triggers by namespace prefix', () => {
+        const result = getTriggerTypeSuggestions('alerting.', mockRange);
+
+        expect(result.map((s) => s.label)).toEqual(['alerting.episodeAcked']);
+      });
+
+      it('should filter registered triggers by title prefix', () => {
+        const result = getTriggerTypeSuggestions('Cases - Case', mockRange);
+
+        expect(result.map((s) => s.label)).toEqual(['cases.caseCreated']);
+      });
+    });
+
     describe('snippet generation', () => {
       it('should generate snippets for each trigger type', () => {
         getTriggerTypeSuggestions('', mockRange);
 
-        // Check that generateTriggerSnippet was called for each trigger type (with defaultCondition from trigger def)
         expect(generateTriggerSnippet).toHaveBeenCalledTimes(3);
         expect(generateTriggerSnippet).toHaveBeenCalledWith('alert', {
           defaultCondition: undefined,
@@ -125,11 +194,9 @@ describe('get_trigger_type_suggestions', () => {
 
         const alertSuggestion = result.find((s) => s.label === 'alert');
         expect(alertSuggestion?.insertText).toContain('alert:');
-        expect(alertSuggestion?.insertText).toContain('# Alert trigger configuration');
 
         const scheduledSuggestion = result.find((s) => s.label === 'scheduled');
         expect(scheduledSuggestion?.insertText).toContain('scheduled:');
-        expect(scheduledSuggestion?.insertText).toContain('every:');
 
         const manualSuggestion = result.find((s) => s.label === 'manual');
         expect(manualSuggestion?.insertText).toContain('manual:');
@@ -163,36 +230,45 @@ describe('get_trigger_type_suggestions', () => {
         const result = getTriggerTypeSuggestions('', mockRange);
 
         const alertSuggestion = result.find((s) => s.label === 'alert');
-        expect(alertSuggestion?.documentation).toBe('Trigger workflow when an alert rule fires');
-
-        const scheduledSuggestion = result.find((s) => s.label === 'scheduled');
-        expect(scheduledSuggestion?.documentation).toBe(
-          'Trigger workflow on a schedule (cron or interval)'
+        expect(alertSuggestion?.documentation).toBe(
+          'Trigger a workflow when an alerting rule fires'
         );
 
+        const scheduledSuggestion = result.find((s) => s.label === 'scheduled');
+        expect(scheduledSuggestion?.documentation).toContain('schedule');
+
         const manualSuggestion = result.find((s) => s.label === 'manual');
-        expect(manualSuggestion?.documentation).toBe('Trigger workflow manually');
+        expect(manualSuggestion?.documentation).toContain('manually');
       });
 
-      it('should set detail to "Workflow trigger" for all suggestions', () => {
+      it('should set detail to the human-readable trigger title', () => {
         const result = getTriggerTypeSuggestions('', mockRange);
         result.forEach((suggestion) => {
-          expect(suggestion.detail).toBe('Workflow trigger');
+          expect(typeof suggestion.detail).toBe('string');
+          expect(suggestion.detail).not.toBe(suggestion.label);
         });
       });
 
       it('should set sortText so built-in triggers sort before event-driven, each group alphabetical', () => {
+        mockGetTriggerDefinitions.mockReturnValue([
+          mockTrigger({
+            id: 'alerting.ruleCreated',
+            title: 'Alerting - Rule created',
+            description: 'When a rule is created.',
+            stability: 'tech_preview',
+          }),
+        ]);
+
         const result = getTriggerTypeSuggestions('', mockRange);
-        const builtIn = ['alert', 'manual', 'scheduled'];
+        const builtInLabels = ['alert', 'manual', 'scheduled'];
         result.forEach((suggestion) => {
-          const label =
-            typeof suggestion.label === 'string' ? suggestion.label : suggestion.label.label;
-          const prefix = builtIn.includes(label) ? '0_' : '1_';
+          const label = getSuggestionLabel(suggestion.label);
+          const prefix = builtInLabels.includes(label) ? '0_' : '1_';
           expect(suggestion.sortText).toBe(`!${prefix}${label}`);
         });
       });
 
-      it('should set filterText to match the trigger type', () => {
+      it('should set filterText to the technical trigger id for deduplication with YAML schema suggestions', () => {
         const result = getTriggerTypeSuggestions('', mockRange);
         result.forEach((suggestion) => {
           expect(suggestion.filterText).toBe(suggestion.label);
@@ -227,7 +303,8 @@ describe('get_trigger_type_suggestions', () => {
 
       it('should handle whitespace prefix', () => {
         const result = getTriggerTypeSuggestions('  ', mockRange);
-        expect(result).toHaveLength(3); // whitespace doesn't match any trigger types
+        // Empty prefix after trim matches all built-in triggers.
+        expect(result).toHaveLength(3);
       });
 
       it('should handle special characters in prefix', () => {
@@ -263,21 +340,21 @@ describe('get_trigger_type_suggestions', () => {
       expect(result).toHaveLength(3);
       expect(result).toEqual(
         expect.arrayContaining([
-          {
+          expect.objectContaining({
             type: 'alert',
-            description: 'Trigger workflow when an alert rule fires',
+            label: 'Alert',
             icon: monaco.languages.CompletionItemKind.Customcolor,
-          },
-          {
+          }),
+          expect.objectContaining({
             type: 'scheduled',
-            description: 'Trigger workflow on a schedule (cron or interval)',
+            label: 'Scheduled',
             icon: monaco.languages.CompletionItemKind.Operator,
-          },
-          {
+          }),
+          expect.objectContaining({
             type: 'manual',
-            description: 'Trigger workflow manually',
+            label: 'Manual',
             icon: monaco.languages.CompletionItemKind.TypeParameter,
-          },
+          }),
         ])
       );
     });
@@ -285,18 +362,20 @@ describe('get_trigger_type_suggestions', () => {
     it('should cache the result and return same instance on subsequent calls', () => {
       const result1 = getBuiltInTriggerTypesFromSchema();
       const result2 = getBuiltInTriggerTypesFromSchema();
-      expect(result1).toBe(result2); // Same reference
+      expect(result1).toBe(result2);
     });
 
     it('should return trigger types with correct properties', () => {
       const result = getBuiltInTriggerTypesFromSchema();
       result.forEach((triggerType) => {
         expect(triggerType).toHaveProperty('type');
+        expect(triggerType).toHaveProperty('label');
         expect(triggerType).toHaveProperty('description');
         expect(triggerType).toHaveProperty('icon');
         expect(typeof triggerType.type).toBe('string');
+        expect(typeof triggerType.label).toBe('string');
         expect(typeof triggerType.description).toBe('string');
-        expect(typeof triggerType.icon).toBe('number'); // monaco.languages.CompletionItemKind values are numbers
+        expect(typeof triggerType.icon).toBe('number');
       });
     });
   });

@@ -195,7 +195,8 @@ export const panelFooterStyles = ({ euiTheme }: UseEuiTheme) => {
     flex-shrink: 0;
     margin-block-start: auto;
     min-block-size: ${euiTheme.size.xxl};
-    padding: ${euiTheme.size.base};
+    padding-block: ${euiTheme.size.s};
+    padding-inline: ${euiTheme.size.base};
 
     &:not(:first-child) {
       border-block-start: ${euiTheme.border.thin};

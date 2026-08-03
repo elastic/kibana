@@ -16,6 +16,7 @@ export type {
 } from './tools';
 export type { AgentsServiceStartContract } from './agents';
 export type { AttachmentUIDefinition, AttachmentServiceStartContract } from './attachments';
+export type { RendererUIDefinition, RendererServiceStartContract } from './renderers';
 export type {
   EventsServiceStartContract,
   ChatUiEventsContract,
@@ -29,6 +30,7 @@ export type { ConversationInputShellProps } from './conversation_input_shell';
 export type {
   AgentBuilderPluginSetup,
   AgentBuilderPluginStart,
+  EmbeddableChatAccess,
   EmbeddableConversationProps,
   PublicEmbeddableConversationProps,
   PublicEmbeddableConversationInputProps,
@@ -37,14 +39,10 @@ export type {
   ConversationSidebarRef,
   OpenConversationSidebarReturn,
 } from './plugin_contract';
-export { AgentBuilderAnnouncementModal } from './announcement_modal/agent_builder_announcement_modal';
-export type {
-  AgentBuilderAnnouncementModalProps,
-  AgentBuilderAnnouncementVariant,
-} from './announcement_modal/agent_builder_announcement_modal';
-export { McpClientDetails, McpClientLogo } from './oauth_clients';
+export { McpClientDetails, McpClientDetailsContent, McpClientLogo } from './oauth_clients';
 export type {
   McpClientDetailsProps,
+  McpClientDetailsContentProps,
   McpClientDetailsData,
   McpClientDetailsPresentation,
   McpClientLogoProps,
