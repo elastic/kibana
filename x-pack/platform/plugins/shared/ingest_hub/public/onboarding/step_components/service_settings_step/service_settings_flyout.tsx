@@ -9,8 +9,8 @@ import React, { useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiButtonGroup,
   EuiButtonIcon,
-  EuiCallOut,
   EuiComboBox,
   EuiFieldText,
   EuiFlexGroup,
@@ -22,6 +22,7 @@ import {
   EuiFormRow,
   EuiSpacer,
   EuiSwitch,
+  EuiText,
   EuiTitle,
   EuiToolTip,
   useGeneratedHtmlId,
@@ -34,40 +35,49 @@ import type { ServiceVars } from './use_service_settings';
 import {
   AWS_REGION_OPTIONS,
   FIELD_CONFIG,
+  REGION_FIELD_NAMES,
   getFlyoutFields,
   getMandatoryBooleanFields,
+  getRegionFieldName,
+  getRequiredTextFields,
+  hasTransportChoice,
 } from './field_config';
+import type { TransportType } from './field_config';
+import { SignalTypeBadge } from '../services_step/signal_type_badge';
 
-interface CollectionSettingsFlyoutProps {
+interface ServiceSettingsFlyoutProps {
   service: AwsServiceMatrixEntry;
   config: ServiceVars;
   globalRegion: string;
-  onApply: (fields: Record<string, string>) => void;
+  onApply: (fields: Record<string, string>, transport: TransportType | null) => void;
   onClose: () => void;
 }
 
-const REGION_FIELD_NAMES = new Set(['region', 'region_name', 'aws_region']);
+const TRANSPORT_OPTIONS = [
+  {
+    id: 'aws-s3' as TransportType,
+    label: i18n.translate('xpack.ingestHub.serviceSettingsStep.flyout.transport.s3', {
+      defaultMessage: 'S3',
+    }),
+  },
+  {
+    id: 'aws-cloudwatch' as TransportType,
+    label: i18n.translate('xpack.ingestHub.serviceSettingsStep.flyout.transport.cloudwatch', {
+      defaultMessage: 'CloudWatch',
+    }),
+  },
+];
 
-function getRegionFieldName(
-  service: AwsServiceMatrixEntry,
-  activeTransport: string | null
-): string {
-  const rc = service.requiredConfig ?? [];
-  if (activeTransport === 'aws-s3' && rc.includes('region')) return 'region';
-  if (activeTransport === 'aws-cloudwatch' && rc.includes('region_name')) return 'region_name';
-  if (rc.includes('aws_region')) return 'aws_region';
-  return 'aws_region';
-}
-
-export function CollectionSettingsFlyout({
+export function ServiceSettingsFlyout({
   service,
   config,
   globalRegion,
   onApply,
   onClose,
-}: CollectionSettingsFlyoutProps) {
+}: ServiceSettingsFlyoutProps) {
   const flyoutTitleId = useGeneratedHtmlId();
   const [draft, setDraft] = useState<Record<string, string>>({ ...config.vars });
+  const [draftTransport, setDraftTransport] = useState<TransportType | null>(config.trigger);
 
   const [regionsRows, setRegionsRows] = useState<string[]>(() => {
     const parts = (config.vars.regions ?? '')
@@ -96,10 +106,15 @@ export function CollectionSettingsFlyout({
     syncRegionsToDraft(final);
   };
 
-  const flyoutFields = getFlyoutFields(service, config.trigger);
-  const regionField = getRegionFieldName(service, config.trigger);
-  const otherFlyoutFields = flyoutFields.filter((f) => !REGION_FIELD_NAMES.has(f));
-  const mandatoryBoolFields = getMandatoryBooleanFields(service, config.trigger);
+  const hasTransport = hasTransportChoice(service);
+  const requiredTextFields = getRequiredTextFields(service, draftTransport);
+  const requiredTextFieldSet = new Set(requiredTextFields);
+  const flyoutFields = getFlyoutFields(service, draftTransport);
+  const regionField = getRegionFieldName(service, draftTransport);
+  const otherFlyoutFields = flyoutFields.filter(
+    (f) => !REGION_FIELD_NAMES.has(f) && !requiredTextFieldSet.has(f)
+  );
+  const mandatoryBoolFields = getMandatoryBooleanFields(service, draftTransport);
 
   const regionValue = draft[regionField]?.trim() || globalRegion;
   const selectedRegionOption = regionValue ? [{ label: regionValue }] : [];
@@ -122,62 +137,123 @@ export function CollectionSettingsFlyout({
   };
 
   const handleApply = () => {
-    onApply(draft);
+    onApply(draft, draftTransport);
+  };
+
+  const anyRequiredEmpty = requiredTextFields.some((f) => !(draft[f] ?? '').trim());
+
+  const getFieldLabel = (fieldName: string): string => {
+    const meta = FIELD_CONFIG[fieldName];
+    if (!meta) return fieldName;
+    if (hasTransport && meta.transport === 'aws-s3') return `[S3] ${meta.label}`;
+    if (hasTransport && meta.transport === 'aws-cloudwatch') return `[CloudWatch] ${meta.label}`;
+    return meta.label;
   };
 
   return (
-    <EuiFlyout size="m" ownFocus onClose={onClose} aria-labelledby={flyoutTitleId}>
+    <EuiFlyout
+      size="s"
+      ownFocus
+      onClose={onClose}
+      aria-labelledby={flyoutTitleId}
+      data-test-subj="serviceSettingsFlyout"
+    >
       <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="m" id={flyoutTitleId}>
-          <h2>
-            <FormattedMessage
-              id="xpack.ingestHub.serviceSettingsStep.flyout.title"
-              defaultMessage="Collection settings — {serviceName}"
-              values={{ serviceName: service.name }}
-            />
-          </h2>
-        </EuiTitle>
+        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={false}>
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="m" id={flyoutTitleId}>
+              <h2>{service.name}</h2>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <SignalTypeBadge signalType={service.signalType} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <EuiCallOut
-          title={i18n.translate('xpack.ingestHub.serviceSettingsStep.flyout.callout.title', {
-            defaultMessage: 'Sensible defaults applied',
-          })}
-          color="success"
-          iconType="checkInCircleFilled"
-        >
-          <p>
-            <FormattedMessage
-              id="xpack.ingestHub.serviceSettingsStep.flyout.callout.body"
-              defaultMessage="{awsRegion} overrides the global region for this service only."
-              values={{ awsRegion: <strong>AWS Region</strong> }}
-            />
-            {otherFlyoutFields.includes('regions') && (
+        {hasTransport && (
+          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={false}>
+            <EuiFlexItem grow={false}>
+              <EuiButtonGroup
+                legend={i18n.translate(
+                  'xpack.ingestHub.serviceSettingsStep.flyout.transport.legend',
+                  { defaultMessage: 'Transport type' }
+                )}
+                options={TRANSPORT_OPTIONS}
+                idSelected={draftTransport ?? 'aws-s3'}
+                onChange={(id) => setDraftTransport(id as TransportType)}
+                buttonSize="compressed"
+                color="primary"
+                data-test-subj="serviceSettingsFlyout-transportToggle"
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        )}
+
+        {requiredTextFields.length > 0 && (
+          <>
+            <EuiSpacer size="m" />
+            {anyRequiredEmpty && (
               <>
-                {' '}
-                <FormattedMessage
-                  id="xpack.ingestHub.serviceSettingsStep.flyout.callout.bodyRegions"
-                  defaultMessage="{regions} is an optional filter to restrict collection to specific regions."
-                  values={{ regions: <strong>Regions</strong> }}
-                />
+                <EuiText
+                  size="s"
+                  color="danger"
+                  data-test-subj="serviceSettingsFlyout-requiredHint"
+                >
+                  <p>
+                    <FormattedMessage
+                      id="xpack.ingestHub.serviceSettingsStep.flyout.requiredHint"
+                      defaultMessage="Complete the required fields below before continuing."
+                    />
+                  </p>
+                </EuiText>
+                <EuiSpacer size="s" />
               </>
             )}
-          </p>
-        </EuiCallOut>
+            {requiredTextFields.map((fieldName) => {
+              const meta = FIELD_CONFIG[fieldName];
+              if (!meta) return null;
+              const value = draft[fieldName] ?? '';
+              const isInvalid = value.trim() === '';
+              return (
+                <EuiFormRow
+                  key={fieldName}
+                  display="rowCompressed"
+                  label={getFieldLabel(fieldName)}
+                  isInvalid={isInvalid}
+                  error={
+                    isInvalid
+                      ? i18n.translate(
+                          'xpack.ingestHub.serviceSettingsStep.flyout.requiredField.error',
+                          { defaultMessage: 'This field is required.' }
+                        )
+                      : undefined
+                  }
+                >
+                  <EuiFieldText
+                    compressed
+                    value={value}
+                    onChange={(e) => handleFieldChange(fieldName, e.target.value)}
+                    placeholder={meta.placeholder}
+                    isInvalid={isInvalid}
+                    data-test-subj={`serviceSettingsFlyout-field-${fieldName}`}
+                  />
+                </EuiFormRow>
+              );
+            })}
+          </>
+        )}
+
         <EuiSpacer size="m" />
-        <EuiTitle size="xs">
-          <h3>
-            <FormattedMessage
-              id="xpack.ingestHub.serviceSettingsStep.flyout.advancedHeading"
-              defaultMessage="ADVANCED COLLECTION SETTINGS"
-            />
-          </h3>
-        </EuiTitle>
-        <EuiSpacer size="s" />
+
         <EuiFormRow
           label={i18n.translate('xpack.ingestHub.serviceSettingsStep.flyout.regionOverride.label', {
             defaultMessage: 'AWS Region (override)',
           })}
+          helpText={i18n.translate(
+            'xpack.ingestHub.serviceSettingsStep.flyout.regionOverride.helpText',
+            { defaultMessage: 'Overrides the global region for this service only.' }
+          )}
           isInvalid={!regionValue.trim()}
         >
           <EuiComboBox
@@ -190,6 +266,7 @@ export function CollectionSettingsFlyout({
             customOptionText='Use "{searchValue}" as region'
           />
         </EuiFormRow>
+
         {otherFlyoutFields.map((fieldName) => {
           const meta = FIELD_CONFIG[fieldName];
           if (!meta) return null;
@@ -279,7 +356,7 @@ export function CollectionSettingsFlyout({
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={onClose} data-test-subj="collectionSettingsFlyout-closeButton">
+            <EuiButtonEmpty onClick={onClose} data-test-subj="serviceSettingsFlyout-closeButton">
               <FormattedMessage
                 id="xpack.ingestHub.serviceSettingsStep.flyout.closeButton"
                 defaultMessage="Close"
@@ -287,10 +364,10 @@ export function CollectionSettingsFlyout({
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton fill onClick={handleApply}>
+            <EuiButton fill onClick={handleApply} data-test-subj="serviceSettingsFlyout-saveButton">
               <FormattedMessage
-                id="xpack.ingestHub.serviceSettingsStep.flyout.applyButton"
-                defaultMessage="Apply"
+                id="xpack.ingestHub.serviceSettingsStep.flyout.saveButton"
+                defaultMessage="Save"
               />
             </EuiButton>
           </EuiFlexItem>
