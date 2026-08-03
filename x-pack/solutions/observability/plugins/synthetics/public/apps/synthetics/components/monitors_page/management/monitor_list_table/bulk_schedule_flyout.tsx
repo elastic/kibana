@@ -37,8 +37,8 @@ import {
   ConfigKey,
   MonitorTypeEnum,
   ScheduleUnit,
-  SourceType,
 } from '../../../../../../../common/runtime_types';
+import { splitMonitorsForBulkEdit } from './bulk_edit_eligibility';
 import { useGetUrlParams } from '../../../../hooks';
 import { fetchBulkUpdateMonitors } from '../../../../state';
 import { kibanaService } from '../../../../../../utils/kibana_service';
@@ -88,20 +88,10 @@ export const BulkScheduleFlyout = ({
   const flyoutTitleId = useGeneratedHtmlId();
   const skippedAccordionId = useGeneratedHtmlId();
 
-  // Only `ui`-origin monitors can be patched via the bulk API; project/terraform
-  // monitors are rejected per-id server-side, so we exclude them up front.
-  const { eligibleMonitors, skippedMonitors } = useMemo(() => {
-    const eligible: EncryptedSyntheticsSavedMonitor[] = [];
-    const skipped: Array<{ id: string; name: string }> = [];
-    for (const monitor of monitors) {
-      if (monitor[ConfigKey.MONITOR_SOURCE_TYPE] === SourceType.UI) {
-        eligible.push(monitor);
-      } else {
-        skipped.push({ id: monitor[ConfigKey.CONFIG_ID], name: monitor[ConfigKey.NAME] });
-      }
-    }
-    return { eligibleMonitors: eligible, skippedMonitors: skipped };
-  }, [monitors]);
+  const { eligibleMonitors, skippedMonitors } = useMemo(
+    () => splitMonitorsForBulkEdit(monitors),
+    [monitors]
+  );
 
   // Sub-minute schedules are only valid for lightweight monitors (http/tcp/icmp).
   // For a mixed selection we fall back to the most restrictive set (minutes only,
