@@ -39,6 +39,10 @@ export const labels = {
       'xpack.security.management.applicationConnections.filters.statusConnected',
       { defaultMessage: 'Connected' }
     ),
+    statusExpired: i18n.translate(
+      'xpack.security.management.applicationConnections.filters.statusExpired',
+      { defaultMessage: 'Expired' }
+    ),
     statusRevoked: i18n.translate(
       'xpack.security.management.applicationConnections.filters.statusRevoked',
       { defaultMessage: 'Revoked' }
@@ -69,6 +73,9 @@ export const labels = {
           'This connection is authorized. Sessions expire after 30 days of inactivity.',
       }
     ),
+    expired: i18n.translate('xpack.security.management.applicationConnections.status.expired', {
+      defaultMessage: 'Expired',
+    }),
     revoked: i18n.translate('xpack.security.management.applicationConnections.status.revoked', {
       defaultMessage: 'Revoked',
     }),

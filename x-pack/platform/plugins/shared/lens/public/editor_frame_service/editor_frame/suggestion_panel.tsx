@@ -213,6 +213,7 @@ const SuggestionPreview = ({
           : undefined
       }
     >
+      {/* eslint-disable-next-line @elastic/eui/tooltip-focusable-anchor */}
       <div data-test-subj={`lnsSuggestion-${camelCase(preview.title)}`}>
         <EuiPanel
           hasBorder={true}
