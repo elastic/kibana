@@ -206,9 +206,7 @@ export const generateApiSchemaDoc = ({
   title: string;
   source?: string;
   schema: z.ZodType;
-  extraSections?: (
-    jsonSchema: unknown
-  ) => Array<{ heading: string; content: string }> | undefined;
+  extraSections?: (jsonSchema: unknown) => Array<{ heading: string; content: string }> | undefined;
 }): string => {
   const jsonSchema = zodToJsonSchema(schema);
   const fieldTable = formatFieldTable(jsonSchemaToFieldTable(jsonSchema));

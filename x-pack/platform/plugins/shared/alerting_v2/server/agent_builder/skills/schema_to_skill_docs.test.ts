@@ -6,10 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type {
-  ActionPolicyWorkflowPayload,
-  AlertEpisode,
-} from '../../lib/dispatcher/types';
+import type { ActionPolicyWorkflowPayload, AlertEpisode } from '../../lib/dispatcher/types';
 import {
   generateApiSchemaDoc,
   generateOperationsDoc,
@@ -61,17 +58,19 @@ describe('schema_to_skill_docs', () => {
       expect(doc).toContain('# Example API Schema Reference');
       expect(doc).toContain('Auto-generated from `@kbn/alerting-v2-schemas`.');
       expect(doc).toContain('## Top-Level Fields');
-      expect(doc).toContain('| `name` | string | required | Display name. (min length: 1, max length: 64) |');
-      expect(doc).toContain('| `enabled` | boolean | optional | Whether the resource is enabled. |');
+      expect(doc).toContain(
+        '| `name` | string | required | Display name. (min length: 1, max length: 64) |'
+      );
+      expect(doc).toContain(
+        '| `enabled` | boolean | optional | Whether the resource is enabled. |'
+      );
     });
 
     it('appends extra sections from the converted JSON schema', () => {
       const doc = generateApiSchemaDoc({
         title: 'Example API Schema Reference',
         schema: exampleApiSchema,
-        extraSections: () => [
-          { heading: 'Notes', content: 'Extra guidance for the agent.' },
-        ],
+        extraSections: () => [{ heading: 'Notes', content: 'Extra guidance for the agent.' }],
       });
 
       expect(doc).toContain('## Notes');
@@ -101,7 +100,9 @@ describe('schema_to_skill_docs', () => {
       expect(doc).toContain('Auto-generated from the example tool Zod schemas.');
       expect(doc).toContain('#### `operation: "set_name"`');
       expect(doc).toContain('#### `operation: "validate"`');
-      expect(doc).toContain('| `name` | string | required | Display name. (min length: 1, max length: 64) |');
+      expect(doc).toContain(
+        '| `name` | string | required | Display name. (min length: 1, max length: 64) |'
+      );
       expect(doc).toContain('| `operation` | "set_name" | required |');
     });
   });

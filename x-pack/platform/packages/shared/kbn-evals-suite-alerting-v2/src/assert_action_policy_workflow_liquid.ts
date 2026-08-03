@@ -164,9 +164,7 @@ export const assertActionPolicyWorkflowLiquid = (
     variables = Array.from(new Set(scanForTemplateVariables(parsed))).sort();
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    throw new Error(
-      `Generated workflow contains invalid Liquid template syntax: ${message}`
-    );
+    throw new Error(`Generated workflow contains invalid Liquid template syntax: ${message}`);
   }
 
   const payloadVariables = variables.filter(isActionPolicyPayloadLiquidPath);
@@ -176,9 +174,7 @@ export const assertActionPolicyWorkflowLiquid = (
         `Action-policy dispatch exposes alert data as \`inputs.payload\` ` +
         `(mirrors \`ActionPolicyWorkflowPayload\`). ` +
         `Found variables: ${
-          variables.length > 0
-            ? variables.map((path) => `\`${path}\``).join(', ')
-            : '(none)'
+          variables.length > 0 ? variables.map((path) => `\`${path}\``).join(', ') : '(none)'
         }.`
     );
   }
@@ -189,8 +185,8 @@ export const assertActionPolicyWorkflowLiquid = (
       path === PAYLOAD_PREFIX
         ? ''
         : path.startsWith(`${PAYLOAD_PREFIX}.`)
-          ? path.slice(PAYLOAD_PREFIX.length + 1)
-          : path.slice(PAYLOAD_PREFIX.length); // inputs.payload[...]
+        ? path.slice(PAYLOAD_PREFIX.length + 1)
+        : path.slice(PAYLOAD_PREFIX.length); // inputs.payload[...]
     return getInvalidActionPolicyPayloadField(relative, payloadSchema) !== null;
   });
 

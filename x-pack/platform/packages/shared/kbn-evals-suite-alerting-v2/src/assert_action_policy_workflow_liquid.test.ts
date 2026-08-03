@@ -81,9 +81,7 @@ steps:
   it('accepts a workflow with valid inputs.payload.* fields', () => {
     const { variables } = assertActionPolicyWorkflowLiquid(validWorkflowYaml);
 
-    expect(variables).toEqual(
-      expect.arrayContaining(['inputs.payload.episodes', 'execution.url'])
-    );
+    expect(variables).toEqual(expect.arrayContaining(['inputs.payload.episodes', 'execution.url']));
   });
 
   it('rejects invalid Liquid syntax', () => {
@@ -107,7 +105,9 @@ steps:
       message: "{{ inputs.payload.policy_id }} {{ inputs.payload.alerts }}"
 `;
 
-    expect(() => assertActionPolicyWorkflowLiquid(yaml)).toThrow(/unknown `inputs\.payload` fields/i);
+    expect(() => assertActionPolicyWorkflowLiquid(yaml)).toThrow(
+      /unknown `inputs\.payload` fields/i
+    );
     expect(() => assertActionPolicyWorkflowLiquid(yaml)).toThrow(/inputs\.payload\.policy_id/);
     expect(() => assertActionPolicyWorkflowLiquid(yaml)).toThrow(/inputs\.payload\.alerts/);
   });
@@ -146,4 +146,3 @@ steps:
     expect(() => assertActionPolicyWorkflowLiquid(yaml)).toThrow(/\(none\)/);
   });
 });
-
