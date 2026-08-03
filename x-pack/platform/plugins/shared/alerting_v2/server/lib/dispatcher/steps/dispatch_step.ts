@@ -95,27 +95,21 @@ export class DispatchStep implements DispatcherStep {
           }
         } catch (err) {
           this.logger.error({
-            error:
-              err instanceof Error
-                ? err
-                : new Error(
-                    `Failed to dispatch group ${group.id} to workflow ${destination.id}: ${String(
-                      err
-                    )}`
-                  ),
+            error: err,
             code: ALERTING_V2_LOG_CODES.DISPATCH_WORKFLOW_SCHEDULE_FAILED,
+            labels: {
+              group_id: group.id,
+              policy_id: group.policyId,
+              workflow_id: destination.id,
+            },
           });
         }
       }
     } catch (err) {
       this.logger.error({
-        error:
-          err instanceof Error
-            ? err
-            : new Error(
-                `Failed to dispatch group ${group.id} for policy ${group.policyId}: ${String(err)}`
-              ),
+        error: err,
         code: ALERTING_V2_LOG_CODES.DISPATCH_GROUP_UNHANDLED_ERROR,
+        labels: { group_id: group.id, policy_id: group.policyId },
       });
     }
     return { groupId: group.id, executionIds };

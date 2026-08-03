@@ -7,6 +7,7 @@
 
 import type { WorkflowDetailDto } from '@kbn/workflows';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import { ALERTING_V2_LOG_CODES } from '../../errors/error_codes';
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
 import {
   createDispatcherPipelineState,
@@ -261,12 +262,15 @@ describe('DispatchStep', () => {
 
     expect(result.type).toBe('continue');
     expect(mockLogger.error).toHaveBeenCalledTimes(1);
-    expect(mockLogger.error).toHaveBeenCalledWith(
-      'service unavailable',
-      expect.objectContaining({
-        error: expect.objectContaining({ message: 'service unavailable' }),
-      })
-    );
+    expect(mockLogger.error).toHaveBeenCalledWith('service unavailable', {
+      labels: {
+        group_id: 'g1',
+        policy_id: 'p1',
+        workflow_id: 'workflow-1',
+        code: ALERTING_V2_LOG_CODES.DISPATCH_WORKFLOW_SCHEDULE_FAILED,
+      },
+      error: expect.objectContaining({ message: 'service unavailable' }),
+    });
   });
 
   it('continues dispatching remaining destinations when one destination fails', async () => {

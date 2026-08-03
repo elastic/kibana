@@ -239,7 +239,7 @@ export class ActionPolicyExecutionHistoryClient {
 
   private unwrapArray<T>(result: PromiseSettledResult<T[]>, code: AlertingV2LogCode): T[] {
     if (result.status === 'fulfilled') return result.value;
-    this.logFailure(result.reason, code);
+    this.logger.error({ error: result.reason, code });
     return [];
   }
 
@@ -267,13 +267,8 @@ export class ActionPolicyExecutionHistoryClient {
     code: AlertingV2LogCode
   ): { items: T[]; total: number } {
     if (result.status === 'fulfilled') return result.value;
-    this.logFailure(result.reason, code);
+    this.logger.error({ error: result.reason, code });
     return { items: [], total: 0 };
-  }
-
-  private logFailure(reason: unknown, code: AlertingV2LogCode): void {
-    const error = reason instanceof Error ? reason : new Error(String(reason));
-    this.logger.error({ error, code });
   }
 }
 
