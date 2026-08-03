@@ -557,8 +557,8 @@ describe('markScheduledExecutionFailedAfterTaskError', () => {
 
   beforeEach(() => {
     esClient = elasticsearchServiceMock.createElasticsearchClient();
-    repository = new WorkflowExecutionRepository(esClient, logger);
-    stepExecutionRepository = new StepExecutionRepository(esClient, logger);
+    repository = new WorkflowExecutionRepository(esClient);
+    stepExecutionRepository = new StepExecutionRepository(esClient);
     jest.spyOn(stepExecutionRepository, 'markNonTerminalStepsFailed').mockResolvedValue(undefined);
     jest.spyOn(logger, 'warn').mockImplementation(() => {});
     jest.spyOn(logger, 'error').mockImplementation(() => {});
