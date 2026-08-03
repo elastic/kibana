@@ -5,26 +5,36 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiCallOut,
   EuiComboBox,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiIconTip,
+  EuiInMemoryTable,
+  EuiLink,
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { AWS_REGION_OPTIONS } from './field_config';
-import { useServiceSettings } from './use_service_settings';
-import { ServiceSettingsCard } from './service_settings_card';
-import { CollectionSettingsFlyout } from './collection_settings_flyout';
+import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
+import { AWS_REGION_OPTIONS, getRegionFieldName } from './field_config';
 import type { TransportType } from './field_config';
+import { useServiceSettings } from './use_service_settings';
+import { ServiceSettingsFlyout } from './service_settings_flyout';
+import { SignalTypeBadge } from '../services_step/signal_type_badge';
+import { ServiceSearchFilter } from '../service_search_filter';
+import type { SignalFilter } from '../services_step/use_services_step';
 
 interface ServiceSettingsStepProps {
   onContinue: () => void;
@@ -36,11 +46,18 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
     globalRegion,
     setGlobalRegion,
     selectedServices,
+    filteredServices,
+    incompleteServices,
+    incompleteServiceIds,
+    searchQuery,
+    setSearchQuery,
+    signalFilter,
+    setSignalFilter,
     getServiceVars,
-    setServiceTransport,
-    setServiceField,
-    setServiceFields,
-    showValidation,
+    setServiceFieldsAndTransport,
+    globalRegionTouched,
+    setGlobalRegionTouched,
+    isReady,
     handleNext,
   } = useServiceSettings({ onContinue });
 
@@ -50,21 +67,135 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
     ? selectedServices.find((s) => s.id === activeFlyoutServiceId) ?? null
     : null;
 
-  const handleTransportChange = (serviceId: string) => (transport: TransportType) => {
-    setServiceTransport(serviceId, transport);
-  };
-
-  const handleFieldChange = (serviceId: string) => (fieldName: string, value: string) => {
-    setServiceField(serviceId, fieldName, value);
-  };
-
-  const handleFlyoutApply = (serviceId: string) => (fields: Record<string, string>) => {
-    setServiceFields(serviceId, fields);
-    setActiveFlyoutServiceId(null);
-  };
+  const handleFlyoutApply =
+    (serviceId: string) => (fields: Record<string, string>, transport: TransportType | null) => {
+      setServiceFieldsAndTransport(serviceId, fields, transport);
+      setActiveFlyoutServiceId(null);
+    };
 
   const globalRegionOptions = AWS_REGION_OPTIONS;
   const selectedGlobalRegionOption = globalRegion ? [{ label: globalRegion }] : [];
+
+  const continueTooltipContent = useMemo(() => {
+    if (isReady) return undefined;
+    const reasons: string[] = [];
+    if (!globalRegion.trim()) {
+      reasons.push(
+        i18n.translate('xpack.ingestHub.serviceSettingsStep.continueTooltip.noRegion', {
+          defaultMessage: 'Set a global region',
+        })
+      );
+    }
+    if (incompleteServices.length > 0) {
+      reasons.push(
+        i18n.translate('xpack.ingestHub.serviceSettingsStep.continueTooltip.incompleteServices', {
+          defaultMessage:
+            '{count, plural, one {# service needs configuration} other {# services need configuration}}',
+          values: { count: incompleteServices.length },
+        })
+      );
+    }
+    return reasons.join(' · ');
+  }, [isReady, globalRegion, incompleteServices]);
+
+  const columns: Array<EuiBasicTableColumn<AwsServiceMatrixEntry>> = useMemo(
+    () => [
+      {
+        width: '32px',
+        render: (service: AwsServiceMatrixEntry) =>
+          incompleteServiceIds.has(service.id) ? (
+            <EuiIconTip
+              type="warning"
+              color="warning"
+              content={i18n.translate(
+                'xpack.ingestHub.serviceSettingsStep.table.attentionTooltip',
+                { defaultMessage: 'Required configuration missing' }
+              )}
+              anchorProps={{ 'data-test-subj': `serviceSettingsStep-attentionIcon-${service.id}` }}
+            />
+          ) : null,
+      },
+      {
+        name: i18n.translate('xpack.ingestHub.serviceSettingsStep.table.col.serviceName', {
+          defaultMessage: 'Service Name',
+        }),
+        render: (service: AwsServiceMatrixEntry) => (
+          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiToolTip
+                content={i18n.translate('xpack.ingestHub.serviceSettingsStep.table.editAriaLabel', {
+                  defaultMessage: 'Edit {name}',
+                  values: { name: service.name },
+                })}
+                disableScreenReaderOutput
+              >
+                <EuiButtonIcon
+                  iconType="expand"
+                  size="xs"
+                  color="text"
+                  onClick={() => setActiveFlyoutServiceId(service.id)}
+                  aria-label={i18n.translate(
+                    'xpack.ingestHub.serviceSettingsStep.table.editAriaLabel',
+                    {
+                      defaultMessage: 'Edit {name}',
+                      values: { name: service.name },
+                    }
+                  )}
+                  data-test-subj={`serviceSettingsStep-editButton-${service.id}`}
+                />
+              </EuiToolTip>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiLink
+                onClick={() => setActiveFlyoutServiceId(service.id)}
+                data-test-subj={`serviceSettingsStep-serviceLink-${service.id}`}
+              >
+                {service.name}
+              </EuiLink>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ),
+        sortable: (service: AwsServiceMatrixEntry) => service.name,
+      },
+      {
+        field: 'signalType' as const,
+        name: i18n.translate('xpack.ingestHub.serviceSettingsStep.table.col.collects', {
+          defaultMessage: 'Collects',
+        }),
+        render: (signalType: AwsServiceMatrixEntry['signalType']) => (
+          <SignalTypeBadge signalType={signalType} />
+        ),
+        sortable: true,
+      },
+      {
+        field: 'category' as const,
+        name: i18n.translate('xpack.ingestHub.serviceSettingsStep.table.col.category', {
+          defaultMessage: 'Category',
+        }),
+        sortable: true,
+      },
+      {
+        name: i18n.translate('xpack.ingestHub.serviceSettingsStep.table.col.region', {
+          defaultMessage: 'Region',
+        }),
+        render: (service: AwsServiceMatrixEntry) => {
+          const config = getServiceVars(service.id);
+          const regionField = getRegionFieldName(service, config.trigger);
+          const override = config.vars[regionField]?.trim();
+          if (override) return override;
+          if (globalRegion) {
+            return globalRegion;
+          }
+          return (
+            <EuiText size="s" color="subdued">
+              —
+            </EuiText>
+          );
+        },
+      },
+    ],
+    [getServiceVars, globalRegion, incompleteServiceIds]
+  );
 
   return (
     <div data-test-subj="onboardingStep-serviceSettings">
@@ -83,8 +214,7 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
             <p>
               <FormattedMessage
                 id="xpack.ingestHub.serviceSettingsStep.subtitle"
-                defaultMessage="Configure each selected service. Click {collectionSettings} on any service to tune optional settings."
-                values={{ collectionSettings: <strong>Collection settings</strong> }}
+                defaultMessage="Configure each selected service."
               />
             </p>
           </EuiText>
@@ -92,13 +222,23 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
         <EuiFlexItem grow={false} style={{ minWidth: 260 }}>
           <EuiFormRow
             display="rowCompressed"
-            label={i18n.translate('xpack.ingestHub.serviceSettingsStep.globalRegion.label', {
-              defaultMessage:
-                'Global AWS Region — can be overridden per service in Collection settings',
-            })}
-            isInvalid={showValidation && !globalRegion.trim()}
+            label={
+              <>
+                {i18n.translate('xpack.ingestHub.serviceSettingsStep.globalRegion.label', {
+                  defaultMessage: 'Global AWS region',
+                })}{' '}
+                <EuiIconTip
+                  type="info"
+                  color="subdued"
+                  content={i18n.translate('xpack.ingestHub.serviceSettingsStep.globalRegion.note', {
+                    defaultMessage: 'Can be overridden per service',
+                  })}
+                />
+              </>
+            }
+            isInvalid={globalRegionTouched && !globalRegion.trim()}
             error={
-              showValidation && !globalRegion.trim() ? (
+              globalRegionTouched && !globalRegion.trim() ? (
                 <span data-test-subj="serviceSettingsStep-globalRegionError">
                   {i18n.translate('xpack.ingestHub.serviceSettingsStep.globalRegion.error', {
                     defaultMessage: 'A global region is required.',
@@ -112,14 +252,21 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
               singleSelection={{ asPlainText: true }}
               options={globalRegionOptions}
               selectedOptions={selectedGlobalRegionOption}
-              onChange={(selected) => setGlobalRegion(selected[0]?.label ?? '')}
-              onCreateOption={(searchValue) => setGlobalRegion(searchValue)}
-              isInvalid={showValidation && !globalRegion.trim()}
+              onChange={(selected) => {
+                setGlobalRegionTouched(true);
+                setGlobalRegion(selected[0]?.label ?? '');
+              }}
+              onCreateOption={(searchValue) => {
+                setGlobalRegionTouched(true);
+                setGlobalRegion(searchValue);
+              }}
+              isInvalid={globalRegionTouched && !globalRegion.trim()}
               customOptionText='Use "{searchValue}" as region'
               placeholder={i18n.translate(
                 'xpack.ingestHub.serviceSettingsStep.globalRegion.placeholder',
                 { defaultMessage: 'Select or enter a region' }
               )}
+              data-test-subj="serviceSettingsStep-globalRegion"
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -127,22 +274,54 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
 
       <EuiSpacer size="m" />
 
-      {selectedServices.map((service) => {
-        const config = getServiceVars(service.id);
-        return (
-          <React.Fragment key={service.id}>
-            <ServiceSettingsCard
-              service={service}
-              config={config}
-              showValidation={showValidation}
-              onTransportChange={handleTransportChange(service.id)}
-              onFieldChange={handleFieldChange(service.id)}
-              onOpenFlyout={() => setActiveFlyoutServiceId(service.id)}
-            />
-            <EuiSpacer size="s" />
-          </React.Fragment>
-        );
-      })}
+      {incompleteServices.length > 0 && (
+        <>
+          <EuiCallOut
+            announceOnMount
+            color="warning"
+            iconType="warning"
+            size="s"
+            title={i18n.translate('xpack.ingestHub.serviceSettingsStep.attentionCallout.title', {
+              defaultMessage: 'Some services need your input',
+            })}
+            data-test-subj="serviceSettingsStep-attentionCallout"
+          />
+          <EuiSpacer size="m" />
+        </>
+      )}
+
+      <ServiceSearchFilter
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        signalFilter={signalFilter as SignalFilter}
+        onSignalFilterChange={setSignalFilter}
+        searchTestSubj="serviceSettingsStep-searchBox"
+        filterTestSubj="serviceSettingsStep-signalFilter"
+      />
+
+      <EuiSpacer size="s" />
+
+      <EuiText size="s" color="subdued">
+        <FormattedMessage
+          id="xpack.ingestHub.serviceSettingsStep.serviceCount"
+          defaultMessage="Showing {count} {count, plural, one {service} other {services}}"
+          values={{ count: <strong>{filteredServices.length}</strong> }}
+        />
+      </EuiText>
+
+      <EuiSpacer size="s" />
+
+      <EuiInMemoryTable
+        items={filteredServices}
+        columns={columns}
+        pagination={{ initialPageSize: 10, pageSizeOptions: [10, 25, 50] }}
+        sorting={true}
+        tableLayout="auto"
+        tableCaption={i18n.translate('xpack.ingestHub.serviceSettingsStep.table.caption', {
+          defaultMessage: 'Selected AWS services configuration',
+        })}
+        data-test-subj="serviceSettingsStep-table"
+      />
 
       <EuiSpacer size="m" />
 
@@ -158,17 +337,27 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
           )}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton fill onClick={handleNext} data-test-subj="serviceSettingsStep-continueButton">
-            <FormattedMessage
-              id="xpack.ingestHub.serviceSettingsStep.continueButton"
-              defaultMessage="Continue"
-            />
-          </EuiButton>
+          <EuiToolTip content={continueTooltipContent}>
+            {/* span needed: disabled <button> swallows pointer events, span intercepts them for the tooltip */}
+            <span tabIndex={0} style={{ display: 'inline-block' }}>
+              <EuiButton
+                fill
+                onClick={handleNext}
+                disabled={!isReady}
+                data-test-subj="serviceSettingsStep-continueButton"
+              >
+                <FormattedMessage
+                  id="xpack.ingestHub.serviceSettingsStep.continueButton"
+                  defaultMessage="Continue"
+                />
+              </EuiButton>
+            </span>
+          </EuiToolTip>
         </EuiFlexItem>
       </EuiFlexGroup>
 
       {activeFlyoutService && (
-        <CollectionSettingsFlyout
+        <ServiceSettingsFlyout
           service={activeFlyoutService}
           config={getServiceVars(activeFlyoutService.id)}
           globalRegion={globalRegion}
