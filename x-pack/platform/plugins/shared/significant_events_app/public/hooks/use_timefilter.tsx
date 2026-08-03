@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import type { TimefilterContract, TimefilterHook } from '@kbn/data-plugin/public';
+import type { TimefilterHook } from '@kbn/data-plugin/public';
 import { useKibana } from './use_kibana';
 
-export function useTimefilter(): TimefilterHook & {
-  setTime: TimefilterContract['setTime'];
-} {
+export function useTimefilter(): TimefilterHook {
   const {
     dependencies: {
       start: {
@@ -19,10 +17,5 @@ export function useTimefilter(): TimefilterHook & {
     },
   } = useKibana();
 
-  const result = query.timefilter.timefilter.useTimefilter();
-
-  return {
-    ...result,
-    setTime: query.timefilter.timefilter.setTime,
-  };
+  return query.timefilter.timefilter.useTimefilter();
 }
