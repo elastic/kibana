@@ -54,6 +54,7 @@ export * from './specs/argocd/argocd';
 export * from './specs/sublime_security/sublime_security';
 export * from './specs/workday/workday';
 export * from './specs/kubernetes/kubernetes';
+export * from './specs/posthog/posthog';
 export * from './specs/new_relic/new_relic';
 export * from './specs/grafana/grafana';
 export * from './specs/rootly/rootly';

@@ -259,6 +259,10 @@ export const ConnectorIconsMap: Map<
     lazy(() => import(/* webpackChunkName: "connectorIconKubernetes" */ './specs/kubernetes/icon')),
   ],
   [
+    '.posthog',
+    lazy(() => import(/* webpackChunkName: "connectorIconposthog" */ './specs/posthog/icon')),
+  ],
+  [
     '.new_relic',
     lazy(() => import(/* webpackChunkName: "connectorIconNewRelic" */ './specs/new_relic/icon')),
   ],
