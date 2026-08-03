@@ -51,9 +51,6 @@ import {
   type VersionedDocument,
 } from './converters';
 
-const OCC_MAX_RETRIES = 5;
-const OCC_RETRY_DELAY_MS = 400;
-
 export interface ConversationClient {
   get(conversationId: string): Promise<Conversation>;
   exists(conversationId: string): Promise<boolean>;
@@ -241,7 +238,7 @@ class ConversationClientImpl implements ConversationClient {
     return this.writeConversation({
       conversationId,
       access,
-      maxRetries: retryOnConflict ? OCC_MAX_RETRIES : 0,
+      ...(retryOnConflict ? {} : { maxRetries: 0 }),
       fields: () => fields,
     });
   }
@@ -412,38 +409,14 @@ class ConversationClientImpl implements ConversationClient {
     conversationId,
     access,
     fields,
-    maxRetries = OCC_MAX_RETRIES,
+    maxRetries = 5,
   }: {
     conversationId: string;
     access: ConversationAccess;
     fields: (current: Conversation) => Omit<ConversationUpdatableFields, 'id'>;
     maxRetries?: number;
   }): Promise<Conversation> {
-    const writer = new OccWriter<Conversation>({
-      get: async (id) => {
-        const document = await this.getDocumentWithAccess({ conversationId: id, access });
-
-        return {
-          id,
-          source: fromEs(document),
-          occ: { seqNo: document._seq_no, primaryTerm: document._primary_term },
-        };
-      },
-      index: async ({ id, document, ifSeqNo, ifPrimaryTerm }) => {
-        const response = await this.storage.getClient().index({
-          id,
-          document: toEs(document, this.space),
-          ...(ifSeqNo != null && ifPrimaryTerm != null
-            ? { if_seq_no: ifSeqNo, if_primary_term: ifPrimaryTerm }
-            : {}),
-        });
-
-        return { seqNo: response._seq_no!, primaryTerm: response._primary_term! };
-      },
-      logger: this.logger,
-      maxRetries,
-      retryDelayMs: OCC_RETRY_DELAY_MS,
-    });
+    const writer = this.createWriter({ access, maxRetries });
 
     try {
       const { document } = await writer.readModifyWrite({
@@ -470,5 +443,39 @@ class ConversationClientImpl implements ConversationClient {
 
       throw error;
     }
+  }
+
+  private createWriter({
+    access,
+    maxRetries,
+  }: {
+    access: ConversationAccess;
+    maxRetries: number;
+  }): OccWriter<Conversation> {
+    return new OccWriter<Conversation>({
+      get: async (id) => {
+        const document = await this.getDocumentWithAccess({ conversationId: id, access });
+
+        return {
+          id,
+          source: fromEs(document),
+          occ: { seqNo: document._seq_no, primaryTerm: document._primary_term },
+        };
+      },
+      index: async ({ id, document, ifSeqNo, ifPrimaryTerm }) => {
+        const response = await this.storage.getClient().index({
+          id,
+          document: toEs(document, this.space),
+          ...(ifSeqNo != null && ifPrimaryTerm != null
+            ? { if_seq_no: ifSeqNo, if_primary_term: ifPrimaryTerm }
+            : {}),
+        });
+
+        return { seqNo: response._seq_no!, primaryTerm: response._primary_term! };
+      },
+      logger: this.logger,
+      maxRetries,
+      retryDelayMs: 400,
+    });
   }
 }
