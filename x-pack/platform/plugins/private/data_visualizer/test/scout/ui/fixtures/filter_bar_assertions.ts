@@ -108,16 +108,17 @@ export const addFilterAllowExistingBadges = async (
   await page.testSubj.click('saveFilter');
   await page.testSubj.locator('addFilterPopover').waitFor({ state: 'hidden' });
 
-  for (const field of getFilterFieldKeyVariants(options.field)) {
-    const filterBadge = page.testSubj.locator(
-      `~filter & ~filter-key-${field} & ~filter-value-${options.value}`
-    );
-    if ((await filterBadge.count()) > 0) {
-      return;
-    }
-  }
-
-  throw new Error(`Filter for ${options.field}:${options.value} was not added`);
+  await expect
+    .poll(async () => {
+      for (const field of getFilterFieldKeyVariants(options.field)) {
+        const filterBadge = page.testSubj.locator(
+          `~filter & ~filter-key-${field} & ~filter-value-${options.value}`
+        );
+        if ((await filterBadge.count()) > 0) return true;
+      }
+      return false;
+    })
+    .toBe(true);
 };
 
 export const removeFirstPresentFilter = async (page: ScoutPage, fields: string[]) => {

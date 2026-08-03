@@ -65,32 +65,31 @@ export class DataVisualizerDataView {
   }
 
   async addRuntimeField(name: string, script: string, fieldType: string) {
-    // Match FTR: retry the full add-field flow — opening the picker / editor can race
-    // with data-view load, and Monaco script binding needs a settled form.
-    await expect(async () => {
-      await this.dataSourceSelectorButton.click();
-      await this.addFieldButton.click();
-      await this.waitForIndexPatternFieldEditor();
-      await this.fieldNameInput.locator('input').fill(name);
+    // Wait for the add-field button to be enabled before clicking — this settles any
+    // data-view load race without retrying the entire multi-step form.
+    await this.dataSourceSelectorButton.click();
+    await expect(this.addFieldButton).toBeEnabled({ timeout: 30_000 });
+    await this.addFieldButton.click();
+    await this.waitForIndexPatternFieldEditor();
+    await this.fieldNameInput.locator('input').fill(name);
 
-      const valueSwitch = this.page.testSubj.locator('valueRow').locator('[role="switch"]');
-      if ((await valueSwitch.getAttribute('aria-checked')) !== 'true') {
-        await valueSwitch.click();
-      }
+    const valueSwitch = this.page.testSubj.locator('valueRow').locator('[role="switch"]');
+    if ((await valueSwitch.getAttribute('aria-checked')) !== 'true') {
+      await valueSwitch.click();
+    }
 
-      // Wait for the accessible Monaco textarea (Discover/Lens pattern) so the React
-      // form onChange is wired before we set the model value.
-      const scriptEditor = this.page.testSubj
-        .locator('scriptFieldRow')
-        .getByRole('textbox', { name: /Editor content/ });
-      await scriptEditor.waitFor({ state: 'visible', timeout: 10_000 });
-      await this.scriptCodeEditor.setCodeEditorValue(script);
+    // Wait for the accessible Monaco textarea (Discover/Lens pattern) so the React
+    // form onChange is wired before we set the model value.
+    const scriptEditor = this.page.testSubj
+      .locator('scriptFieldRow')
+      .getByRole('textbox', { name: /Editor content/ });
+    await scriptEditor.waitFor({ state: 'visible', timeout: 10_000 });
+    await this.scriptCodeEditor.setCodeEditorValue(script);
 
-      await this.setIndexPatternFieldEditorFieldType(fieldType);
-      await expect(this.fieldEditorSaveButton).toBeEnabled({ timeout: 10_000 });
-      await this.fieldEditorSaveButton.click();
-      await this.waitForIndexPatternFieldEditorHidden();
-    }).toPass({ timeout: 30_000 });
+    await this.setIndexPatternFieldEditorFieldType(fieldType);
+    await expect(this.fieldEditorSaveButton).toBeEnabled({ timeout: 10_000 });
+    await this.fieldEditorSaveButton.click();
+    await this.waitForIndexPatternFieldEditorHidden();
 
     // Saving triggers mlTimefilterRefresh$; apply again (FTR does the same). Stats for
     // the new runtime field can take longer than Playwright's default 10s wait.

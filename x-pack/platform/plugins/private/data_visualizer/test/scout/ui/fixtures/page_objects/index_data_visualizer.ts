@@ -7,17 +7,9 @@
 
 import type { Locator, ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
+import { RANDOM_SAMPLER_OPTION_VALUES, type RandomSamplerOption } from '../random_sampler';
 
-export type RandomSamplerOption =
-  | 'dvRandomSamplerOptionOnAutomatic'
-  | 'dvRandomSamplerOptionOnManual'
-  | 'dvRandomSamplerOptionOff';
-
-const RANDOM_SAMPLER_OPTION_VALUES: Record<RandomSamplerOption, string> = {
-  dvRandomSamplerOptionOff: 'off',
-  dvRandomSamplerOptionOnManual: 'on_manual',
-  dvRandomSamplerOptionOnAutomatic: 'on_automatic',
-};
+export type { RandomSamplerOption };
 
 export class IndexDataVisualizer {
   readonly randomSamplerOptionsButton: Locator;

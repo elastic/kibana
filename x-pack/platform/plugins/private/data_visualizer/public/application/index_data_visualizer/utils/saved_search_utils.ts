@@ -123,11 +123,17 @@ export function getEsQueryFromSavedSearch({
     // That race can clear/rebuild the search with an empty query while the UI still shows
     // the saved search query/filters, leaving document count at 0.
     // Include saved-search filters (and any pinned global filters) directly in the DSL.
-    const filtersForQuery = [
-      ...savedFilters,
-      ...(filterManager?.getGlobalFilters?.() ?? []),
-      ...(userFilters ?? []),
-    ];
+    // Include saved-search filters plus any interactive app-state filters currently in the
+    // filter manager. Deduplicate against savedFilters to avoid doubling filters that are
+    // stored in the saved search but were also hydrated into the filter manager after render.
+    const filterManagerFilters = filterManager?.getFilters?.() ?? [];
+    const savedFilterKeys = new Set(
+      savedFilters.map((sf) => `${sf.meta?.key}::${JSON.stringify(sf.meta?.params)}`)
+    );
+    const extraFilters = filterManagerFilters.filter(
+      (f) => !savedFilterKeys.has(`${f.meta?.key}::${JSON.stringify(f.meta?.params)}`)
+    );
+    const filtersForQuery = [...savedFilters, ...extraFilters, ...(userFilters ?? [])];
     try {
       // buildEsQuery throws an exception for a fallible operation (anti-pattern).
       // We MUST always wrap it in a try block to prevent a failed parse from being unhandled &

@@ -8,19 +8,11 @@
 import type { Locator, ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { setComboBoxValue } from '../combo_box_helpers';
+import { RANDOM_SAMPLER_OPTION_VALUES, type RandomSamplerOption } from '../random_sampler';
+
+export type DataDriftRandomSamplerOption = RandomSamplerOption;
 
 type SubjectId = 'reference' | 'comparison';
-
-const RANDOM_SAMPLER_OPTION_VALUES: Record<DataDriftRandomSamplerOption, string> = {
-  dvRandomSamplerOptionOff: 'off',
-  dvRandomSamplerOptionOnManual: 'on_manual',
-  dvRandomSamplerOptionOnAutomatic: 'on_automatic',
-};
-
-export type DataDriftRandomSamplerOption =
-  | 'dvRandomSamplerOptionOnAutomatic'
-  | 'dvRandomSamplerOptionOnManual'
-  | 'dvRandomSamplerOptionOff';
 
 export class DataDrift {
   private readonly dataSourceSelectorButton: Locator;
