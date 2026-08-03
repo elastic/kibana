@@ -68,7 +68,9 @@ export const ParamsList = () => {
       render: (item: ListParamItem) =>
         item.source?.type === 'vault' ? (
           <EuiBadge color="hollow" iconType="lock" data-test-subj="syntheticsParamVaultBadge">
-            {`vault: ${item.source.path}#${item.source.field}`}
+            {`vault: ${item.source.connection ? `${item.source.connection}@` : ''}${
+              item.source.path
+            }#${item.source.field}`}
           </EuiBadge>
         ) : (
           <ParamsText text={item.value ?? ''} />

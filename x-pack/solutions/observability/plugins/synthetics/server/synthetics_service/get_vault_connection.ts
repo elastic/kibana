@@ -65,25 +65,35 @@ export const getVaultConnectionConfigs = async (
   server: SyntheticsServerSetup,
   spaceId: string
 ): Promise<HeartbeatVaultConfig[]> => {
-  const encryptedClient = server.encryptedSavedObjects.getClient();
-  const finder =
-    await encryptedClient.createPointInTimeFinderDecryptedAsInternalUser<SyntheticsVaultConnection>(
-      {
-        type: syntheticsVaultConnectionType,
-        perPage: 1000,
-        namespaces: [spaceId],
-      }
-    );
+  // Resilient by design: this is fetched once per policy-sync (E1) up front, so a
+  // failure here must NOT break the whole batch (including monitors that use no
+  // vault). Degrade to "no connections" — non-vault monitors are unaffected, and a
+  // vault monitor with a now-missing connection fails closed at its own policy
+  // generation rather than taking the sync down.
+  try {
+    const encryptedClient = server.encryptedSavedObjects.getClient();
+    const finder =
+      await encryptedClient.createPointInTimeFinderDecryptedAsInternalUser<SyntheticsVaultConnection>(
+        {
+          type: syntheticsVaultConnectionType,
+          perPage: 1000,
+          namespaces: [spaceId],
+        }
+      );
 
-  const configs: HeartbeatVaultConfig[] = [];
-  for await (const result of finder.find()) {
-    for (const so of result.saved_objects) {
-      if (so.attributes) {
+    const configs: HeartbeatVaultConfig[] = [];
+    for await (const result of finder.find()) {
+      for (const so of result.saved_objects) {
+        // Skip decrypt-failed objects (attributes stripped) rather than emitting a
+        // connection with no secret.
+        if (so.error || !so.attributes) continue;
         configs.push(toHeartbeatConfig(so.attributes));
       }
     }
+    finder.close().catch(() => {});
+    return configs;
+  } catch (e) {
+    server.logger?.error(`Vault: failed to load connections for space "${spaceId}": ${e.message}`);
+    return [];
   }
-  finder.close().catch(() => {});
-
-  return configs;
 };

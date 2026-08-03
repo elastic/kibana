@@ -64,6 +64,12 @@ export const editSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
     if (isEmpty(data)) {
       return response.badRequest({ body: { message: 'Request body cannot be empty' } });
     }
+    // D4: a parameter is either a literal value or a vault source, not both.
+    if (data.value && data.source) {
+      return response.badRequest({
+        body: { message: 'A parameter cannot set both a value and a vault source' },
+      });
+    }
     const encryptedSavedObjectsClient = server.encryptedSavedObjects.getClient();
 
     try {

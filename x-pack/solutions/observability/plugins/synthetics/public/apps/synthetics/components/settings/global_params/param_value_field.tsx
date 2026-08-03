@@ -113,7 +113,6 @@ const VaultSourceFields = () => {
         <EuiSelect
           fullWidth
           data-test-subj="syntheticsParamVaultConnection"
-          hasNoInitialSelection={connections.length > 1}
           options={[
             { value: '', text: VAULT_DEFAULT_CONNECTION },
             ...connections.map((n) => ({ value: n, text: n })),
@@ -164,7 +163,7 @@ const VaultSourceFields = () => {
         iconType="lock"
         title={i18n.translate('xpack.synthetics.paramValueField.vaultCallout', {
           defaultMessage:
-            'The secret is resolved at runtime by the agent (Heartbeat) from HashiCorp Vault. Kibana stores only this reference and never the plaintext secret.',
+            'The secret is resolved at runtime by the agent (Heartbeat) from HashiCorp Vault, so it only applies to monitors on private locations. Kibana stores only this reference and never the plaintext secret.',
         })}
       >
         <EuiCode>{'${vault/<connection>@<path>#<field>}'}</EuiCode>

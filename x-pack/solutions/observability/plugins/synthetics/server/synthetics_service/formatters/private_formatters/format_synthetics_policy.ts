@@ -129,6 +129,15 @@ export const formatSyntheticsPolicy = (
     }
   });
 
+  // Collect the vault connection names this monitor references BEFORE any value is
+  // transformed below — the browser inline script is base64-encoded a few lines
+  // down, which would otherwise hide a ${vault/..} token inside it from detection
+  // (C3). Empty when the monitor references no vault-backed secret.
+  const referencedVaultConnections = new Set<string | undefined>();
+  Object.values(dataStream?.vars ?? {}).forEach((v) => {
+    referencedConnectionNames(v?.value).forEach((n) => referencedVaultConnections.add(n));
+  });
+
   // This field is NOT in the monitor config, but needs to be set in the policy
   // so Heartbeat knows to decode the base64-encoded script
   const encodingVar = dataStream?.vars?.['source.inline.encoding'];
@@ -174,16 +183,14 @@ export const formatSyntheticsPolicy = (
   // as a single Fleet secret and the compiled policy carries only a
   // $co.elastic.secret{...} reference.
   const vaultItem = dataStream?.vars?.vault;
-  if (vaultItem && vaultConnections?.length) {
-    const referenced = new Set<string | undefined>();
-    Object.values(dataStream?.vars ?? {}).forEach((v) => {
-      referencedConnectionNames(v?.value).forEach((n) => referenced.add(n));
-    });
-    if (referenced.size > 0) {
-      const scoped = scopeVaultConnections(vaultConnections, referenced, config[ConfigKey.NAME]);
-      if (scoped.length > 0) {
-        vaultItem.value = Buffer.from(JSON.stringify(scoped)).toString('base64');
-      }
+  if (vaultItem && vaultConnections?.length && referencedVaultConnections.size > 0) {
+    const scoped = scopeVaultConnections(
+      vaultConnections,
+      referencedVaultConnections,
+      config[ConfigKey.NAME]
+    );
+    if (scoped.length > 0) {
+      vaultItem.value = Buffer.from(JSON.stringify(scoped)).toString('base64');
     }
   }
 

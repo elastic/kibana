@@ -79,34 +79,52 @@ export const getVaultConnectionsRoute: SyntheticsRestApiRouteFactory<
   handler: async (routeContext) => listConnections(routeContext),
 });
 
+// Upper bound for any single connection string; these flow into SO docs and the
+// delivered policy blob, so keep them bounded (AGENTS.md).
+const MAX_LEN = 2048;
+
+const isHttpUrl = (v: string): string | undefined => {
+  try {
+    const { protocol } = new URL(v);
+    return protocol === 'http:' || protocol === 'https:' ? undefined : 'must be an http(s) URL';
+  } catch (e) {
+    return 'must be a valid URL';
+  }
+};
+
+// A Go duration string, e.g. "5m", "30s", "1.5h" — matches Heartbeat's parser so a
+// value that would fail at config-unpack on every agent is rejected up front.
+const isDuration = (v: string): string | undefined =>
+  /^\d+(\.\d+)?(ms|s|m|h)$/.test(v) ? undefined : 'must be a duration like "5m", "30s", or "1h"';
+
 // HashiCorp Vault provider request shapes. Adding a provider means adding its
 // config/secrets schema and turning `type`/`config`/`secrets` into a discriminated
 // `schema.oneOf` keyed on `type`.
 const HashiCorpVaultConfigSchema = schema.object({
-  address: schema.string({ minLength: 1 }),
+  address: schema.string({ minLength: 1, maxLength: MAX_LEN, validate: isHttpUrl }),
   authMethod: schema.oneOf([schema.literal('token'), schema.literal('approle')]),
-  namespace: schema.maybe(schema.string()),
-  kvMount: schema.maybe(schema.string()),
+  namespace: schema.maybe(schema.string({ maxLength: MAX_LEN })),
+  kvMount: schema.maybe(schema.string({ maxLength: MAX_LEN })),
   tlsSkipVerify: schema.maybe(schema.boolean()),
-  roleId: schema.maybe(schema.string()),
+  roleId: schema.maybe(schema.string({ maxLength: MAX_LEN })),
 });
 
 const HashiCorpVaultSecretsSchema = schema.object({
-  token: schema.maybe(schema.string()),
-  secretId: schema.maybe(schema.string()),
+  token: schema.maybe(schema.string({ maxLength: MAX_LEN })),
+  secretId: schema.maybe(schema.string({ maxLength: MAX_LEN })),
 });
 
 const SaveBodySchema = schema.object({
   name: schema.string({
     minLength: 1,
-    maxLength: 1024,
+    maxLength: MAX_LEN,
     validate: (v) =>
       VAULT_CONNECTION_NAME_REGEX.test(v)
         ? undefined
         : 'must contain only letters, numbers, and . _ -',
   }),
   type: schema.maybe(schema.literal('hashicorp_vault')),
-  secretRefreshInterval: schema.maybe(schema.string()),
+  secretRefreshInterval: schema.maybe(schema.string({ maxLength: 32, validate: isDuration })),
   config: HashiCorpVaultConfigSchema,
   secrets: schema.maybe(HashiCorpVaultSecretsSchema),
 });
@@ -179,6 +197,20 @@ export const saveVaultConnectionRoute: SyntheticsRestApiRouteFactory<
           token: body.secrets?.token || existing?.secrets?.token,
           secretId: body.secrets?.secretId || existing?.secrets?.secretId,
         };
+
+    // C9: a new connection must carry a usable credential — otherwise it saves,
+    // propagates, and only fails later at the agent.
+    const effectiveSecret = body.config.authMethod === 'token' ? secrets.token : secrets.secretId;
+    if (!existing && !effectiveSecret) {
+      return response.badRequest({
+        body: {
+          message:
+            body.config.authMethod === 'token'
+              ? 'A token is required to create a token-auth connection'
+              : 'A secret_id is required to create an approle connection',
+        },
+      });
+    }
     // Non-secret marker so the (non-decrypting) list read can report "secret saved".
     const hasSecret =
       body.config.authMethod === 'token' ? Boolean(secrets.token) : Boolean(secrets.secretId);
@@ -245,11 +277,16 @@ export const refreshVaultConnectionsRoute: SyntheticsRestApiRouteFactory<
     const refreshedAt = new Date().toISOString();
     for await (const result of finder.find()) {
       for (const so of result.saved_objects) {
-        if (!so.attributes) continue;
+        // B3: the decrypting finder returns decrypt-failed objects with `error`
+        // set and their attributes stripped — re-creating those would wipe the
+        // secret. Skip them.
+        if (so.error || !so.attributes) continue;
         await savedObjectsClient.create<SyntheticsVaultConnection>(
           syntheticsVaultConnectionType,
           { ...so.attributes, refreshedAt },
-          { id: so.id, overwrite: true, initialNamespaces: [spaceId] }
+          // B5: preserve the object's actual namespaces on overwrite rather than
+          // forcing [spaceId], which would narrow (or error on) a shared object.
+          { id: so.id, overwrite: true, initialNamespaces: so.namespaces ?? [spaceId] }
         );
       }
     }

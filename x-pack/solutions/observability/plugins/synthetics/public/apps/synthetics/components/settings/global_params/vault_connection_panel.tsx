@@ -13,6 +13,7 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
+  EuiConfirmModal,
   EuiFieldPassword,
   EuiFieldText,
   EuiFlexGroup,
@@ -109,6 +110,7 @@ export const VaultConnectionPanel = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [testing, setTesting] = useState(false);
   const [testResult, setTestResult] = useState<{ ok: boolean; message: string } | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
 
   const accordionId = useGeneratedHtmlId({ prefix: 'vaultConnections' });
   const flyoutTitleId = useGeneratedHtmlId({ prefix: 'vaultConnectionFlyout' });
@@ -123,9 +125,11 @@ export const VaultConnectionPanel = () => {
       const res = await http.get<VaultConnectionStatus[]>(SYNTHETICS_API_URLS.VAULT_CONNECTION);
       setConnections(Array.isArray(res) ? res : []);
     } catch (e) {
-      // non-fatal for the params page
+      // Surface the failure rather than showing an empty list (which reads as
+      // "no connections configured").
+      notifications?.toasts.addError(e as Error, { title: LOAD_ERROR_TOAST });
     }
-  }, [http]);
+  }, [http, notifications]);
 
   useEffect(() => {
     load();
@@ -245,7 +249,7 @@ export const VaultConnectionPanel = () => {
     },
     {
       field: 'type',
-      name: TYPE_LABEL,
+      name: PROVIDER_LABEL,
       render: (ty?: SecretProviderType) => providerLabel(ty),
     },
     {
@@ -281,7 +285,10 @@ export const VaultConnectionPanel = () => {
           icon: 'trash',
           color: 'danger',
           type: 'icon',
-          onClick: (c: VaultConnectionStatus) => onDelete(c.name ?? ''),
+          // Confirm before deleting (and never issue a delete for an empty name).
+          onClick: (c: VaultConnectionStatus) => {
+            if (c.name) setDeleteTarget(c.name);
+          },
           enabled: () => canSave,
         },
       ],
@@ -372,7 +379,15 @@ export const VaultConnectionPanel = () => {
               </EuiTitle>
             </EuiFlyoutHeader>
             <EuiFlyoutBody>
-              <EuiForm component="form">
+              <EuiForm
+                component="form"
+                onSubmit={(e) => {
+                  // Without this, pressing Enter triggers a native form submit that
+                  // reloads the page and discards the typed secret.
+                  e.preventDefault();
+                  if (editing.name && editing.address && !saving) onSave();
+                }}
+              >
                 <EuiFormRow fullWidth label={PROVIDER_LABEL} helpText={PROVIDER_HELP}>
                   <EuiSelect
                     fullWidth
@@ -564,6 +579,29 @@ export const VaultConnectionPanel = () => {
           </EuiFlyout>
         )}
       </EuiAccordion>
+      {deleteTarget && (
+        <EuiConfirmModal
+          title={DELETE_CONFIRM_TITLE}
+          onCancel={() => setDeleteTarget(null)}
+          onConfirm={async () => {
+            const name = deleteTarget;
+            setDeleteTarget(null);
+            await onDelete(name);
+          }}
+          cancelButtonText={CANCEL_LABEL}
+          confirmButtonText={DELETE_LABEL}
+          buttonColor="danger"
+          data-test-subj="syntheticsVaultDeleteConfirm"
+        >
+          <p>
+            {i18n.translate('xpack.synthetics.vaultConnection.deleteConfirmBody', {
+              defaultMessage:
+                'Delete the Vault connection "{name}"? Parameters that reference it will stop resolving at the agent until they are pointed at another connection.',
+              values: { name: deleteTarget },
+            })}
+          </p>
+        </EuiConfirmModal>
+      )}
     </EuiPanel>
   );
 };
@@ -580,9 +618,6 @@ const PROVIDER_LABEL = i18n.translate('xpack.synthetics.vaultConnection.provider
 });
 const PROVIDER_HELP = i18n.translate('xpack.synthetics.vaultConnection.providerHelp', {
   defaultMessage: 'The secret-management backend this connection resolves secrets from.',
-});
-const TYPE_LABEL = i18n.translate('xpack.synthetics.vaultConnection.type', {
-  defaultMessage: 'Provider',
 });
 const NAME_LABEL = i18n.translate('xpack.synthetics.vaultConnection.name', {
   defaultMessage: 'Name',
@@ -662,6 +697,12 @@ const SAVE_ERROR_TOAST = i18n.translate('xpack.synthetics.vaultConnection.saveEr
 });
 const DELETE_ERROR_TOAST = i18n.translate('xpack.synthetics.vaultConnection.deleteErrorToast', {
   defaultMessage: 'Failed to delete Vault connection',
+});
+const DELETE_CONFIRM_TITLE = i18n.translate('xpack.synthetics.vaultConnection.deleteConfirmTitle', {
+  defaultMessage: 'Delete Vault connection?',
+});
+const LOAD_ERROR_TOAST = i18n.translate('xpack.synthetics.vaultConnection.loadErrorToast', {
+  defaultMessage: 'Failed to load Vault connections',
 });
 const REFRESHED_TOAST = i18n.translate('xpack.synthetics.vaultConnection.refreshedToast', {
   defaultMessage: 'Refreshing secrets — configs are being re-pushed to agents',

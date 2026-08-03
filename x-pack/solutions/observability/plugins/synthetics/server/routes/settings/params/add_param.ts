@@ -67,6 +67,17 @@ export const addSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
           body: { message: `Param "${invalid.key}" must have either a value or a vault source` },
         });
       }
+      // D4: a param is either a literal value or a vault source, not both.
+      const ambiguous = (paramsToValidate as SyntheticsParamRequest[]).find(
+        (param) => param.value && param.source
+      );
+      if (ambiguous) {
+        return response.badRequest({
+          body: {
+            message: `Param "${ambiguous.key}" must not set both a value and a vault source`,
+          },
+        });
+      }
 
       const savedObjectsData = parseParamBody(
         spaceId,
