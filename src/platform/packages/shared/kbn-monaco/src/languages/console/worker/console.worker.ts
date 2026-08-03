@@ -11,12 +11,9 @@
 /* eslint-disable @kbn/eslint/module_migration */
 
 import '@babel/runtime/regenerator';
-// @ts-ignore
-import * as worker from 'monaco-editor/esm/vs/editor/editor.worker';
+import { initialize } from 'monaco-editor/editor/editor.worker.js';
 import { ConsoleWorker } from './console_worker';
 
-self.onmessage = () => {
-  worker.initialize((ctx: any, createData: any) => {
-    return new ConsoleWorker(ctx);
-  });
-};
+initialize((ctx: any, createData: any) => {
+  return new ConsoleWorker(ctx);
+});

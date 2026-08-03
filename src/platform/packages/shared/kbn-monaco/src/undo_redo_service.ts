@@ -8,10 +8,10 @@
  */
 
 /* eslint-disable @kbn/eslint/module_migration */
-import { StandaloneServices } from 'monaco-editor/esm/vs/editor/standalone/browser/standaloneServices';
-import { IUndoRedoService } from 'monaco-editor/esm/vs/platform/undoRedo/common/undoRedo';
+import { StandaloneServices } from 'monaco-editor/editor/standalone/browser/standaloneServices.js';
+import { IUndoRedoService } from 'monaco-editor/platform/undoRedo/common/undoRedo.js';
 
-import type { Uri } from 'monaco-editor/esm/vs/editor/editor.api';
+import type { Uri } from 'monaco-editor';
 
 export interface UndoRedoElement {
   readonly type: 0;

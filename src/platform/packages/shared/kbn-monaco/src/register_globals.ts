@@ -13,7 +13,7 @@ import { monaco } from './monaco_imports';
 export const DEFAULT_WORKER_ID = 'default' as const;
 
 const langSpecificWorkerIds = [
-  monaco.languages.json.jsonDefaults.languageId,
+  monaco.json.jsonDefaults.languageId,
   XJSON_LANG_ID,
   PAINLESS_LANG_ID,
   YAML_LANG_ID,
@@ -23,7 +23,7 @@ const langSpecificWorkerIds = [
 // exported for use in webpack config to build workers
 export type LangSpecificWorkerIds = [typeof DEFAULT_WORKER_ID, ...typeof langSpecificWorkerIds];
 
-declare module 'monaco-editor/esm/vs/editor/editor.api' {
+declare module 'monaco-editor' {
   export interface Environment {
     // add typing for exposing monaco on the MonacoEnvironment property
     monaco: typeof monaco;

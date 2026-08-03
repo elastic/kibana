@@ -8,7 +8,7 @@
  */
 
 /* eslint-disable-next-line @kbn/eslint/module_migration */
-import type * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
+import type * as monaco from 'monaco-editor';
 import { createParser } from '../grammar';
 import type { Parser, ParseResult } from '../../../ace_migration/types';
 

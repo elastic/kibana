@@ -8,23 +8,23 @@
  */
 
 // Monaco languages support
-declare module 'monaco-editor/esm/vs/languages/definitions/markdown/markdown.js';
-declare module 'monaco-editor/esm/vs/languages/definitions/css/css.js';
-declare module 'monaco-editor/esm/vs/languages/definitions/yaml/yaml.js';
+declare module 'monaco-editor/languages/definitions/markdown/markdown.js';
+declare module 'monaco-editor/languages/definitions/css/css.js';
+declare module 'monaco-editor/languages/definitions/yaml/yaml.js';
 
-declare module 'monaco-editor/esm/vs/languages/definitions/javascript/register.js';
-declare module 'monaco-editor/esm/vs/languages/definitions/xml/register.js';
-declare module 'monaco-editor/esm/vs/languages/definitions/yaml/register.js';
-declare module 'monaco-editor/esm/vs/languages/definitions/liquid/register.js';
+declare module 'monaco-editor/languages/definitions/javascript/register.js';
+declare module 'monaco-editor/languages/definitions/xml/register.js';
+declare module 'monaco-editor/languages/definitions/yaml/register.js';
+declare module 'monaco-editor/languages/definitions/liquid/register.js';
 
 // Monaco internal services
-declare module 'monaco-editor/esm/vs/editor/standalone/browser/standaloneServices' {
+declare module 'monaco-editor/editor/standalone/browser/standaloneServices.js' {
   interface StandaloneServicesType {
     get<T>(serviceId: unknown): T;
   }
   export const StandaloneServices: StandaloneServicesType;
 }
 
-declare module 'monaco-editor/esm/vs/platform/undoRedo/common/undoRedo' {
+declare module 'monaco-editor/platform/undoRedo/common/undoRedo.js' {
   export const IUndoRedoService: symbol;
 }

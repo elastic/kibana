@@ -11,13 +11,10 @@
 /* eslint-disable @kbn/eslint/module_migration */
 
 import '@babel/runtime/regenerator';
-// @ts-ignore
-import * as worker from 'monaco-editor/esm/vs/editor/editor.worker';
-import type { monaco } from '../../../monaco_imports';
+import { initialize } from 'monaco-editor/editor/editor.worker.js';
+import type * as monaco from 'monaco-editor';
 import { PainlessWorker } from './painless_worker';
 
-self.onmessage = () => {
-  worker.initialize((ctx: monaco.worker.IWorkerContext, createData: any) => {
-    return new PainlessWorker(ctx);
-  });
-};
+initialize((ctx: monaco.worker.IWorkerContext, createData: any) => {
+  return new PainlessWorker(ctx);
+});

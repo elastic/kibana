@@ -11,12 +11,9 @@
 /* eslint-disable @kbn/eslint/module_migration */
 
 import '@babel/runtime/regenerator';
-// @ts-ignore
-import * as worker from 'monaco-editor/esm/vs/editor/editor.worker';
+import { initialize } from 'monaco-editor/editor/editor.worker.js';
 import { XJsonWorker } from './xjson_worker';
 
-self.onmessage = () => {
-  worker.initialize((ctx: any, createData: any) => {
-    return new XJsonWorker(ctx);
-  });
-};
+initialize((ctx: any, createData: any) => {
+  return new XJsonWorker(ctx);
+});
