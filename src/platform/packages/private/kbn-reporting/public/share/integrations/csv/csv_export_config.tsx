@@ -71,7 +71,10 @@ export const getCsvReportParams: ReportParamsGetter<
     columns: sharingData.columns,
     searchSource: getSearchSource({
       addGlobalTimeFilter: true,
-      absoluteTime: !forShareUrl,
+      // Use absolute time only for immediate exports (useAbsoluteTime=true).
+      // Scheduled reports omit useAbsoluteTime so they store relative date math,
+      // which each run resolves anchored to its scheduled run time (forceNow).
+      absoluteTime: useAbsoluteTime && !forShareUrl,
     }),
   };
 };
