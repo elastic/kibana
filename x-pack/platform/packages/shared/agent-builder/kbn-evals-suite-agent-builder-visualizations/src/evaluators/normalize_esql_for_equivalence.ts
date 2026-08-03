@@ -58,7 +58,10 @@ export function stripRedundantTimestampBindBounds(query: string): string {
 
   // Trailing conjunct: `WHERE <rest> AND <bounds>` → `WHERE <rest>`
   normalized = normalized.replace(
-    new RegExp(String.raw`(\|\s*WHERE\s+.+?)\s+AND\s+${TIMESTAMP_BOUND_CONJUNCT}(?=\s*(?:\||$))`, 'gi'),
+    new RegExp(
+      String.raw`(\|\s*WHERE\s+.+?)\s+AND\s+${TIMESTAMP_BOUND_CONJUNCT}(?=\s*(?:\||$))`,
+      'gi'
+    ),
     '$1'
   );
 

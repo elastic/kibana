@@ -272,9 +272,7 @@ export function createEsqlResultEquivalenceEvaluator<
       // gold/candidate differ only on that optional conjunct still compare
       // the same executed window (BUCKET/TBUCKET already carries the params).
       // Original extractor strings stay in metadata for debugging.
-      const executableGoldQuery = substituteEsqlBindParams(
-        normalizeEsqlForEquivalence(goldQuery)
-      );
+      const executableGoldQuery = substituteEsqlBindParams(normalizeEsqlForEquivalence(goldQuery));
       const executableCandidateQuery = substituteEsqlBindParams(
         normalizeEsqlForEquivalence(candidateQuery)
       );

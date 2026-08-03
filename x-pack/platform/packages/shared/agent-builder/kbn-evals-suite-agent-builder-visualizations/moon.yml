@@ -17,12 +17,14 @@ project:
   owner: '@elastic/kibana-presentation'
   sourceRoot: x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder-visualizations
 dependsOn:
-  - '@kbn/evals'
   - '@kbn/agent-builder-common'
-  - '@kbn/esql-language'
-  - '@kbn/inference-common'
-  - '@kbn/tooling-log'
   - '@kbn/core'
+  - '@kbn/esql-language'
+  - '@kbn/evals'
+  - '@kbn/inference-common'
+  - '@kbn/inference-prompt-utils'
+  - '@kbn/tooling-log'
+  - '@kbn/zod'
 tags:
   - functional-tests
   - package
