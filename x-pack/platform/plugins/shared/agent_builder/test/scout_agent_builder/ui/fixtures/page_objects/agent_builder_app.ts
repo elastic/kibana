@@ -230,10 +230,16 @@ export class AgentBuilderApp {
 
   async navigateToNewTool() {
     await this.navigateToApp('manage/tools/new');
+    await this.page.testSubj
+      .locator('agentBuilderToolFormPage')
+      .waitFor({ state: 'visible', timeout: 60_000 });
   }
 
   async navigateToTool(toolId: string) {
     await this.navigateToApp(`manage/tools/${toolId}`);
+    await this.page.testSubj
+      .locator('agentBuilderToolFormPage')
+      .waitFor({ state: 'visible', timeout: 60_000 });
   }
 
   async navigateToBulkImportMcp() {
