@@ -58,18 +58,24 @@ export const EditTransformFlyout: FC<EditAction> = ({
             </h2>
           </EuiTitle>
         </EuiFlyoutHeader>
-        {isManagedTransform({ config }) ? (
-          <ManagedTransformsWarningCallout
-            count={1}
-            action={i18n.translate(
-              'xpack.transform.transformList.editManagedTransformsDescription',
-              {
-                defaultMessage: 'editing',
-              }
-            )}
-          />
-        ) : null}
-        <EuiFlyoutBody banner={<EditTransformFlyoutCallout />}>
+        <EuiFlyoutBody
+          banner={
+            <>
+              {isManagedTransform({ config }) ? (
+                <ManagedTransformsWarningCallout
+                  count={1}
+                  action={i18n.translate(
+                    'xpack.transform.transformList.editManagedTransformsDescription',
+                    {
+                      defaultMessage: 'editing',
+                    }
+                  )}
+                />
+              ) : null}
+              <EditTransformFlyoutCallout />
+            </>
+          }
+        >
           <EditTransformFlyoutForm />
           <EditTransformApiErrorCallout />
         </EuiFlyoutBody>
