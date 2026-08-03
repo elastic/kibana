@@ -1,5 +1,56 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`schema_to_skill_docs generateActionPolicyOperationsDoc matches the reviewed skill-doc snapshot 1`] = `
+"# Action Policy Operations Schema Reference
+
+Auto-generated from the \`manage_action_policy\` tool Zod schemas.
+
+#### \`operation: \\"set_metadata\\"\`
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| \`operation\` | string | required |  |
+| \`name\` | string | optional | The action policy name. (min length: 1, max length: 256) |
+| \`description\` | string | optional | A description of the action policy. (max length: 1024) |
+| \`tags\` | string[] | optional | Tags for categorizing the action policy. (max items: 20) |
+
+#### \`operation: \\"set_destinations\\"\`
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| \`operation\` | string | required |  |
+| \`destinations\` | { type: \\"workflow\\", ... }[] | required | The list of workflow destinations. (min items: 1, max items: 10) |
+
+#### \`operation: \\"set_matcher\\"\`
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| \`operation\` | string | required |  |
+| \`matcher\` | string | null | required | A KQL query to match alert episodes, or null for a catch-all. |
+
+#### \`operation: \\"set_grouping\\"\`
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| \`operation\` | string | required |  |
+| \`groupingMode\` | \\"per_episode\\" | \\"all\\" | \\"per_field\\" | optional | The grouping mode. (enum: per_episode | all | per_field) |
+| \`groupBy\` | array | null | optional | Fields used to group alerts (required when groupingMode is per_field). |
+
+#### \`operation: \\"set_throttle\\"\`
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| \`operation\` | string | required |  |
+| \`strategy\` | \\"on_status_change\\" | \\"per_status_interval\\" | \\"time_interval\\" | \\"every_time\\" | optional | The throttle strategy. (enum: on_status_change | per_status_interval | time_interval | every_time) |
+| \`interval\` | string | optional | The throttle interval (e.g. 5m, 1h). |
+
+#### \`operation: \\"validate\\"\`
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| \`operation\` | string | required |  |"
+`;
+
 exports[`schema_to_skill_docs generateActionPolicySchemaDoc matches the reviewed skill-doc snapshot 1`] = `
 "# Action Policy API Schema Reference
 

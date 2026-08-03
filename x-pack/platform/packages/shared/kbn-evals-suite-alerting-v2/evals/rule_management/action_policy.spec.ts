@@ -24,6 +24,7 @@ import {
   WORKFLOW_GENERATION_TOOL_ID,
   WORKFLOW_YAML_ATTACHMENT_TYPE,
 } from '../../src/constants';
+import { assertActionPolicyWorkflowLiquid } from '../../src/assert_action_policy_workflow_liquid';
 import { getLatestAttachmentData } from '../../src/evaluators/expected_attachment';
 
 evaluate.describe(
@@ -113,6 +114,7 @@ evaluate.describe(
                     expect(parsedWorkflow.triggers?.map((trigger) => trigger.type)).toEqual([
                       'manual',
                     ]);
+                    assertActionPolicyWorkflowLiquid(workflow!.yaml!);
                   },
                 },
               },

@@ -64,6 +64,11 @@ Add new ideas under "Backlog"; move them to "Implemented" once a spec covers the
   asserts the generated `workflow.yaml` has `triggers: [{ type: 'manual' }]` (plus
   `rule.id` matcher and destination = workflow attachment `workflowId`). See
   `evals/rule_management/action_policy.spec.ts`.
+- [x] **Notification workflow Liquid is valid and action-policy-scoped** — generated
+  `workflow.yaml` Liquid must parse and only reference `inputs.payload.*` /
+  engine vars (`execution.*`, `triggeredBy`, etc.), never v1 `event.*` paths.
+  See `src/assert_action_policy_workflow_liquid.ts` (wired in
+  `evals/rule_management/action_policy.spec.ts`).
 - [x] **Rule vs action-policy tool routing** — natural-language requests route to the correct
   tool (`manage_rule` vs `manage_action_policy`), and conceptual questions do not mutate
   state. See `evals/rule_management/rule_management.spec.ts`.

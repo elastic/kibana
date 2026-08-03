@@ -13,6 +13,7 @@ import {
   generateRuleSchemaDoc,
   generateRuleOperationsDoc,
   generateActionPolicySchemaDoc,
+  generateActionPolicyOperationsDoc,
   generateActionPolicyWorkflowPayloadDoc,
 } from './schema_to_skill_docs';
 
@@ -110,6 +111,28 @@ describe('schema_to_skill_docs', () => {
       expect(doc).toContain('`matcher`');
       expect(doc).toContain('`groupingMode`');
       expect(doc).toContain('`throttle`');
+    });
+  });
+
+  describe('generateActionPolicyOperationsDoc', () => {
+    /**
+     * Snapshot of the generated skill markdown for `manage_action_policy`
+     * operations (`actionPolicyOperationSchema`).
+     *
+     * Review the diff when regenerating with `-u` — this is LLM-facing docs.
+     */
+    it('matches the reviewed skill-doc snapshot', () => {
+      expect(generateActionPolicyOperationsDoc()).toMatchSnapshot();
+    });
+
+    it('includes all operation types', () => {
+      const doc = generateActionPolicyOperationsDoc();
+      expect(doc).toContain('set_metadata');
+      expect(doc).toContain('set_destinations');
+      expect(doc).toContain('set_matcher');
+      expect(doc).toContain('set_grouping');
+      expect(doc).toContain('set_throttle');
+      expect(doc).toContain('validate');
     });
   });
 

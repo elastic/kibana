@@ -12,6 +12,7 @@ import {
   builtinWorkflowInputDefinitions,
 } from '@kbn/workflows';
 import { ruleOperationSchema } from '../tools/manage_rule/operations';
+import { actionPolicyOperationSchema } from '../tools/manage_action_policy/operations';
 
 const LARGE_ENUM_THRESHOLD = 20;
 
@@ -250,6 +251,22 @@ export const generateActionPolicySchemaDoc = (): string => {
     'Auto-generated from `@kbn/alerting-v2-schemas`. This is the source of truth for field names, types, and constraints.',
     '',
     fieldTable,
+  ].join('\n');
+};
+
+/**
+ * Generates concise markdown documentation for the manage_action_policy tool operations.
+ */
+export const generateActionPolicyOperationsDoc = (): string => {
+  const jsonSchema = zodToJsonSchema(actionPolicyOperationSchema);
+  const variants = formatVariantSchemas(jsonSchema);
+
+  return [
+    '# Action Policy Operations Schema Reference',
+    '',
+    'Auto-generated from the `manage_action_policy` tool Zod schemas.',
+    '',
+    variants,
   ].join('\n');
 };
 
