@@ -533,6 +533,48 @@ filterlist: {}
         pathParams: { node_id: '*', metric: 'jvm' },
       });
     });
+
+    describe('integrations normalization on v3 API queries', () => {
+      const baseYaml = `
+id: transform-stats
+name: transform_stats
+version: 3
+type: API
+api: _cat/tasks
+scheduleCron: 1h
+enabled: true
+filterlist: {}
+`;
+
+      it('parses integrations as an array when authored as a YAML sequence', () => {
+        const yaml = `${baseYaml}integrations:\n  - endpoint\n  - fleet_server\n`;
+        const [q] = parseHealthDiagnosticQueries(yaml) as HealthDiagnosticQueryV3[];
+        expect(q.integrations).toEqual(['endpoint', 'fleet_server']);
+      });
+
+      it('parses integrations as an array when authored as a comma-separated scalar', () => {
+        const yaml = `${baseYaml}integrations: endpoint,fleet_server\n`;
+        const [q] = parseHealthDiagnosticQueries(yaml) as HealthDiagnosticQueryV3[];
+        expect(q.integrations).toEqual(['endpoint', 'fleet_server']);
+      });
+
+      it('trims whitespace around comma-separated entries', () => {
+        const yaml = `${baseYaml}integrations: " endpoint , fleet_server "\n`;
+        const [q] = parseHealthDiagnosticQueries(yaml) as HealthDiagnosticQueryV3[];
+        expect(q.integrations).toEqual(['endpoint', 'fleet_server']);
+      });
+
+      it('leaves integrations undefined when the field is absent', () => {
+        const [q] = parseHealthDiagnosticQueries(baseYaml) as HealthDiagnosticQueryV3[];
+        expect(q.integrations).toBeUndefined();
+      });
+
+      it('returns ParseFailureQuery when integrations is an invalid type', () => {
+        const yaml = `${baseYaml}integrations:\n  nested: value\n`;
+        const [q] = parseHealthDiagnosticQueries(yaml);
+        expect('_raw' in q).toBe(true);
+      });
+    });
   });
 
   describe('unknown version', () => {

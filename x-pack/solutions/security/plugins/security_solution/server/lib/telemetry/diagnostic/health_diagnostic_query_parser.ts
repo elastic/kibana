@@ -172,7 +172,7 @@ const parseV3 = (raw: Record<string, unknown> | null): HealthDiagnosticQuery => 
         pathParams,
         queryParams: raw.queryParams as Record<string, string | number> | undefined,
         responsePathKey: raw.responsePathKey as string | undefined,
-        integrations: raw.integrations as string[] | undefined,
+        integrations: normalizeIntegrations(raw.integrations),
         encryptionKeyId: raw.encryptionKeyId as string | undefined,
       } satisfies HealthDiagnosticQueryV3;
     } catch (err) {
@@ -248,6 +248,21 @@ const assertFilterlist = (raw: Record<string, unknown> | null): Record<string, A
     throw new Error('Missing or invalid required field: filterlist');
   }
   return raw.filterlist as Record<string, Action>;
+};
+
+const normalizeIntegrations = (value: unknown): string[] | undefined => {
+  if (value === undefined || value === null) return undefined;
+  if (typeof value === 'string') {
+    const parts = value
+      .split(',')
+      .map((p) => p.trim())
+      .filter((p) => p.length > 0);
+    return parts.length > 0 ? parts : undefined;
+  }
+  if (Array.isArray(value) && value.every((v) => typeof v === 'string')) {
+    return value.length > 0 ? value : undefined;
+  }
+  throw new Error('integrations must be a comma-separated string or array of strings');
 };
 
 const assertPathParamsCoverage = (
