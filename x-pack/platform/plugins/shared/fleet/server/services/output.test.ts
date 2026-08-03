@@ -389,9 +389,7 @@ function getMockedEncryptedSoClient() {
             timeout: '30s',
           },
           secrets: {
-            otlp_exporter: {
-              api_key: { id: 'otlp-api-key-secret-id' },
-            },
+            api_key: { id: 'otlp-api-key-secret-id' },
           },
         });
       }
@@ -1481,10 +1479,8 @@ describe('Output Service', () => {
               protocol: 'grpc',
             },
             secrets: {
-              otlp_exporter: {
-                api_key: 'my-api-key',
-                tls: { key_pem: 'my-key-pem' },
-              },
+              api_key: 'my-api-key',
+              otlp_exporter: { tls: { key_pem: 'my-key-pem' } },
             },
           },
           { id: 'output-test' }
@@ -1494,8 +1490,8 @@ describe('Output Service', () => {
           expect.anything(),
           expect.objectContaining({
             type: 'otlp',
+            api_key: 'my-api-key',
             otlp_exporter: expect.objectContaining({
-              api_key: 'my-api-key',
               tls: expect.objectContaining({ key_pem: 'my-key-pem' }),
             }),
           }),
@@ -1516,10 +1512,8 @@ describe('Output Service', () => {
             type: 'otlp',
             otlp_exporter: { endpoint: 'https://otel.example.com:4317', protocol: 'grpc' },
             secrets: {
-              otlp_exporter: {
-                api_key: { id: 'api-key-secret-id' },
-                tls: { key_pem: { id: 'key-pem-secret-id' } },
-              },
+              api_key: { id: 'api-key-secret-id' },
+              otlp_exporter: { tls: { key_pem: { id: 'key-pem-secret-id' } } },
             },
           },
         } as any);
@@ -1537,10 +1531,8 @@ describe('Output Service', () => {
               protocol: 'grpc',
             },
             secrets: {
-              otlp_exporter: {
-                api_key: 'my-api-key',
-                tls: { key_pem: 'my-key-pem' },
-              },
+              api_key: 'my-api-key',
+              otlp_exporter: { tls: { key_pem: 'my-key-pem' } },
             },
           },
           { id: 'output-test' }
@@ -1551,10 +1543,8 @@ describe('Output Service', () => {
           expect.objectContaining({
             type: 'otlp',
             secrets: {
-              otlp_exporter: {
-                api_key: { id: 'api-key-secret-id' },
-                tls: { key_pem: { id: 'key-pem-secret-id' } },
-              },
+              api_key: { id: 'api-key-secret-id' },
+              otlp_exporter: { tls: { key_pem: { id: 'key-pem-secret-id' } } },
             },
           }),
           expect.anything()
@@ -2946,10 +2936,8 @@ describe('Output Service', () => {
           protocol: 'grpc',
         },
         secrets: {
-          otlp_exporter: {
-            api_key: 'updated-api-key',
-            tls: { key_pem: 'updated-key-pem' },
-          },
+          api_key: 'updated-api-key',
+          otlp_exporter: { tls: { key_pem: 'updated-key-pem' } },
         },
       });
 
@@ -2958,8 +2946,8 @@ describe('Output Service', () => {
         expect.anything(),
         expect.objectContaining({
           type: 'otlp',
+          api_key: 'updated-api-key',
           otlp_exporter: expect.objectContaining({
-            api_key: 'updated-api-key',
             tls: expect.objectContaining({ key_pem: 'updated-key-pem' }),
           }),
         })
@@ -2982,10 +2970,8 @@ describe('Output Service', () => {
           type: 'otlp',
           otlp_exporter: { endpoint: 'https://new.example.com:4317', protocol: 'grpc' },
           secrets: {
-            otlp_exporter: {
-              api_key: { id: 'updated-api-key-secret-id' },
-              tls: { key_pem: { id: 'updated-key-pem-secret-id' } },
-            },
+            api_key: { id: 'updated-api-key-secret-id' },
+            otlp_exporter: { tls: { key_pem: { id: 'updated-key-pem-secret-id' } } },
           },
         },
       } as any);
@@ -2996,10 +2982,8 @@ describe('Output Service', () => {
           protocol: 'grpc',
         },
         secrets: {
-          otlp_exporter: {
-            api_key: 'updated-api-key',
-            tls: { key_pem: 'updated-key-pem' },
-          },
+          api_key: 'updated-api-key',
+          otlp_exporter: { tls: { key_pem: 'updated-key-pem' } },
         },
       });
 
@@ -3009,10 +2993,8 @@ describe('Output Service', () => {
         expect.objectContaining({
           type: 'otlp',
           secrets: {
-            otlp_exporter: {
-              api_key: { id: 'updated-api-key-secret-id' },
-              tls: { key_pem: { id: 'updated-key-pem-secret-id' } },
-            },
+            api_key: { id: 'updated-api-key-secret-id' },
+            otlp_exporter: { tls: { key_pem: { id: 'updated-key-pem-secret-id' } } },
           },
         })
       );

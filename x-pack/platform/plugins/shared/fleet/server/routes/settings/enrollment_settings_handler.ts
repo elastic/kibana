@@ -19,6 +19,7 @@ import type {
   EnrollmentSettingsFleetServerPolicy,
   FleetProxy,
   FleetServerHost,
+  NewBeatsOutput,
   Output,
   DownloadSource,
 } from '../../../common/types';
@@ -224,20 +225,13 @@ function sanitizeEnrollmentFleetServerHost(host: FleetServerHost): FleetServerHo
 }
 
 function sanitizeEnrollmentOutput(output: Output): Output {
+  const beatsOutput = output as NewBeatsOutput;
   return {
     ...omit(output, ['secrets']),
-    ssl: output.ssl ? omit(output.ssl, ['key']) : output.ssl,
-    ...(output.type === 'kafka'
-      ? {
-          password: undefined,
-        }
-      : {}),
-    ...(output.type === 'remote_elasticsearch'
-      ? {
-          service_token: undefined,
-        }
-      : {}),
-  };
+    ssl: beatsOutput.ssl ? omit(beatsOutput.ssl, ['key']) : beatsOutput.ssl,
+    ...(output.type === 'kafka' ? { password: undefined } : {}),
+    ...(output.type === 'remote_elasticsearch' ? { service_token: undefined } : {}),
+  } as Output;
 }
 
 function sanitizeEnrollmentDownloadSource(downloadSource: DownloadSource): DownloadSource {
