@@ -12,7 +12,7 @@ import { ROLE } from '../../../../config/services/security_solution_edr_workflow
 export default function endpointAPIIntegrationTests(providerContext: FtrProviderContext) {
   const { loadTestFile, getService } = providerContext;
 
-  describe('Endpoint plugin', function () {
+  describe('Endpoint artifacts - Basic License / Essentials Tier', function () {
     const ingestManager = getService('ingestManager');
     const rolesUsersProvider = getService('rolesUsersProvider');
     const kbnClient = getService('kibanaServer');
@@ -51,16 +51,6 @@ export default function endpointAPIIntegrationTests(providerContext: FtrProvider
       }
     });
 
-    // Remember to make sure the suite is enabled in .buildkite/pipelines/security_solution_quality_gate/mki_periodic/mki_periodic_defend_workflows.yml when adding new tests without @skipInServerlessMKI
-    loadTestFile(require.resolve('./trusted_apps'));
-    loadTestFile(require.resolve('./trusted_devices'));
-    loadTestFile(require.resolve('./event_filters'));
-    loadTestFile(require.resolve('./host_isolation_exceptions'));
-    loadTestFile(require.resolve('./blocklists'));
-    loadTestFile(require.resolve('./custom_yara_signatures'));
-    loadTestFile(require.resolve('./endpoint_exceptions'));
-    loadTestFile(require.resolve('./endpoint_list_api_rbac'));
-    loadTestFile(require.resolve('./artifact_import'));
-    loadTestFile(require.resolve('./endpoint_exceptions_per_policy_opt_in'));
+    loadTestFile(require.resolve('./custom_yara_signatures_no_license'));
   });
 }
