@@ -294,16 +294,22 @@ export const ConnectorIconsMap: Map<
     '.datadog',
     lazy(() => import(/* webpackChunkName: "connectorIconDatadog" */ './specs/datadog/icon')),
   ],
-
   [
     '.jenkins',
     lazy(() => import(/* webpackChunkName: "connectorIconjenkins" */ './specs/jenkins/icon')),
   ],
-
   [
     '.azure_monitor',
     lazy(
       () => import(/* webpackChunkName: "connectorIconazuremonitor" */ './specs/azure_monitor/icon')
+  ],
+  [
+    '.prometheus_alertmanager',
+    lazy(
+      () =>
+        import(
+          /* webpackChunkName: "connectorIconPrometheusAlertmanager" */ './specs/prometheus_alertmanager/icon'
+        )
     ),
   ],
 ]);

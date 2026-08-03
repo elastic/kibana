@@ -1260,6 +1260,7 @@ x-pack/platform/plugins/shared/searchprofiler @elastic/kibana-management
 x-pack/platform/plugins/shared/security @elastic/kibana-security
 x-pack/platform/plugins/shared/serverless @elastic/appex-sharedux
 x-pack/platform/plugins/shared/significant_events @elastic/obs-sig-events-team
+x-pack/platform/plugins/shared/significant_events_app @elastic/obs-sig-events-team
 x-pack/platform/plugins/shared/slo_shared @elastic/actionable-obs-team
 x-pack/platform/plugins/shared/spaces @elastic/kibana-security
 x-pack/platform/plugins/shared/stack_alerts @elastic/response-ops
@@ -2415,7 +2416,9 @@ x-pack/platform/test/plugin_api_integration/test_suites/platform/ @elastic/kiban
 /x-pack/platform/test/api_integration_deployment_agnostic/apis/core/ @elastic/kibana-core
 /x-pack/platform/test/api_integration_deployment_agnostic/apis/saved_objects_management/ @elastic/kibana-core
 /x-pack/platform/test/serverless/functional/configs/security/config.saved_objects_management.ts @elastic/kibana-core
-/config/ @elastic/kibana-core
+/config/node.options @elastic/kibana-core
+/config/kibana.yml @elastic/kibana-core
+/config/README.md @elastic/kibana-core
 /config/serverless.yml @elastic/kibana-security
 /config/serverless.*.yml @elastic/kibana-security
 /config/serverless.workplaceai.yml @elastic/kibana-security @elastic/search-kibana
@@ -2669,6 +2672,7 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/argocd/** @elastic/ni
 src/platform/packages/shared/kbn-connector-specs/src/specs/one_password/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/outlook/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/pagerduty/** @elastic/workchat-eng
+src/platform/packages/shared/kbn-connector-specs/src/specs/prometheus_alertmanager/** @elastic/nightshift-context-and-research-team
 src/platform/packages/shared/kbn-connector-specs/src/specs/salesforce/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/servicenow_search/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/sharepoint_online/** @elastic/workchat-eng
