@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { distinctUntilKeyChanged, map } from 'rxjs';
+import { distinctUntilKeyChanged, map, shareReplay } from 'rxjs';
 
 import type {
   HttpServiceSetup,
@@ -13,6 +13,7 @@ import type {
   Logger,
   LoggerContextConfigInput,
   LoggingServiceSetup,
+  StatusServiceSetup,
 } from '@kbn/core/server';
 import type { AuditEvent, AuditLogger, AuditServiceSetup } from '@kbn/security-plugin-types-server';
 import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
@@ -23,6 +24,8 @@ import {
   AUDIT_OTEL_PROMOTE_RESOURCE_ATTRIBUTES,
   AUDIT_OTEL_RESOURCE_ATTRIBUTES,
 } from './audit_otel_transform';
+import type { AuditLogWriteAccess } from './audit_write_access';
+import { getAuditLogPath, getAuditStatus$, probeAuditLogWriteAccess } from './audit_write_access';
 import type { SecurityLicense, SecurityLicenseFeatures } from '../../common';
 import type { ConfigType } from '../config';
 import type { SecurityPluginSetup } from '../plugin';
@@ -37,6 +40,8 @@ interface AuditServiceSetupParams {
   config: ConfigType['audit'];
   logging: Pick<LoggingServiceSetup, 'configure'>;
   http: Pick<HttpServiceSetup, 'registerOnPostAuth'>;
+  // Used to report the plugin as degraded while the audit log cannot be written.
+  status: Pick<StatusServiceSetup, 'set' | 'derivedStatus$'>;
   // The OTel audit field transforms target Serverless log-delivery requirements only. On other
   // build flavors the OTel appender is left untouched (full resource, raw ECS field names).
   // Defaults to `false` (no transforms) when omitted; the plugin always passes it explicitly.
@@ -68,17 +73,38 @@ export class AuditService {
     config,
     logging,
     http,
+    status,
     isServerless = false,
     getCurrentUser,
     getSID,
     getSpaceId,
     recordAuditLoggingUsage,
   }: AuditServiceSetupParams): AuditServiceSetup {
-    // Configure logging during setup and when license changes
+    const auditLogPath = getAuditLogPath(config.appender);
+
+    const probed$ = license.features$.pipe(
+      distinctUntilKeyChanged('allowAuditLogging'),
+      map((features) => ({
+        features,
+        writeAccess: auditLogPath ? probeAuditLogWriteAccess(auditLogPath) : undefined,
+      })),
+      shareReplay(1)
+    );
+
+    const writeAccess$ = auditLogPath
+      ? probed$.pipe(map(({ writeAccess }) => writeAccess!))
+      : undefined;
+
+    // Report the plugin as degraded while the audit log cannot be written, so the lost audit
+    // trail shows up in /api/status rather than having to be inferred.
+    status.set(getAuditStatus$({ writeAccess$, derivedStatus$: status.derivedStatus$ }));
+
+    // Configure logging during setup and when the license changes
     logging.configure(
-      license.features$.pipe(
-        distinctUntilKeyChanged('allowAuditLogging'),
-        createLoggingConfig(config, isServerless)
+      probed$.pipe(
+        map(({ features, writeAccess }) =>
+          createLoggingConfig(config, isServerless, writeAccess)(features)
+        )
       )
     );
 
@@ -174,8 +200,18 @@ export class AuditService {
   }
 }
 
-export const createLoggingConfig = (config: ConfigType['audit'], isServerless = false) =>
-  map<Pick<SecurityLicenseFeatures, 'allowAuditLogging'>, LoggerContextConfigInput>((features) => {
+export const createLoggingConfig =
+  (config: ConfigType['audit'], isServerless = false, writeAccess?: AuditLogWriteAccess) =>
+  (features: Pick<SecurityLicenseFeatures, 'allowAuditLogging'>): LoggerContextConfigInput => {
+    if (writeAccess && !writeAccess.writable) {
+      return {
+        appenders: {
+          auditTrailAppender: { type: 'console' as const, layout: { type: 'json' as const } },
+        },
+        loggers: [{ name: 'audit.ecs', level: 'off' as const, appenders: ['auditTrailAppender'] }],
+      };
+    }
+
     const baseAppender = config.appender ?? {
       type: 'console' as const,
       layout: {
@@ -220,7 +256,7 @@ export const createLoggingConfig = (config: ConfigType['audit'], isServerless = 
         },
       ],
     };
-  });
+  };
 
 /**
  * Evaluates the list of provided ignore rules, and filters out events only
