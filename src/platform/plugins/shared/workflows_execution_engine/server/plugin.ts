@@ -47,6 +47,7 @@ import { checkLicense } from './lib/check_license';
 import { ensureWorkflowsDataStreamsRolledOver } from './lib/data_streams/ensure_data_streams_rolled_over';
 import { getAuthenticatedUser } from './lib/get_user';
 import {
+  markScheduledExecutionFailedAfterTaskError,
   resolveExhaustedWorkflowRunTask,
   resolveInterruptedWorkflowResumeTask,
   resolveInterruptedWorkflowRunTask,
@@ -525,20 +526,29 @@ export class WorkflowsExecutionEnginePlugin
               }
               logger.debug(`Running scheduled workflow task for workflow ${workflow.id}`);
 
-              // Guard check: Check&Skip only when workflow has no concurrency strategy. When strategy is
-              // set, the concurrency check (later) governs the limit and strategy.
-              if (!workflow.definition?.settings?.concurrency?.strategy) {
-                const wasSkipped = await checkAndSkipIfExistingScheduledExecution(
-                  workflow,
-                  spaceId,
-                  workflowExecutionRepository,
-                  stepExecutionRepository,
-                  taskInstance,
-                  logger
-                );
-                if (wasSkipped) {
-                  return;
+              // Overlap / recovery: always run so past-tick abandoned `pending` orphans are
+              // reaped even on the first attempt of a new schedule interval. Defer in-flight
+              // SKIPPED only when concurrency key+strategy will enforce collisions.
+              const concurrency = workflow.definition?.settings?.concurrency;
+              const deferInFlightDuplicatesToConcurrency = Boolean(
+                concurrency?.key?.trim() && concurrency?.strategy
+              );
+              const workflowTaskManager = new WorkflowTaskManager(pluginsStart.taskManager);
+              const wasSkipped = await checkAndSkipIfExistingScheduledExecution(
+                workflow,
+                spaceId,
+                workflowExecutionRepository,
+                stepExecutionRepository,
+                taskInstance,
+                logger,
+                {
+                  createSkippedForInFlightDuplicates: !deferInFlightDuplicatesToConcurrency,
+                  hasActiveTaskForExecution: (executionId) =>
+                    workflowTaskManager.hasActiveTaskForExecution(executionId),
                 }
+              );
+              if (wasSkipped) {
+                return;
               }
 
               // Check for RRule triggers and log details
@@ -606,7 +616,7 @@ export class WorkflowsExecutionEnginePlugin
               await maybeDrainConcurrencyQueueBeforeEnqueue({
                 workflowExecution,
                 workflowExecutionRepository,
-                workflowTaskManager: new WorkflowTaskManager(pluginsStart.taskManager),
+                workflowTaskManager,
                 logger,
                 failureLogLabel: 'Scheduled workflow concurrency queue drain failed',
               });
@@ -626,7 +636,7 @@ export class WorkflowsExecutionEnginePlugin
                     spaceId: workflowExecution.spaceId,
                     request: fakeRequest,
                     workflowExecutionRepository,
-                    workflowTaskManager: new WorkflowTaskManager(pluginsStart.taskManager),
+                    workflowTaskManager,
                     internalResumeWorkflowExecution: this.internalResumeWorkflowExecutionHandler,
                     logger,
                   });
@@ -640,18 +650,32 @@ export class WorkflowsExecutionEnginePlugin
 
               const [, , workflowsExecutionEngine] = await core.getStartServices();
 
-              await runWorkflow({
-                workflowRunId: workflowExecution.id,
-                spaceId: workflowExecution.spaceId,
-                signal: taskAbortController.signal,
-                logger,
-                config,
-                fakeRequest,
-                dependencies,
-                workflowsExecutionEngine,
-                meteringService: this.meteringService,
-                internalResumeWorkflowExecution: this.internalResumeWorkflowExecutionHandler,
-              });
+              // Create-then-fail: scheduled runs start inline (no bound workflow:run). If
+              // runWorkflow throws after create, terminalize the still-non-terminal doc so a
+              // pending cannot hold a concurrency slot until a later tick reaps it.
+              try {
+                await runWorkflow({
+                  workflowRunId: workflowExecution.id,
+                  spaceId: workflowExecution.spaceId,
+                  signal: taskAbortController.signal,
+                  logger,
+                  config,
+                  fakeRequest,
+                  dependencies,
+                  workflowsExecutionEngine,
+                  meteringService: this.meteringService,
+                  internalResumeWorkflowExecution: this.internalResumeWorkflowExecutionHandler,
+                });
+              } catch (error) {
+                await markScheduledExecutionFailedAfterTaskError({
+                  workflowExecutionRepository,
+                  stepExecutionRepository,
+                  workflowRunId: workflowExecution.id,
+                  spaceId: workflowExecution.spaceId,
+                  logger,
+                });
+                throw error;
+              }
 
               const scheduleType = rruleTriggers.length > 0 ? 'RRule' : 'interval/cron';
               logger.debug(
@@ -901,7 +925,10 @@ export class WorkflowsExecutionEnginePlugin
       } else {
         // Schedule a task: either we're not in a task, or this is a child execution (must not run inline)
         const taskInstance = createTaskInstance(workflowExecution, ['workflows']);
-        await plugins.taskManager.schedule(taskInstance, { request: request as KibanaRequest });
+        await plugins.taskManager.schedule(taskInstance, {
+          request: request as KibanaRequest,
+          cloneApiKey: true,
+        });
         this.logger.debug(
           `Scheduling workflow task for workflow ${workflow.id}, execution ${workflowExecution.id}${
             isChildExecution ? ' (child execution)' : ''
@@ -950,7 +977,7 @@ export class WorkflowsExecutionEnginePlugin
         generateExecutionTaskScope(workflowExecution as EsWorkflowExecution)
       );
 
-      await plugins.taskManager.schedule(taskInstance, { request });
+      await plugins.taskManager.schedule(taskInstance, { request, cloneApiKey: true });
       this.logger.debug(
         `Scheduling workflow task with user context for workflow ${workflow.id}, execution ${workflowExecution.id}`
       );
@@ -1135,7 +1162,7 @@ export class WorkflowsExecutionEnginePlugin
             generateExecutionTaskScope(p.workflowExecution as EsWorkflowExecution)
           )
         );
-        await plugins.taskManager.bulkSchedule(tasks, { request });
+        await plugins.taskManager.bulkSchedule(tasks, { request, cloneApiKey: true });
         this.logger.debug(`Bulk-scheduled ${toSchedule.length} workflow task(s) with user context`);
       }
 
@@ -1193,13 +1220,13 @@ export class WorkflowsExecutionEnginePlugin
         enabled: true,
       };
 
-      // Use Task Manager's first-class API key support by passing the request
-      // This ensures the step runs with the user's permissions, not kibana_system
+      // Use Task Manager's first-class API key support by passing the request.
+      // Clone so org/global UIAM keys are granted as TM-managed internal keys.
       // At this point, request is guaranteed to exist due to the early check above
       this.logger.debug(
         `Scheduling workflow step task with user context for workflow ${workflow.id}, step ${stepId}`
       );
-      await plugins.taskManager.schedule(taskInstance, { request });
+      await plugins.taskManager.schedule(taskInstance, { request, cloneApiKey: true });
 
       return {
         workflowExecutionId: workflowExecution.id as string,

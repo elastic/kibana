@@ -9,7 +9,8 @@ import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../fixtures';
 
-test.describe('OverviewSaveLensVisualization', { tag: tags.stateful.classic }, () => {
+// Failing: See https://github.com/elastic/kibana/issues/264879
+test.describe.skip('OverviewSaveLensVisualization', { tag: tags.stateful.classic }, () => {
   test.beforeAll(async ({ syntheticsServices }) => {
     await syntheticsServices.cleanUp();
   });
