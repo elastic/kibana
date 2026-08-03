@@ -23,29 +23,23 @@ const createHttpFetchError = (message: string, status: number) =>
 
 describe('InitialSolutionSetup', () => {
   const originalLocation = window.location;
-  let hrefSpy: jest.Mock;
   const serverBasePath = '/server-base-path';
 
-  beforeEach(() => {
-    hrefSpy = jest.fn();
-    Object.defineProperty(window, 'location', {
-      configurable: true,
-      writable: true,
-      value: { ...originalLocation, search: '', reload: jest.fn() },
-    });
-    Object.defineProperty(window.location, 'href', {
-      configurable: true,
-      set: hrefSpy,
-      get: () => '',
-    });
-    jest.clearAllMocks();
+  beforeAll(() => {
+    // @ts-expect-error override window.location for navigation assertions
+    delete window.location;
+    // @ts-expect-error partial Location mock
+    window.location = { href: 'http://localhost/spaces/space_selector' };
   });
 
-  afterEach(() => {
-    Object.defineProperty(window, 'location', {
-      configurable: true,
-      value: originalLocation,
-    });
+  afterAll(() => {
+    // @ts-expect-error restore window.location
+    window.location = originalLocation;
+  });
+
+  beforeEach(() => {
+    window.location.href = 'http://localhost/spaces/space_selector';
+    jest.clearAllMocks();
   });
 
   const renderSetup = (spacesManager = spacesManagerMock.create()) => {
@@ -56,10 +50,9 @@ describe('InitialSolutionSetup', () => {
   };
 
   it('continues to space preserving next after successful completion', async () => {
-    Object.defineProperty(window.location, 'search', {
-      configurable: true,
-      value: '?next=%2Fapp%2Fhome',
-    });
+    window.location.href = `http://localhost/spaces/space_selector?next=${encodeURIComponent(
+      '/app/home'
+    )}`;
     const user = userEvent.setup();
     const spacesManager = spacesManagerMock.create();
     spacesManager.completeInitialSolutionSetup = jest.fn().mockResolvedValue(undefined);
@@ -69,9 +62,43 @@ describe('InitialSolutionSetup', () => {
 
     await waitFor(() => {
       expect(spacesManager.completeInitialSolutionSetup).toHaveBeenCalledWith('es');
-      expect(hrefSpy).toHaveBeenCalledWith(
+      expect(window.location.href).toBe(
         `${serverBasePath}${ENTER_SPACE_PATH}?next=${encodeURIComponent('/app/home')}`
       );
+    });
+  });
+
+  it('preserves hash fragments from the current page when forwarding next', async () => {
+    window.location.href = `http://localhost/spaces/space_selector?next=${encodeURIComponent(
+      '/app/home'
+    )}#/discover/foo`;
+    const user = userEvent.setup();
+    const spacesManager = spacesManagerMock.create();
+    spacesManager.completeInitialSolutionSetup = jest.fn().mockResolvedValue(undefined);
+
+    renderSetup(spacesManager);
+    await user.click(screen.getByRole('button', { name: 'Select Elasticsearch' }));
+
+    await waitFor(() => {
+      expect(window.location.href).toBe(
+        `${serverBasePath}${ENTER_SPACE_PATH}?next=${encodeURIComponent('/app/home#/discover/foo')}`
+      );
+    });
+  });
+
+  it('omits next when the continuation URL is external', async () => {
+    window.location.href = `http://localhost/spaces/space_selector?next=${encodeURIComponent(
+      'https://evil.com'
+    )}`;
+    const user = userEvent.setup();
+    const spacesManager = spacesManagerMock.create();
+    spacesManager.completeInitialSolutionSetup = jest.fn().mockResolvedValue(undefined);
+
+    renderSetup(spacesManager);
+    await user.click(screen.getByRole('button', { name: 'Select Elasticsearch' }));
+
+    await waitFor(() => {
+      expect(window.location.href).toBe(`${serverBasePath}${ENTER_SPACE_PATH}`);
     });
   });
 
@@ -87,7 +114,7 @@ describe('InitialSolutionSetup', () => {
 
     await waitFor(() => {
       expect(spacesManager.getInitialSolutionSetup).toHaveBeenCalledTimes(1);
-      expect(hrefSpy).toHaveBeenCalledWith(`${serverBasePath}${ENTER_SPACE_PATH}`);
+      expect(window.location.href).toBe(`${serverBasePath}${ENTER_SPACE_PATH}`);
     });
     expect(screen.queryByTestId('initialSolutionSetupError')).not.toBeInTheDocument();
   });
@@ -105,6 +132,6 @@ describe('InitialSolutionSetup', () => {
     expect(await screen.findByTestId('initialSolutionSetupError')).toHaveTextContent(
       'Setup conflict'
     );
-    expect(hrefSpy).not.toHaveBeenCalled();
+    expect(window.location.href).toBe('http://localhost/spaces/space_selector');
   });
 });

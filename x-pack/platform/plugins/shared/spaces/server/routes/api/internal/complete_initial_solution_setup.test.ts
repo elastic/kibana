@@ -11,15 +11,20 @@ import { kibanaResponseFactory, SavedObjectsErrorHelpers } from '@kbn/core/serve
 import { httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 
-import type { InitialSolutionSetupRouteDeps } from '.';
+import type { InitialSolutionSetupRouteDeps, InternalRouteDeps } from '.';
 import { initCompleteInitialSolutionSetupApi } from './complete_initial_solution_setup';
 import { SOLUTION_VIEW_CLASSIC } from '../../../../common/constants';
 import type { InitialSolutionSetupService } from '../../../initial_solution_setup/initial_solution_setup_service';
+import { spacesClientMock } from '../../../spaces_client/spaces_client.mock';
 import { mockRouteContext, mockRouteContextWithInvalidLicense } from '../__fixtures__';
 
 describe('POST /internal/spaces/_complete_initial_solution_setup', () => {
   const setup = (completeImpl?: InitialSolutionSetupService['complete']) => {
     const router = httpServiceMock.createRouter();
+    const spacesClient = spacesClientMock.create();
+    const getSpacesService = jest.fn().mockReturnValue({
+      createSpacesClient: jest.fn().mockReturnValue(spacesClient),
+    });
     const initialSolutionSetup = {
       isRequired: jest.fn(),
       complete: jest.fn(completeImpl ?? jest.fn().mockResolvedValue(undefined)),
@@ -27,12 +32,15 @@ describe('POST /internal/spaces/_complete_initial_solution_setup', () => {
 
     initCompleteInitialSolutionSetupApi({
       router,
+      getSpacesService,
       initialSolutionSetup,
-    } as InitialSolutionSetupRouteDeps);
+    } as InternalRouteDeps & InitialSolutionSetupRouteDeps);
 
     return {
       routeHandler: router.post.mock.calls[0][1],
       initialSolutionSetup,
+      spacesClient,
+      getSpacesService,
     };
   };
 
@@ -42,20 +50,18 @@ describe('POST /internal/spaces/_complete_initial_solution_setup', () => {
     ['oblt', 'oblt'],
     ['security', 'security'],
   ] as const)('returns http/200 with the selected %s solution', async (_label, solution) => {
-    const { routeHandler, initialSolutionSetup } = setup();
+    const { routeHandler, initialSolutionSetup, spacesClient, getSpacesService } = setup();
+    const request = httpServerMock.createKibanaRequest({
+      method: 'post',
+      body: { solution },
+    });
 
-    const response = await routeHandler(
-      mockRouteContext,
-      httpServerMock.createKibanaRequest({
-        method: 'post',
-        body: { solution },
-      }),
-      kibanaResponseFactory
-    );
+    const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
 
     expect(response.status).toEqual(200);
     expect(response.payload).toEqual({ solution });
-    expect(initialSolutionSetup.complete).toHaveBeenCalledWith(solution);
+    expect(getSpacesService().createSpacesClient).toHaveBeenCalledWith(request);
+    expect(initialSolutionSetup.complete).toHaveBeenCalledWith(spacesClient, solution);
   });
 
   it('returns http/403 when the license is invalid', async () => {

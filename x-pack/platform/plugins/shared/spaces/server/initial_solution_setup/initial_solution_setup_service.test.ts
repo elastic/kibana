@@ -5,87 +5,76 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
+
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 
 import { InitialSolutionSetupService } from './initial_solution_setup_service';
 import { SOLUTION_VIEW_CLASSIC } from '../../common/constants';
-import type { SpaceSavedObjectAttributes } from '../types';
+import { spacesClientMock } from '../spaces_client/spaces_client.mock';
 
 interface MockOptions {
   enabled?: boolean;
-  attributes?: SpaceSavedObjectAttributes;
+  required?: boolean;
   notFound?: boolean;
-  version?: string;
 }
 
 const createService = (options: MockOptions = {}) => {
-  const mockGet = jest.fn();
-  const mockUpdate = jest.fn().mockResolvedValue({});
+  const spacesClient = spacesClientMock.create();
 
   if (options.notFound) {
-    mockGet.mockRejectedValue(
+    spacesClient.isInitialSolutionSetupRequired.mockRejectedValue(
       SavedObjectsErrorHelpers.createGenericNotFoundError('space', DEFAULT_SPACE_ID)
     );
   } else {
-    mockGet.mockResolvedValue({
-      attributes: options.attributes ?? {},
-      version: options.version ?? 'v1',
-    });
+    spacesClient.isInitialSolutionSetupRequired.mockResolvedValue(options.required ?? false);
   }
 
-  const getSavedObjects = jest.fn().mockResolvedValue({
-    createInternalRepository: jest.fn().mockReturnValue({
-      get: mockGet,
-      update: mockUpdate,
-    }),
-  });
+  spacesClient.completeInitialSolutionSetup.mockResolvedValue(undefined);
 
   const service = new InitialSolutionSetupService({
     enabled: options.enabled ?? true,
-    getSavedObjects,
   });
 
-  return { service, mockGet, mockUpdate };
+  return { service, spacesClient };
 };
 
 describe('InitialSolutionSetupService', () => {
   describe('#isRequired()', () => {
     it('returns false when disabled', async () => {
-      const { service, mockGet } = createService({ enabled: false });
+      const { service, spacesClient } = createService({ enabled: false, required: true });
 
-      await expect(service.isRequired()).resolves.toBe(false);
-      expect(mockGet).not.toHaveBeenCalled();
+      await expect(service.isRequired(spacesClient)).resolves.toBe(false);
+      expect(spacesClient.isInitialSolutionSetupRequired).not.toHaveBeenCalled();
     });
 
     it('returns true when the default space marker is set', async () => {
-      const { service } = createService({ attributes: { solutionSetupRequired: true } });
+      const { service, spacesClient } = createService({ required: true });
 
-      await expect(service.isRequired()).resolves.toBe(true);
+      await expect(service.isRequired(spacesClient)).resolves.toBe(true);
     });
 
     it('returns false when the default space marker is unset', async () => {
-      const { service } = createService({ attributes: {} });
+      const { service, spacesClient } = createService({ required: false });
 
-      await expect(service.isRequired()).resolves.toBe(false);
+      await expect(service.isRequired(spacesClient)).resolves.toBe(false);
     });
 
     it('returns false when the default space is missing and does not cache the result', async () => {
-      const { service, mockGet } = createService({ notFound: true });
+      const { service, spacesClient } = createService({ notFound: true });
 
-      await expect(service.isRequired()).resolves.toBe(false);
-      await expect(service.isRequired()).resolves.toBe(false);
-      expect(mockGet).toHaveBeenCalledTimes(2);
+      await expect(service.isRequired(spacesClient)).resolves.toBe(false);
+      await expect(service.isRequired(spacesClient)).resolves.toBe(false);
+      expect(spacesClient.isInitialSolutionSetupRequired).toHaveBeenCalledTimes(2);
     });
 
     it('caches a terminal false marker', async () => {
-      const { service, mockGet } = createService({
-        attributes: { solutionSetupRequired: false },
-      });
+      const { service, spacesClient } = createService({ required: false });
 
-      await expect(service.isRequired()).resolves.toBe(false);
-      await expect(service.isRequired()).resolves.toBe(false);
-      expect(mockGet).toHaveBeenCalledTimes(1);
+      await expect(service.isRequired(spacesClient)).resolves.toBe(false);
+      await expect(service.isRequired(spacesClient)).resolves.toBe(false);
+      expect(spacesClient.isInitialSolutionSetupRequired).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -96,47 +85,41 @@ describe('InitialSolutionSetupService', () => {
       ['oblt', 'oblt'],
       ['security', 'security'],
     ] as const)('persists %s as the space solution', async (_label, solution) => {
-      const { service, mockUpdate } = createService({
-        attributes: { solutionSetupRequired: true },
-        version: 'v42',
-      });
+      const { service, spacesClient } = createService();
 
-      await service.complete(solution);
+      await service.complete(spacesClient, solution);
 
-      expect(mockUpdate).toHaveBeenCalledWith(
-        'space',
-        DEFAULT_SPACE_ID,
-        { solution, solutionSetupRequired: false },
-        { version: 'v42' }
-      );
+      expect(spacesClient.completeInitialSolutionSetup).toHaveBeenCalledWith(solution);
     });
 
     it('rejects completion when disabled', async () => {
-      const { service } = createService({ enabled: false });
+      const { service, spacesClient } = createService({ enabled: false });
 
-      await expect(service.complete('es')).rejects.toMatchInlineSnapshot(
+      await expect(service.complete(spacesClient, 'es')).rejects.toMatchInlineSnapshot(
         `[Error: Initial solution setup is disabled]`
       );
+      expect(spacesClient.completeInitialSolutionSetup).not.toHaveBeenCalled();
     });
 
-    it('rejects completion when setup is already complete', async () => {
-      const { service } = createService({ attributes: { solutionSetupRequired: false } });
+    it('propagates conflicts when setup is already complete', async () => {
+      const { service, spacesClient } = createService();
+      spacesClient.completeInitialSolutionSetup.mockRejectedValue(
+        Boom.conflict('Initial solution setup is already complete')
+      );
 
-      await expect(service.complete('es')).rejects.toMatchInlineSnapshot(
+      await expect(service.complete(spacesClient, 'es')).rejects.toMatchInlineSnapshot(
         `[Error: Initial solution setup is already complete]`
       );
     });
 
-    it('caches completion so subsequent reads skip the repository', async () => {
-      const { service, mockGet } = createService({
-        attributes: { solutionSetupRequired: true },
-      });
+    it('caches completion so subsequent reads skip the client', async () => {
+      const { service, spacesClient } = createService({ required: true });
 
-      await service.complete('security');
-      mockGet.mockClear();
+      await service.complete(spacesClient, 'security');
+      spacesClient.isInitialSolutionSetupRequired.mockClear();
 
-      await expect(service.isRequired()).resolves.toBe(false);
-      expect(mockGet).not.toHaveBeenCalled();
+      await expect(service.isRequired(spacesClient)).resolves.toBe(false);
+      expect(spacesClient.isInitialSolutionSetupRequired).not.toHaveBeenCalled();
     });
   });
 });

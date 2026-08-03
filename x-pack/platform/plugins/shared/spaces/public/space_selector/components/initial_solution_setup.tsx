@@ -8,17 +8,20 @@
 import {
   EuiButton,
   EuiCard,
-  EuiFlexGrid,
+  EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
   EuiPanel,
+  EuiSpacer,
   EuiText,
+  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useState } from 'react';
 
 import { isHttpFetchError } from '@kbn/core-http-browser';
 import { i18n } from '@kbn/i18n';
+import { parseNextURL } from '@kbn/std';
 
 import type { SolutionView } from '../../../common';
 import { ENTER_SPACE_PATH } from '../../../common';
@@ -31,14 +34,16 @@ interface Props {
 }
 
 export const InitialSolutionSetup = ({ spacesManager, serverBasePath }: Props) => {
+  const { euiTheme } = useEuiTheme();
   const [selectedSolution, setSelectedSolution] = useState<SolutionView>();
   const [error, setError] = useState<Error>();
 
   const continueToSpace = () => {
-    const next = new URLSearchParams(window.location.search).get('next');
-    window.location.href = `${serverBasePath}${ENTER_SPACE_PATH}${
-      next ? `?next=${encodeURIComponent(next)}` : ''
-    }`;
+    // Match /spaces/enter: validate next without basePath, since Spaces stores app-relative next URLs.
+    const parsed = parseNextURL(window.location.href);
+    const enterUrl = `${serverBasePath}${ENTER_SPACE_PATH}`;
+    window.location.href =
+      parsed === '/' ? enterUrl : `${enterUrl}?next=${encodeURIComponent(parsed)}`;
   };
 
   const completeSetup = async (solution: SolutionView) => {
@@ -70,21 +75,18 @@ export const InitialSolutionSetup = ({ spacesManager, serverBasePath }: Props) =
 
   return (
     <>
-      <EuiFlexGrid
-        columns={4}
-        gutterSize="l"
-        css={css`
-          max-width: 1120px;
-          margin: 0 auto;
-        `}
-      >
+      <EuiFlexGroup gutterSize="l" justifyContent="center" wrap responsive={false}>
         {SOLUTION_VIEW_OPTIONS.map(
           ({ value, initialSetupName, description, icon, dataTestSubj }) => (
-            <EuiFlexItem key={value}>
+            <EuiFlexItem key={value} grow={false}>
               <EuiCard
                 css={css`
-                  height: 100%;
-                  min-height: 280px;
+                  width: calc(${euiTheme.size.l} * 13) !important;
+                  min-height: calc(${euiTheme.size.base} * 15);
+
+                  .euiCard__content {
+                    overflow: hidden;
+                  }
                 `}
                 data-test-subj={`initialSolutionSetup-${dataTestSubj}`}
                 icon={<EuiIcon type={icon} size="xl" />}
@@ -115,11 +117,14 @@ export const InitialSolutionSetup = ({ spacesManager, serverBasePath }: Props) =
             </EuiFlexItem>
           )
         )}
-      </EuiFlexGrid>
+      </EuiFlexGroup>
       {error ? (
-        <EuiPanel color="danger" data-test-subj="initialSolutionSetupError">
-          <EuiText color="danger">{error.message}</EuiText>
-        </EuiPanel>
+        <>
+          <EuiSpacer />
+          <EuiPanel color="danger" data-test-subj="initialSolutionSetupError">
+            <EuiText color="danger">{error.message}</EuiText>
+          </EuiPanel>
+        </>
       ) : null}
     </>
   );

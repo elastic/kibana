@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
-import type { InitialSolutionSetupRouteDeps } from '.';
+import type { InitialSolutionSetupRouteDeps, InternalRouteDeps } from '.';
 import type { CompleteInitialSolutionSetupResponse } from '../../../../common';
 import { wrapError } from '../../../lib/errors';
 import { solutionSchema } from '../../../lib/space_schema';
@@ -16,8 +16,9 @@ import { createLicensedRouteHandler } from '../../lib';
 
 export function initCompleteInitialSolutionSetupApi({
   router,
+  getSpacesService,
   initialSolutionSetup,
-}: InitialSolutionSetupRouteDeps) {
+}: InternalRouteDeps & InitialSolutionSetupRouteDeps) {
   router.post(
     {
       path: '/internal/spaces/_complete_initial_solution_setup',
@@ -25,7 +26,7 @@ export function initCompleteInitialSolutionSetupApi({
         authz: {
           enabled: false,
           reason:
-            'This one-time development route is guarded by the pending setup marker and an optimistic concurrency check',
+            'This route delegates authorization to the spaces service via a scoped spaces client',
         },
       },
       validate: {
@@ -36,7 +37,8 @@ export function initCompleteInitialSolutionSetupApi({
     },
     createLicensedRouteHandler(async (_context, request, response) => {
       try {
-        await initialSolutionSetup.complete(request.body.solution);
+        const spacesClient = getSpacesService().createSpacesClient(request);
+        await initialSolutionSetup.complete(spacesClient, request.body.solution);
         const body: CompleteInitialSolutionSetupResponse = {
           solution: request.body.solution,
         };

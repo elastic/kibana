@@ -504,6 +504,118 @@ describe('#getPersistedFeatureVisibility', () => {
   });
 });
 
+describe('#isInitialSolutionSetupRequired', () => {
+  test('returns true when the marker is set on the default space', async () => {
+    const mockDebugLogger = createMockDebugLogger();
+    const mockConfig = createMockConfig();
+    const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
+    mockCallWithRequestRepository.get.mockResolvedValue({
+      id: 'default',
+      type: 'space',
+      references: [],
+      attributes: { name: 'Default', solutionSetupRequired: true },
+    });
+
+    const client = new SpacesClient(
+      mockDebugLogger,
+      mockConfig,
+      mockCallWithRequestRepository,
+      [],
+      'traditional',
+      featuresStart,
+      undefined
+    );
+
+    await expect(client.isInitialSolutionSetupRequired()).resolves.toBe(true);
+    expect(mockCallWithRequestRepository.get).toHaveBeenCalledWith('space', 'default');
+  });
+
+  test('returns false when the marker is unset', async () => {
+    const mockDebugLogger = createMockDebugLogger();
+    const mockConfig = createMockConfig();
+    const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
+    mockCallWithRequestRepository.get.mockResolvedValue({
+      id: 'default',
+      type: 'space',
+      references: [],
+      attributes: { name: 'Default' },
+    });
+
+    const client = new SpacesClient(
+      mockDebugLogger,
+      mockConfig,
+      mockCallWithRequestRepository,
+      [],
+      'traditional',
+      featuresStart,
+      undefined
+    );
+
+    await expect(client.isInitialSolutionSetupRequired()).resolves.toBe(false);
+  });
+});
+
+describe('#completeInitialSolutionSetup', () => {
+  test('persists the selected solution and clears the marker with optimistic concurrency', async () => {
+    const mockDebugLogger = createMockDebugLogger();
+    const mockConfig = createMockConfig();
+    const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
+    mockCallWithRequestRepository.get.mockResolvedValue({
+      id: 'default',
+      type: 'space',
+      references: [],
+      version: 'v42',
+      attributes: { name: 'Default', solutionSetupRequired: true },
+    });
+
+    const client = new SpacesClient(
+      mockDebugLogger,
+      mockConfig,
+      mockCallWithRequestRepository,
+      [],
+      'traditional',
+      featuresStart,
+      undefined
+    );
+
+    await client.completeInitialSolutionSetup('oblt');
+
+    expect(mockCallWithRequestRepository.update).toHaveBeenCalledWith(
+      'space',
+      'default',
+      { solution: 'oblt', solutionSetupRequired: false },
+      { version: 'v42' }
+    );
+  });
+
+  test('rejects when setup is already complete', async () => {
+    const mockDebugLogger = createMockDebugLogger();
+    const mockConfig = createMockConfig();
+    const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
+    mockCallWithRequestRepository.get.mockResolvedValue({
+      id: 'default',
+      type: 'space',
+      references: [],
+      attributes: { name: 'Default', solutionSetupRequired: false },
+    });
+
+    const client = new SpacesClient(
+      mockDebugLogger,
+      mockConfig,
+      mockCallWithRequestRepository,
+      [],
+      'traditional',
+      featuresStart,
+      undefined
+    );
+
+    await expect(client.completeInitialSolutionSetup('es')).rejects.toThrow(
+      'Initial solution setup is already complete'
+    );
+    expect(mockCallWithRequestRepository.update).not.toHaveBeenCalled();
+  });
+});
+
 describe('#create', () => {
   const id = 'foo';
   const attributes = {

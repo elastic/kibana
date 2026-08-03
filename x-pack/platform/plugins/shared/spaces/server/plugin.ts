@@ -162,7 +162,6 @@ export class SpacesPlugin
     const getSavedObjects = async () => (await core.getStartServices())[0].savedObjects;
     const initialSolutionSetup = new InitialSolutionSetupService({
       enabled: isInitialSolutionSetupEnabled,
-      getSavedObjects,
     });
     this.defaultSpaceService = new DefaultSpaceService();
     this.defaultSpaceService.setup({

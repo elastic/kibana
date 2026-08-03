@@ -12,8 +12,13 @@ import { SpacesSavedObjectMappings, UsageStatsMappings } from './mappings';
 import { spaceMigrations, usageStatsMigrations } from './migrations';
 import { SavedObjectsSpacesExtension } from './saved_objects_spaces_extension';
 import { SpacesSavedObjectSchemas } from './schemas';
+import { solutionSchema } from '../lib/space_schema';
 import type { SpacesServiceStart } from '../spaces_service';
 import { SPACES_USAGE_STATS_TYPE } from '../usage_stats';
+
+const spaceCreateSchemaWithSolution = SpacesSavedObjectSchemas['8.8.0'].extends({
+  solution: schema.maybe(solutionSchema),
+});
 
 interface SetupDeps {
   core: Pick<CoreSetup, 'savedObjects' | 'getStartServices'>;
@@ -42,16 +47,7 @@ export class SpacesSavedObjectsService {
             },
           ],
           schemas: {
-            create: SpacesSavedObjectSchemas['8.8.0'].extends({
-              solution: schema.maybe(
-                schema.oneOf([
-                  schema.literal('security'),
-                  schema.literal('oblt'),
-                  schema.literal('es'),
-                  schema.literal('classic'),
-                ])
-              ),
-            }),
+            create: spaceCreateSchemaWithSolution,
           },
         },
         2: {
@@ -67,15 +63,7 @@ export class SpacesSavedObjectsService {
         3: {
           changes: [],
           schemas: {
-            create: SpacesSavedObjectSchemas['8.8.0'].extends({
-              solution: schema.maybe(
-                schema.oneOf([
-                  schema.literal('security'),
-                  schema.literal('oblt'),
-                  schema.literal('es'),
-                  schema.literal('classic'),
-                ])
-              ),
+            create: spaceCreateSchemaWithSolution.extends({
               solutionSetupRequired: schema.maybe(schema.boolean()),
             }),
           },

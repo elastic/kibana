@@ -59,7 +59,8 @@ export function initSpacesOnPostAuthRequestInterceptor({
       (isRequestingKibanaRoot || isRequestingApplication || isEnteringSpace)
     ) {
       try {
-        if (await initialSolutionSetup.isRequired()) {
+        const spacesClient = spacesService.createSpacesClient(request);
+        if (await initialSolutionSetup.isRequired(spacesClient)) {
           const next = isRequestingApplication
             ? `${request.url.pathname}${request.url.search}`
             : request.url.searchParams.get('next') ?? undefined;
@@ -68,7 +69,12 @@ export function initSpacesOnPostAuthRequestInterceptor({
           });
         }
       } catch (error) {
-        return response.customError(wrapError(error));
+        const wrappedError = wrapError(error);
+        if (wrappedError.statusCode === 403) {
+          log.debug(`Skipping initial solution setup redirect; unauthorized. ${error}`);
+        } else {
+          log.warn(`Failed to check initial solution setup state: ${error}`);
+        }
       }
     }
 

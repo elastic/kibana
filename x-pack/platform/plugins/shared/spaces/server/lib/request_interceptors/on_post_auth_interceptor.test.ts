@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
+
 import {
   coreMock,
   httpServerMock,
@@ -35,12 +37,14 @@ const space = (id: string, overrides: Partial<Space> = {}): Space => ({
 describe('initSpacesOnPostAuthRequestInterceptor', () => {
   let postAuthHandler: OnPostAuthHandler;
   let getSpacesService: jest.Mock;
+  let createSpacesClient: jest.Mock;
   let getCurrent: jest.Mock;
   let getCurrentProfileId: jest.Mock;
   let update: jest.Mock;
   let getAll: jest.Mock;
   let getSpaceId: jest.Mock;
   let isInitialSolutionSetupRequired: jest.Mock;
+  let log: ReturnType<typeof loggingSystemMock.createLogger>;
   let response: ReturnType<typeof httpServerMock.createLifecycleResponseFactory>;
   let toolkit: ReturnType<typeof httpServiceMock.createOnPostAuthToolkit>;
 
@@ -51,6 +55,7 @@ describe('initSpacesOnPostAuthRequestInterceptor', () => {
     getAll = jest.fn();
     getSpaceId = jest.fn();
     isInitialSolutionSetupRequired = jest.fn().mockResolvedValue(false);
+    log = loggingSystemMock.createLogger();
 
     const coreStart = coreMock.createStart();
     coreStart.userProfile = {
@@ -74,12 +79,13 @@ describe('initSpacesOnPostAuthRequestInterceptor', () => {
       {},
     ]);
 
+    createSpacesClient = jest.fn().mockReturnValue({
+      getAll,
+      get: jest.fn(),
+    });
     getSpacesService = jest.fn().mockReturnValue({
       getSpaceId,
-      createSpacesClient: jest.fn().mockReturnValue({
-        getAll,
-        get: jest.fn(),
-      }),
+      createSpacesClient,
     });
 
     initSpacesOnPostAuthRequestInterceptor({
@@ -89,7 +95,7 @@ describe('initSpacesOnPostAuthRequestInterceptor', () => {
       initialSolutionSetup: {
         isRequired: isInitialSolutionSetupRequired,
       } as any,
-      log: loggingSystemMock.createLogger(),
+      log,
     });
 
     response = httpServerMock.createLifecycleResponseFactory();
@@ -419,9 +425,10 @@ describe('initSpacesOnPostAuthRequestInterceptor', () => {
       });
     });
 
-    it('returns custom error when setup check fails', async () => {
+    it('continues original flow when setup check fails', async () => {
       isInitialSolutionSetupRequired.mockRejectedValue(new Error('setup failed'));
       getSpaceId.mockReturnValue(DEFAULT_SPACE_ID);
+      getAll.mockResolvedValue([space('default')]);
 
       const request = httpServerMock.createKibanaRequest({
         path: '/',
@@ -430,9 +437,55 @@ describe('initSpacesOnPostAuthRequestInterceptor', () => {
 
       await postAuthHandler(request, response, toolkit);
 
-      expect(response.customError).toHaveBeenCalled();
-      expect(response.redirected).not.toHaveBeenCalled();
-      expect(toolkit.next).not.toHaveBeenCalled();
+      expect(log.warn).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to check initial solution setup state')
+      );
+      expect(response.customError).not.toHaveBeenCalled();
+      expect(response.redirected).toHaveBeenCalledWith({
+        headers: {
+          location: addSpaceIdToPath(serverBasePath, 'default', ENTER_SPACE_PATH),
+        },
+      });
+    });
+
+    it('continues original flow when setup check is unauthorized', async () => {
+      isInitialSolutionSetupRequired.mockRejectedValue(Boom.forbidden('Unauthorized'));
+      getSpaceId.mockReturnValue(DEFAULT_SPACE_ID);
+      getAll.mockResolvedValue([space('default')]);
+
+      const request = httpServerMock.createKibanaRequest({
+        path: '/',
+        auth: { isAuthenticated: true },
+      });
+
+      await postAuthHandler(request, response, toolkit);
+
+      expect(log.debug).toHaveBeenCalledWith(
+        expect.stringContaining('Skipping initial solution setup redirect; unauthorized')
+      );
+      expect(log.warn).not.toHaveBeenCalled();
+      expect(response.customError).not.toHaveBeenCalled();
+      expect(response.redirected).toHaveBeenCalledWith({
+        headers: {
+          location: addSpaceIdToPath(serverBasePath, 'default', ENTER_SPACE_PATH),
+        },
+      });
+    });
+
+    it('passes the request-scoped spaces client to the setup service', async () => {
+      getSpaceId.mockReturnValue(DEFAULT_SPACE_ID);
+      const spacesClient = { getAll, get: jest.fn() };
+      createSpacesClient.mockReturnValue(spacesClient);
+
+      const request = httpServerMock.createKibanaRequest({
+        path: '/',
+        auth: { isAuthenticated: true },
+      });
+
+      await postAuthHandler(request, response, toolkit);
+
+      expect(createSpacesClient).toHaveBeenCalledWith(request);
+      expect(isInitialSolutionSetupRequired).toHaveBeenCalledWith(spacesClient);
     });
   });
 });

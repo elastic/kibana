@@ -27,7 +27,13 @@ export type {
   SpacesClientWrapper,
 } from './spaces_client';
 
-export type { Space, GetAllSpacesOptions, GetAllSpacesPurpose, GetSpaceResult } from '../common';
+export type {
+  Space,
+  SolutionView,
+  GetAllSpacesOptions,
+  GetAllSpacesPurpose,
+  GetSpaceResult,
+} from '../common';
 
 export const config: PluginConfigDescriptor = {
   schema: ConfigSchema,

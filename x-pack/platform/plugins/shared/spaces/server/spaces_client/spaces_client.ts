@@ -16,13 +16,14 @@ import type {
   SavedObject,
 } from '@kbn/core/server';
 import type { LegacyUrlAliasTarget } from '@kbn/core-saved-objects-common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { INpreClient } from '@kbn/cps/server/npre';
 import { getSpaceDefaultNpreName, PROJECT_ROUTING } from '@kbn/cps-common';
 import type { KibanaFeature } from '@kbn/features-plugin/common';
 import type { FeaturesPluginStart } from '@kbn/features-plugin/server';
 
 import { isReservedSpace } from '../../common';
-import type { spaceV1 as v1 } from '../../common';
+import type { SolutionView, spaceV1 as v1 } from '../../common';
 import type { ConfigType } from '../config';
 import { withSpaceSolutionDisabledFeatures } from '../lib/utils/space_solution_disabled_features';
 import type { SpaceSavedObjectAttributes } from '../types';
@@ -57,6 +58,17 @@ export interface ISpacesClient {
    * @param id the space id.
    */
   getPersistedFeatureVisibility(id: string): Promise<string[]>;
+
+  /**
+   * Returns whether the default space still requires one-time initial solution setup.
+   */
+  isInitialSolutionSetupRequired(): Promise<boolean>;
+
+  /**
+   * Completes one-time initial solution setup for the default space.
+   * @param solution the selected solution view.
+   */
+  completeInitialSolutionSetup(solution: SolutionView): Promise<void>;
 
   /**
    * Creates a space.
@@ -154,6 +166,47 @@ export class SpacesClient implements ISpacesClient {
     const spaceObject = await this.repository.get<{ disabledFeatures?: string[] }>('space', id);
 
     return spaceObject.attributes.disabledFeatures ?? [];
+  }
+
+  public async isInitialSolutionSetupRequired() {
+    const spaceObject = await this.repository.get<SpaceSavedObjectAttributes>(
+      'space',
+      DEFAULT_SPACE_ID
+    );
+    return spaceObject.attributes.solutionSetupRequired === true;
+  }
+
+  public async completeInitialSolutionSetup(solution: SolutionView) {
+    if (this.isServerless) {
+      throw Boom.badRequest(
+        'Unable to complete initial solution setup, solution property is forbidden in serverless'
+      );
+    }
+
+    if (Boolean(solution) && !this.config.allowSolutionVisibility) {
+      throw Boom.badRequest(
+        'Unable to complete initial solution setup, the solution property can not be set when xpack.spaces.allowSolutionVisibility setting is disabled'
+      );
+    }
+
+    const spaceObject = await this.repository.get<SpaceSavedObjectAttributes>(
+      'space',
+      DEFAULT_SPACE_ID
+    );
+
+    if (spaceObject.attributes.solutionSetupRequired !== true) {
+      throw Boom.conflict('Initial solution setup is already complete');
+    }
+
+    await this.repository.update<SpaceSavedObjectAttributes>(
+      'space',
+      DEFAULT_SPACE_ID,
+      {
+        solution,
+        solutionSetupRequired: false,
+      },
+      { version: spaceObject.version }
+    );
   }
 
   public async create(space: v1.Space) {

@@ -5,30 +5,33 @@
  * 2.0.
  */
 
-import type { InitialSolutionSetupRouteDeps } from '.';
+import type { InitialSolutionSetupRouteDeps, InternalRouteDeps } from '.';
 import type { GetInitialSolutionSetupResponse } from '../../../../common';
 import { wrapError } from '../../../lib/errors';
 import { createLicensedRouteHandler } from '../../lib';
 
 export function initGetInitialSolutionSetupApi({
   router,
+  getSpacesService,
   initialSolutionSetup,
-}: InitialSolutionSetupRouteDeps) {
+}: InternalRouteDeps & InitialSolutionSetupRouteDeps) {
   router.get(
     {
       path: '/internal/spaces/_initial_solution_setup',
       security: {
         authz: {
           enabled: false,
-          reason: 'This route only reports whether the one-time development setup is pending',
+          reason:
+            'This route delegates authorization to the spaces service via a scoped spaces client',
         },
       },
       validate: false,
     },
-    createLicensedRouteHandler(async (_context, _request, response) => {
+    createLicensedRouteHandler(async (_context, request, response) => {
       try {
+        const spacesClient = getSpacesService().createSpacesClient(request);
         const body: GetInitialSolutionSetupResponse = {
-          required: await initialSolutionSetup.isRequired(),
+          required: await initialSolutionSetup.isRequired(spacesClient),
         };
         return response.ok({
           body,
