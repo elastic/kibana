@@ -6,8 +6,6 @@
  */
 
 import {
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
@@ -16,7 +14,7 @@ import {
 } from '@elastic/eui';
 import { CodeEditor } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
-import { KbnDangerCallout } from '@kbn/ui-callout';
+import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import React from 'react';
 import { useWorkflow } from '../../hooks/use_workflow';
 
@@ -41,7 +39,8 @@ export const WorkflowYamlPreviewFlyout = ({
   workflowName,
   onClose,
 }: WorkflowYamlPreviewFlyoutProps) => {
-  const { data: workflow, isLoading, error } = useWorkflow(workflowId, true);
+  const { data: workflow, isLoading, error } = useWorkflow(workflowId);
+  const workflowYaml = workflow?.yaml;
 
   return (
     <EuiFlyout
@@ -62,11 +61,7 @@ export const WorkflowYamlPreviewFlyout = ({
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         {isLoading ? (
-          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiLoadingSpinner size="m" data-test-subj="contextWorkflowYamlPreviewLoading" />
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <EuiLoadingSpinner size="m" data-test-subj="contextWorkflowYamlPreviewLoading" />
         ) : null}
         {error ? (
           <KbnDangerCallout
@@ -77,19 +72,32 @@ export const WorkflowYamlPreviewFlyout = ({
             )}
             data-test-subj="contextWorkflowYamlPreviewError"
           >
-            {error instanceof Error
-              ? error.message
-              : i18n.translate(
-                  'xpack.contextEngine.aiIndexDetail.automations.previewFlyoutErrorBody',
-                  { defaultMessage: 'Try again later.' }
-                )}
+            {i18n.translate(
+              'xpack.contextEngine.aiIndexDetail.automations.previewFlyoutErrorBody',
+              { defaultMessage: 'Try again later.' }
+            )}
           </KbnDangerCallout>
         ) : null}
-        {workflow?.yaml ? (
-          <div style={{ height: '60vh' }}>
+        {!isLoading && !error && workflow && !workflowYaml ? (
+          <KbnWarningCallout
+            announceOnMount
+            title={i18n.translate(
+              'xpack.contextEngine.aiIndexDetail.automations.previewFlyoutEmptyTitle',
+              { defaultMessage: 'No workflow YAML available' }
+            )}
+            data-test-subj="contextWorkflowYamlPreviewEmpty"
+          >
+            {i18n.translate(
+              'xpack.contextEngine.aiIndexDetail.automations.previewFlyoutEmptyBody',
+              { defaultMessage: 'This workflow does not have YAML content to preview.' }
+            )}
+          </KbnWarningCallout>
+        ) : null}
+        {workflowYaml ? (
+          <div css={{ height: '60vh' }}>
             <CodeEditor
               languageId="yaml"
-              value={workflow.yaml}
+              value={workflowYaml}
               height="100%"
               options={READ_ONLY_OPTIONS}
               isCopyable

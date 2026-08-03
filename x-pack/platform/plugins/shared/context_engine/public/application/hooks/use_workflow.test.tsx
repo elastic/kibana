@@ -38,8 +38,8 @@ describe('useWorkflow', () => {
     });
   });
 
-  it('fetches the workflow when enabled', async () => {
-    const { result } = renderHook(() => useWorkflow('wf-1', true), {
+  it('fetches the workflow', async () => {
+    const { result } = renderHook(() => useWorkflow('wf-1'), {
       wrapper: createWrapper(),
     });
 
@@ -51,11 +51,5 @@ describe('useWorkflow', () => {
       name: 'My workflow',
       yaml: 'name: test\nsteps: []',
     });
-  });
-
-  it('does not fetch when disabled', () => {
-    renderHook(() => useWorkflow('wf-1', false), { wrapper: createWrapper() });
-
-    expect(mockGetWorkflow).not.toHaveBeenCalled();
   });
 });

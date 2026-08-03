@@ -76,7 +76,7 @@ describe('WorkflowYamlPreviewFlyout', () => {
     expect(screen.getByTestId('contextWorkflowYamlPreviewFlyout')).toBeInTheDocument();
     expect(screen.getByText('Workflow preview: My workflow')).toBeInTheDocument();
     expect(screen.getByTestId('contextWorkflowYamlPreview')).toHaveTextContent('name: preview');
-    expect(mockUseWorkflow).toHaveBeenCalledWith('wf-1', true);
+    expect(mockUseWorkflow).toHaveBeenCalledWith('wf-1');
   });
 
   it('shows an error when loading fails', () => {
@@ -89,6 +89,20 @@ describe('WorkflowYamlPreviewFlyout', () => {
     renderFlyout();
 
     expect(screen.getByTestId('contextWorkflowYamlPreviewError')).toBeInTheDocument();
-    expect(screen.getByText('Forbidden')).toBeInTheDocument();
+    expect(screen.getByText('Try again later.')).toBeInTheDocument();
+    expect(screen.queryByText('Forbidden')).not.toBeInTheDocument();
+  });
+
+  it('shows a message when the workflow has no yaml content', () => {
+    mockUseWorkflow.mockReturnValue({
+      data: { id: 'wf-1' },
+      isLoading: false,
+      error: null,
+    });
+
+    renderFlyout();
+
+    expect(screen.getByTestId('contextWorkflowYamlPreviewEmpty')).toBeInTheDocument();
+    expect(screen.queryByTestId('contextWorkflowYamlPreview')).not.toBeInTheDocument();
   });
 });

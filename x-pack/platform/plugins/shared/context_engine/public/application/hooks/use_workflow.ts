@@ -8,12 +8,11 @@
 import { useQuery } from '@kbn/react-query';
 import { useWorkflowsApi } from '@kbn/workflows-ui';
 
-export const useWorkflow = (workflowId: string | undefined, enabled: boolean) => {
+export const useWorkflow = (workflowId: string) => {
   const api = useWorkflowsApi();
 
   return useQuery({
     queryKey: ['context_engine', 'workflow', workflowId],
-    queryFn: () => api.getWorkflow(workflowId!),
-    enabled: enabled && Boolean(workflowId),
+    queryFn: () => api.getWorkflow(workflowId),
   });
 };
