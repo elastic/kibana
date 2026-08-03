@@ -7,10 +7,11 @@
 import type { Logger } from '@kbn/core/server';
 import { ProductLine } from '../../common/product';
 import { getCloudSecurityUsageRecord } from './cloud_security_metering_task';
-import { CNVM, CSPM, KSPM } from './constants';
+import { CLOUD_DEFEND, CNVM, CSPM, KSPM } from './constants';
 import type { CloudSecuritySolutions } from './types';
 import type { MeteringCallBackResponse, MeteringCallbackInput, Tier, UsageRecord } from '../types';
 import type { ServerlessSecurityConfig } from '../config';
+import { getCloudDefendUsageRecords } from './defend_for_containers_metering';
 
 export const cloudSecurityMetringCallback = async ({
   esClient,
@@ -34,11 +35,24 @@ export const cloudSecurityMetringCallback = async ({
   const tier: Tier = getCloudProductTier(config, logger);
 
   try {
-    const cloudSecuritySolutions: CloudSecuritySolutions[] = [CSPM, KSPM, CNVM];
+    const cloudSecuritySolutions: CloudSecuritySolutions[] = [CSPM, KSPM, CNVM, CLOUD_DEFEND];
 
     const promiseResults = await Promise.allSettled(
       cloudSecuritySolutions.map((cloudSecuritySolution) => {
-        return getCloudSecurityUsageRecord({
+        if (cloudSecuritySolution !== CLOUD_DEFEND) {
+          return getCloudSecurityUsageRecord({
+            esClient,
+            projectId,
+            logger,
+            taskId,
+            lastSuccessfulReport,
+            cloudSecuritySolution,
+            tier,
+          });
+        }
+
+        // since lastSuccessfulReport is not used by getCloudSecurityUsageRecord, we want to verify if it is used by getCloudDefendUsageRecords before getCloudSecurityUsageRecord.
+        return getCloudDefendUsageRecords({
           esClient,
           projectId,
           logger,
