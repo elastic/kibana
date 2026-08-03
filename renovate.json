@@ -2140,9 +2140,9 @@
         "@aws-sdk/credential-provider-node",
         "google-auth-library"
       ],
-      "reviewers": ["team:workchat-eng", "team:appex-ai-infra"],
+      "reviewers": ["team:workchat-eng"],
       "matchBaseBranches": ["main"],
-      "addLabels": ["Team:agent-builder", "Team:AI Infra"],
+      "addLabels": ["Team:agent-builder"],
       "minimumReleaseAge": "14 days",
       "enabled": true
     },
