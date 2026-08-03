@@ -84,6 +84,13 @@ export interface ConsoleDataState {
 
     /** The state of the input area. Set to `error` if wanting to show it as being in error state */
     visibleState: 'error' | undefined;
+
+    /**
+     * The Suggestion to be presented to the user
+     */
+    suggestion: {
+      value: string;
+    };
   };
 }
 
@@ -198,6 +205,12 @@ export type ConsoleDataAction =
       type: 'updateInputPlaceholderState';
       payload: {
         placeholder: ConsoleDataState['input']['placeholder'];
+      };
+    }
+  | {
+      type: 'updateInputSuggestionState';
+      payload: {
+        suggestion: ConsoleDataState['input']['suggestion'];
       };
     }
   | {

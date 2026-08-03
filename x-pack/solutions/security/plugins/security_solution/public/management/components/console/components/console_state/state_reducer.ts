@@ -47,6 +47,7 @@ export const initiateState = (
       showPopover: undefined,
       history: [],
       visibleState: undefined,
+      suggestion: { value: '' },
     },
   };
 
@@ -105,6 +106,7 @@ export const stateDataReducer: ConsoleStoreReducer = (state, action) => {
     case 'updateInputPlaceholderState':
     case 'setInputState':
     case 'updateInputCommandArgState':
+    case 'updateInputSuggestionState':
       newState = handleInputAreaState(state, action);
       break;
 
