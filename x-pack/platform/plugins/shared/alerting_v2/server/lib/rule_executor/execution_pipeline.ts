@@ -19,6 +19,7 @@ import {
   LoggerServiceToken,
   type LoggerServiceContract,
 } from '../services/logger_service/logger_service';
+import { ALERTING_V2_LOG_CODES } from '../errors/error_codes';
 import { createExecutionContext } from '../execution_context';
 import type {
   MetricCollector,
@@ -155,6 +156,7 @@ export class RuleExecutionPipeline implements RuleExecutionPipelineContract {
     if (!rule) {
       this.logger.warn({
         message: `[rule_executor] Skipping rule.execution.succeeded for rule "${rawInput.ruleId}": no rule in final state.`,
+        code: ALERTING_V2_LOG_CODES.RULE_EXECUTION_EVENT_PUBLISH_SKIPPED,
       });
       return;
     }
@@ -176,6 +178,7 @@ export class RuleExecutionPipeline implements RuleExecutionPipelineContract {
         message: `[rule_executor] Failed to publish rule.execution.succeeded event: ${
           error instanceof Error ? error.message : String(error)
         }`,
+        code: ALERTING_V2_LOG_CODES.RULE_EXECUTION_EVENT_PUBLISH_FAILED,
       });
     }
   }
@@ -191,6 +194,7 @@ export class RuleExecutionPipeline implements RuleExecutionPipelineContract {
         message: `[rule_executor] Failed to publish rule.execution.failed event: ${
           publishError instanceof Error ? publishError.message : String(publishError)
         }`,
+        code: ALERTING_V2_LOG_CODES.RULE_EXECUTION_EVENT_PUBLISH_FAILED,
       });
     }
   }

@@ -12,6 +12,7 @@ import {
   LoggerServiceToken,
   type LoggerServiceContract,
 } from '../../services/logger_service/logger_service';
+import { ALERTING_V2_LOG_CODES } from '../../errors/error_codes';
 import type { MetricRecorder } from './types';
 import { MetricRecorderToken } from './tokens';
 
@@ -81,6 +82,7 @@ export class MetricsMiddleware implements RuleExecutionMiddleware {
                 message: `[metrics] recorder "${recorder.name}" failed at step "${stepName}": ${
                   error instanceof Error ? error.message : String(error)
                 }`,
+                code: ALERTING_V2_LOG_CODES.RULE_EXECUTION_METRICS_RECORDER_FAILED,
               });
             }
           }

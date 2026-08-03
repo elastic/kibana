@@ -1,5 +1,11 @@
 # Alerting v2 — Error contract
 
+> This document covers `ALERTING_V2_ERROR_CODES` — the codes that travel out
+> over HTTP. `error_codes.ts` hosts a second catalog, `ALERTING_V2_LOG_CODES`,
+> which is never serialized into a response; those codes are attached to
+> `logger.warn(...)` / `logger.error(...)` and are documented in
+> [`../services/logger_service/README.md`](../services/logger_service/README.md).
+
 All HTTP routes emit error responses that conform to the shared
 `errorResponseSchema` (defined in
 [`@kbn/alerting-v2-schemas`](../../../../../packages/shared/response-ops/alerting-v2-schemas/src/error_response_schema.ts)):

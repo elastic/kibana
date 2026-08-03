@@ -10,6 +10,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import { inject, injectable } from 'inversify';
 import type { LoggerServiceContract } from '../logger_service/logger_service';
 import { LoggerServiceToken } from '../logger_service/logger_service';
+import { ALERTING_V2_LOG_CODES } from '../../errors/error_codes';
 
 /** Parameters for {@link StorageServiceContract.bulkIndexDocs}. */
 export interface BulkIndexDocsParams<TDocument extends Record<string, unknown>> {
@@ -182,8 +183,7 @@ export class StorageService implements StorageServiceContract {
     } catch (error) {
       this.logger.error({
         error,
-        code: 'BULK_INDEX_ERROR',
-        type: 'StorageServiceError',
+        code: ALERTING_V2_LOG_CODES.STORAGE_BULK_INDEX_FAILED,
       });
 
       throw error;
@@ -258,8 +258,7 @@ export class StorageService implements StorageServiceContract {
     const error = firstErrorItem.create?.error;
     this.logger.error({
       error: new Error(`[${error?.type ?? 'UNKNOWN_ERROR'}] ${error?.reason ?? 'UNKNOWN_REASON'}`),
-      code: 'BULK_INDEX_ERROR',
-      type: 'StorageServiceError',
+      code: ALERTING_V2_LOG_CODES.STORAGE_BULK_INDEX_FAILED,
     });
   }
 

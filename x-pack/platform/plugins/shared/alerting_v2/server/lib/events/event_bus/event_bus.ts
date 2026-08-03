@@ -12,6 +12,7 @@ import {
   LoggerServiceToken,
   type LoggerServiceContract,
 } from '../../services/logger_service/logger_service';
+import type { AlertingV2Labels } from '../../services/logger_service/types';
 import type {
   DomainEvent,
   EventBus,
@@ -27,17 +28,6 @@ type AnyHandler = (event: DomainEvent, ...extra: unknown[]) => Promise<void> | v
 type EventBusErrorCode =
   | typeof ALERTING_V2_LOG_CODES.EVENT_BUS_HANDLER_FAILURE
   | typeof ALERTING_V2_LOG_CODES.EVENT_BUS_EMITTER_ERROR;
-
-interface EventBusErrorContext {
-  /** Stable machine-readable identifier used for log correlation. */
-  readonly code: EventBusErrorCode;
-  /**
-   * Human-readable scope appended to `EventBus:` in the log `type` field.
-   * Use the domain event's `type` for handler failures, or `'internal'`
-   * for failures originating in the underlying emitter.
-   */
-  readonly scope: string;
-}
 
 /**
  * Event names that have special semantics on Node's {@link EventEmitter} and
@@ -103,10 +93,7 @@ export class AsyncDomainEventBus<TEvent extends DomainEvent = DomainEvent, TCont
     // safe regardless of what is published or what `captureRejections`
     // routes here.
     this.#emitter.on('error', (err) =>
-      this.#logError(err, {
-        code: ALERTING_V2_LOG_CODES.EVENT_BUS_EMITTER_ERROR,
-        scope: 'internal',
-      })
+      this.#logError(err, ALERTING_V2_LOG_CODES.EVENT_BUS_EMITTER_ERROR)
     );
   }
 
@@ -125,6 +112,8 @@ export class AsyncDomainEventBus<TEvent extends DomainEvent = DomainEvent, TCont
         message: () =>
           `[alerting_v2.EventBus] Refused to publish event with reserved \`type\` "${event.type}". ` +
           `These names are reserved by Node's EventEmitter.`,
+        code: ALERTING_V2_LOG_CODES.EVENT_BUS_PUBLISH_REJECTED,
+        labels: { event_type: event.type },
       });
 
       return;
@@ -152,9 +141,8 @@ export class AsyncDomainEventBus<TEvent extends DomainEvent = DomainEvent, TCont
         try {
           await (handler as (...args: unknown[]) => Promise<void> | void)(event, ...extra);
         } catch (err) {
-          this.#logError(err, {
-            code: ALERTING_V2_LOG_CODES.EVENT_BUS_HANDLER_FAILURE,
-            scope: event.type,
+          this.#logError(err, ALERTING_V2_LOG_CODES.EVENT_BUS_HANDLER_FAILURE, {
+            event_type: event.type,
           });
         }
       });
@@ -173,12 +161,7 @@ export class AsyncDomainEventBus<TEvent extends DomainEvent = DomainEvent, TCont
     };
   }
 
-  #logError(err: unknown, { code, scope }: EventBusErrorContext): void {
-    const error = err instanceof Error ? err : new Error(String(err));
-    this.logger.error({
-      error,
-      code,
-      type: `EventBus:${scope}`,
-    });
+  #logError(error: unknown, code: EventBusErrorCode, labels?: AlertingV2Labels): void {
+    this.logger.error({ error, code, labels });
   }
 }

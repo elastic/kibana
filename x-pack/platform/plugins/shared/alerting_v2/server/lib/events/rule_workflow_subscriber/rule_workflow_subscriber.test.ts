@@ -7,6 +7,7 @@
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
+import { ALERTING_V2_LOG_CODES } from '../../errors/error_codes';
 import type { LoggerService } from '../../services/logger_service/logger_service';
 import type { WorkflowService } from '../../services/workflow_service/workflow_service';
 import { RULE_CREATED_EVENT_TYPE, type RuleCreatedEvent } from '../rule_event_publisher/events';
@@ -77,7 +78,7 @@ describe('RuleWorkflowSubscriber', () => {
       expect(mockEmitEvent).toHaveBeenCalledWith(RuleCreatedTriggerId, ruleCreatedEvent.payload);
     });
 
-    it('catches WorkflowService failures, logs them, and does not let the rejection escape the handler', async () => {
+    it("catches WorkflowService failures, logs them with the binding's eventType, and does not let the rejection escape the handler", async () => {
       mockEmitEvent.mockRejectedValueOnce(new Error('workflows unreachable'));
 
       subscriber.start();
@@ -87,6 +88,13 @@ describe('RuleWorkflowSubscriber', () => {
       ).resolves.toBeUndefined();
 
       expect(mockLogger.error).toHaveBeenCalledTimes(1);
+      expect(mockLogger.error).toHaveBeenCalledWith('workflows unreachable', {
+        labels: {
+          event_type: RULE_CREATED_EVENT_TYPE,
+          code: ALERTING_V2_LOG_CODES.RULE_WORKFLOW_SUBSCRIBER_FAILURE,
+        },
+        error: expect.objectContaining({ message: 'workflows unreachable' }),
+      });
     });
   });
 

@@ -16,6 +16,7 @@ import {
   LoggerServiceToken,
   type LoggerServiceContract,
 } from '../../services/logger_service/logger_service';
+import { ALERTING_V2_LOG_CODES } from '../../errors/error_codes';
 import type {
   DispatcherPipelineState,
   DispatcherStep,
@@ -75,6 +76,7 @@ export class DispatchStep implements DispatcherStep {
         this.logger.warn({
           message: () =>
             `No API key found for policy ${group.policyId}, skipping dispatch of group ${group.id}`,
+          code: ALERTING_V2_LOG_CODES.DISPATCH_POLICY_MISSING_API_KEY,
         });
         return { groupId: group.id, executionIds };
       }
@@ -101,6 +103,7 @@ export class DispatchStep implements DispatcherStep {
                       err
                     )}`
                   ),
+            code: ALERTING_V2_LOG_CODES.DISPATCH_WORKFLOW_SCHEDULE_FAILED,
           });
         }
       }
@@ -112,6 +115,7 @@ export class DispatchStep implements DispatcherStep {
             : new Error(
                 `Failed to dispatch group ${group.id} for policy ${group.policyId}: ${String(err)}`
               ),
+        code: ALERTING_V2_LOG_CODES.DISPATCH_GROUP_UNHANDLED_ERROR,
       });
     }
     return { groupId: group.id, executionIds };
@@ -139,6 +143,7 @@ export class DispatchStep implements DispatcherStep {
     if (!workflow) {
       this.logger.warn({
         message: () => `Workflow ${workflowId} not found, skipping dispatch for group ${group.id}`,
+        code: ALERTING_V2_LOG_CODES.DISPATCH_WORKFLOW_NOT_FOUND,
       });
       return undefined;
     }
@@ -147,6 +152,7 @@ export class DispatchStep implements DispatcherStep {
       this.logger.warn({
         message: () =>
           `Workflow ${workflowId} is disabled, enable it to dispatch for group ${group.id}`,
+        code: ALERTING_V2_LOG_CODES.DISPATCH_WORKFLOW_DISABLED,
       });
       return undefined;
     }

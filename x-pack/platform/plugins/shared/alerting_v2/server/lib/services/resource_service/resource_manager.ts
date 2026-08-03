@@ -10,6 +10,7 @@ import { inject, injectable } from 'inversify';
 import type { IRetryService } from '../retry_service/alerting_retry_service';
 import type { LoggerServiceContract } from '../logger_service/logger_service';
 import { LoggerServiceToken } from '../logger_service/logger_service';
+import { ALERTING_V2_LOG_CODES } from '../../errors/error_codes';
 import { RetryServiceToken } from '../retry_service/tokens';
 
 export interface IResourceInitializer {
@@ -181,8 +182,7 @@ export class ResourceManager implements ResourceManagerContract {
 
         this.logger.error({
           error: err,
-          code: 'ALERTING_RESOURCES_SERVICE_ERROR',
-          type: 'AlertingResourcesServiceError',
+          code: ALERTING_V2_LOG_CODES.RESOURCES_BOOTSTRAP_FAILED,
         });
 
         throw state.error;

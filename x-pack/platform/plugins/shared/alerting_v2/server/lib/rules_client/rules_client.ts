@@ -28,7 +28,7 @@ import { treeifyError, type z } from '@kbn/zod/v4';
 import { inject, injectable } from 'inversify';
 import { type RuleSavedObjectAttributes } from '../../saved_objects';
 import { withApm as withApmDecorator } from '../apm/with_apm_decorator';
-import { ALERTING_V2_ERROR_CODES } from '../errors/error_codes';
+import { ALERTING_V2_ERROR_CODES, ALERTING_V2_LOG_CODES } from '../errors/error_codes';
 import {
   getInvalidRuleDataMessage,
   getRuleAlreadyExistsMessage,
@@ -723,7 +723,7 @@ export class RulesClient {
 
     this.logger.error({
       error: new Error(message),
-      code: ALERTING_V2_ERROR_CODES.TASK_MANAGER_DRIFT,
+      code: ALERTING_V2_LOG_CODES.RULE_TASK_MANAGER_DRIFT,
     });
 
     errors?.push(...driftedRuleIds.map((id) => toTaskManagerDriftError(id, message)));
@@ -838,7 +838,7 @@ export class RulesClient {
 
         this.logger.error({
           error: new Error(message),
-          code: ALERTING_V2_ERROR_CODES.TASK_MANAGER_DRIFT,
+          code: ALERTING_V2_LOG_CODES.RULE_TASK_MANAGER_DRIFT,
         });
 
         for (const id of driftedRuleIds) {

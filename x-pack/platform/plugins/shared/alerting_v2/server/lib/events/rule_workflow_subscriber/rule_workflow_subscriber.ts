@@ -77,7 +77,7 @@ export class RuleWorkflowSubscriber {
       this.logger.error({
         error: err,
         code: ALERTING_V2_LOG_CODES.RULE_WORKFLOW_SUBSCRIBER_FAILURE,
-        type: `RuleWorkflowSubscriber:${trigger.triggerId}`,
+        labels: { event_type: trigger.eventType },
       });
     }
   }

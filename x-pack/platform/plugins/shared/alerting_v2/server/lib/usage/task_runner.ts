@@ -13,6 +13,7 @@ import {
   LoggerServiceToken,
   type LoggerServiceContract,
 } from '../services/logger_service/logger_service';
+import { ALERTING_V2_LOG_CODES } from '../errors/error_codes';
 import type { AlertingTaskRunner } from '../services/task_run_scope_service/create_task_runner';
 import { SCHEDULE } from './constants';
 import { getActionPolicyStats } from './lib/get_action_policy_stats';
@@ -54,7 +55,10 @@ export class TelemetryTaskRunner implements AlertingTaskRunner {
       return { state: updatedState, schedule: SCHEDULE };
     } catch (err) {
       const errorMessage = err && err.message ? err.message : String(err);
-      this.logger.warn({ message: `Error executing alerting v2 telemetry task: ${errorMessage}` });
+      this.logger.warn({
+        message: `Error executing alerting v2 telemetry task: ${errorMessage}`,
+        code: ALERTING_V2_LOG_CODES.TASKS_TELEMETRY_RUN_FAILED,
+      });
 
       return {
         state: {

@@ -38,10 +38,10 @@ import { ALERT_ACTION_WORKFLOW_TRIGGERS, type AlertActionWorkflowTriggerBinding 
  *    `OnStart` phase.
  *
  *  - **Error handling.** Each handler runs inside its own try/catch and
- *    logs failures with the binding's `triggerId` attached. The
- *    `AsyncDomainEventBus` already isolates handlers from each other,
- *    but logging the `triggerId` is more useful for triage than the
- *    bare bus-event-type tag the bus alone would emit.
+ *    logs failures with the binding's `eventType` attached as the
+ *    `event_type` label. The `AsyncDomainEventBus` already isolates
+ *    handlers from each other, but logging here attributes the failure
+ *    to this subscriber rather than to the bus.
  *
  *  - **Auth model.** The publisher's {@link AlertingPublisherContext}
  *    carries the originating `KibanaRequest` across the bus's
@@ -103,7 +103,7 @@ export class AlertActionWorkflowSubscriber {
       this.logger.error({
         error: err,
         code: ALERTING_V2_LOG_CODES.ALERT_ACTION_WORKFLOW_SUBSCRIBER_FAILURE,
-        type: `AlertActionWorkflowSubscriber:${trigger.triggerId}`,
+        labels: { event_type: trigger.eventType },
       });
     }
   }

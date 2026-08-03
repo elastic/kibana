@@ -9,6 +9,7 @@ import type { Logger } from '@kbn/logging';
 import { ErrorHandlingMiddleware } from './error_handling_middleware';
 import { createRuleExecutionMiddlewareContext } from './test_utils';
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
+import { ALERTING_V2_LOG_CODES } from '../../errors/error_codes';
 import { collectStreamResults, createPipelineStream, createRulePipelineState } from '../test_utils';
 
 describe('ErrorHandlingMiddleware', () => {
@@ -42,11 +43,19 @@ describe('ErrorHandlingMiddleware', () => {
         throw error;
       })()
     );
-    const context = createRuleExecutionMiddlewareContext();
+    const context = createRuleExecutionMiddlewareContext({ name: 'fetch_rule' });
 
     await expect(
       collectStreamResults(middleware.execute(context, next, createPipelineStream()))
     ).rejects.toThrow('Step failed');
-    expect(logger.error).toHaveBeenCalled();
+    expect(logger.error).toHaveBeenCalledWith(
+      'Step failed',
+      expect.objectContaining({
+        labels: {
+          code: ALERTING_V2_LOG_CODES.RULE_EXECUTION_STEP_FAILED,
+          step: 'fetch_rule',
+        },
+      })
+    );
   });
 });

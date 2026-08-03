@@ -30,7 +30,7 @@ import {
   ACTION_POLICY_SAVED_OBJECT_TYPE,
   type ActionPolicySavedObjectAttributes,
 } from '../../saved_objects';
-import { ALERTING_V2_ERROR_CODES } from '../errors/error_codes';
+import { ALERTING_V2_ERROR_CODES, ALERTING_V2_LOG_CODES } from '../errors/error_codes';
 import { EncryptedSavedObjectsClientToken } from '../dispatcher/steps/dispatch_step_tokens';
 import { ActionPolicySavedObjectServiceScopedToken } from '../services/action_policy_saved_object_service/tokens';
 import type { ActionPolicySavedObjectServiceContract } from '../services/action_policy_saved_object_service/types';
@@ -425,6 +425,7 @@ export class ActionPolicyClient {
             }" during pre-matching: ${
               err instanceof Error ? err.message : String(err)
             }. Treating as no-match.`,
+          code: ALERTING_V2_LOG_CODES.POLICY_MATCHER_KQL_INVALID,
         });
         continue;
       }
