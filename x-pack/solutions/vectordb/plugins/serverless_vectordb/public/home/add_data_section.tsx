@@ -34,14 +34,14 @@ export const AddDataSection = () => {
       telemetryId: 'serverlessVectordb-home-addData-embeddings',
     },
     {
-      key: 'createIndex',
-      iconType: 'indexOpen',
-      label: i18n.translate('xpack.serverlessVectordb.home.addData.createIndex', {
-        defaultMessage: 'Create a blank index',
+      key: 'devTools',
+      iconType: 'code',
+      label: i18n.translate('xpack.serverlessVectordb.home.addData.devTools', {
+        defaultMessage: 'Open Dev Tools',
       }),
-      onClick: navigateToIndexManagement,
-      testSubj: 'addDataCreateIndexLink',
-      telemetryId: 'serverlessVectordb-home-addData-createIndex',
+      onClick: () => application.navigateToApp('dev_tools'),
+      testSubj: 'addDataDevToolsLink',
+      telemetryId: 'serverlessVectordb-home-addData-devTools',
     },
     {
       key: 'sampleData',
