@@ -808,11 +808,12 @@ export class TaskManagerRunner implements TaskRunner {
             error.error?.type === 'version_conflict_engine_exception';
 
           if ((this.isExpired || this.isCancelled) && isVersionConflict) {
-            this.logger.debug(
+            this.logger.warn(
               `Skipping the update of expired/cancelled task ${label} because it was reclaimed by another Kibana while running.`,
               { tags: [this.id, this.taskType] }
             );
-          } else {
+          } else if (isVersionConflict) {            
+            this.logger.warn(`Resolving version conflict for task ${label}`, { tags: [this.id, this.taskType] });
             await resolveTaskDocumentConflicts({
               taskId: this.id,
               partialTask,
@@ -820,6 +821,9 @@ export class TaskManagerRunner implements TaskRunner {
               bufferedTaskStore: this.bufferedTaskStore,
               logger: this.logger,
             });
+            this.logger.info(`Resolved version conflict for task ${label}`, { tags: [this.id, this.taskType] });
+          } else {
+            throw error;
           }
         }
       }

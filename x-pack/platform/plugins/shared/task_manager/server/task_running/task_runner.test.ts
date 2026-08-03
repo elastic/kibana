@@ -3413,7 +3413,7 @@ describe('TaskManagerRunner', () => {
       );
       expect(frameworkErrorLogs).toEqual([]);
 
-      expect(logger.debug).toHaveBeenCalledWith(
+      expect(logger.warn).toHaveBeenCalledWith(
         `Skipping the update of expired/cancelled task bar:${id} because it was reclaimed by another Kibana while running.`,
         { tags: [id, 'bar'] }
       );
