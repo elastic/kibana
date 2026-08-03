@@ -122,17 +122,28 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
         render: (service: AwsServiceMatrixEntry) => (
           <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
             <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                iconType="expand"
-                size="xs"
-                color="text"
-                onClick={() => setActiveFlyoutServiceId(service.id)}
-                aria-label={i18n.translate(
-                  'xpack.ingestHub.serviceSettingsStep.table.editAriaLabel',
-                  { defaultMessage: 'Edit {name}', values: { name: service.name } }
-                )}
-                data-test-subj={`serviceSettingsStep-editButton-${service.id}`}
-              />
+              <EuiToolTip
+                content={i18n.translate('xpack.ingestHub.serviceSettingsStep.table.editAriaLabel', {
+                  defaultMessage: 'Edit {name}',
+                  values: { name: service.name },
+                })}
+                disableScreenReaderOutput
+              >
+                <EuiButtonIcon
+                  iconType="expand"
+                  size="xs"
+                  color="text"
+                  onClick={() => setActiveFlyoutServiceId(service.id)}
+                  aria-label={i18n.translate(
+                    'xpack.ingestHub.serviceSettingsStep.table.editAriaLabel',
+                    {
+                      defaultMessage: 'Edit {name}',
+                      values: { name: service.name },
+                    }
+                  )}
+                  data-test-subj={`serviceSettingsStep-editButton-${service.id}`}
+                />
+              </EuiToolTip>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiLink
@@ -327,7 +338,8 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiToolTip content={continueTooltipContent}>
-            <span>
+            {/* span needed: disabled <button> swallows pointer events, span intercepts them for the tooltip */}
+            <span tabIndex={0} style={{ display: 'inline-block' }}>
               <EuiButton
                 fill
                 onClick={handleNext}
