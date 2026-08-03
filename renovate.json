@@ -1724,7 +1724,7 @@
     },
     {
       "groupName": "adm-zip",
-      "matchDepNames": ["adm-zip", "@types/adm-zip"],
+      "matchDepNames": ["adm-zip"],
       "reviewers": ["team:security-solution"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team: SecuritySolution"],

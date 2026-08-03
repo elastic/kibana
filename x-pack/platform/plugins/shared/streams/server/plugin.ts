@@ -17,7 +17,6 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { SIGNIFICANT_EVENTS_APP_ID } from '@kbn/deeplinks-observability';
 import { i18n } from '@kbn/i18n';
 import { OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS } from '@kbn/management-settings-ids';
-import { STREAMS_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
 import { registerRoutes } from '@kbn/server-route-repository';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { RulesClient, RulesClientCreateOptions } from '@kbn/alerting-plugin/server';
@@ -29,7 +28,6 @@ import type { StreamsClient } from './lib/streams/client';
 import type { StreamsConfig } from '../common/config';
 import {
   STREAMS_API_PRIVILEGES,
-  STREAMS_CONSUMER,
   STREAMS_FEATURE_ID,
   STREAMS_SETTINGS_DOCUMENT_ID,
   STREAMS_TIERED_FEATURES,
@@ -131,11 +129,6 @@ export class StreamsPlugin
       this.logger.get('streams-stats-telemetry'),
       plugins.usageCollection
     );
-
-    const alertingFeatures = STREAMS_RULE_TYPE_IDS.map((ruleTypeId) => ({
-      ruleTypeId,
-      consumers: [STREAMS_CONSUMER],
-    }));
 
     registerSuggestionsInferenceFeatures(
       plugins.searchInferenceEndpoints,
@@ -251,24 +244,12 @@ export class StreamsPlugin
       order: 600,
       category: DEFAULT_APP_CATEGORIES.management,
       app: [STREAMS_FEATURE_ID, SIGNIFICANT_EVENTS_APP_ID],
-      alerting: alertingFeatures,
       privileges: {
         all: {
           app: [STREAMS_FEATURE_ID, SIGNIFICANT_EVENTS_APP_ID],
           savedObject: {
             all: [],
             read: [],
-          },
-          alerting: {
-            rule: {
-              all: alertingFeatures,
-              enable: alertingFeatures,
-              manual_run: alertingFeatures,
-              manage_rule_settings: alertingFeatures,
-            },
-            alert: {
-              all: alertingFeatures,
-            },
           },
           api: [STREAMS_API_PRIVILEGES.read, STREAMS_API_PRIVILEGES.manage],
           ui: [STREAMS_UI_PRIVILEGES.show, STREAMS_UI_PRIVILEGES.manage],
@@ -278,14 +259,6 @@ export class StreamsPlugin
           savedObject: {
             all: [],
             read: [],
-          },
-          alerting: {
-            rule: {
-              read: alertingFeatures,
-            },
-            alert: {
-              read: alertingFeatures,
-            },
           },
           api: [STREAMS_API_PRIVILEGES.read],
           ui: [STREAMS_UI_PRIVILEGES.show],
