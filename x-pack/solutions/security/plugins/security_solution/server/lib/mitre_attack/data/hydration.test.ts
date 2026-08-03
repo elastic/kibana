@@ -97,6 +97,112 @@ describe('hydrateIndex', () => {
     });
   });
 
+  describe('with semantic search enabled', () => {
+    const semanticInferenceId = '.elser-2-elasticsearch';
+
+    const buildHydratedEs = (storedStamp?: string) => {
+      const { esClient, logger } = buildEs();
+      esClient.indices.getMapping.mockResolvedValue({
+        'index-name': {
+          mappings: { _meta: storedStamp ? { mitre_attack_stamp: storedStamp } : {} },
+        },
+      } as never);
+      esClient.bulk.mockResolvedValue({ errors: false, items: [] } as never);
+      esClient.indices.refresh.mockResolvedValue({} as never);
+      esClient.indices.putMapping.mockResolvedValue({ acknowledged: true } as never);
+      return { esClient, logger };
+    };
+
+    it('adds an embedded text field to every document', async () => {
+      const { esClient, logger } = buildHydratedEs();
+      const artifact = buildArtifact();
+
+      await hydrateIndex({
+        esClient,
+        indexName: 'index-name',
+        artifact,
+        logger,
+        semanticInferenceId,
+      });
+
+      const [, tacticDoc, , techniqueDoc] = esClient.bulk.mock.calls[0][0].operations as Array<
+        Record<string, unknown>
+      >;
+      expect(tacticDoc.semantic).toBe('Credential Access (TA0006)\n\ndesc');
+      expect(techniqueDoc.semantic).toBe(
+        'Valid Accounts (T1078)\n\nTactics: credential-access\n\ndesc'
+      );
+    });
+
+    it('qualifies the stored stamp with the inference endpoint', async () => {
+      const { esClient, logger } = buildHydratedEs();
+
+      await hydrateIndex({
+        esClient,
+        indexName: 'index-name',
+        artifact: buildArtifact('base-stamp'),
+        logger,
+        semanticInferenceId,
+      });
+
+      expect(esClient.indices.putMapping).toHaveBeenCalledWith({
+        index: 'index-name',
+        _meta: { mitre_attack_stamp: `base-stamp|semantic:${semanticInferenceId}` },
+      });
+    });
+
+    it('re-hydrates an index that was previously built without embeddings', async () => {
+      const { esClient, logger } = buildHydratedEs('base-stamp');
+
+      const result = await hydrateIndex({
+        esClient,
+        indexName: 'index-name',
+        artifact: buildArtifact('base-stamp'),
+        logger,
+        semanticInferenceId,
+      });
+
+      expect(result.hydrated).toBe(true);
+      expect(esClient.bulk).toHaveBeenCalled();
+    });
+
+    it('re-hydrates without embeddings when semantic search is turned back off', async () => {
+      const { esClient, logger } = buildHydratedEs(`base-stamp|semantic:${semanticInferenceId}`);
+
+      const result = await hydrateIndex({
+        esClient,
+        indexName: 'index-name',
+        artifact: buildArtifact('base-stamp'),
+        logger,
+      });
+
+      expect(result.hydrated).toBe(true);
+      const [, tacticDoc] = esClient.bulk.mock.calls[0][0].operations as Array<
+        Record<string, unknown>
+      >;
+      expect(tacticDoc.semantic).toBeUndefined();
+      expect(esClient.indices.putMapping).toHaveBeenCalledWith({
+        index: 'index-name',
+        _meta: { mitre_attack_stamp: 'base-stamp' },
+      });
+    });
+
+    it('skips re-indexing when the semantic-qualified stamp already matches', async () => {
+      const { esClient, logger } = buildHydratedEs(`base-stamp|semantic:${semanticInferenceId}`);
+
+      const result = await hydrateIndex({
+        esClient,
+        indexName: 'index-name',
+        artifact: buildArtifact('base-stamp'),
+        logger,
+        semanticInferenceId,
+      });
+
+      expect(result.hydrated).toBe(false);
+      expect(esClient.bulk).not.toHaveBeenCalled();
+    });
+  });
+
   it('throws when bulk reports errors so the cached promise is invalidated', async () => {
     const { esClient, logger } = buildEs();
     esClient.indices.getMapping.mockResolvedValue({

@@ -22,7 +22,7 @@ const sampleHit: MitreEntity = {
 
 describe('buildMitreAttackTool', () => {
   const buildDeps = () => {
-    const mockSearch = jest.fn().mockResolvedValue([sampleHit]);
+    const mockSearch = jest.fn().mockResolvedValue({ entities: [sampleHit], mode: 'keyword' });
     const createClient = jest.fn().mockReturnValue({
       search: mockSearch,
       list: jest.fn(),

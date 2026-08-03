@@ -26,6 +26,13 @@ export {
   mitreAttackArtifactVersionSchema,
 } from './src/schema';
 
-export { mitreAttackFieldMap, type MitreAttackFieldMap } from './src/field_map';
+export {
+  mitreAttackFieldMap,
+  buildMitreAttackFieldMap,
+  MITRE_SEMANTIC_FIELD,
+  type MitreAttackFieldMap,
+} from './src/field_map';
+
+export { buildSemanticText } from './src/semantic_text';
 
 export { loadMitreAttackArtifact, loadMitreAttackArtifactVersion } from './src/load_artifact';

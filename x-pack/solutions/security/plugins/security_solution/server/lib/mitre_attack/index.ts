@@ -14,5 +14,8 @@ export type {
 } from './data/mitre_attack_data_service';
 export type {
   MitreAttackSearchParams,
+  MitreAttackSearchResult,
   MitreAttackListParams,
+  MitreSearchMode,
+  ResolvedMitreSearchMode,
 } from './data/mitre_attack_data_client';

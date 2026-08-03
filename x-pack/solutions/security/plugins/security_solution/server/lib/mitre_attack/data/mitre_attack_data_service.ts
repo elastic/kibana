@@ -7,14 +7,15 @@
 
 import type { ElasticsearchClient, Logger, LoggerFactory } from '@kbn/core/server';
 import { ReplaySubject, type Subject } from 'rxjs';
-import { IndexPatternAdapter, type InstallParams } from '@kbn/index-adapter';
+import { IndexPatternAdapter, type FieldMap, type InstallParams } from '@kbn/index-adapter';
 import {
+  buildMitreAttackFieldMap,
   loadMitreAttackArtifact,
   loadMitreAttackArtifactVersion,
 } from '@kbn/security-mitre-attack-common';
-import { mitreAttackFieldMap } from './mitre_attack_field_map';
 import { hydrateIndex } from './hydration';
 import { MitreAttackDataClient } from './mitre_attack_data_client';
+import { MITRE_DEFAULT_INFERENCE_ID, ensureSemanticEndpointAvailable } from './semantic';
 
 const INDEX_BASE_NAME = '.kibana-mitre-attack';
 const INDEX_TEMPLATE_NAME = 'mitre-attack-template';
@@ -28,6 +29,15 @@ export interface MitreAttackDataServiceSetupParams {
    */
   pluginStop$?: Subject<void>;
   tasksTimeoutMs?: number;
+  /**
+   * Opt in to embedding entities into a `semantic_text` field. Ignored when the
+   * inference endpoint turns out to be unavailable.
+   */
+  semantic?: {
+    enabled: boolean;
+    /** Defaults to the preconfigured ELSER endpoint. */
+    inferenceId?: string;
+  };
 }
 
 export interface MitreAttackDataServiceCreateClientParams {
@@ -38,14 +48,13 @@ export interface MitreAttackDataServiceCreateClientParams {
 /**
  * Owns the lifecycle of the managed `.kibana-mitre-attack-{spaceId}` index.
  *
- * - On `setup()`, installs the index/component templates via
- *   `IndexPatternAdapter`. Templates are global; concrete indices are created
- *   lazily per space.
+ * - On `setup()`, resolves whether semantic search is usable and then installs
+ *   the index/component templates via `IndexPatternAdapter`. Templates are
+ *   global; concrete indices are created lazily per space.
  * - `hydrate(spaceId)` ensures the concrete index exists and that its stamp
  *   matches the bundled artifact. Idempotent and concurrency-safe per space.
- * - `createClient({ spaceId, esScopedClient })` returns a read-only client
- *   that resolves the index name (waiting on hydration if needed) on every
- *   call.
+ * - `createClient({ spaceId, esClient })` returns a read-only client that
+ *   resolves the index name (waiting on hydration if needed) on every call.
  */
 export class MitreAttackDataService {
   private readonly logger: Logger;
@@ -55,18 +64,12 @@ export class MitreAttackDataService {
   private installPromise?: Promise<void>;
   private internalEsClient?: ElasticsearchClient;
   private installed = false;
+  /** Set once `setup()` resolves; `undefined` means keyword-only. */
+  private semanticInferenceId?: string;
 
   constructor(loggerFactory: LoggerFactory, kibanaVersion: string) {
     this.logger = loggerFactory.get('mitreAttack');
     this.adapter = new IndexPatternAdapter(INDEX_BASE_NAME, { kibanaVersion });
-    this.adapter.setComponentTemplate({
-      name: COMPONENT_TEMPLATE_NAME,
-      fieldMap: mitreAttackFieldMap,
-    });
-    this.adapter.setIndexTemplate({
-      name: INDEX_TEMPLATE_NAME,
-      componentTemplateRefs: [COMPONENT_TEMPLATE_NAME],
-    });
   }
 
   /**
@@ -77,6 +80,7 @@ export class MitreAttackDataService {
     esClient,
     pluginStop$,
     tasksTimeoutMs,
+    semantic,
   }: MitreAttackDataServiceSetupParams): Promise<void> {
     if (this.installPromise) {
       return this.installPromise;
@@ -88,10 +92,47 @@ export class MitreAttackDataService {
       tasksTimeoutMs,
       logger: this.logger,
     };
-    this.installPromise = this.adapter.install(params).then(() => {
+
+    this.installPromise = this.runInstall(params, semantic).then(() => {
       this.installed = true;
     });
     return this.installPromise;
+  }
+
+  private async runInstall(
+    params: InstallParams,
+    semantic: MitreAttackDataServiceSetupParams['semantic']
+  ): Promise<void> {
+    this.semanticInferenceId = await this.resolveSemanticInferenceId(params.esClient, semantic);
+
+    this.adapter.setComponentTemplate({
+      name: COMPONENT_TEMPLATE_NAME,
+      fieldMap: buildMitreAttackFieldMap({
+        semanticInferenceId: this.semanticInferenceId,
+      }) as unknown as FieldMap,
+    });
+    this.adapter.setIndexTemplate({
+      name: INDEX_TEMPLATE_NAME,
+      componentTemplateRefs: [COMPONENT_TEMPLATE_NAME],
+    });
+
+    await this.adapter.install(params);
+  }
+
+  private async resolveSemanticInferenceId(
+    esClient: ElasticsearchClient,
+    semantic: MitreAttackDataServiceSetupParams['semantic']
+  ): Promise<string | undefined> {
+    if (!semantic?.enabled) {
+      return undefined;
+    }
+    const inferenceId = semantic.inferenceId ?? MITRE_DEFAULT_INFERENCE_ID;
+    const available = await ensureSemanticEndpointAvailable({
+      esClient,
+      inferenceId,
+      logger: this.logger,
+    });
+    return available ? inferenceId : undefined;
   }
 
   /**
@@ -136,6 +177,7 @@ export class MitreAttackDataService {
       indexName,
       artifact,
       logger: this.logger,
+      semanticInferenceId: this.semanticInferenceId,
     });
   }
 
@@ -150,9 +192,12 @@ export class MitreAttackDataService {
     return new MitreAttackDataClient({
       esClient,
       logger: this.logger,
-      resolveIndexName: async () => {
+      resolveTarget: async () => {
         await this.hydrate(spaceId);
-        return this.adapter.getIndexName(spaceId);
+        return {
+          indexName: this.adapter.getIndexName(spaceId),
+          semanticEnabled: this.semanticInferenceId != null,
+        };
       },
     });
   }
@@ -160,5 +205,10 @@ export class MitreAttackDataService {
   /** Returns the artifact version stamp without paying entity-list parse cost. */
   getArtifactStamp(): string {
     return loadMitreAttackArtifactVersion().stamp;
+  }
+
+  /** Whether the installed mapping carries embeddings. Valid after `setup()`. */
+  isSemanticEnabled(): boolean {
+    return this.semanticInferenceId != null;
   }
 }

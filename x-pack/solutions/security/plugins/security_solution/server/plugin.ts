@@ -773,7 +773,12 @@ export class Plugin implements ISecuritySolutionPlugin {
 
         if (config.experimentalFeatures.managedMitreSourceEnabled) {
           this.mitreAttackDataService
-            .setup({ esClient: coreStart.elasticsearch.client.asInternalUser })
+            .setup({
+              esClient: coreStart.elasticsearch.client.asInternalUser,
+              semantic: {
+                enabled: config.experimentalFeatures.managedMitreSemanticSearchEnabled,
+              },
+            })
             .then(() =>
               // Eager hydration for the default space mirrors `RuleMigrationsDataService`.
               // Other spaces hydrate lazily on first read, see `MitreAttackDataClient`.

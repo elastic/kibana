@@ -244,17 +244,17 @@ const retrieveCandidates = async (
   const searchQuery = [state.userQuery, ruleTags, ruleQuery].filter(Boolean).join(' ').trim();
 
   const tactics =
-    searchQuery.length > 0
-      ? await client.list({ framework: FRAMEWORK, types: ['tactic'] })
-      : [];
+    searchQuery.length > 0 ? await client.list({ framework: FRAMEWORK, types: ['tactic'] }) : [];
 
   const techniqueAndSub = searchQuery
-    ? await client.search({
-        query: searchQuery,
-        framework: FRAMEWORK,
-        types: ['technique', 'subtechnique'],
-        limit: MAX_TECHNIQUE_CANDIDATES,
-      })
+    ? (
+        await client.search({
+          query: searchQuery,
+          framework: FRAMEWORK,
+          types: ['technique', 'subtechnique'],
+          limit: MAX_TECHNIQUE_CANDIDATES,
+        })
+      ).entities
     : [];
 
   return [...tactics, ...techniqueAndSub];
@@ -282,9 +282,7 @@ const formatCandidateBlock = (candidates: MitreEntity[]): string => {
   if (tactics.length > 0) {
     sections.push(
       'Tactics:',
-      ...tactics.map(
-        (t) => `- ${t.id} ${t.name} — ${truncateDescription(t.description ?? '')}`
-      )
+      ...tactics.map((t) => `- ${t.id} ${t.name} — ${truncateDescription(t.description ?? '')}`)
     );
   }
   if (techniques.length > 0) {

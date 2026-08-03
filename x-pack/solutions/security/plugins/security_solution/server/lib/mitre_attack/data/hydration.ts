@@ -7,9 +7,25 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { MitreAttackArtifact, MitreEntity } from '@kbn/security-mitre-attack-common';
+import { MITRE_SEMANTIC_FIELD, buildSemanticText } from '@kbn/security-mitre-attack-common';
 
 const STAMP_META_KEY = 'mitre_attack_stamp';
 const BULK_BATCH_SIZE = 500;
+
+/**
+ * Every document in a semantic batch is embedded inline, so batches are kept
+ * small enough that a cold ELSER deployment does not blow the request timeout.
+ */
+const SEMANTIC_BULK_BATCH_SIZE = 50;
+const SEMANTIC_BULK_TIMEOUT_MS = 5 * 60 * 1000;
+
+/**
+ * Stamp written to the index `_meta`. Keying it on the inference endpoint means
+ * enabling, disabling, or repointing semantic search forces a re-hydration, so
+ * the embeddings in the index always match the mapping that produced them.
+ */
+export const buildEffectiveStamp = (artifactStamp: string, semanticInferenceId?: string): string =>
+  semanticInferenceId ? `${artifactStamp}|semantic:${semanticInferenceId}` : artifactStamp;
 
 interface ReadStoredStampParams {
   esClient: ElasticsearchClient;
@@ -74,6 +90,7 @@ interface BulkIndexEntitiesParams {
   indexName: string;
   entities: MitreEntity[];
   logger: Logger;
+  semanticEnabled: boolean;
 }
 
 /**
@@ -86,18 +103,24 @@ const bulkIndexEntities = async ({
   indexName,
   entities,
   logger,
+  semanticEnabled,
 }: BulkIndexEntitiesParams): Promise<void> => {
-  for (let offset = 0; offset < entities.length; offset += BULK_BATCH_SIZE) {
-    const slice = entities.slice(offset, offset + BULK_BATCH_SIZE);
+  const batchSize = semanticEnabled ? SEMANTIC_BULK_BATCH_SIZE : BULK_BATCH_SIZE;
+
+  for (let offset = 0; offset < entities.length; offset += batchSize) {
+    const slice = entities.slice(offset, offset + batchSize);
     const operations = slice.flatMap((entity) => [
       { index: { _index: indexName, _id: buildDocId(entity) } },
-      entity,
+      semanticEnabled ? { ...entity, [MITRE_SEMANTIC_FIELD]: buildSemanticText(entity) } : entity,
     ]);
 
-    const response = await esClient.bulk({
-      operations,
-      refresh: false,
-    });
+    const response = await esClient.bulk(
+      {
+        operations,
+        refresh: false,
+      },
+      semanticEnabled ? { requestTimeout: SEMANTIC_BULK_TIMEOUT_MS } : undefined
+    );
 
     if (response.errors) {
       const failed = response.items.filter((item) => {
@@ -122,6 +145,11 @@ export interface HydrateIndexParams {
   indexName: string;
   artifact: MitreAttackArtifact;
   logger: Logger;
+  /**
+   * When set, each document also carries a `semantic_text` field embedded by
+   * this endpoint. Must match the `inference_id` in the installed mapping.
+   */
+  semanticInferenceId?: string;
 }
 
 /**
@@ -134,11 +162,13 @@ export const hydrateIndex = async ({
   indexName,
   artifact,
   logger,
+  semanticInferenceId,
 }: HydrateIndexParams): Promise<{ hydrated: boolean; entityCount: number }> => {
+  const effectiveStamp = buildEffectiveStamp(artifact.stamp, semanticInferenceId);
   const storedStamp = await readStoredStamp({ esClient, indexName, logger });
-  if (storedStamp === artifact.stamp) {
+  if (storedStamp === effectiveStamp) {
     logger.debug(
-      `MITRE ATT&CK index ${indexName} already at stamp ${artifact.stamp}; skipping hydration`
+      `MITRE ATT&CK index ${indexName} already at stamp ${effectiveStamp}; skipping hydration`
     );
     return { hydrated: false, entityCount: artifact.entities.length };
   }
@@ -146,16 +176,22 @@ export const hydrateIndex = async ({
   logger.info(
     `Hydrating MITRE ATT&CK index ${indexName} ${
       storedStamp ? `from stamp ${storedStamp}` : '(empty)'
-    } to stamp ${artifact.stamp} (${artifact.entities.length} entities)`
+    } to stamp ${effectiveStamp} (${artifact.entities.length} entities)`
   );
 
-  await bulkIndexEntities({ esClient, indexName, entities: artifact.entities, logger });
+  await bulkIndexEntities({
+    esClient,
+    indexName,
+    entities: artifact.entities,
+    logger,
+    semanticEnabled: semanticInferenceId != null,
+  });
 
   // Refresh once at the end so reads can immediately see the new docs.
   await esClient.indices.refresh({ index: indexName });
 
-  await writeStoredStamp({ esClient, indexName, stamp: artifact.stamp, logger });
+  await writeStoredStamp({ esClient, indexName, stamp: effectiveStamp, logger });
 
-  logger.info(`Hydrated MITRE ATT&CK index ${indexName} to stamp ${artifact.stamp}`);
+  logger.info(`Hydrated MITRE ATT&CK index ${indexName} to stamp ${effectiveStamp}`);
   return { hydrated: true, entityCount: artifact.entities.length };
 };

@@ -72,7 +72,7 @@ export const buildMitreAttackTool = (deps: MitreAttackToolDeps): AssistantTool =
 
     return tool(
       async ({ question, framework, types, limit }) => {
-        const entities = await client.search({
+        const { entities } = await client.search({
           query: question,
           framework: (framework ?? 'enterprise') as MitreFramework,
           types: types as MitreEntityType[] | undefined,

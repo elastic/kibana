@@ -6,12 +6,8 @@
  */
 
 import type { MitreEntity } from '@kbn/security-mitre-attack-common';
-import type { MitreAttackDataClient } from '../../../../mitre_attack';
-import {
-  addMitreMappingsNode,
-  buildLegacyLookups,
-  formatMitreMapping,
-} from './add_mitre_mappings';
+import type { MitreAttackDataClient, ResolvedMitreSearchMode } from '../../../../mitre_attack';
+import { addMitreMappingsNode, buildLegacyLookups, formatMitreMapping } from './add_mitre_mappings';
 import { MITRE_MAPPING_SELECTION_PROMPT } from './prompts';
 
 jest.mock('./prompts', () => ({
@@ -106,8 +102,11 @@ const mockClient = ({
   getById: jest.Mock;
   list: jest.Mock;
   search: jest.Mock;
-}): MitreAttackDataClient =>
-  ({ getById, list, search } as unknown as MitreAttackDataClient);
+}): MitreAttackDataClient => ({ getById, list, search } as unknown as MitreAttackDataClient);
+
+/** `search()` returns the retrieved entities alongside the mode it resolved to. */
+const mockSearch = (entities: MitreEntity[], mode: ResolvedMitreSearchMode = 'keyword') =>
+  jest.fn().mockResolvedValue({ entities, mode });
 
 // Fixture IDs come from the real MITRE dictionary the node validates against:
 // TA0001 Initial Access, TA0002 Execution, T1078 Valid Accounts (belongs to
@@ -199,7 +198,7 @@ describe('addMitreMappingsNode', () => {
       return undefined;
     });
     const list = jest.fn().mockResolvedValue([tactic]);
-    const search = jest.fn().mockResolvedValue([technique, subtechnique]);
+    const search = mockSearch([technique, subtechnique]);
 
     const node = addMitreMappingsNode({
       model: {} as never,
@@ -258,7 +257,7 @@ describe('addMitreMappingsNode', () => {
       return undefined;
     });
     const list = jest.fn().mockResolvedValue([persistenceTactic]);
-    const search = jest.fn().mockResolvedValue([cloudAppIntegrationTechnique]);
+    const search = mockSearch([cloudAppIntegrationTechnique]);
 
     const node = addMitreMappingsNode({
       model: {} as never,
@@ -329,7 +328,7 @@ describe('addMitreMappingsNode', () => {
       return undefined;
     });
     const list = jest.fn().mockResolvedValue([tactic]);
-    const search = jest.fn().mockResolvedValue([otherTechnique]);
+    const search = mockSearch([otherTechnique]);
 
     const node = addMitreMappingsNode({
       model: {} as never,

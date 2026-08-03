@@ -81,7 +81,7 @@ export const mitreAttackTool = (
         esClient: esClient.asInternalUser,
       });
 
-      const entities = await client.search({
+      const { entities } = await client.search({
         query: question,
         framework: (framework ?? 'enterprise') as MitreFramework,
         types: types as MitreEntityType[] | undefined,

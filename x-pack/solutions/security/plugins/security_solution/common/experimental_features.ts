@@ -155,6 +155,15 @@ export const allowedExperimentalValues = Object.freeze({
   managedMitreSourceEnabled: false,
 
   /**
+   * Embeds MITRE entities into a `semantic_text` field on the managed index and
+   * switches search to hybrid (BM25 + ELSER) retrieval. Requires
+   * `managedMitreSourceEnabled`. Falls back to keyword-only search when the
+   * inference endpoint is unavailable, so enabling this can degrade but not
+   * break MITRE lookups.
+   */
+  managedMitreSemanticSearchEnabled: false,
+
+  /**
    * Disables the siem migrations feature
    */
   siemMigrationsDisabled: false,

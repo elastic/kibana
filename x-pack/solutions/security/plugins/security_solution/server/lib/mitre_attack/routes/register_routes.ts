@@ -10,6 +10,7 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import type { MitreEntity } from '@kbn/security-mitre-attack-common';
 import type { SecuritySolutionPluginRouter } from '../../../types';
+import type { ResolvedMitreSearchMode } from '../data/mitre_attack_data_client';
 import {
   GET_MITRE_BY_ID_ROUTE,
   GET_MITRE_SUBTECHNIQUES_ROUTE,
@@ -186,20 +187,25 @@ export const registerMitreAttackRoutes = (router: SecuritySolutionPluginRouter, 
           request: { query: buildRouteValidationWithZod(searchQuerySchema) },
         },
       },
-      async (context, request, response): Promise<IKibanaResponse<{ entities: MitreEntity[] }>> => {
+      async (
+        context,
+        request,
+        response
+      ): Promise<IKibanaResponse<{ entities: MitreEntity[]; mode: ResolvedMitreSearchMode }>> => {
         try {
           const ctx = await context.resolve(['securitySolution']);
           const client = ctx.securitySolution.getMitreAttackDataClient();
           if (!client) {
             return response.notFound({ body: 'MITRE ATT&CK source disabled' });
           }
-          const entities = await client.search({
+          const { entities, mode } = await client.search({
             query: request.query.q,
             framework: request.query.framework,
             types: request.query.types,
             limit: request.query.limit,
+            mode: request.query.mode,
           });
-          return response.ok({ body: { entities } });
+          return response.ok({ body: { entities, mode } });
         } catch (err) {
           logger.error(`MITRE search route failed: ${err.message}`);
           const error = transformError(err);

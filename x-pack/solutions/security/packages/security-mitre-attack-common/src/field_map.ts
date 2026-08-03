@@ -32,3 +32,38 @@ export const mitreAttackFieldMap = {
 } as const;
 
 export type MitreAttackFieldMap = typeof mitreAttackFieldMap;
+
+/**
+ * Name of the `semantic_text` field holding the embedded representation of an
+ * entity. Only present in the mapping when semantic search is enabled and the
+ * configured inference endpoint is reachable — a `semantic_text` field whose
+ * `inference_id` cannot be resolved makes every index request fail, so the
+ * field is added deliberately rather than unconditionally.
+ */
+export const MITRE_SEMANTIC_FIELD = 'semantic';
+
+interface BuildMitreAttackFieldMapParams {
+  /**
+   * Inference endpoint backing the `semantic_text` field. When omitted the
+   * mapping is byte-identical to `mitreAttackFieldMap`, which keeps the
+   * keyword-only index exactly as it was before semantic search existed.
+   */
+  semanticInferenceId?: string;
+}
+
+export const buildMitreAttackFieldMap = ({
+  semanticInferenceId,
+}: BuildMitreAttackFieldMapParams = {}) => {
+  if (!semanticInferenceId) {
+    return { ...mitreAttackFieldMap };
+  }
+
+  return {
+    ...mitreAttackFieldMap,
+    [MITRE_SEMANTIC_FIELD]: {
+      type: 'semantic_text',
+      required: false,
+      inference_id: semanticInferenceId,
+    },
+  };
+};
