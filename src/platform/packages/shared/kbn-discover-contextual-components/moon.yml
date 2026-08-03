@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/discover-contextual-components'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/obs-exploration-team'
+  defaultOwner: '@elastic/obs-signals-logs-team'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/discover-contextual-components'
   description: Moon project for @kbn/discover-contextual-components
   channel: ''
-  owner: '@elastic/obs-exploration-team'
+  owner: '@elastic/obs-signals-logs-team'
   sourceRoot: src/platform/packages/shared/kbn-discover-contextual-components
 dependsOn:
   - '@kbn/field-formats-plugin'
