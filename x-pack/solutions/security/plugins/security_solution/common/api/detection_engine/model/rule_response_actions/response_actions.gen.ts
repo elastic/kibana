@@ -167,15 +167,15 @@ export const KillProcessParams = lazySchema(() =>
     comment: z.string().optional(),
     config: z.object({
       /**
-       * Field to use instead of process.pid
+       * Field to use instead of `process.pid`
        */
       field: z.string().max(2000),
       /**
-       * Whether to overwrite field with process.pid
+       * Whether to overwrite field with `process.pid`
        */
       overwrite: z.boolean().optional().default(true),
       /**
-       * Whether to also terminate the descendant processes of the targeted process. This field is only available for use with v9.6.0 of the stack.
+       * Whether to also terminate the descendant processes of the targeted process.
        */
       kill_descendants: z.boolean().optional(),
     }),
