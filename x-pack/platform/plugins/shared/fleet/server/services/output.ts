@@ -855,7 +855,8 @@ class OutputService {
         data.type === outputType.RemoteElasticsearch
       ) {
         if (!output.service_token && output.secrets?.service_token) {
-          data.service_token = output.secrets.service_token as string;
+          (data as OutputSoRemoteElasticsearchAttributes).service_token = output.secrets
+            .service_token as string;
         }
       }
     }
@@ -1161,6 +1162,11 @@ class OutputService {
       );
     }
 
+    // Domain validation complete; transition to SO persistence shape.
+    const updateSoData = updateData as unknown as Nullable<Partial<OutputSOAttributes>> & {
+      type: ValueOf<OutputType>;
+    };
+
     const removeKafkaFields = (target: Nullable<Partial<OutputSoKafkaAttributes>>) => {
       target.version = null;
       target.key = null;
@@ -1182,6 +1188,20 @@ class OutputService {
       target.broker_timeout = null;
       target.required_acks = null;
       target.ssl = null;
+    };
+
+    const removeBeatsFields = (target: Nullable<Partial<BeatsSoBaseAttributes>>) => {
+      target.hosts = null;
+      target.ca_sha256 = null;
+      target.ca_trusted_fingerprint = null;
+      target.config_yaml = null;
+      target.ssl = null;
+      target.shipper = null;
+      target.preset = null;
+      target.proxy_id = null;
+      target.write_to_logs_streams = null;
+      target.otel_exporter_config_yaml = null;
+      target.otel_disable_beatsauth = null;
     };
 
     if (isTypeChanged) {
@@ -1280,6 +1300,16 @@ class OutputService {
           updateData.password = null;
         }
       }
+
+      if (isOtlpOutput(originalOutput)) {
+        // clear OTLP-only fields when leaving OTLP; secrets cleaned up via getOutputSecretPaths
+        (updateData as Nullable<OutputSoOtlpAttributes>).otlp_exporter = null;
+      }
+
+      if (isOtlpOutput(updateData)) {
+        // clear beats-only fields when switching to OTLP
+        removeBeatsFields(updateData as Nullable<BeatsSoBaseAttributes>);
+      }
     }
 
     if (isBeatsOutput(updateData) && isBeatsOutput(typedFullUpdateData)) {
@@ -1330,8 +1360,8 @@ class OutputService {
       }
     }
 
-    if (outputTypeSupportPresets(updateData) && updateData.hosts) {
-      updateData.hosts = updateData.hosts.map(normalizeHostsForAgents);
+    if (outputTypeSupportPresets(updateSoData) && updateSoData.hosts) {
+      updateSoData.hosts = updateSoData.hosts.map(normalizeHostsForAgents);
     }
 
     // Kafka does not support proxies — clear any proxy_id silently (#267281)
@@ -1386,7 +1416,7 @@ class OutputService {
         secretHashes: data.is_preconfigured ? secretHashes : undefined,
       });
 
-      updateData.secrets = secretsRes.outputUpdate.secrets;
+      updateSoData.secrets = secretsRes.outputUpdate.secrets;
       secretsToDelete = secretsRes.secretsToDelete;
     } else {
       if (isBeatsOutput(typedFullUpdateData) && isBeatsOutput(updateData)) {
@@ -1411,7 +1441,7 @@ class OutputService {
       }
     }
 
-    patchUpdateDataWithRequireEncryptedAADFields(updateData, originalOutput);
+    patchUpdateDataWithRequireEncryptedAADFields(updateSoData, originalOutput);
 
     auditLoggingService.writeCustomSoAuditLog({
       action: 'update',
@@ -1423,7 +1453,7 @@ class OutputService {
     await this.soClient.update<Nullable<OutputSOAttributes>>(
       SAVED_OBJECT_TYPE,
       outputIdToUuid(id),
-      updateData
+      updateSoData
     );
 
     if (secretsToDelete.length) {

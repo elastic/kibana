@@ -9,7 +9,7 @@ import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/
 
 import type { SOSecretPath, Output } from '../../../common/types';
 import type { NewOutput } from '../../../common';
-import { isBeatsOutput } from '../../../common/services/output_helpers';
+import { isBeatsOutput, isOtlpOutput } from '../../../common/services/output_helpers';
 import type { SecretReference } from '../../types';
 import { OUTPUT_SECRETS_MINIMUM_FLEET_SERVER_VERSION } from '../../constants';
 
@@ -115,6 +115,12 @@ export function getOutputSecretReferences(output: Output): SecretReference[] {
     }
   }
 
+  if (isOtlpOutput(output)) {
+    if (typeof output.secrets?.otlp_exporter?.tls?.key_pem === 'object') {
+      outputSecretPaths.push({ id: output.secrets.otlp_exporter.tls.key_pem.id });
+    }
+  }
+
   return outputSecretPaths;
 }
 
@@ -134,6 +140,15 @@ function getOutputSecretPaths(
   if (typed.type === 'remote_elasticsearch') {
     if (typed.secrets?.service_token) {
       outputSecretPaths.push({ path: 'secrets.service_token', value: typed.secrets.service_token });
+    }
+  }
+
+  if (isOtlpOutput(typed)) {
+    if (typed.secrets?.otlp_exporter?.tls?.key_pem) {
+      outputSecretPaths.push({
+        path: 'secrets.otlp_exporter.tls.key_pem',
+        value: typed.secrets.otlp_exporter.tls.key_pem,
+      });
     }
   }
 

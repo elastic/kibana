@@ -27,6 +27,7 @@ import { packagePolicyService } from './package_policy';
 import { auditLoggingService } from './audit_logging';
 import { findAgentlessPolicies } from './outputs/helpers';
 import { outputSavedObjectToOutput } from './output';
+import { extractAndUpdateOutputSecrets } from './secrets';
 
 jest.mock('./app_context');
 jest.mock('./agent_policy');
@@ -37,6 +38,10 @@ jest.mock('./outputs/helpers');
 
 const mockedFindAgentlessPolicies = findAgentlessPolicies as jest.MockedFunction<
   typeof findAgentlessPolicies
+>;
+
+const mockedExtractAndUpdateOutputSecrets = extractAndUpdateOutputSecrets as jest.MockedFunction<
+  typeof extractAndUpdateOutputSecrets
 >;
 
 const mockedAuditLoggingService = auditLoggingService as jest.Mocked<typeof auditLoggingService>;
@@ -392,6 +397,7 @@ function getMockedEncryptedSoClient() {
             compression: 'gzip',
             timeout: '30s',
           },
+          secrets: {},
         });
       }
       default:
@@ -1459,6 +1465,42 @@ describe('Output Service', () => {
               endpoint: 'https://otel.example.com:4317',
               protocol: 'grpc',
             },
+          }),
+          expect.anything()
+        );
+      });
+
+      it('should write tls key_pem as plaintext when secret storage is disabled', async () => {
+        const soClient = getMockedSoClient();
+        mockedAgentPolicyService.list.mockResolvedValue({ items: [] } as any);
+        mockedPackagePolicyService.list.mockResolvedValue({ items: [] } as any);
+
+        await outputService.create(
+          soClient,
+          esClientMock,
+          {
+            is_default: false,
+            is_default_monitoring: false,
+            name: 'Test OTLP secrets plaintext',
+            type: 'otlp',
+            otlp_exporter: {
+              endpoint: 'https://otel.example.com:4317',
+              protocol: 'grpc',
+            },
+            secrets: {
+              otlp_exporter: { tls: { key_pem: 'my-key-pem' } },
+            },
+          },
+          { id: 'output-test' }
+        );
+
+        expect(soClient.create).toBeCalledWith(
+          expect.anything(),
+          expect.objectContaining({
+            type: 'otlp',
+            otlp_exporter: expect.objectContaining({
+              tls: expect.objectContaining({ key_pem: 'my-key-pem' }),
+            }),
           }),
           expect.anything()
         );
