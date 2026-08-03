@@ -153,6 +153,7 @@ describe('<BulkOperations />', () => {
         setMonitorPendingStatusUpdate={setMonitorPendingStatusUpdate}
         setIsLocationsFlyoutOpen={jest.fn()}
         setIsScheduleFlyoutOpen={jest.fn()}
+        setIsMaintenanceWindowsFlyoutOpen={jest.fn()}
       />
     );
 
