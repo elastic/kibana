@@ -39,17 +39,13 @@ import type {
   OutputSoKafkaAttributes,
   OutputSoRemoteElasticsearchAttributes,
   OutputSoOtlpAttributes,
-  OutputSoBaseAttributes,
   SecretReference,
   BeatsSoBaseAttributes,
   BeatsOutputSOAttributes,
 } from '../types';
 import type {
-  KafkaOutput,
   NewBeatsOutput,
   NewOtlpOutput,
-  NewRemoteElasticsearchOutput,
-  OtlpExporterConfig,
   UpdateOutput,
   UpdateTypedOutput,
 } from '../../common/types';
@@ -61,6 +57,8 @@ import {
   OUTPUT_SAVED_OBJECT_TYPE,
   OUTPUT_HEALTH_DATA_STREAM,
   MAX_CONCURRENT_BACKFILL_OUTPUTS_PRESETS,
+  SERVERLESS_DEFAULT_OUTPUT_ID,
+  SERVERLESS_PRIVATE_OUTPUT_ID,
 } from '../constants';
 import {
   SO_SEARCH_LIMIT,
@@ -74,11 +72,13 @@ import {
   FLEET_APM_PACKAGE,
   FLEET_SYNTHETICS_PACKAGE,
   FLEET_SERVER_PACKAGE,
-  otlpProtocol,
-  OTLP_GRPC_ONLY_COMPRESSION_TYPES,
 } from '../../common/constants';
 import type { ValueOf } from '../../common/types';
-import { normalizeHostsForAgents, validateFleetSavedObjectId } from '../../common/services';
+import {
+  normalizeHostsForAgents,
+  validateFleetSavedObjectId,
+  validateSslCertPath,
+} from '../../common/services';
 import {
   FleetEncryptedSavedObjectEncryptionKeyRequired,
   OutputInvalidError,
@@ -262,21 +262,6 @@ async function getAgentPoliciesPerOutput(
   return Object.values(agentPoliciesIndexedById);
 }
 
-function validateOtlpExporterProtocol(exporter: OtlpExporterConfig) {
-  if (exporter.protocol === otlpProtocol.Grpc && exporter.http !== undefined) {
-    throw new OutputInvalidError('`http` fields are only valid when protocol is `http/protobuf`');
-  }
-  if (
-    exporter.protocol === otlpProtocol.HttpProtobuf &&
-    exporter.compression !== undefined &&
-    OTLP_GRPC_ONLY_COMPRESSION_TYPES.includes(exporter.compression)
-  ) {
-    throw new OutputInvalidError(
-      '`snappy` and `zstd` compression are only valid when protocol is `grpc`'
-    );
-  }
-}
-
 async function validateLogstashOutputNotUsedInAPMPolicy(outputId?: string, isDefault?: boolean) {
   const agentPolicies = await getAgentPoliciesPerOutput(outputId, isDefault);
 
@@ -391,7 +376,7 @@ function validateOutputNotUsedInPolicy(
 async function validateTypeChanges(
   esClient: ElasticsearchClient,
   id: string,
-  data: Nullable<Partial<OutputSOAttributes>>,
+  data: NewOutput | UpdateTypedOutput,
   originalOutput: Output,
   defaultDataOutputId: string | null,
   fromPreconfiguration: boolean
@@ -438,7 +423,7 @@ async function validateTypeChanges(
 async function updateAgentPoliciesDataOutputId(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
-  data: Nullable<Partial<OutputSOAttributes>>,
+  data: NewOutput | UpdateTypedOutput,
   isDefault: boolean,
   defaultDataOutputId: string | null,
   agentPolicies: AgentPolicy[],
@@ -676,9 +661,11 @@ class OutputService {
       throw new OutputInvalidError('OTLP output type is not enabled');
     }
 
-    if (isOtlpOutput(output)) {
-      validateOtlpExporterProtocol(output.otlp_exporter);
+    await this._validateOutputServerless(output);
+    if (isBeatsOutput(output)) {
+      this._validateOutputSslPaths(output);
     }
+    this._ensureNoDuplicateSecrets(output);
 
     await validateOutputServerless(this, output);
     const isPreconfigured =
@@ -723,8 +710,8 @@ class OutputService {
     await updateAgentPoliciesDataOutputId(
       soClient,
       esClient,
-      data,
-      data.is_default,
+      output,
+      output.is_default,
       defaultDataOutputId,
       _.uniq([...policiesWithFleetServer, ...policiesWithSynthetics, ...agentlessPolicies]),
       options?.fromPreconfiguration ?? false
@@ -876,19 +863,16 @@ class OutputService {
         }
       } else if (isOtlpOutput(output)) {
         const otlpData = data as OutputSoOtlpAttributes;
-        const otlpSecrets = output.secrets?.otlp_exporter;
-        if (!output.otlp_exporter.api_key && otlpSecrets?.api_key) {
-          otlpData.otlp_exporter = {
-            ...otlpData.otlp_exporter,
-            api_key: otlpSecrets.api_key as string,
-          };
+        if (!output.api_key && output.secrets?.api_key) {
+          otlpData.api_key = output.secrets.api_key as string;
         }
-        if (!output.otlp_exporter.tls?.key_pem && otlpSecrets?.tls?.key_pem) {
+        const otlpExporterSecrets = output.secrets?.otlp_exporter;
+        if (!output.otlp_exporter.tls?.key_pem && otlpExporterSecrets?.tls?.key_pem) {
           otlpData.otlp_exporter = {
             ...otlpData.otlp_exporter,
             tls: {
               ...otlpData.otlp_exporter.tls,
-              key_pem: otlpSecrets.tls.key_pem as string,
+              key_pem: otlpExporterSecrets.tls.key_pem as string,
             },
           };
         }
@@ -1184,13 +1168,6 @@ class OutputService {
       }
     }
 
-    if (isOtlpOutput(updateData)) {
-      const otlpUpdateData = updateData as OutputSoOtlpAttributes;
-      if (otlpUpdateData.otlp_exporter) {
-        validateOtlpExporterProtocol(otlpUpdateData.otlp_exporter);
-      }
-    }
-
     const defaultDataOutputId = await this.getDefaultDataOutputId();
     if (isTypeChanged || originalOutput.is_default !== mergedIsDefault) {
       await validateTypeChanges(
@@ -1202,6 +1179,11 @@ class OutputService {
         fromPreconfiguration
       );
     }
+
+    // Domain validation complete; transition to SO persistence shape.
+    const updateSoData = updateData as unknown as Nullable<Partial<OutputSOAttributes>> & {
+      type: ValueOf<OutputType>;
+    };
 
     const removeKafkaFields = (target: Nullable<Partial<OutputSoKafkaAttributes>>) => {
       target.version = null;
@@ -1241,32 +1223,32 @@ class OutputService {
     };
 
     if (isTypeChanged) {
-      if (updateData.type === outputType.Elasticsearch) {
-        updateData.preset = null;
+      if (updateSoData.type === outputType.Elasticsearch) {
+        (updateSoData as unknown as Nullable<BeatsSoBaseAttributes>).preset = null;
       }
 
-      if (updateData.type !== outputType.Kafka && originalOutput.type === outputType.Kafka) {
-        removeKafkaFields(updateData as Nullable<OutputSoKafkaAttributes>);
+      if (updateSoData.type !== outputType.Kafka && originalOutput.type === outputType.Kafka) {
+        removeKafkaFields(updateSoData as unknown as Nullable<OutputSoKafkaAttributes>);
       }
 
       if (originalOutput.type === outputType.RemoteElasticsearch) {
-        (updateData as Nullable<OutputSoRemoteElasticsearchAttributes>).service_token = null;
-        (updateData as Nullable<OutputSoRemoteElasticsearchAttributes>).kibana_api_key = null;
+        (updateSoData as Nullable<OutputSoRemoteElasticsearchAttributes>).service_token = null;
+        (updateSoData as Nullable<OutputSoRemoteElasticsearchAttributes>).kibana_api_key = null;
       }
 
       if (
         originalOutput.type === outputType.Elasticsearch ||
         originalOutput.type === outputType.RemoteElasticsearch
       ) {
-        (updateData as Nullable<BeatsSoBaseAttributes>).write_to_logs_streams = null;
-        (updateData as Nullable<BeatsSoBaseAttributes>).otel_exporter_config_yaml = null;
-        (updateData as Nullable<BeatsSoBaseAttributes>).otel_disable_beatsauth = null;
+        (updateSoData as Nullable<BeatsSoBaseAttributes>).write_to_logs_streams = null;
+        (updateSoData as Nullable<BeatsSoBaseAttributes>).otel_exporter_config_yaml = null;
+        (updateSoData as Nullable<BeatsSoBaseAttributes>).otel_disable_beatsauth = null;
       }
 
-      if (updateData.type === outputType.Logstash) {
+      if (updateSoData.type === outputType.Logstash) {
         // remove ES specific field
-        (updateData as BeatsSoBaseAttributes).ca_trusted_fingerprint = null;
-        (updateData as BeatsSoBaseAttributes).ca_sha256 = null;
+        (updateSoData as BeatsSoBaseAttributes).ca_trusted_fingerprint = null;
+        (updateSoData as BeatsSoBaseAttributes).ca_sha256 = null;
       }
 
       if (updateData.type === outputType.Kafka) {
@@ -1283,11 +1265,11 @@ class OutputService {
           !updateData.compression ||
           (updateData.compression === kafkaCompressionType.Gzip && !updateData.compression_level)
         ) {
-          kafkaUpdateData.compression_level = 4;
+          updateData.compression_level = 4;
         }
         if (updateData.compression && updateData.compression !== kafkaCompressionType.Gzip) {
           // Clear compression level if compression is not gzip
-          kafkaUpdateData.compression_level = null;
+          updateData.compression_level = null;
         }
 
         if (!updateData.client_id) {
@@ -1323,9 +1305,9 @@ class OutputService {
         if (!updateData.broker_timeout) {
           updateData.broker_timeout = 10;
         }
-        if (kafkaUpdateData.required_acks === null || kafkaUpdateData.required_acks === undefined) {
+        if (updateData.required_acks === null || updateData.required_acks === undefined) {
           // required_acks can be 0
-          kafkaUpdateData.required_acks = kafkaAcknowledgeReliabilityLevel.Commit;
+          updateData.required_acks = kafkaAcknowledgeReliabilityLevel.Commit;
         }
         // Clear fields that are only valid for specific auth_type values
         if (updateData.auth_type && updateData.auth_type !== kafkaAuthType.None) {
@@ -1338,13 +1320,14 @@ class OutputService {
       }
 
       if (isOtlpOutput(originalOutput)) {
-        // clear OTLP-only field when leaving OTLP; secrets cleaned up via getOutputSecretPaths
-        (updateData as Nullable<OutputSoOtlpAttributes>).otlp_exporter = null;
+        // clear OTLP-only fields when leaving OTLP; secrets cleaned up via getOutputSecretPaths
+        (updateSoData as Nullable<OutputSoOtlpAttributes>).otlp_exporter = null;
+        (updateSoData as Nullable<OutputSoOtlpAttributes>).api_key = null;
       }
 
-      if (isOtlpOutput(updateData)) {
+      if (isOtlpOutput(updateSoData)) {
         // clear beats-only fields when switching to OTLP
-        removeBeatsFields(updateData as Nullable<BeatsSoBaseAttributes>);
+        removeBeatsFields(updateSoData as Nullable<BeatsSoBaseAttributes>);
       }
     }
 
@@ -1396,8 +1379,8 @@ class OutputService {
       }
     }
 
-    if (outputTypeSupportPresets(updateData) && updateData.hosts) {
-      updateData.hosts = updateData.hosts.map(normalizeHostsForAgents);
+    if (outputTypeSupportPresets(updateSoData) && updateSoData.hosts) {
+      updateSoData.hosts = updateSoData.hosts.map(normalizeHostsForAgents);
     }
 
     // Kafka does not support proxies — clear any proxy_id silently (#267281)
@@ -1452,7 +1435,7 @@ class OutputService {
         secretHashes: data.is_preconfigured ? secretHashes : undefined,
       });
 
-      updateData.secrets = secretsRes.outputUpdate.secrets;
+      updateSoData.secrets = secretsRes.outputUpdate.secrets;
       secretsToDelete = secretsRes.secretsToDelete;
     } else {
       if (isBeatsOutput(typedFullUpdateData) && isBeatsOutput(updateData)) {
@@ -1476,26 +1459,24 @@ class OutputService {
         }
       } else if (isOtlpOutput(updateData)) {
         const otlpUpdateData = updateData as OutputSoOtlpAttributes;
-        const otlpSecrets = (data as Partial<NewOtlpOutput>).secrets?.otlp_exporter;
-        if (!otlpUpdateData.otlp_exporter?.api_key && otlpSecrets?.api_key) {
-          otlpUpdateData.otlp_exporter = {
-            ...otlpUpdateData.otlp_exporter,
-            api_key: otlpSecrets.api_key as string,
-          };
+        const domainData = data as Partial<NewOtlpOutput>;
+        if (!otlpUpdateData.api_key && domainData.secrets?.api_key) {
+          otlpUpdateData.api_key = domainData.secrets.api_key as string;
         }
-        if (!otlpUpdateData.otlp_exporter?.tls?.key_pem && otlpSecrets?.tls?.key_pem) {
+        const otlpExporterSecrets = domainData.secrets?.otlp_exporter;
+        if (!otlpUpdateData.otlp_exporter?.tls?.key_pem && otlpExporterSecrets?.tls?.key_pem) {
           otlpUpdateData.otlp_exporter = {
             ...otlpUpdateData.otlp_exporter,
             tls: {
               ...otlpUpdateData.otlp_exporter?.tls,
-              key_pem: otlpSecrets.tls.key_pem as string,
+              key_pem: otlpExporterSecrets.tls.key_pem as string,
             },
           };
         }
       }
     }
 
-    patchUpdateDataWithRequireEncryptedAADFields(updateData, originalOutput);
+    patchUpdateDataWithRequireEncryptedAADFields(updateSoData, originalOutput);
 
     auditLoggingService.writeCustomSoAuditLog({
       action: 'update',
@@ -1507,7 +1488,7 @@ class OutputService {
     await this.soClient.update<Nullable<OutputSOAttributes>>(
       SAVED_OBJECT_TYPE,
       outputIdToUuid(id),
-      updateData
+      updateSoData
     );
 
     if (secretsToDelete.length) {
@@ -1636,6 +1617,84 @@ class OutputService {
     );
 
     return outputSO.updated_at;
+  }
+
+  private _validateOutputSslPaths(output: Partial<NewBeatsOutput>): void {
+    const paths = [
+      ...(output.ssl?.certificate_authorities ?? []),
+      output.ssl?.certificate,
+      output.ssl?.key,
+      output.secrets?.ssl?.key,
+    ];
+    for (const p of paths) {
+      if (!p || typeof p === 'object') continue;
+      const err = validateSslCertPath(p);
+      if (err) throw new OutputInvalidError(err);
+    }
+  }
+
+  private _ensureNoDuplicateSecrets(output: UpdateTypedOutput | NewOutput): void {
+    if (output.type === outputType.Kafka && output?.password && output?.secrets?.password) {
+      throw new OutputInvalidError('Cannot specify both password and secrets.password');
+    }
+    if (isBeatsOutput(output) && output.ssl?.key && output.secrets?.ssl?.key) {
+      throw new OutputInvalidError('Cannot specify both ssl.key and secrets.ssl.key');
+    }
+    if (
+      output.type === outputType.RemoteElasticsearch &&
+      output.service_token &&
+      output.secrets?.service_token
+    ) {
+      throw new OutputInvalidError('Cannot specify both service_token and secrets.service_token');
+    }
+  }
+
+  private async _validateOutputServerless(
+    output: UpdateTypedOutput | NewOutput,
+    outputId?: string,
+    resolvedOriginalOutput?: Output
+  ): Promise<void> {
+    const cloudSetup = appContextService.getCloud();
+    if (!cloudSetup?.isServerlessEnabled) {
+      return;
+    }
+    // On update, skip serverless host check if hosts are not being changed.
+    if (outputId && !('hosts' in output)) {
+      return;
+    }
+    const defaultOutput = await this.get(SERVERLESS_DEFAULT_OUTPUT_ID);
+    let originalOutput = resolvedOriginalOutput;
+    if (outputId && !originalOutput) {
+      originalOutput = await this.get(outputId);
+    }
+    const type = output.type || originalOutput?.type;
+    if (type !== outputType.Elasticsearch) {
+      return;
+    }
+    // Guard for hosts access — defaultOutput is always the default ES output but the union requires narrowing
+    if (defaultOutput.type !== outputType.Elasticsearch || !('hosts' in output)) {
+      return;
+    }
+    if (deepEqual(output.hosts, defaultOutput.hosts)) {
+      return;
+    }
+    try {
+      const privateOutput = await this.get(SERVERLESS_PRIVATE_OUTPUT_ID);
+      if (
+        privateOutput.type === outputType.Elasticsearch &&
+        deepEqual(output.hosts, privateOutput.hosts)
+      ) {
+        return;
+      }
+    } catch (e) {
+      if (!SavedObjectsErrorHelpers.isNotFoundError(e)) {
+        throw e;
+      }
+      appContextService.getLogger().debug(`Private ES output SO not found: ${e?.message ?? e}`);
+    }
+    throw new OutputInvalidError(
+      `Elasticsearch output host must have default URL in serverless: ${defaultOutput.hosts}`
+    );
   }
 }
 

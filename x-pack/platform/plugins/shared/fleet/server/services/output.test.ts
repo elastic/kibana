@@ -14,15 +14,11 @@ import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-p
 import { RESERVED_CONFIG_YML_KEYS, SERVERLESS_PRIVATE_OUTPUT_ID } from '../../common/constants';
 import type { OutputSOAttributes } from '../types';
 import type { NewElasticsearchOutput } from '../../common/types';
-<<<<<<< HEAD
 import {
   OUTPUT_SAVED_OBJECT_TYPE,
   SO_SEARCH_LIMIT,
   SERVERLESS_DEFAULT_OUTPUT_ID,
 } from '../constants';
-=======
-import { OUTPUT_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../constants';
->>>>>>> 5d1cc5f1f566 (Adjust type narrowing in outputSavedObjectToOutput)
 
 import { outputService, outputIdToUuid } from './output';
 import { appContextService } from './app_context';
@@ -1501,10 +1497,8 @@ describe('Output Service', () => {
               protocol: 'grpc',
             },
             secrets: {
-              otlp_exporter: {
-                api_key: 'my-api-key',
-                tls: { key_pem: 'my-key-pem' },
-              },
+              api_key: 'my-api-key',
+              otlp_exporter: { tls: { key_pem: 'my-key-pem' } },
             },
           },
           { id: 'output-test' }
@@ -1514,8 +1508,8 @@ describe('Output Service', () => {
           expect.anything(),
           expect.objectContaining({
             type: 'otlp',
+            api_key: 'my-api-key',
             otlp_exporter: expect.objectContaining({
-              api_key: 'my-api-key',
               tls: expect.objectContaining({ key_pem: 'my-key-pem' }),
             }),
           }),
@@ -1536,10 +1530,8 @@ describe('Output Service', () => {
             type: 'otlp',
             otlp_exporter: { endpoint: 'https://otel.example.com:4317', protocol: 'grpc' },
             secrets: {
-              otlp_exporter: {
-                api_key: { id: 'api-key-secret-id' },
-                tls: { key_pem: { id: 'key-pem-secret-id' } },
-              },
+              api_key: { id: 'api-key-secret-id' },
+              otlp_exporter: { tls: { key_pem: { id: 'key-pem-secret-id' } } },
             },
           },
         } as any);
@@ -1557,10 +1549,8 @@ describe('Output Service', () => {
               protocol: 'grpc',
             },
             secrets: {
-              otlp_exporter: {
-                api_key: 'my-api-key',
-                tls: { key_pem: 'my-key-pem' },
-              },
+              api_key: 'my-api-key',
+              otlp_exporter: { tls: { key_pem: 'my-key-pem' } },
             },
           },
           { id: 'output-test' }
@@ -1571,10 +1561,8 @@ describe('Output Service', () => {
           expect.objectContaining({
             type: 'otlp',
             secrets: {
-              otlp_exporter: {
-                api_key: { id: 'api-key-secret-id' },
-                tls: { key_pem: { id: 'key-pem-secret-id' } },
-              },
+              api_key: { id: 'api-key-secret-id' },
+              otlp_exporter: { tls: { key_pem: { id: 'key-pem-secret-id' } } },
             },
           }),
           expect.anything()
@@ -3288,7 +3276,6 @@ describe('Output Service', () => {
       });
     });
 
-<<<<<<< HEAD
     describe('otlp output', () => {
       beforeEach(() => {
         mockedAppContextService.getExperimentalFeatures.mockReturnValue({
@@ -3296,43 +3283,6 @@ describe('Output Service', () => {
         } as any);
         mockedAgentPolicyService.list.mockResolvedValue({ items: [] } as any);
         mockedPackagePolicyService.list.mockResolvedValue({ items: [] } as any);
-=======
-    it('Should throw if OTLP output type is not enabled on update', async () => {
-      const soClient = getMockedSoClient({});
-      mockedAppContextService.getExperimentalFeatures.mockReturnValue({
-        managedOtlpOutput: false,
-      } as any);
-
-      await expect(
-        outputService.update(soClient, esClientMock, 'existing-otlp-output', {
-          name: 'Updated OTLP',
-        })
-      ).rejects.toThrow('OTLP output type is not enabled');
-
-      mockedAppContextService.getExperimentalFeatures.mockReturnValue({} as any);
-    });
-
-    it('Should clear beats fields when changing an ES output to OTLP', async () => {
-      const soClient = getMockedSoClient({});
-      mockedAppContextService.getExperimentalFeatures.mockReturnValue({
-        managedOtlpOutput: true,
-      } as any);
-      mockedAgentPolicyService.list.mockResolvedValue({
-        items: [{}],
-      } as unknown as ReturnType<typeof mockedAgentPolicyService.list>);
-      mockedAgentPolicyService.getByIds.mockResolvedValue([]);
-      mockedAgentPolicyService.hasAPMIntegration.mockReturnValue(false);
-      mockedAgentPolicyService.hasFleetServerIntegration.mockReturnValue(false);
-      mockedAgentPolicyService.hasSyntheticsIntegration.mockReturnValue(false);
-      mockedPackagePolicyService.list.mockResolvedValue({ items: [] } as any);
-
-      await outputService.update(soClient, esClientMock, 'existing-es-output', {
-        type: 'otlp',
-        otlp_exporter: {
-          endpoint: 'https://otel.example.com:4317',
-          protocol: 'grpc',
-        },
->>>>>>> 0a6a9fa920de (Add otlp output schema and validation)
       });
 
       afterEach(() => {
@@ -3532,10 +3482,8 @@ describe('Output Service', () => {
           protocol: 'grpc',
         },
         secrets: {
-          otlp_exporter: {
-            api_key: 'updated-api-key',
-            tls: { key_pem: 'updated-key-pem' },
-          },
+          api_key: 'updated-api-key',
+          otlp_exporter: { tls: { key_pem: 'updated-key-pem' } },
         },
       });
 
@@ -3544,8 +3492,8 @@ describe('Output Service', () => {
         expect.anything(),
         expect.objectContaining({
           type: 'otlp',
+          api_key: 'updated-api-key',
           otlp_exporter: expect.objectContaining({
-            api_key: 'updated-api-key',
             tls: expect.objectContaining({ key_pem: 'updated-key-pem' }),
           }),
         })
@@ -3568,10 +3516,8 @@ describe('Output Service', () => {
           type: 'otlp',
           otlp_exporter: { endpoint: 'https://new.example.com:4317', protocol: 'grpc' },
           secrets: {
-            otlp_exporter: {
-              api_key: { id: 'updated-api-key-secret-id' },
-              tls: { key_pem: { id: 'updated-key-pem-secret-id' } },
-            },
+            api_key: { id: 'updated-api-key-secret-id' },
+            otlp_exporter: { tls: { key_pem: { id: 'updated-key-pem-secret-id' } } },
           },
         },
       } as any);
@@ -3582,10 +3528,8 @@ describe('Output Service', () => {
           protocol: 'grpc',
         },
         secrets: {
-          otlp_exporter: {
-            api_key: 'updated-api-key',
-            tls: { key_pem: 'updated-key-pem' },
-          },
+          api_key: 'updated-api-key',
+          otlp_exporter: { tls: { key_pem: 'updated-key-pem' } },
         },
       });
 
@@ -3595,10 +3539,8 @@ describe('Output Service', () => {
         expect.objectContaining({
           type: 'otlp',
           secrets: {
-            otlp_exporter: {
-              api_key: { id: 'updated-api-key-secret-id' },
-              tls: { key_pem: { id: 'updated-key-pem-secret-id' } },
-            },
+            api_key: { id: 'updated-api-key-secret-id' },
+            otlp_exporter: { tls: { key_pem: { id: 'updated-key-pem-secret-id' } } },
           },
         })
       );
