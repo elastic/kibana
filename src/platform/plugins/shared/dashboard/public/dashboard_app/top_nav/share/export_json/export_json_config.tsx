@@ -65,9 +65,6 @@ const ExportDashboardJsonFlyout = ({ closeFlyout }: { closeFlyout: () => void })
       openInConsole={{
         canShow: Boolean(coreServices.application?.capabilities?.dev_tools?.show),
         getRequest: (jsonValue) => `POST kbn:${DASHBOARD_API_PATH}\n${jsonValue}`,
-        label: i18n.translate('dashboard.exportJson.openInConsoleButtonLabel', {
-          defaultMessage: 'Open in Console',
-        }),
         useUrl: shareService?.url.locators.useUrl,
       }}
       prepareExportJson={sanitizeDashboard}

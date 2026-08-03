@@ -8,9 +8,9 @@
  */
 
 import { act, renderHook, waitFor } from '@testing-library/react';
-import { useSanitizedState } from './use_sanitized_state';
+import { usePreparedState } from './use_prepared_state';
 
-describe('useSanitizedState', () => {
+describe('usePreparedState', () => {
   const state = {
     title: 'my object',
     items: [],
@@ -22,11 +22,11 @@ describe('useSanitizedState', () => {
 
   test('starts loading and then returns a success state', async () => {
     const prepareExportJson = jest.fn().mockResolvedValue({
-      data: { ...state, title: 'my object (sanitized)' },
+      data: { ...state, title: 'my object (prepared)' },
       warnings: ['Unsupported property removed'],
     });
 
-    const { result } = renderHook(() => useSanitizedState({ state, prepareExportJson }));
+    const { result } = renderHook(() => usePreparedState({ state, prepareExportJson }));
     expect(result.current.status).toBe('loading');
 
     await waitFor(() => {
@@ -42,11 +42,11 @@ describe('useSanitizedState', () => {
       .fn()
       .mockRejectedValueOnce(new Error('boom'))
       .mockResolvedValueOnce({
-        data: { ...state, title: 'my object (sanitized)' },
+        data: { ...state, title: 'my object (prepared)' },
         warnings: [],
       });
 
-    const { result } = renderHook(() => useSanitizedState({ state, prepareExportJson }));
+    const { result } = renderHook(() => usePreparedState({ state, prepareExportJson }));
     await waitFor(() => {
       expect(result.current.status).toBe('error');
     });
@@ -64,7 +64,7 @@ describe('useSanitizedState', () => {
   });
 
   test('uses the state as the prepared result when no preparation is provided', async () => {
-    const { result } = renderHook(() => useSanitizedState({ state }));
+    const { result } = renderHook(() => usePreparedState({ state }));
 
     await waitFor(() => {
       expect(result.current.status).toBe('success');

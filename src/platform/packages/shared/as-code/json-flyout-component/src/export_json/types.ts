@@ -30,9 +30,9 @@ export interface ExportJsonSharingData<State extends object> {
   getExportJson: () => State;
 }
 
-export interface ExportJsonSanitizedState<SanitizedState extends object> {
+export interface ExportJsonPreparedState<PreparedState extends object> {
   status: ExportJsonStatus;
-  data: SanitizedState | undefined;
+  data: PreparedState | undefined;
   warnings: string[];
   error: Error | undefined;
 }

@@ -34,7 +34,7 @@ import type {
   ExportJsonSharingData,
   PrepareExportJsonFunction,
 } from './types';
-import { useSanitizedState } from './use_sanitized_state';
+import { usePreparedState } from './use_prepared_state';
 
 const flyoutBodyCss = css`
   ${euiFullHeight()}
@@ -104,7 +104,7 @@ export const ExportJsonFlyoutContent = <
 }: ExportJsonFlyoutContentProps<State, PreparedState>) => {
   const state = useMemo(() => getExportJson(), [getExportJson]);
 
-  const { status, data, warnings, error, retry } = useSanitizedState<State, PreparedState>({
+  const { status, data, warnings, error, retry } = usePreparedState<State, PreparedState>({
     state,
     prepareExportJson,
   });

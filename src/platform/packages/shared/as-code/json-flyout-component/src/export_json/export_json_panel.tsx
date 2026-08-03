@@ -29,10 +29,10 @@ import { css } from '@emotion/react';
 import { CodeEditor, XJsonLang } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import { KbnWarningCallout } from '@kbn/ui-callout';
-import type { ExportJsonOpenInConsoleConfig, ExportJsonSanitizedState } from './types';
+import type { ExportJsonOpenInConsoleConfig, ExportJsonPreparedState } from './types';
 
-export type ExportJsonPanelProps<SanitizedState extends object> =
-  ExportJsonSanitizedState<SanitizedState> & {
+export type ExportJsonPanelProps<PreparedState extends object> =
+  ExportJsonPreparedState<PreparedState> & {
     dataTestSubjPrefix: string;
     onRetry: () => void;
     openInConsole?: ExportJsonOpenInConsoleConfig;
@@ -281,10 +281,10 @@ function ErrorState({
           iconType="error"
           color="danger"
           titleSize="s"
-          data-test-subj={`${dataTestSubjPrefix}ExportSourceSanitizeErrorPrompt`}
+          data-test-subj={`${dataTestSubjPrefix}ExportSourcePrepareErrorPrompt`}
           title={
             <h3>
-              {i18n.translate('asCodeExport.exportJson.sanitizeErrorTitle', {
+              {i18n.translate('asCodeExport.exportJson.prepareErrorTitle', {
                 defaultMessage: 'Unable to export',
               })}
             </h3>
@@ -292,13 +292,13 @@ function ErrorState({
           body={
             <EuiText size="s">
               <p>
-                {i18n.translate('asCodeExport.exportJson.sanitizeErrorBody', {
+                {i18n.translate('asCodeExport.exportJson.prepareErrorBody', {
                   defaultMessage: 'Sorry, there was an error loading the JSON source.',
                 })}
               </p>
               {error && (
                 <p>
-                  {i18n.translate('asCodeExport.exportJson.sanitizeErrorDetails', {
+                  {i18n.translate('asCodeExport.exportJson.prepareErrorDetails', {
                     defaultMessage: 'Error: {errorMessage}',
                     values: { errorMessage: error.message },
                   })}
@@ -326,7 +326,7 @@ function ErrorState({
   );
 }
 
-export const ExportJsonPanel = <State extends object, SanitizedState extends object>({
+export const ExportJsonPanel = <State extends object, PreparedState extends object>({
   status,
   data,
   warnings,
@@ -334,7 +334,7 @@ export const ExportJsonPanel = <State extends object, SanitizedState extends obj
   onRetry,
   openInConsole,
   dataTestSubjPrefix,
-}: ExportJsonPanelProps<SanitizedState>) => {
+}: ExportJsonPanelProps<PreparedState>) => {
   const warningsAccordionId = useGeneratedHtmlId({
     prefix: `${dataTestSubjPrefix}ExportSourceWarnings`,
   });
