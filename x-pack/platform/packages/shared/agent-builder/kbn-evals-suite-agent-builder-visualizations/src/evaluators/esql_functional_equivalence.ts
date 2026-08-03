@@ -12,6 +12,7 @@ import type { Evaluator } from '@kbn/evals';
 import { executeUntilValid } from '@kbn/inference-prompt-utils';
 import pRetry from 'p-retry';
 import { z } from '@kbn/zod/v4';
+import { normalizeEsqlForEquivalence } from './normalize_esql_for_equivalence';
 
 export const ESQL_FUNCTIONAL_EQUIVALENCE_EVALUATOR_NAME = 'ES|QL Functional Equivalence';
 
@@ -20,13 +21,16 @@ export const ESQL_FUNCTIONAL_EQUIVALENCE_EVALUATOR_NAME = 'ES|QL Functional Equi
  * historical scores in the golden cluster can be partitioned cleanly:
  *
  *   - `v1` (framework default): vague "Yes/No" rubric, no calibration.
- *   - `v2` (this evaluator):    three-point rubric + few-shot + bias toward
- *                               conservative partial credit for caveats.
+ *   - `v2`: three-point rubric + few-shot + bias toward conservative
+ *     partial credit for caveats.
+ *   - `v3` (this evaluator): same rubric as v2, plus pre-judge stripping of
+ *     redundant `@timestamp` `?_tstart`/`?_tend` WHERE bounds (those are
+ *     optional when the window is already expressed via BUCKET/TBUCKET).
  *
  * The Kibana evaluations data stream keys evaluator history on
  * `evaluator.name` only, so we deliberately keep the same name as the
  * framework's evaluator (history-compatible). Dashboards that want to
- * isolate v2 trend can filter on `evaluator.metadata.judgeVersion`.
+ * isolate a rubric trend can filter on `evaluator.metadata.judgeVersion`.
  *
  * Ported from `@kbn/evals-suite-security-esql-generation-regression` — the
  * rubric is language-level (not security-specific), so the visualization
@@ -34,7 +38,7 @@ export const ESQL_FUNCTIONAL_EQUIVALENCE_EVALUATOR_NAME = 'ES|QL Functional Equi
  * across sibling `functional-tests` suites, so it is copied rather than
  * imported. If a third suite needs it, promote it into `@kbn/evals`.
  */
-export const ESQL_FUNCTIONAL_EQUIVALENCE_JUDGE_VERSION = 'v2';
+export const ESQL_FUNCTIONAL_EQUIVALENCE_JUDGE_VERSION = 'v3';
 
 /**
  * Three-point judgement returned by the LLM judge. Mapped to a numeric
@@ -89,6 +93,8 @@ TREAT THE FOLLOWING AS EQUIVALENT (do NOT penalise):
 - Equivalent comparison forms: \`x >= 5 AND x <= 10\` vs \`x BETWEEN 5 AND 10\`; \`a == "x" AND b == "y"\` vs \`a == "x" | WHERE b == "y"\`.
 - Output column ordering or extra cosmetic \`KEEP\`/\`DROP\` clauses that don't change the answer.
 - Time-range bind parameters: \`WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend\` is equivalent to a hardcoded time-range literal of the same window — both refer to "the user's time of interest".
+- Presence vs absence of a redundant \`WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend\` when the same window is already expressed via \`BUCKET(@timestamp, …, ?_tstart, ?_tend)\` or \`TBUCKET(…, ?_tstart, ?_tend)\` — do NOT penalise either form.
+- Presence vs absence of \`SORT <time bucket> ASC\` on a time-series query — charts order the time axis; do NOT penalise either form.
 - Different but compatible bucketing where the granularity is interchangeable for the question (e.g. \`BUCKET(@timestamp, 1h)\` vs \`BUCKET(@timestamp, 50, ?_tstart, ?_tend)\` over the same window when the question is "by hour").
 - Broader index patterns that still cover the same logical dataset: \`logs-*\` vs \`logs-endpoint.*\` when the gold uses the broader pattern.
 - Different but equivalent ordering of clauses (\`SORT ... | LIMIT n\` vs \`LIMIT n | SORT ...\` when the result set fits in n).
@@ -121,7 +127,7 @@ Candidate ES|QL query (under evaluation):
 Score the candidate's functional equivalence to the gold.`;
 
 const CalibratedEsqlEquivalencePrompt = createPrompt({
-  name: 'agent_builder_visualizations_esql_equivalence_v2',
+  name: 'agent_builder_visualizations_esql_equivalence',
   description:
     'Three-point calibrated rubric judging ES|QL functional equivalence with explicit allow/deny lists for common transformations.',
   input: z.object({
@@ -237,6 +243,12 @@ export function createCalibratedEsqlEquivalenceEvaluator({
         };
       }
 
+      // Strip optional `@timestamp` bind-param WHERE bounds before judging so
+      // presence/absence of that conjunct cannot swing the score when the
+      // dashboard window is already expressed via BUCKET/TBUCKET params.
+      const normalizedPrediction = normalizeEsqlForEquivalence(prediction);
+      const normalizedGroundTruth = normalizeEsqlForEquivalence(groundTruth);
+
       async function runAnalysis(): Promise<{
         equivalence: EquivalenceJudgement;
         reason: string;
@@ -245,8 +257,8 @@ export function createCalibratedEsqlEquivalenceEvaluator({
           prompt: CalibratedEsqlEquivalencePrompt,
           inferenceClient,
           input: {
-            ground_truth: groundTruth,
-            prediction,
+            ground_truth: normalizedGroundTruth,
+            prediction: normalizedPrediction,
           },
           finalToolChoice: {
             function: 'evaluate',

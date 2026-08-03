@@ -47,9 +47,9 @@ evaluate.describe(
                 expected:
                   'A bar chart backed by ES|QL that counts documents grouped by the response code field.',
                 query: `FROM kibana_sample_data_logs
-| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend
-| STATS request_count = COUNT(*) BY response.keyword
-| SORT request_count DESC`,
+| STATS \`Request Count\` = COUNT(*) BY response.keyword
+| SORT \`Request Count\` DESC
+| LIMIT 10`,
                 goldenToolPath: ['load_skill', 'platform.core.create_visualization'],
               },
               metadata: { includeHitDetection: true },
@@ -63,8 +63,7 @@ evaluate.describe(
                 expected:
                   'A single metric visualization backed by ES|QL that counts all documents.',
                 query: `FROM kibana_sample_data_logs
-| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend
-| STATS total_requests = COUNT(*)`,
+| STATS \`Total Requests\` = COUNT(*)`,
                 goldenToolPath: ['load_skill', 'platform.core.create_visualization'],
               },
               metadata: { includeHitDetection: true },
@@ -78,9 +77,7 @@ evaluate.describe(
                 expected:
                   'A time-series visualization backed by ES|QL that sums the bytes field bucketed by time.',
                 query: `FROM kibana_sample_data_logs
-| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend
-| STATS total_bytes = SUM(bytes) BY bucket = BUCKET(@timestamp, 75, ?_tstart, ?_tend)
-| SORT bucket ASC`,
+| STATS \`Total Bytes\` = SUM(bytes) BY \`Time Bucket\` = BUCKET(@timestamp, 75, ?_tstart, ?_tend)`,
                 goldenToolPath: ['load_skill', 'platform.core.create_visualization'],
               },
               metadata: { includeHitDetection: true },
@@ -101,9 +98,7 @@ evaluate.describe(
                 expected:
                   'A time-series line chart backed by a TS ES|QL query that averages each CPU load-average gauge (1m, 5m, 15m) over time buckets, with the dotted field paths quoted so they are not misparsed as numeric literals.',
                 query: `TS metrics-hostmetricsreceiver.otel-default
-| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend
-| STATS \`1-Minute Load Average\` = AVG(AVG_OVER_TIME(\`system.cpu.load_average.1m\`)), \`5-Minute Load Average\` = AVG(AVG_OVER_TIME(\`system.cpu.load_average.5m\`)), \`15-Minute Load Average\` = AVG(AVG_OVER_TIME(\`system.cpu.load_average.15m\`)) BY \`Time Bucket\` = TBUCKET(75, ?_tstart, ?_tend)
-| SORT \`Time Bucket\` ASC`,
+| STATS \`1-Minute Load Average\` = AVG(AVG_OVER_TIME(\`system.cpu.load_average.1m\`)), \`5-Minute Load Average\` = AVG(AVG_OVER_TIME(\`system.cpu.load_average.5m\`)), \`15-Minute Load Average\` = AVG(AVG_OVER_TIME(\`system.cpu.load_average.15m\`)) BY \`Time Bucket\` = TBUCKET(75, ?_tstart, ?_tend)`,
                 goldenToolPath: ['load_skill', 'platform.core.create_visualization'],
               },
               metadata: { includeHitDetection: true },
@@ -117,9 +112,7 @@ evaluate.describe(
                 expected:
                   'A time-series line chart backed by a TS ES|QL query that averages each CPU load-average gauge (1m, 5m, 15m) over time buckets, with the dotted field paths quoted so they are not misparsed as numeric literals.',
                 query: `TS metrics-hostmetricsreceiver.otel-default
-| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend
-| STATS \`1-Minute Load Average\` = AVG(AVG_OVER_TIME(\`system.cpu.load_average.1m\`)), \`5-Minute Load Average\` = AVG(AVG_OVER_TIME(\`system.cpu.load_average.5m\`)), \`15-Minute Load Average\` = AVG(AVG_OVER_TIME(\`system.cpu.load_average.15m\`)) BY \`Time Bucket\` = TBUCKET(75, ?_tstart, ?_tend)
-| SORT \`Time Bucket\` ASC`,
+| STATS \`1-Minute Load Average\` = AVG(AVG_OVER_TIME(\`system.cpu.load_average.1m\`)), \`5-Minute Load Average\` = AVG(AVG_OVER_TIME(\`system.cpu.load_average.5m\`)), \`15-Minute Load Average\` = AVG(AVG_OVER_TIME(\`system.cpu.load_average.15m\`)) BY \`Time Bucket\` = TBUCKET(75, ?_tstart, ?_tend)`,
                 goldenToolPath: ['load_skill', 'platform.core.create_visualization'],
               },
               metadata: { includeHitDetection: true },

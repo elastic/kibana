@@ -8,6 +8,7 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Evaluator, EvaluationResult, Example, TaskOutput } from '@kbn/evals';
 import { substituteEsqlBindParams } from './esql_bind_params';
+import { normalizeEsqlForEquivalence } from './normalize_esql_for_equivalence';
 
 export const ESQL_RESULT_EQUIVALENCE_EVALUATOR_NAME = 'ES|QL Result Equivalence';
 
@@ -266,16 +267,17 @@ export function createEsqlResultEquivalenceEvaluator<
         };
       }
 
-      // Substitute `?_tstart` / `?_tend` bind parameters before execution.
-      // The agent emits these placeholders in candidate queries (matching
-      // the production agent-builder substitution surface). Gold queries
-      // in this suite's dataset don't use them today, but the call is
-      // idempotent so passing both through is safe and future-proof. The
-      // original strings are still surfaced in `metadata.goldQuery` /
-      // `metadata.candidateQuery` so debugging sees what the agent
-      // actually produced, not the substituted form.
-      const executableGoldQuery = substituteEsqlBindParams(goldQuery);
-      const executableCandidateQuery = substituteEsqlBindParams(candidateQuery);
+      // Normalize then substitute `?_tstart` / `?_tend` before execution.
+      // Redundant `@timestamp` bind-param WHERE bounds are stripped so
+      // gold/candidate differ only on that optional conjunct still compare
+      // the same executed window (BUCKET/TBUCKET already carries the params).
+      // Original extractor strings stay in metadata for debugging.
+      const executableGoldQuery = substituteEsqlBindParams(
+        normalizeEsqlForEquivalence(goldQuery)
+      );
+      const executableCandidateQuery = substituteEsqlBindParams(
+        normalizeEsqlForEquivalence(candidateQuery)
+      );
       const [goldResult, candidateResult] = await Promise.allSettled([
         esClient.esql.query({ query: executableGoldQuery }) as Promise<EsqlQueryResult>,
         esClient.esql.query({ query: executableCandidateQuery }) as Promise<EsqlQueryResult>,

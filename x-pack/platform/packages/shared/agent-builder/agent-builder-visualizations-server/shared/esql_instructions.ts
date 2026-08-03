@@ -69,4 +69,19 @@ e.g.
 TS logs-tsds | STATS count = COUNT() BY bucket = TBUCKET(75, ?_tstart, ?_tend)
 \`\`\`
 
-Also omit \`LIMIT\` (same reasons as with FROM).`;
+Also omit \`LIMIT\` (same reasons as with FROM).
+
+## Grouping dimensions (BY)
+
+Only \`BY\` dimensions the user asked for:
+
+- **Time series** default: group by the time bucket alone (e.g. \`BY bucket = TBUCKET(75, ?_tstart, ?_tend)\`). Do **not** add every TSDB \`ts_dimension\` such as \`host.name\`, \`service.name\`, or \`pod\` just because it appears in the mapping.
+- Add an extra dimension only when the user explicitly asks for a breakdown (e.g. "per host", "by service", "split by region").
+- **Categorical charts**: \`BY\` only the category field(s) named in the request (plus no invented splits).
+- Index dimensions may be used in \`WHERE\` filters when the user scopes to a specific series; that is not a reason to put them in \`BY\`.
+
+## Row order and cardinality (SORT / LIMIT)
+
+- **Time series** (line / area / bar over time): omit \`SORT\` and \`LIMIT\`. The bucket range already bounds the rows, and the chart orders the time axis — an explicit \`SORT <time bucket> ASC\` is unnecessary.
+- **Categorical charts** (bar / pie-style rankings by a keyword or other non-time dimension): \`SORT <measure> DESC\` so categories are ordered by magnitude (e.g. request count), not by the category label. Then keep only the top categories with \`LIMIT 10\` by default so the chart stays readable. Use a different limit only when the user asks (e.g. top 5 / top 20). Do not invent an "Other" bucket unless asked.
+- Only sort by the category field when the user asks for alphabetical / natural label order, or when the category itself is ordinal (e.g. hour-of-day).`;
