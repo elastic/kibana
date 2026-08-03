@@ -907,7 +907,7 @@ describe('runRelationshipMaintainer', () => {
 
   describe('requestTimeoutMs', () => {
     it('passes requestTimeout to esClient.search when requestTimeoutMs is set', async () => {
-      const { esClient, search, esql } = makeEsClient();
+      const { esClient, search } = makeEsClient();
       const { crudClient, entityMetadataClient } = makeClients();
       search.mockResolvedValueOnce({ aggregations: { users: { buckets: [] } } });
 
@@ -1613,7 +1613,7 @@ describe('runRelationshipMaintainer', () => {
 
   describe('per-integration completion log', () => {
     it('logs info on successful integration completion with key metrics', async () => {
-      const { esClient, search, esql } = makeEsClient();
+      const { esClient, search } = makeEsClient();
       const { crudClient, entityMetadataClient } = makeClients();
       const logger = loggerMock.create();
 
