@@ -14,6 +14,7 @@ import {
   type Conversation,
   createConversationNotFoundError,
   createConversationWriteConflictError,
+  createInternalError,
   isAgentNotFoundError,
   isAgentUnavailableError,
   isConversationNotFoundError,
@@ -33,7 +34,7 @@ import type {
 } from './types';
 import { createSpaceDslFilter } from '../../../utils/spaces';
 import { isVersionConflictError } from '../../../utils/is_version_conflict_error';
-import type { ConversationProperties, ConversationStorage } from './storage';
+import type { ConversationStorage } from './storage';
 import { createStorage } from './storage';
 import { mergeAttachmentsById, upsertRound } from './round_writes';
 import {
@@ -45,10 +46,10 @@ import {
   type Document,
 } from './converters';
 
-// Higher than the `@kbn/occ` defaults: the re-read is a near-real-time search,
-// so a retry can briefly still see the pre-conflict document.
 const OCC_MAX_RETRIES = 5;
 const OCC_RETRY_DELAY_MS = 250;
+
+type VersionedDocument = Document & Required<Pick<Document, '_seq_no' | '_primary_term'>>;
 
 export interface ConversationClient {
   get(conversationId: string): Promise<Conversation>;
@@ -156,7 +157,7 @@ class ConversationClientImpl implements ConversationClient {
   }
 
   async exists(conversationId: string): Promise<boolean> {
-    const document = await this._get(conversationId);
+    const document = await this.getDocument(conversationId);
 
     return document !== undefined;
   }
@@ -329,7 +330,7 @@ class ConversationClientImpl implements ConversationClient {
     }
   }
 
-  private async _get(conversationId: string): Promise<Document | undefined> {
+  private async getDocument(conversationId: string): Promise<VersionedDocument | undefined> {
     const response = await this.storage.getClient().search({
       track_total_hits: false,
       size: 1,
@@ -342,11 +343,20 @@ class ConversationClientImpl implements ConversationClient {
         },
       },
     });
-    if (response.hits.hits.length === 0) {
+
+    const hit = response.hits.hits[0] as Document | undefined;
+
+    if (!hit) {
       return undefined;
-    } else {
-      return response.hits.hits[0] as Document;
     }
+
+    const { _seq_no: seqNo, _primary_term: primaryTerm } = hit;
+
+    if (seqNo === undefined || primaryTerm === undefined) {
+      throw createInternalError(`Conversation ${conversationId} was read without version metadata`);
+    }
+
+    return { ...hit, _seq_no: seqNo, _primary_term: primaryTerm };
   }
 
   /**
@@ -361,8 +371,8 @@ class ConversationClientImpl implements ConversationClient {
   }: {
     conversationId: string;
     access: ConversationAccess;
-  }): Promise<Document> {
-    const document = await this._get(conversationId);
+  }): Promise<VersionedDocument> {
+    const document = await this.getDocument(conversationId);
 
     if (!document) {
       throw createConversationNotFoundError({ conversationId });
@@ -418,23 +428,21 @@ class ConversationClientImpl implements ConversationClient {
     mutate: (current: Conversation) => Conversation;
     maxRetries?: number;
   }): Promise<Conversation> {
-    let updatedConversation: Conversation | undefined;
-
-    const writer = new OccWriter<ConversationProperties>({
+    const writer = new OccWriter<Conversation>({
       get: async (id) => {
         const document = await this.getDocumentWithAccess({ conversationId: id, access });
 
         return {
           id,
-          source: document._source!,
-          occ: { seqNo: document._seq_no!, primaryTerm: document._primary_term! },
+          source: fromEs(document),
+          occ: { seqNo: document._seq_no, primaryTerm: document._primary_term },
         };
       },
       // `refresh` stays at the adapter's `wait_for` default so a retry's re-read sees the winner
       index: async ({ id, document, ifSeqNo, ifPrimaryTerm }) => {
         const response = await this.storage.getClient().index({
           id,
-          document,
+          document: toEs(document, this.space),
           ...(ifSeqNo != null && ifPrimaryTerm != null
             ? { if_seq_no: ifSeqNo, if_primary_term: ifPrimaryTerm }
             : {}),
@@ -447,16 +455,8 @@ class ConversationClientImpl implements ConversationClient {
       retryDelayMs: OCC_RETRY_DELAY_MS,
     });
 
-    await writer.readModifyWrite({
-      id: conversationId,
-      mutate: (source) => {
-        updatedConversation = mutate(fromEs({ _id: conversationId, _source: source }));
+    const { document } = await writer.readModifyWrite({ id: conversationId, mutate });
 
-        return toEs(updatedConversation, this.space);
-      },
-    });
-
-    // readModifyWrite either invokes the mutator or throws
-    return updatedConversation!;
+    return document;
   }
 }

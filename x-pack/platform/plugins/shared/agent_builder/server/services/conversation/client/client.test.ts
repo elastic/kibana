@@ -51,6 +51,8 @@ describe('ConversationClient', () => {
     accessMode = ConversationAccessControlMode.Private,
     seqNo = 1,
     primaryTerm = 1,
+    // ES omits both fields entirely when `seq_no_primary_term` is not requested
+    versioned = true,
     title = 'Conversation 1',
     rounds = [],
     attachments,
@@ -64,6 +66,7 @@ describe('ConversationClient', () => {
     accessMode?: ConversationAccessControlMode;
     seqNo?: number;
     primaryTerm?: number;
+    versioned?: boolean;
     title?: string;
     rounds?: unknown[];
     attachments?: unknown[];
@@ -72,8 +75,7 @@ describe('ConversationClient', () => {
   } = {}): Document =>
     ({
       _id: id,
-      _seq_no: seqNo,
-      _primary_term: primaryTerm,
+      ...(versioned ? { _seq_no: seqNo, _primary_term: primaryTerm } : {}),
       _source: {
         agent_id: agentId,
         user_id: userId,
@@ -580,6 +582,17 @@ describe('ConversationClient', () => {
       expect(mockEsClient.index).toHaveBeenCalledWith(
         expect.objectContaining({ if_seq_no: 42, if_primary_term: 7 })
       );
+    });
+
+    it('refuses to write when the read returned no version metadata', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [createConversationDocument({ versioned: false })] },
+      });
+
+      await expect(client.update({ id: 'conversation-1', title: 'x' })).rejects.toThrow(
+        /read without version metadata/
+      );
+      expect(mockEsClient.index).not.toHaveBeenCalled();
     });
 
     it('surfaces a write conflict as a conversation write conflict error', async () => {
