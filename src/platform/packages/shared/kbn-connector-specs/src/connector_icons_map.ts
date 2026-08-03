@@ -115,6 +115,10 @@ export const ConnectorIconsMap: Map<
     ),
   ],
   [
+    '.graphql',
+    lazy(() => import(/* webpackChunkName: "connectorIconGraphQL" */ './specs/graphql/icon')),
+  ],
+  [
     '.slack2',
     lazy(() => import(/* webpackChunkName: "connectorIconSlack2" */ './specs/slack/icon')),
   ],

@@ -20,6 +20,7 @@ export * from './specs/figma/figma';
 export * from './specs/github/github';
 export * from './specs/google_calendar/google_calendar';
 export * from './specs/google_drive/google_drive';
+export * from './specs/graphql/graphql';
 export * from './specs/greynoise/greynoise';
 export * from './specs/notion/notion';
 export * from './specs/shodan/shodan';

@@ -22,6 +22,7 @@
 - [Google Drive](/reference/connectors-kibana/google-drive-action-type.md): Search and access files and folders in Google Drive.
 - [Google Gmail](/reference/connectors-kibana/gmail-action-type.md): Search and read emails from Gmail.
 - [Grafana](/reference/connectors-kibana/grafana-action-type.md): Read alerts and rules, manage silences, and post annotations.
+- [GraphQL](/reference/connectors-kibana/graphql-action-type.md): Run queries and mutations, and introspect schemas on any GraphQL endpoint.
 - [HubSpot](/reference/connectors-kibana/hubspot-action-type.md): Search and retrieve contacts, companies, deals, and tickets from HubSpot CRM.
 - [Jenkins](/reference/connectors-kibana/jenkins-action-type.md): Trigger, monitor, and stop Jenkins builds, and manage jobs, test reports, and the build queue.
 - [Jina Reader](/reference/connectors-kibana/jina-action-type.md): Convert web pages into markdown from their URL and search the web for better LLM grounding.
