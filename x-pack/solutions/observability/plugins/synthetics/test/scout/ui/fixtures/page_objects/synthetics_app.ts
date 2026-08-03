@@ -294,6 +294,25 @@ export class SyntheticsAppPage {
     await this.page.click('text="100 rows"');
   }
 
+  async selectAllMonitors() {
+    await this.page.testSubj.click('checkboxSelectAll');
+  }
+
+  async openBulkActionsMenu() {
+    // The bulk actions button only renders once at least one monitor is selected.
+    await this.page.testSubj.click('syntheticsBulkActionsButton');
+  }
+
+  async selectMaintenanceWindowInFlyout(title: string) {
+    const flyout = this.page.testSubj.locator('syntheticsBulkMaintenanceWindowsFlyout');
+    await flyout.locator('[data-test-subj="comboBoxSearchInput"]').click();
+    await this.page.getByRole('option', { name: title }).click();
+  }
+
+  async saveBulkMaintenanceWindows() {
+    await this.page.testSubj.click('syntheticsBulkMaintenanceWindowsSave');
+  }
+
   async findEditMonitorConfiguration(monitorEditDetails: Array<[string, string]>) {
     await this.page.click('text="Advanced options"');
     for (const [selector, expected] of monitorEditDetails) {
@@ -427,10 +446,16 @@ export class SyntheticsAppPage {
     await this.page.testSubj.waitForSelector('querySubmitButton');
   }
 
-  async refreshOverview() {
-    // The overview header replaced the shared refresh button with the
-    // SyntheticsDatePicker, whose EuiSuperDatePicker apply/refresh button drives
-    // the app refresh.
+  async refreshOverview(refreshInterval = 15) {
+    // Callers create monitors via the API after navigating with zero monitors, so
+    // the overview has already redirected to its empty getting-started/management
+    // state, which has no SyntheticsDatePicker. Re-navigate so the fresh load
+    // re-queries the now-existing monitors and renders the populated overview
+    // header before clicking the date picker's apply/refresh button.
+    await this.navigateToOverview(refreshInterval);
+    await expect(this.page.testSubj.locator('superDatePickerApplyTimeButton')).toBeVisible({
+      timeout: 30_000,
+    });
     await this.page.testSubj.click('superDatePickerApplyTimeButton');
     await this.waitForLoadingToFinish();
   }

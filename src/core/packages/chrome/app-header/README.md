@@ -33,6 +33,18 @@ with other hooks. Most apps should use `ChromeAppHeaderRegistration`.
 Use `chrome.next.appHeader.set` only when a React adapter is not practical. It is the imperative
 primitive behind the React APIs.
 
+## Back navigation
+
+Pass the destination as `back`. Kibana handles same-origin `href` values as SPA navigation, so an
+`onClick` that navigates to the same URL is unnecessary:
+
+```tsx
+<AppHeader back="/app/my-app" title="Details" />
+```
+
+Use the object form when the back button needs a destination label or click behavior that differs
+from following `href`. If the handler replaces navigation, call `event.preventDefault()`.
+
 ## Discover tabs
 
 Discover uses `DiscoverAppHeader` from `@kbn/app-header/discover` to place its UnifiedTabs bar beside
