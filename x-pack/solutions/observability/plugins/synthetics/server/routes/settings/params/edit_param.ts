@@ -45,7 +45,7 @@ export const editSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
           })
         ),
         description: schema.maybe(schema.string()),
-        tags: schema.maybe(schema.arrayOf(schema.string())),
+        tags: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
       }),
     },
   },

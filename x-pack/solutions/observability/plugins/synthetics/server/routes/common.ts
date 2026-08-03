@@ -24,7 +24,7 @@ const MAX_MONITOR_QUERY_IDS_IN_BODY = 10000;
 const MAX_MONITOR_QUERY_ID_LENGTH = 256;
 
 const StringOrArraySchema = schema.maybe(
-  schema.oneOf([schema.string(), schema.arrayOf(schema.string())])
+  schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { maxSize: 1000 })])
 );
 
 const UseLogicalAndFieldLiterals = useLogicalAndFields.map((f) => schema.literal(f)) as [
@@ -49,7 +49,12 @@ const CommonQuerySchema = {
   configIds: StringOrArraySchema,
   showFromAllSpaces: schema.maybe(schema.boolean()),
   useLogicalAndFor: schema.maybe(
-    schema.oneOf([schema.string(), schema.arrayOf(schema.oneOf(UseLogicalAndFieldLiterals))])
+    schema.oneOf([
+      schema.string(),
+      schema.arrayOf(schema.oneOf(UseLogicalAndFieldLiterals), {
+        maxSize: useLogicalAndFields.length,
+      }),
+    ])
   ),
   // Date-range window for the overview list (see runtime type docs). The
   // overview page always sends these; their presence scopes each monitor's
@@ -67,7 +72,7 @@ export const QuerySchema = schema.object({
   perPage: schema.maybe(schema.number()),
   sortField: MonitorSortFieldSchema,
   sortOrder: schema.maybe(schema.oneOf([schema.literal('desc'), schema.literal('asc')])),
-  searchAfter: schema.maybe(schema.arrayOf(schema.string())),
+  searchAfter: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10 })),
   internal: schema.maybe(
     schema.boolean({
       defaultValue: false,

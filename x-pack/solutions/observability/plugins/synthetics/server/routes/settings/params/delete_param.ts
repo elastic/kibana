@@ -30,6 +30,7 @@ export const deleteSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
         schema.object({
           ids: schema.arrayOf(schema.string(), {
             minSize: 1,
+            maxSize: 500,
           }),
         })
       ),
