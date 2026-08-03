@@ -43,6 +43,77 @@ function compactLargeEnums(node: unknown): unknown {
   return result;
 }
 
+const REF_PREFIXES = ['#/definitions/', '#/$defs/'] as const;
+
+/** Keys that carry schema composition rather than the field's own shape. */
+const COMPOSITION_KEYS = new Set(['$ref', 'allOf', 'definitions', '$defs', '$schema']);
+
+function resolveRef(ref: string, root: JsonSchemaNode): JsonSchemaNode | undefined {
+  if (ref === '#') return root;
+  const prefix = REF_PREFIXES.find((candidate) => ref.startsWith(candidate));
+  if (!prefix) return undefined;
+  const defs = (root.definitions ?? root.$defs) as JsonSchemaNode | undefined;
+  const target = defs?.[decodeURIComponent(ref.slice(prefix.length))];
+  return target && typeof target === 'object' ? (target as JsonSchemaNode) : undefined;
+}
+
+/** Merges a referenced schema with the referencing site's own keys; the referencing site wins. */
+function mergeSchemaNodes(base: JsonSchemaNode, override: JsonSchemaNode): JsonSchemaNode {
+  const merged: JsonSchemaNode = { ...base, ...override };
+
+  const baseProperties = base.properties as JsonSchemaNode | undefined;
+  const overrideProperties = override.properties as JsonSchemaNode | undefined;
+  if (baseProperties || overrideProperties) {
+    merged.properties = { ...baseProperties, ...overrideProperties };
+  }
+
+  const required = [
+    ...((base.required as string[]) ?? []),
+    ...((override.required as string[]) ?? []),
+  ];
+  if (required.length > 0) merged.required = [...new Set(required)];
+
+  return merged;
+}
+
+/**
+ * Expands `$ref` pointers back into the tree. Every schema carrying a
+ * `.meta({ id })` is hoisted into `definitions` by `z.toJSONSchema`, and
+ * draft-7 — which cannot combine `$ref` with sibling keys — wraps the pointer
+ * in a single-member `allOf`. The renderers below read `type`, `enum` and
+ * `properties` directly, so unresolved pointers would render as `unknown`.
+ * `visiting` tracks the pointers on the current path to stop self-referencing
+ * definitions from recursing forever.
+ */
+function inlineRefs(node: unknown, root: JsonSchemaNode, visiting: ReadonlySet<string>): unknown {
+  if (Array.isArray(node)) return node.map((item) => inlineRefs(item, root, visiting));
+  if (node === null || typeof node !== 'object') return node;
+
+  const obj = node as JsonSchemaNode;
+  const own: JsonSchemaNode = {};
+  for (const [key, value] of Object.entries(obj)) {
+    if (COMPOSITION_KEYS.has(key)) continue;
+    own[key] = inlineRefs(value, root, visiting);
+  }
+
+  const bases: JsonSchemaNode[] = [];
+  const { $ref: ref, allOf } = obj;
+  if (typeof ref === 'string' && !visiting.has(ref)) {
+    const target = resolveRef(ref, root);
+    if (target) {
+      const nested = new Set(visiting).add(ref);
+      bases.push(inlineRefs(target, root, nested) as JsonSchemaNode);
+    }
+  }
+  if (Array.isArray(allOf)) {
+    for (const member of allOf) {
+      bases.push(inlineRefs(member, root, visiting) as JsonSchemaNode);
+    }
+  }
+
+  return [...bases, own].reduce(mergeSchemaNodes, {});
+}
+
 export class SchemaTranslationError extends Error {
   constructor(message: string, public readonly cause?: unknown) {
     super(message);
@@ -52,8 +123,11 @@ export class SchemaTranslationError extends Error {
 
 function zodToJsonSchema(schema: z.ZodType): unknown {
   try {
-    const jsonSchema = z.toJSONSchema(schema, { target: 'draft-7', unrepresentable: 'any' });
-    return compactLargeEnums(jsonSchema);
+    const jsonSchema = z.toJSONSchema(schema, {
+      target: 'draft-7',
+      unrepresentable: 'any',
+    }) as JsonSchemaNode;
+    return compactLargeEnums(inlineRefs(jsonSchema, jsonSchema, new Set()));
   } catch (e) {
     const message = e instanceof Error ? e.message : String(e);
     throw new SchemaTranslationError(`Failed to convert Zod schema to JSON Schema: ${message}`, e);
