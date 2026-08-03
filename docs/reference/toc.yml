@@ -133,7 +133,6 @@ toc:
           - file: connectors-kibana/workday-action-type.md
           - file: connectors-kibana/zendesk-action-type.md
           - file: connectors-kibana/zoom-action-type.md
-          - file: connectors-kibana/aws-cloudwatch-action-type.md
       - file: connectors-kibana/pre-configured-connectors.md
   - file: kibana-plugins.md
   - file: commands.md
