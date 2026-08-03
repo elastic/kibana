@@ -101,7 +101,7 @@ export function registerInternalConversationRoutes({
 
   router.post(
     {
-      path: `${internalApiPath}/conversations/{conversation_id}/_mark_pinned`,
+      path: `${internalApiPath}/conversations/{conversation_id}/_set_pinned`,
       validate: {
         params: schema.object({
           conversation_id: schema.string({ maxLength: 256 }),

@@ -81,7 +81,7 @@ export class ConversationsService {
     pinned: boolean;
   }): Promise<MarkPinnedConversationResponse> {
     return await this.http.post<MarkPinnedConversationResponse>(
-      `${internalApiPath}/conversations/${conversationId}/_mark_pinned`,
+      `${internalApiPath}/conversations/${conversationId}/_set_pinned`,
       { body: JSON.stringify({ pinned }) }
     );
   }

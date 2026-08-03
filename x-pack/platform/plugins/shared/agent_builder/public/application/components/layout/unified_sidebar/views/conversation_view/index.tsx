@@ -120,9 +120,9 @@ export const ConversationSidebarView: React.FC = () => {
 
   const pinnedConversations = useMemo(
     () =>
-      [...conversations]
-        .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
-        .filter((c) => c.pinned),
+      conversations
+        .filter((c) => c.pinned)
+        .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()),
     [conversations]
   );
 
