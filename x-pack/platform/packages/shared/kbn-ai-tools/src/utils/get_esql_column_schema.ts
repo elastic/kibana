@@ -49,7 +49,10 @@ export async function getEsqlColumnSchema({
     ...(filter ? { filter } : {}),
   };
   const response = isTracedEsClient(esClient)
-    ? ((await esClient.esql('get_esql_column_schema', queryParams)) as unknown as ESQLSearchResponse)
+    ? ((await esClient.esql(
+        'get_esql_column_schema',
+        queryParams
+      )) as unknown as ESQLSearchResponse)
     : ((await esClient.esql.query(queryParams, {
         signal,
       })) as unknown as ESQLSearchResponse);
