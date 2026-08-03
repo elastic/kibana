@@ -67989,6 +67989,7 @@ paths:
           required: false
           schema:
             type: string
+            x-state: Generally available; added in 9.5.0
         - description: Whether to exclude step-level execution data.
           in: query
           name: omitStepRuns
@@ -68001,12 +68002,14 @@ paths:
           required: false
           schema:
             type: string
+            x-state: Generally available; added in 9.5.0
         - description: Datemath upper bound for filtering executions by finishedAt (inclusive when parsed with roundUp).
           in: query
           name: finishedBefore
           required: false
           schema:
             type: string
+            x-state: Generally available; added in 9.5.0
         - description: Field to collapse execution results by.
           in: query
           name: collapse
@@ -68018,6 +68021,7 @@ paths:
               - executedBy
               - triggeredBy
             type: string
+            x-state: Generally available; added in 9.5.0
         - description: Field to sort executions by.
           in: query
           name: sortField
@@ -68027,6 +68031,7 @@ paths:
               - createdAt
               - finishedAt
             type: string
+            x-state: Generally available; added in 9.5.0
         - description: Sort order.
           in: query
           name: sortOrder
@@ -68036,6 +68041,7 @@ paths:
               - asc
               - desc
             type: string
+            x-state: Generally available; added in 9.5.0
         - description: Page number.
           in: query
           name: page
@@ -68057,12 +68063,14 @@ paths:
           required: false
           schema:
             type: string
+            x-state: Generally available; added in 9.5.0
         - description: Datemath upper bound for filtering executions by startedAt (inclusive when parsed with roundUp).
           in: query
           name: startedBefore
           required: false
           schema:
             type: string
+            x-state: Generally available; added in 9.5.0
       responses:
         '200':
           content:
