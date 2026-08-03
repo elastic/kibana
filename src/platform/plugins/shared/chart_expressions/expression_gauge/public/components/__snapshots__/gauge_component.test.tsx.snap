@@ -503,7 +503,7 @@ exports[`GaugeComponent renders the chart 1`] = `
           "extraTextAlign": "right",
           "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
           "iconAlign": "right",
-          "minHeight": 64,
+          "minHeight": 80,
           "minValueFontSize": 12,
           "nonFiniteText": "N/A",
           "spacing": "small",

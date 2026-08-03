@@ -510,9 +510,9 @@ export function XYChart({
     const tickVisible = axis.showLabels;
     const position = getOriginalAxisPosition(axis.position, shouldRotate);
 
-    const style = {
-      maxExtent: axis.truncate ?? '100%',
+    const style: RecursivePartial<AxisStyle> = {
       tickLabel: {
+        ...(axis.truncate ? { maxLength: axis.truncate, truncate: 'end' } : {}),
         fill: axis.labelColor,
         visible: tickVisible,
         rotation: axis.labelsOrientation,
