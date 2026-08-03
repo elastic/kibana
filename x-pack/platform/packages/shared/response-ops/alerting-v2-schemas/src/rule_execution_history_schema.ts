@@ -6,23 +6,14 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { arrayOrSingleSchema } from './common';
-
-export const RULE_EXECUTIONS_MAX_PER_PAGE = 100;
-export const RULE_EXECUTIONS_DEFAULT_PER_PAGE = 20;
-/**
- * Maximum number of events that can be paged through. Mirrors the default
- * Elasticsearch `index.max_result_window` so deep pagination via `from +
- * size` cannot blow up at the cluster boundary. Future work can switch to
- * `search_after` to remove the cap.
- */
-export const RULE_EXECUTIONS_MAX_RESULT_WINDOW = 10_000;
-/**
- * Maximum number of rule ids accepted by the `ruleId` filter. Caps the
- * `terms` clause size on the server and keeps the query string within a
- * reasonable URL length budget (256 chars per id * 10 ids ≈ 2,5KB).
- */
-export const RULE_EXECUTIONS_MAX_RULE_ID_FILTER = 10;
+import { arrayOrSingleSchema, queryIntSchema } from './common';
+import {
+  ID_MAX_LENGTH,
+  EXECUTION_HISTORY_MAX_PER_PAGE,
+  EXECUTION_HISTORY_DEFAULT_PER_PAGE,
+  EXECUTION_HISTORY_MAX_RESULT_WINDOW,
+  EXECUTION_HISTORY_MAX_RULE_ID_FILTER,
+} from './constants';
 
 /**
  * Coarse ECS-aligned outcome (`event.outcome`) for a single rule execution.
@@ -50,17 +41,17 @@ const outcomeArraySchema = arrayOrSingleSchema(
 );
 
 /**
- * Rule id filter. Each id must be a non-empty string up to 256 chars; the
- * array is capped at {@link RULE_EXECUTIONS_MAX_RULE_ID_FILTER}.
+ * Rule id filter. Each id must be a non-empty string up to {@link ID_MAX_LENGTH}
+ * chars; the array is capped at {@link EXECUTION_HISTORY_MAX_RULE_ID_FILTER}.
  */
 const ruleIdArraySchema = arrayOrSingleSchema(
-  z.string().min(1).max(256),
-  RULE_EXECUTIONS_MAX_RULE_ID_FILTER
+  z.string().trim().min(1).max(ID_MAX_LENGTH),
+  EXECUTION_HISTORY_MAX_RULE_ID_FILTER
 );
 
-export const getRuleExecutionsRequestSchema = z
+export const listRuleExecutionsRequestSchema = z
   .object({
-    rule_id: ruleIdArraySchema.optional().describe(`Rule id filter. `),
+    rule_ids: ruleIdArraySchema.optional().describe(`Rule id filter. `),
     outcome: outcomeArraySchema.optional().describe('Outcome filter. '),
     from: z.iso
       .datetime()
@@ -72,26 +63,18 @@ export const getRuleExecutionsRequestSchema = z
       .default('started_at')
       .describe('Sort field. Defaults to started_at.'),
     sort_order: z.enum(['asc', 'desc']).default('desc').describe('Sort direction.'),
-    page: z.coerce
-      .number()
-      .int()
-      .min(1)
-      .max(RULE_EXECUTIONS_MAX_RESULT_WINDOW)
+    page: queryIntSchema({ min: 1, max: EXECUTION_HISTORY_MAX_RESULT_WINDOW })
       .default(1)
       .describe(`Page number.`),
-    per_page: z.coerce
-      .number()
-      .int()
-      .min(1)
-      .max(RULE_EXECUTIONS_MAX_PER_PAGE)
-      .default(RULE_EXECUTIONS_DEFAULT_PER_PAGE)
+    per_page: queryIntSchema({ min: 1, max: EXECUTION_HISTORY_MAX_PER_PAGE })
+      .default(EXECUTION_HISTORY_DEFAULT_PER_PAGE)
       .describe(`Number of results per page.`),
   })
-  .refine(({ page, per_page: perPage }) => page * perPage <= RULE_EXECUTIONS_MAX_RESULT_WINDOW, {
-    message: `page * per_page cannot exceed ${RULE_EXECUTIONS_MAX_RESULT_WINDOW}.`,
+  .refine(({ page, per_page }) => page * per_page <= EXECUTION_HISTORY_MAX_RESULT_WINDOW, {
+    message: `page * per_page cannot exceed ${EXECUTION_HISTORY_MAX_RESULT_WINDOW}.`,
     path: ['page'],
   });
-export type GetRuleExecutionsRequest = z.infer<typeof getRuleExecutionsRequestSchema>;
+export type ListRuleExecutionsRequest = z.infer<typeof listRuleExecutionsRequestSchema>;
 
 export const ruleExecutionViewSchema = z.object({
   id: z.string(),
@@ -118,11 +101,11 @@ export const ruleExecutionViewSchema = z.object({
 
 export type RuleExecutionView = z.infer<typeof ruleExecutionViewSchema>;
 
-export const getRuleExecutionsResponseSchema = z.object({
+export const listRuleExecutionsResponseSchema = z.object({
   items: z.array(ruleExecutionViewSchema),
   total: z.number().int().nonnegative(),
   page: z.number().int().min(1),
   perPage: z.number().int().min(1),
 });
 
-export type GetRuleExecutionsResponse = z.infer<typeof getRuleExecutionsResponseSchema>;
+export type ListRuleExecutionsResponse = z.infer<typeof listRuleExecutionsResponseSchema>;
