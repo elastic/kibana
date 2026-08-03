@@ -129,21 +129,27 @@ export const BulkMaintenanceWindowsFlyout = ({
           title: getSuccessMessage(mode, updatedCount),
           toastLifeTimeMs: 3000,
         });
+        reloadPage();
+        onClose();
       } else {
+        // Keep the flyout open and the selection intact so the "try again"
+        // guidance in the warning toast is actionable — closing here would clear
+        // the selection (see onClose in monitor_list.tsx) and leave nothing to retry.
         kibanaService.toasts.addWarning({
           title: getPartialFailureMessage(mode, updatedCount, failedCount),
           toastLifeTimeMs: 5000,
         });
+        reloadPage();
       }
     } catch (e) {
       kibanaService.toasts.addDanger({
         title: getFailureMessage(mode),
         toastLifeTimeMs: 5000,
       });
-    } finally {
-      setIsUpdating(false);
       reloadPage();
       onClose();
+    } finally {
+      setIsUpdating(false);
     }
   }, [updates, mode, spaceId, reloadPage, onClose]);
 

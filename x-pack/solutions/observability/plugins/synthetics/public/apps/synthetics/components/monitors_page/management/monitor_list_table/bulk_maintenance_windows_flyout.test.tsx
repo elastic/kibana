@@ -261,6 +261,10 @@ describe('<BulkMaintenanceWindowsFlyout />', () => {
       );
     });
     expect(kibanaService.toasts.addSuccess).not.toHaveBeenCalled();
+    // The list is refreshed to reflect the successes, but the flyout stays open
+    // and the selection is preserved so the failed monitors can be retried.
+    expect(reloadPage).toHaveBeenCalledTimes(1);
+    expect(onClose).not.toHaveBeenCalled();
   });
 
   it('shows a danger toast when the request throws', async () => {
