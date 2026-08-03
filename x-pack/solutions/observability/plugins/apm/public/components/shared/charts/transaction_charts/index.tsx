@@ -13,7 +13,6 @@ import { AnnotationsContextProvider } from '../../../../context/annotations/anno
 import { ChartPointerEventContextProvider } from '../../../../context/chart_pointer_event/chart_pointer_event_context';
 import { ServiceOverviewThroughputChart } from '../../../app/service_overview/service_overview_throughput_chart';
 import { ContextualServiceMapSection } from '../../../app/service_map/contextual_map/contextual_service_map_section';
-import { SERVICE_MAP_EBT_DETAILS } from '../../../app/service_map/ebt_constants';
 import { LatencyChart } from '../latency_chart';
 import { TransactionBreakdownChart } from '../transaction_breakdown_chart';
 import { TransactionColdstartRateChart } from '../transaction_coldstart_rate_chart';
@@ -139,7 +138,6 @@ export function TransactionCharts({
         sectionTestSubj="apmTransactionDetailsServiceMapSection"
         exploreLinkTestSubj="apmTransactionDetailsExploreInServiceMap"
         embeddableContainerTestSubj="apmTransactionDetailsServiceMapEmbeddableContainer"
-        exploreLinkEbtDetail={SERVICE_MAP_EBT_DETAILS.TRANSACTION_DETAILS}
       />
     </EuiFlexItem>
   ) : null;

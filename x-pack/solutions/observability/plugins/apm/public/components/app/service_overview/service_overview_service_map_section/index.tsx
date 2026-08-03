@@ -10,7 +10,6 @@ import { useApmServiceContext } from '../../../../context/apm_service/use_apm_se
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { ContextualServiceMapSection } from '../../service_map/contextual_map/contextual_service_map_section';
 import { SERVICE_OVERVIEW_CONTEXTUAL_MAP_PANEL_HEIGHT } from '../../service_map/contextual_map/constants';
-import { SERVICE_MAP_EBT_DETAILS } from '../../service_map/ebt_constants';
 
 export function ServiceOverviewServiceMapSection() {
   const { serviceName } = useApmServiceContext();
@@ -34,7 +33,6 @@ export function ServiceOverviewServiceMapSection() {
       sectionTestSubj="apmServiceOverviewServiceMapSection"
       exploreLinkTestSubj="apmServiceOverviewExploreInServiceMap"
       embeddableContainerTestSubj="apmServiceOverviewServiceMapEmbeddableContainer"
-      exploreLinkEbtDetail={SERVICE_MAP_EBT_DETAILS.SERVICE_OVERVIEW}
     />
   );
 }

@@ -31,10 +31,7 @@ import { ApmEmbeddableContext } from '../../../../embeddable/embeddable_context'
 import { ServiceMapEmbeddable } from '../../../../embeddable/service_map/service_map_embeddable';
 import { getServiceMapUrl } from '../../../../embeddable/service_map/get_service_map_url';
 import { APM_EBT_ACTIONS } from '../../../app/ebt_constants';
-import {
-  SERVICE_MAP_EBT_DETAILS,
-  SERVICE_MAP_EBT_ELEMENTS,
-} from '../../../app/service_map/ebt_constants';
+import { SERVICE_MAP_EBT_ELEMENTS } from '../../../app/service_map/ebt_constants';
 import { SERVICE_FLYOUT_SOURCES } from '../../../shared/service_flyout/constants';
 import { useApmEmbeddableDeps } from '../../context/apm_embeddable_deps_context';
 import type { AlertDetailsAppSectionProps } from '../alert_details_app_section/types';
@@ -152,8 +149,7 @@ export function AlertDetailsServiceMapSection({ alert }: AlertDetailsAppSectionP
                 data-test-subj="apmAlertDetailsExploreInServiceMap"
                 {...getEbtProps({
                   action: APM_EBT_ACTIONS.EXPLORE_SERVICE_MAP,
-                  element: SERVICE_MAP_EBT_ELEMENTS.EXPLORE_LINK,
-                  detail: SERVICE_MAP_EBT_DETAILS.ALERT_DETAILS,
+                  element: SERVICE_MAP_EBT_ELEMENTS.SECTION_HEADER_LINK,
                 })}
               >
                 {EXPLORE_IN_SERVICE_MAP_LABEL}

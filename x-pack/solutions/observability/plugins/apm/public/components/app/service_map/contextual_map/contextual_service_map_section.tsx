@@ -56,8 +56,6 @@ export interface ContextualServiceMapSectionProps {
   sectionTestSubj?: string;
   exploreLinkTestSubj?: string;
   embeddableContainerTestSubj?: string;
-  /** EBT `detail` for the Explore link — which page/surface opened the full map. */
-  exploreLinkEbtDetail: string;
 }
 
 export function ContextualServiceMapSection({
@@ -73,7 +71,6 @@ export function ContextualServiceMapSection({
   sectionTestSubj = 'apmContextualServiceMapSection',
   exploreLinkTestSubj = 'apmContextualServiceMapExploreInServiceMap',
   embeddableContainerTestSubj = 'apmContextualServiceMapEmbeddableContainer',
-  exploreLinkEbtDetail,
 }: ContextualServiceMapSectionProps) {
   const license = useLicenseContext();
   const { core, config } = useApmPluginContext();
@@ -190,8 +187,7 @@ export function ContextualServiceMapSection({
           data-test-subj={exploreLinkTestSubj}
           {...getEbtProps({
             action: APM_EBT_ACTIONS.EXPLORE_SERVICE_MAP,
-            element: SERVICE_MAP_EBT_ELEMENTS.EXPLORE_LINK,
-            detail: exploreLinkEbtDetail,
+            element: SERVICE_MAP_EBT_ELEMENTS.SECTION_HEADER_LINK,
           })}
         >
           {EXPLORE_IN_SERVICE_MAP_LABEL}
