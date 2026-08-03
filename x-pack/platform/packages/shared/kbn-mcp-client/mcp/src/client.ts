@@ -78,10 +78,8 @@ export class McpClient {
         maxReconnectionDelay,
       },
     });
-
     this.name = clientDetails.name;
     this.version = clientDetails.version;
-
     this.client = new Client({
       name: clientDetails.name,
       version: clientDetails.version,
