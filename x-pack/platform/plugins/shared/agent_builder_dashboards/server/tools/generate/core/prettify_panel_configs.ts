@@ -22,9 +22,9 @@ import type { PanelAuthoringNote } from './resolve_panel';
 import type { PanelFailure } from './utils';
 
 const prettifyNlQuery =
-  'Polish this existing visualization while preserving its analysis intent, chart type, and ES|QL query.';
+  'Bring this existing visualization in line with the configuration rules stated in this prompt, preserving its analysis intent, chart type, and ES|QL query.';
 const prettifyConfigInstructions =
-  'Apply chart configuration best practices. Preserve the existing analysis intent and chart type. Keep the provided ES|QL query unchanged. The "authoring_note" must be one factual sentence describing only what changed from the existing chart configuration.';
+  'This is a cleanup pass over the existing configuration, not a redesign. Change only what is needed to satisfy the rules stated in this prompt; keep everything else exactly as it is in the existing configuration. Do not introduce features the existing configuration does not already have (reference lines, annotations, markers, extra styling) unless a stated rule requires them. If the existing configuration already satisfies the rules, return it unchanged. Keep the provided ES|QL query unchanged. The "authoring_note" must be one factual sentence describing only what changed from the existing chart configuration.';
 
 interface PrettifyRequest {
   panelId: string;
