@@ -48,18 +48,11 @@ export const CRITICAL_FILES_JEST_INTEGRATION_TESTS = [
   '.buildkite/pipeline-utils/ci-stats/**/*.{ts,js}',
 ];
 
-// Jest integration configs that must run on every PR regardless of the affected-package graph.
-// These boot a full Kibana and snapshot a *global registry* populated at runtime by many
-// downstream publishers that sit upstream of the config's own package in the dependency graph.
-// includeDownstream expansion therefore never reaches them, so the graph cannot predict when a
-// publisher-only change (e.g. a new rule-type param, connector type, or task type) invalidates the
-// snapshot. Keep this list tiny — it is a deliberate escape hatch, not a dumping ground.
+// Integration configs that snapshot a global registry (rule-type params, connector types, task
+// types) fed by downstream plugins. Those publishers sit upstream of these configs, so
+// includeDownstream never marks them affected — they must run regardless of the graph. Keep tiny.
 export const ALWAYS_RUN_JEST_INTEGRATION_CONFIGS = [
-  // rule-type param + alert-as-data field snapshots; rule types are registered by security, o11y,
-  // ml, apm, stack, monitoring, … (serverless_upgrade_and_rollback_checks, alert_as_data_fields)
   'x-pack/platform/plugins/shared/alerting/jest.integration.config.js',
-  // connector-type registry snapshot; connector types registered by stack_connectors et al.
   'x-pack/platform/plugins/shared/actions/jest.integration.config.js',
-  // task cost/priority registry snapshots; task types registered by many downstream plugins
   'x-pack/platform/plugins/shared/task_manager/jest.integration.config.js',
 ];

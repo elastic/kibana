@@ -75,11 +75,7 @@ export function filterJestUnitConfigsByAffected(
   });
 }
 
-/**
- * Narrow Jest integration configs to those owned by affected packages, unless a critical file
- * changed. Configs in ALWAYS_RUN_JEST_INTEGRATION_CONFIGS are re-added afterwards so global-registry
- * snapshot suites run irrespective of the affected graph.
- */
+/** Like the unit filter, but always re-adds ALWAYS_RUN_JEST_INTEGRATION_CONFIGS. */
 export function filterJestIntegrationConfigsByAffected(
   jestIntegrationConfigs: string[],
   context: SelectiveTestingContext
@@ -113,10 +109,7 @@ function filterByAffected(args: {
   return withAlwaysRun;
 }
 
-/**
- * Re-add always-run configs that affected-filtering dropped. Matches on the base config path so
- * sharded entries (`config||shard=1/2`) are all restored.
- */
+// Matches on the base path so every shard of an always-run config is restored.
 function addAlwaysRunConfigs(
   filtered: string[],
   allConfigs: string[],
