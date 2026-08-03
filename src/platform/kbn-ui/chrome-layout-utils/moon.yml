@@ -24,10 +24,13 @@ tags:
   - prod
   - group-platform
   - private
+  - jest-unit-tests
 fileGroups:
   src:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
     - '!packaging/target/**/*'
+  jest-config:
+    - jest.config.js
 tasks: {}
