@@ -99,9 +99,6 @@ export const registerGetTracingProjectsRoute = ({ router, logger }: RouteDepende
             size: 0,
             query: buildRootSpanQuery(),
             aggs: {
-              project_count: {
-                cardinality: { field: 'name' },
-              },
               projects: {
                 terms: {
                   field: 'name',
@@ -138,10 +135,9 @@ export const registerGetTracingProjectsRoute = ({ router, logger }: RouteDepende
 
           const aggs = pagingResponse.aggregations as Record<string, unknown> | undefined;
           const projectsAgg = aggs?.projects as { buckets: Array<Record<string, unknown>> };
-          const projectCountAgg = aggs?.project_count as { value: number };
-          const totalProjects = Math.min(projectCountAgg?.value ?? 0, MAX_TRACING_PROJECTS);
 
           const allBuckets = projectsAgg?.buckets ?? [];
+          const totalProjects = Math.min(allBuckets.length, MAX_TRACING_PROJECTS);
           const startIndex = (page - 1) * perPage;
           const pagedBuckets = allBuckets.slice(startIndex, startIndex + perPage);
           const pagedProjectNames = pagedBuckets.map((bucket) => bucket.key as string);

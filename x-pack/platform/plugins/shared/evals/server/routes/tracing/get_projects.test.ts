@@ -111,7 +111,6 @@ describe('GET /internal/evals/tracing/projects', () => {
     const { handler, context, esClient } = setup();
     esClient.search.mockResolvedValueOnce({
       aggregations: {
-        project_count: { value: 0 },
         projects: { buckets: [] },
       },
     } as any);
@@ -130,7 +129,6 @@ describe('GET /internal/evals/tracing/projects', () => {
     const { handler, context, esClient } = setup();
     esClient.search.mockResolvedValueOnce({
       aggregations: {
-        project_count: { value: 0 },
         projects: { buckets: [] },
       },
     } as any);
@@ -153,7 +151,6 @@ describe('GET /internal/evals/tracing/projects', () => {
     const { handler, context, esClient } = setup();
     esClient.search.mockResolvedValueOnce({
       aggregations: {
-        project_count: { value: 0 },
         projects: { buckets: [] },
       },
     } as any);
@@ -177,7 +174,6 @@ describe('GET /internal/evals/tracing/projects', () => {
     const { handler, context, esClient } = setup();
     esClient.search.mockResolvedValueOnce({
       aggregations: {
-        project_count: { value: 0 },
         projects: { buckets: [] },
       },
     } as any);
@@ -195,7 +191,6 @@ describe('GET /internal/evals/tracing/projects', () => {
     const { handler, context, esClient } = setup();
     esClient.search.mockResolvedValueOnce({
       aggregations: {
-        project_count: { value: 0 },
         projects: { buckets: [] },
       },
     } as any);
@@ -215,7 +210,6 @@ describe('GET /internal/evals/tracing/projects', () => {
     const { handler, context, esClient } = setup();
     esClient.search.mockResolvedValueOnce({
       aggregations: {
-        project_count: { value: 0 },
         projects: { buckets: [] },
       },
     } as any);
@@ -235,7 +229,6 @@ describe('GET /internal/evals/tracing/projects', () => {
 
     esClient.search.mockResolvedValueOnce({
       aggregations: {
-        project_count: { value: 1 },
         projects: {
           buckets: [
             buildProjectBucket({
@@ -282,7 +275,6 @@ describe('GET /internal/evals/tracing/projects', () => {
 
     esClient.search.mockResolvedValueOnce({
       aggregations: {
-        project_count: { value: 1 },
         projects: {
           buckets: [buildProjectBucket({ name: 'my-project' })],
         },
@@ -310,7 +302,6 @@ describe('GET /internal/evals/tracing/projects', () => {
 
     esClient.search.mockResolvedValueOnce({
       aggregations: {
-        project_count: { value: 2 },
         projects: {
           buckets: [
             buildProjectBucket({ name: 'project-a' }),
@@ -354,7 +345,6 @@ describe('GET /internal/evals/tracing/projects', () => {
     );
     esClient.search.mockResolvedValueOnce({
       aggregations: {
-        project_count: { value: 30 },
         projects: { buckets },
       },
     } as any);
@@ -377,7 +367,6 @@ describe('GET /internal/evals/tracing/projects', () => {
     const { handler, context, esClient } = setup();
     esClient.search.mockResolvedValueOnce({
       aggregations: {
-        project_count: { value: 0 },
         projects: { buckets: [] },
       },
     } as any);
@@ -396,7 +385,6 @@ describe('GET /internal/evals/tracing/projects', () => {
     );
     esClient.search.mockResolvedValueOnce({
       aggregations: {
-        project_count: { value: 30 },
         projects: { buckets },
       },
     } as any);
@@ -426,7 +414,6 @@ describe('GET /internal/evals/tracing/projects', () => {
     );
     esClient.search.mockResolvedValueOnce({
       aggregations: {
-        project_count: { value: 200 },
         projects: { buckets },
       },
     } as any);
@@ -451,12 +438,15 @@ describe('GET /internal/evals/tracing/projects', () => {
 
   it('clamps total to the number of projects it can actually page through', async () => {
     const { handler, context, esClient } = setup();
+    const buckets = Array.from({ length: MAX_TRACING_PROJECTS + 500 }, (_, i) =>
+      buildProjectBucket({ name: `project-${i}` })
+    );
     esClient.search.mockResolvedValueOnce({
       aggregations: {
-        project_count: { value: 5000 },
-        projects: { buckets: [] },
+        projects: { buckets },
       },
     } as any);
+    esClient.search.mockResolvedValueOnce(buildTraceIdsResponse([]) as any);
 
     const response = await handler(context, makeRequest(), kibanaResponseFactory);
 
@@ -467,7 +457,6 @@ describe('GET /internal/evals/tracing/projects', () => {
     const { handler, context, esClient } = setup();
     esClient.search.mockResolvedValueOnce({
       aggregations: {
-        project_count: { value: 0 },
         projects: { buckets: [] },
       },
     } as any);
@@ -483,7 +472,6 @@ describe('GET /internal/evals/tracing/projects', () => {
     const { handler, context, esClient } = setup();
     esClient.search.mockResolvedValueOnce({
       aggregations: {
-        project_count: { value: 1 },
         projects: {
           buckets: [
             buildProjectBucket({
@@ -507,7 +495,6 @@ describe('GET /internal/evals/tracing/projects', () => {
     const { handler, context, esClient } = setup();
     esClient.search.mockResolvedValueOnce({
       aggregations: {
-        project_count: { value: 1 },
         projects: {
           buckets: [
             buildProjectBucket({
