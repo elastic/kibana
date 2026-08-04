@@ -389,6 +389,20 @@ export async function update(
           }`;
     }
 
+    // Linked field definitions are ensured BEFORE the configuration is persisted so a
+    // configured v1 custom field can never become active without its v2 definition; a
+    // linkage failure fails the whole update (addendum A1). Runs regardless of the
+    // templates feature flag — the definition substrate must stay consistent either way.
+    // When the patch omits customFields, falls back to the pre-patch set (already
+    // linked → cheap no-op).
+    await ensureGlobalFieldDefinitions({
+      owner: configuration.attributes.owner,
+      spaceId: clientArgs.spaceId,
+      customFields: request.customFields ?? configuration.attributes.customFields,
+      fieldDefinitionsService,
+      logger,
+    });
+
     const patch = await caseConfigureService.patch({
       unsecuredSavedObjectsClient,
       configurationId: configuration.id,
@@ -401,18 +415,6 @@ export async function update(
       },
       originalConfiguration: configuration,
     });
-
-    if (clientArgs.config.templates.enabled) {
-      // Mirror any new custom fields into global field definitions. When the patch omits
-      // customFields, falls back to the pre-patch set (all names already exist → cheap no-op).
-      // Non-fatal: logged and swallowed inside the helper.
-      await ensureGlobalFieldDefinitions({
-        owner: configuration.attributes.owner,
-        customFields: request.customFields ?? configuration.attributes.customFields,
-        fieldDefinitionsService,
-        logger,
-      });
-    }
 
     const res = {
       ...configuration.attributes,
@@ -534,6 +536,16 @@ export async function create(
         : `Error creating mapping for ${validatedConfigurationRequest.connector.name}`;
     }
 
+    // Ensure linked field definitions BEFORE persisting the configuration (addendum A1);
+    // a linkage failure fails the create. Runs regardless of the templates feature flag.
+    await ensureGlobalFieldDefinitions({
+      owner: validatedConfigurationRequest.owner,
+      spaceId: clientArgs.spaceId,
+      customFields: validatedConfigurationRequest.customFields ?? [],
+      fieldDefinitionsService,
+      logger,
+    });
+
     const post = await caseConfigureService.post({
       unsecuredSavedObjectsClient,
       attributes: {
@@ -549,16 +561,6 @@ export async function create(
       },
       id: savedObjectID,
     });
-
-    if (clientArgs.config.templates.enabled) {
-      // Mirror new custom fields into global field definitions. Non-fatal: logged and swallowed.
-      await ensureGlobalFieldDefinitions({
-        owner: validatedConfigurationRequest.owner,
-        customFields: validatedConfigurationRequest.customFields ?? [],
-        fieldDefinitionsService,
-        logger,
-      });
-    }
 
     const res = {
       ...post.attributes,

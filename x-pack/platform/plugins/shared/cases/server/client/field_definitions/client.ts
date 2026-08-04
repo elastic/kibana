@@ -20,10 +20,18 @@ import type {
 } from '../../../common/types/api/field_definition/v1';
 import type { CasesClientArgs } from '../types';
 import { Operations } from '../../authorization';
-import { MAX_FIELD_DEFINITIONS_PER_OWNER } from '../../../common/constants';
+import {
+  CASE_CONFIGURE_SAVED_OBJECT,
+  MAX_FIELD_DEFINITIONS_PER_OWNER,
+} from '../../../common/constants';
 import { CASES_API_ERROR_CODES } from '../../../common/constants/error_codes';
 import { createTypedApiError } from '../../common/api_errors';
-import { parseFieldDefinitionIdentity } from './utils';
+import { parseFieldDefinitionIdentity } from '../../common/utils/field_definitions';
+import {
+  buildFieldLinkIndexes,
+  getActivelyLinkedDefinitionIds,
+} from '../../common/utils/field_link_resolution';
+import { buildFilter } from '../utils';
 
 /**
  * API for interacting with field definitions (the reusable fields library).
@@ -71,8 +79,48 @@ const incrementIdentityRejectionCounters = (
 export const createFieldDefinitionsSubClient = (
   clientArgs: CasesClientArgs
 ): FieldDefinitionsSubClient => {
-  const { services, authorization, usageCounter } = clientArgs;
-  const { fieldDefinitionsService } = services;
+  const { services, authorization, usageCounter, unsecuredSavedObjectsClient } = clientArgs;
+  const { fieldDefinitionsService, caseConfigureService } = services;
+
+  /**
+   * A4 guard: true when the given definition is **actively linked** — i.e. one
+   * of the owner's configured v1 custom fields resolves to it (via `legacyKey`
+   * or an unambiguous name match). Actively linked definitions cannot be
+   * deleted or demoted from `isGlobal`, or the live customFields mirror would
+   * lose its write target while the v1 field stays active.
+   *
+   * Space-scoped by construction: both the configuration and the definitions
+   * are read through the request-scoped SO client.
+   */
+  const isDefinitionActivelyLinked = async (
+    fieldDef: SavedObject<FieldDefinition>
+  ): Promise<boolean> => {
+    const { owner } = fieldDef.attributes;
+    const configurations = await caseConfigureService.find({
+      unsecuredSavedObjectsClient,
+      options: {
+        filter: buildFilter({
+          filters: owner,
+          field: 'owner',
+          operator: 'or',
+          type: CASE_CONFIGURE_SAVED_OBJECT,
+        }),
+      },
+    });
+    const configuredFields = configurations.saved_objects.flatMap(
+      (config) => config.attributes.customFields ?? []
+    );
+    if (configuredFields.length === 0) {
+      return false;
+    }
+
+    const definitionSavedObjects = await fieldDefinitionsService.getFieldDefinitionSavedObjects(
+      owner
+    );
+    const indexes = buildFieldLinkIndexes(definitionSavedObjects);
+    const activeIds = getActivelyLinkedDefinitionIds(configuredFields, indexes);
+    return activeIds.has(fieldDef.attributes.fieldDefinitionId);
+  };
 
   const fieldDefinitionsSubClient: FieldDefinitionsSubClient = {
     getFieldDefinitions: async (params: FieldDefinitionsFindRequest) => {
@@ -181,6 +229,18 @@ export const createFieldDefinitionsSubClient = (
         }
       }
 
+      // A4 demotion guard: an actively linked definition must stay global — the
+      // configured v1 custom field renders on every case through this link.
+      if (fieldDef.attributes.isGlobal && input.isGlobal === false) {
+        if (await isDefinitionActivelyLinked(fieldDef)) {
+          throw Boom.conflict(
+            `Cannot remove the global flag from field definition "${fieldDef.attributes.name}": ` +
+              `it is linked to an active custom field in the Cases settings. Remove the custom ` +
+              `field from the configuration first.`
+          );
+        }
+      }
+
       // No per-owner name-uniqueness check on update: the identity guard above
       // guarantees the name cannot change, and the persisted name is already
       // unique for the owner.
@@ -204,6 +264,17 @@ export const createFieldDefinitionsSubClient = (
         const names = referencingTemplates.map(({ name }) => `"${name}"`).join(', ');
         throw Boom.conflict(
           `Cannot delete field definition "${fieldDef.attributes.name}": it is referenced by ${referencingTemplates.length} active template(s): ${names}`
+        );
+      }
+
+      // A4 delete guard: a definition linked to a configured v1 custom field is
+      // the storage target of the live customFields mirror — deleting it would
+      // leave the active v1 field without a v2 identity.
+      if (await isDefinitionActivelyLinked(fieldDef)) {
+        throw Boom.conflict(
+          `Cannot delete field definition "${fieldDef.attributes.name}": it is linked to an ` +
+            `active custom field in the Cases settings. Remove the custom field from the ` +
+            `configuration first.`
         );
       }
 

@@ -11,6 +11,7 @@ import { type FieldDefinition } from '../../../common/types/domain/field_definit
 import { CASE_FIELD_DEFINITION_SAVED_OBJECT } from '../../../common/constants';
 import { modelVersion1 } from './model_versions/model_version_1';
 import { modelVersion2 } from './model_versions/model_version_2';
+import { modelVersion2 } from './model_versions/model_version_2';
 
 const mappings = {
   dynamic: false,
@@ -47,6 +48,7 @@ export const caseFieldDefinitionSavedObjectType: SavedObjectsType = {
   mappings,
   modelVersions: {
     1: modelVersion1,
+    2: modelVersion2,
     2: modelVersion2,
   },
   management: {

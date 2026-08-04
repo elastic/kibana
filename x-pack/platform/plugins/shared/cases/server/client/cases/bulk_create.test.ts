@@ -1552,6 +1552,29 @@ describe('bulkCreate', () => {
 
     const adapterCasesClient = createCasesClientMock();
 
+    // Linked v2 definitions for the configured v1 fields — write-time mirroring
+    // only writes keys that resolve to a definition (via legacyKey or name).
+    const adapterFieldDefinitions = [
+      {
+        fieldDefinitionId: 'fd-priority',
+        name: 'priority',
+        owner: SECURITY_SOLUTION_OWNER,
+        description: '',
+        isGlobal: true,
+        legacyKey: 'priority',
+        definition: 'name: priority\ntype: keyword\ncontrol: INPUT_TEXT\nlabel: Priority\n',
+      },
+      {
+        fieldDefinitionId: 'fd-count',
+        name: 'count',
+        owner: SECURITY_SOLUTION_OWNER,
+        description: '',
+        isGlobal: true,
+        legacyKey: 'count',
+        definition: 'name: count\ntype: integer\ncontrol: INPUT_NUMBER\nlabel: Count\n',
+      },
+    ];
+
     beforeEach(() => {
       jest.clearAllMocks();
       adapterCasesClient.configure.get = jest
@@ -1564,6 +1587,10 @@ describe('bulkCreate', () => {
     it('mirrors customFields into extended_fields when templates flag is enabled', async () => {
       const clientArgs = createCasesClientMockArgs();
       clientArgs.config = { ...clientArgs.config, templates: { enabled: true } };
+      clientArgs.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
+        fieldDefinitions: adapterFieldDefinitions,
+        total: adapterFieldDefinitions.length,
+      });
       clientArgs.services.caseService.bulkCreateCases.mockResolvedValue({
         saved_objects: [caseSO],
       });
@@ -1602,6 +1629,10 @@ describe('bulkCreate', () => {
     it('overrides explicit extended_fields values when customField is also set (customFields-win)', async () => {
       const clientArgs = createCasesClientMockArgs();
       clientArgs.config = { ...clientArgs.config, templates: { enabled: true } };
+      clientArgs.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
+        fieldDefinitions: adapterFieldDefinitions,
+        total: adapterFieldDefinitions.length,
+      });
       clientArgs.services.caseService.bulkCreateCases.mockResolvedValue({
         saved_objects: [caseSO],
       });
@@ -1628,6 +1659,10 @@ describe('bulkCreate', () => {
       // the request never submitted priority. Fix: mirror only request-provided customFields.
       const clientArgs = createCasesClientMockArgs();
       clientArgs.config = { ...clientArgs.config, templates: { enabled: true } };
+      clientArgs.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
+        fieldDefinitions: adapterFieldDefinitions,
+        total: adapterFieldDefinitions.length,
+      });
       clientArgs.services.caseService.bulkCreateCases.mockResolvedValue({
         saved_objects: [caseSO],
       });

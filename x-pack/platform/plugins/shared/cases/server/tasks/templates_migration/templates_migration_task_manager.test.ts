@@ -234,7 +234,7 @@ describe('TemplatesMigrationTaskManager', () => {
       const runner = getTaskRunner(manager);
       await runner.run();
 
-      // Only the one find for configure SOs — no field-def, template, or case lookups
+      // Only the one find for configure SOs � no field-def, template, or case lookups
       expect(repo.find).toHaveBeenCalledTimes(1);
       expect(repo.create).not.toHaveBeenCalled();
       expect(repo.update).not.toHaveBeenCalled();
@@ -273,7 +273,13 @@ describe('TemplatesMigrationTaskManager', () => {
 
       const [fieldDefCall, templateCall] = repo.create.mock.calls;
       expect(fieldDefCall[0]).toBe(CASE_FIELD_DEFINITION_SAVED_OBJECT);
-      expect(fieldDefCall[1]).toMatchObject({ name: 'cf_text', owner: 'cases', isGlobal: true });
+      // Friendly label-derived name; the raw v1 key is recorded as legacyKey.
+      expect(fieldDefCall[1]).toMatchObject({
+        name: 'label_for_cf_text',
+        owner: 'cases',
+        isGlobal: true,
+        legacyKey: 'cf_text',
+      });
 
       expect(templateCall[0]).toBe(CASE_TEMPLATE_SAVED_OBJECT);
       expect(templateCall[1]).toMatchObject({
@@ -282,7 +288,7 @@ describe('TemplatesMigrationTaskManager', () => {
         isLatest: true,
         fieldDefinitions: [
           expect.objectContaining({
-            name: 'cf_text',
+            name: 'label_for_cf_text',
             type: 'keyword',
             control: 'INPUT_TEXT',
           }),
@@ -331,9 +337,12 @@ describe('TemplatesMigrationTaskManager', () => {
           .map((c) => [c[1].name, parseYaml(c[1].definition) as Record<string, unknown>])
       );
 
-      const textDef = fieldDefByName.get('cf_text') as { metadata?: { default?: unknown } };
-      const numDef = fieldDefByName.get('cf_num') as { metadata?: { default?: unknown } };
-      const toggleDef = fieldDefByName.get('cf_toggle') as {
+      // Created definitions carry friendly, label-derived names.
+      const textDef = fieldDefByName.get('label_for_cf_text') as {
+        metadata?: { default?: unknown };
+      };
+      const numDef = fieldDefByName.get('label_for_cf_num') as { metadata?: { default?: unknown } };
+      const toggleDef = fieldDefByName.get('label_for_cf_toggle') as {
         control?: string;
         metadata?: { default?: unknown };
       };
@@ -437,7 +446,7 @@ describe('TemplatesMigrationTaskManager', () => {
       expect(templateCreateCall).toBeDefined();
       const definition = (templateCreateCall?.[1] as { definition: string }).definition;
 
-      // The migrated definition must validate — an invalid definition would have been skipped and
+      // The migrated definition must validate � an invalid definition would have been skipped and
       // never written, and would fail the preview.
       const result = ParsedTemplateDefinitionSchema.safeParse(parseYaml(definition));
       expect(result.success).toBe(true);
@@ -452,9 +461,9 @@ describe('TemplatesMigrationTaskManager', () => {
     });
 
     it('fully migrates a fleshed-out v1 template: identity ? attributes; connector (all sub-fields), settings & case defaults ? definition', async () => {
-      // The core GA guarantee: a complete legacy template — template identity (name/description/tags),
+      // The core GA guarantee: a complete legacy template � template identity (name/description/tags),
       // every case default, a fully-populated Jira connector (all sub-fields incl. the free-form
-      // otherFields), and both settings — migrates COMPLETELY and losslessly to v2.
+      // otherFields), and both settings � migrates COMPLETELY and losslessly to v2.
       const connectorFields = {
         issueType: '10002',
         priority: 'Highest',
@@ -465,11 +474,11 @@ describe('TemplatesMigrationTaskManager', () => {
         customFields: [buildLegacyCustomField('cf_text')],
         templates: [
           buildLegacyTemplate('Security incident template', ['cf_text'], {
-            // Template identity — must land on the SO attributes, NOT the definition.
+            // Template identity � must land on the SO attributes, NOT the definition.
             description: 'Template used by the SOC for suspicious-login incidents',
             tags: ['soc', 'identity-tag'],
             caseFields: {
-              // Case defaults — must land in the definition (the blueprint).
+              // Case defaults � must land in the definition (the blueprint).
               title: 'Investigate suspicious login',
               description: 'Default case description',
               tags: ['triage', 'p1'],
@@ -610,12 +619,12 @@ describe('TemplatesMigrationTaskManager', () => {
       const manager = await buildAndSchedule();
       await getTaskRunner(manager).run();
 
-      // Only one create — for the template; field-def is reused
+      // Only one create � for the template; field-def is reused
       expect(repo.create).toHaveBeenCalledTimes(1);
       expect(repo.create.mock.calls[0][0]).toBe(CASE_TEMPLATE_SAVED_OBJECT);
     });
 
-    it('logs a warning when a reused field definition has a mismatched control type', async () => {
+    it('creates a new correctly-typed definition instead of linking to a type-incompatible name match', async () => {
       const configSO = buildConfigureSO({
         customFields: [buildLegacyCustomField('cf_text')], // TEXT ? expects INPUT_TEXT
       });
@@ -627,7 +636,7 @@ describe('TemplatesMigrationTaskManager', () => {
         attributes: {
           name: 'cf_text',
           owner: 'cases',
-          // A TEXT legacy field would produce control: INPUT_TEXT — this has INPUT_NUMBER
+          // A TEXT legacy field would produce control: INPUT_TEXT � this has INPUT_NUMBER
           definition: 'name: cf_text\ncontrol: INPUT_NUMBER\ntype: integer\n',
           fieldDefinitionId: 'x',
         },
@@ -641,10 +650,16 @@ describe('TemplatesMigrationTaskManager', () => {
       const manager = await buildAndSchedule();
       await getTaskRunner(manager).run();
 
-      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('control="INPUT_NUMBER"'));
-      // Field is still reused — no new field-def created
-      expect(repo.create).not.toHaveBeenCalledWith(
+      // A new keyword definition is created under the friendly name; the mismatched
+      // definition keeps its own identity and is never repaired or overwritten.
+      expect(repo.create).toHaveBeenCalledWith(
         CASE_FIELD_DEFINITION_SAVED_OBJECT,
+        expect.objectContaining({ name: 'label_for_cf_text', legacyKey: 'cf_text' }),
+        expect.anything()
+      );
+      expect(repo.update).not.toHaveBeenCalledWith(
+        CASE_FIELD_DEFINITION_SAVED_OBJECT,
+        'x',
         expect.anything(),
         expect.anything()
       );
@@ -679,7 +694,7 @@ describe('TemplatesMigrationTaskManager', () => {
       const manager = await buildAndSchedule();
       await getTaskRunner(manager).run();
 
-      // Field is reused by case-insensitive match — no new field-def SO created
+      // Field is reused by case-insensitive match � no new field-def SO created
       expect(repo.create).not.toHaveBeenCalledWith(
         CASE_FIELD_DEFINITION_SAVED_OBJECT,
         expect.anything(),
@@ -814,7 +829,7 @@ describe('TemplatesMigrationTaskManager', () => {
       const manager = await buildAndSchedule();
       await getTaskRunner(manager).run();
 
-      // No creates — template reused
+      // No creates � template reused
       expect(repo.create).not.toHaveBeenCalled();
       // Both flags written even though there were no custom fields at migration time
       expect(repo.update).toHaveBeenCalledWith(
@@ -940,7 +955,7 @@ describe('TemplatesMigrationTaskManager', () => {
       const manager = await buildAndSchedule();
       await getTaskRunner(manager).run();
 
-      // No SO creates; no flags written (empty arrays — flags are set only when there is data to
+      // No SO creates; no flags written (empty arrays � flags are set only when there is data to
       // migrate, so the next startup can detect newly-added custom fields or templates).
       expect(repo.create).not.toHaveBeenCalled();
       expect(repo.update).not.toHaveBeenCalled();
@@ -964,7 +979,11 @@ describe('TemplatesMigrationTaskManager', () => {
       // Field-def phase must run (flag is false), template phase must not (flag already true)
       expect(repo.create).toHaveBeenCalledTimes(1);
       expect(repo.create.mock.calls[0][0]).toBe(CASE_FIELD_DEFINITION_SAVED_OBJECT);
-      expect(repo.create.mock.calls[0][1]).toMatchObject({ name: 'cf_text', isGlobal: true });
+      expect(repo.create.mock.calls[0][1]).toMatchObject({
+        name: 'label_for_cf_text',
+        isGlobal: true,
+        legacyKey: 'cf_text',
+      });
 
       // Field/template phase writes only the custom fields flag (templates flag already true)...
       expect(repo.update).toHaveBeenCalledWith(
@@ -1279,7 +1298,7 @@ describe('TemplatesMigrationTaskManager', () => {
       );
       // ...and the case scan filters by owner within that PIT, scoped to the same namespace as the
       // PIT. `namespaces` must be on the `find` too: the migration's internal repo is unscoped (no
-      // spaces extension), and without it `find` defaults to the `default` space — returning the
+      // spaces extension), and without it `find` defaults to the `default` space � returning the
       // wrong space's cases, which then 404 on bulkUpdate against this space.
       const caseFind = repo.find.mock.calls.find((c) => c[0]?.type === CASE_SAVED_OBJECT);
       expect(caseFind?.[0]).toEqual(
@@ -1311,7 +1330,7 @@ describe('TemplatesMigrationTaskManager', () => {
       const caseFind = repo.find.mock.calls.find((c) => c[0]?.type === CASE_SAVED_OBJECT);
       expect(caseFind?.[0]).toEqual(expect.objectContaining({ namespaces: ['analytics-1'] }));
 
-      // The update lands in the space's namespace — not the default namespace.
+      // The update lands in the space's namespace � not the default namespace.
       expect(repo.bulkUpdate).toHaveBeenCalledTimes(1);
       expect(repo.bulkUpdate.mock.calls[0][0]).toEqual([
         expect.objectContaining({ id: 'case-1', namespace: 'analytics-1' }),
@@ -1395,7 +1414,7 @@ describe('TemplatesMigrationTaskManager', () => {
       ]);
       mockFindByType(configSO, [caseSO]);
       // A 404 means the case can't be resolved for update (deleted, or a stored id/namespace that
-      // doesn't line up) — retrying will never succeed.
+      // doesn't line up) � retrying will never succeed.
       repo.bulkUpdate.mockResolvedValue({
         saved_objects: [
           {
@@ -1813,7 +1832,7 @@ describe('TemplatesMigrationTaskManager', () => {
   // A stateful fake of the cases index that models a PIT scan the way the real SO repo does when no
   // sortField is given: results are ordered by a unique per-doc tiebreaker (like `_shard_doc`), and
   // `searchAfter` returns strictly the docs after that tiebreaker. bulkUpdate mutates the docs in
-  // place. This exercises the real pagination control flow — proving no case is skipped or visited
+  // place. This exercises the real pagination control flow � proving no case is skipped or visited
   // twice across page boundaries even when many share the same `created_at`. (A true end-to-end test
   // against real Elasticsearch is a recommended follow-up; there is no jest-integration harness for
   // this startup task today.)
@@ -1822,7 +1841,7 @@ describe('TemplatesMigrationTaskManager', () => {
       const TOTAL = 2500; // 3 pages at CASE_BACKFILL_PAGE_SIZE (1000)
       const docs = Array.from({ length: TOTAL }, (_, i) => ({
         id: `case-${i}`,
-        // Identical created_at for all — the old created_at sort would have skipped some here.
+        // Identical created_at for all � the old created_at sort would have skipped some here.
         attributes: {
           owner: 'cases',
           created_at: '2024-01-01T00:00:00.000Z',
@@ -1871,7 +1890,7 @@ describe('TemplatesMigrationTaskManager', () => {
       const manager = await buildAndSchedule();
       const result = await getTaskRunner(manager).run();
 
-      // Every case was backfilled exactly once — none skipped at a page boundary.
+      // Every case was backfilled exactly once � none skipped at a page boundary.
       const backfilled = docs.filter(
         (d) => d.attributes.extended_fields?.cf_text_as_keyword != null
       );
@@ -2014,7 +2033,7 @@ describe('TemplatesMigrationTaskManager', () => {
 
     it('fires when the space had pending backfill work even if this run wrote nothing (multi-run finish / post-restart re-scan)', async () => {
       // Space is pending (customFields present, legacyCasesMigrated not set) but every case already
-      // has its extended_fields — the boundary case where the completing run writes 0 cases yet the
+      // has its extended_fields � the boundary case where the completing run writes 0 cases yet the
       // migration genuinely finished outstanding work. The hook must still fire, keyed on the
       // restart-durable pending flags rather than a per-run write count.
       const configSO = buildConfigureSO({ customFields: [buildLegacyCustomField('cf_text')] });
@@ -2033,7 +2052,7 @@ describe('TemplatesMigrationTaskManager', () => {
     });
 
     it('does NOT fire on a no-op restart where every space is already fully migrated', async () => {
-      // Custom fields present, but the space was already backfilled in a prior run — the exact shape
+      // Custom fields present, but the space was already backfilled in a prior run � the exact shape
       // of every Kibana restart after the migration is done. Firing here would run a full analytics
       // re-index on every single startup.
       const configSO = buildConfigureSO({
@@ -2131,7 +2150,7 @@ describe('TemplatesMigrationTaskManager', () => {
       );
     });
 
-    it('does not require a hook — a completing backfill with no hook configured still deletes the task', async () => {
+    it('does not require a hook � a completing backfill with no hook configured still deletes the task', async () => {
       const configSO = buildConfigureSO({ customFields: [buildLegacyCustomField('cf_text')] });
       mockFindByType(configSO, [
         buildCaseSO('case-1', [{ key: 'cf_text', type: CustomFieldTypes.TEXT, value: 'hello' }]),

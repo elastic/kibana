@@ -6,342 +6,290 @@
  */
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { CustomFieldTypes } from '../../../common/types/domain/custom_field/v1';
+import type { FieldDefinition } from '../../../common/types/domain/field_definition/latest';
 import { createFieldDefinitionsServiceMock } from '../../services/mocks';
+import { deriveFieldDefinitionId } from '../../common/utils/field_definitions';
 import { ensureGlobalFieldDefinitions } from './ensure_field_definitions';
 
 describe('ensureGlobalFieldDefinitions', () => {
   const logger = loggingSystemMock.createLogger();
   const owner = 'securitySolutionFixture';
+  const spaceId = 'default';
 
+  // Legacy keys are uuid-ish opaque strings in real data; labels are human text.
   const textField = {
-    key: 'my_text',
+    key: 'text_key_1',
     label: 'My Text',
     type: CustomFieldTypes.TEXT,
     required: false,
   };
 
   const toggleField = {
-    key: 'my_toggle',
+    key: 'toggle_key_1',
     label: 'My Toggle',
     type: CustomFieldTypes.TOGGLE,
     required: true,
   };
 
+  const makeDefinition = (overrides: Partial<FieldDefinition> = {}): FieldDefinition => ({
+    fieldDefinitionId: 'existing-id',
+    name: 'my_text',
+    owner,
+    definition: 'name: my_text\nlabel: My Text\ntype: keyword\ncontrol: INPUT_TEXT\n',
+    isGlobal: true,
+    ...overrides,
+  });
+
+  const asSavedObject = (attributes: FieldDefinition, version = 'v1') => ({
+    id: attributes.fieldDefinitionId,
+    type: 'cases-field-definition',
+    references: [],
+    attributes,
+    version,
+  });
+
   let fieldDefinitionsService: ReturnType<typeof createFieldDefinitionsServiceMock>;
+
+  const ensure = (customFields: unknown) =>
+    ensureGlobalFieldDefinitions({
+      owner,
+      spaceId,
+      customFields: customFields as Parameters<
+        typeof ensureGlobalFieldDefinitions
+      >[0]['customFields'],
+      fieldDefinitionsService,
+      logger,
+    });
 
   beforeEach(() => {
     jest.clearAllMocks();
     fieldDefinitionsService = createFieldDefinitionsServiceMock();
+    fieldDefinitionsService.getFieldDefinitionSavedObjects.mockResolvedValue([]);
+    // The create return value is ignored by ensureGlobalFieldDefinitions — the
+    // locally-built attributes are authoritative — so the default mock suffices.
   });
 
-  it('returns immediately when customFields is undefined', async () => {
-    await ensureGlobalFieldDefinitions({
-      owner,
-      customFields: undefined,
-      fieldDefinitionsService,
-      logger,
-    });
+  it.each([undefined, null, []])('returns immediately when customFields is %p', async (value) => {
+    await ensure(value);
 
-    expect(fieldDefinitionsService.getFieldDefinitions).not.toHaveBeenCalled();
+    expect(fieldDefinitionsService.getFieldDefinitionSavedObjects).not.toHaveBeenCalled();
     expect(fieldDefinitionsService.createFieldDefinition).not.toHaveBeenCalled();
   });
 
-  it('returns immediately when customFields is null', async () => {
-    await ensureGlobalFieldDefinitions({
-      owner,
-      customFields: null,
-      fieldDefinitionsService,
-      logger,
-    });
-
-    expect(fieldDefinitionsService.getFieldDefinitions).not.toHaveBeenCalled();
-    expect(fieldDefinitionsService.createFieldDefinition).not.toHaveBeenCalled();
-  });
-
-  it('returns immediately when customFields is an empty array', async () => {
-    await ensureGlobalFieldDefinitions({
-      owner,
-      customFields: [],
-      fieldDefinitionsService,
-      logger,
-    });
-
-    expect(fieldDefinitionsService.getFieldDefinitions).not.toHaveBeenCalled();
-    expect(fieldDefinitionsService.createFieldDefinition).not.toHaveBeenCalled();
-  });
-
-  it('creates a global field definition for a new custom field', async () => {
-    fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
-      fieldDefinitions: [],
-      total: 0,
-    });
-    fieldDefinitionsService.createFieldDefinition.mockResolvedValue({} as never);
-
-    await ensureGlobalFieldDefinitions({
-      owner,
-      customFields: [textField],
-      fieldDefinitionsService,
-      logger,
-    });
+  it('creates a linked definition with a friendly name, deterministic id, and legacyKey', async () => {
+    await ensure([textField]);
 
     expect(fieldDefinitionsService.createFieldDefinition).toHaveBeenCalledTimes(1);
-    const [call] = fieldDefinitionsService.createFieldDefinition.mock.calls;
-    expect(call[0]).toMatchObject({
+    const [input, serverManaged] = fieldDefinitionsService.createFieldDefinition.mock.calls[0];
+
+    // Friendly, label-derived name — NOT the raw v1 key.
+    expect(input).toMatchObject({
       name: 'my_text',
       owner,
       description: 'My Text',
       isGlobal: true,
     });
-    // definition should be YAML and not contain a fieldDefinitionId (service generates it)
-    expect(call[0].definition).toContain('name: my_text');
-    expect(call[0]).not.toHaveProperty('fieldDefinitionId');
+    expect(input.definition).toContain('name: my_text');
+
+    expect(serverManaged).toEqual({
+      id: deriveFieldDefinitionId({ spaceId, owner, name: 'my_text' }),
+      legacyKey: 'text_key_1',
+    });
   });
 
-  it('reuses an existing global field definition with the same name', async () => {
-    fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
-      fieldDefinitions: [
-        {
-          fieldDefinitionId: 'existing-id',
-          name: 'my_text',
-          owner,
-          definition: 'name: my_text\nlabel: My Text\ntype: keyword\ncontrol: INPUT_TEXT\n',
-          isGlobal: true,
-        },
-      ],
-      total: 1,
-    });
+  it('reuses a definition linked via legacyKey without writing anything', async () => {
+    fieldDefinitionsService.getFieldDefinitionSavedObjects.mockResolvedValue([
+      asSavedObject(makeDefinition({ legacyKey: 'text_key_1' })),
+    ] as never);
 
-    await ensureGlobalFieldDefinitions({
-      owner,
-      customFields: [textField],
-      fieldDefinitionsService,
-      logger,
-    });
+    await ensure([textField]);
 
     expect(fieldDefinitionsService.createFieldDefinition).not.toHaveBeenCalled();
+    expect(fieldDefinitionsService.setLegacyKey).not.toHaveBeenCalled();
   });
 
-  it('logs a warning when the existing definition has a control/type mismatch', async () => {
-    fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
-      fieldDefinitions: [
-        {
-          fieldDefinitionId: 'existing-id',
-          name: 'my_text',
-          owner,
-          // Mismatched: stored as integer/INPUT_NUMBER but the custom field is TEXT
-          definition: 'name: my_text\nlabel: My Text\ntype: integer\ncontrol: INPUT_NUMBER\n',
-          isGlobal: true,
-        },
-      ],
-      total: 1,
-    });
+  it('reuses an exact-name match (pre-friendly-name definition) and repairs its legacyKey with OCC', async () => {
+    // Definition named after the raw v1 key, no legacyKey yet.
+    fieldDefinitionsService.getFieldDefinitionSavedObjects.mockResolvedValue([
+      asSavedObject(
+        makeDefinition({
+          fieldDefinitionId: 'legacy-def',
+          name: 'text_key_1',
+          definition: 'name: text_key_1\nlabel: My Text\ntype: keyword\ncontrol: INPUT_TEXT\n',
+        }),
+        'so-version-7'
+      ),
+    ] as never);
 
-    await ensureGlobalFieldDefinitions({
-      owner,
-      customFields: [textField],
-      fieldDefinitionsService,
-      logger,
-    });
+    await ensure([textField]);
 
     expect(fieldDefinitionsService.createFieldDefinition).not.toHaveBeenCalled();
-    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('already exists but has'));
+    expect(fieldDefinitionsService.setLegacyKey).toHaveBeenCalledWith('legacy-def', 'text_key_1', {
+      version: 'so-version-7',
+    });
   });
 
-  it('creates only the missing field definitions when some already exist', async () => {
-    fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
-      fieldDefinitions: [
-        {
-          fieldDefinitionId: 'existing-id',
-          name: 'my_text',
-          owner,
-          definition: 'name: my_text\nlabel: My Text\ntype: keyword\ncontrol: INPUT_TEXT\n',
-          isGlobal: true,
-        },
-      ],
-      total: 1,
-    });
-    fieldDefinitionsService.createFieldDefinition.mockResolvedValue({} as never);
-
-    await ensureGlobalFieldDefinitions({
-      owner,
-      customFields: [textField, toggleField],
-      fieldDefinitionsService,
-      logger,
-    });
-
-    expect(fieldDefinitionsService.createFieldDefinition).toHaveBeenCalledTimes(1);
-    expect(fieldDefinitionsService.createFieldDefinition).toHaveBeenCalledWith(
-      expect.objectContaining({ name: 'my_toggle', isGlobal: true })
+  it('does not fail the configuration write when legacyKey repair loses its OCC race', async () => {
+    fieldDefinitionsService.getFieldDefinitionSavedObjects.mockResolvedValue([
+      asSavedObject(
+        makeDefinition({
+          fieldDefinitionId: 'legacy-def',
+          name: 'text_key_1',
+          definition: 'name: text_key_1\nlabel: My Text\ntype: keyword\ncontrol: INPUT_TEXT\n',
+        })
+      ),
+    ] as never);
+    fieldDefinitionsService.setLegacyKey.mockRejectedValue(
+      SavedObjectsErrorHelpers.createConflictError('cases-field-definition', 'legacy-def')
     );
+
+    await expect(ensure([textField])).resolves.toBeUndefined();
+    expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('Skipped legacyKey repair'));
   });
 
-  it('logs an error and continues when createFieldDefinition fails for one field', async () => {
-    fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
-      fieldDefinitions: [],
-      total: 0,
-    });
+  it('reuses a non-global linked definition and warns instead of duplicating it', async () => {
+    fieldDefinitionsService.getFieldDefinitionSavedObjects.mockResolvedValue([
+      asSavedObject(makeDefinition({ legacyKey: 'text_key_1', isGlobal: false })),
+    ] as never);
 
-    fieldDefinitionsService.createFieldDefinition
-      .mockRejectedValueOnce(new Error('SO write failed'))
-      .mockResolvedValueOnce({} as never);
-
-    await expect(
-      ensureGlobalFieldDefinitions({
-        owner,
-        customFields: [textField, toggleField],
-        fieldDefinitionsService,
-        logger,
-      })
-    ).resolves.toBeUndefined();
-
-    expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('my_text'));
-    // Both fields were attempted; the second one succeeded
-    expect(fieldDefinitionsService.createFieldDefinition).toHaveBeenCalledTimes(2);
-  });
-
-  it('logs an error and does not throw when getFieldDefinitions fails', async () => {
-    fieldDefinitionsService.getFieldDefinitions.mockRejectedValue(new Error('ES unavailable'));
-
-    await expect(
-      ensureGlobalFieldDefinitions({
-        owner,
-        customFields: [textField],
-        fieldDefinitionsService,
-        logger,
-      })
-    ).resolves.toBeUndefined();
-
-    expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('ES unavailable'));
-    expect(fieldDefinitionsService.createFieldDefinition).not.toHaveBeenCalled();
-  });
-
-  it('reads all field definitions (not only isGlobal: true) to detect non-global duplicates', async () => {
-    fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
-      fieldDefinitions: [],
-      total: 0,
-    });
-    fieldDefinitionsService.createFieldDefinition.mockResolvedValue({
-      attributes: { name: 'my_text', owner, isGlobal: true },
-    } as never);
-
-    await ensureGlobalFieldDefinitions({
-      owner,
-      customFields: [textField],
-      fieldDefinitionsService,
-      logger,
-    });
-
-    // Must be called WITHOUT an isGlobal filter option
-    expect(fieldDefinitionsService.getFieldDefinitions).toHaveBeenCalledWith(owner);
-    expect(fieldDefinitionsService.getFieldDefinitions).not.toHaveBeenCalledWith(
-      owner,
-      expect.objectContaining({ isGlobal: true })
-    );
-  });
-
-  it('skips create and warns when a non-global definition of the same name already exists', async () => {
-    fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
-      fieldDefinitions: [
-        {
-          fieldDefinitionId: 'existing-id',
-          name: 'my_text',
-          owner,
-          definition: 'name: my_text\nlabel: My Text\ntype: keyword\ncontrol: INPUT_TEXT\n',
-          isGlobal: false,
-        },
-      ],
-      total: 1,
-    });
-
-    await ensureGlobalFieldDefinitions({
-      owner,
-      customFields: [textField],
-      fieldDefinitionsService,
-      logger,
-    });
+    await ensure([textField]);
 
     expect(fieldDefinitionsService.createFieldDefinition).not.toHaveBeenCalled();
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('non-global'));
   });
 
-  it('reuses an existing definition when the existing name and custom field key differ only in case', async () => {
-    fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
-      fieldDefinitions: [
-        {
-          fieldDefinitionId: 'existing-id',
-          // Stored with uppercase first letter; custom field key is all-lowercase
-          name: 'My_Text',
-          owner,
-          definition: 'name: My_Text\nlabel: My Text\ntype: keyword\ncontrol: INPUT_TEXT\n',
-          isGlobal: true,
-        },
-      ],
-      total: 1,
-    });
+  it('fails the configuration write when two definitions claim the same legacyKey', async () => {
+    fieldDefinitionsService.getFieldDefinitionSavedObjects.mockResolvedValue([
+      asSavedObject(
+        makeDefinition({ fieldDefinitionId: 'a', name: 'one', legacyKey: 'text_key_1' })
+      ),
+      asSavedObject(
+        makeDefinition({ fieldDefinitionId: 'b', name: 'two', legacyKey: 'text_key_1' })
+      ),
+    ] as never);
 
-    await ensureGlobalFieldDefinitions({
-      owner,
-      // textField.key === 'my_text' (all lowercase)
-      customFields: [textField],
-      fieldDefinitionsService,
-      logger,
-    });
-
-    // Case-insensitive match — no duplicate should be created.
+    await expect(ensure([textField])).rejects.toThrow(
+      /"text_key_1" \(multiple field definitions claim this custom field key\)/
+    );
     expect(fieldDefinitionsService.createFieldDefinition).not.toHaveBeenCalled();
+  });
+
+  it('fails the configuration write when the linked definition has an incompatible type', async () => {
+    fieldDefinitionsService.getFieldDefinitionSavedObjects.mockResolvedValue([
+      asSavedObject(
+        makeDefinition({
+          legacyKey: 'text_key_1',
+          definition: 'name: my_text\nlabel: My Text\ntype: integer\ncontrol: INPUT_NUMBER\n',
+        })
+      ),
+    ] as never);
+
+    await expect(ensure([textField])).rejects.toThrow(/incompatible type/);
+  });
+
+  it('fails the configuration write on an ambiguous normalized-name match', async () => {
+    fieldDefinitionsService.getFieldDefinitionSavedObjects.mockResolvedValue([
+      asSavedObject(
+        makeDefinition({
+          fieldDefinitionId: 'a',
+          name: 'Text_Key_1',
+          definition: 'name: Text_Key_1\nlabel: A\ntype: keyword\ncontrol: INPUT_TEXT\n',
+        })
+      ),
+      asSavedObject(
+        makeDefinition({
+          fieldDefinitionId: 'b',
+          name: 'TEXT_KEY_1',
+          definition: 'name: TEXT_KEY_1\nlabel: B\ntype: keyword\ncontrol: INPUT_TEXT\n',
+        })
+      ),
+    ] as never);
+
+    await expect(ensure([textField])).rejects.toThrow(/ambiguously match/);
+    expect(fieldDefinitionsService.createFieldDefinition).not.toHaveBeenCalled();
+  });
+
+  it('fails the configuration write when the per-owner cap blocks a required creation', async () => {
+    const existing = Array.from({ length: 200 }, (_, i) =>
+      asSavedObject(
+        makeDefinition({
+          fieldDefinitionId: `fd-${i}`,
+          name: `field_${i}`,
+          definition: `name: field_${i}\nlabel: F\ntype: keyword\ncontrol: INPUT_TEXT\n`,
+        })
+      )
+    );
+    fieldDefinitionsService.getFieldDefinitionSavedObjects.mockResolvedValue(existing as never);
+
+    await expect(ensure([textField])).rejects.toThrow(/maximum of 200 field definitions/);
+    expect(fieldDefinitionsService.createFieldDefinition).not.toHaveBeenCalled();
+  });
+
+  it('does not hit the cap check for fields that resolve to existing definitions', async () => {
+    const existing = Array.from({ length: 199 }, (_, i) =>
+      asSavedObject(
+        makeDefinition({
+          fieldDefinitionId: `fd-${i}`,
+          name: `field_${i}`,
+          definition: `name: field_${i}\nlabel: F\ntype: keyword\ncontrol: INPUT_TEXT\n`,
+        })
+      )
+    );
+    existing.push(asSavedObject(makeDefinition({ legacyKey: 'text_key_1' })));
+    fieldDefinitionsService.getFieldDefinitionSavedObjects.mockResolvedValue(existing as never);
+
+    // 200 existing but textField resolves — no creation needed, no capacity error.
+    await expect(ensure([textField])).resolves.toBeUndefined();
   });
 
   it('creates exactly one SO when two customFields share the same key (intra-request dedup)', async () => {
-    fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
-      fieldDefinitions: [],
-      total: 0,
-    });
-    fieldDefinitionsService.createFieldDefinition.mockResolvedValue({
-      attributes: { name: 'my_text', owner, isGlobal: true },
-    } as never);
+    await ensure([textField, { ...textField }]);
 
-    const duplicate = { ...textField }; // same key as textField
-
-    await ensureGlobalFieldDefinitions({
-      owner,
-      customFields: [textField, duplicate],
-      fieldDefinitionsService,
-      logger,
-    });
-
-    // Second entry hits the index already populated by the first create.
+    // The second entry resolves through the in-loop index update (legacyKey match).
     expect(fieldDefinitionsService.createFieldDefinition).toHaveBeenCalledTimes(1);
   });
 
-  it('skips and warns when the per-owner cap is reached, without throwing', async () => {
-    // The cap is 200 (MAX_FIELD_DEFINITIONS_PER_OWNER). Seed the service response
-    // with exactly 200 existing definitions so the very next create must be blocked.
-    const existingDefinitions = Array.from({ length: 200 }, (_, i) => ({
-      fieldDefinitionId: `fd-${i}`,
-      name: `field_${i}`,
-      owner,
-      definition: `name: field_${i}\ntype: keyword\ncontrol: INPUT_TEXT\n`,
-      isGlobal: true,
-    }));
+  it('suffixes the friendly name when another definition already uses it', async () => {
+    // Existing definition already owns the normalized name my_text and is linked elsewhere.
+    fieldDefinitionsService.getFieldDefinitionSavedObjects.mockResolvedValue([
+      asSavedObject(makeDefinition({ legacyKey: 'some_other_key' })),
+    ] as never);
 
-    fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
-      fieldDefinitions: existingDefinitions,
-      total: existingDefinitions.length,
-    });
+    await ensure([textField]);
 
-    await expect(
-      ensureGlobalFieldDefinitions({
-        owner,
-        customFields: [textField, toggleField],
-        fieldDefinitionsService,
-        logger,
-      })
-    ).resolves.toBeUndefined();
+    const [input] = fieldDefinitionsService.createFieldDefinition.mock.calls[0];
+    expect(input.name).toMatch(/^my_text_[0-9a-f]{8}$/);
+  });
 
-    expect(fieldDefinitionsService.createFieldDefinition).not.toHaveBeenCalled();
-    expect(logger.warn).toHaveBeenCalledWith(
-      expect.stringContaining('maximum of 200 field definitions')
+  it('converges on a concurrent creator of the same link after a deterministic-id conflict', async () => {
+    const deterministicId = deriveFieldDefinitionId({ spaceId, owner, name: 'my_text' });
+    fieldDefinitionsService.createFieldDefinition.mockRejectedValueOnce(
+      SavedObjectsErrorHelpers.createConflictError('cases-field-definition', deterministicId)
     );
+    fieldDefinitionsService.getFieldDefinition.mockResolvedValue(
+      asSavedObject(
+        makeDefinition({ fieldDefinitionId: deterministicId, legacyKey: 'text_key_1' })
+      ) as never
+    );
+
+    await expect(ensure([textField])).resolves.toBeUndefined();
+
+    expect(fieldDefinitionsService.createFieldDefinition).toHaveBeenCalledTimes(1);
+    expect(fieldDefinitionsService.getFieldDefinition).toHaveBeenCalledWith(deterministicId);
+  });
+
+  it('creates missing definitions and reuses resolved ones in one pass', async () => {
+    fieldDefinitionsService.getFieldDefinitionSavedObjects.mockResolvedValue([
+      asSavedObject(makeDefinition({ legacyKey: 'text_key_1' })),
+    ] as never);
+
+    await ensure([textField, toggleField]);
+
+    expect(fieldDefinitionsService.createFieldDefinition).toHaveBeenCalledTimes(1);
+    const [input, serverManaged] = fieldDefinitionsService.createFieldDefinition.mock.calls[0];
+    expect(input).toMatchObject({ name: 'my_toggle', isGlobal: true });
+    expect(serverManaged).toMatchObject({ legacyKey: 'toggle_key_1' });
   });
 });

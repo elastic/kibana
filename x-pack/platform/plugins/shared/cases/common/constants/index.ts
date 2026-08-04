@@ -234,6 +234,13 @@ export const MAX_FIELDS_PER_TEMPLATE = 200 as const;
  */
 export const MAX_EXTENDED_FIELD_VALUE_BYTES = 30000 as const;
 /**
+ * Maximum length of a full `${name}_as_${type}` extended-field storage key.
+ * Shared by the friendly-name generator (which reserves room for the longest
+ * type suffix) and the analytics runtime-field guard so a generated name can
+ * never produce a key the analytics layer rejects.
+ */
+export const MAX_SNAKE_KEY_LENGTH = 256 as const;
+/**
  * Bounds for `extendedFieldFilters` on find/search and All Cases URL state.
  * Field Library values can legitimately occupy the full template/value payload, and each of the
  * 200 fields can contribute both values of a TOGGLE filter.
