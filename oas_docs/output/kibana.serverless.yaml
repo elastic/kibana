@@ -83448,7 +83448,6 @@ components:
                         type: object
                         properties:
                           column_order:
-                            default: []
                             description: Ordered list of field names to display in the data table. If omitted, defaults to the advanced setting "defaultColumns" or the referenced saved object.
                             items:
                               description: Field name of a column in display order.
@@ -83486,8 +83485,7 @@ components:
                               - enum:
                                   - normal
                                 type: string
-                            default: compact
-                            description: Data grid density. Choose "compact", "expanded", or "normal" for row spacing. If omitted, defaults to Discover or embeddable defaults (e.g. user preference / local storage).
+                            description: Data grid density. Choose "compact", "expanded", or "normal" for row spacing. If omitted, Discover or the embedding application determines the density from its current settings, such as the user preference.
                           filters:
                             default: []
                             description: List of filters to apply to the data in the tab.
@@ -83503,8 +83501,7 @@ components:
                               - enum:
                                   - auto
                                 type: string
-                            default: 3
-                            description: Header row height. Use a number (1–5) or "auto" to size based on content. If omitted, defaults to Discover or embeddable defaults (e.g. user preference / local storage).
+                            description: Header row height. Use a number (1–5) or "auto" to size based on content. If omitted, Discover or the embedding application determines the height from its current settings, such as the user preference.
                           query:
                             $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-as-code-query'
                           row_height:
@@ -83515,16 +83512,13 @@ components:
                               - enum:
                                   - auto
                                 type: string
-                            default: 3
                             description: Data row height. Use a number (1–20) or "auto" to size based on content. If omitted, defaults to the advanced setting "discover:rowHeightOption".
                           rows_per_page:
-                            default: 100
                             description: The number of rows to display per page in the data table. If omitted, defaults to the advanced setting "discover:sampleRowsPerPage".
                             maximum: 10000
                             minimum: 1
                             type: number
                           sample_size:
-                            default: 500
                             description: The number of documents to sample for the data table. If omitted, defaults to the advanced setting "discover:sampleSize".
                             maximum: 10000
                             minimum: 10
@@ -83570,7 +83564,6 @@ components:
                         type: object
                         properties:
                           column_order:
-                            default: []
                             description: Ordered list of field names to display in the data table. If omitted, defaults to the advanced setting "defaultColumns" or the referenced saved object.
                             items:
                               description: Field name of a column in display order.
@@ -83601,8 +83594,7 @@ components:
                               - enum:
                                   - normal
                                 type: string
-                            default: compact
-                            description: Data grid density. Choose "compact", "expanded", or "normal" for row spacing. If omitted, defaults to Discover or embeddable defaults (e.g. user preference / local storage).
+                            description: Data grid density. Choose "compact", "expanded", or "normal" for row spacing. If omitted, Discover or the embedding application determines the density from its current settings, such as the user preference.
                           header_row_height:
                             anyOf:
                               - maximum: 5
@@ -83611,8 +83603,7 @@ components:
                               - enum:
                                   - auto
                                 type: string
-                            default: 3
-                            description: Header row height. Use a number (1–5) or "auto" to size based on content. If omitted, defaults to Discover or embeddable defaults (e.g. user preference / local storage).
+                            description: Header row height. Use a number (1–5) or "auto" to size based on content. If omitted, Discover or the embedding application determines the height from its current settings, such as the user preference.
                           row_height:
                             anyOf:
                               - maximum: 20
@@ -83621,16 +83612,13 @@ components:
                               - enum:
                                   - auto
                                 type: string
-                            default: 3
                             description: Data row height. Use a number (1–20) or "auto" to size based on content. If omitted, defaults to the advanced setting "discover:rowHeightOption".
                           rows_per_page:
-                            default: 100
                             description: The number of rows to display per page in the data table. If omitted, defaults to the advanced setting "discover:sampleRowsPerPage".
                             maximum: 10000
                             minimum: 1
                             type: number
                           sample_size:
-                            default: 500
                             description: The number of documents to sample for the data table. If omitted, defaults to the advanced setting "discover:sampleSize".
                             maximum: 10000
                             minimum: 10
