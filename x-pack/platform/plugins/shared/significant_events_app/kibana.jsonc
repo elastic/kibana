@@ -15,6 +15,7 @@
       "licensing",
       "share",
       "significant_events",
+      "streams",
       "unifiedSearch"
     ],
     "optionalPlugins": ["agentBuilder", "cloud", "spaces"],
