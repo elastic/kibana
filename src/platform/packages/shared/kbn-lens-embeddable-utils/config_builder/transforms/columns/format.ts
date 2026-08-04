@@ -9,8 +9,16 @@
 
 import type { ValueFormatConfig } from '@kbn/lens-common';
 import type { LensApiMetricOperation } from '../../schema/metric_ops';
-import { LENS_FORMAT_NUMBER_DECIMALS_DEFAULT } from '../../schema/constants';
+import {
+  LENS_FORMAT_DURATION_COMPACT_DEFAULT,
+  LENS_FORMAT_DURATION_DECIMALS_DEFAULT,
+} from '../../schema/constants';
 import { durationInputUnitCompat, durationOutputUnitCompat } from './duration_units';
+
+/** Approximate duration output ignores decimals/compact (UI hides them; formatter does not use them). */
+function isApproximateDurationApiTo(to: string): boolean {
+  return to === 'auto-approximate';
+}
 
 export function fromFormatAPIToLensState(
   format: LensApiMetricOperation['format']
@@ -38,17 +46,27 @@ export function fromFormatAPIToLensState(
     };
   }
   if (format.type === 'duration') {
+    const toUnit = durationOutputUnitCompat.toState(format.to);
+    // GA `auto-approximate` and legacy `humanize` both map to Lens `humanize`.
+    const approximate = toUnit === 'humanize' || isApproximateDurationApiTo(format.to);
+    // Legacy duration schema has no `decimals`/`compact`; narrow with `in` before reading.
+    const decimals = 'decimals' in format ? format.decimals : undefined;
+    const compact = 'compact' in format ? format.compact : undefined;
+    const suffix = format.suffix ? { suffix: format.suffix } : {};
+    const fromUnit = durationInputUnitCompat.toState(format.from);
+
+    // Approximate: ignore input decimals/compact (not configurable). `decimals` is only
+    // required by ValueFormatConfig; use the shared default. SO→API omits both.
     return {
       id: format.type,
       params: {
-        // `decimals`/`compact` are ignored for the approximate (`humanize`) output but are honored for
-        // precise/fixed output units, so they must round-trip. Default a missing `decimals` to the shared
-        // numeric default.
-        decimals: 'decimals' in format ? format.decimals : LENS_FORMAT_NUMBER_DECIMALS_DEFAULT,
-        fromUnit: durationInputUnitCompat.toState(format.from),
-        toUnit: durationOutputUnitCompat.toState(format.to),
-        ...('compact' in format ? { compact: format.compact } : {}),
-        ...(format.suffix ? { suffix: format.suffix } : {}),
+        decimals: approximate
+          ? LENS_FORMAT_DURATION_DECIMALS_DEFAULT
+          : decimals ?? LENS_FORMAT_DURATION_DECIMALS_DEFAULT,
+        ...(!approximate ? { compact: compact ?? LENS_FORMAT_DURATION_COMPACT_DEFAULT } : {}),
+        fromUnit,
+        toUnit,
+        ...suffix,
       },
     };
   }
@@ -86,12 +104,19 @@ export function fromFormatLensStateToAPI(
     } as LensApiMetricOperation['format'];
   }
   if (format.id === 'duration') {
+    const to = durationOutputUnitCompat.toAPI(format.params?.toUnit);
+    const approximate = isApproximateDurationApiTo(to);
     return {
       type: format.id,
       from: durationInputUnitCompat.toAPI(format.params?.fromUnit),
-      to: durationOutputUnitCompat.toAPI(format.params?.toUnit),
-      ...(format.params?.decimals != null ? { decimals: format.params.decimals } : {}),
-      ...(format.params?.compact != null ? { compact: format.params.compact } : {}),
+      to,
+      // Approximate: omit decimals/compact — not configurable and ignored at render.
+      ...(!approximate
+        ? {
+            decimals: format.params?.decimals ?? LENS_FORMAT_DURATION_DECIMALS_DEFAULT,
+            compact: format.params?.compact ?? LENS_FORMAT_DURATION_COMPACT_DEFAULT,
+          }
+        : {}),
       ...(format.params?.suffix ? { suffix: format.params.suffix } : {}),
     };
   }

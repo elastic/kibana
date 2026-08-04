@@ -8,7 +8,6 @@
  */
 
 import { z } from '@kbn/zod';
-import { LENS_FORMAT_NUMBER_DECIMALS_DEFAULT, LENS_FORMAT_COMPACT_DEFAULT } from './constants';
 
 const DURATION_FINE_GRAINED_INPUT = ['ps', 'ns', 'us'] as const;
 
@@ -29,22 +28,19 @@ const durationFormatSuffixSchema = z.string().optional().meta({
 });
 
 /**
- * Number of decimal places to display. Only takes effect for precise output units
- * (`auto`/`humanizePrecise` and the fixed conversion units); it is ignored for the
- * approximate `auto-approximate`/`humanize` output.
+ * Number of decimals
  */
-const durationFormatDecimalsSchema = z.number().default(LENS_FORMAT_NUMBER_DECIMALS_DEFAULT).meta({
+const durationFormatDecimalsSchema = z.number().optional().meta({
   description:
-    'Number of decimal places to display. Applied for precise/fixed output units. Ignored for the approximate (`auto-approximate`) output.',
+    'Number of decimal places to display. Defaults to `0`. Ignored for `auto-approximate`.',
 });
 
 /**
- * When `true`, uses short unit suffixes (for example `ms` instead of `Milliseconds`). Ignored for the
- * approximate (`auto-approximate`) output, which never renders a unit suffix.
+ * Whether to use compact unit suffixes
  */
-const durationFormatCompactSchema = z.boolean().default(LENS_FORMAT_COMPACT_DEFAULT).meta({
+const durationFormatCompactSchema = z.boolean().optional().meta({
   description:
-    'When `true`, uses short unit suffixes (for example `ms`). Ignored for the approximate (`auto-approximate`) output.',
+    'When `true`, uses short unit suffixes (for example, `ms` instead of `Milliseconds`). Defaults to `true`. Ignored for `auto-approximate`.',
 });
 
 export const durationFormatSchema = z
