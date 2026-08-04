@@ -1,5 +1,5 @@
 {
-  "sha1": "",
+  "sha1": "6f76677f026285f6c975c6a6effe0d851898c9ef",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -199,6 +199,34 @@
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/get_certs.spec.ts",
         "line": 390,
         "column": 16
+      }
+    },
+    {
+      "id": "b0aae28b2a3143e-fa52f188bdb4d91",
+      "title": "MaintenanceWindowsRoute returns only monitor-referenced windows to a read-only user, projecting the UI fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/maintenance_windows_route.spec.ts",
+        "line": 114,
+        "column": 56
+      }
+    },
+    {
+      "id": "b0aae28b2a3143e-814df6954500a4e",
+      "title": "MaintenanceWindowsRoute only returns maintenance windows from the caller space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/maintenance_windows_route.spec.ts",
+        "line": 154,
+        "column": 49
       }
     },
     {

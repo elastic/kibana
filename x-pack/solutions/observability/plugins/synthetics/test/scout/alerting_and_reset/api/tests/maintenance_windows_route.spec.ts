@@ -8,8 +8,8 @@
 import { v4 as uuidv4 } from 'uuid';
 import type { ApiClientFixture, KbnClient, KibanaRole } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
-import { apiTest, mergeSyntheticsApiHeaders } from '../fixtures';
-import { addMonitor } from '../fixtures/monitors';
+import { apiTest, mergeSyntheticsApiHeaders } from '../../../common/fixtures';
+import { addMonitor } from '../../../common/fixtures/monitors';
 
 /**
  * Covers `GET /internal/synthetics/monitors/maintenance_windows`.
