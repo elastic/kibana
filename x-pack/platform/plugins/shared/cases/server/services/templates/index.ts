@@ -25,7 +25,7 @@ import type {
 import { ParsedTemplateDefinitionSchema } from '../../../common/types/domain/template/v1';
 import type { FieldDefinition } from '../../../common/types/domain/field_definition/v1';
 import { isRefField } from '../../../common/types/domain/template/fields';
-import { getYamlDefaultAsString } from '../../../common/utils';
+import { getYamlDefaultAsString, normalizeFieldDefinitionName } from '../../../common/utils';
 import { toFieldDefinitions, trimFieldDefaults } from './utils';
 import {
   CASE_TEMPLATE_SAVED_OBJECT,
@@ -676,12 +676,18 @@ export class TemplatesService {
       try {
         const parsed = parseYaml(so.attributes.definition ?? '');
         const fields: unknown[] = Array.isArray(parsed?.fields) ? parsed.fields : [];
+        // Case-insensitive, matching resolveTemplateFields: a template referencing
+        // "CF_Text" still resolves a definition named "cf_text", so it must also
+        // block that definition's deletion.
+        const normalizedFieldName = normalizeFieldDefinitionName(fieldName);
         const hasRef = fields.some(
           (f) =>
             typeof f === 'object' &&
             f !== null &&
             '$ref' in f &&
-            (f as Record<string, unknown>).$ref === fieldName
+            typeof (f as Record<string, unknown>).$ref === 'string' &&
+            normalizeFieldDefinitionName((f as Record<string, unknown>).$ref as string) ===
+              normalizedFieldName
         );
         if (hasRef) {
           referencing.push({ name: so.attributes.name });

@@ -687,6 +687,90 @@ describe('TemplatesMigrationTaskManager', () => {
       );
     });
 
+    it('keeps a template field whose $ref matches a reused definition only case-insensitively', async () => {
+      const configSO = buildConfigureSO({
+        customFields: [buildLegacyCustomField('cf_text')],
+        templates: [buildLegacyTemplate('Cased Template', ['cf_text'])],
+      });
+
+      const existingFieldDef = {
+        id: 'existing-fd',
+        type: CASE_FIELD_DEFINITION_SAVED_OBJECT,
+        references: [],
+        attributes: {
+          name: 'CF_Text',
+          owner: 'cases',
+          definition: 'name: CF_Text\ncontrol: INPUT_TEXT\ntype: keyword\n',
+          fieldDefinitionId: 'x',
+          isGlobal: true,
+        },
+      };
+
+      repo.find
+        .mockResolvedValueOnce({ saved_objects: [configSO], total: 1 })
+        .mockResolvedValueOnce({ saved_objects: [existingFieldDef], total: 1 }) // field-defs
+        .mockResolvedValueOnce({ saved_objects: [], total: 0 }); // templates
+
+      const manager = await buildAndSchedule();
+      await getTaskRunner(manager).run();
+
+      const templateCreate = repo.create.mock.calls.find(
+        ([type]) => type === CASE_TEMPLATE_SAVED_OBJECT
+      );
+      expect(templateCreate).toBeDefined();
+
+      const attributes = templateCreate![1] as {
+        definition: string;
+        fieldDefinitions: Array<{ name: string }>;
+      };
+      // The `$ref` keeps the legacy key; case-insensitive resolution matches it to the
+      // reused "CF_Text" definition, so the field survives into fieldDefinitions
+      // instead of being silently dropped.
+      expect(attributes.definition).toContain('$ref: cf_text');
+      expect(attributes.fieldDefinitions).toContainEqual(
+        expect.objectContaining({ name: 'CF_Text' })
+      );
+    });
+
+    it('skips field-definition creation and warns when the per-owner cap is reached', async () => {
+      // The cap is 200 (MAX_FIELD_DEFINITIONS_PER_OWNER) — seed exactly 200 existing
+      // definitions so the very next create must be blocked.
+      const existingFieldDefs = Array.from({ length: 200 }, (_, i) => ({
+        id: `fd-${i}`,
+        type: CASE_FIELD_DEFINITION_SAVED_OBJECT,
+        references: [],
+        attributes: {
+          name: `field_${i}`,
+          owner: 'cases',
+          definition: `name: field_${i}\ncontrol: INPUT_TEXT\ntype: keyword\n`,
+          fieldDefinitionId: `fd-${i}`,
+          isGlobal: true,
+        },
+      }));
+
+      const configSO = buildConfigureSO({
+        customFields: [buildLegacyCustomField('cf_over_cap')],
+        templates: [],
+      });
+
+      repo.find
+        .mockResolvedValueOnce({ saved_objects: [configSO], total: 1 })
+        .mockResolvedValueOnce({ saved_objects: existingFieldDefs, total: 200 }) // field-defs
+        .mockResolvedValueOnce({ saved_objects: [], total: 0 }); // templates
+
+      const manager = await buildAndSchedule();
+      await getTaskRunner(manager).run();
+
+      expect(repo.create).not.toHaveBeenCalledWith(
+        CASE_FIELD_DEFINITION_SAVED_OBJECT,
+        expect.anything(),
+        expect.anything()
+      );
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('maximum of 200 field definitions')
+      );
+    });
+
     it('creates field definitions with refresh: wait_for to avoid races with concurrent configure PATCHes', async () => {
       const configSO = buildConfigureSO({
         customFields: [buildLegacyCustomField('cf_text')],

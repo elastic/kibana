@@ -2097,6 +2097,39 @@ describe('TemplatesService', () => {
       expect(result).toEqual([]);
     });
 
+    it('matches a $ref that differs from the field name only in case', async () => {
+      // resolveTemplateFields resolves $refs case-insensitively, so a template
+      // referencing "PRIORITY" still depends on the definition named "priority"
+      // and must block its deletion.
+      const service = createService();
+
+      const definition = yamlStringify({
+        name: 'Cased Template',
+        fields: [{ $ref: 'PRIORITY' }],
+      });
+      const so = makeSO('so-cased', definition, 'Cased Template');
+
+      unsecuredSavedObjectsClient.search.mockResolvedValue({
+        took: 1,
+        timed_out: false,
+        _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+        hits: {
+          total: { value: 1, relation: 'eq' },
+          max_score: null,
+          hits: [makeHit('so-cased')],
+        },
+      } as unknown as ReturnType<typeof createMockSearchResponse>);
+
+      savedObjectsSerializer.rawToSavedObject.mockReturnValueOnce(so);
+
+      const result = await service.getActiveTemplatesReferencingField(
+        'securitySolution',
+        'priority'
+      );
+
+      expect(result).toEqual([{ name: 'Cased Template' }]);
+    });
+
     it('skips a template with unparseable YAML rather than blocking the delete', async () => {
       // FAILURE SCENARIO: a corrupt definition is in ES — the guard must not
       // throw; it should skip the corrupt template and return [] (unblocked).

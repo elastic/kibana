@@ -15,6 +15,7 @@ import {
   getV2FieldType,
   getYamlDefaultAsString,
   mergeCustomFieldsIntoExtendedFields,
+  normalizeFieldDefinitionName,
   parseFieldDefinitionsToInlineFields,
   resolveTemplateFields,
 } from './template_fields';
@@ -56,6 +57,16 @@ describe('template field key utils', () => {
       expect(getFieldCamelKey(name, type)).toBe(
         snakeKey.replace(/_([a-z])/g, (_, c) => c.toUpperCase())
       );
+    });
+  });
+
+  describe('normalizeFieldDefinitionName', () => {
+    it('lowercases and trims', () => {
+      expect(normalizeFieldDefinitionName('  My_Field ')).toBe('my_field');
+    });
+
+    it('leaves an already-normalized name unchanged', () => {
+      expect(normalizeFieldDefinitionName('my_field')).toBe('my_field');
     });
   });
 
@@ -201,6 +212,29 @@ describe('template field key utils', () => {
     it('drops a $ref that cannot be resolved in the library', () => {
       const ref: RefField = { $ref: 'unknown' };
       expect(resolveTemplateFields([ref], libDefs)).toEqual([]);
+    });
+
+    it('resolves a $ref that differs from the library name only in case', () => {
+      const ref: RefField = { $ref: 'LIB_Text' };
+      const [resolved] = resolveTemplateFields([ref], libDefs);
+      expect(resolved).toBeDefined();
+      expect(resolved.metadata?.default).toBe('from_lib');
+    });
+
+    it('keys extended-fields under the legacy key when a case-insensitive $ref carries a name alias', () => {
+      const caseInsensitiveLibDefs = [
+        makeLibDef('CF_Text', {
+          name: 'CF_Text',
+          type: 'keyword',
+          control: 'INPUT_TEXT',
+          metadata: { default: 'from_lib' },
+        }),
+      ];
+      // A `name` alias composes with case-insensitive $ref resolution: the ref resolves
+      // to the library definition, the alias controls the resolved field's storage key.
+      const ref: RefField = { $ref: 'CF_Text', name: 'cf_text' };
+      const resolved = resolveTemplateFields([ref], caseInsensitiveLibDefs);
+      expect(buildExtendedFieldsDefaults(resolved)).toEqual({ cf_text_as_keyword: 'from_lib' });
     });
 
     it('produces an empty extended-fields default for a null-cleared $ref', () => {

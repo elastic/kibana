@@ -19,6 +19,16 @@ import { CustomFieldTypes } from '../types/domain/custom_field/v1';
 
 export const getFieldSnakeKey = (name: string, type: string): string => `${name}_as_${type}`;
 
+/**
+ * Normalizes a field definition name for deduplication / lookup purposes.
+ *
+ * The field-definitions sub-client enforces `toLowerCase()`-only uniqueness at the API
+ * layer; the `trim()` here is deliberately stricter (mirroring template-name uniqueness
+ * in the templates service) — being stricter is safe for every current caller because
+ * they all use it to *skip* work on a match, never to reject a write.
+ */
+export const normalizeFieldDefinitionName = (name: string): string => name.trim().toLowerCase();
+
 export const getFieldCamelKey = (name: string, type: string): string =>
   camelCase(getFieldSnakeKey(name, type));
 
@@ -109,9 +119,10 @@ export const applyRefFieldOverride = (
 /**
  * Resolves a template `fields` array into a flat list of inline fields by:
  * - passing inline fields through as-is,
- * - looking up `$ref` fields by name in `libraryDefs`, parsing their YAML definition,
- *   and applying the ref entry's `name` alias and `metadata.default` override (see
- *   {@link applyRefFieldOverride}).
+ * - looking up `$ref` fields by name in `libraryDefs` (case-insensitive, matching the
+ *   uniqueness semantics the field-definitions API enforces on names), parsing their
+ *   YAML definition, and applying the ref entry's `name` alias and `metadata.default`
+ *   override (see {@link applyRefFieldOverride}).
  *
  * Fields that cannot be resolved or that produce another ref are silently dropped.
  */
@@ -122,7 +133,8 @@ export const resolveTemplateFields = (
   definitionFields.flatMap((field): InlineField[] => {
     if (isInlineField(field)) return [field];
     const refField = field as RefField;
-    const fd = libraryDefs.find((d) => d.name === refField.$ref);
+    const normalizedRef = normalizeFieldDefinitionName(refField.$ref);
+    const fd = libraryDefs.find((d) => normalizeFieldDefinitionName(d.name) === normalizedRef);
     if (!fd) return [];
     try {
       const parsed = parseYaml(fd.definition);

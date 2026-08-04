@@ -8,7 +8,12 @@
 import { stringify as stringifyYaml } from 'yaml';
 import { CustomFieldTypes } from '../../../common/types/domain/custom_field/v1';
 import { FieldType } from '../../../common/types/domain/template/fields';
-import { getV2FieldType } from '../../../common/utils/template_fields';
+import {
+  getV2FieldType,
+  normalizeFieldDefinitionName,
+} from '../../../common/utils/template_fields';
+
+export { normalizeFieldDefinitionName };
 
 interface LegacyCustomField {
   key: string;
@@ -37,13 +42,6 @@ const coerceLegacyToggleDefault = (value: string | number | boolean): boolean | 
   }
   return undefined;
 };
-
-/**
- * Normalizes a field definition name for deduplication/conflict checks — the same
- * semantics the field-definitions sub-client enforces at the API layer (trim +
- * toLowerCase, matching `ensureUniqueTemplateName` in the templates service).
- */
-export const normalizeFieldDefinitionName = (name: string): string => name.trim().toLowerCase();
 
 /**
  * Builds a normalized (case-insensitive) name → definition index from any array of
