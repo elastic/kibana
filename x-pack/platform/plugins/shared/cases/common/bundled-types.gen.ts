@@ -1241,7 +1241,7 @@ export type GetCaseTemplatesResponse = z.infer<typeof GetCaseTemplatesResponse>;
 /**
   * The body for creating or fully replacing a case template. Server-managed attributes (author, usage statistics, field summaries, version flags) are computed and cannot be set.
 
-Resource limits (enforced on write; a violation returns `400`): an owner may have at most 200 templates per space, and a definition may declare at most 200 fields. Version history is intentionally uncapped. A single stored extended-field value may not exceed 30000 UTF-8 bytes.
+Resource limits (enforced on write; a violation returns `400`): an owner may have at most 200 templates per space, and a definition may declare at most 200 fields. Version history is intentionally uncapped. A single stored extended-field value may not exceed 30000 UTF-8 bytes. The YAML `definition` string itself may not exceed 30000 characters (enforced on create, update, and `dry_run`).
 
   */
 export const TemplateWriteRequest = lazySchema(() =>
@@ -1256,7 +1256,7 @@ export const TemplateWriteRequest = lazySchema(() =>
       * The template definition as a YAML string: case defaults (name, severity, category, tags, assignees, connector, settings) and a `fields` array of inline field definitions or `$ref` entries pointing into the owner's field library. Stored field values appear on cases under `extended_fields` keys shaped `<field_name>_as_<storage_type>`.
 
       */
-    definition: z.string(),
+    definition: z.string().max(30000),
     /**
      * A description of the template.
      */
