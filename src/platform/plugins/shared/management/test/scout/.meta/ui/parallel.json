@@ -1,5 +1,9 @@
 {
-  "sha1": "3e6560834b077899ad61f2bae26b858a6d781dd5",
+  "sha1": "6e9275617838011b752b26e2c8d5b1c98c3509d3",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
   "tests": [
     {
       "id": "a85e30db18dd980-231d31d916345e0",
@@ -30,8 +34,8 @@
       }
     },
     {
-      "id": "a85e30db18dd980-1b731d7876730e0",
-      "title": "Stack Management — data section ccr_user sees cross_cluster_replication and the full cluster:manage data section",
+      "id": "a85e30db18dd980-13d9bb13023df2d",
+      "title": "Stack Management — data section ccr_user sees cross_cluster_replication and the cluster:manage data section",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -53,7 +57,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/management/test/scout/ui/parallel_tests/data_section.spec.ts",
-        "line": 109,
+        "line": 108,
         "column": 7
       }
     },
