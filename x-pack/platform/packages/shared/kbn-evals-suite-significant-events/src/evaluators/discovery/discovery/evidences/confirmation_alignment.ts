@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { SignalVerdict } from '@kbn/significant-events-schema';
 import type { DiscoveryEvaluator } from '../../types';
 
 const asSet = (values: string[]): Set<string> => new Set(values);
@@ -13,21 +14,26 @@ interface EventWithSignals {
   signals?: Array<{
     type?: string;
     metadata?: { rule_uuid?: string };
-    verification?: { assessment?: string };
+    verdict?: SignalVerdict;
   }>;
 }
 
 const getRuleSignals = (event: EventWithSignals) =>
   (event.signals ?? []).flatMap((signal) =>
     signal.type === 'detection' && signal.metadata?.rule_uuid
-      ? [{ ruleUuid: signal.metadata.rule_uuid, assessment: signal.verification?.assessment }]
+      ? [{ ruleUuid: signal.metadata.rule_uuid, verdict: signal.verdict }]
       : []
   );
 
 const sharedRuleCount = (event: EventWithSignals, expectedRuleUuids: Set<string>) => {
   const eventRuleUuids = new Set(
     getRuleSignals(event)
-      .filter((signal) => signal.assessment === 'active' || signal.assessment === 'inconclusive')
+      .filter(
+        (signal) =>
+          signal.verdict === 'confirms' ||
+          signal.verdict === 'inconclusive' ||
+          signal.verdict === 'not_checked'
+      )
       .map((signal) => signal.ruleUuid)
   );
   return [...eventRuleUuids].filter((ruleUuid) => expectedRuleUuids.has(ruleUuid)).length;
@@ -82,14 +88,16 @@ export const confirmationAlignmentEvaluator: DiscoveryEvaluator = {
       const ruleSignals = getRuleSignals(event);
       const actualRuleUuids = asSet(
         ruleSignals
-          .filter((signal) => signal.assessment === 'active')
+          .filter((signal) => signal.verdict === 'confirms')
           .map((signal) => signal.ruleUuid)
       );
       const nonMembersWithoutRejection = ruleSignals
         .filter(
           (signal) =>
             !expectedRuleSet.has(signal.ruleUuid) &&
-            (signal.assessment === 'active' || signal.assessment === 'inconclusive')
+            (signal.verdict === 'confirms' ||
+              signal.verdict === 'inconclusive' ||
+              signal.verdict === 'not_checked')
         )
         .map((signal) => signal.ruleUuid);
       const isExactMatch =
@@ -107,7 +115,7 @@ export const confirmationAlignmentEvaluator: DiscoveryEvaluator = {
             .sort()
             .join(', ')}]${
             nonMembersWithoutRejection.length > 0
-              ? `; expected non-blocking assessment for [${nonMembersWithoutRejection
+              ? `; expected non-blocking verdict for [${nonMembersWithoutRejection
                   .sort()
                   .join(', ')}]`
               : ''

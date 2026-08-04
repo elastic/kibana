@@ -402,7 +402,7 @@ describe('mergeSignalsLatestPerRule', () => {
     type: 'detection',
     stream_name: 'logs.test',
     description: 'Test signal',
-    verification: { assessment: 'active', lens: 'failure' },
+    verdict: 'confirms',
     metadata: {
       detection_id: `det-${ruleUuid}`,
       rule_uuid: ruleUuid,
@@ -440,6 +440,17 @@ describe('mergeSignalsLatestPerRule', () => {
     );
     expect(ruleUuids).toContain('rule-1');
     expect(ruleUuids).toContain('rule-2');
+  });
+
+  it('carries forward a non-blocking signal unchanged', () => {
+    const nonBlocking = { ...makeSignal('rule-1'), verdict: 'refutes' as const };
+    const result = mergeSignalsLatestPerRule(
+      [{ '@timestamp': TS_EARLIER, signals: [nonBlocking] }],
+      [makeSignal('rule-2')],
+      TS_SUBMITTED
+    );
+
+    expect(result).toContainEqual(nonBlocking);
   });
 
   it('prefers prior doc when its timestamp is newer than submitted', () => {
@@ -541,7 +552,7 @@ describe('eventsWriteBulkHandler — dedup mode', () => {
       {
         type: 'detection',
         metadata: { rule_uuid: 'rule-abc', rule_name: 'High Latency' },
-        verification: { assessment: 'active', lens: 'failure' },
+        verdict: 'confirms',
       } as never,
     ],
     dedup_window: 'now-24h',
@@ -559,7 +570,7 @@ describe('eventsWriteBulkHandler — dedup mode', () => {
           rule_name: 'High Latency',
           ...(changePointType !== undefined ? { change_point_type: changePointType } : {}),
         },
-        verification: { assessment: 'active', lens: 'failure' },
+        verdict: 'confirms',
       } as never,
     ],
   });
@@ -612,7 +623,7 @@ describe('eventsWriteBulkHandler — dedup mode', () => {
             rule_name: 'High Latency',
             change_point_type: 'spike',
           },
-          verification: { assessment: 'active', lens: 'failure' },
+          verdict: 'confirms',
         } as never,
       ],
     };
@@ -638,7 +649,7 @@ describe('eventsWriteBulkHandler — dedup mode', () => {
                 rule_name: 'High Latency',
                 change_point_type: 'dip',
               },
-              verification: { assessment: 'active', lens: 'failure' },
+              verdict: 'confirms',
             } as never,
           ],
         },
@@ -850,7 +861,7 @@ describe('eventsWriteBulkHandler — dedup mode', () => {
         {
           type: 'detection',
           metadata: { rule_uuid: 'rule-abc', rule_name: 'High Latency', change_point_type: '' },
-          verification: { assessment: 'active', lens: 'failure' },
+          verdict: 'confirms',
         } as never,
       ],
     };
@@ -954,6 +965,7 @@ describe('eventsWriteItemSchema', () => {
         type: 'detection',
         stream_name: 'logs.test',
         description: 'x'.repeat(MAX_SIGNAL_DESCRIPTION_LENGTH),
+        verdict: 'not_checked',
         metadata: {
           detection_id: 'det-1',
           rule_uuid: 'rule-1',

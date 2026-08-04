@@ -111,6 +111,7 @@ const mockSignal: SignalEntry = {
   type: 'detection',
   stream_name: 'logs.web-frontend',
   description: 'P95 latency on web-frontend rose from 120ms to 890ms.',
+  verdict: 'confirms',
   evidence: {
     esql_query: 'FROM logs.web-frontend\n| SORT @timestamp DESC',
     result: 'found',

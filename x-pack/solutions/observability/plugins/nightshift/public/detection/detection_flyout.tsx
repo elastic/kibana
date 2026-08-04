@@ -171,7 +171,7 @@ export function DetectionFlyout({
                 <EuiBadge color="default">{changePointLabel}</EuiBadge>
               </EuiFlexItem>
             )}
-            {signal?.verification?.assessment === 'non_incident' && (
+            {signal?.verdict === 'refutes' && (
               <EuiFlexItem grow={false}>
                 <EuiBadge color="warning">
                   {i18n.translate('xpack.nightshift.detectionFlyout.unconfirmedBadge', {

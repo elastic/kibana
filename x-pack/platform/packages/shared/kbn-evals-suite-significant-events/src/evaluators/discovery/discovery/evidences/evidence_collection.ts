@@ -26,7 +26,7 @@ const detectionSignalsByRuleUuid = (
 
 const hasQuietNoQueryDisposition = (signal: SignalEntry): boolean =>
   signal.evidence == null &&
-  signal.confirmed === undefined &&
+  signal.verdict === 'not_checked' &&
   /no backed query KI (?:matched|available)/i.test(signal.description);
 
 /** CODE evaluator: every input detection has one signal and evidence when an exact backed query exists. */

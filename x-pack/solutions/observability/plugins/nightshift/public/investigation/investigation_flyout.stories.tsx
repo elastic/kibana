@@ -8,6 +8,7 @@
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { EuiPageTemplate } from '@elastic/eui';
+import type { SignalEntry } from '@kbn/significant-events-schema';
 import {
   checkoutDetection,
   checkoutDetectionSignal,
@@ -50,9 +51,9 @@ interface NightshiftFlyoutStoryProps {
 }
 
 const noop = () => undefined;
-const unconfirmedDetectionSignal = {
+const unconfirmedDetectionSignal: SignalEntry = {
   ...checkoutDetectionSignal,
-  verification: { assessment: 'non_incident' as const, lens: 'failure' as const },
+  verdict: 'refutes',
 };
 
 const renderScenario = (scenario: FlyoutScenario): React.ReactElement => {

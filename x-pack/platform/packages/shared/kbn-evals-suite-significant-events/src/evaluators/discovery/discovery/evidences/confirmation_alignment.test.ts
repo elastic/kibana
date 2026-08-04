@@ -18,17 +18,10 @@ const evaluate = (
     metadata: null,
   });
 
-const detection = (ruleUuid: string, active?: boolean) => ({
+const detection = (ruleUuid: string, confirms?: boolean) => ({
   type: 'detection',
   metadata: { rule_uuid: ruleUuid },
-  ...(active === undefined
-    ? { verification: { assessment: 'inconclusive', lens: 'failure' } }
-    : {
-        verification: {
-          assessment: active ? 'active' : 'non_incident',
-          lens: 'failure',
-        },
-      }),
+  verdict: confirms === undefined ? 'inconclusive' : confirms ? 'confirms' : 'refutes',
 });
 
 describe('confirmationAlignmentEvaluator', () => {

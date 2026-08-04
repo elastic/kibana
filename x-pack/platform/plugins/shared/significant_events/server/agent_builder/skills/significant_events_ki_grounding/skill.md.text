@@ -88,7 +88,7 @@ For each match retain **correlation context**:
 - **For `kind: "query"`**: `description` and `evidence[]` define the expected incident mechanism, `features[]` references identify feature KIs.
 - **For `kind: "feature"`**: `properties` are stable identity and topology facts. `evidence[]` supports hypotheses. `meta` contains diagnostic hints, not current-state proof. `title`, `subtype`, and `tags[]` and classify context.
 
-This context may support or reject an incident match when rows are sparse. Detections with NO_MATCH do not proceed through Steps 3–5; emit a quiet signal entry for each (omit `confirmed`, `collected_at`, and `evidence`). Set `description` to a plain-language summary using `rule_name` — never the UUID mapping notation. Example: `"<rule_name>: no backed query KI matched this detection."`.
+This context may support or reject an incident match when rows are sparse. Detections with NO_MATCH do not proceed through Steps 3–5; emit a quiet signal entry for each with `verdict: "not_checked"` (omit `collected_at` and `evidence`). Set `description` to a plain-language summary using `rule_name` — never the UUID mapping notation. Example: `"<rule_name>: no backed query KI matched this detection."`.
 
 ---
 
@@ -112,11 +112,7 @@ Before: FROM logs.* METADATA _id, _source | WHERE body.text : "ECONNREFUSED" | L
 After:  FROM logs.* | WHERE @timestamp >= "2026-06-11T15:03:00Z" AND @timestamp <= NOW() | WHERE body.text : "ECONNREFUSED" | KEEP @timestamp, body.text | SORT @timestamp ASC | LIMIT 1
 ```
 
-**Budget — 1 call per matched rule, no exceptions.** Every rule with a matched backed query KI gets exactly 1 confirmation call. Never skip a rule's query based on overlap with other rules' features, expected grouping, or any downstream reasoning — confirmation is per-rule and unconditional.
-
-**Contradiction follow-up (exception, not routine):** run at most 1 second call for a rule only when its primary result contradicts the hypothesis — 0 rows when failure was expected, or only healthy/unrelated rows.
-
-Never retry completed checks or run a third wave. Note any checks skipped because the budget was exhausted in `summary`.
+**Budget — exactly 1 call per matched rule.** Every rule with a matched backed query KI gets exactly 1 confirmation call. Never skip a rule's query based on overlap with other rules' features, expected grouping, or any downstream reasoning — confirmation is per-rule and unconditional. Do not run contradiction follow-ups, retries, or a third wave. Note any checks skipped because the budget was exhausted in `summary`.
 
 **Deduplication before executing:**
 - Identical query bodies (after METADATA stripped and KEEP/SORT/LIMIT appended): execute once, write 1 `signals` entry per KI.
@@ -126,22 +122,24 @@ Never retry completed checks or run a third wave. Note any checks skipped becaus
 
 ### Step 4: Record Signal Verdicts
 
-**One `signals` entry per rule — never two**, regardless of how many calls you made for it. When a contradiction follow-up ran, the single entry narrates both attempts and its `evidence.esql_query`/`evidence.result` reflect the resolving (second) call. Each signal entry combines the detection metadata and the query result into one object. See `<output_format>` for the exact format.
+**One `signals` entry per rule — never two.** Each entry reflects the one confirmation query and combines its detection metadata with that query's result. See `<output_format>` for the exact format.
 
-1. **Write the Signal Verdict** using the compact **Found / Impact / Verdict** format (keep under 350 chars). **Found** names the row signature and failing target from the query result. **Impact** names who or what is blocked, degraded, or unaffected — outcome language only. **Verdict** is the label: `confirms`, `refutes`, or `inconclusive`. Do not put dependency chains, upstream causes, or topology in the description — record those in Step 5 `causal_features` and `blast_radius`. Budget order when over limit: shorten Found first; never omit Impact on `confirms`. Concretely:
-   - **Confirmed**: `"Found: dial tcp inventory-db:5432 connection refused. Impact: db-dependent requests blocked. Verdict: confirms."`
-   - **Inconclusive (signature mismatch)**: `"Found: upstream API error, not a metrics export failure. Impact: unrelated to metrics export. Verdict: inconclusive."`
-   - **Inconclusive (off-topic match)**: `"Found: different service/failure; substring match only. Verdict: inconclusive."`
-   - **Inconclusive (no match)**: `"Found: no match. Verdict: inconclusive."`
-   - **Refutes (healthy rows)**: `"Found: healthy transaction log, no error signature. Impact: none. Verdict: refutes."`
+1. **Write the Signal Description** using the compact **Found / Impact** format (keep under 350 chars). **Found** names the concrete row signature and failing target from the query result without reproducing raw sensitive values; refer to sensitive field names and exposure type only. Never say only that rows were returned. **Impact** names who or what is blocked, degraded, or unaffected — outcome language only. The structured `verdict` carries the conclusion. Do not put dependency chains, upstream causes, or topology in the description — record those in Step 5 `causal_features` and `blast_radius`. Budget order when over limit: shorten Found first; never omit Impact on `confirms`. Concretely:
+   - **Confirms**: `"Found: dial tcp inventory-db:5432 connection refused. Impact: db-dependent requests blocked."`
+   - **Off-topic (signature mismatch)**: `"Found: upstream API error, not a metrics export failure. Impact: unrelated to metrics export."`
+   - **Off-topic match**: `"Found: different service/failure; substring match only."`
+   - **Inconclusive (no match)**: `"Found: no match."`
+   - **Refutes (healthy rows)**: `"Found: healthy transaction log, no error signature. Impact: none."`
 
-   `result: found` means rows were returned — it does **not** mean the hypothesis is confirmed. Healthy or off-topic rows require `refutes` or `inconclusive` in the Verdict. A query may match a row via keyword substring without the row being on-topic; always verify the row content corroborates the KI's hypothesized service, error type, and mechanism before writing `confirms`.
+   `result: found` means a row was returned — it does **not** mean the hypothesis is confirmed. Healthy rows use `refutes`; a genuinely returned row that does not address the authored hypothesis uses `off_topic`. Empty or errored evidence uses `inconclusive`; never assign `off_topic` without a returned row. A query may match a row via keyword substring without the row being on-topic; always verify the row content corroborates the KI's hypothesized service, error type, and mechanism before writing `confirms`.
 
-2. **Set `confirmed` from the verdict and result**:
-   - `confirmed: true` only for a `confirms` verdict backed by a found row that directly supports the rule's failure, degradation, exposure, or evidenced cascade.
-   - `confirmed: false` for a healthy, positive, non-confirming, or unrelated found row. A successful row never confirms a failure.
-   - Omit `confirmed` for empty or errored evidence. Empty or errored evidence cannot establish a mechanism, impact, or severity tier; retain the result so the calling discovery agent can apply its failure or recovery lens.
-   - When an off-topic found row contains a concrete non-benign error, keep `confirmed: false` for this rule but preserve the error signature in the signal description. The calling discovery agent must assess that observed error as a separate incident candidate; an off-topic verdict rejects the rule hypothesis, not the observed error.
+2. **Set `verdict` from the row content and result**:
+   - `confirms` only for a found row that directly supports the rule's failure, degradation, exposure, or evidenced cascade.
+   - `refutes` for successful healthy, positive, or no-failure evidence under the applicable failure or recovery lens.
+   - `off_topic` for a found row that does not address the authored rule hypothesis.
+   - `inconclusive` for empty or errored evidence when a query ran. It cannot establish a mechanism, impact, or severity tier.
+   - `not_checked` only when no backed query KI exists.
+   - When an off-topic found row contains a concrete non-benign error, preserve only a redacted signature in the signal description. The calling discovery agent must assess that observed error as a separate incident candidate; an off-topic verdict rejects the rule hypothesis, not the observed error.
 
 3. **Technology fetch (optional call):** for detections with a `confirms` verdict and a connectivity or protocol failure type (connection refused, dial timeout, i/o timeout, protocol error, etc.), inspect each already-fetched entity feature KI's `properties.technology` — that value is the technology KI's `id` . Collect all such IDs across those detections, deduplicate, and exclude any already fetched. If any remain, spend the Step 1 optional call on a single `platform_sig_events_ki_search` with `kind: ["feature"]`, `feature_ids: [<all collected>]`, `feature_types: ["technology"]`, using the union of those detections' stream names. Batch all IDs into one call. Skip if the set is empty.
 
@@ -186,6 +184,7 @@ A shared mechanism in `query.evidence[]` may connect detections for incident gro
 
 1. **From `feature.type: "dependency"`**: include only when the edge connects the selected cause to an evidenced affected feature or propagation path, and current evidence shows the active condition affects this relationship. Preserve the fetched `source` → `target` edge when that evidence supports it, even when `target` is the causal_features. `query.evidence[]` and `feature.meta` are strong hypothesis seeds — read before querying. `meta.downstream_services`, query KI `evidence`, and service-reference properties may explain a relationship, but cannot create a `blast_radius` dependency entry without a qualifying dependency KI and current evidence of impact.
    Entry: `{ type: "dependency", feature_id, source, target, protocol?, stream_name? }`.
+   - If the confirmed failure also affects a resolved entity at this edge's `source` or `target`, emit that entity separately as a `type: "entity"` entry. The dependency edge does not replace the affected entity entry; include both when both are grounded by current evidence.
 
 2. **From `feature.type: "infrastructure"`**: include only when current evidence, interpreted through the exact-query KI, shows the active condition affects the infrastructure component or its workloads. Hosting the failing service alone is insufficient.
    Entry: `{ type: "infrastructure", feature_id, title?, workloads, stream_name? }`.
@@ -196,22 +195,22 @@ A shared mechanism in `query.evidence[]` may connect detections for incident gro
 4. **From `feature.type: "technology"`**: include only when the Signal Verdict is `confirms` and the confirmed failure type (connection failure, protocol error, etc.) is the specific concern the technology KI documents (e.g., a connection-pool KI when the verdict confirms a connectivity failure). Derive the owning service from `feature.meta`, `query.evidence[]`, or the matched query KI's context. Use that service as `source` and the technology KI's `id` as `target`.
    Entry: `{ type: "dependency", feature_id: <technology id>, source: <owning service>, target: <technology id>, stream_name? }`.
 
-5. **Cross-rule error evidence**: when the Signal Verdict is `inconclusive` because the query result is off-topic (the row does not match the rule's expected signature), but the row contains a clear error signal — connection error, HTTP 5xx, exception, or I/O timeout — naming a specific service, and that service matches a fetched feature KI (entity or dependency endpoint), add that service as a `type: entity` blast_radius entry. Do not promote it to `causal_features` — the matched rule did not confirm it as the cause. Gate: the service name must match a feature KI fetched anywhere in this batch invocation (any detection's ki_search results); do not infer services from noisy or ambiguous log text.
+5. **Cross-rule error evidence**: when the Signal Verdict is `off_topic` because the found row does not match the rule's expected signature, but the row contains a clear error signal — connection error, HTTP 5xx, exception, or I/O timeout — naming a specific service, and that service matches a fetched feature KI (entity or dependency endpoint), add that service as a `type: entity` blast_radius entry. Do not promote it to `causal_features` — the matched rule did not confirm it as the cause. Gate: the service name must match a feature KI fetched anywhere in this batch invocation (any detection's ki_search results); do not infer services from noisy or ambiguous log text.
    Entry: `{ type: "entity", feature_id: <matched feature KI id>, name: <service name>, stream_name? }`.
 
 </procedure>
 
 <output_format>
 
-**signals** — always emit; one entry per detection rule — every rule that ran `platform_core_execute_esql` plus every "no confirming query available" rule. `[]` only when no ES|QL calls were made and no rules were active. Never emit two entries for the same rule; when a contradiction follow-up ran, the single entry reflects the resolving call.
+**signals** — always emit; one entry per detection rule — every rule that ran `platform_core_execute_esql` plus every "no confirming query available" rule. `[]` only when no ES|QL calls were made and no rules were active. Never emit two entries for the same rule; each entry reflects the one confirmation query.
 
 Each entry:
 - `type`: always `"detection"`
 - `stream_name`: the detection rule's stream
-- `description`: Signal Verdict narrative
-- `confirmed`: `true` / `false` when verified; omit when verification failed or did not run
+- `description`: Signal Verdict narrative; never include raw sensitive values from the query row
+- `verdict`: `confirms` | `refutes` | `off_topic` | `inconclusive` | `not_checked`
 - `collected_at`: ISO-8601 query timestamp; omit for quiet-rule entries
-- `evidence`: `{ esql_query, result }` when a query ran; omit for quiet rules. `result`: `"found"` | `"empty"` | `"error"`
+- `evidence`: `{ esql_query, result }` for the one confirmation query; omit for quiet rules. `result`: `"found"` | `"empty"` | `"error"`
 - `metadata`: detection input
 - `causal_features`: array with Causal Features entries; emit `[]` when empty
 - `blast_radius`: array with Blast Radius entries, emit [] when empty

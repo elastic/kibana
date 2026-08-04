@@ -36,7 +36,7 @@ const EVIDENCE_DESCRIPTION_SHARED_CRITERIA: EvaluationCriterion[] = [
 const EVIDENCE_DESCRIPTION_CRITERIA: EvaluationCriterion[] = [
   {
     id: 'evidence_description_is_grounded_check',
-    text: 'Every signal the agent verified this cycle (fresh entries — the ones at or near the newest `collected_at` — where it set `confirmed` to true or false) must use the grounding contract: "Found: … Impact: … Verdict: …". Found must identify the observed row signature and target, Impact must state the outcome for the affected operation, and Verdict must be `confirms`, `refutes`, or `inconclusive`. Do not add process narration or a "Testing: … Expected: …" preamble. Entries carried forward unchanged from prior cycles (older `collected_at`) are acceptable in any format. Signals without a confirmed value were not verified and are exempt.',
+    text: 'Every fresh signal must use the grounding contract: description states the observed row signature and impact, while `verdict` is `confirms`, `refutes`, `off_topic`, `inconclusive`, or `not_checked`. Do not repeat a Verdict label in the description or add process narration and a "Testing: … Expected: …" preamble. Entries carried forward unchanged from prior cycles (older `collected_at`) are acceptable in any format.',
     score: 1,
   },
   ...EVIDENCE_DESCRIPTION_SHARED_CRITERIA,
@@ -78,7 +78,7 @@ const NARRATIVE_FIELDS_CRITERIA: EvaluationCriterion[] = [
 const SIGNAL_EVIDENCE_CONSISTENCY_CRITERIA: EvaluationCriterion[] = [
   {
     id: 'signal_confirmation_matches_evidence',
-    text: 'Set `confirmed: true` only when a found row directly confirms the rule’s failure, degradation, exposure, or evidenced cascade. A healthy, positive, unrelated, empty, errored, or ambiguous result must never be `confirmed: true`; use `false` for verified healthy/positive/unrelated rows and omit it for empty or errored evidence.',
+    text: 'Use `confirms` only when a found row directly supports the rule’s failure, degradation, exposure, or evidenced cascade. Use `refutes` for verified healthy, positive, or no-failure evidence; `off_topic` for unrelated found rows; `inconclusive` when a query cannot establish a conclusion; and `not_checked` when no query ran.',
     score: 1,
   },
   {

@@ -9,7 +9,7 @@ import type { DiscoveryEvaluator } from '../../types';
 import { summarizeEsqlGrounding } from '../../utils/tool_usage';
 
 /**
- * CODE evaluator: every `open` event must carry an `active` signal and the agent must
+ * CODE evaluator: every `open` event must carry a `confirms` signal and the agent must
  * have run `execute_esql` this cycle. Score = valid open / open; null when none open.
  */
 export const confirmedEvidencesEvaluator: DiscoveryEvaluator = {
@@ -24,7 +24,7 @@ export const confirmedEvidencesEvaluator: DiscoveryEvaluator = {
       return Promise.resolve({
         score: null,
         label: 'unavailable',
-        explanation: 'No open — active-signal invariant does not apply',
+        explanation: 'No open — confirms-signal invariant does not apply',
       });
     }
 
@@ -37,16 +37,16 @@ export const confirmedEvidencesEvaluator: DiscoveryEvaluator = {
 
     openEvents.forEach((event, i) => {
       const signals = (event.signals ?? []).filter((s) => s.type === 'detection');
-      const hasActiveSignal = signals.some((s) => s.verification?.assessment === 'active');
+      const hasConfirmsSignal = signals.some((s) => s.verdict === 'confirms');
 
-      if (hasActiveSignal && sufficientEsqlCoverage) {
+      if (hasConfirmsSignal && sufficientEsqlCoverage) {
         satisfied++;
       } else if (!sufficientEsqlCoverage) {
         issues.push(
           `[${i}] agent ran ${esqlCallCount} execute_esql call(s) for ${openEvents.length} open event(s) — insufficient per-event coverage`
         );
       } else {
-        issues.push(`[${i}] open with no active signal`);
+        issues.push(`[${i}] open with no confirms signal`);
       }
     });
 
@@ -56,7 +56,7 @@ export const confirmedEvidencesEvaluator: DiscoveryEvaluator = {
       explanation:
         issues.length > 0
           ? `${issues.join('; ')} (score=${score.toFixed(2)})`
-          : `All ${openEvents.length} open event(s) backed by active, grounding-verified signals`,
+          : `All ${openEvents.length} open event(s) backed by confirms, grounding-verified signals`,
     });
   },
 };

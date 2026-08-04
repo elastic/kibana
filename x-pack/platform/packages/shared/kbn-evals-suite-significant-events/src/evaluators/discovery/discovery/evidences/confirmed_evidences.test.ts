@@ -52,7 +52,7 @@ describe('confirmedEvidencesEvaluator', () => {
           {
             type: 'detection',
             description: 'confirms.',
-            verification: { assessment: 'active', lens: 'failure' },
+            verdict: 'confirms',
           },
         ],
       },
@@ -86,7 +86,7 @@ describe('confirmedEvidencesEvaluator', () => {
           {
             type: 'detection',
             description: 'confirms.',
-            verification: { assessment: 'active', lens: 'failure' },
+            verdict: 'confirms',
           },
         ],
       },
@@ -103,7 +103,7 @@ describe('confirmedEvidencesEvaluator', () => {
           {
             type: 'detection',
             description: 'confirms.',
-            verification: { assessment: 'active', lens: 'failure' },
+            verdict: 'confirms',
           },
         ],
       },
@@ -114,7 +114,7 @@ describe('confirmedEvidencesEvaluator', () => {
           {
             type: 'detection',
             description: 'confirms.',
-            verification: { assessment: 'active', lens: 'failure' },
+            verdict: 'confirms',
           },
         ],
       },
@@ -132,7 +132,7 @@ describe('confirmedEvidencesEvaluator', () => {
           {
             type: 'detection',
             description: 'confirms.',
-            verification: { assessment: 'active', lens: 'failure' },
+            verdict: 'confirms',
           },
         ],
       },

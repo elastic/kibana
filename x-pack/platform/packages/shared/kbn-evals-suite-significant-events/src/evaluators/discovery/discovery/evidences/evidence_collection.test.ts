@@ -26,8 +26,9 @@ const detectionSignal = (
   description:
     evidence === 'quiet'
       ? 'No backed query KI matched this detection.'
-      : 'Testing: something. Expected: error. Found: 1 row. Verdict: confirms.',
-  ...(evidence === 'found' ? { confirmed: true } : {}),
+      : 'Found: checkout payment timeout to payment API. Impact: checkout requests fail.',
+  verdict:
+    evidence === 'found' ? 'confirms' : evidence === 'quiet' ? 'not_checked' : 'inconclusive',
   stream_name: 'logs',
   ...(evidence === 'found'
     ? { evidence: { esql_query: 'FROM logs | LIMIT 1', result: 'found' as const } }
