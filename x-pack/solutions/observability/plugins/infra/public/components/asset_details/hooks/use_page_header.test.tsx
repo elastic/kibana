@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { RouteState } from '@kbn/metrics-data-access-plugin/public';
 import { renderHook } from '@testing-library/react';
 import { usePageHeader } from './use_page_header';
 import { useTabSwitcherContext } from './use_tab_switcher';
@@ -14,14 +15,29 @@ import { usePluginConfig } from '../../../containers/plugin_config_context';
 import { useAssetDetailsRenderPropsContext } from './use_asset_details_render_props';
 import { ContentTabIds, type Tab } from '../types';
 
-const mockUseHistory = jest.fn(() => ({
+interface MockHistory {
+  goBack: jest.Mock;
+  length: number;
+}
+
+interface MockLocation {
+  state: RouteState | null;
+}
+
+const mockOriginRouteState: RouteState = {
+  originAppId: 'metrics',
+  originPathname: '/hosts',
+  originSearch: '?kuery=host.name:%20foo',
+};
+
+const mockUseHistory = jest.fn<MockHistory, []>(() => ({
   goBack: jest.fn(),
   length: 0,
 }));
-const mockUseLocation = jest.fn(() => ({
+const mockUseLocation = jest.fn<MockLocation, []>(() => ({
   state: null,
 }));
-const mockChromeNextIsEnabled = jest.fn(() => false);
+const mockChromeNextIsEnabled = jest.fn<boolean, []>(() => false);
 
 jest.mock('react-router-dom', () => ({
   useHistory: () => mockUseHistory(),
@@ -207,11 +223,7 @@ describe('usePageHeader', () => {
     it('should hide the Return breadcrumb when Chrome Next is enabled', () => {
       mockChromeNextIsEnabled.mockReturnValue(true);
       mockUseLocation.mockReturnValue({
-        state: {
-          originAppId: 'metrics',
-          originPathname: '/hosts',
-          originSearch: '?kuery=host.name:%20foo',
-        },
+        state: mockOriginRouteState,
       });
 
       const { result } = renderHook(() => usePageHeader([mockOverviewTab], []));
@@ -222,11 +234,7 @@ describe('usePageHeader', () => {
     it('should show the Return breadcrumb for classic chrome when origin state exists', () => {
       mockChromeNextIsEnabled.mockReturnValue(false);
       mockUseLocation.mockReturnValue({
-        state: {
-          originAppId: 'metrics',
-          originPathname: '/hosts',
-          originSearch: '?kuery=host.name:%20foo',
-        },
+        state: mockOriginRouteState,
       });
 
       const { result } = renderHook(() => usePageHeader([mockOverviewTab], []));
