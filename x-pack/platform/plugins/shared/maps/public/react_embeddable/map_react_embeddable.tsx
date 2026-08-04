@@ -26,7 +26,6 @@ import {
   distinctUntilChanged,
   map,
   merge,
-  share,
 } from 'rxjs';
 import {
   ON_APPLY_FILTER,
@@ -152,7 +151,7 @@ export const mapEmbeddableFactory: EmbeddablePublicDefinition<MapEmbeddableState
         reduxSync.anyStateChange$,
         titleManager.anyStateChange$,
         timeRangeManager.anyStateChange$
-      ).pipe(share()),
+      ),
       getComparators: () => {
         return {
           ...crossPanelActionsComparators,

@@ -228,7 +228,6 @@ export function initializeReduxSync({
       ),
       mapCenterAndZoom$.pipe(
         skip(1),
-        // distinctUntilChanged(reduxSyncComparators.mapCenter as ComparatorFunction),
         map(() => undefined)
       ),
       openTOCDetails$.pipe(

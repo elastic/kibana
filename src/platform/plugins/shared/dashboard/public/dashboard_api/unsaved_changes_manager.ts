@@ -7,15 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  BehaviorSubject,
-  combineLatest,
-  debounceTime,
-  map,
-  of,
-  share,
-  type Observable,
-} from 'rxjs';
+import { BehaviorSubject, combineLatest, debounceTime, map, of, type Observable } from 'rxjs';
 
 import type {
   HasLastSavedChildState,
@@ -86,8 +78,7 @@ export function initializeUnsavedChangesManager({
   ]).pipe(
     map(([settings, unifiedSearch, layout, projectRouting, approximation]) => {
       return { ...settings, ...unifiedSearch, ...layout, ...projectRouting, ...approximation };
-    }),
-    share()
+    })
   );
 
   const unsavedChangesSubscription = combineLatest([viewMode$, dashboardStateChanges$])
