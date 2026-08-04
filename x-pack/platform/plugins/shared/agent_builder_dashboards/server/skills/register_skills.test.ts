@@ -43,4 +43,17 @@ describe('registerSkills', () => {
       'provide a new `chartType` when the request changes the chart family'
     );
   });
+
+  describe('panel editing reference', () => {
+    const reference = (dashboardManagementSkill.referencedContent ?? []).find(
+      ({ name }) => name === 'panel-editing'
+    );
+
+    it('tells the skill body to read the file before every edit', () => {
+      expect(dashboardManagementSkill.content).toContain(
+        `${reference?.relativePath}/${reference?.name}.md`
+      );
+      expect(dashboardManagementSkill.content).toContain('before any `edit_panels` call');
+    });
+  });
 });

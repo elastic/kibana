@@ -18,9 +18,13 @@ export const setMetadataOperation = defineOperation({
       .max(256)
       .optional()
       .describe(
-        "Non-empty dashboard title. If the current title is empty, missing, or a placeholder, invent one from the dashboard's contents."
+        "Non-empty dashboard title. Required for a new dashboard. Invent one from the dashboard's contents when the current title is empty, missing, or the `User Dashboard` placeholder."
       ),
-    description: z.string().max(2048).optional(),
+    description: z
+      .string()
+      .max(2048)
+      .optional()
+      .describe('What the dashboard shows, for someone browsing a list of saved dashboards.'),
     time_range: timeRangeSchema
       .optional()
       .describe(
