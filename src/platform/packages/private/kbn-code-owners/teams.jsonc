@@ -191,13 +191,13 @@
   },
   {
     "id": "cloud-services",
-    "name": "SecurityCloud Services",
+    "name": "Security Cloud Services",
     "areas": [
       "security"
     ],
     "github": {
       "team": "elastic/cloud-services",
-      "label": "Team:Cloud Services"
+      "label": "Team:Security-Cloud Services"
     }
   },
   {

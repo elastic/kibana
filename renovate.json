@@ -2168,7 +2168,7 @@
       "matchDepNames": ["seedrandom", "@types/seedrandom"],
       "reviewers": ["team:cloud-services"],
       "matchBaseBranches": ["main"],
-      "addLabels": ["Team:Cloud Services"],
+      "addLabels": ["Team:Security-Cloud Services"],
       "minimumReleaseAge": "14 days",
       "enabled": true
     },
