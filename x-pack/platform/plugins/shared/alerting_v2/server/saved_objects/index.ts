@@ -102,11 +102,6 @@ export function registerSavedObjects({
     attributesToIncludeInAAD: new Set(ActionPolicyAttributesIncludedInAAD),
   });
 
-  encryptedSavedObjects.registerType({
-    type: API_KEY_PENDING_INVALIDATION_TYPE,
-    attributesToEncrypt: new Set(['apiKeyId', 'uiamApiKey']),
-    attributesToIncludeInAAD: new Set(['createdAt']),
-  });
 }
 
 export type { ActionPolicySavedObjectAttributes } from './schemas/action_policy_saved_object_attributes';

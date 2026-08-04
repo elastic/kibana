@@ -14,10 +14,8 @@ import type { SecurityServiceStart } from '@kbn/core-security-server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { RunContext, RunResult } from '@kbn/task-manager-plugin/server/task';
 import { runInvalidate } from '@kbn/task-manager-plugin/server';
-import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import { inject, injectable } from 'inversify';
 import { ApiKeyServiceSavedObjectsClientToken } from '../../services/api_key_service/tokens';
-import { EncryptedSavedObjectsClientToken } from '../../dispatcher/steps/dispatch_step_tokens';
 import { API_KEY_PENDING_INVALIDATION_TYPE } from '../../../saved_objects';
 import type { PluginConfig } from '../../../config';
 import type { AlertingServerStartDependencies } from '../../../types';
@@ -40,8 +38,6 @@ export class ApiKeyInvalidationTaskRunner {
     @inject(CoreStart('security')) private readonly securityCore: SecurityServiceStart,
     @inject(PluginStart<AlertingServerStartDependencies['security']>('security'))
     private readonly security: SecurityPluginStart,
-    @inject(EncryptedSavedObjectsClientToken)
-    private readonly encryptedSavedObjectsClient: EncryptedSavedObjectsClient,
     @inject(PluginInitializer('config'))
     pluginConfigAccessor: PluginInitializerContext<PluginConfig>['config']
   ) {
@@ -59,7 +55,6 @@ export class ApiKeyInvalidationTaskRunner {
 
     try {
       const result = await runInvalidate({
-        encryptedSavedObjectsClient: this.encryptedSavedObjectsClient,
         invalidateApiKeyFn: this.security?.authc.apiKeys.invalidateAsInternalUser,
         invalidateUiamApiKeyFn: this.securityCore.authc.apiKeys.uiam?.invalidate,
         logger: this.logger,
