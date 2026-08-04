@@ -94,8 +94,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       afterEach(async () => {
         await common.navigateToApp('dashboard');
-        await testSubjects.click('discard-unsaved-New-Dashboard');
-        await testSubjects.click('confirmModalConfirmButton');
+        const discardButtonExists = await testSubjects.exists('discard-unsaved-New-Dashboard');
+        if (discardButtonExists) {
+          await testSubjects.click('discard-unsaved-New-Dashboard');
+          await testSubjects.click('confirmModalConfirmButton');
+        }
       });
 
       it('should be restored when opening from the background search', async () => {
