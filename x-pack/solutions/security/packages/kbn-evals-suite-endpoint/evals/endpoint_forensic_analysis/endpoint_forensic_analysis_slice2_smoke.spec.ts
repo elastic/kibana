@@ -5,11 +5,12 @@
  * 2.0.
  */
 
+import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import { tags } from '@kbn/scout';
 import { evaluate } from '../../src/evaluate';
 import { waitForEndpointPackage } from '../../src/data_generators/endpoint_data';
 import { seedForensicTimeline } from '../../src/data_generators/forensic_data';
-import { cleanupSeededData } from '../../src/data_generators/cleanup';
+import { cleanupForensicData } from '../../src/data_generators/cleanup';
 
 /**
  * Slice 2 Osquery tool sequences (minimum-sufficient per golden-dataset reconciliation).
@@ -32,20 +33,23 @@ evaluate.describe(
   'Endpoint Forensic Analysis — slice 2 Osquery smoke',
   { tag: tags.stateful.classic },
   () => {
-    evaluate.beforeAll(async ({ kbnClient, esClient, internalEsClient, chatClient, log }) => {
+    evaluate.beforeAll(async ({ kbnClient, esClient, internalEsClient, agentBuilderClient, log }) => {
       await waitForEndpointPackage(kbnClient, esClient, log);
-      await cleanupSeededData({ esClient, internalEsClient });
+      await cleanupForensicData({ esClient, internalEsClient });
       await seedForensicTimeline({ esClient }, log);
 
       try {
-        await chatClient.converse({ message: 'hello' });
+        await agentBuilderClient.converse({
+          agentId: agentBuilderDefaultAgentId,
+          input: 'hello',
+        });
       } catch (e) {
         log.warning(`Warmup failed: ${e}`);
       }
     });
 
     evaluate.afterAll(async ({ esClient, internalEsClient }) => {
-      await cleanupSeededData({ esClient, internalEsClient });
+      await cleanupForensicData({ esClient, internalEsClient });
     });
 
     evaluate(

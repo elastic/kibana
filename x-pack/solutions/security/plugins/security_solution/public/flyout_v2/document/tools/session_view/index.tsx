@@ -11,8 +11,6 @@ import { css } from '@emotion/react';
 import { EuiFlyoutBody, EuiFlyoutHeader, useEuiTheme } from '@elastic/eui';
 import { type DataTableRecord } from '@kbn/discover-utils';
 import type { Process, ProcessEvent } from '@kbn/session-view-plugin/common';
-import { useHistory } from 'react-router-dom';
-import { useStore } from 'react-redux-v7';
 import { DocumentToolsFlyoutHeader } from '../../../shared/components/document_tools_flyout_header';
 import type { CellActionRenderer } from '../../../shared/components/cell_actions';
 import type { SessionViewConfig } from '../../../../../common/types/session_view';
@@ -21,7 +19,7 @@ import { PREFIX } from '../../../../flyout/shared/test_ids';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useSessionViewConfig } from './hooks/use_session_view_config';
-import { flyoutProviders } from '../../../shared/components/flyout_provider';
+import { useOpenFlyout } from '../../../shared/hooks/use_open_flyout';
 import { useDefaultDocumentFlyoutProperties } from '../../../shared/hooks/use_default_flyout_properties';
 import { buildFlyoutNavTitle } from '../../../shared/utils/build_flyout_nav_title';
 import {
@@ -30,7 +28,14 @@ import {
   SESSION_VIEW_TITLE,
 } from '../../../shared/constants/flyout_titles';
 import { SessionViewDetails } from './components/session_view_details';
-import { FlyoutSessionContextProvider, useFlyoutSessionContext } from '../../../session_context';
+import { useFlyoutSessionContext } from '../../../session_context';
+import {
+  FLYOUT_ORIGIN,
+  FLYOUT_SESSION_KIND,
+  FLYOUT_SURFACE,
+  FLYOUT_TOOL,
+  FLYOUT_TYPE,
+} from '../../../../common/lib/telemetry';
 
 export const SESSION_VIEW_TEST_ID = `${PREFIX}SessionView` as const;
 
@@ -70,10 +75,8 @@ export interface SessionViewProps {
 export const SessionView: FC<SessionViewProps> = memo(
   ({ hit, jumpToEntityId, jumpToCursor, renderCellActions, onAlertUpdated }) => {
     const { euiTheme } = useEuiTheme();
-    const { services } = useKibana();
-    const { overlays, sessionView } = services;
-    const store = useStore();
-    const history = useHistory();
+    const { sessionView } = useKibana().services;
+    const open = useOpenFlyout();
     const defaultFlyoutProperties = useDefaultDocumentFlyoutProperties();
     const { historyKey } = useFlyoutSessionContext();
     const { openDocumentFlyoutFromIndexAsChild } = useFlyoutApi();
@@ -97,6 +100,7 @@ export const SessionView: FC<SessionViewProps> = memo(
           indexName: alertIndex,
           renderCellActions,
           onAlertUpdated,
+          origin: FLYOUT_ORIGIN.SESSION_VIEW_ALERT,
         }),
       [openDocumentFlyoutFromIndexAsChild, renderCellActions, onAlertUpdated]
     );
@@ -137,48 +141,44 @@ export const SessionView: FC<SessionViewProps> = memo(
 
         const processName = selectedProcess.getDetails().process?.name;
 
-        overlays.openSystemFlyout(
-          flyoutProviders({
-            services,
-            store,
-            history,
-            children: (
-              <FlyoutSessionContextProvider value={{ session: 'inherit', historyKey }}>
-                <SessionViewDetails
-                  selectedProcess={selectedProcess}
-                  index={sessionViewConfig.index}
-                  sessionEntityId={sessionViewConfig.sessionEntityId}
-                  sessionStartTime={sessionViewConfig.sessionStartTime}
-                  investigatedAlertId={sessionViewConfig.investigatedAlertId}
-                  renderCellActions={renderCellActions}
-                  onJumpToEvent={handleJumpToEvent}
-                  onAlertUpdated={onAlertUpdated}
-                />
-              </FlyoutSessionContextProvider>
-            ),
-          }),
+        open(
+          <SessionViewDetails
+            selectedProcess={selectedProcess}
+            index={sessionViewConfig.index}
+            sessionEntityId={sessionViewConfig.sessionEntityId}
+            sessionStartTime={sessionViewConfig.sessionStartTime}
+            investigatedAlertId={sessionViewConfig.investigatedAlertId}
+            renderCellActions={renderCellActions}
+            onJumpToEvent={handleJumpToEvent}
+            onAlertUpdated={onAlertUpdated}
+          />,
           {
             ...defaultFlyoutProperties,
             historyKey,
-            session: 'inherit',
+            session: FLYOUT_SESSION_KIND.INHERIT,
             title: buildFlyoutNavTitle(formatFlyoutTitle(SESSION_VIEW_DETAILS_TITLE, processName)),
-          }
+          },
+          {
+            surface: FLYOUT_SURFACE.TOOL,
+            tool: FLYOUT_TOOL.SESSION_VIEW,
+            flyoutType: FLYOUT_TYPE.DOCUMENT,
+            session: FLYOUT_SESSION_KIND.INHERIT,
+            origin: FLYOUT_ORIGIN.SESSION_VIEW_PROCESS,
+          },
+          FLYOUT_SESSION_KIND.INHERIT
         );
       },
       [
         historyKey,
         defaultFlyoutProperties,
         handleJumpToEvent,
-        history,
         onAlertUpdated,
-        overlays,
+        open,
         renderCellActions,
-        services,
         sessionViewConfig?.index,
         sessionViewConfig?.investigatedAlertId,
         sessionViewConfig?.sessionEntityId,
         sessionViewConfig?.sessionStartTime,
-        store,
       ]
     );
 

@@ -19,7 +19,7 @@ const AppMenuComponent = lazy(async () => {
 });
 
 export interface AppMenuProps {
-  menu?: AppMenuConfig & { isCollapsed?: boolean };
+  menu?: AppMenuConfig;
   docLink?: string;
   showAddIntegrations?: boolean;
 }
@@ -36,11 +36,7 @@ export const AppMenu = React.memo<AppMenuProps>(({ menu, docLink, showAddIntegra
   if (menu || hasStaticItems) {
     return (
       <Suspense>
-        <AppMenuComponent
-          config={menu}
-          staticItems={staticItems}
-          isCollapsed={menu?.isCollapsed ?? false}
-        />
+        <AppMenuComponent config={menu} staticItems={staticItems} />
       </Suspense>
     );
   }

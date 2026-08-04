@@ -55,6 +55,9 @@ export const EntityDetailsHighlightsResponse = lazySchema(() =>
      * The highlights of the entity.
      */
     summary: z.object({
+      /**
+       * Assigned asset criticality only. Empty when unassigned.
+       */
       assetCriticality: z.array(z.object({}).catchall(z.unknown())).optional(),
       riskScore: z.array(z.object({}).catchall(z.unknown())).optional(),
       vulnerabilities: z.array(z.object({}).catchall(z.unknown())).optional(),

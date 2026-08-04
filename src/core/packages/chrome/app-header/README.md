@@ -13,11 +13,11 @@ the page cannot safely own the header placement yet.
 
 ## Folder layout
 
-Region components (back button, badges, tabs, metadata, app menu, title actions, etc.) live as flat
-files directly in `src/app_header/`, with shared data resolution in `src/app_header/hooks/`. A region
-graduates to its own folder only when it gains real complexity of its own — an internal component
-split, dedicated stories, or a README. Today only `title_area/` meets that bar. Keep new regions flat
-until they earn a folder; don't pre-folder simple slots.
+Region components (back button, badges, tabs, description, metadata, app menu, title actions, etc.)
+live as flat files directly in `src/app_header/`, with shared data resolution in
+`src/app_header/hooks/`. A region graduates to its own folder only when it gains real complexity of
+its own — an internal component split, dedicated stories, or a README. Today only `title_area/` meets
+that bar. Keep new regions flat until they earn a folder; don't pre-folder simple slots.
 
 ## Which API should I use?
 
@@ -32,6 +32,26 @@ with other hooks. Most apps should use `ChromeAppHeaderRegistration`.
 
 Use `chrome.next.appHeader.set` only when a React adapter is not practical. It is the imperative
 primitive behind the React APIs.
+
+## Back navigation
+
+Pass the destination as `back`. Kibana handles same-origin `href` values as SPA navigation, so an
+`onClick` that navigates to the same URL is unnecessary:
+
+```tsx
+<AppHeader back="/app/my-app" title="Details" />
+```
+
+Use the object form when the back button needs a destination label or click behavior that differs
+from following `href`. If the handler replaces navigation, call `event.preventDefault()`.
+
+## Discover tabs
+
+Discover uses `DiscoverAppHeader` from `@kbn/app-header/discover` to place its UnifiedTabs bar beside
+the title. This is a Discover-specific layout exception; other apps should use the structured
+`tabs` or `badges` props on `AppHeader`. The public header components discard undeclared props, so
+this internal title slot cannot be forced through a type suppression. When the tabs bar is present,
+it owns the bottom separator and title actions remain visible without hovering.
 
 ## Editable titles
 
@@ -54,11 +74,38 @@ Pass a title object when the page title can be renamed from the header:
 The header renders a normal heading until the user edits it. Pressing Enter or leaving the input
 saves, Escape cancels, and returning a string from `onSave` keeps edit mode open.
 
+## Description and metadata
+
+Use `description` only when short explanatory text materially helps users understand the page. It
+accepts a string:
+
+```tsx
+<AppHeader
+  title="Data federation"
+  description="Query and analyze data stored across multiple Elasticsearch clusters."
+/>
+```
+
+To add a URL rendered with the fixed label "Learn more", use the object form:
+
+```tsx
+<AppHeader
+  title="Data federation"
+  description={{
+    text: 'Query and analyze data stored across multiple Elasticsearch clusters.',
+    learnMoreUrl: documentationUrl,
+  }}
+/>
+```
+
+Description and `metadata` share the secondary row and are mutually exclusive. Use metadata for
+structured entity facts such as status, owner, or creation time. Documentation links that are not
+part of a necessary description belong in the app menu via `docLink`.
+
 ## Title size
 
-The title is `xs` for a single-row header and `s` when the header has a second row (tabs or a
-metadata row), where an `xs` title looks too small in the taller header. This is automatic — there
-is no size knob to set.
+The title is `xs` with `compact` spacing and `s` with every other spacing mode. This is automatic —
+there is no size knob to set.
 
 ## Spacing
 

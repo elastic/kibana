@@ -75,7 +75,10 @@ export const endpointForensicAnalysisSkill = defineSkillType({
     'Endpoint DFIR forensic reconstruction (read-only): patient zero identification across enrolled hosts, ' +
     'host-scoped attack timelines, lateral movement chains between named hosts, and persistence enumeration. ' +
     'Use for incident-scoped questions naming specific hosts or outbreaks — NOT fleet-wide proactive hunts (use threat-hunting). ' +
-    'NOT alert triage by alert ID (use alert-analysis). NOT response actions (use endpoint-response-actions).',
+    'NOT alert triage by alert ID (use alert-analysis). NOT host isolation, kill process, or file retrieve (direct the analyst to Endpoint response actions in Security — no dedicated Agent Builder skill yet). ' +
+    'NOT conflicting/incompatible antivirus or security software, policy or configuration failures, endpoint health or missed check-ins, ' +
+    'performance/resource troubleshooting, or output/integration failures — even when the question names a specific host ' +
+    '(use elastic-defend-configuration-troubleshooting).',
   content: `# Endpoint Forensic Analysis
 
 ## When to Use
@@ -86,14 +89,21 @@ Load when the analyst asks about a **specific host or incident** and needs foren
 - Lateral movement chain between hosts
 - Persistence mechanism enumeration
 
+Naming a specific host is **not** sufficient on its own — the question must also require forensic reconstruction (timeline, patient zero, lateral movement, persistence), not configuration/health/software-conflict diagnosis. See "Do not load" below.
+
 Do **not** load for:
 - Fleet-wide proactive hunts → threat-hunting
 - Alert triage from alert id only → alert-analysis
-- Host isolation / kill process / file retrieve → endpoint-response-actions
+- Host isolation / kill process / file retrieve → tell the analyst to use **Endpoint response actions** in Security (Fleet / Endpoint details). Do not invoke response-action tools from this skill.
+- Conflicting or incompatible security software, including antivirus/AV software (e.g. "does host X have conflicting antivirus", third-party AV conflicts) → elastic-defend-configuration-troubleshooting. Naming a specific host does **not** make this a forensic question — antivirus/AV conflict detection is always configuration troubleshooting, never forensic reconstruction.
+- Policy/configuration failures → elastic-defend-configuration-troubleshooting
+- Endpoint health and missed check-ins → elastic-defend-configuration-troubleshooting
+- Performance/resource troubleshooting → elastic-defend-configuration-troubleshooting
+- Output or integration failures → elastic-defend-configuration-troubleshooting
 
 ## Scope (read-only)
 
-This skill MUST NOT invoke response actions. On response-action requests, hand off to endpoint-response-actions and stop.
+This skill MUST NOT invoke response actions. On response-action requests, explain that this skill is read-only and direct the analyst to Endpoint response actions in Security; then stop.
 
 ## Capability Detection (Phase 0 — ALWAYS FIRST)
 
@@ -133,7 +143,7 @@ Return earliest host, timestamp, indicator, and delivery-vector hypothesis.
 
 ### 4. Attack timeline
 Merge process, file, network, and registry events for the host in the time window; sort by \`@timestamp\` ascending.
-Present the answer as an explicit chronological timeline — an ordered, timestamp-labeled sequence of events scoped to the named host — not a prose paragraph. If telemetry is sparse or unavailable, still lay out the ordered reconstruction as a timeline skeleton (the sequence of stages to expect for that host), so the response remains a scoped chronological narrative.
+Present the answer as an explicit chronological timeline — an ordered, timestamp-labeled sequence of events scoped to the named host — not a prose paragraph. **Only include events supported by query results.** If telemetry is sparse or unavailable, state the data gap explicitly and optionally provide a clearly labeled investigation plan (suggested ES|QL queries / indices to check) — do **not** present an expected attack sequence as that host's chronology.
 
 ### 5. IoC extraction
 After reconstructing the attack on a host, call \`${ENDPOINT_FORENSIC_EXTRACT_IOCS_TOOL_ID}\` with the host(s) and time window to produce a structured IoC summary. Present the result as a markdown table with one row per indicator type:

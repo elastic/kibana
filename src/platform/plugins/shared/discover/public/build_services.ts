@@ -71,7 +71,8 @@ import type { DiscoverStartPlugins } from './types';
 import type { DiscoverContextAppLocator } from './application/context/services/locator';
 import type { DiscoverSingleDocLocator } from './application/doc/locator';
 import type { DiscoverAppLocator } from '../common';
-import { type ProfilesManager, ProfileStateRegistry } from './context_awareness';
+import type { ProfileStateRegistry } from '../common/context_awareness';
+import type { ProfilesManager } from './context_awareness';
 import type { DiscoverEBTManager } from './ebt_manager';
 import {
   CASCADE_LAYOUT_ENABLED_FEATURE_FLAG_KEY,
@@ -79,6 +80,7 @@ import {
   IS_ESQL_DEFAULT_FEATURE_FLAG_KEY,
 } from './constants';
 import { EmbeddableEditorService } from './plugin_imports/embeddable_editor_service';
+import { InitialTabStateService } from './plugin_imports/initial_tab_state_service';
 
 /**
  * Location state of internal Discover history instance
@@ -118,6 +120,7 @@ export interface DiscoverServices {
   embeddable: EmbeddableStart;
   history: History<HistoryLocationState>;
   getScopedHistory: <T>() => ScopedHistory<T | undefined> | undefined;
+  initialTabStateService: InitialTabStateService;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   theme: ThemeServiceStart;
   userProfile: UserProfileService;
@@ -178,6 +181,7 @@ export const buildServices = ({
   scopedHistory,
   urlTracker,
   profilesManager,
+  profileStateRegistry,
   ebtManager,
   setHeaderActionMenu = noop,
 }: {
@@ -191,6 +195,7 @@ export const buildServices = ({
   scopedHistory?: ScopedHistory;
   urlTracker: UrlTracker;
   profilesManager: ProfilesManager;
+  profileStateRegistry: ProfileStateRegistry;
   ebtManager: DiscoverEBTManager;
   setHeaderActionMenu?: AppMountParameters['setHeaderActionMenu'];
 }): DiscoverServices => {
@@ -228,6 +233,7 @@ export const buildServices = ({
     filterManager: plugins.data.query.filterManager,
     history,
     getScopedHistory: <T>() => scopedHistory as ScopedHistory<T | undefined>,
+    initialTabStateService: new InitialTabStateService(),
     setHeaderActionMenu,
     dataViews: plugins.data.dataViews,
     inspector: plugins.inspector,
@@ -266,7 +272,7 @@ export const buildServices = ({
     noDataPage: plugins.noDataPage,
     observabilityAIAssistant: plugins.observabilityAIAssistant,
     profilesManager,
-    profileStateRegistry: new ProfileStateRegistry(),
+    profileStateRegistry,
     ebtManager,
     fieldsMetadata: plugins.fieldsMetadata,
     logsDataAccess: plugins.logsDataAccess,

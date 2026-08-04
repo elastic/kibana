@@ -23,12 +23,15 @@ export interface OAuthConnectionUser {
 export interface OAuthConnection {
   id: string;
   client_id: string;
+  client_name?: string;
   name?: string;
   resource: string;
   creation?: string;
   revoked?: boolean;
   revocation?: string;
   revocation_reason?: string;
+  expired?: boolean;
+  expiration?: string;
   scopes?: string[];
   user_id?: string;
   user?: OAuthConnectionUser;

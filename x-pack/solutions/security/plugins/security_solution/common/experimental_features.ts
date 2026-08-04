@@ -45,6 +45,12 @@ export const allowedExperimentalValues = Object.freeze({
   responseActionsEndpointMemoryDump: true,
 
   /**
+   * `physical` memory dump type for the Memory Dump response action for Elastic Defend Endpoint
+   * Release: 9.6
+   */
+  responseActionsEndpointMemoryDumpRaw: false,
+
+  /**
    * `runscript` response action for Elastic Defend Endpoint
    * Release: 9.4
    */
@@ -67,6 +73,12 @@ export const allowedExperimentalValues = Object.freeze({
    * Release: 9.5
    */
   responseActionsEndpointCancel: false,
+
+  /**
+   * `kill_descendants` parameter option for the `kill-process` response action for Elastic Defend Endpoint
+   * Release: 9.6
+   */
+  responseActionsEndpointKillProcessDescendants: false,
 
   /**
    * Enables CCS prefixing of endpoint indices so a Defend agent shipping to a remote ES output
@@ -126,7 +138,7 @@ export const allowedExperimentalValues = Object.freeze({
    * Entity Analytics surfaces such as the entity flyout, and registers the
    * `security.entity` unified cases attachment type.
    */
-  entityAttachmentsEnabled: false,
+  entityAttachmentsEnabled: true,
 
   /**
    * Enables AI rule creation feature
@@ -198,7 +210,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    *  Enables the Microsoft Sentinel rules import feature
    */
-  sentinelRulesMigration: false,
+  sentinelRulesMigration: true,
   /**
    * Enables the Kubernetes Dashboard in Security Solution
    */
@@ -248,7 +260,7 @@ export const allowedExperimentalValues = Object.freeze({
 
   /**
    * Enables the Endpoint Forensic Analysis Agent Builder skill (DFIR / patient zero / timeline).
-   * Gates skill registration so the feature can ship dark and be enabled per environment.
+   * Shipped dark by default; enable per environment via config.
    */
   endpointForensicAnalysisSkill: false,
 
@@ -286,7 +298,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables entity ML anomaly details API
    */
-  entityAnalyticsAnomalyDetails: false,
+  entityAnalyticsAnomalyDetails: true,
 
   /**
    * Enables the deprecated prebuilt rules UI
@@ -305,12 +317,6 @@ export const allowedExperimentalValues = Object.freeze({
   ruleChangesHistoryEnabled: true,
 
   /**
-   * Enables public Detection Engine attacks REST APIs
-   * (`/api/detection_engine/attacks/*`).
-   */
-  publicAttacksApiEnabled: false,
-
-  /**
    * Enables the agent builder `run_rule_preview` tool and the `security.rule.preview`
    * attachment (server type + client renderer). Gates registration so the feature can
    * ship dark and be enabled per environment.
@@ -320,7 +326,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the risk score history API endpoint for Entity Analytics.
    */
-  riskScoreHistoryEnabled: false,
+  riskScoreHistoryEnabled: true,
 
   /**
    * Enables UI treatments surfacing rules whose MITRE ATT&CK mappings drift

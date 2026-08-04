@@ -51,6 +51,7 @@ const mockProps = {
   ] as AnonymizationFieldResponse[],
   entityType: 'user',
   entityIdentifier: 'test-user',
+  persistSummary: true,
 };
 
 const mockEntityDetailsResponse = {
@@ -77,6 +78,7 @@ const mockStoredSummary: PersistedEntityAiSummary = {
   recommended_actions: ['Stored action'],
   generated_at: 1_700_000_000_000,
   generated_by: 'stored-user',
+  author_profile_uid: 'u_stored_user',
   staleness: {
     enabled_signals: ['risk_score'],
     snapshot: { risk_score: 42 },
@@ -305,6 +307,34 @@ describe('useFetchEntityDetailsHighlights', () => {
       });
     });
 
+    it('skips persistence when the user lacks metadata read access (canRead: false)', async () => {
+      mockFetchEntityDetailsHighlights.mockResolvedValueOnce(mockEntityDetailsResponse);
+      mockInferenceOutput.mockResolvedValueOnce(mockSuccessfulInferenceOutput);
+      const refetchEntityRecord = jest.fn();
+      const refetchPersistedSummary = jest.fn();
+
+      const { result } = renderHook(() =>
+        useFetchEntityDetailsHighlights({
+          ...mockProps,
+          entitySnapshot: mockEntitySnapshot,
+          persistSummary: false,
+          refetchEntityRecord,
+          refetchPersistedSummary,
+        })
+      );
+
+      await act(async () => {
+        await result.current.fetchEntityHighlights();
+      });
+
+      // In-session result is still set — generation is on-demand only.
+      expect(result.current.result?.response).toEqual(mockSuccessfulInferenceOutput.output);
+      expect(mockSaveEntityAiSummary).not.toHaveBeenCalled();
+      expect(refetchEntityRecord).not.toHaveBeenCalled();
+      expect(refetchPersistedSummary).not.toHaveBeenCalled();
+      expect(mockAddError).not.toHaveBeenCalled();
+    });
+
     it('refreshes the entity record and persisted summary after a successful save', async () => {
       mockFetchEntityDetailsHighlights.mockResolvedValueOnce(mockEntityDetailsResponse);
       mockInferenceOutput.mockResolvedValueOnce(mockSuccessfulInferenceOutput);
@@ -422,6 +452,7 @@ describe('useFetchEntityDetailsHighlights', () => {
         summaryAsText: '',
         generatedAt: mockStoredSummary.generated_at,
         generatedBy: mockStoredSummary.generated_by,
+        authorProfileUid: mockStoredSummary.author_profile_uid,
       });
     });
 

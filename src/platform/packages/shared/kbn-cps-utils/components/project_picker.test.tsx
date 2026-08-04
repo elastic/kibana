@@ -16,6 +16,7 @@ import { EuiThemeProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { PROJECT_ROUTING } from '@kbn/cps-common';
 import { ProjectPicker } from './project_picker';
+import { ProjectPickerContent } from './project_picker_content';
 
 describe('ProjectPicker', () => {
   const mockProjects = {
@@ -217,5 +218,109 @@ describe('ProjectPicker', () => {
 
       expect(screen.getByText('Cross-project search (CPS) scope')).toBeInTheDocument();
     });
+  });
+});
+
+describe('ProjectPickerContent', () => {
+  const mockProjects = {
+    originProject: {
+      _id: 'origin',
+      _alias: 'Origin CPSProject',
+      _type: 'observability',
+      _organisation: 'test-org',
+    },
+    linkedProjects: [
+      {
+        _id: 'linked1',
+        _alias: 'Linked CPSProject 1',
+        _type: 'security',
+        _organisation: 'test-org',
+      },
+    ],
+    isLoading: false,
+    error: null,
+  };
+
+  it('can hide project routing controls and show only the project list', async () => {
+    await act(async () => {
+      render(
+        <I18nProvider>
+          <EuiThemeProvider>
+            <ProjectPickerContent projects={mockProjects} controlsState="hidden" />
+          </EuiThemeProvider>
+        </I18nProvider>
+      );
+    });
+
+    expect(screen.queryByText('All projects')).not.toBeInTheDocument();
+    expect(screen.queryByText('This project')).not.toBeInTheDocument();
+    expect(screen.getByText('Origin CPSProject')).toBeInTheDocument();
+    expect(screen.getByText('Linked CPSProject 1')).toBeInTheDocument();
+  });
+
+  it('can render a linked-only project list', async () => {
+    await act(async () => {
+      render(
+        <I18nProvider>
+          <EuiThemeProvider>
+            <ProjectPickerContent
+              projects={{
+                ...mockProjects,
+                originProject: null,
+              }}
+              controlsState="hidden"
+            />
+          </EuiThemeProvider>
+        </I18nProvider>
+      );
+    });
+
+    expect(screen.getByText('Linked CPSProject 1')).toBeInTheDocument();
+  });
+
+  it('shows loading state without projects', async () => {
+    await act(async () => {
+      render(
+        <I18nProvider>
+          <EuiThemeProvider>
+            <ProjectPickerContent
+              projects={{
+                originProject: null,
+                linkedProjects: [],
+                isLoading: true,
+                error: null,
+              }}
+              controlsState="hidden"
+            />
+          </EuiThemeProvider>
+        </I18nProvider>
+      );
+    });
+
+    expect(screen.getByText('Searching across 0 projects')).toBeInTheDocument();
+  });
+
+  it('shows error state without projects', async () => {
+    await act(async () => {
+      render(
+        <I18nProvider>
+          <EuiThemeProvider>
+            <ProjectPickerContent
+              projects={{
+                originProject: null,
+                linkedProjects: [],
+                isLoading: false,
+                error: new Error('Failed to load projects'),
+              }}
+              controlsState="hidden"
+            />
+          </EuiThemeProvider>
+        </I18nProvider>
+      );
+    });
+
+    expect(
+      screen.getByText('Failed to load projects. Try refreshing the page.')
+    ).toBeInTheDocument();
   });
 });
