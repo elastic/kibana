@@ -172,16 +172,9 @@ export function CasesTableServiceProvider(
     },
 
     async getCaseById(caseId: string) {
-      const targetCase = await find.allByCssSelector(
-        `[data-test-subj*="cases-table-row-${caseId}"`,
-        100
-      );
-
-      if (!targetCase.length) {
-        throw new Error(`Cannot find case with id ${caseId} on table.`);
-      }
-
-      return targetCase[0];
+      // Poll for the row to render rather than querying once, so the lookup does not race the
+      // async render of the cases table (e.g. inside the "attach to existing case" modal).
+      return await find.byCssSelector(`[data-test-subj*="cases-table-row-${caseId}"`);
     },
 
     async getCaseByIndex(index: number) {
