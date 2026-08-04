@@ -131,6 +131,12 @@ include::upgrade-notes.asciidoc[]
 
 The 8.19.19 release includes the following enhancements and fixes.
 
+[IMPORTANT]
+====
+The 8.19.19 release contains fixes for potential security vulnerabilities.
+For details, go to the https://discuss.elastic.co/c/announcements/security-announcements/31[security announcements].
+====
+
 [float]
 [[enhancement-v8.19.19]]
 === Enhancements

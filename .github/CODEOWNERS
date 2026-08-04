@@ -131,6 +131,7 @@ src/platform/packages/shared/kbn-content-management-utils @elastic/kibana-data-d
 x-pack/platform/packages/shared/kbn-content-packs-schema @elastic/streams-program-team
 examples/controls_example @elastic/kibana-presentation
 src/platform/plugins/shared/controls @elastic/kibana-presentation
+src/cli @elastic/kibana-operations
 src/core @elastic/kibana-core
 src/core/packages/analytics/browser @elastic/kibana-core
 src/core/packages/analytics/browser-internal @elastic/kibana-core
@@ -338,6 +339,7 @@ src/core/packages/test-helpers/deprecations-getters @elastic/kibana-core
 src/core/packages/test-helpers/http-setup-browser @elastic/kibana-core
 src/core/test-helpers/kbn-server @elastic/kibana-core
 src/core/test-helpers/model-versions @elastic/kibana-core
+src/dev @elastic/kibana-operations
 src/core/packages/test-helpers/so-type-serializer @elastic/kibana-core
 src/core/packages/test-helpers/test-utils @elastic/kibana-core
 src/core/packages/theme/browser @elastic/kibana-core
