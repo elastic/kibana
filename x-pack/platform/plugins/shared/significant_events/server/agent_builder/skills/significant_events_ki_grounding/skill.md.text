@@ -198,7 +198,7 @@ Each entry:
 - `confirmed`: `true` / `false` when verified; omit when verification failed or did not run
 - `collected_at`: ISO-8601 query timestamp; omit for quiet-rule entries
 - `evidence`: `{ esql_query, result }` when a query ran; omit for quiet rules. `result`: `"found"` | `"empty"` | `"error"`
-- `metadata`: copy the complete metadata object from the matching input detection verbatim. Do not reconstruct it or alter any field.
+- `metadata`: detection input
 - `causal_features`: array with Causal Features entries; emit `[]` when empty
 - `blast_radius`: array with Blast Radius entries, emit [] when empty
 

@@ -39,7 +39,7 @@ const scoreOutputTool = (
   if (!calledTools.has(TOOL_ID_EVENTS_WRITE)) {
     return {
       score: 0,
-      label: 'missing-output-write',
+      label: `missing-${TOOL_ID_EVENTS_WRITE}`,
       explanation: `${TOOL_ID_EVENTS_WRITE} was not called — required to persist the decision`,
     };
   }
@@ -48,8 +48,8 @@ const scoreOutputTool = (
   if (!persistenceCalls.valid) {
     return {
       score: 0.75,
-      label: 'multiple-events-write-calls',
-      explanation: `${TOOL_ID_EVENTS_WRITE} was called ${persistenceCalls.count} times without one justified partial-failure retry`,
+      label: `multiple-${TOOL_ID_EVENTS_WRITE}-calls`,
+      explanation: '${TOOL_ID_EVENTS_WRITE} was called ${persistenceCalls.count} times without one justified partial-failure retry',
     };
   }
   return null;
@@ -116,7 +116,7 @@ export const scoreToolUsage = ({
   if (!hasQueryKiSearch) {
     return {
       score: 0,
-      label: 'missing-query-ki-search',
+      label: `missing-${TOOL_ID_KI_SEARCH}`,
       explanation: `${TOOL_ID_KI_SEARCH} was not called — required to decide whether ES|QL is available`,
     };
   }
@@ -128,7 +128,7 @@ export const scoreToolUsage = ({
   if (hasUnfilteredEventSearch) {
     return {
       score: 0,
-      label: 'unfiltered-event-search',
+      label: `unfiltered-${TOOL_ID_EVENT_SEARCH}`,
       explanation: `${TOOL_ID_EVENT_SEARCH} was not called with exclude_unconfirmed_signals: true — required to exclude signals whose confirmed value is false`,
     };
   }

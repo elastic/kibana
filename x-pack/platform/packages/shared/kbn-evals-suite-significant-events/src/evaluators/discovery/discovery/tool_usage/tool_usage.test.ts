@@ -91,7 +91,7 @@ describe('scoreToolUsage', () => {
     const result = scoreToolUsage({ steps, detectionCount: 1 });
 
     expect(result.score).toBe(0);
-    expect(result.label).toBe('unfiltered-event-search');
+    expect(result.label).toBe(`unfiltered-${TOOL_ID_EVENT_SEARCH}`);
   });
 
   it('requires topology search before writing a topology-bearing event after a zero-result rule search', () => {
@@ -121,7 +121,7 @@ describe('scoreToolUsage', () => {
       toolCall(TOOL_ID_EVENTS_WRITE),
     ];
 
-    expect(scoreToolUsage({ steps, detectionCount: 1 }).label).toBe('missing-query-ki-search');
+    expect(scoreToolUsage({ steps, detectionCount: 1 }).label).toBe(`missing-${TOOL_ID_KI_SEARCH}`);
   });
 
   it('penalizes multiple event writes without a partial-failure retry', () => {
@@ -129,7 +129,7 @@ describe('scoreToolUsage', () => {
       steps: [...allExpectedTools, toolCall(TOOL_ID_EVENTS_WRITE)],
       detectionCount: 1,
     });
-    expect(result).toMatchObject({ score: 0.75, label: 'multiple-events-write-calls' });
+    expect(result).toMatchObject({ score: 0.75, label: `multiple-${TOOL_ID_EVENTS_WRITE}-calls` });
   });
 
   it('allows one retry after an event bulk item fails', () => {
