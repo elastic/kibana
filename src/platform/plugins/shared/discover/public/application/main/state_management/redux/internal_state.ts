@@ -29,10 +29,10 @@ import {
 import { dismissFlyouts, DiscoverFlyouts } from '@kbn/discover-utils';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { ESQLControlVariable } from '@kbn/esql-types';
+import type { SerializableRecord } from '@kbn/utility-types';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { UnifiedDataTableRestorableState } from '@kbn/unified-data-table';
-import { DISCOVER_QUERY_MODE_KEY } from '../../../../../common/constants';
 import type { DiscoverCustomizationContext } from '../../../../customizations';
 import type { DiscoverServices } from '../../../../build_services';
 import type { ContextAwarenessToolkit } from '../../../../context_awareness/toolkit';
@@ -340,7 +340,7 @@ export const internalStateSlice = createSlice({
 
     setProfileState: (
       state,
-      action: TabAction<{ key: string; profileState: object | undefined }>
+      action: TabAction<{ key: string; profileState: SerializableRecord | undefined }>
     ) =>
       withTab(state, action.payload, (tab) => {
         if (action.payload.profileState && Object.keys(action.payload.profileState).length > 0) {
@@ -436,17 +436,6 @@ export const internalStateSlice = createSlice({
           };
         }),
     },
-
-    setProfileStateFieldsToResetWithoutResetId: (
-      state,
-      action: TabAction<Pick<TabState['defaultProfileState'], 'fieldsToReset'>>
-    ) =>
-      withTab(state, action.payload, (tab) => {
-        tab.defaultProfileState = {
-          ...tab.defaultProfileState,
-          fieldsToReset: action.payload.fieldsToReset,
-        };
-      }),
 
     resetOnSavedSearchChange: (state, action: TabAction) =>
       withTab(state, action.payload, (tab) => {
@@ -618,14 +607,6 @@ export const syncLocallyPersistedTabState = createAction<TabActionPayload>(
 
 export const discardFlyoutsOnTabChange = createAction('internalState/discardFlyoutsOnTabChange');
 
-export const transitionedFromEsqlToDataView = createAction<TabActionPayload>(
-  'internalState/transitionedFromEsqlToDataView'
-);
-
-export const transitionedFromDataViewToEsql = createAction<TabActionPayload>(
-  'internalState/transitionedFromDataViewToEsql'
-);
-
 type InternalStateListenerEffect<
   TActionCreator extends PayloadActionCreator<TPayload>,
   TPayload = TActionCreator extends PayloadActionCreator<infer T> ? T : never
@@ -696,28 +677,6 @@ const createMiddleware = (options: InternalStateDependencies) => {
     actionCreator: discardFlyoutsOnTabChange,
     effect: () => {
       dismissFlyouts([DiscoverFlyouts.lensEdit]);
-    },
-  });
-
-  // This pair of listeners updates the default query mode based on the last used query type (ES|QL vs Data View), we use
-  // this so new discover sessions use that query mode as a default.
-  //
-  // NOTE: In the short term we will add a feature flag to default to ES|QL when there is no existing preference saved.
-  // Right now we use classic - this means that users will have to switch to ES|QL manually the first time if they already
-  // had classic stored as their last used mode.
-  startListening({
-    actionCreator: transitionedFromDataViewToEsql,
-    effect: (action, listenerApi) => {
-      const { services } = listenerApi.extra;
-      services.storage.set(DISCOVER_QUERY_MODE_KEY, 'esql');
-    },
-  });
-
-  startListening({
-    actionCreator: transitionedFromEsqlToDataView,
-    effect: (action, listenerApi) => {
-      const { services } = listenerApi.extra;
-      services.storage.set(DISCOVER_QUERY_MODE_KEY, 'classic');
     },
   });
 
