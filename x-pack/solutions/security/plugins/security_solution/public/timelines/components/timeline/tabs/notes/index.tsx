@@ -8,6 +8,7 @@
 import React, { useCallback, useEffect, useMemo } from 'react';
 import {
   EuiAvatar,
+  EuiCallOut,
   EuiComment,
   EuiEmptyPrompt,
   EuiFlexGroup,
@@ -237,6 +238,15 @@ const NotesTabContentComponent: React.FC<NotesTabContentProps> = React.memo(({ t
             <>
               {fetchStatus === ReqStatus.Loading && (
                 <EuiLoadingElastic data-test-subj={NOTES_LOADING_TEST_ID} size="xxl" />
+              )}
+              {fetchStatus === ReqStatus.Failed && (
+                <EuiCallOut
+                  announceOnMount
+                  title={FETCH_NOTES_ERROR}
+                  color="danger"
+                  iconType="error"
+                  data-test-subj="super-timeline-notes-error"
+                />
               )}
               {fetchStatus === ReqStatus.Succeeded && (
                 <SuperTimelineNotes

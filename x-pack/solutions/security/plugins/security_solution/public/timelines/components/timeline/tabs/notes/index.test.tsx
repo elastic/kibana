@@ -270,6 +270,33 @@ describe('NotesTabContentComponent', () => {
       expect(queryByTestId(`${DELETE_NOTE_BUTTON_TEST_ID}-0`)).not.toBeInTheDocument();
       expect(queryByTestId(`${DELETE_NOTE_BUTTON_TEST_ID}-1`)).not.toBeInTheDocument();
     });
+
+    it('should render an error callout when notes fetch fails in Super Timeline mode', () => {
+      // WHY: the old code had no ReqStatus.Failed render path in the Super Timeline branch,
+      // leaving the panel blank on a 403 or network error — no feedback for the user.
+      const mockStore = createMockStore({
+        ...mockGlobalStateWithSuperTimeline,
+        notes: {
+          ...mockGlobalStateWithSuperTimeline.notes,
+          status: {
+            ...mockGlobalStateWithSuperTimeline.notes.status,
+            fetchNotesBySavedObjectIds: ReqStatus.Failed,
+          },
+          error: {
+            ...mockGlobalStateWithSuperTimeline.notes.error,
+            fetchNotesBySavedObjectIds: { type: 'http', status: 403 },
+          },
+        },
+      });
+
+      const { getByTestId } = render(
+        <TestProviders store={mockStore}>
+          <NotesTabContentComponent timelineId={TimelineId.active} />
+        </TestProviders>
+      );
+
+      expect(getByTestId('super-timeline-notes-error')).toBeInTheDocument();
+    });
   });
 
   it('should render the timeline description at the top', () => {
