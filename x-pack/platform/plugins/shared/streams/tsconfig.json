@@ -15,6 +15,7 @@
   ],
   "exclude": ["target/**/*"],
   "kbn_references": [
+    "@kbn/deeplinks-observability",
     "@kbn/config-schema",
     "@kbn/core-pricing-common",
     "@kbn/core",
@@ -32,7 +33,6 @@
     "@kbn/rule-registry-plugin",
     "@kbn/es-types",
     "@kbn/licensing-plugin",
-    "@kbn/rule-data-utils",
     "@kbn/zod",
     "@kbn/streams-schema",
     "@kbn/significant-events-schema",
