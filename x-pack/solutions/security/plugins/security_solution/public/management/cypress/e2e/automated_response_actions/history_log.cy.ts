@@ -12,8 +12,7 @@ import { indexEndpointRuleAlerts } from '../../tasks/index_endpoint_rule_alerts'
 
 import { login, ROLE } from '../../tasks/login';
 
-// FLAKY: https://github.com/elastic/kibana/issues/242862
-describe.skip(
+describe(
   'Response actions history page',
   {
     tags: [
@@ -78,11 +77,18 @@ describe.skip(
         cy.get('tbody .euiTableRow').should('have.lengthOf', maxLength);
       });
 
+      // The response actions history is a shared, deployment-wide index that other tests
+      // can add rows to, so assert on each visible row's type instead of on absolute counts.
+      // Rule-triggered rows render "Triggered by rule"; manually-triggered rows render a username.
       cy.getByTestSubj('response-actions-list-types-filter-popoverButton').click();
       cy.getByTestSubj('types-filter-option').contains('Triggered by rule').click();
       cy.getByTestSubj('response-actions-list').within(() => {
-        cy.get('tbody .euiTableRow').should('have.lengthOf', 1);
-        cy.get('tbody .euiTableRow').eq(0).contains('Triggered by rule');
+        cy.get('tbody .euiTableRow').should(($rows) => {
+          expect($rows.length).to.be.greaterThan(0);
+          $rows.each((_, row) => {
+            expect(row.textContent).to.contain('Triggered by rule');
+          });
+        });
       });
       cy.getByTestSubj('types-filter-option').contains('Triggered by rule').click();
       cy.getByTestSubj('response-actions-list').within(() => {
@@ -90,11 +96,23 @@ describe.skip(
       });
       cy.getByTestSubj('types-filter-option').contains('Triggered manually').click();
       cy.getByTestSubj('response-actions-list').within(() => {
-        cy.get('tbody .euiTableRow').should('have.lengthOf', maxLength - 1);
+        cy.get('tbody .euiTableRow').should(($rows) => {
+          expect($rows.length).to.be.greaterThan(0);
+          $rows.each((_, row) => {
+            expect(row.textContent).to.not.contain('Triggered by rule');
+          });
+        });
       });
+      // Switch to "Triggered by rule" only, then open the linked rule from the first row.
+      cy.getByTestSubj('types-filter-option').contains('Triggered manually').click();
       cy.getByTestSubj('types-filter-option').contains('Triggered by rule').click();
       cy.getByTestSubj('response-actions-list').within(() => {
-        cy.get('tbody .euiTableRow').should('have.lengthOf', maxLength);
+        cy.get('tbody .euiTableRow').should(($rows) => {
+          expect($rows.length).to.be.greaterThan(0);
+          $rows.each((_, row) => {
+            expect(row.textContent).to.contain('Triggered by rule');
+          });
+        });
         cy.get('tbody .euiTableRow').eq(0).contains('Triggered by rule').click();
       });
       // check if we were moved to Rules app after clicking Triggered by rule
