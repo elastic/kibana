@@ -39,7 +39,7 @@ x-codeSamples:
   - lang: curl
     source: |
       curl \
-        -X GET "${KIBANA_URL}/api/workflows/executions?from=0&size=25&trackTotalHits=true&kql=startedAt%20%3E%3D%20%22now-15m%22&sortField=startedAt&sortOrder=desc" \
+        -X GET "${KIBANA_URL}/api/workflows/workflow/executions?page=1&size=25&trackTotalHits=true&kql=startedAt%20%3E%3D%20%22now-15m%22&sortField=startedAt&sortOrder=desc" \
         -H "Authorization: ApiKey ${API_KEY}"
   - lang: Console
     source: |
