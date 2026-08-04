@@ -62,6 +62,8 @@ env:
 runs-on: kibana
 timeout-minutes: 120
 
+imports:
+  - .github/workflows/shared/app-dex-agents-otel.md
 engine:
   id: claude
   version: "2.1.165"
