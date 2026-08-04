@@ -3016,6 +3016,14 @@
   resolved "https://registry.yarnpkg.com/@esbuild/win32-x64/-/win32-x64-0.27.2.tgz#9e585ab6086bef994c6e8a5b3a0481219ada862b"
   integrity sha512-sRdU18mcKf7F+YgheI/zGf5alZatMUTKj/jNS6l744f9u3WFu4v7twcUI9vu4mknF4Y9aDlblIie0IM+5xxaqQ==
 
+"@eslint-community/eslint-plugin-eslint-comments@4.4.1":
+  version "4.4.1"
+  resolved "https://registry.yarnpkg.com/@eslint-community/eslint-plugin-eslint-comments/-/eslint-plugin-eslint-comments-4.4.1.tgz#dbfab6f2447c22be8758a0a9a9c80e56d2e2b93f"
+  integrity sha512-lb/Z/MzbTf7CaVYM9WCFNQZ4L1yi3ev2fsFPF99h31ljhSEyUoyEsKsNWiU+qD1glbYTDJdqgyaLKtyTkkqtuQ==
+  dependencies:
+    escape-string-regexp "^4.0.0"
+    ignore "^5.2.4"
+
 "@eslint-community/eslint-utils@^4.2.0", "@eslint-community/eslint-utils@^4.9.1":
   version "4.9.1"
   resolved "https://registry.yarnpkg.com/@eslint-community/eslint-utils/-/eslint-utils-4.9.1.tgz#4e90af67bc51ddee6cdef5284edf572ec376b595"
@@ -21522,14 +21530,6 @@ eslint-plugin-es@^3.0.0:
     eslint-utils "^2.0.0"
     regexpp "^3.0.0"
 
-eslint-plugin-eslint-comments@3.2.0:
-  version "3.2.0"
-  resolved "https://registry.yarnpkg.com/eslint-plugin-eslint-comments/-/eslint-plugin-eslint-comments-3.2.0.tgz#9e1cd7b4413526abb313933071d7aba05ca12ffa"
-  integrity sha512-0jkOl0hfojIHHmEHgmNdqv4fmh7300NdpA9FFpF7zaoLvB/QeXOGNLIo86oAveJFrfB1p05kC8hpEMHM8DwWVQ==
-  dependencies:
-    escape-string-regexp "^1.0.5"
-    ignore "^5.0.5"
-
 eslint-plugin-formatjs@4.12.2:
   version "4.12.2"
   resolved "https://registry.yarnpkg.com/eslint-plugin-formatjs/-/eslint-plugin-formatjs-4.12.2.tgz#ad275d78f82bad95583c141f65ecd7e222c329ed"
@@ -24059,7 +24059,7 @@ ignore@7.0.5, ignore@^7.0.5:
   resolved "https://registry.yarnpkg.com/ignore/-/ignore-7.0.5.tgz#4cb5f6cd7d4c7ab0365738c7aea888baa6d7efd9"
   integrity sha512-Hs59xBNfUIunMFgWAbGX5cq6893IbWg4KnrjbYwX3tx0ztorVgTDA6B2sxf8ejHJ4wz8BqGUMYlnzNBer5NvGg==
 
-ignore@^5.0.5, ignore@^5.1.1, ignore@^5.2.0, ignore@^5.2.1:
+ignore@^5.1.1, ignore@^5.2.0, ignore@^5.2.1, ignore@^5.2.4:
   version "5.3.2"
   resolved "https://registry.yarnpkg.com/ignore/-/ignore-5.3.2.tgz#3cd40e729f3643fd87cb04e50bf0eb722bc596f5"
   integrity sha512-hsBTNUqQTDwkWtcdYI2i06Y/nUBEsNEDJKjWdigLvegy8kDuJAS8uRlpkkcQpyEXL0Z/pjDy5HBmMjRCJ2gq+g==

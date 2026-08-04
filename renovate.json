@@ -953,7 +953,7 @@
         "eslint-plugin-ban",
         "eslint-plugin-cypress",
         "eslint-plugin-depend",
-        "eslint-plugin-eslint-comments",
+        "@eslint-community/eslint-plugin-eslint-comments",
         "eslint-plugin-formatjs",
         "eslint-plugin-import",
         "eslint-plugin-jest",
