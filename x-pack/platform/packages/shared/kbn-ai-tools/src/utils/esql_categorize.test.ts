@@ -168,6 +168,7 @@ describe('categorizeWithNoiseExclusion', () => {
     expect(plain).toContain('| SAMPLE 0.1 |');
     expect(plain).not.toContain('NOT MATCH');
     expect(plain).not.toContain('WHERE count >');
+    expect(plain).toContain('| SORT count DESC | LIMIT 1000');
     expect(esql.mock.calls[1][0]).toBe('categorize_noise_exclusion_plain');
     expect(rows).toEqual([{ count: 160, pattern: 'error', sample: 'error one' }]);
   });

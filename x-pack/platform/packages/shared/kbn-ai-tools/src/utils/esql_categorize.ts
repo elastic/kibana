@@ -47,6 +47,7 @@ export function buildCategorizeWithSampleQuery({
   outputFormat,
   excludeTokens,
   countThreshold,
+  order = 'ASC',
 }: {
   indices: string | string[];
   field: string;
@@ -55,6 +56,7 @@ export function buildCategorizeWithSampleQuery({
   outputFormat?: CategorizeOutputFormat;
   excludeTokens?: string[];
   countThreshold?: number;
+  order?: 'ASC' | 'DESC';
 }): string {
   const fieldCol = esql.col(columnPath(field));
 
@@ -86,7 +88,7 @@ export function buildCategorizeWithSampleQuery({
   }
 
   return stats
-    .sort([['count'], 'ASC', ''])
+    .sort([['count'], order, ''])
     .limit(limit)
     .print('basic');
 }
@@ -163,11 +165,13 @@ export async function categorizeWithNoiseExclusion({
 
   if (headRows.length === 0) {
     // No head to strip; a plain sampled categorize is the cheapest safe option.
+    // DESC: unthresholded, so ASC silently truncates to the rarest 1000 on wide streams.
     const plainQuery = buildCategorizeWithSampleQuery({
       indices,
       field,
       samplingProbability: p1,
       outputFormat: 'tokens',
+      order: 'DESC',
     });
     return dedupeByPattern(
       normalizeCounts(

@@ -263,7 +263,8 @@ async function detectMessageField({
   start: number;
   end: number;
 }): Promise<string | undefined> {
-  const columns = await getEsqlColumnSchema({ esClient, index, start, end });
+  // Traced esql() hardcodes drop_null_columns: true, which prunes all columns from a LIMIT 0 probe.
+  const columns = await getEsqlColumnSchema({ esClient: esClient.client, index, start, end });
   const textColumnNames = new Set(
     columns.filter((column) => column.type === 'text').map((column) => column.name)
   );
