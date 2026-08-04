@@ -26,8 +26,7 @@ const mockAttributes: LooseLensAttributes = {
   description: 'bar',
 };
 
-// TEMP SKIP: apiFormat flag enabled
-describe.skip('LensClient', () => {
+describe('LensClient', () => {
   const httpMock = coreMock.createStart().http;
   let client: LensClient;
 

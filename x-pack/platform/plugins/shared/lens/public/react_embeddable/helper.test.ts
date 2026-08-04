@@ -32,8 +32,7 @@ describe('Embeddable helpers', () => {
         dataOverrides: { id: 'formBased' },
       });
     }
-    // TEMP SKIP: apiFormat flag enabled
-    it.skip('should forward a by value state', async () => {
+    it('should forward a by value state', async () => {
       const services = getServices();
       const initialState = {
         attributes: defaultDoc,
@@ -42,8 +41,7 @@ describe('Embeddable helpers', () => {
       expect(runtimeState).toEqual(initialState);
     });
 
-    // TEMP SKIP: apiFormat flag enabled
-    it.skip('should wrap Lens doc/attributes into component state shape', async () => {
+    it('should wrap Lens doc/attributes into component state shape', async () => {
       const services = getServices();
       const runtimeState = await deserializeState(services, { attributes: defaultDoc });
       expect(runtimeState).toEqual(

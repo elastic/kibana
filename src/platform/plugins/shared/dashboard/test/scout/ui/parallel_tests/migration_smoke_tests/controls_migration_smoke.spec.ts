@@ -71,8 +71,7 @@ spaceTest.describe('Controls migration smoke (8.0.0)', { tag: tags.stateful.clas
     await scoutSpace.savedObjects.cleanStandardList();
   });
 
-  // TEMP SKIP: apiFormat flag enabled
-  spaceTest.skip(
+  spaceTest(
     'imports and renders controls without regressions',
     async ({ page, pageObjects, kbnClient, scoutSpace }) => {
       await spaceTest.step('open the migrated dashboard', async () => {

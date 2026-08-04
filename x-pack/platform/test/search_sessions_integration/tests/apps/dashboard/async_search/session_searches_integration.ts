@@ -162,8 +162,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      // TEMP SKIP: apiFormat flag enabled
-      it.skip('Other bucket should be added to a session when restoring', async () => {
+      it('Other bucket should be added to a session when restoring', async () => {
         // not using regular navigation method, because don't want to wait until all panels load
         // await dashboard.loadSavedDashboard('Lens with other bucket');
         await listingTable.clickItemLink('dashboard', 'Lens with other bucket');

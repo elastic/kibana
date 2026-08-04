@@ -195,8 +195,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             });
           });
 
-          // TEMP SKIP: apiFormat flag enabled
-          it.skip('propagates to Kibana logs', async () => {
+          it('propagates to Kibana logs', async () => {
             await logContains({
               description: 'execution context propagates to Kibana logs',
               predicate: checkExecutionContextEntry({

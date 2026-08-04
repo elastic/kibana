@@ -16,8 +16,7 @@ import {
   testData,
 } from '../fixtures';
 
-// TEMP SKIP: apiFormat flag enabled
-test.describe.skip('Lens Convert to ES|QL', { tag: '@local-stateful-classic' }, () => {
+test.describe('Lens Convert to ES|QL', { tag: '@local-stateful-classic' }, () => {
   test.beforeAll(async ({ esArchiver, kbnClient, uiSettings, apiServices }) => {
     await apiServices.core.settings({
       'feature_flags.overrides': {

@@ -37,8 +37,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
   }
 
-  // TEMP SKIP: apiFormat flag enabled
-  describe.skip('Failed docs errors in dataStream', function () {
+  describe('Failed docs errors in dataStream', function () {
     describe('Querying', function () {
       let synthtraceLogsEsClient: LogsSynthtraceEsClient;
       let supertestViewerWithCookieCredentials: SupertestWithRoleScopeType;
