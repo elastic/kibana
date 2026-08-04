@@ -16,11 +16,10 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { FormattedRelative } from '@kbn/i18n-react';
 import { getEmptyValue } from '../../../common/components/empty_value';
 import { ADDED_A_DESCRIPTION } from '../open_timeline/note_previews/translations';
-import { NotesList, TIMELINE_NOTE_COLORS } from '../../../notes/components/notes_list';
+import { NotesList } from '../../../notes/components/notes_list';
 import { unnamedTimeline } from './translations';
 import type { Note } from '../../../../common/api/timeline';
 
@@ -45,17 +44,6 @@ export const SuperTimelineNotes: React.FC<SuperTimelineNotesProps> = ({
   superTimelineSourceTitles,
   superTimelineDescriptions,
 }) => {
-  const colorMap = useMemo(
-    () =>
-      new Map(
-        superTimelineSourceIds.map((id, i) => [
-          id,
-          TIMELINE_NOTE_COLORS[i % TIMELINE_NOTE_COLORS.length],
-        ])
-      ),
-    [superTimelineSourceIds]
-  );
-
   const notesByTimeline = useMemo(() => {
     const map = new Map<string, Note[]>(superTimelineSourceIds.map((id) => [id, []]));
     for (const note of notes) {
@@ -75,7 +63,6 @@ export const SuperTimelineNotes: React.FC<SuperTimelineNotesProps> = ({
     <>
       {superTimelineSourceIds.map((id, index) => {
         const title = superTimelineSourceTitles[index] || unnamedTimeline(index);
-        const color = colorMap.get(id) ?? TIMELINE_NOTE_COLORS[0];
         const timelineNotes = notesByTimeline.get(id) ?? [];
         const desc = descriptionByTimelineId.get(id);
         const itemCount = timelineNotes.length + (desc ? 1 : 0);
@@ -83,14 +70,7 @@ export const SuperTimelineNotes: React.FC<SuperTimelineNotesProps> = ({
         if (itemCount === 0) return null;
 
         return (
-          <div
-            key={id}
-            css={css`
-              border-left: 3px solid ${color};
-              padding-left: 12px;
-              margin-bottom: 16px;
-            `}
-          >
+          <div key={id}>
             <EuiAccordion
               id={`super-timeline-group-${id}`}
               initialIsOpen={true}
@@ -119,9 +99,7 @@ export const SuperTimelineNotes: React.FC<SuperTimelineNotesProps> = ({
                         )
                       }
                       event={ADDED_A_DESCRIPTION}
-                      timelineAvatar={
-                        <EuiAvatar size="l" name={desc.updatedBy || title} color={color} />
-                      }
+                      timelineAvatar={<EuiAvatar size="l" name={desc.updatedBy || title} />}
                     >
                       <EuiText size="s">{desc.description}</EuiText>
                     </EuiComment>
@@ -134,7 +112,6 @@ export const SuperTimelineNotes: React.FC<SuperTimelineNotesProps> = ({
                     options={{
                       hideTimelineIcon: true,
                       hideDeleteIcon: true,
-                      timelineColorMap: colorMap,
                     }}
                   />
                 )}
