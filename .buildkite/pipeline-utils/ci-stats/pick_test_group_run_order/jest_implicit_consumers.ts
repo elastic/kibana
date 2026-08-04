@@ -14,6 +14,13 @@
  * registered encrypted SO type at runtime, but lives in @kbn/encrypted-saved-objects-plugin
  * while publishers (alerting, actions, fleet, …) sit upstream in the dependency graph.
  * Publisher-only model-version changes therefore skip that config under includeDownstream.
+ *
+ * The same blind spot applies to a publisher's `server/config.ts`: flipping a plugin's
+ * `enabled` default (or any other config default) can activate ESO registration code
+ * that already existed but had never run, without touching any saved_objects file. See
+ * https://github.com/elastic/kibana/issues/240718 / 240719, caused by enabling
+ * alerting_v2 by default (#276217) without the ci_checks snapshot being refreshed,
+ * because the PR touched no saved_objects files and selective testing skipped it.
  */
 
 import minimatch from 'minimatch';
@@ -38,6 +45,12 @@ const IMPLICIT_JEST_CONSUMERS: readonly ImplicitConsumerRule[] = [
       '**/packages/**/server/saved_objects/model_versions/**/*.{ts,tsx}',
       '**/packages/**/server/saved_objects/schemas/**/*.{ts,tsx}',
     ],
+    consumers: [ENCRYPTED_SAVED_OBJECTS_PLUGIN],
+  },
+  {
+    reason:
+      'A plugin config change (e.g. flipping an `enabled` default) can activate previously-dormant ESO registration code without touching any saved_objects file.',
+    patterns: ['**/server/config.{ts,tsx}'],
     consumers: [ENCRYPTED_SAVED_OBJECTS_PLUGIN],
   },
 ];
