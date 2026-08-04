@@ -76,5 +76,6 @@ describe('dashboard search sort options', () => {
     const findOptions = findWithTagFilterMock.mock.calls[0][1];
     expect(findOptions).not.toHaveProperty('sortField');
     expect(findOptions).not.toHaveProperty('sortOrder');
+    expect(findOptions).toHaveProperty('search');
   });
 });
