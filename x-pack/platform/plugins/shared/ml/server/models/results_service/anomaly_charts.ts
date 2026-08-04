@@ -1712,9 +1712,14 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
   }
 
   async function getRecordsForCriteriaChart(config: SeriesConfigWithMetadata, range: ChartRange) {
-    let criteria: MlEntityField[] = [];
-    criteria.push({ fieldName: 'detector_index', fieldValue: config.detectorIndex });
-    criteria = criteria.concat(config.entityFields);
+    const criteria: CriteriaField[] = [
+      { fieldName: 'detector_index', fieldValue: config.detectorIndex },
+      ...config.entityFields.map(({ fieldName, fieldValue, fieldType }) => ({
+        fieldName,
+        fieldValue,
+        fieldType,
+      })),
+    ];
 
     try {
       return await getRecordsForCriteria(
