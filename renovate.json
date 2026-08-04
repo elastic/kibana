@@ -2140,9 +2140,9 @@
         "@aws-sdk/credential-provider-node",
         "google-auth-library"
       ],
-      "reviewers": ["team:security-generative-ai"],
+      "reviewers": ["team:workchat-eng"],
       "matchBaseBranches": ["main"],
-      "addLabels": ["Team:Security Generative AI"],
+      "addLabels": ["Team:agent-builder"],
       "minimumReleaseAge": "14 days",
       "enabled": true
     },
