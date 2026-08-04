@@ -16,218 +16,204 @@ import { KBN_ARCHIVES } from '../fixtures/constants';
  * population, which cloud deployments can't provide (they preinstall managed Fleet dashboards
  * that cleanStandardList() can't remove). Two cloud-tolerant attempts regressed (see #273038).
  */
-test.describe(
-  'GlobalSearchBar',
-  { tag: '@local-stateful-classic' },
-  () => {
-    test.beforeAll(async ({ kbnClient }) => {
-      await kbnClient.savedObjects.cleanStandardList();
-      await kbnClient.importExport.load(KBN_ARCHIVES.SEARCH_SYNTAX);
-    });
+test.describe('GlobalSearchBar', { tag: '@local-stateful-classic' }, () => {
+  test.beforeAll(async ({ kbnClient }) => {
+    await kbnClient.savedObjects.cleanStandardList();
+    await kbnClient.importExport.load(KBN_ARCHIVES.SEARCH_SYNTAX);
+  });
 
-    test.beforeEach(async ({ browserAuth, pageObjects }) => {
-      await browserAuth.loginAsViewer();
-      await pageObjects.globalSearch.navigateToHome();
-    });
+  test.beforeEach(async ({ browserAuth, pageObjects }) => {
+    await browserAuth.loginAsViewer();
+    await pageObjects.globalSearch.navigateToHome();
+  });
 
-    test.afterAll(async ({ kbnClient }) => {
-      await kbnClient.savedObjects.cleanStandardList();
-    });
+  test.afterAll(async ({ kbnClient }) => {
+    await kbnClient.savedObjects.cleanStandardList();
+  });
 
-    test('shows the popover on focus', async ({ pageObjects }) => {
-      await pageObjects.globalSearch.focus();
-      expect(await pageObjects.globalSearch.isPopoverDisplayed()).toBe(true);
+  test('shows the popover on focus', async ({ pageObjects }) => {
+    await pageObjects.globalSearch.focus();
+    expect(await pageObjects.globalSearch.isPopoverDisplayed()).toBe(true);
 
-      await pageObjects.globalSearch.blur();
-      expect(await pageObjects.globalSearch.isPopoverDisplayed()).toBe(false);
-    });
+    await pageObjects.globalSearch.blur();
+    expect(await pageObjects.globalSearch.isPopoverDisplayed()).toBe(false);
+  });
 
-    test('redirects to the correct page', async ({ page, pageObjects }) => {
-      await pageObjects.globalSearch.searchFor('type:application discover');
-      await expect(pageObjects.globalSearch.resultLabels).not.toHaveCount(0);
-      await pageObjects.globalSearch.clickOnOption(0);
+  test('redirects to the correct page', async ({ page, pageObjects }) => {
+    await pageObjects.globalSearch.searchFor('type:application discover');
+    await expect(pageObjects.globalSearch.resultLabels).not.toHaveCount(0);
+    await pageObjects.globalSearch.clickOnOption(0);
 
-      expect(page.url()).toContain('discover');
-    });
+    expect(page.url()).toContain('discover');
+  });
 
-    test('shows a suggestion when searching for a term matching a type', async ({
-      pageObjects,
-    }) => {
-      await pageObjects.globalSearch.searchFor('dashboard');
-      await expect(
-        pageObjects.globalSearch.resultLabels.filter({ hasText: 'type: dashboard' })
-      ).toBeVisible();
+  test('shows a suggestion when searching for a term matching a type', async ({ pageObjects }) => {
+    await pageObjects.globalSearch.searchFor('dashboard');
+    await expect(
+      pageObjects.globalSearch.resultLabels.filter({ hasText: 'type: dashboard' })
+    ).toBeVisible();
 
-      await pageObjects.globalSearch.clickOnOption(0);
+    await pageObjects.globalSearch.clickOnOption(0);
 
-      const searchTerm = await pageObjects.globalSearch.getFieldValue();
-      expect(searchTerm).toBe('type:dashboard');
+    const searchTerm = await pageObjects.globalSearch.getFieldValue();
+    expect(searchTerm).toBe('type:dashboard');
 
-      // Refine with a title term so the results stay within the provider's result cap
-      // (defaultMaxProviderResults) even on deployments that ship many managed dashboards
-      // (e.g. cloud Fleet integrations), which would otherwise displace the archive dashboards.
-      await pageObjects.globalSearch.searchFor('type:dashboard dashboard');
+    // Refine with a title term so the results stay within the provider's result cap
+    // (defaultMaxProviderResults) even on deployments that ship many managed dashboards
+    // (e.g. cloud Fleet integrations), which would otherwise displace the archive dashboards.
+    await pageObjects.globalSearch.searchFor('type:dashboard dashboard');
 
-      const expectedLabels = [
-        'dashboard 1 (tag-2)',
-        'dashboard 2 (tag-3)',
-        'dashboard 3 (tag-1 and tag-3)',
-        'dashboard 4 (tag-special-chars)',
-      ];
+    const expectedLabels = [
+      'dashboard 1 (tag-2)',
+      'dashboard 2 (tag-3)',
+      'dashboard 3 (tag-1 and tag-3)',
+      'dashboard 4 (tag-special-chars)',
+    ];
 
-      for (const label of expectedLabels) {
-        await expect(
-          pageObjects.globalSearch.resultLabels.filter({ hasText: label })
-        ).toBeVisible();
-      }
-    });
+    for (const label of expectedLabels) {
+      await expect(pageObjects.globalSearch.resultLabels.filter({ hasText: label })).toBeVisible();
+    }
+  });
 
-    test('shows a suggestion when searching for a term matching a tag name', async ({
-      pageObjects,
-    }) => {
-      await pageObjects.globalSearch.searchFor('tag-1');
-      await expect(
-        pageObjects.globalSearch.resultLabels.filter({ hasText: 'tag: tag-1' })
-      ).toBeVisible();
+  test('shows a suggestion when searching for a term matching a tag name', async ({
+    pageObjects,
+  }) => {
+    await pageObjects.globalSearch.searchFor('tag-1');
+    await expect(
+      pageObjects.globalSearch.resultLabels.filter({ hasText: 'tag: tag-1' })
+    ).toBeVisible();
 
-      await pageObjects.globalSearch.clickOnOption(0);
+    await pageObjects.globalSearch.clickOnOption(0);
 
-      const searchTerm = await pageObjects.globalSearch.getFieldValue();
-      expect(searchTerm).toBe('tag:tag-1');
+    const searchTerm = await pageObjects.globalSearch.getFieldValue();
+    expect(searchTerm).toBe('tag:tag-1');
 
-      await expect(pageObjects.globalSearch.resultLabels).toHaveText([
-        'Visualization 1 (tag-1)',
-        'Visualization 3 (tag-1 + tag-3)',
-        'dashboard 3 (tag-1 and tag-3)',
-      ]);
-    });
+    await expect(pageObjects.globalSearch.resultLabels).toHaveText([
+      'Visualization 1 (tag-1)',
+      'Visualization 3 (tag-1 + tag-3)',
+      'dashboard 3 (tag-1 and tag-3)',
+    ]);
+  });
 
-    test('allows to filter by type', async ({ pageObjects }) => {
-      await pageObjects.globalSearch.navigateToHome();
-      // Include a title term ('dashboard') alongside the type filter so the four archive
-      // dashboards stay within the provider's result cap on deployments that ship many
-      // managed dashboards (e.g. cloud Fleet integrations).
-      await pageObjects.globalSearch.searchFor('type:dashboard dashboard');
+  test('allows to filter by type', async ({ pageObjects }) => {
+    await pageObjects.globalSearch.navigateToHome();
+    // Include a title term ('dashboard') alongside the type filter so the four archive
+    // dashboards stay within the provider's result cap on deployments that ship many
+    // managed dashboards (e.g. cloud Fleet integrations).
+    await pageObjects.globalSearch.searchFor('type:dashboard dashboard');
 
-      const expectedLabels = [
-        'dashboard 1 (tag-2)',
-        'dashboard 2 (tag-3)',
-        'dashboard 3 (tag-1 and tag-3)',
-        'dashboard 4 (tag-special-chars)',
-      ];
+    const expectedLabels = [
+      'dashboard 1 (tag-2)',
+      'dashboard 2 (tag-3)',
+      'dashboard 3 (tag-1 and tag-3)',
+      'dashboard 4 (tag-special-chars)',
+    ];
 
-      for (const label of expectedLabels) {
-        await expect(
-          pageObjects.globalSearch.resultLabels.filter({ hasText: label })
-        ).toBeVisible();
-      }
-    });
+    for (const label of expectedLabels) {
+      await expect(pageObjects.globalSearch.resultLabels.filter({ hasText: label })).toBeVisible();
+    }
+  });
 
-    test('allows to filter by multiple types', async ({ pageObjects }) => {
-      // The 'tag' term matches every archive fixture (their titles all contain '(tag-N)') but
-      // not the managed dashboards a cloud deployment ships, keeping the expected objects within
-      // the provider's result cap.
-      await pageObjects.globalSearch.searchFor('type:(dashboard OR visualization) tag');
+  test('allows to filter by multiple types', async ({ pageObjects }) => {
+    // The 'tag' term matches every archive fixture (their titles all contain '(tag-N)') but
+    // not the managed dashboards a cloud deployment ships, keeping the expected objects within
+    // the provider's result cap.
+    await pageObjects.globalSearch.searchFor('type:(dashboard OR visualization) tag');
 
-      const expectedLabels = [
-        'Visualization 1 (tag-1)',
-        'Visualization 2 (tag-2)',
-        'Visualization 3 (tag-1 + tag-3)',
-        'Visualization 4 (tag-2)',
-        'My awesome vis (tag-4)',
-        'dashboard 1 (tag-2)',
-        'dashboard 2 (tag-3)',
-        'dashboard 3 (tag-1 and tag-3)',
-        'dashboard 4 (tag-special-chars)',
-      ];
+    const expectedLabels = [
+      'Visualization 1 (tag-1)',
+      'Visualization 2 (tag-2)',
+      'Visualization 3 (tag-1 + tag-3)',
+      'Visualization 4 (tag-2)',
+      'My awesome vis (tag-4)',
+      'dashboard 1 (tag-2)',
+      'dashboard 2 (tag-3)',
+      'dashboard 3 (tag-1 and tag-3)',
+      'dashboard 4 (tag-special-chars)',
+    ];
 
-      for (const label of expectedLabels) {
-        await expect(
-          pageObjects.globalSearch.resultLabels.filter({ hasText: label })
-        ).toBeVisible();
-      }
-    });
+    for (const label of expectedLabels) {
+      await expect(pageObjects.globalSearch.resultLabels.filter({ hasText: label })).toBeVisible();
+    }
+  });
 
-    test('allows to filter by tag', async ({ pageObjects }) => {
-      await pageObjects.globalSearch.searchFor('tag:tag-1');
+  test('allows to filter by tag', async ({ pageObjects }) => {
+    await pageObjects.globalSearch.searchFor('tag:tag-1');
 
-      await expect(pageObjects.globalSearch.resultLabels).toHaveText([
-        'Visualization 1 (tag-1)',
-        'Visualization 3 (tag-1 + tag-3)',
-        'dashboard 3 (tag-1 and tag-3)',
-      ]);
-    });
+    await expect(pageObjects.globalSearch.resultLabels).toHaveText([
+      'Visualization 1 (tag-1)',
+      'Visualization 3 (tag-1 + tag-3)',
+      'dashboard 3 (tag-1 and tag-3)',
+    ]);
+  });
 
-    test('allows to filter by multiple tags', async ({ pageObjects }) => {
-      await pageObjects.globalSearch.searchFor('tag:tag-1 tag:tag-3');
+  test('allows to filter by multiple tags', async ({ pageObjects }) => {
+    await pageObjects.globalSearch.searchFor('tag:tag-1 tag:tag-3');
 
-      await expect(pageObjects.globalSearch.resultLabels).toHaveText([
-        'Visualization 1 (tag-1)',
-        'Visualization 3 (tag-1 + tag-3)',
-        'dashboard 2 (tag-3)',
-        'dashboard 3 (tag-1 and tag-3)',
-      ]);
-    });
+    await expect(pageObjects.globalSearch.resultLabels).toHaveText([
+      'Visualization 1 (tag-1)',
+      'Visualization 3 (tag-1 + tag-3)',
+      'dashboard 2 (tag-3)',
+      'dashboard 3 (tag-1 and tag-3)',
+    ]);
+  });
 
-    test('allows to filter by type and tag', async ({ pageObjects }) => {
-      await pageObjects.globalSearch.navigateToHome();
-      await pageObjects.globalSearch.searchFor('type:dashboard tag:tag-3');
+  test('allows to filter by type and tag', async ({ pageObjects }) => {
+    await pageObjects.globalSearch.navigateToHome();
+    await pageObjects.globalSearch.searchFor('type:dashboard tag:tag-3');
 
-      await expect(pageObjects.globalSearch.resultLabels).toHaveText([
-        'dashboard 2 (tag-3)',
-        'dashboard 3 (tag-1 and tag-3)',
-      ]);
-    });
+    await expect(pageObjects.globalSearch.resultLabels).toHaveText([
+      'dashboard 2 (tag-3)',
+      'dashboard 3 (tag-1 and tag-3)',
+    ]);
+  });
 
-    test('allows to filter by multiple types and tags', async ({ pageObjects }) => {
-      await pageObjects.globalSearch.searchFor(
-        'type:(dashboard OR visualization) tag:(tag-1 OR tag-3)'
-      );
+  test('allows to filter by multiple types and tags', async ({ pageObjects }) => {
+    await pageObjects.globalSearch.searchFor(
+      'type:(dashboard OR visualization) tag:(tag-1 OR tag-3)'
+    );
 
-      const expectedLabels = [
-        'Visualization 1 (tag-1)',
-        'Visualization 3 (tag-1 + tag-3)',
-        'dashboard 2 (tag-3)',
-        'dashboard 3 (tag-1 and tag-3)',
-      ];
+    const expectedLabels = [
+      'Visualization 1 (tag-1)',
+      'Visualization 3 (tag-1 + tag-3)',
+      'dashboard 2 (tag-3)',
+      'dashboard 3 (tag-1 and tag-3)',
+    ];
 
-      for (const label of expectedLabels) {
-        await expect(
-          pageObjects.globalSearch.resultLabels.filter({ hasText: label })
-        ).toBeVisible();
-      }
-    });
+    for (const label of expectedLabels) {
+      await expect(pageObjects.globalSearch.resultLabels.filter({ hasText: label })).toBeVisible();
+    }
+  });
 
-    test('allows to filter by term and type', async ({ pageObjects }) => {
-      await pageObjects.globalSearch.searchFor('type:visualization awesome');
+  test('allows to filter by term and type', async ({ pageObjects }) => {
+    await pageObjects.globalSearch.searchFor('type:visualization awesome');
 
-      await expect(pageObjects.globalSearch.resultLabels).toHaveText(['My awesome vis (tag-4)']);
-    });
+    await expect(pageObjects.globalSearch.resultLabels).toHaveText(['My awesome vis (tag-4)']);
+  });
 
-    test('allows to filter by term and tag', async ({ pageObjects }) => {
-      await pageObjects.globalSearch.searchFor('tag:tag-4 awesome');
+  test('allows to filter by term and tag', async ({ pageObjects }) => {
+    await pageObjects.globalSearch.searchFor('tag:tag-4 awesome');
 
-      await expect(pageObjects.globalSearch.resultLabels).toHaveText(['My awesome vis (tag-4)']);
-    });
+    await expect(pageObjects.globalSearch.resultLabels).toHaveText(['My awesome vis (tag-4)']);
+  });
 
-    test('allows to filter by tags containing special characters', async ({ pageObjects }) => {
-      await pageObjects.globalSearch.searchFor('tag:"my%tag"');
+  test('allows to filter by tags containing special characters', async ({ pageObjects }) => {
+    await pageObjects.globalSearch.searchFor('tag:"my%tag"');
 
-      await expect(pageObjects.globalSearch.resultLabels).toHaveText([
-        'dashboard 4 (tag-special-chars)',
-      ]);
-    });
+    await expect(pageObjects.globalSearch.resultLabels).toHaveText([
+      'dashboard 4 (tag-special-chars)',
+    ]);
+  });
 
-    test('returns no results when searching for an unknown tag', async ({ pageObjects }) => {
-      await pageObjects.globalSearch.searchFor('tag:unknown');
+  test('returns no results when searching for an unknown tag', async ({ pageObjects }) => {
+    await pageObjects.globalSearch.searchFor('tag:unknown');
 
-      expect(await pageObjects.globalSearch.isNoResultsPlaceholderDisplayed()).toBe(true);
-    });
+    expect(await pageObjects.globalSearch.isNoResultsPlaceholderDisplayed()).toBe(true);
+  });
 
-    test('returns no results when searching for an unknown type', async ({ pageObjects }) => {
-      await pageObjects.globalSearch.searchFor('type:unknown');
+  test('returns no results when searching for an unknown type', async ({ pageObjects }) => {
+    await pageObjects.globalSearch.searchFor('type:unknown');
 
-      expect(await pageObjects.globalSearch.isNoResultsPlaceholderDisplayed()).toBe(true);
-    });
-  }
-);
+    expect(await pageObjects.globalSearch.isNoResultsPlaceholderDisplayed()).toBe(true);
+  });
+});
