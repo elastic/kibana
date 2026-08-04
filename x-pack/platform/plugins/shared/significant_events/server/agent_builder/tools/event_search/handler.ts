@@ -172,15 +172,14 @@ const toCompactEvent = (
   };
 };
 
-// The generic lets a call site passing `view: 'full'` (or omitting it, defaulting to 'compact')
-// get back the matching response member, so callers don't need to narrow on `.view` themselves.
-export async function searchEventsToolHandler<V extends EventSearchView = 'compact'>({
 const hasRequestedRule = (event: SignificantEvent, ruleUuids: string[]) =>
   (event.signals ?? []).some(
     (signal) => signal.metadata?.rule_uuid !== undefined && ruleUuids.includes(signal.metadata.rule_uuid)
-  )})
+  );
 
-export async function searchEventsToolHandler({
+// The generic lets a call site passing `view: 'full'` (or omitting it, defaulting to 'compact')
+// get back the matching response member, so callers don't need to narrow on `.view` themselves.
+export async function searchEventsToolHandler<V extends EventSearchView = 'compact'>({
   eventClient,
   params,
 }: {
