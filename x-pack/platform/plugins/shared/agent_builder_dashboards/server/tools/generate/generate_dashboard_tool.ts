@@ -25,22 +25,50 @@ import {
   getErrorMessage,
   hasValidCreateMetadataOperations,
   dashboardOperationSchema,
+  indexPanelsById,
+  prettifyPanelConfigs,
 } from './core';
 import { applyDefaultDashboardTimeRange } from './time_range';
 
 const newDashboardMetadataErrorMessage =
   'New dashboards require a set_metadata operation with a non-empty title.';
 
-const generateDashboardSchema = z.object({
-  dashboardAttachmentId: z
-    .string()
-    .max(256)
-    .optional()
-    .describe(
-      '(optional) The id of the dashboard attachment to update. Omit to create a new dashboard. The tool reads the current dashboard payload from this reference, so you never have to pass the full payload back in.'
-    ),
-  operations: z.array(dashboardOperationSchema).min(1),
-});
+const generateDashboardSchema = z
+  .object({
+    dashboardAttachmentId: z
+      .string()
+      .max(256)
+      .optional()
+      .describe(
+        '(optional) The id of the dashboard attachment to update. Omit to create a new dashboard. The tool reads the current dashboard payload from this reference, so you never have to pass the full payload back in.'
+      ),
+    operations: z.array(dashboardOperationSchema),
+    prettifyPanelConfigs: z
+      .boolean()
+      .optional()
+      .describe(
+        '(optional) Refresh surviving pre-existing ES|QL Lens panel configs. Strong default: do not set this for normal create or update requests because generated panels already follow chart best practices. Set it only when the user explicitly asks to prettify, polish, or improve the visualization configs of an existing dashboard.'
+      ),
+  })
+  .check((ctx) => {
+    if (ctx.value.prettifyPanelConfigs && !ctx.value.dashboardAttachmentId) {
+      ctx.issues.push({
+        code: 'custom',
+        message: 'dashboardAttachmentId is required when prettifyPanelConfigs is true.',
+        input: ctx.value,
+        path: ['dashboardAttachmentId'],
+      });
+    }
+
+    if (ctx.value.operations.length === 0 && !ctx.value.prettifyPanelConfigs) {
+      ctx.issues.push({
+        code: 'custom',
+        message: 'At least one operation or prettifyPanelConfigs: true is required.',
+        input: ctx.value,
+        path: ['operations'],
+      });
+    }
+  });
 
 /**
  * Compact projection of a dashboard payload, returned in the tool result.
@@ -53,7 +81,7 @@ const generateDashboardSchema = z.object({
  * authored in this run, keyed by panel id. Panels that were not authored now
  * (or whose engine returned no note) simply have no `authoring_note`.
  */
-const summarizeDashboard = (
+export const summarizeDashboard = (
   dashboardData: DashboardAttachmentData,
   authoringNotesByPanelId: Map<string, string>
 ) => ({
@@ -107,7 +135,7 @@ export const generateDashboardTool = (): BuiltinSkillBoundedTool<
     type: ToolType.builtin,
     description: `Generate or update a dashboard from ordered operations.
 
-Persists the resulting dashboard as an attachment and returns its id plus a compact summary (not the full payload). Reference the returned attachment id to render the dashboard; do not copy the payload into follow-up tool calls.
+Persists the resulting dashboard as an attachment and returns its id, a compact dashboard summary, and one-sentence summaries for successfully authored panels (not the full payload). Reference the returned attachment id to render the dashboard; do not copy the payload into follow-up tool calls.
 
 Use operations[] to:
 1. set metadata
@@ -119,12 +147,15 @@ Use operations[] to:
 7. add / remove controls (interactive filters pinned above the dashboard: dropdown, range slider, or time slider)`,
     schema: generateDashboardSchema,
     handler: async (
-      { dashboardAttachmentId: previousAttachmentId, operations },
+      { dashboardAttachmentId: previousAttachmentId, operations, prettifyPanelConfigs: prettify },
       { logger, attachments, events, esClient, modelProvider }
     ) => {
       try {
         const latestVersion = retrieveLatestVersion(attachments, previousAttachmentId);
         const isNewDashboard = !latestVersion;
+        const existingPanels = latestVersion
+          ? [...indexPanelsById(latestVersion.data.panels).values()]
+          : [];
 
         if (isNewDashboard && !hasValidCreateMetadataOperations(operations)) {
           logger.error(newDashboardMetadataErrorMessage);
@@ -132,18 +163,33 @@ Use operations[] to:
         }
 
         const dashboardAttachmentId = previousAttachmentId ?? uuidv4();
+        const resolvePanelContent = createVisPanelResolver({
+          logger,
+          modelProvider,
+          events,
+          esClient,
+        });
 
-        const { dashboardData, failures, panelAuthoringNotes } = await executeDashboardOperations({
+        const operationResult = await executeDashboardOperations({
           dashboardData: latestVersion?.data,
           operations,
           logger,
-          resolvePanelContent: createVisPanelResolver({
-            logger,
-            modelProvider,
-            events,
-            esClient,
-          }),
+          resolvePanelContent,
         });
+        const { failures, panelAuthoringNotes, contentResolvedPanelIds } = operationResult;
+        let dashboardData = operationResult.dashboardData;
+
+        if (prettify) {
+          const prettifyResult = await prettifyPanelConfigs({
+            dashboardData,
+            existingPanels,
+            resolvePanelContent,
+            skipPanelIds: contentResolvedPanelIds,
+          });
+          dashboardData = prettifyResult.dashboardData;
+          failures.push(...prettifyResult.failures);
+          panelAuthoringNotes.push(...prettifyResult.panelAuthoringNotes);
+        }
 
         // Data-aware default time range computation
         const finalDashboardData = await applyDefaultDashboardTimeRange({
@@ -202,7 +248,11 @@ Use operations[] to:
               type: ToolResultType.error,
               data: {
                 message: `Failed to generate dashboard: ${errorMessage}`,
-                metadata: { dashboardAttachmentId: previousAttachmentId, operations },
+                metadata: {
+                  dashboardAttachmentId: previousAttachmentId,
+                  operations,
+                  prettifyPanelConfigs: prettify,
+                },
               },
             },
           ],

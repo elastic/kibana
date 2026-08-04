@@ -42,6 +42,7 @@ export const executeDashboardOperations = async ({
 }: ExecuteDashboardOperationsParams): Promise<{
   dashboardData: DashboardAttachmentData;
   failures: PanelFailure[];
+  contentResolvedPanelIds: ReadonlySet<string>;
   panelAuthoringNotes: PanelAuthoringNote[];
 }> => {
   let nextDashboardData = structuredClone(
@@ -74,6 +75,7 @@ export const executeDashboardOperations = async ({
   return {
     dashboardData: nextDashboardData,
     failures,
+    contentResolvedPanelIds: context.contentResolvedPanelIds,
     panelAuthoringNotes,
   };
 };

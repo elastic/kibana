@@ -58,8 +58,9 @@ DATA SOURCE RULES:
 4. Follow the schema definition strictly, with the single exception that you must omit the 'data_source' field.
 
 TITLE RULES:
-- Omit the 'title' field when the chart already displays the information within itself (e.g. metric, gauge, tagcloud, waffle charts show their value and label directly).
-- When a title is needed, make it self-explanatory and exhaustive so that axis titles become unnecessary.
+- NEVER set 'title' on self-labeling charts (metric, gauge, tagcloud, waffle) — they display their value and label directly.
+- ALWAYS set 'title' on every other chart type (xy, heatmap, pie, ...) — it is often the panel's only label.
+- Make every title self-explanatory and exhaustive so that axis titles become unnecessary.
 - NEVER duplicate information across the chart title, axis titles, and metric labels.
 
 NUMBER FORMAT RULES:

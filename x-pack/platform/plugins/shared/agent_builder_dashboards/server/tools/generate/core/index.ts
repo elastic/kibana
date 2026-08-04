@@ -9,9 +9,8 @@ export { dashboardOperationSchema, executeDashboardOperations } from './operatio
 
 export { getErrorMessage, hasValidCreateMetadataOperations } from './utils';
 
-export { createPanelFailureResult } from './resolve_panel';
-export type { PanelContentAttempt } from './resolve_panel';
-export type { VisPanelResolutionRequest } from './operations/panels';
+export { indexPanelsById } from './dashboard_state';
+
+export { prettifyPanelConfigs } from './prettify_panel_configs';
 
 export { createVisPanelResolver } from './resolvers/vis_panel_resolver';
-export type { VisPanelResolverDeps } from './resolvers/vis_panel_resolver';

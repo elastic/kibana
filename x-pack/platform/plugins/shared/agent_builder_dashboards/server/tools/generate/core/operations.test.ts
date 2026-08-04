@@ -1480,6 +1480,7 @@ describe('executeDashboardOperations', () => {
             'Panel "panel-1" with type "aiOpsLogRateAnalysis" is not supported for inline visualization editing.',
         },
       ]);
+      expect(result.contentResolvedPanelIds.size).toBe(0);
     });
 
     it('resolves multiple panel edits in one edit_panels op in parallel', async () => {

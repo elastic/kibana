@@ -98,6 +98,9 @@ export const chartTypeRegistry: ChartTypeRegistry = {
           "Choose 'metric' for single numerical statistics, aggregations, counts, or KPIs without ranges",
       },
       config: {
+        perChartTypeRules: [
+          'Prefer right-aligned metric values. Use left/center only when the user asks.',
+        ],
         options: {
           coloring: {
             dynamic: { recommendedStepCount: 3 },
@@ -145,6 +148,8 @@ export const chartTypeRegistry: ChartTypeRegistry = {
           'For new XY charts, omit explicit `color` properties and let Lens apply its current default palettes. Only add colors when the user explicitly requests them.',
           'When editing an existing XY chart, preserve its existing explicit colors unless the user asks to change them; do not introduce new color overrides.',
           'Never introduce or switch to legacy palette IDs (`eui_amsterdam`, `kibana_v7_legacy`, or `elastic_brand_2023`).',
+          "Hide the legend when the chart plots a single series (one layer, one 'y' metric, no 'breakdown_by') — it would only repeat the metric's label. Keep it visible otherwise.",
+          'Default visible legends to outside the chart at the bottom with the list layout (not grid); deviate only when the user asks.',
         ],
       },
     },

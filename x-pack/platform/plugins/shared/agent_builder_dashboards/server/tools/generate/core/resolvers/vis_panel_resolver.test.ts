@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { buildLensConfig, buildVegaConfig } from '@kbn/agent-builder-visualizations-server';
 import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
+import { buildLensConfig, buildVegaConfig } from '@kbn/agent-builder-visualizations-server';
 import { VEGA_VIS_TYPE } from '@kbn/agent-builder-visualizations-common';
 import type { ModelProvider, ToolEventEmitter } from '@kbn/agent-builder-server';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
@@ -134,7 +134,10 @@ describe('createVisPanelResolver', () => {
       type: 'vis',
       operationType: 'edit_panels',
       identifier: 'panel-1',
-      nlQuery: 'change the title',
+      nlQuery: 'turn this into a line chart',
+      chartType: SupportedChartType.XY,
+      esql: 'FROM logs-* | STATS count = COUNT(*)',
+      additionalChartConfigInstructions: 'Polish the existing config.',
       existingPanel: {
         id: 'panel-1',
         type: LENS_EMBEDDABLE_TYPE,
@@ -147,6 +150,9 @@ describe('createVisPanelResolver', () => {
       expect.objectContaining({
         existingConfig: JSON.stringify({ type: 'xy' }),
         parsedExistingConfig: { type: 'xy' },
+        chartType: SupportedChartType.XY,
+        esql: 'FROM logs-* | STATS count = COUNT(*)',
+        additionalChartConfigInstructions: 'Polish the existing config.',
       })
     );
   });

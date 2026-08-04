@@ -30,6 +30,7 @@ import {
   isValidateConfigAction,
 } from './actions_lens';
 import { createGenerateConfigPrompt } from './prompts';
+import { getEsqlDataSourceCarriers, getEsqlQueriesFromLensConfig } from './lens_config_helpers';
 
 // Regex to extract JSON from markdown code blocks
 const INLINE_JSON_REGEX = /```(?:json)?\s*([\s\S]*?)\s*```/gm;
@@ -63,43 +64,6 @@ const validateConfigForChartType = (
   chartType: SupportedChartType,
   config: unknown
 ): VisualizationConfig => chartTypeRegistry[chartType].schema.parse(config);
-
-export interface EsqlDataSourceCarrier {
-  data_source?: { type?: string; query?: string };
-}
-
-/**
- * Returns the objects that carry a `data_source` for this config shape:
- * XY-ESQL configs keep one `data_source` per layer; every other ESQL chart
- * (metric, gauge, tagcloud, ...) carries it on the config itself. Used both to
- * read existing queries (edits) and to inject the validated query (generation).
- */
-export const getEsqlDataSourceCarriers = (config: unknown): EsqlDataSourceCarrier[] => {
-  if (!config || typeof config !== 'object') return [];
-  const { layers } = config as { layers?: unknown };
-  return Array.isArray(layers)
-    ? (layers as EsqlDataSourceCarrier[])
-    : [config as EsqlDataSourceCarrier];
-};
-
-/**
- * Helper to extract ESQL queries from a visualization config.
- * Handles both single-dataset configs (metric, gauge, tagcloud) and layers-based configs (XY).
- * For XY charts with multiple layers, returns all unique ESQL queries.
- */
-function getExistingEsqlQueries(config: VisualizationConfig | null): string[] {
-  if (!config) return [];
-
-  const queries: string[] = [];
-  for (const carrier of getEsqlDataSourceCarriers(config)) {
-    const dataSource = carrier.data_source;
-    if (dataSource?.type === 'esql' && dataSource.query && !queries.includes(dataSource.query)) {
-      queries.push(dataSource.query);
-    }
-  }
-
-  return queries;
-}
 
 const VisualizationStateAnnotation = Annotation.Root({
   // inputs
@@ -146,7 +110,7 @@ export const createVisualizationGraph = async (
         // On edit, seed generation with the existing per-layer queries so a
         // query-changing edit can modify them instead of being stuck with the
         // original columns.
-        existingQueries: getExistingEsqlQueries(state.parsedExistingConfig),
+        existingQueries: getEsqlQueriesFromLensConfig(state.parsedExistingConfig),
         index: state.index,
         modelProvider,
         events,
