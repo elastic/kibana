@@ -28,6 +28,12 @@ export const InputAreaPopover = memo<InputAreaPopoverProps>(({ children, width =
   const isPopoverOpen = show !== undefined;
   const dispatch = useConsoleStateDispatch();
 
+  // ID should be passed down to whatever component is rendered in the popover, so that
+  // `focus` can be applied to it after the popover is opened
+  const initialFocusId = useMemo(() => {
+    return `inputPopover_${Math.random().toString(36).substring(2, 15)}`;
+  }, []);
+
   const popoverPanelStyles = useMemo<CSSProperties>(() => {
     return {
       width,
@@ -66,6 +72,7 @@ export const InputAreaPopover = memo<InputAreaPopoverProps>(({ children, width =
       attachToAnchor={true}
       focusTrapProps={focusTrapProps}
       ownFocus={false}
+      initialFocus={`#${initialFocusId}`}
       data-test-subj={getTestId('inputPopover')}
       aria-label={i18n.translate('xpack.securitySolution.console.inputAreaPopover.ariaLabel', {
         defaultMessage: 'Command input history',
@@ -73,7 +80,7 @@ export const InputAreaPopover = memo<InputAreaPopoverProps>(({ children, width =
     >
       {show && (
         <EuiFocusTrap clickOutsideDisables={true}>
-          {show === 'input-history' && <CommandInputHistory />}
+          {show === 'input-history' && <CommandInputHistory initialFocusId={initialFocusId} />}
         </EuiFocusTrap>
       )}
     </EuiPopover>
