@@ -6,27 +6,30 @@
  */
 
 import type { CoreSetup } from '@kbn/core/server';
-import { notificationWriteSchema } from '../common/notification_schema';
+import { notificationWriteSchema } from '../../common/notification_schema';
 import {
   NOTIFICATION_TYPE_FLAGS,
   NOTIFICATION_TYPE_ENABLED_DEFAULT,
-} from '../common/feature_flags';
-import { joinNotificationTypeId } from '../common/notification_registry_utils';
-import type { NotificationKind } from '../common/notification_registry_types';
-import { buildStateNotificationId, buildTimeseriesNotificationId } from '../common/notification_id';
+} from '../../common/feature_flags';
+import { joinNotificationTypeId } from '../../common/notification_registry_utils';
+import type { NotificationKind } from '../../common/notification_registry_types';
+import {
+  buildStateNotificationId,
+  buildTimeseriesNotificationId,
+} from '../../common/notification_id';
 import type {
   NotificationDocument,
   NotificationDraft,
   StateSubmitIdParts,
   TimeseriesSubmitIdParts,
-} from '../common/types';
-import { getNotificationDataStreamClient } from './data_stream/notification_data_stream';
+} from '../../common/types';
+import { getNotificationDataStreamClient } from '../storage/notification_data_stream';
 import type {
   NotificationCenterPluginSetup,
   NotificationCenterPluginStart,
   NotificationCenterStartDependencies,
   SubmitNotificationResult,
-} from './types';
+} from '../types';
 
 type NotificationCenterCore = CoreSetup<
   NotificationCenterStartDependencies,
