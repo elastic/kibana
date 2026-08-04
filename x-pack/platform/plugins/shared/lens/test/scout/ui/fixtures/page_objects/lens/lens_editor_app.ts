@@ -7,18 +7,17 @@
 
 import type { DebugState } from '@elastic/charts';
 import { LensApp } from '@kbn/scout';
-import { expect } from '@kbn/scout/ui';
 import { normalizeComputedColor, parseInlineStyle } from './lens_editor_helpers';
 
 /** `useDebouncedValue` waits 256ms before committing; add margin for a busy main thread. */
 const FORMAT_PARAM_DEBOUNCE_FLUSH_MS = 500;
 
 /**
- * Lens-editor page object used by Lens's own Scout suites. Extends shared `@kbn/scout`
- * `LensApp` with editor-only helpers. Methods are grouped below with section comments that
- * match a former mixin split (layers / dimensions / style / metric / datatable / drag_drop /
- * workspace) so we can assess re-splitting later without keeping mixin machinery now.
+ * Default timeout for `page.waitForFunction` readiness waits.
+ * Unlike `expect` / action timeouts, Playwright's `waitForFunction` has no Scout default.
  */
+const WAIT_FOR_FUNCTION_TIMEOUT_MS = 10_000;
+
 export class LensEditorApp extends LensApp {
   // ---------------------------------------------------------------------------
   // Layers — tabs, per-layer data-view switch, add/remove
@@ -26,9 +25,7 @@ export class LensEditorApp extends LensApp {
 
   // Tab `data-test-subj` values use layer ids (not numeric indices); this only ever
   // resolves to elements when there are 2+ layers (EUI hides the tab strip for one).
-  private get layerTabsLocator() {
-    return this.page.testSubj.locator('^unifiedTabs_tab_');
-  }
+  private readonly layerTabsLocator = this.page.testSubj.locator('^unifiedTabs_tab_');
 
   /**
    * Switches the data view of a Lens layer via the layer's data view picker.
@@ -64,7 +61,13 @@ export class LensEditorApp extends LensApp {
    * Tab `data-test-subj` values use layer ids (not numeric indices), so tabs are resolved by order.
    */
   async activateLayerTab(index: number) {
-    await expect.poll(async () => await this.layerTabsLocator.count()).toBeGreaterThan(index);
+    // waitForFunction has no Scout default (unlike expect/actionTimeout).
+    await this.page.waitForFunction(
+      (minExclusive) =>
+        document.querySelectorAll('[data-test-subj^="unifiedTabs_tab_"]').length > minExclusive,
+      index,
+      { timeout: WAIT_FOR_FUNCTION_TIMEOUT_MS }
+    );
 
     const tabs = await this.layerTabsLocator.all();
     const tab = tabs[index];
@@ -152,7 +155,7 @@ export class LensEditorApp extends LensApp {
         return count > before;
       },
       tabsBefore,
-      { timeout: 10_000 }
+      { timeout: WAIT_FOR_FUNCTION_TIMEOUT_MS }
     );
   }
 
@@ -185,7 +188,7 @@ export class LensEditorApp extends LensApp {
         (before) =>
           document.querySelectorAll('[data-test-subj^="unifiedTabs_tab_"]').length < before,
         tabsBefore,
-        { timeout: 10_000 }
+        { timeout: WAIT_FOR_FUNCTION_TIMEOUT_MS }
       );
     } else {
       // Clearing the only layer keeps its (now empty) panel, so wait for its dimensions to go.
@@ -218,14 +221,10 @@ export class LensEditorApp extends LensApp {
   // ---------------------------------------------------------------------------
 
   /** Locator for all dimension-trigger buttons in the Lens config panel. */
-  getDimensionTriggerLocator() {
-    return this.page.testSubj.locator('lns-dimensionTrigger');
-  }
+  readonly dimensionTriggerLocator = this.page.testSubj.locator('lns-dimensionTrigger');
 
   /**
    * Locator for dimension-trigger buttons inside a panel/group.
-   * Prefer `expect(locator).toHaveText(...)` / `toHaveCount(0)` over `expect.poll`
-   * + `getDimensionTriggerText` — Playwright auto-waits on the locator.
    */
   getDimensionTriggersLocator(dimension: string) {
     return this.page.testSubj.locator(`${dimension} > lns-dimensionTrigger`);
@@ -233,7 +232,7 @@ export class LensEditorApp extends LensApp {
 
   /** Returns all dimension-trigger button locators currently rendered in the editor. */
   getDimensionTriggers() {
-    return this.getDimensionTriggerLocator().all();
+    return this.dimensionTriggerLocator.all();
   }
 
   /**
@@ -267,10 +266,15 @@ export class LensEditorApp extends LensApp {
    * default (un-hovered) state before asserting colors.
    */
   async hoverOverDimensionButton(index = 0) {
-    const triggersLocator = this.getDimensionTriggerLocator();
-    await expect.poll(async () => await triggersLocator.count()).toBeGreaterThan(index);
+    // waitForFunction has no Scout default (unlike expect/actionTimeout).
+    await this.page.waitForFunction(
+      (minExclusive) =>
+        document.querySelectorAll('[data-test-subj="lns-dimensionTrigger"]').length > minExclusive,
+      index,
+      { timeout: WAIT_FOR_FUNCTION_TIMEOUT_MS }
+    );
 
-    const triggers = await triggersLocator.all();
+    const triggers = await this.dimensionTriggerLocator.all();
     const trigger = triggers[index];
     if (!trigger) {
       throw new Error(`Dimension trigger not found at index ${index}`);
@@ -307,7 +311,7 @@ export class LensEditorApp extends LensApp {
         minCount: dimensionIndex,
       },
       // waitForFunction has no Scout default (unlike expect/actionTimeout).
-      { timeout: 10_000 }
+      { timeout: WAIT_FOR_FUNCTION_TIMEOUT_MS }
     );
 
     const editors = await editorsLocator.all();
@@ -467,7 +471,7 @@ export class LensEditorApp extends LensApp {
         return el instanceof HTMLInputElement && el.value === expected;
       },
       { sel: selector, expected: value },
-      { timeout: 10_000 }
+      { timeout: WAIT_FOR_FUNCTION_TIMEOUT_MS }
     );
     // eslint-disable-next-line playwright/no-wait-for-timeout
     await this.page.waitForTimeout(FORMAT_PARAM_DEBOUNCE_FLUSH_MS);
@@ -533,21 +537,12 @@ export class LensEditorApp extends LensApp {
   // ---------------------------------------------------------------------------
 
   /** Style flyout title — Lens uses a DOM id, not a data-test-subj (FTR parity). */
-  private get dimensionContainerTitle() {
-    return this.page.locator('#lnsDimensionContainerTitle');
-  }
-
-  private get styleSettingsButton() {
-    return this.page.locator('button[data-test-subj="style"]');
-  }
-
-  private get flyoutBackButton() {
-    return this.page.testSubj.locator('lns-indexPattern-dimensionContainerBack');
-  }
-
-  private get referenceLineFillBelowButton() {
-    return this.page.testSubj.locator('lnsXY_fill_below');
-  }
+  private readonly dimensionContainerTitle = this.page.locator('#lnsDimensionContainerTitle');
+  private readonly styleSettingsButton = this.page.locator('button[data-test-subj="style"]');
+  private readonly flyoutBackButton = this.page.testSubj.locator(
+    'lns-indexPattern-dimensionContainerBack'
+  );
+  readonly referenceLineFillBelowButton = this.page.testSubj.locator('lnsXY_fill_below');
 
   /**
    * Opens the Lens style settings flyout.
@@ -693,29 +688,48 @@ export class LensEditorApp extends LensApp {
       return colorStops;
     };
 
-    let prevColorStopsJson: string | null = null;
-    await expect
-      .poll(
-        async () => {
-          const stopCount = await stopInputsLocator.count();
-          if (expectedStopsCount !== undefined && stopCount !== expectedStopsCount) {
-            return false;
-          }
-          if (stopCount === 0) {
-            return false;
-          }
-
-          const colorStopsJson = JSON.stringify(await readColorStops());
-          if (prevColorStopsJson === colorStopsJson) {
-            return true;
-          }
-          prevColorStopsJson = colorStopsJson;
+    await this.page.evaluate(() => {
+      delete (window as unknown as { __lensPaletteStopsPrev?: string }).__lensPaletteStopsPrev;
+    });
+    // Palette stops can take several debounce cycles to stabilize after edits.
+    // waitForFunction has no Scout default (unlike expect/actionTimeout).
+    await this.page.waitForFunction(
+      ({ expectedCount }) => {
+        const panel = document.querySelector('[data-test-subj="lns-palettePanelFlyout"]');
+        if (!panel) {
           return false;
-        },
-        // Palette stops can take several debounce cycles to stabilize after edits.
-        { intervals: [500], timeout: 20_000 }
-      )
-      .toBe(true);
+        }
+        const stopInputs = panel.querySelectorAll(
+          '[data-test-subj^="lnsPalettePanel_dynamicColoring_range_value_"]'
+        );
+        if (expectedCount != null && stopInputs.length !== expectedCount) {
+          return false;
+        }
+        if (stopInputs.length === 0) {
+          return false;
+        }
+        const colorAnchors = panel.querySelectorAll('[data-test-subj="euiColorPickerAnchor"]');
+        const colorStops = Array.from(stopInputs).map((input, i) => {
+          const anchor = colorAnchors[i] as HTMLElement | undefined;
+          return {
+            stop: (input as HTMLInputElement).getAttribute('value'),
+            color: anchor ? getComputedStyle(anchor).backgroundColor : undefined,
+          };
+        });
+        const colorStopsJson = JSON.stringify(colorStops);
+        const win = window as unknown as { __lensPaletteStopsPrev?: string };
+        if (win.__lensPaletteStopsPrev === colorStopsJson) {
+          return true;
+        }
+        win.__lensPaletteStopsPrev = colorStopsJson;
+        return false;
+      },
+      { expectedCount: expectedStopsCount ?? null },
+      { polling: 500, timeout: 20_000 }
+    );
+    await this.page.evaluate(() => {
+      delete (window as unknown as { __lensPaletteStopsPrev?: string }).__lensPaletteStopsPrev;
+    });
 
     return readColorStops();
   }
@@ -732,11 +746,6 @@ export class LensEditorApp extends LensApp {
     await this.page.keyboard.press('Tab');
   }
 
-  /** Locator for the reference-line "fill below" style button in the open dimension editor. */
-  getReferenceLineFillBelowButton() {
-    return this.referenceLineFillBelowButton;
-  }
-
   /** Enables the "fill below" style for the reference line in the open dimension editor. */
   async setReferenceLineFillBelow() {
     await this.referenceLineFillBelowButton.click();
@@ -749,7 +758,7 @@ export class LensEditorApp extends LensApp {
           .querySelector('[data-test-subj="lnsXY_fill_below"]')
           ?.getAttribute('aria-pressed') === 'true',
       undefined,
-      { timeout: 10_000 }
+      { timeout: WAIT_FOR_FUNCTION_TIMEOUT_MS }
     );
   }
 
@@ -809,32 +818,23 @@ export class LensEditorApp extends LensApp {
 
   // Elastic Charts pads the last grid row with empty filler cells (`role="presentation"`,
   // no title/value) to keep tile sizing consistent; excluded since they aren't real metrics.
-  private get metricTilesLocator() {
-    return this.page.locator('[data-test-subj="mtrVis"] .echChart li:not([role="presentation"])');
-  }
-
   // Scope Elastic Charts class selectors to the metric workspace so chrome/other
   // panels with the same classes can't produce false positives.
-  private get secondaryMetricBadge() {
-    return this.page.locator('[data-test-subj="mtrVis"] .echBadge__content');
-  }
-
-  private get secondaryMetricLabel() {
-    return this.page.locator('[data-test-subj="mtrVis"] .echSecondaryMetric__label');
-  }
-
-  private get metricProgressBar() {
-    return this.page.locator('[data-test-subj="mtrVis"] .echSingleMetricProgress');
-  }
-
-  private get legacyMetricValue() {
-    return this.page.testSubj.locator('metric_value');
-  }
-
-  /** Locator matching every Elastic Charts metric tile currently rendered. */
-  getMetricTilesLocator() {
-    return this.metricTilesLocator;
-  }
+  readonly metricTilesLocator = this.page.locator(
+    '[data-test-subj="mtrVis"] .echChart li:not([role="presentation"])'
+  );
+  readonly secondaryMetricBadge = this.page.locator('[data-test-subj="mtrVis"] .echBadge__content');
+  private readonly secondaryMetricLabel = this.page.locator(
+    '[data-test-subj="mtrVis"] .echSecondaryMetric__label'
+  );
+  /**
+   * Added in a render pass after the one `waitForVisualization` settles on — callers that need
+   * to assert it appears should poll `count()` before snapshotting via `getMetricVisualizationData`.
+   */
+  readonly metricProgressBar = this.page.locator(
+    '[data-test-subj="mtrVis"] .echSingleMetricProgress'
+  );
+  readonly legacyMetricValue = this.page.testSubj.locator('metric_value');
 
   /** Returns locators for each Elastic Charts metric tile currently rendered. */
   getMetricTiles() {
@@ -853,16 +853,6 @@ export class LensEditorApp extends LensApp {
     }
     const tiles = await this.getMetricTiles();
     await tiles[index].click();
-  }
-
-  /**
-   * Returns the progress-bar locator rendered on metric tiles once a "max" dimension is set.
-   * Elastic Charts adds this element in a render pass after the one `waitForVisualization`
-   * settles on, so callers that need to assert it appears should poll this locator's `count()`
-   * before snapshotting tile state via `getMetricVisualizationData`.
-   */
-  getMetricProgressBarLocator() {
-    return this.metricProgressBar;
   }
 
   /** Reads the current state of every metric tile inside `[data-test-subj="mtrVis"]`. */
@@ -911,15 +901,6 @@ export class LensEditorApp extends LensApp {
     return (await this.secondaryMetricBadge.innerText()).trim();
   }
 
-  /**
-   * Returns the secondary-value trend badge locator, so callers can assert its presence or
-   * background color with `toHaveCount` / `toHaveCSS` (both auto-retry until the debounced
-   * update settles).
-   */
-  getSecondaryMetricBadgeLocator() {
-    return this.secondaryMetricBadge;
-  }
-
   /** Returns the secondary metric's label text, or `undefined` if not rendered. */
   async getSecondaryMetricLabel(): Promise<string | undefined> {
     if ((await this.secondaryMetricLabel.count()) === 0) {
@@ -947,17 +928,12 @@ export class LensEditorApp extends LensApp {
   }
 
   /**
-   * Locator for the legacy metric value element. Prefer asserting its computed
-   * color with `expect(...).toHaveCSS('color', ...)` over `getLegacyMetricStyle()`
-   * when checking a color that was just changed — coloring updates are debounced,
-   * so a point-in-time read of the `style` attribute can race the update, while
+   * Parses the inline `style` attribute of the legacy metric value element into a map.
+   * Prefer asserting `legacyMetricValue` color with `expect(...).toHaveCSS('color', ...)`
+   * over this helper when checking a color that was just changed — coloring updates are
+   * debounced, so a point-in-time read of the `style` attribute can race the update, while
    * `toHaveCSS` auto-retries until the color settles.
    */
-  getLegacyMetricValueLocator() {
-    return this.legacyMetricValue;
-  }
-
-  /** Parses the inline `style` attribute of the legacy metric value element into a map. */
   async getLegacyMetricStyle(): Promise<Record<string, string>> {
     return parseInlineStyle((await this.legacyMetricValue.getAttribute('style')) ?? '');
   }
@@ -966,13 +942,11 @@ export class LensEditorApp extends LensApp {
   // Datatable — cell / header reading
   // ---------------------------------------------------------------------------
 
-  private get dataTable() {
-    return this.page.testSubj.locator('lnsDataTable');
-  }
+  private readonly dataTable = this.page.testSubj.locator('lnsDataTable');
 
   /**
    * Locator for a Lens datatable cell. Prefer `expect(locator).toContainText(...)`
-   * over `expect.poll` + `getDatatableCellText` when asserting visible values.
+   * over polling + `getDatatableCellText` when asserting visible values.
    */
   getDatatableCellLocator(rowIndex = 0, colIndex = 0, addRowNumberColumn = true) {
     const col = colIndex + (addRowNumberColumn ? 1 : 0);
@@ -1026,7 +1000,7 @@ export class LensEditorApp extends LensApp {
           .length > minCount,
       { minCount: index },
       // waitForFunction has no Scout default (unlike expect/actionTimeout).
-      { timeout: 10_000 }
+      { timeout: WAIT_FOR_FUNCTION_TIMEOUT_MS }
     );
     const headerContents = await headers.all();
     const headerContent = headerContents[index];
@@ -1141,7 +1115,7 @@ export class LensEditorApp extends LensApp {
         return nodes.length > 0;
       },
       from,
-      { timeout: 10_000 }
+      { timeout: WAIT_FOR_FUNCTION_TIMEOUT_MS }
     );
     await this.page.waitForFunction(
       (chain) => {
@@ -1157,7 +1131,7 @@ export class LensEditorApp extends LensApp {
         return nodes.length > 0;
       },
       to,
-      { timeout: 10_000 }
+      { timeout: WAIT_FOR_FUNCTION_TIMEOUT_MS }
     );
     await this.html5DragAndDrop(from, to);
     await this.waitForLensDragDropToFinish();
@@ -1184,7 +1158,7 @@ export class LensEditorApp extends LensApp {
       ({ panelSubj, minCount }) =>
         document.querySelectorAll(`[data-test-subj="${panelSubj}"]`).length >= minCount,
       { panelSubj: dimension, minCount: Math.max(startIndex, endIndex) },
-      { timeout: 10_000 }
+      { timeout: WAIT_FOR_FUNCTION_TIMEOUT_MS }
     );
     await this.page.evaluate(
       async ([panelSubj, startIdx, endIdx]) => {
@@ -1409,7 +1383,7 @@ export class LensEditorApp extends LensApp {
     await this.page.waitForFunction(
       () => document.querySelectorAll('.domDroppable--active').length > 0,
       undefined,
-      { timeout: 10_000 }
+      { timeout: WAIT_FOR_FUNCTION_TIMEOUT_MS }
     );
     let activeKey = await this.paceKeyboardDragDrop();
     for (let i = 0; i < steps; i++) {
@@ -1433,7 +1407,7 @@ export class LensEditorApp extends LensApp {
           `[data-test-subj="${groupSubj}"] [data-test-subj="lnsDragDrop-keyboardHandler"]`
         ).length > min,
       { groupSubj: group, min: index },
-      { timeout: 10_000 }
+      { timeout: WAIT_FOR_FUNCTION_TIMEOUT_MS }
     );
     const handlers = await handlersLocator.all();
     const handler = handlers[index];
@@ -1465,7 +1439,7 @@ export class LensEditorApp extends LensApp {
           `[data-test-subj="${groupSubj}"] [data-test-subj="lnsDragDrop-keyboardHandler"]`
         ).length > min,
       { groupSubj: group, min: index },
-      { timeout: 10_000 }
+      { timeout: WAIT_FOR_FUNCTION_TIMEOUT_MS }
     );
     const handlers = await handlersLocator.all();
     const handler = handlers[index];
@@ -1527,46 +1501,33 @@ export class LensEditorApp extends LensApp {
   public readonly chartTitle = this.page.testSubj.locator('lns_ChartTitle');
   /** XY legend items (elastic-charts does not expose a `data-test-subj` for these). */
   public readonly xyLegendItems = this.page.locator('.echLegendItem');
+  // Stable locators as readonly fields (Scout UI best practice); methods stay for parameterized
+  // locators and multi-step actions. See docs/extend/testing/ui-best-practices.md.
+  readonly convertToEsqlButton = this.page.getByRole('button', { name: 'Convert to ES|QL' });
+  readonly convertToEsqlModal = this.page.getByTestId('lnsConvertToEsqlModal');
+  readonly convertToEsqlModalConfirmButton = this.page.getByTestId('confirmModalConfirmButton');
+  readonly secondaryFlyoutBackButton = this.page.getByTestId(
+    'lns-indexPattern-dimensionContainerClose'
+  );
+  readonly inlineEditor = this.page.getByTestId('customizeLens');
+  readonly editInLensButton = this.page.getByTestId('navigateToLensEditorLink');
+  readonly discardChangesModal = this.page.testSubj.locator('lnsApp_discardChangesModalOrigin');
+  readonly autoApplyToggle = this.page.testSubj.locator('lnsToggleAutoApply');
 
-  private get goBackToAppButton() {
-    return this.page.testSubj.locator('lnsApp_goBackToAppButton');
-  }
-
-  private get discardChangesModal() {
-    return this.page.testSubj.locator('lnsApp_discardChangesModalOrigin');
-  }
-
-  private get confirmModalConfirmButton() {
-    return this.page.testSubj.locator('confirmModalConfirmButton');
-  }
-
-  private get messageListTrigger() {
-    return this.page.testSubj.locator('lens-message-list-trigger');
-  }
-
-  private get settingsButton() {
-    return this.page.testSubj.locator('lnsApp_settingsButton');
-  }
-
-  private get settingsMenu() {
-    return this.page.testSubj.locator('lnsApp__settingsMenu');
-  }
-
-  private get autoApplyToggle() {
-    return this.page.testSubj.locator('lnsToggleAutoApply');
-  }
-
-  private get emptyWorkspacePrompt() {
-    return this.page.testSubj.locator('workspace-drag-drop-prompt');
-  }
-
-  private get workspaceApplyChangesPrompt() {
-    return this.page.testSubj.locator('workspace-apply-changes-prompt');
-  }
-
-  private get suggestionPanelToggle() {
-    return this.page.testSubj.locator('lensSuggestionsPanelToggleButton');
-  }
+  private readonly goBackToAppButton = this.page.testSubj.locator('lnsApp_goBackToAppButton');
+  private readonly confirmModalConfirmButton = this.page.testSubj.locator(
+    'confirmModalConfirmButton'
+  );
+  private readonly messageListTrigger = this.page.testSubj.locator('lens-message-list-trigger');
+  private readonly settingsButton = this.page.testSubj.locator('lnsApp_settingsButton');
+  private readonly settingsMenu = this.page.testSubj.locator('lnsApp__settingsMenu');
+  private readonly emptyWorkspacePrompt = this.page.testSubj.locator('workspace-drag-drop-prompt');
+  private readonly workspaceApplyChangesPrompt = this.page.testSubj.locator(
+    'workspace-apply-changes-prompt'
+  );
+  private readonly suggestionPanelToggle = this.page.testSubj.locator(
+    'lensSuggestionsPanelToggleButton'
+  );
 
   async openFullEditor() {
     await this.page.gotoApp('lens');
@@ -1647,10 +1608,6 @@ export class LensEditorApp extends LensApp {
     await this.goBackToAppButton.click();
   }
 
-  getDiscardChangesModal() {
-    return this.discardChangesModal;
-  }
-
   async confirmDiscardChangesModal() {
     await this.discardChangesModal.waitFor({ state: 'visible' });
     await this.confirmModalConfirmButton.click();
@@ -1674,20 +1631,36 @@ export class LensEditorApp extends LensApp {
     const removeLocator = this.page.testSubj.locator(
       `${dimensionTestSubj} > indexPattern-dimension-remove`
     );
-    await expect
-      .poll(
-        async () => {
-          const buttons = await removeLocator.all();
-          if (buttons.length > 0) {
-            await buttons[0].hover();
-            await buttons[0].click();
+    // Sequential remove+re-render per dimension can exceed the 10s actionTimeout.
+    const deadline = Date.now() + 30_000;
+    while ((await removeLocator.count()) > 0) {
+      if (Date.now() >= deadline) {
+        throw new Error(`Timed out removing dimensions for "${dimensionTestSubj}"`);
+      }
+      const buttons = await removeLocator.all();
+      const button = buttons[0];
+      if (!button) {
+        break;
+      }
+      const countBefore = buttons.length;
+      await button.hover();
+      await button.click();
+      // waitForFunction has no Scout default (unlike expect/actionTimeout).
+      await this.page.waitForFunction(
+        ({ panelSubj, before }) => {
+          const panel = document.querySelector(`[data-test-subj="${panelSubj}"]`);
+          if (!panel) {
+            return true;
           }
-          return removeLocator.count();
+          return (
+            panel.querySelectorAll('[data-test-subj="indexPattern-dimension-remove"]').length <
+            before
+          );
         },
-        // Sequential remove+re-render per dimension can exceed the 10s expect timeout.
-        { timeout: 30_000 }
-      )
-      .toBe(0);
+        { panelSubj: dimensionTestSubj, before: countBefore },
+        { timeout: WAIT_FOR_FUNCTION_TIMEOUT_MS }
+      );
+    }
   }
 
   /**
@@ -1782,11 +1755,6 @@ export class LensEditorApp extends LensApp {
     await this.settingsMenu.waitFor({ state: 'hidden' });
   }
 
-  /** Locator for the auto-apply toggle. Requires the settings menu to be open. */
-  getAutoApplyToggle() {
-    return this.autoApplyToggle;
-  }
-
   /** Toggles the auto-apply setting. Requires the settings menu to be open. */
   async toggleAutoApply() {
     await this.autoApplyToggle.click();
@@ -1815,7 +1783,7 @@ export class LensEditorApp extends LensApp {
           .querySelector('[data-test-subj="lensSuggestionsPanelToggleButton"]')
           ?.getAttribute('aria-expanded') === 'true',
       undefined,
-      { timeout: 10_000 }
+      { timeout: WAIT_FOR_FUNCTION_TIMEOUT_MS }
     );
     await this.suggestionPanelToggle.click();
     await this.page.waitForFunction(
@@ -1824,7 +1792,7 @@ export class LensEditorApp extends LensApp {
         return el == null || el.getAttribute('aria-expanded') !== 'true';
       },
       undefined,
-      { timeout: 10_000 }
+      { timeout: WAIT_FOR_FUNCTION_TIMEOUT_MS }
     );
   }
 
@@ -1879,7 +1847,7 @@ export class LensEditorApp extends LensApp {
         return el?.value === expected;
       },
       { subj: testSubj, expected: value },
-      { timeout: 10_000 }
+      { timeout: WAIT_FOR_FUNCTION_TIMEOUT_MS }
     );
     await input.press('Tab');
     // Blur completed — callers must poll a UI side effect (chart debug, dimension label)
@@ -1890,7 +1858,7 @@ export class LensEditorApp extends LensApp {
         return el != null && document.activeElement !== el;
       },
       testSubj,
-      { timeout: 10_000 }
+      { timeout: WAIT_FOR_FUNCTION_TIMEOUT_MS }
     );
   }
 
@@ -1902,29 +1870,5 @@ export class LensEditorApp extends LensApp {
   async getFormulaText(): Promise<string> {
     const modelIndex = await this.getFormulaModelIndex();
     return this.codeEditor.getCodeEditorValue(modelIndex);
-  }
-
-  getConvertToEsqlButton() {
-    return this.page.getByRole('button', { name: 'Convert to ES|QL' });
-  }
-
-  getConvertToEsqModal() {
-    return this.page.getByTestId('lnsConvertToEsqlModal');
-  }
-
-  getConvertToEsqModalConfirmButton() {
-    return this.page.getByTestId('confirmModalConfirmButton');
-  }
-
-  getSecondaryFlyoutBackButton() {
-    return this.page.getByTestId('lns-indexPattern-dimensionContainerClose');
-  }
-
-  getInlineEditor() {
-    return this.page.getByTestId('customizeLens');
-  }
-
-  getEditInLensButton() {
-    return this.page.getByTestId('navigateToLensEditorLink');
   }
 }

@@ -103,7 +103,7 @@ test.describe('Lens Convert to ES|QL', { tag: '@local-stateful-classic' }, () =>
     );
     await expect(panel).toContainText('Converted metric');
 
-    await lens.getSecondaryFlyoutBackButton().click();
+    await lens.secondaryFlyoutBackButton.click();
 
     await applyLensInlineEditorAndWaitClosed({ lens });
 
@@ -136,7 +136,7 @@ test.describe('Lens Convert to ES|QL', { tag: '@local-stateful-classic' }, () =>
       pageObjects,
       testData.ESQL_CONVERSION_PANEL_IDS.INLINE_METRIC
     );
-    await expect(lens.getConvertToEsqlButton()).toBeEnabled();
+    await expect(lens.convertToEsqlButton).toBeEnabled();
     await expect(page.getByTestId('ESQLEditor')).toBeHidden();
   });
 
@@ -147,6 +147,6 @@ test.describe('Lens Convert to ES|QL', { tag: '@local-stateful-classic' }, () =>
       pageObjects,
       testData.ESQL_CONVERSION_PANEL_IDS.SAVED_METRIC
     );
-    await expect(pageObjects.lens.getConvertToEsqlButton()).toBeDisabled();
+    await expect(pageObjects.lens.convertToEsqlButton).toBeDisabled();
   });
 });

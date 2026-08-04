@@ -22,27 +22,27 @@ spaceTest.describe('Lens disable auto-apply', { tag: '@local-stateful-classic' }
     async ({ page, pageObjects: { lens } }) => {
       await spaceTest.step('persists the auto-apply setting across page refresh', async () => {
         await lens.openSettingsMenu();
-        await expect(lens.getAutoApplyToggle()).toHaveAttribute('aria-checked', 'true');
+        await expect(lens.autoApplyToggle).toHaveAttribute('aria-checked', 'true');
         await lens.toggleAutoApply();
-        await expect(lens.getAutoApplyToggle()).toHaveAttribute('aria-checked', 'false');
+        await expect(lens.autoApplyToggle).toHaveAttribute('aria-checked', 'false');
         await lens.closeSettingsMenu();
 
         await page.reload();
         await lens.waitForEmptyWorkspace();
 
         await lens.openSettingsMenu();
-        await expect(lens.getAutoApplyToggle()).toHaveAttribute('aria-checked', 'false');
+        await expect(lens.autoApplyToggle).toHaveAttribute('aria-checked', 'false');
         await lens.toggleAutoApply();
-        await expect(lens.getAutoApplyToggle()).toHaveAttribute('aria-checked', 'true');
+        await expect(lens.autoApplyToggle).toHaveAttribute('aria-checked', 'true');
         await lens.closeSettingsMenu();
 
         await page.reload();
         await lens.waitForEmptyWorkspace();
 
         await lens.openSettingsMenu();
-        await expect(lens.getAutoApplyToggle()).toHaveAttribute('aria-checked', 'true');
+        await expect(lens.autoApplyToggle).toHaveAttribute('aria-checked', 'true');
         await lens.toggleAutoApply();
-        await expect(lens.getAutoApplyToggle()).toHaveAttribute('aria-checked', 'false');
+        await expect(lens.autoApplyToggle).toHaveAttribute('aria-checked', 'false');
         await lens.closeSettingsMenu();
       });
 

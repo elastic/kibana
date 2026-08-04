@@ -45,14 +45,14 @@ spaceTest.describe('Lens metric secondary', { tag: '@local-stateful-classic' }, 
     async ({ page, pageObjects: { lens } }) => {
       await lens.openDimensionEditor(`${SECONDARY_PANEL} > lns-dimensionTrigger`);
       // Coloring defaults to "None", so the secondary value renders without a trend badge.
-      await expect(lens.getSecondaryMetricBadgeLocator()).toHaveCount(0);
+      await expect(lens.secondaryMetricBadge).toHaveCount(0);
 
       await spaceTest.step('configures a static badge color', async () => {
         await page.testSubj.click('lnsMetric_color_mode_static');
 
         await lens.setColorPickerValue(CUSTOM_STATIC_COLOR_HEX);
 
-        await expect(lens.getSecondaryMetricBadgeLocator()).toHaveCSS(
+        await expect(lens.secondaryMetricBadge).toHaveCSS(
           'background-color',
           CUSTOM_STATIC_COLOR_RGB
         );
@@ -90,7 +90,7 @@ spaceTest.describe('Lens metric secondary', { tag: '@local-stateful-classic' }, 
         await page.testSubj.click('lnsMetric_color_mode_none');
 
         await page.testSubj.click('lnsMetric_color_mode_static');
-        await expect(lens.getSecondaryMetricBadgeLocator()).toHaveCSS(
+        await expect(lens.secondaryMetricBadge).toHaveCSS(
           'background-color',
           CUSTOM_STATIC_COLOR_RGB
         );
@@ -106,7 +106,7 @@ spaceTest.describe('Lens metric secondary', { tag: '@local-stateful-classic' }, 
     async ({ page, pageObjects: { lens } }) => {
       // One tile per day in the 5-day range (with empty buckets included) plus the date span's
       // partial boundary buckets. Excludes the 2 grid filler cells Elastic Charts pads the last
-      // row with (see `getMetricTilesLocator`'s `:not([role="presentation"])`).
+      // row with (see `metricTilesLocator`'s `:not([role="presentation"])`).
       const N_TILES = 37;
 
       await spaceTest.step('breaks down by date histogram, including empty buckets', async () => {
@@ -120,14 +120,14 @@ spaceTest.describe('Lens metric secondary', { tag: '@local-stateful-classic' }, 
         await lens.enableIncludeEmptyRows();
 
         await lens.waitForVisualization('mtrVis');
-        await expect(lens.getMetricTilesLocator()).toHaveCount(N_TILES);
+        await expect(lens.metricTilesLocator).toHaveCount(N_TILES);
       });
 
       await spaceTest.step('collapses the breakdown to a single tile', async () => {
         await page.locator('select[data-test-subj="indexPattern-collapse-by"]').selectOption('sum');
         await lens.closeDimensionEditor();
 
-        await expect(lens.getMetricTilesLocator()).toHaveCount(1);
+        await expect(lens.metricTilesLocator).toHaveCount(1);
       });
 
       await spaceTest.step(
@@ -139,7 +139,7 @@ spaceTest.describe('Lens metric secondary', { tag: '@local-stateful-classic' }, 
             field: 'ip',
           });
 
-          await expect(lens.getMetricTilesLocator()).toHaveCount(N_TILES);
+          await expect(lens.metricTilesLocator).toHaveCount(N_TILES);
         }
       );
     }

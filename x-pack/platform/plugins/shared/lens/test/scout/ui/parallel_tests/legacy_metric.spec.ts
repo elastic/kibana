@@ -61,7 +61,7 @@ spaceTest.describe('Lens legacy metric', { tag: '@local-stateful-classic' }, () 
 
         // Coloring updates are debounced, so assert the computed color (auto-retries)
         // rather than a point-in-time read of the `style` attribute.
-        await expect(lens.getLegacyMetricValueLocator()).toHaveCSS('color', LABELS_COLOR);
+        await expect(lens.legacyMetricValue).toHaveCSS('color', LABELS_COLOR);
         expect((await lens.getLegacyMetricStyle())['background-color']).toBeUndefined();
       });
 
@@ -69,19 +69,19 @@ spaceTest.describe('Lens legacy metric', { tag: '@local-stateful-classic' }, () 
         await lens.openPalettePanelFlyout();
         await lens.setPaletteRangeValue(1, '21000');
 
-        await expect(lens.getLegacyMetricValueLocator()).toHaveCSS('color', RANGE_TWEAKED_COLOR);
+        await expect(lens.legacyMetricValue).toHaveCSS('color', RANGE_TWEAKED_COLOR);
       });
 
       await spaceTest.step('recolors the metric when reversing the palette', async () => {
         await lens.reversePaletteColors();
 
-        await expect(lens.getLegacyMetricValueLocator()).toHaveCSS('color', REVERSED_COLOR);
+        await expect(lens.legacyMetricValue).toHaveCSS('color', REVERSED_COLOR);
       });
 
       await spaceTest.step('resets the color stops when picking a predefined palette', async () => {
         await lens.changePaletteTo('temperature');
 
-        await expect(lens.getLegacyMetricValueLocator()).toHaveCSS('color', TEMPERATURE_COLOR);
+        await expect(lens.legacyMetricValue).toHaveCSS('color', TEMPERATURE_COLOR);
       });
     }
   );

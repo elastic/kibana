@@ -125,8 +125,8 @@ spaceTest.describe(
         await spaceTest.step(
           'remove timestamp breakdown and keep a single metric trendline',
           async () => {
-            await lens.getSecondaryFlyoutBackButton().click();
-            await expect(lens.getSecondaryFlyoutBackButton()).toBeHidden();
+            await lens.secondaryFlyoutBackButton.click();
+            await expect(lens.secondaryFlyoutBackButton).toBeHidden();
 
             const breakdownPanel = page.getByTestId('lnsMetric_breakdownByDimensionPanel');
             await breakdownPanel.hover();

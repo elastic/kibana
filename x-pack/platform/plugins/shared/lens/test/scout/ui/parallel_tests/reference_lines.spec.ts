@@ -115,10 +115,7 @@ spaceTest.describe('Lens reference lines', { tag: '@local-stateful-classic' }, (
           await lens.waitForVisualization('xyVisChart');
 
           await lens.openDimensionEditor(`${REFERENCE_LINE_RIGHT} > lns-dimensionTrigger`, 1);
-          await expect(lens.getReferenceLineFillBelowButton()).toHaveAttribute(
-            'aria-pressed',
-            'true'
-          );
+          await expect(lens.referenceLineFillBelowButton).toHaveAttribute('aria-pressed', 'true');
           await lens.closeDimensionEditor();
         }
       );
@@ -136,10 +133,7 @@ spaceTest.describe('Lens reference lines', { tag: '@local-stateful-classic' }, (
           await lens.waitForVisualization('xyVisChart');
 
           await lens.openDimensionEditor(`${REFERENCE_LINE_RIGHT} > lns-dimensionTrigger`, 1, 1);
-          await expect(lens.getReferenceLineFillBelowButton()).toHaveAttribute(
-            'aria-pressed',
-            'true'
-          );
+          await expect(lens.referenceLineFillBelowButton).toHaveAttribute('aria-pressed', 'true');
           await lens.closeDimensionEditor();
         }
       );

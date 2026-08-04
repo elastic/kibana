@@ -128,7 +128,7 @@ spaceTest.describe('Lens ESQL dashboard inline editing', { tag: '@local-stateful
         'add limit and verify line chart type and red color persist',
         async () => {
           await dashboard.clickPanelAction('embeddablePanelAction-editPanel');
-          await expect(lens.getInlineEditor()).toBeVisible();
+          await expect(lens.inlineEditor).toBeVisible();
 
           await setEsqlQueryAndRun(
             dashboard,

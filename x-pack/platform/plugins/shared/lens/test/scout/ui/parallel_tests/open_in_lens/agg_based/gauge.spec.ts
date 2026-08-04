@@ -36,7 +36,7 @@ spaceTest.describe('Lens open in Lens — agg-based Gauge', { tag: tags.deployme
     await lens.waitForVisualization('gaugeChart');
     expect(await lens.getLayerCount()).toBe(1);
 
-    await expect(lens.getDimensionTriggerLocator()).toHaveCount(3);
+    await expect(lens.dimensionTriggerLocator).toHaveCount(3);
     const dimensions = await lens.getDimensionTriggers();
     await expect(dimensions[0]).toHaveText('Count');
 
@@ -53,7 +53,7 @@ spaceTest.describe('Lens open in Lens — agg-based Gauge', { tag: tags.deployme
     await lens.waitForVisualization('gaugeChart');
     expect(await lens.getLayerCount()).toBe(1);
 
-    await expect(lens.getDimensionTriggerLocator()).toHaveCount(3);
+    await expect(lens.dimensionTriggerLocator).toHaveCount(3);
     const dimensions = await lens.getDimensionTriggers();
     await expect(dimensions[0]).toHaveText('Average machine.ram');
     await expect(dimensions[1]).toHaveText('Static value: 0');
@@ -84,7 +84,7 @@ spaceTest.describe('Lens open in Lens — agg-based Gauge', { tag: tags.deployme
     await lens.waitForVisualization('gaugeChart');
     expect(await lens.getLayerCount()).toBe(1);
 
-    await expect(lens.getDimensionTriggerLocator()).toHaveCount(3);
+    await expect(lens.dimensionTriggerLocator).toHaveCount(3);
     const dimensions = await lens.getDimensionTriggers();
     await expect(dimensions[0]).toHaveText('Average machine.ram');
     await expect(dimensions[1]).toHaveText('Static value: 0');

@@ -69,7 +69,7 @@ spaceTest.describe('Lens open in Lens — agg-based Pie', { tag: tags.deployment
     await lens.waitForVisualization('partitionVisChart');
     expect(await lens.getLayerCount()).toBe(1);
 
-    await expect(lens.getDimensionTriggerLocator()).toHaveCount(2);
+    await expect(lens.dimensionTriggerLocator).toHaveCount(2);
 
     const sliceByText = await lens.getDimensionTriggerText('lnsPie_sliceByDimensionPanel', 0);
     const sizeByText = await lens.getDimensionTriggerText('lnsPie_sizeByDimensionPanel', 0);
@@ -84,7 +84,7 @@ spaceTest.describe('Lens open in Lens — agg-based Pie', { tag: tags.deployment
     await convertToLensByTitle({ dashboard }, 'Pie - Basic count');
     await lens.waitForVisualization('partitionVisChart');
 
-    await expect(lens.getDimensionTriggerLocator()).toHaveCount(2);
+    await expect(lens.dimensionTriggerLocator).toHaveCount(2);
 
     const sliceByText = await lens.getDimensionTriggerText('lnsPie_sliceByDimensionPanel', 0);
     const sizeByText = await lens.getDimensionTriggerText('lnsPie_sizeByDimensionPanel', 0);

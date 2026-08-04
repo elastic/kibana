@@ -129,7 +129,7 @@ export async function completeLensCsvExport(page: ScoutPage): Promise<void> {
   }
 }
 
-// Uses Lens-editor-only methods (e.g. `getInlineEditor`, `getConvertToEsqlButton`), so this is
+// Uses Lens-editor-only methods (e.g. `inlineEditor`, `convertToEsqlButton`), so this is
 // typed against the Lens plugin's rich page object, not the shared `@kbn/scout` `PageObjects`.
 type DashboardAndLens = Pick<LensPageObjects, 'dashboard' | 'lens'>;
 type VisualizeAndLens = Pick<PageObjects, 'visualize' | 'lens'>;
@@ -323,7 +323,7 @@ export async function openDimensionEditorAndWaitForFlyout(
   await dimensionButton.click();
 
   // Confirm that the secondary flyout is opened
-  await expect(lens.getSecondaryFlyoutBackButton()).toBeVisible();
+  await expect(lens.secondaryFlyoutBackButton).toBeVisible();
   await expect(page.getByTestId('text-based-languages-field-selection-row')).toBeVisible();
 }
 
@@ -332,17 +332,17 @@ export async function openInlineEditorAndWaitVisible(
   panelId: string
 ) {
   await dashboard.openInlineEditor(panelId);
-  await expect(lens.getInlineEditor()).toBeVisible();
+  await expect(lens.inlineEditor).toBeVisible();
 }
 
 export async function applyLensInlineEditorAndWaitClosed({ lens }: Pick<LensPageObjects, 'lens'>) {
   await lens.getApplyFlyoutButton().click();
-  await expect(lens.getInlineEditor()).toBeHidden();
+  await expect(lens.inlineEditor).toBeHidden();
 }
 
 export async function cancelLensInlineEditorAndWaitClosed({ lens }: Pick<LensPageObjects, 'lens'>) {
   await lens.getCancelFlyoutButton().click();
-  await expect(lens.getInlineEditor()).toBeHidden();
+  await expect(lens.inlineEditor).toBeHidden();
 }
 
 /**
@@ -368,15 +368,15 @@ export async function convertToEsqlViaModal({
   const { lens } = pageObjects;
 
   // Click on the "Conver to ES|QL" button in the in-line editor
-  await lens.getConvertToEsqlButton().click();
+  await lens.convertToEsqlButton.click();
 
   // Click on the confirmation button in the modal
-  const modal = lens.getConvertToEsqModal();
-  await lens.getConvertToEsqModalConfirmButton().click();
+  const modal = lens.convertToEsqlModal;
+  await lens.convertToEsqlModalConfirmButton.click();
   await expect(modal).toBeHidden();
 
   // Confirm that the in-line editor has been updated
-  await expect(lens.getConvertToEsqlButton()).toBeHidden();
+  await expect(lens.convertToEsqlButton).toBeHidden();
   await expect(page.getByTestId('ESQLEditor')).toBeVisible();
   await expect(page.getByText('ES|QL Query Results')).toBeVisible();
 }

@@ -86,7 +86,7 @@ spaceTest.describe('Lens ES|QL metric trendline toggle', { tag: '@local-stateful
         await page.getByTestId('lnsMetric_background_chart_line').click();
         await expect(page.locator('.echSingleMetricSparkline')).toBeVisible();
 
-        await lens.getSecondaryFlyoutBackButton().click();
+        await lens.secondaryFlyoutBackButton.click();
         await applyLensInlineEditorAndWaitClosed({ lens });
       });
 
@@ -116,7 +116,7 @@ spaceTest.describe('Lens ES|QL metric trendline toggle', { tag: '@local-stateful
         await page.getByTestId('lnsMetric_background_chart_none').click();
         await expect(page.locator('.echSingleMetricSparkline')).toHaveCount(0);
 
-        await lens.getSecondaryFlyoutBackButton().click();
+        await lens.secondaryFlyoutBackButton.click();
         await applyLensInlineEditorAndWaitClosed({ lens });
       });
 
