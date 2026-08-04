@@ -38,6 +38,7 @@ describe('EpisodeInlineContent', () => {
     render(
       <EpisodeInlineContent
         attachment={createAttachment({ severity: 'high', last_tags: ['ops'] }) as any}
+        isSidebar={false}
       />
     );
 
