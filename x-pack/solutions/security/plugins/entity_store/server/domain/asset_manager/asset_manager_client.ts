@@ -27,10 +27,7 @@ import {
   stopHistorySnapshotTask,
 } from '../../tasks/history_snapshot_task';
 import { scheduleStatusReportTask, stopStatusReportTask } from '../../tasks/status_report_task';
-import {
-  scheduleResilienceTask,
-  stopResilienceTask,
-} from '../../tasks/resilience_task';
+import { scheduleResilienceTask, stopResilienceTask } from '../../tasks/resilience_task';
 import { installSharedElasticsearchAssets, uninstallElasticsearchAssets } from './install_assets';
 import {
   EngineDescriptorTypeName,
