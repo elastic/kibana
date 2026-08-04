@@ -17,8 +17,6 @@ import { useStreamsPrivileges } from '../../../../hooks/use_streams_privileges';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { QueryStreamSchemaEditor } from '../../../query_streams/query_stream_schema_editor';
 import { RedirectTo } from '../../../redirect_to';
-import { useSignificantEventsApp } from '../../../../hooks/use_significant_events_app';
-import { SignificantEventsAppRedirect } from '../../../significant_events_app_redirect';
 import { QueryStreamBadge, useDiscoverStreamLink } from '../../../stream_badges';
 import { StreamDeleteModal } from '../../../stream_delete_modal';
 import { StreamDetailAttachments } from '../../../stream_detail_attachments';
@@ -57,12 +55,7 @@ export function QueryStreamDetailManagement({
     path: { key, tab },
   } = useStreamsAppParams('/{key}/management/{tab}');
   const { rangeFrom, rangeTo } = useTimeRange();
-  const {
-    ui,
-    features: { significantEvents },
-  } = useStreamsPrivileges();
-  const { isAvailable: isSignificantEventsAvailable, isLoading: isSignificantEventsLoading } =
-    useSignificantEventsApp();
+  const { ui } = useStreamsPrivileges();
 
   const canDeleteQueryStream = ui[STREAMS_UI_PRIVILEGES.manage];
 
@@ -175,28 +168,6 @@ export function QueryStreamDetailManagement({
     isSelected: tab === tabKey,
     'data-test-subj': `queryStreamDetails-${tabKey}-tab`,
   }));
-
-  if (tab === 'significantEvents') {
-    if (isSignificantEventsLoading) {
-      return null;
-    }
-    if (isSignificantEventsAvailable) {
-      return <SignificantEventsAppRedirect tab="knowledge_indicators" stream={key} />;
-    }
-
-    if (significantEvents?.available) {
-      return (
-        <RedirectTo
-          path="/_discovery/{tab}"
-          params={{ path: { tab: 'knowledge_indicators' }, query: { stream: key } }}
-        />
-      );
-    }
-
-    return (
-      <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: 'overview' } }} />
-    );
-  }
 
   if (!isValidManagementSubTab(tab) || !tabs[tab]?.content) {
     return (

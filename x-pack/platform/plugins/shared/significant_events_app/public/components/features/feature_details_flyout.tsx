@@ -98,7 +98,7 @@ export function FeatureDetailsFlyout({
               button={
                 <EuiToolTip content={ACTIONS_BUTTON_ARIA_LABEL} disableScreenReaderOutput>
                   <EuiButtonIcon
-                    data-test-subj="streamsAppFeatureDetailsFlyoutActionsButton"
+                    data-test-subj="significantEventsAppFeatureDetailsFlyoutActionsButton"
                     iconType="boxesVertical"
                     aria-label={ACTIONS_BUTTON_ARIA_LABEL}
                     onClick={toggleActionsPopover}
@@ -122,7 +122,7 @@ export function FeatureDetailsFlyout({
                             color: ${euiTheme.colors.primary};
                           `}
                           onClick={handleRestoreClick}
-                          data-test-subj="streamsAppFeatureDetailsFlyoutRestoreAction"
+                          data-test-subj="significantEventsAppFeatureDetailsFlyoutRestoreAction"
                         >
                           {RESTORE_ACTION_LABEL}
                         </EuiContextMenuItem>,
@@ -137,7 +137,7 @@ export function FeatureDetailsFlyout({
                             color: ${euiTheme.colors.warning};
                           `}
                           onClick={handleExcludeClick}
-                          data-test-subj="streamsAppFeatureDetailsFlyoutExcludeAction"
+                          data-test-subj="significantEventsAppFeatureDetailsFlyoutExcludeAction"
                         >
                           {EXCLUDE_ACTION_LABEL}
                         </EuiContextMenuItem>,
@@ -152,7 +152,7 @@ export function FeatureDetailsFlyout({
                             color: ${euiTheme.colors.danger};
                           `}
                           onClick={handleDeleteClick}
-                          data-test-subj="streamsAppFeatureDetailsFlyoutDeleteAction"
+                          data-test-subj="significantEventsAppFeatureDetailsFlyoutDeleteAction"
                         >
                           {DELETE_ACTION_LABEL}
                         </EuiContextMenuItem>,
@@ -166,7 +166,7 @@ export function FeatureDetailsFlyout({
         <EuiFlexItem grow={false}>
           <EuiToolTip content={CLOSE_BUTTON_ARIA_LABEL} disableScreenReaderOutput>
             <EuiButtonIcon
-              data-test-subj="streamsAppFeatureDetailsFlyoutCloseButton"
+              data-test-subj="significantEventsAppFeatureDetailsFlyoutCloseButton"
               iconType="cross"
               aria-label={CLOSE_BUTTON_ARIA_LABEL}
               onClick={onClose}

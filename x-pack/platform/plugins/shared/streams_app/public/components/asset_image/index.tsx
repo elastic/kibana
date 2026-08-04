@@ -71,13 +71,6 @@ const imageSets = {
       defaultMessage: 'Extract fields image for the streams app',
     }),
   },
-  barChart: {
-    light: () => import('./bar_chart.svg'),
-    dark: () => import('./bar_chart.svg'),
-    alt: i18n.translate('xpack.streams.barChartImage', {
-      defaultMessage: 'Bar chart sample',
-    }),
-  },
   attachmentsEmpty: {
     light: () => import('./attachments_empty_light.svg'),
     dark: () => import('./attachments_empty_dark.svg'),

@@ -36,6 +36,7 @@
       "spaces",
       "indexLifecycleManagement",
       "evals",
+      "significant_events",
       "significantEventsApp"
     ],
     "requiredBundles": [

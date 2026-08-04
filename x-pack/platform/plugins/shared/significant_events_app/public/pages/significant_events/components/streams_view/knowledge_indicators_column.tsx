@@ -21,7 +21,7 @@ export function KnowledgeIndicatorsColumn({
   stream,
   streamOnboardingResult,
 }: KnowledgeIndicatorsColumnProps) {
-  const { features } = useStreamFeatures(stream, [streamOnboardingResult]);
+  const { features } = useStreamFeatures(stream.name, [streamOnboardingResult]);
 
   return (
     <EuiText

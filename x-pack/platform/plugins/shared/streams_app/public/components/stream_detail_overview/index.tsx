@@ -27,19 +27,18 @@ export function StreamOverview() {
   const { definition, refresh } = useStreamDetail();
   const {
     features: { contentPacks },
-    isLoading: isPrivilegesLoading,
   } = useStreamsPrivileges();
   const {
     significantEventsApp,
     isAvailable,
     isLoading: isAvailabilityLoading,
   } = useSignificantEventsApp();
-  const KnowledgeIndicatorsPanel = significantEventsApp?.KnowledgeIndicatorsPanel;
+  const KnowledgeIndicatorsPanel = useMemo(
+    () => significantEventsApp?.getKnowledgeIndicatorsPanel(),
+    [significantEventsApp]
+  );
   const showKnowledgeIndicatorsPanel =
-    KnowledgeIndicatorsPanel !== undefined &&
-    isAvailable &&
-    !isPrivilegesLoading &&
-    !isAvailabilityLoading;
+    KnowledgeIndicatorsPanel != null && isAvailable && !isAvailabilityLoading;
 
   const isIngest = Streams.ingest.all.GetResponse.is(definition);
   const isDraft = isDraftGetResponse(definition);
@@ -66,7 +65,9 @@ export function StreamOverview() {
     { id: 'about', node: <AboutPanel />, show: true },
     {
       id: 'knowledge-indicators',
-      node: KnowledgeIndicatorsPanel ? <KnowledgeIndicatorsPanel definition={definition} /> : null,
+      node: KnowledgeIndicatorsPanel ? (
+        <KnowledgeIndicatorsPanel streamName={definition.stream.name} />
+      ) : null,
       show: showKnowledgeIndicatorsPanel,
     },
     {

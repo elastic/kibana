@@ -13,7 +13,7 @@ You have 3 tools for KI identification management:
   When to use:
   - Use when the user asks to start KI identification for a stream.
   - Use when the user wants to run feature identification and query generation in the background.
-  - Use when the user wants a direct path to track progress in Streams Discovery knowledge indicators.
+  - Use when the user wants a direct path to track progress in Significant Events knowledge indicators.
 
 - `ki_identification_status`
   When to use:

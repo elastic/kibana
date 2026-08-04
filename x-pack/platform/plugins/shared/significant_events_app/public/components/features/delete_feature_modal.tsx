@@ -106,14 +106,14 @@ export function DeleteFeatureModal({
           tableCaption={TABLE_CAPTION}
           items={features}
           columns={columns}
-          data-test-subj="streamsAppDeleteFeatureModalTable"
+          data-test-subj="significantEventsAppDeleteFeatureModalTable"
         />
       </EuiModalBody>
       <EuiModalFooter>
         <EuiButtonEmpty
           onClick={onCancel}
           disabled={isLoading}
-          data-test-subj="streamsAppDeleteFeatureModalCancelButton"
+          data-test-subj="significantEventsAppDeleteFeatureModalCancelButton"
         >
           {CANCEL_BUTTON_LABEL}
         </EuiButtonEmpty>
@@ -122,7 +122,7 @@ export function DeleteFeatureModal({
           onClick={onConfirm}
           isLoading={isLoading}
           fill
-          data-test-subj="streamsAppDeleteFeatureModalConfirmButton"
+          data-test-subj="significantEventsAppDeleteFeatureModalConfirmButton"
         >
           {i18n.translate('xpack.significantEventsApp.deleteFeatureModal.deleteButton', {
             defaultMessage: 'Delete {count, plural, one {feature} other {features}}',

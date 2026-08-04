@@ -47,76 +47,76 @@ import { hasRunningInvestigation } from '../shared/investigation_status';
 import { RUNNING_POLL_INTERVAL_MS } from '../../../../constants';
 
 const LIFECYCLE_TITLE = i18n.translate(
-  'xpack.significantEventsApp.sigEventsTab.flyout.lifecycleTitle',
+  'xpack.significantEventsApp.significantEventsTab.flyout.lifecycleTitle',
   {
     defaultMessage: 'Lifecycle',
   }
 );
 const LIFECYCLE_ERROR = i18n.translate(
-  'xpack.significantEventsApp.sigEventsTab.flyout.lifecycleError',
+  'xpack.significantEventsApp.significantEventsTab.flyout.lifecycleError',
   {
     defaultMessage: 'Failed to load lifecycle data',
   }
 );
 const CLOSE_BUTTON_ARIA_LABEL = i18n.translate(
-  'xpack.significantEventsApp.sigEventsTab.flyout.close',
+  'xpack.significantEventsApp.significantEventsTab.flyout.close',
   {
     defaultMessage: 'Close',
   }
 );
 const CLOSE_EVENT_LABEL = i18n.translate(
-  'xpack.significantEventsApp.sigEventsTab.flyout.closeEvent',
+  'xpack.significantEventsApp.significantEventsTab.flyout.closeEvent',
   {
     defaultMessage: 'Close significant event',
   }
 );
 const ACTIONS_BUTTON_ARIA_LABEL = i18n.translate(
-  'xpack.significantEventsApp.sigEventsTab.flyout.actionsMenuButtonAriaLabel',
+  'xpack.significantEventsApp.significantEventsTab.flyout.actionsMenuButtonAriaLabel',
   {
     defaultMessage: 'Actions',
   }
 );
 
 const COPY_LINK_ARIA_LABEL = i18n.translate(
-  'xpack.significantEventsApp.sigEventsTab.flyout.copyLink',
+  'xpack.significantEventsApp.significantEventsTab.flyout.copyLink',
   {
     defaultMessage: 'Copy link to this event',
   }
 );
 
 const COPY_LINK_SUCCESS = i18n.translate(
-  'xpack.significantEventsApp.sigEventsTab.flyout.copyLinkSuccess',
+  'xpack.significantEventsApp.significantEventsTab.flyout.copyLinkSuccess',
   {
     defaultMessage: 'Copied link to event',
   }
 );
 
 const RUN_LABEL = i18n.translate(
-  'xpack.significantEventsApp.sigEventsTab.runInvestigationButton.label',
+  'xpack.significantEventsApp.significantEventsTab.runInvestigationButton.label',
   {
     defaultMessage: 'Run investigation',
   }
 );
 const RESTART_LABEL = i18n.translate(
-  'xpack.significantEventsApp.sigEventsTab.runInvestigationButton.restartLabel',
+  'xpack.significantEventsApp.significantEventsTab.runInvestigationButton.restartLabel',
   {
     defaultMessage: 'Restart investigation',
   }
 );
 const RESTART_INVESTIGATION_TOOLTIP = i18n.translate(
-  'xpack.significantEventsApp.sigEventsTab.flyout.restartInvestigationTooltip',
+  'xpack.significantEventsApp.significantEventsTab.flyout.restartInvestigationTooltip',
   {
     defaultMessage: 'This will cancel the running investigation and start a new one.',
   }
 );
 const SEVERITY_LABEL = i18n.translate(
-  'xpack.significantEventsApp.sigEventsTab.flyout.severityLabel',
+  'xpack.significantEventsApp.significantEventsTab.flyout.severityLabel',
   {
     defaultMessage: 'Severity',
   }
 );
 const CONFIDENCE_LABEL = i18n.translate(
-  'xpack.significantEventsApp.sigEventsTab.flyout.confidenceLabel',
+  'xpack.significantEventsApp.significantEventsTab.flyout.confidenceLabel',
   {
     defaultMessage: 'Confidence',
   }

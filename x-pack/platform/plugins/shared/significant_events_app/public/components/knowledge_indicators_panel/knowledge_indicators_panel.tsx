@@ -18,7 +18,6 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import type { Streams } from '@kbn/streams-schema';
 import React from 'react';
 import { useFetchDiscoveryQueries } from '../../hooks/use_fetch_discovery_queries';
 import { useStreamFeatures } from '../../hooks/use_stream_features';
@@ -28,7 +27,7 @@ import { useSignificantEventsAppRouter } from '../../hooks/use_significant_event
 const ACTIVE_DRAFT_STATUS = ['active', 'draft'] as const;
 
 interface KnowledgeIndicatorsPanelProps {
-  definition: Streams.all.GetResponse;
+  streamName: string;
 }
 
 interface KnowledgeIndicatorCountProps {
@@ -83,16 +82,15 @@ function KnowledgeIndicatorCount({
   );
 }
 
-export function KnowledgeIndicatorsPanel({ definition }: KnowledgeIndicatorsPanelProps) {
+export function KnowledgeIndicatorsPanel({ streamName }: KnowledgeIndicatorsPanelProps) {
   const router = useSignificantEventsAppRouter();
-  const streamName = definition.stream.name;
   const streamOnboardingResult = useStreamOnboardingStatus(streamName);
 
   const {
     features,
     featuresLoading,
     error: featuresError,
-  } = useStreamFeatures(definition.stream, [streamOnboardingResult]);
+  } = useStreamFeatures(streamName, [streamOnboardingResult]);
   const queriesFetchState = useFetchDiscoveryQueries(
     {
       name: streamName,
@@ -147,7 +145,7 @@ export function KnowledgeIndicatorsPanel({ definition }: KnowledgeIndicatorsPane
   return (
     <EuiLink
       href={href}
-      data-test-subj="streamsAppKnowledgeIndicatorsPanelLink"
+      data-test-subj="significantEventsAppKnowledgeIndicatorsPanelLink"
       aria-label={ariaLabel}
       css={css`
         text-decoration: none;
@@ -175,7 +173,7 @@ export function KnowledgeIndicatorsPanel({ definition }: KnowledgeIndicatorsPane
             isLoading={featuresIsLoading}
             isError={!!featuresError}
             label={featuresLabel}
-            data-test-subj="streamsAppKnowledgeIndicatorsFeaturesCount"
+            data-test-subj="significantEventsAppKnowledgeIndicatorsFeaturesCount"
           />
           <KnowledgeIndicatorCount
             count={queriesError || queriesCount === undefined ? undefined : queriesCount}
@@ -183,7 +181,7 @@ export function KnowledgeIndicatorsPanel({ definition }: KnowledgeIndicatorsPane
             isFetching={queriesFetching}
             isError={queriesError}
             label={queriesLabel}
-            data-test-subj="streamsAppKnowledgeIndicatorsQueriesCount"
+            data-test-subj="significantEventsAppKnowledgeIndicatorsQueriesCount"
           />
         </EuiFlexGroup>
       </EuiPanel>

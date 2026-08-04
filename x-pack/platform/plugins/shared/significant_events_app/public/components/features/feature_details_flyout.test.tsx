@@ -43,7 +43,7 @@ describe('FeatureDetailsFlyout', () => {
     const feature = createMinimalFeature({ id: 'feature-123' });
     renderWithProviders(<FeatureDetailsFlyout feature={feature} onClose={mockOnClose} />);
 
-    const idElement = screen.getByTestId('streamsAppFeatureDetailsFlyoutId');
+    const idElement = screen.getByTestId('significantEventsAppFeatureDetailsFlyoutId');
     expect(idElement).toBeInTheDocument();
     expect(idElement).toHaveTextContent('feature-123');
   });
@@ -54,7 +54,7 @@ describe('FeatureDetailsFlyout', () => {
     });
     renderWithProviders(<FeatureDetailsFlyout feature={feature} onClose={mockOnClose} />);
 
-    const metaSection = screen.getByTestId('streamsAppFeatureDetailsFlyoutMeta');
+    const metaSection = screen.getByTestId('significantEventsAppFeatureDetailsFlyoutMeta');
     expect(metaSection).toBeInTheDocument();
     expect(metaSection.textContent).toContain('"key1"');
     expect(metaSection.textContent).toContain('"value1"');
@@ -66,7 +66,7 @@ describe('FeatureDetailsFlyout', () => {
     const feature = createMinimalFeature({ meta: {} });
     renderWithProviders(<FeatureDetailsFlyout feature={feature} onClose={mockOnClose} />);
 
-    const metaSection = screen.getByTestId('streamsAppFeatureDetailsFlyoutMeta');
+    const metaSection = screen.getByTestId('significantEventsAppFeatureDetailsFlyoutMeta');
     expect(metaSection).toBeInTheDocument();
     expect(screen.getByText('No meta information')).toBeInTheDocument();
   });
@@ -77,7 +77,7 @@ describe('FeatureDetailsFlyout', () => {
     });
     renderWithProviders(<FeatureDetailsFlyout feature={feature} onClose={mockOnClose} />);
 
-    const metaSection = screen.getByTestId('streamsAppFeatureDetailsFlyoutMeta');
+    const metaSection = screen.getByTestId('significantEventsAppFeatureDetailsFlyoutMeta');
     expect(metaSection).toBeInTheDocument();
     expect(metaSection.textContent).toContain('endpoints');
     expect(metaSection.textContent).toContain('"host"');
@@ -88,7 +88,7 @@ describe('FeatureDetailsFlyout', () => {
     const feature = createMinimalFeature({ id: 'raw-doc-feature', type: 'dataset_analysis' });
     renderWithProviders(<FeatureDetailsFlyout feature={feature} onClose={mockOnClose} />);
 
-    const rawDocumentSection = screen.getByTestId('streamsAppFeatureDetailsFlyoutRawDocument');
+    const rawDocumentSection = screen.getByTestId('significantEventsAppFeatureDetailsFlyoutRawDocument');
     expect(rawDocumentSection).toBeInTheDocument();
     expect(rawDocumentSection.textContent).toContain('"id"');
     expect(rawDocumentSection.textContent).toContain('"raw-doc-feature"');

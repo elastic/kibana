@@ -12,12 +12,12 @@ import { i18n } from '@kbn/i18n';
 import type { SignificantEvent } from '@kbn/significant-events-schema';
 
 const CAUSAL_FEATURES_TITLE = i18n.translate(
-  'xpack.significantEventsApp.sigEventsTab.flyout.causalFeatures',
+  'xpack.significantEventsApp.significantEventsTab.flyout.causalFeatures',
   {
     defaultMessage: 'Causal Features',
   }
 );
-const STREAMS_TITLE = i18n.translate('xpack.significantEventsApp.sigEventsTab.flyout.streams', {
+const STREAMS_TITLE = i18n.translate('xpack.significantEventsApp.significantEventsTab.flyout.streams', {
   defaultMessage: 'Streams',
 });
 
@@ -55,7 +55,7 @@ export const SignificantEventDetails = ({ event }: SignificantEventDetailsProps)
         <EuiFlexGroup direction="column" gutterSize="s">
           <EuiTitle size="xs">
             <h3>
-              {i18n.translate('xpack.significantEventsApp.sigEventsTab.flyout.signals', {
+              {i18n.translate('xpack.significantEventsApp.significantEventsTab.flyout.signals', {
                 defaultMessage: 'Signals ({count})',
                 values: { count: detectionSignals.length },
               })}

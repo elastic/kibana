@@ -13,6 +13,7 @@ import type {
 } from '../../../lib/workflows/onboarding_workflow_client';
 import type { SignificantEventsMaintenanceService } from '../../../lib/maintenance/maintenance_service';
 import { assertNotPaused } from '../../../routes/utils/assert_not_paused';
+import { SIGNIFICANT_EVENTS_APP_ROUTE } from '../../../../common/constants';
 
 const DEFAULT_LOOKBACK_MS = 24 * 60 * 60 * 1000;
 
@@ -65,7 +66,7 @@ export async function startKiIdentificationToolHandler({
   await streamsKIsOnboardingClient.run({ inputs, request });
 
   return {
-    kibanaPath: `/app/significant_events/knowledge_indicators?stream=${encodeURIComponent(
+    kibanaPath: `${SIGNIFICANT_EVENTS_APP_ROUTE}/knowledge_indicators?stream=${encodeURIComponent(
       streamName
     )}`,
   };

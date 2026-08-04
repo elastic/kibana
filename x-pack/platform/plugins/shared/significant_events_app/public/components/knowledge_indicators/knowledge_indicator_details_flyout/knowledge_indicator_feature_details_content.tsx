@@ -36,7 +36,7 @@ export function KnowledgeIndicatorFeatureDetailsContent({ feature, onOpenInDisco
       {
         title: DETAILS_ID_LABEL,
         description: (
-          <EuiText size="s" data-test-subj="streamsAppFeatureDetailsFlyoutId">
+          <EuiText size="s" data-test-subj="significantEventsAppFeatureDetailsFlyoutId">
             {feature.id}
           </EuiText>
         ),
@@ -102,7 +102,7 @@ export function KnowledgeIndicatorFeatureDetailsContent({ feature, onOpenInDisco
           headerRightContent={
             onOpenInDiscover ? (
               <EuiButtonEmpty
-                data-test-subj="streamsAppFeatureDetailsFlyoutOpenInDiscover"
+                data-test-subj="significantEventsAppFeatureDetailsFlyoutOpenInDiscover"
                 size="xs"
                 iconType="discoverApp"
                 iconSide="left"
@@ -152,7 +152,7 @@ export function KnowledgeIndicatorFeatureDetailsContent({ feature, onOpenInDisco
           )}
         </InfoPanel>
       </EuiFlexItem>
-      <EuiFlexItem data-test-subj="streamsAppFeatureDetailsFlyoutMeta">
+      <EuiFlexItem data-test-subj="significantEventsAppFeatureDetailsFlyoutMeta">
         <InfoPanel title={META_LABEL}>
           {hasMeta ? (
             <EuiCodeBlock language="json" paddingSize="s" fontSize="s" isCopyable>
@@ -163,7 +163,7 @@ export function KnowledgeIndicatorFeatureDetailsContent({ feature, onOpenInDisco
           )}
         </InfoPanel>
       </EuiFlexItem>
-      <EuiFlexItem data-test-subj="streamsAppFeatureDetailsFlyoutRawDocument">
+      <EuiFlexItem data-test-subj="significantEventsAppFeatureDetailsFlyoutRawDocument">
         <InfoPanel title={RAW_DOCUMENT_LABEL}>
           <EuiCodeBlock language="json" paddingSize="s" fontSize="s" isCopyable>
             {JSON.stringify(feature, null, 2)}

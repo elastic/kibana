@@ -16,8 +16,10 @@ import {
   SIGNIFICANT_EVENT_ATTACHMENT_TYPE,
   type PendingSignificantEventAttachment,
 } from '@kbn/significant-events-plugin/common';
-import { AGENTBUILDER_FEATURE_ID } from '@kbn/agent-builder-plugin/public';
 import type { FocusedSignificantEventService } from '../services/focused_significant_event_service';
+
+/** Matches `@kbn/agent-builder-plugin` feature/app id without a public value import. */
+const AGENT_BUILDER_APP_ID = 'agentBuilder';
 
 export interface IdGenerator {
   readonly current: string;
@@ -70,7 +72,7 @@ export const createSignificantEventAttachmentIdRegenerationSubscription = ({
 
   subscription.add(
     chrome.sidebar.getCurrentAppId$().subscribe((appId) => {
-      const isAgentBuilderOpen = appId === AGENTBUILDER_FEATURE_ID;
+      const isAgentBuilderOpen = appId === AGENT_BUILDER_APP_ID;
 
       if (wasAgentBuilderOpen && !isAgentBuilderOpen) {
         draftAttachmentId.next();
@@ -141,7 +143,7 @@ export const registerSignificantEventAutoAttach = ({
         pendingAddAttachmentTimeout = undefined;
       }
 
-      if (appId !== AGENTBUILDER_FEATURE_ID || !event || !isNewConversation(conversation)) {
+      if (appId !== AGENT_BUILDER_APP_ID || !event || !isNewConversation(conversation)) {
         return;
       }
 

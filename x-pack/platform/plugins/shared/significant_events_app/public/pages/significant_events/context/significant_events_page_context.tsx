@@ -183,7 +183,7 @@ export function SignificantEventsPageProvider({
 
     const invalidateAll = () =>
       void Promise.all([
-        queryClient.invalidateQueries({ queryKey: ['sigEvents'] }),
+        queryClient.invalidateQueries({ queryKey: ['significantEvents'] }),
         queryClient.invalidateQueries({ queryKey: ['detections'] }),
       ]);
 

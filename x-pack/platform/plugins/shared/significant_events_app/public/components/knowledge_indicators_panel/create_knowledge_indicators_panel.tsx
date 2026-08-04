@@ -7,13 +7,18 @@
 
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { QueryClientProvider } from '@kbn/react-query';
 import type { CoreStart } from '@kbn/core/public';
-import type { Streams } from '@kbn/streams-schema';
 import { dynamic } from '@kbn/shared-ux-utility';
 import { SignificantEventsAppContextProvider } from '../../app_root/app_context_provider';
-import type { SignificantEventsAppStartDependencies } from '../../types';
+import { significantEventsQueryClient } from '../../query_client';
+import type {
+  KnowledgeIndicatorsPanelComponent,
+  SignificantEventsAppStartDependencies,
+} from '../../types';
 import type { SignificantEventsAppServices } from '../../services/types';
+
+export type { KnowledgeIndicatorsPanelComponent };
 
 const KnowledgeIndicatorsPanelLazy = dynamic(() =>
   import('./knowledge_indicators_panel').then((mod) => ({
@@ -21,13 +26,13 @@ const KnowledgeIndicatorsPanelLazy = dynamic(() =>
   }))
 );
 
-// Module-level QueryClient so all embedded panel instances share a single cache.
-const embeddedQueryClient = new QueryClient();
-
 /**
- * Factory called once in plugin start(). Returns a React component that embeds
- * KnowledgeIndicatorsPanel with its own context — safe to render anywhere in the
- * Kibana shell, including inside streams_app pages.
+ * Factory used by `getKnowledgeIndicatorsPanel()`. Returns a React component that
+ * embeds KnowledgeIndicatorsPanel with its own context — safe to render anywhere
+ * in the Kibana shell, including inside streams_app pages.
+ *
+ * The plugin loads this module via `dynamic()` so QueryClient / MemoryRouter stay
+ * off SEA page-load until a consumer renders the panel.
  */
 export function createKnowledgeIndicatorsPanel({
   coreStart,
@@ -39,7 +44,7 @@ export function createKnowledgeIndicatorsPanel({
   pluginsStart: SignificantEventsAppStartDependencies;
   services: SignificantEventsAppServices;
   isServerless: boolean;
-}): React.ComponentType<{ definition: Streams.all.GetResponse }> {
+}): KnowledgeIndicatorsPanelComponent {
   const context = {
     core: coreStart,
     dependencies: { start: pluginsStart },
@@ -47,18 +52,14 @@ export function createKnowledgeIndicatorsPanel({
     isServerless,
   };
 
-  return function KnowledgeIndicatorsPanelEmbedded({
-    definition,
-  }: {
-    definition: Streams.all.GetResponse;
-  }) {
+  return function KnowledgeIndicatorsPanelEmbedded({ streamName }: { streamName: string }) {
     return (
       <SignificantEventsAppContextProvider context={context}>
-        <QueryClientProvider client={embeddedQueryClient}>
+        <QueryClientProvider client={significantEventsQueryClient}>
           {/* MemoryRouter satisfies useHistory() inside the panel; navigation uses
               application.getUrlForApp() so the in-memory history is never touched. */}
           <MemoryRouter>
-            <KnowledgeIndicatorsPanelLazy definition={definition} />
+            <KnowledgeIndicatorsPanelLazy streamName={streamName} />
           </MemoryRouter>
         </QueryClientProvider>
       </SignificantEventsAppContextProvider>

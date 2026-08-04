@@ -24,10 +24,10 @@ import {
 } from '@kbn/significant-events-plugin/common';
 import type { Observable } from 'rxjs';
 import { combineLatest, distinctUntilChanged, from, map, shareReplay, switchMap } from 'rxjs';
+import { dynamic } from '@kbn/shared-ux-utility';
 import { SIGNIFICANT_EVENTS_APP_ROUTE } from '../common/constants';
 import { SignificantEventsAppLocatorDefinition } from '../common/locators';
 import { FocusedSignificantEventService } from './services/focused_significant_event_service';
-import { createKnowledgeIndicatorsPanel } from './components/knowledge_indicators_panel/create_knowledge_indicators_panel';
 import type {
   SignificantEventsAppPublicSetup,
   SignificantEventsAppPublicStart,
@@ -35,6 +35,7 @@ import type {
   SignificantEventsAppStartDependencies,
 } from './types';
 import type { SignificantEventsAppServices } from './services/types';
+import type { KnowledgeIndicatorsPanelComponent } from './types';
 
 export class SignificantEventsAppPlugin
   implements
@@ -50,8 +51,8 @@ export class SignificantEventsAppPlugin
   private availability$!: Observable<boolean>;
   private focusedSignificantEventService!: FocusedSignificantEventService;
   private cleanupSignificantEventAttachment?: () => void;
-  // Async so attachment UI / significant-events-schema (→ streamlang) stay off page-load.
-  private significantEventAttachmentReady?: Promise<void>;
+  private stopped = false;
+  private knowledgeIndicatorsPanel?: KnowledgeIndicatorsPanelComponent;
 
   constructor(private readonly context: PluginInitializerContext) {}
 
@@ -110,14 +111,11 @@ export class SignificantEventsAppPlugin
         },
       ],
       updater$: from(startServicesPromise).pipe(
-        switchMap(([, pluginsStart]) =>
-          combineLatest([pluginsStart.streams.navigationStatus$, this.availability$]).pipe(
-            // Mirrors the server-side gate: the app and its deep links only surface
-            // in global search when streams navigation is enabled and the rollout
-            // flag is on. The app never appears in the side navigations.
-            map(([{ status }, isAvailable]) => status === 'enabled' && isAvailable),
-            // Every updater emission makes core rebuild the status of all registered
-            // apps, so drop the redundant re-emissions of the sources.
+        switchMap(() =>
+          this.availability$.pipe(
+            // Standalone app: surface in global search whenever the client gate is
+            // on. Nightshift and other consumers link here independently of Streams
+            // navigation status.
             distinctUntilChanged(),
             map(
               (visible): AppUpdater =>
@@ -133,10 +131,10 @@ export class SignificantEventsAppPlugin
         )
       ),
       mount: async (appMountParameters: AppMountParameters<unknown>) => {
-        // Warm the application chunk in parallel with resolving start services.
-        void import('./app_root/render_app');
-        const [coreStart, pluginsStart] = await startServicesPromise;
-        const { renderApp } = await import('./app_root/render_app');
+        const [[coreStart, pluginsStart], { renderApp }] = await Promise.all([
+          startServicesPromise,
+          import('./app_root/render_app'),
+        ]);
 
         const services: SignificantEventsAppServices = {
           availability$: this.availability$,
@@ -190,15 +188,21 @@ export class SignificantEventsAppPlugin
       const { agentBuilder } = pluginsStart;
       const { chrome } = coreStart;
       const { focusedSignificantEventService } = this;
-      this.significantEventAttachmentReady = import(
-        './components/significant_event_attachment'
-      ).then(({ registerSignificantEventAttachment }) => {
-        this.cleanupSignificantEventAttachment = registerSignificantEventAttachment({
-          agentBuilder,
-          chrome,
-          focusedSignificantEventService,
-        });
-      });
+      // Async so attachment UI / significant-events-schema (→ streamlang) stay off page-load.
+      void import('./components/significant_event_attachment').then(
+        ({ registerSignificantEventAttachment }) => {
+          const cleanup = registerSignificantEventAttachment({
+            agentBuilder,
+            chrome,
+            focusedSignificantEventService,
+          });
+          if (this.stopped) {
+            cleanup();
+            return;
+          }
+          this.cleanupSignificantEventAttachment = cleanup;
+        }
+      );
     }
 
     const services: SignificantEventsAppServices = {
@@ -209,18 +213,29 @@ export class SignificantEventsAppPlugin
 
     return {
       availability$: this.availability$,
-      KnowledgeIndicatorsPanel: createKnowledgeIndicatorsPanel({
-        coreStart,
-        pluginsStart,
-        services,
-        isServerless,
-      }),
+      getKnowledgeIndicatorsPanel: () => {
+        if (!this.knowledgeIndicatorsPanel) {
+          this.knowledgeIndicatorsPanel = dynamic(() =>
+            import(
+              './components/knowledge_indicators_panel/create_knowledge_indicators_panel'
+            ).then(({ createKnowledgeIndicatorsPanel }) => ({
+              default: createKnowledgeIndicatorsPanel({
+                coreStart,
+                pluginsStart,
+                services,
+                isServerless,
+              }),
+            }))
+          );
+        }
+        return this.knowledgeIndicatorsPanel;
+      },
     };
   }
 
   stop() {
-    void this.significantEventAttachmentReady?.then(() => {
-      this.cleanupSignificantEventAttachment?.();
-    });
+    this.stopped = true;
+    this.cleanupSignificantEventAttachment?.();
+    this.cleanupSignificantEventAttachment = undefined;
   }
 }

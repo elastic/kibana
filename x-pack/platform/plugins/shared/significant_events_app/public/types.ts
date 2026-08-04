@@ -16,8 +16,9 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { StreamsPluginStart } from '@kbn/streams-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type React from 'react';
-import type { Streams } from '@kbn/streams-schema';
 import type { Observable } from 'rxjs';
+
+export type KnowledgeIndicatorsPanelComponent = React.ComponentType<{ streamName: string }>;
 
 export interface SignificantEventsAppSetupDependencies {
   share: SharePluginSetup;
@@ -48,9 +49,9 @@ export interface SignificantEventsAppPublicStart {
    */
   availability$: Observable<boolean>;
   /**
-   * Embeddable Knowledge Indicators panel for use in streams_app's stream
-   * overview.  Rendered outside the SEA app tree — carries its own
-   * QueryClient and KibanaContext so no extra wrapping is needed.
+   * Factory for the embeddable Knowledge Indicators panel used in streams_app's
+   * stream overview. Call once per render tree; the returned component carries
+   * its own QueryClient and KibanaContext so no extra wrapping is needed.
    */
-  KnowledgeIndicatorsPanel: React.ComponentType<{ definition: Streams.all.GetResponse }>;
+  getKnowledgeIndicatorsPanel: () => KnowledgeIndicatorsPanelComponent;
 }

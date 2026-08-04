@@ -7,9 +7,7 @@
 
 import { EuiButton, EuiCallOut, EuiLoadingElastic, EuiSpacer } from '@elastic/eui';
 import type { AppHeaderMenu } from '@kbn/app-header';
-import { STREAMS_APP_LOCATOR_ID } from '@kbn/deeplinks-observability';
 import { i18n } from '@kbn/i18n';
-import type { StreamsAppLocationParams } from '@kbn/streams-plugin/common';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { useKibana } from '../../hooks/use_kibana';
 import { getFormattedError } from '../../util/errors';
@@ -65,15 +63,9 @@ export function SignificantEventsPage() {
       notifications: { toasts },
     },
     dependencies: {
-      start: {
-        agentBuilder,
-        share: {
-          url: { locators },
-        },
-      },
+      start: { agentBuilder },
     },
   } = useKibana();
-  const streamsLocator = locators.get<StreamsAppLocationParams>(STREAMS_APP_LOCATOR_ID);
 
   const {
     ui: streamsUiPrivileges,
@@ -90,14 +82,6 @@ export function SignificantEventsPage() {
     status: maintenanceStatus,
   } = useBlocksNewActivity();
   const showMaintenanceBanners = tab !== 'settings';
-
-  // Direct visits when the client-side gate is off must leave this app — `/` here
-  // redirects to `/{tab}` and would otherwise loop with the gate below.
-  useEffect(() => {
-    if (!isPrivilegesLoading && !significantEvents.available) {
-      void streamsLocator?.navigate({}, { replace: true });
-    }
-  }, [isPrivilegesLoading, significantEvents.available, streamsLocator]);
 
   const onOnboardingFailed = useCallback(
     (error: string) => {
@@ -236,20 +220,21 @@ export function SignificantEventsPage() {
     [tab, router]
   );
 
-  if (isPrivilegesLoading || isAvailabilityLoading || !significantEvents.available) {
-    // Waiting for the client/server gates, or leaving the app when the client
-    // gate is off (see effect above).
+  if (isPrivilegesLoading || isAvailabilityLoading) {
     return <EuiLoadingElastic size="xxl" />;
   }
 
-  if (availability && !availability.available) {
+  if (!significantEvents.available || (availability && !availability.available)) {
+    const reason =
+      availability && !availability.available ? availability.reason : ('feature_flag' as const);
     return (
       <SignificantEventsAppPageTemplate.Body grow>
-        <SignificantEventsNotEnabledPrompt reason={availability.reason} />
+        <SignificantEventsNotEnabledPrompt reason={reason} />
       </SignificantEventsAppPageTemplate.Body>
     );
   }
 
+  // Legacy alias from an earlier tab name; keep until bookmarks are gone.
   if (tab === 'discoveries') {
     return <RedirectTo path="/{tab}" params={{ path: { tab: 'significant_events' } }} />;
   }

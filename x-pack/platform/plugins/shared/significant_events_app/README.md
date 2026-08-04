@@ -11,10 +11,18 @@ consumes the `significant_events` plugin (server APIs via the typed
 
 The app is gated behind the Significant Events rollout feature flag
 (`streams.significantEventsAvailable`), the Enterprise license and the pricing tier;
-when unavailable it is hidden from navigation/global search and direct visits are
-redirected to the Streams app.
+when unavailable it is hidden from navigation/global search and direct visits show
+`SignificantEventsNotEnabledPrompt`.
 
-The plugin's start contract exposes the availability gate (`availability$`) so
-other plugins — notably `streams_app` — can gate sig-events entry points. Deep
-links go through the share plugin locator registered under
+## Start contract
+
+- `availability$`: client-side gate (flag + license + pricing). Used for app/deep-link
+  visibility in global search. Streams does **not** subscribe to this; it probes
+  `GET /internal/significant_events/availability` via the optional `significant_events`
+  start client instead (that endpoint also covers required plugins).
+- `getKnowledgeIndicatorsPanel()`: factory returning a lazy embeddable panel for
+  Streams stream overview. Pass `{ streamName }`. Providers and the panel chunk stay
+  behind a dynamic import so they are not part of SEA page-load.
+
+Deep links go through the share plugin locator registered under
 `SIGNIFICANT_EVENTS_APP_LOCATOR_ID`.

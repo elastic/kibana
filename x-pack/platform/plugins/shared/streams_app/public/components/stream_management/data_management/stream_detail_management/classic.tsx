@@ -31,8 +31,6 @@ import {
   ImportLifecycleFlyoutProvider,
   useImportLifecycleFlyoutContext,
 } from '../stream_detail_lifecycle/import_from_stream';
-import { useSignificantEventsApp } from '../../../../hooks/use_significant_events_app';
-import { SignificantEventsAppRedirect } from '../../../significant_events_app_redirect';
 
 const classicStreamManagementSubTabs = [
   'overview',
@@ -96,10 +94,8 @@ function ClassicStreamDetailManagementContent({
   const importLifecycleFlyout = useImportLifecycleFlyoutContext();
 
   const {
-    features: { queryStreams, significantEvents },
+    features: { queryStreams },
   } = useStreamsPrivileges();
-  const { isAvailable: isSignificantEventsAvailable, isLoading: isSignificantEventsLoading } =
-    useSignificantEventsApp();
 
   const isProcessingEnabled = !definition.replicated;
 
@@ -227,28 +223,6 @@ function ClassicStreamDetailManagementContent({
   if (tab === 'partitioning' && !queryStreams.enabled) {
     return (
       <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: 'lifecycle' } }} />
-    );
-  }
-
-  if (tab === 'significantEvents') {
-    if (isSignificantEventsLoading) {
-      return null;
-    }
-    if (isSignificantEventsAvailable) {
-      return <SignificantEventsAppRedirect tab="knowledge_indicators" stream={key} />;
-    }
-
-    if (significantEvents?.available) {
-      return (
-        <RedirectTo
-          path="/_discovery/{tab}"
-          params={{ path: { tab: 'knowledge_indicators' }, query: { stream: key } }}
-        />
-      );
-    }
-
-    return (
-      <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: 'overview' } }} />
     );
   }
 

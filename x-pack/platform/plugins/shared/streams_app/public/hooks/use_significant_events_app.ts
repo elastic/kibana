@@ -5,31 +5,60 @@
  * 2.0.
  */
 
-import { EMPTY } from 'rxjs';
-import useObservable from 'react-use/lib/useObservable';
+import { type QueryFunctionContext, useQuery } from '@kbn/react-query';
 import { useKibana } from './use_kibana';
 
+const SIGNIFICANT_EVENTS_AVAILABILITY_QUERY_KEY = ['significantEventsAvailability'] as const;
+
 /**
- * Returns the significantEventsApp optional plugin and a reactive `isAvailable`
- * boolean derived from its `availability$` observable. Components should gate
- * any sig-events UI behind `isAvailable` so it stays hidden in environments
- * where the plugin is absent or the feature-flag / license is off.
+ * Returns the optional significantEventsApp start contract and a server-confirmed
+ * `isAvailable` flag from `GET /internal/significant_events/availability`.
  *
- * `isLoading` is true until the first emission when the plugin is present —
- * use it before navigating away on the basis of `isAvailable`.
+ * Gate any Significant Events UI behind `isAvailable`. When either the
+ * significant_events or significantEventsApp plugin is absent, Streams keeps
+ * working and SE UI stays hidden.
+ *
+ * `isLoading` is true while the availability request is in flight when the
+ * significant_events plugin is present — wait on it before navigating away
+ * on the basis of `isAvailable`.
  */
 export function useSignificantEventsApp() {
   const {
     dependencies: {
-      start: { significantEventsApp },
+      start: { significantEventsApp, significant_events: significantEvents },
     },
   } = useKibana();
 
-  const availability = useObservable(significantEventsApp?.availability$ ?? EMPTY);
+  const repositoryClient = significantEvents?.significantEventsRepositoryClient;
+
+  const { data, isLoading, error } = useQuery({
+    queryKey: SIGNIFICANT_EVENTS_AVAILABILITY_QUERY_KEY,
+    queryFn: ({ signal }: QueryFunctionContext) => {
+      if (!repositoryClient) {
+        throw new Error('significant_events plugin is not available');
+      }
+      return repositoryClient.fetch('GET /internal/significant_events/availability', {
+        signal: signal ?? null,
+      });
+    },
+    enabled: repositoryClient != null,
+  });
+
+  if (repositoryClient == null) {
+    return {
+      significantEventsApp,
+      isAvailable: false,
+      isLoading: false,
+    };
+  }
+
+  // Treat a failed availability request as "not available" so callers hide SE UI
+  // instead of proceeding as if it were available.
+  const isAvailable = error ? false : data?.available === true;
 
   return {
     significantEventsApp,
-    isAvailable: availability ?? false,
-    isLoading: significantEventsApp != null && availability === undefined,
+    isAvailable,
+    isLoading,
   };
 }

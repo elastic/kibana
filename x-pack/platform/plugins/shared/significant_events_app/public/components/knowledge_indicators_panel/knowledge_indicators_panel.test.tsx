@@ -54,15 +54,15 @@ describe('KnowledgeIndicatorsPanel', () => {
   });
 
   it('renders feature and query counts with features first', () => {
-    renderWithI18n(<KnowledgeIndicatorsPanel definition={definition} />);
+    renderWithI18n(<KnowledgeIndicatorsPanel streamName={definition.stream.name} />);
 
     expect(screen.getByText('Knowledge indicators')).toBeInTheDocument();
-    expect(screen.getByTestId('streamsAppKnowledgeIndicatorsFeaturesCount')).toHaveTextContent('2');
-    expect(screen.getByTestId('streamsAppKnowledgeIndicatorsFeaturesCount')).toHaveTextContent(
+    expect(screen.getByTestId('significantEventsAppKnowledgeIndicatorsFeaturesCount')).toHaveTextContent('2');
+    expect(screen.getByTestId('significantEventsAppKnowledgeIndicatorsFeaturesCount')).toHaveTextContent(
       'features'
     );
-    expect(screen.getByTestId('streamsAppKnowledgeIndicatorsQueriesCount')).toHaveTextContent('8');
-    expect(screen.getByTestId('streamsAppKnowledgeIndicatorsQueriesCount')).toHaveTextContent(
+    expect(screen.getByTestId('significantEventsAppKnowledgeIndicatorsQueriesCount')).toHaveTextContent('8');
+    expect(screen.getByTestId('significantEventsAppKnowledgeIndicatorsQueriesCount')).toHaveTextContent(
       'queries'
     );
   });
@@ -80,24 +80,24 @@ describe('KnowledgeIndicatorsPanel', () => {
       isError: false,
     });
 
-    renderWithI18n(<KnowledgeIndicatorsPanel definition={definition} />);
+    renderWithI18n(<KnowledgeIndicatorsPanel streamName={definition.stream.name} />);
 
-    expect(screen.getByTestId('streamsAppKnowledgeIndicatorsFeaturesCount')).toHaveTextContent(
+    expect(screen.getByTestId('significantEventsAppKnowledgeIndicatorsFeaturesCount')).toHaveTextContent(
       'feature'
     );
-    expect(screen.getByTestId('streamsAppKnowledgeIndicatorsQueriesCount')).toHaveTextContent(
+    expect(screen.getByTestId('significantEventsAppKnowledgeIndicatorsQueriesCount')).toHaveTextContent(
       'query'
     );
   });
 
   it('links to the knowledge indicators tab with the stream pre-filtered', () => {
-    renderWithI18n(<KnowledgeIndicatorsPanel definition={definition} />);
+    renderWithI18n(<KnowledgeIndicatorsPanel streamName={definition.stream.name} />);
 
     expect(link).toHaveBeenCalledWith('/{tab}', {
       path: { tab: 'knowledge_indicators' },
       query: { stream: definition.stream.name },
     });
-    expect(screen.getByTestId('streamsAppKnowledgeIndicatorsPanelLink')).toHaveAttribute(
+    expect(screen.getByTestId('significantEventsAppKnowledgeIndicatorsPanelLink')).toHaveAttribute(
       'href',
       '/app/significant_events/knowledge_indicators?stream=logs'
     );
@@ -116,10 +116,10 @@ describe('KnowledgeIndicatorsPanel', () => {
       isError: false,
     });
 
-    renderWithI18n(<KnowledgeIndicatorsPanel definition={definition} />);
+    renderWithI18n(<KnowledgeIndicatorsPanel streamName={definition.stream.name} />);
 
     expect(screen.getAllByTestId('knowledgeIndicatorsCountLoading')).toHaveLength(2);
-    expect(screen.getByTestId('streamsAppKnowledgeIndicatorsPanelLink')).toHaveAttribute(
+    expect(screen.getByTestId('significantEventsAppKnowledgeIndicatorsPanelLink')).toHaveAttribute(
       'aria-label',
       `View knowledge indicators for ${definition.stream.name}: loading counts`
     );
@@ -138,7 +138,7 @@ describe('KnowledgeIndicatorsPanel', () => {
       isError: true,
     });
 
-    renderWithI18n(<KnowledgeIndicatorsPanel definition={definition} />);
+    renderWithI18n(<KnowledgeIndicatorsPanel streamName={definition.stream.name} />);
 
     expect(screen.getAllByTestId('knowledgeIndicatorsCountUnavailable')).toHaveLength(2);
   });
@@ -156,11 +156,11 @@ describe('KnowledgeIndicatorsPanel', () => {
       isError: false,
     });
 
-    renderWithI18n(<KnowledgeIndicatorsPanel definition={definition} />);
+    renderWithI18n(<KnowledgeIndicatorsPanel streamName={definition.stream.name} />);
 
     expect(
       screen
-        .getByTestId('streamsAppKnowledgeIndicatorsQueriesCount')
+        .getByTestId('significantEventsAppKnowledgeIndicatorsQueriesCount')
         .querySelector('[data-test-subj="knowledgeIndicatorsCountUnavailable"]')
     ).toBeInTheDocument();
   });
@@ -178,12 +178,12 @@ describe('KnowledgeIndicatorsPanel', () => {
       isError: false,
     });
 
-    renderWithI18n(<KnowledgeIndicatorsPanel definition={definition} />);
+    renderWithI18n(<KnowledgeIndicatorsPanel streamName={definition.stream.name} />);
 
-    expect(screen.getByTestId('streamsAppKnowledgeIndicatorsFeaturesCount')).toHaveTextContent('1');
+    expect(screen.getByTestId('significantEventsAppKnowledgeIndicatorsFeaturesCount')).toHaveTextContent('1');
     expect(
       screen
-        .getByTestId('streamsAppKnowledgeIndicatorsQueriesCount')
+        .getByTestId('significantEventsAppKnowledgeIndicatorsQueriesCount')
         .querySelector('[data-test-subj="knowledgeIndicatorsCountLoading"]')
     ).toBeInTheDocument();
   });
