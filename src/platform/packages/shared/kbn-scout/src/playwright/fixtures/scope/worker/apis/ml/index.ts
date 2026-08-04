@@ -134,6 +134,8 @@ export interface MlDataFrameAnalyticsApi {
   ) => Promise<{ state: string | undefined; hasTrainingDocs: boolean }>;
   /** Wait for a data frame analytics job to stop by polling the Elasticsearch API */
   waitForStopped: (analyticsId: string, timeoutMs?: number) => Promise<void>;
+  /** Wait until training has begun so a subsequent waitForStopped does not resolve on the initial stopped state */
+  waitForTrainingDocs: (analyticsId: string, timeoutMs?: number) => Promise<void>;
   /**
    * Delete a data frame analytics job if it exists via the Elasticsearch API.
    * Add space-aware saved object cleanup if this is used in space-scoped tests.
@@ -684,6 +686,22 @@ export const getMlApiHelper = (
       );
     },
 
+    async waitForTrainingDocs(analyticsId: string, timeoutMs = 60_000): Promise<void> {
+      await waitForCondition(
+        `data frame analytics job '${analyticsId}' to have training docs`,
+        async () => {
+          if ((await this.getStats(analyticsId)).hasTrainingDocs) {
+            return true;
+          }
+          throw new Error(
+            `DFA job '${analyticsId}' did not report training docs within ${timeoutMs}ms`
+          );
+        },
+        timeoutMs,
+        3_000
+      );
+    },
+
     async deleteIfExists(analyticsId: string): Promise<void> {
       await measurePerformanceAsync(
         log,
@@ -710,6 +728,8 @@ export const getMlApiHelper = (
         async () => {
           await this.createViaKibana(jobConfig, space);
           await this.start(jobConfig.id);
+          // Avoid resolving waitForStopped on the brief post-start stopped state.
+          await this.waitForTrainingDocs(jobConfig.id);
           await this.waitForStopped(jobConfig.id, timeoutMs);
           await savedObjects.sync(false, space);
         }
