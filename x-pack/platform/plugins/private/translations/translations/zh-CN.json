@@ -11909,7 +11909,6 @@
     "xpack.agentBuilder.overview.autoInclude.disabledToast": "内置功能已禁用",
     "xpack.agentBuilder.overview.autoInclude.enabledToast": "内置功能已启用",
     "xpack.agentBuilder.overview.autoInclude.errorToast": "无法更新功能设置。",
-    "xpack.agentBuilder.overview.byAuthor": "作者：{author}",
     "xpack.agentBuilder.overview.capabilities.addConnector": "添加连接器",
     "xpack.agentBuilder.overview.capabilities.addPlugin": "添加插件",
     "xpack.agentBuilder.overview.capabilities.addSkill": "添加技能",

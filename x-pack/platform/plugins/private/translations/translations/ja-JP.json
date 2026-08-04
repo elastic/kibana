@@ -11907,7 +11907,6 @@
     "xpack.agentBuilder.overview.autoInclude.disabledToast": "組み込み機能無効",
     "xpack.agentBuilder.overview.autoInclude.enabledToast": "組み込み機能有効",
     "xpack.agentBuilder.overview.autoInclude.errorToast": "機能設定を更新できません",
-    "xpack.agentBuilder.overview.byAuthor": "{author}によって",
     "xpack.agentBuilder.overview.capabilities.addConnector": "コネクターを追加",
     "xpack.agentBuilder.overview.capabilities.addPlugin": "プラグインを追加してください",
     "xpack.agentBuilder.overview.capabilities.addSkill": "スキルを追加",

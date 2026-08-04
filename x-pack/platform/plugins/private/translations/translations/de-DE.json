@@ -11881,7 +11881,6 @@
     "xpack.agentBuilder.overview.autoInclude.disabledToast": "Integrierte Funktionen deaktiviert",
     "xpack.agentBuilder.overview.autoInclude.enabledToast": "Integrierte Funktionen aktiviert",
     "xpack.agentBuilder.overview.autoInclude.errorToast": "Die Funktionseinstellung kann nicht aktualisiert werden",
-    "xpack.agentBuilder.overview.byAuthor": "Von {author}",
     "xpack.agentBuilder.overview.capabilities.addConnector": "Konnektor hinzufügen",
     "xpack.agentBuilder.overview.capabilities.addPlugin": "Plugin hinzufügen",
     "xpack.agentBuilder.overview.capabilities.addSkill": "Eine Fähigkeit hinzufügen",
