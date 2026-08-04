@@ -13,7 +13,7 @@ import { EuiButtonEmpty } from '@elastic/eui';
 import {
   ExportJsonFlyoutContent,
   type ExportJsonSharingData,
-} from '@kbn/as-code-json-flyout-component';
+} from '@kbn/as-code-export-flyout-component';
 import { i18n } from '@kbn/i18n';
 import type { ExportShareParameters } from '@kbn/share-plugin/public';
 import { downloadFileAs, useShareTypeContext } from '@kbn/share-plugin/public';

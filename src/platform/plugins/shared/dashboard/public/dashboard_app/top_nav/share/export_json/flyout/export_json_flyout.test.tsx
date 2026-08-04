@@ -37,7 +37,7 @@ const mockExportJsonFlyoutContent = jest.fn(
   )
 );
 
-jest.mock('@kbn/as-code-json-flyout-component', () => ({
+jest.mock('@kbn/as-code-export-flyout-component', () => ({
   ExportJsonFlyoutContent: (props: MockExportJsonFlyoutContentProps) =>
     mockExportJsonFlyoutContent(props),
 }));

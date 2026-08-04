@@ -106,7 +106,7 @@
     "@kbn/cps",
     "@kbn/as-code-filters-schema",
     "@kbn/as-code-filters-transforms",
-    "@kbn/as-code-json-flyout-component",
+    "@kbn/as-code-export-flyout-component",
     "@kbn/scout",
     "@kbn/core-chrome-app-menu-components",
     "@kbn/core-chrome-app-menu",

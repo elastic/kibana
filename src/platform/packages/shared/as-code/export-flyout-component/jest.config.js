@@ -10,5 +10,5 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../../..',
-  roots: ['<rootDir>/src/platform/packages/shared/as-code/json-flyout-component'],
+  roots: ['<rootDir>/src/platform/packages/shared/as-code/export-flyout-component'],
 };

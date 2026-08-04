@@ -10,7 +10,7 @@
 import React, { useCallback, useState } from 'react';
 
 import { EuiSwitch } from '@elastic/eui';
-import { ExportJsonFlyoutContent } from '@kbn/as-code-json-flyout-component';
+import { ExportJsonFlyoutContent } from '@kbn/as-code-export-flyout-component';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { downloadFileAs } from '@kbn/share-plugin/public';
