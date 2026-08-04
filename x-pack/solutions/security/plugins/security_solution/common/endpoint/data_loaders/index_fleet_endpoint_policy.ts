@@ -13,16 +13,18 @@ import type {
   CreatePackagePolicyRequest,
   CreatePackagePolicyResponse,
   DeleteAgentPolicyResponse,
+  GetPackagePoliciesResponse,
   PostDeletePackagePoliciesResponse,
 } from '@kbn/fleet-plugin/common';
 import {
   AGENT_POLICY_API_ROUTES,
   PACKAGE_POLICY_API_ROUTES,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   API_VERSIONS,
 } from '@kbn/fleet-plugin/common';
 import { memoize } from 'lodash';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { catchAxiosErrorFormatAndThrow } from '../format_axios_error';
+import { catchAxiosErrorFormatAndThrow, FormattedAxiosError } from '../format_axios_error';
 import { usageTracker } from './usage_tracker';
 import { getEndpointPackageInfo } from '../utils/package';
 import type { PolicyData } from '../types';
@@ -116,18 +118,54 @@ export const indexFleetEndpointPolicy = usageTracker.track(
       },
     };
 
-    const createPackagePolicy = async (): Promise<CreatePackagePolicyResponse> =>
-      kbnClient
-        .request<CreatePackagePolicyResponse>({
-          path: PACKAGE_POLICY_API_ROUTES.CREATE_PATTERN,
-          method: 'POST',
-          body: newPackagePolicyData,
+    const fetchExistingPackagePolicy = async (): Promise<
+      CreatePackagePolicyResponse | undefined
+    > => {
+      const { data } = await kbnClient
+        .request<GetPackagePoliciesResponse>({
+          path: PACKAGE_POLICY_API_ROUTES.LIST_PATTERN,
+          method: 'GET',
+          query: { kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.name: "${policyName}"` },
           headers: {
             'elastic-api-version': API_VERSIONS.public.v1,
           },
         })
-        .catch(catchAxiosErrorFormatAndThrow)
-        .then((res) => res.data);
+        .catch(catchAxiosErrorFormatAndThrow);
+
+      const existing = data.items.find((item) => item.name === policyName);
+
+      return existing ? { item: existing } : undefined;
+    };
+
+    // `retryOnError` below re-sends this POST on transient errors. When a prior attempt already
+    // committed the policy but returned a transient error, the retry hits a duplicate-name 409.
+    // Treat that conflict as success by returning the already-created policy.
+    const createPackagePolicy = async (): Promise<CreatePackagePolicyResponse> => {
+      try {
+        const { data } = await kbnClient
+          .request<CreatePackagePolicyResponse>({
+            path: PACKAGE_POLICY_API_ROUTES.CREATE_PATTERN,
+            method: 'POST',
+            body: newPackagePolicyData,
+            headers: {
+              'elastic-api-version': API_VERSIONS.public.v1,
+            },
+          })
+          .catch(catchAxiosErrorFormatAndThrow);
+
+        return data;
+      } catch (error) {
+        if (error instanceof FormattedAxiosError && error.response.status === 409) {
+          const existing = await fetchExistingPackagePolicy();
+
+          if (existing) {
+            return existing;
+          }
+        }
+
+        throw error;
+      }
+    };
 
     const started = new Date();
     const hasTimedOut = (): boolean => {
