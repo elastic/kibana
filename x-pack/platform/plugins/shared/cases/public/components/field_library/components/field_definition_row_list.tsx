@@ -1,0 +1,58 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import type { FieldDefinition } from '../../../../common/types/domain/field_definition/v1';
+import type { InlineField } from '../../../../common/types/domain/template/fields';
+import { FieldDefinitionRow } from './field_definition_row';
+
+interface FieldDefinitionRowListProps {
+  fieldDefinitions: FieldDefinition[];
+  parseInlineField: (definition: string) => InlineField | undefined;
+  onEdit: (fieldDefinition: FieldDefinition) => void;
+  onDelete: (fieldDefinition: FieldDefinition) => void;
+  emptyMessage: string;
+  dataTestSubj: string;
+}
+
+/** An unordered group of field definitions, rendered with the same row as the ordered group. */
+export const FieldDefinitionRowList: React.FC<FieldDefinitionRowListProps> = ({
+  fieldDefinitions,
+  parseInlineField,
+  onEdit,
+  onDelete,
+  emptyMessage,
+  dataTestSubj,
+}) => {
+  if (fieldDefinitions.length === 0) {
+    // An empty list shell reads as "something failed to load"; a sentence reads as "there is
+    // nothing here yet", which is the actual state.
+    return (
+      <EuiText size="s" color="subdued" data-test-subj={`${dataTestSubj}Empty`}>
+        <p>{emptyMessage}</p>
+      </EuiText>
+    );
+  }
+
+  return (
+    <EuiFlexGroup direction="column" gutterSize="s" data-test-subj={dataTestSubj}>
+      {fieldDefinitions.map((fieldDefinition) => (
+        <EuiFlexItem grow={false} key={fieldDefinition.fieldDefinitionId}>
+          <FieldDefinitionRow
+            fieldDefinition={fieldDefinition}
+            inlineField={parseInlineField(fieldDefinition.definition)}
+            onEdit={onEdit}
+            onDelete={onDelete}
+          />
+        </EuiFlexItem>
+      ))}
+    </EuiFlexGroup>
+  );
+};
+
+FieldDefinitionRowList.displayName = 'FieldDefinitionRowList';

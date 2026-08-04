@@ -114,12 +114,22 @@ export const Description = ({
         display: -webkit-box;
         -webkit-box-orient: vertical;
         -webkit-line-clamp: 2;
-        padding: 0 ${euiTheme.size.m} ${euiTheme.size.m};
+        /* Aligns with the expanded body's text edge so toggling doesn't shift the content. */
+        padding: ${euiTheme.size.m} ${euiTheme.size.l};
+      `,
+      // Everything else on this page is a plain bordered panel, so a fourth bordered panel read as
+      // just more chrome. The description gets figure/ground separation instead: a tinted, slightly
+      // inset header band that names the region, and an accent edge tying the whole block together.
+      panel: css`
+        border-inline-start: ${euiTheme.border.width.thick} solid
+          ${euiTheme.colors.borderStrongPrimary};
+        overflow: hidden;
       `,
       header: css`
         padding: ${euiTheme.size.s} ${euiTheme.size.m};
         align-items: center;
         min-height: ${euiTheme.size.xxl};
+        background: ${euiTheme.colors.backgroundBaseSubdued};
       `,
       headerWithBorder: css`
         border-bottom: ${euiTheme.border.thin};
@@ -134,7 +144,7 @@ export const Description = ({
         }
       `,
       unsavedDraft: css`
-        padding: 0 ${euiTheme.size.m} ${euiTheme.size.m};
+        padding: 0 ${euiTheme.size.l} ${euiTheme.size.l};
       `,
     }),
     [euiTheme, sFontSize]
@@ -152,6 +162,7 @@ export const Description = ({
       hasShadow={false}
       grow={false}
       color="transparent"
+      css={styles.panel}
       data-test-subj="description"
     >
       <EuiFlexGroup direction="column" gutterSize="none">
@@ -164,7 +175,11 @@ export const Description = ({
           >
             <EuiFlexItem grow={false}>
               {isEditable ? (
-                <EuiText data-test-subj="description-title" css={styles.titleButton} component="span">
+                <EuiText
+                  data-test-subj="description-title"
+                  css={styles.titleButton}
+                  component="span"
+                >
                   {i18n.DESCRIPTION}
                 </EuiText>
               ) : (
@@ -176,7 +191,11 @@ export const Description = ({
                   data-test-subj="description-collapse-icon"
                   css={styles.titleButton}
                 >
-                  <EuiIcon type={isCollapsed ? 'arrowRight' : 'arrowDown'} size="s" />
+                  <EuiIcon
+                    type={isCollapsed ? 'arrowRight' : 'arrowDown'}
+                    size="s"
+                    aria-hidden={true}
+                  />
                   <span data-test-subj="description-title">{i18n.DESCRIPTION}</span>
                 </button>
               )}
@@ -232,6 +251,7 @@ export const Description = ({
                 {/* An unsaved draft is a recovery affordance, not a footnote: it needs to be more
                     prominent than the content it is about to overwrite, and it needs a way out. */}
                 <EuiCallOut
+                  announceOnMount
                   size="s"
                   color="warning"
                   iconType="documentEdit"

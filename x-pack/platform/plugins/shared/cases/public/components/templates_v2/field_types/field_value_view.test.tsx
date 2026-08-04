@@ -36,7 +36,8 @@ describe('FieldValueView', () => {
     expect(screen.getByTestId('template-field-value-text-investigation_notes')).toHaveTextContent(
       longValue
     );
-    await userEvent.click(screen.getByRole('button', { name: 'Edit' }));
+    // The row itself is the edit control, so its accessible name names the field it edits.
+    await userEvent.click(screen.getByRole('button', { name: 'Edit Investigation notes' }));
     expect(onEdit).toHaveBeenCalledTimes(1);
   });
 

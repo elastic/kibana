@@ -79,12 +79,12 @@ describe('AllFieldDefinitionsPage', () => {
 
     renderWithTestingProviders(<AllFieldDefinitionsPage />);
 
-    const moveUpButtons = screen.getAllByTestId('fieldDefinitionMoveUpButton');
-    const moveDownButtons = screen.getAllByTestId('fieldDefinitionMoveDownButton');
-    expect(moveUpButtons[0]).toBeDisabled();
-    expect(moveDownButtons[1]).toBeDisabled();
+    // Move up/down live in each row's actions menu as the pointer-free path alongside dragging.
+    // The first row offers no "Move up" at all rather than a disabled one.
+    await userEvent.click(screen.getByTestId('fieldDefinitionActionsButton-first_field'));
+    expect(screen.queryByTestId('fieldDefinitionMoveUpButton')).not.toBeInTheDocument();
 
-    await userEvent.click(moveDownButtons[0]);
+    await userEvent.click(screen.getByTestId('fieldDefinitionMoveDownButton'));
 
     expect(mockReorderGlobalFieldDefinitions).toHaveBeenCalledWith([
       expect.objectContaining({ fieldDefinitionId: 'second', displayOrder: 0 }),
@@ -93,6 +93,11 @@ describe('AllFieldDefinitionsPage', () => {
   });
 
   it('renders the Label column immediately after the Name column', () => {
+    mockGetFieldDefinitions.mockReturnValue({
+      data: { fieldDefinitions: [buildFieldDefinition({})] },
+      isLoading: false,
+    });
+
     renderWithTestingProviders(<AllFieldDefinitionsPage />);
 
     const headerCells = screen.getAllByRole('columnheader').map((cell) => cell.textContent);

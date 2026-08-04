@@ -15,7 +15,7 @@ import * as i18n from '../translations';
 
 export const useReorderGlobalFieldDefinitions = () => {
   const queryClient = useQueryClient();
-  const { showErrorToast, showSuccessToast } = useCasesToast();
+  const { showErrorToast } = useCasesToast();
 
   return useMutation<FieldDefinition[], ServerError, FieldDefinition[]>(
     (fieldDefinitions) =>
@@ -26,9 +26,10 @@ export const useReorderGlobalFieldDefinitions = () => {
       ),
     {
       mutationKey: casesMutationsKeys.updateFieldDefinition,
+      // No success toast: the list settling into its new order is the feedback, and a toast per
+      // drag would fire several times during a single reordering session.
       onSuccess: () => {
         queryClient.invalidateQueries(casesQueriesKeys.fieldDefinitions);
-        showSuccessToast(i18n.SUCCESS_REORDERING_GLOBAL_FIELD_DEFINITIONS);
       },
       onError: (error: ServerError) => {
         showErrorToast(error, { title: i18n.ERROR_REORDERING_GLOBAL_FIELD_DEFINITIONS });

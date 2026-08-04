@@ -289,6 +289,22 @@ export const TEMPLATE_FIELDS_SECTION_EMPTY = i18n.translate(
   { defaultMessage: 'No template-only fields yet.' }
 );
 
+export const REORDER_DISABLED_WHILE_SEARCHING = i18n.translate(
+  'xpack.cases.fieldLibrary.reorderDisabledWhileSearching',
+  { defaultMessage: 'Clear the search to reorder these fields.' }
+);
+
+export const EDIT_FIELD_DEFINITION_NAMED = (name: string) =>
+  i18n.translate('xpack.cases.fieldLibrary.editFieldDefinitionNamed', {
+    defaultMessage: 'Edit {name}',
+    values: { name },
+  });
+
+export const NO_MATCHING_FIELD_DEFINITIONS = i18n.translate(
+  'xpack.cases.fieldLibrary.noMatchingFieldDefinitions',
+  { defaultMessage: 'No fields match your search.' }
+);
+
 export const SEARCH_FIELD_DEFINITIONS = i18n.translate(
   'xpack.cases.fieldLibrary.searchFieldDefinitions',
   { defaultMessage: 'Search fields' }

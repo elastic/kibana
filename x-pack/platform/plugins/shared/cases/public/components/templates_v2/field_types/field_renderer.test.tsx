@@ -468,7 +468,7 @@ describe('FieldsRenderer — case details view mode', () => {
     ).toBeInTheDocument();
     expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
 
-    await userEvent.click(screen.getByRole('button', { name: 'Edit' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Edit Investigation notes' }));
 
     expect(screen.getByRole('textbox', { name: 'Investigation notes' })).toHaveValue(
       'A detailed note that should be readable before the field enters edit mode.'

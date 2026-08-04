@@ -7,7 +7,7 @@
 
 import { useMemo } from 'react';
 import { css } from '@emotion/react';
-import { useEuiTheme, useEuiFontSize } from '@elastic/eui';
+import { useEuiTheme } from '@elastic/eui';
 
 /**
  * Styles for user-authored markdown (case descriptions, comments).
@@ -27,8 +27,6 @@ import { useEuiTheme, useEuiFontSize } from '@elastic/eui';
  */
 export const useProseCss = () => {
   const { euiTheme } = useEuiTheme();
-  const mFontSize = useEuiFontSize('m');
-  const sFontSize = useEuiFontSize('s');
 
   return useMemo(
     () => css`
@@ -41,6 +39,7 @@ export const useProseCss = () => {
         h6 {
           max-inline-size: 90ch;
           font-weight: ${euiTheme.font.weight.semiBold};
+          line-height: ${euiTheme.font.lineHeightMultiplier};
           margin-block: ${euiTheme.size.l} ${euiTheme.size.xs};
 
           &:first-child {
@@ -48,24 +47,28 @@ export const useProseCss = () => {
           }
         }
 
+        /* Sized in em against the body scale rather than in fixed tokens, so all six levels keep a
+           visible ladder relative to each other while the largest still lands below the page's own
+           title. Flattening them to a single size is just as unreadable as letting them run free. */
         h1 {
-          font-size: ${mFontSize.fontSize};
-          line-height: ${mFontSize.lineHeight};
+          font-size: 1.35em;
         }
 
-        h2,
-        h3,
-        h4,
-        h5,
-        h6 {
-          font-size: ${sFontSize.fontSize};
-          line-height: ${sFontSize.lineHeight};
+        h2 {
+          font-size: 1.2em;
         }
 
-        h3,
-        h4,
+        h3 {
+          font-size: 1.1em;
+        }
+
+        h4 {
+          font-size: 1em;
+        }
+
         h5,
         h6 {
+          font-size: 0.9em;
           color: ${euiTheme.colors.textSubdued};
         }
 
@@ -112,6 +115,6 @@ export const useProseCss = () => {
         }
       }
     `,
-    [euiTheme, mFontSize, sFontSize]
+    [euiTheme]
   );
 };
