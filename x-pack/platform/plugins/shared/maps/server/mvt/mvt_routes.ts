@@ -7,7 +7,7 @@
 
 import type { Stream } from 'stream';
 import type { IncomingHttpHeaders } from 'http';
-import { schema } from '@kbn/config-schema';
+import { z as zod } from '@kbn/zod';
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import type { CoreStart, KibanaRequest, KibanaResponseFactory, Logger } from '@kbn/core/server';
 import type { IRouter } from '@kbn/core/server';
@@ -48,20 +48,24 @@ export function initMVTRoutes({
         version: '1',
         validate: {
           request: {
-            params: schema.object({
-              x: schema.number(),
-              y: schema.number(),
-              z: schema.number(),
-            }),
-            query: schema.object({
-              buffer: schema.maybe(schema.number()),
-              geometryFieldName: schema.string(),
-              hasLabels: schema.boolean(),
-              requestBody: schema.string(),
-              index: schema.string(),
-              token: schema.maybe(schema.string()),
-              executionContextId: schema.maybe(schema.string()),
-            }),
+            params: zod
+              .object({
+                x: zod.coerce.number(),
+                y: zod.coerce.number(),
+                z: zod.coerce.number(),
+              })
+              .strict(),
+            query: zod
+              .object({
+                buffer: zod.coerce.number().optional(),
+                geometryFieldName: zod.string(),
+                hasLabels: zod.stringbool({ truthy: ['true'], falsy: ['false'] }),
+                requestBody: zod.string(),
+                index: zod.string(),
+                token: zod.string().optional(),
+                executionContextId: zod.string().optional(),
+              })
+              .strict(),
           },
         },
       },
@@ -134,22 +138,26 @@ export function initMVTRoutes({
         version: '1',
         validate: {
           request: {
-            params: schema.object({
-              x: schema.number(),
-              y: schema.number(),
-              z: schema.number(),
-            }),
-            query: schema.object({
-              buffer: schema.maybe(schema.number()),
-              geometryFieldName: schema.string(),
-              hasLabels: schema.boolean(),
-              requestBody: schema.string(),
-              index: schema.string(),
-              renderAs: schema.string(),
-              token: schema.maybe(schema.string()),
-              gridPrecision: schema.number(),
-              executionContextId: schema.maybe(schema.string()),
-            }),
+            params: zod
+              .object({
+                x: zod.coerce.number(),
+                y: zod.coerce.number(),
+                z: zod.coerce.number(),
+              })
+              .strict(),
+            query: zod
+              .object({
+                buffer: zod.coerce.number().optional(),
+                geometryFieldName: zod.string(),
+                hasLabels: zod.stringbool({ truthy: ['true'], falsy: ['false'] }),
+                requestBody: zod.string(),
+                index: zod.string(),
+                renderAs: zod.string(),
+                token: zod.string().optional(),
+                gridPrecision: zod.coerce.number(),
+                executionContextId: zod.string().optional(),
+              })
+              .strict(),
           },
         },
       },

@@ -9,7 +9,6 @@
 
 import {
   EuiButton,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
@@ -24,6 +23,7 @@ import { WORKFLOWS_APP_ID } from '@kbn/deeplinks-workflows';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { AiButton } from '@kbn/shared-ux-ai-components';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { validateInstallFormValues } from '@kbn/workflows-library';
 import type { InstallFormField, TemplateBody } from '@kbn/workflows-library';
 import { InstallForm } from './install_form';
@@ -235,10 +235,7 @@ export const TemplateInstallSection = React.memo<TemplateInstallSectionProps>(
         >
           {installError ? (
             <>
-              <EuiCallOut
-                announceOnMount
-                color="danger"
-                iconType="warning"
+              <KbnDangerCallout
                 size="s"
                 title={i18n.translate('workflows.library.install.errorTitle', {
                   defaultMessage: 'The template could not be installed',
@@ -246,7 +243,7 @@ export const TemplateInstallSection = React.memo<TemplateInstallSectionProps>(
                 data-test-subj="workflowLibraryTemplateInstallError"
               >
                 {installError}
-              </EuiCallOut>
+              </KbnDangerCallout>
               <EuiSpacer size="s" />
             </>
           ) : null}

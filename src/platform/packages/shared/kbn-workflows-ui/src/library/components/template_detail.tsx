@@ -118,12 +118,14 @@ export const TemplateDetail = React.memo<TemplateDetailProps>(function TemplateD
   // sees the workflow that Install would create. Unset fields fall back to
   // the form defaults / `<name>` placeholders inside `renderTemplate`.
   const [previewValues, setPreviewValues] = useState<Record<string, unknown>>({});
+
   // Values belong to a single template; drop them when the source changes
   // (catalog slug or the identity of a pre-loaded/custom template).
-  const resetKey = slug ?? template?.raw;
+  const resetKey = slug ?? template?.metadata.slug;
   useEffect(() => {
     setPreviewValues({});
   }, [resetKey]);
+
   const previewYaml = useMemo(
     () => (data ? renderTemplate({ template: data, values: previewValues }) : ''),
     [data, previewValues]
