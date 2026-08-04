@@ -310,7 +310,9 @@ describe('getNormalizeCommonFields - maintenance windows', () => {
       monitor: { ...baseMonitor, maintenanceWindows: ['mw-id-1'] },
       maintenanceWindows,
     };
-    const { normalizedFields } = getNormalizeCommonFields(config as NormalizedProjectProps);
+    const { normalizedFields } = getNormalizeCommonFields(
+      config as unknown as NormalizedProjectProps
+    );
     expect(normalizedFields.maintenance_windows).toEqual(['mw-id-1']);
   });
 
@@ -320,7 +322,9 @@ describe('getNormalizeCommonFields - maintenance windows', () => {
       monitor: { ...baseMonitor, maintenanceWindows: ['Weekend window', 'mw-id-2'] },
       maintenanceWindows,
     };
-    const { normalizedFields } = getNormalizeCommonFields(config as NormalizedProjectProps);
+    const { normalizedFields } = getNormalizeCommonFields(
+      config as unknown as NormalizedProjectProps
+    );
     expect(normalizedFields.maintenance_windows).toEqual(['mw-id-1', 'mw-id-2']);
   });
 
@@ -340,7 +344,7 @@ describe('getNormalizeCommonFields - maintenance windows', () => {
       monitor: { ...baseMonitor, maintenanceWindows: ['does-not-exist'] },
       maintenanceWindows,
     };
-    expect(() => getNormalizeCommonFields(config as NormalizedProjectProps)).toThrow(
+    expect(() => getNormalizeCommonFields(config as unknown as NormalizedProjectProps)).toThrow(
       /does-not-exist/
     );
   });
