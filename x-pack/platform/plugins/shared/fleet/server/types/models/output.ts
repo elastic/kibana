@@ -349,7 +349,8 @@ const KafkaUpdateSchema = {
 };
 
 /**
- * OTLP schemas
+ * OTLP schemas — field shapes match otelcol v0.155.0, pinned in elastic-agent/internal/edot/go.mod.
+ * Spec root: https://github.com/open-telemetry/opentelemetry-collector/blob/v0.155.0/exporter/otlpexporter/config.go
  */
 
 // Validated against otelcol v0.155.0:
