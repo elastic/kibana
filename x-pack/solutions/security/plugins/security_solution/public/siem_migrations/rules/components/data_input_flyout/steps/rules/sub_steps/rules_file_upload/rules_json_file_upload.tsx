@@ -20,6 +20,7 @@ import {
   CreateSentinelRulesBody,
   type SentinelArmResource,
 } from '../../../../../../../../../common/siem_migrations/model/vendor/rules/sentinel.gen';
+import { useRuleMigrationVendorCopy } from '../../../../../../hooks/use_rule_migration_vendor_copy';
 
 export interface SentinelRulesJsonFileUploadProps {
   createMigration: CreateMigration;

@@ -49614,8 +49614,6 @@
     "xpack.securitySolution.siemMigrations.rules.dataInputFlyout.referenceSet.title": "上传参考集",
     "xpack.securitySolution.siemMigrations.rules.dataInputFlyout.referenceSets.referenceSetsFileUpload.title": "更新您的参考集导出",
     "xpack.securitySolution.siemMigrations.rules.dataInputFlyout.retryTranslateButton": "重试转换",
-    "xpack.securitySolution.siemMigrations.rules.dataInputFlyout.rules.checkResources.description": "为获得最佳转换结果，我们会复查数据以获取宏和查找。如果找到，我们会要求您接下来上传这些内容。",
-    "xpack.securitySolution.siemMigrations.rules.dataInputFlyout.rules.checkResources.title": "检查宏和查找",
     "xpack.securitySolution.siemMigrations.rules.dataInputFlyout.rules.copyExportQuery.description.section": "搜索和报告",
     "xpack.securitySolution.siemMigrations.rules.dataInputFlyout.rules.copyExportQuery.title": "导出规则",
     "xpack.securitySolution.siemMigrations.rules.dataInputFlyout.rules.rulesFileUpload.promptQradar": "选择或拖放导出的 XML 文件",
