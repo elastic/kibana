@@ -608,7 +608,9 @@ export class EndpointMetadataService {
           srcLastCheckin: _agent.last_checkin ?? null,
           srcLastCheckinStatus: _agent.last_checkin_status ?? null,
           srcActive: _agent.active ?? null,
-          srcPolicyRevisionIdx: _agent.policy_revision_idx ?? null,
+          // Present on the document but absent from Fleet's `Agent` type
+          srcPolicyRevisionIdx:
+            (_agent as unknown as Record<string, unknown>).policy_revision_idx ?? null,
           srcEnrolledAt: _agent.enrolled_at ?? null,
           endpointTimestamp: endpoint['@timestamp'] ?? null,
           kibanaNow: new Date().toISOString(),
