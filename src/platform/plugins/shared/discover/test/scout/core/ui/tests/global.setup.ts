@@ -8,6 +8,7 @@
  */
 
 import { globalSetupHook } from '@kbn/scout';
+import { DATE_NESTED_ES_ARCHIVE } from '../../../common/ui/fixtures/constants';
 
 globalSetupHook('Setup Discover tests data', async ({ esArchiver, log }) => {
   log.debug('[setup:logstash] loading logstash_functional ES data (only if it does not exist)...');
@@ -15,4 +16,8 @@ globalSetupHook('Setup Discover tests data', async ({ esArchiver, log }) => {
     'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
   );
   log.debug('[setup:logstash] logstash_functional ES data ready');
+
+  log.debug('[setup:date_nested] loading date_nested ES data (only if it does not exist)...');
+  await esArchiver.loadIfNeeded(DATE_NESTED_ES_ARCHIVE);
+  log.debug('[setup:date_nested] date_nested ES data ready');
 });

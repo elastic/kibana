@@ -63,9 +63,10 @@ describe('Dropbox', () => {
       expect(Dropbox.metadata.minimumLicense).toBe('enterprise');
     });
 
-    it('should support both workflows and agentBuilder feature IDs', () => {
+    it('should support workflows, agentBuilder, and contextEngine feature IDs', () => {
       expect(Dropbox.metadata.supportedFeatureIds).toContain('workflows');
       expect(Dropbox.metadata.supportedFeatureIds).toContain('agentBuilder');
+      expect(Dropbox.metadata.supportedFeatureIds).toContain('contextEngine');
     });
 
     it('should be marked as technical preview', () => {

@@ -34,6 +34,7 @@ describe('GoogleCalendar', () => {
     expect(GoogleCalendar.metadata.displayName).toBe('Google Calendar');
     expect(GoogleCalendar.metadata.minimumLicense).toBe('enterprise');
     expect(GoogleCalendar.metadata.supportedFeatureIds).toContain('workflows');
+    expect(GoogleCalendar.metadata.supportedFeatureIds).toContain('contextEngine');
   });
 
   it('should support ears auth type as first visible option', () => {

@@ -635,6 +635,7 @@ const generateQueriesRoute = createServerRoute({
       inferenceClient,
       soClient,
       scopedClusterClient,
+      streamDataEsClient,
       licensing,
       tuningConfig,
     } = scopedClients;
@@ -659,6 +660,7 @@ const generateQueriesRoute = createServerRoute({
         soClient,
         kiClient,
         esClient: scopedClusterClient.asCurrentUser,
+        streamDataEsClient,
         featureFlags: server.core.featureFlags,
         searchInferenceEndpoints: server.searchInferenceEndpoints,
         request,
