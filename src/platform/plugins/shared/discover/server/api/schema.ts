@@ -93,7 +93,6 @@ const discoverSessionControlPanelSchema = z
 export const discoverSessionControlPanelsSchema = z
   .array(discoverSessionControlPanelSchema)
   .max(MAX_DISCOVER_SESSION_CONTROL_PANELS)
-  .default([])
   .refine(
     (panels) => new Set(panels.map((p) => p.id)).size === panels.length,
     'control_panels must have unique ids'
@@ -208,11 +207,13 @@ export const discoverSessionApiDataSchema = z
     description: 'Configuration data for a Discover session.',
   });
 
-export const discoverSessionApiResponseSchema = z.object({
-  id: z.string().meta({ description: 'The Discover session ID.' }),
-  data: discoverSessionApiDataSchema,
-  meta: asCodeMetaSchema,
-});
+export const discoverSessionApiResponseSchema = z
+  .object({
+    id: z.string().meta({ description: 'The Discover session ID.' }),
+    data: discoverSessionApiDataSchema,
+    meta: asCodeMetaSchema,
+  })
+  .strict();
 
 export const discoverSessionSearchParamsSchema = asCodePaginationParamsSchema.extend({
   query: z
@@ -225,25 +226,31 @@ export const discoverSessionSearchParamsSchema = asCodePaginationParamsSchema.ex
     .optional(),
 });
 
-const discoverSessionSearchItemSchema = z.object({
-  id: z.string().meta({ description: 'The Discover session ID.' }),
-  data: z.object({
-    title: z.string().meta({ description: 'Discover session title.' }),
-    description: z.string().optional().meta({ description: 'Discover session description.' }),
-  }),
-  meta: asCodeMetaSchema,
-});
+const discoverSessionSearchItemSchema = z
+  .object({
+    id: z.string().meta({ description: 'The Discover session ID.' }),
+    data: z
+      .object({
+        title: z.string().meta({ description: 'Discover session title.' }),
+        description: z.string().optional().meta({ description: 'Discover session description.' }),
+      })
+      .strict(),
+    meta: asCodeMetaSchema,
+  })
+  .strict();
 
-export const discoverSessionSearchResponseSchema = z.object({
-  data: z
-    .array(discoverSessionSearchItemSchema)
-    // Mirror the request's production-enforced `per_page` maximum in OAS and dev response validation.
-    .max(PAGINATION_MAX_SIZE)
-    .meta({
-      description: 'List of matching Discover sessions (summaries, not the full session state).',
-    }),
-  meta: asCodePaginationResponseMetaSchema,
-});
+export const discoverSessionSearchResponseSchema = z
+  .object({
+    data: z
+      .array(discoverSessionSearchItemSchema)
+      // Mirror the request's production-enforced `per_page` maximum in OAS and dev response validation.
+      .max(PAGINATION_MAX_SIZE)
+      .meta({
+        description: 'List of matching Discover sessions (summaries, not the full session state).',
+      }),
+    meta: asCodePaginationResponseMetaSchema,
+  })
+  .strict();
 
 export type DiscoverSessionApiData = z.output<typeof discoverSessionApiDataSchema>;
 export type DiscoverSessionApiResponse = z.output<typeof discoverSessionApiResponseSchema>;
