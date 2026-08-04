@@ -55,9 +55,11 @@ export const useInitTimelineFromUrlParam = () => {
 
       const parsedState = safeDecode(timelineState) as TimelineUrl | null;
 
-      // Make sure we only re-initialize the timeline if there are significant changes to the active timeline.
-      // Without this check, we could potentially overwrite the timeline.
-      if (!hasTimelineStateChanged(activeTimeline, parsedState)) {
+      // Only re-initialize when the URL state differs from the active timeline.
+      // Without this guard a popstate event carrying the same timeline param would silently
+      // re-load the timeline and discard in-progress edits (filters, data providers, etc.).
+      // When there is no active timeline yet, always initialize.
+      if (!activeTimeline || hasTimelineStateChanged(activeTimeline, parsedState)) {
         onInitialize(parsedState);
       }
     };
@@ -70,7 +72,7 @@ export const useInitTimelineFromUrlParam = () => {
   useInitializeUrlParam(URL_PARAM_KEY.timeline, onInitialize);
 };
 
-function hasTimelineStateChanged(
+export function hasTimelineStateChanged(
   activeTimeline: TimelineModel | null,
   newState: TimelineUrl | null
 ) {
