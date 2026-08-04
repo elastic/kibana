@@ -152,9 +152,12 @@ function jsonSchemaToFieldTable(jsonSchema: unknown): FieldInfo[] {
   });
 }
 
-/** Type unions and enum lists contain `|`, which would otherwise split the cell into extra columns. */
+/**
+ * Type unions and enum lists contain `|`, which would otherwise split the cell into extra columns.
+ * Backslashes are escaped first so a literal `\` before a pipe cannot consume the escape we add.
+ */
 function escapeTableCell(value: string): string {
-  return value.replace(/\|/g, '\\|');
+  return value.replace(/\\/g, '\\\\').replace(/\|/g, '\\|');
 }
 
 function formatFieldTable(fields: FieldInfo[]): string {

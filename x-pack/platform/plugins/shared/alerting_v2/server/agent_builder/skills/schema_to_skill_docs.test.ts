@@ -95,6 +95,21 @@ describe('schema_to_skill_docs', () => {
       expect(rows[0].split(/(?<!\\)\|/).length - 2).toBe(4);
     });
 
+    it('escapes backslashes so they cannot consume the escape added for a following pipe', () => {
+      const doc = generateApiSchemaDoc({
+        title: 'Pattern Example',
+        schema: z.object({
+          code: z
+            .string()
+            .regex(/^a\|b$/)
+            .describe('Code.'),
+        }),
+      });
+
+      // `\\` renders as a literal backslash and `\|` as a literal pipe, so the cell holds `^a\|b$`.
+      expect(doc).toContain('| `code` | string | required | Code. (pattern: ^a\\\\\\|b$) |');
+    });
+
     it('appends extra sections from the converted JSON schema', () => {
       const doc = generateApiSchemaDoc({
         title: 'Example API Schema Reference',
