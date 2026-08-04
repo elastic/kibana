@@ -371,22 +371,21 @@ test.describe(
         await expect(pageObjects.composeDiscover.flyout).toBeVisible();
       });
 
-      await test.step('sandbox opens in YAML mode and offers the real timestamp field', async () => {
-        await expect(pageObjects.composeDiscover.sandboxApplyButton).toBeVisible();
-        await expect(pageObjects.composeDiscover.yamlSubmitButton).toBeVisible();
-        await pageObjects.composeDiscover.selectSandboxTimeField('timestamp');
-        await expect(pageObjects.composeDiscover.sandboxTimeFieldSelector).toHaveValue('timestamp');
+      await test.step('opens in form mode (not YAML); select the correct time field', async () => {
+        // Breach-only standalone rules are now representable — no YAML mode.
+        await expect(pageObjects.composeDiscover.yamlSubmitButton).toBeHidden();
+        // The stored @timestamp is not in the index options; wait for options to load
+        // then explicitly select the correct field so it persists on save.
+        await pageObjects.composeDiscover.selectTimeField('timestamp');
+        await expect(pageObjects.composeDiscover.timeFieldSelector).toHaveValue('timestamp');
+        await expect(pageObjects.composeDiscover.nextButton).toBeEnabled();
       });
 
-      await test.step('apply and save persists timestamp', async () => {
-        await pageObjects.composeDiscover.clickApply();
-        // Apply updates YAML via React state — wait until the editor reflects it
-        // before Save, or YamlSubmit can persist the stale `@timestamp` value.
-        await expect(pageObjects.composeDiscover.flyout).toContainText('time_field: timestamp');
-        await expect(pageObjects.composeDiscover.flyout).not.toContainText(
-          "time_field: '@timestamp'"
-        );
-        await pageObjects.composeDiscover.clickYamlSubmit();
+      await test.step('proceed through steps, save, and verify persisted time field', async () => {
+        await pageObjects.composeDiscover.clickNext(); // Recovery Condition
+        await pageObjects.composeDiscover.clickNext(); // Details
+        await pageObjects.composeDiscover.clickNext(); // Actions
+        await pageObjects.composeDiscover.clickSubmit();
         await expect(pageObjects.composeDiscover.flyout).toBeHidden({ timeout: 30_000 });
 
         await expect
@@ -465,12 +464,13 @@ test.describe(
         await expect(pageObjects.composeDiscover.sandboxApplyButton).toBeHidden();
       });
 
-      await test.step('summary shows no alert condition (standalone breach query)', async () => {
+      await test.step('summary shows no alert condition (standalone breach query) and Next is enabled', async () => {
         await expect(
           pageObjects.composeDiscover.summarySection('no_alert_condition')
         ).toBeVisible();
         await expect(pageObjects.composeDiscover.noAlertConditionCallout).toBeVisible();
-        await expect(pageObjects.composeDiscover.nextButton).toBeDisabled();
+        // Conditionless rules are valid — Next is not blocked.
+        await expect(pageObjects.composeDiscover.nextButton).toBeEnabled();
       });
 
       await test.step('form Time field still resolves from the standalone breach query', async () => {
@@ -647,7 +647,7 @@ test.describe(
       });
     });
 
-    test('alert condition validation: base-only query shows the no-alert-condition callout and disables Next', async ({
+    test('alert condition validation: base-only query shows the no-alert-condition callout and keeps Next enabled', async ({
       pageObjects,
     }) => {
       await test.step('open create flyout and open the query editor', async () => {
@@ -671,8 +671,8 @@ test.describe(
         );
       });
 
-      await test.step('Next button is disabled', async () => {
-        await expect(pageObjects.composeDiscover.nextButton).toBeDisabled();
+      await test.step('Next button is enabled — conditionless rules are valid', async () => {
+        await expect(pageObjects.composeDiscover.nextButton).toBeEnabled();
       });
     });
 
@@ -698,7 +698,7 @@ test.describe(
       });
     });
 
-    test('alert condition validation: a base-only query keeps the user on the Alert Condition step', async ({
+    test('alert condition validation: a base-only query shows the callout and Next is enabled', async ({
       page,
       pageObjects,
     }) => {
@@ -709,9 +709,10 @@ test.describe(
         await pageObjects.composeDiscover.applySandboxBaseQueryOnly(BASE_QUERY);
       });
 
-      await test.step('Next is disabled — verify we stay on Alert Condition step', async () => {
-        await expect(pageObjects.composeDiscover.nextButton).toBeDisabled();
+      await test.step('no-alert-condition callout is shown, Next is enabled, still on Alert Condition step', async () => {
         await expect(pageObjects.composeDiscover.noAlertConditionCallout).toBeVisible();
+        // Conditionless rules are valid — Next is not blocked.
+        await expect(pageObjects.composeDiscover.nextButton).toBeEnabled();
         await expect(page.testSubj.locator('ruleNameInput')).toBeHidden();
       });
     });
