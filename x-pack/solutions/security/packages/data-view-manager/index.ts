@@ -26,3 +26,17 @@ export * from './src/utils/build_browser_fields';
 export * from './src/utils/init_data_view';
 
 export { DataViewManagerProvider } from './src/provider';
+export type { DataViewManagerProviderProps } from './src/provider';
+
+export {
+  DataViewManagerDependenciesProvider,
+  useDataViewManagerDependencies,
+  useDataViewManagerServices,
+} from './src/context';
+export type {
+  DataViewManagerServices,
+  DataViewManagerDependencies,
+  CreateDefaultDataView,
+  CreateDefaultDataViewResult,
+  CreateExploreDataView,
+} from './src/context';

@@ -19,6 +19,9 @@
   "kbn_references": [
     "@kbn/data-views-plugin",
     "@kbn/timelines-plugin",
-    "@kbn/response-ops-alerts-fields-browser"
+    "@kbn/response-ops-alerts-fields-browser",
+    "@kbn/core",
+    "@kbn/spaces-plugin",
+    "@kbn/kibana-utils-plugin"
   ]
 }
