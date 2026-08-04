@@ -239,27 +239,21 @@ export function CasesTableServiceProvider(
     },
 
     async filterByOwner(owner: string) {
-      const itemSubj = `options-filter-popover-item-${owner}`;
       const isAlreadyOpen = await testSubjects.exists('options-filter-popover-panel-owner');
 
-      if (!isAlreadyOpen) {
-        await testSubjects.click('options-filter-popover-button-owner');
-        await retry.waitFor(`filterByOwner popover opened`, async () => {
-          return await testSubjects.exists('options-filter-popover-panel-owner');
-        });
+      if (isAlreadyOpen) {
+        await testSubjects.click(`options-filter-popover-item-${owner}`);
+        await header.waitUntilLoadingHasFinished();
+        return;
       }
 
-      await testSubjects.click(itemSubj);
-      // Confirm this owner is actually checked before returning: the click otherwise races the
-      // async table reload each selection triggers, and a click landing mid-reload is dropped.
-      await retry.waitFor(`owner filter "${owner}" to be selected`, async () => {
-        const item = await testSubjects.find(itemSubj);
-        return (await item.getAttribute('aria-checked')) === 'true';
+      await testSubjects.click('options-filter-popover-button-owner');
+      await retry.waitFor(`filterByOwner popover opened`, async () => {
+        return await testSubjects.exists('options-filter-popover-panel-owner');
       });
+
+      await testSubjects.click(`options-filter-popover-item-${owner}`);
       await header.waitUntilLoadingHasFinished();
-      // Let the reload this selection triggered settle before returning, so a following
-      // filterByOwner click (multi-select) lands on a stable table instead of a re-rendering one.
-      await this.waitForTableToFinishLoading();
     },
 
     async refreshTable() {
