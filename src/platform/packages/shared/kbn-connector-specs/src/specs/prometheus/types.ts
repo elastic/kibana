@@ -306,6 +306,94 @@ export const ListPrometheusRulesInputSchema = lazySchema(() =>
 );
 export type ListPrometheusRulesInput = z.infer<typeof ListPrometheusRulesInputSchema>;
 
+const rangeTimeField = (bound: 'start' | 'end') =>
+  z
+    .string()
+    .min(1)
+    .max(64)
+    .describe(
+      `RFC3339 timestamp (or Unix epoch seconds) for the ${bound} of the range, e.g. "2026-01-01T00:00:00Z".`
+    );
+
+export const QueryRangePrometheusInputSchema = lazySchema(() =>
+  z.object({
+    query: z
+      .string()
+      .min(1)
+      .max(MAX_QUERY_LENGTH)
+      .describe(
+        "A PromQL expression to evaluate over the range, e.g. 'rate(http_requests_total[5m])'."
+      ),
+    start: rangeTimeField('start'),
+    end: rangeTimeField('end'),
+    step: z
+      .string()
+      .min(1)
+      .max(32)
+      .describe(
+        'Query resolution step width, e.g. "15s", "1m", "1h", or a plain number of seconds.'
+      ),
+  })
+);
+export type QueryRangePrometheusInput = z.infer<typeof QueryRangePrometheusInputSchema>;
+
+export const ListPrometheusTargetsInputSchema = lazySchema(() =>
+  z.object({
+    state: z
+      .enum(['active', 'dropped', 'any'])
+      .optional()
+      .describe(
+        'Restrict to "active" (currently scraped) or "dropped" (relabeled away) targets. Defaults to "any", returning both.'
+      ),
+  })
+);
+export type ListPrometheusTargetsInput = z.infer<typeof ListPrometheusTargetsInputSchema>;
+
+const seriesMatchField = () =>
+  z
+    .array(matcherExprField())
+    .min(1)
+    .max(MAX_MATCHERS)
+    .describe(
+      "One or more series selector expressions, e.g. 'up{job=\"node\"}' or 'process_start_time_seconds'. The result is the union of all matches."
+    );
+
+const optionalRangeTimeField = (bound: 'start' | 'end') =>
+  z
+    .string()
+    .max(64)
+    .optional()
+    .describe(
+      `Optional RFC3339 timestamp (or Unix epoch seconds) for the ${bound} of the time range. If omitted, Prometheus uses its own default.`
+    );
+
+export const GetPrometheusSeriesInputSchema = lazySchema(() =>
+  z.object({
+    match: seriesMatchField(),
+    start: optionalRangeTimeField('start'),
+    end: optionalRangeTimeField('end'),
+  })
+);
+export type GetPrometheusSeriesInput = z.infer<typeof GetPrometheusSeriesInputSchema>;
+
+export const ListPrometheusLabelValuesInputSchema = lazySchema(() =>
+  z.object({
+    label: z
+      .string()
+      .min(1)
+      .max(MAX_LABEL_LENGTH)
+      .describe('The label name to list known values for, e.g. "job" or "instance".'),
+    match: z
+      .array(matcherExprField())
+      .max(MAX_MATCHERS)
+      .optional()
+      .describe('Optional series selector expressions to restrict which series are considered.'),
+    start: optionalRangeTimeField('start'),
+    end: optionalRangeTimeField('end'),
+  })
+);
+export type ListPrometheusLabelValuesInput = z.infer<typeof ListPrometheusLabelValuesInputSchema>;
+
 // ---------------------------------------------------------------------------
 // Lightweight response shapes (only the fields the connector reads/documents)
 // ---------------------------------------------------------------------------

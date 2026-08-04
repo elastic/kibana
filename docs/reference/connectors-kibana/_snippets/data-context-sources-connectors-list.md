@@ -40,7 +40,7 @@
 - [Outlook](/reference/connectors-kibana/outlook-action-type.md): Search emails, list folders, and read messages and attachments in Microsoft Outlook.
 - [PagerDuty (MCP)](/reference/connectors-kibana/pagerduty-mcp-action-type.md): Access incidents, escalation policies, schedules, on-calls, users, and teams in PagerDuty.
 - [PostHog](/reference/connectors-kibana/posthog-action-type.md): Triage error-tracking issues, run HogQL queries, and control feature flags.
-- [Prometheus Alertmanager](/reference/connectors-kibana/prometheus-alertmanager-action-type.md): Read alerts and alert groups, and create, list, and expire silences to mute noise.
+- [Prometheus](/reference/connectors-kibana/prometheus-action-type.md): Run PromQL queries, and read, silence, and manage alerts and alert groups in Alertmanager.
 - [Rootly](/reference/connectors-kibana/rootly-action-type.md): Declare and drive incidents through their lifecycle.
 - [Salesforce](/reference/connectors-kibana/salesforce-action-type.md): Query and retrieve data from your Salesforce org using SOQL and the REST API.
 - [Sentry](/reference/connectors-kibana/sentry-action-type.md): Triage Sentry issues and provision issue alert rules.
