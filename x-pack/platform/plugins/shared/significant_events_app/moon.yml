@@ -19,7 +19,6 @@ project:
 dependsOn:
   - '@kbn/agent-builder-browser'
   - '@kbn/agent-builder-common'
-  - '@kbn/agent-builder-plugin'
   - '@kbn/app-header'
   - '@kbn/calculate-auto'
   - '@kbn/charts-plugin'

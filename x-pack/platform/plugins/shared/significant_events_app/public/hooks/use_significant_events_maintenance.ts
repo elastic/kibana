@@ -76,9 +76,12 @@ export const useMaintenanceStatus = () => {
   return useQuery<SignificantEventsMaintenanceStatus, Error>({
     queryKey: MAINTENANCE_STATUS_QUERY_KEY,
     queryFn: ({ signal }: QueryFunctionContext) =>
-      significantEventsRepositoryClient.fetch('GET /internal/significant_events/maintenance/_status', {
-        signal: signal ?? null,
-      }),
+      significantEventsRepositoryClient.fetch(
+        'GET /internal/significant_events/maintenance/_status',
+        {
+          signal: signal ?? null,
+        }
+      ),
     refetchInterval: MAINTENANCE_STATUS_REFETCH_INTERVAL_MS,
     refetchOnWindowFocus: true,
   });
@@ -128,9 +131,12 @@ export const useSignificantEventsMaintenanceActions = () => {
 
   const pauseMutation = useMutation<SignificantEventsMaintenanceSummary, Error, void>({
     mutationFn: () =>
-      significantEventsRepositoryClient.fetch('POST /internal/significant_events/maintenance/_pause', {
-        signal: null,
-      }),
+      significantEventsRepositoryClient.fetch(
+        'POST /internal/significant_events/maintenance/_pause',
+        {
+          signal: null,
+        }
+      ),
     onSuccess: (summary) => {
       if (summary.partialFailures.length > 0) {
         toasts.addWarning({
@@ -149,9 +155,12 @@ export const useSignificantEventsMaintenanceActions = () => {
 
   const resumeMutation = useMutation<SignificantEventsMaintenanceSummary, Error, void>({
     mutationFn: () =>
-      significantEventsRepositoryClient.fetch('POST /internal/significant_events/maintenance/_resume', {
-        signal: null,
-      }),
+      significantEventsRepositoryClient.fetch(
+        'POST /internal/significant_events/maintenance/_resume',
+        {
+          signal: null,
+        }
+      ),
     onSuccess: (summary) => {
       // Resume always flips the control plane to enabled (or throws). Partial
       // re-enable failures are warnings, not a lingering paused state.

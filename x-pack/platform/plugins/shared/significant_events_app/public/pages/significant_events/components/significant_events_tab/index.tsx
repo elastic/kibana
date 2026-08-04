@@ -127,15 +127,24 @@ const SEARCH_PLACEHOLDER = i18n.translate(
     defaultMessage: 'Search events...',
   }
 );
-const FETCH_ERROR_TITLE = i18n.translate('xpack.significantEventsApp.significantEventsTab.fetchError', {
-  defaultMessage: 'Failed to load significant events',
-});
-const TABLE_CAPTION = i18n.translate('xpack.significantEventsApp.significantEventsTab.tableCaption', {
-  defaultMessage: 'Significant Events',
-});
-const LOADING_MESSAGE = i18n.translate('xpack.significantEventsApp.significantEventsTab.loadingMessage', {
-  defaultMessage: 'Loading events...',
-});
+const FETCH_ERROR_TITLE = i18n.translate(
+  'xpack.significantEventsApp.significantEventsTab.fetchError',
+  {
+    defaultMessage: 'Failed to load significant events',
+  }
+);
+const TABLE_CAPTION = i18n.translate(
+  'xpack.significantEventsApp.significantEventsTab.tableCaption',
+  {
+    defaultMessage: 'Significant Events',
+  }
+);
+const LOADING_MESSAGE = i18n.translate(
+  'xpack.significantEventsApp.significantEventsTab.loadingMessage',
+  {
+    defaultMessage: 'Loading events...',
+  }
+);
 const EMPTY_MESSAGE = i18n.translate('xpack.significantEventsApp.significantEventsTab.emptyBody', {
   defaultMessage: 'No significant events found.',
 });

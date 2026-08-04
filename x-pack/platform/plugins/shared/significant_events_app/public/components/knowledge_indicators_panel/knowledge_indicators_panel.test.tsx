@@ -57,14 +57,18 @@ describe('KnowledgeIndicatorsPanel', () => {
     renderWithI18n(<KnowledgeIndicatorsPanel streamName={definition.stream.name} />);
 
     expect(screen.getByText('Knowledge indicators')).toBeInTheDocument();
-    expect(screen.getByTestId('significantEventsAppKnowledgeIndicatorsFeaturesCount')).toHaveTextContent('2');
-    expect(screen.getByTestId('significantEventsAppKnowledgeIndicatorsFeaturesCount')).toHaveTextContent(
-      'features'
-    );
-    expect(screen.getByTestId('significantEventsAppKnowledgeIndicatorsQueriesCount')).toHaveTextContent('8');
-    expect(screen.getByTestId('significantEventsAppKnowledgeIndicatorsQueriesCount')).toHaveTextContent(
-      'queries'
-    );
+    expect(
+      screen.getByTestId('significantEventsAppKnowledgeIndicatorsFeaturesCount')
+    ).toHaveTextContent('2');
+    expect(
+      screen.getByTestId('significantEventsAppKnowledgeIndicatorsFeaturesCount')
+    ).toHaveTextContent('features');
+    expect(
+      screen.getByTestId('significantEventsAppKnowledgeIndicatorsQueriesCount')
+    ).toHaveTextContent('8');
+    expect(
+      screen.getByTestId('significantEventsAppKnowledgeIndicatorsQueriesCount')
+    ).toHaveTextContent('queries');
   });
 
   it('uses singular labels when the count is one', () => {
@@ -82,12 +86,12 @@ describe('KnowledgeIndicatorsPanel', () => {
 
     renderWithI18n(<KnowledgeIndicatorsPanel streamName={definition.stream.name} />);
 
-    expect(screen.getByTestId('significantEventsAppKnowledgeIndicatorsFeaturesCount')).toHaveTextContent(
-      'feature'
-    );
-    expect(screen.getByTestId('significantEventsAppKnowledgeIndicatorsQueriesCount')).toHaveTextContent(
-      'query'
-    );
+    expect(
+      screen.getByTestId('significantEventsAppKnowledgeIndicatorsFeaturesCount')
+    ).toHaveTextContent('feature');
+    expect(
+      screen.getByTestId('significantEventsAppKnowledgeIndicatorsQueriesCount')
+    ).toHaveTextContent('query');
   });
 
   it('links to the knowledge indicators tab with the stream pre-filtered', () => {
@@ -180,7 +184,9 @@ describe('KnowledgeIndicatorsPanel', () => {
 
     renderWithI18n(<KnowledgeIndicatorsPanel streamName={definition.stream.name} />);
 
-    expect(screen.getByTestId('significantEventsAppKnowledgeIndicatorsFeaturesCount')).toHaveTextContent('1');
+    expect(
+      screen.getByTestId('significantEventsAppKnowledgeIndicatorsFeaturesCount')
+    ).toHaveTextContent('1');
     expect(
       screen
         .getByTestId('significantEventsAppKnowledgeIndicatorsQueriesCount')

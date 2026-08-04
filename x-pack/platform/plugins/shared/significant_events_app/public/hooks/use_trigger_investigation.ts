@@ -53,10 +53,13 @@ export const useTriggerInvestigation = ({
 
   const mutation = useMutation<TriggerInvestigationResult, Error, string>({
     mutationFn: (eventUuid: string) =>
-      significantEventsRepositoryClient.fetch('POST /internal/significant_events/events/{id}/investigate', {
-        params: { path: { id: eventUuid } },
-        signal: null,
-      }),
+      significantEventsRepositoryClient.fetch(
+        'POST /internal/significant_events/events/{id}/investigate',
+        {
+          params: { path: { id: eventUuid } },
+          signal: null,
+        }
+      ),
     onSuccess: () => {
       toasts.addSuccess({
         title: TRIGGER_SUCCESS_TOAST_TITLE,

@@ -88,7 +88,9 @@ describe('FeatureDetailsFlyout', () => {
     const feature = createMinimalFeature({ id: 'raw-doc-feature', type: 'dataset_analysis' });
     renderWithProviders(<FeatureDetailsFlyout feature={feature} onClose={mockOnClose} />);
 
-    const rawDocumentSection = screen.getByTestId('significantEventsAppFeatureDetailsFlyoutRawDocument');
+    const rawDocumentSection = screen.getByTestId(
+      'significantEventsAppFeatureDetailsFlyoutRawDocument'
+    );
     expect(rawDocumentSection).toBeInTheDocument();
     expect(rawDocumentSection.textContent).toContain('"id"');
     expect(rawDocumentSection.textContent).toContain('"raw-doc-feature"');

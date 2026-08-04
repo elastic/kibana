@@ -89,7 +89,6 @@ dependsOn:
   - '@kbn/scout'
   - '@kbn/scout-synthtrace'
   - '@kbn/search-types'
-  - '@kbn/server-route-repository'
   - '@kbn/server-route-repository-client'
   - '@kbn/share-plugin'
   - '@kbn/shared-ux-ai-components'

@@ -17,9 +17,12 @@ const CAUSAL_FEATURES_TITLE = i18n.translate(
     defaultMessage: 'Causal Features',
   }
 );
-const STREAMS_TITLE = i18n.translate('xpack.significantEventsApp.significantEventsTab.flyout.streams', {
-  defaultMessage: 'Streams',
-});
+const STREAMS_TITLE = i18n.translate(
+  'xpack.significantEventsApp.significantEventsTab.flyout.streams',
+  {
+    defaultMessage: 'Streams',
+  }
+);
 
 const signalPanelCss = css`
   margin-bottom: 4px;

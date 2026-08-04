@@ -53,10 +53,13 @@ export const useUpdateSignificantEvent = ({
 
   const mutation = useMutation<UpdateSignificantEventResult, Error, UpdateSignificantEventArgs>({
     mutationFn: ({ eventUuid, status }: UpdateSignificantEventArgs) =>
-      significantEventsRepositoryClient.fetch('POST /internal/significant_events/events/{id}/update', {
-        params: { path: { id: eventUuid }, body: { status } },
-        signal: null,
-      }),
+      significantEventsRepositoryClient.fetch(
+        'POST /internal/significant_events/events/{id}/update',
+        {
+          params: { path: { id: eventUuid }, body: { status } },
+          signal: null,
+        }
+      ),
     onSuccess: () => {
       toasts.addSuccess({ title: UPDATE_SUCCESS_TOAST_TITLE });
       onUpdateSuccess?.();

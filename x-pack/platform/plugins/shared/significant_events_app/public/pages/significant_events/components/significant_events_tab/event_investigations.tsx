@@ -50,10 +50,13 @@ const OPEN_CONVERSATION_LABEL = i18n.translate(
 );
 
 const getRunningDurationText = (duration: string): string =>
-  i18n.translate('xpack.significantEventsApp.significantEventsTab.flyout.investigationRunningDuration', {
-    defaultMessage: '{duration} (running)',
-    values: { duration },
-  });
+  i18n.translate(
+    'xpack.significantEventsApp.significantEventsTab.flyout.investigationRunningDuration',
+    {
+      defaultMessage: '{duration} (running)',
+      values: { duration },
+    }
+  );
 
 const formatDuration = (startedAt: string, completedAt?: string): string => {
   const start = new Date(startedAt).getTime();

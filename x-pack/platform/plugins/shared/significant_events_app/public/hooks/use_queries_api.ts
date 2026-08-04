@@ -58,24 +58,30 @@ export function useQueriesApi(): QueriesApi {
         });
       },
       removeQuery: async ({ queryId }: { queryId: string; streamName: string }) => {
-        await significantEventsRepositoryClient.fetch('POST /internal/streams/queries/_bulk_delete', {
-          signal,
-          params: {
-            body: {
-              queryIds: [queryId],
+        await significantEventsRepositoryClient.fetch(
+          'POST /internal/streams/queries/_bulk_delete',
+          {
+            signal,
+            params: {
+              body: {
+                queryIds: [queryId],
+              },
             },
-          },
-        });
+          }
+        );
       },
       deleteQueriesInBulk: async ({ queryIds }: { queryIds: string[]; streamName: string }) => {
-        await significantEventsRepositoryClient.fetch('POST /internal/streams/queries/_bulk_delete', {
-          signal: null,
-          params: {
-            body: {
-              queryIds,
+        await significantEventsRepositoryClient.fetch(
+          'POST /internal/streams/queries/_bulk_delete',
+          {
+            signal: null,
+            params: {
+              body: {
+                queryIds,
+              },
             },
-          },
-        });
+          }
+        );
       },
       abort: () => {
         abort();

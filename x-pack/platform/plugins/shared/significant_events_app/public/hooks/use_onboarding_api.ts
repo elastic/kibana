@@ -64,12 +64,15 @@ export function useOnboardingApi() {
         );
       },
       getOnboardingStatuses: async (streamNames: string[]) => {
-        return significantEventsRepositoryClient.fetch('POST /internal/streams/onboarding/_bulk_status', {
-          signal,
-          params: {
-            body: { streamNames },
-          },
-        });
+        return significantEventsRepositoryClient.fetch(
+          'POST /internal/streams/onboarding/_bulk_status',
+          {
+            signal,
+            params: {
+              body: { streamNames },
+            },
+          }
+        );
       },
       cancelOnboarding: async (streamName: string) => {
         await significantEventsRepositoryClient.fetch(

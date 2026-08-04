@@ -17,8 +17,7 @@ export const useStreamFeatures = (
   deps: unknown[] = [],
   { enabled = true }: { enabled?: boolean } = {}
 ) => {
-  const { significantEventsRepositoryClient } =
-    useKibana().dependencies.start.significant_events;
+  const { significantEventsRepositoryClient } = useKibana().dependencies.start.significant_events;
   const showFetchErrorToast = useFetchErrorToast();
 
   const fetchFeatures = async ({ signal: querySignal }: QueryFunctionContext) => {
