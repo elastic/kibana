@@ -27,6 +27,7 @@ import { screen, waitFor, within } from '@testing-library/react';
 import * as sourceDocumentModule from '../components/source_document';
 import * as sourcePopoverContentModule from '../components/source_popover_content';
 import { getRenderCellValueFn } from './get_render_cell_value';
+import { InTableSearchCellContext } from '@kbn/data-grid-in-table-search';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 
@@ -319,6 +320,50 @@ describe('Unified data table cell rendering', () => {
       },
       expect.anything()
     );
+  });
+
+  describe('in-table search counting pass for the _source column', () => {
+    const renderSourceCell = ({ isCounting, term }: { isCounting: boolean; term: string }) => {
+      const DataTableCellValue = getRenderCellValueFn({
+        closePopover: jest.fn(),
+        columnsMeta: undefined,
+        dataView: dataViewMock,
+        fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
+        maxEntries: 100,
+        rows: rowsSource.map(build),
+        shouldShowFieldHandler: (fieldName: string) => ['extension', 'bytes'].includes(fieldName),
+      });
+
+      return renderWithI18n(
+        <InTableSearchCellContext.Provider value={{ inTableSearchTerm: term, isCounting }}>
+          <DataTableCellValue
+            colIndex={0}
+            columnId="_source"
+            isDetails={false}
+            isExpandable={true}
+            isExpanded={false}
+            rowIndex={0}
+            setCellProps={jest.fn()}
+          />
+        </InTableSearchCellContext.Provider>
+      );
+    };
+
+    it('renders the document content as cheap text instead of the tree while counting', () => {
+      const { container } = renderSourceCell({ isCounting: true, term: 'gz' });
+
+      // No interactive tree is mounted for the offscreen counting pass...
+      expect(screen.queryByTestId('jsonTreeViewer')).toBeNull();
+      // ...but the document's searchable content is present for the wrapper to count over.
+      expect(container.textContent).toContain('bytes');
+      expect(container.textContent).toContain('100');
+    });
+
+    it('renders the interactive tree for visible cells (not counting)', () => {
+      renderSourceCell({ isCounting: false, term: 'gz' });
+
+      expect(screen.getByTestId('jsonTreeViewer')).toBeVisible();
+    });
   });
 
   it('renders _source column in ES|QL mode even when dataView has no _source field', () => {

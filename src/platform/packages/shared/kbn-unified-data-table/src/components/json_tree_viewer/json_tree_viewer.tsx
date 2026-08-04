@@ -11,8 +11,14 @@ import React, { memo, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-import { buildRows, collectExpandableIds, type FormatValue, type JsonValue } from './tree_model';
-import { collectContainersWithMatch, getDocScan, EMPTY_ID_SET } from './doc_scan';
+import {
+  buildNodes,
+  buildRows,
+  collectExpandableIds,
+  type FormatValue,
+  type JsonValue,
+} from './tree_model';
+import { collectContainersWithMatch, EMPTY_ID_SET } from './doc_scan';
 import {
   useRovingTreeNavigation,
   useTreeExpansion,
@@ -49,17 +55,16 @@ export const JsonTreeViewer = memo(function JsonTreeViewer({
 }: JsonTreeViewerProps) {
   const styles = useMemoCss(treeStyles);
 
-  const { nodes, text } = useMemo(() => getDocScan(json), [json]);
+  const nodes = useMemo(() => buildNodes(json), [json]);
   const expandableIds = useMemo(() => collectExpandableIds(nodes), [nodes]);
 
   // Collections to force-open for the active search term (empty unless the document has a match).
+  // Only the on-screen cells run this; the offscreen match-counting pass renders cheap text instead
+  // of the tree (see get_render_cell_value.tsx), so this no longer needs a pre-scanned text guard.
   const searchTermLower = expandNodesContainingTerm?.trim().toLowerCase() ?? '';
   const expandedBySearchNodes = useMemo(
-    () =>
-      searchTermLower && text.includes(searchTermLower)
-        ? collectContainersWithMatch(nodes, searchTermLower)
-        : EMPTY_ID_SET,
-    [nodes, text, searchTermLower]
+    () => (searchTermLower ? collectContainersWithMatch(nodes, searchTermLower) : EMPTY_ID_SET),
+    [nodes, searchTermLower]
   );
 
   const expansion = useTreeExpansion({

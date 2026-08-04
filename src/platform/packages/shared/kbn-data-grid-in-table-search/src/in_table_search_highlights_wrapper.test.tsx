@@ -7,13 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useContext } from 'react';
 import { InTableSearchHighlightsWrapper } from './in_table_search_highlights_wrapper';
+import { InTableSearchCellContext } from './in_table_search_cell_context';
 import { render, waitFor, screen } from '@testing-library/react';
 
 const colors = {
   highlightColor: 'black',
   highlightBackgroundColor: 'green',
+};
+
+const CountingProbe = () => {
+  const { isCounting } = useContext(InTableSearchCellContext);
+  return <span>{isCounting ? 'is-counting' : 'not-counting'}</span>;
 };
 
 describe('InTableSearchHighlightsWrapper', () => {
@@ -189,6 +195,32 @@ describe('InTableSearchHighlightsWrapper', () => {
 
       expect(container.innerHTML).toMatchInlineSnapshot(`"<span><div>test</div></span>"`);
       expect(onHighlightsCountFound).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('InTableSearchCellContext', () => {
+    it('is true for children rendered in the offscreen dry-run counting pass', () => {
+      render(
+        <InTableSearchHighlightsWrapper
+          inTableSearchTerm="x"
+          onHighlightsCountFound={jest.fn()}
+          {...colors}
+        >
+          <CountingProbe />
+        </InTableSearchHighlightsWrapper>
+      );
+
+      expect(screen.getByText('is-counting')).toBeVisible();
+    });
+
+    it('is false for children rendered as visible cells', () => {
+      render(
+        <InTableSearchHighlightsWrapper inTableSearchTerm="x" {...colors}>
+          <CountingProbe />
+        </InTableSearchHighlightsWrapper>
+      );
+
+      expect(screen.getByText('not-counting')).toBeVisible();
     });
   });
 });

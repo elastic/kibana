@@ -15,6 +15,7 @@ import type { EuiDataGridCellValueElementProps, EuiDataGridSetCellProps } from '
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
+import { InTableSearchCellContext } from '@kbn/data-grid-in-table-search';
 import type {
   DataTableColumnsMeta,
   DataTableRecord,
@@ -33,7 +34,7 @@ import {
   getTreeExpansion,
   setTreeExpansion,
 } from '../components/json_tree_viewer/tree_expansion_store';
-import { InTableSearchTermContext } from '../components/json_tree_viewer/in_table_search_context';
+import { getDocumentText } from '../components/json_tree_viewer/doc_scan';
 import { buildDocumentTree, createHighlightFormatter } from './build_document_tree';
 
 export const CELL_CLASS = 'unifiedDataTable__cellValue';
@@ -79,7 +80,8 @@ export const getRenderCellValueFn = ({
       columnMeta: columnsMeta?.[columnId],
     });
     const ctx = useContext(UnifiedDataTableContext);
-    const inTableSearchTerm = useContext(InTableSearchTermContext);
+    const { inTableSearchTerm, isCounting: isInTableSearchCounting } =
+      useContext(InTableSearchCellContext);
     // Marks the query's matched terms in the JSON tree's leaves. Memoised so the tree's leaf
     // rendering stays referentially stable across re-renders (e.g. expand/collapse). `dataView` and
     // `fieldFormats` come from the factory closure and never change for a given renderer.
@@ -202,6 +204,13 @@ export const getRenderCellValueFn = ({
           columnsMeta,
           shouldShowFieldHandler,
         });
+        if (isInTableSearchCounting && inTableSearchTerm) {
+          // Offscreen match-counting pass: the in-table search wrapper only walks the cell's text to
+          // count matches. Skip the interactive tree entirely and render the document's content as
+          // cheap text — doing this (instead of mounting the full tree) for every row is what keeps
+          // Find-in-table responsive on large result sets.
+          return <span className={CELL_CLASS}>{getDocumentText(documentTree)}</span>;
+        }
         // Persist expand/reveal state outside the cell (keyed by the row) so it survives the
         // remount in-table search forces on every keystroke.
         return (
