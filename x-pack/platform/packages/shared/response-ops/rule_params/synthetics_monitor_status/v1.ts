@@ -28,34 +28,48 @@ const NumberOfChecksSchema = schema.object({
   }),
 });
 
-const StatusRuleConditionSchema = schema.object({
-  groupBy: schema.maybe(
-    schema.string({
-      defaultValue: 'locationId',
-    })
-  ),
-  downThreshold: schema.maybe(
-    schema.number({
-      defaultValue: 3,
-    })
-  ),
-  locationsThreshold: schema.maybe(
-    schema.number({
-      defaultValue: 1,
-    })
-  ),
-  window: schema.oneOf([
-    schema.object({
-      time: TimeWindowSchema,
-    }),
-    NumberOfChecksSchema,
-  ]),
-  includeRetests: schema.maybe(schema.boolean()),
-  alertOnNoData: schema.maybe(schema.boolean()),
-  recoveryStrategy: schema.maybe(
-    schema.oneOf([schema.literal('firstUp'), schema.literal('conditionNotMet')])
-  ),
-});
+const StatusRuleConditionSchema = schema.object(
+  {
+    groupBy: schema.maybe(
+      schema.string({
+        defaultValue: 'locationId',
+      })
+    ),
+    downThreshold: schema.maybe(
+      schema.number({
+        defaultValue: 3,
+      })
+    ),
+    locationsThreshold: schema.maybe(
+      schema.number({
+        defaultValue: 1,
+      })
+    ),
+    window: schema.oneOf([
+      schema.object({
+        time: TimeWindowSchema,
+      }),
+      NumberOfChecksSchema,
+    ]),
+    includeRetests: schema.maybe(schema.boolean()),
+    alertOnNoData: schema.maybe(schema.boolean()),
+    recoveryStrategy: schema.maybe(
+      schema.oneOf([schema.literal('firstUp'), schema.literal('conditionNotMet')])
+    ),
+  },
+  {
+    // In "within the last N checks" mode the down threshold can never exceed the
+    // number of checks, otherwise the rule can never fire (see issue #214831).
+    validate: ({ downThreshold, window }) => {
+      if (window && 'numberOfChecks' in window && downThreshold !== undefined) {
+        const { numberOfChecks } = window;
+        if (downThreshold > numberOfChecks) {
+          return `[downThreshold]: cannot be greater than the number of checks (${numberOfChecks})`;
+        }
+      }
+    },
+  }
+);
 
 export const syntheticsMonitorStatusRuleParamsSchema = schema.object(
   {

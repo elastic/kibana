@@ -73,4 +73,31 @@ test.describe.skip('CustomStatusAlert', { tag: tags.stateful.classic }, () => {
       await expect(page.getByText('Synthetics monitor status rule')).toBeVisible();
     });
   });
+
+  test('flags an impossible down threshold vs number of checks', async ({
+    pageObjects,
+    page,
+    browserAuth,
+  }) => {
+    await test.step('login and navigate to overview', async () => {
+      await browserAuth.loginAsPrivilegedUser();
+      await pageObjects.syntheticsApp.navigateToOverview(15);
+    });
+
+    await test.step('open the create status rule form', async () => {
+      await pageObjects.syntheticsApp.openManageStatusRule();
+      await page.testSubj.click('createNewStatusRule');
+      await expect(page.testSubj.locator('valueExpression')).toBeVisible();
+    });
+
+    await test.step('set a down threshold greater than the number of checks', async () => {
+      // Default condition uses 5 checks, so 10 down checks can never happen.
+      await page.testSubj.click('valueExpression');
+      await page.testSubj.fill('valueFieldNumber', '10');
+
+      await expect(
+        page.getByText('The number of down checks (10) cannot be greater than the number of checks')
+      ).toBeVisible();
+    });
+  });
 });

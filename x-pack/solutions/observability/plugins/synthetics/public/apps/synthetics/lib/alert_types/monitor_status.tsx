@@ -13,6 +13,7 @@ import type { ObservabilityRuleTypeModel } from '@kbn/observability-plugin/publi
 import type { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import type { SyntheticsMonitorStatusRuleParams as StatusRuleParams } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
 import { getSyntheticsErrorRouteFromMonitorId } from '../../../../../common/utils/get_synthetics_monitor_url';
+import { validateStatusRuleParams } from '../../../../../common/rules/status_rule';
 import { STATE_ID } from '../../../../../common/field_names';
 import { SyntheticsMonitorStatusTranslations } from '../../../../../common/rules/synthetics/translations';
 import type { AlertTypeInitializer } from './types';
@@ -36,8 +37,8 @@ export const initMonitorStatusAlertType: AlertTypeInitializer = ({
   ruleParamsExpression: (paramProps: RuleTypeParamsExpressionProps<StatusRuleParams>) => (
     <MonitorStatusAlert coreStart={core} plugins={plugins} params={paramProps} />
   ),
-  validate: (_ruleParams: StatusRuleParams) => {
-    return { errors: {} };
+  validate: (ruleParams: StatusRuleParams) => {
+    return { errors: validateStatusRuleParams(ruleParams.condition) };
   },
   defaultActionMessage,
   defaultRecoveryMessage,
