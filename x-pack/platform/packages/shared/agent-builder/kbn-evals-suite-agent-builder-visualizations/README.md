@@ -42,18 +42,21 @@ This keeps gold and candidate structurally parallel so the equivalence evaluator
 
 To create or refresh the snapshot:
 
-1. Start ES with `path.repo` set (e.g. `yarn es snapshot -E path.repo=/tmp/es-snapshots`)
-2. Make sure `gsutil` is installed and `gcloud auth login` (or ADC) is set up
-3. Run:
+1. Pull the GCS service-account key from Vault and add it to your local ES keystore:
+   ```bash
+   vault read -field=credentials secret/kibana/gcs/obs-ai-datasets > /tmp/gcs-key.json
+   elasticsearch-keystore add-file gcs.client.default.credentials_file /tmp/gcs-key.json
+   # restart ES so it picks up the new keystore entry
+   ```
+2. Run the script:
+   ```bash
+   ELASTICSEARCH_URL=http://localhost:9200 \
+   ELASTICSEARCH_USERNAME=elastic \
+   ELASTICSEARCH_PASSWORD=changeme \
+   npx ts-node scripts/create_snapshot.ts
+   ```
 
-```bash
-ELASTICSEARCH_URL=http://localhost:9200 \
-ELASTICSEARCH_USERNAME=elastic \
-ELASTICSEARCH_PASSWORD=changeme \
-npx ts-node scripts/create_snapshot.ts
-```
-
-The script seeds synthetic `system.cpu.load_average.*` documents, verifies the `TS` query executes, snapshots `metrics-hostmetricsreceiver.otel-default` to the local filesystem, then uploads to `gs://obs-ai-datasets/viz-evals/otel-host-metrics` via `gsutil`. No GCS credentials are needed in ES — only your local `gcloud` auth is used for the upload.
+The script seeds synthetic `system.cpu.load_average.*` documents, verifies the `TS` query executes, then snapshots `metrics-hostmetricsreceiver.otel-default` directly to `gs://obs-ai-datasets/viz-evals/otel-host-metrics`. Temporary templates are cleaned up on exit.
 
 ## Notes
 

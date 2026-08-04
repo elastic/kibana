@@ -7,16 +7,13 @@
 
 /**
  * One-off script: seed `metrics-hostmetricsreceiver.otel-default` with synthetic
- * OTel host-metrics data, snapshot it to the local filesystem, then upload to GCS.
- *
- * ES writes snapshots directly to whatever repository backend it has credentials
- * for. A local FS snapshot sidesteps GCS credential setup entirely — you just
- * need `gsutil` installed and `gcloud auth login` (or ADC) before uploading.
+ * OTel host-metrics data and snapshot it to GCS for use in viz eval fixtures.
  *
  * Prerequisites:
- *   - A running ES cluster at ELASTICSEARCH_URL with path.repo configured to
- *     include SNAPSHOT_DIR (add `-E path.repo=/tmp/es-snapshots` when starting ES)
- *   - `gsutil` available in PATH (part of Google Cloud SDK)
+ *   - A running ES cluster at ELASTICSEARCH_URL with GCS credentials in its keystore:
+ *       vault read -field=credentials secret/kibana/gcs/obs-ai-datasets > /tmp/gcs-key.json
+ *       elasticsearch-keystore add-file gcs.client.default.credentials_file /tmp/gcs-key.json
+ *       # then restart ES
  *
  * Usage:
  *   ELASTICSEARCH_URL=http://localhost:9200 \
@@ -25,15 +22,13 @@
  *   npx ts-node scripts/create_snapshot.ts
  */
 
-import { execSync } from 'child_process';
 import { Client } from '@elastic/elasticsearch';
-import { createFsRepository, createSnapshot } from '@kbn/es-snapshot-loader';
+import { createGcsRepository, createSnapshot } from '@kbn/es-snapshot-loader';
 import { ToolingLog } from '@kbn/tooling-log';
 
 const GCS_BUCKET = 'obs-ai-datasets';
 const GCS_BASE_PATH = 'viz-evals/otel-host-metrics';
 const SNAPSHOT_NAME = 'otel-host-metrics';
-const SNAPSHOT_DIR = process.env.SNAPSHOT_DIR ?? '/tmp/es-snapshots/viz-evals';
 
 const INDEX = 'metrics-hostmetricsreceiver.otel-default';
 // Priority 500 wins over `metrics-otel@template` (priority 120) and ensures
@@ -149,30 +144,23 @@ async function main() {
     }
     log.info(`TS query verified: ${rowCount} bucket(s) returned`);
 
-    log.info(`Step 5b/5: creating local FS snapshot at ${SNAPSHOT_DIR}`);
+    log.info(`Step 5b/5: creating GCS snapshot "${SNAPSHOT_NAME}" at ${GCS_BUCKET}/${GCS_BASE_PATH}`);
     const result = await createSnapshot({
       esClient,
       log,
-      repository: createFsRepository({ location: SNAPSHOT_DIR }),
+      repository: createGcsRepository({ bucket: GCS_BUCKET, basePath: GCS_BASE_PATH }),
       snapshotName: SNAPSHOT_NAME,
       indices: [INDEX],
     });
     if (!result.success) {
       throw new Error(`Snapshot creation failed: ${result.errors.join('; ')}`);
     }
-    log.success(`Snapshot "${SNAPSHOT_NAME}" created (${result.indices.length} indices) at ${SNAPSHOT_DIR}`);
+    log.success(`Snapshot "${SNAPSHOT_NAME}" created (${result.indices.length} indices)`);
   } finally {
     log.info('Cleaning up temporary templates');
     await esClient.indices.deleteIndexTemplate({ name: INDEX_TEMPLATE }).catch(() => {});
     await esClient.cluster.deleteComponentTemplate({ name: COMPONENT_TEMPLATE }).catch(() => {});
   }
-
-  log.info(`Uploading snapshot to gs://${GCS_BUCKET}/${GCS_BASE_PATH}`);
-  execSync(
-    `gsutil -m cp -r "${SNAPSHOT_DIR}/" "gs://${GCS_BUCKET}/${GCS_BASE_PATH}/"`,
-    { stdio: 'inherit' }
-  );
-  log.success('Upload complete. Snapshot is ready for use by the eval suite.');
 }
 
 main().catch((err) => {
