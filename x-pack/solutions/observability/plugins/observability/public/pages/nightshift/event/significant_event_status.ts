@@ -15,7 +15,7 @@ import { getInvestigationProgressStatusLabel } from '../common/investigation_pro
 export { getInvestigationProgressStatusLabel };
 
 /**
- * Nightshift surfaces two triage buckets derived from `@kbn/significant-events-schema`
+ * Nightshift surfaces two events buckets derived from `@kbn/significant-events-schema`
  * statuses:
  * - Needs action: `open`
  * - Resolved: `closed` and `dismissed`

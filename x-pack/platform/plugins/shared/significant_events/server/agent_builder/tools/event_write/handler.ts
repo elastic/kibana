@@ -632,7 +632,7 @@ export async function eventsWriteBulkHandler({
   try {
     response = await eventClient.bulkCreate(
       pendingWrites.map(({ document }) => document),
-      // `wait_for` lets the immediate triage `_count` see the newly written event version.
+      // `wait_for` lets the immediate discovery `_count` see the newly written event version.
       { throwOnFail: false, refresh: 'wait_for' }
     );
   } catch (error) {

@@ -378,7 +378,7 @@ export function SettingsTab() {
                           'xpack.streams.significantEventsDiscovery.settings.scheduledDiscoveryHelp',
                           {
                             defaultMessage:
-                              'When enabled, Significant Events detection, discovery, and triage run automatically in the current Kibana space.',
+                              'When enabled, Significant Events detection and discovery run automatically in the current Kibana space.',
                           }
                         )}
                   </EuiText>
@@ -472,7 +472,7 @@ export function SettingsTab() {
                       )}
                       helpText={i18n.translate(
                         'xpack.streams.significantEventsDiscovery.settings.reviewIntervalHelp',
-                        { defaultMessage: 'How often scheduled discovery and triage review runs.' }
+                        { defaultMessage: 'How often scheduled discovery review runs.' }
                       )}
                     >
                       <EuiFieldNumber

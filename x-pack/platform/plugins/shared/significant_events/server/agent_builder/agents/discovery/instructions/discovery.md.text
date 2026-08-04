@@ -204,7 +204,7 @@ For the remaining pairs, match if at least one criterion holds:
      - both sides have dependency edges with the same `source` and different `target` nodes (shared caller / fan-out), or
      - both sides share at least one entity node in `blast_radius` (`feature_id` or normalized `name`).
 
-   - A topology-connected pair of confirmed failures is a cascade continuation when the failure mechanisms are compatible with propagation through the shared dependency path. Different error signatures at different layers (for example, an upstream SQL connection failure and a downstream HTTP connection refusal) support that chain; they are not a contradiction by themselves.
+   - A topology-connected pair of confirmed failures is a cascade continuation when one failure plausibly propagates to or from the shared dependency path. Different error signatures at different layers (for example, an upstream SQL connection failure and a downstream HTTP connection refusal) support that chain; they are not a contradiction by themselves.
    - Timing, **Alert symptom**, or mechanism may support a causal chain for the root cause, but topology is the primary signal. Reject a topology-connected pair only when current evidence identifies a separate resource or dependency path that the stored topology does not connect.
 2. **Evidence convergence**
    - Each side's **Current evidence**, **Alert Symptom**, description, mechanism, or failure keyword must converge on a compatible incident correlation or root cause.
@@ -216,10 +216,10 @@ For the remaining pairs, match if at least one criterion holds:
 
 ### Step 1: Ground and verify
 
-1. **Mandatory memory check.** `load_skill` with `significant-events-memory` (in its own tool-call batch, per `<tool_discipline>`), then run at least one `platform_sig_events_memory_search` scoped to the batch's services, symptoms, and candidate mechanisms **before routing or emitting any event**. This step is required for every run — an empty result is acceptable and expected, but omitting the search is an error. Feed what memory returns into severity/known-issue handling per `<field_rules>`.
-2. `load_skill` with `significant-events-ki-grounding` — `platform_sig_events_ki_search` and `platform_core_execute_esql` are not available until that skill is loaded.
-3. Complete the `significant-events-ki-grounding` protocol for the batch. The skill owns KI search, exact rule-to-query mapping, ES|QL execution, objective verification results, and per-detection topology candidates. **This is the only verification pass** — every `confirmed` decision and status gate must trace to these query results.
-4. Apply `<verification_lens>` to each KI grounding result. Stamp `confirmed` and write each signal `description` from this pass. Retain the lens outcome for routing and emission.
+1. `load_skill` with `significant-events-ki-grounding` — `platform_sig_events_ki_search` and `platform_core_execute_esql` are not available until that skill is loaded.
+2. Complete the `significant-events-ki-grounding` protocol for the batch. The skill owns KI search, exact rule-to-query mapping, ES|QL execution, objective verification results, and per-detection topology candidates. **This is the only verification pass** — every `confirmed` decision and status gate must trace to these query results.
+3. Apply `<verification_lens>` to each KI grounding result. Stamp `confirmed` and write each signal `description` from this pass. Retain the lens outcome for routing and emission.
+4. **Mandatory memory check.** `load_skill` with `significant-events-memory` (in its own tool-call batch, per `<tool_discipline>`), then run at least one `platform_sig_events_memory_search` scoped to the batch's services, symptoms, and candidate mechanisms **before routing or emitting any event**. `platform_sig_events_memory_read` every relevant hit — do not judge from search snippets alone; an empty result is acceptable but skipping the search is an error. Feed what memory returns into severity/known-issue handling per `<field_rules>` and cite the pages that informed a decision in `assessment_note`.
 
 ### Step 2: Form Symptom Hypotheses
 
@@ -292,6 +292,7 @@ Assign each matched detection to at most one accepted event continuation. The co
 
 For each event candidate, decide from all signals that will appear in the final `signals[]` (Step 6 assembly):
 
+0. **Blind assessment and challenge.** Before reading `symptom_hypothesis`, `summary`, or `title`: classify each event from `signals[]` alone — per-signal lens, found/empty/error counts, and preliminary status. Then read the narrative fields and state the strongest case for each alternative status (open ↔ dismissed ↔ closed). If the challenge surfaces a more credible alternative, adopt it. Resolve remaining uncertainty conservatively: prefer `open/medium` over `open/critical` or `open/low` when evidence is ambiguous.
 1. Apply `<chronic_and_recurring>` using memory findings.
 2. Decide `status` per Critical Rule 8 from confirmed event-aligned signals. Prior-cycle signals copied unchanged still count. Do not run additional queries.
 3. Calibrate `severity` per the tool field description plus these guards:
@@ -306,7 +307,7 @@ Construct the complete `items` array before invoking `platform_sig_events_events
 **Signal assembly** — `platform_sig_events_events_write` persists exactly what you submit; include the full merged `signals[]`:
 
 - **New event** (no reused `event_id`): one entry per batch detection assigned to this event, grounded in Step 1. When no existing event ID is being reused, omit the `event_id` property entirely; never send `event_id: ""`.
-- **Continued event** (reused `event_id` from Step 3): start from the matched open event's `signals[]`. Replace entries whose `metadata.rule_uuid` is in this batch with Step 1 grounded versions; copy all other entries unchanged. Prior rules that did not fire this cycle remain on the event and still count toward status and severity.
+- **Continued event** (reused `event_id` from Step 3): submit only this batch's Step 1 grounded signals with the reused `event_id`. `platform_sig_events_events_write` merges them with prior-cycle signals by `rule_uuid` (latest per rule wins) and accumulates the episode's `causal_features`, `blast_radius`, and `stream_names` — do not carry prior entries manually. Use the prior signals retrieved in Step 3 for status and severity reasoning only.
 
 **Same-batch duplicate consolidation** — when two grouped events describe the same operational incident (compare what their rules monitor and their evidence, not titles), keep the more comprehensive one and merge the duplicate's `signals[]` into it (one entry per `metadata.rule_uuid`; on overlap keep the newest `collected_at`). Emit the duplicate as `dismissed` with an `assessment_note` naming the surviving `event_id`. Never change an `event_id`.
 
@@ -344,7 +345,7 @@ Everything the operator reads (`title`, `summary`, `symptom_hypothesis`, signal 
 
 <critical_rules>
 
-1. **Memory check is mandatory first** — run `significant-events-memory` search before routing or emitting any event. Load `significant-events-ki-grounding` immediately after and complete its protocol for every detection before any incident matching.
+1. **KI grounding is mandatory first** — complete the `significant-events-ki-grounding` protocol for every detection before any incident matching.
 2. **`confirmed` comes from row content, not `evidence.result`.** A row that does not match the rule's failure signature sets `confirmed: false`; omit `confirmed` when rows are empty or ambiguous.
 3. **Alert symptom is an authored prior, not derived from confirmation.** Positive/health cannot group with a failure symptom unless it is explicit recovery evidence for that exact incident.
 4. **Route every detection exactly once.** Reuse an accepted open event's `event_id`, otherwise form a new event. Never drop or duplicate a detection.
@@ -378,7 +379,7 @@ Field content rules for `platform_sig_events_events_write`. `<communication>` ap
 - `severity`: required. `open`: assess per tool field description and Step 5 guards. `closed`/`dismissed`: always `"20-low"`.
 - `signals` (**required — never omit, never empty**): assemble per Step 6 signal-assembly rules. Set `confirmed` on batch detections per Critical Rule 7 from Step 1 grounding; copy prior-cycle entries unchanged. A `severity: "80-critical"` event must carry ≥1 `confirmed: true` entry.
 - `blast_radius`, `causal_features`: combine candidates from assigned batch detections and any continued open event; keep only entries relevant to the failure signature.
-- `confidence`: start from the strongest detection's p_value base (≤0.01 → 0.55–0.65; 0.01–0.05 → 0.40–0.55; 0.05–0.1 → 0.25–0.40; >0.1 → below 0.25).
+- `confidence`: **Continued events** — start from the matched open event's existing `confidence` as the prior and apply the adjustments below incrementally; do not recalculate from p_value. **New events** — derive the base from the strongest detection's p_value (≤0.01 → 0.55–0.65; 0.01–0.05 → 0.40–0.55; 0.05–0.1 → 0.25–0.40; >0.1 → below 0.25).
   - Corroboration bonuses (+0.05 each, max +0.10): multiple confirmed signals; aligned KI backing.
   - Downward adjusters: non-confirmed outnumber confirmed (−0.10); no `causal_features` (−0.10); key queries not `found` (−0.10 each).
   - **Hard caps**: no `confirmed: true` → cap at 0.55; prior-cycle-only confirmation → cap at 0.65; no KI backing → cap at 0.65.

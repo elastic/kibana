@@ -125,7 +125,7 @@ describe('eventsWriteHandler', () => {
     expect(result.written).toBe(true);
   });
 
-  it('writes with refresh wait_for so an immediate triage _count can see the event', async () => {
+  it('writes with refresh wait_for so an immediate discovery _count can see the event', async () => {
     const eventClient = {
       findLatestActive: noopFindLatestActive,
       findLatestByEventIds: jest.fn().mockResolvedValue(new Map()),
