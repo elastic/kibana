@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { HasPanelCapabilities, PublishesHideBorder } from '@kbn/presentation-publishing';
+import type {
+  HasPanelCapabilities,
+  PanelInteraction,
+  PublishesHideBorder,
+} from '@kbn/presentation-publishing';
 import type {
   CanLockHoverActions,
   HasParentApi,
@@ -68,7 +72,7 @@ export interface PresentationPanelProps<
    */
   titleHighlight?: string;
 
-  onInteraction: () => void;
+  onInteraction: (interaction: PanelInteraction) => void;
 }
 
 /**

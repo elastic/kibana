@@ -33,9 +33,7 @@ const customActionsStyles = css({
 });
 
 export const PresentationPanelHoverActionsWrapper = (
-  props: PropsWithChildren<PresentationPanelHoverActionsProps> & {
-    onInteraction: () => void;
-  }
+  props: PropsWithChildren<PresentationPanelHoverActionsProps>
 ) => {
   const [defaultTitle, title, hasLockedHoverActions, overrideHoverActions] =
     useBatchedPublishingSubjects(
@@ -64,7 +62,6 @@ export const PresentationPanelHoverActionsWrapper = (
         ''
       )}`}
       css={containerStyles}
-      onClick={props.onInteraction}
     >
       {OverriddenHoverActionsComponent && (
         <div className="embPanel__hoverActions" css={customActionsStyles}>

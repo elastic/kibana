@@ -590,8 +590,8 @@ export function initializeLayoutManager(
         layout$.next(layout);
       },
       registerChildApi: (api: DefaultEmbeddableApi) => {
-        api.interaction$.subscribe(() => {
-          console.log(`[${api.uuid}] interaction$ emit`);
+        api.interaction$.subscribe((interaction) => {
+          console.log(`[${api.uuid}] interaction`, interaction);
         });
         children$.next({
           ...children$.value,

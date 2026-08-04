@@ -10,7 +10,11 @@
 import React from 'react';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { v4 as generateId } from 'uuid';
-import type { HasPanelCapabilities, HasSerializedChildState } from '@kbn/presentation-publishing';
+import type {
+  HasPanelCapabilities,
+  HasSerializedChildState,
+  PanelInteraction,
+} from '@kbn/presentation-publishing';
 import { i18n } from '@kbn/i18n';
 import type {
   DefaultEmbeddableApi,
@@ -37,8 +41,8 @@ export async function buildEmbeddable<
   type: string;
 }) {
   const uuid = maybeId ?? generateId();
-  const interaction$ = new Subject<void>();
-  const onInteraction = () => interaction$.next();
+  const interaction$ = new Subject<PanelInteraction>();
+  const onInteraction = (interaction: PanelInteraction) => interaction$.next(interaction);
 
   const finalizeApi = (apiRegistration: EmbeddableApiRegistration<SerializedState, Api>) => {
     const hasLockedHoverActions$ = new BehaviorSubject(false);
@@ -85,7 +89,7 @@ export async function buildEmbeddable<
     return {
       componentApi: api,
       Component,
-      onInteraction
+      onInteraction,
     };
   } catch (e) {
     /**
@@ -98,7 +102,7 @@ export async function buildEmbeddable<
         interaction$,
       } as unknown as EmbeddableApiRegistration<SerializedState, Api>),
       Component: () => <span />,
-      onInteraction
+      onInteraction,
     };
   }
 }
