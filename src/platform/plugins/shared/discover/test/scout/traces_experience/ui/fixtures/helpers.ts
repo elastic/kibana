@@ -42,7 +42,7 @@ async function waitForTracesProfileApplied(
 
 export async function openServiceFlyoutFromAboutSection(flyout: TracesFlyout): Promise<void> {
   await expect(flyout.about.serviceNameLink).toBeVisible();
-  await flyout.about.serviceNameLink.dispatchEvent('click');
+  await flyout.about.serviceNameLink.click();
   await expect(flyout.serviceFlyout.container).toBeVisible({ timeout: 15000 });
 }
 
