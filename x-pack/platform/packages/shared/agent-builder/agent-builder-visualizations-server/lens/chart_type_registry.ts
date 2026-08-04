@@ -40,6 +40,11 @@ interface ChartTypeRegistryEntry {
        */
       perChartTypeRules?: string[];
       /**
+       * Free-form chart-specific rules appended only during prettify passes.
+       * These are added on top of (and may override) perChartTypeRules.
+       */
+      prettifyRules?: string[];
+      /**
        * Structured config-generation options consumed by specialized prompt
        * builders.
        */
@@ -134,6 +139,9 @@ export const chartTypeRegistry: Record<SupportedChartType, ChartTypeRegistryEntr
           'Never introduce or switch to legacy palette IDs (`eui_amsterdam`, `kibana_v7_legacy`, or `elastic_brand_2023`).',
           "Hide the legend when the chart plots a single series (one layer, one 'y' metric, no 'breakdown_by') — it would only repeat the metric's label. Keep it visible otherwise.",
           'Default visible legends to outside the chart at the bottom with the list layout (not grid); deviate only when the user asks.',
+        ],
+        prettifyRules: [
+          'Strip all explicit color overrides from layers and breakdown_by fields so Lens applies its current default palette. This overrides the preserved-colors rule that applies to regular edits.',
         ],
       },
     },
@@ -248,3 +256,13 @@ export type ChartTypeRegistry = typeof chartTypeRegistry;
 export type VisualizationConfig = ReturnType<
   ChartTypeRegistry[SupportedChartType]['schema']['validate']
 >;
+
+const prettifyBaseInstructions =
+  'This is a cleanup pass over the existing configuration, not a redesign. Change only what is needed to satisfy the rules stated in this prompt; keep everything else exactly as it is in the existing configuration. Do not introduce features the existing configuration does not already have (reference lines, annotations, markers, extra styling) unless a stated rule requires them. If the existing configuration already satisfies the rules, return it unchanged. Keep the provided ES|QL query unchanged. The "authoring_note" must be one factual sentence describing only what changed from the existing chart configuration.';
+
+export const getPrettifyConfigInstructions = (chartType: SupportedChartType): string => {
+  const prettifyRules = chartTypeRegistry[chartType].prompt.config?.prettifyRules ?? [];
+  return prettifyRules.length > 0
+    ? `${prettifyBaseInstructions} ${prettifyRules.join(' ')}`
+    : prettifyBaseInstructions;
+};
