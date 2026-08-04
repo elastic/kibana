@@ -14,6 +14,7 @@ import type { CoreContext } from '@kbn/core-base-server-internal';
 import type { Logger } from '@kbn/logging';
 import { PluginType } from '@kbn/core-base-common';
 import type { LazyInitContext } from '@kbn/core-plugins-server';
+import { DEFERRED_INIT_STATE_TYPE } from '@kbn/core-deferred-init-common';
 import type { PluginWrapper } from './plugin';
 import { type PluginDependencies } from './types';
 import {
@@ -267,7 +268,11 @@ export class PluginsSystem<T extends PluginType> {
         if (this.deferredInitEngine && plugin.enableLazyInitialize) {
           const ctx: LazyInitContext = {
             elasticsearch: { client: deps.elasticsearch.client.asInternalUser },
-            savedObjects: deps.savedObjects.createInternalRepository(),
+            // The shared state doc is a hidden SO type, so the internal repository must be granted
+            // access to it explicitly — otherwise reads throw not-found (swallowed as `undefined`)
+            // and writes throw unsupported-type (swallowed as a warn), silently disabling the
+            // whole cross-instance caching layer in `runGuarded`.
+            savedObjects: deps.savedObjects.createInternalRepository([DEFERRED_INIT_STATE_TYPE]),
             logger: this.coreContext.logger.get('deferred-init', pluginName),
           };
           this.deferredInitEngine.setRunner(
