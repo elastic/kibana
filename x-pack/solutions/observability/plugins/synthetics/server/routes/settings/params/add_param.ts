@@ -18,6 +18,7 @@ import type {
 } from '../../../../common/runtime_types';
 import { syntheticsParamType } from '../../../../common/types/saved_objects';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
+import { PARAMS_WRITE_API } from '../../../feature';
 import { asyncGlobalParamsPropagation } from '../../../tasks/sync_global_params_task';
 
 const ParamsObjectSchema = schema.object({
@@ -43,6 +44,7 @@ export const addSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
       body: schema.oneOf([ParamsObjectSchema, schema.arrayOf(ParamsObjectSchema)]),
     },
   },
+  requiredPrivileges: [PARAMS_WRITE_API],
   handler: async ({ request, response, server, savedObjectsClient }) => {
     try {
       const { id: spaceId } = (await server.spaces?.spacesService.getActiveSpace(request)) ?? {

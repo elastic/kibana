@@ -15,6 +15,7 @@ import type { SyntheticsRestApiRouteFactory } from '../../types';
 import type { SyntheticsParamRequest, SyntheticsParams } from '../../../../common/runtime_types';
 import { syntheticsParamType } from '../../../../common/types/saved_objects';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
+import { PARAMS_WRITE_API } from '../../../feature';
 import { asyncGlobalParamsPropagation } from '../../../tasks/sync_global_params_task';
 
 const RequestParamsSchema = schema.object({
@@ -49,6 +50,7 @@ export const editSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
       }),
     },
   },
+  requiredPrivileges: [PARAMS_WRITE_API],
   handler: async (routeContext) => {
     const { savedObjectsClient, request, response, spaceId, server } = routeContext;
     const { invalidResponse } = await validateRouteSpaceName(routeContext);

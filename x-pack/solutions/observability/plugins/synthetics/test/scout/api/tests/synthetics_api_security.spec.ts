@@ -57,6 +57,14 @@ const expectedBodyTag = (route: SweepRoute, readUser: boolean): string => {
       : '[uptime-read,private-location-write,uptime-write]';
   }
 
+  const isParamsWrite =
+    (method === 'POST' || method === 'DELETE' || method === 'PUT') &&
+    path.startsWith(COMMON_API_URLS.PARAMS);
+
+  if (isParamsWrite) {
+    return readUser ? '[params-write,uptime-write]' : '[uptime-read,params-write,uptime-write]';
+  }
+
   if (method === 'GET') {
     return GET_ROUTES_REQUIRING_WRITE_ACCESS.has(path)
       ? readUser

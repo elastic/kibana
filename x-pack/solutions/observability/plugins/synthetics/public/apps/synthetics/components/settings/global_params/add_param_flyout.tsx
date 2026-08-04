@@ -72,7 +72,7 @@ export const AddParamFlyout = ({
 
   const { application } = useKibana<ClientPluginsStart>().services;
 
-  const canSave = (application?.capabilities.uptime.save ?? false) as boolean;
+  const canManageParams = (application?.capabilities.uptime.canManageParams ?? false) as boolean;
 
   const dispatch = useDispatch();
 
@@ -183,14 +183,14 @@ export const AddParamFlyout = ({
 
   return (
     <div>
-      <NoPermissionsTooltip canEditSynthetics={canSave}>
+      <NoPermissionsTooltip canEditSynthetics={canManageParams}>
         <EuiButton
           data-test-subj="syntheticsAddParamFlyoutButton"
           fill
           iconType="plusCircle"
           iconSide="left"
           onClick={() => setIsFlyoutVisible(true)}
-          isDisabled={!canSave}
+          isDisabled={!canManageParams}
         >
           {CREATE_PARAM}
         </EuiButton>
