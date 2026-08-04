@@ -699,8 +699,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/sharing.spec.ts",
-        "line": 130,
-        "column": 12
+        "line": 107,
+        "column": 20
       }
     },
     {
@@ -712,8 +712,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/sharing.spec.ts",
-        "line": 220,
-        "column": 12
+        "line": 184,
+        "column": 54
       }
     },
     {
