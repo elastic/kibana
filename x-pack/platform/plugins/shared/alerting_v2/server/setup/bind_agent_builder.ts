@@ -75,6 +75,7 @@ export function bindAgentBuilder({ bind }: ContainerModuleLoadOptions) {
         logger,
         getEpisodesClient: (context) =>
           resolveRequestScoped(injection, context.request, EpisodesClient),
+        getRulesClient: (context) => resolveRequestScoped(injection, context.request, RulesClient),
       }) as AttachmentTypeDefinition,
     [Logger, CoreStart('injection')]
   );
