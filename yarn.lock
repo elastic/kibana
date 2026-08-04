@@ -8249,7 +8249,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/nightshift@link:x-pack/solutions/observability/packages/kbn-nightshift":
+"@kbn/nightshift-plugin@link:x-pack/solutions/observability/plugins/nightshift":
   version "0.0.0"
   uid ""
 

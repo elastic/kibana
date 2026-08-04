@@ -5,9 +5,4 @@
  * 2.0.
  */
 
-module.exports = {
-  preset: '@kbn/test',
-  rootDir: '../../../../..',
-  roots: ['<rootDir>/x-pack/solutions/observability/packages/kbn-nightshift'],
-  coveragePathIgnorePatterns: ['.*\\.stories\\.tsx$', '.storybook/', 'jest.config.js'],
-};
+export const NIGHTSHIFT_APP_ROUTE = '/app/nightshift';

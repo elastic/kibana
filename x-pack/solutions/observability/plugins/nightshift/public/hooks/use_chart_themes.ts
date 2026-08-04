@@ -5,9 +5,13 @@
  * 2.0.
  */
 
-import { defaultConfig } from '@kbn/storybook';
+import { useKibana } from './use_kibana';
 
-module.exports = {
-  ...defaultConfig,
-  stories: ['../**/*.stories.tsx'],
+export const useChartThemes = () => {
+  const { charts } = useKibana().services;
+
+  return {
+    baseTheme: charts.theme.useChartsBaseTheme(),
+    sparklineTheme: charts.theme.useSparklineOverrides(),
+  };
 };
