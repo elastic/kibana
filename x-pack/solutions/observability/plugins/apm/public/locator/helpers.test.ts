@@ -45,6 +45,19 @@ describe('getPathForServiceDetail', () => {
       expect(query.get('kuery')).toBe('');
       expect(query.get('serviceGroup')).toBe('');
     });
+
+    it('returns the service inventory link when the serviceName key is omitted', () => {
+      const path = getPathForServiceDetail({}, defaultOptions);
+      const { pathname, query } = splitPath(path);
+
+      expect(pathname).toBe('/services');
+      expect(query.get('environment')).toBe(ENVIRONMENT_ALL.value);
+      expect(query.get('rangeFrom')).toBe('now-15m');
+      expect(query.get('rangeTo')).toBe('now');
+      expect(query.get('comparisonEnabled')).toBe('false');
+      expect(query.get('kuery')).toBe('');
+      expect(query.get('serviceGroup')).toBe('');
+    });
   });
 
   describe('when dashboardId is provided', () => {
