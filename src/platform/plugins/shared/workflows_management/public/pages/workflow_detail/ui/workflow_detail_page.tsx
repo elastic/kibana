@@ -7,7 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiTitle,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux-v7';
@@ -24,7 +31,10 @@ import { WorkflowDetailLoadingState } from './workflow_detail_loading_state';
 import { WorkflowDetailTestModal } from './workflow_detail_test_modal';
 import { WorkflowDetailTestStepModal } from './workflow_detail_test_step_modal';
 import { WorkflowNotFoundPage } from './workflow_not_found_page';
+import { PLUGIN_ID } from '../../../../common';
 import type { WorkflowDetailTab } from '../../../common/lib/telemetry/events/workflows/ui/types';
+import { AgenticFirstEmptyStateLive } from '../../../components';
+import { WorkflowsDeepLinks } from '../../../deep_links';
 import { setActiveTab, setExecution, setYamlString } from '../../../entities/workflows/store';
 import {
   selectActiveTab,
@@ -161,6 +171,16 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
   // TODO: manage it in a workflow state context
   const [highlightDiff, setHighlightDiff] = useState(false);
 
+  // When creating a new workflow, start on the agentic-first landing; drop into the
+  // YAML editor when the user opts into "Start manually" or picks an example.
+  // `?startBlank=true` in the URL skips the landing (used by "Start manually" on
+  // the empty workflow list — otherwise the user would land on the same screen).
+  const startBlank = new URLSearchParams(location.search).get('startBlank') === 'true';
+  const [showAgenticLanding, setShowAgenticLanding] = useState(!id && !startBlank);
+  useEffect(() => {
+    setShowAgenticLanding(!id && !startBlank);
+  }, [id, startBlank]);
+
   const onCloseExecutionDetail = useCallback(() => {
     setSelectedExecution(null);
   }, [setSelectedExecution]);
@@ -196,6 +216,55 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
           </p>
         }
       />
+    );
+  }
+
+  if (!id && showAgenticLanding) {
+    return (
+      <EuiFlexGroup direction="column" gutterSize="none" css={kbnFullBodyHeightCss()}>
+        <EuiFlexItem grow={false}>
+          <div css={css({ padding: '8px 24px 12px' })}>
+            <EuiButtonEmpty
+              size="xs"
+              iconType="arrowLeft"
+              onClick={onBackToWorkflows}
+              flush="left"
+              data-test-subj="newWorkflowBackToWorkflows"
+            >
+              <FormattedMessage
+                id="workflows.newWorkflow.backToWorkflows"
+                defaultMessage="Back to Workflows"
+              />
+            </EuiButtonEmpty>
+            <EuiSpacer size="xs" />
+            <EuiTitle size="s">
+              <h1>
+                <FormattedMessage
+                  id="workflows.newWorkflow.title"
+                  defaultMessage="New automation flow"
+                />
+              </h1>
+            </EuiTitle>
+          </div>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <AgenticFirstEmptyStateLive
+            withDotBackground
+            onSubmitPrompt={() => setShowAgenticLanding(false)}
+            onStartManually={() => setShowAgenticLanding(false)}
+            onSelectExample={() => setShowAgenticLanding(false)}
+            onSelectTemplate={(template) =>
+              application.navigateToApp(PLUGIN_ID, {
+                deepLinkId: WorkflowsDeepLinks.library,
+                path: template.slug,
+              })
+            }
+            onExploreLibrary={() =>
+              application.navigateToApp(PLUGIN_ID, { deepLinkId: WorkflowsDeepLinks.library })
+            }
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   }
 
