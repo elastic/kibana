@@ -100,8 +100,6 @@ export const chartTypeRegistry: ChartTypeRegistry = {
       config: {
         rules: [
           'Prefer right-aligned metric values. Use left/center only when the user asks.',
-          'Add a secondary metric or background chart only when the request asks for one — never surface extra query columns on your own initiative.',
-          'Apply dynamic coloring to a secondary metric that conveys a comparison or status.',
         ],
         coloringRules: [
           'Metric placement: set `apply_color_to: "value"` only together with a color config; do not color the background unless the user asks. When not coloring, omit both `color` and `apply_color_to` — `apply_color_to` without a color makes Lens tint the value with a default green.',
