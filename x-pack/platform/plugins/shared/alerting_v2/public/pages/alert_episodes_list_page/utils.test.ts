@@ -6,7 +6,7 @@
  */
 
 import { alertEpisodeToDataTableRecord } from './utils';
-import type { AlertEpisode } from '@kbn/alerting-v2-common-queries';
+import type { AlertEpisode } from '@kbn/alerting-v2-schemas';
 describe('alertEpisodeToDataTableRecord', () => {
   const mockEpisode = {
     'episode.id': 'ep1',

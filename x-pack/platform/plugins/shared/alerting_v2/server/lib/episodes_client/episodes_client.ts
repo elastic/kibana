@@ -6,11 +6,8 @@
  */
 
 import { inject, injectable } from 'inversify';
-import {
-  buildEpisodeQuery,
-  type AlertEpisode,
-  type AlertEpisodeEsqlRow,
-} from '@kbn/alerting-v2-common-queries';
+import { buildEpisodeQuery, type AlertEpisodeEsqlRow } from '@kbn/alerting-v2-common-queries';
+import type { AlertEpisode } from '@kbn/alerting-v2-schemas';
 import { normalizeTags } from '@kbn/alerting-v2-utils';
 import type { QueryServiceContract } from '../services/query_service/query_service';
 import { QueryServiceScopedToken } from '../services/query_service/tokens';
