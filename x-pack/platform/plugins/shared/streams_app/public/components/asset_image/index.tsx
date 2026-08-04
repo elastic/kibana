@@ -33,13 +33,6 @@ const imageSets = {
       defaultMessage: 'No documents image for the streams app',
     }),
   },
-  significantEventsEmptyState: {
-    light: () => import('./significant_events_empty_state_light.svg'),
-    dark: () => import('./significant_events_empty_state_dark.svg'),
-    alt: i18n.translate('xpack.streams.significantEvents.emptyStateImage', {
-      defaultMessage: 'Empty state illustration for the Significant events view',
-    }),
-  },
   addStreams: {
     light: () => import('./add_streams_light.svg'),
     dark: () => import('./add_streams_dark.svg'),
@@ -78,13 +71,6 @@ const imageSets = {
       defaultMessage: 'Extract fields image for the streams app',
     }),
   },
-  barChart: {
-    light: () => import('./bar_chart.svg'),
-    dark: () => import('./bar_chart.svg'),
-    alt: i18n.translate('xpack.streams.barChartImage', {
-      defaultMessage: 'Bar chart sample',
-    }),
-  },
   attachmentsEmpty: {
     light: () => import('./attachments_empty_light.svg'),
     dark: () => import('./attachments_empty_dark.svg'),
@@ -106,25 +92,11 @@ const imageSets = {
       defaultMessage: 'Suggest AI partitioning image for the streams app',
     }),
   },
-  knowledgeIndicatorsEmptyState: {
-    light: () => import('./knowledge_indicators_empty_state_light.svg'),
-    dark: () => import('./knowledge_indicators_empty_state_dark.svg'),
-    alt: i18n.translate('xpack.streams.knowledgeIndicators.emptyStateImage', {
-      defaultMessage: 'Empty state illustration for the Knowledge Indicators view',
-    }),
-  },
   queryStreamsEmptyState: {
     light: () => import('./query_streams_empty_state_light.svg'),
     dark: () => import('./query_streams_empty_state_dark.svg'),
     alt: i18n.translate('xpack.streams.queryStreams.emptyStateImage', {
       defaultMessage: 'Empty state illustration for query streams',
-    }),
-  },
-  significantEventsDiscovery: {
-    light: () => import('./significant_events_discovery_light.svg'),
-    dark: () => import('./significant_events_discovery_dark.svg'),
-    alt: i18n.translate('xpack.streams.significantEventsDiscovery.illustrationImage', {
-      defaultMessage: 'Illustration for the Significant Events discovery view',
     }),
   },
 };
