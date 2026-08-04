@@ -2892,23 +2892,29 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/241398
-    describe.skip('sequence queries with suppression duration', () => {
+    describe('sequence queries with suppression duration', () => {
       it('suppresses alerts across two rule executions when the suppression duration exceeds the rule interval', async () => {
         const id = uuidv4();
-        const firstTimestamp = new Date(Date.now() - 1000).toISOString();
-        const firstTimestamp2 = new Date().toISOString();
+        // Fixed timestamps + preview drive both executions deterministically: the first execution's
+        // 35m lookback sees the first two docs, the second execution's lookback sees the last two, so
+        // no wall-clock/patch-latency race decides which docs land in each run's window.
+        const firstRunTimestamp1 = '2020-10-28T05:45:00.000Z';
+        const firstRunTimestamp2 = '2020-10-28T05:46:00.000Z';
+        const secondRunTimestamp1 = '2020-10-28T06:10:00.000Z';
+        const secondRunTimestamp2 = '2020-10-28T06:11:00.000Z';
 
         const firstDocument = {
           id,
-          '@timestamp': firstTimestamp,
+          '@timestamp': firstRunTimestamp1,
           host: {
             name: 'host-a',
           },
         };
         await indexListOfSourceDocuments([
           firstDocument,
-          { ...firstDocument, '@timestamp': firstTimestamp2 },
+          { ...firstDocument, '@timestamp': firstRunTimestamp2 },
+          { ...firstDocument, '@timestamp': secondRunTimestamp1 },
+          { ...firstDocument, '@timestamp': secondRunTimestamp2 },
         ]);
 
         const rule: EqlRuleCreateProps = {
@@ -2925,18 +2931,24 @@ export default ({ getService }: FtrProviderContext) => {
           from: 'now-35m',
           interval: '30m',
         };
-        const createdRule = await createRule(supertest, log, rule);
-        const alerts = await getOpenAlerts(supertest, log, es, createdRule);
 
-        expect(alerts.hits.hits).toHaveLength(3);
-        const [sequenceAlert, buildingBlockAlerts] = partitionSequenceBuildingBlocks(
-          alerts.hits.hits
-        );
-        expect(buildingBlockAlerts).toHaveLength(2);
+        const { previewId } = await previewRule({
+          supertest,
+          rule,
+          timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
+          invocationCount: 2,
+        });
+
+        const previewAlerts = await getPreviewAlerts({ es, previewId });
+        const [sequenceAlert] = partitionSequenceBuildingBlocks(previewAlerts);
+
+        // The first execution creates the sequence alert; the second execution's sequence falls within
+        // the 300m suppression window, so it is suppressed into the same alert (docs_count 1) instead of
+        // creating a new one.
         expect(sequenceAlert).toHaveLength(1);
 
-        // suppression start equal to alert timestamp
-        const suppressionStart = sequenceAlert[0]._source?.[TIMESTAMP];
+        const suppressionStart = sequenceAlert[0]._source?.[ALERT_SUPPRESSION_START] as string;
+        const suppressionEnd = sequenceAlert[0]._source?.[ALERT_SUPPRESSION_END] as string;
 
         expect(sequenceAlert[0]._source).toEqual(
           expect.objectContaining({
@@ -2946,58 +2958,14 @@ export default ({ getService }: FtrProviderContext) => {
                 value: 'host-a',
               },
             ],
-            // suppression boundaries equal to original event time, since no alert been suppressed
-            [ALERT_SUPPRESSION_START]: suppressionStart,
-            [ALERT_SUPPRESSION_END]: suppressionStart,
-            [ALERT_SUPPRESSION_DOCS_COUNT]: 0,
+            [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
           })
         );
 
-        // index an event that happened 1 second before the next event in the sequence
-        const secondTimestamp = new Date(Date.now() - 1000).toISOString();
-        const secondDocument = {
-          id,
-          '@timestamp': secondTimestamp,
-          host: {
-            name: 'host-a',
-          },
-        };
-
-        // Add a new document, then disable and re-enable to trigger another rule run. The second doc should
-        // trigger an update to the existing alert without changing the timestamp
-        await indexListOfSourceDocuments([secondDocument]);
-        await patchRule(supertest, log, { id: createdRule.id, enabled: false });
-        await patchRule(supertest, log, { id: createdRule.id, enabled: true });
-        const afterTimestamp = new Date();
-        const secondAlerts = await getOpenAlerts(
-          supertest,
-          log,
-          es,
-          createdRule,
-          RuleExecutionStatusEnum.succeeded,
-          undefined,
-          afterTimestamp
+        // suppression window is extended by the second execution's suppressed sequence
+        expect(new Date(suppressionEnd).getTime()).toBeGreaterThan(
+          new Date(suppressionStart).getTime()
         );
-
-        const [sequenceAlert2] = partitionSequenceBuildingBlocks(secondAlerts.hits.hits);
-
-        expect(sequenceAlert2).toHaveLength(1);
-        expect(sequenceAlert2[0]._source).toEqual({
-          ...sequenceAlert2[0]?._source,
-          [ALERT_SUPPRESSION_TERMS]: [
-            {
-              field: 'host.name',
-              value: 'host-a',
-            },
-          ],
-          [ALERT_SUPPRESSION_DOCS_COUNT]: 1, // 1 alert from second rule run, that's why 1 suppressed
-        });
-        // suppression end value should be greater than second document timestamp, but lesser than current time
-        const suppressionEnd = new Date(
-          sequenceAlert2[0]._source?.[ALERT_SUPPRESSION_END] as string
-        ).getTime();
-        expect(suppressionEnd).toBeLessThan(new Date().getTime());
-        expect(suppressionEnd).toBeGreaterThan(new Date(secondTimestamp).getDate());
       });
 
       it('does not suppress alerts outside of duration', async () => {
