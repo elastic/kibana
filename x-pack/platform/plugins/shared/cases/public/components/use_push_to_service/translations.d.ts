@@ -1,0 +1,10 @@
+export * from '../../common/translations';
+export declare const PUSH_INCIDENT: (thirdParty: string) => string;
+export declare const UPDATE_INCIDENT: (thirdParty: string) => string;
+export declare const PUSH_LOCKED_TITLE: (thirdParty: string) => string;
+export declare const PUSH_LOCKED_DESC: string;
+export declare const CONFIGURE_CONNECTOR: string;
+export declare const PUSH_DISABLE_BY_KIBANA_CONFIG_TITLE: string;
+export declare const PUSH_DISABLE_BY_LICENSE_TITLE: string;
+export declare const LINK_CLOUD_DEPLOYMENT: string;
+export declare const LINK_ACTIONS_CONFIGURATION: string;

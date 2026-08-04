@@ -1,0 +1,5 @@
+import type { DocViewerRestorableState } from '../../types';
+export declare const withRestorableState: <TComponent extends React.ComponentType<any>>(Component: TComponent) => import("react").ForwardRefExoticComponent<import("react").PropsWithoutRef<import("react").CustomComponentPropsWithRef<TComponent> & Pick<import("@kbn/restorable-state").RestorableStateProviderProps<DocViewerRestorableState>, "initialState" | "onInitialStateChange">> & import("react").RefAttributes<import("react").ElementRef<TComponent> & import("@kbn/restorable-state").RestorableStateProviderApi>>, useRestorableState: <TKey extends keyof DocViewerRestorableState>(key: TKey, initialValue: DocViewerRestorableState[TKey] | (() => DocViewerRestorableState[TKey]), options?: {
+    shouldIgnoredRestoredValue?: ((restoredValue: DocViewerRestorableState[TKey]) => boolean) | undefined;
+    shouldStoreDefaultValueRightAway?: boolean;
+} | undefined) => readonly [DocViewerRestorableState[TKey], (value: import("react").SetStateAction<DocViewerRestorableState[TKey]>) => void];

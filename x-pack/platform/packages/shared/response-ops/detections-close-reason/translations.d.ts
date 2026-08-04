@@ -1,0 +1,10 @@
+export declare const BULK_ACTION_CLOSE_SELECTED: string;
+export declare const CLOSING_REASON_MENU_TITLE: string;
+export declare const CLOSING_REASON_BUTTON_MESSAGE: string;
+export declare const CLOSING_REASON_DUPLICATE: string;
+export declare const CLOSING_REASON_FALSE_POSITIVE: string;
+export declare const CLOSING_REASON_CLOSE_WITHOUT_REASON: string;
+export declare const CLOSING_REASON_TRUE_POSITIVE: string;
+export declare const CLOSING_REASON_BENIGN_POSITIVE: string;
+export declare const CLOSING_REASON_OTHER: string;
+export declare const CLOSING_REASON_AUTOMATED_CLOSURE: string;

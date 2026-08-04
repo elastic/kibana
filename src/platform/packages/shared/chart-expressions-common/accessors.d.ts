@@ -1,0 +1,15 @@
+import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
+import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common/types';
+import type { ExpressionValueVisDimension } from '.';
+export declare function findAccessor(accessor: string, columns: DatatableColumn[]): DatatableColumn | undefined;
+export declare function findAccessor(accessor: number, columns: DatatableColumn[]): number | DatatableColumn | undefined;
+export declare function findAccessor(accessor: string | number, columns: DatatableColumn[]): number | DatatableColumn | undefined;
+export declare function findAccessorOrFail(accessor: string, columns: DatatableColumn[]): DatatableColumn;
+export declare function findAccessorOrFail(accessor: number, columns: DatatableColumn[]): number | DatatableColumn;
+export declare function findAccessorOrFail(accessor: string | number, columns: DatatableColumn[]): number | DatatableColumn;
+export declare const getAccessorByDimension: (dimension: string | ExpressionValueVisDimension, columns: DatatableColumn[]) => string;
+export declare const validateAccessor: (accessor: string | ExpressionValueVisDimension | undefined, columns: DatatableColumn[]) => void;
+export declare function getAccessor(dimension: string | ExpressionValueVisDimension): string | number | DatatableColumn;
+export declare function getFormatByAccessor(dimension: string | ExpressionValueVisDimension, columns: DatatableColumn[], defaultColumnFormat?: SerializedFieldFormat): SerializedFieldFormat | undefined;
+export declare const getColumnByAccessor: (accessor: ExpressionValueVisDimension | string, columns?: Datatable["columns"]) => DatatableColumn | undefined;
+export declare function isVisDimension(accessor: string | ExpressionValueVisDimension | undefined): accessor is ExpressionValueVisDimension;

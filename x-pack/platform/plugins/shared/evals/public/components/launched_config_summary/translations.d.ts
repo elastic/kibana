@@ -1,0 +1,9 @@
+export declare const SECTION_CONFIGURATION: string;
+export declare const CONFIG_NAME: string;
+export declare const CONFIG_TARGET: string;
+export declare const CONFIG_AGENT: string;
+export declare const CONFIG_MODELS: string;
+export declare const CONFIG_DATASETS: string;
+export declare const CONFIG_EVALUATORS: string;
+export declare const CONFIG_REPETITIONS: string;
+export declare const CONFIG_CONCURRENCY: string;

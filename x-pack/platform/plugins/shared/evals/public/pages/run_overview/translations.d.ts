@@ -1,0 +1,14 @@
+export declare const TITLE: string;
+export declare const SUBTITLE: string;
+export declare const SECTION_PROGRESS: string;
+export declare const SECTION_RESULTS: string;
+export declare const VIEW_DETAILS: string;
+export declare const RESULTS_PENDING: string;
+export declare const NO_RESULTS: string;
+export declare const COMPARE: string;
+export declare const COMPARE_PENDING_HINT: string;
+export declare const COMPARE_HINT_MANY: string;
+export declare const BACK_TO_EXPERIMENTS: string;
+export declare const EMPTY_TITLE: string;
+export declare const EMPTY_BODY: string;
+export declare const scoresIngested: (count: number) => string;

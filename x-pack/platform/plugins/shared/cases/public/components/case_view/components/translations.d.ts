@@ -1,0 +1,11 @@
+export declare const ATTACH_BUTTON_LABEL: string;
+export declare const ATTACH_MENU_FILE: string;
+export declare const ATTACH_MENU_TIMELINE: string;
+export declare const ATTACH_MENU_LABEL: string;
+export declare const ATTACH_MENU_SAVED_OBJECT: string;
+export declare const NO_SEARCH_RESULTS_TITLE: string;
+export declare const NO_SEARCH_RESULTS_BODY: string;
+export declare const TYPE: string;
+export declare const OBSERVABLES: string;
+export declare const AUTHOR: string;
+export declare const CLEAR_FILTERS: string;

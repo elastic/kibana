@@ -1,0 +1,1 @@
+export { getAsCodeTagsSchema } from './schema';

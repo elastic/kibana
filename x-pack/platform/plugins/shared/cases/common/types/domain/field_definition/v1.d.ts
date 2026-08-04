@@ -1,0 +1,26 @@
+import { z } from '@kbn/zod/v4';
+export declare const FieldDefinitionSchema: z.ZodObject<{
+    fieldDefinitionId: z.ZodString;
+    name: z.ZodString;
+    definition: z.ZodString;
+    owner: z.ZodString;
+    description: z.ZodOptional<z.ZodString>;
+    isGlobal: z.ZodOptional<z.ZodBoolean>;
+}, z.core.$strip>;
+export type FieldDefinition = z.infer<typeof FieldDefinitionSchema>;
+export declare const CreateFieldDefinitionInputSchema: z.ZodObject<{
+    description: z.ZodOptional<z.ZodString>;
+    name: z.ZodString;
+    definition: z.ZodString;
+    owner: z.ZodString;
+    isGlobal: z.ZodOptional<z.ZodBoolean>;
+}, z.core.$strip>;
+export type CreateFieldDefinitionInput = z.infer<typeof CreateFieldDefinitionInputSchema>;
+export declare const UpdateFieldDefinitionInputSchema: z.ZodObject<{
+    description: z.ZodOptional<z.ZodString>;
+    name: z.ZodString;
+    definition: z.ZodString;
+    owner: z.ZodString;
+    isGlobal: z.ZodOptional<z.ZodBoolean>;
+}, z.core.$strip>;
+export type UpdateFieldDefinitionInput = z.infer<typeof UpdateFieldDefinitionInputSchema>;

@@ -1,0 +1,27 @@
+export declare const lensCMMSearchResultSchema: import("@kbn/config-schema").ObjectType<{
+    id: import("@kbn/config-schema").Type<string>;
+    type: import("@kbn/config-schema").Type<string>;
+    version: import("@kbn/config-schema").Type<string | undefined>;
+    createdAt: import("@kbn/config-schema").Type<string | undefined>;
+    updatedAt: import("@kbn/config-schema").Type<string | undefined>;
+    createdBy: import("@kbn/config-schema").Type<string | undefined>;
+    updatedBy: import("@kbn/config-schema").Type<string | undefined>;
+    error: import("@kbn/config-schema").Type<Readonly<{} & {
+        error: string;
+        message: string;
+        statusCode: number;
+        metadata: Readonly<{} & {}>;
+    }> | undefined>;
+    attributes: import("@kbn/config-schema").ObjectType<{
+        description: import("@kbn/config-schema").Type<string | undefined>;
+        title: import("@kbn/config-schema").Type<string>;
+    }>;
+    references: import("@kbn/config-schema").Type<Readonly<{} & {
+        id: string;
+        type: string;
+        name: string;
+    }>[]>;
+    namespaces: import("@kbn/config-schema").Type<string[] | undefined>;
+    originId: import("@kbn/config-schema").Type<string | undefined>;
+    managed: import("@kbn/config-schema").Type<boolean | undefined>;
+}>;

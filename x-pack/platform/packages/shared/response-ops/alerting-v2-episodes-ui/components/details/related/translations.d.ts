@@ -1,0 +1,11 @@
+export declare const RELATED_EPISODES_TITLE: string;
+export declare const RELATED_EPISODES_EMPTY: string;
+export declare const RELATED_SAME_GROUP_TITLE: string;
+export declare const RELATED_SAME_GROUP_DESCRIPTION: string;
+export declare const RELATED_SAME_GROUP_EMPTY: string;
+export declare const RELATED_OTHER_GROUPS_TITLE: string;
+export declare const RELATED_OTHER_GROUPS_DESCRIPTION: string;
+export declare const RELATED_RULE_ONLY_LIST_TITLE: string;
+export declare const RELATED_RULE_ONLY_LIST_DESCRIPTION: string;
+export declare const RELATED_OTHER_GROUPS_EMPTY: string;
+export declare const getRelatedEpisodeMissingRuleTitle: (episodeId: string) => string;

@@ -1,0 +1,16 @@
+import { VECTOR_STYLES } from '../../../../common/constants';
+import type { VectorStylePropertiesDescriptor } from '../../../../common/descriptor_types';
+export declare const MIN_SIZE = 1;
+export declare const MAX_SIZE = 64;
+export declare const DEFAULT_MIN_SIZE = 7;
+export declare const DEFAULT_MAX_SIZE = 32;
+export declare const DEFAULT_SIGMA = 3;
+export declare const DEFAULT_LABEL_SIZE = 14;
+export declare const DEFAULT_ICON_SIZE = 6;
+export declare const DEFAULT_COLOR_RAMP: string;
+export declare const DEFAULT_COLOR_PALETTE: string;
+export declare const LABEL_STYLES: VECTOR_STYLES[];
+export declare const LINE_STYLES: VECTOR_STYLES[];
+export declare const POLYGON_STYLES: VECTOR_STYLES[];
+export declare function getDefaultStaticProperties(mapColors?: string[]): Required<VectorStylePropertiesDescriptor>;
+export declare function getDefaultDynamicProperties(): Required<VectorStylePropertiesDescriptor>;

@@ -1,0 +1,33 @@
+import type { EuiDataGridCellPopoverElementProps, EuiDataGridStyle, RenderCellValue } from '@elastic/eui';
+import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import React from 'react';
+import type { FieldRow } from './field_row';
+import type { UseTableFiltersCallbacksReturn } from './table_filters';
+export interface TableGridProps {
+    id: string;
+    containerWidth: number;
+    rows: FieldRow[];
+    isEsqlMode: boolean;
+    filter?: DocViewFilterFn;
+    onAddColumn?: (columnName: string) => void;
+    onRemoveColumn?: (columnName: string) => void;
+    columns?: string[];
+    onFindSearchTermMatch?: UseTableFiltersCallbacksReturn['onFindSearchTermMatch'];
+    searchTerm?: string;
+    initialPageSize: number;
+    onChangePageSize?: (newPageSize: number) => void;
+    initialPageIndex?: number;
+    onChangePageIndex?: (newPageIndex: number) => void;
+    pinnedFields?: string[];
+    onTogglePinned?: (field: string) => void;
+    hidePinColumn?: boolean;
+    customRenderCellValue?: RenderCellValue;
+    customRenderCellPopover?: React.JSXElementConstructor<EuiDataGridCellPopoverElementProps>;
+    gridStyle?: EuiDataGridStyle;
+    headerVisibility?: boolean;
+    hideFilteringOnComputedColumns?: boolean;
+}
+export declare const PAGE_SIZE_OPTIONS: number[];
+export declare const GRID_COLUMN_FIELD_NAME = "name";
+export declare const GRID_COLUMN_FIELD_VALUE = "value";
+export declare function TableGrid({ id, containerWidth, rows, isEsqlMode, filter, onAddColumn, onRemoveColumn, columns, onFindSearchTermMatch, searchTerm, initialPageSize, onChangePageSize, initialPageIndex, onChangePageIndex, onTogglePinned, hidePinColumn, customRenderCellValue, customRenderCellPopover, gridStyle, headerVisibility, hideFilteringOnComputedColumns, }: TableGridProps): React.JSX.Element;

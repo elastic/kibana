@@ -1,0 +1,16 @@
+import type { RemoteClustersState } from '../types';
+import type { RequestError } from '../../../types';
+export declare const getClustersList: (state: RemoteClustersState) => import("../types").RemoteCluster[];
+export declare const getClustersByName: (state: RemoteClustersState) => Record<string, import("../types").RemoteCluster>;
+export declare const getClusterByName: (state: RemoteClustersState, name: string) => import("../types").RemoteCluster;
+export declare const isDetailPanelOpen: (state: RemoteClustersState) => boolean;
+export declare const getDetailPanelCluster: (state: RemoteClustersState) => import("../types").RemoteCluster | undefined;
+export declare const getDetailPanelClusterName: (state: RemoteClustersState) => string | undefined;
+export declare const isLoading: (state: RemoteClustersState) => boolean;
+export declare const clusterLoadError: (state: RemoteClustersState) => unknown;
+export declare const isAddingCluster: (state: RemoteClustersState) => boolean;
+export declare const getAddClusterError: (state: RemoteClustersState) => RequestError | undefined;
+export declare const getEditedCluster: (state: RemoteClustersState) => import("../types").RemoteCluster | undefined;
+export declare const isEditingCluster: (state: RemoteClustersState) => boolean;
+export declare const getEditClusterError: (state: RemoteClustersState) => RequestError | undefined;
+export declare const isRemovingCluster: (state: RemoteClustersState) => boolean;

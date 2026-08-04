@@ -1,0 +1,13 @@
+export * from '../../common/translations';
+export declare const REMOVE_ASSIGNEE: string;
+export declare const REMOVE_ASSIGNEE_ARIA_LABEL: string;
+export declare const MISSING_PROFILE: string;
+export declare const SEARCH_USERS: string;
+export declare const EDIT_ASSIGNEES: string;
+export declare const REMOVE_ASSIGNEES: string;
+export declare const ASSIGNEES: string;
+export declare const USER_DOES_NOT_EXIST: string;
+export declare const LEARN_PRIVILEGES_GRANT_ACCESS: string;
+export declare const MODIFY_SEARCH: string;
+export declare const INVALID_ASSIGNEES: string;
+export declare const MAX_SELECTED_ASSIGNEES: (limit: number) => string;

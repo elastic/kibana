@@ -1,0 +1,14 @@
+export declare const STEP_ATTACH_TITLE: string;
+export declare const STEP_ATTACH_DESCRIPTION: string;
+export declare const STEP_CHAT_TITLE: string;
+export declare const STEP_CHAT_DESCRIPTION: string;
+export declare const STEP_PILLS_TITLE: string;
+export declare const STEP_PILLS_DESCRIPTION: string;
+export declare const STEP_SETTINGS_TITLE: string;
+export declare const STEP_SETTINGS_DESCRIPTION: string;
+export declare const STEP_ATTRIBUTES_TITLE: string;
+export declare const STEP_ATTRIBUTES_DESCRIPTION: string;
+export declare const STEP_TEMPLATE_FIELDS_TITLE: string;
+export declare const STEP_TEMPLATE_FIELDS_DESCRIPTION: string;
+export declare const STEP_CONNECTOR_TITLE: string;
+export declare const STEP_CONNECTOR_DESCRIPTION: string;

@@ -1,0 +1,32 @@
+import type { Capabilities } from '@kbn/core/public';
+import type { IUiSettingsClient } from '@kbn/core/public';
+import type { DataPublicPluginStart, ISearchSource, SerializedSearchSourceFields } from '@kbn/data-plugin/public';
+import type { TimeRange } from '@kbn/es-query';
+import type { AggregateQuery, Query } from '@kbn/es-query';
+import type { DiscoverAppState } from '../application/main/state_management/redux';
+/**
+ * Preparing data to share the current state as link or CSV/Report
+ */
+export declare function getSharingData(currentSearchSource: ISearchSource, state: DiscoverAppState, services: {
+    uiSettings: IUiSettingsClient;
+    data: DataPublicPluginStart;
+}, absoluteTimeRange?: TimeRange): Promise<{
+    getSearchSource: ({ addGlobalTimeFilter, absoluteTime, }: {
+        addGlobalTimeFilter?: boolean;
+        absoluteTime?: boolean;
+    }) => SerializedSearchSourceFields;
+    columns: string[];
+}>;
+export declare function getColumnsWithTimeField({ columns, timeFieldName, uiSettings, query, }: {
+    columns: string[];
+    timeFieldName: string | undefined;
+    uiSettings: IUiSettingsClient;
+    query?: AggregateQuery | Query;
+}): string[];
+export interface DiscoverCapabilities {
+    createShortUrl?: boolean;
+    save?: boolean;
+    show?: boolean;
+    storeSearchSession?: boolean;
+}
+export declare const showPublicUrlSwitch: (anonymousUserCapabilities: Capabilities) => boolean;

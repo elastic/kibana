@@ -1,0 +1,30 @@
+import type { DocLinksStart } from '@kbn/core-doc-links-browser';
+import type { FieldInputServices, FieldInputKibanaDependencies } from '@kbn/management-settings-components-field-input';
+/**
+ * Contextual services used by a {@link FieldRow} component.
+ */
+export interface Services {
+    links: {
+        [key: string]: string;
+    };
+}
+/**
+ * Contextual services used by a {@link FieldRow} component and its dependents.
+ */
+export type FieldRowServices = FieldInputServices & Services;
+/**
+ * An interface containing a collection of Kibana plugins and services required to
+ * render a {@link FieldRow} component.
+ */
+export interface KibanaDependencies {
+    docLinks: {
+        links: {
+            management: DocLinksStart['links']['management'];
+        };
+    };
+}
+/**
+ * An interface containing a collection of Kibana plugins and services required to
+ * render a {@link FieldRow} component and its dependents.
+ */
+export type FieldRowKibanaDependencies = KibanaDependencies & FieldInputKibanaDependencies;

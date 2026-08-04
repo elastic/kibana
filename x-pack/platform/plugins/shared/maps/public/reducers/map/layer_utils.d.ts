@@ -1,0 +1,11 @@
+import type { LayerDescriptor } from '../../../common/descriptor_types';
+import type { MapState } from './types';
+export declare function getLayerIndex(list: LayerDescriptor[], layerId: string): number;
+export declare function findLayerById(state: MapState, layerId: string): LayerDescriptor | undefined;
+export declare function clearLayerProp(state: MapState, layerId: string, propName: keyof LayerDescriptor): MapState;
+export declare function updateLayerInList(state: MapState, layerId: string, attribute: keyof LayerDescriptor, newValue?: unknown): MapState;
+export declare function updateLayerSourceDescriptorProp(state: MapState, layerId: string, propName: string, value: unknown): MapState;
+export declare function trackCurrentLayerState(state: MapState, layerId: string): MapState;
+export declare function removeTrackedLayerState(state: MapState, layerId: string): MapState;
+export declare function rollbackTrackedLayerState(state: MapState, layerId: string): MapState;
+export declare function setLayer(layerList: LayerDescriptor[], layerDescriptor: LayerDescriptor): LayerDescriptor[];

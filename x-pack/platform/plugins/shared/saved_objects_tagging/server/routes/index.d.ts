@@ -1,0 +1,6 @@
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import type { TagsPluginRouter } from '../types';
+export declare const registerRoutes: ({ router, usageCounter, }: {
+    router: TagsPluginRouter;
+    usageCounter?: UsageCounter;
+}) => void;

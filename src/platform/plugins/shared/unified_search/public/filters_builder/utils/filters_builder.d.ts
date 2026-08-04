@@ -1,0 +1,13 @@
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
+import type { Filter } from '@kbn/es-query';
+import { BooleanRelation } from '@kbn/es-query';
+import type { Operator } from '../../filter_bar/filter_editor';
+import type { FilterLocation, Path } from '../types';
+export declare const getPathInArray: (path: Path) => number[];
+export declare const getGroupedFilters: (filter: Filter) => Filter[];
+export declare const normalizeFilters: (filters: Filter[]) => Filter[];
+export declare const getFilterByPath: (filters: Filter[], path: Path) => Filter;
+export declare const addFilter: (filters: Filter[], filter: Filter, dest: FilterLocation, booleanRelation: BooleanRelation, dataView: DataView) => Filter[];
+export declare const removeFilter: (filters: Filter[], dest: FilterLocation) => Filter[];
+export declare const moveFilter: (filters: Filter[], from: FilterLocation, to: FilterLocation, booleanRelation: BooleanRelation, dataView: DataView) => Filter[];
+export declare const updateFilters: (filters: Filter[], dest: FilterLocation, field?: DataViewField, operator?: Operator, params?: Filter["meta"]["params"]) => Filter[];

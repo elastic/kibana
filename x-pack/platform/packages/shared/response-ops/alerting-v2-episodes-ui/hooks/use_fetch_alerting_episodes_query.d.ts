@@ -1,0 +1,126 @@
+import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
+import type { TimeRange } from '@kbn/es-query';
+import type { UseAlertingEpisodesDataViewOptions } from './use_alerting_episodes_data_view';
+import { type AlertEpisode, type EpisodesFilterState, type EpisodesSortState } from '../queries/episodes_query';
+export interface UseFetchAlertingEpisodesQueryOptions {
+    pageSize: number;
+    filterState?: EpisodesFilterState;
+    sortState?: EpisodesSortState;
+    timeRange?: TimeRange | null;
+    services: UseAlertingEpisodesDataViewOptions['services'] & {
+        expressions: ExpressionsStart;
+    };
+}
+/**
+ * Hook to fetch alerting episodes data with filters and sort.
+ * Returns an ad-hoc data view too, constructed from the query columns.
+ */
+export declare const useFetchAlertingEpisodesQuery: ({ pageSize, services, filterState, sortState, timeRange, }: UseFetchAlertingEpisodesQueryOptions) => {
+    dataView: import("@kbn/data-views-plugin/common").DataView | undefined;
+    data: AlertEpisode[];
+    error: unknown;
+    isError: true;
+    isLoading: false;
+    isLoadingError: false;
+    isRefetchError: true;
+    isSuccess: false;
+    status: "error";
+    dataUpdatedAt: number;
+    errorUpdatedAt: number;
+    failureCount: number;
+    failureReason: unknown;
+    errorUpdateCount: number;
+    isFetched: boolean;
+    isFetchedAfterMount: boolean;
+    isFetching: boolean;
+    isInitialLoading: boolean;
+    isPaused: boolean;
+    isPlaceholderData: boolean;
+    isPreviousData: boolean;
+    isRefetching: boolean;
+    isStale: boolean;
+    refetch: <TPageData>(options?: (import("@tanstack/query-core").RefetchOptions & import("@tanstack/query-core").RefetchQueryFilters<TPageData>) | undefined) => Promise<import("@tanstack/query-core").QueryObserverResult<AlertEpisode[], unknown>>;
+    remove: () => void;
+    fetchStatus: import("@tanstack/query-core").FetchStatus;
+} | {
+    dataView: import("@kbn/data-views-plugin/common").DataView | undefined;
+    data: AlertEpisode[];
+    error: null;
+    isError: false;
+    isLoading: false;
+    isLoadingError: false;
+    isRefetchError: false;
+    isSuccess: true;
+    status: "success";
+    dataUpdatedAt: number;
+    errorUpdatedAt: number;
+    failureCount: number;
+    failureReason: unknown;
+    errorUpdateCount: number;
+    isFetched: boolean;
+    isFetchedAfterMount: boolean;
+    isFetching: boolean;
+    isInitialLoading: boolean;
+    isPaused: boolean;
+    isPlaceholderData: boolean;
+    isPreviousData: boolean;
+    isRefetching: boolean;
+    isStale: boolean;
+    refetch: <TPageData>(options?: (import("@tanstack/query-core").RefetchOptions & import("@tanstack/query-core").RefetchQueryFilters<TPageData>) | undefined) => Promise<import("@tanstack/query-core").QueryObserverResult<AlertEpisode[], unknown>>;
+    remove: () => void;
+    fetchStatus: import("@tanstack/query-core").FetchStatus;
+} | {
+    dataView: import("@kbn/data-views-plugin/common").DataView | undefined;
+    data: undefined;
+    error: unknown;
+    isError: true;
+    isLoading: false;
+    isLoadingError: true;
+    isRefetchError: false;
+    isSuccess: false;
+    status: "error";
+    dataUpdatedAt: number;
+    errorUpdatedAt: number;
+    failureCount: number;
+    failureReason: unknown;
+    errorUpdateCount: number;
+    isFetched: boolean;
+    isFetchedAfterMount: boolean;
+    isFetching: boolean;
+    isInitialLoading: boolean;
+    isPaused: boolean;
+    isPlaceholderData: boolean;
+    isPreviousData: boolean;
+    isRefetching: boolean;
+    isStale: boolean;
+    refetch: <TPageData>(options?: (import("@tanstack/query-core").RefetchOptions & import("@tanstack/query-core").RefetchQueryFilters<TPageData>) | undefined) => Promise<import("@tanstack/query-core").QueryObserverResult<AlertEpisode[], unknown>>;
+    remove: () => void;
+    fetchStatus: import("@tanstack/query-core").FetchStatus;
+} | {
+    dataView: import("@kbn/data-views-plugin/common").DataView | undefined;
+    data: undefined;
+    error: null;
+    isError: false;
+    isLoading: true;
+    isLoadingError: false;
+    isRefetchError: false;
+    isSuccess: false;
+    status: "loading";
+    dataUpdatedAt: number;
+    errorUpdatedAt: number;
+    failureCount: number;
+    failureReason: unknown;
+    errorUpdateCount: number;
+    isFetched: boolean;
+    isFetchedAfterMount: boolean;
+    isFetching: boolean;
+    isInitialLoading: boolean;
+    isPaused: boolean;
+    isPlaceholderData: boolean;
+    isPreviousData: boolean;
+    isRefetching: boolean;
+    isStale: boolean;
+    refetch: <TPageData>(options?: (import("@tanstack/query-core").RefetchOptions & import("@tanstack/query-core").RefetchQueryFilters<TPageData>) | undefined) => Promise<import("@tanstack/query-core").QueryObserverResult<AlertEpisode[], unknown>>;
+    remove: () => void;
+    fetchStatus: import("@tanstack/query-core").FetchStatus;
+};

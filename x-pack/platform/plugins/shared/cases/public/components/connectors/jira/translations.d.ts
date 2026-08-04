@@ -1,0 +1,12 @@
+export declare const ISSUE_TYPES_API_ERROR: string;
+export declare const FIELDS_API_ERROR: string;
+export declare const ISSUES_API_ERROR: string;
+export declare const GET_ISSUE_API_ERROR: (id: string) => string;
+export declare const SEARCH_ISSUES_COMBO_BOX_ARIA_LABEL: string;
+export declare const SEARCH_ISSUES_PLACEHOLDER: string;
+export declare const SEARCH_ISSUES_LOADING: string;
+export declare const PRIORITY: string;
+export declare const ISSUE_TYPE: string;
+export declare const PARENT_ISSUE: string;
+export declare const ISSUE_TYPE_REQUIRED: string;
+export declare const OTHER_FIELDS: string;

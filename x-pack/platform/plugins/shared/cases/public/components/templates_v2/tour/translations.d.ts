@@ -1,0 +1,13 @@
+export declare const START_TOUR: string;
+export declare const STEP_CREATE_TITLE: string;
+export declare const STEP_CREATE_DESCRIPTION: string;
+export declare const STEP_FIELD_LIBRARY_TITLE: string;
+export declare const STEP_FIELD_LIBRARY_DESCRIPTION: string;
+export declare const EDITOR_STEP_YAML_TITLE: string;
+export declare const EDITOR_STEP_YAML_DESCRIPTION: string;
+export declare const EDITOR_STEP_PREVIEW_TITLE: string;
+export declare const EDITOR_STEP_PREVIEW_DESCRIPTION: string;
+export declare const EDITOR_STEP_ACTIONS_TITLE: string;
+export declare const EDITOR_STEP_ACTIONS_DESCRIPTION: string;
+export declare const EDITOR_STEP_CONFIG_TITLE: string;
+export declare const EDITOR_STEP_CONFIG_DESCRIPTION: string;

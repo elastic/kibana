@@ -1,0 +1,31 @@
+import type { JSONSchema7TypeName } from 'json-schema';
+import type { Observable } from 'rxjs';
+import type { ChatCompletionChunkEvent, MessageAddEvent } from '../conversation_complete';
+type JSONSchemaOrPrimitive = CompatibleJSONSchema | string | number | boolean;
+export type CompatibleJSONSchema = {
+    type?: JSONSchema7TypeName;
+    enum?: JSONSchemaOrPrimitive[] | readonly JSONSchemaOrPrimitive[];
+    const?: JSONSchemaOrPrimitive;
+    minLength?: number | undefined;
+    maxLength?: number | undefined;
+    items?: CompatibleJSONSchema[] | CompatibleJSONSchema;
+    required?: string[] | readonly string[] | undefined;
+    properties?: Record<string, CompatibleJSONSchema>;
+    allOf?: CompatibleJSONSchema[] | readonly CompatibleJSONSchema[] | undefined;
+    anyOf?: CompatibleJSONSchema[] | readonly CompatibleJSONSchema[] | undefined;
+    oneOf?: CompatibleJSONSchema[] | readonly CompatibleJSONSchema[] | undefined;
+    description?: string;
+};
+export type FunctionResponse = {
+    content?: any;
+    data?: any;
+} | Observable<ChatCompletionChunkEvent | MessageAddEvent>;
+export interface FunctionDefinition<TParameters extends CompatibleJSONSchema = CompatibleJSONSchema> {
+    name: string;
+    description: string;
+    isInternal?: boolean;
+    descriptionForUser?: string;
+    parameters?: TParameters;
+}
+export type FunctionRegistry = Map<string, FunctionDefinition>;
+export {};

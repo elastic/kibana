@@ -1,0 +1,1 @@
+export declare const App: import("react-redux-v7").ConnectedComponent<import("react").FC<import("./app").Props>, import("react-redux-v7").Omit<import("./app").Props, "hasPermission" | "permissionsLoading" | "permissionsError" | "loadPermissions">>;

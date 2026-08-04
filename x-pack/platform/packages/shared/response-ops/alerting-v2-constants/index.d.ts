@@ -1,0 +1,10 @@
+export * from './src';
+export declare const DEFAULT_TIME_FIELD = "@timestamp";
+export declare const ALERTING_V2_RULE_API_PATH: "/api/alerting/v2/rules";
+export declare const ALERTING_V2_ALERT_API_PATH: "/api/alerting/v2/alerts";
+export declare const ALERTING_V2_ACTION_POLICY_API_PATH: "/api/alerting/v2/action_policies";
+export declare const ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_API_PATH: "/api/alerting/v2/execution_history/action_policies";
+export declare const ALERTING_V2_EXECUTION_HISTORY_RULES_API_PATH: "/api/alerting/v2/execution_history/rules";
+export declare const ALERTING_V2_SUGGESTIONS_RULE_EVENT_FIELDS_API_PATH: "/api/alerting/v2/suggestions/rule_event_fields";
+export declare const ALERTING_V2_INTERNAL_SUGGESTIONS_MATCHER_VALUES_API_PATH: "/internal/alerting/v2/suggestions/values";
+export declare const ALERTING_V2_INTERNAL_SUGGESTIONS_USER_PROFILES_API_PATH: "/internal/alerting/v2/suggestions/user_profiles";

@@ -1,0 +1,10 @@
+import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
+import type { AggExpressionType, AggExpressionFunctionArgs } from '..';
+import { BUCKET_TYPES } from '..';
+export declare const aggRareTermsFnName = "aggRareTerms";
+type Input = any;
+type AggArgs = AggExpressionFunctionArgs<typeof BUCKET_TYPES.RARE_TERMS>;
+type Output = AggExpressionType;
+type FunctionDefinition = ExpressionFunctionDefinition<typeof aggRareTermsFnName, Input, AggArgs, Output>;
+export declare const aggRareTerms: () => FunctionDefinition;
+export {};

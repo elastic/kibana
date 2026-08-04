@@ -1,0 +1,1 @@
+export declare const LicenseDashboard: import("react-redux-v7").ConnectedComponent<import("react").FC<import("./license_dashboard").Props>, import("react-redux-v7").Omit<import("./license_dashboard").Props, "setBreadcrumb">>;
