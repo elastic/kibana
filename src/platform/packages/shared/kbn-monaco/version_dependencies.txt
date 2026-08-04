@@ -67,7 +67,7 @@ locate-path@7.2.0
 merge-stream@2.0.0
 mime-db@1.52.0
 mime-types@2.1.35
-monaco-editor@0.46.0
+monaco-editor@0.50.0
 monaco-languageserver-types@0.2.3
 monaco-marker-data-provider@1.1.1
 monaco-types@0.1.0
