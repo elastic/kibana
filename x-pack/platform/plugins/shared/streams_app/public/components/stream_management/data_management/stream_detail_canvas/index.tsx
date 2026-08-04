@@ -15,7 +15,6 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Streams } from '@kbn/streams-schema';
 import {
   useEdgesState,
   useNodesState,
@@ -33,7 +32,6 @@ import {
 import { CanvasShell, getCanvasContainerStyles } from './canvas_shell';
 import { CanvasToolbar } from './canvas_toolbar';
 import { applyLayout } from './layout';
-import { MockStreamCanvas } from './placeholder_stream_canvas';
 import { useCanvasKeyboardShortcuts } from './use_canvas_a11y';
 import { useCanvasHistory } from './use_canvas_history';
 import type { ClassicCanvasNode } from './types';
@@ -46,25 +44,12 @@ interface CanvasContextMenuState {
   target: CanvasContextMenuTarget;
 }
 
-interface StreamDetailCanvasProps {
-  definition: Streams.ingest.all.GetResponse;
-}
-
 /**
- * For classic streams the canvas renders every classic stream as an inferred
- * source -> destination pair, so the content is the same regardless of which
- * classic stream's tab is open. Wired (and any other) streams keep the mock
- * canvas until their topology is wired to real data.
+ * Renders every classic stream as an inferred source -> destination pair. Wired
+ * streams are not represented yet and will join the graph once their topology is
+ * wired to real data.
  */
-export function StreamDetailCanvas({ definition }: StreamDetailCanvasProps) {
-  if (Streams.ClassicStream.GetResponse.is(definition)) {
-    return <ClassicStreamsCanvas />;
-  }
-
-  return <MockStreamCanvas streamName={definition.stream.name} />;
-}
-
-function ClassicStreamsCanvas() {
+export function StreamsCanvas() {
   const { euiTheme } = useEuiTheme();
   const {
     dependencies: {

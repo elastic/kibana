@@ -38,6 +38,7 @@ dependsOn:
   - '@kbn/react-kibana-context-render'
   - '@kbn/css-utils'
   - '@kbn/shared-ux-utility'
+  - '@kbn/ui-callout'
 tags:
   - plugin
   - prod
