@@ -22,7 +22,7 @@ import { createDataSource } from '../../../../../../common/data_sources/utils';
 import type { DiscoverAppState, TabState } from '../types';
 import { selectAllTabs, selectRecentlyClosedTabs, selectTab } from '../selectors';
 import {
-  internalStateSlice,
+  internalStateSliceActions,
   discardFlyoutsOnTabChange,
   type TabActionPayload,
   type InternalStateThunkActionCreator,
@@ -50,7 +50,7 @@ import { fromSavedObjectTabToTabState } from '../tab_mapping_utils';
 import { initializeAndSync, stopSyncing } from './tab_sync';
 
 export const setTabs: InternalStateThunkActionCreator<
-  [Parameters<typeof internalStateSlice.actions.setTabs>[0]]
+  [Parameters<typeof internalStateSliceActions.setTabs>[0]]
 > = (params) =>
   function setTabsThunkFn(
     dispatch,
@@ -122,7 +122,7 @@ export const setTabs: InternalStateThunkActionCreator<
     }
 
     dispatch(
-      internalStateSlice.actions.setTabs({
+      internalStateSliceActions.setTabs({
         ...params,
         recentlyClosedTabs: tabsStorageManager.getNRecentlyClosedTabs({
           previousOpenTabs: previousTabs,
@@ -602,7 +602,7 @@ export const disconnectTab: InternalStateThunkActionCreator<[TabActionPayload]> 
     tabRuntimeState.dataStateContainer$.getValue()?.cancel();
     dispatch(stopSyncing({ tabId }));
     tabRuntimeState.customizationService$.getValue()?.cleanup();
-    dispatch(internalStateSlice.actions.disconnectTab({ tabId }));
+    dispatch(internalStateSliceActions.disconnectTab({ tabId }));
   };
 
 function differenceIterateeByTabId(tab: TabState) {

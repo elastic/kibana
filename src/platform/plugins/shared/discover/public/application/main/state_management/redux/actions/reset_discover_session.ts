@@ -8,7 +8,7 @@
  */
 
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
-import { internalStateSlice } from '../internal_state';
+import { internalStateSliceActions } from '../internal_state';
 import { selectTabRuntimeState } from '../runtime_state';
 import { selectTab } from '../selectors';
 import {
@@ -50,7 +50,7 @@ export const resetDiscoverSession = createInternalStateAsyncThunk(
 
     const allTabs = await Promise.all(
       discoverSession.tabs.map(async (tab) => {
-        dispatch(internalStateSlice.actions.resetOnSavedSearchChange({ tabId: tab.id }));
+        dispatch(internalStateSliceActions.resetOnSavedSearchChange({ tabId: tab.id }));
 
         const existingTab = selectTab(state, tab.id);
         const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tab.id);

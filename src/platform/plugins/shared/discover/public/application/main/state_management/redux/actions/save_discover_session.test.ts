@@ -18,7 +18,7 @@ import type { SaveDiscoverSessionParams } from '@kbn/saved-search-plugin/public'
 import { internalStateActions } from '..';
 import { ESQL_TYPE } from '@kbn/data-view-utils';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
-import { internalStateSlice } from '../internal_state';
+import { internalStateSliceActions } from '../internal_state';
 import type { SaveDiscoverSessionThunkParams } from './save_discover_session';
 import * as tabStateDataViewActions from './tab_state_data_view';
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
@@ -148,7 +148,7 @@ describe('saveDiscoverSession', () => {
     );
 
     const resetOnSavedSearchChangeSpy = jest.spyOn(
-      internalStateSlice.actions,
+      internalStateSliceActions,
       'resetOnSavedSearchChange'
     );
     const setDataViewSpy = jest.spyOn(tabStateDataViewActions, 'setDataView');
@@ -199,7 +199,7 @@ describe('saveDiscoverSession', () => {
 
   it('should not update local state if saveDiscoverSession returns undefined', async () => {
     const resetOnSavedSearchChangeSpy = jest.spyOn(
-      internalStateSlice.actions,
+      internalStateSliceActions,
       'resetOnSavedSearchChange'
     );
     const { toolkit, saveDiscoverSessionSpy } = await setup();
@@ -217,7 +217,7 @@ describe('saveDiscoverSession', () => {
 
   it('should allow errors thrown at the persistence layer to bubble up and not modify local state', async () => {
     const resetOnSavedSearchChangeSpy = jest.spyOn(
-      internalStateSlice.actions,
+      internalStateSliceActions,
       'resetOnSavedSearchChange'
     );
     const { toolkit, saveDiscoverSessionSpy } = await setup();
@@ -278,7 +278,7 @@ describe('saveDiscoverSession', () => {
           const { toolkit, saveDiscoverSessionSpy } = await setup({ initializeTab: true });
 
           toolkit.internalState.dispatch(
-            internalStateSlice.actions.setGlobalState({
+            internalStateSliceActions.setGlobalState({
               tabId: toolkit.getCurrentTab().id,
               globalState: { timeRange: TIME_RANGE_30M, refreshInterval: REFRESH_INTERVAL_5S },
             })
@@ -365,7 +365,7 @@ describe('saveDiscoverSession', () => {
         });
 
         toolkit.internalState.dispatch(
-          internalStateSlice.actions.setGlobalState({
+          internalStateSliceActions.setGlobalState({
             tabId: toolkit.getCurrentTab().id,
             globalState: { timeRange: TIME_RANGE_1H, refreshInterval: REFRESH_INTERVAL_20S },
           })
@@ -402,7 +402,7 @@ describe('saveDiscoverSession', () => {
         });
 
         toolkit.internalState.dispatch(
-          internalStateSlice.actions.setGlobalState({
+          internalStateSliceActions.setGlobalState({
             tabId: toolkit.getCurrentTab().id,
             globalState: { timeRange: TIME_RANGE_1H, refreshInterval: REFRESH_INTERVAL_20S },
           })
@@ -494,7 +494,7 @@ describe('saveDiscoverSession', () => {
       });
 
     toolkit.internalState.dispatch(
-      internalStateSlice.actions.setDefaultProfileAdHocDataViewIds([defaultProfileId])
+      internalStateSliceActions.setDefaultProfileAdHocDataViewIds([defaultProfileId])
     );
 
     await toolkit.internalState.dispatch(

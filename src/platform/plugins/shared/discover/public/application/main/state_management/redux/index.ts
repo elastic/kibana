@@ -8,7 +8,7 @@
  */
 
 import { omit } from 'lodash';
-import { internalStateSlice, syncLocallyPersistedTabState } from './internal_state';
+import { internalStateSliceActions, syncLocallyPersistedTabState } from './internal_state';
 import * as actions from './actions';
 
 export {
@@ -40,7 +40,7 @@ export {
 
 export const internalStateActions = {
   ...omit(
-    internalStateSlice.actions,
+    internalStateSliceActions,
     'setTabs',
     'disconnectTab',
     'setDefaultProfileAdHocDataViewIds',

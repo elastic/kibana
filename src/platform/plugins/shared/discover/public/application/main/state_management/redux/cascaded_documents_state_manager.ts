@@ -9,7 +9,7 @@
 
 import type { CascadedDocumentsStateManager } from '../../data_fetching/cascaded_documents_fetcher';
 import type { InternalStateStore } from './internal_state';
-import { internalStateSlice } from './internal_state';
+import { internalStateSliceActions } from './internal_state';
 import { selectTab } from './selectors';
 
 export const createCascadedDocumentsStateManager = ({
@@ -34,7 +34,7 @@ export const createCascadedDocumentsStateManager = ({
     const currentTab = selectTab(internalState.getState(), tabId);
     const cascadedDocumentsState = currentTab.cascadedDocumentsState;
     internalState.dispatch(
-      internalStateSlice.actions.setCascadedDocumentsState({
+      internalStateSliceActions.setCascadedDocumentsState({
         tabId,
         cascadedDocumentsState: {
           ...cascadedDocumentsState,
@@ -50,7 +50,7 @@ export const createCascadedDocumentsStateManager = ({
     const currentTab = selectTab(internalState.getState(), tabId);
     const cascadedDocumentsState = currentTab.cascadedDocumentsState;
     internalState.dispatch(
-      internalStateSlice.actions.setCascadedDocumentsState({
+      internalStateSliceActions.setCascadedDocumentsState({
         tabId,
         cascadedDocumentsState: {
           ...cascadedDocumentsState,

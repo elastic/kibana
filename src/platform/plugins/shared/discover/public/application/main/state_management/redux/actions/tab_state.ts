@@ -33,7 +33,7 @@ import { APP_STATE_URL_KEY } from '../../../../../../common';
 import { DataSourceType } from '../../../../../../common/data_sources';
 import { isEqualState } from '../../utils/state_comparators';
 import {
-  internalStateSlice,
+  internalStateSliceActions,
   type InternalStateThunkActionCreator,
   type InternalStateThunkAction,
   type TabActionPayload,
@@ -85,7 +85,7 @@ const mergeAppState = (
 export const setAppState: InternalStateThunkActionCreator<[AppStatePayload]> = (payload) =>
   function setAppStateThunkFn(dispatch, _, { runtimeStateManager }) {
     const profileId = selectDataSourceProfileId(runtimeStateManager, payload.tabId);
-    dispatch(internalStateSlice.actions.setAppState({ ...payload, profileId }));
+    dispatch(internalStateSliceActions.setAppState({ ...payload, profileId }));
   };
 
 export const syncProfileStateSnapshot: InternalStateThunkActionCreator<
@@ -93,7 +93,7 @@ export const syncProfileStateSnapshot: InternalStateThunkActionCreator<
 > = (payload) =>
   function syncProfileStateSnapshotThunkFn(dispatch, _, { runtimeStateManager }) {
     const profileId = selectDataSourceProfileId(runtimeStateManager, payload.tabId);
-    dispatch(internalStateSlice.actions.syncProfileStateSnapshot({ ...payload, profileId }));
+    dispatch(internalStateSliceActions.syncProfileStateSnapshot({ ...payload, profileId }));
   };
 
 /**
@@ -159,7 +159,7 @@ export const updateGlobalState: InternalStateThunkActionCreator<[GlobalStatePayl
 
     if (hasStateChanges) {
       dispatch(
-        internalStateSlice.actions.setGlobalState({
+        internalStateSliceActions.setGlobalState({
           tabId: payload.tabId,
           globalState: mergedGlobalState,
         })
@@ -214,7 +214,7 @@ export const updateAttributes: InternalStateThunkActionCreator<[AttributesPayloa
 
     if (hasStateChanges) {
       dispatch(
-        internalStateSlice.actions.setAttributes({
+        internalStateSliceActions.setAttributes({
           tabId: payload.tabId,
           attributes: mergedAttributes,
         })
@@ -290,7 +290,7 @@ export const setProfileState = <TState extends SerializableRecord>(
     };
 
     const dispatchProfileState = (profileState: SerializableRecord | undefined) => {
-      dispatch(internalStateSlice.actions.setProfileState({ tabId, key, profileState }));
+      dispatch(internalStateSliceActions.setProfileState({ tabId, key, profileState }));
     };
 
     const profileUrlStateDefinition = selectCurrentProfileStateDefinition(
@@ -399,7 +399,7 @@ export const transitionFromESQLToDataView: InternalStateThunkActionCreator<
   function transitionFromESQLToDataViewThunkFn(dispatch, _, { services }) {
     // Mark all profile state fields to reset when transitioning to data view mode
     dispatch(
-      internalStateSlice.actions.setProfileStateFieldsToReset({
+      internalStateSliceActions.setProfileStateFieldsToReset({
         tabId,
         fieldsToReset: 'all',
       })
@@ -446,7 +446,7 @@ export const transitionFromDataViewToESQL: InternalStateThunkActionCreator<
   function transitionFromDataViewToESQLThunkFn(dispatch, getState, { services }) {
     // Mark all profile state fields to reset when transitioning to ES|QL mode
     dispatch(
-      internalStateSlice.actions.setProfileStateFieldsToReset({
+      internalStateSliceActions.setProfileStateFieldsToReset({
         tabId,
         fieldsToReset: 'all',
       })

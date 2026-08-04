@@ -11,7 +11,6 @@ import { type Observable, distinctUntilChanged, map, skip } from 'rxjs';
 import { isEqual } from 'lodash';
 import { type GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 import { type INullableBaseStateContainer } from '@kbn/kibana-utils-plugin/public';
-import type { ThunkDispatch, UnknownAction } from '@reduxjs/toolkit';
 import {
   internalStateActions,
   selectCurrentProfileStateDefinition,
@@ -21,8 +20,9 @@ import {
   type DiscoverAppState,
   type DiscoverInternalState,
   type InternalStateDependencies,
+  type InternalStateDispatch,
 } from '../redux';
-import { internalStateSlice } from '../redux/internal_state';
+import { internalStateSliceActions } from '../redux/internal_state';
 import { createTabAppStateObservable } from './create_tab_app_state_observable';
 import { ProfileStateType, type ProfileStateMap } from '../../../../../common/context_awareness';
 
@@ -38,7 +38,7 @@ export const createUrlSyncObservables = ({
   services,
 }: {
   tabId: string;
-  dispatch: ThunkDispatch<DiscoverInternalState, InternalStateDependencies, UnknownAction>;
+  dispatch: InternalStateDispatch;
   getState: () => DiscoverInternalState;
   internalState$: Observable<DiscoverInternalState>;
   runtimeStateManager: InternalStateDependencies['runtimeStateManager'];
@@ -155,7 +155,7 @@ export const createUrlSyncObservables = ({
         });
 
         dispatch(
-          internalStateSlice.actions.setProfileState({
+          internalStateSliceActions.setProfileState({
             tabId,
             key: stateKey,
             profileState: { ...nonUrlProfileState, ...nextProfileUrlState },
@@ -183,7 +183,7 @@ export const createUrlSyncObservables = ({
 
         if (!isEqual(currentProfileState, nonUrlProfileState)) {
           dispatch(
-            internalStateSlice.actions.setProfileState({
+            internalStateSliceActions.setProfileState({
               tabId,
               key: profileUrlStateDefinition.key,
               profileState: nonUrlProfileState,

@@ -9,7 +9,6 @@
 
 import {
   type EqualityFn,
-  type TypedUseSelectorHook,
   type ReactReduxContextValue,
   Provider as ReduxProvider,
   createDispatchHook,
@@ -29,7 +28,9 @@ import { selectTab } from './selectors';
 import { type TabActionInjector, createTabActionInjector } from './utils';
 import type { ChartPortalNode } from '../../components/chart';
 
-const internalStateContext = createContext<ReactReduxContextValue | null>(null);
+const internalStateContext = createContext<ReactReduxContextValue<DiscoverInternalState> | null>(
+  null
+);
 
 const useInternalStateContext = () => {
   const context = useContext(internalStateContext);
@@ -50,13 +51,12 @@ export const InternalStateProvider = ({
   </ReduxProvider>
 );
 
-export const useInternalStateDispatch = createDispatchHook(
-  internalStateContext
-) as () => InternalStateDispatch;
+export const useInternalStateDispatch =
+  createDispatchHook(internalStateContext).withTypes<InternalStateDispatch>();
 
 export const useInternalStateGetState = (): (() => DiscoverInternalState) => {
   const { store } = useInternalStateContext();
-  return store.getState as () => DiscoverInternalState;
+  return store.getState;
 };
 
 export const useInternalStateSubscribe = (): ((listener: () => void) => () => void) => {
@@ -64,8 +64,8 @@ export const useInternalStateSubscribe = (): ((listener: () => void) => () => vo
   return store.subscribe;
 };
 
-export const useInternalStateSelector: TypedUseSelectorHook<DiscoverInternalState> =
-  createSelectorHook(internalStateContext);
+export const useInternalStateSelector =
+  createSelectorHook(internalStateContext).withTypes<DiscoverInternalState>();
 
 interface CurrentTabContextValue {
   currentTabId: string;

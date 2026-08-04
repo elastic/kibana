@@ -9,7 +9,7 @@
 
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { differenceBy } from 'lodash';
-import { internalStateSlice, type InternalStateThunkActionCreator } from '../internal_state';
+import { internalStateSliceActions, type InternalStateThunkActionCreator } from '../internal_state';
 import { createInternalStateAsyncThunk } from '../utils';
 
 export const loadDataViewList = createInternalStateAsyncThunk(
@@ -47,7 +47,7 @@ export const setDefaultProfileAdHocDataViews: InternalStateThunkActionCreator<[D
 
     dispatch(setAdHocDataViews(adHocDataViews));
     dispatch(
-      internalStateSlice.actions.setDefaultProfileAdHocDataViewIds(defaultProfileAdHocDataViewIds)
+      internalStateSliceActions.setDefaultProfileAdHocDataViewIds(defaultProfileAdHocDataViewIds)
     );
   };
 
@@ -82,6 +82,6 @@ export const replaceAdHocDataViewWithId: InternalStateThunkActionCreator<[string
       )
     );
     dispatch(
-      internalStateSlice.actions.setDefaultProfileAdHocDataViewIds(defaultProfileAdHocDataViewIds)
+      internalStateSliceActions.setDefaultProfileAdHocDataViewIds(defaultProfileAdHocDataViewIds)
     );
   };

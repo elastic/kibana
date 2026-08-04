@@ -14,7 +14,7 @@ import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 import type { ControlPanelsState } from '@kbn/control-group-renderer';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import { getEsqlDataView } from '@kbn/discover-utils';
-import { internalStateSlice, type TabActionPayload } from '../internal_state';
+import { internalStateSliceActions, type TabActionPayload } from '../internal_state';
 import { getInitialAppState } from '../../utils/get_initial_app_state';
 import { TabInitializationStatus, type DiscoverAppState } from '..';
 import type { DiscoverDataStateContainer } from '../../discover_data_state_container';
@@ -103,7 +103,7 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
       );
 
       dispatch(
-        internalStateSlice.actions.setEsqlVariables({
+        internalStateSliceActions.setEsqlVariables({
           tabId,
           esqlVariables: extractEsqlVariables(esqlControls),
         })
@@ -320,7 +320,7 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
     });
 
     dispatch(
-      internalStateSlice.actions.initializeTabState({
+      internalStateSliceActions.initializeTabState({
         tabId,
         initialAppState,
         initialProfileState,
@@ -339,7 +339,7 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
       dispatch(fetchData({ tabId, initial: true }));
     } else {
       dispatch(
-        internalStateSlice.actions.setForceFetchOnSelect({ tabId, forceFetchOnSelect: true })
+        internalStateSliceActions.setForceFetchOnSelect({ tabId, forceFetchOnSelect: true })
       );
     }
 

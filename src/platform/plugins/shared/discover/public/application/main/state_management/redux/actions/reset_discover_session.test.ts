@@ -12,7 +12,7 @@ import { createDiscoverServicesMock } from '../../../../../__mocks__/services';
 import { getDiscoverInternalStateMock } from '../../../../../__mocks__/discover_state.mock';
 import { internalStateActions, selectTab, selectTabRuntimeState } from '..';
 import type { InternalStateStore } from '../internal_state';
-import { internalStateSlice } from '../internal_state';
+import { internalStateSliceActions } from '../internal_state';
 import { getPersistedTabMock } from '../__mocks__/internal_state.mocks';
 import * as tabsActions from './tabs';
 import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
@@ -21,7 +21,7 @@ import { dataViewWithNoTimefieldMock } from '../../../../../__mocks__/data_view_
 
 const markUnsavedTabs = (internalState: InternalStateStore, tabIds: string[]) =>
   internalState.dispatch(
-    internalStateSlice.actions.setUnsavedChanges({
+    internalStateSliceActions.setUnsavedChanges({
       hasUnsavedChanges: true,
       unsavedTabIds: tabIds,
     })
@@ -137,7 +137,7 @@ describe('resetDiscoverSession', () => {
     expect(tab3RuntimeState.dataStateContainer$.getValue()).toBeUndefined();
 
     const resetOnSavedSearchChangeSpy = jest.spyOn(
-      internalStateSlice.actions,
+      internalStateSliceActions,
       'resetOnSavedSearchChange'
     );
 

@@ -147,19 +147,19 @@ const syncProfileStateSnapshot = (
   profileStateSnapshots[profileId] = profileStateSnapshot;
 };
 
-export const internalStateSlice = createSlice({
+const internalStateSlice = createSlice({
   name: 'internalState',
   initialState,
   reducers: {
     setInitializationState: (
-      state: DiscoverInternalState,
+      state,
       action: PayloadAction<DiscoverInternalState['initializationState']>
     ) => {
       state.initializationState = action.payload;
     },
 
     setTabs: (
-      state: DiscoverInternalState,
+      state,
       action: PayloadAction<{
         allTabs: TabState[];
         selectedTabId: string;
@@ -191,57 +191,42 @@ export const internalStateSlice = createSlice({
         action.payload.updatedDiscoverSession ?? state.persistedDiscoverSession;
     },
 
-    setUnsavedChanges: (
-      state: DiscoverInternalState,
-      action: PayloadAction<HasUnsavedChangesResult>
-    ) => {
+    setUnsavedChanges: (state, action: PayloadAction<HasUnsavedChangesResult>) => {
       state.hasUnsavedChanges = action.payload.hasUnsavedChanges;
       state.tabs.unsavedIds = action.payload.unsavedTabIds;
     },
 
-    disconnectTab: (state: DiscoverInternalState, action: TabAction) =>
+    disconnectTab: (state, action: TabAction) =>
       withTab(state, action.payload, (tab) => {
         tab.initializationState = { initializationStatus: TabInitializationStatus.Disconnected };
       }),
 
-    setForceFetchOnSelect: (
-      state: DiscoverInternalState,
-      action: TabAction<Pick<TabState, 'forceFetchOnSelect'>>
-    ) =>
+    setForceFetchOnSelect: (state, action: TabAction<Pick<TabState, 'forceFetchOnSelect'>>) =>
       withTab(state, action.payload, (tab) => {
         tab.forceFetchOnSelect = action.payload.forceFetchOnSelect;
       }),
 
-    setIsDataViewLoading: (
-      state: DiscoverInternalState,
-      action: TabAction<Pick<TabState, 'isDataViewLoading'>>
-    ) =>
+    setIsDataViewLoading: (state, action: TabAction<Pick<TabState, 'isDataViewLoading'>>) =>
       withTab(state, action.payload, (tab) => {
         tab.isDataViewLoading = action.payload.isDataViewLoading;
       }),
 
-    setDefaultProfileAdHocDataViewIds: (
-      state: DiscoverInternalState,
-      action: PayloadAction<string[]>
-    ) => {
+    setDefaultProfileAdHocDataViewIds: (state, action: PayloadAction<string[]>) => {
       state.defaultProfileAdHocDataViewIds = action.payload;
     },
 
     setDefaultProfileEsqlQuery: (
-      state: DiscoverInternalState,
+      state,
       action: PayloadAction<DiscoverInternalState['defaultProfileEsqlQuery']>
     ) => {
       state.defaultProfileEsqlQuery = action.payload;
     },
 
-    setTabsBarVisibility: (
-      state: DiscoverInternalState,
-      action: PayloadAction<TabsBarVisibility>
-    ) => {
+    setTabsBarVisibility: (state, action: PayloadAction<TabsBarVisibility>) => {
       state.tabsBarVisibility = action.payload;
     },
 
-    markNonActiveTabsForRefetch: (state: DiscoverInternalState) => {
+    markNonActiveTabsForRefetch: (state) => {
       // Mark all non-active tabs to refetch on selection
       // Used when projectRouting changes in CPS Manager
       const currentTabId = state.tabs.unsafeCurrentId;
@@ -253,7 +238,7 @@ export const internalStateSlice = createSlice({
     },
 
     setExpandedDoc: (
-      state: DiscoverInternalState,
+      state,
       action: TabAction<{
         expandedDoc: DataTableRecord | undefined;
         expandedDocOwner?: string;
@@ -293,7 +278,7 @@ export const internalStateSlice = createSlice({
     },
 
     setRenderDocumentViewMeta: (
-      state: DiscoverInternalState,
+      state,
       action: TabAction<Pick<TabState, 'renderDocumentViewMeta'>>
     ) => {
       withTab(state, action.payload, (tab) => {
@@ -302,7 +287,7 @@ export const internalStateSlice = createSlice({
     },
 
     setInitialDocViewerTabId: (
-      state: DiscoverInternalState,
+      state,
       action: TabAction<{
         initialDocViewerTabId: string | undefined;
       }>
@@ -312,10 +297,7 @@ export const internalStateSlice = createSlice({
       });
     },
 
-    setDataRequestParams: (
-      state: DiscoverInternalState,
-      action: TabAction<Pick<TabState, 'dataRequestParams'>>
-    ) =>
+    setDataRequestParams: (state, action: TabAction<Pick<TabState, 'dataRequestParams'>>) =>
       withTab(state, action.payload, (tab) => {
         tab.dataRequestParams = action.payload.dataRequestParams;
       }),
@@ -323,10 +305,7 @@ export const internalStateSlice = createSlice({
     /**
      * Set the tab global state, overwriting existing state and pushing to URL history
      */
-    setGlobalState: (
-      state: DiscoverInternalState,
-      action: TabAction<Pick<TabState, 'globalState'>>
-    ) =>
+    setGlobalState: (state, action: TabAction<Pick<TabState, 'globalState'>>) =>
       withTab(state, action.payload, (tab) => {
         tab.globalState = action.payload.globalState;
       }),
@@ -334,10 +313,7 @@ export const internalStateSlice = createSlice({
     /**
      * Set the tab app state, overwriting existing state and pushing to URL history
      */
-    setAppState: (
-      state: DiscoverInternalState,
-      action: TabAction<RawAppStatePayload & { profileId: string }>
-    ) =>
+    setAppState: (state, action: TabAction<RawAppStatePayload & { profileId: string }>) =>
       withTab(state, action.payload, (tab) => {
         let appState = normalizeVisiblePanelsState(action.payload.appState);
 
@@ -355,7 +331,7 @@ export const internalStateSlice = createSlice({
       }),
 
     syncProfileStateSnapshot: (
-      state: DiscoverInternalState,
+      state,
       action: TabAction<{ profileId: string; appState?: TabState['appState'] }>
     ) =>
       withTab(state, action.payload, (tab) => {
@@ -363,7 +339,7 @@ export const internalStateSlice = createSlice({
       }),
 
     setProfileState: (
-      state: DiscoverInternalState,
+      state,
       action: TabAction<{ key: string; profileState: SerializableRecord | undefined }>
     ) =>
       withTab(state, action.payload, (tab) => {
@@ -378,7 +354,7 @@ export const internalStateSlice = createSlice({
      * Set the initial tab app and profile state
      */
     initializeTabState: (
-      state: DiscoverInternalState,
+      state,
       action: TabAction<{
         initialAppState: TabState['appState'];
         initialProfileState: TabState['profileState'];
@@ -393,16 +369,13 @@ export const internalStateSlice = createSlice({
     /**
      * Set the tab attributes state
      */
-    setAttributes: (
-      state: DiscoverInternalState,
-      action: TabAction<Pick<TabState, 'attributes'>>
-    ) =>
+    setAttributes: (state, action: TabAction<Pick<TabState, 'attributes'>>) =>
       withTab(state, action.payload, (tab) => {
         tab.attributes = action.payload.attributes;
       }),
 
     setOverriddenVisContextAfterInvalidation: (
-      state: DiscoverInternalState,
+      state,
       action: TabAction<Pick<TabState, 'overriddenVisContextAfterInvalidation'>>
     ) =>
       withTab(state, action.payload, (tab) => {
@@ -411,7 +384,7 @@ export const internalStateSlice = createSlice({
       }),
 
     setCascadedDocumentsState: (
-      state: DiscoverInternalState,
+      state,
       action: TabAction<Pick<TabState, 'cascadedDocumentsState'>>
     ) =>
       withTab(state, action.payload, (tab) => {
@@ -419,7 +392,7 @@ export const internalStateSlice = createSlice({
       }),
 
     setSelectedCascadeGroups: (
-      state: DiscoverInternalState,
+      state,
       actions: TabAction<Pick<TabState['cascadedDocumentsState'], 'selectedCascadeGroups'>>
     ) =>
       withTab(state, actions.payload, (tab) => {
@@ -427,17 +400,14 @@ export const internalStateSlice = createSlice({
       }),
 
     setEsqlVariables: (
-      state: DiscoverInternalState,
+      state,
       action: TabAction<{ esqlVariables: ESQLControlVariable[] | undefined }>
     ) =>
       withTab(state, action.payload, (tab) => {
         tab.esqlVariables = action.payload.esqlVariables;
       }),
 
-    setIsESQLToDataViewTransitionModalVisible: (
-      state: DiscoverInternalState,
-      action: PayloadAction<boolean>
-    ) => {
+    setIsESQLToDataViewTransitionModalVisible: (state, action: PayloadAction<boolean>) => {
       state.isESQLToDataViewTransitionModalVisible = action.payload;
     },
 
@@ -454,7 +424,7 @@ export const internalStateSlice = createSlice({
         },
       }),
       reducer: (
-        state: DiscoverInternalState,
+        state,
         action: TabAction<{
           fieldsToReset: Pick<TabState['defaultProfileState'], 'fieldsToReset' | 'resetId'>;
         }>
@@ -467,7 +437,7 @@ export const internalStateSlice = createSlice({
         }),
     },
 
-    resetOnSavedSearchChange: (state: DiscoverInternalState, action: TabAction) =>
+    resetOnSavedSearchChange: (state, action: TabAction) =>
       withTab(state, action.payload, (tab) => {
         tab.overriddenVisContextAfterInvalidation = undefined;
         tab.expandedDoc = undefined;
@@ -478,7 +448,7 @@ export const internalStateSlice = createSlice({
       }),
 
     setESQLEditorUiState: (
-      state: DiscoverInternalState,
+      state,
       action: TabAction<{ esqlEditorUiState: Partial<TabState['uiState']['esqlEditor']> }>
     ) =>
       withTab(state, action.payload, (tab) => {
@@ -486,7 +456,7 @@ export const internalStateSlice = createSlice({
       }),
 
     setDataGridUiState: (
-      state: DiscoverInternalState,
+      state,
       action: TabAction<{ dataGridUiState: Partial<TabState['uiState']['dataGrid']> }>
     ) =>
       withTab(state, action.payload, (tab) => {
@@ -494,7 +464,7 @@ export const internalStateSlice = createSlice({
       }),
 
     setFieldListUiState: (
-      state: DiscoverInternalState,
+      state,
       action: TabAction<{ fieldListUiState: Partial<TabState['uiState']['fieldList']> }>
     ) =>
       withTab(state, action.payload, (tab) => {
@@ -502,7 +472,7 @@ export const internalStateSlice = createSlice({
       }),
 
     setFieldListExistingFieldsInfoUiState: (
-      state: DiscoverInternalState,
+      state,
       action: TabAction<{
         fieldListExistingFieldsInfo: TabState['uiState']['fieldListExistingFieldsInfo'];
       }>
@@ -512,7 +482,7 @@ export const internalStateSlice = createSlice({
       }),
 
     resetAffectedFieldListExistingFieldsInfoUiState: (
-      state: DiscoverInternalState,
+      state,
       action: PayloadAction<{
         dataViewId: string;
       }>
@@ -525,7 +495,7 @@ export const internalStateSlice = createSlice({
     },
 
     setLayoutUiState: (
-      state: DiscoverInternalState,
+      state,
       action: TabAction<{ layoutUiState: Partial<TabState['uiState']['layout']> }>
     ) =>
       withTab(state, action.payload, (tab) => {
@@ -533,7 +503,7 @@ export const internalStateSlice = createSlice({
       }),
 
     setSearchDraftUiState: (
-      state: DiscoverInternalState,
+      state,
       action: TabAction<{ searchDraftUiState: Partial<TabState['uiState']['searchDraft']> }>
     ) =>
       withTab(state, action.payload, (tab) => {
@@ -541,7 +511,7 @@ export const internalStateSlice = createSlice({
       }),
 
     setMetricsGridState: (
-      state: DiscoverInternalState,
+      state,
       action: TabAction<{ metricsGridState: Partial<TabState['uiState']['metricsGrid']> }>
     ) =>
       withTab(state, action.payload, (tab) => {
@@ -549,7 +519,7 @@ export const internalStateSlice = createSlice({
       }),
 
     setDocViewerUiState: (
-      state: DiscoverInternalState,
+      state,
       action: TabAction<{ docViewerUiState: Partial<TabState['uiState']['docViewer']> }>
     ) =>
       withTab(state, action.payload, (tab) => {
@@ -557,7 +527,7 @@ export const internalStateSlice = createSlice({
       }),
 
     setDataCascadeUiState: (
-      state: DiscoverInternalState,
+      state,
       action: TabAction<{ dataCascadeUiState: TabState['uiState']['dataCascade'] }>
     ) =>
       withTab(state, action.payload, (tab) => {
@@ -565,7 +535,7 @@ export const internalStateSlice = createSlice({
       }),
 
     setCascadedDocumentsDataGridUiState: (
-      state: DiscoverInternalState,
+      state,
       action: TabAction<{
         nodeId: string;
         dataGridUiState: Partial<UnifiedDataTableRestorableState>;
@@ -630,6 +600,8 @@ export const internalStateSlice = createSlice({
     });
   },
 });
+
+export const internalStateSliceActions = { ...internalStateSlice.actions };
 
 export const syncLocallyPersistedTabState = createAction<TabActionPayload>(
   'internalState/syncLocallyPersistedTabState'

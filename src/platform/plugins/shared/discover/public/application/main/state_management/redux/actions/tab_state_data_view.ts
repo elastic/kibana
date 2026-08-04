@@ -16,7 +16,7 @@ import {
   DEFAULT_COLUMNS_SETTING,
 } from '@kbn/discover-utils';
 import {
-  internalStateSlice,
+  internalStateSliceActions,
   type TabActionPayload,
   type InternalStateThunkActionCreator,
 } from '../internal_state';
@@ -47,7 +47,7 @@ export const setDataView: InternalStateThunkActionCreator<
     const { currentDataView$ } = selectTabRuntimeState(runtimeStateManager, tabId);
 
     if (dataView.id !== currentDataView$.getValue()?.id) {
-      dispatch(internalStateSlice.actions.setExpandedDoc({ tabId, expandedDoc: undefined }));
+      dispatch(internalStateSliceActions.setExpandedDoc({ tabId, expandedDoc: undefined }));
     }
 
     currentDataView$.next(dataView);
