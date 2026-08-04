@@ -86,8 +86,9 @@ evaluate.describe(
             },
             // Regression: the agent must emit a `TS` query that quotes the `.1m` / `.5m` / `.15m`
             // field paths (unquoted, `.1m` is lexed as a numeric literal and the parse fails) and
-            // wraps each gauge in `AVG_OVER_TIME`. Backed by the GCS snapshot replay so execution
-            // / validity signals are meaningful.
+            // wraps each gauge in `AVG_OVER_TIME`. Backed by the GCS snapshot replay.
+            // TODO: verify metrics-hostmetricsreceiver.otel-default is present in the
+            // payment-service-failures snapshot after first replay; revise if not.
             {
               input: {
                 question:

@@ -16,11 +16,11 @@ import type { ToolingLog } from '@kbn/tooling-log';
 
 export type { LoadResult };
 
-// GCS snapshot in the shared obs-ai bucket, under a viz-evals-specific path.
-// Run scripts/create_viz_evals_snapshot.js once to capture the snapshot.
+// Reuses the shared obs-ai-datasets bucket — same vault path / CI credentials as
+// kbn-evals-suite-observability-ai. No custom snapshot needed.
 const GCS_BUCKET = 'obs-ai-datasets';
-const GCS_BASE_PATH = 'viz-evals/otel-host-metrics';
-const SNAPSHOT_NAME = 'otel-host-metrics';
+const GCS_BASE_PATH = 'otel-demo/payment-service-failures';
+const SNAPSHOT_NAME = 'payment-service-failures';
 
 async function deleteStaleTemporaryIndices(esClient: Client, log: ToolingLog): Promise<void> {
   let staleIndices: string[];

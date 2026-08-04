@@ -38,25 +38,14 @@ This keeps gold and candidate structurally parallel so the equivalence evaluator
 
 ### OTel data fixture
 
-`src/fixtures/replay.ts` uses `@kbn/es-snapshot-loader` to replay a GCS snapshot (same pattern as `@kbn/evals-suite-observability-ai`) into `logs-*`, `metrics-*`, and `traces-*` data streams. The CPU-load examples specifically guard against the failure where the agent leaves the `.1m` / `.5m` / `.15m` field paths unquoted (Elasticsearch lexes `.1m` as a numeric literal → `parsing_exception`).
+`src/fixtures/replay.ts` uses `@kbn/es-snapshot-loader` to replay the shared OTel Demo snapshot from `gs://obs-ai-datasets/otel-demo/payment-service-failures` — the same bucket and vault credentials as `@kbn/evals-suite-observability-ai`. No custom snapshot needed; no separate GCS setup required.
 
-To create or refresh the snapshot:
+The snapshot contains OTel Demo logs, metrics, and traces. After first replay, check what `metrics-*` streams actually landed and adjust the CPU-load example accordingly:
 
-1. Pull the GCS service-account key from Vault and add it to your local ES keystore:
-   ```bash
-   vault read -field=credentials secret/kibana/gcs/obs-ai-datasets > /tmp/gcs-key.json
-   elasticsearch-keystore add-file gcs.client.default.credentials_file /tmp/gcs-key.json
-   # restart ES so it picks up the new keystore entry
-   ```
-2. Run the script:
-   ```bash
-   ELASTICSEARCH_URL=http://localhost:9200 \
-   ELASTICSEARCH_USERNAME=elastic \
-   ELASTICSEARCH_PASSWORD=changeme \
-   npx ts-node scripts/create_snapshot.ts
-   ```
-
-The script seeds synthetic `system.cpu.load_average.*` documents, verifies the `TS` query executes, then snapshots `metrics-hostmetricsreceiver.otel-default` directly to `gs://obs-ai-datasets/viz-evals/otel-host-metrics`. Temporary templates are cleaned up on exit.
+```bash
+GET metrics-*/_field_caps?fields=system.cpu.*,@timestamp
+GET _data_stream/metrics-*
+```
 
 ## Notes
 
