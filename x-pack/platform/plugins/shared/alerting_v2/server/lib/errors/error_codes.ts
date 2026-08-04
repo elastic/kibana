@@ -207,6 +207,12 @@ export const ALERTING_V2_LOG_CODES = {
    */
   RULE_EXECUTOR_WORKFLOW_SUBSCRIBER_FAILURE: 'RULE_EXECUTOR_WORKFLOW_SUBSCRIBER_FAILURE',
   /**
+   * The rule-changes-history subscriber failed to record a change entry for a
+   * rule domain event. The rule operation itself already succeeded; only the
+   * audit entry for this change was lost.
+   */
+  RULE_CHANGES_HISTORY_SUBSCRIBER_FAILURE: 'RULE_CHANGES_HISTORY_SUBSCRIBER_FAILURE',
+  /**
    * A domain event was refused by the bus because its `type` collides with a
    * reserved emitter event name. The publisher continued; no subscriber ran.
    */
