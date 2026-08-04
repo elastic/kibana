@@ -51208,8 +51208,6 @@
     "xpack.significantEventsApp.settings.scheduledDiscoveryHelp": "Wenn aktiviert, laufen die Erkennung, Ermittlung und Triage signifikanter Ereignisse im aktuellen Kibana-Bereich automatisch ab.",
     "xpack.significantEventsApp.settings.scheduledDiscoveryLabel": "Geplante Erkennung",
     "xpack.significantEventsApp.settings.scheduledDiscoveryTitle": "Geplante Erkennung",
-    "xpack.significantEventsApp.settings.triageBatchSizeHelp": "Maximale Anzahl von Erkennungen, die an jeden geplanten Triage-Durchlauf gesendet werden.",
-    "xpack.significantEventsApp.settings.triageBatchSizeLabel": "Triage-Batch-Größe",
     "xpack.significantEventsApp.settings.tuningInfo": "Dies sind erweiterte Einstellungen, die steuern, wie Features erkannt und nach Abfragen gesucht werden. Falsche Werte können die Onboarding-Qualität beeinträchtigen oder unerwartetes Verhalten verursachen. Änderungen werden bei der nächsten Ausführung wirksam.",
     "xpack.significantEventsApp.settings.tuningTitle": "Optimierung wichtiger Ereignisse",
     "xpack.significantEventsApp.settingsTab": "Einstellungen",
