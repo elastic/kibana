@@ -8,14 +8,16 @@
 import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSkeletonText } from '@elastic/eui';
 import { MaintenanceWindowsLink } from '../../monitor_add_edit/fields/maintenance_windows/create_maintenance_windows_btn';
-import { useMaintenanceWindows } from '../../monitor_add_edit/fields/maintenance_windows/use_maintenance_windows';
+import { useFetchMaintenanceWindows } from '../../../hooks';
 
 export const MonitorMaintenanceWindows = ({ monitorMWs }: { monitorMWs: string[] }) => {
-  const { isLoading, data } = useMaintenanceWindows();
+  // The details panel only ever shows windows already attached to the monitor, so it can use
+  // the monitor-referenced (read-only accessible) route rather than the privileged full list.
+  const { isLoading, data } = useFetchMaintenanceWindows();
 
   const titleById = useMemo(() => {
     const map = new Map<string, string>();
-    data?.data?.forEach((mw) => map.set(mw.id, mw.title));
+    data?.maintenanceWindows?.forEach((mw) => map.set(mw.id, mw.title));
     return map;
   }, [data]);
 
