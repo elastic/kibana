@@ -10,6 +10,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { type ConnectorTypeInfo, isInternalConnector } from '@kbn/workflows';
+import { unwrapSchema } from '@kbn/workflows/common/utils/zod';
 import { z } from '@kbn/zod/v4';
 import { getCachedAllConnectors } from './connectors_cache';
 
@@ -128,23 +129,6 @@ interface ExtractedParam {
 
 // Fields that are transport/formatting concerns rather than meaningful step parameters.
 const NON_PARAMETER_FIELDS = ['pretty', 'human', 'error_trace', 'source', 'filter_path'];
-
-/**
- * Peel wrapper schemas (optional / default / nullable / lazy) until reaching the inner type.
- * Mirrors the unwrap pattern used across `@kbn/workflows-yaml` zod helpers.
- */
-function unwrapSchema(schema: z.ZodType): z.ZodType {
-  let current = schema;
-  while (
-    current instanceof z.ZodOptional ||
-    current instanceof z.ZodDefault ||
-    current instanceof z.ZodNullable ||
-    current instanceof z.ZodLazy
-  ) {
-    current = current.unwrap() as z.ZodType;
-  }
-  return current;
-}
 
 function isFieldRequired(fieldSchema: z.ZodType): boolean {
   // A field is optional when `undefined` is a valid value for it.
@@ -364,7 +348,7 @@ function extractFromUnion(schema: z.ZodUnion): ExtractedParam[] {
 /**
  * Returns a placeholder shape that surfaces the discriminator key for a
  * `ZodDiscriminatedUnion` field, or an array containing one such shape for
- * `ZodArray<ZodDiscriminatedUnion>`. Unwraps `ZodOptional`/`ZodDefault` first.
+ * `ZodArray<ZodDiscriminatedUnion>`. Unwraps optional/default/nullable/lazy wrappers first.
  *
  * Examples:
  *   z.discriminatedUnion('type', [...])              -> { type: '' }
@@ -373,10 +357,7 @@ function extractFromUnion(schema: z.ZodUnion): ExtractedParam[] {
  * Returns `undefined` for any other shape so callers can fall back.
  */
 function extractDiscriminatorStub(fieldSchema: z.ZodType): unknown {
-  let inner: z.ZodType = fieldSchema;
-  if (inner instanceof z.ZodOptional || inner instanceof z.ZodDefault) {
-    inner = inner.unwrap() as z.ZodType;
-  }
+  const inner = unwrapSchema(fieldSchema);
 
   if (inner instanceof z.ZodDiscriminatedUnion) {
     const key = getDiscriminatorKey(inner);
@@ -384,10 +365,7 @@ function extractDiscriminatorStub(fieldSchema: z.ZodType): unknown {
   }
 
   if (inner instanceof z.ZodArray) {
-    let element = inner.element as z.ZodType;
-    if (element instanceof z.ZodOptional || element instanceof z.ZodDefault) {
-      element = element.unwrap() as z.ZodType;
-    }
+    const element = unwrapSchema(inner.element as z.ZodType);
     if (element instanceof z.ZodDiscriminatedUnion) {
       const key = getDiscriminatorKey(element);
       return key ? [{ [key]: '' }] : undefined;
@@ -422,11 +400,7 @@ function getDiscriminatorKey(union: z.ZodDiscriminatedUnion): string | undefined
  */
 function extractBodyExample(bodySchema: z.ZodType): any {
   try {
-    // Handle ZodOptional wrapper
-    let schema = bodySchema;
-    if (bodySchema instanceof z.ZodOptional) {
-      schema = bodySchema.unwrap() as z.ZodType;
-    }
+    const schema = unwrapSchema(bodySchema);
 
     // If it's a ZodObject, try to extract its shape and build YAML-compatible example
     if (schema instanceof z.ZodObject) {
