@@ -16,7 +16,26 @@ import {
   RULE_API_PATH,
   EXECUTION_HISTORY_API_PATH,
   RULE_EXECUTIONS_API_PATH,
+  RULE_TEMPLATE_API_PATH,
 } from './constants';
+
+/**
+ * Serializes a query object into a search string. Arrays become repeated
+ * `key=value` pairs (e.g. `?tags=a&tags=b`) to match how the routes parse
+ * multi-value query params. `undefined` values are dropped.
+ */
+const toQueryString = (query: Record<string, string | number | string[] | undefined>): string => {
+  const params = new URLSearchParams();
+  for (const [key, value] of Object.entries(query)) {
+    if (value === undefined) continue;
+    if (Array.isArray(value)) {
+      value.forEach((item) => params.append(key, String(item)));
+    } else {
+      params.set(key, String(value));
+    }
+  }
+  return params.toString();
+};
 
 /**
  * Pre-parse input shape for {@link listRuleExecutionsUrl}. Kept local because
@@ -95,6 +114,25 @@ export const getListActionPoliciesUrl = (
   }
   return `${ACTION_POLICY_API_PATH}?${params.toString()}`;
 };
+/** URL for a single rule template resource. */
+export const getRuleTemplateUrl = (id: string) =>
+  `${RULE_TEMPLATE_API_PATH}/${encodeURIComponent(id)}`;
+
+/** URL for the find rule templates endpoint, optionally with a query string. */
+export const getFindRuleTemplatesUrl = (
+  query?: Record<string, string | number | string[] | undefined>
+): string => {
+  const qs = query ? toQueryString(query) : '';
+  return qs ? `${RULE_TEMPLATE_API_PATH}?${qs}` : RULE_TEMPLATE_API_PATH;
+};
+
+/** URL for the rule template tags aggregation endpoint. */
+export const getRuleTemplateTagsUrl = (query?: { search?: string }): string => {
+  const path = `${RULE_TEMPLATE_API_PATH}/_tags`;
+  const qs = query ? toQueryString(query) : '';
+  return qs ? `${path}?${qs}` : path;
+};
+
 const getAlertActionUrl = (groupHash: string, suffix: string) =>
   `${ALERT_API_PATH}/${encodeURIComponent(groupHash)}/${suffix}`;
 

@@ -71,6 +71,14 @@ export const ALERTING_V2_ERROR_CODES = {
    */
   RULE_RUN_ERROR: 'RULE_RUN_ERROR',
 
+  // ────────────────────── Rule templates ─────────────────────
+  /**
+   * No alerting v2 rule template exists for the given identifier. Also covers a
+   * saved object that exists but does not belong to the v2 engine, or whose
+   * stored payload no longer parses as v2 rule template data.
+   */
+  RULE_TEMPLATE_NOT_FOUND: 'RULE_TEMPLATE_NOT_FOUND',
+
   // ────────────────────── Action policies ────────────────────
   /** An action policy with the given identifier does not exist. */
   ACTION_POLICY_NOT_FOUND: 'ACTION_POLICY_NOT_FOUND',
@@ -144,6 +152,15 @@ export const ALERTING_V2_LOG_CODES = {
    * has been violated and the read path silently shrank a page.
    */
   EXECUTION_HISTORY_NORMALIZER_REJECTED_EVENTS: 'EXECUTION_HISTORY_NORMALIZER_REJECTED_EVENTS',
+
+  // ──────────────── Rule templates (graceful degradation) ────────────────
+  /**
+   * A stored `engine: "v2"` rule template failed to parse as v2 rule template
+   * data while listing templates. Fleet validates templates at install time, so
+   * this signals content that has drifted from the schema. The page is still
+   * returned; the offending template is omitted.
+   */
+  RULE_TEMPLATE_VALIDATION_FAILED: 'RULE_TEMPLATE_VALIDATION_FAILED',
   /**
    * Action-policy id resolution failed while building the search filter for
    * the action-policy execution-history search. The search proceeds without

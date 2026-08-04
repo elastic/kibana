@@ -16,6 +16,7 @@ import type { ActionPolicySavedObjectAttributes } from '../../../saved_objects';
 import { ACTION_POLICY_SAVED_OBJECT_TYPE } from '../../../saved_objects';
 import type { AlertingServerStartDependencies } from '../../../types';
 import { EncryptedSavedObjectsClientToken } from '../../dispatcher/steps/dispatch_step_tokens';
+import { escapeRegex } from '../../escape_regex';
 import { spaceIdToNamespace } from '../../space_id_to_namespace';
 import { ActionPolicySavedObjectsClientToken } from './tokens';
 import type {
@@ -31,8 +32,6 @@ export type {
   ActionPolicySavedObjectBulkUpdateItem,
   ActionPolicySavedObjectServiceContract,
 };
-
-const escapeRegex = (str: string): string => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 @injectable()
 export class ActionPolicySavedObjectService implements ActionPolicySavedObjectServiceContract {

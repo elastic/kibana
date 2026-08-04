@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { CreateActionPolicyDataInput, CreateRuleData } from '@kbn/alerting-v2-schemas';
+import type {
+  CreateActionPolicyDataInput,
+  CreateRuleData,
+  RuleTemplateData,
+} from '@kbn/alerting-v2-schemas';
 import type { AlertEvent } from '../../../server/resources/datastreams/alert_events';
 import { LOOKBACK_WINDOW, SCHEDULE_INTERVAL } from './constants';
 
@@ -55,6 +59,38 @@ export type BuildCreateRuleDataInput = Partial<CreateRuleData>;
 export const buildCreateRuleData = (input: BuildCreateRuleDataInput = {}): CreateRuleData => ({
   ...DEFAULTS,
   ...input,
+});
+
+/**
+ * Builds the attributes of an `engine: "v2"` rule template. The nested `rule`
+ * payload reuses {@link buildCreateRuleData} so seeded templates are always
+ * valid create-rule data — the read APIs parse it before responding.
+ */
+export const buildRuleTemplateData = (rule: BuildCreateRuleDataInput = {}): RuleTemplateData => ({
+  engine: 'v2',
+  rule: buildCreateRuleData(rule),
+});
+
+/**
+ * Attributes of an alerting v1 (Fleet-shaped) rule template. Seeded to assert
+ * that the v2 read APIs never surface templates belonging to the other engine.
+ *
+ * `engine` is omitted by default because that is how the templates installed
+ * before the field existed are stored; pass `engine: 'v1'` to cover templates
+ * that carry an explicit non-v2 engine.
+ */
+export const buildV1RuleTemplateAttributes = ({
+  name = 'scout-v1-template',
+  tags = ['v1-only'],
+  engine,
+}: { name?: string; tags?: string[]; engine?: string } = {}) => ({
+  ...(engine ? { engine } : {}),
+  name,
+  tags,
+  description: 'Alerting v1 rule template',
+  ruleTypeId: '.index-threshold',
+  schedule: { interval: '1m' },
+  params: { threshold: [1000] },
 });
 
 export type BuildCreateActionPolicyDataInput = Partial<CreateActionPolicyDataInput>;

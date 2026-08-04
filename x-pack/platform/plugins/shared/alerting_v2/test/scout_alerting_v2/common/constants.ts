@@ -21,12 +21,21 @@ export const ACTION_POLICY_SEARCH_MAX_LENGTH = 256;
 export const ACTION_POLICY_TAGS_MAX_COUNT = 10;
 export const ACTION_POLICY_TAG_MAX_LENGTH = 128;
 
+/** Mirrors the `per_page` upper bound in `findRuleTemplatesRequestSchema`. */
+export const RULE_TEMPLATE_PER_PAGE_MAX = 100;
+
+export {
+  MAX_TAG_LENGTH as RULE_TEMPLATE_TAG_MAX_LENGTH,
+  MAX_TAGS as RULE_TEMPLATE_TAGS_MAX_COUNT,
+} from '@kbn/alerting-v2-constants';
 export {
   ALERTING_V2_RULE_API_PATH as RULE_API_PATH,
   ALERTING_V2_ALERT_API_PATH as ALERT_API_PATH,
   ALERTING_V2_ACTION_POLICY_API_PATH as ACTION_POLICY_API_PATH,
   ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_API_PATH as EXECUTION_HISTORY_API_PATH,
   ALERTING_V2_EXECUTION_HISTORY_RULES_API_PATH as RULE_EXECUTIONS_API_PATH,
+  ALERTING_V2_INTERNAL_RULE_TEMPLATE_API_PATH as RULE_TEMPLATE_API_PATH,
 } from '@kbn/alerting-v2-constants';
+export { RULE_TEMPLATE_SAVED_OBJECT_TYPE } from '../../../common/saved_object_types';
 export { ALERT_EVENTS_DATA_STREAM } from '../../../server/resources/datastreams/alert_events';
 export { ALERT_ACTIONS_DATA_STREAM } from '../../../server/resources/datastreams/alert_actions';

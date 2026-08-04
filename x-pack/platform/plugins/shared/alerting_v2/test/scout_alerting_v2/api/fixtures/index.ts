@@ -22,6 +22,7 @@ import {
   getRuleChangesHistoryApiService,
   getRuleExecutionsApiService,
   getRulesApiService,
+  getRuleTemplatesApiService,
   getTaskManagerService,
   getTelemetryService,
   getWorkflowsApiService,
@@ -34,6 +35,7 @@ import {
   type RuleExecutionsApiService,
   type RulesApiService,
   type RuleEventsApiService,
+  type RuleTemplatesApiService,
   type TaskManagerService,
   type TelemetryService,
   type WorkflowsApiService,
@@ -44,6 +46,7 @@ import { getSourceIndexApiService } from '../../common/services/source_index_api
 
 export interface AlertingApiServices {
   rules: RulesApiService;
+  ruleTemplates: RuleTemplatesApiService;
   ruleChangesHistory: RuleChangesHistoryApiService;
   ruleEvents: RuleEventsApiService;
   alertActionsEvents: AlertActionsEventsService;
@@ -81,6 +84,7 @@ export const buildAlertingApiServices = ({
   const taskManager = getTaskManagerService({ kbnClient, log });
   return {
     rules: getRulesApiService({ kbnClient, log }),
+    ruleTemplates: getRuleTemplatesApiService({ esClient, log }),
     ruleChangesHistory: getRuleChangesHistoryApiService({ esClient, log, config }),
     ruleEvents: getRuleEventsApiService({ esClient, log }),
     alertActionsEvents: getAlertActionsEventsService({ esClient, log }),
@@ -131,6 +135,8 @@ export {
   buildExternalAlertEvent,
   buildCreateRuleData,
   buildCreateActionPolicyData,
+  buildRuleTemplateData,
+  buildV1RuleTemplateAttributes,
   buildWorkflowYaml,
   getSnoozeDate,
 } from '../../common/builders';
@@ -166,11 +172,17 @@ export {
   getUpdateActionPolicyApiKeyUrl,
   getListExecutionHistoryUrl,
   listRuleExecutionsUrl,
+  getFindRuleTemplatesUrl,
+  getRuleTemplateUrl,
+  getRuleTemplateTagsUrl,
 } from '../../common/urls';
 export {
   ACTION_POLICY_PER_PAGE_MAX,
   ACTION_POLICY_SEARCH_MAX_LENGTH,
   ACTION_POLICY_TAG_MAX_LENGTH,
   ACTION_POLICY_TAGS_MAX_COUNT,
+  RULE_TEMPLATE_PER_PAGE_MAX,
+  RULE_TEMPLATE_TAG_MAX_LENGTH,
+  RULE_TEMPLATE_TAGS_MAX_COUNT,
 } from '../../common/constants';
 export * as testData from '../../common/constants';

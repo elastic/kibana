@@ -8,3 +8,8 @@
 export const RULE_SAVED_OBJECT_TYPE = 'alerting_rule';
 export const ACTION_POLICY_SAVED_OBJECT_TYPE = 'alerting_action_policy';
 export const API_KEY_PENDING_INVALIDATION_TYPE = 'alerting_api_key_pending_invalidation';
+/**
+ * Registered by the alerting (v1) plugin and shared by both engines. Alerting v2
+ * only ever reads the documents carrying `engine: "v2"`.
+ */
+export const RULE_TEMPLATE_SAVED_OBJECT_TYPE = 'alerting_rule_template';

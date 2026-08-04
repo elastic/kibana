@@ -59,6 +59,9 @@ import { UpsertActionPolicyRoute } from '../routes/action_policies/upsert_action
 import { MatchActionPoliciesForRuleRoute } from '../routes/action_policies/match_action_policies_for_rule_route';
 import { CreateAlertEventRoute } from '../routes/alert_events/create_alert_event_route';
 import { CreateAlertEventBySourceRoute } from '../routes/alert_events/create_alert_event_by_source_route';
+import { FindRuleTemplatesRoute } from '../routes/rule_templates/find_rule_templates_route';
+import { GetRuleTemplateRoute } from '../routes/rule_templates/get_rule_template_route';
+import { GetRuleTemplateTagsRoute } from '../routes/rule_templates/get_rule_template_tags_route';
 
 /**
  * TODO: https://github.com/elastic/rna-program/issues/426
@@ -123,4 +126,7 @@ export function bindRoutes({ bind }: ContainerModuleLoadOptions) {
   bind(Route).toConstantValue(MatchActionPoliciesForRuleRoute);
   bind(Route).toConstantValue(CreateAlertEventRoute);
   bind(Route).toConstantValue(CreateAlertEventBySourceRoute);
+  bind(Route).toConstantValue(FindRuleTemplatesRoute);
+  bind(Route).toConstantValue(GetRuleTemplateTagsRoute);
+  bind(Route).toConstantValue(GetRuleTemplateRoute);
 }

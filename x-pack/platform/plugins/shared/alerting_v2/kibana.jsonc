@@ -10,6 +10,9 @@
     "server": true,
     "configPath": ["xpack", "alerting_v2"],
     "requiredPlugins": [
+      // Registers the shared `alerting_rule_template` saved object type that the
+      // v2 rule template APIs read.
+      "alerting",
       "taskManager",
       "features",
       "spaces",
