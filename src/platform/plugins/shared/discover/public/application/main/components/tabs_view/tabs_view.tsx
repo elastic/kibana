@@ -96,7 +96,13 @@ export const TabsView = (props: SingleTabViewProps) => {
             )}
           </>
         );
-        return <ChromeAppHeader menu={topNavMenuItems} share={shareAction} tabsBar={tabsBarWithDelimiter} />;
+        return (
+          <ChromeAppHeader
+            menu={topNavMenuItems}
+            share={shareAction}
+            tabsBar={tabsBarWithDelimiter}
+          />
+        );
       };
     }
   }, [isChromeNextProjectHeader, topNavMenuItems, shareAction, euiTheme]);
