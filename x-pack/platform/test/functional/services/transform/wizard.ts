@@ -636,7 +636,20 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
     },
 
     async fillFilterTermValue(value: string) {
-      await comboBox.set('transformFilterTermValueSelector', value);
+      // The term filter value combobox is async: it validates the typed value against
+      // field-value suggestions fetched from Elasticsearch on a debounce. Selecting the
+      // value before that round-trip settles leaves the combobox flagged invalid, which
+      // keeps the "Apply" button disabled. Re-run the selection until the value is
+      // committed as a valid option (by which point the suggestions have loaded).
+      await retry.try(async () => {
+        await comboBox.set('transformFilterTermValueSelector', value);
+        const comboBoxElement = await testSubjects.find('transformFilterTermValueSelector');
+        if (!(await comboBox.checkValidity(comboBoxElement))) {
+          throw new Error(
+            `Expected term filter value "${value}" to be committed as a valid selection`
+          );
+        }
+      });
     },
 
     async fillPercentilesAggPercents(value: number[]) {
