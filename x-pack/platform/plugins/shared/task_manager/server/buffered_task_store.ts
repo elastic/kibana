@@ -94,7 +94,7 @@ export class BufferedTaskStore implements Updatable {
     await unwrapPromise(this.bufferedRemove({ id }));
   }
 
-  public async get(id: string): Promise<ConcreteTaskInstance | null> {
+  public async get(id: string): Promise<ConcreteTaskInstance> {
     return this.taskStore.get(id);
   }
 }

@@ -3459,13 +3459,13 @@ describe('TaskManagerRunner', () => {
       await runner.run();
 
       expect(logger.warn).toHaveBeenCalledWith(
-        `Resolving task document version conflict after task run for bar:${id}`,
+        `Resolving task document version conflict after task run for task "bar:${id}"`,
         {
           tags: [id, 'bar', 'task-doc-resolve-conflict'],
         }
       );
       expect(logger.warn).toHaveBeenCalledWith(
-        `Resolved task document version conflict after task run for bar:${id}`,
+        `Resolved task document version conflict after task run for task "bar:${id}"`,
         {
           tags: [id, 'bar', 'task-doc-resolve-conflict'],
         }
@@ -3527,13 +3527,13 @@ describe('TaskManagerRunner', () => {
       await runner.run();
 
       expect(logger.warn).toHaveBeenCalledWith(
-        `Resolving task document version conflict after task run for bar:${id}`,
+        `Resolving task document version conflict after task run for task "bar:${id}"`,
         {
           tags: [id, 'bar', 'task-doc-resolve-conflict'],
         }
       );
       expect(logger.warn).toHaveBeenCalledWith(
-        `Resolved task document version conflict after task run for bar:${id}`,
+        `Resolved task document version conflict after task run for task "bar:${id}"`,
         {
           tags: [id, 'bar', 'task-doc-resolve-conflict'],
         }

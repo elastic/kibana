@@ -19,7 +19,7 @@ export async function resolveTaskDocumentConflicts(
 ): Promise<void> {
   const label = `${opts.originalTask.taskType}:${opts.taskId}`;
   const tags = [opts.taskId, opts.originalTask.taskType, 'task-doc-resolve-conflict'];
-  opts.logger.warn(`Resolving task document version conflict after task run for ${label}`, {
+  opts.logger.warn(`Resolving task document version conflict after task run for task "${label}"`, {
     tags,
   });
 
@@ -51,7 +51,7 @@ export async function resolveTaskDocumentConflicts(
     return;
   }
 
-  opts.logger.warn(`Resolved task document version conflict after task run for ${label}`, {
+  opts.logger.warn(`Resolved task document version conflict after task run for task "${label}"`, {
     tags,
   });
 }
@@ -68,13 +68,16 @@ async function resolveTaskDocumentConflictsOnce({
   tags,
 }: ResolveTaskDocumentConflictsOnceOpts): Promise<void> {
   logger.debug(
-    `Resolving task document conflict for task "${taskId}" (attempt ${attempt}/${maxAttempts}).`
+    `Resolving task document conflict for task "${label}" (attempt ${attempt}/${maxAttempts}).`,
+    { tags }
   );
 
   // if current task is not found, consider transient and retry
-  const currentTask = await bufferedTaskStore.get(taskId);
-  if (currentTask == null) {
-    throw Error(`Unable to resolve task document conflicts for task "${taskId}": task not found`);
+  let currentTask: ConcreteTaskInstance;
+  try {
+    currentTask = await bufferedTaskStore.get(taskId);
+  } catch (error) {
+    throw Error(`Unable to resolve task document conflicts for task "${label}": ${error.message}`);
   }
 
   // A number of "permanent" conditions can occur that mean we should not retry,
@@ -82,13 +85,13 @@ async function resolveTaskDocumentConflictsOnce({
 
   if (currentTask.ownerId && currentTask.ownerId !== originalTask.ownerId) {
     throwNotRetryableError(
-      `Unable to resolve task document conflicts for task "${taskId}": task has been claimed by another worker`
+      `Unable to resolve task document conflicts for task "${label}": task has been claimed by another worker`
     );
   }
 
   if (currentTask.attempts && currentTask.attempts !== originalTask.attempts) {
     throwNotRetryableError(
-      `Unable to resolve task document conflicts for task "${taskId}": task attempts has been updated by another worker`
+      `Unable to resolve task document conflicts for task "${label}": task attempts has been updated by another worker`
     );
   }
 
@@ -97,7 +100,7 @@ async function resolveTaskDocumentConflictsOnce({
     currentTask.startedAt?.valueOf() !== originalTask.startedAt?.valueOf()
   ) {
     throwNotRetryableError(
-      `Unable to resolve task document conflicts for task "${taskId}": task startedAt has been updated by another worker`
+      `Unable to resolve task document conflicts for task "${label}": task startedAt has been updated by another worker`
     );
   }
 

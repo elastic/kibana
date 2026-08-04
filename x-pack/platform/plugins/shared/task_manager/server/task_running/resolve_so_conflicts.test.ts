@@ -12,6 +12,8 @@ import { TaskStatus } from '../task';
 import { resolveTaskDocumentConflicts } from './resolve_so_conflicts';
 import type { Updatable } from './task_runner';
 
+const LOG_META = { tags: ['task-1', 'bar', 'task-doc-resolve-conflict'] };
+
 const createTask = (overrides: Partial<ConcreteTaskInstance> = {}): ConcreteTaskInstance => ({
   id: 'task-1',
   taskType: 'bar',
@@ -74,21 +76,18 @@ describe('resolveTaskDocumentConflicts', () => {
     await resolve();
 
     expect(logger.debug).toHaveBeenCalledWith(
-      'Resolving task document conflict for task "task-1" (attempt 1/3).'
+      'Resolving task document conflict for task "bar:task-1" (attempt 1/3).',
+      LOG_META
     );
     expect(logger.warn).toHaveBeenNthCalledWith(
       1,
-      'Resolving task document version conflict after task run for bar:task-1',
-      {
-        tags: ['task-1', 'bar', 'task-doc-resolve-conflict'],
-      }
+      'Resolving task document version conflict after task run for task "bar:task-1"',
+      LOG_META
     );
     expect(logger.warn).toHaveBeenNthCalledWith(
       2,
-      'Resolved task document version conflict after task run for bar:task-1',
-      {
-        tags: ['task-1', 'bar', 'task-doc-resolve-conflict'],
-      }
+      'Resolved task document version conflict after task run for task "bar:task-1"',
+      LOG_META
     );
 
     expect(store.get).toHaveBeenCalledWith('task-1');
@@ -158,21 +157,23 @@ describe('resolveTaskDocumentConflicts', () => {
 
     expect(store.get).toHaveBeenCalledTimes(2);
     expect(store.partialUpdate).toHaveBeenCalledTimes(2);
-    expect(logger.debug).toHaveBeenCalledWith(
-      'Resolving task document conflict for task "task-1" (attempt 2/3).'
+    expect(logger.debug).toHaveBeenNthCalledWith(
+      2,
+      'Resolving task document conflict for task "bar:task-1" (attempt 2/3).',
+      LOG_META
     );
   });
 
   test('retries when the task is not found and logs error after exhausting retries', async () => {
-    store.get.mockResolvedValue(null);
+    store.get.mockRejectedValue(new Error('task not found'));
 
     await resolve();
 
     expect(store.partialUpdate).not.toHaveBeenCalled();
     expect(store.get).toHaveBeenCalledTimes(3);
     expect(logger.error).toHaveBeenCalledWith(
-      'Error resolving task document version conflict after task run: Unable to resolve task document conflicts for task "task-1": task not found',
-      { tags: ['task-1', 'bar', 'task-doc-resolve-conflict'] }
+      'Error resolving task document version conflict after task run: Unable to resolve task document conflicts for task "bar:task-1": task not found',
+      LOG_META
     );
   });
 
@@ -187,7 +188,7 @@ describe('resolveTaskDocumentConflicts', () => {
     expect(store.partialUpdate).toHaveBeenCalledTimes(3);
     expect(logger.error).toHaveBeenCalledWith(
       'Error resolving task document version conflict after task run: persistent conflict',
-      { tags: ['task-1', 'bar', 'task-doc-resolve-conflict'] }
+      LOG_META
     );
   });
 
@@ -201,8 +202,8 @@ describe('resolveTaskDocumentConflicts', () => {
     expect(store.get).toHaveBeenCalledTimes(1);
     expect(store.partialUpdate).not.toHaveBeenCalled();
     expect(logger.error).toHaveBeenCalledWith(
-      'Skipping resolving task document version conflict after task run: Unable to resolve task document conflicts for task "task-1": task has been claimed by another worker',
-      { tags: ['task-1', 'bar', 'task-doc-resolve-conflict'] }
+      'Skipping resolving task document version conflict after task run: Unable to resolve task document conflicts for task "bar:task-1": task has been claimed by another worker',
+      LOG_META
     );
   });
 
@@ -214,8 +215,8 @@ describe('resolveTaskDocumentConflicts', () => {
     expect(store.get).toHaveBeenCalledTimes(1);
     expect(store.partialUpdate).not.toHaveBeenCalled();
     expect(logger.error).toHaveBeenCalledWith(
-      'Skipping resolving task document version conflict after task run: Unable to resolve task document conflicts for task "task-1": task attempts has been updated by another worker',
-      { tags: ['task-1', 'bar', 'task-doc-resolve-conflict'] }
+      'Skipping resolving task document version conflict after task run: Unable to resolve task document conflicts for task "bar:task-1": task attempts has been updated by another worker',
+      LOG_META
     );
   });
 
@@ -228,12 +229,12 @@ describe('resolveTaskDocumentConflicts', () => {
     expect(store.partialUpdate).not.toHaveBeenCalled();
     expect(logger.warn).toHaveBeenNthCalledWith(
       1,
-      'Resolving task document version conflict after task run for bar:task-1',
-      { tags: ['task-1', 'bar', 'task-doc-resolve-conflict'] }
+      'Resolving task document version conflict after task run for task "bar:task-1"',
+      LOG_META
     );
     expect(logger.error).toHaveBeenCalledWith(
-      'Skipping resolving task document version conflict after task run: Unable to resolve task document conflicts for task "task-1": task startedAt has been updated by another worker',
-      { tags: ['task-1', 'bar', 'task-doc-resolve-conflict'] }
+      'Skipping resolving task document version conflict after task run: Unable to resolve task document conflicts for task "bar:task-1": task startedAt has been updated by another worker',
+      LOG_META
     );
   });
 });

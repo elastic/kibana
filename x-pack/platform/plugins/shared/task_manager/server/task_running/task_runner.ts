@@ -107,7 +107,7 @@ export interface Updatable {
     options: { validate: boolean; doc: ConcreteTaskInstance }
   ): Promise<ConcreteTaskInstance>;
   remove(id: string): Promise<void>;
-  get(id: string): Promise<ConcreteTaskInstance | null>;
+  get(id: string): Promise<ConcreteTaskInstance>;
 }
 
 type Opts = {
