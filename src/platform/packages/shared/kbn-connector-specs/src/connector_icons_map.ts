@@ -294,10 +294,16 @@ export const ConnectorIconsMap: Map<
     '.datadog',
     lazy(() => import(/* webpackChunkName: "connectorIconDatadog" */ './specs/datadog/icon')),
   ],
-
   [
     '.jenkins',
     lazy(() => import(/* webpackChunkName: "connectorIconjenkins" */ './specs/jenkins/icon')),
+  ],
+  [
+    '.aws_cloudwatch',
+    lazy(
+      () =>
+        import(/* webpackChunkName: "connectorIconawscloudwatch" */ './specs/aws_cloudwatch/icon')
+    ),
   ],
   [
     '.aws_x_ray',
