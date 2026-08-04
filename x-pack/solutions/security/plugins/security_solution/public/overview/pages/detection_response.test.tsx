@@ -13,7 +13,7 @@ import { TestProviders } from '../../common/mock';
 import { noCasesPermissions, readCasesPermissions } from '../../cases_test_utils';
 import { useKibana as mockUseKibana } from '../../common/lib/kibana/__mocks__';
 import { useDataView } from '../../data_view_manager/hooks/use_data_view';
-import { getMockDataViewWithMatchedIndices } from '../../data_view_manager/mocks/mock_data_view';
+import { getMockDataViewWithMatchedIndices } from '../../data_view_manager/mocks';
 import { defaultImplementation } from '../../data_view_manager/hooks/__mocks__/use_data_view';
 
 jest.mock('../components/detection_response/alerts_by_status', () => ({

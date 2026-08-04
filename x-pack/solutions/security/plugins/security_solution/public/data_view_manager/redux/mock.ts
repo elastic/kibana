@@ -8,6 +8,10 @@
 import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID } from '../constants';
 import { initialDataViewManagerState, type RootState } from './reducer';
 
+/** The timeline scope data view id used by the mock state; exported so tests can assert on it
+ * without reaching into the state shape. */
+export const mockTimelineDataViewId = 'mock-timeline-data-view';
+
 const dataViewManagerState = structuredClone(initialDataViewManagerState).dataViewManager;
 
 export const mockDataViewManagerState: RootState = {
@@ -15,7 +19,7 @@ export const mockDataViewManagerState: RootState = {
     ...dataViewManagerState,
     timeline: {
       ...dataViewManagerState.timeline,
-      dataViewId: 'mock-timeline-data-view',
+      dataViewId: mockTimelineDataViewId,
       status: 'ready',
     },
     default: {

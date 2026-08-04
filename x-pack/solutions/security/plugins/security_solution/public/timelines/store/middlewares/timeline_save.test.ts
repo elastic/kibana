@@ -26,8 +26,11 @@ import {
   showCallOutUnauthorizedMsg,
   startTimelineSaving,
 } from '../actions';
-import { getMockDataViewWithMatchedIndices } from '../../../data_view_manager/mocks/mock_data_view';
-import { mockDataViewManagerState } from '../../../data_view_manager/redux/mock';
+import {
+  getMockDataViewWithMatchedIndices,
+  mockDataViewManagerState,
+  mockTimelineDataViewId,
+} from '../../../data_view_manager/mocks';
 
 jest.mock('../actions', () => {
   const actual = jest.requireActual('../actions');
@@ -91,7 +94,7 @@ describe('Timeline save middleware', () => {
     expect(persistTimeline as unknown as jest.Mock).toHaveBeenCalledWith(
       expect.objectContaining({
         timeline: expect.objectContaining({
-          dataViewId: mockDataViewManagerState.dataViewManager.timeline.dataViewId,
+          dataViewId: mockTimelineDataViewId,
           indexNames: ['test'],
         }),
       })

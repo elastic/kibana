@@ -15,10 +15,7 @@ import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { getColumnHeaders } from '../../body/column_headers/helpers';
-import {
-  mockBrowserFieldsWithId,
-  mockDataViewSpec,
-} from '../../../../../data_view_manager/mocks/timeline_data_view';
+import { mockBrowserFieldsWithId, mockDataViewSpec } from '../../../../../data_view_manager/mocks';
 import * as timelineActions from '../../../../store/actions';
 import { defaultUdtHeaders } from '../../body/column_headers/default_headers';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';

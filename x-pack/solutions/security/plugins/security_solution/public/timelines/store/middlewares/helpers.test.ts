@@ -10,7 +10,7 @@ import { TimelineId } from '../../../../common/types/timeline';
 import { TimelineStatusEnum } from '../../../../common/api/timeline';
 import { persistTimeline } from '../../containers/api';
 import { ensureTimelineIsSaved, extractTimelineIdsAndVersions } from './helpers';
-import { getMockDataViewWithMatchedIndices } from '../../../data_view_manager/mocks/mock_data_view';
+import { getMockDataViewWithMatchedIndices } from '../../../data_view_manager/mocks';
 import type { TimelineModel } from '../model';
 import { parse } from 'uuid';
 

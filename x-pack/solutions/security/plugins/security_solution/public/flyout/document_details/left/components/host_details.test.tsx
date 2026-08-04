@@ -41,7 +41,7 @@ import { USER_PREVIEW_BANNER } from '../../../../flyout_v2/document/main/compone
 import { NetworkPreviewPanelKey, NETWORK_PREVIEW_BANNER } from '../../../network_details';
 import { useAlertsByStatus } from '../../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status';
 import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
-import { getMockDataViewWithMatchedIndices } from '../../../../data_view_manager/mocks/mock_data_view';
+import { getMockDataViewWithMatchedIndices } from '../../../../data_view_manager/mocks';
 
 jest.mock('@kbn/expandable-flyout');
 jest.mock('@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview');

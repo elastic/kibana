@@ -12,7 +12,7 @@ import { wrapper } from '../../mocks';
 import { useLensAttributes } from '../../use_lens_attributes';
 
 import { getAuthenticationLensAttributes } from './authentication';
-import { getMockDataViewWithMatchedIndices } from '../../../../../data_view_manager/mocks/mock_data_view';
+import { getMockDataViewWithMatchedIndices } from '../../../../../data_view_manager/mocks';
 import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
 
 jest.mock('uuid', () => ({

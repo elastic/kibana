@@ -24,7 +24,7 @@ import type { GroupingAggregation } from '@kbn/grouping';
 import { defaultGroupingOptions, defaultGroupStatsAggregations } from './grouping_settings';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
-import { getMockDataViewWithMatchedIndices } from '../../../data_view_manager/mocks/mock_data_view';
+import { getMockDataViewWithMatchedIndices } from '../../../data_view_manager/mocks';
 import { parseGroupingQuery } from '@kbn/grouping/src';
 import type { AlertsGroupingAggregation } from './grouping_settings/types';
 

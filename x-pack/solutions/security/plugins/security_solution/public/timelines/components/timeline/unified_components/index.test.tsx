@@ -12,10 +12,7 @@ import { UnifiedTimeline } from '.';
 import { TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
 import { useTimelineEvents } from '../../../containers';
 import { useTimelineEventsDetails } from '../../../containers/details';
-import {
-  mockBrowserFieldsWithId,
-  mockDataViewSpec,
-} from '../../../../data_view_manager/mocks/timeline_data_view';
+import { mockBrowserFieldsWithId, mockDataViewSpec } from '../../../../data_view_manager/mocks';
 import {
   createSecuritySolutionStorageMock,
   mockTimelineData,

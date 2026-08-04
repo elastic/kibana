@@ -11,7 +11,7 @@ import { wrapper } from '../../mocks';
 import { useLensAttributes } from '../../use_lens_attributes';
 
 import { kpiUniqueIpsDestinationMetricLensAttributes } from './kpi_unique_ips_destination_metric';
-import { getMockDataViewWithMatchedIndices } from '../../../../../data_view_manager/mocks/mock_data_view';
+import { getMockDataViewWithMatchedIndices } from '../../../../../data_view_manager/mocks';
 import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
 
 jest.mock('../../../../utils/route/use_route_spy', () => ({

@@ -8,7 +8,7 @@
 import { DataView } from '@kbn/data-views-plugin/common';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 
-import { mockDataViewSpec } from '../../../../data_view_manager/mocks/timeline_data_view';
+import { mockDataViewSpec } from '../../../../data_view_manager/mocks';
 import { mockTimelineData } from '../../../../common/mock';
 import type { TransformTimelineItemToUnifiedRowsReturn } from './utils';
 import { transformTimelineItemToUnifiedRows } from './utils';

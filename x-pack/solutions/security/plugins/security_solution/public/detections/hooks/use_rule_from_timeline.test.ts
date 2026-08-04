@@ -15,10 +15,7 @@ import { mockTimeline } from '../../../server/lib/timeline/__mocks__/create_time
 import type { TimelineModel } from '../..';
 import type { ResolveTimelineResponse } from '../../../common/api/timeline';
 import { useDataView } from '../../data_view_manager/hooks/use_data_view';
-import {
-  getMockDataView,
-  getMockDataViewWithMatchedIndices,
-} from '../../data_view_manager/mocks/mock_data_view';
+import { getMockDataView, getMockDataViewWithMatchedIndices } from '../../data_view_manager/mocks';
 import { withIndices } from '../../data_view_manager/hooks/__mocks__/use_data_view';
 
 jest.mock('../../common/hooks/use_experimental_features');
