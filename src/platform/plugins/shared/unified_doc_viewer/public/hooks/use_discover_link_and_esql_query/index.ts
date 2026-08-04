@@ -7,15 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { from, type QueryOperator } from '@kbn/esql-composer';
+import { esql } from '@elastic/esql';
+import type { ESQLAstExpression } from '@elastic/esql/types';
 import { useGetGenerateDiscoverLink } from '../use_generate_discover_link';
-import { withUnmappedFields, type UnmappedFieldsPolicy } from './esql_unmapped_fields';
-
-export { withUnmappedFields, type UnmappedFieldsPolicy } from './esql_unmapped_fields';
+import { withUnmappedFields, type UnmappedFieldsPolicy } from '../esql_unmapped_fields';
 
 export interface UseDiscoverLinkAndEsqlQueryParams {
   indexPattern?: string;
-  whereClause?: QueryOperator;
+  whereClause?: ESQLAstExpression;
   unmappedFieldsPolicy?: UnmappedFieldsPolicy;
 }
 
@@ -33,10 +32,13 @@ export function useDiscoverLinkAndEsqlQuery({
     return { discoverUrl: undefined, esqlQueryString: undefined };
   }
 
-  const rawQuery = from(indexPattern).pipe(whereClause).toString();
-  const esqlQueryString = unmappedFieldsPolicy
-    ? withUnmappedFields(rawQuery, { policy: unmappedFieldsPolicy })
-    : rawQuery;
+  // Build a fresh query per call because `ComposerQuery.where` mutates in place.
+  const query = esql.from(indexPattern);
+  if (unmappedFieldsPolicy) {
+    withUnmappedFields(query, { policy: unmappedFieldsPolicy });
+  }
+  query.where`${whereClause}`;
+  const esqlQueryString = query.print('pipe-multiline');
   const discoverUrl = generateDiscoverLink(whereClause);
 
   return { discoverUrl, esqlQueryString };

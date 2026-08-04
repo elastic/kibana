@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { TRACE_ID_FIELD } from '@kbn/discover-utils';
-import { where } from '@kbn/esql-composer';
+import { esql } from '@elastic/esql';
 import { createRestorableStateProvider } from '@kbn/restorable-state';
 import { getEbtProps } from '@kbn/ebt-click';
 import { useDataSourcesContext } from '../../../../../hooks/use_data_sources';
@@ -129,7 +129,7 @@ function InternalTraceWaterfall({
 
   const { discoverUrl, esqlQueryString } = useDiscoverLinkAndEsqlQuery({
     indexPattern: indexes.apm.traces,
-    whereClause: where(`${TRACE_ID_FIELD} == ?traceId`, { traceId }),
+    whereClause: esql.exp`${esql.col(TRACE_ID_FIELD)} == ${esql.str(traceId)}`,
   });
 
   const openInDiscoverSectionAction = useOpenInDiscoverSectionAction({

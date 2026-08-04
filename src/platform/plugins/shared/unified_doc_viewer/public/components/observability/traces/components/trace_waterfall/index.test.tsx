@@ -7,11 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import type { TraceWaterfallRestorableState } from '.';
 import { TraceWaterfall } from '.';
+// Imported after the component so `@kbn/discover-utils` finishes initializing its
+// barrel exports (e.g. TRACE_ID_FIELD) before this deep `__mocks__` entry pulls in
+// the same package via a different path.
+import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { setUnifiedDocViewerServices } from '../../../../../plugin';
 import type { UnifiedDocViewerServices } from '../../../../../types';
 import type { FullScreenWaterfallProps } from '../full_screen_waterfall';
@@ -69,10 +72,6 @@ const mockFullScreenWaterfall = jest.fn(
 
 jest.mock('../full_screen_waterfall', () => ({
   FullScreenWaterfall: (props: FullScreenWaterfallProps) => mockFullScreenWaterfall(props),
-}));
-
-jest.mock('@kbn/esql-composer', () => ({
-  where: jest.fn(),
 }));
 
 describe('TraceWaterfall', () => {

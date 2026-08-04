@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { esql } from '@elastic/esql';
 import type { SpanLinkDetails } from '@kbn/apm-types';
 import {
   SERVICE_NAME_FIELD,
@@ -14,24 +15,24 @@ import {
   TRACE_ID_FIELD,
   TRANSACTION_ID_FIELD,
 } from '@kbn/discover-utils';
-import { where } from '@kbn/esql-composer';
+import type { ESQLAstExpression } from '@elastic/esql/types';
 
-export function createSpanNameWhereClause(item: SpanLinkDetails) {
+export function createSpanNameWhereClause(item: SpanLinkDetails): ESQLAstExpression {
   const transactionId = item.details?.transactionId;
   if (transactionId) {
-    return where(`${TRANSACTION_ID_FIELD} == ?transactionId`, [{ transactionId }]);
+    return esql.exp`${esql.col(TRANSACTION_ID_FIELD)} == ${esql.str(transactionId)}`;
   }
 
-  return where(`${SPAN_ID_FIELD} == ?spanId`, [{ spanId: item.spanId }]);
+  return esql.exp`${esql.col(SPAN_ID_FIELD)} == ${esql.str(item.spanId)}`;
 }
 
-export function createServiceNameWhereClause(item: SpanLinkDetails) {
+export function createServiceNameWhereClause(item: SpanLinkDetails): ESQLAstExpression | undefined {
   const serviceName = item.details?.serviceName;
   if (!serviceName) return undefined;
 
-  return where(`${SERVICE_NAME_FIELD} == ?serviceName`, [{ serviceName }]);
+  return esql.exp`${esql.col(SERVICE_NAME_FIELD)} == ${esql.str(serviceName)}`;
 }
 
-export function createTraceIdWhereClause(item: SpanLinkDetails) {
-  return where(`${TRACE_ID_FIELD} == ?traceId`, [{ traceId: item.traceId }]);
+export function createTraceIdWhereClause(item: SpanLinkDetails): ESQLAstExpression {
+  return esql.exp`${esql.col(TRACE_ID_FIELD)} == ${esql.str(item.traceId)}`;
 }

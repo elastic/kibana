@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { Builder, esql } from '@elastic/esql';
+import type { ESQLAstExpression } from '@elastic/esql/types';
 import { fieldConstants } from '@kbn/discover-utils';
-import { where } from '@kbn/esql-composer';
 
 interface ErrorField {
   fieldName: string;
@@ -17,16 +18,6 @@ interface ErrorField {
 
 function needsNormalization(message: string): boolean {
   return /\n|\t|\r/.test(message);
-}
-
-function escapeEsqlStringLiteral(value: string): string {
-  // Backslashes must be escaped FIRST to prevent double-escaping issues
-  return value
-    .replace(/\\/g, '\\\\') // Escape backslashes first
-    .replace(/"/g, '\\"') // Escape double quotes
-    .replace(/\t/g, '\\t') // Escape tabs
-    .replace(/\r/g, '\\r') // Escape carriage returns
-    .replace(/\n/g, '\\n'); // Escape newlines
 }
 
 export function getEsqlQuery({
@@ -39,56 +30,41 @@ export function getEsqlQuery({
   culprit?: string;
   message?: ErrorField;
   type?: ErrorField;
-}) {
-  const conditions: string[] = [];
-  const params: Record<string, string> = {};
-
-  if (serviceName) {
-    const paramName = 'serviceName';
-    conditions.push(`${fieldConstants.SERVICE_NAME_FIELD} == ?${paramName}`);
-    params[paramName] = serviceName;
-  } else {
+}): ESQLAstExpression | undefined {
+  if (!serviceName) {
     return undefined;
   }
 
+  const conditions: ESQLAstExpression[] = [
+    esql.exp`${esql.col(fieldConstants.SERVICE_NAME_FIELD)} == ${esql.str(serviceName)}`,
+  ];
+
   if (culprit) {
-    const paramName = 'culprit';
-    conditions.push(`${fieldConstants.ERROR_CULPRIT_FIELD} == ?${paramName}`);
-    params[paramName] = culprit;
+    conditions.push(
+      esql.exp`${esql.col(fieldConstants.ERROR_CULPRIT_FIELD)} == ${esql.str(culprit)}`
+    );
   }
 
   if (message?.value !== undefined && message?.fieldName) {
     const messageValue = String(message.value);
-    if (needsNormalization(messageValue)) {
-      const escapedMessage = escapeEsqlStringLiteral(messageValue);
-      conditions.push(`MATCH_PHRASE(${message.fieldName}, "${escapedMessage}")`);
-    } else {
-      const paramName = 'message';
-      conditions.push(`${message.fieldName} == ?${paramName}`);
-      params[paramName] = messageValue;
-    }
+    const messageColumn = esql.col(message.fieldName);
+    conditions.push(
+      needsNormalization(messageValue)
+        ? esql.exp`MATCH_PHRASE(${messageColumn}, ${esql.str(messageValue)})`
+        : esql.exp`${messageColumn} == ${esql.str(messageValue)}`
+    );
   }
 
   if (type?.value !== undefined && type?.fieldName) {
-    const typeFieldName = type.fieldName;
+    const typeColumn = esql.col(type.fieldName);
     if (Array.isArray(type.value)) {
-      const matchConditions = type.value.map((val) => {
-        const stringValue = String(val);
-        // Security: Escape all special characters to prevent ESQL injection
-        const escapedValue = escapeEsqlStringLiteral(stringValue);
-        return `MATCH(${typeFieldName}, "${escapedValue}")`;
+      type.value.forEach((val) => {
+        conditions.push(esql.exp`MATCH(${typeColumn}, ${esql.str(String(val))})`);
       });
-      conditions.push(matchConditions.join(' AND '));
     } else {
-      const paramName = 'type';
-      conditions.push(`${typeFieldName} == ?${paramName}`);
-      params[paramName] = type.value;
+      conditions.push(esql.exp`${typeColumn} == ${esql.str(type.value)}`);
     }
   }
 
-  if (conditions.length === 0) {
-    return undefined;
-  }
-
-  return where(conditions.join(' AND '), params);
+  return conditions.reduce((left, right) => Builder.expression.func.binary('and', [left, right]));
 }

@@ -20,7 +20,7 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useMemo, useState } from 'react';
-import { where } from '@kbn/esql-composer';
+import { esql } from '@elastic/esql';
 import {
   OTEL_LINKS_SPAN_ID,
   OTEL_LINKS_TRACE_ID,
@@ -32,6 +32,7 @@ import type { SpanLinkDetails } from '@kbn/apm-types';
 import { SPAN_LINKS_SPAN_ID } from '@kbn/apm-types';
 import type { ProcessorEvent } from '@kbn/apm-types-shared';
 import { getEbtProps } from '@kbn/ebt-click';
+import type { ESQLAstExpression } from '@elastic/esql/types';
 import { ContentFrameworkSection } from '../../../../content_framework/lazy_content_framework_section';
 import { useDataSourcesContext } from '../../../../../hooks/use_data_sources';
 import { getColumns } from './get_columns';
@@ -225,13 +226,14 @@ export function SpanLinks({ docId, traceId, processorEvent }: Props) {
   );
 }
 
-export function getIncomingSpanLinksESQL(traceId: string, docId: string) {
-  return where(
-    `QSTR("${OTEL_LINKS_TRACE_ID}:${traceId} AND ${OTEL_LINKS_SPAN_ID}:${docId}") OR QSTR("${SPAN_LINKS_TRACE_ID}:${traceId} AND ${SPAN_LINKS_SPAN_ID}:${docId}")`
-  );
+export function getIncomingSpanLinksESQL(traceId: string, docId: string): ESQLAstExpression {
+  const otelQuery = `${OTEL_LINKS_TRACE_ID}:${traceId} AND ${OTEL_LINKS_SPAN_ID}:${docId}`;
+  const spanLinksQuery = `${SPAN_LINKS_TRACE_ID}:${traceId} AND ${SPAN_LINKS_SPAN_ID}:${docId}`;
+
+  return esql.exp`QSTR(${esql.str(otelQuery)}) OR QSTR(${esql.str(spanLinksQuery)})`;
 }
 
-export function getOutgoingSpanLinksESQL(spanLinks: SpanLinkDetails[]) {
+export function getOutgoingSpanLinksESQL(spanLinks: SpanLinkDetails[]): ESQLAstExpression {
   const traceIds: string[] = [];
   const spanIds: string[] = [];
 
@@ -240,10 +242,10 @@ export function getOutgoingSpanLinksESQL(spanLinks: SpanLinkDetails[]) {
     spanIds.push(spanId);
   });
 
-  return where(
-    `${TRACE_ID_FIELD} IN (${traceIds.map(() => '?').join()}) AND ${SPAN_ID_FIELD} IN (${spanIds
-      .map(() => '?')
-      .join()})`,
-    [...traceIds, ...spanIds]
-  );
+  const traceIdLiterals = traceIds.map((id) => esql.str(id));
+  const spanIdLiterals = spanIds.map((id) => esql.str(id));
+
+  return esql.exp`${esql.col(TRACE_ID_FIELD)} IN (${traceIdLiterals}) AND ${esql.col(
+    SPAN_ID_FIELD
+  )} IN (${spanIdLiterals})`;
 }

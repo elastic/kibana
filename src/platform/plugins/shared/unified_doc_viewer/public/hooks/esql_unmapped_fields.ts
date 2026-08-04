@@ -7,19 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ComposerQuery } from '@elastic/esql';
+
+const UNMAPPED_FIELDS_SETTING = 'unmapped_fields';
+
 export type UnmappedFieldsPolicy = 'NULLIFY' | 'LOAD';
 
 interface WithUnmappedFieldsOptions {
   policy?: UnmappedFieldsPolicy;
 }
 
+/**
+ * Nullifies columns missing from the resolved index pattern instead of failing
+ * ES|QL verification. See https://github.com/elastic/kibana/issues/281060.
+ */
 export const withUnmappedFields = (
-  esqlQuery: string,
+  query: ComposerQuery,
   { policy = 'NULLIFY' }: WithUnmappedFieldsOptions = {}
-): string => {
-  const header = `SET unmapped_fields="${policy}";`;
-  if (esqlQuery.startsWith(header)) {
-    return esqlQuery;
-  }
-  return `${header}\n${esqlQuery}`;
+): ComposerQuery => {
+  // `addSetCommand` appends unconditionally, so drop any previous policy first.
+  query.removeSetCommand(UNMAPPED_FIELDS_SETTING);
+  query.addSetCommand(UNMAPPED_FIELDS_SETTING, policy);
+  return query;
 };

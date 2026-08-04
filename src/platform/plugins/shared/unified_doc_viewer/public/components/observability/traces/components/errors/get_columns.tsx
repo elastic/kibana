@@ -12,8 +12,8 @@ import { EuiText, EuiTextTruncate } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { Builder, esql } from '@elastic/esql';
 import type { ErrorData, ErrorsByTraceId } from '@kbn/apm-types';
-import { where } from '@kbn/esql-composer';
 import {
   TRACE_ID,
   SPAN_ID,
@@ -23,6 +23,7 @@ import {
   EXCEPTION_MESSAGE,
 } from '@kbn/apm-types';
 import { EBT_CLICK_ACTIONS } from '@kbn/ebt-click';
+import type { ESQLAstExpression } from '@elastic/esql/types';
 import { useDataSourcesContext } from '../../../../../hooks/use_data_sources';
 import { NOT_AVAILABLE_LABEL } from '../../common/constants';
 import { TRACES_DOC_VIEWER_EBT_ELEMENTS, TRACES_DOC_VIEWER_EBT_DETAILS } from '../../ebt_constants';
@@ -44,35 +45,32 @@ function createWhereClause({
   docId?: string;
   source: ErrorsByTraceId['source'];
   item: ErrorsByTraceId['traceErrors'][0];
-}) {
-  let queryString = `${TRACE_ID} == ?traceId`;
-  const params: Array<Record<string, unknown>> = [{ traceId }];
+}): ESQLAstExpression {
+  const conditions: ESQLAstExpression[] = [esql.exp`${esql.col(TRACE_ID)} == ${esql.str(traceId)}`];
 
   if (docId) {
-    queryString += ` AND ${SPAN_ID} == ?docId`;
-    params.push({ docId });
+    conditions.push(esql.exp`${esql.col(SPAN_ID)} == ${esql.str(docId)}`);
   }
 
   if (source === 'apm') {
-    queryString += ` AND ${PROCESSOR_EVENT} == ?processorEvent`;
-    params.push({ processorEvent: 'error' });
-
-    queryString += ` AND ${ERROR_ID} == ?errorId`;
-    params.push({ errorId: item.error.id });
+    conditions.push(esql.exp`${esql.col(PROCESSOR_EVENT)} == ${esql.str('error')}`);
+    if (item.error.id) {
+      conditions.push(esql.exp`${esql.col(ERROR_ID)} == ${esql.str(item.error.id)}`);
+    }
   }
 
   if (source === 'unprocessedOtel') {
     if (item?.eventName) {
-      queryString += ` AND ${EVENT_NAME} == ?eventName`;
-      params.push({ eventName: item.eventName });
+      conditions.push(esql.exp`${esql.col(EVENT_NAME)} == ${esql.str(item.eventName)}`);
     }
     if (item?.error?.exception?.message) {
-      queryString += ` AND ${EXCEPTION_MESSAGE} == ?exceptionMessage`;
-      params.push({ exceptionMessage: item.error.exception.message });
+      conditions.push(
+        esql.exp`${esql.col(EXCEPTION_MESSAGE)} == ${esql.str(item.error.exception.message)}`
+      );
     }
   }
 
-  return where(queryString, params);
+  return conditions.reduce((left, right) => Builder.expression.func.binary('and', [left, right]));
 }
 
 const ErrorMessageLinkCell = ({
