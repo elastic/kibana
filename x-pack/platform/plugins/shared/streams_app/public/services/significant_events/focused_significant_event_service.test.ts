@@ -12,7 +12,6 @@ const createEvent = (eventId: string): SignificantEvent => ({
   '@timestamp': '2026-01-01T00:00:00.000Z',
   event_uuid: `event-${eventId}`,
   event_id: eventId,
-  discovery_id: `discovery-${eventId}`,
   stream_names: ['logs.payment'],
   title: `Event ${eventId}`,
   summary: 'Summary',
