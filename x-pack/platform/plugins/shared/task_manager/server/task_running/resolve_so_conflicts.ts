@@ -142,7 +142,7 @@ function throwNotRetryableError(message: string): never {
   const error = new NotRetryableError(message);
   throw new pRetry.AbortError(error);
 }
-class NotRetryableError extends pRetry.AbortError {
+class NotRetryableError extends Error {
   constructor(message: string) {
     super(message);
   }
