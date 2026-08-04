@@ -76,8 +76,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/256840
-    describe.skip('Header', () => {
+    describe('Header', () => {
       const testRunUuid = uuidv4();
       const ruleName = `test-rule-${testRunUuid}`;
       const RULE_TYPE_ID = '.es-query';
@@ -106,6 +105,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await openRulesSection();
         await testSubjects.existOrFail('rulesList');
         await openFirstRule(rule.name);
+        // The rule type renders only once `useGetRuleTypesPermissions` resolves
+        // (a spinner shows in its place until then), so gate on it before asserting.
+        await testSubjects.existOrFail('ruleSummaryRuleType');
       });
 
       after(async () => {
