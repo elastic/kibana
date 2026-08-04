@@ -162,6 +162,8 @@ export const PrivateLocationsTable = ({
         <PolicyName
           agentPolicyId={agentPolicyId}
           locationStats={agentStatsByLocation.get(item.id)}
+          // The expanded panel already shows the agent count, so drop the badge there.
+          hideAgentCount={expandedIds.has(item.id)}
         />
       ),
     },

@@ -5,48 +5,36 @@
  * 2.0.
  */
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import type { LocationAgentStats } from '../../../../../../../server/routes/settings/private_locations/get_agent_stats';
-import { getPrivateLocationAgentStats } from '../../../../state/private_locations/api';
+import { getAgentStatsAction, selectAgentStats } from '../../../../state/agent_stats';
 import { useSyntheticsRefreshContext } from '../../../../contexts';
 
 /**
  * Enrolled agents, health and host metrics for every private location, keyed by
- * location id. Refetches on app refresh so the private locations table and the
- * monitor "Location agents" section stay in sync with Fleet.
+ * location id. Backed by a shared Redux slice so both consumers — the private
+ * locations table and the monitor "Location agents" section — read from one
+ * cache and trigger a single fetch, refetching only when the cache is empty or
+ * on an app refresh (rather than a full cross-location fan-out per mount).
  */
 export const useAgentStats = () => {
-  const [data, setData] = useState<LocationAgentStats[]>([]);
-  const [loading, setLoading] = useState(false);
+  const dispatch = useDispatch();
+  const { data, loading } = useSelector(selectAgentStats);
   const { lastRefresh } = useSyntheticsRefreshContext();
+  const lastRefreshRef = useRef(lastRefresh);
 
   useEffect(() => {
-    let cancelled = false;
-    setLoading(true);
-    getPrivateLocationAgentStats()
-      .then((stats) => {
-        if (!cancelled) {
-          setData(stats);
-        }
-      })
-      .catch(() => {
-        if (!cancelled) {
-          setData([]);
-        }
-      })
-      .finally(() => {
-        if (!cancelled) {
-          setLoading(false);
-        }
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [lastRefresh]);
+    const refreshed = lastRefreshRef.current !== lastRefresh;
+    lastRefreshRef.current = lastRefresh;
+    if (data === null || refreshed) {
+      dispatch(getAgentStatsAction.get());
+    }
+  }, [dispatch, data, lastRefresh]);
 
   const byLocation = useMemo(() => {
     const map = new Map<string, LocationAgentStats>();
-    data.forEach((entry) => map.set(entry.locationId, entry));
+    (data ?? []).forEach((entry) => map.set(entry.locationId, entry));
     return map;
   }, [data]);
 

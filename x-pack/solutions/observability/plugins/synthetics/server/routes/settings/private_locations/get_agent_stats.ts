@@ -56,6 +56,12 @@ export interface LocationAgentStats {
 }
 
 interface AgentHostMeta {
+  /**
+   * Original-case `host.name`. The map is keyed by the lowercased name (to dedupe
+   * agents sharing a host), but `metrics-system.*` stores `host.name` as a
+   * case-sensitive keyword, so the metrics lookup must query the original case.
+   */
+  name: string;
   lastCheckin: number | null;
   /** Total host RAM (MiB) from agent metadata, or null when the agent doesn't report it. */
   memoryMib: number | null;
@@ -92,24 +98,33 @@ const getEnrolledAgentHosts = async (
   const byHost = new Map<string, AgentHostMeta>();
 
   const perPage = 1000;
+  // Bound the pagination on Fleet's authoritative `total`, with a hard page cap
+  // as a safety net so a misbehaving paginator (e.g. one that keeps returning
+  // full pages) can't spin forever. `perPage * MAX_PAGES` also stays within ES's
+  // default 10k `from + size` window, past which `listAgents` would throw.
+  const MAX_PAGES = 10;
   let page = 1;
-  let hasMore = true;
+  let total = Infinity;
+  let fetched = 0;
   // Paginate: a location's agent policy can hold more than one page of agents,
   // and dropping the overflow would make the UI's per-agent stats, counts and
   // health disagree with reality at scale.
-  while (hasMore) {
-    const { agents } = await server.fleet.agentService.asInternalUser.listAgents({
-      showInactive: false,
-      perPage,
-      page,
-      kuery: `policy_id:"${agentPolicyId}"`,
-    });
+  while (fetched < total && page <= MAX_PAGES) {
+    const { agents, total: totalAgents } =
+      await server.fleet.agentService.asInternalUser.listAgents({
+        showInactive: false,
+        perPage,
+        page,
+        kuery: `policy_id:"${agentPolicyId}"`,
+      });
+    total = totalAgents ?? agents.length;
 
     for (const agent of agents) {
       const meta = agent.local_metadata as AgentLocalMetadata | undefined;
       const host = meta?.host;
-      const name = (host?.name ?? host?.hostname)?.toLowerCase();
-      if (!name) {
+      const originalName = host?.name ?? host?.hostname;
+      const name = originalName?.toLowerCase();
+      if (!name || !originalName) {
         continue;
       }
       const last = agent.last_checkin ? Date.parse(agent.last_checkin) : NaN;
@@ -122,6 +137,7 @@ const getEnrolledAgentHosts = async (
       // Keep the freshest agent's identity when several share a host name.
       const isFresher = (lastCheckin ?? 0) >= (prev?.lastCheckin ?? -1);
       byHost.set(name, {
+        name: isFresher ? originalName : prev?.name ?? originalName,
         lastCheckin: Math.max(prev?.lastCheckin ?? 0, lastCheckin ?? 0) || lastCheckin,
         memoryMib: Math.max(prev?.memoryMib ?? 0, memoryMib ?? 0) || null,
         agentId: isFresher ? agent.id : prev?.agentId ?? null,
@@ -138,7 +154,11 @@ const getEnrolledAgentHosts = async (
       });
     }
 
-    hasMore = agents.length === perPage;
+    fetched += agents.length;
+    // Guard against an empty page (or a bad `total`) so the loop always terminates.
+    if (agents.length === 0) {
+      break;
+    }
     page += 1;
   }
 
@@ -262,7 +282,10 @@ export const getPrivateLocationAgentStats: SyntheticsRestApiRouteFactory<
         );
 
         const hosts = [...enrolledHosts.keys()];
-        const metrics = await getHostMetricsFromSystem(esClient, hosts).catch(
+        // `metrics-system.*` stores `host.name` as a case-sensitive keyword, so
+        // query the original-case names; results are re-keyed lowercase to join.
+        const metricHostNames = [...enrolledHosts.values()].map((meta) => meta.name);
+        const metrics = await getHostMetricsFromSystem(esClient, metricHostNames).catch(
           () => new Map<string, HostMetrics>()
         );
 
@@ -270,12 +293,18 @@ export const getPrivateLocationAgentStats: SyntheticsRestApiRouteFactory<
           .map((host): AgentStat => {
             const meta = enrolledHosts.get(host);
             const hostMetrics = metrics.get(host);
+            const totalMemoryMib = meta?.memoryMib ?? hostMetrics?.totalMib ?? null;
+            // Used can momentarily read above total across the two metricsets; cap it.
+            const usedMemoryMib =
+              hostMetrics?.usedMib != null && totalMemoryMib != null
+                ? Math.min(hostMetrics.usedMib, totalMemoryMib)
+                : hostMetrics?.usedMib ?? null;
             return {
               host,
               lastCheckin: meta?.lastCheckin ?? null,
               healthy: meta?.agentStatus === 'online',
-              totalMemoryMib: meta?.memoryMib ?? hostMetrics?.totalMib ?? null,
-              usedMemoryMib: hostMetrics?.usedMib ?? null,
+              totalMemoryMib,
+              usedMemoryMib,
               usedMemoryPct: hostMetrics?.usedPct ?? null,
               cpuPct: hostMetrics?.cpuPct ?? null,
               agentId: meta?.agentId ?? null,
