@@ -5,10 +5,4 @@
  * 2.0.
  */
 
-import type { FtrProviderContext } from '../../ftr_provider_context';
-
-export default ({ loadTestFile }: FtrProviderContext) => {
-  describe('License app', function () {
-    loadTestFile(require.resolve('./home_page'));
-  });
-};
+export { LicenseManagementPage } from './license_management_page';

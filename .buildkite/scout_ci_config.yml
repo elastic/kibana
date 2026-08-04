@@ -49,6 +49,7 @@ plugins:
     - kibana_overview
     - kql
     - lens
+    - license_management
     - links
     - logstash
     - management

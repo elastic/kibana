@@ -8,7 +8,7 @@
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['licenseManagement', 'common']);
+  const PageObjects = getPageObjects(['common']);
   const a11y = getService('a11y');
   const testSubjects = getService('testSubjects');
 

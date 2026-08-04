@@ -248,7 +248,6 @@ enabled:
   - x-pack/platform/test/functional/apps/lens/group14/config.ts
   - x-pack/platform/test/functional/apps/lens/group15/config.ts
   - x-pack/platform/test/functional/apps/lens/open_in_lens/dashboard/config.ts
-  - x-pack/platform/test/functional/apps/license_management/config.ts
   - x-pack/platform/test/functional/apps/logstash/config.ts
   - x-pack/platform/test/functional/apps/managed_content/config.ts
   - x-pack/platform/test/functional/apps/maps/group1/config.ts
