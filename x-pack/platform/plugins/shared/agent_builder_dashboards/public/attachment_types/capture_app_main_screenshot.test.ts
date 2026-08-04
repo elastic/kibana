@@ -6,7 +6,10 @@
  */
 
 import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/core-chrome-layout-constants';
-import { captureAppMainScreenshot } from './capture_app_main_screenshot';
+import {
+  captureAppMainScreenshot,
+  pickScreenshotEncoding,
+} from './capture_app_main_screenshot';
 
 const mockToBlob = jest.fn();
 
@@ -16,6 +19,30 @@ jest.mock('dom-to-image-more', () => ({
     toBlob: (...args: unknown[]) => mockToBlob(...args),
   },
 }));
+
+describe('pickScreenshotEncoding', () => {
+  it('returns undefined for an empty candidate list', () => {
+    expect(pickScreenshotEncoding([])).toBeUndefined();
+  });
+
+  it('prefers png when it is within 20% of the smallest lossy encode', () => {
+    const picked = pickScreenshotEncoding([
+      { media_type: 'image/png', data: 'p'.repeat(110) },
+      { media_type: 'image/webp', data: 'w'.repeat(100) },
+      { media_type: 'image/jpeg', data: 'j'.repeat(120) },
+    ]);
+    expect(picked?.media_type).toBe('image/png');
+  });
+
+  it('picks the smallest encode when png is much larger', () => {
+    const picked = pickScreenshotEncoding([
+      { media_type: 'image/png', data: 'p'.repeat(200) },
+      { media_type: 'image/webp', data: 'w'.repeat(100) },
+      { media_type: 'image/jpeg', data: 'j'.repeat(130) },
+    ]);
+    expect(picked?.media_type).toBe('image/webp');
+  });
+});
 
 describe('captureAppMainScreenshot', () => {
   beforeEach(() => {
@@ -28,7 +55,7 @@ describe('captureAppMainScreenshot', () => {
     expect(mockToBlob).not.toHaveBeenCalled();
   });
 
-  it('returns a png payload when capture succeeds and jpeg compression is unavailable', async () => {
+  it('returns a png payload when capture succeeds and canvas compression is unavailable', async () => {
     const el = document.createElement('div');
     el.id = APP_MAIN_SCROLL_CONTAINER_ID;
     Object.defineProperty(el, 'offsetWidth', { value: 100 });

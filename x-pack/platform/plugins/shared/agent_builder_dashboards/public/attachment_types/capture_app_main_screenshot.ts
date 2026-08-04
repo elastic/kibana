@@ -8,11 +8,21 @@
 // @ts-expect-error no types for dom-to-image-more
 import domtoimage from 'dom-to-image-more';
 import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/core-chrome-layout-constants';
-import type { ImageAttachmentData } from '@kbn/agent-builder-common/attachments';
+import type {
+  ImageAttachmentData,
+  ImageAttachmentMediaType,
+} from '@kbn/agent-builder-common/attachments';
 import { IMAGE_ATTACHMENT_MAX_BASE64_LENGTH } from '@kbn/agent-builder-common/attachments';
 
-const MAX_WIDTH_PX = 1280;
-const JPEG_QUALITY = 0.72;
+/** Enough for layout + labels; Anthropic image tokens scale with width×height. */
+const MAX_WIDTH_PX = 1024;
+const JPEG_QUALITY = 0.68;
+const WEBP_QUALITY = 0.72;
+/**
+ * Prefer PNG when it is close to the smallest lossy encode — Kibana UIs are mostly
+ * flat color + sharp text, where PNG stays readable and often competitive in size.
+ */
+const PNG_PREFERENCE_RATIO = 1.2;
 
 const blobToBase64 = (blob: Blob): Promise<string> => {
   return new Promise((resolve, reject) => {
@@ -31,7 +41,46 @@ const blobToBase64 = (blob: Blob): Promise<string> => {
   });
 };
 
-const compressBlobToJpegBase64 = async (blob: Blob): Promise<string | undefined> => {
+const canvasToBase64 = async (
+  canvas: HTMLCanvasElement,
+  mediaType: ImageAttachmentMediaType,
+  quality?: number
+): Promise<string | undefined> => {
+  const blob = await new Promise<Blob | null>((resolve) => {
+    canvas.toBlob(resolve, mediaType, quality);
+  });
+  if (!blob) {
+    return undefined;
+  }
+  const data = await blobToBase64(blob);
+  if (data.length > IMAGE_ATTACHMENT_MAX_BASE64_LENGTH) {
+    return undefined;
+  }
+  return data;
+};
+
+/**
+ * Among valid encodings, prefer PNG when near the smallest size (crisp UI text);
+ * otherwise pick the smallest payload (typically WebP/JPEG).
+ */
+export const pickScreenshotEncoding = (
+  candidates: ImageAttachmentData[]
+): ImageAttachmentData | undefined => {
+  if (candidates.length === 0) {
+    return undefined;
+  }
+
+  const smallest = candidates.reduce((best, current) =>
+    current.data.length < best.data.length ? current : best
+  );
+  const png = candidates.find((candidate) => candidate.media_type === 'image/png');
+  if (png && png.data.length <= smallest.data.length * PNG_PREFERENCE_RATIO) {
+    return png;
+  }
+  return smallest;
+};
+
+const compressCaptureBlob = async (blob: Blob): Promise<ImageAttachmentData | undefined> => {
   if (typeof createImageBitmap !== 'function' || typeof document === 'undefined') {
     return undefined;
   }
@@ -48,22 +97,37 @@ const compressBlobToJpegBase64 = async (blob: Blob): Promise<string | undefined>
     if (!ctx) {
       return undefined;
     }
+    // Flat white backdrop matches Kibana light UI and helps PNG/WebP compress empty space.
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, width, height);
     ctx.drawImage(bitmap, 0, 0, width, height);
 
-    const jpegBlob = await new Promise<Blob | null>((resolve) => {
-      canvas.toBlob(resolve, 'image/jpeg', JPEG_QUALITY);
-    });
-    if (!jpegBlob) {
-      return undefined;
+    const encodings: Array<{
+      mediaType: ImageAttachmentMediaType;
+      quality?: number;
+    }> = [
+      { mediaType: 'image/png' },
+      { mediaType: 'image/webp', quality: WEBP_QUALITY },
+      { mediaType: 'image/jpeg', quality: JPEG_QUALITY },
+    ];
+
+    const candidates: ImageAttachmentData[] = [];
+    for (const { mediaType, quality } of encodings) {
+      const data = await canvasToBase64(canvas, mediaType, quality);
+      if (data) {
+        candidates.push({ media_type: mediaType, data });
+      }
     }
-    return blobToBase64(jpegBlob);
+
+    return pickScreenshotEncoding(candidates);
   } finally {
     bitmap.close();
   }
 };
 
 /**
- * Captures `#app-main-scroll` as a compressed JPEG (fallback PNG) for chat attachment.
+ * Captures `#app-main-scroll` for chat attachment: downscales, then picks PNG/WebP/JPEG.
+ * SVG is not used — DOM capture is raster (charts are canvas), and SVG would still embed bitmaps.
  * Returns undefined when the element is missing or capture fails.
  */
 export const captureAppMainScreenshot = async (): Promise<ImageAttachmentData | undefined> => {
@@ -100,11 +164,12 @@ export const captureAppMainScreenshot = async (): Promise<ImageAttachmentData | 
       return undefined;
     }
 
-    const jpegData = await compressBlobToJpegBase64(blob);
-    if (jpegData && jpegData.length <= IMAGE_ATTACHMENT_MAX_BASE64_LENGTH) {
-      return { media_type: 'image/jpeg', data: jpegData };
+    const compressed = await compressCaptureBlob(blob);
+    if (compressed) {
+      return compressed;
     }
 
+    // Fallback when canvas compression is unavailable (e.g. some test environments).
     const pngData = await blobToBase64(blob);
     if (pngData.length > IMAGE_ATTACHMENT_MAX_BASE64_LENGTH) {
       return undefined;
