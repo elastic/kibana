@@ -179,9 +179,9 @@ pageLoadAssetSize:
   securitySolutionServerless: 57112
   serverless: 7412
   serverlessObservability: 21263
-  serverlessSearch: 26287
+  serverlessSearch: 29112
   serverlessVectordb: 11999
-  serverlessWorkplaceAI: 4855
+  serverlessWorkplaceAI: 5347
   sessionView: 47912
   share: 64059
   significant_events: 9425
