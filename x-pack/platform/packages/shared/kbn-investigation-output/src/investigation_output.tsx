@@ -22,6 +22,7 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { InvestigationOutputProps } from './types';
 import { HypothesisRow } from './hypothesis_row';
+import { SignificantEventUpdates } from './significant_event_updates';
 import { buildHeader, buildFinalResultsMarkdown } from './utils';
 
 /**
@@ -152,6 +153,10 @@ export const InvestigationOutput: React.FC<InvestigationOutputProps> = ({
           {finalResultsMarkdown}
         </EuiMarkdownFormat>
       )}
+
+      {status === 'complete' && state?.significant_event_updates?.length ? (
+        <SignificantEventUpdates updates={state.significant_event_updates} />
+      ) : null}
     </EuiPanel>
   );
 };

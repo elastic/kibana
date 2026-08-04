@@ -16,7 +16,9 @@ import { StreamManagementDefaultRedirect } from '../components/stream_management
 import { StreamListView } from '../components/stream_list_view';
 import { StreamDetailRoot } from '../components/stream_root';
 import { StreamDetailManagement } from '../components/stream_management/data_management/stream_detail_management';
-import { SignificantEventsDiscoveryPage } from '../components/significant_events/significant_events_discovery/page';
+import { SignificantEventsAppRedirect } from '../components/significant_events_app_redirect';
+import { StreamsLayout } from '../components/streams_layout';
+import { DEFAULT_STREAMS_LAYOUT_TAB } from '../components/streams_layout/tabs';
 
 /**
  * Optional time range query params.
@@ -73,7 +75,7 @@ const streamsAppRoutes = {
             element: <RedirectTo path="/_discovery/{tab}" params={{ path: { tab: 'streams' } }} />,
           },
           '/_discovery/{tab}': {
-            element: <SignificantEventsDiscoveryPage />,
+            element: <SignificantEventsAppRedirect />,
             params: t.intersection([
               t.type({
                 path: t.type({
@@ -93,6 +95,35 @@ const streamsAppRoutes = {
                   selectedItem: t.string,
                   selectedEvent: t.string,
                 }),
+              }),
+            ]),
+          },
+        },
+      },
+      /**
+       * Declared before `/{key}` so the literal path wins over a stream name.
+       */
+      '/new-experience': {
+        element: <Outlet />,
+        children: {
+          '/new-experience': {
+            element: (
+              <RedirectTo
+                path="/new-experience/{tab}"
+                params={{ path: { tab: DEFAULT_STREAMS_LAYOUT_TAB } }}
+              />
+            ),
+          },
+          '/new-experience/{tab}': {
+            element: <StreamsLayout />,
+            params: t.intersection([
+              t.type({
+                path: t.type({
+                  tab: t.string,
+                }),
+              }),
+              t.partial({
+                query: timeRangeQueryParams,
               }),
             ]),
           },
