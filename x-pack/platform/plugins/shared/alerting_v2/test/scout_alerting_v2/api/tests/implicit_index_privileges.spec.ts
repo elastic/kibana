@@ -191,10 +191,10 @@ const summarizeImplicitGrant = (role: { indices?: ImplicitIndexEntry[] }): Impli
 };
 
 /**
- * Runs a search over `indexPattern` as the given native user and returns the sorted `space_id`s the
- * search actually returned. A denied search (403) or one that resolves to no authorized index is
- * normalized to an empty list, so callers assert visibility without caring which "no access" shape
- * ES produced.
+ * Runs a search over `indexPattern` as the given native user and returns the sorted, unique
+ * `space_id`s the search actually returned. A denied search (403) or one that resolves to no
+ * authorized index is normalized to an empty list, so callers assert visibility without caring
+ * which "no access" shape ES produced.
  */
 const seenSpaceIds = async (
   esClient: EsClient,
@@ -213,12 +213,17 @@ const seenSpaceIds = async (
     { headers: { authorization }, ignore: [403, 404], meta: true }
   );
 
-  return response.statusCode === 200
-    ? (response.body.hits?.hits ?? [])
-        .map((hit) => hit._source?.space_id)
-        .filter((spaceId): spaceId is string => typeof spaceId === 'string')
-        .sort()
-    : [];
+  if (response.statusCode !== 200) {
+    return [];
+  }
+
+  // Dedupe: the alerting_v2 dispatcher task re-emits derived `.alert-actions` rows carrying the
+  // same `source`/`space_id` as the seeded docs, so a single space can back multiple hits. This
+  // helper reports *which* spaces a role can read, not how many documents back each one.
+  const spaceIds = (response.body.hits?.hits ?? [])
+    .map((hit) => hit._source?.space_id)
+    .filter((spaceId): spaceId is string => typeof spaceId === 'string');
+  return [...new Set(spaceIds)].sort();
 };
 
 apiTest.describe(
