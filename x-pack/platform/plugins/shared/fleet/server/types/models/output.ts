@@ -14,6 +14,7 @@ import {
   kafkaPartitionType,
   kafkaSaslMechanism,
   kafkaVerificationModes,
+  MAX_HOSTS,
   outputType,
 } from '../../../common/constants';
 
@@ -139,7 +140,10 @@ const PresetSchema = schema.oneOf([
 export const ElasticSearchSchema = {
   ...BaseSchema,
   type: schema.literal(outputType.Elasticsearch),
-  hosts: schema.arrayOf(schema.uri({ scheme: ['http', 'https'] }), { minSize: 1, maxSize: 10 }),
+  hosts: schema.arrayOf(schema.uri({ scheme: ['http', 'https'] }), {
+    minSize: 1,
+    maxSize: MAX_HOSTS,
+  }),
   preset: schema.maybe(PresetSchema),
   write_to_logs_streams: schema.maybe(schema.oneOf([schema.literal(null), schema.boolean()])),
 };
@@ -148,7 +152,10 @@ const ElasticSearchUpdateSchema = {
   ...UpdateSchema,
   type: schema.maybe(schema.literal(outputType.Elasticsearch)),
   hosts: schema.maybe(
-    schema.arrayOf(schema.uri({ scheme: ['http', 'https'] }), { minSize: 1, maxSize: 10 })
+    schema.arrayOf(schema.uri({ scheme: ['http', 'https'] }), {
+      minSize: 1,
+      maxSize: MAX_HOSTS,
+    })
   ),
   preset: schema.maybe(PresetSchema),
   write_to_logs_streams: schema.maybe(schema.oneOf([schema.literal(null), schema.boolean()])),
@@ -199,7 +206,7 @@ export const LogstashSchema = {
   type: schema.literal(outputType.Logstash),
   hosts: schema.arrayOf(schema.string({ validate: validateLogstashHost }), {
     minSize: 1,
-    maxSize: 10,
+    maxSize: MAX_HOSTS,
   }),
 };
 
@@ -207,7 +214,10 @@ const LogstashUpdateSchema = {
   ...UpdateSchema,
   type: schema.maybe(schema.literal(outputType.Logstash)),
   hosts: schema.maybe(
-    schema.arrayOf(schema.string({ validate: validateLogstashHost }), { minSize: 1, maxSize: 10 })
+    schema.arrayOf(schema.string({ validate: validateLogstashHost }), {
+      minSize: 1,
+      maxSize: MAX_HOSTS,
+    })
   ),
   secrets: schema.maybe(
     schema.object({
@@ -221,7 +231,7 @@ export const KafkaSchema = {
   type: schema.literal(outputType.Kafka),
   hosts: schema.arrayOf(schema.string({ validate: validateKafkaHost }), {
     minSize: 1,
-    maxSize: 10,
+    maxSize: MAX_HOSTS,
   }),
   version: schema.maybe(schema.string()),
   key: schema.maybe(schema.string()),
@@ -326,7 +336,10 @@ const KafkaUpdateSchema = {
   ...KafkaSchema,
   type: schema.maybe(schema.literal(outputType.Kafka)),
   hosts: schema.maybe(
-    schema.arrayOf(schema.string({ validate: validateKafkaHost }), { minSize: 1, maxSize: 10 })
+    schema.arrayOf(schema.string({ validate: validateKafkaHost }), {
+      minSize: 1,
+      maxSize: MAX_HOSTS,
+    })
   ),
   auth_type: schema.maybe(
     schema.oneOf([
