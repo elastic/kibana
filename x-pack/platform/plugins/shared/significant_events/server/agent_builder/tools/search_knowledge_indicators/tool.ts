@@ -139,7 +139,7 @@ export function createSearchKnowledgeIndicatorsTool({
       - Retrieve queries-only KIs with \`kind: ['query']\`
     `,
     schema: searchKnowledgeIndicatorsSchema,
-    tags: ['streams', 'significant_events'],
+    tags: ['streams', 'significantEvents'],
     availability: {
       cacheMode: 'space',
       handler: async (): Promise<ToolAvailabilityResult> => {

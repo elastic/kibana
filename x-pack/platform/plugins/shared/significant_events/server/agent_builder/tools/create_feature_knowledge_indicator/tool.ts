@@ -58,7 +58,7 @@ export function createFeatureKnowledgeIndicatorTool({
       saved as a feature KI for future investigations.
     `,
     schema: createFeatureKISchema,
-    tags: ['streams', 'significant_events'],
+    tags: ['streams', 'significantEvents'],
     confirmation: {
       askUser: 'always',
       getConfirmation: async ({ toolParams }) => {

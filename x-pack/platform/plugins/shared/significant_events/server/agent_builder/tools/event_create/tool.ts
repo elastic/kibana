@@ -51,7 +51,7 @@ export function createEventTool({
       })}
     `,
     schema: createEventSchema,
-    tags: ['streams', 'significant_events'],
+    tags: ['streams', 'significantEvents'],
     confirmation: {
       askUser: 'always',
       getConfirmation: async ({ toolParams }) => ({

@@ -80,7 +80,7 @@ import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '../common/feature_fla
 import { isSignificantEventsAvailable } from './routes/utils/assert_significant_events_access';
 import type { SignificantEventsKIsOnboardingClient } from './lib/workflows/onboarding_workflow_client';
 
-const SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER = 'significant_events';
+const SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER = 'significantEvents';
 
 export class SignificantEventsPlugin
   implements
@@ -515,7 +515,7 @@ export class SignificantEventsPlugin
   ): Promise<void> {
     if (!(await isAvailable())) {
       this.logger.debug(
-        'significant_events: availability flag disabled, skipping managed resource installation'
+        'significantEvents: availability flag disabled, skipping managed resource installation'
       );
       return;
     }
@@ -571,7 +571,7 @@ export class SignificantEventsPlugin
 
   private logManagedResourceError(context: string, error: unknown): void {
     this.logger.error(
-      `significant_events: failed to install managed resources (${context}): ${
+      `significantEvents: failed to install managed resources (${context}): ${
         error instanceof Error ? error.message : String(error)
       }`
     );
@@ -579,7 +579,7 @@ export class SignificantEventsPlugin
 
   private logSkillsRegistrationError(scope: string, error: unknown): void {
     this.logger.error(
-      `significant_events: failed to register ${scope} skills: ${
+      `significantEvents: failed to register ${scope} skills: ${
         error instanceof Error ? error.message : String(error)
       }`
     );
