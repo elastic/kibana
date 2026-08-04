@@ -17,6 +17,8 @@ export {
   ToolOrigin,
   type ToolDefinition,
   type ToolDefinitionWithSchema,
+  type ToolConfirmationPolicyMode,
+  type ToolConfirmationPolicy,
   platformCoreTools,
   platformCoreCasesTools,
   platformSignificantEventsTools,
