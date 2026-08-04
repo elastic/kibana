@@ -23,6 +23,7 @@ export {
   writeConnectorRegistries,
   validateConnectorDocsList,
   validateConnectorToc,
+  validateConnectorIcons,
   CONNECTOR_DOCS_LIST_PATH,
   DOCS_TOC_PATH,
   REGENERATE_COMMAND,

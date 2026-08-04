@@ -571,6 +571,214 @@ export function validateConnectorToc(content: string): string[] {
   return problems;
 }
 
+interface SvgBounds {
+  minX: number;
+  minY: number;
+  maxX: number;
+  maxY: number;
+}
+
+/**
+ * Computes a rough bounding box of an SVG path's geometry by walking its command endpoints
+ * (curve control points included, which slightly overestimates — fine for a sanity check).
+ * Returns `null` for empty/unparseable path data.
+ */
+export function computeSvgPathBounds(pathData: string, into?: SvgBounds): SvgBounds | null {
+  const tokens = pathData.match(/[MmLlHhVvCcSsQqTtAaZz]|-?(?:\d*\.\d+|\d+\.?)(?:[eE][+-]?\d+)?/g);
+  if (!tokens) return null;
+
+  const bounds: SvgBounds = into ?? {
+    minX: Infinity,
+    minY: Infinity,
+    maxX: -Infinity,
+    maxY: -Infinity,
+  };
+  let x = 0;
+  let y = 0;
+  let subpathStartX = 0;
+  let subpathStartY = 0;
+  let index = 0;
+  let command = '';
+
+  const record = (px: number, py: number) => {
+    bounds.minX = Math.min(bounds.minX, px);
+    bounds.minY = Math.min(bounds.minY, py);
+    bounds.maxX = Math.max(bounds.maxX, px);
+    bounds.maxY = Math.max(bounds.maxY, py);
+  };
+  const next = () => Number(tokens[index++]);
+
+  while (index < tokens.length) {
+    const token = tokens[index];
+    if (/^[MmLlHhVvCcSsQqTtAaZz]$/.test(token)) {
+      command = token;
+      index++;
+      if (command === 'Z' || command === 'z') {
+        x = subpathStartX;
+        y = subpathStartY;
+      }
+      continue;
+    }
+    // A number token: repeat the current command (SVG allows implicit repetition, and an
+    // implicit lineto after a moveto).
+    const relative = command === command.toLowerCase();
+    switch (command.toUpperCase()) {
+      case 'M':
+        x = relative ? x + next() : next();
+        y = relative ? y + next() : next();
+        subpathStartX = x;
+        subpathStartY = y;
+        record(x, y);
+        command = relative ? 'l' : 'L';
+        break;
+      case 'L':
+        x = relative ? x + next() : next();
+        y = relative ? y + next() : next();
+        record(x, y);
+        break;
+      case 'H':
+        x = relative ? x + next() : next();
+        record(x, y);
+        break;
+      case 'V':
+        y = relative ? y + next() : next();
+        record(x, y);
+        break;
+      case 'C':
+        for (let i = 0; i < 3; i++) {
+          const px = relative ? x + next() : next();
+          const py = relative ? y + next() : next();
+          record(px, py);
+          if (i === 2) {
+            x = px;
+            y = py;
+          }
+        }
+        break;
+      case 'S':
+      case 'Q':
+        for (let i = 0; i < 2; i++) {
+          const px = relative ? x + next() : next();
+          const py = relative ? y + next() : next();
+          record(px, py);
+          if (i === 1) {
+            x = px;
+            y = py;
+          }
+        }
+        break;
+      case 'T':
+        x = relative ? x + next() : next();
+        y = relative ? y + next() : next();
+        record(x, y);
+        break;
+      case 'A': {
+        next(); // rx
+        next(); // ry
+        next(); // x-axis-rotation
+        next(); // large-arc-flag
+        next(); // sweep-flag
+        x = relative ? x + next() : next();
+        y = relative ? y + next() : next();
+        record(x, y);
+        break;
+      }
+      default:
+        // Number before any command: malformed path data; bail out of this path.
+        return bounds.minX === Infinity ? null : bounds;
+    }
+  }
+
+  return bounds.minX === Infinity ? null : bounds;
+}
+
+/**
+ * Minimum fraction of the path-geometry bounding box that must fall inside the `viewBox` for an
+ * icon to count as sane. Generous on purpose: real icons routinely bleed a little (and curve
+ * control points overestimate the true ink extents), but a wrong `viewBox` — like the Dynatrace
+ * icon that shipped with a `viewBox` containing ~19% of its geometry's height, rendering the
+ * logo as a clipped sliver in the connector picker — lands far below this.
+ */
+const ICON_MIN_VIEWBOX_COVERAGE = 0.4;
+
+/**
+ * Checks a connector icon component's source for a `viewBox` that doesn't actually contain its
+ * path geometry — the "icon renders as a clipped sliver / mostly empty tile" failure mode that
+ * otherwise only surfaces when someone opens the connector picker in a browser. Purely textual:
+ * parses `viewBox="..."` and every `d="..."` attribute and compares bounding boxes.
+ *
+ * Skips (returns no problems for) icons this static approach can't judge: no `viewBox`, no
+ * `<path d="...">` geometry (e.g. `<rect>`/`<circle>`-based or imported-SVG icons), or any
+ * `transform=` attribute (which re-maps coordinates in ways bbox math can't follow).
+ */
+export function validateConnectorIconSource(source: string, label: string): string[] {
+  const viewBoxMatch = source.match(/viewBox=["']([^"']+)["']/);
+  if (!viewBoxMatch) return [];
+  if (/\btransform=/.test(source)) return [];
+
+  const viewBoxParts = viewBoxMatch[1].trim().split(/[\s,]+/).map(Number);
+  if (viewBoxParts.length !== 4 || viewBoxParts.some((n) => !Number.isFinite(n))) {
+    return [`${label}: unparseable viewBox "${viewBoxMatch[1]}".`];
+  }
+  const [vbX, vbY, vbWidth, vbHeight] = viewBoxParts;
+
+  let geometry: SvgBounds | null = null;
+  for (const match of source.matchAll(/\bd=["']([^"']+)["']/g)) {
+    geometry = computeSvgPathBounds(match[1], geometry ?? undefined);
+  }
+  if (!geometry) return [];
+
+  const geometryWidth = geometry.maxX - geometry.minX;
+  const geometryHeight = geometry.maxY - geometry.minY;
+  if (geometryWidth <= 0 || geometryHeight <= 0) return [];
+
+  const overlapWidth =
+    Math.min(geometry.maxX, vbX + vbWidth) - Math.max(geometry.minX, vbX);
+  const overlapHeight =
+    Math.min(geometry.maxY, vbY + vbHeight) - Math.max(geometry.minY, vbY);
+  const overlapArea = Math.max(overlapWidth, 0) * Math.max(overlapHeight, 0);
+  const coverage = overlapArea / (geometryWidth * geometryHeight);
+
+  if (coverage < ICON_MIN_VIEWBOX_COVERAGE) {
+    return [
+      `${label}: only ${Math.round(coverage * 100)}% of the path geometry ` +
+        `(x ${Math.round(geometry.minX)}..${Math.round(geometry.maxX)}, ` +
+        `y ${Math.round(geometry.minY)}..${Math.round(geometry.maxY)}) falls inside ` +
+        `viewBox "${viewBoxMatch[1]}" — the icon will render clipped or mostly empty. ` +
+        `Use the source SVG's own viewBox or recompute it from the path bounds.`,
+    ];
+  }
+
+  return [];
+}
+
+/**
+ * Runs `validateConnectorIconSource` over every registered connector's icon component file.
+ * Returns human-readable problem descriptions; an empty array means all icons look sane.
+ */
+export function validateConnectorIcons(entries: ConnectorRegistryEntry[]): string[] {
+  const problems: string[] = [];
+  for (const entry of entries) {
+    if (!entry.iconImportPath) continue;
+    const basePath = join(SRC_DIR, entry.iconImportPath);
+    const candidates = [
+      `${basePath}.tsx`,
+      `${basePath}.ts`,
+      join(basePath, 'index.tsx'),
+      join(basePath, 'index.ts'),
+    ];
+    const iconFile = candidates.find((candidate) => existsSync(candidate));
+    if (!iconFile) continue;
+    problems.push(
+      ...validateConnectorIconSource(
+        readFileSync(iconFile, 'utf8'),
+        `${entry.id} (${relative(PACKAGE_ROOT, iconFile)})`
+      )
+    );
+  }
+  return problems;
+}
+
 export interface GeneratedConnectorFile {
   path: string;
   content: string;

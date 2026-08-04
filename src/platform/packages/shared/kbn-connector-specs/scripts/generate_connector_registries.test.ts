@@ -27,7 +27,10 @@ import {
   renderConnectorIconsMapFile,
   renderConnectorOwnersCodeownersLines,
   toChunkName,
+  computeSvgPathBounds,
   validateConnectorDocsList,
+  validateConnectorIconSource,
+  validateConnectorIcons,
   validateConnectorToc,
 } from './generate_connector_registries';
 
@@ -113,6 +116,12 @@ describe('generate_connector_registries', () => {
     it('has no ordering or duplicate-entry issues', () => {
       const content = readFileSync(DOCS_TOC_PATH, 'utf8');
       expect(validateConnectorToc(content)).toEqual([]);
+    });
+  });
+
+  describe('connector icons', () => {
+    it('every registered icon has a viewBox that contains its path geometry', () => {
+      expect(validateConnectorIcons(computeConnectorRegistry())).toEqual([]);
     });
   });
 
@@ -425,6 +434,57 @@ describe('generate_connector_registries', () => {
       const problems = validateConnectorToc('toc:\n  - file: index.md\n');
       expect(problems).toHaveLength(1);
       expect(problems[0]).toContain('Could not find');
+    });
+  });
+
+  describe('computeSvgPathBounds', () => {
+    it('tracks absolute and relative commands', () => {
+      const bounds = computeSvgPathBounds('M10 10 L30 10 l0 20 H5 V40 Z');
+      expect(bounds).toEqual({ minX: 5, minY: 10, maxX: 30, maxY: 40 });
+    });
+
+    it('accumulates across multiple paths when passed a previous result', () => {
+      const first = computeSvgPathBounds('M0 0 L10 10');
+      const combined = computeSvgPathBounds('M50 50 L60 60', first!);
+      expect(combined).toEqual({ minX: 0, minY: 0, maxX: 60, maxY: 60 });
+    });
+
+    it('returns null for empty path data', () => {
+      expect(computeSvgPathBounds('')).toBeNull();
+    });
+  });
+
+  describe('validateConnectorIconSource', () => {
+    const icon = (viewBox: string, d: string, extra = '') =>
+      `<svg viewBox="${viewBox}" ${extra}><path d="${d}" /></svg>`;
+
+    it('passes an icon whose geometry fills its viewBox', () => {
+      expect(validateConnectorIconSource(icon('0 0 32 32', 'M2 2 L30 2 L30 30 L2 30 Z'), 'x')).toEqual(
+        []
+      );
+    });
+
+    it('flags a viewBox that clips most of the geometry (the Dynatrace failure mode)', () => {
+      const problems = validateConnectorIconSource(
+        icon('0 0 100 10', 'M0 0 L100 0 L100 100 L0 100 Z'),
+        '.dynatrace'
+      );
+      expect(problems).toHaveLength(1);
+      expect(problems[0]).toContain('.dynatrace');
+      expect(problems[0]).toContain('falls inside');
+    });
+
+    it('skips icons with transforms, no viewBox, or no path geometry', () => {
+      expect(
+        validateConnectorIconSource(
+          icon('0 0 10 10', 'M0 0 L100 100', 'transform="scale(0.1)"'),
+          'x'
+        )
+      ).toEqual([]);
+      expect(validateConnectorIconSource('<svg><path d="M0 0 L100 100" /></svg>', 'x')).toEqual([]);
+      expect(validateConnectorIconSource('<svg viewBox="0 0 32 32"><rect /></svg>', 'x')).toEqual(
+        []
+      );
     });
   });
 });

@@ -16,6 +16,7 @@ import {
   computeGeneratedFiles,
   validateConnectorDocsList,
   validateConnectorToc,
+  validateConnectorIcons,
   CONNECTOR_DOCS_LIST_PATH,
   DOCS_TOC_PATH,
 } from '@kbn/connector-specs/codegen';
@@ -41,15 +42,25 @@ export const ConnectorRegistriesCommand: GenerateCommand = {
     // in both modes, since a bad ordering/duplicate isn't something running without --check would
     // fix.
     const structuralProblems = [
-      { path: CONNECTOR_DOCS_LIST_PATH, problems: validateConnectorDocsList(readFileSync(CONNECTOR_DOCS_LIST_PATH, 'utf8')) },
-      { path: DOCS_TOC_PATH, problems: validateConnectorToc(readFileSync(DOCS_TOC_PATH, 'utf8')) },
+      {
+        label: Path.relative(REPO_ROOT, CONNECTOR_DOCS_LIST_PATH),
+        problems: validateConnectorDocsList(readFileSync(CONNECTOR_DOCS_LIST_PATH, 'utf8')),
+      },
+      {
+        label: Path.relative(REPO_ROOT, DOCS_TOC_PATH),
+        problems: validateConnectorToc(readFileSync(DOCS_TOC_PATH, 'utf8')),
+      },
+      {
+        label: 'connector icons',
+        problems: validateConnectorIcons(entries),
+      },
     ].filter(({ problems }) => problems.length > 0);
     if (structuralProblems.length > 0) {
       throw createFailError(
         structuralProblems
           .map(
-            ({ path, problems }) =>
-              `${Path.relative(REPO_ROOT, path)} has ${problems.length} issue(s):\n` +
+            ({ label, problems }) =>
+              `${label} has ${problems.length} issue(s):\n` +
               problems.map((p) => `  - ${p}`).join('\n')
           )
           .join('\n')
