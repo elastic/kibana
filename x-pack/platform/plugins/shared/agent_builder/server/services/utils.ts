@@ -17,6 +17,13 @@ import { apiPrivileges } from '../../common/features';
 
 const KIBANA_APPLICATION = `${APPLICATION_PREFIX}.kibana`;
 
+interface StableUserIdAuthUser {
+  username?: string;
+  profile_uid?: string;
+  authentication_type?: string;
+  authentication_realm?: { type?: string; name?: string };
+}
+
 /**
  * Builds a stable principal id for Agent Builder ownership checks.
  *
@@ -27,21 +34,31 @@ const KIBANA_APPLICATION = `${APPLICATION_PREFIX}.kibana`;
  *
  * The `realm:` prefix keeps synthetic ids distinguishable from profile uids.
  */
-export const toStableUserId = ({
-  profileUid,
-  username,
-  authenticationRealm,
+export const toStableUserId = async ({
+  authUser,
+  resolveApiKeyProfileUid,
 }: {
-  profileUid?: string;
-  username?: string;
-  authenticationRealm?: { type?: string; name?: string };
-}): string | undefined => {
+  authUser: StableUserIdAuthUser;
+  resolveApiKeyProfileUid?: () => Promise<string | undefined>;
+}): Promise<string | undefined> => {
+  const isApiKey = authUser.authentication_type === 'api_key';
+  let profileUid = authUser.profile_uid;
+
+  if (isApiKey && profileUid === undefined && resolveApiKeyProfileUid) {
+    profileUid = await resolveApiKeyProfileUid();
+  }
+
   if (profileUid) {
     return profileUid;
   }
 
-  const realmType = authenticationRealm?.type;
-  const realmName = authenticationRealm?.name;
+  if (isApiKey) {
+    return undefined;
+  }
+
+  const realmType = authUser.authentication_realm?.type;
+  const realmName = authUser.authentication_realm?.name;
+  const { username } = authUser;
   if (!realmType || !realmName || !username) {
     return undefined;
   }
@@ -102,24 +119,15 @@ export const getUserFromRequest = async ({
 }): Promise<CurrentUser> => {
   const authUser = security.authc.getCurrentUser(request);
   if (authUser?.username) {
-    const isApiKey = authUser.authentication_type === 'api_key';
-    let profileUid = authUser.profile_uid;
-    if (isApiKey && profileUid === undefined) {
-      profileUid = await resolveApiKeyOwnerProfileUid({ request, esClient });
-    }
-
     return {
-      id: toStableUserId({
-        profileUid,
-        username: authUser.username,
-        authenticationRealm: isApiKey ? undefined : authUser.authentication_realm,
+      id: await toStableUserId({
+        authUser,
+        resolveApiKeyProfileUid: () => resolveApiKeyOwnerProfileUid({ request, esClient }),
       }),
       username: authUser.username,
     };
   }
 
-  // Fallback for un-enriched fake requests (e.g. Task Manager execution of a
-  // task scheduled before enrichment): call ES _security/_authenticate
   const authResponse = await esClient.security.authenticate();
   return {
     id: authUser?.profile_uid,
