@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiButtonGroup,
@@ -51,6 +51,7 @@ import { paths } from '../../constants';
 import type { AlertEpisodesKibanaServices } from '../../episodes_kibana_services';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { UserCapabilities } from '../../services/user_capabilities';
+import { FocusedEpisodeService } from '../../services/focused_episode_service';
 import { getDiscoverHrefForRuleAndEpisodeTimestamp } from '../../utils/discover_href_for_episode';
 import {
   filterEpisodeActionsByPrivilege,
@@ -101,6 +102,20 @@ export function EpisodeDetailsPage() {
     episodeId,
     services: { data, spaces },
   });
+
+  const focusedEpisodeService = useService(FocusedEpisodeService);
+
+  useEffect(() => {
+    if (!episode) {
+      return;
+    }
+
+    focusedEpisodeService.setFocusedEpisode(episode);
+
+    return () => {
+      focusedEpisodeService.clearFocusedEpisode(episode['episode.id']);
+    };
+  }, [episode, focusedEpisodeService]);
 
   const ruleId = episode?.['rule.id'];
   const groupHash = episode?.group_hash;
