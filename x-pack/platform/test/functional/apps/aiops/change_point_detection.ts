@@ -29,6 +29,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await ml.testResources.deleteDataViewByTitle('ft_ecommerce');
     });
 
+    afterEach(async () => {
+      // A failed test can leave the "Selected change points" flyout open; its overlay
+      // mask then intercepts clicks in later tests. Always tear it down between tests.
+      await aiops.changePointDetectionPage.closeFlyoutIfOpen();
+    });
+
     it(`loads the change point detection page`, async () => {
       // Start navigation from the base of the ML app.
       await ml.navigation.navigateToMl();

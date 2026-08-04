@@ -112,17 +112,27 @@ export function ChangePointDetectionPageProvider(
 
     async assertDetailedView(expectedChartCount: number) {
       const testSubj = 'aiopsChangePointDetectionSelectedCharts > xyVisChart';
-      await elasticChart.waitForRenderComplete(testSubj);
-      const changePointCharts = await testSubjects.findAll(testSubj);
-      expect(changePointCharts.length >= expectedChartCount).to.eql(
-        true,
-        `Expected equal or more than ${expectedChartCount} charts in the flyout (got '${changePointCharts.length}')`
-      );
+      // Charts render one by one, so retry the count until they all mount instead of
+      // asserting after a single render-complete tick.
+      await retry.tryForTime(30 * 1000, async () => {
+        await elasticChart.waitForRenderComplete(testSubj);
+        const changePointCharts = await testSubjects.findAll(testSubj);
+        expect(changePointCharts.length >= expectedChartCount).to.eql(
+          true,
+          `Expected equal or more than ${expectedChartCount} charts in the flyout (got '${changePointCharts.length}')`
+        );
+      });
     },
 
     async closeFlyout() {
       await browser.pressKeys(browser.keys.ESCAPE);
       await testSubjects.missingOrFail('aiopsChangePointDetectionSelectedCharts');
+    },
+
+    async closeFlyoutIfOpen() {
+      if (await testSubjects.exists('aiopsChangePointDetectionSelectedCharts')) {
+        await this.closeFlyout();
+      }
     },
 
     async addChangePointConfig() {
