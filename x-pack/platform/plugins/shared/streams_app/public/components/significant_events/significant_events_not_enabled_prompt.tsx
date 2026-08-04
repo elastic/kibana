@@ -48,6 +48,10 @@ const NOT_ENABLED_BODY_MESSAGES: Record<NotEnabledReason, () => string> = {
       defaultMessage:
         'Significant events is in Technical Preview and is being rolled out gradually. It is not available in this environment yet.',
     }),
+  project_type: () =>
+    i18n.translate('xpack.streams.significantEvents.notEnabledPrompt.projectTypeBody', {
+      defaultMessage: 'Significant events is only available in Observability projects.',
+    }),
   pricing_tier: () =>
     i18n.translate('xpack.streams.significantEvents.notEnabledPrompt.pricingTierBody', {
       defaultMessage: 'Significant events is not available on the current pricing tier.',
