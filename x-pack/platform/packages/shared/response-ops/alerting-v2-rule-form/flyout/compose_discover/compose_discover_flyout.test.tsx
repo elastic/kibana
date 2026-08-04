@@ -1604,7 +1604,7 @@ describe('ComposeDiscoverFlyout', () => {
       expect(readCommittedQuery?.()).toMatchObject({ format: 'standalone' });
     });
 
-    it('coerces noDataStrategy to none when switching back to alert after a merge left a standalone query', () => {
+    it('re-splits a merged query when switching back to alert and keeps a valid noDataStrategy', () => {
       const rule = {
         ...ruleWithRecoveryStrategy,
         no_data_strategy: 'recover' as const,
@@ -1618,9 +1618,37 @@ describe('ComposeDiscoverFlyout', () => {
         getLatestFormProps().onKindChange('alert');
       });
 
-      // No automatic re-split — standalone cannot keep recover.
+      // Heuristic restores composed base + condition; recover stays valid.
+      expect(readCommittedQuery?.()).toMatchObject({
+        format: 'composed',
+        base: 'FROM logs-*',
+        breach: { segment: expect.stringMatching(/WHERE count > 100/) },
+      });
+      expect(readNoDataStrategy?.()).toBe('recover');
+      expect(getLatestFormProps().state.childOpen).toBe(false);
+    });
+
+    it('keeps a conditionless query standalone when switching back to alert and coerces noDataStrategy', () => {
+      const rule = {
+        ...ruleWithRecoveryStrategy,
+        query: {
+          format: 'standalone' as const,
+          breach: { query: 'FROM logs-* | STATS count = COUNT(*) BY host.name' },
+        },
+        no_data_strategy: 'recover' as const,
+      };
+      renderFlyout({ mode: 'edit', rule: rule as any });
+
+      act(() => {
+        getLatestFormProps().onKindChange('signal');
+      });
+      act(() => {
+        getLatestFormProps().onKindChange('alert');
+      });
+
       expect(readCommittedQuery?.()).toMatchObject({ format: 'standalone' });
       expect(readNoDataStrategy?.()).toBe('none');
+      expect(getLatestFormProps().state.childOpen).toBe(false);
     });
 
     it('silently merges a composed query to standalone when switching to signal', () => {

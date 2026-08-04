@@ -118,8 +118,10 @@ export function reducer(
       };
     case 'KIND_CHANGE':
       // Reset manual split when switching kind — the unified query is rebuilt.
+      // Do not force the sandbox open; signal→alert attempts a heuristic split in
+      // the flyout handler instead (same path as unified Apply).
       return action.kind === 'alert'
-        ? { ...state, step: 0, childOpen: true, activeTab: 'base', manualSplitEnabled: false }
+        ? { ...state, step: 0, activeTab: 'base', manualSplitEnabled: false }
         : {
             ...state,
             recoveryType: 'default',

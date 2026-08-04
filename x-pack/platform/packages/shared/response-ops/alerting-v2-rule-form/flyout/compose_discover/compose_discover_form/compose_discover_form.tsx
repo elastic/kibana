@@ -196,6 +196,12 @@ export const ComposeDiscoverForm = ({
         stepContent
       ) : (
         <>
+          {/*
+            Query first so create users hit Open query editor before the mode
+            radios (disabled until a query is committed / while the sandbox is open).
+          */}
+          {stepContent}
+          <EuiSpacer size="m" />
           <ModeSelect
             value={isAlert ? 'alert' : 'signal'}
             onChange={onKindChange}
@@ -203,8 +209,6 @@ export const ComposeDiscoverForm = ({
             compressed
             data-test-subj="composeDiscoverModeSelect"
           />
-          <EuiSpacer size="m" />
-          {stepContent}
           {isAlert && (
             <>
               <EuiHorizontalRule margin="m" />

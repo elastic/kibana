@@ -367,6 +367,16 @@ describe('shell shared fields', () => {
     expect(screen.getByText('Lookback Window')).toBeInTheDocument();
   });
 
+  it('renders the query section above ModeSelect on the alert condition step', () => {
+    renderShell({ step: 0 }, { kind: 'alert' });
+
+    const querySection = screen.getByTestId('mockAlertConditionStep');
+    const modeSelect = screen.getByTestId('composeDiscoverModeSelect');
+    expect(
+      querySection.compareDocumentPosition(modeSelect) && Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
+  });
+
   it('does not render AlertDelayField when kind is signal', () => {
     renderShell(
       { step: 0 },

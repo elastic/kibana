@@ -608,12 +608,17 @@ export function ComposeDiscoverFlyout({
     (kind: 'signal' | 'alert') => {
       if (kind === 'alert') {
         /*
-         * Do not re-split. Switching back from signal leaves the query as a
-         * single block (issue #820 / #812 corollary). Remap no-data only when
-         * the current value is invalid for the current query shape.
+         * Attempt the same heuristic split as unified Apply so signal→alert can
+         * restore a composed base/condition without opening the sandbox. When
+         * the heuristic cannot isolate a condition, the query stays standalone
+         * (every returned row is a breach). Remap no-data only when invalid for
+         * the resulting shape.
          */
-        const alertQuery = methods.getValues('query');
+        const currentQuery = methods.getValues('query');
+        const split = splitResultToRuleQuery(getBreachQuery(currentQuery)).query;
+        const alertQuery = resolveUnifiedAlertApplyQuery(currentQuery, split);
         setSandboxQuery(alertQuery);
+        methods.setValue('query', alertQuery, { shouldDirty: true });
         const currentNoData = methods.getValues('noDataStrategy');
         const resolvedNoData = resolveNoDataStrategyForQuery(currentNoData, alertQuery.format);
         if (resolvedNoData !== currentNoData) {

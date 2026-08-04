@@ -120,8 +120,17 @@ describe('createInitialState', () => {
 
 describe('reducer', () => {
   describe('KIND_CHANGE', () => {
-    it('kind=alert opens child on the base tab and resets to step 0', () => {
+    it('kind=alert resets to step 0 on the base tab without opening the sandbox', () => {
       const state = createState({ step: 2, childOpen: false, activeTab: 'alert' });
+      const next = reducer(state, { type: 'KIND_CHANGE', kind: 'alert' });
+
+      expect(next.childOpen).toBe(false);
+      expect(next.step).toBe(0);
+      expect(next.activeTab).toBe('base');
+    });
+
+    it('kind=alert preserves an already-open sandbox', () => {
+      const state = createState({ step: 2, childOpen: true, activeTab: 'alert' });
       const next = reducer(state, { type: 'KIND_CHANGE', kind: 'alert' });
 
       expect(next.childOpen).toBe(true);
