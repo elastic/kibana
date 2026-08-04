@@ -9,7 +9,7 @@
 
 import type { Locator, PageObjects, ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import type { DiscoverPageObjects } from '../../../../common/ui/fixtures';
+import type { DiscoverPageObjects } from '../..';
 import {
   SECURITY_DATA_VIEWS,
   SECURITY_FLYOUT_TEST_SUBJECTS as TS,

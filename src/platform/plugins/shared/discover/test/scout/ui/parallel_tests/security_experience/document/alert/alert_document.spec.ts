@@ -15,7 +15,7 @@ import {
   teardownSecurityExperience,
   PUSH_FLYOUT_VIEWPORT,
   SECURITY_TEST_DATA,
-} from '../../../fixtures';
+} from '../../../../fixtures/security_experience';
 
 /**
  * Alert document flyout rendered inside Discover. Confirms the Security context-awareness profile

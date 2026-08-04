@@ -14,7 +14,7 @@ import {
   setupSecurityExperience,
   teardownSecurityExperience,
   PUSH_FLYOUT_VIEWPORT,
-} from '../../../fixtures';
+} from '../../../../fixtures/security_experience';
 
 /**
  * Attack Discovery documents were added to the Security context-awareness profile after this suite

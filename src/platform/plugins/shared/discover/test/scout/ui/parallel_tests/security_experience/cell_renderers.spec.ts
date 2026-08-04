@@ -16,7 +16,7 @@ import {
   PUSH_FLYOUT_VIEWPORT,
   SECURITY_CELL_RENDERER_SAVED_SEARCH,
   SECURITY_TEST_DATA,
-} from '../fixtures';
+} from '../../fixtures/security_experience';
 
 /**
  * Custom Discover data-grid cell renderers registered by the Security context-awareness profile

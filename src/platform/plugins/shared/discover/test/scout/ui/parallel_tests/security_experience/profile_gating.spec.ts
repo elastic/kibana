@@ -15,7 +15,7 @@ import {
   teardownSecurityExperience,
   SECURITY_DATA_VIEWS,
   PUSH_FLYOUT_VIEWPORT,
-} from '../fixtures';
+} from '../../fixtures/security_experience';
 
 /**
  * Sanity coverage that the Security flyout enhancement is gated on the security solution view: the

@@ -14,7 +14,7 @@ import {
   setupSecurityExperience,
   teardownSecurityExperience,
   PUSH_FLYOUT_VIEWPORT,
-} from '../../../fixtures';
+} from '../../../../fixtures/security_experience';
 
 /**
  * IOC (threat intelligence indicator) flyout rendered inside Discover. The Security profile injects

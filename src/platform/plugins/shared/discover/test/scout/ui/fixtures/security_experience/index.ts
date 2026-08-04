@@ -9,8 +9,8 @@
 
 import type { ScoutParallelWorkerFixtures } from '@kbn/scout';
 import { createLazyPageObject } from '@kbn/scout';
-import type { DiscoverPageObjects } from '../../../common/ui/fixtures';
-import { spaceTest as spaceBaseTest } from '../../../common/ui/fixtures';
+import type { DiscoverPageObjects } from '..';
+import { spaceTest as spaceBaseTest } from '..';
 import { SecurityDiscoverFlyout } from './page_objects';
 
 export interface SecurityExperienceTestFixtures {

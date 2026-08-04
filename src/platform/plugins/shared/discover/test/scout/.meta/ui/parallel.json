@@ -1,5 +1,5 @@
 {
-  "sha1": "786808c065220058449fa52be828980dfcbffecc",
+  "sha1": "e3223a0a40b87d1ab67f46d766423e1ba9ef7dcd",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -12,7 +12,7 @@
       "tags": [],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/global.teardown.ts",
-        "line": 16,
+        "line": 17,
         "column": 19
       }
     },
@@ -23,7 +23,7 @@
       "tags": [],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/global.setup.ts",
-        "line": 26,
+        "line": 27,
         "column": 16
       }
     },
@@ -2504,6 +2504,266 @@
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/metrics_experience/tab_duplication_state.spec.ts",
         "line": 143,
+        "column": 14
+      }
+    },
+    {
+      "id": "a9b39c8a0adc3a3-3d2343049834a84",
+      "title": "Security in Discover - cell renderers rule name column renders a link that requests the rule details",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/security_experience/cell_renderers.spec.ts",
+        "line": 55,
+        "column": 12
+      }
+    },
+    {
+      "id": "a9b39c8a0adc3a3-2a2c011434e6fdf",
+      "title": "Security in Discover - cell renderers IP column renders a link that opens the network flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/security_experience/cell_renderers.spec.ts",
+        "line": 74,
+        "column": 12
+      }
+    },
+    {
+      "id": "a9b39c8a0adc3a3-c71b2d50c9c0b7d",
+      "title": "Security in Discover - cell renderers host column renders a link that opens the host flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/security_experience/cell_renderers.spec.ts",
+        "line": 82,
+        "column": 12
+      }
+    },
+    {
+      "id": "a9b39c8a0adc3a3-96f696d9c03db46",
+      "title": "Security in Discover - cell renderers user column renders a link that opens the user flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/security_experience/cell_renderers.spec.ts",
+        "line": 90,
+        "column": 12
+      }
+    },
+    {
+      "id": "2af515ff342077d-399193484079508",
+      "title": "Security in Discover - Dashboard embedded flyout alert flyout opens from a Discover panel embedded in a dashboard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/security_experience/dashboard/dashboard_embedded.spec.ts",
+        "line": 42,
+        "column": 14
+      }
+    },
+    {
+      "id": "54479780bee8c8c-6a8388b18dad3c6",
+      "title": "Security in Discover - Alert document flyout adds a filter from a highlighted field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/security_experience/document/alert/alert_document.spec.ts",
+        "line": 47,
+        "column": 14
+      }
+    },
+    {
+      "id": "54479780bee8c8c-c3695aa565e0229",
+      "title": "Security in Discover - Alert document flyout add as column cell action adds the field to the Discover table",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/security_experience/document/alert/alert_document.spec.ts",
+        "line": 61,
+        "column": 14
+      }
+    },
+    {
+      "id": "54479780bee8c8c-be072a86e0dde37",
+      "title": "Security in Discover - Alert document flyout doc viewer tabs: security Overview is the default tab and Table / JSON tabs switch",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/security_experience/document/alert/alert_document.spec.ts",
+        "line": 79,
+        "column": 14
+      }
+    },
+    {
+      "id": "2812254b742c94d-f5090f1858d0368",
+      "title": "Security in Discover - Alert document take action explore action opens the security alerts page in a new tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/security_experience/document/alert/take_action.spec.ts",
+        "line": 44,
+        "column": 14
+      }
+    },
+    {
+      "id": "190623b7c8aa619-11d491ba71c3bf1",
+      "title": "Security in Discover - Attack Discovery document flyout routes an attack document to its Overview tab alongside the Discover tabs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/security_experience/document/attack/attack_document.spec.ts",
+        "line": 42,
+        "column": 14
+      }
+    },
+    {
+      "id": "51409a8838b8d25-acf320cada82d7b",
+      "title": "Security in Discover - Event document flyout routes an event document to the security Overview tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/security_experience/document/event/event_document.spec.ts",
+        "line": 42,
+        "column": 14
+      }
+    },
+    {
+      "id": "b51ecce2ec86911-788bb7ac7206c0a",
+      "title": "Security in Discover - IOC flyout routes an IOC document to its Overview tab alongside the Discover tabs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/security_experience/document/ioc/ioc_document.spec.ts",
+        "line": 39,
+        "column": 12
+      }
+    },
+    {
+      "id": "a436dcaff06cfaa-058055c54cb4aa7",
+      "title": "Security in Discover - Profile gated on security solution view does not enhance the alert flyout under the classic solution view",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/security_experience/profile_gating.spec.ts",
+        "line": 42,
         "column": 14
       }
     },

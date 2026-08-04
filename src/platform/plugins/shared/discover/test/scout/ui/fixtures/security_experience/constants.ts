@@ -73,7 +73,7 @@ export const PUSH_FLYOUT_VIEWPORT = { width: 1920, height: 1080 } as const;
  * validate the multi-object file as a single JSON document.
  */
 export const SECURITY_KBN_ARCHIVE =
-  'src/platform/plugins/shared/discover/test/scout/security_experience/ui/fixtures/kbn_archives/security_saved_objects.ndjson';
+  'src/platform/plugins/shared/discover/test/scout/ui/fixtures/security_experience/kbn_archives/security_saved_objects.ndjson';
 
 /**
  * Synthetic-document field values referenced by the specs. Values used only when generating the

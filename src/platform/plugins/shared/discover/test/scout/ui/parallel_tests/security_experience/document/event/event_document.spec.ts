@@ -14,7 +14,7 @@ import {
   setupSecurityExperience,
   teardownSecurityExperience,
   PUSH_FLYOUT_VIEWPORT,
-} from '../../../fixtures';
+} from '../../../../fixtures/security_experience';
 
 /**
  * Event document flyout rendered inside Discover. The Security context-awareness profile enhances

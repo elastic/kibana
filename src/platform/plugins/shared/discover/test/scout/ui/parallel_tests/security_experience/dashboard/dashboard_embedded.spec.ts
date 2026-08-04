@@ -14,27 +14,25 @@ import {
   setupSecurityExperience,
   teardownSecurityExperience,
   PUSH_FLYOUT_VIEWPORT,
-  TAKE_ACTION_TEST_SUBJECTS as TA,
-} from '../../../fixtures';
+} from '../../../fixtures/security_experience';
 
 /**
- * Discover replaces the Security app's "Investigate in Timeline" action with an "Explore in Alerts"
- * action. Menu composition and action sub-panels are covered by flyout_v2 unit and Scout tests.
+ * Discover embedded in a Dashboard. A saved-search panel uses the same unified data table and
+ * expand-row → doc viewer flyout path, so the Security profile enhances the flyout there too.
  */
 spaceTest.describe(
-  'Security in Discover - Alert document take action',
+  'Security in Discover - Dashboard embedded flyout',
   { tag: tags.stateful.all },
   () => {
+    // Force a wide viewport so the doc viewer flyout (pushMinBreakpoint="xl") renders in push mode.
     spaceTest.use({ viewport: PUSH_FLYOUT_VIEWPORT });
 
     spaceTest.beforeAll(async ({ scoutSpace }) => {
       await setupSecurityExperience(scoutSpace);
     });
 
-    spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
+    spaceTest.beforeEach(async ({ browserAuth }) => {
       await browserAuth.loginAsPrivilegedUser();
-      await pageObjects.securityDiscoverFlyout.openAlertFlyoutFromDiscover();
-      await pageObjects.securityDiscoverFlyout.waitForDocumentHeader();
     });
 
     spaceTest.afterAll(async ({ scoutSpace }) => {
@@ -42,17 +40,13 @@ spaceTest.describe(
     });
 
     spaceTest(
-      'explore action opens the security alerts page in a new tab',
-      async ({ page, pageObjects }) => {
+      'alert flyout opens from a Discover panel embedded in a dashboard',
+      async ({ pageObjects }) => {
         const { securityDiscoverFlyout } = pageObjects;
-        await securityDiscoverFlyout.openTakeActionMenu();
+        await securityDiscoverFlyout.openAlertFlyoutFromDashboard();
 
-        // The explore action opens the relevant security page in a new browser tab (window.open).
-        const newTabPromise = page.context().waitForEvent('page');
-        await securityDiscoverFlyout.clickTakeActionItem(TA.EXPLORE);
-        const newTab = await newTabPromise;
-        await expect(newTab).toHaveURL(/app\/security\/alerts/);
-        await newTab.close();
+        await securityDiscoverFlyout.waitForDocumentHeader();
+        await expect(securityDiscoverFlyout.overviewTab).toHaveAttribute('aria-selected', 'true');
       }
     );
   }

@@ -15,6 +15,7 @@ import {
   PARTIAL_DIM_FULL_CONFIG,
   PARTIAL_DIM_ONLY_CONFIG,
 } from '../fixtures/metrics_experience';
+import { createSecurityTestIndices } from '../fixtures/security_experience';
 import {
   TRACES,
   richTrace,
@@ -76,6 +77,10 @@ globalSetupHook(
       'src/platform/test/functional/fixtures/es_archiver/kibana_sample_data_flights'
     );
     log.debug('[setup:kibana_sample_data_flights] kibana_sample_data_flights ES data ready');
+
+    log.debug('[setup:security] (re)creating security test indices...');
+    await createSecurityTestIndices(esClient);
+    log.debug('[setup:security] security test indices ready');
 
     // Metrics Experience setup
     log.debug('[setup:metrics] creating metrics test index (only if it does not exist)...');
