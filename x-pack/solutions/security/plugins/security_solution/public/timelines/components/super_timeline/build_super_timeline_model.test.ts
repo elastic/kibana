@@ -353,9 +353,11 @@ describe('buildSuperTimelineModel', () => {
       // WHY: combineQueries may (theoretically) return a serialized JSON array or primitive in edge
       // cases. The old code set reason: 'eql', which would misidentify a KQL timeline as EQL in the
       // warning toast and confuse the user. 'unknown' is accurate and non-misleading.
-      const spy = jest
-        .spyOn(kuery, 'combineQueries')
-        .mockReturnValueOnce({ filterQuery: JSON.stringify([1, 2, 3]) });
+      const spy = jest.spyOn(kuery, 'combineQueries').mockReturnValueOnce({
+        filterQuery: JSON.stringify([1, 2, 3]),
+        kqlError: undefined,
+        baseKqlQuery: { query: '', language: 'kuery' },
+      });
       const t = makeTimeline({
         savedObjectId: 'kql-bad-serialize',
         title: 'Bad Serialize',
