@@ -208,6 +208,8 @@ export const BulkOperations = ({
               values: { count: resetIds.length },
             }),
             icon: 'refresh',
+            disabled: isActionDisabled,
+            toolTipContent: disabledTooltip,
             'data-test-subj': 'syntheticsBulkResetIntegrationButton',
             onClick: () => {
               closePopover();
