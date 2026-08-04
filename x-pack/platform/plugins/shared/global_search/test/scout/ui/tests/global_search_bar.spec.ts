@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { getPlaywrightTagsFor } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
 import { KBN_ARCHIVES } from '../fixtures/constants';
@@ -19,7 +18,7 @@ import { KBN_ARCHIVES } from '../fixtures/constants';
  */
 test.describe(
   'GlobalSearchBar',
-  { tag: getPlaywrightTagsFor('stateful', 'classic', 'local') },
+  { tag: '@local-stateful-classic' },
   () => {
     test.beforeAll(async ({ kbnClient }) => {
       await kbnClient.savedObjects.cleanStandardList();
