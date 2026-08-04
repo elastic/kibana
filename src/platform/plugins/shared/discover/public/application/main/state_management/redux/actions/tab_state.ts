@@ -9,6 +9,7 @@
 
 import { isFunction, isEqual } from 'lodash';
 import { type DataView, DataViewType } from '@kbn/data-views-plugin/common';
+import type { SerializableRecord } from '@kbn/utility-types';
 import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 import {
   type AggregateQuery,
@@ -23,7 +24,11 @@ import {
   SORT_DEFAULT_ORDER_SETTING,
   getDefaultSort,
 } from '@kbn/discover-utils';
-import { GLOBAL_STATE_URL_KEY, PROFILE_STATE_URL_KEY } from '../../../../../../common/constants';
+import {
+  GLOBAL_STATE_URL_KEY,
+  PROFILE_STATE_URL_KEY,
+  DISCOVER_QUERY_MODE_KEY,
+} from '../../../../../../common/constants';
 import { APP_STATE_URL_KEY } from '../../../../../../common';
 import { DataSourceType } from '../../../../../../common/data_sources';
 import { isEqualState } from '../../utils/state_comparators';
@@ -32,20 +37,18 @@ import {
   type InternalStateThunkActionCreator,
   type InternalStateThunkAction,
   type TabActionPayload,
-  transitionedFromEsqlToDataView,
-  transitionedFromDataViewToEsql,
 } from '../internal_state';
 import {
   ProfileStateType,
   type ProfileStateDefinition,
   type ProfileStateDefaultsHandling,
-  type ProfileStateMutationOptions,
-} from '../../../../../context_awareness';
+} from '../../../../../../common/context_awareness';
+import type { ProfileStateMutationOptions } from '../../../../../context_awareness';
 import { selectTab } from '../selectors';
 import {
   selectDataSourceProfileId,
   selectCurrentProfileUrlState,
-  selectCurrentProfileUrlStateDefinition,
+  selectCurrentProfileStateDefinition,
   selectTabRuntimeState,
 } from '../runtime_state';
 import type {
@@ -219,7 +222,7 @@ export const updateAttributes: InternalStateThunkActionCreator<[AttributesPayloa
     }
   };
 
-type ProfileStatePayload<TState extends object> = TabActionPayload<{
+type ProfileStatePayload<TState extends SerializableRecord> = TabActionPayload<{
   profileStateDefinition: ProfileStateDefinition<TState>;
   profileState: TState;
   historyMethod?: ProfileStateMutationOptions['historyMethod'];
@@ -236,7 +239,7 @@ const URL_PROFILE_STATE_TYPES = new Set([ProfileStateType.Url]);
 /**
  * Updates tab profile state for provided definition, and optionally pushes to URL history
  */
-export const setProfileState = <TState extends object>(
+export const setProfileState = <TState extends SerializableRecord>(
   payload: ProfileStatePayload<TState>
 ): InternalStateThunkAction =>
   function setProfileStateThunkFn(
@@ -274,7 +277,7 @@ export const setProfileState = <TState extends object>(
       stateTypes,
       defaultsHandling,
     }: {
-      profileState: object | undefined;
+      profileState: SerializableRecord | undefined;
       stateTypes: Set<ProfileStateType>;
       defaultsHandling?: ProfileStateDefaultsHandling;
     }) => {
@@ -286,11 +289,11 @@ export const setProfileState = <TState extends object>(
       });
     };
 
-    const dispatchProfileState = (profileState: object | undefined) => {
+    const dispatchProfileState = (profileState: SerializableRecord | undefined) => {
       dispatch(internalStateSlice.actions.setProfileState({ tabId, key, profileState }));
     };
 
-    const profileUrlStateDefinition = selectCurrentProfileUrlStateDefinition(
+    const profileUrlStateDefinition = selectCurrentProfileStateDefinition(
       runtimeStateManager,
       tabId
     );
@@ -427,7 +430,10 @@ export const transitionFromESQLToDataView: InternalStateThunkActionCreator<
       })
     );
 
-    dispatch(transitionedFromEsqlToDataView({ tabId }));
+    services.storage.set(DISCOVER_QUERY_MODE_KEY, {
+      currentMode: 'classic',
+      defaultMode: services.discoverFeatureFlags.getIsEsqlDefault() ? 'esql' : 'classic',
+    });
   };
 
 /**
@@ -437,7 +443,7 @@ export const transitionFromESQLToDataView: InternalStateThunkActionCreator<
 export const transitionFromDataViewToESQL: InternalStateThunkActionCreator<
   [TabActionPayload<{ dataView: DataView }>]
 > = ({ tabId, dataView }) =>
-  function transitionFromDataViewToESQLThunkFn(dispatch, getState) {
+  function transitionFromDataViewToESQLThunkFn(dispatch, getState, { services }) {
     // Mark all profile state fields to reset when transitioning to ES|QL mode
     dispatch(
       internalStateSlice.actions.setProfileStateFieldsToReset({
@@ -473,7 +479,10 @@ export const transitionFromDataViewToESQL: InternalStateThunkActionCreator<
     // clears pinned filters
     dispatch(updateGlobalState({ tabId, globalState: { filters: [] } }));
 
-    dispatch(transitionedFromDataViewToEsql({ tabId }));
+    services.storage.set(DISCOVER_QUERY_MODE_KEY, {
+      currentMode: 'esql',
+      defaultMode: services.discoverFeatureFlags.getIsEsqlDefault() ? 'esql' : 'classic',
+    });
   };
 
 /**

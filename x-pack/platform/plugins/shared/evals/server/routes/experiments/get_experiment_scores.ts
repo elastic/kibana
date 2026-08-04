@@ -15,11 +15,16 @@ import {
   GetEvaluationExperimentScoresRequestQuery,
 } from '@kbn/evals-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { EVALS_API_PRIVILEGES } from '../../../common';
 import type { RouteDependencies } from '../register_routes';
 import { handleMaximumResponseSizeExceededError } from '../utils/handle_response_size_error';
 
-export const registerGetExperimentScoresRoute = ({ router, logger }: RouteDependencies) => {
+export const registerGetExperimentScoresRoute = ({
+  router,
+  logger,
+  getSpaceId,
+}: RouteDependencies) => {
   router.versioned
     .get({
       path: EVALS_EXPERIMENT_SCORES_URL,
@@ -44,6 +49,7 @@ export const registerGetExperimentScoresRoute = ({ router, logger }: RouteDepend
           const { experimentId } = request.params;
           const { suite_id: suiteId, model_id: modelId, execution_id: executionId } = request.query;
           const evalsContext = await context.evals;
+          const spaceId = getSpaceId ? await getSpaceId(request) : DEFAULT_SPACE_ID;
 
           const filterId = executionId ?? experimentId;
           const filterField = executionId ? 'metadata.execution_id' : 'experiment_id';
@@ -51,6 +57,7 @@ export const registerGetExperimentScoresRoute = ({ router, logger }: RouteDepend
             suiteId,
             modelId,
             filterField,
+            spaceId,
           });
 
           const searchResponse = await evalsContext.evaluationScoreService.search({

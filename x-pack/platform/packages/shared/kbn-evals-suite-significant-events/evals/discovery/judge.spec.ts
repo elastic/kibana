@@ -9,7 +9,7 @@ import { SIGNIFICANT_EVENTS_JUDGE_AGENT_ID } from '@kbn/significant-events-plugi
 import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '@kbn/significant-events-plugin/common';
 import { tags } from '@kbn/scout';
 import { getCurrentTraceId } from '@kbn/evals';
-import type { Discovery } from '@kbn/significant-events-schema';
+import type { SignificantEvent } from '@kbn/significant-events-schema';
 import type { GcsConfig } from '../../src/data_generators/replay';
 import {
   replayIntoManagedStream,
@@ -36,6 +36,7 @@ import { extractSignificantEventsFromToolCall } from '../../src/evaluators/disco
 import { buildDiscoveryJudgeInput } from '../../src/evaluators/discovery/judge/build_agent_input';
 
 const TRUST_UPSTREAM = process.env.SIGEVENTS_TRUST_UPSTREAM === 'true';
+const SIGNIFICANT_EVENTS_EVENTS_DATA_STREAM = '.significant_events-events';
 
 evaluate.describe(
   'Significant Events Discovery - Judge Agent',
@@ -76,7 +77,7 @@ evaluate.describe(
       evaluate.describe(dataset.id, () => {
         interface CollectedExample {
           scenario: DiscoveryJudgeScenario;
-          discoveries: Discovery[];
+          discoveries: SignificantEvent[];
           snapshotKey: string;
         }
 
@@ -240,23 +241,51 @@ evaluate.describe(
                     snapshotSource.gcs
                   );
 
-                  const converseResult = await agentBuilderClient.converse({
-                    agentId: SIGNIFICANT_EVENTS_JUDGE_AGENT_ID,
-                    input: agentInput,
-                  });
+                  const seededEventUuids = discoveries.map((discovery) => discovery.event_uuid);
 
-                  return {
-                    // The agent returns its result as JSON in the final message (no emit tool /
-                    // structured_output on the public converse API); parse it for the evaluators.
-                    significantEvents: extractSignificantEventsFromToolCall(converseResult.steps),
-                    inputDiscoveries: discoveries,
-                    // Raw converse steps — the trajectory and grounding evaluators read tool calls.
-                    steps: converseResult.steps,
-                    // The agent runs inline (local execution), so its gen_ai spans nest under the
-                    // eval's trace — tag with that id, like the inferenceClient-based evals. This
-                    // keeps trace metrics correlatable against the default cluster (no TRACING_ES_URL).
-                    traceId: getCurrentTraceId(),
-                  };
+                  try {
+                    await Promise.all(
+                      discoveries.map((discovery) =>
+                        esClient.index({
+                          index: SIGNIFICANT_EVENTS_EVENTS_DATA_STREAM,
+                          document: { ...discovery, '@timestamp': new Date().toISOString() },
+                        })
+                      )
+                    );
+                    if (seededEventUuids.length > 0) {
+                      await esClient.indices.refresh({
+                        index: SIGNIFICANT_EVENTS_EVENTS_DATA_STREAM,
+                      });
+                    }
+
+                    const converseResult = await agentBuilderClient.converse({
+                      agentId: SIGNIFICANT_EVENTS_JUDGE_AGENT_ID,
+                      input: agentInput,
+                    });
+
+                    return {
+                      // The agent returns its result as JSON in the final message (no emit tool /
+                      // structured_output on the public converse API); parse it for the evaluators.
+                      significantEvents: extractSignificantEventsFromToolCall(converseResult.steps),
+                      inputDiscoveries: discoveries,
+                      // Raw converse steps — the trajectory and grounding evaluators read tool calls.
+                      steps: converseResult.steps,
+                      // The agent runs inline (local execution), so its gen_ai spans nest under the
+                      // eval's trace — tag with that id, like the inferenceClient-based evals. This
+                      // keeps trace metrics correlatable against the default cluster (no TRACING_ES_URL).
+                      traceId: getCurrentTraceId(),
+                    };
+                  } finally {
+                    // Prevent this example's seeded discoveries from leaking into the next one when
+                    // both share a snapshotKey (which skips the next replay's data-stream wipe).
+                    if (seededEventUuids.length > 0) {
+                      await esClient.deleteByQuery({
+                        index: SIGNIFICANT_EVENTS_EVENTS_DATA_STREAM,
+                        query: { terms: { event_uuid: seededEventUuids } },
+                        refresh: true,
+                      });
+                    }
+                  }
                 },
               },
               [

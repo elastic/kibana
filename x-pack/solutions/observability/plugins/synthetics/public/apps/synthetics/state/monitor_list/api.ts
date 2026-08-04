@@ -74,7 +74,8 @@ export const fetchDeleteMonitor = async ({
 
 export interface BulkUpdateMonitorRequest {
   id: string;
-  attributes: Partial<EncryptedSyntheticsMonitor>;
+  // Request-only; public bulk-update location normalizer reads it with `locations`.
+  attributes: Partial<EncryptedSyntheticsMonitor> & { private_locations?: string[] };
 }
 
 export interface BulkUpdateMonitorsResult {

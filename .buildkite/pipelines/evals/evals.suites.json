@@ -46,6 +46,20 @@
       ]
     },
     {
+      "id": "alerting-v2",
+      "name": "Alerting V2",
+      "slackChannel": "#rna-program-notify",
+      "configPath": "x-pack/platform/packages/shared/kbn-evals-suite-alerting-v2/playwright.config.ts",
+      "serverConfigSet": "evals_alerting_v2",
+      "tags": [
+        "platform",
+        "alerting-v2"
+      ],
+      "ciLabels": [
+        "evals:alerting-v2"
+      ]
+    },
+    {
       "id": "esql-generation",
       "name": "ES|QL Generation Evaluations",
       "slackChannel": "#agent-builder-alerts",
@@ -95,6 +109,8 @@
         "eis/openai-gpt-5.4",
         "eis/openai-gpt-5.4-mini",
         "eis/openai-gpt-5.4-nano",
+        "eis/openai-gpt-5.6-luna",
+        "eis/openai-gpt-5.6-terra",
         "eis/openai-gpt-oss-120b"
       ]
     },
@@ -319,8 +335,13 @@
       "name": "Alert Analysis Workflow",
       "slackChannel": "#security-generative-ai-evals",
       "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-alert-analysis-workflow/playwright.config.ts",
-      "tags": ["security", "alert-analysis"],
-      "ciLabels": ["evals:security-alert-analysis-workflow"]
+      "tags": [
+        "security",
+        "alert-analysis"
+      ],
+      "ciLabels": [
+        "evals:security-alert-analysis-workflow"
+      ]
     },
     {
       "id": "skill-selection-benchmark",
