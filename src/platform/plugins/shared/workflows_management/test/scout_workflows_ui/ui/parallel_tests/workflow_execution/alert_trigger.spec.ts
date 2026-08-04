@@ -9,6 +9,7 @@
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
+import { waitForCondition } from '../../../common/utils/wait_for_condition';
 import { spaceTest as test } from '../../fixtures';
 import { cleanupWorkflowsAndRules } from '../../fixtures/cleanup';
 import {
@@ -59,8 +60,7 @@ const getCreateAlertRuleWorkflow = (projectType: string | undefined) => {
 
 // Alert trigger tests run on Security and Observability (and ESS), but NOT on Elasticsearch/Search.
 // Security uses the detection engine API; Observability uses the generic alerting API.
-// Failing: See https://github.com/elastic/kibana/issues/252959
-test.describe.skip(
+test.describe(
   'Workflow execution - Alert triggers',
   {
     tag: [
@@ -192,34 +192,74 @@ test.describe.skip(
 
       assertAlertOutputs(actualSingleOutputs, mockAlerts, isSecurityProject);
 
-      // Validate multiple-alerts workflow execution (all alerts in one execution)
-      await pageObjects.workflowEditor.gotoWorkflowExecutions(multipleWorkflow.id);
+      // Validate summary-mode (summaryMode: true) workflow executions.
+      //
+      // The summary action fires once per 15s rule run that produced alerts, so when the two
+      // mock alerts are detected in separate runs the summary target legitimately executes more
+      // than once — each execution only iterating over that run's alerts. Asserting a fixed
+      // "1 execution with 2 iterations" is therefore non-deterministic. Instead we poll until the
+      // eventual aggregate invariant holds: the union of log_each_alert outputs across all summary
+      // executions covers both alerts. See https://github.com/elastic/kibana/issues/252959.
+      const collectSummaryOutputs = async (): Promise<string[]> => {
+        await pageObjects.workflowEditor.gotoWorkflowExecutions(multipleWorkflow.id);
 
-      const multipleWorkflowExecutions = page.testSubj.locator('workflowExecutionListItem');
-      await expect(multipleWorkflowExecutions).toHaveCount(1, {
+        const multipleWorkflowExecutions = page.testSubj.locator('workflowExecutionListItem');
+        const executionCount = await multipleWorkflowExecutions.count();
+
+        const outputs: string[] = [];
+        for (let i = 0; i < executionCount; i++) {
+          // eslint-disable-next-line playwright/no-nth-methods -- iterating over execution list items by index
+          await multipleWorkflowExecutions.nth(i).click();
+
+          await pageObjects.workflowExecution.waitForExecutionStatus(
+            'completed',
+            EXECUTION_TIMEOUT
+          );
+          await pageObjects.workflowExecution.expandStepsTree();
+
+          // A summary execution iterates only over the alerts detected in its rule run, so the
+          // iteration count varies between 1 and mockAlerts.length depending on how the docs split.
+          for (let iteration = 0; iteration < mockAlerts.length; iteration++) {
+            const logEachAlertButton = await pageObjects.workflowExecution
+              .getStep(`foreach_log_each_alert > ${iteration} > log_each_alert`)
+              .catch(() => null);
+            if (!logEachAlertButton) {
+              break;
+            }
+            await logEachAlertButton.click();
+
+            const alertOutput = await pageObjects.workflowExecution.getStepResultJson<unknown>(
+              'output'
+            );
+            outputs.push(JSON.stringify(alertOutput));
+          }
+
+          await page.testSubj.click('workflowBackToExecutionsLink');
+          await page.testSubj.waitForSelector('workflowExecutionList', { state: 'visible' });
+        }
+
+        return outputs;
+      };
+
+      const summaryCoversAllAlerts = (outputs: string[]) =>
+        isSecurityProject
+          ? mockAlerts.every((alert) => outputs.some((output) => output.includes(alert.alert_id)))
+          : outputs.length > 0;
+
+      const { success: summaryCovered, result: summaryOutputs } = await waitForCondition({
+        action: collectSummaryOutputs,
+        condition: summaryCoversAllAlerts,
+        interval: 3_000,
         timeout: ALERT_PROPAGATION_TIMEOUT,
       });
 
-      await multipleWorkflowExecutions.click();
-
-      await pageObjects.workflowExecution.waitForExecutionStatus('completed', EXECUTION_TIMEOUT);
-      await pageObjects.workflowExecution.expandStepsTree();
-
-      // 2 iterations (both alerts in single execution)
-      const iterationOutputs: string[] = [];
-      for (let i = 0; i < mockAlerts.length; i++) {
-        const logEachAlertButton = await pageObjects.workflowExecution.getStep(
-          `foreach_log_each_alert > ${i} > log_each_alert`
-        );
-        await logEachAlertButton.click();
-
-        const alertOutput = await pageObjects.workflowExecution.getStepResultJson<unknown>(
-          'output'
-        );
-        iterationOutputs.push(JSON.stringify(alertOutput));
-      }
-
-      assertAlertOutputs(iterationOutputs, mockAlerts, isSecurityProject);
+      expect(
+        summaryCovered,
+        `Summary workflow executions never covered all alerts. Collected outputs: ${JSON.stringify(
+          summaryOutputs
+        )}`
+      ).toBe(true);
+      assertAlertOutputs(summaryOutputs, mockAlerts, isSecurityProject);
     });
 
     test('should not trigger a disabled workflow when alert fires', async ({
