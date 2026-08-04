@@ -250,14 +250,16 @@ export function CasesTableServiceProvider(
       }
 
       await testSubjects.click(itemSubj);
-      // Each filter item's onClick closes over the selectedOptions captured at render time, so
-      // selecting another owner before this selection commits would recompute the toggle from a
-      // stale list and silently drop it. Wait until this owner is actually checked before returning.
+      // Confirm this owner is actually checked before returning: the click otherwise races the
+      // async table reload each selection triggers, and a click landing mid-reload is dropped.
       await retry.waitFor(`owner filter "${owner}" to be selected`, async () => {
         const item = await testSubjects.find(itemSubj);
         return (await item.getAttribute('aria-checked')) === 'true';
       });
       await header.waitUntilLoadingHasFinished();
+      // Let the reload this selection triggered settle before returning, so a following
+      // filterByOwner click (multi-select) lands on a stable table instead of a re-rendering one.
+      await this.waitForTableToFinishLoading();
     },
 
     async refreshTable() {
