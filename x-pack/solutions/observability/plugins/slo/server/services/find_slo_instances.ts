@@ -14,6 +14,7 @@ import {
 import { SUMMARY_DESTINATION_INDEX_PATTERN } from '../../common/constants';
 import { IllegalArgumentError } from '../errors';
 import type { SLODefinitionClient } from './slo_definition_client';
+import { decodeSearchAfter, encodeSearchAfter } from './utils/search_after';
 
 const DEFAULT_SIZE = 100;
 
@@ -30,6 +31,8 @@ export async function findSLOInstances(
   if (size <= 0 || size > 1000) {
     throw new IllegalArgumentError('Size must be between 1 and 1000');
   }
+
+  const afterObj = searchAfter ? decodeSearchAfter(searchAfter) : undefined;
 
   const { slo } = await definitionClient.execute(sloId, spaceId, remoteName);
   const groupBy = [slo.groupBy].flat();
@@ -75,7 +78,7 @@ export async function findSLOInstances(
     aggs: {
       instances: {
         composite: {
-          ...(searchAfter ? { after: { instanceId: searchAfter } } : {}),
+          ...(afterObj ? { after: afterObj } : {}),
           size,
           sources: [{ instanceId: { terms: { field: 'slo.instanceId' } } }],
         },
@@ -91,7 +94,7 @@ export async function findSLOInstances(
       instanceId: bucket.key.instanceId,
       groupings: toGroupings(bucket.key.instanceId, groupBy),
     })),
-    searchAfter: buckets.length === size ? afterKey?.instanceId : undefined,
+    searchAfter: buckets.length === size && afterKey ? encodeSearchAfter(afterKey) : undefined,
   };
 }
 

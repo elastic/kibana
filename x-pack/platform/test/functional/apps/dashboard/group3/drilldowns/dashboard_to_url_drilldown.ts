@@ -23,6 +23,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const testSubjects = getService('testSubjects');
 
+  /**
+   * Purpose: Url drilldown smoke test
+   *
+   * Migration: Migrate to scout
+   */
   describe('Dashboard to URL drilldown', function () {
     before(async () => {
       log.debug('Dashboard to URL:initTests');

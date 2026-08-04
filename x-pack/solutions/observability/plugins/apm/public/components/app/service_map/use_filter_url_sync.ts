@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEffect, useCallback, useState } from 'react';
+import { useEffect, useCallback, useState, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
 import type { Filter } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
@@ -13,7 +13,19 @@ import { decode as decodeRison } from '@kbn/rison';
 import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import type { AlertStatus } from '@kbn/rule-data-utils';
+import type { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
 import type { ApmPluginStartDeps } from '../../../plugin';
+import {
+  ALERT_STATUS_VALUES,
+  ANOMALY_SEVERITY_VALUES,
+  CONNECTION_VALUES,
+  MAP_ORIENTATION_VALUES,
+  SLO_STATUS_VALUES,
+} from '../../../../common/embeddable/service_map_embeddable_schema';
+import type { SloStatus } from '../../../../common/service_inventory';
+import type { ConnectionFilter, ServiceMapViewFilters } from './apply_service_map_visibility';
+import type { ServiceMapOrientation } from './service_map_options_panel';
 
 const APP_STATE_KEY = '_a';
 
@@ -29,6 +41,75 @@ export type ControlSelections = Record<string, string[]>;
 interface AppFilterState {
   filters?: Filter[];
   controlSelections?: ControlSelections;
+  viewFilters?: Partial<{
+    alertStatusFilter: string[];
+    sloStatusFilter: string[];
+    connectionFilter: string[];
+    anomalySeverityFilter: string[];
+  }>;
+  mapOrientation?: string;
+}
+
+function getRestoredAppFilters(initialState: AppFilterState | null): Filter[] {
+  if (!initialState?.filters || initialState.filters.length === 0) {
+    return [];
+  }
+
+  return initialState.filters.map((f) => ({
+    ...f,
+    $state: { store: FilterStateStore.APP_STATE },
+  }));
+}
+
+function filterKnownValues<T extends string>(values: unknown, allowed: readonly T[]): T[] {
+  if (!Array.isArray(values)) return [];
+  const allowedSet = new Set<string>(allowed);
+  return values.filter((v): v is T => typeof v === 'string' && allowedSet.has(v));
+}
+
+/**
+ * Validates and merges `_a.viewFilters` into a full `ServiceMapViewFilters`.
+ * Unknown values are dropped so malicious / stale URL state can't break the map.
+ */
+export function parseViewFiltersFromAppState(
+  initialState: AppFilterState | null
+): ServiceMapViewFilters | undefined {
+  const raw = initialState?.viewFilters;
+  if (!raw || typeof raw !== 'object') return undefined;
+
+  const next: ServiceMapViewFilters = {
+    alertStatusFilter: filterKnownValues(
+      raw.alertStatusFilter,
+      ALERT_STATUS_VALUES
+    ) as AlertStatus[],
+    sloStatusFilter: filterKnownValues(raw.sloStatusFilter, SLO_STATUS_VALUES) as SloStatus[],
+    connectionFilter: filterKnownValues(
+      raw.connectionFilter,
+      CONNECTION_VALUES
+    ) as ConnectionFilter[],
+    anomalySeverityFilter: filterKnownValues(
+      raw.anomalySeverityFilter,
+      ANOMALY_SEVERITY_VALUES
+    ) as ML_ANOMALY_SEVERITY[],
+  };
+
+  const hasAny =
+    next.alertStatusFilter.length > 0 ||
+    next.sloStatusFilter.length > 0 ||
+    next.connectionFilter.length > 0 ||
+    next.anomalySeverityFilter.length > 0;
+
+  return hasAny ? next : undefined;
+}
+
+export function parseMapOrientationFromAppState(
+  initialState: AppFilterState | null
+): ServiceMapOrientation | undefined {
+  const raw = initialState?.mapOrientation;
+  if (typeof raw !== 'string') return undefined;
+  return (MAP_ORIENTATION_VALUES as readonly string[]).includes(raw)
+    ? (raw as ServiceMapOrientation)
+    : undefined;
 }
 
 /**
@@ -37,7 +118,7 @@ interface AppFilterState {
  * (via deepExactRt) before React components mount — so kbnUrlStateStorage
  * won't find `_a` in history.location.search.
  */
-function readInitialAppStateFromRawUrl(): AppFilterState | null {
+export function readInitialAppStateFromRawUrl(): AppFilterState | null {
   try {
     const raw = window.location.href;
     const match = raw.match(/[?&]_a=([^&#]+)/);
@@ -79,23 +160,17 @@ export function useFilterUrlSync() {
     })
   );
 
+  const [initialState] = useState<AppFilterState | null>(() => {
+    const state = storage.get<AppFilterState>(APP_STATE_KEY);
+    return state ?? readInitialAppStateFromRawUrl();
+  });
+
+  const initialAppFilters = useMemo(() => getRestoredAppFilters(initialState), [initialState]);
+
   useEffect(() => {
     const kbnUrlStateStorage = storage;
 
-    // Try kbnUrlStateStorage first, fall back to raw URL parsing
-    // (the typed router strips `_a` from history.location.search).
-    let initialState = kbnUrlStateStorage.get<AppFilterState>(APP_STATE_KEY);
-    if (!initialState) {
-      initialState = readInitialAppStateFromRawUrl();
-    }
-
-    if (initialState?.filters && initialState.filters.length > 0) {
-      const restoredFilters = initialState.filters.map((f) => ({
-        ...f,
-        $state: { store: FilterStateStore.APP_STATE },
-      }));
-      filterManager.setAppFilters(restoredFilters);
-    }
+    filterManager.setAppFilters(initialAppFilters);
 
     // Subscribe to filterManager changes and write back to URL
     const sub = filterManager.getUpdates$().subscribe(() => {
@@ -115,7 +190,7 @@ export function useFilterUrlSync() {
     return () => {
       sub.unsubscribe();
     };
-  }, [filterManager, storage, toasts]);
+  }, [filterManager, initialAppFilters, storage]);
 
   const persistControlSelections = useCallback(
     (selections: ControlSelections) => {
@@ -138,12 +213,8 @@ export function useFilterUrlSync() {
   );
 
   const getRestoredControlSelections = useCallback((): ControlSelections | undefined => {
-    let state = storage.get<AppFilterState>(APP_STATE_KEY);
-    if (!state) {
-      state = readInitialAppStateFromRawUrl();
-    }
-    return state?.controlSelections ?? undefined;
-  }, [storage]);
+    return initialState?.controlSelections ?? undefined;
+  }, [initialState]);
 
-  return { persistControlSelections, getRestoredControlSelections };
+  return { initialAppFilters, persistControlSelections, getRestoredControlSelections };
 }

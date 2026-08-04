@@ -6,7 +6,7 @@
  */
 import { i18n } from '@kbn/i18n';
 
-import { AGENT_TYPE_OPAMP } from '../../../../../../../common/constants';
+import { buildPolicyBaseIdsWithFallbackKuery } from '../../../../../../../common/services';
 import { AgentStatusKueryHelper } from '../../../../services';
 import { AGENTS_PREFIX } from '../../../../constants';
 
@@ -35,9 +35,11 @@ export const getKuery = ({
     if (kueryBuilder) {
       kueryBuilder = `(${kueryBuilder}) and`;
     }
-    kueryBuilder = `${kueryBuilder} ${AGENTS_PREFIX}.policy_id : (${selectedAgentPolicies
-      .map((agentPolicy) => `"${agentPolicy}"`)
-      .join(' or ')})`;
+    kueryBuilder = `${kueryBuilder} ${buildPolicyBaseIdsWithFallbackKuery(
+      selectedAgentPolicies,
+      `${AGENTS_PREFIX}.policy_base_id`,
+      `${AGENTS_PREFIX}.policy_id`
+    )}`;
   }
 
   if (selectedTags?.length) {
@@ -102,13 +104,5 @@ export const getKuery = ({
       kueryBuilder = kueryStatus;
     }
   }
-  const excludeOpamp = `NOT type:${AGENT_TYPE_OPAMP}`;
-  const trimmed = kueryBuilder.trim();
-  if (trimmed) {
-    kueryBuilder = `(${trimmed}) and ${excludeOpamp}`;
-  } else {
-    kueryBuilder = excludeOpamp;
-  }
-
-  return kueryBuilder;
+  return kueryBuilder.trim();
 };

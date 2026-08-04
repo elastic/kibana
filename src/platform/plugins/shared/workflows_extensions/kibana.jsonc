@@ -11,8 +11,6 @@
     "browser": true,
     "server": true,
     "requiredPlugins": ["actions", "inference", "spaces"],
-    "optionalPlugins": ["searchInferenceEndpoints"],
     "extraPublicDirs": ["common"]
   }
 }
-

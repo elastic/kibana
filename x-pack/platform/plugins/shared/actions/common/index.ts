@@ -50,6 +50,7 @@ export {
   EndpointSecurityConnectorFeatureId,
   WorkflowsConnectorFeatureId,
   AgentBuilderConnectorFeatureId,
+  ContextEngineConnectorFeatureId,
   AlertingConnectorFeature,
   CasesConnectorFeature,
   UptimeConnectorFeature,
@@ -60,6 +61,7 @@ export {
   EndpointSecurityConnectorFeature,
   WorkflowsConnectorFeature,
   AgentBuilderConnectorFeature,
+  ContextEngineConnectorFeature,
   areValidFeatures,
   getConnectorFeatureName,
   getConnectorCompatibility,
@@ -89,6 +91,9 @@ export const DEFAULT_MICROSOFT_GRAPH_API_SCOPE = 'https://graph.microsoft.com/.d
 export const MAX_EMAIL_BODY_LENGTH = 25 * 1000 * 1000; // 25MB
 
 export const CONNECTOR_ID_MAX_LENGTH = 36;
+export const ISO_DATE_MAX_LENGTH = 100;
+export const MAX_EXECUTION_FILTER_LENGTH = 8192;
+export const MAX_FEATURE_ID_LENGTH = 100;
 export const DEFAULT_EMAIL_BODY_LENGTH = MAX_EMAIL_BODY_LENGTH;
 
 export type {
@@ -96,6 +101,8 @@ export type {
   StartOAuthFlowPathParams,
   StartOAuthFlowResponse,
   DisconnectOAuthPathParams,
+  CancelOAuthPathParams,
+  CancelOAuthBody,
 } from './routes/connector/apis/oauth';
 export {
   OAuthAuthorizationStatus,

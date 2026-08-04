@@ -11,11 +11,14 @@ import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import type { Logger } from '@kbn/logging';
 import type { MainCategories } from '@kbn/siem-readiness';
-import { getIndexCategoryMap, isQualityIncompatible } from '@kbn/siem-readiness';
+import { getIndexCategoryMap, isQualityIncompatible, enrichFindings } from '@kbn/siem-readiness';
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../plugin_contract';
 import { getQuality } from '../../../lib/siem_readiness/dimensions';
-import { fetchCategories } from '../../../lib/siem_readiness/fetchers';
+import {
+  getSiemReadinessSharedContext,
+  fetchSiemReadinessSharedContext,
+} from '../../../lib/siem_readiness/fetchers';
 import { SIEM_READINESS_QUALITY_TOOL_ID } from './tool_ids';
 
 const schema = z.object({});
@@ -27,7 +30,7 @@ export const getQualityTool = (
   id: SIEM_READINESS_QUALITY_TOOL_ID,
   type: ToolType.builtin,
   description:
-    'Retrieves SIEM data quality health based on ECS (Elastic Common Schema) compatibility check results. Returns indices with incompatible field mappings including field-level details — filtered to categorized SIEM indices. Includes an overall health status (healthy / actionsRequired / noData) and actionable findings. Note: results are only available after running a data quality check from the Security > Data Quality dashboard.',
+    'Retrieves SIEM data quality health based on ECS (Elastic Common Schema) compatibility check results. Returns indices with incompatible field mappings including field-level details — filtered to categorized SIEM indices. Includes an overall health status (healthy / actionsRequired / noData) and actionable findings. Note: results are only available after running a data quality check from the Security > Data Quality dashboard. Each actionable finding includes blast radius data. When presenting any finding, always show these as explicit labeled fields: Affected Platform, Affected Rules, Affected Tactics.',
   schema,
   tags: ['security', 'siem-readiness', 'quality'],
   availability: {
@@ -36,12 +39,38 @@ export const getQualityTool = (
       return getAgentBuilderResourceAvailability({ core, request, logger });
     },
   },
-  handler: async (_params, { esClient, logger: handlerLogger }) => {
+  handler: async (_params, { esClient, logger: handlerLogger, request }) => {
     try {
-      const [payload, categoriesResult] = await Promise.all([
-        getQuality({ esClient: esClient.asCurrentUser, logger: handlerLogger }),
-        fetchCategories({ esClient: esClient.asCurrentUser, logger: handlerLogger }),
-      ]);
+      const [coreStart, startPlugins] = await core.getStartServices();
+
+      // Phase 1: shared context (rules reverse map + categories) — lazy per-request
+      const { reverseMapResult, categoriesResult, indexToPlatform } =
+        await getSiemReadinessSharedContext(request, async () => {
+          const rulesClient = await startPlugins.alerting.getRulesClientWithRequest(request);
+          const dataViewsService = await startPlugins.dataViews.dataViewsServiceFactory(
+            coreStart.savedObjects.getScopedClient(request),
+            esClient.asCurrentUser
+          );
+          return fetchSiemReadinessSharedContext({
+            rulesClient,
+            esClient: esClient.asCurrentUser,
+            dataViewsService,
+            logger: handlerLogger,
+          });
+        });
+
+      // Phase 2: dimension-specific data (quality check results)
+      const payload = await getQuality({
+        esClient: esClient.asCurrentUser,
+        logger: handlerLogger,
+      });
+
+      // Phase 3: blast radius enrichment
+      const allEnrichedFindings = enrichFindings(payload.actionableFindings ?? [], {
+        ...reverseMapResult,
+        indexToPlatform,
+        dimension: 'quality',
+      });
 
       const indexToCategoryMap = getIndexCategoryMap(categoriesResult);
 
@@ -49,7 +78,7 @@ export const getQualityTool = (
         indexToCategoryMap.has(result.indexName)
       );
 
-      const enrichedFindings = (payload.actionableFindings ?? [])
+      const enrichedFindings = allEnrichedFindings
         .filter((finding) => indexToCategoryMap.has(finding.resource))
         .map((finding) => {
           const category = indexToCategoryMap.get(finding.resource) as MainCategories | undefined;

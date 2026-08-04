@@ -99,5 +99,11 @@
   {
     "script": ".buildkite/scripts/steps/checks/verify_moon_projects.sh",
     "mayChangeFiles": true
+  },
+  {
+    "script": ".buildkite/scripts/steps/checks/unused_deps.sh"
+  },
+  {
+    "script": ".buildkite/scripts/steps/checks/jest_negative.sh"
   }
 ]

@@ -11,7 +11,8 @@ import {
   getConnectorActionErrorMeta,
   ESTIMATED_JSON_OUTPUT_OVERHEAD_BYTES,
 } from '../../connector_utils';
-import type { ActionContext } from '../../connector_spec';
+import type { ActionContext, AuthTypeDef } from '../../connector_spec';
+import { generateSecretsSchemaFromSpec } from '../../lib/generate_secrets_schema_from_spec';
 import { GoogleDriveConnector } from './google_drive';
 
 describe('GoogleDriveConnector', () => {
@@ -30,8 +31,28 @@ describe('GoogleDriveConnector', () => {
   });
 
   describe('auth', () => {
-    it('supports bearer auth', () => {
-      expect(GoogleDriveConnector.auth?.types).toContain('bearer');
+    it('supports ears auth type as first visible option', () => {
+      const visibleTypes = GoogleDriveConnector.auth?.types.filter(
+        (t) => typeof t === 'string' || !(t as AuthTypeDef).isLegacy
+      );
+      expect(visibleTypes?.[0]).toEqual(expect.objectContaining({ type: 'ears' }));
+    });
+
+    it('bearer auth is hidden (not shown in picker) but retained for existing connectors', () => {
+      const bearerDef = GoogleDriveConnector.auth?.types.find(
+        (t): t is AuthTypeDef => typeof t === 'object' && t.type === 'bearer'
+      );
+      expect(bearerDef).toBeDefined();
+      expect(bearerDef?.isLegacy).toBe(true);
+    });
+
+    it('existing connectors with bearer auth still pass schema validation', () => {
+      const schema = generateSecretsSchemaFromSpec(GoogleDriveConnector.auth, {
+        isEarsEnabled: true,
+        isEarsExperimentalEnabled: true,
+      });
+      const result = schema.safeParse({ authType: 'bearer', token: 'some-legacy-token' });
+      expect(result.success).toBe(true);
     });
 
     it('supports oauth_authorization_code with correct Google defaults', () => {
@@ -106,12 +127,34 @@ describe('GoogleDriveConnector', () => {
           pageSize: 250,
           fields:
             'nextPageToken, files(id, name, mimeType, size, createdTime, modifiedTime, webViewLink)',
+          includeItemsFromAllDrives: true,
+          supportsAllDrives: true,
         },
       });
       expect(result).toEqual({
         files: mockResponse.data.files,
         nextPageToken: undefined,
       });
+    });
+
+    it('should include shared drive files in search results', async () => {
+      const mockResponse = { data: { files: [], nextPageToken: undefined } };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      await GoogleDriveConnector.actions.searchFiles.handler(mockContext, {
+        query: "name contains 'budget'",
+        pageSize: 250,
+      });
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://www.googleapis.com/drive/v3/files',
+        expect.objectContaining({
+          params: expect.objectContaining({
+            includeItemsFromAllDrives: true,
+            supportsAllDrives: true,
+          }),
+        })
+      );
     });
 
     it('should include pageToken when provided', async () => {
@@ -136,6 +179,8 @@ describe('GoogleDriveConnector', () => {
           pageToken: 'next-page-token',
           fields:
             'nextPageToken, files(id, name, mimeType, size, createdTime, modifiedTime, webViewLink)',
+          includeItemsFromAllDrives: true,
+          supportsAllDrives: true,
         },
       });
     });
@@ -240,12 +285,35 @@ describe('GoogleDriveConnector', () => {
           pageSize: 250,
           fields:
             'nextPageToken, files(id, name, mimeType, size, createdTime, modifiedTime, webViewLink)',
+          includeItemsFromAllDrives: true,
+          supportsAllDrives: true,
         },
       });
       expect(result).toEqual({
         files: mockResponse.data.files,
         nextPageToken: undefined,
       });
+    });
+
+    it('should include shared drive files when listing a folder', async () => {
+      const mockResponse = { data: { files: [], nextPageToken: undefined } };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      await GoogleDriveConnector.actions.listFiles.handler(mockContext, {
+        folderId: 'folder-abc123',
+        pageSize: 250,
+        includeTrashed: false,
+      });
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://www.googleapis.com/drive/v3/files',
+        expect.objectContaining({
+          params: expect.objectContaining({
+            includeItemsFromAllDrives: true,
+            supportsAllDrives: true,
+          }),
+        })
+      );
     });
 
     it('should list files in a specific folder', async () => {
@@ -420,7 +488,7 @@ describe('GoogleDriveConnector', () => {
       expect(mockClient.get).toHaveBeenCalledWith(
         'https://www.googleapis.com/drive/v3/files/file-1',
         {
-          params: { fields: 'id, name, mimeType, size' },
+          params: { fields: 'id, name, mimeType, size', supportsAllDrives: true },
         }
       );
 
@@ -428,7 +496,7 @@ describe('GoogleDriveConnector', () => {
       expect(mockClient.get).toHaveBeenCalledWith(
         'https://www.googleapis.com/drive/v3/files/file-1',
         {
-          params: { alt: 'media' },
+          params: { alt: 'media', supportsAllDrives: true },
           responseType: 'arraybuffer',
         }
       );
@@ -518,6 +586,81 @@ describe('GoogleDriveConnector', () => {
       );
     });
 
+    describe('responseType: text', () => {
+      it('should return a native text file as a plain string with utf-8 encoding', async () => {
+        mockClient.get
+          .mockResolvedValueOnce({
+            data: { id: 'txt-1', name: 'notes.txt', mimeType: 'text/plain', size: '512' },
+          })
+          .mockResolvedValueOnce({ data: 'hello world' });
+
+        const result = await GoogleDriveConnector.actions.downloadFile.handler(mockContext, {
+          fileId: 'txt-1',
+          responseType: 'text',
+        });
+
+        expect(mockClient.get).toHaveBeenCalledWith(
+          'https://www.googleapis.com/drive/v3/files/txt-1',
+          { params: { alt: 'media', supportsAllDrives: true }, responseType: 'text' }
+        );
+        expect(result).toEqual(
+          expect.objectContaining({ content: 'hello world', encoding: 'utf-8' })
+        );
+      });
+
+      it('should fall back to base64 when responseType "text" is requested for a binary mime type', async () => {
+        const binaryData = Buffer.from('pdf binary content');
+        mockClient.get
+          .mockResolvedValueOnce({
+            data: { id: 'pdf-1', name: 'report.pdf', mimeType: 'application/pdf', size: '1024' },
+          })
+          .mockResolvedValueOnce({ data: binaryData });
+
+        const result = await GoogleDriveConnector.actions.downloadFile.handler(mockContext, {
+          fileId: 'pdf-1',
+          responseType: 'text',
+        });
+
+        expect(mockClient.get).toHaveBeenCalledWith(
+          'https://www.googleapis.com/drive/v3/files/pdf-1',
+          { params: { alt: 'media', supportsAllDrives: true }, responseType: 'arraybuffer' }
+        );
+        expect(result).toEqual(
+          expect.objectContaining({
+            content: binaryData.toString('base64'),
+            encoding: 'base64',
+          })
+        );
+      });
+
+      it.each([
+        ['application/vnd.google-apps.document', 'text/markdown'],
+        ['application/vnd.google-apps.spreadsheet', 'text/csv'],
+        ['application/vnd.google-apps.presentation', 'text/plain'],
+      ])('should export Google Workspace type %s as %s', async (sourceMimeType, exportMimeType) => {
+        mockClient.get
+          .mockResolvedValueOnce({ data: { id: 'ws-1', name: 'file', mimeType: sourceMimeType } })
+          .mockResolvedValueOnce({ data: 'text content' });
+
+        const result = await GoogleDriveConnector.actions.downloadFile.handler(mockContext, {
+          fileId: 'ws-1',
+          responseType: 'text',
+        });
+
+        expect(mockClient.get).toHaveBeenCalledWith(
+          'https://www.googleapis.com/drive/v3/files/ws-1/export',
+          { params: { mimeType: exportMimeType }, responseType: 'text' }
+        );
+        expect(result).toEqual(
+          expect.objectContaining({
+            mimeType: exportMimeType,
+            content: 'text content',
+            encoding: 'utf-8',
+          })
+        );
+      });
+    });
+
     it('should throw Google Drive API error when present', async () => {
       const error = {
         response: {
@@ -566,7 +709,7 @@ describe('GoogleDriveConnector', () => {
 
       expect(mockClient.get).toHaveBeenCalledWith(
         'https://www.googleapis.com/drive/v3/files/file-1',
-        { params: { fields: metadataFields } }
+        { params: { fields: metadataFields, supportsAllDrives: true } }
       );
       expect(result).toEqual({ files: [mockResponse.data] });
     });
@@ -594,15 +737,15 @@ describe('GoogleDriveConnector', () => {
       expect(mockClient.get).toHaveBeenCalledTimes(3);
       expect(mockClient.get).toHaveBeenCalledWith(
         'https://www.googleapis.com/drive/v3/files/file-1',
-        { params: { fields: metadataFields } }
+        { params: { fields: metadataFields, supportsAllDrives: true } }
       );
       expect(mockClient.get).toHaveBeenCalledWith(
         'https://www.googleapis.com/drive/v3/files/file-2',
-        { params: { fields: metadataFields } }
+        { params: { fields: metadataFields, supportsAllDrives: true } }
       );
       expect(mockClient.get).toHaveBeenCalledWith(
         'https://www.googleapis.com/drive/v3/files/file-3',
-        { params: { fields: metadataFields } }
+        { params: { fields: metadataFields, supportsAllDrives: true } }
       );
       expect(result).toEqual({
         files: [mockResponse1.data, mockResponse2.data, mockResponse3.data],

@@ -319,8 +319,10 @@ export function QueryList({
                   beforeMessage={i18n.translate('esqlEditor.query.esqlQueriesCopy', {
                     defaultMessage: 'Copy query to clipboard',
                   })}
+                  tooltipProps={{ disableScreenReaderOutput: true }}
                 >
                   {(copy) => (
+                    /* eslint-disable-next-line @elastic/eui/tooltip-button-icon-wrap */
                     <EuiButtonIcon
                       iconType="copy"
                       iconSize="m"
@@ -423,12 +425,8 @@ export function QueryColumn({
   return (
     <>
       {isExpandable && (
-        <EuiButtonIcon
-          onClick={() => {
-            setIsRowExpanded(!isRowExpanded);
-          }}
-          data-test-subj="ESQLEditor-queryList-queryString-expanded"
-          aria-label={
+        <EuiToolTip
+          content={
             isRowExpanded
               ? i18n.translate('esqlEditor.query.collapseLabel', {
                   defaultMessage: 'Collapse',
@@ -437,13 +435,30 @@ export function QueryColumn({
                   defaultMessage: 'Expand',
                 })
           }
-          iconType={isRowExpanded ? 'chevronSingleDown' : 'chevronSingleRight'}
-          size="xs"
-          color="text"
-          css={css`
-            flex-shrink: 0;
-          `}
-        />
+          disableScreenReaderOutput
+        >
+          <EuiButtonIcon
+            onClick={() => {
+              setIsRowExpanded(!isRowExpanded);
+            }}
+            data-test-subj="ESQLEditor-queryList-queryString-expanded"
+            aria-label={
+              isRowExpanded
+                ? i18n.translate('esqlEditor.query.collapseLabel', {
+                    defaultMessage: 'Collapse',
+                  })
+                : i18n.translate('esqlEditor.query.expandLabel', {
+                    defaultMessage: 'Expand',
+                  })
+            }
+            iconType={isRowExpanded ? 'chevronSingleDown' : 'chevronSingleRight'}
+            size="xs"
+            color="text"
+            css={css`
+              flex-shrink: 0;
+            `}
+          />
+        </EuiToolTip>
       )}
       <span
         css={css`

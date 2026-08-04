@@ -1,3 +1,4 @@
+knip
 safe-stable-stringify
 ajv-draft-04
 ajv-formats
@@ -48,3 +49,12 @@ jszip
 @opentelemetry/exporter-logs-otlp-grpc
 @opentelemetry/exporter-logs-otlp-proto
 @opentelemetry/otlp-transformer
+just-bash
+typescript-7
+immer-v9
+react-redux-v7
+redux-thunk-v2
+redux-toolkit-v1
+redux-v4
+reselect-v4
+graphql

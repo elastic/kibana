@@ -148,8 +148,7 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
 
       if (grepFilterSpecs && isGrepReturnedSpecPattern) {
         log.info('No tests found - all tests could have been skipped via Cypress tags');
-        // eslint-disable-next-line no-process-exit
-        return process.exit(0);
+        return;
       }
 
       const concreteFilePaths = isGrepReturnedFilePaths
@@ -207,8 +206,7 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
 
       if (!files?.length) {
         log.info('No tests found');
-        // eslint-disable-next-line no-process-exit
-        return process.exit(0);
+        return;
       }
 
       const esPorts: number[] = [9200, 9220];
@@ -270,6 +268,14 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
 
       const failedSpecFilePaths: string[] = [];
       const infraFailedSpecFilePaths: string[] = [];
+
+      const isCypressFailedRunResult = (
+        runResult:
+          | CypressCommandLine.CypressRunResult
+          | CypressCommandLine.CypressFailedRunResult
+          | undefined
+      ): runResult is CypressCommandLine.CypressFailedRunResult =>
+        Boolean(runResult && 'status' in runResult && runResult.status === 'failed');
 
       const isTestAssertionFailure = (
         runResult:
@@ -588,7 +594,9 @@ ${JSON.stringify(cyCustomEnv, null, 2)}
 
                 results.push(runResult);
 
-                if (!(runResult as CypressCommandLine.CypressRunResult)?.totalFailed) {
+                if (isCypressFailedRunResult(runResult)) {
+                  infraFailedSpecFilePaths.push(filePath);
+                } else if (runResult.totalFailed === 0) {
                   _.pull(failedSpecFilePaths, filePath);
                   if (!isOpen && isInBuildkite()) {
                     markSpecCompleted(filePath).catch(() => {});

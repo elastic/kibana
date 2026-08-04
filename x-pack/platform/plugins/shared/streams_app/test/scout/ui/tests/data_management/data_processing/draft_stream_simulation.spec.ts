@@ -67,9 +67,16 @@ test.describe(
     });
 
     test.beforeEach(async ({ browserAuth, apiServices, pageObjects }) => {
+      // Draft-stream samples are fetched via ES|QL from the parent's asynchronously-created
+      // `$.` view, which can fail with a transient "Unknown index" before it propagates
+      // (more likely on cloud targets). waitForDraftPreviewSamples refreshes until the grid
+      // renders; extend the default 60s per-test budget (which includes hooks) to leave
+      // headroom for the login → clear → goto → wait-for-samples → switchToColumnsView chain.
+      test.setTimeout(150_000);
       await browserAuth.loginAsAdmin();
       await apiServices.streams.clearStreamProcessors(DRAFT_CHILD);
       await pageObjects.streams.gotoProcessingTab(DRAFT_CHILD);
+      await pageObjects.streams.waitForDraftPreviewSamples();
       await pageObjects.streams.switchToColumnsView();
     });
 

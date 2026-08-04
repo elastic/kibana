@@ -19,9 +19,12 @@ export type {
   DataStream,
   DataStreamIndex,
   DataRetention,
+  EsDataRetention,
   IndexMode,
 } from './data_streams';
 
 export type * from './component_templates';
 
 export type * from './enrich_policies';
+
+export type * from './snapshot_repositories';

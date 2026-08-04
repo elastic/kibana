@@ -7,11 +7,13 @@
 
 import { queryPings } from './query_pings';
 import type { SyntheticsEsClient } from '../lib';
+import { HEARTBEAT_UNMAPPED_LOCATION_LABEL } from '../../common/runtime_types';
 
 jest.mock('../lib'); // Mock the ES client module
 
 const mockEsClient: Partial<SyntheticsEsClient> = {
   search: jest.fn(),
+  heartbeatIndices: 'synthetics-*',
 };
 
 describe('queryPings', () => {
@@ -154,6 +156,124 @@ describe('queryPings', () => {
     });
 
     expect(mockEsClient.search).toHaveBeenCalledTimes(1);
+  });
+
+  describe('CCS index targeting', () => {
+    const emptyResponse = {
+      body: {
+        hits: {
+          hits: [],
+          total: { value: 0 },
+        },
+      },
+    };
+
+    it('targets the local heartbeat indices when remoteName is absent', async () => {
+      (mockEsClient.search as jest.Mock).mockResolvedValueOnce(emptyResponse);
+
+      await queryPings({
+        syntheticsEsClient: mockEsClient as SyntheticsEsClient,
+        dateRange: { from: '2023-01-01', to: '2023-01-02' },
+        size: 10,
+        pageIndex: 0,
+      });
+
+      const searchParams = (mockEsClient.search as jest.Mock).mock.calls[0][0];
+      expect(searchParams.index).toBe(mockEsClient.heartbeatIndices);
+    });
+
+    it('prefixes the index with remoteName when present', async () => {
+      (mockEsClient.search as jest.Mock).mockResolvedValueOnce(emptyResponse);
+
+      await queryPings({
+        syntheticsEsClient: mockEsClient as SyntheticsEsClient,
+        dateRange: { from: '2023-01-01', to: '2023-01-02' },
+        size: 10,
+        pageIndex: 0,
+        remoteName: 'cluster1',
+      });
+
+      const searchParams = (mockEsClient.search as jest.Mock).mock.calls[0][0];
+      expect(searchParams.index).toBe('cluster1:synthetics-*');
+    });
+
+    it('also prefixes the index in the fields-only branch', async () => {
+      (mockEsClient.search as jest.Mock).mockResolvedValueOnce(emptyResponse);
+
+      await queryPings({
+        syntheticsEsClient: mockEsClient as SyntheticsEsClient,
+        dateRange: { from: '2023-01-01', to: '2023-01-02' },
+        size: 10,
+        pageIndex: 0,
+        remoteName: 'cluster1',
+        fields: [{ field: 'monitor.id' }],
+        fieldsExtractorFn: (doc: any) => ({ fieldData: doc._source }),
+      });
+
+      const searchParams = (mockEsClient.search as jest.Mock).mock.calls[0][0];
+      expect(searchParams.index).toBe('cluster1:synthetics-*');
+    });
+  });
+
+  describe('location post_filter', () => {
+    const emptyResponse = {
+      body: {
+        hits: {
+          hits: [],
+          total: { value: 0 },
+        },
+      },
+    };
+
+    it('omits the post_filter when no locations are selected', async () => {
+      (mockEsClient.search as jest.Mock).mockResolvedValueOnce(emptyResponse);
+
+      await queryPings({
+        syntheticsEsClient: mockEsClient as SyntheticsEsClient,
+        dateRange: { from: '2023-01-01', to: '2023-01-02' },
+        size: 10,
+        pageIndex: 0,
+      });
+
+      const searchParams = (mockEsClient.search as jest.Mock).mock.calls[0][0];
+      expect(searchParams.post_filter).toBeUndefined();
+    });
+
+    it('uses a terms post_filter for real locations', async () => {
+      (mockEsClient.search as jest.Mock).mockResolvedValueOnce(emptyResponse);
+
+      await queryPings({
+        syntheticsEsClient: mockEsClient as SyntheticsEsClient,
+        dateRange: { from: '2023-01-01', to: '2023-01-02' },
+        size: 10,
+        pageIndex: 0,
+        // The REST route JSON.parses `locations` into an array before calling
+        // queryPings; the shared param type still declares it as `string`.
+        locations: ['US East'] as unknown as string,
+      });
+
+      const searchParams = (mockEsClient.search as jest.Mock).mock.calls[0][0];
+      expect(searchParams.post_filter).toEqual({
+        terms: { 'observer.geo.name': ['US East'] },
+      });
+    });
+
+    it('matches location-less pings for the Heartbeat placeholder location', async () => {
+      (mockEsClient.search as jest.Mock).mockResolvedValueOnce(emptyResponse);
+
+      await queryPings({
+        syntheticsEsClient: mockEsClient as SyntheticsEsClient,
+        dateRange: { from: '2023-01-01', to: '2023-01-02' },
+        size: 10,
+        pageIndex: 0,
+        locations: [HEARTBEAT_UNMAPPED_LOCATION_LABEL] as unknown as string,
+      });
+
+      const searchParams = (mockEsClient.search as jest.Mock).mock.calls[0][0];
+      expect(searchParams.post_filter).toEqual({
+        bool: { must_not: { exists: { field: 'observer.geo.name' } } },
+      });
+    });
   });
 
   it('should throw an error if query fails to execute', async () => {

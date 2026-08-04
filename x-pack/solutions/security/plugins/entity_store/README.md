@@ -2,6 +2,47 @@
 
 Central place for Entities management and logs extraction.
 
+## Entity AI Summary — index privileges
+
+The Entity AI Summary is persisted to the entity **metadata** datastream
+(`.entities.v2.metadata.security_{namespace}`), not to the entity latest index.
+Its access-control model separates generation from display:
+
+- **Generation** is gated only on feature-level permissions — the Security Solution
+  Kibana feature plus its `entity-analytics` sub-privilege — and an **Enterprise**
+  license. The persisted document is written with the Kibana **internal** user
+  (`asInternalUser`), so a user does **not** need their own write privilege on the
+  metadata index to generate and persist a summary.
+- **Display** is gated on the user's **own** read privilege on
+  `.entities.v2.metadata.security_*`. With read access the persisted summary is shown
+  (including the original `generated_by` / `generated_at`, so a second user sees the
+  first user's generation); without it the flyout gracefully falls back to on-demand
+  generation and nothing is persisted for that view.
+
+### Serverless
+
+Serverless project roles already grant the required access (see
+`src/platform/packages/shared/kbn-es/src/serverless_resources/project_roles/security/roles.yml`):
+`viewer` / `t1_analyst` get `read` on `.entities.v2.metadata.security_*`, while
+`editor` / `t2_analyst` / `detections_admin` get `read` + `write`.
+
+### Self-managed / ECH (stateful)
+
+To **see** a persisted AI summary on self-managed or Elastic Cloud Hosted deployments,
+a user needs, in addition to the Security Solution Kibana feature privileges:
+
+- `read` on the entity metadata indices `.entities.v2.metadata.security_*`.
+
+No metadata **write** privilege is required for any user, because persistence always
+goes through the Kibana internal user. Users lacking metadata read still get on-demand
+generation (graceful degradation).
+
+> Note: Elasticsearch built-in roles (e.g. `detections_admin`) are defined in the
+> Elasticsearch repository, not in this fork. Whether they already include
+> `.entities.v2.metadata.security_*` read is a verification item against a live cluster,
+> not something enforced here. Kibana test fixtures cover the model via custom roles
+> (see `security_solution/test/scout/entity_analytics/api/tests/ai_summary`).
+
 ## Entity Maintainers Framework
 
 The Entity Store plugin exposes an **Entity Maintainers Framework** so that other plugins can register recurring tasks that run in the context of the entity store. Registration is part of the plugin setup contract: consumers call `registerEntityMaintainer` during their plugin’s `setup` phase and supply a configuration object.

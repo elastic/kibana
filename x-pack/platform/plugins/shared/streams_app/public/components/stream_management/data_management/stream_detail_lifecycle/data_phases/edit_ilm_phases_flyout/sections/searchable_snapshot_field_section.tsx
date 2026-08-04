@@ -9,10 +9,10 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { useFormContext, useWatch, type FieldPath } from 'react-hook-form';
 import {
+  EuiCheckbox,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIconTip,
-  EuiSwitch,
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
@@ -46,6 +46,9 @@ export const SearchableSnapshotFieldSection = ({
 
   const titleId = useGeneratedHtmlId({
     prefix: dataTestSubj,
+  });
+  const checkboxId = useGeneratedHtmlId({
+    prefix: `${dataTestSubj}SearchableSnapshotCheckbox-${phaseName}`,
   });
 
   const isFrozenPhase = phaseName === 'frozen';
@@ -91,11 +94,9 @@ export const SearchableSnapshotFieldSection = ({
 
         {!isFrozenPhase && (
           <EuiFlexItem grow={false}>
-            <EuiSwitch
-              label=""
-              showLabel={false}
+            <EuiCheckbox
+              id={checkboxId}
               aria-labelledby={titleId}
-              compressed
               checked={isEnabled}
               data-test-subj={`${dataTestSubj}SearchableSnapshotSwitch`}
               onChange={(e) => {

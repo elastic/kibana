@@ -17,6 +17,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import type { IngestStreamLifecycleDSL } from '@kbn/streams-schema';
+import { usePushFlyoutFocus } from '@kbn/data-lifecycle-phases';
 import {
   Form,
   UseField,
@@ -62,6 +63,7 @@ export const EditDslStepsFlyout = ({
   );
 
   const { footerStyles } = useStyles();
+  const { focusProps } = usePushFlyoutFocus();
 
   const initialStepsRef = useRef<IngestStreamLifecycleDSL>(initialSteps);
   const expectedInitialStepsCountRef = useRef<number>(
@@ -71,6 +73,17 @@ export const EditDslStepsFlyout = ({
   const dataRetentionInfo = useMemo(() => {
     const retention = initialStepsRef.current.dsl?.data_retention;
     const parsed = parseInterval(retention);
+    if (!parsed) return;
+    const ms = toMilliseconds(parsed.value, parsed.unit);
+    if (!Number.isFinite(ms) || ms < 0) return;
+    return { ms, esFormat: `${parsed.value}${parsed.unit}` };
+  }, []);
+
+  // Downsampling rounds must finish before the data reaches the frozen phase (searchable snapshot);
+  // if none is configured, the delete phase (data retention) is the boundary. When present, this
+  // takes over as both the help-text reference and the validation boundary.
+  const frozenAfterInfo = useMemo(() => {
+    const parsed = parseInterval(initialStepsRef.current.dsl?.frozen_after);
     if (!parsed) return;
     const ms = toMilliseconds(parsed.value, parsed.unit);
     if (!Number.isFinite(ms) || ms < 0) return;
@@ -230,6 +243,7 @@ export const EditDslStepsFlyout = ({
     const button = (
       <EuiButton
         fill
+        size="s"
         isLoading={Boolean(isSaving) || form.isSubmitting}
         data-test-subj={`${dataTestSubj}SaveButton`}
         onClick={() => form.submit()}
@@ -257,12 +271,14 @@ export const EditDslStepsFlyout = ({
   return (
     <EuiFlyout
       type="push"
-      size="s"
+      size={400}
       paddingSize="none"
       ownFocus={false}
       onClose={onClose}
       aria-labelledby={flyoutTitleId}
+      role="region"
       data-test-subj={dataTestSubj}
+      {...focusProps}
     >
       <Form form={form} FormWrapper={FragmentFormWrapper}>
         <OnStepFieldErrorsChangeProvider value={onStepFieldErrorsChange}>
@@ -286,6 +302,8 @@ export const EditDslStepsFlyout = ({
                 reindexErrorsAfterRemoval={reindexErrorsAfterRemoval}
                 dataRetentionMs={dataRetentionInfo?.ms}
                 dataRetentionEsFormat={dataRetentionInfo?.esFormat}
+                frozenAfterMs={frozenAfterInfo?.ms}
+                frozenAfterEsFormat={frozenAfterInfo?.esFormat}
               />
             )}
           </UseArray>
@@ -304,6 +322,7 @@ export const EditDslStepsFlyout = ({
               data-test-subj={`${dataTestSubj}CancelButton`}
               onClick={onClose}
               flush="left"
+              size="s"
             >
               {i18n.translate('xpack.streams.editDslStepsFlyout.cancel', {
                 defaultMessage: 'Cancel',

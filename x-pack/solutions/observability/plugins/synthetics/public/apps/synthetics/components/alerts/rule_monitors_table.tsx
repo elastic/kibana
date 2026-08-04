@@ -10,7 +10,7 @@ import { EuiLink, EuiInMemoryTable } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { uniqBy } from 'lodash';
 import { selectInspectRule } from '../../state/alert_rules/selectors';
 import type { ClientPluginsStart } from '../../../../plugin';

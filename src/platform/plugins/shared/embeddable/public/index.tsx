@@ -17,6 +17,7 @@ export { getAddFromLibraryType, useAddFromLibraryTypes } from './add_from_librar
 export { PanelNotFoundError, PanelIncompatibleError } from './react_embeddable_system';
 export { EmbeddableStateTransfer } from './state_transfer';
 export { ACTION_EDIT_PANEL } from './ui_actions/edit_panel_action/constants';
+export { ACTION_INSPECT_PANEL } from './ui_actions/inspect_panel_action/constants';
 export { ACTION_REMOVE_PANEL } from './ui_actions/remove_panel_action/constants';
 export {
   isMultiValueClickTriggerContext,
@@ -24,6 +25,7 @@ export {
   isRowClickTriggerContext,
   isValueClickTriggerContext,
 } from './ui_actions/triggers';
+export { EXPORT_ACTION_GROUP } from './ui_actions/constants';
 
 export type {
   CellValueContext,
@@ -46,6 +48,7 @@ export {
   type DefaultEmbeddableApi,
   type EmbeddablePublicDefinition,
   type LayoutConstraints,
+  type QuickActionIds,
 } from './react_embeddable_system';
 
 export type { PresentationPanelProps } from './react_embeddable_system/panel_component/types';

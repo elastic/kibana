@@ -35,9 +35,23 @@ export interface VisualizationMockItem extends UserContentCommonSchema {
 }
 
 /**
- * Mock visualization items
+ * Mock visualization items.
+ *
+ * Tuned to span the name-cell permutation matrix (short/long title ×
+ * empty/short/long description × no/few/many tags) so consumers of this
+ * fixture exercise both narrow-viewport column-stack and ≥ 2560px
+ * wrap-on-overflow layouts. The matrix uses `t{s,m,l}` for title length,
+ * `d{0,s,l}` for description length, and `g{0,f,m}` for tag count.
+ * `visType` is held variety-rich so the fixture also covers the
+ * type-icon code path.
+ *
+ * Pinned IDs preserved for story call-sites:
+ *
+ * - `vis-001` — initial favorite (see `services.ts`).
  */
 export const MOCK_VISUALIZATIONS: VisualizationMockItem[] = [
+  // ts-ds-gm — sparse-but-favorited (short title, short description, many
+  // tags). Wide viewports pack this row onto a single line.
   {
     id: 'vis-001',
     type: 'visualization',
@@ -48,8 +62,8 @@ export const MOCK_VISUALIZATIONS: VisualizationMockItem[] = [
     managed: false,
     attributes: {
       id: 'vis-001',
-      title: 'Revenue Over Time',
-      description: 'Line chart showing revenue trends',
+      title: 'Revenue',
+      description: 'Daily revenue trend.',
       visType: 'lens',
       typeTitle: 'Lens',
       icon: 'lensApp',
@@ -59,8 +73,15 @@ export const MOCK_VISUALIZATIONS: VisualizationMockItem[] = [
       editUrl: '/app/lens#/edit/vis-001',
       editApp: 'lens',
     },
-    references: [{ type: 'tag', id: 'tag-production', name: 'Production' }],
+    references: [
+      { type: 'tag', id: 'tag-production', name: 'Production' },
+      { type: 'tag', id: 'tag-important', name: 'Important' },
+      { type: 'tag', id: 'tag-security', name: 'Security' },
+      { type: 'tag', id: 'tag-development', name: 'Development' },
+      { type: 'tag', id: 'fleet-managed-default', name: 'Managed' },
+    ],
   },
+  // tm-ds-gf — baseline medium/short/few row, the most "typical" shape.
   {
     id: 'vis-002',
     type: 'visualization',
@@ -72,7 +93,7 @@ export const MOCK_VISUALIZATIONS: VisualizationMockItem[] = [
     attributes: {
       id: 'vis-002',
       title: 'Order Distribution by Category',
-      description: 'Pie chart of orders by product category',
+      description: 'Pie chart of orders by product category.',
       visType: 'pie',
       typeTitle: 'Pie',
       icon: 'chartPie',
@@ -83,6 +104,8 @@ export const MOCK_VISUALIZATIONS: VisualizationMockItem[] = [
     },
     references: [{ type: 'tag', id: 'tag-important', name: 'Important' }],
   },
+  // ts-dl-g0 — short title, long description, no tags. Description wraps
+  // within its cell at wide viewports.
   {
     id: 'vis-003',
     type: 'visualization',
@@ -92,8 +115,9 @@ export const MOCK_VISUALIZATIONS: VisualizationMockItem[] = [
     managed: false,
     attributes: {
       id: 'vis-003',
-      title: 'Top Products Table',
-      description: 'Data table of top selling products',
+      title: 'Top Products',
+      description:
+        'Data table of best-selling SKUs across all storefronts with breakdowns by region, channel, and seasonal demand variance — refreshed nightly and intended as the canonical source for Merchandising weekly reviews. Columns include 7-day units sold, 28-day rolling revenue, return rate, in-stock percentage at the regional DC, and the assigned merchandising owner; each row links into the SKU master record, the demand-forecast notebook, and the markdown-decision audit trail. Seasonality is normalized against the prior-year curve so a launch week does not visually dominate the long tail. Anchored to `ecommerce-*` plus the regional inventory data view.',
       visType: 'table',
       typeTitle: 'Data Table',
       icon: 'table',
@@ -104,6 +128,8 @@ export const MOCK_VISUALIZATIONS: VisualizationMockItem[] = [
     },
     references: [],
   },
+  // tl-ds-gf — long title, short description, few tags. Title and the
+  // tag chain compete for horizontal space when the row tries to pack.
   {
     id: 'vis-004',
     type: 'visualization',
@@ -114,8 +140,9 @@ export const MOCK_VISUALIZATIONS: VisualizationMockItem[] = [
     managed: false,
     attributes: {
       id: 'vis-004',
-      title: 'Server Response Times',
-      description: 'Area chart of server response latencies',
+      title:
+        'Server Response Times — p50, p95, p99 Latencies by Region, Endpoint & Deployment Channel',
+      description: 'Per-endpoint latency.',
       visType: 'area',
       typeTitle: 'Area',
       icon: 'chartArea',
@@ -126,6 +153,8 @@ export const MOCK_VISUALIZATIONS: VisualizationMockItem[] = [
     },
     references: [{ type: 'tag', id: 'tag-development', name: 'Development' }],
   },
+  // tl-dl-gm — managed kitchen-sink row: long title + long description +
+  // many tags. At wide viewports each part wraps to its own line.
   {
     id: 'vis-005',
     type: 'visualization',
@@ -135,8 +164,10 @@ export const MOCK_VISUALIZATIONS: VisualizationMockItem[] = [
     managed: true,
     attributes: {
       id: 'vis-005',
-      title: 'Alert Count Metric',
-      description: 'Single metric showing total alerts',
+      title:
+        'Alert Count — Cross-Cluster Totals With Severity, Source, and On-Call Rotation Breakdowns',
+      description:
+        'Single metric showing the cluster-wide alert count rolled up across all configured detectors, with drill-downs into severity, originating source, and the on-call rotation assignment in effect at firing time. Pairs with the incident triage workspace and is embedded at the top of the Security and SRE landing pages so the on-call always sees the live total before opening any individual rule. The metric reconciles dedupe windows across the Defend, Endpoint, and stack-monitoring rule packs so a single root cause that fires across packs counts once; suppressions, snoozes, and acknowledged-but-open alerts are tracked in companion sparklines and surfaced as the trend annotation.',
       visType: 'metric',
       typeTitle: 'Metric',
       icon: 'chartMetric',
@@ -145,8 +176,15 @@ export const MOCK_VISUALIZATIONS: VisualizationMockItem[] = [
     editor: {
       editUrl: '/app/visualize#/edit/vis-005',
     },
-    references: [{ type: 'tag', id: 'tag-security', name: 'Security' }],
+    references: [
+      { type: 'tag', id: 'tag-security', name: 'Security' },
+      { type: 'tag', id: 'tag-important', name: 'Important' },
+      { type: 'tag', id: 'tag-archived', name: 'Archived' },
+      { type: 'tag', id: 'fleet-pkg-endpoint-default', name: 'Elastic Defend' },
+      { type: 'tag', id: 'fleet-managed-default', name: 'Managed' },
+    ],
   },
+  // ts-d0-g0 — most-sparse row: title only.
   {
     id: 'vis-006',
     type: 'visualization',
@@ -157,8 +195,7 @@ export const MOCK_VISUALIZATIONS: VisualizationMockItem[] = [
     managed: false,
     attributes: {
       id: 'vis-006',
-      title: 'Tag Cloud - Keywords',
-      description: 'Word cloud of popular search terms',
+      title: 'Keywords',
       visType: 'tagcloud',
       typeTitle: 'Tag Cloud',
       icon: 'chartTagCloud',
@@ -167,8 +204,10 @@ export const MOCK_VISUALIZATIONS: VisualizationMockItem[] = [
     editor: {
       editUrl: '/app/visualize#/edit/vis-006',
     },
-    references: [{ type: 'tag', id: 'tag-archived', name: 'Archived' }],
+    references: [],
   },
+  // tl-dl-gf — prototypical rich row: long title + long description with
+  // few tags. Title sits on its own line and the description wraps below.
   {
     id: 'vis-007',
     type: 'visualization',
@@ -179,8 +218,9 @@ export const MOCK_VISUALIZATIONS: VisualizationMockItem[] = [
     managed: false,
     attributes: {
       id: 'vis-007',
-      title: 'Custom Vega Chart',
-      description: 'Advanced visualization using Vega-Lite',
+      title: 'Custom Vega Chart — Multi-Series Latency Distribution With Cohort Annotations',
+      description:
+        'Advanced visualization rendered with Vega-Lite that overlays multi-series latency distributions with rolling-window cohort annotations; intended for performance regression triage during release sign-off. Each series renders the p50/p95/p99 ribbon for one upstream service with a faceted overlay for the requesting client cohort so a regression isolated to a single client SDK version is visually obvious. Annotation layers cross-reference the deploy stream, feature-flag flips, and any active scheduled load test so a spike that coincides with a soak-test window does not get mis-attributed to a deploy. Vega spec lives in the saved-object body; a sibling ES|QL panel exposes the underlying query for engineers who want to fork the chart for ad-hoc analysis.',
       visType: 'vega',
       typeTitle: 'Vega',
       icon: 'code',
@@ -191,6 +231,9 @@ export const MOCK_VISUALIZATIONS: VisualizationMockItem[] = [
     },
     references: [{ type: 'tag', id: 'tag-development', name: 'Development' }],
   },
+  // tm-d0-gf — medium title, no description, few tags. Exercises the
+  // "tags only" wrap behavior (tags fill the row alongside the title).
+  // Also exercises the `error` rendering path.
   {
     id: 'vis-008',
     type: 'visualization',
@@ -201,7 +244,6 @@ export const MOCK_VISUALIZATIONS: VisualizationMockItem[] = [
     attributes: {
       id: 'vis-008',
       title: 'Broken Visualization',
-      description: 'This visualization has an error',
       visType: 'line',
       typeTitle: 'Line',
       icon: 'chartLine',
@@ -209,6 +251,9 @@ export const MOCK_VISUALIZATIONS: VisualizationMockItem[] = [
       error: 'Index pattern not found: logs-*',
     },
     error: 'Index pattern not found: logs-*',
-    references: [],
+    references: [
+      { type: 'tag', id: 'tag-archived', name: 'Archived' },
+      { type: 'tag', id: 'tag-development', name: 'Development' },
+    ],
   },
 ];

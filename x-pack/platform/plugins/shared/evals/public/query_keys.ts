@@ -8,29 +8,45 @@
 export const queryKeys = {
   datasets: {
     all: ['evals', 'datasets'] as const,
-    list: (filters?: { page?: number; perPage?: number }) =>
-      ['evals', 'datasets', 'list', filters] as const,
+    list: (filters?: {
+      page?: number;
+      perPage?: number;
+      search?: string;
+      sortField?: string;
+      sortOrder?: string;
+    }) => ['evals', 'datasets', 'list', filters] as const,
     detail: (datasetId: string) => ['evals', 'datasets', 'detail', datasetId] as const,
   },
   remotes: {
     all: ['evals', 'remotes'] as const,
     list: () => ['evals', 'remotes', 'list'] as const,
   },
-  runs: {
-    all: ['evals', 'runs'] as const,
+  experiments: {
+    all: ['evals', 'experiments'] as const,
     list: (filters?: {
       suiteId?: string;
       modelId?: string;
       branch?: string;
+      buildId?: string;
       page?: number;
       perPage?: number;
-    }) => ['evals', 'runs', 'list', filters] as const,
-    detail: (runId: string) => ['evals', 'runs', 'detail', runId] as const,
-    scores: (runId: string) => ['evals', 'runs', 'scores', runId] as const,
-    datasetExamples: (runId: string, datasetId: string) =>
-      ['evals', 'runs', 'datasets', 'examples', runId, datasetId] as const,
-    compare: (runIdA: string, runIdB: string) =>
-      ['evals', 'runs', 'compare', runIdA, runIdB] as const,
+    }) => ['evals', 'experiments', 'list', filters] as const,
+    detail: (experimentId: string, executionId?: string) =>
+      ['evals', 'experiments', 'detail', experimentId, executionId] as const,
+    scores: (experimentId: string, executionId?: string) =>
+      ['evals', 'experiments', 'scores', experimentId, executionId] as const,
+    datasetExamples: (experimentId: string, datasetId: string, executionId?: string) =>
+      [
+        'evals',
+        'experiments',
+        'datasets',
+        'examples',
+        experimentId,
+        datasetId,
+        executionId,
+      ] as const,
+    compare: (type: string, baselineId: string, targetId: string) =>
+      ['evals', 'experiments', 'compare', type, baselineId, targetId] as const,
   },
   examples: {
     all: ['evals', 'examples'] as const,

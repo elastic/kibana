@@ -49,6 +49,9 @@ const SUPPORTED_LOGOS = [
   'confluence',
   'salesforce',
   'splunk',
+  'supabase',
+  'vercel_black',
+  'vercel_white',
 ] as const;
 
 export type SupportedLogo = (typeof SUPPORTED_LOGOS)[number];
@@ -77,7 +80,7 @@ export const EUI_LOGO_BY_BRAND: Partial<Record<SupportedLogo, string>> = {
   logstash: 'logoLogstash',
 };
 
-function useIconForLogo(logo?: SupportedLogo): string | undefined {
+export function useIconForLogo(logo?: SupportedLogo): string | undefined {
   const {
     services: { http },
   } = useKibana();

@@ -5,6 +5,13 @@
  * 2.0.
  */
 
-export type { DomainEvent, EventBus, EventBusSubscriber, Subscription } from './types';
-export { EventBusToken, EventBusSubscriberToken } from './types';
-export { AlertingDomainEventBus } from './event_bus';
+export type {
+  DomainEvent,
+  EventBus,
+  EventBusContextRest,
+  EventBusHandlerArgs,
+  EventBusSubscriber,
+  Subscription,
+} from './types';
+export { EventBusSubscriberToken } from './types';
+export { AsyncDomainEventBus } from './event_bus';

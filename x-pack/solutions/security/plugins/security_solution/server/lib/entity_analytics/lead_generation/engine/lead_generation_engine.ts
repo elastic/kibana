@@ -16,7 +16,7 @@ import type {
   ObservationModule,
 } from '../types';
 import { computeStaleness, DEFAULT_ENGINE_CONFIG } from '../types';
-import { llmSynthesizeBatch } from './llm_synthesize';
+import { llmSynthesizeBatch, type CohortContext, type ScoredEntityInput } from './llm_synthesize';
 
 interface LeadGenerationEngineDeps {
   readonly logger: Logger;
@@ -255,8 +255,10 @@ const groupIntoLeads = async (
   const groups = groupByObservationPattern(scoredEntities);
   const now = new Date();
 
+  const cohort = computeCohortContext(groups);
+
   const synthStart = Date.now();
-  const llmResults = await llmSynthesizeBatch(chatModel, groups, logger);
+  const llmResults = await llmSynthesizeBatch(chatModel, groups, logger, cohort);
   logger.debug(
     `[LeadGenerationEngine] LLM synthesis: ${Date.now() - synthStart}ms (${groups.length} leads)`
   );
@@ -269,7 +271,7 @@ const groupIntoLeads = async (
     return {
       id: uuidv4(),
       title: llm.title,
-      byline: buildByline(group, allObservations),
+      byline: llm.byline?.trim() ? llm.byline : buildByline(group, allObservations),
       description: llm.description,
       entities: group.map((e) => e.entity),
       tags: llm.tags,
@@ -291,6 +293,27 @@ const groupIntoLeads = async (
  */
 const groupByObservationPattern = (scoredEntities: ScoredEntity[]): ScoredEntity[][] => {
   return scoredEntities.map((entity) => [entity]);
+};
+
+/**
+ * Aggregates cross-entity ("peer") context across the batch so a single lead's
+ * narrative can convey scope — e.g. how many other candidate entities exhibit
+ * the same observation type. Each entity is counted once per observation type.
+ */
+export const computeCohortContext = (groups: ScoredEntityInput[][]): CohortContext => {
+  const entityCountByObservationType: Record<string, number> = {};
+
+  for (const group of groups) {
+    for (const scored of group) {
+      const typesForEntity = new Set(scored.observations.map((o) => o.type));
+      for (const type of typesForEntity) {
+        entityCountByObservationType[type] = (entityCountByObservationType[type] ?? 0) + 1;
+      }
+    }
+  }
+
+  const totalCandidates = groups.reduce((sum, group) => sum + group.length, 0);
+  return { totalCandidates, entityCountByObservationType };
 };
 
 const buildByline = (group: ScoredEntity[], observations: Observation[]): string => {

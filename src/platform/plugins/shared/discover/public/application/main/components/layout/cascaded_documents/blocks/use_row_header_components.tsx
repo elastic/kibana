@@ -63,7 +63,7 @@ interface RowClickActionContext {
   esqlVariables: ESQLControlVariable[] | undefined;
   rowContext: RowContext;
   closeActionMenu: () => void;
-  openInNewTab: (...args: Parameters<typeof internalStateActions.openInNewTab>) => void;
+  openInNewTab: (...args: Parameters<typeof internalStateActions.openInNewTab>) => Promise<void>;
   updateESQLQuery: UpdateESQLQueryFn;
 }
 

@@ -26,14 +26,21 @@ export const createInitialMetricsTelemetry = (): MetricsTelemetry => ({
   total_number_of_dimensions: 0,
   metrics_by_type: {},
   units: {},
-  multi_value_counts: { data_streams: 0, field_types: 0, metric_types: 0, units: 0 },
+  multi_value_counts: { index_names: 0, field_types: 0, metric_types: 0, units: 0 },
 });
 
 /**
  * Dimension names that are internal metadata and should not be exposed to users.
  * See: https://github.com/elastic/observability-dev/issues/5412
+ *
+ * These are genuine time-series dimensions in Elasticsearch (part of the TSID),
+ * so `METRICS_INFO` legitimately returns them and they can only be hidden here,
+ * at the presentation layer. `temporality` in particular originates from OTLP
+ * data (delta vs. cumulative aggregation) rather than being injected by
+ * Elastic, so it carries no `_` prefix and must be excluded by exact name.
+ * See: https://github.com/elastic/kibana/issues/273563
  */
-const INTERNAL_DIMENSION_EXACT_NAMES = new Set(['_metric_names_hash', 'unit']);
+const INTERNAL_DIMENSION_EXACT_NAMES = new Set(['_metric_names_hash', 'unit', 'temporality']);
 
 /**
  * Dimension name prefixes that indicate internal metadata fields.
@@ -64,7 +71,13 @@ export const parseMetricsWithTelemetry = (
 
   for (const metric of response) {
     const metricTypes = toArray(metric.metric_type);
-    const dataStreams = toArray(metric.data_stream);
+    // The TS shape exposes `index_name`, but ES|QL `METRICS_INFO` returns a
+    // column literally named `data_stream`. Accept either at parse time so a
+    // future ES|QL column rename can land before or after this Kibana rename
+    // without breaking parsing in either direction.
+    const indexNames = toArray(
+      metric.index_name ?? (metric as unknown as { data_stream?: string[] | string }).data_stream
+    );
     const units = toArray(metric.unit);
     const fieldTypes = toArray(metric.field_type);
     const dimensions = toArray(metric.dimension_fields).filter(
@@ -73,7 +86,7 @@ export const parseMetricsWithTelemetry = (
 
     accumulateMetricsRowTelemetry(telemetry, {
       metricTypes,
-      dataStreams,
+      indexNames,
       units,
       fieldTypes,
     });
@@ -91,10 +104,10 @@ export const parseMetricsWithTelemetry = (
       return toDimension(name);
     });
 
-    for (const stream of dataStreams) {
+    for (const source of indexNames) {
       parsedMetrics.push({
         metricName: metric.metric_name,
-        dataStream: stream,
+        indexName: source,
         units,
         metricTypes,
         fieldTypes,

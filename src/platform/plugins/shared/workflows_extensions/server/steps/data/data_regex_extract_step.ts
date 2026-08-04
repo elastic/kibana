@@ -33,7 +33,7 @@ export const dataRegexExtractStepDefinition = createServerStepDefinition({
   ...dataRegexExtractStepCommonDefinition,
   handler: async (context) => {
     try {
-      const source = context.contextManager.renderInputTemplate(context.config.source);
+      const source = context.config.source;
       const errorIfNoMatch = context.config.errorIfNoMatch || false;
       const { pattern, fields, flags = '' } = context.input;
 

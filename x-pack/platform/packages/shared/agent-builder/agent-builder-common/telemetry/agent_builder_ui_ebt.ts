@@ -19,6 +19,7 @@ const ebtAction = {
   navSidebar: {
     SIDEBAR_LAYER_TRANSITION: 'sidebar_layer_transition',
     SIDEBAR_NAVIGATION_CLICK: 'sidebar_navigation_click',
+    SIDEBAR_TOGGLE: 'sidebar_toggle',
     AGENT_SWITCH: 'agent_switch',
     AGENT_SELECTOR_OPEN: 'agent_selector_open',
     MANAGE_ALL_AGENTS_CLICK: 'manage_all_agents_click',
@@ -31,6 +32,10 @@ const ebtAction = {
     OPEN_CONVERSATION_MENU: 'open_conversation_menu',
     RENAME_CONVERSATION: 'rename_conversation',
     DELETE_CONVERSATION: 'delete_conversation',
+    MARK_AS_READ: 'mark_as_read',
+    MARK_AS_UNREAD: 'mark_as_unread',
+    PIN_CONVERSATION: 'pin_conversation',
+    UNPIN_CONVERSATION: 'unpin_conversation',
   },
   agentCustomization: {
     ENTITY_ADD_FROM_LIBRARY: 'entity_add_from_library',
@@ -61,8 +66,19 @@ const ebtAction = {
     COPY_MCP_URL: 'copy_mcp_url',
     BULK_IMPORT_MCP: 'bulk_import_mcp',
     MANAGE_MCP_CLIENTS: 'manage_mcp_clients',
+    MCP_CLIENT_CREATE_OPEN: 'mcp_client_create_open',
+    MCP_CLIENT_CREATE_SUBMIT: 'mcp_client_create_submit',
+    MCP_CLIENT_CREATE_CANCEL: 'mcp_client_create_cancel',
+    MCP_CLIENT_VIEW_DETAILS: 'mcp_client_view_details',
+    MCP_CLIENT_COPY_SECRET: 'mcp_client_copy_secret',
+    MCP_CLIENT_REVOKE_OPEN: 'mcp_client_revoke_open',
+    MCP_CLIENT_REVOKE_CONFIRM: 'mcp_client_revoke_confirm',
+    MANAGE_APPLICATION_CONNECTIONS_LINK: 'manage_application_connections_link',
     MCP_DOCS: 'mcp_docs',
     ADD_REFERENCED_FILE: 'add_referenced_file',
+    EDIT_REFERENCED_FILE: 'edit_referenced_file',
+    SAVE_REFERENCED_FILE: 'save_referenced_file',
+    CANCEL_REFERENCED_FILE: 'cancel_referenced_file',
     REMOVE_REFERENCED_FILE: 'remove_referenced_file',
     TOOL_CANCEL: 'tool_cancel',
     TEST_TOOL: 'test_tool',
@@ -168,10 +184,18 @@ const ebtAction = {
     ATTACHMENT_CLOSE: 'attachment_close',
     CONFIRM_PROMPT_CONFIRM: 'confirm_prompt_confirm',
     CONFIRM_PROMPT_CANCEL: 'confirm_prompt_cancel',
+    AUTH_PROMPT_AUTHORIZE: 'auth_prompt_authorize',
+    AUTH_PROMPT_CANCEL: 'auth_prompt_cancel',
     DELETE_CONFIRM: 'delete_confirm',
     DELETE_CANCEL: 'delete_cancel',
     EXTERNAL_LINK_CONFIRM: 'external_link_confirm',
     EXTERNAL_LINK_CANCEL: 'external_link_cancel',
+    OPEN_ROUND_METADATA: 'open_round_metadata',
+    EXPAND_TOOL_CALL_STEP: 'expand_tool_call_step',
+    EXPAND_TOOL_CALL_GROUP: 'expand_tool_call_group',
+    VIEW_TOOL_RESPONSE: 'view_tool_response',
+    VIEW_SUB_AGENT_EXECUTION: 'view_sub_agent_execution',
+    OPEN_ESQL_IN_DISCOVER: 'open_esql_in_discover',
   },
   libraryPanel: {
     MANAGE_ALL: 'manage_all',
@@ -200,6 +224,10 @@ const ebtDetail = {
     MANAGE_CLICK: 'manage_click',
     BACK_CLICK: 'back_click',
   },
+  sidebarToggle: {
+    EXPAND: 'expand',
+    CONDENSE: 'condense',
+  },
 } as const;
 
 const ebtEntity = {
@@ -207,6 +235,7 @@ const ebtEntity = {
   PLUGIN: 'plugin',
   SKILL: 'skill',
   AGENT: 'agent',
+  MCP_CLIENT: 'mcp_client',
 } as const;
 const ebtFormat = {} as const;
 

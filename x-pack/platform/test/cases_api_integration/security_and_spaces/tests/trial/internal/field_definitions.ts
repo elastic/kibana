@@ -6,20 +6,24 @@
  */
 
 import expect from '@kbn/expect';
+import { stringify } from 'yaml';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { deleteAllCaseItems, getSpaceUrlPrefix } from '../../../../common/lib/api';
 import {
+  noKibanaPrivileges,
   secOnly,
   secOnlyManageTemplates,
   secOnlyNoManageTemplates,
+  secOnlyRead,
 } from '../../../../common/lib/authentication/users';
 
 const FIELD_DEFINITIONS_URL = '/internal/cases/field_definitions';
+const TEMPLATES_URL = '/internal/cases/templates';
 
 const buildCreateBody = (overrides: Record<string, unknown> = {}) => ({
   name: 'priority',
   owner: 'securitySolutionFixture',
-  definition: 'name: priority\ncontrol: SELECT_BASIC\ntype: keyword\n',
+  definition: 'name: priority\ncontrol: INPUT_TEXT\ntype: keyword\n',
   ...overrides,
 });
 
@@ -74,6 +78,17 @@ export default ({ getService }: FtrProviderContext): void => {
           .set('kbn-xsrf', 'true')
           .send(buildCreateBody({ definition: ': {not valid yaml' }))
           .expect(400);
+      });
+
+      it('returns 400 when a field-library definition is a reference', async () => {
+        const { body } = await supertestWithoutAuth
+          .post(`${getSpaceUrlPrefix('space1')}${FIELD_DEFINITIONS_URL}`)
+          .auth(secOnlyManageTemplates.username, secOnlyManageTemplates.password)
+          .set('kbn-xsrf', 'true')
+          .send(buildCreateBody({ definition: '$ref: existing_field\n' }))
+          .expect(400);
+
+        expect(body.message).to.contain('Invalid field definition');
       });
 
       it('returns 409 when a field definition with the same name already exists', async () => {
@@ -140,11 +155,31 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(body.fieldDefinitions).to.have.length(1);
       });
 
-      it('returns 403 for a user without manageTemplates privilege', async () => {
-        await supertestWithoutAuth
+      it('lists field definitions for a read-only user (cases.read is sufficient)', async () => {
+        const { body } = await supertestWithoutAuth
+          .get(`${getSpaceUrlPrefix('space1')}${FIELD_DEFINITIONS_URL}`)
+          .query({ owner: 'securitySolutionFixture' })
+          .auth(secOnlyRead.username, secOnlyRead.password)
+          .expect(200);
+
+        expect(body.fieldDefinitions).to.have.length(1);
+      });
+
+      it('lists field definitions for a user with full Cases access but no manageTemplates sub-privilege', async () => {
+        const { body } = await supertestWithoutAuth
           .get(`${getSpaceUrlPrefix('space1')}${FIELD_DEFINITIONS_URL}`)
           .query({ owner: 'securitySolutionFixture' })
           .auth(secOnlyNoManageTemplates.username, secOnlyNoManageTemplates.password)
+          .expect(200);
+
+        expect(body.fieldDefinitions).to.have.length(1);
+      });
+
+      it('returns 403 for a user with no Kibana privileges', async () => {
+        await supertestWithoutAuth
+          .get(`${getSpaceUrlPrefix('space1')}${FIELD_DEFINITIONS_URL}`)
+          .query({ owner: 'securitySolutionFixture' })
+          .auth(noKibanaPrivileges.username, noKibanaPrivileges.password)
           .expect(403);
       });
 
@@ -156,6 +191,55 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(200);
 
         expect(body.fieldDefinitions).to.have.length(0);
+      });
+
+      describe('isGlobal filter', () => {
+        beforeEach(async () => {
+          // Add a second definition with isGlobal: true alongside the one from the outer beforeEach
+          await supertest
+            .post(`${getSpaceUrlPrefix('space1')}${FIELD_DEFINITIONS_URL}`)
+            .set('kbn-xsrf', 'true')
+            .send(buildCreateBody({ name: 'severity', isGlobal: true }))
+            .expect(200);
+        });
+
+        it('returns only isGlobal definitions when filtered with isGlobal=true', async () => {
+          const { body } = await supertest
+            .get(`${getSpaceUrlPrefix('space1')}${FIELD_DEFINITIONS_URL}`)
+            .query({ owner: 'securitySolutionFixture', isGlobal: true })
+            .expect(200);
+
+          expect(body.fieldDefinitions).to.have.length(1);
+          expect(body.fieldDefinitions[0].name).to.eql('severity');
+          expect(body.fieldDefinitions[0].isGlobal).to.eql(true);
+        });
+
+        it('returns all definitions when isGlobal is not specified', async () => {
+          const { body } = await supertest
+            .get(`${getSpaceUrlPrefix('space1')}${FIELD_DEFINITIONS_URL}`)
+            .query({ owner: 'securitySolutionFixture' })
+            .expect(200);
+
+          expect(body.total).to.eql(2);
+        });
+
+        it('returns all definitions when isGlobal=false (no filter applied)', async () => {
+          const { body } = await supertest
+            .get(`${getSpaceUrlPrefix('space1')}${FIELD_DEFINITIONS_URL}`)
+            .query({ owner: 'securitySolutionFixture', isGlobal: false })
+            .expect(200);
+
+          expect(body.total).to.eql(2);
+        });
+
+        it('persists the isGlobal flag returned in the response', async () => {
+          const { body } = await supertest
+            .get(`${getSpaceUrlPrefix('space1')}${FIELD_DEFINITIONS_URL}`)
+            .query({ owner: 'securitySolutionFixture', isGlobal: true })
+            .expect(200);
+
+          expect(body.fieldDefinitions[0].isGlobal).to.eql(true);
+        });
       });
     });
 
@@ -179,7 +263,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .set('kbn-xsrf', 'true')
           .send(
             buildCreateBody({
-              definition: 'name: priority\ncontrol: SELECT_BASIC\ntype: keyword\nlabel: Priority\n',
+              definition: 'name: priority\ncontrol: INPUT_TEXT\ntype: keyword\nlabel: Priority\n',
             })
           )
           .expect(200);
@@ -272,6 +356,89 @@ export default ({ getService }: FtrProviderContext): void => {
           .auth(secOnlyManageTemplates.username, secOnlyManageTemplates.password)
           .set('kbn-xsrf', 'true')
           .expect(404);
+      });
+
+      it('returns 409 when an active template references the field via $ref', async () => {
+        // FAILURE SCENARIO: deleting "priority" while "Incident Template" has $ref: priority in its definition
+        await supertest
+          .post(`${getSpaceUrlPrefix('space1')}${TEMPLATES_URL}`)
+          .set('kbn-xsrf', 'true')
+          .send({
+            name: 'Incident Template',
+            owner: 'securitySolutionFixture',
+            definition: stringify({
+              name: 'Incident Template',
+              fields: [{ $ref: 'priority' }],
+            }),
+            isEnabled: true,
+          })
+          .expect(200);
+
+        const { body } = await supertestWithoutAuth
+          .delete(`${getSpaceUrlPrefix('space1')}${FIELD_DEFINITIONS_URL}/${fieldDefinitionId}`)
+          .auth(secOnlyManageTemplates.username, secOnlyManageTemplates.password)
+          .set('kbn-xsrf', 'true')
+          .expect(409);
+
+        expect(body.message).to.contain('"Incident Template"');
+      });
+
+      it('returns 409 when a template references the field via $ref with a local name alias', async () => {
+        // FAILURE SCENARIO: The template uses { $ref: 'priority', name: 'Custom Label' }.
+        // The `fieldDefinitions` keyword cache stores "Custom Label" as the resolved name.
+        // A query against the cache would miss this ref. The hybrid approach (match_phrase
+        // pre-filter + YAML parse) finds the $ref: priority value correctly regardless.
+        await supertest
+          .post(`${getSpaceUrlPrefix('space1')}${TEMPLATES_URL}`)
+          .set('kbn-xsrf', 'true')
+          .send({
+            name: 'Aliased Ref Template',
+            owner: 'securitySolutionFixture',
+            definition: stringify({
+              name: 'Aliased Ref Template',
+              fields: [{ $ref: 'priority', name: 'Custom Priority Label' }],
+            }),
+            isEnabled: true,
+          })
+          .expect(200);
+
+        const { body } = await supertestWithoutAuth
+          .delete(`${getSpaceUrlPrefix('space1')}${FIELD_DEFINITIONS_URL}/${fieldDefinitionId}`)
+          .auth(secOnlyManageTemplates.username, secOnlyManageTemplates.password)
+          .set('kbn-xsrf', 'true')
+          .expect(409);
+
+        expect(body.message).to.contain('"Aliased Ref Template"');
+      });
+
+      it('succeeds when the only referencing template has been deleted', async () => {
+        // Create a template that references the field, then soft-delete it
+        const { body: templateBody } = await supertest
+          .post(`${getSpaceUrlPrefix('space1')}${TEMPLATES_URL}`)
+          .set('kbn-xsrf', 'true')
+          .send({
+            name: 'Deleted Template',
+            owner: 'securitySolutionFixture',
+            definition: stringify({
+              name: 'Deleted Template',
+              fields: [{ $ref: 'priority' }],
+            }),
+            isEnabled: true,
+          })
+          .expect(200);
+
+        await supertest
+          .post(`${getSpaceUrlPrefix('space1')}${TEMPLATES_URL}/_bulk_delete`)
+          .set('kbn-xsrf', 'true')
+          .send({ ids: [templateBody.templateId] })
+          .expect(204);
+
+        // Field definition can now be deleted because the only referencing template is gone
+        await supertestWithoutAuth
+          .delete(`${getSpaceUrlPrefix('space1')}${FIELD_DEFINITIONS_URL}/${fieldDefinitionId}`)
+          .auth(secOnlyManageTemplates.username, secOnlyManageTemplates.password)
+          .set('kbn-xsrf', 'true')
+          .expect(204);
       });
     });
   });

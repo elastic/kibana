@@ -5,12 +5,4 @@
  * 2.0.
  */
 
-export interface IngestionTimeRange {
-  from: number;
-  to: number;
-}
-
-export interface IngestionTimeRanges {
-  classicApm: IngestionTimeRange;
-  otelNative: IngestionTimeRange;
-}
+export type { IngestionTimeRange, IngestionTimeRanges } from '@kbn/apm-types';

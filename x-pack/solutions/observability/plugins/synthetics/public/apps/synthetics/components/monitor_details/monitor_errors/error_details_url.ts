@@ -11,16 +11,19 @@ export const getErrorDetailsUrl = ({
   stateId,
   locationId,
   spaceId,
+  remoteName,
 }: {
   stateId: string;
   basePath: string;
   configId: string;
   locationId?: string;
   spaceId?: string;
+  remoteName?: string;
 }) => {
   const params = new URLSearchParams();
   if (locationId) params.set('locationId', locationId);
   if (spaceId) params.set('spaceId', spaceId);
+  if (remoteName) params.set('remoteName', remoteName);
   const search = params.toString();
   return `${basePath}/app/synthetics/monitor/${configId}/errors/${stateId}${
     search ? `?${search}` : ''

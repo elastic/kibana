@@ -18,13 +18,30 @@ import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
 export interface Props extends Pick<MetricWTrend, 'title' | 'color' | 'extra' | 'subtitle'> {
   id: string;
   loading: boolean;
-  value: number;
+  // `null` is "no data": Elastic Charts renders it as the Metric theme's
+  // `nonFiniteText` ("N/A") rather than a fabricated value.
+  value: number | null;
   toolTip: React.ReactNode;
   style?: CSSProperties;
+  valueFormatter?: (value: number) => string;
 }
 
+const DEFAULT_FORMATTER = (d: number) => d.toString();
+
 export const MetricChartWrapper = React.memo(
-  ({ color, extra, id, loading, value, subtitle, title, toolTip, style, ...props }: Props) => {
+  ({
+    color,
+    extra,
+    id,
+    loading,
+    value,
+    subtitle,
+    title,
+    toolTip,
+    style,
+    valueFormatter,
+    ...props
+  }: Props) => {
     const { euiTheme } = useEuiTheme();
     const loadedOnce = useRef(false);
 
@@ -40,13 +57,18 @@ export const MetricChartWrapper = React.memo(
       }
     }, [loading]);
 
+    // `Metric` only renders numbers: swap `null` → `NaN` so an empty tile shows
+    // the theme's `nonFiniteText` ("N/A") instead of a fabricated value.
+    const numericValue = value ?? Number.NaN;
+    const format = valueFormatter ?? DEFAULT_FORMATTER;
+
     const metricsData: MetricWNumber = {
       title,
       subtitle,
       color,
       extra,
-      value,
-      valueFormatter: (d: number) => d.toString(),
+      value: numericValue,
+      valueFormatter: format,
     };
 
     return (

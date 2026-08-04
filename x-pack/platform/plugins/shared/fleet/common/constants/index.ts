@@ -71,3 +71,5 @@ export * from './mappings';
 export const AUTO_UPGRADE_DEFAULT_RETRIES = ['30m', '1h', '2h', '4h', '8h', '16h', '24h'];
 
 export const FLEET_LOG_INDICES = [AGENT_STATUS_CHANGE_DATA_STREAM_NAME];
+
+export const SCHEDULED_UNENROLL_ACTION_ID_PREFIX = 'ScheduledUnenrollInactiveAgents-';

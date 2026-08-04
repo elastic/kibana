@@ -7,7 +7,7 @@
 
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiAvatar, EuiButtonIcon, EuiComment, EuiLink } from '@elastic/eui';
+import { EuiAvatar, EuiButtonIcon, EuiComment, EuiLink, EuiToolTip } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { ChatItem } from './chat_item';
 import type { ChatTimelineItem, ChatTimelineProps } from './chat_timeline';
@@ -72,6 +72,11 @@ export function ChatConsolidatedItems({
     setExpanded(!expanded);
   };
 
+  const toggleButtonLabel = i18n.translate(
+    'xpack.aiAssistant.chatCollapsedItems.toggleButtonLabel',
+    { defaultMessage: 'Show / hide items' }
+  );
+
   return (
     <>
       <EuiComment
@@ -105,15 +110,15 @@ export function ChatConsolidatedItems({
         }
         username=""
         actions={
-          <EuiButtonIcon
-            aria-label={i18n.translate('xpack.aiAssistant.chatCollapsedItems.toggleButtonLabel', {
-              defaultMessage: 'Show / hide items',
-            })}
-            color="text"
-            data-test-subj="observabilityAiAssistantChatCollapsedItemsButton"
-            iconType={expanded ? 'chevronSingleUp' : 'chevronSingleDown'}
-            onClick={handleToggleExpand}
-          />
+          <EuiToolTip content={toggleButtonLabel} disableScreenReaderOutput>
+            <EuiButtonIcon
+              aria-label={toggleButtonLabel}
+              color="text"
+              data-test-subj="observabilityAiAssistantChatCollapsedItemsButton"
+              iconType={expanded ? 'chevronSingleUp' : 'chevronSingleDown'}
+              onClick={handleToggleExpand}
+            />
+          </EuiToolTip>
         }
       />
 

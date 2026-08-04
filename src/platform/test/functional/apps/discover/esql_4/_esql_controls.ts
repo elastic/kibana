@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * Migration recommendation: MIGRATE TO SCOUT. Good integration test for a complex integrtaion. But the ui-based fixture creation should be replaced with an API-based fixture creation in Scout.
+ */
+
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
@@ -76,10 +80,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // Verify that the control exists in discover
         const control = await dashboardControls.getControlElementById('esql-control-1');
         expect(control).to.be.ok();
+
+        await discover.waitUntilTabIsLoaded();
         await discover.expectDocTableToBeLoaded();
       });
     });
 
+    // NOTE: Great candidate for an API-based fixture creation in Scout.
     const addUnlinkedSavedSearch = async () => {
       await dashboard.navigateToApp();
       await dashboard.clickNewDashboard();
@@ -229,7 +236,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('when saving a new by-value Discover session panel back to a dashboard with matching controls', () => {
-      it('should update the existing dashboard control instead of creating a duplicate', async () => {
+      // This is flacky and sometimes it creates a duplicate: https://github.com/elastic/kibana/issues/265636
+      it.skip('should update the existing dashboard control instead of creating a duplicate', async () => {
         await addUnlinkedSavedSearch();
 
         expect(await dashboardControls.getControlsCount()).to.be(1);

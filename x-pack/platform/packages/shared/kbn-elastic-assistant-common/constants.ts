@@ -130,6 +130,12 @@ export const ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX =
   '.alerts-security.attack.discovery.alerts' as const;
 
 /**
+ * The common prefix for ad hoc Attack discovery alerts indices
+ */
+export const ATTACK_DISCOVERY_ADHOC_ALERTS_COMMON_INDEX_PREFIX =
+  '.adhoc.alerts-security.attack.discovery.alerts' as const;
+
+/**
  * This feature flag disables the InferenceChatModel feature.
  *
  * It may be overridden via the following setting in `kibana.yml` or `kibana.dev.yml`:

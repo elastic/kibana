@@ -214,8 +214,10 @@ export const RuntimeMappings: FC<Props> = ({ actions, state }) => {
                     <EuiCopy
                       beforeMessage={COPY_RUNTIME_FIELDS_TO_CLIPBOARD_TEXT}
                       textToCopy={advancedRuntimeMappingsConfig ?? ''}
+                      tooltipProps={{ disableScreenReaderOutput: true }}
                     >
                       {(copy: () => void) => (
+                        /* eslint-disable-next-line @elastic/eui/tooltip-button-icon-wrap */
                         <EuiButtonIcon
                           onClick={copy}
                           iconType="copy"

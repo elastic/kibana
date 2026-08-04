@@ -73,6 +73,7 @@ import { SavedObjectsSyncService } from './saved_objects/sync_task';
 import { registerCasesPersistableState } from './lib/register_cases';
 import { registerSampleDataSetLinks } from './lib/register_sample_data_set_links';
 import { inferenceModelRoutes } from './routes/inference_models';
+import { registerEmbeddables } from './lib/register_embeddables';
 
 export type MlPluginSetup = SharedServices;
 export type MlPluginStart = void;
@@ -143,7 +144,7 @@ export class MlServerPlugin
           'Granting All or Read feature privilege for Machine Learning will also grant the equivalent feature privileges to certain types of Kibana saved objects, namely index patterns, dashboards, saved Discover sessions and visualizations as well as machine learning job, trained model and module saved objects.',
       }),
       management: {
-        insightsAndAlerting: ['jobsListLink', 'triggersActions'],
+        insightsAndAlerting: ['jobsListLink', 'triggersActionsRules', 'triggersActionsAlerts'],
       },
       alerting: alertingFeatures,
       privileges: {
@@ -304,6 +305,8 @@ export class MlServerPlugin
     }
 
     registerKibanaSettings(coreSetup);
+
+    registerEmbeddables(plugins.embeddable, this.enabledFeatures);
 
     if (plugins.usageCollection) {
       const getIndexForType = (type: string) =>

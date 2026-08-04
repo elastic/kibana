@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { readFileSync } from 'fs';
+import { rootCertificates } from 'node:tls';
+
 import { i18n } from '@kbn/i18n';
 import { tryCatch, map, mapNullable, getOrElse } from 'fp-ts/Option';
 import url from 'url';
@@ -38,6 +41,73 @@ enum AllowListingField {
 
 export const DEFAULT_MAX_ATTEMPTS = 3;
 
+interface FileBasedSSLConfig {
+  verificationMode?: SSLSettings['verificationMode'];
+  certificate?: string;
+  key?: string;
+  certificateAuthorities?: string | readonly string[];
+}
+
+interface ResolveFileBasedSSLSettingsOptions {
+  ssl: FileBasedSSLConfig | undefined;
+  serviceName: string;
+  includeSystemCertificateAuthorities?: boolean;
+  allowPartialTrustChain?: boolean;
+}
+
+const resolveFileBasedSSLSettings = ({
+  ssl,
+  serviceName,
+  includeSystemCertificateAuthorities = false,
+  allowPartialTrustChain,
+}: ResolveFileBasedSSLSettingsOptions): SSLSettings => {
+  const readSSLFile = (filePath: string, configKey: string): Buffer => {
+    try {
+      return readFileSync(filePath);
+    } catch (err) {
+      throw new Error(
+        `${serviceName} SSL configuration error: failed to read ${configKey} file: ${err.message}`
+      );
+    }
+  };
+  const certificateAuthorityPaths = ssl?.certificateAuthorities
+    ? Array.isArray(ssl.certificateAuthorities)
+      ? ssl.certificateAuthorities
+      : [ssl.certificateAuthorities]
+    : [];
+  const certificateAuthorities = certificateAuthorityPaths.map((filePath) =>
+    readSSLFile(filePath, 'certificateAuthorities')
+  );
+  const settings: SSLSettings = {
+    ...getSSLSettingsFromConfig(ssl?.verificationMode),
+    cert: ssl?.certificate ? readSSLFile(ssl.certificate, 'certificate') : undefined,
+    key: ssl?.key ? readSSLFile(ssl.key, 'key') : undefined,
+    ca:
+      certificateAuthorities.length > 0
+        ? Buffer.concat([
+            ...(includeSystemCertificateAuthorities
+              ? [Buffer.from(`${rootCertificates.join('\n')}\n`)]
+              : []),
+            ...certificateAuthorities,
+          ])
+        : undefined,
+  };
+
+  if (allowPartialTrustChain !== undefined) {
+    settings.allowPartialTrustChain = allowPartialTrustChain;
+  }
+
+  return settings;
+};
+
+const createCachedSSLSettings = (resolve: () => SSLSettings): (() => SSLSettings) => {
+  let cache: SSLSettings | undefined;
+  return () => {
+    cache ??= resolve();
+    return cache;
+  };
+};
+
 export interface ActionsConfigurationUtilities {
   isHostnameAllowed: (hostname: string) => boolean;
   isUriAllowed: (uri: string) => boolean;
@@ -46,6 +116,8 @@ export interface ActionsConfigurationUtilities {
   ensureUriAllowed: (uri: string) => void;
   ensureActionTypeEnabled: (actionType: string) => void;
   getSSLSettings: () => SSLSettings;
+  getEARSSSLSettings: () => SSLSettings;
+  getRelaySSLSettings: () => SSLSettings;
   getProxySettings: () => undefined | ProxySettings;
   getResponseSettings: () => ResponseSettings;
   getCustomHostSettings: (targetUrl: string) => CustomHostSettings | undefined;
@@ -77,6 +149,7 @@ export interface ActionsConfigurationUtilities {
   getMaxEmailBodyLength: () => number;
   getEarsUrl: () => string | undefined;
   isEarsEnabled: () => boolean;
+  isEarsExperimentalEnabled: () => boolean;
 }
 
 function allowListErrorMessage(field: AllowListingField, value: string) {
@@ -206,6 +279,20 @@ export function getActionsConfigurationUtilities(
   const isUriAllowed = curry(isHostnameAllowedInUri)(config);
   const isActionTypeEnabled = curry(isActionTypeEnabledInConfig)(config);
   const validatedEmailCurried = curry(validateEmails)(config);
+  const getEARSSSLSettings = createCachedSSLSettings(() =>
+    resolveFileBasedSSLSettings({
+      ssl: config.auth.ears?.ssl,
+      serviceName: 'EARS',
+    })
+  );
+  const getRelaySSLSettings = createCachedSSLSettings(() =>
+    resolveFileBasedSSLSettings({
+      ssl: config.relay?.ssl,
+      serviceName: 'Relay',
+      includeSystemCertificateAuthorities: true,
+      allowPartialTrustChain: config.relay?.ssl ? true : undefined,
+    })
+  );
   return {
     isHostnameAllowed,
     isUriAllowed,
@@ -213,6 +300,8 @@ export function getActionsConfigurationUtilities(
     getProxySettings: () => getProxySettingsFromConfig(config),
     getResponseSettings: () => getResponseSettingsFromConfig(config),
     getSSLSettings: () => getSSLSettingsFromConfig(config.ssl?.verificationMode),
+    getEARSSSLSettings,
+    getRelaySSLSettings,
     ensureUriAllowed(uri: string) {
       if (!isUriAllowed(uri)) {
         throw new Error(allowListErrorMessage(AllowListingField.URL, uri));
@@ -283,5 +372,6 @@ export function getActionsConfigurationUtilities(
     },
     getEarsUrl: () => config.auth.ears?.url,
     isEarsEnabled: () => config.auth.ears?.enabled ?? false,
+    isEarsExperimentalEnabled: () => config.auth.ears?.enableExperimental ?? false,
   };
 }

@@ -8,8 +8,9 @@
  */
 
 import React, { useMemo, type ReactElement } from 'react';
-import { EuiContextMenu, EuiPopover, EuiToolTip } from '@elastic/eui';
+import { EuiContextMenu, EuiPopover, EuiToolTip, type PopoverAnchorPosition } from '@elastic/eui';
 import { getPopoverPanels, getTooltip } from '../utils';
+import { APP_MENU_TEST_SUBJECTS } from '../test_subjects';
 import type {
   AppMenuItemType,
   AppMenuPopoverItem,
@@ -29,6 +30,8 @@ interface AppMenuContextMenuProps {
   primaryActionItem?: AppMenuPrimaryActionItem;
   switchConfig?: AppMenuSwitch;
   popoverTestId?: string;
+  anchorPosition?: PopoverAnchorPosition;
+  repositionToCrossAxis?: boolean;
   onClose: () => void;
   onCloseOverflowButton?: () => void;
 }
@@ -44,7 +47,9 @@ export const AppMenuPopover = ({
   popoverWidth,
   primaryActionItem,
   switchConfig,
-  popoverTestId = 'app-menu-popover',
+  popoverTestId = APP_MENU_TEST_SUBJECTS.popover,
+  anchorPosition = 'downLeft',
+  repositionToCrossAxis,
   onClose,
   onCloseOverflowButton,
 }: AppMenuContextMenuProps) => {
@@ -96,8 +101,9 @@ export const AppMenuPopover = ({
       closePopover={onClose}
       panelPaddingSize="none"
       hasArrow={false}
-      anchorPosition="downLeft"
+      anchorPosition={anchorPosition}
       aria-label={title || content}
+      repositionToCrossAxis={repositionToCrossAxis}
     >
       <EuiContextMenu initialPanelId={0} panels={panels} css={{ minWidth: 180 }} />
     </EuiPopover>

@@ -61,6 +61,9 @@ dependsOn:
   - '@kbn/cps-utils'
   - '@kbn/cps'
   - '@kbn/discover-utils'
+  - '@kbn/scout'
+  - '@kbn/ui-callout'
+  - '@kbn/core-http-browser-mocks'
 tags:
   - plugin
   - prod
@@ -71,6 +74,7 @@ fileGroups:
   src:
     - public/**/*
     - server/**/*
+    - test/**/*
     - '!target/**/*'
   jest-config:
     - jest.config.js

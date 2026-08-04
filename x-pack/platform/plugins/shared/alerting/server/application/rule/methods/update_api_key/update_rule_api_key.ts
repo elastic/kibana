@@ -124,7 +124,6 @@ async function updateApiKeyWithOCC(context: RulesClientContext, { id }: UpdateAp
   context.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
 
   try {
-    const updateRuleApiKeyTimestamp = Date.now();
     const updatedRuleSavedObject = await context.unsecuredSavedObjectsClient.update(
       RULE_SAVED_OBJECT_TYPE,
       id,
@@ -136,10 +135,12 @@ async function updateApiKeyWithOCC(context: RulesClientContext, { id }: UpdateAp
 
     await logRuleChanges({
       ruleSOs: [updatedRuleSavedObject] as Array<SavedObject<RawRule>>,
+      encryptedFieldsMap: new Map([
+        [id, { apiKey: apiKeyAttributes.apiKey, uiamApiKey: apiKeyAttributes.uiamApiKey ?? null }],
+      ]),
       rulesClientContext: context,
       changesContext: {
         action: RuleChangeTrackingAction.ruleUpdateApiKey,
-        timestamp: updateRuleApiKeyTimestamp,
       },
     });
   } catch (e) {

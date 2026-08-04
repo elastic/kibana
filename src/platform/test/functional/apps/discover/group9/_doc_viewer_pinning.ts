@@ -7,11 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * Migration recommendation: MIGRATE TO SCOUT. Fine as smoke test.
+ */
+
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
   const esql = getService('esql');
   const kibanaServer = getService('kibanaServer');
   const { common, discover, timePicker, unifiedFieldList } = getPageObjects([
@@ -108,9 +111,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('discover doc viewer pinning', function describeIndexTests() {
     before(async function () {
-      await esArchiver.loadIfNeeded(
-        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
-      );
       await kibanaServer.importExport.load(
         'src/platform/test/functional/fixtures/kbn_archiver/discover'
       );
@@ -122,9 +122,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async () => {
-      await esArchiver.unload(
-        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
-      );
       await kibanaServer.importExport.unload(
         'src/platform/test/functional/fixtures/kbn_archiver/discover'
       );
@@ -188,40 +185,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
 
       await expectExpandedDocState({ timestamp, clientIp, paginationHidden: true });
-    });
-
-    [
-      {
-        description: 'only METADATA _id is selected',
-        metadataFields: ['_id'],
-      },
-      {
-        description: 'only METADATA _index is selected',
-        metadataFields: ['_index'],
-      },
-      {
-        description: 'no METADATA fields are selected',
-        metadataFields: [],
-      },
-    ].forEach(({ description, metadataFields }) => {
-      it(`should keep the expanded ES|QL result pinned and hide navigation after refresh when ${description}`, async () => {
-        await setPinnedDocTimeWindow();
-        await switchToEsqlMode();
-
-        const query = buildPinnedDocEsqlQuery({ metadataFields });
-        await submitEsqlQuery(query);
-
-        await openDocViewerFlyout();
-
-        const timestamp = await dataGrid.getDocViewerFieldValue('@timestamp');
-        const clientIp = await dataGrid.getDocViewerFieldValue('clientip');
-
-        await expectExpandedDocState({ timestamp, clientIp, activePage: 0 });
-
-        await refreshEsqlQuery();
-
-        await expectExpandedDocState({ timestamp, clientIp, paginationHidden: true });
-      });
     });
   });
 }

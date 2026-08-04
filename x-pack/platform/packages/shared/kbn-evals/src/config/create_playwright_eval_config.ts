@@ -13,8 +13,8 @@ import type { AvailableConnectorWithId } from '@kbn/gen-ai-functional-testing';
 import { getAvailableConnectors } from '@kbn/gen-ai-functional-testing';
 
 export interface EvaluationTestOptions extends ScoutTestOptions {
-  connector: AvailableConnectorWithId;
-  evaluationConnector: AvailableConnectorWithId;
+  connectorParam: AvailableConnectorWithId;
+  evaluationConnectorParam: AvailableConnectorWithId;
   repetitions: number;
   timeout?: number;
 }
@@ -28,16 +28,19 @@ export function createPlaywrightEvalsConfig({
   repetitions,
   timeout,
   runGlobalSetup,
+  workers,
 }: {
   testDir: string;
   testIgnore?: PlaywrightTestConfig['testIgnore'];
   repetitions?: number;
   timeout?: number;
   runGlobalSetup?: boolean;
+  workers?: 1 | 2 | 3;
 }): PlaywrightTestConfig<{}, EvaluationTestOptions> {
   const { reporter, use, outputDir, projects, ...config } = createPlaywrightConfig({
     testDir,
     runGlobalSetup,
+    workers,
   });
 
   // gets the connectors from either the env variable or kibana.yml/kibana.dev.yml
@@ -71,7 +74,14 @@ export function createPlaywrightEvalsConfig({
   const experimentRepetitions =
     parseInt(process.env.EVALUATION_REPETITIONS || '', 10) || repetitions || 1;
 
-  const setupProjects = projects?.filter((project) => project.name === 'setup-local') ?? [];
+  // Pass through Scout's setup AND teardown hook projects unchanged. Scout's `setup-local`
+  // references its teardown via Playwright's `teardown` field; dropping the `teardown-local`
+  // project would leave a dangling reference and Playwright fails with "Project 'setup-local'
+  // has unknown teardown project 'teardown-local'".
+  const hookProjects =
+    projects?.filter(
+      (project) => project.name === 'setup-local' || project.name === 'teardown-local'
+    ) ?? [];
 
   // get just the 'local' project (for now)
   const nextProjects = connectors.flatMap((connector) => {
@@ -84,8 +94,8 @@ export function createPlaywrightEvalsConfig({
             name: connector.id,
             use: {
               ...project.use,
-              connector,
-              evaluationConnector,
+              connectorParam: connector,
+              evaluationConnectorParam: evaluationConnector,
               repetitions: experimentRepetitions,
             },
           };
@@ -104,10 +114,22 @@ export function createPlaywrightEvalsConfig({
     use: {
       serversConfigDir: (use as ScoutTestOptions).serversConfigDir,
     },
-    projects: [...setupProjects, ...nextProjects],
+    projects: [...hookProjects, ...nextProjects],
     globalSetup: require.resolve('./setup.js'),
     globalTeardown: require.resolve('./teardown.js'),
     timeout: timeout ?? 5 * 60_000,
+    // Playwright 1.61 on Node >=23.5 registers a synchronous `module.registerHooks` load hook
+    // that transforms all first-party TypeScript (anything not in node_modules) with its own
+    // bundled Babel. Workspace `@kbn/*` symlinks resolve to real paths outside node_modules, so
+    // they are captured by Playwright's hook BEFORE `@kbn/swc-register` (pirates) can run.
+    // Playwright's bundled Babel does not handle TypeScript namespace `export import` syntax
+    // correctly and produces invalid CJS output, causing a SyntaxError at load time.
+    //
+    // Defer all first-party Kibana TypeScript to `@kbn/swc-register`; Playwright already
+    // skips node_modules itself. `x-pack/` covers plugins and packages; `src/` covers core.
+    build: {
+      external: ['**/x-pack/**', '**/src/**'],
+    },
     ...(testIgnore !== undefined ? { testIgnore } : {}),
   });
 }

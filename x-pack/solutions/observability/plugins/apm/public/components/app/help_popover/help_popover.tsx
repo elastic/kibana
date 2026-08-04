@@ -15,6 +15,7 @@ import {
   EuiPopover,
   EuiPopoverTitle,
   EuiText,
+  EuiToolTip,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import styled from '@emotion/styled';
@@ -27,9 +28,11 @@ const PopoverContent = styled(EuiText)`
 export function HelpPopoverButton({
   buttonTextEnabled = false,
   onClick,
+  tooltipContent,
 }: {
   buttonTextEnabled?: boolean;
   onClick: EuiLinkButtonProps['onClick'];
+  tooltipContent?: ReactNode;
 }) {
   const buttonText = i18n.translate('xpack.apm.helpPopover.ariaLabel', {
     defaultMessage: 'Help',
@@ -50,13 +53,15 @@ export function HelpPopoverButton({
   }
 
   return (
-    <EuiButtonIcon
-      data-test-subj="apmHelpPopoverButtonButton"
-      className="apmHelpPopover__buttonIcon"
-      iconType="question"
-      aria-label={buttonText}
-      onClick={onClick}
-    />
+    <EuiToolTip content={tooltipContent ?? buttonText} disableScreenReaderOutput>
+      <EuiButtonIcon
+        data-test-subj="apmHelpPopoverButtonButton"
+        className="apmHelpPopover__buttonIcon"
+        iconType="question"
+        aria-label={buttonText}
+        onClick={onClick}
+      />
+    </EuiToolTip>
   );
 }
 

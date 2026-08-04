@@ -1,0 +1,9 @@
+prs:
+- https://github.com/elastic/kibana/pull/270603
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-05-26
+areas:
+- Discover and ES|QL
+title: Fix unhandled DOM exceptions in ES|QL editor

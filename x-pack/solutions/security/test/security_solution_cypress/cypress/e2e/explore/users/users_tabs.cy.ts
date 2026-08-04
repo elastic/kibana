@@ -24,7 +24,7 @@ import { ENABLE_RISK_SCORE_BUTTON } from '../../../screens/entity_analytics';
 describe(
   'Users stats and tables',
   {
-    tags: ['@ess', '@serverless'],
+    tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
     env: {
       ftrConfig: {
         kbnServerArgs: [

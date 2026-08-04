@@ -45,26 +45,22 @@ export const offsetRangeToMonacoRange = (
       endLineNumber: number;
     }
   | undefined => {
-  if (range.start === range.end) {
-    return;
-  }
-
   let startColumn = NaN;
   let endColumn = 0;
   let startOfCurrentLine = 0;
   let currentLine = 1;
 
   // find the line and start column
-  for (let i = 0; i < expression.length; i++) {
-    if (expression[i] === '\n') {
-      currentLine++;
-      startOfCurrentLine = i + 1;
-    }
-
+  for (let i = 0; i <= expression.length; i++) {
     if (i === range.start) {
       startColumn = i + 1 - startOfCurrentLine;
       endColumn = startColumn + range.end - range.start;
       break;
+    }
+
+    if (i < expression.length && expression[i] === '\n') {
+      currentLine++;
+      startOfCurrentLine = i + 1;
     }
   }
 

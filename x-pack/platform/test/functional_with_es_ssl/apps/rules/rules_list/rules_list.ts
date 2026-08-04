@@ -67,7 +67,9 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
     };
 
     before(async () => {
-      await pageObjects.common.navigateToApp('rules');
+      await pageObjects.common.navigateToApp('management', {
+        path: 'insightsAndAlerting/triggersActions',
+      });
       await testSubjects.click('rulesTab');
     });
 
@@ -540,7 +542,7 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
         expect(alertsErrorBannerExistErrors).to.have.length(1);
         expect(
           await (await alertsErrorBannerExistErrors[0].findByTagName('p')).getVisibleText()
-        ).to.equal(' Error found in 1 rule. Show rule with error');
+        ).to.equal('Error found in 1 rule. Show rule with error');
       });
 
       await retry.try(async () => {

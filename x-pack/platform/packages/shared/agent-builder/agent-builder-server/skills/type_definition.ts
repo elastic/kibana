@@ -26,9 +26,13 @@ import type {
 export type SkillsDirectoryStructure = Directory<{
   skills: Directory<{
     platform: FileDirectory<{
+      'agent-builder': FileDirectory;
       alerting: FileDirectory;
+      cases: FileDirectory;
+      'context-engine': FileDirectory;
       dashboard: FileDirectory;
       discover: FileDirectory;
+      evals: FileDirectory;
       streams: FileDirectory;
       visualization: FileDirectory;
       workflows: FileDirectory;
@@ -38,12 +42,19 @@ export type SkillsDirectoryStructure = Directory<{
       alerts: FileDirectory<{
         rules: FileDirectory;
       }>;
+      // The `attack-discovery` skill directory is registered by the
+      // discoveries plugin's attack-discovery-generator skill. Type-only
+      // addition is FF-off safe (no runtime impact) and required for the
+      // discoveries plugin to type-check.
+      'attack-discovery': FileDirectory<{}>;
       compliance: FileDirectory<{}>;
       rules: FileDirectory;
       entities: FileDirectory<{}>;
+      watchlists: FileDirectory<{}>;
       endpoint: FileDirectory<{}>;
       ml: FileDirectory<{}>;
       siem_readiness: FileDirectory<{}>;
+      entity_analytics_leads: FileDirectory<{}>;
     }>;
     search: FileDirectory<{}>;
   }>;
@@ -52,7 +63,7 @@ export type SkillsDirectoryStructure = Directory<{
 /**
  * Base paths where files can be placed (exact paths from the structure)
  */
-type DirectoryPath = FilePathsFromStructure<SkillsDirectoryStructure>;
+export type DirectoryPath = FilePathsFromStructure<SkillsDirectoryStructure>;
 
 /**
  * Server-side definition of a skill type.
@@ -96,6 +107,19 @@ export interface SkillDefinition<
    */
   experimental?: boolean;
   /**
+   * Required UI setting to enable a skill.
+   * To enable a skill when a boolean UiSetting is true, pass the key as a string.
+   * To enable a skill when a specific value is set for a UiSetting, pass an object with key and value.
+   */
+  uiSettingRequired?: string | { key: string; value: unknown };
+  /**
+   * When true, this skill is not automatically included on agents that have
+   * `enable_elastic_capabilities` set. It remains available to any agent that
+   * references it explicitly via `skill_ids`.
+   * Defaults to false.
+   */
+  excludeFromElasticCapabilities?: boolean;
+  /**
    * Content of the skill.
    */
   content: string;
@@ -133,11 +157,13 @@ export interface ReferencedContent {
    * Valid relative paths are:
    * - "." - stores reference content in the same directory as the skill
    * - "./[directory]" - stores reference content in the "[directory]" directory
-   * - Avoid multiple levels of directories (such as "./[directory]/[subdirectory]") to keep the structure flat.
+   * - "./[directory]/[subdirectory]" - nested subdirectories are supported; each segment must
+   *   contain only lowercase letters, numbers, underscores, and hyphens. Parent traversal ("../") is not allowed.
    *
    * Examples:
    * - basePath: "skills/security/alerts/rules" & relativePath: "." - stores reference content in the "skills/security/alerts/rules/[name].md" file
    * - basePath: "skills/security/alerts/rules" & relativePath: "./queries" - stores reference content in the "skills/security/alerts/rules/queries/[name].md" file
+   * - basePath: "skills/security/alerts/rules" & relativePath: "./queries/esql" - stores reference content in the "skills/security/alerts/rules/queries/esql/[name].md" file
    */
   relativePath: string;
   /**
@@ -160,8 +186,8 @@ export const referencedContentSchema = z.array(
       .string()
       .min(1, 'Relative path must be non-empty')
       .regex(
-        /^(?:\.|\.\/[a-z0-9-_]+)$/,
-        'Relative path must start with a dot and contain only lowercase letters, numbers, underscores, and hyphens'
+        /^\.(?:\/[a-z0-9-_]+)*$/,
+        'Relative path must start with a dot and may contain "/"-separated segments of lowercase letters, numbers, underscores, and hyphens (no "../")'
       ),
     content: z.string().min(1, 'Content must be non-empty'),
   })

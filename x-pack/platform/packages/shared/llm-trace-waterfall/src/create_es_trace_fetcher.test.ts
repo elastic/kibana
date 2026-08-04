@@ -11,36 +11,38 @@ import { createEsTraceFetcher } from './create_es_trace_fetcher';
 import { mapEsSourceToTraceSpan } from './map_es_source_to_trace_span';
 
 describe('createEsTraceFetcher', () => {
-  it('queries traces-*, maps spans, and computes total duration', async () => {
-    const hits = [
-      {
-        _id: 'span-1',
-        _source: {
-          trace_id: 'trace-1',
-          name: 'root',
-          '@timestamp': '2026-01-01T00:00:00.000Z',
-          duration: 2_000_000,
-        },
+  const hits = [
+    {
+      _id: 'span-1',
+      _source: {
+        trace_id: 'trace-1',
+        name: 'root',
+        '@timestamp': '2026-01-01T00:00:00.000Z',
+        duration: 2_000_000,
       },
-      {
-        _id: 'span-2',
-        _source: {
-          trace_id: 'trace-1',
-          name: 'child',
-          '@timestamp': '2026-01-01T00:00:00.500Z',
-          duration: 1_000_000,
-        },
+    },
+    {
+      _id: 'span-2',
+      _source: {
+        trace_id: 'trace-1',
+        name: 'child',
+        '@timestamp': '2026-01-01T00:00:00.500Z',
+        duration: 1_000_000,
       },
-    ];
-    const search = jest.fn().mockReturnValue(
+    },
+  ];
+
+  const createMockSearch = () =>
+    jest.fn().mockReturnValue(
       of({
         rawResponse: {
-          hits: {
-            hits,
-          },
+          hits: { hits },
         },
       })
     );
+
+  it('queries traces-* by default, maps spans, and computes total duration', async () => {
+    const search = createMockSearch();
     const fetchTrace = createEsTraceFetcher(
       search as unknown as DataPublicPluginStart['search']['search']
     );
@@ -61,5 +63,23 @@ describe('createEsTraceFetcher', () => {
 
     expect(result.spans).toEqual(hits.map((hit) => mapEsSourceToTraceSpan(hit._source, hit._id)));
     expect(result.durationMs).toBe(501);
+  });
+
+  it('uses a custom index when provided', async () => {
+    const search = createMockSearch();
+    const fetchTrace = createEsTraceFetcher(
+      search as unknown as DataPublicPluginStart['search']['search'],
+      { index: 'traces-agent_builder.otel-pablo' }
+    );
+
+    await fetchTrace('trace-1');
+
+    expect(search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        params: expect.objectContaining({
+          index: 'traces-agent_builder.otel-pablo',
+        }),
+      })
+    );
   });
 });

@@ -14,7 +14,19 @@ import type { ValidateTransform } from './types';
 import { getChartSchema } from './schema';
 import { getChartNormalizer } from './normalizers';
 
-const strictChartTypes = new Set(['heatmap', 'data_table']);
+const strictChartTypes = new Set([
+  'heatmap',
+  'data_table',
+  'pie',
+  'mosaic',
+  'treemap',
+  'waffle',
+  'tag_cloud',
+  'region_map',
+  'metric',
+  'legacy_metric',
+  'xy',
+]);
 
 /**
  * Test harness to validate LensConfigBuilder conversions
@@ -39,11 +51,11 @@ export function validateStateTransformsFn(
     const newApiConfig = builder.toAPIFormat(attributes);
 
     expect(() => {
-      schema.validate(newApiConfig);
+      schema.parse(newApiConfig);
     }).not.toThrow();
 
     expect(() => {
-      lensApiConfigSchema.validate(newApiConfig);
+      lensApiConfigSchema.parse(newApiConfig);
     }).not.toThrow();
 
     // Temporary strict mode, all checks should eventually be strict

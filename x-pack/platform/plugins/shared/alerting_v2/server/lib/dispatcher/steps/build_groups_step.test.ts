@@ -11,6 +11,7 @@ import {
   createDispatcherPipelineState,
   createMatchedPair,
   createActionPolicy,
+  createRule,
 } from '../fixtures/test_utils';
 
 describe('BuildGroupsStep', () => {
@@ -294,6 +295,65 @@ describe('buildActionGroups', () => {
     expect(groups[0].episodes[1].rule_id).toBe('r2');
   });
 
+  it('populates rules map from state.rules for episodes in the group', () => {
+    const policy = createActionPolicy({ id: 'p1', groupingMode: 'all' });
+    const rules = new Map([
+      ['r1', createRule({ id: 'r1', name: 'CPU spike' })],
+      ['r2', createRule({ id: 'r2', name: 'Cert expiry' })],
+    ]);
+    const matched = [
+      createMatchedPair({
+        episode: createAlertEpisode({ rule_id: 'r1', episode_id: 'e1' }),
+        policy,
+      }),
+      createMatchedPair({
+        episode: createAlertEpisode({ rule_id: 'r2', episode_id: 'e2' }),
+        policy,
+      }),
+    ];
+
+    const groups = buildActionGroups(matched, rules);
+
+    expect(groups[0].rules).toEqual({
+      r1: { name: 'CPU spike' },
+      r2: { name: 'Cert expiry' },
+    });
+  });
+
+  it('omits rules not present in state.rules', () => {
+    const policy = createActionPolicy({ id: 'p1' });
+    const rules = new Map([['r1', createRule({ id: 'r1', name: 'CPU spike' })]]);
+    const matched = [
+      createMatchedPair({
+        episode: createAlertEpisode({ rule_id: 'r1', episode_id: 'e1' }),
+        policy,
+      }),
+      createMatchedPair({
+        episode: createAlertEpisode({ rule_id: 'r-missing', episode_id: 'e2' }),
+        policy,
+      }),
+    ];
+
+    const groups = buildActionGroups(matched, rules);
+
+    expect(groups[0].rules).toEqual({ r1: { name: 'CPU spike' } });
+    expect(groups[1].rules).toEqual({});
+  });
+
+  it('returns empty rules map when state.rules is undefined', () => {
+    const policy = createActionPolicy({ id: 'p1' });
+    const matched = [
+      createMatchedPair({
+        episode: createAlertEpisode({ rule_id: 'r1', episode_id: 'e1' }),
+        policy,
+      }),
+    ];
+
+    const groups = buildActionGroups(matched);
+
+    expect(groups[0].rules).toEqual({});
+  });
+
   it('creates one group per episode for explicit per_episode mode', () => {
     const policy = createActionPolicy({
       id: 'p1',
@@ -314,5 +374,24 @@ describe('buildActionGroups', () => {
     const groups = buildActionGroups(matched);
 
     expect(groups).toHaveLength(2);
+  });
+
+  it('external episode (null rule_id) groups successfully with no rule entry in group.rules', () => {
+    const policy = createActionPolicy({ id: 'p1', spaceId: 'default' });
+    const episode = createAlertEpisode({
+      source: 'pagerduty',
+      rule_id: null,
+      space_id: 'default',
+      episode_id: 'pd-ep-1',
+      group_hash: 'pd-hash-1',
+    });
+    const matched = [createMatchedPair({ episode, policy })];
+
+    const groups = buildActionGroups(matched);
+
+    expect(groups).toHaveLength(1);
+    expect(groups[0].episodes).toHaveLength(1);
+    expect(groups[0].episodes[0]).toBe(episode);
+    expect(groups[0].rules).toEqual({});
   });
 });

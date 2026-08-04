@@ -6,10 +6,13 @@
  */
 
 import {
-  bulkActionActionPoliciesBodySchema,
+  actionPolicyDestinationSchema,
+  bulkSnoozeActionPoliciesBodySchema,
   createActionPolicyDataSchema,
+  snoozeActionPolicyBodySchema,
   updateActionPolicyDataSchema,
 } from './action_policy_data_schema';
+import { MAX_BULK_ITEMS } from './constants';
 
 const DESTINATIONS = [{ type: 'workflow' as const, id: 'wf-1' }];
 
@@ -215,79 +218,38 @@ describe('createActionPolicyDataSchema', () => {
         })
       ).toThrow();
     });
-  });
 
-  describe('type and ruleId', () => {
-    it('defaults type to "global" when omitted', () => {
-      const result = createActionPolicyDataSchema.parse(base);
-
-      expect(result.type).toBe('global');
-      expect(result.ruleId).toBeUndefined();
-    });
-
-    it('accepts explicit type "global" without ruleId', () => {
-      const result = createActionPolicyDataSchema.parse({ ...base, type: 'global' });
-
-      expect(result.type).toBe('global');
-      expect(result.ruleId).toBeUndefined();
-    });
-
-    it('accepts type "single_rule" with non-empty ruleId', () => {
-      const result = createActionPolicyDataSchema.parse({
-        ...base,
-        type: 'single_rule',
-        ruleId: 'rule-1',
-      });
-
-      expect(result.type).toBe('single_rule');
-      expect(result.ruleId).toBe('rule-1');
-    });
-
-    it('rejects type "single_rule" without ruleId', () => {
-      expect(() => createActionPolicyDataSchema.parse({ ...base, type: 'single_rule' })).toThrow(
-        /ruleId is required/
-      );
-    });
-
-    it('rejects type "single_rule" with empty ruleId', () => {
+    it('rejects unknown top-level fields (strict)', () => {
       expect(() =>
-        createActionPolicyDataSchema.parse({ ...base, type: 'single_rule', ruleId: '' })
+        createActionPolicyDataSchema.parse({
+          ...base,
+          unknownField: 'x',
+        })
       ).toThrow();
     });
 
-    it('rejects type "global" with ruleId set', () => {
+    it('rejects unknown keys inside throttle (strict)', () => {
       expect(() =>
-        createActionPolicyDataSchema.parse({ ...base, type: 'global', ruleId: 'rule-1' })
-      ).toThrow(/ruleId is only allowed/);
-    });
-
-    it('rejects ruleId provided with no type (defaults to global, so ruleId is forbidden)', () => {
-      expect(() => createActionPolicyDataSchema.parse({ ...base, ruleId: 'rule-1' })).toThrow(
-        /ruleId is only allowed/
-      );
-    });
-
-    it('rejects an unknown type value', () => {
-      expect(() => createActionPolicyDataSchema.parse({ ...base, type: 'team_rule' })).toThrow();
+        createActionPolicyDataSchema.parse({
+          ...base,
+          throttle: { strategy: 'on_status_change', unknownField: 'x' },
+        })
+      ).toThrow();
     });
   });
 });
 
 describe('updateActionPolicyDataSchema', () => {
-  describe('immutability of type and ruleId', () => {
-    it('rejects `type` in the update payload (immutable)', () => {
-      expect(() =>
-        updateActionPolicyDataSchema.parse({ name: 'New', type: 'single_rule' })
-      ).toThrow();
-    });
+  it('rejects any unknown key (strict)', () => {
+    expect(() => updateActionPolicyDataSchema.parse({ name: 'New', unknownField: 'x' })).toThrow();
+  });
 
-    it('rejects `ruleId` in the update payload (immutable)', () => {
-      expect(() => updateActionPolicyDataSchema.parse({ name: 'New', ruleId: 'rule-2' })).toThrow();
-    });
-
-    it('rejects any unknown key (strict)', () => {
-      expect(() => updateActionPolicyDataSchema.parse({ name: 'New', futureField: 'x' })).toThrow();
-    });
+  it('rejects unknown keys inside throttle (strict)', () => {
+    expect(() =>
+      updateActionPolicyDataSchema.parse({
+        throttle: { strategy: 'on_status_change', unknownField: 'x' },
+      })
+    ).toThrow();
   });
 
   describe('valid payloads', () => {
@@ -438,44 +400,83 @@ describe('updateActionPolicyDataSchema', () => {
   });
 });
 
-describe('bulkActionActionPoliciesBodySchema', () => {
-  it('accepts a delete action', () => {
-    const result = bulkActionActionPoliciesBodySchema.parse({
-      actions: [{ id: 'policy-1', action: 'delete' }],
+describe('bulkSnoozeActionPoliciesBodySchema', () => {
+  it('accepts ids plus snoozedUntil', () => {
+    const result = bulkSnoozeActionPoliciesBodySchema.parse({
+      ids: ['policy-1', 'policy-2'],
+      snoozedUntil: '2026-04-01T10:00:00Z',
     });
 
     expect(result).toEqual({
-      actions: [{ id: 'policy-1', action: 'delete' }],
+      ids: ['policy-1', 'policy-2'],
+      snoozedUntil: '2026-04-01T10:00:00Z',
     });
   });
 
-  it('accepts mixed actions including delete', () => {
-    const result = bulkActionActionPoliciesBodySchema.parse({
-      actions: [
-        { id: 'policy-1', action: 'enable' },
-        { id: 'policy-2', action: 'disable' },
-        { id: 'policy-3', action: 'delete' },
-        { id: 'policy-4', action: 'snooze', snoozedUntil: '2026-04-01T10:00:00Z' },
-        { id: 'policy-5', action: 'unsnooze' },
-      ],
-    });
-
-    expect(result.actions).toHaveLength(5);
-    expect(result.actions[2]).toEqual({ id: 'policy-3', action: 'delete' });
-  });
-
-  it('rejects an unknown action', () => {
+  it('rejects a missing snoozedUntil', () => {
     expect(() =>
-      bulkActionActionPoliciesBodySchema.parse({
-        actions: [{ id: 'policy-1', action: 'unknown' }],
+      bulkSnoozeActionPoliciesBodySchema.parse({
+        ids: ['policy-1'],
       })
     ).toThrow();
   });
 
-  it('rejects an empty actions array', () => {
+  it('rejects a non-datetime snoozedUntil', () => {
     expect(() =>
-      bulkActionActionPoliciesBodySchema.parse({
-        actions: [],
+      bulkSnoozeActionPoliciesBodySchema.parse({
+        ids: ['policy-1'],
+        snoozedUntil: 'not-a-date',
+      })
+    ).toThrow();
+  });
+
+  it('rejects an empty ids array', () => {
+    expect(() =>
+      bulkSnoozeActionPoliciesBodySchema.parse({
+        ids: [],
+        snoozedUntil: '2026-04-01T10:00:00Z',
+      })
+    ).toThrow();
+  });
+
+  it('rejects more than MAX_BULK_ITEMS ids', () => {
+    expect(() =>
+      bulkSnoozeActionPoliciesBodySchema.parse({
+        ids: Array.from({ length: MAX_BULK_ITEMS + 1 }, (_, i) => `policy-${i}`),
+        snoozedUntil: '2026-04-01T10:00:00Z',
+      })
+    ).toThrow();
+  });
+
+  it('rejects unknown top-level fields (strict)', () => {
+    expect(() =>
+      bulkSnoozeActionPoliciesBodySchema.parse({
+        ids: ['policy-1'],
+        snoozedUntil: '2026-04-01T10:00:00Z',
+        unknownField: 'x',
+      })
+    ).toThrow();
+  });
+});
+
+describe('snoozeActionPolicyBodySchema', () => {
+  it('rejects unknown top-level fields (strict)', () => {
+    expect(() =>
+      snoozeActionPolicyBodySchema.parse({
+        snoozedUntil: '2026-04-01T10:00:00Z',
+        unknownField: 'x',
+      })
+    ).toThrow();
+  });
+});
+
+describe('actionPolicyDestinationSchema', () => {
+  it('rejects unknown fields on workflow destination (strict)', () => {
+    expect(() =>
+      actionPolicyDestinationSchema.parse({
+        type: 'workflow',
+        id: 'wf-1',
+        unknownField: 'x',
       })
     ).toThrow();
   });

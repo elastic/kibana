@@ -57,11 +57,13 @@ export interface SavedObjectsCheckFinding {
   severity: FindingSeverity;
   typeName?: string;
   message: string;
+  /** Plain-text supplement (e.g. fixture diff) rendered separately in PR comments. */
+  details?: string;
   fixHint?: string;
   /**
    * Path fragment appended to the Saved Objects docs base URL.
    * MUST start with `#` (anchor on the same page, e.g. `#defining-model-versions`)
-   * or `/` (relative path, e.g. `/validate#troubleshooting`).
+   * or `/` (relative path, e.g. `/troubleshooting#existing-type-mutated-migrations`).
    * A value without a leading `#` or `/` will produce a malformed URL.
    */
   docsAnchor?: string;
@@ -81,8 +83,15 @@ export interface TypeChangeDetails {
 
 export interface SavedObjectsCheckReport {
   status: 'pass' | 'fail';
+  /** Requested baseline commit (e.g. merge-base) passed to `--baseline`. */
   baseline?: string;
+  /** GCS snapshot commit actually used when it differs from {@link baseline}. */
+  baselineSnapshotSha?: string;
+  /** True when the baseline snapshot came from an ancestor of {@link baseline}. */
+  baselineSnapshotUsedAncestor?: boolean;
   serverlessBaseline?: string;
+  serverlessBaselineSnapshotSha?: string;
+  serverlessBaselineSnapshotUsedAncestor?: boolean;
   newTypes: string[];
   updatedTypes: string[];
   removedTypes: string[];
@@ -92,4 +101,11 @@ export interface SavedObjectsCheckReport {
    * Only present when both `from` and `to` snapshots are available.
    */
   typeChanges?: Record<string, TypeChangeDetails>;
+  /**
+   * True when the check ran against synthetic test data (either via `--test`
+   * or the automatic fallback when no real SO types changed). In this mode the
+   * `newTypes` / `updatedTypes` / `removedTypes` lists reflect test fixtures,
+   * not actual contributor changes, so no PR comment should be posted.
+   */
+  testMode?: boolean;
 }

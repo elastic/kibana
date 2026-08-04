@@ -14,6 +14,7 @@ import {
   EuiPopover,
   EuiPopoverTitle,
   EuiText,
+  EuiToolTip,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { SerializedStyles } from '@emotion/react';
@@ -24,15 +25,22 @@ export const HelpPopoverButton: FC<{
   styles?: SerializedStyles;
 }> = ({ onClick, styles }) => {
   return (
-    <EuiButtonIcon
-      size="s"
-      iconType="question"
-      aria-label={i18n.translate('xpack.ml.helpPopover.ariaLabel', {
+    <EuiToolTip
+      content={i18n.translate('xpack.ml.helpPopover.ariaLabel', {
         defaultMessage: 'Help',
       })}
-      onClick={onClick}
-      css={styles}
-    />
+      disableScreenReaderOutput
+    >
+      <EuiButtonIcon
+        size="s"
+        iconType="question"
+        aria-label={i18n.translate('xpack.ml.helpPopover.ariaLabel', {
+          defaultMessage: 'Help',
+        })}
+        onClick={onClick}
+        css={styles}
+      />
+    </EuiToolTip>
   );
 };
 

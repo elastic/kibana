@@ -10,6 +10,7 @@ import { PluginInitializer } from '@kbn/core-di-server';
 import type { PluginInitializerContext } from '@kbn/core/server';
 import type { ContainerModuleLoadOptions } from 'inversify';
 import { EsServiceInternalToken } from '../lib/services/es_service/tokens';
+import { RuleChangesHistoryClientToken } from '../lib/rule_changes_history';
 import { ResourceManager } from '../lib/services/resource_service/resource_manager';
 import { initializeResources } from '../resources/register_resources';
 import { scheduleApiKeyInvalidationTask } from '../lib/tasks/invalidate_pending_api_keys/schedule_task';
@@ -17,12 +18,14 @@ import type { PluginConfig } from '../config';
 import type { AlertingServerStartDependencies } from '../types';
 import { scheduleDispatcherTask } from '../lib/dispatcher/schedule_task';
 import { scheduleTelemetryTask } from '../lib/usage/schedule_task';
+import { initSubscribers } from '../lib/events/init_subscribers';
 
 export function bindOnStart({ bind }: ContainerModuleLoadOptions) {
   bind(OnStart).toConstantValue(async (container) => {
     const resourceManager = container.get(ResourceManager);
     const logger = container.get(Logger);
     const esClient = container.get(EsServiceInternalToken);
+    const changeHistoryClient = container.get(RuleChangesHistoryClientToken);
     const taskManager = container.get(
       PluginStart<AlertingServerStartDependencies['taskManager']>('taskManager')
     );
@@ -34,9 +37,12 @@ export function bindOnStart({ bind }: ContainerModuleLoadOptions) {
       resourceManager,
       esClient,
       logger,
+      changeHistoryClient,
     });
 
-    scheduleDispatcherTask({ taskManager, resourceManager }).catch((error) => {
+    initSubscribers(container);
+
+    scheduleDispatcherTask({ taskManager }).catch((error) => {
       logger.error(error as Error, {
         error: {
           code: 'DISPATCHER_TASK_SCHEDULE_FAILURE',

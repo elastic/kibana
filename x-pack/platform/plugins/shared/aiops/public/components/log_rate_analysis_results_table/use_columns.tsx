@@ -14,6 +14,7 @@ import {
   EuiIcon,
   EuiIconTip,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import type { estypes } from '@elastic/elasticsearch';
 import { i18n } from '@kbn/i18n';
@@ -250,7 +251,7 @@ export const useColumns = (
                   },
                 ]);
           return (
-            <>
+            <div css={{ display: 'flex', alignItems: 'center', overflow: 'hidden' }}>
               {type === SIGNIFICANT_ITEM_TYPE.KEYWORD && (
                 <FieldStatsPopover
                   dataView={dataView}
@@ -267,6 +268,7 @@ export const useColumns = (
                   css={{
                     marginLeft: euiTheme.size.s,
                     marginRight: euiTheme.size.xs,
+                    flexShrink: 0,
                   }}
                 >
                   <EuiIconTip
@@ -284,10 +286,19 @@ export const useColumns = (
                 </span>
               )}
 
-              <span title={fieldName} className="eui-textTruncate">
+              <span
+                title={fieldName}
+                css={{
+                  flex: 1,
+                  minWidth: 0,
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                }}
+              >
                 {fieldName}
               </span>
-            </>
+            </div>
           );
         },
         sortable: true,
@@ -301,17 +312,19 @@ export const useColumns = (
           defaultMessage: 'Field value',
         }),
         render: (_, { fieldValue, type }) => (
-          <span title={String(fieldValue)}>
-            {type === 'keyword' ? (
-              String(fieldValue)
-            ) : (
-              <EuiText size="xs">
-                <EuiCode language="log" transparentBackground css={{ paddingInline: '0px' }}>
-                  {String(fieldValue)}
-                </EuiCode>
-              </EuiText>
-            )}
-          </span>
+          <EuiToolTip content={String(fieldValue)} disableScreenReaderOutput>
+            <span tabIndex={0}>
+              {type === 'keyword' ? (
+                String(fieldValue)
+              ) : (
+                <EuiText size="xs">
+                  <EuiCode language="log" transparentBackground css={{ paddingInline: '0px' }}>
+                    {String(fieldValue)}
+                  </EuiCode>
+                </EuiText>
+              )}
+            </span>
+          </EuiToolTip>
         ),
         sortable: true,
         textOnly: true,

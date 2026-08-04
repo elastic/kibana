@@ -1,6 +1,192 @@
 {
-  "sha1": "d13b6fb7d29ba6f8e304295849ace4b416b28f01",
+  "sha1": "4a68bfade4be31382f185e565812712a3e61db3d",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
   "tests": [
+    {
+      "id": "d18f81a84aa5c84-01def2558f31c21",
+      "title": "Agent Builder — agents access-control API POST allows explicit private access-control mode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_access_control_api.spec.ts",
+        "line": 334,
+        "column": 81
+      }
+    },
+    {
+      "id": "d18f81a84aa5c84-59ff86426426626",
+      "title": "Agent Builder — agents access-control API PUT updates access-control mode explicitly",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_access_control_api.spec.ts",
+        "line": 347,
+        "column": 17
+      }
+    },
+    {
+      "id": "d18f81a84aa5c84-a36af989fc96c45",
+      "title": "Agent Builder — agents access-control API PUT rejects access-control mode change for default agent (404)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_access_control_api.spec.ts",
+        "line": 364,
+        "column": 55
+      }
+    },
+    {
+      "id": "d18f81a84aa5c84-ba3c4ccaaaab9a1",
+      "title": "Agent Builder — agents access-control API non-owner gets 404 on a Private agent until granted",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_access_control_api.spec.ts",
+        "line": 384,
+        "column": 77
+      }
+    },
+    {
+      "id": "d18f81a84aa5c84-4730ee7d11f26a2",
+      "title": "Agent Builder — agents access-control API legacy visibility and acl are honored for read, list, and access-control APIs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_access_control_api.spec.ts",
+        "line": 443,
+        "column": 16
+      }
+    },
+    {
+      "id": "d18f81a84aa5c84-69bf56f647371d6",
+      "title": "Agent Builder — agents access-control API GET /agents/{id} keeps only the caller's access_control entry for non-managers",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_access_control_api.spec.ts",
+        "line": 538,
+        "column": 7
+      }
+    },
+    {
+      "id": "d18f81a84aa5c84-84de39b31cd1b72",
+      "title": "Agent Builder — agents access-control API GET /agents/{id}/access_control returns permissions and redacts entries for non-managers",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_access_control_api.spec.ts",
+        "line": 547,
+        "column": 27
+      }
+    },
+    {
+      "id": "d18f81a84aa5c84-4a8865c385008a4",
+      "title": "Agent Builder — agents access-control API PUT /agents/{id}/access_control gates on access-control management (User and Editor → 404, Manager → 200)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_access_control_api.spec.ts",
+        "line": 624,
+        "column": 6
+      }
+    },
+    {
+      "id": "d18f81a84aa5c84-2a247bc6014e0da",
+      "title": "Agent Builder — agents access-control API legacy Manager acl can change access-control mode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_access_control_api.spec.ts",
+        "line": 664,
+        "column": 21
+      }
+    },
+    {
+      "id": "d18f81a84aa5c84-2fe900b04db094d",
+      "title": "Agent Builder — agents access-control API PUT /agents/{id}/access_control rejects callers without manageAgents (403)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_access_control_api.spec.ts",
+        "line": 669,
+        "column": 27
+      }
+    },
+    {
+      "id": "d18f81a84aa5c84-ab362410b67d64c",
+      "title": "Agent Builder — agents access-control API PUT /access_control on the default agent returns 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_access_control_api.spec.ts",
+        "line": 703,
+        "column": 31
+      }
+    },
+    {
+      "id": "d18f81a84aa5c84-d904341290ecaa5",
+      "title": "Agent Builder — agents access-control API cluster admin can read a Private agent they are not in the access control of",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_access_control_api.spec.ts",
+        "line": 717,
+        "column": 27
+      }
+    },
+    {
+      "id": "d18f81a84aa5c84-645b019a74319ed",
+      "title": "Agent Builder — agents access-control API /_suggest_user_profiles requires manageAgents (reader gets 403)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_access_control_api.spec.ts",
+        "line": 702,
+        "column": 27
+      }
+    },
     {
       "id": "bff1cb9c45e581b-d652b9eb526a6ea",
       "title": "Agent Builder — agents API POST /api/agent_builder/agents creates agent",
@@ -14,7 +200,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_api.spec.ts",
         "line": 42,
-        "column": 12
+        "column": 84
       }
     },
     {
@@ -30,7 +216,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_api.spec.ts",
         "line": 61,
-        "column": 12
+        "column": 13
       }
     },
     {
@@ -45,8 +231,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_api.spec.ts",
-        "line": 75,
-        "column": 12
+        "line": 72,
+        "column": 14
       }
     },
     {
@@ -61,13 +247,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_api.spec.ts",
-        "line": 83,
-        "column": 12
+        "line": 78,
+        "column": 23
       }
     },
     {
-      "id": "bff1cb9c45e581b-a94a1d5e0090347",
-      "title": "Agent Builder — agents API POST /api/agent_builder/agents defaults visibility to public with created_by",
+      "id": "bff1cb9c45e581b-2fcaeb58d47d62f",
+      "title": "Agent Builder — agents API POST /api/agent_builder/agents defaults access-control mode to public with created_by",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -77,8 +263,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_api.spec.ts",
-        "line": 103,
-        "column": 12
+        "line": 100,
+        "column": 14
       }
     },
     {
@@ -93,8 +279,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_api.spec.ts",
-        "line": 119,
-        "column": 12
+        "line": 116,
+        "column": 16
       }
     },
     {
@@ -109,8 +295,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_api.spec.ts",
-        "line": 141,
-        "column": 12
+        "line": 137,
+        "column": 29
       }
     },
     {
@@ -125,8 +311,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_api.spec.ts",
-        "line": 153,
-        "column": 12
+        "line": 146,
+        "column": 30
       }
     },
     {
@@ -141,8 +327,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_api.spec.ts",
-        "line": 179,
-        "column": 12
+        "line": 170,
+        "column": 29
       }
     },
     {
@@ -157,8 +343,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_api.spec.ts",
-        "line": 200,
-        "column": 12
+        "line": 190,
+        "column": 89
       }
     },
     {
@@ -173,8 +359,72 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_api.spec.ts",
-        "line": 219,
-        "column": 12
+        "line": 207,
+        "column": 18
+      }
+    },
+    {
+      "id": "bff1cb9c45e581b-4bb89a6c4b0e36a",
+      "title": "Agent Builder — agents API agent responses expose the raw configuration and default the type to chat",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_api.spec.ts",
+        "line": 215,
+        "column": 49
+      }
+    },
+    {
+      "id": "bff1cb9c45e581b-41b3134f0941bb5",
+      "title": "Agent Builder — agents API GET-modify-PUT round-trips keep the stored configuration stable",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_api.spec.ts",
+        "line": 237,
+        "column": 27
+      }
+    },
+    {
+      "id": "bff1cb9c45e581b-e39c5a13fda894e",
+      "title": "Agent Builder — agents API POST rejects a type field (typed agents are created in code, not via the API)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_api.spec.ts",
+        "line": 262,
+        "column": 25
+      }
+    },
+    {
+      "id": "bff1cb9c45e581b-3fad42af990346c",
+      "title": "Agent Builder — agents API PUT rejects changing the agent type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_api.spec.ts",
+        "line": 275,
+        "column": 19
       }
     },
     {
@@ -189,8 +439,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_api.spec.ts",
-        "line": 230,
-        "column": 12
+        "line": 290,
+        "column": 11
       }
     },
     {
@@ -205,50 +455,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_api.spec.ts",
-        "line": 249,
-        "column": 12
-      }
-    },
-    {
-      "id": "2beeca8c68780a0-f370e79e23c9074",
-      "title": "Agent Builder — agents visibility API POST allows explicit private visibility",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_visibility_api.spec.ts",
-        "line": 36,
-        "column": 12
-      }
-    },
-    {
-      "id": "2beeca8c68780a0-dbb4b75aeab0077",
-      "title": "Agent Builder — agents visibility API PUT updates visibility explicitly",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_visibility_api.spec.ts",
-        "line": 47,
-        "column": 12
-      }
-    },
-    {
-      "id": "2beeca8c68780a0-3e667e492409f16",
-      "title": "Agent Builder — agents visibility API PUT rejects visibility change for default agent (404)",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_visibility_api.spec.ts",
-        "line": 66,
-        "column": 12
+        "line": 308,
+        "column": 14
       }
     },
     {
@@ -263,8 +471,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/attachments_api.spec.ts",
-        "line": 87,
-        "column": 12
+        "line": 79,
+        "column": 50
       }
     },
     {
@@ -279,8 +487,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/attachments_api.spec.ts",
-        "line": 107,
-        "column": 12
+        "line": 96,
+        "column": 27
       }
     },
     {
@@ -295,8 +503,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/attachments_api.spec.ts",
-        "line": 130,
-        "column": 12
+        "line": 115,
+        "column": 27
       }
     },
     {
@@ -311,8 +519,50 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/attachments_api.spec.ts",
-        "line": 146,
-        "column": 12
+        "line": 130,
+        "column": 13
+      }
+    },
+    {
+      "id": "5e1819ccd21625a-15831800091ed82",
+      "title": "Agent Builder — conversations access-control API public conversations require conversation access and agent use access",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_access_control_api.spec.ts",
+        "line": 411,
+        "column": 29
+      }
+    },
+    {
+      "id": "5e1819ccd21625a-984590e296dee6c",
+      "title": "Agent Builder — conversations access-control API auto-create cannot overwrite or take over another user conversation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_access_control_api.spec.ts",
+        "line": 744,
+        "column": 7
+      }
+    },
+    {
+      "id": "5e1819ccd21625a-38ea603d84caa81",
+      "title": "Agent Builder — conversations access-control API route-level privilege remains distinct from resource access",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_access_control_api.spec.ts",
+        "line": 787,
+        "column": 16
       }
     },
     {
@@ -327,8 +577,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_api.spec.ts",
-        "line": 87,
-        "column": 12
+        "line": 74,
+        "column": 44
       }
     },
     {
@@ -343,8 +593,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_api.spec.ts",
-        "line": 110,
-        "column": 12
+        "line": 100,
+        "column": 14
       }
     },
     {
@@ -359,8 +609,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_api.spec.ts",
-        "line": 128,
-        "column": 12
+        "line": 114,
+        "column": 29
       }
     },
     {
@@ -375,8 +625,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_api.spec.ts",
-        "line": 154,
-        "column": 12
+        "line": 138,
+        "column": 8
       }
     },
     {
@@ -391,8 +641,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_api.spec.ts",
-        "line": 171,
-        "column": 12
+        "line": 150,
+        "column": 26
       }
     },
     {
@@ -407,8 +657,40 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_api.spec.ts",
-        "line": 188,
-        "column": 12
+        "line": 168,
+        "column": 21
+      }
+    },
+    {
+      "id": "908082c6d828973-1bb0c1f810ae2fb",
+      "title": "Agent Builder — conversations API converse create exposes and stores conversation access mode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_api.spec.ts",
+        "line": 182,
+        "column": 28
+      }
+    },
+    {
+      "id": "908082c6d828973-1c24d03c0a93c25",
+      "title": "Agent Builder — conversations API converse ignores access mode when continuing a conversation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_api.spec.ts",
+        "line": 225,
+        "column": 9
       }
     },
     {
@@ -423,8 +705,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_api.spec.ts",
-        "line": 216,
-        "column": 12
+        "line": 274,
+        "column": 15
       }
     },
     {
@@ -439,8 +721,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_api.spec.ts",
-        "line": 225,
-        "column": 12
+        "line": 281,
+        "column": 11
       }
     },
     {
@@ -455,8 +737,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_api.spec.ts",
-        "line": 245,
-        "column": 12
+        "line": 295,
+        "column": 14
       }
     },
     {
@@ -471,8 +753,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_api.spec.ts",
-        "line": 254,
-        "column": 12
+        "line": 301,
+        "column": 89
       }
     },
     {
@@ -487,8 +769,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_api.spec.ts",
-        "line": 273,
-        "column": 12
+        "line": 316,
+        "column": 25
       }
     },
     {
@@ -503,8 +785,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_attachments_api.spec.ts",
-        "line": 52,
-        "column": 14
+        "line": 45,
+        "column": 33
       }
     },
     {
@@ -519,8 +801,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_attachments_api.spec.ts",
-        "line": 68,
-        "column": 14
+        "line": 59,
+        "column": 12
       }
     },
     {
@@ -535,8 +817,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_attachments_api.spec.ts",
-        "line": 84,
-        "column": 14
+        "line": 75,
+        "column": 12
       }
     },
     {
@@ -551,8 +833,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_attachments_api.spec.ts",
-        "line": 111,
-        "column": 14
+        "line": 110,
+        "column": 41
       }
     },
     {
@@ -567,8 +849,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_attachments_api.spec.ts",
-        "line": 127,
-        "column": 14
+        "line": 123,
+        "column": 12
       }
     },
     {
@@ -583,8 +865,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_attachments_api.spec.ts",
-        "line": 143,
-        "column": 14
+        "line": 139,
+        "column": 12
       }
     },
     {
@@ -599,8 +881,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_attachments_api.spec.ts",
-        "line": 179,
-        "column": 14
+        "line": 183,
+        "column": 18
       }
     },
     {
@@ -615,8 +897,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_attachments_api.spec.ts",
-        "line": 52,
-        "column": 14
+        "line": 45,
+        "column": 33
       }
     },
     {
@@ -631,8 +913,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_attachments_api.spec.ts",
-        "line": 68,
-        "column": 14
+        "line": 59,
+        "column": 12
       }
     },
     {
@@ -647,8 +929,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_attachments_api.spec.ts",
-        "line": 84,
-        "column": 14
+        "line": 75,
+        "column": 12
       }
     },
     {
@@ -663,8 +945,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_attachments_api.spec.ts",
-        "line": 111,
-        "column": 14
+        "line": 110,
+        "column": 41
       }
     },
     {
@@ -679,8 +961,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_attachments_api.spec.ts",
-        "line": 127,
-        "column": 14
+        "line": 123,
+        "column": 12
       }
     },
     {
@@ -695,8 +977,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_attachments_api.spec.ts",
-        "line": 143,
-        "column": 14
+        "line": 139,
+        "column": 12
       }
     },
     {
@@ -711,8 +993,152 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_attachments_api.spec.ts",
-        "line": 179,
-        "column": 14
+        "line": 183,
+        "column": 18
+      }
+    },
+    {
+      "id": "23808d62419391b-3869981e6c97b56",
+      "title": "Agent Builder - converse callback API delivers completed response to callback URL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_callback_api.spec.ts",
+        "line": 134,
+        "column": 23
+      }
+    },
+    {
+      "id": "23808d62419391b-92f5e782bc9e4c1",
+      "title": "Agent Builder - converse callback API stores callback origin authorship on list and get conversation responses",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_callback_api.spec.ts",
+        "line": 196,
+        "column": 29
+      }
+    },
+    {
+      "id": "23808d62419391b-edfb8df4e3d1793",
+      "title": "Agent Builder - converse callback API delivers failed response to callback URL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_callback_api.spec.ts",
+        "line": 290,
+        "column": 11
+      }
+    },
+    {
+      "id": "23808d62419391b-0dffc761e12b7ef",
+      "title": "Agent Builder - converse callback API delivers aborted response to callback URL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_callback_api.spec.ts",
+        "line": 326,
+        "column": 31
+      }
+    },
+    {
+      "id": "23808d62419391b-82a75a6c138a614",
+      "title": "Agent Builder - converse callback API returns the existing execution for a replayed idempotency key",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_callback_api.spec.ts",
+        "line": 365,
+        "column": 18
+      }
+    },
+    {
+      "id": "23808d62419391b-e3a4852c5eeefc2",
+      "title": "Agent Builder - converse callback API schedules a single execution for concurrent duplicate deliveries",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_callback_api.spec.ts",
+        "line": 429,
+        "column": 20
+      }
+    },
+    {
+      "id": "23808d62419391b-be5f9d8b14fa9ea",
+      "title": "Agent Builder - converse callback API schedules separate executions for the same key on different origins",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_callback_api.spec.ts",
+        "line": 493,
+        "column": 29
+      }
+    },
+    {
+      "id": "23808d62419391b-a98d347436e2dcf",
+      "title": "Agent Builder - converse callback API prefers a caller-provided execution id over the idempotency key",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_callback_api.spec.ts",
+        "line": 551,
+        "column": 31
+      }
+    },
+    {
+      "id": "23808d62419391b-8077e4c805574b4",
+      "title": "Agent Builder - converse callback API continues conversation for repeated Slack origin",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_callback_api.spec.ts",
+        "line": 590,
+        "column": 9
       }
     },
     {
@@ -727,8 +1153,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_error_regenerate_api.spec.ts",
-        "line": 62,
-        "column": 14
+        "line": 55,
+        "column": 33
       }
     },
     {
@@ -743,8 +1169,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_error_regenerate_api.spec.ts",
-        "line": 106,
-        "column": 14
+        "line": 94,
+        "column": 35
       }
     },
     {
@@ -759,8 +1185,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_error_regenerate_api.spec.ts",
-        "line": 167,
-        "column": 14
+        "line": 151,
+        "column": 23
       }
     },
     {
@@ -775,8 +1201,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_error_regenerate_api.spec.ts",
-        "line": 235,
-        "column": 14
+        "line": 217,
+        "column": 21
       }
     },
     {
@@ -791,8 +1217,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_error_regenerate_api.spec.ts",
-        "line": 62,
-        "column": 14
+        "line": 55,
+        "column": 33
       }
     },
     {
@@ -807,8 +1233,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_error_regenerate_api.spec.ts",
-        "line": 106,
-        "column": 14
+        "line": 94,
+        "column": 35
       }
     },
     {
@@ -823,8 +1249,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_error_regenerate_api.spec.ts",
-        "line": 167,
-        "column": 14
+        "line": 151,
+        "column": 23
       }
     },
     {
@@ -839,8 +1265,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_error_regenerate_api.spec.ts",
-        "line": 235,
-        "column": 14
+        "line": 217,
+        "column": 21
       }
     },
     {
@@ -855,8 +1281,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_simple_multi_api.spec.ts",
-        "line": 48,
-        "column": 14
+        "line": 41,
+        "column": 26
       }
     },
     {
@@ -871,8 +1297,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_simple_multi_api.spec.ts",
-        "line": 78,
-        "column": 14
+        "line": 64,
+        "column": 92
       }
     },
     {
@@ -887,8 +1313,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_simple_multi_api.spec.ts",
-        "line": 130,
-        "column": 14
+        "line": 110,
+        "column": 27
       }
     },
     {
@@ -903,8 +1329,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_simple_multi_api.spec.ts",
-        "line": 48,
-        "column": 14
+        "line": 41,
+        "column": 26
       }
     },
     {
@@ -919,8 +1345,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_simple_multi_api.spec.ts",
-        "line": 78,
-        "column": 14
+        "line": 64,
+        "column": 92
       }
     },
     {
@@ -935,8 +1361,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_simple_multi_api.spec.ts",
-        "line": 130,
-        "column": 14
+        "line": 110,
+        "column": 27
       }
     },
     {
@@ -951,8 +1377,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_tool_calling_api.spec.ts",
-        "line": 80,
-        "column": 14
+        "line": 72,
+        "column": 33
       }
     },
     {
@@ -967,8 +1393,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_tool_calling_api.spec.ts",
-        "line": 144,
-        "column": 14
+        "line": 134,
+        "column": 18
       }
     },
     {
@@ -983,8 +1409,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_tool_calling_api.spec.ts",
-        "line": 80,
-        "column": 14
+        "line": 72,
+        "column": 33
       }
     },
     {
@@ -999,8 +1425,24 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_tool_calling_api.spec.ts",
-        "line": 144,
-        "column": 14
+        "line": 134,
+        "column": 18
+      }
+    },
+    {
+      "id": "e4d863c37e81c3f-1121048c07532a3",
+      "title": "Agent Builder — tracing snapshot trace documents match snapshot after conversation with tool call",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_tracing_snapshot_api.spec.ts",
+        "line": 205,
+        "column": 9
       }
     },
     {
@@ -1016,7 +1458,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/plugins_installation_api.spec.ts",
         "line": 62,
-        "column": 12
+        "column": 13
       }
     },
     {
@@ -1029,8 +1471,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/rbac_api.spec.ts",
-        "line": 275,
-        "column": 12
+        "line": 304,
+        "column": 33
       }
     },
     {
@@ -1043,8 +1485,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/rbac_api.spec.ts",
-        "line": 312,
-        "column": 12
+        "line": 328,
+        "column": 14
       }
     },
     {
@@ -1057,8 +1499,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/rbac_api.spec.ts",
-        "line": 356,
-        "column": 12
+        "line": 374,
+        "column": 25
       }
     },
     {
@@ -1071,8 +1513,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/rbac_api.spec.ts",
-        "line": 409,
-        "column": 12
+        "line": 424,
+        "column": 19
       }
     },
     {
@@ -1085,8 +1527,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/rbac_api.spec.ts",
-        "line": 459,
-        "column": 12
+        "line": 471,
+        "column": 14
       }
     },
     {
@@ -1099,8 +1541,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/skills_crud_api.spec.ts",
-        "line": 33,
-        "column": 12
+        "line": 29,
+        "column": 29
       }
     },
     {
@@ -1113,8 +1555,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/skills_crud_api.spec.ts",
-        "line": 45,
-        "column": 12
+        "line": 37,
+        "column": 14
       }
     },
     {
@@ -1127,8 +1569,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/skills_crud_api.spec.ts",
-        "line": 63,
-        "column": 12
+        "line": 53,
+        "column": 24
       }
     },
     {
@@ -1141,8 +1583,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/skills_crud_api.spec.ts",
-        "line": 79,
-        "column": 12
+        "line": 69,
+        "column": 14
       }
     },
     {
@@ -1155,8 +1597,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/skills_crud_api.spec.ts",
-        "line": 100,
-        "column": 12
+        "line": 86,
+        "column": 25
       }
     },
     {
@@ -1169,8 +1611,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/skills_crud_api.spec.ts",
-        "line": 122,
-        "column": 12
+        "line": 108,
+        "column": 15
       }
     },
     {
@@ -1183,8 +1625,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/skills_validation_api.spec.ts",
-        "line": 26,
-        "column": 12
+        "line": 22,
+        "column": 29
       }
     },
     {
@@ -1197,8 +1639,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/skills_validation_api.spec.ts",
-        "line": 41,
-        "column": 12
+        "line": 35,
+        "column": 23
       }
     },
     {
@@ -1211,8 +1653,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/skills_validation_api.spec.ts",
-        "line": 68,
-        "column": 12
+        "line": 60,
+        "column": 20
       }
     },
     {
@@ -1225,8 +1667,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/skills_validation_api.spec.ts",
-        "line": 84,
-        "column": 12
+        "line": 73,
+        "column": 19
       }
     },
     {
@@ -1239,8 +1681,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/skills_validation_api.spec.ts",
-        "line": 97,
-        "column": 12
+        "line": 85,
+        "column": 24
       }
     },
     {
@@ -1253,13 +1695,41 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/skills_validation_api.spec.ts",
-        "line": 105,
+        "line": 91,
+        "column": 10
+      }
+    },
+    {
+      "id": "1b65711126013c6-4680cb5f8075c8c",
+      "title": "Agent Builder — SML internal API POST /internal/agent_builder_sml/sml/_search autocomplete",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/sml_api.spec.ts",
+        "line": 78,
+        "column": 7
+      }
+    },
+    {
+      "id": "1b65711126013c6-7588b6188fdff3b",
+      "title": "Agent Builder — SML internal API POST /internal/agent_builder_sml/sml/_search wildcard returns item fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/sml_api.spec.ts",
+        "line": 93,
         "column": 12
       }
     },
     {
-      "id": "1b65711126013c6-7ec29fa26d8296c",
-      "title": "Agent Builder — SML internal API POST /internal/agent_builder/sml/_search autocomplete",
+      "id": "1b65711126013c6-7d12781749f488c",
+      "title": "Agent Builder — SML internal API POST /internal/agent_builder_sml/sml/_search rejects empty query",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -1267,50 +1737,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/sml_api.spec.ts",
-        "line": 89,
-        "column": 10
-      }
-    },
-    {
-      "id": "1b65711126013c6-97dacc2fc7b0e11",
-      "title": "Agent Builder — SML internal API POST /internal/agent_builder/sml/_search wildcard returns expected item fields",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/sml_api.spec.ts",
-        "line": 105,
-        "column": 10
-      }
-    },
-    {
-      "id": "1b65711126013c6-730fa95c6745993",
-      "title": "Agent Builder — SML internal API POST /internal/agent_builder/sml/_search omits content when skip_content is true",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/sml_api.spec.ts",
-        "line": 128,
-        "column": 10
-      }
-    },
-    {
-      "id": "1b65711126013c6-ff0990d6a368fe5",
-      "title": "Agent Builder — SML internal API POST /internal/agent_builder/sml/_search rejects empty query",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/sml_api.spec.ts",
-        "line": 145,
-        "column": 10
+        "line": 111,
+        "column": 29
       }
     },
     {
@@ -1323,13 +1751,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/sml_api.spec.ts",
-        "line": 154,
-        "column": 10
+        "line": 123,
+        "column": 5
       }
     },
     {
-      "id": "1b65711126013c6-cf6d7f8e78a8ae4",
-      "title": "Agent Builder — SML internal API POST /internal/agent_builder/sml/_attach attaches chunk and persists attachment refs",
+      "id": "1b65711126013c6-af2271c43253dbd",
+      "title": "Agent Builder — SML internal API POST /internal/agent_builder/sml/_attach attaches entry and persists attachment refs",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -1337,8 +1765,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/sml_api.spec.ts",
-        "line": 174,
-        "column": 10
+        "line": 136,
+        "column": 30
       }
     },
     {
@@ -1353,8 +1781,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/spaces_api.spec.ts",
-        "line": 106,
-        "column": 12
+        "line": 119,
+        "column": 7
       }
     },
     {
@@ -1369,8 +1797,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/spaces_api.spec.ts",
-        "line": 121,
-        "column": 12
+        "line": 133,
+        "column": 16
       }
     },
     {
@@ -1385,8 +1813,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/spaces_api.spec.ts",
-        "line": 139,
-        "column": 14
+        "line": 156,
+        "column": 74
       }
     },
     {
@@ -1401,8 +1829,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/spaces_api.spec.ts",
-        "line": 156,
-        "column": 14
+        "line": 172,
+        "column": 5
       }
     },
     {
@@ -1417,8 +1845,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/spaces_api.spec.ts",
-        "line": 139,
-        "column": 14
+        "line": 156,
+        "column": 74
       }
     },
     {
@@ -1433,8 +1861,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/spaces_api.spec.ts",
-        "line": 156,
-        "column": 14
+        "line": 172,
+        "column": 5
       }
     },
     {
@@ -1450,7 +1878,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/tools_builtin_api.spec.ts",
         "line": 18,
-        "column": 12
+        "column": 13
       }
     },
     {
@@ -1465,8 +1893,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/tools_builtin_api.spec.ts",
-        "line": 29,
-        "column": 12
+        "line": 26,
+        "column": 14
       }
     },
     {
@@ -1481,8 +1909,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/tools_builtin_api.spec.ts",
-        "line": 41,
-        "column": 12
+        "line": 35,
+        "column": 25
       }
     },
     {
@@ -1497,8 +1925,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/tools_builtin_api.spec.ts",
-        "line": 61,
-        "column": 12
+        "line": 54,
+        "column": 23
       }
     },
     {
@@ -1513,8 +1941,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/tools_builtin_internal_api.spec.ts",
-        "line": 30,
-        "column": 12
+        "line": 25,
+        "column": 29
       }
     },
     {
@@ -1529,8 +1957,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/tools_builtin_internal_api.spec.ts",
-        "line": 47,
-        "column": 12
+        "line": 40,
+        "column": 24
       }
     },
     {
@@ -1546,7 +1974,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/tools_delete_force_api.spec.ts",
         "line": 70,
-        "column": 12
+        "column": 75
       }
     },
     {
@@ -1561,8 +1989,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/tools_delete_force_api.spec.ts",
-        "line": 104,
-        "column": 12
+        "line": 109,
+        "column": 14
       }
     },
     {
@@ -1577,8 +2005,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/tools_delete_force_api.spec.ts",
-        "line": 114,
-        "column": 12
+        "line": 117,
+        "column": 25
       }
     },
     {
@@ -1593,8 +2021,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/tools_delete_force_api.spec.ts",
-        "line": 128,
-        "column": 12
+        "line": 130,
+        "column": 25
       }
     },
     {
@@ -1609,8 +2037,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/tools_delete_force_api.spec.ts",
-        "line": 164,
-        "column": 12
+        "line": 166,
+        "column": 41
       }
     },
     {
@@ -1626,7 +2054,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/tools_esql_api.spec.ts",
         "line": 35,
-        "column": 12
+        "column": 13
       }
     },
     {
@@ -1641,8 +2069,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/tools_esql_api.spec.ts",
-        "line": 47,
-        "column": 12
+        "line": 44,
+        "column": 27
       }
     },
     {
@@ -1657,8 +2085,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/tools_esql_api.spec.ts",
-        "line": 77,
-        "column": 12
+        "line": 74,
+        "column": 27
       }
     },
     {
@@ -1673,8 +2101,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/tools_esql_api.spec.ts",
-        "line": 86,
-        "column": 12
+        "line": 81,
+        "column": 9
       }
     },
     {
@@ -1689,8 +2117,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/tools_esql_api.spec.ts",
-        "line": 94,
-        "column": 12
+        "line": 88,
+        "column": 21
       }
     },
     {
@@ -1705,8 +2133,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/tools_esql_api.spec.ts",
-        "line": 164,
-        "column": 14
+        "line": 160,
+        "column": 11
       }
     },
     {
@@ -1721,8 +2149,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/tools_esql_api.spec.ts",
-        "line": 174,
-        "column": 12
+        "line": 168,
+        "column": 11
       }
     },
     {
@@ -1737,8 +2165,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/tools_esql_api.spec.ts",
-        "line": 190,
-        "column": 12
+        "line": 182,
+        "column": 24
       }
     },
     {
@@ -1753,8 +2181,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/tools_esql_api.spec.ts",
-        "line": 198,
-        "column": 12
+        "line": 190,
+        "column": 13
       }
     },
     {
@@ -1769,8 +2197,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/tools_esql_api.spec.ts",
-        "line": 214,
-        "column": 12
+        "line": 202,
+        "column": 25
       }
     },
     {
@@ -1785,8 +2213,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/tools_esql_api.spec.ts",
-        "line": 230,
-        "column": 12
+        "line": 217,
+        "column": 23
       }
     },
     {
@@ -1801,8 +2229,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/tools_esql_api.spec.ts",
-        "line": 238,
-        "column": 12
+        "line": 225,
+        "column": 9
       }
     },
     {
@@ -1817,8 +2245,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/tools_esql_api.spec.ts",
-        "line": 256,
-        "column": 12
+        "line": 239,
+        "column": 43
       }
     },
     {
@@ -1833,8 +2261,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/tools_esql_internal_api.spec.ts",
-        "line": 45,
-        "column": 12
+        "line": 43,
+        "column": 23
       }
     },
     {
@@ -1849,8 +2277,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/tools_esql_internal_api.spec.ts",
-        "line": 75,
-        "column": 12
+        "line": 70,
+        "column": 16
       }
     },
     {
@@ -1866,7 +2294,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/tools_esql_internal_api.spec.ts",
         "line": 101,
-        "column": 12
+        "column": 13
       }
     },
     {
@@ -1881,8 +2309,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/tools_index_search_api.spec.ts",
-        "line": 42,
-        "column": 12
+        "line": 39,
+        "column": 58
       }
     },
     {
@@ -1897,8 +2325,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/tools_index_search_api.spec.ts",
-        "line": 53,
-        "column": 12
+        "line": 48,
+        "column": 14
       }
     },
     {
@@ -1913,8 +2341,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/tools_index_search_api.spec.ts",
-        "line": 62,
-        "column": 12
+        "line": 55,
+        "column": 54
       }
     },
     {
@@ -1929,8 +2357,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/tools_index_search_api.spec.ts",
-        "line": 70,
-        "column": 12
+        "line": 63,
+        "column": 24
       }
     },
     {
@@ -1945,8 +2373,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/tools_index_search_api.spec.ts",
-        "line": 82,
-        "column": 12
+        "line": 73,
+        "column": 22
       }
     },
     {
@@ -1961,8 +2389,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/tools_index_search_api.spec.ts",
-        "line": 97,
-        "column": 12
+        "line": 84,
+        "column": 15
       }
     },
     {
@@ -1977,8 +2405,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/tools_index_search_api.spec.ts",
-        "line": 109,
-        "column": 12
+        "line": 97,
+        "column": 75
       }
     },
     {
@@ -1993,8 +2421,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/tools_index_search_api.spec.ts",
-        "line": 121,
-        "column": 12
+        "line": 109,
+        "column": 13
       }
     },
     {
@@ -2009,8 +2437,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/tools_index_search_api.spec.ts",
-        "line": 137,
-        "column": 12
+        "line": 121,
+        "column": 57
       }
     },
     {
@@ -2025,8 +2453,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/tools_index_search_api.spec.ts",
-        "line": 145,
-        "column": 12
+        "line": 124,
+        "column": 23
       }
     },
     {
@@ -2041,8 +2469,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/tools_index_search_api.spec.ts",
-        "line": 181,
-        "column": 14
+        "line": 158,
+        "column": 30
       }
     },
     {
@@ -2057,8 +2485,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/tools_index_search_api.spec.ts",
-        "line": 190,
-        "column": 14
+        "line": 170,
+        "column": 22
       }
     },
     {
@@ -2073,8 +2501,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/tools_index_search_api.spec.ts",
-        "line": 208,
-        "column": 12
+        "line": 181,
+        "column": 65
       }
     },
     {
@@ -2089,8 +2517,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/tools_index_search_api.spec.ts",
-        "line": 216,
-        "column": 12
+        "line": 188,
+        "column": 9
       }
     },
     {
@@ -2105,8 +2533,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/tools_index_search_api.spec.ts",
-        "line": 234,
-        "column": 12
+        "line": 208,
+        "column": 13
       }
     },
     {
@@ -2122,7 +2550,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/tools_legacy_migration_api.spec.ts",
         "line": 93,
-        "column": 12
+        "column": 67
       }
     },
     {
@@ -2138,7 +2566,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/tools_legacy_migration_api.spec.ts",
         "line": 130,
-        "column": 12
+        "column": 85
       }
     }
   ]

@@ -7,3 +7,5 @@
 
 export { convertQradarReferenceSetToLookup } from './qradar_reference_set';
 export type { ConvertQradarReferenceSetToLookupParams } from './qradar_reference_set';
+export { convertSentinelWatchlistToResource } from './sentinel_watchlist';
+export type { ConvertSentinelWatchlistToResourceParams } from './sentinel_watchlist';

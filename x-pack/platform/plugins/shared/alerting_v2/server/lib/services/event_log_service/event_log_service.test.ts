@@ -6,9 +6,22 @@
  */
 
 import type { IEvent } from '@kbn/event-log-plugin/server';
-import { httpServerMock } from '@kbn/core-http-server-mocks';
-import { ACTION_POLICY_SAVED_OBJECT_TYPE } from '../../../saved_objects';
+import {
+  ACTION_POLICY_EVENT_ACTIONS,
+  ACTION_POLICY_EVENT_PROVIDER,
+} from '../../dispatcher/steps/constants';
 import { createEventLogService } from './event_log_service.mock';
+import type { FindRuleExecutionsQuery } from './types';
+
+const SINCE = '2026-05-04T00:00:00Z';
+
+const buildSearchResponse = (
+  hits: Array<{ _id?: string; _source: unknown }> = [],
+  total: number | { value: number; relation: 'eq' | 'gte' } = hits.length
+) =>
+  ({
+    hits: { hits, total },
+  } as any);
 
 describe('EventLogService', () => {
   describe('logEvent', () => {
@@ -39,265 +52,387 @@ describe('EventLogService', () => {
   });
 
   describe('findActionPolicyExecutionEvents', () => {
-    const START_DATE = '2026-05-04T00:00:00Z';
-
-    const buildResult = (
-      overrides: Partial<{ data: unknown[]; page: number; per_page: number; total: number }> = {}
-    ) => ({
-      data: [],
-      page: 1,
-      per_page: 50,
-      total: 0,
-      ...overrides,
-    });
-
-    it('uses the request-scoped event log client', async () => {
-      const { eventLogService, mockEventLogClient, mockClientService } = createEventLogService();
-      mockEventLogClient.findEventsWithAuthFilter.mockResolvedValue(buildResult() as any);
-      const request = httpServerMock.createKibanaRequest();
+    it('resolves the index pattern via IEventLogService.getIndexPattern', async () => {
+      const { eventLogService, mockEsClient, mockEventLogSetup } = createEventLogService();
+      mockEventLogSetup.getIndexPattern.mockReturnValue('.kibana-event-log-test-*');
+      mockEsClient.search.mockResolvedValue(buildSearchResponse());
 
       await eventLogService.findActionPolicyExecutionEvents({
-        request,
         spaceId: 'default',
-        startDate: START_DATE,
+        startDate: SINCE,
       });
 
-      expect(mockClientService.getClient).toHaveBeenCalledWith(request);
-    });
-
-    it('queries findEventsWithAuthFilter with the policy SO type and an empty ids array', async () => {
-      const { eventLogService, mockEventLogClient } = createEventLogService();
-      mockEventLogClient.findEventsWithAuthFilter.mockResolvedValue(buildResult() as any);
-      const request = httpServerMock.createKibanaRequest();
-
-      await eventLogService.findActionPolicyExecutionEvents({
-        request,
-        spaceId: 'default',
-        startDate: START_DATE,
-      });
-
-      const [type, ids] = mockEventLogClient.findEventsWithAuthFilter.mock.calls[0];
-      expect(type).toBe(ACTION_POLICY_SAVED_OBJECT_TYPE);
-      expect(ids).toEqual([]);
-    });
-
-    it('passes the dispatched/throttled provider filter as the auth filter', async () => {
-      const { eventLogService, mockEventLogClient } = createEventLogService();
-      mockEventLogClient.findEventsWithAuthFilter.mockResolvedValue(buildResult() as any);
-      const request = httpServerMock.createKibanaRequest();
-
-      await eventLogService.findActionPolicyExecutionEvents({
-        request,
-        spaceId: 'default',
-        startDate: START_DATE,
-      });
-
-      const authFilter = mockEventLogClient.findEventsWithAuthFilter.mock.calls[0][2];
-      expect(authFilter).toMatchObject({ type: 'function', function: 'and' });
-    });
-
-    it('forwards page and perPage to per_page in options, sorted by @timestamp desc', async () => {
-      const { eventLogService, mockEventLogClient } = createEventLogService();
-      mockEventLogClient.findEventsWithAuthFilter.mockResolvedValue(
-        buildResult({ page: 3, per_page: 25 }) as any
+      expect(mockEventLogSetup.getIndexPattern).toHaveBeenCalled();
+      expect(mockEsClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({ index: '.kibana-event-log-test-*' })
       );
-      const request = httpServerMock.createKibanaRequest();
+    });
+
+    it('filters by provider, space and start date and orders by @timestamp desc', async () => {
+      const { eventLogService, mockEsClient } = createEventLogService();
+      mockEsClient.search.mockResolvedValue(buildSearchResponse());
 
       await eventLogService.findActionPolicyExecutionEvents({
-        request,
+        spaceId: 'my-space',
+        startDate: SINCE,
+      });
+
+      const [args] = mockEsClient.search.mock.calls[0] as [any];
+      expect(args.query.bool.filter).toEqual(
+        expect.arrayContaining([
+          { term: { 'event.provider': ACTION_POLICY_EVENT_PROVIDER } },
+          { term: { 'kibana.space_ids': 'my-space' } },
+          { range: { '@timestamp': { gte: SINCE } } },
+        ])
+      );
+      expect(args.sort).toEqual([{ '@timestamp': { order: 'desc' } }]);
+      expect(args.track_total_hits).toBe(true);
+    });
+
+    it('matches both dispatched and throttled when outcome is omitted', async () => {
+      const { eventLogService, mockEsClient } = createEventLogService();
+      mockEsClient.search.mockResolvedValue(buildSearchResponse());
+
+      await eventLogService.findActionPolicyExecutionEvents({
         spaceId: 'default',
-        startDate: START_DATE,
+        startDate: SINCE,
+      });
+
+      const [args] = mockEsClient.search.mock.calls[0] as [any];
+      expect(args.query.bool.filter).toEqual(
+        expect.arrayContaining([
+          {
+            terms: {
+              'event.action': [
+                ACTION_POLICY_EVENT_ACTIONS.DISPATCHED,
+                ACTION_POLICY_EVENT_ACTIONS.THROTTLED,
+              ],
+            },
+          },
+        ])
+      );
+    });
+
+    it('narrows event.action to the provided outcomes', async () => {
+      const { eventLogService, mockEsClient } = createEventLogService();
+      mockEsClient.search.mockResolvedValue(buildSearchResponse());
+
+      await eventLogService.findActionPolicyExecutionEvents({
+        spaceId: 'default',
+        startDate: SINCE,
+        outcomes: ['dispatched'],
+      });
+
+      const [args] = mockEsClient.search.mock.calls[0] as [any];
+      expect(args.query.bool.filter).toEqual(
+        expect.arrayContaining([{ terms: { 'event.action': ['dispatched'] } }])
+      );
+    });
+
+    it('emits a nested saved_objects.id terms filter that includes policy + rule ids', async () => {
+      const { eventLogService, mockEsClient } = createEventLogService();
+      mockEsClient.search.mockResolvedValue(buildSearchResponse());
+
+      await eventLogService.findActionPolicyExecutionEvents({
+        spaceId: 'default',
+        startDate: SINCE,
+        policyIds: ['p1'],
+        ruleIds: ['r1'],
+      });
+
+      const [args] = mockEsClient.search.mock.calls[0] as [any];
+      const boolClause = args.query.bool.filter.find((f: any) => f?.bool?.should);
+      expect(boolClause).toBeDefined();
+      expect(boolClause.bool.should).toEqual(
+        expect.arrayContaining([
+          {
+            nested: {
+              path: 'kibana.saved_objects',
+              query: {
+                bool: {
+                  filter: [
+                    { term: { 'kibana.saved_objects.type': 'alerting_action_policy' } },
+                    { terms: { 'kibana.saved_objects.id': ['p1'] } },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            nested: {
+              path: 'kibana.saved_objects',
+              query: {
+                bool: {
+                  filter: [
+                    { term: { 'kibana.saved_objects.type': 'alerting_rule' } },
+                    { terms: { 'kibana.saved_objects.id': ['r1'] } },
+                  ],
+                },
+              },
+            },
+          },
+          { terms: { 'kibana.alerting_v2.dispatcher.rule_ids': ['r1'] } },
+        ])
+      );
+      expect(boolClause.bool.minimum_should_match).toBe(1);
+    });
+
+    it('forwards episodeIds as an episode_ids terms filter to the ES query', async () => {
+      const { eventLogService, mockEsClient } = createEventLogService();
+      mockEsClient.search.mockResolvedValue(buildSearchResponse());
+
+      await eventLogService.findActionPolicyExecutionEvents({
+        spaceId: 'default',
+        startDate: SINCE,
+        episodeIds: ['ep-1', 'ep-2'],
+      });
+
+      const [args] = mockEsClient.search.mock.calls[0] as [any];
+      expect(args.query.bool.filter).toEqual(
+        expect.arrayContaining([
+          { terms: { 'kibana.alerting_v2.dispatcher.episode_ids': ['ep-1', 'ep-2'] } },
+        ])
+      );
+    });
+
+    it('translates page/perPage into from/size', async () => {
+      const { eventLogService, mockEsClient } = createEventLogService();
+      mockEsClient.search.mockResolvedValue(buildSearchResponse());
+
+      await eventLogService.findActionPolicyExecutionEvents({
+        spaceId: 'default',
+        startDate: SINCE,
         page: 3,
         perPage: 25,
       });
 
-      const options = mockEventLogClient.findEventsWithAuthFilter.mock.calls[0][4];
-      expect(options).toEqual(
-        expect.objectContaining({
-          page: 3,
-          per_page: 25,
-          sort: [{ sort_field: '@timestamp', sort_order: 'desc' }],
-        })
-      );
+      const [args] = mockEsClient.search.mock.calls[0] as [any];
+      expect(args.from).toBe(50);
+      expect(args.size).toBe(25);
     });
 
     it('applies default page=1 and perPage=50 when not provided', async () => {
-      const { eventLogService, mockEventLogClient } = createEventLogService();
-      mockEventLogClient.findEventsWithAuthFilter.mockResolvedValue(buildResult() as any);
-      const request = httpServerMock.createKibanaRequest();
+      const { eventLogService, mockEsClient } = createEventLogService();
+      mockEsClient.search.mockResolvedValue(buildSearchResponse());
 
       await eventLogService.findActionPolicyExecutionEvents({
-        request,
         spaceId: 'default',
-        startDate: START_DATE,
+        startDate: SINCE,
       });
 
-      const options = mockEventLogClient.findEventsWithAuthFilter.mock.calls[0][4];
-      expect(options).toEqual(
-        expect.objectContaining({
-          page: 1,
-          per_page: 50,
-        })
-      );
+      const [args] = mockEsClient.search.mock.calls[0] as [any];
+      expect(args.from).toBe(0);
+      expect(args.size).toBe(50);
     });
 
-    it('passes startDate as the start option to the client', async () => {
-      const { eventLogService, mockEventLogClient } = createEventLogService();
-      mockEventLogClient.findEventsWithAuthFilter.mockResolvedValue(buildResult() as any);
-      const request = httpServerMock.createKibanaRequest();
-
-      await eventLogService.findActionPolicyExecutionEvents({
-        request,
-        spaceId: 'default',
-        startDate: START_DATE,
-      });
-
-      const options = mockEventLogClient.findEventsWithAuthFilter.mock.calls[0][4];
-      expect(options).toEqual(expect.objectContaining({ start: START_DATE }));
-    });
-
-    it('passes the provided spaceId as namespace to the client', async () => {
-      const { eventLogService, mockEventLogClient } = createEventLogService();
-      mockEventLogClient.findEventsWithAuthFilter.mockResolvedValue(buildResult() as any);
-      const request = httpServerMock.createKibanaRequest();
-
-      await eventLogService.findActionPolicyExecutionEvents({
-        request,
-        spaceId: 'my-space',
-        startDate: START_DATE,
-      });
-
-      const namespace = mockEventLogClient.findEventsWithAuthFilter.mock.calls[0][3];
-      expect(namespace).toBe('my-space');
-    });
-
-    it('maps the client result to the contract shape', async () => {
-      const { eventLogService, mockEventLogClient } = createEventLogService();
-      const fakeEvents = [{ '@timestamp': '2026-05-05T10:00:00Z' }];
-      mockEventLogClient.findEventsWithAuthFilter.mockResolvedValue({
-        data: fakeEvents,
-        page: 2,
-        per_page: 25,
-        total: 137,
-      } as any);
-      const request = httpServerMock.createKibanaRequest();
+    it('maps the ES response to the contract shape', async () => {
+      const { eventLogService, mockEsClient } = createEventLogService();
+      const source = { '@timestamp': '2026-05-05T10:00:00Z' };
+      mockEsClient.search.mockResolvedValue(buildSearchResponse([{ _source: source }], 137));
 
       const result = await eventLogService.findActionPolicyExecutionEvents({
-        request,
         spaceId: 'default',
-        startDate: START_DATE,
+        startDate: SINCE,
         page: 2,
         perPage: 25,
       });
 
       expect(result).toEqual({
-        events: fakeEvents,
+        events: [source],
         page: 2,
         perPage: 25,
         total: 137,
       });
     });
 
-    it('propagates errors from the underlying client', async () => {
-      const { eventLogService, mockEventLogClient } = createEventLogService();
-      mockEventLogClient.findEventsWithAuthFilter.mockRejectedValue(new Error('boom'));
-      const request = httpServerMock.createKibanaRequest();
+    it('reads total.value when ES returns the object form', async () => {
+      const { eventLogService, mockEsClient } = createEventLogService();
+      mockEsClient.search.mockResolvedValue(buildSearchResponse([], { value: 42, relation: 'eq' }));
+
+      const result = await eventLogService.findActionPolicyExecutionEvents({
+        spaceId: 'default',
+        startDate: SINCE,
+      });
+      expect(result.total).toBe(42);
+    });
+
+    it('propagates errors from the ES client', async () => {
+      const { eventLogService, mockEsClient } = createEventLogService();
+      mockEsClient.search.mockRejectedValue(new Error('boom'));
 
       await expect(
         eventLogService.findActionPolicyExecutionEvents({
-          request,
           spaceId: 'default',
-          startDate: START_DATE,
+          startDate: SINCE,
         })
       ).rejects.toThrow('boom');
     });
   });
 
-  describe('countActionPolicyExecutionEventsSince', () => {
-    const buildResult = (total: number) => ({ data: [], page: 1, per_page: 0, total });
+  describe('findRuleExecutions', () => {
+    const baseQuery: FindRuleExecutionsQuery = {
+      spaceId: 'default',
+      page: 1,
+      perPage: 20,
+    };
 
-    it('queries findEventsWithAuthFilter with per_page=0 and the given since as start', async () => {
-      const { eventLogService, mockEventLogClient } = createEventLogService();
-      mockEventLogClient.findEventsWithAuthFilter.mockResolvedValue(buildResult(0) as any);
-      const request = httpServerMock.createKibanaRequest();
-      const since = '2026-05-05T10:00:00.000Z';
+    const validRaw = {
+      event: {
+        provider: 'taskManager',
+        action: 'task-run',
+        outcome: 'success',
+        start: '2026-06-23T09:59:50.000Z',
+        end: '2026-06-23T10:00:00.000Z',
+        duration: 1_000_000_000,
+      },
+      kibana: {
+        task: {
+          id: 'alerting_v2:rule_executor:default:rule-1',
+          type: 'alerting_v2:rule_executor',
+          schedule_delay: 500_000_000,
+        },
+        server_uuid: 'srv-1',
+      },
+    };
 
-      await eventLogService.countActionPolicyExecutionEventsSince({
-        request,
-        spaceId: 'default',
-        since,
-      });
+    it('resolves the index pattern via IEventLogService.getIndexPattern', async () => {
+      const { eventLogService, mockEsClient, mockEventLogSetup } = createEventLogService();
+      mockEventLogSetup.getIndexPattern.mockReturnValue('.kibana-event-log-test-*');
+      mockEsClient.search.mockResolvedValue(buildSearchResponse());
 
-      const [type, ids, , namespace, options] =
-        mockEventLogClient.findEventsWithAuthFilter.mock.calls[0];
-      expect(type).toBe(ACTION_POLICY_SAVED_OBJECT_TYPE);
-      expect(ids).toEqual([]);
-      expect(namespace).toBe('default');
-      expect(options).toEqual(
-        expect.objectContaining({
-          page: 1,
-          per_page: 0,
-          start: since,
-          sort: [{ sort_field: '@timestamp', sort_order: 'desc' }],
-        })
+      await eventLogService.findRuleExecutions(baseQuery);
+
+      expect(mockEventLogSetup.getIndexPattern).toHaveBeenCalled();
+      expect(mockEsClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({ index: '.kibana-event-log-test-*' })
       );
     });
 
-    it('reuses the dispatched/throttled provider auth filter', async () => {
-      const { eventLogService, mockEventLogClient } = createEventLogService();
-      mockEventLogClient.findEventsWithAuthFilter.mockResolvedValue(buildResult(0) as any);
-      const request = httpServerMock.createKibanaRequest();
+    it('passes the query body produced by the builder to ES', async () => {
+      const { eventLogService, mockEsClient } = createEventLogService();
+      mockEsClient.search.mockResolvedValue(buildSearchResponse());
 
-      await eventLogService.countActionPolicyExecutionEventsSince({
-        request,
-        spaceId: 'default',
-        since: '2026-05-05T10:00:00.000Z',
+      await eventLogService.findRuleExecutions({
+        ...baseQuery,
+        ruleIds: ['rule-a'],
+        outcomes: ['failure'],
       });
 
-      const authFilter = mockEventLogClient.findEventsWithAuthFilter.mock.calls[0][2];
-      expect(authFilter).toMatchObject({ type: 'function', function: 'and' });
+      const [args] = mockEsClient.search.mock.calls[0] as [any];
+      const filters = args.query.bool.filter;
+      expect(filters).toEqual(
+        expect.arrayContaining([
+          { term: { 'event.provider': 'taskManager' } },
+          { term: { 'kibana.task.type': 'alerting_v2:rule_executor' } },
+          { term: { 'event.action': 'task-run' } },
+          { prefix: { 'kibana.task.id': 'alerting_v2:rule_executor:default:' } },
+          { terms: { 'kibana.task.id': ['alerting_v2:rule_executor:default:rule-a'] } },
+          { terms: { 'event.outcome': ['failure'] } },
+        ])
+      );
+      expect(args).not.toHaveProperty('track_total_hits');
     });
 
-    it('returns the total reported by the client as count', async () => {
-      const { eventLogService, mockEventLogClient } = createEventLogService();
-      mockEventLogClient.findEventsWithAuthFilter.mockResolvedValue(buildResult(42) as any);
-      const request = httpServerMock.createKibanaRequest();
+    it('always sends the space-prefix filter to ES, even with no ruleIds (cross-space leak guard)', async () => {
+      const { eventLogService, mockEsClient } = createEventLogService();
+      mockEsClient.search.mockResolvedValue(buildSearchResponse());
 
-      const result = await eventLogService.countActionPolicyExecutionEventsSince({
-        request,
-        spaceId: 'default',
-        since: '2026-05-05T10:00:00.000Z',
-      });
+      await eventLogService.findRuleExecutions({ ...baseQuery, spaceId: 'space-A' });
 
-      expect(result).toEqual({ count: 42 });
+      const [args] = mockEsClient.search.mock.calls[0] as [any];
+      expect(args.query.bool.filter).toEqual(
+        expect.arrayContaining([
+          { prefix: { 'kibana.task.id': 'alerting_v2:rule_executor:space-A:' } },
+        ])
+      );
     });
 
-    it('uses the request-scoped event log client', async () => {
-      const { eventLogService, mockEventLogClient, mockClientService } = createEventLogService();
-      mockEventLogClient.findEventsWithAuthFilter.mockResolvedValue(buildResult(0) as any);
-      const request = httpServerMock.createKibanaRequest();
+    it('normalizes hits and drops malformed rows without throwing', async () => {
+      const { eventLogService, mockEsClient } = createEventLogService();
+      mockEsClient.search.mockResolvedValue(
+        buildSearchResponse([
+          { _id: 'doc-1', _source: validRaw },
+          {
+            _id: 'doc-2',
+            _source: {
+              ...validRaw,
+              kibana: { ...validRaw.kibana, task: { ...validRaw.kibana.task, id: 'malformed' } },
+            },
+          },
+        ])
+      );
 
-      await eventLogService.countActionPolicyExecutionEventsSince({
-        request,
-        spaceId: 'default',
-        since: '2026-05-05T10:00:00.000Z',
-      });
+      const result = await eventLogService.findRuleExecutions(baseQuery);
 
-      expect(mockClientService.getClient).toHaveBeenCalledWith(request);
+      expect(result.items).toHaveLength(1);
+      expect(result.items[0].rule.id).toBe('rule-1');
     });
 
-    it('propagates errors from the underlying client', async () => {
-      const { eventLogService, mockEventLogClient } = createEventLogService();
-      mockEventLogClient.findEventsWithAuthFilter.mockRejectedValue(new Error('boom'));
-      const request = httpServerMock.createKibanaRequest();
+    it('surfaces the ES document _id as the execution id', async () => {
+      const { eventLogService, mockEsClient } = createEventLogService();
+      mockEsClient.search.mockResolvedValue(
+        buildSearchResponse([{ _id: 'tEv0XJUBd-rfxabc1234', _source: validRaw }])
+      );
 
-      await expect(
-        eventLogService.countActionPolicyExecutionEventsSince({
-          request,
-          spaceId: 'default',
-          since: '2026-05-05T10:00:00.000Z',
+      const result = await eventLogService.findRuleExecutions(baseQuery);
+      expect(result.items[0].id).toBe('tEv0XJUBd-rfxabc1234');
+    });
+
+    it('drops hits with a missing _id', async () => {
+      const { eventLogService, mockEsClient } = createEventLogService();
+      mockEsClient.search.mockResolvedValue(
+        buildSearchResponse([
+          { _source: validRaw }, // no _id
+          { _id: 'doc-2', _source: validRaw },
+        ])
+      );
+
+      const result = await eventLogService.findRuleExecutions(baseQuery);
+      expect(result.items).toHaveLength(1);
+      expect(result.items[0].id).toBe('doc-2');
+    });
+
+    it('returns total as a plain number when ES reports an exact count', async () => {
+      const { eventLogService, mockEsClient } = createEventLogService();
+      mockEsClient.search.mockResolvedValue(
+        buildSearchResponse([{ _id: 'doc-1', _source: validRaw }], 1)
+      );
+
+      const result = await eventLogService.findRuleExecutions(baseQuery);
+      expect(result.total).toBe(1);
+    });
+
+    it('returns total.value when ES caps the relation at gte (10000+ semantics)', async () => {
+      const { eventLogService, mockEsClient } = createEventLogService();
+      mockEsClient.search.mockResolvedValue(
+        buildSearchResponse([{ _id: 'doc-1', _source: validRaw }], {
+          value: 10_000,
+          relation: 'gte',
         })
-      ).rejects.toThrow('boom');
+      );
+
+      const result = await eventLogService.findRuleExecutions(baseQuery);
+      expect(result.total).toBe(10_000);
+    });
+
+    it('echoes page and perPage back on the result', async () => {
+      const { eventLogService, mockEsClient } = createEventLogService();
+      mockEsClient.search.mockResolvedValue(buildSearchResponse());
+
+      const result = await eventLogService.findRuleExecutions({
+        ...baseQuery,
+        page: 3,
+        perPage: 25,
+      });
+      expect(result.page).toBe(3);
+      expect(result.perPage).toBe(25);
+    });
+
+    it('propagates errors from the ES client', async () => {
+      const { eventLogService, mockEsClient } = createEventLogService();
+      mockEsClient.search.mockRejectedValue(new Error('boom'));
+
+      await expect(eventLogService.findRuleExecutions(baseQuery)).rejects.toThrow('boom');
     });
   });
 });

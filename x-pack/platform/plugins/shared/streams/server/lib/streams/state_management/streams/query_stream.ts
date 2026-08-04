@@ -10,6 +10,7 @@ import { validateQuery } from '@kbn/esql-language';
 import { Parser } from '@elastic/esql';
 import type { ESQLSource, ESQLCommand } from '@elastic/esql/types';
 import {
+  LOGS_ROOT_STREAM_NAME,
   Streams,
   getEsqlViewName,
   getParentId,
@@ -316,6 +317,14 @@ export class QueryStream extends StreamActiveRecord<Streams.QueryStream.Definiti
     }
 
     // Check for conflicts with existing streams
+    if (this._definition.name === LOGS_ROOT_STREAM_NAME) {
+      errors.push(
+        new Error(
+          `Cannot create query stream: a stream with name "${this._definition.name}" is reserved for the legacy root stream`
+        )
+      );
+    }
+
     if (existingStream && !Streams.QueryStream.Definition.is(existingStream.definition)) {
       errors.push(
         new Error(

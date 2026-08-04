@@ -7,19 +7,20 @@
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { nodeBuilder, nodeTypes, type KueryNode } from '@kbn/es-query';
+import { PERMANENT_UIAM_CONVERSION_ERROR_CODES } from '@kbn/uiam-api-keys-provisioning-status';
 import { UIAM_API_KEYS_PROVISIONING_STATUS_SAVED_OBJECT_TYPE } from '../../saved_objects';
-import { NON_CLOUD_USER_API_KEY_CREATOR_ERROR_CODE } from '../constants';
+import { EXCLUDE_FILTER_CLAUSE_BATCH_SIZE, GET_STATUS_BATCH_SIZE } from '../constants';
 import {
-  UiamApiKeyProvisioningStatus,
   UiamApiKeyProvisioningEntityType,
+  UiamApiKeyProvisioningStatus,
 } from '../../saved_objects/schemas/raw_uiam_api_keys_provisioning_status';
 import { convertRuleIdsToKueryNode } from '../../lib/convert_rule_ids_to_kuery_node';
-import { GET_STATUS_BATCH_SIZE, EXCLUDE_FILTER_CLAUSE_BATCH_SIZE } from '../constants';
 
 /**
  * Returns a KQL filter that excludes rules which already have provisioning status
- * COMPLETED/SKIPPED or failed due to non-Cloud user API key creator code.
- * Returns undefined when there are no such rules (no filter applied).
+ * COMPLETED/SKIPPED or failed with a permanent UIAM conversion error code (see
+ * {@link PERMANENT_UIAM_CONVERSION_ERROR_CODES}). Returns undefined when there
+ * are no such rules (no filter applied).
  */
 export const getExcludeRulesFilter = async (
   savedObjectsClient: SavedObjectsClientContract
@@ -31,7 +32,11 @@ export const getExcludeRulesFilter = async (
       nodeBuilder.is(`${statusAttr}.status`, UiamApiKeyProvisioningStatus.SKIPPED),
       nodeBuilder.and([
         nodeBuilder.is(`${statusAttr}.status`, UiamApiKeyProvisioningStatus.FAILED),
-        nodeBuilder.is(`${statusAttr}.errorCode`, NON_CLOUD_USER_API_KEY_CREATOR_ERROR_CODE),
+        nodeBuilder.or(
+          PERMANENT_UIAM_CONVERSION_ERROR_CODES.map((code) =>
+            nodeBuilder.is(`${statusAttr}.errorCode`, code)
+          )
+        ),
       ]),
     ]),
     nodeBuilder.is(`${statusAttr}.entityType`, UiamApiKeyProvisioningEntityType.RULE),

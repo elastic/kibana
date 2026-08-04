@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import type { GenericMetricsChart } from '@kbn/apm-api-shared';
 import { getJavaMetricsCharts } from './by_agent/java';
 import { getDefaultMetricsCharts } from './by_agent/default';
 import { isJavaAgentName } from '../../../common/agent_name';
-import type { GenericMetricsChart } from './fetch_and_transform_metrics';
 import type { APMConfig } from '../..';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { hasOTelMetrics } from './has_otel_metrics';

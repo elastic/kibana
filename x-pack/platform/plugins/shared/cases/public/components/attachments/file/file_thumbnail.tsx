@@ -20,7 +20,7 @@ import { getFileFromReferenceMetadata } from './utils';
 
 const componentStyle: EuiImageProps['css'] = { cursor: 'pointer' };
 
-type FileThumbnailProps = UnifiedReferenceAttachmentViewProps<FileAttachmentMetadata>;
+export type FileThumbnailProps = UnifiedReferenceAttachmentViewProps<FileAttachmentMetadata>;
 
 export const FileThumbnail = React.memo((props: FileThumbnailProps) => {
   const { isPreviewVisible, showPreview, closePreview } = useFilePreview();

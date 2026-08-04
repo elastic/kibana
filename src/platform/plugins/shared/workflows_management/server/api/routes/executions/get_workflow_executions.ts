@@ -9,17 +9,27 @@
 
 import path from 'path';
 import { schema, type Type } from '@kbn/config-schema';
-import type { ExecutionStatus, ExecutionType, WorkflowExecutionSortField } from '@kbn/workflows';
+import type {
+  ExecutionStatus,
+  ExecutionType,
+  WorkflowExecutionCollapseField,
+  WorkflowExecutionSortField,
+} from '@kbn/workflows';
 import {
   ExecutionStatusValues,
   ExecutionTypeValues,
+  WorkflowExecutionCollapseFields,
   WorkflowExecutionSortFields,
 } from '@kbn/workflows';
 import type { SearchWorkflowExecutionsParams } from '../../workflows_management_service';
 import type { RouteDependencies } from '../types';
 import { API_VERSION, AVAILABILITY, MAX_PAGE_SIZE, OAS_TAG } from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
-import { WORKFLOW_EXECUTION_READ_SECURITY } from '../utils/route_security';
+import {
+  assertCanReadManagedWorkflowExecution,
+  hasWorkflowExecutionReadPrivilege,
+  WORKFLOW_EXECUTION_READ_WITH_MANAGED_SECURITY,
+} from '../utils/route_security';
 import { workflowIdParamSchema } from '../utils/schemas';
 import { withAvailabilityCheck } from '../utils/with_availability_check';
 
@@ -29,12 +39,15 @@ const executionStatusSchema = schema.oneOf(
 const executionTypeSchema = schema.oneOf(
   ExecutionTypeValues.map((type) => schema.literal(type)) as [Type<ExecutionType>]
 );
+
+const EXECUTION_QUERY_PARAM_AVAILABILITY = { stability: 'stable', since: '9.5.0' } as const;
+
 export function registerGetWorkflowExecutionsRoute({ router, api, spaces }: RouteDependencies) {
   router.versioned
     .get({
       path: '/api/workflows/workflow/{workflowId}/executions',
       access: 'public',
-      security: WORKFLOW_EXECUTION_READ_SECURITY,
+      security: WORKFLOW_EXECUTION_READ_WITH_MANAGED_SECURITY,
       summary: 'Get workflow executions',
       description: 'Retrieve a paginated list of executions for a specific workflow.',
       options: {
@@ -87,7 +100,10 @@ export function registerGetWorkflowExecutionsRoute({ router, api, spaces }: Rout
               ),
               concurrencyGroupKey: schema.maybe(
                 schema.string({
-                  meta: { description: 'Filter by evaluated concurrency group key.' },
+                  meta: {
+                    description: 'Filter by evaluated concurrency group key.',
+                    availability: EXECUTION_QUERY_PARAM_AVAILABILITY,
+                  },
                 })
               ),
               omitStepRuns: schema.maybe(
@@ -100,6 +116,7 @@ export function registerGetWorkflowExecutionsRoute({ router, api, spaces }: Rout
                   meta: {
                     description:
                       'Datemath lower bound for filtering executions by finishedAt (inclusive when parsed).',
+                    availability: EXECUTION_QUERY_PARAM_AVAILABILITY,
                   },
                 })
               ),
@@ -108,8 +125,22 @@ export function registerGetWorkflowExecutionsRoute({ router, api, spaces }: Rout
                   meta: {
                     description:
                       'Datemath upper bound for filtering executions by finishedAt (inclusive when parsed with roundUp).',
+                    availability: EXECUTION_QUERY_PARAM_AVAILABILITY,
                   },
                 })
+              ),
+              collapse: schema.maybe(
+                schema.oneOf(
+                  WorkflowExecutionCollapseFields.map((field) => schema.literal(field)) as [
+                    Type<WorkflowExecutionCollapseField>
+                  ],
+                  {
+                    meta: {
+                      description: 'Field to collapse execution results by.',
+                      availability: EXECUTION_QUERY_PARAM_AVAILABILITY,
+                    },
+                  }
+                )
               ),
               sortField: schema.maybe(
                 schema.oneOf(
@@ -117,13 +148,19 @@ export function registerGetWorkflowExecutionsRoute({ router, api, spaces }: Rout
                     Type<WorkflowExecutionSortField>
                   ],
                   {
-                    meta: { description: 'Field to sort executions by.' },
+                    meta: {
+                      description: 'Field to sort executions by.',
+                      availability: EXECUTION_QUERY_PARAM_AVAILABILITY,
+                    },
                   }
                 )
               ),
               sortOrder: schema.maybe(
                 schema.oneOf([schema.literal('asc'), schema.literal('desc')], {
-                  meta: { description: 'Sort order.' },
+                  meta: {
+                    description: 'Sort order.',
+                    availability: EXECUTION_QUERY_PARAM_AVAILABILITY,
+                  },
                 })
               ),
               page: schema.maybe(schema.number({ min: 1, meta: { description: 'Page number.' } })),
@@ -139,6 +176,7 @@ export function registerGetWorkflowExecutionsRoute({ router, api, spaces }: Rout
                   meta: {
                     description:
                       'Datemath lower bound for filtering executions by startedAt (inclusive when parsed).',
+                    availability: EXECUTION_QUERY_PARAM_AVAILABILITY,
                   },
                 })
               ),
@@ -147,6 +185,7 @@ export function registerGetWorkflowExecutionsRoute({ router, api, spaces }: Rout
                   meta: {
                     description:
                       'Datemath upper bound for filtering executions by startedAt (inclusive when parsed with roundUp).',
+                    availability: EXECUTION_QUERY_PARAM_AVAILABILITY,
                   },
                 })
               ),
@@ -156,8 +195,13 @@ export function registerGetWorkflowExecutionsRoute({ router, api, spaces }: Rout
       },
       withAvailabilityCheck(async (context, request, response) => {
         try {
+          if (!hasWorkflowExecutionReadPrivilege(request)) {
+            return response.forbidden();
+          }
           const spaceId = spaces.getSpaceId(request);
           const { workflowId } = request.params;
+          const workflow = await api.getWorkflow(workflowId, spaceId);
+          assertCanReadManagedWorkflowExecution(request, workflow);
           const executedBy = request.query.executedBy;
           const params: SearchWorkflowExecutionsParams = {
             workflowId,
@@ -176,6 +220,7 @@ export function registerGetWorkflowExecutionsRoute({ router, api, spaces }: Rout
             startedBefore: request.query.startedBefore,
             finishedAfter: request.query.finishedAfter,
             finishedBefore: request.query.finishedBefore,
+            collapse: request.query.collapse,
             sortField: request.query.sortField,
             sortOrder: request.query.sortOrder,
           };

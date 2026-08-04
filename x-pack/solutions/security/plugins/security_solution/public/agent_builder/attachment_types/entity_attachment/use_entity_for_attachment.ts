@@ -11,6 +11,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useQuery } from '@kbn/react-query';
 import { ENTITY_STORE_ROUTES } from '@kbn/entity-store/common';
 import { EntityType } from '../../../../common/entity_analytics/types';
+import { normalizeMultiValueField } from '../normalize_multi_value_field';
 import type { CriticalityLevelWithUnassigned } from '../../../../common/entity_analytics/asset_criticality/types';
 import type { RiskSeverity, RiskStats } from '../../../../common/search_strategy';
 import type { EntityAttachmentIdentifier } from './types';
@@ -63,7 +64,13 @@ interface EntityRecordShape {
      * downstream.
      */
     source?: string | string[];
-    attributes?: { watchlists?: string[] };
+    /**
+     * `entity.attributes.watchlists` is a `keyword` field. Elasticsearch only
+     * serialiZes it as an array when the document has multiple values; a single
+     * watchlist membership comes back as a bare string. Accept either shape and
+     * normaliZe downstream via `normalizeMultiValueField`.
+     */
+    attributes?: { watchlists?: string | string[] };
     lifecycle?: { first_seen?: string; last_activity?: string };
     risk?: Partial<RiskStats> & {
       calculated_level?: string;
@@ -157,12 +164,7 @@ const shapeRecord = (
       } as RiskStats)
     : undefined;
 
-  const rawSource = entityField?.source;
-  const sources = Array.isArray(rawSource)
-    ? rawSource.filter((s): s is string => typeof s === 'string' && s.length > 0)
-    : typeof rawSource === 'string' && rawSource.length > 0
-    ? [rawSource]
-    : [];
+  const sources = normalizeMultiValueField(entityField?.source);
 
   return {
     entityType: toEntityType(identifier.identifierType),
@@ -176,7 +178,7 @@ const shapeRecord = (
     riskLevel,
     riskStats,
     assetCriticality,
-    watchlistIds: entityField?.attributes?.watchlists?.slice() ?? [],
+    watchlistIds: normalizeMultiValueField(entityField?.attributes?.watchlists),
     sources,
   };
 };

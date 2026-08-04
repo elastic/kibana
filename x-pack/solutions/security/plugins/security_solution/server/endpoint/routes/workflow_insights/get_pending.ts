@@ -93,14 +93,24 @@ const getPendingRouteHandler = (
 
       const agentBuilder = endpointContext.service.getAgentBuilder();
 
+      const isExactCombo = Boolean(
+        insightTypes && insightTypes.length > 0 && endpointIds && endpointIds.length > 0
+      );
+
       // Terminal states (failed/aborted) are included so the FE can distinguish failure from
       // completion: empty response = scan complete; only failed/aborted = show error toast.
-      const statusFilter = [
+      const actionableStatuses = [
         ExecutionStatus.running,
         ExecutionStatus.scheduled,
         ExecutionStatus.failed,
         ExecutionStatus.aborted,
       ];
+
+      const statusFilter = isExactCombo
+        ? [...actionableStatuses, ExecutionStatus.completed]
+        : actionableStatuses;
+
+      const querySize = isExactCombo ? 1 : 100;
 
       // Known limitation: FindExecutionsFilter.metadata uses exact-match term queries
       // (Record<string, string>), so each findExecutions call can only filter by a single
@@ -147,25 +157,25 @@ const getPendingRouteHandler = (
 
       let allResults: Awaited<ReturnType<typeof agentBuilder.execution.findExecutions>>;
 
+      const buildFindOptions = (metadataFilter: Record<string, string>) => ({
+        filter: {
+          metadata: metadataFilter,
+          status: statusFilter,
+        },
+        size: querySize,
+        ...(isExactCombo ? { sort: { field: '@timestamp' as const, order: 'desc' as const } } : {}),
+      });
+
       if (metadataFilters.length === 1) {
-        allResults = await agentBuilder.execution.findExecutions(request, {
-          filter: {
-            metadata: metadataFilters[0],
-            status: statusFilter,
-          },
-          size: 100,
-        });
+        allResults = await agentBuilder.execution.findExecutions(
+          request,
+          buildFindOptions(metadataFilters[0])
+        );
       } else {
         const perComboResults = await pMap(
           metadataFilters,
           (metadataFilter) =>
-            agentBuilder.execution.findExecutions(request, {
-              filter: {
-                metadata: metadataFilter,
-                status: statusFilter,
-              },
-              size: 100,
-            }),
+            agentBuilder.execution.findExecutions(request, buildFindOptions(metadataFilter)),
           { concurrency: 5 }
         );
 
@@ -178,7 +188,11 @@ const getPendingRouteHandler = (
         });
       }
 
-      const pending = allResults.map((execution) => ({
+      const actionableResults = isExactCombo
+        ? allResults.filter((execution) => execution.status !== ExecutionStatus.completed)
+        : allResults;
+
+      const pending = actionableResults.map((execution) => ({
         executionId: execution.executionId,
         status: execution.status,
         conversationId:

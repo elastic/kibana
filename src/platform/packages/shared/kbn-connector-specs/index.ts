@@ -23,7 +23,7 @@ export {
 } from './src/auth_types/oauth_client_credentials_private_key_jwt';
 
 export { getConnectorSpec } from './src/get_connector_spec';
-export { isToolAction } from './src/connector_spec';
+export { isToolAction, TEST_CONNECTOR_SUB_ACTION } from './src/connector_spec';
 export {
   getConnectorActionErrorMeta,
   setConnectorActionErrorMeta,
@@ -34,6 +34,7 @@ export {
   ESTIMATED_JSON_OUTPUT_OVERHEAD_BYTES,
 } from './src/connector_utils';
 export { normalizeAuthorizationHeaderValue } from './src/auth_types/oauth_authz_code_and_ears_helpers';
+export { isEarsExperimentalConnector } from './src/lib/ears_experimental_utils';
 
 export { ConnectorAuthorizationError, isConnectorAuthorizationError } from './src/errors';
 export type { ConnectorAuthorizationReason } from './src/errors';

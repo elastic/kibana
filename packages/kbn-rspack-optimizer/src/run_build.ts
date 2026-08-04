@@ -22,6 +22,7 @@ export const IGNORED_WATCH_PATTERNS: RegExp[] = [
   /[\\/]node_modules[\\/]/,
   /[\\/]target[\\/]/,
   /\.tsbuildinfo$/,
+  /(^|[\\/])tsconfig[^\\/]*\.type_check\.json$/,
   /\.test\.[jt]sx?$/,
   /\.spec\.[jt]sx?$/,
   /\.stories\.[jt]sx?$/,
@@ -109,7 +110,7 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
 
     let hmrPort: number | undefined;
     if (hmr) {
-      hmrServer = new HmrServer(options.basePath);
+      hmrServer = new HmrServer(options.basePath, log);
       hmrPort = await hmrServer.start();
     }
 

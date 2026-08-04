@@ -19,12 +19,11 @@ export const NotionConnector: ConnectorSpec = {
     }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
-    supportedFeatureIds: ['workflows', 'agentBuilder'],
+    supportedFeatureIds: ['workflows', 'agentBuilder', 'contextEngine'],
   },
 
   auth: {
     types: [
-      'bearer',
       {
         type: 'oauth_authorization_code',
         overrides: {
@@ -39,6 +38,7 @@ export const NotionConnector: ConnectorSpec = {
           tokenUrl: 'https://api.notion.com/v1/oauth/token',
         },
       },
+      { type: 'bearer', isLegacy: true, defaults: {} },
     ],
     headers: {
       'Notion-Version': '2025-09-03',

@@ -13,6 +13,8 @@ import type {
   CompactionStep,
   BackgroundAgentCompleteStep,
   TodosStep,
+  AskUserQuestionStep,
+  RelevantSkillsStep,
   ConversationRoundStepType,
   Conversation,
 } from '@kbn/agent-builder-common/chat/conversation';
@@ -27,7 +29,12 @@ export type ConversationCreateRequest = Omit<
 };
 
 export type ConversationUpdateRequest = Pick<Conversation, 'id'> &
-  Partial<Pick<Conversation, 'title' | 'rounds' | 'attachments' | 'state'>>;
+  Partial<
+    Pick<
+      Conversation,
+      'title' | 'rounds' | 'attachments' | 'state' | 'status' | 'read' | 'pinned' | 'workspace_id'
+    >
+  >;
 
 export interface ConversationListOptions {
   agentId?: string;
@@ -56,7 +63,9 @@ export type PersistentConversationRoundStep =
   | ReasoningStep
   | CompactionStep
   | BackgroundAgentCompleteStep
-  | TodosStep;
+  | TodosStep
+  | AskUserQuestionStep
+  | RelevantSkillsStep;
 
 /**
  * Legacy fields that may exist in old persisted documents.

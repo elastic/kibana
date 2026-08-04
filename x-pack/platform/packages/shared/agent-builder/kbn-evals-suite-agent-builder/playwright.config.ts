@@ -13,9 +13,10 @@ export default createPlaywrightEvalsConfig({
   // under `evals/esql/`. Excluding them here prevents the recursive
   // `testDir` walk from picking them up and double-running them in the
   // agent-builder weekly cycle.
-  testIgnore: ['**/esql/**'],
+  testIgnore: ['**/esql/**', '**/skill_selection/**'],
   // CI job timeout is ~1h; keep default low and use EVALUATION_REPETITIONS
   // for longer/higher-confidence runs.
   repetitions: 1,
   timeout: 4 * 60 * 60_000, // 4 hours timeout given large datasets in use
+  workers: 2,
 });

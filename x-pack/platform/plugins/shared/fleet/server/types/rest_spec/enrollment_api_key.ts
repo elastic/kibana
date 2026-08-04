@@ -10,6 +10,7 @@ import { schema } from '@kbn/config-schema';
 import { ENROLLMENT_API_KEY_MAPPINGS } from '../../constants';
 
 import { FLEET_ENROLLMENT_API_PREFIX } from '../../../common/constants';
+import { isValidEnrollmentKeyExpiration } from '../../../common/services';
 
 import { validateKuery } from '../../routes/utils/filter_utils';
 import { EnrollmentAPIKeySchema } from '../models';
@@ -46,9 +47,10 @@ export const GetOneEnrollmentAPIKeyRequestSchema = {
   }),
 };
 
-export const EnrollmentAPIKeyResponseSchema = schema.object({
-  item: EnrollmentAPIKeySchema,
-});
+export const EnrollmentAPIKeyResponseSchema = schema.object(
+  { item: EnrollmentAPIKeySchema },
+  { meta: { id: 'enrollment_api_key_response' } }
+);
 
 export const DeleteEnrollmentAPIKeyRequestSchema = {
   params: schema.object({
@@ -72,16 +74,33 @@ export const DeleteEnrollmentAPIKeyRequestSchema = {
   }),
 };
 
-export const DeleteEnrollmentAPIKeyResponseSchema = schema.object({
-  action: schema.literal('deleted'),
-});
+export const DeleteEnrollmentAPIKeyResponseSchema = schema.object(
+  { action: schema.literal('deleted') },
+  { meta: { id: 'delete_enrollment_api_key_response' } }
+);
 
 export const PostEnrollmentAPIKeyRequestSchema = {
-  body: schema.object({
-    name: schema.maybe(schema.string()),
-    policy_id: schema.string(),
-    expiration: schema.maybe(schema.string()),
-  }),
+  body: schema.object(
+    {
+      name: schema.maybe(schema.string()),
+      policy_id: schema.string(),
+      expiration: schema.maybe(
+        schema.string({
+          maxLength: 20,
+          meta: {
+            description:
+              'The expiration time for the enrollment token, expressed as a duration (for example, 30d, 24h, 90m). By default, enrollment tokens never expire.',
+          },
+          validate: (value) => {
+            if (!isValidEnrollmentKeyExpiration(value)) {
+              return 'Expiration must be a valid duration (for example, 30d, 24h, 90m, 60s)';
+            }
+          },
+        })
+      ),
+    },
+    { meta: { id: 'new_enrollment_api_key' } }
+  ),
 };
 
 export const BulkDeleteEnrollmentAPIKeysRequestSchema = {
@@ -125,6 +144,7 @@ export const BulkDeleteEnrollmentAPIKeysRequestSchema = {
       }),
     },
     {
+      meta: { id: 'bulk_delete_enrollment_api_keys_request' },
       validate: (value) => {
         const hasTokenIds = value.tokenIds && value.tokenIds.length > 0;
         const hasKuery = value.kuery && value.kuery.trim() !== '';
@@ -136,9 +156,12 @@ export const BulkDeleteEnrollmentAPIKeysRequestSchema = {
   ),
 };
 
-export const BulkDeleteEnrollmentAPIKeysResponseSchema = schema.object({
-  action: schema.string(),
-  count: schema.number(),
-  successCount: schema.number(),
-  errorCount: schema.number(),
-});
+export const BulkDeleteEnrollmentAPIKeysResponseSchema = schema.object(
+  {
+    action: schema.string(),
+    count: schema.number(),
+    successCount: schema.number(),
+    errorCount: schema.number(),
+  },
+  { meta: { id: 'bulk_delete_enrollment_api_keys_response' } }
+);

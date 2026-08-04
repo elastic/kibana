@@ -50,14 +50,12 @@ const DATAFEED_CONFIG: Datafeed = {
 };
 
 export default function ({ getService }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
   const ml = getService('ml');
 
   describe('rule editor flyout', function () {
     this.tags(['ml']);
 
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/ecommerce');
       await ml.testResources.createDataViewIfNeeded('ft_ecommerce', 'order_date');
       await ml.testResources.setKibanaTimeZoneToUTC();
       await ml.api.createAndRunAnomalyDetectionLookbackJob(JOB_CONFIG, DATAFEED_CONFIG);
@@ -138,7 +136,10 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.ruleEditorFlyout.selectFilter('day_of_week');
       await ml.testExecution.logTestStep('save rule');
       await ml.ruleEditorFlyout.save();
-      await ml.ruleEditorFlyout.closeIfOpen();
+      await ml.ruleEditorFlyout.assertNotExists();
+      // The save success toast overlays the anomalies table actions button; dismiss it so the
+      // next menu-open click is not intercepted.
+      await ml.ruleEditorFlyout.dismissToasts();
 
       // verify if rule flyout updated its state
       await ml.anomaliesTable.ensureAnomalyActionsMenuOpen(0);
@@ -149,7 +150,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       await ml.ruleEditorFlyout.deleteRule();
       await ml.ruleEditorFlyout.confirmModalConfirmButton();
-      await ml.ruleEditorFlyout.closeIfOpen();
+      await ml.ruleEditorFlyout.assertNotExists();
 
       await ml.api.deleteFilter(filterId);
     });

@@ -455,6 +455,34 @@ describe('SharedLists', () => {
     });
   });
 
+  it('calls refreshExceptions via Refresh button when no stale filter is present', async () => {
+    const mockRefreshExceptions = jest.fn();
+
+    (useExceptionLists as jest.Mock).mockReturnValue([
+      false,
+      [exceptionList1, exceptionList2],
+      { page: 1, perPage: 20, total: 2 },
+      jest.fn(),
+      mockRefreshExceptions,
+      { field: 'created_at', order: 'desc' },
+      jest.fn(),
+    ]);
+
+    const { getByTestId } = render(
+      <TestProviders>
+        <SharedLists />
+      </TestProviders>
+    );
+
+    await waitFor(() => {
+      expect(getByTestId('refreshRulesAction-linkIcon')).toBeInTheDocument();
+    });
+
+    fireEvent.click(getByTestId('refreshRulesAction-linkIcon'));
+
+    expect(mockRefreshExceptions).toHaveBeenCalledTimes(1);
+  });
+
   it('returns focus to the create button when the create shared list flyout is closed', async () => {
     (useUserPrivileges as jest.Mock).mockReturnValue({
       ...initialUserPrivilegesState(),

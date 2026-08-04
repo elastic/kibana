@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { expectPrettyError } from '@kbn/zod-helpers/v4';
 import { RUNTIME_FIELD_COMPOSITE_TYPE } from '@kbn/data-views-plugin/common';
 import { savedDataViewSpecSchema } from './schema_saved_data_view';
 
@@ -16,7 +17,7 @@ describe('savedDataViewSpecSchema', () => {
       index_pattern: 'logs-*',
     };
 
-    expect(savedDataViewSpecSchema.validate(input)).toEqual(input);
+    expect(savedDataViewSpecSchema.parse(input)).toEqual(input);
   });
 
   it('accepts indexed field overrides with popularity', () => {
@@ -36,7 +37,7 @@ describe('savedDataViewSpecSchema', () => {
       },
     };
 
-    expect(savedDataViewSpecSchema.validate(input)).toEqual(input);
+    expect(savedDataViewSpecSchema.parse(input)).toEqual(input);
   });
 
   it('accepts primitive and composite runtime definitions with popularity', () => {
@@ -62,7 +63,7 @@ describe('savedDataViewSpecSchema', () => {
       },
     };
 
-    expect(savedDataViewSpecSchema.validate(input)).toEqual(input);
+    expect(savedDataViewSpecSchema.parse(input)).toEqual(input);
   });
 
   it('rejects popularity below 0 for indexed field overrides', () => {
@@ -75,9 +76,45 @@ describe('savedDataViewSpecSchema', () => {
       },
     };
 
-    expect(() => savedDataViewSpecSchema.validate(input)).toThrow(
-      /popularity\]: Value must be equal to or greater than \[0\]/i
-    );
+    expectPrettyError(savedDataViewSpecSchema.safeParse(input)).toMatchInlineSnapshot(`
+      "✖ Too small: expected number to be >=0
+        → at field_settings.bytes_field.popularity"
+    `);
+  });
+
+  it('accepts field_filters as an array of strings', () => {
+    const input = {
+      index_pattern: 'logs-*',
+      field_filters: ['field_a', 'field_b'],
+    };
+
+    expect(savedDataViewSpecSchema.parse(input)).toEqual(input);
+  });
+
+  it('accepts an empty field_filters array', () => {
+    const input = {
+      index_pattern: 'logs-*',
+      field_filters: [],
+    };
+
+    expect(savedDataViewSpecSchema.parse(input)).toEqual(input);
+  });
+
+  it('accepts spec without field_filters', () => {
+    const input = {
+      index_pattern: 'logs-*',
+    };
+
+    expect(savedDataViewSpecSchema.parse(input)).toEqual(input);
+  });
+
+  it('rejects field_filters with non-string values', () => {
+    const input = {
+      index_pattern: 'logs-*',
+      field_filters: [123],
+    };
+
+    expect(() => savedDataViewSpecSchema.parse(input)).toThrow();
   });
 
   it('rejects an empty field_settings key', () => {
@@ -88,6 +125,9 @@ describe('savedDataViewSpecSchema', () => {
       },
     };
 
-    expect(() => savedDataViewSpecSchema.validate(input)).toThrow(/key\(""\)/);
+    expectPrettyError(savedDataViewSpecSchema.safeParse(input)).toMatchInlineSnapshot(`
+      "✖ Invalid key in record
+        → at field_settings."
+    `);
   });
 });

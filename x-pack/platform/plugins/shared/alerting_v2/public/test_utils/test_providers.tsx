@@ -9,6 +9,8 @@ import React, { type PropsWithChildren } from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { MemoryRouter } from 'react-router-dom';
+import { MockChromeContextProvider } from '@kbn/core-chrome-browser-context-mocks';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
@@ -47,5 +49,26 @@ export function TestProviders({
         <I18nProvider>{children}</I18nProvider>
       </QueryClientProvider>
     </KibanaContextProvider>
+  );
+}
+
+/**
+ * Provider stack shared by the management list-page tests (rules, action policies, alert episodes,
+ * execution history). These pages inject services via mocked `useService` / `useKibana`, so this
+ * wrapper deliberately omits `KibanaContextProvider` and only supplies the ambient contexts the
+ * pages need: chrome (for `@kbn/app-header`), i18n, routing, and react-query.
+ */
+export function ListPageTestProviders({
+  children,
+  queryClient = createTestQueryClient(),
+}: PropsWithChildren<{ queryClient?: QueryClient }>) {
+  return (
+    <MockChromeContextProvider>
+      <I18nProvider>
+        <MemoryRouter>
+          <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+        </MemoryRouter>
+      </I18nProvider>
+    </MockChromeContextProvider>
   );
 }

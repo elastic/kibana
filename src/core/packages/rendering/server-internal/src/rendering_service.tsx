@@ -10,15 +10,17 @@
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { BehaviorSubject, firstValueFrom, of, map, catchError, take, timeout } from 'rxjs';
-import { i18n as i18nLib } from '@kbn/i18n';
+import { i18n as i18nLib, EN_LOCALE } from '@kbn/i18n';
 import type { ThemeVersion } from '@kbn/ui-shared-deps-npm';
 
+import type { Logger } from '@kbn/logging';
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import type { KibanaRequest, HttpAuth } from '@kbn/core-http-server';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
 import type { CustomBranding } from '@kbn/core-custom-branding-common';
 import type { UserStorageServiceStart } from '@kbn/core-user-storage-server';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import {
   type DarkModeValue,
   type ThemeName,
@@ -43,9 +45,9 @@ import {
   getSettingValue,
   getCommonStylesheetPaths,
   getThemeStylesheetPaths,
-  getScriptPaths,
   getBrowserLoggingConfig,
 } from './render_utils';
+import { resolveLocale } from './resolve_locale';
 import { filterUiPlugins } from './filter_ui_plugins';
 import { getApmConfig } from './get_apm_config';
 import type { InternalRenderingRequestHandlerContext } from './internal_types';
@@ -70,10 +72,14 @@ export const DEFAULT_THEME_NAME_FEATURE_FLAG = 'coreRendering.defaultThemeName';
 /** @internal */
 export class RenderingService {
   private readonly themeName$ = new BehaviorSubject<ThemeName>(DEFAULT_THEME_NAME);
+  private readonly logger: Logger;
   private airgapped: boolean = false;
   private isCoreRenderingInReactConcurrentMode: boolean = true;
+  private exposeNavDependencies: boolean = false;
   private userStorageStart?: UserStorageServiceStart;
-  constructor(private readonly coreContext: CoreContext) {}
+  constructor(private readonly coreContext: CoreContext) {
+    this.logger = coreContext.logger.get('rendering');
+  }
 
   public async preboot({
     http,
@@ -115,6 +121,12 @@ export class RenderingService {
     this.isCoreRenderingInReactConcurrentMode = await firstValueFrom(
       this.coreContext.configService.atPath<boolean>('isCoreRenderingInReactConcurrentMode')
     ).catch(() => true);
+
+    this.exposeNavDependencies = await firstValueFrom(
+      this.coreContext.configService.atPath<{ exposeNavDependencies?: boolean }>('plugins')
+    )
+      .then((pluginsConfig) => pluginsConfig?.exposeNavDependencies ?? false)
+      .catch(() => false);
 
     registerBootstrapRoute({
       router: http.createRouter<InternalRenderingRequestHandlerContext>(''),
@@ -185,6 +197,7 @@ export class RenderingService {
       packageInfo: this.coreContext.env.packageInfo,
       airgapped: this.airgapped,
       isCoreRenderingInReactConcurrentMode: this.isCoreRenderingInReactConcurrentMode,
+      exposeNavDependencies: this.exposeNavDependencies,
     };
     const staticAssetsHrefBase = http.staticAssets.getHrefBase();
     const usingCdn = http.staticAssets.isUsingCdn();
@@ -213,7 +226,7 @@ export class RenderingService {
             // locale
             userSettings?.getUserSettingLocale(request),
             // user storage
-            this.fetchUserStorageValues(request),
+            this.fetchUserStorage(request),
           ] as [
             ReturnType<typeof withAsyncDefaultValues>,
             Promise<Record<string, UserProvidedValues>>,
@@ -273,28 +286,31 @@ export class RenderingService {
     });
     const themeName = this.themeName$.getValue();
 
-    const scriptPaths = getScriptPaths({
-      themeName,
-      darkMode,
-      baseHref: staticAssetsHrefBase,
-    });
-
     const loggingConfig = await getBrowserLoggingConfig(this.coreContext.configService);
 
     const configLocale = i18nLib.getLocale();
     const translationHashes = i18n.getTranslationHashes();
     const availableLocales = i18n.getAvailableLocales();
-    // Resolve the effective locale server-side using the priority chain:
-    // 1. User profile setting
-    // 2. kibana.yml i18n.defaultLocale (configLocale)
-    const effectiveLocale =
-      userSettingLocale && translationHashes[userSettingLocale] ? userSettingLocale : configLocale;
-    let translationsUrl: string;
-    if (usingCdn) {
-      translationsUrl = `${staticAssetsHrefBase}/translations/${effectiveLocale}.json`;
-    } else {
-      const translationHash = translationHashes[effectiveLocale] ?? i18n.getTranslationHash();
-      translationsUrl = `${serverBasePath}/translations/${translationHash}/${effectiveLocale}.json`;
+    const { locale: effectiveLocale, setCookieHeader } = resolveLocale({
+      request,
+      userSettingLocale,
+      configLocale,
+      configuredLocales: availableLocales.map((entry) => entry.id),
+      translationHashes,
+      serverBasePath,
+      allowLocaleCookie: i18n.allowLocaleCookie,
+    });
+    // When the effective locale is English, the browser's pre-allocated `intl`
+    // instance is already wired to English (see kbn-i18n module initialisation).
+    // Signal null so the browser skips the HTTP fetch and react re-renders.
+    let translationsUrl: string | null = null;
+    if (effectiveLocale !== EN_LOCALE) {
+      if (usingCdn) {
+        translationsUrl = `${staticAssetsHrefBase}/translations/${effectiveLocale}.json`;
+      } else {
+        const translationHash = translationHashes[effectiveLocale] ?? i18n.getTranslationHash();
+        translationsUrl = `${serverBasePath}/translations/${translationHash}/${effectiveLocale}.json`;
+      }
     }
 
     const apmConfig = getApmConfig(request.url.pathname);
@@ -331,7 +347,6 @@ export class RenderingService {
       themeVersion,
       darkMode,
       stylesheetPaths: commonStylesheetPaths,
-      scriptPaths,
       preloadFonts,
       optimizeFontLoading: useRspack || undefined,
       customBranding: {
@@ -346,6 +361,7 @@ export class RenderingService {
         branch: env.packageInfo.branch,
         basePath,
         serverBasePath,
+        spaceId: request.spaceId,
         publicBaseUrl,
         assetsHrefBase: staticAssetsHrefBase,
         logging: loggingConfig,
@@ -396,19 +412,42 @@ export class RenderingService {
       },
     };
 
-    return `<!DOCTYPE html>${renderToStaticMarkup(<Template metadata={metadata} />)}`;
+    const cookieHeaders: Record<string, string> = i18n.allowLocaleCookie
+      ? { 'set-cookie': setCookieHeader }
+      : {};
+
+    return {
+      body: `<!DOCTYPE html>${renderToStaticMarkup(<Template metadata={metadata} />)}`,
+      headers: cookieHeaders,
+    };
   }
 
   public async stop() {}
 
-  private async fetchUserStorageValues(request: KibanaRequest): Promise<Record<string, unknown>> {
+  private async fetchUserStorage(request: KibanaRequest): Promise<Record<string, unknown>> {
     const userStorage = this.userStorageStart;
     if (!userStorage) return {};
 
     const client = userStorage.asScoped(request);
     if (!client) return {};
 
-    return client.getForInjection();
+    try {
+      return await client.getForInjection();
+    } catch (err) {
+      // Authorization errors are expected for users whose auth realm does not
+      // grant access to user-storage saved objects (e.g. certain SAML configs).
+      // Degrade gracefully so the page still renders with default values.
+      if (
+        SavedObjectsErrorHelpers.isForbiddenError(err) ||
+        SavedObjectsErrorHelpers.isNotAuthorizedError(err)
+      ) {
+        this.logger.debug(`User storage preload skipped (not authorized): ${err.message}`);
+        return {};
+      }
+
+      this.logger.error(`User storage preload failed: ${err.message}`);
+      throw err;
+    }
   }
 }
 

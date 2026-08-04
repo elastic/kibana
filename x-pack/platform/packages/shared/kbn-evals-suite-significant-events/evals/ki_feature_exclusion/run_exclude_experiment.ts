@@ -5,8 +5,13 @@
  * 2.0.
  */
 
-import { isDuplicateFeature } from '@kbn/streams-schema';
-import { identifyFeatures, type ExcludedFeatureSummary } from '@kbn/streams-ai';
+import { isDuplicateFeature } from '@kbn/significant-events-schema';
+import {
+  EMPTY_TOKENS,
+  identifyFeatures,
+  sumTokens,
+  type ExcludedFeatureSummary,
+} from '@kbn/streams-ai';
 import { featuresPrompt } from '@kbn/streams-ai/src/features/prompt';
 import { sortBy } from 'lodash';
 import type { Client } from '@elastic/elasticsearch';
@@ -42,7 +47,7 @@ export async function runExcludeExperiment({
     log,
   });
 
-  const { features: initialFeatures } = await identifyFeatures({
+  const { features: initialFeatures, tokensUsed: initialTokens } = await identifyFeatures({
     streamName: MANAGED_STREAM_NAME,
     sampleDocuments,
     systemPrompt: featuresPrompt,
@@ -50,6 +55,11 @@ export async function runExcludeExperiment({
     logger,
     signal: abortController.signal,
   });
+
+  // The exclusion flow runs identification several times, so provider token
+  // counts have to be summed across every run to be comparable with the
+  // trace-derived totals, which cover the whole task.
+  let tokensUsed = sumTokens({ accumulated: EMPTY_TOKENS, added: initialTokens });
 
   log.info(`Initial identification returned ${initialFeatures.length} features`);
 
@@ -61,6 +71,7 @@ export async function runExcludeExperiment({
       initialFeatures,
       excludedFeatures: [],
       followUpRuns: [],
+      tokens_used: tokensUsed,
     };
   }
 
@@ -79,7 +90,11 @@ export async function runExcludeExperiment({
   const outputs: ExcludeExperimentOutput['followUpRuns'] = [];
 
   for (let i = 0; i < followUpRuns; i++) {
-    const { features: rawFeatures, ignoredFeatures } = await identifyFeatures({
+    const {
+      features: rawFeatures,
+      ignoredFeatures,
+      tokensUsed: followUpTokens,
+    } = await identifyFeatures({
       streamName: MANAGED_STREAM_NAME,
       sampleDocuments,
       excludedFeatures,
@@ -88,6 +103,8 @@ export async function runExcludeExperiment({
       logger,
       signal: abortController.signal,
     });
+
+    tokensUsed = sumTokens({ accumulated: tokensUsed, added: followUpTokens });
 
     const features = rawFeatures.filter(
       (feature) =>
@@ -108,5 +125,6 @@ export async function runExcludeExperiment({
     initialFeatures,
     excludedFeatures,
     followUpRuns: outputs,
+    tokens_used: tokensUsed,
   };
 }

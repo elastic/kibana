@@ -6,4 +6,7 @@
  */
 
 export const VECTORDB_APP_ID = 'vectordb';
-export const TUTORIALS_DEEP_LINK_ID = 'tutorials';
+export const GETTING_STARTED_DEEP_LINK_ID = 'getting_started';
+export const GETTING_STARTED_PATH = `/${GETTING_STARTED_DEEP_LINK_ID}`;
+export const DEPLOYMENT_STATS_PATH = '/internal/serverless_vectordb/deployment_stats';
+export const WORKFLOWS_STATS_PATH = '/api/workflows/stats';

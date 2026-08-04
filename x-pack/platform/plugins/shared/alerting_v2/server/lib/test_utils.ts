@@ -49,26 +49,27 @@ export function createMockLogger(): jest.Mocked<Logger> {
 /**
  * Creates a standard RuleResponse for testing.
  */
-export function createRuleResponse(overrides: Partial<RuleResponse> = {}): RuleResponse {
+export function createRuleResponse(
+  overrides: Partial<Omit<RuleResponse, 'metadata'>> & {
+    metadata?: Partial<RuleResponse['metadata']>;
+  } = {}
+): RuleResponse {
+  const { metadata, ...rest } = overrides;
   return {
     id: 'rule-1',
     kind: 'alert',
-    metadata: { name: 'test-rule' },
     time_field: '@timestamp',
     schedule: { every: '1m', lookback: '5m' },
-    evaluation: {
-      query: {
-        base: 'FROM logs-* | LIMIT 10',
-      },
-    },
+    recovery_strategy: 'no_breach',
+    query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 10' } },
     grouping: { fields: [] },
-    recovery_policy: { type: 'no_breach' },
     enabled: true,
     createdBy: 'elastic_profile_uid',
     createdAt: '2025-01-01T00:00:00.000Z',
     updatedBy: 'elastic_profile_uid',
     updatedAt: '2025-01-01T00:00:00.000Z',
-    ...overrides,
+    ...rest,
+    metadata: { name: 'test-rule', ...metadata, version: metadata?.version ?? 1 },
   };
 }
 
@@ -83,11 +84,8 @@ export function createRuleSoAttributes(
     metadata: { name: 'test-rule' },
     time_field: '@timestamp',
     schedule: { every: '1m', lookback: '5m' },
-    evaluation: {
-      query: {
-        base: 'FROM logs-* | LIMIT 10',
-      },
-    },
+    recovery_strategy: 'no_breach',
+    query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 10' } },
     grouping: { fields: [] },
     enabled: true,
     createdBy: 'elastic_profile_uid',
@@ -125,6 +123,7 @@ export function createRuleExecutionPipelineInput(
     ruleId: 'rule-1',
     spaceId: 'default',
     scheduledAt: '2025-01-01T00:00:00.000Z',
+    executionUuid: 'execution-uuid',
     abortSignal: new AbortController().signal,
     ...overrides,
   };

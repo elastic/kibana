@@ -13,6 +13,7 @@ import { DataSourceType } from '../../../../../common/data_sources';
 import type { ContextWithProfileId } from '../../../profile_service';
 import type { DataSourceProfileProviderParams, RootContext } from '../../../profiles';
 import { DataSourceCategory, SolutionType } from '../../../profiles';
+import { EMPTY_CONTEXT_AWARENESS_TOOLKIT } from '../../../toolkit';
 import type { ProfileProviderServices } from '../../profile_provider_services';
 import {
   SPARKLINE_DATA_SOURCE_PROFILE_ID,
@@ -173,10 +174,10 @@ describe('sparklineDataSourceProfileProvider', () => {
           category: DataSourceCategory.Default,
           sparklineColumns,
         },
+        toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
       });
       return getCellRenderers({
         rowHeight: 1,
-        actions: {},
         dataView: {} as DataView,
         density: undefined,
       });
@@ -201,10 +202,10 @@ describe('sparklineDataSourceProfileProvider', () => {
           category: DataSourceCategory.Default,
           sparklineColumns: [],
         },
+        toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
       });
       const params = {
         rowHeight: 1,
-        actions: {},
         dataView: {} as DataView,
         density: undefined,
       };
@@ -221,11 +222,11 @@ describe('sparklineDataSourceProfileProvider', () => {
             category: DataSourceCategory.Default,
             sparklineColumns: ['bytes_spark'],
           },
+          toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
         }
       );
       const renderers = getCellRenderers({
         rowHeight: 1,
-        actions: {},
         dataView: {} as DataView,
         density: undefined,
       });
@@ -242,11 +243,11 @@ describe('sparklineDataSourceProfileProvider', () => {
             category: DataSourceCategory.Default,
             sparklineColumns: ['my_spark'],
           },
+          toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
         }
       );
       const renderers = getCellRenderers({
         rowHeight: 1,
-        actions: {},
         dataView: {} as DataView,
         density: undefined,
       });

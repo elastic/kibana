@@ -18,6 +18,7 @@ import type { SerializableRecord } from '@kbn/utility-types';
 import {
   type EmbeddableApiContext,
   apiIsPresentationContainer,
+  apiPublishesApproximation,
   apiPublishesUnifiedSearch,
 } from '@kbn/presentation-publishing';
 import {
@@ -126,6 +127,10 @@ async function getDiscoverLocationParams({
     ? embeddable.parentApi
     : undefined;
 
+  const isApproximate = apiPublishesApproximation(embeddable.parentApi)
+    ? embeddable.parentApi.isApproximate$.value
+    : false;
+
   return {
     ...args,
     query: queryToApply,
@@ -134,6 +139,7 @@ async function getDiscoverLocationParams({
     esqlControls: presentationContainer
       ? getEsqlControls(presentationContainer, args.query)
       : undefined,
+    isApproximate,
   };
 }
 

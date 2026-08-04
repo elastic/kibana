@@ -135,5 +135,35 @@ describe('ServiceNow SIR service', () => {
       expect(res).toEqual(getAddObservablesResponse()[0]);
       expectAddObservables(true);
     });
+
+    test('addObservableToIncident wraps errors with the structured context suffix', async () => {
+      mockApplicationVersion();
+      requestMock.mockImplementationOnce(() => {
+        const err = Object.assign(new Error('forbidden'), {
+          isAxiosError: true as const,
+          response: { status: 403, data: { error: { message: 'denied', detail: 'no access' } } },
+        });
+        throw err;
+      });
+
+      await expect(service.addObservableToIncident(observables[0], 'incident-1')).rejects.toThrow(
+        /\[status=403\] \[method=post\] \[endpoint=observables\]$/
+      );
+    });
+
+    test('bulkAddObservableToIncident wraps errors with the structured context suffix', async () => {
+      mockApplicationVersion();
+      requestMock.mockImplementationOnce(() => {
+        const err = Object.assign(new Error('forbidden'), {
+          isAxiosError: true as const,
+          response: { status: 403, data: { error: { message: 'denied', detail: 'no access' } } },
+        });
+        throw err;
+      });
+
+      await expect(service.bulkAddObservableToIncident(observables, 'incident-1')).rejects.toThrow(
+        /\[status=403\] \[method=post\] \[endpoint=bulk_observables\]$/
+      );
+    });
   });
 });

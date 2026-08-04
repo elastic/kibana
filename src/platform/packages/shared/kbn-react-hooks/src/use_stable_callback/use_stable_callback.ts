@@ -7,18 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useEffect, useRef } from 'react';
+import { useState } from 'react';
+import useLatest from 'react-use/lib/useLatest';
 
 /**
  * Accepts a callback and returns a function with a stable identity
  * that will always call the latest version of the callback when invoked
  */
-export const useStableCallback = <T extends (...args: never[]) => unknown>(fn: T | undefined) => {
-  const ref = useRef(fn);
+export const useStableCallback = <T extends (...args: Parameters<T>) => ReturnType<T>>(fn: T) => {
+  const latestFn = useLatest(fn);
+  const [stableFn] = useState(() => {
+    return ((...args: Parameters<T>) => latestFn.current(...args)) as T;
+  });
 
-  useEffect(() => {
-    ref.current = fn;
-  }, [fn]);
-
-  return useRef((...args: Parameters<T>) => ref.current?.(...args)).current;
+  return stableFn;
 };

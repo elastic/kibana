@@ -34,7 +34,12 @@ import {
   formatDefineStepData,
   formatRule,
   formatScheduleStepData,
+  getApiOnlyThreatMatchFields,
 } from './helpers';
+import {
+  getRulesSchemaMock,
+  getThreatMatchingSchemaMock,
+} from '../../../../../common/api/detection_engine/model/rule_schema/rule_response_schema.mock';
 import {
   mockAboutStepRule,
   mockActionsStepRule,
@@ -1167,6 +1172,37 @@ describe('helpers', () => {
       );
 
       expect(result).not.toHaveProperty<RuleCreateProps>('id');
+    });
+  });
+
+  describe('getApiOnlyThreatMatchFields', () => {
+    // https://github.com/elastic/kibana/issues/276203
+    it('returns concurrent_searches/items_per_search from a threat_match rule', () => {
+      const rule = {
+        ...getThreatMatchingSchemaMock(),
+        concurrent_searches: 4,
+        items_per_search: 2500,
+      };
+
+      const result = getApiOnlyThreatMatchFields(rule);
+
+      expect(result).toEqual({ concurrent_searches: 4, items_per_search: 2500 });
+    });
+
+    it('returns undefined values when a threat_match rule has none set', () => {
+      const rule = getThreatMatchingSchemaMock();
+
+      const result = getApiOnlyThreatMatchFields(rule);
+
+      expect(result).toEqual({ concurrent_searches: undefined, items_per_search: undefined });
+    });
+
+    it('returns an empty object for non-threat_match rules', () => {
+      const rule = getRulesSchemaMock();
+
+      const result = getApiOnlyThreatMatchFields(rule);
+
+      expect(result).toEqual({});
     });
   });
 

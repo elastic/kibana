@@ -14,7 +14,7 @@ import {
   ToolResultType,
   AgentExecutionMode,
 } from '@kbn/agent-builder-common';
-import { withExecuteToolSpan } from '@kbn/inference-tracing';
+import { withExecuteToolSpan, markToolSpanAsError } from '@kbn/inference-tracing';
 import type {
   AfterToolCallHookContext,
   BeforeToolCallHookContext,
@@ -45,6 +45,7 @@ import {
   createSkillsService,
 } from './utils';
 import { toolConfirmationId, createToolConfirmationPrompt } from './utils/prompts';
+import { enforceResultSizeLimit } from './utils/enforce_result_size_limit';
 import type { RunnerManager } from './runner';
 
 export const runTool = async <TParams = Record<string, unknown>>({
@@ -166,8 +167,8 @@ export const runInternalTool = async <TParams = Record<string, unknown>>({
 
   const toolReturn = await withExecuteToolSpan(
     tool.id,
-    { tool: { input: toolParams } },
-    async (): Promise<ToolHandlerReturn> => {
+    { tool: { input: toolParams, toolCallId, description: tool.description } },
+    async (span): Promise<ToolHandlerReturn> => {
       const schema = await tool.getSchema();
       const validation = schema.safeParse(toolParams);
       if (validation.error) {
@@ -182,8 +183,14 @@ export const runInternalTool = async <TParams = Record<string, unknown>>({
           validation.data as Record<string, unknown>,
           toolHandlerContext
         );
+        if (isToolHandlerStandardReturn(result) && hasOnlyErrorResults(result.results) && span) {
+          markToolSpanAsError(span, { result: result.results });
+        }
         return result;
       } catch (err) {
+        if (span) {
+          markToolSpanAsError(span, { error: err });
+        }
         return {
           results: [createErrorResult(err.message)],
         };
@@ -202,14 +209,18 @@ export const runInternalTool = async <TParams = Record<string, unknown>>({
           tool_result_id: result.tool_result_id ?? getToolResultId(),
         } as ToolResult)
     );
-    runToolReturn = { results: resultsWithIds };
+    // Storage guardrail: cap the total persisted size for non-MCP calls
+    const guardedResults =
+      source === 'mcp' ? resultsWithIds : enforceResultSizeLimit(resultsWithIds);
+    runToolReturn = { results: guardedResults };
 
     reportToolCallTelemetry({
       parentManager,
       toolId: tool.id,
+      toolType: tool.type,
       toolCallId,
       source,
-      results: resultsWithIds,
+      results: guardedResults,
       duration,
     });
   } else {
@@ -241,12 +252,11 @@ export const runInternalTool = async <TParams = Record<string, unknown>>({
   runToolReturn = afterToolHooksResult.toolReturn;
 
   if (runToolReturn.results && !isExcludedFromFilestore(tool.id)) {
-    runToolReturn.results.forEach((result) => {
-      resultStore.add({
-        tool_id: tool.id,
-        tool_call_id: toolCallId,
-        result,
-      });
+    resultStore.add({
+      tool_id: tool.id,
+      tool_call_id: toolCallId,
+      params: toolParams,
+      results: runToolReturn.results,
     });
   }
 
@@ -274,15 +284,17 @@ export const createToolHandlerContext = async <TParams = Record<string, unknown>
     modelProvider,
     toolsService,
     resultStore,
+    skillsStore,
     attachmentStateManager,
     logger,
     promptManager,
     stateManager,
-    filestore,
     skillServiceStart,
     toolManager,
+    experimentalFeatures,
   } = manager.deps;
   const spaceId = getCurrentSpaceId({ request, spaces });
+  const savedObjectsClient = savedObjects.getScopedClient(request);
 
   const callContext: ToolHandlerCallContext = {
     toolId,
@@ -295,8 +307,8 @@ export const createToolHandlerContext = async <TParams = Record<string, unknown>
     request,
     spaceId,
     logger,
-    esClient: elasticsearch.client.asScoped(request),
-    savedObjectsClient: savedObjects.getScopedClient(request),
+    esClient: elasticsearch.client.asScoped(request, { projectRouting: 'space' }),
+    savedObjectsClient,
     modelProvider,
     runner: manager.getRunner(),
     toolProvider: createToolProvider({
@@ -311,6 +323,7 @@ export const createToolHandlerContext = async <TParams = Record<string, unknown>
       toolParams: toolParams as Record<string, unknown>,
     }),
     resultStore: resultStore.asReadonly(),
+    skillsStore: skillsStore.asReadonly(),
     attachments: attachmentStateManager,
     skills: await createSkillsService({
       skillServiceStart,
@@ -320,11 +333,11 @@ export const createToolHandlerContext = async <TParams = Record<string, unknown>
       runner: manager.getRunner(),
     }),
     toolManager,
-    filestore,
     events: createToolEventEmitter({ eventHandler: onEvent, context: manager.context }),
     runContext: manager.context,
     executionMode: manager.deps.executionMode,
     agentConfiguration: manager.deps.agentConfiguration,
+    experimentalFeatures,
   };
 };
 
@@ -335,6 +348,7 @@ const getAgentExecutionContext = (manager: RunnerManager) => {
 const reportToolCallTelemetry = ({
   parentManager,
   toolId,
+  toolType,
   toolCallId,
   source,
   results,
@@ -342,6 +356,7 @@ const reportToolCallTelemetry = ({
 }: {
   parentManager: RunnerManager;
   toolId: string;
+  toolType: ToolType;
   toolCallId: string;
   source: string;
   results: ToolResult[];
@@ -354,7 +369,7 @@ const reportToolCallTelemetry = ({
 
   try {
     const agentContext = getAgentExecutionContext(parentManager);
-    const allErrors = results.length > 0 && results.every((r) => r.type === ToolResultType.error);
+    const allErrors = hasOnlyErrorResults(results);
 
     if (allErrors) {
       const firstError = results[0];
@@ -367,6 +382,7 @@ const reportToolCallTelemetry = ({
         conversationId: agentContext?.conversationId,
         executionId: agentContext?.executionId,
         toolId,
+        toolType,
         toolCallId,
         source,
         errorType: 'tool_error',
@@ -379,6 +395,7 @@ const reportToolCallTelemetry = ({
         conversationId: agentContext?.conversationId,
         executionId: agentContext?.executionId,
         toolId,
+        toolType,
         toolCallId,
         source,
         resultTypes: results.map((r) => r.type),
@@ -389,3 +406,6 @@ const reportToolCallTelemetry = ({
     parentManager.deps.logger.warn(`Failed to report tool call telemetry: ${e}`);
   }
 };
+
+const hasOnlyErrorResults = (results: Array<{ type: string }>): boolean =>
+  results.length > 0 && results.every((r) => r.type === ToolResultType.error);

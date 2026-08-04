@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+// Original test (remove during Scout migration): src/platform/test/functional/apps/discover/group3/_request_counts.ts
+
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -25,7 +27,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const elasticChart = getService('elasticChart');
   const log = getService('log');
 
-  describe('discover request counts', function describeIndexTests() {
+  // Failing: See https://github.com/elastic/kibana/issues/275603
+  describe.skip('discover request counts', function describeIndexTests() {
     before(async function () {
       await svlCommonPage.loginAsAdmin();
       await esArchiver.loadIfNeeded(

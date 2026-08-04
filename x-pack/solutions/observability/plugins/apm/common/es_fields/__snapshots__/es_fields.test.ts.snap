@@ -15,7 +15,45 @@ exports[`Error AGENT_VERSION 1`] = `"agent version"`;
 
 exports[`Error ANOMALY_DETECTOR_TYPE 1`] = `undefined`;
 
+exports[`Error ANOMALY_TIMESTAMP 1`] = `undefined`;
+
 exports[`Error APP_LAUNCH_TIME 1`] = `undefined`;
+
+exports[`Error ATTRIBUTE_GEN_AI_CONVERSATION_ID 1`] = `undefined`;
+
+exports[`Error ATTRIBUTE_GEN_AI_INPUT_MESSAGES 1`] = `undefined`;
+
+exports[`Error ATTRIBUTE_GEN_AI_OPERATION_NAME 1`] = `undefined`;
+
+exports[`Error ATTRIBUTE_GEN_AI_OUTPUT_MESSAGES 1`] = `undefined`;
+
+exports[`Error ATTRIBUTE_GEN_AI_PROVIDER_NAME 1`] = `undefined`;
+
+exports[`Error ATTRIBUTE_GEN_AI_REQUEST_MAX_TOKENS 1`] = `undefined`;
+
+exports[`Error ATTRIBUTE_GEN_AI_REQUEST_MODEL 1`] = `undefined`;
+
+exports[`Error ATTRIBUTE_GEN_AI_REQUEST_SEED 1`] = `undefined`;
+
+exports[`Error ATTRIBUTE_GEN_AI_REQUEST_TEMPERATURE 1`] = `undefined`;
+
+exports[`Error ATTRIBUTE_GEN_AI_REQUEST_TOP_K 1`] = `undefined`;
+
+exports[`Error ATTRIBUTE_GEN_AI_REQUEST_TOP_P 1`] = `undefined`;
+
+exports[`Error ATTRIBUTE_GEN_AI_RESPONSE_FINISH_REASONS 1`] = `undefined`;
+
+exports[`Error ATTRIBUTE_GEN_AI_RESPONSE_ID 1`] = `undefined`;
+
+exports[`Error ATTRIBUTE_GEN_AI_RESPONSE_MODEL 1`] = `undefined`;
+
+exports[`Error ATTRIBUTE_GEN_AI_SYSTEM 1`] = `undefined`;
+
+exports[`Error ATTRIBUTE_GEN_AI_SYSTEM_INSTRUCTIONS 1`] = `undefined`;
+
+exports[`Error ATTRIBUTE_GEN_AI_USAGE_INPUT_TOKENS 1`] = `undefined`;
+
+exports[`Error ATTRIBUTE_GEN_AI_USAGE_OUTPUT_TOKENS 1`] = `undefined`;
 
 exports[`Error ATTRIBUTE_HTTP_SCHEME 1`] = `undefined`;
 
@@ -142,6 +180,10 @@ exports[`Error FAAS_NAME 1`] = `undefined`;
 
 exports[`Error FAAS_TRIGGER_TYPE 1`] = `undefined`;
 
+exports[`Error GEN_AI_USAGE_INPUT_TOKENS 1`] = `undefined`;
+
+exports[`Error GEN_AI_USAGE_OUTPUT_TOKENS 1`] = `undefined`;
+
 exports[`Error HOST 1`] = `
 Object {
   "hostname": "my hostname",
@@ -166,6 +208,14 @@ exports[`Error ID 1`] = `undefined`;
 
 exports[`Error INDEX 1`] = `undefined`;
 
+exports[`Error K8S_CLUSTER_NAME 1`] = `undefined`;
+
+exports[`Error K8S_DEPLOYMENT_NAME 1`] = `undefined`;
+
+exports[`Error K8S_NODE_NAME 1`] = `undefined`;
+
+exports[`Error K8S_POD_NAME 1`] = `undefined`;
+
 exports[`Error KIND 1`] = `undefined`;
 
 exports[`Error KUBERNETES 1`] = `undefined`;
@@ -185,8 +235,6 @@ exports[`Error KUBERNETES_NAMESPACE_NAME 1`] = `undefined`;
 exports[`Error KUBERNETES_NODE_NAME 1`] = `undefined`;
 
 exports[`Error KUBERNETES_POD_NAME 1`] = `undefined`;
-
-exports[`Error KUBERNETES_POD_NAME_OTEL 1`] = `undefined`;
 
 exports[`Error KUBERNETES_POD_UID 1`] = `undefined`;
 
@@ -336,6 +384,8 @@ exports[`Error SERVICE_LANGUAGE_VERSION 1`] = `"v1337"`;
 
 exports[`Error SERVICE_NAME 1`] = `"service name"`;
 
+exports[`Error SERVICE_NAMESPACE 1`] = `undefined`;
+
 exports[`Error SERVICE_NODE_NAME 1`] = `undefined`;
 
 exports[`Error SERVICE_OVERFLOW_COUNT 1`] = `undefined`;
@@ -463,7 +513,45 @@ exports[`Span AGENT_VERSION 1`] = `"agent version"`;
 
 exports[`Span ANOMALY_DETECTOR_TYPE 1`] = `undefined`;
 
+exports[`Span ANOMALY_TIMESTAMP 1`] = `undefined`;
+
 exports[`Span APP_LAUNCH_TIME 1`] = `undefined`;
+
+exports[`Span ATTRIBUTE_GEN_AI_CONVERSATION_ID 1`] = `undefined`;
+
+exports[`Span ATTRIBUTE_GEN_AI_INPUT_MESSAGES 1`] = `undefined`;
+
+exports[`Span ATTRIBUTE_GEN_AI_OPERATION_NAME 1`] = `undefined`;
+
+exports[`Span ATTRIBUTE_GEN_AI_OUTPUT_MESSAGES 1`] = `undefined`;
+
+exports[`Span ATTRIBUTE_GEN_AI_PROVIDER_NAME 1`] = `undefined`;
+
+exports[`Span ATTRIBUTE_GEN_AI_REQUEST_MAX_TOKENS 1`] = `undefined`;
+
+exports[`Span ATTRIBUTE_GEN_AI_REQUEST_MODEL 1`] = `undefined`;
+
+exports[`Span ATTRIBUTE_GEN_AI_REQUEST_SEED 1`] = `undefined`;
+
+exports[`Span ATTRIBUTE_GEN_AI_REQUEST_TEMPERATURE 1`] = `undefined`;
+
+exports[`Span ATTRIBUTE_GEN_AI_REQUEST_TOP_K 1`] = `undefined`;
+
+exports[`Span ATTRIBUTE_GEN_AI_REQUEST_TOP_P 1`] = `undefined`;
+
+exports[`Span ATTRIBUTE_GEN_AI_RESPONSE_FINISH_REASONS 1`] = `undefined`;
+
+exports[`Span ATTRIBUTE_GEN_AI_RESPONSE_ID 1`] = `undefined`;
+
+exports[`Span ATTRIBUTE_GEN_AI_RESPONSE_MODEL 1`] = `undefined`;
+
+exports[`Span ATTRIBUTE_GEN_AI_SYSTEM 1`] = `undefined`;
+
+exports[`Span ATTRIBUTE_GEN_AI_SYSTEM_INSTRUCTIONS 1`] = `undefined`;
+
+exports[`Span ATTRIBUTE_GEN_AI_USAGE_INPUT_TOKENS 1`] = `undefined`;
+
+exports[`Span ATTRIBUTE_GEN_AI_USAGE_OUTPUT_TOKENS 1`] = `undefined`;
 
 exports[`Span ATTRIBUTE_HTTP_SCHEME 1`] = `undefined`;
 
@@ -581,6 +669,10 @@ exports[`Span FAAS_NAME 1`] = `undefined`;
 
 exports[`Span FAAS_TRIGGER_TYPE 1`] = `undefined`;
 
+exports[`Span GEN_AI_USAGE_INPUT_TOKENS 1`] = `undefined`;
+
+exports[`Span GEN_AI_USAGE_OUTPUT_TOKENS 1`] = `undefined`;
+
 exports[`Span HOST 1`] = `undefined`;
 
 exports[`Span HOST_ARCHITECTURE 1`] = `undefined`;
@@ -601,6 +693,14 @@ exports[`Span ID 1`] = `undefined`;
 
 exports[`Span INDEX 1`] = `undefined`;
 
+exports[`Span K8S_CLUSTER_NAME 1`] = `undefined`;
+
+exports[`Span K8S_DEPLOYMENT_NAME 1`] = `undefined`;
+
+exports[`Span K8S_NODE_NAME 1`] = `undefined`;
+
+exports[`Span K8S_POD_NAME 1`] = `undefined`;
+
 exports[`Span KIND 1`] = `undefined`;
 
 exports[`Span KUBERNETES 1`] = `undefined`;
@@ -620,8 +720,6 @@ exports[`Span KUBERNETES_NAMESPACE_NAME 1`] = `undefined`;
 exports[`Span KUBERNETES_NODE_NAME 1`] = `undefined`;
 
 exports[`Span KUBERNETES_POD_NAME 1`] = `undefined`;
-
-exports[`Span KUBERNETES_POD_NAME_OTEL 1`] = `undefined`;
 
 exports[`Span KUBERNETES_POD_UID 1`] = `undefined`;
 
@@ -767,6 +865,8 @@ exports[`Span SERVICE_LANGUAGE_VERSION 1`] = `undefined`;
 
 exports[`Span SERVICE_NAME 1`] = `"service name"`;
 
+exports[`Span SERVICE_NAMESPACE 1`] = `undefined`;
+
 exports[`Span SERVICE_NODE_NAME 1`] = `undefined`;
 
 exports[`Span SERVICE_OVERFLOW_COUNT 1`] = `undefined`;
@@ -894,7 +994,45 @@ exports[`Transaction AGENT_VERSION 1`] = `"agent version"`;
 
 exports[`Transaction ANOMALY_DETECTOR_TYPE 1`] = `undefined`;
 
+exports[`Transaction ANOMALY_TIMESTAMP 1`] = `undefined`;
+
 exports[`Transaction APP_LAUNCH_TIME 1`] = `undefined`;
+
+exports[`Transaction ATTRIBUTE_GEN_AI_CONVERSATION_ID 1`] = `undefined`;
+
+exports[`Transaction ATTRIBUTE_GEN_AI_INPUT_MESSAGES 1`] = `undefined`;
+
+exports[`Transaction ATTRIBUTE_GEN_AI_OPERATION_NAME 1`] = `undefined`;
+
+exports[`Transaction ATTRIBUTE_GEN_AI_OUTPUT_MESSAGES 1`] = `undefined`;
+
+exports[`Transaction ATTRIBUTE_GEN_AI_PROVIDER_NAME 1`] = `undefined`;
+
+exports[`Transaction ATTRIBUTE_GEN_AI_REQUEST_MAX_TOKENS 1`] = `undefined`;
+
+exports[`Transaction ATTRIBUTE_GEN_AI_REQUEST_MODEL 1`] = `undefined`;
+
+exports[`Transaction ATTRIBUTE_GEN_AI_REQUEST_SEED 1`] = `undefined`;
+
+exports[`Transaction ATTRIBUTE_GEN_AI_REQUEST_TEMPERATURE 1`] = `undefined`;
+
+exports[`Transaction ATTRIBUTE_GEN_AI_REQUEST_TOP_K 1`] = `undefined`;
+
+exports[`Transaction ATTRIBUTE_GEN_AI_REQUEST_TOP_P 1`] = `undefined`;
+
+exports[`Transaction ATTRIBUTE_GEN_AI_RESPONSE_FINISH_REASONS 1`] = `undefined`;
+
+exports[`Transaction ATTRIBUTE_GEN_AI_RESPONSE_ID 1`] = `undefined`;
+
+exports[`Transaction ATTRIBUTE_GEN_AI_RESPONSE_MODEL 1`] = `undefined`;
+
+exports[`Transaction ATTRIBUTE_GEN_AI_SYSTEM 1`] = `undefined`;
+
+exports[`Transaction ATTRIBUTE_GEN_AI_SYSTEM_INSTRUCTIONS 1`] = `undefined`;
+
+exports[`Transaction ATTRIBUTE_GEN_AI_USAGE_INPUT_TOKENS 1`] = `undefined`;
+
+exports[`Transaction ATTRIBUTE_GEN_AI_USAGE_OUTPUT_TOKENS 1`] = `undefined`;
 
 exports[`Transaction ATTRIBUTE_HTTP_SCHEME 1`] = `undefined`;
 
@@ -1016,6 +1154,10 @@ exports[`Transaction FAAS_NAME 1`] = `undefined`;
 
 exports[`Transaction FAAS_TRIGGER_TYPE 1`] = `undefined`;
 
+exports[`Transaction GEN_AI_USAGE_INPUT_TOKENS 1`] = `undefined`;
+
+exports[`Transaction GEN_AI_USAGE_OUTPUT_TOKENS 1`] = `undefined`;
+
 exports[`Transaction HOST 1`] = `
 Object {
   "hostname": "my hostname",
@@ -1039,6 +1181,14 @@ exports[`Transaction HTTP_RESPONSE_STATUS_CODE 1`] = `200`;
 exports[`Transaction ID 1`] = `undefined`;
 
 exports[`Transaction INDEX 1`] = `undefined`;
+
+exports[`Transaction K8S_CLUSTER_NAME 1`] = `undefined`;
+
+exports[`Transaction K8S_DEPLOYMENT_NAME 1`] = `undefined`;
+
+exports[`Transaction K8S_NODE_NAME 1`] = `undefined`;
+
+exports[`Transaction K8S_POD_NAME 1`] = `undefined`;
 
 exports[`Transaction KIND 1`] = `undefined`;
 
@@ -1065,8 +1215,6 @@ exports[`Transaction KUBERNETES_NAMESPACE_NAME 1`] = `undefined`;
 exports[`Transaction KUBERNETES_NODE_NAME 1`] = `undefined`;
 
 exports[`Transaction KUBERNETES_POD_NAME 1`] = `undefined`;
-
-exports[`Transaction KUBERNETES_POD_NAME_OTEL 1`] = `undefined`;
 
 exports[`Transaction KUBERNETES_POD_UID 1`] = `"pod1234567890abcdef"`;
 
@@ -1215,6 +1363,8 @@ exports[`Transaction SERVICE_LANGUAGE_NAME 1`] = `"nodejs"`;
 exports[`Transaction SERVICE_LANGUAGE_VERSION 1`] = `"v1337"`;
 
 exports[`Transaction SERVICE_NAME 1`] = `"service name"`;
+
+exports[`Transaction SERVICE_NAMESPACE 1`] = `undefined`;
 
 exports[`Transaction SERVICE_NODE_NAME 1`] = `undefined`;
 

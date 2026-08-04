@@ -7,7 +7,13 @@
 import React, { useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiPopover, EuiContextMenuPanel, EuiButtonIcon, EuiContextMenuItem } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiPopover,
+  EuiToolTip,
+} from '@elastic/eui';
 import type { ProcessEvent } from '../../../common';
 
 export const BUTTON_TEST_ID = 'sessionView:detailPanelAlertActionsBtn';
@@ -82,16 +88,23 @@ export const DetailPanelAlertActions = ({
     <EuiPopover
       id={uuid}
       button={
-        <EuiButtonIcon
-          display="empty"
-          size="s"
-          iconType="boxesVertical"
-          aria-label={i18n.translate('xpack.sessionView.detailPanelAlertListItem.moreButton', {
+        <EuiToolTip
+          content={i18n.translate('xpack.sessionView.detailPanelAlertListItem.moreButton', {
             defaultMessage: 'More',
           })}
-          data-test-subj={BUTTON_TEST_ID}
-          onClick={onToggleMenu}
-        />
+          disableScreenReaderOutput
+        >
+          <EuiButtonIcon
+            display="empty"
+            size="s"
+            iconType="boxesVertical"
+            aria-label={i18n.translate('xpack.sessionView.detailPanelAlertListItem.moreButton', {
+              defaultMessage: 'More',
+            })}
+            data-test-subj={BUTTON_TEST_ID}
+            onClick={onToggleMenu}
+          />
+        </EuiToolTip>
       }
       isOpen={isPopoverOpen}
       closePopover={onClosePopover}

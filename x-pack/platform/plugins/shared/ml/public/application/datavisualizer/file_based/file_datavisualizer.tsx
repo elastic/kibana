@@ -6,9 +6,8 @@
  */
 
 import type { FC } from 'react';
-import React, { useMemo, useCallback } from 'react';
+import React, { useEffect, useMemo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { useTimefilter } from '@kbn/ml-date-picker';
 import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 
@@ -27,8 +26,7 @@ import {
 import { isFullLicense } from '../../license';
 import { mlNodesAvailable, getMlNodeCount } from '../../ml_nodes_check/check_ml_nodes';
 import { checkPermission } from '../../capabilities/check_capabilities';
-import { MlPageHeader } from '../../components/page_header';
-import { PageTitle } from '../../components/page_title';
+import { MlAppHeader, useDataVisualizerBack } from '../../components/ml_app_header';
 import { buildDependencies } from './util';
 
 export const FileDataVisualizerPage: FC = () => {
@@ -43,7 +41,12 @@ export const FileDataVisualizerPage: FC = () => {
   const mlApi = useMlApi();
   const mlLocator = useMlLocator()!;
   const mlManagementLocator = useMlManagementLocatorInternal();
-  getMlNodeCount(mlApi);
+  const dataVisualizerBack = useDataVisualizerBack();
+
+  useEffect(() => {
+    getMlNodeCount(mlApi);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const getDependencies = useCallback(async () => buildDependencies(services), [services]);
 
@@ -111,16 +114,12 @@ export const FileDataVisualizerPage: FC = () => {
   return (
     <>
       <>
-        <MlPageHeader>
-          <PageTitle
-            title={
-              <FormattedMessage
-                id="xpack.ml.dataVisualizer.pageHeader"
-                defaultMessage="Data Visualizer"
-              />
-            }
-          />
-        </MlPageHeader>
+        <MlAppHeader
+          title={i18n.translate('xpack.ml.dataVisualizer.fileBasedLabel', {
+            defaultMessage: 'File upload',
+          })}
+          back={dataVisualizerBack}
+        />
         <FileDataVisualizerWrapper
           getDependencies={getDependencies}
           location={'ml-file-data-visualizer'}

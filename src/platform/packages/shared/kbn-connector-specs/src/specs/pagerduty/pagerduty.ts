@@ -60,7 +60,7 @@ export const PagerdutyConnector: ConnectorSpec = {
     }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
-    supportedFeatureIds: ['workflows', 'agentBuilder'],
+    supportedFeatureIds: ['workflows', 'agentBuilder', 'contextEngine'],
   },
 
   auth: {
@@ -94,6 +94,7 @@ export const PagerdutyConnector: ConnectorSpec = {
         .meta({
           widget: 'text',
           placeholder: 'https://mcp.pagerduty.com/mcp',
+          hidden: true,
           label: i18n.translate('connectorSpecs.pagerduty.config.serverUrl.label', {
             defaultMessage: 'MCP Server URL',
           }),

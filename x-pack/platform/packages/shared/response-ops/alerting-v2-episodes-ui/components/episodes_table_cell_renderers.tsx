@@ -17,15 +17,18 @@ import {
 } from '@elastic/eui';
 
 import type { CustomCellRenderer } from '@kbn/unified-data-table';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import type { FindRulesResponse } from '@kbn/alerting-v2-schemas';
+import { getBreachEsqlQuery } from '@kbn/alerting-v2-schemas';
 import type { AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
-import type { EpisodeActionState } from '../types/action';
-import type { AlertEpisodeGroupAction } from '../types/action';
+import type { EpisodeActionState, EpisodeStatusGroupAction } from '../types/action';
 
 import { parseEpisodeDataJson } from '../utils/episode_grouping_data';
 import { AlertingEpisodeGroupingTags } from './grouping/alerting_episode_grouping_tags';
 import { AlertEpisodeStatusBadges } from './status/status_badges';
 import { AlertEpisodeTags } from './actions/tags';
+import { AlertEpisodeSeverityBadge } from './severity/episode_severity_badge';
+import type { EpisodeSeverity } from './severity/severity_utils';
 
 type Rule = FindRulesResponse['items'][number];
 type CellRendererProps = Parameters<CustomCellRenderer[string]>[0];
@@ -42,15 +45,9 @@ export const EpisodeStatusCell = ({ row, columnId }: CellRendererProps) => {
     lastAckActor: (row.flattened.last_ack_actor as string | undefined) ?? null,
   };
 
-  const groupAction: AlertEpisodeGroupAction = {
-    groupHash: row.flattened.group_hash as string,
-    ruleId: row.flattened['rule.id'] as string | null,
-    lastDeactivateAction: (row.flattened.last_deactivate_action as string | undefined) ?? null,
+  const groupAction: EpisodeStatusGroupAction = {
     lastSnoozeAction: (row.flattened.last_snooze_action as string | undefined) ?? null,
     snoozeExpiry: (row.flattened.snooze_expiry as string | undefined) ?? null,
-    tags: (row.flattened.last_tags as string[] | undefined) ?? [],
-    lastSnoozeActor: (row.flattened.last_snooze_actor as string | undefined) ?? null,
-    lastDeactivateActor: (row.flattened.last_deactivate_actor as string | undefined) ?? null,
   };
 
   return (
@@ -68,10 +65,18 @@ export const EpisodeTagsCell = ({ row }: CellRendererProps) => {
   return <AlertEpisodeTags tags={tags} />;
 };
 
+export const EpisodeSeverityCell = ({ row }: CellRendererProps) => {
+  const severity = row.flattened.severity as EpisodeSeverity | undefined | null;
+
+  return <AlertEpisodeSeverityBadge severity={severity} />;
+};
+
 export interface EpisodeRuleCellProps extends CellRendererProps {
   rulesCache: Record<string, Rule>;
   isLoadingRules: boolean;
   rowHeight: number;
+  /** Source data views keyed by rule id, used to format grouping values via `fieldFormats`. */
+  sourceDataViewsByRule?: Map<string, DataView>;
 }
 
 export const EpisodeRuleCell = ({
@@ -80,16 +85,35 @@ export const EpisodeRuleCell = ({
   rulesCache,
   isLoadingRules,
   rowHeight,
+  sourceDataViewsByRule,
 }: EpisodeRuleCellProps) => {
   const { euiTheme } = useEuiTheme();
 
-  if (!Object.keys(rulesCache).length && isLoadingRules) {
-    return <EuiSkeletonText />;
-  }
   const ruleId = row.flattened[columnId] as string;
   const rule = rulesCache[ruleId];
+
+  if (isLoadingRules && !rule) {
+    return <EuiSkeletonText />;
+  }
+
   if (!rule) {
-    return <>{ruleId}</>;
+    const eventRuleName = row.flattened['rule.name'] as string | undefined;
+    const episodeData = parseEpisodeDataJson(row.flattened.episode_data);
+    const dataRuleName =
+      typeof episodeData.rule_name === 'string' ? episodeData.rule_name : undefined;
+    // External alerts: prefer data.rule_name when the caller put it in data.*;
+    // fall back to rule.name from the event, then rule.id, then an em dash.
+    const displayName = dataRuleName ?? eventRuleName ?? ruleId ?? '—';
+    return (
+      <EuiText
+        size="s"
+        css={css`
+          font-weight: ${euiTheme.font.weight.semiBold};
+        `}
+      >
+        {displayName}
+      </EuiText>
+    );
   }
   const ruleName = (
     <EuiText
@@ -118,6 +142,7 @@ export const EpisodeRuleCell = ({
               <AlertingEpisodeGroupingTags
                 fields={groupingFields}
                 data={episodeData}
+                dataView={sourceDataViewsByRule?.get(ruleId)}
                 data-test-subj="episodeRuleCellGroupingTags"
               />
             </EuiFlexItem>
@@ -137,7 +162,7 @@ export const EpisodeRuleCell = ({
             padding: 0;
           `}
         >
-          {rule.evaluation.query.base}
+          {getBreachEsqlQuery(rule.query)}
         </EuiCode>
       </EuiFlexItem>
     </EuiFlexGroup>

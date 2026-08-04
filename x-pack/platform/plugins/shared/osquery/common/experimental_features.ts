@@ -29,7 +29,7 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the "Export Results" button and server-side streaming export endpoints
    * for downloading osquery results as NDJSON, JSON, or CSV files.
    */
-  exportResults: false,
+  exportResults: true,
   /**
    * Enables RFC 5545 RRULE-based recurrence scheduling for packs and pack queries
    * as an alternative to native interval-based scheduling. When enabled, the
@@ -38,7 +38,7 @@ export const allowedExperimentalValues = Object.freeze({
    * Fleet config fans the pack-level schedule onto each query that doesn't have
    * its own override. Requires osquerybeat with RRULE support.
    */
-  rruleScheduling: false,
+  rruleScheduling: true,
 });
 
 type ExperimentalFeatures = { [K in keyof typeof allowedExperimentalValues]: boolean };

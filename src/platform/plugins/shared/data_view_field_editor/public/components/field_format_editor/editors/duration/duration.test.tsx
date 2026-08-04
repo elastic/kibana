@@ -33,7 +33,7 @@ const createDurationFormat = ({
     }),
     isHuman: () => isHuman,
     isHumanPrecise: () => isHumanPrecise,
-    reactConvert: jest
+    convertToReact: jest
       .fn()
       .mockImplementation((input: string) => `converted duration for ${input}`),
     type: {

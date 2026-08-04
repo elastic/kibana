@@ -35,12 +35,23 @@ export const GmailConnector: ConnectorSpec = {
     }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
-    supportedFeatureIds: ['workflows', 'agentBuilder'],
+    supportedFeatureIds: ['workflows', 'agentBuilder', 'contextEngine'],
   },
 
   auth: {
     types: [
-      'bearer',
+      {
+        type: 'ears',
+        isRecommended: true,
+        isExperimental: true,
+        overrides: {
+          meta: { scope: { disabled: true } },
+        },
+        defaults: {
+          provider: 'google',
+          scope: 'https://www.googleapis.com/auth/gmail.readonly',
+        },
+      },
       {
         type: 'oauth_authorization_code',
         overrides: {
@@ -56,16 +67,7 @@ export const GmailConnector: ConnectorSpec = {
           scope: 'https://www.googleapis.com/auth/gmail.readonly',
         },
       },
-      {
-        type: 'ears',
-        overrides: {
-          meta: { scope: { disabled: true } },
-        },
-        defaults: {
-          provider: 'google',
-          scope: 'https://www.googleapis.com/auth/gmail.readonly',
-        },
-      },
+      { type: 'bearer', isLegacy: true, defaults: {} },
     ],
     headers: {
       Accept: 'application/json',

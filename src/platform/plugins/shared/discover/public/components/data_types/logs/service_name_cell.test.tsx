@@ -13,10 +13,12 @@ import { buildDataTableRecord } from '@kbn/discover-utils';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { render, screen } from '@testing-library/react';
-import { DataGridDensity } from '@kbn/unified-data-table';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { getServiceNameCell } from './service_name_cell';
-import type { CellRenderersExtensionParams } from '../../../context_awareness';
+import {
+  EMPTY_CONTEXT_AWARENESS_TOOLKIT,
+  type ContextAwarenessToolkit,
+} from '../../../context_awareness';
 
 const core = {
   application: {
@@ -44,15 +46,14 @@ const renderCell = (
   record: DataTableRecord,
   fieldFormats: FieldFormatsStart = fieldFormatsMock
 ) => {
-  const cellRenderersExtensionParamsMock: CellRenderersExtensionParams = {
+  const toolkit: ContextAwarenessToolkit = {
+    ...EMPTY_CONTEXT_AWARENESS_TOOLKIT,
     actions: {
+      ...EMPTY_CONTEXT_AWARENESS_TOOLKIT.actions,
       addFilter: jest.fn(),
     },
-    dataView: dataViewMock,
-    density: DataGridDensity.COMPACT,
-    rowHeight: 1,
   };
-  const ServiceNameCell = getServiceNameCell(serviceNameField, cellRenderersExtensionParamsMock);
+  const ServiceNameCell = getServiceNameCell(serviceNameField, toolkit);
   render(
     <ServiceNameCell
       rowIndex={0}
@@ -105,9 +106,9 @@ describe('getServiceNameCell', () => {
     const mockFieldFormats = {
       ...fieldFormatsMock,
       getDefaultInstance: jest.fn().mockReturnValue({
-        reactConvert: jest.fn().mockImplementation((value, options) => {
+        convertToReact: jest.fn().mockImplementation((value, options) => {
           if (options?.hit?.highlight?.bytes) {
-            return <mark className="ffSearch__highlight">{value}</mark>;
+            return <mark>{value}</mark>;
           }
           return value;
         }),
@@ -124,13 +125,13 @@ describe('getServiceNameCell', () => {
 
     it('renders search highlights', () => {
       renderCell('bytes', record, mockFieldFormats);
-      expect(screen.getByText('12345').closest('mark')).toHaveClass('ffSearch__highlight');
+      expect(screen.getByText('12345').closest('mark')).toBeInTheDocument();
     });
 
     it('sets textValue to plain text extracted from the formatted value', () => {
       renderCell('bytes', record, mockFieldFormats);
       // highlights are rendered
-      expect(screen.getByText('12345').closest('mark')).toHaveClass('ffSearch__highlight');
+      expect(screen.getByText('12345').closest('mark')).toBeInTheDocument();
       // textValue is plain text extracted from the <mark> React element
       expect(screen.getByTestId('dataTableCellActionsPopover_bytes')).toHaveAttribute(
         'title',

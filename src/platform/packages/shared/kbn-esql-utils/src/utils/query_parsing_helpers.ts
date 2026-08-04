@@ -16,23 +16,34 @@ import {
   BasicPrettyPrinter,
   isStringLiteral,
 } from '@elastic/esql';
-import { CommandNames, esqlCommandRegistry, TRANSFORMATIONAL_COMMANDS } from '@kbn/esql-language';
-
+import {
+  CommandNames,
+  esqlCommandRegistry,
+  getPromqlBracketsToClose,
+  TRANSFORMATIONAL_COMMANDS,
+} from '@kbn/esql-language';
+import type { PromQLLabel } from '@elastic/esql';
 import type {
   ESQLAstItem,
   ESQLSource,
   ESQLFunction,
   ESQLColumn,
+  ESQLCommand,
   ESQLSingleAstItem,
   ESQLInlineCast,
   ESQLCommandOption,
   ESQLAstForkCommand,
+  ESQLAstQueryExpression,
 } from '@elastic/esql/types';
 import { type ESQLControlVariable, ESQLVariableType } from '@kbn/esql-types';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
-import type { monaco } from '@kbn/monaco';
+import type { monaco } from '@kbn/code-editor';
 
 const DEFAULT_ESQL_LIMIT = 1000;
+
+const DROP_COMMAND_REGEX = /DROP\s/i;
+const LEADING_PARAM_PREFIX_REGEX = /^\?+/;
+const TRAILING_CLOSERS_REGEX = /[\s)\]}]+$/;
 
 export function getRemoteClustersFromESQLQuery(esql?: string): string[] | undefined {
   if (!esql) return undefined;
@@ -163,7 +174,15 @@ export function getLimitFromESQLQuery(esql: string): number {
 
 export function removeDropCommandsFromESQLQuery(esql?: string): string {
   const pipes = (esql || '').split('|');
-  return pipes.filter((statement) => !/DROP\s/i.test(statement)).join('|');
+  return pipes.filter((statement) => !DROP_COMMAND_REGEX.test(statement)).join('|');
+}
+
+/**
+ * Converts a single TS command node to an equivalent FROM command node, preserving its
+ * source arguments. Returns the command unchanged if it isn't a TS command.
+ */
+export function convertTimeseriesCommandNodeToFrom<T extends ESQLCommand>(cmd: T): T {
+  return cmd.name === 'ts' ? { ...cmd, name: 'from' } : cmd;
 }
 
 /**
@@ -176,10 +195,7 @@ export function convertTimeseriesCommandToFrom(esql?: string): string {
   const timeseriesCommand = Walker.commands(root).find(({ name }) => name === 'ts');
   if (!timeseriesCommand) return esql || '';
 
-  const fromCommand = {
-    ...timeseriesCommand,
-    name: 'from',
-  };
+  const fromCommand = convertTimeseriesCommandNodeToFrom(timeseriesCommand);
 
   // Replace the ts command with the from command in the commands array
   const newCommands = root.commands.map((command) =>
@@ -195,11 +211,14 @@ export function convertTimeseriesCommandToFrom(esql?: string): string {
 }
 
 /**
- * When the ?_tstart and ?_tend params are used, we want to retrieve the timefield from the query.
- * @param esql:string
- * @returns string
+ * Parses the ES|QL query and returns the column used with `?_tstart`/`?_tend` named params.
+ * Returns `undefined` when the query contains no time filter params.
+ *
+ * Use this for synchronous/server-side contexts where only local parsing is needed.
+ * For client-side code with HTTP access that also needs `fieldCaps` fallback,
+ * use `getESQLTimeField` instead.
  */
-export const getTimeFieldFromESQLQuery = (esql: string) => {
+export const parseTimeFieldFromESQLQuery = (esql: string) => {
   const { root } = Parser.parse(esql);
   const functions: ESQLFunction[] = [];
 
@@ -279,7 +298,7 @@ export const getKqlSearchQueries = (esql: string) => {
  * @param lineWidth - Optional line width in characters; when provided, output is wrapped to fit. Otherwise uses the library default (80).
  */
 export const prettifyQuery = (src: string, lineWidth?: number): string => {
-  const { root } = Parser.parse(src, { withFormatting: true });
+  const { root } = Parser.parse(src, { withFormatting: true, withParens: true });
   return WrappingPrettyPrinter.print(root, {
     multiline: true,
     ...(lineWidth !== undefined && { wrap: lineWidth }),
@@ -311,7 +330,7 @@ export const getQueryColumnsFromESQLQuery = (esql: string): string[] => {
 export const getESQLQueryVariables = (esql: string): string[] => {
   const { root } = Parser.parse(esql);
   const usedVariablesInQuery = Walker.params(root);
-  return usedVariablesInQuery.map((v) => v.text.replace(/^\?+/, ''));
+  return usedVariablesInQuery.map((v) => v.text.replace(LEADING_PARAM_PREFIX_REGEX, ''));
 };
 
 /**
@@ -372,16 +391,17 @@ const hasQuestionMarkAtEndOrSecondLastPosition = (queryString: string) => {
 };
 
 /**
- * Finds the column closest to the given cursor position within an array of columns.
+ * Finds the node closest to the given cursor position within an array of located nodes.
+ * Works for any node exposing a `location` range (ES|QL columns, PromQL labels, ...).
  *
- * @param columns An array of ES|QL columns.
+ * @param columns An array of nodes with a location range.
  * @param cursorPosition The current cursor position.
- * @returns The column object closest to the cursor, or null if the columns array is empty.
+ * @returns The node closest to the cursor, or undefined if the array is empty.
  */
-export function findClosestColumn(
-  columns: ESQLColumn[],
+export function findClosestField<T extends { location: { min: number; max: number } }>(
+  columns: T[],
   cursorPosition?: monaco.Position
-): ESQLColumn | undefined {
+): T | undefined {
   if (columns.length === 0) {
     return undefined;
   }
@@ -430,17 +450,27 @@ export const getValuesFromQueryField = (queryString: string, cursorPosition?: mo
   const validQuery = `${queryInCursorPosition} ""`;
   const { root } = Parser.parse(validQuery);
   const lastCommand = root.commands[root.commands.length - 1];
-  const columns: ESQLColumn[] = [];
+  const fields: Array<ESQLColumn | PromQLLabel> = [];
 
-  walk(lastCommand, {
-    visitColumn: (node) => columns.push(node),
-  });
+  if (lastCommand?.name === 'promql') {
+    // Empty `{agent=}` loses its label; reopen and add a placeholder value so it survives.
+    const validPromqlQuery = `${queryInCursorPosition.replace(TRAILING_CLOSERS_REGEX, '')} ""`;
+    const { root: promqlRoot } = Parser.parse(
+      `${validPromqlQuery}${getPromqlBracketsToClose(validPromqlQuery)}`
+    );
 
-  const column = findClosestColumn(columns, cursorPosition);
-
-  if (column && column.name && column.name !== '*') {
-    return `${column.name}`;
+    Walker.walk(promqlRoot, {
+      promql: { visitPromqlLabel: (label) => fields.push(label) },
+    });
+  } else {
+    walk(lastCommand, {
+      visitColumn: (column) => fields.push(column),
+    });
   }
+
+  const field = findClosestField(fields, cursorPosition);
+
+  return field?.name !== '*' ? field?.name : undefined;
 };
 
 // this is for backward compatibility, if the query is of fields or functions type
@@ -514,24 +544,7 @@ export const getCategorizeColumns = (esql: string): string[] => {
   }
 
   // If there is a rename command, we need to check if the column is renamed
-  const renameCommand = root.commands.find(({ name }) => name === 'rename');
-  if (!renameCommand) {
-    return columns;
-  }
-  const renameFunctions: ESQLFunction[] = [];
-  walk(renameCommand, {
-    visitFunction: (node) => renameFunctions.push(node),
-  });
-
-  renameFunctions.forEach((renameFunction) => {
-    const { original, renamed } = getArgsFromRenameFunction(renameFunction);
-    const oldColumn = original.name;
-    const newColumn = renamed.name;
-    if (columns.includes(oldColumn)) {
-      columns[columns.indexOf(oldColumn)] = newColumn;
-    }
-  });
-  return columns;
+  return replaceColumnNamesIfRenamed(root, columns);
 };
 
 export const getSparklineColumns = (esql: string): string[] => {
@@ -584,27 +597,8 @@ export const getSparklineColumns = (esql: string): string[] => {
     }
   }
 
-  const renameCommands = root.commands.filter(({ name }) => name === 'rename');
-  if (renameCommands.length === 0) {
-    return columns;
-  }
-  const renameFunctions: ESQLFunction[] = [];
-  renameCommands.forEach((renameCommand) => {
-    walk(renameCommand, {
-      visitFunction: (node) => renameFunctions.push(node),
-    });
-  });
-
-  renameFunctions.forEach((renameFunction) => {
-    const { original, renamed } = getArgsFromRenameFunction(renameFunction);
-    const oldColumn = original.name;
-    const newColumn = renamed.name;
-    if (columns.includes(oldColumn)) {
-      columns[columns.indexOf(oldColumn)] = newColumn;
-    }
-  });
-
-  return columns;
+  // If there is a rename command, we need to check if the column is renamed
+  return replaceColumnNamesIfRenamed(root, columns);
 };
 
 /**
@@ -707,4 +701,37 @@ export const hasTimeseriesInfoCommand = (esql?: string): boolean => {
   return root.commands.some(
     ({ name }) => name === CommandNames.METRICS_INFO || name === CommandNames.TS_INFO
   );
+};
+
+/**
+ * Given an array of column names, it returns a new array with corrected column names
+ * if any of the columns is renamed in the query.
+ */
+export const replaceColumnNamesIfRenamed = (
+  root: ESQLAstQueryExpression,
+  columnNames: string[]
+): string[] => {
+  const columns = [...columnNames];
+  const renameCommands = root.commands.filter(({ name }) => name === 'rename');
+
+  if (renameCommands.length === 0) {
+    return columns;
+  }
+
+  const renameFunctions: ESQLFunction[] = [];
+  renameCommands.forEach((renameCommand) => {
+    walk(renameCommand, {
+      visitFunction: (node) => renameFunctions.push(node),
+    });
+  });
+
+  for (const renameFunction of renameFunctions) {
+    const { original, renamed } = getArgsFromRenameFunction(renameFunction);
+    const index = columns.indexOf(original.name);
+    if (index !== -1) {
+      columns[index] = renamed.name;
+    }
+  }
+
+  return columns;
 };

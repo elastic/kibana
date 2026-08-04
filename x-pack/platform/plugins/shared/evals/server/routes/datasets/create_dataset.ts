@@ -79,10 +79,8 @@ export const registerCreateDatasetRoute = ({
           }
 
           const { name, description } = request.body;
-          const coreContext = await context.core;
           const evalsContext = await context.evals;
-          const esClient = coreContext.elasticsearch.client.asCurrentUser;
-          const datasetClient = evalsContext.datasetService.getClient(esClient);
+          const datasetClient = evalsContext.datasetService.getClient();
 
           const dataset = await datasetClient.create(name, description);
 
@@ -108,7 +106,8 @@ export const registerCreateDatasetRoute = ({
             });
           }
 
-          logger.error(`Failed to create evaluation dataset: ${error}`);
+          const errorMessage = error instanceof Error ? error.message : String(error);
+          logger.error(`Failed to create evaluation dataset: ${errorMessage}`);
           return response.customError({
             statusCode: 500,
             body: { message: 'Failed to create evaluation dataset' },

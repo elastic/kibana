@@ -37,6 +37,7 @@ export interface ReportWorkflowAiChatOpenedParams {
   entryPoint: WorkflowAiChatEntryPoint;
   sessionType: WorkflowAiSessionType;
   workflowId?: string;
+  autoOpened: boolean;
 }
 
 export interface ReportWorkflowAiProposalReceivedParams {
@@ -66,4 +67,5 @@ export interface ReportWorkflowAiSessionCompletedParams {
   proposalsAccepted: number;
   proposalsDeclined: number;
   proposalsPending: number;
+  autoOpened: boolean;
 }
