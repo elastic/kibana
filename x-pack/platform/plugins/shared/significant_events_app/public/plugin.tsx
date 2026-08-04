@@ -25,7 +25,6 @@ import {
 import type { Observable } from 'rxjs';
 import { combineLatest, distinctUntilChanged, from, map, shareReplay, switchMap } from 'rxjs';
 import { SIGNIFICANT_EVENTS_APP_ROUTE } from '../common/constants';
-import type { SignificantEventsAppLocator } from '../common/locators';
 import { SignificantEventsAppLocatorDefinition } from '../common/locators';
 import { FocusedSignificantEventService } from './services/focused_significant_event_service';
 import { createKnowledgeIndicatorsPanel } from './components/knowledge_indicators_panel/create_knowledge_indicators_panel';
@@ -46,7 +45,6 @@ export class SignificantEventsAppPlugin
       SignificantEventsAppStartDependencies
     >
 {
-  private locator!: SignificantEventsAppLocator;
   // Built in start(); core guarantees every plugin start() runs before any app mount,
   // so the mount callback below can safely read it.
   private availability$!: Observable<boolean>;
@@ -63,9 +61,7 @@ export class SignificantEventsAppPlugin
   ): SignificantEventsAppPublicSetup {
     const startServicesPromise = coreSetup.getStartServices();
 
-    this.locator = pluginsSetup.share.url.locators.create(
-      new SignificantEventsAppLocatorDefinition()
-    );
+    pluginsSetup.share.url.locators.create(new SignificantEventsAppLocatorDefinition());
 
     coreSetup.application.register({
       id: SIGNIFICANT_EVENTS_APP_ID,
@@ -213,7 +209,6 @@ export class SignificantEventsAppPlugin
 
     return {
       availability$: this.availability$,
-      locator: this.locator,
       KnowledgeIndicatorsPanel: createKnowledgeIndicatorsPanel({
         coreStart,
         pluginsStart,

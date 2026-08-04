@@ -18,7 +18,6 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import type React from 'react';
 import type { Streams } from '@kbn/streams-schema';
 import type { Observable } from 'rxjs';
-import type { SignificantEventsAppLocator } from '../common/locators';
 
 export interface SignificantEventsAppSetupDependencies {
   share: SharePluginSetup;
@@ -48,11 +47,6 @@ export interface SignificantEventsAppPublicStart {
    * recreating the observable.
    */
   availability$: Observable<boolean>;
-  /**
-   * Typed locator for linking into the app (registered under
-   * SIGNIFICANT_EVENTS_APP_LOCATOR_ID).
-   */
-  locator: SignificantEventsAppLocator;
   /**
    * Embeddable Knowledge Indicators panel for use in streams_app's stream
    * overview.  Rendered outside the SEA app tree — carries its own
