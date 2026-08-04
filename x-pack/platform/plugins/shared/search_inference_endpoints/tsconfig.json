@@ -1,7 +1,7 @@
 {
   "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
-    "outDir": "target/types",
+    "outDir": "target/types"
   },
   "include": [
     "__mocks__/**/*",
@@ -52,9 +52,8 @@
     "@kbn/analytics",
     "@kbn/datemath",
     "@kbn/core-http-browser",
-    "@kbn/es-errors"
+    "@kbn/es-errors",
+    "@kbn/app-header"
   ],
-  "exclude": [
-    "target/**/*"
-  ]
+  "exclude": ["target/**/*"]
 }

@@ -7,14 +7,14 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  EuiButton,
-  EuiButtonEmpty,
   EuiCallOut,
   EuiEmptyPrompt,
   EuiLoadingSpinner,
   EuiPageTemplate,
   EuiSpacer,
 } from '@elastic/eui';
+import { AppHeader } from '@kbn/app-header';
+import type { AppHeaderMenu } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
 import type { Location } from 'history';
 import { useHistory } from 'react-router-dom';
@@ -194,6 +194,28 @@ export const ModelSettings: React.FC = () => {
 
   const showFeatureSections = enableAi && featureSpecificModels;
 
+  const menu = useMemo<AppHeaderMenu>(
+    () => ({
+      ...(canManage
+        ? {
+            primaryActionItem: {
+              id: 'saveSettings',
+              label: i18n.translate('xpack.searchInferenceEndpoints.settings.saveButton', {
+                defaultMessage: 'Save settings',
+              }),
+              iconType: 'save' as const,
+              run: handleSave,
+              testId: 'save-settings-button',
+              disableButton: !isDirty || !defaultModelValidation.isValid,
+              isLoading: isFeatureSaving,
+            },
+          }
+        : {}),
+      items: [],
+    }),
+    [canManage, defaultModelValidation.isValid, handleSave, isDirty, isFeatureSaving]
+  );
+
   if (connectorsLoading || isLoading) {
     return (
       <EuiPageTemplate.Section
@@ -212,44 +234,12 @@ export const ModelSettings: React.FC = () => {
 
   return (
     <>
-      <EuiPageTemplate.Header
-        data-test-subj="modelSettingsPageHeader"
-        pageTitle={i18n.translate('xpack.searchInferenceEndpoints.settings.title', {
+      <AppHeader
+        title={i18n.translate('xpack.searchInferenceEndpoints.settings.title', {
           defaultMessage: 'Feature settings',
         })}
-        bottomBorder
-        paddingSize="none"
-        restrictWidth={true}
-        rightSideItems={[
-          ...(canManage
-            ? [
-                <EuiButton
-                  fill
-                  onClick={handleSave}
-                  isLoading={isFeatureSaving}
-                  isDisabled={!isDirty || !defaultModelValidation.isValid}
-                  data-test-subj="save-settings-button"
-                >
-                  {i18n.translate('xpack.searchInferenceEndpoints.settings.saveButton', {
-                    defaultMessage: 'Save settings',
-                  })}
-                </EuiButton>,
-              ]
-            : []),
-          <EuiButtonEmpty
-            iconType="popout"
-            iconSide="right"
-            iconSize="s"
-            flush="both"
-            target="_blank"
-            data-test-subj="settings-api-documentation"
-            href={docLinks.featureSettings}
-          >
-            {i18n.translate('xpack.searchInferenceEndpoints.settings.documentationLabel', {
-              defaultMessage: 'Documentation',
-            })}
-          </EuiButtonEmpty>,
-        ]}
+        menu={menu}
+        docLink={docLinks.featureSettings}
       />
       <EuiSpacer size="l" />
       <EuiPageTemplate.Section
