@@ -22,7 +22,7 @@ const { executeEsql: TOOL_ID_EXECUTE_ESQL } = platformCoreTools;
 const {
   searchKnowledgeIndicators: TOOL_ID_KI_SEARCH,
   searchEvent: TOOL_ID_EVENT_SEARCH,
-  discoveryWrite: TOOL_ID_DISCOVERY_WRITE,
+  eventsWrite: TOOL_ID_EVENTS_WRITE,
 } = platformSignificantEventsTools;
 
 export interface ToolUsageScore {
@@ -50,20 +50,20 @@ export const scoreToolUsage = ({
         };
   }
 
-  if (!calledTools.has(TOOL_ID_DISCOVERY_WRITE)) {
+  if (!calledTools.has(TOOL_ID_EVENTS_WRITE)) {
     return {
       score: 0,
-      label: `missing-${TOOL_ID_DISCOVERY_WRITE}`,
-      explanation: `${TOOL_ID_DISCOVERY_WRITE} was not called — required to emit at least one discovery`,
+      label: `missing-${TOOL_ID_EVENTS_WRITE}`,
+      explanation: `${TOOL_ID_EVENTS_WRITE} was not called — required to emit at least one discovery`,
     };
   }
 
-  const persistenceCalls = summarizePersistenceCalls(steps, TOOL_ID_DISCOVERY_WRITE);
+  const persistenceCalls = summarizePersistenceCalls(steps, TOOL_ID_EVENTS_WRITE);
   if (!persistenceCalls.valid) {
     return {
       score: 0.75,
-      label: 'multiple-discovery-write-calls',
-      explanation: `${TOOL_ID_DISCOVERY_WRITE} was called ${persistenceCalls.count} times without one justified partial-failure retry`,
+      label: 'multiple-events-write-calls',
+      explanation: `${TOOL_ID_EVENTS_WRITE} was called ${persistenceCalls.count} times without one justified partial-failure retry`,
     };
   }
 
