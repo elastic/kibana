@@ -315,11 +315,16 @@ export const ConnectorIconsMap: Map<
     lazy(() => import(/* webpackChunkName: "connectorIconawsxray" */ './specs/aws_x_ray/icon')),
   ],
   [
-    '.prometheus_alertmanager',
+    '.prometheus',
+    lazy(() => import(/* webpackChunkName: "connectorIconPrometheus" */ './specs/prometheus/icon')),
+  ],
+
+  [
+    '.google_cloud_monitoring',
     lazy(
       () =>
         import(
-          /* webpackChunkName: "connectorIconPrometheusAlertmanager" */ './specs/prometheus_alertmanager/icon'
+          /* webpackChunkName: "connectorIcongooglecloudmonitoring" */ './specs/google_cloud_monitoring/icon'
         )
     ),
   ],

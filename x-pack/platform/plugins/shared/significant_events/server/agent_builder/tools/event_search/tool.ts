@@ -183,6 +183,11 @@ export function createSearchEventsTool({
         defaultMessage:
           'Never re-call this tool with the same filters (rule_uuids, stream_names, topology_feature_ids, query) and a different per_page to retry — per_page only controls page size. When has_more is true, set page to the next_page value from the previous response with all other parameters unchanged. When has_more is false, the result set is complete; do not re-query.',
       })}
+
+      ${i18n.translate('xpack.significantEvents.agentBuilder.tools.eventSearch.description.line3', {
+        defaultMessage:
+          'A compact event caps its signals list and sets signals_truncated to true when a long-running event has more signals than shown; total_signals holds the real count. To read every signal for such an event, call again with view: full and event_ids: [event_id].',
+      })}
     `,
     schema: searchEventsSchema,
     tags: ['streams', 'significant_events'],
