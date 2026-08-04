@@ -101,14 +101,26 @@ describe('discover session API transforms', () => {
     },
   };
 
+  const withControlGroupJson = (controlGroupJson: string) => ({
+    ...discoverSessionAttributes,
+    tabs: discoverSessionAttributes.tabs.map((tab, index) =>
+      index === 1
+        ? {
+            ...tab,
+            attributes: { ...tab.attributes, controlGroupJson },
+          }
+        : tab
+    ),
+  });
+
   describe('transform out', () => {
     it('maps saved object attributes to API data', () => {
-      const transformed = transformDiscoverSessionOut(discoverSessionAttributes);
+      const { sessionState: transformed } = transformDiscoverSessionOut(discoverSessionAttributes);
       expect(transformed).toEqual(discoverSessionApiData);
     });
 
     it('extracts tag IDs from saved object references', () => {
-      const transformed = transformDiscoverSessionOut(discoverSessionAttributes, [
+      const { sessionState: transformed } = transformDiscoverSessionOut(discoverSessionAttributes, [
         { type: 'tag', id: 'tag-1', name: 'tag-ref-tag-1' },
         { type: 'index-pattern', id: 'data-view-1', name: 'data-view-ref' },
       ]);
@@ -132,8 +144,58 @@ describe('discover session API transforms', () => {
         ),
       };
 
-      const transformed = transformDiscoverSessionOut(attributes);
+      const { sessionState: transformed } = transformDiscoverSessionOut(attributes);
       expect(transformed.tabs[0].sort).toEqual([{ name: '@timestamp', direction: 'desc' }]);
+    });
+
+    it('omits invalid stored control panels and reports a warning', () => {
+      const attributes = withControlGroupJson(
+        JSON.stringify({
+          valid: expectedControlGroup['control-1'],
+          invalid: { order: 1, type: ESQL_CONTROL },
+        })
+      );
+
+      const { sessionState: transformed, warnings } = transformDiscoverSessionOut(attributes);
+
+      expect(transformed.tabs[1].control_panels?.map(({ id }) => id)).toEqual(['valid']);
+      expect(warnings).toEqual([
+        expect.objectContaining({
+          type: 'dropped_panel',
+          tab_id: attributes.tabs[1].id,
+          panel_id: 'invalid',
+        }),
+      ]);
+    });
+
+    it('omits control_panels when all stored entries are invalid', () => {
+      const attributes = withControlGroupJson(JSON.stringify({ invalid: { type: ESQL_CONTROL } }));
+
+      const { sessionState: transformed, warnings } = transformDiscoverSessionOut(attributes);
+
+      expect(transformed.tabs[1].control_panels).toBeUndefined();
+      expect(warnings).toEqual([
+        expect.objectContaining({
+          type: 'dropped_panel',
+          tab_id: attributes.tabs[1].id,
+          panel_id: 'invalid',
+        }),
+      ]);
+    });
+
+    it('omits control_panels and reports a warning when its JSON container is unreadable', () => {
+      const attributes = withControlGroupJson('not-json');
+
+      const { sessionState: transformed, warnings } = transformDiscoverSessionOut(attributes);
+
+      expect(transformed.tabs[1].control_panels).toBeUndefined();
+      expect(warnings).toEqual([
+        expect.objectContaining({
+          type: 'dropped_property',
+          tab_id: attributes.tabs[1].id,
+          key: 'control_panels',
+        }),
+      ]);
     });
   });
 
@@ -469,15 +531,16 @@ describe('discover session API transforms', () => {
   describe('round-trip', () => {
     it('round-trips fixture API data through persistence', () => {
       const { attributes, references } = transformDiscoverSessionIn(discoverSessionApiData);
-      const roundTripped = transformDiscoverSessionOut(attributes, references);
+      const { sessionState: roundTripped } = transformDiscoverSessionOut(attributes, references);
 
       expect(roundTripped).toEqual(discoverSessionApiData);
     });
 
     it('round-trips fixture saved object attributes through API', () => {
-      const apiDataFromStored = transformDiscoverSessionOut(discoverSessionAttributes);
+      const { sessionState: apiDataFromStored } =
+        transformDiscoverSessionOut(discoverSessionAttributes);
       const { attributes, references } = transformDiscoverSessionIn(apiDataFromStored);
-      const roundTripped = transformDiscoverSessionOut(attributes, references);
+      const { sessionState: roundTripped } = transformDiscoverSessionOut(attributes, references);
 
       expect(apiDataFromStored).toEqual(discoverSessionApiData);
       expect(roundTripped).toEqual(discoverSessionApiData);
@@ -486,7 +549,7 @@ describe('discover session API transforms', () => {
 
     it('round-trips fixture saved object attributes preserving API-representable persistence values', () => {
       const reverted = transformDiscoverSessionIn(
-        transformDiscoverSessionOut(discoverSessionAttributes)
+        transformDiscoverSessionOut(discoverSessionAttributes).sessionState
       ).attributes;
       const expected = transformDiscoverSessionIn(discoverSessionApiData).attributes;
 
@@ -512,7 +575,7 @@ describe('discover session API transforms', () => {
 
   it('round-trips API data and preserves semantic values', () => {
     const { attributes, references } = transformDiscoverSessionIn(apiData);
-    const roundTripped = transformDiscoverSessionOut(attributes, references);
+    const { sessionState: roundTripped } = transformDiscoverSessionOut(attributes, references);
     const reverted = transformDiscoverSessionIn(roundTripped);
 
     expect(roundTripped).toMatchObject(apiData);

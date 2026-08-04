@@ -12,9 +12,12 @@ import type { DiscoverSessionControlPanels } from '../schema';
 import { transformControlPanelsIn, transformControlPanelsOut } from './transform_control_panels';
 
 describe('control panel transforms', () => {
+  const transformOut = (controlGroupJson: string | undefined) =>
+    transformControlPanelsOut(controlGroupJson, 'tab-1');
+
   describe('transformControlPanelsOut', () => {
     it('maps stored controlGroupJson to API control_panels and normalizes legacy type', () => {
-      const result = transformControlPanelsOut(
+      const { panels } = transformOut(
         JSON.stringify({
           b: {
             order: 1,
@@ -43,7 +46,7 @@ describe('control panel transforms', () => {
         })
       );
 
-      expect(result).toEqual([
+      expect(panels).toEqual([
         {
           id: 'a',
           type: ESQL_CONTROL,
@@ -75,38 +78,61 @@ describe('control panel transforms', () => {
       ]);
     });
 
-    it('throws when control JSON is invalid', () => {
-      expect(() => transformControlPanelsOut('not-json')).toThrow(
-        'controlGroupJson is not valid JSON'
+    it('returns a warning when control JSON is invalid', () => {
+      const { panels, warnings } = transformOut('not-json');
+
+      expect(panels).toBeUndefined();
+      expect(warnings).toEqual([
+        expect.objectContaining({
+          type: 'dropped_property',
+          tab_id: 'tab-1',
+          key: 'control_panels',
+        }),
+      ]);
+    });
+
+    it('returns a warning when control JSON is not an object', () => {
+      const { panels, warnings } = transformOut('[]');
+
+      expect(panels).toBeUndefined();
+      expect(warnings).toEqual([
+        expect.objectContaining({
+          type: 'dropped_property',
+          tab_id: 'tab-1',
+          key: 'control_panels',
+        }),
+      ]);
+    });
+
+    it('returns no panels or warnings when controlGroupJson is undefined', () => {
+      expect(transformOut(undefined)).toEqual({ panels: undefined, warnings: [] });
+    });
+
+    it('returns a warning when a stored panel entry is malformed', () => {
+      const { panels, warnings } = transformOut(
+        JSON.stringify({
+          bad: null,
+          good: {
+            order: 0,
+            type: 'esqlControl',
+            control_type: 'STATIC_VALUES',
+            variable_name: 'foo',
+            variable_type: 'values',
+            available_options: ['a'],
+            selected_options: ['a'],
+            single_select: true,
+          },
+        })
       );
-    });
 
-    it('returns undefined when controlGroupJson is undefined', () => {
-      expect(transformControlPanelsOut(undefined)).toBeUndefined();
-    });
-
-    it('throws when stored panel entries are malformed', () => {
-      expect(() =>
-        transformControlPanelsOut(
-          JSON.stringify({
-            bad: null,
-            good: {
-              order: 0,
-              type: 'esqlControl',
-              control_type: 'STATIC_VALUES',
-              variable_name: 'foo',
-              variable_type: 'values',
-              available_options: ['a'],
-              selected_options: ['a'],
-              single_select: true,
-            },
-          })
-        )
-      ).toThrow('controlGroupJson must be a JSON object');
+      expect(panels?.map(({ id }) => id)).toEqual(['good']);
+      expect(warnings).toEqual([
+        expect.objectContaining({ type: 'dropped_panel', tab_id: 'tab-1', panel_id: 'bad' }),
+      ]);
     });
 
     it('converts legacy camelCase config keys to snake_case', () => {
-      const result = transformControlPanelsOut(
+      const { panels } = transformOut(
         JSON.stringify({
           'control-1': {
             order: 0,
@@ -123,7 +149,7 @@ describe('control panel transforms', () => {
         })
       );
 
-      expect(result).toEqual([
+      expect(panels).toEqual([
         {
           id: 'control-1',
           type: ESQL_CONTROL,
@@ -141,8 +167,8 @@ describe('control panel transforms', () => {
       ]);
     });
 
-    it('returns undefined for empty controlGroupJson object', () => {
-      expect(transformControlPanelsOut('{}')).toBeUndefined();
+    it('returns no panels or warnings for an empty controlGroupJson object', () => {
+      expect(transformOut('{}')).toEqual({ panels: undefined, warnings: [] });
     });
   });
 
@@ -180,7 +206,7 @@ describe('control panel transforms', () => {
 
     it('round-trips API control_panels through stored controlGroupJson', () => {
       const stored = transformControlPanelsIn(controlPanels);
-      expect(transformControlPanelsOut(stored)).toEqual(controlPanels);
+      expect(transformOut(stored).panels).toEqual(controlPanels);
     });
 
     it('round-trips legacy stored controlGroupJson through API control_panels', () => {
@@ -211,10 +237,10 @@ describe('control panel transforms', () => {
         },
       });
 
-      const apiPanels = transformControlPanelsOut(legacyStored);
+      const { panels: apiPanels } = transformOut(legacyStored);
       const storedAgain = transformControlPanelsIn(apiPanels);
 
-      expect(transformControlPanelsOut(storedAgain)).toEqual(apiPanels);
+      expect(transformOut(storedAgain).panels).toEqual(apiPanels);
     });
   });
 
