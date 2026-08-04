@@ -1299,6 +1299,7 @@ const componentStyles = {
       backgroundColor: euiTheme.colors.backgroundBasePlain,
       '& .euiSelectableListItem': {
         padding: 0,
+        borderRadius: 0,
         borderBottom: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
       },
       '& .euiSelectableListItem:last-child': {
@@ -1350,11 +1351,17 @@ const componentStyles = {
       },
       '& .euiSelectableListItem__content': {
         gap: 0,
+        borderRadius: 0,
       },
       '& .euiSelectableListItem__text': {
         padding: 0,
+        borderRadius: 0,
         // Never underline option text — EUI focus/hover styles add it by default
         textDecoration: 'none !important',
+      },
+      // EuiListItemLayout defaults to a small radius; keep category rows square.
+      '& .euiListItemLayout': {
+        borderRadius: 0,
       },
       // EUI keeps a focused row after mouseDown; suppress that so only hover OR our
       // keyboard-active row shows the highlight (one at a time).

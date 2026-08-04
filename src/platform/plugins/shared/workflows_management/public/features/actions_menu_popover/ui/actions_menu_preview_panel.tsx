@@ -894,10 +894,14 @@ const previewStepRowStyles = {
       gap: '11px',
       backgroundColor: euiTheme.colors.backgroundBasePlain,
       border: 'none',
+      borderBottom: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
       borderRadius: 0,
       cursor: 'pointer',
       textAlign: 'left',
       margin: 0,
+      '&:last-child': {
+        borderBottom: 'none',
+      },
       '&:hover': {
         backgroundColor: euiTheme.colors.backgroundBaseSubdued,
       },
