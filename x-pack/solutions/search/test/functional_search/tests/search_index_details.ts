@@ -42,8 +42,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const indexWithoutDataName = 'search-empty-index';
   const indexDoesNotExistName = 'search-not-found';
 
-  // Failing: See https://github.com/elastic/kibana/issues/248780
-  describe.skip('Search index details page', function () {
+  describe('Search index details page', function () {
     describe('Solution Nav - Search', function () {
       let cleanUp: () => Promise<unknown>;
       let spaceCreated: { id: string } = { id: '' };

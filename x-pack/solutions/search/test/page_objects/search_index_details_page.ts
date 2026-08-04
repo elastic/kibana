@@ -201,7 +201,11 @@ export function SearchIndexDetailPageProvider({ getService, getPageObjects }: Ft
 
     async expectAddFieldToBeEnabled() {
       await testSubjects.existOrFail('indexDetailsMappingsAddField');
-      const isMappingsFieldEnabled = await testSubjects.isEnabled('indexDetailsMappingsAddField');
+      // The button stays disabled until the async user-privileges request resolves,
+      // so poll for the enabled state instead of sampling it once.
+      const isMappingsFieldEnabled = await testSubjects.waitForEnabled(
+        'indexDetailsMappingsAddField'
+      );
       expect(isMappingsFieldEnabled).to.be(true);
     },
 
