@@ -88,6 +88,7 @@
     "@kbn/core-analytics-server-mocks",
     "@kbn/cps-server-utils",
     "@kbn/cps-utils",
+    "@kbn/core-saved-objects-common",
   ],
   "exclude": ["target/**/*"]
 }
