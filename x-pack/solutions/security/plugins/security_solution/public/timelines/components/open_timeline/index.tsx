@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux-v7';
 import { encode } from '@kbn/rison';
 import type { State } from '../../../common/store';
@@ -23,6 +23,7 @@ import type { SortFieldTimeline } from '../../../../common/api/timeline';
 import { TimelineId } from '../../../../common/types/timeline';
 import type { TimelineModel } from '../../store/model';
 import { timelineSelectors } from '../../store';
+import { getTimelineShowStatusByIdSelector } from '../../store/selectors';
 import { createTimeline as dispatchCreateNewTimeline } from '../../store/actions';
 import { useGetAllTimeline } from '../../containers/all';
 import { OpenTimeline } from './open_timeline';
@@ -208,6 +209,20 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
       timelineStatus,
       onlyFavorites,
     ]);
+
+    // Refetch when the active timeline modal closes so that savedSearchId (ESQL) and
+    // other fields saved during the session are reflected in the compatibility check.
+    const getTimelineShowStatus = useMemo(() => getTimelineShowStatusByIdSelector(), []);
+    const { show: activeTimelineVisible } = useSelector((state: State) =>
+      getTimelineShowStatus(state, TimelineId.active)
+    );
+    const prevActiveTimelineVisible = useRef(activeTimelineVisible);
+    useEffect(() => {
+      if (prevActiveTimelineVisible.current && !activeTimelineVisible) {
+        refetch();
+      }
+      prevActiveTimelineVisible.current = activeTimelineVisible;
+    }, [activeTimelineVisible, refetch]);
 
     /** Invoked when the user presses enters to submit the text in the search input */
     const onQueryChange: OnQueryChange = useCallback((query: EuiSearchBarQuery) => {

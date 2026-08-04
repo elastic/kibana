@@ -238,11 +238,26 @@ export const updateTimelineShowTimeline = ({
 }: UpdateShowTimelineProps): TimelineById => {
   const timeline = timelineById[id];
 
+  // When a super timeline is closed, reset its transient fields so the footer
+  // reverts to a blank timeline state rather than continuing to show super timeline metadata.
+  const superTimelineReset =
+    !show && timeline.isSuperTimeline
+      ? {
+          isSuperTimeline: false,
+          superTimelineSourceIds: [],
+          superTimelineSourceTitles: [],
+          superTimelineDescriptions: [],
+          title: '',
+          description: '',
+        }
+      : {};
+
   return {
     ...timelineById,
     [id]: {
       ...timeline,
       show,
+      ...superTimelineReset,
     },
   };
 };

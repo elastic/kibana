@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { EuiBasicTable } from '@elastic/eui';
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -37,6 +37,10 @@ import {
   UtilityBarText,
 } from '../../../common/components/utility_bar';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { useSelector } from 'react-redux-v7';
+import { TimelineId } from '../../../../common/types/timeline';
+import { getTimelineShowStatusByIdSelector } from '../../../timelines/store/selectors';
+import type { State } from '../../../common/store';
 import { useGetTimelinesByIds } from './use_get_timelines_by_ids';
 import { NO_TIMELINES_ATTACHED, TIMELINE_DISPLAY_NAME } from './translations';
 
@@ -83,6 +87,20 @@ export const CaseViewTimelines: React.FC<CommonAttachmentTabViewProps> = ({ case
   });
 
   const tableRef = useRef<EuiBasicTable<OpenTimelineResult> | null>(null);
+
+  // Refetch when the active timeline modal closes so that savedSearchId (ESQL) and
+  // other fields saved during the session are reflected in the compatibility check.
+  const getTimelineShowStatus = useMemo(() => getTimelineShowStatusByIdSelector(), []);
+  const { show: activeTimelineVisible } = useSelector((state: State) =>
+    getTimelineShowStatus(state, TimelineId.active)
+  );
+  const prevActiveTimelineVisible = useRef(activeTimelineVisible);
+  useEffect(() => {
+    if (prevActiveTimelineVisible.current && !activeTimelineVisible) {
+      refetch();
+    }
+    prevActiveTimelineVisible.current = activeTimelineVisible;
+  }, [activeTimelineVisible, refetch]);
 
   const queryTimelineById = useQueryTimelineById();
   const onOpenTimeline = useCallback<OnOpenTimeline>(

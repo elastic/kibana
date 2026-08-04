@@ -346,6 +346,45 @@ describe('Timeline', () => {
         },
       });
     });
+
+    test('should reset super timeline fields when a super timeline is closed', () => {
+      // WHY: Super Timeline is transient and read-only. When the modal is closed the footer
+      // must revert to a blank timeline state, not continue showing "Super Timeline" metadata.
+      const superTimelineById: TimelineById = {
+        foo: {
+          ...basicTimeline,
+          show: true,
+          isSuperTimeline: true,
+          title: 'Super Timeline',
+          description: 'aggregated view',
+          superTimelineSourceIds: ['id-1', 'id-2'],
+          superTimelineSourceTitles: ['Alpha', 'Beta'],
+          superTimelineDescriptions: [
+            {
+              savedObjectId: 'id-1',
+              title: 'Alpha',
+              description: 'desc',
+              updatedBy: null,
+              updated: null,
+            },
+          ],
+        },
+      };
+
+      const update = updateTimelineShowTimeline({
+        id: 'foo',
+        show: false,
+        timelineById: superTimelineById,
+      });
+
+      expect(update.foo.show).toBe(false);
+      expect(update.foo.isSuperTimeline).toBe(false);
+      expect(update.foo.title).toBe('');
+      expect(update.foo.description).toBe('');
+      expect(update.foo.superTimelineSourceIds).toEqual([]);
+      expect(update.foo.superTimelineSourceTitles).toEqual([]);
+      expect(update.foo.superTimelineDescriptions).toEqual([]);
+    });
   });
 
   describe('#upsertTimelineColumn', () => {
