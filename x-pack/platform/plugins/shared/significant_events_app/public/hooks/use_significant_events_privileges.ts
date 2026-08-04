@@ -24,7 +24,7 @@ export function useSignificantEventsPrivileges() {
   // The composite gate (rollout flag × Enterprise license × pricing tier) is computed
   // once in the plugin's start() and multicast through the services context — every
   // feature-flag evaluation POSTs a usage counter, so components must not recreate
-  // the observable. undefined means the first emission hasn't arrived yet (loading).
+  // the observable.
   const significantEventsAvailable = useObservable(availability$);
 
   return {

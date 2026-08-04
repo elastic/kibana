@@ -10,6 +10,7 @@
 import { expect } from '@kbn/scout/ui';
 import type { PageObjects } from '@kbn/scout';
 import type { TracesExperiencePage } from './page_objects';
+import type { TracesFlyout } from './page_objects/flyout';
 
 /**
  * Waits for the traces data-source profile to have engaged before assertions
@@ -37,6 +38,12 @@ async function waitForTracesProfileApplied(
   }
 
   await pageObjects.dataGrid.waitForDocTableRendered();
+}
+
+export async function openServiceFlyoutFromAboutSection(flyout: TracesFlyout): Promise<void> {
+  await expect(flyout.about.serviceNameLink).toBeVisible();
+  await flyout.about.serviceNameLink.click();
+  await expect(flyout.serviceFlyout.container).toBeVisible({ timeout: 15000 });
 }
 
 export async function expectTracesExperienceEnabled(
