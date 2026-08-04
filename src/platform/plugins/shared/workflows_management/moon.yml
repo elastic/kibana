@@ -55,7 +55,6 @@ dependsOn:
   - '@kbn/cell-actions'
   - '@kbn/ui-actions-plugin'
   - '@kbn/storybook'
-  - '@kbn/ui-chrome-layout'
   - '@kbn/react-field'
   - '@kbn/storage-adapter'
   - '@kbn/occ'
