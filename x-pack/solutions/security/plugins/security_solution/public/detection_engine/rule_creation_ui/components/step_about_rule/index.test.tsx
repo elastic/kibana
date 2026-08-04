@@ -197,11 +197,11 @@ describe('StepAboutRuleComponent', () => {
   });
 
   it('is invalid if description is not present', async () => {
-    const { user } = setup(<TestComp />);
+    setup(<TestComp />);
 
-    await user.type(
+    fireEvent.change(
       within(screen.getByTestId('detectionEngineStepAboutRuleName')).getByRole('textbox'),
-      'Test name text'
+      { target: { value: 'Test name text' } }
     );
 
     await submitForm();
@@ -228,15 +228,15 @@ describe('StepAboutRuleComponent', () => {
   });
 
   it('is valid if is not a threat match rule and threat_indicator_path is not present', async () => {
-    const { user } = setup(<TestComp />);
+    setup(<TestComp />);
 
-    await user.type(
+    fireEvent.change(
       within(screen.getByTestId('detectionEngineStepAboutRuleDescription')).getByRole('textbox'),
-      'Test description text'
+      { target: { value: 'Test description text' } }
     );
-    await user.type(
+    fireEvent.change(
       within(screen.getByTestId('detectionEngineStepAboutRuleName')).getByRole('textbox'),
-      'Test name text'
+      { target: { value: 'Test name text' } }
     );
 
     await submitForm();
@@ -249,11 +249,11 @@ describe('StepAboutRuleComponent', () => {
   });
 
   it('is invalid if no "name" is present', async () => {
-    const { user } = setup(<TestComp />);
+    setup(<TestComp />);
 
-    await user.type(
+    fireEvent.change(
       within(screen.getByTestId('detectionEngineStepAboutRuleDescription')).getByRole('textbox'),
-      'Test description text'
+      { target: { value: 'Test description text' } }
     );
 
     await submitForm();
@@ -266,15 +266,15 @@ describe('StepAboutRuleComponent', () => {
   it('is valid if both "name" and "description" are present', async () => {
     const handleSubmit = jest.fn();
 
-    const { user } = setup(<TestComp onSubmit={handleSubmit} />);
+    setup(<TestComp onSubmit={handleSubmit} />);
 
-    await user.type(
+    fireEvent.change(
       within(screen.getByTestId('detectionEngineStepAboutRuleDescription')).getByRole('textbox'),
-      'Test description text'
+      { target: { value: 'Test description text' } }
     );
-    await user.type(
+    fireEvent.change(
       within(screen.getByTestId('detectionEngineStepAboutRuleName')).getByRole('textbox'),
-      'Test name text'
+      { target: { value: 'Test name text' } }
     );
 
     await submitForm();
@@ -297,13 +297,13 @@ describe('StepAboutRuleComponent', () => {
 
     const { user } = setup(<TestComp onSubmit={handleSubmit} />);
 
-    await user.type(
+    fireEvent.change(
       within(screen.getByTestId('detectionEngineStepAboutRuleName')).getByRole('textbox'),
-      'Test name text'
+      { target: { value: 'Test name text' } }
     );
-    await user.type(
+    fireEvent.change(
       within(screen.getByTestId('detectionEngineStepAboutRuleDescription')).getByRole('textbox'),
-      'Test description text'
+      { target: { value: 'Test description text' } }
     );
     await user.clear(
       within(screen.getByTestId('detectionEngineStepAboutRuleRiskScore-defaultRisk')).getByRole(
@@ -336,13 +336,13 @@ describe('StepAboutRuleComponent', () => {
 
     const { user } = setup(<TestComp onSubmit={handleSubmit} />);
 
-    await user.type(
+    fireEvent.change(
       within(screen.getByTestId('detectionEngineStepAboutRuleName')).getByRole('textbox'),
-      'Test name text'
+      { target: { value: 'Test name text' } }
     );
-    await user.type(
+    fireEvent.change(
       within(screen.getByTestId('detectionEngineStepAboutRuleDescription')).getByRole('textbox'),
-      'Test description text'
+      { target: { value: 'Test description text' } }
     );
 
     await submitForm();
