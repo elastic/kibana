@@ -1,5 +1,5 @@
 {
-  "sha1": "fb39b8e935e4bc9e457f9ebbff113a15a60b0bf3",
+  "sha1": "6fc06005199124ee154b845b49f6e9bb155f2328",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -714,12 +714,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
@@ -738,12 +732,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
@@ -762,12 +750,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
@@ -786,12 +768,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
@@ -810,12 +786,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
