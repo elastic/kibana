@@ -281,6 +281,75 @@ describe('getNormalizeCommonFields', () => {
   });
 });
 
+describe('getNormalizeCommonFields - maintenance windows', () => {
+  const baseConfig = {
+    locations: [{ label: 'US North America', id: 'us_central', isServiceManaged: true }],
+    privateLocations: [],
+    projectId: 'test-projectId',
+    namespace: 'test-namespace',
+    version: '8.7.0',
+  };
+
+  const baseMonitor = {
+    name: 'A monitor',
+    id: 'test-id',
+    type: 'http',
+    urls: 'https://elastic.co',
+    locations: ['us_central'],
+    schedule: 3,
+  };
+
+  const maintenanceWindows = [
+    { id: 'mw-id-1', title: 'Weekend window' },
+    { id: 'mw-id-2', title: 'Nightly Deploy' },
+  ];
+
+  it('accepts the snake_case maintenance_windows key', () => {
+    const config = {
+      ...baseConfig,
+      monitor: { ...baseMonitor, maintenance_windows: ['mw-id-1'] },
+      maintenanceWindows,
+    };
+    const { normalizedFields } = getNormalizeCommonFields(config as NormalizedProjectProps);
+    expect(normalizedFields.maintenance_windows).toEqual(['mw-id-1']);
+  });
+
+  it('resolves maintenance window names to ids', () => {
+    const config = {
+      ...baseConfig,
+      monitor: { ...baseMonitor, maintenance_windows: ['Weekend window', 'mw-id-2'] },
+      maintenanceWindows,
+    };
+    const { normalizedFields } = getNormalizeCommonFields(config as NormalizedProjectProps);
+    expect(normalizedFields.maintenance_windows).toEqual(['mw-id-1', 'mw-id-2']);
+  });
+
+  it('prefers the snake_case key over the camelCase alias', () => {
+    const config = {
+      ...baseConfig,
+      monitor: {
+        ...baseMonitor,
+        maintenance_windows: ['mw-id-2'],
+        maintenanceWindows: ['mw-id-1'],
+      },
+      maintenanceWindows,
+    };
+    const { normalizedFields } = getNormalizeCommonFields(config as NormalizedProjectProps);
+    expect(normalizedFields.maintenance_windows).toEqual(['mw-id-2']);
+  });
+
+  it('throws for an unresolved maintenance window reference', () => {
+    const config = {
+      ...baseConfig,
+      monitor: { ...baseMonitor, maintenance_windows: ['does-not-exist'] },
+      maintenanceWindows,
+    };
+    expect(() => getNormalizeCommonFields(config as NormalizedProjectProps)).toThrow(
+      /does-not-exist/
+    );
+  });
+});
+
 describe('getMonitorSchedule', () => {
   it('should return default value if schedule is falsy', () => {
     const defaultValue = { number: '5', unit: ScheduleUnit.MINUTES };

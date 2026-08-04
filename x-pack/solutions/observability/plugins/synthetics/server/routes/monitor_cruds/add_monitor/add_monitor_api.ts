@@ -43,6 +43,7 @@ import type { RouteContext } from '../../types';
 import { formatTelemetryEvent, sendTelemetryEvents } from '../../telemetry/monitor_upgrade_sender';
 import { formatKibanaNamespace } from '../../../../common/formatters';
 import { getPrivateLocationsForNamespaces } from '../../../synthetics_service/get_private_locations';
+import { resolveMaintenanceWindowsOrThrow } from '../../../synthetics_service/maintenance_windows/resolve_maintenance_windows';
 
 export type CreateMonitorPayLoad = MonitorFields & {
   url?: string;
@@ -191,6 +192,19 @@ export class AddEditMonitorAPI {
 
     const defaultFields = DEFAULT_FIELDS[monitorType];
 
+    const maintenanceWindowRefs = monitor[ConfigKey.MAINTENANCE_WINDOWS];
+    let resolvedMaintenanceWindows = maintenanceWindowRefs;
+    if (maintenanceWindowRefs && maintenanceWindowRefs.length > 0) {
+      const maintenanceWindows =
+        (await syntheticsMonitorClient.syntheticsService.getMaintenanceWindows(
+          this.routeContext.spaceId
+        )) ?? [];
+      resolvedMaintenanceWindows = resolveMaintenanceWindowsOrThrow(
+        maintenanceWindowRefs,
+        maintenanceWindows
+      );
+    }
+
     let locationsVal: MonitorFields['locations'] = [];
 
     if (!locations && !privateLocations && prevLocations) {
@@ -240,6 +254,8 @@ export class AddEditMonitorAPI {
       [ConfigKey.SCHEDULE]: getMonitorSchedule(schedule ?? defaultFields[ConfigKey.SCHEDULE]),
       [ConfigKey.MAX_ATTEMPTS]: getMaxAttempts(retestOnFailure, monitor[ConfigKey.MAX_ATTEMPTS]),
       [ConfigKey.LOCATIONS]: locationsVal,
+      [ConfigKey.MAINTENANCE_WINDOWS]:
+        resolvedMaintenanceWindows ?? defaultFields?.[ConfigKey.MAINTENANCE_WINDOWS] ?? [],
     } as MonitorFields;
   }
 
