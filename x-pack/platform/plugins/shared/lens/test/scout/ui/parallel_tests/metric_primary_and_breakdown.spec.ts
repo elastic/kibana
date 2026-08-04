@@ -5,9 +5,12 @@
  * 2.0.
  */
 
-import { spaceTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { buildMetricVisualization, createLogstashLensEditorSuiteSetup } from '../fixtures';
+import {
+  buildMetricVisualization,
+  createLogstashLensEditorSuiteSetup,
+  spaceTest,
+} from '../fixtures';
 
 const PRIMARY_PANEL = 'lnsMetric_primaryMetricDimensionPanel';
 const BREAKDOWN_PANEL = 'lnsMetric_breakdownByDimensionPanel';

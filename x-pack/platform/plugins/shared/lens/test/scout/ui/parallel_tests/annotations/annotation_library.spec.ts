@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { spaceTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import {
   applyLensInlineEditorAndWaitClosed,
   createLogstashLensEditorSuiteSetup,
   deleteAnnotationGroupFromLibrary,
+  spaceTest,
   testData,
 } from '../../fixtures';
 

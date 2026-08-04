@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { test } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import {
   applyLensInlineEditorAndWaitClosed,
@@ -13,6 +12,7 @@ import {
   convertToEsqlViaModal,
   openDimensionEditorAndWaitForFlyout,
   openInlineEditorAndWaitVisible,
+  test,
   testData,
 } from '../fixtures';
 

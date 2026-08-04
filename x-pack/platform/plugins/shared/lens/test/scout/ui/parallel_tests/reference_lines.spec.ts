@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { spaceTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { createLogstashLensEditorSuiteSetup } from '../fixtures';
+import { createLogstashLensEditorSuiteSetup, spaceTest } from '../fixtures';
 
 const REFERENCE_LINE_LEFT = 'lnsXY_yReferenceLineLeftPanel';
 const REFERENCE_LINE_RIGHT = 'lnsXY_yReferenceLineRightPanel';

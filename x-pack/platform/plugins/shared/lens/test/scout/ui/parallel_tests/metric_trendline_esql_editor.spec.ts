@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { spaceTest, KibanaCodeEditorWrapper } from '@kbn/scout';
+import { KibanaCodeEditorWrapper } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import {
   applyLensInlineEditorAndWaitClosed,
   openDimensionEditorAndWaitForFlyout,
   openInlineEditorAndWaitVisible,
+  spaceTest,
   testData,
 } from '../fixtures';
 

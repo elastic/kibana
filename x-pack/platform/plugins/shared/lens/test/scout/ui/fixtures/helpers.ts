@@ -9,6 +9,7 @@ import { KibanaCodeEditorWrapper } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { ContentListWrapper } from '@kbn/scout';
 import type { Locator, PageObjects, ScoutPage } from '@kbn/scout';
+import type { LensPageObjects } from './page_objects';
 import {
   DATA_VIEW_ID,
   FORMULA_ESCAPED_RUNTIME_FIELD,
@@ -128,7 +129,9 @@ export async function completeLensCsvExport(page: ScoutPage): Promise<void> {
   }
 }
 
-type DashboardAndLens = Pick<PageObjects, 'dashboard' | 'lens'>;
+// Uses Lens-editor-only methods (e.g. `getInlineEditor`, `getConvertToEsqlButton`), so this is
+// typed against the Lens plugin's rich page object, not the shared `@kbn/scout` `PageObjects`.
+type DashboardAndLens = Pick<LensPageObjects, 'dashboard' | 'lens'>;
 type VisualizeAndLens = Pick<PageObjects, 'visualize' | 'lens'>;
 
 /**
@@ -332,12 +335,12 @@ export async function openInlineEditorAndWaitVisible(
   await expect(lens.getInlineEditor()).toBeVisible();
 }
 
-export async function applyLensInlineEditorAndWaitClosed({ lens }: Pick<PageObjects, 'lens'>) {
+export async function applyLensInlineEditorAndWaitClosed({ lens }: Pick<LensPageObjects, 'lens'>) {
   await lens.getApplyFlyoutButton().click();
   await expect(lens.getInlineEditor()).toBeHidden();
 }
 
-export async function cancelLensInlineEditorAndWaitClosed({ lens }: Pick<PageObjects, 'lens'>) {
+export async function cancelLensInlineEditorAndWaitClosed({ lens }: Pick<LensPageObjects, 'lens'>) {
   await lens.getCancelFlyoutButton().click();
   await expect(lens.getInlineEditor()).toBeHidden();
 }

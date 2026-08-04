@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { spaceTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import {
   cleanupLogstashOpenInLensDefaults,
   setupLogstashOpenInLensDefaults,
+  spaceTest,
   testData,
 } from '../../../fixtures';
 

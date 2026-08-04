@@ -6,13 +6,14 @@
  */
 
 import type { ScoutPage } from '@kbn/scout';
-import { spaceTest, tags } from '@kbn/scout';
+import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import {
-  testData,
   canConvertToLensByTitle,
   convertToLensByTitle,
   createOpenInLensSuiteSetup,
+  spaceTest,
+  testData,
 } from '../../../fixtures';
 
 /** Returns the selected option labels from a combo box inside the dimension editor flyout. */

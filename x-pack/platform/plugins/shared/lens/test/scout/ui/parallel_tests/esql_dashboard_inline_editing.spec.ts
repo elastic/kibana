@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { spaceTest, KibanaCodeEditorWrapper } from '@kbn/scout';
+import { KibanaCodeEditorWrapper } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import type { PageObjects, ScoutPage } from '@kbn/scout';
-import { applyLensInlineEditorAndWaitClosed, testData } from '../fixtures';
+import { applyLensInlineEditorAndWaitClosed, spaceTest, testData } from '../fixtures';
 
 const setEsqlQueryAndRun = async (
   dashboard: PageObjects['dashboard'],

@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { spaceTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { createLogstashLensEditorSuiteSetup, testData } from '../fixtures';
+import { createLogstashLensEditorSuiteSetup, spaceTest, testData } from '../fixtures';
 
 // Dynamic-coloring outputs are deterministic for the fixed logstash archive, so the exact
 // palette colors are asserted (same approach as metric_progress_bar_lens_editor.spec.ts).

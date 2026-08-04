@@ -8,14 +8,19 @@
 import type { PageObjects, ScoutPage } from '@kbn/scout';
 import { createLazyPageObject } from '@kbn/scout';
 import { Inspector } from '@kbn/inspector-plugin/test/scout/ui/fixtures/page_objects';
+import { LensEditorApp } from './lens';
 
-export type LensPageObjects = PageObjects & {
+export type LensPageObjects = Omit<PageObjects, 'lens'> & {
+  lens: LensEditorApp;
   inspector: Inspector;
 };
 
 export function extendPageObjects(pageObjects: PageObjects, page: ScoutPage): LensPageObjects {
   return {
     ...pageObjects,
+    // Overrides the shared, slim `@kbn/scout` LensApp with the Lens-editor-only subclass so
+    // Lens's Scout specs keep the flat `lens.someMethod()` API without call-site churn.
+    lens: createLazyPageObject(LensEditorApp, page),
     inspector: createLazyPageObject(Inspector, page),
   };
 }

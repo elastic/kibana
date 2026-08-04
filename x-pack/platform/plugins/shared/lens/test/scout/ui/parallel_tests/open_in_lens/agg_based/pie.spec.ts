@@ -7,13 +7,14 @@
 
 import type { DebugState } from '@elastic/charts';
 import { MISSING_TOKEN } from '@kbn/field-formats-common';
-import { spaceTest, tags } from '@kbn/scout';
+import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import {
-  testData,
   canConvertToLensByTitle,
   convertToLensByTitle,
   createOpenInLensSuiteSetup,
+  spaceTest,
+  testData,
 } from '../../../fixtures';
 
 function getPieChartLabels(debugState: DebugState): string[] {
