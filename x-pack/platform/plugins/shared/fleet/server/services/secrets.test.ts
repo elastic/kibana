@@ -1124,6 +1124,42 @@ describe('secrets', () => {
         ).toBe(true);
       });
     });
+
+    describe('when secret values are already secret references', () => {
+      it('does not recreate secrets and returns existing references', async () => {
+        const mockPackagePolicy = {
+          vars: {
+            'pkg-secret-1': {
+              value: { id: 'existing-secret-1', isSecretRef: true },
+            },
+            'pkg-secret-2': {
+              value: { id: 'existing-secret-2', isSecretRef: true },
+            },
+          },
+          inputs: [],
+        } as unknown as NewPackagePolicy;
+
+        const result = await extractAndWriteSecrets({
+          packagePolicy: mockPackagePolicy,
+          packageInfo: mockIntegrationPackage,
+          esClient: esClientMock,
+        });
+
+        expect(esClientMock.transport.request).not.toHaveBeenCalled();
+        expect(result.secretReferences).toEqual([
+          { id: 'existing-secret-1' },
+          { id: 'existing-secret-2' },
+        ]);
+        expect(result.packagePolicy.vars!['pkg-secret-1'].value).toEqual({
+          id: 'existing-secret-1',
+          isSecretRef: true,
+        });
+        expect(result.packagePolicy.vars!['pkg-secret-2'].value).toEqual({
+          id: 'existing-secret-2',
+          isSecretRef: true,
+        });
+      });
+    });
   });
 
   describe('extractAndUpdateSecrets', () => {
