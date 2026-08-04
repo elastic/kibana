@@ -124,15 +124,14 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       it('renders the rule details', async () => {
         const headingText = await testSubjects.getVisibleText('appHeaderTitle');
         expect(headingText.includes(`test-rule-${testRunUuid}`)).toBe(true);
-        // The `ruleSummaryRuleType` container mounts a frame before its text child
-        // paints, so a single read can observe an empty string. Wait for the value
-        // to render, then assert it once.
-        await retry.waitForWithTimeout('rule type value to render', 120 * 1000, async () => {
-          const text = await testSubjects.getVisibleText('ruleSummaryRuleType');
-          return text.trim().length > 0;
+        // The rule type value resolves asynchronously (`useGetRuleTypesPermissions`
+        // plus the rule-type index) and renders through empty frames before it
+        // settles. Read and assert within the same retry attempt so a re-render
+        // cannot blank the value between the read and the assertion.
+        await retry.tryForTime(120 * 1000, async () => {
+          const ruleType = await testSubjects.getVisibleText('ruleSummaryRuleType');
+          expect(ruleType).toEqual('Elasticsearch query');
         });
-        const ruleType = await testSubjects.getVisibleText('ruleSummaryRuleType');
-        expect(ruleType).toEqual('Elasticsearch query');
         const { username } = await svlUserManager.getUserData(ADMIN_ROLE);
 
         await retry.tryForTime(15 * 1000, async () => {
