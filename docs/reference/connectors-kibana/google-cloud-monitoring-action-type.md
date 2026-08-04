@@ -1,7 +1,7 @@
 ---
 navigation_title: "Google Cloud Monitoring"
 type: reference
-description: "Use the Google Cloud Monitoring connector to find, mute, and snooze GCP alerting policies, and to enrich alerts with metric, uptime, and SLO data."
+description: "Use the Google Cloud Monitoring connector to find, silence, and snooze GCP alerting policies, and to enrich alerts with metric, uptime, and SLO data."
 applies_to:
   stack: preview 9.6
   serverless: preview
@@ -9,7 +9,7 @@ applies_to:
 
 # Google Cloud Monitoring connector [google-cloud-monitoring-action-type]
 
-The Google Cloud Monitoring connector wraps the [Cloud Monitoring API v3](https://cloud.google.com/monitoring/api/ref_v3/rest) so that AI agents and workflows can locate the alerting policy behind a firing alert, mute or unmute it, suppress alerts for a maintenance window, and enrich the alert with metric, Uptime check, and Service Level Objective (SLO) data. Cloud Monitoring has no incidents REST resource, so this connector drives alert suppression through the policy's `enabled` flag and through Snoozes rather than an acknowledge-incident call.
+The Google Cloud Monitoring connector wraps the [Cloud Monitoring API v3](https://cloud.google.com/monitoring/api/ref_v3/rest) so that AI agents and workflows can locate the alerting policy behind a firing alert, silence or reactivate it, suppress alerts for a maintenance window, and enrich the alert with metric, Uptime check, and Service Level Objective (SLO) data. Cloud Monitoring has no incidents REST resource, so this connector drives alert suppression through the policy's `enabled` flag and through Snoozes rather than an acknowledge-incident call.
 
 ## Create connectors in {{kib}} [define-google-cloud-monitoring-ui]
 
@@ -41,7 +41,7 @@ Get alert policy
     - `projectId` (optional).
 
 Set alert policy enabled
-:   Mute (`enabled: false`) or unmute (`enabled: true`) an alerting policy — the core lifecycle primitive Cloud Monitoring exposes in place of an acknowledge-incident call. Prefer *Create snooze* for a bounded maintenance window, since a snooze re-enables itself automatically.
+:   Silence (`enabled: false`) or reactivate (`enabled: true`) an alerting policy — the core lifecycle primitive Cloud Monitoring exposes in place of an acknowledge-incident call. Prefer *Create snooze* for a bounded maintenance window, since a snooze re-enables itself automatically.
     - `policyName` (required).
     - `enabled` (required): `true` or `false`.
     - `projectId` (optional).
@@ -61,7 +61,7 @@ Create snooze
     - `displayName` (required).
     - `startTime`, `endTime` (required): RFC 3339 / ISO 8601 timestamps.
     - `policyNames` (optional, up to 16): Alert policies this snooze applies to.
-    - `filter` (optional): Label filter; requires exactly one entry in `policyNames`.
+    - `filter` (optional): Label filter. Requires exactly one entry in `policyNames`.
     - `projectId` (optional).
 
 List snoozes
@@ -72,7 +72,7 @@ List snoozes
 Update snooze
 :   Extend, shorten, or rename an existing snooze so suppression tracks the incident instead of outlasting it. Set `endTime` to a time in the past to end an active snooze immediately.
     - `snoozeName` (required).
-    - `displayName`, `startTime`, `endTime` (optional; at least one required).
+    - `displayName`, `startTime`, `endTime` (optional, but at least one is required).
     - `projectId` (optional).
 
 List notification channels
@@ -92,7 +92,7 @@ List Uptime check configs
     - `filter`, `pageSize`, `pageToken`, `projectId` (optional).
 
 List services
-:   List the Cloud Monitoring services defined in the project (App Engine, GKE, custom, etc.). Use the ID from a returned service name with *List Service Level Objectives*.
+:   List the Cloud Monitoring services defined in the project (App Engine, GKE, custom, and so on). Use the ID from a returned service name with *List Service Level Objectives*.
     - `filter`, `pageSize`, `pageToken`, `projectId` (optional).
 
 List Service Level Objectives
