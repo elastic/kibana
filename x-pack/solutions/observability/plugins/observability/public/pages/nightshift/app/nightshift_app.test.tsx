@@ -5,17 +5,21 @@
  * 2.0.
  */
 
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, within } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
+import { usePageReady } from '@kbn/ebt-tools';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { SignificantEvent } from '@kbn/significant-events-schema';
 import { NightshiftApp } from './nightshift_app';
 import { useFetchSignificantEvents } from '../hooks/use_fetch_significant_events';
+import { useCloseSignificantEvent } from '../hooks/use_close_significant_event';
 import { useKibana } from '../../../utils/kibana_react';
 
 jest.mock('../hooks/use_fetch_significant_events');
+jest.mock('../hooks/use_close_significant_event');
 jest.mock('../../../utils/kibana_react');
+jest.mock('@kbn/ebt-tools');
 
 // The flyout's own behavior is covered by event_flyout.test.tsx.
 jest.mock('../event/event_flyout', () => ({
@@ -30,7 +34,9 @@ jest.mock('../event/event_flyout', () => ({
 }));
 
 const mockUseFetchSignificantEvents = useFetchSignificantEvents as jest.Mock;
+const mockUseCloseSignificantEvent = useCloseSignificantEvent as jest.Mock;
 const mockUseKibana = useKibana as jest.Mock;
+const mockUsePageReady = usePageReady as jest.Mock;
 
 const openChat = jest.fn();
 const scrollIntoView = jest.fn();
@@ -59,10 +65,17 @@ interface FetchState {
   error?: Error | null;
 }
 
-function setEvents({ events = [], total, isLoading = false, error = null }: FetchState = {}) {
+function setEvents({
+  events = [],
+  total,
+  isLoading = false,
+  isFetching,
+  error = null,
+}: FetchState & { isFetching?: boolean } = {}) {
   mockUseFetchSignificantEvents.mockReturnValue({
     data: { hits: events, total: total ?? events.length, page: 1, perPage: 50 },
     error,
+    isFetching: isFetching ?? isLoading,
     isLoading,
     refetch: jest.fn(),
   });
@@ -98,6 +111,11 @@ describe('NightshiftApp', () => {
 
   beforeEach(() => {
     openChat.mockClear();
+    mockUsePageReady.mockClear();
+    mockUseCloseSignificantEvent.mockReturnValue({
+      closeSignificantEvent: jest.fn(),
+      closingEventUuid: undefined,
+    });
     scrollIntoView.mockClear();
     Object.defineProperty(HTMLElement.prototype, 'scrollIntoView', {
       configurable: true,
@@ -106,7 +124,20 @@ describe('NightshiftApp', () => {
     mockUseKibana.mockReturnValue({
       services: {
         agentBuilder: { openChat },
-        application: { getUrlForApp: () => '/events' },
+        application: {
+          getUrlForApp: (appId: string, options?: { path?: string; deepLinkId?: string }) => {
+            // Mirror the registered appRoute (`/app/significant_events`), not the camelCase app id.
+            const base =
+              appId === 'significantEvents' ? '/app/significant_events' : `/app/${appId}`;
+            if (options?.deepLinkId === 'events') {
+              return `${base}/significant_events`;
+            }
+            if (options?.path) {
+              return `${base}${options.path.startsWith('/') ? options.path : `/${options.path}`}`;
+            }
+            return base;
+          },
+        },
       },
     });
     setEvents();
@@ -119,13 +150,62 @@ describe('NightshiftApp', () => {
     expect(screen.getByText('Some significant events need action')).toBeInTheDocument();
   });
 
-  it('shows only the checking hero while loading', () => {
+  it('reports when the landing page is ready', () => {
+    setEvents({
+      events: [
+        mockEvent({ event_id: '1', status: 'open' }),
+        mockEvent({ event_id: '2', status: 'closed' }),
+      ],
+    });
+
+    renderWithIntl();
+
+    expect(mockUsePageReady).toHaveBeenCalledWith(
+      expect.objectContaining({
+        isReady: true,
+        isRefreshing: false,
+        customMetrics: expect.objectContaining({
+          key1: 'critical_high_event_count',
+          value1: 2,
+          key2: 'needs_action_event_count',
+          value2: 1,
+          key3: 'resolved_event_count',
+          value3: 1,
+        }),
+      })
+    );
+  });
+
+  it('shows the processing empty state while loading', () => {
     setEvents({ isLoading: true });
     renderWithIntl();
-    expect(screen.getByText('Running a quick check')).toBeInTheDocument();
+    expect(screen.getByText('Looking into your data...')).toBeInTheDocument();
+    expect(
+      screen.getByRole('group', { name: 'Checking streams, entities, and detections' })
+    ).toHaveAttribute('aria-busy', 'true');
+    expect(screen.getByText('Streams')).toBeInTheDocument();
+    expect(screen.getByText('Entities')).toBeInTheDocument();
+    expect(screen.getByText('Detections')).toBeInTheDocument();
     expect(screen.queryByText('Some significant events need action')).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /^Need action:/ })).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /^Resolved:/ })).not.toBeInTheDocument();
+  });
+
+  it('animates from the loading state into the populated landing page', () => {
+    setEvents({ isLoading: true });
+    const { rerender } = renderWithIntl();
+
+    setEvents({ events: [mockEvent()] });
+    rerender(
+      <I18nProvider>
+        <MemoryRouter>
+          <NightshiftApp />
+        </MemoryRouter>
+      </I18nProvider>
+    );
+
+    expect(screen.getByTestId('nightshiftLoadingExitTransition')).toBeInTheDocument();
+    expect(screen.getByTestId('nightshiftPopulatedContent')).toBeInTheDocument();
   });
 
   it('renders summary cards with correct counts', () => {
@@ -139,8 +219,29 @@ describe('NightshiftApp', () => {
     const { container } = renderWithIntl();
     expect(screen.getByRole('button', { name: 'Need action: 2' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Resolved: 1' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Need action: 2' })).toHaveAttribute(
+      'data-ebt-detail',
+      'needsAction'
+    );
+    expect(screen.getByRole('button', { name: 'Resolved: 1' })).toHaveAttribute(
+      'data-ebt-detail',
+      'resolved'
+    );
     expect(container.querySelector('[data-euiicon-type="faceNeutral"]')).toBeInTheDocument();
     expect(container.querySelector('[data-euiicon-type="faceHappy"]')).toBeInTheDocument();
+  });
+
+  it('renders the resolved section empty state when no events are resolved', () => {
+    setEvents({ events: [mockEvent({ status: 'open' })] });
+    renderWithIntl();
+
+    const resolvedHeading = screen.getByRole('heading', { name: 'Resolved' });
+    const resolvedSection = resolvedHeading.closest('section');
+
+    expect(resolvedSection).not.toBeNull();
+    expect(
+      within(resolvedSection as HTMLElement).getByText('No significant events found')
+    ).toBeInTheDocument();
   });
 
   it('scrolls to the event lists from the summary cards', () => {
@@ -186,9 +287,12 @@ describe('NightshiftApp', () => {
     const { container } = renderWithIntl();
 
     expect(container.querySelectorAll('[data-test-subj="blast-radius-chip"]')).toHaveLength(10);
-    expect(screen.getByTestId('blast-radius-show-more')).toHaveTextContent('+2 more');
+    const showMoreButton = screen.getByTestId('blast-radius-show-more');
+    expect(showMoreButton).toHaveTextContent('+2 more');
+    expect(showMoreButton).toHaveAttribute('data-ebt-action', 'expandBlastRadius');
+    expect(showMoreButton).toHaveAttribute('data-ebt-element', 'nightshiftBlastRadius');
 
-    fireEvent.click(screen.getByTestId('blast-radius-show-more'));
+    fireEvent.click(showMoreButton);
     expect(container.querySelectorAll('[data-test-subj="blast-radius-chip"]')).toHaveLength(12);
   });
 
@@ -215,7 +319,10 @@ describe('NightshiftApp', () => {
     });
     renderWithIntl();
 
-    fireEvent.click(screen.getByRole('button', { name: /service-b/i }));
+    const blastRadiusButton = screen.getByRole('button', { name: /service-b/i });
+    expect(blastRadiusButton).toHaveAttribute('data-ebt-action', 'filterByBlastRadius');
+    expect(blastRadiusButton).toHaveAttribute('data-ebt-detail', 'stream');
+    fireEvent.click(blastRadiusButton);
 
     expect(screen.getByText('Service B event')).toBeInTheDocument();
     expect(screen.queryByText('Service A event')).not.toBeInTheDocument();
@@ -235,7 +342,9 @@ describe('NightshiftApp', () => {
     fireEvent.click(screen.getByRole('button', { name: /service-b/i }));
     expect(screen.queryByText('Service A event')).not.toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('button', { name: /service-b/i }));
+    const selectedBlastRadiusButton = screen.getByRole('button', { name: /service-b/i });
+    expect(selectedBlastRadiusButton).toHaveAttribute('data-ebt-action', 'clearBlastRadiusFilter');
+    fireEvent.click(selectedBlastRadiusButton);
     expect(screen.getByText('Service A event')).toBeInTheDocument();
     expect(screen.getByText('Service B event')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Need action: 2' })).toBeInTheDocument();
@@ -270,15 +379,33 @@ describe('NightshiftApp', () => {
     expect(screen.getByRole('button', { name: /service-a/i })).toBeInTheDocument();
   });
 
-  it('shows an all-clear hero and message when there are no events', () => {
+  it('shows the completed empty state when there are no events', () => {
     setEvents({ events: [] });
     renderWithIntl();
-    expect(screen.getByText("You're all caught up")).toBeInTheDocument();
+    expect(screen.getByText('No significant events found')).toBeInTheDocument();
     expect(
-      screen.getByText('No significant events were detected. Nothing needs your attention.')
+      screen.getByRole('group', { name: 'Streams, entities, and detections checked' })
+    ).toHaveAttribute('aria-busy', 'false');
+    expect(
+      screen.getByRole('link', { name: 'What do we know about your logs?' })
     ).toBeInTheDocument();
     expect(screen.queryByRole('heading', { name: 'Need Action' })).not.toBeInTheDocument();
     expect(screen.queryByRole('heading', { name: 'Resolved' })).not.toBeInTheDocument();
+  });
+
+  it('links from the empty state to significant events discovery', () => {
+    setEvents({ events: [] });
+    renderWithIntl();
+
+    const logsLink = screen.getByRole('link', {
+      name: 'What do we know about your logs?',
+    });
+    expect(logsLink).toHaveAttribute(
+      'href',
+      '/app/significant_events/significant_events?rangeFrom=now-24h&rangeTo=now'
+    );
+    expect(logsLink).toHaveAttribute('data-ebt-action', 'viewSignificantEvents');
+    expect(logsLink).toHaveAttribute('data-ebt-element', 'nightshiftPageHeader');
   });
 
   it('shows the all-clear hero when only resolved events exist', () => {
@@ -310,18 +437,16 @@ describe('NightshiftApp', () => {
     renderWithIntl();
 
     expect(screen.getByText('Unable to load significant events')).toBeInTheDocument();
-    expect(
-      screen.queryByText('No significant events were detected. Nothing needs your attention.')
-    ).not.toBeInTheDocument();
+    expect(screen.queryByText('No significant events found')).not.toBeInTheDocument();
   });
 
   it('links to all significant events', () => {
     setEvents({ events: [mockEvent()] });
     renderWithIntl();
-    expect(screen.getByRole('link', { name: 'Show all events' })).toHaveAttribute(
-      'href',
-      '/events'
-    );
+    const showAllEventsLink = screen.getByRole('link', { name: 'Show all events' });
+    expect(showAllEventsLink).toHaveAttribute('href', '/app/significant_events/significant_events');
+    expect(showAllEventsLink).toHaveAttribute('data-ebt-action', 'viewAllSignificantEvents');
+    expect(showAllEventsLink).toHaveAttribute('data-ebt-element', 'nightshiftPageHeader');
   });
 
   it('opens an event in chat with a prefilled prompt and attachment', () => {
@@ -338,6 +463,22 @@ describe('NightshiftApp', () => {
         attachments: [expect.objectContaining({ id: event.event_uuid, origin: event.event_id })],
       })
     );
+  });
+
+  it('closes a significant event from its list action', () => {
+    const closeSignificantEvent = jest.fn();
+    const event = mockEvent();
+    mockUseCloseSignificantEvent.mockReturnValue({
+      closeSignificantEvent,
+      closingEventUuid: undefined,
+    });
+    setEvents({ events: [event] });
+    renderWithIntl();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Close Test significant event' }));
+
+    expect(closeSignificantEvent).toHaveBeenCalledWith(event.event_uuid);
+    expect(screen.queryByTestId('stubEventFlyout')).not.toBeInTheDocument();
   });
 
   it('opens the event flyout when a row is clicked and closes it again', () => {
@@ -362,6 +503,24 @@ describe('NightshiftApp', () => {
     expect(screen.getByText('Flyout: Deep linked event')).toBeInTheDocument();
   });
 
+  it('restores the open flyout from a superseded eventUuid using eventId', () => {
+    setEvents({
+      events: [
+        mockEvent({
+          event_id: 'evt-1',
+          event_uuid: 'evt-uuid-current',
+          title: 'Lineage linked event',
+        }),
+      ],
+    });
+    renderWithIntl(<NightshiftApp />, {
+      initialEntries: ['/?eventUuid=evt-uuid-stale&eventId=evt-1'],
+    });
+
+    expect(screen.getByText('Flyout: Lineage linked event')).toBeInTheDocument();
+    expect(screen.queryByText('Significant Event not found')).not.toBeInTheDocument();
+  });
+
   it('keeps the flyout open when a refetch returns a newer event version', () => {
     const initialEvent = mockEvent({
       event_id: 'evt-1',
@@ -376,7 +535,7 @@ describe('NightshiftApp', () => {
     });
     setEvents({ events: [initialEvent] });
     const { rerender } = renderWithIntl(<NightshiftApp />, {
-      initialEntries: ['/?eventUuid=evt-uuid-1'],
+      initialEntries: ['/?eventUuid=evt-uuid-1&eventId=evt-1'],
     });
 
     expect(screen.getByText('Flyout: Investigating event')).toBeInTheDocument();
@@ -399,7 +558,7 @@ describe('NightshiftApp', () => {
     });
     rerender(
       <I18nProvider>
-        <MemoryRouter>
+        <MemoryRouter initialEntries={['/?eventUuid=evt-uuid-1&eventId=evt-1']}>
           <NightshiftApp />
         </MemoryRouter>
       </I18nProvider>

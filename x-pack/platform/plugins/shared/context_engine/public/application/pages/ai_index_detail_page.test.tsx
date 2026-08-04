@@ -7,6 +7,7 @@
 
 import { EuiProvider } from '@elastic/eui';
 import { coreMock } from '@kbn/core/public/mocks';
+import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -40,6 +41,15 @@ jest.mock('@kbn/esql/public', () => ({
   ),
 }));
 
+jest.mock('../hooks/use_data_connectors', () => ({
+  useDataConnectors: () => ({
+    connectors: [],
+    connectorNameById: new Map(),
+    connectorActionTypeById: new Map(),
+    isLoading: false,
+  }),
+}));
+
 const mockMgetWorkflows = jest.fn();
 const mockCreateWorkflow = jest.fn();
 
@@ -65,7 +75,9 @@ const renderWithProviders = (services: ReturnType<typeof coreMock.createStart>) 
   return render(
     <I18nProvider>
       <EuiProvider>
-        <KibanaContextProvider services={services}>
+        <KibanaContextProvider
+          services={{ ...services, triggersActionsUi: triggersActionsUiMock.createStart() }}
+        >
           <QueryClientProvider client={queryClient}>
             <MemoryRouter initialEntries={[getAiIndexDetailPath(aiIndex.id)]}>
               <Route path={CONTEXT_ENGINE_PATHS.detail} component={AiIndexDetailPage} />
@@ -102,7 +114,7 @@ describe('AiIndexDetailPage', () => {
     expect(screen.getByText('my-ai-index')).toBeInTheDocument();
     expect(screen.getByTestId('contextAiIndexSourceRow')).toHaveTextContent('FROM My view');
     // The non-editable detail list shows the generic ES|QL source type.
-    expect(screen.getByTestId('contextAiIndexSourceType')).toHaveTextContent('ES|QL');
+    expect(screen.getByTestId('contextSourceTypeBadge')).toHaveTextContent('ES|QL');
   });
 
   it('renders a back button linking to the AI indexes landing page', async () => {
@@ -194,8 +206,7 @@ describe('AiIndexDetailPage', () => {
     fireEvent.click(screen.getByTestId('contextEditSourcesButton'));
 
     expect(await screen.findByTestId('contextEditSourcesFlyout')).toBeInTheDocument();
-    // Stored sources are restored as raw ES|QL, keyed by their query.
-    expect(await screen.findByTestId('contextSelectedSource-FROM My view')).toBeInTheDocument();
+    expect(await screen.findByTestId('contextSelectedSource-esql-0')).toBeInTheDocument();
   });
 
   it('saves edited sources and refetches the AI index', async () => {
@@ -248,13 +259,14 @@ describe('AiIndexDetailPage', () => {
     expect(mockMgetWorkflows).not.toHaveBeenCalled();
   });
 
-  it('enables the automations edit button once the AI index has loaded', async () => {
+  it('shows edit controls once the AI index has loaded', async () => {
     const services = coreMock.createStart();
     services.http.get.mockResolvedValue(aiIndex);
 
     renderWithProviders(services);
 
-    expect(screen.getByTestId('contextEditAutomationsButton')).toBeDisabled();
+    expect(screen.queryByTestId('contextEditAutomationsButton')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('contextEditDescriptionButton')).not.toBeInTheDocument();
 
     await waitForElementToBeRemoved(() => screen.queryByTestId('contextAiIndexTitleLoading'));
 
@@ -339,8 +351,7 @@ describe('AiIndexDetailPage', () => {
 
     await waitForElementToBeRemoved(() => screen.queryByTestId('contextAiIndexTitleLoading'));
 
-    fireEvent.click(screen.getByTestId('contextEditAutomationsButton'));
-    fireEvent.click(await screen.findByTestId('contextCreateAutomationButton'));
+    fireEvent.click(screen.getByTestId('contextCreateAutomationButton'));
 
     await waitFor(() => {
       expect(mockCreateWorkflow).toHaveBeenCalledWith({
@@ -362,8 +373,51 @@ describe('AiIndexDetailPage', () => {
     });
 
     expect(services.application.navigateToApp).toHaveBeenCalledWith('workflows', {
-      path: '/wf-created',
+      path: '/wf-created?returnApp=context_engine&returnPath=%2Fai_index%2Fmy-ai-index',
     });
+  });
+
+  it('hides edit controls and shows the managed badge for managed AI indexes', async () => {
+    const services = coreMock.createStart();
+    services.http.get.mockResolvedValue({ ...aiIndex, managed: true });
+
+    renderWithProviders(services);
+
+    await waitForElementToBeRemoved(() => screen.queryByTestId('contextAiIndexTitleLoading'));
+
+    expect(screen.getByTestId('contextAiIndexDetailManagedBadge')).toHaveTextContent('Managed');
+    expect(screen.queryByTestId('contextEditDescriptionButton')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('contextEditSourcesButton')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('contextEditAutomationsButton')).not.toBeInTheDocument();
+  });
+
+  it('shows edit controls and no managed badge for non-managed AI indexes', async () => {
+    const services = coreMock.createStart();
+    services.http.get.mockResolvedValue({ ...aiIndex, managed: false });
+
+    renderWithProviders(services);
+
+    await waitForElementToBeRemoved(() => screen.queryByTestId('contextAiIndexTitleLoading'));
+
+    expect(screen.queryByTestId('contextAiIndexDetailManagedBadge')).not.toBeInTheDocument();
+    expect(screen.getByTestId('contextEditDescriptionButton')).toBeInTheDocument();
+    expect(screen.getByTestId('contextEditSourcesButton')).toBeInTheDocument();
+    expect(screen.getByTestId('contextEditAutomationsButton')).toBeInTheDocument();
+  });
+
+  it('renders connector sources using the connector id when no name is resolved', async () => {
+    const services = coreMock.createStart();
+    services.http.get.mockResolvedValue({
+      ...aiIndex,
+      sources: [{ type: 'connector', value: 'connector-abc' }],
+    });
+
+    renderWithProviders(services);
+
+    await waitForElementToBeRemoved(() => screen.queryByTestId('contextAiIndexTitleLoading'));
+
+    expect(screen.getByTestId('contextAiIndexSourceRow')).toHaveTextContent('connector-abc');
+    expect(screen.getByTestId('contextSourceTypeBadge')).toHaveTextContent('Connector');
   });
 
   it('removes an automation and refetches', async () => {

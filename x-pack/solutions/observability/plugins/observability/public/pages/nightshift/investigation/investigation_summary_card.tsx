@@ -19,6 +19,7 @@ import {
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
+import { getEbtProps } from '@kbn/ebt-click';
 import type { InvestigationStatus } from '@kbn/investigation-output';
 import type { InvestigationState } from '@kbn/significant-events-schema';
 import { i18n } from '@kbn/i18n';
@@ -30,6 +31,7 @@ import { InvestigationCompleteStatus, InvestigatingStatusDots } from './investig
 import { InvestigationFormattedText } from './investigation_formatted_text';
 import { TruncatableSummary } from '../common/truncatable_summary';
 import { createFadeOverlayBackground } from '../common/fade_overlay_background';
+import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../common/ebt_constants';
 import {
   nightshiftOpacityTransition,
   nightshiftReducedMotionStyles,
@@ -54,6 +56,13 @@ const recommendationChatTooltip = i18n.translate(
   'xpack.observability.nightshift.investigation.recommendationChatTooltip',
   {
     defaultMessage: 'Ask agent about this recommendation',
+  }
+);
+
+const completedStatusLabel = i18n.translate(
+  'xpack.observability.nightshift.investigation.summaryCompleteStatusLabel',
+  {
+    defaultMessage: 'Complete',
   }
 );
 
@@ -84,7 +93,7 @@ function InvestigationStatusRow({
           <EuiTitle size="xxs">
             <h4>
               <InvestigationCompleteStatus
-                label={statusLabel}
+                label={completedStatusLabel}
                 testSubj="nightshiftInvestigationStatusIcon"
               />
             </h4>
@@ -149,6 +158,10 @@ function TryNextPanel({
               color="primary"
               data-test-subj="nightshiftInvestigationMoreRecommendationsLink"
               onClick={onShowMoreRecommendations}
+              {...getEbtProps({
+                action: NIGHTSHIFT_EBT_ACTIONS.VIEW_INVESTIGATION,
+                element: NIGHTSHIFT_EBT_ELEMENTS.INVESTIGATION_SUMMARY,
+              })}
             >
               {i18n.translate('xpack.observability.nightshift.investigation.moreRecommendations', {
                 defaultMessage: 'More recommendations',
@@ -215,6 +228,7 @@ function TryNextPanel({
             `}
           >
             <InvestigationItemChatButton
+              ebtElement={NIGHTSHIFT_EBT_ELEMENTS.INVESTIGATION_SUMMARY}
               tooltip={recommendationChatTooltip}
               testSubj="nightshiftInvestigationTryNextChatButton"
               onClick={openRecommendationInChat}
