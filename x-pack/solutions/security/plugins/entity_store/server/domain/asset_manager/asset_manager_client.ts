@@ -162,10 +162,24 @@ export class AssetManagerClient {
         }),
       ]);
 
-      // Phase 2: Initialize engines and start background tasks.
+      // Phase 2: Initialize engines (and EUID scripts). Descriptors must exist before
+      // namespace-scoped TM schedules are created — those tasks self-delete when they
+      // find zero engines, so scheduling them in parallel with initEntity can tear
+      // down a freshly scheduled status task mid-install.
       await Promise.all([
         ...entityTypes.map((type) => this.initEntity(request, type, logsExtraction)),
 
+        // Stored scripts are managed assets with no granular ES privilege (only `manage`/`all`),
+        // so create them as the internal user rather than forcing the enabling user to hold
+        // broad cluster `manage`.
+        installEuidStoredScripts({
+          esClient: this.internalEsClient,
+          logger: this.logger,
+        }),
+      ]);
+
+      // Phase 3: Schedule namespace-scoped background tasks after descriptors exist.
+      await Promise.all([
         scheduleHistorySnapshotTasks({
           logger: this.logger,
           taskManager: this.taskManager,
@@ -179,14 +193,6 @@ export class AssetManagerClient {
           taskManager: this.taskManager,
           namespace: this.namespace,
           request,
-        }),
-
-        // Stored scripts are managed assets with no granular ES privilege (only `manage`/`all`),
-        // so create them as the internal user rather than forcing the enabling user to hold
-        // broad cluster `manage`.
-        installEuidStoredScripts({
-          esClient: this.internalEsClient,
-          logger: this.logger,
         }),
       ]);
     } catch (error) {

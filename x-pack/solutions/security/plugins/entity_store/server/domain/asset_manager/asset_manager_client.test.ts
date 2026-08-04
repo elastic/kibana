@@ -184,6 +184,26 @@ describe('AssetManagerClient', () => {
     expect(mockScheduleExtractEntityTask).toHaveBeenCalledTimes(2);
   });
 
+  it('schedules status and history tasks only after engine descriptors exist', async () => {
+    const order: string[] = [];
+    mockEngineDescriptorClient.init.mockImplementation(async () => {
+      order.push('descriptor');
+    });
+    mockScheduleStatusReportTask.mockImplementation(async () => {
+      order.push('status');
+    });
+    mockScheduleHistorySnapshotTasks.mockImplementation(async () => {
+      order.push('history');
+    });
+
+    await client.init({} as KibanaRequest, ['host', 'user']);
+
+    const lastDescriptor = order.lastIndexOf('descriptor');
+    expect(lastDescriptor).toBeGreaterThanOrEqual(0);
+    expect(order.indexOf('status')).toBeGreaterThan(lastDescriptor);
+    expect(order.indexOf('history')).toBeGreaterThan(lastDescriptor);
+  });
+
   it('runs v1 cleanup and stored-script setup as the internal user', async () => {
     await client.init({} as KibanaRequest, ['host', 'user']);
 
