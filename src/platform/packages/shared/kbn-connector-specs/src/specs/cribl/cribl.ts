@@ -337,7 +337,7 @@ export const Cribl: ConnectorSpec = {
                 'core.kibanaConnectorSpecs.cribl.auth.bearerWithTls.caHelpText',
                 {
                   defaultMessage:
-                    'Paste the PEM-encoded certificate authority used to verify the Leader, if it ' +
+                    'Upload the PEM-encoded certificate authority used to verify the Leader, if it ' +
                     'presents a private/self-signed certificate. Leave empty to rely on the system trust store.',
                 }
               ),
