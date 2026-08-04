@@ -99,6 +99,7 @@ spaceTest.describe(
       await dataGrid.waitForDocTableRendered();
       await dataGrid.openGridDisplaySettings();
       await dataGrid.setSampleSize(CUSTOM_SAMPLE_SIZE_FOR_SAVED_SEARCH);
+      expect(await dataGrid.getCurrentSampleSize()).toBe(CUSTOM_SAMPLE_SIZE_FOR_SAVED_SEARCH);
 
       await discover.clickNewSearch();
       await dataGrid.waitForLoad();
