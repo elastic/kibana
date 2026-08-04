@@ -3071,7 +3071,7 @@ describe('ActionPolicyClient', () => {
       expect(result.total).toBe(0);
     });
 
-    it('returns global APs for policies with no matcher, along with the space-wide total', async () => {
+    it('returns global APs for policies with no matcher, along with the space-scoped total', async () => {
       jest.spyOn(rulesSavedObjectService, 'get').mockResolvedValueOnce({
         id: 'rule-1',
         attributes: ruleAttributes as never,

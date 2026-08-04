@@ -23,6 +23,24 @@ import { streamsInvestigationManagementSkill } from '../../memory_and_investigat
 
 type SignificantEventsSkill = Parameters<AgentBuilderPluginStart['skills']['register']>[0];
 
+/**
+ * Hides a skill's inline tools while significant events is unavailable. Registered tools declare
+ * `availability` and get filtered out of the catalog; inline tools have no such hook, and skills
+ * cannot be unregistered, so `getInlineTools` (re-invoked per skill load) is the only place left
+ * that still sees current availability.
+ */
+export const gateInlineTools = <TSkill extends SignificantEventsSkill>(
+  skill: TSkill,
+  isAvailable: () => Promise<boolean>
+): TSkill => {
+  const { getInlineTools } = skill;
+  if (!getInlineTools) {
+    return skill;
+  }
+
+  return { ...skill, getInlineTools: async () => ((await isAvailable()) ? getInlineTools() : []) };
+};
+
 interface RegisterSignificantEventsSkillsOptions {
   agentBuilder: AgentBuilderPluginStart;
   telemetry: EbtTelemetryClient;
@@ -91,7 +109,7 @@ export const registerSignificantEventsSkills = async ({
     }
 
     const results = await Promise.allSettled(
-      pending.map((skill) => agentBuilder.skills.register(skill))
+      pending.map((skill) => agentBuilder.skills.register(gateInlineTools(skill, isAvailable)))
     );
 
     const failed: string[] = [];
