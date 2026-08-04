@@ -22,15 +22,17 @@ If these skills are not available when needed (Tasks 6–7), the agent creation 
 Use `TaskCreate` to create all of the following tasks up front so the user can see the full plan. Set all tasks to `pending` initially.
 
 1. **Create the connector code** — "Generate connector spec, types, and documentation for $ARGUMENTS"
-2. **Code review** — "Review generated connector files for correctness and completeness"
+2. **Code review** — "Review generated connector files for correctness and completeness, and with a
+   fresh-eyes pass using the real PR bot's own criteria"
 3. **Edit based on review** — "Fix issues found during code review"
 4. **Wait for Kibana** — "Ask user to start Elasticsearch and Kibana"
-5. **Activate the connector** — "Create a connector instance in running Kibana"
+5. **Activate the connector** — "Ask the user to create a connector instance in the Kibana UI"
 6. **Create a test agent** — "Create an Agent Builder agent wired to the new connector tools"
 7. **Chat test** — "Send a test message to the agent and observe tool calls"
 8. **Verify tool call quality** — "Analyze chat results for successful tool executions"
 9. **Iterate on quality** — "Fix code issues and re-test until quality bar is met"
-10. **Final code review** — "Final review of all generated files and documentation"
+10. **Final code review** — "Final review of all generated files and documentation, including a
+    fresh-eyes pass using the real PR bot's own criteria"
 11. **Final chat test** — "Final end-to-end conversation to confirm everything works"
 12. **Compile the PR validation table** — "Build the `## Validated` action-by-action table for the PR description"
 13. **Report completion** — "Tell the user the connector is ready for manual inspection"
@@ -89,7 +91,14 @@ Mark task 2 as `in_progress`.
 
 Review the files generated in Task 1 using the **review-connector** skill. Apply its checklist to the connector spec and docs.
 
-List all issues found. If no issues are found, note that the code looks good.
+Also invoke the **bot-parity-review** skill (`Skill: bot-parity-review`) for a fresh-eyes pass using the
+real PR bot's own review criteria, not the connector checklist. `review-connector` and `bot-parity-review`
+check for different things — the connector-domain checklist doesn't cover the generic correctness/security/
+test-sufficiency/architectural-fit concerns the real bot applies, and `bot-parity-review` runs in an isolated
+context with no memory of having written this code, so it catches what the same-agent self-review pass
+tends to miss.
+
+List all issues found from both passes. If no issues are found, note that the code looks good.
 
 Mark task 2 as `completed`.
 
@@ -99,9 +108,10 @@ Mark task 2 as `completed`.
 
 Mark task 3 as `in_progress`.
 
-If issues were found in Task 2, fix them using the `Edit` tool. After fixing, re-read the files and verify the fixes are correct.
+If issues were found in Task 2 (from either `review-connector` or `bot-parity-review`), fix them using the
+`Edit` tool. After fixing, re-read the files and verify the fixes are correct.
 
-If the fixes are significant, do another review pass. Repeat the review/edit cycle until you're satisfied with the quality — typically 1-2 iterations.
+If the fixes are significant, do another review pass with both skills. Repeat the review/edit cycle until you're satisfied with the quality — typically 1-2 iterations.
 
 Mark task 3 as `completed`.
 
@@ -145,7 +155,12 @@ Skill: activate-connector
 Args: $ARGUMENTS
 ```
 
-This will list available types, ask the user for credentials, and create the connector instance via the Actions API. When `agentBuilder:experimentalFeatures` is true, the connector's sub-actions become available to agents.
+This will list available types, then ask the user to create the connector themselves through the Kibana UI
+(its preferred path) so they can confirm the creation form renders correctly and so the live credential
+never has to flow through you — see `activate-connector`'s Step 3 for why. Only fall back to its
+script-driven Step 4 if the user explicitly asks you to create it for them. When
+`agentBuilder:experimentalFeatures` is true, the connector's sub-actions become available to agents either
+way.
 
 **If the user reports `Error: No widget found for schema type: ZodNumberFormat...`** when opening the
 connector creation form in the Kibana UI, a `z.number()` field was used in the connector's config
@@ -272,7 +287,13 @@ Mark task 9 as `completed`.
 
 Mark task 10 as `in_progress`.
 
-Do one final review using the **review-connector** skill. Verify no TODOs/placeholders, consistent naming, no debug artifacts. The review skill will also run docs quality checks (`docs-check-style`, `crosslink-validator`, `frontmatter-audit`, `content-type-checker`, `applies-to-tagging`) on any connector docs. Make any final minor fixes if needed.
+Do one final review using the **review-connector** skill. Verify no TODOs/placeholders, consistent naming, no debug artifacts. The review skill will also run docs quality checks (`docs-check-style`, `crosslink-validator`, `frontmatter-audit`, `content-type-checker`, `applies-to-tagging`) on any connector docs.
+
+Also do one final **bot-parity-review** pass (`Skill: bot-parity-review`). Task 9's live-testing iteration
+can introduce new code after Tasks 2/3 already ran, so re-running this fresh-eyes, real-bot-criteria check
+here catches anything introduced since.
+
+Make any final minor fixes needed from either pass.
 
 Mark task 10 as `completed`.
 
@@ -352,13 +373,15 @@ Tell the user something like the below template, listing the actual file paths t
 > 2. Try chatting with the agent in the Kibana UI
 > 3. Review the generated code and adjust as needed
 > 4. When satisfied, commit the code changes and open a PR — include the `## Validated` table from Task 12
->    in the PR description, and add the `release_note:feature` and `Feature:Actions/ConnectorTypes` labels
+>    in the PR description, and add the `release_note:feature`, `Feature:Actions/ConnectorTypes`, and
+>    `backport:skip` labels
 
 List the actual file paths that were created or modified during the process, and include the `## Validated`
 table compiled in Task 12 in your response so the user has it even if they open the PR themselves.
 
-If you open the PR yourself (via `gh pr create`), apply both labels as part of that same command or
-immediately after with `gh pr edit <number> --add-label "release_note:feature" --add-label "Feature:Actions/ConnectorTypes"`.
+If you open the PR yourself (via `gh pr create`), apply all three labels as part of that same command or
+immediately after with `gh pr edit <number> --add-label "release_note:feature" --add-label "Feature:Actions/ConnectorTypes" --add-label "backport:skip"`.
 `release_note:feature` surfaces the new connector in the condensed release notes; `Feature:Actions/ConnectorTypes`
-routes the PR to the right reviewers and keeps it discoverable alongside other connector-type work. Use these
-exact label names/casing — check `gh label list --repo elastic/kibana --search <name>` if unsure they still exist.
+routes the PR to the right reviewers and keeps it discoverable alongside other connector-type work;
+`backport:skip` reflects that a brand-new connector only ever lands on `main`, not older release branches.
+Use these exact label names/casing — check `gh label list --repo elastic/kibana --search <name>` if unsure they still exist.

@@ -71,6 +71,12 @@ node scripts/generate connector-registries
 
 After running the generator, fill in the TODO placeholders.
 
+`docs/reference/toc.yml` and the connectors snippet-list file are two more merge-conflict-prone spots
+that aren't fully regenerable (they carry hand-written navigation/description text) — see "Handling
+merge conflicts" in [`../SKILL.md`](../SKILL.md) for how to resolve conflicts in those, and in the
+three generated files above, without reintroducing the kind of silent breakage described earlier in
+this section.
+
 ## Connector Spec Structure
 
 ```typescript

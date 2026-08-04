@@ -7,6 +7,10 @@ description: Review connector spec changes (spec, docs). Use when reviewing a PR
 
 Use this skill when reviewing or preparing changes to a **connector spec** (spec code, documentation). Apply the checklist below; use the optional thorough check when the user asks for deeper validation against the vendor API.
 
+This is a connector-domain checklist, not a substitute for the real `@claude` PR bot's own generic review
+criteria (correctness, security/authz, test sufficiency, architectural fit) — see **bot-parity-review** for
+a fresh-eyes pass using those instead. `build-connector` and standalone `create-connector` run both.
+
 ## When to use
 
 - Reviewing a PR that adds or changes a connector spec
@@ -72,9 +76,14 @@ Use this skill when reviewing or preparing changes to a **connector spec** (spec
 - Spec is exported from `all_specs.ts`, its icon is registered in `connector_icons_map.ts`, and its
   `OWNER` export is reflected in `.github/CODEOWNERS`. All three are generated from `src/specs/`
   (see `scripts/generate_connector_registries.ts`) — a CI test fails if any of them drifts from what
-  the generator produces, so a passing CI run already confirms they're consistent. If CI is red on
-  that test (most often after a hand-resolved merge conflict), tell the author to run
-  `node scripts/generate connector-registries` and commit the result, rather than hand-editing any of them.
+  the generator produces, so a passing CI run already confirms they're consistent. The same test also
+  checks the connectors snippet-list file (see the Documentation section below) for ordering and
+  duplicate-link mistakes. If CI is red on that test (most often after a hand-resolved merge conflict),
+  tell the author to run `node scripts/generate connector-registries` (or fix the snippet-list entry) and
+  commit the result, rather than hand-editing any of them — and to run `node scripts/eslint --fix` and
+  `node scripts/type_check` on whatever they hand-resolved immediately after, since a bad manual conflict
+  resolution has broken the build silently before (an unbalanced `lazy(...)` call caught only by a
+  reviewer reading the diff, not CI).
   Do not add unused/cargo-culted flags; only set flags the platform or this connector actually uses.
 - **Input schemas & types**: Action input schemas and their `z.infer<>` types must live in a separate
   `types.ts` file alongside the spec (not inline in the spec file, and not as `as` casts in handlers).
@@ -183,11 +192,15 @@ actual documented behavior — flag them even without live access to the API, ba
 - **Snippets file**: Third-party data connectors (cloud storage, SaaS search, etc.) belong in
   `docs/reference/connectors-kibana/_snippets/data-context-sources-connectors-list.md`, **not**
   `elastic-connectors-list.md` (which is reserved for Kibana-native connectors like Cases, Index,
-  ServerLog, and Obs AI Assistant). Order them alphabetically. Flag any third-party connector 
-  entry added to the wrong file.
+  ServerLog, and Obs AI Assistant). Flag any third-party connector entry added to the wrong file.
+  Alphabetical order within a category and duplicate links are CI-checked (`generate_connector_registries.test.ts`),
+  so you don't need to eyeball ordering here — but do check the entry landed in a sensible category
+  (most belong in "Third-party search"; re-categorize into "Threat intelligence"/"Identity management"/etc.
+  if it's a better fit — the scaffold always inserts into the first category and relies on a human to move it).
 - **`toc.yml` placement**: Third-party connectors belong under the `data-context-sources-connectors.md`
   node, **not** `elastic-connectors.md`. Flag any third-party connector whose `toc.yml` entry is a
-  child of `elastic-connectors.md`.
+  child of `elastic-connectors.md`. Unlike the snippets file, `toc.yml` ordering isn't CI-checked yet,
+  so verify alphabetical order by eye.
 - **Doc frontmatter version**: `applies_to.stack` must include a version number — `stack: preview X.Y`,
   not just `stack: preview`. The version must be ≥ every other version referenced anywhere in the doc
   (a new connector cannot have been available before any feature it references). Flag any doc where it
@@ -226,8 +239,8 @@ Report documentation issues alongside code issues.
   `✅ Pass` with no concrete scenario described. If live testing hasn't happened yet, every row should
   still be present, marked `⚠️ Not validated — needs manual verification` — that's acceptable, an
   entirely missing table is not.
-- **Labels**: The PR must have both `release_note:feature` and `Feature:Actions/ConnectorTypes` applied
-  (check with `gh pr view <number> --json labels`). Flag if either is missing.
+- **Labels**: The PR must have `release_note:feature`, `Feature:Actions/ConnectorTypes`, and `backport:skip`
+  all applied (check with `gh pr view <number> --json labels`). Flag if any is missing.
 
 ### Naming and Conventions
 

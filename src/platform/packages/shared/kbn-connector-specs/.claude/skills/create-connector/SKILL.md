@@ -182,6 +182,14 @@ Before treating the connector as done, re-read the whole diff once, end to end, 
 This mirrors what the `review-connector` skill checks — running it yourself first means real review
 cycles catch new problems instead of re-flagging things you could have caught alone.
 
+Then, if this skill is running standalone (not orchestrated by `build-connector`, which already runs this
+as part of its own Tasks 2/3/10), also invoke the **bot-parity-review** skill (`Skill: bot-parity-review`).
+The checklist above and `review-connector` are both connector-domain checklists; `bot-parity-review` applies
+the real `@claude` PR bot's own generic criteria (correctness, security/authz, test sufficiency,
+architectural fit) in a fresh, isolated context with no memory of having written this code — catching a
+different class of issue than either self-review pass above, before it reaches the real bot. Fix anything
+it finds before treating the connector as done.
+
 ## Step 5: Write Documentation
 
 Create a connector doc page in `docs/reference/connectors-kibana/{name}-action-type.md`.
@@ -229,9 +237,34 @@ exposes and whether it's been observed working. If you ran this skill standalone
 doesn't get skipped when the PR is written. See
 [reference/pr-validation-table.md](reference/pr-validation-table.md) for the exact format.
 
-The PR must also carry the `release_note:feature` and `Feature:Actions/ConnectorTypes` labels. If you open
-the PR yourself, add them with `gh pr create --label "release_note:feature" --label "Feature:Actions/ConnectorTypes" ...`
-(or `gh pr edit <number> --add-label ...` afterward). If a human opens the PR, remind them to add both.
+The PR must also carry the `release_note:feature`, `Feature:Actions/ConnectorTypes`, and `backport:skip`
+labels (a brand-new connector only ever lands on `main`, so it doesn't need backporting). If you open
+the PR yourself, add them with `gh pr create --label "release_note:feature" --label "Feature:Actions/ConnectorTypes" --label "backport:skip" ...`
+(or `gh pr edit <number> --add-label ...` afterward). If a human opens the PR, remind them to add all three.
+
+## Handling merge conflicts
+
+`all_specs.ts`, `connector_icons_map.ts`, the generated block in `.github/CODEOWNERS`, `docs/reference/toc.yml`,
+and `docs/reference/connectors-kibana/_snippets/data-context-sources-connectors-list.md` are the files most
+likely to conflict when several connector PRs land close together — they all used to require every PR to
+append a line near the same spot.
+
+- **`all_specs.ts` / `connector_icons_map.ts` / CODEOWNERS**: don't hand-resolve the conflict markers. Pick
+  either side (or delete the conflicting hunk entirely), then run `node scripts/generate connector-registries`
+  and commit the regenerated result. `generate_connector_registries.test.ts` fails CI if any of the three still
+  drifts from `src/specs/`, so a bad manual merge can't reach a reviewer silently — but it's still faster to
+  regenerate than to debug a lint/type-check failure caused by a mis-resolved conflict.
+- **The snippet-list file**: this one carries hand-written descriptions, so it can't be regenerated — keep both
+  sides' new entries and reinsert them alphabetically within their category. `generate_connector_registries.test.ts`
+  also checks this file's ordering and for the same doc being linked twice, so a bad resolution here fails CI too.
+- **`toc.yml`**: also hand-written and not yet covered by an automated ordering check — keep both sides' new
+  entries and double-check the resulting alphabetical order by eye.
+
+Whichever of these you hand-resolve, run `node scripts/eslint --fix <file>` and
+`node scripts/type_check --project src/platform/packages/shared/kbn-connector-specs/tsconfig.json` (or the
+`packages/kbn-generate/tsconfig.json` project, if that's what you touched) on it immediately, before pushing —
+don't wait for CI. A hand-resolved conflict has previously left an unbalanced `lazy(...)` call in
+`connector_icons_map.ts` that only a reviewer caught by reading the diff.
 
 ## Important Notes
 
