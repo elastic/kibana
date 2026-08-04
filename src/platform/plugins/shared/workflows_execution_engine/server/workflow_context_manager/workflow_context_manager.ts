@@ -316,6 +316,7 @@ export class WorkflowContextManager {
         coreStart: this.coreStart,
         cloudSetup: this.dependencies.cloudSetup,
         workflowRunId: this.workflowExecutionState.getWorkflowExecution().id,
+        spaceId: this.getWorkflowSpaceId(),
       },
       params
     );
