@@ -27,7 +27,7 @@ node scripts/evals run --suite agent-builder-visualizations
 
 ## Dataset
 
-Seed examples live inline in `evals/visualization_creation/visualization_creation.spec.ts`. Most target the `kibana_sample_data_logs` index (loaded in `beforeAll`). One example reproduces an OTel host-metrics `TS` failure seen in dashboard-level evals and targets the replayed OTel data stream (`metrics-hostmetricsreceiver.otel-default`, `system.cpu.load_average.{1m,5m,15m}` gauges). Grow this to 20–30 real prompts with ground-truth ES|QL and expected chart types.
+Seed examples live inline in `evals/visualization_creation/visualization_creation.spec.ts`. Most target the `kibana_sample_data_logs` index (loaded in `beforeAll`). One example targets host load metrics from the GCS snapshot replay (`metrics-system.load-default`, `system.load.{1,5,15}`). Grow this to 20–30 real prompts with ground-truth ES|QL and expected chart types.
 
 **Gold queries follow the agent's idiom** (see `agent-builder-visualizations-server/shared/esql_instructions.ts`):
 

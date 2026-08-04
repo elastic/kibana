@@ -84,21 +84,19 @@ evaluate.describe(
               },
               metadata: { includeHitDetection: true },
             },
-            // Regression: the agent must emit a `TS` query that quotes the `.1m` / `.5m` / `.15m`
-            // field paths (unquoted, `.1m` is lexed as a numeric literal and the parse fails) and
-            // wraps each gauge in `AVG_OVER_TIME`. Backed by the GCS snapshot replay.
-            // TODO: verify metrics-hostmetricsreceiver.otel-default is present in the
-            // payment-service-failures snapshot after first replay; revise if not.
+            // Host metrics from the GCS otel-demo snapshot: Beats system load data stream
+            // (`metrics-system.load-default` / `system.load.{1,5,15}`), not OTel hostmetrics
+            // `system.cpu.load_average.*` gauges.
             {
               input: {
                 question:
-                  'Show CPU load average metrics over time as a line chart. Include system.cpu.load_average.1m (1-minute), system.cpu.load_average.5m (5-minute), and system.cpu.load_average.15m (15-minute) as separate lines, bucketed by auto time interval.',
+                  'Show CPU load average metrics over time as a line chart. Include system.load.1 (1-minute), system.load.5 (5-minute), and system.load.15 (15-minute) as separate lines, bucketed by auto time interval.',
               },
               output: {
                 expected:
-                  'A time-series line chart backed by a TS ES|QL query that averages each CPU load-average gauge (1m, 5m, 15m) over time buckets, with the dotted field paths quoted so they are not misparsed as numeric literals.',
-                query: `TS metrics-hostmetricsreceiver.otel-default
-| STATS \`1-Minute Load Average\` = AVG(AVG_OVER_TIME(\`system.cpu.load_average.1m\`)), \`5-Minute Load Average\` = AVG(AVG_OVER_TIME(\`system.cpu.load_average.5m\`)), \`15-Minute Load Average\` = AVG(AVG_OVER_TIME(\`system.cpu.load_average.15m\`)) BY \`Time Bucket\` = TBUCKET(75, ?_tstart, ?_tend)`,
+                  'A time-series line chart backed by ES|QL that averages system.load.1, system.load.5, and system.load.15 from metrics-system.load-default over auto time buckets.',
+                query: `FROM metrics-system.load-default
+| STATS \`1-Minute Load\` = AVG(\`system.load.1\`), \`5-Minute Load\` = AVG(\`system.load.5\`), \`15-Minute Load\` = AVG(\`system.load.15\`) BY \`Time Bucket\` = BUCKET(@timestamp, 75, ?_tstart, ?_tend)`,
                 goldenToolPath: ['load_skill', 'platform.core.create_visualization'],
               },
               metadata: { includeHitDetection: true },
