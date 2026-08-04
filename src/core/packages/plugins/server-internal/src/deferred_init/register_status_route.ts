@@ -38,7 +38,7 @@ export function registerDeferredInitStatusRoute(router: IRouter, engine: Deferre
     {
       path: DEFERRED_INIT_STATUS_ROUTE,
       validate: {
-        params: schema.object({ pluginId: schema.string() }),
+        params: schema.object({ pluginId: schema.string({ maxLength: 256 }) }),
       },
       security: {
         authz: {
