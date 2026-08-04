@@ -55,6 +55,35 @@ const scoreOutputTool = (
   return null;
 };
 
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null;
+
+const didRuleSearchReturnNoCandidates = ({
+  params,
+  results,
+  toolId,
+}: ReturnType<typeof extractOrderedToolCalls>[number]): boolean =>
+  toolId === TOOL_ID_EVENT_SEARCH &&
+  Array.isArray(params.rule_uuids) &&
+  params.rule_uuids.length > 0 &&
+  results.some(
+    (result) =>
+      isRecord(result) &&
+      isRecord(result.data) &&
+      (result.data.total === 0 ||
+        (Array.isArray(result.data.events) && result.data.events.length === 0))
+  );
+
+const writesTopology = ({ params, toolId }: ReturnType<typeof extractOrderedToolCalls>[number]) =>
+  toolId === TOOL_ID_EVENTS_WRITE &&
+  Array.isArray(params.items) &&
+  params.items.some(
+    (item) =>
+      isRecord(item) &&
+      ((Array.isArray(item.causal_features) && item.causal_features.length > 0) ||
+        (Array.isArray(item.blast_radius) && item.blast_radius.length > 0))
+  );
+
 export const scoreToolUsage = ({
   steps,
   detectionCount,
@@ -101,6 +130,22 @@ export const scoreToolUsage = ({
       score: 0,
       label: 'unfiltered-event-search',
       explanation: `${TOOL_ID_EVENT_SEARCH} was not called with exclude_unconfirmed_signals: true — required to exclude signals whose confirmed value is false`,
+    };
+  }
+
+  const ruleSearchFoundNoCandidates = orderedCalls.some(didRuleSearchReturnNoCandidates);
+  const hasTopologySearch = orderedCalls.some(
+    ({ params, toolId }) =>
+      toolId === TOOL_ID_EVENT_SEARCH &&
+      Array.isArray(params.topology_feature_ids) &&
+      params.topology_feature_ids.length > 0
+  );
+  if (ruleSearchFoundNoCandidates && orderedCalls.some(writesTopology) && !hasTopologySearch) {
+    return {
+      score: 0,
+      label: 'missing-topology-search',
+      explanation:
+        'A rule-filtered event search returned no candidates, but the agent wrote topology-bearing event data without running the required topology-filtered event search',
     };
   }
 

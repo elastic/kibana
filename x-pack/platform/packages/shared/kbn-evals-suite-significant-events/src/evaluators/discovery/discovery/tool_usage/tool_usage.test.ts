@@ -94,6 +94,26 @@ describe('scoreToolUsage', () => {
     expect(result.label).toBe('unfiltered-event-search');
   });
 
+  it('requires topology search before writing a topology-bearing event after a zero-result rule search', () => {
+    const steps = [
+      toolCall(
+        TOOL_ID_EVENT_SEARCH,
+        { exclude_unconfirmed_signals: true, rule_uuids: ['rule-uuid-1'] },
+        [{ data: { total: 0, events: [] } }]
+      ),
+      toolCall(TOOL_ID_KI_SEARCH, { kind: ['query'] }),
+      toolCall(TOOL_ID_EXECUTE_ESQL),
+      toolCall(TOOL_ID_EVENTS_WRITE, {
+        items: [{ causal_features: [{ feature_id: 'checkout' }], blast_radius: [] }],
+      }),
+    ];
+
+    expect(scoreToolUsage({ steps, detectionCount: 1 })).toMatchObject({
+      score: 0,
+      label: 'missing-topology-search',
+    });
+  });
+
   it('requires query KI search', () => {
     const steps = [
       toolCall(TOOL_ID_EVENT_SEARCH, { exclude_unconfirmed_signals: true }),

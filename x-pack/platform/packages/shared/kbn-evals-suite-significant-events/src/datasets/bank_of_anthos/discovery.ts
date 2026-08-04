@@ -27,9 +27,11 @@ const toInputDetections = (events: Array<Partial<SignificantEvent>>): Array<Part
  * query results before promoting. Every field here is seeded by one of the cascade `detections`, so
  * the canonical input and this expected answer stay self-consistent.
  */
+const LEDGER_DB_CASCADE_EVENT_ID = 'transactionhistory__frontend-transactionhistory-read-timeout';
+
 const LEDGER_DB_CASCADE_EVENT: Partial<SignificantEvent> = {
   status: 'open',
-  event_id: 'transactionhistory__frontend-transactionhistory-read-timeout',
+  event_id: LEDGER_DB_CASCADE_EVENT_ID,
   title: 'Ledger backends — customer transaction connectivity failure',
   symptom_hypothesis:
     'Customer transaction flows are failing because ledger database and cache dependencies refuse connections.',
@@ -332,7 +334,7 @@ export const discovery: DatasetConfig['discovery'] = [
       expected_ground_truth:
         'discoveries=[ledger-db-cascade (transactionhistory/balancereader/ledgerwriter->postgresql SQLState 08001, cache errors, frontend connection-refused failures)]',
       expected_confirmed_rule_uuids: {
-        LEDGER_DB_CASCADE_RULE_UUIDS,
+        [LEDGER_DB_CASCADE_EVENT_ID]: LEDGER_DB_CASCADE_RULE_UUIDS,
       },
       expected_significant_events: [LEDGER_DB_CASCADE_EVENT],
       criteria: [
@@ -388,15 +390,15 @@ export const discovery: DatasetConfig['discovery'] = [
     },
     output: {
       expected_ground_truth:
-        'misgrouped ledger event remains open/80-critical for the database cascade; successful authentication signals remain unconfirmed and do not shape the event narrative',
+        'misgrouped ledger event remains open/80-critical for the database cascade; unbacked authentication detections do not shape the event narrative',
       expected_confirmed_rule_uuids: {
-        'ledger-db-disconnect__misgrouped-auth': LEDGER_DB_CASCADE_RULE_UUIDS,
+        [LEDGER_DB_CASCADE_EVENT_ID]: LEDGER_DB_CASCADE_RULE_UUIDS,
       },
-      expected_significant_events: [MISGROUPED_LEDGER_EVENT],
+      expected_significant_events: [LEDGER_DB_CASCADE_EVENT],
       criteria: [
         {
           id: 'reject-unrelated-auth-membership',
-          text: 'Sets confirmed:false on Successful User Login and New User Account Created because their healthy rows do not support the ledger database event, and identifies them as unrelated in assessment_note.',
+          text: 'Omits Successful User Login and New User Account Created from the event because neither has a backed query KI; does not incorporate authentication activity into assessment_note.',
           score: 3,
         },
         {

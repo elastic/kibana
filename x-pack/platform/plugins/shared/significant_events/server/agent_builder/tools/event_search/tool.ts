@@ -196,7 +196,7 @@ export function createSearchEventsTool({
 
       ${i18n.translate('xpack.significantEvents.agentBuilder.tools.eventSearch.description.line3', {
         defaultMessage:
-          'Provide at least one filter. Good: `{ "rule_uuids": ["..."], "status": "open" }`. Invalid: `{}`. Never re-call this tool with the same filters and a different per_page to retry — per_page only controls page size. When has_more is true, set page to the next_page value from the previous response with all other parameters unchanged. When has_more is false, the result set is complete; do not re-query.',
+          'Provide at least one filter. Good: `\'{ "rule_uuids": ["..."], "status": "open" }\'`. Invalid: `\'{}\'`. Never re-call this tool with the same filters and a different per_page to retry — per_page only controls page size. When has_more is true, set page to the next_page value from the previous response with all other parameters unchanged. When has_more is false, the result set is complete; do not re-query.',
       })}
 
       ${i18n.translate('xpack.significantEvents.agentBuilder.tools.eventSearch.description.line4', {

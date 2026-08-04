@@ -63,13 +63,20 @@ export const evidenceCollectionEvaluator: DiscoveryEvaluator = {
     const unexpectedRuleUuids = [...signalsByRuleUuid.keys()].filter(
       (ruleUuid) => !expectedRuleUuids.has(ruleUuid)
     );
-    unexpectedRuleUuids.forEach((ruleUuid) => {
-      issues.push(
-        ruleUuid ? `unexpected signal for rule "${ruleUuid}"` : 'signal missing metadata.rule_uuid'
-      );
-    });
+    if (unexpectedRuleUuids.length > 0) {
+      const unexpectedRules = unexpectedRuleUuids
+        .map((ruleUuid) =>
+          ruleUuid ? `"${ruleUuid}"` : 'a signal without metadata.rule_uuid'
+        )
+        .join(', ');
+      return Promise.resolve({
+        score: 0,
+        label: 'unexpected-rule-uuid',
+        explanation: `Agent output contains detection signal(s) not present in the input batch: ${unexpectedRules}`,
+      });
+    }
 
-    const score = covered / (expectedRuleUuids.size + unexpectedRuleUuids.length);
+    const score = covered / expectedRuleUuids.size;
     return Promise.resolve({
       score,
       explanation:

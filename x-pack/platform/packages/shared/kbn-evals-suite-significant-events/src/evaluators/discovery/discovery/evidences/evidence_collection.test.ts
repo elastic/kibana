@@ -92,11 +92,11 @@ describe('evidenceCollectionEvaluator', () => {
     }
   );
 
-  it('rejects duplicate and unexpected signals', async () => {
+  it('rejects duplicate signals', async () => {
     const result = await evaluate(
       [
         {
-          signals: [detectionSignal('r1'), detectionSignal('r1'), detectionSignal('unexpected')],
+          signals: [detectionSignal('r1'), detectionSignal('r1')],
         },
       ],
       ['r1']
@@ -104,6 +104,12 @@ describe('evidenceCollectionEvaluator', () => {
 
     expect(result.score).toBe(0);
     expect(result.explanation).toContain('duplicate signals for input rule "r1"');
-    expect(result.explanation).toContain('unexpected signal for rule "unexpected"');
+  });
+
+  it('rejects detection signals whose UUID is not in the input batch', async () => {
+    const result = await evaluate([{ signals: [detectionSignal('unexpected')] }], ['r1']);
+
+    expect(result).toMatchObject({ score: 0, label: 'unexpected-rule-uuid' });
+    expect(result.explanation).toContain('"unexpected"');
   });
 });
