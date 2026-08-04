@@ -130,12 +130,7 @@ test.describe(
       await test.step('verify restore is Complete in restore status table', async () => {
         await snapshotRestore.navToRestoreStatus({ empty: false });
         const restoredIndexName = `restored_${logsDbIndex}`;
-        const restoreRow = page.testSubj
-          .locator('restoreList')
-          .locator('[data-test-subj="row"]')
-          .filter({
-            has: page.testSubj.locator('restoreTableIndex').filter({ hasText: restoredIndexName }),
-          });
+        const restoreRow = snapshotRestore.restoreStatusRow(restoredIndexName);
         // Not `toHaveText`: EUI puts a hidden responsive column-header glyph inside each `<td>`,
         // so the cell text is `restored_logsdb-index↦` and exact matching never holds.
         await expect(restoreRow.locator('[data-test-subj="restoreTableIndex"]')).toContainText(

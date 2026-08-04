@@ -122,20 +122,32 @@ export class SnapshotRestorePage {
     return this.page.testSubj.locator('cleanupCodeBlock').innerText();
   }
 
-  async clickSnapshotLink(nameContains: string) {
-    await this.page.testSubj
+  /** Row in the snapshots table whose snapshot name contains `nameContains`. */
+  private snapshotRow(nameContains: string) {
+    return this.page.testSubj
       .locator('snapshotTable')
       .locator('[data-test-subj="row"]')
-      .filter({ has: this.page.testSubj.locator('snapshotLink').filter({ hasText: nameContains }) })
-      .locator('[data-test-subj="snapshotLink"]')
-      .click();
+      .filter({
+        has: this.page.testSubj.locator('snapshotLink').filter({ hasText: nameContains }),
+      });
+  }
+
+  /** Row in the restore-status table for the named restored index. */
+  restoreStatusRow(indexName: string) {
+    return this.page.testSubj
+      .locator('restoreList')
+      .locator('[data-test-subj="row"]')
+      .filter({
+        has: this.page.testSubj.locator('restoreTableIndex').filter({ hasText: indexName }),
+      });
+  }
+
+  async clickSnapshotLink(nameContains: string) {
+    await this.snapshotRow(nameContains).locator('[data-test-subj="snapshotLink"]').click();
   }
 
   async clickSnapshotRestoreButton(nameContains: string) {
-    await this.page.testSubj
-      .locator('snapshotTable')
-      .locator('[data-test-subj="row"]')
-      .filter({ has: this.page.testSubj.locator('snapshotLink').filter({ hasText: nameContains }) })
+    await this.snapshotRow(nameContains)
       .locator('[data-test-subj="srsnapshotListRestoreActionButton"]')
       .click();
   }
@@ -152,12 +164,7 @@ export class SnapshotRestorePage {
             .locator('reloadButton')
             .click({ timeout: 5_000 })
             .catch(() => {});
-          const row = this.page.testSubj
-            .locator('snapshotTable')
-            .locator('[data-test-subj="row"]')
-            .filter({
-              has: this.page.testSubj.locator('snapshotLink').filter({ hasText: nameContains }),
-            });
+          const row = this.snapshotRow(nameContains);
           // The prefix is unique to this run, so exactly one row is expected; anything else means
           // the table has not settled.
           if ((await row.count()) !== 1) return null;
