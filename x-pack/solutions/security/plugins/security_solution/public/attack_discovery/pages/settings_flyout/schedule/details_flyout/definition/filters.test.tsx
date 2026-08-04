@@ -49,8 +49,6 @@ describe('Filters', () => {
   it('should render correct filter', async () => {
     await renderComponent();
 
-    await waitFor(() =>
-      expect(screen.getByTestId('filters')).toHaveTextContent('_type: exists')
-    );
+    await waitFor(() => expect(screen.getByTestId('filters')).toHaveTextContent('_type: exists'));
   });
 });
