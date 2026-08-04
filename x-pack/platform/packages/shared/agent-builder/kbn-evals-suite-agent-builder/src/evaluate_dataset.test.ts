@@ -185,6 +185,7 @@ describe('createEvaluateExternalDataset', () => {
             examples: [],
           },
         ],
+        trustUpstreamDataset: true,
       }),
       expect.any(Array)
     );
