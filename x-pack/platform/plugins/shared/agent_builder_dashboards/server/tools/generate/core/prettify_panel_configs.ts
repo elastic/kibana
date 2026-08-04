@@ -15,6 +15,7 @@ import {
   getChartTypeFromLensConfig,
   getEsqlQueriesFromLensConfig,
   getPrettifyConfigInstructions,
+  panelNeedsPrettify,
 } from '@kbn/agent-builder-visualizations-server';
 import { indexPanelsById, updatePanelInDashboard } from './dashboard_state';
 import { DASHBOARD_OPERATION_FAILURE_TYPES } from './failure_types';
@@ -85,6 +86,10 @@ export const prettifyPanelConfigs = async ({
 
     const request = toPrettifyRequest(existingPanel.id, currentPanel);
     if (!request) {
+      continue;
+    }
+
+    if (!panelNeedsPrettify(request.chartType, request.panel.config)) {
       continue;
     }
 

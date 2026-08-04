@@ -12,5 +12,6 @@ export {
   getChartTypeFromLensConfig,
   getEsqlQueriesFromLensConfig,
 } from './lens/lens_config_helpers';
+export { panelNeedsPrettify } from './lens/panel_needs_prettify';
 export type { VisualizationConfig } from './lens/types';
 export { buildVegaConfig } from './vega';

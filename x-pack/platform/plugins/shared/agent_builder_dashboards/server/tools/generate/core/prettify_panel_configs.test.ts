@@ -17,6 +17,20 @@ import { prettifyPanelConfigs } from './prettify_panel_configs';
 const grid = { x: 0, y: 0, w: 12, h: 8 };
 const esql = 'FROM logs-* | STATS requests = COUNT(*)';
 
+/** Metric config that still needs a prettify refresh (redundant auto color). */
+const metricNeedingPrettify = {
+  type: 'metric',
+  data_source: { type: 'esql', query: esql },
+  metrics: [
+    {
+      type: 'primary',
+      operation: 'count',
+      column: 'requests',
+      color: { type: 'auto' },
+    },
+  ],
+} as const;
+
 const createPanel = (
   id: string,
   config: Record<string, unknown>,
@@ -49,22 +63,20 @@ describe('prettifyPanelConfigs', () => {
   it('refreshes only surviving pre-existing ES|QL Lens panels', async () => {
     const survivingPanel = createPanel('surviving', {
       title: 'Requests',
-      type: 'metric',
-      data_source: { type: 'esql', query: esql },
+      ...metricNeedingPrettify,
     });
     const removedPanel = createPanel('removed', {
-      type: 'metric',
-      data_source: { type: 'esql', query: esql },
+      ...metricNeedingPrettify,
     });
     const nonEsqlPanel = createPanel('non-esql', {
       title: 'Legacy requests',
       type: 'metric',
       data_source: { type: 'index_pattern', id: 'logs-*' },
+      metrics: metricNeedingPrettify.metrics,
     });
     const newPanel = createPanel('new', {
       title: 'New panel',
-      type: 'metric',
-      data_source: { type: 'esql', query: esql },
+      ...metricNeedingPrettify,
     });
     const dashboardData: DashboardAttachmentData = {
       title: 'Service overview',
@@ -103,11 +115,34 @@ describe('prettifyPanelConfigs', () => {
     expect(result.panelAuthoringNotes).toEqual([]);
   });
 
+  it('skips panels that do not need a prettify refresh', async () => {
+    const cleanMetric = createPanel('clean-metric', {
+      title: 'Clean',
+      type: 'metric',
+      data_source: { type: 'esql', query: esql },
+      metrics: [{ type: 'primary', operation: 'count', column: 'requests' }],
+    });
+    const pie = createPanel('pie', {
+      title: 'Share',
+      type: 'pie',
+      data_source: { type: 'esql', query: esql },
+    });
+    const resolvePanelContent = createResolvePanelContent();
+
+    const result = await prettifyPanelConfigs({
+      dashboardData: { title: 'Service overview', panels: [cleanMetric, pie] },
+      existingPanels: [cleanMetric, pie],
+      resolvePanelContent,
+    });
+
+    expect(resolvePanelContent).not.toHaveBeenCalled();
+    expect(result.dashboardData.panels).toEqual([cleanMetric, pie]);
+  });
+
   it('collects panel authoring notes from successful resolves', async () => {
     const panel = createPanel('requests', {
       title: 'Requests',
-      type: 'metric',
-      data_source: { type: 'esql', query: esql },
+      ...metricNeedingPrettify,
     });
     const resolvePanelContent = createResolvePanelContent(
       'Polished requests',
@@ -131,8 +166,7 @@ describe('prettifyPanelConfigs', () => {
   it('omits panel authoring notes when the resolve has no authoring note', async () => {
     const panel = createPanel('requests', {
       title: 'Requests',
-      type: 'metric',
-      data_source: { type: 'esql', query: esql },
+      ...metricNeedingPrettify,
     });
     const resolvePanelContent = createResolvePanelContent();
 
@@ -179,13 +213,11 @@ describe('prettifyPanelConfigs', () => {
   it('skips panels already content-resolved in this call', async () => {
     const editedPanel = createPanel('edited', {
       title: 'Edited',
-      type: 'metric',
-      data_source: { type: 'esql', query: esql },
+      ...metricNeedingPrettify,
     });
     const untouchedPanel = createPanel('untouched', {
       title: 'Untouched',
-      type: 'metric',
-      data_source: { type: 'esql', query: esql },
+      ...metricNeedingPrettify,
     });
     const dashboardData: DashboardAttachmentData = {
       title: 'Service overview',
@@ -216,8 +248,7 @@ describe('prettifyPanelConfigs', () => {
   it('records resolve failures for panels that were attempted', async () => {
     const panel = createPanel('broken', {
       title: 'Broken',
-      type: 'metric',
-      data_source: { type: 'esql', query: esql },
+      ...metricNeedingPrettify,
     });
     const resolvePanelContent = jest.fn<
       ReturnType<ResolvePanelContent>,
