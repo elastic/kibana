@@ -104,8 +104,6 @@ export const METRICS_EXPERIENCE_TAGS = [
 ];
 
 export const RECOMMENDED_QUERY_TAGS = [
-  ...tags.stateful.search,
-  ...tags.stateful.observability,
-  ...tags.stateful.security,
+  ...tags.stateful.classic,
   ...tags.serverless.observability.complete,
 ];
