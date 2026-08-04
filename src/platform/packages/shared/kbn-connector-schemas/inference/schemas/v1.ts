@@ -52,7 +52,22 @@ const AIMessage = lazySchema(() =>
   z
     .object({
       role: z.string(),
-      content: z.string().nullish(),
+      content: z
+        .union([
+          z.string(),
+          z.array(
+            z.union([
+              z.object({ type: z.literal('text'), text: z.string() }).strict(),
+              z
+                .object({
+                  type: z.literal('image_url'),
+                  image_url: z.object({ url: z.string(), detail: z.string().optional() }).strict(),
+                })
+                .strict(),
+            ])
+          ),
+        ])
+        .nullish(),
       name: z.string().optional(),
       tool_calls: z
         .array(

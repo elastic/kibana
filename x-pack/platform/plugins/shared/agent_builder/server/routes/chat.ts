@@ -539,6 +539,9 @@ export function registerChatRoutes({
         availability: {
           since: '9.2.0',
         },
+        body: {
+          maxBytes: 4 * 1024 * 1024,
+        },
       },
     })
     .addVersion(
@@ -587,6 +590,9 @@ export function registerChatRoutes({
         tags: ['oas-tag:agent builder'],
         availability: {
           since: '9.2.0',
+        },
+        body: {
+          maxBytes: 4 * 1024 * 1024,
         },
       },
     })

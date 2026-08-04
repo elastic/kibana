@@ -6,6 +6,7 @@
  */
 
 import { isElementCommandBadge, serializeCommandBadge } from './command_badge';
+import { isElementImagePlaceholder } from './image_placeholder';
 import { stripZeroWidthSpaces } from './utils';
 
 /**
@@ -26,7 +27,9 @@ export const serializeEditorContent = (editorElement: HTMLElement): string => {
       continue;
     }
     const element = node as HTMLElement;
-    if (isElementCommandBadge(element)) {
+    if (isElementImagePlaceholder(element)) {
+      // placeholder is visual-only — not included in message text
+    } else if (isElementCommandBadge(element)) {
       result += serializeCommandBadge(element);
     } else if (element.tagName === 'BR') {
       result += '\n';

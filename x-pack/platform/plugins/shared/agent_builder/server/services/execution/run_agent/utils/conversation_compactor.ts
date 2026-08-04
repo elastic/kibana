@@ -373,6 +373,7 @@ const generateLlmSummary = async (
   const historyMessages = await convertPreviousRounds({
     conversation: tempConversation,
     compactionSummary: existingSummary,
+    includeImages: false,
   });
 
   // Build a context block with the programmatically extracted tool calls

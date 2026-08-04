@@ -43,8 +43,64 @@ export const AttachmentPill: React.FC<AttachmentPillProps> = ({
   const uiDefinition = attachmentsService.getAttachmentUiDefinition(attachment.type);
   const [isHovered, setIsHovered] = useState(false);
 
-  const displayName = uiDefinition?.getLabel(attachment) ?? attachment.type;
   const canRemoveAttachment = Boolean(onRemoveAttachment);
+  const thumbnailUrl = uiDefinition?.getPillThumbnail?.(attachment);
+
+  if (thumbnailUrl) {
+    return (
+      <div
+        css={css`
+          position: relative;
+          width: 72px;
+          height: 32px;
+          border-radius: ${euiTheme.border.radius.medium};
+          overflow: hidden;
+          flex-shrink: 0;
+        `}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        data-test-subj={`agentBuilderAttachmentPill-${attachment.id}`}
+      >
+        <img
+          src={thumbnailUrl}
+          alt={uiDefinition?.getLabel(attachment) ?? attachment.type}
+          css={css`
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+          `}
+        />
+        {canRemoveAttachment && isHovered && (
+          <div
+            css={css`
+              position: absolute;
+              inset: 0;
+              background: rgba(0, 0, 0, 0.45);
+              display: flex;
+              align-items: center;
+              justify-content: center;
+            `}
+          >
+            <EuiButtonIcon
+              iconType="cross"
+              size="s"
+              color="ghost"
+              aria-label={removeAriaLabel}
+              onClick={onRemoveAttachment}
+              {...getEbtProps({
+                element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                action: AGENT_BUILDER_UI_EBT.action.conversation.REMOVE_ATTACHMENT,
+                detail: 'conversation',
+              })}
+            />
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  const displayName = uiDefinition?.getLabel(attachment) ?? attachment.type;
   const iconType = uiDefinition?.getIcon?.() ?? DEFAULT_ICON;
 
   const iconContainerStyles = css`
@@ -55,6 +111,7 @@ export const AttachmentPill: React.FC<AttachmentPillProps> = ({
     height: ${euiTheme.size.xl};
     border-radius: ${euiTheme.border.radius.small};
     background-color: ${euiTheme.colors.backgroundBasePrimary};
+    overflow: hidden;
   `;
 
   const titleStyles = css`

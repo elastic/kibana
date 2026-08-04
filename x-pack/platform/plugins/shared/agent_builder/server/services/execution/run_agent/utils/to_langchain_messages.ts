@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { BaseMessage, HumanMessage } from '@langchain/core/messages';
-import { AIMessage, ToolMessage } from '@langchain/core/messages';
+import type { BaseMessage, HumanMessage, MessageContentImageUrl } from '@langchain/core/messages';
+import { AIMessage, HumanMessage as LCHumanMessage, ToolMessage } from '@langchain/core/messages';
 import type {
   AssistantResponse,
   ConversationRoundStep,
@@ -28,6 +28,8 @@ import {
   sanitizeToolId,
   wrapToolResultContent,
 } from '@kbn/agent-builder-genai-utils/langchain';
+import { AttachmentType } from '@kbn/agent-builder-common/attachments';
+import type { ImageAttachmentData } from '@kbn/agent-builder-common/attachments';
 import { generateXmlTree, type XmlNode } from '@kbn/agent-builder-genai-utils/tools/utils';
 import type {
   ProcessedAttachment,
@@ -69,6 +71,14 @@ export interface ConversationToLangchainOptions {
    * prefix stays stable across rounds (prompt-cache friendly).
    */
   conversationTimestamp?: string;
+  /**
+   * When false, image attachments are NOT injected into the final user message.
+   * Set to false from the compaction path to avoid sending images in compaction
+   * prompts (image parts are dropped from system/assistant messages by the
+   * inference-langchain bridge anyway, and compaction uses its own system prompt).
+   * Defaults to true.
+   */
+  includeImages?: boolean;
 }
 
 /**
@@ -83,6 +93,7 @@ export const convertPreviousRounds = async ({
   ignoreSteps = false,
   compactionSummary,
   conversationTimestamp,
+  includeImages = true,
 }: ConversationToLangchainOptions): Promise<BaseMessage[]> => {
   const messages: BaseMessage[] = [];
   const attachmentTypeInstructionsProvided = new Set<string>();
@@ -118,12 +129,27 @@ export const convertPreviousRounds = async ({
     );
   }
 
+  const imageParts: MessageContentImageUrl[] = includeImages
+    ? conversation.attachmentStateManager
+        .getActive()
+        .filter((a) => a.type === AttachmentType.image)
+        .map((a) => {
+          const version = a.versions.find((v) => v.version === a.current_version);
+          const data = version?.data as ImageAttachmentData | undefined;
+          return data
+            ? ({ type: 'image_url', image_url: { url: data.content } } as MessageContentImageUrl)
+            : null;
+        })
+        .filter((part): part is MessageContentImageUrl => part !== null)
+    : [];
+
   messages.push(
     formatRoundInput({
       input,
       timestamp: inputTimestamp,
       attachmentTypes: conversation.attachmentTypes,
       attachmentTypeInstructionsProvided,
+      imageParts,
     })
   );
 
@@ -210,11 +236,13 @@ const formatRoundInput = ({
   timestamp,
   attachmentTypes,
   attachmentTypeInstructionsProvided,
+  imageParts = [],
 }: {
   input: ProcessedRoundInput;
   timestamp?: string;
   attachmentTypes?: ProcessedAttachmentType[];
   attachmentTypeInstructionsProvided?: Set<string>;
+  imageParts?: MessageContentImageUrl[];
 }): HumanMessage => {
   const { message, attachments, attachment_context, attachment_refs } = input;
 
@@ -259,6 +287,10 @@ const formatRoundInput = ({
 
   if (timestamp && timestamp !== new Date(0).toISOString()) {
     content = `[Sent: ${formatDate(timestamp)}]\n\n${content}`;
+  }
+
+  if (imageParts.length > 0) {
+    return new LCHumanMessage({ content: [{ type: 'text', text: content }, ...imageParts] });
   }
 
   return createUserMessage(content);

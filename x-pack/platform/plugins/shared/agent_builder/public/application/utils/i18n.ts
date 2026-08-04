@@ -2878,4 +2878,23 @@ export const labels = {
       defaultMessage: 'Yes, abort',
     }),
   },
+  attachImage: {
+    buttonAriaLabel: i18n.translate('xpack.agentBuilder.attachImage.buttonAriaLabel', {
+      defaultMessage: 'Attach image',
+    }),
+    tooLarge: (maxSize: string) =>
+      i18n.translate('xpack.agentBuilder.attachImage.tooLarge', {
+        defaultMessage: 'Image is too large. Maximum size is {maxSize}.',
+        values: { maxSize },
+      }),
+    invalidType: i18n.translate('xpack.agentBuilder.attachImage.invalidType', {
+      defaultMessage: 'Only PNG and JPEG images are supported.',
+    }),
+    alreadyAttached: i18n.translate('xpack.agentBuilder.attachImage.alreadyAttached', {
+      defaultMessage: 'An image is already attached. Remove it before attaching a new one.',
+    }),
+    readError: i18n.translate('xpack.agentBuilder.attachImage.readError', {
+      defaultMessage: 'Could not read the image file.',
+    }),
+  },
 };

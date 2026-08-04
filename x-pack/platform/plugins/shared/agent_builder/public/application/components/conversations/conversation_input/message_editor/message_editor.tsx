@@ -10,7 +10,6 @@ import { css } from '@emotion/react';
 import {
   euiTextTruncate,
   keys,
-  useEuiFontSize,
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
@@ -31,6 +30,8 @@ import {
   getSelectionRange,
   insertNodeAtCursor,
 } from './utils';
+import { createImagePlaceholderElement } from './image_placeholder';
+import { useEditorFontStyles, useImagePlaceholderStyles } from './use_editor_styles';
 
 const EDITOR_MAX_HEIGHT = 240;
 
@@ -119,6 +120,8 @@ interface MessageEditorProps {
   placeholder?: string;
   ariaLabel?: string;
   'data-test-subj'?: string;
+  onPasteFile?: (file: File) => void;
+  insertImagePlaceholderOnPaste?: boolean;
 }
 
 export const MessageEditor: React.FC<MessageEditorProps> = ({
@@ -128,9 +131,12 @@ export const MessageEditor: React.FC<MessageEditorProps> = ({
   placeholder = '',
   ariaLabel,
   'data-test-subj': dataTestSubj,
+  onPasteFile,
+  insertImagePlaceholderOnPaste = false,
 }) => {
   const [isComposing, setIsComposing] = useState(false);
   const commandMenuRef = useRef<CommandMenuHandle>(null);
+  const pastedImageCountRef = useRef(0);
   const { ref, onChange, onFocus, commandMatch } = messageEditor;
   const editorId = useGeneratedHtmlId({ prefix: 'messageEditor' });
   const { euiTheme } = useEuiTheme();
@@ -142,9 +148,8 @@ export const MessageEditor: React.FC<MessageEditorProps> = ({
       display: block;
     }
   `;
-  const fontStyles = css`
-    ${useEuiFontSize('m')}
-  `;
+  const fontStyles = useEditorFontStyles();
+  const imagePlaceholderStyles = useImagePlaceholderStyles();
   const commandBadgeStyles = css`
     [${COMMAND_BADGE_ATTRIBUTE}] {
       display: inline-flex;
@@ -172,6 +177,7 @@ export const MessageEditor: React.FC<MessageEditorProps> = ({
     placeholderStyles,
     fontStyles,
     commandBadgeStyles,
+    imagePlaceholderStyles,
   ];
 
   const handleCompositionStart = () => setIsComposing(true);
@@ -207,6 +213,29 @@ export const MessageEditor: React.FC<MessageEditorProps> = ({
         onCompositionStart={handleCompositionStart}
         onCompositionEnd={handleCompositionEnd}
         onPaste={(event) => {
+          if (onPasteFile) {
+            const imageItem = Array.from(event.clipboardData.items).find(
+              (item) => item.kind === 'file' && item.type.startsWith('image/')
+            );
+            if (imageItem) {
+              event.preventDefault();
+              const file = imageItem.getAsFile();
+              if (file) {
+                if (insertImagePlaceholderOnPaste) {
+                  let label = file.name;
+                  if (!label) {
+                    pastedImageCountRef.current += 1;
+                    label = `Image #${pastedImageCountRef.current}`;
+                  }
+                  insertNodeAtCursor(createImagePlaceholderElement(label));
+                  onChange();
+                }
+                onPasteFile(file);
+              }
+              return;
+            }
+          }
+
           event.preventDefault();
 
           const htmlData = event.clipboardData.getData('text/html');

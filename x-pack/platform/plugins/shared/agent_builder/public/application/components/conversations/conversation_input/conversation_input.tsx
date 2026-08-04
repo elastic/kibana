@@ -9,8 +9,9 @@ import { EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { PropsWithChildren } from 'react';
-import React, { useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { ConversationInputShell } from '@kbn/agent-builder-browser';
+import { AttachmentType } from '@kbn/agent-builder-common/attachments';
 import { useConversationId } from '../../../context/conversation/use_conversation_id';
 import { useConversationStream } from '../../../hooks/use_conversation_stream';
 import { useSubmitMessage } from '../../../hooks/use_submit_message';
@@ -27,6 +28,7 @@ import { useToasts } from '../../../hooks/use_toasts';
 import { InputActions } from './input_actions';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
 import { AttachmentPillsRow } from './attachment_pills_row';
+import { processImageFile } from './input_actions/attach_image_button';
 
 const containerAriaLabel = i18n.translate('xpack.agentBuilder.conversationInput.container.label', {
   defaultMessage: 'Message input form',
@@ -105,9 +107,26 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
   const { addErrorToast } = useToasts();
   const hasActiveConversation = useHasActiveConversation();
   const isAwaitingPrompt = useIsAwaitingPrompt();
-  const { attachments, initialMessage, autoSendInitialMessage, resetInitialMessage } =
-    useConversationContext();
+  const {
+    attachments,
+    upsertAttachments,
+    initialMessage,
+    autoSendInitialMessage,
+    resetInitialMessage,
+  } = useConversationContext();
   const submitMessage = useSubmitMessage();
+
+  const hasImageAttached = Boolean(
+    attachments?.some((a) => !('items' in a) && a.type === AttachmentType.image)
+  );
+
+  const handlePasteFile = useCallback(
+    async (file: File) => {
+      if (!upsertAttachments) return;
+      await processImageFile({ file, upsertAttachments, addErrorToast, hasImageAttached });
+    },
+    [upsertAttachments, addErrorToast, hasImageAttached]
+  );
 
   const validateAgentId = useValidateAgentId();
   const isAgentIdValid = validateAgentId(agentId);
@@ -202,33 +221,35 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
 
   return (
     <InputContainer isDisabled={isInputDisabled} isCollapsed={shouldCollapseInput}>
-      {visibleAttachments.length > 0 && (
-        <EuiFlexItem grow={false}>
-          <AttachmentPillsRow attachments={visibleAttachments} removable />
+        {visibleAttachments.length > 0 && (
+          <EuiFlexItem grow={false}>
+            <AttachmentPillsRow attachments={visibleAttachments} removable />
+          </EuiFlexItem>
+        )}
+        <EuiFlexItem css={editorContainerStyles}>
+          <MessageEditor
+            messageEditor={messageEditor}
+            onSubmit={handleSubmit}
+            disabled={isInputDisabled}
+            placeholder={placeholder}
+            ariaLabel={messageEditorAriaLabel}
+            data-test-subj="agentBuilderConversationInputEditor"
+            onPasteFile={upsertAttachments ? handlePasteFile : undefined}
+            insertImagePlaceholderOnPaste
+          />
         </EuiFlexItem>
-      )}
-      <EuiFlexItem css={editorContainerStyles}>
-        <MessageEditor
-          messageEditor={messageEditor}
-          onSubmit={handleSubmit}
-          disabled={isInputDisabled}
-          placeholder={placeholder}
-          ariaLabel={messageEditorAriaLabel}
-          data-test-subj="agentBuilderConversationInputEditor"
-        />
-      </EuiFlexItem>
-      {!isAgentDeleted && (
-        <InputActions
-          onSubmit={handleSubmit}
-          isSubmitDisabled={isSubmitDisabled}
-          resetToPendingMessage={() => {
-            if (pendingMessage) {
-              messageEditorController.setContent(pendingMessage);
-            }
-          }}
-          agentId={agentId}
-        />
-      )}
+        {!isAgentDeleted && (
+          <InputActions
+            onSubmit={handleSubmit}
+            isSubmitDisabled={isSubmitDisabled}
+            resetToPendingMessage={() => {
+              if (pendingMessage) {
+                messageEditorController.setContent(pendingMessage);
+              }
+            }}
+            agentId={agentId}
+          />
+        )}
     </InputContainer>
   );
 };

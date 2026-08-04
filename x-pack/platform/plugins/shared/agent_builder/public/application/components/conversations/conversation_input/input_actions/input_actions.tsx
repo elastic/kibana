@@ -10,6 +10,7 @@ import { css } from '@emotion/react';
 import React from 'react';
 import { ConversationActionButton } from './conversation_action_button';
 import { ConnectorSelector } from './connector_selector';
+import { AttachImageButton } from './attach_image_button';
 
 const connectorFlexItemStyles = css`
   flex-shrink: 1;
@@ -22,6 +23,7 @@ interface InputActionsProps {
   isSubmitDisabled: boolean;
   resetToPendingMessage: () => void;
   agentId?: string;
+  showAttachButton?: boolean;
 }
 
 export const InputActions: React.FC<InputActionsProps> = ({
@@ -29,6 +31,7 @@ export const InputActions: React.FC<InputActionsProps> = ({
   isSubmitDisabled,
   resetToPendingMessage,
   agentId,
+  showAttachButton = true,
 }) => (
   <EuiFlexItem grow={false}>
     <EuiFlexGroup
@@ -42,6 +45,11 @@ export const InputActions: React.FC<InputActionsProps> = ({
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiFlexGroup gutterSize="m" responsive={false} alignItems="center">
+          {showAttachButton && (
+            <EuiFlexItem grow={false}>
+              <AttachImageButton />
+            </EuiFlexItem>
+          )}
           <EuiFlexItem grow={false}>
             <ConversationActionButton
               onSubmit={onSubmit}
