@@ -149,6 +149,7 @@ if [[ ! -f "${YARA_SRC}/.libs/libyara.a" ]]; then
     --disable-magic \
     --disable-dex \
     --disable-macho \
+    --disable-dotnet \
     --without-crypto \
     CFLAGS="-O2 -DNDEBUG"
 

@@ -12,7 +12,14 @@ import { validateYaraRule } from '...';
 const result = await validateYaraRule(ruleText);
 ```
 
+## Modules
+
 Supports standard module imports used at compile time (e.g. `import "pe"`, `import "math"`). Validation is compile-only — modules are not loaded against sample bytes.
+
+Supported modules: `pe`, `elf`, `math`, `time`, `string`, `console`, `tests`
+Disabled modules: `hash`, `macho`, `dotnet`, `dex`, `magic`, `cuckoo`
+
+Should be in sync with Endpoint.
 
 ## Version
 

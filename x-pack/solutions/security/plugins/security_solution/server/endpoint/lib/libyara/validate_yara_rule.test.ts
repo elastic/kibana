@@ -79,27 +79,60 @@ rule X {
     expect(good.errors).toEqual([]);
   });
 
-  it('accepts rules that import the pe module', async () => {
-    const result = await validateYaraRule(`
-        import "pe"
-        rule PeCheck {
-          condition:
-            pe.is_pe and pe.number_of_sections > 0
-        }
-        `);
+  describe('supported modules', () => {
+    const supportedModules = ['pe', 'elf', 'math', 'time', 'string', 'console', 'tests'] as const;
+    const moduleSmoke: Record<(typeof supportedModules)[number], string> = {
+      pe: 'pe.is_pe',
+      elf: 'elf.type == elf.ET_NONE',
+      math: 'math.abs(-1) == 1',
+      time: 'time.now() >= 0',
+      string: 'string.length("a") == 1',
+      console: 'console.log("x")',
+      tests: 'tests.foobar(1) == "foo"',
+    };
 
-    expect(result.errors).toEqual([]);
+    it.each(supportedModules)('accepts rules that import the %s module', async (module) => {
+      const result = await validateYaraRule(`
+        import "${module}"
+        rule ${module}Check {
+          condition:
+            ${moduleSmoke[module]}
+          }
+          `);
+
+      expect(result.errors).toEqual([]);
+    });
   });
 
-  it('accepts rules that import math', async () => {
-    const result = await validateYaraRule(`
-import "math"
-rule MathCheck {
+  describe('unsupported modules', () => {
+    const unsupportedModules = [
+      // built-in but not supported YARA modules
+      'hash',
+      'macho',
+      'dotnet',
+      'dex',
+      'magic',
+      'cuckoo',
+
+      // user modules
+      'userModuleWithRandomName',
+    ];
+
+    it.each(unsupportedModules)('rejects rules that import the %s module', async (module) => {
+      const result = await validateYaraRule(`
+import "${module}"
+rule ${module}Check {
   condition:
     true
 }
 `);
 
-    expect(result.errors).toEqual([]);
+      expect(result.errors).toEqual([
+        expect.objectContaining({
+          severity: 'error',
+          message: `unknown module "${module}"`,
+        }),
+      ]);
+    });
   });
 });
