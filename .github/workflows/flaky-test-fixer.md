@@ -234,7 +234,7 @@ timeout-minutes: 90
 
 Open a single draft PR with the smallest possible test-side fix for this flaky-test issue. Do not open a PR if any of the following is true:
 
-- an open PR already covers it — one patching the same test, or the same root cause behind a related failed-test issue. Search for PRs that reference this issue number (in their body or in the issue timeline), and for recent PRs touching the failing test's file;
+- an open PR already covers it: one patching the same test, or the same root cause behind a related failed-test issue. Search for PRs that reference this issue number (in their body or in the issue timeline), and for recent PRs touching the failing test's file;
 - you cannot identify a credible fix; or
 - the fix has to target a version branch (see "Fixes that must target a version branch").
 
