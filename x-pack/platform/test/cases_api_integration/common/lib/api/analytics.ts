@@ -54,15 +54,18 @@ export const runCAISynchronizationTask = async (supertest: SuperTest.Agent) => {
     .expect(200);
 };
 
-export const runAttachmentsBackfillTask = async (supertest: SuperTest.Agent) => {
+export const runAttachmentsBackfillTask = async (
+  supertest: SuperTest.Agent,
+  spaceId: string = 'default'
+) => {
   await supertest
     .post('/api/analytics_index/backfill/run_soon')
     .set('kbn-xsrf', 'xxx')
     .send({
-      taskId: getCAIAttachmentsBackfillTaskId('default', 'securitySolution'),
+      taskId: getCAIAttachmentsBackfillTaskId(spaceId, 'securitySolution'),
       sourceIndex: CAI_ATTACHMENTS_SOURCE_INDEX,
-      destIndex: getAttachmentsDestinationIndexName('default', 'securitySolution'),
-      sourceQuery: JSON.stringify(getAttachmentsSourceQuery('default', 'securitySolution')),
+      destIndex: getAttachmentsDestinationIndexName(spaceId, 'securitySolution'),
+      sourceQuery: JSON.stringify(getAttachmentsSourceQuery(spaceId, 'securitySolution')),
     })
     .expect(200);
 };

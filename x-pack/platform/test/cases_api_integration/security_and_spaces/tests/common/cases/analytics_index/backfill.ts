@@ -47,8 +47,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const retry = getService('retry');
   const authSpace1 = getAuthWithSuperUser();
 
-  // FLAKY: https://github.com/elastic/kibana/issues/243870
-  describe.skip('analytics indexes backfill task', () => {
+  describe('analytics indexes backfill task', () => {
     beforeEach(async () => {
       await deleteAllCaseAnalyticsItems(esClient);
       await deleteAllCaseItems(esClient);
@@ -158,8 +157,6 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
-    // This test passes locally but fails in the flaky test runner.
-    // Increasing the timeout did not work.
     it('should backfill the cases attachments index', async () => {
       const postedCase = await createCase(
         supertest,
@@ -190,7 +187,7 @@ export default ({ getService }: FtrProviderContext): void => {
         auth: authSpace1,
       });
 
-      await runAttachmentsBackfillTask(supertest);
+      await runAttachmentsBackfillTask(supertest, 'space1');
 
       await retry.tryForTime(300000, async () => {
         const firstAttachmentAnalytics = await esClient.get({
