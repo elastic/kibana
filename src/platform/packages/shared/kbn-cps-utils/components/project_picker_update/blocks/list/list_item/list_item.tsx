@@ -20,6 +20,7 @@ import {
   EuiIconTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import capitalize from 'lodash/capitalize';
 import type { CPSProject } from '../../../../../types';
 import { getProjectTags, getSolutionIcon } from '../../../../utils';
 
@@ -65,7 +66,7 @@ export function ProjectPickerListItem({
       <EuiFlexItem grow={false}>
         <EuiIconTip
           position="top"
-          content={project._type}
+          content={capitalize(project._type)}
           type={getSolutionIcon(project._type)}
           data-test-subj="projectPickerListItemIcon"
         />
@@ -136,6 +137,7 @@ export function ProjectPickerListItem({
                 onClick={onContextMenu.bind(null, project)}
                 aria-labelledby={contextMenuTooltipId}
                 data-test-subj={`projectPickerListItemContextMenu-${project._id}`}
+                color="text"
               />
             </EuiToolTip>
           </EuiFlexItem>
