@@ -14,6 +14,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { SECURITY_TIMELINE_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
 import type { CommonAttachmentTabViewProps } from '@kbn/cases-plugin/public/client/attachment_framework/types';
 
+import { useSelector } from 'react-redux-v7';
 import { TimelineTypeEnum, type SortFieldTimeline } from '../../../../common/api/timeline';
 import type {
   OnOpenTimeline,
@@ -37,7 +38,6 @@ import {
   UtilityBarText,
 } from '../../../common/components/utility_bar';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
-import { useSelector } from 'react-redux-v7';
 import { TimelineId } from '../../../../common/types/timeline';
 import { getTimelineShowStatusByIdSelector } from '../../../timelines/store/selectors';
 import type { State } from '../../../common/store';
@@ -96,11 +96,27 @@ export const CaseViewTimelines: React.FC<CommonAttachmentTabViewProps> = ({ case
   );
   const prevActiveTimelineVisible = useRef(activeTimelineVisible);
   useEffect(() => {
+    if (!isSuperTimelineEnabled) return;
     if (prevActiveTimelineVisible.current && !activeTimelineVisible) {
       refetch();
     }
     prevActiveTimelineVisible.current = activeTimelineVisible;
-  }, [activeTimelineVisible, refetch]);
+  }, [activeTimelineVisible, isSuperTimelineEnabled, refetch]);
+
+  // Super timeline: when timelines data changes after a refetch, update selectedItems to
+  // use fresh row objects so savedSearchId reflects the latest server state.
+  const selectedItemsRef = useRef(selectedItems);
+  selectedItemsRef.current = selectedItems;
+  useEffect(() => {
+    if (!isSuperTimelineEnabled) return;
+    const current = selectedItemsRef.current;
+    if (current.length === 0) return;
+    const byId = new Map(timelines.map((r) => [r.savedObjectId, r]));
+    const refreshed = current.map((item) => byId.get(item.savedObjectId ?? '') ?? item);
+    if (refreshed.some((r, i) => r !== current[i])) {
+      setSelectedItems(refreshed);
+    }
+  }, [isSuperTimelineEnabled, timelines]);
 
   const queryTimelineById = useQueryTimelineById();
   const onOpenTimeline = useCallback<OnOpenTimeline>(

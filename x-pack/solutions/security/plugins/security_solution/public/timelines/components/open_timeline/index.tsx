@@ -56,6 +56,7 @@ import { TIMELINE_ACTIONS } from '../../../common/lib/apm/user_actions';
 import { defaultUdtHeaders } from '../timeline/body/column_headers/default_headers';
 import { timelineDefaults } from '../../store/defaults';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 
 interface OwnProps<TCache = object> {
   /** Displays open timeline in modal */
@@ -133,6 +134,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
   }) => {
     const dispatch = useDispatch();
     const { startTransaction } = useStartTransaction();
+    const isSuperTimelineEnabled = useIsExperimentalFeatureEnabled('superTimeline');
     const noteIds = useSelector((state: State) => state.notes.ids);
     /** Required by EuiTable for expandable rows: a map of `TimelineResult.savedObjectId` to rendered notes */
     const [itemIdToExpandedNotesRowMap, setItemIdToExpandedNotesRowMap] = useState<
@@ -210,19 +212,38 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
       onlyFavorites,
     ]);
 
-    // Refetch when the active timeline modal closes so that savedSearchId (ESQL) and
-    // other fields saved during the session are reflected in the compatibility check.
+    // Super timeline: refetch when the active timeline modal closes so that savedSearchId
+    // (ESQL) and other fields saved during the session are reflected in the compatibility check.
     const getTimelineShowStatus = useMemo(() => getTimelineShowStatusByIdSelector(), []);
     const { show: activeTimelineVisible } = useSelector((state: State) =>
       getTimelineShowStatus(state, TimelineId.active)
     );
     const prevActiveTimelineVisible = useRef(activeTimelineVisible);
     useEffect(() => {
+      if (!isSuperTimelineEnabled) return;
       if (prevActiveTimelineVisible.current && !activeTimelineVisible) {
         refetch();
       }
       prevActiveTimelineVisible.current = activeTimelineVisible;
-    }, [activeTimelineVisible, refetch]);
+    }, [activeTimelineVisible, isSuperTimelineEnabled, refetch]);
+
+    // Super timeline: when timelines data changes after a refetch, update selectedItems to
+    // use fresh row objects so savedSearchId reflects the latest server state. EUI does not
+    // re-fire onSelectionChange when searchResults change, so without this the compatibility
+    // check (getUnmergeableSelections) would see stale data and leave "View Super Timeline"
+    // incorrectly enabled.
+    const selectedItemsRef = useRef(selectedItems);
+    selectedItemsRef.current = selectedItems;
+    useEffect(() => {
+      if (!isSuperTimelineEnabled) return;
+      const current = selectedItemsRef.current;
+      if (current.length === 0) return;
+      const byId = new Map(timelines.map((r) => [r.savedObjectId, r]));
+      const refreshed = current.map((item) => byId.get(item.savedObjectId ?? '') ?? item);
+      if (refreshed.some((r, i) => r !== current[i])) {
+        setSelectedItems(refreshed);
+      }
+    }, [isSuperTimelineEnabled, timelines]);
 
     /** Invoked when the user presses enters to submit the text in the search input */
     const onQueryChange: OnQueryChange = useCallback((query: EuiSearchBarQuery) => {
