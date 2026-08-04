@@ -90,7 +90,6 @@ const SystemActionAccordionContent: React.FC<SystemActionAccordionContentProps> 
       >
         <EuiFlexItem>
           <RuleActionsMessage
-            useDefaultMessage
             action={action}
             index={index}
             connector={connector}

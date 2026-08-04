@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React, { Suspense, useMemo } from 'react';
+import React, { Suspense, useCallback, useMemo } from 'react';
 import { EuiCallOut, EuiErrorBoundary, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import type { ActionVariable, RuleActionParam } from '@kbn/alerting-types';
 import type { ActionConnector } from '@kbn/alerts-ui-shared';
-import { ActionConnectorMode } from '@kbn/alerts-ui-shared';
+import { ActionConnectorMode, useGeneratedActionMessage } from '@kbn/alerts-ui-shared';
 import { useRuleFormState } from '../hooks';
 import type { RuleAction, RuleUiAction } from '../common';
 import { getSelectedActionGroup } from '../utils';
@@ -18,7 +18,6 @@ export interface RuleActionsMessageProps {
   action: RuleUiAction;
   index: number;
   templateFields: ActionVariable[];
-  useDefaultMessage: boolean;
   connector: ActionConnector;
   producerId: string;
   warning?: string | null;
@@ -26,16 +25,7 @@ export interface RuleActionsMessageProps {
 }
 
 export const RuleActionsMessage = (props: RuleActionsMessageProps) => {
-  const {
-    action,
-    index,
-    templateFields,
-    useDefaultMessage,
-    connector,
-    producerId,
-    warning,
-    onParamsChange,
-  } = props;
+  const { action, index, templateFields, connector, producerId, warning, onParamsChange } = props;
 
   const {
     plugins: { actionTypeRegistry },
@@ -69,16 +59,40 @@ export const RuleActionsMessage = (props: RuleActionsMessageProps) => {
     });
   }, [isSystemAction, action, selectedRuleType, selectedRuleTypeModel]);
 
-  const defaultMessage = useMemo(() => {
+  const template = useMemo(() => {
     if (isSystemAction) {
       return selectedRuleTypeModel.defaultSummaryMessage;
     }
-
-    // if action is a summary action, show the default summary message
     return (action as RuleAction).frequency?.summary
       ? selectedRuleTypeModel.defaultSummaryMessage
       : selectedActionGroup?.defaultActionMessage ?? selectedRuleTypeModel.defaultActionMessage;
   }, [isSystemAction, action, selectedRuleTypeModel, selectedActionGroup]);
+
+  const groupKey = useMemo(() => {
+    if (isSystemAction) {
+      return 'system';
+    }
+    const summary = !!(action as RuleAction).frequency?.summary;
+    const group = (action as RuleAction).group ?? '';
+    return `${group}|${summary ? 'summary' : 'action'}`;
+  }, [isSystemAction, action]);
+
+  const onMessageOwnerChange = useCallback(
+    (partial: Partial<any>) => {
+      for (const [key, value] of Object.entries(partial)) {
+        onParamsChange(key, value as RuleActionParam);
+      }
+    },
+    [onParamsChange]
+  );
+
+  useGeneratedActionMessage({
+    template,
+    groupKey,
+    messageField: actionTypeModel.messageField,
+    params: action.params as any,
+    onChange: onMessageOwnerChange,
+  });
 
   if (!ParamsFieldsComponent) {
     return null;
@@ -96,8 +110,6 @@ export const RuleActionsMessage = (props: RuleActionsMessageProps) => {
               selectedActionGroupId={selectedActionGroup?.id}
               editAction={onParamsChange}
               messageVariables={templateFields}
-              defaultMessage={defaultMessage}
-              useDefaultMessage={useDefaultMessage}
               actionConnector={connector}
               executionMode={ActionConnectorMode.ActionForm}
               ruleTypeId={selectedRuleType.id}

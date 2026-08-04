@@ -129,8 +129,6 @@ export const RuleActionsItem = (props: RuleActionsItemProps) => {
     );
   });
 
-  const [useDefaultMessage, setUseDefaultMessage] = useState(false);
-
   const [storedActionParamsForAadToggle, setStoredActionParamsForAadToggle] = useState<
     Record<string, SavedObjectAttribute>
   >({});
@@ -471,7 +469,6 @@ export const RuleActionsItem = (props: RuleActionsItemProps) => {
           <EuiSpacer size="s" />
           <RuleActionsSettings
             action={action}
-            onUseDefaultMessageChange={() => setUseDefaultMessage(true)}
             onNotifyWhenChange={onNotifyWhenChange}
             onActionGroupChange={onActionGroupChange}
             onAlertsFilterChange={onAlertsFilterChange}
@@ -487,7 +484,6 @@ export const RuleActionsItem = (props: RuleActionsItemProps) => {
           <RuleActionsMessage
             action={action}
             index={index}
-            useDefaultMessage={useDefaultMessage}
             connector={connector}
             producerId={producerId}
             warning={warning}
@@ -505,7 +501,6 @@ export const RuleActionsItem = (props: RuleActionsItemProps) => {
     plain,
     index,
     templateFields,
-    useDefaultMessage,
     warning,
     checkEnabledResult,
     onNotifyWhenChange,

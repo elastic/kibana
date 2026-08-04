@@ -22,7 +22,6 @@ jest.mock('./rule_actions_notify_when', () => ({
     showMinimumThrottleWarning,
     isRecoveredActionGroup,
     onChange,
-    onUseDefaultMessage,
   }: RuleActionsNotifyWhenProps) => (
     <div>
       RuleActionsNotifyWhen
@@ -40,7 +39,6 @@ jest.mock('./rule_actions_notify_when', () => ({
       >
         RuleActionsNotifyWhenOnChange
       </button>
-      <button onClick={onUseDefaultMessage}>RuleActionsNotifyWhenOnUseDefaultMessage</button>
     </div>
   ),
 }));
@@ -132,7 +130,6 @@ const ruleModel: RuleTypeModel = {
   requiresAppContext: false,
 };
 
-const mockOnUseDefaultMessageChange = jest.fn();
 const mockOnNotifyWhenChange = jest.fn();
 const mockOnActionGroupChange = jest.fn();
 const mockOnAlertsFilterChange = jest.fn();
@@ -168,7 +165,6 @@ describe('ruleActionsSettings', () => {
     render(
       <RuleActionsSettings
         action={getAction('1')}
-        onUseDefaultMessageChange={mockOnUseDefaultMessageChange}
         onNotifyWhenChange={mockOnNotifyWhenChange}
         onActionGroupChange={mockOnActionGroupChange}
         onAlertsFilterChange={mockOnAlertsFilterChange}
@@ -184,7 +180,6 @@ describe('ruleActionsSettings', () => {
     render(
       <RuleActionsSettings
         action={getAction('1')}
-        onUseDefaultMessageChange={mockOnUseDefaultMessageChange}
         onNotifyWhenChange={mockOnNotifyWhenChange}
         onActionGroupChange={mockOnActionGroupChange}
         onAlertsFilterChange={mockOnAlertsFilterChange}
@@ -222,7 +217,6 @@ describe('ruleActionsSettings', () => {
             notifyWhen: 'onActionGroupChange',
           },
         })}
-        onUseDefaultMessageChange={mockOnUseDefaultMessageChange}
         onNotifyWhenChange={mockOnNotifyWhenChange}
         onActionGroupChange={mockOnActionGroupChange}
         onAlertsFilterChange={mockOnAlertsFilterChange}
@@ -258,7 +252,6 @@ describe('ruleActionsSettings', () => {
             notifyWhen: 'onActionGroupChange',
           },
         })}
-        onUseDefaultMessageChange={mockOnUseDefaultMessageChange}
         onNotifyWhenChange={mockOnNotifyWhenChange}
         onActionGroupChange={mockOnActionGroupChange}
         onAlertsFilterChange={mockOnAlertsFilterChange}
@@ -274,7 +267,6 @@ describe('ruleActionsSettings', () => {
     render(
       <RuleActionsSettings
         action={getAction('1')}
-        onUseDefaultMessageChange={mockOnUseDefaultMessageChange}
         onNotifyWhenChange={mockOnNotifyWhenChange}
         onActionGroupChange={mockOnActionGroupChange}
         onAlertsFilterChange={mockOnAlertsFilterChange}
@@ -289,17 +281,12 @@ describe('ruleActionsSettings', () => {
       summary: true,
       throttle: '5m',
     });
-
-    await userEvent.click(screen.getByText('RuleActionsNotifyWhenOnUseDefaultMessage'));
-
-    expect(mockOnUseDefaultMessageChange).toHaveBeenCalled();
   });
 
   test('should allow for selecting of action groups', async () => {
     render(
       <RuleActionsSettings
         action={getAction('1')}
-        onUseDefaultMessageChange={mockOnUseDefaultMessageChange}
         onNotifyWhenChange={mockOnNotifyWhenChange}
         onActionGroupChange={mockOnActionGroupChange}
         onAlertsFilterChange={mockOnAlertsFilterChange}
@@ -335,7 +322,6 @@ describe('ruleActionsSettings', () => {
     render(
       <RuleActionsSettings
         action={getAction('1')}
-        onUseDefaultMessageChange={mockOnUseDefaultMessageChange}
         onNotifyWhenChange={mockOnNotifyWhenChange}
         onActionGroupChange={mockOnActionGroupChange}
         onAlertsFilterChange={mockOnAlertsFilterChange}
@@ -368,7 +354,6 @@ describe('ruleActionsSettings', () => {
     render(
       <RuleActionsSettings
         action={getAction('1')}
-        onUseDefaultMessageChange={mockOnUseDefaultMessageChange}
         onNotifyWhenChange={mockOnNotifyWhenChange}
         onActionGroupChange={mockOnActionGroupChange}
         onAlertsFilterChange={mockOnAlertsFilterChange}
@@ -410,7 +395,6 @@ describe('ruleActionsSettings', () => {
     render(
       <RuleActionsSettings
         action={getAction('1')}
-        onUseDefaultMessageChange={mockOnUseDefaultMessageChange}
         onNotifyWhenChange={mockOnNotifyWhenChange}
         onActionGroupChange={mockOnActionGroupChange}
         onAlertsFilterChange={mockOnAlertsFilterChange}
@@ -444,7 +428,6 @@ describe('ruleActionsSettings', () => {
     render(
       <RuleActionsSettings
         action={getAction('1', { group: 'recovered' })}
-        onUseDefaultMessageChange={mockOnUseDefaultMessageChange}
         onNotifyWhenChange={mockOnNotifyWhenChange}
         onActionGroupChange={mockOnActionGroupChange}
         onAlertsFilterChange={mockOnAlertsFilterChange}
@@ -478,7 +461,6 @@ describe('ruleActionsSettings', () => {
     render(
       <RuleActionsSettings
         action={getAction('1', { group: 'testActionGroup' })}
-        onUseDefaultMessageChange={mockOnUseDefaultMessageChange}
         onNotifyWhenChange={mockOnNotifyWhenChange}
         onActionGroupChange={mockOnActionGroupChange}
         onAlertsFilterChange={mockOnAlertsFilterChange}
@@ -515,7 +497,6 @@ describe('ruleActionsSettings', () => {
     render(
       <RuleActionsSettings
         action={getAction('1')}
-        onUseDefaultMessageChange={mockOnUseDefaultMessageChange}
         onNotifyWhenChange={mockOnNotifyWhenChange}
         onActionGroupChange={mockOnActionGroupChange}
         onAlertsFilterChange={mockOnAlertsFilterChange}

@@ -114,7 +114,6 @@ const actionGroupDisplay = ({
 
 export interface RuleActionsSettingsProps {
   action: RuleAction;
-  onUseDefaultMessageChange: () => void;
   onNotifyWhenChange: (frequency: RuleActionFrequency) => void;
   onActionGroupChange: (group: string) => void;
   onAlertsFilterChange: (query?: AlertsFilter['query']) => void;
@@ -124,7 +123,6 @@ export interface RuleActionsSettingsProps {
 export const RuleActionsSettings = (props: RuleActionsSettingsProps) => {
   const {
     action,
-    onUseDefaultMessageChange,
     onNotifyWhenChange,
     onActionGroupChange,
     onAlertsFilterChange,
@@ -240,7 +238,6 @@ export const RuleActionsSettings = (props: RuleActionsSettingsProps) => {
               throttleUnit={actionThrottleUnit}
               hasAlertsMappings={selectedRuleType.hasAlertsMappings}
               onChange={onNotifyWhenChange}
-              onUseDefaultMessage={onUseDefaultMessageChange}
               showMinimumThrottleWarning={showMinimumThrottleWarning}
               showMinimumThrottleUnitWarning={showMinimumThrottleUnitWarning}
               isRecoveredActionGroup={isRecoveredActionGroup}

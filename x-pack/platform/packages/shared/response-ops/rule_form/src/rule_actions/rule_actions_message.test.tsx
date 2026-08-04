@@ -9,7 +9,12 @@ import React, { lazy } from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { RuleActionsMessage } from './rule_actions_message';
 import type { RuleType } from '@kbn/alerting-types';
-import type { ActionParamsProps, ActionTypeModel, RuleTypeModel } from '@kbn/alerts-ui-shared';
+import type {
+  ActionParamsProps,
+  ActionTypeModel,
+  MessageField,
+  RuleTypeModel,
+} from '@kbn/alerts-ui-shared';
 import { TypeRegistry } from '@kbn/alerts-ui-shared/lib';
 import {
   getAction,
@@ -73,11 +78,25 @@ const ruleModel: RuleTypeModel = {
 
 const mockOnParamsChange = jest.fn();
 
+interface TestActionParams {
+  message?: string;
+}
+
+const mockMessageField: MessageField<TestActionParams> = {
+  get: (params) => params.message,
+  set: (params, message) => ({ message }),
+};
+
 const mockedActionParamsFields = lazy(async () => ({
-  default({ defaultMessage, selectedActionGroupId, errors, editAction }: ActionParamsProps<any>) {
+  default({
+    actionParams,
+    selectedActionGroupId,
+    errors,
+    editAction,
+  }: ActionParamsProps<TestActionParams>) {
     return (
       <div data-test-subj="actionParamsFieldMock">
-        {defaultMessage && <div data-test-subj="defaultMessageMock">{defaultMessage}</div>}
+        {actionParams.message && <div data-test-subj="messageMock">{actionParams.message}</div>}
         {selectedActionGroupId && (
           <div data-test-subj="selectedActionGroupIdMock">{selectedActionGroupId}</div>
         )}
@@ -125,7 +144,6 @@ describe('RuleActionsMessage', () => {
         action={getAction('1', { actionTypeId: 'actionTypeModel-1' })}
         index={1}
         templateFields={[]}
-        useDefaultMessage
         connector={getConnector('1')}
         producerId="stackAlerts"
         onParamsChange={mockOnParamsChange}
@@ -145,7 +163,6 @@ describe('RuleActionsMessage', () => {
         action={getAction('1', { actionTypeId: 'actionTypeModel-1' })}
         index={1}
         templateFields={[]}
-        useDefaultMessage
         connector={getConnector('1')}
         producerId="stackAlerts"
         warning="test warning"
@@ -162,16 +179,14 @@ describe('RuleActionsMessage', () => {
     ).toBeInTheDocument();
   });
 
-  test('should render default action message for normal actions', async () => {
+  test('should render action group id for normal actions', async () => {
     render(
       <RuleActionsMessage
         action={getAction('1', { actionTypeId: 'actionTypeModel-1' })}
         index={1}
         templateFields={[]}
-        useDefaultMessage
         connector={getConnector('1')}
         producerId="stackAlerts"
-        warning="test warning"
         onParamsChange={mockOnParamsChange}
       />
     );
@@ -180,62 +195,10 @@ describe('RuleActionsMessage', () => {
       return expect(screen.getByTestId('actionParamsFieldMock')).toBeInTheDocument();
     });
 
-    expect(screen.getByText('Sample default action message')).toBeInTheDocument();
+    expect(screen.getByTestId('selectedActionGroupIdMock')).toBeInTheDocument();
   });
 
-  test('should render default summary message for actions with summaries', async () => {
-    render(
-      <RuleActionsMessage
-        action={getAction('1', {
-          actionTypeId: 'actionTypeModel-1',
-          frequency: {
-            summary: true,
-            notifyWhen: 'onActionGroupChange',
-            throttle: '5m',
-          },
-        })}
-        index={1}
-        templateFields={[]}
-        useDefaultMessage
-        connector={getConnector('1')}
-        producerId="stackAlerts"
-        warning="test warning"
-        onParamsChange={mockOnParamsChange}
-      />
-    );
-
-    await waitFor(() => {
-      return expect(screen.getByTestId('actionParamsFieldMock')).toBeInTheDocument();
-    });
-
-    expect(screen.getByText('Sample default summary message')).toBeInTheDocument();
-  });
-
-  test('should render default recovery message for action recovery group', async () => {
-    render(
-      <RuleActionsMessage
-        action={getAction('1', {
-          actionTypeId: 'actionTypeModel-1',
-          group: 'recovered',
-        })}
-        index={1}
-        templateFields={[]}
-        useDefaultMessage
-        connector={getConnector('1')}
-        producerId="stackAlerts"
-        warning="test warning"
-        onParamsChange={mockOnParamsChange}
-      />
-    );
-
-    await waitFor(() => {
-      return expect(screen.getByTestId('actionParamsFieldMock')).toBeInTheDocument();
-    });
-
-    expect(screen.getByText('Sample default recovery message')).toBeInTheDocument();
-  });
-
-  test('should render default summary message for system actions', async () => {
+  test('should not render action group id for system actions', async () => {
     const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
     actionTypeRegistry.register(
       getActionTypeModel('1', {
@@ -267,7 +230,6 @@ describe('RuleActionsMessage', () => {
         })}
         index={1}
         templateFields={[]}
-        useDefaultMessage
         connector={getConnector('1')}
         producerId="stackAlerts"
         warning="test warning"
@@ -279,7 +241,6 @@ describe('RuleActionsMessage', () => {
       return expect(screen.getByTestId('actionParamsFieldMock')).toBeInTheDocument();
     });
 
-    expect(screen.getByText('Sample default summary message')).toBeInTheDocument();
     expect(screen.queryByTestId('selectedActionGroupIdMock')).not.toBeInTheDocument();
   });
 
@@ -310,7 +271,6 @@ describe('RuleActionsMessage', () => {
         action={getAction('1', { actionTypeId: 'actionTypeModel-1' })}
         index={1}
         templateFields={[]}
-        useDefaultMessage
         connector={getConnector('1')}
         producerId="stackAlerts"
         warning="test warning"
@@ -331,7 +291,6 @@ describe('RuleActionsMessage', () => {
         action={getAction('1', { actionTypeId: 'actionTypeModel-1' })}
         index={1}
         templateFields={[]}
-        useDefaultMessage
         connector={getConnector('1')}
         producerId="stackAlerts"
         warning="test warning"
@@ -349,5 +308,94 @@ describe('RuleActionsMessage', () => {
       { paramsKey: 'paramsValue' },
       1
     );
+  });
+
+  describe('with messageField descriptor', () => {
+    test('writes template on group key transition via messageField', async () => {
+      const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
+      actionTypeRegistry.register(
+        getActionTypeModel('1', {
+          actionParamsFields: mockedActionParamsFields,
+          messageField: mockMessageField,
+        })
+      );
+
+      useRuleFormState.mockReturnValue({
+        plugins: { actionTypeRegistry },
+        actionsParamsErrors: {},
+        selectedRuleType: ruleType,
+        selectedRuleTypeModel: ruleModel,
+        connectors: [getConnector('1')],
+        connectorTypes: [getActionType('1')],
+        aadTemplateFields: [],
+      });
+
+      const action = getAction('1', {
+        actionTypeId: 'actionTypeModel-1',
+        params: { message: 'Sample default action message' },
+      });
+
+      render(
+        <RuleActionsMessage
+          action={action}
+          index={1}
+          templateFields={[]}
+          connector={getConnector('1')}
+          producerId="stackAlerts"
+          onParamsChange={mockOnParamsChange}
+        />
+      );
+
+      await waitFor(() => {
+        return expect(screen.getByTestId('actionParamsFieldMock')).toBeInTheDocument();
+      });
+
+      // No onChange on initial mount when message matches template
+      expect(mockOnParamsChange).not.toHaveBeenCalled();
+    });
+
+    test('uses normal template for non-recovery non-summary actions', async () => {
+      const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
+      actionTypeRegistry.register(
+        getActionTypeModel('1', {
+          actionParamsFields: mockedActionParamsFields,
+          messageField: mockMessageField,
+        })
+      );
+
+      useRuleFormState.mockReturnValue({
+        plugins: { actionTypeRegistry },
+        actionsParamsErrors: {},
+        selectedRuleType: ruleType,
+        selectedRuleTypeModel: ruleModel,
+        connectors: [getConnector('1')],
+        connectorTypes: [getActionType('1')],
+        aadTemplateFields: [],
+      });
+
+      // Action with blank message — hook will write template on first real transition
+      const action = getAction('1', {
+        actionTypeId: 'actionTypeModel-1',
+        params: { message: '' },
+      });
+
+      render(
+        <RuleActionsMessage
+          action={action}
+          index={1}
+          templateFields={[]}
+          connector={getConnector('1')}
+          producerId="stackAlerts"
+          onParamsChange={mockOnParamsChange}
+        />
+      );
+
+      await waitFor(() => {
+        return expect(screen.getByTestId('actionParamsFieldMock')).toBeInTheDocument();
+      });
+
+      // No onChange on mount for blank (initialized state)
+      expect(mockOnParamsChange).not.toHaveBeenCalled();
+    });
   });
 });

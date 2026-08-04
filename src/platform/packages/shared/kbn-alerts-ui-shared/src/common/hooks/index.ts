@@ -8,6 +8,8 @@
  */
 
 export * from './use_alert_field_names';
+export { useGeneratedActionMessage } from './use_generated_action_message';
+export type { UseGeneratedActionMessageProps } from './use_generated_action_message';
 export * from './use_alerts_data_view';
 export * from './use_fetch_alerts_index_names_query';
 export * from './use_get_alerts_group_aggregations_query';

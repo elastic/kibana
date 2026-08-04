@@ -42,7 +42,6 @@ describe('ruleActionsNotifyWhen', () => {
         throttle={throttle}
         throttleUnit={throttleUnit}
         onChange={jest.fn()}
-        onUseDefaultMessage={jest.fn()}
         hasAlertsMappings={hasAlertsMappings}
       />
     );
@@ -69,7 +68,6 @@ describe('ruleActionsNotifyWhen', () => {
         throttle={defaultThrottleProps.throttle}
         throttleUnit={defaultThrottleProps.throttleUnit}
         onChange={jest.fn()}
-        onUseDefaultMessage={jest.fn()}
         hasAlertsMappings
       />
     );
@@ -89,7 +87,6 @@ describe('ruleActionsNotifyWhen', () => {
         throttle={throttleProps.throttle}
         throttleUnit={throttleProps.throttleUnit}
         onChange={jest.fn()}
-        onUseDefaultMessage={jest.fn()}
         hasAlertsMappings
       />
     );

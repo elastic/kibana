@@ -136,6 +136,11 @@ export interface CustomConnectorSelectionItem {
   ) => React.LazyExoticComponent<ComponentType<{ actionConnector: ActionConnector }>> | undefined;
 }
 
+export interface MessageField<ActionParams> {
+  get(params: Partial<ActionParams>): string | undefined;
+  set(params: Partial<ActionParams>, message: string): Partial<ActionParams>;
+}
+
 export interface ActionTypeModel<ActionConfig = any, ActionSecrets = any, ActionParams = any> {
   id: string;
   iconClass: IconType;
@@ -165,6 +170,7 @@ export interface ActionTypeModel<ActionConfig = any, ActionSecrets = any, Action
   isSystemActionType?: boolean;
   subFeature?: SubFeature;
   isTestable?: boolean;
+  messageField?: MessageField<ActionParams>;
   /**
    * Connector form config
    */

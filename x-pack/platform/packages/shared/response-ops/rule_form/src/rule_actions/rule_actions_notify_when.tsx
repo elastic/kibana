@@ -156,7 +156,6 @@ export interface RuleActionsNotifyWhenProps {
   showMinimumThrottleUnitWarning?: boolean;
   notifyWhenSelectOptions?: NotifyWhenSelectOptions[];
   onChange: (frequency: RuleActionFrequency) => void;
-  onUseDefaultMessage: () => void;
   isRecoveredActionGroup?: boolean;
 }
 
@@ -169,7 +168,6 @@ export const RuleActionsNotifyWhen = ({
   showMinimumThrottleUnitWarning,
   notifyWhenSelectOptions = NOTIFY_WHEN_OPTIONS,
   onChange,
-  onUseDefaultMessage,
   isRecoveredActionGroup = false,
 }: RuleActionsNotifyWhenProps) => {
   const [summaryMenuOpen, setSummaryMenuOpen] = useState(false);
@@ -254,16 +252,9 @@ export const RuleActionsNotifyWhen = ({
           : frequency.notifyWhen,
         throttle: frequency.throttle,
       });
-      onUseDefaultMessage();
       setSummaryMenuOpen(false);
     },
-    [
-      frequency,
-      onUseDefaultMessage,
-      selectedOptionDoesNotExist,
-      getDefaultNotifyWhenOption,
-      onChange,
-    ]
+    [frequency, selectedOptionDoesNotExist, getDefaultNotifyWhenOption, onChange]
   );
 
   const { euiTheme } = useEuiTheme();
