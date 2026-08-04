@@ -35,6 +35,12 @@ import type { InfoBlockItem } from './types';
 const meta: Meta<typeof InfoBlocks> = {
   title: 'Flyout Template/Info Blocks',
   component: InfoBlocks,
+  argTypes: {
+    items: { table: { disable: true } },
+    hasLeadingSpacer: { table: { disable: true } },
+    compressed: { table: { disable: true } },
+    'data-test-subj': { table: { disable: true } },
+  },
 };
 export default meta;
 
@@ -272,9 +278,7 @@ const GalleryDemo: React.FC = () => {
 };
 
 export const Gallery: Story = {
-  args: {
-    items: SAMPLE_ITEMS,
-  },
+  parameters: { controls: { hideNoControlsWarning: true } },
   render: () => <GalleryDemo />,
 };
 
