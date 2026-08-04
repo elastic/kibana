@@ -1304,16 +1304,6 @@ describe('RulesClient', () => {
   });
 
   describe('getTags', () => {
-    const findResponseWithTags = (tags: string[]) => ({
-      saved_objects: [],
-      total: 0,
-      page: 1,
-      per_page: 0,
-      aggregations: {
-        tags: { buckets: tags.map((key) => ({ key })) },
-      },
-    });
-
     it('returns the aggregated tags without a filter or search', async () => {
       const client = createClient();
 
@@ -1340,26 +1330,26 @@ describe('RulesClient', () => {
     it('translates kind: signal to an SO filter', async () => {
       const client = createClient();
 
-      mockSavedObjectsClient.find.mockResolvedValueOnce(findResponseWithTags(['sig']));
+      rulesSavedObjectService.findTags.mockResolvedValueOnce(['sig']);
 
       await client.getTags({ kind: 'signal' });
 
-      expect(mockSavedObjectsClient.find).toHaveBeenCalledWith(
-        expect.objectContaining({
-          filter: `${RULE_SAVED_OBJECT_TYPE}.attributes.kind: signal`,
-        })
-      );
+      expect(rulesSavedObjectService.findTags).toHaveBeenCalledWith({
+        filter: `${RULE_SAVED_OBJECT_TYPE}.attributes.kind: signal`,
+      });
     });
 
     it('forwards search to the saved-object service', async () => {
       const client = createClient();
 
-      mockSavedObjectsClient.find.mockResolvedValueOnce(findResponseWithTags(['production']));
+      rulesSavedObjectService.findTags.mockResolvedValueOnce(['production']);
 
       await client.getTags({ search: 'pro' });
 
-      // search is passed via the agg include pattern — verified via the SO service layer
-      expect(mockSavedObjectsClient.find).toHaveBeenCalled();
+      expect(rulesSavedObjectService.findTags).toHaveBeenCalledWith({
+        search: 'pro',
+        filter: undefined,
+      });
     });
   });
 
