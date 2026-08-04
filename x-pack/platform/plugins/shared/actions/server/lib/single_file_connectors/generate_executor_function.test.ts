@@ -411,6 +411,7 @@ describe('generateExecutorFunction', () => {
       await Promise.all(capturedGetClients.map((getClient) => getClient('fake')));
 
       expect(buildCount).toBe(1);
+      expect(mockGetCredential).toHaveBeenCalledTimes(1);
     });
 
     it('does not build when no client is requested (untouched → no build)', async () => {
@@ -438,6 +439,7 @@ describe('generateExecutorFunction', () => {
       await executor(makeExecOptions({ subAction: 'testAction', subActionParams: {} }));
 
       expect(buildCount).toBe(0);
+      expect(mockGetCredential).not.toHaveBeenCalled();
     });
 
     it('surfaces a build rejection from getClient as a thrown FRAMEWORK-tagged error', async () => {

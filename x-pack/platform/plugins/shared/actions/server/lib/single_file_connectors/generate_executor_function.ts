@@ -142,14 +142,6 @@ export const generateExecutorFunction = ({
         : {}),
     });
 
-    const credential = getCredential({
-      connectorId,
-      secrets,
-      connectorTokenClient,
-      authMode,
-      profileUid,
-    });
-
     if (!actions[subAction]) {
       const errorMessage = `[Action][ExternalService] Unsupported subAction type ${subAction}.`;
       logger.error(errorMessage);
@@ -200,7 +192,19 @@ export const generateExecutorFunction = ({
             profileUid,
             connectorVersion,
           }),
-          () => clientType.build({ logger, config, networkSettings, credential }),
+          () =>
+            clientType.build({
+              logger,
+              config,
+              networkSettings,
+              credential: getCredential({
+                connectorId,
+                secrets,
+                connectorTokenClient,
+                authMode,
+                profileUid,
+              }),
+            }),
           (client) => clientType.terminate(client)
         );
       } catch (err) {

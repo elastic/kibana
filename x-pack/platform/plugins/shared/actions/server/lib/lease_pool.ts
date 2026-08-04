@@ -48,7 +48,14 @@ export class LeasePool<TClient> {
 
     this.logger?.debug(`Building new pooled client for key "${key}"`);
 
+    // Deferred rather than `buildFn()` so a `build` that throws synchronously still rejects the
+    // returned promise instead of throwing out of `lease` before the entry is cached.
     const promise = Promise.resolve().then(buildFn);
+    // A failed build must not stay cached as a broken entry, so drop the key and let the next
+    // caller rebuild. `promise` itself is returned unmodified so the caller still sees the error.
+    // The guard matters because this runs a microtask after `cache.set`: by then the key may have
+    // been evicted and re-leased, and a losing build must not delete its replacement. `peek`
+    // rather than `get`, so an error path does not reset the replacement's idle timer.
     promise.catch(() => {
       if (this.cache.peek(key)?.promise === promise) {
         this.cache.delete(key);
@@ -60,6 +67,17 @@ export class LeasePool<TClient> {
     return promise;
   }
 
+  /**
+   * Terminates every pooled client belonging to one connector, now, rather than waiting for the
+   * idle timer. A connector can own several entries (multiple client types, multiple user
+   * profiles, lingering older revisions), hence the prefix scan; `connectorId` is the first key
+   * component to make that possible, and is encoded so one connector's prefix cannot match
+   * another's.
+   *
+   * Awaited, because callers depend on the ordering: connector delete and OAuth disconnect must
+   * finish terminating (which may require an authenticated call to the remote service) before the
+   * credentials that termination needs are removed.
+   */
   async evict(connectorId: string): Promise<void> {
     const prefix = `${encodeURIComponent(connectorId)}:`;
     const keysToEvict = [...this.cache.keys()].filter((key) => key.startsWith(prefix));
@@ -79,17 +97,32 @@ export class LeasePool<TClient> {
     this.cache.clear();
   }
 
+  /**
+   * Returns a promise so `evict` can await completion, which is what gives connector delete and
+   * OAuth disconnect their ordering guarantee.
+   *
+   * Memoized: `evict` deletes the key, which fires `dispose`, which calls this, and then awaits
+   * this again on the entry it collected. Without the memo `terminate` would run twice on the same
+   * client.
+   */
   private terminateEntry(entry: PoolEntry<TClient>, key: string): Promise<void> {
-    entry.terminationPromise ??= entry.promise.then(
-      async (client) => {
-        try {
-          await entry.terminate(client);
-        } catch (err) {
-          this.logger?.warn(`Failed to terminate client for key "${key}": ${err.message}`);
-        }
-      },
-      () => {}
-    );
+    entry.terminationPromise ??= (async () => {
+      let client: TClient;
+      try {
+        // The entry may still hold an in-flight build, so there may be nothing open yet.
+        client = await entry.promise;
+      } catch {
+        // The build failed, so nothing was opened, and the error already surfaced to whoever
+        // called `lease`.
+        return;
+      }
+
+      try {
+        await entry.terminate(client);
+      } catch (err) {
+        this.logger?.warn(`Failed to terminate client for key "${key}": ${err.message}`);
+      }
+    })();
 
     return entry.terminationPromise;
   }
