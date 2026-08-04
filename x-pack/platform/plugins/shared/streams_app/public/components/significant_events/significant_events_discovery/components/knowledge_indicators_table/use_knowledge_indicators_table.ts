@@ -68,6 +68,14 @@ export function useKnowledgeIndicatorsTable() {
     });
   }, []);
 
+  // Keeps the table page in sync with flyout prev/next navigation.
+  const goToPageForItemIndex = useCallback((index: number) => {
+    setPagination((current) => {
+      const targetPage = Math.floor(index / current.pageSize);
+      return current.pageIndex === targetPage ? current : { ...current, pageIndex: targetPage };
+    });
+  }, []);
+
   const clearSelection = useCallback(() => {
     setSelectedKnowledgeIndicators([]);
   }, []);
@@ -307,6 +315,7 @@ export function useKnowledgeIndicatorsTable() {
     handleBulkRestore,
     deleteKnowledgeIndicatorsInBulk,
     handleBulkPromote,
+    goToPageForItemIndex,
     ...urlState,
   };
 }
