@@ -21,6 +21,7 @@ export type {
   CreateEntityFromSourceRequest,
   CreateEntitiesFromSourceResult,
   EntityCreationRejectionReason,
+  CreateEntityFromSourceRejectionReason,
 } from './domain/crud';
 export type { EntityMetadataClient } from './domain/entity_metadata';
 export type { ResolutionClient } from './domain/resolution';

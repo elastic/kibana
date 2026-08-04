@@ -582,7 +582,7 @@ export const RISK_SCORE_MAINTAINER_STAGE_SUMMARY_EVENT: EventTypeOpts<RiskScoreM
         _meta: {
           optional: true,
           description:
-            'not_in_store scores dropped by the create-if-missing path during base scoring (no representative alert document, or the creation policy rejected the candidate)',
+            'not_in_store scores dropped by the create-if-missing path during base scoring (no representative alert document, the creation policy rejected the candidate, or the bulk create itself failed)',
         },
       },
       entitiesIterated: {

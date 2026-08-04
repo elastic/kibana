@@ -90,8 +90,8 @@ interface LoadedRunConfig {
   /**
    * Gates the risk score maintainer's create-if-missing path (Phase 1 base scoring only).
    * Requires both `idBasedRiskScoringEnabled` and the
-   * `xpack.securitySolution.entityAnalytics.riskEngine.createMissingEntities` kill switch, so
-   * creation can be disabled independently without turning off dual-write.
+   * `xpack.securitySolution.entityAnalytics.riskEngine.createMissingEntities` opt-in setting, so
+   * creation can be enabled independently of dual-write.
    */
   createMissingEntitiesEnabled: boolean;
   watchlistConfigs: Awaited<ReturnType<typeof fetchWatchlistConfigs>>;
@@ -387,7 +387,8 @@ const loadRunConfiguration = async ({
   const uiSettingsClient = coreStart.uiSettings.asScopedToClient(soClient);
   const idBasedRiskScoringEnabled = await getIsIdBasedRiskScoringEnabled(uiSettingsClient);
   const createMissingEntitiesEnabled =
-    idBasedRiskScoringEnabled && (entityAnalyticsConfig?.riskEngine?.createMissingEntities ?? true);
+    idBasedRiskScoringEnabled &&
+    (entityAnalyticsConfig?.riskEngine?.createMissingEntities ?? false);
   const watchlistConfigs = await fetchWatchlistConfigs({
     soClient: internalSoClient,
     esClient,

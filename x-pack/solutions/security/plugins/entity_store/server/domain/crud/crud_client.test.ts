@@ -118,6 +118,7 @@ describe('CRUDClient', () => {
 
       expect(result).toEqual({ created: ['host:host-1'], alreadyExists: [], rejected: [] });
       expect(esClient.bulk).toHaveBeenCalledTimes(1);
+      expect(esClient.bulk).toHaveBeenCalledWith(expect.objectContaining({ refresh: false }));
 
       const operations = getBulkOperations(0);
       expect(operations[0]).toEqual({ create: { _id: hashEuid('host:host-1') } });
@@ -130,6 +131,26 @@ describe('CRUDClient', () => {
         risk: { calculated_score_norm: 70 },
       });
       expect((createdDoc as any).host).toEqual({ id: 'host-1' });
+    });
+
+    it('falls back entity.name to the untyped id when the source has no host.name (matches extraction)', async () => {
+      esClient.bulk.mockResolvedValue({ errors: false, items: [] } as any);
+
+      const result = await client.createEntitiesFromSource([
+        {
+          type: 'host',
+          source: { host: { id: 'host-1' } }, // no host.name
+          createdBy: 'risk_score_maintainer',
+        },
+      ]);
+
+      expect(result.created).toEqual(['host:host-1']);
+      const operations = getBulkOperations(0);
+      const createdDoc = operations[1] as Entity;
+      expect(createdDoc.entity).toMatchObject({
+        id: 'host:host-1',
+        name: 'host-1',
+      });
     });
 
     it('creates local-namespace users with entity.confidence and composed entity.name', async () => {
@@ -184,7 +205,7 @@ describe('CRUDClient', () => {
       });
     });
 
-    it('drops entities that fail for a reason other than a conflict, and logs a warning', async () => {
+    it('counts entities that fail for a reason other than a conflict as rejected, and logs a warning', async () => {
       esClient.bulk.mockResolvedValue({
         errors: true,
         items: [
@@ -206,7 +227,11 @@ describe('CRUDClient', () => {
         },
       ]);
 
-      expect(result).toEqual({ created: [], alreadyExists: [], rejected: [] });
+      expect(result).toEqual({
+        created: [],
+        alreadyExists: [],
+        rejected: [{ reason: 'bulk_create_failed' }],
+      });
       expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('some_other_exception'));
     });
 

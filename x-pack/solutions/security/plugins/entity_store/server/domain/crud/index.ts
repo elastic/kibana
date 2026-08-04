@@ -12,5 +12,6 @@ export {
   type BulkObjectResponse,
   type CreateEntityFromSourceRequest,
   type CreateEntitiesFromSourceResult,
+  type CreateEntityFromSourceRejectionReason,
 } from './crud_client';
 export type { EntityCreationRejectionReason } from '../../../common/domain/definitions/entity_creation_policy';

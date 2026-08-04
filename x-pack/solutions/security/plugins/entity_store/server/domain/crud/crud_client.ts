@@ -102,13 +102,23 @@ export interface CreateEntityFromSourceRequest {
   fields?: Record<string, unknown>;
 }
 
+/**
+ * `EntityCreationRejectionReason` values are policy rejections that never reach Elasticsearch.
+ * `bulk_create_failed` covers requests that passed the policy but failed in the bulk create
+ * itself for a reason other than a 409 conflict (e.g. a mapping or validation error) — see
+ * `createEntitiesFromSource`.
+ */
+export type CreateEntityFromSourceRejectionReason =
+  | EntityCreationRejectionReason
+  | 'bulk_create_failed';
+
 export interface CreateEntitiesFromSourceResult {
   /** EUIDs successfully created. */
   created: string[];
   /** EUIDs that already existed by the time the bulk create ran (race with another creator). */
   alreadyExists: string[];
-  /** Requests that never reached Elasticsearch because the creation policy rejected them. */
-  rejected: Array<{ reason: EntityCreationRejectionReason }>;
+  /** Requests that never reached Elasticsearch because the creation policy rejected them, or that failed in the bulk create itself. */
+  rejected: Array<{ reason: CreateEntityFromSourceRejectionReason }>;
 }
 
 // EntityUpdateClient is the maintainer-safe CRUD surface: all CRUD methods
@@ -476,6 +486,10 @@ export class CRUDClient {
    * Issues one `create`-only bulk request so a document that already exists (e.g. created
    * concurrently by logs extraction) surfaces as a per-item 409 in `alreadyExists`, rather than
    * silently overwriting it — callers should fall back to the update path for those ids.
+   *
+   * Does not wait for a refresh: nothing in the same maintainer run reads these documents back
+   * from the latest index, so the extra ES-side cost of `wait_for` isn't warranted here. Failures
+   * are still logged and reported back to the caller (see `bulk_create_failed` below).
    */
   public async createEntitiesFromSource(
     requests: CreateEntityFromSourceRequest[]
@@ -522,7 +536,7 @@ export class CRUDClient {
     const resp = await this.esClient.bulk({
       index: getLatestEntitiesIndexName(this.namespace),
       operations,
-      refresh: 'wait_for',
+      refresh: false,
     });
 
     if (!resp.errors) {
@@ -539,6 +553,7 @@ export class CRUDClient {
         this.logger.warn(
           `createEntitiesFromSource: failed to create entity ${euid}: ${outcome.error.type}`
         );
+        result.rejected.push({ reason: 'bulk_create_failed' });
       } else {
         result.created.push(euid);
       }

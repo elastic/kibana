@@ -44,10 +44,10 @@ interface ScoreAndPersistBaseEntitiesParams extends ScoreBaseEntitiesParams {
   writer: RiskEngineDataWriter;
   idBasedRiskScoringEnabled: boolean;
   /**
-   * Create-if-missing kill switch (`idBasedRiskScoringEnabled &&
+   * Create-if-missing opt-in (`idBasedRiskScoringEnabled &&
    * xpack.securitySolution.entityAnalytics.riskEngine.createMissingEntities`, computed by the
-   * caller). When false, scores for EUIDs absent from the entity store are dropped, matching
-   * pre-existing behaviour.
+   * caller, both default to enabling dual-write only). When false, scores for EUIDs absent from
+   * the entity store are dropped, matching pre-existing behaviour.
    */
   createMissingEntities: boolean;
   refresh?: Parameters<typeof persistScoresToRiskIndex>[0]['refresh'];
@@ -63,8 +63,9 @@ export interface Phase1BaseScoringSummary extends StepResult {
   entitiesCreated: number;
   /**
    * not_in_store scores dropped by the create-if-missing path (no representative alert document,
-   * or the creation policy rejected the candidate). Always 0 when `createMissingEntities` is
-   * false, since scores are dropped without evaluating a policy in that case.
+   * the creation policy rejected the candidate, or the bulk create itself failed). Always 0 when
+   * `createMissingEntities` is false, since scores are dropped without evaluating a policy in
+   * that case.
    */
   entitiesCreateRejected: number;
 }

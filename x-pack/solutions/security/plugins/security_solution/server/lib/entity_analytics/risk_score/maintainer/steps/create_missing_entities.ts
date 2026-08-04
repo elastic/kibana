@@ -36,9 +36,15 @@ export interface CreateMissingEntitiesResult {
    * e.g. logs extraction). Callers should fall back to the normal update path for these.
    */
   alreadyExists: string[];
-  /** Total scores dropped: no representative alert document, or the creation policy rejected them. */
+  /**
+   * Total scores dropped: no representative alert document, the creation policy rejected them,
+   * or the bulk create itself failed.
+   */
   rejectedCount: number;
-  /** Rejection counts by reason, for telemetry (`no_alert_document` plus policy rejection reasons). */
+  /**
+   * Rejection counts by reason, for telemetry (`no_alert_document`, policy rejection reasons, or
+   * `bulk_create_failed`).
+   */
   rejectedByReason: Record<string, number>;
 }
 

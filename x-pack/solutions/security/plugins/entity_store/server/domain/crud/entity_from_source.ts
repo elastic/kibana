@@ -41,8 +41,7 @@ export interface BuildEntityFromSourceParams {
  * {@link EntityCreationAccepted} candidate (see `getEntityCreationCandidate`). Populates the
  * fields a real `createEntity` caller would send: `entity.id` plus its identity source fields,
  * `entity.name`, entity type scoping (`entity.EngineMetadata.*`), provenance (`entity.created_by`),
- * `entity.source`, and initial lifecycle timestamps. `@timestamp` and any remaining defaulting
- * (e.g. `entity.name` falling back to the id) are left to `validateAndTransformDoc`.
+ * `entity.source`, and initial lifecycle timestamps. `@timestamp` is left to `validateAndTransformDoc`.
  */
 export function buildEntityFromSource({
   entityType,
@@ -60,18 +59,15 @@ export function buildEntityFromSource({
     set(built, field, value);
   }
 
+  const untypedId = getUntypedId(entityType, candidate.euid, definition);
   set(built, 'entity.EngineMetadata.Type', entityType);
-  set(
-    built,
-    'entity.EngineMetadata.UntypedId',
-    getUntypedId(entityType, candidate.euid, definition)
-  );
+  set(built, 'entity.EngineMetadata.UntypedId', untypedId);
   set(built, 'entity.created_by', createdBy);
 
   const { name, confidence } = deriveEntityNameAndConfidence(definition, doc, built);
-  if (name !== undefined) {
-    set(built, 'entity.name', name);
-  }
+  // Matches extraction's own fallback (`entity.name = CASE(..., recent.entity.EngineMetadata.UntypedId)`)
+  // rather than letting `validateAndTransformDoc` default to the full EUID.
+  set(built, 'entity.name', name ?? untypedId);
   if (confidence !== undefined) {
     set(built, 'entity.confidence', confidence);
   }
