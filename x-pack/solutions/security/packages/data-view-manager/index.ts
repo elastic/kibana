@@ -33,6 +33,9 @@ export {
   useDataViewManagerDependencies,
   useDataViewManagerServices,
 } from './src/context';
+
+export { DataViewManagerTestProvider } from './src/test/provider';
+export type { DataViewManagerTestProviderProps } from './src/test/provider';
 export type {
   DataViewManagerServices,
   DataViewManagerDependencies,
