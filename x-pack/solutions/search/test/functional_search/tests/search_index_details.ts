@@ -76,15 +76,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await testHasEmbeddedConsole(pageObjects);
         });
         it('should have breadcrumbs', async () => {
-          await pageObjects.searchIndexDetailsPage.expectBreadcrumbsToBeAvailable(
-            'Index Management'
-          );
           await pageObjects.searchIndexDetailsPage.expectBreadcrumbsToBeAvailable('Indices');
 
           await pageObjects.searchIndexDetailsPage.clickOnBreadcrumb('Indices');
-          await pageObjects.indexManagement.expectToBeOnIndexManagement();
-
-          await pageObjects.searchIndexDetailsPage.clickOnBreadcrumb('Index Management');
           await pageObjects.indexManagement.expectToBeOnIndexManagement();
 
           await pageObjects.searchNavigation.navigateToIndexDetailPage(indexWithoutDataName);
