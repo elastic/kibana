@@ -22,10 +22,10 @@ import { role } from '../common/role';
 let bedrockConnectorId: string | null = null;
 
 // TODO: https://github.com/elastic/kibana/issues/228940 remove @skipInServerlessMKI tag when privileges issue is fixed
-describe(
+// Failing: See https://github.com/elastic/kibana/issues/242870
+describe.skip(
   'Dashboard Migrations - Translated Dashboards Page',
   { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] },
-
   () => {
     before(() => {
       role.setup();
