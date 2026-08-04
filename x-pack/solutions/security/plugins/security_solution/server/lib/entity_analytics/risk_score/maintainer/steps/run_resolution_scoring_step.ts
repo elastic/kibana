@@ -59,7 +59,8 @@ export const runResolutionScoringStep = async ({
     `starting phase 2 resolution scoring: page_size=${pageSize}, sample_size=${sampleSize}`
   );
   let pagesProcessed = 0;
-  let scoresWrittenResolution = 0;
+  let scoresWrittenRiskIndex = 0;
+  let scoresWrittenEntityStore = 0;
   let scoresFailed = 0;
   let abortedBetweenPages = false;
   const newScores: Record<string, number> = {};
@@ -86,20 +87,21 @@ export const runResolutionScoringStep = async ({
     }
     pagesProcessed += 1;
     if (pageScores.length > 0) {
-      scoresWrittenResolution += await persistScoresToRiskIndex({
+      scoresWrittenRiskIndex += await persistScoresToRiskIndex({
         writer,
         entityType,
         scores: pageScores,
         logger: runLogger,
         refresh,
       });
-      const { errorsCount } = await persistScoresToEntityStore({
+      const { docsWritten, errorsCount } = await persistScoresToEntityStore({
         crudClient,
         logger: runLogger,
         entityType,
         scores: pageScores,
         enabled: idBasedRiskScoringEnabled,
       });
+      scoresWrittenEntityStore += docsWritten;
       scoresFailed += errorsCount;
 
       if (collectScores) {
@@ -112,7 +114,7 @@ export const runResolutionScoringStep = async ({
     }
   }
 
-  if (scoresWrittenResolution === 0) {
+  if (scoresWrittenRiskIndex === 0) {
     const skipReason = abortedBetweenPages
       ? 'aborted'
       : pagesProcessed === 0
@@ -122,7 +124,8 @@ export const runResolutionScoringStep = async ({
       `phase 2 resolution scoring produced no writes: reason=${skipReason}, pages=${pagesProcessed}`
     );
     return {
-      scoresWritten: 0,
+      scoresWrittenRiskIndex: 0,
+      scoresWrittenEntityStore,
       scoresFailed,
       pagesProcessed,
       skippedReason: !abortedBetweenPages && pagesProcessed === 0 ? 'lookup_empty' : undefined,
@@ -131,11 +134,12 @@ export const runResolutionScoringStep = async ({
   }
 
   runLogger.debug(
-    `phase 2 resolution scoring wrote ${scoresWrittenResolution} docs across ${pagesProcessed} page(s)`
+    `phase 2 resolution scoring wrote ${scoresWrittenRiskIndex} docs across ${pagesProcessed} page(s)`
   );
 
   return {
-    scoresWritten: scoresWrittenResolution,
+    scoresWrittenRiskIndex,
+    scoresWrittenEntityStore,
     scoresFailed,
     pagesProcessed,
     scores: newScores,

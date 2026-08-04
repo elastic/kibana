@@ -13,9 +13,12 @@ import {
 } from './entity_maintainer_run_summary';
 
 const emptyMetrics = (overrides: Partial<RunMetrics> = {}): RunMetrics => ({
-  scoresWrittenBase: 0,
-  scoresWrittenResolution: 0,
-  scoresWrittenResetToZero: 0,
+  scoresWrittenRiskIndexBase: 0,
+  scoresWrittenRiskIndexResolution: 0,
+  scoresWrittenRiskIndexResetToZero: 0,
+  scoresWrittenEntityStoreBase: 0,
+  scoresWrittenEntityStoreResolution: 0,
+  scoresWrittenEntityStoreResetToZero: 0,
   scoresCalculatedBase: 0,
   scoresDroppedNotInStore: 0,
   scoresFailedBase: 0,
@@ -144,7 +147,8 @@ describe('buildRiskScoreEntityMaintainerRunSummary', () => {
         metrics: emptyMetrics({
           scoresCalculatedBase: 12,
           scoresDroppedNotInStore: 3,
-          scoresWrittenBase: 7,
+          scoresWrittenRiskIndexBase: 7,
+          scoresWrittenEntityStoreBase: 7,
           scoresFailedBase: 2,
           pagesProcessed: 5,
         }),
@@ -161,6 +165,28 @@ describe('buildRiskScoreEntityMaintainerRunSummary', () => {
         failed: 2,
       },
       stages,
+    });
+  });
+
+  it('maps funnel.applied from entity-store writes, not risk-index writes', () => {
+    expect(
+      buildRiskScoreEntityMaintainerRunSummary({
+        entityType: 'host',
+        metrics: emptyMetrics({
+          scoresCalculatedBase: 5,
+          scoresWrittenRiskIndexBase: 5,
+          scoresWrittenEntityStoreBase: 0,
+          scoresFailedBase: 0,
+          pagesProcessed: 1,
+        }),
+        stages: [],
+      }).funnel
+    ).toEqual({
+      scanned: 5,
+      qualified: 5,
+      applied: 0,
+      droppedNotInStore: 0,
+      failed: 0,
     });
   });
 });

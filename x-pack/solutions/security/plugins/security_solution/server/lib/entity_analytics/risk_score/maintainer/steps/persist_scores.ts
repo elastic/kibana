@@ -52,22 +52,22 @@ export const persistScoresToEntityStore = async ({
   entityType: EntityType;
   scores: EntityRiskScoreRecord[];
   enabled: boolean;
-}): Promise<{ errorsCount: number }> => {
+}): Promise<{ docsWritten: number; errorsCount: number }> => {
   if (!enabled) {
-    return { errorsCount: 0 };
+    return { docsWritten: 0, errorsCount: 0 };
   }
 
-  const entityStoreErrors = await persistRiskScoresToEntityStore({
+  const { docsWritten, unexpectedErrors } = await persistRiskScoresToEntityStore({
     crudClient,
     logger,
     scores: { [entityType]: scores },
   });
-  if (entityStoreErrors.length > 0) {
+  if (unexpectedErrors.length > 0) {
     logger.warn(
-      `Entity store dual-write had ${entityStoreErrors.length} error(s): ${entityStoreErrors.join(
+      `Entity store dual-write had ${unexpectedErrors.length} error(s): ${unexpectedErrors.join(
         '; '
       )}`
     );
   }
-  return { errorsCount: entityStoreErrors.length };
+  return { docsWritten, errorsCount: unexpectedErrors.length };
 };

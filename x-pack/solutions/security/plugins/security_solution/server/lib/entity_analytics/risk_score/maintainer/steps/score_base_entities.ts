@@ -49,7 +49,7 @@ interface ScoreAndPersistBaseEntitiesParams extends ScoreBaseEntitiesParams {
 
 export interface Phase1BaseScoringSummary extends StepResult {
   pagesProcessed: number;
-  scoresWritten: number;
+  scoresWrittenRiskIndex: number;
   scoresCalculated: number;
   scoresDroppedNotInStore: number;
   scores: Record<string, number>;
@@ -152,7 +152,8 @@ export const scoreBaseEntities = async ({
   ...params
 }: ScoreAndPersistBaseEntitiesParams): Promise<Phase1BaseScoringSummary> => {
   let pagesProcessed = 0;
-  let scoresWritten = 0;
+  let scoresWrittenRiskIndex = 0;
+  let scoresWrittenEntityStore = 0;
   let scoresCalculated = 0;
   let scoresDroppedNotInStore = 0;
   let scoresFailed = 0;
@@ -178,20 +179,21 @@ export const scoreBaseEntities = async ({
         `dropped ${droppedCount} not_in_store scores from page (kept ${inStoreScores.length})`
       );
     }
-    scoresWritten += await persistScoresToRiskIndex({
+    scoresWrittenRiskIndex += await persistScoresToRiskIndex({
       writer,
       entityType: params.entityType,
       scores: inStoreScores,
       logger: params.logger,
       refresh,
     });
-    const { errorsCount } = await persistScoresToEntityStore({
+    const { docsWritten, errorsCount } = await persistScoresToEntityStore({
       crudClient: params.crudClient,
       logger: params.logger,
       entityType: params.entityType,
       scores: inStoreScores,
       enabled: idBasedRiskScoringEnabled,
     });
+    scoresWrittenEntityStore += docsWritten;
     scoresFailed += errorsCount;
 
     if (collectScores) {
@@ -203,7 +205,8 @@ export const scoreBaseEntities = async ({
 
   return {
     pagesProcessed,
-    scoresWritten,
+    scoresWrittenRiskIndex,
+    scoresWrittenEntityStore,
     scoresCalculated,
     scoresDroppedNotInStore,
     scoresFailed,

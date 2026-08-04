@@ -224,7 +224,8 @@ describe('score_base_entities', () => {
       expect(writtenScores).toHaveLength(1);
       expect(writtenScores[0].id_value).toBe('user:in-store@okta');
 
-      expect(summary.scoresWritten).toBe(1);
+      expect(summary.scoresWrittenRiskIndex).toBe(1);
+      expect(summary.scoresWrittenEntityStore).toBe(0);
       expect(summary.scoresCalculated).toBe(2);
       expect(summary.scoresDroppedNotInStore).toBe(1);
       expect(summary.scoresFailed).toBe(0);
@@ -255,7 +256,8 @@ describe('score_base_entities', () => {
 
       const writtenScores = (writer.bulk as jest.Mock).mock.calls[0][0][EntityType.user];
       expect(writtenScores).toHaveLength(0);
-      expect(summary.scoresWritten).toBe(0);
+      expect(summary.scoresWrittenRiskIndex).toBe(0);
+      expect(summary.scoresWrittenEntityStore).toBe(0);
       expect(summary.scoresCalculated).toBe(2);
       expect(summary.scoresDroppedNotInStore).toBe(2);
       expect(summary.scoresFailed).toBe(0);

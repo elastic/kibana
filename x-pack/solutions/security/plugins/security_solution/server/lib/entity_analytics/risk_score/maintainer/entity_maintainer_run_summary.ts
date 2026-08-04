@@ -92,7 +92,7 @@ export const buildRiskScorePhase0EntityMaintainerRunSummary = ({
  * Builds the entity-maintainers framework run-summary payload for one
  * risk-score entity-type sub-run.
  *
- * Funnel is the base-scoring path only
+ * Funnel is the base-scoring entity-store path only
  * - stages[] = base / resolution / reset_to_zero applied + status/duration
  *
  * TODO - after #280948 (create-if-missing):
@@ -122,7 +122,7 @@ export const buildRiskScoreEntityMaintainerRunSummary = ({
     funnel: {
       scanned: metrics.scoresCalculatedBase,
       qualified: qualifiedBase,
-      applied: metrics.scoresWrittenBase,
+      applied: metrics.scoresWrittenEntityStoreBase,
       droppedNotInStore: metrics.scoresDroppedNotInStore,
       failed: metrics.scoresFailedBase,
     },

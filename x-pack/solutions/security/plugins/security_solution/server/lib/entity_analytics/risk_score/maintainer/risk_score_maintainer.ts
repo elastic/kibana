@@ -524,13 +524,13 @@ const executeEntityTypeRun = async ({
     metricsTracker.recordBase(runMetrics, baseSummary);
     baseStage.success({
       pagesProcessed: baseSummary.pagesProcessed,
-      scoresWritten: baseSummary.scoresWritten,
+      scoresWritten: baseSummary.scoresWrittenRiskIndex,
     });
     frameworkTelemetryStages.push({
       name: 'base',
       status: 'success',
       durationMs: Date.now() - baseStartedAtMs,
-      applied: baseSummary.scoresWritten,
+      applied: baseSummary.scoresWrittenEntityStore,
     });
   } catch (error) {
     const errorMessage = telemetryReporter.getErrorMessage(error);
@@ -588,18 +588,18 @@ const executeEntityTypeRun = async ({
           status: 'skipped',
           durationMs: Date.now() - resolutionStartedAtMs,
           skipReason: resolutionResult.skippedReason,
-          applied: resolutionResult.scoresWritten,
+          applied: resolutionResult.scoresWrittenEntityStore,
         });
       } else {
         resolutionStage.success({
           pagesProcessed: resolutionResult.pagesProcessed,
-          scoresWritten: resolutionResult.scoresWritten,
+          scoresWritten: resolutionResult.scoresWrittenRiskIndex,
         });
         frameworkTelemetryStages.push({
           name: 'resolution',
           status: 'success',
           durationMs: Date.now() - resolutionStartedAtMs,
-          applied: resolutionResult.scoresWritten,
+          applied: resolutionResult.scoresWrittenEntityStore,
         });
       }
     } catch (error) {
@@ -651,20 +651,20 @@ const executeEntityTypeRun = async ({
           now: runNow,
         });
         metricsTracker.recordResetToZero(runMetrics, resetResult);
-        if (resetResult.scoresWritten > 0) {
-          runLogger.info(`reset ${resetResult.scoresWritten} stale risk scores to zero`);
+        if (resetResult.scoresWrittenRiskIndex > 0) {
+          runLogger.info(`reset ${resetResult.scoresWrittenRiskIndex} stale risk scores to zero`);
         } else {
           runLogger.debug('reset_to_zero found no stale scores');
         }
         resetStage.success({
-          scoresWritten: resetResult.scoresWritten,
+          scoresWritten: resetResult.scoresWrittenRiskIndex,
           resetBatchLimitHit: resetResult.resetBatchLimitHit,
         });
         frameworkTelemetryStages.push({
           name: 'reset_to_zero',
           status: 'success',
           durationMs: Date.now() - resetStartedAtMs,
-          applied: resetResult.scoresWritten,
+          applied: resetResult.scoresWrittenEntityStore,
         });
       } catch (error) {
         const errorMessage = telemetryReporter.getErrorMessage(error);
@@ -726,9 +726,9 @@ const executeEntityTypeRun = async ({
   runTelemetry.completionSummary({
     runStatus,
     runErrorKind,
-    scoresWrittenBase: runMetrics.scoresWrittenBase,
-    scoresWrittenResolution: runMetrics.scoresWrittenResolution,
-    scoresWrittenResetToZero: runMetrics.scoresWrittenResetToZero,
+    scoresWrittenBase: runMetrics.scoresWrittenRiskIndexBase,
+    scoresWrittenResolution: runMetrics.scoresWrittenRiskIndexResolution,
+    scoresWrittenResetToZero: runMetrics.scoresWrittenRiskIndexResetToZero,
     pagesProcessed: runMetrics.pagesProcessed,
     lookupPrunedDocs: runMetrics.lookupPrunedDocs,
   });

@@ -32,7 +32,10 @@ describe('runResolutionScoringStep', () => {
     esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
     crudClient = {} as EntityUpdateClient;
     (persistScoresToRiskIndex as jest.Mock).mockResolvedValue(0);
-    (persistScoresToEntityStore as jest.Mock).mockResolvedValue({ errorsCount: 0 });
+    (persistScoresToEntityStore as jest.Mock).mockResolvedValue({
+      docsWritten: 0,
+      errorsCount: 0,
+    });
   });
 
   afterEach(() => {
@@ -67,7 +70,8 @@ describe('runResolutionScoringStep', () => {
       })
     );
     expect(result).toEqual({
-      scoresWritten: 0,
+      scoresWrittenRiskIndex: 0,
+      scoresWrittenEntityStore: 0,
       scoresFailed: 0,
       pagesProcessed: 0,
       skippedReason: undefined,
@@ -95,7 +99,8 @@ describe('runResolutionScoringStep', () => {
     });
 
     expect(result).toEqual({
-      scoresWritten: 0,
+      scoresWrittenRiskIndex: 0,
+      scoresWrittenEntityStore: 0,
       scoresFailed: 0,
       pagesProcessed: 0,
       skippedReason: 'lookup_empty',
