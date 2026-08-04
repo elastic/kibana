@@ -117,6 +117,32 @@ describe('AwsCredentialsAuth', () => {
     );
   });
 
+  // Regression test: a path segment built with `encodeURIComponent` (e.g. an
+  // index pattern like "logs-*") leaves `*` unescaped. AWS's SigV4
+  // canonicalization on the receiving end percent-encodes it, so an
+  // unescaped `*` in the literal request path/query causes a signature
+  // mismatch even though the client's own signing and wire bytes agree with
+  // each other.
+  it('percent-encodes RFC-3986 reserved characters left unescaped in the path and query by encodeURIComponent', async () => {
+    const interceptor = await getInterceptor();
+
+    const config = {
+      url: `https://search-my-domain-abc123.us-east-1.es.amazonaws.com/_cat/indices/${encodeURIComponent(
+        'logs-*'
+      )}`,
+      method: 'get',
+      params: { h: 'name,health,pri.store.size' },
+      headers: new AxiosHeaders(),
+    } as unknown as InternalAxiosRequestConfig;
+
+    const result = await interceptor(config);
+
+    expect(result.url).toBe(
+      'https://search-my-domain-abc123.us-east-1.es.amazonaws.com/_cat/indices/logs-%2A' +
+        '?h=name%2Chealth%2Cpri.store.size'
+    );
+  });
+
   it('merges params already embedded in the URL string with axios `params`', async () => {
     const interceptor = await getInterceptor();
 

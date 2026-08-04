@@ -11,7 +11,12 @@ import { z, lazySchema } from '@kbn/zod/v4';
 import type { AxiosInstance, InternalAxiosRequestConfig } from 'axios';
 import type { AuthContext, AuthTypeSpec } from '../connector_spec';
 import * as i18n from './translations';
-import { buildCanonicalQueryString, parseAwsHost, signRequest } from './aws_credential_helpers';
+import {
+  buildCanonicalQueryString,
+  escapeSigV4ReservedChars,
+  parseAwsHost,
+  signRequest,
+} from './aws_credential_helpers';
 
 // ============================================================================
 // Auth Type Definition
@@ -74,7 +79,11 @@ export const AwsCredentialsAuth: AuthTypeSpec<AuthSchemaType> = {
         }
 
         const method = (config.method || 'GET').toUpperCase();
-        const path = fullUrl.pathname;
+        // `fullUrl.pathname` may already contain `%XX` escapes from the
+        // action's own `encodeURIComponent` calls, but never escapes
+        // `! ' ( ) *` (e.g. a "logs-*" index pattern) — fix those up here so
+        // the same rule applies to the path as to the query string below.
+        const path = escapeSigV4ReservedChars(fullUrl.pathname);
         const queryParams: Record<string, string> = {};
         fullUrl.searchParams.forEach((value, key) => {
           queryParams[key] = value;

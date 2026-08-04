@@ -50,6 +50,23 @@ export function parseAwsHost(
 }
 
 /**
+ * AWS SigV4 canonicalization requires every byte outside the RFC-3986
+ * unreserved set (A-Z a-z 0-9 - _ . ~) to be percent-encoded, but
+ * `encodeURIComponent` leaves `! ' ( ) *` unescaped since they're valid
+ * within a generic URI. AWS decodes the request it receives on the wire and
+ * re-canonicalizes it using the stricter RFC-3986 rule, so any of these five
+ * characters left unescaped in a signed request/query value causes a
+ * signature mismatch — reported back as a generic access-denied error, not a
+ * helpful encoding error. This fixes up the residual set of characters
+ * without disturbing any `%XX` escapes already present, so it's safe to
+ * apply both to fresh `encodeURIComponent` output and to an already
+ * partially-encoded string like a URL pathname (see `aws_credentials.ts`).
+ */
+export function escapeSigV4ReservedChars(value: string): string {
+  return value.replace(/[!'()*]/g, (char) => `%${char.charCodeAt(0).toString(16).toUpperCase()}`);
+}
+
+/**
  * Builds the query string used both to compute the SigV4 signature and as
  * the literal query string sent on the wire. AWS rejects a request whose
  * live query string differs, byte-for-byte, from the one that was signed —
@@ -60,7 +77,12 @@ export function parseAwsHost(
 export function buildCanonicalQueryString(queryParams: Record<string, string>): string {
   return Object.keys(queryParams)
     .sort()
-    .map((key) => `${encodeURIComponent(key)}=${encodeURIComponent(queryParams[key])}`)
+    .map(
+      (key) =>
+        `${escapeSigV4ReservedChars(encodeURIComponent(key))}=${escapeSigV4ReservedChars(
+          encodeURIComponent(queryParams[key])
+        )}`
+    )
     .join('&');
 }
 
