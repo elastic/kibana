@@ -46,9 +46,8 @@ export function initializeHistoryManager({
   api: ReturnType<typeof startTrackingHistory<DashboardState>>['api'];
   cleanup: () => void;
 } {
-  const { viewMode, ...rest } = initialState;
   const disableUndoRedo$ = new BehaviorSubject<boolean>(false);
-  const dashboardCurrentState$ = new BehaviorSubject<DashboardState>(rest);
+  const dashboardCurrentState$ = new BehaviorSubject<DashboardState>(initialState);
 
   combineLatest([hasOverlays$, dataLoading$])
     .pipe(map(([hasOverlays, dataLoading]) => Boolean(hasOverlays || dataLoading)))

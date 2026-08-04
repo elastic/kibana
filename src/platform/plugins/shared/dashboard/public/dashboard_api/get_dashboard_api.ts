@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EuiFlyoutProps } from '@elastic/eui';
-import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, concatMap, merge, of, Subject } from 'rxjs';
 import { v4 } from 'uuid';
+
+import type { EuiFlyoutProps } from '@elastic/eui';
+import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 
 import { getLastSavedState } from '../../common/default_dashboard_state';
 import { DASHBOARD_APP_ID } from '../../common/page_bundle_constants';
