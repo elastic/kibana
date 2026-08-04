@@ -9,8 +9,7 @@
     "public/**/*",
     "server/**/*",
     "types/**/*",
-    "test/scenarios/**/*",
-    "test/scout/api/**/*"
+    "test/scenarios/**/*"
   ],
   "kbn_references": [
     "@kbn/synthtrace",
@@ -144,13 +143,11 @@
     "@kbn/es-query-constants",
     "@kbn/cps",
     "@kbn/core-spaces-common",
-    "@kbn/scout-oblt",
-    "@kbn/scout-synthtrace",
-    "@kbn/synthtrace-client",
     "@kbn/test",
     "@kbn/es-archiver",
     "@kbn/tooling-log",
-    "@kbn/core-logging-server-mocks"
+    "@kbn/core-logging-server-mocks",
+    "@kbn/synthtrace-client"
   ],
   "exclude": ["target/**/*"]
 }
