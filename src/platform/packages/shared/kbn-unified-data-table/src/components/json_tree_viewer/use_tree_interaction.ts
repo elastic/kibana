@@ -37,8 +37,7 @@ export interface TreeExpansionState {
 interface UseTreeExpansionArgs {
   initialState?: TreeExpansionState;
   onStateChange?: (state: TreeExpansionState) => void;
-  // Collections force-open for the active search term; unioned in but never persisted.
-  searchExpanded: ReadonlySet<string>;
+  expandedBySearchNodes: ReadonlySet<string>;
   // Every toggleable collection id, for Expand-all and the `isAllExpanded` check.
   expandableIds: string[];
 }
@@ -61,7 +60,7 @@ export interface TreeExpansion {
 export const useTreeExpansion = ({
   initialState,
   onStateChange,
-  searchExpanded,
+  expandedBySearchNodes,
   expandableIds,
 }: UseTreeExpansionArgs): TreeExpansion => {
   const [expanded, setExpanded] = useState<ReadonlySet<string>>(
@@ -84,8 +83,9 @@ export const useTreeExpansion = ({
   // (the write-through effect above only mirrors `expanded`/`revealed`), so a query never pollutes
   // the user's expand/collapse state.
   const effectiveExpanded = useMemo(
-    () => (searchExpanded.size ? new Set([...expanded, ...searchExpanded]) : expanded),
-    [expanded, searchExpanded]
+    () =>
+      expandedBySearchNodes.size ? new Set([...expanded, ...expandedBySearchNodes]) : expanded,
+    [expanded, expandedBySearchNodes]
   );
 
   const setExpandedFor = useCallback((id: string, shouldExpand: boolean) => {

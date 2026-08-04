@@ -178,7 +178,7 @@ describe('JsonTreeViewer', () => {
     const doc = { user: { city: 'Berlin' }, org: { name: 'Acme' } };
 
     it('expands a collapsed container so a hidden match renders, leaving non-matches collapsed', () => {
-      render(<JsonTreeViewer json={doc} searchTerm="berl" />);
+      render(<JsonTreeViewer json={doc} expandNodesContainingTerm="berl" />);
 
       // `user` was collapsed; the match forces it open.
       expect(screen.getByText('"Berlin"')).toBeVisible();
@@ -194,7 +194,13 @@ describe('JsonTreeViewer', () => {
 
     it('keeps the search-driven expansion out of the persisted host state', () => {
       const states: TreeExpansionState[] = [];
-      render(<JsonTreeViewer json={doc} searchTerm="berl" onStateChange={(s) => states.push(s)} />);
+      render(
+        <JsonTreeViewer
+          json={doc}
+          expandNodesContainingTerm="berl"
+          onStateChange={(s) => states.push(s)}
+        />
+      );
 
       // The match is visible (auto-expanded)…
       expect(screen.getByText('"Berlin"')).toBeVisible();
@@ -298,7 +304,7 @@ describe('JsonTreeViewer', () => {
       render(
         <JsonTreeViewer
           json={{ user: { city: 'Berlin' } }}
-          searchTerm="berl"
+          expandNodesContainingTerm="berl"
           formatValue={markMatch('Berlin')}
         />
       );

@@ -40,7 +40,7 @@ export interface JsonTreeViewerProps {
    * The active in-table search term. Every collection whose subtree contains it is auto-expanded so
    * the match renders — in-table search can only count/highlight rendered DOM text.
    */
-  searchTerm?: string;
+  expandNodesContainingTerm?: string;
   /**
    * Function called for each leaf node to render its value.
    */
@@ -51,7 +51,7 @@ export const JsonTreeViewer = memo(function JsonTreeViewer({
   json,
   initialState,
   onStateChange,
-  searchTerm,
+  expandNodesContainingTerm,
   formatValue,
 }: JsonTreeViewerProps) {
   const styles = useMemoCss(treeStyles);
@@ -62,8 +62,8 @@ export const JsonTreeViewer = memo(function JsonTreeViewer({
   const root = useMemo(() => getRootLayout(json), [json]);
 
   // Collections to force-open for the active search term (empty unless the document has a match).
-  const searchTermLower = searchTerm?.trim().toLowerCase() ?? '';
-  const searchExpanded = useMemo(
+  const searchTermLower = expandNodesContainingTerm?.trim().toLowerCase() ?? '';
+  const expandedBySearchNodes = useMemo(
     () =>
       searchTermLower && text.includes(searchTermLower)
         ? collectContainersWithMatch(nodes, searchTermLower)
@@ -74,7 +74,7 @@ export const JsonTreeViewer = memo(function JsonTreeViewer({
   const expansion = useTreeExpansion({
     initialState,
     onStateChange,
-    searchExpanded,
+    expandedBySearchNodes,
     expandableIds,
   });
 

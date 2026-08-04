@@ -9,12 +9,44 @@
 
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
-import { JsonTreeViewer, type FormatValue, type JsonValue } from './json_tree_viewer';
+import { JsonTreeViewer, type JsonTreeViewerProps, type JsonValue } from './json_tree_viewer';
 
-export default {
+type StoryArgs = Omit<JsonTreeViewerProps, 'formatValue'> & {
+  containerWidth: number;
+};
+
+const meta: Meta<StoryArgs> = {
   title: 'UnifiedDataTable/JsonTreeViewer',
   component: JsonTreeViewer,
-} as Meta<typeof JsonTreeViewer>;
+  argTypes: {
+    json: {
+      control: 'object',
+      description: 'The document rendered as a JSON tree.',
+    },
+    expandNodesContainingTerm: {
+      control: 'text',
+      description: 'Active in-table search term; every collection containing a match auto-expands.',
+    },
+    containerWidth: {
+      control: { type: 'range', min: 200, max: 900, step: 10 },
+      description: 'Story-only: width of the wrapping container, to exercise value wrapping.',
+      table: { category: 'Story knobs' },
+    },
+  },
+  args: {
+    expandNodesContainingTerm: '',
+    containerWidth: 440,
+  },
+  render: ({ containerWidth, ...props }) => (
+    <div style={{ width: containerWidth }}>
+      <JsonTreeViewer {...props} />
+    </div>
+  ),
+};
+
+export default meta;
+
+type Story = StoryObj<StoryArgs>;
 
 const nestedDocument = {
   '@timestamp': '2024-01-15T10:30:00.000Z',
@@ -70,82 +102,26 @@ const longValueDocument = {
 
 const arrayValue: JsonValue = ['alpha', 'beta', { nested: true }, [1, 2, 3]];
 
-export const SyntaxTreeSimpleObject: StoryObj<typeof JsonTreeViewer> = {
-  render: () => (
-    <div style={{ width: 440 }}>
-      <JsonTreeViewer json={{ name: 'Alice', age: 30, active: true, score: null }} />
-    </div>
-  ),
+export const JsonTreeViewerSimpleObject: Story = {
+  args: { json: { name: 'Alice', age: 30, active: true, score: null } },
 };
 
-export const SyntaxTreeNestedDocument: StoryObj<typeof JsonTreeViewer> = {
-  render: () => (
-    <div style={{ width: 440 }}>
-      <JsonTreeViewer json={nestedDocument} />
-    </div>
-  ),
+export const JsonTreeViewerNestedDocument: Story = {
+  args: { json: nestedDocument },
 };
 
-export const SyntaxTreeLargeObject: StoryObj<typeof JsonTreeViewer> = {
-  render: () => (
-    <div style={{ width: 440 }}>
-      <JsonTreeViewer json={largeDocument} />
-    </div>
-  ),
+export const JsonTreeViewerLargeObject: Story = {
+  args: { json: largeDocument },
 };
 
-export const SyntaxTreeLargeNested: StoryObj<typeof JsonTreeViewer> = {
-  render: () => (
-    <div style={{ width: 440 }}>
-      <JsonTreeViewer json={largeNestedDocument} />
-    </div>
-  ),
+export const JsonTreeViewerLargeNested: Story = {
+  args: { json: largeNestedDocument },
 };
 
-export const SyntaxTreeArrayValue: StoryObj<typeof JsonTreeViewer> = {
-  render: () => (
-    <div style={{ width: 440 }}>
-      <JsonTreeViewer json={arrayValue} />
-    </div>
-  ),
+export const JsonTreeViewerArrayValue: Story = {
+  args: { json: arrayValue },
 };
 
-export const SyntaxTreeLongValues: StoryObj<typeof JsonTreeViewer> = {
-  render: () => (
-    <div style={{ width: 440 }}>
-      <JsonTreeViewer json={longValueDocument} />
-    </div>
-  ),
-};
-
-const highlightDocument = {
-  message: 'User login successful',
-  service: 'authentication',
-  level: 'info',
-  count: 42,
-};
-
-// Stands in for a host's query-highlight formatter: it marks the first occurrence of a term in a
-// string value, leaving the raw value (and every non-string) untouched.
-const markTerm =
-  (term: string): FormatValue =>
-  ({ value }) => {
-    if (typeof value !== 'string') return undefined;
-    const index = value.toLowerCase().indexOf(term.toLowerCase());
-    if (index === -1) return undefined;
-    return (
-      <>
-        {value.slice(0, index)}
-        <mark>{value.slice(index, index + term.length)}</mark>
-        {value.slice(index + term.length)}
-      </>
-    );
-  };
-
-export const SyntaxTreeHighlighted: StoryObj<typeof JsonTreeViewer> = {
-  render: () => (
-    <div style={{ width: 440 }}>
-      <JsonTreeViewer json={highlightDocument} formatValue={markTerm('e')} />
-    </div>
-  ),
+export const JsonTreeViewerLongValues: Story = {
+  args: { json: longValueDocument },
 };

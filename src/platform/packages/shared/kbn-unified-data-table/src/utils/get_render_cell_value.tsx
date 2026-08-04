@@ -220,7 +220,7 @@ export const getRenderCellValueFn = ({
               json={documentTree}
               initialState={getTreeExpansion(row.raw)}
               onStateChange={(state) => setTreeExpansion(row.raw, state)}
-              searchTerm={inTableSearchTerm}
+              expandNodesContainingTerm={inTableSearchTerm}
               formatValue={formatTreeValue}
             />
           </span>
