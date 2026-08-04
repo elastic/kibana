@@ -16,11 +16,13 @@ import { installInvestigationAgent } from './install_investigation_agent';
 describe('installInvestigationAgent', () => {
   it('ensures a system-owned persisted typed agent in the requested space', async () => {
     const agentBuilder = agentBuilderMocks.createStart();
+    const availability = { cacheMode: 'space' as const, handler: jest.fn() };
 
-    await installInvestigationAgent({ agentBuilder, spaceId: 'space-1' });
+    await installInvestigationAgent({ agentBuilder, spaceId: 'space-1', availability });
 
     expect(agentBuilder.agents.ensure).toHaveBeenCalledWith({
       spaceId: 'space-1',
+      availability,
       agent: {
         id: SIGNIFICANT_EVENTS_INVESTIGATION_AGENT_ID,
         type: SIGNIFICANT_EVENTS_INVESTIGATION_AGENT_TYPE_ID,
