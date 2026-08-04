@@ -9,7 +9,7 @@ import { renderHook } from '@testing-library/react';
 import { TestProviders } from '../../common/mock';
 import { useSelectDataView } from './use_select_data_view';
 import { useDispatch } from 'react-redux-v7';
-import { PageScope } from '../constants';
+import { PageScope } from '@kbn/data-view-manager';
 
 jest.mock('react-redux-v7', () => {
   const dispatch = jest.fn();

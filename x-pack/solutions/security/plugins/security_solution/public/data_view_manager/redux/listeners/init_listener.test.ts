@@ -9,14 +9,14 @@ import type { AnyAction, Dispatch, ListenerEffectAPI } from 'redux-toolkit-v1';
 import { mockDataViewManagerState } from '../mock';
 import { createInitListener } from './init_listener';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
-import type { RootState } from '../reducer';
-import { sharedDataViewManagerSlice } from '../slices';
-import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, PageScope } from '../../constants';
+import type { RootState } from '@kbn/data-view-manager';
+import { sharedDataViewManagerSlice } from '@kbn/data-view-manager';
+import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, PageScope } from '@kbn/data-view-manager';
 import {
   DEFAULT_ALERT_DATA_VIEW_ID,
   DEFAULT_ATTACK_DATA_VIEW_ID,
 } from '../../../../common/constants';
-import { selectDataViewAsync } from '../actions';
+import { selectDataViewAsync } from '@kbn/data-view-manager';
 import type { CoreStart } from '@kbn/core/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { createDefaultDataView } from '../../utils/create_default_data_view';

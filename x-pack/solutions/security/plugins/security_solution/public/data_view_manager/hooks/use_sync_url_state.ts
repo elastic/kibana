@@ -6,11 +6,11 @@
  */
 
 import { useCallback } from 'react';
-import { PageScope } from '../constants';
-import { type DataViewManagerUrlState } from '../redux/types';
+import { PageScope } from '@kbn/data-view-manager';
+import { type DataViewManagerUrlState } from '@kbn/data-view-manager';
 import { useInitializeUrlParam } from '../../common/utils/global_query_string';
 import { URL_PARAM_KEY } from '../../common/hooks/constants';
-import { type SelectDataViewAsyncPayload } from '../redux/actions';
+import { type SelectDataViewAsyncPayload } from '@kbn/data-view-manager';
 
 /**
  * Restores data view selection automatically if (and only if) the sourcerer url param is set during app init. (only during the initial render)

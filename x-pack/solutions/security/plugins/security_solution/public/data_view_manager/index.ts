@@ -12,7 +12,11 @@
  * will expose once it is extracted into a package.
  */
 
-export * from './constants';
+export {
+  DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
+  SLICE_PREFIX,
+  PageScope,
+} from '@kbn/data-view-manager';
 
 export * from './hooks/use_data_view';
 export * from './hooks/use_browser_fields';
@@ -32,4 +36,4 @@ export * from './utils/paths';
 export * from './utils/build_browser_fields';
 
 // Imperative selector for non-React consumers (e.g. redux middleware).
-export { scopedDataViewSelector } from './redux/selectors';
+export { scopedDataViewSelector } from '@kbn/data-view-manager';

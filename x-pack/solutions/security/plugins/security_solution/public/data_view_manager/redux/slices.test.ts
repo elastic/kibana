@@ -11,9 +11,9 @@ import {
   initialScopeState,
   initialSharedState,
   sharedDataViewManagerSlice,
-} from './slices';
-import { selectDataViewAsync } from './actions';
-import { PageScope } from '../constants';
+} from '@kbn/data-view-manager';
+import { selectDataViewAsync } from '@kbn/data-view-manager';
+import { PageScope } from '@kbn/data-view-manager';
 
 describe('slices', () => {
   describe('dataViewSelectionSlice', () => {});

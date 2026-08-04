@@ -9,7 +9,7 @@ import type { DataViewFieldMap } from '@kbn/data-plugin/common';
 import { DataView } from '@kbn/data-plugin/common';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import type { FieldFormat, FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
-import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID } from '../constants';
+import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID } from '@kbn/data-view-manager';
 import { mockIndexFieldsByName } from '../../common/containers/source/mock';
 
 export const getMockDataView = (fieldFormats: FieldFormatsStartCommon = fieldFormatsMock) =>

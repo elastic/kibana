@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID } from '../constants';
-import { initialDataViewManagerState, type RootState } from './reducer';
+import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID } from '@kbn/data-view-manager';
+import { initialDataViewManagerState, type RootState } from '@kbn/data-view-manager';
 
 /** The timeline scope data view id used by the mock state; exported so tests can assert on it
  * without reaching into the state shape. */

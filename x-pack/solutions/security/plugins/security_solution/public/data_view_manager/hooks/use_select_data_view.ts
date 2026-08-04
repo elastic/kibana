@@ -7,8 +7,8 @@
 
 import { useDispatch } from 'react-redux-v7';
 import { useCallback } from 'react';
-import type { PageScope } from '../constants';
-import { selectDataViewAsync } from '../redux/actions';
+import type { PageScope } from '@kbn/data-view-manager';
+import { selectDataViewAsync } from '@kbn/data-view-manager';
 
 interface UseSelectDataViewParams {
   /**

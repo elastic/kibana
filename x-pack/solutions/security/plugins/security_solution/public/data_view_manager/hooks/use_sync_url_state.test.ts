@@ -9,7 +9,7 @@ import { renderHook } from '@testing-library/react';
 import { useRestoreDataViewManagerStateFromURL } from './use_sync_url_state';
 import * as globalQueryString from '../../common/utils/global_query_string';
 
-import { PageScope } from '../constants';
+import { PageScope } from '@kbn/data-view-manager';
 
 jest.mock('../../common/utils/global_query_string');
 

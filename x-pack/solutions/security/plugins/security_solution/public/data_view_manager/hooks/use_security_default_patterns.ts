@@ -7,7 +7,7 @@
 
 import { useMemo } from 'react';
 import { useSelector } from 'react-redux-v7';
-import { sharedStateSelector } from '../redux/selectors';
+import { sharedStateSelector } from '@kbn/data-view-manager';
 
 interface UseSecurityDefaultPatternsResult {
   /**

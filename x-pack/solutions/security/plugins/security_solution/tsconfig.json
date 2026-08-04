@@ -86,6 +86,7 @@
     "@kbn/inference-connectors",
     "@kbn/elastic-assistant-plugin",
     "@kbn/data-views-plugin",
+    "@kbn/data-view-manager",
     "@kbn/datemath",
     "@kbn/ui-theme",
     "@kbn/securitysolution-list-api",

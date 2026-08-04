@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { PayloadAction } from 'redux-toolkit-v1';
+import type { Action, CaseReducer, PayloadAction, Slice } from 'redux-toolkit-v1';
 import { createSlice } from 'redux-toolkit-v1';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { PageScope } from '../constants';
@@ -16,6 +16,29 @@ import type {
   SignalIndexMetadata,
 } from './types';
 import { selectDataViewAsync, type SelectDataViewAsyncPayload } from './actions';
+
+/**
+ * Explicit case-reducer shapes for the slices below. Annotating the exported
+ * slices with these (via the named `Slice` type) keeps immer's internal
+ * `WritableDraft` type out of the package's emitted declarations, which is
+ * required for a portable `.d.ts`.
+ */
+type SharedCaseReducers = {
+  setDataViews: CaseReducer<SharedDataViewSelectionState, PayloadAction<DataViewSpec[]>>;
+  setSignalIndex: CaseReducer<SharedDataViewSelectionState, PayloadAction<SignalIndexMetadata>>;
+  setDataViewId: CaseReducer<
+    SharedDataViewSelectionState,
+    PayloadAction<{ defaultDataViewId: string; alertDataViewId: string }>
+  >;
+  addDataView: CaseReducer<SharedDataViewSelectionState, PayloadAction<DataView>>;
+  init: CaseReducer<SharedDataViewSelectionState, PayloadAction<SelectDataViewAsyncPayload[]>>;
+  error: CaseReducer<SharedDataViewSelectionState, Action>;
+};
+
+type ScopedCaseReducers = {
+  setSelectedDataView: CaseReducer<ScopedDataViewSelectionState, PayloadAction<string>>;
+  dataViewSelectionError: CaseReducer<ScopedDataViewSelectionState, PayloadAction<string>>;
+};
 
 export const initialScopeState: ScopedDataViewSelectionState = {
   dataViewId: null,
@@ -31,7 +54,11 @@ export const initialSharedState: SharedDataViewSelectionState = {
   alertDataViewId: null,
 };
 
-export const sharedDataViewManagerSlice = createSlice({
+export const sharedDataViewManagerSlice: Slice<
+  SharedDataViewSelectionState,
+  SharedCaseReducers,
+  string
+> = createSlice({
   name: `${SLICE_PREFIX}/shared`,
   initialState: initialSharedState,
   reducers: {
@@ -81,7 +108,9 @@ export const sharedDataViewManagerSlice = createSlice({
   },
 });
 
-export const createDataViewSelectionSlice = <T extends PageScope>(scopeName: T) =>
+export const createDataViewSelectionSlice = <T extends PageScope>(
+  scopeName: T
+): Slice<ScopedDataViewSelectionState, ScopedCaseReducers, string> =>
   createSlice({
     name: `${SLICE_PREFIX}/${scopeName}`,
     initialState: initialScopeState,

@@ -8,7 +8,7 @@
 import { type DataViewListItem } from '@kbn/data-views-plugin/public';
 import { useMemo } from 'react';
 import { useSelector } from 'react-redux-v7';
-import { sharedStateSelector } from '../redux/selectors';
+import { sharedStateSelector } from '@kbn/data-view-manager';
 
 /**
  * Returns a list of saved data views

@@ -15,7 +15,7 @@ import { useSelectDataView } from '../../hooks/use_select_data_view';
 import { useUpdateUrlParam } from '../../../common/utils/global_query_string';
 import { URL_PARAM_KEY } from '../../../common/hooks/constants';
 import { useKibana as mockUseKibana } from '../../../common/lib/kibana/__mocks__';
-import { PageScope } from '../../constants';
+import { PageScope } from '@kbn/data-view-manager';
 
 jest.mock('../../../common/utils/global_query_string', () => ({
   useUpdateUrlParam: jest.fn(),

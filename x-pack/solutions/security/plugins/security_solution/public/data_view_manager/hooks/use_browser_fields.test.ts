@@ -8,7 +8,7 @@
 import { renderHook } from '@testing-library/react';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { useBrowserFields } from './use_browser_fields';
-import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID } from '../constants';
+import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID } from '@kbn/data-view-manager';
 
 const buildDataView = () =>
   new DataView({

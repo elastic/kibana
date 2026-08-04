@@ -9,7 +9,7 @@ import { renderHook } from '@testing-library/react';
 import { TestProviders } from '../../common/mock';
 import { useInitDataViewManager } from './use_init_data_view_manager';
 import { useDispatch } from 'react-redux-v7';
-import { sharedDataViewManagerSlice } from '../redux/slices';
+import { sharedDataViewManagerSlice } from '@kbn/data-view-manager';
 
 jest.mock('react-redux-v7', () => {
   const dispatch = jest.fn();

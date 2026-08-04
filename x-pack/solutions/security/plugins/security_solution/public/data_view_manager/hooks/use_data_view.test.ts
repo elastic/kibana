@@ -7,7 +7,7 @@
 
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { DataView } from '@kbn/data-views-plugin/public';
-import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, PageScope } from '../constants';
+import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, PageScope } from '@kbn/data-view-manager';
 import { useDataView } from './use_data_view';
 import { useSelector } from 'react-redux-v7';
 import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';

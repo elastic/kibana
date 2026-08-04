@@ -16,7 +16,7 @@ import type { DocLinks } from '@kbn/doc-links';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { dataTableActions, TableId } from '@kbn/securitysolution-data-table';
 import { isObject } from 'lodash';
-import { PageScope } from './data_view_manager/constants';
+import { PageScope } from '@kbn/data-view-manager';
 import {
   ALERTS_PATH,
   APP_UI_ID,

@@ -8,7 +8,7 @@
 import { renderHook } from '@testing-library/react';
 import { useSelector } from 'react-redux-v7';
 import { useSavedDataViews } from './use_saved_data_views';
-import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID } from '../constants';
+import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID } from '@kbn/data-view-manager';
 import { DEFAULT_ALERT_DATA_VIEW_ID } from '../../../common/constants';
 
 jest.mock('react-redux-v7', () => ({

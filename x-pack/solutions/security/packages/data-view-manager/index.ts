@@ -5,6 +5,21 @@
  * 2.0.
  */
 
-export function foo() {
-  return 'hello world';
-}
+/**
+ * Public entry point for the data view manager package.
+ *
+ * NOTE: the redux primitives (reducer, slices, actions, selectors) are exported
+ * transitionally while the module is being migrated out of the security_solution
+ * plugin. They will become package-internal once the hooks, components and
+ * listeners live here and consumers interact with the package solely through its
+ * provider, hooks and components.
+ */
+
+export * from './src/constants';
+export * from './src/redux/types';
+export * from './src/redux/actions';
+export * from './src/redux/slices';
+export * from './src/redux/reducer';
+export * from './src/redux/selectors';
+
+export { DataViewManagerProvider } from './src/provider';

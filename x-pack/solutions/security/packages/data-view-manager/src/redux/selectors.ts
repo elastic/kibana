@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createSelector } from 'redux-toolkit-v1';
+import { createSelector } from 'reselect-v4';
 
 import type { PageScope } from '../constants';
 import type { RootState } from './reducer';

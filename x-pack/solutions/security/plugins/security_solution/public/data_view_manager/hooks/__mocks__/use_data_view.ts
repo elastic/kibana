@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID } from '../../constants';
+import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID } from '@kbn/data-view-manager';
 import { getMockDataView, getMockDataViewWithMatchedIndices } from '../../mocks/mock_data_view';
 import type { UseDataViewReturnValue } from '../use_data_view';
 

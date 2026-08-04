@@ -10,9 +10,9 @@ import { DataView } from '@kbn/data-views-plugin/public';
 import { useSelector } from 'react-redux-v7';
 import { type FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import { useKibana } from '../../common/lib/kibana';
-import { PageScope } from '../constants';
-import { scopedDataViewSelector } from '../redux/selectors';
-import type { SharedDataViewSelectionState } from '../redux/types';
+import { PageScope } from '@kbn/data-view-manager';
+import { scopedDataViewSelector } from '@kbn/data-view-manager';
+import type { SharedDataViewSelectionState } from '@kbn/data-view-manager';
 
 const INITIAL_DV = new DataView({
   fieldFormats: {} as FieldFormatsStartCommon,

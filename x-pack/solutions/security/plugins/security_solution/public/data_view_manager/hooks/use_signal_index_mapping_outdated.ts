@@ -6,7 +6,7 @@
  */
 
 import { useSelector } from 'react-redux-v7';
-import { signalIndexOutdatedSelector } from '../redux/selectors';
+import { signalIndexOutdatedSelector } from '@kbn/data-view-manager';
 
 /**
  * Returns whether the signal index mapping is outdated.

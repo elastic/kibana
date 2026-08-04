@@ -12,13 +12,13 @@ import {
   addListener as originalAddListener,
   removeListener as originalRemoveListener,
 } from 'redux-toolkit-v1';
-import type { RootState } from '../redux/reducer';
+import type { RootState } from '@kbn/data-view-manager';
 import { useKibana } from '../../common/lib/kibana';
 import { createDataViewSelectedListener } from '../redux/listeners/data_view_selected';
 import { createInitListener } from '../redux/listeners/init_listener';
-import { sharedDataViewManagerSlice } from '../redux/slices';
-import { type SelectDataViewAsyncPayload } from '../redux/actions';
-import { PageScope } from '../constants';
+import { sharedDataViewManagerSlice } from '@kbn/data-view-manager';
+import { type SelectDataViewAsyncPayload } from '@kbn/data-view-manager';
+import { PageScope } from '@kbn/data-view-manager';
 import { useUserInfo } from '../../detections/components/user_info';
 
 type OriginalListener = Parameters<typeof originalAddListener>[0];

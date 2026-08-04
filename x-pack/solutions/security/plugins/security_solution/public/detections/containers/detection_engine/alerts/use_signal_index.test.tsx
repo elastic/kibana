@@ -10,16 +10,17 @@ import { useSignalIndex } from './use_signal_index';
 import * as api from './api';
 import { useAppToastsMock } from '../../../../common/hooks/use_app_toasts.mock';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
-import {
-  signalIndexNameSelector,
-  signalIndexOutdatedSelector,
-} from '../../../../data_view_manager/redux/selectors';
+import { signalIndexNameSelector, signalIndexOutdatedSelector } from '@kbn/data-view-manager';
 
 jest.mock('./api');
 jest.mock('../../../../common/hooks/use_app_toasts');
 jest.mock('../../../../common/components/user_privileges/endpoint/use_endpoint_privileges');
 jest.mock('../../../../timelines/components/timeline/tabs/esql');
-jest.mock('../../../../data_view_manager/redux/selectors');
+jest.mock('@kbn/data-view-manager', () => ({
+  ...jest.requireActual('@kbn/data-view-manager'),
+  signalIndexNameSelector: jest.fn(),
+  signalIndexOutdatedSelector: jest.fn(),
+}));
 
 describe('useSignalIndex', () => {
   let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;

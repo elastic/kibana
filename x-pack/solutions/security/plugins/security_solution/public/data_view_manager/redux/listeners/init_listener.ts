@@ -10,14 +10,14 @@ import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
-import type { RootState } from '../reducer';
-import { sharedDataViewManagerSlice } from '../slices';
-import { PageScope } from '../../constants';
-import { selectDataViewAsync } from '../actions';
+import type { RootState } from '@kbn/data-view-manager';
+import { sharedDataViewManagerSlice } from '@kbn/data-view-manager';
+import { PageScope } from '@kbn/data-view-manager';
+import { selectDataViewAsync } from '@kbn/data-view-manager';
 import { createDefaultDataView } from '../../utils/create_default_data_view';
 import { createExploreDataView } from '../../utils/create_explore_data_view';
 import { getSelectedDataViewStorageKey } from './storage_keys';
-import type { DataViewSpec } from '../types';
+import type { DataViewSpec } from '@kbn/data-view-manager';
 
 /**
  * Creates a Redux listener for initializing the Data View Manager state.

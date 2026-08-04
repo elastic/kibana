@@ -6,7 +6,7 @@
  */
 
 import { useSelector } from 'react-redux-v7';
-import { sharedStatusSelector } from '../redux/selectors';
+import { sharedStatusSelector } from '@kbn/data-view-manager';
 
 /**
  * Returns the shared initialization status of the data view manager

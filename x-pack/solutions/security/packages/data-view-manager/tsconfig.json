@@ -2,13 +2,21 @@
   "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
+    "types": [
+      "@kbn/ambient-ui-types",
+      "jest",
+      "node",
+      "react"
+    ]
   },
   "include": [
     "**/*.ts",
-    "**/*.tsx",
+    "**/*.tsx"
   ],
   "exclude": [
     "target/**/*"
   ],
-  "kbn_references": []
+  "kbn_references": [
+    "@kbn/data-views-plugin"
+  ]
 }

@@ -36,7 +36,7 @@ import { notesReducer } from '../../notes/store/notes.slice';
 import {
   dataViewManagerReducer,
   initialDataViewManagerState,
-} from '../../data_view_manager/redux/reducer';
+} from '@kbn/data-view-manager';
 
 enableMapSet();
 
