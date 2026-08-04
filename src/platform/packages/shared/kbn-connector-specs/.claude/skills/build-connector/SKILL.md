@@ -326,6 +326,14 @@ least one of them to a non-default value, not just the required-fields-only happ
 body mismatch on an optional param doesn't error — the vendor silently ignores it — so a test that never
 sets the param will pass even though the feature is broken.
 
+**At least one live call must use a hostile input**, not just plain alphanumerics: a wildcard
+(`logs-*`), spaces, quotes, `! ' ( )`, `=` inside a value, or unicode — whichever an action can safely
+take (a search string or name filter is usually the easiest slot). Encoding and signing bugs (URL
+building, query serialization, SigV4/HMAC canonicalization) pass every alphanumeric test and then fail
+live as generic vendor errors; a `logs-*` index pattern is exactly what exposed a SigV4 signature bug
+that had survived a full happy-path validation pass. Record which action covered this — the PR
+validation table requires it (see `create-connector/reference/pr-validation-table.md`).
+
 Verify the agent successfully calls tools, gets results, and produces a useful response.
 
 Mark task 11 as `completed`.

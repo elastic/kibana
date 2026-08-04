@@ -297,6 +297,13 @@ Report documentation issues alongside code issues.
   `action_input_bounds_baseline.ts` (that list grandfathers pre-existing specs and must only shrink), and
   still review whether the chosen limits are *sensible* for what the vendor accepts, which the test can't
   judge.
+- **Hand-rolled request signing / canonicalization**: If the diff implements or modifies request
+  signing (SigV4, HMAC, shared-key), check it against the vendor's canonicalization spec — not against
+  what generic JS helpers do. `encodeURIComponent` is *not* RFC-3986 (it leaves `! ' ( ) *`
+  unescaped, which breaks AWS SigV4 for inputs like `logs-*`), `new URL()` normalizes paths, and
+  `JSON.stringify` key order is not canonical JSON. Flag any encoding/ordering step in a signing path
+  with no regression test covering reserved characters (`* ! ' ( )`, spaces, `=` in values, unicode) —
+  these bugs pass every alphanumeric test and live-fail as generic vendor "access denied" errors.
 - **Escape-hatch / raw-request actions**: Any generic action that lets the caller choose the path, method,
   or headers of the upstream request (`request`, `callApi`, `rawQuery`, MCP `callTool`, ...) needs its
   guardrails reviewed character-by-character: the method allowlist should be an enum (not a free string);
