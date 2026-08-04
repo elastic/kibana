@@ -16,6 +16,5 @@
   },
   "kbn_references": [
     "@kbn/scout",
-    "@kbn/cross-cluster-replication-plugin",
   ]
 }
