@@ -7,10 +7,12 @@
 
 import { hasTimelineStateChanged } from './use_init_timeline_url_param';
 import { timelineDefaults } from '../../../timelines/store/defaults';
+import { TimelineTabs } from '../../../../common/types/timeline';
 import type { TimelineModel } from '../../../timelines/store/model';
 
 const activeTimeline: TimelineModel = {
   ...timelineDefaults,
+  id: 'timeline-1',
   savedObjectId: 'abc-123',
   savedSearchId: null,
   superTimelineSourceIds: [],
@@ -24,7 +26,7 @@ describe('hasTimelineStateChanged', () => {
 
   it('returns falsy when activeTimeline is null — caller treats this as "no existing state, initialize"', () => {
     expect(
-      hasTimelineStateChanged(null, { id: 'abc-123', isOpen: true, activeTab: 'query' })
+      hasTimelineStateChanged(null, { id: 'abc-123', isOpen: true, activeTab: TimelineTabs.query })
     ).toBeFalsy();
   });
 
@@ -37,8 +39,7 @@ describe('hasTimelineStateChanged', () => {
       hasTimelineStateChanged(activeTimeline, {
         id: 'abc-123',
         isOpen: true,
-        activeTab: 'query',
-        savedSearchId: null,
+        activeTab: TimelineTabs.query,
         superTimelineSourceIds: [],
       })
     ).toBe(false);
@@ -49,7 +50,7 @@ describe('hasTimelineStateChanged', () => {
       hasTimelineStateChanged(activeTimeline, {
         id: 'different-id',
         isOpen: true,
-        activeTab: 'query',
+        activeTab: TimelineTabs.query,
       })
     ).toBe(true);
   });
@@ -58,7 +59,7 @@ describe('hasTimelineStateChanged', () => {
     expect(
       hasTimelineStateChanged(
         { ...activeTimeline, savedSearchId: null },
-        { id: 'abc-123', isOpen: true, activeTab: 'query', savedSearchId: 'search-1' }
+        { id: 'abc-123', isOpen: true, activeTab: TimelineTabs.query, savedSearchId: 'search-1' }
       )
     ).toBe(true);
   });
@@ -67,7 +68,12 @@ describe('hasTimelineStateChanged', () => {
     expect(
       hasTimelineStateChanged(
         { ...activeTimeline, superTimelineSourceIds: ['id-1', 'id-2'] },
-        { id: 'abc-123', isOpen: true, activeTab: 'query', superTimelineSourceIds: ['id-1'] }
+        {
+          id: 'abc-123',
+          isOpen: true,
+          activeTab: TimelineTabs.query,
+          superTimelineSourceIds: ['id-1'],
+        }
       )
     ).toBe(true);
   });
@@ -79,8 +85,7 @@ describe('hasTimelineStateChanged', () => {
         {
           id: 'abc-123',
           isOpen: true,
-          activeTab: 'query',
-          savedSearchId: null,
+          activeTab: TimelineTabs.query,
           superTimelineSourceIds: ['id-1', 'id-2'],
         }
       )

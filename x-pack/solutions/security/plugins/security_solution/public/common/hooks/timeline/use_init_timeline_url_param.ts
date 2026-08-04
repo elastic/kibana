@@ -80,7 +80,7 @@ export function hasTimelineStateChanged(
     activeTimeline &&
     newState &&
     (activeTimeline.savedObjectId !== newState.id ||
-      activeTimeline.savedSearchId !== newState.savedSearchId ||
+      (activeTimeline.savedSearchId ?? null) !== (newState.savedSearchId ?? null) ||
       JSON.stringify([...(activeTimeline.superTimelineSourceIds ?? [])].sort()) !==
         JSON.stringify([...(newState.superTimelineSourceIds ?? [])].sort()))
   );
