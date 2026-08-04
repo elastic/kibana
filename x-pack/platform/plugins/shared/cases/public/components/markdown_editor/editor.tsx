@@ -75,9 +75,8 @@ const MarkdownEditorComponent = forwardRef<MarkdownEditorRef, MarkdownEditorProp
 
     return (
       <EuiMarkdownEditor
-        // prevent images from displaying at full scale, and keep the editor's preview pane on the
-        // same heading scale and measure as the rendered view — otherwise toggling preview snapped
-        // the content back to raw markdown sizing.
+        // prevent images from displaying at full scale, and hold the preview pane to the same line
+        // measure as the rendered view so toggling preview doesn't reflow the content
         css={[scaledMarkdownImages, proseCss]}
         ref={editorRef}
         aria-label={ariaLabel}

@@ -26,6 +26,8 @@ interface GlobalFieldDefinitionsListProps {
   onReorder: (fieldDefinitions: FieldDefinition[]) => void;
   onEdit: (fieldDefinition: FieldDefinition) => void;
   onDelete: (fieldDefinition: FieldDefinition) => void;
+  /** True once a reorder write has failed, so the optimistic order can roll back to the server's. */
+  hasReorderFailed: boolean;
 }
 
 export const GlobalFieldDefinitionsList: React.FC<GlobalFieldDefinitionsListProps> = ({
@@ -34,6 +36,7 @@ export const GlobalFieldDefinitionsList: React.FC<GlobalFieldDefinitionsListProp
   onReorder,
   onEdit,
   onDelete,
+  hasReorderFailed,
 }) => {
   const [announcement, setAnnouncement] = useState('');
 
@@ -44,7 +47,10 @@ export const GlobalFieldDefinitionsList: React.FC<GlobalFieldDefinitionsListProp
   const serverOrderKey = fieldDefinitions.map(({ fieldDefinitionId }) => fieldDefinitionId).join();
   const pendingOrderKey = pendingOrder?.map(({ fieldDefinitionId }) => fieldDefinitionId).join();
 
-  if (pendingOrder && pendingOrderKey === serverOrderKey) {
+  // Drop the optimistic order once the server agrees with it, and also when the write failed —
+  // otherwise a failed reorder leaves the list showing an order that was never persisted, and the
+  // error toast is the only hint that what is on screen is a lie.
+  if (pendingOrder && (pendingOrderKey === serverOrderKey || hasReorderFailed)) {
     setPendingOrder(undefined);
   }
 

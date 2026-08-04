@@ -125,12 +125,14 @@ export const UserActionsList = React.memo(
     // collapse another one of the same type.
     const collapsibleCommentIds = useMemo(
       () =>
-        comments.flatMap((comment, index) =>
-          comment.children != null &&
-          comment.className !== 'isEdit' &&
-          comment.className !== 'showMoreActivities'
-            ? [`activity-${index}`]
-            : []
+        new Set(
+          comments.flatMap((comment, index) =>
+            comment.children != null &&
+            comment.className !== 'isEdit' &&
+            comment.className !== 'showMoreActivities'
+              ? [`activity-${index}`]
+              : []
+          )
         ),
       [comments]
     );
@@ -139,7 +141,7 @@ export const UserActionsList = React.memo(
       () =>
         comments.map((comment, index) => {
           const commentId = `activity-${index}`;
-          if (!collapsibleCommentIds.includes(commentId)) {
+          if (!collapsibleCommentIds.has(commentId)) {
             return comment;
           }
 
@@ -177,10 +179,11 @@ export const UserActionsList = React.memo(
       [comments, collapsedCommentIds, collapsibleCommentIds, toggleComment]
     );
 
-    const hasCollapsibleComments = collapsibleCommentIds.length > 1;
+    const hasCollapsibleComments = collapsibleCommentIds.size > 1;
     const allCollapsed =
-      hasCollapsibleComments && collapsibleCommentIds.every((id) => collapsedCommentIds.has(id));
-    const allExpanded = collapsibleCommentIds.every((id) => !collapsedCommentIds.has(id));
+      hasCollapsibleComments &&
+      [...collapsibleCommentIds].every((id) => collapsedCommentIds.has(id));
+    const allExpanded = [...collapsibleCommentIds].every((id) => !collapsedCommentIds.has(id));
 
     const collapseAll = React.useCallback(
       () => setCollapsedCommentIds(new Set(collapsibleCommentIds)),

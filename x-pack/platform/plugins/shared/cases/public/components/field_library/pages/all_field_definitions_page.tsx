@@ -81,8 +81,11 @@ export const AllFieldDefinitionsPage: React.FC<AllFieldDefinitionsPageProps> = (
   const { mutate: deleteFieldDef } = useDeleteFieldDefinition({
     onSuccess: () => setDeletingFieldDef(undefined),
   });
-  const { mutate: reorderGlobalFieldDefinitions, isLoading: isReorderingGlobalFieldDefinitions } =
-    useReorderGlobalFieldDefinitions();
+  const {
+    mutate: reorderGlobalFieldDefinitions,
+    isLoading: isReorderingGlobalFieldDefinitions,
+    isError: hasReorderFailed,
+  } = useReorderGlobalFieldDefinitions();
 
   const fieldDefinitions = useMemo(() => data?.fieldDefinitions ?? [], [data?.fieldDefinitions]);
   const globalFieldDefinitions = useMemo(
@@ -316,6 +319,7 @@ export const AllFieldDefinitionsPage: React.FC<AllFieldDefinitionsPageProps> = (
                   onReorder={handleReorderGlobalFields}
                   onEdit={handleEdit}
                   onDelete={handleDelete}
+                  hasReorderFailed={hasReorderFailed}
                 />
               )}
             </section>

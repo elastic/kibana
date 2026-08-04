@@ -31,10 +31,12 @@ jest.mock('../hooks/use_delete_field_definition', () => ({
   useDeleteFieldDefinition: () => ({ mutate: jest.fn() }),
 }));
 
+const mockReorderState = { isLoading: false, isError: false };
+
 jest.mock('../hooks/use_reorder_global_field_definitions', () => ({
   useReorderGlobalFieldDefinitions: () => ({
     mutate: mockReorderGlobalFieldDefinitions,
-    isLoading: false,
+    ...mockReorderState,
   }),
 }));
 
@@ -56,6 +58,8 @@ const buildFieldDefinition = (overrides: Partial<FieldDefinition>): FieldDefinit
 describe('AllFieldDefinitionsPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockReorderState.isLoading = false;
+    mockReorderState.isError = false;
     mockGetFieldDefinitions.mockReturnValue({ data: { fieldDefinitions: [] }, isLoading: false });
   });
 
@@ -89,6 +93,52 @@ describe('AllFieldDefinitionsPage', () => {
     expect(mockReorderGlobalFieldDefinitions).toHaveBeenCalledWith([
       expect.objectContaining({ fieldDefinitionId: 'second', displayOrder: 0 }),
       expect.objectContaining({ fieldDefinitionId: 'first', displayOrder: 1 }),
+    ]);
+  });
+
+  it('rolls the optimistic order back to the server order when the reorder write fails', async () => {
+    const firstField = buildFieldDefinition({
+      fieldDefinitionId: 'first',
+      name: 'first_field',
+      isGlobal: true,
+      displayOrder: 0,
+    });
+    const secondField = buildFieldDefinition({
+      fieldDefinitionId: 'second',
+      name: 'second_field',
+      isGlobal: true,
+      displayOrder: 1,
+    });
+    mockGetFieldDefinitions.mockReturnValue({
+      data: { fieldDefinitions: [firstField, secondField] },
+      isLoading: false,
+    });
+
+    const { rerender } = renderWithTestingProviders(<AllFieldDefinitionsPage />);
+
+    await userEvent.click(screen.getByTestId('fieldDefinitionActionsButton-first_field'));
+    await userEvent.click(screen.getByTestId('fieldDefinitionMoveDownButton'));
+
+    // Optimistic: the moved field is shown last before the write resolves.
+    const optimisticOrder = screen
+      .getAllByTestId(/^fieldDefinitionRow-/)
+      .map((row) => row.getAttribute('data-test-subj'));
+    expect(optimisticOrder).toEqual([
+      'fieldDefinitionRow-second_field',
+      'fieldDefinitionRow-first_field',
+    ]);
+
+    // The write fails and the server order never changes, so the list must go back to the truth
+    // rather than keep showing an order that was never persisted.
+    mockReorderState.isError = true;
+    rerender(<AllFieldDefinitionsPage />);
+
+    const rolledBackOrder = screen
+      .getAllByTestId(/^fieldDefinitionRow-/)
+      .map((row) => row.getAttribute('data-test-subj'));
+    expect(rolledBackOrder).toEqual([
+      'fieldDefinitionRow-first_field',
+      'fieldDefinitionRow-second_field',
     ]);
   });
 

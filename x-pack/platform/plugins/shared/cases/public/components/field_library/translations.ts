@@ -27,11 +27,6 @@ export const SUCCESS_UPDATING_FIELD_DEFINITION = i18n.translate(
   { defaultMessage: 'Field definition updated successfully' }
 );
 
-export const SUCCESS_REORDERING_GLOBAL_FIELD_DEFINITIONS = i18n.translate(
-  'xpack.cases.fieldLibrary.successReorderingGlobalFieldDefinitions',
-  { defaultMessage: 'Global field order updated successfully' }
-);
-
 export const ERROR_UPDATING_FIELD_DEFINITION = i18n.translate(
   'xpack.cases.fieldLibrary.errorUpdatingFieldDefinition',
   { defaultMessage: 'Failed to update field definition' }
@@ -120,22 +115,6 @@ export const FIELD_ALREADY_EXISTS_ERROR = (fieldName: string) =>
     values: { fieldName },
   });
 
-export const NAME_COLUMN = i18n.translate('xpack.cases.fieldLibrary.nameColumn', {
-  defaultMessage: 'Name',
-});
-
-export const LABEL_COLUMN = i18n.translate('xpack.cases.fieldLibrary.labelColumn', {
-  defaultMessage: 'Label',
-});
-
-export const DESCRIPTION_COLUMN = i18n.translate('xpack.cases.fieldLibrary.descriptionColumn', {
-  defaultMessage: 'Description',
-});
-
-export const REQUIRED_COLUMN = i18n.translate('xpack.cases.fieldLibrary.requiredColumn', {
-  defaultMessage: 'Required',
-});
-
 export const REQUIRED_BADGE = i18n.translate('xpack.cases.fieldLibrary.requiredBadge', {
   defaultMessage: 'Required',
 });
@@ -147,10 +126,6 @@ export const REQUIRED_ON_CLOSE_BADGE = i18n.translate(
 
 export const OWNER_COLUMN = i18n.translate('xpack.cases.fieldLibrary.ownerColumn', {
   defaultMessage: 'Owner',
-});
-
-export const ACTIONS_COLUMN = i18n.translate('xpack.cases.fieldLibrary.actionsColumn', {
-  defaultMessage: 'Actions',
 });
 
 export const FIELD_DEFINITION_FORM_TITLE_CREATE = i18n.translate(
@@ -240,18 +215,6 @@ export const APPLY_TO_ALL_CASES_HELP_TEXT = i18n.translate(
       'When enabled, this field appears in every case regardless of which template is applied.',
   }
 );
-
-export const APPLY_TO_ALL_CASES_COLUMN = i18n.translate('xpack.cases.fieldLibrary.isGlobalColumn', {
-  defaultMessage: 'Global field',
-});
-
-export const GLOBAL_FIELD_YES = i18n.translate('xpack.cases.fieldLibrary.globalFieldYes', {
-  defaultMessage: 'Yes',
-});
-
-export const GLOBAL_FIELD_NO = i18n.translate('xpack.cases.fieldLibrary.globalFieldNo', {
-  defaultMessage: 'No',
-});
 
 export const GLOBAL_FIELDS_SECTION_TITLE = i18n.translate(
   'xpack.cases.fieldLibrary.globalFieldsSectionTitle',
