@@ -30,9 +30,17 @@ spaceTest.describe('Discover request counts - ES|QL mode', { tag: tags.deploymen
 
   spaceTest.beforeEach(async ({ browserAuth, pageObjects, page }) => {
     await browserAuth.loginAsPrivilegedUser();
+    // goto sets ES|QL mode via localStorage (addInitScript) before page load, so the
+    // page opens in ES|QL mode without clicking the language-switch button.
+    // Calling selectTextBaseLang() here is intentionally avoided: on CI its
+    // getCurrentQueryMode() race can misdetect 'classic' and click the button, which
+    // dispatches a Redux transition that schedules a deferred re-fetch. That request
+    // fires asynchronously after beforeEach returns, landing inside the test's
+    // countMatchingRequests window and inflating the count from 2 to 3.
     await pageObjects.discover.goto({ queryMode: 'esql' });
-    await pageObjects.discover.selectTextBaseLang();
-    // Activate the histogram so setCodeEditorValue auto-submits trigger both docs + chart requests.
+    await pageObjects.discover.codeEditor.waitCodeEditorReady('ESQLEditor');
+    // Activate the histogram: the first explicit submit loads the chart (Lens) so
+    // subsequent submits in the test window fire both docs + chart requests.
     let initialCount = 0;
     const drainInitial = page.waitForResponse(
       (r) => r.url().includes(ESQL_ENDPOINT) && ++initialCount >= 2,
