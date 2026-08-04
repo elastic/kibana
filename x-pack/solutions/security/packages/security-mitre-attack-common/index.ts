@@ -31,6 +31,8 @@ export {
   buildMitreAttackFieldMap,
   MITRE_SEMANTIC_FIELD,
   type MitreAttackFieldMap,
+  type MitreAttackFieldDefinition,
+  type MitreAttackIndexFieldMap,
 } from './src/field_map';
 
 export { buildSemanticText } from './src/semantic_text';

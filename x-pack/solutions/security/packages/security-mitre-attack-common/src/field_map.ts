@@ -42,6 +42,21 @@ export type MitreAttackFieldMap = typeof mitreAttackFieldMap;
  */
 export const MITRE_SEMANTIC_FIELD = 'semantic';
 
+/**
+ * Structural description of a single mapped field. Mirrors the subset of
+ * `FieldMap` from `@kbn/index-adapter` that this package uses, redeclared here
+ * so the package stays dependency-free.
+ */
+export interface MitreAttackFieldDefinition {
+  type: string;
+  required: boolean;
+  array?: boolean;
+  multi_fields?: ReadonlyArray<{ name: string; type: string; flat_name: string }>;
+  inference_id?: string;
+}
+
+export type MitreAttackIndexFieldMap = Record<string, MitreAttackFieldDefinition>;
+
 interface BuildMitreAttackFieldMapParams {
   /**
    * Inference endpoint backing the `semantic_text` field. When omitted the
@@ -53,7 +68,7 @@ interface BuildMitreAttackFieldMapParams {
 
 export const buildMitreAttackFieldMap = ({
   semanticInferenceId,
-}: BuildMitreAttackFieldMapParams = {}) => {
+}: BuildMitreAttackFieldMapParams = {}): MitreAttackIndexFieldMap => {
   if (!semanticInferenceId) {
     return { ...mitreAttackFieldMap };
   }

@@ -103,7 +103,10 @@ export class MitreAttackDataService {
     params: InstallParams,
     semantic: MitreAttackDataServiceSetupParams['semantic']
   ): Promise<void> {
-    this.semanticInferenceId = await this.resolveSemanticInferenceId(params.esClient, semantic);
+    this.semanticInferenceId = await this.resolveSemanticInferenceId(
+      await params.esClient,
+      semantic
+    );
 
     this.adapter.setComponentTemplate({
       name: COMPONENT_TEMPLATE_NAME,
