@@ -57661,7 +57661,6 @@
     "xpack.synthetics.settings.getParams.failed": "Die globalen Parameter konnten nicht abgerufen werden.",
     "xpack.synthetics.settings.index": "Synthetische Einstellungen",
     "xpack.synthetics.settings.invalid.nanError": "Der Wert muss eine ganze Zahl sein.",
-    "xpack.synthetics.settings.mws.failed": "Die Wartungsfenster konnten nicht abgerufen werden.",
     "xpack.synthetics.settings.noSpace.error": "Indexnamen dürfen keine Leerzeichen enthalten",
     "xpack.synthetics.settings.saveSuccess": "Einstellungen wurden gespeichert!",
     "xpack.synthetics.settings.statusRule.inspect": "Der Regeltyp „Monitor-Status“ konnte nicht überprüft werden.",

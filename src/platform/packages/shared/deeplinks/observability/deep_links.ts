@@ -101,16 +101,7 @@ export type UptimeLinkId = 'Certificates';
 
 export type ProfilingLinkId = 'stacktraces' | 'flamegraphs' | 'functions';
 
-export const significantEventsDeepLinkIds = [
-  'significantEventsDiscovery',
-  'significantEventsKnowledgeIndicators',
-  'significantEventsEvents',
-  'significantEventsRules',
-] as const;
-
-export type SigEventsLinkId = (typeof significantEventsDeepLinkIds)[number];
-
-export type StreamsLinkId = 'overview' | SigEventsLinkId;
+export type StreamsLinkId = 'overview';
 
 export type SignificantEventsLinkId = 'knowledge_indicators' | 'events' | 'rules';
 
