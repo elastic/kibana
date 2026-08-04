@@ -3,7 +3,10 @@
 - [Amazon S3](/reference/connectors-kibana/amazon-s3-action-type.md): List and download content from AWS S3 buckets.
 - [Ansible Control Server](/reference/connectors-kibana/ansible-controller-action-type.md): Launch and monitor Ansible Automation Controller / AWX jobs.
 - [Argo CD](/reference/connectors-kibana/argocd-action-type.md): Manage GitOps applications in Argo CD — sync, inspect health and resources.
+- [AWS CloudWatch](/reference/connectors-kibana/aws-cloudwatch-action-type.md): List and suppress alarms, query metrics and Logs Insights, and retrieve log events from AWS CloudWatch.
+- [AWS X-Ray](/reference/connectors-kibana/aws-x-ray-action-type.md): Retrieve X-Ray insights, service graphs, and trace summaries and details for distributed tracing.
 - [Azure Blob Storage](/reference/connectors-kibana/azure-blob-action-type.md): List containers and blobs, and retrieve blob content from Azure Blob Storage.
+- [Azure Monitor](/reference/connectors-kibana/azure-monitor-action-type.md): List and triage alerts, query metrics and logs, and control alert rules in Azure Monitor.
 - [BigQuery](/reference/connectors-kibana/bigquery-action-type.md): Run GoogleSQL queries and retrieve results from Google BigQuery.
 - [Box](/reference/connectors-kibana/box-action-type.md): Search files and folders, read content, and query enterprise content using Box AI.
 - [Brave Search](/reference/connectors-kibana/brave-search-action-type.md): Search the web using the Brave Search API.

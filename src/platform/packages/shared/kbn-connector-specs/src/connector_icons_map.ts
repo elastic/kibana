@@ -212,7 +212,6 @@ export const ConnectorIconsMap: Map<
         )
     ),
   ],
-
   [
     '.snowflake',
     lazy(() => import(/* webpackChunkName: "connectorIconsnowflake" */ './specs/snowflake/icon')),
@@ -294,12 +293,27 @@ export const ConnectorIconsMap: Map<
     '.datadog',
     lazy(() => import(/* webpackChunkName: "connectorIconDatadog" */ './specs/datadog/icon')),
   ],
-
   [
     '.jenkins',
     lazy(() => import(/* webpackChunkName: "connectorIconjenkins" */ './specs/jenkins/icon')),
   ],
-
+  [
+    '.azure_monitor',
+    lazy(
+      () => import(/* webpackChunkName: "connectorIconazuremonitor" */ './specs/azure_monitor/icon')
+    ),
+  ],
+  [
+    '.aws_cloudwatch',
+    lazy(
+      () =>
+        import(/* webpackChunkName: "connectorIconawscloudwatch" */ './specs/aws_cloudwatch/icon')
+    ),
+  ],
+  [
+    '.aws_x_ray',
+    lazy(() => import(/* webpackChunkName: "connectorIconawsxray" */ './specs/aws_x_ray/icon')),
+  ],
   [
     '.prometheus_alertmanager',
     lazy(
