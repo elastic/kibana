@@ -96,20 +96,20 @@ const createServices = () => ({
 });
 
 const renderWithProviders = (services: ReturnType<typeof createServices>) => {
-  services.share.url.locators.get = jest.fn((locatorId: string) => {
+  const discoverLocator = sharePluginMock.createLocator();
+  discoverLocator.getRedirectUrl.mockReturnValue('/app/discover');
+
+  const indexManagementLocator = sharePluginMock.createLocator();
+  indexManagementLocator.getUrl.mockResolvedValue(
+    '/app/management/data/index_management/indices/index_details?indexName=ai-index-ds-my-ai-index'
+  );
+
+  jest.spyOn(services.share.url.locators, 'get').mockImplementation((locatorId: string) => {
     if (locatorId === DISCOVER_APP_LOCATOR) {
-      return {
-        getRedirectUrl: jest.fn(() => '/app/discover'),
-      };
+      return discoverLocator;
     }
     if (locatorId === INDEX_MANAGEMENT_LOCATOR_ID) {
-      return {
-        getUrl: jest
-          .fn()
-          .mockResolvedValue(
-            '/app/management/data/index_management/indices/index_details?indexName=ai-index-ds-my-ai-index'
-          ),
-      };
+      return indexManagementLocator;
     }
     return undefined;
   });
