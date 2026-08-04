@@ -24,6 +24,17 @@ import { FIELD_FORMAT_IDS } from '../types';
 const templateMatchRE = /{{([\s\S]+?)}}/g;
 const allowedUrlSchemes = ['http://', 'https://', 'mailto:'];
 
+/**
+ * encodeURIComponent leaves the RFC 3986 sub-delims !'()* unencoded; percent-encode
+ * them too so templated values stay intact in any URL context — e.g. an apostrophe
+ * inside the rison state of a Kibana app URL would otherwise break the target URL
+ */
+const encodeUriComponentStrict = (value: string): string =>
+  encodeURIComponent(value).replace(
+    /[!'()*]/g,
+    (char) => `%${char.charCodeAt(0).toString(16).toUpperCase()}`
+  );
+
 const URL_TYPES = [
   {
     kind: 'a',
@@ -98,7 +109,7 @@ export class UrlFormat extends FieldFormat {
     if (!template) return strValue;
 
     return this.compileTemplate(template)({
-      value: encodeURIComponent(strValue),
+      value: encodeUriComponentStrict(strValue),
       rawValue: value,
     });
   }
