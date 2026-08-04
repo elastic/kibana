@@ -723,6 +723,7 @@ export const ExceptionListType = lazySchema(() =>
     'endpoint_events',
     'endpoint_host_isolation_exceptions',
     'endpoint_blocklists',
+    'endpoint_custom_yara_signatures',
   ])
 );
 export type ExceptionListType = z.infer<typeof ExceptionListType>;

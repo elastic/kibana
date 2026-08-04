@@ -481,6 +481,7 @@ module.exports = {
     '@elastic/eui/icon-accessibility-rules': 'error',
     '@elastic/eui/tooltip-button-icon-wrap': 'error',
     '@elastic/eui/tooltip-focusable-anchor': 'error',
+    '@elastic/eui/no-unnamed-radio-group': 'error',
   },
 
   overrides: [
