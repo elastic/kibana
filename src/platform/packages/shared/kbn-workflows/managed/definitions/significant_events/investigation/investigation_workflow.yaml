@@ -249,11 +249,11 @@ steps:
                       const: status
                     from:
                       type: string
-                      enum: ['pending', 'open', 'closed', 'dismissed']
+                      enum: ['open', 'closed', 'dismissed']
                       description: The status from inputs.context.status — the value before this investigation ran.
                     to:
                       type: string
-                      enum: ['pending', 'open', 'closed', 'dismissed']
+                      enum: ['open', 'closed', 'dismissed']
                       description: The proposed new status.
                     reason:
                       type: string
