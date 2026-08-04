@@ -43,10 +43,43 @@ export function lazyImmutableGCableObject<T extends object>(factory: () => T): T
     return fresh;
   };
 
-  return new Proxy({} as T, {
+  // self is assigned below; captured in the get trap closure so the alias
+  // step can identify which proxy key to look up in ctx.seen.
+  let self: T;
+
+  self = new Proxy({} as T, {
     get(_target, prop) {
       const real = materialize() as unknown as Record<PropertyKey, unknown>;
       const value = real[prop];
+
+      // zod's toJSONSchema registers the schema passed to process() in ctx.seen,
+      // but _zod.processJSONSchema is a closure over `inst` (the real schema) and
+      // passes it to the inner processor, which then does ctx.seen.get(inst).
+      // Because proxy !== inst, the lookup returns undefined and crashes.
+      // Fix: before calling the original processJSONSchema, alias the proxy's
+      // ctx.seen entry under the real object's identity so both lookups hit it.
+      if (
+        prop === '_zod' &&
+        value != null &&
+        typeof (value as Record<PropertyKey, unknown>).processJSONSchema === 'function'
+      ) {
+        const originalPJS = (value as Record<PropertyKey, unknown>)
+          .processJSONSchema as (...args: unknown[]) => unknown;
+        return {
+          ...(value as object),
+          processJSONSchema: (
+            ctx: { seen?: Map<unknown, unknown> },
+            json: unknown,
+            params: unknown
+          ) => {
+            if (ctx?.seen instanceof Map && ctx.seen.has(self) && !ctx.seen.has(real)) {
+              ctx.seen.set(real, ctx.seen.get(self));
+            }
+            return originalPJS(ctx, json, params);
+          },
+        };
+      }
+
       if (typeof value === 'function') {
         return (value as (...args: unknown[]) => unknown).bind(real);
       }
@@ -78,4 +111,6 @@ export function lazyImmutableGCableObject<T extends object>(factory: () => T): T
       throw new Error('lazyImmutableGCableObject produces an immutable object');
     },
   });
+
+  return self;
 }
