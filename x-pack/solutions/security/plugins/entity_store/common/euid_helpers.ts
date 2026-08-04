@@ -138,10 +138,7 @@ export const euid = {
     /**
      * Minimal ESQL fragments (`{ evalAssignment, presenceGate }`) for the host-scoped
      * (non-IDP) user EUID `user:<user.name>@<host.id>@local`, skipping the
-     * `entity.namespace` derivation — ~2 EVAL columns per row instead of ~35.
-     *
-     * **Precondition:** every document read carries both `user.name` and `host.id`.
-     * IDP users are indexed under a different EUID, so this would 404 on write.
+     * `entity.namespace` derivation.
      */
     getHostScopedUserEuidEsql: euidModule.getHostScopedUserEuidEsql,
   },

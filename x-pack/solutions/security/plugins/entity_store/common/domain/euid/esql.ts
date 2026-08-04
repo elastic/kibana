@@ -363,15 +363,7 @@ const HOST_SCOPED_USER_FIELDS = ['user.name', 'host.id'] as const;
  *
  * Mirrors the `entity.namespace == 'local'` branch of
  * `userEntityDefinition.identityField.euidRanking`, but hardcodes the namespace
- * instead of deriving `entity.namespace` — that derivation is a 7-arm
- * CASE/COALESCE tree, so skipping it takes a caller from ~35 EVAL columns per row
- * to ~2. Only valid for callers whose documents are exclusively host-scoped users.
- *
- * No fallback fields: that ranking branch has one arm gated on both `user.name`
- * and `host.id` being non-empty, so a document missing either is an IDP user that
- * extraction indexed under a different EUID entirely. `esql.test.ts` pins the
- * branch's shape so a definition change fails CI rather than silently emitting
- * EUIDs the entity store doesn't hold.
+ * instead of deriving `entity.namespace`.
  */
 export function getHostScopedUserEuidEsql(): {
   /** RHS for `| EVAL <col> = …` producing the host-scoped user EUID. */
