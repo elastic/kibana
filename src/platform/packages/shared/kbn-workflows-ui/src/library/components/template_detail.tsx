@@ -9,7 +9,6 @@
 
 import {
   EuiBadge,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFocusTrap,
@@ -23,6 +22,7 @@ import { css } from '@emotion/react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { stringify } from 'yaml';
 import { i18n } from '@kbn/i18n';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import {
   getStepByNameFromNestedSteps,
   transformWorkflowToGraph,
@@ -44,8 +44,8 @@ import {
   type WorkflowVisualEditorFlyoutTarget,
 } from '../../components';
 import { useTemplate } from '../hooks/use_template';
+import { getCategoryLabel } from '../lib/category_labels';
 import { getWorkflowTypes } from '../lib/get_workflow_types';
-import { humanizeCategoryId } from '../lib/humanize_category_id';
 
 export interface TemplateDetailProps {
   /** Catalog slug to fetch. Ignored when `template` is provided. */
@@ -214,14 +214,11 @@ export const TemplateDetail = React.memo<TemplateDetailProps>(function TemplateD
 
   if (isError || !data) {
     return (
-      <EuiCallOut
+      <KbnDangerCallout
         data-test-subj="workflowLibraryTemplateDetail-error"
-        color="danger"
-        iconType="warning"
         title={i18n.translate('workflows.library.templateDetail.errorTitle', {
           defaultMessage: 'Unable to load this template',
         })}
-        announceOnMount
       />
     );
   }
@@ -405,7 +402,7 @@ export const TemplateDetail = React.memo<TemplateDetailProps>(function TemplateD
                               >
                                 {metadata.categories.map((category) => (
                                   <EuiBadge key={`tag-${category}`} color="hollow">
-                                    {humanizeCategoryId(category)}
+                                    {getCategoryLabel(category)}
                                   </EuiBadge>
                                 ))}
                               </div>
