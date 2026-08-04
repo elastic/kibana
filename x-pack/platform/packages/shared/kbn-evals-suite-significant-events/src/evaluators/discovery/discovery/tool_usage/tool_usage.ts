@@ -49,7 +49,8 @@ const scoreOutputTool = (
     return {
       score: 0.75,
       label: `multiple-${TOOL_ID_EVENTS_WRITE}-calls`,
-      explanation: '${TOOL_ID_EVENTS_WRITE} was called ${persistenceCalls.count} times without one justified partial-failure retry',
+      explanation:
+        '${TOOL_ID_EVENTS_WRITE} was called ${persistenceCalls.count} times without one justified partial-failure retry',
     };
   }
   return null;
