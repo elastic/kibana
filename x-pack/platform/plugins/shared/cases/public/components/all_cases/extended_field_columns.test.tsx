@@ -69,6 +69,27 @@ describe('extended_field_columns helpers', () => {
       expect(screen.getByText('jdoe, asmith')).toBeInTheDocument();
     });
 
+    it('extracts a user picker name containing an escaped quote', () => {
+      // JSON.stringify escapes an embedded `"` in a display name (e.g. a nickname like
+      // `Robert "Bob" Smith`); a naive regex over the raw string would mis-split on it.
+      renderWithTestingProviders(
+        <>
+          {renderExtendedFieldValue(
+            field(FieldType.USER_PICKER),
+            JSON.stringify([{ uid: 'u-1', name: 'Robert "Bob" Smith' }])
+          )}
+        </>
+      );
+      expect(screen.getByText('Robert "Bob" Smith')).toBeInTheDocument();
+    });
+
+    it('falls back to the raw value for malformed user picker JSON', () => {
+      renderWithTestingProviders(
+        <>{renderExtendedFieldValue(field(FieldType.USER_PICKER), 'not-json')}</>
+      );
+      expect(screen.getByText('not-json')).toBeInTheDocument();
+    });
+
     it('renders a plain text value as-is', () => {
       renderWithTestingProviders(
         <>{renderExtendedFieldValue(field(FieldType.INPUT_TEXT), 'hello')}</>
