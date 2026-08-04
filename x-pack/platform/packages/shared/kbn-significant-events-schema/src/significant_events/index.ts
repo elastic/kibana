@@ -7,10 +7,8 @@
 
 export {
   detectionSchema,
-  processedMarkerSchema,
   CHANGE_POINT_TYPES,
   type Detection,
-  type ProcessedMarker,
   type ChangePointType,
 } from './detections';
 export { discoverySchema, type Discovery } from './discoveries';
