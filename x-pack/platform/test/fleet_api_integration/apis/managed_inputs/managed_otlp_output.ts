@@ -114,8 +114,8 @@ export default function (providerContext: FtrProviderContext) {
 
       it('creates a fully-populated http/protobuf OTLP output and round-trips all attributes', async () => {
         // Exercises every optional sub-block that is valid for http/protobuf in one payload.
-        // grpc-only compression values (snappy, zstd) are excluded because
-        // validateOtlpExporterProtocol rejects them with http/protobuf.
+        // grpc-only compression values (snappy, zstd) are excluded — the schema only allows
+        // gzip/none for http/protobuf (OtlpHttpExporterSchema).
         // api_key is exercised in the dedicated secrets test below.
         const name = `otlp-http-full-${uuidv4()}`;
         const otlpExporter = {
@@ -150,15 +150,13 @@ export default function (providerContext: FtrProviderContext) {
             max_elapsed_time: '300s',
             multiplier: 1.5,
           },
-          http: {
-            encoding: 'proto',
-            traces_endpoint: '/v1/traces',
-            metrics_endpoint: '/v1/metrics',
-            logs_endpoint: '/v1/logs',
-            profiles_endpoint: '/v1/profiles',
-            read_buffer_size: 4096,
-            write_buffer_size: 4096,
-          },
+          encoding: 'proto',
+          traces_endpoint: '/v1/traces',
+          metrics_endpoint: '/v1/metrics',
+          logs_endpoint: '/v1/logs',
+          profiles_endpoint: '/v1/profiles',
+          read_buffer_size: 4096,
+          write_buffer_size: 4096,
         };
 
         const { body } = await supertest
@@ -192,9 +190,7 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(400);
 
-        expect(body.message).to.contain(
-          '`http` fields are only valid when protocol is `http/protobuf`'
-        );
+        expect(body.message).to.contain('[request body.otlp_exporter.http]');
       });
 
       it('returns 400 when http/protobuf protocol is combined with grpc-only compression', async () => {
@@ -212,9 +208,7 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(400);
 
-        expect(body.message).to.contain(
-          '`snappy` and `zstd` compression are only valid when protocol is `grpc`'
-        );
+        expect(body.message).to.contain('[request body.otlp_exporter.compression]');
       });
 
       it('stores api_key and tls.key_pem as ESO secrets and returns secret refs', async () => {
