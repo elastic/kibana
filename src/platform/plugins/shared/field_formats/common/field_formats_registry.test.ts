@@ -54,6 +54,26 @@ describe('FieldFormatsRegistry', () => {
     });
   });
 
+  describe('getDefaultInstance', () => {
+    test('should not return a cached instance built with different params', () => {
+      fieldFormatsRegistry.register([StringFormat]);
+      defaultMap = {
+        [KBN_FIELD_TYPES.STRING]: { id: StringFormat.id, params: {} },
+      };
+      fieldFormatsRegistry.init(getConfig, {}, []);
+
+      const upper = fieldFormatsRegistry.getDefaultInstance(KBN_FIELD_TYPES.STRING, undefined, {
+        transform: 'upper',
+      });
+      const lower = fieldFormatsRegistry.getDefaultInstance(KBN_FIELD_TYPES.STRING, undefined, {
+        transform: 'lower',
+      });
+
+      expect(upper.convertToText('abc')).toBe('ABC');
+      expect(lower.convertToText('ABC')).toBe('abc');
+    });
+  });
+
   describe('register', () => {
     test('should provide an public "register" method', () => {
       expect(fieldFormatsRegistry.register).toBeDefined();
