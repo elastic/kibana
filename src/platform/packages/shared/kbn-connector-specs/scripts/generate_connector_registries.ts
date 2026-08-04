@@ -85,6 +85,9 @@ export const CONNECTOR_DOCS_LIST_PATH = join(
   REPO_ROOT,
   'docs/reference/connectors-kibana/_snippets/data-context-sources-connectors-list.md'
 );
+export const DOCS_TOC_PATH = join(REPO_ROOT, 'docs/reference/toc.yml');
+/** The TOC entry whose `children:` list every scaffolded third-party connector doc joins. */
+export const DOCS_TOC_CONNECTORS_SECTION = 'connectors-kibana/data-context-sources-connectors.md';
 
 export const REGENERATE_COMMAND = 'node scripts/generate connector-registries';
 
@@ -503,6 +506,66 @@ export function validateConnectorDocsList(content: string): string[] {
       );
     }
     previousDisplayName = displayName;
+  }
+
+  return problems;
+}
+
+/**
+ * Checks the third-party connectors section of `docs/reference/toc.yml` for the same two
+ * hand-merge failure modes `validateConnectorDocsList` catches in the snippet list: a child
+ * `- file:` entry landing out of alphabetical order (both `posthog`/`prometheus-alertmanager`
+ * and a Buildkite TOC placement had to be fixed by reviewers), or the same doc listed twice
+ * (a mis-resolved reorder once left `gmail-action-type.md` in twice). Returns human-readable
+ * problem descriptions; an empty array means the section is clean.
+ *
+ * Like the snippet list, `toc.yml` mixes generated-adjacent entries with hand-maintained ones
+ * elsewhere in the file, so only the `data-context-sources-connectors.md` children block —
+ * the one every scaffolded connector inserts into — is validated, structurally.
+ */
+export function validateConnectorToc(content: string): string[] {
+  const problems: string[] = [];
+  const lines = content.split('\n');
+  const sectionIdx = lines.findIndex((l) => l.includes(`file: ${DOCS_TOC_CONNECTORS_SECTION}`));
+
+  if (sectionIdx === -1) {
+    return [
+      `Could not find the "file: ${DOCS_TOC_CONNECTORS_SECTION}" section. If the section moved, ` +
+        `update DOCS_TOC_CONNECTORS_SECTION in generate_connector_registries.ts.`,
+    ];
+  }
+
+  let childIndent: string | null = null;
+  let previousFile: string | null = null;
+  const seenFiles = new Set<string>();
+
+  for (let i = sectionIdx + 1; i < lines.length; i++) {
+    const trimmed = lines[i].trim();
+    if (trimmed === '' || trimmed === 'children:') continue;
+
+    const currentIndent = lines[i].match(/^(\s*)/)?.[1] ?? '';
+    if (childIndent === null && trimmed.startsWith('- file:')) {
+      childIndent = currentIndent;
+    }
+    if (childIndent === null) continue;
+    // Outdenting past the children indentation means the section ended.
+    if (currentIndent.length < childIndent.length) break;
+    if (currentIndent !== childIndent || !trimmed.startsWith('- file:')) continue;
+
+    const file = trimmed.replace(/^- file:\s*/, '');
+
+    if (seenFiles.has(file)) {
+      problems.push(`"${file}" is listed twice in the connectors TOC section. Remove the duplicate.`);
+    }
+    seenFiles.add(file);
+
+    if (previousFile !== null && file.toLowerCase() < previousFile.toLowerCase()) {
+      problems.push(
+        `"${file}" is out of alphabetical order in the connectors TOC section ` +
+          `(it comes after "${previousFile}").`
+      );
+    }
+    previousFile = file;
   }
 
   return problems;

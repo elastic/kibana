@@ -14,6 +14,7 @@ import {
   CONNECTOR_DOCS_LIST_PATH,
   CONNECTOR_OWNERS_MARKER_END,
   CONNECTOR_OWNERS_MARKER_START,
+  DOCS_TOC_PATH,
   ICONS_MAP_PATH,
   REGENERATE_COMMAND,
   computeConnectorRegistry,
@@ -27,6 +28,7 @@ import {
   renderConnectorOwnersCodeownersLines,
   toChunkName,
   validateConnectorDocsList,
+  validateConnectorToc,
 } from './generate_connector_registries';
 
 function assertUpToDate(label: string, actual: string, expected: string) {
@@ -104,6 +106,13 @@ describe('generate_connector_registries', () => {
     it('has no ordering or duplicate-link issues', () => {
       const content = readFileSync(CONNECTOR_DOCS_LIST_PATH, 'utf8');
       expect(validateConnectorDocsList(content)).toEqual([]);
+    });
+  });
+
+  describe('docs/reference/toc.yml connectors section', () => {
+    it('has no ordering or duplicate-entry issues', () => {
+      const content = readFileSync(DOCS_TOC_PATH, 'utf8');
+      expect(validateConnectorToc(content)).toEqual([]);
     });
   });
 
@@ -372,6 +381,50 @@ describe('generate_connector_registries', () => {
       expect(validateConnectorDocsList(content)).toEqual([
         '"/reference/connectors-kibana/gmail-action-type.md" is linked twice, as "Gmail" and as "Google Gmail". Remove the duplicate entry.',
       ]);
+    });
+  });
+
+  describe('validateConnectorToc', () => {
+    const toc = (children: string[]) =>
+      [
+        'toc:',
+        '  - file: connectors-kibana.md',
+        '    children:',
+        '      - file: connectors-kibana/data-context-sources-connectors.md',
+        '        children:',
+        ...children.map((c) => `          - file: connectors-kibana/${c}-action-type.md`),
+        '      - file: connectors-kibana/pre-configured-connectors.md',
+        '  - file: kibana-plugins.md',
+        '',
+      ].join('\n');
+
+    it('returns no problems for a sorted, duplicate-free section', () => {
+      expect(validateConnectorToc(toc(['datadog', 'grafana', 'posthog']))).toEqual([]);
+    });
+
+    it('flags an out-of-order entry', () => {
+      expect(validateConnectorToc(toc(['datadog', 'prometheus-alertmanager', 'posthog']))).toEqual([
+        '"connectors-kibana/posthog-action-type.md" is out of alphabetical order in the ' +
+          'connectors TOC section (it comes after "connectors-kibana/prometheus-alertmanager-action-type.md").',
+      ]);
+    });
+
+    it('flags a duplicate entry', () => {
+      expect(validateConnectorToc(toc(['gmail', 'gmail']))).toEqual([
+        '"connectors-kibana/gmail-action-type.md" is listed twice in the connectors TOC section. Remove the duplicate.',
+      ]);
+    });
+
+    it('does not validate entries outside the connectors section', () => {
+      // `pre-configured-connectors.md` (a sibling) and `kibana-plugins.md` (an outdent) are
+      // both alphabetically "before" the last connector child, but are not section children.
+      expect(validateConnectorToc(toc(['zoom']))).toEqual([]);
+    });
+
+    it('reports a missing section marker instead of silently passing', () => {
+      const problems = validateConnectorToc('toc:\n  - file: index.md\n');
+      expect(problems).toHaveLength(1);
+      expect(problems[0]).toContain('Could not find');
     });
   });
 });

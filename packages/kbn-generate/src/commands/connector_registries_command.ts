@@ -15,7 +15,9 @@ import { createFailError } from '@kbn/dev-cli-errors';
 import {
   computeGeneratedFiles,
   validateConnectorDocsList,
+  validateConnectorToc,
   CONNECTOR_DOCS_LIST_PATH,
+  DOCS_TOC_PATH,
 } from '@kbn/connector-specs/codegen';
 
 import type { GenerateCommand } from '../generate_command';
@@ -34,17 +36,23 @@ export const ConnectorRegistriesCommand: GenerateCommand = {
   async run({ log, flags }) {
     const { entries, files } = await computeGeneratedFiles();
 
-    // Not one of `files` above: this one's descriptions are hand-written prose, so it can only be
-    // structurally validated (ordering, duplicate links), not fully regenerated. Checked in both
-    // modes, since a bad ordering/duplicate here isn't something running without --check would fix.
-    const docsListProblems = validateConnectorDocsList(
-      readFileSync(CONNECTOR_DOCS_LIST_PATH, 'utf8')
-    );
-    if (docsListProblems.length > 0) {
+    // Not among `files` above: these two are hand-maintained prose/nav files, so they can only be
+    // structurally validated (ordering, duplicate links/entries), not fully regenerated. Checked
+    // in both modes, since a bad ordering/duplicate isn't something running without --check would
+    // fix.
+    const structuralProblems = [
+      { path: CONNECTOR_DOCS_LIST_PATH, problems: validateConnectorDocsList(readFileSync(CONNECTOR_DOCS_LIST_PATH, 'utf8')) },
+      { path: DOCS_TOC_PATH, problems: validateConnectorToc(readFileSync(DOCS_TOC_PATH, 'utf8')) },
+    ].filter(({ problems }) => problems.length > 0);
+    if (structuralProblems.length > 0) {
       throw createFailError(
-        `${Path.relative(REPO_ROOT, CONNECTOR_DOCS_LIST_PATH)} has ${
-          docsListProblems.length
-        } issue(s):\n` + docsListProblems.map((p) => `  - ${p}`).join('\n')
+        structuralProblems
+          .map(
+            ({ path, problems }) =>
+              `${Path.relative(REPO_ROOT, path)} has ${problems.length} issue(s):\n` +
+              problems.map((p) => `  - ${p}`).join('\n')
+          )
+          .join('\n')
       );
     }
 

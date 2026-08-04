@@ -10,18 +10,21 @@
 /**
  * Dev-only entry point: regenerates `src/all_specs.ts`, `src/connector_icons_map.ts`, and the
  * per-connector ownership block in `.github/CODEOWNERS` from `src/specs/`, and validates the
- * structure (ordering, duplicate links) of `data-context-sources-connectors-list.md`. This is
- * Node-only tooling (it shells out to `fs`, `eslint`, `prettier`), kept out of the main
- * `./index.ts`/`./icons.ts` entry points because those are isomorphic and get bundled for the
- * browser. Only import this from other build/dev tooling (currently `@kbn/generate`'s `connector`
- * and `connector-registries` commands), never from application code.
+ * structure (ordering, duplicate links) of `data-context-sources-connectors-list.md` and the
+ * third-party connectors section of `docs/reference/toc.yml`. This is Node-only tooling (it
+ * shells out to `fs`, `eslint`, `prettier`), kept out of the main `./index.ts`/`./icons.ts`
+ * entry points because those are isomorphic and get bundled for the browser. Only import this
+ * from other build/dev tooling (currently `@kbn/generate`'s `connector` and
+ * `connector-registries` commands), never from application code.
  */
 export {
   computeGeneratedFiles,
   computeConnectorRegistry,
   writeConnectorRegistries,
   validateConnectorDocsList,
+  validateConnectorToc,
   CONNECTOR_DOCS_LIST_PATH,
+  DOCS_TOC_PATH,
   REGENERATE_COMMAND,
   type ConnectorRegistryEntry,
   type GeneratedConnectorFile,
