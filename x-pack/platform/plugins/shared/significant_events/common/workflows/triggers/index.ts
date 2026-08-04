@@ -40,7 +40,7 @@ const baseEventSchema = z.object({
     .enum(SEVERITY_OPTIONS)
     .describe('Severity: "80-critical", "60-high", "40-medium", or "20-low".'),
   stream_names: z.array(z.string()).describe('Data streams associated with this event.'),
-  occurred_at: z.string().describe('When this event version was written (ISO 8601 timestamp).'),
+  occurred_at: z.string().describe('When the triggered event happened (ISO 8601 timestamp).'),
 });
 
 export type SignificantEventTriggerBasePayload = z.infer<typeof baseEventSchema>;

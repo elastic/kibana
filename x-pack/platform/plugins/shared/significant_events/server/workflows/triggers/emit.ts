@@ -40,22 +40,41 @@ export const createTriggerEmitter = ({
   }
 
   // Resolve the request-scoped workflows client once per emitter and reuse it across emits (a
-  // single bulk write can emit many triggers). Reset on failure so a later emit can retry.
+  // single bulk write can emit many triggers).
   let clientPromise: ReturnType<WorkflowsExtensionsServerPluginStart['getClient']> | undefined;
+
+  const logFailure = (triggerId: SignificantEventsTriggerId, error: unknown): void => {
+    logger.warn(
+      `Failed to emit significant-events workflow trigger "${triggerId}": ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
+  };
+
+  // Reset the cached promise only when client creation fails, so a later emit can retry it. A failed
+  // `emitEvent` leaves a healthy client in place.
+  const resolveClient = async (triggerId: SignificantEventsTriggerId) => {
+    try {
+      clientPromise ??= workflowsExtensions.getClient(request);
+      return await clientPromise;
+    } catch (error) {
+      clientPromise = undefined;
+      logFailure(triggerId, error);
+      return undefined;
+    }
+  };
 
   return (triggerId, payload) => {
     void (async () => {
+      const client = await resolveClient(triggerId);
+      if (!client) {
+        return;
+      }
+
       try {
-        clientPromise ??= workflowsExtensions.getClient(request);
-        const client = await clientPromise;
         await client.emitEvent(triggerId, payload);
       } catch (error) {
-        clientPromise = undefined;
-        logger.warn(
-          `Failed to emit significant-events workflow trigger "${triggerId}": ${
-            error instanceof Error ? error.message : String(error)
-          }`
-        );
+        logFailure(triggerId, error);
       }
     })();
   };
