@@ -88,7 +88,14 @@ export const useFetchQueryOccurrenceStats = (
       ({ queries: queryOccurrenceSeries, aggregated_occurrences: aggregatedOccurrences }) => {
         return {
           queries: queryOccurrenceSeries.map((series) => {
-            const { occurrences, change_points, stream_name, rule_backed, ...rest } = series;
+            const {
+              occurrences,
+              change_points,
+              rule_uuid: _ruleUuid,
+              stream_name,
+              rule_backed,
+              ...rest
+            } = series;
             return {
               query: rest,
               stream_name,

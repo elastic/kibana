@@ -31,6 +31,12 @@ import {
   type ActionPolicySavedObjectAttributes,
 } from '../../saved_objects';
 import { ALERTING_V2_ERROR_CODES } from '../errors/error_codes';
+import {
+  getActionPolicyAlreadyExistsMessage,
+  getActionPolicyNotFoundMessage,
+  getActionPolicyVersionConflictMessage,
+  getInvalidActionPolicyDataMessage,
+} from '../errors/action_policy_error_messages';
 import { EncryptedSavedObjectsClientToken } from '../dispatcher/steps/dispatch_step_tokens';
 import { ActionPolicySavedObjectServiceScopedToken } from '../services/action_policy_saved_object_service/tokens';
 import type { ActionPolicySavedObjectServiceContract } from '../services/action_policy_saved_object_service/types';
@@ -50,7 +56,7 @@ import type {
   BulkActionPoliciesByIdsParams,
   BulkSnoozeActionPoliciesParams,
   CreateActionPolicyParams,
-  FindActionPoliciesParams,
+  FindActionPoliciesArgs,
   FindActionPoliciesResponse,
   MatchActionPoliciesForRuleParams,
   MatchActionPoliciesForRuleResponse,
@@ -147,7 +153,7 @@ export class ActionPolicyClient {
     const parsed = schema.safeParse(data);
     if (!parsed.success) {
       throw Boom.badRequest(
-        `Error validating ${context} action policy data - ${stringifyZodError(parsed.error)}`,
+        getInvalidActionPolicyDataMessage(context, stringifyZodError(parsed.error)),
         {
           code: ALERTING_V2_ERROR_CODES.INVALID_ACTION_POLICY_DATA,
           details: { context, errors: treeifyError(parsed.error) },
@@ -170,7 +176,7 @@ export class ActionPolicyClient {
       return { attrs: doc.attributes, version: doc.version };
     } catch (e) {
       if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
-        throw Boom.notFound(`Action policy with id "${id}" not found`, {
+        throw Boom.notFound(getActionPolicyNotFoundMessage(id), {
           code: ALERTING_V2_ERROR_CODES.ACTION_POLICY_NOT_FOUND,
           details: { action_policy_id: id },
         });
@@ -199,13 +205,10 @@ export class ActionPolicyClient {
       return await this.actionPolicySavedObjectService.update({ id, attrs, version });
     } catch (e) {
       if (SavedObjectsErrorHelpers.isConflictError(e)) {
-        throw Boom.conflict(
-          `Action policy with id "${id}" has already been updated by another user`,
-          {
-            code: ALERTING_V2_ERROR_CODES.ACTION_POLICY_VERSION_CONFLICT,
-            details: { action_policy_id: id },
-          }
-        );
+        throw Boom.conflict(getActionPolicyVersionConflictMessage(id), {
+          code: ALERTING_V2_ERROR_CODES.ACTION_POLICY_VERSION_CONFLICT,
+          details: { action_policy_id: id },
+        });
       }
       throw e;
     }
@@ -243,7 +246,7 @@ export class ActionPolicyClient {
       this.markApiKeysForInvalidation(attributes.auth?.apiKey, false);
       if (SavedObjectsErrorHelpers.isConflictError(e)) {
         const conflictId = params.options?.id ?? 'unknown';
-        throw Boom.conflict(`Action policy with id "${conflictId}" already exists`, {
+        throw Boom.conflict(getActionPolicyAlreadyExistsMessage(conflictId), {
           code: ALERTING_V2_ERROR_CODES.ACTION_POLICY_ALREADY_EXISTS,
           details: { action_policy_id: conflictId },
         });
@@ -338,7 +341,7 @@ export class ActionPolicyClient {
   }
 
   public async findActionPolicies(
-    params: FindActionPoliciesParams = {}
+    params: FindActionPoliciesArgs = {}
   ): Promise<FindActionPoliciesResponse> {
     const page = params.page ?? DEFAULT_PAGE;
     const perPage = params.perPage ?? DEFAULT_PER_PAGE;
@@ -601,7 +604,7 @@ export class ActionPolicyClient {
     return { affected_count: affectedCount, errors };
   }
 
-  private buildFindFilter(params: FindActionPoliciesParams): KueryNode | undefined {
+  private buildFindFilter(params: FindActionPoliciesArgs): KueryNode | undefined {
     const conditions: KueryNode[] = [];
     const attrPrefix = `${ACTION_POLICY_SAVED_OBJECT_TYPE}.attributes`;
 
@@ -645,7 +648,7 @@ export class ActionPolicyClient {
 
   public async deleteActionPolicy({ id }: { id: string }): Promise<void> {
     if (!(await this.actionPolicyExists({ id }))) {
-      throw Boom.notFound(`Action policy with id "${id}" not found`, {
+      throw Boom.notFound(getActionPolicyNotFoundMessage(id), {
         code: ALERTING_V2_ERROR_CODES.ACTION_POLICY_NOT_FOUND,
         details: { action_policy_id: id },
       });
@@ -744,7 +747,7 @@ export class ActionPolicyClient {
       });
     } catch (e) {
       if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
-        throw Boom.notFound(`Action policy with id "${id}" not found`, {
+        throw Boom.notFound(getActionPolicyNotFoundMessage(id), {
           code: ALERTING_V2_ERROR_CODES.ACTION_POLICY_NOT_FOUND,
           details: { action_policy_id: id },
         });

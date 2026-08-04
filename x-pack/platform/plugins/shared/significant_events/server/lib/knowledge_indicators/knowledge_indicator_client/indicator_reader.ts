@@ -12,17 +12,21 @@ import { isStoredFeatureKnowledgeIndicator, isStoredQueryKnowledgeIndicator } fr
 import {
   combineWhere,
   inPredicate,
+  notInPredicate,
   IS_NOT_DELETED,
   IS_NOT_EXCLUDED,
   IS_NOT_EXPIRED,
 } from '../esql_helpers';
 import {
   EXCLUDED,
+  FEATURE_SLUG,
   FEATURE_TYPE,
   ID,
   KI_TYPE_FEATURE,
   KI_TYPE_QUERY,
+  QUERY_RULE_ID,
   QUERY_RULE_BACKED,
+  QUERY_TYPE,
   STREAM_NAME,
   TYPE,
 } from '../fields';
@@ -53,7 +57,9 @@ export class IndicatorReader {
     streams: string | string[],
     options: {
       type?: string[];
+      excludedType?: string[];
       id?: string[];
+      featureIds?: string[];
       minConfidence?: number;
       limit?: number;
       includeExcluded?: boolean;
@@ -74,6 +80,12 @@ export class IndicatorReader {
     const featureTypesFilter = options.type?.length
       ? inPredicate(FEATURE_TYPE, options.type)
       : undefined;
+    const excludedFeatureTypesFilter = options.excludedType?.length
+      ? notInPredicate(FEATURE_TYPE, options.excludedType)
+      : undefined;
+    const featureIdsFilter = options.featureIds?.length
+      ? inPredicate(FEATURE_SLUG, options.featureIds)
+      : undefined;
 
     const where = combineWhere(
       inPredicate(TYPE, [KI_TYPE_FEATURE]),
@@ -86,6 +98,8 @@ export class IndicatorReader {
       options.includeExcluded ? undefined : IS_NOT_EXCLUDED,
       options.includeExpired ? undefined : IS_NOT_EXPIRED,
       featureTypesFilter,
+      excludedFeatureTypesFilter,
+      featureIdsFilter,
       minConfidenceFilter
     );
 
@@ -164,6 +178,8 @@ export class IndicatorReader {
     filters?: {
       ruleUnbacked?: RuleUnbackedFilter;
       queryIds?: string[];
+      queryTypes?: string[];
+      ruleIds?: string[];
       minSeverityScore?: number;
       includeExpired?: boolean;
     }
@@ -172,6 +188,12 @@ export class IndicatorReader {
       typeof filters?.minSeverityScore === 'number'
         ? esql.exp`\`query.severity_score\` >= ${filters.minSeverityScore}`
         : undefined;
+    const queryTypesFilter = filters?.queryTypes?.length
+      ? inPredicate(QUERY_TYPE, filters.queryTypes)
+      : undefined;
+    const ruleIdsFilter = filters?.ruleIds?.length
+      ? inPredicate(QUERY_RULE_ID, filters.ruleIds)
+      : undefined;
 
     const where = combineWhere(
       inPredicate(TYPE, [KI_TYPE_QUERY]),
@@ -183,6 +205,8 @@ export class IndicatorReader {
       IS_NOT_DELETED,
       filters?.includeExpired ? undefined : IS_NOT_EXPIRED,
       ruleUnbackedPostGroupingWhere(filters?.ruleUnbacked ?? 'exclude'),
+      queryTypesFilter,
+      ruleIdsFilter,
       minSeverityFilter
     );
 

@@ -36,6 +36,7 @@ dependsOn:
   - '@kbn/ui-actions-plugin'
   - '@kbn/spaces-plugin'
   - '@kbn/config-schema'
+  - '@kbn/zod'
   - '@kbn/utility-types'
   - '@kbn/es-query'
   - '@kbn/i18n'
@@ -130,6 +131,7 @@ dependsOn:
   - '@kbn/core-test-helpers-test-utils'
   - '@kbn/app-header'
   - '@kbn/core-chrome-browser-hooks'
+  - '@kbn/ui-callout'
 tags:
   - plugin
   - prod

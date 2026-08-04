@@ -16,10 +16,9 @@ import type {
 import { registerRoutes } from '@kbn/server-route-repository';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { RulesClientCreateOptions } from '@kbn/alerting-plugin/server';
-import { distinctUntilChanged, filter, skip } from 'rxjs';
+import { combineLatest, distinctUntilChanged, filter, skip, switchMap } from 'rxjs';
 import type { Subscription } from 'rxjs';
 import type { StreamsServer } from '@kbn/streams-plugin/server/types';
-import type { SignificantEventsConfig } from '../common/config';
 import { getRelayAppConnectionSavedObjectType } from './lib/slack_app/saved_object';
 import { getSignificantEventsMaintenanceStateSavedObjectType } from './lib/maintenance/saved_object';
 import {
@@ -37,7 +36,7 @@ import { deleteLegacyRules } from './lib/significant_events/rules/delete_legacy_
 
 import { createSignificantEventsAlertingContextResolver } from './lib/significant_events/alerting/significant_events_alerting_context';
 import type { SignificantEventsAlertingContext } from './lib/significant_events/alerting/significant_events_alerting_context';
-import { EbtTelemetryService } from './lib/telemetry';
+import { EbtTelemetryService } from './lib/telemetry/ebt';
 import { significantEventsRouteRepository } from './routes';
 import type { GetScopedClients, RouteHandlerScopedClients } from './routes/types';
 import type {
@@ -75,46 +74,36 @@ import {
   installDiscoveryAgents,
   registerSignificantEventsDiscoveryAgentTypes,
 } from './agent_builder/agents/discovery';
+import { createSignificantEventsAvailability } from './agent_builder/tools/significant_events_availability';
 import { SIGNIFICANT_EVENT_TIERED_FEATURES } from '../common/constants';
 import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '../common/feature_flags';
-import { isSignificantEventsAvailable } from './lib/feature_flags/is_significant_events_available';
+import { isSignificantEventsAvailable } from './routes/utils/assert_significant_events_access';
 import type { SignificantEventsKIsOnboardingClient } from './lib/workflows/onboarding_workflow_client';
 
 const SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER = 'significant_events';
 
-export interface SignificantEventsPluginSetup {
-  registerKnowledgeIndicatorClientProvider(
-    provider: (request: KibanaRequest) => Promise<KnowledgeIndicatorClient>
-  ): void;
-}
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface SignificantEventsPluginStart {}
-
 export class SignificantEventsPlugin
   implements
     Plugin<
-      SignificantEventsPluginSetup,
-      SignificantEventsPluginStart,
+      void,
+      void,
       SignificantEventsPluginSetupDependencies,
       SignificantEventsPluginStartDependencies
     >
 {
-  public config: SignificantEventsConfig;
   public logger: Logger;
   public server?: StreamsServer;
   private isDev: boolean;
   private ebtTelemetryService = new EbtTelemetryService();
   private getScopedClients?: GetScopedClients;
   private subscriptions: Subscription[] = [];
-  private kiProvider?: (request: KibanaRequest) => Promise<KnowledgeIndicatorClient>;
   private kibanaVersion: string;
   private streamsKIsOnboardingClient?: SignificantEventsKIsOnboardingClient;
   private managedWorkflowsInstaller?: ManagedWorkflowsInstaller;
   private maintenanceService?: SignificantEventsMaintenanceService;
 
-  constructor(context: PluginInitializerContext<SignificantEventsConfig>) {
+  constructor(context: PluginInitializerContext) {
     this.isDev = context.env.mode.dev;
-    this.config = context.config.get();
     this.logger = context.logger.get();
     this.kibanaVersion = context.env.packageInfo.version;
   }
@@ -122,7 +111,7 @@ export class SignificantEventsPlugin
   public setup(
     core: CoreSetup<SignificantEventsPluginStartDependencies>,
     plugins: SignificantEventsPluginSetupDependencies
-  ): SignificantEventsPluginSetup {
+  ): void {
     this.server = {
       logger: this.logger,
       workflowsManagement: plugins.workflowsManagement,
@@ -208,13 +197,11 @@ export class SignificantEventsPlugin
         });
 
       let kiClientPromise: ReturnType<typeof createKnowledgeIndicatorClient> | undefined;
-      const getKnowledgeIndicatorClient: () => Promise<KnowledgeIndicatorClient> = this.kiProvider
-        ? () => this.kiProvider!(request)
-        : () => {
-            kiClientPromise ??= (async () =>
-              createKnowledgeIndicatorClient(await resolveSignificantEventsAlertingContext()))();
-            return kiClientPromise;
-          };
+      const getKnowledgeIndicatorClient: () => Promise<KnowledgeIndicatorClient> = () => {
+        kiClientPromise ??= (async () =>
+          createKnowledgeIndicatorClient(await resolveSignificantEventsAlertingContext()))();
+        return kiClientPromise;
+      };
 
       const license = await licensing.getLicense();
       const isSecurityEnabled = license.getFeature('security').isEnabled;
@@ -324,7 +311,7 @@ export class SignificantEventsPlugin
     }
 
     core.pricing.registerProductFeatures(SIGNIFICANT_EVENT_TIERED_FEATURES);
-    registerFeatureFlags(core, this.logger);
+    registerFeatureFlags(core, this.logger, plugins.cloud);
 
     this.maintenanceService = createSignificantEventsMaintenanceService({
       logger: this.logger,
@@ -352,18 +339,9 @@ export class SignificantEventsPlugin
       logger: this.logger,
       runDevModeChecks: this.isDev,
     });
-
-    return {
-      registerKnowledgeIndicatorClientProvider: (provider) => {
-        this.kiProvider = provider;
-      },
-    };
   }
 
-  public start(
-    core: CoreStart,
-    plugins: SignificantEventsPluginStartDependencies
-  ): SignificantEventsPluginStart {
+  public start(core: CoreStart, plugins: SignificantEventsPluginStartDependencies): void {
     if (this.server) {
       this.server.core = core;
       this.server.isServerless = core.elasticsearch.getCapabilities().serverless;
@@ -380,18 +358,27 @@ export class SignificantEventsPlugin
       this.server.relayClient = plugins.actions.getRelayClient();
     }
 
-    // The availability flag observable emits its current value on subscribe. `skip(1)` drops that
+    // Availability is the same requirement registry that gates requests, so a deployment never gets
+    // resources it cannot run. Only the flag and the license change at runtime, so only those feed
+    // the stream.
+    const isAvailable = () =>
+      this.server
+        ? isSignificantEventsAvailable({ server: this.server, licensing: plugins.licensing })
+        : Promise.resolve(false);
+    const available$ = combineLatest([
+      core.featureFlags.getBooleanValue$(STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG, false),
+      plugins.licensing.license$,
+    ]).pipe(switchMap(isAvailable), distinctUntilChanged());
+
+    // The availability observable emits its current value on subscribe. `skip(1)` drops that
     // initial emission so the stream represents *changes* only; the initial install/registration is
     // driven explicitly below. `filter((enabled) => enabled)` then keeps only the off->on
     // transitions, since installation only ever adds resources (a flip back to off is handled by
     // request-time gating).
-    const availabilityEnabled$ = core.featureFlags
-      .getBooleanValue$(STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG, false)
-      .pipe(
-        distinctUntilChanged(),
-        skip(1),
-        filter((enabled) => enabled)
-      );
+    const availabilityEnabled$ = available$.pipe(
+      skip(1),
+      filter((enabled) => enabled)
+    );
 
     // Managed workflows go through a single serialized installer that owns the only `ready()` call,
     // so a runtime flag flip can never close the reconciliation window with a partial set (which
@@ -402,7 +389,7 @@ export class SignificantEventsPlugin
       this.managedWorkflowsInstaller = createManagedWorkflowsInstaller({
         getClient: () =>
           workflowsExtensions.initManagedWorkflowsClient(SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER),
-        isAvailable: () => isSignificantEventsAvailable(core.featureFlags),
+        isAvailable,
         logger: this.logger,
       });
     }
@@ -410,41 +397,37 @@ export class SignificantEventsPlugin
     // ES templates and managed workflows are installed only when significant events is available,
     // and (re)installed if the availability flag flips on at runtime. This keeps a deployment fully
     // clean while the feature has never been enabled.
-    void this.ensureSignificantEventsInstalled(core).catch((error: unknown) => {
+    void this.ensureSignificantEventsInstalled(core, isAvailable).catch((error: unknown) => {
       this.logManagedResourceError('startup', error);
     });
 
     this.subscriptions.push(
       availabilityEnabled$.subscribe(() => {
-        void this.ensureSignificantEventsInstalled(core).catch((error: unknown) => {
+        void this.ensureSignificantEventsInstalled(core, isAvailable).catch((error: unknown) => {
           this.logManagedResourceError('availability flag change', error);
         });
       })
     );
 
-    // Editable investigation + discovery/judge agents: installed via agents.ensure when
-    // significant events is available. skip(1) on availabilityEnabled$ drops the initial
-    // emission, so catch up at startup as well. Per-space installs also happen just-in-time
-    // from triggerInvestigationWorkflow (investigation), scheduled discovery enablement,
-    // and manual discovery execute (discovery/judge).
-    // Pause re-assert runs inside ensureSignificantEventsInstalled after every install.
-    if (plugins.agentBuilder) {
+    // Editable investigation + discovery/judge agents: installed via agents.ensure with the same
+    // availability gate as registered tools. Profiles stay installed; Agent Builder hides them
+    // when significant events is unavailable. Always ensure at start so the in-memory availability
+    // handler is registered even when the feature is currently off (otherwise leftover profiles
+    // from a prior enablement would show as available). Per-space installs also happen
+    // just-in-time from triggerInvestigationWorkflow, scheduled discovery enablement, and manual
+    // discovery execute.
+    if (plugins.agentBuilder && this.server) {
       const agentBuilder = plugins.agentBuilder;
-      const installAgents = () =>
-        Promise.all([
-          installInvestigationAgent({ agentBuilder, spaceId: DEFAULT_SPACE_ID }),
-          installDiscoveryAgents({ agentBuilder, spaceId: DEFAULT_SPACE_ID }),
-        ]).catch((error: unknown) => {
-          this.logManagedResourceError('significant events agents', error);
-        });
-
-      void (async () => {
-        if (await isSignificantEventsAvailable(core.featureFlags)) {
-          await installAgents();
-        }
-      })();
-
-      this.subscriptions.push(availabilityEnabled$.subscribe(() => void installAgents()));
+      const availability = createSignificantEventsAvailability({
+        server: this.server,
+        logger: this.logger,
+      });
+      void Promise.all([
+        installInvestigationAgent({ agentBuilder, spaceId: DEFAULT_SPACE_ID, availability }),
+        installDiscoveryAgents({ agentBuilder, spaceId: DEFAULT_SPACE_ID, availability }),
+      ]).catch((error: unknown) => {
+        this.logManagedResourceError('significant events agents', error);
+      });
     }
 
     if (plugins.agentBuilder && this.server && this.getScopedClients) {
@@ -474,7 +457,7 @@ export class SignificantEventsPlugin
         maintenanceService: this.maintenanceService,
         memoryToolsOptions,
         logger: this.logger,
-        isAvailable: () => isSignificantEventsAvailable(core.featureFlags),
+        isAvailable,
       })
         .then(({ ensureRegistered }) => {
           const onFlip = () => {
@@ -498,7 +481,7 @@ export class SignificantEventsPlugin
         agentBuilder,
         memoryToolsOptions,
         logger: this.logger,
-        isAvailable: () => isSignificantEventsAvailable(core.featureFlags),
+        isAvailable,
       })
         .then(({ ensureRegistered }) => {
           const onFlip = () => {
@@ -514,8 +497,6 @@ export class SignificantEventsPlugin
           this.logger.error(`Failed to register significant events memory skills: ${err.message}`);
         });
     }
-
-    return {};
   }
 
   /**
@@ -528,8 +509,11 @@ export class SignificantEventsPlugin
    * workflows). Rejects with an aggregate error naming every installer that failed, so the caller
    * can surface a single actionable log line.
    */
-  private async ensureSignificantEventsInstalled(core: CoreStart): Promise<void> {
-    if (!(await isSignificantEventsAvailable(core.featureFlags))) {
+  private async ensureSignificantEventsInstalled(
+    core: CoreStart,
+    isAvailable: () => Promise<boolean>
+  ): Promise<void> {
+    if (!(await isAvailable())) {
       this.logger.debug(
         'significant_events: availability flag disabled, skipping managed resource installation'
       );
