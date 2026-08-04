@@ -223,7 +223,7 @@ export class FieldFormatsRegistry {
     params?: FieldFormatParams
   ): string {
     const typeKey: string =
-      Array.isArray(esTypes) && !(esTypes as string[]).includes(fieldType)
+      Array.isArray(esTypes) && !esTypes.some((esType) => String(esType) === String(fieldType))
         ? [fieldType, ...esTypes].join('-')
         : fieldType;
 

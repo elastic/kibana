@@ -71,6 +71,15 @@ describe('FieldFormatsRegistry', () => {
 
       expect(upper.convertToText('abc')).toBe('ABC');
       expect(lower.convertToText('ABC')).toBe('abc');
+
+      // different params must not share an instance...
+      expect(upper).not.toBe(lower);
+      // ...while identical params still hit the memoized instance
+      expect(
+        fieldFormatsRegistry.getDefaultInstance(KBN_FIELD_TYPES.STRING, undefined, {
+          transform: 'upper',
+        })
+      ).toBe(upper);
     });
   });
 
