@@ -48,7 +48,7 @@ export interface ToolsFlyoutHeaderProps {
 export const ToolsFlyoutHeader: FC<ToolsFlyoutHeaderProps> = memo(
   ({ title, onTitleClick, label, iconType, badge, timestamp }) => {
     const { euiTheme } = useEuiTheme();
-    const showSourceContext = !!onTitleClick && !!label && !!iconType;
+    const showSourceContext = !!label && !!iconType;
 
     return (
       <EuiFlexGroup

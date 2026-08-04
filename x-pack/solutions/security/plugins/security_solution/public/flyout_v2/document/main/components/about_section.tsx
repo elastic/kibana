@@ -29,6 +29,7 @@ import { EventCategoryDescription } from './event_category_description';
 import { EventKindDescription } from './event_kind_description';
 import { EventRenderer } from './event_renderer';
 import { FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
+import { isRulePreviewDocument } from '../../../shared/utils/is_rule_preview_document';
 
 export const ABOUT_SECTION_TEST_ID = `${PREFIX}AboutSection` as const;
 
@@ -53,6 +54,7 @@ export const AboutSection = memo(({ hit }: AboutSectionProps) => {
   const eventKind = useMemo(() => getFieldValue(hit, EVENT_KIND) as string, [hit]);
   const isAlert = eventKind === EventKind.signal;
   const eventKindInECS = eventKind ? isEcsAllowedValue(EVENT_KIND, eventKind) : false;
+  const isRulePreview = useMemo(() => isRulePreviewDocument(hit), [hit]);
 
   const ruleId = useMemo(
     () => (isAlert ? (getFieldValue(hit, ALERT_RULE_UUID) as string) : undefined),
@@ -94,6 +96,7 @@ export const AboutSection = memo(({ hit }: AboutSectionProps) => {
             <AlertDescription
               hit={hit}
               onShowRuleSummary={ruleId ? onShowRuleSummary : undefined}
+              ruleSummaryDisabled={isRulePreview}
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>

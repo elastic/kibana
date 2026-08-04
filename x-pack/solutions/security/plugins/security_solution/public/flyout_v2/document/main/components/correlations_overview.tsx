@@ -66,7 +66,6 @@ export const CorrelationsOverview = memo(
 
     const { show: showAlertsByAncestry, ancestryDocumentId } = useShowRelatedAlertsByAncestry({
       hit,
-      isRulePreview,
     });
     const { show: showSameSourceAlerts, originalEventId } = useShowRelatedAlertsBySameSourceEvent({
       hit,

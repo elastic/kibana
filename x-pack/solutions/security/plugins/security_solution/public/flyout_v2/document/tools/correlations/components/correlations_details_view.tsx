@@ -22,6 +22,7 @@ import { RelatedAlertsBySameSourceEvent } from './related_alerts_by_same_source_
 import { RelatedAlertsBySession } from './related_alerts_by_session';
 import { RelatedAlertsByAncestry } from './related_alerts_by_ancestry';
 import { RelatedAttacks } from './related_attacks';
+import { isRulePreviewDocument } from '../../../../shared/utils/is_rule_preview_document';
 
 export interface CorrelationsDetailsViewProps {
   /**
@@ -32,10 +33,6 @@ export interface CorrelationsDetailsViewProps {
    * Scope ID for the document
    */
   scopeId: string;
-  /**
-   * Whether the document is being displayed in a rule preview
-   */
-  isRulePreview: boolean;
   /**
    * Callback to open an alert preview when clicking the preview button in the correlations table
    */
@@ -59,11 +56,11 @@ export const CorrelationsDetailsView = memo(
   ({
     hit,
     scopeId,
-    isRulePreview,
     onShowAlert,
     onShowAttack,
     useLegacyExpandableFlyout,
   }: CorrelationsDetailsViewProps) => {
+    const isRulePreview = useMemo(() => isRulePreviewDocument(hit), [hit]);
     const eventId = hit.raw._id ?? '';
     const ecsData = useMemo<Ecs>(
       () => ({
@@ -76,7 +73,6 @@ export const CorrelationsDetailsView = memo(
 
     const { show: showAlertsByAncestry, ancestryDocumentId } = useShowRelatedAlertsByAncestry({
       hit,
-      isRulePreview,
     });
     const { show: showSameSourceAlerts, originalEventId } = useShowRelatedAlertsBySameSourceEvent({
       hit,

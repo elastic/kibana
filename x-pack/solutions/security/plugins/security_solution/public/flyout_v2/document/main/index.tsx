@@ -41,6 +41,7 @@ import {
 } from '../../../timelines/components/timeline/body/renderers/constants';
 import { RemoteDocumentCallout } from './components/remote_document_callout';
 import { FLYOUT_ORIGIN, FLYOUT_TYPE } from '../../../common/lib/telemetry';
+import { isRulePreviewDocument } from '../../shared/utils/is_rule_preview_document';
 
 const footerStyles = css`
   @media (max-width: 767px) {
@@ -100,6 +101,7 @@ export const DocumentFlyout = memo(
       () => (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,
       [hit]
     );
+    const isRulePreview = useMemo(() => isRulePreviewDocument(hit), [hit]);
     const isSecurityApp = useIsInSecurityApp();
     const { hasAlertsRead, loading } = useAlertsPrivileges();
     const missingAlertsPrivilege = !loading && !hasAlertsRead && isAlert;
@@ -129,19 +131,19 @@ export const DocumentFlyout = memo(
       (props: OpenFlyoutLinkProps) => {
         // Rule name fields: substitute the rule UUID as the link target (the flyout is keyed by
         // UUID) while keeping the rule name as the displayed text. When no UUID is available,
-        // render plain text to avoid opening the rule flyout with an invalid id.
+        // or when in rule preview (the rule doesn't exist yet), render plain text.
         if (
           props.field === SIGNAL_RULE_NAME_FIELD_NAME ||
           props.field === LEGACY_SIGNAL_RULE_NAME_FIELD_NAME
         ) {
-          if (!ruleId) {
+          if (!ruleId || isRulePreview) {
             return <>{props.children}</>;
           }
           return <OpenFlyoutLink {...props} value={ruleId} displayValue={props.value} asParent />;
         }
         return <OpenFlyoutLink {...props} />;
       },
-      [ruleId]
+      [ruleId, isRulePreview]
     );
 
     const onShowNotesFromHeader = useCallback(() => {
@@ -207,7 +209,7 @@ export const DocumentFlyout = memo(
               renderFlyoutLink={renderFlyoutLink}
             />
           ) : isSecurityApp && selectedTabId === 'json' ? (
-            <JsonTab hit={hit} />
+            <JsonTab hit={hit} isRulePreview={isRulePreview} />
           ) : (
             <OverviewTab
               hit={hit}
@@ -216,9 +218,11 @@ export const DocumentFlyout = memo(
             />
           )}
         </EuiFlyoutBody>
-        <EuiFlyoutFooter css={footerStyles}>
-          <Footer hit={hit} onAlertUpdated={onAlertUpdated} onShowNotes={onShowNotesFromFooter} />
-        </EuiFlyoutFooter>
+        {!isRulePreview && (
+          <EuiFlyoutFooter css={footerStyles}>
+            <Footer hit={hit} onAlertUpdated={onAlertUpdated} onShowNotes={onShowNotesFromFooter} />
+          </EuiFlyoutFooter>
+        )}
       </>
     );
   }

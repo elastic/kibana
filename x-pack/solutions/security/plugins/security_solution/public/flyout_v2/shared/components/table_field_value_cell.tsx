@@ -41,10 +41,6 @@ export interface FieldValueCellProps {
    */
   ruleId: string;
   /**
-   * Whether the preview link is in rule preview
-   */
-  isRulePreview: boolean;
-  /**
    * Value of the link field if it exists. Allows to navigate to other pages like host, user, network...
    */
   getLinkValue?: (field: string) => string | null;
@@ -80,7 +76,6 @@ export const TableFieldValueCell = memo(
     ruleId,
     getLinkValue,
     values,
-    isRulePreview,
     entityId,
     hit,
     renderFlyoutLink: RenderFlyoutLink,

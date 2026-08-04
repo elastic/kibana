@@ -152,8 +152,6 @@ export interface OpenDocumentCorrelationsParams {
   hit: DataTableRecord;
   /** Scope id for the document. */
   scopeId: string;
-  /** Whether the document is being displayed in a rule preview. */
-  isRulePreview: boolean;
   /** Callback to open one of the correlated alerts. */
   onShowAlert: (id: string, indexName: string, title?: string) => void;
   /** Optional callback to open a correlated attack; when omitted the attack column is hidden. */
@@ -543,21 +541,13 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
   );
 
   const openDocumentCorrelations = useCallback(
-    ({
-      hit,
-      scopeId,
-      isRulePreview,
-      onShowAlert,
-      onShowAttack,
-      origin,
-    }: OpenDocumentCorrelationsParams) => {
+    ({ hit, scopeId, onShowAlert, onShowAttack, origin }: OpenDocumentCorrelationsParams) => {
       const { documentId, indexName } = documentIdsFromHit(hit);
       writeOnOpen({
         kind: FLYOUT_DESCRIPTOR_KIND.documentCorrelations,
         documentId,
         indexName,
         scopeId,
-        isRulePreview,
       });
       // A tool flyout opens with session:'start' — it is a root, not a child of the document, and
       // the document is not persisted alongside it. Closing the tool therefore clears the param
@@ -567,7 +557,6 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
         <CorrelationsDetails
           hit={hit}
           scopeId={scopeId}
-          isRulePreview={isRulePreview}
           onShowAlert={onShowAlert}
           onShowAttack={onShowAttack}
         />,

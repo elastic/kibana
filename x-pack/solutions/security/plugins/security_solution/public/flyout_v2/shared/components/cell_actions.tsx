@@ -17,6 +17,7 @@ import {
   CellActionsMode,
   SecurityCellActions,
 } from '../../../common/components/cell_actions';
+import { SecurityCellActionType } from '../../../app/actions/constants';
 import { getSourcererScopeId } from '../../../helpers';
 
 export interface CellActionRendererProps {
@@ -51,6 +52,12 @@ export interface CreateCellActionRendererOptions {
    * "Toggle column in table" action can add/remove columns on the imperatively-controlled alerts table.
    */
   alertsTableRef?: RefObject<AlertsTableImperativeApi>;
+  /**
+   * Action types that should be hidden from the cell action menu. Used in contexts where certain
+   * actions are meaningless, e.g. Filter-for/out and Toggle-column are disabled in rule preview
+   * because the alerts are transient and not backed by a persistent data view.
+   */
+  disabledActionTypes?: SecurityCellActionType[];
 }
 
 /**
@@ -71,6 +78,7 @@ export const createCellActionRenderer = (
     triggerId = SECURITY_CELL_ACTIONS_DEFAULT,
     visibleCellActions = 5,
     alertsTableRef,
+    disabledActionTypes = [],
   }: CreateCellActionRendererOptions = {}
 ): CellActionRenderer => {
   const boundCellActionRenderer: CellActionRenderer = ({
@@ -91,6 +99,7 @@ export const createCellActionRenderer = (
         visibleCellActions={visibleCellActions}
         sourcererScopeId={getSourcererScopeId(effectiveScopeId)}
         metadata={{ scopeId: effectiveScopeId, alertsTableRef }}
+        disabledActionTypes={disabledActionTypes}
       >
         {children}
       </SecurityCellActions>
@@ -104,6 +113,16 @@ export const createCellActionRenderer = (
  * This is used in the expandable flyout and in the new flyout (though only when used in Security Solution).
  */
 export const cellActionRenderer: CellActionRenderer = createCellActionRenderer('');
+
+/**
+ * Cell action renderer for rule preview contexts. Disables Filter-for/Filter-out and
+ * Toggle-column because those actions are meaningless against transient preview alerts.
+ * Mirrors the v1 behavior in
+ * `flyout/document_details/shared/components/cell_actions.tsx:48-52`.
+ */
+export const rulePreviewCellActionRenderer: CellActionRenderer = createCellActionRenderer('', {
+  disabledActionTypes: [SecurityCellActionType.FILTER, SecurityCellActionType.TOGGLE_COLUMN],
+});
 
 /**
  * Cell action renderer for Cases.
