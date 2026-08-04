@@ -16,9 +16,8 @@ const buildPublicConversationFilter = () => {
 };
 
 /**
- * Matches conversations owned by the current user, on the stable `user_id` when the document
- * stored one, or on username only when it did not. Mirrors `isConversationOwner` so listing
- * cannot surface conversations the get/update paths would deny.
+ * Matches conversations owned by the current user, on `user_id` when the document stored one and on
+ * username only when it did not. Mirrors `isConversationOwner`.
  */
 const buildOwnedConversationFilter = ({ user }: { user: UserIdAndName }) => {
   const shouldClauses: Array<Record<string, unknown>> = [];
@@ -27,8 +26,6 @@ const buildOwnedConversationFilter = ({ user }: { user: UserIdAndName }) => {
     shouldClauses.push({ term: { user_id: user.id } });
   }
 
-  // Ownership for docs without user_id: username match only when user_id was never stored, so
-  // id-backed conversations are not reopened to same-username principals from other realms.
   shouldClauses.push({
     bool: {
       must_not: { exists: { field: 'user_id' } },

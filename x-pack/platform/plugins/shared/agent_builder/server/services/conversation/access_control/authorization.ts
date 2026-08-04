@@ -14,11 +14,8 @@ export type ConversationAccess = 'converse' | 'owner';
 /**
  * Checks whether the current user owns the conversation.
  *
- * Stable ids are preferred when the conversation document stored a `user_id` (profile uid or
- * realm-qualified id). Username matching is kept only for documents that never stored an id, so
- * those owners are not orphaned. In practice those are conversations created through un-enriched
- * fake requests, where `_security/_authenticate` yields a username but no resolvable principal.
- * That fallback cannot distinguish same-username principals across authentication realms.
+ * Username matching is limited to documents that never stored a `user_id`, so those owners are not
+ * orphaned. It cannot distinguish same-username principals across authentication realms.
  */
 export const isConversationOwner = ({
   conversation,
@@ -31,8 +28,6 @@ export const isConversationOwner = ({
     return conversation.user_id === user.id;
   }
 
-  // Docs without user_id: fall back to username so the original owner keeps access. Never reached
-  // for id-backed documents, otherwise a same-username principal from another realm would match.
   if (conversation.user_id === undefined && user.username !== undefined) {
     return conversation.user_name === user.username;
   }

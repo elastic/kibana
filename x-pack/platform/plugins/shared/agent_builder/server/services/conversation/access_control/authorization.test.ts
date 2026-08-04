@@ -57,7 +57,6 @@ describe('conversation access control', () => {
     });
 
     it('does not fall back to username when the conversation stored a user_id', () => {
-      // A same-username principal from another realm resolving to no id must not match.
       expect(
         isConversationOwner({
           conversation: conversation({ user_id: 'owner-profile-id', user_name: user.username }),

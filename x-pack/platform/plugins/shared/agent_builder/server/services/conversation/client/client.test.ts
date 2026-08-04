@@ -515,8 +515,7 @@ describe('ConversationClient', () => {
 
       await client.update({ id: 'conversation-1', read: true }, { access: 'converse' });
 
-      // Guards against a future refactor giving `toEs` a `currentUser` argument, which would let
-      // any converse-access writer silently take ownership of a public conversation.
+      // Holds because `toEs` takes no caller; pinned so a `currentUser` argument cannot slip in.
       expect(mockEsClient.index).toHaveBeenCalledWith(
         expect.objectContaining({
           document: expect.objectContaining({
