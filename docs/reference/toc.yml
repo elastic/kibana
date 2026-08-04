@@ -118,8 +118,8 @@ toc:
           - file: connectors-kibana/one-password-action-type.md
           - file: connectors-kibana/outlook-action-type.md
           - file: connectors-kibana/pagerduty-mcp-action-type.md
-          - file: connectors-kibana/prometheus-alertmanager-action-type.md
           - file: connectors-kibana/posthog-action-type.md
+          - file: connectors-kibana/prometheus-action-type.md
           - file: connectors-kibana/rootly-action-type.md
           - file: connectors-kibana/salesforce-action-type.md
           - file: connectors-kibana/sentry-action-type.md

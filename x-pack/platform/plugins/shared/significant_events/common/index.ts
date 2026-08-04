@@ -15,6 +15,7 @@ export {
 } from './feature_flags';
 
 export {
+  SIGNIFICANT_EVENTS_APP_ROUTE,
   SIGNIFICANT_EVENT_TIERED_FEATURES,
   SIGNIFICANT_EVENTS_TIERED_FEATURE,
   // backward-compat alias used by streams_app and serverless_observability
