@@ -163,7 +163,11 @@ export const AlertEpisodeSeverityHeatmap = ({ eventRows }: AlertEpisodeSeverityH
   );
 
   return (
-    <EuiPanel hasBorder paddingSize="m" data-test-subj="alertingV2EpisodeSeverityHeatmap">
+    <EuiPanel
+      hasShadow={false}
+      paddingSize="none"
+      data-test-subj="alertingV2EpisodeSeverityHeatmap"
+    >
       <EuiTitle size="xxs">
         <h2>{i18n.SEVERITY_HEATMAP_TITLE}</h2>
       </EuiTitle>

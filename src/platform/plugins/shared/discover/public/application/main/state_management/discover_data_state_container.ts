@@ -51,7 +51,7 @@ import { internalStateActions, selectCurrentProfileUrlState, selectTabRuntimeSta
 import { buildEsqlFetchSubscribe } from './utils/build_esql_fetch_subscribe';
 import { createSearchSource } from './utils/create_search_source';
 import { PROFILE_STATE_URL_KEY } from '../../../../common/constants';
-import type { ProfileStateMap } from '../../../context_awareness';
+import type { ProfileStateMap } from '../../../../common/context_awareness';
 
 export interface SavedSearchData {
   main$: DataMain$;
