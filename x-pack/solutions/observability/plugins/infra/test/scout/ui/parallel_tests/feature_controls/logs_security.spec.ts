@@ -39,12 +39,22 @@ test.describe('Logs feature controls - security', { tag: tags.stateful.classic }
     pageObjects: { featureControlsPage, collapsibleNav },
   }) => {
     await browserAuth.loginWithCustomRole(globalLogsAll);
-    await featureControlsPage.gotoHome();
-    await collapsibleNav.expandNav();
-    await expect(featureControlsPage.getNavLink('Logs')).toBeVisible({
-      timeout: EXTENDED_TIMEOUT,
+
+    await test.step('shows the Logs nav link', async () => {
+      await featureControlsPage.gotoHome();
+      await collapsibleNav.expandNav();
+      await expect(featureControlsPage.getNavLink('Logs')).toBeVisible({
+        timeout: EXTENDED_TIMEOUT,
+      });
     });
-    await expect(featureControlsPage.readOnlyBadge).toBeHidden();
+
+    // The badge is only set once the Logs app mounts (`useReadOnlyBadge`), so it
+    // has to be asserted from inside the app rather than from the home page.
+    await test.step('can access the Logs app without a read-only badge', async () => {
+      await featureControlsPage.gotoLogs();
+      await expect(featureControlsPage.logsApp).toBeVisible({ timeout: EXTENDED_TIMEOUT });
+      await expect(featureControlsPage.readOnlyBadge).toBeHidden();
+    });
   });
 
   test('with logs read privileges shows the Logs nav link', async ({
