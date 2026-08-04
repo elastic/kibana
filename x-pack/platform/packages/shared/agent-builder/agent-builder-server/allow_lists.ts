@@ -84,6 +84,9 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.streams}.create_partition`,
   `${internalNamespaces.streams}.delete_stream`,
 
+  // Custom content panels
+  'custom_content_update_panel',
+
   // Workflows
   `${internalNamespaces.workflows}.validate_workflow`,
   `${internalNamespaces.workflows}.get_step_definitions`,
@@ -104,9 +107,6 @@ export type AgentBuilderBuiltinTool = (typeof AGENT_BUILDER_BUILTIN_TOOLS)[numbe
 export const AGENT_BUILDER_BUILTIN_AGENTS = [
   `${internalNamespaces.search}.agent`,
   `${internalNamespaces.security}.agent`,
-  `${internalNamespaces.streams}.sig-events.discovery`,
-  `${internalNamespaces.streams}.sig-events.discovery-judge`,
-  `${internalNamespaces.platformSignificantEvents}.investigation`,
 ] as const;
 
 export type AgentBuilderBuiltinAgent = (typeof AGENT_BUILDER_BUILTIN_AGENTS)[number];
@@ -123,7 +123,12 @@ export const isAllowedBuiltinAgent = (agentName: string): agentName is AgentBuil
  * This is a manually maintained list of all agent types registered in Agent Builder.
  * The intention is to force a code review from the Agent Builder team when any team adds a new agent type.
  */
-export const AGENT_BUILDER_AGENT_TYPES = [chatAgentTypeId] as const;
+export const AGENT_BUILDER_AGENT_TYPES = [
+  chatAgentTypeId,
+  `${internalNamespaces.platformSignificantEvents}.investigation-type`,
+  `${internalNamespaces.platformSignificantEvents}.discovery-type`,
+  `${internalNamespaces.platformSignificantEvents}.discovery-judge-type`,
+] as const;
 
 export type AgentBuilderAgentType = (typeof AGENT_BUILDER_AGENT_TYPES)[number];
 
@@ -148,6 +153,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
 
   // Platform – Alerting
   'rule-management',
+  'action-policy-management',
 
   // Platform – Dashboard
   'dashboard-management',
@@ -171,8 +177,15 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'significant-events-onboarding',
   'streams-gap-detection',
 
+  // Platform – Context Engine
+  'ki-automation-generation',
+  'ki-retrieval',
+
   // Platform – Workflows
   'workflow-authoring',
+
+  // Evals
+  'eval-experiment-authoring',
 
   // Security Solution
   'entity-analytics-leads',
@@ -187,6 +200,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'threat-hunting',
   'find-security-rules',
   'pci-compliance',
+  'endpoint-forensic-analysis',
   'investigate-rule',
   'siem-readiness',
   'attack-discovery-alert-retrieval-builder',
@@ -250,6 +264,8 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
 
   // Platform – Streams (significant events)
   'platform.sig_event',
+  'platform.ki_feature',
+  'platform.sig_event_detection',
 
   // Platform – Discover
   'esql.query_results',
@@ -293,6 +309,9 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
 
   // Observability – APM
   'observability.service-map',
+
+  // Platform – Custom Content
+  'platform.custom_content.panel_context',
 ] as const;
 
 export type AgentBuilderBuiltinAttachment = (typeof AGENT_BUILDER_BUILTIN_ATTACHMENTS)[number];

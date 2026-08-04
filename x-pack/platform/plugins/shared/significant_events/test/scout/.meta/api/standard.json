@@ -1,5 +1,5 @@
 {
-  "sha1": "a223b2d26704fea67d837d0259fbabc8a8f3e137",
+  "sha1": "746690973c40791cd33a78571d11c7eacc1baf78",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -12,8 +12,8 @@
       "tags": [],
       "location": {
         "file": "x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/global.teardown.ts",
-        "line": 12,
-        "column": 19
+        "line": 5,
+        "column": 1
       }
     },
     {
@@ -23,8 +23,8 @@
       "tags": [],
       "location": {
         "file": "x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/global.setup.ts",
-        "line": 12,
-        "column": 16
+        "line": 5,
+        "column": 1
       }
     },
     {
@@ -39,8 +39,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/memory_and_investigation/memory_crud.spec.ts",
-        "line": 45,
-        "column": 12
+        "line": 39,
+        "column": 7
       }
     },
     {
@@ -55,8 +55,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/memory_and_investigation/memory_crud.spec.ts",
-        "line": 216,
-        "column": 12
+        "line": 212,
+        "column": 15
       }
     },
     {
@@ -71,8 +71,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/memory_and_investigation/memory_crud.spec.ts",
-        "line": 305,
-        "column": 12
+        "line": 265,
+        "column": 44
       }
     },
     {
@@ -87,8 +87,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/memory_and_investigation/memory_crud.spec.ts",
-        "line": 379,
-        "column": 12
+        "line": 335,
+        "column": 44
       }
     },
     {
@@ -103,8 +103,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/memory_and_investigation/memory_crud.spec.ts",
-        "line": 442,
-        "column": 12
+        "line": 419,
+        "column": 25
       }
     },
     {
@@ -119,8 +119,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/significant_events/onboarding_bulk_status.spec.ts",
-        "line": 29,
-        "column": 12
+        "line": 21,
+        "column": 44
       }
     },
     {
@@ -135,8 +135,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/significant_events/onboarding_bulk_status.spec.ts",
-        "line": 55,
-        "column": 12
+        "line": 47,
+        "column": 6
       }
     },
     {
@@ -151,13 +151,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/significant_events/onboarding_bulk_status.spec.ts",
-        "line": 67,
-        "column": 12
+        "line": 54,
+        "column": 30
       }
     },
     {
-      "id": "0d69f0f4d0e3e1c-f75acbd504e73c9",
-      "title": "Memory managed workflows system-streams-memory-synthesis: is installed and valid",
+      "id": "0d69f0f4d0e3e1c-365722779727e4f",
+      "title": "Managed workflows system-significant-events-discovery: is installed and valid",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -167,13 +167,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/workflows/managed_workflows.spec.ts",
-        "line": 40,
-        "column": 14
+        "line": 37,
+        "column": 76
       }
     },
     {
-      "id": "0d69f0f4d0e3e1c-80513cd613ff114",
-      "title": "Memory managed workflows system-streams-memory-consolidation: is installed and valid",
+      "id": "0d69f0f4d0e3e1c-ce49965b1da3194",
+      "title": "Managed workflows system-significant-events-triage: is installed and valid",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -183,13 +183,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/workflows/managed_workflows.spec.ts",
-        "line": 40,
-        "column": 14
+        "line": 37,
+        "column": 76
       }
     },
     {
-      "id": "0d69f0f4d0e3e1c-7d45219dead2acf",
-      "title": "Memory managed workflows system-streams-memory-conversation-scraper: is installed and valid",
+      "id": "0d69f0f4d0e3e1c-d95aa7602c1aaa1",
+      "title": "Managed workflows system-significant-events-memory-synthesis: is installed and valid",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -199,8 +199,40 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/workflows/managed_workflows.spec.ts",
-        "line": 40,
-        "column": 14
+        "line": 37,
+        "column": 76
+      }
+    },
+    {
+      "id": "0d69f0f4d0e3e1c-1d51e462f457f17",
+      "title": "Managed workflows system-significant-events-memory-consolidation: is installed and valid",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/workflows/managed_workflows.spec.ts",
+        "line": 37,
+        "column": 76
+      }
+    },
+    {
+      "id": "0d69f0f4d0e3e1c-ab74f08d1843e2e",
+      "title": "Managed workflows system-significant-events-memory-conversation-scraper: is installed and valid",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/workflows/managed_workflows.spec.ts",
+        "line": 37,
+        "column": 76
       }
     }
   ]

@@ -8,6 +8,7 @@
 import type { ZodObject } from '@kbn/zod/v4';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type {
+  AgentCreateRequest,
   Conversation,
   ConversationWithoutRounds,
   ConversationListOptions,
@@ -17,7 +18,12 @@ import type { AttachmentTypeDefinition } from './attachments';
 import type { RendererTypeDefinition } from './renderers';
 import type { SkillDefinition } from './skills';
 import type { SkillRegistry } from './skills/registry';
-import type { BuiltInAgentDefinition, AgentTypeDefinition, AgentRegistry } from './agents';
+import type {
+  BuiltInAgentDefinition,
+  AgentTypeDefinition,
+  AgentRegistry,
+  AgentAvailabilityConfig,
+} from './agents';
 import type { RunToolFn, ModelProvider } from './runner';
 import type { RunAgentFn } from './agents';
 import type { HooksServiceSetup } from './hooks/types';
@@ -119,6 +125,19 @@ export interface AgentsStart {
    * Return an agent registry scoped to the current user and context.
    */
   getRegistry: (opts: { request: KibanaRequest }) => Promise<AgentRegistry>;
+  /**
+   * Ensure a system-owned persisted agent exists in a space without overwriting later edits.
+   * Intended for code-owned startup installation; does not require a user request.
+   *
+   * Optional `availability` is kept in memory and keyed by `agent.id` (never persisted). Use the
+   * same {@link AgentAvailabilityConfig} shape as built-in agents. Prefer passing it on every
+   * `ensure` call for that id.
+   */
+  ensure: (opts: {
+    spaceId: string;
+    agent: AgentCreateRequest;
+    availability?: AgentAvailabilityConfig;
+  }) => Promise<void>;
 }
 
 /**

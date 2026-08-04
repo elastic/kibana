@@ -19,6 +19,7 @@ import {
   EuiToolTip,
   EuiTitle,
 } from '@elastic/eui';
+import { usePushFlyoutFocus } from '@kbn/data-lifecycle-phases';
 import { useDataPhasesFlyoutStyles } from './use_data_phases_flyout_styles';
 
 export interface FlyoutShellProps {
@@ -28,6 +29,7 @@ export interface FlyoutShellProps {
   onClose: () => void;
   title: React.ReactNode;
   tabsRow: React.ReactNode;
+  banner?: React.ReactNode;
   children: React.ReactNode;
   isSubmitting: boolean;
   isSaving?: boolean;
@@ -41,6 +43,7 @@ export const FlyoutShell = ({
   onClose,
   title,
   tabsRow,
+  banner,
   children,
   isSubmitting,
   isSaving,
@@ -48,6 +51,7 @@ export const FlyoutShell = ({
 }: FlyoutShellProps) => {
   const { headerStyles, footerStyles } = useDataPhasesFlyoutStyles();
   const isSaveDisabled = isSaveDisabledDueToInvalid || isSubmitting;
+  const { focusProps } = usePushFlyoutFocus();
 
   const button = (
     <EuiButton
@@ -83,7 +87,9 @@ export const FlyoutShell = ({
       ownFocus={false}
       onClose={onClose}
       aria-labelledby={flyoutTitleId}
+      role="region"
       data-test-subj={dataTestSubj}
+      {...focusProps}
     >
       <EuiFlyoutHeader hasBorder>
         <EuiFlexGroup direction="column" gutterSize="s" responsive={false} css={headerStyles}>
@@ -101,7 +107,7 @@ export const FlyoutShell = ({
         </EuiFlexGroup>
       </EuiFlyoutHeader>
 
-      <EuiFlyoutBody>{children}</EuiFlyoutBody>
+      <EuiFlyoutBody banner={banner}>{children}</EuiFlyoutBody>
 
       <EuiFlyoutFooter>
         <EuiFlexGroup

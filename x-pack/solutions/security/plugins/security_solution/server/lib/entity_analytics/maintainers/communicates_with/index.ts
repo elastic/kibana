@@ -15,6 +15,7 @@ export const communicatesWithMaintainer: RegisterEntityMaintainerConfig = {
   id: 'communicates_with',
   description: 'Computes communicates_with relationships from cloud API and MDM activity events',
   interval: '1d',
+  timeout: '1h',
   initialState: {},
   run: async ({
     esClient,
@@ -23,11 +24,11 @@ export const communicatesWithMaintainer: RegisterEntityMaintainerConfig = {
     status,
     crudClient,
     entityMetadataClient,
-    abortController,
+    signal,
     telemetry,
   }) => {
     const namespace = status.metadata.namespace;
-    logger.info('Starting communicates_with maintainer run');
+    logger.info('[communicates_with] Starting run');
 
     const collector: RelationshipMaintainerTelemetryCollector = {
       sources: [],
@@ -42,7 +43,7 @@ export const communicatesWithMaintainer: RegisterEntityMaintainerConfig = {
       crudClient,
       entityMetadataClient,
       integrations: COMMUNICATES_WITH_INTEGRATION_RELATIONSHIP_CONFIGS,
-      abortController,
+      signal,
       telemetryCollector: collector,
     });
 
@@ -63,7 +64,7 @@ export const communicatesWithMaintainer: RegisterEntityMaintainerConfig = {
     });
 
     logger.info(
-      `Completed run: ${result.totalBuckets} buckets, ${result.totalRecords} records, ${result.totalWritten} entities written, ${result.totalDroppedTargets} targets dropped, ${result.totalMetadataDocsApplied} metadata docs appended`
+      `[communicates_with] Completed run: ${result.totalBuckets} buckets, ${result.totalRecords} records, ${result.totalWritten} entities written, ${result.totalDroppedTargets} targets dropped, ${result.totalMetadataDocsApplied} metadata docs appended`
     );
     return result;
   },

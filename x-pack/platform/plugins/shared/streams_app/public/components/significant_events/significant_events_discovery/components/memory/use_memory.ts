@@ -175,15 +175,12 @@ const useMemoryTaskAction = (
       );
     },
     onError: (error) => {
-      core.notifications.toasts.addError(
-        error instanceof Error ? error : new Error(String(error)),
-        {
-          title: i18n.translate('xpack.streams.memory.taskError', {
-            defaultMessage: '{actionName} failed.',
-            values: { actionName },
-          }),
-        }
-      );
+      core.notifications.toasts.addError(getFormattedError(error), {
+        title: i18n.translate('xpack.streams.memory.taskError', {
+          defaultMessage: '{actionName} failed.',
+          values: { actionName },
+        }),
+      });
     },
   });
 };
@@ -262,14 +259,11 @@ export const useToggleMemoryWorkflows = () => {
       );
     },
     onError: (error) => {
-      core.notifications.toasts.addError(
-        error instanceof Error ? error : new Error(String(error)),
-        {
-          title: i18n.translate('xpack.streams.memory.workflowsToggleError', {
-            defaultMessage: 'Failed to update background workflow state.',
-          }),
-        }
-      );
+      core.notifications.toasts.addError(getFormattedError(error), {
+        title: i18n.translate('xpack.streams.memory.workflowsToggleError', {
+          defaultMessage: 'Failed to update background workflow state.',
+        }),
+      });
     },
   });
 };

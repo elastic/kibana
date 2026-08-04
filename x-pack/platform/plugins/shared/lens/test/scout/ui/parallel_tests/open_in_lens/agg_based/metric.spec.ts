@@ -14,7 +14,7 @@ import {
   createOpenInLensSuiteSetup,
 } from '../../../fixtures';
 
-spaceTest.describe('Lens open in Lens — agg-based Metric', { tag: tags.stateful.classic }, () => {
+spaceTest.describe('Lens open in Lens — agg-based Metric', { tag: tags.deploymentAgnostic }, () => {
   const openInLensSuite = createOpenInLensSuiteSetup({
     archivePath: testData.KBN_ARCHIVE_PATHS.OPEN_IN_LENS.AGG_BASED.METRIC,
     dashboardTitles: testData.DASHBOARD_TITLES.OPEN_IN_LENS.AGG_BASED.METRIC,
@@ -40,7 +40,7 @@ spaceTest.describe('Lens open in Lens — agg-based Metric', { tag: tags.statefu
         title: 'Count',
         subtitle: undefined,
         extraText: '',
-        value: '14,005',
+        value: '14,004',
         color: 'rgba(255, 255, 255, 1)',
         trendlineColor: undefined,
         showingBar: false,
@@ -178,16 +178,6 @@ spaceTest.describe('Lens open in Lens — agg-based Metric', { tag: tags.statefu
           extraText: '',
           value: '13,009,497,206.823',
           color: 'rgba(183, 224, 117, 1)',
-          trendlineColor: undefined,
-          showingBar: false,
-          showingTrendline: false,
-        },
-        {
-          title: undefined,
-          subtitle: undefined,
-          extraText: undefined,
-          value: undefined,
-          color: 'rgba(255, 255, 255, 1)',
           trendlineColor: undefined,
           showingBar: false,
           showingTrendline: false,

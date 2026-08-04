@@ -146,7 +146,8 @@
       "x-pack/solutions/security/packages/kbn-cloud-security-posture",
       "x-pack/solutions/security/packages/navigation",
       "x-pack/solutions/security/packages/side-nav",
-      "x-pack/solutions/security/packages/upselling"
+      "x-pack/solutions/security/packages/upselling",
+      "x-pack/solutions/security/packages/distribution-bar"
     ],
     "sharedPlatformPackages": [
       "x-pack/platform/packages/shared/kbn-cloud-security-posture"

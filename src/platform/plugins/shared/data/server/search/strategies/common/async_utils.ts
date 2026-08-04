@@ -11,8 +11,18 @@ import type {
   AsyncSearchSubmitRequest,
   AsyncSearchGetRequest,
 } from '@elastic/elasticsearch/lib/api/types';
+import type { TransportRequestOptions } from '@elastic/elasticsearch';
 import type { ISearchOptions } from '@kbn/search-types';
 import type { SearchConfigSchema } from '../../../config';
+
+/**
+ * Returns the `asStream` transport option with 401 retry handling enabled
+ * when streaming is requested, or `undefined` otherwise.
+ */
+export const getAsStreamWithRetryOption = (
+  stream: boolean | undefined
+): TransportRequestOptions['asStream'] =>
+  (stream ? { retryOn401: true } : undefined) as unknown as TransportRequestOptions['asStream'];
 
 /**
  @internal

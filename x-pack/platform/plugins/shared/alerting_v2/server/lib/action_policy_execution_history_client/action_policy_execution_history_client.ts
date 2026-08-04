@@ -12,18 +12,12 @@ import type { IValidatedEvent } from '@kbn/event-log-plugin/server';
 import { nodeBuilder, nodeTypes, toKqlExpression } from '@kbn/es-query';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import {
-  POLICY_EXECUTION_HISTORY_MAX_PER_PAGE,
+  EXECUTION_HISTORY_DEFAULT_PER_PAGE,
   type PolicyExecutionHistoryItem,
   type RuleResponse,
-  type PolicyExecutionOutcome,
   type PolicyExecutionOutcomeFilter,
   type SearchMatchCounts,
 } from '@kbn/alerting-v2-schemas';
-
-// Cap the per-page name-lookup batch. Independent from the embedded rules cap
-// in the response — broad policies can reference thousands of ids in a single
-// event but we only need names for ids that will actually render.
-const MAX_RULES_PER_NAME_LOOKUP = 1000;
 import { ActionPolicyClient } from '../action_policy_client';
 import { RulesClient } from '../rules_client';
 import { WorkflowsManagementApiToken } from '../dispatcher/steps/dispatch_step_tokens';
@@ -42,20 +36,31 @@ import {
   type NameMaps,
 } from './build_execution_history_item';
 
-const TIME_WINDOW_HOURS = 24;
+// Default lower bound on the event timestamp when the caller does not pass an
+// explicit `start_date`.
+const DEFAULT_TIME_WINDOW_HOURS = 24;
+
+// Pagination defaults applied when the caller omits them
 const DEFAULT_PAGE = 1;
-const DEFAULT_PER_PAGE = POLICY_EXECUTION_HISTORY_MAX_PER_PAGE;
 
 const SEARCH_ID_CAP = 500;
-const DEFAULT_OUTCOME_FILTER: PolicyExecutionOutcomeFilter = 'all';
 
-export interface ListExecutionHistoryParams {
+// Cap the per-page name-lookup batch.
+const MAX_RULES_PER_NAME_LOOKUP = 1000;
+
+export interface ListExecutionHistoryArgs {
   request: KibanaRequest;
   page?: number;
   perPage?: number;
   search?: string;
   ruleIds?: string[];
   outcome?: PolicyExecutionOutcomeFilter;
+  episodeIds?: string[];
+  /**
+   * Inclusive ISO timestamp lower bound for `@timestamp`. When provided it
+   * replaces the default rolling {@link DEFAULT_TIME_WINDOW_HOURS}-hour window.
+   */
+  startDate?: string;
 }
 
 export interface ListExecutionHistoryResult {
@@ -64,18 +69,6 @@ export interface ListExecutionHistoryResult {
   perPage: number;
   totalEvents: number;
   searchMatches: SearchMatchCounts | null;
-}
-
-export interface CountNewEventsSinceParams {
-  request: KibanaRequest;
-  since: string;
-  search?: string;
-  ruleIds?: string[];
-  outcome?: PolicyExecutionOutcomeFilter;
-}
-
-export interface CountNewEventsSinceResult {
-  count: number;
 }
 
 @injectable()
@@ -94,30 +87,40 @@ export class ActionPolicyExecutionHistoryClient {
   public async listExecutionHistory({
     request,
     page = DEFAULT_PAGE,
-    perPage = DEFAULT_PER_PAGE,
+    perPage = EXECUTION_HISTORY_DEFAULT_PER_PAGE,
     search,
     ruleIds,
-    outcome = DEFAULT_OUTCOME_FILTER,
-  }: ListExecutionHistoryParams): Promise<ListExecutionHistoryResult> {
-    const startDate = new Date(Date.now() - TIME_WINDOW_HOURS * 60 * 60 * 1000).toISOString();
+    outcome,
+    episodeIds,
+    startDate,
+  }: ListExecutionHistoryArgs): Promise<ListExecutionHistoryResult> {
+    const effectiveStartDate =
+      startDate ?? new Date(Date.now() - DEFAULT_TIME_WINDOW_HOURS * 60 * 60 * 1000).toISOString();
     const spaceId = this.spaces.spacesService.getSpaceId(request);
     const searchIsActive = search !== undefined && search.trim() !== '';
 
     const matchingSearchIds = await this.resolveSearchIds(search);
 
     if (searchIsActive && !matchingSearchIds.hasMatches) {
-      return { items: [], page, perPage, totalEvents: 0, searchMatches: matchingSearchIds.matches };
+      return {
+        items: [],
+        page,
+        perPage,
+        totalEvents: 0,
+        searchMatches: matchingSearchIds.matches,
+      };
     }
 
     const result = await this.eventLogService.findActionPolicyExecutionEvents({
       spaceId,
-      startDate,
+      startDate: effectiveStartDate,
       page,
       perPage,
-      outcome: toOutcomeForService(outcome),
+      outcomes: outcome,
       policyIds: matchingSearchIds.policyIds,
       ruleIds: matchingSearchIds.ruleIds,
       mandatoryRuleIds: ruleIds,
+      episodeIds,
     });
 
     const nameMaps = await this.resolveNames(result.events, spaceId);
@@ -139,30 +142,6 @@ export class ActionPolicyExecutionHistoryClient {
       totalEvents: result.total,
       searchMatches: matchingSearchIds.matches,
     };
-  }
-
-  public async countNewEventsSince({
-    request,
-    since,
-    search,
-    ruleIds,
-    outcome = DEFAULT_OUTCOME_FILTER,
-  }: CountNewEventsSinceParams): Promise<CountNewEventsSinceResult> {
-    const spaceId = this.spaces.spacesService.getSpaceId(request);
-
-    const searchIds = await this.resolveSearchIds(search);
-    if (search !== undefined && !searchIds.hasMatches) {
-      return { count: 0 };
-    }
-
-    return this.eventLogService.countActionPolicyExecutionEventsSince({
-      spaceId,
-      since,
-      outcome: toOutcomeForService(outcome),
-      policyIds: searchIds.policyIds,
-      ruleIds: searchIds.ruleIds,
-      mandatoryRuleIds: ruleIds,
-    });
   }
 
   private async resolveSearchIds(search: string | undefined): Promise<ResolvedSearchIds> {
@@ -266,10 +245,6 @@ export class ActionPolicyExecutionHistoryClient {
     this.logger.error({ error, code });
   }
 }
-
-const toOutcomeForService = (
-  outcome: PolicyExecutionOutcomeFilter
-): PolicyExecutionOutcome | undefined => (outcome === 'all' ? undefined : outcome);
 
 // Only treat the search term as a candidate id when it looks like a UUID — Kibana saved
 // objects created via the API use UUIDs by default. Avoids polluting the KQL with ordinary

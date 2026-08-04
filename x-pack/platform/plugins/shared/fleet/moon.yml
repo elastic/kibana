@@ -66,6 +66,7 @@ dependsOn:
   - '@kbn/test'
   - '@kbn/stdio-dev-helpers'
   - '@kbn/tooling-log'
+  - '@kbn/apm-types'
   - '@kbn/apm-utils'
   - '@kbn/core-saved-objects-common'
   - '@kbn/core-http-server'
@@ -131,6 +132,7 @@ dependsOn:
   - '@kbn/human-readable-id'
   - '@kbn/elastic-agent-condition-language'
   - '@kbn/app-header'
+  - '@kbn/core-http-browser'
 tags:
   - plugin
   - prod

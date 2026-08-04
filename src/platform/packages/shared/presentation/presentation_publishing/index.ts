@@ -227,9 +227,15 @@ export {
   type HasSerializedChildState,
 } from './interfaces/containers/child_state';
 
-export { childrenUnsavedChanges$ } from './interfaces/containers/container_state/children_unsaved_changes';
+export {
+  childrenUnsavedChanges$,
+  DEBOUNCE_TIME as CHILDREN_UNSAVED_CHANGES_DEBOUNCE,
+} from './interfaces/containers/container_state/children_unsaved_changes';
 
-export { initializeStateApi } from './interfaces/containers/container_state/initialize_state_api';
+export {
+  initializeStateApi,
+  UNSAVED_CHANGES_DEBOUNCE,
+} from './interfaces/containers/container_state/initialize_state_api';
 
 export {
   apiCanDuplicatePanels,
@@ -289,3 +295,5 @@ export { apiCanFocusPanel, type CanFocusPanel } from './interfaces/containers/ca
 
 export { apiPublishesESQLQuery, type PublishesESQLQuery } from './interfaces/publishes_esql_query';
 export { apiPublishesEsqlUsage, type PublishesEsqlUsage } from './interfaces/publishes_esql_usage';
+
+export { apiSupportsJsonExport, type SupportsJsonExport } from './interfaces/supports_json_export';

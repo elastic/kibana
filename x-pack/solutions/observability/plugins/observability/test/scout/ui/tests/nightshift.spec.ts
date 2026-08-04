@@ -7,10 +7,7 @@
 
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
-import {
-  OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS,
-  OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_DISCOVERY,
-} from '@kbn/management-settings-ids';
+import { APP_HEADER_TEST_SUBJECTS, getAppMenuItemTestSubj } from '@kbn/app-header';
 import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '@kbn/streams-plugin/common';
 import { test } from '../fixtures';
 
@@ -18,7 +15,7 @@ test.describe(
   'Nightshift navigation from Significant Events Discovery',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
-    test.beforeAll(async ({ apiServices, kbnClient, config }) => {
+    test.beforeAll(async ({ apiServices, config }) => {
       // Significant events discovery is gated behind the streams.significantEventsAvailable feature
       // flag (defaults to false). The /internal/core/_settings route used to force it on is only
       // registered when coreApp.allowDynamicConfigOverrides=true (Scout's local base configs);
@@ -38,24 +35,16 @@ test.describe(
           [STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG]: true,
         },
       });
-      await kbnClient.uiSettings.update({
-        [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS]: true,
-        [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_DISCOVERY]: true,
-      });
     });
 
     test.beforeEach(async ({ browserAuth }) => {
       await browserAuth.loginAsAdmin();
     });
 
-    test.afterAll(async ({ apiServices, kbnClient, config }) => {
+    test.afterAll(async ({ apiServices, config }) => {
       if (config.isCloud) {
         return;
       }
-      await kbnClient.uiSettings.update({
-        [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS]: false,
-        [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_DISCOVERY]: false,
-      });
       await apiServices.core.settings({
         'feature_flags.overrides': {
           [STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG]: false,
@@ -63,15 +52,25 @@ test.describe(
       });
     });
 
-    test('navigates to Nightshift page from Streams discovery', async ({ page }) => {
+    test('navigates between Streams discovery, Nightshift, and settings', async ({ page }) => {
       await page.gotoApp('streams/_discovery/streams');
 
-      const nightshiftButton = page.getByRole('link', { name: /nightshift/i });
+      const nightshiftButton = page.testSubj.locator(getAppMenuItemTestSubj('nightshift'));
       await expect(nightshiftButton).toBeVisible({ timeout: 60_000 });
       await nightshiftButton.click();
 
       await expect(page).toHaveURL(/\/app\/observability\/nightshift/, { timeout: 60_000 });
       await expect(page.testSubj.locator('nightshiftPage')).toBeVisible({ timeout: 60_000 });
+
+      await expect(page.testSubj.locator(APP_HEADER_TEST_SUBJECTS.root)).toHaveCount(1);
+      await expect(page.testSubj.locator(APP_HEADER_TEST_SUBJECTS.title)).toHaveText('Nightshift');
+
+      // Single settings action stays inline at Scout's default viewport — click it directly
+      // (no overflow branch; expect() auto-waits for mount).
+      const settingsLink = page.testSubj.locator('nightshiftSettingsLink');
+      await expect(settingsLink).toBeVisible();
+      await settingsLink.click();
+      await expect(page).toHaveURL(/\/app\/streams\/_discovery\/settings/);
     });
   }
 );

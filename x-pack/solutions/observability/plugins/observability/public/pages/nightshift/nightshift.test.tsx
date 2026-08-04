@@ -5,36 +5,40 @@
  * 2.0.
  */
 
-import { render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
+import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
 import { I18nProvider } from '@kbn/i18n-react';
 import { NightshiftPage } from './nightshift';
 import { useKibana } from '../../utils/kibana_react';
 import { usePluginContext } from '../../hooks/use_plugin_context';
-import { useFetchSignificantEventsAvailability } from './hooks/use_fetch_significant_events_availability';
 import { OVERVIEW_PATH } from '../../../common/locators/paths';
 
 const mockReplace = jest.fn();
 
 jest.mock('react-router-dom', () => ({ useHistory: () => ({ replace: mockReplace }) }));
 jest.mock('@kbn/observability-shared-plugin/public', () => ({ useBreadcrumbs: jest.fn() }));
-jest.mock('./components/nightshift_app', () => ({
+jest.mock('./app/nightshift_app', () => ({
   NightshiftApp: () => <div data-test-subj="nightshiftAppStub" />,
 }));
-jest.mock('../../utils/kibana_react');
-jest.mock('../../hooks/use_plugin_context');
-jest.mock('./hooks/use_fetch_significant_events_availability');
+jest.mock('../../utils/kibana_react', () => ({ useKibana: jest.fn() }));
+jest.mock('../../hooks/use_plugin_context', () => ({ usePluginContext: jest.fn() }));
 
 const mockUseKibana = useKibana as jest.Mock;
 const mockUsePluginContext = usePluginContext as jest.Mock;
-const mockUseAvailability = useFetchSignificantEventsAvailability as jest.Mock;
 
-const getUiSetting = jest.fn();
+const getBooleanValue = jest.fn();
+const getUrlForApp = jest.fn((appId: string, { path }: { path: string }) => `/app/${appId}${path}`);
+const navigateToUrl = jest.fn();
 
 function renderPage() {
   return render(
     <I18nProvider>
-      <NightshiftPage />
+      <MockAppHeaderProvider>
+        <NightshiftPage />
+      </MockAppHeaderProvider>
     </I18nProvider>
   );
 }
@@ -42,63 +46,65 @@ function renderPage() {
 describe('NightshiftPage', () => {
   beforeEach(() => {
     mockReplace.mockClear();
-    getUiSetting.mockReturnValue(true);
+    navigateToUrl.mockClear();
+    getBooleanValue.mockReturnValue(true);
     mockUseKibana.mockReturnValue({
       services: {
+        application: { getUrlForApp, navigateToUrl },
         http: { basePath: { prepend: (path: string) => path } },
-        uiSettings: { get: getUiSetting },
+        featureFlags: { getBooleanValue },
         serverless: undefined,
       },
     });
     mockUsePluginContext.mockReturnValue({
       ObservabilityPageTemplate: ({ children }: { children: React.ReactNode }) => <>{children}</>,
     });
-    mockUseAvailability.mockReturnValue({
-      data: { available: true },
-      error: null,
-      isLoading: false,
-    });
   });
 
-  it('redirects to the overview when the discovery setting is disabled', () => {
-    getUiSetting.mockReturnValue(false);
+  it('redirects to the overview when the availability flag is disabled', () => {
+    getBooleanValue.mockReturnValue(false);
     renderPage();
     expect(mockReplace).toHaveBeenCalledWith(OVERVIEW_PATH);
     expect(screen.queryByTestId('nightshiftAppStub')).not.toBeInTheDocument();
   });
 
-  it('renders the app when discovery is enabled and significant events is available', () => {
+  it('renders the app when the availability flag is enabled', async () => {
     renderPage();
     expect(mockReplace).not.toHaveBeenCalled();
+    await waitFor(() =>
+      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Nightshift')
+    );
     expect(screen.getByTestId('nightshiftAppStub')).toBeInTheDocument();
   });
 
-  it('waits (renders nothing, no redirect) while availability is resolving', () => {
-    mockUseAvailability.mockReturnValue({ data: undefined, error: null, isLoading: true });
+  it('links to Streams settings with EBT tracking', async () => {
     renderPage();
-    expect(mockReplace).not.toHaveBeenCalled();
-    expect(screen.queryByTestId('nightshiftAppStub')).not.toBeInTheDocument();
-  });
+    await openAppMenuOverflow();
 
-  it('redirects when significant events is unavailable', () => {
-    mockUseAvailability.mockReturnValue({
-      data: { available: false, reason: 'feature_flag' },
-      error: null,
-      isLoading: false,
-    });
-    renderPage();
-    expect(mockReplace).toHaveBeenCalledWith(OVERVIEW_PATH);
-    expect(screen.queryByTestId('nightshiftAppStub')).not.toBeInTheDocument();
-  });
+    const settingsLink = await screen.findByTestId('nightshiftSettingsLink');
+    expect(settingsLink).toHaveAttribute('href', '/app/streams/_discovery/settings');
 
-  it('redirects when the availability check fails', () => {
-    mockUseAvailability.mockReturnValue({
-      data: undefined,
-      error: new Error('boom'),
-      isLoading: false,
-    });
-    renderPage();
-    expect(mockReplace).toHaveBeenCalledWith(OVERVIEW_PATH);
-    expect(screen.queryByTestId('nightshiftAppStub')).not.toBeInTheDocument();
+    let trackedClick: { action: string | null; element: string | null } | undefined;
+    const captureTrackedClick = (event: MouseEvent) => {
+      const target = event.target;
+      const trackedTarget = target instanceof Element ? target.closest('[data-ebt-action]') : null;
+      trackedClick = trackedTarget
+        ? {
+            action: trackedTarget.getAttribute('data-ebt-action'),
+            element: trackedTarget.getAttribute('data-ebt-element'),
+          }
+        : undefined;
+    };
+    document.addEventListener('click', captureTrackedClick);
+    await act(async () => fireEvent.click(settingsLink));
+    document.removeEventListener('click', captureTrackedClick);
+
+    await waitFor(() =>
+      expect(trackedClick).toEqual({
+        action: 'viewSettings',
+        element: 'nightshiftPageHeader',
+      })
+    );
+    expect(navigateToUrl).toHaveBeenCalledWith('/app/streams/_discovery/settings');
   });
 });

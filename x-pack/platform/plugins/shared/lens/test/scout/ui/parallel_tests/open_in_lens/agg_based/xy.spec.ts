@@ -12,10 +12,9 @@ import {
   canConvertToLensByTitle,
   convertToLensByTitle,
   createOpenInLensSuiteSetup,
-  getChartDebugData,
 } from '../../../fixtures';
 
-spaceTest.describe('Lens open in Lens — agg-based XY', { tag: tags.stateful.classic }, () => {
+spaceTest.describe('Lens open in Lens — agg-based XY', { tag: tags.deploymentAgnostic }, () => {
   const openInLensSuite = createOpenInLensSuiteSetup({
     archivePath: testData.KBN_ARCHIVE_PATHS.OPEN_IN_LENS.AGG_BASED.XY,
     dashboardTitles: testData.DASHBOARD_TITLES.OPEN_IN_LENS.AGG_BASED.XY,
@@ -188,7 +187,7 @@ spaceTest.describe('Lens open in Lens — agg-based XY', { tag: tags.stateful.cl
     expect(await lens.getSelectedAxisSide()).toBe('Right');
   });
 
-  spaceTest('should convert split series', async ({ page, pageObjects }) => {
+  spaceTest('should convert split series', async ({ pageObjects }) => {
     const { dashboard, lens } = pageObjects;
     const expectedLegend = ['win 8', 'win xp', 'win 7', 'ios', 'osx'];
 
@@ -203,13 +202,15 @@ spaceTest.describe('Lens open in Lens — agg-based XY', { tag: tags.stateful.cl
     await expect
       .poll(
         async () =>
-          (await getChartDebugData(page, 'xyVisChart')).legend?.items.map((item) => item.name),
+          (
+            await lens.getCurrentChartDebugState('xyVisChart')
+          ).legend?.items.map((item) => item.name),
         { timeout: 20_000 }
       )
       .toStrictEqual(expectedLegend);
   });
 
-  spaceTest('should convert x-axis', async ({ page, pageObjects }) => {
+  spaceTest('should convert x-axis', async ({ pageObjects }) => {
     const { dashboard, lens } = pageObjects;
     const expectedLegend = ['Count'];
 
@@ -224,7 +225,9 @@ spaceTest.describe('Lens open in Lens — agg-based XY', { tag: tags.stateful.cl
     await expect
       .poll(
         async () =>
-          (await getChartDebugData(page, 'xyVisChart')).legend?.items.map((item) => item.name),
+          (
+            await lens.getCurrentChartDebugState('xyVisChart')
+          ).legend?.items.map((item) => item.name),
         { timeout: 20_000 }
       )
       .toStrictEqual(expectedLegend);

@@ -9,12 +9,15 @@ import { firstValueFrom, of, toArray } from 'rxjs';
 import {
   ChatEventType,
   ConversationRoundStatus,
-  ConversationSourceType,
+  ConversationOriginType,
   isRoundCompleteEvent,
   type ChatEvent,
 } from '@kbn/agent-builder-common';
 import type { ConversationStateManager, ModelProvider } from '@kbn/agent-builder-server/runner';
-import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
+import {
+  createAttachmentStateManager,
+  type AttachmentStateManager,
+} from '@kbn/agent-builder-server/attachments';
 import { createRound } from '../../../../test_utils/conversations';
 import type { ConvertedEvents } from '../convert_graph_events';
 import { createFinalStateEvent } from '../events';
@@ -33,11 +36,11 @@ describe('addRoundCompleteEvent', () => {
     } as unknown as AttachmentStateManager,
   });
 
-  it('stamps source type on the round and source author on the input for new rounds', async () => {
-    const source = {
-      type: ConversationSourceType.Slack,
+  it('stamps origin type and author on the round for new rounds', async () => {
+    const origin = {
+      type: ConversationOriginType.Slack,
       external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
-      author: { id: 'U123', name: 'Jane Doe', handle: 'jane' },
+      author: { id: 'U123', full_name: 'Jane Doe', username: 'jane' },
     };
     const messageCompleteEvent: ChatEvent = {
       type: ChatEventType.messageComplete,
@@ -56,7 +59,8 @@ describe('addRoundCompleteEvent', () => {
           ...createDeps(),
           pendingRound: undefined,
           userInput: { message: '@agent summarize this' },
-          source,
+          origin,
+          author: origin.author,
           startTime: new Date('2026-01-01T00:00:00.000Z'),
         }),
         toArray()
@@ -65,21 +69,23 @@ describe('addRoundCompleteEvent', () => {
 
     const roundCompleteEvent = events.find(isRoundCompleteEvent);
 
-    expect(roundCompleteEvent?.data.round.source).toEqual({
-      type: ConversationSourceType.Slack,
+    expect(roundCompleteEvent?.data.round.origin).toEqual({
+      type: ConversationOriginType.Slack,
     });
-    expect(roundCompleteEvent?.data.round.input.source).toEqual({
-      author: { id: 'U123', name: 'Jane Doe', handle: 'jane' },
+    expect(roundCompleteEvent?.data.round.author).toEqual({
+      id: 'U123',
+      full_name: 'Jane Doe',
+      username: 'jane',
     });
   });
 
-  it('preserves the original round source when resuming a pending round', async () => {
+  it('preserves the original round origin and author when resuming a pending round', async () => {
     const pendingRound = createRound({
       status: ConversationRoundStatus.awaitingPrompt,
-      source: { type: ConversationSourceType.Slack },
+      origin: { type: ConversationOriginType.Slack },
+      author: { id: 'U123', full_name: 'Jane Doe', username: 'jane' },
       input: {
         message: '@agent summarize this',
-        source: { author: { id: 'U123', name: 'Jane Doe', handle: 'jane' } },
       },
     });
     const messageCompleteEvent: ChatEvent = {
@@ -99,10 +105,10 @@ describe('addRoundCompleteEvent', () => {
           ...createDeps(),
           pendingRound,
           userInput: { message: 'continue' },
-          source: {
-            type: ConversationSourceType.Slack,
+          origin: {
+            type: ConversationOriginType.Slack,
             external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
-            author: { id: 'U999', name: 'John Roe', handle: 'john' },
+            author: { id: 'U999', full_name: 'John Roe', username: 'john' },
           },
           startTime: new Date('2026-01-01T00:00:00.000Z'),
         }),
@@ -112,11 +118,224 @@ describe('addRoundCompleteEvent', () => {
 
     const roundCompleteEvent = events.find(isRoundCompleteEvent);
 
-    expect(roundCompleteEvent?.data.round.source).toEqual({
-      type: ConversationSourceType.Slack,
+    expect(roundCompleteEvent?.data.round.origin).toEqual({
+      type: ConversationOriginType.Slack,
     });
-    expect(roundCompleteEvent?.data.round.input.source).toEqual({
-      author: { id: 'U123', name: 'Jane Doe', handle: 'jane' },
+    expect(roundCompleteEvent?.data.round.author).toEqual({
+      id: 'U123',
+      full_name: 'Jane Doe',
+      username: 'jane',
     });
+  });
+
+  it('stamps the resolved author on the round when there is no origin', async () => {
+    const messageCompleteEvent: ChatEvent = {
+      type: ChatEventType.messageComplete,
+      data: {
+        message_id: 'message-1',
+        message_content: 'Done',
+      },
+    };
+
+    const events = await firstValueFrom(
+      of(
+        createFinalStateEvent({ currentCycle: 0, errorCount: 0 } as never) as ConvertedEvents,
+        messageCompleteEvent as ConvertedEvents
+      ).pipe(
+        addRoundCompleteEvent({
+          ...createDeps(),
+          pendingRound: undefined,
+          userInput: { message: 'Hello' },
+          author: { id: 'profile-1', username: 'jane' },
+          startTime: new Date('2026-01-01T00:00:00.000Z'),
+        }),
+        toArray()
+      )
+    );
+
+    const roundCompleteEvent = events.find(isRoundCompleteEvent);
+
+    expect(roundCompleteEvent?.data.round.author).toEqual({ id: 'profile-1', username: 'jane' });
+    expect(roundCompleteEvent?.data.round.origin).toBeUndefined();
+  });
+
+  const typeDefStub = {
+    getTypeDefinition: (type: string) => ({
+      id: type,
+      validate: (input: unknown) => ({ valid: true as const, data: input }),
+      format: () => ({ getRepresentation: () => ({ type: 'text' as const, value: '' }) }),
+    }),
+  };
+  it('persists attachment_refs and a rendered attachment_context for an attachment created this round', async () => {
+    const attachmentStateManager = createAttachmentStateManager([], typeDefStub);
+    // Mirrors what the attachment_add tool handler does mid-round.
+    await attachmentStateManager.add(
+      { id: 'a-1', type: 'text', data: { content: 'hi' }, description: 'A note' },
+      'user'
+    );
+    const messageCompleteEvent: ChatEvent = {
+      type: ChatEventType.messageComplete,
+      data: { message_id: 'msg-1', message_content: 'done' },
+    };
+
+    const events = await firstValueFrom(
+      of(
+        createFinalStateEvent({ currentCycle: 0, errorCount: 0 } as never) as ConvertedEvents,
+        messageCompleteEvent as ConvertedEvents
+      ).pipe(
+        addRoundCompleteEvent({
+          ...createDeps(),
+          attachmentStateManager,
+          pendingRound: undefined,
+          userInput: { message: 'hello' },
+          startTime: new Date(),
+        }),
+        toArray()
+      )
+    );
+
+    const roundCompleteEvent = events.find(isRoundCompleteEvent);
+
+    expect(roundCompleteEvent?.data.round.input.attachment_refs).toEqual([
+      { attachment_id: 'a-1', version: 1, operation: 'created', actor: 'user' },
+    ]);
+    expect(roundCompleteEvent?.data.round.input.attachment_context).toContain(
+      '<attachments count="1">'
+    );
+    expect(roundCompleteEvent?.data.round.input.attachment_context).toContain(
+      'attachment_id="a-1"'
+    );
+    expect(roundCompleteEvent?.data.round.input.attachment_context).toContain(
+      'description="A note"'
+    );
+  });
+
+  it('persists an "updated" attachment_context for an attachment updated this round', async () => {
+    const attachmentStateManager = createAttachmentStateManager(
+      [
+        {
+          id: 'a-1',
+          type: 'text',
+          active: true,
+          current_version: 1,
+          versions: [
+            {
+              version: 1,
+              data: { content: 'v1' },
+              created_at: '2024-01-01T00:00:00.000Z',
+              content_hash: 'hash-v1',
+              estimated_tokens: 1,
+            },
+          ],
+        },
+      ],
+      typeDefStub
+    );
+    await attachmentStateManager.update('a-1', { data: { content: 'v2' } }, 'user');
+    const messageCompleteEvent: ChatEvent = {
+      type: ChatEventType.messageComplete,
+      data: { message_id: 'msg-1', message_content: 'done' },
+    };
+
+    const events = await firstValueFrom(
+      of(
+        createFinalStateEvent({ currentCycle: 0, errorCount: 0 } as never) as ConvertedEvents,
+        messageCompleteEvent as ConvertedEvents
+      ).pipe(
+        addRoundCompleteEvent({
+          ...createDeps(),
+          attachmentStateManager,
+          pendingRound: undefined,
+          userInput: { message: 'hello' },
+          startTime: new Date(),
+        }),
+        toArray()
+      )
+    );
+
+    const roundCompleteEvent = events.find(isRoundCompleteEvent);
+
+    expect(roundCompleteEvent?.data.round.input.attachment_refs).toEqual([
+      { attachment_id: 'a-1', version: 2, operation: 'updated', actor: 'user' },
+    ]);
+    expect(roundCompleteEvent?.data.round.input.attachment_context).toContain(
+      '<attachments count="1">'
+    );
+    expect(roundCompleteEvent?.data.round.input.attachment_context).toContain(
+      'attachment_id="a-1"'
+    );
+  });
+
+  it('does not set attachment_context when no attachments were created or updated this round', async () => {
+    const attachmentStateManager = createAttachmentStateManager([], typeDefStub);
+    const messageCompleteEvent: ChatEvent = {
+      type: ChatEventType.messageComplete,
+      data: { message_id: 'msg-1', message_content: 'done' },
+    };
+
+    const events = await firstValueFrom(
+      of(
+        createFinalStateEvent({ currentCycle: 0, errorCount: 0 } as never) as ConvertedEvents,
+        messageCompleteEvent as ConvertedEvents
+      ).pipe(
+        addRoundCompleteEvent({
+          ...createDeps(),
+          attachmentStateManager,
+          pendingRound: undefined,
+          userInput: { message: 'hello' },
+          startTime: new Date(),
+        }),
+        toArray()
+      )
+    );
+
+    const roundCompleteEvent = events.find(isRoundCompleteEvent);
+
+    expect(roundCompleteEvent?.data.round.input.attachment_refs).toBeUndefined();
+    expect(roundCompleteEvent?.data.round.input.attachment_context).toBeUndefined();
+  });
+
+  it('only reports attachments touched this round, not ones created before clearAccessTracking()', async () => {
+    const attachmentStateManager = createAttachmentStateManager([], typeDefStub);
+    await attachmentStateManager.add(
+      { id: 'earlier', type: 'text', data: { content: 'from a previous round' } },
+      'user'
+    );
+    // Simulates prepare_conversation.ts's per-round reset of access tracking.
+    attachmentStateManager.clearAccessTracking();
+    await attachmentStateManager.add(
+      { id: 'this-round', type: 'text', data: { content: 'now' } },
+      'user'
+    );
+    const messageCompleteEvent: ChatEvent = {
+      type: ChatEventType.messageComplete,
+      data: { message_id: 'msg-1', message_content: 'done' },
+    };
+
+    const events = await firstValueFrom(
+      of(
+        createFinalStateEvent({ currentCycle: 0, errorCount: 0 } as never) as ConvertedEvents,
+        messageCompleteEvent as ConvertedEvents
+      ).pipe(
+        addRoundCompleteEvent({
+          ...createDeps(),
+          attachmentStateManager,
+          pendingRound: undefined,
+          userInput: { message: 'hello' },
+          startTime: new Date(),
+        }),
+        toArray()
+      )
+    );
+
+    const roundCompleteEvent = events.find(isRoundCompleteEvent);
+
+    expect(roundCompleteEvent?.data.round.input.attachment_refs).toEqual([
+      { attachment_id: 'this-round', version: 1, operation: 'created', actor: 'user' },
+    ]);
+    expect(roundCompleteEvent?.data.round.input.attachment_context).toContain(
+      'attachment_id="this-round"'
+    );
+    expect(roundCompleteEvent?.data.round.input.attachment_context).not.toContain('earlier');
   });
 });

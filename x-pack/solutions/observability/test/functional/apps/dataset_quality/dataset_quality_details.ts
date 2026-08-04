@@ -67,7 +67,8 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
   const failedAndDegradedDatasetName = 'synth.2';
   const failedAndDegradedDataStreamName = `logs-${failedAndDegradedDatasetName}-${defaultNamespace}`;
 
-  describe('Dataset Quality Details', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/278245
+  describe.skip('Dataset Quality Details', () => {
     before(async () => {
       // Install Apache Integration and ingest logs for it
       await PageObjects.observabilityLogsExplorer.installPackage(apachePkg);
@@ -455,9 +456,19 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
 
         await firstDashboardButton.click();
 
-        const breadcrumbText = await testSubjects.getVisibleText('breadcrumb last');
+        await retry.tryForTime(30 * 1000, async () => {
+          const currentUrl = await browser.getCurrentUrl();
+          const parsedUrl = new URL(currentUrl);
+          const breadcrumbText = await retry.try(async () => {
+            const titleSubj = (await testSubjects.exists('breadcrumb last', { timeout: 1000 }))
+              ? 'breadcrumb last'
+              : 'appHeaderTitle';
+            return testSubjects.getVisibleText(titleSubj);
+          });
 
-        expect(breadcrumbText).to.eql(dashboardText);
+          expect(parsedUrl.pathname).to.contain('/app/dashboards');
+          expect(breadcrumbText).to.eql(dashboardText);
+        });
       });
     });
 

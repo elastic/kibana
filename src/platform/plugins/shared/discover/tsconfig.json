@@ -156,6 +156,8 @@
     "@kbn/use-observable",
     "@kbn/core-security-server",
     "@kbn/esql-views-plugin",
+    "@kbn/core-http-server",
+    "@kbn/ui-callout",
   ],
   "exclude": ["target/**/*"]
 }

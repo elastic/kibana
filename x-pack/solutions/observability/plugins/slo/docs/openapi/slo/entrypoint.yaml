@@ -39,3 +39,7 @@ paths:
     $ref: 'paths/s@{spaceid}@api@slos@_bulk_delete.yaml'
   '/s/{spaceId}/api/observability/slos/_bulk_delete/{taskId}':
     $ref: 'paths/s@{spaceid}@api@slos@_bulk_delete@{taskid}.yaml'
+  '/s/{spaceId}/api/observability/slos/_bulk_snapshot':
+    $ref: 'paths/s@{spaceid}@api@slos@_bulk_snapshot.yaml'
+  '/s/{spaceId}/api/observability/slos/{sloId}/_snapshot':
+    $ref: 'paths/s@{spaceid}@api@slos@{sloid}@_snapshot.yaml'

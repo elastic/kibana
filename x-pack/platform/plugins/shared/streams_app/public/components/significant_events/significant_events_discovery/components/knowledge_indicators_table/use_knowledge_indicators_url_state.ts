@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { castArray } from 'lodash';
 import { useDebouncedValue } from '@kbn/react-hooks';
 import { COMPUTED_FEATURE_TYPES } from '@kbn/significant-events-schema';
 import type { KnowledgeIndicator } from '@kbn/streams-ai';
@@ -20,9 +21,6 @@ import { getKnowledgeIndicatorType } from '../../../stream_detail_significant_ev
 
 const SEARCH_DEBOUNCE_MS = 300;
 const COMPUTED_FEATURE_TYPES_SET = new Set<string>(COMPUTED_FEATURE_TYPES);
-
-const toArray = (v: string | string[] | undefined): string[] =>
-  v == null ? [] : Array.isArray(v) ? v : [v];
 
 interface UseKnowledgeIndicatorsUrlStateParams {
   knowledgeIndicators: KnowledgeIndicator[];
@@ -53,10 +51,16 @@ export function useKnowledgeIndicatorsUrlState({
   const [statusFilter, setStatusFilter] = useState<'active' | 'excluded'>(() =>
     query?.status === 'excluded' ? 'excluded' : 'active'
   );
-  const [selectedTypes, setSelectedTypes] = useState<string[]>(() => toArray(query?.type));
-  const [selectedSubtypes, setSelectedSubtypes] = useState<string[]>(() => toArray(query?.subtype));
-  const [selectedStreams, setSelectedStreams] = useState<string[]>(() => toArray(query?.stream));
-  const initialUrlStreamsRef = useRef<string[]>(toArray(query?.stream));
+  const [selectedTypes, setSelectedTypes] = useState<string[]>(() =>
+    query?.type ? castArray(query.type) : []
+  );
+  const [selectedSubtypes, setSelectedSubtypes] = useState<string[]>(() =>
+    query?.subtype ? castArray(query.subtype) : []
+  );
+  const [selectedStreams, setSelectedStreams] = useState<string[]>(() =>
+    query?.stream ? castArray(query.stream) : []
+  );
+  const initialUrlStreamsRef = useRef<string[]>(query?.stream ? castArray(query.stream) : []);
   const [hideComputedTypes, setHideComputedTypes] = useState(() =>
     query?.showComputed === 'true' ? false : true
   );
@@ -218,6 +222,16 @@ export function useKnowledgeIndicatorsUrlState({
     [router, buildQueryParams]
   );
 
+  const selectKnowledgeIndicator = useCallback(
+    (ki: KnowledgeIndicator) => {
+      router.push('/_discovery/{tab}', {
+        path: { tab: 'knowledge_indicators' },
+        query: buildQueryParams(getKnowledgeIndicatorItemId(ki)),
+      });
+    },
+    [router, buildQueryParams]
+  );
+
   const handleStatusFilterChange = useCallback(
     (filter: 'active' | 'excluded') => {
       setStatusFilter(filter);
@@ -292,5 +306,6 @@ export function useKnowledgeIndicatorsUrlState({
     handleSearchChange,
     closeFlyout,
     toggleSelectedKnowledgeIndicator,
+    selectKnowledgeIndicator,
   };
 }

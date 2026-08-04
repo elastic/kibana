@@ -48,6 +48,7 @@ import type {
   CspServerPluginStartServices,
 } from './types';
 import { setupRoutes } from './routes/setup_routes';
+import { cspUiSettings } from './ui_settings';
 import { cspBenchmarkRule, cspSettings } from './saved_objects';
 import { deleteOldAndLegacyCdrDataViewsForAllSpaces } from './saved_objects/data_views';
 import { initializeCspIndices } from './create_indices/create_indices';
@@ -96,6 +97,7 @@ export class CspPlugin
   ): CspServerPluginSetup {
     core.savedObjects.registerType<CspBenchmarkRule>(cspBenchmarkRule);
     core.savedObjects.registerType<CspSettings>(cspSettings);
+    core.uiSettings.register(cspUiSettings);
 
     setupRoutes({
       core,
