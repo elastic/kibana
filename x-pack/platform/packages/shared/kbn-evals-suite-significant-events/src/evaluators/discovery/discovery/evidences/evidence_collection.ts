@@ -65,9 +65,7 @@ export const evidenceCollectionEvaluator: DiscoveryEvaluator = {
     );
     if (unexpectedRuleUuids.length > 0) {
       const unexpectedRules = unexpectedRuleUuids
-        .map((ruleUuid) =>
-          ruleUuid ? `"${ruleUuid}"` : 'a signal without metadata.rule_uuid'
-        )
+        .map((ruleUuid) => (ruleUuid ? `"${ruleUuid}"` : 'a signal without metadata.rule_uuid'))
         .join(', ');
       return Promise.resolve({
         score: 0,

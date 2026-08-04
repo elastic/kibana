@@ -81,7 +81,7 @@ const eventsWriteItemsSchema = z
   .describe(
     i18n.translate('xpack.significantEvents.agentBuilder.tools.eventsWrite.schema.items', {
       defaultMessage:
-        'The significant event items to write. Provide a complete, non-empty array. Do not call this tool to plan or probe: `\'{}\'` and `\'{ "items": [] }\'` are invalid. For a new event, omit event_id; for a continuation, supply a non-empty existing event_id.',
+        "The significant event items to write. Provide a complete, non-empty array. Do not call this tool to plan or probe: `'{}'` and `'{ \"items\": [] }'` are invalid. For a new event, omit event_id; for a continuation, supply a non-empty existing event_id.",
     })
   );
 
