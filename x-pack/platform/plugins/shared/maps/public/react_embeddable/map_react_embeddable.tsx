@@ -112,7 +112,6 @@ export const mapEmbeddableFactory: EmbeddablePublicDefinition<MapEmbeddableState
       .pipe(
         debounceTime(100),
         map(([reduxSyncLoading, stateLoading]) => {
-          console.log('!!!!!!!!!!!!!!!', { reduxSyncLoading, stateLoading });
           return reduxSyncLoading || stateLoading;
         }),
         distinctUntilChanged()

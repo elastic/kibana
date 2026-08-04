@@ -173,7 +173,6 @@ export function initializeLayoutManager(
         const child = currentChildren[uuid];
         const nextChildState = childStateToApply[uuid];
         if (apiHasSerializableState(child)) {
-          console.log('before', uuid);
           setStatePromises.push(child.applySerializedState(nextChildState));
         }
       } else {
@@ -183,7 +182,6 @@ export function initializeLayoutManager(
         childrenModified = true;
       }
       await Promise.all(setStatePromises);
-      console.log('after', uuid);
     }
     if (childrenModified) children$.next(currentChildren);
   };
@@ -546,7 +544,6 @@ export function initializeLayoutManager(
             )
           ),
           map(([[currentLayout, childrenChanges]]) => {
-            console.log({ currentLayout, childrenChanges });
             const hasPanelChanges =
               childrenChanges.some(
                 (childChanges) =>

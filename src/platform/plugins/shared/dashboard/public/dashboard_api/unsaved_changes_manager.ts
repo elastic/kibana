@@ -7,15 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  BehaviorSubject,
-  combineLatest,
-  debounceTime,
-  map,
-  tap,
-  share,
-  type Observable,
-} from 'rxjs';
+import { BehaviorSubject, combineLatest, debounceTime, map, share, type Observable } from 'rxjs';
 
 import type { HasLastSavedChildState } from '@kbn/presentation-publishing';
 import type {
@@ -82,7 +74,6 @@ export function initializeUnsavedChangesManager({
     projectRoutingManager?.internalApi.startComparing(lastSavedState$) ?? of({}),
   ]).pipe(
     map(([settings, unifiedSearch, layout, projectRouting]) => {
-      console.log('dashboard state changes', { settings, unifiedSearch, layout, projectRouting });
       return { ...settings, ...unifiedSearch, ...layout, ...projectRouting };
     }),
     share()
