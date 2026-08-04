@@ -10,7 +10,7 @@ import { TableId } from '@kbn/securitysolution-data-table';
 import type { Alert } from '@kbn/alerting-types';
 import type { RenderContext } from '@kbn/response-ops-alerts-table/types';
 import { SECURITY_CELL_ACTIONS_DEFAULT } from '@kbn/ui-actions-plugin/common/trigger_ids';
-import { PageScope } from '../../../data_view_manager/constants';
+import { PageScope, useDataView } from '../../../data_view_manager';
 import type { UseDataGridColumnsSecurityCellActionsProps } from '../../../common/components/cell_actions';
 import { useDataGridColumnsSecurityCellActions } from '../../../common/components/cell_actions';
 import { SecurityCellActionType } from '../../../app/actions/constants';
@@ -18,7 +18,6 @@ import type {
   GetSecurityAlertsTableProp,
   SecurityAlertsTableContext,
 } from '../../components/alerts_table/types';
-import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 
 export const useCellActionsOptions = (
   tableId: TableId,

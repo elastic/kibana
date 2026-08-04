@@ -8,7 +8,7 @@
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { memo } from 'react';
 
-import { PageScope } from '../../../../../../data_view_manager/constants';
+import { PageScope, DataViewPicker } from '../../../../../../data_view_manager';
 import { InputsModelId } from '../../../../../../common/store/inputs/constants';
 import { TimelineTabs } from '../../../../../../../common/types/timeline';
 import { ExitFullScreen } from '../../../../../../common/components/exit_full_screen';
@@ -17,7 +17,6 @@ import { TimelineDatePickerLock } from '../../../date_picker_lock';
 import type { TimelineFullScreen } from '../../../../../../common/containers/use_full_screen';
 import { EqlQueryBarTimeline } from '../../../query_bar/eql';
 import { StyledEuiFlyoutHeader, TabHeaderContainer } from '../../shared/layout';
-import { DataViewPicker } from '../../../../../../data_view_manager/components/data_view_picker';
 
 export type EqlTabHeaderProps = {
   activeTab: TimelineTabs;

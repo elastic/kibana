@@ -14,7 +14,7 @@ import { EVENT_FILTERS_PATH, TRUSTED_APPS_PATH } from '../../../../common/consta
 import { TestProviders } from '../../mock';
 import { hasAccessToSecuritySolution } from '../../../helpers_access';
 import type { LinkInfo } from '../../links';
-import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
+import { useDataView } from '../../../data_view_manager';
 import {
   defaultImplementation,
   withMatchedIndices,

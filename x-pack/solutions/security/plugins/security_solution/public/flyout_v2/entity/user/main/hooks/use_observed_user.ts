@@ -15,7 +15,7 @@ import { Direction, NOT_EVENT_KIND_ASSET_FILTER } from '../../../../../../common
 import { useGlobalTime } from '../../../../../common/containers/use_global_time';
 import { useFirstLastSeen } from '../../../../../common/containers/use_first_last_seen';
 import { isActiveTimeline } from '../../../../../helpers';
-import { useSecurityDefaultPatterns } from '../../../../../data_view_manager/hooks/use_security_default_patterns';
+import { useSecurityDefaultPatterns } from '../../../../../data_view_manager';
 import { useQueryInspector } from '../../../../../common/components/page/manage_query';
 import type { InspectResponse } from '../../../../../types';
 import type {

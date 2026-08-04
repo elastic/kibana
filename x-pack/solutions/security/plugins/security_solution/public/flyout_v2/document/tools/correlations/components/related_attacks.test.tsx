@@ -21,7 +21,7 @@ import {
   EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID,
 } from '../../../../shared/components/test_ids';
 import { usePaginatedAlerts } from '../hooks/use_paginated_alerts';
-import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
+import { useDataView } from '../../../../../data_view_manager';
 import { getMockDataViewWithMatchedIndices } from '../../../../../data_view_manager/mocks';
 import { useIsInSecurityApp } from '../../../../../common/hooks/is_in_security_app';
 import { useAlertsPrivileges } from '../../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';

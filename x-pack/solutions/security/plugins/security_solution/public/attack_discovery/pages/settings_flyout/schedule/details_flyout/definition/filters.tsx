@@ -11,8 +11,7 @@ import { mapAndFlattenFilters } from '@kbn/data-plugin/public';
 import type { Filter } from '@kbn/es-query';
 import { FilterItems } from '@kbn/unified-search-plugin/public';
 
-import { PageScope } from '../../../../../../data_view_manager/constants';
-import { useDataView } from '../../../../../../data_view_manager/hooks/use_data_view';
+import { PageScope, useDataView } from '../../../../../../data_view_manager';
 
 interface FiltersProps {
   filters: Filter[];

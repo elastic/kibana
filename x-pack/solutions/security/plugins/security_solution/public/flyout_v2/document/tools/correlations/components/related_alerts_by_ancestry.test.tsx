@@ -25,7 +25,7 @@ import {
 } from '../../../../shared/components/test_ids';
 import { usePaginatedAlerts } from '../hooks/use_paginated_alerts';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
-import { useSecurityDefaultPatterns } from '../../../../../data_view_manager/hooks/use_security_default_patterns';
+import { useSecurityDefaultPatterns } from '../../../../../data_view_manager';
 import { useIsInSecurityApp } from '../../../../../common/hooks/is_in_security_app';
 import { useAlertsPrivileges } from '../../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { useKibana } from '../../../../../common/lib/kibana';

@@ -10,7 +10,7 @@ import type { Action } from '@kbn/ui-actions-plugin/public';
 import React, { memo, useMemo } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import type { Filter } from '@kbn/es-query';
-import { PageScope } from '../../../../data_view_manager/constants';
+import { PageScope } from '../../../../data_view_manager';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { HeaderSection } from '../../../../common/components/header_section';
 import { InspectButtonContainer } from '../../../../common/components/inspect';

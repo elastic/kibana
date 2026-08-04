@@ -12,9 +12,12 @@ import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { DataLoadingState } from '@kbn/unified-data-table';
 import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
-import { useSelectedPatterns } from '../../../../../data_view_manager/hooks/use_selected_patterns';
-import { useBrowserFields } from '../../../../../data_view_manager/hooks/use_browser_fields';
-import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
+import {
+  useSelectedPatterns,
+  useBrowserFields,
+  useDataView,
+  PageScope,
+} from '../../../../../data_view_manager';
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
 import { useTimelineDataFilters } from '../../../../containers/use_timeline_data_filters';
 import { useInvalidFilterQuery } from '../../../../../common/hooks/use_invalid_filter_query';
@@ -34,7 +37,6 @@ import { isActiveTimeline } from '../../../../../helpers';
 import type { TimelineModel } from '../../../../store/model';
 import { useTimelineColumns } from '../shared/use_timeline_columns';
 import { EventsCountBadge } from '../shared/layout';
-import { PageScope } from '../../../../../data_view_manager/constants';
 
 /**
  * TODO: This component is a pared down duplicate of the logic used in timeline/tabs/query/index.tsx

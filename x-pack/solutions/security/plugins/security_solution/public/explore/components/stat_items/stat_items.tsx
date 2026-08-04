@@ -16,7 +16,7 @@ import { ChartHeight, FlexItem } from './utils';
 import { MetricEmbeddable } from './metric_embeddable';
 import { VisualizationEmbeddable } from '../../../common/components/visualization_actions/visualization_embeddable';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
-import { PageScope } from '../../../data_view_manager/constants';
+import { PageScope } from '../../../data_view_manager';
 
 export const StatItemsComponent = React.memo<StatItemsProps>(({ statItems, from, id, to }) => {
   const timerange = useMemo(

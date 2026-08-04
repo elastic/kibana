@@ -8,8 +8,7 @@
 import { useCallback } from 'react';
 import { useDispatch } from 'react-redux-v7';
 import { isEmpty } from 'lodash/fp';
-import { PageScope } from '../../../data_view_manager/constants';
-import { useSelectDataView } from '../../../data_view_manager/hooks/use_select_data_view';
+import { PageScope, useSelectDataView } from '../../../data_view_manager';
 import type { Note } from '../../../../common/api/timeline';
 import { TimelineStatusEnum, TimelineTypeEnum } from '../../../../common/api/timeline';
 import { createNote } from '../notes/helpers';

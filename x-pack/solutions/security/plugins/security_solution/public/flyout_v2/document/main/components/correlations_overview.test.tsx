@@ -37,7 +37,7 @@ import {
   EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID,
   EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID,
 } from '../../../shared/components/test_ids';
-import { useSecurityDefaultPatterns } from '../../../../data_view_manager/hooks/use_security_default_patterns';
+import { useSecurityDefaultPatterns } from '../../../../data_view_manager';
 
 jest.mock('../../tools/correlations/hooks/use_show_related_alerts_by_ancestry');
 jest.mock('../../tools/correlations/hooks/use_show_related_alerts_by_same_source_event');

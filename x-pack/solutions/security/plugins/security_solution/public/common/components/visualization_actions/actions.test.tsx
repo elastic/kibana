@@ -13,7 +13,7 @@ import { VisualizationActions } from './actions';
 import { TestProviders } from '../../mock';
 import type { VisualizationActionsProps } from './types';
 import * as useLensAttributesModule from './use_lens_attributes';
-import { PageScope } from '../../../data_view_manager/constants';
+import { PageScope } from '../../../data_view_manager';
 
 jest.mock('./use_actions');
 

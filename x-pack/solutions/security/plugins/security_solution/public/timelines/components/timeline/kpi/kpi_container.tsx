@@ -11,8 +11,12 @@ import { useSelector } from 'react-redux-v7';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { TimerangeInput } from '@kbn/timelines-plugin/common';
 import { EuiPanel } from '@elastic/eui';
-import { PageScope } from '../../../../data_view_manager/constants';
-import { useBrowserFields } from '../../../../data_view_manager/hooks/use_browser_fields';
+import {
+  PageScope,
+  useBrowserFields,
+  useSelectedPatterns,
+  useDataView,
+} from '../../../../data_view_manager';
 import { TimelineId } from '../../../../../common/types';
 import type { State } from '../../../../common/store';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
@@ -26,8 +30,6 @@ import {
   endSelector,
   startSelector,
 } from '../../../../common/components/super_date_picker/selectors';
-import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
-import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 
 interface KpiExpandedProps {
   timelineId: string;

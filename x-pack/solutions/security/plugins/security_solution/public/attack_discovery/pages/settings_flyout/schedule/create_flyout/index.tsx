@@ -19,8 +19,7 @@ import {
 import { useAssistantContext } from '@kbn/elastic-assistant';
 import { useLoadConnectors } from '@kbn/inference-connectors';
 import React, { useCallback, useState } from 'react';
-import { PageScope } from '../../../../../data_view_manager/constants';
-import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
+import { PageScope, useDataView } from '../../../../../data_view_manager';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { ConfirmationModal } from '../confirmation_modal';
 import { Footer } from '../../footer';

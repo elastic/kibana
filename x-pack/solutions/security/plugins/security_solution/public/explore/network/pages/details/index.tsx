@@ -12,7 +12,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiSpacer } from '@elasti
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { buildEsQuery } from '@kbn/es-query';
 import { SECURITY_CELL_ACTIONS_DEFAULT } from '@kbn/ui-actions-plugin/common/trigger_ids';
-import { PageScope } from '../../../../data_view_manager/constants';
+import { PageScope, useDataView, useSelectedPatterns } from '../../../../data_view_manager';
 import { AlertsByStatus } from '../../../../overview/components/detection_response/alerts_by_status';
 import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
@@ -54,8 +54,6 @@ import { navTabsNetworkDetails } from './nav_tabs';
 import { NetworkDetailsTabs } from './details_tabs';
 import { useInstalledSecurityJobNameById } from '../../../../common/components/ml/hooks/use_installed_security_jobs';
 import { CellActionsMode, SecurityCellActions } from '../../../../common/components/cell_actions';
-import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
-import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
 
 const NetworkDetailsManage = manageQuery(IpOverview);
 

@@ -16,9 +16,8 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { PageScope } from '../../../data_view_manager/constants';
+import { PageScope, useDataView } from '../../../data_view_manager';
 import { HeaderPage } from '../../../common/components/header_page';
-import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { AttacksPageContent } from './content';
 import { UninitializedDataViewEmptyState } from './uninitialized_empty_state/uninitialized_data_view_empty_state';
 import { PAGE_TITLE } from '../../pages/attacks/translations';

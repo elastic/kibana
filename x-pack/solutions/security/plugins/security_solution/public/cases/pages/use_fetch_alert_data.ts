@@ -7,14 +7,12 @@
 
 import { useMemo } from 'react';
 import type { Ecs } from '@kbn/cases-plugin/common';
-import { PageScope } from '../../data_view_manager/constants';
+import { PageScope, useSelectedPatterns, useDataView } from '../../data_view_manager';
 import { useQueryAlerts } from '../../detections/containers/detection_engine/alerts/use_query';
 import { useAlertsPrivileges } from '../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { ALERTS_QUERY_NAMES } from '../../detections/containers/detection_engine/alerts/constants';
 import type { SignalHit } from '../../common/utils/alerts';
 import { buildAlertsQuery, formatAlertToEcsSignal } from '../../common/utils/alerts';
-import { useSelectedPatterns } from '../../data_view_manager/hooks/use_selected_patterns';
-import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 
 export const useFetchAlertData = (alertIds: string[]): [boolean, Record<string, unknown>] => {
   const { hasAlertsRead } = useAlertsPrivileges();

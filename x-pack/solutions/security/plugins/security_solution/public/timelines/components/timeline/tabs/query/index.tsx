@@ -17,10 +17,12 @@ import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { TimelineItem } from '@kbn/timelines-plugin/common';
-import { PageScope } from '../../../../../data_view_manager/constants';
-import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
-import { useSelectedPatterns } from '../../../../../data_view_manager/hooks/use_selected_patterns';
-import { useBrowserFields } from '../../../../../data_view_manager/hooks/use_browser_fields';
+import {
+  PageScope,
+  useDataView,
+  useSelectedPatterns,
+  useBrowserFields,
+} from '../../../../../data_view_manager';
 import { useFetchNotes } from '../../../../../notes/hooks/use_fetch_notes';
 import {
   DocumentDetailsLeftPanelKey,

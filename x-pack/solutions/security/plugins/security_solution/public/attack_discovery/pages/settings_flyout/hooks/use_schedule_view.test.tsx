@@ -11,7 +11,7 @@ import { act, fireEvent, render, renderHook, screen, waitFor } from '@testing-li
 import { useScheduleView } from './use_schedule_view';
 import { useScheduleApi } from '../schedule/logic/use_schedule_api';
 import { useKibana } from '../../../../common/lib/kibana';
-import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
+import { useDataView } from '../../../../data_view_manager';
 import { TestProviders } from '../../../../common/mock';
 import { mockFindAttackDiscoverySchedules } from '../../mock/mock_find_attack_discovery_schedules';
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';

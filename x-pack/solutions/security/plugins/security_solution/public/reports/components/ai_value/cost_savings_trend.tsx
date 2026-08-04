@@ -17,7 +17,7 @@ import {
 import { css } from '@emotion/react';
 import { Chart, Settings, Position, Tooltip, Axis, ScaleType, LineSeries } from '@elastic/charts';
 import { i18n as i18nLib } from '@kbn/i18n';
-import { PageScope } from '../../../data_view_manager/constants';
+import { PageScope } from '../../../data_view_manager';
 import { useSignalIndexWithDefault } from '../../hooks/use_signal_index_with_default';
 import * as i18n from './translations';
 import type {

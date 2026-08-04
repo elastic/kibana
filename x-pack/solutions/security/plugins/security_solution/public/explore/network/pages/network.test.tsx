@@ -18,7 +18,7 @@ import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 
 import { InputsModelId } from '../../../common/store/inputs/constants';
 import { SECURITY_FEATURE_ID } from '../../../../common/constants';
-import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
+import { useDataView } from '../../../data_view_manager';
 import { withMatchedIndices } from '../../../data_view_manager/hooks/__mocks__/use_data_view';
 
 jest.mock('../../../common/components/empty_prompt');

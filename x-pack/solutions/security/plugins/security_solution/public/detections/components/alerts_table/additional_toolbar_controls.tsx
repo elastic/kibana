@@ -26,7 +26,7 @@ import { AlertsEventTypes, METRIC_TYPE, track } from '../../../common/lib/teleme
 import { useDataTableFilters } from '../../../common/hooks/use_data_table_filters';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { AdditionalFiltersAction } from './additional_filters_action';
-import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
+import { useDataView } from '../../../data_view_manager';
 import { DETECTIONS_TABLE_IDS } from '../../constants';
 
 const { changeViewMode } = dataTableActions;

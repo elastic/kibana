@@ -32,8 +32,7 @@ import {
   type ReportDataQualityCheckAllCompletedParams,
   type ReportDataQualityIndexCheckedParams,
 } from '../../common/lib/telemetry';
-import { useDataView } from '../../data_view_manager/hooks/use_data_view';
-import { useSelectedPatterns } from '../../data_view_manager/hooks/use_selected_patterns';
+import { useDataView, useSelectedPatterns } from '../../data_view_manager';
 import { PageLoader } from '../../common/components/page_loader';
 
 const LOCAL_STORAGE_KEY = 'dataQualityDashboardLastChecked';

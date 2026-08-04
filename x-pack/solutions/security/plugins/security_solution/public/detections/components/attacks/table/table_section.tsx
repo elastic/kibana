@@ -16,7 +16,7 @@ import { isGroupingBucket } from '@kbn/grouping/src';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { AttackDetailsRightPanelKey } from '../../../../flyout/attack_details/constants/panel_keys';
 import { ALERT_ATTACK_IDS } from '../../../../../common/field_maps/field_names';
-import { PageScope } from '../../../../data_view_manager/constants';
+import { PageScope } from '../../../../data_view_manager';
 import { useDataTableFilters } from '../../../../common/hooks/use_data_table_filters';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';

@@ -13,7 +13,7 @@ import { getExcludeAlertsFilters } from './utils';
 import { getAlertFilteringMetricLensAttributes } from '../../../common/components/visualization_actions/lens_attributes/ai/alert_filtering_metric';
 import { VisualizationContextMenuActions } from '../../../common/components/visualization_actions/types';
 import { useSignalIndexWithDefault } from '../../hooks/use_signal_index_with_default';
-import { PageScope } from '../../../data_view_manager/constants';
+import { PageScope } from '../../../data_view_manager';
 
 jest.mock('../../../common/components/visualization_actions/visualization_embeddable', () => ({
   VisualizationEmbeddable: jest.fn(() => <div data-test-subj="mock-visualization-embeddable" />),

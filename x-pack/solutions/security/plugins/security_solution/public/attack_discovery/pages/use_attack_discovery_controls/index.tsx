@@ -24,7 +24,7 @@ import { DEFAULT_END, DEFAULT_START } from '@kbn/elastic-assistant-common';
 import { useLoadConnectors } from '@kbn/inference-connectors';
 
 import { useKibana } from '../../../common/lib/kibana';
-import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
+import { useDataView } from '../../../data_view_manager';
 import { convertToBuildEsQuery } from '../../../common/lib/kuery';
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
 import { useAttackDiscovery } from '../use_attack_discovery';

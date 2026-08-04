@@ -23,7 +23,12 @@ import { buildEsQuery } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { LastEventIndexKey } from '@kbn/timelines-plugin/common';
 import { useUpdateAssetCriticality } from '../../../../entity_analytics/api/hooks/use_update_asset_criticality';
-import { PageScope } from '../../../../data_view_manager/constants';
+import {
+  PageScope,
+  useDataView,
+  useSelectedPatterns,
+  useSecurityDefaultPatterns,
+} from '../../../../data_view_manager';
 import { useCalculateEntityRiskScore } from '../../../../entity_analytics/api/hooks/use_calculate_entity_risk_score';
 import { useAssetCriticalityPrivileges } from '../../../../entity_analytics/components/asset_criticality/use_asset_criticality';
 import { AssetCriticalityAccordion } from '../../../../entity_analytics/components/asset_criticality/asset_criticality_selector';
@@ -71,8 +76,6 @@ import { useInvalidFilterQuery } from '../../../../common/hooks/use_invalid_filt
 import { EmptyPrompt } from '../../../../common/components/empty_prompt';
 import { AlertCountByRuleByStatus } from '../../../../common/components/alert_count_by_status';
 import { useRefetchOverviewPageRiskScore } from '../../../../entity_analytics/api/hooks/use_refetch_overview_page_risk_score';
-import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
-import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
 import { PageLoader } from '../../../../common/components/page_loader';
 import {
   useEntityFromStore,
@@ -83,7 +86,6 @@ import { USER_PANEL_OBSERVED_USER_QUERY_ID } from '../../../../flyout/entity_det
 import { useObservedUser } from '../../../../flyout_v2/entity/user/main/hooks/use_observed_user';
 import { buildRiskScoreStateFromEntityRecord } from '../../../../flyout/entity_details/shared/entity_store_risk_utils';
 import { NO_CORRESPONDING_ENTITY_EXISTS } from '../../../../flyout/entity_details/shared/translations';
-import { useSecurityDefaultPatterns } from '../../../../data_view_manager/hooks/use_security_default_patterns';
 import type { UserItem } from '../../../../../common/search_strategy';
 import type { Entity } from '../../../../../common/api/entity_analytics';
 import { euidDslFilterToPageFilters } from '../../../helpers';

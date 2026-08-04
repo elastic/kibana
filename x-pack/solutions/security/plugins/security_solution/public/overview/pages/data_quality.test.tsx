@@ -15,7 +15,7 @@ import { TestProviders } from '../../common/mock';
 import { DataQuality } from './data_quality';
 import { useKibana } from '../../common/lib/kibana';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { useDataView } from '../../data_view_manager/hooks/use_data_view';
+import { useDataView } from '../../data_view_manager';
 import { getMockDataView, getMockDataViewWithMatchedIndices } from '../../data_view_manager/mocks';
 import {
   defaultImplementation,

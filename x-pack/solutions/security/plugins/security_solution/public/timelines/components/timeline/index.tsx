@@ -14,7 +14,7 @@ import styled from 'styled-components';
 import { isTab } from '@kbn/timelines-plugin/public';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
 import { DEFAULT_ALERTS_INDEX, DEFAULT_DATA_VIEW_ID } from '../../../../common/constants';
-import { PageScope } from '../../../data_view_manager/constants';
+import { PageScope, useSelectedPatterns, useDataView } from '../../../data_view_manager';
 import { timelineActions, timelineSelectors } from '../../store';
 import { timelineDefaults } from '../../store/defaults';
 import type { CellValueElementProps } from './cell_rendering';
@@ -30,8 +30,6 @@ import { useTimelineFullScreen } from '../../../common/containers/use_full_scree
 import { EXIT_FULL_SCREEN_CLASS_NAME } from '../../../common/components/exit_full_screen';
 import { useResolveConflict } from '../../../common/hooks/use_resolve_conflict';
 import { defaultUdtHeaders } from './body/column_headers/default_headers';
-import { useSelectedPatterns } from '../../../data_view_manager/hooks/use_selected_patterns';
-import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { TimelineContext } from './context';
 
 const TimelineBody = styled.div`

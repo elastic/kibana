@@ -16,7 +16,7 @@ import * as useAddBulkToTimelineActionModule from '../../components/alerts_table
 import * as useBulkAlertActionItemsModule from './use_alert_actions';
 import * as useBulkRunAlertWorkflowPanelModule from './use_bulk_run_alert_workflow_panel';
 import type { TableId } from '@kbn/securitysolution-data-table';
-import { PageScope } from '../../../data_view_manager/constants';
+import { PageScope } from '../../../data_view_manager';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 
 jest.mock('../../../common/containers/use_global_time');

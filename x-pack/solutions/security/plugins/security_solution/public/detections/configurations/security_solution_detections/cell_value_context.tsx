@@ -9,15 +9,14 @@ import React, { createContext, useMemo } from 'react';
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import { dataTableSelectors, tableDefaults } from '@kbn/securitysolution-data-table';
 import type { BrowserFields } from '@kbn/timelines-plugin/common';
-import type { PageScope } from '../../../data_view_manager/constants';
+import type { PageScope } from '../../../data_view_manager';
 import { useLicense } from '../../../common/hooks/use_license';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { VIEW_SELECTION } from '../../../../common/constants';
 import { getAllFieldsByName } from '../../../common/containers/source';
 import type { AlertColumnHeaders } from './columns';
 import { eventRenderedViewColumns, getColumns } from './columns';
-import { useBrowserFields } from '../../../data_view_manager/hooks/use_browser_fields';
-import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
+import { useBrowserFields, useDataView } from '../../../data_view_manager';
 
 interface AlertTableCellContextProps {
   browserFields: BrowserFields;

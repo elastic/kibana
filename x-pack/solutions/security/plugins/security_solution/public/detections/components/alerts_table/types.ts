@@ -12,7 +12,7 @@ import type { AlertsTablePropsWithRef } from '@kbn/response-ops-alerts-table/typ
 import type { TableId } from '@kbn/securitysolution-data-table';
 import type { EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
 import type { GroupingBucket } from '@kbn/grouping/src';
-import type { PageScope } from '../../../data_view_manager/constants';
+import type { PageScope } from '../../../data_view_manager';
 import type { AlertsUserProfilesData } from '../../configurations/security_solution_detections/fetch_page_context';
 import type { Status } from '../../../../common/api/detection_engine';
 import type { Note } from '../../../../common/api/timeline';

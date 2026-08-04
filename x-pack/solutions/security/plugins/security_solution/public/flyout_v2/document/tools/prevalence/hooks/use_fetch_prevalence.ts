@@ -12,7 +12,7 @@ import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/type
 import { EXCLUDE_COLD_AND_FROZEN_TIERS_IN_PREVALENCE } from '../../../../../../common/constants';
 import { createFetchData } from '../../../main/utils/fetch_data';
 import { useKibana } from '../../../../../common/lib/kibana';
-import { useSecurityDefaultPatterns } from '../../../../../data_view_manager/hooks/use_security_default_patterns';
+import { useSecurityDefaultPatterns } from '../../../../../data_view_manager';
 
 const QUERY_KEY = 'useFetchFieldValuePairWithAggregation';
 

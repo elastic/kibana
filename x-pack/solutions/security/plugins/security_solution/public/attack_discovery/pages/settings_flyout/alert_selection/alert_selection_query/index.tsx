@@ -13,11 +13,10 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { Filter, Query } from '@kbn/es-query';
 import { debounce } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
-import { PageScope } from '../../../../../data_view_manager/constants';
+import { PageScope, useDataView } from '../../../../../data_view_manager';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { getCommonTimeRanges } from '../helpers/get_common_time_ranges';
 import type { AlertsSelectionSettings } from '../../types';
-import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
 
 export const STEP = 50;
 export const NO_INDEX_PATTERNS: DataView[] = [];

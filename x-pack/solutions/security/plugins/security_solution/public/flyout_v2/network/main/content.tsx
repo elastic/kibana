@@ -9,7 +9,7 @@ import type { FC } from 'react';
 import React, { memo, useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux-v7';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
-import { PageScope } from '../../../data_view_manager/constants';
+import { PageScope, useDataView, useSelectedPatterns } from '../../../data_view_manager';
 import { PageLoader } from '../../../common/components/page_loader';
 import { InputsModelId } from '../../../common/store/inputs/constants';
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
@@ -29,8 +29,6 @@ import { useAnomaliesTableData } from '../../../common/components/ml/anomaly/use
 import { useInstalledSecurityJobNameById } from '../../../common/components/ml/hooks/use_installed_security_jobs';
 import { EmptyPrompt } from '../../../common/components/empty_prompt';
 import type { NarrowDateRange } from '../../../common/components/ml/types';
-import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
-import { useSelectedPatterns } from '../../../data_view_manager/hooks/use_selected_patterns';
 
 export interface ContentProps {
   /**

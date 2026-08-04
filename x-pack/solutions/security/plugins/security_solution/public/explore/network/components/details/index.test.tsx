@@ -20,7 +20,7 @@ import { mockAnomalies } from '../../../../common/components/ml/mock';
 import type { NarrowDateRange } from '../../../../common/components/ml/types';
 import { FlowTargetSourceDest } from '../../../../../common/search_strategy';
 
-import { PageScope } from '../../../../data_view_manager/constants';
+import { PageScope } from '../../../../data_view_manager';
 
 describe('IP Overview Component', () => {
   describe('rendering', () => {

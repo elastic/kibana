@@ -7,7 +7,7 @@
 
 import React, { useMemo } from 'react';
 import { AuthStackByField } from '../../../../../common/api/search_strategy/users/authentications';
-import { PageScope } from '../../../../data_view_manager/constants';
+import { PageScope } from '../../../../data_view_manager';
 import { AuthenticationsUserTable } from '../../../components/authentication/authentications_user_table';
 import { histogramConfigs } from '../../../components/authentication/helpers';
 import type { AuthenticationsUserTableProps } from '../../../components/authentication/types';

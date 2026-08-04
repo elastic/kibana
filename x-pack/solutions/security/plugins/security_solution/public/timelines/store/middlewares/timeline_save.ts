@@ -21,8 +21,7 @@ import {
 } from '@kbn/es-query';
 
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { PageScope } from '../../../data_view_manager/constants';
-import { scopedDataViewSelector } from '../../../data_view_manager/redux/selectors';
+import { PageScope, scopedDataViewSelector } from '../../../data_view_manager';
 import {
   endTimelineSaving,
   saveTimeline,

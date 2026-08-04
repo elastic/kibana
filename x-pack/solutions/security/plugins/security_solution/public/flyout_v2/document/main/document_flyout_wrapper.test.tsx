@@ -10,7 +10,7 @@ import { render } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { ElasticRequestState } from '@kbn/unified-doc-viewer';
 import { useEsDocSearch } from '@kbn/unified-doc-viewer-plugin/public';
-import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
+import { useDataView } from '../../../data_view_manager';
 import { useAlertsPrivileges } from '../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { TestProviders } from '../../../common/mock';
 import { DocumentFlyoutWrapper } from './document_flyout_wrapper';

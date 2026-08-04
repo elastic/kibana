@@ -6,8 +6,7 @@
  */
 
 import { useEffect } from 'react';
-import { useInitDataViewManager } from '../../data_view_manager/hooks/use_init_data_view_manager';
-import { useDataViewManagerStatus } from '../../data_view_manager/hooks/use_data_view_manager_status';
+import { useInitDataViewManager, useDataViewManagerStatus } from '../../data_view_manager';
 
 export const DataViewManagerBootstrap = () => {
   const initDataViewManager = useInitDataViewManager();

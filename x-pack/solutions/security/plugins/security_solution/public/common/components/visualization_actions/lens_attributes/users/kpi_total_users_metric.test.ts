@@ -14,7 +14,7 @@ import {
   buildKpiTotalUsersMetricLensAttributes,
   kpiTotalUsersMetricLensAttributes,
 } from './kpi_total_users_metric';
-import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
+import { useDataView } from '../../../../../data_view_manager';
 import { withIndices } from '../../../../../data_view_manager/hooks/__mocks__/use_data_view';
 
 jest.mock('../../../../utils/route/use_route_spy', () => ({

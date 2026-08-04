@@ -8,10 +8,12 @@
 import { useCallback } from 'react';
 import { useDispatch } from 'react-redux-v7';
 import { v4 as uuidv4 } from 'uuid';
-import { PageScope } from '../../../../data_view_manager/constants';
-import { useSignalIndexName } from '../../../../data_view_manager/hooks/use_signal_index_name';
-import { useSecurityDefaultPatterns } from '../../../../data_view_manager/hooks/use_security_default_patterns';
-import { useSelectDataView } from '../../../../data_view_manager/hooks/use_select_data_view';
+import {
+  PageScope,
+  useSignalIndexName,
+  useSecurityDefaultPatterns,
+  useSelectDataView,
+} from '../../../../data_view_manager';
 import {
   getDataProvider,
   getDataProviderAnd,

@@ -15,7 +15,7 @@ import { Hosts } from './hosts';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 import { InputsModelId } from '../../../common/store/inputs/constants';
 import { HostsTabs } from './hosts_tabs';
-import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
+import { useDataView } from '../../../data_view_manager';
 import { withIndices } from '../../../data_view_manager/hooks/__mocks__/use_data_view';
 
 jest.mock('react-router-dom', () => ({

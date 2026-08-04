@@ -21,8 +21,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { cellActionRenderer } from '../../../../flyout_v2/shared/components/cell_actions';
-import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
-import { PageScope } from '../../../../data_view_manager/constants';
+import { useDataView, PageScope, useSelectedPatterns } from '../../../../data_view_manager';
 import { useWhichFlyout } from '../../shared/hooks/use_which_flyout';
 import { useDocumentDetailsContext } from '../../shared/context';
 import {
@@ -35,7 +34,6 @@ import { useTimelineDataFilters } from '../../../../timelines/containers/use_tim
 import { isActiveTimeline } from '../../../../helpers';
 import { useIsAnalyzerEnabled } from '../../../../detections/hooks/use_is_analyzer_enabled';
 import { AnalyzerPreviewNoDataMessage } from '../../../../flyout_v2/document/main/components/analyzer_no_data_message';
-import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
 import { useKibana } from '../../../../common/lib/kibana';
 import { EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER } from '../../../../../common/constants';
 

@@ -14,12 +14,11 @@ import { useQueryAlerts } from '../../containers/detection_engine/alerts/use_que
 import { groupingSearchResponse } from './grouping_settings/mock';
 import { useKibana } from '../../../common/lib/kibana';
 import { createTelemetryServiceMock } from '../../../common/lib/telemetry/telemetry_service.mock';
-import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
+import { useDataView, PageScope } from '../../../data_view_manager';
 import { getMockDataViewWithMatchedIndices } from '../../../data_view_manager/mocks';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { defaultGroupStatsAggregations } from './grouping_settings';
-import { PageScope } from '../../../data_view_manager/constants';
 import {
   fetchQueryAlerts,
   fetchQueryUnifiedAlerts,

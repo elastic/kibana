@@ -10,7 +10,7 @@ import { EuiBadge, EuiSkeletonText, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
+import { useDataView, PageScope, useSelectedPatterns } from '../../../../data_view_manager';
 import { useIsAnalyzerEnabled } from '../../../../detections/hooks/use_is_analyzer_enabled';
 import { AnalyzerPreview } from './analyzer_preview';
 import {
@@ -19,8 +19,6 @@ import {
   ANALYZER_PREVIEW_TEST_ID,
 } from './test_ids';
 import { ExpandablePanel } from '../../../shared/components/expandable_panel';
-import { PageScope } from '../../../../data_view_manager/constants';
-import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
 import { AnalyzerPreviewNoDataMessage } from './analyzer_no_data_message';
 import { EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER } from '../../../../../common/constants';
 import { useKibana } from '../../../../common/lib/kibana';

@@ -54,7 +54,7 @@ import {
 } from '@kbn/rule-data-utils';
 import { TableId } from '@kbn/securitysolution-data-table';
 
-import { PageScope } from '../../../data_view_manager/constants';
+import { PageScope } from '../../../data_view_manager';
 import type { TimelineEventsType } from '../../../../common/types/timeline';
 import { TimelineId } from '../../../../common/types/timeline';
 

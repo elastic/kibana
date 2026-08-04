@@ -24,8 +24,7 @@ import { noop } from 'lodash';
 import type { Alert } from '@kbn/alerting-types';
 import { AlertsTable as ResponseOpsAlertsTable } from '@kbn/response-ops-alerts-table';
 import { PROJECT_ROUTING } from '@kbn/cps-utils';
-import { PageScope } from '../../../data_view_manager/constants';
-import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
+import { PageScope, useDataView, useBrowserFields } from '../../../data_view_manager';
 import { useAlertsContext } from './alerts_context';
 import { useBulkActionsByTableType } from '../../hooks/trigger_actions_alert_table/use_bulk_actions';
 import type {
@@ -62,7 +61,6 @@ import { useFetchUserProfilesFromAlerts } from '../../configurations/security_so
 import { useCellActionsOptions } from '../../hooks/trigger_actions_alert_table/use_cell_actions';
 import { useAlertsTableFieldsBrowserOptions } from '../../hooks/trigger_actions_alert_table/use_trigger_actions_browser_fields_options';
 import { AlertTableCellContextProvider } from '../../configurations/security_solution_detections/cell_value_context';
-import { useBrowserFields } from '../../../data_view_manager/hooks/use_browser_fields';
 import { DETECTIONS_TABLE_IDS } from '../../constants';
 
 const { updateIsLoading, updateTotalCount } = dataTableActions;

@@ -19,7 +19,7 @@ import {
 } from '@elastic/charts';
 import { i18n as i18nLib } from '@kbn/i18n';
 import { TOTAL_ALERTS_PROCESSED } from './translations';
-import { PageScope } from '../../../data_view_manager/constants';
+import { PageScope } from '../../../data_view_manager';
 import { VisualizationContextMenuActions } from '../../../common/components/visualization_actions/types';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
 import { getAlertProcessingDonutAttributes } from '../../../common/components/visualization_actions/lens_attributes/ai/alert_processing_donut';

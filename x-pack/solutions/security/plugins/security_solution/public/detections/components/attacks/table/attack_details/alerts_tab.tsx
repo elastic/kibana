@@ -14,7 +14,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { Alert } from '@kbn/alerting-types';
 import { TableId } from '@kbn/securitysolution-data-table';
-import { PageScope } from '../../../../../data_view_manager/constants';
+import { PageScope } from '../../../../../data_view_manager';
 import { AlertsTable } from '../../../alerts_table';
 import { useFilteredRelatedAlertIds } from './use_filtered_related_alert_ids';
 import { useKibana } from '../../../../../common/lib/kibana';

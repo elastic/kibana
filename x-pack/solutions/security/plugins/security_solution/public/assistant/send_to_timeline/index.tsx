@@ -12,7 +12,13 @@ import type { Filter } from '@kbn/es-query';
 import { useDispatch } from 'react-redux-v7';
 import { css } from '@emotion/react';
 import { useAssistantContext } from '@kbn/elastic-assistant';
-import { PageScope } from '../../data_view_manager/constants';
+import {
+  PageScope,
+  useDataView,
+  useSignalIndexName,
+  useSecurityDefaultPatterns,
+  useSelectDataView,
+} from '../../data_view_manager';
 import { extractTimelineCapabilities } from '../../common/utils/timeline_capabilities';
 import { inputsActions } from '../../common/store/inputs';
 import { InputsModelId } from '../../common/store/inputs/constants';
@@ -35,10 +41,6 @@ import { useDiscoverInTimelineContext } from '../../common/components/discover_i
 import { useShowTimeline } from '../../common/utils/timeline/use_show_timeline';
 import { useDiscoverState } from '../../timelines/components/timeline/tabs/esql/use_discover_state';
 import { useKibana } from '../../common/lib/kibana';
-import { useDataView } from '../../data_view_manager/hooks/use_data_view';
-import { useSignalIndexName } from '../../data_view_manager/hooks/use_signal_index_name';
-import { useSecurityDefaultPatterns } from '../../data_view_manager/hooks/use_security_default_patterns';
-import { useSelectDataView } from '../../data_view_manager/hooks/use_select_data_view';
 
 export interface SendToTimelineButtonProps {
   asEmptyButton: boolean;

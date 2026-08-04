@@ -40,10 +40,9 @@ import {
   tableDefaults,
   TableId,
 } from '@kbn/securitysolution-data-table';
-import { PageScope } from '../../../../data_view_manager/constants';
+import { PageScope, useDataView } from '../../../../data_view_manager';
 import { RuleCustomizationsContextProvider } from '../../../rule_management/components/rule_details/rule_customizations_diff/rule_customizations_context';
 import { useGroupTakeActionsItems } from '../../../../detections/hooks/alerts_table/use_group_take_action_items';
-import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 import {
   defaultGroupStatsAggregations,
   defaultGroupStatsRenderer,

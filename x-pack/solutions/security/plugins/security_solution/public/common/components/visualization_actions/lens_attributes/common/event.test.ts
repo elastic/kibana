@@ -12,7 +12,7 @@ import { wrapper } from '../../mocks';
 import { useLensAttributes } from '../../use_lens_attributes';
 
 import { getEventsHistogramLensAttributes, stackByFieldAccessorId } from './events';
-import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
+import { useDataView } from '../../../../../data_view_manager';
 import { withIndices } from '../../../../../data_view_manager/hooks/__mocks__/use_data_view';
 
 jest.mock('uuid', () => ({

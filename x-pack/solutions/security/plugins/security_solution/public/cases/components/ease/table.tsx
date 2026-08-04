@@ -19,7 +19,7 @@ import { useBulkAddToChatConfig } from '../../../agent_builder/hooks/use_bulk_ad
 import { useAgentBuilderAvailability } from '../../../agent_builder/hooks/use_agent_builder_availability';
 import { ActionsCell } from '../../../detections/components/alert_summary/table/actions_cell';
 import { CellValue } from '../../../detections/components/alert_summary/table/render_cell';
-import { useBrowserFields } from '../../../data_view_manager/hooks/use_browser_fields';
+import { useBrowserFields } from '../../../data_view_manager';
 import type { AdditionalTableContext } from '../../../detections/components/alert_summary/table/table';
 import {
   ACTION_COLUMN_WIDTH,

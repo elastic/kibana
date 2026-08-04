@@ -34,7 +34,7 @@ import { useInvestigateInTimeline } from '../../../../detections/components/aler
 import { useGraphPreview } from '../../../../flyout_v2/document/main/hooks/use_graph_preview';
 import { useNavigateToGraphVisualization } from '../../shared/hooks/use_navigate_to_graph_visualization';
 import { useUpsellingComponent } from '../../../../common/hooks/use_upselling';
-import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
+import { useSelectedPatterns } from '../../../../data_view_manager';
 import { useNavigateToSessionView } from '../../shared/hooks/use_navigate_to_session_view';
 
 jest.mock('../../../../flyout_v2/shared/hooks/use_expand_section', () => ({

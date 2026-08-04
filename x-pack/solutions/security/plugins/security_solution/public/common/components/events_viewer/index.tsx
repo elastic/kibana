@@ -32,8 +32,8 @@ import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
-import type { PageScope } from '../../../data_view_manager/constants';
-import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
+import type { PageScope } from '../../../data_view_manager';
+import { useDataView, useSelectedPatterns, useBrowserFields } from '../../../data_view_manager';
 import { InspectButton } from '../inspect';
 import type {
   ControlColumnProps,
@@ -61,8 +61,6 @@ import type { BulkActionsProp } from '../toolbar/bulk_actions/types';
 import { StatefulEventContext } from './stateful_event_context';
 import { defaultUnit } from '../toolbar/unit';
 import { globalFiltersQuerySelector, globalQuerySelector } from '../../store/inputs/selectors';
-import { useSelectedPatterns } from '../../../data_view_manager/hooks/use_selected_patterns';
-import { useBrowserFields } from '../../../data_view_manager/hooks/use_browser_fields';
 
 const SECURITY_ALERTS_CONSUMERS = [AlertConsumers.SIEM];
 

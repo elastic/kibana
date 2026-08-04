@@ -16,7 +16,7 @@ import {
 } from '../../../../common/constants';
 import { createMockStore, mockGlobalState, TestProviders } from '../../../common/mock';
 import { TimelineId } from '../../../../common/types/timeline';
-import { dataViewPickerPaths } from '../../../data_view_manager/utils/paths';
+import { dataViewPickerPaths } from '../../../data_view_manager';
 
 import { DATA_VIEW_PICKER_TEST_ID } from '../../../data_view_manager/components/data_view_picker/constants';
 import { useKibana as mockUseKibana } from '../../../common/lib/kibana/__mocks__';

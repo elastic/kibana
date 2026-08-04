@@ -9,8 +9,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux-v7';
 import { encode } from '@kbn/rison';
 import type { State } from '../../../common/store';
-import { PageScope } from '../../../data_view_manager/constants';
-import { useSelectedPatterns } from '../../../data_view_manager/hooks/use_selected_patterns';
+import { PageScope, useSelectedPatterns, useDataView } from '../../../data_view_manager';
 import {
   RULE_FROM_EQL_URL_PARAM,
   RULE_FROM_TIMELINE_URL_PARAM,
@@ -54,7 +53,6 @@ import { useStartTransaction } from '../../../common/lib/apm/use_start_transacti
 import { TIMELINE_ACTIONS } from '../../../common/lib/apm/user_actions';
 import { defaultUdtHeaders } from '../timeline/body/column_headers/default_headers';
 import { timelineDefaults } from '../../store/defaults';
-import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 
 interface OwnProps<TCache = object> {
   /** Displays open timeline in modal */

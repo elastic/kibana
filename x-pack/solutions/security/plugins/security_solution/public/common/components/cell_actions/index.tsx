@@ -14,10 +14,9 @@ import { CellActions, useDataGridColumnsCellActions } from '@kbn/cell-actions';
 import React, { useMemo } from 'react';
 import type { CellActionFieldValue, CellActionsData } from '@kbn/cell-actions/src/types';
 import type { EuiButtonIconProps } from '@elastic/eui';
-import { PageScope } from '../../../data_view_manager/constants';
+import { PageScope, useDataView } from '../../../data_view_manager';
 import type { SecurityCellActionMetadata } from '../../../app/actions/types';
 import { SecurityCellActionType } from '../../../app/actions/constants';
-import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 
 // bridge exports for convenience
 export * from '@kbn/cell-actions';

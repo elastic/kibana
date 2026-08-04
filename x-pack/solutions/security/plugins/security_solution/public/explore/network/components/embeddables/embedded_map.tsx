@@ -14,7 +14,7 @@ import styled from '@emotion/styled';
 import { css } from '@emotion/react';
 import type { Filter, Query } from '@kbn/es-query';
 import type { MapApi, RenderTooltipContentParams } from '@kbn/maps-plugin/public';
-import { PageScope } from '../../../../data_view_manager/constants';
+import { PageScope, useDataView } from '../../../../data_view_manager';
 import { buildTimeRangeFilter } from '../../../../detections/components/alerts_table/helpers';
 import type { GlobalTimeArgs } from '../../../../common/containers/use_global_time';
 import { Embeddable } from './embeddable';
@@ -22,7 +22,6 @@ import { MapToolTip } from './map_tool_tip/map_tool_tip';
 import * as i18n from './translations';
 import { useKibana } from '../../../../common/lib/kibana';
 import { getLayerList } from './map_config';
-import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 
 export const NETWORK_MAP_VISIBLE = 'network_map_visbile';
 

@@ -11,7 +11,7 @@ import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { DataViewBase } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import { TableId } from '@kbn/securitysolution-data-table';
-import { PageScope } from '../../../../data_view_manager/constants';
+import { PageScope } from '../../../../data_view_manager';
 import { AlertTableCellContextProvider } from '../../../../detections/configurations/security_solution_detections/cell_value_context';
 import { StatefulEventsViewer } from '../../../../common/components/events_viewer';
 import { defaultRowRenderers } from '../../../../timelines/components/timeline/body/renderers';

@@ -13,7 +13,7 @@ import type {
 } from './use_alert_prevalence_from_process_tree';
 import { useAlertPrevalenceFromProcessTree } from './use_alert_prevalence_from_process_tree';
 import { useHttp } from '../../../../common/lib/kibana';
-import { useSecurityDefaultPatterns } from '../../../../data_view_manager/hooks/use_security_default_patterns';
+import { useSecurityDefaultPatterns } from '../../../../data_view_manager';
 import { useQuery } from '@kbn/react-query';
 import { useAlertDocumentAnalyzerSchema } from './use_alert_document_analyzer_schema';
 import { mockStatsNode } from '../../../../flyout/document_details/right/mocks/mock_analyzer_data';

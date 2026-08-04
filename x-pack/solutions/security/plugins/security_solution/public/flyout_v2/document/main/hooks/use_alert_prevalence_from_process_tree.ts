@@ -9,7 +9,7 @@ import { useQuery } from '@kbn/react-query';
 import { useMemo } from 'react';
 import { useAlertDocumentAnalyzerSchema } from './use_alert_document_analyzer_schema';
 import { useHttp } from '../../../../common/lib/kibana';
-import { useSecurityDefaultPatterns } from '../../../../data_view_manager/hooks/use_security_default_patterns';
+import { useSecurityDefaultPatterns } from '../../../../data_view_manager';
 
 export interface StatsNode {
   /**

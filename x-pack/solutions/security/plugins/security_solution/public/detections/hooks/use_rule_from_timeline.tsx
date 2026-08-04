@@ -9,9 +9,13 @@ import { isEmpty } from 'lodash/fp';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { EqlOptions } from '@kbn/timelines-plugin/common';
-import { PageScope } from '../../data_view_manager/constants';
-import { useSelectDataView } from '../../data_view_manager/hooks/use_select_data_view';
-import { useSelectedPatterns } from '../../data_view_manager/hooks/use_selected_patterns';
+import {
+  PageScope,
+  useSelectDataView,
+  useSelectedPatterns,
+  useBrowserFields,
+  useDataView,
+} from '../../data_view_manager';
 import { convertKueryToElasticSearchQuery } from '../../common/lib/kuery';
 import { useAppToasts } from '../../common/hooks/use_app_toasts';
 import type { TimelineModel } from '../..';
@@ -20,8 +24,6 @@ import { useQueryTimelineById } from '../../timelines/components/open_timeline/h
 import { useGetInitialUrlParamValue } from '../../common/utils/global_query_string/helpers';
 import { buildGlobalQuery } from '../../timelines/components/timeline/helpers';
 import { getDataProviderFilter } from '../../timelines/components/timeline/query_bar';
-import { useBrowserFields } from '../../data_view_manager/hooks/use_browser_fields';
-import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 
 export const RULE_FROM_TIMELINE_URL_PARAM = 'createRuleFromTimeline';
 export const RULE_FROM_EQL_URL_PARAM = 'createRuleFromEql';

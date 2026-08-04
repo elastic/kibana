@@ -7,7 +7,7 @@
 
 import React, { useMemo } from 'react';
 import type { ITooltipProperty } from '@kbn/maps-plugin/public/classes/tooltips/tooltip_property';
-import { PageScope } from '../../../../../data_view_manager/constants';
+import { PageScope } from '../../../../../data_view_manager';
 import { sourceDestinationFieldMappings } from '../map_config';
 import {
   getEmptyTagValue,

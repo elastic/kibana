@@ -7,8 +7,7 @@
 
 import { useMemo } from 'react';
 import { useEuiTheme } from '@elastic/eui';
-import { PageScope } from '../../../data_view_manager/constants';
-import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
+import { PageScope, useDataView, useSelectedPatterns } from '../../../data_view_manager';
 import { SecurityPageName } from '../../../../common/constants';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { inputsSelectors } from '../../store';
@@ -22,7 +21,6 @@ import {
   getNetworkDetailsPageFilter,
   sourceOrDestinationIpExistsFilter,
 } from './utils';
-import { useSelectedPatterns } from '../../../data_view_manager/hooks/use_selected_patterns';
 import { useGlobalFilterQuery } from '../../hooks/use_global_filter_query';
 
 export const useLensAttributes = ({

@@ -26,7 +26,7 @@ import { SecurityPageName } from '../../../app/types';
 import type { Query } from '@kbn/es-query';
 import { getEventsHistogramLensAttributes } from './lens_attributes/common/events';
 import type { EuiThemeComputed } from '@elastic/eui';
-import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
+import { useDataView } from '../../../data_view_manager';
 import {
   defaultImplementation,
   withIndices,

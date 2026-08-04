@@ -14,7 +14,7 @@ import styled from '@emotion/styled';
 import { EuiButton } from '@elastic/eui';
 import type { DataView } from '@kbn/data-plugin/common';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
-import type { PageScope } from '../../../data_view_manager/constants';
+import type { PageScope } from '../../../data_view_manager';
 import { APP_UI_ID, DEFAULT_NUMBER_FORMAT } from '../../../../common/constants';
 import { SHOWING, UNIT } from '../../../common/components/events_viewer/translations';
 import { getTabsOnHostsUrl } from '../../../common/components/link_to/redirect_to_hosts';

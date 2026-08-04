@@ -8,8 +8,7 @@
 import type { ComponentProps, ReactElement } from 'react';
 import React, { useMemo } from 'react';
 import { RootDragDropProvider } from '@kbn/dom-drag-drop';
-import { PageScope } from '../../../../data_view_manager/constants';
-import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
+import { PageScope, useDataView } from '../../../../data_view_manager';
 import { DataViewErrorComponent } from '../../../../common/components/data_view_error';
 import { StyledTableFlexGroup, StyledUnifiedTableFlexItem } from '../unified_components/styles';
 import { UnifiedTimeline } from '../unified_components';

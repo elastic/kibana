@@ -10,15 +10,17 @@ import type { Filter } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { DataProvider } from '@kbn/timelines-plugin/common';
 import { DataLoadingState } from '@kbn/unified-data-table';
-import { PageScope } from '../../../../../data_view_manager/constants';
+import {
+  PageScope,
+  useDataView,
+  useSelectedPatterns,
+  useBrowserFields,
+} from '../../../../../data_view_manager';
 import { TimelineId } from '../../../../../../common/types/timeline';
 import { useKibana } from '../../../../lib/kibana';
 import { combineQueries } from '../../../../lib/kuery';
 import { useTimelineEvents } from '../../../../../timelines/containers';
 import type { TimeRange } from '../../../../store/inputs/model';
-import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
-import { useSelectedPatterns } from '../../../../../data_view_manager/hooks/use_selected_patterns';
-import { useBrowserFields } from '../../../../../data_view_manager/hooks/use_browser_fields';
 
 const fields = ['*'];
 const runtimeMappings = {};

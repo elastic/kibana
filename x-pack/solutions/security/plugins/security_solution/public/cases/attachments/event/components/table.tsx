@@ -28,7 +28,7 @@ import { useDispatch, useSelector } from 'react-redux-v7';
 import { EuiEmptyPrompt, EuiProgress, useEuiTheme } from '@elastic/eui';
 import { SECURITY_CELL_ACTIONS_CASE_EVENTS } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { RowAction } from '../../../../common/components/control_columns/row_action';
-import { buildBrowserFields } from '../../../../data_view_manager/utils/build_browser_fields';
+import { buildBrowserFields } from '../../../../data_view_manager';
 import { getDefaultControlColumn } from '../../../../timelines/components/timeline/body/control_columns';
 import { defaultRowRenderers } from '../../../../timelines/components/timeline/body/renderers';
 import { DefaultCellRenderer } from '../../../../timelines/components/timeline/cell_rendering/default_cell_renderer';

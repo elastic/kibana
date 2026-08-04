@@ -24,7 +24,7 @@ import type {
 } from '../../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
 import type { ObservedEntityData } from '../../../shared/components/observed_entity/types';
 import { isActiveTimeline } from '../../../../../helpers';
-import { useSecurityDefaultPatterns } from '../../../../../data_view_manager/hooks/use_security_default_patterns';
+import { useSecurityDefaultPatterns } from '../../../../../data_view_manager';
 
 export type ObservedHostResult = Omit<ObservedEntityData<HostItem>, 'anomalies'> & {
   entityRecord?: EntityStoreRecord | null;

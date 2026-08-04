@@ -13,7 +13,7 @@ import { AlertFiltersKqlBar } from './alert_filters_kql_bar';
 import type { UIAlertFilter } from './common';
 import { useKibana } from '../../../common/lib/kibana';
 import { TestProviders } from '../../../common/mock';
-import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
+import { useDataView } from '../../../data_view_manager';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../../data_view_manager/hooks/use_data_view');

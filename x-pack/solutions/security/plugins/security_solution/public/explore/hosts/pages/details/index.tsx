@@ -22,7 +22,12 @@ import { useLocation } from 'react-router-dom';
 import { buildEsQuery } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { useUpdateAssetCriticality } from '../../../../entity_analytics/api/hooks/use_update_asset_criticality';
-import { PageScope } from '../../../../data_view_manager/constants';
+import {
+  PageScope,
+  useDataView,
+  useSelectedPatterns,
+  useSecurityDefaultPatterns,
+} from '../../../../data_view_manager';
 import type { NarrowDateRange } from '../../../../common/components/ml/types';
 import { useCalculateEntityRiskScore } from '../../../../entity_analytics/api/hooks/use_calculate_entity_risk_score';
 import { useAssetCriticalityPrivileges } from '../../../../entity_analytics/components/asset_criticality/use_asset_criticality';
@@ -73,8 +78,6 @@ import { AlertCountByRuleByStatus } from '../../../../common/components/alert_co
 import { useLicense } from '../../../../common/hooks/use_license';
 import { ResponderActionButton } from '../../../../common/components/endpoint/responder';
 import { useRefetchOverviewPageRiskScore } from '../../../../entity_analytics/api/hooks/use_refetch_overview_page_risk_score';
-import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
-import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
 import { PageLoader } from '../../../../common/components/page_loader';
 import {
   useEntityFromStore,
@@ -85,7 +88,6 @@ import { HOST_PANEL_OBSERVED_HOST_QUERY_ID } from '../../../../flyout/entity_det
 import { useObservedHost } from '../../../../flyout_v2/entity/host/main/hooks/use_observed_host';
 import { buildRiskScoreStateFromEntityRecord } from '../../../../flyout/entity_details/shared/entity_store_risk_utils';
 import { NO_CORRESPONDING_ENTITY_EXISTS } from '../../../../flyout/entity_details/shared/translations';
-import { useSecurityDefaultPatterns } from '../../../../data_view_manager/hooks/use_security_default_patterns';
 import type { Entity } from '../../../../../common/api/entity_analytics';
 import { euidDslFilterToPageFilters } from '../../../helpers';
 

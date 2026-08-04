@@ -38,9 +38,8 @@ import { usePrivilegedMonitoringEngineStatus } from '../hooks/use_privileged_mon
 import { PrivilegedUserMonitoringManageDataSources } from '../components/privileged_user_monitoring_manage_data_sources';
 import { UserLimitCallOut } from '../components/user_limit_callout';
 import { EmptyPrompt } from '../../common/components/empty_prompt';
-import { useDataView } from '../../data_view_manager/hooks/use_data_view';
+import { useDataView, PageScope } from '../../data_view_manager';
 import { PageLoader } from '../../common/components/page_loader';
-import { PageScope } from '../../data_view_manager/constants';
 import { forceHiddenTimeline } from '../../common/utils/timeline/force_hidden_timeline';
 
 type PageState =

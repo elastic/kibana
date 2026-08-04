@@ -17,9 +17,7 @@ import { appActions } from '../../common/store/app';
 import { InputsModelId } from '../../common/store/inputs/constants';
 import { TestProviders } from '../../common/mock';
 import { defaultUdtHeaders } from '../components/timeline/body/column_headers/default_headers';
-import { PageScope } from '../../data_view_manager/constants';
-import { useSecurityDefaultPatterns } from '../../data_view_manager/hooks/use_security_default_patterns';
-import { useSelectDataView } from '../../data_view_manager/hooks/use_select_data_view';
+import { PageScope, useSecurityDefaultPatterns, useSelectDataView } from '../../data_view_manager';
 
 jest.mock('../../common/components/discover_in_timeline/use_discover_in_timeline_context');
 jest.mock('../../common/containers/use_global_time', () => {

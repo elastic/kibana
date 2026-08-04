@@ -17,10 +17,8 @@ import {
   TableId,
 } from '@kbn/securitysolution-data-table';
 import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
-import type { PageScope } from '../../../../data_view_manager/constants';
-import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
-import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
-import { useBrowserFields } from '../../../../data_view_manager/hooks/use_browser_fields';
+import type { PageScope } from '../../../../data_view_manager';
+import { useDataView, useSelectedPatterns, useBrowserFields } from '../../../../data_view_manager';
 import type { CustomBulkAction } from '../../../../../common/types';
 import { combineQueries } from '../../../../common/lib/kuery';
 import { useKibana } from '../../../../common/lib/kibana';

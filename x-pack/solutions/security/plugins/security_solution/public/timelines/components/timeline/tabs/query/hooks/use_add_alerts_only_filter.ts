@@ -10,11 +10,10 @@ import { popularizeField } from '@kbn/unified-data-table/src/utils/popularize_fi
 import { generateFilters } from '@kbn/data-plugin/public';
 import { useDispatch } from 'react-redux-v7';
 import { i18n } from '@kbn/i18n';
-import { useDataView } from '../../../../../../data_view_manager/hooks/use_data_view';
+import { useDataView, PageScope } from '../../../../../../data_view_manager';
 import { useKibana } from '../../../../../../common/lib/kibana';
 import { DEFAULT_ALERTS_INDEX } from '../../../../../../../common/constants';
 import { useSpaceId } from '../../../../../../common/hooks/use_space_id';
-import { PageScope } from '../../../../../../data_view_manager/constants';
 import { timelineActions } from '../../../../../store';
 
 const ALERTS_ONLY_FILTER_ALIAS = i18n.translate(

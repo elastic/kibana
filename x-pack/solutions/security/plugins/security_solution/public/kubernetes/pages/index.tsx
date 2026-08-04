@@ -23,7 +23,7 @@ import { convertToBuildEsQuery } from '../../common/lib/kuery';
 import { useInvalidFilterQuery } from '../../common/hooks/use_invalid_filter_query';
 import { SessionsView } from '../../common/components/sessions_viewer';
 import { kubernetesSessionsHeaders } from './constants';
-import { useDataView } from '../../data_view_manager/hooks/use_data_view';
+import { useDataView } from '../../data_view_manager';
 
 export const KubernetesContainer = React.memo(() => {
   const { kubernetesSecurity, uiSettings } = useKibana().services;

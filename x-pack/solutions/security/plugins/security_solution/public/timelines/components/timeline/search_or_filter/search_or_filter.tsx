@@ -11,7 +11,7 @@ import styled from 'styled-components';
 import type { Filter } from '@kbn/es-query';
 
 import type { FilterManager } from '@kbn/data-plugin/public';
-import { PageScope } from '../../../../data_view_manager/constants';
+import { PageScope, DataViewPicker } from '../../../../data_view_manager';
 import { type TimelineType, TimelineTypeEnum } from '../../../../../common/api/timeline';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import type { KqlMode } from '../../../store/model';
@@ -20,7 +20,6 @@ import { SuperDatePicker } from '../../../../common/components/super_date_picker
 import type { KueryFilterQuery } from '../../../../../common/types/timeline';
 import type { DataProvider } from '../data_providers/data_provider';
 import { QueryBarTimeline } from '../query_bar';
-import { DataViewPicker } from '../../../../data_view_manager/components/data_view_picker';
 
 import { TimelineDatePickerLock } from '../date_picker_lock';
 import {

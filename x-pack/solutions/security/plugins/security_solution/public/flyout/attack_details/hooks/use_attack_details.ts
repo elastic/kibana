@@ -16,9 +16,7 @@ import {
 import { useMemo } from 'react';
 import type { SearchHit } from '../../../../common/search_strategy';
 
-import { PageScope } from '../../../data_view_manager/constants';
-import { useBrowserFields } from '../../../data_view_manager/hooks/use_browser_fields';
-import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
+import { PageScope, useBrowserFields, useDataView } from '../../../data_view_manager';
 import { useTimelineEventsDetails } from '../../../timelines/containers/details';
 import type { GetFieldsData } from '../../document_details/shared/hooks/use_get_fields_data';
 import { useGetFieldsData } from '../../document_details/shared/hooks/use_get_fields_data';

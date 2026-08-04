@@ -11,7 +11,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import styled from '@emotion/styled';
 
 import useAsync from 'react-use/lib/useAsync';
-import { PageScope } from '../../../data_view_manager/constants';
+import { PageScope } from '../../../data_view_manager';
 import { InputsModelId } from '../../store/inputs/constants';
 import { ModalInspectQuery } from '../inspect/modal';
 

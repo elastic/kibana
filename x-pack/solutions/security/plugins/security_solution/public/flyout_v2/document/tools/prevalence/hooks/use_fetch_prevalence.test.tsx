@@ -13,7 +13,7 @@ import { useSelector } from 'react-redux-v7';
 import { useFetchPrevalence } from './use_fetch_prevalence';
 import { createFetchData } from '../../../main/utils/fetch_data';
 import { useKibana } from '../../../../../common/lib/kibana';
-import { useSecurityDefaultPatterns } from '../../../../../data_view_manager/hooks/use_security_default_patterns';
+import { useSecurityDefaultPatterns } from '../../../../../data_view_manager';
 
 jest.mock('@kbn/es-query');
 jest.mock('@kbn/react-query');

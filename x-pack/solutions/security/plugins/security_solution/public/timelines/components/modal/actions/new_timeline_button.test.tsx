@@ -14,7 +14,7 @@ import { timelineActions } from '../../../store';
 import { TestProviders } from '../../../../common/mock';
 import { RowRendererValues } from '../../../../../common/api/timeline';
 import { defaultUdtHeaders } from '../../timeline/body/column_headers/default_headers';
-import { useSecurityDefaultPatterns } from '../../../../data_view_manager/hooks/use_security_default_patterns';
+import { useSecurityDefaultPatterns } from '../../../../data_view_manager';
 
 jest.mock('../../../../common/components/discover_in_timeline/use_discover_in_timeline_context');
 jest.mock('../../../../data_view_manager/hooks/use_security_default_patterns');

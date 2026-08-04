@@ -12,7 +12,7 @@ import { useParams } from 'react-router-dom';
 import { pick } from 'lodash/fp';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { ViewMode } from '@kbn/presentation-publishing';
-import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
+import { useDataView } from '../../../data_view_manager';
 import { SecurityPageName } from '../../../../common/constants';
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
 import { useCapabilities } from '../../../common/lib/kibana';

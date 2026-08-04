@@ -10,8 +10,7 @@ import { useFilteredRelatedAlertIds } from './use_filtered_related_alert_ids';
 import { useGlobalTime } from '../../../../../common/containers/use_global_time';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
-import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
-import { useBrowserFields } from '../../../../../data_view_manager/hooks/use_browser_fields';
+import { useDataView, useBrowserFields } from '../../../../../data_view_manager';
 import { useQueryAlerts } from '../../../../containers/detection_engine/alerts/use_query';
 
 jest.mock('../../../../../common/containers/use_global_time', () => ({

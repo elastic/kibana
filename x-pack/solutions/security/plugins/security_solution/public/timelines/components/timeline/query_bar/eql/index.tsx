@@ -10,8 +10,7 @@ import React, { memo, useCallback, useEffect, useMemo } from 'react';
 import { EuiOutsideClickDetector } from '@elastic/eui';
 import { useDispatch } from 'react-redux-v7';
 import { css } from '@emotion/css';
-import { PageScope } from '../../../../../data_view_manager/constants';
-import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
+import { PageScope, useDataView, useSelectedPatterns } from '../../../../../data_view_manager';
 import type { EqlOptions } from '../../../../../../common/search_strategy';
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
 import { EqlQueryEdit } from '../../../../../detection_engine/rule_creation/components/eql_query_edit';
@@ -21,7 +20,6 @@ import type { FormSchema, FormSubmitHandler } from '../../../../../shared_import
 import { Form, UseField, useForm } from '../../../../../shared_imports';
 import { timelineActions } from '../../../../store';
 import { getEqlOptions } from './selectors';
-import { useSelectedPatterns } from '../../../../../data_view_manager/hooks/use_selected_patterns';
 
 interface TimelineEqlQueryBar {
   index: string[];

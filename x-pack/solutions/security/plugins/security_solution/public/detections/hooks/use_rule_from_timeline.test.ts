@@ -14,7 +14,7 @@ import { useAppToastsMock } from '../../common/hooks/use_app_toasts.mock';
 import { mockTimeline } from '../../../server/lib/timeline/__mocks__/create_timelines';
 import type { TimelineModel } from '../..';
 import type { ResolveTimelineResponse } from '../../../common/api/timeline';
-import { useDataView } from '../../data_view_manager/hooks/use_data_view';
+import { useDataView } from '../../data_view_manager';
 import { getMockDataView, getMockDataViewWithMatchedIndices } from '../../data_view_manager/mocks';
 import { withIndices } from '../../data_view_manager/hooks/__mocks__/use_data_view';
 

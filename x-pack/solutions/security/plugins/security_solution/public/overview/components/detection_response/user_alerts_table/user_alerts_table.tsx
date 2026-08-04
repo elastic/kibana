@@ -21,7 +21,7 @@ import {
 
 import { ALERT_SEVERITY } from '@kbn/rule-data-utils';
 import { SECURITY_CELL_ACTIONS_ALERTS_COUNT } from '@kbn/ui-actions-plugin/common/trigger_ids';
-import { PageScope } from '../../../../data_view_manager/constants';
+import { PageScope } from '../../../../data_view_manager';
 import { useNavigateToAlertsPageWithFilters } from '../../../../common/hooks/use_navigate_to_alerts_page_with_filters';
 import { FormattedCount } from '../../../../common/components/formatted_number';
 import { HeaderSection } from '../../../../common/components/header_section';

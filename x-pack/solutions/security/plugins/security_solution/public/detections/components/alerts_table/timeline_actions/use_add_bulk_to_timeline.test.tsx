@@ -9,7 +9,7 @@ import { renderHook } from '@testing-library/react';
 import { useAddBulkToTimelineAction } from './use_add_bulk_to_timeline';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { TableId } from '@kbn/securitysolution-data-table';
-import { PageScope } from '../../../../data_view_manager/constants';
+import { PageScope } from '../../../../data_view_manager';
 import { TestProviders } from '../../../../common/mock';
 
 // Mock all dependencies

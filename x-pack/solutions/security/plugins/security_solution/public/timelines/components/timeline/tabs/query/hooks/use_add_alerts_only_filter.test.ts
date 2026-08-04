@@ -7,7 +7,7 @@
 
 import { renderHook } from '@testing-library/react';
 import { useAddAlertsOnlyFilter } from './use_add_alerts_only_filter';
-import { useDataView } from '../../../../../../data_view_manager/hooks/use_data_view';
+import { useDataView } from '../../../../../../data_view_manager';
 import { useKibana } from '../../../../../../common/lib/kibana';
 import { useDispatch } from 'react-redux-v7';
 import type { DataView } from '@kbn/data-views-plugin/common';

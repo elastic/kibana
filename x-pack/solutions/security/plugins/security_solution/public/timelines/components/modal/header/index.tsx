@@ -18,7 +18,7 @@ import { useDispatch, useSelector } from 'react-redux-v7';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import styled from 'styled-components';
-import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
+import { useDataView, useBrowserFields, PageScope } from '../../../../data_view_manager';
 import { NewTimelineButton } from '../actions/new_timeline_button';
 import { OpenTimelineButton } from '../actions/open_timeline_button';
 import { APP_ID } from '../../../../../common';
@@ -40,8 +40,6 @@ import { InspectButton } from '../../../../common/components/inspect';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { AttachToCaseButton } from '../actions/attach_to_case_button';
 import { SaveTimelineButton } from '../actions/save_timeline_button';
-import { useBrowserFields } from '../../../../data_view_manager/hooks/use_browser_fields';
-import { PageScope } from '../../../../data_view_manager/constants';
 
 const whiteSpaceNoWrapCSS = { 'white-space': 'nowrap' };
 const autoOverflowXCSS = { 'overflow-x': 'auto' };

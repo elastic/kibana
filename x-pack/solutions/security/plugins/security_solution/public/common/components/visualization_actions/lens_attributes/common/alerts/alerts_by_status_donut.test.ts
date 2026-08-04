@@ -11,7 +11,7 @@ import { mockExtraFilter, wrapper } from '../../../mocks';
 import { useLensAttributes } from '../../../use_lens_attributes';
 
 import { getAlertsByStatusAttributes } from './alerts_by_status_donut';
-import { useDataView } from '../../../../../../data_view_manager/hooks/use_data_view';
+import { useDataView } from '../../../../../../data_view_manager';
 import { withIndices } from '../../../../../../data_view_manager/hooks/__mocks__/use_data_view';
 
 jest.mock('uuid', () => ({

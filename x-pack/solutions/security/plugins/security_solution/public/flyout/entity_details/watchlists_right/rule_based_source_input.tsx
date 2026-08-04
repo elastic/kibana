@@ -26,7 +26,7 @@ import { useMutation, useQueryClient } from '@kbn/react-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { Filter, Query } from '@kbn/es-query';
 import type { FilterManager, SavedQuery } from '@kbn/data-plugin/public';
-import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
+import { useDataView, PageScope } from '../../../data_view_manager';
 import type { CreateWatchlistRequestBodyInput } from '../../../../common/api/entity_analytics/watchlists/management/create.gen';
 import type { MonitoringEntitySource } from '../../../../common/api/entity_analytics/watchlists/data_source/common.gen';
 import { QueryBar } from '../../../common/components/query_bar';
@@ -45,7 +45,6 @@ import {
   WATCHLIST_INDEX_PATTERN_PLACEHOLDER,
   WATCHLIST_LOOKBACK_PERIOD_LABEL,
 } from './translations';
-import { PageScope } from '../../../data_view_manager/constants';
 
 const DEBOUNCE_OPTIONS = { wait: 300 };
 

@@ -18,8 +18,7 @@ import { createFlyoutApiMock } from '../../use_flyout_api.mock';
 import { ElasticRequestState } from '@kbn/unified-doc-viewer';
 import { useEsDocSearch } from '@kbn/unified-doc-viewer-plugin/public';
 import { useIsNewFlyoutEnabled } from '../../../common/hooks/use_is_new_flyout_enabled';
-import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
-import { PageScope } from '../../../data_view_manager/constants';
+import { useDataView, PageScope } from '../../../data_view_manager';
 import { notifyFlyoutV2Navigation } from './flyout_v2_navigation';
 import { FLYOUT_ORIGIN } from '../../../common/lib/telemetry/events/flyout_v2/types';
 

@@ -10,7 +10,7 @@ import { shallow } from 'enzyme';
 import React from 'react';
 import { TimelinesPage } from './timelines_page';
 import { useUserPrivileges } from '../../common/components/user_privileges';
-import { useDataView } from '../../data_view_manager/hooks/use_data_view';
+import { useDataView } from '../../data_view_manager';
 import { withMatchedIndices } from '../../data_view_manager/hooks/__mocks__/use_data_view';
 
 jest.mock('react-router-dom', () => {

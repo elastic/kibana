@@ -17,7 +17,7 @@ import {
 import { RelatedAlertsByAncestry } from './related_alerts_by_ancestry';
 import { useFetchRelatedAlertsByAncestry } from '../hooks/use_fetch_related_alerts_by_ancestry';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { useSecurityDefaultPatterns } from '../../../../data_view_manager/hooks/use_security_default_patterns';
+import { useSecurityDefaultPatterns } from '../../../../data_view_manager';
 import { useKibana } from '../../../../common/lib/kibana';
 
 jest.mock('../hooks/use_fetch_related_alerts_by_ancestry');

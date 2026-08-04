@@ -12,9 +12,9 @@ import type {
   CreateFieldComponent,
   GetFieldTableColumns,
 } from '@kbn/response-ops-alerts-fields-browser/types';
-import type { PageScope } from '../../../data_view_manager/constants';
+import type { PageScope } from '../../../data_view_manager';
 import type { ColumnHeaderOptions } from '../../../../common/types';
-import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
+import { useDataView } from '../../../data_view_manager';
 import { useKibana } from '../../../common/lib/kibana';
 import { defaultColumnHeaderType } from '../timeline/body/column_headers/default_headers';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../timeline/body/constants';

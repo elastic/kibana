@@ -21,7 +21,7 @@ import {
   shouldIgnoreAlertFilters,
 } from './helpers';
 import { TableId } from '@kbn/securitysolution-data-table';
-import { PageScope } from '../../../data_view_manager/constants';
+import { PageScope } from '../../../data_view_manager';
 
 /** the following scopes are NOT detection alert tables */
 const otherScopes = [

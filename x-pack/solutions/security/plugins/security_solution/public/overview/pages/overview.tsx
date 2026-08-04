@@ -38,8 +38,7 @@ import { useAllTiDataSources } from '../containers/overview_cti_links/use_all_ti
 import { useUserPrivileges } from '../../common/components/user_privileges';
 import { useAlertsPrivileges } from '../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { EmptyPrompt } from '../../common/components/empty_prompt';
-import { useSelectedPatterns } from '../../data_view_manager/hooks/use_selected_patterns';
-import { useDataView } from '../../data_view_manager/hooks/use_data_view';
+import { useSelectedPatterns, useDataView } from '../../data_view_manager';
 import { PageLoader } from '../../common/components/page_loader';
 import {
   filterAlertsFromIndexPatterns,

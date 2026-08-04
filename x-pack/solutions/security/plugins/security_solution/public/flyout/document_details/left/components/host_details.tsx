@@ -87,7 +87,7 @@ import { DocumentEventTypes } from '../../../../common/lib/telemetry';
 import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from '../../../../overview/components/detection_response/alerts_by_status/types';
 import { useNavigateToHostDetails } from '../../../entity_details/host_right/hooks/use_navigate_to_host_details';
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
-import { useSecurityDefaultPatterns } from '../../../../data_view_manager/hooks/use_security_default_patterns';
+import { useSecurityDefaultPatterns } from '../../../../data_view_manager';
 import { useSpaceId } from '../../../../common/hooks/use_space_id';
 import type { EntityFromStoreResult } from '../../../entity_details/shared/hooks/use_entity_from_store';
 import { useObservedHost } from '../../../../flyout_v2/entity/host/main/hooks/use_observed_host';

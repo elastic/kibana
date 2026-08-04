@@ -10,7 +10,7 @@ import styled from '@emotion/styled';
 
 import { EuiFlexGroup, EuiFlexItem, EuiSelect, EuiSpacer } from '@elastic/eui';
 import { isString } from 'lodash/fp';
-import type { PageScope } from '../../../data_view_manager/constants';
+import type { PageScope } from '../../../data_view_manager';
 import * as i18n from './translations';
 import { HeaderSection } from '../header_section';
 import { Panel } from '../panel';

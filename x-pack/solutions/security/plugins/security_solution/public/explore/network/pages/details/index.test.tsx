@@ -12,7 +12,7 @@ import { useParams } from 'react-router-dom';
 import { TestProviders } from '../../../../common/mock';
 import { NetworkDetails } from '.';
 import { FlowTargetSourceDest } from '../../../../../common/search_strategy';
-import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
+import { useDataView } from '../../../../data_view_manager';
 import {
   defaultImplementation,
   withIndices,

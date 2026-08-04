@@ -9,7 +9,7 @@ import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useDispatch } from 'react-redux-v7';
 import { css } from '@emotion/react';
 
-import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
+import { useDataView } from '../../../data_view_manager';
 import { ChartLabel } from '../../../overview/components/detection_response/alerts_by_status/chart_label';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { inputsActions, inputsSelectors } from '../../store/inputs';

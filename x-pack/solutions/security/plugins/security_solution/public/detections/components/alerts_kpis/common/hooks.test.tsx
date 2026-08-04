@@ -13,7 +13,7 @@ import type { GetAggregatableFields, UseInspectButtonParams } from './hooks';
 import { getAggregatableFields, useInspectButton, useStackByFields } from './hooks';
 import { mockBrowserFields } from '../../../../common/containers/source/mock';
 import { TestProviders } from '../../../../common/mock';
-import { useBrowserFields } from '../../../../data_view_manager/hooks/use_browser_fields';
+import { useBrowserFields } from '../../../../data_view_manager';
 
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');

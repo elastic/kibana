@@ -17,7 +17,7 @@ import type {
   ItemsPanelConfig,
 } from '@kbn/response-ops-alerts-table/types';
 import { useBulkRunAlertWorkflowPanel } from './use_bulk_run_alert_workflow_panel';
-import { PageScope } from '../../../data_view_manager/constants';
+import { PageScope } from '../../../data_view_manager';
 import { useBulkAlertAssigneesItems } from '../../../common/components/toolbar/bulk_actions/use_bulk_alert_assignees_items';
 import { useBulkAlertTagsItems } from '../../../common/components/toolbar/bulk_actions/use_bulk_alert_tags_items';
 import { useGlobalTime } from '../../../common/containers/use_global_time';

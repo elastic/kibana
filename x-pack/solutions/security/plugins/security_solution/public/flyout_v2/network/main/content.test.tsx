@@ -14,8 +14,7 @@ import { useNetworkDetails } from '../../../explore/network/containers/details';
 import { useAnomaliesTableData } from '../../../common/components/ml/anomaly/use_anomalies_table_data';
 import { useInstalledSecurityJobNameById } from '../../../common/components/ml/hooks/use_installed_security_jobs';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
-import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
-import { useSelectedPatterns } from '../../../data_view_manager/hooks/use_selected_patterns';
+import { useDataView, useSelectedPatterns } from '../../../data_view_manager';
 
 jest.mock('../../../explore/network/components/details', () => ({
   IpOverview: () => <div data-test-subj="ip-overview" />,

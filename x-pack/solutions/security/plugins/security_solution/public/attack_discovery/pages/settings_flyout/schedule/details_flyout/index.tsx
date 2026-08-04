@@ -27,7 +27,7 @@ import { useLoadConnectors } from '@kbn/inference-connectors';
 import { DEFAULT_END, DEFAULT_START } from '@kbn/elastic-assistant-common';
 import type { Filter } from '@kbn/es-query';
 
-import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
+import { useDataView, PageScope } from '../../../../../data_view_manager';
 import * as i18n from './translations';
 
 import { useKibana } from '../../../../../common/lib/kibana';
@@ -45,7 +45,6 @@ import {
   convertFormDataInBaseSchedule,
   convertFormDataToWorkflowSchedule,
 } from '../utils/convert_form_data';
-import { PageScope } from '../../../../../data_view_manager/constants';
 import { WithMissingPrivileges } from '../missing_privileges';
 
 interface Props {

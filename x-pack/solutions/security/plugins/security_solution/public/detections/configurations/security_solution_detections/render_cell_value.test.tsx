@@ -20,7 +20,7 @@ import type { TimelineNonEcsData } from '../../../../common/search_strategy/time
 import type { RenderCellValueProps } from './render_cell_value';
 import { CellValue } from './render_cell_value';
 import { AlertTableCellContextProvider } from './cell_value_context';
-import { PageScope } from '../../../data_view_manager/constants';
+import { PageScope } from '../../../data_view_manager';
 
 jest.mock('../../../common/lib/kibana');
 

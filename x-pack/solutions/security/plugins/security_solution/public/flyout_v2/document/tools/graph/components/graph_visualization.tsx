@@ -29,8 +29,7 @@ import {
 } from '@kbn/cloud-security-posture-common/schema/graph/v1';
 import { isEntityNodeEnriched } from '@kbn/cloud-security-posture-graph/src/components/utils';
 import { useFlyoutBodyAvailableHeight } from '../hooks/use_flyout_body_available_height';
-import { PageScope } from '../../../../../data_view_manager/constants';
-import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
+import { PageScope, useDataView } from '../../../../../data_view_manager';
 import { PREFIX } from '../../../../../flyout/shared/test_ids';
 import { useInvestigateInTimeline } from '../../../../../common/hooks/timeline/use_investigate_in_timeline';
 import { normalizeTimeRange } from '../../../../../common/utils/normalize_time_range';

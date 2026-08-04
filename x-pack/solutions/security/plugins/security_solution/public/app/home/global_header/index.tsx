@@ -15,7 +15,12 @@ import { useLocation } from 'react-router-dom';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { PageScope } from '../../../data_view_manager/constants';
+import {
+  PageScope,
+  getScopeFromPath,
+  showDataViewPickerByPath,
+  DataViewPicker,
+} from '../../../data_view_manager';
 import { SECURITY_FEATURE_ID } from '../../../../common';
 import { MlPopover } from '../../../common/components/ml_popover/ml_popover';
 import { useKibana } from '../../../common/lib/kibana';
@@ -24,9 +29,7 @@ import { TimelineId } from '../../../../common/types/timeline';
 import { timelineDefaults } from '../../../timelines/store/defaults';
 import { timelineSelectors } from '../../../timelines/store';
 import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
-import { getScopeFromPath, showDataViewPickerByPath } from '../../../data_view_manager/utils/paths';
 import { useAddIntegrationsUrl } from '../../../common/hooks/use_add_integrations_url';
-import { DataViewPicker } from '../../../data_view_manager/components/data_view_picker';
 
 const BUTTON_ADD_DATA = i18n.translate('xpack.securitySolution.globalHeader.buttonAddData', {
   defaultMessage: 'Add integrations',

@@ -17,7 +17,7 @@ import numeral from '@elastic/numeral';
 
 import type { Filter } from '@kbn/es-query';
 
-import { PageScope } from '../../../../data_view_manager/constants';
+import { PageScope } from '../../../../data_view_manager';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { APP_UI_ID, DEFAULT_NUMBER_FORMAT } from '../../../../../common/constants';
 import type { UpdateDateRange } from '../../../../common/components/charts/common';

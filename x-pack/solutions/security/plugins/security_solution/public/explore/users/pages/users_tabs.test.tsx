@@ -12,7 +12,7 @@ import { Router } from '@kbn/shared-ux-router';
 import { TestProviders } from '../../../common/mock';
 import { Users } from './users';
 import { mockCasesContext } from '@kbn/cases-plugin/public/mocks/mock_cases_context';
-import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
+import { useDataView } from '../../../data_view_manager';
 import { withIndices } from '../../../data_view_manager/hooks/__mocks__/use_data_view';
 
 jest.mock('../../../common/components/empty_prompt');

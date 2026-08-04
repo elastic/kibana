@@ -8,12 +8,14 @@
 import { useCallback } from 'react';
 import { useDispatch } from 'react-redux-v7';
 import type { Filter, Query } from '@kbn/es-query';
-import { useSelectedPatterns } from '../../../data_view_manager/hooks/use_selected_patterns';
-import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
-import { PageScope } from '../../../data_view_manager/constants';
-import { useSelectDataView } from '../../../data_view_manager/hooks/use_select_data_view';
-import { useSignalIndexName } from '../../../data_view_manager/hooks/use_signal_index_name';
-import { useSecurityDefaultPatterns } from '../../../data_view_manager/hooks/use_security_default_patterns';
+import {
+  useSelectedPatterns,
+  useDataView,
+  PageScope,
+  useSelectDataView,
+  useSignalIndexName,
+  useSecurityDefaultPatterns,
+} from '../../../data_view_manager';
 import { useCreateTimeline } from '../../../timelines/hooks/use_create_timeline';
 import { applyKqlFilterQuery, setFilters, updateProviders } from '../../../timelines/store/actions';
 import type { DataProvider } from '../../../../common/types';

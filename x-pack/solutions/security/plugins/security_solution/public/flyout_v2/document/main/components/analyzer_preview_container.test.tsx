@@ -17,9 +17,7 @@ import {
   ANALYZER_PREVIEW_TEST_ID,
 } from './test_ids';
 import { EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID } from '../../../shared/components/test_ids';
-import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
-import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
-import { PageScope } from '../../../../data_view_manager/constants';
+import { useDataView, useSelectedPatterns, PageScope } from '../../../../data_view_manager';
 
 jest.mock('../../../../detections/hooks/use_is_analyzer_enabled');
 jest.mock('../../../../data_view_manager/hooks/use_data_view');

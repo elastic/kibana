@@ -28,7 +28,7 @@ import { useFetchRelatedAlertsByAncestry } from '../../../main/hooks/use_fetch_r
 import { useFetchRelatedAlertsBySameSourceEvent } from '../../../main/hooks/use_fetch_related_alerts_by_same_source_event';
 import { useFetchRelatedCases } from '../../../main/hooks/use_fetch_related_cases';
 import { EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID } from '../../../../shared/components/test_ids';
-import { useSecurityDefaultPatterns } from '../../../../../data_view_manager/hooks/use_security_default_patterns';
+import { useSecurityDefaultPatterns } from '../../../../../data_view_manager';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { useAlertsPrivileges } from '../../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import type { DataTableRecord } from '@kbn/discover-utils';

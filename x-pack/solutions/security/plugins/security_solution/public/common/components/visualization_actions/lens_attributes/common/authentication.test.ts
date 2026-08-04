@@ -13,7 +13,7 @@ import { useLensAttributes } from '../../use_lens_attributes';
 
 import { getAuthenticationLensAttributes } from './authentication';
 import { getMockDataViewWithMatchedIndices } from '../../../../../data_view_manager/mocks';
-import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
+import { useDataView } from '../../../../../data_view_manager';
 
 jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('generated-uuid'),

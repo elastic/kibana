@@ -28,7 +28,7 @@ import { SecuritySolutionPageWrapper } from '../../common/components/page_wrappe
 import { HeaderPage } from '../../common/components/header_page';
 import * as i18n from './translations';
 import { NoPrivileges } from '../../common/components/no_privileges';
-import { useDataView } from '../../data_view_manager/hooks/use_data_view';
+import { useDataView } from '../../data_view_manager';
 import { PageLoader } from '../../common/components/page_loader';
 import { inputsSelectors } from '../../common/store';
 import { useHasSecurityCapability } from '../../helper_hooks';

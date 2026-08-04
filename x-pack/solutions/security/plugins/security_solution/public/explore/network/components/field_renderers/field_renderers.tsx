@@ -14,7 +14,7 @@ import {
   type IdentityFields,
   ecsSliceToFlattenedDocument,
 } from '../../../../flyout/document_details/shared/utils';
-import type { PageScope } from '../../../../data_view_manager/constants';
+import type { PageScope } from '../../../../data_view_manager';
 import { DefaultFieldRenderer } from '../../../../timelines/components/field_renderers/default_renderer';
 import type {
   AutonomousSystem,

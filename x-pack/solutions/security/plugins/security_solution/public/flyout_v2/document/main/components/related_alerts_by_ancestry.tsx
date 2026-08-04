@@ -10,7 +10,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useFetchRelatedAlertsByAncestry } from '../hooks/use_fetch_related_alerts_by_ancestry';
 import { InsightsSummaryRow } from './insights_summary_row';
 import { CORRELATIONS_RELATED_ALERTS_BY_ANCESTRY_TEST_ID } from './test_ids';
-import { useSecurityDefaultPatterns } from '../../../../data_view_manager/hooks/use_security_default_patterns';
+import { useSecurityDefaultPatterns } from '../../../../data_view_manager';
 import { useKibana } from '../../../../common/lib/kibana';
 import { FLYOUT_STORAGE_KEYS } from '../constants/local_storage';
 

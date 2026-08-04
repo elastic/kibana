@@ -12,7 +12,7 @@ import { VisualizationEmbeddable } from '../../../common/components/visualizatio
 import { getTimeSavedMetricLensAttributes } from '../../../common/components/visualization_actions/lens_attributes/ai/time_saved_metric';
 import { VisualizationContextMenuActions } from '../../../common/components/visualization_actions/types';
 import { useSignalIndexWithDefault } from '../../hooks/use_signal_index_with_default';
-import { PageScope } from '../../../data_view_manager/constants';
+import { PageScope } from '../../../data_view_manager';
 import * as i18n from './translations';
 
 jest.mock('../../../common/components/visualization_actions/visualization_embeddable', () => ({

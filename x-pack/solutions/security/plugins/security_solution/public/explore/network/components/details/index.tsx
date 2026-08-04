@@ -8,7 +8,7 @@
 import { euiDarkVars as darkTheme, euiLightVars as lightTheme } from '@kbn/ui-theme';
 import React from 'react';
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
-import type { PageScope } from '../../../../data_view_manager/constants';
+import type { PageScope } from '../../../../data_view_manager';
 import type { DescriptionList } from '../../../../../common/utility_types';
 import type {
   FlowTargetSourceDest,

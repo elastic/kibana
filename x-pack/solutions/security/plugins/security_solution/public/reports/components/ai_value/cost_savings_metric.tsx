@@ -9,7 +9,7 @@ import React, { useCallback, useMemo } from 'react';
 
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
-import { PageScope } from '../../../data_view_manager/constants';
+import { PageScope } from '../../../data_view_manager';
 import * as i18n from './translations';
 import {
   type GetLensAttributes,

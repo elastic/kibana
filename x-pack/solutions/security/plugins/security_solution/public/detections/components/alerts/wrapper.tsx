@@ -18,7 +18,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { HeaderPage } from '../../../common/components/header_page';
-import type { UseDataViewReturnValue } from '../../../data_view_manager/hooks/use_data_view';
+import type { UseDataViewReturnValue } from '../../../data_view_manager';
 import { AlertsPageContent } from './content';
 import { PAGE_TITLE } from '../../pages/alerts/translations';
 

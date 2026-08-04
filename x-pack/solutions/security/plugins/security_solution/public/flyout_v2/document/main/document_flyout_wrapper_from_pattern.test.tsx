@@ -8,7 +8,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { DocumentFlyoutWrapperFromPattern } from './document_flyout_wrapper_from_pattern';
-import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
+import { useDataView } from '../../../data_view_manager';
 import { useTimelineEventsDetails } from '../../../timelines/containers/details';
 import { useAlertsPrivileges } from '../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 

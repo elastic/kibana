@@ -7,7 +7,7 @@
 import { useCallback, useMemo } from 'react';
 import type { EuiDataGridColumn } from '@elastic/eui';
 import { noop } from 'lodash';
-import type { PageScope } from '../../../data_view_manager/constants';
+import type { PageScope } from '../../../data_view_manager';
 import { useFieldBrowserOptions } from '../../../timelines/components/fields_browser';
 
 export const useAlertsTableFieldsBrowserOptions = (

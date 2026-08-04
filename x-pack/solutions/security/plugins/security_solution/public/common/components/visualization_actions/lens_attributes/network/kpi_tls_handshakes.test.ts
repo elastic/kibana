@@ -11,7 +11,7 @@ import { wrapper } from '../../mocks';
 import { useLensAttributes } from '../../use_lens_attributes';
 
 import { kpiTlsHandshakesLensAttributes } from './kpi_tls_handshakes';
-import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
+import { useDataView } from '../../../../../data_view_manager';
 import { withIndices } from '../../../../../data_view_manager/hooks/__mocks__/use_data_view';
 
 jest.mock('../../../../utils/route/use_route_spy', () => ({

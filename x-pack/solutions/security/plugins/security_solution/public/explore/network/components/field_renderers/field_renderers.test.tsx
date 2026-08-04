@@ -24,7 +24,7 @@ import type { AutonomousSystem } from '../../../../../common/search_strategy';
 import { FlowTarget } from '../../../../../common/search_strategy';
 import type { HostEcs } from '@kbn/securitysolution-ecs';
 import { mockGetUrlForApp } from '@kbn/security-solution-navigation/mocks/context';
-import { PageScope } from '../../../../data_view_manager/constants';
+import { PageScope } from '../../../../data_view_manager';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('@kbn/security-solution-navigation/src/context');

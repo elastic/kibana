@@ -22,7 +22,7 @@ import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_flyout_enabled';
 import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
 import { createFlyoutApiMock } from '../../../../../flyout_v2/use_flyout_api.mock';
-import { PageScope } from '../../../../../data_view_manager/constants';
+import { PageScope } from '../../../../../data_view_manager';
 
 jest.mock('../../../../../common/hooks/use_is_new_flyout_enabled', () => ({
   useIsNewFlyoutEnabled: jest.fn().mockReturnValue(false),

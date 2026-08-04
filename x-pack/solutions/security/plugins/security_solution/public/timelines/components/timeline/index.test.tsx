@@ -20,7 +20,7 @@ import { useTimelineEvents } from '../../containers';
 import { DefaultCellRenderer } from './cell_rendering/default_cell_renderer';
 import { SELECTOR_TIMELINE_GLOBAL_CONTAINER } from './styles';
 import { defaultRowRenderers } from './body/renderers';
-import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
+import { useDataView } from '../../../data_view_manager';
 import { withIndices } from '../../../data_view_manager/hooks/__mocks__/use_data_view';
 
 jest.mock('../../containers', () => ({

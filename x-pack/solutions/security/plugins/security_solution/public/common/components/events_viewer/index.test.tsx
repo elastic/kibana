@@ -22,7 +22,7 @@ import { defaultRowRenderers } from '../../../timelines/components/timeline/body
 import type { UseFieldBrowserOptionsProps } from '../../../timelines/components/fields_browser';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { mount } from 'enzyme';
-import { PageScope } from '../../../data_view_manager/constants';
+import { PageScope } from '../../../data_view_manager';
 
 jest.mock('../../lib/kibana');
 

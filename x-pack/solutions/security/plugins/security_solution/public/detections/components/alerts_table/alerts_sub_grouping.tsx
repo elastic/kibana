@@ -23,8 +23,7 @@ import { parseGroupingQuery } from '@kbn/grouping/src';
 import type { estypes } from '@elastic/elasticsearch';
 import type { TableIdLiteral } from '@kbn/securitysolution-data-table';
 import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
-import { PageScope } from '../../../data_view_manager/constants';
-import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
+import { PageScope, useDataView, useBrowserFields } from '../../../data_view_manager';
 import type { GroupTakeActionItems } from './types';
 import { combineQueries } from '../../../common/lib/kuery';
 import type { AlertsGroupingAggregation } from './grouping_settings/types';
@@ -39,7 +38,6 @@ import * as i18n from './translations';
 import { useQueryAlerts } from '../../containers/detection_engine/alerts/use_query';
 import { ALERTS_QUERY_NAMES } from '../../containers/detection_engine/alerts/constants';
 import { getAlertsGroupingQuery } from './grouping_settings';
-import { useBrowserFields } from '../../../data_view_manager/hooks/use_browser_fields';
 import {
   fetchQueryAlerts,
   fetchQueryUnifiedAlerts,

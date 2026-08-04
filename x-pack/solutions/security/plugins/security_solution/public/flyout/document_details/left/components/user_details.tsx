@@ -75,9 +75,11 @@ import { buildEuidCspPreviewOptions } from '../../../../cloud_security_posture/u
 import { useNonClosedAlerts } from '../../../../cloud_security_posture/hooks/use_non_closed_alerts';
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
 import { useNavigateToUserDetails } from '../../../entity_details/user_right/hooks/use_navigate_to_user_details';
-import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
-import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
-import { useSecurityDefaultPatterns } from '../../../../data_view_manager/hooks/use_security_default_patterns';
+import {
+  useSelectedPatterns,
+  useDataView,
+  useSecurityDefaultPatterns,
+} from '../../../../data_view_manager';
 import { useEntityFromStore } from '../../../entity_details/shared/hooks/use_entity_from_store';
 import { useObservedUser } from '../../../../flyout_v2/entity/user/main/hooks/use_observed_user';
 import {

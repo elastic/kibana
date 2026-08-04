@@ -19,9 +19,7 @@ import type { TimeRange } from '../../common/store/inputs/model';
 import { useDiscoverInTimelineContext } from '../../common/components/discover_in_timeline/use_discover_in_timeline_context';
 import { defaultUdtHeaders } from '../components/timeline/body/column_headers/default_headers';
 import { timelineDefaults } from '../store/defaults';
-import { useSelectDataView } from '../../data_view_manager/hooks/use_select_data_view';
-import { PageScope } from '../../data_view_manager/constants';
-import { useSecurityDefaultPatterns } from '../../data_view_manager/hooks/use_security_default_patterns';
+import { useSelectDataView, PageScope, useSecurityDefaultPatterns } from '../../data_view_manager';
 
 export interface UseCreateTimelineParams {
   /**

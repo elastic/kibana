@@ -24,7 +24,7 @@ import { AlertSelection } from '../alert_selection';
 import { useKibana } from '../../../../common/lib/kibana';
 import { AttackDiscoveryEventTypes } from '../../../../common/lib/telemetry';
 import { convertToBuildEsQuery } from '../../../../common/lib/kuery';
-import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
+import { useDataView } from '../../../../data_view_manager';
 import { parseFilterQuery } from '../parse_filter_query';
 import type { SettingsOverrideOptions } from '../../results/history/types';
 import type { UseFetchDefaultEsqlQueryResult } from '../workflow_configuration';

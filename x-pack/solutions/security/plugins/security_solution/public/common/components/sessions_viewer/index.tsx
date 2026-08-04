@@ -12,7 +12,7 @@ import { useDispatch } from 'react-redux-v7';
 import { EVENT_ACTION } from '@kbn/rule-data-utils';
 import { dataTableActions, TableId } from '@kbn/securitysolution-data-table';
 import { SECURITY_CELL_ACTIONS_DEFAULT } from '@kbn/ui-actions-plugin/common/trigger_ids';
-import { PageScope } from '../../../data_view_manager/constants';
+import { PageScope } from '../../../data_view_manager';
 import { useAddBulkToTimelineAction } from '../../../detections/components/alerts_table/timeline_actions/use_add_bulk_to_timeline';
 import type { SessionsComponentsProps } from './types';
 import type { ESBoolQuery } from '../../../../common/typed_json';

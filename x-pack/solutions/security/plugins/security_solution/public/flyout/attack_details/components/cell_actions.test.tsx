@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { SECURITY_CELL_ACTIONS_DETAILS_FLYOUT } from '@kbn/ui-actions-plugin/common/trigger_ids';
-import { PageScope } from '../../../data_view_manager/constants';
+import { PageScope } from '../../../data_view_manager';
 import { CellActions } from './cell_actions';
 
 const MockedSecurityCellActions = jest.fn(({ children }) => <>{children}</>);

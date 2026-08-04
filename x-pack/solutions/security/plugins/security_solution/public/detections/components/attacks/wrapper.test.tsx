@@ -15,7 +15,7 @@ import {
 } from './wrapper';
 import { UNINITIALIZED_DATA_VIEW_EMPTY_STATE_TEST_ID } from './uninitialized_empty_state/uninitialized_data_view_empty_state';
 import { TestProviders } from '../../../common/mock';
-import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
+import { useDataView } from '../../../data_view_manager';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/data_view.stub';
 

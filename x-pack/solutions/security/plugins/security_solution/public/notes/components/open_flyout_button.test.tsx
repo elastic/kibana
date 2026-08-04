@@ -13,7 +13,7 @@ import { OpenFlyoutButtonIcon } from './open_flyout_button';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { DocumentDetailsRightPanelKey } from '../../flyout/document_details/shared/constants/panel_keys';
 import { TableId } from '@kbn/securitysolution-data-table';
-import { useDataView } from '../../data_view_manager/hooks/use_data_view';
+import { useDataView } from '../../data_view_manager';
 import { withIndices } from '../../data_view_manager/hooks/__mocks__/use_data_view';
 import { useFlyoutApi } from '../../flyout_v2/use_flyout_api';
 import { createFlyoutApiMock } from '../../flyout_v2/use_flyout_api.mock';

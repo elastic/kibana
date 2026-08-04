@@ -9,8 +9,7 @@ import React, { useMemo } from 'react';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { PageScope } from '../../../../../data_view_manager/constants';
-import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
+import { PageScope, useDataView } from '../../../../../data_view_manager';
 import {
   type CorrelationsCustomTableColumn,
   CorrelationsDetailsAlertsTable,

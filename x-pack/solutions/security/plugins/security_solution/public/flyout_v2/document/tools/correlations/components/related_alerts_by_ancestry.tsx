@@ -17,7 +17,7 @@ import {
   CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_TEST_ID,
 } from './test_ids';
 import { getColumns } from '../utils/get_columns';
-import { useSecurityDefaultPatterns } from '../../../../../data_view_manager/hooks/use_security_default_patterns';
+import { useSecurityDefaultPatterns } from '../../../../../data_view_manager';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { FLYOUT_STORAGE_KEYS } from '../../../main/constants/local_storage';
 

@@ -17,8 +17,7 @@ import type { FlowTargetSourceDest } from '../../../../common/search_strategy/se
 import type { ManagedUserHit } from '../../../../common/search_strategy/security_solution/users/managed_details';
 import { useIsNewFlyoutEnabled } from '../../../common/hooks/use_is_new_flyout_enabled';
 import { FLYOUT_ORIGIN, type FlyoutOrigin } from '../../../common/lib/telemetry';
-import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
-import { PageScope } from '../../../data_view_manager/constants';
+import { useDataView, PageScope } from '../../../data_view_manager';
 import type { FlyoutApi } from '../../use_flyout_api';
 import { useFlyoutApi } from '../../use_flyout_api';
 import type {

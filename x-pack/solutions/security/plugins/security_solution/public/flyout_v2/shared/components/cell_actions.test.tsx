@@ -8,7 +8,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { TimelineId } from '../../../../common/types/timeline';
-import { PageScope } from '../../../data_view_manager/constants';
+import { PageScope } from '../../../data_view_manager';
 import { cellActionRenderer, createCellActionRenderer } from './cell_actions';
 
 const mockSecurityCellActions = jest.fn((props: Record<string, unknown>) => (

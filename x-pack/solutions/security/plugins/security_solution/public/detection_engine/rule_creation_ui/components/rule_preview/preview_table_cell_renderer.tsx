@@ -9,7 +9,7 @@ import React, { useMemo } from 'react';
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import { TableId } from '@kbn/securitysolution-data-table';
 import type { Alert } from '@kbn/alerting-types';
-import { PageScope } from '../../../../data_view_manager/constants';
+import { PageScope } from '../../../../data_view_manager';
 import type { CellValueElementProps } from '../../../../../common/types';
 import { CellValue } from '../../../../detections/configurations/security_solution_detections';
 

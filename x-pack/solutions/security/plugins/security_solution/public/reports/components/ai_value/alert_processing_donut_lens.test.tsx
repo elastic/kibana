@@ -12,7 +12,7 @@ import { VisualizationEmbeddable } from '../../../common/components/visualizatio
 import { getAlertProcessingDonutAttributes } from '../../../common/components/visualization_actions/lens_attributes/ai/alert_processing_donut';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
 import { VisualizationContextMenuActions } from '../../../common/components/visualization_actions/types';
-import { PageScope } from '../../../data_view_manager/constants';
+import { PageScope } from '../../../data_view_manager';
 import { I18nProvider } from '@kbn/i18n-react';
 import { DonutChartWrapper } from '../../../common/components/charts/donutchart';
 

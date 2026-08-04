@@ -13,7 +13,7 @@ import { EntityAnalyticsPage } from './entity_analytics_dashboard';
 import { TestProviders } from '../../common/mock';
 
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
-import { useDataView } from '../../data_view_manager/hooks/use_data_view';
+import { useDataView } from '../../data_view_manager';
 
 jest.mock('../../common/hooks/use_experimental_features', () => ({
   useIsExperimentalFeatureEnabled: jest.fn(() => false),

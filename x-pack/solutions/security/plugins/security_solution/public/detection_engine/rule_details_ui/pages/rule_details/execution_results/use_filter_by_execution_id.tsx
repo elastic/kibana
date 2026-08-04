@@ -13,7 +13,7 @@ import type { Filter, Query } from '@kbn/es-query';
 import { buildFilter, FILTERS } from '@kbn/es-query';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 
-import { PageScope } from '../../../../../data_view_manager/constants';
+import { PageScope, useDataView } from '../../../../../data_view_manager';
 import { InputsModelId } from '../../../../../common/store/inputs/constants';
 import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
@@ -30,7 +30,6 @@ import type {
   RelativeTimeRange,
 } from '../../../../../common/store/inputs/model';
 import { isAbsoluteTimeRange, isRelativeTimeRange } from '../../../../../common/store/inputs/model';
-import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
 import * as i18n from './translations';
 
 const EXECUTION_UUID_FIELD_NAME = 'kibana.alert.rule.execution.uuid';

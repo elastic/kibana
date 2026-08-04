@@ -21,7 +21,7 @@ import { defaultColumnHeaderType } from '../timeline/body/column_headers/default
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../timeline/body/constants';
 import { EuiInMemoryTable } from '@elastic/eui';
 import type { BrowserFieldItem } from '@kbn/response-ops-alerts-fields-browser/types';
-import { PageScope } from '../../../data_view_manager/constants';
+import { PageScope } from '../../../data_view_manager';
 
 let mockIndexPatternFieldEditor: Start;
 jest.mock('../../../common/lib/kibana');

@@ -25,7 +25,7 @@ import type { EndpointPrivileges } from '../../../common/endpoint/types';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 import { useRiskScore } from '../../entity_analytics/api/hooks/use_risk_score';
 import { useAlertsPrivileges } from '../../detections/containers/detection_engine/alerts/use_alerts_privileges';
-import { useDataView } from '../../data_view_manager/hooks/use_data_view';
+import { useDataView } from '../../data_view_manager';
 
 const mockNavigateToApp = jest.fn();
 jest.mock('../../common/components/empty_prompt');

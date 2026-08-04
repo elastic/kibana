@@ -12,7 +12,7 @@ import React from 'react';
 import { AlertSelectionFields } from '.';
 import { TestProviders } from '../../../../../common/mock';
 import { useKibana } from '../../../../../common/lib/kibana';
-import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
+import { useDataView } from '../../../../../data_view_manager';
 import { CUSTOMIZE_THE_CONNECTOR_AND_ALERTS } from '../translations';
 
 jest.mock('react-router', () => ({

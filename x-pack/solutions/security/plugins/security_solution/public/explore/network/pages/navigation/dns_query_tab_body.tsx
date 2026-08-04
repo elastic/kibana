@@ -7,7 +7,7 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { getOr } from 'lodash/fp';
-import { PageScope } from '../../../../data_view_manager/constants';
+import { PageScope } from '../../../../data_view_manager';
 import { NetworkDnsTable } from '../../components/network_dns_table';
 import { ID, useNetworkDns } from '../../containers/network_dns';
 import { manageQuery } from '../../../../common/components/page/manage_query';

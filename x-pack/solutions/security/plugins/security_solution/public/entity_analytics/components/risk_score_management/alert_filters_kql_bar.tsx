@@ -24,11 +24,10 @@ import {
 import type { Query } from '@kbn/es-query';
 import { fromKueryExpression } from '@kbn/es-query';
 import { PageLoader } from '../../../common/components/page_loader';
-import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
+import { useDataView, PageScope } from '../../../data_view_manager';
 import { useKibana } from '../../../common/lib/kibana';
 import * as i18n from '../../translations';
 import type { UIAlertFilter } from './common';
-import { PageScope } from '../../../data_view_manager/constants';
 
 const COMBOBOX_LABEL_MAPPING = {
   user: 'Users',

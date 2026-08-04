@@ -29,7 +29,7 @@ import { InsightsSection } from './insights_section';
 import { useAlertPrevalence } from '../../../../flyout_v2/document/main/hooks/use_alert_prevalence';
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
 import { useExpandSection } from '../../../../flyout_v2/shared/hooks/use_expand_section';
-import { useSecurityDefaultPatterns } from '../../../../data_view_manager/hooks/use_security_default_patterns';
+import { useSecurityDefaultPatterns } from '../../../../data_view_manager';
 import { useShowRelatedAlertsByAncestry } from '../../../../flyout_v2/document/tools/correlations/hooks/use_show_related_alerts_by_ancestry';
 import { useShowRelatedAlertsBySameSourceEvent } from '../../../../flyout_v2/document/tools/correlations/hooks/use_show_related_alerts_by_same_source_event';
 import { useShowRelatedAlertsBySession } from '../../../../flyout_v2/document/tools/correlations/hooks/use_show_related_alerts_by_session';

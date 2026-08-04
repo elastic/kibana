@@ -7,8 +7,8 @@
 
 import { useMemo } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { UseDataViewReturnValue } from '../../data_view_manager/hooks/use_data_view';
-import { useSignalIndexName } from '../../data_view_manager/hooks/use_signal_index_name';
+import type { UseDataViewReturnValue } from '../../data_view_manager';
+import { useSignalIndexName } from '../../data_view_manager';
 
 /**
  * Computes whether the signal index still needs to be initialized for the given alerts data view.

@@ -13,7 +13,7 @@ import { createMockStore, mockGlobalState, TestProviders } from '../../../common
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { useKibana as mockUseKibana } from '../../../common/lib/kibana/__mocks__';
 import { createTelemetryServiceMock } from '../../../common/lib/telemetry/telemetry_service.mock';
-import { PageScope } from '../../../data_view_manager/constants';
+import { PageScope } from '../../../data_view_manager';
 import * as useGetGroupSelectorHook from '@kbn/grouping/src/hooks/use_get_group_selector';
 
 const mockDispatch = jest.fn();

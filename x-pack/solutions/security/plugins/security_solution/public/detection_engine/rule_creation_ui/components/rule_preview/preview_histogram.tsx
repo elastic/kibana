@@ -10,7 +10,7 @@ import usePrevious from 'react-use/lib/usePrevious';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { DataViewBase } from '@kbn/es-query';
-import { PageScope } from '../../../../data_view_manager/constants';
+import { PageScope } from '../../../../data_view_manager';
 import * as i18n from './translations';
 import { isNoisy } from './helpers';
 import { Panel } from '../../../../common/components/panel';

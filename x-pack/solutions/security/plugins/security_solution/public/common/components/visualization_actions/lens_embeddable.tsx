@@ -18,7 +18,7 @@ import type {
   XYVisualizationState,
 } from '@kbn/lens-plugin/public';
 import { css } from '@emotion/react';
-import { PageScope } from '../../../data_view_manager/constants';
+import { PageScope } from '../../../data_view_manager';
 import { setAbsoluteRangeDatePicker } from '../../store/inputs/actions';
 import { useKibana } from '../../lib/kibana';
 import { useLensAttributes } from './use_lens_attributes';

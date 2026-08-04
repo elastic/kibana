@@ -17,7 +17,7 @@ import { DataLoadingState } from '@kbn/unified-data-table';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { RunTimeMappings, TimelineItem } from '@kbn/timelines-plugin/common/search_strategy';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import { PageScope } from '../../../../../data_view_manager/constants';
+import { PageScope, useDataView, useSelectedPatterns } from '../../../../../data_view_manager';
 import { useFetchNotes } from '../../../../../notes/hooks/use_fetch_notes';
 import { InputsModelId } from '../../../../../common/store/inputs/constants';
 import { useKibana } from '../../../../../common/lib/kibana';
@@ -51,8 +51,6 @@ import {
   NotesEventTypes,
 } from '../../../../../common/lib/telemetry';
 import { TimelineRefetch } from '../../refetch_timeline';
-import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
-import { useSelectedPatterns } from '../../../../../data_view_manager/hooks/use_selected_patterns';
 import { isAttackDiscoveryRow } from '../../unified_components/data_table/is_attack_discovery_row';
 import {
   AttackDetailsLeftPanelKey,

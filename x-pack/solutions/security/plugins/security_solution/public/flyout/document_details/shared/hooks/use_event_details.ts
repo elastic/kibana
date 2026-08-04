@@ -8,7 +8,7 @@
 import type { BrowserFields, TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
-import { PageScope } from '../../../../data_view_manager/constants';
+import { PageScope, useDataView, useBrowserFields } from '../../../../data_view_manager';
 import { DEFAULT_ALERTS_INDEX, DEFAULT_PREVIEW_INDEX } from '../../../../../common/constants';
 import type { RunTimeMappings } from '../../../../../common/api/search_strategy';
 import { useSpaceId } from '../../../../common/hooks/use_space_id';
@@ -17,8 +17,6 @@ import { useTimelineEventsDetails } from '../../../../timelines/containers/detai
 import type { SearchHit } from '../../../../../common/search_strategy';
 import type { GetFieldsData } from './use_get_fields_data';
 import { useGetFieldsData } from './use_get_fields_data';
-import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
-import { useBrowserFields } from '../../../../data_view_manager/hooks/use_browser_fields';
 
 /**
  * The referenced alert _index in the flyout uses the `.internal.` such as `.internal.alerts-security.alerts-spaceId` in the alert page flyout and .internal.preview.alerts-security.alerts-spaceId` in the rule creation preview flyout,

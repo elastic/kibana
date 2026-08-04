@@ -6,9 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import { PageScope } from '../../../../../data_view_manager/constants';
-import { useBrowserFields } from '../../../../../data_view_manager/hooks/use_browser_fields';
-import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
+import { PageScope, useBrowserFields, useDataView } from '../../../../../data_view_manager';
 import { requiredFieldsForActions } from '../../../../../detections/components/alerts_table/default_config';
 import { defaultUdtHeaders } from '../../body/column_headers/default_headers';
 import type { ColumnHeaderOptions } from '../../../../../../common/types';

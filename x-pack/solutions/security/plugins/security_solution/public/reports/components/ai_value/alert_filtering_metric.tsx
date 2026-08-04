@@ -9,7 +9,7 @@ import React, { useCallback, useMemo } from 'react';
 
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
-import { PageScope } from '../../../data_view_manager/constants';
+import { PageScope } from '../../../data_view_manager';
 import { useSignalIndexWithDefault } from '../../hooks/use_signal_index_with_default';
 import { getExcludeAlertsFilters } from './utils';
 import type { GetLensAttributes } from '../../../common/components/visualization_actions/types';

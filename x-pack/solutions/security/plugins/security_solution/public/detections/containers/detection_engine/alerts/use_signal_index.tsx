@@ -8,8 +8,7 @@
 import { useEffect, useState } from 'react';
 import { isSecurityAppError } from '@kbn/securitysolution-t-grid';
 
-import { useSignalIndexMappingOutdated } from '../../../../data_view_manager/hooks/use_signal_index_mapping_outdated';
-import { useSignalIndexName } from '../../../../data_view_manager/hooks/use_signal_index_name';
+import { useSignalIndexMappingOutdated, useSignalIndexName } from '../../../../data_view_manager';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { createSignalIndex, getSignalIndex } from './api';
 import * as i18n from './translations';
