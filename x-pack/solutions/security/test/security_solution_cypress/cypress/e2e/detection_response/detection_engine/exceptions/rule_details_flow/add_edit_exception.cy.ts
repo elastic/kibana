@@ -162,8 +162,7 @@ describe(
         cy.get(EXCEPTION_CARD_ITEM_CONDITIONS).should('have.text', ' agent.nameIS foo');
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/238439
-      describe.skip('rule with existing shared exceptions', () => {
+      describe('rule with existing shared exceptions', () => {
         it('Creates an exception item to add to shared list', () => {
           // displays existing exception items
           cy.get(EXCEPTION_ITEM_VIEWER_CONTAINER).should('have.length', 1);
@@ -226,7 +225,6 @@ describe(
           cy.get(EXCEPTION_ITEM_VIEWER_CONTAINER).should('have.length', 2);
         });
 
-        // Trying to figure out with EUI why the search won't trigger
         it('Can search for items', () => {
           // displays existing exception items
           cy.get(EXCEPTION_ITEM_VIEWER_CONTAINER).should('have.length', 1);

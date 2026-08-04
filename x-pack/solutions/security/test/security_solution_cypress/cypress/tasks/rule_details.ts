@@ -109,8 +109,12 @@ export const openExceptionFlyoutFromEmptyViewerPrompt = () => {
 };
 
 export const searchForExceptionItem = (query: string) => {
+  // The viewer's EuiSearchBar filters incrementally as the user types, so there is no submit
+  // action: drop the synthetic `{enter}` and wait for the filtered fetch to settle instead.
+  cy.intercept('GET', '**/api/exception_lists/items/_find*').as('findExceptionItems');
   cy.get(EXCEPTION_ITEM_VIEWER_SEARCH).clear();
-  cy.get(EXCEPTION_ITEM_VIEWER_SEARCH).type(`${query}{enter}`);
+  cy.get(EXCEPTION_ITEM_VIEWER_SEARCH).type(query);
+  cy.wait('@findExceptionItems');
 };
 
 export const addExceptionFlyoutFromViewerHeader = () => {
