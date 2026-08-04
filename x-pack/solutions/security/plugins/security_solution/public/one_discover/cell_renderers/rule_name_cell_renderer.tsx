@@ -17,6 +17,13 @@ import { buildFlyoutContent } from '../../flyout_v2/shared/utils/build_flyout_co
 import { formatFlyoutTitle, RULE_TITLE } from '../../flyout_v2/shared/constants/flyout_titles';
 import type { StartServices } from '../../types';
 import type { SecurityAppStore } from '../../common/store/types';
+import {
+  FLYOUT_ORIGIN,
+  FLYOUT_SESSION_KIND,
+  FLYOUT_SURFACE,
+  FLYOUT_TYPE,
+} from '../../common/lib/telemetry';
+import { trackFlyoutOpen } from '../../flyout_v2/shared/hooks/use_flyout_telemetry';
 
 export interface RuleNameCellRendererProps extends DataGridCellValueElementProps {
   /** Kibana start services, used to access overlays for opening the rule details flyout */
@@ -54,7 +61,7 @@ export const RuleNameCellRenderer = React.memo<RuleNameCellRendererProps>(
 
     const handleClick = useCallback(() => {
       if (!flyoutContent) return;
-      overlays.openSystemFlyout(
+      const ref = overlays.openSystemFlyout(
         flyoutProviders({
           services,
           store,
@@ -67,6 +74,12 @@ export const RuleNameCellRenderer = React.memo<RuleNameCellRendererProps>(
           title: formatFlyoutTitle(RULE_TITLE, ruleName),
         }
       );
+      trackFlyoutOpen(services.telemetry, ref, {
+        surface: FLYOUT_SURFACE.FLYOUT,
+        flyoutType: FLYOUT_TYPE.RULE,
+        session: FLYOUT_SESSION_KIND.START,
+        origin: FLYOUT_ORIGIN.TABLE_FIELD_LINK,
+      });
     }, [
       defaultDocumentFlyoutProperties,
       overlays,
