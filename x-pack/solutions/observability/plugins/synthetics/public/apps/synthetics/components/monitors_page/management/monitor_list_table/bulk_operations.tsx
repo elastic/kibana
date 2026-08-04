@@ -8,7 +8,7 @@
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
-import { EuiButton, EuiContextMenu, EuiPopover } from '@elastic/eui';
+import { EuiButton, EuiContextMenu, EuiPopover, EuiToolTip } from '@elastic/eui';
 import type { EncryptedSyntheticsSavedMonitor } from '../../../../../../../common/runtime_types';
 import { ConfigKey } from '../../../../../../../common/runtime_types';
 import {
@@ -29,6 +29,9 @@ export const BulkOperations = ({
   setMonitorPendingReset,
   setMonitorPendingStatusUpdate,
   setBulkEditAction,
+  setIsLocationsFlyoutOpen,
+  setIsScheduleFlyoutOpen,
+  setIsMaintenanceWindowsFlyoutOpen,
 }: {
   selectedItems: EncryptedSyntheticsSavedMonitor[];
   setMonitorPendingDeletion: (val: string[]) => void;
@@ -38,6 +41,9 @@ export const BulkOperations = ({
   }) => void;
   setMonitorPendingStatusUpdate: (val: { ids: string[]; enabled: boolean } | null) => void;
   setBulkEditAction: (action: BulkEditAction) => void;
+  setIsLocationsFlyoutOpen: (val: boolean) => void;
+  setIsScheduleFlyoutOpen: (val: boolean) => void;
+  setIsMaintenanceWindowsFlyoutOpen: (val: boolean) => void;
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const { isUnhealthy, isFixableByReset } = useMonitorIntegrationHealth();
@@ -77,7 +83,21 @@ export const BulkOperations = ({
   ).length;
 
   if (selectedItems.length === 0) {
-    return null;
+    // Keep the affordance visible but disabled so users can discover bulk
+    // actions before selecting anything; the tooltip explains what to do.
+    return (
+      <EuiToolTip content={SELECT_MONITORS_FIRST}>
+        <EuiButton
+          data-test-subj="syntheticsBulkActionsButton"
+          size="s"
+          iconType="arrowDown"
+          iconSide="right"
+          isDisabled={true}
+        >
+          {BULK_ACTIONS_LABEL}
+        </EuiButton>
+      </EuiToolTip>
+    );
   }
 
   const isActionDisabled = !canEditSynthetics || !isServiceAllowed;
@@ -197,12 +217,53 @@ export const BulkOperations = ({
         ]
       : []),
     {
+      name: i18n.translate('xpack.synthetics.bulkOperations.editLocations', {
+        defaultMessage: 'Edit locations',
+      }),
+      icon: 'globe',
+      disabled: isActionDisabled,
+      toolTipContent: disabledTooltip,
+      'data-test-subj': 'syntheticsBulkEditLocationsItem',
+      onClick: () => {
+        closePopover();
+        setIsLocationsFlyoutOpen(true);
+      },
+    },
+    {
+      name: i18n.translate('xpack.synthetics.bulkOperations.editSchedule', {
+        defaultMessage: 'Edit schedule',
+      }),
+      icon: 'timeRefresh',
+      disabled: isActionDisabled,
+      toolTipContent: disabledTooltip,
+      'data-test-subj': 'syntheticsBulkEditScheduleItem',
+      onClick: () => {
+        closePopover();
+        setIsScheduleFlyoutOpen(true);
+      },
+    },
+    {
+      name: i18n.translate('xpack.synthetics.bulkOperations.manageMaintenanceWindows', {
+        defaultMessage: 'Manage maintenance windows',
+      }),
+      icon: 'bellSlash',
+      disabled: isActionDisabled,
+      toolTipContent: disabledTooltip,
+      'data-test-subj': 'syntheticsBulkMaintenanceWindowsItem',
+      onClick: () => {
+        closePopover();
+        setIsMaintenanceWindowsFlyoutOpen(true);
+      },
+    },
+    {
       name: i18n.translate('xpack.synthetics.bulkOperationPopover.clickMeToLoadButtonLabel', {
         defaultMessage:
           'Delete {monitorCount, number} selected {monitorCount, plural, one {monitor} other {monitors}}',
         values: { monitorCount: selectedItems.length },
       }),
       icon: 'trash',
+      disabled: isActionDisabled,
+      toolTipContent: disabledTooltip,
       'data-test-subj': 'syntheticsBulkDeleteMonitorsItem',
       onClick: () => {
         closePopover();
@@ -236,6 +297,17 @@ export const BulkOperations = ({
     </EuiPopover>
   );
 };
+
+const BULK_ACTIONS_LABEL = i18n.translate('xpack.synthetics.bulkOperations.bulkActionsLabel', {
+  defaultMessage: 'Bulk actions',
+});
+
+const SELECT_MONITORS_FIRST = i18n.translate(
+  'xpack.synthetics.bulkOperations.selectMonitorsFirst',
+  {
+    defaultMessage: 'Select one or more monitors to perform bulk actions.',
+  }
+);
 
 const ALL_ALREADY_ENABLED = i18n.translate('xpack.synthetics.bulkOperations.allAlreadyEnabled', {
   defaultMessage: 'All selected monitors are already enabled.',

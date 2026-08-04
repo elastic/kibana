@@ -172,6 +172,7 @@ dependsOn:
   - '@kbn/agent-builder-plugin'
   - '@kbn/app-header'
   - '@kbn/core-chrome-app-menu-components'
+  - '@kbn/global-search-plugin'
 tags:
   - plugin
   - prod

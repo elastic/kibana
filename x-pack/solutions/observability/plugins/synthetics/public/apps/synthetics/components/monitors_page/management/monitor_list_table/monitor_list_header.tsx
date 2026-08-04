@@ -20,6 +20,9 @@ export const MonitorListHeader = ({
   setMonitorPendingReset,
   setMonitorPendingStatusUpdate,
   setBulkEditAction,
+  setIsLocationsFlyoutOpen,
+  setIsScheduleFlyoutOpen,
+  setIsMaintenanceWindowsFlyoutOpen,
 }: {
   recordRangeLabel: JSX.Element;
   selectedItems: EncryptedSyntheticsSavedMonitor[];
@@ -30,6 +33,9 @@ export const MonitorListHeader = ({
   }) => void;
   setMonitorPendingStatusUpdate: (val: { ids: string[]; enabled: boolean } | null) => void;
   setBulkEditAction: (action: BulkEditAction) => void;
+  setIsLocationsFlyoutOpen: (val: boolean) => void;
+  setIsScheduleFlyoutOpen: (val: boolean) => void;
+  setIsMaintenanceWindowsFlyoutOpen: (val: boolean) => void;
 }) => {
   return (
     <EuiFlexGroup alignItems="center">
@@ -43,6 +49,9 @@ export const MonitorListHeader = ({
           setMonitorPendingReset={setMonitorPendingReset}
           setMonitorPendingStatusUpdate={setMonitorPendingStatusUpdate}
           setBulkEditAction={setBulkEditAction}
+          setIsLocationsFlyoutOpen={setIsLocationsFlyoutOpen}
+          setIsScheduleFlyoutOpen={setIsScheduleFlyoutOpen}
+          setIsMaintenanceWindowsFlyoutOpen={setIsMaintenanceWindowsFlyoutOpen}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
