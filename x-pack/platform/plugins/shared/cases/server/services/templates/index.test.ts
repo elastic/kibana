@@ -1966,6 +1966,27 @@ describe('TemplatesService', () => {
           `Template field "field_one" default exceeds the maximum size of ${MAX_EXTENDED_FIELD_VALUE_BYTES} bytes`
         );
       });
+
+      it('rejects the dry_run preflight when the definition exceeds the SO maxLength', async () => {
+        const service = createService();
+        const definition = `name: Too Long\nseverity: low\nfields: []\n#${'y'.repeat(
+          MAX_TEMPLATE_DEFINITION_LENGTH
+        )}`;
+
+        expect(definition.length).toBeGreaterThan(MAX_TEMPLATE_DEFINITION_LENGTH);
+
+        await expect(
+          service.validateWriteInput({
+            name: 'Too Long',
+            owner: 'securitySolution',
+            definition,
+          })
+        ).rejects.toThrow(
+          `Template definition exceeds the maximum length of ${MAX_TEMPLATE_DEFINITION_LENGTH} characters.`
+        );
+
+        expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+      });
     });
   });
 

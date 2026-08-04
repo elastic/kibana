@@ -7,6 +7,8 @@ description: >
   Resource limits (enforced on write; a violation returns `400`): an owner may have at most
   200 templates per space, and a definition may declare at most 200 fields. Version history is
   intentionally uncapped. A single stored extended-field value may not exceed 30000 UTF-8 bytes.
+  The YAML `definition` string itself may not exceed 30000 characters (enforced on create, update,
+  and `dry_run`).
 type: object
 required:
   - owner
@@ -26,6 +28,9 @@ properties:
     $ref: 'owner.yaml'
   definition:
     type: string
+    # Keep in sync with MAX_TEMPLATE_DEFINITION_LENGTH in
+    # x-pack/platform/plugins/shared/cases/common/constants/index.ts.
+    maxLength: 30000
     description: >
       The template definition as a YAML string: case defaults (name, severity, category, tags,
       assignees, connector, settings) and a `fields` array of inline field definitions or

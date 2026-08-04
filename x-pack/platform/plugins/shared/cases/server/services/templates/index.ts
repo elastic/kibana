@@ -31,6 +31,7 @@ import {
   CASE_TEMPLATE_SAVED_OBJECT,
   MAX_EXTENDED_FIELD_VALUE_BYTES,
   MAX_FIELDS_PER_TEMPLATE,
+  MAX_TEMPLATE_DEFINITION_LENGTH,
   MAX_TEMPLATES_PER_OWNER,
 } from '../../../common/constants';
 import type {
@@ -371,6 +372,7 @@ export class TemplatesService {
 
     this.assertFieldCountWithinLimit(parsedDefinition.fields.length);
     this.assertTemplateDefaultValuesWithinLimit(parsedDefinition.fields);
+    this.assertDefinitionLengthWithinLimit(normalizedDefinition);
 
     await this.assertTemplateNameIsUnique({
       name: templateName,
@@ -433,6 +435,7 @@ export class TemplatesService {
 
     this.assertFieldCountWithinLimit(parsedDefinition.fields.length);
     this.assertTemplateDefaultValuesWithinLimit(parsedDefinition.fields);
+    this.assertDefinitionLengthWithinLimit(normalizedDefinition);
 
     await this.assertTemplateNameIsUnique({
       name: templateName,
@@ -634,9 +637,10 @@ export class TemplatesService {
     }
 
     // Keep dry_run faithful to the real write: mirror the same resource-limit assertions each write
-    // path runs.
+    // path runs (including the SO `definition` maxLength, which otherwise only surfaces on apply).
     this.assertFieldCountWithinLimit(parsedDefinition.fields.length);
     this.assertTemplateDefaultValuesWithinLimit(parsedDefinition.fields);
+    this.assertDefinitionLengthWithinLimit(normalizedDefinition);
 
     await this.assertTemplateNameIsUnique({
       name: templateName,
@@ -647,6 +651,19 @@ export class TemplatesService {
     const isCreate = excludeTemplateId === undefined;
     if (isCreate || (currentOwner !== undefined && input.owner !== currentOwner)) {
       await this.assertOwnerTemplateCountWithinLimit(input.owner);
+    }
+  }
+
+  /**
+   * Mirrors the saved-object `definition` maxLength so create/update/`dry_run` reject oversized
+   * YAML with an actionable 400 before the SO layer. Measured after `trimFieldDefaults` — the same
+   * string that would be persisted.
+   */
+  private assertDefinitionLengthWithinLimit(definition: string): void {
+    if (definition.length > MAX_TEMPLATE_DEFINITION_LENGTH) {
+      throw Boom.badRequest(
+        `Template definition exceeds the maximum length of ${MAX_TEMPLATE_DEFINITION_LENGTH} characters.`
+      );
     }
   }
 

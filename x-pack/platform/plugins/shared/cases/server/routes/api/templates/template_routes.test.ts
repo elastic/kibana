@@ -590,7 +590,13 @@ describe('Template Routes', () => {
     });
 
     it('returns a specific version when version query param is provided', async () => {
-      // Add a second version of template-1
+      // Mark the existing v1 as not latest and add v2 as the tip.
+      const v1 = mockTemplates.find(
+        (template) => template.templateId === 'template-1' && template.templateVersion === 1
+      );
+      if (v1) {
+        v1.isLatest = false;
+      }
       mockTemplates.push({
         templateId: 'template-1',
         name: 'Template One v2',
@@ -599,6 +605,7 @@ describe('Template Routes', () => {
         templateVersion: 2,
         deletedAt: null,
         author: 'alice',
+        isLatest: true,
       });
 
       const context = createMockContext();
@@ -614,6 +621,8 @@ describe('Template Routes', () => {
             templateId: 'template-1',
             name: 'Template One',
             templateVersion: 1,
+            isLatest: false,
+            latestVersion: 2,
           }),
         })
       );

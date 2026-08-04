@@ -53,7 +53,14 @@ export const getPublicTemplateRoute = createCasesRoute({
         });
       }
 
-      const body: TemplateV2Response = parseTemplate(template.attributes);
+      let latestVersion = template.attributes.templateVersion;
+      if (template.attributes.isLatest === false) {
+        const latestTemplate = await casesClient.templates.getTemplate(templateId);
+        latestVersion =
+          latestTemplate?.attributes.templateVersion ?? template.attributes.templateVersion;
+      }
+
+      const body: TemplateV2Response = parseTemplate(template.attributes, { latestVersion });
 
       return response.ok({ body });
     } catch (error) {
