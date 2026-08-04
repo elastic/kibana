@@ -105,8 +105,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await openRulesSection();
         await testSubjects.existOrFail('rulesList');
         await openFirstRule(rule.name);
-        // The rule type renders only once `useGetRuleTypesPermissions` resolves
-        // (a spinner shows in its place until then), so gate on it before asserting.
+        // Wait for the rule details panel to finish loading: the rule type value
+        // replaces its loading spinner once `useGetRuleTypesPermissions` resolves.
         await testSubjects.existOrFail('ruleSummaryRuleType');
       });
 
@@ -124,6 +124,13 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       it('renders the rule details', async () => {
         const headingText = await testSubjects.getVisibleText('appHeaderTitle');
         expect(headingText.includes(`test-rule-${testRunUuid}`)).toBe(true);
+        // The `ruleSummaryRuleType` container mounts a frame before its text child
+        // paints, so a single read can observe an empty string. Wait for the value
+        // to render, then assert it once.
+        await retry.waitForWithTimeout('rule type value to render', 120 * 1000, async () => {
+          const text = await testSubjects.getVisibleText('ruleSummaryRuleType');
+          return text.trim().length > 0;
+        });
         const ruleType = await testSubjects.getVisibleText('ruleSummaryRuleType');
         expect(ruleType).toEqual('Elasticsearch query');
         const { username } = await svlUserManager.getUserData(ADMIN_ROLE);
