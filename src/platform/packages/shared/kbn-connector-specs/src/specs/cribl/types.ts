@@ -55,6 +55,9 @@ export const RequestInputSchema = lazySchema(() =>
       })
       .optional()
       .describe('Optional query parameters.'),
+    // Intentionally unbounded: the request body can be an arbitrary Cribl resource (a full
+    // pipeline/route/source config), so its shape can't be constrained here. `z.unknown()`
+    // has no size-bounding method to apply; the platform's HTTP layer enforces payload limits.
     body: z.unknown().optional().describe('Optional request body for POST/PUT/PATCH.'),
   })
 );
@@ -79,14 +82,12 @@ export type ListWorkerGroupsInput = z.infer<typeof ListWorkerGroupsInputSchema>;
 // =============================================================================
 
 export const ListWorkersInputSchema = lazySchema(() => z.object({}));
-export type ListWorkersInput = z.infer<typeof ListWorkersInputSchema>;
 
 // =============================================================================
 // getHealth
 // =============================================================================
 
 export const GetHealthInputSchema = lazySchema(() => z.object({}));
-export type GetHealthInput = z.infer<typeof GetHealthInputSchema>;
 
 // =============================================================================
 // listRoutes / updateRoutes

@@ -185,6 +185,40 @@ describe('Cribl', () => {
     });
   });
 
+  describe('listWorkers', () => {
+    it('lists Worker Nodes with the leader-context URL', async () => {
+      mockRequest.mockResolvedValue(
+        okResponse({ items: [{ id: 'worker-1', group: 'default' }], count: 1 })
+      );
+
+      const result = await Cribl.actions.listWorkers.handler(mockContext, {});
+
+      expect(mockRequest).toHaveBeenCalledWith(
+        expect.objectContaining({
+          method: 'GET',
+          url: `${SERVER_URL}/api/v1/master/workers`,
+        })
+      );
+      expect(result).toEqual({ count: 1, items: [{ id: 'worker-1', group: 'default' }] });
+    });
+  });
+
+  describe('getHealth', () => {
+    it('reads the Leader health endpoint', async () => {
+      mockRequest.mockResolvedValue(okResponse({ status: 'healthy', role: 'primary' }));
+
+      const result = await Cribl.actions.getHealth.handler(mockContext, {});
+
+      expect(mockRequest).toHaveBeenCalledWith(
+        expect.objectContaining({
+          method: 'GET',
+          url: `${SERVER_URL}/api/v1/health`,
+        })
+      );
+      expect(result).toEqual({ status: 'healthy', role: 'primary' });
+    });
+  });
+
   describe('listRoutes', () => {
     it('reads the routing table scoped to a group and unwraps the items envelope', async () => {
       mockRequest.mockResolvedValue(
@@ -279,6 +313,26 @@ describe('Cribl', () => {
     });
   });
 
+  describe('listPipelines', () => {
+    it('lists pipelines scoped to a group', async () => {
+      mockRequest.mockResolvedValue(
+        okResponse({ items: [{ id: 'main', type: 'pipeline' }], count: 1 })
+      );
+
+      const result = await Cribl.actions.listPipelines.handler(mockContext, {
+        groupName: 'myGroup',
+      });
+
+      expect(mockRequest).toHaveBeenCalledWith(
+        expect.objectContaining({
+          method: 'GET',
+          url: `${SERVER_URL}/api/v1/m/myGroup/pipelines`,
+        })
+      );
+      expect(result).toEqual({ count: 1, items: [{ id: 'main', type: 'pipeline' }] });
+    });
+  });
+
   describe('getPipeline', () => {
     it('unwraps the single-item Cribl response envelope', async () => {
       mockRequest.mockResolvedValue(
@@ -297,6 +351,26 @@ describe('Cribl', () => {
         })
       );
       expect(result).toEqual({ id: 'main', conf: { functions: [] } });
+    });
+  });
+
+  describe('listSources', () => {
+    it('lists Sources scoped to a group', async () => {
+      mockRequest.mockResolvedValue(
+        okResponse({ items: [{ id: 'in_splunk_hec', type: 'splunk_hec' }], count: 1 })
+      );
+
+      const result = await Cribl.actions.listSources.handler(mockContext, {
+        groupName: 'myGroup',
+      });
+
+      expect(mockRequest).toHaveBeenCalledWith(
+        expect.objectContaining({
+          method: 'GET',
+          url: `${SERVER_URL}/api/v1/m/myGroup/system/inputs`,
+        })
+      );
+      expect(result).toEqual({ count: 1, items: [{ id: 'in_splunk_hec', type: 'splunk_hec' }] });
     });
   });
 
@@ -350,6 +424,26 @@ describe('Cribl', () => {
           },
         })
       );
+    });
+  });
+
+  describe('listDestinations', () => {
+    it('lists Destinations scoped to a group', async () => {
+      mockRequest.mockResolvedValue(
+        okResponse({ items: [{ id: 'devnull', type: 'devnull' }], count: 1 })
+      );
+
+      const result = await Cribl.actions.listDestinations.handler(mockContext, {
+        groupName: 'myGroup',
+      });
+
+      expect(mockRequest).toHaveBeenCalledWith(
+        expect.objectContaining({
+          method: 'GET',
+          url: `${SERVER_URL}/api/v1/m/myGroup/system/outputs`,
+        })
+      );
+      expect(result).toEqual({ count: 1, items: [{ id: 'devnull', type: 'devnull' }] });
     });
   });
 
