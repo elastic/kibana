@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { act, fireEvent, render } from '@testing-library/react';
+import { fireEvent, render, waitFor } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
 import type { AgentPolicy, InMemoryPackagePolicy } from '../../../../../../types';
@@ -99,12 +99,12 @@ describe('PackagePolicyUpgradeCell', () => {
       // The agentless upgrade opens a confirm modal instead of linking to the (blocked) legacy route.
       expect(button).not.toHaveAttribute('href');
 
-      await act(async () => {
-        fireEvent.click(button);
-      });
+      fireEvent.click(button);
 
       // The shared agentless-upgrade confirm modal is shown.
-      expect(await utils.findByTestId('confirmModalConfirmButton')).toBeInTheDocument();
+      await waitFor(() =>
+        expect(utils.getByTestId('confirmModalConfirmButton')).toBeInTheDocument()
+      );
     });
   });
 });
