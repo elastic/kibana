@@ -57,7 +57,7 @@ export function fromFormatAPIToLensState(
       id: format.type,
       params: {
         // doesn't matter, it's will be ignored but want to make TS happy
-        decimals: 2,
+        decimals: 0, // match runtime default
         pattern: format.pattern,
       },
     };

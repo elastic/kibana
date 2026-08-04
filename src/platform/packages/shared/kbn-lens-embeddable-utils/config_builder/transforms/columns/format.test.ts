@@ -273,7 +273,7 @@ describe('Format Transforms', () => {
         expect(fromFormatAPIToLensState(input)).toEqual({
           id: 'custom',
           params: {
-            decimals: 2,
+            decimals: 0,
             pattern: '$0,0.00',
           },
         });
@@ -496,7 +496,7 @@ describe('Format Transforms', () => {
         const input = {
           id: 'custom',
           params: {
-            decimals: 2,
+            decimals: 0,
             pattern: '$0,0.00',
           },
         } satisfies ValueFormatConfig;
