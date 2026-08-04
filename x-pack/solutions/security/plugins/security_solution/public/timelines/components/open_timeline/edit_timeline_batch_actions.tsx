@@ -158,7 +158,9 @@ export const useEditTimelineBatchActions = ({
             disabled={!isSuperTimelineActionEnabled}
             icon="merge"
             key="SuperTimelineItemKey"
-            onClick={() => handleOpenSuperTimeline(closePopover)}
+            onClick={
+              isSuperTimelineActionEnabled ? () => handleOpenSuperTimeline(closePopover) : undefined
+            }
             toolTipContent={superTimelineTooltip}
             toolTipProps={{ position: 'left' }}
           >
