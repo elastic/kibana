@@ -232,6 +232,7 @@ const TAB_COMPARATORS: TabComparators = {
   chartInterval: fieldComparator('chartInterval', 'auto'),
   breakdownField: fieldComparator('breakdownField', ''),
   density: fieldComparator('density', DataGridDensity.COMPACT),
+  isApproximate: fieldComparator('isApproximate', false),
   visContext: visContextComparator,
   controlGroupJson: (a, b) => {
     // ignore the order of keys when comparing JSON strings
