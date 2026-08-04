@@ -98,6 +98,7 @@ export async function createAlertingRuleFromTemplate(
         consumer: 'alerts',
       }, // what value for consumer will make sense?
       options: { id: ruleId },
+      templateId: alertTemplateArchiveAsset.id,
     });
 
     return {

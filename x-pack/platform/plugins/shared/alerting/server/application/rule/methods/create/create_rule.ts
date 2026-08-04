@@ -50,6 +50,7 @@ import type { ValidateScheduleLimitResult } from '../get_schedule_frequency';
 import { validateScheduleLimit } from '../get_schedule_frequency';
 import { logRuleChanges } from '../common_utils/log_rule_changes';
 import { RULE_CREATED_EVENT } from './event_based_telemetry';
+import { deriveFleetTemplateId } from './derive_fleet_template_id';
 
 export interface CreateRuleOptions {
   id?: string;
@@ -316,6 +317,7 @@ export async function createRule<Params extends RuleParams = never>(
     enabled: data.enabled,
     consumer: data.consumer,
     producer: ruleType.producer,
+    predefinedId: options?.id,
   });
 
   // TODO (http-versioning): Remove this cast, this enables us to move forward
@@ -338,6 +340,7 @@ function reportRuleCreatedEvent(
     enabled,
     consumer,
     producer,
+    predefinedId,
   }: {
     id: string;
     templateId?: string;
@@ -346,12 +349,15 @@ function reportRuleCreatedEvent(
     enabled: boolean;
     consumer: string;
     producer: string;
+    predefinedId?: string;
   }
 ): void {
   try {
+    const resolvedTemplateId = templateId ?? deriveFleetTemplateId(predefinedId, context.spaceId);
+
     context.analytics?.reportEvent(RULE_CREATED_EVENT.eventType, {
       rule_id: id,
-      ...(templateId ? { template_id: templateId } : {}),
+      ...(resolvedTemplateId ? { template_id: resolvedTemplateId } : {}),
       created_at: new Date(createTime).toISOString(),
       rule_type_id: alertTypeId,
       enabled,
