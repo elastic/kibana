@@ -191,7 +191,7 @@ describe(
         cy.get(BASIC_TABLE_LOADING).should('not.exist');
         cy.get(SAVED_OBJECTS_ROW_TITLES).should(
           'contain.text',
-          `Saved Discover session for timeline - ${timelineName}`
+          `Saved Discover session for Timeline - ${timelineName}`
         );
       });
 
@@ -215,7 +215,7 @@ describe(
         cy.get(BASIC_TABLE_LOADING).should('not.exist');
         cy.get(SAVED_OBJECTS_ROW_TITLES).should(
           'contain.text',
-          `Saved Discover session for timeline - ${renamedTimelineName}`
+          `Saved Discover session for Timeline - ${renamedTimelineName}`
         );
       });
     });

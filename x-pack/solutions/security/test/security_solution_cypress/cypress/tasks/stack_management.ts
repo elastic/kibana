@@ -51,6 +51,9 @@ export const clickSavedObjectTagsFilter = () => {
 };
 
 export const clickSavedObjectTagOption = (optionId: string) => {
-  // Legacy saved objects and content list both render tag-searchbar-option-* nodes.
-  cy.get(GET_SAVED_OBJECTS_TAGS_OPTION(optionId)).first().click();
+  // After opening the Tags filter, the option in the open dropdown is :visible while any
+  // tag-searchbar-option-* element outside a closed popover is not. Scoping to :visible
+  // avoids ambiguity when multiple frameworks (legacy saved objects tagging and
+  // content-list) render identical test-subjects on the same page.
+  cy.get(GET_SAVED_OBJECTS_TAGS_OPTION(optionId)).filter(':visible').click();
 };
