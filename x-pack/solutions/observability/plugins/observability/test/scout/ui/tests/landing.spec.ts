@@ -16,8 +16,10 @@ import {
 } from '../fixtures/generators';
 import { BIGGER_TIMEOUT, SHORTER_TIMEOUT } from '../fixtures/constants';
 
-// Failing: See https://github.com/elastic/kibana/issues/267146
-test.describe.skip(
+// Runs in the serial `tests/` suite (single worker): the landing redirect checks for
+// logs/APM data cluster-wide, so a sibling spec generating data on a second worker would
+// leak into this suite's "no data" assertions. See https://github.com/elastic/kibana/issues/267146
+test.describe(
   'Observability Landing Page',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
