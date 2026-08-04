@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { kafkaAuthType } from '../../../common/constants';
+import { kafkaAuthType, kafkaConnectionType } from '../../../common/constants';
 
 import {
   validateKafkaHost,
@@ -121,6 +121,7 @@ describe('Output model', () => {
             type: 'kafka',
             hosts,
             auth_type: kafkaAuthType.None,
+            connection_type: kafkaConnectionType.Plaintext,
           });
         }).not.toThrow();
       });
@@ -134,6 +135,7 @@ describe('Output model', () => {
             type: 'kafka',
             hosts,
             auth_type: kafkaAuthType.None,
+            connection_type: kafkaConnectionType.Plaintext,
           });
         }).toThrow();
       });
