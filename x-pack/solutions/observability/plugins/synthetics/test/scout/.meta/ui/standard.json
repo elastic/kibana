@@ -1,5 +1,5 @@
 {
-  "sha1": "84641001aabe16f44ee73c06595e1e04887b3ddd",
+  "sha1": "186ea2ef1dddb66cf58a3ad256b0600d6da33209",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -115,6 +115,20 @@
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/alerting_default.spec.ts",
         "line": 32,
         "column": 23
+      }
+    },
+    {
+      "id": "2194ba53e2b08e7-f33b7e9ee853aea",
+      "title": "Bulk edit — maintenance windows applies a maintenance window to selected monitors in bulk",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/bulk_edit_maintenance_windows.spec.ts",
+        "line": 86,
+        "column": 11
       }
     },
     {
@@ -288,28 +302,28 @@
     {
       "id": "0ffb4babb4c147d-1128db6b7fad457",
       "title": "OverviewCompactView switches to compact view and persists the selection",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/overview_compact_view.spec.ts",
-        "line": 15,
+        "line": 14,
         "column": 11
       }
     },
     {
       "id": "63227c5cfe04f39-ccf6627ff5bcb2c",
       "title": "OverviewSaveLensVisualization opens save lens visualization modal with correct attributes",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/overview_save_lens_visualization.spec.ts",
-        "line": 15,
+        "line": 14,
         "column": 11
       }
     },
