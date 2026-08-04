@@ -36,13 +36,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const retry = getService('retry');
   const kibanaServer = getService('kibanaServer');
   let INITIAL_CSV_QUOTE_VALUES_SETTING_VALUE: any;
+  let INITIAL_DISABLE_ANIMATIONS_SETTING_VALUE: any;
 
-  // FLAKY: https://github.com/elastic/kibana/issues/172990
-  describe.skip('Common advanced settings', function () {
+  describe('Common advanced settings', function () {
     // the suite is flaky on MKI
     this.tags(['failsOnMKI']);
     before(async () => {
       INITIAL_CSV_QUOTE_VALUES_SETTING_VALUE = await kibanaServer.uiSettings.get('csv:quoteValues');
+      INITIAL_DISABLE_ANIMATIONS_SETTING_VALUE = await kibanaServer.uiSettings.get(
+        settings.ACCESSIBILITY_DISABLE_ANIMATIONS_ID
+      );
       // Setting the `csv:quoteValues` setting to its default value
       await kibanaServer.uiSettings.update({
         'csv:quoteValues': true,
@@ -52,9 +55,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     after(async () => {
-      // Resetting the `csv:quoteValues` setting to its initial value
+      // Resetting the settings mutated by this suite to their initial values
       await kibanaServer.uiSettings.update({
         'csv:quoteValues': INITIAL_CSV_QUOTE_VALUES_SETTING_VALUE,
+        [settings.ACCESSIBILITY_DISABLE_ANIMATIONS_ID]: INITIAL_DISABLE_ANIMATIONS_SETTING_VALUE,
       });
     });
 
@@ -129,23 +133,19 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       it('renders a page reload toast when updating a setting that requires page reload', async () => {
         const fieldTestSubj =
           'management-settings-editField-' + settings.ACCESSIBILITY_DISABLE_ANIMATIONS_ID;
-        const fieldEnabled = await testSubjects.isEuiSwitchChecked(fieldTestSubj);
+        const initiallyEnabled = await testSubjects.isEuiSwitchChecked(fieldTestSubj);
+
         await testSubjects.click(fieldTestSubj);
-        await pageObjects.common.sleep(2000);
+        await retry.waitFor('animations setting to be toggled', async () => {
+          return (await testSubjects.isEuiSwitchChecked(fieldTestSubj)) !== initiallyEnabled;
+        });
 
         // Save changes
         await testSubjects.click(SAVE_BUTTON_TEST_SUBJ);
 
-        expect(await testSubjects.exists(PAGE_RELOAD_BUTTON_TEST_SUBJ)).to.be(true);
-        await testSubjects.click(PAGE_RELOAD_BUTTON_TEST_SUBJ);
-        await pageObjects.common.sleep(2000);
-
-        // Reset setting to its initial value
-        await testSubjects.click(fieldTestSubj);
-        await testSubjects.click(SAVE_BUTTON_TEST_SUBJ);
-        await testSubjects.click(PAGE_RELOAD_BUTTON_TEST_SUBJ);
-        await pageObjects.common.sleep(1000);
-        expect(await testSubjects.isEuiSwitchChecked(fieldTestSubj)).to.be(fieldEnabled);
+        // Saving a setting that requires a page reload surfaces a toast with a reload button.
+        // The setting is reset via the Kibana API in the `after` hook.
+        await testSubjects.existOrFail(PAGE_RELOAD_BUTTON_TEST_SUBJ);
       });
 
       it("doesn't allow setting an invalid value", async () => {
