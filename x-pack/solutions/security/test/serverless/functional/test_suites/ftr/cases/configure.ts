@@ -24,8 +24,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const find = getService('find');
   const comboBox = getService('comboBox');
 
-  // Failing: See https://github.com/elastic/kibana/issues/251532
-  describe.skip('Configure Case', function () {
+  describe('Configure Case', function () {
     before(async () => {
       await svlCommonPage.loginAsAdmin();
       await navigateToCasesApp(getPageObject, getService, owner);
@@ -69,7 +68,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       it('opens and closes the connectors flyout correctly', async () => {
         await common.clickAndValidate('add-new-connector', 'euiFlyoutCloseButton');
         await testSubjects.click('euiFlyoutCloseButton');
-        expect(await testSubjects.exists('euiFlyoutCloseButton')).to.be(false);
+        await testSubjects.missingOrFail('euiFlyoutCloseButton');
       });
     });
 
@@ -83,7 +82,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await testSubjects.setCheckbox('text-custom-field-required-wrapper', 'check');
 
         await testSubjects.click('common-flyout-save');
-        expect(await testSubjects.exists('euiFlyoutCloseButton')).to.be(false);
+        await testSubjects.missingOrFail('euiFlyoutCloseButton');
 
         await testSubjects.existOrFail('custom-fields-list');
 
@@ -101,7 +100,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await input.type('!!!');
 
         await testSubjects.click('common-flyout-save');
-        expect(await testSubjects.exists('euiFlyoutCloseButton')).to.be(false);
+        await testSubjects.missingOrFail('euiFlyoutCloseButton');
 
         await testSubjects.existOrFail('custom-fields-list');
 
@@ -143,7 +142,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await cases.create.setCategory('new');
 
         await testSubjects.click('common-flyout-save');
-        expect(await testSubjects.exists('euiFlyoutCloseButton')).to.be(false);
+        await testSubjects.missingOrFail('euiFlyoutCloseButton');
 
         await retry.waitFor('templates-list', async () => {
           return await testSubjects.exists('templates-list');
@@ -174,7 +173,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await cases.create.setCategory('new!');
 
         await testSubjects.click('common-flyout-save');
-        expect(await testSubjects.exists('euiFlyoutCloseButton')).to.be(false);
+        await testSubjects.missingOrFail('euiFlyoutCloseButton');
 
         await retry.waitFor('templates-list', async () => {
           return await testSubjects.exists('templates-list');
