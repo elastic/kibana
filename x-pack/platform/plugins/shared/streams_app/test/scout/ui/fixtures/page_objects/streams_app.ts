@@ -9,14 +9,17 @@
 
 import moment from 'moment';
 import type { Locator, ScoutPage } from '@kbn/scout';
-import {
-  EuiCodeBlockWrapper,
-  EuiDataGridWrapper,
-  EuiSuperSelectWrapper,
-  KibanaCodeEditorWrapper,
-} from '@kbn/scout';
+import { KibanaCodeEditorWrapper, type EuiDataGridObject } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import type { FieldTypeOption } from '../../../../../public/components/stream_management/data_management/schema_editor/constants';
+
+interface CellValueExpectation {
+  columnName: string;
+  rowIndex: number;
+  value: string;
+  invertCondition?: boolean;
+  timeout?: number;
+}
 
 const LEGACY_DATE_FORMAT = 'MMM D, YYYY @ HH:mm:ss.SSS';
 
@@ -29,7 +32,6 @@ export class StreamsApp {
   public readonly fieldTypeSuperSelect;
   public readonly previewDataGrid;
   public readonly schemaDataGrid;
-  public readonly advancedSettingsCodeBlock;
   public readonly kibanaMonacoEditor;
   public readonly saveRoutingRuleButton;
   public readonly concatFieldInput;
@@ -82,22 +84,12 @@ export class StreamsApp {
     this.dateProcessorFormatsComboBox = this.page.components.comboBox(
       'streamsAppDateProcessorFormatsComboBox'
     );
-    this.fieldTypeSuperSelect = new EuiSuperSelectWrapper(
-      this.page,
-      'streamsAppFieldFormTypeSelect'
-    );
-    // TODO: Make locator more specific when possible
-    this.previewDataGrid = new EuiDataGridWrapper(this.page, { locator: '.euiDataGrid' });
-    this.schemaDataGrid = new EuiDataGridWrapper(
-      this.page,
-      'streamsAppSchemaEditorFieldsTableLoaded'
-    );
-    this.advancedSettingsCodeBlock = new EuiCodeBlockWrapper(this.page, {
-      locator: '.euiCodeBlock',
-    });
+    this.fieldTypeSuperSelect = this.page.components.superSelect('streamsAppFieldFormTypeSelect');
+    this.previewDataGrid = this.page.components.dataGrid('streamsAppPreviewDataGrid');
+    this.schemaDataGrid = this.page.components.dataGrid('streamsAppSchemaEditorFieldsTableLoaded');
     this.kibanaMonacoEditor = new KibanaCodeEditorWrapper(this.page);
     this.saveRoutingRuleButton = this.page.getByTestId('streamsAppStreamDetailRoutingSaveButton');
-    this.concatFieldInput = new EuiSuperSelectWrapper(this.page, 'streamsAppConcatFieldInput');
+    this.concatFieldInput = this.page.components.superSelect('streamsAppConcatFieldInput');
     this.concatLiteralInput = this.page.getByTestId('streamsAppConcatLiteralInput');
     this.createStreamButton = this.page.getByTestId('streamsAppCreateStreamButton');
     this.createQueryStreamButton = this.page.getByTestId('streamsAppCreateQueryStreamButton');
@@ -1060,20 +1052,20 @@ export class StreamsApp {
    * Uses a high default timeout so the simulation preview has time to refresh
    * after transient stale values (e.g. literal "null" from a Set processor).
    */
-  async expectCellValueContains({
-    columnName,
-    rowIndex,
-    value,
-    invertCondition = false,
-    timeout = 30_000,
-  }: {
-    columnName: string;
-    rowIndex: number;
-    value: string;
-    invertCondition?: boolean;
-    timeout?: number;
-  }) {
-    const cellLocator = this.previewDataGrid.getCellLocatorByColId(rowIndex, columnName);
+  async expectCellValueContains(params: CellValueExpectation) {
+    await this.expectGridCellValueContains(this.previewDataGrid, params);
+  }
+
+  /** Same as {@link expectCellValueContains}, against the schema editor fields table. */
+  async expectSchemaEditorCellValueContains(params: CellValueExpectation) {
+    await this.expectGridCellValueContains(this.schemaDataGrid, params);
+  }
+
+  private async expectGridCellValueContains(
+    grid: EuiDataGridObject,
+    { columnName, rowIndex, value, invertCondition = false, timeout = 30_000 }: CellValueExpectation
+  ) {
+    const cellLocator = grid.cell(rowIndex, columnName);
 
     if (invertCondition) {
       await expect(cellLocator).not.toContainText(value, { timeout });
@@ -1445,7 +1437,7 @@ export class StreamsApp {
   }
 
   async fillConcatFieldInput(value: string) {
-    await this.concatFieldInput.selectOption(value);
+    await this.concatFieldInput.selectOptionByValue(value);
   }
 
   async fillConcatLiteralInput(value: string) {

@@ -76,12 +76,12 @@ test.describe(
       await pageObjects.streams.searchFields(parentFieldName);
 
       // Verify the field is shown as inherited
-      await pageObjects.streams.expectCellValueContains({
+      await pageObjects.streams.expectSchemaEditorCellValueContains({
         columnName: 'name',
         rowIndex: 0,
         value: parentFieldName,
       });
-      await pageObjects.streams.expectCellValueContains({
+      await pageObjects.streams.expectSchemaEditorCellValueContains({
         columnName: 'status',
         rowIndex: 0,
         value: 'Inherited',
@@ -108,9 +108,11 @@ test.describe(
 
       // Wait for ECS/Otel recommendation to load - the /fields_metadata call provides type hints
       // Give extra time for the API response to be processed and the UI to update
-      await expect(pageObjects.streams.fieldTypeSuperSelect.valueInputLocator).toHaveValue('ip', {
-        timeout: 30_000,
-      });
+      await expect
+        .poll(() => pageObjects.streams.fieldTypeSuperSelect.getSelectedValue(), {
+          timeout: 30_000,
+        })
+        .toBe('ip');
 
       await page.getByTestId('streamsAppSchemaEditorAddFieldButton').click();
       await expect(
@@ -125,12 +127,12 @@ test.describe(
       await pageObjects.streams.searchFields(ecsFieldName);
 
       // Verify the field was added with IP type
-      await pageObjects.streams.expectCellValueContains({
+      await pageObjects.streams.expectSchemaEditorCellValueContains({
         columnName: 'name',
         rowIndex: 0,
         value: ecsFieldName,
       });
-      await pageObjects.streams.expectCellValueContains({
+      await pageObjects.streams.expectSchemaEditorCellValueContains({
         columnName: 'type',
         rowIndex: 0,
         value: 'ip',
@@ -169,7 +171,7 @@ test.describe(
 
       // Verify the ECS field was created
       await pageObjects.streams.searchFields(ecsFieldName);
-      await pageObjects.streams.expectCellValueContains({
+      await pageObjects.streams.expectSchemaEditorCellValueContains({
         columnName: 'name',
         rowIndex: 0,
         value: ecsFieldName,
@@ -177,14 +179,14 @@ test.describe(
 
       // Verify the alias field was automatically created
       await pageObjects.streams.searchFields(aliasFieldName);
-      await pageObjects.streams.expectCellValueContains({
+      await pageObjects.streams.expectSchemaEditorCellValueContains({
         columnName: 'name',
         rowIndex: 0,
         value: aliasFieldName,
       });
 
       // Verify the Type column shows the alias relationship for the alias field
-      await pageObjects.streams.expectCellValueContains({
+      await pageObjects.streams.expectSchemaEditorCellValueContains({
         columnName: 'type',
         rowIndex: 1,
         value: `Alias for ${ecsFieldName}`,

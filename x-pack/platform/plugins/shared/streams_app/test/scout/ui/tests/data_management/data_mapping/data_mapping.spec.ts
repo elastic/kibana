@@ -76,7 +76,7 @@ test.describe(
       // Verify the search filters the results
       const rows = await pageObjects.streams.getPreviewTableRows();
       expect(rows).toHaveLength(1);
-      await pageObjects.streams.expectCellValueContains({
+      await pageObjects.streams.expectSchemaEditorCellValueContains({
         columnName: 'name',
         rowIndex: 0,
         value: '@timestamp',
@@ -91,12 +91,12 @@ test.describe(
       await pageObjects.streams.searchFields('host');
 
       // Verify the search filters the results
-      await pageObjects.streams.expectCellValueContains({
+      await pageObjects.streams.expectSchemaEditorCellValueContains({
         columnName: 'name',
         rowIndex: 0,
         value: 'resource.attributes.host.name',
       });
-      await pageObjects.streams.expectCellValueContains({
+      await pageObjects.streams.expectSchemaEditorCellValueContains({
         columnName: 'name',
         rowIndex: 1,
         value: 'host',
@@ -113,7 +113,7 @@ test.describe(
 
       const numberRows = await pageObjects.streams.getPreviewTableRows();
       for (let rowIndex = 0; rowIndex < numberRows.length; rowIndex++) {
-        await pageObjects.streams.expectCellValueContains({
+        await pageObjects.streams.expectSchemaEditorCellValueContains({
           columnName: 'type',
           rowIndex,
           value: 'Number',
@@ -130,7 +130,7 @@ test.describe(
 
       const mappedRows = await pageObjects.streams.getPreviewTableRows();
       for (let rowIndex = 0; rowIndex < mappedRows.length; rowIndex++) {
-        await pageObjects.streams.expectCellValueContains({
+        await pageObjects.streams.expectSchemaEditorCellValueContains({
           columnName: 'status',
           rowIndex,
           value: 'Inherited',
@@ -144,12 +144,12 @@ test.describe(
       // Search specific unmapped field
       await pageObjects.streams.searchFields('resource.attributes.host.ip');
       // Verify the field is unmapped
-      await pageObjects.streams.expectCellValueContains({
+      await pageObjects.streams.expectSchemaEditorCellValueContains({
         columnName: 'name',
         rowIndex: 0,
         value: 'resource.attributes.host.ip',
       });
-      await pageObjects.streams.expectCellValueContains({
+      await pageObjects.streams.expectSchemaEditorCellValueContains({
         columnName: 'status',
         rowIndex: 0,
         value: 'Unmapped',
@@ -168,12 +168,12 @@ test.describe(
       await pageObjects.streams.submitSchemaChanges();
 
       // Verify the field is now mapped
-      await pageObjects.streams.expectCellValueContains({
+      await pageObjects.streams.expectSchemaEditorCellValueContains({
         columnName: 'name',
         rowIndex: 0,
         value: 'resource.attributes.host.ip',
       });
-      await pageObjects.streams.expectCellValueContains({
+      await pageObjects.streams.expectSchemaEditorCellValueContains({
         columnName: 'status',
         rowIndex: 0,
         value: 'Mapped',
@@ -186,12 +186,12 @@ test.describe(
       // Search specific unmapped field
       await pageObjects.streams.searchFields('resource.attributes.host.ip');
       // Verify the field is unmapped
-      await pageObjects.streams.expectCellValueContains({
+      await pageObjects.streams.expectSchemaEditorCellValueContains({
         columnName: 'name',
         rowIndex: 0,
         value: 'resource.attributes.host.ip',
       });
-      await pageObjects.streams.expectCellValueContains({
+      await pageObjects.streams.expectSchemaEditorCellValueContains({
         columnName: 'status',
         rowIndex: 0,
         value: 'Unmapped',
@@ -211,12 +211,12 @@ test.describe(
       await pageObjects.toasts.closeAll();
 
       // Verify the field is now mapped
-      await pageObjects.streams.expectCellValueContains({
+      await pageObjects.streams.expectSchemaEditorCellValueContains({
         columnName: 'name',
         rowIndex: 0,
         value: 'resource.attributes.host.ip',
       });
-      await pageObjects.streams.expectCellValueContains({
+      await pageObjects.streams.expectSchemaEditorCellValueContains({
         columnName: 'status',
         rowIndex: 0,
         value: 'Mapped',
@@ -229,12 +229,12 @@ test.describe(
       await pageObjects.streams.submitSchemaChanges();
 
       // Verify the field is now unmapped
-      await pageObjects.streams.expectCellValueContains({
+      await pageObjects.streams.expectSchemaEditorCellValueContains({
         columnName: 'name',
         rowIndex: 0,
         value: 'resource.attributes.host.ip',
       });
-      await pageObjects.streams.expectCellValueContains({
+      await pageObjects.streams.expectSchemaEditorCellValueContains({
         columnName: 'status',
         rowIndex: 0,
         value: 'Unmapped',
@@ -277,17 +277,17 @@ test.describe(
       await pageObjects.streams.searchFields(fieldName);
 
       // Verify the field was added and is mapped
-      await pageObjects.streams.expectCellValueContains({
+      await pageObjects.streams.expectSchemaEditorCellValueContains({
         columnName: 'name',
         rowIndex: 0,
         value: fieldName,
       });
-      await pageObjects.streams.expectCellValueContains({
+      await pageObjects.streams.expectSchemaEditorCellValueContains({
         columnName: 'type',
         rowIndex: 0,
         value: 'keyword',
       });
-      await pageObjects.streams.expectCellValueContains({
+      await pageObjects.streams.expectSchemaEditorCellValueContains({
         columnName: 'status',
         rowIndex: 0,
         value: 'Mapped',
@@ -309,7 +309,7 @@ test.describe(
       await pageObjects.streams.confirmChangesInReviewModal();
 
       // Verify the description is visible in the table
-      await pageObjects.streams.expectCellValueContains({
+      await pageObjects.streams.expectSchemaEditorCellValueContains({
         columnName: 'description',
         rowIndex: 0,
         value: 'The IP address of the host',
