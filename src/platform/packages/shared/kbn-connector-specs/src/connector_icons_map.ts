@@ -333,4 +333,14 @@ export const ConnectorIconsMap: Map<
         )
     ),
   ],
+
+  [
+    '.opensearch_aws_opensearch_service',
+    lazy(
+      () =>
+        import(
+          /* webpackChunkName: "connectorIconopensearchawsopensearchservice" */ './specs/opensearch_aws_opensearch_service/icon'
+        )
+    ),
+  ],
 ]);

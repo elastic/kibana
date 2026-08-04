@@ -2673,6 +2673,7 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/notion/** @elastic/wo
 src/platform/packages/shared/kbn-connector-specs/src/specs/one_drive/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/argocd/** @elastic/nightshift-context-and-research-team
 src/platform/packages/shared/kbn-connector-specs/src/specs/one_password/** @elastic/workflows-eng
+src/platform/packages/shared/kbn-connector-specs/src/specs/opensearch_aws_opensearch_service/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/outlook/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/pagerduty/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/prometheus_alertmanager/** @elastic/nightshift-context-and-research-team

@@ -69,3 +69,4 @@ export * from './specs/aws_cloudwatch/aws_cloudwatch';
 export * from './specs/aws_x_ray/aws_x_ray';
 export * from './specs/prometheus_alertmanager/prometheus_alertmanager';
 export * from './specs/google_cloud_monitoring/google_cloud_monitoring';
+export * from './specs/opensearch_aws_opensearch_service/opensearch_aws_opensearch_service';

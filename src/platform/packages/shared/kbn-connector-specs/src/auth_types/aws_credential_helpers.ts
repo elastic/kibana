@@ -12,6 +12,17 @@ import { calculateAWSA4Signature, sha256Hash } from './aws_crypto_helpers';
 const EMPTY_BODY_SHA256 = 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855';
 
 /**
+ * Services whose per-resource hostname puts the region *before* the service
+ * code: {resource-id}.{region}.{service}.amazonaws.com. This is the reverse
+ * of the itemName.service.region order used by e.g. S3's virtual-hosted-style
+ * {bucket}.s3.{region}.amazonaws.com. Amazon OpenSearch Service domain
+ * endpoints (`es`) and OpenSearch Serverless collection endpoints (`aoss`)
+ * follow this reversed order — see
+ * https://docs.aws.amazon.com/opensearch-service/latest/developerguide/managedomains-signing-service-requests.html.
+ */
+const REGION_BEFORE_SERVICE_HOSTS = new Set(['es', 'aoss']);
+
+/**
  * Parse an AWS hostname into service and region.
  * Supports: {service}.{region}.amazonaws.com
  */
@@ -30,8 +41,27 @@ export function parseAwsHost(
     return { service: parts[0], region: parts[1] };
   }
 
+  if (parts.length === 3 && REGION_BEFORE_SERVICE_HOSTS.has(parts[2])) {
+    return { itemName: parts[0], region: parts[1], service: parts[2] };
+  }
+
   // Handle item-specific hostnames like {bucket}.s3.{region}.amazonaws.com
   return { itemName: parts[0], service: parts[1], region: parts[2] };
+}
+
+/**
+ * Builds the query string used both to compute the SigV4 signature and as
+ * the literal query string sent on the wire. AWS rejects a request whose
+ * live query string differs, byte-for-byte, from the one that was signed —
+ * so signing and the outgoing request must always derive from this single
+ * function rather than two independently-encoded copies (see `signRequest`
+ * callers in aws_credentials.ts, which reuse this to rewrite `config.url`).
+ */
+export function buildCanonicalQueryString(queryParams: Record<string, string>): string {
+  return Object.keys(queryParams)
+    .sort()
+    .map((key) => `${encodeURIComponent(key)}=${encodeURIComponent(queryParams[key])}`)
+    .join('&');
 }
 
 /**
@@ -55,10 +85,7 @@ export async function signRequest(
   const dateStamp = now.toISOString().split('T')[0].replace(/-/g, '');
   const amzDate = now.toISOString().replace(/[:-]|\.\d{3}/g, '');
 
-  const sortedParams = Object.keys(queryParams).sort();
-  const canonicalQuerystring = sortedParams
-    .map((key) => `${encodeURIComponent(key)}=${encodeURIComponent(queryParams[key])}`)
-    .join('&');
+  const canonicalQuerystring = buildCanonicalQueryString(queryParams);
 
   const hasBody = body !== undefined && body !== '';
   const payloadHash = hasBody ? await sha256Hash(body) : EMPTY_BODY_SHA256;

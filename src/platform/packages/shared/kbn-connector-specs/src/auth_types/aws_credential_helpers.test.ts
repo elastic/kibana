@@ -43,6 +43,27 @@ describe('parseAwsHost()', () => {
       region: 'us-west-2',
     });
   });
+
+  it('parses Amazon OpenSearch Service domain hostnames with region before service', () => {
+    expect(parseAwsHost('search-my-domain-abc123.us-east-1.es.amazonaws.com')).toEqual({
+      itemName: 'search-my-domain-abc123',
+      region: 'us-east-1',
+      service: 'es',
+    });
+    expect(parseAwsHost('vpc-my-domain-abc123.eu-west-1.es.amazonaws.com')).toEqual({
+      itemName: 'vpc-my-domain-abc123',
+      region: 'eu-west-1',
+      service: 'es',
+    });
+  });
+
+  it('parses OpenSearch Serverless collection hostnames with region before service', () => {
+    expect(parseAwsHost('abc123xyz.us-east-1.aoss.amazonaws.com')).toEqual({
+      itemName: 'abc123xyz',
+      region: 'us-east-1',
+      service: 'aoss',
+    });
+  });
 });
 
 describe('signRequest()', () => {
