@@ -135,7 +135,6 @@ export const JiraConnector: ConnectorSpec = {
   actions: {
     searchIssuesWithJql: {
       isTool: true,
-      annotations: { readOnlyHint: true },
       description:
         'Search or filter Jira issues using JQL (Jira Query Language). Use when you need to find issues by status, assignee, project, label, or any other criteria. Supports pagination via nextPageToken.',
       input: SearchIssuesWithJqlInputSchema,
@@ -152,7 +151,6 @@ export const JiraConnector: ConnectorSpec = {
     },
     getIssue: {
       isTool: true,
-      annotations: { readOnlyHint: true },
       description:
         'Fetch full details of a single Jira issue by its ID or key. Use when you already have the issue key (e.g. PROJ-123) or issue ID and need the complete record including fields, comments, and metadata.',
       input: GetIssueInputSchema,
@@ -167,7 +165,6 @@ export const JiraConnector: ConnectorSpec = {
     },
     getProjects: {
       isTool: true,
-      annotations: { readOnlyHint: true },
       description:
         'List or search Jira projects. Use when you need to discover available projects or find a project by name or key. Supports pagination and optional text filtering.',
       input: GetProjectsInputSchema,
@@ -186,7 +183,6 @@ export const JiraConnector: ConnectorSpec = {
     },
     getProject: {
       isTool: true,
-      annotations: { readOnlyHint: true },
       description:
         'Fetch full details of a single Jira project by its ID or key. Use when you already have the project key (e.g. PROJ) or numeric project ID and need the complete project record.',
       input: GetProjectInputSchema,
@@ -203,7 +199,6 @@ export const JiraConnector: ConnectorSpec = {
     },
     searchUsers: {
       isTool: true,
-      annotations: { readOnlyHint: true },
       description:
         'Find Jira users by name, username, or email. Use when you need a user accountId (e.g. for JQL assignee filters) or to look up user contact details. At least one search parameter should be provided.',
       input: SearchUsersInputSchema,
