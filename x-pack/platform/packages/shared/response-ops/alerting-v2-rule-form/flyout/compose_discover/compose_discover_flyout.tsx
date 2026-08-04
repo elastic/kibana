@@ -68,6 +68,7 @@ import {
 } from './use_heuristic_split';
 import { useSplitQueryCompletion } from './use_split_query_completion';
 import { getTimeFieldResolutionQuery } from './get_time_field_resolution_query';
+import { resolveNoDataStrategyForQuery } from './resolve_no_data_strategy';
 import { useResolveTimeField } from './use_resolve_time_field';
 
 const LazyYamlRuleForm = React.lazy(() =>
@@ -614,11 +615,11 @@ export function ComposeDiscoverFlyout({
         const alertQuery = splitResultToRuleQuery(full).query;
         setSandboxQuery(alertQuery);
         methods.setValue('query', alertQuery, { shouldDirty: true });
-        methods.setValue(
-          'noDataStrategy',
-          alertQuery.format === 'standalone' ? 'none' : 'last_known_status',
-          { shouldDirty: true }
-        );
+        const currentNoData = methods.getValues('noDataStrategy');
+        const resolvedNoData = resolveNoDataStrategyForQuery(currentNoData, alertQuery.format);
+        if (resolvedNoData !== currentNoData) {
+          methods.setValue('noDataStrategy', resolvedNoData, { shouldDirty: true });
+        }
         methods.setValue('recoveryStrategy', 'no_breach', { shouldDirty: true });
       } else {
         // Assemble from committed query — discards any unapplied sandbox edits cleanly.
@@ -629,7 +630,8 @@ export function ComposeDiscoverFlyout({
         };
         setSandboxQuery(standalone);
         methods.setValue('query', standalone, { shouldDirty: true });
-        methods.setValue('noDataStrategy', undefined, { shouldDirty: true });
+        // Keep noDataStrategy in form state so alert↔signal round-trips preserve a
+        // still-valid choice; request mappers omit it for signal rules.
         methods.setValue('recoveryStrategy', undefined, { shouldDirty: true });
       }
       methods.setValue('kind', kind, { shouldDirty: true });
@@ -843,7 +845,11 @@ export function ComposeDiscoverFlyout({
 
     methods.setValue('query', queryToCommit, { shouldDirty: true });
     if (isAlert && queryToCommit.format === 'standalone') {
-      methods.setValue('noDataStrategy', 'none', { shouldDirty: true });
+      const currentNoData = methods.getValues('noDataStrategy');
+      const resolvedNoData = resolveNoDataStrategyForQuery(currentNoData, 'standalone');
+      if (resolvedNoData !== currentNoData) {
+        methods.setValue('noDataStrategy', resolvedNoData, { shouldDirty: true });
+      }
       if (uiState.recoveryType === 'custom') {
         dispatch({ type: 'SET_RECOVERY_TYPE', recoveryType: 'default', isBuilderMode });
         methods.setValue('recoveryStrategy', 'no_breach', { shouldDirty: true });

@@ -1587,6 +1587,79 @@ describe('ComposeDiscoverFlyout', () => {
       expect(readRecoveryStrategy?.()).toBe('no_breach');
     });
 
+    it('preserves a valid noDataStrategy across an alert→signal→alert round-trip', () => {
+      const rule = {
+        ...ruleWithRecoveryStrategy,
+        no_data_strategy: 'recover' as const,
+      };
+      renderFlyout({ mode: 'edit', rule: rule as any });
+
+      expect(readNoDataStrategy?.()).toBe('recover');
+
+      act(() => {
+        getLatestFormProps().onKindChange('signal');
+      });
+      // Left in form state so mappers can omit it for signal without losing the choice.
+      expect(readNoDataStrategy?.()).toBe('recover');
+
+      act(() => {
+        getLatestFormProps().onKindChange('alert');
+      });
+
+      // Query re-splits to composed (has WHERE), so recover remains valid.
+      expect(readCommittedQuery?.()).toMatchObject({ format: 'composed' });
+      expect(readNoDataStrategy?.()).toBe('recover');
+    });
+
+    it('coerces noDataStrategy to none when switching to alert yields a conditionless standalone query', () => {
+      const rule = {
+        ...ruleWithRecoveryStrategy,
+        query: {
+          format: 'standalone' as const,
+          breach: { query: 'FROM logs-* | STATS count = COUNT(*) BY host.name' },
+        },
+        no_data_strategy: 'last_known_status' as const,
+      };
+      renderFlyout({ mode: 'edit', rule: rule as any });
+
+      expect(readNoDataStrategy?.()).toBe('last_known_status');
+
+      act(() => {
+        getLatestFormProps().onKindChange('signal');
+      });
+      act(() => {
+        getLatestFormProps().onKindChange('alert');
+      });
+
+      expect(readCommittedQuery?.()).toMatchObject({ format: 'standalone' });
+      expect(readNoDataStrategy?.()).toBe('none');
+    });
+
+    it('keeps noDataStrategy as none when re-applying an unchanged conditionless standalone query', () => {
+      const rule = {
+        ...ruleWithRecoveryStrategy,
+        query: {
+          format: 'standalone' as const,
+          breach: { query: 'FROM logs-* | STATS count = COUNT(*) BY host.name' },
+        },
+        no_data_strategy: 'none' as const,
+      };
+      renderFlyout({ mode: 'edit', rule: rule as any });
+
+      openSandbox();
+      expect(readNoDataStrategy?.()).toBe('none');
+
+      act(() => {
+        fireEvent.click(screen.getByTestId('mockSandboxApply'));
+      });
+
+      expect(readCommittedQuery?.()).toEqual({
+        format: 'standalone',
+        breach: { query: 'FROM logs-* | STATS count = COUNT(*) BY host.name' },
+      });
+      expect(readNoDataStrategy?.()).toBe('none');
+    });
+
     it('opens in YAML mode for no_data_strategy: emit', () => {
       const rule = {
         ...ruleWithRecoveryStrategy,
