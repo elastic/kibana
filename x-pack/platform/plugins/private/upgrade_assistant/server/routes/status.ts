@@ -41,7 +41,7 @@ export function registerUpgradeStatusRoute({
       },
       validate: {
         query: schema.object({
-          targetVersion: schema.maybe(schema.string()),
+          targetVersion: schema.maybe(schema.string({ maxLength: 64 })),
         }),
       },
     },

@@ -8,7 +8,7 @@
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { APP_HEADER_TEST_SUBJECTS, getAppMenuItemTestSubj } from '@kbn/app-header';
-import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '@kbn/streams-plugin/common';
+import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '@kbn/significant-events-plugin/common';
 import { test } from '../fixtures';
 
 test.describe(
@@ -52,8 +52,8 @@ test.describe(
       });
     });
 
-    test('navigates between Streams discovery, Nightshift, and settings', async ({ page }) => {
-      await page.gotoApp('streams/_discovery/streams');
+    test('navigates between Significant Events, Nightshift, and settings', async ({ page }) => {
+      await page.gotoApp('significant_events/streams');
 
       const nightshiftButton = page.testSubj.locator(getAppMenuItemTestSubj('nightshift'));
       await expect(nightshiftButton).toBeVisible({ timeout: 60_000 });
@@ -70,7 +70,7 @@ test.describe(
       const settingsLink = page.testSubj.locator('nightshiftSettingsLink');
       await expect(settingsLink).toBeVisible();
       await settingsLink.click();
-      await expect(page).toHaveURL(/\/app\/streams\/_discovery\/settings/);
+      await expect(page).toHaveURL(/\/app\/significant_events\/settings/);
     });
   }
 );

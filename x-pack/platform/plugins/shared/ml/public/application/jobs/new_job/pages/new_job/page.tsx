@@ -39,7 +39,7 @@ import type { ExistingJobsAndGroups } from '../../../../services/job_service';
 import { useNewJobCapsService } from '../../../../services/new_job_capabilities/new_job_capabilities_service';
 import { getNewJobDefaults } from '../../../../services/ml_server_info';
 import { useToastNotificationService } from '../../../../services/toast_notification_service';
-import { MlAppHeader } from '../../../../components/ml_app_header';
+import { MlAppHeader, useAnomalyDetectionJobsBack } from '../../../../components/ml_app_header';
 
 const PAGE_WIDTH = 1200; // document.querySelector('.single-metric-job-container').width();
 const BAR_TARGET = PAGE_WIDTH > 2000 ? 1000 : PAGE_WIDTH / 2;
@@ -58,6 +58,7 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
   } = useMlKibana();
   const mlApi = useMlApi();
   const newJobCapsService = useNewJobCapsService();
+  const anomalyDetectionJobsBack = useAnomalyDetectionJobsBack();
 
   const chartInterval = useTimeBuckets(uiSettings);
 
@@ -218,6 +219,7 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
           title={`${i18n.translate('xpack.ml.newJob.page.createJob', {
             defaultMessage: 'Create job',
           })}: ${jobCreatorTitle}`}
+          back={anomalyDetectionJobsBack}
         />
       </div>
 

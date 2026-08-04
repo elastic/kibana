@@ -51,9 +51,11 @@ jszip
 @opentelemetry/otlp-transformer
 just-bash
 jsondiffpatch
+typescript-7
 immer-v9
 react-redux-v7
 redux-thunk-v2
 redux-toolkit-v1
 redux-v4
 reselect-v4
+graphql

@@ -14,6 +14,7 @@ import { AWS_SERVICES_MAP } from '../../aws_service_matrix';
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 import type { DeploySettingsStepState, ServiceChipState } from '../../onboarding_flow_context';
+import { FIELD_CONFIG } from '../service_settings_step/field_config';
 import { SERVICE_SETTINGS_SESSION_KEY } from '../service_settings_step/use_service_settings';
 import type { ServiceVars } from '../service_settings_step/use_service_settings';
 
@@ -32,8 +33,8 @@ export interface UseDeployResult {
 
 interface PackageInputEntry {
   enabled: boolean;
-  vars?: Record<string, string | boolean>;
-  streams: Record<string, { enabled: boolean; vars: Record<string, string | boolean> }>;
+  vars?: Record<string, string | boolean | string[]>;
+  streams: Record<string, { enabled: boolean; vars: Record<string, string | boolean | string[]> }>;
 }
 
 const BOOLEAN_VAR_NAMES = new Set([
@@ -59,13 +60,24 @@ export function buildStreamVars(
   service: AwsServiceMatrixEntry,
   serviceVars: ServiceVars,
   globalRegion: string
-): Record<string, string | boolean> {
-  const result: Record<string, string | boolean> = {};
+): Record<string, string | boolean | string[]> {
+  const result: Record<string, string | boolean | string[]> = {};
 
   for (const [key, value] of Object.entries(serviceVars.vars)) {
-    result[key] = BOOLEAN_VAR_NAMES.has(key) ? value === 'true' : value;
+    if (BOOLEAN_VAR_NAMES.has(key)) {
+      result[key] = value === 'true';
+    } else if (FIELD_CONFIG[key]?.multi) {
+      const parts = value
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean);
+      if (parts.length > 0) result[key] = parts;
+    } else {
+      result[key] = value;
+    }
   }
 
+  // Backfill singular region field from globalRegion when not explicitly set
   const regionField = getRegionFieldName(service, serviceVars.trigger);
   if (regionField && !result[regionField] && globalRegion) {
     result[regionField] = globalRegion;
