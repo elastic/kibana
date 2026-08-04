@@ -33,8 +33,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
   const supertest = getService('supertest');
   const taskManagerUtils = new TaskManagerUtils(es, retry);
 
-  // Failing: See https://github.com/elastic/kibana/issues/275667
-  describe.skip('disable', function () {
+  describe('disable', function () {
     this.tags('skipFIPS');
     const objectRemover = new ObjectRemover(supertestWithoutAuth);
     const ruleUtils = new RuleUtils({ space: Spaces.space1, supertestWithoutAuth });
@@ -302,20 +301,24 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
       // disable rule, and implicitly task
       await ruleUtils.disable(createdRule.id);
 
-      // wait for the task to be disabled
-      await waitForDisabledTask(createdRule.scheduled_task_id);
+      // wait for the task to be idle and disabled
+      await waitForIdleDisabledTask(createdRule.scheduled_task_id);
 
       // manually enable task
       await taskManagerUtils.setTaskEnabled(createdRule.scheduled_task_id, true);
 
-      // wait for the task to be disabled
-      await waitForDisabledTask(createdRule.scheduled_task_id);
+      // wait for the task to be idle and disabled again
+      await waitForIdleDisabledTask(createdRule.scheduled_task_id);
     });
 
-    async function waitForDisabledTask(taskId: string) {
+    async function waitForIdleDisabledTask(taskId: string) {
       await retry.try(async () => {
         const taskDoc = await getScheduledTask(taskId);
         expect(taskDoc.task.enabled).to.be(false);
+        expect(taskDoc.task.status).to.eql('idle');
+        expect(taskDoc.task.ownerId).to.be(null);
+        expect(taskDoc.task.startedAt).to.be(null);
+        expect(taskDoc.task.retryAt).to.be(null);
       });
     }
   });
