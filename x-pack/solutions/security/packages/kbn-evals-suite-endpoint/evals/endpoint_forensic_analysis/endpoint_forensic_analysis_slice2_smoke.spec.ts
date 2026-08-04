@@ -33,20 +33,22 @@ evaluate.describe(
   'Endpoint Forensic Analysis — slice 2 Osquery smoke',
   { tag: tags.stateful.classic },
   () => {
-    evaluate.beforeAll(async ({ kbnClient, esClient, internalEsClient, agentBuilderClient, log }) => {
-      await waitForEndpointPackage(kbnClient, esClient, log);
-      await cleanupForensicData({ esClient, internalEsClient });
-      await seedForensicTimeline({ esClient }, log);
+    evaluate.beforeAll(
+      async ({ kbnClient, esClient, internalEsClient, agentBuilderClient, log }) => {
+        await waitForEndpointPackage(kbnClient, esClient, log);
+        await cleanupForensicData({ esClient, internalEsClient });
+        await seedForensicTimeline({ esClient }, log);
 
-      try {
-        await agentBuilderClient.converse({
-          agentId: agentBuilderDefaultAgentId,
-          input: 'hello',
-        });
-      } catch (e) {
-        log.warning(`Warmup failed: ${e}`);
+        try {
+          await agentBuilderClient.converse({
+            agentId: agentBuilderDefaultAgentId,
+            input: 'hello',
+          });
+        } catch (e) {
+          log.warning(`Warmup failed: ${e}`);
+        }
       }
-    });
+    );
 
     evaluate.afterAll(async ({ esClient, internalEsClient }) => {
       await cleanupForensicData({ esClient, internalEsClient });
