@@ -304,10 +304,10 @@ describe('getNormalizeCommonFields - maintenance windows', () => {
     { id: 'mw-id-2', title: 'Nightly Deploy' },
   ];
 
-  it('accepts the snake_case maintenance_windows key', () => {
+  it('keeps valid maintenance window ids', () => {
     const config = {
       ...baseConfig,
-      monitor: { ...baseMonitor, maintenance_windows: ['mw-id-1'] },
+      monitor: { ...baseMonitor, maintenanceWindows: ['mw-id-1'] },
       maintenanceWindows,
     };
     const { normalizedFields } = getNormalizeCommonFields(config as NormalizedProjectProps);
@@ -317,31 +317,27 @@ describe('getNormalizeCommonFields - maintenance windows', () => {
   it('resolves maintenance window names to ids', () => {
     const config = {
       ...baseConfig,
-      monitor: { ...baseMonitor, maintenance_windows: ['Weekend window', 'mw-id-2'] },
+      monitor: { ...baseMonitor, maintenanceWindows: ['Weekend window', 'mw-id-2'] },
       maintenanceWindows,
     };
     const { normalizedFields } = getNormalizeCommonFields(config as NormalizedProjectProps);
     expect(normalizedFields.maintenance_windows).toEqual(['mw-id-1', 'mw-id-2']);
   });
 
-  it('prefers the snake_case key over the camelCase alias', () => {
+  it('passes references through when no maintenance windows are available to resolve against', () => {
     const config = {
       ...baseConfig,
-      monitor: {
-        ...baseMonitor,
-        maintenance_windows: ['mw-id-2'],
-        maintenanceWindows: ['mw-id-1'],
-      },
-      maintenanceWindows,
+      monitor: { ...baseMonitor, maintenanceWindows: ['mw-id-1'] },
+      maintenanceWindows: [],
     };
     const { normalizedFields } = getNormalizeCommonFields(config as NormalizedProjectProps);
-    expect(normalizedFields.maintenance_windows).toEqual(['mw-id-2']);
+    expect(normalizedFields.maintenance_windows).toEqual(['mw-id-1']);
   });
 
   it('throws for an unresolved maintenance window reference', () => {
     const config = {
       ...baseConfig,
-      monitor: { ...baseMonitor, maintenance_windows: ['does-not-exist'] },
+      monitor: { ...baseMonitor, maintenanceWindows: ['does-not-exist'] },
       maintenanceWindows,
     };
     expect(() => getNormalizeCommonFields(config as NormalizedProjectProps)).toThrow(

@@ -65,7 +65,6 @@ export const ProjectMonitorCodec = t.intersection([
     fields: t.record(t.string, t.string),
     'service.name': t.string,
     maintenanceWindows: t.array(t.string),
-    maintenance_windows: t.array(t.string),
     spaces: t.array(t.string),
   }),
 ]);

@@ -108,7 +108,7 @@ export const getNormalizeCommonFields = ({
     [ConfigKey.ALERT_CONFIG]: getAlertConfig(monitor),
     [ConfigKey.LABELS]: monitor.fields || defaultFields[ConfigKey.LABELS],
     [ConfigKey.MAINTENANCE_WINDOWS]: resolveMaintenanceWindowsOrThrow(
-      monitor.maintenance_windows ?? monitor.maintenanceWindows,
+      monitor.maintenanceWindows,
       maintenanceWindows
     ),
     [ConfigKey.KIBANA_SPACES]: monitor.spaces || defaultFields[ConfigKey.KIBANA_SPACES],
@@ -515,7 +515,6 @@ export const normalizeYamlConfig = (data: NormalizedProjectProps['monitor']) => 
     id: _id,
     retestOnFailure: _retestOnFailure,
     maintenanceWindows: _maintenanceWindows,
-    maintenance_windows: _maintenanceWindowsSnakeCase,
     ...yamlConfig
   } = flattenedConfig;
   const unsupportedKeys = Object.keys(yamlConfig).filter((key) => !supportedKeys.includes(key));
