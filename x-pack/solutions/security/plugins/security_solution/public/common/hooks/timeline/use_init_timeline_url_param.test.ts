@@ -42,6 +42,7 @@ jest.mock('../../../timelines/components/super_timeline/use_open_super_timeline'
 }));
 
 jest.mock('react-redux-v7', () => ({
+  ...jest.requireActual('react-redux-v7'),
   useSelector: () => null,
 }));
 
