@@ -24,8 +24,6 @@
     "@kbn/actions-utils",
     "@kbn/i18n",
     "@kbn/mcp-client",
-    "@kbn/dev-cli-runner",
-    "@kbn/dev-cli-errors",
     "@kbn/repo-info",
   ]
 }
