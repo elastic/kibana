@@ -33,8 +33,8 @@ const contributeLinkLabel = i18n.translate('workflowsManagement.libraryPage.cont
   defaultMessage: 'Contribute a template',
 });
 
-const createFromFilelabel = i18n.translate('workflowsManagement.libraryPage.createFromFile', {
-  defaultMessage: 'Create workflow from file',
+const createFromFileLabel = i18n.translate('workflowsManagement.libraryPage.createFromFile', {
+  defaultMessage: 'Import template',
 });
 
 // The Workflow Template Library ships from `elastic/workflows`; the header
@@ -72,21 +72,22 @@ export const LibraryCatalogBrowserPage = React.memo(() => {
   const headerMenu = useMemo<AppHeaderMenu>(
     () => ({
       primaryActionItem: {
-        id: 'createFromFile',
-        label: createFromFilelabel,
-        iconType: 'importAction',
-        run: openUploadFlyout,
-        testId: 'workflowLibraryCreateFromFileButton',
+        id: 'contributeTemplate',
+        order: 1,
+        label: contributeLinkLabel,
+        iconType: 'logoGithub',
+        href: CONTRIBUTE_TEMPLATE_URL,
+        target: '_blank',
+        testId: 'workflowLibraryContributeLink',
       },
       items: [
         {
-          id: 'contributeTemplate',
-          order: 1,
-          label: contributeLinkLabel,
-          iconType: 'logoGithub',
-          href: CONTRIBUTE_TEMPLATE_URL,
-          target: '_blank',
-          testId: 'workflowLibraryContributeLink',
+          id: 'createFromFile',
+          label: createFromFileLabel,
+          iconType: 'importAction',
+          overflow: true,
+          run: openUploadFlyout,
+          testId: 'workflowLibraryCreateFromFileButton',
         },
       ],
     }),
