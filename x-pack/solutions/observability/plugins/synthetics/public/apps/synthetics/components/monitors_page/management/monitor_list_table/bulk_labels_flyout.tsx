@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiButtonEmpty,
@@ -22,6 +22,7 @@ import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import type { EncryptedSyntheticsSavedMonitor } from '../../../../../../../common/runtime_types';
 import { ConfigKey } from '../../../../../../../common/runtime_types';
 import { fetchFieldSuggestions } from '../../../../state';
+import { useCanUsePublicLocationsPermission } from '../../../../../../hooks/use_capabilities';
 import type { BulkEditMode } from './bulk_edit_flyout';
 import {
   BulkEditFlyout,
@@ -31,6 +32,7 @@ import {
 } from './bulk_edit_flyout';
 
 interface LabelPair {
+  id: string;
   key: string;
   value: string;
 }
@@ -65,13 +67,23 @@ export const BulkLabelsFlyout = ({
   onClose: () => void;
   reloadPage: () => void;
 }) => {
+  const canUsePublicLocations = useCanUsePublicLocationsPermission();
+  const pairIdRef = useRef(0);
+  const createEmptyPair = useCallback((): LabelPair => {
+    pairIdRef.current += 1;
+    return { id: String(pairIdRef.current), key: '', value: '' };
+  }, []);
+
   const [mode, setMode] = useState<BulkEditMode>('add');
-  const [pairs, setPairs] = useState<LabelPair[]>([{ key: '', value: '' }]);
+  const [pairs, setPairs] = useState<LabelPair[]>(() => {
+    pairIdRef.current += 1;
+    return [{ id: String(pairIdRef.current), key: '', value: '' }];
+  });
   const [removeKeys, setRemoveKeys] = useState<string[]>([]);
 
   const { editableMonitors, skippedMonitors } = useMemo(
-    () => partitionEditableMonitors(monitors),
-    [monitors]
+    () => partitionEditableMonitors(monitors, canUsePublicLocations),
+    [monitors, canUsePublicLocations]
   );
 
   const { data: suggestions } = useFetcher(() => fetchFieldSuggestions(), []);
@@ -144,7 +156,7 @@ export const BulkLabelsFlyout = ({
 
   const removePairRow = (index: number) => {
     setPairs((prev) =>
-      prev.length === 1 ? [{ key: '', value: '' }] : prev.filter((_, i) => i !== index)
+      prev.length === 1 ? [createEmptyPair()] : prev.filter((_, i) => i !== index)
     );
   };
 
@@ -190,14 +202,14 @@ export const BulkLabelsFlyout = ({
         >
           <div>
             {pairs.map((pair, index) => (
-              <React.Fragment key={index}>
+              <React.Fragment key={pair.id}>
                 {index > 0 && <EuiSpacer size="xs" />}
                 <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
                   <EuiFlexItem>
                     <EuiComboBox
                       fullWidth
                       singleSelection={{ asPlainText: true }}
-                      data-test-subj="syntheticsBulkLabelsKeyComboBox"
+                      data-test-subj={`syntheticsBulkLabelsKeyComboBox-${index}`}
                       aria-label={KEY_PLACEHOLDER}
                       placeholder={KEY_PLACEHOLDER}
                       options={labelKeyOptions}
@@ -210,7 +222,7 @@ export const BulkLabelsFlyout = ({
                   <EuiFlexItem>
                     <EuiFieldText
                       fullWidth
-                      data-test-subj="syntheticsBulkLabelsValueField"
+                      data-test-subj={`syntheticsBulkLabelsValueField-${index}`}
                       aria-label={VALUE_PLACEHOLDER}
                       placeholder={VALUE_PLACEHOLDER}
                       value={pair.value}
@@ -219,7 +231,7 @@ export const BulkLabelsFlyout = ({
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiButtonIcon
-                      data-test-subj="syntheticsBulkLabelsRemoveRow"
+                      data-test-subj={`syntheticsBulkLabelsRemoveRow-${index}`}
                       iconType="trash"
                       color="danger"
                       aria-label={REMOVE_ROW_LABEL}
@@ -235,7 +247,7 @@ export const BulkLabelsFlyout = ({
               iconType="plusInCircle"
               size="s"
               flush="left"
-              onClick={() => setPairs((prev) => [...prev, { key: '', value: '' }])}
+              onClick={() => setPairs((prev) => [...prev, createEmptyPair()])}
             >
               {ADD_ROW_LABEL}
             </EuiButtonEmpty>
