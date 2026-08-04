@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { TIME_FIELD } from '../constants';
-import { buildEpisodeEventsEsqlQuery } from './episode_events_query';
+import { DEFAULT_TIME_FIELD } from '@kbn/alerting-v2-constants';
+import { buildEpisodeEventsQuery } from './episode_events_query';
 
 const SPACE_ID = 'default';
 
-describe('buildEpisodeEventsEsqlQuery', () => {
+describe('buildEpisodeEventsQuery', () => {
   it('filters by episode id and sorts by time ascending', () => {
     const episodeId = 'episode-xyz';
-    const queryString = buildEpisodeEventsEsqlQuery(SPACE_ID, episodeId).print('basic');
+    const queryString = buildEpisodeEventsQuery(SPACE_ID, episodeId).print('basic');
     expect(queryString).toContain('episode.id');
     expect(queryString).toContain(episodeId);
-    expect(queryString).toContain(`SORT ${TIME_FIELD} ASC`);
+    expect(queryString).toContain(`SORT ${DEFAULT_TIME_FIELD} ASC`);
     expect(queryString).toContain('severity');
     expect(queryString).toContain('data');
   });

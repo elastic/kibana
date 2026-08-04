@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ALERT_EVENTS_DATA_STREAM, ALERT_ACTIONS_DATA_STREAM } from '../constants';
+import { ALERT_ACTIONS_DATA_STREAM, ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-constants';
 import { buildEpisodeQuery } from './episode_query';
 
 const SPACE_ID = 'default';
