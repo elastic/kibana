@@ -11,7 +11,7 @@ export const dashboardCompositionPrompt = `
 A well-composed dashboard tells a coherent story about the data:
 
 1. **Consider a markdown panel when it adds value** — to set context about what the dashboard monitors, data sources, or important notes. Not every dashboard needs one.
-2. **Lead with high-level metrics** (Metric or Gauge panels): total counts, averages, key performance indicators that give an at-a-glance summary. A bare number is hard to judge, so by default give each metric context: request a comparison in the panel's \`query\` (previous period, target, or rate) so it renders as a secondary metric. Skip it only when no comparison is meaningful for that value, and never request one that another panel already shows.
+2. **Lead with high-level metrics** (Metric or Gauge panels): total counts, averages, key performance indicators that give an at-a-glance summary.
 3. **Follow with time-series trends** (XY line/area panels): how the key metrics change over time.
 4. **Add breakdowns and distributions** (XY bar, Heatmap, Tagcloud panels): top-N rankings, categorical splits, and density views.
 5. **Include as many panels as are valuable for the underlying data and user intent.** Let the richness and diversity of the available fields drive the panel count instead of a fixed numeric target.

@@ -84,8 +84,6 @@ export const chartTypeRegistry: Record<SupportedChartType, ChartTypeRegistryEntr
       config: {
         perChartTypeRules: [
           'Prefer right-aligned metric values. Use left/center only when the user asks.',
-          'Add a secondary metric or background chart only when the request asks for one — never surface extra query columns on your own initiative.',
-          'Apply dynamic coloring to a secondary metric that conveys a comparison or status.',
         ],
         options: {
           coloring: {
