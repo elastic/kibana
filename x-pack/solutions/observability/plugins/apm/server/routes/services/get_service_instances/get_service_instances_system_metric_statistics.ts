@@ -14,6 +14,8 @@ import {
   METRIC_OTEL_SYSTEM_MEMORY_UTILIZATION,
   METRIC_OTEL_JVM_PROCESS_CPU_PERCENT,
   METRIC_OTEL_JVM_SYSTEM_CPU_PERCENT,
+  METRIC_JVM_CPU_RECENT_UTILIZATION,
+  METRIC_OTEL_JVM_CPU_PERCENT,
   SERVICE_NAME,
   SERVICE_NODE_NAME,
 } from '../../../../common/es_fields/apm';
@@ -22,7 +24,12 @@ import type { Coordinate } from '../../../../typings/timeseries';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { getBucketSize } from '../../../../common/utils/get_bucket_size';
 import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
-import { systemMemory, cgroupMemory, jvmHeapMemory } from '../../metrics/by_agent/shared/memory';
+import {
+  systemMemory,
+  cgroupMemory,
+  jvmHeapMemory,
+  jvmStableHeapMemory,
+} from '../../metrics/by_agent/shared/memory';
 import { getOffsetInMs } from '../../../../common/utils/get_offset_in_ms';
 
 interface ServiceInstanceSystemMetricPrimaryStatistics {
@@ -64,6 +71,8 @@ const otelSystemCpuFilter = { exists: { field: METRIC_OTEL_SYSTEM_CPU_UTILIZATIO
 const otelSystemMemoryFilter = { exists: { field: METRIC_OTEL_SYSTEM_MEMORY_UTILIZATION } };
 const jvmSystemCpuFilter = { exists: { field: METRIC_OTEL_JVM_SYSTEM_CPU_PERCENT } };
 const jvmProcessCpuFilter = { exists: { field: METRIC_OTEL_JVM_PROCESS_CPU_PERCENT } };
+const jvmStableCpuFilter = { exists: { field: METRIC_JVM_CPU_RECENT_UTILIZATION } };
+const jvmMetricsPrefixedCpuFilter = { exists: { field: METRIC_OTEL_JVM_CPU_PERCENT } };
 const classicCpuFilter = { exists: { field: METRIC_PROCESS_CPU_PERCENT } };
 
 function withTimeseriesFactory<TParams extends AggregationOptionsByType['avg']>(
@@ -152,84 +161,106 @@ export async function getServiceInstancesSystemMetricStatistics<T extends true |
     endWithOffset
   );
 
-  const response = await apmEventClient.search('get_service_instances_system_metric_statistics', {
-    apm: {
-      events: [ProcessorEvent.metric],
-    },
-    track_total_hits: false,
-    size: 0,
-    query: {
-      bool: {
-        filter: [
-          { term: { [SERVICE_NAME]: serviceName } },
-          ...rangeQuery(startWithOffset, endWithOffset),
-          ...environmentQuery(environment),
-          ...kqlQuery(kuery),
-          ...(serviceNodeIds?.length ? [{ terms: { [SERVICE_NODE_NAME]: serviceNodeIds } }] : []),
-          {
-            bool: {
-              should: [
-                otelSystemCpuFilter,
-                otelSystemMemoryFilter,
-                jvmSystemCpuFilter,
-                jvmProcessCpuFilter,
-                jvmHeapMemory.filter,
-                cgroupMemory.filter,
-                systemMemory.filter,
-                classicCpuFilter,
-              ],
-              minimum_should_match: 1,
+  const response = await apmEventClient.search(
+    'get_service_instances_system_metric_statistics',
+    {
+      apm: {
+        events: [ProcessorEvent.metric],
+      },
+      track_total_hits: false,
+      size: 0,
+      query: {
+        bool: {
+          filter: [
+            { term: { [SERVICE_NAME]: serviceName } },
+            ...rangeQuery(startWithOffset, endWithOffset),
+            ...environmentQuery(environment),
+            ...kqlQuery(kuery),
+            ...(serviceNodeIds?.length ? [{ terms: { [SERVICE_NODE_NAME]: serviceNodeIds } }] : []),
+            {
+              bool: {
+                should: [
+                  otelSystemCpuFilter,
+                  otelSystemMemoryFilter,
+                  jvmSystemCpuFilter,
+                  jvmProcessCpuFilter,
+                  jvmStableCpuFilter,
+                  jvmMetricsPrefixedCpuFilter,
+                  jvmHeapMemory.filter,
+                  jvmStableHeapMemory.filter,
+                  cgroupMemory.filter,
+                  systemMemory.filter,
+                  classicCpuFilter,
+                ],
+                minimum_should_match: 1,
+              },
+            },
+          ],
+        },
+      },
+      aggs: {
+        [SERVICE_NODE_NAME]: {
+          terms: {
+            field: SERVICE_NODE_NAME,
+            missing: SERVICE_NODE_NAME_MISSING,
+            ...(size ? { size } : {}),
+            ...(serviceNodeIds?.length ? { include: serviceNodeIds } : {}),
+          },
+          aggs: {
+            // Preference:
+            // host SemConv → process.runtime.jvm.* → stable jvm.* / metrics.jvm.* → classic ECS
+            cpu_usage_otel_system: {
+              filter: otelSystemCpuFilter,
+              aggs: withTimeseries({ field: METRIC_OTEL_SYSTEM_CPU_UTILIZATION }),
+            },
+            cpu_usage_jvm_system: {
+              filter: jvmSystemCpuFilter,
+              aggs: withTimeseries({ field: METRIC_OTEL_JVM_SYSTEM_CPU_PERCENT }),
+            },
+            cpu_usage_jvm_process: {
+              filter: jvmProcessCpuFilter,
+              aggs: withTimeseries({ field: METRIC_OTEL_JVM_PROCESS_CPU_PERCENT }),
+            },
+            cpu_usage_jvm_stable: {
+              filter: jvmStableCpuFilter,
+              aggs: withTimeseries({ field: METRIC_JVM_CPU_RECENT_UTILIZATION }),
+            },
+            cpu_usage_jvm_metrics_prefixed: {
+              filter: jvmMetricsPrefixedCpuFilter,
+              aggs: withTimeseries({ field: METRIC_OTEL_JVM_CPU_PERCENT }),
+            },
+            cpu_usage: {
+              filter: classicCpuFilter,
+              aggs: withTimeseries({ field: METRIC_PROCESS_CPU_PERCENT }),
+            },
+            memory_usage_otel_system: {
+              filter: otelSystemMemoryFilter,
+              aggs: withTimeseries({ field: METRIC_OTEL_SYSTEM_MEMORY_UTILIZATION }),
+            },
+            memory_usage_jvm_heap: {
+              filter: jvmHeapMemory.filter,
+              aggs: withTimeseries({ script: jvmHeapMemory.script }),
+            },
+            memory_usage_jvm_stable_heap: {
+              filter: jvmStableHeapMemory.filter,
+              aggs: withTimeseries({ script: jvmStableHeapMemory.script }),
+            },
+            memory_usage_cgroup: {
+              filter: cgroupMemory.filter,
+              aggs: withTimeseries({ script: cgroupMemory.script }),
+            },
+            memory_usage_system: {
+              filter: systemMemory.filter,
+              aggs: withTimeseries({ script: systemMemory.script }),
             },
           },
-        ],
-      },
-    },
-    aggs: {
-      [SERVICE_NODE_NAME]: {
-        terms: {
-          field: SERVICE_NODE_NAME,
-          missing: SERVICE_NODE_NAME_MISSING,
-          ...(size ? { size } : {}),
-          ...(serviceNodeIds?.length ? { include: serviceNodeIds } : {}),
-        },
-        aggs: {
-          // Preference: host SemConv → JVM (same fields as Metrics charts) → classic ECS
-          cpu_usage_otel_system: {
-            filter: otelSystemCpuFilter,
-            aggs: withTimeseries({ field: METRIC_OTEL_SYSTEM_CPU_UTILIZATION }),
-          },
-          cpu_usage_jvm_system: {
-            filter: jvmSystemCpuFilter,
-            aggs: withTimeseries({ field: METRIC_OTEL_JVM_SYSTEM_CPU_PERCENT }),
-          },
-          cpu_usage_jvm_process: {
-            filter: jvmProcessCpuFilter,
-            aggs: withTimeseries({ field: METRIC_OTEL_JVM_PROCESS_CPU_PERCENT }),
-          },
-          cpu_usage: {
-            filter: classicCpuFilter,
-            aggs: withTimeseries({ field: METRIC_PROCESS_CPU_PERCENT }),
-          },
-          memory_usage_otel_system: {
-            filter: otelSystemMemoryFilter,
-            aggs: withTimeseries({ field: METRIC_OTEL_SYSTEM_MEMORY_UTILIZATION }),
-          },
-          memory_usage_jvm_heap: {
-            filter: jvmHeapMemory.filter,
-            aggs: withTimeseries({ script: jvmHeapMemory.script }),
-          },
-          memory_usage_cgroup: {
-            filter: cgroupMemory.filter,
-            aggs: withTimeseries({ script: cgroupMemory.script }),
-          },
-          memory_usage_system: {
-            filter: systemMemory.filter,
-            aggs: withTimeseries({ script: systemMemory.script }),
-          },
         },
       },
     },
-  });
+    // OTel-native metrics (e.g. metrics-*.otel-*) often omit processor.event.
+    // Metrics Lens dashboards already query those indices without this filter.
+    { skipProcessorEventFilter: true }
+  );
 
   return (
     (response.aggregations?.[SERVICE_NODE_NAME].buckets.map((serviceNodeBucket) => {
@@ -239,11 +270,14 @@ export async function getServiceInstancesSystemMetricStatistics<T extends true |
           serviceNodeBucket.cpu_usage_otel_system,
           serviceNodeBucket.cpu_usage_jvm_system,
           serviceNodeBucket.cpu_usage_jvm_process,
+          serviceNodeBucket.cpu_usage_jvm_stable,
+          serviceNodeBucket.cpu_usage_jvm_metrics_prefixed,
           serviceNodeBucket.cpu_usage
         ),
         memoryUsage: firstAvailableMetric(
           serviceNodeBucket.memory_usage_otel_system,
           serviceNodeBucket.memory_usage_jvm_heap,
+          serviceNodeBucket.memory_usage_jvm_stable_heap,
           serviceNodeBucket.memory_usage_cgroup,
           serviceNodeBucket.memory_usage_system
         ),

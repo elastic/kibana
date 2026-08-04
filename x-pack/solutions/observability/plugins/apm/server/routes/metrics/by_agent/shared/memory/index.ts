@@ -13,6 +13,9 @@ import {
   LABEL_TYPE,
   METRIC_CGROUP_MEMORY_LIMIT_BYTES,
   METRIC_CGROUP_MEMORY_USAGE_BYTES,
+  METRIC_JVM_MEMORY_LIMIT,
+  METRIC_JVM_MEMORY_TYPE,
+  METRIC_JVM_MEMORY_USED,
   METRIC_OTEL_JVM_PROCESS_MEMORY_LIMIT,
   METRIC_OTEL_JVM_PROCESS_MEMORY_USAGE,
   METRIC_SYSTEM_FREE_MEMORY,
@@ -103,7 +106,7 @@ export const cgroupMemory = {
   },
 };
 
-/** Same heap fields/filter as Metrics tab `getHeapMemoryChart` for OTel. */
+/** Same heap fields/filter as Metrics tab `getHeapMemoryChart` for OTel (`process.runtime.jvm.*`). */
 export const jvmHeapMemory = {
   filter: {
     bool: {
@@ -119,6 +122,30 @@ export const jvmHeapMemory = {
     source: `
       double used = (double)$('${METRIC_OTEL_JVM_PROCESS_MEMORY_USAGE}', 0);
       double limit = (double)$('${METRIC_OTEL_JVM_PROCESS_MEMORY_LIMIT}', 0);
+      if (limit <= 0) {
+        return null;
+      }
+      return used / limit;
+    `,
+  },
+};
+
+/** Stable JVM SemConv heap % (`jvm.memory.*`) as used by Metrics Lens dashboards / EDOT. */
+export const jvmStableHeapMemory = {
+  filter: {
+    bool: {
+      filter: [
+        { term: { [METRIC_JVM_MEMORY_TYPE]: VALUE_OTEL_JVM_MEMORY_TYPE_HEAP } },
+        { exists: { field: METRIC_JVM_MEMORY_USED } },
+        { exists: { field: METRIC_JVM_MEMORY_LIMIT } },
+      ],
+    },
+  },
+  script: {
+    lang: 'painless',
+    source: `
+      double used = (double)$('${METRIC_JVM_MEMORY_USED}', 0);
+      double limit = (double)$('${METRIC_JVM_MEMORY_LIMIT}', 0);
       if (limit <= 0) {
         return null;
       }
