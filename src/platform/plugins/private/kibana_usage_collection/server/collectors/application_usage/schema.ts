@@ -190,6 +190,7 @@ export const applicationUsageSchema = {
    * @removeBy 9.0.0
    */
   siem: commonSchema,
+  significantEvents: commonSchema,
   space_selector: commonSchema,
   streams: commonSchema,
   uptime: commonSchema,

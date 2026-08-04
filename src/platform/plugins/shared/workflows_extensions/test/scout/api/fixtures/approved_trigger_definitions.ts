@@ -80,6 +80,14 @@ export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: strin
     schemaHash: '95d5d9bc425bbc2ef5391ee67d280aa42c1acfab230920a482e91d01a02c4a13',
   },
   {
+    id: 'alerting.ruleEventsGenerated',
+    schemaHash: '31e25156a8b716955cad7a2ac7e2344d825c17d327aeb9223b3c6a836e07aa14',
+  },
+  {
+    id: 'alerting.ruleExecutionFailed',
+    schemaHash: 'c6153bb406d59918ee8127e5573ab2cd4715c78ca9f2fa8f4dc4ba6883044224',
+  },
+  {
     id: 'alerting.ruleUpdated',
     schemaHash: '95d5d9bc425bbc2ef5391ee67d280aa42c1acfab230920a482e91d01a02c4a13',
   },
