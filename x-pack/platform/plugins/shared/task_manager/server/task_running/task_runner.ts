@@ -745,6 +745,7 @@ export class TaskManagerRunner implements TaskRunner {
       const label = `${this.taskType}:${this.instance.task.id}`;
 
       let shouldUpdateTask: boolean = false;
+      const originalTask = this.instance.task;
       let partialTask: PartialConcreteTaskInstance = {
         id: this.instance.task.id,
         version: this.instance.task.version,
@@ -813,18 +814,12 @@ export class TaskManagerRunner implements TaskRunner {
               { tags: [this.id, this.taskType] }
             );
           } else if (isVersionConflict) {
-            this.logger.warn(`Resolving version conflict for task ${label}`, {
-              tags: [this.id, this.taskType],
-            });
             await resolveTaskDocumentConflicts({
               taskId: this.id,
               partialTask,
-              originalTask: this.instance.task,
+              originalTask,
               bufferedTaskStore: this.bufferedTaskStore,
               logger: this.logger,
-            });
-            this.logger.info(`Resolved version conflict for task ${label}`, {
-              tags: [this.id, this.taskType],
             });
           } else {
             throw error;

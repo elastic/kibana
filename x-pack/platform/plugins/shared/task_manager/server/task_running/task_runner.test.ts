@@ -3458,12 +3458,18 @@ describe('TaskManagerRunner', () => {
 
       await runner.run();
 
-      expect(logger.warn).toHaveBeenCalledWith(`Resolving version conflict for task bar:${id}`, {
-        tags: [id, 'bar'],
-      });
-      expect(logger.info).toHaveBeenCalledWith(`Resolved version conflict for task bar:${id}`, {
-        tags: [id, 'bar'],
-      });
+      expect(logger.warn).toHaveBeenCalledWith(
+        `Resolving task document version conflict after task run for bar:${id}`,
+        {
+          tags: [id, 'bar', 'task-doc-resolve-conflict'],
+        }
+      );
+      expect(logger.warn).toHaveBeenCalledWith(
+        `Resolved task document version conflict after task run for bar:${id}`,
+        {
+          tags: [id, 'bar', 'task-doc-resolve-conflict'],
+        }
+      );
       expect(store.get).toHaveBeenCalledWith(id);
       expect(store.partialUpdate).toHaveBeenCalledTimes(2);
       expect(store.partialUpdate).toHaveBeenLastCalledWith(
@@ -3520,12 +3526,18 @@ describe('TaskManagerRunner', () => {
 
       await runner.run();
 
-      expect(logger.warn).toHaveBeenCalledWith(`Resolving version conflict for task bar:${id}`, {
-        tags: [id, 'bar'],
-      });
-      expect(logger.info).toHaveBeenCalledWith(`Resolved version conflict for task bar:${id}`, {
-        tags: [id, 'bar'],
-      });
+      expect(logger.warn).toHaveBeenCalledWith(
+        `Resolving task document version conflict after task run for bar:${id}`,
+        {
+          tags: [id, 'bar', 'task-doc-resolve-conflict'],
+        }
+      );
+      expect(logger.warn).toHaveBeenCalledWith(
+        `Resolved task document version conflict after task run for bar:${id}`,
+        {
+          tags: [id, 'bar', 'task-doc-resolve-conflict'],
+        }
+      );
       expect(store.get).toHaveBeenCalledWith(id);
       expect(store.partialUpdate).toHaveBeenCalledTimes(2);
     });

@@ -34,7 +34,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ...integrationConfig.get('kbnTestServer'),
       serverArgs: [
         ...integrationConfig.get('kbnTestServer.serverArgs'),
-        '--xpack.eventLog.logEntries=true',
         '--xpack.eventLog.indexEntries=true',
         // Pin cases analyticsV2 ON so the `check_registered_task_types` guard is
         // deterministic regardless of the plugin's default. With v2 enabled the

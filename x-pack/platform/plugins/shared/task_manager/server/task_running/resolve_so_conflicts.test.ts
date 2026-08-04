@@ -5,23 +5,12 @@
  * 2.0.
  */
 
-import type pRetry from 'p-retry';
 import { mockLogger } from '../test_utils';
 import { bufferedTaskStoreMock } from '../buffered_task_store.mock';
 import type { ConcreteTaskInstance, PartialConcreteTaskInstance } from '../task';
 import { TaskStatus } from '../task';
 import { resolveTaskDocumentConflicts } from './resolve_so_conflicts';
 import type { Updatable } from './task_runner';
-
-jest.mock('p-retry', () => {
-  const actual = jest.requireActual('p-retry');
-  return {
-    __esModule: true,
-    default: (fn: Parameters<typeof pRetry>[0], options?: Parameters<typeof pRetry>[1]) =>
-      actual.default(fn, { ...options, minTimeout: 0, factor: 1 }),
-    AbortError: actual.AbortError,
-  };
-});
 
 const createTask = (overrides: Partial<ConcreteTaskInstance> = {}): ConcreteTaskInstance => ({
   id: 'task-1',
@@ -70,6 +59,7 @@ describe('resolveTaskDocumentConflicts', () => {
       originalTask,
       bufferedTaskStore: store,
       logger,
+      pRetryOptions: { minTimeout: 0, factor: 1 },
     });
 
   test('merges partial updates onto the current task and preserves its version', async () => {
@@ -86,6 +76,21 @@ describe('resolveTaskDocumentConflicts', () => {
     expect(logger.debug).toHaveBeenCalledWith(
       'Resolving task document conflict for task "task-1" (attempt 1/3).'
     );
+    expect(logger.warn).toHaveBeenNthCalledWith(
+      1,
+      'Resolving task document version conflict after task run for bar:task-1',
+      {
+        tags: ['task-1', 'bar', 'task-doc-resolve-conflict'],
+      }
+    );
+    expect(logger.warn).toHaveBeenNthCalledWith(
+      2,
+      'Resolved task document version conflict after task run for bar:task-1',
+      {
+        tags: ['task-1', 'bar', 'task-doc-resolve-conflict'],
+      }
+    );
+
     expect(store.get).toHaveBeenCalledWith('task-1');
     expect(store.partialUpdate).toHaveBeenCalledTimes(1);
     expect(store.partialUpdate).toHaveBeenCalledWith(
@@ -158,54 +163,77 @@ describe('resolveTaskDocumentConflicts', () => {
     );
   });
 
-  test('throws when the task is not found', async () => {
+  test('retries when the task is not found and logs error after exhausting retries', async () => {
     store.get.mockResolvedValue(null);
 
-    await expect(resolve()).rejects.toThrow(
-      'Unable to resolve task document conflicts for task "task-1": task not found'
-    );
+    await resolve();
+
     expect(store.partialUpdate).not.toHaveBeenCalled();
     expect(store.get).toHaveBeenCalledTimes(3);
+    expect(logger.error).toHaveBeenCalledWith(
+      'Error resolving task document version conflict after task run: Unable to resolve task document conflicts for task "task-1": task not found',
+      { tags: ['task-1', 'bar', 'task-doc-resolve-conflict'] }
+    );
   });
 
-  test('throws when the task was claimed by another worker', async () => {
-    store.get.mockResolvedValue(
-      createTask({
-        ownerId: 'kibana-node-2',
-        startedAt: originalTask.startedAt,
-      })
-    );
+  test('retries when partialUpdate fails all attempts and logs error after exhausting retries', async () => {
+    const currentTask = createTask({ version: 'WzIsMV0=', startedAt: originalTask.startedAt });
+    store.get.mockResolvedValue(currentTask);
+    store.partialUpdate.mockRejectedValue(new Error('persistent conflict'));
 
-    await expect(resolve()).rejects.toThrow(
-      'Unable to resolve task document conflicts for task "task-1": task has been claimed by another worker'
+    await resolve();
+
+    expect(store.get).toHaveBeenCalledTimes(3);
+    expect(store.partialUpdate).toHaveBeenCalledTimes(3);
+    expect(logger.error).toHaveBeenCalledWith(
+      'Error resolving task document version conflict after task run: persistent conflict',
+      { tags: ['task-1', 'bar', 'task-doc-resolve-conflict'] }
     );
-    expect(store.partialUpdate).not.toHaveBeenCalled();
   });
 
-  test('throws when attempts were updated by another worker', async () => {
+  test('does not retry when the task was claimed by another worker', async () => {
     store.get.mockResolvedValue(
-      createTask({
-        attempts: 1,
-        startedAt: originalTask.startedAt,
-      })
+      createTask({ ownerId: 'kibana-node-2', startedAt: originalTask.startedAt })
     );
 
-    await expect(resolve()).rejects.toThrow(
-      'Unable to resolve task document conflicts for task "task-1": task attempts has been updated by another worker'
-    );
+    await resolve();
+
+    expect(store.get).toHaveBeenCalledTimes(1);
     expect(store.partialUpdate).not.toHaveBeenCalled();
+    expect(logger.error).toHaveBeenCalledWith(
+      'Skipping resolving task document version conflict after task run: Unable to resolve task document conflicts for task "task-1": task has been claimed by another worker',
+      { tags: ['task-1', 'bar', 'task-doc-resolve-conflict'] }
+    );
   });
 
-  test('throws when startedAt was updated by another worker', async () => {
-    store.get.mockResolvedValue(
-      createTask({
-        startedAt: new Date('2020-01-01T00:00:30.000Z'),
-      })
-    );
+  test('does not retry when attempts were updated by another worker', async () => {
+    store.get.mockResolvedValue(createTask({ attempts: 1, startedAt: originalTask.startedAt }));
 
-    await expect(resolve()).rejects.toThrow(
-      'Unable to resolve task document conflicts for task "task-1": task startedAthas been updated by another worker'
-    );
+    await resolve();
+
+    expect(store.get).toHaveBeenCalledTimes(1);
     expect(store.partialUpdate).not.toHaveBeenCalled();
+    expect(logger.error).toHaveBeenCalledWith(
+      'Skipping resolving task document version conflict after task run: Unable to resolve task document conflicts for task "task-1": task attempts has been updated by another worker',
+      { tags: ['task-1', 'bar', 'task-doc-resolve-conflict'] }
+    );
+  });
+
+  test('does not retry when startedAt was updated by another worker', async () => {
+    store.get.mockResolvedValue(createTask({ startedAt: new Date('2020-01-01T00:00:30.000Z') }));
+
+    await resolve();
+
+    expect(store.get).toHaveBeenCalledTimes(1);
+    expect(store.partialUpdate).not.toHaveBeenCalled();
+    expect(logger.warn).toHaveBeenNthCalledWith(
+      1,
+      'Resolving task document version conflict after task run for bar:task-1',
+      { tags: ['task-1', 'bar', 'task-doc-resolve-conflict'] }
+    );
+    expect(logger.error).toHaveBeenCalledWith(
+      'Skipping resolving task document version conflict after task run: Unable to resolve task document conflicts for task "task-1": task startedAt has been updated by another worker',
+      { tags: ['task-1', 'bar', 'task-doc-resolve-conflict'] }
+    );
   });
 });
