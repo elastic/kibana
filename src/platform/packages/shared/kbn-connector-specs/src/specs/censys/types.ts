@@ -19,14 +19,13 @@ export const HOST_SCHEMA = z
     'Host identifier — an IPv4 or IPv6 address (e.g., "8.8.8.8" or "2001:4860:4860::8888")'
   );
 
-  const DOMAIN_HOSTNAME_SCHEMA = z
-    .string()
-    .min(1)
-    .max(253)
-    .regex(/^[a-zA-Z0-9.-]+$/, {
-      message: 'Must be a hostname or domain (letters, numbers, dots, and hyphens only)',
-    });
-
+const DOMAIN_HOSTNAME_SCHEMA = z
+  .string()
+  .min(1)
+  .max(253)
+  .regex(/^[a-zA-Z0-9.-]+$/, {
+    message: 'Must be a hostname or domain (letters, numbers, dots, and hyphens only)',
+  });
 
 export const HOSTNAME_SCHEMA = z
   .union([z.ipv4(), z.ipv6(), DOMAIN_HOSTNAME_SCHEMA])
@@ -48,9 +47,10 @@ export const TRANSPORT_PROTOCOL_SCHEMA = z
   .enum(['unknown', 'tcp', 'udp', 'icmp', 'quic'])
   .describe('Transport protocol: "unknown", "tcp", "udp", "icmp", or "quic"');
 
-const RFC3339_TIMESTAMP_SCHEMA = z
-  .string()
-  .datetime({ offset: true, message: 'Must be an RFC 3339 timestamp (e.g., "2025-01-01T00:00:00Z")' });
+const RFC3339_TIMESTAMP_SCHEMA = z.string().datetime({
+  offset: true,
+  message: 'Must be an RFC 3339 timestamp (e.g., "2025-01-01T00:00:00Z")',
+});
 
 // =============================================================================
 // Helpers

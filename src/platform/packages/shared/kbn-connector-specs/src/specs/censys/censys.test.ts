@@ -493,9 +493,7 @@ describe('CensysConnector', () => {
           type: 'host',
           host: '8.8.8.8',
         })
-      ).rejects.toThrow(
-        'Censys API error (403): User does not have access to CensEye entitlement'
-      );
+      ).rejects.toThrow('Censys API error (403): User does not have access to CensEye entitlement');
     });
 
     it('falls back to title when detail is missing', async () => {
