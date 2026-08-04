@@ -30,24 +30,53 @@ export const getPackagesArgs = (): string[] => {
 
 export const bundledPackagesLocation = path.join(path.dirname(__filename), '/fixtures/packages');
 
-export async function installPackage(supertest: SuperTest.Agent, packageName: SupportedPackage) {
-  const pkg = PACKAGES.find(({ name }) => name === packageName);
+// The Fleet EPM "install by upload" endpoint is contention-prone under the
+// repeated per-suite uploads these tests perform and intermittently answers
+// 429/5xx; retry those transient statuses so a single blip doesn't fail setup.
+const MAX_UPLOAD_ATTEMPTS = 3;
+const TRANSIENT_UPLOAD_STATUSES = [429, 500, 502, 503, 504];
+
+const uploadPackage = (supertest: SuperTest.Agent, zipPath: string): Promise<number> => {
   const request = supertest
     .post('/api/fleet/epm/packages')
     .set('kbn-xsrf', 'xxx')
     .set('content-type', 'application/zip');
-  // wait 10s before uploading again to avoid getting 429 from upload endpoint
-  await new Promise((resolve) => setTimeout(resolve, 10000));
 
-  return new Promise<void>((resolve, reject) => {
-    createReadStream(path.join(bundledPackagesLocation, `${pkg!.name}-${pkg!.version}.zip`))
+  return new Promise<number>((resolve, reject) => {
+    createReadStream(zipPath)
+      .on('error', reject)
       .on('data', (chunk) => request.write(chunk))
       .on('end', () => {
         request
           .send()
-          .expect(200)
-          .then(() => resolve())
+          .then((response) => resolve(response.status))
           .catch(reject);
       });
   });
+};
+
+export async function installPackage(
+  supertest: SuperTest.Agent,
+  packageName: SupportedPackage
+): Promise<void> {
+  const pkg = PACKAGES.find(({ name }) => name === packageName);
+  const zipPath = path.join(bundledPackagesLocation, `${pkg!.name}-${pkg!.version}.zip`);
+
+  for (let attempt = 1; attempt <= MAX_UPLOAD_ATTEMPTS; attempt++) {
+    // wait 10s before (re)uploading to avoid getting 429 from the upload endpoint
+    await new Promise((resolve) => setTimeout(resolve, 10000));
+
+    const status = await uploadPackage(supertest, zipPath);
+    if (status === 200) {
+      return;
+    }
+
+    if (attempt === MAX_UPLOAD_ATTEMPTS || !TRANSIENT_UPLOAD_STATUSES.includes(status)) {
+      throw new Error(
+        `Failed to install package "${
+          pkg!.name
+        }": expected 200 from POST /api/fleet/epm/packages, got ${status} after ${attempt} attempt(s)`
+      );
+    }
+  }
 }
