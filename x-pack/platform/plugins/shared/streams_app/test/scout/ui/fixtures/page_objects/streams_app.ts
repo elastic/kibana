@@ -471,9 +471,15 @@ export class StreamsApp {
   // Routing-specific utility methods
   async clickCreateRoutingRule() {
     const button = this.page.getByTestId('streamsAppStreamDetailRoutingAddRuleButton');
-    await expect(button).toBeVisible();
-    // Locator.click() can get flaky here due to rapid re-renders; use a direct DOM click.
-    await button.evaluate((el) => (el as HTMLElement).click());
+    const nameField = this.page.getByTestId('streamsAppRoutingStreamEntryNameField');
+    // On AI-enabled targets the routing panel re-renders while AI features resolve, which can
+    // both strand an auto-waiting click mid-action and swallow a raw DOM click. Retry an
+    // actionability-checked click until the creation form actually opens.
+    await expect(async () => {
+      if (await nameField.isVisible()) return;
+      await button.click({ timeout: 5_000 });
+      await expect(nameField).toBeVisible({ timeout: 5_000 });
+    }).toPass({ timeout: 30_000 });
   }
 
   async fillRoutingRuleName(name: string) {
