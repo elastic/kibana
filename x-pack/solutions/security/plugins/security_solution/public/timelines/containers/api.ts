@@ -44,6 +44,7 @@ import {
 } from '../../../common/constants';
 
 import { KibanaServices } from '../../common/lib/kibana';
+import { hasNonEmptyEsqlQuery } from '../components/timeline/tabs/esql/utils';
 import { ToasterError } from '../../common/components/toasters';
 import { parseOrThrowErrorFactory } from '../../../common/timelines/zod_errors';
 import type {
@@ -119,21 +120,29 @@ const patchTimeline = async ({
 }: RequestPatchTimeline): Promise<PatchTimelineResponse | TimelineErrorResponse> => {
   let response = null;
   let requestBody = null;
+
+  // Resolve the effective savedSearchId before building the request body.
+  // If the saved search no longer has a non-empty ES|QL query the user has cleared it,
+  // so we send savedSearchId: null to the server so the timeline is no longer flagged
+  // as ES|QL-incompatible after a single save (without this it required two saves).
+  let effectiveTimeline = timeline;
   try {
-    requestBody = JSON.stringify({ timeline, timelineId, version });
-  } catch (err) {
-    return Promise.reject(new Error(`Failed to stringify query: ${JSON.stringify(err)}`));
+    if (timeline.savedSearchId && savedSearch) {
+      if (hasNonEmptyEsqlQuery(savedSearch.searchSource.getField('query'))) {
+        const { savedSearch: savedSearchService } = KibanaServices.get();
+        await savedSearchService.save(savedSearch, { copyOnSave: false });
+      } else {
+        effectiveTimeline = { ...timeline, savedSearchId: null };
+      }
+    }
+  } catch (e) {
+    return Promise.reject(new Error(`Failed to save saved search: ${timeline.savedSearchId}`));
   }
 
   try {
-    if (timeline.savedSearchId && savedSearch) {
-      const { savedSearch: savedSearchService } = KibanaServices.get();
-      await savedSearchService.save(savedSearch, {
-        copyOnSave: false,
-      });
-    }
-  } catch (e) {
-    return Promise.reject(new Error(`Failed to copy saved search: ${timeline.savedSearchId}`));
+    requestBody = JSON.stringify({ timeline: effectiveTimeline, timelineId, version });
+  } catch (err) {
+    return Promise.reject(new Error(`Failed to stringify query: ${JSON.stringify(err)}`));
   }
 
   try {
