@@ -6,7 +6,7 @@
  */
 
 import type { ScoutPage, KibanaUrl } from '@kbn/scout';
-import { EuiComboBoxWrapper, KibanaCodeEditorWrapper } from '@kbn/scout';
+import { KibanaCodeEditorWrapper } from '@kbn/scout';
 
 /**
  * Page object for the Data Frame Analytics section of Stack Management ML.
@@ -53,10 +53,17 @@ export class DataFrameAnalyticsPage {
       .locator('savedObjectsFinderTable')
       .locator('table:not([aria-busy="true"])')
       .waitFor({ state: 'visible', timeout: 40_000 });
-    await this.page.testSubj.locator('savedObjectFinderSearchInput').fill(sourceName);
-    // fill() triggers a 300 ms debounced API search. Wait explicitly for the matching
-    // source item rather than relying on the 10 s default action timeout — the search
-    // can be slow in loaded CI environments or when the data view was just created.
+    const searchInput = this.page.testSubj.locator('savedObjectFinderSearchInput');
+    // The finder's EuiSearchBar (incremental) only fetches filtered results from its onChange
+    // handler, which fires on real keyboard events. Playwright's fill() sets the value via
+    // insertText without firing those events, so the fetch never runs, the list stays
+    // unfiltered and the target row never appears. Drive the search with native type() to
+    // fire the keydown/keyup events onChange listens for.
+    await searchInput.click();
+    await searchInput.clear();
+    await searchInput.type(sourceName, { delay: 50 });
+    // Wait for the debounced search + fetch to render the matching source row rather than
+    // relying on the default action timeout — it can be slow under CI load.
     const resultItem = this.page.testSubj.locator(`savedObjectTitle${sourceName}`);
     await resultItem.waitFor({ state: 'visible', timeout: 40_000 });
     await resultItem.click();
@@ -470,8 +477,9 @@ export class DataFrameAnalyticsPage {
       .selectOption({ label: config.indexName });
     // Query entities combobox
     if (config.queryEntityFieldNames.length > 0) {
-      const entitiesCombo = new EuiComboBoxWrapper(this.page, 'mlJobCustomUrlQueryEntitiesInput');
-      await entitiesCombo.selectMultiOptions(config.queryEntityFieldNames);
+      await this.page.components
+        .comboBox('mlJobCustomUrlQueryEntitiesInput')
+        .setSelectedOptions(config.queryEntityFieldNames);
     }
     await this.page.testSubj.locator('mlJobAddCustomUrl').click();
     // Wait for the form editor to close, indicating the URL was added to the list
@@ -492,8 +500,9 @@ export class DataFrameAnalyticsPage {
       .selectOption({ label: config.dashboardName });
     // Query entities combobox
     if (config.queryEntityFieldNames.length > 0) {
-      const entitiesCombo = new EuiComboBoxWrapper(this.page, 'mlJobCustomUrlQueryEntitiesInput');
-      await entitiesCombo.selectMultiOptions(config.queryEntityFieldNames);
+      await this.page.components
+        .comboBox('mlJobCustomUrlQueryEntitiesInput')
+        .setSelectedOptions(config.queryEntityFieldNames);
     }
     await this.page.testSubj.locator('mlJobAddCustomUrl').click();
     // Wait for the form editor to close, indicating the URL was added to the list

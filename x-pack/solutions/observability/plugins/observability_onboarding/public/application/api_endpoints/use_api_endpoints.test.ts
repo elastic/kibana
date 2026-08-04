@@ -234,4 +234,51 @@ describe('useApiEndpoints', () => {
 
     expect(result.current.isLoading).toBe(true);
   });
+
+  it('resolves Supabase for the OpenTelemetry tab and both vendors for the popover when managed OTLP is available', () => {
+    const { result } = setup({
+      isManagedOtlpServiceAvailable: true,
+      managedOtlpServiceUrl: 'https://otlp.example.com:443',
+    });
+
+    expect(
+      findEndpoint(result, 'opentelemetry')?.additionalEndpoints.map((endpoint) => endpoint.id)
+    ).toEqual(['supabase']);
+    expect(result.current.popoverEndpoints.map((endpoint) => endpoint.id)).toEqual([
+      'supabase',
+      'vercel',
+    ]);
+  });
+
+  it('resolves vendor endpoint URLs from the managed OTLP URL', () => {
+    const { result } = setup({
+      isManagedOtlpServiceAvailable: true,
+      managedOtlpServiceUrl: 'https://otlp.example.com:443',
+    });
+
+    expect(findEndpoint(result, 'opentelemetry')?.additionalEndpoints[0]).toEqual({
+      id: 'supabase',
+      cardTitle: 'Supabase',
+      fieldLabel: 'Supabase logs endpoint',
+      logo: 'supabase',
+      url: 'https://otlp.example.com:443/supabase/v1/logs',
+    });
+  });
+
+  it('resolves no vendor endpoints when the managed OTLP service is unavailable', () => {
+    const { result } = setup({ managedOtlpServiceUrl: 'https://otlp.example.com:443' });
+
+    expect(findEndpoint(result, 'opentelemetry')?.additionalEndpoints).toEqual([]);
+    expect(result.current.popoverEndpoints).toEqual([]);
+  });
+
+  it('resolves no vendor endpoints for the Prometheus and Elasticsearch tabs', () => {
+    const { result } = setup({
+      isManagedOtlpServiceAvailable: true,
+      managedOtlpServiceUrl: 'https://otlp.example.com:443',
+    });
+
+    expect(findEndpoint(result, 'prometheus')?.additionalEndpoints).toEqual([]);
+    expect(findEndpoint(result, 'elasticsearch')?.additionalEndpoints).toEqual([]);
+  });
 });

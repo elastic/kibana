@@ -100,18 +100,25 @@ export const AnomaliesTab: React.FC<AnomaliesTabProps> = ({ entityId, entityType
   );
   const [recentTimeRanges, setRecentTimeRanges] = useState<TimeRangeBoundsOption[]>([]);
 
-  const handleDatePickerChange = useCallback((args: DateRangePickerOnChangeProps) => {
-    if (args.isInvalid) return;
-    setStart(args.start);
-    setEnd(args.end);
-    setDatePickerValue(args.value);
-    setRecentTimeRanges((prev) => {
-      const key = `${args.start}|${args.end}`;
-      const deduped = prev.filter((r) => `${r.start}|${r.end}` !== key);
-      return [{ start: args.start, end: args.end }, ...deduped].slice(0, 10);
-    });
-    setTablePageIndex(0);
-  }, []);
+  const handleDatePickerChange = useCallback(
+    (args: DateRangePickerOnChangeProps) => {
+      if (args.isInvalid) return;
+      setStart(args.start);
+      setEnd(args.end);
+      setDatePickerValue(args.value);
+      setRecentTimeRanges((prev) => {
+        const key = `${args.start}|${args.end}`;
+        const deduped = prev.filter((r) => `${r.start}|${r.end}` !== key);
+        return [{ start: args.start, end: args.end }, ...deduped].slice(0, 10);
+      });
+      setTablePageIndex(0);
+      if (args.start !== start || args.end !== end) {
+        setIsOverviewFilterPending(true);
+        setIsSummaryFilterPending(true);
+      }
+    },
+    [start, end]
+  );
 
   const timeRangeMs = useMemo(
     () => ({

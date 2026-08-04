@@ -8,6 +8,7 @@
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/core/server';
 import type { EbtTelemetryClient } from '../../lib/telemetry/ebt';
+import type { SignificantEventsMaintenanceService } from '../../lib/maintenance/maintenance_service';
 import type { SignificantEventsKIsOnboardingClient } from '../../lib/workflows/onboarding_workflow_client';
 import type { MemoryToolsOptions } from '../../memory_and_investigation/tools/memory';
 import { knowledgeIndicatorsManagementSkill } from './knowledge_indicators_management';
@@ -22,42 +23,58 @@ import { streamsInvestigationManagementSkill } from '../../memory_and_investigat
 
 type SignificantEventsSkill = Parameters<AgentBuilderPluginStart['skills']['register']>[0];
 
+/**
+ * Hides a skill's inline tools while significant events is unavailable. Registered tools declare
+ * `availability` and get filtered out of the catalog; inline tools have no such hook, and skills
+ * cannot be unregistered, so `getInlineTools` (re-invoked per skill load) is the only place left
+ * that still sees current availability.
+ */
+export const gateInlineTools = <TSkill extends SignificantEventsSkill>(
+  skill: TSkill,
+  isAvailable: () => Promise<boolean>
+): TSkill => {
+  const { getInlineTools } = skill;
+  if (!getInlineTools) {
+    return skill;
+  }
+
+  return { ...skill, getInlineTools: async () => ((await isAvailable()) ? getInlineTools() : []) };
+};
+
 interface RegisterSignificantEventsSkillsOptions {
   agentBuilder: AgentBuilderPluginStart;
   telemetry: EbtTelemetryClient;
   streamsKIsOnboardingClient?: SignificantEventsKIsOnboardingClient;
+  maintenanceService?: SignificantEventsMaintenanceService;
   memoryToolsOptions: MemoryToolsOptions;
   logger: Logger;
   isAvailable: () => Promise<boolean>;
-  isInvestigationEnabled: () => Promise<boolean>;
 }
 
 /**
  * Registers the significant events agent-builder skills at start, gated by the
  * `streams.significantEventsAvailable` feature flag. Skills register through the start-phase
  * `skills.register` API only when the feature is available, and again when the flag flips on. The
- * investigation skill carries an additional `streams.investigationEnabled` gate.
+ * investigation skill is part of the unified experience, so it registers with the rest.
  *
  * `skills.register` throws if a skill id is already registered, so we track the ids we have
  * registered and never re-attempt them, and we serialize `ensureRegistered` calls. Together these
- * make retries after a partial failure and concurrent flips (availability + investigation firing in
- * the same tick) safe: no duplicate registration and no stuck "already registered" errors.
+ * make retries after a partial failure and repeated flips safe: no duplicate registration and no
+ * stuck "already registered" errors.
  *
  * The flip only ever adds skills. A skill registered while the feature was on cannot be removed if
  * the flag later flips off, so request-time gating (see `assertSignificantEventsAccess`) stays the
  * mechanism that blocks access once the feature is unavailable. Agent-builder tools, attachments,
- * and agents likewise stay registered at setup (those APIs are setup-only). One consequence of the
- * setup/start split: enabling investigation at runtime registers the investigation skill here, but
- * the matching investigation agent is registered once at setup and only appears after a restart.
+ * and agents likewise stay registered at setup (those APIs are setup-only).
  */
 export const registerSignificantEventsSkills = async ({
   agentBuilder,
   telemetry,
   streamsKIsOnboardingClient,
+  maintenanceService,
   memoryToolsOptions,
   logger,
   isAvailable,
-  isInvestigationEnabled,
 }: RegisterSignificantEventsSkillsOptions): Promise<{ ensureRegistered: () => Promise<void> }> => {
   const registeredSkillIds = new Set<string>();
 
@@ -65,11 +82,18 @@ export const registerSignificantEventsSkills = async ({
     knowledgeIndicatorsManagementSkill,
     significantEventsKIGroundingSkill,
     significantEventsManagementSkill,
-    ...(streamsKIsOnboardingClient
-      ? [createKiIdentificationManagementSkill({ telemetry, streamsKIsOnboardingClient })]
+    ...(streamsKIsOnboardingClient && maintenanceService
+      ? [
+          createKiIdentificationManagementSkill({
+            telemetry,
+            streamsKIsOnboardingClient,
+            maintenanceService,
+          }),
+        ]
       : []),
     createSignificantEventsOnboardingSkill(memoryToolsOptions),
     createGapDetectionSkill(memoryToolsOptions),
+    streamsInvestigationManagementSkill,
   ];
 
   // Registers only the skills not registered yet. Already-registered skills are skipped (a second
@@ -85,7 +109,7 @@ export const registerSignificantEventsSkills = async ({
     }
 
     const results = await Promise.allSettled(
-      pending.map((skill) => agentBuilder.skills.register(skill))
+      pending.map((skill) => agentBuilder.skills.register(gateInlineTools(skill, isAvailable)))
     );
 
     const failed: string[] = [];
@@ -125,19 +149,11 @@ export const registerSignificantEventsSkills = async ({
       'core',
       'Significant events skills registered (streams.significantEventsAvailable is enabled)'
     );
-
-    if (await isInvestigationEnabled()) {
-      await registerSkills(
-        [streamsInvestigationManagementSkill],
-        'investigation',
-        'Significant events investigation skill registered (streams.investigationEnabled is enabled)'
-      );
-    }
   };
 
-  // Serialize invocations: availability and investigation flips can fire together, and registering
-  // the same skill twice throws. Chaining runs them one at a time; each run only attempts skills
-  // that are not yet registered.
+  // Serialize invocations: the availability flip can fire while a prior run is in flight, and
+  // registering the same skill twice throws. Chaining runs them one at a time; each run only
+  // attempts skills that are not yet registered.
   let queue: Promise<void> = Promise.resolve();
   const ensureRegistered = (): Promise<void> => {
     queue = queue.catch(() => {}).then(doEnsureRegistered);

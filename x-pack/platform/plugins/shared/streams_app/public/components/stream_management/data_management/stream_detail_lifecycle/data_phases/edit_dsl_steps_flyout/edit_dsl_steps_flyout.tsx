@@ -17,6 +17,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import type { IngestStreamLifecycleDSL } from '@kbn/streams-schema';
+import { usePushFlyoutFocus } from '@kbn/data-lifecycle-phases';
 import {
   Form,
   UseField,
@@ -62,6 +63,7 @@ export const EditDslStepsFlyout = ({
   );
 
   const { footerStyles } = useStyles();
+  const { focusProps } = usePushFlyoutFocus();
 
   const initialStepsRef = useRef<IngestStreamLifecycleDSL>(initialSteps);
   const expectedInitialStepsCountRef = useRef<number>(
@@ -274,7 +276,9 @@ export const EditDslStepsFlyout = ({
       ownFocus={false}
       onClose={onClose}
       aria-labelledby={flyoutTitleId}
+      role="region"
       data-test-subj={dataTestSubj}
+      {...focusProps}
     >
       <Form form={form} FormWrapper={FragmentFormWrapper}>
         <OnStepFieldErrorsChangeProvider value={onStepFieldErrorsChange}>

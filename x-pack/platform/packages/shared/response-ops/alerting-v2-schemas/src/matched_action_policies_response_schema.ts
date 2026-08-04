@@ -54,6 +54,13 @@ export type MatchedActionPolicy = z.infer<typeof matchedActionPolicySchema>;
 export const matchActionPoliciesForRuleResponseSchema = z
   .object({
     items: z.array(matchedActionPolicySchema).describe('The list of matched action policies.'),
+    total: z
+      .number()
+      .int()
+      .min(0)
+      .describe(
+        'Total number of action policies in the space. If greater than the number evaluated, the match results may be incomplete.'
+      ),
   })
   .describe('Action policies that match a given rule, grouped by match category.');
 

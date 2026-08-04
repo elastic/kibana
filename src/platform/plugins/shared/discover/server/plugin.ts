@@ -38,12 +38,14 @@ import {
   TRACES_PRODUCT_FEATURE_ID,
 } from '../common/constants';
 import { getSearchEmbeddableTransforms } from '../common/embeddable';
+import { createProfileStateRegistry } from '../common/context_awareness';
 
 export class DiscoverServerPlugin
   implements Plugin<object, DiscoverServerPluginStart, object, DiscoverServerPluginStartDeps>
 {
   private readonly config: ConfigSchema;
   private readonly logger: Logger;
+  private readonly profileStateRegistry = createProfileStateRegistry();
   private subscriptions: Subscription[] = [];
   private embeddableTransformsEnabled = true;
 
@@ -68,6 +70,7 @@ export class DiscoverServerPlugin
 
     registerRoutes(
       core.http,
+      core.userActivity,
       this.logger,
       plugins.usageCollection?.createUsageCounter('discover_sessions_api')
     );
@@ -80,7 +83,14 @@ export class DiscoverServerPlugin
       plugins.share.url.locators.create({
         id: DISCOVER_APP_LOCATOR,
         getLocation: (params) => {
-          return appLocatorGetLocationCommon({ useHash: false, setStateToKbnUrl }, params);
+          return appLocatorGetLocationCommon(
+            {
+              useHash: false,
+              setStateToKbnUrl,
+              profileStateRegistry: this.profileStateRegistry,
+            },
+            params
+          );
         },
       });
     }

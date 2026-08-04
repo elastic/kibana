@@ -1,5 +1,9 @@
 {
-  "sha1": "c8d2e9f0383227b3f3fb02dcbaf063979e608b54",
+  "sha1": "ed85e48e5c00c48d606a6cac1dd5b71e8c4356c9",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
   "tests": [
     {
       "id": "bc6aa97a6c2d787-a0104f7a4f9a2c2",
@@ -10,8 +14,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/ui/tests/classification_creation.spec.ts",
-        "line": 104,
-        "column": 7
+        "line": 97,
+        "column": 15
       }
     },
     {
@@ -24,8 +28,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/ui/tests/feature_controls.spec.ts",
-        "line": 35,
-        "column": 7
+        "line": 30,
+        "column": 8
       }
     },
     {
@@ -38,8 +42,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/ui/tests/feature_controls.spec.ts",
-        "line": 46,
-        "column": 7
+        "line": 36,
+        "column": 16
       }
     },
     {
@@ -52,7 +56,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/ui/tests/outlier_detection_creation.spec.ts",
         "line": 108,
-        "column": 7
+        "column": 8
       }
     },
     {
@@ -64,8 +68,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/ui/tests/regression_creation.spec.ts",
-        "line": 103,
-        "column": 7
+        "line": 96,
+        "column": 15
       }
     }
   ]

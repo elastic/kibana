@@ -7,7 +7,7 @@
 
 import { isEmpty } from 'lodash/fp';
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 
 import type { Filter, Query } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
@@ -110,7 +110,7 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
       toStr != null ? toStr : new Date(to).toISOString()
     );
     const { dataView } = useDataView(PageScope.timeline);
-    const browserFields = useBrowserFields(PageScope.timeline);
+    const browserFields = useBrowserFields(dataView);
 
     const [savedQuery, setSavedQuery] = useState<SavedQuery | undefined>(undefined);
     const [filterQueryConverted, setFilterQueryConverted] = useState<Query>({

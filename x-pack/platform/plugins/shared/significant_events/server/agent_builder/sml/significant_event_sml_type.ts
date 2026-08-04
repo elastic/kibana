@@ -6,7 +6,7 @@
  */
 
 import type { SmlEntry, SmlTypeDefinition } from '@kbn/agent-builder-sml-plugin/server';
-import type { SignificantEvent } from '@kbn/significant-events-schema';
+import { type SignificantEvent } from '@kbn/significant-events-schema';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { SIGNIFICANT_EVENT_ATTACHMENT_TYPE, SIGNIFICANT_EVENT_SML_TYPE } from '../../../common';
 import { STREAMS_API_PRIVILEGES } from '../../../common/constants';
@@ -22,15 +22,12 @@ const PAGE_SIZE = 100;
 const eventToSmlContent = (event: SignificantEvent): string => {
   return [
     event.title,
+    event.symptom_hypothesis,
     event.summary,
-    event.root_cause,
     `status: ${event.status}`,
-    `criticality: ${event.criticality}`,
+    `severity: ${event.severity}`,
     `confidence: ${event.confidence}`,
     `streams: ${event.stream_names.join(', ')}`,
-    event.recommendations.length > 0
-      ? `recommendations: ${event.recommendations.join('\n')}`
-      : undefined,
   ]
     .filter((part): part is string => Boolean(part))
     .join('\n');
@@ -61,7 +58,7 @@ export const createSignificantEventSmlType = ({
           }
 
           yield hits.map((event) => ({
-            id: event.discovery_slug,
+            id: event.event_id,
             updatedAt: event['@timestamp'],
             spaces: ['*'],
           }));
@@ -85,7 +82,7 @@ export const createSignificantEventSmlType = ({
           esClient: context.esClient,
           space: DEFAULT_SPACE_ID,
         });
-        const { hits } = await eventClient.findByDiscoverySlug(originId);
+        const { hits } = await eventClient.findByEventId(originId);
         const event = hits.at(-1);
 
         if (!event) {
@@ -118,7 +115,7 @@ export const createSignificantEventSmlType = ({
         return undefined;
       }
       const { getEventClient } = await getScopedClients({ request: context.request });
-      const { hits } = await getEventClient().findByDiscoverySlug(item.origin_id);
+      const { hits } = await getEventClient().findByEventId(item.origin_id);
       const event = hits.at(-1);
 
       if (!event) {
@@ -127,7 +124,7 @@ export const createSignificantEventSmlType = ({
 
       return {
         type: SIGNIFICANT_EVENT_ATTACHMENT_TYPE,
-        origin: event.discovery_slug,
+        origin: event.event_id,
         data: event,
       };
     },

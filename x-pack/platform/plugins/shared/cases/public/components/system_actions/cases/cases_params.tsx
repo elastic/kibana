@@ -261,6 +261,7 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
           <TemplateSelectorV2
             owner={owner}
             templateId={templateId ?? null}
+            legacyTemplates={currentConfiguration.templates}
             isLoading={isLoadingCaseConfiguration}
             isDisabled={true}
             onChange={onV2TemplateChange}
@@ -355,6 +356,7 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
             <TemplateSelectorV2
               owner={owner}
               templateId={templateId ?? null}
+              legacyTemplates={currentConfiguration.templates}
               isLoading={isLoadingCaseConfiguration}
               onChange={onV2TemplateChange}
             />

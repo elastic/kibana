@@ -48,6 +48,10 @@ const NOT_ENABLED_BODY_MESSAGES: Record<NotEnabledReason, () => string> = {
       defaultMessage:
         'Significant events is in Technical Preview and is being rolled out gradually. It is not available in this environment yet.',
     }),
+  project_type: () =>
+    i18n.translate('xpack.streams.significantEvents.notEnabledPrompt.projectTypeBody', {
+      defaultMessage: 'Significant events is only available in Observability projects.',
+    }),
   pricing_tier: () =>
     i18n.translate('xpack.streams.significantEvents.notEnabledPrompt.pricingTierBody', {
       defaultMessage: 'Significant events is not available on the current pricing tier.',
@@ -55,11 +59,6 @@ const NOT_ENABLED_BODY_MESSAGES: Record<NotEnabledReason, () => string> = {
   license: () =>
     i18n.translate('xpack.streams.significantEvents.notEnabledPrompt.licenseBody', {
       defaultMessage: 'An Enterprise license or higher is required to use significant events.',
-    }),
-  ui_setting: () =>
-    i18n.translate('xpack.streams.significantEvents.notEnabledPrompt.uiSettingBody', {
-      defaultMessage:
-        'Significant events is disabled. Enable it in Advanced Settings to start using it.',
     }),
   unknown: () =>
     i18n.translate('xpack.streams.significantEvents.notEnabledPrompt.unknownBody', {

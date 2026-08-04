@@ -7,11 +7,13 @@
 
 import type {
   AppMountParameters,
+  AppUpdater,
   CoreSetup,
   CoreStart,
   Plugin as CorePlugin,
 } from '@kbn/core/public';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
+import { from, map } from 'rxjs';
 
 import { i18n } from '@kbn/i18n';
 import type { ReactElement } from 'react';
@@ -88,6 +90,7 @@ import { getRuleDefinitionLazy } from './common/get_rule_definition';
 import { getRuleSnoozeModalLazy } from './common/get_rule_snooze_modal';
 import { getRulesSettingsLinkLazy } from './common/get_rules_settings_link';
 import { AlertRuleFromVisAction } from './common/alert_rule_from_vis_ui_action';
+import { getRulesAppUpdate } from './get_rules_app_update';
 
 import type {
   ActionTypeModel,
@@ -308,7 +311,15 @@ export class Plugin
         title: i18n.translate('xpack.triggersActionsUI.rulesPage.title', {
           defaultMessage: 'Rules',
         }),
-        visibleIn: ['globalSearch', 'projectSideNav'],
+        visibleIn: ['projectSideNav'],
+        // Gate this app on the Rules management capability.
+        updater$: from(core.getStartServices()).pipe(
+          map(
+            ([coreStart]): AppUpdater =>
+              () =>
+                getRulesAppUpdate(coreStart.application.capabilities)
+          )
+        ),
         category: DEFAULT_APP_CATEGORIES.management,
         async mount(params: AppMountParameters) {
           const [coreStart] = (await core.getStartServices()) as [CoreStart, PluginsStart, unknown];

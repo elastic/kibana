@@ -91,7 +91,6 @@ export const AlertsCard: OnboardingCardComponent = ({
               <EuiSpacer size="m" />
               <CardCallOut
                 color="primary"
-                icon="info"
                 text={i18n.ALERTS_CARD_CALLOUT_INTEGRATIONS_TEXT}
                 action={
                   <EuiLink onClick={expandIntegrationsCard}>

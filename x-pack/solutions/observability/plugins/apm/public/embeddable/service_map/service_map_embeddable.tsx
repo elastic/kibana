@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiLoadingSpinner, EuiPanel } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { EuiCallOut, EuiLoadingSpinner, EuiPanel, useEuiTheme } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
+import { SERVICE_NAME } from '@kbn/apm-types';
 import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import { useKibanaQuerySettings } from '@kbn/observability-shared-plugin/public';
@@ -23,6 +25,7 @@ import { FETCH_STATUS } from '../../hooks/use_fetcher';
 import { useLicenseContext } from '../../context/license/use_license_context';
 import { useApmPluginContext } from '../../context/apm_plugin/use_apm_plugin_context';
 import { EmptyPrompt } from '../../components/app/service_map/empty_prompt';
+import { DisabledPrompt } from '../../components/app/service_map/disabled_prompt';
 import { TimeoutPrompt } from '../../components/app/service_map/timeout_prompt';
 import { useServiceMap } from '../../components/app/service_map/use_service_map';
 import { useServiceMapBadges } from '../../components/app/service_map/use_service_map_badges';
@@ -32,9 +35,9 @@ import {
   CONTEXTUAL_MAP_DEFAULT_BASE_MAX_HOPS,
   CONTEXTUAL_MAP_DEFAULT_MAX_VISIBLE_NODES,
 } from '../../components/app/service_map/contextual_map/constants';
-import { SERVICE_FLYOUT_SOURCES } from '../../components/shared/service_flyout/constants';
 import type { ServiceFlyoutOptions } from '../../components/shared/service_flyout/types';
 import { ServiceMapSloFlyoutProvider } from '../../components/shared/service_map/service_map_slo_flyout_context';
+import { LicensePrompt } from '../../components/shared/license_prompt';
 import {
   SloOverviewFlyout,
   useSloOverviewFlyout,
@@ -51,6 +54,11 @@ export interface ServiceMapEmbeddableProps {
   environment?: Environment;
   kuery?: string;
   serviceName?: string;
+  /**
+   * Multi-service context highlight from panel state (`highlighted_service_names`).
+   * When unset, falls back to highlighting `serviceName` alone.
+   */
+  highlightedServiceNames?: string[];
   serviceGroupId?: string;
   core: CoreStart;
   onBlockingError?: (error: Error | undefined) => void;
@@ -103,12 +111,52 @@ function LoadingSpinner() {
   );
 }
 
+function EmbeddableContainer({
+  children,
+  centered = false,
+}: {
+  children: React.ReactNode;
+  centered?: boolean;
+}) {
+  const { euiTheme } = useEuiTheme();
+
+  return (
+    <div
+      data-test-subj="apmServiceMapEmbeddable"
+      css={css({
+        width: '100%',
+        height: '100%',
+        minWidth: EMBEDDABLE_MIN_WIDTH,
+        minHeight: EMBEDDABLE_MIN_HEIGHT,
+        boxSizing: 'border-box',
+        ...(centered
+          ? {
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: euiTheme.size.base,
+            }
+          : {
+              position: 'relative',
+            }),
+      })}
+    >
+      {centered ? (
+        <div css={css({ maxWidth: EMBEDDABLE_MIN_WIDTH, textAlign: 'center' })}>{children}</div>
+      ) : (
+        children
+      )}
+    </div>
+  );
+}
+
 export function ServiceMapEmbeddable({
   rangeFrom,
   rangeTo,
   environment = ENVIRONMENT_ALL.value,
   kuery = '',
   serviceName,
+  highlightedServiceNames: highlightedServiceNamesProp,
   serviceGroupId,
   core,
   onBlockingError,
@@ -285,13 +333,12 @@ export function ServiceMapEmbeddable({
     };
   }, [viewFilters, badgesStatus]);
 
-  const flyoutOptionsForGraph = useMemo<ServiceFlyoutOptions>(
-    () => ({
-      source: SERVICE_FLYOUT_SOURCES.dashboardEmbeddable,
-      ...flyoutOptions,
-    }),
-    [flyoutOptions]
-  );
+  const highlightedServiceNames = useMemo(() => {
+    if (highlightedServiceNamesProp && highlightedServiceNamesProp.length > 0) {
+      return highlightedServiceNamesProp;
+    }
+    return serviceName ? [serviceName] : undefined;
+  }, [highlightedServiceNamesProp, serviceName]);
 
   const badgeDependentFiltersActive =
     (viewFilters?.alertStatusFilter?.length ?? 0) > 0 ||
@@ -300,21 +347,27 @@ export function ServiceMapEmbeddable({
   const showBadgesFailedWarning =
     badgeDependentFiltersActive && badgesStatus === FETCH_STATUS.FAILURE;
 
-  if (!license || !isActivePlatinumLicense(license) || !config.serviceMapEnabled) {
+  if (!license) {
     return (
-      <div
-        data-test-subj="apmServiceMapEmbeddable"
-        style={{
-          width: '100%',
-          height: '100%',
-          minWidth: EMBEDDABLE_MIN_WIDTH,
-          minHeight: EMBEDDABLE_MIN_HEIGHT,
-          position: 'relative',
-          boxSizing: 'border-box',
-        }}
-      >
+      <EmbeddableContainer>
         <LoadingSpinner />
-      </div>
+      </EmbeddableContainer>
+    );
+  }
+
+  if (!isActivePlatinumLicense(license)) {
+    return (
+      <EmbeddableContainer centered>
+        <LicensePrompt text={invalidLicenseMessage} />
+      </EmbeddableContainer>
+    );
+  }
+
+  if (!config.serviceMapEnabled) {
+    return (
+      <EmbeddableContainer centered>
+        <DisabledPrompt />
+      </EmbeddableContainer>
     );
   }
 
@@ -378,9 +431,16 @@ export function ServiceMapEmbeddable({
     rangeFrom,
     rangeTo,
     environment,
+    kuery,
     serviceName,
     serviceGroupId,
     filterPills,
+    viewFilters,
+    mapOrientation,
+    controlSelections:
+      highlightedServiceNamesProp && highlightedServiceNamesProp.length > 0
+        ? { [SERVICE_NAME]: highlightedServiceNamesProp }
+        : undefined,
   });
 
   const isLoading = status === FETCH_STATUS.LOADING || badgesStatus === FETCH_STATUS.LOADING;
@@ -426,7 +486,7 @@ export function ServiceMapEmbeddable({
             onCollapse={onCollapse}
             onBaseMaxHopsChange={setBaseMaxHops}
             onMaxVisibleNodesChange={setMaxVisibleNodes}
-            highlightedServiceName={serviceName}
+            highlightedServiceNames={highlightedServiceNames}
             environment={environment}
             kuery={kuery}
             start={start}
@@ -436,7 +496,7 @@ export function ServiceMapEmbeddable({
             alwaysNavigateOnPopoverFocus={alwaysNavigateOnPopoverFocus}
             clearKueryOnPopoverNavigation={clearKueryOnPopoverNavigation}
             showContextControls={!hideContextControls}
-            flyoutOptions={flyoutOptionsForGraph}
+            flyoutOptions={flyoutOptions}
           />
         ) : (
           <ServiceMapGraph
@@ -444,7 +504,7 @@ export function ServiceMapEmbeddable({
             nodes={isLoading ? [] : nodesForGraph}
             edges={isLoading ? [] : data.edges}
             serviceName={serviceName}
-            highlightedServiceName={serviceName}
+            highlightedServiceNames={highlightedServiceNames}
             environment={environment}
             kuery={kuery}
             start={start}
@@ -460,7 +520,7 @@ export function ServiceMapEmbeddable({
             onMapOrientationChange={onMapOrientationChange}
             viewFilters={viewFiltersForGraph}
             onViewFiltersChange={onViewFiltersChange}
-            flyoutOptions={flyoutOptionsForGraph}
+            flyoutOptions={flyoutOptions}
           />
         )}
       </div>

@@ -15,8 +15,7 @@ const testIndexName = `index-test-${Math.random()}`;
 const byteUnitsDataStreamName = `byte-units-data-stream-${Math.random().toString(36).slice(2)}`;
 const byteUnitsTemplateName = `${byteUnitsDataStreamName}-template`;
 
-// Failing: See https://github.com/elastic/kibana/issues/274798
-test.describe.skip('Home page', { tag: tags.stateful.classic }, () => {
+test.describe('Home page', { tag: tags.stateful.classic }, () => {
   test.beforeAll(async ({ esClient, log }) => {
     const { policies } = await esClient.enrich.getPolicy();
     for (const policy of policies as EnrichSummary[]) {
@@ -146,11 +145,7 @@ test.describe.skip('Home page', { tag: tags.stateful.classic }, () => {
     await pageObjects.indexManagement.changeTabs('data_streamsTab');
     const dataStreamTable = page.testSubj.locator('dataStreamTable');
     await expect(dataStreamTable).toBeVisible();
-    await page
-      .getByRole('searchbox', {
-        name: 'This is a search bar. As you type, the results lower in the page will automatically filter.',
-      })
-      .fill(byteUnitsDataStreamName);
+    await page.testSubj.locator('dataStreamSearch').fill(byteUnitsDataStreamName);
     await page.testSubj.locator('includeStatsSwitch').click();
 
     const dataStreamRow = dataStreamTable.getByRole('row', {
