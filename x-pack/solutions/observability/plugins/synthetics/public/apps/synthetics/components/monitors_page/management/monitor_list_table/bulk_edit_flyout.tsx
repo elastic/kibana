@@ -29,7 +29,6 @@ import type {
   EncryptedSyntheticsSavedMonitor,
 } from '../../../../../../../common/runtime_types';
 import { ConfigKey } from '../../../../../../../common/runtime_types';
-import { useCanUsePublicLocationsPermission } from '../../../../../../hooks/use_capabilities';
 import { useKibanaSpace } from '../../../../../../hooks/use_kibana_space';
 import { getMonitorSpaceToAppend } from '../../../../hooks';
 import type { BulkUpdateMonitorRequest } from '../../../../state';
