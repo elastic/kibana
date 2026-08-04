@@ -10,34 +10,25 @@ import type {
   AttachmentFormatContext,
   AttachmentResolveContext,
 } from '@kbn/agent-builder-server/attachments';
-import { ToolType } from '@kbn/agent-builder-common';
 import { getLatestVersion, type VersionedAttachment } from '@kbn/agent-builder-common/attachments';
-import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
-import { ALERTING_NAMESPACE, RULE_MANAGEMENT_SKILL_ID } from '@kbn/alerting-v2-constants';
+import { RULE_MANAGEMENT_SKILL_ID } from '@kbn/alerting-v2-constants';
 import {
   EPISODE_ATTACHMENT_TYPE,
   episodeAttachmentDataSchema,
-  ruleAttachmentDataSchema,
   type EpisodeAttachmentData,
 } from '@kbn/alerting-v2-schemas';
 import type { Logger } from '@kbn/core/server';
-import { z } from '@kbn/zod/v4';
 import { alertEpisodeToEpisodeAttachment } from '../../../common/agent_builder/episode_mappers';
 import type { EpisodesClient } from '../../lib/episodes_client';
 import type { RulesClient } from '../../lib/rules_client';
+import { getRuleTool, getRuleToolId } from '../tools/get_rule';
+import { refreshEpisodeTool, refreshEpisodeToolId } from '../tools/refresh_episode';
 
 interface CreateEpisodeAttachmentTypeOptions {
   logger: Logger;
   getEpisodesClient: (context: AttachmentFormatContext) => EpisodesClient;
   getRulesClient: (context: AttachmentFormatContext) => RulesClient;
 }
-
-/** Bounded tool ids — unique per attachment instance when multiple episodes are present. */
-export const refreshEpisodeToolId = (attachmentId: string): string =>
-  `${ALERTING_NAMESPACE}.refresh_episode.${attachmentId}`;
-
-export const getRuleToolId = (attachmentId: string): string =>
-  `${ALERTING_NAMESPACE}.get_rule.${attachmentId}`;
 
 const formatEpisodeDescription = ({
   attachmentId,
@@ -86,7 +77,7 @@ const formatEpisodeDescription = ({
     `Use the ${refreshToolId} tool to refresh this episode with the latest state from Elasticsearch.`
   );
   lines.push(
-    `Use the ${ruleToolId} tool to fetch the Alerting v2 rule associated with this episode. To create, explain, or modify that rule, load the ${RULE_MANAGEMENT_SKILL_ID} skill.`
+    `Use the ${ruleToolId} tool to fetch the Alerting v2 rule associated with this episode. To modify that rule, or create a new rule, load the ${RULE_MANAGEMENT_SKILL_ID} skill.`
   );
 
   return lines.join('\n');
@@ -171,99 +162,19 @@ export const createEpisodeAttachmentType = ({
         }),
       }),
       getBoundedTools: () => [
-        {
-          id: refreshToolId,
-          type: ToolType.builtin,
-          description: `Refresh alert episode "${episodeId}" (attachment "${attachment.id}") with the latest status, timestamps, severity, tags, assignee, and snooze state from Elasticsearch. Call when the snapshot may be outdated or the user asks about current episode state.`,
-          schema: z.object({}),
-          handler: async (_args, toolContext) => {
-            try {
-              const client = getEpisodesClient({
-                request: toolContext.request,
-                spaceId: toolContext.spaceId,
-              });
-              const episode = await client.get(episodeId);
-              if (!episode) {
-                return {
-                  results: [
-                    {
-                      type: ToolResultType.error,
-                      data: {
-                        message: `Episode "${episodeId}" not found`,
-                      },
-                    },
-                  ],
-                };
-              }
-
-              const data = episodeAttachmentDataSchema.parse(
-                alertEpisodeToEpisodeAttachment(episode)
-              );
-
-              return {
-                results: [
-                  {
-                    type: ToolResultType.other,
-                    data,
-                  },
-                ],
-              };
-            } catch (error) {
-              const message = error instanceof Error ? error.message : String(error);
-              logger.warn(`Failed to refresh episode "${episodeId}": ${message}`);
-              return {
-                results: [
-                  {
-                    type: ToolResultType.error,
-                    data: {
-                      message: `Failed to refresh episode "${episodeId}": ${message}`,
-                    },
-                  },
-                ],
-              };
-            }
-          },
-        },
-        {
-          id: ruleToolId,
-          type: ToolType.builtin,
-          description: `Fetch Alerting v2 rule "${ruleId}" associated with episode "${episodeId}" (attachment "${attachment.id}"), including name, schedule, query, enabled state, and metadata. This tool is read-only. To create, explain, or modify the rule, load the ${RULE_MANAGEMENT_SKILL_ID} skill.`,
-          schema: z.object({}),
-          handler: async (_args, toolContext) => {
-            try {
-              const rulesClient = getRulesClient({
-                request: toolContext.request,
-                spaceId: toolContext.spaceId,
-              });
-              const rule = await rulesClient.getRule({ id: ruleId });
-              const data = ruleAttachmentDataSchema.parse(rule);
-
-              return {
-                results: [
-                  {
-                    type: ToolResultType.other,
-                    data,
-                  },
-                ],
-              };
-            } catch (error) {
-              const message = error instanceof Error ? error.message : String(error);
-              logger.warn(
-                `Failed to fetch rule "${ruleId}" for episode "${episodeId}": ${message}`
-              );
-              return {
-                results: [
-                  {
-                    type: ToolResultType.error,
-                    data: {
-                      message: `Failed to fetch rule "${ruleId}" for episode "${episodeId}": ${message}`,
-                    },
-                  },
-                ],
-              };
-            }
-          },
-        },
+        refreshEpisodeTool({
+          attachmentId: attachment.id,
+          episodeId,
+          logger,
+          getEpisodesClient,
+        }),
+        getRuleTool({
+          attachmentId: attachment.id,
+          episodeId,
+          ruleId,
+          logger,
+          getRulesClient,
+        }),
       ],
     };
   },

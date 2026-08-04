@@ -12,22 +12,18 @@ import type {
   Attachment,
   VersionedAttachmentWithOrigin,
 } from '@kbn/agent-builder-common/attachments';
-import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import {
   ALERT_EPISODE_STATUS,
   EPISODE_ATTACHMENT_TYPE,
   type AlertEpisode,
   type EpisodeAttachmentData,
-  type RuleAttachmentData,
 } from '@kbn/alerting-v2-schemas';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { EpisodesClient } from '../../lib/episodes_client';
 import type { RulesClient } from '../../lib/rules_client';
-import {
-  createEpisodeAttachmentType,
-  getRuleToolId,
-  refreshEpisodeToolId,
-} from './episode_attachment_type';
+import { getRuleToolId } from '../tools/get_rule';
+import { refreshEpisodeToolId } from '../tools/refresh_episode';
+import { createEpisodeAttachmentType } from './episode_attachment_type';
 
 const baseEpisodeData: EpisodeAttachmentData = {
   '@timestamp': '2026-04-10T12:00:00.000Z',
@@ -40,29 +36,6 @@ const baseEpisodeData: EpisodeAttachmentData = {
   duration: 3600000,
   severity: 'high',
   last_tags: ['ops'],
-};
-
-const baseRuleData: RuleAttachmentData = {
-  id: 'rule-1',
-  enabled: true,
-  kind: 'alert',
-  metadata: {
-    name: 'High CPU',
-    description: 'CPU breach detection',
-    tags: ['ops', 'cpu'],
-    owner: 'observability',
-  },
-  time_field: '@timestamp',
-  schedule: { every: '5m', lookback: '15m' },
-  query: {
-    format: 'standalone',
-    breach: { query: 'FROM metrics-* | STATS avg_cpu = AVG(cpu) BY host.name' },
-  },
-  state_transition: null,
-  createdBy: 'elastic',
-  createdAt: '2026-04-01T00:00:00.000Z',
-  updatedBy: 'elastic',
-  updatedAt: '2026-04-10T00:00:00.000Z',
 };
 
 type EpisodeVersionedAttachment = VersionedAttachmentWithOrigin<
@@ -344,145 +317,6 @@ describe('createEpisodeAttachmentType', () => {
         })
       );
       expect(tools[1].description).toContain('rule-management');
-    });
-
-    it('refresh tool returns the latest episode snapshot', async () => {
-      const refreshed: AlertEpisode = {
-        ...baseEpisodeData,
-        'episode.status': ALERT_EPISODE_STATUS.INACTIVE,
-        last_timestamp: '2026-04-20T12:00:00.000Z',
-        severity: 'low',
-      };
-      get.mockResolvedValueOnce(refreshed);
-
-      const formatted = await definition.format(buildAttachment(baseEpisodeData), {
-        request: {} as KibanaRequest,
-        spaceId: 'default',
-      });
-      const [tool] = await formatted.getBoundedTools!();
-      const result = await tool.handler(
-        {},
-        { request: {} as KibanaRequest, spaceId: 'default' } as never
-      );
-
-      expect(get).toHaveBeenCalledWith('ep-1');
-      expect(result).toEqual({
-        results: [
-          {
-            type: ToolResultType.other,
-            data: expect.objectContaining({
-              'episode.id': 'ep-1',
-              'episode.status': ALERT_EPISODE_STATUS.INACTIVE,
-              last_timestamp: '2026-04-20T12:00:00.000Z',
-              severity: 'low',
-            }),
-          },
-        ],
-      });
-    });
-
-    it('refresh tool returns an error when the episode is missing', async () => {
-      get.mockResolvedValueOnce(undefined);
-
-      const formatted = await definition.format(buildAttachment(baseEpisodeData), {
-        request: {} as KibanaRequest,
-        spaceId: 'default',
-      });
-      const [tool] = await formatted.getBoundedTools!();
-      const result = await tool.handler(
-        {},
-        { request: {} as KibanaRequest, spaceId: 'default' } as never
-      );
-
-      expect(result).toEqual({
-        results: [
-          {
-            type: ToolResultType.error,
-            data: { message: 'Episode "ep-1" not found' },
-          },
-        ],
-      });
-    });
-
-    it('refresh tool returns an error when get throws', async () => {
-      get.mockRejectedValueOnce(new Error('boom'));
-
-      const formatted = await definition.format(buildAttachment(baseEpisodeData), {
-        request: {} as KibanaRequest,
-        spaceId: 'default',
-      });
-      const [tool] = await formatted.getBoundedTools!();
-      const result = await tool.handler(
-        {},
-        { request: {} as KibanaRequest, spaceId: 'default' } as never
-      );
-
-      expect(result).toEqual({
-        results: [
-          {
-            type: ToolResultType.error,
-            data: { message: 'Failed to refresh episode "ep-1": boom' },
-          },
-        ],
-      });
-      expect(logger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('Failed to refresh episode "ep-1"')
-      );
-    });
-
-    it('get_rule tool returns the associated rule', async () => {
-      getRule.mockResolvedValueOnce(baseRuleData);
-
-      const formatted = await definition.format(buildAttachment(baseEpisodeData), {
-        request: {} as KibanaRequest,
-        spaceId: 'default',
-      });
-      const [, tool] = await formatted.getBoundedTools!();
-      const result = await tool.handler(
-        {},
-        { request: {} as KibanaRequest, spaceId: 'default' } as never
-      );
-
-      expect(getRule).toHaveBeenCalledWith({ id: 'rule-1' });
-      expect(result).toEqual({
-        results: [
-          {
-            type: ToolResultType.other,
-            data: expect.objectContaining({
-              id: 'rule-1',
-              metadata: expect.objectContaining({ name: 'High CPU' }),
-            }),
-          },
-        ],
-      });
-    });
-
-    it('get_rule tool returns an error when getRule throws', async () => {
-      getRule.mockRejectedValueOnce(new Error('not found'));
-
-      const formatted = await definition.format(buildAttachment(baseEpisodeData), {
-        request: {} as KibanaRequest,
-        spaceId: 'default',
-      });
-      const [, tool] = await formatted.getBoundedTools!();
-      const result = await tool.handler(
-        {},
-        { request: {} as KibanaRequest, spaceId: 'default' } as never
-      );
-
-      expect(result).toEqual({
-        results: [
-          {
-            type: ToolResultType.error,
-            data: {
-              message: 'Failed to fetch rule "rule-1" for episode "ep-1": not found',
-            },
-          },
-        ],
-      });
-      expect(logger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('Failed to fetch rule "rule-1" for episode "ep-1"')
-      );
     });
   });
 
