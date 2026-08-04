@@ -233,7 +233,7 @@ describe('useInstallEntityStoreV2', () => {
       status: EntityStoreStatusEnum.enum.not_installed,
       hasInstallPermissions: false,
     });
-    mockServices.http.fetch.mockResolvedValueOnce({ total: 0 });
+    mockServices.http.fetch.mockResolvedValueOnce({ total: 2 });
 
     renderHook(() => useInstallEntityStoreV2(asServices(mockServices)));
 
