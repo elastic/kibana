@@ -1051,6 +1051,8 @@
       "@kbn/data-view-field-editor-plugin/*": ["./src/platform/plugins/shared/data_view_field_editor/*"],
       "@kbn/data-view-management-plugin": ["./src/platform/plugins/shared/data_view_management"],
       "@kbn/data-view-management-plugin/*": ["./src/platform/plugins/shared/data_view_management/*"],
+      "@kbn/data-view-manager": ["./x-pack/solutions/security/packages/data-view-manager"],
+      "@kbn/data-view-manager/*": ["./x-pack/solutions/security/packages/data-view-manager/*"],
       "@kbn/data-view-utils": ["./src/platform/packages/shared/kbn-data-view-utils"],
       "@kbn/data-view-utils/*": ["./src/platform/packages/shared/kbn-data-view-utils/*"],
       "@kbn/data-view-validation": ["./src/platform/packages/shared/kbn-data-view-validation"],

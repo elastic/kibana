@@ -605,6 +605,7 @@
     "@kbn/data-view-field-editor-example-plugin": "link:examples/data_view_field_editor_example",
     "@kbn/data-view-field-editor-plugin": "link:src/platform/plugins/shared/data_view_field_editor",
     "@kbn/data-view-management-plugin": "link:src/platform/plugins/shared/data_view_management",
+    "@kbn/data-view-manager": "link:x-pack/solutions/security/packages/data-view-manager",
     "@kbn/data-view-utils": "link:src/platform/packages/shared/kbn-data-view-utils",
     "@kbn/data-view-validation": "link:src/platform/packages/shared/kbn-data-view-validation",
     "@kbn/data-views-as-code-plugin": "link:src/platform/plugins/shared/data_views_as_code",

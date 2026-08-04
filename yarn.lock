@@ -6633,6 +6633,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/data-view-manager@link:x-pack/solutions/security/packages/data-view-manager":
+  version "0.0.0"
+  uid ""
+
 "@kbn/data-view-utils@link:src/platform/packages/shared/kbn-data-view-utils":
   version "0.0.0"
   uid ""
