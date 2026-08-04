@@ -13,6 +13,7 @@ import { ConfigKey, SourceType } from '../../../../../../../common/runtime_types
 import { render } from '../../../../utils/testing/rtl_helpers';
 import { useKibanaSpace } from '../../../../../../hooks/use_kibana_space';
 import { useCanUsePublicLocationsPermission } from '../../../../../../hooks/use_capabilities';
+import { kibanaService } from '../../../../../../utils/kibana_service';
 import { fetchBulkUpdateMonitors } from '../../../../state';
 import { BulkTagsFlyout } from './bulk_tags_flyout';
 
@@ -48,13 +49,18 @@ const useFetcherMock = useFetcher as jest.Mock;
 const makeMonitor = (
   id: string,
   name: string,
-  { origin = SourceType.UI, tags = [] as string[] }: { origin?: SourceType; tags?: string[] } = {}
+  {
+    origin = SourceType.UI,
+    tags = [] as string[],
+    spaces,
+  }: { origin?: SourceType; tags?: string[]; spaces?: string[] } = {}
 ): EncryptedSyntheticsSavedMonitor =>
   ({
     [ConfigKey.CONFIG_ID]: id,
     [ConfigKey.NAME]: name,
     [ConfigKey.MONITOR_SOURCE_TYPE]: origin,
     [ConfigKey.TAGS]: tags,
+    ...(spaces ? { [ConfigKey.KIBANA_SPACES]: spaces } : {}),
   } as unknown as EncryptedSyntheticsSavedMonitor);
 
 const typeAndEnter = (input: Element | null, value: string) => {
@@ -145,6 +151,45 @@ describe('<BulkTagsFlyout />', () => {
         updates: [{ id: 'ui-1', attributes: { [ConfigKey.TAGS]: ['team-a'] } }],
       });
     });
+  });
+
+  it('shows a partial-failure toast when one cross-space request fails', async () => {
+    const monitors = [
+      makeMonitor('home', 'Home monitor', { spaces: ['default'] }),
+      makeMonitor('away', 'Away monitor', { spaces: ['team-b'] }),
+    ];
+    fetchBulkUpdateMonitorsMock.mockImplementation(({ spaceId, updates }) => {
+      if (spaceId === 'team-b') {
+        return Promise.reject(new Error('space request failed'));
+      }
+      return Promise.resolve({
+        result: updates.map(({ id }) => ({ id, updated: true })),
+      });
+    });
+
+    const { getByTestId } = render(
+      <BulkTagsFlyout monitors={monitors} onClose={onClose} reloadPage={reloadPage} />
+    );
+
+    const input = getByTestId('syntheticsBulkTagsComboBox').querySelector(
+      '[data-test-subj="comboBoxSearchInput"]'
+    );
+    typeAndEnter(input, 'team-a');
+
+    fireEvent.click(getByTestId('syntheticsBulkEditFlyoutSubmit'));
+
+    await waitFor(() => {
+      expect(fetchBulkUpdateMonitorsMock).toHaveBeenCalledTimes(2);
+    });
+    await waitFor(() => {
+      expect(kibanaService.toasts.addWarning).toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: '1 updated, 1 failed. Check that the failed monitors are editable and try again.',
+        })
+      );
+    });
+    expect(kibanaService.toasts.addSuccess).not.toHaveBeenCalled();
+    expect(kibanaService.toasts.addDanger).not.toHaveBeenCalled();
   });
 
   it('disables the submit button until a tag is selected', () => {

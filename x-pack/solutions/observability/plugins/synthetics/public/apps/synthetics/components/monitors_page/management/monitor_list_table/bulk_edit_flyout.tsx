@@ -176,14 +176,28 @@ export const useBulkEditSubmit = ({
 
     setIsSubmitting(true);
     try {
-      const responses = await Promise.all(
-        [...updatesBySpace.entries()].map(([targetSpaceId, spaceUpdates]) =>
+      const spaceRequests = [...updatesBySpace.entries()].map(([targetSpaceId, spaceUpdates]) => ({
+        targetSpaceId,
+        spaceUpdates,
+      }));
+      const settlements = await Promise.allSettled(
+        spaceRequests.map(({ targetSpaceId, spaceUpdates }) =>
           fetchBulkUpdateMonitors({ updates: spaceUpdates, spaceId: targetSpaceId })
         )
       );
-      const result = responses.flatMap((response) => response.result);
-      const failedCount = result.filter((entry) => !entry.updated).length;
-      const updatedCount = result.length - failedCount;
+
+      let updatedCount = 0;
+      let failedCount = 0;
+      settlements.forEach((settlement, index) => {
+        const { spaceUpdates } = spaceRequests[index];
+        if (settlement.status === 'fulfilled') {
+          const result = settlement.value.result;
+          failedCount += result.filter((entry) => !entry.updated).length;
+          updatedCount += result.filter((entry) => entry.updated).length;
+        } else {
+          failedCount += spaceUpdates.length;
+        }
+      });
 
       if (failedCount === 0) {
         kibanaService.toasts.addSuccess({
