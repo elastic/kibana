@@ -1782,7 +1782,6 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/solutions/observability/plugins/observability/public/pages/alerts @elastic/actionable-obs-team
 /x-pack/solutions/observability/plugins/observability/public/pages/annotations @elastic/actionable-obs-team
 /x-pack/solutions/observability/plugins/observability/public/pages/cases @elastic/actionable-obs-team
-/x-pack/solutions/observability/plugins/observability/public/pages/nightshift @elastic/nightshift-context-and-research-team @elastic/nightshift-sre-agent-team
 /x-pack/solutions/observability/plugins/observability/public/pages/rule_details @elastic/actionable-obs-team
 /x-pack/solutions/observability/plugins/observability/public/pages/rules @elastic/actionable-obs-team
 /x-pack/solutions/observability/plugins/observability/public/rules @elastic/actionable-obs-team

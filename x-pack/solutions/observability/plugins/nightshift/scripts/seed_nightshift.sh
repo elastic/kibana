@@ -24,7 +24,7 @@
 # Requires: curl, python3, a running Elasticsearch + Kibana (for KI features).
 # Backing streams and significant-event references use logs.* streams only (no metrics.*).
 #
-# Location: x-pack/solutions/observability/plugins/observability/scripts/nightshift/
+# Location: x-pack/solutions/observability/plugins/nightshift/scripts/
 # Run from repo root or this directory.
 #
 # Environment:
