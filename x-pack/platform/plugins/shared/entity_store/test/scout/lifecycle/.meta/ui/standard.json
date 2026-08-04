@@ -1,0 +1,57 @@
+{
+  "sha1": "",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
+  "tests": [
+    {
+      "id": "df3ef90b0baaa13-b3c4008ef7e0517",
+      "title": "Entity Store auto-install auto-installs the entity store when visiting a Security page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/ui/tests/entity_store_auto_install.spec.ts",
+        "line": 78,
+        "column": 48
+      }
+    },
+    {
+      "id": "df3ef90b0baaa13-07b6d4e7ffddae4",
+      "title": "Entity Store auto-install does not auto-install after stopping",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/ui/tests/entity_store_auto_install.spec.ts",
+        "line": 92,
+        "column": 7
+      }
+    },
+    {
+      "id": "df3ef90b0baaa13-709a391808d5c2b",
+      "title": "Entity Store auto-install does not auto-install after uninstalling",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/ui/tests/entity_store_auto_install.spec.ts",
+        "line": 111,
+        "column": 22
+      }
+    }
+  ]
+}

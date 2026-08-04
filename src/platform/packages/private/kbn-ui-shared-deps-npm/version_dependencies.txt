@@ -14,8 +14,8 @@
 @babel/types@7.29.0
 @base2/pretty-print-object@1.0.1
 @elastic/apm-rum-core@5.25.3
-@elastic/charts@71.9.0
-@elastic/esql-definitions@4.15.0
+@elastic/charts@72.0.1
+@elastic/esql-definitions@4.17.0
 @elastic/esql-grammar@4.16.0
 @elastic/esql-promql-grammar@4.16.0
 @elastic/esql-types@4.16.0
