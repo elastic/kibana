@@ -83,22 +83,19 @@ async function resolveTaskDocumentConflictsOnce({
   // A number of "permanent" conditions can occur that mean we should not retry,
   // so we need to check for those and not retry.
 
-  if (currentTask.ownerId && currentTask.ownerId !== originalTask.ownerId) {
+  if (currentTask.ownerId !== originalTask.ownerId) {
     throwNotRetryableError(
       `Unable to resolve task document conflicts for task "${label}": task has been claimed by another worker`
     );
   }
 
-  if (currentTask.attempts && currentTask.attempts !== originalTask.attempts) {
+  if (currentTask.attempts !== originalTask.attempts) {
     throwNotRetryableError(
       `Unable to resolve task document conflicts for task "${label}": task attempts has been updated by another worker`
     );
   }
 
-  if (
-    currentTask.startedAt &&
-    currentTask.startedAt?.valueOf() !== originalTask.startedAt?.valueOf()
-  ) {
+  if (currentTask.startedAt?.valueOf() !== originalTask.startedAt?.valueOf()) {
     throwNotRetryableError(
       `Unable to resolve task document conflicts for task "${label}": task startedAt has been updated by another worker`
     );
