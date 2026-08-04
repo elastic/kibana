@@ -18,6 +18,7 @@ import { SavedQueries } from './saved_queries';
 import { Packs } from './packs';
 import { NewLiveQueryPage } from './live_queries/new';
 import { MissingPrivileges, NotFoundPage } from './components';
+import { FilesPage } from './files';
 
 const LiveQueriesToHistoryRedirect = () => {
   const location = useLocation();
@@ -39,6 +40,17 @@ const NewQueryRoute = () => {
   return canRunQuery ? <NewLiveQueryPage /> : <MissingPrivileges />;
 };
 
+const FilesRoute = () => {
+  const permissions = useKibana().services.application.capabilities.osquery;
+  const isFileSystemViewerEnabled = useIsExperimentalFeatureEnabled('fileSystemViewer');
+
+  if (!isFileSystemViewerEnabled || !permissions.writeLiveQueries) {
+    return <NotFoundPage />;
+  }
+
+  return <FilesPage />;
+};
+
 const OsqueryAppRoutesComponent = () => {
   useBreadcrumbs('base');
   const isHistoryEnabled = useIsExperimentalFeatureEnabled('queryHistoryRework');
@@ -57,6 +69,9 @@ const OsqueryAppRoutesComponent = () => {
         </Route>
         <Route path="/history">
           <History />
+        </Route>
+        <Route path="/files">
+          <FilesRoute />
         </Route>
         <Route path="/live_queries">
           <LiveQueriesToHistoryRedirect />
@@ -78,6 +93,9 @@ const OsqueryAppRoutesComponent = () => {
       </Route>
       <Route path={`/saved_queries`}>
         <SavedQueries />
+      </Route>
+      <Route path="/files">
+        <FilesRoute />
       </Route>
       <Route path="/live_queries">
         <LiveQueries />

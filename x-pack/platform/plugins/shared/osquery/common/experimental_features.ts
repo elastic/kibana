@@ -39,6 +39,13 @@ export const allowedExperimentalValues = Object.freeze({
    * its own override. Requires osquerybeat with RRULE support.
    */
   rruleScheduling: false,
+  /**
+   * Enables the Files tab in the Osquery app: a single-host file-system viewer
+   * backed by Osquery `file`-table live queries (lazy expandable directory tree),
+   * with per-file act-verbs (Endpoint get-file / runscript) gated by host
+   * capability, RBAC, and license. Gates both the UI tab and its internal routes.
+   */
+  fileSystemViewer: true,
 });
 
 type ExperimentalFeatures = { [K in keyof typeof allowedExperimentalValues]: boolean };

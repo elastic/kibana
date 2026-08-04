@@ -19,6 +19,7 @@ import { initActionResultsRoutes } from './action_results';
 import { initUnifiedHistoryRoutes } from './unified_history';
 import { initScheduledResultsRoutes } from './scheduled_results';
 import { initSchemasRoutes } from './schemas';
+import { initFileSystemRoutes } from './file_system';
 import type { SchemaService } from '../lib/schema_service';
 
 export const defineRoutes = (
@@ -37,4 +38,5 @@ export const defineRoutes = (
   initUnifiedHistoryRoutes(router, context);
   initScheduledResultsRoutes(router, context);
   initSchemasRoutes(router, context, schemaService);
+  initFileSystemRoutes(router, context);
 };
