@@ -190,14 +190,14 @@
     }
   },
   {
-    "id": "integration-experience",
-    "name": "Security Integrations Integration Experience",
+    "id": "cloud-services",
+    "name": "SecurityCloud Services",
     "areas": [
       "security"
     ],
     "github": {
-      "team": "elastic/integration-experience",
-      "label": "Team:Integration-Experience"
+      "team": "elastic/cloud-services",
+      "label": "Team:Cloud Services"
     }
   },
   {
