@@ -7,6 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// Evaluate the full @kbn/discover-utils barrel before any import that enters
+// the package through a deep path (e.g. `@kbn/discover-utils/src/__mocks__`).
+// Deep-first evaluation leaves the package's root export object permanently
+// missing late barrel exports (a CJS re-export snapshot taken mid-cycle),
+// which strips `defaultState` from the real metrics grid profile state
+// definitions used below.
+import '@kbn/discover-utils';
 import { omit } from 'lodash';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
@@ -25,6 +32,10 @@ import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_sta
 import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
 import { dataViewMockWithTimeField } from '@kbn/discover-utils/src/__mocks__';
 import { TEST_PROFILE_STATE_DEF } from '../../../../context_awareness/__mocks__/profile_state';
+import {
+  METRICS_GRID_SETTINGS_STATE_DEF,
+  METRICS_GRID_SORT_STATE_DEF,
+} from '../../../../../common/context_awareness';
 
 const services = createDiscoverServicesMock();
 const tab1 = getTabStateMock({
@@ -712,6 +723,43 @@ describe('tab mapping utils', () => {
 
       expect(tabState.profileState).toEqual({
         testProfileState: { uiValue: 'existingUi' },
+      });
+    });
+
+    it('should round-trip the real metrics grid definitions (sort and grid settings) through the saved object tab', () => {
+      const servicesWithRegistry = createDiscoverServicesMock();
+      servicesWithRegistry.profileStateRegistry.registerDefinition(METRICS_GRID_SORT_STATE_DEF);
+      servicesWithRegistry.profileStateRegistry.registerDefinition(METRICS_GRID_SETTINGS_STATE_DEF);
+
+      // Every metrics grid field is typed Persistent, so both a non-default
+      // sort and non-default grid settings are written to saved sessions.
+      const tabWithMetricsState = getTabStateMock({
+        id: 'profile-tab',
+        profileState: {
+          metricsGridSort: { field: 'recency', direction: 'desc' },
+          metricsGridSettings: { counterAggregation: 'max' },
+        },
+      });
+
+      const savedObjectTab = fromTabStateToSavedObjectTab({
+        tab: tabWithMetricsState,
+        services: servicesWithRegistry,
+        currentDataView: undefined,
+      });
+
+      expect(savedObjectTab.profileState).toEqual({
+        metricsGridSort: { field: 'recency', direction: 'desc' },
+        metricsGridSettings: { counterAggregation: 'max' },
+      });
+
+      const tabState = fromSavedObjectTabToTabState({
+        tab: savedObjectTab,
+        profileStateRegistry: servicesWithRegistry.profileStateRegistry,
+      });
+
+      expect(tabState.profileState).toEqual({
+        metricsGridSort: { field: 'recency', direction: 'desc' },
+        metricsGridSettings: { counterAggregation: 'max' },
       });
     });
   });
