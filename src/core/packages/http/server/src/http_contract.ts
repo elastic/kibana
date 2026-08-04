@@ -63,6 +63,8 @@ export interface HttpSelfFetchOptions<TRequestBody = unknown> {
   query?: HttpSelfFetchQuery;
   /** JSON-serializable or text request body. */
   body?: TRequestBody | string | null;
+  /** Buffered non-JSON request body (mutually exclusive with `body`). */
+  rawBody?: BodyInit | null;
   /** Non-auth, non-Core-owned headers to send with the request. */
   headers?: HttpSelfFetchHeaders;
   /**

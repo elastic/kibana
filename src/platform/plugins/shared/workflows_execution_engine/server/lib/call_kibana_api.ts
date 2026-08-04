@@ -64,6 +64,8 @@ export interface CallKibanaApiParams {
    */
   path: string;
   body?: unknown;
+  /** Buffered non-JSON body, mutually exclusive with `body` (used for FormData uploads). */
+  rawBody?: BodyInit | null;
   query?: Record<string, string | number | boolean | undefined>;
   /**
    * Caller-supplied headers. Cross-cutting headers (Authorization, x-elastic-internal-origin-request,
@@ -71,6 +73,8 @@ export interface CallKibanaApiParams {
    */
   headers?: Record<string, string>;
   signal?: AbortSignal;
+  /** Optional per-call response size cap. */
+  maxResponseBytes?: number;
 }
 
 export interface CallKibanaApiResult<T = unknown> {
@@ -216,7 +220,8 @@ export async function callKibanaApi<T = unknown>(
   params: CallKibanaApiParams
 ): Promise<CallKibanaApiResult<T>> {
   const { fakeRequest, workflowRunId, coreStart, spaceId } = deps;
-  const maxResponseBytes = deps.maxResponseBytes ?? DEFAULT_MAX_RESPONSE_BYTES;
+  const maxResponseBytes =
+    params.maxResponseBytes ?? deps.maxResponseBytes ?? DEFAULT_MAX_RESPONSE_BYTES;
 
   const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(fakeRequest);
   if (!authorizationHeader) {
@@ -240,6 +245,7 @@ export async function callKibanaApi<T = unknown>(
     headers: outboundHeaders,
     query: params.query,
     body: params.body ?? undefined,
+    rawBody: params.rawBody,
     // Mark the loopback as Kibana-internal so internal routes stay reachable.
     access: 'internal',
     asResponse: true,

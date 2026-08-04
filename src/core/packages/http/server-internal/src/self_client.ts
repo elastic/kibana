@@ -168,7 +168,10 @@ class InternalHttpSelfScopedClient implements HttpSelfScopedClient {
     const method = options.method ?? 'GET';
     const url = this.createUrl(path, options);
     const headers = this.createHeaders(options);
-    const body = serializeBody(headers, options.body);
+    if (options.body !== undefined && options.rawBody !== undefined) {
+      throw new Error('Invalid self HTTP options, body and rawBody are mutually exclusive.');
+    }
+    const body = options.rawBody !== undefined ? options.rawBody : serializeBody(headers, options.body);
 
     return new Request(url, {
       method,
