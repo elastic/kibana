@@ -263,6 +263,36 @@ describe('Top Values Transforms', () => {
         label: '',
       });
     });
+
+    it('should derive parentFormat from the number of fields', () => {
+      const single = fromTermsLensApiToLensState(
+        { operation: 'terms', fields: ['status'], limit: 5 },
+        getMetricColumnIdByIndex
+      );
+      expect(single.params.parentFormat).toEqual({ id: 'terms' });
+
+      const multi = fromTermsLensApiToLensState(
+        { operation: 'terms', fields: ['status', 'region'], limit: 5 },
+        getMetricColumnIdByIndex
+      );
+      expect(multi.params.parentFormat).toEqual({ id: 'multi_terms' });
+    });
+
+    it('should read a persisted format', () => {
+      const result = fromTermsLensApiToLensState(
+        {
+          operation: 'terms',
+          fields: ['bytes'],
+          limit: 5,
+          format: { type: 'number', decimals: 2, compact: false },
+        },
+        getMetricColumnIdByIndex
+      );
+      expect(result.params.format).toEqual({
+        id: 'number',
+        params: { decimals: 2, compact: false },
+      });
+    });
   });
 
   describe('fromTermsLensStateToAPI', () => {
@@ -610,6 +640,55 @@ describe('Top Values Transforms', () => {
       expect(result.other_bucket).toEqual({
         include_documents_without_field: false,
       });
+    });
+
+    it('should emit a persisted format', () => {
+      const input: TermsIndexPatternColumn = {
+        operationType: 'terms',
+        sourceField: 'bytes',
+        customLabel: false,
+        label: '',
+        isBucketed: true,
+        dataType: 'number',
+        params: {
+          secondaryFields: [],
+          size: 5,
+          orderBy: { type: 'alphabetical' },
+          orderDirection: 'asc',
+          parentFormat: { id: 'terms' },
+          format: { id: 'number', params: { decimals: 2 } },
+        },
+      };
+
+      const result = fromTermsLensStateToAPI(input, columns);
+      expect(result.format).toEqual({ type: 'number', decimals: 2 });
+    });
+  });
+
+  describe('round-trip', () => {
+    it('should round-trip a multi-field terms column with a format (parentFormat multi_terms)', () => {
+      const original: TermsIndexPatternColumn = {
+        operationType: 'terms',
+        sourceField: 'geo.src',
+        customLabel: false,
+        label: '',
+        isBucketed: true,
+        dataType: 'string',
+        params: {
+          secondaryFields: ['geo.dest'],
+          size: 5,
+          orderBy: { type: 'column', columnId: 'metricCol1' },
+          orderDirection: 'desc',
+          parentFormat: { id: 'multi_terms' },
+          format: { id: 'number', params: { decimals: 2 } },
+        },
+      };
+
+      const api = fromTermsLensStateToAPI(original, columns);
+      const roundTripped = fromTermsLensApiToLensState(api, (index: number) => columns[index]?.id);
+
+      expect(roundTripped.params.parentFormat).toEqual({ id: 'multi_terms' });
+      expect(roundTripped.params.format).toEqual({ id: 'number', params: { decimals: 2 } });
     });
   });
 });
