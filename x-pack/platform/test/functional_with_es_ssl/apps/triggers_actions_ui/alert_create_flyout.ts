@@ -147,11 +147,24 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     },
   };
 
-  // FLAKY: https://github.com/elastic/kibana/issues/246218
-  describe.skip('create alert', function () {
+  describe('create alert', function () {
     let apmSynthtraceEsClient: ApmSynthtraceEsClient;
     const webhookConnectorName = 'webhook-test';
     let esQueryRuleId: string;
+    const generatedRuleNames: string[] = [];
+
+    async function getExactAlertsByName(name: string) {
+      const alerts = await getAlertsByName(name);
+      return (alerts as Array<{ id: string; name: string }>).filter((r) => r.name === name);
+    }
+
+    async function waitForExactAlert(name: string) {
+      await retry.try(async () => {
+        const found = await getExactAlertsByName(name);
+        if (found.length === 0) throw new Error(`rule "${name}" not found`);
+      });
+    }
+
     before(async () => {
       await esArchiver.load(
         'src/platform/test/api_integration/fixtures/es_archiver/index_patterns/constant_keyword'
@@ -207,9 +220,22 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await esArchiver.unload(
         'src/platform/test/api_integration/fixtures/es_archiver/index_patterns/constant_keyword'
       );
-      await supertest.delete(`/api/alerting/rule/${esQueryRuleId}`).set('kbn-xsrf', 'foo');
+      await supertest
+        .delete(`/api/alerting/rule/${esQueryRuleId}`)
+        .set('kbn-xsrf', 'foo')
+        .expect(204);
 
       await deleteConnectorByName(webhookConnectorName);
+    });
+
+    afterEach(async () => {
+      if (generatedRuleNames.length > 0) {
+        const namesToDelete = generatedRuleNames.splice(0);
+        for (const name of namesToDelete) {
+          const found = await getExactAlertsByName(name);
+          await deleteAlerts(found.map((r) => r.id));
+        }
+      }
     });
 
     beforeEach(async () => {
@@ -222,6 +248,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     it('should delete the right action when the same action has been added twice', async () => {
       // create a new rule
       const ruleName = generateUniqueKey();
+      generatedRuleNames.push(ruleName);
       await rules.common.defineIndexThresholdAlert(ruleName);
 
       // add webhook connector 1
@@ -248,9 +275,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const modalCards = await find.allByCssSelector(
         '[data-test-subj="ruleActionsConnectorsModalCard"]'
       );
-      const webhookCard = modalCards.find(async (card) => {
-        return (await card.getAttribute('innerText'))?.indexOf(webhookConnectorName) !== -1;
-      });
+      let webhookCard = null;
+      for (const card of modalCards) {
+        const text = await card.getAttribute('innerText');
+        if (text?.indexOf(webhookConnectorName) !== -1) {
+          webhookCard = card;
+          break;
+        }
+      }
       if (!webhookCard) {
         throw new Error('Webhook connector card not found');
       }
@@ -267,17 +299,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const doesExist = await find.existsByXpath(".//*[text()='myUniqueKey']");
       expect(doesExist).to.eql(false);
 
-      // clean up created alert
-      const alertsToDelete = await getAlertsByName(ruleName);
-      await deleteAlerts(alertsToDelete.map((rule: { id: string }) => rule.id));
+      // check that the removed action is the right one (checked above)
       expect(true).to.eql(true);
-      // Additional cleanup step to prevent
-      // FLAKY: https://github.com/elastic/kibana/issues/167443
-      // FLAKY: https://github.com/elastic/kibana/issues/167444
     });
 
     it('should create an alert', async () => {
       const alertName = generateUniqueKey();
+      generatedRuleNames.push(alertName);
       await rules.common.defineIndexThresholdAlert(alertName);
 
       // filterKuery validation
@@ -349,14 +377,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         interval: '1 min',
       });
       expect(searchResultAfterSave.duration).to.match(/\d{2,}:\d{2}/);
-
-      // clean up created alert
-      const alertsToDelete = await getAlertsByName(alertName);
-      await deleteAlerts(alertsToDelete.map((alertItem: { id: string }) => alertItem.id));
     });
 
     it('should create an alert with composite query in filter for conditional action', async () => {
       const alertName = generateUniqueKey();
+      generatedRuleNames.push(alertName);
       await rules.common.defineIndexThresholdAlert(alertName);
 
       // filterKuery validation
@@ -445,14 +470,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         interval: '1 min',
       });
       expect(searchResultAfterSave.duration).to.match(/\d{2,}:\d{2}/);
-
-      // clean up created alert
-      const alertsToDelete = await getAlertsByName(alertName);
-      await deleteAlerts(alertsToDelete.map((alertItem: { id: string }) => alertItem.id));
     });
 
     it('should create an alert with DSL filter for conditional action', async () => {
       const alertName = generateUniqueKey();
+      generatedRuleNames.push(alertName);
       await rules.common.defineIndexThresholdAlert(alertName);
 
       // filterKuery validation
@@ -494,14 +516,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.scrollIntoView('globalQueryBar');
 
       await filterBar.hasFilter('query', filter, true);
-
-      // clean up created alert
-      const alertsToDelete = await getAlertsByName(alertName);
-      await deleteAlerts(alertsToDelete.map((alertItem: { id: string }) => alertItem.id));
     });
 
     it('should create an alert with actions in multiple groups', async () => {
       const alertName = generateUniqueKey();
+      generatedRuleNames.push(alertName);
       await defineAlwaysFiringAlert(alertName);
 
       await testSubjects.click('ruleActionsAddActionButton');
@@ -544,14 +563,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         tags: '',
         interval: '1 min',
       });
-
-      // clean up created alert
-      const alertsToDelete = await getAlertsByName(alertName);
-      await deleteAlerts(alertsToDelete.map((alertItem: { id: string }) => alertItem.id));
     });
 
     it('should show save confirmation before creating alert with no actions', async () => {
       const alertName = generateUniqueKey();
+      generatedRuleNames.push(alertName);
       await defineAlwaysFiringAlert(alertName);
 
       await testSubjects.click('rulePageFooterSaveButton');
@@ -567,7 +583,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       const toastTitle = await toasts.getTitleAndDismiss();
       expect(toastTitle).to.eql(`Created rule "${alertName}"`);
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await waitForExactAlert(alertName);
 
       await pageObjects.common.navigateToApp('management', {
         path: 'insightsAndAlerting/triggersActions',
@@ -582,10 +598,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         tags: '',
         interval: '1 min',
       });
-
-      // clean up created alert
-      const alertsToDelete = await getAlertsByName(alertName);
-      await deleteAlerts(alertsToDelete.map((alertItem: { id: string }) => alertItem.id));
     });
 
     it('should show discard confirmation before closing flyout without saving', async () => {

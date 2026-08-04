@@ -46,8 +46,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const sampleData = getService('sampleData');
   const rules = getService('rules');
 
-  // Failing: See https://github.com/elastic/kibana/issues/258426
-  describe.skip('Embeddable alerts panel', function () {
+  describe('Embeddable alerts panel', function () {
     this.tags('skipFIPS');
 
     before(async () => {
@@ -72,12 +71,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     after(async () => {
-      await sampleData.testResources.removeAllKibanaSampleData();
-      await objectRemover.removeAll();
+      try {
+        await sampleData.testResources.removeAllKibanaSampleData();
+      } finally {
+        await objectRemover.removeAll();
+      }
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/258426
-    describe.skip('Config editor', () => {
+    describe('Config editor', () => {
       it('should show the solution picker when multiple solutions are available', async () => {
         await toasts.dismissIfExists();
         await dashboardAddPanel.openAddPanelFlyout();
@@ -143,7 +144,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
 
         after(async () => {
-          await security.testUser.restoreDefaults();
+          try {
+            await security.testUser.restoreDefaults();
+          } catch (_) {
+            // best-effort cleanup
+          }
         });
       });
     }
