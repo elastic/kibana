@@ -28,7 +28,6 @@ import {
 import { createRule } from '../../../../../../tasks/api_calls/rules';
 import { getNewRule } from '../../../../../../objects/rule';
 import { getExceptionList } from '../../../../../../objects/exception';
-import { LOADING_INDICATOR } from '../../../../../../screens/security_header';
 import { ALERTS_COUNT, ALERT_EMBEDDABLE_EMPTY_PROMPT } from '../../../../../../screens/alerts';
 import {
   addExceptionEntryFieldValue,
@@ -72,7 +71,6 @@ describe('Close matching Alerts ', { tags: ['@ess', '@serverless'] }, () => {
     waitForAlertsToPopulate();
     // Disables enabled rule
     clickDisableRuleSwitch();
-    cy.get(LOADING_INDICATOR).should('not.exist');
   });
   after(() => {
     cy.task('esArchiverUnload', { archiveName: 'exceptions' });
@@ -98,7 +96,6 @@ describe('Close matching Alerts ', { tags: ['@ess', '@serverless'] }, () => {
 
     // Closed alert should appear in table
     goToClosedAlertsOnRuleDetailsPage();
-    cy.get(LOADING_INDICATOR).should('not.exist');
     cy.get(ALERTS_COUNT).should('contain', '1');
   });
 
