@@ -7,59 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export interface PnpmField {
-  onlyBuiltDependencies?: string[];
-  ignoredBuiltDependencies?: string[];
-  overrides?: Record<string, string>;
-}
-
-// Keep in sync with INSTALL_SETTINGS in
-// src/dev/kbn_pm/src/commands/bootstrap/regenerate_pnpm_workspace.mjs — the
-// canonical dev-side generator. Both mirror package.json "pnpm" into the
-// pnpm-workspace.yaml that pnpm 11 actually reads.
-const INSTALL_SETTINGS = [
-  'nodeLinker: hoisted',
-  "hoistPattern:\n  - '*'",
-  "publicHoistPattern:\n  - '*'",
-  'shamefullyHoist: true',
-  'autoInstallPeers: true',
-  'strictPeerDependencies: false',
-  'dedupePeerDependents: true',
-].join('\n');
+// Keep in sync with regenerate_pnpm_workspace.mjs, which owns this block.
+const PACKAGES_START = '# START GENERATED PACKAGES';
+const PACKAGES_END = '# END GENERATED PACKAGES';
 
 /**
- * Renders the settings-only pnpm-workspace.yaml written into the distributable
- * build dir. No `packages:` block — it exists purely to carry install settings,
- * the build allowlist and overrides for the standalone in-build install.
+ * Derives the settings-only pnpm-workspace.yaml written into the distributable
+ * build dir from the repo's pnpm-workspace.yaml: we drop the generated
+ * `packages:` block and keep the authored install settings, allowBuilds and
+ * overrides. With no `packages:`, the build dir is its own workspace root, so
+ * the in-build install resolves the same hoisted layout + pinned overrides as
+ * the repo. Removed afterwards by CleanPackageManagerRelatedFiles.
  */
-export function renderPnpmWorkspace(pnpm: PnpmField = {}): string {
-  const blocks = [INSTALL_SETTINGS];
-
-  const allowBuilds = new Map<string, boolean>();
-  for (const name of pnpm.onlyBuiltDependencies ?? []) allowBuilds.set(name, true);
-  for (const name of pnpm.ignoredBuiltDependencies ?? []) allowBuilds.set(name, false);
-  if (allowBuilds.size) {
-    const entries = [...allowBuilds.keys()].sort();
-    blocks.push(
-      ['allowBuilds:', ...entries.map((name) => `  ${yaml(name)}: ${allowBuilds.get(name)}`)].join(
-        '\n'
-      )
+export function renderPnpmWorkspace(rootWorkspaceYaml: string): string {
+  const re = new RegExp(`${PACKAGES_START}[\\s\\S]*?${PACKAGES_END}\\n*`);
+  if (!re.test(rootWorkspaceYaml)) {
+    throw new Error(
+      `pnpm-workspace.yaml is missing the "${PACKAGES_START} … ${PACKAGES_END}" markers`
     );
   }
-
-  const overrides = pnpm.overrides ?? {};
-  const overrideKeys = Object.keys(overrides).sort();
-  if (overrideKeys.length) {
-    blocks.push(
-      ['overrides:', ...overrideKeys.map((k) => `  ${yaml(k)}: ${yaml(overrides[k])}`)].join('\n')
-    );
-  }
-
-  return `${blocks.join('\n')}\n`;
-}
-
-// Single-quote keys/values: override keys/values carry @, >, <, :, $ and spaces
-// that YAML would otherwise mis-parse. Only ' needs escaping inside.
-function yaml(value: string): string {
-  return `'${String(value).replace(/'/g, "''")}'`;
+  return `${rootWorkspaceYaml.replace(re, '').replace(/^\n+/, '').replace(/\n*$/, '')}\n`;
 }

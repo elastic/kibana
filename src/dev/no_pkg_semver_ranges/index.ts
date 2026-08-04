@@ -15,6 +15,7 @@ import { REPO_ROOT } from '@kbn/repo-info';
 
 const PKG_JSON_PATH = resolve(REPO_ROOT, 'package.json');
 const PNPM_LOCK_PATH = resolve(REPO_ROOT, 'pnpm-lock.yaml');
+const PNPM_WORKSPACE_PATH = resolve(REPO_ROOT, 'pnpm-workspace.yaml');
 const DEPENDENCIES_FIELDS = ['dependencies', 'devDependencies'] as const;
 
 interface ImporterDep {
@@ -27,12 +28,15 @@ export function checkSemverRanges(
     fix?: boolean;
     pkgJsonContent?: string;
     pnpmLockContent?: string;
+    pnpmWorkspaceContent?: string;
   } = {}
 ) {
   const pkgJsonContent =
     runOptions.pkgJsonContent ?? readFileSync(PKG_JSON_PATH, { encoding: 'utf-8' });
   const pnpmLockContent =
     runOptions.pnpmLockContent ?? readFileSync(PNPM_LOCK_PATH, { encoding: 'utf-8' });
+  const pnpmWorkspaceContent =
+    runOptions.pnpmWorkspaceContent ?? readFileSync(PNPM_WORKSPACE_PATH, { encoding: 'utf-8' });
   const fix = runOptions.fix ?? false;
 
   if (!pnpmLockContent || !pkgJsonContent) {
@@ -92,8 +96,10 @@ export function checkSemverRanges(
     }
   }
 
-  // pnpm.overrides must also be pinned (no ranges).
-  const overrides = pkg.pnpm?.overrides;
+  // pnpm-workspace.yaml overrides must also be pinned (no ranges).
+  const { overrides } = (parseYaml(pnpmWorkspaceContent) ?? {}) as {
+    overrides?: Record<string, unknown>;
+  };
   if (overrides && typeof overrides === 'object') {
     const overridesErrors = [];
 
@@ -111,7 +117,7 @@ export function checkSemverRanges(
     if (overridesErrors.length > 0) {
       throw new Error(
         `[no-pkg-semver-ranges] Found ${overridesErrors.length} version(s) ` +
-          `with ^/~ in package.json's pnpm.overrides field:\n` +
+          `with ^/~ in pnpm-workspace.yaml's overrides:\n` +
           overridesErrors.join('\n') +
           `\n ^-- Please remove semver ranges and pin the overrides manually.`
       );
