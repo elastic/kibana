@@ -645,24 +645,36 @@ export const fillDefineNewTermsRuleAndContinue = (rule: NewTermsRuleCreateProps)
 
 /**
  * Pastes query into the ES|QL Monaco editor via a synthetic ClipboardEvent.
- * This avoids flakiness in the tests when typing in the ES|QL query bar.
+ * While the ad-hoc data view loads the editor is rendered read-only (`isDisabled`
+ * maps to Monaco's `readOnly`), which silently drops the paste. Monaco does not
+ * expose that read-only window as a `disabled`/`readonly` DOM attribute, so we
+ * re-dispatch the paste until the query actually lands in the editor.
  */
 export const fillEsqlQueryBar = (query: string) => {
-  cy.get(ESQL_QUERY_BAR_INPUT_AREA).should('exist').click({ force: true });
-
   const selectAll = Cypress.platform === 'darwin' ? '{cmd}a' : '{ctrl}a';
-  cy.get(ESQL_QUERY_BAR_INPUT_AREA).type(`${selectAll}{del}`, { force: true });
 
-  cy.get(ESQL_QUERY_BAR_INPUT_AREA).then(($textarea) => {
-    const dataTransfer = new DataTransfer();
-    dataTransfer.setData('text/plain', query);
-    const pasteEvent = new ClipboardEvent('paste', {
-      clipboardData: dataTransfer,
-      bubbles: true,
-      cancelable: true,
+  const dispatchPaste = () => {
+    cy.get(ESQL_QUERY_BAR_INPUT_AREA).click({ force: true });
+    cy.get(ESQL_QUERY_BAR_INPUT_AREA).type(`${selectAll}{del}`, { force: true });
+    cy.get(ESQL_QUERY_BAR_INPUT_AREA).then(($textarea) => {
+      const dataTransfer = new DataTransfer();
+      dataTransfer.setData('text/plain', query);
+      const pasteEvent = new ClipboardEvent('paste', {
+        clipboardData: dataTransfer,
+        bubbles: true,
+        cancelable: true,
+      });
+      $textarea[0].dispatchEvent(pasteEvent);
     });
-    $textarea[0].dispatchEvent(pasteEvent);
-  });
+  };
+
+  cy.waitUntil(
+    () => {
+      dispatchPaste();
+      return cy.get(ESQL_QUERY_BAR).then(($bar) => $bar.text().includes(query));
+    },
+    { interval: 500, timeout: 30000 }
+  );
 
   cy.get(ESQL_QUERY_BAR).contains(query);
 };
