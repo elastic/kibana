@@ -129,7 +129,7 @@ const searchEventsSchema = significantEventSchema
       .describe(
         i18n.translate('xpack.significantEvents.agentBuilder.tools.eventSearch.schema.perPage', {
           defaultMessage:
-            'Number of events to return per page. Defaults to 20; compact responses are capped at 50 and full responses at 10.',
+            'Number of events to return per page. Defaults to 20; compact responses are capped at 50 and full responses at 10. Controls page size only — never change it on a repeated call to retry the same filters; set page to the next_page value from the previous response instead.',
         })
       ),
     from: z
@@ -176,11 +176,21 @@ export function createSearchEventsTool({
 
       ${i18n.translate('xpack.significantEvents.agentBuilder.tools.eventSearch.description.line2', {
         defaultMessage:
-          'Use compact for broad searches and continuation matching. Use full only when complete evidence and assessment details are required. Follow next_page while has_more is true. Omit status to return all states.',
+          'Use compact for broad searches and continuation matching. Use full only when complete evidence and assessment details are required. While has_more is true, set page to the next_page value from the previous response. Omit status to return all states.',
+      })}
+
+      ${i18n.translate('xpack.significantEvents.agentBuilder.tools.eventSearch.description.line3', {
+        defaultMessage:
+          'Never re-call this tool with the same filters (rule_uuids, stream_names, topology_feature_ids, query) and a different per_page to retry — per_page only controls page size. When has_more is true, set page to the next_page value from the previous response with all other parameters unchanged. When has_more is false, the result set is complete; do not re-query.',
+      })}
+
+      ${i18n.translate('xpack.significantEvents.agentBuilder.tools.eventSearch.description.line3', {
+        defaultMessage:
+          'A compact event caps its signals list and sets signals_truncated to true when a long-running event has more signals than shown; total_signals holds the real count. To read every signal for such an event, call again with view: full and event_ids: [event_id].',
       })}
     `,
     schema: searchEventsSchema,
-    tags: ['streams', 'significant_events'],
+    tags: ['streams', 'significant-events'],
     availability: createSignificantEventsAvailability({ server, logger }),
     handler: async (toolParams, context) => {
       const { request } = context;

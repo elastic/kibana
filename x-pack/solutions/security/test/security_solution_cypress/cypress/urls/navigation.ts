@@ -116,7 +116,7 @@ export const ENTITY_ANALYTICS_HOME_PAGE_URL = '/app/security/entity_analytics_ho
 // Asset Inventory
 export const ASSET_INVENTORY_URL = '/app/security/asset_inventory';
 export const ASSET_INVENTORY_INTEGRATION_URL =
-  '/app/fleet/integrations/cloud_asset_inventory/add-integration';
+  '/app/integrations/detail/cloud_asset_inventory/add-integration';
 
 // Custom Role Creation
 export const CUSTOM_ROLES_URL = 'app/management/security/roles/edit';
