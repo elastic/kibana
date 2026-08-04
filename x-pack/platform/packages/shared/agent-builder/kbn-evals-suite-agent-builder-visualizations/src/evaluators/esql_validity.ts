@@ -73,7 +73,9 @@ export function createEsqlValidityEvaluator<
 
       const noun = details.length === 1 ? 'query' : 'queries';
       const explanation = allValid
-        ? `All ${details.length} ES|QL ${details.length === 1 ? 'query is' : 'queries are'} syntactically valid.`
+        ? `All ${details.length} ES|QL ${
+            details.length === 1 ? 'query is' : 'queries are'
+          } syntactically valid.`
         : [
             `${invalidQueries.length} of ${details.length} ES|QL ${noun} failed validation:`,
             ...invalidQueries.map((d) => `  • "${truncate(d.query, 80)}": ${d.errors.join('; ')}`),

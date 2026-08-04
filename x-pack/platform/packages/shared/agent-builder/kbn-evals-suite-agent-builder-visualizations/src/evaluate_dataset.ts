@@ -140,7 +140,8 @@ export function createEvaluateDataset({
   const baseEquivalenceEvaluator = createCalibratedEsqlEquivalenceEvaluator({
     inferenceClient,
     log,
-    predictionExtractor: (output) => (output as VisualizationAgentTaskOutput | undefined)?.esql ?? '',
+    predictionExtractor: (output) =>
+      (output as VisualizationAgentTaskOutput | undefined)?.esql ?? '',
     groundTruthExtractor: (expected) => (expected as { query?: string } | undefined)?.query ?? '',
   });
 
