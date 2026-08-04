@@ -99,8 +99,12 @@
   {
     "id": "cloud-services",
     "name": "Cloud Services",
+    "areas": [
+      "security"
+    ],
     "github": {
-      "team": "elastic/cloud-services"
+      "team": "elastic/cloud-services",
+      "label": "Team:Security-Cloud Services"
     }
   },
   {
@@ -187,17 +191,6 @@
     "github": {
       "team": "elastic/fleet",
       "label": "Team:Fleet"
-    }
-  },
-  {
-    "id": "cloud-services",
-    "name": "Security Cloud Services",
-    "areas": [
-      "security"
-    ],
-    "github": {
-      "team": "elastic/cloud-services",
-      "label": "Team:Security-Cloud Services"
     }
   },
   {
