@@ -12,6 +12,7 @@ import {
   type SecurityServiceStart,
 } from '@kbn/core-security-server';
 import type { CurrentUser } from '@kbn/agent-builder-common';
+import { errors } from '@elastic/elasticsearch';
 import { APPLICATION_PREFIX } from '@kbn/security-plugin/common/constants';
 import { apiPrivileges } from '../../common/features';
 
@@ -86,12 +87,19 @@ const resolveApiKeyOwnerProfileUid = async ({
     return undefined;
   }
 
-  const response = await esClient.security.getApiKey({
-    with_profile_uid: true,
-    id,
-  });
+  try {
+    const response = await esClient.security.getApiKey({
+      with_profile_uid: true,
+      id,
+    });
 
-  return response.api_keys?.[0]?.profile_uid;
+    return response.api_keys?.[0]?.profile_uid;
+  } catch (error) {
+    if (error instanceof errors.ResponseError && error.statusCode === 403) {
+      return undefined;
+    }
+    throw error;
+  }
 };
 
 /**

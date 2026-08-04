@@ -10,6 +10,7 @@ import {
   securityServiceMock,
   elasticsearchServiceMock,
 } from '@kbn/core/server/mocks';
+import { errors } from '@elastic/elasticsearch';
 import { APPLICATION_PREFIX } from '@kbn/security-plugin/common/constants';
 import {
   isAdminFromRequest,
@@ -220,7 +221,7 @@ describe('getUserFromRequest', () => {
     });
   });
 
-  it('propagates API key profile lookup failures instead of falling back to username', async () => {
+  it('treats a 403 from API key profile lookup as profile not resolvable', async () => {
     const apiKeyId = 'api-key-id';
     const request = httpServerMock.createKibanaRequest({
       headers: {
@@ -233,9 +234,47 @@ describe('getUserFromRequest', () => {
       authentication_type: 'api_key',
       authentication_realm: { type: '_es_api_key', name: '_es_api_key' },
     } as any);
-    esClient.security.getApiKey.mockRejectedValue(new Error('forbidden'));
+    esClient.security.getApiKey.mockRejectedValue(
+      new errors.ResponseError({
+        statusCode: 403,
+        body: { error: { type: 'security_exception' }, status: 403 },
+        headers: {},
+        warnings: [],
+        meta: {} as never,
+      })
+    );
 
-    await expect(getUserFromRequest({ request, security, esClient })).rejects.toThrow('forbidden');
+    const result = await getUserFromRequest({ request, security, esClient });
+
+    expect(result).toEqual({
+      username: 'shareduser',
+    });
+  });
+
+  it('propagates non-403 API key profile lookup failures', async () => {
+    const apiKeyId = 'api-key-id';
+    const request = httpServerMock.createKibanaRequest({
+      headers: {
+        authorization: `ApiKey ${Buffer.from(`${apiKeyId}:secret`).toString('base64')}`,
+      },
+    });
+
+    security.authc.getCurrentUser.mockReturnValue({
+      username: 'shareduser',
+      authentication_type: 'api_key',
+      authentication_realm: { type: '_es_api_key', name: '_es_api_key' },
+    } as any);
+    esClient.security.getApiKey.mockRejectedValue(
+      new errors.ResponseError({
+        statusCode: 500,
+        body: { error: { type: 'server_error' }, status: 500 },
+        headers: {},
+        warnings: [],
+        meta: {} as never,
+      })
+    );
+
+    await expect(getUserFromRequest({ request, security, esClient })).rejects.toThrow();
   });
 
   it('prefers profile uid on the authenticated user for api_key auth without looking up the key', async () => {
