@@ -182,7 +182,7 @@ const GENERAL_INFORMATION_LABEL = i18n.translate(
 );
 
 const OPEN_IN_DISCOVER_LABEL = i18n.translate(
-  'xpack.streams.featureDetailsFlyout.openInDiscoverLabel',
+  'xpack.significantEventsApp.featureDetailsFlyout.openInDiscoverLabel',
   {
     defaultMessage: 'Open in Discover',
   }

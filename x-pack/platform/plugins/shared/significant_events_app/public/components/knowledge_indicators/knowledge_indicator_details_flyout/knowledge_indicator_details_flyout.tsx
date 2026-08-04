@@ -413,14 +413,14 @@ const CLOSE_BUTTON_ARIA_LABEL = i18n.translate(
 );
 
 const PAGINATION_ARIA_LABEL = i18n.translate(
-  'xpack.streams.knowledgeIndicatorDetailsFlyout.paginationAriaLabel',
+  'xpack.significantEventsApp.knowledgeIndicatorDetailsFlyout.paginationAriaLabel',
   {
     defaultMessage: 'Knowledge indicator pagination',
   }
 );
 
 const OPEN_IN_DISCOVER_LABEL = i18n.translate(
-  'xpack.streams.knowledgeIndicatorDetailsFlyout.openInDiscoverActionLabel',
+  'xpack.significantEventsApp.knowledgeIndicatorDetailsFlyout.openInDiscoverActionLabel',
   {
     defaultMessage: 'Open in Discover',
   }
