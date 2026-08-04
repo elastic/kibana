@@ -13,6 +13,7 @@ import { COMMON_HEADERS, DISCOVER_SESSION_API_BASE_PATH } from '../fixtures/cons
 
 const createRequestBody = (title: string) => ({
   title,
+  tags: ['tag-1', 'tag-2'],
   tabs: [
     {
       id: 'main',
@@ -69,6 +70,7 @@ apiTest.describe('POST /api/discover_sessions', { tag: tags.deploymentAgnostic }
     expect(response.body.data).toMatchObject({
       title,
       description: '',
+      tags: ['tag-1', 'tag-2'],
       tabs: [
         expect.objectContaining({
           id: 'main',

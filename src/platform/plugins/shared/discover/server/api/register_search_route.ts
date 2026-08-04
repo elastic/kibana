@@ -28,7 +28,7 @@ export const registerSearchRoute = (
       path: basePath,
       summary: 'Search Discover sessions',
       description:
-        'Returns a paginated summary list of Discover sessions. Use `GET /api/discover_sessions/{id}` for the full session state.',
+        'Returns a paginated summary list of Discover sessions, including their tags. Use `GET /api/discover_sessions/{id}` for the full session state.',
       ...routeConfig,
     })
     .addVersion(

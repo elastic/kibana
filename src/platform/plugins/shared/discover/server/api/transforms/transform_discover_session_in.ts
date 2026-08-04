@@ -11,6 +11,7 @@ import {
   AS_CODE_DATA_VIEW_SPEC_TYPE,
   AS_CODE_ESQL_DATA_SOURCE_TYPE,
 } from '@kbn/as-code-data-views-schema';
+import { toStoredTags } from '@kbn/as-code-shared-transforms';
 import { ESQL_TYPE } from '@kbn/data-view-utils';
 import type { SavedObjectReference } from '@kbn/core/server';
 import { get } from 'lodash';
@@ -102,7 +103,8 @@ const getVisContextRequestData = (tab: DiscoverSessionApiTab) => {
 export const transformDiscoverSessionIn = (
   data: DiscoverSessionApiData
 ): { attributes: DiscoverSessionAttributes; references: SavedObjectReference[] } => {
-  const references: SavedObjectReference[] = [];
+  const { references: tagReferences } = toStoredTags({ tags: data.tags });
+  const references: SavedObjectReference[] = [...tagReferences];
 
   const tabs: DiscoverSessionAttributes['tabs'] = data.tabs.map((tab) => {
     const { state: tabAttributes, references: tabReferences } = toStoredTab(tab, {

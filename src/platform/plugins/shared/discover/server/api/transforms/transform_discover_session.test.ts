@@ -26,6 +26,7 @@ describe('discover session API transforms', () => {
   const apiData: DiscoverSessionApiData = {
     title: 'Session',
     description: 'Session description',
+    tags: ['tag-1', 'tag-2'],
     tabs: [
       {
         id: 'tab-classic',
@@ -104,6 +105,15 @@ describe('discover session API transforms', () => {
     it('maps saved object attributes to API data', () => {
       const transformed = transformDiscoverSessionOut(discoverSessionAttributes);
       expect(transformed).toEqual(discoverSessionApiData);
+    });
+
+    it('extracts tag IDs from saved object references', () => {
+      const transformed = transformDiscoverSessionOut(discoverSessionAttributes, [
+        { type: 'tag', id: 'tag-1', name: 'tag-ref-tag-1' },
+        { type: 'index-pattern', id: 'data-view-1', name: 'data-view-ref' },
+      ]);
+
+      expect(transformed.tags).toEqual(['tag-1']);
     });
 
     it('converts legacy flat tab sort to API sort objects', () => {
@@ -258,6 +268,19 @@ describe('discover session API transforms', () => {
       });
       expect(references).toEqual([]);
     });
+
+    it('creates unique saved object references for tags', () => {
+      const { references } = transformDiscoverSessionIn({
+        ...discoverSessionApiData,
+        tags: ['tag-1', 'tag-1', 'tag-2'],
+      });
+
+      expect(references).toEqual([
+        { type: 'tag', id: 'tag-1', name: 'tag-ref-tag-1' },
+        { type: 'tag', id: 'tag-2', name: 'tag-ref-tag-2' },
+      ]);
+    });
+
     it('adds tab-prefixed references for data view reference tabs', () => {
       const { attributes, references } = transformDiscoverSessionIn(apiData);
 

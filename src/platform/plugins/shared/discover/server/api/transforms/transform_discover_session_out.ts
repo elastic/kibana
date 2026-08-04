@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { toAsCodeTags } from '@kbn/as-code-shared-transforms';
 import type { SavedObjectReference } from '@kbn/core/server';
 import type { DiscoverSessionAttributes } from '@kbn/saved-search-plugin/server';
 import { fromStoredTab } from '../../../common/embeddable/transform_utils';
@@ -18,9 +19,12 @@ export const transformDiscoverSessionOut = (
   attributes: DiscoverSessionAttributes,
   references: SavedObjectReference[] = []
 ): DiscoverSessionApiData => {
+  const { tags } = toAsCodeTags(references);
+
   return {
     title: attributes.title,
     description: attributes.description,
+    tags,
     tabs: attributes.tabs.map((tab) => {
       const apiTab = fromStoredTab(tab.attributes, references);
       const visContext = transformVisContextOut(tab.attributes.visContext);
