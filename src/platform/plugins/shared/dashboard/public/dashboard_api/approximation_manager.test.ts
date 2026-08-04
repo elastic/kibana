@@ -44,7 +44,7 @@ describe('approximationManager', () => {
     const manager = initializeApproximationManager(
       getSampleDashboardState({ esql_approximation: true })
     );
-    const emissions: boolean[] = [];
+    const emissions: Array<boolean | undefined> = [];
     manager.api.isApproximate$.subscribe((v) => emissions.push(v));
 
     manager.api.setEsqlApproximation(true);
