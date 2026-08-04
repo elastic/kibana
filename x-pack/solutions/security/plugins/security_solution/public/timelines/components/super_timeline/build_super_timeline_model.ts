@@ -19,7 +19,7 @@ import { combineQueries } from '../../../common/lib/kuery';
 export const SUPER_TIMELINE_TITLE = 'Super Timeline';
 export const SUPER_TIMELINE_QUERY_ALIAS = 'Super Timeline Sources';
 
-export type SkippedQueryReason = 'eql' | 'esql';
+export type SkippedQueryReason = 'eql' | 'esql' | 'unknown';
 
 export interface SkippedQueryTimeline {
   id: string;
@@ -190,7 +190,10 @@ const buildTimelineSubFilter = (
 
   const parsedQuery = parseFilterQuery(combined.filterQuery);
   if (parsedQuery === null) {
-    return { filter: null, skipped: { id, title, reason: 'eql' } };
+    // combineQueries produced valid JSON but not a plain object — internal serialization edge
+    // case, not a user-authored EQL/ESQL query. Use 'unknown' so the warning toast doesn't
+    // misidentify a KQL timeline as EQL.
+    return { filter: null, skipped: { id, title, reason: 'unknown' } };
   }
 
   return {

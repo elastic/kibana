@@ -17,6 +17,7 @@ import {
   SUPER_TIMELINE_TITLE,
   SUPER_TIMELINE_QUERY_ALIAS,
 } from './build_super_timeline_model';
+import * as kuery from '../../../common/lib/kuery';
 
 const mockDataView = createStubDataView({ spec: { id: 'mock-data-view' } });
 const mockBrowserFields = {};
@@ -346,6 +347,25 @@ describe('buildSuperTimelineModel', () => {
       const { model, skippedQueryTimelines } = buildSuperTimelineModel([t1], deps);
       expect(model.filters).toHaveLength(0);
       expect(skippedQueryTimelines).toHaveLength(0);
+    });
+
+    it('reports reason "unknown" when combineQueries produces non-plain-object JSON', () => {
+      // WHY: combineQueries may (theoretically) return a serialized JSON array or primitive in edge
+      // cases. The old code set reason: 'eql', which would misidentify a KQL timeline as EQL in the
+      // warning toast and confuse the user. 'unknown' is accurate and non-misleading.
+      const spy = jest
+        .spyOn(kuery, 'combineQueries')
+        .mockReturnValueOnce({ filterQuery: JSON.stringify([1, 2, 3]) });
+      const t = makeTimeline({
+        savedObjectId: 'kql-bad-serialize',
+        title: 'Bad Serialize',
+        filters: [],
+      });
+      const { model, skippedQueryTimelines } = buildSuperTimelineModel([t], deps);
+      expect(skippedQueryTimelines).toHaveLength(1);
+      expect(skippedQueryTimelines[0].reason).toBe('unknown');
+      expect(model.filters).toHaveLength(0);
+      spy.mockRestore();
     });
   });
 

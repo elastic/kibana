@@ -75,7 +75,7 @@ export const SKIPPED_QUERY_TITLE = i18n.translate(
 export const skippedQueryText = (titles: string) =>
   i18n.translate('xpack.securitySolution.timeline.superTimeline.skippedQueryText', {
     defaultMessage:
-      'The following timelines use EQL or ESQL and their queries were not included: {titles}. Their pinned events and notes are still shown.',
+      'The following timelines could not have their queries merged: {titles}. Their pinned events and notes are still shown.',
     values: { titles },
   });
 
