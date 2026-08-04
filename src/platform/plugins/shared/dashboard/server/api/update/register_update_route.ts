@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { once } from 'lodash';
-
+import { onceCacheOnSuccess } from '@kbn/std';
 import { z } from '@kbn/zod';
 import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
 import { logRequest, writeErrorHandler } from '@kbn/as-code-utils';
@@ -38,8 +37,8 @@ export function registerUpdateRoute(
 
   // Do not call getDashboardStateSchema when registering route.
   // Route is registered during setup and before all plugins have registered embeddable schemas.
-  // Instead, use once to only call getDashboardStateSchema the first time a route handler is executed.
-  const getCachedDashboardStateSchema = once(() => {
+  // Instead, use onceCacheOnSuccess to only call getDashboardStateSchema the first time a route handler is executed.
+  const getCachedDashboardStateSchema = onceCacheOnSuccess(() => {
     return getDashboardStateSchema(false);
   });
 

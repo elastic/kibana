@@ -13,7 +13,7 @@ import type { VersionedRouter } from '@kbn/core-http-server';
 import type { Logger, RequestHandlerContext } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { z } from '@kbn/zod';
-import { once } from 'lodash';
+import { onceCacheOnSuccess } from '@kbn/std';
 import { getDashboardStateSchema } from '../dashboard_state_schemas';
 import { getRouteConfig } from '../get_route_config';
 import { read } from './read';
@@ -36,8 +36,8 @@ export function registerReadRoute(
 
   // Do not call getDashboardStateSchema when registering route.
   // Route is registered during setup and before all plugins have registered embeddable schemas.
-  // Instead, use once to only call getDashboardStateSchema the first time a route handler is executed.
-  const getCachedDashboardStateSchema = once(() => {
+  // Instead, use onceCacheOnSuccess to only call getDashboardStateSchema the first time a route handler is executed.
+  const getCachedDashboardStateSchema = onceCacheOnSuccess(() => {
     return getDashboardStateSchema(false, true);
   });
 
