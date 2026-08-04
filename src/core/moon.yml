@@ -57,6 +57,7 @@ dependsOn:
   - '@kbn/core-ui-settings-server-mocks'
   - '@kbn/core-lifecycle-server-mocks'
   - '@kbn/core-plugins-server'
+  - '@kbn/core-deferred-init-common'
   - '@kbn/config-mocks'
   - '@kbn/core-http-server-mocks'
   - '@kbn/core-http-resources-server-mocks'
