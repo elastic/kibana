@@ -101,7 +101,7 @@ export const LocationAgentDetails = ({
       render: (host: string, agent: AgentStat) => (
         <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiIcon type="node" size="s" />
+            <EuiIcon type="node" size="s" aria-hidden={true} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiLink
@@ -259,6 +259,7 @@ export const LocationAgentDetails = ({
                   type="cluster"
                   size="m"
                   css={{ marginInlineEnd: 6, verticalAlign: 'text-bottom' }}
+                  aria-hidden={true}
                 />
                 {OVERVIEW_TITLE}
               </h4>
@@ -344,6 +345,7 @@ export const LocationAgentDetails = ({
           <>
             <EuiSpacer size="m" />
             <EuiCallOut
+              announceOnMount
               size="s"
               color={calloutColor}
               iconType="warning"

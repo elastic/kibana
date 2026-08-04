@@ -80,7 +80,13 @@ export const AgentPolicyDetailsFlyout = ({
       <EuiFlyoutBody>
         {!policy && (
           <>
-            <EuiCallOut size="s" color="warning" title={POLICY_NOT_FOUND} iconType="warning" />
+            <EuiCallOut
+              announceOnMount
+              size="s"
+              color="warning"
+              title={POLICY_NOT_FOUND}
+              iconType="warning"
+            />
             <EuiSpacer size="m" />
           </>
         )}
