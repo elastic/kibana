@@ -76,7 +76,6 @@ export {
   type Detection,
   type ChangePointType,
   CHANGE_POINT_TYPES,
-  type Discovery,
   type KnowledgeIndicator,
   type SignificantEvent,
   type SignificantEventStatus,
@@ -90,6 +89,7 @@ export {
   type SignificantEventUpdate,
   type SignificantEventUpdateEvidence,
   SIGNIFICANT_EVENT_STATUS_OPTIONS,
+  SIGNIFICANT_EVENT_ACTIVE_STATUS_OPTIONS,
   INVESTIGATION_PROGRESS_UI_EVENT,
   INVESTIGATE_STEP_ID,
   MAX_SIGNIFICANT_EVENT_UPDATE_EVIDENCE,
@@ -103,7 +103,6 @@ export {
   SEVERITY_OPTIONS,
   getSeverityLabel,
   detectionSchema,
-  discoverySchema,
   blastRadiusEntrySchema,
   causalFeatureSchema,
   signalEntrySchema,
@@ -117,6 +116,7 @@ export {
   MAX_RULE_NAME_LENGTH,
   MAX_TEXT_LENGTH,
   MAX_TITLE_LENGTH,
+  MAX_SIGNAL_DESCRIPTION_LENGTH,
 } from './src/significant_events';
 
 export type {
