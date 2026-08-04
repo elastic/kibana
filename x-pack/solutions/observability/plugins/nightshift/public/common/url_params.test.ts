@@ -13,9 +13,9 @@ import {
   NIGHTSHIFT_EVENT_ID_QUERY_PARAM,
   NIGHTSHIFT_EVENT_UUID_QUERY_PARAM,
   setNightshiftEventSelectionParams,
-} from './nightshift_url_params';
+} from './url_params';
 
-describe('nightshift_url_params', () => {
+describe('url_params', () => {
   it('builds a share URL with eventUuid and eventId query params', () => {
     window.history.pushState(
       {},

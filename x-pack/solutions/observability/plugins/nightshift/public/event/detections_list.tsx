@@ -40,7 +40,7 @@ import {
 } from '../detection/change_point';
 import { ChangePointSparkline } from '../detection/change_point_visualization';
 import { getDetectionEntities } from './get_detection_entities';
-import { nightshiftBackgroundTransition } from '../common/nightshift_transition';
+import { nightshiftBackgroundTransition } from '../common/transition';
 import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../common/ebt_constants';
 
 const SPARKLINE_SKELETON_WIDTH = 64;

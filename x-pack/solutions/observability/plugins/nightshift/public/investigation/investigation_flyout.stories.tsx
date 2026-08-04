@@ -18,11 +18,11 @@ import {
   runningInvestigation,
   runningInvestigationState,
   streamOnlyEntity,
-} from '../__storybook__/nightshift_fixtures';
+} from '../__storybook__/sample_events';
 import {
   NightshiftStorybookProvider,
   type NightshiftStreamFeaturesScenario,
-} from '../__storybook__/nightshift_storybook_provider';
+} from '../__storybook__/provider';
 import { DetectionFlyout } from '../detection/detection_flyout';
 import { EntityFlyout } from '../entity/entity_flyout';
 import { EventInvestigation } from '../event/event_investigation';

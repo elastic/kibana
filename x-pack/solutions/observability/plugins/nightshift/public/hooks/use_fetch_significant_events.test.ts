@@ -8,7 +8,7 @@
 import { renderHook } from '@testing-library/react';
 import type { QueryClient } from '@kbn/react-query';
 import type { SignificantEvent } from '@kbn/significant-events-schema';
-import { NIGHTSHIFT_LANDING_SEVERITIES } from '../common/nightshift_constants';
+import { NIGHTSHIFT_LANDING_SEVERITIES } from '../common/constants';
 import {
   clearPendingInvestigationCompletionsForTests,
   markEventInvestigationCompleteInCache,
@@ -33,7 +33,7 @@ const mockEvent = (overrides: Partial<SignificantEvent> = {}): SignificantEvent 
     ...overrides,
   } as SignificantEvent);
 
-jest.mock('../../../utils/kibana_react', () => ({
+jest.mock('./use_kibana', () => ({
   useKibana: () => ({
     services: {
       http: {

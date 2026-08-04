@@ -40,7 +40,7 @@ import type {
   SignificantEventInvestigation,
 } from '@kbn/significant-events-schema';
 import { AiButton } from '@kbn/shared-ux-ai-components';
-import { useKibana } from '../../../utils/kibana_react';
+import { useKibana } from '../hooks/use_kibana';
 import { buildInvestigationConversationChatOptions } from '../chat/open_significant_event_in_chat';
 import {
   buildHypothesisChatOptions,
@@ -71,7 +71,7 @@ import {
   nightshiftBackgroundTransition,
   nightshiftReducedMotionStyles,
   nightshiftTransformTransition,
-} from '../common/nightshift_transition';
+} from '../common/transition';
 import {
   getConclusionBody,
   getHypothesisStatusLabel,

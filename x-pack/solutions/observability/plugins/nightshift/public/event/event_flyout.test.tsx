@@ -85,7 +85,7 @@ jest.mock('../hooks/use_fetch_event_lifecycle', () => ({
 
 const mockOpenChat = jest.fn();
 
-jest.mock('../../../utils/kibana_react', () => ({
+jest.mock('../hooks/use_kibana', () => ({
   useKibana: () => ({
     services: {
       http: { get: jest.fn(), basePath: { prepend: (path: string) => path } },

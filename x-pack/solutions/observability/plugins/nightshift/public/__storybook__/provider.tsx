@@ -13,7 +13,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { MemoryRouter } from 'react-router-dom';
-import type { StartServices } from '../../../utils/kibana_react';
+import type { StartServices } from '../hooks/use_kibana';
 import {
   NIGHTSHIFT_SIGNIFICANT_EVENTS_QUERY_KEY,
   type NightshiftSignificantEventsQueryData,
@@ -27,7 +27,7 @@ import {
   inventoryEvent,
   checkoutEvent,
   resolvedPaymentEvent,
-} from './nightshift_fixtures';
+} from './sample_events';
 
 export type NightshiftStorybookScenario =
   | 'loading'

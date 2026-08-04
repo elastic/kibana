@@ -10,7 +10,7 @@ import React from 'react';
 import { EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { getEbtProps } from '@kbn/ebt-click';
 import { AiButtonIcon } from '@kbn/shared-ux-ai-components';
-import { useKibana } from '../../../utils/kibana_react';
+import { useKibana } from '../hooks/use_kibana';
 import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_DETAILS } from '../common/ebt_constants';
 
 export interface InvestigationItemChatButtonProps {

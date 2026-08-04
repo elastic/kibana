@@ -9,15 +9,15 @@ import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { EuiPageTemplate } from '@elastic/eui';
 import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
-import { checkoutEvent } from '../__storybook__/nightshift_fixtures';
+import { checkoutEvent } from '../__storybook__/sample_events';
 import {
   NightshiftStorybookProvider,
   type NightshiftLifecycleScenario,
   type NightshiftStorybookScenario,
   type NightshiftStreamFeaturesScenario,
-} from '../__storybook__/nightshift_storybook_provider';
-import { NightshiftApp } from './nightshift_app';
-import { NightshiftAppHeader } from './nightshift_app_header';
+} from '../__storybook__/provider';
+import { NightshiftApp } from './app';
+import { NightshiftAppHeader } from './app_header';
 
 const noop = () => undefined;
 

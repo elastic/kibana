@@ -17,8 +17,8 @@ import {
 } from '@elastic/eui';
 import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
+import { NightshiftMarkIcon } from '@kbn/observability-shared-plugin/public';
 import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../common/ebt_constants';
-import { NightshiftMarkIcon } from './nightshift_mark_icon';
 
 export interface NightshiftHeaderProps {
   isEmptyState?: boolean;

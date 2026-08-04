@@ -9,7 +9,7 @@ import { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import type { SignificantEventStatus } from '@kbn/significant-events-schema';
-import { useKibana } from '../../../utils/kibana_react';
+import { useKibana } from './use_kibana';
 import {
   NIGHTSHIFT_SIGNIFICANT_EVENTS_QUERY_KEY,
   type NightshiftSignificantEventsQueryData,

@@ -24,6 +24,7 @@ import { i18n } from '@kbn/i18n';
 import { useInvestigationState } from '@kbn/investigation-output';
 import { useQueryClient } from '@kbn/react-query';
 import type { SignificantEvent } from '@kbn/significant-events-schema';
+import { NightshiftMarkIcon } from '@kbn/observability-shared-plugin/public';
 import { DetectionFlyout } from '../detection/detection_flyout';
 import { DetectionsList } from './detections_list';
 import { EventInvestigation } from './event_investigation';
@@ -36,8 +37,7 @@ import {
   isInvestigationTerminalFailure,
 } from '../common/investigation_progress_status';
 import { useFlyoutShareUrlCustomAction } from '../common/flyout_share_url_button';
-import { buildNightshiftEventFlyoutShareUrl } from '../common/nightshift_url_params';
-import { NightshiftMarkIcon } from '../app/nightshift_mark_icon';
+import { buildNightshiftEventFlyoutShareUrl } from '../common/url_params';
 import { useFormatTimestamp } from '../common/format_timestamp';
 import { useFetchDetectionOccurrences } from '../hooks/use_fetch_detection_occurrences';
 import { useFetchEventLifecycle } from '../hooks/use_fetch_event_lifecycle';
@@ -47,7 +47,7 @@ import {
   isNeedsActionStatus,
   rememberInvestigationTerminalFailure,
 } from './significant_event_status';
-import { useKibana } from '../../../utils/kibana_react';
+import { useKibana } from '../hooks/use_kibana';
 import { NIGHTSHIFT_EBT_ELEMENTS } from '../common/ebt_constants';
 import { setFlyoutMenuCloseButtonEbtProps } from '../common/flyout_close_ebt';
 

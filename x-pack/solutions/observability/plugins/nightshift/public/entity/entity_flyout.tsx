@@ -31,7 +31,7 @@ import {
   KI_FEATURE_ATTACHMENT_TYPE,
 } from '@kbn/significant-events-plugin/common';
 import { AiButton } from '@kbn/shared-ux-ai-components';
-import { useKibana } from '../../../utils/kibana_react';
+import { useKibana } from '../hooks/use_kibana';
 import { formatChatAttachmentDescription } from '../chat/chat_attachment_description';
 import {
   NIGHTSHIFT_EBT_ACTIONS,

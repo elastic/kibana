@@ -13,8 +13,8 @@ import {
   nightshiftBackgroundColorTransition,
   nightshiftOpacityTransition,
   nightshiftReducedMotionStyles,
-} from '../common/nightshift_transition';
-import { useKibana } from '../../../utils/kibana_react';
+} from '../common/transition';
+import { useKibana } from '../hooks/use_kibana';
 
 const investigationRowHoverActionOverlayClassName = 'nightshiftInvestigationRowHoverActionOverlay';
 

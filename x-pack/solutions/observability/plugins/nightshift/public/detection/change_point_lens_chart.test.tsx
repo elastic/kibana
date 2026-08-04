@@ -33,7 +33,7 @@ jest.mock('@kbn/lens-embeddable-utils', () => ({
   })),
 }));
 
-jest.mock('../../../utils/kibana_react', () => ({
+jest.mock('../hooks/use_kibana', () => ({
   useKibana: () => ({
     services: mockServices,
   }),

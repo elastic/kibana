@@ -27,7 +27,7 @@ import {
   NIGHTSHIFT_EBT_DETAILS,
   NIGHTSHIFT_EBT_ELEMENTS,
 } from '../common/ebt_constants';
-import { nightshiftBackgroundTransition } from '../common/nightshift_transition';
+import { nightshiftBackgroundTransition } from '../common/transition';
 
 export interface SignificantEventItemProps {
   event: SignificantEvent;

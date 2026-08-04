@@ -17,7 +17,7 @@ import {
 import type { LifecycleDetection } from '@kbn/significant-events-schema';
 import React, { useMemo } from 'react';
 import useAsync from 'react-use/lib/useAsync';
-import { useKibana } from '../../../utils/kibana_react';
+import { useKibana } from '../hooks/use_kibana';
 import {
   DETECTION_OCCURRENCE_BUCKET_SIZE,
   getChangePointLabel,

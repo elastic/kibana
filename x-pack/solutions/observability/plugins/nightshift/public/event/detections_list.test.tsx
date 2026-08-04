@@ -28,7 +28,7 @@ jest.mock('../detection/change_point_visualization', () => ({
   ),
 }));
 
-jest.mock('../../../utils/kibana_react', () => ({
+jest.mock('../hooks/use_kibana', () => ({
   useKibana: () => ({
     services: {
       http: { basePath: { prepend: (path: string) => `/base${path}` } },

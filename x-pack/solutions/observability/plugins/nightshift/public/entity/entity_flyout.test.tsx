@@ -18,7 +18,7 @@ import { EntityFlyout } from './entity_flyout';
 
 const mockOpenChat = jest.fn();
 
-jest.mock('../../../utils/kibana_react', () => ({
+jest.mock('../hooks/use_kibana', () => ({
   useKibana: () => ({
     services: {
       agentBuilder: {

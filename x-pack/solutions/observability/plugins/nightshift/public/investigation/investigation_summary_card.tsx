@@ -24,7 +24,7 @@ import type { InvestigationStatus } from '@kbn/investigation-output';
 import type { InvestigationState } from '@kbn/significant-events-schema';
 import { i18n } from '@kbn/i18n';
 import { buildRecommendationChatOptions } from './open_investigation_item_in_chat';
-import { useKibana } from '../../../utils/kibana_react';
+import { useKibana } from '../hooks/use_kibana';
 import { InvestigationItemChatButton } from './investigation_item_chat_button';
 import { BlindSpotsTable } from './blind_spots_table';
 import { InvestigationCompleteStatus, InvestigatingStatusDots } from './investigation_status_badge';
@@ -32,10 +32,7 @@ import { InvestigationFormattedText } from './investigation_formatted_text';
 import { TruncatableSummary } from '../common/truncatable_summary';
 import { createFadeOverlayBackground } from '../common/fade_overlay_background';
 import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../common/ebt_constants';
-import {
-  nightshiftOpacityTransition,
-  nightshiftReducedMotionStyles,
-} from '../common/nightshift_transition';
+import { nightshiftOpacityTransition, nightshiftReducedMotionStyles } from '../common/transition';
 import {
   getConclusionBody,
   getInvestigationGoalText,

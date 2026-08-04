@@ -21,7 +21,7 @@ import { SIGNIFICANT_EVENTS_APP_ID } from '@kbn/deeplinks-observability';
 import { usePageReady } from '@kbn/ebt-tools';
 import { i18n } from '@kbn/i18n';
 import type { SignificantEvent } from '@kbn/significant-events-schema';
-import { useKibana } from '../../../utils/kibana_react';
+import { useKibana } from '../hooks/use_kibana';
 import { buildNewSignificantEventChatOptions } from '../chat/open_significant_event_in_chat';
 import {
   byCriticalityAndUpdatedAtDesc,
@@ -38,8 +38,8 @@ import { BlastRadiusEntities } from '../landing/blast_radius_entities';
 import { SignificantEventList } from '../landing/significant_event_list';
 import { SignificantEventStatuses } from '../landing/significant_event_statuses';
 import { EventFlyout } from '../event/event_flyout';
-import { NightshiftHeader } from './nightshift_header';
-import { NightshiftEmptyState } from './nightshift_empty_state';
+import { NightshiftHeader } from './header';
+import { NightshiftEmptyState } from './empty_state';
 import {
   BLAST_RADIUS_QUERY_PARAM,
   clearNightshiftEventSelectionParams,
@@ -47,7 +47,7 @@ import {
   NIGHTSHIFT_EVENT_ID_QUERY_PARAM,
   NIGHTSHIFT_EVENT_UUID_QUERY_PARAM,
   setNightshiftEventSelectionParams,
-} from '../common/nightshift_url_params';
+} from '../common/url_params';
 
 const COMPACT_APP_HEADER_HEIGHT_PX = 48;
 const POPULATED_CONTENT_TRANSITION_MS = 400;

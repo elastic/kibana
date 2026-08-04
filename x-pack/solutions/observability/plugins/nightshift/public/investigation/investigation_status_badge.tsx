@@ -27,7 +27,7 @@ import {
   getRememberedInvestigationTerminalFailure,
   isEventInvestigated,
 } from '../event/significant_event_status';
-import { nightshiftReducedMotionStyles } from '../common/nightshift_transition';
+import { nightshiftReducedMotionStyles } from '../common/transition';
 
 // Staggered offsets so the dots pulse in sequence (typing-indicator effect).
 const INVESTIGATING_DOT_DELAYS_MS = [0, 160, 320] as const;

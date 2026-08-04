@@ -20,7 +20,7 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useUiSetting: () => 'MMM D, YYYY @ HH:mm:ss.SSS',
 }));
 
-jest.mock('../../../utils/kibana_react', () => ({
+jest.mock('../hooks/use_kibana', () => ({
   useKibana: () => ({
     services: {
       http: { get: jest.fn() },

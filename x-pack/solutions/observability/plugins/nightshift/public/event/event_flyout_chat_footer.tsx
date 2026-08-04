@@ -27,7 +27,7 @@ import type {
   SignificantEventInvestigation,
 } from '@kbn/significant-events-schema';
 import { AiButton } from '@kbn/shared-ux-ai-components';
-import { useKibana } from '../../../utils/kibana_react';
+import { useKibana } from '../hooks/use_kibana';
 import {
   buildInvestigationConversationChatOptions,
   buildNewSignificantEventChatOptions,

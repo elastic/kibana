@@ -10,7 +10,7 @@ import React from 'react';
 import { EuiIcon, EuiText, useEuiTheme } from '@elastic/eui';
 import { getEbtProps, type EbtClickAttrs } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
-import { nightshiftBackgroundTransition } from '../common/nightshift_transition';
+import { nightshiftBackgroundTransition } from '../common/transition';
 
 export interface EntityChipProps {
   ebt?: EbtClickAttrs;

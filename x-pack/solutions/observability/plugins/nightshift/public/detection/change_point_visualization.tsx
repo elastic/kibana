@@ -28,7 +28,7 @@ import {
   getOccurrenceBucketIntervalMs,
   type OccurrencePoint,
 } from './change_point';
-import { useChartThemes } from '../../../hooks/use_chart_themes';
+import { useChartThemes } from '../hooks/use_chart_themes';
 import { ChangePointAnnotationTooltip } from './change_point_annotation_tooltip';
 
 const SPARKLINE_HEIGHT = 32;

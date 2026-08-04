@@ -11,14 +11,14 @@ import { MemoryRouter } from 'react-router-dom';
 import { usePageReady } from '@kbn/ebt-tools';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { SignificantEvent } from '@kbn/significant-events-schema';
-import { NightshiftApp } from './nightshift_app';
+import { NightshiftApp } from './app';
 import { useFetchSignificantEvents } from '../hooks/use_fetch_significant_events';
 import { useCloseSignificantEvent } from '../hooks/use_close_significant_event';
-import { useKibana } from '../../../utils/kibana_react';
+import { useKibana } from '../hooks/use_kibana';
 
 jest.mock('../hooks/use_fetch_significant_events');
 jest.mock('../hooks/use_close_significant_event');
-jest.mock('../../../utils/kibana_react');
+jest.mock('../hooks/use_kibana');
 jest.mock('@kbn/ebt-tools');
 
 // The flyout's own behavior is covered by event_flyout.test.tsx.

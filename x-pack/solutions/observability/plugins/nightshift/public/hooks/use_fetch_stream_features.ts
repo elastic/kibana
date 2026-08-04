@@ -11,7 +11,7 @@ import type { SignificantEventsRouteRepository } from '@kbn/significant-events-p
 import { isComputedFeature, type Feature } from '@kbn/significant-events-schema';
 import type { StreamsRouteRepository } from '@kbn/streams-plugin/server';
 import type { StreamsRepositoryClientOptions } from '@kbn/streams-plugin/public/api';
-import { useKibana } from '../../../utils/kibana_react';
+import { useKibana } from './use_kibana';
 
 type MergedStreamsRepositoryClient = RouteRepositoryClient<
   StreamsRouteRepository & SignificantEventsRouteRepository,

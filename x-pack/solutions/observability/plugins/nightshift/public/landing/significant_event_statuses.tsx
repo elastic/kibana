@@ -23,7 +23,7 @@ import {
   NIGHTSHIFT_EBT_DETAILS,
   NIGHTSHIFT_EBT_ELEMENTS,
 } from '../common/ebt_constants';
-import { nightshiftStatusCardTransition } from '../common/nightshift_transition';
+import { nightshiftStatusCardTransition } from '../common/transition';
 
 type SignificantEventStatusGroup = 'needsAction' | 'resolved';
 

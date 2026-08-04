@@ -9,14 +9,14 @@ import { css } from '@emotion/react';
 import React, { useCallback } from 'react';
 import { EuiHorizontalRule, EuiPanel, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useKibana } from '../../../utils/kibana_react';
+import { useKibana } from '../hooks/use_kibana';
 import { InvestigationItemChatButton } from './investigation_item_chat_button';
 import { InvestigationFormattedText } from './investigation_formatted_text';
 import { InvestigationRowHoverAction } from './investigation_row_hover_action';
 import { buildBlindSpotChatOptions } from './open_investigation_item_in_chat';
 import { formatBlindSpotMarkdown, type BlindSpotItem } from './investigation_presentation';
 import { NIGHTSHIFT_EBT_ELEMENTS } from '../common/ebt_constants';
-import { nightshiftBackgroundTransition } from '../common/nightshift_transition';
+import { nightshiftBackgroundTransition } from '../common/transition';
 
 const blindSpotChatTooltip = i18n.translate(
   'xpack.observability.nightshift.investigation.blindSpotChatTooltip',

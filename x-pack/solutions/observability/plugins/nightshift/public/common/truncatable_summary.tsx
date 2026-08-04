@@ -10,7 +10,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { EuiLink, EuiText, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { InvestigationFormattedText } from '../investigation/investigation_formatted_text';
-import { nightshiftOpacityTransition } from './nightshift_transition';
+import { nightshiftOpacityTransition } from './transition';
 
 const DEFAULT_MAX_SUMMARY_LENGTH = 300;
 

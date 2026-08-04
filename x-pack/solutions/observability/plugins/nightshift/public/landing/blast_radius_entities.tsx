@@ -24,7 +24,7 @@ import {
   NIGHTSHIFT_EBT_ACTIONS,
   NIGHTSHIFT_EBT_ELEMENTS,
 } from '../common/ebt_constants';
-import { nightshiftInteractiveSurfaceTransition } from '../common/nightshift_transition';
+import { nightshiftInteractiveSurfaceTransition } from '../common/transition';
 import type { BlastRadiusChip } from './blast_radius_chips';
 
 export const MAX_VISIBLE_BLAST_RADIUS_ENTITIES = 10;

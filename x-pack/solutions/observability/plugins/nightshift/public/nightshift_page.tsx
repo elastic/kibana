@@ -6,17 +6,19 @@
  */
 
 import React, { useCallback, useEffect } from 'react';
-import { useHistory } from 'react-router-dom';
 import { EuiPageTemplate } from '@elastic/eui';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { SIGNIFICANT_EVENTS_APP_ID } from '@kbn/deeplinks-observability';
+import {
+  NIGHTSHIFT_APP_ID,
+  OBSERVABILITY_OVERVIEW_APP_ID,
+  SIGNIFICANT_EVENTS_APP_ID,
+} from '@kbn/deeplinks-observability';
 import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '@kbn/significant-events-plugin/common';
-import { NightshiftApp } from './app/nightshift_app';
-import { NightshiftAppHeader } from './app/nightshift_app_header';
-import { useKibana } from '../../utils/kibana_react';
-import { usePluginContext } from '../../hooks/use_plugin_context';
-import { OVERVIEW_PATH } from '../../../common/locators/paths';
+import { NIGHTSHIFT_APP_ROUTE } from '../common/constants';
+import { NightshiftApp } from './app/app';
+import { NightshiftAppHeader } from './app/app_header';
+import { useKibana } from './hooks/use_kibana';
 
 export function NightshiftPage(): React.ReactElement | null {
   const {
@@ -24,9 +26,9 @@ export function NightshiftPage(): React.ReactElement | null {
     http: { basePath },
     featureFlags,
     serverless,
+    observabilityShared,
   } = useKibana().services;
-  const { ObservabilityPageTemplate } = usePluginContext();
-  const history = useHistory();
+  const { PageTemplate: ObservabilityPageTemplate } = observabilityShared.navigation;
   const settingsHref = application.getUrlForApp(SIGNIFICANT_EVENTS_APP_ID, {
     path: '/settings',
   });
@@ -42,11 +44,11 @@ export function NightshiftPage(): React.ReactElement | null {
   useBreadcrumbs(
     [
       {
-        href: basePath.prepend('/app/observability/nightshift'),
-        text: i18n.translate('xpack.observability.breadcrumbs.nightshiftLinkText', {
+        href: basePath.prepend(NIGHTSHIFT_APP_ROUTE),
+        text: i18n.translate('xpack.observability.nightshift.breadcrumbs.linkText', {
           defaultMessage: 'Nightshift',
         }),
-        deepLinkId: 'observability-overview:nightshift',
+        deepLinkId: NIGHTSHIFT_APP_ID,
       },
     ],
     { serverless }
@@ -54,9 +56,9 @@ export function NightshiftPage(): React.ReactElement | null {
 
   useEffect(() => {
     if (!isEnabled) {
-      history.replace(OVERVIEW_PATH);
+      application.navigateToApp(OBSERVABILITY_OVERVIEW_APP_ID);
     }
-  }, [history, isEnabled]);
+  }, [application, isEnabled]);
 
   if (!isEnabled) {
     return null;

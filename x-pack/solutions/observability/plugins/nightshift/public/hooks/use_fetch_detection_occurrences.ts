@@ -17,7 +17,7 @@ import {
   getDetectionOccurrenceTimeRange,
   type OccurrencePoint,
 } from '../detection/change_point';
-import { useKibana } from '../../../utils/kibana_react';
+import { useKibana } from './use_kibana';
 
 type MergedStreamsRepositoryClient = RouteRepositoryClient<
   StreamsRouteRepository & SignificantEventsRouteRepository,

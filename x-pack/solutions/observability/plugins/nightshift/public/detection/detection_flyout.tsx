@@ -43,7 +43,7 @@ import { EntityChip } from '../entity/entity_chip';
 import { EntityFlyout } from '../entity/entity_flyout';
 import { FlyoutSectionTitle } from '../common/flyout_section_title';
 import { TruncatableSummary } from '../common/truncatable_summary';
-import { useKibana } from '../../../utils/kibana_react';
+import { useKibana } from '../hooks/use_kibana';
 import { useFetchStreamFeatures } from '../hooks/use_fetch_stream_features';
 import {
   getDetectionEntities,

@@ -9,14 +9,14 @@ import React from 'react';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { SignificantEvent } from '@kbn/significant-events-schema';
-import { useKibana } from '../../../utils/kibana_react';
+import { useKibana } from './use_kibana';
 import {
   NIGHTSHIFT_SIGNIFICANT_EVENTS_QUERY_KEY,
   type NightshiftSignificantEventsQueryData,
 } from './use_fetch_significant_events';
 import { useCloseSignificantEvent } from './use_close_significant_event';
 
-jest.mock('../../../utils/kibana_react');
+jest.mock('./use_kibana');
 
 const mockUseKibana = useKibana as jest.Mock;
 const httpPost = jest.fn();

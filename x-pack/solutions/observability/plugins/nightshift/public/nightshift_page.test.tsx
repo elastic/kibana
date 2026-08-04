@@ -11,23 +11,17 @@ import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
 import { I18nProvider } from '@kbn/i18n-react';
-import { NightshiftPage } from './nightshift';
-import { useKibana } from '../../utils/kibana_react';
-import { usePluginContext } from '../../hooks/use_plugin_context';
-import { OVERVIEW_PATH } from '../../../common/locators/paths';
+import { OBSERVABILITY_OVERVIEW_APP_ID } from '@kbn/deeplinks-observability';
+import { NightshiftPage } from './nightshift_page';
+import { useKibana } from './hooks/use_kibana';
 
-const mockReplace = jest.fn();
-
-jest.mock('react-router-dom', () => ({ useHistory: () => ({ replace: mockReplace }) }));
 jest.mock('@kbn/observability-shared-plugin/public', () => ({ useBreadcrumbs: jest.fn() }));
-jest.mock('./app/nightshift_app', () => ({
+jest.mock('./app/app', () => ({
   NightshiftApp: () => <div data-test-subj="nightshiftAppStub" />,
 }));
-jest.mock('../../utils/kibana_react', () => ({ useKibana: jest.fn() }));
-jest.mock('../../hooks/use_plugin_context', () => ({ usePluginContext: jest.fn() }));
+jest.mock('./hooks/use_kibana', () => ({ useKibana: jest.fn() }));
 
 const mockUseKibana = useKibana as jest.Mock;
-const mockUsePluginContext = usePluginContext as jest.Mock;
 
 const getBooleanValue = jest.fn();
 /** Mirrors the registered `appRoute` for significantEvents (`/app/significant_events`). */
@@ -36,6 +30,7 @@ const getUrlForApp = jest.fn((appId: string, { path }: { path: string }) => {
   return `${base}${path.startsWith('/') ? path : `/${path}`}`;
 });
 const navigateToUrl = jest.fn();
+const navigateToApp = jest.fn();
 
 function renderPage() {
   return render(
@@ -49,32 +44,34 @@ function renderPage() {
 
 describe('NightshiftPage', () => {
   beforeEach(() => {
-    mockReplace.mockClear();
+    navigateToApp.mockClear();
     navigateToUrl.mockClear();
     getBooleanValue.mockReturnValue(true);
     mockUseKibana.mockReturnValue({
       services: {
-        application: { getUrlForApp, navigateToUrl },
+        application: { getUrlForApp, navigateToUrl, navigateToApp },
         http: { basePath: { prepend: (path: string) => path } },
         featureFlags: { getBooleanValue },
         serverless: undefined,
+        observabilityShared: {
+          navigation: {
+            PageTemplate: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+          },
+        },
       },
-    });
-    mockUsePluginContext.mockReturnValue({
-      ObservabilityPageTemplate: ({ children }: { children: React.ReactNode }) => <>{children}</>,
     });
   });
 
   it('redirects to the overview when the availability flag is disabled', () => {
     getBooleanValue.mockReturnValue(false);
     renderPage();
-    expect(mockReplace).toHaveBeenCalledWith(OVERVIEW_PATH);
+    expect(navigateToApp).toHaveBeenCalledWith(OBSERVABILITY_OVERVIEW_APP_ID);
     expect(screen.queryByTestId('nightshiftAppStub')).not.toBeInTheDocument();
   });
 
   it('renders the app when the availability flag is enabled', async () => {
     renderPage();
-    expect(mockReplace).not.toHaveBeenCalled();
+    expect(navigateToApp).not.toHaveBeenCalled();
     await waitFor(() =>
       expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Nightshift')
     );

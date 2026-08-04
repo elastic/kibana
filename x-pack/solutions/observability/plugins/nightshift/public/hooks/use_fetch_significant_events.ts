@@ -9,8 +9,8 @@ import moment from 'moment';
 import { useQuery, type QueryClient, type UseQueryResult } from '@kbn/react-query';
 import type { HttpSetup } from '@kbn/core/public';
 import type { SignificantEvent } from '@kbn/significant-events-schema';
-import { useKibana } from '../../../utils/kibana_react';
-import { NIGHTSHIFT_LANDING_SEVERITIES } from '../common/nightshift_constants';
+import { useKibana } from './use_kibana';
+import { NIGHTSHIFT_LANDING_SEVERITIES } from '../common/constants';
 import { hasRunningInvestigations } from '../event/significant_event_status';
 
 /**
