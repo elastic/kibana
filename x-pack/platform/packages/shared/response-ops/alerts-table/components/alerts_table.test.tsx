@@ -237,7 +237,7 @@ describe('AlertsTable', () => {
   let refresh: RenderContext<AdditionalContext>['refresh'];
   let refreshSpy: jest.SpyInstance<void, []>;
 
-  mockAlertsDataGrid.mockImplementation((props) => {
+  const realAlertsDataGridMockImplementation = (props: AlertsDataGridProps<AdditionalContext>) => {
     const { AlertsDataGrid: ActualAlertsDataGrid } = jest.requireActual('./alerts_data_grid');
     onPageIndexChange = props.renderContext.onPageIndexChange;
     onToggleColumn = props.onToggleColumn;
@@ -245,7 +245,23 @@ describe('AlertsTable', () => {
     refresh = props.renderContext.refresh;
     refreshSpy = jest.spyOn(props.renderContext, 'refresh');
     return <ActualAlertsDataGrid {...props} />;
-  });
+  };
+
+  const columnStateAlertsDataGridMockImplementation = (
+    props: AlertsDataGridProps<AdditionalContext>
+  ) => {
+    onToggleColumn = props.onToggleColumn;
+    onResetColumns = props.onResetColumns;
+    return (
+      <>
+        {props.columnVisibility.visibleColumns.map((id) => (
+          <div key={id} data-test-subj={`dataGridHeaderCell-${id}`} />
+        ))}
+      </>
+    );
+  };
+
+  mockAlertsDataGrid.mockImplementation(realAlertsDataGridMockImplementation);
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -254,8 +270,14 @@ describe('AlertsTable', () => {
   });
 
   describe('Columns', () => {
-    // FLAKY: https://github.com/elastic/kibana/issues/253350
-    describe.skip('with no saved configuration', () => {
+    describe('with no saved configuration', () => {
+      beforeAll(() => {
+        mockAlertsDataGrid.mockImplementation(columnStateAlertsDataGridMockImplementation);
+      });
+
+      afterAll(() => {
+        mockAlertsDataGrid.mockImplementation(realAlertsDataGridMockImplementation);
+      });
       it('should show the default columns if the columns prop is not set', async () => {
         render(<AlertsTable {...tableProps} columns={undefined} />);
 
