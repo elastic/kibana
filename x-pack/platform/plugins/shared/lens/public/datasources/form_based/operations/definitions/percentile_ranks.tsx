@@ -83,7 +83,7 @@ export const percentileRanksOperation: OperationDefinition<
       supportedFieldTypes.includes(fieldType) &&
       aggregatable &&
       timeSeriesMetric !== 'counter' &&
-      (!aggregationRestrictions || !aggregationRestrictions.percentile_ranks)
+      (!aggregationRestrictions || aggregationRestrictions.percentile_ranks)
     ) {
       return {
         dataType: 'number',
@@ -99,7 +99,7 @@ export const percentileRanksOperation: OperationDefinition<
       newField &&
         supportedFieldTypes.includes(newField.type) &&
         newField.aggregatable &&
-        (!newField.aggregationRestrictions || !newField.aggregationRestrictions.percentile_ranks)
+        (!newField.aggregationRestrictions || newField.aggregationRestrictions.percentile_ranks)
     );
   },
   getDefaultLabel: (column, columns, indexPattern) =>
