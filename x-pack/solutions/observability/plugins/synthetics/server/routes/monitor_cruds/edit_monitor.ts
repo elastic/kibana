@@ -129,6 +129,22 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
         previousMonitor.attributes.locations
       );
 
+      // When the caller explicitly provides a namespace we honor it verbatim (even `default`),
+      // but still validate it. Omitting it keeps the previous monitor's namespace. See issue #221335.
+      const isNamespaceProvided =
+        (monitor as CreateMonitorPayLoad)[ConfigKey.NAMESPACE] !== undefined;
+      if (isNamespaceProvided) {
+        try {
+          (editedMonitor as MonitorFields)[ConfigKey.NAMESPACE] =
+            editMonitorAPI.getMonitorNamespace(
+              (editedMonitor as MonitorFields)[ConfigKey.NAMESPACE],
+              true
+            );
+        } catch (namespaceError) {
+          return response.badRequest({ body: { message: namespaceError.message } });
+        }
+      }
+
       const validationResult = validateMonitor(editedMonitor as MonitorFields, spaceId);
 
       if (!validationResult.valid || !validationResult.decodedMonitor) {

@@ -272,6 +272,62 @@ describe('AddNewMonitorsPublicAPI', () => {
     });
   });
 
+  describe('getMonitorNamespace', () => {
+    const buildApi = (spaceId: string) =>
+      new AddEditMonitorAPI({
+        routeContext: { spaceId },
+        spaceId,
+      } as any);
+
+    it('falls back to the Kibana space namespace when namespace is not explicitly provided', () => {
+      const api = buildApi('test-space');
+      expect(api.getMonitorNamespace('default', false)).toBe('test_space');
+    });
+
+    it('honors an explicitly provided "default" namespace', () => {
+      const api = buildApi('test-space');
+      expect(api.getMonitorNamespace('default', true)).toBe('default');
+    });
+
+    it('honors a custom namespace regardless of whether it was explicitly provided', () => {
+      const api = buildApi('test-space');
+      expect(api.getMonitorNamespace('custom', false)).toBe('custom');
+      expect(api.getMonitorNamespace('custom', true)).toBe('custom');
+    });
+
+    it('throws when the resolved namespace is invalid', () => {
+      const api = buildApi('test-space');
+      expect(() => api.getMonitorNamespace('UPPER_CASE', true)).toThrow(/namespace is invalid/);
+    });
+  });
+
+  describe('hydrateMonitorFields namespace resolution', () => {
+    const buildApi = (spaceId: string, body: Record<string, unknown>) =>
+      new AddEditMonitorAPI({
+        routeContext: { spaceId, request: { query: {}, body } },
+        spaceId,
+        request: { query: {}, body },
+      } as any);
+
+    it('resolves omitted namespace to the Kibana space namespace', () => {
+      const api = buildApi('test-space', { type: 'http' });
+      const result = api.hydrateMonitorFields({
+        newMonitorId: 'id-1',
+        normalizedMonitor: { namespace: 'default' } as any,
+      });
+      expect(result.namespace).toBe('test_space');
+    });
+
+    it('preserves an explicitly provided "default" namespace', () => {
+      const api = buildApi('test-space', { type: 'http', namespace: 'default' });
+      const result = api.hydrateMonitorFields({
+        newMonitorId: 'id-1',
+        normalizedMonitor: { namespace: 'default' } as any,
+      });
+      expect(result.namespace).toBe('default');
+    });
+  });
+
   describe('validateUniqueMonitorName', () => {
     it('should return an error message if the monitor name already exists', async () => {
       const api = new AddEditMonitorAPI({
