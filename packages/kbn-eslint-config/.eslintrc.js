@@ -45,16 +45,10 @@ const JS_YAML_LEGACY_CONSUMERS = [
   'src/platform/packages/shared/kbn-connector-cli/src/create_connectors/manifest_loader.ts',
   'src/platform/packages/shared/kbn-edot-collector/src/get_edot_collector_configuration.ts',
   'src/platform/packages/shared/kbn-edot-collector/src/read_kibana_config.ts',
-  'src/platform/packages/shared/kbn-otel-demo/src/demos/aws_retail_store/manifests.ts',
-  'src/platform/packages/shared/kbn-otel-demo/src/demos/bank_of_anthos/manifests.ts',
-  'src/platform/packages/shared/kbn-otel-demo/src/demos/quarkus_super_heroes/manifests.ts',
-  'src/platform/packages/shared/kbn-otel-demo/src/demos/rust_k8s_demo/manifests.ts',
-  'src/platform/packages/shared/kbn-otel-demo/src/get_edot_k8s_collector_config.ts',
   'src/platform/packages/shared/kbn-scout/src/cli/create_test_tracks.ts',
   'src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/agent_builder_smoke/stateful/classic.stateful.config.ts',
   'src/platform/packages/shared/kbn-scout/src/tests_discovery/search_configs.test.ts',
   'src/platform/packages/shared/kbn-scout/src/tests_discovery/search_configs.ts',
-  'src/platform/packages/shared/kbn-synthtrace/src/cli/utils/read_kibana_config.ts',
   'src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/config/ftr_configs_manifest.ts',
   'src/platform/plugins/private/interactive_setup/server/kibana_config_writer.ts',
   'x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/utils/yaml_form_utils.test.ts',
@@ -472,6 +466,7 @@ module.exports = {
      * a11y-related rules:
      * all existing violations were fixed; keep this as error to prevent new ones.
      */
+    '@elastic/eui/callout-announce-on-mount': 'error',
     '@elastic/eui/prefer-eui-icon-tip': 'error',
     '@elastic/eui/sr-output-disabled-tooltip': 'error',
     '@elastic/eui/badge-accessibility-rules': 'error',
@@ -480,6 +475,9 @@ module.exports = {
     '@elastic/eui/tooltip-no-interactive-content': 'error',
     '@elastic/eui/require-table-caption': 'error',
     '@elastic/eui/accessible-interactive-element': 'error',
+    '@elastic/eui/icon-accessibility-rules': 'error',
+    '@elastic/eui/tooltip-button-icon-wrap': 'error',
+    '@elastic/eui/tooltip-focusable-anchor': 'error',
   },
 
   overrides: [

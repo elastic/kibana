@@ -9,9 +9,16 @@ import { encode as encodeRison } from '@kbn/rison';
 import type { CoreStart } from '@kbn/core/public';
 import { SERVICE_NAME } from '@kbn/apm-types';
 import type { Environment } from '../../../common/environment_rt';
+import type { ServiceMapViewFilters } from '../../components/app/service_map/apply_service_map_visibility';
+import type { ServiceMapOrientation } from '../../components/app/service_map/service_map_options_panel';
 
 /** Controls API selections keyed by field name (e.g. `{ 'service.name': ['frontend'] }`). */
 export type ServiceMapControlSelections = Record<string, string[]>;
+
+/** Compact view-filter payload stored in `_a` for Dashboard → full map round-trips. */
+export type ServiceMapUrlViewFilters = {
+  [K in keyof ServiceMapViewFilters]?: ServiceMapViewFilters[K];
+};
 
 export interface ServiceMapUrlParams {
   rangeFrom: string;
@@ -31,6 +38,13 @@ export interface ServiceMapUrlParams {
    * field names (e.g. TRANSACTION_NAME, TRANSACTION_TYPE constants).
    */
   filterPills?: Array<{ field: string; value: string }>;
+  /**
+   * Options-panel filters (Dependencies, alert/SLO/anomaly status).
+   * Seeded into `_a.viewFilters` for restore on the global map.
+   */
+  viewFilters?: ServiceMapViewFilters;
+  /** Map layout orientation; omitted from `_a` when horizontal (default). */
+  mapOrientation?: ServiceMapOrientation;
 }
 
 /**
@@ -56,6 +70,26 @@ function mergeControlValue(
   }
 }
 
+function compactViewFiltersForUrl(
+  viewFilters: ServiceMapViewFilters | undefined
+): ServiceMapUrlViewFilters | undefined {
+  if (!viewFilters) return undefined;
+  const compact: ServiceMapUrlViewFilters = {};
+  if (viewFilters.alertStatusFilter.length > 0) {
+    compact.alertStatusFilter = viewFilters.alertStatusFilter;
+  }
+  if (viewFilters.sloStatusFilter.length > 0) {
+    compact.sloStatusFilter = viewFilters.sloStatusFilter;
+  }
+  if (viewFilters.connectionFilter.length > 0) {
+    compact.connectionFilter = viewFilters.connectionFilter;
+  }
+  if (viewFilters.anomalySeverityFilter.length > 0) {
+    compact.anomalySeverityFilter = viewFilters.anomalySeverityFilter;
+  }
+  return Object.keys(compact).length > 0 ? compact : undefined;
+}
+
 /**
  * Builds query params for the global service map (`/service-map`).
  * Shared by `getServiceMapUrl` and focused-map route redirects.
@@ -70,6 +104,8 @@ export function buildServiceMapSearchParams(params: ServiceMapUrlParams): URLSea
     serviceGroupId,
     controlSelections: controlSelectionsParam,
     filterPills,
+    viewFilters,
+    mapOrientation,
   } = params;
   const searchParams = new URLSearchParams();
   searchParams.set('rangeFrom', rangeFrom);
@@ -107,6 +143,8 @@ export function buildServiceMapSearchParams(params: ServiceMapUrlParams): URLSea
       query: { match_phrase: Record<string, string> };
     }>;
     controlSelections?: ServiceMapControlSelections;
+    viewFilters?: ServiceMapUrlViewFilters;
+    mapOrientation?: ServiceMapOrientation;
   } = {};
 
   if (filterBarPills.length > 0) {
@@ -123,7 +161,21 @@ export function buildServiceMapSearchParams(params: ServiceMapUrlParams): URLSea
     appState.controlSelections = nonEmptyControlSelections;
   }
 
-  if (appState.filters !== undefined || appState.controlSelections !== undefined) {
+  const compactViewFilters = compactViewFiltersForUrl(viewFilters);
+  if (compactViewFilters) {
+    appState.viewFilters = compactViewFilters;
+  }
+
+  if (mapOrientation && mapOrientation !== 'horizontal') {
+    appState.mapOrientation = mapOrientation;
+  }
+
+  if (
+    appState.filters !== undefined ||
+    appState.controlSelections !== undefined ||
+    appState.viewFilters !== undefined ||
+    appState.mapOrientation !== undefined
+  ) {
     searchParams.set('_a', encodeRison(appState));
   }
 
