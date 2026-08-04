@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { userProfileServiceMock } from '@kbn/core-user-profile-server-mocks';
 import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { AnalyticsServiceSetup } from '@kbn/core/server';
@@ -73,6 +74,7 @@ describe('DetectionRulesClient.revertPrebuiltRule', () => {
         isSystemAction: jest.fn((id: string) => id === 'system-connector-.cases'),
       } as unknown as jest.Mocked<ActionsClient>,
       rulesClient,
+      userProfile: userProfileServiceMock.createStart(),
       mlAuthz,
       rulesAuthz,
       savedObjectsClient: savedObjectsClientMock.create(),

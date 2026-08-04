@@ -22,7 +22,10 @@ import { IconChartHeatmap } from '@kbn/chart-icons';
 import { tacticOrder as mitreTacticOrder } from '../../../../common/detection_engine/mitre/mitre_tactics_order';
 import { tactics as mitreTactics } from '../../../../common/detection_engine/mitre/mitre_tactics_techniques';
 import { AnomaliesSwimlane } from './anomalies_swimlane';
-import { ENTITY_ANOMALY_TIMELINE_TITLE } from './translations';
+import {
+  ENTITY_ANOMALY_TIMELINE_TITLE,
+  ENTITY_ANOMALIES_SWIMLANE_MITRE_TACTIC_Y_AXIS_LABEL,
+} from './translations';
 import { ANOMALIES_TAB_TIMELINE_TEST_ID } from './test_ids';
 import { useAnomalyBands } from '../recent_anomalies/anomaly_bands';
 import { getAnomalyChartStyling } from '../recent_anomalies';
@@ -35,8 +38,21 @@ const tacticNames = [...mitreTactics]
 
 const TACTIC_ACCESSOR = 'mitre_tactic';
 
+interface SwimlaneRecord {
+  '@timestamp': number;
+  record_score: number;
+  count: number;
+}
+
+interface AnomalyTimeBucketEntry {
+  timestamp: string;
+  maxScore: number;
+  threatTactics?: string[];
+  tacticCounts?: Record<string, number>;
+}
+
 interface AnomalyTabTimelineProps {
-  anomalies: Array<{ timestamp: string; maxScore: number; threatTactics?: string[] }>;
+  anomalies: AnomalyTimeBucketEntry[];
   selectedTactic?: string | null;
   timeRangeMs: { from: number; to: number };
   isEmpty?: boolean;
@@ -68,10 +84,14 @@ export const AnomalyTabTimelineSection: React.FC<AnomalyTabTimelineProps> = ({
   );
 
   const records = useMemo(() => {
-    const byTactic = new Map<string, Array<{ '@timestamp': number; record_score: number }>>();
+    const byTactic = new Map<string, SwimlaneRecord[]>();
     for (const a of anomalies) {
       for (const tactic of a.threatTactics ?? []) {
-        const entry = { '@timestamp': new Date(a.timestamp).getTime(), record_score: a.maxScore };
+        const entry = {
+          '@timestamp': new Date(a.timestamp).getTime(),
+          record_score: a.maxScore,
+          count: a.tacticCounts?.[tactic] ?? 0,
+        };
         const existing = byTactic.get(tactic);
         if (existing) {
           existing.push(entry);
@@ -157,6 +177,7 @@ export const AnomalyTabTimelineSection: React.FC<AnomalyTabTimelineProps> = ({
               to={timeRangeMs.to}
               yAxisNames={mitreTacticNames}
               yAxisAccessor={TACTIC_ACCESSOR}
+              yAxisLabel={ENTITY_ANOMALIES_SWIMLANE_MITRE_TACTIC_Y_AXIS_LABEL}
               heatmapId="entity-anomalies-tab-timeline-heatmap"
               ySortPredicate="dataIndex"
             />

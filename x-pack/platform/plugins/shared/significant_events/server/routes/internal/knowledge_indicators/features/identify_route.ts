@@ -28,6 +28,43 @@ import {
 } from '../../../../lib/significant_events/features';
 import { shouldIdentifyFeatures } from '../../../../lib/significant_events/features/should_identify_features';
 import { isSignificantEventsSemanticCodeSearchGroundingEnabled } from '../../../../lib/semantic_code_search_grounding/is_significant_events_semantic_code_search_grounding_enabled';
+import type { SyncWorkflowService } from '../../../../lib/workflows/sync_workflow';
+import type { SignificantEventsMaintenanceService } from '../../../../lib/maintenance/maintenance_service';
+import { stateBlocksNewActivity } from '../../../../../common/maintenance/state_machine';
+
+// Best-effort bootstrap of the standalone KI sync (groundedness) sweep workflow,
+// which runs under a request whose API key can schedule the workflow trigger.
+// Only the inferred route bootstraps: it runs at least once per identification
+// pass and always precedes computed identification, so hooking it covers every
+// path. Idempotent and non-blocking — a failure here must never fail extraction.
+const bootstrapSyncWorkflow = async ({
+  syncWorkflowService,
+  maintenanceService,
+  request,
+  logger,
+}: {
+  syncWorkflowService: SyncWorkflowService | undefined;
+  maintenanceService: SignificantEventsMaintenanceService;
+  request: Parameters<SyncWorkflowService['ensureEnabled']>[0]['request'];
+  logger: { warn: (message: string) => void };
+}): Promise<void> => {
+  if (!syncWorkflowService) {
+    return;
+  }
+  try {
+    const state = await maintenanceService.getState({ request });
+    if (stateBlocksNewActivity(state)) {
+      return;
+    }
+    await syncWorkflowService.ensureEnabled({ request });
+  } catch (error) {
+    logger.warn(
+      `Failed to ensure KI sync workflow is enabled: ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
+  }
+};
 
 // ---------------------------------------------------------------------------
 // Route 1: Identify inferred features (one iteration: sample + infer + reconcile)
@@ -61,23 +98,33 @@ const identifyInferredFeaturesRoute = createServerRoute({
         maxExcludedFeaturesInPrompt: z.number().optional(),
         maxPreviouslyIdentifiedFeatures: z.number().optional(),
         diverseOffset: z.number().min(0).optional(),
+        samplingTimeoutMs: z.number().int().min(1_000).max(240_000).optional(),
       })
       .nullable()
       .optional(),
   }),
-  handler: async ({ params, request, getScopedClients, server, logger, telemetry }) => {
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    server,
+    logger,
+    telemetry,
+    syncWorkflowService,
+    maintenanceService,
+  }) => {
     const scopedClients = await getScopedClients({ request });
     const {
       scopedClusterClient,
+      streamDataEsClient,
       streamsClient,
       inferenceClient,
       soClient,
       tuningConfig,
       licensing,
-      uiSettingsClient,
     } = scopedClients;
 
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    await assertSignificantEventsAccess({ server, licensing });
 
     const { streamName } = params.path;
     const routeLogger = logger.get('features_identification', 'inferred', streamName);
@@ -95,6 +142,7 @@ const identifyInferredFeaturesRoute = createServerRoute({
       maxExcludedFeaturesInPrompt = tuningConfig.max_excluded_features_in_prompt,
       maxPreviouslyIdentifiedFeatures,
       diverseOffset,
+      samplingTimeoutMs = tuningConfig.sampling_timeout_ms,
     } = params.body ?? {};
 
     const [connectorId, stream, kiClient] = await Promise.all([
@@ -115,6 +163,7 @@ const identifyInferredFeaturesRoute = createServerRoute({
     try {
       const result = await identifyInferredFeatures({
         esClient: scopedClusterClient.asCurrentUser,
+        samplingEsClient: streamDataEsClient,
         kiClient,
         soClient,
         inferenceClient: inferenceClient.bindTo({
@@ -143,10 +192,24 @@ const identifyInferredFeaturesRoute = createServerRoute({
           max_entity_filters: maxEntityFilters,
           max_excluded_features_in_prompt: maxExcludedFeaturesInPrompt,
           maxPreviouslyIdentifiedFeatures,
+          sampling_timeout_ms: samplingTimeoutMs,
         },
         diverseOffset,
         trackFeaturesIdentified: (data) => telemetry.trackFeaturesIdentified(data),
+        // Expose prior Significant Events (read-only search) to feature
+        // extraction when Agent Builder tools are available.
+        ...(server.agentBuilder?.tools
+          ? { agentBuilderTools: server.agentBuilder.tools, request }
+          : {}),
       });
+
+      await bootstrapSyncWorkflow({
+        syncWorkflowService,
+        maintenanceService,
+        request,
+        logger: routeLogger,
+      });
+
       return { ...result, connectorId };
     } catch (error) {
       routeLogger.error(
@@ -217,9 +280,9 @@ const identifyComputedFeaturesRoute = createServerRoute({
   }),
   handler: async ({ params, request, getScopedClients, server, logger, telemetry }) => {
     const scopedClients = await getScopedClients({ request });
-    const { scopedClusterClient, streamsClient, licensing, uiSettingsClient } = scopedClients;
+    const { streamDataEsClient, streamsClient, licensing } = scopedClients;
 
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    await assertSignificantEventsAccess({ server, licensing });
 
     const { streamName } = params.path;
     const routeLogger = logger.get('features_identification', 'computed', streamName);
@@ -244,7 +307,7 @@ const identifyComputedFeaturesRoute = createServerRoute({
         streamName,
         start,
         end,
-        esClient: scopedClusterClient.asCurrentUser,
+        esClient: streamDataEsClient,
         kiClient,
         logger: routeLogger,
         runId,
@@ -291,9 +354,9 @@ const shouldIdentifyRoute = createServerRoute({
   }),
   handler: async ({ params, request, getScopedClients, server }) => {
     const scopedClients = await getScopedClients({ request });
-    const { licensing, uiSettingsClient } = scopedClients;
+    const { licensing } = scopedClients;
 
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    await assertSignificantEventsAccess({ server, licensing });
 
     const kiClient = await scopedClients.getKnowledgeIndicatorClient();
     return shouldIdentifyFeatures({

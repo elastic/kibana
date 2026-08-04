@@ -6,7 +6,7 @@
  */
 
 import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
-import type { SmlTypeDefinition } from '@kbn/agent-context-layer-plugin/server';
+import type { SmlTypeDefinition } from '@kbn/agent-builder-sml-plugin/server';
 import {
   RULE_ATTACHMENT_TYPE,
   RULE_SML_TYPE,
@@ -59,7 +59,7 @@ export const createRuleSmlType = ({
     }
   },
 
-  getSmlData: async (originId, context) => {
+  getSmlEntry: async (originId, context) => {
     if (!(await getIsAlertingV2Enabled())) {
       return undefined;
     }
@@ -77,13 +77,9 @@ export const createRuleSmlType = ({
       const contentParts = [name, description, kind, tags, query].filter(Boolean);
 
       return {
-        chunks: [
-          {
-            type: RULE_SML_TYPE,
-            title: name,
-            content: contentParts.join('\n'),
-          },
-        ],
+        type: RULE_SML_TYPE,
+        title: name,
+        content: contentParts.join('\n'),
       };
     } catch (error) {
       context.logger.warn(
@@ -99,7 +95,6 @@ export const createRuleSmlType = ({
    */
   getPermissions: () => ({
     kibana: { privileges: [{ name: `api:${ALERTING_V2_API_PRIVILEGES.rules.read}` }] },
-    elasticsearch: { indices: [] },
   }),
 
   toAttachment: async (item, context) => {

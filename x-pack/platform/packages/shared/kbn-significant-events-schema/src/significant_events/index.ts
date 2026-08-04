@@ -5,13 +5,23 @@
  * 2.0.
  */
 
-export { detectionSchema, type Detection } from './detections';
-export { discoverySchema, discoveryDetectionSchema, type Discovery } from './discoveries';
 export {
-  dependencyEdgeSchema,
-  infraComponentSchema,
-  causeKiSchema,
-  evidenceSchema,
+  detectionSchema,
+  CHANGE_POINT_TYPES,
+  type Detection,
+  type ChangePointType,
+} from './detections';
+export {
+  blastRadiusEntrySchema,
+  causalFeatureSchema,
+  signalEntrySchema,
+  severitySchema,
+  SEVERITY_OPTIONS,
+  getSeverityLabel,
+  type BlastRadiusEntry,
+  type CausalFeature,
+  type SignalEntry,
+  type Severity,
 } from './common_schemas';
 export type { KnowledgeIndicator } from '../queries';
 export {
@@ -19,6 +29,7 @@ export {
   type SignificantEventInvestigation,
   type SignificantEventStatus,
   SIGNIFICANT_EVENT_STATUS_OPTIONS,
+  SIGNIFICANT_EVENT_ACTIVE_STATUS_OPTIONS,
   significantEventInvestigationSchema,
   significantEventSchema,
   significantEventStatusSchema,
@@ -28,11 +39,17 @@ export {
   MAX_RULE_NAME_LENGTH,
   MAX_TEXT_LENGTH,
   MAX_TITLE_LENGTH,
+  MAX_SIGNAL_DESCRIPTION_LENGTH,
 } from './constants';
 export {
   INVESTIGATION_PROGRESS_UI_EVENT,
   INVESTIGATE_STEP_ID,
+  MAX_SIGNIFICANT_EVENT_UPDATE_EVIDENCE,
+  MAX_SIGNIFICANT_EVENT_UPDATES,
+  significantEventUpdateSchema,
   investigationStateSchema,
+  type SignificantEventUpdate,
+  type SignificantEventUpdateEvidence,
   type InvestigationHypothesis,
   type InvestigationState,
 } from './investigation_state';

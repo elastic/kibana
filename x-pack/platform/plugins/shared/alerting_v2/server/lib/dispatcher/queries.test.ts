@@ -51,11 +51,11 @@ describe('getDispatchableAlertEventsQuery', () => {
     );
   });
 
-  it('aggregates by rule_id, group_hash, episode_id with episode_status as LAST aggregation', () => {
+  it('aggregates by subject, group_hash, episode_id with episode_status as LAST aggregation', () => {
     const req = getDispatchableAlertEventsQuery();
 
-    expect(req.query).toContain('BY rule_id, group_hash, episode_id');
-    expect(req.query).not.toContain('BY rule_id, group_hash, episode_id, episode_status');
+    expect(req.query).toContain('BY subject, group_hash, episode_id');
+    expect(req.query).not.toContain('BY subject, group_hash, episode_id, episode_status');
     expect(req.query).toContain('last_episode_status = LAST(episode_status, @timestamp)');
   });
 
@@ -100,9 +100,45 @@ describe('getDispatchableAlertEventsQuery', () => {
     const req = getDispatchableAlertEventsQuery();
 
     expect(req.query).toContain(
-      'KEEP last_event_timestamp, rule_id, group_hash, episode_id, last_episode_status, data_json, severity'
+      'KEEP last_event_timestamp, rule_id, source, space_id, group_hash, episode_id, last_episode_status, data_json, severity'
     );
     expect(req.query).toContain('RENAME last_episode_status AS episode_status');
+  });
+
+  it('computes subject via CASE to group internal and external episodes separately', () => {
+    const req = getDispatchableAlertEventsQuery();
+
+    expect(req.query).toContain('subject = CASE(');
+  });
+
+  it('drops rows whose subject could not be resolved, before any aggregation', () => {
+    const req = getDispatchableAlertEventsQuery();
+
+    expect(req.query).toContain('WHERE subject IS NOT NULL');
+    expect(req.query.indexOf('WHERE subject IS NOT NULL')).toBeLessThan(
+      req.query.indexOf('INLINE STATS')
+    );
+  });
+
+  it('groups INLINE STATS BY subject, group_hash (not rule_id, group_hash)', () => {
+    const req = getDispatchableAlertEventsQuery();
+
+    expect(req.query).toContain('BY subject, group_hash');
+    expect(req.query).not.toContain('BY rule_id, group_hash');
+  });
+
+  it('groups STATS BY subject, group_hash, episode_id', () => {
+    const req = getDispatchableAlertEventsQuery();
+
+    expect(req.query).toContain('BY subject, group_hash, episode_id');
+  });
+
+  it('projects source and space_id via LAST aggregation', () => {
+    const req = getDispatchableAlertEventsQuery();
+
+    expect(req.query).toContain('source = LAST(source, @timestamp) WHERE type IS NOT NULL');
+    expect(req.query).toContain('space_id = LAST(space_id, @timestamp) WHERE type IS NOT NULL');
+    expect(req.query).toContain('KEEP last_event_timestamp, rule_id, source, space_id,');
   });
 
   it('sorts by timestamp ascending with a limit', () => {
@@ -190,7 +226,7 @@ describe('getAlertEpisodeSuppressionsQueries', () => {
     expect(getAlertEpisodeSuppressionsQueries([])).toEqual([]);
   });
 
-  it('uses CONCAT + IN to filter by (rule_id, group_hash) pairs', () => {
+  it('uses CONCAT + IN to filter by (subject, group_hash) pairs', () => {
     const episodes = [
       createAlertEpisode({ rule_id: 'rule-1', group_hash: 'hash-1' }),
       createAlertEpisode({ rule_id: 'rule-2', group_hash: 'hash-2' }),
@@ -199,7 +235,7 @@ describe('getAlertEpisodeSuppressionsQueries', () => {
     const requests = getAlertEpisodeSuppressionsQueries(episodes);
 
     expect(requests).toHaveLength(1);
-    expect(requests[0].query).toContain('CONCAT(rule_id, "::", group_hash)');
+    expect(requests[0].query).toContain('CONCAT(subject, "::", group_hash)');
     expect(requests[0].query).toContain('rule-1::hash-1');
     expect(requests[0].query).toContain('rule-2::hash-2');
   });
@@ -243,6 +279,24 @@ describe('getAlertEpisodeSuppressionsQueries', () => {
     expect(requests[0].query).toContain('expiry > "2026-01-22T08:00:00.000Z"::DATETIME');
   });
 
+  it('classifies snooze rows by expiry instead of pre-filtering expired ones', () => {
+    const requests = getAlertEpisodeSuppressionsQueries([createAlertEpisode()]);
+
+    // Expired snoozes must stay in the row set so LAST() still sees them: dropping them before
+    // LAST() would resurrect an older snooze (e.g. an indefinite one) as the latest snooze action.
+    expect(requests[0].query).not.toContain('action_type != "snooze"');
+    expect(requests[0].query).toContain('action_type == "snooze", "snooze_expired"');
+    expect(requests[0].query).toContain('LAST(_snooze_action, @timestamp)');
+  });
+
+  it('retains indefinite snoozes (no expiry) as active snoozes', () => {
+    const requests = getAlertEpisodeSuppressionsQueries([createAlertEpisode()]);
+
+    // `expiry > <ts>` alone evaluates to NULL when expiry is NULL (ES|QL null comparison), which
+    // would misclassify indefinite snoozes as expired. `expiry IS NULL` marks them active.
+    expect(requests[0].query).toContain('expiry IS NULL OR expiry > ');
+  });
+
   it('falls back to epoch when all timestamps are invalid', () => {
     const episodes = [createAlertEpisode({ last_event_timestamp: 'not-a-date' })];
 
@@ -271,11 +325,12 @@ describe('getAlertEpisodeSuppressionsQueries', () => {
     expect(requests[0].query).toContain('last_deactivate_action == "deactivate", TRUE');
   });
 
-  it('keeps the expected output columns', () => {
+  it('keeps the expected output columns including source and rule_id', () => {
     const requests = getAlertEpisodeSuppressionsQueries([createAlertEpisode()]);
 
+    expect(requests[0].query).toContain('rule_id = LAST(rule_id, @timestamp)');
     expect(requests[0].query).toContain(
-      'KEEP rule_id, group_hash, episode_id, should_suppress, last_ack_action, last_deactivate_action, last_snooze_action'
+      'KEEP rule_id, group_hash, episode_id, should_suppress, last_ack_action, last_deactivate_action, last_snooze_action, source'
     );
   });
 
@@ -296,7 +351,7 @@ describe('getAlertEpisodeSuppressionsQueries', () => {
     const requests = getAlertEpisodeSuppressionsQueries(episodes);
 
     expect(requests).toHaveLength(1);
-    expect(requests[0].query).toContain('CONCAT(rule_id, "::", group_hash)');
+    expect(requests[0].query).toContain('CONCAT(subject, "::", group_hash)');
     expect(requests[0].query).toContain('rule-0::hash-0');
     expect(requests[0].query).toContain('rule-499::hash-499');
   });
@@ -336,6 +391,98 @@ describe('getAlertEpisodeSuppressionsQueries', () => {
     for (const request of requests) {
       expect(request.query).toContain('expiry > "2026-03-01T00:00:00.000Z"::DATETIME');
     }
+  });
+
+  it('computes subject via CASE to distinguish internal from external episodes', () => {
+    const requests = getAlertEpisodeSuppressionsQueries([createAlertEpisode()]);
+
+    expect(requests[0].query).toContain(
+      'subject = CASE(source IS NULL OR source == "internal", rule_id, CONCAT(space_id, "::", source))'
+    );
+  });
+
+  it('builds _pair_key from subject (not rule_id directly)', () => {
+    const requests = getAlertEpisodeSuppressionsQueries([createAlertEpisode()]);
+
+    expect(requests[0].query).toContain('CONCAT(subject, "::", group_hash)');
+    expect(requests[0].query).not.toContain('CONCAT(rule_id, "::", group_hash)');
+  });
+
+  it('groups INLINE STATS BY subject, group_hash', () => {
+    const requests = getAlertEpisodeSuppressionsQueries([createAlertEpisode()]);
+
+    expect(requests[0].query).toContain('BY subject, group_hash');
+  });
+
+  it('groups STATS BY subject, group_hash, episode_id', () => {
+    const requests = getAlertEpisodeSuppressionsQueries([createAlertEpisode()]);
+
+    expect(requests[0].query).toContain('BY subject, group_hash, episode_id');
+  });
+
+  it('projects source and space_id via LAST aggregation in STATS', () => {
+    const requests = getAlertEpisodeSuppressionsQueries([createAlertEpisode()]);
+
+    expect(requests[0].query).toContain('source = LAST(source, @timestamp)');
+    expect(requests[0].query).toContain('space_id = LAST(space_id, @timestamp)');
+  });
+
+  it('keeps the expected output columns', () => {
+    const requests = getAlertEpisodeSuppressionsQueries([createAlertEpisode()]);
+
+    expect(requests[0].query).toContain(
+      'KEEP rule_id, group_hash, episode_id, should_suppress, last_ack_action, last_deactivate_action, last_snooze_action, source, space_id'
+    );
+  });
+
+  it('drops rows whose subject could not be resolved', () => {
+    const requests = getAlertEpisodeSuppressionsQueries([createAlertEpisode()]);
+
+    expect(requests[0].query).toContain('WHERE subject IS NOT NULL');
+  });
+
+  it('uses episodeSubject for pair key construction (internal episode uses rule_id)', () => {
+    const episodes = [
+      createAlertEpisode({ source: 'internal', rule_id: 'rule-abc', group_hash: 'hash-abc' }),
+    ];
+
+    const requests = getAlertEpisodeSuppressionsQueries(episodes);
+
+    // For internal episodes, episodeSubject returns rule_id
+    expect(requests[0].query).toContain('rule-abc::hash-abc');
+  });
+
+  it('uses episodeSubject for pair key construction (external episode uses space-scoped source)', () => {
+    const episodes = [
+      createAlertEpisode({ source: 'pagerduty', rule_id: null, group_hash: 'hash-pd' }),
+    ];
+
+    const requests = getAlertEpisodeSuppressionsQueries(episodes);
+
+    // For external episodes, episodeSubject returns `${space_id}::${source}`
+    expect(requests[0].query).toContain('default::pagerduty::hash-pd');
+  });
+
+  it('builds distinct pair keys for the same vendor and group_hash in different spaces', () => {
+    const episodes = [
+      createAlertEpisode({
+        source: 'pagerduty',
+        rule_id: null,
+        space_id: 'space-a',
+        group_hash: 'hash-pd',
+      }),
+      createAlertEpisode({
+        source: 'pagerduty',
+        rule_id: null,
+        space_id: 'space-b',
+        group_hash: 'hash-pd',
+      }),
+    ];
+
+    const requests = getAlertEpisodeSuppressionsQueries(episodes);
+
+    expect(requests[0].query).toContain('space-a::pagerduty::hash-pd');
+    expect(requests[0].query).toContain('space-b::pagerduty::hash-pd');
   });
 });
 

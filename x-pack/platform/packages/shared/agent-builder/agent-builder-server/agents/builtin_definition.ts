@@ -28,6 +28,11 @@ export type BuiltInAgentDefinition = Pick<
   AgentDefinition,
   'id' | 'name' | 'description' | 'labels' | 'avatar_icon' | 'avatar_symbol' | 'avatar_color'
 > & {
+  /**
+   * Id of a registered agent type. Defaults to the chat type (empty base).
+   * The type must be registered before the agent.
+   */
+  type?: string;
   configuration:
     | BuiltInAgentConfiguration
     | ((ctx: AgentConfigContext) => MaybePromise<BuiltInAgentConfiguration>);

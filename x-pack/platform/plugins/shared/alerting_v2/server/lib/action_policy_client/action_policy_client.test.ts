@@ -7,7 +7,7 @@
 
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import type { UserProfileServiceStart } from '@kbn/core-user-profile-server';
-import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import {
   ACTION_POLICY_SAVED_OBJECT_TYPE,
   type ActionPolicySavedObjectAttributes,
@@ -22,9 +22,10 @@ import {
 import type { RulesSavedObjectService } from '../services/rules_saved_object_service/rules_saved_object_service';
 import { createRulesSavedObjectService } from '../services/rules_saved_object_service/rules_saved_object_service.mock';
 import type { UserService } from '../services/user_service/user_service';
-import { createUserProfile, createUserService } from '../services/user_service/user_service.mock';
+import { createUserService } from '../services/user_service/user_service.mock';
 import type { LoggerService } from '../services/logger_service/logger_service';
 import { createLoggerService } from '../services/logger_service/logger_service.mock';
+import { ALERTING_V2_LOG_CODES } from '../errors/error_codes';
 import { ActionPolicyClient } from './action_policy_client';
 
 jest.mock('@kbn/eval-kql', () => ({
@@ -42,6 +43,7 @@ describe('ActionPolicyClient', () => {
   let userProfileService: jest.Mocked<UserProfileServiceStart>;
   let apiKeyService: jest.Mocked<ApiKeyServiceContract>;
   let loggerService: LoggerService;
+  let mockLogger: jest.Mocked<Logger>;
   let mockEncryptedSavedObjects: ReturnType<typeof createMockEncryptedSavedObjects>;
   let mockEsoClient: ReturnType<ReturnType<typeof createMockEncryptedSavedObjects>['getClient']>;
 
@@ -63,7 +65,7 @@ describe('ActionPolicyClient', () => {
     });
     ({ userService, userProfileService } = createUserService());
     apiKeyService = createMockApiKeyService();
-    ({ loggerService } = createLoggerService());
+    ({ loggerService, mockLogger } = createLoggerService());
     mockEncryptedSavedObjects = createMockEncryptedSavedObjects((id) => {
       if (id === 'policy-id-update-1') return { apiKey: 'old-api-key', createdByUser: false };
       if (id === 'policy-id-update-key-1') return { apiKey: 'old-api-key', createdByUser: false };
@@ -84,7 +86,7 @@ describe('ActionPolicyClient', () => {
       loggerService
     );
 
-    userProfileService.getCurrent.mockResolvedValue(createUserProfile('elastic_profile_uid'));
+    userProfileService.getCurrentProfileId.mockResolvedValue('elastic_profile_uid');
 
     mockSavedObjectsClient.create.mockResolvedValue({
       id: 'policy-id-default',
@@ -2076,8 +2078,8 @@ describe('ActionPolicyClient', () => {
     });
   });
 
-  describe('bulkActionActionPolicies', () => {
-    it('issues a single bulkUpdate with partial attrs for mixed actions', async () => {
+  describe('bulkEnableActionPolicies', () => {
+    it('issues a single bulkUpdate stamping enabled:true + audit metadata', async () => {
       mockSavedObjectsClient.bulkUpdate.mockResolvedValueOnce({
         saved_objects: [
           {
@@ -2094,31 +2096,10 @@ describe('ActionPolicyClient', () => {
             references: [],
             version: 'WzQsMV0=',
           },
-          {
-            id: 'policy-3',
-            type: ACTION_POLICY_SAVED_OBJECT_TYPE,
-            attributes: {},
-            references: [],
-            version: 'WzUsMV0=',
-          },
-          {
-            id: 'policy-4',
-            type: ACTION_POLICY_SAVED_OBJECT_TYPE,
-            attributes: {},
-            references: [],
-            version: 'WzYsMV0=',
-          },
         ],
       });
 
-      const res = await client.bulkActionActionPolicies({
-        actions: [
-          { id: 'policy-1', action: 'enable' },
-          { id: 'policy-2', action: 'disable' },
-          { id: 'policy-3', action: 'snooze', snoozedUntil: '2025-06-01T12:00:00.000Z' },
-          { id: 'policy-4', action: 'unsnooze' },
-        ],
-      });
+      const res = await client.bulkEnableActionPolicies({ ids: ['policy-1', 'policy-2'] });
 
       expect(mockSavedObjectsClient.bulkUpdate).toHaveBeenCalledTimes(1);
       expect(mockSavedObjectsClient.bulkUpdate).toHaveBeenCalledWith([
@@ -2135,40 +2116,32 @@ describe('ActionPolicyClient', () => {
           type: ACTION_POLICY_SAVED_OBJECT_TYPE,
           id: 'policy-2',
           attributes: {
-            enabled: false,
-            updatedBy: 'elastic_profile_uid',
-            updatedAt: '2025-01-01T00:00:00.000Z',
-          },
-        },
-        {
-          type: ACTION_POLICY_SAVED_OBJECT_TYPE,
-          id: 'policy-3',
-          attributes: {
-            snoozedUntil: '2025-06-01T12:00:00.000Z',
-            updatedBy: 'elastic_profile_uid',
-            updatedAt: '2025-01-01T00:00:00.000Z',
-          },
-        },
-        {
-          type: ACTION_POLICY_SAVED_OBJECT_TYPE,
-          id: 'policy-4',
-          attributes: {
-            snoozedUntil: null,
+            enabled: true,
             updatedBy: 'elastic_profile_uid',
             updatedAt: '2025-01-01T00:00:00.000Z',
           },
         },
       ]);
-
-      expect(mockSavedObjectsClient.get).not.toHaveBeenCalled();
-      expect(mockSavedObjectsClient.update).not.toHaveBeenCalled();
-
-      expect(res).toEqual({ processed: 4, total: 4, errors: [] });
+      expect(res).toEqual({ affected_count: 2, errors: [] });
     });
 
-    it('collects errors from bulkUpdate response', async () => {
+    it('returns an empty result without touching the store for an empty id list', async () => {
+      const res = await client.bulkEnableActionPolicies({ ids: [] });
+
+      expect(mockSavedObjectsClient.bulkUpdate).not.toHaveBeenCalled();
+      expect(res).toEqual({ affected_count: 0, errors: [] });
+    });
+
+    it('maps per-object SO failures to the canonical bulk-error shape', async () => {
       mockSavedObjectsClient.bulkUpdate.mockResolvedValueOnce({
         saved_objects: [
+          {
+            id: 'ok-policy',
+            type: ACTION_POLICY_SAVED_OBJECT_TYPE,
+            attributes: {},
+            references: [],
+            version: 'WzMsMV0=',
+          },
           {
             id: 'missing-policy',
             type: ACTION_POLICY_SAVED_OBJECT_TYPE,
@@ -2183,17 +2156,25 @@ describe('ActionPolicyClient', () => {
         ],
       });
 
-      const res = await client.bulkActionActionPolicies({
-        actions: [{ id: 'missing-policy', action: 'enable' }],
+      const res = await client.bulkEnableActionPolicies({
+        ids: ['ok-policy', 'missing-policy'],
       });
 
-      expect(res.processed).toBe(0);
-      expect(res.total).toBe(1);
-      expect(res.errors).toHaveLength(1);
-      expect(res.errors[0].id).toBe('missing-policy');
+      expect(res.affected_count).toBe(1);
+      expect(res.errors).toEqual([
+        {
+          id: 'missing-policy',
+          error: {
+            code: 'ACTION_POLICY_NOT_FOUND',
+            message: 'Saved object [action_policy/missing-policy] not found',
+          },
+        },
+      ]);
     });
+  });
 
-    it('handles delete actions via bulkDelete and update actions via bulkUpdate', async () => {
+  describe('bulkDisableActionPolicies', () => {
+    it('issues a single bulkUpdate stamping enabled:false + audit metadata', async () => {
       mockSavedObjectsClient.bulkUpdate.mockResolvedValueOnce({
         saved_objects: [
           {
@@ -2205,136 +2186,173 @@ describe('ActionPolicyClient', () => {
           },
         ],
       });
-      mockSavedObjectsClient.bulkDelete.mockResolvedValueOnce({
-        statuses: [
-          {
-            id: 'policy-2',
-            type: ACTION_POLICY_SAVED_OBJECT_TYPE,
-            success: true,
-          },
-        ],
-      });
 
-      const res = await client.bulkActionActionPolicies({
-        actions: [
-          { id: 'policy-1', action: 'enable' },
-          { id: 'policy-2', action: 'delete' },
-        ],
-      });
+      const res = await client.bulkDisableActionPolicies({ ids: ['policy-1'] });
 
-      expect(mockSavedObjectsClient.bulkUpdate).toHaveBeenCalledTimes(1);
       expect(mockSavedObjectsClient.bulkUpdate).toHaveBeenCalledWith([
         {
           type: ACTION_POLICY_SAVED_OBJECT_TYPE,
           id: 'policy-1',
           attributes: {
-            enabled: true,
+            enabled: false,
             updatedBy: 'elastic_profile_uid',
             updatedAt: '2025-01-01T00:00:00.000Z',
           },
         },
       ]);
-      expect(mockSavedObjectsClient.bulkDelete).toHaveBeenCalledTimes(1);
-      expect(mockSavedObjectsClient.bulkDelete).toHaveBeenCalledWith([
-        { type: ACTION_POLICY_SAVED_OBJECT_TYPE, id: 'policy-2' },
-      ]);
-
-      expect(res).toEqual({ processed: 2, total: 2, errors: [] });
+      expect(res).toEqual({ affected_count: 1, errors: [] });
     });
+  });
 
-    it('handles delete-only bulk actions without calling bulkUpdate', async () => {
-      mockSavedObjectsClient.bulkDelete.mockResolvedValueOnce({
-        statuses: [
-          {
-            id: 'policy-1',
-            type: ACTION_POLICY_SAVED_OBJECT_TYPE,
-            success: true,
-          },
-        ],
-      });
-
-      const res = await client.bulkActionActionPolicies({
-        actions: [{ id: 'policy-1', action: 'delete' }],
-      });
-
-      expect(mockSavedObjectsClient.bulkUpdate).not.toHaveBeenCalled();
-      expect(mockSavedObjectsClient.bulkDelete).toHaveBeenCalledTimes(1);
-
-      expect(res).toEqual({ processed: 1, total: 1, errors: [] });
-    });
-
-    it('collects errors from both bulkUpdate and bulkDelete', async () => {
+  describe('bulkSnoozeActionPolicies', () => {
+    it('issues a single bulkUpdate stamping snoozedUntil + audit metadata', async () => {
       mockSavedObjectsClient.bulkUpdate.mockResolvedValueOnce({
         saved_objects: [
           {
             id: 'policy-1',
             type: ACTION_POLICY_SAVED_OBJECT_TYPE,
-            attributes: {} as ActionPolicySavedObjectAttributes,
+            attributes: {},
             references: [],
-            error: {
-              statusCode: 404,
-              error: 'Not Found',
-              message: 'Not found',
-            },
+            version: 'WzMsMV0=',
           },
         ],
       });
+
+      const res = await client.bulkSnoozeActionPolicies({
+        ids: ['policy-1'],
+        snoozedUntil: '2025-06-01T12:00:00.000Z',
+      });
+
+      expect(mockSavedObjectsClient.bulkUpdate).toHaveBeenCalledWith([
+        {
+          type: ACTION_POLICY_SAVED_OBJECT_TYPE,
+          id: 'policy-1',
+          attributes: {
+            snoozedUntil: '2025-06-01T12:00:00.000Z',
+            updatedBy: 'elastic_profile_uid',
+            updatedAt: '2025-01-01T00:00:00.000Z',
+          },
+        },
+      ]);
+      expect(res).toEqual({ affected_count: 1, errors: [] });
+    });
+
+    it('rejects an invalid snoozedUntil before touching the store', async () => {
+      await expect(
+        client.bulkSnoozeActionPolicies({ ids: ['policy-1'], snoozedUntil: 'not-a-date' })
+      ).rejects.toMatchObject({ output: { statusCode: 400 } });
+
+      expect(mockSavedObjectsClient.bulkUpdate).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('bulkUnsnoozeActionPolicies', () => {
+    it('issues a single bulkUpdate stamping snoozedUntil:null + audit metadata', async () => {
+      mockSavedObjectsClient.bulkUpdate.mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: 'policy-1',
+            type: ACTION_POLICY_SAVED_OBJECT_TYPE,
+            attributes: {},
+            references: [],
+            version: 'WzMsMV0=',
+          },
+        ],
+      });
+
+      const res = await client.bulkUnsnoozeActionPolicies({ ids: ['policy-1'] });
+
+      expect(mockSavedObjectsClient.bulkUpdate).toHaveBeenCalledWith([
+        {
+          type: ACTION_POLICY_SAVED_OBJECT_TYPE,
+          id: 'policy-1',
+          attributes: {
+            snoozedUntil: null,
+            updatedBy: 'elastic_profile_uid',
+            updatedAt: '2025-01-01T00:00:00.000Z',
+          },
+        },
+      ]);
+      expect(res).toEqual({ affected_count: 1, errors: [] });
+    });
+  });
+
+  describe('bulkDeleteActionPolicies', () => {
+    it('returns an empty result without touching the store for an empty id list', async () => {
+      const res = await client.bulkDeleteActionPolicies({ ids: [] });
+
+      expect(mockSavedObjectsClient.bulkDelete).not.toHaveBeenCalled();
+      expect(res).toEqual({ affected_count: 0, errors: [] });
+    });
+
+    it('issues a single bulkDelete and reports affected_count', async () => {
+      mockSavedObjectsClient.bulkDelete.mockResolvedValueOnce({
+        statuses: [
+          { id: 'policy-1', type: ACTION_POLICY_SAVED_OBJECT_TYPE, success: true },
+          { id: 'policy-2', type: ACTION_POLICY_SAVED_OBJECT_TYPE, success: true },
+        ],
+      });
+
+      const res = await client.bulkDeleteActionPolicies({ ids: ['policy-1', 'policy-2'] });
+
+      expect(mockSavedObjectsClient.bulkDelete).toHaveBeenCalledTimes(1);
+      expect(mockSavedObjectsClient.bulkDelete).toHaveBeenCalledWith([
+        { type: ACTION_POLICY_SAVED_OBJECT_TYPE, id: 'policy-1' },
+        { type: ACTION_POLICY_SAVED_OBJECT_TYPE, id: 'policy-2' },
+      ]);
+      expect(res).toEqual({ affected_count: 2, errors: [] });
+    });
+
+    it('maps per-object SO failures to the canonical bulk-error shape', async () => {
       mockSavedObjectsClient.bulkDelete.mockResolvedValueOnce({
         statuses: [
           {
             id: 'policy-2',
             type: ACTION_POLICY_SAVED_OBJECT_TYPE,
             success: false,
-            error: {
-              statusCode: 404,
-              error: 'Not Found',
-              message: 'Not found',
-            },
+            error: { statusCode: 404, error: 'Not Found', message: 'Not found' },
           },
         ],
       });
 
-      const res = await client.bulkActionActionPolicies({
-        actions: [
-          { id: 'policy-1', action: 'enable' },
-          { id: 'policy-2', action: 'delete' },
-        ],
-      });
+      const res = await client.bulkDeleteActionPolicies({ ids: ['policy-2'] });
 
-      expect(res.processed).toBe(0);
-      expect(res.total).toBe(2);
-      expect(res.errors).toHaveLength(2);
+      expect(res.affected_count).toBe(0);
+      expect(res.errors).toEqual([
+        { id: 'policy-2', error: { code: 'ACTION_POLICY_NOT_FOUND', message: 'Not found' } },
+      ]);
     });
 
-    it('invalidates API keys for successfully bulk-deleted policies', async () => {
+    /**
+     * Wires the PIT finder to return a decrypted auth block per id so the
+     * bulk-delete path has keys to queue for invalidation.
+     */
+    const mockDecryptedAuthFor = (
+      policies: Array<{ id: string; apiKey: string; createdByUser?: boolean }>
+    ) => {
       const esoClient = mockEncryptedSavedObjects.getClient();
       (esoClient.createPointInTimeFinderDecryptedAsInternalUser as jest.Mock).mockResolvedValueOnce(
         {
           async *find() {
             yield {
-              saved_objects: [
-                {
-                  id: 'policy-del-1',
-                  type: ACTION_POLICY_SAVED_OBJECT_TYPE,
-                  attributes: {
-                    auth: { apiKey: 'key-1', createdByUser: false, owner: 'test-user' },
-                  },
-                  references: [],
-                },
-                {
-                  id: 'policy-del-2',
-                  type: ACTION_POLICY_SAVED_OBJECT_TYPE,
-                  attributes: {
-                    auth: { apiKey: 'key-2', createdByUser: false, owner: 'test-user' },
-                  },
-                  references: [],
-                },
-              ],
+              saved_objects: policies.map(({ id, apiKey, createdByUser = false }) => ({
+                id,
+                type: ACTION_POLICY_SAVED_OBJECT_TYPE,
+                attributes: { auth: { apiKey, createdByUser, owner: 'test-user' } },
+                references: [],
+              })),
             };
           },
           close: jest.fn(),
         }
       );
+    };
+
+    it('invalidates API keys for bulk-deleted policies in a single batched call', async () => {
+      mockDecryptedAuthFor([
+        { id: 'policy-del-1', apiKey: 'key-1' },
+        { id: 'policy-del-2', apiKey: 'key-2' },
+      ]);
       mockSavedObjectsClient.bulkDelete.mockResolvedValueOnce({
         statuses: [
           { id: 'policy-del-1', type: ACTION_POLICY_SAVED_OBJECT_TYPE, success: true },
@@ -2342,49 +2360,143 @@ describe('ActionPolicyClient', () => {
         ],
       });
 
-      const res = await client.bulkActionActionPolicies({
-        actions: [
-          { id: 'policy-del-1', action: 'delete' },
-          { id: 'policy-del-2', action: 'delete' },
+      const res = await client.bulkDeleteActionPolicies({
+        ids: ['policy-del-1', 'policy-del-2'],
+      });
+
+      expect(res).toEqual({ affected_count: 2, errors: [] });
+      expect(apiKeyService.markApiKeysForInvalidation).toHaveBeenCalledTimes(1);
+      expect(apiKeyService.markApiKeysForInvalidation).toHaveBeenCalledWith(['key-1', 'key-2']);
+    });
+
+    it('queues API keys for invalidation before deleting the saved objects', async () => {
+      mockDecryptedAuthFor([{ id: 'policy-del-order', apiKey: 'key-order' }]);
+      mockSavedObjectsClient.bulkDelete.mockResolvedValueOnce({
+        statuses: [
+          { id: 'policy-del-order', type: ACTION_POLICY_SAVED_OBJECT_TYPE, success: true },
         ],
       });
 
-      expect(res).toEqual({ processed: 2, total: 2, errors: [] });
-      expect(apiKeyService.markApiKeysForInvalidation).toHaveBeenCalledTimes(2);
-      expect(apiKeyService.markApiKeysForInvalidation).toHaveBeenCalledWith(['key-1']);
-      expect(apiKeyService.markApiKeysForInvalidation).toHaveBeenCalledWith(['key-2']);
+      await client.bulkDeleteActionPolicies({ ids: ['policy-del-order'] });
+
+      const invalidationOrder =
+        apiKeyService.markApiKeysForInvalidation.mock.invocationCallOrder[0];
+      const deleteOrder = mockSavedObjectsClient.bulkDelete.mock.invocationCallOrder[0];
+      expect(invalidationOrder).toBeLessThan(deleteOrder);
+    });
+
+    it('leaves a policy in place when its API key cannot be queued for invalidation', async () => {
+      mockDecryptedAuthFor([
+        { id: 'policy-del-ok', apiKey: 'key-ok' },
+        { id: 'policy-del-stuck', apiKey: 'key-stuck' },
+      ]);
+      apiKeyService.markApiKeysForInvalidation.mockResolvedValueOnce([
+        { success: true },
+        { success: false, message: 'index is read-only' },
+      ]);
+      mockSavedObjectsClient.bulkDelete.mockResolvedValueOnce({
+        statuses: [{ id: 'policy-del-ok', type: ACTION_POLICY_SAVED_OBJECT_TYPE, success: true }],
+      });
+
+      const res = await client.bulkDeleteActionPolicies({
+        ids: ['policy-del-ok', 'policy-del-stuck'],
+      });
+
+      // The blocked policy never reaches the delete phase, so its still-valid
+      // API key keeps a saved object referencing it.
+      expect(mockSavedObjectsClient.bulkDelete).toHaveBeenCalledWith([
+        { type: ACTION_POLICY_SAVED_OBJECT_TYPE, id: 'policy-del-ok' },
+      ]);
+      expect(res.affected_count).toBe(1);
+      expect(res.errors).toEqual([
+        {
+          id: 'policy-del-stuck',
+          error: {
+            code: 'API_KEY_INVALIDATION_FAILED',
+            message:
+              'Action policy with id "policy-del-stuck" was not deleted because its API key could not be queued for invalidation: index is read-only',
+          },
+        },
+      ]);
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        expect.stringContaining('Skipped deleting action policy(ies) [policy-del-stuck]'),
+        expect.objectContaining({
+          error: expect.objectContaining({
+            code: ALERTING_V2_LOG_CODES.ACTION_POLICY_DELETE_BLOCKED_BY_API_KEY_INVALIDATION,
+          }),
+        })
+      );
+    });
+
+    it('skips the delete round-trip entirely when every invalidation fails', async () => {
+      mockDecryptedAuthFor([{ id: 'policy-del-stuck', apiKey: 'key-stuck' }]);
+      apiKeyService.markApiKeysForInvalidation.mockResolvedValueOnce([
+        { success: false, message: 'index is read-only' },
+      ]);
+
+      const res = await client.bulkDeleteActionPolicies({ ids: ['policy-del-stuck'] });
+
+      expect(mockSavedObjectsClient.bulkDelete).not.toHaveBeenCalled();
+      expect(res.affected_count).toBe(0);
+      expect(res.errors).toHaveLength(1);
+    });
+
+    it('logs divergence when keys were queued but the delete failed', async () => {
+      mockDecryptedAuthFor([{ id: 'policy-del-diverged', apiKey: 'key-diverged' }]);
+      mockSavedObjectsClient.bulkDelete.mockResolvedValueOnce({
+        statuses: [
+          {
+            id: 'policy-del-diverged',
+            type: ACTION_POLICY_SAVED_OBJECT_TYPE,
+            success: false,
+            error: { statusCode: 409, error: 'Conflict', message: 'version conflict' },
+          },
+        ],
+      });
+
+      const res = await client.bulkDeleteActionPolicies({ ids: ['policy-del-diverged'] });
+
+      expect(res.affected_count).toBe(0);
+      expect(res.errors).toEqual([
+        {
+          id: 'policy-del-diverged',
+          error: { code: 'ACTION_POLICY_VERSION_CONFLICT', message: 'version conflict' },
+        },
+      ]);
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'Queued API key(s) for action policy(ies) [policy-del-diverged] for invalidation but failed to delete them'
+        ),
+        expect.objectContaining({
+          error: expect.objectContaining({
+            code: ALERTING_V2_LOG_CODES.ACTION_POLICY_API_KEY_INVALIDATION_DIVERGED,
+          }),
+        })
+      );
+    });
+
+    it('does not log divergence when the delete succeeds', async () => {
+      mockDecryptedAuthFor([{ id: 'policy-del-clean', apiKey: 'key-clean' }]);
+      mockSavedObjectsClient.bulkDelete.mockResolvedValueOnce({
+        statuses: [
+          { id: 'policy-del-clean', type: ACTION_POLICY_SAVED_OBJECT_TYPE, success: true },
+        ],
+      });
+
+      await client.bulkDeleteActionPolicies({ ids: ['policy-del-clean'] });
+
+      expect(mockLogger.error).not.toHaveBeenCalled();
     });
 
     it('skips API key invalidation for bulk-deleted policies with createdByUser: true', async () => {
-      const esoClient = mockEncryptedSavedObjects.getClient();
-      (esoClient.createPointInTimeFinderDecryptedAsInternalUser as jest.Mock).mockResolvedValueOnce(
-        {
-          async *find() {
-            yield {
-              saved_objects: [
-                {
-                  id: 'policy-del-user',
-                  type: ACTION_POLICY_SAVED_OBJECT_TYPE,
-                  attributes: {
-                    auth: { apiKey: 'user-key', createdByUser: true, owner: 'test-user' },
-                  },
-                  references: [],
-                },
-              ],
-            };
-          },
-          close: jest.fn(),
-        }
-      );
+      mockDecryptedAuthFor([{ id: 'policy-del-user', apiKey: 'user-key', createdByUser: true }]);
       mockSavedObjectsClient.bulkDelete.mockResolvedValueOnce({
         statuses: [{ id: 'policy-del-user', type: ACTION_POLICY_SAVED_OBJECT_TYPE, success: true }],
       });
 
-      const res = await client.bulkActionActionPolicies({
-        actions: [{ id: 'policy-del-user', action: 'delete' }],
-      });
+      const res = await client.bulkDeleteActionPolicies({ ids: ['policy-del-user'] });
 
-      expect(res).toEqual({ processed: 1, total: 1, errors: [] });
+      expect(res).toEqual({ affected_count: 1, errors: [] });
       expect(apiKeyService.markApiKeysForInvalidation).not.toHaveBeenCalled();
     });
 
@@ -2397,12 +2509,113 @@ describe('ActionPolicyClient', () => {
         statuses: [{ id: 'policy-del-err', type: ACTION_POLICY_SAVED_OBJECT_TYPE, success: true }],
       });
 
-      const res = await client.bulkActionActionPolicies({
-        actions: [{ id: 'policy-del-err', action: 'delete' }],
+      const res = await client.bulkDeleteActionPolicies({ ids: ['policy-del-err'] });
+
+      expect(res).toEqual({ affected_count: 1, errors: [] });
+      expect(apiKeyService.markApiKeysForInvalidation).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('bulkUpdateActionPoliciesApiKey', () => {
+    const existingAttributes: ActionPolicySavedObjectAttributes = {
+      name: 'existing-policy',
+      description: 'existing-policy description',
+      enabled: true,
+      destinations: [{ type: 'workflow', id: 'existing-workflow' }],
+      auth: { apiKey: 'old-api-key', owner: 'old-user', createdByUser: false },
+      createdBy: 'creator_profile_uid',
+      createdAt: '2024-12-01T00:00:00.000Z',
+      updatedBy: 'updater_profile_uid',
+      updatedAt: '2024-12-01T00:00:00.000Z',
+    };
+
+    it('rotates the API key for every id and reports affected_count', async () => {
+      mockSavedObjectsClient.get.mockResolvedValue({
+        id: 'policy-1',
+        type: ACTION_POLICY_SAVED_OBJECT_TYPE,
+        references: [],
+        version: 'WzEsMV0=',
+        attributes: existingAttributes,
       });
 
-      expect(res).toEqual({ processed: 1, total: 1, errors: [] });
-      expect(apiKeyService.markApiKeysForInvalidation).not.toHaveBeenCalled();
+      const res = await client.bulkUpdateActionPoliciesApiKey({ ids: ['policy-1', 'policy-2'] });
+
+      expect(mockSavedObjectsClient.update).toHaveBeenCalledTimes(2);
+      expect(res).toEqual({ affected_count: 2, errors: [] });
+    });
+
+    it('collects a per-item error when a single rotation fails and keeps going', async () => {
+      mockSavedObjectsClient.get
+        .mockResolvedValueOnce({
+          id: 'policy-ok',
+          type: ACTION_POLICY_SAVED_OBJECT_TYPE,
+          references: [],
+          version: 'WzEsMV0=',
+          attributes: existingAttributes,
+        })
+        .mockRejectedValueOnce(
+          SavedObjectsErrorHelpers.createGenericNotFoundError(
+            ACTION_POLICY_SAVED_OBJECT_TYPE,
+            'policy-missing'
+          )
+        );
+
+      const res = await client.bulkUpdateActionPoliciesApiKey({
+        ids: ['policy-ok', 'policy-missing'],
+      });
+
+      expect(res.affected_count).toBe(1);
+      expect(res.errors).toHaveLength(1);
+      expect(res.errors[0].id).toBe('policy-missing');
+      expect(res.errors[0].error.code).toBe('ACTION_POLICY_NOT_FOUND');
+    });
+
+    it('rotates keys concurrently instead of one-at-a-time', async () => {
+      mockSavedObjectsClient.get.mockResolvedValue({
+        id: 'policy',
+        type: ACTION_POLICY_SAVED_OBJECT_TYPE,
+        references: [],
+        version: 'WzEsMV0=',
+        attributes: existingAttributes,
+      });
+
+      const ids = ['policy-1', 'policy-2', 'policy-3'];
+      let inFlight = 0;
+
+      // Every rotation parks on this shared gate until the test releases it, so
+      // they all stay in flight at once. `allInFlight` resolves only when the
+      // last rotation reaches the gate — which can only happen if they run
+      // concurrently. A sequential loop keeps `inFlight` at 1, never resolves
+      // `allInFlight`, and times the test out.
+      let releaseAll: () => void = () => {};
+      const gate = new Promise<void>((resolve) => {
+        releaseAll = resolve;
+      });
+
+      let markAllInFlight: () => void = () => {};
+      const allInFlight = new Promise<void>((resolve) => {
+        markAllInFlight = resolve;
+      });
+
+      apiKeyService.create.mockImplementation(async () => {
+        inFlight += 1;
+        if (inFlight === ids.length) {
+          markAllInFlight();
+        }
+        await gate;
+        return { apiKey: 'encoded-es-api-key', owner: 'test-user', createdByUser: false };
+      });
+
+      const resultPromise = client.bulkUpdateActionPoliciesApiKey({ ids });
+
+      await allInFlight;
+
+      // All rotations reached key creation before any of them completed.
+      expect(apiKeyService.create).toHaveBeenCalledTimes(ids.length);
+
+      releaseAll();
+
+      expect(await resultPromise).toEqual({ affected_count: 3, errors: [] });
     });
   });
 
@@ -2502,6 +2715,84 @@ describe('ActionPolicyClient', () => {
         'policy-id-del-1'
       );
       expect(apiKeyService.markApiKeysForInvalidation).toHaveBeenCalledWith(['some-key']);
+      expect(apiKeyService.markApiKeysForInvalidation.mock.invocationCallOrder[0]).toBeLessThan(
+        mockSavedObjectsClient.delete.mock.invocationCallOrder[0]
+      );
+    });
+
+    it('does not delete the policy when its API key cannot be queued for invalidation', async () => {
+      mockSavedObjectsClient.get.mockResolvedValueOnce({
+        id: 'policy-id-del-1',
+        type: ACTION_POLICY_SAVED_OBJECT_TYPE,
+        references: [],
+        version: 'WzEsMV0=',
+        attributes: {
+          name: 'policy-to-delete',
+          description: '',
+          destinations: [],
+          auth: { apiKey: 'some-key', owner: 'test-user', createdByUser: false },
+          createdBy: 'elastic_profile_uid',
+          createdAt: '2025-01-01T00:00:00.000Z',
+          updatedBy: 'elastic_profile_uid',
+          updatedAt: '2025-01-01T00:00:00.000Z',
+        },
+      });
+      apiKeyService.markApiKeysForInvalidation.mockResolvedValueOnce([
+        { success: false, message: 'index is read-only' },
+      ]);
+
+      await expect(client.deleteActionPolicy({ id: 'policy-id-del-1' })).rejects.toMatchObject({
+        output: { statusCode: 500 },
+        data: {
+          code: 'API_KEY_INVALIDATION_FAILED',
+          details: { action_policy_id: 'policy-id-del-1' },
+        },
+      });
+
+      expect(mockSavedObjectsClient.delete).not.toHaveBeenCalled();
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        expect.stringContaining('Skipped deleting action policy(ies) [policy-id-del-1]'),
+        expect.objectContaining({
+          error: expect.objectContaining({
+            code: ALERTING_V2_LOG_CODES.ACTION_POLICY_DELETE_BLOCKED_BY_API_KEY_INVALIDATION,
+          }),
+        })
+      );
+    });
+
+    it('logs divergence when the key was queued but the delete failed', async () => {
+      mockSavedObjectsClient.get.mockResolvedValueOnce({
+        id: 'policy-id-del-1',
+        type: ACTION_POLICY_SAVED_OBJECT_TYPE,
+        references: [],
+        version: 'WzEsMV0=',
+        attributes: {
+          name: 'policy-to-delete',
+          description: '',
+          destinations: [],
+          auth: { apiKey: 'some-key', owner: 'test-user', createdByUser: false },
+          createdBy: 'elastic_profile_uid',
+          createdAt: '2025-01-01T00:00:00.000Z',
+          updatedBy: 'elastic_profile_uid',
+          updatedAt: '2025-01-01T00:00:00.000Z',
+        },
+      });
+      mockSavedObjectsClient.delete.mockRejectedValueOnce(new Error('delete failed'));
+
+      await expect(client.deleteActionPolicy({ id: 'policy-id-del-1' })).rejects.toThrow(
+        'delete failed'
+      );
+
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'Queued API key(s) for action policy(ies) [policy-id-del-1] for invalidation but failed to delete them'
+        ),
+        expect.objectContaining({
+          error: expect.objectContaining({
+            code: ALERTING_V2_LOG_CODES.ACTION_POLICY_API_KEY_INVALIDATION_DIVERGED,
+          }),
+        })
+      );
     });
 
     it('throws 404 when action policy is not found', async () => {
@@ -2777,9 +3068,10 @@ describe('ActionPolicyClient', () => {
       const result = await client.matchActionPoliciesForRule({ ruleId: 'missing-rule' });
 
       expect(result.items).toHaveLength(0);
+      expect(result.total).toBe(0);
     });
 
-    it('returns global APs for policies with no matcher', async () => {
+    it('returns global APs for policies with no matcher, along with the space-scoped total', async () => {
       jest.spyOn(rulesSavedObjectService, 'get').mockResolvedValueOnce({
         id: 'rule-1',
         attributes: ruleAttributes as never,
@@ -2787,7 +3079,10 @@ describe('ActionPolicyClient', () => {
       });
 
       mockSavedObjectsClient.find.mockResolvedValueOnce(
-        makeFindResponse([{ id: 'ap-catchall', attributes: { ...baseAttributes, matcher: null } }])
+        makeFindResponse(
+          [{ id: 'ap-catchall', attributes: { ...baseAttributes, matcher: null } }],
+          150
+        )
       );
 
       const result = await client.matchActionPoliciesForRule({ ruleId: 'rule-1' });
@@ -2795,6 +3090,7 @@ describe('ActionPolicyClient', () => {
       expect(result.items).toHaveLength(1);
       expect(result.items[0].category).toBe('global');
       expect(result.items[0].actionPolicy.id).toBe('ap-catchall');
+      expect(result.total).toBe(150);
     });
 
     it('returns global-filtered APs for policies where evaluateKql returns true', async () => {

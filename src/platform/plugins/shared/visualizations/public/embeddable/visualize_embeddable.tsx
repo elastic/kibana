@@ -98,6 +98,20 @@ export const visualizeEmbeddableFactory: EmbeddablePublicDefinition<
       initialProjectRoutingOverrides
     );
 
+    const usesEsql$ = new BehaviorSubject<boolean>(
+      initialVisInstance.type.usesEsql?.(initialVisInstance.params) ?? false
+    );
+
+    const getUsedDataViews = async (visInstance: Vis) => {
+      if (visInstance.type.getUsedIndexPattern) {
+        return visInstance.type.getUsedIndexPattern(visInstance.params);
+      }
+      return visInstance.data.indexPattern ? [visInstance.data.indexPattern] : [];
+    };
+    const dataViews$ = new BehaviorSubject<DataView[] | undefined>(
+      await getUsedDataViews(initialVisInstance)
+    );
+
     // Track UI state
     const onUiStateChange = () => serializedVis$.next(vis$.getValue().serialize());
 
@@ -117,6 +131,22 @@ export const visualizeEmbeddableFactory: EmbeddablePublicDefinition<
             if (!isEqual(projectRoutingOverrides$.getValue(), newOverrides)) {
               projectRoutingOverrides$.next(newOverrides);
             }
+          }
+
+          const usesEsql = vis.type.usesEsql?.(vis.params) ?? false;
+          if (usesEsql$.getValue() !== usesEsql) {
+            usesEsql$.next(usesEsql);
+          }
+
+          try {
+            const nextDataViews = await getUsedDataViews(vis);
+            const currentDataViewIds = (dataViews$.getValue() ?? []).map(({ id }) => id);
+            const nextDataViewIds = nextDataViews.map(({ id }) => id);
+            if (!isEqual(currentDataViewIds, nextDataViewIds)) {
+              dataViews$.next(nextDataViews);
+            }
+          } catch {
+            // keep the previously resolved data views if resolution fails
           }
 
           const { params, abortController } = await getExpressionParams();
@@ -158,16 +188,6 @@ export const visualizeEmbeddableFactory: EmbeddablePublicDefinition<
       : undefined;
 
     const inspectorAdapters$ = new BehaviorSubject<Record<string, unknown>>({});
-
-    // Track data views
-    let initialDataViews: DataView[] | undefined = [];
-    if (initialVisInstance.data.indexPattern)
-      initialDataViews = [initialVisInstance.data.indexPattern];
-    if (initialVisInstance.type.getUsedIndexPattern) {
-      initialDataViews = await initialVisInstance.type.getUsedIndexPattern(
-        initialVisInstance.params
-      );
-    }
 
     const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
 
@@ -254,8 +274,9 @@ export const visualizeEmbeddableFactory: EmbeddablePublicDefinition<
       ...stateApi,
       defaultTitle$,
       dataLoading$,
-      dataViews$: new BehaviorSubject<DataView[] | undefined>(initialDataViews),
+      dataViews$,
       projectRoutingOverrides$,
+      usesEsql$,
       rendered$: hasRendered$,
       supportedTriggers: () => [
         ON_OPEN_PANEL_MENU,
@@ -344,6 +365,7 @@ export const visualizeEmbeddableFactory: EmbeddablePublicDefinition<
           const projectRouting = apiPublishesProjectRouting(parentApi)
             ? data.projectRouting
             : undefined;
+          const isApproximate = data.isApproximate;
           const searchSessionId = apiPublishesSearchSession(parentApi) ? data.searchSessionId : '';
           searchSessionId$.next(searchSessionId);
           const settings = apiPublishesSettings(parentApi)
@@ -380,6 +402,7 @@ export const visualizeEmbeddableFactory: EmbeddablePublicDefinition<
             return await getExpressionRendererProps({
               unifiedSearch,
               projectRouting,
+              isApproximate,
               vis: vis$.getValue(),
               settings,
               disableTriggers,

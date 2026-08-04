@@ -29,6 +29,7 @@ import { findLiveQueryRequestQuerySchema } from '../../../common/api';
 import { generateTablePaginationOptions } from '../../../common/utils/build_query';
 import { getResultCountsForActions } from '../../lib/get_result_counts_for_actions';
 import { hasConnectedRemoteClusters } from '../../utils/ccs_utils';
+import { OSQUERY_SEARCH_STRATEGY } from '../../search_strategy/constants';
 import { findLiveQueryResponseSchema } from './response_schemas';
 
 export const findLiveQueryRoute = (
@@ -87,7 +88,7 @@ export const findLiveQueryRoute = (
                 },
                 spaceId,
               },
-              { abortSignal, strategy: 'osquerySearchStrategy' }
+              { abortSignal, strategy: OSQUERY_SEARCH_STRATEGY }
             )
           );
 
@@ -134,7 +135,7 @@ export const findLiveQueryRoute = (
                 esClient,
                 allActionIds,
                 spaceId,
-                integrationNamespaces ?? [spaceId],
+                integrationNamespaces,
                 ccsEnabled
               );
 

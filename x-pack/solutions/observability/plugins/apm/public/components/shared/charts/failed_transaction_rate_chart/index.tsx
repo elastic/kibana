@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
 import type { APIReturnType } from '@kbn/apm-api-shared';
+import { unit } from '@kbn/apm-common';
 import { useShouldShowAnomalyUi } from '../../../../hooks/use_should_show_anomaly_ui';
 import { usePreviousPeriodLabel } from '../../../../hooks/use_previous_period_text';
 import { isTimeComparison } from '../../time_comparison/get_comparison_options';
@@ -32,7 +33,6 @@ import { OpenInDiscover } from '../../links/discover_links/open_in_discover';
 import { APM_CHART_EBT_ELEMENTS } from '../ebt_constants';
 import { OpenAnomalies } from '../../links/machine_learning_links/open_anomalies';
 import { useAnomalyThreshold } from '../../../../hooks/use_anomaly_threshold';
-import { unit } from '../../../../utils/style';
 
 function yLabelFormat(y?: number | null) {
   return asPercent(y || 0, 1);

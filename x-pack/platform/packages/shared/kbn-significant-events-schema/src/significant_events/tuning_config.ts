@@ -27,6 +27,8 @@ export const significantEventsTuningConfigSchema = z.object({
   max_entity_filters: z.number(),
   semantic_min_score: z.number(),
   rrf_rank_constant: z.number(),
+  sampling_timeout_ms: z.number(),
+  query_validation_timeout_ms: z.number(),
 });
 
 export type SignificantEventsTuningConfig = z.infer<typeof significantEventsTuningConfigSchema>;
@@ -44,6 +46,8 @@ export const SIGNIFICANT_EVENTS_TUNING_FIELD_BOUNDS: Record<
   max_entity_filters: { min: 1, max: 50, integer: true },
   semantic_min_score: { min: 0, max: 1 },
   rrf_rank_constant: { min: 1, max: 100, integer: true },
+  sampling_timeout_ms: { min: 1000, max: 240_000, integer: true },
+  query_validation_timeout_ms: { min: 1000, max: 240_000, integer: true },
 };
 
 export const DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG: SignificantEventsTuningConfig = {
@@ -56,6 +60,8 @@ export const DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG: SignificantEventsTuningCo
   max_entity_filters: 10,
   semantic_min_score: 0.15,
   rrf_rank_constant: 20,
+  sampling_timeout_ms: 60_000,
+  query_validation_timeout_ms: 10_000,
 };
 
 /**

@@ -86,6 +86,6 @@ export const HISTORY_INDEX_PATTERN = `${getEntityIndexPattern({
   schemaVersion: ENTITY_SCHEMA_VERSION_V2,
   dataset: ENTITY_HISTORY,
   namespace: 'default',
-})}*`;
+})}.*`;
 
-export const ENTRA_SOURCE_INDEX = 'logs-entityanalytics_entra_id.entity-default';
+export const ENTRA_SOURCE_INDEX = 'logs-entityanalytics_entra_id.user-default';

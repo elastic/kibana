@@ -9,6 +9,7 @@
     "@kbn/core-pricing-common",
     "@kbn/projects-solutions-groups",
     "@kbn/controls-schemas",
+    "@kbn/utility-types",
   ],
   "exclude": ["target/**/*"]
 }

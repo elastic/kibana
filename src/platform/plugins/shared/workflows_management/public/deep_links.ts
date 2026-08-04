@@ -28,7 +28,7 @@ export function getDeepLinks({
 }: DeepLinksParams = {}): AppDeepLink[] {
   const links: AppDeepLink[] = [
     {
-      id: WorkflowsPageName.workflows,
+      id: WorkflowsPageName.list,
       title: libraryEnabled
         ? i18n.translate('workflowsManagement.nav.workflowsDeepLinkTitle', {
             defaultMessage: 'Workflows',
@@ -43,7 +43,7 @@ export function getDeepLinks({
     links.push({
       id: WorkflowsPageName.library,
       title: i18n.translate('workflowsManagement.nav.libraryDeepLinkTitle', {
-        defaultMessage: 'Library',
+        defaultMessage: 'Template Library',
       }),
       path: '/library',
       visibleIn: sideNavVisibleIn,

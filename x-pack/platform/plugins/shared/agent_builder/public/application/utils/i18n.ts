@@ -552,16 +552,6 @@ export const labels = {
       breadcrumb: i18n.translate('xpack.agentBuilder.mcpClients.breadcrumb', {
         defaultMessage: 'MCP clients',
       }),
-      techPreviewBadgeLabel: i18n.translate('xpack.agentBuilder.mcpClients.techPreviewBadgeLabel', {
-        defaultMessage: 'Technical preview',
-      }),
-      techPreviewBadgeDescription: i18n.translate(
-        'xpack.agentBuilder.mcpClients.techPreviewBadgeDescription',
-        {
-          defaultMessage:
-            'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
-        }
-      ),
       addMcpClientButtonLabel: i18n.translate(
         'xpack.agentBuilder.mcpClients.addMcpClientButtonLabel',
         {
@@ -612,7 +602,7 @@ export const labels = {
       ),
       name: i18n.translate('xpack.agentBuilder.mcpClients.name', { defaultMessage: 'Name' }),
       connections: i18n.translate('xpack.agentBuilder.mcpClients.connections', {
-        defaultMessage: 'Connections',
+        defaultMessage: 'Active connections',
       }),
       status: i18n.translate('xpack.agentBuilder.mcpClients.status', {
         defaultMessage: 'Status',
@@ -865,7 +855,6 @@ export const labels = {
         defaultMessage: 'Available skills for AI agents: {skillsCount} skills',
         values: { skillsCount },
       }),
-    skillIdLabel: i18n.translate('xpack.agentBuilder.skills.idLabel', { defaultMessage: 'ID' }),
     nameLabel: i18n.translate('xpack.agentBuilder.skills.nameLabel', { defaultMessage: 'Name' }),
     descriptionLabel: i18n.translate('xpack.agentBuilder.skills.descriptionLabel', {
       defaultMessage: 'Description',
@@ -2833,6 +2822,10 @@ export const labels = {
       workflowLabel: i18n.translate('xpack.agentBuilder.overview.editDetails.workflowLabel', {
         defaultMessage: 'Workflows',
       }),
+      workflowAdminOnlyReason: i18n.translate(
+        'xpack.agentBuilder.overview.editDetails.workflowAdminOnlyReason',
+        { defaultMessage: 'Only administrators can configure pre-execution workflows.' }
+      ),
       instructionsTitle: i18n.translate(
         'xpack.agentBuilder.overview.editDetails.instructionsTitle',
         { defaultMessage: 'Custom Instructions' }

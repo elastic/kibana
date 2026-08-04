@@ -166,6 +166,7 @@ export const ChangeHistoryItem = memo(function ChangeHistoryItem({
                       >
                         <EuiText
                           size="xs"
+                          tabIndex={0}
                           css={css`
                             white-space: nowrap;
                             overflow: hidden;
@@ -195,7 +196,7 @@ export const ChangeHistoryItem = memo(function ChangeHistoryItem({
                             {' • '}
                             {changesSummaryTooltip ? (
                               <EuiToolTip position="top" content={changesSummaryTooltip}>
-                                <span data-test-subj="changeHistoryItemChanges">
+                                <span tabIndex={0} data-test-subj="changeHistoryItemChanges">
                                   {i18n.N_CHANGES(item.changes.count)}
                                 </span>
                               </EuiToolTip>

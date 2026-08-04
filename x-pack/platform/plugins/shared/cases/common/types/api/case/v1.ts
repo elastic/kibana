@@ -6,6 +6,7 @@
  */
 
 import * as rt from 'io-ts';
+import { either } from 'fp-ts/Either';
 import {
   MAX_DESCRIPTION_LENGTH,
   MAX_LENGTH_PER_TAG,
@@ -53,6 +54,40 @@ import {
   CaseCustomFieldTextWithValidationValueRt,
   CaseCustomFieldNumberWithValidationValueRt,
 } from '../custom_field/v1';
+
+/**
+ * A positive integer template version (matches the `integer, minimum: 1` contract documented in
+ * the OpenAPI bundle and the zod mirror). Rejects zero, negatives and non-integers at the io-ts
+ * boundary rather than letting a bad value fall through to a generic "not found".
+ */
+const TemplateVersionRt = new rt.Type<number, number, unknown>(
+  'TemplateVersion',
+  rt.number.is,
+  (input, context) =>
+    either.chain(rt.number.validate(input, context), (value) => {
+      if (!Number.isSafeInteger(value) || value < 1) {
+        return rt.failure(input, context, 'The template version must be a positive integer.');
+      }
+      return rt.success(value);
+    }),
+  rt.identity
+);
+
+/**
+ * Template reference accepted on case CREATION. Unlike the stored/domain `CaseTemplate` (and the
+ * PATCH request, where switching templates is an explicit versioned action), `version` may be
+ * omitted here: the server resolves the template's latest version and pins it on the case.
+ */
+export const CaseRequestTemplateRt = rt.intersection([
+  rt.strict({
+    id: rt.string,
+  }),
+  rt.exact(
+    rt.partial({
+      version: TemplateVersionRt,
+    })
+  ),
+]);
 
 const CaseCustomFieldTextWithValidationRt = rt.strict({
   key: rt.string,
@@ -227,7 +262,7 @@ export const CasePostRequestRt = rt.intersection([
        * The list of custom field values of the case.
        */
       customFields: CaseRequestCustomFieldsRt,
-      template: rt.union([CaseTemplate, rt.null]),
+      template: rt.union([CaseRequestTemplateRt, rt.null]),
       [CASE_EXTENDED_FIELDS]: rt.record(rt.string, rt.string),
     })
   ),
@@ -470,6 +505,25 @@ export const CasesFindResponseRt = rt.intersection([
   CasesStatusResponseRt,
 ]);
 
+/**
+ * Response of the internal `_search` API. A superset of the public `_find` response: it adds
+ * `mttr` so the (internal-only) cases list metrics bar can reflect the same query as the table.
+ * `mttr` deliberately lives here and NOT on `CasesFindResponseRt` so the public `_find` contract
+ * (and its generated OpenAPI) never advertises a field the public API does not return.
+ */
+export const CasesSearchResponseRt = rt.intersection([
+  CasesFindResponseRt,
+  rt.exact(
+    rt.partial({
+      /**
+       * The average resolve time in seconds of the cases matching the search, ignoring the
+       * status filter (like the status counts). Null when no matching case has been closed.
+       */
+      mttr: rt.union([rt.number, rt.null]),
+    })
+  ),
+]);
+
 export const CasesSimilarResponseRt = rt.strict({
   cases: rt.array(SimilarCaseRt),
   page: rt.number,
@@ -648,6 +702,7 @@ export type CasesFindRequestWithCustomFields = rt.TypeOf<typeof CasesFindRequest
 export type CasesSearchRequest = rt.TypeOf<typeof CasesSearchRequestRt>;
 export type CasesFindRequestSortFields = rt.TypeOf<typeof CasesFindRequestSortFieldsRt>;
 export type CasesFindResponse = rt.TypeOf<typeof CasesFindResponseRt>;
+export type CasesSearchResponse = rt.TypeOf<typeof CasesSearchResponseRt>;
 export type CasePatchRequest = rt.TypeOf<typeof CasePatchRequestRt>;
 export type CasesPatchRequest = rt.TypeOf<typeof CasesPatchRequestRt>;
 export type UpdateSummary = rt.TypeOf<typeof UpdateSummaryRt>;

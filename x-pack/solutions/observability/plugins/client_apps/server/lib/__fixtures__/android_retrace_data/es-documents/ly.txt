@@ -1,0 +1,82 @@
+{
+  "schema_version": 1,
+  "map_version": "2.2",
+  "obfuscated_class": "ly",
+  "original_class": "co.elastic.otel.android.internal.features.sessionmanager.SessionManager$InnerSession",
+  "source_file": "SessionManager.kt",
+  "methods": {
+    "hashCode": {
+      "mappings": [
+        {
+          "obf_range": [
+            12,
+            15
+          ],
+          "orig_range": [
+            0,
+            0
+          ],
+          "method": "hashCode"
+        },
+        {
+          "obf_range": [
+            12,
+            15
+          ],
+          "orig_range": [
+            0,
+            0
+          ],
+          "method": "hashCode",
+          "class": "SessionManager$InnerSession",
+          "extras": [
+            {
+              "id": "com.android.tools.r8.synthesized"
+            },
+            {
+              "id": "com.android.tools.r8.outlineCallsite",
+              "positions": {
+                "1": 24
+              },
+              "outline": "Lkg;e(JII)I"
+            }
+          ]
+        },
+        {
+          "obf_range": [
+            16,
+            23
+          ],
+          "orig_range": [
+            0,
+            0
+          ],
+          "method": "hashCode"
+        },
+        {
+          "obf_range": [
+            16,
+            23
+          ],
+          "orig_range": [
+            0,
+            0
+          ],
+          "method": "hashCode",
+          "class": "SessionManager$InnerSession"
+        },
+        {
+          "obf_range": [
+            24,
+            24
+          ],
+          "orig_range": [
+            0,
+            0
+          ],
+          "method": "hashCode"
+        }
+      ]
+    }
+  }
+}

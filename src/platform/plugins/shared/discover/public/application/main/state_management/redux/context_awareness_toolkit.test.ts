@@ -169,11 +169,43 @@ describe('createContextAwarenessToolkit', () => {
     stateAdapter.setState(firstState);
     expect(stateAdapter.getState()).toEqual(firstState);
     expect(selectTab(internalState.getState(), tabId).profileState).toEqual({
-      testProfileState: firstState,
+      testProfileState: {
+        uiValue: 'primary',
+        nestedValue: { count: 50 },
+      },
     });
 
     stateAdapter.updateState({ nestedValue: { count: 100 } });
     expect(stateAdapter.getState()).toEqual({ ...firstState, nestedValue: { count: 100 } });
+  });
+
+  it('merges registered defaults when reading partial profile state', async () => {
+    const { internalState, profileStateRegistry, tabId } = await setup();
+    profileStateRegistry.registerDefinition(TEST_PROFILE_STATE_DEF);
+
+    const stateAdapter = createContextAwarenessToolkit({
+      internalState,
+      profileStateRegistry,
+      tabId,
+    }).getStateAdapter(TEST_PROFILE_STATE_DEF);
+    const tabState = selectTab(internalState.getState(), tabId);
+
+    internalState.dispatch(
+      internalStateActions.initializeTabState({
+        tabId,
+        initialAppState: tabState.appState,
+        initialProfileState: {
+          [TEST_PROFILE_STATE_DEF.key]: {
+            urlValue: 'fromUrl',
+          },
+        },
+      })
+    );
+
+    expect(stateAdapter.getState()).toEqual({
+      ...TEST_PROFILE_STATE_DEF.defaultState,
+      urlValue: 'fromUrl',
+    });
   });
 
   it('emits profile state updates', async () => {
@@ -237,5 +269,30 @@ describe('createContextAwarenessToolkit', () => {
     expect(firstTabStateAdapter.getState()).toEqual(firstState);
     expect(otherTabStateAdapter.getState()).toEqual(TEST_PROFILE_STATE_DEF.defaultState);
     expect(selectTab(internalState.getState(), otherTab.id).profileState).toEqual({});
+  });
+
+  it('forwards profile state history options to Redux', async () => {
+    const { internalState, profileStateRegistry, tabId } = await setup();
+    const setProfileStateSpy = jest.spyOn(internalStateActions, 'setProfileState');
+    profileStateRegistry.registerDefinition(TEST_PROFILE_STATE_DEF);
+
+    const stateAdapter = createContextAwarenessToolkit({
+      internalState,
+      profileStateRegistry,
+      tabId,
+    }).getStateAdapter(TEST_PROFILE_STATE_DEF);
+
+    const profileState = {
+      ...TEST_PROFILE_STATE_DEF.defaultState,
+      urlValue: 'nextUrl',
+    };
+    stateAdapter.setState(profileState, { historyMethod: 'replace' });
+
+    expect(setProfileStateSpy).toHaveBeenCalledWith({
+      tabId,
+      profileStateDefinition: TEST_PROFILE_STATE_DEF,
+      profileState,
+      historyMethod: 'replace',
+    });
   });
 });

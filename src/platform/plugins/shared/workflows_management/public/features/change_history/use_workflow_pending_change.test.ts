@@ -9,7 +9,7 @@
 
 import { renderHook } from '@testing-library/react';
 import React from 'react';
-import { Provider } from 'react-redux';
+import { Provider } from 'react-redux-v7';
 import type { WorkflowDetailDto } from '@kbn/workflows';
 
 import { WORKFLOW_UNSAVED_CHANGE_ID } from './constants';

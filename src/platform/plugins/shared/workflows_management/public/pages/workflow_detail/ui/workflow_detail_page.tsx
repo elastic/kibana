@@ -9,13 +9,13 @@
 
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useCallback, useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { useLocation } from 'react-router-dom';
 import { isHttpFetchError } from '@kbn/core-http-browser';
 import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
+import { useWorkflowsCapabilities, type WorkflowsCreateRouteState } from '@kbn/workflows-ui';
 import { workflowDefaultYaml } from './workflow_default_yml';
 import { WorkflowDetailEditor } from './workflow_detail_editor';
 import { WorkflowDetailHeader } from './workflow_detail_header';
@@ -47,6 +47,13 @@ import {
   type WorkflowDetailRouteState,
 } from '../../../shared/utils/workflow_navigation';
 
+/**
+ * `location.state` the page can arrive with: list-navigation state (back
+ * link) and, on `/create`, the cross-app initial-content contract
+ * (`WorkflowsCreateRouteState`, e.g. the Template Library's "Remix with AI").
+ */
+type WorkflowDetailLocationState = WorkflowDetailRouteState & WorkflowsCreateRouteState;
+
 const isLoadWorkflowNotFoundError = (error: unknown) =>
   isHttpFetchError(error) && error.response?.status === 404;
 
@@ -63,7 +70,7 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
     useAsyncThunkState(loadWorkflowThunk);
   const telemetry = useTelemetry();
   const { application } = useKibana().services;
-  const location = useLocation<WorkflowDetailRouteState | undefined>();
+  const location = useLocation<WorkflowDetailLocationState | undefined>();
 
   const isReady = !isLoadingWorkflow && !isLoadingConnectors;
 
@@ -109,15 +116,33 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
     loadWorkflows(); // dispatch load workflows on mount
   }, [loadConnectors, loadWorkflows]);
 
+  // Seed the editor once per create-session: tracks whether the editor was
+  // already seeded so URL-state churn (`history.replace` in
+  // `useWorkflowUrlState` drops `location.state`) and re-renders never
+  // clobber in-progress edits or re-fire telemetry.
+  const seededRef = useRef(false);
+
   // Load workflow when id changes
   useEffect(() => {
     if (id) {
+      seededRef.current = false;
       loadWorkflow({ id }); // sets loaded yaml string
-    } else {
-      dispatch(setYamlString(workflowDefaultYaml));
-      telemetry.reportWorkflowCreateOpened({ editorType: 'yaml' });
+      return;
     }
-  }, [loadWorkflow, id, dispatch, telemetry]);
+    if (seededRef.current) {
+      return;
+    }
+    seededRef.current = true;
+
+    // A navigation can hand `/create` its initial content through history
+    // state (`WorkflowsCreateRouteState`) — e.g. the Template Library's
+    // "Remix with AI" passes the rendered template. The state travels on the
+    // history entry, not the URL, so plain `/create` links and shared URLs
+    // fall back to the default YAML.
+    const { initialYaml } = location.state ?? {};
+    dispatch(setYamlString(initialYaml || workflowDefaultYaml));
+    telemetry.reportWorkflowCreateOpened({ editorType: 'yaml' });
+  }, [loadWorkflow, id, dispatch, telemetry, location.state]);
 
   // Sync activeTab from URL state to store
   useEffect(() => {

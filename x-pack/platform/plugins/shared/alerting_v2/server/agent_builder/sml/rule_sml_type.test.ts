@@ -181,29 +181,25 @@ describe('createRuleSmlType', () => {
     });
   });
 
-  describe('getSmlData', () => {
-    it('returns a single chunk built from rule metadata + query', async () => {
+  describe('getSmlEntry', () => {
+    it('returns a single entry built from rule metadata + query', async () => {
       getRepoSo.mockResolvedValueOnce({ id: 'rule-1', attributes: baseRuleAttrs });
 
-      const result = await buildDefinition().getSmlData('rule-1', buildSmlContext());
+      const result = await buildDefinition().getSmlEntry('rule-1', buildSmlContext());
 
       expect(getRepoSo).toHaveBeenCalledWith(RULE_SAVED_OBJECT_TYPE, 'rule-1');
       expect(result).toEqual({
-        chunks: [
-          {
-            type: RULE_SML_TYPE,
-            title: 'High CPU',
-            content: [
-              'High CPU',
-              'CPU breach detection',
-              'alert',
-              'ops, cpu',
-              (baseRuleAttrs.query as { breach: { query: string } }).breach.query,
-            ].join('\n'),
-          },
-        ],
+        type: RULE_SML_TYPE,
+        title: 'High CPU',
+        content: [
+          'High CPU',
+          'CPU breach detection',
+          'alert',
+          'ops, cpu',
+          (baseRuleAttrs.query as { breach: { query: string } }).breach.query,
+        ].join('\n'),
       });
-      expect(result?.chunks[0]).not.toHaveProperty('permissions');
+      expect(result).not.toHaveProperty('permissions');
     });
 
     it('falls back to originId for title when metadata.name is missing', async () => {
@@ -215,16 +211,16 @@ describe('createRuleSmlType', () => {
         } as unknown as RuleSavedObjectAttributes,
       });
 
-      const result = await buildDefinition().getSmlData('rule-bare', buildSmlContext());
+      const result = await buildDefinition().getSmlEntry('rule-bare', buildSmlContext());
 
-      expect(result?.chunks[0].title).toBe('rule-bare');
+      expect(result?.title).toBe('rule-bare');
     });
 
     it('returns undefined and logs a warning when the saved object lookup throws', async () => {
       getRepoSo.mockRejectedValueOnce(new Error('not found'));
       const logger = loggingSystemMock.createLogger();
 
-      const result = await buildDefinition().getSmlData('rule-missing', buildSmlContext(logger));
+      const result = await buildDefinition().getSmlEntry('rule-missing', buildSmlContext(logger));
 
       expect(result).toBeUndefined();
       expect(logger.warn).toHaveBeenCalledWith(
@@ -235,7 +231,7 @@ describe('createRuleSmlType', () => {
     it('returns undefined without reading the saved object when alerting v2 is disabled', async () => {
       getIsAlertingV2Enabled.mockResolvedValue(false);
 
-      const result = await buildDefinition().getSmlData('rule-1', buildSmlContext());
+      const result = await buildDefinition().getSmlEntry('rule-1', buildSmlContext());
 
       expect(result).toBeUndefined();
       expect(getRepoSo).not.toHaveBeenCalled();
@@ -247,7 +243,6 @@ describe('createRuleSmlType', () => {
       const permissions = buildDefinition().getPermissions!('rule-1', buildSmlContext());
       expect(permissions).toEqual({
         kibana: { privileges: [{ name: `api:${ALERTING_V2_API_PRIVILEGES.rules.read}` }] },
-        elasticsearch: { indices: [] },
       });
     });
   });
@@ -265,7 +260,7 @@ describe('createRuleSmlType', () => {
         created_at: '2026-04-10T00:00:00.000Z',
         updated_at: '2026-04-10T00:00:00.000Z',
         spaces: ['default'],
-        permissions: { kibana: { privileges: [] }, elasticsearch: { indices: [] } },
+        permissions: { kibana: { privileges: [] } },
         ingestion_method: 'crawled' as const,
       };
     };

@@ -113,6 +113,10 @@ test.describe('Model Detail Flyout', { tag: [...INFERENCE_LOCAL_TAGS] }, () => {
       await expect(eisModels.addEndpointCancelButton).toBeVisible();
     });
 
+    await test.step('reasoning toggle is wired into the modal for chat_completion', async () => {
+      await expect(eisModels.addEndpointReasoningToggle).toBeVisible();
+    });
+
     await test.step('cancel closes the modal', async () => {
       await eisModels.addEndpointCancelButton.click();
       await expect(eisModels.addEndpointModal).toBeHidden();
@@ -155,6 +159,63 @@ test.describe('Model Detail Flyout', { tag: [...INFERENCE_LOCAL_TAGS] }, () => {
 
     await test.step('Add endpoint is disabled for an EOL model', async () => {
       await expect(eisModels.flyoutAddEndpointButton).toBeDisabled();
+    });
+  });
+
+  test('flyout shows geo region badges for a model with regions', async ({ pageObjects }) => {
+    const { eisModels } = pageObjects;
+
+    await test.step('open flyout for Anthropic Claude Sonnet 3.7', async () => {
+      await eisModels.modelCard('Anthropic Claude Sonnet 3.7').click();
+      await expect(eisModels.flyout).toBeVisible();
+    });
+
+    await test.step('Regions row is visible with badges', async () => {
+      await expect(eisModels.flyoutRegionBadges).toBeVisible();
+    });
+
+    await test.step('US and APAC badges are shown with correct X/Y counts', async () => {
+      await expect(eisModels.flyoutRegionBadge('us')).toBeVisible();
+      await expect(eisModels.flyoutRegionBadge('us')).toContainText('US (1/1)');
+      await expect(eisModels.flyoutRegionBadge('apac')).toBeVisible();
+      await expect(eisModels.flyoutRegionBadge('apac')).toContainText('APAC (1/1)');
+    });
+
+    await test.step('EU badge is not shown (model has no EU regions)', async () => {
+      await expect(eisModels.flyoutRegionBadge('eu')).toBeHidden();
+    });
+  });
+
+  test('flyout shows no region badges for a model without regions', async ({ pageObjects }) => {
+    const { eisModels } = pageObjects;
+
+    await test.step('open flyout for OpenAI GPT-4.1 (no regions in metadata)', async () => {
+      await eisModels.modelCard('OpenAI GPT-4.1').click();
+      await expect(eisModels.flyout).toBeVisible();
+    });
+
+    await test.step('Regions row is not shown', async () => {
+      await expect(eisModels.flyoutRegionBadges).toBeHidden();
+    });
+  });
+
+  test('flyout shows correct region badges for ELSER v2', async ({ pageObjects }) => {
+    const { eisModels } = pageObjects;
+
+    await test.step('open flyout for Elastic ELSER v2', async () => {
+      await eisModels.modelCard('Elastic ELSER v2').click();
+      await expect(eisModels.flyout).toBeVisible();
+    });
+
+    await test.step('EU and US badges are shown with correct X/Y counts', async () => {
+      await expect(eisModels.flyoutRegionBadge('eu')).toBeVisible();
+      await expect(eisModels.flyoutRegionBadge('eu')).toContainText('EU (1/1)');
+      await expect(eisModels.flyoutRegionBadge('us')).toBeVisible();
+      await expect(eisModels.flyoutRegionBadge('us')).toContainText('US (1/1)');
+    });
+
+    await test.step('APAC badge is not shown (ELSER has no APAC regions)', async () => {
+      await expect(eisModels.flyoutRegionBadge('apac')).toBeHidden();
     });
   });
 

@@ -17,6 +17,22 @@ jest.mock('../../../hooks/use_fetch_rules', () => ({
   useFetchRules: (...args: unknown[]) => mockUseFetchRules(...args),
 }));
 
+let mockCanReadRules = true;
+
+jest.mock('@kbn/core-di-browser', () => ({
+  useService: (token: unknown) => {
+    if (typeof token === 'function') {
+      return {
+        canRead: () => mockCanReadRules,
+        canWrite: () => mockCanReadRules,
+        can: () => mockCanReadRules,
+      };
+    }
+    throw new Error(`Unexpected token in useService mock: ${String(token)}`);
+  },
+  CoreStart: (key: string) => key,
+}));
+
 const rule = (id: string, name: string) => ({ id, metadata: { name } });
 
 const mockRules = (
@@ -71,6 +87,7 @@ const openRuleFilter = async () => {
 describe('ExecutionHistorySearchBar — rule filter combobox', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockCanReadRules = true;
     mockRules();
   });
 
@@ -161,5 +178,64 @@ describe('ExecutionHistorySearchBar — rule filter combobox', () => {
     await userEvent.click(clearButton);
 
     expect(onRuleFiltersChange).toHaveBeenCalledWith([]);
+  });
+
+  it('enables the rules fetch when the user can read rules', () => {
+    setup();
+    expect(mockUseFetchRules).toHaveBeenLastCalledWith(expect.objectContaining({ enabled: true }));
+  });
+
+  describe('when the user cannot read rules', () => {
+    beforeEach(() => {
+      mockCanReadRules = false;
+    });
+
+    it('hides the rule filter combobox', () => {
+      setup();
+      expect(screen.queryByTestId('executionHistoryRuleFilter')).not.toBeInTheDocument();
+    });
+
+    it('disables the rules fetch to avoid an unauthorized request', () => {
+      setup();
+      expect(mockUseFetchRules).toHaveBeenLastCalledWith(
+        expect.objectContaining({ enabled: false })
+      );
+    });
+  });
+
+  describe('when showRuleFilter is false', () => {
+    it('hides the rule filter combobox but keeps search and outcome filter', () => {
+      render(
+        <I18nProvider>
+          <ExecutionHistorySearchBar
+            onSearchChange={jest.fn()}
+            outcome="all"
+            onOutcomeChange={jest.fn()}
+            showRuleFilter={false}
+          />
+        </I18nProvider>
+      );
+
+      expect(screen.queryByTestId('executionHistoryRuleFilter')).not.toBeInTheDocument();
+      expect(screen.getByTestId('executionHistorySearchBar')).toBeInTheDocument();
+      expect(screen.getByTestId('executionHistoryOutcomeFilter')).toBeInTheDocument();
+    });
+
+    it('disables the rules fetch even when the user can read rules', () => {
+      render(
+        <I18nProvider>
+          <ExecutionHistorySearchBar
+            onSearchChange={jest.fn()}
+            outcome="all"
+            onOutcomeChange={jest.fn()}
+            showRuleFilter={false}
+          />
+        </I18nProvider>
+      );
+
+      expect(mockUseFetchRules).toHaveBeenLastCalledWith(
+        expect.objectContaining({ enabled: false })
+      );
+    });
   });
 });

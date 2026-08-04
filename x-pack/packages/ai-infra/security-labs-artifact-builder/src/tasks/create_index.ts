@@ -7,25 +7,31 @@
 
 import type { Client } from '@elastic/elasticsearch';
 import { getSecurityLabsMappings } from '../artifact/mappings';
+import type { SemanticTextMapping } from '../artifact/semantic_text';
+import { getSemanticTextMapping } from '../artifact/semantic_text';
 
-export const DEFAULT_ELSER = '.elser-2-elasticsearch';
-
-export interface SemanticTextMapping {
-  type: 'semantic_text';
-  inference_id: string;
-}
+export {
+  DEFAULT_ELSER,
+  DEFAULT_E5_SMALL,
+  DEFAULT_JINA,
+  getSemanticTextMapping,
+} from '../artifact/semantic_text';
+export type { SemanticTextMapping } from '../artifact/semantic_text';
 
 /**
- * Creates the target Elasticsearch index with ELSER semantic_text mapping.
+ * Creates the target Elasticsearch index with a semantic_text mapping driven by
+ * the supplied inference id (defaults to ELSER).
  */
 export const createTargetIndex = async ({
   indexName,
   client,
+  semanticTextMapping,
 }: {
   indexName: string;
   client: Client;
+  semanticTextMapping?: SemanticTextMapping;
 }) => {
-  const mappings = getSecurityLabsMappings();
+  const mappings = getSecurityLabsMappings(semanticTextMapping ?? getSemanticTextMapping());
 
   await client.indices.create({
     index: indexName,

@@ -13,6 +13,7 @@ import {
   isInlineField,
   isRefField,
 } from '../../../../common/types/domain/template/fields';
+import { applyRefFieldOverride } from '../../../../common/utils/template_fields';
 import { useGetFieldDefinitions } from './use_get_field_definitions';
 
 /**
@@ -40,21 +41,7 @@ export const useResolvedFields = (
         const result = FieldSchema.safeParse(parsed);
         if (!result.success || isRefField(result.data)) return [];
 
-        let resolved = result.data as InlineField;
-
-        if (field.name && field.name !== resolved.name) {
-          resolved = { ...resolved, name: field.name };
-        }
-
-        const overrideDefault = field.metadata?.default;
-        if (overrideDefault !== undefined) {
-          resolved = {
-            ...resolved,
-            metadata: { ...(resolved.metadata ?? {}), default: overrideDefault },
-          } as InlineField;
-        }
-
-        return [resolved];
+        return [applyRefFieldOverride(result.data as InlineField, field)];
       } catch {
         return [];
       }

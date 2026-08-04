@@ -9,7 +9,7 @@ import { esql } from '@elastic/esql';
 import type { Client } from '@elastic/elasticsearch';
 import type { QueryDslQueryContainer, SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { getSampleDocumentsEsql } from '@kbn/ai-tools';
+import { getSampleDocumentsEsql, DEFAULT_ESQL_QUERY_TIMEOUT_MS } from '@kbn/ai-tools';
 import { DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG } from '@kbn/significant-events-schema';
 import {
   MANAGED_STREAM_SEARCH_PATTERN,
@@ -81,6 +81,7 @@ export const collectSampleDocuments = async ({
           end: Date.now(),
           dslFilter: [...baseDslFilter, filter],
           size: 1,
+          requestTimeout: DEFAULT_ESQL_QUERY_TIMEOUT_MS,
         });
         return { hits, criterion: details, filter };
       });
@@ -137,6 +138,7 @@ export const collectSampleDocuments = async ({
       dslFilter: baseDslFilter,
       whereCondition: unseenCondition,
       size: remaining,
+      requestTimeout: DEFAULT_ESQL_QUERY_TIMEOUT_MS,
     });
 
     const beforeFill = docs.length;

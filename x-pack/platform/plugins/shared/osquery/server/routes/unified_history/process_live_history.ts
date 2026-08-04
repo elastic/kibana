@@ -62,7 +62,7 @@ export const processLiveHistory = async ({
         liveRows,
         osqueryContext,
         spaceId,
-        integrationNamespaces ?? [spaceId],
+        integrationNamespaces,
         ccsEnabled
       );
     } catch (err) {
@@ -78,7 +78,7 @@ const enrichWithResultCounts = async (
   liveRows: LiveHistoryRow[],
   osqueryContext: OsqueryAppContext,
   spaceId: string,
-  integrationNamespaces: readonly string[],
+  integrationNamespaces: readonly string[] | undefined,
   ccsEnabled: boolean
 ): Promise<void> => {
   const allSubActionIds = liveHits.flatMap(collectSubActionIds);

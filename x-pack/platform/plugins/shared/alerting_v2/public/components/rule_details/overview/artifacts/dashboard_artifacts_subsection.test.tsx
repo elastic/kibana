@@ -53,6 +53,7 @@ const mockHttpService = {
 };
 
 let mockDashboardServiceOverride: typeof mockDashboardService | undefined = mockDashboardService;
+let mockCanWriteRules = true;
 
 jest.mock('@kbn/core-di-browser', () => ({
   useService: (token: unknown, options?: { optional?: boolean }) => {
@@ -68,6 +69,14 @@ jest.mock('@kbn/core-di-browser', () => ({
       }
       return mockDashboardServiceOverride;
     }
+    if (typeof token === 'function') {
+      // UserCapabilities service token
+      return {
+        canWrite: (feature: string) => (feature === 'rules' ? mockCanWriteRules : true),
+        canRead: () => true,
+        can: () => mockCanWriteRules,
+      };
+    }
     return {};
   },
   CoreStart: (key: string) => key,
@@ -81,7 +90,7 @@ const baseRule: RuleApiResponse = {
   id: 'rule-1',
   kind: 'alert',
   enabled: true,
-  metadata: { name: 'Test Rule' },
+  metadata: { name: 'Test Rule', version: 1 },
   time_field: '@timestamp',
   schedule: { every: '5m', lookback: '10m' },
   query: { format: 'composed' as const, base: 'FROM logs-*', breach: { segment: '' } },
@@ -104,6 +113,7 @@ describe('DashboardArtifactsSubsection', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockDashboardServiceOverride = mockDashboardService;
+    mockCanWriteRules = true;
     mockUseUpdateRule.mockReturnValue({
       mutate: mockUpdateRule,
       isLoading: false,
@@ -246,6 +256,40 @@ describe('DashboardArtifactsSubsection', () => {
       },
       expect.objectContaining({ onSettled: expect.any(Function) })
     );
+  });
+
+  describe('when the user only has read privilege', () => {
+    beforeEach(() => {
+      mockCanWriteRules = false;
+    });
+
+    it('hides the add dashboards affordance', () => {
+      renderSubsection(baseRule);
+
+      expect(screen.queryByTestId('ruleDashboardArtifactsAddButton')).not.toBeInTheDocument();
+    });
+
+    it('hides the remove (trash) affordance on resolved dashboard rows', async () => {
+      mockResolveDashboardsByIds.mockResolvedValue({
+        resolved: [{ id: 'dash-1', title: 'Ops Dashboard' }],
+        missing: [],
+      });
+
+      renderSubsection({
+        ...baseRule,
+        artifacts: [{ id: 'artifact-1', type: DASHBOARD_ARTIFACT_TYPE, value: 'dash-1' }],
+      });
+
+      await waitFor(() => {
+        expect(screen.getByTestId('ruleDashboardArtifactTitle-dash-1')).toBeInTheDocument();
+      });
+
+      expect(
+        screen.queryByTestId('ruleDashboardArtifactDeleteButton-dash-1')
+      ).not.toBeInTheDocument();
+      // The read-only open link remains available.
+      expect(screen.getByTestId('ruleDashboardArtifactOpenLink-dash-1')).toBeInTheDocument();
+    });
   });
 
   it('renders a subdued note when the dashboard plugin is unavailable', () => {

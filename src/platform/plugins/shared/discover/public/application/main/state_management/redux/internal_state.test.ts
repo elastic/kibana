@@ -8,10 +8,8 @@
  */
 
 import { ExistenceFetchStatus } from '@kbn/unified-field-list';
-import { createDiscoverServicesMock } from '../../../../__mocks__/services';
+import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_state.mock';
 import {
-  createInternalStateStore,
-  createRuntimeStateManager,
   createTabItem,
   DEFAULT_EXPANDED_DOC_OWNER,
   DEFAULT_HISTOGRAM_KEY_PREFIX,
@@ -20,44 +18,31 @@ import {
   selectTab,
 } from '.';
 import { discardFlyoutsOnTabChange } from './internal_state';
-import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
+import {
+  buildDataViewMock,
+  dataViewMock,
+  deepMockedFields,
+} from '@kbn/discover-utils/src/__mocks__';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { mockControlState } from '../../../../__mocks__/esql_controls';
-import { mockCustomizationContext } from '../../../../customizations/__mocks__/customization_context';
-import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
-import { createTabsStorageManager } from '../tabs_storage_manager';
-import { DiscoverSearchSessionManager } from '../discover_search_session';
 import { selectDataSourceProfileId } from './runtime_state';
 
 describe('InternalStateStore', () => {
-  const services = createDiscoverServicesMock();
-
-  const createTestStore = async () => {
-    const urlStateStorage = createKbnUrlStateStorage();
-    const runtimeStateManager = createRuntimeStateManager();
-    const tabsStorageManager = createTabsStorageManager({
-      urlStateStorage,
-      storage: services.storage,
-      profileStateRegistry: services.profileStateRegistry,
+  const setup = async () => {
+    const toolkit = getDiscoverInternalStateMock({
+      persistedDataViews: [dataViewMock],
     });
-    const store = createInternalStateStore({
-      services,
-      customizationContext: mockCustomizationContext,
-      runtimeStateManager,
-      urlStateStorage,
-      tabsStorageManager,
-      searchSessionManager: new DiscoverSearchSessionManager({
-        history: services.history,
-        session: services.data.search.session,
-      }),
-    });
-    await store.dispatch(internalStateActions.initializeTabs({ discoverSessionId: undefined }));
+    await toolkit.initializeTabs();
 
-    return { store, runtimeStateManager };
+    return {
+      store: toolkit.internalState,
+      runtimeStateManager: toolkit.runtimeStateManager,
+      initializeSingleTab: toolkit.initializeSingleTab,
+    };
   };
 
   it('should set data view', async () => {
-    const { store, runtimeStateManager } = await createTestStore();
+    const { store, runtimeStateManager } = await setup();
     const tabId = store.getState().tabs.unsafeCurrentId;
     expect(
       selectTabRuntimeState(runtimeStateManager, tabId).currentDataView$.value
@@ -68,8 +53,40 @@ describe('InternalStateStore', () => {
     );
   });
 
+  it('should clear expandedDoc when setDataView is called with a different data view id', async () => {
+    const { store } = await setup();
+    const tabId = store.getState().tabs.unsafeCurrentId;
+    const mockDoc = buildDataTableRecord({ _index: 'test', _id: 'doc1' }, dataViewMock);
+
+    store.dispatch(internalStateActions.setDataView({ tabId, dataView: dataViewMock }));
+    store.dispatch(internalStateActions.setExpandedDoc({ tabId, expandedDoc: mockDoc }));
+    expect(selectTab(store.getState(), tabId).expandedDoc).toBe(mockDoc);
+
+    const differentDataView = buildDataViewMock({
+      id: 'different-data-view-id',
+      fields: deepMockedFields,
+    });
+    store.dispatch(internalStateActions.setDataView({ tabId, dataView: differentDataView }));
+
+    expect(selectTab(store.getState(), tabId).expandedDoc).toBeUndefined();
+  });
+
+  it('should not clear expandedDoc when setDataView is called with the same data view id', async () => {
+    const { store } = await setup();
+    const tabId = store.getState().tabs.unsafeCurrentId;
+    const mockDoc = buildDataTableRecord({ _index: 'test', _id: 'doc1' }, dataViewMock);
+
+    store.dispatch(internalStateActions.setDataView({ tabId, dataView: dataViewMock }));
+    store.dispatch(internalStateActions.setExpandedDoc({ tabId, expandedDoc: mockDoc }));
+    expect(selectTab(store.getState(), tabId).expandedDoc).toBe(mockDoc);
+
+    store.dispatch(internalStateActions.setDataView({ tabId, dataView: dataViewMock }));
+
+    expect(selectTab(store.getState(), tabId).expandedDoc).toBe(mockDoc);
+  });
+
   it('should append a new tab to the tabs list', async () => {
-    const { store } = await createTestStore();
+    const { store } = await setup();
     const initialTabId = store.getState().tabs.unsafeCurrentId;
     expect(store.getState().tabs.allIds).toHaveLength(1);
     expect(store.getState().tabs.unsafeCurrentId).toBe(initialTabId);
@@ -100,7 +117,7 @@ describe('InternalStateStore', () => {
   });
 
   it('should copy tab UI state when duplicating a tab', async () => {
-    const { store, runtimeStateManager } = await createTestStore();
+    const { store, runtimeStateManager } = await setup();
     const sourceTabId = store.getState().tabs.unsafeCurrentId;
     const sourceTopPanelHeight = 240;
     const otherTopPanelHeight = 320;
@@ -206,7 +223,7 @@ describe('InternalStateStore', () => {
   });
 
   it('should set control state', async () => {
-    const { store } = await createTestStore();
+    const { store } = await setup();
     await store.dispatch(internalStateActions.initializeTabs({ discoverSessionId: undefined }));
     const tabId = store.getState().tabs.unsafeCurrentId;
     expect(selectTab(store.getState(), tabId).attributes.controlGroupState).toBeUndefined();
@@ -223,7 +240,7 @@ describe('InternalStateStore', () => {
   });
 
   it('should preserve snapshotsByProfileId when updating reset state', async () => {
-    const { store, runtimeStateManager } = await createTestStore();
+    const { store, runtimeStateManager } = await setup();
     const tabId = store.getState().tabs.unsafeCurrentId;
     const profileId = selectDataSourceProfileId(runtimeStateManager, tabId);
 
@@ -262,7 +279,7 @@ describe('InternalStateStore', () => {
   });
 
   it('should only update snapshotsByProfileId', async () => {
-    const { store, runtimeStateManager } = await createTestStore();
+    const { store, runtimeStateManager } = await setup();
     const tabId = store.getState().tabs.unsafeCurrentId;
     const profileId = selectDataSourceProfileId(runtimeStateManager, tabId);
 
@@ -294,7 +311,7 @@ describe('InternalStateStore', () => {
   });
 
   it('should only apply changed app state fields to snapshotsByProfileId', async () => {
-    const { store, runtimeStateManager } = await createTestStore();
+    const { store, runtimeStateManager } = await setup();
     const tabId = store.getState().tabs.unsafeCurrentId;
     const profileId = selectDataSourceProfileId(runtimeStateManager, tabId);
 
@@ -330,7 +347,7 @@ describe('InternalStateStore', () => {
   });
 
   it('should not update snapshotsByProfileId for system-triggered app state changes', async () => {
-    const { store, runtimeStateManager } = await createTestStore();
+    const { store, runtimeStateManager } = await setup();
     const tabId = store.getState().tabs.unsafeCurrentId;
     const profileId = selectDataSourceProfileId(runtimeStateManager, tabId);
 
@@ -361,7 +378,7 @@ describe('InternalStateStore', () => {
   });
 
   it('should reset fieldListExistingFieldsInfo for the tabs with the same dataViewId', async () => {
-    const { store } = await createTestStore();
+    const { store } = await setup();
     const initialTabId = store.getState().tabs.unsafeCurrentId;
     expect(store.getState().tabs.allIds).toHaveLength(1);
     expect(store.getState().tabs.unsafeCurrentId).toBe(initialTabId);
@@ -458,7 +475,7 @@ describe('InternalStateStore', () => {
   });
 
   it('should set expandedDoc and initialDocViewerTabId for a specific tab', async () => {
-    const { store } = await createTestStore();
+    const { store } = await setup();
     const tabId = store.getState().tabs.unsafeCurrentId;
     const mockDoc = buildDataTableRecord({ _index: 'test', _id: 'doc1' }, dataViewMock);
 
@@ -480,7 +497,7 @@ describe('InternalStateStore', () => {
   });
 
   it('should default expandedDocOwner to the main grid when not provided', async () => {
-    const { store } = await createTestStore();
+    const { store } = await setup();
     const tabId = store.getState().tabs.unsafeCurrentId;
     const mockDoc = buildDataTableRecord({ _index: 'test', _id: 'doc1' }, dataViewMock);
 
@@ -495,7 +512,7 @@ describe('InternalStateStore', () => {
   });
 
   it('should maintain separate expandedDoc state for different tabs', async () => {
-    const { store } = await createTestStore();
+    const { store } = await setup();
     const initialTabId = store.getState().tabs.unsafeCurrentId;
     const mockDoc1 = buildDataTableRecord({ _index: 'test', _id: 'doc1' }, dataViewMock);
     const mockDoc2 = buildDataTableRecord({ _index: 'test', _id: 'doc2' }, dataViewMock);
@@ -534,7 +551,7 @@ describe('InternalStateStore', () => {
   });
 
   it('should clear renderDocumentViewMeta when expandedDoc owner changes', async () => {
-    const { store } = await createTestStore();
+    const { store } = await setup();
     const tabId = store.getState().tabs.unsafeCurrentId;
     const mockDoc = buildDataTableRecord({ _index: 'test', _id: 'doc1' }, dataViewMock);
     const renderDocumentViewMeta = {
@@ -570,7 +587,7 @@ describe('InternalStateStore', () => {
   });
 
   it('should set renderDocumentViewMeta for a specific tab', async () => {
-    const { store } = await createTestStore();
+    const { store } = await setup();
     const tabId = store.getState().tabs.unsafeCurrentId;
     const mockDoc = buildDataTableRecord({ _index: 'test', _id: 'doc1' }, dataViewMock);
     const renderDocumentViewMeta = {
@@ -593,7 +610,7 @@ describe('InternalStateStore', () => {
   });
 
   it('should clear expandedDoc state when resetOnSavedSearchChange is dispatched', async () => {
-    const { store } = await createTestStore();
+    const { store } = await setup();
     const tabId = store.getState().tabs.unsafeCurrentId;
     const mockDoc = buildDataTableRecord({ _index: 'test', _id: 'doc1' }, dataViewMock);
     const renderDocumentViewMeta = {
@@ -628,7 +645,7 @@ describe('InternalStateStore', () => {
   });
 
   it('should clear renderDocumentViewMeta when expandedDoc is closed', async () => {
-    const { store } = await createTestStore();
+    const { store } = await setup();
     const tabId = store.getState().tabs.unsafeCurrentId;
     const mockDoc = buildDataTableRecord({ _index: 'test', _id: 'doc1' }, dataViewMock);
     const renderDocumentViewMeta = {
@@ -694,7 +711,7 @@ describe('InternalStateStore', () => {
     };
 
     it('dismisses the Lens edit flyout but preserves the metric insights flyout', async () => {
-      const { store } = await createTestStore();
+      const { store } = await setup();
       const { lensEditClick, metricsClick, cleanup } = setupFakeFlyouts();
 
       try {

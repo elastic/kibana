@@ -250,11 +250,19 @@ export interface FileKindBase {
 export interface FileKindBrowser extends FileKindBase {
   /**
    * Max file contents size, in bytes, enforced for this file kind in the upload
-   * component.
+   * component. A function can be provided to derive the limit per file
    *
    * @default 4MiB
    */
-  maxSizeBytes?: number;
+  maxSizeBytes?: number | ((file: File) => number);
+  /**
+   * When `false`, the "unsupported file type" upload error omits the list of
+   * allowed MIME types. Use this when the list would be too long to show inline
+   * and the consumer surfaces supported types elsewhere.
+   *
+   * @default true
+   */
+  listAllowedMimeTypesInError?: boolean;
   /**
    * Allowed actions that can be done in the File Management UI. If not provided, all actions are allowed
    *

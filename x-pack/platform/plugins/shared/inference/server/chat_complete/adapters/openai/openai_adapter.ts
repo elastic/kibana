@@ -44,6 +44,7 @@ export const openAIAdapter: InferenceConnectorAdapter = {
     abortSignal,
     metadata,
     timeout,
+    maxContentLength,
     stream = false,
   }) => {
     const connector = executor.getConnector();
@@ -99,6 +100,9 @@ export const openAIAdapter: InferenceConnectorAdapter = {
             ? { telemetryMetadata: metadata.connectorTelemetry }
             : {}),
           ...(typeof timeout === 'number' && isFinite(timeout) ? { timeout } : {}),
+          ...(typeof maxContentLength === 'number' && isFinite(maxContentLength)
+            ? { maxContentLength }
+            : {}),
         },
       });
     });
@@ -110,7 +114,7 @@ export const openAIAdapter: InferenceConnectorAdapter = {
       return connectorResult$.pipe(
         handleConnectorStreamResponse({ processStream: eventSourceStreamIntoObservable }),
         processOpenAIStream(),
-        emitTokenCountEstimateIfMissing({ request }),
+        emitTokenCountEstimateIfMissing({ request, logger }),
         useSimulatedFunctionCalling ? parseInlineFunctionCalls({ logger }) : passThrough
       );
     } else {
@@ -119,7 +123,7 @@ export const openAIAdapter: InferenceConnectorAdapter = {
           parseData: (data) => data as OpenAI.ChatCompletion,
         }),
         processOpenAIResponse(),
-        emitTokenCountEstimateIfMissing({ request }),
+        emitTokenCountEstimateIfMissing({ request, logger }),
         useSimulatedFunctionCalling ? parseInlineFunctionCalls({ logger }) : passThrough
       );
     }

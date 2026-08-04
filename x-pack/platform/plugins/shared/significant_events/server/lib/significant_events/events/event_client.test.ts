@@ -7,23 +7,21 @@
 
 import type { BulkResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { ESQLSearchResponse } from '@kbn/es-types';
+import { MAX_SIGNAL_DESCRIPTION_LENGTH } from '@kbn/significant-events-schema';
 import { BulkCreateOperationError } from '../query_utils';
 import { EventClient } from './event_client';
-import type { SignificantEvent } from './data_stream';
+import { storedEventSchema, type SignificantEvent } from './data_stream';
 
 const createEvent = (): SignificantEvent => ({
   '@timestamp': '2026-01-01T00:00:00.000Z',
-  created_at: '2026-01-01T00:00:00.000Z',
-  event_id: 'event-1',
-  discovery_slug: 'agent-event-1',
-  status: 'promoted',
+  event_uuid: 'event-1',
+  event_id: 'agent-event-1',
+  status: 'open',
   stream_names: ['logs.test'],
   title: 'Test event',
   summary: 'Test summary',
-  root_cause: 'Test root cause',
-  criticality: 50,
+  severity: '40-medium',
   confidence: 0.8,
-  recommendations: ['Investigate the test signal'],
 });
 
 const createClient = (response: BulkResponse) => {
@@ -53,29 +51,13 @@ const countResponse = (total: number): ESQLSearchResponse =>
     values: [[total]],
   } as unknown as ESQLSearchResponse);
 
-const createSearchClient = ({
-  openHits,
-  closedHits,
-  allHits = [],
-  total,
-}: {
-  openHits: SignificantEvent[];
-  closedHits: SignificantEvent[];
-  allHits?: SignificantEvent[];
-  total: number;
-}) => {
+const createSearchClient = ({ hits, total }: { hits: SignificantEvent[]; total: number }) => {
   const query = jest.fn(async (request: { query: string }) => {
     const { query: q } = request;
     if (q.includes('STATS total')) {
       return countResponse(total);
     }
-    if (q.includes('status NOT IN')) {
-      return sourceResponse(closedHits);
-    }
-    if (q.includes('status IN')) {
-      return sourceResponse(openHits);
-    }
-    return sourceResponse(allHits);
+    return sourceResponse(hits);
   });
 
   return {
@@ -90,6 +72,27 @@ const createSearchClient = ({
 
 describe('EventClient', () => {
   describe('bulkCreate', () => {
+    it('accepts stored signal descriptions that exceed the agent input limit (backward compat)', () => {
+      const event: SignificantEvent = {
+        ...createEvent(),
+        signals: [
+          {
+            type: 'detection',
+            stream_name: 'logs.test',
+            description: 'x'.repeat(MAX_SIGNAL_DESCRIPTION_LENGTH + 1),
+            metadata: {
+              detection_id: 'detection-1',
+              rule_uuid: 'rule-1',
+              change_point_type: 'spike',
+              p_value: 0.01,
+            },
+          },
+        ],
+      };
+
+      expect(storedEventSchema.safeParse(event).success).toBe(true);
+    });
+
     it('returns bulk responses with errors by default', async () => {
       const response = {
         errors: true,
@@ -101,7 +104,8 @@ describe('EventClient', () => {
       await expect(client.bulkCreate([event])).resolves.toBe(response);
       expect(dataStreamClient.create).toHaveBeenCalledWith({
         space: 'default',
-        documents: [event],
+        documents: [storedEventSchema.parse(event)],
+        refresh: undefined,
       });
     });
 
@@ -138,15 +142,32 @@ describe('EventClient', () => {
   });
 
   describe('findLatestByCurrentStatePaginated', () => {
-    it('filters open state after latest-per-slug reduction', async () => {
-      const resolvedLatest = { ...createEvent(), status: 'resolved' as const };
+    it('filters stable event IDs after latest-state reduction', async () => {
       const { client, query } = createSearchClient({
-        openHits: [],
-        closedHits: [resolvedLatest],
+        hits: [],
         total: 0,
       });
 
-      const result = await client.findLatestByCurrentStatePaginated({ state: 'open' });
+      await client.findLatestByCurrentStatePaginated({
+        eventIds: ['checkout-failure', 'payment-failure'],
+      });
+
+      const dataQuery = query.mock.calls
+        .map((call) => (call[0] as { query: string }).query)
+        .find((q) => !q.includes('STATS total'));
+      expect(dataQuery).toContain('event_id IN ("checkout-failure", "payment-failure")');
+      expect(dataQuery!.indexOf('INLINE STATS latest_ts')).toBeLessThan(
+        dataQuery!.indexOf('event_id IN')
+      );
+    });
+
+    it('filters open state after latest-per-slug reduction', async () => {
+      const { client, query } = createSearchClient({
+        hits: [],
+        total: 0,
+      });
+
+      const result = await client.findLatestByCurrentStatePaginated({ status: ['open'] });
 
       expect(result.hits).toEqual([]);
       const dataQuery = query.mock.calls
@@ -159,18 +180,91 @@ describe('EventClient', () => {
     });
 
     it('treats closed as latest status not in open set', async () => {
-      const resolvedLatest = { ...createEvent(), status: 'resolved' as const };
+      const closedLatest = { ...createEvent(), status: 'closed' as const };
       const { client } = createSearchClient({
-        openHits: [],
-        closedHits: [resolvedLatest],
+        hits: [closedLatest],
         total: 1,
       });
 
-      const result = await client.findLatestByCurrentStatePaginated({ state: 'closed' });
+      const result = await client.findLatestByCurrentStatePaginated({ status: ['closed'] });
 
       expect(result.hits).toHaveLength(1);
-      expect(result.hits[0].status).toBe('resolved');
+      expect(result.hits[0].status).toBe('closed');
       expect(result.total).toBe(1);
+    });
+
+    it('filters severity after latest-per-slug reduction', async () => {
+      const { client, query } = createSearchClient({
+        hits: [],
+        total: 0,
+      });
+
+      await client.findLatestByCurrentStatePaginated({
+        severity: ['80-critical', '60-high'],
+      });
+
+      const dataQuery = query.mock.calls
+        .map((call) => (call[0] as { query: string }).query)
+        .find((q) => !q.includes('STATS total'));
+      expect(dataQuery).toContain('severity IN');
+      expect(dataQuery?.indexOf('INLINE STATS latest_ts')).toBeLessThan(
+        dataQuery!.indexOf('severity IN')
+      );
+    });
+
+    it('excludes pending events when no status filter is provided', async () => {
+      const { client, query } = createSearchClient({
+        hits: [],
+        total: 0,
+      });
+
+      await client.findLatestByCurrentStatePaginated({});
+
+      const dataQuery = query.mock.calls
+        .map((call) => (call[0] as { query: string }).query)
+        .find((q) => !q.includes('STATS total'));
+      expect(dataQuery).toContain('status != "pending"');
+      expect(dataQuery?.indexOf('INLINE STATS latest_ts')).toBeLessThan(
+        dataQuery!.indexOf('status !=')
+      );
+    });
+
+    it('does not exclude pending when filtering by explicit event ids without status', async () => {
+      const { client, query } = createSearchClient({
+        hits: [],
+        total: 0,
+      });
+
+      await client.findLatestByCurrentStatePaginated({ eventIds: ['checkout-failure'] });
+
+      const dataQuery = query.mock.calls
+        .map((call) => (call[0] as { query: string }).query)
+        .find((q) => !q.includes('STATS total'));
+      expect(dataQuery).toContain('event_id IN ("checkout-failure")');
+      expect(dataQuery).not.toContain('status != "pending"');
+    });
+  });
+
+  describe('findLatestActive', () => {
+    it('filters to pending and open statuses after latest-per-event reduction', async () => {
+      const { client, query } = createSearchClient({
+        hits: [],
+        total: 0,
+      });
+
+      await client.findLatestActive({
+        from: 'now-24h',
+        streamNames: ['logs.checkout'],
+        ruleUuids: ['rule-abc'],
+      });
+
+      const dataQuery = query.mock.calls
+        .map((call) => (call[0] as { query: string }).query)
+        .find((q) => !q.includes('STATS total'));
+      expect(dataQuery).toContain('status IN ("pending", "open")');
+      expect(dataQuery?.indexOf('INLINE STATS latest_ts')).toBeLessThan(
+        dataQuery!.indexOf('status IN')
+      );
     });
   });
 });

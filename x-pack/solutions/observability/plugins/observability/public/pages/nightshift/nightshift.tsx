@@ -5,29 +5,39 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
+import { EuiPageTemplate } from '@elastic/eui';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_DISCOVERY } from '@kbn/management-settings-ids';
-import { NightshiftApp } from '@kbn/nightshift';
+import { SIGNIFICANT_EVENTS_APP_ID } from '@kbn/deeplinks-observability';
+import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '@kbn/significant-events-plugin/common';
+import { NightshiftApp } from './app/nightshift_app';
+import { NightshiftAppHeader } from './app/nightshift_app_header';
 import { useKibana } from '../../utils/kibana_react';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { OVERVIEW_PATH } from '../../../common/locators/paths';
 
-export function NightshiftPage() {
+export function NightshiftPage(): React.ReactElement | null {
   const {
+    application,
     http: { basePath },
-    uiSettings,
+    featureFlags,
     serverless,
   } = useKibana().services;
   const { ObservabilityPageTemplate } = usePluginContext();
   const history = useHistory();
-
-  const isEnabled = uiSettings.get<boolean>(
-    OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_DISCOVERY,
-    false
+  const settingsHref = application.getUrlForApp(SIGNIFICANT_EVENTS_APP_ID, {
+    path: '/settings',
+  });
+  const navigateToSettings = useCallback(
+    () => application.navigateToUrl(settingsHref),
+    [application, settingsHref]
   );
+
+  // Availability is owned by this flag alone — the /available endpoint is the same
+  // gate on the server, so a second client probe would only duplicate it.
+  const isEnabled = featureFlags.getBooleanValue(STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG, false);
 
   useBreadcrumbs(
     [
@@ -42,14 +52,29 @@ export function NightshiftPage() {
     { serverless }
   );
 
+  useEffect(() => {
+    if (!isEnabled) {
+      history.replace(OVERVIEW_PATH);
+    }
+  }, [history, isEnabled]);
+
   if (!isEnabled) {
-    history.replace(OVERVIEW_PATH);
     return null;
   }
 
   return (
-    <ObservabilityPageTemplate data-test-subj="nightshiftPage" isEmptyState>
-      <NightshiftApp />
+    <ObservabilityPageTemplate
+      data-test-subj="nightshiftPage"
+      restrictWidth={false}
+      pageSectionProps={{
+        color: 'subdued',
+        paddingSize: 'none',
+      }}
+    >
+      <NightshiftAppHeader onSettingsClick={navigateToSettings} settingsHref={settingsHref} />
+      <EuiPageTemplate.Section component="div" color="subdued" restrictWidth="900px">
+        <NightshiftApp />
+      </EuiPageTemplate.Section>
     </ObservabilityPageTemplate>
   );
 }

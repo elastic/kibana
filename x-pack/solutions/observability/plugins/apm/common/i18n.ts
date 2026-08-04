@@ -4,13 +4,4 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { i18n } from '@kbn/i18n';
-
-export const NOT_AVAILABLE_LABEL = i18n.translate('xpack.apm.notAvailableLabel', {
-  defaultMessage: 'N/A',
-});
-
-export const CLICK_ARIAL_LABEL = i18n.translate('xpack.apm.clickArialLabel.', {
-  defaultMessage: 'Click to view more details',
-});
+export { NOT_AVAILABLE_LABEL } from '@kbn/apm-common';

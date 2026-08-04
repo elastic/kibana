@@ -317,7 +317,7 @@ Each actionable finding includes:
 - type (continuity only): pipeline_failure | silence | volume_drop_warning | volume_drop_critical
 - affectedRules: detection rules impacted by this finding
 - affectedTactics: MITRE ATT&CK tactics with rule counts (total vs affected)
-- affectedPlatform: primary platform impacted (e.g., AWS, Endpoint, Azure)
+- affectedPlatform: primary platform impacted (e.g., AWS, "Crowdstrike (Windows)", "Windows Endpoints")
 - recommendedActions: links to relevant Kibana pages and case creation
 
 Continuity pipeline items include silence and volume health fields:

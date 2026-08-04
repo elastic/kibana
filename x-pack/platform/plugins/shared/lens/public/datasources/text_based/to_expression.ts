@@ -25,7 +25,7 @@ function getExpressionForLayer(
   layer.columns.forEach((col) => {
     // Only pick fields that OriginalColumn declares; the Omit<> drops the
     // `interval: never` discriminant that doesn't apply to text-based columns.
-    const entry = {
+    const entry: OriginalColumn = {
       id: col.columnId,
       label: col.customLabel ? col.label ?? col.fieldName : col.fieldName,
       variable: col.variable,
@@ -33,8 +33,9 @@ function getExpressionForLayer(
       format: col.params?.format,
       dataType: col.meta?.type as OriginalColumn['dataType'],
       customLabel: col.customLabel,
-      operationType: 'literal',
-    } as OriginalColumn;
+      // no operation type for text-based columns
+      operationType: undefined,
+    };
     if (idMapper[col.fieldName]) {
       idMapper[col.fieldName].push(entry);
     } else {

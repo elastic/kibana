@@ -16,9 +16,10 @@ import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import { initUiSettings } from './ui_settings';
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import {
+  ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING,
   ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING,
+  ENABLE_ASSET_INVENTORY_SETTING,
   ENABLE_NEW_FLYOUT_SETTING,
-  ENABLE_RULE_CHANGES_HISTORY_SETTING,
 } from '../common/constants';
 
 describe('initUiSettings', () => {
@@ -26,7 +27,7 @@ describe('initUiSettings', () => {
   const mockExperimentalFeatures = {
     enableAlertsAndAttacksAlignment: false,
     extendedRuleExecutionLoggingEnabled: false,
-    newFlyoutSystemEnabled: false,
+    newFlyoutSystemDisabled: false,
     ruleChangesHistoryEnabled: false,
   } as ExperimentalFeatures;
 
@@ -57,6 +58,47 @@ describe('initUiSettings', () => {
         value: true,
         type: 'boolean',
       })
+    );
+  });
+
+  it('registers ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING synchronously', () => {
+    initUiSettings(mockUiSettings, mockExperimentalFeatures, false);
+
+    const registeredSettings = (mockUiSettings.register as jest.Mock).mock.calls[0][0];
+    expect(registeredSettings).toHaveProperty(ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING);
+  });
+
+  it('registers ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING with value false (off by default)', () => {
+    initUiSettings(mockUiSettings, mockExperimentalFeatures, false);
+
+    const registeredSettings = (mockUiSettings.register as jest.Mock).mock.calls[0][0];
+    expect(registeredSettings[ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING].value).toBe(false);
+  });
+
+  it('registers ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING as editable (not readonly)', () => {
+    initUiSettings(mockUiSettings, mockExperimentalFeatures, false);
+
+    const registeredSettings = (mockUiSettings.register as jest.Mock).mock.calls[0][0];
+    expect(registeredSettings[ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING].readonly).toBeUndefined();
+  });
+
+  it('positions ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING immediately after ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING when alignment is enabled', () => {
+    const enabledFeatures = { ...mockExperimentalFeatures, enableAlertsAndAttacksAlignment: true };
+
+    initUiSettings(mockUiSettings, enabledFeatures, false);
+
+    const keys = Object.keys((mockUiSettings.register as jest.Mock).mock.calls[0][0]);
+    expect(keys.indexOf(ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING)).toBe(
+      keys.indexOf(ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING) + 1
+    );
+  });
+
+  it('positions ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING immediately before ENABLE_ASSET_INVENTORY_SETTING when alignment is disabled', () => {
+    initUiSettings(mockUiSettings, mockExperimentalFeatures, false);
+
+    const keys = Object.keys((mockUiSettings.register as jest.Mock).mock.calls[0][0]);
+    expect(keys.indexOf(ENABLE_ASSET_INVENTORY_SETTING)).toBe(
+      keys.indexOf(ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING) + 1
     );
   });
 
@@ -101,57 +143,30 @@ describe('initUiSettings', () => {
     );
   });
 
-  it('does NOT register ENABLE_NEW_FLYOUT_SETTING when newFlyoutSystemEnabled flag is disabled', () => {
+  it('registers ENABLE_NEW_FLYOUT_SETTING when newFlyoutSystemDisabled flag is disabled', () => {
     initUiSettings(mockUiSettings, mockExperimentalFeatures, false);
-
-    const registeredSettings = (mockUiSettings.register as jest.Mock).mock.calls[0][0];
-    expect(registeredSettings).not.toHaveProperty(ENABLE_NEW_FLYOUT_SETTING);
-  });
-
-  it('registers ENABLE_NEW_FLYOUT_SETTING when newFlyoutSystemEnabled flag is enabled', () => {
-    const enabledFeatures = {
-      ...mockExperimentalFeatures,
-      newFlyoutSystemEnabled: true,
-    };
-
-    initUiSettings(mockUiSettings, enabledFeatures, false);
 
     const registeredSettings = (mockUiSettings.register as jest.Mock).mock.calls[0][0];
     expect(registeredSettings).toHaveProperty(ENABLE_NEW_FLYOUT_SETTING);
     expect(registeredSettings[ENABLE_NEW_FLYOUT_SETTING]).toEqual(
       expect.objectContaining({
         name: 'Enable new flyout',
-        value: false,
+        value: true,
         type: 'boolean',
         requiresPageReload: true,
       })
     );
   });
 
-  it('does NOT register ENABLE_RULE_CHANGES_HISTORY_SETTING when ruleChangesHistoryEnabled flag is disabled', () => {
-    initUiSettings(mockUiSettings, mockExperimentalFeatures, false);
-
-    const registeredSettings = (mockUiSettings.register as jest.Mock).mock.calls[0][0];
-    expect(registeredSettings).not.toHaveProperty(ENABLE_RULE_CHANGES_HISTORY_SETTING);
-  });
-
-  it('registers ENABLE_RULE_CHANGES_HISTORY_SETTING when ruleChangesHistoryEnabled flag is enabled', () => {
-    const enabledFeatures = {
+  it('does NOT register ENABLE_NEW_FLYOUT_SETTING when newFlyoutSystemDisabled flag is enabled', () => {
+    const disabledFeatures = {
       ...mockExperimentalFeatures,
-      ruleChangesHistoryEnabled: true,
+      newFlyoutSystemDisabled: true,
     };
 
-    initUiSettings(mockUiSettings, enabledFeatures, false);
+    initUiSettings(mockUiSettings, disabledFeatures, false);
 
     const registeredSettings = (mockUiSettings.register as jest.Mock).mock.calls[0][0];
-    expect(registeredSettings).toHaveProperty(ENABLE_RULE_CHANGES_HISTORY_SETTING);
-    expect(registeredSettings[ENABLE_RULE_CHANGES_HISTORY_SETTING]).toEqual(
-      expect.objectContaining({
-        name: 'Enable detection rule changes history',
-        value: false,
-        type: 'boolean',
-        requiresPageReload: true,
-      })
-    );
+    expect(registeredSettings).not.toHaveProperty(ENABLE_NEW_FLYOUT_SETTING);
   });
 });

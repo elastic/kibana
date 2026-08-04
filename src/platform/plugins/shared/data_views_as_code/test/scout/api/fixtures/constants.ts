@@ -15,9 +15,11 @@ import {
 export const COMMON_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',
   [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
-  [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+  [ELASTIC_HTTP_VERSION_HEADER]: '1',
 };
 
 export const BASE_PATH = '/api/data_views';
 
 export const ID_OVER_MAX_LENGTH = 'x'.repeat(1759);
+
+export const DATA_VIEWS_AS_CODE_ENABLED_FEATURE_FLAG = 'dataViewsAsCode.enabled';
