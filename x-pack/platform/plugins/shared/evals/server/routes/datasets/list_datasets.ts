@@ -80,6 +80,8 @@ export const registerListDatasetsRoute = ({
             page,
             per_page: perPage,
             search,
+            tags,
+            maturity,
             sort_field: sortField,
             sort_order: sortOrder,
           } = request.query;
@@ -89,6 +91,8 @@ export const registerListDatasetsRoute = ({
             page,
             perPage,
             search,
+            tags,
+            maturity,
             sortField,
             sortOrder,
           });
