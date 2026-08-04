@@ -257,14 +257,33 @@ append a line near the same spot.
 - **The snippet-list file**: this one carries hand-written descriptions, so it can't be regenerated — keep both
   sides' new entries and reinsert them alphabetically within their category. `generate_connector_registries.test.ts`
   also checks this file's ordering and for the same doc being linked twice, so a bad resolution here fails CI too.
-- **`toc.yml`**: also hand-written and not yet covered by an automated ordering check — keep both sides' new
-  entries and double-check the resulting alphabetical order by eye.
+- **`toc.yml`**: also hand-written, so keep both sides' new entries and reinsert them alphabetically.
+  Ordering and duplicates in the third-party connectors section are CI-checked too
+  (`generate_connector_registries.test.ts` and `connector-registries --check`), so a bad resolution
+  fails CI rather than reaching a reviewer.
 
 Whichever of these you hand-resolve, run `node scripts/eslint --fix <file>` and
 `node scripts/type_check --project src/platform/packages/shared/kbn-connector-specs/tsconfig.json` (or the
 `packages/kbn-generate/tsconfig.json` project, if that's what you touched) on it immediately, before pushing —
 don't wait for CI. A hand-resolved conflict has previously left an unbalanced `lazy(...)` call in
 `connector_icons_map.ts` that only a reviewer caught by reading the diff.
+
+### Sequencing multiple connector PRs (avoiding the conflict in the first place)
+
+When several connector PRs are in flight at once, every one of them touches the same hotspot files above,
+so each merge invalidates every other open PR — a batch of N parallel PRs pays roughly N² merge-from-main
+CI runs. Two practices cut most of that cost:
+
+- **Pathfinder first, then fan out.** If the batch shares anything novel (a new auth type, a new category,
+  the first connector by a new team), land one connector end-to-end first and let it absorb the review
+  feedback; apply that feedback to the rest *before* opening their PRs. Review findings on connector PRs
+  are highly repetitive — a finding on the pathfinder is a finding on all of them, and fixing it pre-PR is
+  one commit instead of N review round-trips. Open the rest as a pipelined sequence (each PR opened after
+  the previous one is approved or merged), not as a simultaneous wave.
+- **Merge main in once, deliberately.** Update a connector branch from `main` when (a) it has a real
+  conflict, or (b) it's approved and about to merge. Don't reflexively sync every open PR after every
+  sibling merges — each sync is a full CI run, and the generated hotspot files make the next sync cheap
+  anyway (regenerate, don't hand-resolve).
 
 ## Important Notes
 

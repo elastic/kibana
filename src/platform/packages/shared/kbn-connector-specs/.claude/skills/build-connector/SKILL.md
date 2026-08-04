@@ -57,6 +57,13 @@ connector's PR (Task 12) — every row will read `⚠️ Not validated — needs
 testing happens, but the table itself is not optional; see
 `create-connector/reference/pr-validation-table.md`.
 
+Also sequence the batch's *PRs* deliberately rather than opening them all at once: every connector PR
+touches the same generated/hotspot files, so N simultaneous PRs pay roughly N² merge-from-main CI runs,
+and review findings on connector PRs are repetitive enough that a finding on the first PR almost always
+applies to the whole batch. Land a pathfinder connector first, fold its review feedback into the others
+before their PRs exist, and open the rest as a pipelined sequence — see "Sequencing multiple connector
+PRs" in `create-connector/SKILL.md`.
+
 ---
 
 ## Task 1: Create the Connector Code

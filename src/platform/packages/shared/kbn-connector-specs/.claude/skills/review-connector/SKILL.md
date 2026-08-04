@@ -199,8 +199,9 @@ actual documented behavior — flag them even without live access to the API, ba
   if it's a better fit — the scaffold always inserts into the first category and relies on a human to move it).
 - **`toc.yml` placement**: Third-party connectors belong under the `data-context-sources-connectors.md`
   node, **not** `elastic-connectors.md`. Flag any third-party connector whose `toc.yml` entry is a
-  child of `elastic-connectors.md`. Unlike the snippets file, `toc.yml` ordering isn't CI-checked yet,
-  so verify alphabetical order by eye.
+  child of `elastic-connectors.md`. Ordering and duplicates within the section are CI-checked
+  (`validateConnectorToc` in `generate_connector_registries.test.ts`), so you only need to verify the
+  entry is in the right *section* — not eyeball the alphabetical order.
 - **Doc frontmatter version**: `applies_to.stack` must include a version number — `stack: preview X.Y`,
   not just `stack: preview`. The version must be ≥ every other version referenced anywhere in the doc
   (a new connector cannot have been available before any feature it references). Flag any doc where it
@@ -213,7 +214,9 @@ actual documented behavior — flag them even without live access to the API, ba
   approximations, inline comments describing the shape (e.g. `<!-- Top triangle -->`), non-standard
   brand colors, or a viewBox that doesn't match the vendor's standard. If a genuine brand icon is
   not yet available, prompt the user to obtain one from the vendor — do not accept a generated
-  placeholder.
+  placeholder. A `viewBox` that clips the path geometry (icon renders as a sliver/empty tile) is
+  CI-checked by `validateConnectorIcons` in `generate_connector_registries.test.ts`, so focus your
+  review on brand authenticity and visual quality, not coordinate math.
 
 #### Docs quality checks
 
@@ -288,6 +291,20 @@ Report documentation issues alongside code issues.
   at a glance, but an array of 100,000 short, individually-valid strings is still an unbounded-input DoS
   vector — especially if the array is later joined into a URL query string, since that also risks an
   oversized upstream request.
+
+  Both of the above are now CI-enforced for action inputs by `action_input_bounds.test.ts`, so you don't
+  need to eyeball every string — instead check that the diff doesn't add entries to
+  `action_input_bounds_baseline.ts` (that list grandfathers pre-existing specs and must only shrink), and
+  still review whether the chosen limits are *sensible* for what the vendor accepts, which the test can't
+  judge.
+- **Escape-hatch / raw-request actions**: Any generic action that lets the caller choose the path, method,
+  or headers of the upstream request (`request`, `callApi`, `rawQuery`, MCP `callTool`, ...) needs its
+  guardrails reviewed character-by-character: the method allowlist should be an enum (not a free string);
+  path restrictions must operate on *decoded, split* path segments (`decodeURIComponent`, then split on
+  `/` and compare whole segments) — substring or prefix matching is bypassable via `%2e%2e`/`%2f` encoding,
+  double slashes, or embedding the blocked word inside a longer segment; and any header pass-through needs
+  an allowlist so callers can't override `Authorization`, `Host`, or content-negotiation headers. Flag any
+  denylist built on `String.includes`/`startsWith` over the raw path.
 - **SSRF**: Any URL field in connector config or workflow action input (e.g. `base_url`, `endpoint`, `webhook_url`)
   must be validated. URLs should be allowlisted, restricted to HTTPS, or otherwise prevented from being user-controlled
   in a way that could trigger requests to internal/private hosts. Flag any case where a user-supplied URL flows

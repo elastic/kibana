@@ -165,13 +165,13 @@ Define Zod schemas and inferred types in a separate `types.ts` file alongside th
 import { z } from '@kbn/zod/v4';
 
 export const SearchInputSchema = z.object({
-  query: z.string().describe('Search query string'),
+  query: z.string().min(1).max(2000).describe('Search query string'),
   limit: z.number().optional().describe('Maximum results (default: 20)'),
 });
 export type SearchInput = z.infer<typeof SearchInputSchema>;
 
 export const GetItemInputSchema = z.object({
-  id: z.string().describe('The item ID'),
+  id: z.string().min(1).max(200).describe('The item ID'),
 });
 export type GetItemInput = z.infer<typeof GetItemInputSchema>;
 ```
@@ -180,6 +180,22 @@ This pattern (used by ServiceNow, Slack, GitHub connectors):
 - Eliminates drift between schemas and types — `z.infer` derives the type from the schema
 - Keeps the main connector file focused on handler logic
 - Gives handlers full autocomplete without inline `as` casts
+
+### Every input must be bounded (CI-enforced)
+
+Action inputs arrive over the connector-execute HTTP API, so every schema needs an explicit size bound —
+`action_input_bounds.test.ts` fails CI on any new unbounded input (a baseline grandfathers only pre-existing
+specs, and must not grow):
+
+- `z.string()` → `.max(N)`. Common limits: 2000 for freeform queries, 1024 for paths/URLs, 200 for
+  IDs/names, 50 for short tokens. Inherently bounded formats (`z.uuid()`, `z.iso.datetime()`, ...) count;
+  a `.regex()` does **not** (an anchored pattern still accepts arbitrarily long input).
+- `z.array(...)` / `z.set(...)` → `.max(N)` on the element count (typically 50–100), in addition to
+  bounding the elements themselves.
+- `z.record(...)` → bound the key (`z.string().max(N)` or an enum) **and** cap the entry count. Zod has no
+  built-in record-size bound, so use
+  `.refine((v) => Object.keys(v).length <= 50, { message: 'Too many entries (max 50)' })`.
+  `z.unknown()` values are fine — the key and entry-count bounds are what keep them tractable.
 
 ## MCP-Native Connector Pattern
 
@@ -218,7 +234,7 @@ export const YourMcpConnector: ConnectorSpec = {
       isTool: true,
       description: 'Search Your Service by keyword using the underlying MCP tool.',
       input: z.object({
-        query: z.string().describe('Keyword or natural-language search query'),
+        query: z.string().min(1).max(2000).describe('Keyword or natural-language search query'),
       }),
       handler: withMcpClient(async (client, input) => {
         return client.callTool({ name: 'your_search', arguments: input });
@@ -237,8 +253,12 @@ export const YourMcpConnector: ConnectorSpec = {
       isTool: true,
       description: 'Call any MCP tool by name with arbitrary arguments. Use listTools first to discover available tools.',
       input: z.object({
-        name: z.string().describe('The MCP tool name (from listTools)'),
-        arguments: z.record(z.unknown()).optional().describe('Tool arguments as a key/value map'),
+        name: z.string().min(1).max(200).describe('The MCP tool name (from listTools)'),
+        arguments: z
+          .record(z.string().max(200), z.unknown())
+          .refine((v) => Object.keys(v).length <= 50, { message: 'Too many arguments (max 50)' })
+          .optional()
+          .describe('Tool arguments as a key/value map'),
       }),
       handler: withMcpClient(async (client, input) => {
         return client.callTool(input);
