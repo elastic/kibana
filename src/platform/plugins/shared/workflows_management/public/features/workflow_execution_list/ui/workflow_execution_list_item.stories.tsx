@@ -52,7 +52,7 @@ export const CompletedRecentPrevMonth: Story = {
   args: {
     status: ExecutionStatus.COMPLETED,
     startedAt: moment().startOf('month').subtract(6, 'days').toDate(),
-    executedBy: 'john.doe@example.com',
+    executedByLabel: 'john.doe@example.com',
     triggeredBy: 'manual',
   },
 };
