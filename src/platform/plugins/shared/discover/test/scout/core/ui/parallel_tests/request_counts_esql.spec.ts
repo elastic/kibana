@@ -8,7 +8,6 @@
  */
 
 import type { ScoutPage } from '@kbn/scout';
-import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest } from '../fixtures';
 
