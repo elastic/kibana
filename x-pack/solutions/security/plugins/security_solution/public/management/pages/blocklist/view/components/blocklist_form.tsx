@@ -10,7 +10,6 @@ import {
   EuiForm,
   EuiFormRow,
   EuiFieldText,
-  EuiTextArea,
   EuiHorizontalRule,
   EuiText,
   EuiSpacer,
@@ -20,7 +19,18 @@ import type { BlocklistConditionEntryField } from '@kbn/securitysolution-utils';
 import { OperatingSystem, isPathValid } from '@kbn/securitysolution-utils';
 import { uniq } from 'lodash';
 
-import { ListOperatorEnum, ListOperatorTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
+import type { ListOperatorEnum } from '@kbn/securitysolution-io-ts-list-types';
+import { ListOperatorTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
+import { v4 } from 'uuid';
+import type { monaco } from '@kbn/code-editor';
+import { CodeEditor } from '@kbn/code-editor';
+import { OS_TITLES } from '../../../../common/translations';
+import {
+  YARA_LANG_ID,
+  buildYaraOsValidationMarkers,
+  getYaraOsCompletionProvider,
+  registerYaraLanguage,
+} from './yara_os_completion_provider';
 import { useCanAssignArtifactPerPolicy } from '../../../../hooks/artifacts/use_can_assign_artifact_per_policy';
 import { FormattedError } from '../../../../components/formatted_error';
 import type { ArtifactFormComponentProps } from '../../../../components/artifact_list_page';
@@ -85,6 +95,21 @@ function isValid(itemValidation: ItemValidation): boolean {
   return !Object.values(itemValidation).some((errors) => Object.keys(errors).length);
 }
 
+registerYaraLanguage();
+
+const YARA_RULE_TEMPLATE = `rule Name {
+    meta:
+        os = "Linux"
+        arch = "x86"
+        scan_type = "File, Memory"
+        id = "[ID]"
+    strings:
+        $a = { stringHere }
+    condition:
+        all of them
+}
+`;
+
 // eslint-disable-next-line react/display-name
 export const BlockListForm = memo<ArtifactFormComponentProps>(
   ({ item, onChange, mode, error: submitError }) => {
@@ -95,17 +120,32 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
     const showAssignmentSection = useCanAssignArtifactPerPolicy(item, mode, hasFormChanged);
     const getTestId = useTestIdGenerator(testIdPrefix);
 
-    const blocklistEntry = useMemo((): BlocklistEntry => {
-      if (!item.entries.length) {
-        return {
-          field: 'file.hash.*',
-          operator: ListOperatorEnum.INCLUDED,
-          type: ListOperatorTypeEnum.MATCH_ANY,
-          value: [],
-        };
+    const firstId = useMemo(() => v4(), []);
+    const [osType] = useState<OperatingSystem>(OperatingSystem.LINUX);
+    const [yaraRuleName] = useState(`Name`);
+    const [yaraRule, setYaraRule] = useState(
+      YARA_RULE_TEMPLATE.replace('[ID]', firstId).replace('Name', `Name_${firstId.split('-')[0]}`)
+    );
+    const yaraOsCompletionProvider = useMemo(() => getYaraOsCompletionProvider(), []);
+    const yaraEditorValidationDisposableRef = useRef<monaco.IDisposable | null>(null);
+
+    const handleYaraEditorDidMount = useCallback((editor: monaco.editor.IStandaloneCodeEditor) => {
+      const model = editor.getModel();
+      if (!model) {
+        return;
       }
-      return item.entries[0] as BlocklistEntry;
-    }, [item.entries]);
+
+      buildYaraOsValidationMarkers(model);
+      yaraEditorValidationDisposableRef.current?.dispose();
+      yaraEditorValidationDisposableRef.current = editor.onDidChangeModelContent(() => {
+        buildYaraOsValidationMarkers(model);
+      });
+    }, []);
+
+    const handleYaraEditorWillUnmount = useCallback(() => {
+      yaraEditorValidationDisposableRef.current?.dispose();
+      yaraEditorValidationDisposableRef.current = null;
+    }, []);
 
     const validateValues = useCallback(
       (nextItem: ArtifactFormComponentProps['item'], cleanState = false) => {
@@ -190,23 +230,6 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
       [validateValues, onChange, item]
     );
 
-    const handleOnDescriptionChange = useCallback(
-      (event: React.ChangeEvent<HTMLTextAreaElement>) => {
-        const nextItem = {
-          ...item,
-          description: event.target.value,
-        };
-        validateValues(nextItem);
-
-        onChange({
-          isValid: isValid(errorsRef.current),
-          item: nextItem,
-        });
-        setHasFormChanged(true);
-      },
-      [onChange, item, validateValues]
-    );
-
     const handleEffectedPolicyOnChange: EffectedPolicySelectProps['onChange'] = useCallback(
       (updatedItem) => {
         validateValues(updatedItem);
@@ -244,7 +267,7 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
           <EuiFieldText
             isInvalid={nameVisited && !!Object.keys(errorsRef.current.name).length}
             name="name"
-            value={item.name}
+            value={yaraRuleName}
             onChange={handleOnNameChange}
             onBlur={handleOnNameBlur}
             disabled={true}
@@ -255,15 +278,34 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
           />
         </EuiFormRow>
 
-        <EuiFormRow label={'YARA rule'} fullWidth>
-          <EuiTextArea
-            name="description"
-            value={item.description}
-            onChange={handleOnDescriptionChange}
-            data-test-subj={getTestId('description-input')}
-            fullWidth
-            compressed
+        <EuiFormRow label={'Operating System'} fullWidth>
+          <EuiFieldText
+            name="osType"
+            value={OS_TITLES[osType]}
+            disabled={true}
+            required={nameVisited}
             maxLength={256}
+            data-test-subj={getTestId('name-input')}
+            fullWidth
+          />
+        </EuiFormRow>
+
+        <EuiFormRow label={'YARA rule'} fullWidth>
+          <CodeEditor
+            languageId={YARA_LANG_ID}
+            value={yaraRule}
+            onChange={(value) => setYaraRule(value)}
+            suggestionProvider={yaraOsCompletionProvider}
+            editorDidMount={handleYaraEditorDidMount}
+            editorWillUnmount={handleYaraEditorWillUnmount}
+            dataTestSubj={getTestId('description-input')}
+            height="300px"
+            options={{
+              quickSuggestions: true,
+              wordBasedSuggestions: false,
+              minimap: { enabled: false },
+              fontFamily: 'monospace',
+            }}
           />
         </EuiFormRow>
         <EuiHorizontalRule />
