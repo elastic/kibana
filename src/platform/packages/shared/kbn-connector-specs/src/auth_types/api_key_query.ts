@@ -39,6 +39,7 @@ type NormalizedAuthSchemaType = Record<string, string>;
 export const ApiKeyQueryAuth: AuthTypeSpec<AuthSchemaType> = {
   id: 'api_key_query',
   schema: authSchema,
+  allowedConfigKeys: ['paramNames'],
   normalizeSchema: (defaults?: Record<string, unknown>) => {
     const meta = authSchema.meta() ?? {};
     const paramNames =

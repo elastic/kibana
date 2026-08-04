@@ -132,6 +132,8 @@ export interface AuthTypeDefinition {
   id: string;
   schema: z.ZodObject<Record<string, z.ZodType>>;
   normalizeSchema?: (defaults?: Record<string, unknown>) => z.ZodObject<Record<string, z.ZodType>>;
+  /** Config keys valid in a connector's `defaults` that are consumed by `normalizeSchema` rather than stored as credentials. */
+  allowedConfigKeys?: string[];
   authMode?: AuthMode;
 }
 
