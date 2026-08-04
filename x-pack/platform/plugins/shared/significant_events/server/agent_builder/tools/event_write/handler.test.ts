@@ -655,7 +655,6 @@ describe('eventsWriteBulkHandler — dedup mode', () => {
     expect(eventClient.bulkCreate).toHaveBeenCalledTimes(1);
   });
 
-
   it('returns duplicate_key error for a second in-batch item with the same fingerprint', async () => {
     const eventClient = {
       findLatestActive: jest.fn().mockResolvedValue({ hits: [] }),
