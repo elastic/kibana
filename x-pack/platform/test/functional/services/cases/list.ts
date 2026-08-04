@@ -239,20 +239,24 @@ export function CasesTableServiceProvider(
     },
 
     async filterByOwner(owner: string) {
+      const itemSubj = `options-filter-popover-item-${owner}`;
       const isAlreadyOpen = await testSubjects.exists('options-filter-popover-panel-owner');
 
-      if (isAlreadyOpen) {
-        await testSubjects.click(`options-filter-popover-item-${owner}`);
-        await header.waitUntilLoadingHasFinished();
-        return;
+      if (!isAlreadyOpen) {
+        await testSubjects.click('options-filter-popover-button-owner');
+        await retry.waitFor(`filterByOwner popover opened`, async () => {
+          return await testSubjects.exists('options-filter-popover-panel-owner');
+        });
       }
 
-      await testSubjects.click('options-filter-popover-button-owner');
-      await retry.waitFor(`filterByOwner popover opened`, async () => {
-        return await testSubjects.exists('options-filter-popover-panel-owner');
+      await testSubjects.click(itemSubj);
+      // Each filter item's onClick closes over the selectedOptions captured at render time, so
+      // selecting another owner before this selection commits would recompute the toggle from a
+      // stale list and silently drop it. Wait until this owner is actually checked before returning.
+      await retry.waitFor(`owner filter "${owner}" to be selected`, async () => {
+        const item = await testSubjects.find(itemSubj);
+        return (await item.getAttribute('aria-checked')) === 'true';
       });
-
-      await testSubjects.click(`options-filter-popover-item-${owner}`);
       await header.waitUntilLoadingHasFinished();
     },
 
