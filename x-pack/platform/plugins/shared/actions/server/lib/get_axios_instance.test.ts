@@ -440,9 +440,10 @@ describe('getAxiosInstance', () => {
       connectorId: '1',
       secrets: { authType: 'basic', username: 'u', password: 'p' },
     });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    result.defaults.adapter = jest.fn().mockResolvedValue({ data: {}, status: 200, statusText: 'OK', headers: {} } as any);
 
-    // @ts-expect-error
-    void result!.interceptors.request.handlers[1].fulfilled({ url: 'https://example.com/api' });
+    await result.request({ url: 'https://example.com/api' });
 
     expect(configurationUtilities.ensureUriAllowed).toHaveBeenCalledWith('https://example.com/api');
   });
@@ -464,17 +465,13 @@ describe('getAxiosInstance', () => {
       connectorId: '1',
       secrets: { authType: 'basic', username: 'u', password: 'p' },
     });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    result.defaults.adapter = jest.fn().mockResolvedValue({ data: {}, status: 200, statusText: 'OK', headers: {} } as any);
 
-    let thrown: Error | undefined;
-    try {
-      // @ts-expect-error
-      void result!.interceptors.request.handlers[1].fulfilled({
-        url: 'https://denied.example.com/api',
-      });
-    } catch (e) {
-      thrown = e as Error;
-    }
-    expect(thrown).toBe(allowlistError);
+    await expect(result.request({ url: 'https://denied.example.com/api' })).rejects.toBe(
+      allowlistError
+    );
+    expect(result.defaults.adapter).not.toHaveBeenCalled();
   });
 
   test('allowlist interceptor resolves relative URLs against instance baseURL', async () => {
@@ -487,12 +484,11 @@ describe('getAxiosInstance', () => {
       connectorId: '1',
       secrets: { authType: 'basic', username: 'u', password: 'p' },
     });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    result.defaults.adapter = jest.fn().mockResolvedValue({ data: {}, status: 200, statusText: 'OK', headers: {} } as any);
+    result.defaults.baseURL = 'https://myhost.example.com';
 
-    // @ts-expect-error
-    void result!.interceptors.request.handlers[1].fulfilled({
-      url: '/api/resource',
-      baseURL: 'https://myhost.example.com',
-    });
+    await result.request({ url: '/api/resource' });
 
     expect(configurationUtilities.ensureUriAllowed).toHaveBeenCalledWith(
       'https://myhost.example.com/api/resource'
@@ -514,16 +510,10 @@ describe('getAxiosInstance', () => {
         ca: Buffer.from("Hi i'm a ca"),
       },
     });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    result.defaults.adapter = jest.fn().mockResolvedValue({ data: {}, status: 200, statusText: 'OK', headers: {} } as any);
 
-    // handlers[0] = SSL interceptor installed by PFX configure
-    // handlers[1] = allowlist interceptor registered after authType.configure
-    // @ts-expect-error
-    expect(result!.interceptors.request.handlers.length).toBe(2);
-
-    // @ts-expect-error
-    void result!.interceptors.request.handlers[1].fulfilled({
-      url: 'https://pfx-target.example.com/api',
-    });
+    await result.request({ url: 'https://pfx-target.example.com/api' });
 
     expect(configurationUtilities.ensureUriAllowed).toHaveBeenCalledWith(
       'https://pfx-target.example.com/api'
