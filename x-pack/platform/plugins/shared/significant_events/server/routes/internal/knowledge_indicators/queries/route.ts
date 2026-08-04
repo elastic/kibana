@@ -80,7 +80,7 @@ const requestParamsSchema = baseRequestParamsSchema.extend({
  * #265778) and `skipped_ineligible` for MATCH that is not filter-only. The two
  * are reported separately so the UI can tell the user which one they hit.
  */
-export const promoteUnbackedQueriesRoute = createServerRoute({
+const promoteUnbackedQueriesRoute = createServerRoute({
   endpoint: 'POST /internal/streams/queries/_promote',
   options: {
     access: 'internal',
@@ -127,7 +127,7 @@ export const promoteUnbackedQueriesRoute = createServerRoute({
   },
 });
 
-export const demoteBackedQueriesRoute = createServerRoute({
+const demoteBackedQueriesRoute = createServerRoute({
   endpoint: 'POST /internal/streams/queries/_demote',
   options: {
     access: 'internal',
@@ -199,7 +199,7 @@ export const demoteBackedQueriesRoute = createServerRoute({
   },
 });
 
-export const bulkDeleteQueriesRoute = createServerRoute({
+const bulkDeleteQueriesRoute = createServerRoute({
   endpoint: 'POST /internal/streams/queries/_bulk_delete',
   options: {
     access: 'internal',

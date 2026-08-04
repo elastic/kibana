@@ -19,7 +19,7 @@ import type { RulesClientCreateOptions } from '@kbn/alerting-plugin/server';
 import type { StreamsServer } from '@kbn/streams-plugin/server/types';
 import type { AttachmentClient } from '@kbn/streams-plugin/server';
 import type { SignificantEventsAlertingContext } from '../lib/significant_events/alerting/significant_events_alerting_context';
-import type { EbtTelemetryClient } from '../lib/telemetry';
+import type { EbtTelemetryClient } from '../lib/telemetry/ebt';
 import type { KnowledgeIndicatorClient } from '../lib/knowledge_indicators';
 import type { SignificantEventsClients } from '../lib/significant_events/significant_events_clients';
 import type { ContinuousKiOnboardingWorkflowService } from '../lib/workflows/continuous_onboarding_workflow';
@@ -57,7 +57,7 @@ export interface RouteHandlerScopedClients extends SignificantEventsClients {
   tuningConfig: SignificantEventsTuningConfig;
 }
 
-export interface RouteDependencies {
+export type SignificantEventsRouteHandlerResources = {
   server: StreamsServer;
   telemetry: EbtTelemetryClient;
   getScopedClients: GetScopedClients;
@@ -67,7 +67,4 @@ export interface RouteDependencies {
   workflowClients: WorkflowClients;
   maintenanceService: SignificantEventsMaintenanceService;
   getSpaceId: (request: KibanaRequest) => Promise<string>;
-}
-
-export type SignificantEventsRouteHandlerResources = RouteDependencies &
-  DefaultRouteHandlerResources;
+} & DefaultRouteHandlerResources;
