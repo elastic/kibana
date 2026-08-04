@@ -24,6 +24,17 @@ const mockUiSettingsForFilterManager = coreMock.createStart().uiSettings;
 jest.mock('../../../../../../common/lib/kibana');
 jest.mock('../hooks/use_show_alerts_only_migration_message');
 
+// These sibling components pull in large Redux-connected subtrees (search bar,
+// drag-and-drop data providers) that are expensive to mount and are covered by
+// their own tests. Stubbing them keeps this suite fast and deterministic — the
+// real mounts pushed it past Jest's 5s timeout under CI load.
+jest.mock('../../../search_or_filter', () => ({
+  StatefulSearchOrFilter: () => <div data-test-subj="mockStatefulSearchOrFilter" />,
+}));
+jest.mock('../../../data_providers', () => ({
+  DataProviders: () => <div data-test-subj="dataProviders" />,
+}));
+
 describe('Header', () => {
   const indexPattern = mockIndexPattern;
   const mount = useMountAppended();
@@ -54,10 +65,7 @@ describe('Header', () => {
     timelineType: TimelineTypeEnum.default,
   };
 
-  // FLAKY: https://github.com/elastic/kibana/issues/254016
-  // FLAKY: https://github.com/elastic/kibana/issues/253935
-  // FLAKY: https://github.com/elastic/kibana/issues/253959
-  describe.skip('QueryTabHeader', () => {
+  describe('QueryTabHeader', () => {
     test('should render the data providers when show is true', async () => {
       const testProps = { ...props, show: true };
       const wrapper = await getWrapper(
