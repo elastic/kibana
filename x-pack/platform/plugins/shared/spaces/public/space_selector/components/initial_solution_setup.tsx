@@ -78,7 +78,7 @@ export const InitialSolutionSetup = ({ spacesManager, serverBasePath }: Props) =
             <EuiFlexItem key={value}>
               <EuiCard
                 data-test-subj={`initialSolutionSetup-${dataTestSubj}`}
-                icon={<EuiIcon type={icon} size="xl" />}
+                icon={<EuiIcon type={icon} size="xl" aria-hidden={true} />}
                 title={initialSetupName}
                 description={description}
                 textAlign="center"
