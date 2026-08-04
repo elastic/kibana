@@ -354,79 +354,36 @@ function esqlRawFieldNonEmpty(field: string): string {
   return `(\`${field}\` IS NOT NULL AND \`${field}\` != "")`;
 }
 
-/**
- * Primary identifier of the host-scoped user EUID — first field of the host-scoped
- * branch in `userEntityDefinition.identityField.euidRanking`.
- */
-const HOST_SCOPED_USER_EUID_FIELD = 'user.name';
-
-/** Host that scopes the identity — second field of the host-scoped ranking branch. */
-const HOST_SCOPED_USER_HOST_FIELD = 'host.id';
+/** Fields composing the host-scoped user EUID, per the `entity.namespace == 'local'` ranking branch. */
+const HOST_SCOPED_USER_FIELDS = ['user.name', 'host.id'] as const;
 
 /**
- * Fields that admit a document into the user extraction pipeline
- * (`identityField.documentsFilter`), any one of which is sufficient. Used only for
- * the candidate-document gate — see `getHostScopedUserEuidEsql` for why the EUID
- * itself must not fall back to these.
- */
-const USER_DOCUMENT_CANDIDATE_FIELDS = ['user.email', 'user.name'] as const;
-
-/**
- * ES|QL fragments for the host-scoped (non-IDP) user EUID —
- * `user:<user.name>@<host.id>@<namespace>`, currently
+ * ES|QL fragments for the host-scoped (non-IDP) user EUID:
  * `user:<user.name>@<host.id>@local`.
  *
- * "Host-scoped" is the identity kind: a user whose identity is only meaningful
- * within one host, as opposed to an IDP-issued identity (Okta, Entra ID, …) that
- * is global. The defining trait is the `host.id` in the EUID, not the namespace
- * value — the namespace string comes from `USER_ENTITY_NAMESPACE.Local`, so
- * renaming that value does not invalidate this helper.
+ * Mirrors the `entity.namespace == 'local'` branch of
+ * `userEntityDefinition.identityField.euidRanking`, but hardcodes the namespace
+ * instead of deriving `entity.namespace` — that derivation is a 7-arm
+ * CASE/COALESCE tree, so skipping it takes a caller from ~35 EVAL columns per row
+ * to ~2. Only valid for callers whose documents are exclusively host-scoped users.
  *
- * Derived from the host-scoped branch of
- * `userEntityDefinition.identityField.euidRanking`
- * (`[user.name, '@', host.id, '@', entity.namespace]`, gated on
- * `entity.namespace == 'local'`) — but without emitting the namespace-derivation
- * EVAL chain that `getEuidEsqlEvaluation('user', …)` produces. Callers whose
- * documents are exclusively host-scoped can use this to skip ~35 EVAL columns
- * per row.
- *
- * Takes no arguments: which fields form this identity is a property of the entity
- * definition, not of the caller.
- *
- * The EUID uses `user.name` with NO fallback, because the host-scoped ranking
- * branch has exactly one arm and the branch's `when` gate
- * (`localNamespaceGate`) requires both `user.name` and `host.id` to be non-empty.
- * A `COALESCE(user.name, user.email)` would therefore be wrong in the only case it
- * could ever fire: a document with `user.email` but no `user.name` is classified by
- * extraction as an *IDP* user (`user:alice@corp.com@okta`), never host-scoped, so
- * emitting `user:alice@corp.com@h1@local` would reference an EUID that does not
- * exist in the entity store and 404 on write.
- *
- * `presenceGate` is deliberately broader than the EUID: it mirrors the extraction
- * pipeline's `documentsFilter` (any of `USER_DOCUMENT_CANDIDATE_FIELDS`) so Step 1
- * and Step 2 agree on which documents are candidates. Rows that pass the gate but
- * lack `user.name` yield a NULL EUID and are dropped by the caller's
- * `WHERE COALESCE(<actor>, "") != ""` — the same outcome extraction reaches.
- *
- * The `esql.test.ts` suite asserts the definition's host-scoped branch still has
- * the shape this function assumes, so a definition change fails CI rather than
- * silently producing EUIDs that don't match the entity store.
- *
- * Field references are backtick-wrapped rather than `TO_STRING`-cast in the
- * presence gates — the whole point of this path is to minimise per-row work.
+ * No fallback fields: that ranking branch has one arm gated on both `user.name`
+ * and `host.id` being non-empty, so a document missing either is an IDP user that
+ * extraction indexed under a different EUID entirely. `esql.test.ts` pins the
+ * branch's shape so a definition change fails CI rather than silently emitting
+ * EUIDs the entity store doesn't hold.
  */
 export function getHostScopedUserEuidEsql(): {
   /** RHS for `| EVAL <col> = …` producing the host-scoped user EUID. */
   evalAssignment: string;
-  /** OR-joined "present and non-empty" gate over the candidate user identity fields. */
+  /** `WHERE` gate requiring every field this EUID composes. */
   presenceGate: string;
-  /** `host.id` present-and-non-empty gate — `host.id` is required by this EUID. */
-  hostPresenceGate: string;
 } {
+  const [userField, hostField] = HOST_SCOPED_USER_FIELDS;
+
   return {
-    evalAssignment: `CONCAT("user:", TO_STRING(\`${HOST_SCOPED_USER_EUID_FIELD}\`), "@", TO_STRING(\`${HOST_SCOPED_USER_HOST_FIELD}\`), "@${USER_ENTITY_NAMESPACE.Local}")`,
-    presenceGate: USER_DOCUMENT_CANDIDATE_FIELDS.map(esqlRawFieldNonEmpty).join(' OR '),
-    hostPresenceGate: esqlRawFieldNonEmpty(HOST_SCOPED_USER_HOST_FIELD),
+    evalAssignment: `CONCAT("user:", TO_STRING(\`${userField}\`), "@", TO_STRING(\`${hostField}\`), "@${USER_ENTITY_NAMESPACE.Local}")`,
+    presenceGate: HOST_SCOPED_USER_FIELDS.map(esqlRawFieldNonEmpty).join(' AND '),
   };
 }
 

@@ -367,15 +367,23 @@ describe('buildTargetsPerActorQuery (targets per actor)', () => {
       );
     });
 
-    it('gates on user.email in WHERE but keeps it out of the actor EUID', () => {
+    it('never references user.email — that field belongs to the IDP ranking branch', () => {
       const query = buildTargetsPerActorQuery(hostScopedStandard, 'default');
 
-      // The gate mirrors extraction's documentsFilter (email OR name), but a document
-      // with only user.email is an IDP user — including it in the EUID would emit an
-      // id the entity store does not hold.
-      const [, afterEval] = query.split('actorUserId = CONCAT(');
-      expect(query).toContain('`user.email` IS NOT NULL');
-      expect(afterEval.split('\n')[0]).not.toContain('user.email');
+      // A document with user.email but no user.name is an IDP user that extraction
+      // indexed under a different EUID, so neither the gate nor the EUID may read it.
+      expect(query).not.toContain('user.email');
+    });
+
+    it('emits a single WHERE gate covering both the actor and host-target EUIDs', () => {
+      const query = buildTargetsPerActorQuery(hostScopedStandard, 'default');
+
+      // `host.id` is the only field either EUID reads, so the actor gate doubles as
+      // the target gate — a second host.id check would be dead weight per row.
+      expect(query).toContain(
+        '(`user.name` IS NOT NULL AND `user.name` != "") AND (`host.id` IS NOT NULL AND `host.id` != "")'
+      );
+      expect(query.match(/`host\.id` IS NOT NULL/g)).toHaveLength(1);
     });
 
     it('includes host.id IS NOT NULL gate (requireTargetEntityIdExists host-scoped equivalent)', () => {

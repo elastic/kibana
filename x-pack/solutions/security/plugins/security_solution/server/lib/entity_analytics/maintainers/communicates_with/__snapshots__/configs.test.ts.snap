@@ -147,8 +147,7 @@ FROM logs-system.auth-__namespace__
 | WHERE (MV_CONTAINS(TO_STRING(event.category), \\"authentication\\") OR MV_CONTAINS(TO_STRING(event.category), \\"session\\"))
     AND event.action == \\"ssh_login\\"
     AND event.outcome == \\"success\\"
-    AND ((\`user.email\` IS NOT NULL AND \`user.email\` != \\"\\") OR (\`user.name\` IS NOT NULL AND \`user.name\` != \\"\\"))
-    AND (\`host.id\` IS NOT NULL AND \`host.id\` != \\"\\")
+    AND ((\`user.name\` IS NOT NULL AND \`user.name\` != \\"\\") AND (\`host.id\` IS NOT NULL AND \`host.id\` != \\"\\"))
 | EVAL actorUserId = CONCAT(\\"user:\\", TO_STRING(\`user.name\`), \\"@\\", TO_STRING(\`host.id\`), \\"@local\\")
 | WHERE COALESCE(actorUserId, \\"\\") != \\"\\"
 | EVAL targetEntityId = CONCAT(\\"host:\\", TO_STRING(\`host.id\`))
@@ -166,8 +165,7 @@ FROM logs-system.security-__namespace__
     AND winlog.logon.type IN (\\"Interactive\\", \\"RemoteInteractive\\", \\"CachedInteractive\\")
     AND event.outcome == \\"success\\"
     AND NOT user.name IN (\\"SYSTEM\\", \\"LOCAL SERVICE\\", \\"NETWORK SERVICE\\", \\"ANONYMOUS LOGON\\")
-    AND ((\`user.email\` IS NOT NULL AND \`user.email\` != \\"\\") OR (\`user.name\` IS NOT NULL AND \`user.name\` != \\"\\"))
-    AND (\`host.id\` IS NOT NULL AND \`host.id\` != \\"\\")
+    AND ((\`user.name\` IS NOT NULL AND \`user.name\` != \\"\\") AND (\`host.id\` IS NOT NULL AND \`host.id\` != \\"\\"))
 | EVAL actorUserId = CONCAT(\\"user:\\", TO_STRING(\`user.name\`), \\"@\\", TO_STRING(\`host.id\`), \\"@local\\")
 | WHERE COALESCE(actorUserId, \\"\\") != \\"\\"
 | EVAL targetEntityId = CONCAT(\\"host:\\", TO_STRING(\`host.id\`))

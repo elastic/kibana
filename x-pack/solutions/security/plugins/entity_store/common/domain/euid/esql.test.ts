@@ -727,22 +727,26 @@ describe('getHostScopedUserEuidEsql', () => {
   });
 
   describe('presenceGate', () => {
-    it('admits documents carrying either user.email or user.name', () => {
+    it('requires every field the EUID composes, AND-joined', () => {
       const { presenceGate } = getHostScopedUserEuidEsql();
 
-      // Must stay in sync with the extraction pipeline's documentsFilter, which
-      // admits a document when any of the user identity candidates is present.
+      // Both fields are mandatory — a document missing either is an IDP user that
+      // extraction indexed under a different EUID, so admitting it would build an id
+      // the entity store does not hold.
       expect(presenceGate).toBe(
-        '(`user.email` IS NOT NULL AND `user.email` != "") OR (`user.name` IS NOT NULL AND `user.name` != "")'
+        '(`user.name` IS NOT NULL AND `user.name` != "") AND (`host.id` IS NOT NULL AND `host.id` != "")'
       );
     });
-  });
 
-  describe('hostPresenceGate', () => {
-    it('gates on host.id being present and non-empty', () => {
-      const { hostPresenceGate } = getHostScopedUserEuidEsql();
+    it('gates on exactly the fields the EUID reads', () => {
+      const { evalAssignment, presenceGate } = getHostScopedUserEuidEsql();
 
-      expect(hostPresenceGate).toBe('(`host.id` IS NOT NULL AND `host.id` != "")');
+      for (const field of ['user.name', 'host.id']) {
+        expect(evalAssignment).toContain(`\`${field}\``);
+        expect(presenceGate).toContain(`\`${field}\``);
+      }
+      // user.email belongs to the IDP ranking branch, not this one.
+      expect(presenceGate).not.toContain('user.email');
     });
   });
 });

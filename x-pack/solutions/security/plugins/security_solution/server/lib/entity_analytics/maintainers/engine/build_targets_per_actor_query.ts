@@ -40,12 +40,10 @@ function buildAnyActorFieldNonEmptyEsql(fields: string[]): string {
  * else in the pipeline (WHERE composition, MV_EXPAND, STATS, LIMIT) is identical
  * across configs, so it lives in `buildRelationshipEsql` and is shared.
  *
- * `hostScopedUsersOnly` configs get minimized fragments: the actor EUID and its
- * presence gates come from `euid.esql.getHostScopedUserEuid()` (hardcoded
- * `@local`, no `entity.namespace` derivation), and the target EUID reads `host.id`
- * alone. ~2 EVAL columns per row instead of ~35 — measured ~26× faster on
- * logs-system.auth (~700M docs, 30d lookback). See `hostScopedUsersOnly` in
- * `types.ts` for the data assumptions that make this valid.
+ * `hostScopedUsersOnly` configs get minimized fragments from
+ * `euid.experimental.getHostScopedUserEuidEsql()` — ~2 EVAL columns per row instead of ~35,
+ * measured ~26× faster on logs-system.auth (~700M docs, 30d lookback). See
+ * `hostScopedUsersOnly` in `types.ts` for the data assumptions that make this valid.
  *
  * `config.customActor.fields` is deliberately ignored for those configs: which
  * fields form the host-scoped user EUID is a property of the entity definition,
@@ -61,24 +59,17 @@ function resolveActorAndTargetEsql(
   targetEvalClause: string;
 } {
   if (config.hostScopedUsersOnly) {
-    if (config.requireTargetEntityIdExists && config.targetEntityType !== 'host') {
-      throw new Error(
-        `hostScopedUsersOnly does not support requireTargetEntityIdExists with non-host targetEntityType ('${config.targetEntityType}'). ` +
-          'Drop hostScopedUsersOnly from this config to use the general-case fragments.'
-      );
-    }
-
-    const { evalAssignment, presenceGate, hostPresenceGate } = euid.esql.getHostScopedUserEuid();
+    const { evalAssignment, presenceGate } = euid.experimental.getHostScopedUserEuidEsql();
 
     return {
+      // Requires both `user.name` and `host.id`. For a host target that doubles as
+      // the target gate — `host.id` is the only field either EUID reads — so
+      // `targetGateLine` stays empty rather than emitting a redundant check.
       actorPresenceGate: presenceGate,
       actorEvalLines: `| EVAL ${ENGINE_COLUMNS.actor} = ${evalAssignment}`,
-      // Gate on host.id directly rather than the full EUID-exists DSL: the target
-      // EUID below is host.id only, so the broader gate (host.id OR host.name OR
-      // host.hostname) would admit documents whose EUID we cannot build.
       targetGateLine:
-        config.requireTargetEntityIdExists && config.targetEntityType === 'host'
-          ? `    AND ${hostPresenceGate}\n`
+        config.requireTargetEntityIdExists && config.targetEntityType !== 'host'
+          ? `    AND (${euid.esql.getEuidDocumentsContainsIdFilter(config.targetEntityType)})\n`
           : '',
       targetEvalClause:
         config.targetEntityType === 'host'

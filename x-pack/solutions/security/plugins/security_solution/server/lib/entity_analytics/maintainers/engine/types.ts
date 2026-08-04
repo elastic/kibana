@@ -172,7 +172,7 @@ interface RelationshipIntegrationBase {
    * about the *data*, not a build directive, but it lets Step 2 skip work that
    * only exists to handle the general case:
    *
-   * - the actor EUID comes from `euid.esql.getHostScopedUserEuid()`, which emits
+   * - the actor EUID comes from `euid.experimental.getHostScopedUserEuidEsql()`, which emits
    *   the namespace directly instead of deriving `entity.namespace` (a 7-arm
    *   CASE/COALESCE tree over `event.module`, `event.dataset`,
    *   `data_stream.dataset`, `cloud.provider` and `event.kind`);
