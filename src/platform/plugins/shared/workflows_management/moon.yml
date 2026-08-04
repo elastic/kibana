@@ -55,7 +55,6 @@ dependsOn:
   - '@kbn/cell-actions'
   - '@kbn/ui-actions-plugin'
   - '@kbn/storybook'
-  - '@kbn/ui-chrome-layout'
   - '@kbn/react-field'
   - '@kbn/storage-adapter'
   - '@kbn/occ'
@@ -107,6 +106,7 @@ dependsOn:
   - '@kbn/std'
   - '@kbn/use-observable'
   - '@kbn/cloud-plugin'
+  - '@kbn/user-profile-components'
   - '@kbn/kbn-client'
   - '@kbn/rule-data-utils'
   - '@kbn/std'
@@ -123,7 +123,6 @@ dependsOn:
   - '@kbn/app-header'
   - '@kbn/deeplinks-workflows'
   - '@kbn/core-chrome-app-menu-components'
-  - '@kbn/management-settings-ids'
 tags:
   - plugin
   - prod

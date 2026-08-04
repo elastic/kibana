@@ -62,7 +62,7 @@ const parseConfigAuthoringResponse = (
 const validateConfigForChartType = (
   chartType: SupportedChartType,
   config: unknown
-): VisualizationConfig => chartTypeRegistry[chartType].schema.validate(config);
+): VisualizationConfig => chartTypeRegistry[chartType].schema.parse(config);
 
 export interface EsqlDataSourceCarrier {
   data_source?: { type?: string; query?: string };
