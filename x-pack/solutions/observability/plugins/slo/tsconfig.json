@@ -135,6 +135,7 @@
     "@kbn/core-spaces-common",
     "@kbn/core-feature-flags-server",
     "@kbn/cps",
-    "@kbn/cps-server-utils"
+    "@kbn/cps-server-utils",
+    "@kbn/cps-utils"
   ]
 }

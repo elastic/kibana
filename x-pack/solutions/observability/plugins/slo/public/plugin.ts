@@ -14,6 +14,7 @@ import type {
   PluginInitializerContext,
 } from '@kbn/core/public';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
+import { ProjectRoutingAccess } from '@kbn/cps-utils';
 import type { DefaultClientOptions } from '@kbn/server-route-repository-client';
 import { createRepositoryClient } from '@kbn/server-route-repository-client';
 import { SLOS_BASE_PATH } from '@kbn/slo-shared-plugin/common/locators/paths';
@@ -21,6 +22,10 @@ import { lazy } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { PLUGIN_NAME, sloAppId } from '../common';
 import type { ExperimentalFeatures, SLOConfig } from '../common/config';
+import {
+  OBSERVABILITY_SLO_CPS_ENABLED_DEFAULT,
+  OBSERVABILITY_SLO_CPS_ENABLED_FEATURE_FLAG,
+} from '../common/feature_flags';
 import type { SLORouteRepository } from '../server/routes/utils/get_slo_server_route_repository';
 import { registerEmbeddables } from './register_embeddables';
 import { SloDetailsLocatorDefinition } from './locators/slo_details';
@@ -141,6 +146,15 @@ export class SLOPlugin
 
   public start(core: CoreStart, plugins: SLOPublicPluginsStart) {
     const kibanaVersion = this.initContext.env.packageInfo.version;
+
+    if (
+      core.featureFlags.getBooleanValue(
+        OBSERVABILITY_SLO_CPS_ENABLED_FEATURE_FLAG,
+        OBSERVABILITY_SLO_CPS_ENABLED_DEFAULT
+      )
+    ) {
+      plugins.cps?.cpsManager?.registerAppAccess(sloAppId, () => ProjectRoutingAccess.READONLY);
+    }
 
     const sloClient = createRepositoryClient<SLORouteRepository, DefaultClientOptions>(core);
 

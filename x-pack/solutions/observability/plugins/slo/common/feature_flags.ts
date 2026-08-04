@@ -6,3 +6,9 @@
  */
 
 export const SLO_COMPOSITE_ENABLED = 'slo.compositeSloEnabled';
+
+/** Use with `feature_flags.overrides` in kibana.yml to toggle CPS header picker for SLO. */
+export const OBSERVABILITY_SLO_CPS_ENABLED_FEATURE_FLAG = 'observability.slo.cpsEnabled' as const;
+
+/** Fallback when the flag is unset and no override exists. */
+export const OBSERVABILITY_SLO_CPS_ENABLED_DEFAULT = false;
