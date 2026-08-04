@@ -613,6 +613,10 @@ export class DiscoverApp {
     return Number(await fetchCounter.getAttribute('data-fetch-counter'));
   }
 
+  getErrorCalloutTitle(): Locator {
+    return this.page.testSubj.locator('discoverErrorCalloutTitle');
+  }
+
   getErrorCalloutMessage(): Locator {
     return this.page.testSubj.locator('discoverErrorCalloutMessage');
   }
