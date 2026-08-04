@@ -43,12 +43,8 @@ const KEY = 'about';
  */
 export const AboutSection = memo(() => {
   const { telemetry } = useKibana().services;
-  const {
-    dataAsNestedObject,
-    dataFormattedForFieldBrowser,
-    scopeId,
-    searchHit,
-  } = useDocumentDetailsContext();
+  const { dataAsNestedObject, dataFormattedForFieldBrowser, scopeId, searchHit } =
+    useDocumentDetailsContext();
   const { openPreviewPanel } = useExpandableFlyoutApi();
 
   const { ruleId } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
@@ -85,10 +81,7 @@ export const AboutSection = memo(() => {
   const content =
     eventKind === EventKind.signal ? (
       <>
-        <AlertDescription
-          hit={hit}
-          onShowRuleSummary={openRulePreview}
-        />
+        <AlertDescription hit={hit} onShowRuleSummary={openRulePreview} />
         <AlertReason hit={hit} />
         <MitreAttack hit={hit} />
         <AlertStatus hit={hit} />
