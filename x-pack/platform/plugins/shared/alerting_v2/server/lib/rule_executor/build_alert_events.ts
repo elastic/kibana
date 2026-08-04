@@ -378,12 +378,12 @@ export function buildQueryRecoveryAlertEvents({
   scheduledTimestamp,
   type,
   maxDocSizeBytes,
-}: BuildQueryRecoveryAlertEventsOpts): AlertEvent[] {
+}: BuildQueryRecoveryAlertEventsOpts): AlertEventsBatch {
   const columns = esqlResponse.columns ?? [];
   const values = esqlResponse.values ?? [];
 
   if (columns.length === 0 || values.length === 0) {
-    return [];
+    return { alertEvents: [], truncatedEventsCount: 0 };
   }
 
   const executionUuid = buildExecutionUuid({
@@ -418,17 +418,22 @@ export function buildQueryRecoveryAlertEvents({
   }
 
   if (recoveredByGroupHash.size === 0) {
-    return [];
+    return { alertEvents: [], truncatedEventsCount: 0 };
   }
 
   const wroteAt = new Date().toISOString();
+  let truncatedEventsCount = 0;
 
-  return Array.from(recoveredByGroupHash).map(([groupHash, rowDoc]) => {
+  const alertEvents = Array.from(recoveredByGroupHash).map(([groupHash, rowDoc]) => {
     const { data, truncated } = enforceAlertDataSize({
       rowDoc,
       groupingFields,
       maxBytes: maxDocSizeBytes,
     });
+
+    if (truncated) {
+      truncatedEventsCount++;
+    }
 
     return buildRuleEventDocument({
       '@timestamp': wroteAt,
@@ -443,4 +448,6 @@ export function buildQueryRecoveryAlertEvents({
       space_id: spaceId,
     });
   });
+
+  return { alertEvents, truncatedEventsCount };
 }

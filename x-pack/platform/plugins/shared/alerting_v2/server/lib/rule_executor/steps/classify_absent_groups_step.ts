@@ -16,6 +16,7 @@ import {
   buildRecoveryAlertEvents,
   resolveAlertEventType,
 } from '../build_alert_events';
+import { RULE_EXECUTION_COUNTERS } from '../metrics/counters';
 import { detectDataPresence } from '../detect_data_presence';
 import { executeRecoveryQuery } from '../execute_recovery_query';
 import { fetchActiveAlertGroupHashes } from '../fetch_active_alert_group_hashes';
@@ -29,6 +30,7 @@ import {
   QueryServiceScopedSpaceRoutingToken,
 } from '../../services/query_service/tokens';
 import type { QueryServiceContract } from '../../services/query_service/query_service';
+import type { AlertEventsBatch } from '../build_alert_events';
 import type { ActiveAlertGroupHash } from '../queries';
 import type { RuleResponse } from '../../rules_client';
 import type { AlertEvent } from '../../../resources/datastreams/alert_events';
@@ -92,7 +94,10 @@ export class ClassifyAbsentGroupsStep implements RuleExecutionStep {
       },
       // Runs once, after the query stream is fully drained.
       finalize: async (breachedGroupHashes, lastState) => {
-        const finalBatch = await this.classify(lastState, breachedGroupHashes);
+        const { alertEvents: finalBatch, truncatedEventsCount } = await this.classify(
+          lastState,
+          breachedGroupHashes
+        );
         if (finalBatch.length === 0) {
           return undefined;
         }
@@ -101,9 +106,24 @@ export class ClassifyAbsentGroupsStep implements RuleExecutionStep {
           message: `[${this.name}] Emitting ${finalBatch.length} absence-based event(s) for rule ${lastState.input.ruleId}`,
         });
 
+        if (truncatedEventsCount > 0) {
+          this.logger.warn({
+            message: `[${this.name}] Truncated the data payload of ${truncatedEventsCount} recovery event(s) for rule ${lastState.input.ruleId}: rows exceeded the configured maxDocSize of ${this.maxDocSizeBytes} bytes`,
+          });
+        }
+
         return {
           type: 'continue',
           state: { ...lastState, alertEventsBatch: finalBatch },
+          ...(truncatedEventsCount > 0
+            ? {
+                meta: {
+                  counters: {
+                    [RULE_EXECUTION_COUNTERS.alertEventsDataTruncated]: truncatedEventsCount,
+                  },
+                },
+              }
+            : {}),
         };
       },
     });
@@ -112,18 +132,18 @@ export class ClassifyAbsentGroupsStep implements RuleExecutionStep {
   private async classify(
     state: RulePipelineState,
     breachedGroupHashes: ReadonlySet<string>
-  ): Promise<AlertEvent[]> {
+  ): Promise<AlertEventsBatch> {
     const { rule, input } = state;
 
     if (rule?.kind !== 'alert') {
-      return [];
+      return { alertEvents: [], truncatedEventsCount: 0 };
     }
 
     const recoveryEnabled = rule.recovery_strategy != null && rule.recovery_strategy !== 'none';
     const noDataEnabled = getNoDataEsqlQuery(rule.query, rule.no_data_strategy) != null;
 
     if (!recoveryEnabled && !noDataEnabled) {
-      return [];
+      return { alertEvents: [], truncatedEventsCount: 0 };
     }
 
     const activeGroups = await fetchActiveAlertGroupHashes(
@@ -133,7 +153,7 @@ export class ClassifyAbsentGroupsStep implements RuleExecutionStep {
     );
 
     if (activeGroups.length === 0) {
-      return [];
+      return { alertEvents: [], truncatedEventsCount: 0 };
     }
 
     // Data presence — one query for the whole run.
@@ -147,7 +167,7 @@ export class ClassifyAbsentGroupsStep implements RuleExecutionStep {
       : undefined;
 
     // Recovery — recovered events for active groups NOT in the full breach set.
-    const recoveryEvents = recoveryEnabled
+    const { alertEvents: recoveryEvents, truncatedEventsCount } = recoveryEnabled
       ? await this.buildRecovery({
           rule,
           input,
@@ -155,7 +175,7 @@ export class ClassifyAbsentGroupsStep implements RuleExecutionStep {
           breachedGroupHashes,
           dataPresentGroupHashes,
         })
-      : [];
+      : { alertEvents: [], truncatedEventsCount: 0 };
 
     // No-data — classify active groups absent from breach AND not recovered above.
     const recoveredGroupHashes = new Set(recoveryEvents.map((event) => event.group_hash));
@@ -170,7 +190,10 @@ export class ClassifyAbsentGroupsStep implements RuleExecutionStep {
         })
       : [];
 
-    return [...recoveryEvents, ...noDataEvents];
+    return {
+      alertEvents: [...recoveryEvents, ...noDataEvents],
+      truncatedEventsCount,
+    };
   }
 
   private async buildRecovery({
@@ -185,7 +208,7 @@ export class ClassifyAbsentGroupsStep implements RuleExecutionStep {
     activeGroups: ActiveAlertGroupHash[];
     breachedGroupHashes: ReadonlySet<string>;
     dataPresentGroupHashes?: ReadonlySet<string>;
-  }): Promise<AlertEvent[]> {
+  }): Promise<AlertEventsBatch> {
     const effectiveQuery = getRecoverEsqlQuery(rule.query, rule.recovery_strategy);
 
     if (effectiveQuery) {
@@ -201,16 +224,19 @@ export class ClassifyAbsentGroupsStep implements RuleExecutionStep {
       });
     }
 
-    return buildRecoveryAlertEvents({
-      ruleId: rule.id,
-      ruleVersion: rule.metadata.version,
-      spaceId: input.spaceId,
-      activeGroupHashes: activeGroups,
-      breachedGroupHashes,
-      dataPresentGroupHashes,
-      scheduledTimestamp: input.scheduledAt,
-      type: resolveAlertEventType(rule),
-    });
+    return {
+      alertEvents: buildRecoveryAlertEvents({
+        ruleId: rule.id,
+        ruleVersion: rule.metadata.version,
+        spaceId: input.spaceId,
+        activeGroupHashes: activeGroups,
+        breachedGroupHashes,
+        dataPresentGroupHashes,
+        scheduledTimestamp: input.scheduledAt,
+        type: resolveAlertEventType(rule),
+      }),
+      truncatedEventsCount: 0,
+    };
   }
 
   /**

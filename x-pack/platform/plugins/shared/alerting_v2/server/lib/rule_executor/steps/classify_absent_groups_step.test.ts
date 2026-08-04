@@ -18,6 +18,7 @@ import {
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
 import { createQueryService } from '../../services/query_service/query_service.mock';
 import { buildGroupHash } from '../build_alert_events';
+import { RULE_EXECUTION_COUNTERS } from '../metrics/counters';
 import type { AlertEvent } from '../../../resources/datastreams/alert_events';
 import type { PipelineStateStream } from '../types';
 import type { RuleResponse } from '../../rules_client';
@@ -262,6 +263,49 @@ describe('ClassifyAbsentGroupsStep', () => {
       const finalBatch = results[results.length - 1].state.alertEventsBatch!;
       expect(finalBatch).toHaveLength(1);
       expect(finalBatch[0]?.rule?.version).toBe(9);
+    });
+
+    it('emits alertEventsDataTruncated counter and warns when the recovery query returns oversized rows', async () => {
+      const { step, internalEsClient, scopedEsClient } = createStep(200);
+      const hashRec = hashFor('host-rec');
+      mockActiveGroups(internalEsClient, [hashRec]);
+
+      // Recovery row contains an oversized payload that exceeds the 200-byte limit.
+      scopedEsClient.esql.query.mockResolvedValue(
+        createEsqlResponse(
+          [
+            { name: 'host.name', type: 'keyword' },
+            { name: 'message', type: 'keyword' },
+          ],
+          [['host-rec', 'x'.repeat(500)]]
+        )
+      );
+
+      const rule = createRuleResponse({
+        kind: 'alert',
+        recovery_strategy: 'query',
+        grouping: { fields: ['host.name'] },
+        query: {
+          format: 'standalone',
+          breach: { query: 'FROM m | WHERE breach' },
+          recovery: { query: 'FROM m | WHERE recovered' },
+        },
+      });
+
+      const results = await collectStreamResults(
+        step.executeStream(
+          createPipelineStream([createRulePipelineState({ rule, alertEventsBatch: [] })])
+        )
+      );
+
+      const finalResult = results[results.length - 1];
+      const finalBatch = finalResult.state.alertEventsBatch!;
+      expect(finalBatch).toHaveLength(1);
+      expect(finalBatch[0].data_truncated).toBe(true);
+      // @ts-expect-error: meta is present on the result
+      expect(finalResult.meta?.counters).toEqual({
+        [RULE_EXECUTION_COUNTERS.alertEventsDataTruncated]: 1,
+      });
     });
   });
 

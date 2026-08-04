@@ -540,7 +540,7 @@ describe('buildQueryRecoveryAlertEvents', () => {
 
     const activeGroupHash = breachedEvents[0].group_hash;
 
-    const events = buildQueryRecoveryAlertEvents({
+    const { alertEvents: events } = buildQueryRecoveryAlertEvents({
       ruleId: 'rule-123',
       ruleVersion: 1,
       spaceId: 'default',
@@ -568,7 +568,7 @@ describe('buildQueryRecoveryAlertEvents', () => {
   });
 
   it('returns empty array when recovery query returns no rows', () => {
-    const events = buildQueryRecoveryAlertEvents({
+    const { alertEvents: events } = buildQueryRecoveryAlertEvents({
       ruleId: 'rule-123',
       ruleVersion: 1,
       spaceId: 'default',
@@ -590,7 +590,7 @@ describe('buildQueryRecoveryAlertEvents', () => {
       values: [['host-unknown']],
     };
 
-    const events = buildQueryRecoveryAlertEvents({
+    const { alertEvents: events } = buildQueryRecoveryAlertEvents({
       ruleId: 'rule-123',
       ruleVersion: 1,
       spaceId: 'default',
@@ -634,7 +634,7 @@ describe('buildQueryRecoveryAlertEvents', () => {
 
     const activeGroupHash = breachedEvents[0].group_hash;
 
-    const events = buildQueryRecoveryAlertEvents({
+    const { alertEvents: events } = buildQueryRecoveryAlertEvents({
       ruleId: 'rule-123',
       ruleVersion: 1,
       spaceId: 'default',
@@ -671,7 +671,7 @@ describe('buildQueryRecoveryAlertEvents', () => {
 
     const activeGroupHash = breachedEvents[0].group_hash;
 
-    const events = buildQueryRecoveryAlertEvents({
+    const { alertEvents: events } = buildQueryRecoveryAlertEvents({
       ruleId: 'rule-123',
       ruleVersion: 1,
       spaceId: 'default',
@@ -705,7 +705,7 @@ describe('buildQueryRecoveryAlertEvents', () => {
       maxDocSizeBytes: DEFAULT_MAX_DOC_SIZE_BYTES,
     });
 
-    const events = buildQueryRecoveryAlertEvents({
+    const { alertEvents: events } = buildQueryRecoveryAlertEvents({
       ruleId: 'rule-123',
       ruleVersion: 1,
       spaceId: 'custom-space',
@@ -737,7 +737,7 @@ describe('buildQueryRecoveryAlertEvents', () => {
       maxDocSizeBytes: DEFAULT_MAX_DOC_SIZE_BYTES,
     });
 
-    const events = buildQueryRecoveryAlertEvents({
+    const { alertEvents: events, truncatedEventsCount } = buildQueryRecoveryAlertEvents({
       ruleId: 'rule-123',
       ruleVersion: 1,
       spaceId: 'default',
@@ -760,5 +760,6 @@ describe('buildQueryRecoveryAlertEvents', () => {
     expect(events[0].group_hash).toBe(breachedEvents[0].group_hash);
     expect(events[0].data).toEqual({ 'host.name': 'host-a' });
     expect(events[0].data_truncated).toBe(true);
+    expect(truncatedEventsCount).toBe(1);
   });
 });

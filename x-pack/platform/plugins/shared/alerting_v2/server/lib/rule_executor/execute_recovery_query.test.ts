@@ -58,7 +58,7 @@ describe('executeRecoveryQuery', () => {
     });
     const input = createRuleExecutionInput();
 
-    const events = await executeRecoveryQuery({
+    const { alertEvents: events } = await executeRecoveryQuery({
       queryService,
       logger: loggerService,
       rule,
@@ -92,7 +92,7 @@ describe('executeRecoveryQuery', () => {
 
     scopedEsClient.esql.query.mockResolvedValue(createEsqlResponse([], []));
 
-    const events = await executeRecoveryQuery({
+    const { alertEvents: events } = await executeRecoveryQuery({
       queryService,
       logger: loggerService,
       rule: createRuleResponse({ kind: 'alert', recovery_strategy: 'query' }),
@@ -125,7 +125,7 @@ describe('executeRecoveryQuery', () => {
       createEsqlResponse([{ name: 'host.name', type: 'keyword' }], [['host-x'], ['host-y']])
     );
 
-    const events = await executeRecoveryQuery({
+    const { alertEvents: events } = await executeRecoveryQuery({
       queryService,
       logger: loggerService,
       rule: createRuleResponse({
@@ -234,5 +234,45 @@ describe('executeRecoveryQuery', () => {
       expect.any(Object),
       expect.objectContaining({ signal: abortController.signal })
     );
+  });
+
+  it('returns truncatedEventsCount equal to the number of oversized rows', async () => {
+    const { queryService, scopedEsClient } = setup();
+
+    const groupingFields = ['host.name'];
+    const activeHash = buildGroupHash({
+      rowDoc: { 'host.name': 'host-a' },
+      groupKeyFields: groupingFields,
+      fallbackSeed: 'unused',
+    });
+
+    scopedEsClient.esql.query.mockResolvedValue(
+      createEsqlResponse(
+        [
+          { name: 'host.name', type: 'keyword' },
+          { name: 'message', type: 'keyword' },
+        ],
+        [['host-a', 'x'.repeat(500)]]
+      )
+    );
+
+    const { alertEvents, truncatedEventsCount } = await executeRecoveryQuery({
+      queryService,
+      logger: loggerService,
+      rule: createRuleResponse({
+        kind: 'alert',
+        recovery_strategy: 'query',
+        grouping: { fields: groupingFields },
+      }),
+      effectiveQuery: 'FROM logs-*',
+      input: createRuleExecutionInput(),
+      activeGroupHashes: toActive([activeHash]),
+      breachedGroupHashes: new Set(),
+      maxDocSizeBytes: 200,
+    });
+
+    expect(truncatedEventsCount).toBe(1);
+    expect(alertEvents).toHaveLength(1);
+    expect(alertEvents[0].data_truncated).toBe(true);
   });
 });
