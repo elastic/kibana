@@ -82,6 +82,21 @@ const requestTimeoutsConfig = schema.object({
   update_by_query: schema.number({ defaultValue: 1000 * 30, min: 1000 * 10, max: 1000 * 60 * 10 }),
 });
 
+/*
+ * Diagnostic per-task execution accounting. Uses async_hooks and has real global
+ * overhead, so it ships disabled by default and should be enabled only while
+ * investigating. See the task_activity_tracking module for details.
+ */
+const activityTrackingSchema = schema.object({
+  enabled: schema.boolean({ defaultValue: false }),
+  /*
+   * Track the largest positive V8 heap growth within one callback. This is an
+   * allocation heuristic rather than retained memory, and reading heap statistics
+   * before and after each callback adds overhead, so it is independently opt-in.
+   */
+  track_heap_growth: schema.boolean({ defaultValue: false }),
+});
+
 const validateDuration = (duration: string) => {
   try {
     parseIntervalAsMillisecond(duration);
@@ -91,6 +106,7 @@ const validateDuration = (duration: string) => {
 };
 export const configSchema = schema.object(
   {
+    activity_tracking: activityTrackingSchema,
     allow_reading_invalid_state: schema.boolean({ defaultValue: true }),
     /* The API key type to switch between UIAM API keys and Elasticsearch API keys. */
     api_key_type: schema.oneOf([schema.literal(ApiKeyType.ES), schema.literal(ApiKeyType.UIAM)], {
@@ -230,5 +246,6 @@ export const configSchema = schema.object(
 );
 
 export type TaskManagerConfig = TypeOf<typeof configSchema>;
+export type ActivityTrackingConfig = TypeOf<typeof activityTrackingSchema>;
 export type TaskExecutionFailureThreshold = TypeOf<typeof taskExecutionFailureThresholdSchema>;
 export type EventLoopDelayConfig = TypeOf<typeof eventLoopDelaySchema>;

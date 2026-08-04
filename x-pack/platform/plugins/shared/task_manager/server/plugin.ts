@@ -81,6 +81,7 @@ import {
   UiamApiKeyProvisioningTask,
   taskManagerUiamProvisioningEvents,
 } from './uiam_api_key_provisioning';
+import { TaskActivityTracker, setActiveTaskActivityTracker } from './task_activity_tracking';
 
 export interface TaskManagerSetupContract {
   /**
@@ -167,6 +168,7 @@ export class TaskManagerPlugin
   private startContract?: TaskManagerStartContract;
   private uiamApiKeyProvisioningTask?: UiamApiKeyProvisioningTask;
   private enrichFakeRequest?: FakeRequestEnricher;
+  private taskActivityTracker?: TaskActivityTracker;
 
   constructor(private readonly initContext: PluginInitializerContext) {
     this.initContext = initContext;
@@ -437,6 +439,18 @@ export class TaskManagerPlugin
 
     // Only poll for tasks if configured to run tasks
     if (this.shouldRunBackgroundTasks) {
+      // Diagnostic per-task execution accounting. Off by default; gated to
+      // task-running nodes since only they set the `run task` execution context.
+      if (this.config.activity_tracking.enabled) {
+        this.taskActivityTracker = new TaskActivityTracker({
+          executionContext,
+          logger: this.logger,
+          config: this.config.activity_tracking,
+        });
+        this.taskActivityTracker.enable();
+        setActiveTaskActivityTracker(this.taskActivityTracker);
+      }
+
       this.taskManagerMetricsCollector = new TaskManagerMetricsCollector({
         logger: this.logger,
         store: taskStore,
@@ -546,6 +560,12 @@ export class TaskManagerPlugin
   public async stop() {
     this.licenseSubscriber?.cleanup();
     this.uiamApiKeyProvisioningTask?.stop();
+
+    if (this.taskActivityTracker) {
+      setActiveTaskActivityTracker(undefined);
+      this.taskActivityTracker.stop();
+      this.taskActivityTracker = undefined;
+    }
 
     // Stop polling for tasks
     if (this.taskPollingLifecycle) {

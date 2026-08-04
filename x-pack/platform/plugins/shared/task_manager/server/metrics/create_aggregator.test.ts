@@ -38,6 +38,10 @@ import { TaskOverdueMetricsAggregator } from './task_overdue_metrics_aggregator'
 const logger = loggingSystemMock.createLogger();
 const mockMetricsAggregator = metricsAggregatorMock.create();
 const config: TaskManagerConfig = {
+  activity_tracking: {
+    enabled: false,
+    track_heap_growth: false,
+  },
   discovery: {
     active_nodes_lookback: '30s',
     interval: 10000,

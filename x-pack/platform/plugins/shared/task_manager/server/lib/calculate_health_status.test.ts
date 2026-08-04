@@ -17,6 +17,10 @@ Date.now = jest.fn().mockReturnValue(new Date(now));
 
 const logger = loggingSystemMock.create().get();
 const config = {
+  activity_tracking: {
+    enabled: false,
+    track_heap_growth: false,
+  },
   discovery: {
     active_nodes_lookback: '30s',
     interval: 10000,

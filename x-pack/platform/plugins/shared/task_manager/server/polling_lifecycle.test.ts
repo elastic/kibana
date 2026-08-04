@@ -85,6 +85,10 @@ describe('TaskPollingLifecycle', () => {
   const mockTaskStore = taskStoreMock.create({});
   const taskManagerOpts = {
     config: {
+      activity_tracking: {
+        enabled: false,
+        track_heap_growth: false,
+      },
       discovery: {
         active_nodes_lookback: '30s',
         interval: 10000,

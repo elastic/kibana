@@ -147,7 +147,10 @@ function generateSchemaLines(lineWriter, prop, mappings) {
   }
 
   if (StringOrNumberTypes.has(mappings.type)) {
-    lineWriter.addLine(`${propKey}: ecsStringOrNumber(),`);
+    const optional = mappings.meta?.optional === 'true';
+    lineWriter.addLine(
+      `${propKey}: ${optional ? 'schema.maybe(' : ''}ecsStringOrNumber()${optional ? ')' : ''},`
+    );
     return;
   }
 

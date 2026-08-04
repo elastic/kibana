@@ -30,6 +30,10 @@ const discoveryIsStarted = jest.spyOn(KibanaDiscoveryService.prototype, 'isStart
 
 const coreStart = coreMock.createStart();
 const pluginInitializerContextParams = {
+  activity_tracking: {
+    enabled: false,
+    track_heap_growth: false,
+  },
   max_attempts: 9,
   poll_interval: 3000,
   version_conflict_threshold: 80,

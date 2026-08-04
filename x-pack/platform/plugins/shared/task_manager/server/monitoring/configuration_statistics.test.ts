@@ -25,6 +25,10 @@ describe('Configuration Statistics Aggregator', () => {
 
   test('merges the static config with the merged configs', async () => {
     const configuration: TaskManagerConfig = {
+      activity_tracking: {
+        enabled: false,
+        track_heap_growth: false,
+      },
       discovery: {
         active_nodes_lookback: '30s',
         interval: 10000,

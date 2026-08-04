@@ -41,6 +41,48 @@ exports.EcsCustomPropertyMappings = {
               },
             },
           },
+          // per-task execution accounting (task manager activity tracking)
+          run: {
+            properties: {
+              active_ms: {
+                type: 'long',
+              },
+              idle_ms: {
+                type: 'long',
+              },
+              active_ratio: {
+                type: 'float',
+              },
+              longest_idle_gap_ms: {
+                type: 'long',
+              },
+              longest_event_loop_block_ms: {
+                type: 'long',
+              },
+              callbacks: {
+                type: 'long',
+              },
+              sync_ms: {
+                type: 'long',
+              },
+              event_loop_delay_max_ms: {
+                type: 'long',
+              },
+              unattributed_block_ms: {
+                type: 'long',
+              },
+              process_cpu_ms: {
+                type: 'long',
+              },
+              unattributed_cpu_ms: {
+                type: 'long',
+              },
+              max_heap_growth_per_callback_bytes: {
+                type: 'long',
+                meta: { optional: 'true' },
+              },
+            },
+          },
           // arbitrary consumer-provided data for the current task run, owned by task manager.
           data: {
             type: 'flattened',

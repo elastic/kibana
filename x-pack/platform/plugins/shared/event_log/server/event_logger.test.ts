@@ -7,7 +7,7 @@
 
 import { nanosToMillis } from '../common';
 import type { IEvent, IEventLogger, IEventLogService } from '.';
-import { ECS_VERSION } from './types';
+import { ECS_VERSION, EventSchema } from './types';
 import { EventLogService } from './event_log_service';
 import type { EsContext } from './es/context';
 import { contextMock } from './es/context.mock';
@@ -38,6 +38,51 @@ describe('EventLogger', () => {
       kibanaVersion: '1.0.1',
     });
     eventLogger = service.getLogger({});
+  });
+
+  test('validates task activity fields with or without optional heap growth', () => {
+    const run = {
+      active_ms: 20,
+      idle_ms: 80,
+      active_ratio: 0.2,
+      longest_idle_gap_ms: 50,
+      longest_event_loop_block_ms: 10,
+      callbacks: 3,
+      sync_ms: 5,
+      event_loop_delay_max_ms: 12,
+      unattributed_block_ms: 2,
+      process_cpu_ms: 25,
+      unattributed_cpu_ms: 5,
+    };
+    const event = {
+      kibana: {
+        server_uuid: KIBANA_SERVER_UUID,
+        task: {
+          id: 'task-id',
+          type: 'task-type',
+          scheduled: '2026-07-29T00:00:00.000Z',
+          schedule_delay: 0,
+          run,
+        },
+      },
+    };
+
+    expect(() => EventSchema.validate(event)).not.toThrow();
+    expect(() =>
+      EventSchema.validate({
+        ...event,
+        kibana: {
+          ...event.kibana,
+          task: {
+            ...event.kibana.task,
+            run: {
+              ...run,
+              max_heap_growth_per_callback_bytes: 1024,
+            },
+          },
+        },
+      })
+    ).not.toThrow();
   });
 
   test('handles successful initialization', async () => {

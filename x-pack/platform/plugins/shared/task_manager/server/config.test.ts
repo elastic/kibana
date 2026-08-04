@@ -12,6 +12,10 @@ describe('config validation', () => {
     const config: Record<string, unknown> = {};
     expect(configSchema.validate(config)).toMatchInlineSnapshot(`
       Object {
+        "activity_tracking": Object {
+          "enabled": false,
+          "track_heap_growth": false,
+        },
         "allow_reading_invalid_state": true,
         "api_key_type": "es",
         "auto_calculate_default_ech_capacity": false,
@@ -76,6 +80,10 @@ describe('config validation', () => {
     const config: Record<string, unknown> = {};
     expect(configSchema.validate(config)).toMatchInlineSnapshot(`
       Object {
+        "activity_tracking": Object {
+          "enabled": false,
+          "track_heap_growth": false,
+        },
         "allow_reading_invalid_state": true,
         "api_key_type": "es",
         "auto_calculate_default_ech_capacity": false,
@@ -138,6 +146,10 @@ describe('config validation', () => {
     };
     expect(configSchema.validate(config)).toMatchInlineSnapshot(`
       Object {
+        "activity_tracking": Object {
+          "enabled": false,
+          "track_heap_growth": false,
+        },
         "allow_reading_invalid_state": true,
         "api_key_type": "es",
         "auto_calculate_default_ech_capacity": false,
