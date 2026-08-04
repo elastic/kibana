@@ -333,7 +333,7 @@ export class TaskRunner<
         {
           labels: {
             ruleId: rule.id,
-            ruleTypeId: this.ruleType.id,
+            ruleType: this.ruleType.id,
             spaceId: this.taskInstance.params.spaceId,
           },
         }
@@ -536,7 +536,7 @@ export class TaskRunner<
           this.logger.debug(`no scheduling of actions for rule ${ruleLabel}: rule is snoozed.`, {
             labels: {
               ruleId,
-              ruleTypeId: this.ruleType.id,
+              ruleType: this.ruleType.id,
               spaceId,
               executionId: this.executionId,
             },
@@ -547,7 +547,7 @@ export class TaskRunner<
             {
               labels: {
                 ruleId,
-                ruleTypeId: this.ruleType.id,
+                ruleType: this.ruleType.id,
                 spaceId,
                 executionId: this.executionId,
               },
@@ -589,7 +589,7 @@ export class TaskRunner<
     } else {
       this.logger.debug(
         `skipping updating alerts for rule ${ruleTypeRunnerContext.ruleLogPrefix}: rule execution has been cancelled.`,
-        { labels: { ruleId, ruleTypeId: this.ruleType.id, spaceId, executionId: this.executionId } }
+        { labels: { ruleId, ruleType: this.ruleType.id, spaceId, executionId: this.executionId } }
       );
     }
 
@@ -688,7 +688,7 @@ export class TaskRunner<
 
       this.logger.debug(
         `executing rule ${this.ruleType.id}:${ruleId} at ${this.runDate.toISOString()}`,
-        { labels: { ruleId, ruleTypeId: this.ruleType.id, spaceId, executionId: this.executionId } }
+        { labels: { ruleId, ruleType: this.ruleType.id, spaceId, executionId: this.executionId } }
       );
 
       if (startedAt) {
@@ -754,7 +754,7 @@ export class TaskRunner<
           this.logger.debug(`Failed to clear expired snoozes: ${e.message}`, {
             labels: {
               ruleId,
-              ruleTypeId: this.ruleType.id,
+              ruleType: this.ruleType.id,
               spaceId,
               executionId: this.executionId,
             },
@@ -861,7 +861,7 @@ export class TaskRunner<
             {
               labels: {
                 ruleId,
-                ruleTypeId: this.ruleType.id,
+                ruleType: this.ruleType.id,
                 spaceId: this.taskInstance.params.spaceId,
                 executionId: this.executionId,
               },
@@ -940,7 +940,7 @@ export class TaskRunner<
           {
             labels: {
               ruleId,
-              ruleTypeId: this.ruleType.id,
+              ruleType: this.ruleType.id,
               spaceId,
               executionId: this.executionId,
               taskInstanceId: this.taskInstance.id,
@@ -1013,7 +1013,7 @@ export class TaskRunner<
       {
         labels: {
           ruleId,
-          ruleTypeId: this.ruleType.id,
+          ruleType: this.ruleType.id,
           spaceId: this.taskInstance.params.spaceId,
           executionId: this.executionId,
           taskInstanceId: this.taskInstance.id,
@@ -1026,7 +1026,7 @@ export class TaskRunner<
       {
         labels: {
           ruleId,
-          ruleTypeId: this.ruleType.id,
+          ruleType: this.ruleType.id,
           spaceId: this.taskInstance.params.spaceId,
           executionId: this.executionId,
           taskInstanceId: this.taskInstance.id,
@@ -1063,7 +1063,7 @@ export class TaskRunner<
       {
         labels: {
           ruleId,
-          ruleTypeId: this.ruleType.id,
+          ruleType: this.ruleType.id,
           spaceId: this.taskInstance.params.spaceId,
           executionId: this.executionId,
           taskInstanceId: this.taskInstance.id,

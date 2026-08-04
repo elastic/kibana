@@ -3288,7 +3288,13 @@ describe('Task Runner', () => {
     );
     expect(logger.error).toHaveBeenCalledWith(
       'Executing Rule test:1 has resulted in the following error(s): an error occurred,second error occurred',
-      { tags: ['1', 'test', 'rule-run-failed', 'framework-error'] }
+      {
+        labels: {
+          ruleId: '1',
+          ruleType: 'test',
+        },
+        tags: ['1', 'test', 'rule-run-failed', 'framework-error'],
+      }
     );
   });
 
@@ -3397,6 +3403,11 @@ describe('Task Runner', () => {
     expect(logger.debug).toHaveBeenCalledWith(
       'Executing Rule default:test:1 has resulted in Error: Index is blocked',
       {
+        labels: {
+          ruleId: '1',
+          ruleType: 'test',
+          spaceId: 'default',
+        },
         tags: ['1', 'test', 'rule-run-failed', 'framework-error'],
       }
     );

@@ -47,7 +47,8 @@ export function getState({
           err
         )}`;
         logger.debug(message, {
-          tags: [ruleTypeId, ruleId, 'rule-run-failed', errorSourceTag],
+          labels: { ruleId, ruleType: ruleTypeId, spaceId },
+          tags: ['rule-run-failed', errorSourceTag],
         });
       } else {
         const error = stackTraceLog ? stackTraceLog.message : err;
@@ -56,7 +57,8 @@ export function getState({
           error
         )} - ${stack ?? ''}`;
         logger.error(message, {
-          tags: [ruleTypeId, ruleId, 'rule-run-failed', errorSourceTag],
+          labels: { ruleId, ruleType: ruleTypeId, spaceId },
+          tags: ['rule-run-failed', errorSourceTag],
           error: { stack_trace: stack },
         });
       }
