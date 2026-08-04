@@ -5,7 +5,6 @@
   },
   "include": ["**/*"],
   "kbn_references": [
-    "@kbn/infra-plugin",
     "@kbn/scout-oblt",
     "@kbn/scout-synthtrace",
     "@kbn/synthtrace-client",
