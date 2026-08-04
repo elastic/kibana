@@ -33,7 +33,9 @@ const { identifyComputedFeatures } = jest.requireMock(
 };
 
 const computedRoute =
-  internalIdentifyKIFeaturesRoutes['POST /internal/streams/{streamName}/features/_identify/computed'];
+  internalIdentifyKIFeaturesRoutes[
+    'POST /internal/streams/{streamName}/features/_identify/computed'
+  ];
 
 type HandlerParams = Parameters<typeof computedRoute.handler>[0];
 
@@ -62,7 +64,7 @@ const makeHandlerParams = (): HandlerParams =>
     server: {},
     logger: { get: jest.fn().mockReturnValue({ error: jest.fn() }) },
     telemetry: {},
-  }) as unknown as HandlerParams;
+  } as unknown as HandlerParams);
 
 describe('identifyComputedFeaturesRoute CPS routing', () => {
   beforeEach(() => {

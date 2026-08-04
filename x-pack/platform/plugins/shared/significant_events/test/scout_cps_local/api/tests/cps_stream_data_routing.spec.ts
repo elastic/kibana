@@ -8,10 +8,7 @@
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import type { EsClient } from '@kbn/scout';
-import {
-  significantEventsCpsApiTest as apiTest,
-  COMMON_API_HEADERS,
-} from '../fixtures';
+import { significantEventsCpsApiTest as apiTest, COMMON_API_HEADERS } from '../fixtures';
 
 const CPS_LINKED_INDEX = 'logs-cps-se-ki-test';
 const VIEW_PREFIX = '$.';
@@ -81,10 +78,7 @@ apiTest.describe(
       await apiServices.streamsTest.deleteEsqlView(PARENT_VIEW);
       await apiServices.streamsTest.cleanupTestStreams(PARENT_STREAM);
       await apiServices.streamsTest.disableQueryStreams();
-      await linkedProject.esClient.indices.delete(
-        { index: CPS_LINKED_INDEX },
-        { ignore: [404] }
-      );
+      await linkedProject.esClient.indices.delete({ index: CPS_LINKED_INDEX }, { ignore: [404] });
     });
 
     apiTest(
@@ -123,7 +117,9 @@ apiTest.describe(
         const serializedFeatures = JSON.stringify(response.computedFeatures);
         expect(serializedFeatures).toContain(markerValue);
 
-        const logSamples = response.computedFeatures.find((feature) => feature.type === 'log_samples');
+        const logSamples = response.computedFeatures.find(
+          (feature) => feature.type === 'log_samples'
+        );
         expect(logSamples).toBeDefined();
         expect(JSON.stringify(logSamples?.properties)).toContain(markerValue);
       }

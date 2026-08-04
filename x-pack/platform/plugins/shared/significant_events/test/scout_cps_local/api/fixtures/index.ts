@@ -13,9 +13,9 @@ import type {
   RequestAuthFixture,
   SamlAuth,
 } from '@kbn/scout';
-import type { StreamsTestApiService } from '../../../../../streams/test/scout/api/services/streams_api_service';
-import { getStreamsTestApiService } from '../../../../../streams/test/scout/api/services/streams_api_service';
-import { getStreamsUsers } from '../../../../../streams/test/scout/api/fixtures/constants';
+import type { StreamsTestApiService } from '@kbn/streams-plugin/test/scout/api/services/streams_api_service';
+import { getStreamsTestApiService } from '@kbn/streams-plugin/test/scout/api/services/streams_api_service';
+import { getStreamsUsers } from '@kbn/streams-plugin/test/scout/api/fixtures/constants';
 import {
   getSignificantEventsTestApiService,
   type SignificantEventsTestApiService,
