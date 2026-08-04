@@ -19,7 +19,7 @@ import { useEnablement } from '../../../../hooks';
 import { CANNOT_PERFORM_ACTION_SYNTHETICS } from '../../../common/components/permissions';
 import { SERVICE_NOT_ALLOWED } from '../disabled_callout';
 import { useMonitorIntegrationHealth } from '../../../common/hooks/use_monitor_integration_health';
-import { isMonitorBulkEditable } from './bulk_edit_eligibility';
+import { isMonitorBulkStatusEditable } from './bulk_edit_eligibility';
 
 export type BulkEditAction = 'tags' | 'serviceName' | 'labels';
 
@@ -66,8 +66,8 @@ export const BulkOperations = ({
   // Enable/Disable are per-current-state: only the monitors that would actually
   // change are counted and patched, so we avoid re-syncing Fleet policies for
   // monitors already in the target state. The full by-state set is still handed
-  // to the modal so it can surface the ineligible (project/terraform, or
-  // permission-restricted) monitors as skipped.
+  // to the modal so it can surface the ineligible (permission-restricted)
+  // monitors as skipped.
   const enableCandidates = selectedItems.filter((item) => !item[ConfigKey.ENABLED]);
   const disableCandidates = selectedItems.filter((item) => item[ConfigKey.ENABLED]);
   const enableIds = enableCandidates.map((item) => item[ConfigKey.CONFIG_ID]);
@@ -75,11 +75,14 @@ export const BulkOperations = ({
 
   // Counts/disabled state reflect only monitors that can actually be updated, so
   // the menu never offers an action that would open a modal with nothing to do.
+  // Project/terraform monitors ARE eligible for enable/disable (unlike other
+  // bulk edits), so status eligibility only gates on the public-location
+  // capability.
   const eligibleEnableCount = enableCandidates.filter((item) =>
-    isMonitorBulkEditable(item, canUsePublicLocations)
+    isMonitorBulkStatusEditable(item, canUsePublicLocations)
   ).length;
   const eligibleDisableCount = disableCandidates.filter((item) =>
-    isMonitorBulkEditable(item, canUsePublicLocations)
+    isMonitorBulkStatusEditable(item, canUsePublicLocations)
   ).length;
 
   if (selectedItems.length === 0) {
@@ -321,13 +324,13 @@ const ALL_ALREADY_DISABLED = i18n.translate('xpack.synthetics.bulkOperations.all
 
 const NO_ELIGIBLE_TO_ENABLE = i18n.translate('xpack.synthetics.bulkOperations.noEligibleToEnable', {
   defaultMessage:
-    'None of the selected monitors can be enabled here. Project and Terraform-managed monitors, and monitors using locations you cannot access, are excluded.',
+    'None of the selected monitors can be enabled here. Monitors using locations you cannot access are excluded.',
 });
 
 const NO_ELIGIBLE_TO_DISABLE = i18n.translate(
   'xpack.synthetics.bulkOperations.noEligibleToDisable',
   {
     defaultMessage:
-      'None of the selected monitors can be disabled here. Project and Terraform-managed monitors, and monitors using locations you cannot access, are excluded.',
+      'None of the selected monitors can be disabled here. Monitors using locations you cannot access are excluded.',
   }
 );

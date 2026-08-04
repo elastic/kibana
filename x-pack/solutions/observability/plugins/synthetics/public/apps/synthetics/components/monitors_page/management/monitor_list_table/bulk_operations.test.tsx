@@ -94,14 +94,14 @@ describe('<BulkOperations />', () => {
     } as unknown as ReturnType<typeof useMonitorIntegrationHealth>);
   });
 
-  it('counts only eligible (ui) monitors, ignoring project/terraform ones', () => {
+  it('counts project/terraform monitors as eligible for enable/disable', () => {
     const { getByTestId } = renderMenu([
       makeMonitor('ui-1', { enabled: false }),
       makeMonitor('project-1', { origin: SourceType.PROJECT, enabled: false }),
     ]);
 
     const enableItem = getByTestId('syntheticsBulkEnableMonitorsItem');
-    expect(enableItem).toHaveTextContent('Enable 1 monitor');
+    expect(enableItem).toHaveTextContent('Enable 2 monitors');
     expect(enableItem).not.toBeDisabled();
   });
 
@@ -120,8 +120,12 @@ describe('<BulkOperations />', () => {
   });
 
   it('disables the enable action when every disabled monitor is ineligible', () => {
+    // Project monitors are eligible for enable/disable, so the only way to be
+    // ineligible is a public-location monitor without the required permission.
+    useCanUsePublicLocationsPermissionMock.mockReturnValue(false);
+
     const { getByTestId } = renderMenu([
-      makeMonitor('project-1', { origin: SourceType.PROJECT, enabled: false }),
+      makeMonitor('public-1', { enabled: false, serviceManaged: true }),
     ]);
 
     expect(getByTestId('syntheticsBulkEnableMonitorsItem')).toBeDisabled();
