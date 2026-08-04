@@ -6,12 +6,9 @@
  */
 
 import { useEffect, useMemo } from 'react';
-import { useFetchActiveMaintenanceWindows } from '@kbn/alerts-ui-shared';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useDispatch, useSelector } from 'react-redux-v7';
-import type { MaintenanceWindow } from '@kbn/alerts-ui-shared/src/maintenance_window_callout/types';
 import { useSyncInterval } from './use_sync_interval';
-import type { ClientPluginsStart } from '../../../../../plugin';
+import { useActiveMaintenanceWindows } from '../../../hooks';
 import {
   getMaintenanceWindowsAction,
   selectMaintenanceWindowsState,
@@ -21,30 +18,22 @@ import { useSyntheticsRefreshContext } from '../../../contexts';
 export const useHasPendingMwChanges = (monitorMWIds: string[]) => {
   const dispatch = useDispatch();
 
-  const services = useKibana<ClientPluginsStart>().services;
-  const { data: activeMWsData } = useFetchActiveMaintenanceWindows(services, {
-    enabled: true,
-  });
+  const activeMWs = useActiveMaintenanceWindows(monitorMWIds);
 
   const { data: allMWsData } = useSelector(selectMaintenanceWindowsState);
   const { lastRefresh } = useSyntheticsRefreshContext();
 
   const hasMonitorMWs = monitorMWIds.length > 0;
 
-  const activeMWs: MaintenanceWindow[] =
-    hasMonitorMWs && activeMWsData?.length
-      ? activeMWsData.filter((mw) => monitorMWIds.includes(mw.id))
-      : [];
-
   const needsPendingCheck = hasMonitorMWs && activeMWs.length === 0;
 
   const activeIdsKey = useMemo(
     () =>
-      activeMWsData
-        ?.map((mw) => mw.id)
+      activeMWs
+        .map((mw) => mw.id)
         .sort()
-        .join(',') ?? '',
-    [activeMWsData]
+        .join(','),
+    [activeMWs]
   );
 
   useEffect(() => {

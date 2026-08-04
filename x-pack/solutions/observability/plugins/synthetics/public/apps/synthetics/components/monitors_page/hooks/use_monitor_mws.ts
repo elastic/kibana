@@ -5,18 +5,10 @@
  * 2.0.
  */
 
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useFetchActiveMaintenanceWindows } from '@kbn/alerts-ui-shared';
 import type { OverviewStatusMetaData } from '../../../../../../common/runtime_types';
-import type { ClientPluginsStart } from '../../../../../plugin';
+import { useActiveMaintenanceWindows } from '../../../hooks';
 
 export const useMonitorMWs = (monitor: OverviewStatusMetaData) => {
-  const services = useKibana<ClientPluginsStart>().services;
-  const { data } = useFetchActiveMaintenanceWindows(services, {
-    enabled: true,
-  });
-
-  const monitorMWs = monitor.maintenanceWindows;
-
-  return { activeMWs: data?.filter((mw) => monitorMWs?.includes(mw.id)) ?? [] };
+  const activeMWs = useActiveMaintenanceWindows(monitor.maintenanceWindows ?? []);
+  return { activeMWs };
 };

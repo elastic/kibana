@@ -7,7 +7,7 @@
 
 import { renderHook } from '@testing-library/react';
 import * as redux from 'react-redux-v7';
-import * as alertsShared from '@kbn/alerts-ui-shared';
+import * as syntheticsHooks from '../../../hooks';
 import { useHasPendingMwChanges } from './use_has_pending_mw_changes';
 import { selectMaintenanceWindowsState } from '../../../state/maintenance_windows';
 import { selectDynamicSettings } from '../../../state/settings/selectors';
@@ -18,12 +18,9 @@ jest.mock('react-redux-v7', () => ({
   useSelector: jest.fn(),
 }));
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: jest.fn().mockReturnValue({ services: {} }),
-}));
-
-jest.mock('@kbn/alerts-ui-shared', () => ({
-  useFetchActiveMaintenanceWindows: jest.fn().mockReturnValue({ data: [] }),
+jest.mock('../../../hooks', () => ({
+  ...jest.requireActual('../../../hooks'),
+  useActiveMaintenanceWindows: jest.fn().mockReturnValue([]),
 }));
 
 jest.mock('../../../contexts', () => ({
@@ -32,9 +29,9 @@ jest.mock('../../../contexts', () => ({
 
 const mockUseSelector = redux.useSelector as jest.MockedFunction<typeof redux.useSelector>;
 const mockDispatch = jest.fn();
-const mockUseFetchActiveMWs =
-  alertsShared.useFetchActiveMaintenanceWindows as unknown as jest.MockedFunction<
-    () => { data: Array<{ id: string; title: string }> }
+const mockUseActiveMaintenanceWindows =
+  syntheticsHooks.useActiveMaintenanceWindows as jest.MockedFunction<
+    typeof syntheticsHooks.useActiveMaintenanceWindows
   >;
 
 const mockMW = (id: string, updatedAt: string) => ({
@@ -48,7 +45,7 @@ describe('useHasPendingMwChanges', () => {
     jest.clearAllMocks();
     (redux.useDispatch as jest.Mock).mockReturnValue(mockDispatch);
 
-    mockUseFetchActiveMWs.mockReturnValue({ data: [] });
+    mockUseActiveMaintenanceWindows.mockReturnValue([]);
 
     mockUseSelector.mockImplementation((selector: any) => {
       if (selector === selectMaintenanceWindowsState) {
@@ -129,9 +126,7 @@ describe('useHasPendingMwChanges', () => {
   it('returns no pending changes when MW is currently active', () => {
     const recentlyUpdated = new Date(Date.now() - 60 * 1000).toISOString();
 
-    mockUseFetchActiveMWs.mockReturnValue({
-      data: [{ id: 'mw-1', title: 'MW 1' }],
-    });
+    mockUseActiveMaintenanceWindows.mockReturnValue([{ id: 'mw-1', title: 'MW 1' } as any]);
 
     mockUseSelector.mockImplementation((selector: any) => {
       if (selector === selectMaintenanceWindowsState) {
@@ -150,12 +145,7 @@ describe('useHasPendingMwChanges', () => {
   });
 
   it('filters activeMWs to only those referenced by the monitor', () => {
-    mockUseFetchActiveMWs.mockReturnValue({
-      data: [
-        { id: 'mw-1', title: 'MW 1' },
-        { id: 'mw-other', title: 'MW Other' },
-      ],
-    });
+    mockUseActiveMaintenanceWindows.mockReturnValue([{ id: 'mw-1', title: 'MW 1' } as any]);
 
     mockUseSelector.mockImplementation((selector: any) => {
       if (selector === selectMaintenanceWindowsState) {
