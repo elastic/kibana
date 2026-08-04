@@ -469,6 +469,7 @@ module.exports = {
      * a11y-related rules:
      * all existing violations were fixed; keep this as error to prevent new ones.
      */
+    '@elastic/eui/callout-announce-on-mount': 'error',
     '@elastic/eui/prefer-eui-icon-tip': 'error',
     '@elastic/eui/sr-output-disabled-tooltip': 'error',
     '@elastic/eui/badge-accessibility-rules': 'error',
@@ -477,6 +478,10 @@ module.exports = {
     '@elastic/eui/tooltip-no-interactive-content': 'error',
     '@elastic/eui/require-table-caption': 'error',
     '@elastic/eui/accessible-interactive-element': 'error',
+    '@elastic/eui/icon-accessibility-rules': 'error',
+    '@elastic/eui/tooltip-button-icon-wrap': 'error',
+    '@elastic/eui/tooltip-focusable-anchor': 'error',
+    '@elastic/eui/no-unnamed-radio-group': 'error',
   },
 
   overrides: [

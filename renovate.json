@@ -884,7 +884,7 @@
     },
     {
       "groupName": "typescript",
-      "matchDepNames": ["typescript"],
+      "matchDepNames": ["typescript", "typescript-7"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Operations"],
@@ -1025,8 +1025,7 @@
         "ora",
         "@parcel/watcher",
         "@types/cli-progress",
-        "@types/dedent",
-        "@types/ora"
+        "@types/dedent"
       ],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
@@ -1724,7 +1723,7 @@
     },
     {
       "groupName": "adm-zip",
-      "matchDepNames": ["adm-zip", "@types/adm-zip"],
+      "matchDepNames": ["adm-zip"],
       "reviewers": ["team:security-solution"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team: SecuritySolution"],
@@ -1866,7 +1865,6 @@
         "magic-bytes.js",
         "minimist",
         "object-hash",
-        "require-in-the-middle",
         "tough-cookie",
         "xml-crypto",
         "@elastic/node-crypto",
@@ -1883,11 +1881,20 @@
       "enabled": true
     },
     {
-      "groupName": "platform security modules - ESM required",
-      "matchDepNames": ["@kayahr/text-encoding", "uuid", "@types/uuid"],
+      "groupName": "@kayahr/text-encoding",
+      "matchDepNames": ["@kayahr/text-encoding"],
       "reviewers": ["team:kibana-security"],
       "matchBaseBranches": ["main"],
-      "addLabels": ["Team:Security", "blocked"],
+      "addLabels": ["Team:Security"],
+      "minimumReleaseAge": "14 days",
+      "enabled": true
+    },
+    {
+      "groupName": "uuid",
+      "matchDepNames": ["uuid"],
+      "reviewers": ["team:kibana-security"],
+      "matchBaseBranches": ["main"],
+      "addLabels": ["Team:Security"],
       "minimumReleaseAge": "14 days",
       "enabled": true
     },
@@ -2141,9 +2148,9 @@
         "@aws-sdk/credential-provider-node",
         "google-auth-library"
       ],
-      "reviewers": ["team:security-generative-ai"],
+      "reviewers": ["team:workchat-eng"],
       "matchBaseBranches": ["main"],
-      "addLabels": ["Team:Security Generative AI"],
+      "addLabels": ["Team:agent-builder"],
       "minimumReleaseAge": "14 days",
       "enabled": true
     },
@@ -2343,6 +2350,7 @@
       "matchDepNames": [
         "@types/stats-lite",
         "email-addresses",
+        "graphql",
         "murmurhash",
         "stats-lite"
       ],
