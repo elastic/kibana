@@ -8,6 +8,7 @@
  */
 
 import { z } from '@kbn/zod';
+import { LENS_FORMAT_NUMBER_DECIMALS_DEFAULT, LENS_FORMAT_COMPACT_DEFAULT } from './constants';
 
 const DURATION_FINE_GRAINED_INPUT = ['ps', 'ns', 'us'] as const;
 
@@ -27,6 +28,25 @@ const durationFormatSuffixSchema = z.string().optional().meta({
   description: 'Suffix appended to the formatted value.',
 });
 
+/**
+ * Number of decimal places to display. Only takes effect for precise output units
+ * (`auto`/`humanizePrecise` and the fixed conversion units); it is ignored for the
+ * approximate `auto-approximate`/`humanize` output.
+ */
+const durationFormatDecimalsSchema = z.number().default(LENS_FORMAT_NUMBER_DECIMALS_DEFAULT).meta({
+  description:
+    'Number of decimal places to display. Applied for precise/fixed output units. Ignored for the approximate (`auto-approximate`) output.',
+});
+
+/**
+ * When `true`, uses short unit suffixes (for example `ms` instead of `Milliseconds`). Ignored for the
+ * approximate (`auto-approximate`) output, which never renders a unit suffix.
+ */
+const durationFormatCompactSchema = z.boolean().default(LENS_FORMAT_COMPACT_DEFAULT).meta({
+  description:
+    'When `true`, uses short unit suffixes (for example `ms`). Ignored for the approximate (`auto-approximate`) output.',
+});
+
 export const durationFormatSchema = z
   .object({
     type: z.literal('duration'),
@@ -38,6 +58,8 @@ export const durationFormatSchema = z
       description:
         'Display time unit: `auto` (precise), `auto-approximate`, or a fixed conversion unit.',
     }),
+    decimals: durationFormatDecimalsSchema,
+    compact: durationFormatCompactSchema,
     suffix: durationFormatSuffixSchema,
   })
   .strict()

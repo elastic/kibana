@@ -9,6 +9,7 @@
 
 import type { ValueFormatConfig } from '@kbn/lens-common';
 import type { LensApiMetricOperation } from '../../schema/metric_ops';
+import { LENS_FORMAT_NUMBER_DECIMALS_DEFAULT } from '../../schema/constants';
 import { durationInputUnitCompat, durationOutputUnitCompat } from './duration_units';
 
 export function fromFormatAPIToLensState(
@@ -40,10 +41,13 @@ export function fromFormatAPIToLensState(
     return {
       id: format.type,
       params: {
-        // doesn't matter, it's will be ignored but want to make TS happy
-        decimals: 2,
+        // `decimals`/`compact` are ignored for the approximate (`humanize`) output but are honored for
+        // precise/fixed output units, so they must round-trip. Default a missing `decimals` to the shared
+        // numeric default.
+        decimals: 'decimals' in format ? format.decimals : LENS_FORMAT_NUMBER_DECIMALS_DEFAULT,
         fromUnit: durationInputUnitCompat.toState(format.from),
         toUnit: durationOutputUnitCompat.toState(format.to),
+        ...('compact' in format ? { compact: format.compact } : {}),
         ...(format.suffix ? { suffix: format.suffix } : {}),
       },
     };
@@ -86,6 +90,8 @@ export function fromFormatLensStateToAPI(
       type: format.id,
       from: durationInputUnitCompat.toAPI(format.params?.fromUnit),
       to: durationOutputUnitCompat.toAPI(format.params?.toUnit),
+      ...(format.params?.decimals != null ? { decimals: format.params.decimals } : {}),
+      ...(format.params?.compact != null ? { compact: format.params.compact } : {}),
       ...(format.params?.suffix ? { suffix: format.params.suffix } : {}),
     };
   }

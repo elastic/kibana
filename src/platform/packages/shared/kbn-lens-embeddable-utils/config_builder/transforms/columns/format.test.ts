@@ -112,6 +112,25 @@ describe('Format Transforms', () => {
         });
       });
 
+      it('should preserve explicit decimals and compact', () => {
+        const input = {
+          type: 'duration',
+          from: 'ms',
+          to: 'auto',
+          decimals: 0,
+          compact: true,
+        } satisfies ApiFormat;
+        expect(fromFormatAPIToLensState(input)).toEqual({
+          id: 'duration',
+          params: {
+            decimals: 0,
+            fromUnit: 'milliseconds',
+            toUnit: 'humanizePrecise',
+            compact: true,
+          },
+        });
+      });
+
       it('should include suffix in duration format', () => {
         const input = {
           type: 'duration',
@@ -333,7 +352,27 @@ describe('Format Transforms', () => {
           type: 'duration',
           from: 'ms',
           to: 's',
+          decimals: 2,
           suffix: ' elapsed',
+        });
+      });
+
+      it('should preserve decimals and compact for precise output units', () => {
+        const input = {
+          id: 'duration',
+          params: {
+            decimals: 0,
+            compact: true,
+            fromUnit: 'milliseconds',
+            toUnit: 'humanizePrecise',
+          },
+        } satisfies ValueFormatConfig;
+        expect(fromFormatLensStateToAPI(input)).toEqual({
+          type: 'duration',
+          from: 'ms',
+          to: 'auto',
+          decimals: 0,
+          compact: true,
         });
       });
 
@@ -349,6 +388,8 @@ describe('Format Transforms', () => {
           type: 'duration',
           from: 's',
           to: 'auto-approximate',
+          decimals: 0,
+          compact: true,
         });
       });
 
@@ -366,6 +407,8 @@ describe('Format Transforms', () => {
           type: 'duration',
           from: 's',
           to: 'auto-approximate',
+          decimals: 0,
+          compact: true,
         });
       });
 
@@ -382,6 +425,7 @@ describe('Format Transforms', () => {
           type: 'duration',
           from: 'ms',
           to: 'auto',
+          decimals: 2,
         });
       });
 
@@ -398,6 +442,7 @@ describe('Format Transforms', () => {
           type: 'duration',
           from: 'min',
           to: 'min',
+          decimals: 2,
         });
       });
 
@@ -413,14 +458,17 @@ describe('Format Transforms', () => {
           type: 'duration',
           from: 's',
           to: 'auto',
+          decimals: 0,
         });
       });
 
-      it('should round-trip GA duration formats', () => {
+      it('should round-trip GA duration formats including decimals and compact', () => {
         const apiFormat = {
           type: 'duration',
           from: 's',
           to: 'auto',
+          decimals: 3,
+          compact: true,
         } satisfies ApiFormat;
         const lensFormat = fromFormatAPIToLensState(apiFormat);
         expect(fromFormatLensStateToAPI(lensFormat)).toEqual(apiFormat);
@@ -438,6 +486,7 @@ describe('Format Transforms', () => {
           type: 'duration',
           from: 'min',
           to: 'auto-approximate',
+          decimals: 2,
         });
       });
     });

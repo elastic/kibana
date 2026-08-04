@@ -22,7 +22,7 @@ describe('Duration unit schemas', () => {
         to: 'auto-approximate',
       } satisfies DurationFormat;
 
-      expect(durationFormatSchema.parse(input)).toEqual(input);
+      expect(durationFormatSchema.parse(input)).toEqual({ ...input, decimals: 2, compact: false });
     });
 
     it('validates minutes with the short form `min`', () => {
@@ -32,7 +32,7 @@ describe('Duration unit schemas', () => {
         to: 'auto',
       } satisfies DurationFormat;
 
-      expect(durationFormatSchema.parse(input)).toEqual(input);
+      expect(durationFormatSchema.parse(input)).toEqual({ ...input, decimals: 2, compact: false });
     });
 
     it('validates standard input and output units', () => {
@@ -40,6 +40,18 @@ describe('Duration unit schemas', () => {
         type: 'duration',
         from: 'mo',
         to: 'auto',
+      } satisfies DurationFormat;
+
+      expect(durationFormatSchema.parse(input)).toEqual({ ...input, decimals: 2, compact: false });
+    });
+
+    it('preserves explicit decimals and compact', () => {
+      const input = {
+        type: 'duration',
+        from: 'ms',
+        to: 'auto',
+        decimals: 0,
+        compact: true,
       } satisfies DurationFormat;
 
       expect(durationFormatSchema.parse(input)).toEqual(input);
