@@ -29,7 +29,7 @@ apiTest.describe(
 
     apiTest.beforeAll(async ({ requestAuth, esArchiver }) => {
       viewerApiCredentials = await requestAuth.getApiKey('viewer');
-      await esArchiver.loadIfNeeded(testData.ES_ARCHIVES.logsAndMetrics);
+      await esArchiver.loadIfNeeded(testData.ES_ARCHIVES.LOGS_AND_METRICS_8_0_0);
     });
 
     apiTest('works', async ({ apiClient }) => {
