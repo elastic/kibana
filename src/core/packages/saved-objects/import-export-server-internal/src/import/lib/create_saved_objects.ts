@@ -9,11 +9,16 @@
 
 import type { SavedObjectsImportFailure } from '@kbn/core-saved-objects-common';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import type { CreatedObject, SavedObject } from '@kbn/core-saved-objects-server';
+import type {
+  CreatedObject,
+  SavedObject,
+  SavedObjectBulkResult,
+} from '@kbn/core-saved-objects-server';
 import { isSavedObjectErrorResult } from '@kbn/core-saved-objects-server';
 import type { LegacyUrlAlias } from '@kbn/core-saved-objects-base-server-internal';
 import { LEGACY_URL_ALIAS_TYPE } from '@kbn/core-saved-objects-base-server-internal';
 import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
+import type { RemappedImportResult } from './extract_errors';
 import { extractErrors } from './extract_errors';
 import type { ImportStateMap } from './types';
 
@@ -118,7 +123,7 @@ export const createSavedObjects = async <T>({
     resolvableErrors.includes(type)
   );
 
-  let expectedResults: Array<SavedObject<T>> = objectsToCreate;
+  let expectedResults: Array<SavedObjectBulkResult<T>> = objectsToCreate;
   if (!hasResolvableErrors) {
     const bulkCreateResponse = await savedObjectsClient.bulkCreate(objectsToCreate, {
       namespace,
@@ -137,7 +142,7 @@ export const createSavedObjects = async <T>({
 
   // Remap results to reflect the object IDs that were submitted for import this ensures that consumers understand the
   // results, and collect legacy URL aliases if in compatibility mode.
-  const remappedResults: Array<CreatedObject<T>> = [];
+  const remappedResults: Array<RemappedImportResult<T>> = [];
   const legacyUrlAliases = new Map<string, SavedObject<LegacyUrlAlias>>();
   for (const result of expectedResults) {
     const { id } = objectIdMap.get(`${result.type}:${result.id}`)!;
@@ -149,8 +154,14 @@ export const createSavedObjects = async <T>({
 
     // Indicates that the object has changed ID at some point with the original ID retained as the origin ID, so that
     // legacy URL alias is required to retrieve the object using its original ID.
-    const objectRequiresLegacyUrlAlias = !!result.originId && result.originId !== result.id;
-    if (compatibilityMode && objectRequiresLegacyUrlAlias && objectSuccessfullyImported) {
+    const objectRequiresLegacyUrlAlias =
+      !isSavedObjectErrorResult(result) && !!result.originId && result.originId !== result.id;
+    if (
+      compatibilityMode &&
+      objectRequiresLegacyUrlAlias &&
+      objectSuccessfullyImported &&
+      !isSavedObjectErrorResult(result)
+    ) {
       const legacyUrlAliasId = `${legacyUrlTargetNamespace}:${result.type}:${result.originId}`;
       legacyUrlAliases.set(legacyUrlAliasId, {
         id: legacyUrlAliasId,
@@ -170,7 +181,7 @@ export const createSavedObjects = async <T>({
   }
 
   // Create legacy URL aliases if needed.
-  const legacyUrlAliasResults =
+  const legacyUrlAliasResults: SavedObjectBulkResult[] =
     legacyUrlAliases.size > 0
       ? (
           await savedObjectsClient.bulkCreate([...legacyUrlAliases.values()], {
@@ -181,7 +192,9 @@ export const createSavedObjects = async <T>({
         ).saved_objects
       : [];
   return {
-    createdObjects: remappedResults.filter((obj) => !isSavedObjectErrorResult(obj)),
+    createdObjects: remappedResults.filter(
+      (obj): obj is CreatedObject<T> => !isSavedObjectErrorResult(obj)
+    ),
     errors: extractErrors(remappedResults, objects, legacyUrlAliasResults, legacyUrlAliases),
   };
 };

@@ -107,6 +107,7 @@ dependsOn:
   - '@kbn/std'
   - '@kbn/use-observable'
   - '@kbn/cloud-plugin'
+  - '@kbn/user-profile-components'
   - '@kbn/kbn-client'
   - '@kbn/rule-data-utils'
   - '@kbn/std'
@@ -123,7 +124,6 @@ dependsOn:
   - '@kbn/app-header'
   - '@kbn/deeplinks-workflows'
   - '@kbn/core-chrome-app-menu-components'
-  - '@kbn/management-settings-ids'
 tags:
   - plugin
   - prod

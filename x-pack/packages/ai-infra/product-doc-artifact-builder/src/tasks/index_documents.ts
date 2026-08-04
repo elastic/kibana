@@ -9,6 +9,7 @@ import { chunk as toChunks } from 'lodash';
 import type { Client } from '@elastic/elasticsearch';
 import type { BulkRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { summarizeBulkErrors } from '@kbn/product-doc-common';
 import type { ExtractedDocument } from './extract_documentation';
 
 const indexingChunkSize = 10;
@@ -42,7 +43,11 @@ export const indexDocuments = async ({
       { requestTimeout: 10 * 60 * 1000 }
     );
     if (response.errors) {
-      log.error(`Bulk response errors: ${JSON.stringify(response)}`);
+      throw new Error(
+        `Bulk indexing failed for chunk ${i + 1} of ${chunks.length}: ${summarizeBulkErrors(
+          response
+        )}`
+      );
     }
 
     const duration = Date.now() - before;
