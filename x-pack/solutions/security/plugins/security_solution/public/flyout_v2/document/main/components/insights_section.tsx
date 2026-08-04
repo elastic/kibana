@@ -22,7 +22,6 @@ import { PrevalenceOverview } from './prevalence_overview';
 import { EntitiesOverview } from './entities_overview';
 import { FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
 import { INSIGHTS_SECTION_TITLE } from '../../../shared/constants/flyout_titles';
-import { isRulePreviewDocument } from '../../../shared/utils/is_rule_preview_document';
 
 export const INSIGHTS_SECTION_TEST_ID = `${PREFIX}InsightsSection` as const;
 
@@ -68,7 +67,6 @@ export const InsightsSection = memo(
       () => (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,
       [hit]
     );
-    const isRulePreview = useMemo(() => isRulePreviewDocument(hit), [hit]);
     const ruleId = useMemo(
       () =>
         isAlert
@@ -157,7 +155,6 @@ export const InsightsSection = memo(
         <CorrelationsOverview
           hit={hit}
           scopeId=""
-          isRulePreview={isRulePreview}
           showIcon={false}
           onShowCorrelationsDetails={onShowCorrelationsDetails}
         />
