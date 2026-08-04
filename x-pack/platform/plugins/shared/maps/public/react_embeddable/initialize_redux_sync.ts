@@ -6,22 +6,13 @@
  */
 
 import type { Subscription } from 'rxjs';
-import {
-  BehaviorSubject,
-  debounceTime,
-  distinctUntilChanged,
-  filter,
-  firstValueFrom,
-  map,
-  merge,
-  race,
-  skip,
-} from 'rxjs';
+import { BehaviorSubject, debounceTime, filter, map, merge, skip } from 'rxjs';
 import fastIsEqual from 'fast-deep-equal';
 import type { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import type { PaletteRegistry } from '@kbn/coloring';
 import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
+import type { ComparatorFunction } from 'joi';
 import type { MapCenterAndZoom } from '../../common/descriptor_types';
 import { APP_ID, getEditPath, RENDER_TIMEOUT } from '../../common/constants';
 import type { MapStoreState } from '../reducers/store';
@@ -51,7 +42,6 @@ import {
   setEventHandlers,
 } from '../reducers/non_serializable_instances';
 import type { SavedMap } from '../routes';
-import type { ComparatorFunction } from 'joi';
 
 function getMapCenterAndZoom(state: MapStoreState) {
   return {
