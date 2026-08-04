@@ -281,12 +281,10 @@ describe('FormBasedDimensionEditor', () => {
       <FormBasedDimensionEditorComponent {...defaultProps} {...propsOverrides} />
     );
 
-    const getVisibleFieldSelectOptions = () => {
-      const optionsList = screen.getByRole('dialog');
-      return within(optionsList)
-        .getAllByRole('option')
-        .map((option) => within(option).getByTestId('fullText').textContent);
-    };
+    const getVisibleFieldSelectOptions = () =>
+      within(screen.getByTestId('comboBoxOptionsList indexPattern-dimension-field-optionsList'))
+        .getAllByTestId('fullText')
+        .map((option) => option.textContent);
 
     return { ...rtlRender, getVisibleFieldSelectOptions };
   };
@@ -337,13 +335,13 @@ describe('FormBasedDimensionEditor', () => {
     await userEvent.click(screen.getByRole('button', { name: /open list of options/i }));
     expect(screen.getByText(/There aren't any options available/)).toBeInTheDocument();
   });
-  // Failing: See https://github.com/elastic/kibana/issues/253327
-  test.skip('should list all field names and document as a whole in prioritized order', async () => {
+  it('should list all field names and document as a whole in prioritized order', async () => {
+    const user = userEvent.setup();
     const { getVisibleFieldSelectOptions } = renderDimensionPanel();
 
-    const comboBoxButton = screen.getAllByRole('button', { name: /open list of options/i })[0];
+    const comboBoxButton = screen.getAllByTestId('comboBoxToggleListButton')[0];
     const comboBoxInput = screen.getAllByTestId('comboBoxSearchInput')[0];
-    await userEvent.click(comboBoxButton);
+    await user.click(comboBoxButton);
 
     const allOptions = [
       'Records',
@@ -356,8 +354,8 @@ describe('FormBasedDimensionEditor', () => {
     ];
     expect(allOptions.slice(0, 7)).toEqual(getVisibleFieldSelectOptions());
 
-    // // press arrow up to go back to the beginning
-    await userEvent.type(comboBoxInput, '{ArrowUp}{ArrowUp}');
+    // press arrow up to go back to the beginning
+    await user.type(comboBoxInput, '{ArrowUp}{ArrowUp}');
     expect(getVisibleFieldSelectOptions()).toEqual(allOptions.slice(8));
   }, 10000); // this test can be long running due to a big tree we're rendering and userEvent.type function that is slow
 
