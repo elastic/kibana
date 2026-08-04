@@ -403,7 +403,9 @@ Follow this format:
   </details>
 
   <details>
-  <summary>Diff — applies onto <code>origin/&lt;version-branch&gt;</code> with <code>git apply</code></summary>
+  <summary>Diff</summary>
+
+  Apply onto <version-branch> with `git apply`.
 
   ```diff
   <the unified diff>
