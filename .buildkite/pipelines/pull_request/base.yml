@@ -1,5 +1,8 @@
 env:
   KBN_ES_SNAPSHOT_USE_CACHED: 'true'
+  # TEMPORARY — routes this PR's egress through the Citadel proxy.
+  # platform-engineering-productivity#3163. Revert before merge.
+  USE_CITADEL_PROXY: 'true'
 
 steps:
   - command: .buildkite/scripts/steps/build_kibana.sh
