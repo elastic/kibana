@@ -1865,7 +1865,6 @@
     "dashboard.emptyScreen.viewModeTitle": "Fügen Sie Visualisierungen zu Ihrem Dashboard hinzu",
     "dashboard.esqlApproximationToggle.additionalText": "Der Schnellmodus erfordert mindestens eine ES|QL-Visualisierung, die STATS im Dashboard verwendet.",
     "dashboard.exportJson.label": "JSON",
-    "dashboard.exportJson.openInConsoleButtonLabel": "In der Konsole öffnen",
     "dashboard.featureCatalogue.dashboardDescription": "Eine Sammlung an Visualisierungen und Suchergebnissen anzeigen und freigeben.",
     "dashboard.featureCatalogue.dashboardSubtitle": "Analysieren Sie Daten in Dashboards.",
     "dashboard.featureCatalogue.dashboardTitle": "Dashboard",

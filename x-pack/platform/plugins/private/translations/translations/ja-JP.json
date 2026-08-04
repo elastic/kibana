@@ -1884,7 +1884,6 @@
     "dashboard.emptyScreen.viewModeTitle": "ダッシュボードにビジュアライゼーションを追加",
     "dashboard.esqlApproximationToggle.additionalText": "ファストモードでは、ダッシュボードでSTATSを使用するES|QLの可視化を少なくとも1つ必要とします。",
     "dashboard.exportJson.label": "JSON",
-    "dashboard.exportJson.openInConsoleButtonLabel": "コンソールで開く",
     "dashboard.featureCatalogue.dashboardDescription": "ビジュアライゼーションと検索結果のコレクションの表示と共有を行います。",
     "dashboard.featureCatalogue.dashboardSubtitle": "ダッシュボードでデータを分析します。",
     "dashboard.featureCatalogue.dashboardTitle": "ダッシュボード",

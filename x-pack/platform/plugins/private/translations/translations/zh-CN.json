@@ -1883,7 +1883,6 @@
     "dashboard.emptyScreen.viewModeTitle": "将可视化添加到仪表板",
     "dashboard.esqlApproximationToggle.additionalText": "快速模式要求仪表板中至少有一个使用 STATS 的 ES|QL 可视化。",
     "dashboard.exportJson.label": "JSON",
-    "dashboard.exportJson.openInConsoleButtonLabel": "在 Console 中打开",
     "dashboard.featureCatalogue.dashboardDescription": "显示和共享可视化和搜索结果的集合。",
     "dashboard.featureCatalogue.dashboardSubtitle": "在仪表板中分析数据。",
     "dashboard.featureCatalogue.dashboardTitle": "仪表板",

@@ -1869,7 +1869,6 @@
     "dashboard.emptyScreen.viewModeTitle": "Ajouter des visualisations à votre tableau de bord",
     "dashboard.esqlApproximationToggle.additionalText": "Le mode rapide nécessite au moins une visualisation ES|QL utilisant STATS dans le tableau de bord.",
     "dashboard.exportJson.label": "JSON",
-    "dashboard.exportJson.openInConsoleButtonLabel": "Ouvrir dans la console",
     "dashboard.featureCatalogue.dashboardDescription": "Affichez et partagez une collection de visualisations et de résultats de recherche.",
     "dashboard.featureCatalogue.dashboardSubtitle": "Analysez des données à l’aide de tableaux de bord.",
     "dashboard.featureCatalogue.dashboardTitle": "Dashboard",
