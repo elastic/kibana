@@ -300,6 +300,13 @@ export const ConnectorIconsMap: Map<
   ],
   ['.cribl', lazy(() => import(/* webpackChunkName: "connectorIconCribl" */ './specs/cribl/icon'))],
   [
+    '.aws_cloudwatch',
+    lazy(
+      () =>
+        import(/* webpackChunkName: "connectorIconawscloudwatch" */ './specs/aws_cloudwatch/icon')
+    ),
+  ],
+  [
     '.aws_x_ray',
     lazy(() => import(/* webpackChunkName: "connectorIconawsxray" */ './specs/aws_x_ray/icon')),
   ],

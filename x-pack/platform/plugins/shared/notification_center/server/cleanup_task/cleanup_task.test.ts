@@ -12,56 +12,71 @@ import {
   CLEANUP_TASK_TYPE,
   registerNotificationCleanupTask,
   scheduleNotificationCleanupTask,
-  SEVERITY_RETENTION_DAYS,
 } from './cleanup_task';
-import { NOTIFICATION_DATA_STREAM_NAME } from './data_stream/notification_data_stream';
+import {
+  NOTIFICATION_DATA_RETENTION,
+  NOTIFICATION_DATA_STREAM_NAME,
+} from '../storage/notification_data_stream';
+import { MAX_SEVERITY_TTL_DAYS, SEVERITY_TTL_DAYS } from '../../common/notification_schema';
 
 describe('cleanup_task', () => {
-  describe('SEVERITY_RETENTION_DAYS', () => {
+  describe('SEVERITY_TTL_DAYS', () => {
     it('has correct TTLs per severity', () => {
-      expect(SEVERITY_RETENTION_DAYS.info).toBe(30);
-      expect(SEVERITY_RETENTION_DAYS.warning).toBe(60);
-      expect(SEVERITY_RETENTION_DAYS.error).toBe(180);
-      expect(SEVERITY_RETENTION_DAYS.critical).toBe(180);
+      expect(SEVERITY_TTL_DAYS.info).toBe(30);
+      expect(SEVERITY_TTL_DAYS.warning).toBe(60);
+      expect(SEVERITY_TTL_DAYS.error).toBe(180);
+      expect(SEVERITY_TTL_DAYS.critical).toBe(180);
+      expect(MAX_SEVERITY_TTL_DAYS).toBe(180);
     });
 
-    it('all TTLs stay within the 180d ILM ceiling', () => {
-      for (const days of Object.values(SEVERITY_RETENTION_DAYS)) {
-        expect(days).toBeLessThanOrEqual(180);
+    it('all TTLs stay within the data stream ILM ceiling', () => {
+      const ceilingDays = Number(NOTIFICATION_DATA_RETENTION.replace('d', ''));
+
+      for (const days of Object.values(SEVERITY_TTL_DAYS)) {
+        expect(days).toBeLessThanOrEqual(ceilingDays);
       }
     });
   });
 
   describe('buildCleanupQuery()', () => {
+    interface WindowClause {
+      bool: {
+        filter: [{ terms: { severity: string[] } }, { range: { '@timestamp': { lt: string } } }];
+      };
+    }
+    // The ES DSL builder's return is an ExactlyOne union; assert against a concrete local shape.
+    const cleanupBool = () =>
+      (
+        buildCleanupQuery() as unknown as {
+          bool: { minimum_should_match: number; should: WindowClause[] };
+        }
+      ).bool;
+
     it('returns a bool query with minimum_should_match: 1', () => {
-      const query = buildCleanupQuery();
-      expect(query.bool.minimum_should_match).toBe(1);
+      expect(cleanupBool().minimum_should_match).toBe(1);
     });
 
-    it('produces one should-clause per severity (4 total)', () => {
-      const query = buildCleanupQuery();
-      expect(query.bool.should).toHaveLength(4);
+    it('produces one should-clause per TTL window (3 total)', () => {
+      expect(cleanupBool().should).toHaveLength(3);
     });
 
-    it('each clause filters by term severity and @timestamp range', () => {
-      const query = buildCleanupQuery();
-      const clauses = query.bool.should;
+    it('each clause filters by terms severity and @timestamp range', () => {
+      const clauses = cleanupBool().should;
 
-      const infoClause = clauses.find((c) => c.bool.filter[0].term?.severity === 'info');
+      const byLt = (lt: string) =>
+        clauses.find((c) => c.bool.filter[1].range['@timestamp'].lt === lt);
+
+      const infoClause = byLt('now-30d/d');
       expect(infoClause).toBeDefined();
-      expect(infoClause!.bool.filter[1].range?.['@timestamp'].lt).toBe('now-30d/d');
+      expect(infoClause!.bool.filter[0].terms.severity).toEqual(['info']);
 
-      const warningClause = clauses.find((c) => c.bool.filter[0].term?.severity === 'warning');
+      const warningClause = byLt('now-60d/d');
       expect(warningClause).toBeDefined();
-      expect(warningClause!.bool.filter[1].range?.['@timestamp'].lt).toBe('now-60d/d');
+      expect(warningClause!.bool.filter[0].terms.severity).toEqual(['warning']);
 
-      const errorClause = clauses.find((c) => c.bool.filter[0].term?.severity === 'error');
-      expect(errorClause).toBeDefined();
-      expect(errorClause!.bool.filter[1].range?.['@timestamp'].lt).toBe('now-180d/d');
-
-      const criticalClause = clauses.find((c) => c.bool.filter[0].term?.severity === 'critical');
-      expect(criticalClause).toBeDefined();
-      expect(criticalClause!.bool.filter[1].range?.['@timestamp'].lt).toBe('now-180d/d');
+      const longLivedClause = byLt('now-180d/d');
+      expect(longLivedClause).toBeDefined();
+      expect(longLivedClause!.bool.filter[0].terms.severity).toEqual(['error', 'critical']);
     });
   });
 

@@ -65,5 +65,6 @@ export * from './specs/dynatrace/dynatrace';
 export * from './specs/datadog/datadog';
 export * from './specs/jenkins/jenkins';
 export * from './specs/cribl/cribl';
+export * from './specs/aws_cloudwatch/aws_cloudwatch';
 export * from './specs/aws_x_ray/aws_x_ray';
 export * from './specs/prometheus_alertmanager/prometheus_alertmanager';
