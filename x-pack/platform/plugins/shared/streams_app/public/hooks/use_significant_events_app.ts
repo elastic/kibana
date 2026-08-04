@@ -54,7 +54,9 @@ export function useSignificantEventsApp() {
 
   // Treat a failed availability request as "not available" so callers hide SE UI
   // instead of proceeding as if it were available.
-  const isAvailable = error ? false : data?.available === true;
+  // Also require the significantEventsApp UI plugin: without it there is no app to
+  // navigate to, even when the server reports the feature available.
+  const isAvailable = significantEventsApp != null && (error ? false : data?.available === true);
 
   return {
     significantEventsApp,
