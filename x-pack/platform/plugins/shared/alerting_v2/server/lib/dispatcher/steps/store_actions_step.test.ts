@@ -7,10 +7,8 @@
 
 import { StoreActionsStep } from './store_actions_step';
 import { createMockStorageServiceContract } from '../../services/storage_service/storage_service.mock';
-import {
-  ALERT_ACTIONS_DATA_STREAM,
-  type AlertAction,
-} from '../../../resources/datastreams/alert_actions';
+import { ALERT_ACTIONS_DATA_STREAM } from '@kbn/alerting-v2-constants';
+import type { AlertAction } from '../../../resources/datastreams/alert_actions';
 import {
   createDispatcherPipelineState,
   createAlertEpisode,
