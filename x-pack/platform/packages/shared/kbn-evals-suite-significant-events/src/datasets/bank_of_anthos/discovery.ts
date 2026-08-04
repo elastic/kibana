@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import type { Detection, Discovery } from '@kbn/significant-events-schema';
+import type { Detection, SignificantEvent } from '@kbn/significant-events-schema';
 import type { DatasetConfig } from '../types';
 
-const toInputDetections = (discoveries: Array<Partial<Discovery>>): Array<Partial<Detection>> =>
+const toInputDetections = (
+  discoveries: Array<Partial<SignificantEvent>>
+): Array<Partial<Detection>> =>
   discoveries
     .flatMap((discovery) => discovery.signals ?? [])
     .map((signal) => ({
@@ -27,8 +29,7 @@ const toInputDetections = (discoveries: Array<Partial<Discovery>>): Array<Partia
  * `confirmed: true` itself before promoting (Critical Rule 5). Every field here is seeded by one of
  * the cascade `detections`, so the canonical input and this expected answer stay self-consistent.
  */
-const LEDGER_DB_CASCADE_DISCOVERY: Partial<Discovery> = {
-  kind: 'discovery',
+const LEDGER_DB_CASCADE_DISCOVERY: Partial<SignificantEvent> = {
   event_id: 'transactionhistory__frontend-transactionhistory-read-timeout',
   title: 'Ledger backends — customer transaction connectivity failure',
   symptom_hypothesis:
@@ -44,7 +45,7 @@ const LEDGER_DB_CASCADE_DISCOVERY: Partial<Discovery> = {
       stream_name: 'logs',
       confirmed: true,
       description:
-        'Testing: whether transactionhistory cannot obtain SQL connections to the postgresql backend. Expected if true: SQLState 08001 connection-failure errors on the JDBC path. Found: 1 row at 14:34:19Z — SQL Error 0, SQLState: 08001 (connection refused) from transactionhistory. Verdict: confirms — the database backend is unreachable, breaking transaction-history reads.',
+        'Found: SQLState 08001 connection refused from transactionhistory. Impact: transaction-history reads blocked. Verdict: confirms.',
       evidence: {
         esql_query:
           'FROM logs | WHERE @timestamp >= "2026-06-25T14:30:00Z" AND @timestamp <= NOW() | WHERE MATCH_PHRASE(body.text, "SQLState: 08001") | KEEP @timestamp, body.text | SORT @timestamp ASC | LIMIT 1',
@@ -63,7 +64,7 @@ const LEDGER_DB_CASCADE_DISCOVERY: Partial<Discovery> = {
       stream_name: 'logs',
       confirmed: true,
       description:
-        'Testing: whether the frontend is actively failing to reach transactionhistory with connection-refused errors. Expected if true: HTTPConnectionPool connection refused to transactionhistory:8080. Found: 1 row at 14:33:36Z — connection refused (Errno 111) to transactionhistory:8080 on the /transactions path. Verdict: confirms — users cannot view transaction history; the backend failure is user-visible.',
+        'Found: connection refused to transactionhistory:8080 on /transactions. Impact: users cannot view transaction history. Verdict: confirms.',
       evidence: {
         esql_query:
           'FROM logs | WHERE @timestamp >= "2026-06-25T14:30:00Z" AND @timestamp <= NOW() | WHERE MATCH_PHRASE(body.text, "Error getting transaction_list") | KEEP @timestamp, body.text | SORT @timestamp ASC | LIMIT 1',
@@ -82,7 +83,7 @@ const LEDGER_DB_CASCADE_DISCOVERY: Partial<Discovery> = {
       stream_name: 'logs',
       confirmed: true,
       description:
-        'Testing: whether the frontend is actively failing to reach balancereader with connection-refused errors. Expected if true: HTTPConnectionPool connection refused to balancereader:8080. Found: 1 row at 14:33:35Z — connection refused (Errno 111) to balancereader:8080 on the /balances path. Verdict: confirms — earliest confirmed failure in the cascade; users cannot view account balances.',
+        'Found: connection refused to balancereader:8080 on /balances. Impact: users cannot view account balances. Verdict: confirms.',
       evidence: {
         esql_query:
           'FROM logs | WHERE @timestamp >= "2026-06-25T14:30:00Z" AND @timestamp <= NOW() | WHERE MATCH_PHRASE(body.text, "Error getting balance") | KEEP @timestamp, body.text | SORT @timestamp ASC | LIMIT 1',
@@ -101,7 +102,7 @@ const LEDGER_DB_CASCADE_DISCOVERY: Partial<Discovery> = {
       stream_name: 'logs',
       confirmed: true,
       description:
-        "Testing: whether the shared cache layer is failing as a downstream effect of the database outage, across both transactionhistory and balancereader. Expected if true: 'Cache error' entries from both services. Found: 2 rows at 14:34:59Z — transactionhistory emitting 'getTransactions | Cache error' and balancereader emitting 'getBalance | Cache error'. Verdict: confirms — cache reads are failing in both services, broadening the blast radius from transaction-history reads to balance lookups.",
+        'Found: Cache error from transactionhistory and balancereader. Impact: balance and transaction-history lookups degraded. Verdict: confirms.',
       evidence: {
         esql_query:
           'FROM logs | WHERE @timestamp >= "2026-06-25T14:30:00Z" AND @timestamp <= NOW() | WHERE MATCH_PHRASE(body.text, "Cache error") | KEEP @timestamp, body.text | SORT @timestamp ASC | LIMIT 2',
@@ -120,7 +121,7 @@ const LEDGER_DB_CASCADE_DISCOVERY: Partial<Discovery> = {
       stream_name: 'logs',
       confirmed: true,
       description:
-        "Testing: whether ledgerwriter is blocked from committing transactions because it cannot retrieve account balances from balancereader. Expected if true: ERROR from LedgerWriterController 'Failed to retrieve account balance'. Found: 1 row at 14:34:29Z — ledgerwriter logging 'Failed to retrieve account balance'. Verdict: confirms — ledgerwriter cannot validate balances via balancereader, so payment and deposit submissions fail.",
+        'Found: Failed to retrieve account balance. Impact: payment and deposit submissions fail. Verdict: confirms.',
       evidence: {
         esql_query:
           'FROM logs | WHERE @timestamp >= "2026-06-25T14:30:00Z" AND @timestamp <= NOW() | WHERE MATCH_PHRASE(body.text, "Failed to retrieve account balance") | KEEP @timestamp, body.text | SORT @timestamp ASC | LIMIT 1',
@@ -139,7 +140,7 @@ const LEDGER_DB_CASCADE_DISCOVERY: Partial<Discovery> = {
       stream_name: 'logs',
       confirmed: true,
       description:
-        'Testing: whether the frontend is failing to submit deposit transactions to ledgerwriter with connection-refused errors. Expected if true: HTTPConnectionPool connection refused to ledgerwriter:8080. Found: 1 row at 14:33:39Z — connection refused (Errno 111) to ledgerwriter:8080 on the /transactions path. Verdict: confirms — deposit submissions are failing; users cannot complete deposit transactions.',
+        'Found: connection refused to ledgerwriter:8080 on deposit /transactions. Impact: users cannot complete deposits. Verdict: confirms.',
       evidence: {
         esql_query:
           'FROM logs | WHERE @timestamp >= "2026-06-25T14:30:00Z" AND @timestamp <= NOW() | WHERE MATCH_PHRASE(body.text, "Error submitting deposit") | KEEP @timestamp, body.text | SORT @timestamp ASC | LIMIT 1',
@@ -158,7 +159,7 @@ const LEDGER_DB_CASCADE_DISCOVERY: Partial<Discovery> = {
       stream_name: 'logs',
       confirmed: true,
       description:
-        'Testing: whether the frontend is failing to submit payment transactions to ledgerwriter with connection-refused errors. Expected if true: HTTPConnectionPool connection refused to ledgerwriter:8080. Found: 1 row at 14:33:38Z — connection refused (Errno 111) to ledgerwriter:8080 on the /transactions path. Verdict: confirms — payment submissions are failing; users cannot complete payment transactions.',
+        'Found: connection refused to ledgerwriter:8080 on payment /transactions. Impact: users cannot complete payments. Verdict: confirms.',
       evidence: {
         esql_query:
           'FROM logs | WHERE @timestamp >= "2026-06-25T14:30:00Z" AND @timestamp <= NOW() | WHERE MATCH_PHRASE(body.text, "Error submitting payment") | KEEP @timestamp, body.text | SORT @timestamp ASC | LIMIT 1',
@@ -229,8 +230,7 @@ const LEDGER_DB_CASCADE_RULE_UUIDS = (LEDGER_DB_CASCADE_DISCOVERY.signals ?? [])
   .filter((ruleUuid): ruleUuid is string => Boolean(ruleUuid));
 
 /** Benign login spike — must stay a SEPARATE discovery from the failure cascade and from signup. */
-const BENIGN_LOGIN_DISCOVERY: Partial<Discovery> = {
-  kind: 'discovery',
+const BENIGN_LOGIN_DISCOVERY: Partial<SignificantEvent> = {
   event_id: 'userservice__successful-user-login',
   title: 'Authentication — successful login volume increase',
   symptom_hypothesis: 'Successful login activity increased without an observed failure.',
@@ -244,7 +244,7 @@ const BENIGN_LOGIN_DISCOVERY: Partial<Discovery> = {
       stream_name: 'logs',
       confirmed: true,
       description:
-        'Testing: whether the spike in successful logins represents a failure or anomalous activity. Expected if true: error logs or credential-stuffing patterns. Found: 1 row at 14:30:05Z — successful login event with no error signature. Verdict: refutes — the spike is a volume increase in successful logins, consistent with load-generator ramp-up.',
+        'Found: successful login event, no error signature. Impact: none — volume spike only. Verdict: refutes.',
       evidence: {
         esql_query:
           'FROM logs | WHERE @timestamp >= "2026-06-25T14:30:00Z" AND @timestamp <= NOW() | WHERE MATCH_PHRASE(body.text, "Login Successful") | KEEP @timestamp, body.text | SORT @timestamp ASC | LIMIT 1',
@@ -263,8 +263,7 @@ const BENIGN_LOGIN_DISCOVERY: Partial<Discovery> = {
 };
 
 /** Benign signup spike — must stay a SEPARATE discovery from the failure cascade and from login. */
-const BENIGN_SIGNUP_DISCOVERY: Partial<Discovery> = {
-  kind: 'discovery',
+const BENIGN_SIGNUP_DISCOVERY: Partial<SignificantEvent> = {
   event_id: 'userservice__new-account-created',
   title: 'Authentication — new account creation volume increase',
   symptom_hypothesis: 'New account creation activity increased without an observed failure.',
@@ -278,7 +277,7 @@ const BENIGN_SIGNUP_DISCOVERY: Partial<Discovery> = {
       stream_name: 'logs',
       confirmed: true,
       description:
-        'Testing: whether the spike in new account creations represents a failure or anomalous activity. Expected if true: error logs or suspicious automated-creation patterns. Found: 1 row at 14:30:12Z — successful account-creation event with no error signature. Verdict: refutes — the spike is a volume increase in successful account creations, consistent with load-generator ramp-up.',
+        'Found: successful account creation, no error signature. Impact: none — volume spike only. Verdict: refutes.',
       evidence: {
         esql_query:
           'FROM logs | WHERE @timestamp >= "2026-06-25T14:30:00Z" AND @timestamp <= NOW() | WHERE MATCH_PHRASE(body.text, "Successfully created user") | KEEP @timestamp, body.text | SORT @timestamp ASC | LIMIT 1',
@@ -296,7 +295,7 @@ const BENIGN_SIGNUP_DISCOVERY: Partial<Discovery> = {
   causal_features: [{ feature_id: 'userservice', name: 'userservice', stream_name: 'logs' }],
 };
 
-const MISGROUPED_LEDGER_DISCOVERY: Partial<Discovery> = {
+const MISGROUPED_LEDGER_DISCOVERY: Partial<SignificantEvent> = {
   ...LEDGER_DB_CASCADE_DISCOVERY,
   event_id: 'ledger-db-disconnect__misgrouped-auth',
   signals: [
@@ -311,11 +310,7 @@ export const discovery: DatasetConfig['discovery'] = [
     input: {
       scenario_id: 'ledger-db-disconnect',
       stream_name: 'logs',
-      detections: toInputDetections([
-        LEDGER_DB_CASCADE_DISCOVERY,
-        BENIGN_LOGIN_DISCOVERY,
-        BENIGN_SIGNUP_DISCOVERY,
-      ]),
+      detections: toInputDetections([LEDGER_DB_CASCADE_DISCOVERY]),
     },
     // Ground-truth continuation chains (ordered, by readable `rule_name`) the continuation eval
     // replays one rule per cycle. Each chain legitimately continues ONE event, so the agent
@@ -333,12 +328,8 @@ export const discovery: DatasetConfig['discovery'] = [
     },
     output: {
       expected_ground_truth:
-        'discoveries=[ledger-db-cascade (transactionhistory/balancereader/ledgerwriter->postgresql SQLState 08001, cache errors, frontend connection-refused failures), benign-login (successful login spike, no failures), benign-signup (new account creation spike, no failures)]',
-      expected_discoveries: [
-        LEDGER_DB_CASCADE_DISCOVERY,
-        BENIGN_LOGIN_DISCOVERY,
-        BENIGN_SIGNUP_DISCOVERY,
-      ],
+        'discoveries=[ledger-db-cascade (transactionhistory/balancereader/ledgerwriter->postgresql SQLState 08001, cache errors, frontend connection-refused failures)]',
+      expected_discoveries: [LEDGER_DB_CASCADE_DISCOVERY],
       criteria: [
         {
           id: 'symptom-hypothesis-sql-connection',
@@ -353,11 +344,6 @@ export const discovery: DatasetConfig['discovery'] = [
         {
           id: 'cascade-full-grouping',
           text: 'Further collapses the frontend→balancereader connection failures and the ledgerwriter balance-retrieval, payment, and deposit failures into the same cascading discovery as the transactionhistory cluster — all seven detections linked by the evidence-backed postgresql/cache failure hypothesis rather than split into separate service-scoped discoveries.',
-          score: 2,
-        },
-        {
-          id: 'separate-benign-auth',
-          text: 'Emits the benign login spike and the benign account-creation spike as two separate standalone discoveries, each distinct from the failure cascade — does not merge them with the database incident, and does not group them with each other.',
           score: 2,
         },
         {
