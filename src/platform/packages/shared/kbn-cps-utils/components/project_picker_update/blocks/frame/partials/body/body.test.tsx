@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useRef } from 'react';
 import { render, screen } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
 
@@ -67,6 +67,26 @@ const renderBody = (stateOverrides: Partial<ProjectPickerState> = {}) => {
   );
 };
 
+const ProjectPickerFrameBodyWithScrollContainerRef = ({
+  onRefAttached,
+}: {
+  onRefAttached: (node: HTMLDivElement | null) => void;
+}) => {
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    onRefAttached(scrollContainerRef.current);
+  }, [onRefAttached]);
+
+  return (
+    <EuiThemeProvider>
+      <ProjectPickerFrameBody scrollContainerRef={scrollContainerRef}>
+        <div data-test-subj="bodyChild" />
+      </ProjectPickerFrameBody>
+    </EuiThemeProvider>
+  );
+};
+
 describe('ProjectPickerFrameBody', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -87,6 +107,18 @@ describe('ProjectPickerFrameBody', () => {
       });
 
       expect(screen.getByTestId('projectPickerFilterDisplayAddFilterBtn')).toBeInTheDocument();
+    });
+
+    it('attaches a passed-in scrollContainerRef to the scrollable container element', () => {
+      mockUseProjectPickerState.mockReturnValue(createState());
+      mockUseProjectPickerActions.mockReturnValue({});
+      const onRefAttached = jest.fn();
+
+      render(<ProjectPickerFrameBodyWithScrollContainerRef onRefAttached={onRefAttached} />);
+
+      expect(onRefAttached).toHaveBeenCalledWith(expect.any(HTMLDivElement));
+      const [[attachedNode]] = onRefAttached.mock.calls;
+      expect(attachedNode).toContainElement(screen.getByTestId('bodyChild'));
     });
   });
 

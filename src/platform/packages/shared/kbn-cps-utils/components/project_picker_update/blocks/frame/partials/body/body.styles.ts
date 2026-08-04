@@ -31,7 +31,6 @@ export const bodyStyles = ({ euiTheme }: Pick<UseEuiTheme, 'euiTheme'>) => ({
     width: 'fit-content',
   }),
   bodyContainer: css({
-    maxHeight: '500px',
     overflowY: 'auto',
     overflowAnchor: 'none',
     scrollbarGutter: 'auto',

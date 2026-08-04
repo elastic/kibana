@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import type { RefObject } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { CPSProject } from '../../../../types';
@@ -20,11 +21,20 @@ import { ProjectPickerListItemTagsPopover } from './list_item_tags_popover/list_
 import { ProjectPickerListItemContextMenu } from './list_item_context_menu/list_item_context_menu';
 
 type ActivePopover =
-  | { kind: 'contextMenu'; project: CPSProject }
-  | { kind: 'tags'; project: CPSProject }
+  | { kind: 'contextMenu'; project: CPSProject; isVisible: boolean }
+  | { kind: 'tags'; project: CPSProject; isVisible: boolean }
   | null;
 
-export function ProjectPickerList() {
+export interface ProjectPickerListProps {
+  /**
+   * Ref to the scrollable ancestor that clips the list, if any. When the list is scrolled
+   * within this container, any open popover is closed rather than left floating disconnected
+   * from its anchor button.
+   */
+  scrollContainerRef?: RefObject<HTMLElement>;
+}
+
+export function ProjectPickerList({ scrollContainerRef }: ProjectPickerListProps) {
   const buttonRef = useRef<HTMLElement | null>(null);
   const [activePopover, setActivePopover] = useState<ActivePopover>(null);
   const actions = useProjectPickerActions();
@@ -58,7 +68,7 @@ export function ProjectPickerList() {
         }
 
         buttonRef.current = evt.currentTarget as HTMLElement;
-        setActivePopover({ kind, project });
+        setActivePopover({ kind, project, isVisible: true });
       };
     },
     [activePopover, closePopover]
@@ -101,6 +111,28 @@ export function ProjectPickerList() {
     });
   }, []);
 
+  useEffect(() => {
+    const scrollContainer = scrollContainerRef?.current;
+    const anchorButton = buttonRef.current;
+
+    if (!activePopover || !scrollContainer || !anchorButton) {
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setActivePopover((prev) => (prev ? { ...prev, isVisible: entry.isIntersecting } : prev));
+      },
+      { root: scrollContainer, threshold: 0 }
+    );
+
+    observer.observe(anchorButton);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [activePopover, scrollContainerRef]);
+
   const activeProject = activePopover?.project ?? null;
 
   return (
@@ -109,7 +141,7 @@ export function ProjectPickerList() {
         <ProjectPickerListItemContextMenu
           key={`contextMenu-${activeProject._id}`}
           button={buttonRef.current}
-          isOpen={true}
+          isOpen={activePopover?.isVisible ?? false}
           activeProject={activeProject}
           closeHandler={closePopover}
         />
@@ -118,7 +150,7 @@ export function ProjectPickerList() {
         <ProjectPickerListItemTagsPopover
           key={`tags-${activeProject._id}`}
           button={buttonRef.current}
-          isOpen={true}
+          isOpen={activePopover?.isVisible ?? false}
           closeHandler={closePopover}
           projectTags={getProjectTags(activeProject)}
         />

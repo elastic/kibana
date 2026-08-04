@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useRef } from 'react';
 import { ProjectPickerFrame, ProjectPickerList } from './blocks';
 import { ProjectPickerStateProvider, type ProjectPickerStateProviderProps } from './state';
 
@@ -15,10 +15,12 @@ export function ProjectPicker({
   availableProjects,
   isReadOnly,
 }: Omit<ProjectPickerStateProviderProps, 'children'>) {
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
   return (
     <ProjectPickerStateProvider availableProjects={availableProjects} isReadOnly={isReadOnly}>
-      <ProjectPickerFrame>
-        <ProjectPickerList />
+      <ProjectPickerFrame maxBodyHeight={500} scrollContainerRef={scrollContainerRef}>
+        <ProjectPickerList scrollContainerRef={scrollContainerRef} />
       </ProjectPickerFrame>
     </ProjectPickerStateProvider>
   );

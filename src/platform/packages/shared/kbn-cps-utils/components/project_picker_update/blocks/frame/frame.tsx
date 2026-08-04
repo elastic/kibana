@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type PropsWithChildren } from 'react';
+import React, { type PropsWithChildren, type RefObject, type ComponentProps } from 'react';
 import { EuiSplitPanel, useEuiTheme } from '@elastic/eui';
 import {
   ProjectPickerFrameHeader,
@@ -16,7 +16,16 @@ import {
 } from './partials';
 import { projectPickerFrameStyles } from './frame.styles';
 
-export function ProjectPickerFrame({ children }: PropsWithChildren) {
+interface ProjectPickerFrameProps {
+  scrollContainerRef?: RefObject<HTMLDivElement>;
+  maxBodyHeight?: ComponentProps<typeof ProjectPickerFrameBody>['maxHeight'];
+}
+
+export function ProjectPickerFrame({
+  children,
+  maxBodyHeight,
+  scrollContainerRef,
+}: PropsWithChildren<ProjectPickerFrameProps>) {
   const { euiTheme } = useEuiTheme();
   const styles = projectPickerFrameStyles({ euiTheme });
 
@@ -26,7 +35,9 @@ export function ProjectPickerFrame({ children }: PropsWithChildren) {
         <ProjectPickerFrameHeader />
       </EuiSplitPanel.Inner>
       <EuiSplitPanel.Inner paddingSize="none">
-        <ProjectPickerFrameBody>{children}</ProjectPickerFrameBody>
+        <ProjectPickerFrameBody maxHeight={maxBodyHeight} scrollContainerRef={scrollContainerRef}>
+          {children}
+        </ProjectPickerFrameBody>
       </EuiSplitPanel.Inner>
       <EuiSplitPanel.Inner color="subdued">
         <ProjectPickerFrameFooter />

@@ -137,6 +137,7 @@ export function ProjectPickerFrameHeader() {
                     aria-labelledby={contextMenuTooltipId}
                     iconType="ellipsis"
                     onClick={() => setIsOpen(true)}
+                    color="text"
                   />
                 </EuiToolTip>
               }

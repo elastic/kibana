@@ -7,17 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, type ComponentProps, useEffect, useMemo } from 'react';
+import React, { useCallback, type ComponentProps, useEffect, useMemo, useState } from 'react';
+import type { UseEuiTheme } from '@elastic/eui';
 import {
   EuiFilterGroup,
   EuiSuperSelect,
   EuiComboBox,
   type EuiSuperSelectProps,
   type EuiComboBoxOptionOption,
+  type EuiComboBoxOptionsListProps,
 } from '@elastic/eui';
 import { useForm, useController, type Control, Controller } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
-import { css } from '@emotion/react';
 import {
   type FilterOperatorLiteral,
   FilterOperator,
@@ -134,6 +135,13 @@ export function FilterSelectionInput({
   ]);
 
   useEffect(() => {
+    if (anchoringFilteringTagName && !filteringOperator) {
+      // when a filtering dimension is selected, set a default operator of "EQUALS"
+      form.setValue('operator', FilterOperator.EQUALS);
+    }
+  }, [anchoringFilteringTagName, filteringOperator, form]);
+
+  useEffect(() => {
     if (filteringOperator || filteringTagValue) {
       onFilterInputChanged(form.getValues());
     }
@@ -164,11 +172,16 @@ export function FilterSelectionInput({
     []
   );
 
+  const [customFilterValues, setCustomFilterValues] = useState<string[]>([]);
+
   const filterValues = useMemo(() => {
     return toSelectableOptions(
-      getFilterValuesOptions({ tagName: anchoringFilteringTagName, operator: filteringOperator })
+      ([] as string[]).concat(
+        customFilterValues,
+        getFilterValuesOptions({ tagName: anchoringFilteringTagName, operator: filteringOperator })
+      )
     );
-  }, [anchoringFilteringTagName, filteringOperator, getFilterValuesOptions]);
+  }, [anchoringFilteringTagName, customFilterValues, filteringOperator, getFilterValuesOptions]);
 
   const renderTagValueInput = useCallback<
     ComponentProps<typeof Controller<FilterInput, 'tagValue'>>['render']
@@ -188,14 +201,50 @@ export function FilterSelectionInput({
           : field.value === option.value
       );
 
+      const onCreateOption: NonNullable<EuiComboBoxOptionsListProps<string>['onCreateOption']> = (
+        searchValue
+      ) => {
+        const normalizedSearchValue = searchValue.trim().toLowerCase();
+
+        if (!normalizedSearchValue) {
+          return;
+        }
+
+        setCustomFilterValues((prev) => [...prev, normalizedSearchValue]);
+
+        if (isMultiValueOperator) {
+          // Select the option.
+          field.onChange([normalizedSearchValue]);
+        } else {
+          field.onChange(normalizedSearchValue);
+        }
+      };
+
+      const isDisabled =
+        !anchoringFilteringTagName || !filteringOperator || isExistenceCheckOperator;
+
       return (
         <EuiComboBox
           {...field}
           options={filterValues}
           onChange={handleChange}
           selectedOptions={selectedOptions}
-          singleSelection={!isMultiValueOperator}
-          isDisabled={!anchoringFilteringTagName || !filteringOperator || isExistenceCheckOperator}
+          singleSelection={isMultiValueOperator ? false : { asPlainText: true }}
+          isDisabled={isDisabled}
+          onCreateOption={onCreateOption}
+          customOptionText={i18n.translate('cpsUtils.projectPicker.filterBox.customOptionText', {
+            defaultMessage: "Add '{searchValue}' as your search value on {tagName}",
+            values: {
+              tagName: anchoringFilteringTagName,
+            },
+          })}
+          placeholder={
+            isDisabled
+              ? undefined
+              : i18n.translate('cpsUtils.projectPicker.filterBox.selectValue', {
+                  defaultMessage: 'Select a value',
+                })
+          }
           compressed
           fullWidth
         />
@@ -210,20 +259,27 @@ export function FilterSelectionInput({
     ]
   );
 
+  const styles = useCallback(
+    ({ euiTheme }: UseEuiTheme) => ({
+      '& > *': {
+        flexBasis: 'calc(100% / 3) !important',
+      },
+      '& > *:not(:last-child)': {
+        borderRight: `1px solid ${euiTheme.colors.borderBasePlain}`,
+      },
+      '& > * button, & > * [data-test-subj="comboBoxInput"]': {
+        borderRadius: 'unset',
+        borderWidth: '0',
+        borderStyle: 'none',
+        borderColor: 'transparent',
+        boxShadow: 'none',
+      },
+    }),
+    []
+  );
+
   return (
-    <EuiFilterGroup
-      css={css({
-        '& > *': {
-          flexBasis: 'calc(100% / 3) !important',
-        },
-        '& > * button': {
-          borderRadius: 'unset',
-          borderWidth: '0',
-          borderStyle: 'none',
-          borderColor: 'transparent',
-        },
-      })}
-    >
+    <EuiFilterGroup css={styles}>
       <FilterInputStandardSelect
         control={form.control}
         name="tagName"
@@ -238,9 +294,6 @@ export function FilterSelectionInput({
         name="operator"
         options={filterOperators}
         disabled={!anchoringFilteringTagName}
-        placeholder={i18n.translate('cpsUtils.projectPicker.filterBox.selectOperator', {
-          defaultMessage: 'Select an operator',
-        })}
         compressed
       />
       <Controller

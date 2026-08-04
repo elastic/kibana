@@ -8,5 +8,5 @@
  */
 
 export { ProjectPickerFrameHeader } from './header';
-export { ProjectPickerFrameBody } from './body';
+export { ProjectPickerFrameBody, ProjectPickerFrameBodyHeader } from './body';
 export { ProjectPickerFrameFooter } from './footer';
