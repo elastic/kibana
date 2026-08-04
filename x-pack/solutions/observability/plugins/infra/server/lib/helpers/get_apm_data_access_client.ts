@@ -8,6 +8,7 @@
 import { APMEventClient } from '@kbn/apm-data-access-plugin/server';
 import type { KibanaRequest } from '@kbn/core/server';
 import { UI_SETTINGS } from '@kbn/data-plugin/server';
+import { getProjectRoutingFromRequest } from '@kbn/observability-utils-server/es/get_project_routing_from_request';
 import type { InfraPluginRequestHandlerContext } from '../../types';
 import type { InfraBackendLibs } from '../infra_types';
 
@@ -32,6 +33,7 @@ export const getApmDataAccessClient = ({
     const savedObjectsClient = savedObjects.client;
     const esClient = elasticsearch.client.asCurrentUser;
     const uiSettingsClient = uiSettings.client;
+    const projectRouting = getProjectRoutingFromRequest(request);
 
     const [apmIndices, includeFrozen] = await Promise.all([
       apmDataAccess.getApmIndices(savedObjectsClient).catch(() => undefined),
@@ -47,6 +49,7 @@ export const getApmDataAccessClient = ({
         indices: apmIndices,
         options: {
           includeFrozen,
+          projectRouting,
         },
         debug: false,
         esClient,
