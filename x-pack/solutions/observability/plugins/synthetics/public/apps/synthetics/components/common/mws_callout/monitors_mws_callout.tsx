@@ -15,7 +15,9 @@ export const MonitorsMWsCallout = () => {
   const { allConfigs } = useSelector(selectOverviewStatus);
   const { data } = useFetchMaintenanceWindows();
 
-  const monitorMWIds = [...new Set(allConfigs?.flatMap((config) => config.maintenanceWindows ?? []))];
+  const monitorMWIds = [
+    ...new Set(allConfigs?.flatMap((config) => config.maintenanceWindows ?? [])),
+  ];
 
   const activeMWs = getActiveMaintenanceWindows(data?.maintenanceWindows, monitorMWIds);
 

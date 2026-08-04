@@ -67,9 +67,8 @@ export const getMaintenanceWindowsRoute: SyntheticsRestApiRouteFactory<
       return { maintenanceWindows: [] };
     }
 
-    const maintenanceWindows = await syntheticsMonitorClient.syntheticsService.getMaintenanceWindows(
-      spaceId
-    );
+    const maintenanceWindows =
+      await syntheticsMonitorClient.syntheticsService.getMaintenanceWindows(spaceId);
 
     return {
       maintenanceWindows: maintenanceWindows
