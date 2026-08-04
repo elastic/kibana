@@ -22,7 +22,10 @@ import { timelineActions, timelineSelectors } from '../../../timelines/store';
 import { useAppToasts } from '../../hooks/use_app_toasts';
 import { useShallowEqualSelector } from '../../hooks/use_selector';
 import { useKibana } from '../../lib/kibana';
-import { savedSearchComparator } from '../../../timelines/components/timeline/tabs/esql/utils';
+import {
+  savedSearchComparator,
+  hasNonEmptyEsqlQuery,
+} from '../../../timelines/components/timeline/tabs/esql/utils';
 import {
   DISCOVER_SEARCH_SAVE_ERROR_TITLE,
   DISCOVER_SEARCH_SAVE_ERROR_UNKNOWN,
@@ -231,6 +234,15 @@ export const useDiscoverInTimelineActions = (
 
       // If there is already a saved search, only update the local state
       if (savedSearchId) {
+        // If the ES|QL query was cleared, drop the savedSearchId link immediately so
+        // the next explicit timeline save sends savedSearchId: null to the server and
+        // the timeline appears compatible in the list without requiring a second save.
+        if (!hasNonEmptyEsqlQuery(savedSearch.searchSource.getField('query'))) {
+          dispatch(
+            timelineActions.updateSavedSearchId({ id: TimelineId.active, savedSearchId: null })
+          );
+          return;
+        }
         savedSearch.id = savedSearchId;
         if (!timelineRef.current.savedSearch) {
           dispatch(
