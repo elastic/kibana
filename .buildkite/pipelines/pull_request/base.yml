@@ -3,6 +3,12 @@ env:
   # TEMPORARY — routes this PR's egress through the Citadel proxy.
   # platform-engineering-productivity#3163. Revert before merge.
   USE_CITADEL_PROXY: 'true'
+  # CONTROL RUN — neutralises the proxy while leaving everything else identical
+  # (CA installed, env set, same 394-job matrix). Run once with this line, once
+  # without, on the same commit and labels: failures appearing in BOTH are
+  # Kibana's baseline flake, failures only in the proxied run are ours.
+  # Comment out to go back to a proxied run.
+  CITADEL_EXP_UNPROXY_JOB: 'true'
 
 steps:
   - command: .buildkite/scripts/steps/build_kibana.sh
