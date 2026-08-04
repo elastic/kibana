@@ -150,9 +150,9 @@ describe('HistoricalResults', () => {
       ).toBeInTheDocument();
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/221030
-    describe.skip('when new date is selected', () => {
+    describe('when new date is selected', () => {
       it('should invoke fetchHistoricalResults with new start and end dates, from: 0 and remaining fetch query opts', async () => {
+        const user = userEvent.setup();
         const indexName = 'test';
         const historicalResult = getHistoricalResultStub(indexName);
         const fetchHistoricalResults = jest.fn();
@@ -176,16 +176,14 @@ describe('HistoricalResults', () => {
 
         const superDatePicker = screen.getByTestId('historicalResultsDatePicker');
 
-        await act(async () => {
-          const dateQuickSelect = within(superDatePicker).getByTestId(
-            'superDatePickerToggleQuickMenuButton'
-          );
-          await userEvent.click(dateQuickSelect);
-        });
+        const dateQuickSelect = within(superDatePicker).getByTestId(
+          'superDatePickerToggleQuickMenuButton'
+        );
+        await user.click(dateQuickSelect);
 
         const monthToDateButton = screen.getByTestId('superDatePickerCommonlyUsed_Month_to date');
 
-        await userEvent.click(monthToDateButton);
+        await user.click(monthToDateButton, { pointerEventsCheck: 0 });
 
         const fetchQueryOpts = {
           abortController: expect.any(AbortController),
