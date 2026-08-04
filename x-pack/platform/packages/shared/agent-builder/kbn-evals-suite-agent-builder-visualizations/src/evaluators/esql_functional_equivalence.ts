@@ -16,11 +16,8 @@ import { normalizeEsqlForEquivalence } from './normalize_esql_for_equivalence';
 
 export const ESQL_FUNCTIONAL_EQUIVALENCE_EVALUATOR_NAME = 'ES|QL Functional Equivalence';
 
-// v1 = framework binary Yes/No; v2 = three-point rubric; v3 = same + strips redundant @timestamp WHERE bounds.
-// Evaluator name is kept identical to the framework's so golden-cluster history is continuous;
-// filter on `evaluator.metadata.judgeVersion` for rubric trends.
-// Copied from @kbn/evals-suite-security-esql-generation-regression; promote to @kbn/evals if a third suite needs it.
-export const ESQL_FUNCTIONAL_EQUIVALENCE_JUDGE_VERSION = 'v3';
+// Stamp results with judgeVersion so future rubric changes can be filtered in the golden cluster.
+export const ESQL_FUNCTIONAL_EQUIVALENCE_JUDGE_VERSION = 'v1';
 
 /**
  * Three-point judgement returned by the LLM judge. Mapped to a numeric
@@ -53,11 +50,11 @@ Two queries are FUNCTIONALLY EQUIVALENT when they would produce the same answer 
 
 TREAT THE FOLLOWING AS EQUIVALENT (do NOT penalise):
 - Column alias differences: \`STATS count = COUNT(*)\` vs \`STATS total = COUNT(*)\`.
+- BY grouping aliases: \`BY response.keyword\` vs \`BY \`Response Code\` = response.keyword\` (and \`BY bucket = BUCKET(...)\` vs \`BY BUCKET(...)\`) — the left-hand name is only a label; the grouped field/expression is what matters. Do NOT treat BY alias assignment as invalid or non-equivalent.
 - Equivalent function forms: \`DATE_EXTRACT("hour", @timestamp)\` vs \`HOUR(@timestamp)\`; \`SUBSTRING(x, 1, 3)\` vs \`LEFT(x, 3)\`.
 - Equivalent comparison forms: \`x >= 5 AND x <= 10\` vs \`x BETWEEN 5 AND 10\`; \`a == "x" AND b == "y"\` vs \`a == "x" | WHERE b == "y"\`.
 - Output column ordering or extra cosmetic \`KEEP\`/\`DROP\` clauses that don't change the answer.
-- Time-range bind parameters: \`WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend\` is equivalent to a hardcoded time-range literal of the same window — both refer to "the user's time of interest".
-- Presence vs absence of a redundant \`WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend\` when the same window is already expressed via \`BUCKET(@timestamp, …, ?_tstart, ?_tend)\` or \`TBUCKET(…, ?_tstart, ?_tend)\` — do NOT penalise either form.
+- Time-range bind parameters on \`@timestamp\`: presence vs absence of \`WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend\` is cosmetic for visualization evals (dashboard time picker / \`BUCKET\`/\`TBUCKET\` bind params) — do NOT penalise either form. The same applies when comparing that WHERE to a hardcoded literal of the same window.
 - Presence vs absence of \`SORT <time bucket> ASC\` on a time-series query — charts order the time axis; do NOT penalise either form.
 - Different but compatible bucketing where the granularity is interchangeable for the question (e.g. \`BUCKET(@timestamp, 1h)\` vs \`BUCKET(@timestamp, 50, ?_tstart, ?_tend)\` over the same window when the question is "by hour").
 - Broader index patterns that still cover the same logical dataset: \`logs-*\` vs \`logs-endpoint.*\` when the gold uses the broader pattern.
@@ -151,9 +148,8 @@ function isEquivalenceJudgement(value: unknown): value is EquivalenceJudgement {
 
 /**
  * LLM-judged functional equivalence with a calibrated three-point rubric
- * (equivalent / equivalent_with_caveats / not_equivalent). Drop-in replacement
- * for the framework's binary `createEsqlEquivalenceEvaluator` — same name for
- * history continuity; results are stamped with `metadata.judgeVersion`.
+ * (equivalent / equivalent_with_caveats / not_equivalent). Results are stamped
+ * with `metadata.judgeVersion`.
  */
 export function createCalibratedEsqlEquivalenceEvaluator({
   inferenceClient,
