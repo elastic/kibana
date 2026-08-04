@@ -11,13 +11,32 @@ import { RULE_CHANGE_HISTORY_STORY_OBJECT_ID } from './constants';
 
 /** Domain rule snapshot persisted as `object.snapshot` (API response minus SO OCC token). */
 type RuleSnapshot = Omit<RuleResponse, 'version'>;
+type RuleApiResponse = RuleResponse;
 
-const baseSnapshot = {
-  id: RULE_CHANGE_HISTORY_STORY_OBJECT_ID,
-  kind: 'alert' as const,
+export interface CreateRuleChangeHistoryFixturesOptions {
+  objectId?: string;
+  name?: string;
+  /** When true, returns no history rows. */
+  empty?: boolean;
+  /**
+   * How many newest-first versions to keep after building the full sample timeline.
+   * Ignored when `empty` is true.
+   */
+  versionCount?: 1 | 2 | 3 | 4;
+}
+
+const buildBaseSnapshot = ({
+  objectId,
+  name,
+}: {
+  objectId: string;
+  name: string;
+}): RuleSnapshot => ({
+  id: objectId,
+  kind: 'alert',
   enabled: true,
   metadata: {
-    name: 'Bad Weather',
+    name,
     version: 1,
     description: 'Alert when destination weather is thunder and lightning.',
     tags: ['flights', 'weather'],
@@ -26,7 +45,7 @@ const baseSnapshot = {
   time_field: 'timestamp',
   schedule: { every: '1m', lookback: '5h' },
   query: {
-    format: 'standalone' as const,
+    format: 'standalone',
     breach: {
       query:
         'FROM kibana_sample_data_flights | WHERE DestWeather LIKE "Thunder & Lightning" | STATS c = COUNT(*) BY Carrier | WHERE c > 1',
@@ -36,13 +55,23 @@ const baseSnapshot = {
   createdAt: '2026-07-22T14:00:00.000Z',
   updatedBy: 'admin',
   updatedAt: '2026-07-22T14:00:00.000Z',
-} satisfies RuleSnapshot;
+});
 
 /**
  * Newest-first mock history for Storybook / local UI exploration.
  * Snapshots mirror domain `RuleResponse` minus the SO OCC `version` token.
  */
-export const createRuleChangeHistoryFixtures = (): ChangeHistoryDetail[] => {
+export const createRuleChangeHistoryFixtures = (
+  options: CreateRuleChangeHistoryFixturesOptions = {}
+): ChangeHistoryDetail[] => {
+  if (options.empty) {
+    return [];
+  }
+
+  const objectId = options.objectId ?? RULE_CHANGE_HISTORY_STORY_OBJECT_ID;
+  const name = options.name ?? 'Bad Weather';
+  const baseSnapshot = buildBaseSnapshot({ objectId, name });
+
   const v1: RuleSnapshot = { ...baseSnapshot };
 
   const v2: RuleSnapshot = {
@@ -85,9 +114,9 @@ export const createRuleChangeHistoryFixtures = (): ChangeHistoryDetail[] => {
     updatedBy: 'bailey',
   };
 
-  return [
+  const allVersions: ChangeHistoryDetail[] = [
     {
-      id: 'evt-disable',
+      id: `${objectId}-evt-disable`,
       timestamp: v4.updatedAt,
       actor: { name: 'bailey', profileId: 'user-bailey' },
       action: 'Disabled',
@@ -97,7 +126,7 @@ export const createRuleChangeHistoryFixtures = (): ChangeHistoryDetail[] => {
       changes: { count: 1, summary: [{ label: 'Enabled', count: 1 }] },
     },
     {
-      id: 'evt-query',
+      id: `${objectId}-evt-query`,
       timestamp: v3.updatedAt,
       actor: { name: 'admin', profileId: 'user-admin' },
       action: 'Updated',
@@ -107,7 +136,7 @@ export const createRuleChangeHistoryFixtures = (): ChangeHistoryDetail[] => {
       changes: { count: 1, summary: [{ label: 'Query', count: 1 }] },
     },
     {
-      id: 'evt-lookback',
+      id: `${objectId}-evt-lookback`,
       timestamp: v2.updatedAt,
       actor: { name: 'bailey', profileId: 'user-bailey' },
       action: 'Updated',
@@ -123,7 +152,7 @@ export const createRuleChangeHistoryFixtures = (): ChangeHistoryDetail[] => {
       },
     },
     {
-      id: 'evt-create',
+      id: `${objectId}-evt-create`,
       timestamp: v1.createdAt,
       actor: { name: 'admin', profileId: 'user-admin' },
       action: 'Created',
@@ -131,4 +160,34 @@ export const createRuleChangeHistoryFixtures = (): ChangeHistoryDetail[] => {
       snapshot: v1,
     },
   ];
+
+  const versionCount = options.versionCount ?? 4;
+  const trimmed = allVersions.slice(4 - versionCount);
+
+  if (trimmed.length === 0) {
+    return trimmed;
+  }
+
+  // Ensure the newest retained row is marked current and older ones are not.
+  return trimmed.map((entry, index) => ({
+    ...entry,
+    isCurrent: index === 0,
+  }));
+};
+
+/** Builds a list-row `RuleApiResponse` from the newest fixture snapshot. */
+export const createRuleApiResponseFromHistoryFixtures = (
+  options: CreateRuleChangeHistoryFixturesOptions = {}
+): RuleApiResponse => {
+  const history = createRuleChangeHistoryFixtures({
+    ...options,
+    empty: false,
+    versionCount: options.versionCount ?? 1,
+  });
+  const latest = history[0]?.snapshot as RuleSnapshot;
+
+  return {
+    ...latest,
+    version: 'WzEsMV0=',
+  };
 };

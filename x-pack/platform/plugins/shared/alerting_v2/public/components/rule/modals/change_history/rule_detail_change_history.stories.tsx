@@ -24,22 +24,18 @@ import { useChangeHistoryModal } from '@kbn/change-history-ui';
 import { createMockChangeHistoryAdapter } from '@kbn/change-history-ui/mocks';
 import { i18n } from '@kbn/i18n';
 import { MemoryRouter } from 'react-router-dom';
-import { getRuleDetailMenu } from '../get_rule_detail_menu';
-import { RuleKindBadge } from '../rule_summary_header';
-import type { RuleApiResponse } from '../../../services/rules_api';
+import { getRuleDetailMenu } from '../../../rule_details/get_rule_detail_menu';
+import { RuleKindBadge } from '../../../rule_details/rule_summary_header';
+import type { RuleApiResponse } from '../../../../services/rules_api';
 import {
   RULE_CHANGE_HISTORY_STORY_OBJECT_ID,
   RuleChangeHistoryProvider,
+  createRuleApiResponseFromHistoryFixtures,
   createRuleChangeHistoryFixtures,
 } from '.';
 
-const storyRule = (): RuleApiResponse => {
-  const latest = createRuleChangeHistoryFixtures()[0]?.snapshot as RuleApiResponse;
-  return {
-    ...latest,
-    version: 'WzEsMV0=',
-  };
-};
+const storyRule = (): RuleApiResponse =>
+  createRuleApiResponseFromHistoryFixtures({ versionCount: 4 });
 
 const RuleDetailChangeHistoryShell = ({
   rule,

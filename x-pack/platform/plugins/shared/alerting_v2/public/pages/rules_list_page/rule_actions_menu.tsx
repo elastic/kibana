@@ -24,6 +24,8 @@ export interface RuleActionsMenuProps {
   onDelete: (rule: RuleApiResponse) => void;
   onToggleEnabled?: (rule: RuleApiResponse) => void;
   onRun?: (rule: RuleApiResponse) => void;
+  /** When provided, adds a menu entry that opens change history for the rule. */
+  onViewChangeHistory?: (rule: RuleApiResponse) => void;
 }
 
 export const RuleActionsMenu = ({
@@ -33,6 +35,7 @@ export const RuleActionsMenu = ({
   onDelete,
   onToggleEnabled,
   onRun,
+  onViewChangeHistory,
 }: RuleActionsMenuProps) => {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -82,6 +85,23 @@ export const RuleActionsMenu = ({
     >
       {i18n.translate('xpack.alertingV2.rulesList.action.clone', { defaultMessage: 'Clone' })}
     </EuiContextMenuItem>,
+    ...(onViewChangeHistory
+      ? [
+          <EuiContextMenuItem
+            key="viewChangeHistory"
+            icon={<EuiIcon type="clockCounter" size="m" aria-hidden={true} />}
+            onClick={() => {
+              setIsOpen(false);
+              onViewChangeHistory(rule);
+            }}
+            data-test-subj={`viewChangeHistoryRule-${rule.id}`}
+          >
+            {i18n.translate('xpack.alertingV2.rulesList.action.viewChangeHistory', {
+              defaultMessage: 'View change history',
+            })}
+          </EuiContextMenuItem>,
+        ]
+      : []),
     ...(onToggleEnabled
       ? [
           <EuiContextMenuItem

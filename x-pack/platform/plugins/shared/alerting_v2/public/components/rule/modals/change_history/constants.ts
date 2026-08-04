@@ -6,7 +6,7 @@
  */
 
 import type { ChangeHistoryScope } from '@kbn/change-history-ui';
-import { RULE_SAVED_OBJECT_TYPE } from '../../../../common/saved_object_types';
+import { RULE_SAVED_OBJECT_TYPE } from '../../../../../common/saved_object_types';
 
 /** Matches server `RULE_CHANGES_HISTORY_*` scope for UI query keys and telemetry. */
 export const RULE_CHANGE_HISTORY_SCOPE: ChangeHistoryScope = {
