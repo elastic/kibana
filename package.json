@@ -1521,7 +1521,7 @@
     "moment-timezone": "0.6.1",
     "monaco-editor": "0.44.0",
     "monaco-promql": "1.8.0",
-    "monaco-yaml": "5.1.0",
+    "monaco-yaml": "5.5.0",
     "murmurhash": "2.0.1",
     "mustache": "4.2.0",
     "node-diff3": "3.1.2",
