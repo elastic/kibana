@@ -9,6 +9,7 @@ import Boom from '@hapi/boom';
 
 import { schema } from '@kbn/config-schema';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { AuthzDisabled } from '@kbn/core-security-server';
 
 import type { InitialSolutionSetupRouteDeps } from '.';
 import type { CompleteInitialSolutionSetupResponse } from '../../../../common';
@@ -25,11 +26,7 @@ export function initCompleteInitialSolutionSetupApi({
     {
       path: '/internal/spaces/_complete_initial_solution_setup',
       security: {
-        authz: {
-          enabled: false,
-          reason:
-            'This route delegates authorization to the spaces service via a scoped spaces client',
-        },
+        authz: AuthzDisabled.delegateToSOClient,
       },
       validate: {
         body: schema.object({

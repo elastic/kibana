@@ -15,7 +15,6 @@ import {
   EuiImage,
   EuiLoadingSpinner,
   EuiPanel,
-  EuiPortal,
   EuiSpacer,
   EuiText,
   EuiTextColor,
@@ -29,14 +28,13 @@ import type { Observable } from 'rxjs';
 
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import type { CustomBranding } from '@kbn/core-custom-branding-common';
-import { useKbnFullScreenBgCss } from '@kbn/css-utils/public/full_screen_bg_css';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider, useQuery } from '@kbn/react-query';
 import { KibanaSolutionAvatar } from '@kbn/shared-ux-avatar-solution';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
-import { SpaceCards, SpaceTable } from './components';
+import { BackgroundPortal, SpaceCards, SpaceTable } from './components';
 import { InitialSolutionSetupPage } from './components/initial_solution_setup_page';
 import * as styles from './space_selector.styles';
 import type { GetInitialSolutionSetupResponse, Space } from '../../common';
@@ -370,17 +368,3 @@ export const renderSpaceSelectorApp = (
   );
   return () => ReactDOM.unmountComponentAtNode(element);
 };
-
-// portal the fixed background graphic so it doesn't affect page positioning or overlap on top of global banners
-const BackgroundPortal = React.memo(function BackgroundPortal() {
-  const kbnFullScreenBgCss = useKbnFullScreenBgCss();
-  return (
-    <EuiPortal>
-      <div
-        className="spcSelectorBackground spcSelectorBackground__nonMixinAttributes"
-        css={kbnFullScreenBgCss}
-        role="presentation"
-      />
-    </EuiPortal>
-  );
-});

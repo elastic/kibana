@@ -86,6 +86,7 @@ dependsOn:
   - '@kbn/core-user-profile-server'
   - '@kbn/core-http-browser'
   - '@kbn/ui-callout'
+  - '@kbn/core-security-server'
 tags:
   - plugin
   - prod

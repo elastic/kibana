@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { EuiImage, EuiPortal, EuiSpacer, EuiText, EuiTextColor } from '@elastic/eui';
+import { EuiImage, EuiSpacer, EuiText, EuiTextColor } from '@elastic/eui';
 import React, { useCallback, useRef } from 'react';
 
-import { useKbnFullScreenBgCss } from '@kbn/css-utils/public/full_screen_bg_css';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { KibanaSolutionAvatar } from '@kbn/shared-ux-avatar-solution';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
+import { BackgroundPortal } from './background_portal';
 import { InitialSolutionSetup } from './initial_solution_setup';
 import type { SpacesManager } from '../../spaces_manager';
 import * as styles from '../space_selector.styles';
@@ -71,16 +71,3 @@ export const InitialSolutionSetupPage = ({ spacesManager, serverBasePath, custom
     </KibanaPageTemplate>
   );
 };
-
-const BackgroundPortal = React.memo(function BackgroundPortal() {
-  const kbnFullScreenBgCss = useKbnFullScreenBgCss();
-  return (
-    <EuiPortal>
-      <div
-        className="spcSelectorBackground spcSelectorBackground__nonMixinAttributes"
-        css={kbnFullScreenBgCss}
-        role="presentation"
-      />
-    </EuiPortal>
-  );
-});

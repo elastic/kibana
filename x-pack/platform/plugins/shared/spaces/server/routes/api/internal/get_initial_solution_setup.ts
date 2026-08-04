@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { AuthzDisabled } from '@kbn/core-security-server';
+
 import type { InitialSolutionSetupRouteDeps } from '.';
 import type { GetInitialSolutionSetupResponse } from '../../../../common';
 import { wrapError } from '../../../lib/errors';
@@ -19,11 +21,7 @@ export function initGetInitialSolutionSetupApi({
     {
       path: '/internal/spaces/_initial_solution_setup',
       security: {
-        authz: {
-          enabled: false,
-          reason:
-            'This route delegates authorization to the spaces service via a scoped spaces client',
-        },
+        authz: AuthzDisabled.delegateToSOClient,
       },
       validate: false,
     },
