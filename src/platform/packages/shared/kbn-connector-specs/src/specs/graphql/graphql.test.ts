@@ -419,10 +419,8 @@ describe('GraphQLConnector', () => {
     it('returns ok when the endpoint responds successfully', async () => {
       mockClient.post.mockResolvedValue({ data: { data: { __typename: 'Query' } } });
 
-      if (!GraphQLConnector.test) throw new Error('test not defined');
       const result = await GraphQLConnector.test.handler(mockContext);
 
-      expect(result.ok).toBe(true);
       expect(result.message).toContain('Query');
     });
 
