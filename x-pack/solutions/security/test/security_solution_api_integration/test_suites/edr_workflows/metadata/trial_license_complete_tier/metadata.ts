@@ -49,7 +49,13 @@ export default function ({ getService }: FtrProviderContext) {
       let agent2Timestamp: number;
       let metadataTimestamp: number;
 
-      before(async () => {
+      before(async function () {
+        // Endpoint data setup triggers a full Fleet package install; under CI load its
+        // Elasticsearch calls can be retried for minutes, and `indexFleetEndpointPolicy`
+        // itself budgets up to 5 minutes of transient-error retries. Give the hook enough
+        // room for that budget so slow (not failed) setup doesn't trip mocha's 120s default.
+        this.timeout(10 * 60 * 1000);
+
         await endpointDataStreamHelpers.deleteAllDocsFromFleetAgents(getService);
         await endpointDataStreamHelpers.deleteAllDocsFromMetadataDatastream(getService);
         await endpointDataStreamHelpers.deleteAllDocsFromMetadataCurrentIndex(getService);
