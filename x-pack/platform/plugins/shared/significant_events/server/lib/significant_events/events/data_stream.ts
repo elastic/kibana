@@ -18,7 +18,6 @@ export const eventsMappings = {
   properties: {
     '@timestamp': mappings.date({ format: 'strict_date_optional_time' }),
     event_uuid: mappings.keyword(),
-    discovery_id: mappings.keyword(),
     event_id: mappings.keyword(),
     previous_event_uuid: mappings.keyword(),
     stream_names: mappings.keyword(),
@@ -75,7 +74,7 @@ export const storedEventSchema = significantEventSchema.transform((doc) => ({
 
 export const eventsDataStream: DataStreamDefinition<typeof eventsMappings, StoredEvent> = {
   name: EVENTS_DATA_STREAM,
-  version: 10,
+  version: 12,
   hidden: true,
   template: {
     priority: 500,
