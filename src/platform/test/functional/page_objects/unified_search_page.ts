@@ -73,12 +73,5 @@ export class UnifiedSearchPageObject extends FtrService {
 
   public async switchToDataViewMode() {
     await this.PageObjects.discover.selectDataViewMode();
-    await this.retry.waitFor('the modal to open', async () => {
-      return await this.testSubjects.exists('discover-esql-to-dataview-modal');
-    });
-    await this.testSubjects.click('discover-esql-to-dataview-no-save-btn');
-    await this.retry.waitFor('the modal to close', async () => {
-      return !(await this.testSubjects.exists('discover-esql-to-dataview-modal'));
-    });
   }
 }

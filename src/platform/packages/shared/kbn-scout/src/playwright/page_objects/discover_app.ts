@@ -940,13 +940,6 @@ export class DiscoverApp {
 
     if (currentMode !== 'classic') {
       await this.clickAppMenuItem('select-classic-mode-btn');
-      await this.page.testSubj.waitForSelector('discover-esql-to-dataview-modal', {
-        state: 'visible',
-      });
-      await this.page.testSubj.click('discover-esql-to-dataview-no-save-btn');
-      await this.page.testSubj.waitForSelector('discover-esql-to-dataview-modal', {
-        state: 'hidden',
-      });
     }
 
     await this.waitUntilSearchingHasFinished();

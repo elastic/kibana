@@ -345,7 +345,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('switch modal', () => {
+    describe('switching to a data view', () => {
       beforeEach(async () => {
         await common.navigateToApp('discover');
         await discover.waitUntilTabIsLoaded();
@@ -353,32 +353,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await discover.waitUntilTabIsLoaded();
       });
 
-      it('should show switch modal when switching to a data view', async () => {
+      it('should switch to a data view immediately without a modal', async () => {
         await discover.selectTextBaseLang();
         await discover.waitUntilTabIsLoaded();
         await discover.selectDataViewMode();
-        await retry.try(async () => {
-          await testSubjects.existOrFail('discover-esql-to-dataview-modal');
-        });
+        await discover.waitUntilTabIsLoaded();
+        await testSubjects.missingOrFail('discover-esql-to-dataview-modal');
+        expect(await testSubjects.exists('ESQLEditor')).to.be(false);
       });
 
-      it('should not show switch modal when switching to a data view while a saved search is open', async () => {
+      it('should switch to a data view immediately while a saved search is open', async () => {
         await discover.selectTextBaseLang();
         await discover.waitUntilTabIsLoaded();
         const testQuery = 'from logstash-* | limit 100 | drop @timestamp';
         await monacoEditor.setCodeEditorValue(testQuery);
         await testSubjects.click('querySubmitButton');
         await discover.waitUntilTabIsLoaded();
-        await discover.selectDataViewMode();
-        await retry.try(async () => {
-          await testSubjects.existOrFail('discover-esql-to-dataview-modal');
-        });
-        await find.clickByCssSelector(
-          '[data-test-subj="discover-esql-to-dataview-modal"] .euiModal__closeIcon'
-        );
-        await retry.try(async () => {
-          await testSubjects.missingOrFail('discover-esql-to-dataview-modal');
-        });
         await discover.saveSearch('esql_test');
         await discover.waitUntilTabIsLoaded();
         await discover.selectDataViewMode();
@@ -386,7 +376,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.missingOrFail('discover-esql-to-dataview-modal');
       });
 
-      it('should show switch modal when switching to a data view while a saved search with unsaved changes is open', async () => {
+      it('should switch to a data view immediately while a saved search with unsaved changes is open', async () => {
         await discover.selectTextBaseLang();
         await discover.waitUntilTabIsLoaded();
         await discover.saveSearch('esql_test2');
@@ -396,9 +386,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.click('querySubmitButton');
         await discover.waitUntilTabIsLoaded();
         await discover.selectDataViewMode();
-        await retry.try(async () => {
-          await testSubjects.existOrFail('discover-esql-to-dataview-modal');
-        });
+        await discover.waitUntilTabIsLoaded();
+        await testSubjects.missingOrFail('discover-esql-to-dataview-modal');
       });
 
       it('should show available data views and search results after switching to classic mode', async () => {
