@@ -66,10 +66,10 @@ export class TimelinePage {
     this.batchActionsButton = this.page.testSubj.locator('batchActions');
     this.superTimelineBadge = this.page.testSubj.locator('timeline-modal-super-timeline-badge');
     this.viewSuperTimelineAction = this.page.testSubj.locator('view-super-timeline-action');
-    // The favorites button renders as one of two test subjects depending on state.
-    // Match both so that not.toBeVisible() proves the action is truly hidden, not merely
-    // that the timeline happened to open in the favorited state.
-    this.addToFavoritesButton = this.page.locator(
+    // Scope to the modal header panel so the bottom-bar favorites button (which is
+    // always rendered outside the modal) does not cause false negatives. Match both
+    // star variants so not.toBeVisible() is conclusive regardless of favorited state.
+    this.addToFavoritesButton = this.panel.locator(
       '[data-test-subj="timeline-favorite-empty-star"], [data-test-subj="timeline-favorite-filled-star"]'
     );
   }
