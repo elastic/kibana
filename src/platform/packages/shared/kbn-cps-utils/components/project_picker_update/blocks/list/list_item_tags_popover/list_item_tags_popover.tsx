@@ -59,14 +59,14 @@ export function ProjectPickerListItemTagsPopover({
       button={button}
       isOpen={isOpen}
       css={styles.projectTagsBadgeContainer}
-      panelPaddingSize="s"
+      panelPaddingSize="m"
       anchorPosition="downLeft"
       aria-label={i18n.translate('cpsUtils.projectPicker.list.projectTags.ariaLabel', {
         defaultMessage: 'Project tags',
       })}
       closePopover={closeHandler}
     >
-      <EuiFlexGroup direction="column" responsive={false} gutterSize="xs">
+      <EuiFlexGroup direction="column" responsive={false} gutterSize="s">
         {projectTags.map((tag) => {
           const filter: FilterExpressionValue = {
             operator: FilterOperator.EQUALS,

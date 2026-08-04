@@ -11,14 +11,22 @@ import { css } from '@emotion/react';
 import type { UseEuiTheme } from '@elastic/eui';
 
 export const bodyStyles = ({ euiTheme }: Pick<UseEuiTheme, 'euiTheme'>) => ({
-  filterBoxWrapper: css({
-    position: 'sticky',
-    top: 0,
-    zIndex: euiTheme.levels.header,
-    borderBottom: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
-    backgroundColor: euiTheme.components.headerBackground,
+  bodyControlsPadding: css({
     padding: euiTheme.size.base,
   }),
+  get filterBoxWrapper() {
+    return css([
+      this.bodyControlsPadding,
+      {
+        position: 'sticky',
+        top: 0,
+        zIndex: euiTheme.levels.header,
+        borderBottom: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
+        backgroundColor: euiTheme.components.headerBackground,
+        padding: euiTheme.size.base,
+      },
+    ]);
+  },
   filterCreateButton: css({
     width: 'fit-content',
   }),

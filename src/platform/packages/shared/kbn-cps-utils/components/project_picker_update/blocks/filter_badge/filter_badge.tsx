@@ -21,7 +21,7 @@ type FilterBadgeProps = DistributiveOmit<EuiBadgeProps, 'color'> & {
   filter: FilterExpressionValue;
 };
 
-export function FilterBadge({ filter, css, ...props }: FilterBadgeProps) {
+export function FilterBadge({ filter, css, iconType, ...props }: FilterBadgeProps) {
   const { euiTheme } = useEuiTheme();
   const styles = useMemo(() => filterBadgeStyles(euiTheme), [euiTheme]);
   const isNegated = isNegatedOperator(filter.operator);
@@ -37,6 +37,7 @@ export function FilterBadge({ filter, css, ...props }: FilterBadgeProps) {
         defaultMessage: 'NOT',
       })}
       color="hollow"
+      iconType={iconType === 'empty' ? undefined : iconType}
       {...props}
     >
       {expression}

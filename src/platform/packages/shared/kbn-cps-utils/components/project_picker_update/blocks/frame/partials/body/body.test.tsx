@@ -95,9 +95,7 @@ describe('ProjectPickerFrameBody', () => {
       renderBody({ isReadOnly: true });
 
       expect(screen.queryByTestId('projectPickerFilterDisplayContainer')).not.toBeInTheDocument();
-      expect(
-        screen.queryByTestId('projectPickerFilterDisplayAddFilterBtn')
-      ).not.toBeInTheDocument();
+      expect(screen.queryByTestId('projectPickerFilterDisplayAddFilterBtn')).toBeDisabled();
       expect(screen.getByTestId('bodyChild')).toBeInTheDocument();
     });
 
@@ -108,9 +106,7 @@ describe('ProjectPickerFrameBody', () => {
       });
 
       expect(screen.getByTestId('projectPickerFilterDisplayContainer')).toBeInTheDocument();
-      expect(
-        screen.queryByTestId('projectPickerFilterDisplayAddFilterBtn')
-      ).not.toBeInTheDocument();
+      expect(screen.queryByTestId('projectPickerFilterDisplayAddFilterBtn')).toBeDisabled();
       expect(screen.getByTestId('bodyChild')).toBeInTheDocument();
     });
   });

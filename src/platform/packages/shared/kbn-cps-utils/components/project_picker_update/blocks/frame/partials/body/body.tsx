@@ -57,62 +57,59 @@ export function ProjectPickerFrameBody({
 
   return (
     <EuiFlexGroup direction="column" gutterSize="none" css={styles.bodyContainer}>
-      {showNoMatchingProjectsWarningCallout && (
-        <EuiFlexItem>
-          <KbnWarningCallout
-            announceOnMount
-            title={i18n.translate('cpsUtils.projectPicker.filterBox.noMatch.calloutTitle', {
-              defaultMessage: 'No projects are currently being searched',
-            })}
-            data-test-subj="projectPickerFilterDisplayNoMatchCallout"
-          >
-            <p>
-              {i18n.translate('cpsUtils.projectPicker.filterBox.noMatch.calloutDescription', {
-                defaultMessage:
-                  'Adjust your project filters and toggles to ensure at least one project is included in your search.',
-              })}
-            </p>
-          </KbnWarningCallout>
-        </EuiFlexItem>
-      )}
-      {state.isReadOnly && state.filterExpressions.size === 0 ? null : (
-        <EuiFlexItem css={styles.filterBoxWrapper}>
-          <EuiFlexGroup direction="column" gutterSize="s">
+      <EuiFlexItem css={styles.filterBoxWrapper}>
+        <EuiFlexGroup direction="column" gutterSize="s">
+          {showNoMatchingProjectsWarningCallout && (
+            <EuiFlexItem>
+              <KbnWarningCallout
+                announceOnMount
+                title={i18n.translate('cpsUtils.projectPicker.filterBox.noMatch.calloutTitle', {
+                  defaultMessage: 'No projects are currently being searched',
+                })}
+                data-test-subj="projectPickerFilterDisplayNoMatchCallout"
+              >
+                <p>
+                  {i18n.translate('cpsUtils.projectPicker.filterBox.noMatch.calloutDescription', {
+                    defaultMessage:
+                      'Adjust your project filters and toggles to ensure at least one project is included in your search.',
+                  })}
+                </p>
+              </KbnWarningCallout>
+            </EuiFlexItem>
+          )}
+          {Boolean(state.filterExpressions.size) ? (
             <EuiFlexItem>
               <ProjectPickerFilterDisplay onEditFilter={handleEditFilterRequest} />
             </EuiFlexItem>
-            {state.isReadOnly ? null : (
-              <>
-                {filterViewMode === FilterViewMode.VIEW ? (
-                  <EuiFlexItem grow={false}>
-                    <EuiButtonEmpty
-                      size="xs"
-                      css={styles.filterCreateButton}
-                      data-test-subj="projectPickerFilterDisplayAddFilterBtn"
-                      flush="both"
-                      onClick={handleFilterCreateClick}
-                    >
-                      <EuiText size="xs">
-                        {i18n.translate('cpsUtils.projectPicker.filterDisplay.addFilterBtnText', {
-                          defaultMessage: 'Add project tag filter',
-                        })}
-                      </EuiText>
-                    </EuiButtonEmpty>
-                  </EuiFlexItem>
-                ) : null}
-                {filterViewMode === FilterViewMode.EDIT ? (
-                  <EuiFlexItem>
-                    <ProjectPickerFilterForm
-                      filterId={editingFilter?.id}
-                      onCloseFilterFormRequested={handleCloseFilterFormRequested}
-                    />
-                  </EuiFlexItem>
-                ) : null}
-              </>
-            )}
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      )}
+          ) : null}
+          {filterViewMode === FilterViewMode.VIEW ? (
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                size="xs"
+                css={styles.filterCreateButton}
+                data-test-subj="projectPickerFilterDisplayAddFilterBtn"
+                flush="both"
+                disabled={state.isReadOnly}
+                onClick={handleFilterCreateClick}
+              >
+                <EuiText size="xs">
+                  {i18n.translate('cpsUtils.projectPicker.filterDisplay.addFilterBtnText', {
+                    defaultMessage: 'Add project tag filter',
+                  })}
+                </EuiText>
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          ) : null}
+          {filterViewMode === FilterViewMode.EDIT ? (
+            <EuiFlexItem>
+              <ProjectPickerFilterForm
+                filterId={editingFilter?.id}
+                onCloseFilterFormRequested={handleCloseFilterFormRequested}
+              />
+            </EuiFlexItem>
+          ) : null}
+        </EuiFlexGroup>
+      </EuiFlexItem>
       <EuiFlexItem>{children}</EuiFlexItem>
     </EuiFlexGroup>
   );

@@ -126,8 +126,8 @@ describe('ProjectPickerListItem', () => {
         project: projectWithTags,
       });
 
-      expect(screen.queryByTestId('projectPickerListItemSwitch-1')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('projectPickerListItemContextMenu-1')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('projectPickerListItemSwitch-1')).toBeDisabled();
+      expect(screen.queryByTestId('projectPickerListItemContextMenu-1')).toBeDisabled();
     });
 
     it('still renders the tags badge and invokes onLabelClick when clicked', async () => {

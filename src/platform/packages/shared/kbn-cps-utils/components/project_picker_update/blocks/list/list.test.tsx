@@ -196,14 +196,10 @@ describe('ProjectPickerList', () => {
     it('does not render inclusion switches or per-project context menus', () => {
       renderReadOnlyList();
 
-      expect(screen.queryByTestId('projectPickerListItemSwitch-project-a')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('projectPickerListItemSwitch-project-b')).not.toBeInTheDocument();
-      expect(
-        screen.queryByTestId('projectPickerListItemContextMenu-project-a')
-      ).not.toBeInTheDocument();
-      expect(
-        screen.queryByTestId('projectPickerListItemContextMenu-project-b')
-      ).not.toBeInTheDocument();
+      expect(screen.queryByTestId('projectPickerListItemSwitch-project-a')).toBeDisabled();
+      expect(screen.queryByTestId('projectPickerListItemSwitch-project-b')).toBeDisabled();
+      expect(screen.queryByTestId('projectPickerListItemContextMenu-project-a')).toBeDisabled();
+      expect(screen.queryByTestId('projectPickerListItemContextMenu-project-b')).toBeDisabled();
     });
 
     it('still opens the tags popover when the tags badge is clicked', async () => {
