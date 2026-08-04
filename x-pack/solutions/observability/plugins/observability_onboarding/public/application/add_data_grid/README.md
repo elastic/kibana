@@ -15,8 +15,13 @@ https://github.com/elastic/ingest-dev/issues/8726
   pre-filtered result items, a card renderer.
 - Import from this directory through `index.ts` (the future package entry).
 - Every component has a colocated test that renders WITHOUT
-  `KibanaContextProvider` or a router. That test is the portability guard:
-  if you need a provider, the component no longer belongs here.
+  `KibanaContextProvider` or a router. If you need a provider, the component
+  no longer belongs here.
+- Both rules above are enforced by `../add_data_grid_boundary.test.ts`, which
+  fails on any import outside the allowlist, any relative import that leaves
+  this directory, and any host deep-import that bypasses `index.ts`. Widening
+  the allowlist there is a deliberate decision about what the future package
+  may depend on, not a formality.
 - i18n ids for component chrome live under
   `xpack.observability_onboarding.addDataGrid.*`. Content strings belong to
   the host (see `../add_data_page/observability_flavor.tsx`).
@@ -30,4 +35,6 @@ https://github.com/elastic/ingest-dev/issues/8726
    `xpack.observability_onboarding.addDataGrid` to the package's own prefix
    and add the path mapping to `x-pack/.i18nrc.json`.
 3. Replace host imports (`../add_data_grid`) with the package id.
-4. Run `node scripts/i18n_check --fix` and the moved jest tests.
+4. Move `../add_data_grid_boundary.test.ts` in with it and repoint `GRID_ROOT`
+   and `PUBLIC_ROOT`, so the new package keeps guarding its own boundary.
+5. Run `node scripts/i18n_check --fix` and the moved jest tests.

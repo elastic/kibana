@@ -1,0 +1,117 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { readdirSync, readFileSync } from 'fs';
+import { join, relative, resolve } from 'path';
+
+/**
+ * `add_data_grid/` mirrors the `src/` of a future shared package, so it may only
+ * depend on things that package could depend on. This test is the enforcement:
+ * without it the rule is a convention that a single convenient import erases.
+ *
+ * It lives outside `add_data_grid/` on purpose. A checker that reads the
+ * filesystem needs `fs` and `path`, which the rule below forbids, and it would
+ * otherwise have to exempt itself from its own scan.
+ *
+ * The provider rule falls out of the same allowlist: a test cannot wrap a
+ * component in `KibanaContextProvider` or `MemoryRouter` without importing
+ * `@kbn/kibana-react-plugin/public` or `react-router-dom`, and neither is
+ * allowed here.
+ */
+const GRID_ROOT = resolve(__dirname, 'add_data_grid');
+
+const ALLOWED_IN_SOURCE = [
+  'react',
+  '@elastic/eui',
+  '@emotion/react',
+  '@kbn/i18n',
+  '@kbn/i18n-react',
+];
+
+const ALLOWED_IN_TESTS_ONLY = [
+  '@kbn/test-jest-helpers',
+  '@testing-library/react',
+  '@testing-library/user-event',
+];
+
+// import x from 'y' / export { x } from 'y' / import 'y' / require('y') /
+// import('y') / jest.mock('y'). Anything that pulls in another module.
+const SPECIFIER_PATTERN = /(?:from\s*|import\s*\(\s*|require\s*\(\s*|jest\.mock\(\s*)'([^']+)'/g;
+
+const collectFiles = (directory: string): string[] =>
+  readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
+    const entryPath = join(directory, entry.name);
+    if (entry.isDirectory()) {
+      return collectFiles(entryPath);
+    }
+    return /\.tsx?$/.test(entry.name) ? [entryPath] : [];
+  });
+
+const collectSpecifiers = (filePath: string): string[] => {
+  const contents = readFileSync(filePath, 'utf8');
+  return Array.from(contents.matchAll(SPECIFIER_PATTERN), ([, specifier]) => specifier);
+};
+
+const isRelative = (specifier: string) => specifier.startsWith('.');
+
+const staysInsideGrid = (filePath: string, specifier: string) => {
+  const target = resolve(filePath, '..', specifier);
+  return target === GRID_ROOT || target.startsWith(`${GRID_ROOT}/`);
+};
+
+const gridFiles = collectFiles(GRID_ROOT);
+
+const PUBLIC_ROOT = resolve(__dirname, '..');
+
+const hostFiles = collectFiles(PUBLIC_ROOT).filter((filePath) => !filePath.startsWith(GRID_ROOT));
+
+describe('add_data_grid import boundary', () => {
+  it('finds the directory it is meant to guard', () => {
+    // A rename or a move would otherwise turn every assertion below into a
+    // vacuous pass over an empty file list.
+    expect(gridFiles.length).toBeGreaterThan(10);
+  });
+
+  it.each(gridFiles.map((filePath) => [relative(GRID_ROOT, filePath), filePath]))(
+    '%s imports nothing outside the allowlist',
+    (_label, filePath) => {
+      const isTest = /\.test\.tsx?$/.test(filePath);
+      const allowed = isTest ? [...ALLOWED_IN_SOURCE, ...ALLOWED_IN_TESTS_ONLY] : ALLOWED_IN_SOURCE;
+
+      const violations = collectSpecifiers(filePath).filter(
+        (specifier) => !isRelative(specifier) && !allowed.includes(specifier)
+      );
+
+      expect(violations).toEqual([]);
+    }
+  );
+
+  it.each(gridFiles.map((filePath) => [relative(GRID_ROOT, filePath), filePath]))(
+    '%s keeps its relative imports inside add_data_grid',
+    (_label, filePath) => {
+      const escapes = collectSpecifiers(filePath)
+        .filter(isRelative)
+        .filter((specifier) => !staysInsideGrid(filePath, specifier));
+
+      expect(escapes).toEqual([]);
+    }
+  );
+
+  it('is only reached through its public entry point', () => {
+    // The other half of the package contract. A deep import into a subdirectory
+    // works fine today and breaks the moment the directory becomes a package,
+    // because packages expose one entry point and no subpaths.
+    const deepImports = hostFiles.flatMap((filePath) =>
+      collectSpecifiers(filePath)
+        .filter(isRelative)
+        .filter((specifier) => resolve(filePath, '..', specifier).startsWith(`${GRID_ROOT}/`))
+        .map((specifier) => `${relative(PUBLIC_ROOT, filePath)} -> ${specifier}`)
+    );
+
+    expect(deepImports).toEqual([]);
+  });
+});
