@@ -33,7 +33,10 @@ import {
   ExecutionHistoryClientToken,
 } from '../lib/execution_history_client';
 import { RulesClient } from '../lib/rules_client';
-import { RuleTemplatesClient, RuleTemplateSavedObjectsClientToken } from '../lib/rule_templates_client';
+import {
+  RuleTemplatesClient,
+  RuleTemplateSavedObjectsClientToken,
+} from '../lib/rule_templates_client';
 import {
   createChangeHistoryClient,
   RuleChangesHistoryClientToken,
