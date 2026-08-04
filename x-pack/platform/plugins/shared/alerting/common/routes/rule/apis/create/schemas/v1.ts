@@ -197,7 +197,8 @@ const baseCreateBodyFields = {
     schema.string({
       maxLength: 1024,
       meta: {
-        description: 'The identifier for the rule template this rule was created from, when known.',
+        description:
+          'The identifier for the rule template this rule was created from, when known. Used for telemetry only; it is not stored on the rule and is not returned by read APIs.',
       },
     })
   ),
