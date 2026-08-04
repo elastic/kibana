@@ -18,6 +18,7 @@ import type { DropResult } from '@elastic/eui';
 import type { FieldDefinition } from '../../../../common/types/domain/field_definition/v1';
 import type { InlineField } from '../../../../common/types/domain/template/fields';
 import { FieldDefinitionRow } from './field_definition_row';
+import { FieldDefinitionRowHeader } from './field_definition_row_header';
 import * as i18n from '../translations';
 
 interface GlobalFieldDefinitionsListProps {
@@ -98,6 +99,7 @@ export const GlobalFieldDefinitionsList: React.FC<GlobalFieldDefinitionsListProp
           {announcement}
         </div>
       </EuiScreenReaderOnly>
+      <FieldDefinitionRowHeader />
       <EuiDragDropContext onDragEnd={onDragEnd}>
         <EuiDroppable
           droppableId="globalFieldDefinitions"

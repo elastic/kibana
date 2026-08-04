@@ -115,6 +115,18 @@ export const FIELD_ALREADY_EXISTS_ERROR = (fieldName: string) =>
     values: { fieldName },
   });
 
+export const FIELD_COLUMN = i18n.translate('xpack.cases.fieldLibrary.fieldColumn', {
+  defaultMessage: 'Field',
+});
+
+export const DETAILS_COLUMN = i18n.translate('xpack.cases.fieldLibrary.detailsColumn', {
+  defaultMessage: 'Details',
+});
+
+export const TYPE_COLUMN = i18n.translate('xpack.cases.fieldLibrary.typeColumn', {
+  defaultMessage: 'Type',
+});
+
 export const REQUIRED_BADGE = i18n.translate('xpack.cases.fieldLibrary.requiredBadge', {
   defaultMessage: 'Required',
 });

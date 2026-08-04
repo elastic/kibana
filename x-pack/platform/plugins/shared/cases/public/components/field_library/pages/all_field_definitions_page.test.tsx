@@ -142,6 +142,46 @@ describe('AllFieldDefinitionsPage', () => {
     ]);
   });
 
+  it('gives every row and both group headers identical column tracks', () => {
+    mockGetFieldDefinitions.mockReturnValue({
+      data: {
+        fieldDefinitions: [
+          // A required field and an unrequired one: the badge cell has content in one row and not
+          // the other, which is exactly what used to knock the columns out of alignment.
+          buildFieldDefinition({
+            fieldDefinitionId: 'required',
+            name: 'sla_minutes',
+            isGlobal: true,
+            definition:
+              'name: sla_minutes\ncontrol: INPUT_NUMBER\ntype: long\nvalidation:\n  required: true\n',
+          }),
+          buildFieldDefinition({
+            fieldDefinitionId: 'optional',
+            name: 'affected_users',
+            isGlobal: true,
+            definition: 'name: affected_users\ncontrol: INPUT_NUMBER\ntype: long\n',
+          }),
+          buildFieldDefinition({ fieldDefinitionId: 'template_only', name: 'my_users' }),
+        ],
+      },
+      isLoading: false,
+    });
+
+    renderWithTestingProviders(<AllFieldDefinitionsPage />);
+
+    const tracks = [
+      ...screen.getAllByTestId('fieldDefinitionRowHeader'),
+      ...screen.getAllByTestId(/^fieldDefinitionRow-/),
+    ].map(
+      (element) =>
+        element.style.gridTemplateColumns || getComputedStyle(element).gridTemplateColumns
+    );
+
+    // Every track definition must be content-independent, so all rows resolve to the same columns.
+    expect(new Set(tracks).size).toBe(1);
+    expect(tracks[0]).not.toContain('auto');
+  });
+
   it("shows the field's label parsed from its definition YAML", () => {
     mockGetFieldDefinitions.mockReturnValue({
       data: {

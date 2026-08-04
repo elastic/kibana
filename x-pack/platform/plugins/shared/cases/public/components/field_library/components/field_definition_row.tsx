@@ -6,6 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
+import type { EuiThemeComputed } from '@elastic/eui';
 import { EuiBadge, EuiIcon, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { DraggableProvidedDragHandleProps } from '@hello-pangea/dnd';
@@ -14,6 +15,19 @@ import type { InlineField } from '../../../../common/types/domain/template/field
 import { FIELD_TYPE_TITLES } from '../../templates_v2/utils/field_type_titles';
 import { FieldDefinitionActions } from './field_definition_actions';
 import * as i18n from '../translations';
+
+/**
+ * The column track sizes, shared by every row and by the header.
+ *
+ * Each row is its own grid container — the drag-and-drop wrappers make a single grid spanning all
+ * rows impossible without breaking dragging. So every track here must be *content-independent*:
+ * fixed lengths and `fr` fractions resolve to the same width in every row, whereas an `auto` track
+ * is sized by that row's own content and silently knocks every following column out of alignment.
+ * The handle gutter is always reserved, including for rows that cannot be dragged, so the ordered
+ * and unordered groups line up with each other too.
+ */
+export const getFieldRowGridColumns = (euiTheme: EuiThemeComputed) =>
+  `${euiTheme.size.l} minmax(0, 2fr) minmax(0, 2.5fr) minmax(0, 1.5fr) minmax(0, 1.25fr) ${euiTheme.size.xl}`;
 
 interface FieldDefinitionRowProps {
   fieldDefinition: FieldDefinition;
@@ -54,10 +68,8 @@ export const FieldDefinitionRow: React.FC<FieldDefinitionRowProps> = ({
     () => ({
       row: css`
         display: grid;
-        /* handle | label | name | type | badges | actions */
-        grid-template-columns:
-          ${dragHandleProps ? euiTheme.size.l : '0'} minmax(0, 1.4fr) minmax(0, 1.6fr)
-          minmax(0, 0.9fr) auto ${euiTheme.size.xl};
+        /* handle | label | name-or-description | type | badges | actions */
+        grid-template-columns: ${getFieldRowGridColumns(euiTheme)};
         align-items: center;
         gap: ${euiTheme.size.m};
         padding: ${euiTheme.size.xs} ${euiTheme.size.s};
@@ -115,7 +127,7 @@ export const FieldDefinitionRow: React.FC<FieldDefinitionRowProps> = ({
         justify-content: flex-end;
       `,
     }),
-    [euiTheme, dragHandleProps, isFirst]
+    [euiTheme, isFirst]
   );
 
   const isRequired = inlineField?.validation?.required === true;
@@ -138,7 +150,8 @@ export const FieldDefinitionRow: React.FC<FieldDefinitionRowProps> = ({
           <EuiIcon type="grabOmnidirectional" size="s" aria-hidden={true} />
         </div>
       ) : (
-        <span />
+        // Reserves the gutter on rows that carry no order, so the two groups share a left edge.
+        <span aria-hidden={true} />
       )}
 
       <EuiText size="s" css={styles.truncated}>

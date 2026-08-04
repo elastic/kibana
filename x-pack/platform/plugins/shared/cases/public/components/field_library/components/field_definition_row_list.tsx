@@ -10,6 +10,7 @@ import { EuiText } from '@elastic/eui';
 import type { FieldDefinition } from '../../../../common/types/domain/field_definition/v1';
 import type { InlineField } from '../../../../common/types/domain/template/fields';
 import { FieldDefinitionRow } from './field_definition_row';
+import { FieldDefinitionRowHeader } from './field_definition_row_header';
 
 interface FieldDefinitionRowListProps {
   fieldDefinitions: FieldDefinition[];
@@ -41,6 +42,7 @@ export const FieldDefinitionRowList: React.FC<FieldDefinitionRowListProps> = ({
 
   return (
     <div data-test-subj={dataTestSubj}>
+      <FieldDefinitionRowHeader />
       {fieldDefinitions.map((fieldDefinition, index) => (
         <FieldDefinitionRow
           key={fieldDefinition.fieldDefinitionId}
