@@ -19,7 +19,7 @@ import {
   EuiText,
   EuiTextTruncate,
 } from '@elastic/eui';
-import type { CommandDefinition } from '../../..';
+import { useWithInputTextEntered } from '../../../hooks/state_selectors/use_with_input_text_entered';
 import { useConsoleStateDispatch } from '../../../hooks/state_selectors/use_console_state_dispatch';
 import { getCommandNameWithArgs } from '../../../service/utils';
 import { UserCommandInput } from '../../user_command_input';
@@ -35,27 +35,43 @@ export interface CommandSelectorProps {
   'data-test-subj'?: string;
 }
 
+/**
+ * Displays list of commands defined, or command options if command has already been entered
+ */
 export const CommandSelector = memo<CommandSelectorProps>(
   ({ initialFocusId = htmlIdGenerator()(), 'data-test-subj': dataTestSubj }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
     const commandDefinitions = useWithCommandList();
     const dispatch = useConsoleStateDispatch();
+    const { leftOfCursorText, rightOfCursorText, enteredCommand } = useWithInputTextEntered();
 
-    const selectorOptions: EuiSelectableOption<CommandDefinition>[] = useMemo(() => {
-      const options: EuiSelectableOption<CommandDefinition>[] = [];
+    const selectorOptions: EuiSelectableOption[] = useMemo(() => {
+      const options: EuiSelectableOption[] = [];
 
-      for (const commandDefinition of commandDefinitions.sort((a, b) =>
-        a.name.localeCompare(b.name)
-      )) {
-        options.push({
-          label: getCommandNameWithArgs(commandDefinition),
-          key: commandDefinition.name,
-          data: commandDefinition,
-        });
+      if (enteredCommand?.commandDefinition) {
+        const argNames = Object.keys(enteredCommand.commandDefinition.args ?? {}).sort();
+
+        for (const argName of argNames) {
+          options.push({
+            label: `--${argName}`,
+            key: argName,
+            data: enteredCommand.commandDefinition.args?.[argName] ?? {},
+          });
+        }
+      } else {
+        for (const commandDefinition of commandDefinitions.sort((a, b) =>
+          a.name.localeCompare(b.name)
+        )) {
+          options.push({
+            label: getCommandNameWithArgs(commandDefinition),
+            key: commandDefinition.name,
+            data: commandDefinition,
+          });
+        }
       }
 
       return options;
-    }, [commandDefinitions]);
+    }, [commandDefinitions, enteredCommand?.commandDefinition]);
 
     const searchBarProps = useMemo(() => {
       return {
@@ -74,9 +90,7 @@ export const CommandSelector = memo<CommandSelectorProps>(
       };
     }, []);
 
-    const handleRenderOption = useCallback<
-      NonNullable<EuiSelectableProps<CommandDefinition>['renderOption']>
-    >(
+    const handleRenderOption = useCallback<NonNullable<EuiSelectableProps['renderOption']>>(
       (option) => {
         return (
           <EuiFlexGroup responsive={false}>
@@ -95,7 +109,7 @@ export const CommandSelector = memo<CommandSelectorProps>(
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiText color="subdued" size="xs">
-                <EuiTextTruncate text={option.about} />
+                <EuiTextTruncate text={option.about ?? ''} />
               </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -111,18 +125,30 @@ export const CommandSelector = memo<CommandSelectorProps>(
         const selected = items.find((item) => item.checked === 'on');
 
         if (selected) {
+          let textLeft: string = '';
+          let textRight: string = '';
+
+          // If a command has been entered, then we are appending an option
+          if (enteredCommand?.commandDefinition) {
+            textLeft = `${leftOfCursorText.replace(/ +?(--)$/, '')} ${selected.label}`;
+            textRight = rightOfCursorText;
+          } else {
+            textLeft = selected.label;
+            textRight = '';
+          }
+
           dispatch({
             type: 'updateInputTextEnteredState',
             payload: {
-              leftOfCursorText: selected.label,
-              rightOfCursorText: '',
+              leftOfCursorText: textLeft,
+              rightOfCursorText: textRight,
             },
           });
         }
 
         dispatch({ type: 'addFocusToKeyCapture' });
       },
-      [dispatch]
+      [dispatch, enteredCommand?.commandDefinition, leftOfCursorText, rightOfCursorText]
     );
 
     return (
@@ -132,7 +158,7 @@ export const CommandSelector = memo<CommandSelectorProps>(
           onChange={handleSelectableOnChange}
           renderOption={handleRenderOption}
           searchable={true}
-          searchableProps={searchBarProps}
+          searchProps={searchBarProps}
           listProps={selectableListProps}
         >
           {(list, search) => {
