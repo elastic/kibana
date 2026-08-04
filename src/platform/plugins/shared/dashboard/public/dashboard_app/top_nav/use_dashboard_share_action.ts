@@ -64,29 +64,33 @@ export const useDashboardShareAction = ({
     }
   }, [dashboardApi, lastSavedId, maybeRedirect]);
 
-  const showShare = useCallback(() => {
-    ShowShareModal({
-      shareOptions,
-      canSave: (canManageAccessControl || isInEditAccessMode) && Boolean(hasUnsavedChanges),
+  const showShare = useCallback(
+    (returnFocus?: () => void) => {
+      ShowShareModal({
+        shareOptions,
+        canSave: (canManageAccessControl || isInEditAccessMode) && Boolean(hasUnsavedChanges),
+        accessControl,
+        createdBy: dashboardApi.createdBy,
+        isManaged: dashboardApi.isManaged,
+        accessControlClient,
+        saveDashboard: saveFromShareModal,
+        changeAccessMode: dashboardApi.changeAccessMode,
+        onClose: returnFocus,
+      });
+    },
+    [
+      hasUnsavedChanges,
+      isInEditAccessMode,
+      canManageAccessControl,
       accessControl,
-      createdBy: dashboardApi.createdBy,
-      isManaged: dashboardApi.isManaged,
+      saveFromShareModal,
+      dashboardApi.changeAccessMode,
+      dashboardApi.createdBy,
       accessControlClient,
-      saveDashboard: saveFromShareModal,
-      changeAccessMode: dashboardApi.changeAccessMode,
-    });
-  }, [
-    hasUnsavedChanges,
-    isInEditAccessMode,
-    canManageAccessControl,
-    accessControl,
-    saveFromShareModal,
-    dashboardApi.changeAccessMode,
-    dashboardApi.createdBy,
-    accessControlClient,
-    dashboardApi.isManaged,
-    shareOptions,
-  ]);
+      dashboardApi.isManaged,
+      shareOptions,
+    ]
+  );
 
   const tooltipContent = useMemo(() => {
     if (!dashboardApi.isAccessControlEnabled) {
@@ -103,20 +107,17 @@ export const useDashboardShareAction = ({
     }
 
     return {
-      onClick: () => {
-        showShare();
+      onClick: ({ returnFocus }) => {
+        showShare(returnFocus);
       },
       isDisabled: disableTopNav,
-      // With permission text: title + content. Without: content-only "Share"
-      // (EUI `title` is a header above body — title alone looks empty/odd).
+      // Permission-aware tooltip when access control is on; omit otherwise
       tooltip: tooltipContent
         ? {
             title: topNavStrings.share.tooltipTitle,
             content: tooltipContent,
           }
-        : {
-            content: topNavStrings.share.tooltipTitle,
-          },
+        : undefined,
     };
   }, [disableTopNav, showShare, tooltipContent]);
 };

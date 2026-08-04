@@ -39,7 +39,13 @@ export const useDiscoverShareAction = ({
   hasUnsavedChanges: boolean;
 }): AppHeaderShareAction | undefined => {
   const onClick = useCallback(
-    async ({ triggerElement }: { triggerElement: HTMLElement; returnFocus: () => void }) => {
+    async ({
+      triggerElement,
+      returnFocus,
+    }: {
+      triggerElement: HTMLElement;
+      returnFocus: () => void;
+    }) => {
       const shareOptions = await buildShareOptions({
         discoverParams,
         services,
@@ -52,6 +58,7 @@ export const useDiscoverShareAction = ({
       services.share?.toggleShareContextMenu({
         ...shareOptions,
         anchorElement: triggerElement,
+        onClose: returnFocus,
       });
     },
     [

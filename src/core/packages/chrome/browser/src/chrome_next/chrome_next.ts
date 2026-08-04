@@ -248,7 +248,7 @@ export interface AppHeaderShareAction {
   }) => void | Promise<void>;
   isDisabled?: boolean;
   tooltip?: {
-    content?: string;
+    content: string;
     title?: string;
   };
 }
