@@ -124,12 +124,12 @@ const RESERVED_HEADER_NAMES = new Set([
 
 const stripReservedHeaders = (
   headers: Record<string, string> | undefined,
-  isRawBody: boolean
+  isFormData: boolean
 ): Record<string, string> => {
   if (!headers) return {};
   const out: Record<string, string> = {};
   for (const [name, value] of Object.entries(headers)) {
-    if (name.toLowerCase() === 'content-type' && isRawBody) continue;
+    if (name.toLowerCase() === 'content-type' && isFormData) continue;
     if (!RESERVED_HEADER_NAMES.has(name.toLowerCase())) {
       out[name] = value;
     }
@@ -236,7 +236,7 @@ export async function callKibanaApi<T = unknown>(
   // (reserved ones stripped) plus the engine's event-chain propagation. Authorization,
   // x-elastic-internal-origin, and kbn-version/xsrf are set by the self client itself; JSON
   // requests receive a default content type unless the caller supplied one.
-  const callerHeaders = stripReservedHeaders(params.headers, params.rawBody !== undefined);
+  const callerHeaders = stripReservedHeaders(params.headers, params.rawBody instanceof FormData);
   const hasContentType = Object.keys(callerHeaders).some(
     (name) => name.toLowerCase() === 'content-type'
   );

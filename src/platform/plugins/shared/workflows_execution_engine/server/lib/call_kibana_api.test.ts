@@ -413,6 +413,31 @@ describe('callKibanaApi', () => {
     expect(headers['x-kibana-workflow-execution-id']).toBe('run-42');
   });
 
+  it('strips Content-Type for FormData but preserves it for buffered non-FormData bodies', async () => {
+    mockSelfFetch.mockResolvedValue(mockSelfResponse(createMockResponse({ body: { ok: true } })));
+    await callKibanaApi(
+      { fakeRequest: createFakeRequest(), coreStart: createCoreStart() },
+      {
+        method: 'POST',
+        path: '/api/foo',
+        rawBody: new FormData(),
+        headers: { 'Content-Type': 'multipart/form-data; boundary=caller' },
+      }
+    );
+    expect(lastFetchHeaders()['Content-Type']).toBeUndefined();
+
+    await callKibanaApi(
+      { fakeRequest: createFakeRequest(), coreStart: createCoreStart() },
+      {
+        method: 'POST',
+        path: '/api/foo',
+        rawBody: new URLSearchParams({ value: 'one' }),
+        headers: { 'Content-Type': 'text/plain' },
+      }
+    );
+    expect((mockSelfFetch.mock.calls[1][1] as any).headers['Content-Type']).toBe('text/plain');
+  });
+
   it('defaults JSON string bodies to application/json while preserving explicit content types', async () => {
     mockSelfFetch.mockResolvedValue(mockSelfResponse(createMockResponse({ body: { ok: true } })));
     await callKibanaApi(
