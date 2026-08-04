@@ -1370,7 +1370,7 @@ class OutputService {
 
     // Kafka does not support proxies — clear any proxy_id silently (#267281)
     if (mergedType === outputType.Kafka) {
-      updateData.proxy_id = null;
+      (updateSoData as Nullable<BeatsSoBaseAttributes>).proxy_id = null;
     }
 
     if (data.type === outputType.RemoteElasticsearch) {
