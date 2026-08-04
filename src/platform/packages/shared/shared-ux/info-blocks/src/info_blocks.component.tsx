@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState, type CSSProperties, type FunctionComponent } from 'react';
+import React, { type FunctionComponent } from 'react';
 import { css } from '@emotion/react';
-import { EuiPanel, useEuiTheme, useResizeObserver } from '@elastic/eui';
+import { EuiPanel, useEuiMemoizedStyles } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
 import { InfoBlock } from './info_block.component';
 import type { InfoBlocksProps } from './types';
 
@@ -18,111 +19,165 @@ const MAX_COLUMNS = 3;
 /** Minimum cell width before the grid drops a column. */
 const MIN_BLOCK_WIDTH = 140;
 
-/** Pick 1-3 columns from measured width and visible item count. */
-export const getInfoBlocksColumnCount = (width: number, itemCount: number): number => {
-  const fitColumns = width > 0 ? Math.floor(width / MIN_BLOCK_WIDTH) : MAX_COLUMNS;
-  return Math.max(1, Math.min(MAX_COLUMNS, fitColumns, itemCount || 1));
+const CONTAINER_NAME = 'infoBlocks';
+
+const styles = ({ euiTheme }: UseEuiTheme) => {
+  const twoColumnBelow = MAX_COLUMNS * MIN_BLOCK_WIDTH; // 420
+  const oneColumnBelow = 2 * MIN_BLOCK_WIDTH; // 280
+  const color = euiTheme.border.color;
+  const thickness = euiTheme.border.width.thin;
+  // Horizontal divider insets keep the line off the rounded card corners.
+  const cornerGap = euiTheme.size.base;
+
+  return {
+    wrapper: css`
+      container-type: inline-size;
+      container-name: ${CONTAINER_NAME};
+    `,
+
+    panel: css`
+      display: grid;
+
+      /* Every cell needs position: relative so its absolute pseudo-elements stay inside it. */
+      & > * {
+        position: relative;
+        min-width: 0;
+      }
+
+      /*
+       * Pseudo-element shells — defined once, present on every cell.
+       * ::before  = vertical divider on the inline-end edge
+       * ::after   = horizontal divider on the block-end edge
+       * display and inset-inline-* are overridden per column state below.
+       */
+      & > *::before {
+        content: '';
+        position: absolute;
+        inset-inline-end: 0;
+        inset-block: ${cornerGap};
+        inline-size: ${thickness};
+        background-color: ${color};
+        display: block;
+      }
+      & > *::after {
+        content: '';
+        position: absolute;
+        inset-block-end: 0;
+        inset-inline-start: 0;
+        inset-inline-end: 0;
+        block-size: ${thickness};
+        background-color: ${color};
+        display: block;
+      }
+
+      /* ── 3-column state (default) ── */
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+
+      /* Vertical divider: hide on trailing column. */
+      & > :nth-child(3n)::before {
+        display: none;
+      }
+
+      /* Horizontal divider: hide for the ~last row (:nth-last-child is exact when the last
+         row is full; it hides one extra item per missing cell when the last row is partial). */
+      & > :nth-last-child(-n + 3)::after {
+        display: none;
+      }
+
+      /* Corner insets — first and last columns only; middle columns keep the 0/0 default. */
+      & > :nth-child(3n + 1)::after {
+        inset-inline-start: ${cornerGap};
+      }
+      & > :nth-child(3n)::after {
+        inset-inline-end: ${cornerGap};
+      }
+
+      /* ── 2-column state ── */
+      @container ${CONTAINER_NAME} (width < ${twoColumnBelow}px) {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+
+        /* :nth-child(n) matches every item at the same specificity as :nth-child(3n), so
+           the container-query rule wins by source order, resetting the 3-col hide. */
+        & > :nth-child(n)::before {
+          display: block;
+        }
+        & > :nth-child(2n)::before {
+          display: none;
+        }
+
+        & > :nth-child(n)::after {
+          display: block;
+        }
+        & > :nth-last-child(-n + 2)::after {
+          display: none;
+        }
+
+        & > :nth-child(2n + 1)::after {
+          inset-inline-start: ${cornerGap};
+          inset-inline-end: 0;
+        }
+        & > :nth-child(2n)::after {
+          inset-inline-start: 0;
+          inset-inline-end: ${cornerGap};
+        }
+      }
+
+      /* ── 1-column state ── */
+      @container ${CONTAINER_NAME} (width < ${oneColumnBelow}px) {
+        grid-template-columns: minmax(0, 1fr);
+
+        & > :nth-child(n)::before {
+          display: none;
+        }
+
+        /* Full-width divider with corner insets on both sides. */
+        & > :nth-child(n)::after {
+          display: block;
+          inset-inline-start: ${cornerGap};
+          inset-inline-end: ${cornerGap};
+        }
+        & > :nth-last-child(1)::after {
+          display: none;
+        }
+      }
+    `,
+
+    /*
+     * Applied only when hasLeadingSpacer is active: forces the 2nd item to the first
+     * column of the next row so the first item occupies a single cell with its dividers
+     * intact. Written as a separate style so it can be conditionally composed via css array.
+     */
+    leadingSpacer: css`
+      & > :nth-child(2) {
+        grid-column-start: 1;
+        grid-row-start: 2;
+      }
+
+      @container ${CONTAINER_NAME} (width < ${twoColumnBelow}px) {
+        & > :nth-child(2) {
+          grid-column-start: 1;
+          grid-row-start: 2;
+        }
+      }
+
+      /* Single column: items flow naturally; no forced placement needed. */
+      @container ${CONTAINER_NAME} (width < ${oneColumnBelow}px) {
+        & > :nth-child(2) {
+          grid-column-start: 1;
+          grid-row-start: auto;
+        }
+      }
+    `,
+
+    cellDefault: css`
+      padding: ${euiTheme.size.m};
+    `,
+
+    cellCompressed: css`
+      padding: ${euiTheme.size.s};
+    `,
+  };
 };
-
-/** Computed grid placement + divider hints for a single cell. */
-export interface InfoBlockCellLayout {
-  /** Zero-based column the cell starts in. */
-  columnStart: number;
-  /** Number of columns the cell spans (1 for a real block). */
-  span: number;
-  /** Whether the cell reaches the trailing grid edge. */
-  isLastColumn: boolean;
-  /** True when a real block exists in a later row (drives the horizontal divider). */
-  hasRowBelow: boolean;
-  /** True for a leading spacer: renders no content and no vertical divider. */
-  isSpacer: boolean;
-}
-
-/** Places items in grid order, optionally reserving a leading spacer after the first item. */
-export const getInfoBlocksLayout = (
-  itemCount: number,
-  columns: number,
-  hasLeadingSpacer = false
-): InfoBlockCellLayout[] => {
-  const cols = Math.max(1, columns);
-  const placed: Array<{ columnStart: number; span: number; row: number; isSpacer: boolean }> = [];
-  let col = 0;
-  let row = 0;
-  for (let index = 0; index < itemCount; index++) {
-    placed.push({ columnStart: col, span: 1, row, isSpacer: false });
-    col += 1;
-
-    // The spacer only ever follows the first item, and only if there's room left in its row.
-    if (index === 0 && hasLeadingSpacer && col < cols) {
-      const spacerSpan = cols - col;
-      placed.push({ columnStart: col, span: spacerSpan, row, isSpacer: true });
-      col += spacerSpan;
-    }
-
-    if (col >= cols) {
-      col = 0;
-      row += 1;
-    }
-  }
-  // Trailing spacer-only rows do not count as content.
-  const lastContentRow = placed.reduce(
-    (last, cell) => (cell.isSpacer ? last : Math.max(last, cell.row)),
-    -1
-  );
-  return placed.map((cell) => ({
-    columnStart: cell.columnStart,
-    span: cell.span,
-    isSpacer: cell.isSpacer,
-    isLastColumn: cell.columnStart + cell.span >= cols,
-    hasRowBelow: cell.row < lastContentRow,
-  }));
-};
-
-// Dividers are drawn as pseudo-elements, whose declarations can't be reached
-// through the `style` prop, so their per-cell values (color/thickness/gap and
-// each divider's show/hide + inset) are threaded in as CSS custom properties
-// set via `style`. That keeps this `css` call static (one cached class) even
-// though the values it renders vary per cell and per render.
-const spacerCellCss = css`
-  position: relative;
-
-  &::after {
-    content: '';
-    position: absolute;
-    inset-block-end: 0;
-    inset-inline-start: var(--infoBlocksHorizontalDividerInsetStart, 0);
-    inset-inline-end: var(--infoBlocksHorizontalDividerInsetEnd, 0);
-    block-size: var(--infoBlocksDividerThickness);
-    background-color: var(--infoBlocksDividerColor);
-    display: var(--infoBlocksHorizontalDividerDisplay, none);
-  }
-`;
-
-const itemCellCss = css`
-  position: relative;
-  min-width: 0;
-
-  &::before {
-    content: '';
-    position: absolute;
-    inset-inline-end: 0;
-    inset-block: var(--infoBlocksDividerCornerGap);
-    inline-size: var(--infoBlocksDividerThickness);
-    background-color: var(--infoBlocksDividerColor);
-    display: var(--infoBlocksVerticalDividerDisplay, none);
-  }
-
-  &::after {
-    content: '';
-    position: absolute;
-    inset-block-end: 0;
-    inset-inline-start: var(--infoBlocksHorizontalDividerInsetStart, 0);
-    inset-inline-end: var(--infoBlocksHorizontalDividerInsetEnd, 0);
-    block-size: var(--infoBlocksDividerThickness);
-    background-color: var(--infoBlocksDividerColor);
-    display: var(--infoBlocksHorizontalDividerDisplay, none);
-  }
-`;
 
 /** Responsive card for a small set of labeled values. */
 export const InfoBlocks: FunctionComponent<InfoBlocksProps> = ({
@@ -131,86 +186,28 @@ export const InfoBlocks: FunctionComponent<InfoBlocksProps> = ({
   compressed,
   ...rest
 }) => {
-  const { euiTheme } = useEuiTheme();
-  const [container, setContainer] = useState<HTMLDivElement | null>(null);
-  const { width } = useResizeObserver(container);
-
-  // Compressed mode drops the row-shaping spacer.
+  const memoized = useEuiMemoizedStyles(styles);
+  // Compressed mode opts out of the row-shaping leading spacer.
   const effectiveHasLeadingSpacer = Boolean(hasLeadingSpacer) && !compressed;
-  const columns = getInfoBlocksColumnCount(width, items.length);
-  const layout = getInfoBlocksLayout(items.length, columns, effectiveHasLeadingSpacer);
-  const cellPadding = compressed ? euiTheme.size.s : euiTheme.size.m;
-  const dividerColor = euiTheme.border.color;
-  const dividerThickness = euiTheme.border.width.thin;
-  // Keep divider ends off the card corners.
-  const dividerCornerGap = euiTheme.size.base;
-
-  // The spacer (if any) is synthesized into `layout`, so pair each non-spacer
-  // cell with its real item by walking both in lockstep.
-  let nextItemIndex = 0;
-  const cells = layout.map((cell) => ({
-    cell,
-    item: cell.isSpacer ? null : items[nextItemIndex++],
-  }));
-
-  const panelStyle: CSSProperties = {
-    display: 'grid',
-    gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`,
-    ['--infoBlocksDividerColor' as string]: dividerColor,
-    ['--infoBlocksDividerThickness' as string]: dividerThickness,
-    ['--infoBlocksDividerCornerGap' as string]: dividerCornerGap,
-  };
 
   return (
-    <EuiPanel
-      panelRef={setContainer}
-      paddingSize="none"
-      hasShadow={false}
-      hasBorder
-      data-test-subj={rest['data-test-subj'] ?? 'infoBlocks'}
-      style={panelStyle}
-    >
-      {cells.map(({ cell, item }, cellIndex) => {
-        if (cell.isSpacer) {
-          const spacerStyle: CSSProperties = {
-            gridColumn: `span ${cell.span}`,
-            ['--infoBlocksHorizontalDividerDisplay' as string]: cell.hasRowBelow ? 'block' : 'none',
-            ['--infoBlocksHorizontalDividerInsetStart' as string]:
-              cell.columnStart === 0 ? dividerCornerGap : '0',
-            ['--infoBlocksHorizontalDividerInsetEnd' as string]: cell.isLastColumn
-              ? dividerCornerGap
-              : '0',
-          };
-          return (
-            <div key="leading-spacer" aria-hidden="true" css={spacerCellCss} style={spacerStyle} />
-          );
-        }
-
-        // `item` is non-null here: `cells` only pairs `null` with spacer cells.
-        const isFirstColumn = cell.columnStart === 0;
-        const infoBlockItem = item!;
-        const itemStyle: CSSProperties = {
-          padding: cellPadding,
-          gridColumn: `span ${cell.span}`,
-          ['--infoBlocksVerticalDividerDisplay' as string]: !cell.isLastColumn ? 'block' : 'none',
-          ['--infoBlocksHorizontalDividerDisplay' as string]: cell.hasRowBelow ? 'block' : 'none',
-          ['--infoBlocksHorizontalDividerInsetStart' as string]: isFirstColumn
-            ? dividerCornerGap
-            : '0',
-          ['--infoBlocksHorizontalDividerInsetEnd' as string]: cell.isLastColumn
-            ? dividerCornerGap
-            : '0',
-        };
-        return (
+    <div css={memoized.wrapper}>
+      <EuiPanel
+        paddingSize="none"
+        hasShadow={false}
+        hasBorder
+        css={[memoized.panel, effectiveHasLeadingSpacer && memoized.leadingSpacer]}
+        data-test-subj={rest['data-test-subj'] ?? 'infoBlocks'}
+      >
+        {items.map((item, index) => (
           <div
-            key={infoBlockItem['data-test-subj'] ?? cellIndex}
-            css={itemCellCss}
-            style={itemStyle}
+            key={item['data-test-subj'] ?? index}
+            css={compressed ? memoized.cellCompressed : memoized.cellDefault}
           >
-            <InfoBlock {...infoBlockItem} compressed={compressed} />
+            <InfoBlock {...item} compressed={compressed} />
           </div>
-        );
-      })}
-    </EuiPanel>
+        ))}
+      </EuiPanel>
+    </div>
   );
 };
