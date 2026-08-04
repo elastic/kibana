@@ -4,6 +4,14 @@ set -euo pipefail
 
 source .buildkite/scripts/common/util.sh
 source .buildkite/scripts/common/env.sh
+
+# TEMPORARY — Citadel proxy investigation, platform-engineering-productivity#3163.
+# Remove along with citadel_proxy_experiment.sh before merge.
+# Must come after env.sh (needs BUILDKITE_AGENT_GCP_REGION) but BEFORE
+# setup_job_env.sh, which authenticates to Vault at secrets.elastic.co:8200 —
+# anything sourced after that point cannot influence the proxy for that call.
+source .buildkite/scripts/lifecycle/citadel_proxy_experiment.sh
+
 source .buildkite/scripts/common/setup_job_env.sh
 source .buildkite/scripts/common/setup_executors.sh
 
@@ -21,7 +29,3 @@ if [[ "${BUILDKITE_LABEL:-}" == *"Run Dynamic Pipeline"* || "${BUILDKITE_LABEL:-
 <summary>Agent information from gobld</summary>
 EOF
 fi
-
-# TEMPORARY — Citadel proxy investigation, platform-engineering-productivity#3163.
-# Remove along with citadel_proxy_experiment.sh before merge.
-source .buildkite/scripts/lifecycle/citadel_proxy_experiment.sh

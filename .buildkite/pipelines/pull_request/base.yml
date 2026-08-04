@@ -7,8 +7,8 @@ env:
   # (CA installed, env set, same 394-job matrix). Run once with this line, once
   # without, on the same commit and labels: failures appearing in BOTH are
   # Kibana's baseline flake, failures only in the proxied run are ours.
-  # Comment out to go back to a proxied run.
-  CITADEL_EXP_UNPROXY_JOB: 'true'
+  # Uncomment for a control run; leave commented for a proxied run.
+  # CITADEL_EXP_UNPROXY_JOB: 'true'
 
 steps:
   - command: .buildkite/scripts/steps/build_kibana.sh

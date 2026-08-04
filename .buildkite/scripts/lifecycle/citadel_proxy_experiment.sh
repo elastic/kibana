@@ -121,8 +121,20 @@ _citadel_experiment() {
   #   Static hostname: elastic-kibana-184716 is the GCP project id and
   #   us-central1 is where the Cloud Function is deployed. Agent region and build
   #   vary in the URL path, not the host, so one entry covers every region.
+  #
+  # secrets.elastic.co
+  #   Vault. `setup_job_env.sh` does an approle login against
+  #   secrets.elastic.co:8200 when FTR_EIS_CCM is set. Squid permits only ports
+  #   80 and 443 (Safe_ports / SSL_ports in config/squid.conf), so the CONNECT is
+  #   denied and the login gets a Squid error page back as a 403 — killing
+  #   "Discover EIS Models" (exit 2) and cascading to "Agent Builder Scout Smoke
+  #   Tests" as waiting_failed. Seen in 480322 and 480427.
+  #   Every other job reaches Vault at vault-ci-prod.elastic.dev on 443, which is
+  #   why only the EIS step breaks. Internal auth infrastructure: no audit value,
+  #   maximum breakage risk.
   local confirmed=(
     us-central1-elastic-kibana-184716.cloudfunctions.net
+    secrets.elastic.co
   )
   local bypass_host
   for bypass_host in "${confirmed[@]}"; do
