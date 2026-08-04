@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { test } from '@kbn/scout-oblt';
+export { test } from '@kbn/scout';

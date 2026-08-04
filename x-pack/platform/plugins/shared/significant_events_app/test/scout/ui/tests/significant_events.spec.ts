@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { tags } from '@kbn/scout-oblt';
+import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '@kbn/significant-events-plugin/common';
