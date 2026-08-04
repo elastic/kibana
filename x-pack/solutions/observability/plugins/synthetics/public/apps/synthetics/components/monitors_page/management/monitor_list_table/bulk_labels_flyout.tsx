@@ -16,6 +16,7 @@ import {
   EuiFlexItem,
   EuiFormRow,
   EuiSpacer,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
@@ -230,13 +231,15 @@ export const BulkLabelsFlyout = ({
                     />
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    <EuiButtonIcon
-                      data-test-subj={`syntheticsBulkLabelsRemoveRow-${index}`}
-                      iconType="trash"
-                      color="danger"
-                      aria-label={REMOVE_ROW_LABEL}
-                      onClick={() => removePairRow(index)}
-                    />
+                    <EuiToolTip content={REMOVE_ROW_LABEL} disableScreenReaderOutput>
+                      <EuiButtonIcon
+                        data-test-subj={`syntheticsBulkLabelsRemoveRow-${index}`}
+                        iconType="trash"
+                        color="danger"
+                        aria-label={REMOVE_ROW_LABEL}
+                        onClick={() => removePairRow(index)}
+                      />
+                    </EuiToolTip>
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </React.Fragment>
