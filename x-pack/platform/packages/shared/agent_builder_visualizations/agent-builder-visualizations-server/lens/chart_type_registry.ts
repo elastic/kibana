@@ -106,6 +106,9 @@ export const chartTypeRegistry: ChartTypeRegistry = {
         rules: [
           'Prefer right-aligned metric values. Use left/center only when the user asks.',
         ],
+        prettifyRules: [
+          'Omit `color` on primary metrics unless you are intentionally setting a custom color — `{ "type": "auto" }` is the default and has no effect when set explicitly.',
+        ],
         coloringRules: [
           'Metric placement: set `apply_color_to: "value"` only together with a color config; do not color the background unless the user asks. When not coloring, omit both `color` and `apply_color_to` — `apply_color_to` without a color makes Lens tint the value with a default green.',
           'For clearly bounded metrics, use explicit 3-band `steps` by default. Examples: percent, ratio, CPU/memory/disk utilization, error rate, success rate, or SLO compliance.',
