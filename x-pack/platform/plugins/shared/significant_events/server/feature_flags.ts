@@ -31,7 +31,7 @@ import {
 } from '@kbn/significant-events-schema';
 import type { SignificantEventsPluginStartDependencies } from './types';
 import { isObservabilityDeployment } from './routes/utils/assert_significant_events_access';
-import { STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE } from '../common';
+import { SIGNIFICANT_EVENTS_TIERED_FEATURE } from '../common';
 import {
   DEFAULT_EXTRACTION_INTERVAL_HOURS,
   DEFAULT_SIG_EVENTS_SCHEDULED_DETECTION_BUCKET_INTERVAL_MINUTES,
@@ -85,9 +85,9 @@ export function registerFeatureFlags(
   }
 
   core.pricing
-    .isFeatureAvailable(STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE.id)
-    .then((isTierAvailable) => {
-      if (isTierAvailable) {
+    .isFeatureAvailable(SIGNIFICANT_EVENTS_TIERED_FEATURE.id)
+    .then((isSignificantEventsAvailable) => {
+      if (isSignificantEventsAvailable) {
         core.uiSettings.register({
           [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_INDEX_PATTERNS]: {
             category: ['observability'],
