@@ -80,7 +80,7 @@ export interface ConsoleDataState {
     history: InputHistoryItem[];
 
     /** Show the input area popover */
-    showPopover: 'input-history' | undefined; // Other values will exist in the future
+    showPopover: 'input-history' | 'command-selector' | undefined; // Other values will exist in the future
 
     /** The state of the input area. Set to `error` if wanting to show it as being in error state */
     visibleState: 'error' | undefined;

@@ -183,10 +183,19 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
     ({ value, selection, eventDetails }) => {
       const key = eventDetails.code;
 
-      // UP arrow key
+      // UP arrow key - show input history popup
       if (key === 'ArrowUp') {
         dispatch({ type: 'removeFocusFromKeyCapture' });
         dispatch({ type: 'updateInputPopoverState', payload: { show: 'input-history' } });
+
+        return;
+      }
+
+      // ALT + SPACE - show command selctor
+      if (key === 'Space' && eventDetails.altKey) {
+        eventDetails.preventDefault();
+        dispatch({ type: 'removeFocusFromKeyCapture' });
+        dispatch({ type: 'updateInputPopoverState', payload: { show: 'command-selector' } });
 
         return;
       }

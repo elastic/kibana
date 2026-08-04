@@ -14,6 +14,7 @@ import { CommandInputHistory } from './command_input_history';
 import { useConsoleStateDispatch } from '../../../hooks/state_selectors/use_console_state_dispatch';
 import { useWithInputShowPopover } from '../../../hooks/state_selectors/use_with_input_show_popover';
 import { useDataTestSubj } from '../../../hooks/state_selectors/use_data_test_subj';
+import { CommandSelector } from './command_selector';
 
 export interface InputAreaPopoverProps {
   /** Should be the Console's input area */
@@ -81,6 +82,8 @@ export const InputAreaPopover = memo<InputAreaPopoverProps>(({ children, width =
       {show && (
         <EuiFocusTrap clickOutsideDisables={true}>
           {show === 'input-history' && <CommandInputHistory initialFocusId={initialFocusId} />}
+
+          {show === 'command-selector' && <CommandSelector initialFocusId={initialFocusId} />}
         </EuiFocusTrap>
       )}
     </EuiPopover>
