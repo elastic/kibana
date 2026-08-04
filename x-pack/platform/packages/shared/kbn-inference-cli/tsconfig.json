@@ -26,5 +26,6 @@
     "@kbn/inference-tracing",
     "@kbn/logging",
     "@kbn/es",
+    "@kbn/cli",
   ]
 }

@@ -1,5 +1,5 @@
 {
-  "sha1": "7157a8845f3003ec0c1c0ced1e76de510453d92d",
+  "sha1": "0af5251b23f7a3661dd79694cac0e78c4061c89b",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -33,7 +33,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/alert_details_page.spec.ts",
-        "line": 66,
+        "line": 92,
         "column": 9
       }
     },
@@ -49,7 +49,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/alert_details_page.spec.ts",
-        "line": 73,
+        "line": 99,
         "column": 9
       }
     },
@@ -65,7 +65,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/alert_details_page.spec.ts",
-        "line": 84,
+        "line": 110,
         "column": 9
       }
     },
@@ -81,7 +81,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/alert_details_page.spec.ts",
-        "line": 91,
+        "line": 117,
         "column": 9
       }
     },
@@ -97,7 +97,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/alert_details_page.spec.ts",
-        "line": 98,
+        "line": 124,
         "column": 9
       }
     },
@@ -113,7 +113,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/alert_details_page.spec.ts",
-        "line": 109,
+        "line": 135,
         "column": 9
       }
     },
@@ -129,7 +129,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/alert_details_page.spec.ts",
-        "line": 120,
+        "line": 146,
         "column": 9
       }
     },
@@ -145,7 +145,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/alert_details_page.spec.ts",
-        "line": 131,
+        "line": 157,
         "column": 9
       }
     },
@@ -161,7 +161,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/alert_details_page.spec.ts",
-        "line": 142,
+        "line": 168,
         "column": 9
       }
     },

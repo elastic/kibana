@@ -56,10 +56,12 @@ const getIlmPolicies = async ({
 };
 
 const mapIlmPolicyToFlyout = (policy: PolicyFromES): IlmPolicyForFlyout => {
+  const isManaged = policy.policy._meta?.managed === true;
   return {
     name: policy.name,
     phases: policy.policy.phases,
     serializedPolicy: policy.policy,
+    ...(isManaged ? { isManaged: true } : {}),
   };
 };
 

@@ -69,6 +69,7 @@ export const RETENTION_TEST_IDS = {
 
   // ILM policy selector (inside the lifecycle method flyout when ILM is selected)
   ilmSearchInput: 'retentionSelectorSearchInput',
+  ilmManagedFilterToggle: 'retentionSelectorIncludeManagedFilter',
   ilmPolicyRow: (policyName: string) =>
     `retentionSelectableRow-${policyName.replace(/[^a-zA-Z0-9]+/g, '_')}`,
 
@@ -242,13 +243,26 @@ async function selectIlmMethod(page: ScoutPage): Promise<void> {
 }
 
 /**
- * Selects an ILM policy by name in the ILM retention selector
- * (the lifecycle method flyout must already have ILM selected).
+ * Selects an ILM policy by name in the ILM retention selector.
+ * Pass `{ managed: true }` for managed/system policies — they are
+ * hidden behind a filter toggle by default. The helper then waits for the toggle to appear before
+ * clicking it, so the caller's intent is explicit and the wait is reliable.
  */
-export async function selectIlmPolicy(page: ScoutPage, policyName: string): Promise<void> {
+export async function selectIlmPolicy(
+  page: ScoutPage,
+  policyName: string,
+  { managed = false }: { managed?: boolean } = {}
+): Promise<void> {
   await selectIlmMethod(page);
   const search = page.getByTestId(RETENTION_TEST_IDS.ilmSearchInput);
   await search.waitFor({ state: 'visible' });
+
+  if (managed) {
+    const toggle = page.getByTestId(RETENTION_TEST_IDS.ilmManagedFilterToggle);
+    await toggle.waitFor({ state: 'visible' });
+    await toggle.click();
+  }
+
   await search.fill(policyName);
   await page.getByTestId(RETENTION_TEST_IDS.ilmPolicyRow(policyName)).click();
 }
