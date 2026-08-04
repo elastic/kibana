@@ -11,8 +11,7 @@ import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { ActiveConversation } from '@kbn/agent-builder-browser/events';
 import { ChatEventType, type ChatEvent } from '@kbn/agent-builder-common';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
-import type { AlertEpisode } from '@kbn/alerting-v2-common-queries';
-import { ALERT_EPISODE_STATUS, EPISODE_ATTACHMENT_TYPE } from '@kbn/alerting-v2-schemas';
+import { ALERT_EPISODE_STATUS, EPISODE_ATTACHMENT_TYPE, type AlertEpisode } from '@kbn/alerting-v2-schemas';
 import { AGENTBUILDER_FEATURE_ID } from '@kbn/agent-builder-plugin/public';
 import { FocusedEpisodeService } from '../services/focused_episode_service';
 import { registerEpisodeAutoAttach, type IdGenerator } from './episode_auto_attach';
@@ -128,7 +127,11 @@ describe('registerEpisodeAutoAttach', () => {
   });
 
   it('attaches the focused episode to a new conversation draft when chat is open', () => {
-    const episode = createEpisode();
+    const episode = createEpisode({
+      last_assignee_uid: null,
+      episode_data: null,
+      severity: null,
+    });
 
     focusedEpisodeService.setFocusedEpisode(episode);
     currentAppId$.next(AGENTBUILDER_FEATURE_ID);
@@ -139,7 +142,12 @@ describe('registerEpisodeAutoAttach', () => {
       id: 'draft-id-1',
       type: EPISODE_ATTACHMENT_TYPE,
       origin: 'ep-1',
-      data: expect.objectContaining({ 'episode.id': 'ep-1' }),
+      data: expect.objectContaining({
+        'episode.id': 'ep-1',
+        last_assignee_uid: undefined,
+        episode_data: undefined,
+        severity: undefined,
+      }),
     });
   });
 

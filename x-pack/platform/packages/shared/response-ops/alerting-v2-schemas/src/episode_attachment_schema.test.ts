@@ -45,19 +45,14 @@ describe('episodeAttachmentDataSchema', () => {
     expect(result.success).toBe(true);
   });
 
-  it('normalizes nullish nullable fields to undefined', () => {
+  it('rejects null on optional nullable source fields', () => {
     const result = episodeAttachmentDataSchema.safeParse({
       ...baseEpisode,
       last_assignee_uid: null,
       episode_data: null,
       severity: null,
     });
-    expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data.last_assignee_uid).toBeUndefined();
-      expect(result.data.episode_data).toBeUndefined();
-      expect(result.data.severity).toBeUndefined();
-    }
+    expect(result.success).toBe(false);
   });
 
   it('rejects unknown keys', () => {

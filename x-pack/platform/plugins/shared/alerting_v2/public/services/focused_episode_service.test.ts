@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { AlertEpisode } from '@kbn/alerting-v2-common-queries';
-import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
+import { ALERT_EPISODE_STATUS, type AlertEpisode } from '@kbn/alerting-v2-schemas';
 import { FocusedEpisodeService } from './focused_episode_service';
 
 const createEpisode = (episodeId: string): AlertEpisode => ({

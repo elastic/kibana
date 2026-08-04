@@ -15,6 +15,7 @@ import type {
 import {
   ALERT_EPISODE_STATUS,
   EPISODE_ATTACHMENT_TYPE,
+  type AlertEpisode,
   type EpisodeAttachmentData,
 } from '@kbn/alerting-v2-schemas';
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -107,6 +108,30 @@ describe('createEpisodeAttachmentType', () => {
 
       expect(get).toHaveBeenCalledWith('ep-1');
       expect(result).toEqual(expect.objectContaining({ 'episode.id': 'ep-1' }));
+    });
+
+    it('normalizes null nullable fields via alertEpisodeToEpisodeAttachment', async () => {
+      const episodeWithNulls: AlertEpisode = {
+        ...baseEpisodeData,
+        last_assignee_uid: null,
+        episode_data: null,
+        severity: null,
+      };
+      get.mockResolvedValueOnce(episodeWithNulls);
+
+      const result = await definition.resolve!(
+        'ep-1',
+        agentBuilderMocks.attachments.createResolveContextMock()
+      );
+
+      expect(result).toEqual(
+        expect.objectContaining({
+          'episode.id': 'ep-1',
+          last_assignee_uid: undefined,
+          episode_data: undefined,
+          severity: undefined,
+        })
+      );
     });
 
     it('returns undefined when the episode does not exist', async () => {

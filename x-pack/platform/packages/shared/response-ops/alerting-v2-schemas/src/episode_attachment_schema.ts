@@ -19,19 +19,7 @@ const episodeStatusSchema = z.enum([
   ALERT_EPISODE_STATUS.PENDING,
   ALERT_EPISODE_STATUS.RECOVERING,
 ]);
-
-/** Accept nullish and normalize null → undefined so the inferred type matches AlertEpisode optionality. */
-const nullishToUndefined = <T extends z.ZodType>(schema: T) =>
-  schema.nullish().transform((value) => value ?? undefined);
-
-/**
- * Data stored inside an episode attachment.
- *
- * Mirrors the AlertEpisode row (dotted keys) so the episode details page can
- * hand over the ES|QL row it already has with no flatten/unflatten mapper.
- * The ambient Agent Builder path sends this by value; `resolve` is the
- * by-reference fallback for tools / API callers.
- */
+ 
 export const episodeAttachmentDataSchema = z
   .object({
     '@timestamp': z.iso.datetime(),
@@ -44,12 +32,12 @@ export const episodeAttachmentDataSchema = z
     duration: z.number(),
     triggered_at: z.iso.datetime().optional(),
     last_ack_action: z.enum(['ack', 'unack']).optional(),
-    last_assignee_uid: nullishToUndefined(z.string().min(1).max(ID_MAX_LENGTH)),
+    last_assignee_uid: z.string().min(1).max(ID_MAX_LENGTH).optional(),
     last_snooze_action: z.enum(['snooze', 'unsnooze']).optional(),
     snooze_expiry: z.iso.datetime().optional(),
     last_tags: tagsSchema.optional(),
-    episode_data: nullishToUndefined(z.string().max(MAX_EPISODE_DATA_LENGTH)),
-    severity: nullishToUndefined(z.string().min(1).max(ID_MAX_LENGTH)),
+    episode_data: z.string().max(MAX_EPISODE_DATA_LENGTH).optional(),
+    severity: z.string().min(1).max(ID_MAX_LENGTH).optional(),
   })
   .strict();
 

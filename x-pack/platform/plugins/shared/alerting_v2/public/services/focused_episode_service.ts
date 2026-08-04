@@ -7,7 +7,7 @@
 
 import { BehaviorSubject } from 'rxjs';
 import { injectable } from 'inversify';
-import type { AlertEpisode } from '@kbn/alerting-v2-common-queries';
+import type { AlertEpisode } from '@kbn/alerting-v2-schemas';
 
 @injectable()
 export class FocusedEpisodeService {

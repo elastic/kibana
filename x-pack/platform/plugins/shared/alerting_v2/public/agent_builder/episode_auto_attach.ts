@@ -12,9 +12,13 @@ import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { ActiveConversation } from '@kbn/agent-builder-browser/events';
 import { isRoundCompleteEvent } from '@kbn/agent-builder-common';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
-import type { AlertEpisode } from '@kbn/alerting-v2-common-queries';
-import { EPISODE_ATTACHMENT_TYPE, type EpisodeAttachmentData } from '@kbn/alerting-v2-schemas';
+import {
+  EPISODE_ATTACHMENT_TYPE,
+  type AlertEpisode,
+  type EpisodeAttachmentData,
+} from '@kbn/alerting-v2-schemas';
 import { AGENTBUILDER_FEATURE_ID } from '@kbn/agent-builder-plugin/public';
+import { alertEpisodeToEpisodeAttachment } from '../../common/agent_builder/episode_mappers';
 import type { FocusedEpisodeService } from '../services/focused_episode_service';
 
 export type PendingEpisodeAttachment = AttachmentInput<
@@ -41,18 +45,11 @@ export const createIdGenerator = (): IdGenerator => {
   };
 };
 
-const toEpisodeAttachmentData = (episode: AlertEpisode): EpisodeAttachmentData => ({
-  ...episode,
-  last_assignee_uid: episode.last_assignee_uid ?? undefined,
-  episode_data: episode.episode_data ?? undefined,
-  severity: episode.severity ?? undefined,
-});
-
 const toAttachment = (episode: AlertEpisode, id: string): PendingEpisodeAttachment => ({
   id,
   type: EPISODE_ATTACHMENT_TYPE,
   origin: episode['episode.id'],
-  data: toEpisodeAttachmentData(episode),
+  data: alertEpisodeToEpisodeAttachment(episode),
 });
 
 const isNewConversation = (conversation: ActiveConversation | null): boolean => {

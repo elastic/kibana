@@ -17,6 +17,7 @@ import {
   type EpisodeAttachmentData,
 } from '@kbn/alerting-v2-schemas';
 import type { Logger } from '@kbn/core/server';
+import { alertEpisodeToEpisodeAttachment } from '../../../common/agent_builder/episode_mappers';
 import type { EpisodesClient } from '../../lib/episodes_client';
 
 interface CreateEpisodeAttachmentTypeOptions {
@@ -87,7 +88,7 @@ export const createEpisodeAttachmentType = ({
       if (!episode) {
         return undefined;
       }
-      return episodeAttachmentDataSchema.parse(episode);
+      return episodeAttachmentDataSchema.parse(alertEpisodeToEpisodeAttachment(episode));
     } catch (error) {
       logger.warn(`Failed to resolve episode attachment for origin "${origin}": ${error}`);
       return undefined;
