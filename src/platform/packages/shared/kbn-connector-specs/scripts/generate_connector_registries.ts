@@ -555,7 +555,9 @@ export function validateConnectorToc(content: string): string[] {
     const file = trimmed.replace(/^- file:\s*/, '');
 
     if (seenFiles.has(file)) {
-      problems.push(`"${file}" is listed twice in the connectors TOC section. Remove the duplicate.`);
+      problems.push(
+        `"${file}" is listed twice in the connectors TOC section. Remove the duplicate.`
+      );
     }
     seenFiles.add(file);
 
@@ -621,33 +623,33 @@ export function computeSvgPathBounds(pathData: string, into?: SvgBounds): SvgBou
     }
     // A number token: repeat the current command (SVG allows implicit repetition, and an
     // implicit lineto after a moveto).
-    const relative = command === command.toLowerCase();
+    const isRelative = command === command.toLowerCase();
     switch (command.toUpperCase()) {
       case 'M':
-        x = relative ? x + next() : next();
-        y = relative ? y + next() : next();
+        x = isRelative ? x + next() : next();
+        y = isRelative ? y + next() : next();
         subpathStartX = x;
         subpathStartY = y;
         record(x, y);
-        command = relative ? 'l' : 'L';
+        command = isRelative ? 'l' : 'L';
         break;
       case 'L':
-        x = relative ? x + next() : next();
-        y = relative ? y + next() : next();
+        x = isRelative ? x + next() : next();
+        y = isRelative ? y + next() : next();
         record(x, y);
         break;
       case 'H':
-        x = relative ? x + next() : next();
+        x = isRelative ? x + next() : next();
         record(x, y);
         break;
       case 'V':
-        y = relative ? y + next() : next();
+        y = isRelative ? y + next() : next();
         record(x, y);
         break;
       case 'C':
         for (let i = 0; i < 3; i++) {
-          const px = relative ? x + next() : next();
-          const py = relative ? y + next() : next();
+          const px = isRelative ? x + next() : next();
+          const py = isRelative ? y + next() : next();
           record(px, py);
           if (i === 2) {
             x = px;
@@ -658,8 +660,8 @@ export function computeSvgPathBounds(pathData: string, into?: SvgBounds): SvgBou
       case 'S':
       case 'Q':
         for (let i = 0; i < 2; i++) {
-          const px = relative ? x + next() : next();
-          const py = relative ? y + next() : next();
+          const px = isRelative ? x + next() : next();
+          const py = isRelative ? y + next() : next();
           record(px, py);
           if (i === 1) {
             x = px;
@@ -668,8 +670,8 @@ export function computeSvgPathBounds(pathData: string, into?: SvgBounds): SvgBou
         }
         break;
       case 'T':
-        x = relative ? x + next() : next();
-        y = relative ? y + next() : next();
+        x = isRelative ? x + next() : next();
+        y = isRelative ? y + next() : next();
         record(x, y);
         break;
       case 'A': {
@@ -678,8 +680,8 @@ export function computeSvgPathBounds(pathData: string, into?: SvgBounds): SvgBou
         next(); // x-axis-rotation
         next(); // large-arc-flag
         next(); // sweep-flag
-        x = relative ? x + next() : next();
-        y = relative ? y + next() : next();
+        x = isRelative ? x + next() : next();
+        y = isRelative ? y + next() : next();
         record(x, y);
         break;
       }
@@ -716,7 +718,10 @@ export function validateConnectorIconSource(source: string, label: string): stri
   if (!viewBoxMatch) return [];
   if (/\btransform=/.test(source)) return [];
 
-  const viewBoxParts = viewBoxMatch[1].trim().split(/[\s,]+/).map(Number);
+  const viewBoxParts = viewBoxMatch[1]
+    .trim()
+    .split(/[\s,]+/)
+    .map(Number);
   if (viewBoxParts.length !== 4 || viewBoxParts.some((n) => !Number.isFinite(n))) {
     return [`${label}: unparseable viewBox "${viewBoxMatch[1]}".`];
   }
@@ -732,10 +737,8 @@ export function validateConnectorIconSource(source: string, label: string): stri
   const geometryHeight = geometry.maxY - geometry.minY;
   if (geometryWidth <= 0 || geometryHeight <= 0) return [];
 
-  const overlapWidth =
-    Math.min(geometry.maxX, vbX + vbWidth) - Math.max(geometry.minX, vbX);
-  const overlapHeight =
-    Math.min(geometry.maxY, vbY + vbHeight) - Math.max(geometry.minY, vbY);
+  const overlapWidth = Math.min(geometry.maxX, vbX + vbWidth) - Math.max(geometry.minX, vbX);
+  const overlapHeight = Math.min(geometry.maxY, vbY + vbHeight) - Math.max(geometry.minY, vbY);
   const overlapArea = Math.max(overlapWidth, 0) * Math.max(overlapHeight, 0);
   const coverage = overlapArea / (geometryWidth * geometryHeight);
 

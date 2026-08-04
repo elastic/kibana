@@ -61,6 +61,8 @@ const BOUNDED_STRING_FORMATS = new Set([
 interface ZodDefLike {
   type?: string;
   format?: string;
+  /** On a check's own def (e.g. `max_length`, `string_format`, `custom`). */
+  check?: string;
   checks?: unknown[];
   innerType?: unknown;
   element?: unknown;
@@ -86,7 +88,7 @@ function getDef(schema: unknown): ZodDefLike | null {
 function getCheckKinds(def: ZodDefLike): Array<{ check?: string; format?: string }> {
   return (def.checks ?? []).map((check) => {
     const checkDef = getDef(check);
-    return { check: checkDef?.check as string | undefined, format: checkDef?.format };
+    return { check: checkDef?.check, format: checkDef?.format };
   });
 }
 

@@ -445,7 +445,8 @@ describe('generate_connector_registries', () => {
 
     it('accumulates across multiple paths when passed a previous result', () => {
       const first = computeSvgPathBounds('M0 0 L10 10');
-      const combined = computeSvgPathBounds('M50 50 L60 60', first!);
+      expect(first).not.toBeNull();
+      const combined = computeSvgPathBounds('M50 50 L60 60', first ?? undefined);
       expect(combined).toEqual({ minX: 0, minY: 0, maxX: 60, maxY: 60 });
     });
 
@@ -459,9 +460,9 @@ describe('generate_connector_registries', () => {
       `<svg viewBox="${viewBox}" ${extra}><path d="${d}" /></svg>`;
 
     it('passes an icon whose geometry fills its viewBox', () => {
-      expect(validateConnectorIconSource(icon('0 0 32 32', 'M2 2 L30 2 L30 30 L2 30 Z'), 'x')).toEqual(
-        []
-      );
+      expect(
+        validateConnectorIconSource(icon('0 0 32 32', 'M2 2 L30 2 L30 30 L2 30 Z'), 'x')
+      ).toEqual([]);
     });
 
     it('flags a viewBox that clips most of the geometry (the Dynatrace failure mode)', () => {
