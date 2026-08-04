@@ -22,10 +22,11 @@ import { useResolvedFields } from '../field_library/hooks/use_resolved_fields';
 import { useGetFieldDefinitions } from '../field_library/hooks/use_get_field_definitions';
 import {
   buildExtendedFieldsDefaults,
+  collectNormalizedRefNames,
+  normalizeFieldDefinitionName,
   parseFieldDefinitionsToInlineFields,
   getFieldSnakeKey,
 } from '../../../common/utils';
-import { isRefField } from '../../../common/types/domain/template/fields';
 import { TemplateFieldsValidationContext } from './template_fields_validation_context';
 import { CUSTOM_FIELDS } from '../case_form_fields/translations';
 
@@ -115,12 +116,13 @@ export const CreateCaseTemplateFields: React.FC<CreateCaseTemplateFieldsProps> =
   // Fields referenced by the template via $ref are owned by the template section —
   // exclude them from the global section to avoid duplicate inputs.
   const templateRefNames = useMemo<ReadonlySet<string>>(
-    () => new Set((template?.definition?.fields ?? []).filter(isRefField).map((f) => f.$ref)),
+    () => collectNormalizedRefNames(template?.definition?.fields),
     [template]
   );
 
   const visibleGlobalInlineFields = useMemo(
-    () => globalInlineFields.filter((f) => !templateRefNames.has(f.name)),
+    () =>
+      globalInlineFields.filter((f) => !templateRefNames.has(normalizeFieldDefinitionName(f.name))),
     [globalInlineFields, templateRefNames]
   );
 

@@ -33,6 +33,22 @@ export const getFieldCamelKey = (name: string, type: string): string =>
   camelCase(getFieldSnakeKey(name, type));
 
 /**
+ * Collects the normalized (case-insensitive) `$ref` names from a template's fields array.
+ *
+ * Used to exclude a global field from the global-fields section when the active template
+ * already renders it via `$ref` — normalized so a ref differing only in case from the field
+ * definition's name (e.g. after a case-only rename) still excludes it, matching the
+ * case-insensitive resolution in {@link resolveTemplateFields} / `useResolvedFields`.
+ */
+export const collectNormalizedRefNames = (
+  fields: readonly Field[] | undefined
+): ReadonlySet<string> =>
+  (fields ?? []).reduce((refNames, field) => {
+    if (isRefField(field)) refNames.add(normalizeFieldDefinitionName(field.$ref));
+    return refNames;
+  }, new Set<string>());
+
+/**
  * Parses an array of field definitions into resolved inline fields, skipping any
  * definitions that are malformed or describe reference (non-inline) fields.
  */

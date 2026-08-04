@@ -10,6 +10,7 @@ import {
   applyRefFieldOverride,
   buildExtendedFieldsBackfill,
   buildExtendedFieldsDefaults,
+  collectNormalizedRefNames,
   getFieldCamelKey,
   getFieldSnakeKey,
   getV2FieldType,
@@ -67,6 +68,35 @@ describe('template field key utils', () => {
 
     it('leaves an already-normalized name unchanged', () => {
       expect(normalizeFieldDefinitionName('my_field')).toBe('my_field');
+    });
+  });
+
+  describe('collectNormalizedRefNames', () => {
+    it('returns an empty set for undefined fields', () => {
+      expect(collectNormalizedRefNames(undefined)).toEqual(new Set());
+    });
+
+    it('returns an empty set when there are no ref fields', () => {
+      const fields: Field[] = [{ name: 'hostname', control: 'INPUT_TEXT', type: 'keyword' }];
+      expect(collectNormalizedRefNames(fields)).toEqual(new Set());
+    });
+
+    it('collects normalized (trimmed, lowercased) $ref names', () => {
+      const fields: Field[] = [{ $ref: '  SLA_Tier ' }, { $ref: 'cf_text' }];
+      expect(collectNormalizedRefNames(fields)).toEqual(new Set(['sla_tier', 'cf_text']));
+    });
+
+    it('ignores inline fields and only collects ref fields', () => {
+      const fields: Field[] = [
+        { $ref: 'sla_tier' },
+        { name: 'hostname', control: 'INPUT_TEXT', type: 'keyword' },
+      ];
+      expect(collectNormalizedRefNames(fields)).toEqual(new Set(['sla_tier']));
+    });
+
+    it('deduplicates refs that only differ in case', () => {
+      const fields: Field[] = [{ $ref: 'SLA_Tier' }, { $ref: 'sla_tier' }];
+      expect(collectNormalizedRefNames(fields)).toEqual(new Set(['sla_tier']));
     });
   });
 
