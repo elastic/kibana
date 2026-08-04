@@ -38,7 +38,7 @@ export const allowedExperimentalValues = Object.freeze({
    * Fleet config fans the pack-level schedule onto each query that doesn't have
    * its own override. Requires osquerybeat with RRULE support.
    */
-  rruleScheduling: false,
+  rruleScheduling: true,
   /**
    * Enables osquery cross-project search (CPS) read support on serverless. When enabled
    * (and the platform `cps.cpsEnabled` flag is on), osquery result and action-response

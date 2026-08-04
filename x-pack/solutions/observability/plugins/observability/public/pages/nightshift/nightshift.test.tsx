@@ -30,7 +30,11 @@ const mockUseKibana = useKibana as jest.Mock;
 const mockUsePluginContext = usePluginContext as jest.Mock;
 
 const getBooleanValue = jest.fn();
-const getUrlForApp = jest.fn((appId: string, { path }: { path: string }) => `/app/${appId}${path}`);
+/** Mirrors the registered `appRoute` for significantEvents (`/app/significant_events`). */
+const getUrlForApp = jest.fn((appId: string, { path }: { path: string }) => {
+  const base = appId === 'significantEvents' ? '/app/significant_events' : `/app/${appId}`;
+  return `${base}${path.startsWith('/') ? path : `/${path}`}`;
+});
 const navigateToUrl = jest.fn();
 
 function renderPage() {
@@ -82,7 +86,7 @@ describe('NightshiftPage', () => {
     await openAppMenuOverflow();
 
     const settingsLink = await screen.findByTestId('nightshiftSettingsLink');
-    expect(settingsLink).toHaveAttribute('href', '/app/streams/_discovery/settings');
+    expect(settingsLink).toHaveAttribute('href', '/app/significant_events/settings');
 
     let trackedClick: { action: string | null; element: string | null } | undefined;
     const captureTrackedClick = (event: MouseEvent) => {
@@ -105,6 +109,6 @@ describe('NightshiftPage', () => {
         element: 'nightshiftPageHeader',
       })
     );
-    expect(navigateToUrl).toHaveBeenCalledWith('/app/streams/_discovery/settings');
+    expect(navigateToUrl).toHaveBeenCalledWith('/app/significant_events/settings');
   });
 });
