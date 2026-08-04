@@ -105,7 +105,7 @@ apiTest.describe(
 
         const [responseA, responseB] = await Promise.all([requestA, requestB]);
         // A 409 here means the losing writer exhausted its conflict retries rather
-        // than the test being wrong — see OCC_RETRY_DELAY_MS in the conversation client.
+        // than the test being wrong
         expect(responseA).toHaveStatusCode(200);
         expect(responseB).toHaveStatusCode(200);
 
