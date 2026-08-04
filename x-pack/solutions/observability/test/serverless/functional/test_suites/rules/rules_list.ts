@@ -484,7 +484,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       expect(searchResultsAfterDelete).toHaveLength(0);
     });
 
-    it.skip('should filter rules by the status', async () => {
+    it('should filter rules by the status', async () => {
       const rule1 = await alertingApi.helpers.createAnomalyRule({
         roleAuthc,
       });
@@ -534,7 +534,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       await assertRulesLength(2);
     });
 
-    it.skip('should display total rules by status and error banner only when exists rules with status error', async () => {
+    it('should display total rules by status and error banner only when exists rules with status error', async () => {
       const rule1 = await alertingApi.helpers.createAnomalyRule({
         roleAuthc,
       });
@@ -593,7 +593,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
     });
 
-    it.skip('Expand error in rules table when there is rule with an error associated', async () => {
+    it('Expand error in rules table when there is rule with an error associated', async () => {
       const rule1 = await alertingApi.helpers.createAnomalyRule({
         roleAuthc,
         name: 'a',
