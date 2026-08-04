@@ -3,12 +3,15 @@ env:
   # TEMPORARY — routes this PR's egress through the Citadel proxy.
   # platform-engineering-productivity#3163. Revert before merge.
   USE_CITADEL_PROXY: 'true'
-  # CONTROL RUN — neutralises the proxy while leaving everything else identical
-  # (CA installed, env set, same 394-job matrix). Run once with this line, once
-  # without, on the same commit and labels: failures appearing in BOTH are
-  # Kibana's baseline flake, failures only in the proxied run are ours.
-  # Uncomment for a control run; leave commented for a proxied run.
-  # CITADEL_EXP_UNPROXY_JOB: 'true'
+  # CONTROL RUN. Neutralises the proxy, everything else identical (CA installed,
+  # NODE_EXTRA_CA_CERTS set, same matrix). Compare against the proxied run on THIS
+  # commit: failures in both are Kibana's own flake, failures only in the proxied
+  # run are ours.
+  #
+  # This is the remaining open question for #3163. Access-log data shows the proxy
+  # denies nothing and delays nothing for the residual failures — so if they also
+  # fail here, they were never ours. Comment out for a proxied run.
+  CITADEL_EXP_UNPROXY_JOB: 'true'
 
 steps:
   - command: .buildkite/scripts/steps/build_kibana.sh
