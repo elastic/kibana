@@ -77,8 +77,24 @@ export const fillUpNewEsqlRule = (name = 'Test', description = 'Test', query: st
     cy.getByTestSubj('esqlRuleType').click();
     cy.getByTestSubj('ruleEsqlQueryBar').within(() => {
       cy.getByTestSubj('globalQueryBar').click();
-      cy.getByTestSubj('kibanaCodeEditor').type(query);
+      // Paste instead of `.type()`: typing character-by-character into the ES|QL Monaco
+      // editor is flaky and can register a partial query, leaving the debounced async
+      // validation invalid so `define-continue` never advances to the About step.
+      cy.get('textarea.inputarea').click();
+      cy.get('textarea.inputarea').then(($textarea) => {
+        const dataTransfer = new DataTransfer();
+        dataTransfer.setData('text/plain', query);
+        $textarea[0].dispatchEvent(
+          new ClipboardEvent('paste', {
+            clipboardData: dataTransfer,
+            bubbles: true,
+            cancelable: true,
+          })
+        );
+      });
     });
+    // Confirm the full query registered before continuing so validation runs against it.
+    cy.getByTestSubj('ruleEsqlQueryBar').contains(query);
   });
   cy.getByTestSubj('define-continue').click();
   cy.getByTestSubj('detectionEngineStepAboutRuleName').within(() => {

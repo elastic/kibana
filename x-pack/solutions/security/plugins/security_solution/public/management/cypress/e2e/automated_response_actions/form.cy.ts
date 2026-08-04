@@ -21,8 +21,7 @@ import { login, ROLE } from '../../tasks/login';
 
 export const RESPONSE_ACTIONS_ERRORS = 'response-actions-error';
 
-// FLAKY: https://github.com/elastic/kibana/issues/248743
-describe.skip(
+describe(
   'Form',
   {
     tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
