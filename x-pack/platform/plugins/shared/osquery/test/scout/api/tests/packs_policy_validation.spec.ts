@@ -19,17 +19,44 @@ apiTest.describe(
     let adminCredentials: RoleSessionCredentials;
     let agentPolicyId: string;
     let packagePolicyId: string;
+    let integrationVersion: string | undefined;
     const createdPackIds: string[] = [];
 
     apiTest.beforeAll(async ({ samlAuth, kbnClient }) => {
       adminCredentials = await samlAuth.asInteractiveUser('admin');
 
-      // Get installed osquery_manager version (pre-installed as bundled package)
-      const versionResponse = await kbnClient.request({
-        method: 'GET',
-        path: `${testData.API_PATHS.FLEET_EPM_PACKAGES}/osquery_manager`,
-      });
-      const integrationVersion = (versionResponse.data as Record<string, any>)?.item?.version;
+      // osquery_manager is not a bundled package, so it is neither guaranteed to be
+      // pre-installed nor reliably resolved on the first registry lookup (a transient
+      // miss surfaces as a 404 that fails the whole suite). Resolve its version and
+      // force-install it, retrying to absorb transient registry hiccups. Mirrors the
+      // FTR suite this was migrated from.
+      await expect
+        .poll(
+          async () => {
+            try {
+              const versionResponse = await kbnClient.request({
+                method: 'GET',
+                path: `${testData.API_PATHS.FLEET_EPM_PACKAGES}/osquery_manager`,
+              });
+              integrationVersion = (versionResponse.data as Record<string, any>)?.item?.version;
+              if (!integrationVersion) {
+                return false;
+              }
+
+              await kbnClient.request({
+                method: 'POST',
+                path: `${testData.API_PATHS.FLEET_EPM_PACKAGES}/osquery_manager/${integrationVersion}`,
+                body: { force: true },
+              });
+
+              return true;
+            } catch {
+              return false;
+            }
+          },
+          { timeout: 90_000, intervals: [1_000, 2_000, 5_000, 10_000] }
+        )
+        .toBe(true);
 
       // Create a real agent policy to use as a valid policy_id
       const policyResponse = await kbnClient.request({
