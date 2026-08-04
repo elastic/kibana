@@ -14,13 +14,13 @@ export const groupKiTypeCountsForSummary = (
   countsByType: KiTypeCount[],
   total: number
 ): KiTypeCount[] => {
-  const visibleSum = countsByType.reduce((sum, { count }) => sum + count, 0);
+  const maxVisibleTypes = MAX_KI_TYPE_SUMMARY_COUNT - 1;
 
-  if (visibleSum === total) {
+  if (countsByType.length <= maxVisibleTypes) {
     return countsByType;
   }
 
-  const visibleTypes = countsByType.slice(0, MAX_KI_TYPE_SUMMARY_COUNT - 1);
+  const visibleTypes = countsByType.slice(0, maxVisibleTypes);
   const othersCount = total - visibleTypes.reduce((sum, { count }) => sum + count, 0);
 
   return [...visibleTypes, { type: KI_OTHERS_TYPE, count: othersCount }];

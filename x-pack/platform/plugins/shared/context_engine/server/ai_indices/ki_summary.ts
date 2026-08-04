@@ -6,6 +6,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
+import { isResponseError } from '@kbn/es-errors';
 import {
   groupKiTypeCountsForSummary,
   MAX_KI_TYPE_SUMMARY_COUNT,
@@ -59,10 +60,15 @@ export const getKiSummary = async (
   esClient: ElasticsearchClient,
   destValue: string
 ): Promise<KiSummary> => {
-  const response = await esClient.esql.query({
-    query: getKiCountByTypeQuery(destValue),
-    allow_partial_results: true,
-  });
-
-  return parseKiCountByTypeResponse(response);
+  try {
+    const response = await esClient.esql.query({
+      query: getKiCountByTypeQuery(destValue),
+    });
+    return parseKiCountByTypeResponse(response);
+  } catch (error) {
+    if (isResponseError(error) && error.statusCode === 400) {
+      return { count: 0, countsByType: [] };
+    }
+    throw error;
+  }
 };

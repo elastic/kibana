@@ -6,6 +6,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
+import { errors, type DiagnosticResult } from '@elastic/elasticsearch';
 import { KI_OTHERS_TYPE } from '../../common/ki_type_counts';
 import { getKiCountByTypeQuery, getKiSummary } from './ki_summary';
 
@@ -82,5 +83,60 @@ describe('ki_summary', () => {
         { type: KI_OTHERS_TYPE, count: 3 },
       ],
     });
+  });
+
+  it('returns zero when the backing store does not exist (ES 400)', async () => {
+    const notExistsError = new errors.ResponseError({
+      meta: {
+        aborted: false,
+        attempts: 1,
+        connection: null,
+        context: null,
+        name: 'verification_exception',
+        request: {} as unknown as DiagnosticResult['meta']['request'],
+      },
+      warnings: [],
+      body: {
+        error: { type: 'verification_exception', reason: 'Unknown index [ai-index-idx-sample-ki]' },
+      },
+      statusCode: 400,
+      headers: {},
+    });
+
+    const esClient = {
+      esql: {
+        query: jest.fn().mockRejectedValue(notExistsError),
+      },
+    } as unknown as ElasticsearchClient;
+
+    await expect(getKiSummary(esClient, 'ai-index-idx-sample-ki')).resolves.toEqual({
+      count: 0,
+      countsByType: [],
+    });
+  });
+
+  it('rethrows non-400 ES errors', async () => {
+    const serverError = new errors.ResponseError({
+      meta: {
+        aborted: false,
+        attempts: 1,
+        connection: null,
+        context: null,
+        name: 'internal_server_exception',
+        request: {} as unknown as DiagnosticResult['meta']['request'],
+      },
+      warnings: [],
+      body: { error: { type: 'internal_server_exception' } },
+      statusCode: 500,
+      headers: {},
+    });
+
+    const esClient = {
+      esql: {
+        query: jest.fn().mockRejectedValue(serverError),
+      },
+    } as unknown as ElasticsearchClient;
+
+    await expect(getKiSummary(esClient, 'ai-index-idx-sample-ki')).rejects.toThrow();
   });
 });

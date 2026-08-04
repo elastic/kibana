@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { errors, type DiagnosticResult } from '@elastic/elasticsearch';
 import { actionsClientMock, actionsMock } from '@kbn/actions-plugin/server/mocks';
 import type { ActionResult, ConnectorType } from '@kbn/actions-plugin/server';
 import type { Type } from '@kbn/config-schema';
@@ -440,8 +441,7 @@ describe('ai indices routes', () => {
       });
 
       expect(esqlQuery).toHaveBeenCalledWith({
-        query: 'FROM ai-index-ds-customer_support* | STATS count = COUNT(*) BY type',
-        allow_partial_results: true,
+        query: 'FROM ai-index-ds-customer_support* | STATS count = COUNT(*) BY type | INLINE STATS total = SUM(count) | SORT count DESC | LIMIT 5',
       });
       expect(response.ok).toHaveBeenCalledWith({
         body: {
@@ -452,6 +452,48 @@ describe('ai indices routes', () => {
             { type: 'document', count: 8 },
             { type: 'detection', count: 7 },
           ],
+        },
+      });
+    });
+
+    it('returns 404 when the AI index does not exist', async () => {
+      aiIndexService.get.mockRejectedValue(new AiIndexNotFoundError('missing'));
+
+      await callRoute('GET', aiIndexKiSummaryPath, {
+        params: { aiIndexId: 'missing' },
+      });
+
+      expect(response.notFound).toHaveBeenCalled();
+    });
+
+    it('returns 0 when the backing store does not exist yet', async () => {
+      aiIndexService.get.mockResolvedValue(aiIndexItem);
+      esqlQuery.mockRejectedValue(
+        new errors.ResponseError({
+          meta: {
+            aborted: false,
+            attempts: 1,
+            connection: null,
+            context: null,
+            name: 'verification_exception',
+            request: {} as unknown as DiagnosticResult['meta']['request'],
+          },
+          warnings: [],
+          body: { error: { type: 'verification_exception', reason: 'Unknown index' } },
+          statusCode: 400,
+          headers: {},
+        })
+      );
+
+      await callRoute('GET', aiIndexKiSummaryPath, {
+        params: { aiIndexId: 'customer_support' },
+      });
+
+      expect(response.ok).toHaveBeenCalledWith({
+        body: {
+          count: 0,
+          dest: aiIndexItem.dest,
+          counts_by_type: [],
         },
       });
     });

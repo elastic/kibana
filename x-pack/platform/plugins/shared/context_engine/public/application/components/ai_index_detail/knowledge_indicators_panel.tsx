@@ -15,11 +15,17 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
+import {
+  INDEX_MANAGEMENT_LOCATOR_ID,
+  type IndexManagementLocatorParams,
+} from '@kbn/index-management-shared-types';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useLocatorUrl } from '@kbn/share-plugin/public';
 import React, { useMemo } from 'react';
-import type { GetAiIndexResponse } from '../../../../common/http_api/ai_indices';
+import type { AiIndexDest, GetAiIndexResponse } from '../../../../common/http_api/ai_indices';
 import { useAiIndexKiSummary } from '../../hooks/use_ai_index_ki_summary';
 import { useKibana } from '../../hooks/use_kibana';
 import { getKiTypeLabel } from '../../utils/ki_type_labels';
@@ -31,6 +37,20 @@ interface KnowledgeIndicatorsPanelProps {
 
 const getDiscoverEsqlQuery = (destValue: string): string => `FROM ${destValue} | LIMIT 100`;
 
+const kiTypeLabelStyle = css`
+  text-transform: capitalize;
+`;
+
+const getIndexManagementLocatorParams = (dest: AiIndexDest): IndexManagementLocatorParams => {
+  const name = dest.value.replace(/\*$/, '');
+
+  if (dest.type === 'data_stream') {
+    return { page: 'data_streams_details', dataStreamName: name };
+  }
+
+  return { page: 'index_details', indexName: name };
+};
+
 export const KnowledgeIndicatorsPanel = ({
   isLoading: isLoadingAiIndex,
   aiIndex,
@@ -41,10 +61,24 @@ export const KnowledgeIndicatorsPanel = ({
   const { kiSummary, isLoading: isLoadingKiSummary, error } = useAiIndexKiSummary(aiIndex?.id);
 
   const isLoading = isLoadingAiIndex || isLoadingKiSummary;
-  const destValue = kiSummary?.dest.value ?? aiIndex?.dest.value;
+  const dest = kiSummary?.dest ?? aiIndex?.dest;
+  const destValue = dest?.value;
   const totalCount = kiSummary?.count ?? 0;
   const canOpenDiscover = application.capabilities.discover_v2?.show === true;
   const typeCounts = kiSummary?.counts_by_type ?? [];
+
+  const indexManagementLocator = dest
+    ? share.url.locators.get<IndexManagementLocatorParams>(INDEX_MANAGEMENT_LOCATOR_ID)
+    : undefined;
+  const indexManagementUrl = useLocatorUrl(
+    indexManagementLocator,
+    dest
+      ? getIndexManagementLocatorParams(dest)
+      : { page: 'index_details' as const, indexName: '' },
+    undefined,
+    [dest]
+  );
+  const indexManagementHref = indexManagementUrl || undefined;
 
   const discoverHref = useMemo(() => {
     if (!destValue || !canOpenDiscover) {
@@ -76,10 +110,16 @@ export const KnowledgeIndicatorsPanel = ({
             <EuiText size="s" color="subdued" data-test-subj="contextAiIndexKiHeaderSummary">
               <FormattedMessage
                 id="xpack.contextEngine.aiIndexDetail.knowledgeIndicators.headerSummary"
-                defaultMessage="{count} in {destValue}"
+                defaultMessage="{count} KI's stored in {indexLink}"
                 values={{
                   count: <strong>{totalCount.toLocaleString()}</strong>,
-                  destValue: <code>{destValue}</code>,
+                  indexLink: indexManagementHref ? (
+                    <EuiLink href={indexManagementHref} data-test-subj="contextAiIndexKiIndexLink">
+                      {destValue}
+                    </EuiLink>
+                  ) : (
+                    <code>{destValue}</code>
+                  ),
                 }}
               />
             </EuiText>
@@ -119,7 +159,7 @@ export const KnowledgeIndicatorsPanel = ({
                           <EuiText size="m">
                             <strong>{count.toLocaleString()}</strong>
                           </EuiText>
-                          <EuiText size="xs" color="subdued">
+                          <EuiText size="xs" color="subdued" css={kiTypeLabelStyle}>
                             {getKiTypeLabel(type)}
                           </EuiText>
                         </div>

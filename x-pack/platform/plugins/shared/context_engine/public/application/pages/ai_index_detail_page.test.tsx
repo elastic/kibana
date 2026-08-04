@@ -7,6 +7,8 @@
 
 import { EuiProvider } from '@elastic/eui';
 import { coreMock } from '@kbn/core/public/mocks';
+import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
+import { INDEX_MANAGEMENT_LOCATOR_ID } from '@kbn/index-management-shared-types';
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -94,8 +96,22 @@ const createServices = () => ({
 });
 
 const renderWithProviders = (services: ReturnType<typeof createServices>) => {
-  services.share.url.locators.get = jest.fn().mockReturnValue({
-    getRedirectUrl: jest.fn(() => '/app/discover'),
+  services.share.url.locators.get = jest.fn((locatorId: string) => {
+    if (locatorId === DISCOVER_APP_LOCATOR) {
+      return {
+        getRedirectUrl: jest.fn(() => '/app/discover'),
+      };
+    }
+    if (locatorId === INDEX_MANAGEMENT_LOCATOR_ID) {
+      return {
+        getUrl: jest
+          .fn()
+          .mockResolvedValue(
+            '/app/management/data/index_management/indices/index_details?indexName=ai-index-ds-my-ai-index'
+          ),
+      };
+    }
+    return undefined;
   });
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
@@ -146,7 +162,7 @@ describe('AiIndexDetailPage', () => {
     expect(screen.getByTestId('contextSourceTypeBadge')).toHaveTextContent('ES|QL');
     expect(screen.getByTestId('contextAiIndexKiTypeCount-index_metadata')).toHaveTextContent('10');
     expect(screen.getByTestId('contextAiIndexKiTypeCount-index_metadata')).toHaveTextContent(
-      'Index metadata'
+      'index metadata'
     );
     expect(screen.getByTestId('contextAiIndexKiDiscoverLink')).toBeInTheDocument();
   });

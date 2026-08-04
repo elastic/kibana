@@ -7,10 +7,12 @@
 
 import { EuiProvider } from '@elastic/eui';
 import { coreMock } from '@kbn/core/public/mocks';
+import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
+import { INDEX_MANAGEMENT_LOCATOR_ID } from '@kbn/index-management-shared-types';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import type { GetAiIndexResponse } from '../../../../common/http_api/ai_indices';
 import { KnowledgeIndicatorsPanel } from './knowledge_indicators_panel';
@@ -40,10 +42,24 @@ const renderWithProviders = (ui: React.ReactElement) => {
     ...services.application.capabilities,
     discover_v2: { show: true },
   };
-  services.share.url.locators.get = jest.fn().mockReturnValue({
-    getRedirectUrl: jest.fn(
-      () => '/app/discover#/?_a=(query:(esql:FROM%20ai-index-idx-sample-ki))'
-    ),
+  services.share.url.locators.get = jest.fn((locatorId: string) => {
+    if (locatorId === DISCOVER_APP_LOCATOR) {
+      return {
+        getRedirectUrl: jest.fn(
+          () => '/app/discover#/?_a=(query:(esql:FROM%20ai-index-idx-sample-ki))'
+        ),
+      };
+    }
+    if (locatorId === INDEX_MANAGEMENT_LOCATOR_ID) {
+      return {
+        getUrl: jest
+          .fn()
+          .mockResolvedValue(
+            '/app/management/data/index_management/indices/index_details?indexName=ai-index-idx-sample-ki'
+          ),
+      };
+    }
+    return undefined;
   });
 
   return render(
@@ -90,21 +106,27 @@ describe('KnowledgeIndicatorsPanel', () => {
     expect(screen.getByTestId('contextAiIndexKiLoading')).toBeInTheDocument();
   });
 
-  it('renders header summary, per-type stats, and Discover link', () => {
+  it('renders header summary, per-type stats, and Discover link', async () => {
     renderWithProviders(<KnowledgeIndicatorsPanel isLoading={false} aiIndex={aiIndex} />);
 
     expect(screen.getByTestId('contextAiIndexKiHeaderSummary')).toHaveTextContent(
-      '25 in ai-index-idx-sample-ki'
+      '25 stored in ai-index-idx-sample-ki'
     );
+    await waitFor(() => {
+      expect(screen.getByTestId('contextAiIndexKiIndexLink')).toHaveAttribute(
+        'href',
+        '/app/management/data/index_management/indices/index_details?indexName=ai-index-idx-sample-ki'
+      );
+    });
     expect(screen.getByTestId('contextAiIndexKiTypeCount-index_metadata')).toHaveTextContent('10');
     expect(screen.getByTestId('contextAiIndexKiTypeCount-index_metadata')).toHaveTextContent(
-      'Index metadata'
+      'index metadata'
     );
     expect(screen.getByTestId('contextAiIndexKiTypeCount-document')).toHaveTextContent('8');
-    expect(screen.getByTestId('contextAiIndexKiTypeCount-document')).toHaveTextContent('Documents');
+    expect(screen.getByTestId('contextAiIndexKiTypeCount-document')).toHaveTextContent('document');
     expect(screen.getByTestId('contextAiIndexKiTypeCount-detection')).toHaveTextContent('7');
     expect(screen.getByTestId('contextAiIndexKiTypeCount-detection')).toHaveTextContent(
-      'Detections'
+      'detection'
     );
     expect(screen.getByTestId('contextAiIndexKiDiscoverLink')).toHaveAttribute(
       'href',
@@ -112,7 +134,7 @@ describe('KnowledgeIndicatorsPanel', () => {
     );
   });
 
-  it('hides type stats with zero counts', () => {
+  it('only renders type stats returned by the server', () => {
     mockUseAiIndexKiSummary.mockReturnValue({
       kiSummary: {
         count: 10,
