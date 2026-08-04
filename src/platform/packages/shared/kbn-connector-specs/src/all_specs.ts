@@ -66,7 +66,7 @@ export { OneDrive } from './specs/one_drive/one_drive';
 export { Outlook } from './specs/outlook/outlook';
 export { PagerdutyConnector } from './specs/pagerduty/pagerduty';
 export { PostHog } from './specs/posthog/posthog';
-export { PrometheusAlertmanager } from './specs/prometheus_alertmanager/prometheus_alertmanager';
+export { Prometheus } from './specs/prometheus/prometheus';
 export { Rootly } from './specs/rootly/rootly';
 export { SalesforceConnector } from './specs/salesforce/salesforce';
 export { Sentry } from './specs/sentry/sentry';
