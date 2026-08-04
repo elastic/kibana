@@ -15,7 +15,7 @@
  *
  * Coverage:
  *   - Create: grpc happy path, http/protobuf with optional fields, protocol-validation 400s,
- *     secret round-trip (api_key + tls.key_pem via .fleet-secrets).
+ *     secret round-trip (top-level api_key + otlp_exporter.tls.key_pem via .fleet-secrets).
  *   - Update: otlp_exporter update, ES→OTLP type change, OTLP→ES type change.
  *   - Delete: ESO secret is removed when the output is deleted.
  *   - Policy gating: pure-OTel policy accepted, mixed OTel+beats policy rejected.
@@ -229,8 +229,8 @@ export default function (providerContext: FtrProviderContext) {
               protocol: 'grpc',
             },
             secrets: {
+              api_key: 'test-api-key-value',
               otlp_exporter: {
-                api_key: 'test-api-key-value',
                 tls: { key_pem: 'test-tls-key-pem-value' },
               },
             },
@@ -238,7 +238,7 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
 
         const { item } = body;
-        const apiKeySecretId: string = item.secrets?.otlp_exporter?.api_key?.id;
+        const apiKeySecretId: string = item.secrets?.api_key?.id;
         const tlsKeyPemSecretId: string = item.secrets?.otlp_exporter?.tls?.key_pem?.id;
 
         expect(apiKeySecretId).to.be.a('string');
@@ -345,12 +345,12 @@ export default function (providerContext: FtrProviderContext) {
             name: `otlp-delete-secrets-${uuidv4()}`,
             type: 'otlp',
             otlp_exporter: { endpoint: 'https://otlp.example.com:4317', protocol: 'grpc' },
-            secrets: { otlp_exporter: { api_key: 'to-be-deleted-key' } },
+            secrets: { api_key: 'to-be-deleted-key' },
           })
           .expect(200);
 
         const { id } = createBody.item;
-        const secretId: string = createBody.item.secrets?.otlp_exporter?.api_key?.id;
+        const secretId: string = createBody.item.secrets?.api_key?.id;
         expect(secretId).to.be.a('string');
 
         // Secret exists before delete

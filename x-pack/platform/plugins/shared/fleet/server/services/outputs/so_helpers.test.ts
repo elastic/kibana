@@ -186,6 +186,10 @@ describe('patchUpdateDataWithRequireEncryptedAADFields', () => {
           "allow_edit": Array [
             "hosts",
           ],
+          "id": "logstash-output-1",
+          "is_default": false,
+          "is_default_monitoring": false,
+          "name": "logstash-output",
           "password": null,
           "secrets": Object {
             "ssl": Object {

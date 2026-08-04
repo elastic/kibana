@@ -11,7 +11,11 @@ import { securityMock } from '@kbn/security-plugin/server/mocks';
 import type { Logger } from '@kbn/logging';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 
-import { RESERVED_CONFIG_YML_KEYS } from '../../common/constants';
+import {
+  RESERVED_CONFIG_YML_KEYS,
+  SERVERLESS_DEFAULT_OUTPUT_ID,
+  SERVERLESS_PRIVATE_OUTPUT_ID,
+} from '../../common/constants';
 import type { OutputSOAttributes } from '../types';
 import type { NewElasticsearchOutput } from '../../common/types';
 import { OUTPUT_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../constants';
@@ -1566,6 +1570,195 @@ describe('Output Service', () => {
     });
   });
 
+  describe('serverless validation', () => {
+    const DEFAULT_HOST = 'http://elasticsearch:9200';
+    const PRIVATE_HOST = 'https://abc.es.private.us-east-1.aws.elastic.cloud';
+    let savedEsoImpl: ((...args: any[]) => any) | undefined;
+
+    beforeEach(() => {
+      mockedAppContextService.getCloud.mockReturnValue({ isServerlessEnabled: true } as any);
+      mockedAppContextService.getEncryptedSavedObjectsSetup.mockReturnValue({
+        canEncrypt: true,
+      } as any);
+      savedEsoImpl = esoClientMock.getDecryptedAsInternalUser.getMockImplementation();
+      esoClientMock.getDecryptedAsInternalUser.mockImplementation(async (type, id) => {
+        if (id === outputIdToUuid(SERVERLESS_DEFAULT_OUTPUT_ID)) {
+          return mockOutputSO(SERVERLESS_DEFAULT_OUTPUT_ID, {
+            type: 'elasticsearch',
+            hosts: [DEFAULT_HOST],
+          });
+        }
+        if (id === outputIdToUuid(SERVERLESS_PRIVATE_OUTPUT_ID)) {
+          return mockOutputSO(SERVERLESS_PRIVATE_OUTPUT_ID, {
+            type: 'elasticsearch',
+            hosts: [PRIVATE_HOST],
+          });
+        }
+        if (id === outputIdToUuid('existing-default-output')) {
+          return mockOutputSO('existing-default-output', {
+            type: 'elasticsearch',
+            hosts: [DEFAULT_HOST],
+          });
+        }
+        return savedEsoImpl!(type, id);
+      });
+    });
+
+    afterEach(() => {
+      mockedAppContextService.getCloud.mockReset();
+      if (savedEsoImpl) {
+        esoClientMock.getDecryptedAsInternalUser.mockImplementation(savedEsoImpl);
+      }
+    });
+
+    function makeSoClientWithServerlessOutputs({
+      privateExists = true,
+    }: { privateExists?: boolean } = {}) {
+      const soClient = getMockedSoClient();
+      const handleId = async (id: string) => {
+        if (id === outputIdToUuid(SERVERLESS_DEFAULT_OUTPUT_ID)) {
+          return mockOutputSO(SERVERLESS_DEFAULT_OUTPUT_ID, {
+            type: 'elasticsearch',
+            hosts: [DEFAULT_HOST],
+          });
+        }
+        if (id === outputIdToUuid(SERVERLESS_PRIVATE_OUTPUT_ID)) {
+          if (!privateExists) {
+            throw SavedObjectsErrorHelpers.createGenericNotFoundError(
+              'output',
+              SERVERLESS_PRIVATE_OUTPUT_ID
+            );
+          }
+          return mockOutputSO(SERVERLESS_PRIVATE_OUTPUT_ID, {
+            type: 'elasticsearch',
+            hosts: [PRIVATE_HOST],
+          });
+        }
+        return mockOutputSO('existing-default-output', {
+          type: 'elasticsearch',
+          hosts: [DEFAULT_HOST],
+        });
+      };
+      soClient.get.mockImplementation(async (_type: string, id: string) => handleId(id));
+      esoClientMock.getDecryptedAsInternalUser.mockImplementation(async (_type, id) =>
+        handleId(id)
+      );
+      return soClient;
+    }
+
+    it('rejects create when elasticsearch hosts differ from default in serverless', async () => {
+      const soClient = makeSoClientWithServerlessOutputs();
+      await expect(
+        outputService.create(soClient, esClientMock, {
+          is_default: false,
+          is_default_monitoring: false,
+          name: 'Test',
+          type: 'elasticsearch',
+          hosts: ['http://localhost:8080'],
+        })
+      ).rejects.toThrow(
+        `Elasticsearch output host must have default URL in serverless: ${DEFAULT_HOST}`
+      );
+    });
+
+    it('allows create when elasticsearch hosts match default in serverless', async () => {
+      const soClient = makeSoClientWithServerlessOutputs();
+      await expect(
+        outputService.create(soClient, esClientMock, {
+          is_default: false,
+          is_default_monitoring: false,
+          name: 'Test',
+          type: 'elasticsearch',
+          hosts: [DEFAULT_HOST],
+        })
+      ).resolves.toBeDefined();
+    });
+
+    it('allows create when elasticsearch hosts match the private endpoint in serverless', async () => {
+      const soClient = makeSoClientWithServerlessOutputs();
+      await expect(
+        outputService.create(soClient, esClientMock, {
+          is_default: false,
+          is_default_monitoring: false,
+          name: 'Test',
+          type: 'elasticsearch',
+          hosts: [PRIVATE_HOST],
+        })
+      ).resolves.toBeDefined();
+    });
+
+    it('rejects create when hosts are arbitrary and private endpoint SO is absent', async () => {
+      const soClient = makeSoClientWithServerlessOutputs({ privateExists: false });
+      await expect(
+        outputService.create(soClient, esClientMock, {
+          is_default: false,
+          is_default_monitoring: false,
+          name: 'Test',
+          type: 'elasticsearch',
+          hosts: [PRIVATE_HOST],
+        })
+      ).rejects.toThrow(
+        `Elasticsearch output host must have default URL in serverless: ${DEFAULT_HOST}`
+      );
+    });
+
+    it('rejects update when elasticsearch hosts differ from default in serverless', async () => {
+      const soClient = makeSoClientWithServerlessOutputs();
+      await expect(
+        outputService.update(soClient, esClientMock, 'existing-default-output', {
+          hosts: ['http://localhost:8080'],
+        })
+      ).rejects.toThrow(
+        `Elasticsearch output host must have default URL in serverless: ${DEFAULT_HOST}`
+      );
+    });
+
+    it('rejects create when both ssl.key and secrets.ssl.key are provided for elasticsearch output', async () => {
+      mockedAppContextService.getCloud.mockReturnValue({ isServerlessEnabled: false } as any);
+      const soClient = getMockedSoClient();
+      await expect(
+        outputService.create(soClient, esClientMock, {
+          is_default: false,
+          is_default_monitoring: false,
+          name: 'Test',
+          type: 'elasticsearch',
+          ssl: { key: 'plaintext-key' } as any,
+          secrets: { ssl: { key: 'secret-key' } },
+        })
+      ).rejects.toThrow('Cannot specify both ssl.key and secrets.ssl.key');
+    });
+
+    it('rejects create when both ssl.key and secrets.ssl.key are provided for remote_elasticsearch output', async () => {
+      mockedAppContextService.getCloud.mockReturnValue({ isServerlessEnabled: false } as any);
+      const soClient = getMockedSoClient();
+      await expect(
+        outputService.create(soClient, esClientMock, {
+          is_default: false,
+          is_default_monitoring: false,
+          name: 'Test',
+          type: 'remote_elasticsearch',
+          ssl: { key: 'plaintext-key' } as any,
+          secrets: { ssl: { key: 'secret-key' } },
+        })
+      ).rejects.toThrow('Cannot specify both ssl.key and secrets.ssl.key');
+    });
+
+    it('rejects create when both service_token and secrets.service_token are provided for remote_elasticsearch output', async () => {
+      mockedAppContextService.getCloud.mockReturnValue({ isServerlessEnabled: false } as any);
+      const soClient = getMockedSoClient();
+      await expect(
+        outputService.create(soClient, esClientMock, {
+          is_default: false,
+          is_default_monitoring: false,
+          name: 'Test',
+          type: 'remote_elasticsearch',
+          service_token: 'token1',
+          secrets: { service_token: 'token2' },
+        })
+      ).rejects.toThrow('Cannot specify both service_token and secrets.service_token');
+    });
+  });
+
   describe('update', () => {
     it('should update existing default output when updating an output to become the default output', async () => {
       const soClient = getMockedSoClient({
@@ -2889,6 +3082,7 @@ describe('Output Service', () => {
 
       expect(soClient.update).toBeCalledWith(expect.anything(), expect.anything(), {
         type: 'elasticsearch',
+        api_key: null,
         hosts: ['http://test:9200'],
         otlp_exporter: null,
         preset: 'balanced',
