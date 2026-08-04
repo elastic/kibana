@@ -635,7 +635,7 @@ export function useLoadIndexSettings(indexName: string) {
   });
 }
 
-export function createIndex(indexName: string, indexMode: string) {
+export function createIndex(indexName: string, indexMode?: string) {
   return sendRequest({
     path: `${INTERNAL_API_BASE_PATH}/indices/create`,
     method: 'put',

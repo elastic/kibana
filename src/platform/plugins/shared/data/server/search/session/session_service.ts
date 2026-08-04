@@ -450,7 +450,8 @@ export class SearchSessionService implements ISearchSessionService {
       sessionIds.map((id) => ({ id, type: SEARCH_SESSION_TYPE }))
     );
     const filteredSessions = sessions.saved_objects.filter(
-      (session) => !isSavedObjectErrorResult(session)
+      (session): session is SavedObject<SearchSessionSavedObjectAttributes> =>
+        !isSavedObjectErrorResult(session)
     );
     filteredSessions.forEach((session) => this.throwOnUserConflict(user, session));
     return filteredSessions;

@@ -8,10 +8,12 @@
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
+import { useEuiTheme } from '@elastic/eui';
 // @ts-expect-error
 import { WorkpadPage } from '../workpad_page';
 import { Fullscreen } from '../fullscreen';
 import { WORKPAD_CANVAS_BUFFER, DEFAULT_WORKPAD_CSS } from '../../../common/lib/constants';
+import { useCanvasCheckeredStyles } from '../../lib/use_canvas_checkered_styles';
 import type { CommitFn, CanvasPage } from '../../../types';
 import { WorkpadShortcuts } from './workpad_shortcuts.component';
 
@@ -68,6 +70,22 @@ export const Workpad: FC<Props> = ({
   zoomOut,
   zoomScale,
 }) => {
+  const { euiTheme } = useEuiTheme();
+  const checkeredStyles = useCanvasCheckeredStyles();
+  const workpadStyles = useMemo(
+    () => css`
+      .canvasGrid {
+        background-image: linear-gradient(
+            to right,
+            ${euiTheme.colors.mediumShade} 1px,
+            transparent 1px
+          ),
+          linear-gradient(to bottom, ${euiTheme.colors.mediumShade} 1px, transparent 1px);
+      }
+    `,
+    [euiTheme]
+  );
+
   const headerBannerOffset = useMemo(() => {
     if (!hasHeaderBanner) return 0;
     if (typeof document === 'undefined') return 0;
@@ -88,6 +106,7 @@ export const Workpad: FC<Props> = ({
     <div className="canvasWorkpad__buffer" style={bufferStyle}>
       <div
         className="canvasCheckered"
+        css={checkeredStyles}
         style={{
           height,
           width,
@@ -133,7 +152,7 @@ export const Workpad: FC<Props> = ({
             // NOTE: the data-shared-* attributes here are used for reporting
             return (
               <div
-                css={css(workpadCss || DEFAULT_WORKPAD_CSS)}
+                css={[css(workpadCss || DEFAULT_WORKPAD_CSS), workpadStyles]}
                 className={`canvasWorkpad ${isFullscreenProp ? 'fullscreen' : ''}`}
                 style={fsStyle}
                 data-shared-items-count={totalElementCount}
