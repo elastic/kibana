@@ -14,7 +14,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { AppHeader } from '@kbn/app-header';
-import type { AppHeaderBadge, AppHeaderMenu, AppHeaderMetadataItems } from '@kbn/app-header';
+import type { AppHeaderBadge, AppHeaderMetadataItems } from '@kbn/app-header';
 import { RULE_KIND_LABELS } from '@kbn/alerting-v2-constants';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { css } from '@emotion/react';
@@ -31,6 +31,7 @@ import { useToggleRuleEnabled } from '../../hooks/use_toggle_rule_enabled';
 import { useRunRule } from '../../hooks/use_run_rule';
 import { paths } from '../../constants';
 import { DeleteConfirmationModal } from '../rule/modals/delete_confirmation_modal';
+import { getRuleDetailMenu } from './get_rule_detail_menu';
 import { RuleKindBadge } from './rule_summary_header';
 import { RuleOverviewSection } from './overview';
 import { RuleSidebar } from './sidebar/rule_sidebar';
@@ -62,90 +63,6 @@ const getRuleDetailBadges = (rule: RuleApiResponse): AppHeaderBadge[] => {
 
   return badges;
 };
-
-const getRuleDetailMenu = ({
-  rule,
-  onEdit,
-  onToggleEnabled,
-  isToggleLoading,
-  onClone,
-  onDelete,
-  onRun,
-}: {
-  rule: RuleApiResponse;
-  onEdit: () => void;
-  onToggleEnabled: (enabled: boolean) => void;
-  isToggleLoading: boolean;
-  onClone: () => void;
-  onDelete: () => void;
-  onRun: () => void;
-}): AppHeaderMenu => ({
-  primaryActionItem: {
-    id: 'editRule',
-    label: i18n.translate('xpack.alertingV2.sections.ruleDetails.editRuleButtonLabel', {
-      defaultMessage: 'Edit Rule',
-    }),
-    iconType: 'pencil',
-    run: onEdit,
-    testId: 'openEditRuleFlyoutButton',
-  },
-  switch: {
-    id: 'ruleEnabled',
-    label: rule.enabled
-      ? i18n.translate('xpack.alertingV2.ruleDetails.enabled', {
-          defaultMessage: 'Enabled',
-        })
-      : i18n.translate('xpack.alertingV2.ruleDetails.disabled', {
-          defaultMessage: 'Disabled',
-        }),
-    labelProps: undefined,
-    checked: rule.enabled,
-    onChange: onToggleEnabled,
-    disabled: isToggleLoading,
-    'data-test-subj': 'ruleDetailsEnabledSwitch',
-  },
-  items: [
-    {
-      id: 'runRule',
-      label: i18n.translate('xpack.alertingV2.ruleDetails.runRuleButtonLabel', {
-        defaultMessage: 'Run rule',
-      }),
-      iconType: 'play',
-      order: 0,
-      run: onRun,
-      testId: 'ruleDetailsRunButton',
-      overflow: true,
-      disableButton: !rule.enabled,
-      tooltipContent: rule.enabled
-        ? undefined
-        : i18n.translate('xpack.alertingV2.ruleDetails.runRuleDisabledTooltip', {
-            defaultMessage: 'Enable the rule to run it',
-          }),
-    },
-    {
-      id: 'cloneRule',
-      label: i18n.translate('xpack.alertingV2.ruleDetails.cloneRuleButtonLabel', {
-        defaultMessage: 'Clone rule',
-      }),
-      iconType: 'copy',
-      order: 1,
-      run: onClone,
-      testId: 'ruleDetailsCloneButton',
-      overflow: true,
-    },
-    {
-      id: 'deleteRule',
-      label: i18n.translate('xpack.alertingV2.ruleDetails.deleteRuleButtonLabel', {
-        defaultMessage: 'Delete rule',
-      }),
-      iconType: 'trash',
-      order: 2,
-      run: onDelete,
-      testId: 'ruleDetailsDeleteButton',
-      overflow: true,
-    },
-  ],
-});
 
 export const RuleDetailPage: React.FunctionComponent = () => {
   const rule = useRule();
