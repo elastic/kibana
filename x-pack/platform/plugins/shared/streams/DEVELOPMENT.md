@@ -359,44 +359,46 @@ streams_app/
 │   │   ├── stream_list_view/  # Stream list + tree table
 │   │   ├── stream_root/       # Stream detail wrapper
 │   │   ├── stream_management/
-│   │   │   └── data_management/            # Core management tabs
-│   │   │       ├── stream_detail_management/   # Tab wiring (wired / classic / query)
+│   │   │   └── data_management/   # Core management tabs
+│   │   │       ├── stream_detail_management/
 │   │   │       ├── stream_detail_routing/      # Partitioning / routing rules
 │   │   │       ├── stream_detail_enrichment/   # Processing pipeline (Streamlang)
-│   │   │       │   ├── state_management/       # XState machines
-│   │   │       │   │   ├── stream_enrichment_state_machine/
-│   │   │       │   │   ├── simulation_state_machine/
-│   │   │       │   │   ├── interactive_mode_machine/
-│   │   │       │   │   ├── steps_state_machine/
-│   │   │       │   │   └── yaml_mode_machine/
-│   │   │       │   └── steps/blocks/action/    # Processor editors
 │   │   │       ├── stream_detail_schema_editor/
 │   │   │       ├── stream_detail_lifecycle/    # Retention, downsampling, failure store
 │   │   │       ├── stream_detail_canvas/
 │   │   │       └── shared/                     # Condition editor, condition display
-│   │   ├── significant_events/             # All significant-events UI
-│   │   │   ├── significant_events_discovery/   # Discovery page + its tabs
-│   │   │   ├── stream_detail_significant_events_view/
-│   │   │   └── stream_detail_systems/
+│   │   ├── significant_events_app_redirect/ # Bookmark shim → significant_events_app
 │   │   └── query_streams/                  # Query stream creation
 │   └── telemetry/
 ├── server/                    # Minimal server plugin
 └── test/scout/                # Scout UI tests (Playwright)
 ```
 
+Significant Events UI lives in `significant_events_app` (`/app/significant_events`).
+`streams_app` keeps `/_discovery` routes as a bookmark shim that redirects into that app.
+
+Streams gates Significant Events UI (list button, overview Knowledge Indicators panel,
+redirect shim) via two optional plugins:
+
+- `significantEventsApp` — start contract `getKnowledgeIndicatorsPanel()` / navigation
+- `significant_events` — `significantEventsRepositoryClient.fetch('GET /internal/significant_events/availability')`
+
+When either is absent, or the availability probe returns unavailable, SE UI stays hidden.
+Streams does not subscribe to SEA `availability$`.
+
 ### UI Routes
 
 | Path | Component | Description |
 |------|-----------|-------------|
 | `/` | `StreamListView` | Stream list with tree table |
-| `/_discovery/{tab}` | `SignificantEventsDiscoveryPage` | Discovery: streams, knowledge indicators, queries, detections, significant events, memory, settings |
+| `/_discovery/{tab}` | `SignificantEventsAppRedirect` | Shim → `/app/significant_events/{tab}` |
 | `/{key}/management/{tab}` | `StreamDetailManagement` | Tabbed management (differs by stream type) |
 
 Management tabs for **wired streams**: overview, partitioning, processing, schema, lifecycle, data quality, attachments, canvas.
 
 Management tabs for **classic streams**: overview, lifecycle, partitioning, processing, data quality, schema, attachments, canvas.
 
-There is no per-stream significant events tab — `significantEvents` redirects to the discovery page.
+There is no per-stream significant events tab. Old `/_discovery` bookmarks redirect into `significant_events_app`.
 
 ### Key UI Patterns
 
