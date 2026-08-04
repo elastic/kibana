@@ -46,7 +46,7 @@ Use each detection's `change_point_type` as an investigation hint. The type dict
 - `significant-events-memory` (via `load_skill`) — prior context: known-benign patterns, past dismissals, and known ongoing/background issues SREs already track. **Consulting memory is a required step, not optional**: load the skill early in every run, run at least one `platform_sig_events_memory_search` scoped to the batch's services and symptoms before deciding any status, and `platform_sig_events_memory_read` the relevant hits — do not judge from search snippets. An empty result is acceptable; skipping the search is not. Feed what memory returns into `<chronic_and_recurring>` and the Critical Rule 5 cap, and cite the pages that informed a decision in `assessment_note`. The goal is to surface **new** problems SREs do not yet know about — but never let memory override a current-state check that reveals a genuinely new failure.
 - `platform_sig_events_event_search` — retrieves existing open events.
 - `platform_core_execute_esql` — objective verification during Step 1 grounding only. Do not re-run queries after grouping.
-- `platform_sig_events_events_write` — final output step. **Always** pass `{ "items": [ ... ] }` — never put discovery fields at the top level, even for a single discovery or continuation. Include `dedup_window` (e.g. `"now-24h"`) on new discoveries; reuse `event_id` with `status: "open"` on continuations.
+- `platform_sig_events_events_write` — final output step. **Always** pass `{ "items": [ ... ] }` — never put discovery fields at the top level, even for a single discovery or continuation. Include `dedup_window` (e.g. `"now-24h"`) with the final status on new events; reuse `event_id` with the final status on continuations.
 
 **Tool results stay in your context — never re-issue a call to re-fetch data you already have.**
 
@@ -127,7 +127,7 @@ Example: platform_sig_events_events_write — new candidate write (dedup_window,
 {
   "items": [
     {
-      "status": "pending",
+      "status": "...",
       "dedup_window": "now-24h",
       "title": "...",
       "symptom_hypothesis": "...",
@@ -278,7 +278,7 @@ This search runs on its own topology inputs; a zero-event or zero-match 4.1 resu
    Add accepted rules to `matched_rule_uuids`.
 5. When `has_more` is true and some discoveries remain unmatched, set `page` to the previous response's `next_page` value with all other parameters unchanged and `per_page` held constant.
 
-Assign each matched detection to at most one accepted event continuation. The continuation reuses the matched event's `event_id`. If multiple events match a single detection, prefer greatest rule coverage, then evidence similarity. **Retain the matched open event's full `signals[]` from `event_search` — you will merge them in Step 6.**
+Assign each matched detection to at most one accepted event continuation. The continuation reuses the matched event's `event_id`. If multiple events match a single detection, prefer greatest rule coverage, then evidence similarity. **Retain the matched open event's full `signals[]` from `event_search` for status and severity reasoning in Step 5 only — do not carry them into the write payload; `platform_sig_events_events_write` merges them server-side.**
 
 ### Step 4: Group remaining detections into events
 
@@ -304,7 +304,7 @@ For each event candidate, decide from all signals that will appear in the final 
 
 Construct the complete `items` array before invoking `platform_sig_events_events_write`. Invoke it exactly once only when that array contains at least one complete event item. If no event should be written, finish without invoking it. Good: `{ "items": [{ ... }] }`. Invalid: `{}`, `{ "items": [] }`, and `{ "items": [{ "event_id": "" }] }`. If individual results have `reason: "bulk_error"`, retry only those items once in a second call.
 
-**Signal assembly** — `platform_sig_events_events_write` persists exactly what you submit; include the full merged `signals[]`:
+**Signal assembly** — `platform_sig_events_events_write` persists exactly what you submit; assemble `signals[]` per the rules below:
 
 - **New event** (no reused `event_id`): one entry per batch detection assigned to this event, grounded in Step 1. When no existing event ID is being reused, omit the `event_id` property entirely; never send `event_id: ""`.
 - **Continued event** (reused `event_id` from Step 3): submit only this batch's Step 1 grounded signals with the reused `event_id`. `platform_sig_events_events_write` merges them with prior-cycle signals by `rule_uuid` (latest per rule wins) and accumulates the episode's `causal_features`, `blast_radius`, and `stream_names` — do not carry prior entries manually. Use the prior signals retrieved in Step 3 for status and severity reasoning only.

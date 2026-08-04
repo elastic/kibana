@@ -34,7 +34,7 @@ import {
  *
  * - `dedup_window` present, `event_id` absent → dedup mode: scan for an active event with the
  *   same stream-and-rules fingerprint within the window; skip if found, otherwise create with
- *   status forced to "pending".
+ *   the caller-supplied status.
  * - `event_id` present, `dedup_window` absent → continuation/snapshot mode: write a new version
  *   of the specified event, merging signals and topology with prior versions when found.
  * - Both absent → anonymous snapshot: generate a synthetic event_id, write as-is.
@@ -317,6 +317,9 @@ const alignResults = (results: BulkResults, message: string): EventsWriteBulkRes
   return aligned;
 };
 
+const normalizeEventId = (eventId: string | undefined): string | undefined =>
+  eventId === '' ? undefined : eventId;
+
 const buildWriteCandidates = (inputs: EventsWriteInput[]): WriteCandidate[] =>
   inputs.map((input, index) => {
     if (input.dedup_window !== undefined) {
@@ -336,7 +339,7 @@ const buildWriteCandidates = (inputs: EventsWriteInput[]): WriteCandidate[] =>
       mode: 'snapshot',
       index,
       input,
-      eventId: input.event_id ?? `agent-event-${uuidv4().slice(0, 8)}`,
+      eventId: normalizeEventId(input.event_id) ?? `agent-event-${uuidv4().slice(0, 8)}`,
       eventUuid: uuidv4(),
     };
   });
@@ -505,18 +508,8 @@ const buildPendingWrite = (
         blastRadius: rest.blast_radius ?? [],
       };
 
-  // Dedup writes land as "pending" candidates. Snapshot writes persist caller-supplied status,
-  // except continuations must not downgrade a settled episode to `pending` — discovery may
-  // blanket-set pending on every item, but open/closed/dismissed episodes keep their status.
-  const status =
-    candidate.mode === 'dedup'
-      ? ('pending' as const)
-      : isContinuation &&
-        candidate.input.status === 'pending' &&
-        latestEvent?.status &&
-        latestEvent.status !== 'pending'
-      ? latestEvent.status
-      : candidate.input.status;
+  // Discovery assigns the final status directly; persist caller-supplied status for all write modes.
+  const status = candidate.input.status;
 
   return {
     candidate,
@@ -565,22 +558,17 @@ const applyBulkResults = (
   });
 };
 
-const normalizeEventId = (eventId: string | undefined): string | undefined =>
-  eventId === '' ? undefined : eventId;
-
 /**
  * Versions a batch of significant events in one request while preserving input order in the
  * returned results.
  *
  * Dedup-mode items (`dedup_window` present, no `event_id`):
- *  - Check for an active (status IN pending/open) event with the same fingerprint in-window and
- *    skip the write if found, returning the existing event_id.
- *  - Force status = "pending" — an unvalidated candidate hidden from the default read path.
+ *  - Check for an active (status "open") event with the same fingerprint in-window and skip the
+ *    write if found, returning the existing event_id.
+ *  - Write with the caller-supplied status; discovery assigns the final status directly.
  *
  * Snapshot-mode items (`event_id` present, no `dedup_window`):
  *  - Write a new version of the identified event, persisting the caller-supplied status.
- *    (Discovery-stage callers are expected to pass "pending"; judge/status workflows may
- *    promote to open/closed/dismissed.)
  *  - Merge signals and topology with prior versions when history is found.
  *
  * Anonymous items (neither `event_id` nor `dedup_window`):
