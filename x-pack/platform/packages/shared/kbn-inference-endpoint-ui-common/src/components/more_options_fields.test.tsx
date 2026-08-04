@@ -84,10 +84,14 @@ const mockOptionalProviderFormFields: ConfigEntryView[] = [
   },
 ];
 
-// FLAKY: https://github.com/elastic/kibana/issues/253334
-// FLAKY: https://github.com/elastic/kibana/issues/253333
-describe.skip('MoreOptionsFields', () => {
-  async function expectHeaderInputsToExistAndBeEditable(index: number, addContent: boolean = true) {
+type UserEvent = ReturnType<typeof userEvent.setup>;
+
+describe('MoreOptionsFields', () => {
+  async function expectHeaderInputsToExistAndBeEditable(
+    user: UserEvent,
+    index: number,
+    addContent: boolean = true
+  ) {
     // Input fields for key/value should be present but empty
     const keyInput = screen.getByTestId(`headers-key-${index}`);
     const valueInput = screen.getByTestId(`headers-value-${index}`);
@@ -100,16 +104,20 @@ describe.skip('MoreOptionsFields', () => {
     expect(headersDeleteButton).toBeInTheDocument();
     // Input into key/value
     if (addContent) {
-      await userEvent.clear(keyInput);
-      await userEvent.type(keyInput, `TestCustomKey-${index}`);
-      expect(keyInput).toHaveValue(`TestCustomKey-${index}`);
-      await userEvent.clear(valueInput);
-      await userEvent.type(valueInput, `TestCustomValue-${index}`);
-      expect(valueInput).toHaveValue(`TestCustomValue-${index}`);
+      await user.clear(keyInput);
+      await user.type(keyInput, `k${index}`);
+      expect(keyInput).toHaveValue(`k${index}`);
+      await user.clear(valueInput);
+      await user.type(valueInput, `v${index}`);
+      expect(valueInput).toHaveValue(`v${index}`);
     }
   }
 
-  async function expectAddHeadersButton(toBeEnabled: boolean, clickButton: boolean = false) {
+  async function expectAddHeadersButton(
+    user: UserEvent,
+    toBeEnabled: boolean,
+    clickButton: boolean = false
+  ) {
     const headersAddButton = screen.getByTestId('headers-add-button');
     expect(headersAddButton).toBeInTheDocument();
     if (toBeEnabled) {
@@ -118,7 +126,7 @@ describe.skip('MoreOptionsFields', () => {
       expect(headersAddButton).toBeDisabled();
     }
     if (clickButton && toBeEnabled) {
-      await userEvent.click(headersAddButton);
+      await user.click(headersAddButton);
     }
   }
 
@@ -171,17 +179,18 @@ describe.skip('MoreOptionsFields', () => {
       </MockFormProvider>
     );
 
+    const user = userEvent.setup();
     const mapConfigField = screen.getByTestId('config-field-map-type');
     const headersSwitchUnchecked = screen.getByTestId('headers-switch-unchecked');
     expect(mapConfigField).toBeInTheDocument();
     expect(headersSwitchUnchecked).toBeInTheDocument();
 
-    await userEvent.click(headersSwitchUnchecked);
+    await user.click(headersSwitchUnchecked);
     const headersSwitchChecked = screen.getByTestId('headers-switch-checked');
     expect(headersSwitchChecked).toBeInTheDocument();
 
-    await expectHeaderInputsToExistAndBeEditable(0, false);
-    await expectAddHeadersButton(false);
+    await expectHeaderInputsToExistAndBeEditable(user, 0, false);
+    await expectAddHeadersButton(user, false);
   });
 
   it('should input headers key and value', async () => {
@@ -195,11 +204,12 @@ describe.skip('MoreOptionsFields', () => {
       </MockFormProvider>
     );
 
+    const user = userEvent.setup();
     const headersSwitchUnchecked = screen.getByTestId('headers-switch-unchecked');
-    await userEvent.click(headersSwitchUnchecked);
-    await expectHeaderInputsToExistAndBeEditable(0);
+    await user.click(headersSwitchUnchecked);
+    await expectHeaderInputsToExistAndBeEditable(user, 0);
     // Add button should be enabled when both key and value have input
-    await expectAddHeadersButton(true);
+    await expectAddHeadersButton(user, true);
   });
 
   it('should add multiple headers', async () => {
@@ -213,12 +223,13 @@ describe.skip('MoreOptionsFields', () => {
       </MockFormProvider>
     );
 
+    const user = userEvent.setup();
     const headersSwitchUnchecked = screen.getByTestId('headers-switch-unchecked');
-    await userEvent.click(headersSwitchUnchecked);
-    await expectHeaderInputsToExistAndBeEditable(0);
+    await user.click(headersSwitchUnchecked);
+    await expectHeaderInputsToExistAndBeEditable(user, 0);
     // Add button should be enabled when both key and value have input
-    await expectAddHeadersButton(true, true);
-    await expectHeaderInputsToExistAndBeEditable(1);
+    await expectAddHeadersButton(user, true, true);
+    await expectHeaderInputsToExistAndBeEditable(user, 1);
   });
 
   it('should be able to delete header', async () => {
@@ -232,19 +243,20 @@ describe.skip('MoreOptionsFields', () => {
       </MockFormProvider>
     );
 
+    const user = userEvent.setup();
     const headersSwitchUnchecked = screen.getByTestId('headers-switch-unchecked');
-    await userEvent.click(headersSwitchUnchecked);
-    await expectHeaderInputsToExistAndBeEditable(0);
+    await user.click(headersSwitchUnchecked);
+    await expectHeaderInputsToExistAndBeEditable(user, 0);
     // Add button should be enabled when both key and value have input
-    await expectAddHeadersButton(true, true);
-    await expectHeaderInputsToExistAndBeEditable(1);
+    await expectAddHeadersButton(user, true, true);
+    await expectHeaderInputsToExistAndBeEditable(user, 1);
     // Delete first header
     const headersDeleteButton = screen.getByTestId('headers-delete-button-0');
-    await userEvent.click(headersDeleteButton);
+    await user.click(headersDeleteButton);
     // Expect only one header with value of original second header to remain
     const keyInput = screen.getByTestId('headers-key-0');
     const valueInput = screen.getByTestId('headers-value-0');
-    expect(keyInput?.getAttribute('value')).toBe('TestCustomKey-1');
-    expect(valueInput?.getAttribute('value')).toBe('TestCustomValue-1');
+    expect(keyInput?.getAttribute('value')).toBe('k1');
+    expect(valueInput?.getAttribute('value')).toBe('v1');
   });
 });
