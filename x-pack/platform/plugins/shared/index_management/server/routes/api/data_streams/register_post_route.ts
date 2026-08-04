@@ -24,7 +24,7 @@ export function registerPostOneApplyLatestMappings({
   config,
 }: RouteDependencies) {
   const paramsSchema = schema.object({
-    name: schema.string(),
+    name: schema.string({ maxLength: 1000 }),
   });
   router.post(
     {
@@ -80,7 +80,7 @@ export function registerPostOneRollover({
   config,
 }: RouteDependencies) {
   const paramsSchema = schema.object({
-    name: schema.string(),
+    name: schema.string({ maxLength: 1000 }),
   });
   router.post(
     {
