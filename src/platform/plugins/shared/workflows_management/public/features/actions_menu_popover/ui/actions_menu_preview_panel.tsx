@@ -660,8 +660,9 @@ const panelStyles = {
     flexDirection: 'column',
     alignItems: 'stretch',
   }),
-  // Figma: Frame 8 steps list — connected rows, no outer card border.
+  // Figma: Frame 8 steps list — r=8, connected rows with outer card border.
   // Sizes to content; scroll appears on stepListScroll when it overflows.
+  // overflow:hidden keeps row backgrounds clipped to the card radius.
   stepList: ({ euiTheme }: UseEuiTheme) =>
     css({
       flex: '0 0 auto',
@@ -670,7 +671,7 @@ const panelStyles = {
       // Full width minus the flush-scrollbar gutter
       width: 'calc(100% - 16px)',
       borderRadius: euiTheme.border.radius.medium,
-      border: 'none',
+      border: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
       backgroundColor: euiTheme.colors.backgroundBasePlain,
       overflow: 'hidden',
     }),

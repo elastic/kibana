@@ -1080,7 +1080,7 @@ export function ActionsMenu({
         ...(searchTerm.startsWith(STEPS_PREFIX) && { rowHeight: 64 }),
       }}
       renderOption={renderActionOption}
-      css={[styles.selectable, currentPath.length > 0 && styles.selectableInCategory]}
+      css={styles.selectable}
       singleSelection
     >
       {(list, search) => (
@@ -1385,12 +1385,6 @@ const componentStyles = {
           pointerEvents: 'auto',
         },
     }),
-  // Nested category browse: no row dividers (matches borderless category tiles)
-  selectableInCategory: css({
-    '& .euiSelectableListItem': {
-      borderBottom: 'none',
-    },
-  }),
   actionOptionWrapper: css({
     width: '100%',
     padding: `12px 16px`,
