@@ -37170,7 +37170,6 @@
     "xpack.observability.metricWithSparkline.nATextColorLabel": "不可用",
     "xpack.observability.news.readFullStory": "详细了解",
     "xpack.observability.news.title": "最新动态",
-    "xpack.observability.nightshiftLinkTitle": "夜班",
     "xpack.observability.noFindingsStates.unprivileged.unprivilegedDescription": "要查看 Observability 标注数据，您必须更新权限。 有关详细信息，请联系您的 Kibana 管理员。",
     "xpack.observability.noFindingsStates.unprivileged.unprivilegedFooterMarkdown": "以下索引所需的 Elasticsearch 索引权限 `read`：",
     "xpack.observability.noFindingsStates.unprivileged.unprivilegedTitle": "需要权限",
