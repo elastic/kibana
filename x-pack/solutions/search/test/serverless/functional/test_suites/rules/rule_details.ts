@@ -130,7 +130,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await retry.tryForTime(15 * 1000, async () => {
           const owner = await testSubjects.getVisibleText('apiKeyOwnerLabel');
-          expect(owner.trim()).toEqual(username);
+          expect(owner.trim()).toEqual(`API key owner ${username}`);
         });
       });
 
