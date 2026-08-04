@@ -26,6 +26,7 @@ import {
   type CompactBulkError,
   toCompactBulkError,
 } from '../bulk_write';
+import { emitSignificantEventWriteTriggers } from '../../../workflows/triggers/emit_significant_event_triggers';
 
 /**
  * Input for writing a significant event document.
@@ -640,6 +641,20 @@ export async function eventsWriteBulkHandler({
 
   const createResults = extractCreateResults(response, pendingWrites.length, 'Event');
   applyBulkResults(pendingWrites, createResults, results);
+
+  // Notify subscribed workflows (fire-and-forget) for successfully written docs only: no prior
+  // version -> created; a prior version with a different status (e.g. triage re-open) -> status
+  // changed. Emission is best-effort and guarded, so it never affects the returned results.
+  pendingWrites.forEach(({ candidate, document }, responseIndex) => {
+    if (createResults[responseIndex].error) {
+      return;
+    }
+    emitSignificantEventWriteTriggers({
+      eventClient,
+      significantEvent: document,
+      priorSignificantEvent: latestByEventId.get(candidate.eventId),
+    });
+  });
 
   return alignResults(results, 'Event bulk results were not aligned with every input');
 }
