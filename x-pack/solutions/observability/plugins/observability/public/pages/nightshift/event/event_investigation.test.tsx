@@ -118,6 +118,7 @@ describe('EventInvestigation', () => {
     });
 
     expect(screen.getByTestId('nightshiftInvestigationSummaryCard')).toBeInTheDocument();
+    expect(screen.getByTestId('nightshiftInvestigationStatusIcon')).toHaveTextContent('Complete');
     expect(screen.getByTestId('nightshiftInvestigationHeadline')).toHaveTextContent(
       'Deployment regression in checkout service'
     );
@@ -125,7 +126,14 @@ describe('EventInvestigation', () => {
       `${moment('2026-07-10T12:00:00Z').format('HH:mm')} (5 min)`
     );
 
-    fireEvent.click(screen.getByTestId('nightshiftInvestigationShowDetailsButton'));
+    const showDetailsButton = screen.getByTestId('nightshiftInvestigationShowDetailsButton');
+    expect(showDetailsButton).toHaveAttribute('data-ebt-action', 'viewInvestigation');
+    expect(showDetailsButton).toHaveAttribute(
+      'data-ebt-element',
+      'nightshiftEventFlyoutInvestigation'
+    );
+    expect(showDetailsButton).toHaveAttribute('data-ebt-detail', 'complete');
+    fireEvent.click(showDetailsButton);
     expect(screen.getByTestId('nightshiftInvestigationFlyout')).toBeInTheDocument();
     expect(screen.getByTestId('nightshiftInvestigationFlyoutCompleteBadge')).toHaveTextContent(
       'Complete'
@@ -136,7 +144,10 @@ describe('EventInvestigation', () => {
       'true'
     );
 
-    fireEvent.click(screen.getByTestId('nightshiftInvestigationFlyoutChatButton'));
+    const chatButton = screen.getByTestId('nightshiftInvestigationFlyoutChatButton');
+    expect(chatButton).toHaveAttribute('data-ebt-action', 'openInChat');
+    expect(chatButton).toHaveAttribute('data-ebt-detail', 'existingConversation');
+    fireEvent.click(chatButton);
     expect(mockOpenChat).toHaveBeenCalledWith({ conversationId: 'conv-123' });
   });
 
@@ -149,7 +160,15 @@ describe('EventInvestigation', () => {
       },
     });
 
-    fireEvent.click(screen.getByTestId('nightshiftInvestigationMoreRecommendationsLink'));
+    const moreRecommendationsLink = screen.getByTestId(
+      'nightshiftInvestigationMoreRecommendationsLink'
+    );
+    expect(moreRecommendationsLink).toHaveAttribute('data-ebt-action', 'viewInvestigation');
+    expect(moreRecommendationsLink).toHaveAttribute(
+      'data-ebt-element',
+      'nightshiftInvestigationSummary'
+    );
+    fireEvent.click(moreRecommendationsLink);
     expect(screen.getByTestId('nightshiftInvestigationFlyout')).toBeInTheDocument();
     expect(screen.getByTestId('nightshiftInvestigationFlyoutTab-recommendations')).toHaveAttribute(
       'aria-selected',

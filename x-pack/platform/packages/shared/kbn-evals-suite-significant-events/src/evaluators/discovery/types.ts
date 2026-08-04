@@ -6,7 +6,7 @@
  */
 
 import type { ConverseStep, EvaluationCriterion, Evaluator } from '@kbn/evals';
-import type { Detection, Discovery, SignificantEvent } from '@kbn/significant-events-schema';
+import type { Detection, SignificantEvent } from '@kbn/significant-events-schema';
 
 /** Fields every discovery agent output carries: the converse trail and trace id. */
 export interface AgentOutputBase {
@@ -25,7 +25,7 @@ export interface ExampleOutputBase {
 }
 
 export interface DiscoveryAgentOutput extends AgentOutputBase {
-  discoveries: Discovery[];
+  discoveries: SignificantEvent[];
   inputDetections?: Detection[];
 }
 
@@ -38,7 +38,7 @@ export interface DiscoveryEvaluationExample {
      * Canonical expected discoveries (signals + causal_features + blast_radius) — the grouping check
      * derives its expected groups from these discoveries' `signals[].metadata.rule_uuid`s.
      */
-    expected_discoveries?: Array<Partial<Discovery>>;
+    expected_discoveries?: Array<Partial<SignificantEvent>>;
   } & Record<string, unknown>;
   metadata: Record<string, unknown> | null;
 }
@@ -47,12 +47,12 @@ export type DiscoveryEvaluator = Evaluator<DiscoveryEvaluationExample, Discovery
 
 export interface DiscoveryJudgeAgentOutput extends AgentOutputBase {
   significantEvents: SignificantEvent[];
-  inputDiscoveries: Discovery[];
+  inputDiscoveries: SignificantEvent[];
 }
 
 export interface DiscoveryJudgeEvaluationExample {
   input: {
-    discoveries: Array<Partial<Discovery>>;
+    discoveries: Array<Partial<SignificantEvent>>;
   };
   output: ExampleOutputBase & {
     expected_ground_truth?: string;
