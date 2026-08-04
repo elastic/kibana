@@ -156,10 +156,9 @@ export function SearchIndexDetailPageProvider({ getService, getPageObjects }: Ft
     },
     async expectEditSettingsToBeEnabled() {
       await testSubjects.existOrFail('indexDetailsSettingsEditModeSwitch', { timeout: 2000 });
-      const isEditSettingsButtonDisabled = await testSubjects.isEnabled(
-        'indexDetailsSettingsEditModeSwitch'
-      );
-      expect(isEditSettingsButtonDisabled).to.be(true);
+      await retry.waitFor('edit settings switch to be enabled', async () => {
+        return (await testSubjects.isEnabled('indexDetailsSettingsEditModeSwitch')) === true;
+      });
     },
 
     async openIndicesDetailFromIndexManagementIndicesListTable(indexOfRow: number) {
@@ -201,8 +200,9 @@ export function SearchIndexDetailPageProvider({ getService, getPageObjects }: Ft
 
     async expectAddFieldToBeEnabled() {
       await testSubjects.existOrFail('indexDetailsMappingsAddField');
-      const isMappingsFieldEnabled = await testSubjects.isEnabled('indexDetailsMappingsAddField');
-      expect(isMappingsFieldEnabled).to.be(true);
+      await retry.waitFor('mappings add field button to be enabled', async () => {
+        return (await testSubjects.isEnabled('indexDetailsMappingsAddField')) === true;
+      });
     },
 
     async expectDiscoverLinkExists() {
