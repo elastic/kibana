@@ -105,6 +105,8 @@ describe('buildSuperTimelineModel', () => {
       expect(model.isSuperTimeline).toBe(true);
       expect(model.superTimelineSourceIds).toEqual([]);
       expect(skippedQueryTimelines).toEqual([]);
+      // dateRange must be the safe default, not empty strings that break the time-range picker
+      expect(model.dateRange).toEqual(timelineDefaults.dateRange);
     });
   });
 

@@ -51,7 +51,8 @@ const toDateMathInput = (val: string | number): string =>
 
 const parseFilterQuery = (filterQuery: string): Record<string, unknown> | null => {
   try {
-    return isPlainObject(JSON.parse(filterQuery)) ? JSON.parse(filterQuery) : null;
+    const parsed = JSON.parse(filterQuery);
+    return isPlainObject(parsed) ? parsed : null;
   } catch {
     return null;
   }
@@ -95,8 +96,9 @@ const mergeNotes = (timelines: TimelineModel[]) => {
   return { noteIds, eventIdToNoteIds };
 };
 
-const mergeDateRange = (timelines: TimelineModel[]) =>
-  timelines.reduce(
+const mergeDateRange = (timelines: TimelineModel[]) => {
+  if (timelines.length === 0) return timelineDefaults.dateRange;
+  return timelines.reduce(
     (acc, timeline) => {
       const startMs =
         dateMath.parse(toDateMathInput(timeline.dateRange.start))?.valueOf() ?? Infinity;
@@ -116,6 +118,7 @@ const mergeDateRange = (timelines: TimelineModel[]) =>
     },
     { start: '', end: '' }
   );
+};
 
 const mergeColumns = (timelines: TimelineModel[]): ColumnHeaderOptions[] => {
   const seen = new Set<string>();
