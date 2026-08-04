@@ -65,7 +65,11 @@ import {
 import { DASHBOARD_UI_METRIC_ID } from '../../utils/telemetry_constants';
 import type { initializeTrackPanel } from '../track_panel';
 import type { initializeViewModeManager } from '../view_mode_manager';
-import { arePanelLayoutsEqual, arePinnedPanelLayoutsEqual } from './are_layouts_equal';
+import {
+  areLayoutsEqual,
+  arePanelLayoutsEqual,
+  arePinnedPanelLayoutsEqual,
+} from './are_layouts_equal';
 import { deserializeLayout } from './deserialize_layout';
 import { serializeLayout } from './serialize_layout';
 import {
@@ -161,7 +165,7 @@ export function initializeLayoutManager(
       state.pinned_panels
     );
 
-    if (!arePanelLayoutsEqual(layout$.getValue(), layoutToApply)) {
+    if (!areLayoutsEqual(layout$.getValue(), layoutToApply)) {
       layout$.next({ ...layoutToApply });
     }
     currentChildState = { ...childStateToApply };
