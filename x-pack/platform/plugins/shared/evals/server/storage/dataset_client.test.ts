@@ -6,6 +6,7 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
+import type { Logger } from '@kbn/logging';
 import type { InternalIStorageClient } from '@kbn/storage-adapter';
 import type { DatasetExampleStorageProperties } from './examples_storage';
 import type { DatasetStorageProperties } from './datasets_storage';
@@ -157,8 +158,16 @@ const buildAggregations = (aggs: MockQuery | undefined, allRows: MockRow[]) => {
   };
 };
 
-const createDatasetStorageClient = () => {
+const createDatasetStorageClient = ({ onReadForWrite }: { onReadForWrite?: () => void } = {}) => {
   const docs = new Map<string, DatasetStorageDocument>();
+  const seqNos = new Map<string, number>();
+  const PRIMARY_TERM = 1;
+
+  const nextSeqNo = (id: string) => {
+    const seqNo = (seqNos.get(id) ?? -1) + 1;
+    seqNos.set(id, seqNo);
+    return seqNo;
+  };
 
   const search = jest.fn(async (params: Record<string, unknown>) => {
     const query = params.query as MockQuery | undefined;
@@ -196,10 +205,16 @@ const createDatasetStorageClient = () => {
 
     const from = (params.from as number | undefined) ?? 0;
     const size = (params.size as number | undefined) ?? rows.length;
+    const withVersion = params.seq_no_primary_term === true;
     const paged = rows.slice(from, from + size).map((row) => ({
       _id: row._id,
       _source: projectSource(row._source, params._source),
+      ...(withVersion ? { _seq_no: seqNos.get(row._id) ?? 0, _primary_term: PRIMARY_TERM } : {}),
     }));
+
+    if (withVersion) {
+      onReadForWrite?.();
+    }
 
     return {
       hits: {
@@ -210,23 +225,44 @@ const createDatasetStorageClient = () => {
     };
   });
 
-  const index = jest.fn(async ({ id, op_type: opType, document }: Record<string, unknown>) => {
-    if (opType === 'create' && docs.has(id as string)) {
-      throw new errors.ResponseError({
-        statusCode: 409,
-        body: {},
-        headers: {},
-        warnings: [],
-        meta: {} as any,
-      });
-    }
+  const conflict = () =>
+    new errors.ResponseError({
+      statusCode: 409,
+      body: {},
+      headers: {},
+      warnings: [],
+      meta: {} as any,
+    });
 
-    docs.set(id as string, document as DatasetStorageDocument);
-    return { result: 'created' };
-  });
+  const index = jest.fn(
+    async ({
+      id,
+      op_type: opType,
+      document,
+      if_seq_no: ifSeqNo,
+      if_primary_term: ifPrimaryTerm,
+    }: Record<string, unknown>) => {
+      const docId = id as string;
+
+      if (opType === 'create' && docs.has(docId)) {
+        throw conflict();
+      }
+
+      if (ifSeqNo !== undefined || ifPrimaryTerm !== undefined) {
+        const currentSeqNo = seqNos.get(docId);
+        if (!docs.has(docId) || ifSeqNo !== currentSeqNo || ifPrimaryTerm !== PRIMARY_TERM) {
+          throw conflict();
+        }
+      }
+
+      docs.set(docId, document as DatasetStorageDocument);
+      return { result: 'created', _seq_no: nextSeqNo(docId), _primary_term: PRIMARY_TERM };
+    }
+  );
 
   const remove = jest.fn(async ({ id }: Record<string, unknown>) => {
     const deleted = docs.delete(id as string);
+    seqNos.delete(id as string);
     return { result: deleted ? 'deleted' : 'not_found' };
   });
 
@@ -245,12 +281,14 @@ const createDatasetStorageClient = () => {
         if (operation.index) {
           // ES `index` action overwrites (no 409), matching the storage adapter.
           docs.set(operation.index._id, operation.index.document);
+          nextSeqNo(operation.index._id);
           items.push({ index: { status: 200 } });
           continue;
         }
 
         if (operation.delete) {
           docs.delete(operation.delete._id);
+          seqNos.delete(operation.delete._id);
           items.push({ delete: { status: 200 } });
         }
       }
@@ -266,7 +304,7 @@ const createDatasetStorageClient = () => {
     bulk,
   } as unknown as InternalIStorageClient<DatasetStorageDocument>;
 
-  return { docs, client };
+  return { docs, seqNos, client };
 };
 
 const createExamplesStorageClient = () => {
@@ -395,8 +433,8 @@ const createExamplesStorageClient = () => {
   return { docs, client };
 };
 
-const createClient = () => {
-  const datasetsStorage = createDatasetStorageClient();
+const createClient = ({ onReadForWrite }: { onReadForWrite?: () => void } = {}) => {
+  const datasetsStorage = createDatasetStorageClient({ onReadForWrite });
   const examplesStorage = createExamplesStorageClient();
 
   const datasetsStorageAdapter = {
@@ -406,12 +444,15 @@ const createClient = () => {
     getClient: () => examplesStorage.client,
   } as unknown as DatasetExamplesStorageAdapter;
 
+  const logger = { warn: jest.fn(), debug: jest.fn() } as unknown as Logger;
+
   const client = new DatasetClient({
     datasetsStorageAdapter,
     examplesStorageAdapter,
+    logger,
   });
 
-  return { client, datasetsStorage, examplesStorage };
+  return { client, datasetsStorage, examplesStorage, logger };
 };
 
 describe('DatasetClient', () => {
@@ -917,6 +958,117 @@ describe('DatasetClient', () => {
       const afterDelete = await client.get(created.id);
       expect(afterDelete?.tags).toEqual(['golden']);
       expect(afterDelete?.maturity).toBe('golden');
+    });
+
+    // Omitting tags from a write is one way to lose them; the other is timing.
+    // A suite adding examples reads the dataset, then writes it back, and a tag
+    // edit landing in that gap must not be rolled back by the stale copy.
+    it('keeps tags saved concurrently with an example write', async () => {
+      let raceNextRead: (() => void) | undefined;
+      const { client, datasetsStorage } = createClient({
+        onReadForWrite: () => raceNextRead?.(),
+      });
+
+      const created = await client.create({
+        name: 'dataset-1',
+        description: 'A dataset',
+        tags: ['stale'],
+      });
+
+      raceNextRead = () => {
+        // One-shot: the retry must see the competing write, not another race.
+        raceNextRead = undefined;
+        const current = datasetsStorage.docs.get(created.id)!;
+        datasetsStorage.docs.set(created.id, { ...current, tags: ['curated'], maturity: 'golden' });
+        datasetsStorage.seqNos.set(created.id, (datasetsStorage.seqNos.get(created.id) ?? 0) + 1);
+      };
+
+      await client.addExamples(created.id, [baseExampleA]);
+
+      const afterRace = await client.get(created.id);
+      expect(afterRace?.tags).toEqual(['curated']);
+      expect(afterRace?.maturity).toBe('golden');
+      // The retry still lands the count it was asked to write.
+      expect(afterRace?.examples_count).toBe(1);
+    });
+
+    it('reports an update as a miss when the dataset is deleted mid-write', async () => {
+      const harness: { current?: () => void } = {};
+      const { client, datasetsStorage } = createClient({
+        onReadForWrite: () => harness.current?.(),
+      });
+
+      const created = await client.create({ name: 'dataset-1', description: 'A dataset' });
+
+      harness.current = () => {
+        harness.current = undefined;
+        datasetsStorage.docs.delete(created.id);
+        datasetsStorage.seqNos.delete(created.id);
+      };
+
+      await expect(client.update(created.id, { tags: ['golden'] })).resolves.toBeUndefined();
+    });
+
+    // Under sustained contention the retries run out. What happens then depends on
+    // what the write was carrying, because only one of the two is recoverable.
+    describe('when conflicts outlast the retries', () => {
+      const withoutRetryDelays = async <T>(run: () => Promise<T>): Promise<T> => {
+        jest.useFakeTimers();
+        try {
+          const settled = run().then(
+            (value) => () => value,
+            (error) => () => {
+              throw error;
+            }
+          );
+          await jest.advanceTimersByTimeAsync(10_000);
+          return (await settled)();
+        } finally {
+          jest.useRealTimers();
+        }
+      };
+
+      // Never disarmed, so every attempt reads a version that is stale by the time
+      // it writes.
+      const raceEveryRead =
+        (storage: { docs: Map<string, DatasetStorageDocument>; seqNos: Map<string, number> }) =>
+        () => {
+          for (const [id, document] of storage.docs) {
+            storage.docs.set(id, { ...document, description: `touched-${Date.now()}` });
+            storage.seqNos.set(id, (storage.seqNos.get(id) ?? 0) + 1);
+          }
+        };
+
+      it('lets an example write through, leaving the count to self-correct', async () => {
+        const harness: { current?: () => void } = {};
+        const { client, datasetsStorage, logger } = createClient({
+          onReadForWrite: () => harness.current?.(),
+        });
+
+        const created = await client.create({ name: 'dataset-1', description: 'A dataset' });
+        harness.current = raceEveryRead(datasetsStorage);
+
+        // The examples themselves are written before the dataset is touched, so
+        // failing here would report an error for work that already succeeded.
+        await expect(
+          withoutRetryDelays(() => client.addExamples(created.id, [baseExampleA]))
+        ).resolves.toEqual({ added: 1 });
+        expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining(created.id));
+      });
+
+      it('surfaces a metadata edit that could not be applied', async () => {
+        const harness: { current?: () => void } = {};
+        const { client, datasetsStorage } = createClient({
+          onReadForWrite: () => harness.current?.(),
+        });
+
+        const created = await client.create({ name: 'dataset-1', description: 'A dataset' });
+        harness.current = raceEveryRead(datasetsStorage);
+
+        await expect(
+          withoutRetryDelays(() => client.update(created.id, { tags: ['golden'] }))
+        ).rejects.toThrow(/conflict/i);
+      });
     });
 
     it('preserves tags and maturity when backfilling example counts', async () => {

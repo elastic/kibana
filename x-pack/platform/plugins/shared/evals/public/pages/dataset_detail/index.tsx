@@ -49,11 +49,12 @@ import { isHttpFetchError } from '@kbn/core-http-browser';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { useHistory, useParams } from 'react-router-dom';
 import { TraceWaterfall, useTraceSpans } from '@kbn/llm-trace-waterfall';
-import type {
-  DatasetExample,
-  DatasetMaturity,
-  EvaluationExperimentSummary,
-  EvaluationScoreDocument,
+import {
+  MAX_DATASET_DESCRIPTION_LENGTH,
+  type DatasetExample,
+  type DatasetMaturity,
+  type EvaluationExperimentSummary,
+  type EvaluationScoreDocument,
 } from '@kbn/evals-common';
 import {
   useAddExamples,
@@ -222,10 +223,12 @@ export const DatasetDetailPage: React.FC = () => {
     if (!dataset) return;
     try {
       setFormError(null);
+      const isDescriptionEdited = metadataDescription !== (dataset.description ?? '');
+
       await updateDataset.mutateAsync({
         datasetId: dataset.id,
         updates: {
-          description: metadataDescription,
+          ...(isDescriptionEdited ? { description: metadataDescription } : {}),
           tags: metadataTags,
           maturity: metadataMaturity,
         },
@@ -1128,6 +1131,7 @@ export const DatasetDetailPage: React.FC = () => {
                 <EuiTextArea
                   value={metadataDescription}
                   onChange={(event) => setMetadataDescription(event.target.value)}
+                  maxLength={MAX_DATASET_DESCRIPTION_LENGTH}
                   fullWidth
                 />
               </EuiFormRow>

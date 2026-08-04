@@ -46,8 +46,7 @@ describe('DatasetTagBadges', () => {
     const onRowClick = jest.fn();
 
     render(
-      // eslint-disable-next-line jsx-a11y/click-events-have-key-events
-      <div onClick={onRowClick}>
+      <div role="button" tabIndex={0} onClick={onRowClick} onKeyDown={onRowClick}>
         <DatasetTagBadges tags={['esql']} onTagClick={onTagClick} />
       </div>,
       { wrapper: Wrapper }

@@ -198,6 +198,8 @@ Writes are patch-like: a field omitted from a create, update, or upsert keeps it
 
 The listing also returns `facets` — the distinct tags and maturity levels with dataset counts. They follow the search term but ignore the active tag and maturity filters, so filter options stay stable as they are toggled.
 
+Concurrent writes are guarded with optimistic concurrency, so a suite adding examples cannot roll back tags saved from the UI while it was running. If many writers contend for the same dataset and the retries run out, a write that only refreshes `examples_count` is skipped and logged (the count catches up on the next change), while a metadata change that could not be applied fails the request rather than disappearing.
+
 ## Instrumentation profiles
 
 Evaluator routes reconstruct a normalized evidence round (`input.message`, `response.message`, `steps`) from a trace using an **instrumentation profile**. Pass `subject.instrumentation.profile` on `_validate` / `_evaluate`; when omitted, **`elastic-inference`** is used.

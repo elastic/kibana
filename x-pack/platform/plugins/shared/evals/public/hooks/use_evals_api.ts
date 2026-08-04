@@ -154,6 +154,11 @@ export const useDatasets = (filters: DatasetsListFilters = {}) => {
   });
 };
 
+/**
+ * Every tag in use across datasets, for offering as suggestions. Asking for one
+ * dataset is enough because the tag facet comes from a global aggregation. Reusing
+ * a list query's facets would be cheaper but scopes suggestions to its search term.
+ */
 export const useDatasetTagSuggestions = ({ enabled }: { enabled: boolean }): string[] => {
   const { services } = useKibana();
 

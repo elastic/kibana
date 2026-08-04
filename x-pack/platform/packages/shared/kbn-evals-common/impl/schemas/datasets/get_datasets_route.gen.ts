@@ -44,13 +44,19 @@ export const GetEvaluationDatasetsRequestQuery = lazySchema(() =>
     /**
      * Only return datasets carrying every one of these tags. Comparison is case-insensitive.
      */
-    tags: ArrayFromString(z.string().min(1).max(64)).optional(),
+    tags: ArrayFromString(
+      z
+        .string()
+        .min(1)
+        .max(64)
+        .regex(/^[a-zA-Z0-9][a-zA-Z0-9:._-]*$/)
+    ).optional(),
     /**
      * Only return datasets at one of these maturity levels.
      */
     maturity: ArrayFromString(DatasetMaturity).optional(),
     /**
-     * Sorting by `maturity` orders the levels alphabetically rather than by how curated they are. Datasets with no maturity sort last either way, since Elasticsearch places missing values last regardless of order.
+     * Sorting by `maturity` orders the levels alphabetically rather than by how curated they are.
      */
     sort_field: z
       .enum(['name', 'created_at', 'updated_at', 'examples_count', 'maturity'])

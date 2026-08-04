@@ -33,9 +33,14 @@ import {
   type EuiBasicTableColumn,
 } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
-import type { DatasetMaturity, DatasetSummary } from '@kbn/evals-common';
+import {
+  MAX_DATASET_DESCRIPTION_LENGTH,
+  MAX_DATASET_NAME_LENGTH,
+  type DatasetMaturity,
+  type DatasetSummary,
+} from '@kbn/evals-common';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
-import { useCreateDataset, useDatasets } from '../../hooks/use_evals_api';
+import { useCreateDataset, useDatasetTagSuggestions, useDatasets } from '../../hooks/use_evals_api';
 import { useEvalsPermissions } from '../../hooks/use_evals_permissions';
 import { DeleteDatasetModal } from '../../components/delete_dataset_modal';
 import {
@@ -241,10 +246,10 @@ export const DatasetsListPage: React.FC = () => {
     }
   };
 
-  const suggestedTags = useMemo(
-    () => (data?.facets?.tags ?? []).map(({ value }) => value),
-    [data?.facets?.tags]
-  );
+  // Deliberately not the facets from the list query above: those follow the search
+  // term, and the tags offered while creating a dataset shouldn't depend on what
+  // happens to be typed in the search box.
+  const suggestedTags = useDatasetTagSuggestions({ enabled: isCreateFlyoutOpen });
 
   const datasets = data?.datasets ?? [];
   const hasActiveSearch = debouncedSearch.trim().length > 0;
@@ -400,6 +405,7 @@ export const DatasetsListPage: React.FC = () => {
                   value={name}
                   onChange={(event) => setName(event.target.value)}
                   isInvalid={Boolean(createError)}
+                  maxLength={MAX_DATASET_NAME_LENGTH}
                   fullWidth
                 />
               </EuiFormRow>
@@ -408,6 +414,7 @@ export const DatasetsListPage: React.FC = () => {
                   value={description}
                   onChange={(event) => setDescription(event.target.value)}
                   rows={3}
+                  maxLength={MAX_DATASET_DESCRIPTION_LENGTH}
                   fullWidth
                 />
               </EuiFormRow>

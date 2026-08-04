@@ -31,6 +31,7 @@ paths:
               properties:
                 description:
                   type: string
+                  maxLength: 2048
                 tags:
                   $ref: '../common_attributes.schema.yaml#/components/schemas/DatasetTags'
                 # Inlined rather than $ref'd to DatasetMaturity because only this

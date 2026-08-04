@@ -48,6 +48,7 @@ paths:
               type: string
               minLength: 1
               maxLength: 64
+              pattern: '^[a-zA-Z0-9][a-zA-Z0-9:._-]*$'
           style: form
           explode: true
           description: >-

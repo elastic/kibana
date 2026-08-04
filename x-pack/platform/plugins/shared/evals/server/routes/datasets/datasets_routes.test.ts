@@ -234,6 +234,21 @@ describe('dataset routes', () => {
       );
     });
 
+    it('rejects filter tags the write path would also reject', () => {
+      // A blank tag normalizes away to nothing server-side, so accepting it here
+      // would silently return the unfiltered list instead of failing.
+      expect(GetEvaluationDatasetsRequestQuery.safeParse({ tags: ' ' }).success).toBe(false);
+      expect(GetEvaluationDatasetsRequestQuery.safeParse({ tags: ['has space'] }).success).toBe(
+        false
+      );
+      expect(GetEvaluationDatasetsRequestQuery.safeParse({ tags: ['-leading'] }).success).toBe(
+        false
+      );
+      expect(GetEvaluationDatasetsRequestQuery.safeParse({ tags: ['team:obs-ai'] }).success).toBe(
+        true
+      );
+    });
+
     it('returns the facet counts supplied by the client', async () => {
       const { handler, context, datasetClient } = buildRouteSetup({
         registerRoute: registerListDatasetsRoute,

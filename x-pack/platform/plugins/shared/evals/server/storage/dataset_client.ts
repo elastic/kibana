@@ -14,6 +14,9 @@ import type {
   StorageIndexAdapter,
 } from '@kbn/storage-adapter';
 import { isResponseError } from '@kbn/es-errors';
+import { OccWriter, isOccConflictError } from '@kbn/occ';
+import type { OccDocument } from '@kbn/occ';
+import type { Logger } from '@kbn/logging';
 import {
   DATASET_UUID_NAMESPACE,
   DatasetMaturityEnum,
@@ -152,16 +155,54 @@ export type DatasetExamplesStorageAdapter = StorageIndexAdapter<
 export class DatasetClient {
   private readonly datasetsStorage: InternalIStorageClient<DatasetStorageDocument>;
   private readonly examplesStorage: InternalIStorageClient<DatasetExampleStorageDocument>;
+  private readonly datasetWriter: OccWriter<DatasetStorageProperties>;
+  private readonly logger?: Logger;
 
   constructor({
     datasetsStorageAdapter,
     examplesStorageAdapter,
+    logger,
   }: {
     datasetsStorageAdapter: DatasetsStorageAdapter;
     examplesStorageAdapter: DatasetExamplesStorageAdapter;
+    logger?: Logger;
   }) {
     this.datasetsStorage = datasetsStorageAdapter.getClient();
     this.examplesStorage = examplesStorageAdapter.getClient();
+    this.logger = logger;
+
+    // Every dataset write is a read-modify-write of the whole document, because the
+    // storage adapter can only replace documents outright. Without a conditional write
+    // a suite touching the dataset for an example batch would silently revert tags a
+    // user saved in between, which is the loss this field is supposed to survive.
+    this.datasetWriter = new OccWriter<DatasetStorageProperties>({
+      get: async (id) => {
+        const current = await this.getDatasetForWrite(id);
+        return current ?? null;
+      },
+      index: async ({ id, document, ifSeqNo, ifPrimaryTerm }) => {
+        const response = await this.datasetsStorage.index({
+          id,
+          document,
+          refresh: true,
+          ...(ifSeqNo != null && ifPrimaryTerm != null
+            ? { if_seq_no: ifSeqNo, if_primary_term: ifPrimaryTerm }
+            : {}),
+        });
+
+        // Typed optional, but Elasticsearch always returns both for a write that
+        // landed. Failing here beats handing back made-up values that the next
+        // conditional write would treat as real.
+        if (response._seq_no == null || response._primary_term == null) {
+          throw new Error(`Indexing dataset "${id}" returned no _seq_no/_primary_term`);
+        }
+
+        return { seqNo: response._seq_no, primaryTerm: response._primary_term };
+      },
+      maxRetries: 5,
+      retryDelayMs: 150,
+      logger,
+    });
   }
 
   static getDatasetId(name: string): string {
@@ -374,18 +415,14 @@ export class DatasetClient {
     datasetId: string,
     updates: UpdateDatasetInput
   ): Promise<DatasetWithExamples | undefined> {
-    const existing = await this.getDatasetById(datasetId);
-    if (!existing) {
+    const updatedAt = new Date().toISOString();
+    const written = await this.writeDatasetIfPresent(datasetId, (current) =>
+      buildDatasetDocument(current, { ...updates, updated_at: updatedAt })
+    );
+
+    if (!written) {
       return undefined;
     }
-
-    await this.datasetsStorage.index({
-      id: datasetId,
-      document: buildDatasetDocument(existing, {
-        ...updates,
-        updated_at: new Date().toISOString(),
-      }),
-    });
 
     return this.get(datasetId);
   }
@@ -651,13 +688,10 @@ export class DatasetClient {
     if (examplesChanged) {
       await this.touchDataset(existing.id, metadataPatch);
     } else if (metadataChanged) {
-      await this.datasetsStorage.index({
-        id: existing.id,
-        document: buildDatasetDocument(existing, {
-          ...metadataPatch,
-          updated_at: new Date().toISOString(),
-        }),
-      });
+      const updatedAt = new Date().toISOString();
+      await this.writeDatasetIfPresent(existing.id, (current) =>
+        buildDatasetDocument(current, { ...metadataPatch, updated_at: updatedAt })
+      );
     }
 
     return {
@@ -665,6 +699,38 @@ export class DatasetClient {
       added,
       removed: toDelete.length,
       unchanged,
+    };
+  }
+
+  /**
+   * Reads a dataset along with the `_seq_no`/`_primary_term` a conditional write has
+   * to send back. Separate from `getDatasetById` so `seq_no_primary_term` can't be
+   * forgotten: without it both are undefined and the write silently becomes
+   * unconditional.
+   */
+  private async getDatasetForWrite(
+    datasetId: string
+  ): Promise<OccDocument<DatasetStorageProperties> | undefined> {
+    const response = await this.datasetsStorage.search({
+      track_total_hits: false,
+      size: 1,
+      seq_no_primary_term: true,
+      query: {
+        term: {
+          _id: datasetId,
+        },
+      },
+    });
+
+    const hit = response.hits.hits[0];
+    if (!hit?._source || hit._seq_no == null || hit._primary_term == null) {
+      return undefined;
+    }
+
+    return {
+      id: datasetId,
+      source: hit._source,
+      occ: { seqNo: hit._seq_no, primaryTerm: hit._primary_term },
     };
   }
 
@@ -832,27 +898,66 @@ export class DatasetClient {
    * refresh the count while preserving the timestamp. Recompute-after-write
    * (rather than incrementing) keeps the count correct even when duplicate
    * examples are skipped or writes race.
+   *
+   * The count is taken once rather than per attempt, since `mutate` is synchronous:
+   * a retry can write a count another writer has moved past, which self-corrects on
+   * the next example change.
    */
   private async touchDataset(
     datasetId: string,
     patch: DatasetPatch & { bumpUpdatedAt?: boolean } = {}
   ): Promise<void> {
     const { bumpUpdatedAt = true, ...metadata } = patch;
-    const dataset = await this.getDatasetById(datasetId);
-    if (!dataset) {
-      return;
+    const examplesCount = await this.countExamplesByDatasetId(datasetId);
+    const updatedAt = bumpUpdatedAt ? new Date().toISOString() : undefined;
+
+    await this.writeDatasetIfPresent(
+      datasetId,
+      (current) =>
+        buildDatasetDocument(current, {
+          ...metadata,
+          examples_count: examplesCount,
+          ...(updatedAt ? { updated_at: updatedAt } : {}),
+        }),
+      { tolerateConflict: isEmpty(metadata) }
+    );
+  }
+
+  /**
+   * Conditional read-modify-write that skips an already-deleted dataset instead of
+   * resurrecting it, which is what these callers used to get from reading the
+   * document before writing it back. Returns false when there was nothing to write.
+   */
+  private async writeDatasetIfPresent(
+    datasetId: string,
+    mutate: (current: DatasetStorageProperties) => DatasetStorageProperties,
+    { tolerateConflict = false }: { tolerateConflict?: boolean } = {}
+  ): Promise<boolean> {
+    const exists = await this.datasetExists(datasetId);
+    if (!exists) {
+      return false;
     }
 
-    const examplesCount = await this.countExamplesByDatasetId(datasetId);
+    try {
+      await this.datasetWriter.readModifyWrite({ id: datasetId, mutate });
+      return true;
+    } catch (error) {
+      if (tolerateConflict && isOccConflictError(error)) {
+        this.logger?.warn(
+          `Gave up refreshing dataset "${datasetId}" after repeated write conflicts; its example count may lag until the next change`
+        );
+        return true;
+      }
 
-    await this.datasetsStorage.index({
-      id: datasetId,
-      document: buildDatasetDocument(dataset, {
-        ...metadata,
-        examples_count: examplesCount,
-        ...(bumpUpdatedAt ? { updated_at: new Date().toISOString() } : {}),
-      }),
-    });
+      // A delete landing between the check above and the write makes the writer throw.
+      // Existence is re-read rather than matching its message, which is untyped text:
+      // a dataset that is genuinely gone is a miss, like one absent from the start.
+      if (!(await this.datasetExists(datasetId))) {
+        return false;
+      }
+
+      throw error;
+    }
   }
 
   /**
@@ -860,6 +965,11 @@ export class DatasetClient {
    * field. Idempotent: only datasets missing the field are processed, so reruns
    * (and fresh/empty deployments) are no-ops. Intended to run once on plugin
    * start.
+   *
+   * Unlike the other write paths this one isn't version-checked, since bulk needs
+   * per-item conflict handling. The exposure is a single start-up pass over
+   * documents old enough to be missing the field, so an edit would have to land in
+   * that window to be lost.
    */
   async backfillDatasetCounts(): Promise<{ updated: number }> {
     const batchSize = 100;

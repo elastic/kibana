@@ -35,7 +35,7 @@ export type UpdateEvaluationDatasetRequestParamsInput = z.input<
  */
 export const UpdateEvaluationDatasetRequestBody = lazySchema(() =>
   z.object({
-    description: z.string().optional(),
+    description: z.string().max(2048).optional(),
     tags: DatasetTags.optional(),
     maturity: z.enum(['raw', 'cleaned', 'golden']).nullable().optional(),
   })
