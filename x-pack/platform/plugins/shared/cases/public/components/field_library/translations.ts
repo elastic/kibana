@@ -48,11 +48,11 @@ export const ERROR_DELETING_FIELD_DEFINITION = i18n.translate(
 );
 
 export const FIELD_LIBRARY_TITLE = i18n.translate('xpack.cases.fieldLibrary.title', {
-  defaultMessage: 'Field Library',
+  defaultMessage: 'Field library',
 });
 
 export const FIELD_LIBRARY_DESCRIPTION = i18n.translate('xpack.cases.fieldLibrary.description', {
-  defaultMessage: 'Manage reusable field definitions that can be inserted into case templates.',
+  defaultMessage: 'Define a field once, then apply it to every case or add it to any template.',
 });
 
 export const CREATE_FIELD_DEFINITION = i18n.translate(
@@ -101,12 +101,11 @@ export const INSERT_FIELD = i18n.translate('xpack.cases.fieldLibrary.insertField
 });
 
 export const FIELD_LIBRARY_PANEL_TITLE = i18n.translate('xpack.cases.fieldLibrary.panelTitle', {
-  defaultMessage: 'Field Library',
+  defaultMessage: 'Field library',
 });
 
 export const FIELD_LIBRARY_PANEL_EMPTY = i18n.translate('xpack.cases.fieldLibrary.panelEmpty', {
-  defaultMessage:
-    'No reusable field definitions yet. Create some in the Field Library to insert them here.',
+  defaultMessage: 'No fields yet. Create one in the field library to insert it here.',
 });
 
 export const FIELD_ALREADY_EXISTS_ERROR = (fieldName: string) =>
@@ -193,7 +192,7 @@ export const FIELD_DEFINITION_YAML_INVALID_SYNTAX = i18n.translate(
 
 export const FIELD_DEFINITION_FORM_DESCRIPTION = i18n.translate(
   'xpack.cases.fieldLibrary.fieldDefinitionFormDescription',
-  { defaultMessage: 'Create a reusable field for case templates.' }
+  { defaultMessage: 'Define a field you can apply to every case or add to any template.' }
 );
 
 export const FIELD_DEFINITION_PREVIEW_LABEL = i18n.translate(
@@ -230,38 +229,40 @@ export const APPLY_TO_ALL_CASES_HELP_TEXT = i18n.translate(
 
 export const GLOBAL_FIELDS_SECTION_TITLE = i18n.translate(
   'xpack.cases.fieldLibrary.globalFieldsSectionTitle',
-  { defaultMessage: 'Applies to every case' }
+  { defaultMessage: 'Global fields' }
 );
 
 export const GLOBAL_FIELDS_SECTION_DESCRIPTION = i18n.translate(
   'xpack.cases.fieldLibrary.globalFieldsSectionDescription',
   {
     defaultMessage:
-      'These fields appear on every case, in this order. Drag a field to rearrange it.',
+      'Appear on every case, whether or not a template is applied. When a template is applied, these come first — drag to change their order.',
   }
 );
 
 export const GLOBAL_FIELDS_SECTION_EMPTY = i18n.translate(
   'xpack.cases.fieldLibrary.globalFieldsSectionEmpty',
   {
-    defaultMessage:
-      'No fields apply to every case yet. Use a field’s actions menu to add one here.',
+    defaultMessage: 'No global fields yet. Edit a reusable field and turn on Global field.',
   }
 );
 
 export const TEMPLATE_FIELDS_SECTION_TITLE = i18n.translate(
   'xpack.cases.fieldLibrary.templateFieldsSectionTitle',
-  { defaultMessage: 'Available in templates' }
+  { defaultMessage: 'Reusable fields' }
 );
 
 export const TEMPLATE_FIELDS_SECTION_DESCRIPTION = i18n.translate(
   'xpack.cases.fieldLibrary.templateFieldsSectionDescription',
-  { defaultMessage: 'These fields appear only on cases created from a template that uses them.' }
+  {
+    defaultMessage:
+      'Available to any template. Appear on a case only when a template that uses them is applied.',
+  }
 );
 
 export const TEMPLATE_FIELDS_SECTION_EMPTY = i18n.translate(
   'xpack.cases.fieldLibrary.templateFieldsSectionEmpty',
-  { defaultMessage: 'No template-only fields yet.' }
+  { defaultMessage: 'No reusable fields yet.' }
 );
 
 export const REORDER_DISABLED_WHILE_SEARCHING = i18n.translate(

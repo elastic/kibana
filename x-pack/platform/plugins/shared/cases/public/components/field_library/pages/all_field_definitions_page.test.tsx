@@ -63,7 +63,7 @@ describe('AllFieldDefinitionsPage', () => {
     mockGetFieldDefinitions.mockReturnValue({ data: { fieldDefinitions: [] }, isLoading: false });
   });
 
-  it('reorders global fields from their Field Library actions', async () => {
+  it('reorders global fields from their field library actions', async () => {
     const firstField = buildFieldDefinition({
       fieldDefinitionId: 'first',
       name: 'first_field',

@@ -26,7 +26,7 @@ export const STEP_CREATE_DESCRIPTION = i18n.translate(
 export const STEP_FIELD_LIBRARY_TITLE = i18n.translate(
   'xpack.cases.templates.tour.fieldLibrary.title',
   {
-    defaultMessage: 'Reuse fields from the Field Library',
+    defaultMessage: 'Reuse fields from the field library',
   }
 );
 
