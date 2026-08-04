@@ -22,7 +22,7 @@ export function initializeApproximationManager(initialState: DashboardState) {
   }
 
   const comparators: StateComparators<Pick<DashboardState, 'esql_approximation'>> = {
-    esql_approximation: 'referenceEquality',
+    esql_approximation: (a, b) => Boolean(a) === Boolean(b),
   };
 
   const getState = (): Pick<DashboardState, 'esql_approximation'> => ({
