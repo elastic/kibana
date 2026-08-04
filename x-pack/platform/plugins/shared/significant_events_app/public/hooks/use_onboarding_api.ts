@@ -23,7 +23,7 @@ export function useOnboardingApi() {
   const {
     dependencies: {
       start: {
-        streams: { streamsRepositoryClient },
+        significant_events: { significantEventsRepositoryClient },
       },
     },
   } = useKibana();
@@ -35,7 +35,7 @@ export function useOnboardingApi() {
       scheduleOnboarding: async (streamName: string, options?: ScheduleOnboardingOptions) => {
         const { from, to } = getLast24HoursTimeRange();
 
-        return streamsRepositoryClient.fetch(
+        return significantEventsRepositoryClient.fetch(
           'POST /internal/streams/{streamName}/onboarding/_execute',
           {
             signal,
@@ -53,7 +53,7 @@ export function useOnboardingApi() {
         );
       },
       getOnboardingStatus: async (streamName: string) => {
-        return streamsRepositoryClient.fetch(
+        return significantEventsRepositoryClient.fetch(
           'GET /internal/streams/{streamName}/onboarding/_status',
           {
             signal,
@@ -64,7 +64,7 @@ export function useOnboardingApi() {
         );
       },
       getOnboardingStatuses: async (streamNames: string[]) => {
-        return streamsRepositoryClient.fetch('POST /internal/streams/onboarding/_bulk_status', {
+        return significantEventsRepositoryClient.fetch('POST /internal/streams/onboarding/_bulk_status', {
           signal,
           params: {
             body: { streamNames },
@@ -72,7 +72,7 @@ export function useOnboardingApi() {
         });
       },
       cancelOnboarding: async (streamName: string) => {
-        await streamsRepositoryClient.fetch(
+        await significantEventsRepositoryClient.fetch(
           'POST /internal/streams/{streamName}/onboarding/_execute',
           {
             signal,
@@ -86,6 +86,6 @@ export function useOnboardingApi() {
         );
       },
     }),
-    [signal, streamsRepositoryClient]
+    [signal, significantEventsRepositoryClient]
   );
 }

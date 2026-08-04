@@ -13,7 +13,7 @@ export const useSignificantEventsDiscoveryApi = () => {
   const {
     dependencies: {
       start: {
-        streams: { streamsRepositoryClient },
+        significant_events: { significantEventsRepositoryClient },
       },
     },
   } = useKibana();
@@ -23,7 +23,7 @@ export const useSignificantEventsDiscoveryApi = () => {
   return useMemo(
     () => ({
       triggerSignificantEventsDiscovery: () =>
-        streamsRepositoryClient.fetch(
+        significantEventsRepositoryClient.fetch(
           'POST /internal/streams/significant_events/discovery/_execute',
           {
             // No abort signal: aborting a fire-and-track mutation would silently
@@ -33,7 +33,7 @@ export const useSignificantEventsDiscoveryApi = () => {
           }
         ),
       cancelSignificantEventsDiscovery: () =>
-        streamsRepositoryClient.fetch(
+        significantEventsRepositoryClient.fetch(
           'POST /internal/streams/significant_events/discovery/_execute',
           {
             // No abort signal: cancel is fire-and-forget — aborting mid-flight
@@ -43,11 +43,11 @@ export const useSignificantEventsDiscoveryApi = () => {
           }
         ),
       getSignificantEventsDiscoveryStatus: () =>
-        streamsRepositoryClient.fetch(
+        significantEventsRepositoryClient.fetch(
           'GET /internal/streams/significant_events/discovery/_status',
           { params: {}, signal }
         ),
     }),
-    [signal, streamsRepositoryClient]
+    [signal, significantEventsRepositoryClient]
   );
 };

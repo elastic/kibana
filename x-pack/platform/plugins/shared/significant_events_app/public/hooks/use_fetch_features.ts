@@ -18,7 +18,7 @@ export const useFetchFeatures = () => {
   const {
     dependencies: {
       start: {
-        streams: { streamsRepositoryClient },
+        significant_events: { significantEventsRepositoryClient },
       },
     },
   } = useKibana();
@@ -27,7 +27,7 @@ export const useFetchFeatures = () => {
   const fetchFeatures = async ({
     signal,
   }: QueryFunctionContext): Promise<FetchFeaturesResult | undefined> => {
-    return await streamsRepositoryClient.fetch('GET /internal/streams/_features', {
+    return await significantEventsRepositoryClient.fetch('GET /internal/streams/_features', {
       signal: signal ?? null,
       params: {
         query: {

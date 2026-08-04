@@ -31,7 +31,7 @@ export function useKnowledgeIndicatorsBulkDelete({
     },
     dependencies: {
       start: {
-        streams: { streamsRepositoryClient },
+        significant_events: { significantEventsRepositoryClient },
       },
     },
   } = useKibana();
@@ -58,7 +58,7 @@ export function useKnowledgeIndicatorsBulkDelete({
 
       const queriesPromise: Promise<BulkOperationResult> =
         queryIds.length > 0
-          ? streamsRepositoryClient
+          ? significantEventsRepositoryClient
               .fetch('POST /internal/streams/queries/_bulk_delete', {
                 signal: null,
                 params: { body: { queryIds } },

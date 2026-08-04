@@ -202,7 +202,7 @@ describe('useKnowledgeIndicatorsUrlState', () => {
     it('calls router.replace with filter state', () => {
       renderHook(() => useKnowledgeIndicatorsUrlState(defaultParams));
 
-      expect(mockReplace).toHaveBeenCalledWith('/_discovery/{tab}', {
+      expect(mockReplace).toHaveBeenCalledWith('/{tab}', {
         path: { tab: 'knowledge_indicators' },
         query: {},
       });
@@ -222,7 +222,7 @@ describe('useKnowledgeIndicatorsUrlState', () => {
 
       renderHook(() => useKnowledgeIndicatorsUrlState(defaultParams));
 
-      expect(mockReplace).toHaveBeenCalledWith('/_discovery/{tab}', {
+      expect(mockReplace).toHaveBeenCalledWith('/{tab}', {
         path: { tab: 'knowledge_indicators' },
         query: expect.objectContaining({
           search: 'test',
@@ -240,7 +240,7 @@ describe('useKnowledgeIndicatorsUrlState', () => {
     it('preserves selectedItem in URL', () => {
       mockQuery = { selectedItem: 'f1' };
       renderHook(() => useKnowledgeIndicatorsUrlState(defaultParams));
-      expect(mockReplace).toHaveBeenCalledWith('/_discovery/{tab}', {
+      expect(mockReplace).toHaveBeenCalledWith('/{tab}', {
         path: { tab: 'knowledge_indicators' },
         query: expect.objectContaining({ selectedItem: 'f1' }),
       });
@@ -253,7 +253,7 @@ describe('useKnowledgeIndicatorsUrlState', () => {
       act(() => {
         result.current.closeFlyout();
       });
-      expect(mockPush).toHaveBeenCalledWith('/_discovery/{tab}', {
+      expect(mockPush).toHaveBeenCalledWith('/{tab}', {
         path: { tab: 'knowledge_indicators' },
         query: expect.not.objectContaining({ selectedItem: expect.anything() }),
       });
@@ -269,7 +269,7 @@ describe('useKnowledgeIndicatorsUrlState', () => {
       act(() => {
         result.current.toggleSelectedKnowledgeIndicator(ki);
       });
-      expect(mockPush).toHaveBeenCalledWith('/_discovery/{tab}', {
+      expect(mockPush).toHaveBeenCalledWith('/{tab}', {
         path: { tab: 'knowledge_indicators' },
         query: expect.objectContaining({ selectedItem: 'f1' }),
       });
@@ -286,7 +286,7 @@ describe('useKnowledgeIndicatorsUrlState', () => {
       act(() => {
         result.current.toggleSelectedKnowledgeIndicator(ki);
       });
-      expect(mockPush).toHaveBeenCalledWith('/_discovery/{tab}', {
+      expect(mockPush).toHaveBeenCalledWith('/{tab}', {
         path: { tab: 'knowledge_indicators' },
         query: expect.not.objectContaining({ selectedItem: expect.anything() }),
       });

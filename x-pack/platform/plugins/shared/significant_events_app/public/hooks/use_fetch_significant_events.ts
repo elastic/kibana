@@ -36,7 +36,7 @@ export const useFetchSignificantEvents = ({
   const {
     dependencies: {
       start: {
-        streams: { streamsRepositoryClient },
+        significant_events: { significantEventsRepositoryClient },
       },
     },
   } = useKibana();
@@ -63,7 +63,7 @@ export const useFetchSignificantEvents = ({
     queryFn: async ({
       signal,
     }: QueryFunctionContext): Promise<PaginatedResponse<SignificantEvent>> => {
-      return streamsRepositoryClient.fetch('GET /internal/significant_events/events', {
+      return significantEventsRepositoryClient.fetch('GET /internal/significant_events/events', {
         params: {
           query: {
             page: pagination.page,

@@ -45,7 +45,7 @@ export const useTriggerInvestigation = ({
     },
     dependencies: {
       start: {
-        streams: { streamsRepositoryClient },
+        significant_events: { significantEventsRepositoryClient },
       },
     },
   } = useKibana();
@@ -53,7 +53,7 @@ export const useTriggerInvestigation = ({
 
   const mutation = useMutation<TriggerInvestigationResult, Error, string>({
     mutationFn: (eventUuid: string) =>
-      streamsRepositoryClient.fetch('POST /internal/significant_events/events/{id}/investigate', {
+      significantEventsRepositoryClient.fetch('POST /internal/significant_events/events/{id}/investigate', {
         params: { path: { id: eventUuid } },
         signal: null,
       }),

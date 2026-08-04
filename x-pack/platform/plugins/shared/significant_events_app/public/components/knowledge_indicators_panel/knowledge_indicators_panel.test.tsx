@@ -35,7 +35,7 @@ const renderWithI18n = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I1
 
 describe('KnowledgeIndicatorsPanel', () => {
   const definition = createMockWiredStreamDefinition();
-  const link = jest.fn(() => '/app/streams/_discovery/knowledge_indicators?stream=logs');
+  const link = jest.fn(() => '/app/significant_events/knowledge_indicators?stream=logs');
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -90,16 +90,16 @@ describe('KnowledgeIndicatorsPanel', () => {
     );
   });
 
-  it('links to the discovery knowledge indicators page with the stream pre-filtered', () => {
+  it('links to the knowledge indicators tab with the stream pre-filtered', () => {
     renderWithI18n(<KnowledgeIndicatorsPanel definition={definition} />);
 
-    expect(link).toHaveBeenCalledWith('/_discovery/{tab}', {
+    expect(link).toHaveBeenCalledWith('/{tab}', {
       path: { tab: 'knowledge_indicators' },
       query: { stream: definition.stream.name },
     });
     expect(screen.getByTestId('streamsAppKnowledgeIndicatorsPanelLink')).toHaveAttribute(
       'href',
-      '/app/streams/_discovery/knowledge_indicators?stream=logs'
+      '/app/significant_events/knowledge_indicators?stream=logs'
     );
   });
 

@@ -18,13 +18,14 @@ export const useStreamFeatures = (
   deps: unknown[] = [],
   { enabled = true }: { enabled?: boolean } = {}
 ) => {
-  const { streamsRepositoryClient } = useKibana().dependencies.start.streams;
+  const { significantEventsRepositoryClient } =
+    useKibana().dependencies.start.significant_events;
   const showFetchErrorToast = useFetchErrorToast();
 
   const streamName = definition.name;
 
   const fetchFeatures = async ({ signal: querySignal }: QueryFunctionContext) => {
-    return streamsRepositoryClient.fetch('GET /internal/streams/{name}/features', {
+    return significantEventsRepositoryClient.fetch('GET /internal/streams/{name}/features', {
       params: {
         path: {
           name: streamName,

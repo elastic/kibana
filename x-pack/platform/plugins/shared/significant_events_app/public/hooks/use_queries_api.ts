@@ -35,7 +35,7 @@ export function useQueriesApi(): QueriesApi {
   const {
     dependencies: {
       start: {
-        streams: { streamsRepositoryClient },
+        significant_events: { significantEventsRepositoryClient },
       },
     },
   } = useKibana();
@@ -45,20 +45,20 @@ export function useQueriesApi(): QueriesApi {
     () => ({
       promote: async ({ queryIds }: { queryIds: string[] }) => {
         const params = { body: { queryIds } };
-        return streamsRepositoryClient.fetch('POST /internal/streams/queries/_promote', {
+        return significantEventsRepositoryClient.fetch('POST /internal/streams/queries/_promote', {
           params,
           signal: null,
         });
       },
       demote: async ({ queryIds }: { queryIds: string[] }) => {
         const params = { body: { queryIds } };
-        return streamsRepositoryClient.fetch('POST /internal/streams/queries/_demote', {
+        return significantEventsRepositoryClient.fetch('POST /internal/streams/queries/_demote', {
           params,
           signal: null,
         });
       },
       removeQuery: async ({ queryId }: { queryId: string; streamName: string }) => {
-        await streamsRepositoryClient.fetch('POST /internal/streams/queries/_bulk_delete', {
+        await significantEventsRepositoryClient.fetch('POST /internal/streams/queries/_bulk_delete', {
           signal,
           params: {
             body: {
@@ -68,7 +68,7 @@ export function useQueriesApi(): QueriesApi {
         });
       },
       deleteQueriesInBulk: async ({ queryIds }: { queryIds: string[]; streamName: string }) => {
-        await streamsRepositoryClient.fetch('POST /internal/streams/queries/_bulk_delete', {
+        await significantEventsRepositoryClient.fetch('POST /internal/streams/queries/_bulk_delete', {
           signal: null,
           params: {
             body: {
@@ -82,6 +82,6 @@ export function useQueriesApi(): QueriesApi {
         refresh();
       },
     }),
-    [abort, refresh, signal, streamsRepositoryClient]
+    [abort, refresh, signal, significantEventsRepositoryClient]
   );
 }

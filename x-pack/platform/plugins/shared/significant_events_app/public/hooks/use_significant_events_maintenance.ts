@@ -68,7 +68,7 @@ export const useMaintenanceStatus = () => {
   const {
     dependencies: {
       start: {
-        streams: { streamsRepositoryClient },
+        significant_events: { significantEventsRepositoryClient },
       },
     },
   } = useKibana();
@@ -76,7 +76,7 @@ export const useMaintenanceStatus = () => {
   return useQuery<SignificantEventsMaintenanceStatus, Error>({
     queryKey: MAINTENANCE_STATUS_QUERY_KEY,
     queryFn: ({ signal }: QueryFunctionContext) =>
-      streamsRepositoryClient.fetch('GET /internal/significant_events/maintenance/_status', {
+      significantEventsRepositoryClient.fetch('GET /internal/significant_events/maintenance/_status', {
         signal: signal ?? null,
       }),
     refetchInterval: MAINTENANCE_STATUS_REFETCH_INTERVAL_MS,
@@ -117,7 +117,7 @@ export const useSignificantEventsMaintenanceActions = () => {
     },
     dependencies: {
       start: {
-        streams: { streamsRepositoryClient },
+        significant_events: { significantEventsRepositoryClient },
       },
     },
   } = useKibana();
@@ -128,7 +128,7 @@ export const useSignificantEventsMaintenanceActions = () => {
 
   const pauseMutation = useMutation<SignificantEventsMaintenanceSummary, Error, void>({
     mutationFn: () =>
-      streamsRepositoryClient.fetch('POST /internal/significant_events/maintenance/_pause', {
+      significantEventsRepositoryClient.fetch('POST /internal/significant_events/maintenance/_pause', {
         signal: null,
       }),
     onSuccess: (summary) => {
@@ -149,7 +149,7 @@ export const useSignificantEventsMaintenanceActions = () => {
 
   const resumeMutation = useMutation<SignificantEventsMaintenanceSummary, Error, void>({
     mutationFn: () =>
-      streamsRepositoryClient.fetch('POST /internal/significant_events/maintenance/_resume', {
+      significantEventsRepositoryClient.fetch('POST /internal/significant_events/maintenance/_resume', {
         signal: null,
       }),
     onSuccess: (summary) => {

@@ -45,7 +45,7 @@ export const useUpdateSignificantEvent = ({
     },
     dependencies: {
       start: {
-        streams: { streamsRepositoryClient },
+        significant_events: { significantEventsRepositoryClient },
       },
     },
   } = useKibana();
@@ -53,7 +53,7 @@ export const useUpdateSignificantEvent = ({
 
   const mutation = useMutation<UpdateSignificantEventResult, Error, UpdateSignificantEventArgs>({
     mutationFn: ({ eventUuid, status }: UpdateSignificantEventArgs) =>
-      streamsRepositoryClient.fetch('POST /internal/significant_events/events/{id}/update', {
+      significantEventsRepositoryClient.fetch('POST /internal/significant_events/events/{id}/update', {
         params: { path: { id: eventUuid }, body: { status } },
         signal: null,
       }),

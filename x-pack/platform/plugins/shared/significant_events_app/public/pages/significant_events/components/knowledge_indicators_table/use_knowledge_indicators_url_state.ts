@@ -36,7 +36,7 @@ export function useKnowledgeIndicatorsUrlState({
   clearSelection,
 }: UseKnowledgeIndicatorsUrlStateParams) {
   const router = useSignificantEventsAppRouter();
-  const { query } = useSignificantEventsAppParams('/_discovery/{tab}');
+  const { query } = useSignificantEventsAppParams('/{tab}');
 
   const timeRangeRef = useRef<{ rangeFrom?: string; rangeTo?: string }>({});
   timeRangeRef.current = { rangeFrom: query?.rangeFrom, rangeTo: query?.rangeTo };
@@ -163,7 +163,7 @@ export function useKnowledgeIndicatorsUrlState({
   useEffect(() => {
     const { rangeFrom, rangeTo } = timeRangeRef.current;
     const selectedItem = selectedItemRef.current;
-    router.replace('/_discovery/{tab}', {
+    router.replace('/{tab}', {
       path: { tab: 'knowledge_indicators' },
       query: {
         ...(rangeFrom ? { rangeFrom } : {}),
@@ -204,7 +204,7 @@ export function useKnowledgeIndicatorsUrlState({
   }, []);
 
   const closeFlyout = useCallback(() => {
-    router.push('/_discovery/{tab}', {
+    router.push('/{tab}', {
       path: { tab: 'knowledge_indicators' },
       query: buildQueryParams(),
     });
@@ -214,7 +214,7 @@ export function useKnowledgeIndicatorsUrlState({
     (ki: KnowledgeIndicator) => {
       const id = getKnowledgeIndicatorItemId(ki);
       const isAlreadyOpen = id === selectedItemRef.current;
-      router.push('/_discovery/{tab}', {
+      router.push('/{tab}', {
         path: { tab: 'knowledge_indicators' },
         query: buildQueryParams(isAlreadyOpen ? undefined : id),
       });
@@ -224,7 +224,7 @@ export function useKnowledgeIndicatorsUrlState({
 
   const selectKnowledgeIndicator = useCallback(
     (ki: KnowledgeIndicator) => {
-      router.push('/_discovery/{tab}', {
+      router.push('/{tab}', {
         path: { tab: 'knowledge_indicators' },
         query: buildQueryParams(getKnowledgeIndicatorItemId(ki)),
       });

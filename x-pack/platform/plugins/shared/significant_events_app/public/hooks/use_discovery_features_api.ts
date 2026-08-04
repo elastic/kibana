@@ -31,7 +31,7 @@ export function useDiscoveryFeaturesApi(): DiscoveryFeaturesApi {
   const {
     dependencies: {
       start: {
-        streams: { streamsRepositoryClient },
+        significant_events: { significantEventsRepositoryClient },
       },
     },
   } = useKibana();
@@ -45,7 +45,7 @@ export function useDiscoveryFeaturesApi(): DiscoveryFeaturesApi {
       if (features.length === 0) {
         return { succeededCount: 0, failedCount: 0 };
       }
-      const { succeeded, failed } = await streamsRepositoryClient.fetch(
+      const { succeeded, failed } = await significantEventsRepositoryClient.fetch(
         'POST /internal/streams/features/_bulk',
         {
           signal: null,
@@ -63,5 +63,5 @@ export function useDiscoveryFeaturesApi(): DiscoveryFeaturesApi {
       restoreFeaturesInBulk: (features) =>
         runBulk(features, (feature) => ({ restore: { id: feature.uuid } })),
     };
-  }, [streamsRepositoryClient]);
+  }, [significantEventsRepositoryClient]);
 }

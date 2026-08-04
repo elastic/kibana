@@ -21,7 +21,7 @@ export const useFetchDetections = ({ from, to }: UseFetchDetectionsParams) => {
   const {
     dependencies: {
       start: {
-        streams: { streamsRepositoryClient },
+        significant_events: { significantEventsRepositoryClient },
       },
     },
   } = useKibana();
@@ -35,7 +35,7 @@ export const useFetchDetections = ({ from, to }: UseFetchDetectionsParams) => {
 
   const fetchDetections = useCallback(
     async ({ signal }: QueryFunctionContext): Promise<PaginatedResponse<Detection>> => {
-      return streamsRepositoryClient.fetch('GET /internal/significant_events/detections', {
+      return significantEventsRepositoryClient.fetch('GET /internal/significant_events/detections', {
         params: {
           query: {
             page: pagination.page,
@@ -47,7 +47,7 @@ export const useFetchDetections = ({ from, to }: UseFetchDetectionsParams) => {
         signal: signal ?? null,
       });
     },
-    [streamsRepositoryClient, pagination, from, to]
+    [significantEventsRepositoryClient, pagination, from, to]
   );
 
   const query = useQuery<PaginatedResponse<Detection>, Error>({
@@ -63,7 +63,7 @@ export const useFetchDetectionHistory = (ruleUuid: string | undefined) => {
   const {
     dependencies: {
       start: {
-        streams: { streamsRepositoryClient },
+        significant_events: { significantEventsRepositoryClient },
       },
     },
   } = useKibana();
@@ -72,7 +72,7 @@ export const useFetchDetectionHistory = (ruleUuid: string | undefined) => {
   return useQuery<{ hits: Detection[] }, Error>({
     queryKey: ['detectionHistory', ruleUuid],
     queryFn: async ({ signal }) => {
-      return streamsRepositoryClient.fetch(
+      return significantEventsRepositoryClient.fetch(
         'GET /internal/significant_events/detections/{id}/history',
         {
           params: { path: { id: ruleUuid! } },

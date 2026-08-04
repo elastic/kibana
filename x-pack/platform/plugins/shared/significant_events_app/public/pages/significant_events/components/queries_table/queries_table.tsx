@@ -89,7 +89,7 @@ const PAGE_SIZE_OPTIONS = [10, 25, 50] as const;
 
 export function QueriesTable() {
   const router = useSignificantEventsAppRouter();
-  const { query: routeQuery } = useSignificantEventsAppParams('/_discovery/{tab}');
+  const { query: routeQuery } = useSignificantEventsAppParams('/{tab}');
   const { euiTheme } = useEuiTheme();
   const {
     dependencies: {
@@ -138,7 +138,7 @@ export function QueriesTable() {
   const handleSelectQuery = useCallback(
     (item: SignificantEventQueryRow) => {
       const isAlreadyOpen = item.query.id === routeQuery?.selectedItem;
-      router.push('/_discovery/{tab}', {
+      router.push('/{tab}', {
         path: { tab: 'queries' },
         query: buildQueryRouteParams(isAlreadyOpen ? undefined : item.query.id),
       });
@@ -147,7 +147,7 @@ export function QueriesTable() {
   );
 
   const closeQueryFlyout = useCallback(() => {
-    router.push('/_discovery/{tab}', {
+    router.push('/{tab}', {
       path: { tab: 'queries' },
       query: buildQueryRouteParams(),
     });
@@ -377,7 +377,7 @@ export function QueriesTable() {
         }
         actions={
           <EuiButtonEmpty
-            href={router.link('/_discovery/{tab}', {
+            href={router.link('/{tab}', {
               path: { tab: 'knowledge_indicators' },
             })}
           >

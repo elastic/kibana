@@ -37,7 +37,7 @@ export const useFetchQueryOccurrenceStats = (
   const {
     dependencies: {
       start: {
-        streams: { streamsRepositoryClient },
+        significant_events: { significantEventsRepositoryClient },
         data,
       },
     },
@@ -68,7 +68,7 @@ export const useFetchQueryOccurrenceStats = (
 
     const intervalString = `${bucketSize.asSeconds()}s`;
 
-    const requestPromise = streamsRepositoryClient.fetch(
+    const requestPromise = significantEventsRepositoryClient.fetch(
       'GET /internal/streams/_query_occurrences',
       {
         params: {

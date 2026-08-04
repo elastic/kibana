@@ -112,7 +112,7 @@ export function KnowledgeIndicatorsPanel({ definition }: KnowledgeIndicatorsPane
   const featuresIsLoading = featuresLoading;
   const queriesIsLoading = queriesLoading || queriesFetching;
 
-  const href = router.link('/_discovery/{tab}', {
+  const href = router.link('/{tab}', {
     path: { tab: 'knowledge_indicators' },
     query: { stream: streamName },
   });

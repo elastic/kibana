@@ -11,7 +11,7 @@ import { useSignificantEventsAppRouter } from '../../../../hooks/use_significant
 
 export const useSignificantEventsUrlState = () => {
   const router = useSignificantEventsAppRouter();
-  const { query } = useSignificantEventsAppParams('/_discovery/{tab}');
+  const { query } = useSignificantEventsAppParams('/{tab}');
 
   const queryRef = useRef(query);
   queryRef.current = query;
@@ -21,7 +21,7 @@ export const useSignificantEventsUrlState = () => {
   const openEvent = useCallback(
     (eventId: string) => {
       const q = queryRef.current;
-      router.push('/_discovery/{tab}', {
+      router.push('/{tab}', {
         path: { tab: 'significant_events' },
         query: {
           ...(q?.rangeFrom ? { rangeFrom: q.rangeFrom } : {}),
@@ -35,7 +35,7 @@ export const useSignificantEventsUrlState = () => {
 
   const closeEvent = useCallback(() => {
     const q = queryRef.current;
-    router.push('/_discovery/{tab}', {
+    router.push('/{tab}', {
       path: { tab: 'significant_events' },
       query: {
         ...(q?.rangeFrom ? { rangeFrom: q.rangeFrom } : {}),

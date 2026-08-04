@@ -14,7 +14,7 @@ export const useFetchSignificantEventLifecycle = (eventUuid: string | undefined)
   const {
     dependencies: {
       start: {
-        streams: { streamsRepositoryClient },
+        significant_events: { significantEventsRepositoryClient },
       },
     },
   } = useKibana();
@@ -23,7 +23,7 @@ export const useFetchSignificantEventLifecycle = (eventUuid: string | undefined)
   return useQuery<EventLifecycleResponse, Error>({
     queryKey: ['significantEventLifecycle', eventUuid],
     queryFn: async ({ signal }: QueryFunctionContext) => {
-      return streamsRepositoryClient.fetch(
+      return significantEventsRepositoryClient.fetch(
         'GET /internal/significant_events/events/{id}/lifecycle',
         {
           params: { path: { id: eventUuid! } },
