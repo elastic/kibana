@@ -63,7 +63,7 @@ export const NoDataFound = () => {
             footer={
               <EuiFlexGroup alignItems="center">
                 <EuiFlexItem grow={false}>
-                  <EuiIcon type="fleetApp" size="xl" />
+                  <EuiIcon type="fleetApp" size="xl" aria-hidden={true} />
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <EuiFlexGroup direction="column" alignItems="flexStart" gutterSize="none">

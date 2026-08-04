@@ -36,6 +36,7 @@ const storageSettings = {
       state: types.object({ dynamic: false, properties: {} }),
       status: types.keyword({}),
       read: types.boolean({}),
+      pinned: types.boolean({}),
       workspace_id: types.keyword({}),
       access_control: types.object({
         properties: {
@@ -66,6 +67,7 @@ export interface ConversationProperties {
   state?: ConversationInternalState;
   status?: ConversationRoundStatus;
   read?: boolean;
+  pinned?: boolean;
   workspace_id?: string;
   access_control?: ConversationAccessControl;
   origin?: ConversationOrigin;

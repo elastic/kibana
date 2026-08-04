@@ -43,6 +43,10 @@ export interface RoundInput {
    * References to versioned conversation-level attachments.
    */
   attachment_refs?: AttachmentVersionRef[];
+  /**
+   * Pre-rendered, immutable prompt context for attachments created/updated in this round
+   */
+  attachment_context?: string;
 }
 
 /**
@@ -448,6 +452,8 @@ export interface Conversation {
   access_control?: ConversationAccessControl;
   /** External origin used to resolve conversations submitted from an external system like Slack or GitHub. */
   origin?: ConversationOrigin;
+  /** Whether the conversation has been pinned by the user. */
+  pinned?: boolean;
 }
 
 export type TodoStatus = 'pending' | 'in_progress' | 'completed' | 'cancelled';
