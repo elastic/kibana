@@ -63,6 +63,13 @@ export const ConnectorIconsMap: Map<
     lazy(() => import(/* webpackChunkName: "connectorIconArgocd" */ './specs/argocd/icon')),
   ],
   [
+    '.aws_cloudwatch',
+    lazy(
+      () =>
+        import(/* webpackChunkName: "connectorIconAwsCloudwatch" */ './specs/aws_cloudwatch/icon')
+    ),
+  ],
+  [
     '.aws_lambda',
     lazy(() => import(/* webpackChunkName: "connectorIconAwsLambda" */ './specs/aws_lambda/icon')),
   ],
@@ -73,6 +80,12 @@ export const ConnectorIconsMap: Map<
   [
     '.azure-blob',
     lazy(() => import(/* webpackChunkName: "connectorIconAzureBlob" */ './specs/azure_blob/icon')),
+  ],
+  [
+    '.azure_monitor',
+    lazy(
+      () => import(/* webpackChunkName: "connectorIconAzureMonitor" */ './specs/azure_monitor/icon')
+    ),
   ],
   [
     '.bigquery',
