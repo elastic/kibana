@@ -85,6 +85,7 @@ import { getErrorGroupsRoute } from './errors/get_error_groups';
 import { getErrorStatsRoute } from './errors/get_error_stats';
 import { getMonitorSummaryStatsRoute } from './monitor_cruds/get_monitor_summary_stats';
 import { getSyntheticsDiagnosticsRoute } from './diagnostics/get_synthetics_diagnostics';
+import { getMaintenanceWindowsRoute } from './maintenance_windows/get_maintenance_windows';
 
 export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   addSyntheticsProjectMonitorRoute,
@@ -141,6 +142,7 @@ export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   getErrorStatsRoute,
   getMonitorSummaryStatsRoute,
   getSyntheticsDiagnosticsRoute,
+  getMaintenanceWindowsRoute,
 ];
 
 export const syntheticsAppPublicRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
