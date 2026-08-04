@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
-  EuiCallOut,
   EuiEmptyPrompt,
   EuiFieldSearch,
   EuiFilterGroup,
@@ -19,7 +18,8 @@ import {
 } from '@elastic/eui';
 import { AppHeader } from '@kbn/app-header';
 import type { AppHeaderMenu } from '@kbn/app-header';
-import { useService } from '@kbn/core-di-browser';
+import { KbnDangerCallout } from '@kbn/ui-callout';
+import { CoreStart, useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useBoolean, useDebouncedValue } from '@kbn/react-hooks';
@@ -36,6 +36,7 @@ import {
   useRuleManagementABSkillRequirements,
 } from '../../hooks/use_is_rule_management_ab_skill_available';
 import { useNavigateToAgentBuilder } from '../../hooks/use_navigate_to_agent_builder';
+import { paths } from '../../constants';
 
 import { RulesListTableContainer } from './rules_list_table_container';
 import type { RulesListTableSortField } from './rules_list_table';
@@ -60,56 +61,77 @@ const getRulesListMenu = ({
   onCreateRule,
   onCreateEsqlRule,
   onCreateWithAgent,
+  onBuildSequence,
   createWithAgentDisabled,
   createWithAgentTooltipText,
 }: {
   onCreateRule: () => void;
   onCreateEsqlRule: () => void;
   onCreateWithAgent: () => void;
+  onBuildSequence: () => void;
   createWithAgentDisabled?: boolean;
   createWithAgentTooltipText?: string;
-}): AppHeaderMenu => ({
-  primaryActionItem: {
-    id: 'createRule',
-    label: i18n.translate('xpack.alertingV2.rulesList.createRuleButton', {
-      defaultMessage: 'Create rule',
-    }),
-    iconType: 'plusCircle',
-    run: onCreateRule,
-    testId: 'createRuleButton',
-    popoverTestId: 'createRulePopoverPanel',
-    splitButtonProps: {
-      iconType: 'chevronSingleDown',
-      secondaryButtonAriaLabel: i18n.translate('xpack.alertingV2.rulesList.createRuleMoreOptions', {
-        defaultMessage: 'More create options',
+}): AppHeaderMenu => {
+  const items: AppHeaderMenu['items'] = [
+    {
+      id: 'buildSequence',
+      label: i18n.translate('xpack.alertingV2.rulesList.buildSequenceButton', {
+        defaultMessage: 'Build a sequence',
       }),
-      items: [
-        {
-          id: 'createEsqlRule',
-          label: i18n.translate('xpack.alertingV2.rulesList.createEsqlRuleButton', {
-            defaultMessage: 'Create ES|QL rule',
-          }),
-          iconType: 'productDiscover',
-          order: 0,
-          run: onCreateEsqlRule,
-          testId: 'createEsqlRuleButton',
-        },
-        {
-          id: 'createWithAgent',
-          label: i18n.translate('xpack.alertingV2.rulesList.createWithAgentButton', {
-            defaultMessage: 'Create with agent',
-          }),
-          iconType: 'sparkles' as const,
-          order: 1,
-          run: onCreateWithAgent,
-          testId: 'createWithAgentButton',
-          disableButton: createWithAgentDisabled,
-          tooltipContent: createWithAgentTooltipText,
-        },
-      ],
+      iconType: 'branch',
+      tooltipContent: i18n.translate('xpack.alertingV2.rulesList.buildSequenceTooltip', {
+        defaultMessage: 'Chain rules to detect multi-step alert patterns',
+      }),
+      testId: 'createSequenceRuleButton',
+      run: onBuildSequence,
     },
-  },
-});
+  ];
+
+  return {
+    items,
+    primaryActionItem: {
+      id: 'createRule',
+      label: i18n.translate('xpack.alertingV2.rulesList.createRuleButton', {
+        defaultMessage: 'Create rule',
+      }),
+      iconType: 'plusInCircle',
+      run: onCreateRule,
+      testId: 'createRuleButton',
+      popoverTestId: 'createRulePopoverPanel',
+      splitButtonProps: {
+        iconType: 'arrowDown',
+        secondaryButtonAriaLabel: i18n.translate(
+          'xpack.alertingV2.rulesList.createRuleMoreOptions',
+          { defaultMessage: 'More create options' }
+        ),
+        items: [
+          {
+            id: 'createEsqlRule',
+            label: i18n.translate('xpack.alertingV2.rulesList.createEsqlRuleButton', {
+              defaultMessage: 'Create ES|QL rule',
+            }),
+            iconType: 'productDiscover',
+            order: 0,
+            run: onCreateEsqlRule,
+            testId: 'createEsqlRuleButton',
+          },
+          {
+            id: 'createWithAgent',
+            label: i18n.translate('xpack.alertingV2.rulesList.createWithAgentButton', {
+              defaultMessage: 'Create with agent',
+            }),
+            iconType: 'sparkles' as const,
+            order: 1,
+            run: onCreateWithAgent,
+            testId: 'createWithAgentButton',
+            disableButton: createWithAgentDisabled,
+            tooltipContent: createWithAgentTooltipText,
+          },
+        ],
+      },
+    },
+  };
+};
 
 const SORT_FIELD_TO_TABLE_FIELD: Record<FindRulesSortField, RulesListTableSortField> = {
   kind: 'kind',
@@ -125,6 +147,12 @@ export const RulesListPage = () => {
   useBreadcrumbs('rules_list');
 
   const canWrite = useService(UserCapabilities).canWrite('rules');
+  const { navigateToUrl } = useService(CoreStart('application'));
+  const basePath = useService(CoreStart('http')).basePath;
+
+  const navigateToSequenceBuilder = useCallback(() => {
+    navigateToUrl(basePath.prepend(paths.sequenceRuleCreate));
+  }, [navigateToUrl, basePath]);
 
   const [
     isCreateOptionsFlyoutOpen,
@@ -224,6 +252,7 @@ export const RulesListPage = () => {
             onCreateRule: openCreateOptionsFlyout,
             onCreateEsqlRule: openCreateFlyout,
             onCreateWithAgent: navigateToAgentBuilder,
+            onBuildSequence: navigateToSequenceBuilder,
             createWithAgentDisabled: !isRuleManagementABSkillAvailable,
             createWithAgentTooltipText,
           })
@@ -233,6 +262,7 @@ export const RulesListPage = () => {
       openCreateOptionsFlyout,
       openCreateFlyout,
       navigateToAgentBuilder,
+      navigateToSequenceBuilder,
       isRuleManagementABSkillAvailable,
       createWithAgentTooltipText,
     ]
@@ -257,7 +287,7 @@ export const RulesListPage = () => {
       ) : null}
       {isError ? (
         <>
-          <EuiCallOut
+          <KbnDangerCallout
             announceOnMount
             title={
               <FormattedMessage
@@ -265,11 +295,9 @@ export const RulesListPage = () => {
                 defaultMessage="Failed to load rules"
               />
             }
-            color="danger"
-            iconType="error"
           >
             {error instanceof Error ? error.message : String(error)}
-          </EuiCallOut>
+          </KbnDangerCallout>
           <EuiSpacer />
         </>
       ) : null}

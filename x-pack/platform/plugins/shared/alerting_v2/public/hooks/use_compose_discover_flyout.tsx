@@ -23,6 +23,7 @@ import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import React, { useCallback, useMemo, useState } from 'react';
 import type { RuleApiResponse } from '../services/rules_api';
+import { paths } from '../constants';
 import { useCreateRule } from './use_create_rule';
 import { useSetupRuleNotifications } from './use_setup_rule_notifications';
 import { useUpdateRule } from './use_update_rule';
@@ -171,13 +172,25 @@ export const useComposeDiscoverFlyout = ({
   );
 
   const openEditFlyout = useCallback(
-    (rule: RuleApiResponse) => openRuleFlyout(rule, 'edit'),
-    [openRuleFlyout]
+    (rule: RuleApiResponse) => {
+      if (rule.metadata?.builder_type === 'sequence') {
+        application.navigateToUrl(http.basePath.prepend(paths.sequenceRuleEdit(rule.id)));
+        return;
+      }
+      openRuleFlyout(rule, 'edit');
+    },
+    [openRuleFlyout, application, http]
   );
 
   const openCloneFlyout = useCallback(
-    (rule: RuleApiResponse) => openRuleFlyout(rule, 'clone'),
-    [openRuleFlyout]
+    (rule: RuleApiResponse) => {
+      if (rule.metadata?.builder_type === 'sequence') {
+        application.navigateToUrl(http.basePath.prepend(paths.sequenceRuleClone(rule.id)));
+        return;
+      }
+      openRuleFlyout(rule, 'clone');
+    },
+    [openRuleFlyout, application, http]
   );
 
   const flyout = flyoutOpen ? (

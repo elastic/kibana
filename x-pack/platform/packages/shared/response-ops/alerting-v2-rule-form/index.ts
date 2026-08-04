@@ -81,6 +81,39 @@ export type {
 export { useMatchedActionPolicies } from './flyout/compose_discover/compose_discover_form/use_matched_action_policies';
 export type { UseMatchedActionPoliciesResult } from './flyout/compose_discover/compose_discover_form/use_matched_action_policies';
 
+// Sequence rule builder
+export type { SequenceFormValues, SequenceRule, HopWindow } from './sequence/form_types';
+export {
+  RULE_DRAG_MIME_TYPE,
+  generateStepId,
+  DEFAULT_SEQUENCE_FORM_VALUES,
+  isSequenceValid,
+  totalLookbackSeconds,
+  getCommonGroupingFields,
+  formatLookbackString,
+} from './sequence/form_types';
+export { buildSequenceRuleQueryData } from './sequence/build_esql';
+export { parseSequenceEsql } from './sequence/parse_esql';
+export { SequenceNode } from './sequence/sequence_node';
+export type { SequenceNodeType } from './sequence/sequence_node';
+export { SequenceEdge, WINDOW_OPTIONS } from './sequence/sequence_edge';
+export type { SequenceEdgeType } from './sequence/sequence_edge';
+export { layoutSequence } from './sequence/layout_sequence';
+
+// Sequence builder details sidebar
+export { DetailsAndArtifactsStep } from './flyout/compose_discover/compose_discover_form/details_and_artifacts_step';
+export { NotificationsStep } from './flyout/compose_discover/compose_discover_form/notifications_step';
+export { LinkedActionPoliciesStep } from './flyout/compose_discover/compose_discover_form/linked_action_policies_step';
+export { CentralizedActionPoliciesPanel } from './flyout/compose_discover/compose_discover_form/centralized_action_policies_panel';
+export { ScheduleField } from './form/fields/schedule_field';
+export { LookbackWindow } from './form/fields/lookback_window';
+
+// Compose form mappers
+export {
+  composeFormToCreateRequest,
+  mapRuleToComposeFormValues,
+} from './flyout/compose_discover/compose_mappers';
+
 // Threshold rule-builder ES|QL parser + types — consumed by the episode trend chart
 export { parseThresholdEsql } from './flyout/compose_discover/rule_builder/threshold/parse_esql';
 export {
