@@ -89,6 +89,7 @@ export const chartTypeRegistry: Record<SupportedChartType, ChartTypeRegistryEntr
       config: {
         perChartTypeRules: [
           'Prefer right-aligned metric values. Use left/center only when the user asks.',
+          'Do not set `apply_color_to` unless the user explicitly requests value or background coloring — omitting it applies color to the background by default.',
         ],
         options: {
           coloring: {
