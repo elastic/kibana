@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { AxiosError } from 'axios';
 import type { KbnClient, KbnClientResponse } from '@kbn/test';
 import type {
   AgentPolicy,
@@ -13,11 +14,13 @@ import type {
   CreatePackagePolicyRequest,
   CreatePackagePolicyResponse,
   DeleteAgentPolicyResponse,
+  GetPackagePoliciesResponse,
   PostDeletePackagePoliciesResponse,
 } from '@kbn/fleet-plugin/common';
 import {
   AGENT_POLICY_API_ROUTES,
   PACKAGE_POLICY_API_ROUTES,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   API_VERSIONS,
 } from '@kbn/fleet-plugin/common';
 import { memoize } from 'lodash';
@@ -116,6 +119,25 @@ export const indexFleetEndpointPolicy = usageTracker.track(
       },
     };
 
+    const findPackagePolicyByName = async (): Promise<CreatePackagePolicyResponse | undefined> =>
+      kbnClient
+        .request<GetPackagePoliciesResponse>({
+          path: PACKAGE_POLICY_API_ROUTES.LIST_PATTERN,
+          method: 'GET',
+          query: {
+            perPage: 1,
+            kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.name: "${policyName}"`,
+          },
+          headers: {
+            'elastic-api-version': API_VERSIONS.public.v1,
+          },
+        })
+        .catch(catchAxiosErrorFormatAndThrow)
+        .then((res) => {
+          const item = res.data.items[0];
+          return item ? { item } : undefined;
+        });
+
     const createPackagePolicy = async (): Promise<CreatePackagePolicyResponse> =>
       kbnClient
         .request<CreatePackagePolicyResponse>({
@@ -126,8 +148,19 @@ export const indexFleetEndpointPolicy = usageTracker.track(
             'elastic-api-version': API_VERSIONS.public.v1,
           },
         })
-        .catch(catchAxiosErrorFormatAndThrow)
-        .then((res) => res.data);
+        .then((res) => res.data)
+        .catch(async (error) => {
+          // A prior retry attempt (triggered by a transient error) may have already created the
+          // policy server-side, in which case re-submitting the create returns a 409 conflict.
+          // Recover the already-created policy instead of failing the whole data load.
+          if (error instanceof AxiosError && error.response?.status === 409) {
+            const existing = await findPackagePolicyByName();
+            if (existing) {
+              return existing;
+            }
+          }
+          return catchAxiosErrorFormatAndThrow(error);
+        });
 
     const started = new Date();
     const hasTimedOut = (): boolean => {
