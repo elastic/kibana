@@ -155,6 +155,7 @@ export const AutoOpsPromotionCallout = ({
         content={i18n.translate('management.autoOpsPromotionCallout.dismissAriaLabel', {
           defaultMessage: 'Dismiss AutoOps promotion',
         })}
+        disableScreenReaderOutput
       >
         <EuiButtonIcon
           iconType="cross"
