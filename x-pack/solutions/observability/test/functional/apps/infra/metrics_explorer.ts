@@ -53,7 +53,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       it('should render the correct page title', async () => {
         const documentTitle = await browser.getTitle();
         expect(documentTitle).to.contain(
-          'Metrics Explorer - Infrastructure - Observability - Elastic'
+          'Metrics Explorer - Infrastructure inventory - Observability - Elastic'
         );
       });
 

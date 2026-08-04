@@ -145,7 +145,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         it('should render the correct page title', async () => {
           const documentTitle = await browser.getTitle();
-          expect(documentTitle).to.contain('Hosts - Infrastructure - Observability - Elastic');
+          expect(documentTitle).to.contain(
+            'Hosts - Infrastructure inventory - Observability - Elastic'
+          );
         });
 
         describe('Hosts table', () => {

@@ -35,7 +35,7 @@ test.describe(
     });
 
     test('should render the correct page title', async ({ page }) => {
-      await expect(page).toHaveTitle(/Hosts - Infrastructure - Observability - Elastic/);
+      await expect(page).toHaveTitle(/Hosts - Infrastructure inventory - Observability - Elastic/);
     });
 
     test('should maintain the selected date range when navigating to host details', async ({
