@@ -306,6 +306,7 @@ export default function ({ getService }: FtrProviderContext) {
         'read',
         'minimal_all',
         'minimal_read',
+        'can_run_test',
         'elastic_managed_locations_enabled',
         'can_manage_private_locations',
         'can_read_param_values',

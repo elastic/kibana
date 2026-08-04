@@ -10585,6 +10585,11 @@ export default function ({ getService }: FtrProviderContext) {
                 "login:",
                 "ui:uptime/canReadParamValues",
               ],
+              "can_run_test": Array [
+                "login:",
+                "api:monitor-run",
+                "ui:uptime/canRunTest",
+              ],
               "elastic_managed_locations_enabled": Array [
                 "login:",
                 "ui:uptime/elasticManagedLocationsEnabled",

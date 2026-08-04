@@ -34,7 +34,7 @@ import {
 import { useMonitorAlertEnable } from '../../../../hooks/use_monitor_alert_enable';
 import type { OverviewStatusMetaData } from '../../../../../../../common/runtime_types';
 import { ConfigKey } from '../../../../../../../common/runtime_types';
-import { useCanEditSynthetics } from '../../../../../../hooks/use_capabilities';
+import { useCanEditSynthetics, useCanRunTest } from '../../../../../../hooks/use_capabilities';
 import { useMonitorEnableHandler, useLocationName, useEnablement } from '../../../../hooks';
 import { setFlyoutConfig } from '../../../../state/overview/actions';
 import { useEditMonitorLocator } from '../../../../hooks/use_edit_monitor_locator';
@@ -196,6 +196,9 @@ export function ActionsPopover({
 
   const canEditSynthetics = useCanEditSynthetics();
 
+  // Manual test runs are allowed for write users OR run-only (`canRunTest`) users.
+  const canRunTest = useCanRunTest();
+
   const canUsePublicLocations = useCanUsePublicLocById(monitor.configId);
 
   const { isServiceAllowed } = useEnablement();
@@ -317,13 +320,14 @@ export function ActionsPopover({
       ) : (
         <NoPermissionsTooltip
           canUsePublicLocations={canUsePublicLocations}
-          canEditSynthetics={canEditSynthetics}
+          canEditSynthetics={canRunTest}
         >
           {runTestManually}
         </NoPermissionsTooltip>
       ),
       icon: 'flask',
-      disabled: isReadOnly || testInProgress || !canUsePublicLocations || !isServiceAllowed,
+      disabled:
+        isReadOnly || testInProgress || !canUsePublicLocations || !isServiceAllowed || !canRunTest,
       toolTipContent: readOnlyActionTooltip,
       onClick: isReadOnly
         ? undefined

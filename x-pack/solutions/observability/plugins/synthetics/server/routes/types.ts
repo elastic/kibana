@@ -42,6 +42,12 @@ export interface UMServerRoute<T> {
   method: SupportedMethod;
   writeAccess?: boolean;
   requiredPrivileges?: string[];
+  /**
+   * Privileges where at least ONE must be satisfied (in addition to the always-required
+   * `uptime-read`). Emitted as an `{ anyRequired }` set in the route's authz config, e.g.
+   * `['uptime-write', 'monitor-run']` allows either a full-write user or a run-only user.
+   */
+  anyRequiredPrivileges?: string[];
   handler: T;
   validation?: VersionedRouteValidation<any, any, any>;
   streamHandler?: (
