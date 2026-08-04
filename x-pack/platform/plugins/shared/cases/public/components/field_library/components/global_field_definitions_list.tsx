@@ -95,7 +95,7 @@ export const GlobalFieldDefinitionsList: React.FC<GlobalFieldDefinitionsListProp
       <EuiDragDropContext onDragEnd={onDragEnd}>
         <EuiDroppable
           droppableId="globalFieldDefinitions"
-          spacing="s"
+          spacing="none"
           data-test-subj="globalFieldDefinitionsDroppable"
         >
           {orderedFieldDefinitions.map((fieldDefinition, index) => (
@@ -105,7 +105,7 @@ export const GlobalFieldDefinitionsList: React.FC<GlobalFieldDefinitionsListProp
               draggableId={fieldDefinition.fieldDefinitionId}
               customDragHandle
               hasInteractiveChildren
-              spacing="s"
+              spacing="none"
             >
               {(provided) => (
                 <FieldDefinitionRow
@@ -114,6 +114,7 @@ export const GlobalFieldDefinitionsList: React.FC<GlobalFieldDefinitionsListProp
                   onEdit={onEdit}
                   onDelete={onDelete}
                   dragHandleProps={provided.dragHandleProps}
+                  isFirst={index === 0}
                   onMoveUp={index > 0 ? () => move(index, index - 1) : undefined}
                   onMoveDown={
                     index < orderedFieldDefinitions.length - 1

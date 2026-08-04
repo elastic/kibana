@@ -7,124 +7,34 @@
 
 import { useMemo } from 'react';
 import { css } from '@emotion/react';
-import { useEuiTheme, useEuiFontSize } from '@elastic/eui';
 
 /**
- * Styles for user-authored markdown (case descriptions, comments).
+ * Layout-only styles for user-authored markdown (case descriptions, comments, display fields).
  *
- * Markdown content is outside our control, so the two things that reliably break the page are
- * headings and measure:
+ * Deliberately does NOT restyle headings, weights, or text sizes. Markdown should render the way
+ * markdown renders everywhere else in Kibana; an override here would make the same document look
+ * different depending on which app displayed it, which is a worse problem than the one it solves.
  *
- * - A user's `#` renders at the app's own page-title scale, so their heading visually outranks the
- *   case title and the section chrome around it. Every heading level is capped below the app's
- *   hierarchy while keeping its semantic tag and its size *relative* to the other levels intact.
- * - Pasted machine output (JSON blobs, log lines) has no natural line breaks, so prose stretches to
- *   the full panel width. Text is capped to a readable measure; the cap is applied per text element
- *   rather than to the container so tables, code blocks, and images still get the full width.
- *
- * The `&&&` wrapper is load-bearing: EUI's own markdown styles are emitted after these and match at
- * the same specificity, so without it the caps below lose the tie on source order.
+ * What is left is purely about line length: pasted machine output (JSON blobs, log lines, stack
+ * traces) has no natural break points, so without a cap it stretches to the full panel width and
+ * runs well past a readable measure. Elements that become *less* readable when narrowed — tables,
+ * code blocks, images — opt back out to the full width.
  */
-export const useProseCss = () => {
-  const { euiTheme } = useEuiTheme();
-  const sFontSize = useEuiFontSize('s');
-
-  return useMemo(
+export const useProseCss = () =>
+  useMemo(
     () => css`
-      &&& {
-        /* EUI's markdown renderer defaults to a 16px base, a whole step above the 14px the rest of
-           the case page uses. Every heading below is sized in em, so correcting the base brings the
-           entire ladder into scale with its surroundings instead of shouting over them. */
-        &,
-        .euiMarkdownFormat {
-          font-size: ${sFontSize.fontSize};
-          line-height: ${sFontSize.lineHeight};
-        }
+      p,
+      li,
+      blockquote {
+        max-inline-size: 90ch;
+        overflow-wrap: anywhere;
+      }
 
-        h1,
-        h2,
-        h3,
-        h4,
-        h5,
-        h6 {
-          max-inline-size: 90ch;
-          font-weight: ${euiTheme.font.weight.semiBold};
-          line-height: ${euiTheme.font.lineHeightMultiplier};
-          margin-block: ${euiTheme.size.l} ${euiTheme.size.xs};
-
-          &:first-child {
-            margin-block-start: 0;
-          }
-        }
-
-        /* Sized in em against the body scale rather than in fixed tokens, so all six levels keep a
-           visible ladder relative to each other while the largest still lands below the page's own
-           title. Flattening them to a single size is just as unreadable as letting them run free. */
-        h1 {
-          font-size: 1.35em;
-        }
-
-        h2 {
-          font-size: 1.2em;
-        }
-
-        h3 {
-          font-size: 1.1em;
-        }
-
-        h4 {
-          font-size: 1em;
-        }
-
-        h5,
-        h6 {
-          font-size: 0.9em;
-          color: ${euiTheme.colors.textSubdued};
-        }
-
-        p,
-        ul,
-        ol,
-        blockquote,
-        pre,
-        table {
-          margin-block: 0 ${euiTheme.size.base};
-
-          &:last-child {
-            margin-block-end: 0;
-          }
-        }
-
-        p,
-        li,
-        blockquote {
-          max-inline-size: 90ch;
-          overflow-wrap: anywhere;
-        }
-
-        li + li {
-          margin-block-start: ${euiTheme.size.xxs};
-        }
-
-        /* Authors use rules as section breaks; at default weight a report full of them reads as a
-           stack of boxes rather than as continuous prose. */
-        hr {
-          border: none;
-          border-block-start: ${euiTheme.border.thin};
-          margin-block: ${euiTheme.size.l};
-        }
-
-        code {
-          font-size: 0.9em;
-        }
-
-        pre {
-          padding: ${euiTheme.size.s} ${euiTheme.size.m};
-          border-radius: ${euiTheme.border.radius.small};
-          background: ${euiTheme.colors.backgroundBaseSubdued};
-        }
+      table,
+      pre,
+      img {
+        max-inline-size: none;
       }
     `,
-    [euiTheme, sFontSize]
+    []
   );
-};

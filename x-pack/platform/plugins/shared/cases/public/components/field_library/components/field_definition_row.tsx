@@ -6,15 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import {
-  EuiBadge,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiPanel,
-  EuiText,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiBadge, EuiIcon, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { DraggableProvidedDragHandleProps } from '@hello-pangea/dnd';
 import type { FieldDefinition } from '../../../../common/types/domain/field_definition/v1';
@@ -33,14 +25,17 @@ interface FieldDefinitionRowProps {
   onMoveUp?: () => void;
   onMoveDown?: () => void;
   isMoveDisabled?: boolean;
+  isFirst?: boolean;
 }
 
 /**
- * The single row presentation for a field definition, used by both library groups.
+ * One field definition, as a single dense list row shared by both library groups.
  *
- * Both groups list the same kind of thing, so they use the same row — the ordered group simply
- * gains a drag handle. Rendering one group as cards and the other as a data table made a single
- * page look like two products and left the unordered fields feeling like an afterthought.
+ * A card per field wasted most of its width on nothing — a short field name left two thirds of the
+ * row empty, and stacking name over description made every entry three lines tall for two short
+ * strings. This is a fixed-column list instead: label, name, type, and obligations each own a
+ * column, so values line up down the page and a scan compares like with like. The ordered group
+ * adds a drag handle in the gutter; nothing else differs between the two groups.
  */
 export const FieldDefinitionRow: React.FC<FieldDefinitionRowProps> = ({
   fieldDefinition,
@@ -51,18 +46,33 @@ export const FieldDefinitionRow: React.FC<FieldDefinitionRowProps> = ({
   onMoveUp,
   onMoveDown,
   isMoveDisabled,
+  isFirst = false,
 }) => {
   const { euiTheme } = useEuiTheme();
 
   const styles = useMemo(
     () => ({
       row: css`
-        /* The handle is subdued until the row is engaged: on a settled list the field names should
-           carry the page, not a column of identical grab icons. */
+        display: grid;
+        /* handle | label | name | type | badges | actions */
+        grid-template-columns:
+          ${dragHandleProps ? euiTheme.size.l : '0'} minmax(0, 1.4fr) minmax(0, 1.6fr)
+          minmax(0, 0.9fr) auto ${euiTheme.size.xl};
+        align-items: center;
+        gap: ${euiTheme.size.m};
+        padding: ${euiTheme.size.xs} ${euiTheme.size.s};
+        border-block-start: ${isFirst ? 'none' : euiTheme.border.thin};
+
+        &:hover {
+          background: ${euiTheme.colors.backgroundBaseSubdued};
+        }
+
+        /* The handle stays out of the way until the row is engaged: on a settled list the field
+           names should carry the page, not a column of identical grab icons. */
         .fieldLibraryDragHandle {
           display: flex;
           color: ${euiTheme.colors.textSubdued};
-          opacity: 0.4;
+          opacity: 0.35;
           transition: opacity ${euiTheme.animation.fast};
         }
 
@@ -70,116 +80,116 @@ export const FieldDefinitionRow: React.FC<FieldDefinitionRowProps> = ({
         &:focus-within .fieldLibraryDragHandle {
           opacity: 1;
         }
-
-        &:has(.fieldLibraryRowButton:hover),
-        &:has(.fieldLibraryRowButton:focus-visible) {
-          background: ${euiTheme.colors.backgroundBaseInteractiveHover};
-        }
       `,
-      // The card is the edit control. Only the middle region is the button, so the drag handle and
-      // the actions menu keep their own hit areas and stay valid, non-nested controls.
-      rowButton: css`
-        display: block;
-        inline-size: 100%;
+      // The label cell is the edit control, so the row needs no separate Edit affordance. The drag
+      // handle and actions menu sit outside it and keep their own hit areas.
+      labelButton: css`
+        min-inline-size: 0;
         padding: 0;
         border: none;
         background: none;
         text-align: start;
-        color: inherit;
         cursor: pointer;
+        font-weight: ${euiTheme.font.weight.semiBold};
+        color: ${euiTheme.colors.textParagraph};
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+
+        &:hover,
+        &:focus-visible {
+          text-decoration: underline;
+        }
+      `,
+      truncated: css`
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
       `,
       name: css`
         font-family: ${euiTheme.font.familyCode};
       `,
+      badges: css`
+        display: flex;
+        gap: ${euiTheme.size.xs};
+        justify-content: flex-end;
+      `,
     }),
-    [euiTheme]
+    [euiTheme, dragHandleProps, isFirst]
   );
 
   const isRequired = inlineField?.validation?.required === true;
   const isRequiredOnClose = inlineField?.validation?.required_on_close === true;
   const controlTitle = inlineField?.control ? FIELD_TYPE_TITLES[inlineField.control] : undefined;
+  const label = inlineField?.label ?? fieldDefinition.name;
+  // The description is genuinely useful but rarely short; it rides in the name column's tooltip
+  // rather than claiming a third line on every row.
+  const secondary = fieldDefinition.description ?? fieldDefinition.name;
 
   return (
-    <EuiPanel
-      hasBorder
-      paddingSize="s"
-      css={styles.row}
-      data-test-subj={`fieldDefinitionRow-${fieldDefinition.name}`}
-    >
-      <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
-        {dragHandleProps ? (
-          <EuiFlexItem grow={false}>
-            <div
-              {...dragHandleProps}
-              className="fieldLibraryDragHandle"
-              aria-label={i18n.REORDER_FIELD_HANDLE(fieldDefinition.name)}
-              data-test-subj={`fieldDefinitionDragHandle-${fieldDefinition.name}`}
-            >
-              <EuiIcon type="grabOmnidirectional" aria-hidden={true} />
-            </div>
-          </EuiFlexItem>
+    <div css={styles.row} data-test-subj={`fieldDefinitionRow-${fieldDefinition.name}`}>
+      {dragHandleProps ? (
+        <div
+          {...dragHandleProps}
+          className="fieldLibraryDragHandle"
+          aria-label={i18n.REORDER_FIELD_HANDLE(fieldDefinition.name)}
+          data-test-subj={`fieldDefinitionDragHandle-${fieldDefinition.name}`}
+        >
+          <EuiIcon type="grabOmnidirectional" size="s" aria-hidden={true} />
+        </div>
+      ) : (
+        <span />
+      )}
+
+      <EuiText size="s" css={styles.truncated}>
+        <button
+          type="button"
+          css={styles.labelButton}
+          onClick={() => onEdit(fieldDefinition)}
+          aria-label={i18n.EDIT_FIELD_DEFINITION_NAMED(fieldDefinition.name)}
+          data-test-subj={`fieldDefinitionRowButton-${fieldDefinition.name}`}
+          title={label}
+        >
+          {label}
+        </button>
+      </EuiText>
+
+      <EuiText
+        size="xs"
+        color="subdued"
+        css={[styles.truncated, fieldDefinition.description ? undefined : styles.name]}
+        title={secondary}
+        data-test-subj="fieldDefinitionSecondary"
+      >
+        {secondary}
+      </EuiText>
+
+      <EuiText size="xs" color="subdued" css={styles.truncated}>
+        {controlTitle ?? ''}
+      </EuiText>
+
+      <div css={styles.badges}>
+        {isRequired ? (
+          <EuiBadge color="hollow" data-test-subj="fieldDefinitionRequiredBadge">
+            {i18n.REQUIRED_BADGE}
+          </EuiBadge>
         ) : null}
-        <EuiFlexItem>
-          <button
-            type="button"
-            className="fieldLibraryRowButton"
-            css={styles.rowButton}
-            onClick={() => onEdit(fieldDefinition)}
-            aria-label={i18n.EDIT_FIELD_DEFINITION_NAMED(fieldDefinition.name)}
-            data-test-subj={`fieldDefinitionRowButton-${fieldDefinition.name}`}
-          >
-            <EuiText size="s">
-              <strong>{inlineField?.label ?? fieldDefinition.name}</strong>
-            </EuiText>
-            <EuiText size="xs" color="subdued" css={styles.name}>
-              {fieldDefinition.name}
-            </EuiText>
-            {fieldDefinition.description ? (
-              <EuiText size="xs" color="subdued" data-test-subj="fieldDefinitionDescription">
-                {fieldDefinition.description}
-              </EuiText>
-            ) : null}
-          </button>
-        </EuiFlexItem>
-        {/* The right of the row carries the field's type and obligations rather than empty space,
-            so a scan down the column answers "what kind of field is this" without opening it. */}
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false} wrap>
-            {isRequired ? (
-              <EuiFlexItem grow={false}>
-                <EuiBadge color="hollow" data-test-subj="fieldDefinitionRequiredBadge">
-                  {i18n.REQUIRED_BADGE}
-                </EuiBadge>
-              </EuiFlexItem>
-            ) : null}
-            {isRequiredOnClose ? (
-              <EuiFlexItem grow={false}>
-                <EuiBadge color="hollow" data-test-subj="fieldDefinitionRequiredOnCloseBadge">
-                  {i18n.REQUIRED_ON_CLOSE_BADGE}
-                </EuiBadge>
-              </EuiFlexItem>
-            ) : null}
-            {controlTitle ? (
-              <EuiFlexItem grow={false}>
-                <EuiText size="xs" color="subdued" data-test-subj="fieldDefinitionControlType">
-                  {controlTitle}
-                </EuiText>
-              </EuiFlexItem>
-            ) : null}
-          </EuiFlexGroup>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <FieldDefinitionActions
-            fieldDefinition={fieldDefinition}
-            onEdit={onEdit}
-            onDelete={onDelete}
-            onMoveUp={onMoveUp}
-            onMoveDown={onMoveDown}
-            isMoveDisabled={isMoveDisabled}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiPanel>
+        {isRequiredOnClose ? (
+          <EuiBadge color="hollow" data-test-subj="fieldDefinitionRequiredOnCloseBadge">
+            {i18n.REQUIRED_ON_CLOSE_BADGE}
+          </EuiBadge>
+        ) : null}
+      </div>
+
+      <FieldDefinitionActions
+        fieldDefinition={fieldDefinition}
+        onEdit={onEdit}
+        onDelete={onDelete}
+        onMoveUp={onMoveUp}
+        onMoveDown={onMoveDown}
+        isMoveDisabled={isMoveDisabled}
+      />
+    </div>
   );
 };
 

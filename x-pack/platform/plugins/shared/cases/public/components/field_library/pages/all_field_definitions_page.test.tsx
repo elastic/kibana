@@ -130,8 +130,9 @@ describe('AllFieldDefinitionsPage', () => {
 
     // No placeholder dash: an unlabelled field falls back to its name rather than rendering
     // an empty-looking cell.
-    expect(within(screen.getByTestId('fieldDefinitionRow-my_field')).getAllByText('my_field')
-      .length).toBeGreaterThan(0);
+    expect(
+      within(screen.getByTestId('fieldDefinitionRow-my_field')).getAllByText('my_field').length
+    ).toBeGreaterThan(0);
   });
 
   describe('Required column', () => {

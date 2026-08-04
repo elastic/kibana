@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiText } from '@elastic/eui';
 import type { FieldDefinition } from '../../../../common/types/domain/field_definition/v1';
 import type { InlineField } from '../../../../common/types/domain/template/fields';
 import { FieldDefinitionRow } from './field_definition_row';
@@ -40,18 +40,18 @@ export const FieldDefinitionRowList: React.FC<FieldDefinitionRowListProps> = ({
   }
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="s" data-test-subj={dataTestSubj}>
-      {fieldDefinitions.map((fieldDefinition) => (
-        <EuiFlexItem grow={false} key={fieldDefinition.fieldDefinitionId}>
-          <FieldDefinitionRow
-            fieldDefinition={fieldDefinition}
-            inlineField={parseInlineField(fieldDefinition.definition)}
-            onEdit={onEdit}
-            onDelete={onDelete}
-          />
-        </EuiFlexItem>
+    <div data-test-subj={dataTestSubj}>
+      {fieldDefinitions.map((fieldDefinition, index) => (
+        <FieldDefinitionRow
+          key={fieldDefinition.fieldDefinitionId}
+          fieldDefinition={fieldDefinition}
+          inlineField={parseInlineField(fieldDefinition.definition)}
+          onEdit={onEdit}
+          onDelete={onDelete}
+          isFirst={index === 0}
+        />
       ))}
-    </EuiFlexGroup>
+    </div>
   );
 };
 
