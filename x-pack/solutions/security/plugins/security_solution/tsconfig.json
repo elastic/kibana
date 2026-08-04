@@ -156,6 +156,7 @@
     "@kbn/expressions-plugin",
     "@kbn/dev-proc-runner",
     "@kbn/alerts-ui-shared",
+    "@kbn/app-header",
     "@kbn/security-solution-navigation",
     "@kbn/security-solution-upselling",
     "@kbn/discover-plugin",
