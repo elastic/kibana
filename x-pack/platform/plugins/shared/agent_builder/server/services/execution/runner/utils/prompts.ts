@@ -30,6 +30,7 @@ import {
   ConfirmationStatus,
   isAskUserQuestionPromptResponse,
   isAuthorizationPromptResponse,
+  isBrowserToolResultPromptResponse,
   isConfirmationPromptResponse,
 } from '@kbn/agent-builder-common/agents/prompts';
 import type { InternalToolDefinition } from '@kbn/agent-builder-server';
@@ -171,6 +172,11 @@ export const getAgentPromptStorageState = ({
       } else if (isAskUserQuestionPromptResponse(response)) {
         state.responses[promptId] = {
           type: AgentPromptType.ask_user_question,
+          response,
+        };
+      } else if (isBrowserToolResultPromptResponse(response)) {
+        state.responses[promptId] = {
+          type: AgentPromptType.browser_tool_result,
           response,
         };
       }

@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { BrowserApiToolDefinition } from '@kbn/agent-builder-browser/tools/browser_api_tool';
+import type {
+  BrowserApiToolDefinition,
+  BrowserApiToolHandlerResult,
+} from '@kbn/agent-builder-browser/tools/browser_api_tool';
 import type { ToastsStart } from '@kbn/core-notifications-browser';
 
 export interface BrowserToolCall {
@@ -14,6 +17,10 @@ export interface BrowserToolCall {
   params: unknown;
   timestamp: number;
 }
+
+export type BrowserToolExecutionOutcome =
+  | { ok: true; result?: BrowserApiToolHandlerResult }
+  | { ok: false; error: string };
 
 export class BrowserToolExecutor {
   private toasts?: ToastsStart;
@@ -24,36 +31,52 @@ export class BrowserToolExecutor {
 
   /**
    * Execute browser tool calls, tracking which have already been executed
-   * to prevent re-execution on history load
+   * to prevent re-execution on history load.
+   *
+   * One-way tools show success toasts. Two-way tools (`returnsResult`) stay silent
+   * on success (only toast on failure) because the agent loop continues automatically.
    */
   async executeToolCalls(
     calls: BrowserToolCall[],
     tools: Map<string, BrowserApiToolDefinition<any>>
-  ): Promise<void> {
+  ): Promise<BrowserToolExecutionOutcome[]> {
+    const outcomes: BrowserToolExecutionOutcome[] = [];
+
     for (const call of calls) {
       const tool = tools.get(call.tool_id);
       if (!tool) {
+        outcomes.push({ ok: false, error: `Unknown browser tool: ${call.tool_id}` });
         continue;
       }
 
       try {
         const validatedParams = tool.schema.parse(call.params);
-        await tool.handler(validatedParams);
+        const handlerReturn = await tool.handler(validatedParams);
+        const result =
+          handlerReturn && typeof handlerReturn === 'object' && 'results' in handlerReturn
+            ? (handlerReturn as BrowserApiToolHandlerResult)
+            : undefined;
 
-        if (this.toasts) {
+        if (this.toasts && !tool.returnsResult) {
           this.toasts.addSuccess({
             title: `Executed: ${tool.description}`,
             toastLifeTimeMs: 3000,
           });
         }
+
+        outcomes.push({ ok: true, result });
       } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
         if (this.toasts) {
           this.toasts.addDanger({
             title: `Failed to execute: ${tool.description}`,
-            text: error instanceof Error ? error.message : String(error),
+            text: message,
           });
         }
+        outcomes.push({ ok: false, error: message });
       }
     }
+
+    return outcomes;
   }
 }

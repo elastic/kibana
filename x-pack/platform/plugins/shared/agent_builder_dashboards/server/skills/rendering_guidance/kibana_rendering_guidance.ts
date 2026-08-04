@@ -20,7 +20,12 @@ In Kibana, a dashboard request follows three stages: resolve inputs, generate (w
 2. **Generate** (persists automatically):
    - Call ${dashboardTools.generateDashboard} with \`dashboardAttachmentId\` set to the dashboard you are editing (omit it for a new dashboard) and your batched \`operations\`. The tool reads the current payload from that reference, applies the operations, and persists the result as a \`${DASHBOARD_ATTACHMENT_TYPE}\` attachment for you.
    - It returns \`data.attachment_id\`, \`data.version\`, a compact \`data.dashboard\` summary whose panels carry a one-sentence \`authoring_note\` for the charts authored in this call, and optional \`data.failures\`. Do **not** pass the dashboard payload back into any tool — reference \`data.attachment_id\` instead.
-3. **Render**:
+3. **Visual validation** (required after a successful generate that changed layout or panels):
+   - The live dashboard is applied mid-round when generation succeeds.
+   - Call \`browser_capture_dashboard_screenshot\` **alone** (never in parallel) with \`settle_ms\` of at least \`1500\`.
+   - Inspect the returned screenshot and briefly describe what looks wrong (overlap, empty/broken charts, cramped titles, uneven composition, unused whitespace). If issues are actionable, fix them with a follow-up ${dashboardTools.generateDashboard} call, then screenshot again only if you made another visual change.
+   - Skip the screenshot when generation failed or when the call made no visible UI change (e.g. metadata-only with no layout impact).
+4. **Render**:
    - Render the persisted attachment inline with a render-attachment tag using the returned \`attachment_id\` and \`version\`:
      \`<render_attachment id="{attachment_id}" version="{version}" />\`
 

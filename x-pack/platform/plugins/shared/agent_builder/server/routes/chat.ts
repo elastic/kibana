@@ -73,6 +73,29 @@ export const promptResponseEntrySchema = schema.oneOf([
       },
     }
   ),
+  schema.object(
+    {
+      ok: schema.boolean(),
+      results: schema.maybe(schema.arrayOf(schema.any(), { maxSize: 50 })),
+      image: schema.maybe(
+        schema.object({
+          media_type: schema.oneOf([
+            schema.literal('image/png'),
+            schema.literal('image/jpeg'),
+            schema.literal('image/webp'),
+          ]),
+          data: schema.string({ minLength: 1, maxLength: 1_500_000 }),
+        })
+      ),
+      error: schema.maybe(schema.string({ maxLength: 10_000 })),
+    },
+    {
+      meta: {
+        description:
+          'Result of a two-way browser tool (`browser_tool_result` prompt). Includes optional image for multimodal injection.',
+      },
+    }
+  ),
 ]);
 
 export const conversePayloadSchema = schema.object({
@@ -137,7 +160,7 @@ export const conversePayloadSchema = schema.object({
     schema.recordOf(schema.string({ minLength: 1, maxLength: 512 }), promptResponseEntrySchema, {
       meta: {
         description:
-          'Use this field to respond to a `confirmation`, `authorization`, or `ask_user_question` prompt. Send an `allow` boolean to answer a `confirmation` prompt, an `authorized` boolean to answer an `authorization` prompt, or an `answers` array (one entry per question) to answer an `ask_user_question` prompt.',
+          'Use this field to respond to a `confirmation`, `authorization`, `ask_user_question`, or `browser_tool_result` prompt. Send an `allow` boolean to answer a `confirmation` prompt, an `authorized` boolean to answer an `authorization` prompt, an `answers` array to answer an `ask_user_question` prompt, or `{ ok, results?, image?, error? }` for a two-way browser tool.',
       },
     })
   ),
@@ -271,6 +294,14 @@ export const conversePayloadSchema = schema.object({
         schema: schema.any({
           meta: { description: 'JSON Schema defining the tool parameters (JsonSchema7Type).' },
         }),
+        returns_result: schema.maybe(
+          schema.boolean({
+            meta: {
+              description:
+                'When true, the agent pauses until the client resumes with the browser handler result (two-way).',
+            },
+          })
+        ),
       }),
       {
         meta: {

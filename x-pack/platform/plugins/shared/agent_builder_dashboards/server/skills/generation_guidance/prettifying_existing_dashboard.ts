@@ -36,6 +36,10 @@ Check the existing layout against the panel layout rules (grid packing and chart
 
 If the layout already conforms, do not emit layout operations — \`prettifyPanelConfigs: true\` with empty \`operations\` is the correct call for a config-only prettify. When the user chooses the existing-panels-only option, do not add or remove panels or restructure sections.
 
+## Visual validation (browser screenshot)
+
+After a successful \`generate_dashboard\` that changed layout or panels, you **must** call \`browser_capture_dashboard_screenshot\` alone with \`settle_ms\` ≥ 1500 (the live dashboard is applied mid-round before this tool runs). Use the screenshot to describe visual problems — overlap, empty charts, cramped titles, uneven composition — and fix them with another \`generate_dashboard\` when warranted. Prefer structural layout rules first; the screenshot is confirmation, not a substitute for grid rules. Do not call it in parallel with other tools. Skip only when generation failed or there was no visible UI change.
+
 ## Composition pass (only when new panels are allowed)
 
 When the user requests or selects **Improve existing charts and layout and add useful new panels**, evaluate the dashboard against a **regeneration-quality** bar — not a local cleanup mindset. Compare it to the dashboard you would create from scratch for the same purpose. Only change composition when the existing inventory is sparse, unbalanced, redundant, or missing high-value questions for its purpose.

@@ -205,6 +205,8 @@ describe('registerDashboardAppIntegration', () => {
     const agentBuilder = {
       addAttachment,
       updateAttachmentOrigin,
+      setChatConfig: jest.fn(),
+      clearChatConfig: jest.fn(),
       events: {
         getChatEvents$: jest.fn((conversationId: string) => {
           let chatEvents$ = chatEventsByConversationId.get(conversationId);

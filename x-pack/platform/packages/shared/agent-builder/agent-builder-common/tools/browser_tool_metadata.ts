@@ -37,4 +37,11 @@ export interface BrowserApiToolMetadata {
    * Generated from the tool's Zod schema.
    */
   schema: JSONSchema;
+
+  /**
+   * When true, the server interrupts the agent run until the client resumes with
+   * the real browser handler result. When false/omitted, the tool is one-way
+   * (fire-and-forget stub result on the server).
+   */
+  returns_result?: boolean;
 }

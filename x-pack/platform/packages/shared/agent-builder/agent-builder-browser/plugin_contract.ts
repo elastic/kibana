@@ -94,10 +94,14 @@ export interface EmbeddableConversationProps {
    * Browser API tools that the agent can use to interact with the page.
    * Tools are executed browser-side when the LLM requests them.
    *
+   * One-way (default): fire-and-forget UI side effects; the LLM sees a stub result.
+   * Two-way (`returnsResult: true`): the round pauses until the client resumes with
+   * the handler return value (optional `image` for multimodal injection).
+   *
    * Example:
    * ```typescript
    * browserApiTools: [{
-   *   id: 'dashboard.config.update_title',
+   *   id: 'update_dashboard_title',
    *   description: 'Update the dashboard title',
    *   schema: z.object({
    *     title: z.string().describe('The new title')

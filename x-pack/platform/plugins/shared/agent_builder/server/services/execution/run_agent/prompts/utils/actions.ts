@@ -37,6 +37,7 @@ import {
   isHandoverAction,
   isToolCallAction,
   isExecuteToolAction,
+  isUserImageAction,
 } from '../../actions';
 import type { ToolCallResultTransformer } from '../../utils/tool_summarization';
 import { extractToolReturn } from '../../utils/extract_tool_return';
@@ -146,6 +147,19 @@ const formatActions = async ({
     }
     if (isSubagentRosterUpdatedAction(action)) {
       formatted.push(createUserMessage(formatSubagentRosterNotice(action.roster)));
+    }
+    if (isUserImageAction(action)) {
+      formatted.push(
+        createUserMessage([
+          { type: 'text', text: action.caption },
+          {
+            type: 'image_url',
+            image_url: {
+              url: `data:${action.image.media_type};base64,${action.image.data}`,
+            },
+          },
+        ])
+      );
     }
   }
 

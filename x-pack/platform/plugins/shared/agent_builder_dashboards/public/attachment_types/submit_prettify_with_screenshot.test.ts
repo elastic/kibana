@@ -10,11 +10,11 @@ import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import { AttachmentType } from '@kbn/agent-builder-common/attachments';
 import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/agent-builder-dashboards-common';
 import type { DashboardApi, DashboardStart } from '@kbn/dashboard-plugin/public';
+import { CAPTURE_DASHBOARD_SCREENSHOT_TOOL_ID } from '../browser_tools/capture_dashboard_screenshot';
 import { PRETTIFY_DASHBOARD_PROMPT } from './canvas_integration/use_register_canvas_action_buttons';
 import { captureAppMainScreenshot } from './capture_app_main_screenshot';
 import type { IdGenerator } from '.';
 import {
-  DASHBOARD_AGENT_ID,
   submitPrettifyWithScreenshot,
   submitPrettifyWithScreenshotInConversation,
 } from './submit_prettify_with_screenshot';
@@ -93,16 +93,19 @@ describe('submitPrettifyWithScreenshot', () => {
     jest.useRealTimers();
   });
 
-  it('opens chat with dashboard + screenshot attachments and submits the prompt', async () => {
+  it('opens chat with dashboard + screenshot attachments and the capture browser tool', async () => {
     captureAppMainScreenshotMock.mockResolvedValue({
       media_type: 'image/jpeg',
       data: 'abc',
     });
     const agentBuilder = createAgentBuilder();
     const dashboard = createDashboard({ dashboardApi: createDashboardApi() });
-    const draftAttachmentId = createDraftAttachmentId();
 
-    await submitPrettifyWithScreenshot({ agentBuilder, dashboard, draftAttachmentId });
+    await submitPrettifyWithScreenshot({
+      agentBuilder,
+      dashboard,
+      draftAttachmentId: createDraftAttachmentId(),
+    });
 
     const expectedScreenshot = {
       type: AttachmentType.image,
@@ -117,14 +120,13 @@ describe('submitPrettifyWithScreenshot', () => {
     };
 
     expect(agentBuilder.openChat).toHaveBeenCalledWith({
-      agentId: DASHBOARD_AGENT_ID,
       attachments: [expectedDashboard, expectedScreenshot],
+      browserApiTools: [
+        expect.objectContaining({ id: CAPTURE_DASHBOARD_SCREENSHOT_TOOL_ID, returnsResult: true }),
+      ],
     });
     expect(agentBuilder.addAttachment).toHaveBeenCalledWith(expectedDashboard);
     expect(agentBuilder.addAttachment).toHaveBeenCalledWith(expectedScreenshot);
-    expect(agentBuilder.submitMessage).not.toHaveBeenCalled();
-    jest.runAllTimers();
-    expect(agentBuilder.submitMessage).toHaveBeenCalledWith(PRETTIFY_DASHBOARD_PROMPT);
   });
 
   it('skips dashboard attachment when the current dashboard is already attached', async () => {
@@ -165,7 +167,6 @@ describe('submitPrettifyWithScreenshot', () => {
     });
 
     expect(agentBuilder.openChat).toHaveBeenCalledWith({
-      agentId: DASHBOARD_AGENT_ID,
       attachments: [
         {
           type: AttachmentType.image,
@@ -173,11 +174,14 @@ describe('submitPrettifyWithScreenshot', () => {
           data: { media_type: 'image/png', data: 'xyz' },
         },
       ],
+      browserApiTools: [
+        expect.objectContaining({ id: CAPTURE_DASHBOARD_SCREENSHOT_TOOL_ID, returnsResult: true }),
+      ],
     });
     expect(agentBuilder.addAttachment).toHaveBeenCalledTimes(1);
   });
 
-  it('still submits the prompt when capture fails and no dashboard api is available', async () => {
+  it('still opens chat with the capture tool when capture fails and no dashboard api is available', async () => {
     captureAppMainScreenshotMock.mockResolvedValue(undefined);
     const agentBuilder = createAgentBuilder();
     const dashboard = createDashboard({ dashboardApi: undefined });
@@ -189,11 +193,11 @@ describe('submitPrettifyWithScreenshot', () => {
     });
 
     expect(agentBuilder.openChat).toHaveBeenCalledWith({
-      agentId: DASHBOARD_AGENT_ID,
+      browserApiTools: [
+        expect.objectContaining({ id: CAPTURE_DASHBOARD_SCREENSHOT_TOOL_ID, returnsResult: true }),
+      ],
     });
     expect(agentBuilder.addAttachment).not.toHaveBeenCalled();
-    jest.runAllTimers();
-    expect(agentBuilder.submitMessage).toHaveBeenCalledWith(PRETTIFY_DASHBOARD_PROMPT);
   });
 });
 
@@ -207,23 +211,22 @@ describe('submitPrettifyWithScreenshotInConversation', () => {
     jest.useRealTimers();
   });
 
-  it('adds the screenshot then submits the prompt', async () => {
+  it('adds screenshot and submits the prompt', async () => {
     captureAppMainScreenshotMock.mockResolvedValue({
-      media_type: 'image/png',
-      data: 'xyz',
+      media_type: 'image/webp',
+      data: 'shot',
     });
     const addAttachment = jest.fn();
     const submitMessage = jest.fn();
 
     await submitPrettifyWithScreenshotInConversation({ addAttachment, submitMessage });
+    jest.runAllTimers();
 
     expect(addAttachment).toHaveBeenCalledWith({
       type: AttachmentType.image,
       description: 'Dashboard screenshot',
-      data: { media_type: 'image/png', data: 'xyz' },
+      data: { media_type: 'image/webp', data: 'shot' },
     });
-    expect(submitMessage).not.toHaveBeenCalled();
-    jest.runAllTimers();
     expect(submitMessage).toHaveBeenCalledWith(PRETTIFY_DASHBOARD_PROMPT);
   });
 });

@@ -27,6 +27,12 @@ import {
   createReasoningStep,
   createToolCallStep,
 } from '@kbn/agent-builder-common/chat/conversation';
+import {
+  isBrowserToolResultPrompt,
+  type BrowserToolResultPrompt,
+  type BrowserToolResultPromptResponse,
+  type PromptResponse,
+} from '@kbn/agent-builder-common/agents/prompts';
 import { finalize, type Observable } from 'rxjs';
 import { isBrowserToolCallEvent } from '@kbn/agent-builder-common/chat/events';
 import type { BrowserApiToolDefinition } from '@kbn/agent-builder-browser/tools/browser_api_tool';
@@ -39,25 +45,129 @@ interface SubscribeOptions {
   browserApiTools?: Array<BrowserApiToolDefinition<any>>;
   browserToolExecutor?: BrowserToolExecutor;
   isAborted: () => boolean;
+  /**
+   * When provided, two-way browser tool prompts are executed client-side and
+   * this callback resumes the round with the handler results (auto, no UI).
+   */
+  resumeWithPrompts?: (prompts: Record<string, PromptResponse>) => Observable<ChatEvent>;
 }
+
+const MAX_BROWSER_TOOL_RESUME_DEPTH = 8;
 
 /**
  * Subscribe to a chat event stream and dispatch every event to the conversation cache via
  * `conversationActions`. Returns a Promise that resolves when the stream completes (success
  * or abort) and rejects on a real error.
  *
- * Plain function (not a hook) so mutation `mutationFn` can call it inline. Takes
- * `conversationActions` as a parameter rather than reading from React context — each mutation
- * builds its own actions targeting the mutation-owned conversation id, so events keep writing
- * to the right cache regardless of where the user has navigated.
+ * Two-way browser tools (`returnsResult`) pause the server round; after the stream ends this
+ * helper executes their handlers and optionally auto-resumes via `resumeWithPrompts`.
  */
-export const subscribeToChatEvents = ({
+export const subscribeToChatEvents = async ({
   events$,
   conversationActions,
   browserApiTools,
   browserToolExecutor,
   isAborted,
+  resumeWithPrompts,
 }: SubscribeOptions): Promise<void> => {
+  let depth = 0;
+  let currentEvents$ = events$;
+
+  while (depth <= MAX_BROWSER_TOOL_RESUME_DEPTH) {
+    const pendingBrowserPrompts: BrowserToolResultPrompt[] = [];
+
+    await subscribeOnce({
+      events$: currentEvents$,
+      conversationActions,
+      browserApiTools,
+      browserToolExecutor,
+      isAborted,
+      onBrowserToolResultPrompt: (prompt) => {
+        pendingBrowserPrompts.push(prompt);
+      },
+    });
+
+    if (isAborted() || pendingBrowserPrompts.length === 0 || !resumeWithPrompts) {
+      return;
+    }
+
+    const prompts: Record<string, PromptResponse> = {};
+    for (const prompt of pendingBrowserPrompts) {
+      prompts[prompt.id] = await executeTwoWayBrowserTool({
+        prompt,
+        browserApiTools,
+        browserToolExecutor,
+      });
+    }
+
+    conversationActions.clearPendingPrompts();
+    currentEvents$ = resumeWithPrompts(prompts);
+    depth += 1;
+  }
+
+  throw new Error(
+    `Exceeded max two-way browser tool resume depth (${MAX_BROWSER_TOOL_RESUME_DEPTH})`
+  );
+};
+
+const executeTwoWayBrowserTool = async ({
+  prompt,
+  browserApiTools,
+  browserToolExecutor,
+}: {
+  prompt: BrowserToolResultPrompt;
+  browserApiTools?: Array<BrowserApiToolDefinition<any>>;
+  browserToolExecutor?: BrowserToolExecutor;
+}): Promise<BrowserToolResultPromptResponse> => {
+  const toolDef = browserApiTools?.find((tool) => tool.id === prompt.tool_id);
+  if (!toolDef || !browserToolExecutor) {
+    return {
+      ok: false,
+      error: `Browser tool '${prompt.tool_id}' is not available in the client`,
+    };
+  }
+
+  const [outcome] = await browserToolExecutor.executeToolCalls(
+    [
+      {
+        tool_id: prompt.tool_id,
+        call_id: prompt.tool_call_id,
+        params: prompt.params,
+        timestamp: Date.now(),
+      },
+    ],
+    new Map([[prompt.tool_id, toolDef]])
+  );
+
+  if (!outcome || !outcome.ok) {
+    return {
+      ok: false,
+      error: outcome && !outcome.ok ? outcome.error : 'Browser tool execution failed',
+    };
+  }
+
+  return {
+    ok: true,
+    results: outcome.result?.results,
+    image: outcome.result?.image,
+  };
+};
+
+const subscribeOnce = ({
+  events$,
+  conversationActions,
+  browserApiTools,
+  browserToolExecutor,
+  isAborted,
+  onBrowserToolResultPrompt,
+}: {
+  events$: Observable<ChatEvent>;
+  conversationActions: ConversationActions;
+  browserApiTools?: Array<BrowserApiToolDefinition<any>>;
+  browserToolExecutor?: BrowserToolExecutor;
+  isAborted: () => boolean;
+  onBrowserToolResultPrompt: (prompt: BrowserToolResultPrompt) => void;
+}): Promise<void> => {
   const nextChatEvent = (event: ChatEvent) => {
     if (isMessageChunkEvent(event)) {
       conversationActions.addAssistantMessageChunk({ messageChunk: event.data.text_chunk });
@@ -74,9 +184,6 @@ export const subscribeToChatEvents = ({
         toolCallId: event.data.tool_call_id,
       });
     } else if (isReasoningEvent(event)) {
-      // Skip transient reasoning entirely. The backend emits these as
-      // throwaway "thinking..." placeholders that aren't meant to be
-      // persisted, rendered as a step, or surfaced as the live indicator.
       if (event.data.transient) {
         return;
       }
@@ -103,6 +210,10 @@ export const subscribeToChatEvents = ({
       const toolId = event.data.tool_id;
       if (toolId && browserToolExecutor && browserApiTools) {
         const toolDef = browserApiTools.find((tool) => tool.id === toolId);
+        // Two-way tools run after the stream ends (paired with prompt_request).
+        if (toolDef?.returnsResult) {
+          return;
+        }
         if (toolDef) {
           const toolsMap = new Map([[toolId, toolDef]]);
           browserToolExecutor
@@ -141,6 +252,9 @@ export const subscribeToChatEvents = ({
       conversationActions.addPendingPrompt({
         prompt: event.data.prompt,
       });
+      if (isBrowserToolResultPrompt(event.data.prompt)) {
+        onBrowserToolResultPrompt(event.data.prompt);
+      }
     } else if (isCompactionStartedEvent(event)) {
       conversationActions.addCompactionStep({
         tokenCountBefore: event.data.token_count_before,

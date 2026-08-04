@@ -102,6 +102,16 @@ export const useResumeRoundMutation = ({
           browserApiTools: vars.browserApiTools,
           browserToolExecutor,
           isAborted: () => controller.signal.aborted,
+          resumeWithPrompts: (prompts) =>
+            chatService.resume({
+              signal: controller.signal,
+              executionId: uuidv4(),
+              prompts,
+              conversationId: vars.conversationId,
+              agentId: vars.agentId,
+              connectorId: vars.connectorId,
+              browserApiTools: browserApiToolsMetadata,
+            }),
         });
         succeeded = true;
       } catch (err) {

@@ -360,8 +360,8 @@ export class AgentBuilderPlugin
         openSidebarInternal();
       },
       setChatConfig: (config: EmbeddableConversationProps) => {
-        // Set config until sidebar is next opened
-        this.conversationActiveConfig = config;
+        // Merge into active config so partial updates (e.g. browserApiTools only) are safe.
+        this.conversationActiveConfig = { ...this.conversationActiveConfig, ...config };
         // If there is already an active sidebar, update its props
         if (this.activeSidebarRef && this.sidebarCallbacks) {
           this.sidebarCallbacks.updateProps(config);

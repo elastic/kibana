@@ -14,6 +14,10 @@ import {
   isRelevantSkillsStep,
   type ChatEvent,
 } from '@kbn/agent-builder-common';
+import {
+  AgentPromptRequestSourceType,
+  AgentPromptType,
+} from '@kbn/agent-builder-common/agents/prompts';
 import type { ConversationStateManager, ModelProvider } from '@kbn/agent-builder-server/runner';
 import {
   createAttachmentStateManager,
@@ -447,5 +451,49 @@ describe('addRoundCompleteEvent', () => {
     const events = await runFreshRound(undefined);
     const round = events.find(isRoundCompleteEvent)?.data.round;
     expect(round?.steps.some(isRelevantSkillsStep)).toBe(false);
+  });
+
+  it('does not require a ToolCallStep when pausing on a browser_tool_result prompt', async () => {
+    const promptRequestEvent: ChatEvent = {
+      type: ChatEventType.promptRequest,
+      data: {
+        prompt: {
+          type: AgentPromptType.browser_tool_result,
+          id: 'prompt-1',
+          tool_id: 'capture_dashboard_screenshot',
+          tool_call_id: 'toolu_bdrk_01McDJFswpnajsdBdPg73s9z',
+          params: { settle_ms: 1500 },
+        },
+        source: {
+          type: AgentPromptRequestSourceType.toolCall,
+          tool_call_id: 'toolu_bdrk_01McDJFswpnajsdBdPg73s9z',
+        },
+      },
+    };
+
+    const events = await firstValueFrom(
+      of(
+        createFinalStateEvent({ currentCycle: 2, errorCount: 0 } as never) as ConvertedEvents,
+        promptRequestEvent as ConvertedEvents
+      ).pipe(
+        addRoundCompleteEvent({
+          ...createDeps(),
+          pendingRound: undefined,
+          userInput: { message: 'Prettify this dashboard' },
+          startTime: new Date('2026-01-01T00:00:00.000Z'),
+        }),
+        toArray()
+      )
+    );
+
+    const roundCompleteEvent = events.find(isRoundCompleteEvent);
+    expect(roundCompleteEvent?.data.round.status).toBe(ConversationRoundStatus.awaitingPrompt);
+    expect(roundCompleteEvent?.data.round.pending_prompts).toEqual([
+      expect.objectContaining({
+        type: AgentPromptType.browser_tool_result,
+        tool_id: 'capture_dashboard_screenshot',
+      }),
+    ]);
+    expect(roundCompleteEvent?.data.round.state?.agent.nodes).toEqual([]);
   });
 });

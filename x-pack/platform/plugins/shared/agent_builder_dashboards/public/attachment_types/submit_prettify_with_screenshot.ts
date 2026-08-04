@@ -14,6 +14,7 @@ import {
   isDashboardAttachment,
 } from '@kbn/agent-builder-dashboards-common';
 import type { DashboardApi, DashboardStart } from '@kbn/dashboard-plugin/public';
+import { createCaptureDashboardScreenshotTool } from '../browser_tools/capture_dashboard_screenshot';
 import { captureAppMainScreenshot } from './capture_app_main_screenshot';
 import { PRETTIFY_DASHBOARD_PROMPT } from './canvas_integration/use_register_canvas_action_buttons';
 import type { IdGenerator } from '.';
@@ -127,6 +128,7 @@ export const submitPrettifyWithScreenshot = async ({
   // Already-open sidebar: also upsert via addAttachment (updateProps is a full replace).
   agentBuilder.openChat({
     ...(attachments.length > 0 ? { attachments } : {}),
+    browserApiTools: [createCaptureDashboardScreenshotTool()],
   });
   for (const attachment of attachments) {
     agentBuilder.addAttachment(attachment);

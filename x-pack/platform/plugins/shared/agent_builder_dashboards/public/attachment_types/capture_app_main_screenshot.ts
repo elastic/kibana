@@ -126,29 +126,91 @@ const compressCaptureBlob = async (blob: Blob): Promise<ImageAttachmentData | un
 };
 
 /**
- * Captures `#app-main-scroll` for chat attachment: downscales, then picks PNG/WebP/JPEG.
- * SVG is not used — DOM capture is raster (charts are canvas), and SVG would still embed bitmaps.
- * Returns undefined when the element is missing or capture fails.
+ * Prefer the dashboard content node over `#app-main-scroll`.
+ *
+ * `#app-main-scroll` is a fixed-height overflow scroller. Capturing it (even with
+ * scrollWidth/scrollHeight) still rasters the clipped viewport because cloned
+ * stylesheet rules re-apply overflow + percentage height. The inner dashboard /
+ * grid nodes already size to the full panel layout, so dom-to-image can serialize
+ * them without that clip.
+ */
+export const resolveDashboardCaptureElement = (): HTMLElement | undefined => {
+  const dashboardContainer = document.querySelector<HTMLElement>(
+    '[data-test-subj="dashboardContainer"]'
+  );
+  if (dashboardContainer) {
+    return dashboardContainer;
+  }
+
+  const dashboardViewport = document.querySelector<HTMLElement>(
+    '[data-test-subj="dshDashboardViewport"]'
+  );
+  if (dashboardViewport) {
+    return dashboardViewport;
+  }
+
+  const grid = document.querySelector<HTMLElement>('[data-test-subj="kbnGridLayout"]');
+  if (grid) {
+    return grid.closest<HTMLElement>('.kbnGridWrapper') ?? grid;
+  }
+
+  return document.getElementById(APP_MAIN_SCROLL_CONTAINER_ID) ?? undefined;
+};
+
+const measureElement = (element: HTMLElement): { width: number; height: number } => {
+  const rect = element.getBoundingClientRect();
+  return {
+    width: Math.max(element.scrollWidth, element.offsetWidth, Math.round(rect.width), 1),
+    height: Math.max(element.scrollHeight, element.offsetHeight, Math.round(rect.height), 1),
+  };
+};
+
+/**
+ * Captures the full dashboard (or app main content), not just the visible scroll
+ * viewport, then downscales and picks PNG/WebP/JPEG.
  */
 export const captureAppMainScreenshot = async (): Promise<ImageAttachmentData | undefined> => {
-  const element = document.getElementById(APP_MAIN_SCROLL_CONTAINER_ID);
+  const element = resolveDashboardCaptureElement();
   if (!element) {
     return undefined;
   }
 
+  const { width, height } = measureElement(element);
+  const capturingScrollContainer = element.id === APP_MAIN_SCROLL_CONTAINER_ID;
+
+  // Only the scroll-container fallback needs live style mutation; dashboard/grid
+  // nodes already have intrinsic full height.
+  const previous = capturingScrollContainer
+    ? {
+        height: element.style.height,
+        maxHeight: element.style.maxHeight,
+        overflow: element.style.overflow,
+        overflowY: element.style.overflowY,
+      }
+    : undefined;
+
+  if (previous) {
+    element.style.height = `${height}px`;
+    element.style.maxHeight = 'none';
+    element.style.overflow = 'visible';
+    element.style.overflowY = 'visible';
+  }
+
   try {
-    const scale = 1;
     const blob: Blob | null = await domtoimage.toBlob(element, {
       quality: 1,
       bgcolor: '#ffffff',
       cacheBust: true,
-      width: element.offsetWidth * scale,
-      height: element.offsetHeight * scale,
+      width,
+      height,
       style: {
-        transform: `scale(${scale})`,
+        transform: 'scale(1)',
         transformOrigin: 'top left',
-        width: `${element.offsetWidth}px`,
-        height: `${element.offsetHeight}px`,
+        width: `${width}px`,
+        height: `${height}px`,
+        maxHeight: 'none',
+        overflow: 'visible',
+        overflowY: 'visible',
       },
       styleFilter: (style: CSSStyleSheet) => {
         try {
@@ -177,5 +239,12 @@ export const captureAppMainScreenshot = async (): Promise<ImageAttachmentData | 
     return { media_type: 'image/png', data: pngData };
   } catch {
     return undefined;
+  } finally {
+    if (previous) {
+      element.style.height = previous.height;
+      element.style.maxHeight = previous.maxHeight;
+      element.style.overflow = previous.overflow;
+      element.style.overflowY = previous.overflowY;
+    }
   }
 };

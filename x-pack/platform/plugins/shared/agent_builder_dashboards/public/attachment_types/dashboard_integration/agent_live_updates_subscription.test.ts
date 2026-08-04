@@ -82,4 +82,27 @@ describe('createAgentLiveUpdatesSubscription', () => {
     expect(setState).not.toHaveBeenCalled();
     subscription.unsubscribe();
   });
+
+  it('applies dashboard state mid-round from the dashboard_apply tool_ui event', () => {
+    const { chatEvents$, setState, subscription } = createHarness();
+
+    chatEvents$.next({
+      type: ChatEventType.toolUi,
+      data: {
+        tool_id: 'platform.dashboard.generate_dashboard',
+        tool_call_id: 'call-1',
+        custom_event: 'dashboard_apply',
+        data: {
+          attachment_id: 'attachment-1',
+          data: {
+            title: 'Applied mid-round',
+            panels: [],
+          },
+        },
+      },
+    });
+
+    expect(setState).toHaveBeenCalledTimes(1);
+    subscription.unsubscribe();
+  });
 });

@@ -18,7 +18,7 @@ import {
 } from '@kbn/agent-builder-dashboards-common';
 
 import { createCustomContentTemplateResolver } from '@kbn/custom-content-server';
-import { dashboardTools } from '../../../common';
+import { DASHBOARD_APPLY_UI_EVENT, dashboardTools } from '../../../common';
 import { retrieveLatestVersion } from './attachment_state';
 import {
   createVisPanelResolver,
@@ -158,6 +158,8 @@ export const generateDashboardTool = ({
 
 Persists the resulting dashboard as an attachment and returns its id plus a compact summary (not the full payload). Reference the returned attachment id to render the dashboard; do not copy the payload into follow-up tool calls.
 
+After a successful call, the live dashboard is updated mid-round. You MUST then call \`browser_capture_dashboard_screenshot\` alone (not in parallel) with a settle_ms of at least 1500 so panels can render. Use the returned screenshot to describe visual problems (overlap, empty charts, cramped titles, uneven composition) and fix them with a follow-up generate_dashboard call when needed. Skip the screenshot only when this call failed or made no visible layout/panel changes.
+
 Use operations[] to:
 1. set metadata
 2. add panels (resolved panel configs, or Lens/Vega visualizations from a natural-language query — pick the engine with the panel "renderer" field; defaults to Lens)
@@ -240,6 +242,13 @@ Use operations[] to:
         if (!attachment) {
           throw new Error(`Failed to persist dashboard attachment "${dashboardAttachmentId}".`);
         }
+
+        // Push the new payload to the open dashboard app immediately so a mid-round
+        // browser_capture_dashboard_screenshot sees the applied UI (round_complete is too late).
+        events.sendUiEvent(DASHBOARD_APPLY_UI_EVENT, {
+          attachment_id: attachment.id,
+          data: finalDashboardData,
+        });
 
         logger.info(`Dashboard payload ${isNewDashboard ? 'generated' : 'updated'}`);
 
