@@ -66,7 +66,9 @@ Example: load_skill (must be called alone — do not batch with any other tool)
 ```
 Response: `{ "skill": { "id": "...", "name": "..." }, "loaded_tools": ["platform_sig_events_ki_search", "platform_core_execute_esql"] }`
 
-Example: platform_sig_events_event_search. Populate `stream_names` and `rule_uuids` with all distinct non-empty values from the detection batch.
+Example: platform_sig_events_event_search. Use the rule-match request first. If it returns no accepted event, use the topology-fallback request; omit `rule_uuids` and `stream_names` and provide non-empty topology IDs.
+
+Rule-match request:
 ```json
 {
   "status": "open",
@@ -79,6 +81,20 @@ Example: platform_sig_events_event_search. Populate `stream_names` and `rule_uui
   "rule_uuids": ["..."]
 }
 ```
+
+Topology-fallback request:
+```json
+{
+  "status": "open",
+  "view": "compact",
+  "from": "now-7d",
+  "to": "now",
+  "per_page": 50,
+  "exclude_unconfirmed_signals": true,
+  "topology_feature_ids": ["..."]
+}
+```
+
 Response:
 ```json
 {
@@ -275,6 +291,8 @@ This search runs on its own topology inputs; a zero-event or zero-match 4.1 resu
 2. Build `topology_feature_ids` as the distinct union. If empty, the detection opens a new discovery.
 3. Otherwise, call `platform_sig_events_event_search` with `topology_feature_ids`; omit `rule_uuids` and `stream_names`. **Always run this call when topology_feature_ids is non-empty — do not skip it.**
 4. Accept an event continuation only when the current detection pairs with at least one of the event's signals under <incident_matching>.
+   - For a topology-connected pair of confirmed failures, shared `causal_features[].feature_id` is sufficient acceptance evidence. Reuse the open event's `event_id`; different error signatures or layers do not justify a split.
+   - Reject that continuation only when current evidence identifies a distinct resource or dependency path that the stored event topology does not connect.
    Add accepted rules to `matched_rule_uuids`.
 5. When `has_more` is true and some discoveries remain unmatched, set `page` to the previous response's `next_page` value with all other parameters unchanged and `per_page` held constant.
 

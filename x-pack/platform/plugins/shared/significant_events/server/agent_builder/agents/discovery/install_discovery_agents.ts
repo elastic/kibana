@@ -29,6 +29,7 @@ export const installDiscoveryAgents = async ({
 }): Promise<void> => {
   await agentBuilder.agents.ensure({
     spaceId,
+    availability,
     agent: {
       id: SIGNIFICANT_EVENTS_DISCOVERY_AGENT_ID,
       type: SIGNIFICANT_EVENTS_DISCOVERY_AGENT_TYPE_ID,

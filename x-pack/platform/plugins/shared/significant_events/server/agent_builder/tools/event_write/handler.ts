@@ -335,11 +335,12 @@ const buildWriteCandidates = (inputs: EventsWriteInput[]): WriteCandidate[] =>
         windowFrom: resolveTimeBound(input.dedup_window),
       };
     }
+    const normalizedInput = { ...input, event_id: normalizeEventId(input.event_id) };
     return {
       mode: 'snapshot',
       index,
-      input,
-      eventId: normalizeEventId(input.event_id) ?? `agent-event-${uuidv4().slice(0, 8)}`,
+      input: normalizedInput,
+      eventId: normalizedInput.event_id ?? `agent-event-${uuidv4().slice(0, 8)}`,
       eventUuid: uuidv4(),
     };
   });

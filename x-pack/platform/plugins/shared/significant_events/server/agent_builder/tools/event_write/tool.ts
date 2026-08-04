@@ -48,6 +48,10 @@ export const eventsWriteItemSchema = significantEventSchema
     conversation_id: true,
   })
   .extend({
+    event_id: z
+      .string()
+      .optional()
+      .transform((v) => (v === '' ? undefined : v)),
     dedup_window: z
       .string()
       .max(256)
