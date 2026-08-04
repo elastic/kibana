@@ -1907,7 +1907,6 @@
     "@kbn/workflow-step-schema-cli": "workspace:*",
     "@kbn/workflow-yaml-validate-cli": "workspace:*",
     "@kbn/workspaces": "workspace:*",
-    "@kbn/yarn-install-scripts": "workspace:*",
     "@kbn/yarn-lock-validator": "workspace:*",
     "@mswjs/http-middleware": "0.10.3",
     "@octokit/rest": "22.0.1",

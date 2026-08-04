@@ -110,7 +110,6 @@ packages:
   - 'packages/kbn-validate-next-docs-cli'
   - 'packages/kbn-web-worker-stub'
   - 'packages/kbn-whereis-pkg-cli'
-  - 'packages/kbn-yarn-install-scripts'
   - 'packages/kbn-yarn-lock-validator'
   - 'src/cli'
   - 'src/core'
@@ -1456,14 +1455,39 @@ autoInstallPeers: true
 strictPeerDependencies: false
 dedupePeerDependents: true
 verifyDepsBeforeRun: false
+
+# Dependency build-script gate (formerly @kbn/yarn-install-scripts). pnpm runs a
+# dependency's install/postinstall only when it's set true below. strictDepBuilds
+# fails the install if any build-script dependency is missing from this list, so
+# every one is an explicit, reviewed decision — never a blanket allow or block.
+# When a new dependency trips this, add it here with true (needed) or false (skip)
+# and a one-line reason.
+strictDepBuilds: true
 allowBuilds:
-  '@swc/core': false
-  'chromedriver': true
-  'cypress': true
-  'esbuild': true
-  'geckodriver': true
-  'ms-chromium-edge-driver': false
-  'puppeteer': false
+  # Allowed — the script does required work:
+  'chromedriver': true # downloads the chromedriver binary for functional tests
+  'cypress': true # downloads the Cypress binary for functional tests
+  'esbuild': true # downloads the platform esbuild binary (transitive via esbuild-register)
+  'geckodriver': true # downloads the geckodriver binary for functional tests
+  # Denied — script is unnecessary, unwanted, or handled elsewhere:
+  '@mongodb-js/zstd': false # optional native dep of just-bash; lazy-loads with fallback
+  '@parcel/watcher': false # native build; prebuilds are sufficient
+  '@scarf/scarf': false # anonymous install analytics
+  '@swc/core': false # native build; prebuilds are sufficient
+  'backport': false # writes config into the home dir
+  'core-js': false # donation banner
+  'core-js-pure': false # donation banner
+  'es5-ext': false # prints an informational message
+  'lmdb': false # native bindings; prebuilds are sufficient
+  'ms-chromium-edge-driver': false # downloads Edge driver only if EDGEDRIVER_DOWNLOAD_ON_INSTALL
+  'msgpackr-extract': false # native bindings; prebuilds are sufficient
+  'msw': false # copies a worker script if configured; unused
+  'nice-napi': false # optional piscina nice-value helper
+  'node-liblzma': false # optional native dep of just-bash; lazy-loads with fallback
+  'playwright-chromium': false # browsers installed explicitly in bootstrap
+  'protobufjs': false # prints a version-scheme warning
+  'puppeteer': false # browser download skipped via .puppeteerrc
+  'sharp': false # native build; prebuilds are sufficient
 overrides:
   '@aws-sdk/client-bedrock-agent-runtime': '3.994.0'
   '@aws-sdk/client-bedrock-runtime': '3.994.0'

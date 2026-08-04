@@ -5571,9 +5571,6 @@ importers:
       '@kbn/workspaces':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-workspaces
-      '@kbn/yarn-install-scripts':
-        specifier: workspace:*
-        version: link:packages/kbn-yarn-install-scripts
       '@kbn/yarn-lock-validator':
         specifier: workspace:*
         version: link:packages/kbn-yarn-lock-validator
@@ -6708,8 +6705,6 @@ importers:
   packages/kbn-web-worker-stub: {}
 
   packages/kbn-whereis-pkg-cli: {}
-
-  packages/kbn-yarn-install-scripts: {}
 
   packages/kbn-yarn-lock-validator: {}
 
@@ -30805,7 +30800,7 @@ snapshots:
   '@opentelemetry/core@2.10.0(@opentelemetry/api@1.9.1)':
     dependencies:
       '@opentelemetry/api': 1.9.1
-      '@opentelemetry/semantic-conventions': 1.41.1
+      '@opentelemetry/semantic-conventions': 1.43.0
 
   '@opentelemetry/core@2.9.0(@opentelemetry/api@1.9.1)':
     dependencies:
@@ -31488,7 +31483,7 @@ snapshots:
       '@opentelemetry/core': 2.10.0(@opentelemetry/api@1.9.1)
       '@opentelemetry/resources': 2.10.0(@opentelemetry/api@1.9.1)
       '@opentelemetry/sdk-trace': 2.10.0(@opentelemetry/api@1.9.1)
-      '@opentelemetry/semantic-conventions': 1.41.1
+      '@opentelemetry/semantic-conventions': 1.43.0
 
   '@opentelemetry/sdk-trace-base@2.9.0(@opentelemetry/api@1.9.1)':
     dependencies:
