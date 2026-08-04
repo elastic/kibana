@@ -221,3 +221,31 @@ export const CallToolInputSchema = lazySchema(() =>
   })
 );
 export type CallToolInput = z.infer<typeof CallToolInputSchema>;
+
+export const RunQueryTemplateInputSchema = lazySchema(() =>
+  z.object({
+    templateId: z
+      .string()
+      .min(1)
+      .describe(
+        'Template ID from listQueryTemplates (e.g. "orgCatalog.repos", "activity.searchIssues")'
+      ),
+    variables: z
+      .record(z.string(), z.unknown())
+      .optional()
+      .describe('Template-specific variables (validated per template)'),
+    first: z
+      .number()
+      .int()
+      .min(1)
+      .max(100)
+      .optional()
+      .default(50)
+      .describe('Page size for paginated templates (1–100, default 50)'),
+    after: z.string().optional().describe('Pagination cursor (endCursor from previous response)'),
+  })
+);
+export type RunQueryTemplateInput = z.infer<typeof RunQueryTemplateInputSchema>;
+
+export const ListQueryTemplatesInputSchema = lazySchema(() => z.object({}));
+export type ListQueryTemplatesInput = z.infer<typeof ListQueryTemplatesInputSchema>;

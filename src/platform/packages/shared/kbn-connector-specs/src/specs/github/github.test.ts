@@ -22,6 +22,16 @@ jest.mock('../../lib/mcp/with_mcp_client', () => ({
   }),
 }));
 
+// Mock the GraphQL client so github.test.ts doesn't need a real HTTP client.
+const mockExecuteRunQueryTemplate = jest.fn();
+const mockExecuteGraphQLViewer = jest.fn();
+
+jest.mock('./graphql', () => ({
+  ...jest.requireActual('./graphql'),
+  executeRunQueryTemplate: (...args: unknown[]) => mockExecuteRunQueryTemplate(...args),
+  executeGraphQLViewer: (...args: unknown[]) => mockExecuteGraphQLViewer(...args),
+}));
+
 // Helper: parse raw input through the action schema the way the framework does,
 // so Zod defaults are applied before the handler receives the input.
 const parse = <K extends keyof typeof GithubConnector.actions>(
@@ -33,7 +43,10 @@ describe('GithubConnector', () => {
   const mockContext = {
     client: {},
     log: {},
-    config: { serverUrl: 'https://api.githubcopilot.com/mcp/' },
+    config: {
+      serverUrl: 'https://api.githubcopilot.com/mcp/',
+      graphqlApiUrl: 'https://api.github.com/graphql',
+    },
   } as unknown as ActionContext;
 
   const mockJson = { ok: true };
@@ -459,17 +472,25 @@ describe('GithubConnector', () => {
   });
 
   describe('test handler', () => {
-    it('returns ok with tool count on successful connection', async () => {
+    beforeEach(() => {
+      mockExecuteGraphQLViewer.mockResolvedValue({ login: 'elastic-bot' });
+    });
+
+    it('returns ok with mcp tool count and graphql viewer', async () => {
       if (!GithubConnector.test) {
         throw new Error('test handler not defined');
       }
-      const result = await GithubConnector.test.handler(mockContext);
+      const result = (await GithubConnector.test.handler(mockContext)) as {
+        ok: boolean;
+        mcpToolCount: number;
+        graphqlViewer: string;
+      };
 
       expect(mockListTools).toHaveBeenCalled();
-      expect(result).toEqual({
-        ok: true,
-        message: 'Connected to GitHub MCP server. 2 tools available.',
-      });
+      expect(mockExecuteGraphQLViewer).toHaveBeenCalledWith({ ctx: mockContext });
+      expect(result.ok).toBe(true);
+      expect(result.mcpToolCount).toBe(2);
+      expect(result.graphqlViewer).toBe('elastic-bot');
     });
 
     it('propagates errors thrown by withMcpClient', async () => {
@@ -481,6 +502,119 @@ describe('GithubConnector', () => {
       }
 
       await expect(GithubConnector.test.handler(mockContext)).rejects.toThrow('connection refused');
+    });
+  });
+
+  describe('GraphQL workflow actions', () => {
+    it('exactly 2 GraphQL actions exist (runQueryTemplate and listQueryTemplates), no graphqlQuery', () => {
+      const graphqlActions = Object.entries(GithubConnector.actions)
+        .filter(([, action]) => action.isTool === false)
+        .map(([name]) => name);
+
+      expect(graphqlActions).toHaveLength(2);
+      expect(graphqlActions).toContain('runQueryTemplate');
+      expect(graphqlActions).toContain('listQueryTemplates');
+      expect(graphqlActions).not.toContain('graphqlQuery');
+    });
+
+    describe('listQueryTemplates action', () => {
+      it('returns the list of available templates', async () => {
+        const result = (await GithubConnector.actions.listQueryTemplates.handler(
+          mockContext,
+          {}
+        )) as { templates: Array<{ id: string; description: string }> };
+
+        expect(result.templates).toHaveLength(11);
+        const ids = result.templates.map((t) => t.id);
+        expect(ids).toContain('orgCatalog.repos');
+        expect(ids).toContain('activity.searchIssues');
+        expect(ids).toContain('graph.issueGraph');
+      });
+    });
+
+    describe('runQueryTemplate action', () => {
+      const mockResult = {
+        data: [{ id: 'R_1' }],
+        pageInfo: { hasNextPage: false, endCursor: null },
+        rateLimit: { cost: 1, limit: 5000, remaining: 4999, resetAt: '2026-07-11T12:00:00Z' },
+        shouldBackoff: false,
+        templateId: 'orgCatalog.repos',
+      };
+
+      beforeEach(() => {
+        mockExecuteRunQueryTemplate.mockResolvedValue(mockResult);
+      });
+
+      it('validates variables pre-flight and calls executeRunQueryTemplate', async () => {
+        const result = await GithubConnector.actions.runQueryTemplate.handler(mockContext, {
+          templateId: 'orgCatalog.repos',
+          variables: { org: 'elastic' },
+          first: 10,
+        });
+
+        expect(mockExecuteRunQueryTemplate).toHaveBeenCalledWith(
+          expect.objectContaining({
+            ctx: mockContext,
+            variables: expect.objectContaining({ org: 'elastic', first: 10 }),
+          })
+        );
+        expect(result).toEqual(mockResult);
+      });
+
+      it('throws for unknown templateId listing available IDs', async () => {
+        await expect(
+          GithubConnector.actions.runQueryTemplate.handler(mockContext, {
+            templateId: 'unknown.template',
+            variables: {},
+          })
+        ).rejects.toThrow(/Unknown GitHub GraphQL template/);
+      });
+
+      it('throws variable validation error for missing required field', async () => {
+        await expect(
+          GithubConnector.actions.runQueryTemplate.handler(mockContext, {
+            templateId: 'orgCatalog.repos',
+            variables: {},
+          })
+        ).rejects.toThrow(/Variable validation failed for template "orgCatalog.repos"/);
+
+        expect(mockExecuteRunQueryTemplate).not.toHaveBeenCalled();
+      });
+
+      it('does not inject first/after for entity templates (graph.*)', async () => {
+        mockExecuteRunQueryTemplate.mockResolvedValue({
+          ...mockResult,
+          templateId: 'graph.issueGraph',
+        });
+
+        await GithubConnector.actions.runQueryTemplate.handler(mockContext, {
+          templateId: 'graph.issueGraph',
+          variables: { owner: 'elastic', repo: 'kibana', number: 42 },
+          first: 10,
+          after: 'cursor123',
+        });
+
+        expect(mockExecuteRunQueryTemplate).toHaveBeenCalledWith(
+          expect.objectContaining({
+            variables: expect.not.objectContaining({ first: expect.anything() }),
+          })
+        );
+      });
+
+      it('applies default first=50 for paginated templates when not specified', async () => {
+        const input = parse('runQueryTemplate', {
+          templateId: 'orgCatalog.repos',
+          variables: { org: 'elastic' },
+        });
+
+        await GithubConnector.actions.runQueryTemplate.handler(mockContext, input);
+
+        expect(mockExecuteRunQueryTemplate).toHaveBeenCalledWith(
+          expect.objectContaining({
+            variables: expect.objectContaining({ first: 50 }),
+          })
+        );
+      });
     });
   });
 });

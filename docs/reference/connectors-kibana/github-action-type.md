@@ -9,7 +9,7 @@ applies_to:
 
 # GitHub connector [github-action-type]
 
-The GitHub data source connects to GitHub through the GitHub MCP server. It provides search across code, repositories, issues, pull requests, and users. It also provides access to commits, branches, tags, releases, teams, and file contents. It supports two authentication methods: Bearer token (personal access token) and OAuth Authorization Code.
+The GitHub data source connects to GitHub through two transports: the GitHub MCP server for interactive Agent Builder use, and the GitHub GraphQL API for org-scale workflow ingest. It provides search across code, repositories, issues, pull requests, and users, plus access to commits, branches, tags, releases, teams, and file contents. Workflow ingest actions (`runQueryTemplate`, `listQueryTemplates`) use the GraphQL API directly for high-throughput org-wide data collection. It supports two authentication methods: Bearer token (personal access token) and OAuth Authorization Code.
 
 ## Create connectors in {{kib}} [define-github-ui]
 
@@ -21,6 +21,9 @@ GitHub connectors have the following configuration properties:
 
 MCP Server URL
 :   The URL of the GitHub MCP server. Defaults to `https://api.githubcopilot.com/mcp/`.
+
+GraphQL API URL
+:   The GitHub GraphQL endpoint used by workflow ingest actions (`runQueryTemplate`, `listQueryTemplates`). Defaults to `https://api.github.com/graphql`. Override this for GitHub Enterprise Server deployments.
 
 Authentication
 :   Choose one of the following authentication methods:
@@ -92,6 +95,32 @@ The GitHub connector exposes the following actions:
 
 `callTool`
 :   Call any tool on the GitHub MCP server directly by name. Use this as an escape hatch when a specific tool is not yet exposed as a named action.
+
+### Workflow ingest actions
+
+These actions are workflow primitives — they are not exposed to Agent Builder agents and are intended for high-throughput org-scale ingest in automated workflows.
+
+`runQueryTemplate`
+:   Run a named read-only GitHub GraphQL query template and return a normalized result with `data` (node array), `pageInfo`, `rateLimit`, and `shouldBackoff`. Use `listQueryTemplates` to discover available templates. Required token scopes vary by template; see [Required scopes for GraphQL ingest](#github-graphql-scopes).
+
+`listQueryTemplates`
+:   List all available query templates for use with `runQueryTemplate`. Returns template IDs and descriptions. Available templates include `orgCatalog.repos`, `orgCatalog.teams`, `orgCatalog.members`, `activity.searchIssues`, `activity.searchPullRequests`, `graph.issueGraph`, and others.
+
+## Required scopes for GraphQL ingest [github-graphql-scopes]
+
+The `runQueryTemplate` and `listQueryTemplates` workflow actions call the GitHub GraphQL API directly and require the following classic PAT scopes:
+
+| Scope | Required for |
+| --- | --- |
+| `repo` | Reading repository data (`orgCatalog.repos`, `graph.issueGraph`, `graph.pullRequestGraph`, and search templates) |
+| `read:org` | Reading organization members and teams (`orgCatalog.members`, `orgCatalog.teams`, `orgCatalog.teamMembers`) |
+| `read:project` | Reading GitHub Projects v2 data (`orgCatalog.projects`, `orgCatalog.projectViews`, `orgCatalog.projectItems`) |
+
+::::{note}
+**Fine-grained PATs and GitHub Projects v2**: Fine-grained personal access tokens have limited support for the GitHub GraphQL API and cannot access Projects v2 data. Use a classic PAT with the `read:project` scope for project-related templates.
+
+**OAuth tokens**: The default OAuth scope (`repo`) covers repository and search templates. To use organization or project templates, the OAuth token must include `read:org` and `read:project` scopes.
+::::
 
 ## Connector networking configuration [github-connector-networking-configuration]
 
