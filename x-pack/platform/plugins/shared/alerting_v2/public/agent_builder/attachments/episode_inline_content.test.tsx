@@ -51,7 +51,9 @@ describe('EpisodeInlineContent', () => {
 
 describe('createEpisodeAttachmentDefinition', () => {
   it('uses episode id as the label and falls back to origin', () => {
-    const definition = createEpisodeAttachmentDefinition();
+    const definition = createEpisodeAttachmentDefinition({
+      container: {} as any,
+    });
     expect(definition.getLabel(createAttachment() as any)).toBe('ep-1');
     expect(
       definition.getLabel({

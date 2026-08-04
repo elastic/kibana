@@ -79,18 +79,18 @@ export const createEpisodeAttachmentType = ({
   },
 
   resolve: async (
-    origin: string,
+    episodeId: string,
     context: AttachmentResolveContext
   ): Promise<EpisodeAttachmentData | undefined> => {
     try {
       const client = getEpisodesClient(context);
-      const episode = await client.get(origin);
+      const episode = await client.get(episodeId);
       if (!episode) {
         return undefined;
       }
       return episodeAttachmentDataSchema.parse(alertEpisodeToEpisodeAttachment(episode));
     } catch (error) {
-      logger.warn(`Failed to resolve episode attachment for origin "${origin}": ${error}`);
+      logger.warn(`Failed to resolve episode attachment for origin "${episodeId}": ${error}`);
       return undefined;
     }
   },

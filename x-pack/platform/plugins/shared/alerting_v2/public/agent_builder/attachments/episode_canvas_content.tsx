@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect, useMemo } from 'react';
 import {
   EuiDescriptionList,
   EuiFlexGroup,
@@ -14,17 +14,80 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import type { AttachmentRenderProps } from '@kbn/agent-builder-browser/attachments';
-import { AlertEpisodeStatusBadge } from '@kbn/alerting-v2-episodes-ui/components/status/status_badge';
+import {
+  ActionButtonType,
+  type AttachmentRenderProps,
+  type CanvasRenderCallbacks,
+} from '@kbn/agent-builder-browser/attachments';
+import type { EpisodeAttachmentData } from '@kbn/alerting-v2-schemas';
+import { AlertEpisodeOverviewList } from '@kbn/alerting-v2-episodes-ui/components/details/overview_list';
+import { AlertEpisodeSeverityBadge } from '@kbn/alerting-v2-episodes-ui/components/severity/episode_severity_badge';
+import { AlertEpisodeStatusBadges } from '@kbn/alerting-v2-episodes-ui/components/status/status_badges';
+import type {
+  AlertEpisodeGroupAction,
+  EpisodeActionState,
+} from '@kbn/alerting-v2-episodes-ui/types/action';
+import { EMPTY_VALUE } from '@kbn/alerting-v2-episodes-ui/constants';
+import { formatDateTime } from '@kbn/alerting-v2-episodes-ui/utils/format_date_time';
+import { CoreStart, useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
+import { paths } from '../../constants';
 import type { EpisodeAttachment } from './episode_attachment_definition';
 
-export const EpisodeCanvasContent: React.FC<AttachmentRenderProps<EpisodeAttachment>> = ({
-  attachment,
-}) => {
-  const { data } = attachment;
+export interface EpisodeCanvasContentProps
+  extends AttachmentRenderProps<EpisodeAttachment>,
+    CanvasRenderCallbacks {}
 
-  const items = [
+const buildEpisodeAction = (data: EpisodeAttachmentData): EpisodeActionState => ({
+  episodeId: data['episode.id'],
+  ruleId: data['rule.id'],
+  groupHash: data.group_hash,
+  lastAckAction: data.last_ack_action ?? null,
+  lastAssigneeUid: data.last_assignee_uid ?? null,
+  lastAckActor: null,
+});
+
+const buildGroupAction = (data: EpisodeAttachmentData): AlertEpisodeGroupAction => ({
+  groupHash: data.group_hash,
+  ruleId: data['rule.id'],
+  lastDeactivateAction: null,
+  lastSnoozeAction: data.last_snooze_action ?? null,
+  snoozeExpiry: data.snooze_expiry ?? null,
+  tags: data.last_tags ?? [],
+  lastSnoozeActor: null,
+  lastDeactivateActor: null,
+});
+
+export const EpisodeCanvasContent = ({
+  attachment,
+  registerActionButtons,
+}: EpisodeCanvasContentProps) => {
+  const application = useService(CoreStart('application'));
+  const basePath = useService(CoreStart('http')).basePath;
+  const uiSettings = useService(CoreStart('uiSettings'));
+  const userProfile = useService(CoreStart('userProfile'));
+  const dateFormat = uiSettings.get<string>('dateFormat');
+
+  const { data } = attachment;
+  const episodeAction = useMemo(() => buildEpisodeAction(data), [data]);
+  const groupAction = useMemo(() => buildGroupAction(data), [data]);
+
+  useEffect(() => {
+    registerActionButtons([
+      {
+        label: i18n.translate('xpack.alertingV2.episodeAttachment.viewInEpisodes', {
+          defaultMessage: 'View in Episodes',
+        }),
+        icon: 'popout',
+        type: ActionButtonType.OVERFLOW,
+        handler: () => {
+          application.navigateToUrl(basePath.prepend(paths.alertEpisodeDetails(data['episode.id'])));
+        },
+      },
+    ]);
+  }, [application, basePath, data, registerActionButtons]);
+
+  const identityItems = [
     {
       title: i18n.translate('xpack.alertingV2.episodeAttachment.canvas.episodeId', {
         defaultMessage: 'Episode ID',
@@ -38,48 +101,22 @@ export const EpisodeCanvasContent: React.FC<AttachmentRenderProps<EpisodeAttachm
       description: data['rule.id'],
     },
     {
-      title: i18n.translate('xpack.alertingV2.episodeAttachment.canvas.groupHash', {
-        defaultMessage: 'Group hash',
-      }),
-      description: data.group_hash,
-    },
-    {
       title: i18n.translate('xpack.alertingV2.episodeAttachment.canvas.firstSeen', {
         defaultMessage: 'First seen',
       }),
-      description: data.first_timestamp,
+      description: formatDateTime(data.first_timestamp, dateFormat) || EMPTY_VALUE,
     },
     {
       title: i18n.translate('xpack.alertingV2.episodeAttachment.canvas.lastSeen', {
         defaultMessage: 'Last seen',
       }),
-      description: data.last_timestamp,
+      description: formatDateTime(data.last_timestamp, dateFormat) || EMPTY_VALUE,
     },
-    ...(data.severity
-      ? [
-          {
-            title: i18n.translate('xpack.alertingV2.episodeAttachment.canvas.severity', {
-              defaultMessage: 'Severity',
-            }),
-            description: data.severity,
-          },
-        ]
-      : []),
-    ...(data.last_tags?.length
-      ? [
-          {
-            title: i18n.translate('xpack.alertingV2.episodeAttachment.canvas.tags', {
-              defaultMessage: 'Tags',
-            }),
-            description: data.last_tags.join(', '),
-          },
-        ]
-      : []),
   ];
 
   return (
-    <EuiPanel paddingSize="l" hasShadow={false}>
-      <EuiFlexGroup alignItems="center" gutterSize="s">
+    <EuiPanel paddingSize="l" hasShadow={false} data-test-subj="alertingV2EpisodeAttachmentCanvas">
+      <EuiFlexGroup alignItems="center" gutterSize="s" wrap responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiTitle size="xs">
             <h3>
@@ -90,11 +127,33 @@ export const EpisodeCanvasContent: React.FC<AttachmentRenderProps<EpisodeAttachm
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <AlertEpisodeStatusBadge status={data['episode.status']} />
+          <AlertEpisodeStatusBadges
+            status={data['episode.status']}
+            episodeAction={episodeAction}
+            groupAction={groupAction}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <AlertEpisodeSeverityBadge severity={data.severity} />
         </EuiFlexItem>
       </EuiFlexGroup>
+
       <EuiSpacer size="m" />
-      <EuiDescriptionList listItems={items} type="column" compressed />
+      <EuiDescriptionList listItems={identityItems} type="column" compressed />
+
+      <EuiSpacer size="m" />
+      <AlertEpisodeOverviewList
+        groupingFields={[]}
+        groupingData={{}}
+        groupingStatus="hidden"
+        triggeredAt={data.triggered_at}
+        durationMs={data.duration}
+        assigneeUid={data.last_assignee_uid}
+        episodeAction={episodeAction}
+        groupAction={groupAction}
+        userProfile={userProfile}
+        dateFormat={dateFormat}
+      />
     </EuiPanel>
   );
 };

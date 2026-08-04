@@ -12,7 +12,9 @@ import {
 } from '@kbn/agent-builder-browser/attachments';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import { EPISODE_ATTACHMENT_TYPE, type EpisodeAttachmentData } from '@kbn/alerting-v2-schemas';
+import { Context } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
+import type { Container } from 'inversify';
 import { EpisodeInlineContent } from './episode_inline_content';
 import { EpisodeCanvasContent } from './episode_canvas_content';
 
@@ -20,7 +22,13 @@ export { EPISODE_ATTACHMENT_TYPE };
 
 export type EpisodeAttachment = Attachment<typeof EPISODE_ATTACHMENT_TYPE, EpisodeAttachmentData>;
 
-export const createEpisodeAttachmentDefinition = (): AttachmentUIDefinition<EpisodeAttachment> => ({
+interface EpisodeAttachmentDefinitionServices {
+  container: Container;
+}
+
+export const createEpisodeAttachmentDefinition = ({
+  container,
+}: EpisodeAttachmentDefinitionServices): AttachmentUIDefinition<EpisodeAttachment> => ({
   getLabel: (attachment) =>
     attachment.data?.['episode.id'] ||
     attachment.origin ||
@@ -33,7 +41,11 @@ export const createEpisodeAttachmentDefinition = (): AttachmentUIDefinition<Epis
 
   renderInlineContent: (props) => <EpisodeInlineContent {...props} />,
 
-  renderCanvasContent: (props) => <EpisodeCanvasContent {...props} />,
+  renderCanvasContent: (props, callbacks) => (
+    <Context.Provider value={container}>
+      <EpisodeCanvasContent {...props} {...callbacks} />
+    </Context.Provider>
+  ),
 
   getActionButtons: ({ openCanvas, isCanvas }) => {
     if (isCanvas) return [];
