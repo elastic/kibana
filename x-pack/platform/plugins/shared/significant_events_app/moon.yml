@@ -61,7 +61,6 @@ dependsOn:
   - '@kbn/typed-react-router-config'
   - '@kbn/unified-search-plugin'
   - '@kbn/utility-types'
-  - '@kbn/scout'
 tags:
   - plugin
   - prod
