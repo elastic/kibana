@@ -173,7 +173,7 @@ export class AdHocTaskRunner implements CancellableTask {
           spaceId: namespace,
           executionId: this.executionId,
           ruleId: this.ruleId,
-          ruleTypeId: this.ruleTypeId,
+          ruleType: this.ruleTypeId,
           taskId: this.taskInstance.id,
         },
       });
@@ -327,7 +327,7 @@ export class AdHocTaskRunner implements CancellableTask {
             spaceId,
             executionId: this.executionId,
             ruleId: rule.id,
-            ruleTypeId: this.ruleTypeId,
+            ruleType: this.ruleTypeId,
             taskId: this.taskInstance.id,
           },
         }
@@ -347,7 +347,7 @@ export class AdHocTaskRunner implements CancellableTask {
             spaceId,
             executionId: this.executionId,
             ruleId: rule.id,
-            ruleTypeId: this.ruleTypeId,
+            ruleType: this.ruleTypeId,
             taskId: this.taskInstance.id,
           },
         }
@@ -500,7 +500,7 @@ export class AdHocTaskRunner implements CancellableTask {
               spaceId,
               executionId: this.executionId,
               ruleId: rule.id,
-              ruleTypeId: ruleType.id,
+              ruleType: ruleType.id,
               taskId: this.taskInstance.id,
             },
           }
@@ -570,7 +570,7 @@ export class AdHocTaskRunner implements CancellableTask {
             spaceId,
             executionId: this.executionId,
             ruleId: this.ruleId,
-            ruleTypeId: this.ruleTypeId,
+            ruleType: this.ruleTypeId,
             taskId: this.taskInstance.id,
           },
           tags: [adHocRunParamsId, 'rule-ad-hoc-run-failed'],
@@ -714,7 +714,7 @@ export class AdHocTaskRunner implements CancellableTask {
         labels: {
           executionId: this.executionId,
           ruleId: this.ruleId,
-          ruleTypeId: this.ruleTypeId,
+          ruleType: this.ruleTypeId,
           taskId: this.taskInstance.id,
         },
       }
@@ -725,7 +725,7 @@ export class AdHocTaskRunner implements CancellableTask {
         labels: {
           executionId: this.executionId,
           ruleId: this.ruleId,
-          ruleTypeId: this.ruleTypeId,
+          ruleType: this.ruleTypeId,
           taskId: this.taskInstance.id,
         },
       }
@@ -771,7 +771,7 @@ export class AdHocTaskRunner implements CancellableTask {
           labels: {
             executionId: this.executionId,
             ruleId: this.ruleId,
-            ruleTypeId: this.ruleTypeId,
+            ruleType: this.ruleTypeId,
             taskId: this.taskInstance.id,
           },
         }

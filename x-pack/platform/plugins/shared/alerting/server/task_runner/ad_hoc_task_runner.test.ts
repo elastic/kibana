@@ -596,7 +596,7 @@ describe('Ad Hoc Task Runner', () => {
           spaceId: 'default',
           executionId: UUID,
           ruleId: RULE_ID,
-          ruleTypeId: 'test',
+          ruleType: 'test',
           taskId: '',
         },
       }
@@ -953,7 +953,7 @@ describe('Ad Hoc Task Runner', () => {
           spaceId: 'default',
           executionId: UUID,
           ruleId: RULE_ID,
-          ruleTypeId: 'test',
+          ruleType: 'test',
           taskId: '',
         },
       }
@@ -1097,7 +1097,7 @@ describe('Ad Hoc Task Runner', () => {
           spaceId: 'default',
           executionId: UUID,
           ruleId: RULE_ID,
-          ruleTypeId: 'test',
+          ruleType: 'test',
           taskId: '',
         },
       }
@@ -1285,7 +1285,7 @@ describe('Ad Hoc Task Runner', () => {
         executionId: UUID,
         spaceId: 'default',
         ruleId: RULE_ID,
-        ruleTypeId: 'test',
+        ruleType: 'test',
         taskId: '',
       });
       expect(loggerMeta?.error?.stack_trace).toBeDefined();
@@ -1352,7 +1352,7 @@ describe('Ad Hoc Task Runner', () => {
         executionId: UUID,
         spaceId: 'default',
         ruleId: RULE_ID,
-        ruleTypeId: 'test',
+        ruleType: 'test',
         taskId: '',
       });
       expect(loggerMeta?.error?.stack_trace).toBeDefined();
@@ -1422,7 +1422,7 @@ describe('Ad Hoc Task Runner', () => {
             spaceId: 'default',
             executionId: UUID,
             ruleId: RULE_ID,
-            ruleTypeId: 'test',
+            ruleType: 'test',
             taskId: '',
           },
         }
@@ -1440,7 +1440,7 @@ describe('Ad Hoc Task Runner', () => {
         executionId: UUID,
         spaceId: 'default',
         ruleId: RULE_ID,
-        ruleTypeId: 'test',
+        ruleType: 'test',
         taskId: '',
       });
       expect(loggerMeta?.error?.stack_trace).toBeDefined();
@@ -1518,7 +1518,7 @@ describe('Ad Hoc Task Runner', () => {
             spaceId: 'default',
             executionId: UUID,
             ruleId: RULE_ID,
-            ruleTypeId: 'test',
+            ruleType: 'test',
             taskId: '',
           },
         }
@@ -1527,7 +1527,7 @@ describe('Ad Hoc Task Runner', () => {
       expect(logger.error).nthCalledWith(
         1,
         `Failed to cleanup ad_hoc_run_params object [id="abc"]: trouble deleting this`,
-        { labels: { executionId: UUID, ruleId: RULE_ID, ruleTypeId: 'test', taskId: '' } }
+        { labels: { executionId: UUID, ruleId: RULE_ID, ruleType: 'test', taskId: '' } }
       );
     });
   });
@@ -1592,7 +1592,7 @@ describe('Ad Hoc Task Runner', () => {
             spaceId: 'default',
             executionId: UUID,
             ruleId: RULE_ID,
-            ruleTypeId: 'test',
+            ruleType: 'test',
             taskId: '',
           },
         }
@@ -1600,17 +1600,17 @@ describe('Ad Hoc Task Runner', () => {
       expect(logger.debug).nthCalledWith(
         2,
         `Cancelling execution for ad hoc run with id abc for rule type test with id rule-id - execution exceeded rule type timeout of 3m`,
-        { labels: { executionId: UUID, ruleId: RULE_ID, ruleTypeId: 'test', taskId: '' } }
+        { labels: { executionId: UUID, ruleId: RULE_ID, ruleType: 'test', taskId: '' } }
       );
       expect(logger.debug).nthCalledWith(
         3,
         `Aborting any in-progress ES searches for rule type test with id rule-id`,
-        { labels: { executionId: UUID, ruleId: RULE_ID, ruleTypeId: 'test', taskId: '' } }
+        { labels: { executionId: UUID, ruleId: RULE_ID, ruleType: 'test', taskId: '' } }
       );
       expect(logger.debug).nthCalledWith(
         4,
         `skipping persisting alerts for rule test:rule-id: 'test': rule execution has been cancelled.`,
-        { labels: { ruleId: RULE_ID, ruleTypeId: 'siem.queryRule', spaceId: 'default' } }
+        { labels: { ruleId: RULE_ID, ruleType: 'siem.queryRule', spaceId: 'default' } }
       );
       expect(logger.debug).nthCalledWith(
         5,
@@ -1620,7 +1620,7 @@ describe('Ad Hoc Task Runner', () => {
             spaceId: 'default',
             executionId: UUID,
             ruleId: RULE_ID,
-            ruleTypeId: 'test',
+            ruleType: 'test',
             taskId: '',
           },
         }
@@ -1633,7 +1633,7 @@ describe('Ad Hoc Task Runner', () => {
             spaceId: 'default',
             executionId: UUID,
             ruleId: RULE_ID,
-            ruleTypeId: 'test',
+            ruleType: 'test',
             taskId: '',
           },
         }
@@ -1708,7 +1708,7 @@ describe('Ad Hoc Task Runner', () => {
             spaceId: 'default',
             executionId: UUID,
             ruleId: RULE_ID,
-            ruleTypeId: 'test',
+            ruleType: 'test',
             taskId: '',
           },
         }
@@ -1716,17 +1716,17 @@ describe('Ad Hoc Task Runner', () => {
       expect(logger.debug).nthCalledWith(
         2,
         `Cancelling execution for ad hoc run with id abc for rule type test with id rule-id - execution exceeded rule type timeout of 3m`,
-        { labels: { executionId: UUID, ruleId: RULE_ID, ruleTypeId: 'test', taskId: '' } }
+        { labels: { executionId: UUID, ruleId: RULE_ID, ruleType: 'test', taskId: '' } }
       );
       expect(logger.debug).nthCalledWith(
         3,
         `Aborting any in-progress ES searches for rule type test with id rule-id`,
-        { labels: { executionId: UUID, ruleId: RULE_ID, ruleTypeId: 'test', taskId: '' } }
+        { labels: { executionId: UUID, ruleId: RULE_ID, ruleType: 'test', taskId: '' } }
       );
       expect(logger.debug).nthCalledWith(
         4,
         `skipping persisting alerts for rule test:rule-id: 'test': rule execution has been cancelled.`,
-        { labels: { ruleId: RULE_ID, ruleTypeId: 'siem.queryRule', spaceId: 'default' } }
+        { labels: { ruleId: RULE_ID, ruleType: 'siem.queryRule', spaceId: 'default' } }
       );
       expect(logger.debug).nthCalledWith(
         5,
@@ -1736,7 +1736,7 @@ describe('Ad Hoc Task Runner', () => {
             spaceId: 'default',
             executionId: UUID,
             ruleId: RULE_ID,
-            ruleTypeId: 'test',
+            ruleType: 'test',
             taskId: '',
           },
         }
@@ -1749,7 +1749,7 @@ describe('Ad Hoc Task Runner', () => {
             spaceId: 'default',
             executionId: UUID,
             ruleId: RULE_ID,
-            ruleTypeId: 'test',
+            ruleType: 'test',
             taskId: '',
           },
         }
@@ -1823,7 +1823,7 @@ describe('Ad Hoc Task Runner', () => {
             spaceId: 'default',
             executionId: UUID,
             ruleId: RULE_ID,
-            ruleTypeId: 'test',
+            ruleType: 'test',
             taskId: '',
           },
         }
@@ -1831,12 +1831,12 @@ describe('Ad Hoc Task Runner', () => {
       expect(logger.debug).nthCalledWith(
         2,
         `Cancelling execution for ad hoc run with id abc for rule type test with id rule-id - execution exceeded rule type timeout of 3m`,
-        { labels: { executionId: UUID, ruleId: RULE_ID, ruleTypeId: 'test', taskId: '' } }
+        { labels: { executionId: UUID, ruleId: RULE_ID, ruleType: 'test', taskId: '' } }
       );
       expect(logger.debug).nthCalledWith(
         3,
         `Aborting any in-progress ES searches for rule type test with id rule-id`,
-        { labels: { executionId: UUID, ruleId: RULE_ID, ruleTypeId: 'test', taskId: '' } }
+        { labels: { executionId: UUID, ruleId: RULE_ID, ruleType: 'test', taskId: '' } }
       );
       expect(logger.error).toHaveBeenCalledTimes(1);
 
@@ -1851,7 +1851,7 @@ describe('Ad Hoc Task Runner', () => {
         executionId: UUID,
         spaceId: 'default',
         ruleId: RULE_ID,
-        ruleTypeId: 'test',
+        ruleType: 'test',
         taskId: '',
       });
       expect(loggerMeta?.error?.stack_trace).toBeDefined();

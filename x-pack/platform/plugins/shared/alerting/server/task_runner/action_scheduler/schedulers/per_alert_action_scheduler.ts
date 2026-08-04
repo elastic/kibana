@@ -104,7 +104,7 @@ export class PerAlertActionScheduler<
                   actionId: action.id,
                   actionTypeId: action.actionTypeId,
                   ruleId: this.context.rule.id,
-                  ruleTypeId: this.context.ruleType.id,
+                  ruleType: this.context.ruleType.id,
                   spaceId: this.context.taskInstance.params.spaceId,
                 },
               }
@@ -357,7 +357,7 @@ export class PerAlertActionScheduler<
               actionId: action.id,
               actionTypeId: action.actionTypeId,
               ruleId: rule.id,
-              ruleTypeId: this.context.ruleType.id,
+              ruleType: this.context.ruleType.id,
               ruleLabel,
               spaceId: this.context.taskInstance.params.spaceId,
             },
@@ -390,7 +390,7 @@ export class PerAlertActionScheduler<
                 actionId: action.id,
                 actionTypeId: action.actionTypeId,
                 ruleId: rule.id,
-                ruleTypeId: this.context.ruleType.id,
+                ruleType: this.context.ruleType.id,
                 ruleLabel,
                 spaceId: this.context.taskInstance.params.spaceId,
               },
@@ -425,7 +425,7 @@ export class PerAlertActionScheduler<
             labels: {
               alertId,
               ruleId: this.context.rule.id,
-              ruleTypeId: this.context.ruleType.id,
+              ruleType: this.context.ruleType.id,
               ruleLabel: this.context.ruleLabel,
               spaceId: this.context.taskInstance.params.spaceId,
             },
@@ -454,7 +454,7 @@ export class PerAlertActionScheduler<
             labels: {
               alertId,
               ruleId: this.context.rule.id,
-              ruleTypeId: this.context.ruleType.id,
+              ruleType: this.context.ruleType.id,
               spaceId: this.context.taskInstance.params.spaceId,
             },
           }
@@ -481,7 +481,7 @@ export class PerAlertActionScheduler<
             labels: {
               alertId,
               ruleId: this.context.rule.id,
-              ruleTypeId: this.context.ruleType.id,
+              ruleType: this.context.ruleType.id,
               spaceId: this.context.taskInstance.params.spaceId,
             },
           }
@@ -500,7 +500,7 @@ export class PerAlertActionScheduler<
         {
           labels: {
             ruleId: this.context.rule.id,
-            ruleTypeId: this.context.ruleType.id,
+            ruleType: this.context.ruleType.id,
             spaceId: this.context.taskInstance.params.spaceId,
           },
         }
@@ -526,7 +526,7 @@ export class PerAlertActionScheduler<
             actionId: action.id,
             actionTypeId: action.actionTypeId,
             ruleId: this.context.rule.id,
-            ruleTypeId: this.context.ruleType.id,
+            ruleType: this.context.ruleType.id,
             spaceId: this.context.taskInstance.params.spaceId,
           },
         }

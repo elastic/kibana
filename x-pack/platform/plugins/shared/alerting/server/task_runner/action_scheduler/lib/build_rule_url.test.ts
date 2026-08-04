@@ -137,7 +137,7 @@ describe('buildRuleUrl', () => {
 
     expect(logger.debug).toHaveBeenCalledWith(
       `Rule "1" encountered an error while constructing the rule.url variable: Invalid URL: foo-url`,
-      { labels: { ruleId: '1', ruleTypeId: 'test', spaceId: 'default' } }
+      { labels: { ruleId: '1', ruleType: 'test', spaceId: 'default' } }
     );
   });
 });

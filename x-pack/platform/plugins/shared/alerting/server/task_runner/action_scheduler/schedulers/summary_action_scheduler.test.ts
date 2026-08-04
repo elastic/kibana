@@ -174,7 +174,7 @@ describe('Summary Action Scheduler', () => {
         labels: {
           actionId: 'action-2',
           ruleId: 'rule-id-1',
-          ruleTypeId: 'test',
+          ruleType: 'test',
           spaceId: 'test1',
         },
       }
@@ -186,7 +186,7 @@ describe('Summary Action Scheduler', () => {
         labels: {
           actionId: 'action-3',
           ruleId: 'rule-id-1',
-          ruleTypeId: 'test',
+          ruleType: 'test',
           spaceId: 'test1',
         },
       }

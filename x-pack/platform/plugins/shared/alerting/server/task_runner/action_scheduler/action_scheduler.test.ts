@@ -466,7 +466,7 @@ describe('Action Scheduler', () => {
       {
         labels: {
           ruleId: '1',
-          ruleTypeId: 'test',
+          ruleType: 'test',
           spaceId: 'test1',
         },
       }
@@ -856,7 +856,7 @@ describe('Action Scheduler', () => {
           alertId: '1',
           ruleId: '1',
           ruleLabel: 'rule-label',
-          ruleTypeId: 'test',
+          ruleType: 'test',
           spaceId: 'test1',
         },
       }
@@ -892,7 +892,7 @@ describe('Action Scheduler', () => {
           actionTypeId: 'test',
           ruleId: '1',
           ruleLabel: 'rule-label',
-          ruleTypeId: 'test',
+          ruleType: 'test',
           spaceId: 'test1',
         },
       }
@@ -939,7 +939,7 @@ describe('Action Scheduler', () => {
           alertId: '1',
           ruleId: '1',
           ruleLabel: 'rule-label',
-          ruleTypeId: 'test',
+          ruleType: 'test',
           spaceId: 'test1',
         },
       }
@@ -1000,7 +1000,7 @@ describe('Action Scheduler', () => {
           alertId: '1',
           ruleId: '1',
           ruleLabel: 'rule-label',
-          ruleTypeId: 'test',
+          ruleType: 'test',
           spaceId: 'test1',
         },
       }
@@ -1409,7 +1409,7 @@ describe('Action Scheduler', () => {
         labels: {
           actionId: '1',
           ruleId: '1',
-          ruleTypeId: 'test',
+          ruleType: 'test',
           spaceId: 'test1',
         },
       }
@@ -1952,7 +1952,7 @@ describe('Action Scheduler', () => {
           actionTypeId: 'test',
           alertId: '1',
           ruleId: '1',
-          ruleTypeId: 'test',
+          ruleType: 'test',
           spaceId: 'test1',
         },
       }
@@ -1965,7 +1965,7 @@ describe('Action Scheduler', () => {
           alertId: '2',
           actionTypeId: 'test',
           ruleId: '1',
-          ruleTypeId: 'test',
+          ruleType: 'test',
           spaceId: 'test1',
         },
       }
@@ -1978,7 +1978,7 @@ describe('Action Scheduler', () => {
           alertId: '3',
           actionTypeId: 'test',
           ruleId: '1',
-          ruleTypeId: 'test',
+          ruleType: 'test',
           spaceId: 'test1',
         },
       }
@@ -2883,7 +2883,7 @@ describe('Action Scheduler', () => {
           labels: {
             actionId: 'action-id',
             ruleId: '1',
-            ruleTypeId: 'test',
+            ruleType: 'test',
             spaceId: 'test1',
           },
         }

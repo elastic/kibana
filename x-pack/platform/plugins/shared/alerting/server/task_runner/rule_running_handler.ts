@@ -65,7 +65,7 @@ export class RuleRunningHandler {
         this.isUpdating = false;
         this.logger.error(
           `error updating running attribute rule for ${this.ruleTypeId}:${ruleId} ${err.message}`,
-          { labels: { ruleId, ruleTypeId: this.ruleTypeId } }
+          { labels: { ruleId, ruleType: this.ruleTypeId } }
         );
       });
   }

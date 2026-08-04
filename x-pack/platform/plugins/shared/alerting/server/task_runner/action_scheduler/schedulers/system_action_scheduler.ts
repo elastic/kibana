@@ -132,7 +132,7 @@ export class SystemActionScheduler<
             labels: {
               actionId: action.id,
               ruleId: this.context.rule.id,
-              ruleTypeId: this.context.ruleType.id,
+              ruleType: this.context.ruleType.id,
               spaceId: this.context.taskInstance.params.spaceId,
             },
           }

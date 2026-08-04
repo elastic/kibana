@@ -1521,7 +1521,6 @@ describe('Action Executor', () => {
             alertId: undefined,
             name: '1',
             ruleId: undefined,
-            ruleName: undefined,
             spaceId: 'some-namespace',
           },
         }
@@ -1558,7 +1557,6 @@ describe('Action Executor', () => {
             alertId: undefined,
             name: '1',
             ruleId: undefined,
-            ruleName: undefined,
             spaceId: 'some-namespace',
           },
         }
@@ -1613,7 +1611,6 @@ describe('Action Executor', () => {
             alertId: undefined,
             name: '1',
             ruleId: undefined,
-            ruleName: undefined,
             spaceId: 'some-namespace',
           },
         }
@@ -1628,7 +1625,6 @@ describe('Action Executor', () => {
           alertId: undefined,
           name: '1',
           ruleId: undefined,
-          ruleName: undefined,
           spaceId: 'some-namespace',
         },
         tags: ['action-run-failed', 'user-error'],
@@ -1682,7 +1678,6 @@ describe('Action Executor', () => {
             alertId: undefined,
             name: '1',
             ruleId: undefined,
-            ruleName: undefined,
             spaceId: 'some-namespace',
           },
         }
@@ -1697,7 +1692,6 @@ describe('Action Executor', () => {
           alertId: undefined,
           name: '1',
           ruleId: undefined,
-          ruleName: undefined,
           spaceId: 'some-namespace',
         },
         tags: ['action-run-failed', 'user-error'],
@@ -1735,7 +1729,6 @@ describe('Action Executor', () => {
             alertId: undefined,
             name: '1',
             ruleId: undefined,
-            ruleName: undefined,
             spaceId: 'some-namespace',
           },
         }
@@ -1836,7 +1829,6 @@ describe('Action Executor', () => {
             alertId: undefined,
             name: '1',
             ruleId: undefined,
-            ruleName: undefined,
             spaceId: 'some-namespace',
           },
         }
@@ -1851,7 +1843,6 @@ describe('Action Executor', () => {
           alertId: undefined,
           name: '1',
           ruleId: undefined,
-          ruleName: undefined,
           spaceId: 'some-namespace',
         },
         tags: ['action-run-failed', 'user-error'],

@@ -135,7 +135,7 @@ export class ActionScheduler<
             {
               labels: {
                 ruleId: this.context.rule.id,
-                ruleTypeId: this.context.rule.alertTypeId,
+                ruleType: this.context.rule.alertTypeId,
                 spaceId: this.context.taskInstance.params.spaceId,
                 executionId: this.context.executionId,
                 taskInstanceId: this.context.taskInstance.id,

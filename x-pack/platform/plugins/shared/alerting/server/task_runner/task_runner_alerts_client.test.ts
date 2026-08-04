@@ -391,7 +391,7 @@ describe('Task Runner', () => {
           labels: {
             executionId: RULE_EXECUTION_UUID,
             ruleId: '1',
-            ruleTypeId: 'test',
+            ruleType: 'test',
             spaceId: 'default',
           },
           tags: ['1', 'test'],
@@ -508,7 +508,7 @@ describe('Task Runner', () => {
             labels: {
               executionId: RULE_EXECUTION_UUID,
               ruleId: '1',
-              ruleTypeId: 'test',
+              ruleType: 'test',
               spaceId: 'default',
             },
             tags: ['1', 'test'],
@@ -741,7 +741,7 @@ describe('Task Runner', () => {
           labels: {
             executionId: RULE_EXECUTION_UUID,
             ruleId: '1',
-            ruleTypeId: 'test',
+            ruleType: 'test',
             spaceId: 'default',
           },
           tags: ['1', 'test'],
@@ -832,7 +832,7 @@ describe('Task Runner', () => {
           labels: {
             executionId: RULE_EXECUTION_UUID,
             ruleId: '1',
-            ruleTypeId: 'test',
+            ruleType: 'test',
             spaceId: 'default',
           },
           tags: ['1', 'test'],

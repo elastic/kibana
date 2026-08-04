@@ -687,7 +687,6 @@ export class ActionExecutor {
                   alertId: validatedParams.alertId,
                   alertExecutionId: validatedParams.alertExecutionId,
                   ruleId: validatedParams.ruleId,
-                  ruleName: validatedParams.ruleName,
                 },
                 tags: ['action-run-failed', `${result.errorSource}-error`],
                 error: { stack_trace: result.error.stack },
@@ -703,7 +702,6 @@ export class ActionExecutor {
                 alertId: validatedParams.alertId,
                 alertExecutionId: validatedParams.alertExecutionId,
                 ruleId: validatedParams.ruleId,
-                ruleName: validatedParams.ruleName,
               },
             });
           } else {
@@ -724,7 +722,6 @@ export class ActionExecutor {
                   alertId: validatedParams.alertId,
                   alertExecutionId: validatedParams.alertExecutionId,
                   ruleId: validatedParams.ruleId,
-                  ruleName: validatedParams.ruleName,
                 },
               }
             );
@@ -776,8 +773,6 @@ export class ActionExecutor {
                   name,
                   alertId: validatedParams.alertId,
                   alertExecutionId: validatedParams.alertExecutionId,
-                  ruleId: validatedParams.ruleId,
-                  ruleName: validatedParams.ruleName,
                 },
               });
               logger.error(err, {
@@ -790,7 +785,6 @@ export class ActionExecutor {
                   alertId: validatedParams.alertId,
                   alertExecutionId: validatedParams.alertExecutionId,
                   ruleId: validatedParams.ruleId,
-                  ruleName: validatedParams.ruleName,
                 },
               });
             })

@@ -206,7 +206,7 @@ export class RuleTypeRunner<
             context.logger.warn(
               `rule execution generated greater than ${maxAlerts} alerts: ${context.ruleLogPrefix}`,
               {
-                labels: { ruleId: context.ruleId, ruleTypeId, spaceId: context.spaceId },
+                labels: { ruleId: context.ruleId, ruleType: ruleTypeId, spaceId: context.spaceId },
               }
             );
             context.ruleRunMetricsStore.setHasReachedAlertLimit(true);
@@ -414,7 +414,7 @@ export class RuleTypeRunner<
           context.logger.debug(
             `skipping persisting alerts for rule ${context.ruleLogPrefix}: rule execution has been cancelled.`,
             {
-              labels: { ruleId: context.ruleId, ruleTypeId, spaceId: context.spaceId },
+              labels: { ruleId: context.ruleId, ruleType: ruleTypeId, spaceId: context.spaceId },
             }
           );
         }

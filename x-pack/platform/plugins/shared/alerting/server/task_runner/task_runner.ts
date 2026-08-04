@@ -263,7 +263,12 @@ export class TaskRunner<
       return true;
     } catch (err) {
       this.logger.error(`error updating rule for ${this.ruleType.id}:${ruleId} ${err.message}`, {
-        labels: { ruleId, ruleTypeId: this.ruleType.id, spaceId: this.taskInstance.params.spaceId },
+        labels: {
+          executionId: this.executionId,
+          ruleId,
+          ruleType: this.ruleType.id,
+          spaceId: this.taskInstance.params.spaceId,
+        },
       });
       return false;
     }

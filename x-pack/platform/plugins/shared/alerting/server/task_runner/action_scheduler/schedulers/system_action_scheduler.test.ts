@@ -539,7 +539,7 @@ describe('System Action Scheduler', () => {
           labels: {
             actionId: 'different-action-1',
             ruleId: 'rule-id-1',
-            ruleTypeId: 'test',
+            ruleType: 'test',
             spaceId: 'test1',
           },
         }

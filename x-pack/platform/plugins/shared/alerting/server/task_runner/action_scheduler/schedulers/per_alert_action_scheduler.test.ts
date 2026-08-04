@@ -203,7 +203,7 @@ describe('Per-Alert Action Scheduler', () => {
           actionId: '2',
           actionTypeId: 'test',
           ruleId: 'rule-id-1',
-          ruleTypeId: 'test',
+          ruleType: 'test',
           spaceId: 'test1',
         },
       }
@@ -348,7 +348,7 @@ describe('Per-Alert Action Scheduler', () => {
             actionTypeId: 'test',
             alertId: '1',
             ruleId: 'rule-id-1',
-            ruleTypeId: 'test',
+            ruleType: 'test',
             spaceId: 'test1',
           },
         }
@@ -362,7 +362,7 @@ describe('Per-Alert Action Scheduler', () => {
             actionTypeId: 'test',
             alertId: '1',
             ruleId: 'rule-id-1',
-            ruleTypeId: 'test',
+            ruleType: 'test',
             spaceId: 'test1',
           },
         }
@@ -404,7 +404,7 @@ describe('Per-Alert Action Scheduler', () => {
         {
           labels: {
             ruleId: 'rule-id-1',
-            ruleTypeId: 'test',
+            ruleType: 'test',
             spaceId: 'test1',
           },
         }
@@ -415,7 +415,7 @@ describe('Per-Alert Action Scheduler', () => {
         {
           labels: {
             ruleId: 'rule-id-1',
-            ruleTypeId: 'test',
+            ruleType: 'test',
             spaceId: 'test1',
           },
         }
@@ -563,7 +563,7 @@ describe('Per-Alert Action Scheduler', () => {
             alertId: '2',
             ruleId: 'rule-id-1',
             ruleLabel: 'rule-label',
-            ruleTypeId: 'test',
+            ruleType: 'test',
             spaceId: 'test1',
           },
         }
@@ -606,7 +606,7 @@ describe('Per-Alert Action Scheduler', () => {
           labels: {
             alertId: '2',
             ruleId: 'rule-id-1',
-            ruleTypeId: 'test',
+            ruleType: 'test',
             spaceId: 'test1',
           },
         }
@@ -687,7 +687,7 @@ describe('Per-Alert Action Scheduler', () => {
             alertId: '2',
             ruleId: 'rule-id-1',
             ruleLabel: 'rule-label',
-            ruleTypeId: 'test',
+            ruleType: 'test',
             spaceId: 'test1',
           },
         }
@@ -755,7 +755,7 @@ describe('Per-Alert Action Scheduler', () => {
             alertId: '2',
             ruleId: 'rule-id-1',
             ruleLabel: 'rule-label',
-            ruleTypeId: 'test',
+            ruleType: 'test',
             spaceId: 'test1',
           },
         }
@@ -1458,7 +1458,7 @@ describe('Per-Alert Action Scheduler', () => {
           labels: {
             alertId: '2',
             ruleId: 'rule-id-1',
-            ruleTypeId: 'test',
+            ruleType: 'test',
             spaceId: 'test1',
           },
         }

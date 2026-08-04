@@ -230,7 +230,7 @@ describe('Task Runner Cancel', () => {
         labels: {
           executionId: RULE_EXECUTION_UUID,
           ruleId: '1',
-          ruleTypeId: 'test',
+          ruleType: 'test',
           spaceId: 'default',
           taskInstanceId: '1',
         },
@@ -242,7 +242,7 @@ describe('Task Runner Cancel', () => {
       5,
       `skipping persisting alerts for rule test:1: 'rule-name': rule execution has been cancelled.`,
       {
-        labels: { ruleId: '1', ruleTypeId: 'test', spaceId: 'default' },
+        labels: { ruleId: '1', ruleType: 'test', spaceId: 'default' },
         tags: ['1', 'test'],
       }
     );
@@ -253,7 +253,7 @@ describe('Task Runner Cancel', () => {
         labels: {
           executionId: RULE_EXECUTION_UUID,
           ruleId: '1',
-          ruleTypeId: 'test',
+          ruleType: 'test',
           spaceId: 'default',
         },
         tags: ['1', 'test'],
@@ -266,7 +266,7 @@ describe('Task Runner Cancel', () => {
         labels: {
           executionId: RULE_EXECUTION_UUID,
           ruleId: '1',
-          ruleTypeId: 'test',
+          ruleType: 'test',
           spaceId: 'default',
         },
         tags: ['1', 'test'],
@@ -498,7 +498,7 @@ describe('Task Runner Cancel', () => {
       labels: {
         executionId: RULE_EXECUTION_UUID,
         ruleId: '1',
-        ruleTypeId: 'test',
+        ruleType: 'test',
         spaceId: 'default',
       },
       tags: ['1', 'test'],
@@ -510,7 +510,7 @@ describe('Task Runner Cancel', () => {
         labels: {
           executionId: RULE_EXECUTION_UUID,
           ruleId: '1',
-          ruleTypeId: 'test',
+          ruleType: 'test',
           spaceId: 'default',
           taskInstanceId: '1',
         },
@@ -524,7 +524,7 @@ describe('Task Runner Cancel', () => {
         labels: {
           executionId: RULE_EXECUTION_UUID,
           ruleId: '1',
-          ruleTypeId: 'test',
+          ruleType: 'test',
           spaceId: 'default',
           taskInstanceId: '1',
         },
@@ -538,7 +538,7 @@ describe('Task Runner Cancel', () => {
         labels: {
           executionId: RULE_EXECUTION_UUID,
           ruleId: '1',
-          ruleTypeId: 'test',
+          ruleType: 'test',
           spaceId: 'default',
           taskInstanceId: '1',
         },
