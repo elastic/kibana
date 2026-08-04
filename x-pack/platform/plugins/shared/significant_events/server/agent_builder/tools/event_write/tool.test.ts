@@ -77,7 +77,7 @@ describe('events_write tool', () => {
   it('rejects input without an items array', () => {
     expect(eventsWriteSchema.safeParse(input).success).toBe(false);
   });
-  
+
   it('normalizes an empty event_id to an omitted event_id', () => {
     const result = eventsWriteSchema.parse({
       items: [{ ...input, event_id: '' }],

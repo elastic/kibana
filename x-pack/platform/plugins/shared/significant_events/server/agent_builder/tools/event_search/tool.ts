@@ -38,14 +38,12 @@ const searchEventsSchema = significantEventSchema
   })
   .partial({ stream_names: true })
   .extend({
-    status: significantEventSchema.shape.status
-      .default('open')
-      .describe(
-        i18n.translate('xpack.significantEvents.agentBuilder.tools.eventSearch.schema.status', {
-          defaultMessage:
-            'Event state to search. Defaults to open so continuation searches cannot select closed events. Specify closed or dismissed only when intentionally reviewing that state.',
-        })
-      ),
+    status: significantEventSchema.shape.status.default('open').describe(
+      i18n.translate('xpack.significantEvents.agentBuilder.tools.eventSearch.schema.status', {
+        defaultMessage:
+          'Event state to search. Defaults to open so continuation searches cannot select closed events. Specify closed or dismissed only when intentionally reviewing that state.',
+      })
+    ),
     query: z
       .string()
       .transform(normalizeEventSearchQuery)

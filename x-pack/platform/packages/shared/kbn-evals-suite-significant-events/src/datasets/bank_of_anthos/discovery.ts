@@ -332,7 +332,7 @@ export const discovery: DatasetConfig['discovery'] = [
       expected_ground_truth:
         'discoveries=[ledger-db-cascade (transactionhistory/balancereader/ledgerwriter->postgresql SQLState 08001, cache errors, frontend connection-refused failures)]',
       expected_confirmed_rule_uuids: {
-          LEDGER_DB_CASCADE_RULE_UUIDS,
+        LEDGER_DB_CASCADE_RULE_UUIDS,
       },
       expected_significant_events: [LEDGER_DB_CASCADE_EVENT],
       criteria: [

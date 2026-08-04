@@ -174,7 +174,8 @@ const toCompactEvent = (
 
 const hasRequestedRule = (event: SignificantEvent, ruleUuids: string[]) =>
   (event.signals ?? []).some(
-    (signal) => signal.metadata?.rule_uuid !== undefined && ruleUuids.includes(signal.metadata.rule_uuid)
+    (signal) =>
+      signal.metadata?.rule_uuid !== undefined && ruleUuids.includes(signal.metadata.rule_uuid)
   );
 
 // The generic lets a call site passing `view: 'full'` (or omitting it, defaulting to 'compact')

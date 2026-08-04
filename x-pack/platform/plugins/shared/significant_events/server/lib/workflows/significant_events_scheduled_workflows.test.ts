@@ -194,13 +194,12 @@ describe('scheduled Significant Events managed workflows', () => {
 
     expect(parsed.steps.some((step) => step.status === 'cancelled')).toBe(false);
 
-      const resultStep = findStep(parsed.steps, 'output_result');
-      expect(resultStep?.with).toMatchObject({
-        hasWork: true,
-        processedCount: expect.stringContaining('compute_batch_size.output.processedCount'),
-      });
-    }
-  );
+    const resultStep = findStep(parsed.steps, 'output_result');
+    expect(resultStep?.with).toMatchObject({
+      hasWork: true,
+      processedCount: expect.stringContaining('compute_batch_size.output.processedCount'),
+    });
+  });
 });
 
 describe('SignificantEventsScheduledWorkflowsService', () => {

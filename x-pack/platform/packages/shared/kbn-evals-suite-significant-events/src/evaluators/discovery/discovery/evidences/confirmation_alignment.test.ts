@@ -48,7 +48,10 @@ describe('confirmationAlignmentEvaluator', () => {
         signals: [detection('r1', true), detection('r2', true)],
       },
     ];
-    const result = await evaluate(events, { 'canonical-event-one': ['r1'], 'canonical-event-two': ['r2'] });
+    const result = await evaluate(events, {
+      'canonical-event-one': ['r1'],
+      'canonical-event-two': ['r2'],
+    });
 
     expect(result.score).toBe(0);
     expect(result.explanation).toContain('canonical-event-one:');
