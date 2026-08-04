@@ -54,6 +54,7 @@ import {
   kafkaPartitionType,
   kafkaCompressionType,
   kafkaAcknowledgeReliabilityLevel,
+  kafkaAuthType,
   RESERVED_CONFIG_YML_KEYS,
   FLEET_APM_PACKAGE,
   FLEET_SYNTHETICS_PACKAGE,
@@ -706,6 +707,16 @@ class OutputService {
         // required_acks can be 0
         data.required_acks = kafkaAcknowledgeReliabilityLevel.Commit;
       }
+      // Clear fields that are only valid for specific auth_type values
+      if (output.auth_type !== kafkaAuthType.None) {
+        data.connection_type = undefined;
+      }
+      if (output.auth_type !== kafkaAuthType.Userpass) {
+        data.username = undefined;
+        data.password = undefined;
+      }
+      // Kafka does not support proxies — clear any proxy_id silently (#267281)
+      data.proxy_id = null;
     }
 
     await remoteSyncIntegrationsCheck(esClient, output);
@@ -1145,6 +1156,11 @@ class OutputService {
       updateData.hosts
     ) {
       updateData.hosts = updateData.hosts.map(normalizeHostsForAgents);
+    }
+
+    // Kafka does not support proxies — clear any proxy_id silently (#267281)
+    if (mergedType === outputType.Kafka) {
+      updateData.proxy_id = null;
     }
 
     if (
