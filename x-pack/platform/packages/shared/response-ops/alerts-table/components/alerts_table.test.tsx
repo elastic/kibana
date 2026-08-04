@@ -257,7 +257,7 @@ describe('AlertsTable', () => {
 
   describe('Columns', () => {
     describe('with no saved configuration', () => {
-      beforeEach(() => {
+      beforeAll(() => {
         mockAlertsDataGrid.mockImplementation((props) => {
           onToggleColumn = props.onToggleColumn;
           onResetColumns = props.onResetColumns;
@@ -271,7 +271,7 @@ describe('AlertsTable', () => {
         });
       });
 
-      afterEach(() => {
+      afterAll(() => {
         mockAlertsDataGrid.mockImplementation(realAlertsDataGridMockImplementation);
       });
       it('should show the default columns if the columns prop is not set', async () => {
