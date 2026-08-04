@@ -8,7 +8,15 @@
  */
 
 import { Subject, timer, merge, from, EMPTY, type Observable } from 'rxjs';
-import { exhaustMap, map, distinctUntilChanged, takeUntil, shareReplay, catchError } from 'rxjs';
+import {
+  exhaustMap,
+  map,
+  distinctUntilChanged,
+  takeWhile,
+  takeUntil,
+  shareReplay,
+  catchError,
+} from 'rxjs';
 import { getDeferredInitStatusPath } from '@kbn/core-deferred-init-common';
 import type { DeferredInitStatusResponse } from '@kbn/core-deferred-init-common';
 import type { CoreService } from '@kbn/core-base-browser-internal';
@@ -75,6 +83,11 @@ export class DeferredInitService implements CoreService<DeferredInitStart, Defer
           )
         ),
         distinctUntilChanged(isSameStatus),
+        // `available` is terminal: emit it once (inclusive) then complete, so the poll actually
+        // stops instead of hitting the endpoint every second for the app's whole mounted lifetime.
+        // Keeps polling through `idle`/`initializing`/`failed`. Late subscribers still get the
+        // final `available` replayed via `shareReplay` below.
+        takeWhile((status) => status.status !== 'available', true),
         takeUntil(this.stop$),
         shareReplay({ bufferSize: 1, refCount: true })
       );

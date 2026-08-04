@@ -48,6 +48,26 @@ describe('DeferredInitService', () => {
     subscription.unsubscribe();
   });
 
+  it('stops polling once available, since the status is terminal', async () => {
+    http.get
+      .mockResolvedValueOnce({ pluginId: 'pluginA', status: 'initializing' })
+      .mockResolvedValueOnce({ pluginId: 'pluginA', status: 'available' });
+
+    const { getStatus$ } = service.start({ http: http as any });
+    const subscription = getStatus$('pluginA').subscribe();
+
+    await jest.advanceTimersByTimeAsync(0); // initializing
+    await jest.advanceTimersByTimeAsync(1000); // available -> the shared observable completes
+    expect(http.get).toHaveBeenCalledTimes(2);
+
+    // Once available, further timer ticks must not keep hitting the endpoint for the app's
+    // entire mounted lifetime.
+    await jest.advanceTimersByTimeAsync(5000);
+    expect(http.get).toHaveBeenCalledTimes(2);
+
+    subscription.unsubscribe();
+  });
+
   it('carries the error message and attempt count through when failed', async () => {
     http.get.mockResolvedValue({
       pluginId: 'pluginA',
