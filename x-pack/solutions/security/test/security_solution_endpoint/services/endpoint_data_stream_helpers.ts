@@ -42,6 +42,9 @@ export function SecuritySolutionEndpointDataStreamHelpers() {
         index,
         wait_for_completion: true,
         refresh: true,
+        // Continuously-written indices (e.g. the endpoint metadata-united transform) can re-write
+        // docs mid-scan; proceed instead of aborting the whole teardown on a version conflict.
+        conflicts: 'proceed',
       },
       {
         ignore: [404],
