@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
 import type { RefObject } from 'react';
+import React from 'react';
 import type { AlertsTableImperativeApi } from '@kbn/response-ops-alerts-table/types';
 import {
   SECURITY_CELL_ACTIONS_CASE_EVENTS,
@@ -109,23 +109,7 @@ export const cellActionRenderer: CellActionRenderer = createCellActionRenderer('
  * Cell action renderer for Cases.
  * This is used in the expandable flyout and in the new flyout (though only when used in Security Solution).
  */
-export const casesCellActionRenderer: CellActionRenderer = ({
-  field,
-  value,
-  children,
-  scopeId,
-}: CellActionRendererProps) => (
-  <SecurityCellActions
-    data={{
-      field,
-      value: value ?? [],
-    }}
-    triggerId={SECURITY_CELL_ACTIONS_CASE_EVENTS}
-    mode={CellActionsMode.HOVER_DOWN}
-    visibleCellActions={2}
-    sourcererScopeId={getSourcererScopeId(scopeId)}
-    metadata={{ scopeId }}
-  >
-    {children}
-  </SecurityCellActions>
-);
+export const casesCellActionRenderer: CellActionRenderer = createCellActionRenderer('', {
+  triggerId: SECURITY_CELL_ACTIONS_CASE_EVENTS,
+  visibleCellActions: 4,
+});

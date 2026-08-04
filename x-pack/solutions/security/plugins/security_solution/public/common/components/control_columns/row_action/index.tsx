@@ -12,13 +12,12 @@ import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { TableId } from '@kbn/securitysolution-data-table';
-import { SECURITY_CELL_ACTIONS_DETAILS_FLYOUT } from '@kbn/ui-actions-plugin/common/trigger_ids';
-import type { AlertsTableImperativeApi } from '@kbn/response-ops-alerts-table/types';
 import {
-  casesCellActionRenderer,
-  cellActionRenderer,
-  createCellActionRenderer,
-} from '../../../../flyout_v2/shared/components/cell_actions';
+  SECURITY_CELL_ACTIONS_CASE_EVENTS,
+  SECURITY_CELL_ACTIONS_DETAILS_FLYOUT,
+} from '@kbn/ui-actions-plugin/common/trigger_ids';
+import type { AlertsTableImperativeApi } from '@kbn/response-ops-alerts-table/types';
+import { createCellActionRenderer } from '../../../../flyout_v2/shared/components/cell_actions';
 import { useFlyoutApi } from '../../../../flyout_v2/use_flyout_api';
 import { LeftPanelNotesTab } from '../../../../flyout/document_details/left';
 import { useKibana } from '../../../lib/kibana';
@@ -127,25 +126,27 @@ const RowActionComponent = ({
   }, [refetch]);
 
   // Cell action renderer for the new document details flyout opened from this table.
-  // - Cases uses its own dedicated renderer.
-  // - An alerts table (identified by the presence of `alertsTableRef`) uses the details-flyout
-  //   trigger — which is the only trigger that registers the "Toggle column in table" action — with
-  //   the table scope bound and the table handle forwarded, so the column toggle both shows up and
-  //   targets the imperatively-controlled alerts table.
-  // - Any other table keeps the default renderer.
-  const documentFlyoutCellActionRenderer = useMemo(() => {
-    if (tableId === TableId.alertsOnCasePage) {
-      return casesCellActionRenderer;
-    }
-    if (alertsTableRef) {
-      return createCellActionRenderer(tableId, {
-        triggerId: SECURITY_CELL_ACTIONS_DETAILS_FLYOUT,
+  // The table scope is always bound and the details-flyout trigger is used — that trigger is the
+  // only one that registers the "Toggle column in table" action, and binding the scope makes the
+  // action compatible for both Timeline/table scopes. How the column toggle is applied depends on
+  // the table:
+  // - Alerts tables forward their `alertsTableRef` so the toggle targets the imperatively-controlled
+  //   table.
+  // - Event tables (e.g. the Explore host/user pages) have no ref; the toggle dispatches to the
+  //   Redux data table store keyed by the bound scope instead.
+  // - The alerts table on the Cases page uses the case-events trigger.
+  const documentFlyoutCellActionRenderer = useMemo(
+    () =>
+      createCellActionRenderer(tableId, {
+        triggerId:
+          tableId === TableId.alertsOnCasePage
+            ? SECURITY_CELL_ACTIONS_CASE_EVENTS
+            : SECURITY_CELL_ACTIONS_DETAILS_FLYOUT,
         visibleCellActions: 6,
         alertsTableRef,
-      });
-    }
-    return cellActionRenderer;
-  }, [tableId, alertsTableRef]);
+      }),
+    [tableId, alertsTableRef]
+  );
 
   const handleOnEventDetailPanelOpened = useCallback(() => {
     if (enableNewFlyout && hit) {
