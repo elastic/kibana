@@ -60,7 +60,8 @@ export const buildRuleUrl = <Params extends RuleTypeParams>(
     };
   } catch (error) {
     opts.logger.debug(
-      `Rule "${opts.rule.id}" encountered an error while constructing the rule.url variable: ${error.message}`
+      `Rule "${opts.rule.id}" encountered an error while constructing the rule.url variable: ${error.message}`,
+      { labels: { ruleId: opts.rule.id, ruleTypeId: opts.rule.alertTypeId, spaceId: opts.spaceId } }
     );
     return;
   }

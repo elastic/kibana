@@ -534,7 +534,15 @@ describe('System Action Scheduler', () => {
       expect(ruleRunMetricsStore.getNumberOfTriggeredActions()).toEqual(0);
 
       expect(logger.warn).toHaveBeenCalledWith(
-        `Rule "rule-id-1" skipped scheduling system action "different-action-1" because no connector adapter is configured`
+        `Rule "rule-id-1" skipped scheduling system action "different-action-1" because no connector adapter is configured`,
+        {
+          labels: {
+            actionId: 'different-action-1',
+            ruleId: 'rule-id-1',
+            ruleTypeId: 'test',
+            spaceId: 'test1',
+          },
+        }
       );
 
       expect(results).toHaveLength(0);

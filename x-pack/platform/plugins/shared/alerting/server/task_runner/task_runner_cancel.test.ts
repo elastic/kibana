@@ -226,23 +226,51 @@ describe('Task Runner Cancel', () => {
     expect(logger.debug).toHaveBeenNthCalledWith(
       3,
       `Aborting any in-progress ES searches for rule type test with id 1`,
-      { tags: ['1', 'test'] }
+      {
+        labels: {
+          executionId: RULE_EXECUTION_UUID,
+          ruleId: '1',
+          ruleTypeId: 'test',
+          spaceId: 'default',
+          taskInstanceId: '1',
+        },
+        tags: ['1', 'test'],
+      }
     );
 
     expect(logger.debug).toHaveBeenNthCalledWith(
       5,
       `skipping persisting alerts for rule test:1: 'rule-name': rule execution has been cancelled.`,
-      { tags: ['1', 'test'] }
+      {
+        labels: { ruleId: '1', ruleTypeId: 'test', spaceId: 'default' },
+        tags: ['1', 'test'],
+      }
     );
     expect(logger.debug).toHaveBeenNthCalledWith(
       6,
       `no scheduling of actions for rule test:1: 'rule-name': rule execution has been cancelled.`,
-      { tags: ['1', 'test'] }
+      {
+        labels: {
+          executionId: RULE_EXECUTION_UUID,
+          ruleId: '1',
+          ruleTypeId: 'test',
+          spaceId: 'default',
+        },
+        tags: ['1', 'test'],
+      }
     );
     expect(logger.debug).toHaveBeenNthCalledWith(
       7,
       `skipping updating alerts for rule test:1: 'rule-name': rule execution has been cancelled.`,
-      { tags: ['1', 'test'] }
+      {
+        labels: {
+          executionId: RULE_EXECUTION_UUID,
+          ruleId: '1',
+          ruleTypeId: 'test',
+          spaceId: 'default',
+        },
+        tags: ['1', 'test'],
+      }
     );
 
     testAlertingEventLogCalls({ status: 'ok' });
@@ -467,22 +495,55 @@ describe('Task Runner Cancel', () => {
   function testLogger() {
     expect(logger.debug).toHaveBeenCalledTimes(8);
     expect(logger.debug).nthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z', {
+      labels: {
+        executionId: RULE_EXECUTION_UUID,
+        ruleId: '1',
+        ruleTypeId: 'test',
+        spaceId: 'default',
+      },
       tags: ['1', 'test'],
     });
     expect(logger.debug).nthCalledWith(
       2,
       `Cancelling rule type test with id 1 - execution exceeded rule type timeout of 5m`,
-      { tags: ['1', 'test'] }
+      {
+        labels: {
+          executionId: RULE_EXECUTION_UUID,
+          ruleId: '1',
+          ruleTypeId: 'test',
+          spaceId: 'default',
+          taskInstanceId: '1',
+        },
+        tags: ['1', 'test'],
+      }
     );
     expect(logger.debug).nthCalledWith(
       3,
       'Aborting any in-progress ES searches for rule type test with id 1',
-      { tags: ['1', 'test'] }
+      {
+        labels: {
+          executionId: RULE_EXECUTION_UUID,
+          ruleId: '1',
+          ruleTypeId: 'test',
+          spaceId: 'default',
+          taskInstanceId: '1',
+        },
+        tags: ['1', 'test'],
+      }
     );
     expect(logger.debug).nthCalledWith(
       4,
       `Updating rule task for test rule with id 1 - execution error due to timeout`,
-      { tags: ['1', 'test'] }
+      {
+        labels: {
+          executionId: RULE_EXECUTION_UUID,
+          ruleId: '1',
+          ruleTypeId: 'test',
+          spaceId: 'default',
+          taskInstanceId: '1',
+        },
+        tags: ['1', 'test'],
+      }
     );
     expect(logger.debug).nthCalledWith(
       5,

@@ -127,7 +127,15 @@ export class SystemActionScheduler<
       // System actions without an adapter cannot be executed
       if (!hasConnectorAdapter) {
         this.context.logger.warn(
-          `Rule "${this.context.rule.id}" skipped scheduling system action "${action.id}" because no connector adapter is configured`
+          `Rule "${this.context.rule.id}" skipped scheduling system action "${action.id}" because no connector adapter is configured`,
+          {
+            labels: {
+              actionId: action.id,
+              ruleId: this.context.rule.id,
+              ruleTypeId: this.context.ruleType.id,
+              spaceId: this.context.taskInstance.params.spaceId,
+            },
+          }
         );
 
         continue;

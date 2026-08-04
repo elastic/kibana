@@ -169,11 +169,27 @@ describe('Summary Action Scheduler', () => {
     expect(logger.error).toHaveBeenCalledTimes(2);
     expect(logger.error).toHaveBeenNthCalledWith(
       1,
-      `Skipping action \"action-2\" for rule \"rule-id-1\" because the rule type \"Test\" does not support alert-as-data.`
+      `Skipping action \"action-2\" for rule \"rule-id-1\" because the rule type \"Test\" does not support alert-as-data.`,
+      {
+        labels: {
+          actionId: 'action-2',
+          ruleId: 'rule-id-1',
+          ruleTypeId: 'test',
+          spaceId: 'test1',
+        },
+      }
     );
     expect(logger.error).toHaveBeenNthCalledWith(
       2,
-      `Skipping action \"action-3\" for rule \"rule-id-1\" because the rule type \"Test\" does not support alert-as-data.`
+      `Skipping action \"action-3\" for rule \"rule-id-1\" because the rule type \"Test\" does not support alert-as-data.`,
+      {
+        labels: {
+          actionId: 'action-3',
+          ruleId: 'rule-id-1',
+          ruleTypeId: 'test',
+          spaceId: 'test1',
+        },
+      }
     );
   });
 

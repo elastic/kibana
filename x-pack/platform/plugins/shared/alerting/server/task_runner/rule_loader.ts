@@ -187,7 +187,6 @@ export function getFakeKibanaRequest(
   let effectiveApiKey: string | null = null;
 
   const shouldUseUiamApiKey = context.shouldGrantUiam && context.apiKeyType === ApiKeyType.UIAM;
-  const logTags = ruleId ? [...UIAM_LOGS_USAGE_TAGS, ruleId] : UIAM_LOGS_USAGE_TAGS;
 
   if (shouldUseUiamApiKey) {
     if (!uiamApiKey) {
@@ -200,7 +199,8 @@ export function getFakeKibanaRequest(
         context.logger.debug(
           'UIAM API key is not provided to create a fake request, falling back to ES API key created by the user.',
           {
-            tags: logTags,
+            labels: { ruleId, spaceId },
+            tags: UIAM_LOGS_USAGE_TAGS,
           }
         );
       } else if (isLikelyNonCloudUserApiKeyOwner(apiKeyOwner)) {
@@ -208,7 +208,8 @@ export function getFakeKibanaRequest(
         context.logger.debug(
           'UIAM API key is not provided because the Elasticsearch API key creator is likely a non-Cloud user, falling back to regular API key.',
           {
-            tags: logTags,
+            labels: { ruleId, spaceId },
+            tags: UIAM_LOGS_USAGE_TAGS,
           }
         );
       } else {
@@ -221,7 +222,8 @@ export function getFakeKibanaRequest(
         context.logger.debug(
           'UIAM API key is not provided to create a fake request, falling back to regular API key.',
           {
-            tags: logTags,
+            labels: { ruleId, spaceId },
+            tags: UIAM_LOGS_USAGE_TAGS,
           }
         );
       }

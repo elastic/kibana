@@ -388,6 +388,12 @@ describe('Task Runner', () => {
         expect(ruleType.executor).toHaveBeenCalledTimes(1);
         expect(logger.debug).toHaveBeenCalledTimes(5);
         expect(logger.debug).nthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z', {
+          labels: {
+            executionId: RULE_EXECUTION_UUID,
+            ruleId: '1',
+            ruleTypeId: 'test',
+            spaceId: 'default',
+          },
           tags: ['1', 'test'],
         });
         expect(logger.debug).nthCalledWith(
@@ -498,7 +504,15 @@ describe('Task Runner', () => {
         expect(logger.debug).nthCalledWith(
           debugCall++,
           'executing rule test:1 at 1970-01-01T00:00:00.000Z',
-          { tags: ['1', 'test'] }
+          {
+            labels: {
+              executionId: RULE_EXECUTION_UUID,
+              ruleId: '1',
+              ruleTypeId: 'test',
+              spaceId: 'default',
+            },
+            tags: ['1', 'test'],
+          }
         );
         expect(logger.debug).nthCalledWith(debugCall++, `Initializing resources for AlertsService`);
 
@@ -724,6 +738,12 @@ describe('Task Runner', () => {
 
         expect(logger.debug).toHaveBeenCalledTimes(5);
         expect(logger.debug).nthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z', {
+          labels: {
+            executionId: RULE_EXECUTION_UUID,
+            ruleId: '1',
+            ruleTypeId: 'test',
+            spaceId: 'default',
+          },
           tags: ['1', 'test'],
         });
 
@@ -809,6 +829,12 @@ describe('Task Runner', () => {
 
         expect(logger.debug).toHaveBeenCalledTimes(5);
         expect(logger.debug).nthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z', {
+          labels: {
+            executionId: RULE_EXECUTION_UUID,
+            ruleId: '1',
+            ruleTypeId: 'test',
+            spaceId: 'default',
+          },
           tags: ['1', 'test'],
         });
 

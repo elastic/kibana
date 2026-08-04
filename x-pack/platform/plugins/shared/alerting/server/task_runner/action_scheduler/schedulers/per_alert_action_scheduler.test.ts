@@ -197,7 +197,16 @@ describe('Per-Alert Action Scheduler', () => {
     expect(scheduler.actions).toEqual([actions[0]]);
     expect(logger.error).toHaveBeenCalledTimes(1);
     expect(logger.error).toHaveBeenCalledWith(
-      `Skipping action \"2\" for rule \"rule-id-1\" because the rule type \"Test\" does not support alert-as-data.`
+      `Skipping action \"2\" for rule \"rule-id-1\" because the rule type \"Test\" does not support alert-as-data.`,
+      {
+        labels: {
+          actionId: '2',
+          actionTypeId: 'test',
+          ruleId: 'rule-id-1',
+          ruleTypeId: 'test',
+          spaceId: 'test1',
+        },
+      }
     );
   });
 
@@ -332,11 +341,31 @@ describe('Per-Alert Action Scheduler', () => {
       expect(logger.debug).toHaveBeenCalledTimes(2);
       expect(logger.debug).toHaveBeenNthCalledWith(
         1,
-        `no scheduling of actions \"action-1\" for alert \"1\" from rule \"rule-id-1\": has active maintenance windows mw-1.`
+        `no scheduling of actions \"action-1\" for alert \"1\" from rule \"rule-id-1\": has active maintenance windows mw-1.`,
+        {
+          labels: {
+            actionId: 'action-1',
+            actionTypeId: 'test',
+            alertId: '1',
+            ruleId: 'rule-id-1',
+            ruleTypeId: 'test',
+            spaceId: 'test1',
+          },
+        }
       );
       expect(logger.debug).toHaveBeenNthCalledWith(
         2,
-        `no scheduling of actions \"action-2\" for alert \"1\" from rule \"rule-id-1\": has active maintenance windows mw-1.`
+        `no scheduling of actions \"action-2\" for alert \"1\" from rule \"rule-id-1\": has active maintenance windows mw-1.`,
+        {
+          labels: {
+            actionId: 'action-2',
+            actionTypeId: 'test',
+            alertId: '1',
+            ruleId: 'rule-id-1',
+            ruleTypeId: 'test',
+            spaceId: 'test1',
+          },
+        }
       );
 
       expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toEqual(2);
@@ -371,11 +400,25 @@ describe('Per-Alert Action Scheduler', () => {
       expect(logger.error).toHaveBeenCalledTimes(2);
       expect(logger.error).toHaveBeenNthCalledWith(
         1,
-        `Invalid action group \"invalid\" for rule \"test\".`
+        `Invalid action group \"invalid\" for rule \"test\".`,
+        {
+          labels: {
+            ruleId: 'rule-id-1',
+            ruleTypeId: 'test',
+            spaceId: 'test1',
+          },
+        }
       );
       expect(logger.error).toHaveBeenNthCalledWith(
         2,
-        `Invalid action group \"invalid\" for rule \"test\".`
+        `Invalid action group \"invalid\" for rule \"test\".`,
+        {
+          labels: {
+            ruleId: 'rule-id-1',
+            ruleTypeId: 'test',
+            spaceId: 'test1',
+          },
+        }
       );
 
       expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toEqual(2);
@@ -514,7 +557,16 @@ describe('Per-Alert Action Scheduler', () => {
       expect(logger.debug).toHaveBeenCalledTimes(1);
       expect(logger.debug).toHaveBeenNthCalledWith(
         1,
-        `skipping scheduling of actions for '2' in rule rule-label: rule is muted`
+        `skipping scheduling of actions for '2' in rule rule-label: rule is muted`,
+        {
+          labels: {
+            alertId: '2',
+            ruleId: 'rule-id-1',
+            ruleLabel: 'rule-label',
+            ruleTypeId: 'test',
+            spaceId: 'test1',
+          },
+        }
       );
 
       expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toEqual(2);
@@ -549,7 +601,15 @@ describe('Per-Alert Action Scheduler', () => {
       expect(logger.debug).toHaveBeenCalledTimes(1);
       expect(logger.debug).toHaveBeenNthCalledWith(
         1,
-        `skipping scheduling of actions for '2' in rule rule-label: alert is snoozed`
+        `skipping scheduling of actions for '2' in rule rule-label: alert is snoozed`,
+        {
+          labels: {
+            alertId: '2',
+            ruleId: 'rule-id-1',
+            ruleTypeId: 'test',
+            spaceId: 'test1',
+          },
+        }
       );
 
       expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toEqual(2);
@@ -619,7 +679,18 @@ describe('Per-Alert Action Scheduler', () => {
       expect(logger.debug).toHaveBeenCalledTimes(1);
       expect(logger.debug).toHaveBeenNthCalledWith(
         1,
-        `skipping scheduling of actions for '2' in rule rule-label: alert is active but action group has not changed`
+        `skipping scheduling of actions for '2' in rule rule-label: alert is active but action group has not changed`,
+        {
+          labels: {
+            actionId: 'action-4',
+            actionTypeId: 'test',
+            alertId: '2',
+            ruleId: 'rule-id-1',
+            ruleLabel: 'rule-label',
+            ruleTypeId: 'test',
+            spaceId: 'test1',
+          },
+        }
       );
 
       expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toEqual(3);
@@ -676,7 +747,18 @@ describe('Per-Alert Action Scheduler', () => {
       expect(logger.debug).toHaveBeenCalledTimes(1);
       expect(logger.debug).toHaveBeenNthCalledWith(
         1,
-        `skipping scheduling of actions for '2' in rule rule-label: rule is throttled`
+        `skipping scheduling of actions for '2' in rule rule-label: rule is throttled`,
+        {
+          labels: {
+            actionId: 'action-5',
+            actionTypeId: 'test',
+            alertId: '2',
+            ruleId: 'rule-id-1',
+            ruleLabel: 'rule-label',
+            ruleTypeId: 'test',
+            spaceId: 'test1',
+          },
+        }
       );
 
       expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toEqual(3);
@@ -1371,7 +1453,15 @@ describe('Per-Alert Action Scheduler', () => {
       expect(logger.debug).toHaveBeenCalledTimes(1);
       expect(logger.debug).toHaveBeenNthCalledWith(
         1,
-        `skipping scheduling of actions for '2' in rule rule-label: alert is delayed`
+        `skipping scheduling of actions for '2' in rule rule-label: alert is delayed`,
+        {
+          labels: {
+            alertId: '2',
+            ruleId: 'rule-id-1',
+            ruleTypeId: 'test',
+            spaceId: 'test1',
+          },
+        }
       );
 
       expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toEqual(2);

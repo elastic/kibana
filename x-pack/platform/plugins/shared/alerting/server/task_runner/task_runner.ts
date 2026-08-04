@@ -262,7 +262,9 @@ export class TaskRunner<
       }
       return true;
     } catch (err) {
-      this.logger.error(`error updating rule for ${this.ruleType.id}:${ruleId} ${err.message}`);
+      this.logger.error(`error updating rule for ${this.ruleType.id}:${ruleId} ${err.message}`, {
+        labels: { ruleId, ruleTypeId: this.ruleType.id, spaceId: this.taskInstance.params.spaceId },
+      });
       return false;
     }
   }
@@ -322,7 +324,14 @@ export class TaskRunner<
       }
     } catch (e) {
       this.logger.warn(
-        `Failed to emit alert_auto_unsnooze audit event(s) for rule [id=${rule.id}]: ${e.message}`
+        `Failed to emit alert_auto_unsnooze audit event(s) for rule [id=${rule.id}]: ${e.message}`,
+        {
+          labels: {
+            ruleId: rule.id,
+            ruleTypeId: this.ruleType.id,
+            spaceId: this.taskInstance.params.spaceId,
+          },
+        }
       );
     }
   }
@@ -519,10 +528,25 @@ export class TaskRunner<
     await withAlertingSpan('alerting:schedule-actions', () =>
       this.timer.runWithTimer(TaskRunnerTimerSpan.TriggerActions, async () => {
         if (isRuleSnoozed(rule)) {
-          this.logger.debug(`no scheduling of actions for rule ${ruleLabel}: rule is snoozed.`);
+          this.logger.debug(`no scheduling of actions for rule ${ruleLabel}: rule is snoozed.`, {
+            labels: {
+              ruleId,
+              ruleTypeId: this.ruleType.id,
+              spaceId,
+              executionId: this.executionId,
+            },
+          });
         } else if (!this.shouldLogAndScheduleActionsForAlerts()) {
           this.logger.debug(
-            `no scheduling of actions for rule ${ruleLabel}: rule execution has been cancelled.`
+            `no scheduling of actions for rule ${ruleLabel}: rule execution has been cancelled.`,
+            {
+              labels: {
+                ruleId,
+                ruleTypeId: this.ruleType.id,
+                spaceId,
+                executionId: this.executionId,
+              },
+            }
           );
           this.countUsageOfActionExecutionAfterRuleCancellation();
         } else {
@@ -559,7 +583,8 @@ export class TaskRunner<
       );
     } else {
       this.logger.debug(
-        `skipping updating alerts for rule ${ruleTypeRunnerContext.ruleLogPrefix}: rule execution has been cancelled.`
+        `skipping updating alerts for rule ${ruleTypeRunnerContext.ruleLogPrefix}: rule execution has been cancelled.`,
+        { labels: { ruleId, ruleTypeId: this.ruleType.id, spaceId, executionId: this.executionId } }
       );
     }
 
@@ -657,7 +682,8 @@ export class TaskRunner<
       this.ruleRunning.start(ruleId, this.context.spaceIdToNamespace(spaceId));
 
       this.logger.debug(
-        `executing rule ${this.ruleType.id}:${ruleId} at ${this.runDate.toISOString()}`
+        `executing rule ${this.ruleType.id}:${ruleId} at ${this.runDate.toISOString()}`,
+        { labels: { ruleId, ruleTypeId: this.ruleType.id, spaceId, executionId: this.executionId } }
       );
 
       if (startedAt) {
@@ -720,7 +746,14 @@ export class TaskRunner<
           });
         } catch (e) {
           // Most likely a 409 conflict error, which is ok, we'll try again at the next rule run
-          this.logger.debug(`Failed to clear expired snoozes: ${e.message}`);
+          this.logger.debug(`Failed to clear expired snoozes: ${e.message}`, {
+            labels: {
+              ruleId,
+              ruleTypeId: this.ruleType.id,
+              spaceId,
+              executionId: this.executionId,
+            },
+          });
         }
       })().catch(() => {});
 
@@ -819,7 +852,15 @@ export class TaskRunner<
           this.logger.debug(
             `Updating rule task for ${this.ruleType.id} rule with id ${ruleId} - ${JSON.stringify(
               executionStatus
-            )} - ${JSON.stringify(lastRun)}`
+            )} - ${JSON.stringify(lastRun)}`,
+            {
+              labels: {
+                ruleId,
+                ruleTypeId: this.ruleType.id,
+                spaceId: this.taskInstance.params.spaceId,
+                executionId: this.executionId,
+              },
+            }
           );
         }
 
@@ -890,7 +931,16 @@ export class TaskRunner<
     } catch (err) {
       if (isOutdatedTaskVersionError(err)) {
         this.logger.info(
-          `Outdated task version: The task instance ID: ${this.taskInstance.id} does not match the rule ID: ${ruleId}.`
+          `Outdated task version: The task instance ID: ${this.taskInstance.id} does not match the rule ID: ${ruleId}.`,
+          {
+            labels: {
+              ruleId,
+              ruleTypeId: this.ruleType.id,
+              spaceId,
+              executionId: this.executionId,
+              taskInstanceId: this.taskInstance.id,
+            },
+          }
         );
         return getDeleteRuleTaskRunResult();
       }
@@ -954,11 +1004,29 @@ export class TaskRunner<
     }
 
     this.logger.debug(
-      `Cancelling rule type ${this.ruleType.id} with id ${ruleId} - execution exceeded rule type timeout of ${this.ruleType.ruleTaskTimeout}`
+      `Cancelling rule type ${this.ruleType.id} with id ${ruleId} - execution exceeded rule type timeout of ${this.ruleType.ruleTaskTimeout}`,
+      {
+        labels: {
+          ruleId,
+          ruleTypeId: this.ruleType.id,
+          spaceId: this.taskInstance.params.spaceId,
+          executionId: this.executionId,
+          taskInstanceId: this.taskInstance.id,
+        },
+      }
     );
 
     this.logger.debug(
-      `Aborting any in-progress ES searches for rule type ${this.ruleType.id} with id ${ruleId}`
+      `Aborting any in-progress ES searches for rule type ${this.ruleType.id} with id ${ruleId}`,
+      {
+        labels: {
+          ruleId,
+          ruleTypeId: this.ruleType.id,
+          spaceId: this.taskInstance.params.spaceId,
+          executionId: this.executionId,
+          taskInstanceId: this.taskInstance.id,
+        },
+      }
     );
     this.searchAbortController.abort();
 
@@ -986,7 +1054,16 @@ export class TaskRunner<
       },
     };
     this.logger.debug(
-      `Updating rule task for ${this.ruleType.id} rule with id ${ruleId} - execution error due to timeout`
+      `Updating rule task for ${this.ruleType.id} rule with id ${ruleId} - execution error due to timeout`,
+      {
+        labels: {
+          ruleId,
+          ruleTypeId: this.ruleType.id,
+          spaceId: this.taskInstance.params.spaceId,
+          executionId: this.executionId,
+          taskInstanceId: this.taskInstance.id,
+        },
+      }
     );
     const outcome = 'failed';
     await this.updateRuleSavedObjectPostRun(ruleId, {

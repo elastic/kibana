@@ -204,7 +204,10 @@ export class RuleTypeRunner<
           const maxAlerts = alertsClient.getMaxAlertLimit();
           if (reachedLimit) {
             context.logger.warn(
-              `rule execution generated greater than ${maxAlerts} alerts: ${context.ruleLogPrefix}`
+              `rule execution generated greater than ${maxAlerts} alerts: ${context.ruleLogPrefix}`,
+              {
+                labels: { ruleId: context.ruleId, ruleTypeId, spaceId: context.spaceId },
+              }
             );
             context.ruleRunMetricsStore.setHasReachedAlertLimit(true);
           }
@@ -409,7 +412,10 @@ export class RuleTypeRunner<
           await alertsClient.persistAlerts();
         } else {
           context.logger.debug(
-            `skipping persisting alerts for rule ${context.ruleLogPrefix}: rule execution has been cancelled.`
+            `skipping persisting alerts for rule ${context.ruleLogPrefix}: rule execution has been cancelled.`,
+            {
+              labels: { ruleId: context.ruleId, ruleTypeId, spaceId: context.spaceId },
+            }
           );
         }
       })

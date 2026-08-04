@@ -83,7 +83,9 @@ describe('resolveCpsData', () => {
       resolvedExpression: PROJECT_ROUTING_ALL,
       linkedProjects: [],
     });
-    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('Unexpected 403'));
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('Unexpected 403'), {
+      labels: { spaceId: 'default' },
+    });
   });
 
   it('returns empty linkedProjects and logs warning on unexpected error', async () => {
@@ -97,7 +99,10 @@ describe('resolveCpsData', () => {
     );
 
     expect(result).toEqual({ linkedProjects: [] });
-    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('Failed to resolve CPS data'));
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('Failed to resolve CPS data'),
+      { labels: { spaceId: 'default' } }
+    );
   });
 
   it('resolves the correct NPRE for a custom space', async () => {

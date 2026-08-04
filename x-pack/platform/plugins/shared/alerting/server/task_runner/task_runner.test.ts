@@ -328,6 +328,12 @@ describe('Task Runner', () => {
 
     expect(logger.debug).toHaveBeenCalledTimes(5);
     expect(logger.debug).nthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z', {
+      labels: {
+        executionId: RULE_EXECUTION_UUID,
+        ruleId: '1',
+        ruleTypeId: 'test',
+        spaceId: 'default',
+      },
       tags: ['1', 'test'],
     });
     expect(logger.debug).nthCalledWith(
@@ -573,6 +579,12 @@ describe('Task Runner', () => {
 
     expect(logger.debug).toHaveBeenCalledTimes(6);
     expect(logger.debug).nthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z', {
+      labels: {
+        executionId: RULE_EXECUTION_UUID,
+        ruleId: '1',
+        ruleTypeId: 'test',
+        spaceId: 'default',
+      },
       tags: ['1', 'test'],
     });
     expect(logger.debug).nthCalledWith(
@@ -706,6 +718,12 @@ describe('Task Runner', () => {
 
     expect(logger.debug).toHaveBeenCalledTimes(7);
     expect(logger.debug).nthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z', {
+      labels: {
+        executionId: RULE_EXECUTION_UUID,
+        ruleId: '1',
+        ruleTypeId: 'test',
+        spaceId: 'default',
+      },
       tags: ['1', 'test'],
     });
     expect(logger.debug).nthCalledWith(
@@ -716,7 +734,15 @@ describe('Task Runner', () => {
     expect(logger.debug).nthCalledWith(
       3,
       `no scheduling of actions for rule test:1: '${RULE_NAME}': rule is snoozed.`,
-      { tags: ['1', 'test'] }
+      {
+        labels: {
+          executionId: RULE_EXECUTION_UUID,
+          ruleId: '1',
+          ruleTypeId: 'test',
+          spaceId: 'default',
+        },
+        tags: ['1', 'test'],
+      }
     );
     expect(logger.debug).nthCalledWith(
       4,
@@ -840,7 +866,15 @@ describe('Task Runner', () => {
       if (expectedExecutions) {
         expect(logger.debug).not.toHaveBeenCalledWith(expectedMessage);
       } else {
-        expect(logger.debug).toHaveBeenCalledWith(expectedMessage, { tags: ['1', 'test'] });
+        expect(logger.debug).toHaveBeenCalledWith(expectedMessage, {
+          labels: {
+            executionId: RULE_EXECUTION_UUID,
+            ruleId: '1',
+            ruleTypeId: 'test',
+            spaceId: 'default',
+          },
+          tags: ['1', 'test'],
+        });
       }
     }
   );
@@ -1069,6 +1103,12 @@ describe('Task Runner', () => {
 
     expect(logger.debug).toHaveBeenCalledTimes(7);
     expect(logger.debug).nthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z', {
+      labels: {
+        executionId: RULE_EXECUTION_UUID,
+        ruleId: '1',
+        ruleTypeId: 'test',
+        spaceId: 'default',
+      },
       tags: ['1', 'test'],
     });
     expect(logger.debug).nthCalledWith(
@@ -1079,7 +1119,16 @@ describe('Task Runner', () => {
     expect(logger.debug).nthCalledWith(
       3,
       `skipping scheduling of actions for '2' in rule test:1: '${RULE_NAME}': rule is muted`,
-      { tags: ['1', 'test'] }
+      {
+        labels: {
+          alertId: '2',
+          ruleId: '1',
+          ruleLabel: "test:1: 'rule-name'",
+          ruleTypeId: 'test',
+          spaceId: 'default',
+        },
+        tags: ['1', 'test'],
+      }
     );
     expect(logger.debug).nthCalledWith(
       4,
@@ -1155,7 +1204,18 @@ describe('Task Runner', () => {
     expect(logger.debug).nthCalledWith(
       3,
       `skipping scheduling of actions for '2' in rule test:1: '${RULE_NAME}': rule is throttled`,
-      { tags: ['1', 'test'] }
+      {
+        labels: {
+          actionId: '1',
+          alertId: '2',
+          actionTypeId: 'action',
+          ruleId: '1',
+          ruleLabel: "test:1: 'rule-name'",
+          ruleTypeId: 'test',
+          spaceId: 'default',
+        },
+        tags: ['1', 'test'],
+      }
     );
   });
 
@@ -1192,7 +1252,16 @@ describe('Task Runner', () => {
     expect(logger.debug).nthCalledWith(
       3,
       `skipping scheduling of actions for '2' in rule test:1: '${RULE_NAME}': rule is muted`,
-      { tags: ['1', 'test'] }
+      {
+        labels: {
+          alertId: '2',
+          ruleId: '1',
+          ruleLabel: "test:1: 'rule-name'",
+          ruleTypeId: 'test',
+          spaceId: 'default',
+        },
+        tags: ['1', 'test'],
+      }
     );
   });
 
@@ -1457,6 +1526,12 @@ describe('Task Runner', () => {
 
     expect(logger.debug).toHaveBeenCalledTimes(7);
     expect(logger.debug).nthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z', {
+      labels: {
+        executionId: RULE_EXECUTION_UUID,
+        ruleId: '1',
+        ruleTypeId: 'test',
+        spaceId: 'default',
+      },
       tags: ['1', 'test'],
     });
     expect(logger.debug).nthCalledWith(

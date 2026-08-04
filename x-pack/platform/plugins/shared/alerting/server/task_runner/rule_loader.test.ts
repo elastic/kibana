@@ -408,7 +408,7 @@ describe('rule_loader', () => {
       expect(recordUiamApiKeyFallbackSpy).toHaveBeenCalledWith('unexpected');
     });
 
-    test('includes the rule id in the UIAM log tags when provided', () => {
+    test('includes the rule id in the UIAM log labels when provided', () => {
       const uiamContext = {
         ...context,
         shouldGrantUiam: true,
@@ -423,7 +423,7 @@ describe('rule_loader', () => {
 
       expect(mockLogger.debug).toHaveBeenCalledWith(
         'UIAM API key is not provided to create a fake request, falling back to regular API key.',
-        { tags: expect.arrayContaining([ruleId]) }
+        expect.objectContaining({ labels: expect.objectContaining({ ruleId }) })
       );
     });
   });

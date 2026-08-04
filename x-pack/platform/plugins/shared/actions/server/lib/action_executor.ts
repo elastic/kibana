@@ -482,7 +482,14 @@ export class ActionExecutor {
         }
 
         const actionLabel = `${actionTypeId}:${actionId}: ${name}`;
-        logger.debug(`executing action ${actionLabel}`);
+        logger.debug(`executing action ${actionLabel}`, {
+          labels: {
+            actionLabel,
+            actionTypeId,
+            actionId,
+            spaceId,
+          },
+        });
 
         const task = taskInfo
           ? {
@@ -554,7 +561,15 @@ export class ActionExecutor {
           event.event!.outcome = 'failure';
           event.message = `action execution failure: ${actionLabel}`;
           event.error = { message: err.message };
-          logger.warn(`action execution failure: ${actionLabel}: ${err.message}`);
+          logger.warn(`action execution failure: ${actionLabel}: ${err.message}`, {
+            labels: {
+              actionTypeId,
+              actionLabel,
+              actionId,
+              spaceId,
+              name,
+            },
+          });
           eventLogger.logEvent(event);
           return err.result;
         }
@@ -663,11 +678,34 @@ export class ActionExecutor {
             event.error.message = actionErrorToMessage(result);
             if (result.error) {
               logger.error(result.error, {
-                tags: [actionTypeId, actionId, 'action-run-failed', `${result.errorSource}-error`],
+                labels: {
+                  actionLabel,
+                  actionTypeId,
+                  actionId,
+                  spaceId,
+                  name,
+                  alertId: validatedParams.alertId,
+                  alertExecutionId: validatedParams.alertExecutionId,
+                  ruleId: validatedParams.ruleId,
+                  ruleName: validatedParams.ruleName,
+                },
+                tags: ['action-run-failed', `${result.errorSource}-error`],
                 error: { stack_trace: result.error.stack },
               });
             }
-            logger.warn(`action execution failure: ${actionLabel}: ${event.error.message}`);
+            logger.warn(`action execution failure: ${actionLabel}: ${event.error.message}`, {
+              labels: {
+                actionLabel,
+                actionTypeId,
+                actionId,
+                spaceId,
+                name,
+                alertId: validatedParams.alertId,
+                alertExecutionId: validatedParams.alertExecutionId,
+                ruleId: validatedParams.ruleId,
+                ruleName: validatedParams.ruleName,
+              },
+            });
           } else {
             span?.setOutcome('failure');
             event.event!.outcome = 'failure';
@@ -675,7 +713,20 @@ export class ActionExecutor {
             event.error = event.error || {};
             event.error.message = 'action execution returned unexpected result';
             logger.warn(
-              `action execution failure: ${actionLabel}: returned unexpected result "${result.status}"`
+              `action execution failure: ${actionLabel}: returned unexpected result "${result.status}"`,
+              {
+                labels: {
+                  actionLabel,
+                  actionTypeId,
+                  actionId,
+                  spaceId,
+                  name,
+                  alertId: validatedParams.alertId,
+                  alertExecutionId: validatedParams.alertExecutionId,
+                  ruleId: validatedParams.ruleId,
+                  ruleName: validatedParams.ruleName,
+                },
+              }
             );
           }
 
@@ -716,8 +767,32 @@ export class ActionExecutor {
               }
             })
             .catch((err) => {
-              logger.error('Failed to calculate tokens from streaming response');
-              logger.error(err);
+              logger.error('Failed to calculate tokens from streaming response', {
+                labels: {
+                  actionLabel,
+                  actionTypeId,
+                  actionId,
+                  spaceId,
+                  name,
+                  alertId: validatedParams.alertId,
+                  alertExecutionId: validatedParams.alertExecutionId,
+                  ruleId: validatedParams.ruleId,
+                  ruleName: validatedParams.ruleName,
+                },
+              });
+              logger.error(err, {
+                labels: {
+                  actionLabel,
+                  actionTypeId,
+                  actionId,
+                  spaceId,
+                  name,
+                  alertId: validatedParams.alertId,
+                  alertExecutionId: validatedParams.alertExecutionId,
+                  ruleId: validatedParams.ruleId,
+                  ruleName: validatedParams.ruleName,
+                },
+              });
             })
             .finally(() => {
               completeEventLogging();
