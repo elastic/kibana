@@ -84,10 +84,12 @@ jobs:
             const getLabels = (item) =>
               item.labels.map((label) => (typeof label === 'string' ? label : label.name));
 
-            // The `skipped-test` label alone is not reliable: it is only added
-            // when the /skip automation commits a skip, so manual skips carry
-            // no label. The code reference covers those, and it disappears
-            // when the test is unskipped.
+            // The `skipped-test` label alone is not reliable: an automation
+            // strips it (with `blocker` and version labels) whenever the issue
+            // is closed, and nothing restores it on reopen, so issues that go
+            // through a close/reopen cycle lose it while the test is still
+            // skipped. The code reference covers those cases, and it
+            // disappears when the test is unskipped.
             const getSkipReason = (item) => {
               if (getLabels(item).includes(SKIPPED_LABEL)) {
                 return `it has the "${SKIPPED_LABEL}" label`;
