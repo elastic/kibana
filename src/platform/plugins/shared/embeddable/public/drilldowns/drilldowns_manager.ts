@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject, map, share, skip } from 'rxjs';
+import { BehaviorSubject, map, skip } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 import deepEqual from 'fast-deep-equal';
 import type { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
