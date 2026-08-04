@@ -8,7 +8,7 @@
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { I18nProvider } from '@kbn/i18n-react';
 import { actionTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/application/action_type_registry.mock';
-import React from 'react';
+import React, { useState } from 'react';
 
 import { EuiThemeProvider as ThemeProvider } from '@elastic/eui';
 
@@ -64,18 +64,21 @@ export const TestProvidersComponent: React.FC<Props> = ({
   const mockHttp = httpServiceMock.createStartContract({ basePath: '/test' });
   const mockNavigateToApp = jest.fn();
   const mockGetUrlForApp = jest.fn();
-  const queryClient = new QueryClient({
-    defaultOptions: {
-      queries: {
-        retry: false,
-      },
-    },
-    logger: {
-      log: console.log,
-      warn: console.warn,
-      error: () => {},
-    },
-  });
+  const [queryClient] = useState(
+    () =>
+      new QueryClient({
+        defaultOptions: {
+          queries: {
+            retry: false,
+          },
+        },
+        logger: {
+          log: console.log,
+          warn: console.warn,
+          error: () => {},
+        },
+      })
+  );
 
   const chrome = chromeServiceMock.createStartContract();
   chrome.getChromeStyle$.mockReturnValue(of('classic'));
