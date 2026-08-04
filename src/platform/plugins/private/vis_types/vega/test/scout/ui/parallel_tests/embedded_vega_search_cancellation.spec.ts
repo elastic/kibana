@@ -40,12 +40,12 @@ spaceTest.describe(
       'cancels async search when navigating away from the dashboard',
       async ({ page, pageObjects, network }) => {
         // Set up listener before opening the dashboard to avoid race conditions
-        const vegaRequestPromise = page.waitForRequest(
-          (req) => req.url().endsWith('/internal/search/esql_async') && req.method() === 'POST'
+        const vegaResponsePromise = page.waitForResponse(
+          (req) => req.url().endsWith('/internal/search/esql_async') && req.ok()
         );
         // Open dashboard WITHOUT waiting for render
         await pageObjects.dashboard.openDashboardWithId(dashboardId, { waitForRender: false });
-        await vegaRequestPromise;
+        await vegaResponsePromise;
 
         // Navigate away and verify cancellation DELETE request is sent
         expect(
