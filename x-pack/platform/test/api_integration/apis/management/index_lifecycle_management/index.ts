@@ -12,6 +12,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./policies'));
     loadTestFile(require.resolve('./templates'));
     loadTestFile(require.resolve('./indices'));
+    loadTestFile(require.resolve('./explain'));
     loadTestFile(require.resolve('./nodes'));
     loadTestFile(require.resolve('./snapshot_policies'));
     loadTestFile(require.resolve('./snapshot_repositories'));
