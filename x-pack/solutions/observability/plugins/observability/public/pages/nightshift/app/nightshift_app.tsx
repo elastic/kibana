@@ -17,6 +17,7 @@ import {
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
+import { SIGNIFICANT_EVENTS_APP_ID } from '@kbn/deeplinks-observability';
 import { usePageReady } from '@kbn/ebt-tools';
 import { i18n } from '@kbn/i18n';
 import type { SignificantEvent } from '@kbn/significant-events-schema';
@@ -137,11 +138,11 @@ export function NightshiftApp(): React.ReactElement {
     [search]
   );
 
-  const showAllEventsHref = application.getUrlForApp('streams', {
-    deepLinkId: 'significantEventsEvents',
+  const showAllEventsHref = application.getUrlForApp(SIGNIFICANT_EVENTS_APP_ID, {
+    deepLinkId: 'events',
   });
-  const emptyStateLogsHref = application.getUrlForApp('streams', {
-    path: '/_discovery/significant_events?rangeFrom=now-24h&rangeTo=now',
+  const emptyStateLogsHref = application.getUrlForApp(SIGNIFICANT_EVENTS_APP_ID, {
+    path: '/significant_events?rangeFrom=now-24h&rangeTo=now',
   });
 
   const handleChatClick = useCallback(
