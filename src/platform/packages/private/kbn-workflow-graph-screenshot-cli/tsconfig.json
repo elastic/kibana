@@ -1,0 +1,27 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node"
+    ]
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    "**/*.js"
+  ],
+  "kbn_references": [
+    "@kbn/workflows",
+    "@kbn/workflows-ui",
+    "@kbn/workflows-yaml",
+    "@kbn/dev-cli-runner",
+    "@kbn/dev-cli-errors",
+    "@kbn/tooling-log",
+    "@kbn/node-libs-browser-webpack-plugin",
+  ],
+  "exclude": [
+    "target/**/*"
+  ]
+}

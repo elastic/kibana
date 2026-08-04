@@ -172,6 +172,7 @@ import {
 } from './tasks/agentless/verify_permissions_task';
 import { registerReindexIntegrationKnowledgeTask } from './tasks/reindex_integration_knowledge_task';
 import { registerSyncNamespaceTemplatesTask } from './tasks/sync_namespace_templates_task';
+import { registerSyncIlmPolicyTask } from './tasks/sync_ilm_policy_task';
 import {
   type AgentlessPoliciesService,
   AgentlessPoliciesServiceImpl,
@@ -237,7 +238,7 @@ export interface FleetAppContext {
   agentStatusChangeTask?: AgentStatusChangeTask;
   fleetPolicyRevisionsCleanupTask?: FleetPolicyRevisionsCleanupTask;
   taskManagerStart?: TaskManagerStartContract;
-  fetchUsage?: (abortController: AbortController) => Promise<FleetUsage | undefined>;
+  fetchUsage?: (signal: AbortSignal) => Promise<FleetUsage | undefined>;
   syncIntegrationsTask: SyncIntegrationsTask;
   lockManagerService?: LockManagerService;
   alertingStart?: AlertingServerStart;
@@ -359,7 +360,7 @@ export class FleetPlugin
   private packageService?: PackageService;
   private packagePolicyService?: PackagePolicyService;
   private policyWatcher?: PolicyWatcher;
-  private fetchUsage?: (abortController: AbortController) => Promise<FleetUsage | undefined>;
+  private fetchUsage?: (signal: AbortSignal) => Promise<FleetUsage | undefined>;
   private lockManagerService?: LockManagerService;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
@@ -678,13 +679,11 @@ export class FleetPlugin
 
     // Register usage collection
     registerFleetUsageCollector(core, config, deps.usageCollection);
-    this.fetchUsage = async (abortController: AbortController) =>
-      await fetchFleetUsage(core, config, abortController);
+    this.fetchUsage = async (signal: AbortSignal) => await fetchFleetUsage(core, config, signal);
     this.fleetUsageSender = new FleetUsageSender(deps.taskManager, core, this.fetchUsage);
     registerFleetUsageLogger(deps.taskManager, async () => fetchAgentsUsage(core, config));
 
-    const fetchAgents = async (abortController: AbortController) =>
-      await fetchAgentMetrics(core, abortController);
+    const fetchAgents = async (signal: AbortSignal) => await fetchAgentMetrics(core, signal);
     this.fleetMetricsTask = new FleetMetricsTask(deps.taskManager, fetchAgents);
 
     const router: FleetRouter = core.http.createRouter<FleetRequestHandlerContext>();
@@ -713,6 +712,7 @@ export class FleetPlugin
     registerVerifierPolicyCleanupTask(deps.taskManager);
     registerReindexIntegrationKnowledgeTask(deps.taskManager);
     registerSyncNamespaceTemplatesTask(deps.taskManager);
+    registerSyncIlmPolicyTask(deps.taskManager);
     registerReassignAgentsToVersionSpecificPoliciesTask(deps.taskManager);
 
     this.bulkActionsResolver = new BulkActionsResolver(deps.taskManager, core);

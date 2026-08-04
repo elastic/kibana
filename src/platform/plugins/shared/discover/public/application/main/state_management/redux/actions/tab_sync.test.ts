@@ -19,17 +19,20 @@ import {
   selectTabRuntimeState,
   TabInitializationStatus,
 } from '..';
-import type { TabState } from '../types';
 import { getTabRuntimeStateMock } from '../__mocks__/runtime_state.mocks';
 import { getPersistedTabMock } from '../__mocks__/internal_state.mocks';
 import * as tabSyncApi from './tab_sync';
 import * as createTabPersistableStateObservableModule from '../../utils/create_tab_persistable_state_observable';
 import * as resolveDataViewModule from '../../utils/resolve_data_view';
+import type { TabPersistableState } from '../../utils/create_tab_persistable_state_observable';
+import { PROFILE_STATE_URL_KEY } from '../../../../../../common/constants';
+import { TEST_PROFILE_STATE_DEF } from '../../../../../context_awareness/__mocks__/profile_state';
 
 const { initializeAndSync, stopSyncing } = tabSyncApi;
 
 const setup = async () => {
   const services = createDiscoverServicesMock();
+  services.profileStateRegistry.registerDefinition(TEST_PROFILE_STATE_DEF);
   const toolkit = getDiscoverInternalStateMock({
     services,
     persistedDataViews: [dataViewMockWithTimeField],
@@ -220,9 +223,7 @@ describe('tab_sync actions', () => {
     });
 
     it('should subscribe to createTabPersistableStateObservable for syncing locally persisted tab state', async () => {
-      const mockTabState$ = new Subject<
-        Pick<TabState, 'appState' | 'globalState' | 'attributes'>
-      >();
+      const mockTabState$: Subject<TabPersistableState> = new Subject();
       const createTabPersistableStateObservableSpy = jest
         .spyOn(createTabPersistableStateObservableModule, 'createTabPersistableStateObservable')
         .mockReturnValue(mockTabState$);
@@ -244,9 +245,7 @@ describe('tab_sync actions', () => {
     });
 
     it('should dispatch syncLocallyPersistedTabState when tabState observable emits', async () => {
-      const mockTabState$ = new Subject<
-        Pick<TabState, 'appState' | 'globalState' | 'attributes'>
-      >();
+      const mockTabState$: Subject<TabPersistableState> = new Subject();
       jest
         .spyOn(createTabPersistableStateObservableModule, 'createTabPersistableStateObservable')
         .mockReturnValue(mockTabState$);
@@ -264,8 +263,8 @@ describe('tab_sync actions', () => {
       // Clear any calls that happened during initialization
       syncLocallyPersistedTabStateSpy.mockClear();
 
-      const { appState, globalState, attributes } = getCurrentTab();
-      const nextState = { appState, globalState, attributes };
+      const { appState, globalState, attributes, profileState } = getCurrentTab();
+      const nextState = { appState, globalState, attributes, profileState };
 
       // Emit a state change
       mockTabState$.next(nextState);
@@ -274,10 +273,86 @@ describe('tab_sync actions', () => {
       expect(syncLocallyPersistedTabStateSpy).toHaveBeenCalledWith({ tabId });
     });
 
+    it('should sync profile URL state changes into Redux', async () => {
+      const { tabId, initializeSingleTab, internalState, stateStorageContainer } = await setup();
+
+      await initializeSingleTab({ tabId });
+
+      await stateStorageContainer.set(PROFILE_STATE_URL_KEY, {
+        [TEST_PROFILE_STATE_DEF.key]: {
+          urlValue: 'nextUrl',
+        },
+      });
+
+      expect(selectTab(internalState.getState(), tabId).profileState).toEqual({
+        [TEST_PROFILE_STATE_DEF.key]: {
+          urlValue: 'nextUrl',
+        },
+      });
+    });
+
+    it('should preserve only initial profile URL state from the URL during initialization', async () => {
+      const { tabId, initializeSingleTab, internalState, stateStorageContainer } = await setup();
+      const sharedProfileUrlState = {
+        [TEST_PROFILE_STATE_DEF.key]: {
+          uiValue: 'ignoredUi',
+          urlValue: 'sharedUrl',
+          persistentValue: 'ignoredPersistent',
+          nestedValue: { count: 10 },
+        },
+      };
+
+      await stateStorageContainer.set(PROFILE_STATE_URL_KEY, sharedProfileUrlState);
+
+      await initializeSingleTab({ tabId });
+
+      expect(selectTab(internalState.getState(), tabId).profileState).toEqual({
+        [TEST_PROFILE_STATE_DEF.key]: {
+          urlValue: 'sharedUrl',
+        },
+      });
+    });
+
+    it('should prefer initial profile URL state over existing tab profile state during initialization', async () => {
+      const { tabId, initializeSingleTab, internalState, stateStorageContainer } = await setup();
+      const currentTab = selectTab(internalState.getState(), tabId);
+
+      internalState.dispatch(
+        internalStateActions.setTabs({
+          allTabs: [
+            {
+              ...currentTab,
+              profileState: {
+                [TEST_PROFILE_STATE_DEF.key]: {
+                  urlValue: 'fromTabState',
+                  persistentValue: 'fromTabState',
+                },
+              },
+            },
+          ],
+          selectedTabId: tabId,
+          recentlyClosedTabs: [],
+        })
+      );
+
+      await stateStorageContainer.set(PROFILE_STATE_URL_KEY, {
+        [TEST_PROFILE_STATE_DEF.key]: {
+          urlValue: 'fromUrl',
+        },
+      });
+
+      await initializeSingleTab({ tabId });
+
+      expect(selectTab(internalState.getState(), tabId).profileState).toEqual({
+        [TEST_PROFILE_STATE_DEF.key]: {
+          urlValue: 'fromUrl',
+          persistentValue: 'fromTabState',
+        },
+      });
+    });
+
     it('should unsubscribe from tabStateSubscription when stopSyncing is called', async () => {
-      const mockTabState$ = new Subject<
-        Pick<TabState, 'appState' | 'globalState' | 'attributes'>
-      >();
+      const mockTabState$: Subject<TabPersistableState> = new Subject();
       jest
         .spyOn(createTabPersistableStateObservableModule, 'createTabPersistableStateObservable')
         .mockReturnValue(mockTabState$);

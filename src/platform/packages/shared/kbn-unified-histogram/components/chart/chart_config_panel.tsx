@@ -9,6 +9,7 @@
 
 import type { ComponentProps } from 'react';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { BehaviorSubject } from 'rxjs';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import { isEqual, isObject } from 'lodash';
 import type { LensEmbeddableOutput, Suggestion } from '@kbn/lens-plugin/public';
@@ -36,6 +37,7 @@ export function ChartConfigPanel({
   isPlainRecord,
   query,
   onSuggestionContextEdit,
+  isApproximate,
 }: {
   services: UnifiedHistogramServices;
   visContext: UnifiedHistogramVisContext;
@@ -47,10 +49,17 @@ export function ChartConfigPanel({
   isPlainRecord?: boolean;
   query?: Query | AggregateQuery;
   onSuggestionContextEdit: (suggestion: UnifiedHistogramSuggestionContext | undefined) => void;
+  isApproximate?: boolean;
 }) {
   const [editLensConfigPanel, setEditLensConfigPanel] = useState<JSX.Element | null>(null);
   const previousAdapters = useRef<Record<string, Datatable> | undefined>(undefined);
   const previousQuery = useRef<Query | AggregateQuery | undefined>(undefined);
+
+  const isApproximate$ = useRef(new BehaviorSubject<boolean | undefined>(undefined));
+  useEffect(() => {
+    isApproximate$.current.next(isApproximate);
+  }, [isApproximate]);
+  const editorParentApi = useRef({ isApproximate$: isApproximate$.current });
 
   const updatePanelState = useCallback<
     ComponentProps<EditLensConfigPanelComponent>['updatePanelState']
@@ -114,6 +123,7 @@ export function ChartConfigPanel({
           wrapInFlyout
           hideTextBasedEditor={true}
           hidesSuggestions={currentSuggestionType !== UnifiedHistogramSuggestionType.lensSuggestion}
+          parentApi={editorParentApi.current}
         />
       );
       setEditLensConfigPanel(panel);

@@ -16,8 +16,8 @@ import {
 } from './recent_anomalies_esql_source_query_hooks';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useGlobalFilterQuery } from '../../../../common/hooks/use_global_filter_query';
-import { useEsqlTimeRangeFilter } from '../../../../common/hooks/esql/use_esql_global_filter';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
+import { useSecurityMlModuleJobIds } from '../../../../common/components/ml/hooks/use_security_ml_module_job_ids';
 
 jest.mock('@kbn/react-query', () => ({ useQuery: jest.fn() }));
 jest.mock('@kbn/esql-utils', () => ({
@@ -33,10 +33,10 @@ jest.mock('../../../../common/lib/kibana', () => ({ useKibana: jest.fn() }));
 jest.mock('../../../../common/hooks/use_global_filter_query', () => ({
   useGlobalFilterQuery: jest.fn(),
 }));
-jest.mock('../../../../common/hooks/esql/use_esql_global_filter', () => ({
-  useEsqlTimeRangeFilter: jest.fn(),
-}));
 jest.mock('../../../../common/containers/use_global_time', () => ({ useGlobalTime: jest.fn() }));
+jest.mock('../../../../common/components/ml/hooks/use_security_ml_module_job_ids', () => ({
+  useSecurityMlModuleJobIds: jest.fn(),
+}));
 jest.mock('../../../../common/hooks/use_error_toast', () => ({ useErrorToast: jest.fn() }));
 
 const mockUseQuery = useQuery as jest.Mock;
@@ -46,12 +46,11 @@ const mockTopRowsSource = useRecentAnomaliesTopRowsEsqlSource as jest.Mock;
 const mockDataSource = useRecentAnomaliesDataEsqlSource as jest.Mock;
 const mockUseKibana = useKibana as jest.Mock;
 const mockUseGlobalFilterQuery = useGlobalFilterQuery as jest.Mock;
-const mockUseEsqlTimeRangeFilter = useEsqlTimeRangeFilter as jest.Mock;
 const mockUseGlobalTime = useGlobalTime as jest.Mock;
+const mockUseSecurityJobIds = useSecurityMlModuleJobIds as jest.Mock;
 
 const TOP_ROWS_SQL = 'TOP_ROWS_SQL';
 const DATA_SQL = 'DATA_SQL';
-const TIME_FILTER = 'TIME_FILTER';
 const EMPTY_BOOL = { bool: { must: [], filter: [], should: [], must_not: [] } };
 const ACTIVE_BOOL = {
   bool: {
@@ -74,8 +73,11 @@ const baseParams = {
 let resolvedEntityIds: string[] | undefined;
 let resolveLoading: boolean;
 let topRowsRecords: Array<Record<string, string>>;
+let mlIndexExists: boolean | undefined;
+let mlIndexLoading: boolean;
 
 const RESOLUTION_KEY = 'recent-anomalies-filtered-entity-ids';
+const ML_INDEX_EXISTS_KEY = 'recent-anomalies-ml-index-exists';
 const callFor = (predicate: (key: unknown) => boolean) =>
   mockUseQuery.mock.calls.find(([key]) => predicate(key));
 const resolutionCall = () => callFor((key) => Array.isArray(key) && key[0] === RESOLUTION_KEY);
@@ -89,10 +91,16 @@ describe('useRecentAnomaliesQuery', () => {
     resolvedEntityIds = undefined;
     resolveLoading = false;
     topRowsRecords = [];
+    mlIndexExists = true;
+    mlIndexLoading = false;
 
-    mockUseKibana.mockReturnValue({ services: { data: { search: { search: jest.fn() } } } });
+    mockUseKibana.mockReturnValue({
+      services: {
+        data: { search: { search: jest.fn() }, dataViews: { getExistingIndices: jest.fn() } },
+      },
+    });
     mockUseGlobalTime.mockReturnValue({ from: 'global-from', to: 'global-to' });
-    mockUseEsqlTimeRangeFilter.mockReturnValue(TIME_FILTER);
+    mockUseSecurityJobIds.mockReturnValue({ jobIds: ['security-job-01'], loading: false });
     mockUseGlobalFilterQuery.mockReturnValue({ filterQuery: EMPTY_BOOL });
     mockGetLatestEntitiesIndexName.mockReturnValue('entities-latest-default');
     mockTopRowsSource.mockReturnValue(TOP_ROWS_SQL);
@@ -103,6 +111,9 @@ describe('useRecentAnomaliesQuery', () => {
       const key = queryKey as unknown[];
       if (key[0] === RESOLUTION_KEY) {
         return { data: resolvedEntityIds, isLoading: resolveLoading };
+      }
+      if (key[0] === ML_INDEX_EXISTS_KEY) {
+        return { data: mlIndexExists, isLoading: mlIndexLoading };
       }
       if (key[1] === TOP_ROWS_SQL) {
         return {
@@ -121,18 +132,26 @@ describe('useRecentAnomaliesQuery', () => {
     });
   });
 
-  describe('time range filter', () => {
-    it('uses the fixed time range when one is provided', () => {
+  describe('time range', () => {
+    it('passes the fixed time range to the query as named params input', async () => {
       renderHook(() => useRecentAnomaliesQuery(baseParams));
-      expect(mockUseEsqlTimeRangeFilter).toHaveBeenCalledWith('now-30d', 'now');
+
+      await topRowsCall()![1]({ signal: undefined });
+      expect(mockGetESQLResults).toHaveBeenCalledWith(
+        expect.objectContaining({ timeRange: { from: 'now-30d', to: 'now' } })
+      );
     });
 
-    it('falls back to the global date picker range when no time range is provided', () => {
+    it('falls back to the global date picker range when no time range is provided', async () => {
       renderHook(() => useRecentAnomaliesQuery({ ...baseParams, timeRange: undefined }));
-      expect(mockUseEsqlTimeRangeFilter).toHaveBeenCalledWith('global-from', 'global-to');
+
+      await topRowsCall()![1]({ signal: undefined });
+      expect(mockGetESQLResults).toHaveBeenCalledWith(
+        expect.objectContaining({ timeRange: { from: 'global-from', to: 'global-to' } })
+      );
     });
 
-    it('applies only the time filter to the anomaly query, not the search bar filters', async () => {
+    it('does not send a request-level filter with the anomaly queries (elastic/kibana#277613)', async () => {
       mockUseGlobalFilterQuery.mockReturnValue({ filterQuery: ACTIVE_BOOL });
       resolvedEntityIds = ['host:test_host_01'];
       topRowsRecords = [{ entity_id: 'host:test_host_01', entity_name: 'h1', entity_type: 'host' }];
@@ -140,9 +159,8 @@ describe('useRecentAnomaliesQuery', () => {
       renderHook(() => useRecentAnomaliesQuery(baseParams));
 
       await topRowsCall()![1]({ signal: undefined });
-      expect(mockGetESQLResults).toHaveBeenCalledWith(
-        expect.objectContaining({ filter: TIME_FILTER })
-      );
+      const callArgs = mockGetESQLResults.mock.calls.at(-1)![0];
+      expect(callArgs.filter).toBeUndefined();
     });
   });
 
@@ -201,6 +219,79 @@ describe('useRecentAnomaliesQuery', () => {
 
       expect(result).toEqual({ anomalyRecords: [], rowLabels: [] });
       expect(mockGetESQLResults).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('when the ML anomalies index does not exist', () => {
+    it('short-circuits the top rows query to an empty result without querying ES|QL', async () => {
+      mlIndexExists = false;
+      renderHook(() => useRecentAnomaliesQuery(baseParams));
+
+      mockGetESQLResults.mockClear();
+      const result = await topRowsCall()![1]({ signal: undefined });
+
+      expect(result).toEqual({ records: [], rawResponse: undefined });
+      expect(mockGetESQLResults).not.toHaveBeenCalled();
+    });
+
+    it('runs the ES|QL query as normal when the index does exist', async () => {
+      mlIndexExists = true;
+      renderHook(() => useRecentAnomaliesQuery(baseParams));
+
+      mockGetESQLResults.mockClear();
+      await topRowsCall()![1]({ signal: undefined });
+
+      expect(mockGetESQLResults).toHaveBeenCalledWith(
+        expect.objectContaining({ esqlQuery: TOP_ROWS_SQL })
+      );
+    });
+  });
+
+  describe('while checking whether the ML anomalies index exists', () => {
+    it('disables the top rows query and keeps the result loading', () => {
+      mlIndexLoading = true;
+      const { result } = renderHook(() => useRecentAnomaliesQuery(baseParams));
+
+      expect(topRowsCall()![2].enabled).toBe(false);
+      expect(result.current.isLoading).toBe(true);
+    });
+  });
+
+  describe('when there are no security ML jobs', () => {
+    beforeEach(() => {
+      mockUseSecurityJobIds.mockReturnValue({ jobIds: [], loading: false });
+    });
+
+    it('short-circuits the top rows query to an empty result without querying ES|QL', async () => {
+      renderHook(() => useRecentAnomaliesQuery(baseParams));
+
+      mockGetESQLResults.mockClear();
+      const result = await topRowsCall()![1]({ signal: undefined });
+
+      expect(result).toEqual({ records: [], rawResponse: undefined });
+      expect(mockGetESQLResults).not.toHaveBeenCalled();
+    });
+
+    it('short-circuits the anomaly data query to an empty result without querying ES|QL', async () => {
+      topRowsRecords = [{ entity_id: 'host:test_host_01', entity_name: 'h1', entity_type: 'host' }];
+      renderHook(() => useRecentAnomaliesQuery(baseParams));
+
+      mockGetESQLResults.mockClear();
+      const result = await dataCall()![1]({ signal: undefined });
+
+      expect(result).toEqual({ anomalyRecords: [], rowLabels: [] });
+      expect(mockGetESQLResults).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('while resolving the security ML jobs', () => {
+    it('disables both queries and keeps the result loading', () => {
+      mockUseSecurityJobIds.mockReturnValue({ jobIds: undefined, loading: true });
+      const { result } = renderHook(() => useRecentAnomaliesQuery(baseParams));
+
+      expect(topRowsCall()![2].enabled).toBe(false);
+      expect(dataCall()![2].enabled).toBe(false);
+      expect(result.current.isLoading).toBe(true);
     });
   });
 });

@@ -17,7 +17,7 @@ import {
   enableQueryStreams,
 } from '../../fixtures/query_stream_helpers';
 
-const QUERY_STREAM_NAME = 'logs.ecs.test';
+const QUERY_STREAM_NAME = 'logs.ecs.delete-test';
 const ESQL_VIEW_NAME = `$.${QUERY_STREAM_NAME}`;
 const INITIAL_ESQL_QUERY = 'FROM $.logs.ecs | WHERE host.name == "host-1"';
 
@@ -44,7 +44,7 @@ test.describe('Query streams - Delete query stream', { tag: tags.stateful.classi
 
   test('should support deleting an existing query stream', async ({ pageObjects, esClient }) => {
     await pageObjects.streams.clickStreamNameLink(QUERY_STREAM_NAME);
-    await pageObjects.streams.clickQueryStreamDetailsTab('advanced');
+    await pageObjects.streams.clickQueryStreamDetailsTab('overview');
     await pageObjects.streams.clickDeleteQueryStreamButton();
     await pageObjects.streams.fillDeleteQueryStreamModalInput(QUERY_STREAM_NAME);
     await pageObjects.streams.clickDeleteQueryStreamModalDeleteButton();
@@ -56,6 +56,6 @@ test.describe('Query streams - Delete query stream', { tag: tags.stateful.classi
         method: 'GET',
         path: `/_query/view/${encodeURIComponent(ESQL_VIEW_NAME)}`,
       })
-    ).rejects.toThrow(/index_not_found_exception/);
+    ).rejects.toThrow(/resource_not_found_exception/);
   });
 });

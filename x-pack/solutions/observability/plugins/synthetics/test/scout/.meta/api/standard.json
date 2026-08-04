@@ -1,5 +1,9 @@
 {
-  "sha1": "d44fa85a41db589a1f3532e07db138243abba3b4",
+  "sha1": "e783fa62285601baee3a12b2590465fb652feb9d",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
   "tests": [
     {
       "id": "0e89de24e8ff3a8-faf07b914e53ca6",
@@ -10,8 +14,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/add_monitor_permissions.spec.ts",
-        "line": 83,
-        "column": 12
+        "line": 86,
+        "column": 15
       }
     },
     {
@@ -23,8 +27,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/add_monitor_permissions.spec.ts",
-        "line": 94,
-        "column": 12
+        "line": 99,
+        "column": 17
       }
     },
     {
@@ -36,8 +40,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/add_monitor_permissions.spec.ts",
-        "line": 109,
-        "column": 12
+        "line": 117,
+        "column": 17
       }
     },
     {
@@ -49,7 +53,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/add_monitor_permissions.spec.ts",
-        "line": 138,
+        "line": 140,
         "column": 12
       }
     },
@@ -62,8 +66,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/add_monitor_permissions.spec.ts",
-        "line": 162,
-        "column": 12
+        "line": 166,
+        "column": 27
       }
     },
     {
@@ -75,8 +79,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/add_monitor_private_location.spec.ts",
-        "line": 69,
-        "column": 10
+        "line": 62,
+        "column": 21
       }
     },
     {
@@ -88,8 +92,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/add_monitor_private_location.spec.ts",
-        "line": 88,
-        "column": 10
+        "line": 77,
+        "column": 17
       }
     },
     {
@@ -101,8 +105,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/add_monitor_private_location.spec.ts",
-        "line": 106,
-        "column": 10
+        "line": 96,
+        "column": 36
       }
     },
     {
@@ -114,8 +118,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/add_monitor_private_location.spec.ts",
-        "line": 122,
-        "column": 10
+        "line": 114,
+        "column": 36
       }
     },
     {
@@ -127,8 +131,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/api_keys.spec.ts",
-        "line": 50,
-        "column": 10
+        "line": 56,
+        "column": 17
       }
     },
     {
@@ -141,8 +145,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/auto_upgrade_policies.spec.ts",
-        "line": 82,
-        "column": 15
+        "line": 67,
+        "column": 51
       }
     },
     {
@@ -155,8 +159,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/clean_up_extra_package_policies.spec.ts",
-        "line": 54,
-        "column": 12
+        "line": 45,
+        "column": 13
       }
     },
     {
@@ -169,8 +173,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_monitor_private_location.spec.ts",
-        "line": 95,
-        "column": 15
+        "line": 80,
+        "column": 51
       }
     },
     {
@@ -183,8 +187,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_monitor_project_multi_space.spec.ts",
-        "line": 99,
-        "column": 12
+        "line": 94,
+        "column": 13
       }
     },
     {
@@ -198,7 +202,7 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_monitor_project_multi_space.spec.ts",
         "line": 122,
-        "column": 12
+        "column": 68
       }
     },
     {
@@ -211,8 +215,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_monitor_project_multi_space.spec.ts",
-        "line": 137,
-        "column": 12
+        "line": 146,
+        "column": 16
       }
     },
     {
@@ -225,8 +229,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_monitor_project_multi_space.spec.ts",
-        "line": 178,
-        "column": 12
+        "line": 199,
+        "column": 25
       }
     },
     {
@@ -239,8 +243,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_monitor_project_multi_space.spec.ts",
-        "line": 195,
-        "column": 12
+        "line": 190,
+        "column": 27
       }
     },
     {
@@ -253,8 +257,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_monitor_project_private_location.spec.ts",
-        "line": 416,
-        "column": 12
+        "line": 422,
+        "column": 25
       }
     },
     {
@@ -267,8 +271,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_monitor_project_private_location.spec.ts",
-        "line": 445,
-        "column": 12
+        "line": 454,
+        "column": 10
       }
     },
     {
@@ -281,8 +285,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_monitor_project_private_location.spec.ts",
-        "line": 485,
-        "column": 12
+        "line": 499,
+        "column": 29
       }
     },
     {
@@ -295,8 +299,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_monitor_project_private_location.spec.ts",
-        "line": 512,
-        "column": 12
+        "line": 524,
+        "column": 28
       }
     },
     {
@@ -309,8 +313,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_monitor_project_private_location.spec.ts",
-        "line": 544,
-        "column": 12
+        "line": 555,
+        "column": 11
       }
     },
     {
@@ -323,8 +327,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_monitor_project_private_location.spec.ts",
-        "line": 586,
-        "column": 12
+        "line": 597,
+        "column": 11
       }
     },
     {
@@ -337,8 +341,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_monitor_project_private_location.spec.ts",
-        "line": 628,
-        "column": 12
+        "line": 640,
+        "column": 31
       }
     },
     {
@@ -351,8 +355,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_monitor_project_private_location.spec.ts",
-        "line": 667,
-        "column": 12
+        "line": 683,
+        "column": 32
       }
     },
     {
@@ -365,8 +369,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_monitor_project_private_location.spec.ts",
-        "line": 681,
-        "column": 12
+        "line": 694,
+        "column": 6
       }
     },
     {
@@ -379,8 +383,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_monitor_project_private_location.spec.ts",
-        "line": 696,
-        "column": 12
+        "line": 702,
+        "column": 18
       }
     },
     {
@@ -393,8 +397,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_monitor_project_private_location.spec.ts",
-        "line": 731,
-        "column": 12
+        "line": 746,
+        "column": 10
       }
     },
     {
@@ -407,8 +411,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_monitor_project_private_location.spec.ts",
-        "line": 753,
-        "column": 12
+        "line": 768,
+        "column": 11
       }
     },
     {
@@ -421,8 +425,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_monitor_project_private_location.spec.ts",
-        "line": 776,
-        "column": 12
+        "line": 791,
+        "column": 11
       }
     },
     {
@@ -435,8 +439,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_monitor_project_private_location.spec.ts",
-        "line": 799,
-        "column": 12
+        "line": 814,
+        "column": 11
       }
     },
     {
@@ -449,8 +453,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_monitor_project_private_location.spec.ts",
-        "line": 830,
-        "column": 12
+        "line": 846,
+        "column": 10
       }
     },
     {
@@ -463,8 +467,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_monitor_project_private_location.spec.ts",
-        "line": 861,
-        "column": 12
+        "line": 880,
+        "column": 21
       }
     },
     {
@@ -477,8 +481,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_monitor_project_private_location.spec.ts",
-        "line": 908,
-        "column": 12
+        "line": 924,
+        "column": 74
       }
     },
     {
@@ -491,8 +495,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_monitor_project_private_location.spec.ts",
-        "line": 932,
-        "column": 12
+        "line": 951,
+        "column": 6
       }
     },
     {
@@ -505,8 +509,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_monitor_project_private_location.spec.ts",
-        "line": 953,
-        "column": 12
+        "line": 966,
+        "column": 32
       }
     },
     {
@@ -519,8 +523,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_monitor_project_private_location.spec.ts",
-        "line": 964,
-        "column": 12
+        "line": 982,
+        "column": 16
       }
     },
     {
@@ -533,8 +537,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_monitor_project_private_location.spec.ts",
-        "line": 980,
-        "column": 12
+        "line": 1007,
+        "column": 17
       }
     },
     {
@@ -547,8 +551,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_monitor_project_private_location.spec.ts",
-        "line": 1017,
-        "column": 12
+        "line": 1050,
+        "column": 21
       }
     },
     {
@@ -561,8 +565,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_monitor_project_private_location.spec.ts",
-        "line": 1059,
-        "column": 12
+        "line": 1097,
+        "column": 7
       }
     },
     {
@@ -575,8 +579,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_monitor_project_private_location.spec.ts",
-        "line": 1095,
-        "column": 12
+        "line": 1136,
+        "column": 48
       }
     },
     {
@@ -589,8 +593,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_monitor_project_private_location.spec.ts",
-        "line": 1145,
-        "column": 12
+        "line": 1192,
+        "column": 32
       }
     },
     {
@@ -603,8 +607,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_monitor_project_private_location.spec.ts",
-        "line": 1202,
-        "column": 12
+        "line": 1243,
+        "column": 32
       }
     },
     {
@@ -617,8 +621,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_monitor_project_private_location.spec.ts",
-        "line": 1220,
-        "column": 12
+        "line": 1256,
+        "column": 17
       }
     },
     {
@@ -631,8 +635,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_monitor_project_private_location.spec.ts",
-        "line": 1277,
-        "column": 12
+        "line": 1325,
+        "column": 75
       }
     },
     {
@@ -645,8 +649,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_monitor_project_private_location.spec.ts",
-        "line": 1297,
-        "column": 12
+        "line": 1346,
+        "column": 21
       }
     },
     {
@@ -659,8 +663,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_monitor_project_private_location.spec.ts",
-        "line": 1353,
-        "column": 12
+        "line": 1423,
+        "column": 24
       }
     },
     {
@@ -673,8 +677,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_monitor_project_private_location.spec.ts",
-        "line": 1417,
-        "column": 12
+        "line": 1481,
+        "column": 20
       }
     },
     {
@@ -687,8 +691,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_monitor_project_private_location.spec.ts",
-        "line": 1468,
-        "column": 12
+        "line": 1542,
+        "column": 36
       }
     },
     {
@@ -701,8 +705,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_monitor_project_private_location.spec.ts",
-        "line": 1502,
-        "column": 12
+        "line": 1555,
+        "column": 27
       }
     },
     {
@@ -715,8 +719,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_monitor_project_private_location.spec.ts",
-        "line": 1536,
-        "column": 12
+        "line": 1609,
+        "column": 27
       }
     },
     {
@@ -729,8 +733,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_monitor_project.spec.ts",
-        "line": 117,
-        "column": 12
+        "line": 109,
+        "column": 23
       }
     },
     {
@@ -743,8 +747,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_monitor_project.spec.ts",
-        "line": 202,
-        "column": 12
+        "line": 194,
+        "column": 23
       }
     },
     {
@@ -757,8 +761,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_monitor_project.spec.ts",
-        "line": 322,
-        "column": 12
+        "line": 328,
+        "column": 11
       }
     },
     {
@@ -771,8 +775,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_monitor_project.spec.ts",
-        "line": 421,
-        "column": 12
+        "line": 438,
+        "column": 13
       }
     },
     {
@@ -785,8 +789,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_monitor_project.spec.ts",
-        "line": 507,
-        "column": 12
+        "line": 534,
+        "column": 16
       }
     },
     {
@@ -799,8 +803,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_monitor_project.spec.ts",
-        "line": 532,
-        "column": 12
+        "line": 556,
+        "column": 33
       }
     },
     {
@@ -813,8 +817,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_monitor_project.spec.ts",
-        "line": 576,
-        "column": 12
+        "line": 612,
+        "column": 29
       }
     },
     {
@@ -827,8 +831,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_monitor_project.spec.ts",
-        "line": 655,
-        "column": 12
+        "line": 701,
+        "column": 9
       }
     },
     {
@@ -841,8 +845,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_monitor_project.spec.ts",
-        "line": 689,
-        "column": 12
+        "line": 733,
+        "column": 28
       }
     },
     {
@@ -855,8 +859,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_monitor_project.spec.ts",
-        "line": 714,
-        "column": 12
+        "line": 755,
+        "column": 16
       }
     },
     {
@@ -869,8 +873,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_monitor_project.spec.ts",
-        "line": 750,
-        "column": 12
+        "line": 730,
+        "column": 27
       }
     },
     {
@@ -883,8 +887,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_monitor_public_api_private_location.spec.ts",
-        "line": 44,
-        "column": 12
+        "line": 37,
+        "column": 25
       }
     },
     {
@@ -897,8 +901,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_monitor_public_api_private_location.spec.ts",
-        "line": 51,
-        "column": 12
+        "line": 41,
+        "column": 51
       }
     },
     {
@@ -911,8 +915,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_monitor_public_api_private_location.spec.ts",
-        "line": 56,
-        "column": 12
+        "line": 45,
+        "column": 86
       }
     },
     {
@@ -925,8 +929,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_monitor_public_api_private_location.spec.ts",
-        "line": 68,
-        "column": 12
+        "line": 53,
+        "column": 19
       }
     },
     {
@@ -939,8 +943,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_monitor_public_api_private_location.spec.ts",
-        "line": 90,
-        "column": 12
+        "line": 82,
+        "column": 44
       }
     },
     {
@@ -953,8 +957,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_monitor_public_api_private_location.spec.ts",
-        "line": 102,
-        "column": 12
+        "line": 94,
+        "column": 50
       }
     },
     {
@@ -967,8 +971,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_monitor_public_api_private_location.spec.ts",
-        "line": 118,
-        "column": 12
+        "line": 111,
+        "column": 19
       }
     },
     {
@@ -981,8 +985,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_monitor_public_api_private_location.spec.ts",
-        "line": 137,
-        "column": 12
+        "line": 132,
+        "column": 29
       }
     },
     {
@@ -996,7 +1000,7 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_monitor_public_api_private_location.spec.ts",
         "line": 160,
-        "column": 12
+        "column": 52
       }
     },
     {
@@ -1009,8 +1013,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_monitor_public_api_private_location.spec.ts",
-        "line": 185,
-        "column": 12
+        "line": 188,
+        "column": 29
       }
     },
     {
@@ -1023,8 +1027,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_monitor_public_api_private_location.spec.ts",
-        "line": 204,
-        "column": 12
+        "line": 212,
+        "column": 14
       }
     },
     {
@@ -1037,8 +1041,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_monitor_public_api_private_location.spec.ts",
-        "line": 223,
-        "column": 12
+        "line": 234,
+        "column": 18
       }
     },
     {
@@ -1051,8 +1055,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_monitor_public_api_private_location.spec.ts",
-        "line": 242,
-        "column": 12
+        "line": 255,
+        "column": 23
       }
     },
     {
@@ -1065,8 +1069,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_monitor_public_api_private_location.spec.ts",
-        "line": 261,
-        "column": 12
+        "line": 280,
+        "column": 2
       }
     },
     {
@@ -1079,8 +1083,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_monitor_public_api.spec.ts",
-        "line": 45,
-        "column": 12
+        "line": 39,
+        "column": 7
       }
     },
     {
@@ -1093,8 +1097,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_monitor_public_api.spec.ts",
-        "line": 61,
-        "column": 12
+        "line": 53,
+        "column": 19
       }
     },
     {
@@ -1107,8 +1111,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_monitor_public_api.spec.ts",
-        "line": 80,
-        "column": 12
+        "line": 74,
+        "column": 17
       }
     },
     {
@@ -1122,7 +1126,7 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_monitor_public_api.spec.ts",
         "line": 103,
-        "column": 12
+        "column": 13
       }
     },
     {
@@ -1135,8 +1139,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_monitor_public_api.spec.ts",
-        "line": 128,
-        "column": 12
+        "line": 130,
+        "column": 20
       }
     },
     {
@@ -1149,8 +1153,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_monitor_public_api.spec.ts",
-        "line": 147,
-        "column": 12
+        "line": 153,
+        "column": 25
       }
     },
     {
@@ -1163,8 +1167,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_monitor_public_api.spec.ts",
-        "line": 166,
-        "column": 12
+        "line": 176,
+        "column": 29
       }
     },
     {
@@ -1177,8 +1181,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_monitor_public_api.spec.ts",
-        "line": 185,
-        "column": 12
+        "line": 197,
+        "column": 21
       }
     },
     {
@@ -1191,8 +1195,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_monitor_public_api.spec.ts",
-        "line": 204,
-        "column": 12
+        "line": 221,
+        "column": 7
       }
     },
     {
@@ -1205,8 +1209,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_monitor.spec.ts",
-        "line": 47,
-        "column": 12
+        "line": 40,
+        "column": 25
       }
     },
     {
@@ -1219,8 +1223,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_monitor.spec.ts",
-        "line": 60,
-        "column": 12
+        "line": 47,
+        "column": 57
       }
     },
     {
@@ -1233,8 +1237,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_update_delete_params.spec.ts",
-        "line": 175,
-        "column": 12
+        "line": 222,
+        "column": 8
       }
     },
     {
@@ -1247,8 +1251,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_update_delete_params.spec.ts",
-        "line": 183,
-        "column": 12
+        "line": 230,
+        "column": 22
       }
     },
     {
@@ -1261,8 +1265,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_update_delete_params.spec.ts",
-        "line": 192,
-        "column": 12
+        "line": 249,
+        "column": 49
       }
     },
     {
@@ -1275,8 +1279,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_update_delete_params.spec.ts",
-        "line": 216,
-        "column": 12
+        "line": 266,
+        "column": 13
       }
     },
     {
@@ -1289,8 +1293,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_update_delete_params.spec.ts",
-        "line": 249,
-        "column": 12
+        "line": 296,
+        "column": 10
       }
     },
     {
@@ -1303,8 +1307,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_update_delete_params.spec.ts",
-        "line": 259,
-        "column": 12
+        "line": 306,
+        "column": 15
       }
     },
     {
@@ -1317,8 +1321,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_update_delete_params.spec.ts",
-        "line": 286,
-        "column": 12
+        "line": 335,
+        "column": 19
       }
     },
     {
@@ -1331,8 +1335,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_update_delete_params.spec.ts",
-        "line": 318,
-        "column": 12
+        "line": 363,
+        "column": 29
       }
     },
     {
@@ -1345,8 +1349,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_update_delete_params.spec.ts",
-        "line": 325,
-        "column": 12
+        "line": 370,
+        "column": 7
       }
     },
     {
@@ -1359,8 +1363,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_update_delete_params.spec.ts",
-        "line": 344,
-        "column": 12
+        "line": 393,
+        "column": 13
       }
     },
     {
@@ -1373,8 +1377,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_update_delete_params.spec.ts",
-        "line": 359,
-        "column": 12
+        "line": 409,
+        "column": 16
       }
     },
     {
@@ -1387,8 +1391,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_update_delete_params.spec.ts",
-        "line": 372,
-        "column": 12
+        "line": 423,
+        "column": 17
       }
     },
     {
@@ -1401,8 +1405,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_update_delete_params.spec.ts",
-        "line": 393,
-        "column": 12
+        "line": 446,
+        "column": 17
       }
     },
     {
@@ -1415,8 +1419,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_update_delete_params.spec.ts",
-        "line": 407,
-        "column": 12
+        "line": 472,
+        "column": 31
       }
     },
     {
@@ -1429,8 +1433,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_update_delete_params.spec.ts",
-        "line": 427,
-        "column": 12
+        "line": 489,
+        "column": 31
       }
     },
     {
@@ -1443,8 +1447,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_update_delete_params.spec.ts",
-        "line": 451,
-        "column": 12
+        "line": 507,
+        "column": 24
       }
     },
     {
@@ -1457,8 +1461,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_update_delete_params.spec.ts",
-        "line": 479,
-        "column": 12
+        "line": 521,
+        "column": 7
       }
     },
     {
@@ -1471,8 +1475,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_update_delete_params.spec.ts",
-        "line": 504,
-        "column": 12
+        "line": 595,
+        "column": 27
       }
     },
     {
@@ -1485,8 +1489,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_update_delete_params.spec.ts",
-        "line": 523,
-        "column": 12
+        "line": 550,
+        "column": 69
       }
     },
     {
@@ -1499,8 +1503,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_update_delete_params.spec.ts",
-        "line": 539,
-        "column": 13
+        "line": 564,
+        "column": 82
       }
     },
     {
@@ -1513,8 +1517,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_update_delete_params.spec.ts",
-        "line": 549,
-        "column": 12
+        "line": 651,
+        "column": 27
       }
     },
     {
@@ -1527,8 +1531,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/delete_monitor_project.spec.ts",
-        "line": 111,
-        "column": 12
+        "line": 101,
+        "column": 51
       }
     },
     {
@@ -1541,8 +1545,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/delete_monitor_project.spec.ts",
-        "line": 142,
-        "column": 12
+        "line": 121,
+        "column": 11
       }
     },
     {
@@ -1555,8 +1559,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/delete_monitor_project.spec.ts",
-        "line": 169,
-        "column": 12
+        "line": 154,
+        "column": 20
       }
     },
     {
@@ -1569,8 +1573,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/delete_monitor_project.spec.ts",
-        "line": 197,
-        "column": 12
+        "line": 188,
+        "column": 15
       }
     },
     {
@@ -1583,8 +1587,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/delete_monitor_project.spec.ts",
-        "line": 249,
-        "column": 12
+        "line": 241,
+        "column": 17
       }
     },
     {
@@ -1597,8 +1601,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/delete_monitor.spec.ts",
-        "line": 65,
-        "column": 12
+        "line": 57,
+        "column": 25
       }
     },
     {
@@ -1611,8 +1615,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/delete_monitor.spec.ts",
-        "line": 74,
-        "column": 12
+        "line": 69,
+        "column": 84
       }
     },
     {
@@ -1625,8 +1629,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/delete_monitor.spec.ts",
-        "line": 83,
-        "column": 12
+        "line": 78,
+        "column": 84
       }
     },
     {
@@ -1639,8 +1643,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/delete_monitor.spec.ts",
-        "line": 91,
-        "column": 12
+        "line": 85,
+        "column": 36
       }
     },
     {
@@ -1653,8 +1657,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/delete_monitor.spec.ts",
-        "line": 111,
-        "column": 12
+        "line": 108,
+        "column": 75
       }
     },
     {
@@ -1667,8 +1671,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/delete_monitor.spec.ts",
-        "line": 125,
-        "column": 12
+        "line": 123,
+        "column": 7
       }
     },
     {
@@ -1681,8 +1685,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/edit_monitor_private_location.spec.ts",
-        "line": 85,
-        "column": 12
+        "line": 79,
+        "column": 29
       }
     },
     {
@@ -1695,8 +1699,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/edit_monitor_private_location.spec.ts",
-        "line": 132,
-        "column": 12
+        "line": 124,
+        "column": 14
       }
     },
     {
@@ -1709,8 +1713,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/edit_monitor_private_location.spec.ts",
-        "line": 185,
-        "column": 12
+        "line": 181,
+        "column": 8
       }
     },
     {
@@ -1723,8 +1727,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/edit_monitor_private_location.spec.ts",
-        "line": 199,
-        "column": 12
+        "line": 189,
+        "column": 25
       }
     },
     {
@@ -1737,8 +1741,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/edit_monitor_private_location.spec.ts",
-        "line": 208,
-        "column": 12
+        "line": 200,
+        "column": 33
       }
     },
     {
@@ -1751,8 +1755,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/edit_monitor_private_location.spec.ts",
-        "line": 227,
-        "column": 12
+        "line": 209,
+        "column": 28
       }
     },
     {
@@ -1765,8 +1769,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/edit_monitor_private_location.spec.ts",
-        "line": 275,
-        "column": 12
+        "line": 253,
+        "column": 28
       }
     },
     {
@@ -1779,8 +1783,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/edit_monitor_public_api_private_location.spec.ts",
-        "line": 56,
-        "column": 12
+        "line": 49,
+        "column": 26
       }
     },
     {
@@ -1793,8 +1797,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/edit_monitor_public_api_private_location.spec.ts",
-        "line": 76,
-        "column": 12
+        "line": 69,
+        "column": 23
       }
     },
     {
@@ -1808,7 +1812,7 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/edit_monitor_public_api_private_location.spec.ts",
         "line": 87,
-        "column": 12
+        "column": 13
       }
     },
     {
@@ -1821,8 +1825,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/edit_monitor_public_api_private_location.spec.ts",
-        "line": 102,
-        "column": 12
+        "line": 97,
+        "column": 19
       }
     },
     {
@@ -1835,8 +1839,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/edit_monitor_public_api_private_location.spec.ts",
-        "line": 115,
-        "column": 12
+        "line": 108,
+        "column": 23
       }
     },
     {
@@ -1849,8 +1853,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/edit_monitor_public_api_private_location.spec.ts",
-        "line": 128,
-        "column": 12
+        "line": 121,
+        "column": 23
       }
     },
     {
@@ -1864,7 +1868,7 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/edit_monitor_public_api_private_location.spec.ts",
         "line": 152,
-        "column": 12
+        "column": 76
       }
     },
     {
@@ -1878,7 +1882,7 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/edit_monitor_public_api_private_location.spec.ts",
         "line": 163,
-        "column": 12
+        "column": 13
       }
     },
     {
@@ -1891,8 +1895,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/edit_monitor_public_api_private_location.spec.ts",
-        "line": 183,
-        "column": 12
+        "line": 180,
+        "column": 9
       }
     },
     {
@@ -1906,7 +1910,7 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/edit_monitor_public_api_private_location.spec.ts",
         "line": 201,
-        "column": 12
+        "column": 13
       }
     },
     {
@@ -1919,8 +1923,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/edit_monitor_public_api_private_location.spec.ts",
-        "line": 243,
-        "column": 12
+        "line": 244,
+        "column": 45
       }
     },
     {
@@ -1933,8 +1937,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/edit_monitor_public_api_private_location.spec.ts",
-        "line": 259,
-        "column": 12
+        "line": 267,
+        "column": 22
       }
     },
     {
@@ -1947,8 +1951,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/edit_monitor_public_api_private_location.spec.ts",
-        "line": 275,
-        "column": 12
+        "line": 274,
+        "column": 27
       }
     },
     {
@@ -1961,8 +1965,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/edit_monitor_public_api.spec.ts",
-        "line": 55,
-        "column": 12
+        "line": 48,
+        "column": 25
       }
     },
     {
@@ -1975,8 +1979,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/edit_monitor_public_api.spec.ts",
-        "line": 75,
-        "column": 12
+        "line": 68,
+        "column": 23
       }
     },
     {
@@ -1989,8 +1993,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/edit_monitor_public_api.spec.ts",
-        "line": 93,
-        "column": 12
+        "line": 88,
+        "column": 29
       }
     },
     {
@@ -2004,7 +2008,7 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/edit_monitor_public_api.spec.ts",
         "line": 135,
-        "column": 12
+        "column": 78
       }
     },
     {
@@ -2017,8 +2021,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/edit_monitor_public_api.spec.ts",
-        "line": 154,
-        "column": 12
+        "line": 158,
+        "column": 14
       }
     },
     {
@@ -2031,8 +2035,22 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/edit_monitor.spec.ts",
-        "line": 91,
-        "column": 12
+        "line": 86,
+        "column": 25
+      }
+    },
+    {
+      "id": "05dd61025210a2c-a56a9338bc80bac",
+      "title": "EditMonitorAPI - Public Location persists deletion of label and header keys instead of deep-merging them",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/edit_monitor.spec.ts",
+        "line": 127,
+        "column": 28
       }
     },
     {
@@ -2045,8 +2063,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/edit_monitor.spec.ts",
-        "line": 137,
-        "column": 12
+        "line": 165,
+        "column": 32
       }
     },
     {
@@ -2059,8 +2077,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/edit_monitor.spec.ts",
-        "line": 189,
-        "column": 12
+        "line": 210,
+        "column": 11
       }
     },
     {
@@ -2073,8 +2091,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/edit_monitor.spec.ts",
-        "line": 203,
-        "column": 12
+        "line": 224,
+        "column": 14
       }
     },
     {
@@ -2087,8 +2105,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/edit_monitor.spec.ts",
-        "line": 212,
-        "column": 12
+        "line": 238,
+        "column": 19
       }
     },
     {
@@ -2101,8 +2119,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/edit_monitor.spec.ts",
-        "line": 231,
-        "column": 12
+        "line": 246,
+        "column": 21
       }
     },
     {
@@ -2115,8 +2133,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/edit_monitor.spec.ts",
-        "line": 279,
-        "column": 12
+        "line": 285,
+        "column": 17
       }
     },
     {
@@ -2129,8 +2147,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/edit_private_location.spec.ts",
-        "line": 114,
-        "column": 12
+        "line": 102,
+        "column": 50
       }
     },
     {
@@ -2143,8 +2161,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/edit_private_location.spec.ts",
-        "line": 125,
-        "column": 12
+        "line": 106,
+        "column": 47
       }
     },
     {
@@ -2157,8 +2175,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/edit_private_location.spec.ts",
-        "line": 170,
-        "column": 12
+        "line": 138,
+        "column": 17
       }
     },
     {
@@ -2171,8 +2189,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/edit_private_location.spec.ts",
-        "line": 183,
-        "column": 12
+        "line": 152,
+        "column": 31
       }
     },
     {
@@ -2185,8 +2203,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/edit_private_location.spec.ts",
-        "line": 196,
-        "column": 12
+        "line": 161,
+        "column": 25
       }
     },
     {
@@ -2199,8 +2217,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/enable_default_alerting.spec.ts",
-        "line": 118,
-        "column": 12
+        "line": 127,
+        "column": 19
       }
     },
     {
@@ -2213,8 +2231,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/enable_default_alerting.spec.ts",
-        "line": 130,
-        "column": 12
+        "line": 139,
+        "column": 14
       }
     },
     {
@@ -2227,8 +2245,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/enable_default_alerting.spec.ts",
-        "line": 144,
-        "column": 12
+        "line": 148,
+        "column": 13
       }
     },
     {
@@ -2241,8 +2259,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/enable_default_alerting.spec.ts",
-        "line": 160,
-        "column": 12
+        "line": 163,
+        "column": 27
       }
     },
     {
@@ -2256,7 +2274,7 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/enable_default_alerting.spec.ts",
         "line": 222,
-        "column": 12
+        "column": 80
       }
     },
     {
@@ -2269,8 +2287,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/get_certs.spec.ts",
-        "line": 197,
-        "column": 12
+        "line": 190,
+        "column": 42
       }
     },
     {
@@ -2283,8 +2301,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/get_certs.spec.ts",
-        "line": 216,
-        "column": 12
+        "line": 204,
+        "column": 25
       }
     },
     {
@@ -2297,8 +2315,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/get_certs.spec.ts",
-        "line": 267,
-        "column": 12
+        "line": 256,
+        "column": 16
       }
     },
     {
@@ -2311,8 +2329,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/get_certs.spec.ts",
-        "line": 277,
-        "column": 12
+        "line": 263,
+        "column": 71
       }
     },
     {
@@ -2325,8 +2343,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/get_certs.spec.ts",
-        "line": 287,
-        "column": 12
+        "line": 269,
+        "column": 14
       }
     },
     {
@@ -2339,8 +2357,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/get_certs.spec.ts",
-        "line": 298,
-        "column": 12
+        "line": 278,
+        "column": 24
       }
     },
     {
@@ -2353,8 +2371,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/get_certs.spec.ts",
-        "line": 314,
-        "column": 12
+        "line": 289,
+        "column": 24
       }
     },
     {
@@ -2367,8 +2385,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/get_certs.spec.ts",
-        "line": 352,
-        "column": 12
+        "line": 326,
+        "column": 7
       }
     },
     {
@@ -2381,8 +2399,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/get_certs.spec.ts",
-        "line": 410,
-        "column": 12
+        "line": 390,
+        "column": 16
       }
     },
     {
@@ -2395,8 +2413,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/get_filters.spec.ts",
-        "line": 53,
-        "column": 12
+        "line": 48,
+        "column": 23
       }
     },
     {
@@ -2409,8 +2427,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/get_filters.spec.ts",
-        "line": 68,
-        "column": 12
+        "line": 61,
+        "column": 17
       }
     },
     {
@@ -2423,8 +2441,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/get_filters.spec.ts",
-        "line": 96,
-        "column": 12
+        "line": 103,
+        "column": 17
       }
     },
     {
@@ -2437,8 +2455,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/get_filters.spec.ts",
-        "line": 134,
-        "column": 12
+        "line": 166,
+        "column": 8
       }
     },
     {
@@ -2451,8 +2469,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/get_monitor_project.spec.ts",
-        "line": 137,
-        "column": 12
+        "line": 121,
+        "column": 13
       }
     },
     {
@@ -2465,8 +2483,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/get_monitor_project.spec.ts",
-        "line": 158,
-        "column": 12
+        "line": 137,
+        "column": 75
       }
     },
     {
@@ -2479,8 +2497,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/get_monitor_project.spec.ts",
-        "line": 179,
-        "column": 12
+        "line": 156,
+        "column": 7
       }
     },
     {
@@ -2493,8 +2511,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/get_monitor_project.spec.ts",
-        "line": 200,
-        "column": 12
+        "line": 170,
+        "column": 15
       }
     },
     {
@@ -2507,8 +2525,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/get_monitor_project.spec.ts",
-        "line": 221,
-        "column": 12
+        "line": 189,
+        "column": 15
       }
     },
     {
@@ -2521,8 +2539,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/get_monitor_project.spec.ts",
-        "line": 243,
-        "column": 12
+        "line": 209,
+        "column": 15
       }
     },
     {
@@ -2535,8 +2553,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/get_monitor.spec.ts",
-        "line": 93,
-        "column": 12
+        "line": 89,
+        "column": 7
       }
     },
     {
@@ -2549,8 +2567,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/get_monitor.spec.ts",
-        "line": 131,
-        "column": 12
+        "line": 123,
+        "column": 14
       }
     },
     {
@@ -2563,8 +2581,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/get_monitor.spec.ts",
-        "line": 146,
-        "column": 12
+        "line": 144,
+        "column": 7
       }
     },
     {
@@ -2577,8 +2595,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/get_monitor.spec.ts",
-        "line": 165,
-        "column": 12
+        "line": 161,
+        "column": 14
       }
     },
     {
@@ -2591,8 +2609,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/get_monitor.spec.ts",
-        "line": 190,
-        "column": 12
+        "line": 185,
+        "column": 91
       }
     },
     {
@@ -2605,8 +2623,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/get_monitor.spec.ts",
-        "line": 220,
-        "column": 12
+        "line": 213,
+        "column": 19
       }
     },
     {
@@ -2619,8 +2637,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/get_monitor.spec.ts",
-        "line": 281,
-        "column": 12
+        "line": 264,
+        "column": 71
       }
     },
     {
@@ -2633,8 +2651,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/get_monitor.spec.ts",
-        "line": 309,
-        "column": 12
+        "line": 296,
+        "column": 14
       }
     },
     {
@@ -2647,8 +2665,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/get_monitor.spec.ts",
-        "line": 345,
-        "column": 12
+        "line": 335,
+        "column": 28
       }
     },
     {
@@ -2661,8 +2679,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/get_monitor.spec.ts",
-        "line": 355,
-        "column": 12
+        "line": 345,
+        "column": 98
       }
     },
     {
@@ -2675,8 +2693,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/get_private_location_monitors.spec.ts",
-        "line": 69,
-        "column": 12
+        "line": 61,
+        "column": 7
       }
     },
     {
@@ -2689,8 +2707,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/get_private_location_monitors.spec.ts",
-        "line": 83,
-        "column": 12
+        "line": 67,
+        "column": 7
       }
     },
     {
@@ -2703,8 +2721,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/inspect_monitor.spec.ts",
-        "line": 68,
-        "column": 12
+        "line": 74,
+        "column": 13
       }
     },
     {
@@ -2717,8 +2735,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/inspect_monitor.spec.ts",
-        "line": 140,
-        "column": 12
+        "line": 160,
+        "column": 22
       }
     },
     {
@@ -2731,8 +2749,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/inspect_monitor.spec.ts",
-        "line": 211,
-        "column": 12
+        "line": 239,
+        "column": 31
       }
     },
     {
@@ -2745,8 +2763,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/fixtures/legacy_multispace_shared.ts",
-        "line": 165,
-        "column": 14
+        "line": 155,
+        "column": 64
       }
     },
     {
@@ -2759,8 +2777,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/fixtures/legacy_multispace_shared.ts",
-        "line": 182,
-        "column": 14
+        "line": 165,
+        "column": 69
       }
     },
     {
@@ -2773,8 +2791,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/fixtures/legacy_multispace_shared.ts",
-        "line": 199,
-        "column": 14
+        "line": 180,
+        "column": 9
       }
     },
     {
@@ -2787,8 +2805,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/fixtures/legacy_multispace_shared.ts",
-        "line": 218,
-        "column": 14
+        "line": 197,
+        "column": 9
       }
     },
     {
@@ -2801,8 +2819,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/fixtures/legacy_multispace_shared.ts",
-        "line": 237,
-        "column": 14
+        "line": 212,
+        "column": 15
       }
     },
     {
@@ -2815,8 +2833,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/fixtures/legacy_multispace_shared.ts",
-        "line": 252,
-        "column": 14
+        "line": 222,
+        "column": 32
       }
     },
     {
@@ -2829,8 +2847,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/fixtures/legacy_multispace_shared.ts",
-        "line": 267,
-        "column": 14
+        "line": 234,
+        "column": 15
       }
     },
     {
@@ -2843,8 +2861,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/fixtures/legacy_multispace_shared.ts",
-        "line": 298,
-        "column": 14
+        "line": 268,
+        "column": 9
       }
     },
     {
@@ -2857,8 +2875,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/fixtures/legacy_multispace_shared.ts",
-        "line": 338,
-        "column": 14
+        "line": 310,
+        "column": 53
       }
     },
     {
@@ -2871,8 +2889,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/fixtures/legacy_multispace_shared.ts",
-        "line": 362,
-        "column": 14
+        "line": 338,
+        "column": 15
       }
     },
     {
@@ -2885,8 +2903,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/fixtures/legacy_multispace_shared.ts",
-        "line": 422,
-        "column": 14
+        "line": 368,
+        "column": 27
       }
     },
     {
@@ -2899,8 +2917,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/fixtures/legacy_multispace_shared.ts",
-        "line": 454,
-        "column": 14
+        "line": 402,
+        "column": 17
       }
     },
     {
@@ -2913,8 +2931,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/fixtures/legacy_multispace_shared.ts",
-        "line": 471,
-        "column": 14
+        "line": 422,
+        "column": 84
       }
     },
     {
@@ -2927,8 +2945,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/fixtures/legacy_multispace_shared.ts",
-        "line": 165,
-        "column": 14
+        "line": 155,
+        "column": 64
       }
     },
     {
@@ -2941,8 +2959,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/fixtures/legacy_multispace_shared.ts",
-        "line": 182,
-        "column": 14
+        "line": 165,
+        "column": 69
       }
     },
     {
@@ -2955,8 +2973,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/fixtures/legacy_multispace_shared.ts",
-        "line": 199,
-        "column": 14
+        "line": 180,
+        "column": 9
       }
     },
     {
@@ -2969,8 +2987,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/fixtures/legacy_multispace_shared.ts",
-        "line": 218,
-        "column": 14
+        "line": 197,
+        "column": 9
       }
     },
     {
@@ -2983,8 +3001,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/fixtures/legacy_multispace_shared.ts",
-        "line": 237,
-        "column": 14
+        "line": 212,
+        "column": 15
       }
     },
     {
@@ -2997,8 +3015,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/fixtures/legacy_multispace_shared.ts",
-        "line": 252,
-        "column": 14
+        "line": 222,
+        "column": 32
       }
     },
     {
@@ -3011,8 +3029,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/fixtures/legacy_multispace_shared.ts",
-        "line": 267,
-        "column": 14
+        "line": 234,
+        "column": 15
       }
     },
     {
@@ -3025,8 +3043,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/fixtures/legacy_multispace_shared.ts",
-        "line": 298,
-        "column": 14
+        "line": 268,
+        "column": 9
       }
     },
     {
@@ -3039,8 +3057,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/fixtures/legacy_multispace_shared.ts",
-        "line": 338,
-        "column": 14
+        "line": 310,
+        "column": 53
       }
     },
     {
@@ -3053,8 +3071,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/fixtures/legacy_multispace_shared.ts",
-        "line": 362,
-        "column": 14
+        "line": 338,
+        "column": 15
       }
     },
     {
@@ -3067,8 +3085,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/fixtures/legacy_multispace_shared.ts",
-        "line": 422,
-        "column": 14
+        "line": 368,
+        "column": 27
       }
     },
     {
@@ -3081,8 +3099,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/fixtures/legacy_multispace_shared.ts",
-        "line": 454,
-        "column": 14
+        "line": 402,
+        "column": 17
       }
     },
     {
@@ -3095,8 +3113,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/fixtures/legacy_multispace_shared.ts",
-        "line": 471,
-        "column": 14
+        "line": 422,
+        "column": 84
       }
     },
     {
@@ -3109,8 +3127,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/fixtures/legacy_multispace_shared.ts",
-        "line": 501,
-        "column": 16
+        "line": 456,
+        "column": 34
       }
     },
     {
@@ -3123,8 +3141,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/list_monitors.spec.ts",
-        "line": 80,
-        "column": 12
+        "line": 81,
+        "column": 7
       }
     },
     {
@@ -3137,8 +3155,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/list_monitors.spec.ts",
-        "line": 88,
-        "column": 12
+        "line": 84,
+        "column": 16
       }
     },
     {
@@ -3151,8 +3169,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/list_monitors.spec.ts",
-        "line": 99,
-        "column": 12
+        "line": 90,
+        "column": 32
       }
     },
     {
@@ -3165,8 +3183,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/list_monitors.spec.ts",
-        "line": 110,
-        "column": 12
+        "line": 100,
+        "column": 7
       }
     },
     {
@@ -3179,8 +3197,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/maintenance_windows.spec.ts",
-        "line": 191,
-        "column": 12
+        "line": 184,
+        "column": 72
       }
     },
     {
@@ -3193,8 +3211,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/maintenance_windows.spec.ts",
-        "line": 220,
-        "column": 12
+        "line": 203,
+        "column": 25
       }
     },
     {
@@ -3207,8 +3225,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/migrate_legacy_policies.spec.ts",
-        "line": 116,
-        "column": 12
+        "line": 109,
+        "column": 60
       }
     },
     {
@@ -3221,8 +3239,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/migrate_legacy_policies.spec.ts",
-        "line": 142,
-        "column": 12
+        "line": 129,
+        "column": 90
       }
     },
     {
@@ -3235,8 +3253,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/migrate_legacy_policies.spec.ts",
-        "line": 174,
-        "column": 12
+        "line": 164,
+        "column": 20
       }
     },
     {
@@ -3249,8 +3267,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/migrate_legacy_policies.spec.ts",
-        "line": 208,
-        "column": 12
+        "line": 202,
+        "column": 9
       }
     },
     {
@@ -3263,8 +3281,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/migrate_legacy_policies.spec.ts",
-        "line": 246,
-        "column": 13
+        "line": 240,
+        "column": 6
       }
     },
     {
@@ -3277,8 +3295,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/migrate_legacy_policies.spec.ts",
-        "line": 248,
-        "column": 12
+        "line": 214,
+        "column": 27
       }
     },
     {
@@ -3291,8 +3309,112 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/migrate_legacy_policies.spec.ts",
-        "line": 280,
-        "column": 12
+        "line": 268,
+        "column": 20
+      }
+    },
+    {
+      "id": "3d277402bdac131-477aeb8cdb738c8",
+      "title": "Synthetics multi-space settings [GET] returns defaults anchored to the current space when no SO exists",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/multi_space_settings.spec.ts",
+        "line": 77,
+        "column": 28
+      }
+    },
+    {
+      "id": "3d277402bdac131-00458ca127bf246",
+      "title": "Synthetics multi-space settings [PUT] creates exactly one SO and persists the requested attributes",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/multi_space_settings.spec.ts",
+        "line": 87,
+        "column": 31
+      }
+    },
+    {
+      "id": "3d277402bdac131-9fa1c56ac73b6ff",
+      "title": "Synthetics multi-space settings [PUT] remains a singleton even when the saves come from different spaces",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/multi_space_settings.spec.ts",
+        "line": 116,
+        "column": 13
+      }
+    },
+    {
+      "id": "3d277402bdac131-7e5b44173916c75",
+      "title": "Synthetics multi-space settings [GET] returns the SO from another space when shared via ALL_SPACES",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/multi_space_settings.spec.ts",
+        "line": 150,
+        "column": 17
+      }
+    },
+    {
+      "id": "3d277402bdac131-3caffe79eda0863",
+      "title": "Synthetics multi-space settings [PUT] removing a space hides the settings from that space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/multi_space_settings.spec.ts",
+        "line": 184,
+        "column": 31
+      }
+    },
+    {
+      "id": "3d277402bdac131-e804b1dc151bf2d",
+      "title": "Synthetics multi-space settings [PUT] from a space that does not own the SO still updates the singleton",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/multi_space_settings.spec.ts",
+        "line": 233,
+        "column": 9
+      }
+    },
+    {
+      "id": "3d277402bdac131-18ff6a75d38b4ec",
+      "title": "Synthetics multi-space settings [PUT] collapses ALL_SPACES with specific spaces into [*]",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/multi_space_settings.spec.ts",
+        "line": 275,
+        "column": 19
+      }
+    },
+    {
+      "id": "3d277402bdac131-00a378f9346d5ef",
+      "title": "Synthetics multi-space settings [PUT] is forbidden for a role without uptime-write",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/multi_space_settings.spec.ts",
+        "line": 289,
+        "column": 13
       }
     },
     {
@@ -3304,8 +3426,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/private_location_apis.spec.ts",
-        "line": 178,
-        "column": 10
+        "line": 179,
+        "column": 53
       }
     },
     {
@@ -3317,8 +3439,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/private_location_apis.spec.ts",
-        "line": 186,
-        "column": 10
+        "line": 188,
+        "column": 23
       }
     },
     {
@@ -3330,8 +3452,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/private_location_apis.spec.ts",
-        "line": 205,
-        "column": 10
+        "line": 200,
+        "column": 9
       }
     },
     {
@@ -3343,8 +3465,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/private_location_apis.spec.ts",
-        "line": 220,
-        "column": 10
+        "line": 207,
+        "column": 25
       }
     },
     {
@@ -3356,8 +3478,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/private_location_apis.spec.ts",
-        "line": 235,
-        "column": 10
+        "line": 211,
+        "column": 25
       }
     },
     {
@@ -3369,8 +3491,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/private_location_apis.spec.ts",
-        "line": 246,
-        "column": 10
+        "line": 235,
+        "column": 11
       }
     },
     {
@@ -3382,8 +3504,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/private_location_apis.spec.ts",
-        "line": 263,
-        "column": 10
+        "line": 242,
+        "column": 17
       }
     },
     {
@@ -3395,8 +3517,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/private_location_apis.spec.ts",
-        "line": 277,
-        "column": 10
+        "line": 259,
+        "column": 19
       }
     },
     {
@@ -3408,8 +3530,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/private_location_apis.spec.ts",
-        "line": 295,
-        "column": 10
+        "line": 273,
+        "column": 19
       }
     },
     {
@@ -3421,8 +3543,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/private_location_apis.spec.ts",
-        "line": 315,
-        "column": 10
+        "line": 298,
+        "column": 29
       }
     },
     {
@@ -3434,8 +3556,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/private_location_apis.spec.ts",
-        "line": 334,
-        "column": 10
+        "line": 310,
+        "column": 9
       }
     },
     {
@@ -3448,8 +3570,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/reset_monitor_bulk.spec.ts",
-        "line": 87,
-        "column": 12
+        "line": 80,
+        "column": 13
       }
     },
     {
@@ -3462,8 +3584,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/reset_monitor_bulk.spec.ts",
-        "line": 102,
-        "column": 12
+        "line": 90,
+        "column": 11
       }
     },
     {
@@ -3476,8 +3598,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/reset_monitor_bulk.spec.ts",
-        "line": 131,
-        "column": 12
+        "line": 120,
+        "column": 29
       }
     },
     {
@@ -3490,8 +3612,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/reset_monitor_bulk.spec.ts",
-        "line": 155,
-        "column": 12
+        "line": 144,
+        "column": 16
       }
     },
     {
@@ -3504,8 +3626,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/reset_monitor_bulk.spec.ts",
-        "line": 167,
-        "column": 12
+        "line": 160,
+        "column": 16
       }
     },
     {
@@ -3518,8 +3640,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/reset_monitor_bulk.spec.ts",
-        "line": 182,
-        "column": 12
+        "line": 176,
+        "column": 17
       }
     },
     {
@@ -3532,8 +3654,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/reset_monitor_bulk.spec.ts",
-        "line": 210,
-        "column": 12
+        "line": 220,
+        "column": 30
       }
     },
     {
@@ -3546,8 +3668,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/reset_monitor_bulk.spec.ts",
-        "line": 231,
-        "column": 12
+        "line": 237,
+        "column": 29
       }
     },
     {
@@ -3560,8 +3682,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/reset_monitor_bulk.spec.ts",
-        "line": 242,
-        "column": 12
+        "line": 251,
+        "column": 27
       }
     },
     {
@@ -3574,8 +3696,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/reset_monitor.spec.ts",
-        "line": 104,
-        "column": 12
+        "line": 97,
+        "column": 60
       }
     },
     {
@@ -3588,8 +3710,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/reset_monitor.spec.ts",
-        "line": 114,
-        "column": 12
+        "line": 107,
+        "column": 27
       }
     },
     {
@@ -3602,8 +3724,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/reset_monitor.spec.ts",
-        "line": 140,
-        "column": 12
+        "line": 130,
+        "column": 15
       }
     },
     {
@@ -3616,8 +3738,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/reset_monitor.spec.ts",
-        "line": 163,
-        "column": 12
+        "line": 153,
+        "column": 15
       }
     },
     {
@@ -3630,8 +3752,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/reset_monitor.spec.ts",
-        "line": 179,
-        "column": 12
+        "line": 169,
+        "column": 71
       }
     },
     {
@@ -3644,8 +3766,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/reset_monitor.spec.ts",
-        "line": 193,
-        "column": 12
+        "line": 182,
+        "column": 24
       }
     },
     {
@@ -3658,8 +3780,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/reset_monitor.spec.ts",
-        "line": 209,
-        "column": 12
+        "line": 197,
+        "column": 64
       }
     },
     {
@@ -3672,8 +3794,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/reset_monitor.spec.ts",
-        "line": 231,
-        "column": 12
+        "line": 219,
+        "column": 64
       }
     },
     {
@@ -3686,8 +3808,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/reset_monitor.spec.ts",
-        "line": 244,
-        "column": 12
+        "line": 235,
+        "column": 29
       }
     },
     {
@@ -3700,8 +3822,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/reset_monitor.spec.ts",
-        "line": 258,
-        "column": 12
+        "line": 247,
+        "column": 24
       }
     },
     {
@@ -3714,8 +3836,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/reset_monitor.spec.ts",
-        "line": 287,
-        "column": 12
+        "line": 269,
+        "column": 18
       }
     },
     {
@@ -3728,8 +3850,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/reset_monitor.spec.ts",
-        "line": 315,
-        "column": 12
+        "line": 298,
+        "column": 13
       }
     },
     {
@@ -3742,8 +3864,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/reset_monitor.spec.ts",
-        "line": 321,
-        "column": 12
+        "line": 301,
+        "column": 73
       }
     },
     {
@@ -3756,8 +3878,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/reset_monitor.spec.ts",
-        "line": 330,
-        "column": 12
+        "line": 311,
+        "column": 6
       }
     },
     {
@@ -3770,8 +3892,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/reset_monitor.spec.ts",
-        "line": 339,
-        "column": 12
+        "line": 319,
+        "column": 7
       }
     },
     {
@@ -3784,8 +3906,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/suggestions.spec.ts",
-        "line": 129,
-        "column": 12
+        "line": 123,
+        "column": 42
       }
     },
     {
@@ -3798,8 +3920,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/suggestions.spec.ts",
-        "line": 162,
-        "column": 12
+        "line": 159,
+        "column": 29
       }
     },
     {
@@ -3812,8 +3934,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/sync_global_params_for_filtered_monitors.spec.ts",
-        "line": 66,
-        "column": 12
+        "line": 58,
+        "column": 55
       }
     },
     {
@@ -3826,8 +3948,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/sync_global_params_spaces.spec.ts",
-        "line": 74,
-        "column": 12
+        "line": 65,
+        "column": 20
       }
     },
     {
@@ -3840,8 +3962,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/sync_global_params.spec.ts",
-        "line": 72,
-        "column": 12
+        "line": 64,
+        "column": 55
       }
     },
     {
@@ -3853,8 +3975,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/synthetics_api_security.spec.ts",
-        "line": 144,
-        "column": 10
+        "line": 142,
+        "column": 4
       }
     },
     {
@@ -3866,8 +3988,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/synthetics_api_security.spec.ts",
-        "line": 157,
-        "column": 10
+        "line": 153,
+        "column": 7
       }
     },
     {
@@ -3880,8 +4002,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/synthetics_enablement.spec.ts",
-        "line": 187,
-        "column": 12
+        "line": 190,
+        "column": 18
       }
     },
     {
@@ -3894,8 +4016,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/synthetics_enablement.spec.ts",
-        "line": 193,
-        "column": 12
+        "line": 194,
+        "column": 25
       }
     },
     {
@@ -3909,7 +4031,7 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/synthetics_enablement.spec.ts",
         "line": 202,
-        "column": 12
+        "column": 63
       }
     },
     {
@@ -3922,8 +4044,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/synthetics_enablement.spec.ts",
-        "line": 216,
-        "column": 12
+        "line": 214,
+        "column": 7
       }
     },
     {
@@ -3936,8 +4058,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/synthetics_enablement.spec.ts",
-        "line": 243,
-        "column": 12
+        "line": 235,
+        "column": 24
       }
     },
     {
@@ -3950,8 +4072,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/synthetics_enablement.spec.ts",
-        "line": 258,
-        "column": 14
+        "line": 253,
+        "column": 5
       }
     },
     {
@@ -3964,8 +4086,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/synthetics_enablement.spec.ts",
-        "line": 258,
-        "column": 14
+        "line": 253,
+        "column": 5
       }
     },
     {
@@ -3978,8 +4100,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/synthetics_enablement.spec.ts",
-        "line": 258,
-        "column": 14
+        "line": 253,
+        "column": 5
       }
     },
     {
@@ -3992,8 +4114,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/synthetics_enablement.spec.ts",
-        "line": 288,
-        "column": 12
+        "line": 285,
+        "column": 5
       }
     },
     {
@@ -4006,8 +4128,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/synthetics_enablement.spec.ts",
-        "line": 319,
-        "column": 12
+        "line": 320,
+        "column": 7
       }
     },
     {
@@ -4020,8 +4142,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/synthetics_enablement.spec.ts",
-        "line": 372,
-        "column": 12
+        "line": 373,
+        "column": 25
       }
     },
     {
@@ -4035,7 +4157,7 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/synthetics_enablement.spec.ts",
         "line": 377,
-        "column": 12
+        "column": 75
       }
     },
     {
@@ -4048,8 +4170,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/synthetics_enablement.spec.ts",
-        "line": 385,
-        "column": 12
+        "line": 383,
+        "column": 7
       }
     },
     {
@@ -4062,8 +4184,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/synthetics_enablement.spec.ts",
-        "line": 394,
-        "column": 12
+        "line": 390,
+        "column": 14
       }
     },
     {
@@ -4076,8 +4198,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/synthetics_enablement.spec.ts",
-        "line": 403,
-        "column": 12
+        "line": 396,
+        "column": 14
       }
     },
     {
@@ -4090,8 +4212,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/test_now_monitor.spec.ts",
-        "line": 52,
-        "column": 12
+        "line": 44,
+        "column": 47
       }
     },
     {
@@ -4104,8 +4226,246 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/test_now_monitor.spec.ts",
-        "line": 63,
-        "column": 12
+        "line": 52,
+        "column": 60
+      }
+    },
+    {
+      "id": "57a5a544a5adff3-2b6ead023d7d43a",
+      "title": "tlsRuleBrowserCertsAlert fires an alert for an expiring browser-monitor certificate",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/tls_rule_browser_certs_alert.spec.ts",
+        "line": 210,
+        "column": 21
+      }
+    },
+    {
+      "id": "57a5a544a5adff3-369e192742f4aa9",
+      "title": "tlsRuleBrowserCertsAlert recovers the alert once the browser certificate is no longer evaluated",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/tls_rule_browser_certs_alert.spec.ts",
+        "line": 217,
+        "column": 29
+      }
+    },
+    {
+      "id": "d67539cdf3c0c05-15ffc48d762c16a",
+      "title": "tlsRuleBrowserCerts evaluates only lightweight monitors when includeBrowserCerts is unset",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/tls_rule_browser_certs.spec.ts",
+        "line": 88,
+        "column": 7
+      }
+    },
+    {
+      "id": "d67539cdf3c0c05-5767cc01930b07f",
+      "title": "tlsRuleBrowserCerts also evaluates browser monitors when includeBrowserCerts is true",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/tls_rule_browser_certs.spec.ts",
+        "line": 94,
+        "column": 21
+      }
+    },
+    {
+      "id": "63ce4579d46d5a8-9c91ca8685a7c4d",
+      "title": "UpdateMonitorBulkAPI partially patches a single monitor with a public location",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/update_monitor_bulk.spec.ts",
+        "line": 101,
+        "column": 25
+      }
+    },
+    {
+      "id": "63ce4579d46d5a8-9ef299ac98f7736",
+      "title": "UpdateMonitorBulkAPI partially patches a monitor with a private location",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/update_monitor_bulk.spec.ts",
+        "line": 119,
+        "column": 80
+      }
+    },
+    {
+      "id": "63ce4579d46d5a8-edb9e2140ad4608",
+      "title": "UpdateMonitorBulkAPI patches multiple monitors in one request",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/update_monitor_bulk.spec.ts",
+        "line": 141,
+        "column": 18
+      }
+    },
+    {
+      "id": "63ce4579d46d5a8-9ce215233ce8242",
+      "title": "UpdateMonitorBulkAPI applies a different patch to each id in one request",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/update_monitor_bulk.spec.ts",
+        "line": 171,
+        "column": 13
+      }
+    },
+    {
+      "id": "63ce4579d46d5a8-1f629bd44bb0e4b",
+      "title": "UpdateMonitorBulkAPI keeps the monitor decryptable after a partial patch on an AAD field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/update_monitor_bulk.spec.ts",
+        "line": 207,
+        "column": 1
+      }
+    },
+    {
+      "id": "63ce4579d46d5a8-932249d28094a08",
+      "title": "UpdateMonitorBulkAPI rejects project-origin monitors with an origin error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/update_monitor_bulk.spec.ts",
+        "line": 253,
+        "column": 29
+      }
+    },
+    {
+      "id": "63ce4579d46d5a8-17387cda604e40e",
+      "title": "UpdateMonitorBulkAPI rejects schedules outside the allowed set with a validation error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/update_monitor_bulk.spec.ts",
+        "line": 295,
+        "column": 17
+      }
+    },
+    {
+      "id": "63ce4579d46d5a8-cb7bba4c4c5581f",
+      "title": "UpdateMonitorBulkAPI rejects a patch with an unknown field and leaves the monitor unchanged",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/update_monitor_bulk.spec.ts",
+        "line": 290,
+        "column": 27
+      }
+    },
+    {
+      "id": "63ce4579d46d5a8-1b1e84d58a8ba20",
+      "title": "UpdateMonitorBulkAPI rejects a name patch that collides with another existing monitor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/update_monitor_bulk.spec.ts",
+        "line": 340,
+        "column": 15
+      }
+    },
+    {
+      "id": "63ce4579d46d5a8-241e4ab4611b503",
+      "title": "UpdateMonitorBulkAPI renames a monitor to a brand-new unique name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/update_monitor_bulk.spec.ts",
+        "line": 355,
+        "column": 88
+      }
+    },
+    {
+      "id": "63ce4579d46d5a8-c0d77663955abdd",
+      "title": "UpdateMonitorBulkAPI allows a patch that keeps the monitor its own current name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/update_monitor_bulk.spec.ts",
+        "line": 370,
+        "column": 8
+      }
+    },
+    {
+      "id": "63ce4579d46d5a8-79997ce1e1d1b02",
+      "title": "UpdateMonitorBulkAPI rejects every entry when two updates set the same name in one batch",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/update_monitor_bulk.spec.ts",
+        "line": 400,
+        "column": 15
+      }
+    },
+    {
+      "id": "63ce4579d46d5a8-075d5d6e34e078b",
+      "title": "UpdateMonitorBulkAPI isolates a name conflict to the offending id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/update_monitor_bulk.spec.ts",
+        "line": 416,
+        "column": 69
       }
     }
   ]

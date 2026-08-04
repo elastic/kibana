@@ -21,6 +21,7 @@ import type {
 } from '../../../common/types';
 import {
   dataTypes,
+  FLEET_UNMANAGED_DATA_STREAM_TYPES,
   OTEL_COLLECTOR_INPUT_TYPE,
   outputType,
   USE_APM_VAR_NAME,
@@ -213,8 +214,12 @@ export function generateOtelcolConfig({
         };
 
         // Must run before the APM block below so the aggregated metrics pipeline
-        // does not receive the per-stream routing transform.
-        otelConfig = appendOtelComponents(otelConfig, 'processors', [attributesTransform]);
+        // does not receive the per-stream routing transform. `attributesTransform` is
+        // undefined when the stream only carries Fleet-unmanaged signals (e.g. profiles),
+        // in which case no routing transform is injected.
+        if (attributesTransform) {
+          otelConfig = appendOtelComponents(otelConfig, 'processors', [attributesTransform]);
+        }
 
         if (resolvedOutputId) {
           for (const pipelineId of Object.keys(otelConfig.service?.pipelines ?? {})) {
@@ -314,8 +319,12 @@ function resolveOutputsById({
 function buildDataStreamStatements(type: string, dataset: string, namespace: string): string[] {
   return [
     `set(attributes["data_stream.type"], "${type}")`,
-    `set(attributes["data_stream.dataset"], "${dataset}")`,
-    `set(attributes["data_stream.namespace"], "${namespace}")`,
+    // Only set dataset/namespace when not already provided upstream (e.g. by an OTel receiver
+    // in a Gateway collector feeding this Fleet-managed agent). This preserves upstream routing
+    // so content-pack dashboards resolve to the correct data stream.
+    // See: https://github.com/elastic/ingest-dev/issues/7716
+    `set(attributes["data_stream.dataset"], "${dataset}") where attributes["data_stream.dataset"] == nil`,
+    `set(attributes["data_stream.namespace"], "${namespace}") where attributes["data_stream.namespace"] == nil`,
   ];
 }
 
@@ -367,16 +376,10 @@ function generateOtelTypeTransforms(
           },
         ],
       };
-    case 'profiles':
-      return {
-        profile_statements: [
-          {
-            context: 'profile',
-            statements: buildDataStreamStatements('profiles', dataset, namespace),
-          },
-        ],
-      };
     default:
+      // `profiles` is intentionally absent: it is filtered out before this function is
+      // called (see FLEET_UNMANAGED_DATA_STREAM_TYPES) because the Elasticsearch
+      // exporter — not Fleet — routes it. Any other type here is unexpected.
       throw new FleetError(`unexpected data stream type ${type}`);
   }
 }
@@ -401,18 +404,29 @@ function generateOTelAttributesTransform(
   suffix: string,
   dynamicSignalTypes: boolean,
   signalTypes?: string[]
-): Record<OTelCollectorComponentID, any> {
+): Record<OTelCollectorComponentID, any> | undefined {
   let transformStatements: Record<string, any> = {};
 
   if (dynamicSignalTypes && signalTypes) {
-    signalTypes.forEach((signalType) => {
-      const typeTransforms = generateOtelTypeTransforms(signalType, dataset, namespace);
-      Object.assign(transformStatements, typeTransforms);
-    });
-  } else {
+    signalTypes
+      // Fleet-unmanaged signals (e.g. profiles) are routed by the Elasticsearch exporter,
+      // not by Fleet, so they must not get a data_stream.* routing transform.
+      .filter((signalType) => !FLEET_UNMANAGED_DATA_STREAM_TYPES.includes(signalType))
+      .forEach((signalType) => {
+        const typeTransforms = generateOtelTypeTransforms(signalType, dataset, namespace);
+        Object.assign(transformStatements, typeTransforms);
+      });
+  } else if (!FLEET_UNMANAGED_DATA_STREAM_TYPES.includes(type)) {
     // Default: single signal type from stream.data_stream.type
     transformStatements = generateOtelTypeTransforms(type, dataset, namespace);
   }
+
+  // When every signal type is Fleet-unmanaged (e.g. a profiles-only stream) there is
+  // nothing to route, so do not emit an empty routing transform.
+  if (Object.keys(transformStatements).length === 0) {
+    return undefined;
+  }
+
   return {
     [`transform/${suffix}-routing`]: transformStatements,
   };

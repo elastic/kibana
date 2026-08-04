@@ -42,11 +42,15 @@ interface ScoreBaseEntitiesParams {
 interface ScoreAndPersistBaseEntitiesParams extends ScoreBaseEntitiesParams {
   writer: RiskEngineDataWriter;
   idBasedRiskScoringEnabled: boolean;
+  refresh?: Parameters<typeof persistScoresToRiskIndex>[0]['refresh'];
+  /** When true, populate `scores` in the summary. Omit for full-population runs. */
+  collectScores?: boolean;
 }
 
 export interface Phase1BaseScoringSummary extends StepResult {
   pagesProcessed: number;
   scoresWritten: number;
+  scores: Record<string, number>;
 }
 
 interface EuidPageBounds {
@@ -141,10 +145,13 @@ export const calculateBaseEntityScores = async function* ({
 export const scoreBaseEntities = async ({
   writer,
   idBasedRiskScoringEnabled,
+  refresh,
+  collectScores,
   ...params
 }: ScoreAndPersistBaseEntitiesParams): Promise<Phase1BaseScoringSummary> => {
   let pagesProcessed = 0;
   let scoresWritten = 0;
+  const newScores: Record<string, number> = {};
 
   for await (const page of calculateBaseEntityScores(params)) {
     pagesProcessed += 1;
@@ -168,6 +175,7 @@ export const scoreBaseEntities = async ({
       entityType: params.entityType,
       scores: inStoreScores,
       logger: params.logger,
+      refresh,
     });
     await persistScoresToEntityStore({
       crudClient: params.crudClient,
@@ -176,11 +184,18 @@ export const scoreBaseEntities = async ({
       scores: inStoreScores,
       enabled: idBasedRiskScoringEnabled,
     });
+
+    if (collectScores) {
+      for (const score of inStoreScores) {
+        newScores[score.id_value] = score.calculated_score_norm;
+      }
+    }
   }
 
   return {
     pagesProcessed,
     scoresWritten,
+    scores: newScores,
   };
 };
 

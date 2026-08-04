@@ -50,22 +50,14 @@ export const SalesforceConnector: ConnectorSpec = {
     }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
-    supportedFeatureIds: ['workflows', 'agentBuilder'],
+    supportedFeatureIds: ['workflows', 'agentBuilder', 'contextEngine'],
   },
 
   auth: {
     types: [
       {
-        type: 'oauth_client_credentials',
-        defaults: {},
-        overrides: {
-          meta: {
-            scope: { hidden: true },
-          },
-        },
-      },
-      {
         type: 'oauth_authorization_code',
+        isRecommended: true,
         defaults: {
           scope: 'api refresh_token',
         },
@@ -77,6 +69,15 @@ export const SalesforceConnector: ConnectorSpec = {
             tokenUrl: {
               placeholder: 'https://login.salesforce.com/services/oauth2/token',
             },
+            scope: { hidden: true },
+          },
+        },
+      },
+      {
+        type: 'oauth_client_credentials',
+        defaults: {},
+        overrides: {
+          meta: {
             scope: { hidden: true },
           },
         },

@@ -8,6 +8,7 @@
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { KibanaFeatureConfig } from '@kbn/features-plugin/common';
 import type { AppCategory } from '@kbn/core/types';
+import { ALERTING_V2_SECTION_ID } from '@kbn/alerting-v2-constants';
 import { APP_ID } from '../constants';
 import {
   ALERTING_V2_API_PRIVILEGES,
@@ -24,33 +25,51 @@ const category: AppCategory = {
   euiIconType: 'watchesApp',
 };
 
-const buildKibanaFeature = (feature: AlertingV2FeatureDefinition): KibanaFeatureConfig => ({
-  id: feature.id,
-  name: feature.name,
-  category,
-  app: [APP_ID],
-  privileges: {
-    all: {
-      app: [APP_ID],
-      savedObject: {
-        all: [...feature.privileges.all.savedObject.all],
-        read: [...feature.privileges.all.savedObject.read],
-      },
-      api: [...feature.privileges.all.api],
-      ui: [...feature.privileges.all.ui],
+const buildKibanaFeature = (feature: AlertingV2FeatureDefinition): KibanaFeatureConfig => {
+  const managementApps = [feature.managementApp];
+  const app = [APP_ID];
+
+  return {
+    id: feature.id,
+    name: feature.name,
+    category,
+    app,
+    management: {
+      [ALERTING_V2_SECTION_ID]: managementApps,
     },
-    read: {
-      app: [APP_ID],
-      savedObject: {
-        all: [...feature.privileges.read.savedObject.all],
-        read: [...feature.privileges.read.savedObject.read],
+    privileges: {
+      all: {
+        app,
+        management: {
+          [ALERTING_V2_SECTION_ID]: managementApps,
+        },
+        ...(feature.privileges.all.alerts ? { alerts: { ...feature.privileges.all.alerts } } : {}),
+        savedObject: {
+          all: [...feature.privileges.all.savedObject.all],
+          read: [...feature.privileges.all.savedObject.read],
+        },
+        api: [...feature.privileges.all.api],
+        ui: [...feature.privileges.all.ui],
       },
-      api: [...feature.privileges.read.api],
-      ui: [...feature.privileges.read.ui],
+      read: {
+        app,
+        management: {
+          [ALERTING_V2_SECTION_ID]: managementApps,
+        },
+        ...(feature.privileges.read.alerts
+          ? { alerts: { ...feature.privileges.read.alerts } }
+          : {}),
+        savedObject: {
+          all: [...feature.privileges.read.savedObject.all],
+          read: [...feature.privileges.read.savedObject.read],
+        },
+        api: [...feature.privileges.read.api],
+        ui: [...feature.privileges.read.ui],
+      },
     },
-  },
-  ...(feature.subFeatures.length > 0 ? { subFeatures: [...feature.subFeatures] } : {}),
-});
+    ...(feature.subFeatures.length > 0 ? { subFeatures: [...feature.subFeatures] } : {}),
+  };
+};
 
 export const registerFeaturePrivileges = (features: FeaturesPluginSetup) => {
   Object.values(ALERTING_V2_FEATURES).forEach((feature) => {

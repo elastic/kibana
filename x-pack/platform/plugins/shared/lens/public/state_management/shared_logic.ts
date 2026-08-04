@@ -147,10 +147,10 @@ export function serializeVisualizationToSave<T extends { state: { visualization:
   visualization: Pick<Visualization, 'getPersistableState'>
 ): T {
   if (!visualization.getPersistableState) return attrs;
-  const { state: persistedVizState } = visualization.getPersistableState(attrs.state.visualization);
+  const { state: persistedVisState } = visualization.getPersistableState(attrs.state.visualization);
   return {
     ...attrs,
-    state: { ...attrs.state, visualization: persistedVizState },
+    state: { ...attrs.state, visualization: persistedVisState },
   };
 }
 

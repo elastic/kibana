@@ -86,7 +86,7 @@ export const AttachmentActions: React.FC<AttachmentActionsProps> = ({
             maybeWrapWithTooltip(
               button,
               <EuiButtonEmpty
-                color="text"
+                color={button.color ?? 'text'}
                 size="s"
                 iconType={button.icon}
                 isDisabled={button.disabled}
@@ -117,7 +117,7 @@ export const AttachmentActions: React.FC<AttachmentActionsProps> = ({
             maybeWrapWithTooltip(
               button,
               <EuiButton
-                color="text"
+                color={button.color ?? 'text'}
                 size="s"
                 iconType={button.icon}
                 isDisabled={button.disabled}
@@ -136,15 +136,22 @@ export const AttachmentActions: React.FC<AttachmentActionsProps> = ({
               defaultMessage: 'Attachment actions',
             })}
             button={
-              <EuiButtonIcon
-                color="text"
-                iconType="boxesVertical"
-                aria-label={i18n.translate('xpack.agentBuilder.attachmentActions.moreActions', {
+              <EuiToolTip
+                content={i18n.translate('xpack.agentBuilder.attachmentActions.moreActions', {
                   defaultMessage: 'More actions',
                 })}
-                onClick={togglePopover}
-                size="s"
-              />
+                disableScreenReaderOutput
+              >
+                <EuiButtonIcon
+                  color="text"
+                  iconType="boxesVertical"
+                  aria-label={i18n.translate('xpack.agentBuilder.attachmentActions.moreActions', {
+                    defaultMessage: 'More actions',
+                  })}
+                  onClick={togglePopover}
+                  size="s"
+                />
+              </EuiToolTip>
             }
             isOpen={isPopoverOpen}
             closePopover={closePopover}

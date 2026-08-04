@@ -12,8 +12,7 @@ import { renderingServiceMock } from '@kbn/core-rendering-browser-mocks';
 import { createSnoozeAction } from './snooze';
 import * as modal from '../components/snooze_expiry_modal';
 import * as bulk from './bulk_create_alert_actions';
-import type { AlertEpisode } from '../queries/episodes_query';
-
+import type { AlertEpisode } from '@kbn/alerting-v2-common-queries';
 const makeEpisode = (overrides: Partial<AlertEpisode> = {}): AlertEpisode => ({
   '@timestamp': '2026-04-23T00:00:00Z',
   'episode.id': 'e1',
@@ -52,6 +51,19 @@ describe('createSnoozeAction', () => {
     ).toBe(false);
   });
 
+  it('compatible when snooze has expired', () => {
+    expect(
+      createSnoozeAction(makeDeps()).isCompatible({
+        episodes: [
+          makeEpisode({
+            last_snooze_action: 'snooze',
+            snooze_expiry: '2020-01-01T00:00:00.000Z',
+          }),
+        ],
+      })
+    ).toBe(true);
+  });
+
   it('not compatible on empty selection', () => {
     expect(createSnoozeAction(makeDeps()).isCompatible({ episodes: [] })).toBe(false);
   });
@@ -59,7 +71,7 @@ describe('createSnoozeAction', () => {
   it('execute: opens modal, POSTs unique-by-group SNOOZE items, toasts, calls onSuccess', async () => {
     const deps = makeDeps();
     jest.spyOn(modal, 'openSnoozeExpiryModal').mockResolvedValue('2026-05-01T00:00:00Z');
-    jest.spyOn(bulk, 'bulkCreateAlertActions').mockResolvedValue({ processed: 1, total: 1 });
+    jest.spyOn(bulk, 'bulkCreateAlertActions').mockResolvedValue({ affected_count: 1, errors: [] });
     const onSuccess = jest.fn();
     await createSnoozeAction(deps).execute({
       episodes: [makeEpisode(), makeEpisode({ 'episode.id': 'e2' })],

@@ -6,22 +6,23 @@
  */
 import React, { useCallback, useMemo, useState } from 'react';
 
-import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
+import { EuiFlexItem, EuiFlexGroup, useEuiTheme } from '@elastic/eui';
 
 import { useGetSimilarCases, initialData } from '../../../containers/use_get_similar_cases';
 import type { CaseUI } from '../../../../common/ui/types';
 
-import { CASE_VIEW_PAGE_TABS } from '../../../../common/types';
-import { CaseViewTabs } from '../case_view_tabs';
 import { CASES_TABLE_PER_PAGE_VALUES, type EuiBasicTableOnChange } from '../../all_cases/types';
 import { SimilarCasesTable } from '../../similar_cases/table';
+import { useCasesConfig } from '../../../common/lib/kibana';
+import { SidebarToggleButton } from '../../cases_redesign/case_view/components/sidebar/sidebar_toggle_button';
 
 interface CaseViewSimilarCasesProps {
   caseData: CaseUI;
-  searchTerm?: string;
 }
 
-export const CaseViewSimilarCases = ({ caseData, searchTerm }: CaseViewSimilarCasesProps) => {
+export const CaseViewSimilarCases = ({ caseData }: CaseViewSimilarCasesProps) => {
+  const { euiTheme } = useEuiTheme();
+  const { detailsRedesignEnabled } = useCasesConfig();
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(CASES_TABLE_PER_PAGE_VALUES[0]);
 
@@ -48,26 +49,26 @@ export const CaseViewSimilarCases = ({ caseData, searchTerm }: CaseViewSimilarCa
   );
 
   return (
-    <EuiFlexGroup>
+    <EuiFlexGroup direction="column" gutterSize="none">
+      {detailsRedesignEnabled && (
+        <EuiFlexItem grow={false} css={{ paddingTop: euiTheme.size.s }}>
+          <EuiFlexGroup justifyContent="flexEnd" gutterSize="none">
+            <EuiFlexItem grow={false}>
+              <SidebarToggleButton />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      )}
       <EuiFlexItem>
-        <CaseViewTabs
-          caseData={caseData}
-          activeTab={CASE_VIEW_PAGE_TABS.SIMILAR_CASES}
-          searchTerm={searchTerm}
+        <SimilarCasesTable
+          isLoading={isLoadingCases}
+          cases={data.cases}
+          pagination={pagination}
+          onChange={tableOnChangeCallback}
         />
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <SimilarCasesTable
-              isLoading={isLoadingCases}
-              cases={data.cases}
-              pagination={pagination}
-              onChange={tableOnChangeCallback}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
 };
 
-CaseViewSimilarCases.displayName = 'CaseViewObservables';
+CaseViewSimilarCases.displayName = 'CaseViewSimilarCases';

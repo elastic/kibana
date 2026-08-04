@@ -6,8 +6,14 @@
  */
 
 export {
+  ConversationAccessControlMode,
+  getDefaultConversationAccessControl,
+  type ConversationAccessControl,
+} from './access_control';
+export {
   ConversationRoundStatus,
   ConversationDisplayStatus,
+  ConversationOriginType,
   type ConversationAction,
   type RoundInput,
   type ConverseInput,
@@ -15,6 +21,9 @@ export {
   type ToolCallWithResult,
   type ConversationRound,
   type Conversation,
+  type ConversationOrigin,
+  type ConversationRoundAuthor,
+  type ConversationRoundOrigin,
   type ConversationInternalState,
   type TodoItem,
   type TodoStatus,
@@ -49,6 +58,11 @@ export {
   type AskUserQuestionStepData,
   createAskUserQuestionStep,
   isAskUserQuestionStep,
+  type RelevantSkill,
+  type RelevantSkillsStep,
+  type RelevantSkillsStepData,
+  createRelevantSkillsStep,
+  isRelevantSkillsStep,
 } from './conversation';
 export {
   ChatEventType,

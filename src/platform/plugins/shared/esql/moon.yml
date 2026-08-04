@@ -61,6 +61,8 @@ dependsOn:
   - '@kbn/agent-builder-server'
   - '@kbn/agent-builder-common'
   - '@kbn/code-editor'
+  - '@kbn/management-settings-ids'
+  - '@kbn/core-ui-settings-server'
 tags:
   - plugin
   - prod

@@ -15,8 +15,10 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiLoadingSpinner,
   EuiPopover,
   EuiTextTruncate,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -27,6 +29,7 @@ import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 
 import { appPaths } from '../../../../../utils/app_paths';
 import { useConversationListMutations } from '../../../../../hooks/use_conversation_list_mutations';
+import { useToasts } from '../../../../../hooks/use_toasts';
 import {
   createActiveConversationListItemStyles,
   createConversationListItemStyles,
@@ -52,11 +55,20 @@ const labels = {
   markAsUnread: i18n.translate('xpack.agentBuilder.sidebar.conversationList.markAsUnread', {
     defaultMessage: 'Mark as unread',
   }),
+  pin: i18n.translate('xpack.agentBuilder.sidebar.conversationList.pin', {
+    defaultMessage: 'Pin',
+  }),
+  unpin: i18n.translate('xpack.agentBuilder.sidebar.conversationList.unpin', {
+    defaultMessage: 'Unpin',
+  }),
   openMenu: i18n.translate('xpack.agentBuilder.sidebar.conversationList.openMenu', {
     defaultMessage: 'Open conversation menu',
   }),
   actionsMenu: i18n.translate('xpack.agentBuilder.sidebar.conversationList.actionsMenu', {
     defaultMessage: 'Conversation actions',
+  }),
+  deleteError: i18n.translate('xpack.agentBuilder.sidebar.conversationList.deleteError', {
+    defaultMessage: 'Failed to delete conversation',
   }),
 };
 
@@ -70,6 +82,7 @@ export interface ConversationListItemRowProps {
   onItemClick?: () => void;
   status?: ConversationDisplayStatus;
   read?: boolean;
+  isPinned?: boolean;
 }
 
 export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = ({
@@ -82,17 +95,43 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
   onItemClick,
   status,
   read,
+  isPinned = false,
 }) => {
   const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isRenameModalOpen, setIsRenameModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
-  const { deleteConversation, renameConversation, markAsRead, markAsUnread } =
-    useConversationListMutations({ routeConversationId, agentId });
+  const {
+    deleteConversation,
+    renameConversation,
+    markAsRead,
+    markAsUnread,
+    markAsPinned,
+    markAsUnpinned,
+  } = useConversationListMutations({ routeConversationId, agentId });
+  const { addErrorToast } = useToasts();
 
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
   const togglePopover = useCallback(() => setIsPopoverOpen((open) => !open), []);
+
+  const handleDelete = useCallback(
+    async (convId: string) => {
+      setIsDeleteModalOpen(false);
+      setIsDeleting(true);
+      try {
+        await deleteConversation(convId);
+      } catch (e) {
+        addErrorToast({
+          title: labels.deleteError,
+          text: e instanceof Error ? e.message : undefined,
+        });
+        setIsDeleting(false);
+      }
+    },
+    [deleteConversation, addErrorToast]
+  );
 
   const baseLinkStyles = createConversationListItemStyles(euiTheme);
   const activeLinkStyles = createActiveConversationListItemStyles(euiTheme);
@@ -108,6 +147,15 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
       display: block;
     `,
   ]);
+
+  const iconSlotStyles = css`
+    width: ${euiTheme.size.l};
+    height: ${euiTheme.size.l};
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  `;
 
   const rowStyles = useMemo(() => {
     const bg = euiTheme.colors.backgroundLightPrimary;
@@ -203,6 +251,26 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
         {isUnread ? labels.markAsRead : labels.markAsUnread}
       </EuiContextMenuItem>,
       <EuiContextMenuItem
+        key="pin"
+        icon="pin"
+        onClick={() => {
+          closePopover();
+          if (isPinned) {
+            markAsUnpinned(conversationId);
+          } else {
+            markAsPinned(conversationId);
+          }
+        }}
+        {...getEbtProps({
+          element: AGENT_BUILDER_UI_EBT.element.sidebar,
+          action: isPinned
+            ? AGENT_BUILDER_UI_EBT.action.conversationList.UNPIN_CONVERSATION
+            : AGENT_BUILDER_UI_EBT.action.conversationList.PIN_CONVERSATION,
+        })}
+      >
+        {isPinned ? labels.unpin : labels.pin}
+      </EuiContextMenuItem>,
+      <EuiContextMenuItem
         key="delete"
         icon={<EuiIcon type="trash" color="danger" aria-hidden={true} />}
         data-test-subj={`agentBuilderSidebarConversationDelete-${conversationId}`}
@@ -221,27 +289,39 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
         {labels.delete}
       </EuiContextMenuItem>,
     ],
-    [closePopover, conversationId, euiTheme.colors.danger, isUnread, markAsRead, markAsUnread]
+    [
+      closePopover,
+      conversationId,
+      euiTheme.colors.danger,
+      isPinned,
+      isUnread,
+      markAsPinned,
+      markAsRead,
+      markAsUnpinned,
+      markAsUnread,
+    ]
   );
 
   const menuButton = (
-    <EuiButtonIcon
-      iconType="boxesVertical"
-      display="empty"
-      size="xs"
-      aria-label={labels.openMenu}
-      aria-expanded={isPopoverOpen}
-      onClick={(e: React.MouseEvent) => {
-        e.preventDefault();
-        e.stopPropagation();
-        togglePopover();
-      }}
-      data-test-subj={`agentBuilderSidebarConversationMenu-${conversationId}`}
-      {...getEbtProps({
-        element: AGENT_BUILDER_UI_EBT.element.sidebar,
-        action: AGENT_BUILDER_UI_EBT.action.conversationList.OPEN_CONVERSATION_MENU,
-      })}
-    />
+    <EuiToolTip content={labels.openMenu} disableScreenReaderOutput>
+      <EuiButtonIcon
+        iconType="boxesVertical"
+        display="empty"
+        size="xs"
+        aria-label={labels.openMenu}
+        aria-expanded={isPopoverOpen}
+        onClick={(e: React.MouseEvent) => {
+          e.preventDefault();
+          e.stopPropagation();
+          togglePopover();
+        }}
+        data-test-subj={`agentBuilderSidebarConversationMenu-${conversationId}`}
+        {...getEbtProps({
+          element: AGENT_BUILDER_UI_EBT.element.sidebar,
+          action: AGENT_BUILDER_UI_EBT.action.conversationList.OPEN_CONVERSATION_MENU,
+        })}
+      />
+    </EuiToolTip>
   );
 
   return (
@@ -251,6 +331,7 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
         responsive={false}
         alignItems="center"
         css={rowStyles}
+        style={isDeleting ? { opacity: 0.4, pointerEvents: 'none' } : undefined}
         data-test-subj={`agentBuilderSidebarConversationRow-${conversationId}`}
       >
         <EuiFlexItem
@@ -275,18 +356,21 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
           </Link>
         </EuiFlexItem>
 
-        {status !== undefined || showActionsMenu ? (
+        {isDeleting ? (
+          <EuiFlexItem grow={false}>
+            <div css={iconSlotStyles}>
+              <EuiLoadingSpinner size="s" />
+            </div>
+          </EuiFlexItem>
+        ) : status !== undefined || showActionsMenu ? (
           <EuiFlexItem grow={false}>
             <div
-              css={css`
-                position: relative;
-                width: ${euiTheme.size.l};
-                height: ${euiTheme.size.l};
-                flex-shrink: 0;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-              `}
+              css={[
+                iconSlotStyles,
+                css`
+                  position: relative;
+                `,
+              ]}
             >
               {status !== undefined && (
                 <div
@@ -343,7 +427,7 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
           onClose={() => setIsDeleteModalOpen(false)}
           conversationId={conversationId}
           title={title}
-          onDelete={deleteConversation}
+          onDelete={handleDelete}
         />
       ) : null}
     </>

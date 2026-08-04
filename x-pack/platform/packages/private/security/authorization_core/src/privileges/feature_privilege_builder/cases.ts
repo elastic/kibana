@@ -30,6 +30,16 @@ const readOperations = [
   'getReporters',
   'getUserActions',
   'findConfigurations',
+  'getFieldDefinitions',
+  'getTemplate',
+  'findTemplates',
+] as const;
+// Users with the manageTemplates sub-privilege need read access to templates and the field
+// library even when they lack the standard cases read/all privilege for the owner.
+const manageTemplatesReadOperations = [
+  'getFieldDefinitions',
+  'getTemplate',
+  'findTemplates',
 ] as const;
 // Update operations do not currently include the ability to re-open a case
 const updateOperations = ['updateCase', 'updateComment'] as const;
@@ -77,6 +87,10 @@ export class FeaturePrivilegeCasesBuilder extends BaseFeaturePrivilegeBuilder {
       ...getCasesPrivilege(reopenOperations, privilegeDefinition.cases?.reopenCase),
       ...getCasesPrivilege(assignOperations, privilegeDefinition.cases?.assign),
       ...getCasesPrivilege(manageTemplatesOperations, privilegeDefinition.cases?.manageTemplates),
+      ...getCasesPrivilege(
+        manageTemplatesReadOperations,
+        privilegeDefinition.cases?.manageTemplates
+      ),
     ]);
   }
 }

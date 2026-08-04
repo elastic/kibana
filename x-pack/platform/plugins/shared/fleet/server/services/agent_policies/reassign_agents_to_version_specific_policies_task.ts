@@ -33,10 +33,10 @@ export function registerReassignAgentsToVersionSpecificPoliciesTask(
       maxAttempts: 3,
       createTaskRunner: ({
         taskInstance,
-        abortController,
+        signal,
       }: {
         taskInstance: ConcreteTaskInstance;
-        abortController: AbortController;
+        signal: AbortSignal;
       }) => {
         return {
           async run() {
@@ -47,7 +47,7 @@ export function registerReassignAgentsToVersionSpecificPoliciesTask(
               versionSpecificAgentPolicyIds,
               async (versionedAgentPolicyId) => {
                 await reassignAgentsToVersionSpecificPolicies(versionedAgentPolicyId);
-                throwIfAborted(abortController);
+                throwIfAborted(signal);
               },
               {
                 concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS,

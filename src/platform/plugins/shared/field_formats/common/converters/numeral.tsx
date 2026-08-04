@@ -11,7 +11,6 @@
 import numeral from '@elastic/numeral';
 // @ts-ignore
 import numeralLanguages from '@elastic/numeral/languages';
-import React from 'react';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { MISSING_TOKEN, NAN_LABEL, NULL_LABEL } from '@kbn/field-formats-common';
 import { FieldFormat } from '../field_format';
@@ -78,7 +77,7 @@ export abstract class NumeralFormat extends FieldFormat {
 
   reactConvert: ReactConvertFunction = (val) => {
     if (val == null || val === MISSING_TOKEN) {
-      return <span className="ffString__emptyValue">{NULL_LABEL}</span>;
+      return this.checkForMissingValueReact(val);
     }
     if (typeof val === 'object' && !Array.isArray(val)) {
       return asPrettyString(val);

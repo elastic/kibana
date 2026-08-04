@@ -3,6 +3,7 @@ plugins:
   enabled:
     - advanced_settings
     - agent_builder
+    - agent_builder_dashboards
     - alerting
     - alerting_v2
     - apm
@@ -13,6 +14,8 @@ plugins:
     - cloud_security_posture
     - console
     - contentManagementExamples
+    - content_management
+    - context_engine
     - cross_cluster_replication
     - custom_branding
     - dashboard
@@ -21,9 +24,12 @@ plugins:
     - data_view_editor
     - data_view_management
     - data_views
+    - data_views_as_code
     - dev_tools
     - discover
     - discover_enhanced
+    - embeddable_alerts_table
+    - discoveries
     - entity_store
     - error_boundary_example
     - event_annotation_listing
@@ -44,6 +50,7 @@ plugins:
     - kibana_overview
     - kql
     - lens
+    - links
     - logstash
     - management
     - maps
@@ -63,9 +70,12 @@ plugins:
     - searchprofiler
     - security
     - security_solution
+    - security_solution_serverless
     - serverless_observability
     - share
+    - significant_events
     - slo
+    - snapshot_restore
     - spaces
     - stack_connectors
     - streams
@@ -83,6 +93,8 @@ plugins:
     - workflows_management
   disabled:
     - data_views_as_code # Not yet registered for CI; added to unblock pipelines
+    - discoveries # Not yet registered for CI; added to unblock flaky test runner pipelines
+    - links # Not yet registered for CI; added to unblock flaky test runner pipelines
 
 packages:
   enabled:
@@ -101,3 +113,5 @@ excluded_configs:
   - src/platform/plugins/shared/workflows_management/test/scout_workflows_oom_testing/api/playwright.config.ts
   - x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/ui/playwright.config.ts
   - x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/api/playwright.config.ts
+  - x-pack/solutions/security/plugins/entity_store/test/scout_cps_local/api/playwright.config.ts
+  - x-pack/platform/plugins/shared/spaces/test/scout_cps_local/ui/playwright.config.ts

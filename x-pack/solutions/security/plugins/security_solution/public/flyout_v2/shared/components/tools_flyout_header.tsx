@@ -7,76 +7,119 @@
 
 import type { FC, ReactNode } from 'react';
 import React, { memo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
-import { type DataTableRecord } from '@kbn/discover-utils';
-import { Timestamp } from './timestamp';
-import { DocumentSeverity } from '../../document/main/components/severity';
-import type { CellActionRenderer } from './cell_actions';
-import { noopCellActionRenderer } from './cell_actions';
+import type { IconType } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { ToolsFlyoutTitle } from './tools_flyout_title';
-import { TOOLS_FLYOUT_HEADER_TEST_ID } from './test_ids';
-
-const noop = () => {};
+import { TOOLS_FLYOUT_HEADER_TEST_ID, TOOLS_FLYOUT_HEADER_TIMESTAMP_TEST_ID } from './test_ids';
 
 export interface ToolsFlyoutHeaderProps {
   /**
-   * The document to display
-   */
-  hit: DataTableRecord;
-  /**
-   * Title for the tools flyout (e.g. "Correlations", "Analyzer", "Session view")
+   * Title for the tools flyout (e.g. "Correlations", "Risk score", "Insights").
    */
   title: ReactNode;
   /**
-   * Optional cell action renderer passed to the child document flyout.
+   * Called when the context title button is clicked. Should open the originating
+   * document or entity flyout as a child via `overlays.openSystemFlyout` with
+   * `session: 'inherit'`.
    */
-  renderCellActions?: CellActionRenderer;
+  onTitleClick?: () => void;
   /**
-   * Optional callback invoked after alert mutations in the child document flyout.
+   * Label shown in the context title button (e.g. rule name or entity name).
    */
-  onAlertUpdated?: () => void;
+  label?: string;
+  /**
+   * EUI icon type shown next to the label.
+   */
+  iconType?: IconType;
+  /**
+   * Optional badge rendered alongside the title button (e.g. severity badge for documents).
+   */
+  badge?: ReactNode;
+  /**
+   * Optional metadata rendered below the title row (e.g. timestamp for documents).
+   */
+  timestamp?: ReactNode;
 }
 
 /**
- * Shared header for all tools flyouts. Renders the tool title on the left and document
- * context (expand button, rule name, severity, timestamp) on the right.
+ * Shared header for all tools flyouts. Renders the tool title on the left and optional
+ * source context on the right (expand button, label, badge, timestamp).
  */
 export const ToolsFlyoutHeader: FC<ToolsFlyoutHeaderProps> = memo(
-  ({ hit, title, renderCellActions = noopCellActionRenderer, onAlertUpdated = noop }) => {
+  ({ title, onTitleClick, label, iconType, badge, timestamp }) => {
+    const { euiTheme } = useEuiTheme();
+    const showSourceContext = !!onTitleClick && !!label && !!iconType;
+
     return (
       <EuiFlexGroup
         justifyContent="spaceBetween"
         alignItems="center"
         gutterSize="m"
         responsive={false}
+        css={{ flexWrap: 'nowrap' }}
         data-test-subj={TOOLS_FLYOUT_HEADER_TEST_ID}
       >
-        <EuiFlexItem grow={false}>
-          <EuiTitle size="xs">
+        <EuiFlexItem grow={false} css={{ flexShrink: 0 }}>
+          <EuiTitle size="xs" css={{ whiteSpace: 'nowrap' }}>
             <h4>{title}</h4>
           </EuiTitle>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup alignItems="flexEnd" direction="column" gutterSize="none">
-            <EuiFlexItem>
-              <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false} wrap={false}>
-                <EuiFlexItem grow={false}>
-                  <ToolsFlyoutTitle
-                    hit={hit}
-                    renderCellActions={renderCellActions}
-                    onAlertUpdated={onAlertUpdated}
-                  />
+        {showSourceContext && (
+          <EuiFlexItem
+            grow={true}
+            css={{ marginInlineStart: 'auto', maxWidth: '100%', minWidth: 0 }}
+          >
+            <EuiFlexGroup
+              alignItems="flexEnd"
+              direction="column"
+              gutterSize="none"
+              css={{ minWidth: 0 }}
+            >
+              <EuiFlexItem css={{ maxWidth: '100%', minWidth: 0 }}>
+                <EuiFlexGroup
+                  alignItems="center"
+                  gutterSize="xs"
+                  responsive={false}
+                  wrap={false}
+                  css={{ maxWidth: '100%', minWidth: 0 }}
+                >
+                  <EuiFlexItem css={{ minWidth: euiTheme.base * 8 }}>
+                    <ToolsFlyoutTitle
+                      onTitleClick={onTitleClick}
+                      label={label}
+                      iconType={iconType}
+                    />
+                  </EuiFlexItem>
+                  {badge && <EuiFlexItem grow={false}>{badge}</EuiFlexItem>}
+                </EuiFlexGroup>
+              </EuiFlexItem>
+              {timestamp && (
+                <EuiFlexItem css={{ maxWidth: '100%', minWidth: 0 }}>
+                  <EuiToolTip content={timestamp}>
+                    <div
+                      css={{
+                        maxWidth: '100%',
+                        overflow: 'hidden',
+                        textAlign: 'right',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                        '& > *': {
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap',
+                        },
+                      }}
+                      data-test-subj={TOOLS_FLYOUT_HEADER_TIMESTAMP_TEST_ID}
+                      tabIndex={0}
+                    >
+                      {timestamp}
+                    </div>
+                  </EuiToolTip>
                 </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <DocumentSeverity hit={hit} />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <Timestamp hit={hit} size={'xs'} />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     );
   }

@@ -42,6 +42,8 @@ import type { NotificationsPluginStart } from '@kbn/notifications-plugin/server'
 import type { RuleRegistryPluginStartContract } from '@kbn/rule-registry-plugin/server';
 import type { AlertingServerSetup } from '@kbn/alerting-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
+import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
+import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import type {
   WorkflowsExtensionsServerPluginSetup,
   WorkflowsExtensionsServerPluginStart,
@@ -66,6 +68,7 @@ export interface CasesServerSetupDependencies {
   spaces?: SpacesPluginSetup;
   cloud?: CloudSetup;
   workflowsExtensions?: WorkflowsExtensionsServerPluginSetup;
+  agentBuilder?: AgentBuilderPluginSetup;
 }
 
 export interface CasesServerStartDependencies {
@@ -79,6 +82,17 @@ export interface CasesServerStartDependencies {
   notifications: NotificationsPluginStart;
   ruleRegistry: RuleRegistryPluginStartContract;
   workflowsExtensions?: WorkflowsExtensionsServerPluginStart;
+  /**
+   * Data views server plugin — needed by cases-analytics v2 to create
+   * per-space managed `Cases` data views. Optional because v2 is the only
+   * consumer and is a no-op when `xpack.cases.analyticsV2.enabled=false`;
+   * deployments not running v2 shouldn't have to install dataViews.
+   *
+   * When `analyticsV2.enabled=true` AND this is absent, plugin start logs
+   * at ERROR and skips v2 start — the administrator can either install
+   * dataViews or flip the flag off.
+   */
+  dataViews?: DataViewsServerPluginStart;
 }
 
 export interface CaseRequestContext {
@@ -125,6 +139,12 @@ export interface CasesServerSetup {
    * Cases with the given owner will be allowed to use any close reason accepted by the validator.
    */
   registerCloseReasonValidator: (owner: string, validator: CloseReasonValidator) => void;
+  /**
+   * Registers an owner's unified-attachment prefix so its legacy `alert`/`event`
+   * attachments resolve to a valid unified type (e.g. `security.alert`). For
+   * dynamically registered owners (e.g. FTR fixtures); built-in solutions are pre-registered.
+   */
+  registerOwnerPrefix: (owner: string, prefix: string) => void;
 }
 
 export type PartialField<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;

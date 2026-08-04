@@ -97,13 +97,8 @@ export interface ICommandMetadata {
   isTimeseries?: boolean; // Optional property to indicate if the command is a timeseries source command
   requiresTimeseriesSource?: boolean; // Optional property to indicate the command is only available when the source command is TS
   hiddenAfterCommands?: string[]; // Optional list of command names; this command is not suggested when any of them appear anywhere in the pipeline
-  subquerySupport?: boolean; // Temporary property to indicate if the command supports subquery suggestions.
   subquerySource?: boolean; // Optional property to indicate if the command can start a subquery expression.
-  subquerySourceHidden?: boolean; // Hides the command from subquery source suggestions (e.g. snapshot-only commands).
-  subqueryRestrictions?: {
-    hideInside: boolean; // Command is hidden inside subqueries
-    hideOutside: boolean; // Command is hidden outside subqueries (at root level)
-  };
+  hiddenWhenQueryContainsSubqueries?: boolean; // Optional property to hide the command when the query contains subqueries.
 }
 
 /**
@@ -268,7 +263,6 @@ export class CommandRegistry implements ICommandRegistry {
    * @returns An array of ICommand objects representing all registered commands.
    */
   public getAllCommands(options?: {
-    isCursorInSubquery?: boolean;
     isStartingSubquery?: boolean;
     queryContainsSubqueries?: boolean;
   }): ICommand[] {
@@ -278,24 +272,16 @@ export class CommandRegistry implements ICommandRegistry {
       metadata,
     }));
 
-    const isCursorInSubquery = options?.isCursorInSubquery ?? false;
     const isStartingSubquery = options?.isStartingSubquery ?? false;
     const queryContainsSubqueries = options?.queryContainsSubqueries ?? false;
 
     const filtered = isStartingSubquery
-      ? allCommands.filter(
-          ({ metadata }) => !!metadata.subquerySource && !metadata.subquerySourceHidden
-        )
+      ? allCommands.filter(({ metadata }) => !!metadata.subquerySource)
       : allCommands;
 
-    // Then apply subquery restrictions
-    return filtered.filter(({ metadata: { subqueryRestrictions: restrictions } }) => {
-      if (!restrictions || !queryContainsSubqueries) {
-        return true;
-      }
-
-      return isCursorInSubquery ? !restrictions.hideInside : !restrictions.hideOutside;
-    });
+    return filtered.filter(
+      ({ metadata }) => !queryContainsSubqueries || !metadata.hiddenWhenQueryContainsSubqueries
+    );
   }
 
   /**

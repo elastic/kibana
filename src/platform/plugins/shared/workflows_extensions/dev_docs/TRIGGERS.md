@@ -44,6 +44,7 @@ export type MyTriggerEvent = z.infer<typeof myTriggerEventSchema>;
 
 export const commonMyTriggerDefinition: CommonTriggerDefinition = {
   id: MY_TRIGGER_ID,
+  stability: 'tech_preview',
   eventSchema: myTriggerEventSchema,
   title: i18n.translate('myPlugin.myTrigger.title', { defaultMessage: 'My trigger' }),
   description: i18n.translate('myPlugin.myTrigger.description', {
@@ -59,6 +60,7 @@ export const commonMyTriggerDefinition: CommonTriggerDefinition = {
 };
 ```
 
+- Set `stability` (required) to `'tech_preview'`, `'beta'`, or `'stable'` based on the trigger's maturity. Use `'stable'` for GA triggers (no badge in the editor).
 - Use `.describe()` on schema fields so the UI and docs show helpful text.
 - `eventSchema` must be a Zod object schema; payloads are validated at emit time.
 - When you provide `documentation.examples`, each example must only reference fields present on `eventSchema` (agents pattern-match YAML examples).

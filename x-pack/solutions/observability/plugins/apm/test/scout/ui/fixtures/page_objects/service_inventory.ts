@@ -36,12 +36,12 @@ export class ServiceInventoryPage {
       .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
   }
 
-  getServiceLink(serviceName: string) {
-    return this.servicesTable.getByRole('link', { name: serviceName });
+  getServiceLink(serviceName: string, exact: boolean = false) {
+    return this.servicesTable.getByRole('link', { name: serviceName, exact });
   }
 
-  async clickServiceLink(serviceName: string) {
-    await this.getServiceLink(serviceName).click();
+  async clickServiceLink(serviceName: string, exact: boolean = false) {
+    await this.getServiceLink(serviceName, exact).click();
   }
 
   async waitForServiceOverviewToLoad() {

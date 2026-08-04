@@ -76,12 +76,104 @@ describe('Endpoint Authz service', () => {
       ).toBe(false);
     });
 
+    describe('Actions Log Management', () => {
+      it('should set `canWriteActionsLogManagement` to true if enterprise license and privilege granted', () => {
+        licenseService.isEnterprise.mockReturnValue(true);
+
+        expect(
+          calculateEndpointAuthz(licenseService, fleetAuthz, userRoles, false)
+            .canWriteActionsLogManagement
+        ).toBe(true);
+      });
+
+      it('should set `canWriteActionsLogManagement` to false if not enterprise license', () => {
+        licenseService.isEnterprise.mockReturnValue(false);
+
+        expect(
+          calculateEndpointAuthz(licenseService, fleetAuthz, userRoles, false)
+            .canWriteActionsLogManagement
+        ).toBe(false);
+      });
+
+      it('should set `canWriteActionsLogManagement` to false if privilege not granted', () => {
+        fleetAuthz.packagePrivileges!.endpoint.actions.writeActionsLogManagement.executePackageAction =
+          false;
+
+        expect(
+          calculateEndpointAuthz(licenseService, fleetAuthz, userRoles, false)
+            .canWriteActionsLogManagement
+        ).toBe(false);
+      });
+
+      it('should set `canReadActionsLogManagement` to true if enterprise license and privilege granted', () => {
+        licenseService.isEnterprise.mockReturnValue(true);
+
+        expect(
+          calculateEndpointAuthz(licenseService, fleetAuthz, userRoles, false)
+            .canReadActionsLogManagement
+        ).toBe(true);
+      });
+
+      it('should set `canReadActionsLogManagement` to false if not enterprise license', () => {
+        licenseService.isEnterprise.mockReturnValue(false);
+
+        expect(
+          calculateEndpointAuthz(licenseService, fleetAuthz, userRoles, false)
+            .canReadActionsLogManagement
+        ).toBe(false);
+      });
+
+      it('should set `canReadActionsLogManagement` to false if privilege not granted', () => {
+        fleetAuthz.packagePrivileges!.endpoint.actions.readActionsLogManagement.executePackageAction =
+          false;
+
+        expect(
+          calculateEndpointAuthz(licenseService, fleetAuthz, userRoles, false)
+            .canReadActionsLogManagement
+        ).toBe(false);
+      });
+    });
+
     it('should set `canUnIsolateHost` to true even if not proper license', () => {
       licenseService.isPlatinumPlus.mockReturnValue(false);
 
       expect(
         calculateEndpointAuthz(licenseService, fleetAuthz, userRoles, false).canUnIsolateHost
       ).toBe(true);
+    });
+
+    it('should set `canReadTrustedDevices` to false if not proper license', () => {
+      licenseService.isEnterprise.mockReturnValue(false);
+
+      expect(
+        calculateEndpointAuthz(licenseService, fleetAuthz, userRoles, false).canReadTrustedDevices
+      ).toBe(false);
+    });
+
+    it('should set `canWriteTrustedDevices` to false if not proper license', () => {
+      licenseService.isEnterprise.mockReturnValue(false);
+
+      expect(
+        calculateEndpointAuthz(licenseService, fleetAuthz, userRoles, false).canWriteTrustedDevices
+      ).toBe(false);
+    });
+
+    it('should set `canReadCustomYaraSignatures` to false if not proper license', () => {
+      licenseService.isEnterprise.mockReturnValue(false);
+
+      expect(
+        calculateEndpointAuthz(licenseService, fleetAuthz, userRoles, false)
+          .canReadCustomYaraSignatures
+      ).toBe(false);
+    });
+
+    it('should set `canWriteCustomYaraSignatures` to false if not proper license', () => {
+      licenseService.isEnterprise.mockReturnValue(false);
+
+      expect(
+        calculateEndpointAuthz(licenseService, fleetAuthz, userRoles, false)
+          .canWriteCustomYaraSignatures
+      ).toBe(false);
     });
 
     it(`should allow Host Isolation Exception read/delete when license is not Platinum+`, () => {
@@ -175,6 +267,8 @@ describe('Endpoint Authz service', () => {
       ['canReadTrustedApplications', 'readTrustedApplications'],
       ['canWriteTrustedDevices', 'writeTrustedDevices'],
       ['canReadTrustedDevices', 'readTrustedDevices'],
+      ['canWriteCustomYaraSignatures', 'writeCustomYaraSignatures'],
+      ['canReadCustomYaraSignatures', 'readCustomYaraSignatures'],
       ['canWriteHostIsolationExceptions', 'writeHostIsolationExceptions'],
       ['canAccessHostIsolationExceptions', 'accessHostIsolationExceptions'],
       ['canReadHostIsolationExceptions', 'readHostIsolationExceptions'],
@@ -219,6 +313,8 @@ describe('Endpoint Authz service', () => {
       ['canReadTrustedApplications', ['readTrustedApplications']],
       ['canWriteTrustedDevices', ['writeTrustedDevices']],
       ['canReadTrustedDevices', ['readTrustedDevices']],
+      ['canWriteCustomYaraSignatures', ['writeCustomYaraSignatures']],
+      ['canReadCustomYaraSignatures', ['readCustomYaraSignatures']],
       ['canWriteHostIsolationExceptions', ['writeHostIsolationExceptions']],
       ['canAccessHostIsolationExceptions', ['accessHostIsolationExceptions']],
       ['canReadHostIsolationExceptions', ['readHostIsolationExceptions']],
@@ -275,6 +371,8 @@ describe('Endpoint Authz service', () => {
       ['canReadTrustedApplications', ['readTrustedApplications']],
       ['canWriteTrustedDevices', ['writeTrustedDevices']],
       ['canReadTrustedDevices', ['readTrustedDevices']],
+      ['canWriteCustomYaraSignatures', ['writeCustomYaraSignatures']],
+      ['canReadCustomYaraSignatures', ['readCustomYaraSignatures']],
       ['canWriteHostIsolationExceptions', ['writeHostIsolationExceptions']],
       ['canAccessHostIsolationExceptions', ['accessHostIsolationExceptions']],
       ['canReadHostIsolationExceptions', ['readHostIsolationExceptions']],
@@ -379,6 +477,8 @@ describe('Endpoint Authz service', () => {
         canReadTrustedApplications: false,
         canWriteTrustedDevices: false,
         canReadTrustedDevices: false,
+        canReadCustomYaraSignatures: false,
+        canWriteCustomYaraSignatures: false,
         canWriteWorkflowInsights: false,
         canReadWorkflowInsights: false,
         canWriteHostIsolationExceptions: false,

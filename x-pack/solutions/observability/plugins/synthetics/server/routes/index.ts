@@ -14,6 +14,7 @@ import { syntheticsInspectTLSRuleRoute } from './rules/inspect_tls_rule';
 import { syntheticsGetLatestTestRunRoute } from './pings/get_latest_test_run';
 import { deleteSyntheticsParamsBulkRoute } from './settings/params/delete_params_bulk';
 import { deleteSyntheticsMonitorBulkRoute } from './monitor_cruds/bulk_cruds/delete_monitor_bulk';
+import { updateSyntheticsMonitorBulkRoute } from './monitor_cruds/bulk_cruds/update_monitor_bulk';
 import {
   createGetDynamicSettingsRoute,
   createPostDynamicSettingsRoute,
@@ -59,7 +60,10 @@ import { editSyntheticsMonitorRoute } from './monitor_cruds/edit_monitor';
 import { addSyntheticsMonitorRoute } from './monitor_cruds/add_monitor';
 import { addSyntheticsProjectMonitorRoute } from './monitor_cruds/project_monitor/add_monitor_project';
 import { syntheticsGetPingsRoute, syntheticsGetPingHeatmapRoute } from './pings';
-import { createGetCurrentStatusRoute } from './overview_status/overview_status';
+import {
+  createGetCurrentStatusRoute,
+  createGetStaleStatusRoute,
+} from './overview_status/overview_status';
 import { getHasIntegrationMonitorsRoute } from './fleet/get_has_integration_monitors';
 import { enableDefaultAlertingRoute } from './default_alerts/enable_default_alert';
 import { getDefaultAlertingRoute } from './default_alerts/get_default_alert';
@@ -80,6 +84,7 @@ import { getErrorGroupsRoute } from './errors/get_error_groups';
 import { getErrorStatsRoute } from './errors/get_error_stats';
 import { getMonitorSummaryStatsRoute } from './monitor_cruds/get_monitor_summary_stats';
 import { getSyntheticsDiagnosticsRoute } from './diagnostics/get_synthetics_diagnostics';
+import { getMaintenanceWindowsRoute } from './maintenance_windows/get_maintenance_windows';
 
 export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   addSyntheticsProjectMonitorRoute,
@@ -95,6 +100,7 @@ export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   syntheticsGetPingsRoute,
   getHasIntegrationMonitorsRoute,
   createGetCurrentStatusRoute,
+  createGetStaleStatusRoute,
   getIndexSizesRoute,
   enableDefaultAlertingRoute,
   getDefaultAlertingRoute,
@@ -134,6 +140,7 @@ export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   getErrorStatsRoute,
   getMonitorSummaryStatsRoute,
   getSyntheticsDiagnosticsRoute,
+  getMaintenanceWindowsRoute,
 ];
 
 export const syntheticsAppPublicRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
@@ -151,6 +158,7 @@ export const syntheticsAppPublicRestApiRoutes: SyntheticsRestApiRouteFactory[] =
   editSyntheticsMonitorRoute,
   deleteSyntheticsMonitorRoute,
   deleteSyntheticsMonitorBulkRoute,
+  updateSyntheticsMonitorBulkRoute,
   deleteSyntheticsParamsBulkRoute,
   syntheticsGetLatestTestRunRoute,
   testNowMonitorRoute,

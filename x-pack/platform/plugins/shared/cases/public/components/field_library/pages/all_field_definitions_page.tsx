@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
+  EuiBadge,
   EuiBasicTable,
-  EuiButton,
-  EuiButtonEmpty,
   EuiButtonIcon,
   EuiConfirmModal,
   EuiFlexGroup,
@@ -17,14 +16,14 @@ import {
   EuiSkeletonText,
   EuiSpacer,
   EuiText,
-  EuiTitle,
   EuiToolTip,
-  useEuiTheme,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
+import { parse as parseYaml } from 'yaml';
 import type { Owner } from '../../../../common/bundled-types.gen';
 import type { FieldDefinition } from '../../../../common/types/domain/field_definition/v1';
+import { FieldSchema, isRefField } from '../../../../common/types/domain/template/fields';
+import type { InlineField } from '../../../../common/types/domain/template/fields';
 import { useCasesContext } from '../../cases_context/use_cases_context';
 import { useCasesTemplatesNavigation } from '../../../common/navigation';
 import { useGetFieldDefinitions } from '../hooks/use_get_field_definitions';
@@ -33,13 +32,33 @@ import { useUpdateFieldDefinition } from '../hooks/use_update_field_definition';
 import { useDeleteFieldDefinition } from '../hooks/use_delete_field_definition';
 import { FieldDefinitionFlyout } from '../components/field_definition_flyout';
 import * as i18n from '../translations';
+import * as templatesI18n from '../../templates_v2/translations';
+import { CasesAppHeader } from '../../app/cases_app_header';
+import { CasesPageBody } from '../../app/cases_page_body';
 
 export type AllFieldDefinitionsPageProps = Record<string, never>;
 
+/**
+ * The field library table stores each field's `label` and validation flags inside its `definition`
+ * YAML (a single FieldSchema entry), not as top-level attributes. Parse the inline field out for
+ * the Label and Required columns, tolerating malformed/legacy definitions (and `$ref` entries,
+ * which carry neither) by returning `undefined` so the row still renders.
+ */
+const parseInlineFieldDefinition = (definition: string): InlineField | undefined => {
+  try {
+    const result = FieldSchema.safeParse(parseYaml(definition));
+    if (!result.success || isRefField(result.data)) {
+      return undefined;
+    }
+    return result.data;
+  } catch {
+    return undefined;
+  }
+};
+
 export const AllFieldDefinitionsPage: React.FC<AllFieldDefinitionsPageProps> = () => {
-  const { euiTheme } = useEuiTheme();
   const { owner } = useCasesContext();
-  const { navigateToCasesTemplates } = useCasesTemplatesNavigation();
+  const { getCasesTemplatesUrl, navigateToCasesTemplates } = useCasesTemplatesNavigation();
 
   const [flyoutOpen, setFlyoutOpen] = useState(false);
   const [editingFieldDef, setEditingFieldDef] = useState<FieldDefinition | undefined>(undefined);
@@ -74,21 +93,23 @@ export const AllFieldDefinitionsPage: React.FC<AllFieldDefinitionsPageProps> = (
       name,
       description,
       definition,
+      isGlobal,
     }: {
       name: string;
       description: string;
       definition: string;
+      isGlobal: boolean;
     }) => {
       const ownerValue = (Array.isArray(owner) ? owner[0] : owner) as Owner;
 
       if (editingFieldDef) {
         updateFieldDef({
           id: editingFieldDef.fieldDefinitionId,
-          fieldDefinition: { name, description, definition, owner: ownerValue },
+          fieldDefinition: { name, description, definition, owner: ownerValue, isGlobal },
         });
       } else {
         createFieldDef({
-          fieldDefinition: { name, description, definition, owner: ownerValue },
+          fieldDefinition: { name, description, definition, owner: ownerValue, isGlobal },
         });
       }
     },
@@ -114,9 +135,21 @@ export const AllFieldDefinitionsPage: React.FC<AllFieldDefinitionsPageProps> = (
       'data-test-subj': 'fieldDefinitionNameCell',
     },
     {
+      name: i18n.LABEL_COLUMN,
+      truncateText: true,
+      'data-test-subj': 'fieldDefinitionLabelCell',
+      render: (fd: FieldDefinition) => {
+        const label = parseInlineFieldDefinition(fd.definition)?.label;
+        return (
+          <EuiText size="s" color={label ? 'default' : 'subdued'}>
+            {label ?? '—'}
+          </EuiText>
+        );
+      },
+    },
+    {
       field: 'description',
       name: i18n.DESCRIPTION_COLUMN,
-      truncateText: true,
       render: (description: string | undefined) => (
         <EuiText size="s" color="subdued">
           {description ?? '—'}
@@ -124,9 +157,45 @@ export const AllFieldDefinitionsPage: React.FC<AllFieldDefinitionsPageProps> = (
       ),
     },
     {
-      field: 'owner',
-      name: i18n.OWNER_COLUMN,
-      truncateText: true,
+      name: i18n.REQUIRED_COLUMN,
+      'data-test-subj': 'fieldDefinitionRequiredCell',
+      render: (fd: FieldDefinition) => {
+        const validation = parseInlineFieldDefinition(fd.definition)?.validation;
+        const isRequired = validation?.required === true;
+        const isRequiredOnClose = validation?.required_on_close === true;
+        if (!isRequired && !isRequiredOnClose) {
+          return (
+            <EuiText size="s" color="subdued">
+              {'—'}
+            </EuiText>
+          );
+        }
+        return (
+          <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
+            {isRequired && (
+              <EuiFlexItem grow={false}>
+                <EuiBadge data-test-subj="fieldDefinitionRequiredBadge">
+                  {i18n.REQUIRED_BADGE}
+                </EuiBadge>
+              </EuiFlexItem>
+            )}
+            {isRequiredOnClose && (
+              <EuiFlexItem grow={false}>
+                <EuiBadge data-test-subj="fieldDefinitionRequiredOnCloseBadge">
+                  {i18n.REQUIRED_ON_CLOSE_BADGE}
+                </EuiBadge>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        );
+      },
+    },
+    {
+      field: 'isGlobal',
+      name: i18n.APPLY_TO_ALL_CASES_COLUMN,
+      render: (value: boolean | undefined) =>
+        value ? i18n.GLOBAL_FIELD_YES : i18n.GLOBAL_FIELD_NO,
+      'data-test-subj': 'fieldDefinitionApplyToAllCasesCell',
     },
     {
       name: i18n.ACTIONS_COLUMN,
@@ -164,84 +233,85 @@ export const AllFieldDefinitionsPage: React.FC<AllFieldDefinitionsPageProps> = (
 
   const fieldDefinitions = data?.fieldDefinitions ?? [];
 
+  const fieldLibraryMenu = useMemo(
+    () => ({
+      primaryActionItem: {
+        id: 'createFieldDefinition',
+        label: i18n.CREATE_FIELD_DEFINITION,
+        iconType: 'plusInCircle' as const,
+        run: () => handleCreate(),
+        testId: 'createFieldDefinitionButton',
+      },
+    }),
+    [handleCreate]
+  );
+
+  const fieldLibraryBack = useMemo(
+    () => ({
+      href: getCasesTemplatesUrl(),
+      // `AppHeader` renders this as "Back to {label}", so pass just the destination name.
+      label: templatesI18n.TEMPLATE_TITLE,
+      // AppHeader's back button keeps its `href` on the rendered anchor, so the default
+      // navigation must be prevented here to avoid a full page reload alongside the SPA one.
+      onClick: (event: React.MouseEvent) => {
+        event.preventDefault();
+        navigateToCasesTemplates();
+      },
+    }),
+    [getCasesTemplatesUrl, navigateToCasesTemplates]
+  );
+
   return (
     <>
-      <header>
-        <EuiButtonEmpty
-          iconType="sortLeft"
-          size="xs"
-          flush="left"
-          onClick={navigateToCasesTemplates}
-          aria-label={i18n.BACK_TO_TEMPLATES}
-          data-test-subj="fieldLibraryBackToTemplatesButton"
-        >
-          {i18n.BACK_TO_TEMPLATES}
-        </EuiButtonEmpty>
-        <EuiFlexGroup
-          alignItems="center"
-          gutterSize="s"
-          css={css`
-            margin-bottom: ${euiTheme.size.l};
-          `}
-        >
-          <EuiFlexItem>
-            <EuiTitle size="l">
-              <h1>{i18n.FIELD_LIBRARY_TITLE}</h1>
-            </EuiTitle>
-            <EuiText size="s" color="subdued">
-              <p>{i18n.FIELD_LIBRARY_DESCRIPTION}</p>
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              fill
-              iconType="plusInCircle"
-              onClick={handleCreate}
-              data-test-subj="createFieldDefinitionButton"
-            >
-              {i18n.CREATE_FIELD_DEFINITION}
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </header>
-      <EuiSpacer size="l" />
-      {isLoading ? (
-        <EuiSkeletonText lines={5} />
-      ) : (
-        <EuiBasicTable
-          items={fieldDefinitions}
-          rowHeader="name"
-          columns={columns}
-          data-test-subj="fieldDefinitionsTable"
-        />
-      )}
+      <CasesAppHeader
+        title={i18n.FIELD_LIBRARY_TITLE}
+        back={fieldLibraryBack}
+        menu={fieldLibraryMenu}
+      />
+      <CasesPageBody>
+        <EuiText size="s" color="subdued">
+          <p>{i18n.FIELD_LIBRARY_DESCRIPTION}</p>
+        </EuiText>
+        <EuiSpacer size="l" />
+        {isLoading ? (
+          <EuiSkeletonText lines={5} />
+        ) : (
+          <EuiBasicTable
+            items={fieldDefinitions}
+            tableCaption={i18n.FIELD_DEFINITIONS_TABLE_CAPTION}
+            rowHeader="name"
+            columns={columns}
+            data-test-subj="fieldDefinitionsTable"
+          />
+        )}
 
-      {flyoutOpen && (
-        <FieldDefinitionFlyout
-          owner={Array.isArray(owner) ? owner[0] : owner}
-          fieldDefinition={editingFieldDef}
-          onSave={handleSave}
-          onClose={() => {
-            setFlyoutOpen(false);
-            setEditingFieldDef(undefined);
-          }}
-          isSaving={isCreating || isUpdating}
-        />
-      )}
+        {flyoutOpen && (
+          <FieldDefinitionFlyout
+            owner={Array.isArray(owner) ? owner[0] : owner}
+            fieldDefinition={editingFieldDef}
+            onSave={handleSave}
+            onClose={() => {
+              setFlyoutOpen(false);
+              setEditingFieldDef(undefined);
+            }}
+            isSaving={isCreating || isUpdating}
+          />
+        )}
 
-      {deletingFieldDef && (
-        <EuiConfirmModal
-          title={i18n.DELETE_CONFIRM_TITLE}
-          onCancel={() => setDeletingFieldDef(undefined)}
-          onConfirm={handleConfirmDelete}
-          cancelButtonText={i18n.CANCEL}
-          confirmButtonText={i18n.DELETE_FIELD_DEFINITION}
-          buttonColor="danger"
-          data-test-subj="fieldDefinitionDeleteConfirmModal"
-        >
-          <p>{i18n.DELETE_CONFIRM_BODY(deletingFieldDef.name)}</p>
-        </EuiConfirmModal>
-      )}
+        {deletingFieldDef && (
+          <EuiConfirmModal
+            title={i18n.DELETE_CONFIRM_TITLE}
+            onCancel={() => setDeletingFieldDef(undefined)}
+            onConfirm={handleConfirmDelete}
+            cancelButtonText={i18n.CANCEL}
+            confirmButtonText={i18n.DELETE_FIELD_DEFINITION}
+            buttonColor="danger"
+            data-test-subj="fieldDefinitionDeleteConfirmModal"
+          >
+            <p>{i18n.DELETE_CONFIRM_BODY(deletingFieldDef.name)}</p>
+          </EuiConfirmModal>
+        )}
+      </CasesPageBody>
     </>
   );
 };

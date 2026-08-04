@@ -5,32 +5,55 @@
  * 2.0.
  */
 
-import { PluginSetup, PluginStart } from '@kbn/core-di';
-import { CoreStart, Request, SavedObjectsClientFactory } from '@kbn/core-di-server';
+import { once } from 'lodash';
+import type { CoreDiServiceStart } from '@kbn/core-di';
+import { OnStart, Logger, PluginSetup, PluginStart } from '@kbn/core-di';
+import {
+  CoreStart,
+  PluginInitializer,
+  Request,
+  SavedObjectsClientFactory,
+} from '@kbn/core-di-server';
 import type { ContainerModuleLoadOptions } from 'inversify';
 import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '@kbn/maintenance-windows-plugin/common';
 import { AlertActionsClient } from '../lib/alert_actions_client';
+import { AlertEventsClient } from '../lib/alert_events_client';
 import { DirectorService } from '../lib/director/director';
 import { BasicTransitionStrategy } from '../lib/director/strategies/basic_strategy';
 import { CountTimeframeStrategy } from '../lib/director/strategies/count_timeframe_strategy';
 import { TransitionStrategyFactory } from '../lib/director/strategies/strategy_resolver';
 import { TransitionStrategyToken } from '../lib/director/strategies/types';
 import { DispatcherService } from '../lib/dispatcher/dispatcher';
-import {
-  DispatcherEnabledProviderToken,
-  DispatcherServiceInternalToken,
-} from '../lib/dispatcher/tokens';
-import { ALERTING_V2_DISPATCHER_ENABLED_SETTING_ID } from '../../common/advanced_settings';
+import { DispatcherServiceInternalToken } from '../lib/dispatcher/tokens';
 import { ActionPolicyClient } from '../lib/action_policy_client';
 import { ActionPolicyNamespaceToken } from '../lib/action_policy_client/tokens';
 import { ActionPolicyExecutionHistoryClient } from '../lib/action_policy_execution_history_client';
+import {
+  ExecutionHistoryClient,
+  ExecutionHistoryClientToken,
+} from '../lib/execution_history_client';
 import { RulesClient } from '../lib/rules_client';
+import {
+  createChangeHistoryClient,
+  RuleChangesHistoryClientToken,
+  RuleChangesHistoryService,
+  RuleChangesHistoryServiceToken,
+} from '../lib/rule_changes_history';
 import { RequestSpaceIdToken } from '../lib/services/spaces_service/tokens';
 import { ApiKeyService } from '../lib/services/api_key_service/api_key_service';
-import { EsServiceInternalToken, EsServiceScopedToken } from '../lib/services/es_service/tokens';
+import {
+  EsServiceInternalToken,
+  EsServiceScopedToken,
+  EsServiceScopedSpaceRoutingToken,
+} from '../lib/services/es_service/tokens';
 import { EventLogService } from '../lib/services/event_log_service/event_log_service';
 import { EventLogServiceToken } from '../lib/services/event_log_service/tokens';
 import { LoggerService, LoggerServiceToken } from '../lib/services/logger_service/logger_service';
+import { SettingsService } from '../lib/services/settings_service/settings_service';
+import {
+  SettingsServiceToken,
+  UiSettingsClientToken,
+} from '../lib/services/settings_service/tokens';
 import { MaintenanceWindowService } from '../lib/services/maintenance_window_service/maintenance_window_service';
 import {
   MaintenanceWindowSavedObjectsClientToken,
@@ -46,6 +69,7 @@ import { QueryService } from '../lib/services/query_service/query_service';
 import {
   QueryServiceInternalToken,
   QueryServiceScopedToken,
+  QueryServiceScopedSpaceRoutingToken,
 } from '../lib/services/query_service/tokens';
 import { ResourceManager } from '../lib/services/resource_service/resource_manager';
 import { AlertingRetryService } from '../lib/services/retry_service';
@@ -83,6 +107,7 @@ import type { AlertingServerSetupDependencies, AlertingServerStartDependencies }
 
 export function bindServices({ bind }: ContainerModuleLoadOptions) {
   bind(AlertActionsClient).toSelf().inRequestScope();
+  bind(AlertEventsClient).toSelf().inRequestScope();
   bind(RulesClient).toSelf().inRequestScope();
   bind(RequestSpaceIdToken)
     .toDynamicValue(({ get }) => {
@@ -101,6 +126,8 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
     .inRequestScope();
   bind(ActionPolicyClient).toSelf().inRequestScope();
   bind(ActionPolicyExecutionHistoryClient).toSelf().inRequestScope();
+  bind(ExecutionHistoryClient).toSelf().inRequestScope();
+  bind(ExecutionHistoryClientToken).toService(ExecutionHistoryClient);
   bind(UserService).toSelf().inRequestScope();
   bind(ApiKeyService).toSelf().inRequestScope();
   bind(AlertingRetryService).toSelf().inSingletonScope();
@@ -108,6 +135,27 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
 
   bind(LoggerService).toSelf().inSingletonScope();
   bind(LoggerServiceToken).toService(LoggerService);
+
+  bind(RuleChangesHistoryClientToken)
+    .toDynamicValue(({ get }) => {
+      const logger = get(Logger).get('rule_changes_history');
+      const { version: kibanaVersion } = get(PluginInitializer('env')).packageInfo;
+      return createChangeHistoryClient({ logger, kibanaVersion });
+    })
+    .inSingletonScope();
+  bind(RuleChangesHistoryService).toSelf().inSingletonScope();
+  bind(RuleChangesHistoryServiceToken).toService(RuleChangesHistoryService);
+
+  bind(UiSettingsClientToken)
+    .toDynamicValue(({ get }) => {
+      const savedObjects = get(CoreStart('savedObjects'));
+      const uiSettings = get(CoreStart('uiSettings'));
+      const internalSoClient = savedObjects.createInternalRepository();
+      return uiSettings.globalAsScopedToClient(internalSoClient);
+    })
+    .inSingletonScope();
+  bind(SettingsService).toSelf().inSingletonScope();
+  bind(SettingsServiceToken).toService(SettingsService);
 
   bind(EventLogService).toSelf().inSingletonScope();
   bind(EventLogServiceToken).toService(EventLogService);
@@ -130,11 +178,30 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
     })
     .inRequestScope();
 
-  bind(TaskRunnerFactoryToken).toFactory((context) =>
-    createTaskRunnerFactory({
-      getInjection: () => context.get(CoreStart('injection')),
+  bind(EsServiceScopedSpaceRoutingToken)
+    .toDynamicValue(({ get }) => {
+      const request = get(Request);
+      const elasticsearch = get(CoreStart('elasticsearch'));
+      // `projectRouting: 'space'` scopes rule-execution queries to the originating space/project
+      // when CPS is enabled, matching alerting v1 behavior. Only `asCurrentUser` honors the option.
+      return elasticsearch.client.asScoped(request, { projectRouting: 'space' }).asCurrentUser;
     })
-  );
+    .inRequestScope();
+
+  // Task Manager is a dependency of this plugin, so it can begin polling and run
+  // a task before this plugin's start lifecycle binds `CoreStart('injection')`.
+  // Resolving it eagerly would throw when the binding is not yet available. The
+  // promise resolves on the plugin's `OnStart` hook, at which point the injection
+  // service is guaranteed to be bound, so task runs wait until the plugin starts.
+  const injectionPromise = new Promise<CoreDiServiceStart>((resolve) => {
+    bind(OnStart).toConstantValue(
+      once((container) => {
+        resolve(container.get(CoreStart('injection')));
+      })
+    );
+  });
+
+  bind(TaskRunnerFactoryToken).toFactory(() => createTaskRunnerFactory({ injectionPromise }));
 
   bind(RuleSavedObjectsClientToken)
     .toResolvedValue(
@@ -220,6 +287,15 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
     })
     .inRequestScope();
 
+  bind(QueryServiceScopedSpaceRoutingToken)
+    .toDynamicValue(({ get }) => {
+      const loggerService = get(LoggerServiceToken);
+      // Rule-execution queries run against user data and must respect the space project routing.
+      const esClient = get(EsServiceScopedSpaceRoutingToken);
+      return new QueryService(esClient, loggerService);
+    })
+    .inRequestScope();
+
   bind(QueryServiceInternalToken)
     .toDynamicValue(({ get }) => {
       const loggerService = get(LoggerServiceToken);
@@ -257,18 +333,6 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
 
   bind(DispatcherService).toSelf().inSingletonScope();
   bind(DispatcherServiceInternalToken).toService(DispatcherService);
-
-  bind(DispatcherEnabledProviderToken)
-    .toDynamicValue(({ get }) => {
-      const savedObjects = get(CoreStart('savedObjects'));
-      const uiSettings = get(CoreStart('uiSettings'));
-      return async () => {
-        const soClient = savedObjects.createInternalRepository();
-        const client = uiSettings.globalAsScopedToClient(soClient);
-        return client.get<boolean>(ALERTING_V2_DISPATCHER_ENABLED_SETTING_ID);
-      };
-    })
-    .inSingletonScope();
 
   bind(DirectorService).toSelf().inSingletonScope();
   bind(TransitionStrategyFactory).toSelf().inSingletonScope();

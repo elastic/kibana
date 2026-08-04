@@ -6,7 +6,6 @@
  */
 
 import type { ScoutPage, KibanaUrl, Locator } from '@kbn/scout-oblt';
-import { EuiComboBoxWrapper } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { FormMonitorType } from '../constants';
 
@@ -129,10 +128,9 @@ export class SyntheticsAppPage {
 
   async fillFirstMonitorDetails({ url, location }: { url: string; location: string }) {
     await this.page.testSubj.fill('urls-input', url);
-    const comboBox = new EuiComboBoxWrapper(this.page, {
-      dataTestSubj: 'syntheticsServiceLocations',
-    });
-    await comboBox.selectMultiOption(location);
+    await this.page.components
+      .comboBox('syntheticsServiceLocations')
+      .setSelectedOptions([location]);
   }
 
   async createBasicMonitorDetails({
@@ -296,6 +294,25 @@ export class SyntheticsAppPage {
     await this.page.click('text="100 rows"');
   }
 
+  async selectAllMonitors() {
+    await this.page.testSubj.click('checkboxSelectAll');
+  }
+
+  async openBulkActionsMenu() {
+    // The bulk actions button only renders once at least one monitor is selected.
+    await this.page.testSubj.click('syntheticsBulkActionsButton');
+  }
+
+  async selectMaintenanceWindowInFlyout(title: string) {
+    const flyout = this.page.testSubj.locator('syntheticsBulkMaintenanceWindowsFlyout');
+    await flyout.locator('[data-test-subj="comboBoxSearchInput"]').click();
+    await this.page.getByRole('option', { name: title }).click();
+  }
+
+  async saveBulkMaintenanceWindows() {
+    await this.page.testSubj.click('syntheticsBulkMaintenanceWindowsSave');
+  }
+
   async findEditMonitorConfiguration(monitorEditDetails: Array<[string, string]>) {
     await this.page.click('text="Advanced options"');
     for (const [selector, expected] of monitorEditDetails) {
@@ -429,8 +446,17 @@ export class SyntheticsAppPage {
     await this.page.testSubj.waitForSelector('querySubmitButton');
   }
 
-  async refreshOverview() {
-    await this.page.testSubj.click('syntheticsRefreshButtonButton');
+  async refreshOverview(refreshInterval = 15) {
+    // Callers create monitors via the API after navigating with zero monitors, so
+    // the overview has already redirected to its empty getting-started/management
+    // state, which has no SyntheticsDatePicker. Re-navigate so the fresh load
+    // re-queries the now-existing monitors and renders the populated overview
+    // header before clicking the date picker's apply/refresh button.
+    await this.navigateToOverview(refreshInterval);
+    await expect(this.page.testSubj.locator('superDatePickerApplyTimeButton')).toBeVisible({
+      timeout: 30_000,
+    });
+    await this.page.testSubj.click('superDatePickerApplyTimeButton');
     await this.waitForLoadingToFinish();
   }
 
@@ -468,9 +494,11 @@ export class SyntheticsAppPage {
   }
 
   getDefaultConnectorsComboBox() {
-    return new EuiComboBoxWrapper(this.page, {
-      dataTestSubj: 'default-connectors-input-loaded',
-    });
+    // This combo encodes a loading state in its data-test-subj
+    // (default-connectors-input-{loading|loaded}) and re-fetches after each
+    // selection. setSelectedOptions polls the read-back until the selection
+    // settles, so the "-loaded" anchor reads correctly despite the reload.
+    return this.page.components.comboBox('default-connectors-input-loaded');
   }
 
   isEuiFormFieldInValid(locator: Locator): Promise<boolean> {

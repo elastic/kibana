@@ -7,10 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { BehaviorSubject } from 'rxjs';
 import { firstValueFrom } from 'rxjs';
 import type { BulkResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { HttpStart, NotificationsStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataTableRecord } from '@kbn/discover-utils';
 import { ROW_PLACEHOLDER_PREFIX } from '../constants';
 import { IndexUpdateService } from './index_update_service';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
@@ -123,6 +125,25 @@ describe('IndexUpdateService', () => {
       expect(afterAdd).toBe(false);
     });
 
+    it('clears unsaved changes when an edited value is reverted to its original', async () => {
+      // Seed a fetched document so edits can be compared against the stored value
+      const docsSubject = (service as unknown as { _docs$: BehaviorSubject<DataTableRecord[]> })
+        ._docs$;
+      docsSubject.next([
+        { id: '1', raw: { name: 'Boris' }, flattened: { name: 'Boris' } } as DataTableRecord,
+      ]);
+
+      // Editing the value to something new marks the doc as dirty
+      service.updateDoc('1', { name: 'DBoris' });
+      expect(await firstValueFrom(service.hasUnsavedChanges$)).toBe(true);
+      expect(service.isDirtyRow('1')).toBe(true);
+
+      // Reverting the value back to the original clears the dirty state
+      service.updateDoc('1', { name: 'Boris' });
+      expect(await firstValueFrom(service.hasUnsavedChanges$)).toBe(false);
+      expect(service.isDirtyRow('1')).toBe(false);
+    });
+
     it('does not mark unsaved changes if the only change is deleting a placeholder row', async () => {
       const initial = await firstValueFrom(service.hasUnsavedChanges$);
       expect(initial).toBe(false);
@@ -153,6 +174,26 @@ describe('IndexUpdateService', () => {
     const rowsAfterDeletion = await firstValueFrom(service.rows$);
     expect(rowsAfterDeletion.length).toBe(1); // An empty placeholder row should always be visible
     expect(rowsAfterDeletion[0].id).toEqual(expect.stringContaining(ROW_PLACEHOLDER_PREFIX));
+  });
+
+  describe('updateDoc value parsing', () => {
+    it('keeps the raw text for string-typed fields so object-like values are not coerced', async () => {
+      const rows = await firstValueFrom(service.rows$);
+
+      service.updateDoc(rows[0].id, { asd4: '{}' }, { asd4: { type: 'string', esType: 'text' } });
+
+      const rowsAfterEdition = await firstValueFrom(service.rows$);
+      expect(rowsAfterEdition[0].raw).toEqual({ asd4: '{}' });
+    });
+
+    it('infers the value type when no field type is provided', async () => {
+      const rows = await firstValueFrom(service.rows$);
+
+      service.updateDoc(rows[0].id, { count: '42', enabled: 'true', meta: '{}' });
+
+      const rowsAfterEdition = await firstValueFrom(service.rows$);
+      expect(rowsAfterEdition[0].raw).toEqual({ count: 42, enabled: true, meta: {} });
+    });
   });
 
   describe('flush operations', () => {

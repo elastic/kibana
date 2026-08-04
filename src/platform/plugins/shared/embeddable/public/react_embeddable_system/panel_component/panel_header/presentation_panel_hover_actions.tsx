@@ -29,6 +29,7 @@ import { buildContextMenuForActions, triggers } from '@kbn/ui-actions-plugin/pub
 import { css } from '@emotion/react';
 import type { EmbeddableApiContext, PublishesTitle, ViewMode } from '@kbn/presentation-publishing';
 import { apiCanLockHoverActions, useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import { getPanelContextMenuTriggerId } from '@kbn/presentation-util';
 import type { ActionWithContext } from '@kbn/ui-actions-plugin/public/context_menu/build_eui_context_menu_panels';
 import { BehaviorSubject, Subscription, switchMap } from 'rxjs';
 import {
@@ -45,24 +46,27 @@ import {
 const getContextMenuAriaLabel = (title?: string, index?: number) => {
   if (title) {
     return i18n.translate('embeddableApi.contextMenu.ariaLabelWithTitle', {
-      defaultMessage: 'Panel options for {title}',
+      defaultMessage: 'Menu for {title}',
       values: { title },
     });
   }
   if (index) {
     return i18n.translate('embeddableApi.contextMenu.ariaLabelWithIndex', {
-      defaultMessage: 'Options for panel {index}',
+      defaultMessage: 'Menu for panel {index}',
       values: { index },
     });
   }
   return i18n.translate('embeddableApi.contextMenu.ariaLabel', {
-    defaultMessage: 'Panel options',
+    defaultMessage: 'Panel menu',
   });
 };
 
 const ALLOWED_NOTIFICATIONS = ['ACTION_FILTERS_NOTIFICATION'] as const;
 
-const createClickHandler =
+const getQuickActionElementId = (actionId: string, uuid: string) =>
+  `presentationPanelQuickAction-${actionId}-${uuid}`;
+
+export const createClickHandler =
   (action: Action<EmbeddableApiContext>, context: ActionExecutionContext<EmbeddableApiContext>) =>
   (event: React.MouseEvent) => {
     if (event.currentTarget instanceof HTMLAnchorElement) {
@@ -76,7 +80,6 @@ const createClickHandler =
         event.preventDefault();
       }
     }
-    (event.currentTarget as HTMLElement).blur();
     action.execute(context);
   };
 
@@ -377,18 +380,21 @@ export const PresentationPanelHoverActions = ({
   });
 
   const ContextMenuButton = (
-    <EuiButtonIcon
-      color="text"
-      data-test-subj="embeddablePanelToggleMenuIcon"
-      aria-label={getContextMenuAriaLabel(title, index)}
-      onClick={() => {
-        setIsContextMenuOpen(!isContextMenuOpen);
-        if (apiCanLockHoverActions(api)) {
-          api.lockHoverActions(!hasLockedHoverActions);
-        }
-      }}
-      iconType="boxesVertical"
-    />
+    <EuiToolTip content={getContextMenuAriaLabel(title, index)} disableScreenReaderOutput>
+      <EuiButtonIcon
+        id={api?.uuid ? getPanelContextMenuTriggerId(api.uuid) : undefined}
+        color="text"
+        data-test-subj="embeddablePanelToggleMenuIcon"
+        aria-label={getContextMenuAriaLabel(title, index)}
+        onClick={() => {
+          setIsContextMenuOpen(!isContextMenuOpen);
+          if (apiCanLockHoverActions(api)) {
+            api.lockHoverActions(!hasLockedHoverActions);
+          }
+        }}
+        iconType="boxesVertical"
+      />
+    </EuiToolTip>
   );
 
   const dragHandle = useMemo(
@@ -458,13 +464,14 @@ export const PresentationPanelHoverActions = ({
               />
             )}
             {quickActionElements.map(
-              ({ iconType, 'data-test-subj': dataTestSubj, onClick, name }, i) => (
+              ({ iconType, 'data-test-subj': dataTestSubj, onClick, name, id }) => (
                 <EuiToolTip
                   key={`main_action_${dataTestSubj}_${api?.uuid}`}
                   content={name}
                   disableScreenReaderOutput
                 >
                   <EuiButtonIcon
+                    id={api?.uuid ? getQuickActionElementId(id, api.uuid) : undefined}
                     iconType={iconType}
                     color="text"
                     onClick={onClick as MouseEventHandler}

@@ -103,6 +103,10 @@ const ContributionsTable: React.FC<{
 
   return (
     <EuiBasicTable
+      tableCaption={i18n.translate(
+        'xpack.securitySolution.agentBuilder.entityAttachment.risk.tableCaption',
+        { defaultMessage: 'Risk score contributions' }
+      )}
       data-test-subj={testSubj}
       responsiveBreakpoint={false}
       columns={columnsArray}

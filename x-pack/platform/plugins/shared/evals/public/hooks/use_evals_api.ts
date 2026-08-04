@@ -26,6 +26,7 @@ import {
   EVALS_DATASET_EXAMPLE_URL,
   API_VERSIONS,
   type GetEvaluationDatasetsResponse,
+  type GetEvaluationDatasetsRequestQuery,
   type GetEvaluationDatasetResponse,
   type CreateEvaluationDatasetRequestBodyInput,
   type CreateEvaluationDatasetResponse,
@@ -67,15 +68,23 @@ export interface ExperimentsListFilters {
   suiteId?: string;
   modelId?: string;
   branch?: string;
+  /** Free-text term matched against experiment name or git branch. */
+  search?: string;
   buildId?: string;
   datasetId?: string;
   page?: number;
   perPage?: number;
 }
 
+type DatasetSortField = NonNullable<GetEvaluationDatasetsRequestQuery['sort_field']>;
+type DatasetSortOrder = NonNullable<GetEvaluationDatasetsRequestQuery['sort_order']>;
+
 interface DatasetsListFilters {
   page?: number;
   perPage?: number;
+  search?: string;
+  sortField?: DatasetSortField;
+  sortOrder?: DatasetSortOrder;
 }
 
 interface DatasetWithId {
@@ -116,9 +125,12 @@ export const useDatasets = (filters: DatasetsListFilters = {}) => {
   return useQuery({
     queryKey: queryKeys.datasets.list(filters),
     queryFn: async (): Promise<GetEvaluationDatasetsResponse> => {
-      const query: Record<string, number> = {};
+      const query: Record<string, string | number> = {};
       if (filters.page) query.page = filters.page;
       if (filters.perPage) query.per_page = filters.perPage;
+      if (filters.search) query.search = filters.search;
+      if (filters.sortField) query.sort_field = filters.sortField;
+      if (filters.sortOrder) query.sort_order = filters.sortOrder;
 
       return services.http!.get<GetEvaluationDatasetsResponse>(EVALS_DATASETS_URL, {
         query,
@@ -387,6 +399,7 @@ export const useEvaluationExperiments = (filters: ExperimentsListFilters = {}) =
       if (filters.suiteId) query.suite_id = filters.suiteId;
       if (filters.modelId) query.model_id = filters.modelId;
       if (filters.branch) query.branch = filters.branch;
+      if (filters.search) query.search = filters.search;
       if (filters.buildId) query.build_id = filters.buildId;
       if (filters.datasetId) query.dataset_id = filters.datasetId;
       if (filters.page) query.page = filters.page;
@@ -398,6 +411,7 @@ export const useEvaluationExperiments = (filters: ExperimentsListFilters = {}) =
       });
     },
     keepPreviousData: true,
+    refetchOnMount: 'always',
     retry: (_failureCount, error) => {
       if (isHttpFetchError(error)) {
         return !error.response?.status || error.response.status >= 500;
@@ -407,7 +421,16 @@ export const useEvaluationExperiments = (filters: ExperimentsListFilters = {}) =
   });
 };
 
-export const useEvaluationExperiment = (experimentId: string, executionId?: string) => {
+interface EvaluationExperimentOptions {
+  refetchInterval?: number | false;
+  enabled?: boolean;
+}
+
+export const useEvaluationExperiment = (
+  experimentId: string,
+  executionId?: string,
+  options: EvaluationExperimentOptions = {}
+) => {
   const { services } = useKibana();
 
   return useQuery({
@@ -423,13 +446,14 @@ export const useEvaluationExperiment = (experimentId: string, executionId?: stri
         version: API_VERSIONS.internal.v1,
       });
     },
-    enabled: experimentId.length > 0,
+    enabled: experimentId.length > 0 && (options.enabled ?? true),
     retry: (_failureCount, error) => {
       if (isHttpFetchError(error)) {
         return !error.response?.status || error.response.status >= 500;
       }
       return true;
     },
+    refetchInterval: options.refetchInterval,
     refetchOnWindowFocus: false,
   });
 };
@@ -482,10 +506,16 @@ export const useCompareExperiments = (
   });
 };
 
+interface ExperimentDatasetExamplesOptions {
+  refetchInterval?: number | false;
+  staleTime?: number;
+}
+
 export const useExperimentDatasetExamples = (
   experimentId: string,
   datasetId: string,
-  executionId?: string
+  executionId?: string,
+  options: ExperimentDatasetExamplesOptions = {}
 ) => {
   const { services } = useKibana();
 
@@ -506,6 +536,8 @@ export const useExperimentDatasetExamples = (
       });
     },
     enabled: experimentId.length > 0 && datasetId.length > 0,
+    refetchInterval: options.refetchInterval,
+    staleTime: options.staleTime,
   });
 };
 

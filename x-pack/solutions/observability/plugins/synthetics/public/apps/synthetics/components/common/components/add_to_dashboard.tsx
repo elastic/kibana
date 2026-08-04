@@ -18,7 +18,7 @@ import React, { useCallback } from 'react';
 import type { SaveModalDashboardProps } from '@kbn/presentation-util-plugin/public';
 import { SavedObjectSaveModalDashboard } from '@kbn/presentation-util-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import type { ClientPluginsStart } from '../../../../../plugin';
 import type { SYNTHETICS_MONITORS_EMBEDDABLE } from '../../../../../../common/embeddables/monitors_overview/constants';
 import { selectOverviewView } from '../../../state';
@@ -158,6 +158,9 @@ export const AddToDashboard = ({
           }
           isOpen={isPopoverOpen}
           closePopover={closePopover}
+          aria-label={i18n.translate('xpack.synthetics.addToDashboard.popoverAriaLabel', {
+            defaultMessage: 'Add to dashboard menu',
+          })}
         >
           <EuiContextMenuPanel
             items={[

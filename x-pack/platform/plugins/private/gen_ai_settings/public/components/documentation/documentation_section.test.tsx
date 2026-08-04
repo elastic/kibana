@@ -49,6 +49,7 @@ describe('DocumentationSection', () => {
       }),
       install: jest.fn().mockResolvedValue({ installed: true }),
       uninstall: jest.fn().mockResolvedValue({ success: true }),
+      getDefaultInferenceId: jest.fn().mockResolvedValue('.elser-2-elasticsearch'),
     },
   };
 
@@ -87,6 +88,9 @@ describe('DocumentationSection', () => {
     enableProductDocumentationToolOnDefaultAgentMock.mockResolvedValue(undefined);
     mockProductDocBase.installation.install = jest.fn().mockResolvedValue({ installed: true });
     mockProductDocBase.installation.uninstall = jest.fn().mockResolvedValue({ success: true });
+    mockProductDocBase.installation.getDefaultInferenceId = jest
+      .fn()
+      .mockResolvedValue('.elser-2-elasticsearch');
     mockProductDocBase.installation.getStatus = jest.fn().mockImplementation(({ resourceType }) => {
       if (resourceType === ResourceTypes.securityLabs) {
         return Promise.resolve({
@@ -212,6 +216,60 @@ describe('DocumentationSection', () => {
       await waitFor(() => {
         expect(screen.getByTestId('documentation-install-elastic_documents')).toBeInTheDocument();
         expect(screen.getByTestId('documentation-install-security_labs')).toBeInTheDocument();
+      });
+    });
+
+    it('should disable install actions while the default inference id is resolving', async () => {
+      let resolveInferenceId: (value: string) => void;
+      const inferenceIdPromise = new Promise<string>((resolve) => {
+        resolveInferenceId = resolve;
+      });
+
+      mockProductDocBase.installation.getDefaultInferenceId = jest
+        .fn()
+        .mockReturnValue(inferenceIdPromise);
+      mockProductDocBase.installation.getStatus = jest
+        .fn()
+        .mockImplementation(({ resourceType }) => {
+          if (resourceType === ResourceTypes.securityLabs) {
+            return Promise.resolve({
+              inferenceId: '.elser-2-elasticsearch',
+              resourceType: ResourceTypes.securityLabs,
+              status: 'uninstalled',
+            });
+          }
+          return Promise.resolve({
+            inferenceId: '.elser-2-elasticsearch',
+            overall: 'uninstalled',
+            perProducts: {},
+          });
+        });
+
+      renderComponent(mockProductDocBase, true);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('documentation-install-elastic_documents')).toBeInTheDocument();
+      });
+
+      const installButton = screen.getByTestId('documentation-install-elastic_documents');
+      expect(installButton).toBeDisabled();
+
+      fireEvent.click(installButton);
+      expect(mockProductDocBase.installation.install).not.toHaveBeenCalled();
+
+      resolveInferenceId!('.jina-embeddings-v5-text-small');
+
+      await waitFor(() => {
+        expect(installButton).not.toBeDisabled();
+      });
+
+      fireEvent.click(installButton);
+
+      await waitFor(() => {
+        expect(mockProductDocBase.installation.install).toHaveBeenCalledWith({
+          inferenceId: '.jina-embeddings-v5-text-small',
+          resourceType: ResourceTypes.productDoc,
+        });
       });
     });
 

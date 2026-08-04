@@ -21,7 +21,10 @@ import {
 import { getStreamPatternFor } from '../../privilege_monitoring/data_sources/constants';
 import type { WatchlistConfigClient } from '../management/watchlist_config';
 import { WatchlistConfigClient as WatchlistConfigClientClass } from '../management/watchlist_config';
-import { WatchlistEntitySourceClient } from '../entity_sources/infra';
+import {
+  WatchlistEntitySourceClient,
+  watchlistEntitySourceTypeName,
+} from '../entity_sources/infra';
 import type { StartPlugins } from '../../../../plugin';
 
 // Bump this when PREBUILT_WATCHLISTS definitions change
@@ -213,7 +216,9 @@ export const installPrebuiltWatchlists = async ({
   hasEncryptionKey,
 }: EntityAnalyticsMigrationsParams) => {
   const [coreStart] = await getStartServices();
-  const internalRepo = coreStart.savedObjects.createInternalRepository();
+  // 'space' is a hidden saved object type, so it must be explicitly included or
+  // `find` silently returns an empty result and custom spaces are never discovered.
+  const internalRepo = coreStart.savedObjects.createInternalRepository(['space']);
   const esClient = coreStart.elasticsearch.client.asInternalUser;
 
   const spacesResponse = await internalRepo.find({
@@ -228,7 +233,11 @@ export const installPrebuiltWatchlists = async ({
   }
 
   for (const namespace of namespaces) {
-    const soClient = buildScopedInternalSavedObjectsClientUnsafe({ coreStart, namespace });
+    const soClient = buildScopedInternalSavedObjectsClientUnsafe({
+      coreStart,
+      namespace,
+      includedHiddenTypes: [watchlistEntitySourceTypeName],
+    });
     const watchlistClient = new WatchlistConfigClientClass({
       soClient,
       esClient,

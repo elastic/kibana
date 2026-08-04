@@ -8,9 +8,9 @@
 import { set } from '@kbn/safer-lodash-set/fp';
 import { getOr } from 'lodash/fp';
 import React, { memo, useCallback, useEffect, useMemo } from 'react';
-import type { ConnectedProps } from 'react-redux';
-import { connect, useDispatch } from 'react-redux';
-import type { Dispatch } from 'redux';
+import type { ConnectedProps } from 'react-redux-v7';
+import { connect, useDispatch } from 'react-redux-v7';
+import type { Dispatch } from 'redux-v4';
 import { Subscription } from 'rxjs';
 import deepEqual from 'fast-deep-equal';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
@@ -493,7 +493,12 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
     dispatch(inputsActions.setSearchBarFilter({ id, filters })),
 });
 
-export const connector = connect(makeMapStateToProps, mapDispatchToProps);
+type StateProps = ReturnType<ReturnType<typeof makeMapStateToProps>>;
+type DispatchProps = ReturnType<typeof mapDispatchToProps>;
+export const connector = connect<StateProps, DispatchProps, SiemSearchBarProps, State>(
+  makeMapStateToProps,
+  mapDispatchToProps
+);
 
 type PropsFromRedux = ConnectedProps<typeof connector>;
 

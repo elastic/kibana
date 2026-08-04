@@ -54,7 +54,7 @@ apiTest.describe('Delete action policy API', { tag: '@local-stateful-classic' },
 
       expect(deleteResponse).toHaveStatusCode(204);
 
-      const remaining = await apiServices.alertingV2.actionPolicies.list({ perPage: 100 });
+      const remaining = await apiServices.alertingV2.actionPolicies.list({ per_page: 100 });
       expect(remaining.items.map((policy) => policy.id)).not.toContain(created.id);
     }
   );
@@ -65,6 +65,7 @@ apiTest.describe('Delete action policy API', { tag: '@local-stateful-classic' },
     });
 
     expect(response).toHaveStatusCode(404);
+    expect(response.body.code).toBe('ACTION_POLICY_NOT_FOUND');
   });
 
   apiTest(
@@ -83,6 +84,7 @@ apiTest.describe('Delete action policy API', { tag: '@local-stateful-classic' },
         headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
       });
       expect(secondDelete).toHaveStatusCode(404);
+      expect(secondDelete.body.code).toBe('ACTION_POLICY_NOT_FOUND');
     }
   );
 
@@ -92,6 +94,7 @@ apiTest.describe('Delete action policy API', { tag: '@local-stateful-classic' },
     });
 
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest(

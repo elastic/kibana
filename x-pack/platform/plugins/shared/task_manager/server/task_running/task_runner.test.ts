@@ -17,12 +17,7 @@ import {
   TaskRunResult,
 } from '.';
 import type { TaskEvent, TaskRun } from '../task_events';
-import {
-  asTaskRunEvent,
-  asTaskMarkRunningEvent,
-  TaskPersistence,
-  asTaskManagerStatEvent,
-} from '../task_events';
+import { asTaskRunEvent, TaskPersistence, asTaskManagerStatEvent } from '../task_events';
 import type { ConcreteTaskInstance, TaskEventLogger } from '../task';
 import { getDeleteTaskRunResult, TaskStatus, TaskCost, InstanceTaskCost } from '../task';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
@@ -37,13 +32,8 @@ import { tracing } from '@elastic/opentelemetry-node/sdk';
 import { executionContextServiceMock } from '@kbn/core/server/mocks';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 import { bufferedTaskStoreMock } from '../buffered_task_store.mock';
-import {
-  TASK_MANAGER_RUN_TRANSACTION_TYPE,
-  TASK_MANAGER_TRANSACTION_TYPE,
-  TASK_MANAGER_TRANSACTION_TYPE_MARK_AS_RUNNING,
-} from './task_runner';
+import { TASK_MANAGER_RUN_TRANSACTION_TYPE } from './task_runner';
 import { schema } from '@kbn/config-schema';
-import { CLAIM_STRATEGY_MGET, CLAIM_STRATEGY_UPDATE_BY_QUERY } from '../config';
 import * as nextRunAtUtils from '../lib/get_next_run_at';
 import { configMock } from '../config.mock';
 import { EsApiKeyStrategy } from '../api_key_strategy';
@@ -53,11 +43,14 @@ const executionContext = executionContextServiceMock.createSetupContract();
 const minutesFromNow = (mins: number): Date => secondsFromNow(mins * 60);
 const minutesFromDate = (date: Date, mins: number): Date => secondsFromDate(date, mins * 60);
 const getNextRunAtSpy = jest.spyOn(nextRunAtUtils, 'getNextRunAt');
-const eventLoggerMock = { logEvent: jest.fn() } as unknown as TaskEventLogger;
+const eventLoggerMock = {
+  logEvent: jest.fn(),
+} as unknown as TaskEventLogger;
 const dateRegExp = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{1,3})?Z$/;
 
+const TASK_EXECUTION_UUID = 'NEW_UUID';
 jest.mock('uuid', () => ({
-  v4: () => 'NEW_UUID',
+  v4: () => TASK_EXECUTION_UUID,
 }));
 
 beforeAll(() => {
@@ -121,71 +114,6 @@ describe('TaskManagerRunner', () => {
         .mockImplementation(() => mockApmTrans as any);
     });
 
-    test('makes calls to APM as expected when task markedAsRunning is success', async () => {
-      const { runner } = await pendingStageSetup({
-        instance: {
-          schedule: {
-            interval: '10m',
-          },
-        },
-        definitions: {
-          bar: {
-            title: 'Bar!',
-            createTaskRunner: () => ({
-              run: async () => undefined,
-            }),
-          },
-        },
-      });
-      await runner.markTaskAsRunning();
-      expect(apm.startTransaction).toHaveBeenCalledWith(
-        TASK_MANAGER_TRANSACTION_TYPE_MARK_AS_RUNNING,
-        TASK_MANAGER_TRANSACTION_TYPE
-      );
-      expect(mockApmTrans.end).toHaveBeenCalledWith('success');
-
-      const spans = otelExporter.getFinishedSpans();
-      const span = spans.find((s) => s.name === 'mark-task-as-running');
-      expect(span).toBeDefined();
-      expect(span!.attributes['transaction.type']).toBe(TASK_MANAGER_TRANSACTION_TYPE);
-      expect(span!.status.code).not.toBe(SpanStatusCode.ERROR);
-    });
-
-    test('makes calls to APM as expected when task markedAsRunning fails', async () => {
-      const { runner, store } = await pendingStageSetup({
-        instance: {
-          schedule: {
-            interval: '10m',
-          },
-        },
-        definitions: {
-          bar: {
-            title: 'Bar!',
-            createTaskRunner: () => ({
-              run: async () => undefined,
-            }),
-          },
-        },
-      });
-      store.update.mockRejectedValue(
-        SavedObjectsErrorHelpers.createGenericNotFoundError('type', 'id')
-      );
-      await expect(runner.markTaskAsRunning()).rejects.toMatchInlineSnapshot(
-        `[Error: Saved object [type/id] not found]`
-      );
-      // await runner.markTaskAsRunning();
-      expect(apm.startTransaction).toHaveBeenCalledWith(
-        TASK_MANAGER_TRANSACTION_TYPE_MARK_AS_RUNNING,
-        TASK_MANAGER_TRANSACTION_TYPE
-      );
-      expect(mockApmTrans.end).toHaveBeenCalledWith('failure');
-
-      const spans = otelExporter.getFinishedSpans();
-      const span = spans.find((s) => s.name === 'mark-task-as-running');
-      expect(span).toBeDefined();
-      expect(span!.status.code).toBe(SpanStatusCode.ERROR);
-    });
-
     test('provides execution context on run', async () => {
       const { runner } = await readyToRunStageSetup({
         definitions: {
@@ -225,611 +153,6 @@ describe('TaskManagerRunner', () => {
       expect(runner.toString()).toEqual('bar "foo"');
     });
 
-    test('calculates retryAt by schedule when running a recurring task', async () => {
-      const intervalMinutes = 10;
-      const id = _.random(1, 20).toString();
-      const initialAttempts = _.random(0, 2);
-      const { runner, store } = await pendingStageSetup({
-        instance: {
-          id,
-          attempts: initialAttempts,
-          schedule: {
-            interval: `${intervalMinutes}m`,
-          },
-          enabled: true,
-        },
-        definitions: {
-          bar: {
-            title: 'Bar!',
-            createTaskRunner: () => ({
-              run: async () => undefined,
-            }),
-          },
-        },
-      });
-
-      await runner.markTaskAsRunning();
-
-      expect(store.update).toHaveBeenCalledTimes(1);
-      const instance = store.update.mock.calls[0][0];
-
-      expect(instance.retryAt!.getTime()).toEqual(
-        instance.startedAt!.getTime() + intervalMinutes * 60 * 1000
-      );
-      expect(instance.enabled).not.toBeDefined();
-    });
-
-    test('calculates retryAt by default timout when it exceeds the schedule of a recurring task', async () => {
-      const intervalSeconds = 20;
-      const id = _.random(1, 20).toString();
-      const initialAttempts = _.random(0, 2);
-      const { runner, store } = await pendingStageSetup({
-        instance: {
-          id,
-          attempts: initialAttempts,
-          schedule: {
-            interval: `${intervalSeconds}s`,
-          },
-          enabled: true,
-        },
-        definitions: {
-          bar: {
-            title: 'Bar!',
-            createTaskRunner: () => ({
-              run: async () => undefined,
-            }),
-          },
-        },
-      });
-
-      await runner.markTaskAsRunning();
-
-      expect(store.update).toHaveBeenCalledTimes(1);
-      const instance = store.update.mock.calls[0][0];
-
-      expect(instance.retryAt!.getTime()).toEqual(instance.startedAt!.getTime() + 5 * 60 * 1000);
-      expect(instance.enabled).not.toBeDefined();
-    });
-
-    test('calculates retryAt by task type timeout if it exceeds the schedule when running a recurring task', async () => {
-      const timeoutMinutes = 1;
-      const intervalSeconds = 20;
-      const id = _.random(1, 20).toString();
-      const initialAttempts = _.random(0, 2);
-      const { runner, store } = await pendingStageSetup({
-        instance: {
-          id,
-          attempts: initialAttempts,
-          schedule: {
-            interval: `${intervalSeconds}s`,
-          },
-          enabled: true,
-        },
-        definitions: {
-          bar: {
-            title: 'Bar!',
-            timeout: `${timeoutMinutes}m`,
-            createTaskRunner: () => ({
-              run: async () => undefined,
-            }),
-          },
-        },
-      });
-
-      await runner.markTaskAsRunning();
-
-      expect(store.update).toHaveBeenCalledTimes(1);
-      const instance = store.update.mock.calls[0][0];
-
-      expect(instance.retryAt!.getTime()).toEqual(
-        instance.startedAt!.getTime() + timeoutMinutes * 60 * 1000
-      );
-      expect(instance.enabled).not.toBeDefined();
-    });
-
-    test('does not calculate retryAt by task instance timeout if defined for a recurring task', async () => {
-      const timeoutMinutes = 1;
-      const timeoutOverrideSeconds = 90;
-      const intervalSeconds = 20;
-      const id = _.random(1, 20).toString();
-      const initialAttempts = _.random(0, 2);
-      const { runner, store } = await pendingStageSetup({
-        instance: {
-          id,
-          attempts: initialAttempts,
-          schedule: {
-            interval: `${intervalSeconds}s`,
-          },
-          timeoutOverride: `${timeoutOverrideSeconds}s`,
-          enabled: true,
-        },
-        definitions: {
-          bar: {
-            title: 'Bar!',
-            timeout: `${timeoutMinutes}m`,
-            createTaskRunner: () => ({
-              run: async () => undefined,
-            }),
-          },
-        },
-      });
-
-      await runner.markTaskAsRunning();
-
-      expect(store.update).toHaveBeenCalledTimes(1);
-      const instance = store.update.mock.calls[0][0];
-
-      expect(instance.retryAt!.getTime()).toEqual(
-        instance.startedAt!.getTime() + timeoutMinutes * 60 * 1000
-      );
-      expect(instance.enabled).not.toBeDefined();
-    });
-
-    test('sets startedAt, status, attempts and retryAt when claiming a task', async () => {
-      const timeoutMinutes = 1;
-      const id = _.random(1, 20).toString();
-      const initialAttempts = _.random(0, 2);
-      const { runner, store } = await pendingStageSetup({
-        instance: {
-          id,
-          enabled: true,
-          attempts: initialAttempts,
-          schedule: undefined,
-        },
-        definitions: {
-          bar: {
-            title: 'Bar!',
-            timeout: `${timeoutMinutes}m`,
-            createTaskRunner: () => ({
-              run: async () => undefined,
-            }),
-          },
-        },
-      });
-
-      await runner.markTaskAsRunning();
-
-      expect(store.update).toHaveBeenCalledTimes(1);
-      const instance = store.update.mock.calls[0][0];
-
-      expect(instance.attempts).toEqual(initialAttempts + 1);
-      expect(instance.status).toBe('running');
-      expect(instance.startedAt!.getTime()).toEqual(Date.now());
-
-      const minRunAt = Date.now();
-      const maxRunAt = minRunAt + baseDelay * Math.pow(2, initialAttempts - 1);
-      expect(instance.retryAt!.getTime()).toBeGreaterThanOrEqual(
-        minRunAt + timeoutMinutes * 60 * 1000
-      );
-      expect(instance.retryAt!.getTime()).toBeLessThanOrEqual(
-        maxRunAt + timeoutMinutes * 60 * 1000
-      );
-
-      expect(instance.enabled).not.toBeDefined();
-    });
-
-    test('sets retryAt to task instance timeout override when defined when claiming an ad hoc task', async () => {
-      const timeoutSeconds = 60;
-      const timeoutOverrideSeconds = 90;
-      const id = _.random(1, 20).toString();
-      const initialAttempts = _.random(0, 2);
-      const { runner, store } = await pendingStageSetup({
-        instance: {
-          id,
-          enabled: true,
-          attempts: initialAttempts,
-          timeoutOverride: `${timeoutOverrideSeconds}s`,
-          schedule: undefined,
-        },
-        definitions: {
-          bar: {
-            title: 'Bar!',
-            timeout: `${timeoutSeconds}s`,
-            createTaskRunner: () => ({
-              run: async () => undefined,
-            }),
-          },
-        },
-      });
-
-      await runner.markTaskAsRunning();
-
-      expect(store.update).toHaveBeenCalledTimes(1);
-      const instance = store.update.mock.calls[0][0];
-
-      expect(instance.attempts).toEqual(initialAttempts + 1);
-      expect(instance.status).toBe('running');
-      expect(instance.startedAt!.getTime()).toEqual(Date.now());
-
-      const minRunAt = Date.now();
-      const maxRunAt = minRunAt + baseDelay * Math.pow(2, initialAttempts - 1);
-      expect(instance.retryAt!.getTime()).toBeGreaterThanOrEqual(
-        minRunAt + timeoutOverrideSeconds * 1000
-      );
-      expect(instance.retryAt!.getTime()).toBeLessThanOrEqual(
-        maxRunAt + timeoutOverrideSeconds * 1000
-      );
-
-      expect(instance.enabled).not.toBeDefined();
-    });
-
-    test('sets retryAt when there is an error', async () => {
-      const id = _.random(1, 20).toString();
-      const initialAttempts = _.random(1, 3);
-      const timeoutMinutes = 1;
-      const { runner, store } = await pendingStageSetup({
-        instance: {
-          id,
-          attempts: initialAttempts,
-          schedule: undefined,
-          enabled: true,
-        },
-        definitions: {
-          bar: {
-            title: 'Bar!',
-            timeout: `${timeoutMinutes}m`,
-            createTaskRunner: () => ({
-              run: async () => undefined,
-            }),
-          },
-        },
-      });
-
-      await runner.markTaskAsRunning();
-
-      expect(store.update).toHaveBeenCalledTimes(1);
-      const instance = store.update.mock.calls[0][0];
-
-      const minRunAt = Date.now();
-      const maxRunAt = minRunAt + baseDelay * Math.pow(2, initialAttempts - 1);
-      expect(instance.retryAt!.getTime()).toBeGreaterThanOrEqual(
-        minRunAt + timeoutMinutes * 60 * 1000
-      );
-      expect(instance.retryAt!.getTime()).toBeLessThanOrEqual(
-        maxRunAt + timeoutMinutes * 60 * 1000
-      );
-      expect(instance.enabled).not.toBeDefined();
-    });
-
-    test('it returns false when markTaskAsRunning fails due to VERSION_CONFLICT_STATUS', async () => {
-      const id = _.random(1, 20).toString();
-      const initialAttempts = _.random(1, 3);
-      const timeoutMinutes = 1;
-      const { runner, store } = await pendingStageSetup({
-        instance: {
-          id,
-          attempts: initialAttempts,
-          schedule: undefined,
-        },
-        definitions: {
-          bar: {
-            title: 'Bar!',
-            timeout: `${timeoutMinutes}m`,
-            createTaskRunner: () => ({
-              run: async () => undefined,
-            }),
-          },
-        },
-      });
-
-      store.update.mockRejectedValue(
-        SavedObjectsErrorHelpers.decorateConflictError(new Error('repo error'))
-      );
-
-      expect(await runner.markTaskAsRunning()).toEqual(false);
-    });
-
-    test('it throw when markTaskAsRunning fails for unexpected reasons', async () => {
-      const id = _.random(1, 20).toString();
-      const initialAttempts = _.random(1, 3);
-      const timeoutMinutes = 1;
-      const { runner, store } = await pendingStageSetup({
-        instance: {
-          id,
-          attempts: initialAttempts,
-          schedule: undefined,
-        },
-        definitions: {
-          bar: {
-            title: 'Bar!',
-            timeout: `${timeoutMinutes}m`,
-            createTaskRunner: () => ({
-              run: async () => undefined,
-            }),
-          },
-        },
-      });
-
-      store.update.mockRejectedValue(
-        SavedObjectsErrorHelpers.createGenericNotFoundError('type', 'id')
-      );
-
-      return expect(runner.markTaskAsRunning()).rejects.toMatchInlineSnapshot(
-        `[Error: Saved object [type/id] not found]`
-      );
-    });
-
-    test(`it tries to increment a task's attempts when markTaskAsRunning fails for unexpected reasons`, async () => {
-      const id = _.random(1, 20).toString();
-      const initialAttempts = _.random(1, 3);
-      const timeoutMinutes = 1;
-      const { runner, store } = await pendingStageSetup({
-        instance: {
-          id,
-          attempts: initialAttempts,
-          schedule: undefined,
-        },
-        definitions: {
-          bar: {
-            title: 'Bar!',
-            timeout: `${timeoutMinutes}m`,
-            createTaskRunner: () => ({
-              run: async () => undefined,
-            }),
-          },
-        },
-      });
-
-      store.update.mockRejectedValueOnce(SavedObjectsErrorHelpers.createBadRequestError('type'));
-      store.update.mockResolvedValueOnce(
-        mockInstance({
-          id,
-          attempts: initialAttempts,
-          schedule: undefined,
-        })
-      );
-
-      await expect(runner.markTaskAsRunning()).rejects.toMatchInlineSnapshot(
-        `[Error: type: Bad Request]`
-      );
-
-      expect(store.update).toHaveBeenCalledTimes(1);
-      expect(store.partialUpdate).toHaveBeenCalledTimes(1);
-      expect(store.partialUpdate).toHaveBeenCalledWith(
-        {
-          id,
-          status: TaskStatus.Idle,
-          startedAt: null,
-          retryAt: null,
-          ownerId: null,
-          attempts: initialAttempts + 1,
-        },
-        {
-          validate: false,
-          doc: mockInstance({
-            id,
-            attempts: initialAttempts,
-            schedule: undefined,
-          }),
-        }
-      );
-    });
-
-    test(`it logs an error when failing to increment a task's attempts when markTaskAsRunning fails and throws an error object`, async () => {
-      const id = _.random(1, 20).toString();
-      const initialAttempts = _.random(1, 3);
-      const timeoutMinutes = 1;
-      const { runner, store, logger } = await pendingStageSetup({
-        instance: {
-          id,
-          attempts: initialAttempts,
-          schedule: undefined,
-        },
-        definitions: {
-          bar: {
-            title: 'Bar!',
-            timeout: `${timeoutMinutes}m`,
-            createTaskRunner: () => ({
-              run: async () => undefined,
-            }),
-          },
-        },
-      });
-
-      store.update.mockRejectedValueOnce(SavedObjectsErrorHelpers.createBadRequestError('type'));
-      store.partialUpdate.mockRejectedValueOnce({
-        type: 'type',
-        id: 'id',
-        error: {
-          statusCode: 409,
-          error: 'Conflict',
-          message: 'Saved object [type/id] conflict',
-        },
-      });
-
-      await expect(runner.markTaskAsRunning()).rejects.toMatchInlineSnapshot(
-        `[Error: type: Bad Request]`
-      );
-
-      const loggerCall = logger.error.mock.calls[0][0];
-      expect(loggerCall as string).toMatchInlineSnapshot(
-        `"[Task Runner] Task ${id} failed to release claim after failure: Error: Saved object [type/id] conflict"`
-      );
-
-      expect(store.partialUpdate).toHaveBeenCalledWith(
-        {
-          id,
-          status: TaskStatus.Idle,
-          startedAt: null,
-          retryAt: null,
-          ownerId: null,
-          attempts: initialAttempts + 1,
-        },
-        {
-          validate: false,
-          doc: mockInstance({
-            id,
-            attempts: initialAttempts,
-            schedule: undefined,
-          }),
-        }
-      );
-    });
-
-    test(`it logs an error when failing to increment a task's attempts when markTaskAsRunning fails`, async () => {
-      const id = _.random(1, 20).toString();
-      const initialAttempts = _.random(1, 3);
-      const timeoutMinutes = 1;
-      const { runner, store, logger } = await pendingStageSetup({
-        instance: {
-          id,
-          attempts: initialAttempts,
-          schedule: undefined,
-        },
-        definitions: {
-          bar: {
-            title: 'Bar!',
-            timeout: `${timeoutMinutes}m`,
-            createTaskRunner: () => ({
-              run: async () => undefined,
-            }),
-          },
-        },
-      });
-
-      store.update.mockRejectedValueOnce(SavedObjectsErrorHelpers.createBadRequestError('type'));
-      store.partialUpdate.mockRejectedValueOnce(
-        SavedObjectsErrorHelpers.createBadRequestError('type')
-      );
-
-      await expect(runner.markTaskAsRunning()).rejects.toMatchInlineSnapshot(
-        `[Error: type: Bad Request]`
-      );
-
-      const loggerCall = logger.error.mock.calls[0][0];
-      expect(loggerCall as string).toMatchInlineSnapshot(
-        `"[Task Runner] Task ${id} failed to release claim after failure: Error: type: Bad Request"`
-      );
-
-      expect(store.partialUpdate).toHaveBeenCalledWith(
-        {
-          id,
-          status: TaskStatus.Idle,
-          startedAt: null,
-          retryAt: null,
-          ownerId: null,
-          attempts: initialAttempts + 1,
-        },
-        {
-          validate: false,
-          doc: mockInstance({
-            id,
-            attempts: initialAttempts,
-            schedule: undefined,
-          }),
-        }
-      );
-    });
-
-    test(`it doesnt try to increment a task's attempts when markTaskAsRunning fails for version conflict`, async () => {
-      const id = _.random(1, 20).toString();
-      const initialAttempts = _.random(1, 3);
-      const timeoutMinutes = 1;
-      const { runner, store } = await pendingStageSetup({
-        instance: {
-          id,
-          attempts: initialAttempts,
-          schedule: undefined,
-        },
-        definitions: {
-          bar: {
-            title: 'Bar!',
-            timeout: `${timeoutMinutes}m`,
-            createTaskRunner: () => ({
-              run: async () => undefined,
-            }),
-          },
-        },
-      });
-
-      store.update.mockRejectedValueOnce(
-        SavedObjectsErrorHelpers.createConflictError('type', 'id')
-      );
-      store.update.mockResolvedValueOnce(
-        mockInstance({
-          id,
-          attempts: initialAttempts,
-          schedule: undefined,
-        })
-      );
-
-      await expect(runner.markTaskAsRunning()).resolves.toMatchInlineSnapshot(`false`);
-
-      expect(store.update).toHaveBeenCalledTimes(1);
-    });
-
-    test(`it doesnt try to increment a task's attempts when markTaskAsRunning fails due to Saved Object not being found`, async () => {
-      const id = _.random(1, 20).toString();
-      const initialAttempts = _.random(1, 3);
-      const timeoutMinutes = 1;
-      const { runner, store } = await pendingStageSetup({
-        instance: {
-          id,
-          attempts: initialAttempts,
-          schedule: undefined,
-        },
-        definitions: {
-          bar: {
-            title: 'Bar!',
-            timeout: `${timeoutMinutes}m`,
-            createTaskRunner: () => ({
-              run: async () => undefined,
-            }),
-          },
-        },
-      });
-
-      store.update.mockRejectedValueOnce(
-        SavedObjectsErrorHelpers.createGenericNotFoundError('type', 'id')
-      );
-      store.update.mockResolvedValueOnce(
-        mockInstance({
-          id,
-          attempts: initialAttempts,
-          schedule: undefined,
-        })
-      );
-
-      await expect(runner.markTaskAsRunning()).rejects.toMatchInlineSnapshot(
-        `[Error: Saved object [type/id] not found]`
-      );
-
-      expect(store.update).toHaveBeenCalledTimes(1);
-    });
-
-    test('bypasses getRetry (returning false) of a recurring task to set retryAt when defined', async () => {
-      const id = _.random(1, 20).toString();
-      const initialAttempts = _.random(1, 3);
-      const timeoutMinutes = 1;
-      const { runner, store } = await pendingStageSetup({
-        instance: {
-          id,
-          attempts: initialAttempts,
-          schedule: { interval: '1m' },
-          startedAt: new Date(),
-          enabled: true,
-        },
-        definitions: {
-          bar: {
-            title: 'Bar!',
-            timeout: `${timeoutMinutes}m`,
-            createTaskRunner: () => ({
-              run: async () => undefined,
-            }),
-          },
-        },
-      });
-
-      await runner.markTaskAsRunning();
-
-      expect(store.update).toHaveBeenCalledTimes(1);
-      const instance = store.update.mock.calls[0][0];
-
-      const timeoutDelay = timeoutMinutes * 60 * 1000;
-      expect(instance.retryAt!.getTime()).toEqual(new Date(Date.now() + timeoutDelay).getTime());
-      expect(instance.enabled).not.toBeDefined();
-    });
-
     test('skips marking task as running for mget claim strategy', async () => {
       const { runner, store } = await pendingStageSetup({
         instance: {
@@ -845,7 +168,6 @@ describe('TaskManagerRunner', () => {
             }),
           },
         },
-        strategy: CLAIM_STRATEGY_MGET,
       });
       const result = await runner.markTaskAsRunning();
 
@@ -861,6 +183,68 @@ describe('TaskManagerRunner', () => {
       expect(runner.toString()).toEqual('bar "foo"');
 
       expect(store.update).not.toHaveBeenCalled();
+    });
+
+    test('logs a warning for mget claim strategy when a ready-to-run task has a null startedAt', async () => {
+      const { runner, logger, store } = await pendingStageSetup({
+        instance: {
+          schedule: {
+            interval: '10m',
+          },
+          status: TaskStatus.Running,
+          // a claim anomaly can leave a ready-to-run mget task without a startedAt,
+          // which breaks the running-task invariant; the runner should surface it
+          startedAt: null,
+        },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            timeout: `1m`,
+            createTaskRunner: () => ({
+              run: async () => undefined,
+            }),
+          },
+        },
+      });
+
+      const result = await runner.markTaskAsRunning();
+
+      expect(result).toBe(true);
+      expect(store.update).not.toHaveBeenCalled();
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'Task bar "foo" is ready to run (mget) without a startedAt, which breaks the running-task invariant'
+        ),
+        expect.objectContaining({ tags: ['bar', 'foo'] })
+      );
+    });
+
+    test('does not log for mget claim strategy when startedAt is already set', async () => {
+      const startedAt = new Date('1970-01-01T00:00:00.000Z');
+      const { runner, logger } = await pendingStageSetup({
+        instance: {
+          schedule: {
+            interval: '10m',
+          },
+          status: TaskStatus.Running,
+          startedAt,
+        },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            timeout: `1m`,
+            createTaskRunner: () => ({
+              run: async () => undefined,
+            }),
+          },
+        },
+      });
+
+      const result = await runner.markTaskAsRunning();
+
+      expect(result).toBe(true);
+      expect(logger.warn).not.toHaveBeenCalled();
+      expect(runner.startedAt).toEqual(startedAt);
     });
 
     describe('cost', () => {
@@ -903,65 +287,6 @@ describe('TaskManagerRunner', () => {
           },
         });
         expect(runner.cost).toEqual(TaskCost.Normal);
-      });
-    });
-
-    describe('TaskEvents', () => {
-      test('emits TaskEvent when a task is marked as running', async () => {
-        const id = _.random(1, 20).toString();
-        const onTaskEvent = jest.fn();
-        const { runner, instance, store } = await pendingStageSetup({
-          onTaskEvent,
-          instance: {
-            id,
-          },
-          definitions: {
-            bar: {
-              title: 'Bar!',
-              timeout: `1m`,
-              createTaskRunner: () => ({
-                run: async () => undefined,
-              }),
-            },
-          },
-        });
-
-        store.update.mockResolvedValueOnce(instance);
-
-        await runner.markTaskAsRunning();
-
-        expect(onTaskEvent).toHaveBeenCalledWith(asTaskMarkRunningEvent(id, asOk(instance)));
-      });
-
-      test('emits TaskEvent when a task fails to be marked as running', async () => {
-        expect.assertions(2);
-
-        const id = _.random(1, 20).toString();
-        const onTaskEvent = jest.fn();
-        const { runner, store } = await pendingStageSetup({
-          onTaskEvent,
-          instance: {
-            id,
-          },
-          definitions: {
-            bar: {
-              title: 'Bar!',
-              timeout: `1m`,
-              createTaskRunner: () => ({
-                run: async () => undefined,
-              }),
-            },
-          },
-        });
-
-        store.update.mockRejectedValueOnce(new Error('cant mark as running'));
-
-        try {
-          await runner.markTaskAsRunning();
-        } catch (err) {
-          expect(onTaskEvent).toHaveBeenCalledWith(asTaskMarkRunningEvent(id, asErr(err)));
-        }
-        expect(onTaskEvent).toHaveBeenCalledTimes(1);
       });
     });
   });
@@ -1167,6 +492,235 @@ describe('TaskManagerRunner', () => {
       expect(createTaskRunnerParams.fakeRequest).toBeDefined();
       expect(createTaskRunnerParams.taskInstance).toEqual(instance);
     });
+
+    test('calls enrichFakeRequest with the fake request and userProfileId when both are present', async () => {
+      const enrichFakeRequest = jest.fn();
+      const createTaskRunnerFn = jest.fn();
+      const { runner } = await readyToRunStageSetup({
+        instance: {
+          ...mockInstance(),
+          apiKey: 'aw4badfg333',
+          userScope: {
+            apiKeyId: 'abcdefg',
+            spaceId: 'default',
+            apiKeyCreatedByUser: false,
+            userProfileId: 'u_profile_123',
+          },
+        },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            createTaskRunner: createTaskRunnerFn,
+          },
+        },
+        enrichFakeRequest,
+      });
+
+      await runner.run();
+
+      expect(enrichFakeRequest).toHaveBeenCalledTimes(1);
+      expect(enrichFakeRequest).toHaveBeenCalledWith(
+        expect.objectContaining({ headers: expect.any(Object) }),
+        { profileId: 'u_profile_123', username: undefined }
+      );
+    });
+
+    test('passes enrichRequest on RunContext when userProfileId is present', async () => {
+      const enrichFakeRequest = jest.fn();
+      const createTaskRunnerFn = jest.fn();
+      const { runner } = await readyToRunStageSetup({
+        instance: {
+          ...mockInstance(),
+          apiKey: 'aw4badfg333',
+          userScope: {
+            apiKeyId: 'abcdefg',
+            spaceId: 'default',
+            apiKeyCreatedByUser: false,
+            userProfileId: 'u_profile_123',
+          },
+        },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            createTaskRunner: createTaskRunnerFn,
+          },
+        },
+        enrichFakeRequest,
+      });
+
+      await runner.run();
+
+      const createTaskRunnerParams = createTaskRunnerFn.mock.calls[0][0];
+      expect(createTaskRunnerParams.enrichRequest).toBeDefined();
+      expect(typeof createTaskRunnerParams.enrichRequest).toBe('function');
+    });
+
+    test('enrichRequest is undefined when userProfileId is absent', async () => {
+      const enrichFakeRequest = jest.fn();
+      const createTaskRunnerFn = jest.fn();
+      const { runner } = await readyToRunStageSetup({
+        instance: {
+          ...mockInstance(),
+          apiKey: 'aw4badfg333',
+          userScope: {
+            apiKeyId: 'abcdefg',
+            spaceId: 'default',
+            apiKeyCreatedByUser: false,
+          },
+        },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            createTaskRunner: createTaskRunnerFn,
+          },
+        },
+        enrichFakeRequest,
+      });
+
+      await runner.run();
+
+      expect(enrichFakeRequest).not.toHaveBeenCalled();
+      const createTaskRunnerParams = createTaskRunnerFn.mock.calls[0][0];
+      expect(createTaskRunnerParams.enrichRequest).toBeUndefined();
+    });
+
+    test('enrichRequest calls enrichFakeRequest for child requests', async () => {
+      const enrichFakeRequest = jest.fn();
+      const createTaskRunnerFn = jest.fn();
+      const { runner } = await readyToRunStageSetup({
+        instance: {
+          ...mockInstance(),
+          apiKey: 'aw4badfg333',
+          userScope: {
+            apiKeyId: 'abcdefg',
+            spaceId: 'default',
+            apiKeyCreatedByUser: false,
+            userProfileId: 'u_profile_123',
+          },
+        },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            createTaskRunner: createTaskRunnerFn,
+          },
+        },
+        enrichFakeRequest,
+      });
+
+      await runner.run();
+
+      const createTaskRunnerParams = createTaskRunnerFn.mock.calls[0][0];
+      const childRequest = { fake: 'child-request' };
+      createTaskRunnerParams.enrichRequest(childRequest);
+
+      expect(enrichFakeRequest).toHaveBeenCalledTimes(2);
+      expect(enrichFakeRequest).toHaveBeenLastCalledWith(childRequest, {
+        profileId: 'u_profile_123',
+        username: undefined,
+      });
+    });
+
+    test('runs without error and passes undefined enrichRequest when no enrichFakeRequest hook is provided', async () => {
+      const createTaskRunnerFn = jest.fn();
+      const { runner } = await readyToRunStageSetup({
+        instance: {
+          ...mockInstance(),
+          apiKey: 'aw4badfg333',
+          userScope: {
+            apiKeyId: 'abcdefg',
+            spaceId: 'default',
+            apiKeyCreatedByUser: false,
+            userProfileId: 'u_profile_123',
+          },
+        },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            createTaskRunner: createTaskRunnerFn,
+          },
+        },
+        // no enrichFakeRequest supplied (simulates Core without the hook)
+      });
+
+      await runner.run();
+
+      const createTaskRunnerParams = createTaskRunnerFn.mock.calls[0][0];
+      expect(createTaskRunnerParams.fakeRequest).toBeDefined();
+      expect(createTaskRunnerParams.enrichRequest).toBeUndefined();
+    });
+
+    test('still enriches when apiKeyCreatedByUser is true but userProfileId is present', async () => {
+      const enrichFakeRequest = jest.fn();
+      const createTaskRunnerFn = jest.fn();
+      const { runner } = await readyToRunStageSetup({
+        instance: {
+          ...mockInstance(),
+          apiKey: 'aw4badfg333',
+          userScope: {
+            apiKeyId: 'abcdefg',
+            spaceId: 'default',
+            apiKeyCreatedByUser: true,
+            userProfileId: 'u_profile_123',
+          },
+        },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            createTaskRunner: createTaskRunnerFn,
+          },
+        },
+        enrichFakeRequest,
+      });
+
+      await runner.run();
+
+      expect(enrichFakeRequest).toHaveBeenCalledTimes(1);
+      expect(enrichFakeRequest).toHaveBeenCalledWith(
+        expect.objectContaining({ headers: expect.any(Object) }),
+        { profileId: 'u_profile_123', username: undefined }
+      );
+      const createTaskRunnerParams = createTaskRunnerFn.mock.calls[0][0];
+      expect(createTaskRunnerParams.enrichRequest).toBeDefined();
+    });
+
+    test('propagates enrichFakeRequest errors when enrichRequest is called on a non-fake child request', async () => {
+      let callCount = 0;
+      const enrichFakeRequest = jest.fn().mockImplementation(() => {
+        callCount += 1;
+        // succeed on the initial fake-request enrichment, throw on the child request
+        if (callCount > 1) {
+          throw new Error('boom');
+        }
+      });
+      const createTaskRunnerFn = jest.fn();
+      const { runner } = await readyToRunStageSetup({
+        instance: {
+          ...mockInstance(),
+          apiKey: 'aw4badfg333',
+          userScope: {
+            apiKeyId: 'abcdefg',
+            spaceId: 'default',
+            apiKeyCreatedByUser: false,
+            userProfileId: 'u_profile_123',
+          },
+        },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            createTaskRunner: createTaskRunnerFn,
+          },
+        },
+        enrichFakeRequest,
+      });
+
+      await runner.run();
+
+      const createTaskRunnerParams = createTaskRunnerFn.mock.calls[0][0];
+      const childRequest = { fake: 'child-request' };
+
+      expect(() => createTaskRunnerParams.enrichRequest(childRequest)).toThrow('boom');
+    });
+
     test('queues a reattempt if the task fails', async () => {
       const initialAttempts = _.random(0, 2);
       const id = Date.now().toString();
@@ -2785,6 +2339,7 @@ describe('TaskManagerRunner', () => {
               type: 'bar',
               schedule_delay: expect.any(String),
               scheduled: expect.any(String),
+              execution: { uuid: TASK_EXECUTION_UUID },
             },
           },
           message: `Task bar "${id}" started.`,
@@ -2817,6 +2372,35 @@ describe('TaskManagerRunner', () => {
         expect(startCallIndex).toBeLessThan(endCallIndex);
       });
 
+      test('task-run-start and task-run events share the same execution.uuid', async () => {
+        const id = _.random(1, 20).toString();
+        const { runner } = await readyToRunStageSetup({
+          instance: { id },
+          definitions: {
+            bar: {
+              title: 'Bar!',
+              createTaskRunner: () => ({
+                async run() {
+                  return { state: {} };
+                },
+              }),
+            },
+          },
+        });
+
+        await runner.run();
+
+        const calls = (eventLoggerMock.logEvent as jest.Mock).mock.calls;
+        const startEvent = calls.find((c) => c[0].event.action === 'task-run-start');
+        const endEvent = calls.find((c) => c[0].event.action === 'task-run');
+        expect(startEvent).toBeDefined();
+        expect(endEvent).toBeDefined();
+        const startUuid = startEvent![0].kibana.task.execution.uuid;
+        const endUuid = endEvent![0].kibana.task.execution.uuid;
+        expect(startUuid).toEqual(expect.any(String));
+        expect(startUuid).toBe(endUuid);
+      });
+
       test('eventLog logs a start event even when a task run fails', async () => {
         const id = _.random(1, 20).toString();
         const { runner } = await readyToRunStageSetup({
@@ -2840,6 +2424,303 @@ describe('TaskManagerRunner', () => {
             event: expect.objectContaining({ action: 'task-run-start' }),
           })
         );
+      });
+    });
+
+    describe('setCustomTaskRunEventFields', () => {
+      const findLoggedEvent = (action: string) =>
+        (eventLoggerMock.logEvent as jest.Mock).mock.calls
+          .map((call) => call[0])
+          .find((event) => event.event.action === action);
+
+      test('adds custom fields onto the task-run event under kibana.task.data', async () => {
+        const id = _.random(1, 20).toString();
+        const { runner } = await readyToRunStageSetup({
+          instance: { id },
+          definitions: {
+            bar: {
+              title: 'Bar!',
+              createTaskRunner: (context) => ({
+                async run() {
+                  context.setCustomTaskRunEventFields({
+                    alert_event_count: 5,
+                    metrics: { a: 1 },
+                  });
+                  return { state: {} };
+                },
+              }),
+            },
+          },
+        });
+
+        await runner.run();
+
+        const runEvent = findLoggedEvent('task-run');
+        expect(runEvent).toMatchObject({
+          event: { action: 'task-run', outcome: 'success' },
+          kibana: {
+            task: {
+              id,
+              type: 'bar',
+              execution: { uuid: TASK_EXECUTION_UUID },
+              data: { alert_event_count: 5, metrics: { a: 1 } },
+            },
+          },
+          message: `Task bar "${id}" completed successfully.`,
+        });
+      });
+
+      test('replaces existing fields when called', async () => {
+        const id = _.random(1, 20).toString();
+        const { runner } = await readyToRunStageSetup({
+          instance: { id },
+          definitions: {
+            bar: {
+              title: 'Bar!',
+              createTaskRunner: (context) => ({
+                async run() {
+                  context.setCustomTaskRunEventFields({ a: 1 });
+                  context.setCustomTaskRunEventFields({ b: 2 });
+                  return { state: {} };
+                },
+              }),
+            },
+          },
+        });
+
+        await runner.run();
+
+        const runEvent = findLoggedEvent('task-run');
+        expect(runEvent).toMatchObject({
+          event: { action: 'task-run', outcome: 'success' },
+          kibana: { task: { data: { b: 2 } } },
+        });
+        expect(runEvent.kibana.task.data.a).toBeUndefined();
+      });
+
+      test('cannot override task manager owned fields since custom fields are namespaced', async () => {
+        const id = _.random(1, 20).toString();
+        const { runner } = await readyToRunStageSetup({
+          instance: { id },
+          definitions: {
+            bar: {
+              title: 'Bar!',
+              createTaskRunner: (context) => ({
+                async run() {
+                  context.setCustomTaskRunEventFields({
+                    id: 'hacked',
+                    type: 'hacked',
+                    execution: { uuid: 'hacked' },
+                  });
+                  return { state: {} };
+                },
+              }),
+            },
+          },
+        });
+
+        await runner.run();
+
+        const runEvent = findLoggedEvent('task-run');
+        expect(runEvent.event.action).toBe('task-run');
+        expect(runEvent.event.outcome).toBe('success');
+        expect(runEvent.event.duration).toEqual(expect.any(String));
+        expect(runEvent.kibana.task).toEqual({
+          id,
+          type: 'bar',
+          schedule_delay: expect.any(String),
+          scheduled: expect.any(String),
+          execution: { uuid: TASK_EXECUTION_UUID },
+          data: { id: 'hacked', type: 'hacked', execution: { uuid: 'hacked' } },
+        });
+      });
+
+      test('adds custom fields onto the task-run event when the task throws', async () => {
+        const id = _.random(1, 20).toString();
+        const { runner } = await readyToRunStageSetup({
+          instance: { id },
+          definitions: {
+            bar: {
+              title: 'Bar!',
+              createTaskRunner: (context) => ({
+                async run() {
+                  context.setCustomTaskRunEventFields({ failed: true });
+                  throw new Error('Dangit!');
+                },
+              }),
+            },
+          },
+        });
+
+        await runner.run();
+
+        const runEvent = findLoggedEvent('task-run');
+        expect(runEvent).toMatchObject({
+          event: { action: 'task-run', outcome: 'failure' },
+          kibana: { task: { data: { failed: true } } },
+        });
+      });
+
+      test('adds custom fields onto the task-run event when a taskRunError is returned', async () => {
+        const id = _.random(1, 20).toString();
+        const { runner } = await readyToRunStageSetup({
+          instance: { id, schedule: { interval: '1m' } },
+          definitions: {
+            bar: {
+              title: 'Bar!',
+              createTaskRunner: (context) => ({
+                async run() {
+                  context.setCustomTaskRunEventFields({ degraded: true });
+                  return {
+                    state: {},
+                    taskRunError: createTaskRunError(new Error('test'), TaskErrorSource.FRAMEWORK),
+                  };
+                },
+              }),
+            },
+          },
+        });
+
+        await runner.run();
+
+        const runEvent = findLoggedEvent('task-run');
+        expect(runEvent).toMatchObject({
+          event: { action: 'task-run', outcome: 'failure' },
+          kibana: { task: { data: { degraded: true } } },
+        });
+      });
+
+      test('drops custom fields when the serialized size exceeds 4 KB and logs a warning', async () => {
+        const id = _.random(1, 20).toString();
+        const bigValue = 'x'.repeat(5000);
+        const { runner, logger } = await readyToRunStageSetup({
+          instance: { id },
+          definitions: {
+            bar: {
+              title: 'Bar!',
+              createTaskRunner: (context) => ({
+                async run() {
+                  context.setCustomTaskRunEventFields({ big: bigValue });
+                  return { state: {} };
+                },
+              }),
+            },
+          },
+        });
+
+        await runner.run();
+
+        const runEvent = findLoggedEvent('task-run');
+        expect(runEvent.event.action).toBe('task-run');
+        expect(runEvent.event.outcome).toBe('success');
+        expect(runEvent.kibana.task.data).toBeUndefined();
+        expect(logger.warn).toHaveBeenCalledWith(
+          expect.stringContaining(
+            'Dropping custom task run event fields for task bar because the serialized size'
+          )
+        );
+      });
+
+      test('keeps the previously set fields when a subsequent oversized payload is dropped', async () => {
+        const id = _.random(1, 20).toString();
+        const bigValue = 'x'.repeat(5000);
+        const { runner } = await readyToRunStageSetup({
+          instance: { id },
+          definitions: {
+            bar: {
+              title: 'Bar!',
+              createTaskRunner: (context) => ({
+                async run() {
+                  context.setCustomTaskRunEventFields({ ok: true });
+                  context.setCustomTaskRunEventFields({ big: bigValue });
+                  return { state: {} };
+                },
+              }),
+            },
+          },
+        });
+
+        await runner.run();
+
+        const runEvent = findLoggedEvent('task-run');
+        expect(runEvent).toMatchObject({
+          event: { action: 'task-run', outcome: 'success' },
+          kibana: { task: { data: { ok: true } } },
+        });
+        expect(runEvent.kibana.task.data.big).toBeUndefined();
+      });
+
+      test('silently drops custom fields that cannot be serialized to JSON and logs a warning', async () => {
+        const id = _.random(1, 20).toString();
+        const circular: Record<string, unknown> = {};
+        circular.self = circular;
+        const { runner, logger } = await readyToRunStageSetup({
+          instance: { id },
+          definitions: {
+            bar: {
+              title: 'Bar!',
+              createTaskRunner: (context) => ({
+                async run() {
+                  context.setCustomTaskRunEventFields(circular);
+                  return { state: {} };
+                },
+              }),
+            },
+          },
+        });
+
+        await runner.run();
+
+        const runEvent = findLoggedEvent('task-run');
+        expect(runEvent.event.action).toBe('task-run');
+        expect(runEvent.event.outcome).toBe('success');
+        expect(runEvent.kibana.task.data).toBeUndefined();
+        expect(logger.warn).toHaveBeenCalledWith(
+          expect.stringContaining(
+            'Dropping custom task run event fields for task bar because they could not be serialized to JSON'
+          )
+        );
+      });
+
+      test('adds custom fields set before cancellation onto the task-cancel event', async () => {
+        jest.setSystemTime(new Date(2023, 1, 1, 0, 0, 0, 0));
+        const id = _.random(1, 20).toString();
+        const { runner } = await readyToRunStageSetup({
+          instance: { id, schedule: { interval: '1s' } },
+          definitions: {
+            bar: {
+              title: 'Bar!',
+              timeout: `15s`,
+              createTaskRunner: (context) => ({
+                async run() {
+                  context.setCustomTaskRunEventFields({ started: true });
+                  const promise = new Promise((r) => setTimeout(r, 20000));
+                  jest.advanceTimersByTime(20000);
+                  await promise;
+                },
+              }),
+            },
+          },
+        });
+        jest.setSystemTime(new Date(2023, 1, 1, 0, 10, 0, 0));
+        const promise = runner.run();
+        await Promise.resolve();
+        await runner.cancel();
+        await promise;
+
+        const cancelEvent = findLoggedEvent('task-cancel');
+        expect(cancelEvent).toMatchObject({
+          event: { action: 'task-cancel' },
+          kibana: {
+            task: {
+              id,
+              type: 'bar',
+              execution: { uuid: TASK_EXECUTION_UUID },
+              data: { started: true },
+            },
+          },
+          message: `Task bar "${id}" has been cancelled.`,
+        });
       });
     });
 
@@ -2880,6 +2761,7 @@ describe('TaskManagerRunner', () => {
               type: 'bar',
               schedule_delay: expect.any(String),
               scheduled: expect.any(String),
+              execution: { uuid: TASK_EXECUTION_UUID },
             },
           },
           message: `Task bar "${id}" completed successfully.`,
@@ -2929,6 +2811,7 @@ describe('TaskManagerRunner', () => {
               type: 'bar',
               schedule_delay: expect.any(String),
               scheduled: expect.any(String),
+              execution: { uuid: TASK_EXECUTION_UUID },
             },
           },
           message: `Task bar "${id}" failed with a taskRunError.`,
@@ -2972,6 +2855,7 @@ describe('TaskManagerRunner', () => {
               type: 'bar',
               schedule_delay: expect.any(String),
               scheduled: expect.any(String),
+              execution: { uuid: TASK_EXECUTION_UUID },
             },
           },
           message: `Task bar "${id}" failed.`,
@@ -3025,7 +2909,12 @@ describe('TaskManagerRunner', () => {
             start: expect.stringMatching(dateRegExp),
           },
           kibana: {
-            task: { id, type: 'bar', scheduled: expect.any(String) },
+            task: {
+              id,
+              type: 'bar',
+              scheduled: expect.any(String),
+              execution: { uuid: TASK_EXECUTION_UUID },
+            },
           },
           message: `Task bar "${id}" has been cancelled.`,
         });
@@ -3046,6 +2935,7 @@ describe('TaskManagerRunner', () => {
               type: 'bar',
               schedule_delay: expect.any(String),
               scheduled: expect.any(String),
+              execution: { uuid: TASK_EXECUTION_UUID },
             },
           },
           message: `Task bar "${id}" failed.`,
@@ -3097,7 +2987,12 @@ describe('TaskManagerRunner', () => {
             start: expect.stringMatching(dateRegExp),
           },
           kibana: {
-            task: { id, type: 'bar', scheduled: expect.any(String) },
+            task: {
+              id,
+              type: 'bar',
+              scheduled: expect.any(String),
+              execution: { uuid: TASK_EXECUTION_UUID },
+            },
           },
           message: `Task bar "${id}" has been cancelled.`,
         });
@@ -3117,6 +3012,7 @@ describe('TaskManagerRunner', () => {
               type: 'bar',
               schedule_delay: expect.any(String),
               scheduled: expect.any(String),
+              execution: { uuid: TASK_EXECUTION_UUID },
             },
           },
           message: `Task bar "${id}" failed.`,
@@ -3163,7 +3059,12 @@ describe('TaskManagerRunner', () => {
             start: expect.stringMatching(dateRegExp),
           },
           kibana: {
-            task: { id, type: 'bar', scheduled: expect.any(String) },
+            task: {
+              id,
+              type: 'bar',
+              scheduled: expect.any(String),
+              execution: { uuid: TASK_EXECUTION_UUID },
+            },
           },
           message: `Task bar "${id}" has been cancelled.`,
         });
@@ -3181,6 +3082,7 @@ describe('TaskManagerRunner', () => {
               type: 'bar',
               schedule_delay: expect.any(String),
               scheduled: expect.any(String),
+              execution: { uuid: TASK_EXECUTION_UUID },
             },
           },
           message: `Task bar "${id}" completed successfully.`,
@@ -3224,7 +3126,12 @@ describe('TaskManagerRunner', () => {
             start: expect.stringMatching(dateRegExp),
           },
           kibana: {
-            task: { id, type: 'bar', scheduled: expect.any(String) },
+            task: {
+              id,
+              type: 'bar',
+              scheduled: expect.any(String),
+              execution: { uuid: TASK_EXECUTION_UUID },
+            },
           },
           message: `Task bar "${id}" has been cancelled.`,
         });
@@ -3242,6 +3149,7 @@ describe('TaskManagerRunner', () => {
               type: 'bar',
               schedule_delay: expect.any(String),
               scheduled: expect.any(String),
+              execution: { uuid: TASK_EXECUTION_UUID },
             },
           },
           message: `Task bar "${id}" completed successfully.`,
@@ -3455,6 +3363,60 @@ describe('TaskManagerRunner', () => {
         counterType: 'taskManagerTaskRunner',
         incrementBy: 1,
       });
+    });
+
+    test('handles a version conflict gracefully when an expired recurring task is reclaimed while running and schedule is greater than timeout', async () => {
+      const id = _.random(1, 20).toString();
+      const onTaskEvent = jest.fn();
+      const { runner, store, logger } = await readyToRunStageSetup({
+        onTaskEvent,
+        instance: {
+          id,
+          startedAt: moment().subtract(5, 'm').toDate(),
+          schedule: { interval: '30s' },
+        },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            timeout: '15s',
+            createTaskRunner: () => ({
+              async run() {
+                const promise = new Promise((r) => setTimeout(r, 20000));
+                jest.advanceTimersByTime(20000);
+                await promise;
+              },
+            }),
+          },
+        },
+      });
+
+      // another Kibana reclaimed and updated the task
+      store.partialUpdate.mockRejectedValueOnce({
+        type: 'task',
+        id,
+        status: 409,
+        error: {
+          type: 'version_conflict_engine_exception',
+          reason: `[task:${id}]: version conflict, required seqNo [1], primary term [1]. current document has seqNo [64000] and primary term [1]`,
+        },
+      });
+
+      const promise = runner.run();
+      await Promise.resolve();
+      await runner.cancel();
+      await promise;
+
+      expect(store.partialUpdate).toHaveBeenCalledTimes(1);
+
+      const frameworkErrorLogs = logger.error.mock.calls.filter(([, meta]) =>
+        ((meta as { tags?: string[] })?.tags ?? []).includes('task-run-failed')
+      );
+      expect(frameworkErrorLogs).toEqual([]);
+
+      expect(logger.debug).toHaveBeenCalledWith(
+        `Skipping the update of expired/cancelled task bar:${id} because it was reclaimed by another Kibana while running.`,
+        { tags: [id, 'bar'] }
+      );
     });
 
     test('Prints debug logs on task start/end', async () => {
@@ -3681,7 +3643,7 @@ describe('TaskManagerRunner', () => {
     definitions?: TaskDefinitionRegistry;
     onTaskEvent?: jest.Mock<(event: TaskEvent<unknown, unknown>) => void>;
     allowReadingInvalidState?: boolean;
-    strategy?: string;
+    enrichFakeRequest?: jest.Mock;
   }
 
   function withAnyTiming(taskRun: TaskRun) {
@@ -3744,7 +3706,6 @@ describe('TaskManagerRunner', () => {
     const runner = new TaskManagerRunner({
       defaultMaxAttempts: 5,
       beforeRun: (context) => Promise.resolve(context),
-      beforeMarkRunning: (context) => Promise.resolve(context),
       logger,
       store,
       instance,
@@ -3759,10 +3720,10 @@ describe('TaskManagerRunner', () => {
         },
       }),
       allowReadingInvalidState: opts.allowReadingInvalidState || false,
-      strategy: opts.strategy ?? CLAIM_STRATEGY_UPDATE_BY_QUERY,
       getPollInterval: () => 500,
       apiKeyStrategy: new EsApiKeyStrategy(),
       eventLogger: eventLoggerMock,
+      enrichFakeRequest: opts.enrichFakeRequest,
     });
 
     if (stage === TaskRunningStage.READY_TO_RUN) {

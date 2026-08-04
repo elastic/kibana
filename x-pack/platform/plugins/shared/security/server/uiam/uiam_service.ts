@@ -7,16 +7,22 @@
 
 import Boom from '@hapi/boom';
 import { readFileSync } from 'fs';
+import { chunk, partition } from 'lodash';
 import { Agent } from 'undici';
 
 import type { Logger } from '@kbn/core/server';
-import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
+import {
+  deriveInternalCallerAttestation,
+  HTTPAuthorizationHeader,
+  UIAM_INTERNAL_CALLER_ATTESTATION_HEADER,
+} from '@kbn/core-security-server';
 import type {
   CreateUiamOAuthClientParams,
   UiamOAuthClientLogo,
   UiamOAuthClientResponse,
   UiamOAuthClientType,
   UiamOAuthConnectionResponse,
+  UiamResolvedUsersResponse,
   UpdateUiamOAuthClientParams,
   UpdateUiamOAuthConnectionParams,
 } from '@kbn/core-security-server';
@@ -28,6 +34,7 @@ import type {
 import { ES_CLIENT_AUTHENTICATION_HEADER } from '../../common/constants';
 import type { UiamConfigType } from '../config';
 import { getDetailedErrorMessage } from '../errors';
+import { securityTelemetry } from '../otel/instrumentation';
 
 /**
  * Represents the request body for granting an API key via UIAM.
@@ -106,6 +113,12 @@ export type OAuthConnectionResponse = UiamOAuthConnectionResponse;
 export type CreateOAuthClientRequestBody = CreateUiamOAuthClientParams;
 export type PatchOAuthClientRequestBody = UpdateUiamOAuthClientParams;
 export type PatchOAuthConnectionRequestBody = UpdateUiamOAuthConnectionParams;
+export type ResolvedUsersResponse = UiamResolvedUsersResponse;
+
+/**
+ * Maximum number of user IDs in a single request (aligned with UIAM limit).
+ */
+const RESOLVE_USERS_BATCH_SIZE = 100;
 
 /**
  * Shape of the `error` object inside a UIAM non-2xx response payload, mirroring
@@ -118,6 +131,18 @@ interface UiamErrorDetails {
   resource?: string;
   type?: string;
 }
+
+/**
+ * Telemetry `errorType` for an OAuth token exchange that Kibana itself rejected
+ * as opposed to a failure reported by UIAM.
+ */
+const OAUTH_AUDIENCE_MISMATCH_ERROR_TYPE = 'KIBANA.AUDIENCE_MISMATCH';
+
+/**
+ * Telemetry `errorType` for an OAuth token exchange failure that carries no
+ * recognizable classification.
+ */
+const OAUTH_UNKNOWN_ERROR_TYPE = 'UNKNOWN';
 
 /**
  * Response containing a list of OAuth clients.
@@ -142,6 +167,14 @@ export interface UiamServicePublic {
    * @param accessToken UIAM session access token.
    */
   getAuthenticationHeaders(accessToken: string): Record<string, string>;
+
+  /**
+   * Returns the header(s) a trusted loopback caller stamps on a real HTTP request that carries an
+   * internal UIAM (`essu_`) credential, so the ES cluster client re-attaches the shared secret on
+   * its behalf. Carries a non-reversible HMAC of the shared secret (never the secret itself), bound
+   * to `credential` so it authorizes that credential only.
+   */
+  getInternalCallerAttestationHeaders(credential: HTTPAuthorizationHeader): Record<string, string>;
 
   /**
    * Returns the Elasticsearch client authentication information with the shared secret value. This is to be used with
@@ -212,8 +245,13 @@ export interface UiamServicePublic {
    * Lists OAuth clients via the UIAM service.
    * @param accessToken UIAM session access token.
    * @param clientId Optional client ID filter.
+   * @param projectId Optional project ID filter.
    */
-  listOAuthClients(accessToken: string, clientId?: string): Promise<OAuthClientsResponse>;
+  listOAuthClients(
+    accessToken: string,
+    clientId?: string,
+    projectId?: string
+  ): Promise<OAuthClientsResponse>;
 
   /**
    * Updates an OAuth client's metadata via the UIAM service.
@@ -244,11 +282,13 @@ export interface UiamServicePublic {
    * @param accessToken UIAM session access token.
    * @param clientId Optional client ID filter.
    * @param connectionId Optional connection ID filter.
+   * @param projectId Optional project ID filter.
    */
   listOAuthConnections(
     accessToken: string,
     clientId?: string,
-    connectionId?: string
+    connectionId?: string,
+    projectId?: string
   ): Promise<OAuthConnectionsResponse>;
 
   /**
@@ -278,6 +318,13 @@ export interface UiamServicePublic {
     connectionId: string,
     reason?: string
   ): Promise<OAuthConnectionResponse>;
+
+  /**
+   * Resolves one or more user IDs into basic user information via the UIAM service.
+   * @param accessToken UIAM session access token.
+   * @param userIds The user IDs to resolve.
+   */
+  resolveUsers(accessToken: string, userIds: string[]): Promise<ResolvedUsersResponse>;
 }
 
 interface UiamServiceOptions {
@@ -331,6 +378,18 @@ export class UiamService implements UiamServicePublic {
     return {
       authorization: new HTTPAuthorizationHeader('Bearer', accessToken).toString(),
       [ES_CLIENT_AUTHENTICATION_HEADER]: this.#config.sharedSecret,
+    };
+  }
+
+  /**
+   * See {@link UiamServicePublic.getInternalCallerAttestationHeaders}.
+   */
+  getInternalCallerAttestationHeaders(credential: HTTPAuthorizationHeader): Record<string, string> {
+    return {
+      [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: deriveInternalCallerAttestation(
+        this.#config.sharedSecret,
+        credential
+      ),
     };
   }
 
@@ -412,6 +471,7 @@ export class UiamService implements UiamServicePublic {
     url.searchParams.set('include_token', 'true');
     url.searchParams.set('audience', expectedAudience);
 
+    const startTime = performance.now();
     try {
       const response = await UiamService.#parseUiamResponse(
         await fetch(url.toString(), {
@@ -430,12 +490,22 @@ export class UiamService implements UiamServicePublic {
       const audience = response.credentials?.oauth?.audience;
       if (audience !== expectedAudience) {
         throw Boom.badRequest(
-          `OAuth token audience mismatch: expected "${expectedAudience}" but got "${audience}".`
+          `OAuth token audience mismatch: expected "${expectedAudience}" but got "${audience}".`,
+          { errorType: OAUTH_AUDIENCE_MISMATCH_ERROR_TYPE }
         );
       }
 
+      securityTelemetry.recordOAuthTokenExchangeAttempt(performance.now() - startTime, {
+        outcome: 'success',
+      });
+
       return response.token;
     } catch (err) {
+      securityTelemetry.recordOAuthTokenExchangeAttempt(performance.now() - startTime, {
+        outcome: 'failure',
+        errorType: UiamService.#getOAuthTokenExchangeErrorType(err),
+      });
+
       this.#logger.error(
         () => `Failed to exchange OAuth access token: ${getDetailedErrorMessage(err)}`
       );
@@ -601,13 +671,20 @@ export class UiamService implements UiamServicePublic {
   /**
    * See {@link UiamServicePublic.listOAuthClients}.
    */
-  async listOAuthClients(accessToken: string, clientId?: string): Promise<OAuthClientsResponse> {
+  async listOAuthClients(
+    accessToken: string,
+    clientId?: string,
+    projectId?: string
+  ): Promise<OAuthClientsResponse> {
     try {
       this.#logger.debug('Attempting to list OAuth clients.');
 
       const url = new URL(`${this.#config.url}/uiam/api/v1/oauth/clients`);
       if (clientId) {
         url.searchParams.set('client_id', clientId);
+      }
+      if (projectId) {
+        url.searchParams.set('project_id', projectId);
       }
 
       const response = await UiamService.#parseUiamResponse(
@@ -715,7 +792,8 @@ export class UiamService implements UiamServicePublic {
   async listOAuthConnections(
     accessToken: string,
     clientId?: string,
-    connectionId?: string
+    connectionId?: string,
+    projectId?: string
   ): Promise<OAuthConnectionsResponse> {
     try {
       this.#logger.debug('Attempting to list OAuth connections.');
@@ -726,6 +804,9 @@ export class UiamService implements UiamServicePublic {
       }
       if (connectionId) {
         url.searchParams.set('connection_id', connectionId);
+      }
+      if (projectId) {
+        url.searchParams.set('project_id', projectId);
       }
 
       const response = await UiamService.#parseUiamResponse(
@@ -834,6 +915,64 @@ export class UiamService implements UiamServicePublic {
   }
 
   /**
+   * See {@link UiamServicePublic.resolveUsers}.
+   */
+  async resolveUsers(accessToken: string, userIds: string[]): Promise<ResolvedUsersResponse> {
+    const uniqueUserIds = [...new Set(userIds)];
+    if (uniqueUserIds.length === 0) {
+      return { users: {} };
+    }
+
+    this.#logger.debug(`Attempting to resolve ${uniqueUserIds.length} user(s).`);
+
+    const batches = chunk(uniqueUserIds, RESOLVE_USERS_BATCH_SIZE);
+    const results = await Promise.allSettled(
+      batches.map(async (batch): Promise<ResolvedUsersResponse> => {
+        const url = new URL(`${this.#config.url}/uiam/api/v1/users`);
+        url.searchParams.set('user_id', batch.join(','));
+
+        return UiamService.#parseUiamResponse(
+          await fetch(url.toString(), {
+            method: 'GET',
+            headers: {
+              'User-Agent': this.#userAgentHeader,
+              [ES_CLIENT_AUTHENTICATION_HEADER]: this.#config.sharedSecret,
+              Authorization: `Bearer ${accessToken}`,
+            },
+            // @ts-expect-error Undici `fetch` supports `dispatcher` option, see https://github.com/nodejs/undici/pull/1411.
+            dispatcher: this.#dispatcher,
+          })
+        );
+      })
+    );
+
+    const [fulfilled, failures] = partition(
+      results,
+      (result): result is PromiseFulfilledResult<ResolvedUsersResponse> =>
+        result.status === 'fulfilled'
+    );
+
+    const users: ResolvedUsersResponse['users'] = Object.assign(
+      {},
+      ...fulfilled.map((result) => result.value.users)
+    );
+
+    if (failures.length === batches.length) {
+      throw failures[0].reason;
+    }
+
+    if (failures.length > 0) {
+      this.#logger.warn(
+        () =>
+          `Failed to resolve ${failures.length} of ${batches.length} user batch(es); returning partial results.`
+      );
+    }
+
+    this.#logger.debug('Successfully resolved users.');
+    return { users };
+  }
+
+  /**
    * Creates a custom dispatcher for the native `fetch` to use custom TLS connection settings.
    */
   #createFetchDispatcher() {
@@ -912,5 +1051,15 @@ export class UiamService implements UiamServicePublic {
     };
 
     throw err;
+  }
+
+  static #getOAuthTokenExchangeErrorType(err: unknown): string {
+    if (!Boom.isBoom(err)) {
+      return OAUTH_UNKNOWN_ERROR_TYPE;
+    }
+
+    const payload = err.output?.payload as { error?: UiamErrorDetails } | undefined;
+
+    return err.data?.errorType ?? payload?.error?.type ?? OAUTH_UNKNOWN_ERROR_TYPE;
   }
 }

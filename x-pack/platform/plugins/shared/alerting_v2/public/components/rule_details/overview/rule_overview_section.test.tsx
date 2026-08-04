@@ -16,11 +16,29 @@ jest.mock('./alert_timeline/alert_timeline_section', () => ({
   AlertTimelineSection: () => <div data-test-subj="alertTimelineSectionMock">timeline</div>,
 }));
 
+jest.mock('./signal_rule_overview', () => ({
+  SignalRuleOverview: () => <div data-test-subj="signalRuleOverviewMock">signal</div>,
+}));
+
+jest.mock('./artifacts', () => ({
+  ArtifactsSection: () => <div data-test-subj="artifactsSectionMock">artifacts</div>,
+  SignalArtifactsSection: () => (
+    <div data-test-subj="signalArtifactsSectionMock">signal artifacts</div>
+  ),
+}));
+
+const mockCanRead = jest.fn();
+
+jest.mock('@kbn/core-di-browser', () => ({
+  CoreStart: (key: string) => key,
+  useService: () => ({ canRead: mockCanRead }),
+}));
+
 const baseRule: RuleApiResponse = {
   id: 'rule-1',
   kind: 'alert',
   enabled: true,
-  metadata: { name: 'Test Rule' },
+  metadata: { name: 'Test Rule', version: 1 },
   time_field: '@timestamp',
   schedule: { every: '5m', lookback: '10m' },
   query: { format: 'composed' as const, base: 'FROM logs-*', breach: { segment: '' } },
@@ -40,15 +58,42 @@ const renderSection = (rule: RuleApiResponse) =>
   );
 
 describe('RuleOverviewSection', () => {
-  it('renders the alert activity timeline for alert rules', () => {
-    renderSection({ ...baseRule, kind: 'alert' });
-    expect(screen.getByTestId('alertTimelineSectionMock')).toBeInTheDocument();
-    expect(screen.queryByTestId('signalRuleOverviewEmptyState')).not.toBeInTheDocument();
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockCanRead.mockReturnValue(true);
   });
 
-  it('renders the empty state instead of the timeline for signal rules', () => {
-    renderSection({ ...baseRule, kind: 'signal' });
-    expect(screen.getByTestId('signalRuleOverviewEmptyState')).toBeInTheDocument();
-    expect(screen.queryByTestId('alertTimelineSectionMock')).not.toBeInTheDocument();
+  describe('activity section routing', () => {
+    it('renders the alert timeline for alert rules', () => {
+      renderSection({ ...baseRule, kind: 'alert' });
+      expect(screen.getByTestId('alertTimelineSectionMock')).toBeInTheDocument();
+      expect(screen.queryByTestId('signalRuleOverviewMock')).not.toBeInTheDocument();
+    });
+
+    it('renders the signal overview instead of the timeline for signal rules', () => {
+      renderSection({ ...baseRule, kind: 'signal' });
+      expect(screen.getByTestId('signalRuleOverviewMock')).toBeInTheDocument();
+      expect(screen.queryByTestId('alertTimelineSectionMock')).not.toBeInTheDocument();
+    });
+
+    it('hides the alert timeline when the user cannot read alerts', () => {
+      mockCanRead.mockReturnValue(false);
+      renderSection({ ...baseRule, kind: 'alert' });
+      expect(screen.queryByTestId('alertTimelineSectionMock')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('artifacts visibility', () => {
+    it('shows the artifacts section for alert rules', () => {
+      renderSection({ ...baseRule, kind: 'alert' });
+      expect(screen.getByTestId('artifactsSectionMock')).toBeInTheDocument();
+      expect(screen.queryByTestId('signalArtifactsSectionMock')).not.toBeInTheDocument();
+    });
+
+    it('shows the signal artifacts section for signal rules', () => {
+      renderSection({ ...baseRule, kind: 'signal' });
+      expect(screen.getByTestId('signalArtifactsSectionMock')).toBeInTheDocument();
+      expect(screen.queryByTestId('artifactsSectionMock')).not.toBeInTheDocument();
+    });
   });
 });

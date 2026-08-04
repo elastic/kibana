@@ -7,5 +7,7 @@
 
 export {
   EntityMaintainersClient,
+  getMaintainerStatus,
   type EntityMaintainerListEntry,
+  type EntityMaintainerStatusEntry,
 } from './entity_maintainers_client';

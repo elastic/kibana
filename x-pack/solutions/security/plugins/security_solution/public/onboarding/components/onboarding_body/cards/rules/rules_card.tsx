@@ -87,14 +87,18 @@ export const RulesCard: OnboardingCardComponent = ({
               <EuiSpacer size="m" />
               <CardCallOut
                 color="primary"
-                icon="info"
                 text={i18n.RULES_CARD_CALLOUT_INTEGRATIONS_TEXT}
                 action={
                   <EuiLink onClick={expandIntegrationsCard}>
                     <EuiFlexGroup direction="row" gutterSize="xs" alignItems="center">
                       <EuiFlexItem>{i18n.RULES_CARD_CALLOUT_INTEGRATIONS_BUTTON}</EuiFlexItem>
                       <EuiFlexItem grow={false}>
-                        <EuiIcon type="chevronSingleRight" color="primary" size="s" />
+                        <EuiIcon
+                          type="chevronSingleRight"
+                          color="primary"
+                          size="s"
+                          aria-hidden={true}
+                        />
                       </EuiFlexItem>
                     </EuiFlexGroup>
                   </EuiLink>

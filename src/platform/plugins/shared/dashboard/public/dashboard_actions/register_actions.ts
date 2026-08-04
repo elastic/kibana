@@ -20,6 +20,7 @@ import {
   ACTION_COPY_TO_DASHBOARD,
   ACTION_EXPAND_PANEL,
   ACTION_EXPORT_CSV,
+  ACTION_EXPORT_JSON,
   ACTION_UNLINK_FROM_LIBRARY,
   BADGE_FILTERS_NOTIFICATION,
 } from './constants';
@@ -58,6 +59,12 @@ export const registerActions = async (plugins: DashboardStartDependencies) => {
     });
     uiActions.attachAction(ON_OPEN_PANEL_MENU, ACTION_EXPORT_CSV);
   }
+
+  uiActions.registerActionAsync(ACTION_EXPORT_JSON, async () => {
+    const { ExportJSONAction } = await import('../dashboard_renderer/dashboard_module');
+    return new ExportJSONAction();
+  });
+  uiActions.attachAction(ON_OPEN_PANEL_MENU, ACTION_EXPORT_JSON);
 
   uiActions.registerActionAsync(ACTION_ADD_TO_LIBRARY, async () => {
     const { AddToLibraryAction } = await import('../dashboard_renderer/dashboard_module');

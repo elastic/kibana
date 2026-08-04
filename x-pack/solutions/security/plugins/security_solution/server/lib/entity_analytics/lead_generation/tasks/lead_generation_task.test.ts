@@ -62,6 +62,7 @@ describe('Lead Generation Task', () => {
         experimentalFeatures: { leadGenerationEnabled: true } as never,
         kibanaVersion: '9.0.0',
         config: {} as never,
+        ml: undefined,
       });
 
       expect(logger.info).toHaveBeenCalledWith(
@@ -80,6 +81,7 @@ describe('Lead Generation Task', () => {
         experimentalFeatures: { leadGenerationEnabled: false } as never,
         kibanaVersion: '9.0.0',
         config: {} as never,
+        ml: undefined,
       });
 
       expect(mockTaskManager.registerTaskDefinitions).not.toHaveBeenCalled();
@@ -96,6 +98,7 @@ describe('Lead Generation Task', () => {
         experimentalFeatures: { leadGenerationEnabled: true } as never,
         kibanaVersion: '9.0.0',
         config: {} as never,
+        ml: undefined,
       });
 
       expect(mockTaskManager.registerTaskDefinitions).toHaveBeenCalledWith({
@@ -243,6 +246,7 @@ describe('Lead Generation Task', () => {
         experimentalFeatures: { leadGenerationEnabled: true } as never,
         kibanaVersion: '9.0.0',
         config: {} as never,
+        ml: undefined,
       });
 
       capturedCreateTaskRunner =

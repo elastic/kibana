@@ -97,29 +97,11 @@ export const Zoom: ConnectorSpec = {
     }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
-    supportedFeatureIds: ['workflows', 'agentBuilder'],
+    supportedFeatureIds: ['workflows', 'agentBuilder', 'contextEngine'],
   },
 
   auth: {
     types: [
-      {
-        type: 'bearer',
-        defaults: {},
-        overrides: {
-          meta: {
-            token: {
-              sensitive: true,
-              label: i18n.translate('core.kibanaConnectorSpecs.zoom.auth.token.label', {
-                defaultMessage: 'Zoom access token',
-              }),
-              helpText: i18n.translate('core.kibanaConnectorSpecs.zoom.auth.token.helpText', {
-                defaultMessage:
-                  'Paste a Zoom Server-to-Server OAuth access token. Generate one via the Zoom Marketplace or API. Tokens expire after 1 hour.',
-              }),
-            },
-          },
-        },
-      },
       {
         type: 'oauth_authorization_code',
         overrides: {
@@ -136,6 +118,7 @@ export const Zoom: ConnectorSpec = {
             'user:read:user meeting:read:meeting meeting:read:list_meetings meeting:read:past_meeting meeting:read:list_past_participants meeting:read:list_registrants cloud_recording:read:list_recording_files cloud_recording:read:list_user_recordings',
         },
       },
+      { type: 'bearer', isLegacy: true, defaults: {} },
     ],
   },
 

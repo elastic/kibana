@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/streams-app-plugin",
-  "owner": "@elastic/obs-onboarding-team @elastic/obs-sig-events-team",
+  "owner": "@elastic/streams-ui @elastic/obs-sig-events-team",
   "group": "platform",
   "visibility": "shared",
   "plugin": {
@@ -35,10 +35,11 @@
       "cps",
       "spaces",
       "indexLifecycleManagement",
-      "evals"
+      "evals",
+      "significant_events",
+      "significantEventsApp"
     ],
     "requiredBundles": [
-      "agentBuilder",
       "discover",
       "esql",
       "kibanaReact",

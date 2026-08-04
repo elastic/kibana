@@ -27,8 +27,8 @@ type EsqlValidationDiagnostic = Awaited<ReturnType<typeof validateQuery>>['error
 /**
  * Runs `validateQuery` against every `elasticsearch.esql.query` step in the
  * workflow lookup and returns workflow-style `YamlValidationResult`s in YAML
- * coordinates. The host pipeline (`useYamlValidation`) batches these into
- * markers and feeds the bottom-bar accordion alongside every other validator.
+ * coordinates. The host pipeline (`collectFullWorkflowYamlValidationResults`) batches
+ * these into markers and feeds the bottom-bar accordion alongside every other validator.
  *
  * Liquid handling matches the policy used elsewhere in the editor:
  *
