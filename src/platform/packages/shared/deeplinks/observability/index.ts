@@ -20,10 +20,5 @@ export {
   INGEST_HUB_APP_ID,
   ONBOARDING_APP_ID,
 } from './constants';
-export type {
-  AppId,
-  DeepLinkId,
-  SignificantEventsLinkId,
-  StreamsLinkId,
-} from './deep_links';
+export type { AppId, DeepLinkId, SignificantEventsLinkId, StreamsLinkId } from './deep_links';
 export * from './locators';
