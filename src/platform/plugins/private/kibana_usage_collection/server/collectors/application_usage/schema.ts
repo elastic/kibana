@@ -137,6 +137,7 @@ export const applicationUsageSchema = {
   apm: commonSchema,
   automaticImport: commonSchema,
   canvas: commonSchema,
+  clientApps: commonSchema,
   cloud_connect: commonSchema,
   context_engine: commonSchema,
   enterpriseSearch: commonSchema,
@@ -189,6 +190,7 @@ export const applicationUsageSchema = {
    * @removeBy 9.0.0
    */
   siem: commonSchema,
+  significantEvents: commonSchema,
   space_selector: commonSchema,
   streams: commonSchema,
   uptime: commonSchema,

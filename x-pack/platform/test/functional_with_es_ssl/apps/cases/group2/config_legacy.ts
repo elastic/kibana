@@ -9,10 +9,11 @@ import type { FtrConfigProviderContext } from '@kbn/test';
 
 /**
  * Legacy Cases group2 functional config, pinned with
- * `--xpack.cases.templates.enabled=false` so the legacy in-page custom-fields /
- * templates sections keep rendering once the plugin default flips to ON. This
- * config runs `index_legacy.ts` (only the legacy `configure_legacy` suite). The
- * default flag-ON suite runs under `config.ts`.
+ * `--xpack.cases.templates.enabled=false` and
+ * `--xpack.cases.casesRedesign.settings=false` so the legacy in-page
+ * custom-fields / templates sections keep rendering once those plugin defaults
+ * flip to ON. This config runs `index_legacy.ts` (only the legacy
+ * `configure_legacy` suite). The default flag-ON suite runs under `config.ts`.
  */
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const baseConfig = await readConfigFile(require.resolve('../../../config.base.ts'));
@@ -25,6 +26,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       serverArgs: [
         ...baseConfig.get('kbnTestServer.serverArgs'),
         '--xpack.cases.templates.enabled=false',
+        '--xpack.cases.casesRedesign.settings=false',
       ],
     },
     junit: {

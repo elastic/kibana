@@ -38,6 +38,7 @@ import { useHighlightedFields } from '../hooks/use_highlighted_fields';
 import { getTimelineEventsDetailsFromRecord } from '../utils/get_timeline_events_details_from_record';
 import { useRuleWithFallback } from '../../../../detection_engine/rule_management/logic/use_rule_with_fallback';
 import { useBrowserFields } from '../../../../data_view_manager/hooks/use_browser_fields';
+import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 import type { CellActionRenderer } from '../../../shared/components/cell_actions';
 import type { OpenFlyoutLinkRenderer } from '../../../shared/components/open_flyout_link';
 import { EventKind } from '../constants/event_kinds';
@@ -162,7 +163,8 @@ export const TableTab = memo(
       [hit]
     );
 
-    const browserFields = useBrowserFields(getSourcererScopeId(scopeId));
+    const { dataView } = useDataView(getSourcererScopeId(scopeId));
+    const browserFields = useBrowserFields(dataView);
 
     const isAlert = useMemo(
       () => (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,

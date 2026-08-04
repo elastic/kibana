@@ -151,7 +151,7 @@ describe('TemplatesMigrationTaskManager', () => {
     const taskDef = call[0][CASES_TEMPLATES_MIGRATION_TASK_TYPE];
     const runner = taskDef.createTaskRunner({
       taskInstance: { state: state ?? {} },
-      abortController: new AbortController(),
+      signal: new AbortController().signal,
     } as unknown as RunContext);
     return runner.run();
   };
@@ -160,7 +160,9 @@ describe('TemplatesMigrationTaskManager', () => {
     const call = taskManagerSetupMock.registerTaskDefinitions.mock.calls[0];
     const taskDefs = call[0];
     const taskDef = taskDefs[CASES_TEMPLATES_MIGRATION_TASK_TYPE];
-    return taskDef.createTaskRunner({} as unknown as RunContext);
+    return taskDef.createTaskRunner({
+      signal: new AbortController().signal,
+    } as unknown as RunContext);
   };
 
   const buildAndSchedule = async (
@@ -646,6 +648,65 @@ describe('TemplatesMigrationTaskManager', () => {
         expect.anything(),
         expect.anything()
       );
+    });
+
+    it('reuses an existing field definition when only casing differs (case-insensitive dedup)', async () => {
+      const configSO = buildConfigureSO({
+        // Legacy key is all-lowercase
+        customFields: [buildLegacyCustomField('cf_text')],
+        templates: [],
+      });
+
+      const existingFieldDef = {
+        id: 'existing-fd',
+        type: CASE_FIELD_DEFINITION_SAVED_OBJECT,
+        references: [],
+        attributes: {
+          // Stored with uppercase first letter
+          name: 'CF_Text',
+          owner: 'cases',
+          definition: 'name: CF_Text\ncontrol: INPUT_TEXT\ntype: keyword\n',
+          fieldDefinitionId: 'x',
+          isGlobal: true,
+        },
+      };
+
+      repo.find
+        .mockResolvedValueOnce({ saved_objects: [configSO], total: 1 })
+        .mockResolvedValueOnce({ saved_objects: [existingFieldDef], total: 1 }) // field-defs
+        .mockResolvedValueOnce({ saved_objects: [], total: 0 }); // templates
+
+      const manager = await buildAndSchedule();
+      await getTaskRunner(manager).run();
+
+      // Field is reused by case-insensitive match — no new field-def SO created
+      expect(repo.create).not.toHaveBeenCalledWith(
+        CASE_FIELD_DEFINITION_SAVED_OBJECT,
+        expect.anything(),
+        expect.anything()
+      );
+    });
+
+    it('creates field definitions with refresh: wait_for to avoid races with concurrent configure PATCHes', async () => {
+      const configSO = buildConfigureSO({
+        customFields: [buildLegacyCustomField('cf_text')],
+        templates: [],
+      });
+
+      repo.find
+        .mockResolvedValueOnce({ saved_objects: [configSO], total: 1 })
+        .mockResolvedValueOnce({ saved_objects: [], total: 0 }) // field-defs
+        .mockResolvedValueOnce({ saved_objects: [], total: 0 }); // templates
+
+      const manager = await buildAndSchedule();
+      await getTaskRunner(manager).run();
+
+      const fieldDefCreate = repo.create.mock.calls.find(
+        ([type]) => type === CASE_FIELD_DEFINITION_SAVED_OBJECT
+      );
+      expect(fieldDefCreate).toBeDefined();
+      // The options object (third argument) must carry refresh: 'wait_for'
+      expect(fieldDefCreate![2]).toMatchObject({ refresh: 'wait_for' });
     });
 
     it('reuses existing templates by name and does not duplicate', async () => {

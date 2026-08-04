@@ -16,18 +16,26 @@ import {
   EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiHealth,
+  EuiPagination,
   EuiPopover,
   EuiSpacer,
   EuiTitle,
   EuiToolTip,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
+import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { i18n } from '@kbn/i18n';
 import type { KnowledgeIndicator } from '@kbn/streams-ai';
-import { isComputedFeature } from '@kbn/significant-events-schema';
+import type { Streams } from '@kbn/streams-schema';
+import { isComputedFeature, QUERY_TYPE_STATS } from '@kbn/significant-events-schema';
 import type { Feature } from '@kbn/significant-events-schema';
 import { upperFirst } from 'lodash';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useKibana } from '../../../../hooks/use_kibana';
+import { useTimefilter } from '../../../../hooks/use_timefilter';
+import { buildFeatureDiscoverParams } from '../../significant_events_discovery/utils/discover_helpers';
+import { getKnowledgeIndicatorItemId } from '../utils/get_knowledge_indicator_item_id';
 import { getConfidenceColor } from '../utils/get_confidence_color';
 import { FlyoutMetadataCard } from '../../../flyout_components/flyout_metadata_card';
 import { FlyoutToolbarHeader } from '../../../flyout_components/flyout_toolbar_header';
@@ -41,6 +49,8 @@ import {
   RESTORE_LABEL,
   PROMOTE_LABEL,
 } from '../hooks/use_knowledge_indicator_actions';
+import { useBlocksNewActivity } from '../../../../hooks/significant_events/use_significant_events_maintenance';
+import { STATS_PROMOTE_DISABLED_TOOLTIP } from '../../significant_events_discovery/components/queries_table/translations';
 import { DeleteTableItemsModal } from '../delete_table_items_modal';
 import { getKnowledgeIndicatorStreamName } from '../utils/get_knowledge_indicator_stream_name';
 import { KnowledgeIndicatorFeatureDetailsContent } from './knowledge_indicator_feature_details_content';
@@ -51,6 +61,10 @@ interface Props {
   occurrencesByQueryId: Record<string, Array<{ x: number; y: number }>>;
   onClose: () => void;
   features: Feature[];
+  stream?: Streams.all.Definition;
+  pageIndex?: number;
+  pageCount?: number;
+  onSelectPage?: (pageIndex: number) => void;
 }
 
 export function KnowledgeIndicatorDetailsFlyout({
@@ -58,12 +72,40 @@ export function KnowledgeIndicatorDetailsFlyout({
   occurrencesByQueryId,
   onClose,
   features,
+  stream,
+  pageIndex,
+  pageCount,
+  onSelectPage,
 }: Props) {
+  const {
+    dependencies: {
+      start: { share },
+    },
+  } = useKibana();
+  const { timeState } = useTimefilter();
   const flyoutTitleId = useGeneratedHtmlId({ prefix: 'knowledgeIndicatorDetailsFlyoutTitle' });
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isActionsMenuOpen, setIsActionsMenuOpen] = useState(false);
 
   const streamName = getKnowledgeIndicatorStreamName(knowledgeIndicator);
+
+  // Reset transient UI (popover/delete modal) when navigating to another indicator.
+  const knowledgeIndicatorItemId = getKnowledgeIndicatorItemId(knowledgeIndicator);
+  useEffect(() => {
+    setShowDeleteModal(false);
+    setIsActionsMenuOpen(false);
+  }, [knowledgeIndicatorItemId]);
+
+  const featureFilter =
+    knowledgeIndicator.kind === 'feature' ? knowledgeIndicator.feature.filter : undefined;
+  const discoverLocator = share.url.locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR);
+  const openFeatureInDiscover = useMemo(() => {
+    if (!featureFilter || !discoverLocator || !stream) {
+      return undefined;
+    }
+    return () =>
+      discoverLocator.navigate(buildFeatureDiscoverParams(stream, featureFilter, timeState));
+  }, [discoverLocator, featureFilter, stream, timeState]);
 
   const streamFeatures = useMemo(
     () => features.filter((f) => f.stream_name === streamName),
@@ -76,6 +118,7 @@ export function KnowledgeIndicatorDetailsFlyout({
     promoteQuery,
     isMutating: isActionMutating,
   } = useKnowledgeIndicatorActions({ streamName, onSuccess: onClose });
+  const { blocksActivity, activityBlockTooltip } = useBlocksNewActivity();
 
   const { deleteKnowledgeIndicatorsInBulk, isDeleting: isKIDeleting } =
     useStreamKnowledgeIndicatorsBulkDelete({ streamName, onSuccess: onClose });
@@ -95,6 +138,25 @@ export function KnowledgeIndicatorDetailsFlyout({
       await deleteKnowledgeIndicatorsInBulk([knowledgeIndicator]);
     }
   }, [knowledgeIndicator, demoteRules, deleteKnowledgeIndicatorsInBulk]);
+
+  const openInDiscoverActionItems = useMemo(() => {
+    if (!openFeatureInDiscover) {
+      return [];
+    }
+
+    return [
+      <EuiContextMenuItem
+        key="open-in-discover"
+        icon="discoverApp"
+        onClick={() => {
+          setIsActionsMenuOpen(false);
+          openFeatureInDiscover();
+        }}
+      >
+        {OPEN_IN_DISCOVER_LABEL}
+      </EuiContextMenuItem>,
+    ];
+  }, [openFeatureInDiscover]);
 
   const featureActionItems = useMemo(() => {
     if (knowledgeIndicator.kind !== 'feature') {
@@ -154,46 +216,59 @@ export function KnowledgeIndicatorDetailsFlyout({
     return items;
   }, [excludeFeature, isMutating, knowledgeIndicator, restoreFeature]);
 
-  const queryActionItems = useMemo(
-    () =>
-      knowledgeIndicator.kind === 'query'
+  const queryActionItems = useMemo(() => {
+    if (knowledgeIndicator.kind !== 'query') {
+      return [];
+    }
+
+    const isStats = knowledgeIndicator.query.type === QUERY_TYPE_STATS;
+    const isPromoteDisabled = isMutating || blocksActivity || isStats;
+    const promoteTooltip =
+      activityBlockTooltip ?? (isStats ? STATS_PROMOTE_DISABLED_TOOLTIP : undefined);
+
+    return [
+      ...(!knowledgeIndicator.rule.backed
         ? [
-            ...(!knowledgeIndicator.rule.backed
-              ? [
-                  <EuiContextMenuItem
-                    key="query-promote"
-                    icon="plusCircle"
-                    disabled={isMutating}
-                    onClick={() => {
-                      setIsActionsMenuOpen(false);
-                      promoteQuery(knowledgeIndicator.query.id);
-                    }}
-                  >
-                    {PROMOTE_LABEL}
-                  </EuiContextMenuItem>,
-                ]
-              : []),
             <EuiContextMenuItem
-              key="query-delete"
-              icon="trash"
-              color="danger"
-              disabled={isMutating}
+              key="query-promote"
+              icon="plusCircle"
+              disabled={isPromoteDisabled}
+              toolTipContent={promoteTooltip}
               onClick={() => {
                 setIsActionsMenuOpen(false);
-                setShowDeleteModal(true);
+                promoteQuery(knowledgeIndicator.query.id);
               }}
             >
-              {DELETE_LABEL}
+              {PROMOTE_LABEL}
             </EuiContextMenuItem>,
           ]
-        : [],
-    [isMutating, knowledgeIndicator, promoteQuery]
-  );
+        : []),
+      <EuiContextMenuItem
+        key="query-delete"
+        icon="trash"
+        color="danger"
+        disabled={isMutating}
+        onClick={() => {
+          setIsActionsMenuOpen(false);
+          setShowDeleteModal(true);
+        }}
+      >
+        {DELETE_LABEL}
+      </EuiContextMenuItem>,
+    ];
+  }, [activityBlockTooltip, blocksActivity, isMutating, knowledgeIndicator, promoteQuery]);
 
   const title =
     knowledgeIndicator.kind === 'feature'
       ? knowledgeIndicator.feature.title ?? knowledgeIndicator.feature.id
       : knowledgeIndicator.query.title ?? knowledgeIndicator.query.id;
+
+  const hasPagination =
+    pageCount !== undefined &&
+    pageCount > 1 &&
+    pageIndex !== undefined &&
+    pageIndex >= 0 &&
+    onSelectPage !== undefined;
 
   return (
     <>
@@ -205,7 +280,21 @@ export function KnowledgeIndicatorDetailsFlyout({
         size="40%"
         hideCloseButton
       >
-        <FlyoutToolbarHeader>
+        <FlyoutToolbarHeader
+          leftContent={
+            hasPagination ? (
+              <EuiFlexItem grow={false}>
+                <EuiPagination
+                  aria-label={PAGINATION_ARIA_LABEL}
+                  pageCount={pageCount}
+                  activePage={pageIndex}
+                  onPageClick={onSelectPage}
+                  compressed
+                />
+              </EuiFlexItem>
+            ) : undefined
+          }
+        >
           <EuiFlexItem grow={false}>
             <EuiPopover
               aria-label={ACTIONS_MENU_POPOVER_ARIA_LABEL}
@@ -225,7 +314,9 @@ export function KnowledgeIndicatorDetailsFlyout({
               panelPaddingSize="none"
               anchorPosition="downRight"
             >
-              <EuiContextMenuPanel items={[...featureActionItems, ...queryActionItems]} />
+              <EuiContextMenuPanel
+                items={[...openInDiscoverActionItems, ...featureActionItems, ...queryActionItems]}
+              />
             </EuiPopover>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -288,7 +379,10 @@ export function KnowledgeIndicatorDetailsFlyout({
 
         <EuiFlyoutBody>
           {knowledgeIndicator.kind === 'feature' ? (
-            <KnowledgeIndicatorFeatureDetailsContent feature={knowledgeIndicator.feature} />
+            <KnowledgeIndicatorFeatureDetailsContent
+              feature={knowledgeIndicator.feature}
+              onOpenInDiscover={openFeatureInDiscover}
+            />
           ) : (
             <KnowledgeIndicatorQueryDetailsContent
               query={knowledgeIndicator.query}
@@ -315,6 +409,20 @@ const CLOSE_BUTTON_ARIA_LABEL = i18n.translate(
   'xpack.streams.knowledgeIndicatorDetailsFlyout.closeButtonAriaLabel',
   {
     defaultMessage: 'Close',
+  }
+);
+
+const PAGINATION_ARIA_LABEL = i18n.translate(
+  'xpack.streams.knowledgeIndicatorDetailsFlyout.paginationAriaLabel',
+  {
+    defaultMessage: 'Knowledge indicator pagination',
+  }
+);
+
+const OPEN_IN_DISCOVER_LABEL = i18n.translate(
+  'xpack.streams.knowledgeIndicatorDetailsFlyout.openInDiscoverActionLabel',
+  {
+    defaultMessage: 'Open in Discover',
   }
 );
 

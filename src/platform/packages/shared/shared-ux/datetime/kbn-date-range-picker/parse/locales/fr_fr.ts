@@ -27,7 +27,7 @@ import type { LocaleGrammar } from '../locale_grammar';
  */
 export const FR_FR_GRAMMAR: LocaleGrammar = {
   nowKeyword: 'maintenant',
-  delimiters: ['à', 'a'],
+  delimiters: [{ text: 'à' }, { text: 'a' }],
   namedRanges: {
     "aujourd'hui": { start: 'now/d', end: 'now/d' },
     hier: { start: 'now-1d/d', end: 'now-1d/d' },

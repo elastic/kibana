@@ -47,6 +47,7 @@ import {
 } from './compose_mappers';
 import { HorizontalMinimalStepper, type MinimalStep } from './horizontal_minimal_stepper';
 import { QuerySandboxFlyout } from './query_sandbox_flyout';
+import { SandboxSettingsMenu } from './sandbox_settings_menu';
 import { isAlertTabDisabled } from './compose_discover_tabs';
 import {
   RULE_BUILDER_REGISTRY,
@@ -463,11 +464,16 @@ export function ComposeDiscoverFlyout({
   const [dateRange, setDateRange] = useState({ dateStart: 'now-15m', dateEnd: 'now' });
 
   const watchedTimeField = useWatch({ control: methods.control, name: 'timeField' });
+  /*
+   * One-way RHF -> sandbox draft push. `sandboxTimeField` must stay out of the deps:
+   * with it, the effect re-fires on its own output and reverts the user's in-progress
+   * sandbox selection back to the committed form value (#281806).
+   */
   useEffect(() => {
-    if (watchedTimeField && watchedTimeField !== sandboxTimeField) {
+    if (watchedTimeField) {
       setSandboxTimeField(watchedTimeField);
     }
-  }, [watchedTimeField, sandboxTimeField]);
+  }, [watchedTimeField]);
 
   const isAlert = useWatch({ control: methods.control, name: 'kind' }) === 'alert';
   const watchedQuery = useWatch({ control: methods.control, name: 'query' });
@@ -496,6 +502,7 @@ export function ComposeDiscoverFlyout({
     onTimeFieldChange: handleResolvedTimeFieldChange,
     http: baseServices.http,
     dataViews: baseServices.dataViews,
+    search: baseServices.data.search.search,
   });
 
   /*
@@ -1097,7 +1104,7 @@ export function ComposeDiscoverFlyout({
   }, [syncSandbox, dispatch]);
 
   /*
-   * Split / Merge header buttons passed into the sandbox via headerActions.
+   * Settings (gear) menu rendered in the sandbox flyout header.
    * Alert Condition step only — not on recovery editing.
    */
   const sandboxHeaderActions = useMemo(() => {
@@ -1110,49 +1117,12 @@ export function ComposeDiscoverFlyout({
     ) {
       return undefined;
     }
-    if (uiState.manualSplitEnabled) {
-      return (
-        <EuiToolTip
-          content={i18n.translate('xpack.alertingV2.composeDiscover.querySandbox.mergeTooltip', {
-            defaultMessage:
-              'Combine the base query and alert condition in one editor. When you apply, we automatically split them again.',
-          })}
-        >
-          <EuiButton
-            size="s"
-            color="text"
-            iconType="querySelector"
-            onClick={handleDisableManualSplit}
-            data-test-subj="querySandboxUseSingleEditor"
-          >
-            {i18n.translate(
-              'xpack.alertingV2.composeDiscover.querySandbox.useSingleEditorButtonLabel',
-              { defaultMessage: 'Use single editor' }
-            )}
-          </EuiButton>
-        </EuiToolTip>
-      );
-    }
     return (
-      <EuiToolTip
-        content={i18n.translate('xpack.alertingV2.composeDiscover.querySandbox.splitTooltip', {
-          defaultMessage:
-            'Open separate editors for the base query and alert condition. Automatic splitting is disabled in this mode.',
-        })}
-      >
-        <EuiButton
-          size="s"
-          color="text"
-          iconType="inputOutput"
-          onClick={handleEnableManualSplit}
-          data-test-subj="querySandboxSplitBaseAndAlert"
-        >
-          {i18n.translate(
-            'xpack.alertingV2.composeDiscover.querySandbox.splitBaseAndAlertButtonLabel',
-            { defaultMessage: 'Split base and alert' }
-          )}
-        </EuiButton>
-      </EuiToolTip>
+      <SandboxSettingsMenu
+        manualSplitEnabled={uiState.manualSplitEnabled}
+        onEnableManualSplit={handleEnableManualSplit}
+        onDisableManualSplit={handleDisableManualSplit}
+      />
     );
   }, [
     isBuilderMode,

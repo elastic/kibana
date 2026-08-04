@@ -279,7 +279,6 @@ export const User: FC<UserProps> = memo(function User({
         entityId: params.entityId,
         entityName: params.entityName,
         scopeId,
-        title: params.entityName ?? params.entityId,
         origin,
       }),
     [openEntityDetailsAsChild, scopeId]
@@ -313,6 +312,7 @@ export const User: FC<UserProps> = memo(function User({
             entityId: entityStoreEntityId,
             onShowEntity: onOpenUser,
             title: userName,
+            subTab: path.subTab as RiskScoreLeftPanelSubTab | undefined,
             origin:
               path.subTab === RiskScoreLeftPanelSubTab.RESOLUTION
                 ? FLYOUT_ORIGIN.RISK_SUMMARY_RESOLUTION

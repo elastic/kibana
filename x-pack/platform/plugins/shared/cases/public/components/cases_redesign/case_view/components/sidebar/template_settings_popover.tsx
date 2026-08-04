@@ -7,7 +7,13 @@
 
 import type { FC } from 'react';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
-import { EuiComboBox, EuiIcon, EuiPopover, EuiPopoverTitle } from '@elastic/eui';
+import {
+  EuiComboBox,
+  EuiIcon,
+  EuiPopover,
+  EuiPopoverTitle,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import type { CaseUI } from '../../../../../../common';
 import { useCasesContext } from '../../../../cases_context/use_cases_context';
@@ -38,6 +44,7 @@ export const TemplateSettingsPopover: FC<TemplateSettingsPopoverProps> = ({
 }) => {
   const { owner } = useCasesContext();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const templatePopoverTitleId = useGeneratedHtmlId({ prefix: `${dataTestSubj}-title` });
   const appliedTemplateId = caseData.template?.id ?? '';
 
   const togglePopover = useCallback(() => setIsPopoverOpen((isOpen) => !isOpen), []);
@@ -228,18 +235,22 @@ export const TemplateSettingsPopover: FC<TemplateSettingsPopoverProps> = ({
         closePopover={closePopover}
         anchorPosition="downRight"
         panelPaddingSize="m"
+        aria-labelledby={templatePopoverTitleId}
         data-test-subj={`${dataTestSubj}-popover`}
         button={
           <SidebarSectionSettingsButton data-test-subj={dataTestSubj} onClick={togglePopover} />
         }
       >
-        <EuiPopoverTitle>{commonI18n.APPLY_TEMPLATE_MODAL_TEMPLATE_LABEL}</EuiPopoverTitle>
+        <EuiPopoverTitle id={templatePopoverTitleId}>
+          {commonI18n.APPLY_TEMPLATE_MODAL_TEMPLATE_LABEL}
+        </EuiPopoverTitle>
         <EuiComboBox
           fullWidth
           singleSelection={{ asPlainText: true }}
           options={options}
           selectedOptions={displayedSelectedOptions}
           onChange={onTemplateChange}
+          aria-labelledby={templatePopoverTitleId}
           isLoading={isLoadingTemplates}
           placeholder={commonI18n.APPLY_TEMPLATE_MODAL_TEMPLATE_PLACEHOLDER}
           prepend={
@@ -247,6 +258,7 @@ export const TemplateSettingsPopover: FC<TemplateSettingsPopoverProps> = ({
               <EuiIcon
                 type="warning"
                 color="warning"
+                aria-hidden={true}
                 data-test-subj={`${dataTestSubj}-template-not-found-icon`}
               />
             ) : undefined

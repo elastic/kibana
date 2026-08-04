@@ -18,13 +18,12 @@ test.describe('Tags management — accessibility', { tag: tags.stateful.classic 
     await kbnClient.savedObjects.cleanStandardList();
   });
 
-  test('tags management page a11y', async ({ page, browserAuth, pageObjects, kbnUrl }) => {
+  test('tags management page a11y', async ({ page, browserAuth, pageObjects }) => {
     const { tagManagement } = pageObjects;
     const { tagModal, assignFlyout, tagsTable } = tagManagement;
 
     await browserAuth.loginAsPrivilegedUser();
-    await page.goto(kbnUrl.app('management/kibana/tags'));
-    await tagsTable.waitForLoaded();
+    await tagManagement.goto();
 
     await test.step('main page', async () => {
       const { violations } = await page.checkA11y({ include: A11Y_SELECTORS });

@@ -187,12 +187,12 @@ export const DatasetsListPage: React.FC = () => {
 
     try {
       setCreateError(null);
-      await createDataset.mutateAsync({
+      const { dataset_id: datasetId } = await createDataset.mutateAsync({
         name: name.trim(),
         description: description.trim(),
       });
-      setPageIndex(0);
       closeCreateFlyout();
+      history.push(`/datasets/${datasetId}`);
     } catch (err) {
       setCreateError(err instanceof Error ? err.message : String(err));
     }

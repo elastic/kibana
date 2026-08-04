@@ -35,7 +35,7 @@ import type { ListingPageUrlState } from '@kbn/ml-url-state';
 import { usePageUrlState } from '@kbn/ml-url-state';
 import { dynamic } from '@kbn/shared-ux-utility';
 import type { FC } from 'react';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import { useEuiMaxBreakpoint } from '@elastic/eui';
@@ -73,7 +73,11 @@ import { ModelStatusIndicator } from './model_status_indicator';
 import { MLSavedObjectsSpacesList } from '../components/ml_saved_objects_spaces_list';
 import { useCanManageSpacesAndSavedObjects } from '../hooks/use_spaces';
 import { SpaceManagementContextWrapper } from '../components/space_management_context_wrapper';
-import { SynchronizeSavedObjectsButton } from '../jobs/jobs_list/components/top_level_actions/synchronize_saved_objects_button';
+import { JobSpacesSyncFlyout } from '../components/job_spaces_sync';
+import { HelpMenu } from '../components/help_menu';
+import { MlAppHeader } from '../components/ml_app_header';
+import { useTrainedModelsMenu } from './hooks/use_trained_models_menu';
+import { DatePicker } from '../components/ml_page/date_picker';
 
 interface PageUrlState {
   pageKey: typeof ML_PAGES.TRAINED_MODELS_MANAGE;
@@ -119,8 +123,6 @@ export const ModelsList: FC<Props> = ({
       docLinks,
     },
   } = useMlKibana();
-
-  const isInitialized = useRef<boolean>(false);
 
   const canManageSpacesAndSavedObjects = useCanManageSpacesAndSavedObjects();
 
@@ -176,6 +178,9 @@ export const ModelsList: FC<Props> = ({
   const [modelToTest, setModelToTest] = useState<TrainedModelItem | null>(null);
   const [dfaModelToTest, setDfaModelToTest] = useState<DFAModelItem | null>(null);
   const [isAddModelFlyoutVisible, setIsAddModelFlyoutVisible] = useState(false);
+  const [showSyncFlyout, setShowSyncFlyout] = useState(false);
+
+  const helpLink = docLinks.links.ml.trainedModels;
 
   // List of downloaded/existing models
   const existingModels = useMemo<Array<NLPModelItem | DFAModelItem>>(() => {
@@ -187,13 +192,22 @@ export const ModelsList: FC<Props> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const onCloseSyncFlyout = useCallback(() => {
+    fetchModels();
+    setShowSyncFlyout(false);
+  }, [fetchModels]);
+
+  const menu = useTrainedModelsMenu({
+    onOpenSyncFlyout: () => setShowSyncFlyout(true),
+    onOpenAddModelFlyout: () => setIsAddModelFlyoutVisible(true),
+  });
+
   useEffect(
-    function checkInit() {
-      if (!isInitialized.current && !isLoading) {
-        isInitialized.current = true;
-      }
+    function fetchModelsOnMount() {
+      fetchModels();
     },
-    [isLoading]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
   );
 
   useEffect(
@@ -594,177 +608,167 @@ export const ModelsList: FC<Props> = ({
     }
   }, [items, pageState.showAll]);
 
-  if (!isInitialized.current) {
-    return null;
-  }
-
   return (
-    <div data-test-subj="mlTrainedModelsList">
-      <SpaceManagementContextWrapper>
-        <SavedObjectsWarning onCloseFlyout={fetchModels} forceRefresh={isLoading} />
-        <EuiFlexGroup justifyContent="spaceBetween">
+    <>
+      <MlAppHeader
+        title={i18n.translate('xpack.ml.modelManagement.trainedModelsHeader', {
+          defaultMessage: 'Trained Models',
+        })}
+        menu={menu}
+        docLink={helpLink}
+      />
+      <div data-test-subj="mlTrainedModelsList">
+        <SpaceManagementContextWrapper>
+          <SavedObjectsWarning onCloseFlyout={fetchModels} forceRefresh={isLoading} />
           {modelsStats ? (
-            <EuiFlexItem>
-              <EuiFlexGroup alignItems="center">
-                <EuiFlexItem grow={false}>
-                  <StatsBar stats={modelsStats} dataTestSub={'mlInferenceModelsStatsBar'} />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiSwitch
-                    label={
-                      <FormattedMessage
-                        id="xpack.ml.trainedModels.modelsList.showAllLabel"
-                        defaultMessage="Show all"
-                      />
-                    }
-                    checked={!!pageState.showAll}
-                    onChange={(e) => updatePageState({ showAll: e.target.checked })}
-                    data-test-subj="mlModelsShowAllSwitch"
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          ) : null}
-          <EuiFlexItem grow={false}>
-            <SynchronizeSavedObjectsButton refreshJobs={fetchModels} />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              fill
-              iconType={'plusCircle'}
-              color={'primary'}
-              onClick={setIsAddModelFlyoutVisible.bind(null, true)}
-              data-test-subj="mlModelsAddTrainedModelButton"
-            >
-              <FormattedMessage
-                id="xpack.ml.trainedModels.modelsList.addModelButtonLabel"
-                defaultMessage="Add trained model"
-              />
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="m" />
-        <div data-test-subj="mlModelsTableContainer">
-          <EuiInMemoryTable<TrainedModelUIItem>
-            tableLayout={'auto'}
-            responsiveBreakpoint={'xl'}
-            allowNeutralSort={false}
-            columns={columns}
-            itemIdToExpandedRowMap={itemIdToExpandedRowMap}
-            items={tableItems}
-            itemId={ModelsTableToConfigMapping.id}
-            loading={isLoading}
-            search={search}
-            selection={selection}
-            rowProps={(item) => ({
-              'data-test-subj': `mlModelsTableRow row-${item.model_id}`,
-              // This is a workaround for https://github.com/elastic/eui/issues/8259
-              css: css`
-                ${euiMaxBreakpointXL} {
-                  min-block-size: 10.875rem;
-                }
-              `,
-            })}
-            pagination={pagination}
-            onTableChange={onTableChange}
-            sorting={sorting}
-            data-test-subj={isLoading ? 'mlModelsTable loading' : 'mlModelsTable loaded'}
-            tableCaption={i18n.translate('xpack.ml.trainedModels.modelsList.modelsTableCaption', {
-              defaultMessage: 'Trained models',
-            })}
-            childrenBetween={
-              isElserCalloutVisible ? (
-                <>
-                  <EuiCallOut
-                    announceOnMount={false}
-                    size="s"
-                    title={
-                      <FormattedMessage
-                        id="xpack.ml.trainedModels.modelsList.newElserModelTitle"
-                        defaultMessage="New ELSER model now available"
-                      />
-                    }
-                    onDismiss={setIsElserCalloutDismissed.bind(null, true)}
-                  >
+            <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <StatsBar stats={modelsStats} dataTestSub={'mlInferenceModelsStatsBar'} />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiSwitch
+                  label={
                     <FormattedMessage
-                      id="xpack.ml.trainedModels.modelsList.newElserModelDescription"
-                      defaultMessage="A new version of ELSER that shows faster performance and improved relevance is now available. {docLink} for information on how to start using it."
-                      values={{
-                        docLink: (
-                          <EuiLink href={nlpElserDocUrl} external target={'_blank'}>
-                            <FormattedMessage
-                              id="xpack.ml.trainedModels.modelsList.startDeployment.viewElserDocLink"
-                              defaultMessage="View documentation"
-                            />
-                          </EuiLink>
-                        ),
-                      }}
+                      id="xpack.ml.trainedModels.modelsList.showAllLabel"
+                      defaultMessage="Show all"
                     />
-                  </EuiCallOut>
-                  <EuiSpacer size="m" />
-                </>
-              ) : null
-            }
-          />
-        </div>
-        {modelsToDelete.length > 0 && (
-          <DeleteModelsModal
-            onClose={() => {
-              setModelsToDelete([]);
-            }}
-            onDelete={(refreshList) => {
-              setItemIdToExpandedRowMap((prev) => {
-                const newMap = { ...prev };
-                modelsToDelete.forEach((model) => {
-                  delete newMap[model.model_id];
+                  }
+                  checked={!!pageState.showAll}
+                  onChange={(e) => updatePageState({ showAll: e.target.checked })}
+                  data-test-subj="mlModelsShowAllSwitch"
+                />
+              </EuiFlexItem>
+              <EuiFlexItem />
+              <EuiFlexItem grow={false}>
+                <DatePicker />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          ) : null}
+          <EuiSpacer size="m" />
+          <div data-test-subj="mlModelsTableContainer">
+            <EuiInMemoryTable<TrainedModelUIItem>
+              tableLayout={'auto'}
+              responsiveBreakpoint={'xl'}
+              allowNeutralSort={false}
+              columns={columns}
+              itemIdToExpandedRowMap={itemIdToExpandedRowMap}
+              items={tableItems}
+              itemId={ModelsTableToConfigMapping.id}
+              loading={isLoading}
+              search={search}
+              selection={selection}
+              rowProps={(item) => ({
+                'data-test-subj': `mlModelsTableRow row-${item.model_id}`,
+                // This is a workaround for https://github.com/elastic/eui/issues/8259
+                css: css`
+                  ${euiMaxBreakpointXL} {
+                    min-block-size: 10.875rem;
+                  }
+                `,
+              })}
+              pagination={pagination}
+              onTableChange={onTableChange}
+              sorting={sorting}
+              data-test-subj={isLoading ? 'mlModelsTable loading' : 'mlModelsTable loaded'}
+              tableCaption={i18n.translate('xpack.ml.trainedModels.modelsList.modelsTableCaption', {
+                defaultMessage: 'Trained models',
+              })}
+              childrenBetween={
+                isElserCalloutVisible ? (
+                  <>
+                    <EuiCallOut
+                      announceOnMount={false}
+                      size="s"
+                      title={
+                        <FormattedMessage
+                          id="xpack.ml.trainedModels.modelsList.newElserModelTitle"
+                          defaultMessage="New ELSER model now available"
+                        />
+                      }
+                      onDismiss={setIsElserCalloutDismissed.bind(null, true)}
+                    >
+                      <FormattedMessage
+                        id="xpack.ml.trainedModels.modelsList.newElserModelDescription"
+                        defaultMessage="A new version of ELSER that shows faster performance and improved relevance is now available. {docLink} for information on how to start using it."
+                        values={{
+                          docLink: (
+                            <EuiLink href={nlpElserDocUrl} external target={'_blank'}>
+                              <FormattedMessage
+                                id="xpack.ml.trainedModels.modelsList.startDeployment.viewElserDocLink"
+                                defaultMessage="View documentation"
+                              />
+                            </EuiLink>
+                          ),
+                        }}
+                      />
+                    </EuiCallOut>
+                    <EuiSpacer size="m" />
+                  </>
+                ) : null
+              }
+            />
+          </div>
+          {modelsToDelete.length > 0 && (
+            <DeleteModelsModal
+              onClose={() => {
+                setModelsToDelete([]);
+              }}
+              onDelete={(refreshList) => {
+                setItemIdToExpandedRowMap((prev) => {
+                  const newMap = { ...prev };
+                  modelsToDelete.forEach((model) => {
+                    delete newMap[model.model_id];
+                  });
+                  return newMap;
                 });
-                return newMap;
-              });
 
-              setModelsToDelete([]);
-              setSelectedModels([]);
+                setModelsToDelete([]);
+                setSelectedModels([]);
 
-              if (refreshList) {
-                fetchModels();
-              }
-            }}
-            models={modelsToDelete}
-          />
-        )}
-        {modelToTest === null ? null : (
-          <TestModelAndPipelineCreationFlyout
-            model={modelToTest}
-            onClose={(refreshList?: boolean) => {
-              setModelToTest(null);
-              if (refreshList) {
-                fetchModels();
-              }
-            }}
-          />
-        )}
-        {dfaModelToTest === null ? null : (
-          <TestDfaModelsFlyout
-            model={dfaModelToTest}
-            onClose={setDfaModelToTest.bind(null, null)}
-          />
-        )}
-        {modelToDeploy !== undefined ? (
-          <AddInferencePipelineFlyout
-            onClose={setModelToDeploy.bind(null, undefined)}
-            model={modelToDeploy}
-          />
-        ) : null}
-        {isAddModelFlyoutVisible ? (
-          <AddModelFlyout
-            modelDownloads={items.filter(isModelDownloadItem)}
-            onClose={setIsAddModelFlyoutVisible.bind(null, false)}
-            onSubmit={(modelId) => {
-              onModelDownloadRequest(modelId);
-              setIsAddModelFlyoutVisible(false);
-            }}
-          />
-        ) : null}
-      </SpaceManagementContextWrapper>
-    </div>
+                if (refreshList) {
+                  fetchModels();
+                }
+              }}
+              models={modelsToDelete}
+            />
+          )}
+          {modelToTest === null ? null : (
+            <TestModelAndPipelineCreationFlyout
+              model={modelToTest}
+              onClose={(refreshList?: boolean) => {
+                setModelToTest(null);
+                if (refreshList) {
+                  fetchModels();
+                }
+              }}
+            />
+          )}
+          {dfaModelToTest === null ? null : (
+            <TestDfaModelsFlyout
+              model={dfaModelToTest}
+              onClose={setDfaModelToTest.bind(null, null)}
+            />
+          )}
+          {modelToDeploy !== undefined ? (
+            <AddInferencePipelineFlyout
+              onClose={setModelToDeploy.bind(null, undefined)}
+              model={modelToDeploy}
+            />
+          ) : null}
+          {isAddModelFlyoutVisible ? (
+            <AddModelFlyout
+              modelDownloads={items.filter(isModelDownloadItem)}
+              onClose={setIsAddModelFlyoutVisible.bind(null, false)}
+              onSubmit={(modelId) => {
+                onModelDownloadRequest(modelId);
+                setIsAddModelFlyoutVisible(false);
+              }}
+            />
+          ) : null}
+        </SpaceManagementContextWrapper>
+      </div>
+      {showSyncFlyout ? <JobSpacesSyncFlyout onClose={onCloseSyncFlyout} /> : null}
+      <HelpMenu docLink={helpLink} />
+    </>
   );
 };
