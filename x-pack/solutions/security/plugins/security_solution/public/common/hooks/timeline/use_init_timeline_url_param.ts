@@ -17,10 +17,12 @@ import { useOpenSuperTimeline } from '../../../timelines/components/super_timeli
 import type { TimelineModel, TimelineUrl } from '../../../timelines/store/model';
 import { selectTimelineById } from '../../../timelines/store/selectors';
 import { URL_PARAM_KEY } from '../use_url_state';
+import { useIsExperimentalFeatureEnabled } from '../use_experimental_features';
 
 export const useInitTimelineFromUrlParam = () => {
   const queryTimelineById = useQueryTimelineById();
   const { openSuperTimeline } = useOpenSuperTimeline();
+  const isSuperTimelineEnabled = useIsExperimentalFeatureEnabled('superTimeline');
   const activeTimeline = useSelector((state: State) =>
     selectTimelineById(state, TimelineId.active)
   );
@@ -29,7 +31,11 @@ export const useInitTimelineFromUrlParam = () => {
     (initialState: TimelineUrl | null) => {
       if (initialState != null) {
         if (initialState.superTimelineSourceIds?.length) {
-          openSuperTimeline(initialState.superTimelineSourceIds);
+          // Super Timeline URLs have no 'id'; skip queryTimelineById when the flag is off
+          // rather than calling it with timelineId: undefined.
+          if (isSuperTimelineEnabled) {
+            openSuperTimeline(initialState.superTimelineSourceIds);
+          }
         } else {
           queryTimelineById({
             activeTimelineTab: initialState.activeTab,
@@ -42,7 +48,7 @@ export const useInitTimelineFromUrlParam = () => {
         }
       }
     },
-    [queryTimelineById, openSuperTimeline]
+    [queryTimelineById, openSuperTimeline, isSuperTimelineEnabled]
   );
 
   useEffect(() => {
