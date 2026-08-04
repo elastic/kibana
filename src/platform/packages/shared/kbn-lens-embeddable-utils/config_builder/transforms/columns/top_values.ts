@@ -116,13 +116,10 @@ export function fromTermsLensApiToLensState(
       size: limit, // it cannot be 0 (zero)
       ...(increase_accuracy != null ? { accuracyMode: increase_accuracy } : {}),
       ...(includes?.values
-        ? { include: includes?.values, includeIsRegex: includes?.as_regex ?? false }
+        ? { include: includes.values, includeIsRegex: includes?.as_regex ?? false }
         : {}),
       ...(excludes?.values
-        ? {
-            exclude: excludes.values,
-            excludeIsRegex: excludes?.as_regex ?? false,
-          }
+        ? { exclude: excludes.values, excludeIsRegex: excludes?.as_regex ?? false }
         : {}),
       ...(other_bucket != null ? { otherBucket: true } : {}),
       ...(other_bucket?.include_documents_without_field != null
@@ -286,7 +283,10 @@ export function fromTermsLensStateToAPI(
       ? {
           includes: {
             as_regex: column.params.includeIsRegex,
-            values: column.params.include?.map((value) => String(value)) || [],
+            // Preserve the value type verbatim: numeric fields store numbers and the runtime terms
+            // agg drops stringified numbers at render (`migrateIncludeExcludeFormat` filters with
+            // `Number.isFinite`), so coercing to strings would silently lose the include filter.
+            values: column.params.include ?? [],
           },
         }
       : {}),
@@ -294,7 +294,7 @@ export function fromTermsLensStateToAPI(
       ? {
           excludes: {
             as_regex: column.params.excludeIsRegex,
-            values: column.params.exclude?.map((value) => String(value)) || [],
+            values: column.params.exclude ?? [],
           },
         }
       : {}),
