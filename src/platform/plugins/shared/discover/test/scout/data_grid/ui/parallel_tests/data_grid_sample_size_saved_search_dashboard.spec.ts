@@ -19,8 +19,7 @@ import { testData } from '../fixtures';
 const CUSTOM_SAMPLE_SIZE_FOR_SAVED_SEARCH = 150;
 const CUSTOM_SAMPLE_SIZE_FOR_DASHBOARD_PANEL = 10;
 
-// Failing: See https://github.com/elastic/kibana/issues/282426
-spaceTest.describe.skip(
+spaceTest.describe(
   'Discover data grid sample size - saved search and Dashboard',
   { tag: '@local-stateful-classic' },
   () => {
