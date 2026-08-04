@@ -229,6 +229,7 @@ export const Wizard: FC<WizardProps> = React.memo(
               css={css`
                 display: block;
               `}
+              tabIndex={0}
             >
               {dataViewPickerComponent}
             </span>
