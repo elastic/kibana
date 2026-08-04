@@ -58,10 +58,7 @@ export const alertEventSeverity = alertEventSeveritySchema.enum;
 export const alertEventSchema = z.object({
   '@timestamp': z.string(),
   scheduled_timestamp: z.string().optional(),
-  rule: z.object({
-    id: z.string(),
-    version: z.number(),
-  }),
+  rule: z.object({ id: z.string().optional(), version: z.number().optional() }).optional(),
   group_hash: z.string(),
   data: z.record(z.string(), z.unknown()),
   status: alertEventStatusSchema,
