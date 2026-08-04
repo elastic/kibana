@@ -35,7 +35,7 @@ export const discoveryAgentType = {
           platformCoreTools.executeEsql,
           platformSignificantEventsTools.searchKnowledgeIndicators,
           platformSignificantEventsTools.searchEvent,
-          platformSignificantEventsTools.discoveryWrite,
+          platformSignificantEventsTools.eventsWrite,
         ],
       },
     ],

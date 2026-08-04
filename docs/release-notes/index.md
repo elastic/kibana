@@ -26,8 +26,9 @@ To check for security updates, go to [Security announcements for the Elastic sta
 
 ## 9.4.4 [kibana-9.4.4-release-notes]
 
-% ::::{NOTE}
-% ::::
+::::{important} 
+The 9.4.4 release contains fixes for potential security vulnerabilities. For details, go to [security announcements](https://discuss.elastic.co/c/announcements/security-announcements/31).
+::::
 
 ### Features and enhancements [kibana-9.4.4-features-enhancements]
 
@@ -786,8 +787,9 @@ For the Elastic Security 9.4.0 release information, refer to [Elastic Security S
 
 ## 9.3.8 [kibana-9.3.8-release-notes]
 
-% ::::{NOTE}
-% ::::
+::::{important} 
+The 9.3.8 release contains fixes for potential security vulnerabilities. For details, go to [security announcements](https://discuss.elastic.co/c/announcements/security-announcements/31).
+::::
 
 ### Features and enhancements [kibana-9.3.8-features-enhancements]
 
