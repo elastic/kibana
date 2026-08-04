@@ -236,7 +236,9 @@ export const useRovingTreeNavigation = (
         case 'ArrowRight':
           claim();
           if (row.kind === 'pager') {
-            activatePager(row);
+            // Step focus into the pager's first button rather than firing the action; the buttons
+            // then own Left/Right navigation between themselves.
+            rowRefs.current.get(rowKey(row))?.querySelector<HTMLElement>('button')?.focus();
           } else if (row.hasChildren && !row.isExpanded) {
             setExpandedFor(row.node.id, true);
           } else if (row.hasChildren && row.isExpanded) {
@@ -245,7 +247,7 @@ export const useRovingTreeNavigation = (
             // Leaf row: step into its copy-value button, if it has one.
             rowRefs.current
               .get(rowKey(row))
-              ?.querySelector<HTMLElement>('.jsonSyntaxTreeCopyButton')
+              ?.querySelector<HTMLElement>('.jsonTreeViewerCopyButton')
               ?.focus();
           }
           break;

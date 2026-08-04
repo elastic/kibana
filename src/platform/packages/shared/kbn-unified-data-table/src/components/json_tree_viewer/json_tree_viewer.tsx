@@ -25,7 +25,7 @@ import {
   useTreeExpansion,
   type TreeExpansionState,
 } from './use_tree_interaction';
-import { ClosingBracketRow, NodeRowView, PagerRowView, treeStyles } from './tree_row_views';
+import { ClosingBracketRow, NodeRowView, PagerRowView, treeStyles } from './tree_rows';
 
 export type { FormatValue, JsonValue } from './tree_model';
 export type { TreeExpansionState } from './use_tree_interaction';
@@ -101,12 +101,13 @@ export const JsonTreeViewer = memo(function JsonTreeViewer({
               onClick={isAllExpanded ? collapseAll : expandAll}
               onKeyDown={onControlKeyDown}
               size="xs"
+              color="text"
             >
               {isAllExpanded
-                ? i18n.translate('unifiedDataTable.jsonSyntaxTree.collapseAll', {
+                ? i18n.translate('unifiedDataTable.jsonTreeViewer.collapseAll', {
                     defaultMessage: 'Collapse all',
                   })
-                : i18n.translate('unifiedDataTable.jsonSyntaxTree.expandAll', {
+                : i18n.translate('unifiedDataTable.jsonTreeViewer.expandAll', {
                     defaultMessage: 'Expand all',
                   })}
             </EuiButtonEmpty>
@@ -115,14 +116,12 @@ export const JsonTreeViewer = memo(function JsonTreeViewer({
       )}
 
       <div css={[styles.wrapper, codeFontCss]}>
-        {root.brackets && <div css={styles.rootBracket}>{root.brackets.open}</div>}
-
         <div
           role="tree"
-          aria-label={i18n.translate('unifiedDataTable.jsonSyntaxTree.treeAriaLabel', {
+          aria-label={i18n.translate('unifiedDataTable.jsonTreeViewer.treeAriaLabel', {
             defaultMessage: 'JSON tree view',
           })}
-          data-test-subj="jsonSyntaxTree"
+          data-test-subj="jsonTreeViewer"
         >
           {rows.map((row) => {
             if (row.kind === 'closing') {
@@ -156,8 +155,6 @@ export const JsonTreeViewer = memo(function JsonTreeViewer({
             );
           })}
         </div>
-
-        {root.brackets && <div css={styles.rootBracket}>{root.brackets.close}</div>}
       </div>
     </>
   );

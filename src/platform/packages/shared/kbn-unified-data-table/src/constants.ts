@@ -16,7 +16,7 @@ export const SCORE_COLUMN_NAME = '_score';
 
 /**
  * Evaluation toggle for the Summary (`_source`) in-grid cell: render it with the current
- * field-summary view (`'summary'`) or with the JSON tree viewer (`'jsonSyntaxTree'`). Flip
+ * field-summary view (`'summary'`) or with the JSON tree viewer (`'jsonTreeViewer'`). Flip
  * this to preview the viewer live in the grid. Temporary — the production path is a
  * profile-registered cell renderer.
  */

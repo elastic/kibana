@@ -89,7 +89,7 @@ describe('JsonTreeViewer', () => {
     // The 12th field is capped away initially.
     expect(screen.queryByText('"value_11"')).not.toBeInTheDocument();
 
-    await userEvent.click(screen.getByRole('treeitem', { name: /show 2 more fields/i }));
+    await userEvent.click(screen.getByRole('button', { name: /show 2 more fields/i }));
     expect(screen.getByText('"value_11"')).toBeVisible();
     expect(lastState?.revealed.size).toBe(1);
 
@@ -110,7 +110,7 @@ describe('JsonTreeViewer', () => {
     // At the initial cap only "Show more" is offered.
     expect(screen.queryByRole('button', { name: /show fewer fields/i })).not.toBeInTheDocument();
 
-    await userEvent.click(screen.getByRole('treeitem', { name: /show 10 more fields/i }));
+    await userEvent.click(screen.getByRole('button', { name: /show 10 more fields/i }));
 
     // Both affordances now live inside the one pager row (same line).
     const pager = screen.getByRole('treeitem', { name: /show 5 more fields/i });
@@ -134,6 +134,45 @@ describe('JsonTreeViewer', () => {
       await userEvent.keyboard('{ArrowRight}');
 
       expect(screen.getByRole('button', { name: 'Copy value' })).toHaveFocus();
+    });
+
+    // A pager row's controls are its buttons, so ArrowRight steps focus into the first one (the
+    // "show more/less" button) rather than firing the reveal straight from the row.
+    it('steps from a pager row into its first button with ArrowRight', async () => {
+      // 12 fields capped at 10 renders a "Show 2 more fields" pager row.
+      const doc = Object.fromEntries(Array.from({ length: 12 }, (_, i) => [`field_${i}`, i]));
+      render(<JsonTreeViewer json={doc} />);
+
+      screen.getByRole('treeitem', { name: /show 2 more fields/i }).focus();
+      await userEvent.keyboard('{ArrowRight}');
+
+      expect(screen.getByRole('button', { name: /show 2 more fields/i })).toHaveFocus();
+    });
+
+    // With two buttons on the row, Right/Left step between them (and Left from the first button
+    // returns to the row) so both controls stay keyboard-reachable.
+    it('moves between the two pager buttons with the Right and Left arrows', async () => {
+      // 25 fields: after one reveal the pager row shows both "Show 5 more" and "Show fewer".
+      const doc = Object.fromEntries(Array.from({ length: 25 }, (_, i) => [`field_${i}`, i]));
+      render(<JsonTreeViewer json={doc} />);
+      await userEvent.click(screen.getByRole('button', { name: /show 10 more fields/i }));
+
+      const showMore = screen.getByRole('button', { name: /show 5 more fields/i });
+      const showFewer = screen.getByRole('button', { name: /show fewer fields/i });
+      const pagerRow = screen.getByRole('treeitem', { name: /show 5 more fields/i });
+
+      pagerRow.focus();
+      await userEvent.keyboard('{ArrowRight}');
+      expect(showMore).toHaveFocus();
+
+      await userEvent.keyboard('{ArrowRight}');
+      expect(showFewer).toHaveFocus();
+
+      await userEvent.keyboard('{ArrowLeft}');
+      expect(showMore).toHaveFocus();
+
+      await userEvent.keyboard('{ArrowLeft}');
+      expect(pagerRow).toHaveFocus();
     });
 
     it('steps from the first row up to the Expand all control with ArrowUp', async () => {
