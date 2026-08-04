@@ -21,9 +21,14 @@ export const WARM_START_MEMORY_OBSERVATION_THRESHOLD_BYTES = 5 * 1024 * 1024;
 export const WARM_START_MEMORY_BLOCKING_THRESHOLD_BYTES = 20 * 1024 * 1024;
 export const WARM_START_MEMORY_CONFIDENCE = 0.99;
 
-// One-sided 99% Student-t critical values for df 1..30. The benchmark uses
-// eight pairs by default (df 7); values above the table use the conservative
-// df=30 value rather than silently using a normal approximation.
+// One-sided 99% Student-t critical values for df 1..30.
+//
+// Each value is the 0.99 quantile of Student's t distribution:
+// P(T_df <= tCritical) = 0.99.
+// Reference: https://en.wikipedia.org/wiki/Student%27s_t-distribution#Quantiles
+//
+// The benchmark uses eight pairs by default (df 7); values above the table use
+// the conservative df=30 value rather than silently using a normal approximation.
 const ONE_SIDED_99_T_CRITICAL = [
   31.8205, 6.9646, 4.5407, 3.7469, 3.3649, 3.1427, 2.9979, 2.8965, 2.8214, 2.7638, 2.7181, 2.681,
   2.6503, 2.6245, 2.6025, 2.5835, 2.5669, 2.5524, 2.5395, 2.5274, 2.5176, 2.5083, 2.5, 2.4922,
