@@ -8,8 +8,9 @@
  */
 
 import { EuiComboBoxObject } from '@elastic/eui-test-helpers';
-import { EuiSelectableWrapper } from './selectable';
-import { EuiCheckBoxWrapper } from './check_box';
+import { EuiDataGridObject } from './data_grid_object';
+import { EuiGlobalToastListObject } from './global_toast_list_object';
+import { EuiSuperSelectObject } from './super_select_object';
 import { EuiDataGridWrapper } from './data_grid';
 import { EuiToastWrapper } from './toast';
 import { EuiFieldTextWrapper } from './field_text';
@@ -17,9 +18,13 @@ import { EuiCodeBlockWrapper } from './code_block';
 import { EuiSuperSelectWrapper } from './super_select';
 
 export {
+  // Component Objects (@elastic/eui-test-helpers + prototypes destined for it),
+  // consumed through the `page.components` factories.
   EuiComboBoxObject,
-  EuiSelectableWrapper,
-  EuiCheckBoxWrapper,
+  EuiDataGridObject,
+  EuiGlobalToastListObject,
+  EuiSuperSelectObject,
+  // Deprecated wrappers, kept until all consumers are migrated to `page.components`.
   EuiDataGridWrapper,
   EuiToastWrapper,
   EuiFieldTextWrapper,

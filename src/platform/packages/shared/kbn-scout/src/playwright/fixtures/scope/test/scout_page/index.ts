@@ -9,6 +9,11 @@
 
 import type { EuiComboBoxObject, ObjectScope } from '@elastic/eui-test-helpers';
 import type { Page } from '@playwright/test';
+import type {
+  EuiDataGridObject,
+  EuiGlobalToastListObject,
+  EuiSuperSelectObject,
+} from '../../../../eui_components';
 import type { RunA11yScanOptions } from '../../../../utils';
 import type { PathOptions } from '../../../../../common/services/kibana_url';
 
@@ -148,6 +153,10 @@ export type ScoutPage = Page & {
    */
   components: {
     comboBox: (testSubj: string, scope?: ObjectScope) => EuiComboBoxObject;
+    dataGrid: (testSubj: string, scope?: ObjectScope) => EuiDataGridObject;
+    superSelect: (testSubj: string, scope?: ObjectScope) => EuiSuperSelectObject;
+    /** `testSubj` defaults to `globalToastList`, the subj Kibana core sets on the list. */
+    globalToastList: (testSubj?: string, scope?: ObjectScope) => EuiGlobalToastListObject;
   };
 };
 

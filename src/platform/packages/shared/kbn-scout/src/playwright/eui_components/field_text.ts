@@ -11,7 +11,12 @@ import type { Locator } from '@playwright/test';
 import type { ScoutPage } from '../fixtures/scope/test/scout_page';
 import { resolveSelector, type SelectorInput } from '../utils';
 
-// https://eui.elastic.co/docs/components/forms/text/#text-field
+/**
+ * @deprecated Use native locators instead, e.g. `page.testSubj.locator(subj).locator('input').fill(value)`.
+ * Do not add new usages; this wrapper is removed once all consumers are migrated
+ * (https://github.com/elastic/apps-dx/issues/43).
+ * https://eui.elastic.co/docs/components/forms/text/#text-field
+ */
 export class EuiFieldTextWrapper {
   private readonly fieldTextWrapper: Locator;
   private readonly input: Locator;

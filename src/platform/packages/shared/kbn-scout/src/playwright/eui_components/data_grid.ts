@@ -13,7 +13,12 @@ import { expect } from '@playwright/test';
 import type { ScoutPage } from '../fixtures/scope/test/scout_page';
 import { resolveSelector, type SelectorInput } from '../utils';
 
-// https://eui.elastic.co/docs/components/tables/data-grid/
+/**
+ * @deprecated Use `page.components.dataGrid(testSubj)` (EuiDataGridObject) instead.
+ * Do not add new usages; this wrapper is removed once all consumers are migrated
+ * (https://github.com/elastic/apps-dx/issues/43).
+ * https://eui.elastic.co/docs/components/tables/data-grid/
+ */
 export class EuiDataGridWrapper {
   private readonly page: ScoutPage;
   private readonly dataGridWrapper: Locator;

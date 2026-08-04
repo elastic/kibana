@@ -194,10 +194,12 @@ export const test = baseTest.extend<{}, MyWorkerFixtures>({
 
 Put shared code in `@kbn/scout`, security-specific code in `@kbn/scout-security`.
 
-## EUI Wrappers
+## EUI Test Helpers
 
-Scout provides wrappers for stable EUI interactions — import from `@kbn/scout`:
-`EuiComboBoxWrapper`, `EuiDataGridWrapper`, `EuiSelectableWrapper`, `EuiCheckBoxWrapper`, `EuiFieldTextWrapper`, `EuiCodeBlockWrapper`, `EuiSuperSelectWrapper`, `EuiToastWrapper`
+Scout exposes the `@elastic/eui-test-helpers` package for EUI components that are non-trivial to drive, pre-bound to the page — use `page.components.*` instead of raw selectors:
+`page.components.comboBox(testSubj)`, `page.components.dataGrid(testSubj)`, `page.components.superSelect(testSubj)`, `page.components.globalToastList()`
+
+The old `EuiXxxWrapper` classes are deprecated; do not add new usages. For simple, native-like components (text fields, checkboxes) use plain Playwright locators.
 
 ## Kibana Component Interaction Patterns
 
