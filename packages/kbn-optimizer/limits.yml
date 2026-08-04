@@ -1,8 +1,8 @@
 pageLoadAssetSize:
-  actions: 20500
+  actions: 20800
   advancedSettings: 6119
   agentBuilder: 51190
-  agentBuilderDashboards: 7786
+  agentBuilderDashboards: 8685
   agentBuilderPlatform: 26248
   agentBuilderSml: 2103
   agentBuilderVisualizations: 7356
@@ -33,7 +33,7 @@ pageLoadAssetSize:
   contentManagement: 8350
   contextEngine: 5837
   controls: 10300
-  core: 563984
+  core: 563693
   cps: 9209
   crossClusterReplication: 12662
   customContent: 6111
@@ -184,7 +184,8 @@ pageLoadAssetSize:
   serverlessWorkplaceAI: 4855
   sessionView: 47912
   share: 64059
-  significant_events: 4270
+  significant_events: 12107
+  significantEventsApp: 13163
   slo: 40437
   snapshotRestore: 22068
   spaces: 28871
