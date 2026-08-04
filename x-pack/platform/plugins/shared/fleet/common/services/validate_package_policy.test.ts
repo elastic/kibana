@@ -1303,7 +1303,7 @@ describe('Fleet - validatePackagePolicy() additional_datastreams_permissions', (
     } as unknown as NewPackagePolicy);
 
   const errorsFor = (permissions: string[]) =>
-    validatePackagePolicy(buildPolicy(permissions), minimalPackage, deps)
+    validatePackagePolicy(buildPolicy(permissions), minimalPackage, parse)
       .additional_datastreams_permissions;
 
   // Values that must be accepted: a datastream-type prefix (logs/metrics/traces/synthetics/
