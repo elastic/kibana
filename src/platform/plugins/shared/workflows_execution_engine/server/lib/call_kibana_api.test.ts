@@ -217,6 +217,21 @@ describe('callKibanaApi', () => {
 
   // The self client resolves the base URL itself, and the workflow fake request has no base path, so
   // the space can only reach Core through the path we hand it.
+  it('rejects dot-segment paths that could escape the workflow space', async () => {
+    await expect(
+      callKibanaApi(
+        { fakeRequest: createFakeRequest(), coreStart: createCoreStart(), spaceId: 'current' },
+        { method: 'GET', path: '/s/current/../victim' }
+      )
+    ).rejects.toThrow('Invalid Kibana API path');
+    await expect(
+      callKibanaApi(
+        { fakeRequest: createFakeRequest(), coreStart: createCoreStart(), spaceId: 'current' },
+        { method: 'GET', path: '/api/%2e%2e/victim' }
+      )
+    ).rejects.toThrow('Invalid Kibana API path');
+  });
+
   it('prefixes the path with /s/{spaceId} for a non-default space', async () => {
     mockSelfFetch.mockResolvedValue(mockSelfResponse(createMockResponse({ body: { ok: true } })));
 

@@ -85,10 +85,10 @@ describe('KibanaActionStepImpl', () => {
 
   it('does not double-prefix generated non-default-space paths', async () => {
     contextManager.getWorkflowSpaceId.mockReturnValue('custom');
-    step = createStep({ request: { method: 'GET', path: '/s/custom/api/test' } });
+    step = createStep({ request: { method: 'GET', path: '/api/test' } });
     await (step as any)._run();
     expect(contextManager.callKibanaApi).toHaveBeenCalledWith(
-      expect.objectContaining({ path: '/s/custom/api/test' })
+      expect.objectContaining({ path: '/api/test' })
     );
   });
 });

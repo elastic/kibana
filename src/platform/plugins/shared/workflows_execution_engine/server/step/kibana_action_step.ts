@@ -62,7 +62,12 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep>
     // Use rendered inputs if provided, otherwise fall back to raw configuration.with
     const stepWith = withInputs || this.node.configuration.with;
     // Extract meta params (not forwarded as HTTP request params)
-    const { debug = false, ...httpParams } = stepWith;
+    const {
+      debug = false,
+      use_server_info: _useServerInfo,
+      use_localhost: _useLocalhost,
+      ...httpParams
+    } = stepWith;
 
     try {
       this.workflowLogger.logInfo(`Executing Kibana action: ${stepType}`, {
@@ -138,7 +143,16 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep>
       requestConfig = { method, path, query, headers, rawBody: this.buildFormData(form_data) };
     } else {
       const { method, path, body, query, headers } = buildKibanaRequest(stepType, cleanParams, spaceId);
-      requestConfig = { method, path, body, query, headers };
+      const generatedSpacePrefix = spaceId && spaceId !== 'default' ? `/s/${spaceId}` : '';
+      requestConfig = {
+        method,
+        path: generatedSpacePrefix && path.startsWith(`${generatedSpacePrefix}/`)
+          ? path.slice(generatedSpacePrefix.length)
+          : path,
+        body,
+        query,
+        headers,
+      };
     }
 
     const normalizedMethod = requestConfig.method?.toUpperCase();
