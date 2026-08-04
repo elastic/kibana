@@ -605,6 +605,12 @@ function buildFormBasedLayer(layer: MetricConfigNoESQL): FormBasedPersistedState
   const defaultLayer = layers[DEFAULT_LAYER_ID];
   const trendLineLayer = layers[TRENDLINE_LAYER_ID];
 
+  // Column ids of the metric columns as they live inside the trendline layer. They differ from the
+  // main layer ids, so any reference into the trendline layer (e.g. a terms breakdown `orderBy`)
+  // must use these to resolve to a column that actually exists in that layer.
+  const trendlineMetricColumnId = `${ACCESSOR}_trendline`;
+  const trendlineSecondaryColumnId = `${getAccessorName('secondary')}_trendlineX0`;
+
   if (trendLineLayer) {
     trendLineLayer.linkToLayers = [DEFAULT_LAYER_ID];
   }
@@ -629,20 +635,27 @@ function buildFormBasedLayer(layer: MetricConfigNoESQL): FormBasedPersistedState
 
   if (layer.breakdown_by) {
     const columnName = getAccessorName('breakdown');
-    const breakdownColumn = fromBucketLensApiToLensState(
-      layer.breakdown_by as LensApiBucketOperations,
-      [
-        ...newPrimaryColumns.map((col) => ({ column: col, id: getAccessorName('metric') })),
-        ...(newSecondaryColumns ?? []).map((col) => ({
-          column: col,
-          id: getAccessorName('secondary'),
-        })),
-      ]
-    );
+    const breakdownApiColumn = layer.breakdown_by as LensApiBucketOperations;
+    const breakdownColumn = fromBucketLensApiToLensState(breakdownApiColumn, [
+      ...newPrimaryColumns.map((col) => ({ column: col, id: getAccessorName('metric') })),
+      ...(newSecondaryColumns ?? []).map((col) => ({
+        column: col,
+        id: getAccessorName('secondary'),
+      })),
+    ]);
     addLayerColumn(defaultLayer, columnName, breakdownColumn, true);
 
     if (trendLineLayer) {
-      addLayerColumn(trendLineLayer, `${columnName}_trendline`, breakdownColumn, true);
+      // Rebuild the breakdown for the trendline layer so a metric `rank_by` resolves to the
+      // trendline layer's own metric column ids, and the two layers never share one mutable column.
+      const trendlineBreakdownColumn = fromBucketLensApiToLensState(breakdownApiColumn, [
+        ...newPrimaryColumns.map((col) => ({ column: col, id: trendlineMetricColumnId })),
+        ...(newSecondaryColumns ?? []).map((col) => ({
+          column: col,
+          id: trendlineSecondaryColumnId,
+        })),
+      ]);
+      addLayerColumn(trendLineLayer, `${columnName}_trendline`, trendlineBreakdownColumn, true);
     }
   }
 
@@ -650,7 +663,7 @@ function buildFormBasedLayer(layer: MetricConfigNoESQL): FormBasedPersistedState
     const columnName = getAccessorName('secondary');
     addLayerColumn(defaultLayer, columnName, newSecondaryColumns);
     if (trendLineLayer) {
-      addLayerColumn(trendLineLayer, `${columnName}_trendline`, newSecondaryColumns, false, 'X0');
+      addLayerColumn(trendLineLayer, trendlineSecondaryColumnId, newSecondaryColumns);
     }
   }
 
