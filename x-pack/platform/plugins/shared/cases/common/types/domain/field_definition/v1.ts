@@ -40,18 +40,34 @@ export const FieldDefinitionSchema = z.object({
    * template-specific fields.
    */
   isGlobal: z.boolean().optional(),
+
+  /**
+   * Server-managed link to the v1 custom-field configuration key this definition
+   * was migrated/mirrored from. Only migration and link-repair code may set it;
+   * it is never accepted from API input (see the create/update input schemas) and
+   * is preserved verbatim through ordinary metadata updates. While the matching
+   * v1 field remains configured for the owner/space, values are kept in sync
+   * between `customFields` (keyed by `legacyKey`) and `extended_fields` (keyed by
+   * this definition's name/type).
+   */
+  legacyKey: z.string().optional(),
 });
 
 export type FieldDefinition = z.infer<typeof FieldDefinitionSchema>;
 
+// `fieldDefinitionId` is server-generated and `legacyKey` is server-managed —
+// ordinary create/update callers can never set, change, or clear them (Zod
+// strips unknown keys on parse, so a submitted value is silently dropped).
 export const CreateFieldDefinitionInputSchema = FieldDefinitionSchema.omit({
   fieldDefinitionId: true,
+  legacyKey: true,
 });
 
 export type CreateFieldDefinitionInput = z.infer<typeof CreateFieldDefinitionInputSchema>;
 
 export const UpdateFieldDefinitionInputSchema = FieldDefinitionSchema.omit({
   fieldDefinitionId: true,
+  legacyKey: true,
 });
 
 export type UpdateFieldDefinitionInput = z.infer<typeof UpdateFieldDefinitionInputSchema>;

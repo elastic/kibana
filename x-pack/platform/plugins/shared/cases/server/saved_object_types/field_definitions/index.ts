@@ -10,6 +10,7 @@ import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-serve
 import { type FieldDefinition } from '../../../common/types/domain/field_definition/latest';
 import { CASE_FIELD_DEFINITION_SAVED_OBJECT } from '../../../common/constants';
 import { modelVersion1 } from './model_versions/model_version_1';
+import { modelVersion2 } from './model_versions/model_version_2';
 
 const mappings = {
   dynamic: false,
@@ -46,6 +47,7 @@ export const caseFieldDefinitionSavedObjectType: SavedObjectsType = {
   mappings,
   modelVersions: {
     1: modelVersion1,
+    2: modelVersion2,
   },
   management: {
     // Ride along with case export/import; not listed/exported on their own in the SO Management UI.
@@ -58,5 +60,17 @@ export const caseFieldDefinitionSavedObjectType: SavedObjectsType = {
   },
 };
 
-// NOTE: maintain type "connection" with Domain Schema
-mappings.properties satisfies Record<keyof FieldDefinition, unknown>;
+/**
+ * Attributes that are intentionally NOT indexed. `legacyKey` is resolved via
+ * bounded in-memory owner/space lookups, never via an Elasticsearch query, so
+ * it does not consume a permanent mapping. Any future stored attribute must be
+ * deliberately mapped or added to this reviewed exception list.
+ */
+type UnmappedFieldDefinitionKeys = 'legacyKey';
+
+// NOTE: maintain type "connection" with Domain Schema — every attribute outside
+// the reviewed unmapped set must have an explicit mapping entry.
+mappings.properties satisfies Record<
+  Exclude<keyof FieldDefinition, UnmappedFieldDefinitionKeys>,
+  unknown
+>;

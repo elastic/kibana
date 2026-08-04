@@ -222,6 +222,13 @@ export const MAX_FIELDS_PER_TEMPLATE = 200 as const;
  * Lucene rejects keyword terms over 32,766 bytes.
  */
 export const MAX_EXTENDED_FIELD_VALUE_BYTES = 30000 as const;
+/**
+ * Maximum length of a full `${name}_as_${type}` extended-field storage key.
+ * Shared by the friendly-name generator (which reserves room for the longest
+ * type suffix) and the analytics runtime-field guard so a generated name can
+ * never produce a key the analytics layer rejects.
+ */
+export const MAX_SNAKE_KEY_LENGTH = 256 as const;
 export const MAX_FILENAME_LENGTH = 160 as const;
 export const MAX_CUSTOM_OBSERVABLE_TYPES_LABEL_LENGTH = 50 as const;
 export const MAX_USER_ACTION_SEARCH_LENGTH = 256 as const;

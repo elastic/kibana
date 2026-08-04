@@ -18,7 +18,12 @@ import { CaseCustomFieldRt } from '../../../common/types/domain';
 import { validateCustomFieldTypesInRequest } from './validators';
 import type { UserActionEvent } from '../../services/user_actions/types';
 import { validateMaxUserActions } from '../../common/validators';
-import { mergeCustomFieldsIntoExtendedFields } from '../../../common/utils/template_fields';
+import {
+  loadFieldLinkIndexes,
+  logUnresolvedMirrorKeys,
+  mergeCustomFieldsIntoExtendedFieldsResolved,
+  throwIfMalformedFieldLinkage,
+} from '../../common/utils/mirror_custom_fields';
 
 export interface ReplaceCustomFieldArgs {
   /**
@@ -116,22 +121,38 @@ export const replaceCustomField = async (
 
     // Mirror customFields into extended_fields so that automations writing to the legacy API
     // keep the v2 analytics / UI surface populated. CustomFields-win semantics: the incoming
-    // value always overrides the mirror; a null value clears the mirror key.
+    // value always overrides the mirror; a null value clears the mirror key. The storage key
+    // is resolved through the owner's linked field definition — never the raw v1 key. An
+    // unresolved field is skipped with a diagnostic; malformed linkage rejects the write with
+    // a structured 400.
     //
-    // mergeCustomFieldsIntoExtendedFields returns the *same reference* when the result is
-    // value-identical — that signals "no change needed" and we must not spread extended_fields
-    // into the patch payload (it would be a spurious write that also triggers an extra user action).
+    // The merge returns the *same reference* when the result is value-identical — that signals
+    // "no change needed" and we must not spread extended_fields into the patch payload (it
+    // would be a spurious write that also triggers an extra user action).
     const existingExtendedFields = caseToUpdate.attributes.extended_fields;
     // Pass only the single field being replaced, not the full reconstructed decodedCustomFields.
     // The reconstructed array includes all stored customFields from the case, and stored-null
     // optional fields would hit the merge's delete branch and wipe unrelated mirror keys.
-    const mergedExtendedFields = config.templates.enabled
-      ? mergeCustomFieldsIntoExtendedFields(
-          [{ key: customFieldId, type: foundCustomField.type, value }],
-          existingExtendedFields
-        )
-      : undefined;
-    const extendedFieldsChanged = mergedExtendedFields !== existingExtendedFields;
+    let mergedExtendedFields: Record<string, string> | null | undefined;
+    if (config.templates.enabled) {
+      const linkIndexes = await loadFieldLinkIndexes(
+        caseToUpdate.attributes.owner,
+        clientArgs.services.fieldDefinitionsService
+      );
+      const mirror = mergeCustomFieldsIntoExtendedFieldsResolved(
+        [{ key: customFieldId, type: foundCustomField.type, value }],
+        existingExtendedFields,
+        linkIndexes
+      );
+      throwIfMalformedFieldLinkage(mirror.malformedFields);
+      logUnresolvedMirrorKeys(mirror.unresolvedKeys, {
+        owner: caseToUpdate.attributes.owner,
+        logger,
+      });
+      mergedExtendedFields = mirror.extendedFields;
+    }
+    const extendedFieldsChanged =
+      config.templates.enabled && mergedExtendedFields !== existingExtendedFields;
 
     const patchCasesPayload = {
       caseId,

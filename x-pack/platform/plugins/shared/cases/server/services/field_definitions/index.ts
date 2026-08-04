@@ -124,15 +124,49 @@ export class FieldDefinitionsService {
     );
   }
 
+  /**
+   * Returns the full Saved Objects (attributes + version) for one owner —
+   * used by link resolution, which needs the SO `version` for optimistic
+   * `legacyKey` repair. `getFieldDefinitions` keeps returning bare attributes
+   * because its shape doubles as the find-route response body.
+   */
+  async getFieldDefinitionSavedObjects(
+    owner: string
+  ): Promise<Array<SavedObject<FieldDefinition>>> {
+    const result = await this.dependencies.unsecuredSavedObjectsClient.find<FieldDefinition>({
+      type: CASE_FIELD_DEFINITION_SAVED_OBJECT,
+      filter: `${CASE_FIELD_DEFINITION_SAVED_OBJECT}.attributes.owner: "${escapeKuery(owner)}"`,
+      perPage: MAX_FIELD_DEFINITIONS_PER_OWNER,
+    });
+
+    return result.saved_objects;
+  }
+
+  /**
+   * Creates a field definition. `serverManaged` options are reserved for
+   * migration/configuration-mirroring code paths: a deterministic id (UUIDv5,
+   * preserving the `id === fieldDefinitionId` invariant) and the `legacyKey`
+   * link. Ordinary API callers never reach them — the request input schemas
+   * omit `legacyKey` entirely.
+   *
+   * With a server-managed id the create uses `overwrite: false` semantics (the
+   * SO client default), so a concurrent create of the same deterministic id
+   * surfaces as a 409 conflict for the caller to resolve.
+   */
   async createFieldDefinition(
-    input: CreateFieldDefinitionInput
+    input: CreateFieldDefinitionInput,
+    serverManaged: { id?: string; legacyKey?: string } = {}
   ): Promise<SavedObject<FieldDefinition>> {
     this.assertFieldDefinitionIsValid(input.definition);
 
-    const id = uuidv4();
+    const id = serverManaged.id ?? uuidv4();
     const created = await this.dependencies.unsecuredSavedObjectsClient.create<FieldDefinition>(
       CASE_FIELD_DEFINITION_SAVED_OBJECT,
-      { ...input, fieldDefinitionId: id },
+      {
+        ...input,
+        fieldDefinitionId: id,
+        ...(serverManaged.legacyKey !== undefined ? { legacyKey: serverManaged.legacyKey } : {}),
+      },
       { id }
     );
 
@@ -142,6 +176,22 @@ export class FieldDefinitionsService {
     this.dependencies.refreshAnalyticsV2DataView();
 
     return created;
+  }
+
+  /**
+   * Opportunistic link repair: persists `legacyKey` on a pre-friendly-name
+   * definition whose immutable name was unambiguously matched to a configured
+   * v1 key. Server-managed only — no API path reaches this. The optimistic
+   * `version` check makes a concurrent repair/update lose cleanly (409) instead
+   * of silently overwriting; callers treat that as "skip, retry next write".
+   */
+  async setLegacyKey(id: string, legacyKey: string, options: { version?: string } = {}) {
+    return this.dependencies.unsecuredSavedObjectsClient.update<FieldDefinition>(
+      CASE_FIELD_DEFINITION_SAVED_OBJECT,
+      id,
+      { legacyKey },
+      { version: options.version }
+    );
   }
 
   async updateFieldDefinition(

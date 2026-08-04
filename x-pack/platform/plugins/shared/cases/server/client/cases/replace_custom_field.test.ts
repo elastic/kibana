@@ -396,9 +396,38 @@ describe('Replace custom field', () => {
   });
 
   describe('customFields → extended_fields adapter (write-time mirror)', () => {
+    // Linked v2 definitions for the configured v1 fields — write-time mirroring
+    // only writes keys that resolve to a definition (via legacyKey or name).
+    const mirrorFieldDefinitions = {
+      fieldDefinitions: [
+        {
+          fieldDefinitionId: 'fd-first',
+          name: 'first_key',
+          owner: mockCases[0].attributes.owner,
+          description: '',
+          isGlobal: true,
+          legacyKey: 'first_key',
+          definition: 'name: first_key\ntype: keyword\ncontrol: INPUT_TEXT\nlabel: First\n',
+        },
+        {
+          fieldDefinitionId: 'fd-second',
+          name: 'second_key',
+          owner: mockCases[0].attributes.owner,
+          description: '',
+          isGlobal: true,
+          legacyKey: 'second_key',
+          definition: 'name: second_key\ntype: boolean\ncontrol: TOGGLE\nlabel: Second\n',
+        },
+      ],
+      total: 2,
+    };
+
     it('mirrors the replaced customField into extended_fields when templates flag is enabled', async () => {
       const clientArgsWithFlag = createCasesClientMockArgs();
       clientArgsWithFlag.config = { ...clientArgsWithFlag.config, templates: { enabled: true } };
+      clientArgsWithFlag.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue(
+        mirrorFieldDefinitions
+      );
       clientArgsWithFlag.services.caseService.getCase.mockResolvedValue(theCase);
       clientArgsWithFlag.services.userActionService.getMultipleCasesUserActionsTotal.mockResolvedValue(
         { [mockCases[0].id]: 1 }
@@ -478,6 +507,9 @@ describe('Replace custom field', () => {
 
       const clientArgsWithFlag = createCasesClientMockArgs();
       clientArgsWithFlag.config = { ...clientArgsWithFlag.config, templates: { enabled: true } };
+      clientArgsWithFlag.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue(
+        mirrorFieldDefinitions
+      );
       clientArgsWithFlag.services.caseService.getCase.mockResolvedValue(caseWithExtendedFields);
       clientArgsWithFlag.services.userActionService.getMultipleCasesUserActionsTotal.mockResolvedValue(
         { [mockCases[0].id]: 1 }
@@ -525,6 +557,9 @@ describe('Replace custom field', () => {
 
       const clientArgsWithFlag = createCasesClientMockArgs();
       clientArgsWithFlag.config = { ...clientArgsWithFlag.config, templates: { enabled: true } };
+      clientArgsWithFlag.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue(
+        mirrorFieldDefinitions
+      );
       clientArgsWithFlag.services.caseService.getCase.mockResolvedValue(caseWithExtendedFields);
       clientArgsWithFlag.services.userActionService.getMultipleCasesUserActionsTotal.mockResolvedValue(
         { [mockCases[0].id]: 1 }
@@ -571,6 +606,9 @@ describe('Replace custom field', () => {
 
       const clientArgsWithFlag = createCasesClientMockArgs();
       clientArgsWithFlag.config = { ...clientArgsWithFlag.config, templates: { enabled: true } };
+      clientArgsWithFlag.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue(
+        mirrorFieldDefinitions
+      );
       clientArgsWithFlag.services.caseService.getCase.mockResolvedValue(caseWithExtendedFields);
       clientArgsWithFlag.services.userActionService.getMultipleCasesUserActionsTotal.mockResolvedValue(
         { [mockCases[0].id]: 1 }

@@ -8,6 +8,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { parse as parseYaml } from 'yaml';
 import type { ISavedObjectsRepository, Logger, SavedObject } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import {
   CASE_CONFIGURE_SAVED_OBJECT,
   CASE_TEMPLATE_SAVED_OBJECT,
@@ -18,11 +19,17 @@ import type { FieldDefinition } from '../../../common/types/domain/field_definit
 import { ParsedTemplateDefinitionSchema } from '../../../common/types/domain/template/v1';
 import type { Template } from '../../../common/types/domain/template/v1';
 import { toFieldDefinitions, trimFieldDefaults } from '../../services/templates/utils';
+import type {
+  FieldLinkIndexes,
+  LinkableFieldDefinition,
+} from '../../common/utils/field_link_resolution';
 import {
-  buildFieldDefinitionYaml,
-  buildFieldDefinitionNameIndex,
-  normalizeFieldDefinitionName,
-} from '../../common/utils/field_definitions';
+  addDefinitionToIndexes,
+  buildFieldLinkIndexes,
+  registerRepairedLegacyKey,
+  resolveDefinitionForLegacyField,
+} from '../../common/utils/field_link_resolution';
+import { ensureLinkedFieldDefinition } from '../../common/utils/ensure_linked_field_definition';
 import { buildTemplateYaml } from './build_template_yaml';
 import type { LegacyCustomField, LegacyTemplate, MigrationCounts } from './types';
 
@@ -83,10 +90,13 @@ export const findAllConfigurations = async (
 };
 
 /**
- * Creates a `cases-field-definition` SO (`isGlobal: true`) for each legacy custom field, keyed by the
- * legacy `key` so templates and cases can still reference it. An existing definition of the same name
- * is reused (a control/type mismatch is logged, not overwritten). Returns a legacy-key → ref-name map
- * for the template phase plus created/reused counts.
+ * Ensures a linked `cases-field-definition` SO (`isGlobal: true`) exists for each legacy custom
+ * field. Link resolution follows the field-identity plan (`legacyKey` → exact name → unique
+ * normalized name); new definitions get friendly label-derived names, deterministic UUIDv5 ids,
+ * and `legacyKey`, so a concurrent configure write converges on the same SO. Malformed or
+ * ambiguous linkage is logged and skipped (the field is omitted from template `$ref` maps —
+ * never guessed). Returns a legacy-key → definition-name map for the template phase plus
+ * created/reused counts.
  */
 const migrateFieldDefinitions = async (
   repo: ISavedObjectsRepository,
@@ -108,77 +118,75 @@ const migrateFieldDefinitions = async (
   let reused = 0;
 
   const existingFieldDefs = await findFieldDefinitionsForOwner(repo, owner, nsOption);
-  // Case-insensitive index (first-wins on pre-existing duplicates), matching the
-  // uniqueness semantics enforced by the field-definitions sub-client at the API layer.
-  const existingByName = buildFieldDefinitionNameIndex(
-    existingFieldDefs,
-    (so) => so.attributes.name
-  );
+  const indexes = buildFieldLinkIndexes(existingFieldDefs);
 
   for (const cf of legacyCustomFields) {
-    const existingDef = existingByName.get(normalizeFieldDefinitionName(cf.key));
-    if (existingDef) {
-      const existingParsed = parseYaml(existingDef.attributes.definition ?? '') as Record<
-        string,
-        unknown
-      >;
-      const { yaml: expectedYaml } = buildFieldDefinitionYaml(cf);
-      const expectedParsed = parseYaml(expectedYaml) as Record<string, unknown>;
-      if (
-        existingParsed?.control !== expectedParsed?.control ||
-        existingParsed?.type !== expectedParsed?.type
-      ) {
-        log.warn(
-          `[${executionId}] Field definition "${cf.key}" (owner: "${owner}", namespace: "${namespace}") already exists ` +
-            `but has control="${existingParsed?.control}" / type="${existingParsed?.type}", ` +
-            `expected control="${expectedParsed?.control}" / type="${expectedParsed?.type}" from legacy data — ` +
-            `reusing existing; templates referencing this field may reference a type-mismatched definition`
-        );
-      } else {
-        log.debug(
-          `[${executionId}] Field definition "${cf.key}" already exists for owner "${owner}" in namespace "${namespace}" — reusing`
-        );
-      }
-      refNamesByKey.set(cf.key, cf.key);
-      libraryDefs.push(existingDef.attributes);
-      reused++;
-    } else {
-      try {
-        const { yaml } = buildFieldDefinitionYaml(cf);
-        const fdId = uuidv4();
-        const attributes: FieldDefinition = {
-          fieldDefinitionId: fdId,
-          name: cf.key,
-          owner,
-          definition: yaml,
-          description: cf.label,
-          isGlobal: true,
-        };
-        const createdSo = await repo.create<FieldDefinition>(
-          CASE_FIELD_DEFINITION_SAVED_OBJECT,
-          attributes,
-          {
-            id: fdId,
+    try {
+      const result = await ensureLinkedFieldDefinition(cf, indexes, {
+        spaceId: namespace,
+        owner,
+        createDefinition: async (attributes, id) =>
+          repo.create<FieldDefinition>(CASE_FIELD_DEFINITION_SAVED_OBJECT, attributes, {
+            id,
             ...(nsOption ? { namespace: nsOption } : {}),
             // Use 'wait_for' so a concurrent configure PATCH's find sees this definition
             // and avoids creating a duplicate. Field definitions per owner are O(10s) so
             // the per-document refresh cost is negligible for this one-shot task.
             refresh: 'wait_for',
+          }),
+        fetchDefinitionById: async (id) => {
+          try {
+            const so = await repo.get<FieldDefinition>(CASE_FIELD_DEFINITION_SAVED_OBJECT, id, {
+              ...(nsOption ? { namespace: nsOption } : {}),
+            });
+            return so.attributes;
+          } catch (err) {
+            if (SavedObjectsErrorHelpers.isNotFoundError(err as Error)) {
+              return undefined;
+            }
+            throw err;
           }
-        );
-        // Insert into the index so intra-request duplicate custom-field keys (which the
-        // API blocks but imported/legacy SOs may contain) only produce one SO.
-        existingByName.set(normalizeFieldDefinitionName(cf.key), createdSo);
-        refNamesByKey.set(cf.key, cf.key);
-        libraryDefs.push(attributes);
-        created++;
-      } catch (err) {
+        },
+      });
+
+      if (result.outcome === 'blocked') {
+        // Skipped, never guessed: templates referencing this key omit the field with a
+        // warning (buildTemplateYaml), and the reconciliation phase re-reports it.
         log.error(
-          `[${executionId}] Failed to create field definition for key "${
-            cf.key
-          }" (owner: ${owner}): ${err instanceof Error ? err.message : String(err)}`
+          `[${executionId}] Skipping field definition for custom field "${cf.key}" ` +
+            `(owner: "${owner}", namespace: "${namespace}"): ${result.reason}`
         );
+      } else {
+        const { definition } = result;
+        refNamesByKey.set(cf.key, definition.name);
+        libraryDefs.push(definition);
+
+        if (result.outcome === 'created') {
+          // Register in-loop so intra-config duplicate keys (which the API blocks but
+          // imported/legacy SOs may contain) converge on one SO.
+          addDefinitionToIndexes(indexes, definition);
+          created++;
+        } else {
+          reused++;
+          if (result.needsLegacyKeyRepair && result.link !== undefined) {
+            await repairLegacyKey({
+              repo,
+              nsOption,
+              link: result.link,
+              legacyKey: cf.key,
+              indexes,
+              executionId,
+              log,
+            });
+          }
+        }
       }
+    } catch (err) {
+      log.error(
+        `[${executionId}] Failed to ensure field definition for key "${
+          cf.key
+        }" (owner: ${owner}): ${err instanceof Error ? err.message : String(err)}`
+      );
     }
   }
 
@@ -188,6 +196,55 @@ const migrateFieldDefinitions = async (
     reused,
     libraryDefs,
   };
+};
+
+/**
+ * Opportunistically persists `legacyKey` on a name-matched pre-friendly-name definition with
+ * optimistic concurrency. A conflict means a concurrent writer (configure API or another node)
+ * touched the SO — the repair is skipped, never retried or failed: the name fallback keeps the
+ * link resolving.
+ */
+const repairLegacyKey = async ({
+  repo,
+  nsOption,
+  link,
+  legacyKey,
+  indexes,
+  executionId,
+  log,
+}: {
+  repo: ISavedObjectsRepository;
+  nsOption: string | undefined;
+  link: LinkableFieldDefinition;
+  legacyKey: string;
+  indexes: FieldLinkIndexes;
+  executionId: string;
+  log: Logger;
+}): Promise<void> => {
+  const { definition, version } = link;
+  try {
+    await repo.update<FieldDefinition>(
+      CASE_FIELD_DEFINITION_SAVED_OBJECT,
+      definition.fieldDefinitionId,
+      { legacyKey },
+      {
+        ...(nsOption ? { namespace: nsOption } : {}),
+        ...(version !== undefined ? { version } : {}),
+        refresh: false,
+      }
+    );
+    registerRepairedLegacyKey(indexes, link, legacyKey);
+  } catch (err) {
+    const isConflict = SavedObjectsErrorHelpers.isConflictError(err as Error);
+    const message = `[${executionId}] Skipped legacyKey repair for field definition "${
+      definition.name
+    }": ${err instanceof Error ? err.message : String(err)}`;
+    if (isConflict) {
+      log.debug(message);
+    } else {
+      log.warn(message);
+    }
+  }
 };
 
 /**
@@ -336,15 +393,19 @@ export const migrateOneConfigure = async (
     fieldDefsCreated = result.created;
     fieldDefsReused = result.reused;
     libraryDefs = result.libraryDefs;
-  } else {
-    // Already migrated or no custom fields — build the ref map from legacy keys for the template phase.
+  } else if (legacyTemplates.length > 0 && legacyCustomFields.length > 0) {
+    // Field definitions were migrated on an earlier run but templates still need the ref map
+    // and library defs. Resolve each legacy key through the link indexes (a friendly-named
+    // definition's name differs from the raw key); unresolvable keys are omitted so
+    // buildTemplateYaml skips them with a warning instead of emitting a broken `$ref`.
+    const existingFieldDefs = await findFieldDefinitionsForOwner(repo, owner, nsOption);
+    libraryDefs = existingFieldDefs.map((fd) => fd.attributes);
+    const indexes = buildFieldLinkIndexes(existingFieldDefs);
     for (const cf of legacyCustomFields) {
-      refNamesByKey.set(cf.key, cf.key);
-    }
-    if (legacyTemplates.length > 0 && legacyCustomFields.length > 0) {
-      // Templates still need the library defs to populate fieldDefinitions for `$ref` fields.
-      const existingFieldDefs = await findFieldDefinitionsForOwner(repo, owner, nsOption);
-      libraryDefs = existingFieldDefs.map((fd) => fd.attributes);
+      const resolution = resolveDefinitionForLegacyField(cf, indexes);
+      if (resolution.status === 'resolved') {
+        refNamesByKey.set(cf.key, resolution.link.definition.name);
+      }
     }
   }
 

@@ -25,13 +25,24 @@ import type {
   CasePostRequest,
 } from '../../../common/types/api';
 import { BulkCreateCasesResponseRt, BulkCreateCasesRequestRt } from '../../../common/types/api';
-import { validateCustomFields } from './validators';
+import {
+  validateCustomFields,
+  resolveGlobalFields,
+  validateCaseExtendedFields,
+} from './validators';
 import { applyProfilesToAssignees, getUserProfilesSafe, normalizeCreateCaseRequest } from './utils';
 import { ensureTemplateVersionIsPinned } from './expand_template_defaults';
 import type { BulkCreateCasesArgs } from '../../services/cases/types';
 import type { NotifyAssigneesArgs } from '../../services/notifications/types';
 import type { CaseTransformedAttributes } from '../../common/types/case';
-import { mergeCustomFieldsIntoExtendedFields } from '../../../common/utils/template_fields';
+import type { InlineField } from '../../../common/types/domain/template/fields';
+import type { FieldLinkIndexes } from '../../common/utils/field_link_resolution';
+import {
+  loadFieldLinkIndexes,
+  logUnresolvedMirrorKeys,
+  mergeCustomFieldsIntoExtendedFieldsResolved,
+  throwIfMalformedFieldLinkage,
+} from '../../common/utils/mirror_custom_fields';
 import { validateExtendedFieldValueSizes } from '../../../common/types/domain/template/validate_extended_fields';
 
 export const bulkCreate = async (
@@ -46,6 +57,7 @@ export const bulkCreate = async (
       licensingService,
       notificationService,
       templatesService,
+      fieldDefinitionsService,
     },
     user,
     logger,
@@ -78,22 +90,57 @@ export const bulkCreate = async (
     }
 
     const hasPlatinumLicenseOrGreater = await licensingService.isAtLeastPlatinum();
+    const templatesEnabled = clientArgs.config.templates.enabled;
 
     const bulkCreateRequest: BulkCreateCasesArgs['cases'] = [];
+
+    // Per-owner caches: the request may span owners, but every case of one owner
+    // shares the same link indexes and global field set.
+    const linkIndexesByOwner = new Map<string, FieldLinkIndexes>();
+    const globalFieldsByOwner = new Map<string, InlineField[]>();
 
     for (const theCase of casesWithIds) {
       const customFieldsConfiguration = customFieldsConfigurationMap.get(theCase.owner);
 
       validateRequest({ theCase, customFieldsConfiguration, hasPlatinumLicenseOrGreater });
 
-      bulkCreateRequest.push(
-        createBulkCreateCaseRequest({
-          theCase,
-          user,
-          customFieldsConfiguration,
-          templatesEnabled: clientArgs.config.templates.enabled,
-        })
-      );
+      let linkIndexes: FieldLinkIndexes | undefined;
+      if (templatesEnabled && theCase.customFields?.length) {
+        linkIndexes = linkIndexesByOwner.get(theCase.owner);
+        if (!linkIndexes) {
+          linkIndexes = await loadFieldLinkIndexes(theCase.owner, fieldDefinitionsService);
+          linkIndexesByOwner.set(theCase.owner, linkIndexes);
+        }
+      }
+
+      const { request, extendedFields } = createBulkCreateCaseRequest({
+        theCase,
+        user,
+        customFieldsConfiguration,
+        linkIndexes,
+        logger,
+      });
+      bulkCreateRequest.push(request);
+
+      // Definition-aware validation of the FINAL extended_fields map (request-provided
+      // entries + mirrored entries). `partial: true` — bulk create never enforces
+      // required-field completeness on the map itself.
+      if (templatesEnabled && extendedFields && Object.keys(extendedFields).length > 0) {
+        let globalFields = globalFieldsByOwner.get(theCase.owner);
+        if (!globalFields) {
+          globalFields = await resolveGlobalFields(theCase.owner, fieldDefinitionsService);
+          globalFieldsByOwner.set(theCase.owner, globalFields);
+        }
+        await validateCaseExtendedFields({
+          extendedFields,
+          templateId: theCase.template?.id,
+          globalFields,
+          templatesService,
+          fieldDefinitionsService,
+          owner: theCase.owner,
+          partial: true,
+        });
+      }
     }
 
     // Server-derived assignee identity, gated by feature flag `assigneeIdentity`
@@ -255,13 +302,20 @@ const createBulkCreateCaseRequest = ({
   theCase,
   customFieldsConfiguration,
   user,
-  templatesEnabled,
+  linkIndexes,
+  logger,
 }: {
   theCase: { id: string } & BulkCreateCasesRequest['cases'][number];
   customFieldsConfiguration?: CustomFieldsConfiguration;
   user: User;
-  templatesEnabled: boolean;
-}): BulkCreateCasesArgs['cases'][number] => {
+  /** Preloaded per-owner link indexes; undefined when templates are disabled or no customFields. */
+  linkIndexes?: FieldLinkIndexes;
+  logger: CasesClientArgs['logger'];
+}): {
+  request: BulkCreateCasesArgs['cases'][number];
+  /** The final extended_fields map for post-mirror definition-aware validation. */
+  extendedFields: Record<string, string> | undefined;
+} => {
   const { id, ...caseWithoutId } = theCase;
 
   /**
@@ -276,16 +330,23 @@ const createBulkCreateCaseRequest = ({
   // keep the v2 analytics / UI surface populated. CustomFields-win semantics: the incoming
   // value overrides any pre-set mirror key (e.g. a template default in the request).
   //
+  // Storage keys are resolved through the owner's linked field definitions — never derived
+  // from the raw v1 key. Unresolved fields are skipped with a diagnostic; malformed linkage
+  // rejects the whole bulk create with a structured 400.
+  //
   // Pass the RAW request customFields (caseWithoutId.customFields), not the post-fill array
   // (normalizedCase.customFields). fillMissingCustomFields pads absent optional-no-default
   // fields with { key, value: null }; those synthetic nulls would otherwise hit the merge's
   // delete branch and wipe mirror keys the request never intended to clear.
-  if (templatesEnabled) {
-    normalizedCase.extended_fields =
-      mergeCustomFieldsIntoExtendedFields(
-        caseWithoutId.customFields,
-        normalizedCase.extended_fields
-      ) ?? undefined;
+  if (linkIndexes) {
+    const mirror = mergeCustomFieldsIntoExtendedFieldsResolved(
+      caseWithoutId.customFields,
+      normalizedCase.extended_fields,
+      linkIndexes
+    );
+    throwIfMalformedFieldLinkage(mirror.malformedFields);
+    logUnresolvedMirrorKeys(mirror.unresolvedKeys, { owner: theCase.owner, logger });
+    normalizedCase.extended_fields = mirror.extendedFields ?? undefined;
   }
 
   const extendedFieldValueErrors = validateExtendedFieldValueSizes(
@@ -296,11 +357,14 @@ const createBulkCreateCaseRequest = ({
   }
 
   return {
-    id,
-    ...transformNewCase({
-      user,
-      newCase: normalizedCase,
-    }),
+    request: {
+      id,
+      ...transformNewCase({
+        user,
+        newCase: normalizedCase,
+      }),
+    },
+    extendedFields: normalizedCase.extended_fields,
   };
 };
 

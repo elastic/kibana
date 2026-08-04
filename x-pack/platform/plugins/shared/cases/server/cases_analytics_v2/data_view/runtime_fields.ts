@@ -7,6 +7,7 @@
 
 import { createHash } from 'crypto';
 import type { RuntimeFieldSpec, RuntimeType } from '@kbn/data-views-plugin/common';
+import { MAX_SNAKE_KEY_LENGTH } from '../../../common/constants';
 
 /**
  * Prefix on every fingerprint produced by `computeRuntimeFieldsFingerprint`.
@@ -78,7 +79,6 @@ export const suffixToRuntimeType = (suffix: string): RuntimeType | undefined => 
  * The length cap keeps Painless compile budgets bounded.
  */
 const SAFE_SNAKE_KEY = /^[A-Za-z0-9_]+$/;
-const MAX_SNAKE_KEY_LENGTH = 256;
 
 /**
  * Splits a snake-key into `{ name, suffix }`, or returns `null` if the key

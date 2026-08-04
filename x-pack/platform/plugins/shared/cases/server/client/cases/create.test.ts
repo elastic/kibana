@@ -1116,6 +1116,39 @@ describe('create', () => {
 
     const adapterCasesClientMock = createCasesClientMock();
 
+    // Linked v2 definitions for the configured v1 fields — write-time mirroring
+    // only writes keys that resolve to a definition (via legacyKey or name).
+    const adapterFieldDefinitions = [
+      {
+        fieldDefinitionId: 'fd-priority',
+        name: 'priority',
+        owner: SECURITY_SOLUTION_OWNER,
+        description: '',
+        isGlobal: true,
+        legacyKey: 'priority',
+        definition: yamlStringify({
+          name: 'priority',
+          type: 'keyword',
+          control: 'INPUT_TEXT',
+          label: 'Priority',
+        }),
+      },
+      {
+        fieldDefinitionId: 'fd-count',
+        name: 'count',
+        owner: SECURITY_SOLUTION_OWNER,
+        description: '',
+        isGlobal: true,
+        legacyKey: 'count',
+        definition: yamlStringify({
+          name: 'count',
+          type: 'integer',
+          control: 'INPUT_NUMBER',
+          label: 'Count',
+        }),
+      },
+    ];
+
     beforeEach(() => {
       jest.clearAllMocks();
       adapterCasesClientMock.configure.get = jest
@@ -1126,6 +1159,10 @@ describe('create', () => {
     it('mirrors customFields into extended_fields when templates flag is enabled', async () => {
       const clientArgs = createCasesClientMockArgs();
       clientArgs.config = { ...clientArgs.config, templates: { enabled: true } };
+      clientArgs.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
+        fieldDefinitions: adapterFieldDefinitions,
+        total: adapterFieldDefinitions.length,
+      });
       clientArgs.services.caseService.createCase.mockResolvedValue(caseSO);
 
       await create({ ...theCase, customFields }, clientArgs, adapterCasesClientMock);
@@ -1194,22 +1231,8 @@ describe('create', () => {
       const clientArgs = createCasesClientMockArgs();
       clientArgs.config = { ...clientArgs.config, templates: { enabled: true } };
       clientArgs.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
-        fieldDefinitions: [
-          {
-            fieldDefinitionId: 'fd-priority',
-            name: 'priority',
-            owner: SECURITY_SOLUTION_OWNER,
-            description: '',
-            isGlobal: true,
-            definition: yamlStringify({
-              name: 'priority',
-              type: 'keyword',
-              control: 'INPUT_TEXT',
-              label: 'Priority',
-            }),
-          },
-        ],
-        total: 1,
+        fieldDefinitions: adapterFieldDefinitions,
+        total: adapterFieldDefinitions.length,
       });
       clientArgs.services.caseService.createCase.mockResolvedValue(caseSO);
 

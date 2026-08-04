@@ -2958,6 +2958,41 @@ describe('update', () => {
       clientArgs.services.attachmentService.getter.getCaseAttatchmentStats.mockResolvedValue(
         new Map()
       );
+      // Linked v2 definitions for the configured v1 fields — write-time mirroring
+      // only writes keys that resolve to a definition (via legacyKey or name).
+      clientArgs.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
+        fieldDefinitions: [
+          {
+            fieldDefinitionId: 'fd-priority',
+            name: 'priority',
+            owner: mockCases[0].attributes.owner,
+            description: '',
+            isGlobal: true,
+            legacyKey: 'priority',
+            definition: yamlStringify({
+              name: 'priority',
+              type: 'keyword',
+              control: 'INPUT_TEXT',
+              label: 'Priority',
+            }),
+          },
+          {
+            fieldDefinitionId: 'fd-count',
+            name: 'count',
+            owner: mockCases[0].attributes.owner,
+            description: '',
+            isGlobal: true,
+            legacyKey: 'count',
+            definition: yamlStringify({
+              name: 'count',
+              type: 'integer',
+              control: 'INPUT_NUMBER',
+              label: 'Count',
+            }),
+          },
+        ],
+        total: 2,
+      });
       casesClientMock2.configure.get = jest
         .fn()
         .mockResolvedValue([

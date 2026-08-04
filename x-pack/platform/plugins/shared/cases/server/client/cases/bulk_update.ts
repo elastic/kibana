@@ -80,7 +80,13 @@ import {
 } from './validators';
 import type { InlineField } from '../../../common/types/domain/template/fields';
 import { emptyCasesAssigneesSanitizer } from './sanitizers';
-import { mergeCustomFieldsIntoExtendedFields } from '../../../common/utils/template_fields';
+import type { FieldLinkIndexes } from '../../common/utils/field_link_resolution';
+import {
+  loadFieldLinkIndexes,
+  logUnresolvedMirrorKeys,
+  mergeCustomFieldsIntoExtendedFieldsResolved,
+  throwIfMalformedFieldLinkage,
+} from '../../common/utils/mirror_custom_fields';
 /**
  * Throws an error if any of the requests attempt to update the owner of a case.
  */
@@ -688,11 +694,32 @@ export const bulkUpdate = async (
       });
     }
 
+    // Preload per-owner link indexes for the customFields → extended_fields mirror. Only
+    // owners with at least one customFields update pay the (bounded) definitions fetch.
+    const linkIndexesByOwner = new Map<string, FieldLinkIndexes>();
+    if (clientArgs.config.templates.enabled) {
+      const ownersNeedingIndexes = [
+        ...new Set(
+          casesToUpdate
+            .filter(({ updateReq }) => updateReq.customFields?.length)
+            .map(({ originalCase }) => originalCase.attributes.owner)
+        ),
+      ];
+      for (const ownerNeedingIndexes of ownersNeedingIndexes) {
+        linkIndexesByOwner.set(
+          ownerNeedingIndexes,
+          await loadFieldLinkIndexes(ownerNeedingIndexes, fieldDefinitionsService)
+        );
+      }
+    }
+
     const patchCasesPayload = createPatchCasesPayload({
       user,
       casesToUpdate,
       customFieldsConfigurationMap,
       templatesEnabled: clientArgs.config.templates.enabled,
+      linkIndexesByOwner,
+      logger,
     });
 
     // Resolve names of newly-applied templates so the "applied template" user action records the
@@ -945,11 +972,15 @@ const createPatchCasesPayload = ({
   user,
   customFieldsConfigurationMap,
   templatesEnabled,
+  linkIndexesByOwner,
+  logger,
 }: {
   casesToUpdate: UpdateRequestWithOriginalCase[];
   user: User;
   customFieldsConfigurationMap: Map<string, CustomFieldsConfiguration>;
   templatesEnabled: boolean;
+  linkIndexesByOwner: Map<string, FieldLinkIndexes>;
+  logger: CasesClientArgs['logger'];
 }): PatchCasesArgs => {
   const updatedDt = new Date().toISOString();
 
@@ -996,7 +1027,10 @@ const createPatchCasesPayload = ({
       // customFields — an update that omits customFields must not change extended_fields.
       //
       // CustomFields-win semantics: the incoming value always overrides the mirror key; a null
-      // value the caller explicitly submitted clears the mirror key.
+      // value the caller explicitly submitted clears the mirror key. Storage keys come from
+      // the owner's linked field definitions (preloaded indexes) — never the raw v1 key.
+      // Unresolved fields are skipped with a diagnostic; malformed linkage rejects the update
+      // with a structured 400.
       //
       // Pass the RAW request customFields (updateCaseAttributes.customFields), not the
       // post-fill array (trimmedCaseAttributes.customFields). fillMissingCustomFields pads
@@ -1004,17 +1038,24 @@ const createPatchCasesPayload = ({
       // would otherwise hit the merge's delete branch and wipe mirror keys the update never
       // intended to clear — silently destroying values stored via the v2 UI.
       //
-      // mergeCustomFieldsIntoExtendedFields returns the *same reference* when the result is
-      // value-identical — guard on reference inequality to avoid spurious writes/user-actions.
-      if (templatesEnabled && updateCaseAttributes.customFields) {
+      // The merge returns the *same reference* when the result is value-identical — guard on
+      // reference inequality to avoid spurious writes/user-actions.
+      const linkIndexes = linkIndexesByOwner.get(originalCase.attributes.owner);
+      if (templatesEnabled && updateCaseAttributes.customFields && linkIndexes) {
         const currentExtendedFields =
           trimmedCaseAttributes.extended_fields ?? originalCase.attributes.extended_fields;
-        const merged = mergeCustomFieldsIntoExtendedFields(
+        const mirror = mergeCustomFieldsIntoExtendedFieldsResolved(
           updateCaseAttributes.customFields,
-          currentExtendedFields
+          currentExtendedFields,
+          linkIndexes
         );
-        if (merged !== currentExtendedFields && merged != null) {
-          trimmedCaseAttributes.extended_fields = merged;
+        throwIfMalformedFieldLinkage(mirror.malformedFields);
+        logUnresolvedMirrorKeys(mirror.unresolvedKeys, {
+          owner: originalCase.attributes.owner,
+          logger,
+        });
+        if (mirror.extendedFields !== currentExtendedFields && mirror.extendedFields != null) {
+          trimmedCaseAttributes.extended_fields = mirror.extendedFields;
         }
       }
 

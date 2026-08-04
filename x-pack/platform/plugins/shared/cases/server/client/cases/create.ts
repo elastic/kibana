@@ -28,7 +28,12 @@ import {
 import type { CreateUserAction, CommonUserActionArgs } from '../../services/user_actions/types';
 import { emptyCaseAssigneesSanitizer } from './sanitizers';
 import { normalizeCreateCaseRequest, populateAssigneesIdentity } from './utils';
-import { mergeCustomFieldsIntoExtendedFields } from '../../../common/utils/template_fields';
+import {
+  loadFieldLinkIndexes,
+  logUnresolvedMirrorKeys,
+  mergeCustomFieldsIntoExtendedFieldsResolved,
+  throwIfMalformedFieldLinkage,
+} from '../../common/utils/mirror_custom_fields';
 import {
   applyTemplateDefaultsToCreateRequest,
   ensureTemplateVersionIsPinned,
@@ -179,14 +184,47 @@ export const create = async (
     // keep the v2 analytics / UI surface populated. CustomFields-win semantics: the incoming
     // value overrides any pre-set mirror key (e.g. a template default in the request).
     //
+    // Storage keys are resolved through the owner's linked field definitions (legacyKey →
+    // exact name → unique normalized name) — never derived from the raw v1 key. Fields with
+    // no linked definition are skipped with a diagnostic; malformed linkage rejects the
+    // create with a structured 400.
+    //
     // Pass the RAW request customFields (query.customFields), not the post-fill array
     // (normalizedCase.customFields). fillMissingCustomFields pads absent optional-no-default
     // fields with { key, value: null }; those synthetic nulls would otherwise hit the merge's
     // delete branch and wipe mirror keys the request never intended to clear.
-    if (clientArgs.config.templates.enabled) {
-      normalizedCase.extended_fields =
-        mergeCustomFieldsIntoExtendedFields(query.customFields, normalizedCase.extended_fields) ??
-        undefined; // return type includes null when input is null; CasePostRequest.extended_fields is never null
+    if (clientArgs.config.templates.enabled && query.customFields?.length) {
+      const linkIndexes = await loadFieldLinkIndexes(query.owner, fieldDefinitionsService);
+      const mirror = mergeCustomFieldsIntoExtendedFieldsResolved(
+        query.customFields,
+        normalizedCase.extended_fields,
+        linkIndexes
+      );
+      throwIfMalformedFieldLinkage(mirror.malformedFields);
+      logUnresolvedMirrorKeys(mirror.unresolvedKeys, { owner: query.owner, logger });
+
+      // Definition-aware validation of the FINAL map: the pre-mirror validation above only saw
+      // the request's extended_fields; mirrored entries must also be valid keys with valid
+      // values. `partial: true` — the mirror never makes an absent field "required-missing".
+      if (
+        mirror.extendedFields != null &&
+        mirror.extendedFields !== normalizedCase.extended_fields
+      ) {
+        const globalFields = await resolveGlobalFields(query.owner, fieldDefinitionsService);
+        await validateCaseExtendedFields({
+          extendedFields: mirror.extendedFields,
+          templateId: query.template?.id,
+          globalFields,
+          templatesService,
+          fieldDefinitionsService,
+          owner: query.owner,
+          partial: true,
+          preResolvedTemplateFields: resolvedTemplateFields,
+        });
+      }
+
+      // Return type includes null when input is null; CasePostRequest.extended_fields is never null.
+      normalizedCase.extended_fields = mirror.extendedFields ?? undefined;
     }
 
     const attributes = transformNewCase({
