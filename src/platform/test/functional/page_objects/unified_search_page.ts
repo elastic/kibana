@@ -19,6 +19,10 @@ export class UnifiedSearchPageObject extends FtrService {
     await this.testSubjects.click(switchButtonSelector);
 
     await this.testSubjects.find('indexPattern-switcher', 500);
+    // The switcher fetches its data view list asynchronously; typing the filter
+    // before it renders races the re-render and can scramble the input, leaving
+    // the target option unmatched. Wait for the list to populate first.
+    await this.find.byCssSelector('[data-test-subj^="dataView-"]');
     await this.testSubjects.setValue('indexPattern-switcher--input', dataViewTitle);
     await this.testSubjects.click(`dataView-${dataViewTitle}`);
 

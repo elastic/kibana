@@ -361,10 +361,9 @@ export function setupScenarioRunner(
     scenarioMode: 'tsdb' | 'logsdb',
     testingFn: (indexes: ScenarioIndexes[]) => void
   ): void {
-    const { common, lens, header } = getPageObjects(['common', 'lens', 'dashboard', 'header']);
+    const { common, lens } = getPageObjects(['common', 'lens', 'dashboard']);
     const es = getService('es');
     const log = getService('log');
-    const browser = getService('browser');
     const dataStreams = getService('dataStreams');
     const elasticChart = getService('elasticChart');
     const indexPatterns = getService('indexPatterns');
@@ -439,11 +438,6 @@ export function setupScenarioRunner(
             { override: true }
           );
           await common.navigateToApp('lens');
-          // The data view was just created via the API, but the browser's in-memory
-          // data views cache is not refetched on SPA navigation, so the switcher can
-          // open with a stale list. Reload to rebuild the cache from the server.
-          await browser.refresh();
-          await header.waitUntilLoadingHasFinished();
           await elasticChart.setNewChartUiDebugFlag(true);
           // go to the
           await lens.goToTimeRange(
