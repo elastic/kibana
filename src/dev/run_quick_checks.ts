@@ -28,7 +28,6 @@ interface QuickCheck {
   script: string;
   mayChangeFiles?: boolean;
   // Additional properties can be added here in the future
-  // no-op: merge-queue validation
 }
 
 interface CheckResult {
