@@ -32,7 +32,7 @@ export const expectedCategoryCoverageEvaluator: KIQueryGenerationEvaluator = {
         missing.length > 0
           ? `Missing expected categories: ${missing.join(', ')}`
           : `All expected categories covered: ${expectedCategories.join(', ')}`,
-      details: {
+      metadata: {
         expectedCategories,
         observedCategories: [...observedCategories],
         missing,
