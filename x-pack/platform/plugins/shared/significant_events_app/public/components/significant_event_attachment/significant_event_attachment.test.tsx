@@ -25,7 +25,6 @@ const attachment: SignificantEventAttachment = {
     '@timestamp': '2026-01-01T00:00:00.000Z',
     event_uuid: 'event-1',
     event_id: 'payment-outage',
-    discovery_id: 'discovery-1',
     status: 'open',
     stream_names: ['logs.payment'],
     title: 'Payment outage',
