@@ -14,8 +14,8 @@ import { Application, ApplicationParameters, CoreSetup, CoreStart } from '@kbn/c
 import { Global } from '@kbn/core-di-internal';
 
 export function loadApplication({ bind }: KibanaContainerModuleLoadOptions) {
-  bind(Application).onSetup(({ get }, definition) => {
-    get(CoreSetup('application')).register({
+  bind(Application).onSetup(({ get }, definition, application) => {
+    application.register({
       ...definition,
       mount(params) {
         const scope = get(CoreStart('injection')).fork();
@@ -33,5 +33,5 @@ export function loadApplication({ bind }: KibanaContainerModuleLoadOptions) {
         return isPromise(unmount) ? unmount.then(wrap) : wrap(unmount);
       },
     });
-  });
+  }, CoreSetup('application'));
 }
