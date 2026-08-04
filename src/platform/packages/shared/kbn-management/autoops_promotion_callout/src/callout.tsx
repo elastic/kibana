@@ -19,6 +19,7 @@ import {
   EuiPanel,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { megaphone } from '@elastic/eui-illustrations';
@@ -150,20 +151,26 @@ export const AutoOpsPromotionCallout = ({
         </EuiFlexItem>
         {!compressed && <EuiFlexItem grow={false}>{ctaButton}</EuiFlexItem>}
       </EuiFlexGroup>
-      <EuiButtonIcon
-        iconType="cross"
-        onClick={handleDismiss}
-        style={{
-          position: 'absolute',
-          top: euiTheme.size.s,
-          insetInlineEnd: euiTheme.size.s,
-        }}
-        color="text"
-        aria-label={i18n.translate('management.autoOpsPromotionCallout.dismissAriaLabel', {
+      <EuiToolTip
+        content={i18n.translate('management.autoOpsPromotionCallout.dismissAriaLabel', {
           defaultMessage: 'Dismiss AutoOps promotion',
         })}
-        data-test-subj="autoOpsPromotionCallout-dismiss"
-      />
+      >
+        <EuiButtonIcon
+          iconType="cross"
+          onClick={handleDismiss}
+          style={{
+            position: 'absolute',
+            top: euiTheme.size.s,
+            insetInlineEnd: euiTheme.size.s,
+          }}
+          color="text"
+          aria-label={i18n.translate('management.autoOpsPromotionCallout.dismissAriaLabel', {
+            defaultMessage: 'Dismiss AutoOps promotion',
+          })}
+          data-test-subj="autoOpsPromotionCallout-dismiss"
+        />
+      </EuiToolTip>
     </EuiPanel>
   );
 };
