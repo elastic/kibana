@@ -56,4 +56,50 @@ rule X {
     expect(result.errors).toEqual([]);
     expect(result.warnings.length).toBeGreaterThan(0);
   });
+
+  it('reports pe field errors without poisoning later validations', async () => {
+    const bad = await validateYaraRule(`
+      import "pe"
+      rule BadPe {
+        condition:
+        pe.not_a_real_field
+        }
+        `);
+    expect(bad.errors.length).toBeGreaterThan(0);
+    expect(bad.errors[0].message).toMatch(/invalid field name/i);
+
+    const good = await validateYaraRule(`
+          rule Minimal {
+            strings:
+            $a = "hello"
+            condition:
+            $a
+            }
+            `);
+    expect(good.errors).toEqual([]);
+  });
+
+  it('accepts rules that import the pe module', async () => {
+    const result = await validateYaraRule(`
+        import "pe"
+        rule PeCheck {
+          condition:
+            pe.is_pe and pe.number_of_sections > 0
+        }
+        `);
+
+    expect(result.errors).toEqual([]);
+  });
+
+  it('accepts rules that import math', async () => {
+    const result = await validateYaraRule(`
+import "math"
+rule MathCheck {
+  condition:
+    true
+}
+`);
+
+    expect(result.errors).toEqual([]);
+  });
 });
