@@ -349,13 +349,25 @@ export const closeTimeline = () => {
 
 export const createNewTimeline = () => {
   openCreateTimelineOptionsPopover();
-  cy.get(CREATE_NEW_TIMELINE).click();
+  // Re-query the menu item on each attempt so a mid-animation re-render of the
+  // popover panel retries the click instead of failing on a detached element.
+  recurse(
+    () => cy.get(CREATE_NEW_TIMELINE).filter(':visible').click(),
+    () => Cypress.$(CREATE_NEW_TIMELINE).length === 0,
+    { limit: 5, delay: 100 }
+  );
 };
 
 export const openCreateTimelineOptionsPopover = () => {
   recurse(
     () => {
-      cy.get(NEW_TIMELINE_ACTION).filter(':visible').click();
+      // Only click the toggle when the popover is closed, otherwise retries
+      // oscillate it open→closed and detach the menu item mid-animation.
+      cy.get('body').then(($body) => {
+        if ($body.find(`${CREATE_NEW_TIMELINE}:visible`).length === 0) {
+          cy.get(NEW_TIMELINE_ACTION).filter(':visible').click();
+        }
+      });
       return cy.get(CREATE_NEW_TIMELINE);
     },
     (sub) => sub.is(':visible')
