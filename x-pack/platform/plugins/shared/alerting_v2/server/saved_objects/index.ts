@@ -101,7 +101,6 @@ export function registerSavedObjects({
     attributesToEncrypt: new Set(ActionPolicyAttributesToEncrypt),
     attributesToIncludeInAAD: new Set(ActionPolicyAttributesIncludedInAAD),
   });
-
 }
 
 export type { ActionPolicySavedObjectAttributes } from './schemas/action_policy_saved_object_attributes';

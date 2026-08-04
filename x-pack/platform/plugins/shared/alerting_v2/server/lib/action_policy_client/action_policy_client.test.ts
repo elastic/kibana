@@ -2281,7 +2281,11 @@ describe('ActionPolicyClient', () => {
               saved_objects: policies.map(({ id, apiKey, createdByUser = false }) => ({
                 id,
                 type: ACTION_POLICY_SAVED_OBJECT_TYPE,
-                attributes: { apiKey, apiKeyCreatedByUser: createdByUser, apiKeyOwner: 'test-user' },
+                attributes: {
+                  apiKey,
+                  apiKeyCreatedByUser: createdByUser,
+                  apiKeyOwner: 'test-user',
+                },
                 references: [],
               })),
             };
