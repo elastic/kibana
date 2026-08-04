@@ -27,7 +27,6 @@ export {
   applyFilterState,
 } from './episodes_query';
 export type {
-  AlertEpisode,
   AlertEpisodeEsqlRow,
   EpisodesFilterState,
   EpisodesSortState,

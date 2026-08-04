@@ -24,8 +24,6 @@ import {
 } from './episode_severity';
 import { asTypedEsqlQuery, type TypedEsqlQuery } from './typed_esql_query';
 
-export type { AlertEpisode } from '@kbn/alerting-v2-schemas';
-
 /**
  * Raw ES|QL response shape before client-side normalization.
  */

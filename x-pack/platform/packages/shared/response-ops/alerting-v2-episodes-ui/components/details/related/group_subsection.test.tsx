@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
-import type { AlertEpisode } from '@kbn/alerting-v2-common-queries';
+import type { AlertEpisode } from '@kbn/alerting-v2-schemas';
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
 import { RuleStateStatus, type LoadedRuleState } from '../../../types/rule_state';
 import { RelatedEpisodesGroupSubsection } from './group_subsection';
