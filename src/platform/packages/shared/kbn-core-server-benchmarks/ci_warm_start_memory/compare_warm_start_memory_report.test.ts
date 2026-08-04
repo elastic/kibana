@@ -81,69 +81,82 @@ const makeStart = ({
   },
 });
 
+const makeContext = ({
+  enforcement = 'observe',
+  naturalDelta = (pair: number) => (pair % 2 === 0 ? 0 : 60 * MIB),
+  postForcedGcDelta = 10 * MIB,
+}: {
+  readonly enforcement?: 'observe' | 'fail';
+  readonly naturalDelta?: (pair: number) => number;
+  readonly postForcedGcDelta?: number;
+} = {}): OnCompareContext => {
+  const validPairs = Array.from({ length: 8 }, (_, pair) => {
+    const baseline = makeStart({
+      side: 'baseline',
+      pair,
+      tailHeapUsed: 800 * MIB,
+      postForcedGcHeapUsed: 700 * MIB,
+    });
+    const target = makeStart({
+      side: 'target',
+      pair,
+      tailHeapUsed: 800 * MIB + naturalDelta(pair),
+      postForcedGcHeapUsed: 700 * MIB + postForcedGcDelta,
+    });
+    return { pair, baseline, target };
+  });
+  const config = {
+    monitorInterval: 250,
+    comparisonRun: {
+      mode: 'randomized_paired',
+      pairs: 8,
+      maxAttempts: 12,
+      enforcement,
+    },
+  } as OnCompareContext['left']['config'];
+
+  return {
+    log: {
+      info: jest.fn(),
+      warning: jest.fn(),
+    } as unknown as ToolingLog,
+    left: { config, benchmarks: [] },
+    right: { config, benchmarks: [] },
+    leftSummary: { name: 'left', benchmarks: [] },
+    rightSummary: { name: 'right', benchmarks: [] },
+    comparison: { benchmarks: [] },
+    pairedComparison: {
+      mode: 'randomized_paired',
+      seed: 'darwin-ab',
+      baselineIdentity: 'A',
+      targetIdentity: 'B',
+      benchmarks: [
+        {
+          benchmarkName: 'warm_start',
+          requestedPairs: 8,
+          attemptedPairs: 8,
+          validPairs,
+          starts: validPairs.flatMap(({ baseline, target }) => [baseline, target]),
+          order: Array.from({ length: 8 }, () => 'baseline-target' as const),
+        },
+      ],
+    },
+  };
+};
+
 describe('post-forced-GC warm-start report', () => {
   afterEach(() => {
     jest.clearAllMocks();
   });
 
-  it('reports natural and post-forced-GC paired statistics independently', async () => {
-    const validPairs = Array.from({ length: 8 }, (_, pair) => {
-      const naturalDelta = pair % 2 === 0 ? 0 : 60 * MIB;
-      const baseline = makeStart({
-        side: 'baseline',
-        pair,
-        tailHeapUsed: 800 * MIB,
-        postForcedGcHeapUsed: 700 * MIB,
-      });
-      const target = makeStart({
-        side: 'target',
-        pair,
-        tailHeapUsed: 800 * MIB + naturalDelta,
-        postForcedGcHeapUsed: 730 * MIB,
-      });
-      return { pair, baseline, target };
-    });
-    const config = {
-      monitorInterval: 250,
-      comparisonRun: {
-        mode: 'randomized_paired',
-        pairs: 8,
-        maxAttempts: 12,
-        enforcement: 'observe',
-      },
-    } as OnCompareContext['left']['config'];
-    const context: OnCompareContext = {
-      log: {
-        info: jest.fn(),
-        warning: jest.fn(),
-      } as unknown as ToolingLog,
-      left: { config, benchmarks: [] },
-      right: { config, benchmarks: [] },
-      leftSummary: { name: 'left', benchmarks: [] },
-      rightSummary: { name: 'right', benchmarks: [] },
-      comparison: { benchmarks: [] },
-      pairedComparison: {
-        mode: 'randomized_paired',
-        seed: 'darwin-ab',
-        baselineIdentity: 'A',
-        targetIdentity: 'B',
-        benchmarks: [
-          {
-            benchmarkName: 'warm_start',
-            requestedPairs: 8,
-            attemptedPairs: 8,
-            validPairs,
-            starts: validPairs.flatMap(({ baseline, target }) => [baseline, target]),
-            order: Array.from({ length: 8 }, () => 'baseline-target' as const),
-          },
-        ],
-      },
-    };
-
-    await compareWarmStartMemory(context);
+  it('uses post-forced-GC heap for observation while retaining a higher blocking threshold', async () => {
+    await compareWarmStartMemory(makeContext());
 
     const report = jest.mocked(writeWarmStartMemoryRegressionReport).mock.calls[0][0];
     expect(report.enforcement).toBe('observe');
+    expect(report.outcome).toBe('regression');
+    expect(report.protocol.observationThresholdBytes).toBe(5 * MIB);
+    expect(report.protocol.blockingThresholdBytes).toBe(20 * MIB);
     expect(report.tailHeapUsed).toEqual(
       expect.objectContaining({
         meanBytes: 30 * MIB,
@@ -152,9 +165,9 @@ describe('post-forced-GC warm-start report', () => {
     );
     expect(report.postForcedGcHeapUsed).toEqual(
       expect.objectContaining({
-        meanBytes: 30 * MIB,
+        meanBytes: 10 * MIB,
         sampleStandardDeviationBytes: 0,
-        lowerConfidenceBoundBytes: 30 * MIB,
+        lowerConfidenceBoundBytes: 10 * MIB,
         wouldTrigger: true,
       })
     );
@@ -168,9 +181,31 @@ describe('post-forced-GC warm-start report', () => {
       })
     );
     expect(report.starts[0]).toEqual(
-      expect.objectContaining({
-        forcedGcHeapStats: validPairs[0].baseline.result.forcedGcHeapStats,
+      expect.objectContaining({ forcedGcHeapStats: expect.any(Array) })
+    );
+
+    await expect(
+      compareWarmStartMemory(makeContext({ enforcement: 'fail' }))
+    ).resolves.toBeUndefined();
+    await expect(
+      compareWarmStartMemory(makeContext({ enforcement: 'fail', postForcedGcDelta: 30 * MIB }))
+    ).rejects.toThrow('Warm-start memory regression detected');
+
+    await compareWarmStartMemory(
+      makeContext({
+        naturalDelta: () => 10 * MIB,
+        postForcedGcDelta: 3 * MIB,
       })
+    );
+
+    const diagnosticNaturalReport = jest.mocked(writeWarmStartMemoryRegressionReport).mock
+      .calls[3][0];
+    expect(diagnosticNaturalReport.outcome).toBe('observed');
+    expect(diagnosticNaturalReport.tailHeapUsed).toEqual(
+      expect.objectContaining({ wouldTrigger: true })
+    );
+    expect(diagnosticNaturalReport.postForcedGcHeapUsed).toEqual(
+      expect.objectContaining({ wouldTrigger: false })
     );
   });
 });

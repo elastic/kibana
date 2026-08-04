@@ -17,7 +17,8 @@
  */
 
 export const MIN_VALID_WARM_START_MEMORY_PAIRS = 8;
-export const WARM_START_MEMORY_MATERIALITY_BYTES = 20 * 1024 * 1024;
+export const WARM_START_MEMORY_OBSERVATION_THRESHOLD_BYTES = 5 * 1024 * 1024;
+export const WARM_START_MEMORY_BLOCKING_THRESHOLD_BYTES = 20 * 1024 * 1024;
 export const WARM_START_MEMORY_CONFIDENCE = 0.99;
 
 // One-sided 99% Student-t critical values for df 1..30. The benchmark uses
@@ -36,19 +37,19 @@ export interface PairedMemoryRuleResult {
   readonly standardErrorBytes?: number;
   readonly tCritical?: number;
   readonly lowerConfidenceBoundBytes?: number;
-  readonly materialityBytes: number;
+  readonly thresholdBytes: number;
   readonly wouldTrigger: boolean;
 }
 
 export const evaluatePairedMemoryRule = ({
   deltas,
-  materialityBytes = WARM_START_MEMORY_MATERIALITY_BYTES,
+  thresholdBytes = WARM_START_MEMORY_OBSERVATION_THRESHOLD_BYTES,
 }: {
   deltas: readonly number[];
-  materialityBytes?: number;
+  thresholdBytes?: number;
 }): PairedMemoryRuleResult => {
   if (deltas.length < MIN_VALID_WARM_START_MEMORY_PAIRS) {
-    return { pairCount: deltas.length, materialityBytes, wouldTrigger: false };
+    return { pairCount: deltas.length, thresholdBytes, wouldTrigger: false };
   }
 
   const meanBytes = deltas.reduce((sum, delta) => sum + delta, 0) / deltas.length;
@@ -66,7 +67,7 @@ export const evaluatePairedMemoryRule = ({
     standardErrorBytes,
     tCritical,
     lowerConfidenceBoundBytes,
-    materialityBytes,
-    wouldTrigger: lowerConfidenceBoundBytes > materialityBytes,
+    thresholdBytes,
+    wouldTrigger: lowerConfidenceBoundBytes > thresholdBytes,
   };
 };

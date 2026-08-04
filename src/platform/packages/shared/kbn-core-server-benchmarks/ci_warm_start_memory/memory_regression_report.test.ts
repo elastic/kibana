@@ -35,7 +35,8 @@ const report: WarmStartMemoryRegressionReport = {
     tailSampleCount: 8,
     forcedGcTimeoutMs: 30_000,
     confidence: 0.99,
-    materialityBytes: 20 * 1024 * 1024,
+    observationThresholdBytes: 5 * 1024 * 1024,
+    blockingThresholdBytes: 20 * 1024 * 1024,
   },
   comparison: {
     seed: 'test',

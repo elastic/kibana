@@ -19,7 +19,7 @@
 import {
   evaluatePairedMemoryRule,
   MIN_VALID_WARM_START_MEMORY_PAIRS,
-  WARM_START_MEMORY_MATERIALITY_BYTES,
+  WARM_START_MEMORY_OBSERVATION_THRESHOLD_BYTES,
 } from './paired_memory_rule';
 
 describe('evaluatePairedMemoryRule', () => {
@@ -27,24 +27,28 @@ describe('evaluatePairedMemoryRule', () => {
     const result = evaluatePairedMemoryRule({ deltas: Array(7).fill(30 * 1024 * 1024) });
     expect(result).toEqual({
       pairCount: MIN_VALID_WARM_START_MEMORY_PAIRS - 1,
-      materialityBytes: WARM_START_MEMORY_MATERIALITY_BYTES,
+      thresholdBytes: WARM_START_MEMORY_OBSERVATION_THRESHOLD_BYTES,
       wouldTrigger: false,
     });
   });
 
-  it('triggers only when the lower confidence bound is above materiality', () => {
-    const exactlyMaterial = evaluatePairedMemoryRule({
-      deltas: Array(MIN_VALID_WARM_START_MEMORY_PAIRS).fill(WARM_START_MEMORY_MATERIALITY_BYTES),
-    });
-    const aboveMaterial = evaluatePairedMemoryRule({
+  it('triggers only when the lower confidence bound is above the observation threshold', () => {
+    const exactlyAtThreshold = evaluatePairedMemoryRule({
       deltas: Array(MIN_VALID_WARM_START_MEMORY_PAIRS).fill(
-        WARM_START_MEMORY_MATERIALITY_BYTES + 1
+        WARM_START_MEMORY_OBSERVATION_THRESHOLD_BYTES
+      ),
+    });
+    const aboveThreshold = evaluatePairedMemoryRule({
+      deltas: Array(MIN_VALID_WARM_START_MEMORY_PAIRS).fill(
+        WARM_START_MEMORY_OBSERVATION_THRESHOLD_BYTES + 1
       ),
     });
 
-    expect(exactlyMaterial.lowerConfidenceBoundBytes).toBe(WARM_START_MEMORY_MATERIALITY_BYTES);
-    expect(exactlyMaterial.wouldTrigger).toBe(false);
-    expect(aboveMaterial.wouldTrigger).toBe(true);
+    expect(exactlyAtThreshold.lowerConfidenceBoundBytes).toBe(
+      WARM_START_MEMORY_OBSERVATION_THRESHOLD_BYTES
+    );
+    expect(exactlyAtThreshold.wouldTrigger).toBe(false);
+    expect(aboveThreshold.wouldTrigger).toBe(true);
   });
 
   it('does not trigger a noisy sample with the same mean', () => {

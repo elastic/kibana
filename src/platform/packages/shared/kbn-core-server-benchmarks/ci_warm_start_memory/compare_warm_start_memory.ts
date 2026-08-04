@@ -33,8 +33,9 @@ import {
 import {
   evaluatePairedMemoryRule,
   MIN_VALID_WARM_START_MEMORY_PAIRS,
+  WARM_START_MEMORY_BLOCKING_THRESHOLD_BYTES,
   WARM_START_MEMORY_CONFIDENCE,
-  WARM_START_MEMORY_MATERIALITY_BYTES,
+  WARM_START_MEMORY_OBSERVATION_THRESHOLD_BYTES,
 } from './paired_memory_rule';
 import {
   getWarmStartMemoryRegressionReportContextFromEnv,
@@ -159,9 +160,16 @@ export const compareWarmStartMemory: OnCompareCallback = async ({
       ({ deltaBytes }) => deltaBytes
     ),
   });
+  const postForcedGcHeapBlockingRule = evaluatePairedMemoryRule({
+    deltas: (postForcedGcHeapPairs.pairs as Array<{ deltaBytes: number }>).map(
+      ({ deltaBytes }) => deltaBytes
+    ),
+    thresholdBytes: WARM_START_MEMORY_BLOCKING_THRESHOLD_BYTES,
+  });
   const inconclusive = validPairs.length < MIN_VALID_WARM_START_MEMORY_PAIRS;
-  const wouldTrigger = !inconclusive && rule.wouldTrigger;
-  const outcome = inconclusive ? 'inconclusive' : wouldTrigger ? 'regression' : 'observed';
+  const wouldObserve = !inconclusive && postForcedGcHeapRule.wouldTrigger;
+  const wouldFail = !inconclusive && postForcedGcHeapBlockingRule.wouldTrigger;
+  const outcome = inconclusive ? 'inconclusive' : wouldObserve ? 'regression' : 'observed';
 
   const report: WarmStartMemoryRegressionReport = {
     version: 1,
@@ -174,7 +182,8 @@ export const compareWarmStartMemory: OnCompareCallback = async ({
       tailSampleCount: TAIL_SAMPLE_COUNT,
       forcedGcTimeoutMs: FORCED_GC_TIMEOUT_MS,
       confidence: WARM_START_MEMORY_CONFIDENCE,
-      materialityBytes: WARM_START_MEMORY_MATERIALITY_BYTES,
+      observationThresholdBytes: WARM_START_MEMORY_OBSERVATION_THRESHOLD_BYTES,
+      blockingThresholdBytes: WARM_START_MEMORY_BLOCKING_THRESHOLD_BYTES,
     },
     comparison: {
       baselineIdentity: pairedComparison?.baselineIdentity,
@@ -223,14 +232,16 @@ export const compareWarmStartMemory: OnCompareCallback = async ({
       postForcedGcHeapRule.meanBytes ?? 0
     )}, post-forced-GC 99% LCB ${formatBytes(
       postForcedGcHeapRule.lowerConfidenceBoundBytes ?? 0
-    )}; materiality ${formatBytes(
-      WARM_START_MEMORY_MATERIALITY_BYTES
-    )}, natural wouldTrigger=${wouldTrigger}, post-forced-GC hypotheticalWouldTrigger=${
-      postForcedGcHeapRule.wouldTrigger
-    }. Report: ${reportPath}`
+    )}; observation threshold ${formatBytes(
+      WARM_START_MEMORY_OBSERVATION_THRESHOLD_BYTES
+    )}, blocking threshold ${formatBytes(
+      WARM_START_MEMORY_BLOCKING_THRESHOLD_BYTES
+    )}; natural hypotheticalWouldObserve=${
+      rule.wouldTrigger
+    }, post-forced-GC wouldObserve=${wouldObserve}, post-forced-GC wouldFail=${wouldFail}. Report: ${reportPath}`
   );
 
-  if (wouldTrigger && enforcement === 'fail') {
+  if (wouldFail && enforcement === 'fail') {
     throw new Error(`Warm-start memory regression detected. Report: ${reportPath}`);
   }
 };
