@@ -68,7 +68,7 @@ export function createQueryKnowledgeIndicatorTool({
       future investigations.
     `,
     schema: createQueryKnowledgeIndicatorSchema,
-    tags: ['streams', 'significantEvents'],
+    tags: ['streams', 'significant-events'],
     confirmation: {
       askUser: 'always',
       getConfirmation: async ({ toolParams }) => {

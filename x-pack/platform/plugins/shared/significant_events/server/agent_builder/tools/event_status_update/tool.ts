@@ -47,7 +47,7 @@ export function createEventStatusUpdateTool({
       })}
     `,
     schema: eventStatusUpdateSchema,
-    tags: ['streams', 'significantEvents'],
+    tags: ['streams', 'significant-events'],
     availability: createSignificantEventsAvailability({ server, logger }),
     handler: async (toolParams, context) => {
       const { request } = context;
