@@ -2230,7 +2230,7 @@
     "selenium-webdriver": "4.44.0",
     "sharp": "0.35.2",
     "simple-git": "3.36.0",
-    "sinon": "22.0.0",
+    "sinon": "22.1.0",
     "sort-package-json": "3.2.1",
     "storybook": "8.6.17",
     "style-loader": "4.0.0",
