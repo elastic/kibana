@@ -21,11 +21,6 @@ The issuer URL is injected by the kibana-controller via `xpack.dataFederation.wo
 
 | Key | Default | Description |
 |-----|---------|-------------|
-<<<<<<< HEAD
 | `xpack.dataFederation.enableFederatedIdentityAuth` | `false` | Show the federated identity auth option in the creation flyout |
-=======
-| `xpack.dataFederation.enabled` | `true` | Enables data federation management app |
-| `xpack.dataFederation.enableFederatedIdentityAuth` | `false` | Enable federated identity auth option |
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
 | `xpack.dataFederation.enableGoogleCloudStorageDataSourceType` | `false` | Show GCS as a data source type |
 | `xpack.dataFederation.enableAzureDataSourceType` | `false` | Show Azure Blob as a data source type |
