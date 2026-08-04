@@ -33,28 +33,26 @@ export interface OverviewTabProps {
 /**
  * Overview view displayed in the document details expandable flyout right section
  */
-export const OverviewTab = memo(({ hit, renderCellActions, onAlertUpdated }: OverviewTabProps) => {
-  return (
-    <>
-      <AboutSection hit={hit} />
-      <EuiHorizontalRule margin="m" />
-      <InvestigationSection hit={hit} renderCellActions={renderCellActions} />
-      <EuiHorizontalRule margin="m" />
-      <VisualizationsSection
-        hit={hit}
-        renderCellActions={renderCellActions}
-        onAlertUpdated={onAlertUpdated}
-      />
-      <EuiHorizontalRule margin="m" />
-      <InsightsSection
-        hit={hit}
-        renderCellActions={renderCellActions}
-        onAlertUpdated={onAlertUpdated}
-      />
-      <EuiHorizontalRule margin="m" />
-      <ResponseSection hit={hit} />
-    </>
-  );
-});
+export const OverviewTab = memo(({ hit, renderCellActions, onAlertUpdated }: OverviewTabProps) => (
+  <>
+    <AboutSection hit={hit} />
+    <EuiHorizontalRule margin="m" />
+    <InvestigationSection hit={hit} renderCellActions={renderCellActions} />
+    <EuiHorizontalRule margin="m" />
+    <VisualizationsSection
+      hit={hit}
+      renderCellActions={renderCellActions}
+      onAlertUpdated={onAlertUpdated}
+    />
+    <EuiHorizontalRule margin="m" />
+    <InsightsSection
+      hit={hit}
+      renderCellActions={renderCellActions}
+      onAlertUpdated={onAlertUpdated}
+    />
+    <EuiHorizontalRule margin="m" />
+    <ResponseSection hit={hit} />
+  </>
+));
 
 OverviewTab.displayName = 'OverviewTab';
