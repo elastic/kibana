@@ -10,14 +10,13 @@ import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
-import type { RootState } from '@kbn/data-view-manager';
-import { sharedDataViewManagerSlice } from '@kbn/data-view-manager';
-import { PageScope } from '@kbn/data-view-manager';
-import { selectDataViewAsync } from '@kbn/data-view-manager';
-import { createDefaultDataView } from '../../utils/create_default_data_view';
-import { createExploreDataView } from '../../utils/create_explore_data_view';
+import type { RootState } from '../reducer';
+import { sharedDataViewManagerSlice } from '../slices';
+import { PageScope } from '../../constants';
+import { selectDataViewAsync } from '../actions';
+import type { CreateDefaultDataView, CreateExploreDataView } from '../../context';
 import { getSelectedDataViewStorageKey } from './storage_keys';
-import type { DataViewSpec } from '@kbn/data-view-manager';
+import type { DataViewSpec } from '../types';
 
 /**
  * Creates a Redux listener for initializing the Data View Manager state.
@@ -44,6 +43,16 @@ export const createInitListener = (dependencies: {
   dataViews: DataViewsServicePublic;
   spaces: SpacesPluginStart;
   storage: Storage;
+  /**
+   * Host-supplied factory that creates/loads the default security data views.
+   * Injected by the package provider so the package stays decoupled from the
+   * plugin's initialization API.
+   */
+  createDefaultDataView: CreateDefaultDataView;
+  /**
+   * Host-supplied factory that creates the explore data view.
+   */
+  createExploreDataView: CreateExploreDataView;
 }) => {
   return {
     actionCreator: sharedDataViewManagerSlice.actions.init,
@@ -55,12 +64,13 @@ export const createInitListener = (dependencies: {
         const spaceId = (await dependencies.spaces.getActiveSpace()).id;
 
         // Initialize default data views first
-        const { defaultDataView, alertDataView, attackDataView } = await createDefaultDataView({
-          application: dependencies.application,
-          http: dependencies.http,
-        });
+        const { defaultDataView, alertDataView, attackDataView } =
+          await dependencies.createDefaultDataView({
+            application: dependencies.application,
+            http: dependencies.http,
+          });
 
-        const exploreDataView = await createExploreDataView(
+        const exploreDataView = await dependencies.createExploreDataView(
           {
             dataViews: dependencies.dataViews,
             spaces: dependencies.spaces,

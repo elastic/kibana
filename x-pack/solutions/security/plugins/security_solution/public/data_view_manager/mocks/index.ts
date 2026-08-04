@@ -11,4 +11,4 @@
  */
 export * from './mock_data_view';
 export * from './timeline_data_view';
-export { mockDataViewManagerState, mockTimelineDataViewId } from '../redux/mock';
+export { mockDataViewManagerState, mockTimelineDataViewId } from '@kbn/data-view-manager';

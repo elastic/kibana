@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useSelector } from 'react-redux-v7';
+import { useDataViewManagerSelector as useSelector } from '@kbn/data-view-manager';
 import { signalIndexNameSelector } from '@kbn/data-view-manager';
 
 export const useSignalIndexName = () => useSelector(signalIndexNameSelector);

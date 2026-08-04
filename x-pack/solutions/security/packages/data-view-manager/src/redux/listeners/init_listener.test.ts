@@ -6,25 +6,26 @@
  */
 
 import type { AnyAction, Dispatch, ListenerEffectAPI } from 'redux-toolkit-v1';
-import { mockDataViewManagerState } from '../mock';
-import { createInitListener } from './init_listener';
-import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
-import type { RootState } from '@kbn/data-view-manager';
-import { sharedDataViewManagerSlice } from '@kbn/data-view-manager';
-import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, PageScope } from '@kbn/data-view-manager';
-import {
-  DEFAULT_ALERT_DATA_VIEW_ID,
-  DEFAULT_ATTACK_DATA_VIEW_ID,
-} from '../../../../common/constants';
-import { selectDataViewAsync } from '@kbn/data-view-manager';
+import type { DataView, DataViewsServicePublic } from '@kbn/data-views-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import { createDefaultDataView } from '../../utils/create_default_data_view';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 
-jest.mock('../../utils/create_default_data_view', () => ({
-  createDefaultDataView: jest.fn(),
-}));
+import { mockDataViewManagerState } from '../mock';
+import { createInitListener } from './init_listener';
+import type { RootState } from '../reducer';
+import { sharedDataViewManagerSlice } from '../slices';
+import { selectDataViewAsync } from '../actions';
+import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, PageScope } from '../../constants';
+import type { CreateDefaultDataView, CreateExploreDataView } from '../../context';
+
+// Plugin-owned data view ids, inlined here because the package cannot import the
+// security_solution plugin's constants.
+const DEFAULT_ALERT_DATA_VIEW_ID = 'security-solution-alert';
+const DEFAULT_ATTACK_DATA_VIEW_ID = 'security-solution-attack';
+
+const mockCreateDefaultDataView = jest.fn() as jest.MockedFunction<CreateDefaultDataView>;
+const mockCreateExploreDataView = jest.fn() as jest.MockedFunction<CreateExploreDataView>;
 
 const mockDataViewsService = {
   get: jest.fn(),
@@ -67,12 +68,17 @@ describe('createInitListener', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    jest.mocked(createDefaultDataView).mockResolvedValue({
+    mockCreateDefaultDataView.mockResolvedValue({
       defaultDataView: { id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, title: '' },
       alertDataView: { id: DEFAULT_ALERT_DATA_VIEW_ID, title: '' },
       attackDataView: { id: DEFAULT_ATTACK_DATA_VIEW_ID, title: '' },
       kibanaDataViews: [],
-    } as unknown as Awaited<ReturnType<typeof createDefaultDataView>>);
+    } as unknown as Awaited<ReturnType<CreateDefaultDataView>>);
+
+    mockCreateExploreDataView.mockResolvedValue({
+      id: 'explore-data-view',
+      title: '',
+    } as unknown as DataView);
 
     listener = createInitListener({
       dataViews: mockDataViewsService,
@@ -91,6 +97,8 @@ describe('createInitListener', () => {
         remove: jest.fn(),
         clear: jest.fn(),
       } as unknown as Storage,
+      createDefaultDataView: mockCreateDefaultDataView,
+      createExploreDataView: mockCreateExploreDataView,
     });
   });
 
@@ -106,7 +114,7 @@ describe('createInitListener', () => {
 
     await listener.effect(sharedDataViewManagerSlice.actions.init([]), mockListenerApi);
 
-    expect(jest.mocked(createDefaultDataView)).toHaveBeenCalled();
+    expect(mockCreateDefaultDataView).toHaveBeenCalled();
 
     expect(jest.mocked(mockDataViewsService.getIdsWithTitle)).toHaveBeenCalled();
 

@@ -6,29 +6,56 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import { TestProviders } from '../../common/mock';
+import {
+  useInitDataViewManager as useInitDataViewManagerEngine,
+  useSetSignalIndex,
+} from '@kbn/data-view-manager';
 import { useInitDataViewManager } from './use_init_data_view_manager';
-import { useDispatch } from 'react-redux-v7';
-import { sharedDataViewManagerSlice } from '@kbn/data-view-manager';
+import { useUserInfo } from '../../detections/components/user_info';
 
-jest.mock('react-redux-v7', () => {
-  const dispatch = jest.fn();
+jest.mock('@kbn/data-view-manager', () => ({
+  ...jest.requireActual('@kbn/data-view-manager'),
+  useInitDataViewManager: jest.fn(),
+  useSetSignalIndex: jest.fn(),
+}));
+jest.mock('../../detections/components/user_info');
 
-  return {
-    ...jest.requireActual('react-redux-v7'),
-    useDispatch: () => dispatch,
-  };
-});
+describe('useInitDataViewManager (plugin orchestrator)', () => {
+  const initEngine = jest.fn();
+  const setSignalIndex = jest.fn();
 
-describe('useInitDataViewPicker', () => {
-  it('should render and dispatch an init action', () => {
-    renderHook(
-      () => {
-        return useInitDataViewManager()([]);
-      },
-      { wrapper: TestProviders }
-    );
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (useInitDataViewManagerEngine as jest.Mock).mockReturnValue(initEngine);
+    (useSetSignalIndex as jest.Mock).mockReturnValue(setSignalIndex);
+    (useUserInfo as jest.Mock).mockReturnValue({
+      loading: false,
+      signalIndexName: 'signal-index',
+      signalIndexMappingOutdated: false,
+    });
+  });
 
-    expect(useDispatch()).toHaveBeenCalledWith(sharedDataViewManagerSlice.actions.init([]));
+  it('returns the engine init dispatcher', () => {
+    const { result } = renderHook(() => useInitDataViewManager());
+
+    expect(result.current).toBe(initEngine);
+  });
+
+  it('pushes the current signal index metadata into the store', () => {
+    renderHook(() => useInitDataViewManager());
+
+    expect(setSignalIndex).toHaveBeenCalledWith({ name: 'signal-index', isOutdated: false });
+  });
+
+  it('does not push signal index metadata while the signal index is still loading', () => {
+    (useUserInfo as jest.Mock).mockReturnValue({
+      loading: true,
+      signalIndexName: null,
+      signalIndexMappingOutdated: false,
+    });
+
+    renderHook(() => useInitDataViewManager());
+
+    expect(setSignalIndex).not.toHaveBeenCalled();
   });
 });

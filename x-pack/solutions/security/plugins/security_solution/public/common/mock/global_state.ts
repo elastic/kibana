@@ -42,7 +42,7 @@ import { UsersFields } from '../../../common/search_strategy/security_solution/u
 import { initialGroupingState } from '../store/grouping/reducer';
 import { EMPTY_RESOLVER } from '../../resolver/store/helpers';
 import { getMockDiscoverInTimelineState } from './mock_discover_state';
-import { mockDataViewManagerState } from '../../data_view_manager/redux/mock';
+import { mockDataViewManagerState } from '@kbn/data-view-manager';
 
 export const mockGlobalState: State = {
   app: {

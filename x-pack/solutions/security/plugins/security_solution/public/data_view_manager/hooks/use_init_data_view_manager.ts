@@ -5,41 +5,25 @@
  * 2.0.
  */
 
-import { useDispatch } from 'react-redux-v7';
-import { useCallback, useEffect } from 'react';
-import type { AnyAction, Dispatch, ListenerEffectAPI } from 'redux-toolkit-v1';
+import { useEffect } from 'react';
 import {
-  addListener as originalAddListener,
-  removeListener as originalRemoveListener,
-} from 'redux-toolkit-v1';
-import type { RootState } from '@kbn/data-view-manager';
-import { useKibana } from '../../common/lib/kibana';
-import { createDataViewSelectedListener } from '../redux/listeners/data_view_selected';
-import { createInitListener } from '../redux/listeners/init_listener';
-import { sharedDataViewManagerSlice } from '@kbn/data-view-manager';
-import { type SelectDataViewAsyncPayload } from '@kbn/data-view-manager';
-import { PageScope } from '@kbn/data-view-manager';
+  useInitDataViewManager as useInitDataViewManagerEngine,
+  useSetSignalIndex,
+} from '@kbn/data-view-manager';
 import { useUserInfo } from '../../detections/components/user_info';
 
-type OriginalListener = Parameters<typeof originalAddListener>[0];
-
-interface Listener<Action extends AnyAction = AnyAction> {
-  actionCreator?: unknown;
-  effect: (action: Action, listenerApi: ListenerEffectAPI<RootState, Dispatch>) => void;
-}
-
-const addListener = <T extends AnyAction>(listener: Listener<T>) =>
-  originalAddListener(listener as unknown as OriginalListener);
-
-const removeListener = <T extends AnyAction>(listener: Listener<T>) =>
-  originalRemoveListener(listener as unknown as OriginalListener);
-
 /**
- * Should only be used once in the application, on the top level of the rendering tree
+ * Plugin-side orchestrator for the data view manager. Delegates listener wiring
+ * to the package engine hook and, in addition, keeps the package store in sync
+ * with the signal index metadata (which is owned by the plugin's detections
+ * user info).
+ *
+ * Should only be used once in the application, on the top level of the
+ * rendering tree wrapped by `DataViewManagerProvider`.
  */
 export const useInitDataViewManager = () => {
-  const dispatch = useDispatch();
-  const services = useKibana().services;
+  const initDataViewManager = useInitDataViewManagerEngine();
+  const setSignalIndex = useSetSignalIndex();
 
   const {
     loading: loadingSignalIndex,
@@ -47,82 +31,14 @@ export const useInitDataViewManager = () => {
     signalIndexMappingOutdated,
   } = useUserInfo();
 
-  const onSignalIndexUpdated = useCallback(() => {
-    if (!loadingSignalIndex && signalIndexName != null) {
-      dispatch(
-        sharedDataViewManagerSlice.actions.setSignalIndex({
-          name: signalIndexName,
-          isOutdated: !!signalIndexMappingOutdated,
-        })
-      );
-    }
-  }, [dispatch, loadingSignalIndex, signalIndexMappingOutdated, signalIndexName]);
-
   useEffect(() => {
-    onSignalIndexUpdated();
-    // because we only want onSignalIndexUpdated to run when signalIndexName updates,
-    // but we want to know about the updates from the dependencies of onSignalIndexUpdated
+    if (!loadingSignalIndex && signalIndexName != null) {
+      setSignalIndex({ name: signalIndexName, isOutdated: !!signalIndexMappingOutdated });
+    }
+    // because we only want this to run when signalIndexName updates,
+    // but we want to know about the updates from the other dependencies too
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [signalIndexName]);
 
-  useEffect(() => {
-    // NOTE: init listener contains logic that preloads default security solution data view
-    const dataViewsLoadingListener = createInitListener({
-      dataViews: services.dataViews,
-      http: services.http,
-      uiSettings: services.uiSettings,
-      notifications: services.notifications,
-      application: services.application,
-      spaces: services.spaces,
-      storage: services.storage,
-    });
-
-    dispatch(addListener(dataViewsLoadingListener));
-
-    // NOTE: Every scope has its own listener instance; this allows for cancellation
-    const listeners = [
-      PageScope.default,
-      PageScope.timeline,
-      PageScope.alerts,
-      PageScope.attacks,
-      PageScope.analyzer,
-      PageScope.explore,
-    ].map((scope) =>
-      createDataViewSelectedListener({
-        scope,
-        spaces: services.spaces,
-        dataViews: services.dataViews,
-        notifications: services.notifications,
-        storage: services.storage,
-      })
-    );
-
-    listeners.forEach((dataViewSelectedListener) => {
-      dispatch(addListener(dataViewSelectedListener));
-    });
-
-    // NOTE: this kicks off the data loading in the Data View Picker
-
-    return () => {
-      dispatch(removeListener(dataViewsLoadingListener));
-      listeners.forEach((dataViewSelectedListener) => {
-        dispatch(removeListener(dataViewSelectedListener));
-      });
-    };
-  }, [
-    dispatch,
-    services.application,
-    services.dataViews,
-    services.http,
-    services.notifications,
-    services.spaces,
-    services.storage,
-    services.uiSettings,
-  ]);
-
-  return useCallback(
-    (initialSelection: SelectDataViewAsyncPayload[]) =>
-      dispatch(sharedDataViewManagerSlice.actions.init(initialSelection)),
-    [dispatch]
-  );
+  return initDataViewManager;
 };

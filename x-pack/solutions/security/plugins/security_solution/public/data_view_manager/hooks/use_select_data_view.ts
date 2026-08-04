@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { useDispatch } from 'react-redux-v7';
 import { useCallback } from 'react';
+import { useDataViewManagerDispatch as useDispatch } from '@kbn/data-view-manager';
 import type { PageScope } from '@kbn/data-view-manager';
 import { selectDataViewAsync } from '@kbn/data-view-manager';
 

@@ -5,16 +5,20 @@
  * 2.0.
  */
 
-import { createDataViewSelectedListener } from './data_view_selected';
-import { selectDataViewAsync } from '@kbn/data-view-manager';
 import type { DataViewsServicePublic, FieldSpec } from '@kbn/data-views-plugin/public';
 import type { AnyAction, Dispatch, ListenerEffectAPI } from 'redux-toolkit-v1';
-import type { RootState } from '@kbn/data-view-manager';
-import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, PageScope } from '@kbn/data-view-manager';
-import { DEFAULT_ALERT_DATA_VIEW_ID } from '../../../../common/constants';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
+
+import { createDataViewSelectedListener } from './data_view_selected';
+import { selectDataViewAsync } from '../actions';
+import type { RootState } from '../reducer';
+import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, PageScope } from '../../constants';
+
+// Plugin-owned data view id, inlined here because the package cannot import the
+// security_solution plugin's constants.
+const DEFAULT_ALERT_DATA_VIEW_ID = 'security-solution-alert';
 
 const mockDataViewsService = {
   getDataViewLazy: jest.fn(),

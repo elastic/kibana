@@ -11,11 +11,11 @@ import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { isEmpty } from 'lodash';
 import type { CoreStart } from '@kbn/core/public';
-import type { RootState } from '@kbn/data-view-manager';
-import { scopes } from '@kbn/data-view-manager';
-import { selectDataViewAsync } from '@kbn/data-view-manager';
-import { sharedDataViewManagerSlice } from '@kbn/data-view-manager';
-import { PageScope } from '@kbn/data-view-manager';
+import type { RootState } from '../reducer';
+import { scopes } from '../reducer';
+import { selectDataViewAsync } from '../actions';
+import { sharedDataViewManagerSlice } from '../slices';
+import { PageScope } from '../../constants';
 import { getSelectedDataViewStorageKey } from './storage_keys';
 
 /**

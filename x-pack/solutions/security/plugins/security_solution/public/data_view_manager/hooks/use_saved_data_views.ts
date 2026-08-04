@@ -7,7 +7,7 @@
 
 import { type DataViewListItem } from '@kbn/data-views-plugin/public';
 import { useMemo } from 'react';
-import { useSelector } from 'react-redux-v7';
+import { useDataViewManagerSelector as useSelector } from '@kbn/data-view-manager';
 import { sharedStateSelector } from '@kbn/data-view-manager';
 
 /**
