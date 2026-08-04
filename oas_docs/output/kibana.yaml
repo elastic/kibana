@@ -345,6 +345,7 @@ tags:
     name: short url
     x-displayName: Short URLs
   - name: significant_events
+    x-displayName: Significant Events
   - description: SLO APIs enable you to define, manage and track service-level objectives
     name: slo
     x-displayName: Service level objectives
