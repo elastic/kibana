@@ -14908,17 +14908,6 @@
     "@typescript-eslint/types" "8.60.0"
     eslint-visitor-keys "^5.0.0"
 
-<<<<<<< HEAD
-"@ungap/structured-clone@^1.2.0":
-=======
-"@typescript-eslint/visitor-keys@8.64.0":
-  version "8.64.0"
-  resolved "https://registry.yarnpkg.com/@typescript-eslint/visitor-keys/-/visitor-keys-8.64.0.tgz#7a08421d10e54960733352cd7c95fab1784e8473"
-  integrity sha512-mrtuL8Nsn6gi2H4mo5KMTp823M+3Q19Ew/i+Zlikq20tIMm99C3Ez0dCmkWWnxut20esQvTg8aUSEhMcAOXhEw==
-  dependencies:
-    "@typescript-eslint/types" "8.64.0"
-    eslint-visitor-keys "^5.0.0"
-
 "@typescript/typescript-aix-ppc64@7.0.2":
   version "7.0.2"
   resolved "https://registry.yarnpkg.com/@typescript/typescript-aix-ppc64/-/typescript-aix-ppc64-7.0.2.tgz#cdc7ce81d60f1e09034960ddfb1fb880d7a776b6"
@@ -15019,8 +15008,7 @@
   resolved "https://registry.yarnpkg.com/@typescript/typescript-win32-x64/-/typescript-win32-x64-7.0.2.tgz#cf3b7b0d6ce5635daca4c8e01c189cdcde47ec3c"
   integrity sha512-0BQ3HkAHHlKLSp1qRvf3SUhGpGsDuhB/jgFw75guyqbxJqEaS0Cw/VFO8i2nHglJUzQCRtMMR/IBAKE3ETMC4g==
 
-"@ungap/structured-clone@^1.0.0", "@ungap/structured-clone@^1.2.0":
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
+"@ungap/structured-clone@^1.2.0":
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/@ungap/structured-clone/-/structured-clone-1.2.0.tgz#756641adb587851b5ccb3e095daf27ae581c8406"
   integrity sha512-zuVdFrMJiuCDQUMCzQaD6KL28MjnqqN8XnAqiEq9PNm/hCPTSGfrXCOfwj1ow4LFb/tNymJPwsNbVePc1xFqrQ==
