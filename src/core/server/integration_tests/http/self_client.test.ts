@@ -155,6 +155,32 @@ const startServer = async (serverConfig: TestHttpConfig = { port: TEST_PORT }) =
 
   router.get(
     {
+      path: '/self/call_form_data',
+      security: routeSecurity,
+      validate: false,
+    },
+    async (_context, req, res) => {
+      const form = new FormData();
+      form.append('message', 'hello');
+      const response = await started.httpStart!.selfClient.asScoped(req).fetch<{ message: string }>(
+        '/self/form_target',
+        { method: 'POST', rawBody: form }
+      );
+      return res.ok({ body: response });
+    }
+  );
+
+  router.post(
+    {
+      path: '/self/form_target',
+      security: routeSecurity,
+      validate: false,
+    },
+    (_context, req, res) => res.ok({ body: req.body })
+  );
+
+  router.get(
+    {
       path: '/self/authz_denied',
       security: routeSecurity,
       validate: false,
@@ -391,6 +417,11 @@ describe('Http self client', () => {
       const response = await supertest.get('/self/recursive/2').expect(200);
 
       expect(response.body.error).toContain('a self call cannot issue another self call');
+    });
+
+    it('sends a buffered FormData self-call with its multipart boundary', async () => {
+      const response = await supertest.get('/self/call_form_data').expect(200);
+      expect(response.body).toEqual({ message: 'hello' });
     });
 
     it('does not follow redirects', async () => {

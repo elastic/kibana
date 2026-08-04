@@ -55,6 +55,8 @@ export class CallKibanaApiResponseTooLargeError extends Error {
  * Public input for `callKibanaApi`. Kept intentionally minimal: the transport (Core's HTTP
  * self client) is an implementation detail the caller-visible API does not expose.
  */
+export type BufferedRawBody = FormData | Blob | URLSearchParams | ArrayBuffer | ArrayBufferView;
+
 export interface CallKibanaApiParams {
   method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
   /**
@@ -65,7 +67,7 @@ export interface CallKibanaApiParams {
   path: string;
   body?: unknown;
   /** Buffered non-JSON body, mutually exclusive with `body` (used for FormData uploads). */
-  rawBody?: BodyInit | null;
+  rawBody?: BufferedRawBody | null;
   query?: Record<string, string | number | boolean | undefined>;
   /**
    * Caller-supplied headers. Cross-cutting headers (Authorization, x-elastic-internal-origin-request,
@@ -110,7 +112,6 @@ export interface CallKibanaApiDeps {
  */
 const RESERVED_HEADER_NAMES = new Set([
   'authorization',
-  'content-type',
   'kbn-xsrf',
   UIAM_INTERNAL_CALLER_ATTESTATION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST.toLowerCase(),
@@ -121,11 +122,13 @@ const RESERVED_HEADER_NAMES = new Set([
 ]);
 
 const stripReservedHeaders = (
-  headers: Record<string, string> | undefined
+  headers: Record<string, string> | undefined,
+  isRawBody: boolean
 ): Record<string, string> => {
   if (!headers) return {};
   const out: Record<string, string> = {};
   for (const [name, value] of Object.entries(headers)) {
+    if (name.toLowerCase() === 'content-type' && isRawBody) continue;
     if (!RESERVED_HEADER_NAMES.has(name.toLowerCase())) {
       out[name] = value;
     }
@@ -232,7 +235,7 @@ export async function callKibanaApi<T = unknown>(
   // (reserved ones stripped) plus the engine's event-chain propagation. Authorization, Content-Type,
   // x-elastic-internal-origin, and kbn-version/xsrf are set by the self client itself.
   const outboundHeaders: Record<string, string> = {
-    ...stripReservedHeaders(params.headers),
+    ...stripReservedHeaders(params.headers, params.rawBody !== undefined),
     ...getOutboundEventChainHeaders(fakeRequest, workflowRunId),
     ...getInternalUiamCallerAttestationHeaders(coreStart, fakeRequest),
   };

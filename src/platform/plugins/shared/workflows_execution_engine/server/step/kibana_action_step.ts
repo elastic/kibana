@@ -11,7 +11,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { buildKibanaRequest, KibanaHttpMethods } from '@kbn/workflows';
-import { CallKibanaApiResponseTooLargeError } from '../lib/call_kibana_api';
+import {
+  CallKibanaApiResponseTooLargeError,
+  type BufferedRawBody,
+} from '../lib/call_kibana_api';
 import type { KibanaGraphNode } from '@kbn/workflows/graph/types';
 import { ResponseSizeLimitError } from './errors';
 import type { BaseStep, RunStepResult } from './node_implementation';
@@ -119,7 +122,7 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep>
       method: string;
       path: string;
       body?: unknown;
-      rawBody?: BodyInit;
+      rawBody?: BufferedRawBody;
       query?: Record<string, string | number | boolean | undefined>;
       headers?: Record<string, string>;
     };

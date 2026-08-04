@@ -171,6 +171,13 @@ class InternalHttpSelfScopedClient implements HttpSelfScopedClient {
     if (options.body !== undefined && options.rawBody !== undefined) {
       throw new Error('Invalid self HTTP options, body and rawBody are mutually exclusive.');
     }
+    if (
+      options.rawBody !== undefined &&
+      options.rawBody !== null &&
+      !isBufferedRawBody(options.rawBody)
+    ) {
+      throw new Error('Invalid self HTTP rawBody, only buffered body types are supported.');
+    }
     const body = options.rawBody !== undefined ? options.rawBody : serializeBody(headers, options.body);
 
     return new Request(url, {
@@ -182,7 +189,11 @@ class InternalHttpSelfScopedClient implements HttpSelfScopedClient {
 
   private createUrl<TRequestBody>(path: string, options: HttpSelfFetchOptions<TRequestBody>): URL {
     const baseUrl = this.getBaseUrl();
-    const pathname = options.prependBasePath === false ? path : `${this.request.basePath}${path}`;
+    const requestBasePath =
+      this.request.basePath || (options.prependBasePath === false ? this.params.basePath.serverBasePath : '');
+    const pathname = options.prependBasePath === false
+      ? `${requestBasePath}${path}`
+      : `${this.request.basePath}${path}`;
     const url = new URL(pathname, baseUrl);
 
     if (url.origin !== baseUrl.origin) {
@@ -374,6 +385,13 @@ const addHeaders = (
     }
   }
 };
+
+const isBufferedRawBody = (body: unknown): boolean =>
+  body instanceof FormData ||
+  body instanceof Blob ||
+  body instanceof URLSearchParams ||
+  body instanceof ArrayBuffer ||
+  ArrayBuffer.isView(body);
 
 const serializeBody = <TRequestBody>(
   headers: Headers,

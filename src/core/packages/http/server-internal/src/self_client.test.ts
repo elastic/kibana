@@ -108,6 +108,29 @@ describe('InternalHttpSelfScopedClient', () => {
     jest.clearAllMocks();
   });
 
+  it('preserves server base path when prependBasePath is false on an empty fake request base path', async () => {
+    const { self } = createClient({ publicBaseUrl: 'https://kibana.example.com/base' });
+    await self.asScoped(createFakeRequest()).fetch('/api/status', { prependBasePath: false });
+    const request = (global.fetch as jest.Mock).mock.calls[0][0] as Request;
+    expect(request.url).toBe('https://kibana.example.com/base/api/status');
+  });
+
+  it('supports buffered raw bodies and rejects streams', async () => {
+    const { self } = createClient();
+    await self.asScoped(createRequest()).fetch('/api/upload', {
+      method: 'POST',
+      rawBody: new URLSearchParams({ value: 'one' }),
+    });
+    const request = (global.fetch as jest.Mock).mock.calls[0][0] as Request;
+    expect(request.headers.get('content-type')).toContain('application/x-www-form-urlencoded');
+    await expect(
+      self.asScoped(createRequest()).fetch('/api/upload', {
+        method: 'POST',
+        rawBody: new ReadableStream(),
+      } as any)
+    ).rejects.toThrow();
+  });
+
   it('calls publicBaseUrl with request base path, query, auth headers, and self markers', async () => {
     const { authRequestHeaders, self } = createClient();
     const setTimeoutSpy = jest.spyOn(global, 'setTimeout');
