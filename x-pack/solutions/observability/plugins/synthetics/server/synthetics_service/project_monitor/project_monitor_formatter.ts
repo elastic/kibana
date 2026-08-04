@@ -112,8 +112,14 @@ export class ProjectMonitorFormatter {
       excludeAgentPolicies: true,
     });
     const existingMonitorsPromise = this.getProjectMonitorsForProject();
-    const maintenanceWindowsPromise =
-      this.syntheticsMonitorClient.syntheticsService.getMaintenanceWindows(this.spaceId);
+    // Only fetch maintenance windows when a monitor actually references one, so
+    // pushes that don't use them avoid the extra alerting lookup.
+    const needsMaintenanceWindows = this.monitors.some(
+      (monitor) => (monitor.maintenanceWindows?.length ?? 0) > 0
+    );
+    const maintenanceWindowsPromise = needsMaintenanceWindows
+      ? this.syntheticsMonitorClient.syntheticsService.getMaintenanceWindows(this.spaceId)
+      : Promise.resolve([]);
 
     const [locations, existingMonitors, maintenanceWindows] = await Promise.all([
       locationsPromise,
