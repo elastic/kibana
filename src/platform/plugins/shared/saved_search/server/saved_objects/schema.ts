@@ -161,8 +161,14 @@ export const SCHEMA_DISCOVER_SESSION_V13 = schema.object({
 });
 
 const SCHEMA_TAB_ATTRIBUTES_V14 = SCHEMA_TAB_ATTRIBUTES_V13.extends({
+  // Keys are profile state definition keys and their field names (short
+  // camelCase identifiers from Discover's `ProfileStateRegistry`), so bound
+  // them to keep arbitrary input out of the record keys.
   profileState: schema.maybe(
-    schema.recordOf(schema.string(), schema.recordOf(schema.string(), schema.any()))
+    schema.recordOf(
+      schema.string({ maxLength: 128 }),
+      schema.recordOf(schema.string({ maxLength: 128 }), schema.any())
+    )
   ),
 });
 
