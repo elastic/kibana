@@ -94,7 +94,9 @@ describe('PUT /api/entity_analytics/monitoring/entity_source/{id} - updateMonito
 
     expect(response.status).toEqual(200);
     expect(mockValidateIndexPermissions).toHaveBeenCalledWith(expect.anything(), 'logs-*');
-    expect(mockUpdate).toHaveBeenCalledWith(expect.objectContaining({ id: 'es-1', indexPattern: 'logs-*' }));
+    expect(mockUpdate).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'es-1', indexPattern: 'logs-*' })
+    );
   });
 
   it('does not validate index permissions when no indexPattern is provided', async () => {
