@@ -6,17 +6,19 @@
  */
 
 import React from 'react';
-import { act, render, screen } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
+
+import { stubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 
 import { Filters } from './filters';
-import { useCreateDataView } from '../../../../../../common/hooks/use_create_data_view';
+import { useDataView } from '../../../../../../data_view_manager/hooks/use_data_view';
 import { TestProviders } from '../../../../../../common/mock';
 import { useIsExperimentalFeatureEnabled } from '../../../../../../common/hooks/use_experimental_features';
 
-jest.mock('../../../../../../common/hooks/use_create_data_view');
+jest.mock('../../../../../../data_view_manager/hooks/use_data_view');
 jest.mock('../../../../../../common/hooks/use_experimental_features');
 
-const mockUseCreateDataView = useCreateDataView as jest.MockedFunction<typeof useCreateDataView>;
+const mockUseDataView = useDataView as jest.MockedFunction<typeof useDataView>;
 
 const renderComponent = async () => {
   await act(() => {
@@ -32,20 +34,15 @@ const renderComponent = async () => {
   });
 };
 
-// FLAKY: https://github.com/elastic/kibana/issues/238898
-// FLAKY: https://github.com/elastic/kibana/issues/238897
-describe.skip('Filters', () => {
+describe('Filters', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
     (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
-    mockUseCreateDataView.mockReturnValue({
-      dataView: {
-        getIndexPattern: () => 'logstash-*',
-        fields: [{ name: '_type' }],
-      },
-      loading: false,
-    } as unknown as jest.Mocked<ReturnType<typeof useCreateDataView>>);
+    mockUseDataView.mockReturnValue({
+      dataView: stubDataView,
+      status: 'ready',
+    } as unknown as ReturnType<typeof useDataView>);
   });
 
   it('should render filters component', async () => {
@@ -57,6 +54,8 @@ describe.skip('Filters', () => {
   it('should render correct filter', async () => {
     await renderComponent();
 
-    expect(screen.getByTestId('filters')).toHaveTextContent('_type: exists');
+    await waitFor(() => {
+      expect(screen.getByTestId('filters')).toHaveTextContent('_type: exists');
+    });
   });
 });
