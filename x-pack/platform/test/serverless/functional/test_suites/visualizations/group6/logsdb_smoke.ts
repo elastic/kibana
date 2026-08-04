@@ -25,6 +25,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   ]);
   const testSubjects = getService('testSubjects');
   const find = getService('find');
+  const browser = getService('browser');
   const kibanaServer = getService('kibanaServer');
   const es = getService('es');
   const log = getService('log');
@@ -76,6 +77,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('smoke testing functions support', () => {
       before(async () => {
         await common.navigateToApp('lens');
+        // The data view was created via the API after the browser session (and its
+        // in-memory data views cache) was already warmed by login, and the SPA
+        // navigation above never refetches it — so the switcher can open with a
+        // stale list that omits the new data view. Reload to rebuild the cache
+        // from the server before switching.
+        await browser.refresh();
+        await header.waitUntilLoadingHasFinished();
         await lens.switchDataPanelIndexPattern(logsdbDataView);
         await lens.goToTimeRange();
       });
