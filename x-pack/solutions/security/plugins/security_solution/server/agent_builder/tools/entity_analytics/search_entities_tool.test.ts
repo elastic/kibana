@@ -1204,7 +1204,7 @@ describe('searchEntitiesTool', () => {
 
       // FROM includes both entity index and snapshot index
       expect(query).toContain('entities-latest-default');
-      expect(query).toContain('.entities.v2.history.default*');
+      expect(query).toContain('.entities.v2.history.default.*');
 
       // Risk score IS NOT NULL and timestamp range filters
       expect(query).toContain('WHERE entity.risk.calculated_score_norm IS NOT NULL');

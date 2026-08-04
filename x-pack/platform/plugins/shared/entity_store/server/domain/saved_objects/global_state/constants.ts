@@ -22,33 +22,33 @@ export const LOG_EXTRACTION_MAX_TIME_WINDOW_SIZE_DEFAULT = '15m';
 export const LOG_EXTRACTION_MAX_LOGS_PER_WINDOW_DEFAULT = 100_000;
 export const LOG_EXTRACTION_CAP_BEHAVIOR_DEFAULT = 'drop' as const;
 
+/** Bounds for HTTP/SO string fields to prevent unbounded-input DoS. */
+export const MAX_DURATION_STRING_LENGTH = 32;
+export const MAX_INDEX_PATTERN_LENGTH = 2048;
+export const MAX_INDEX_PATTERNS = 1000;
+export const MAX_ERROR_MESSAGE_LENGTH = 2048;
+export const MAX_TIMESTAMP_STRING_LENGTH = 64;
+
+const durationString = z
+  .string()
+  .max(MAX_DURATION_STRING_LENGTH)
+  .regex(/[smdh]$/);
+
+const indexPatternString = z.string().max(MAX_INDEX_PATTERN_LENGTH);
+const indexPatternsArray = z.array(indexPatternString).max(MAX_INDEX_PATTERNS);
+
 export type LogExtractionConfig = z.infer<typeof LogExtractionConfig>;
 export const LogExtractionConfig = z.object({
-  additionalIndexPatterns: z.array(z.string()).default([]),
-  excludedIndexPatterns: z.array(z.string()).default([]),
+  additionalIndexPatterns: indexPatternsArray.default([]),
+  excludedIndexPatterns: indexPatternsArray.default([]),
   fieldHistoryLength: z.number().int().default(10),
-  lookbackPeriod: z
-    .string()
-    .regex(/[smdh]$/)
-    .default(LOG_EXTRACTION_LOOKBACK_PERIOD_DEFAULT),
-  delay: z
-    .string()
-    .regex(/[smdh]$/)
-    .default(LOG_EXTRACTION_DELAY_DEFAULT),
+  lookbackPeriod: durationString.default(LOG_EXTRACTION_LOOKBACK_PERIOD_DEFAULT),
+  delay: durationString.default(LOG_EXTRACTION_DELAY_DEFAULT),
   docsLimit: z.number().int().min(1).default(LOG_EXTRACTION_DOCS_LIMIT_DEFAULT),
   maxLogsPerPage: z.number().int().min(1).default(LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT),
-  timeout: z
-    .string()
-    .regex(/[smdh]$/)
-    .default(LOG_EXTRACTION_TIMEOUT_DEFAULT),
-  frequency: z
-    .string()
-    .regex(/[smdh]$/)
-    .default(LOG_EXTRACTION_FREQUENCY_DEFAULT),
-  maxTimeWindowSize: z
-    .string()
-    .regex(/[smdh]$/)
-    .default(LOG_EXTRACTION_MAX_TIME_WINDOW_SIZE_DEFAULT),
+  timeout: durationString.default(LOG_EXTRACTION_TIMEOUT_DEFAULT),
+  frequency: durationString.default(LOG_EXTRACTION_FREQUENCY_DEFAULT),
+  maxTimeWindowSize: durationString.default(LOG_EXTRACTION_MAX_TIME_WINDOW_SIZE_DEFAULT),
   maxLogsPerWindow: z.number().int().min(0).default(LOG_EXTRACTION_MAX_LOGS_PER_WINDOW_DEFAULT),
   maxLogsPerWindowCapBehavior: z
     .enum(['defer', 'drop'])
@@ -61,15 +61,12 @@ export const HistorySnapshotStatus = z.enum(['started', 'stopped']);
 export type HistorySnapshotState = z.infer<typeof HistorySnapshotState>;
 export const HistorySnapshotState = z.object({
   status: HistorySnapshotStatus.default('started'),
-  frequency: z
-    .string()
-    .regex(/[smdh]$/)
-    .default(DEFAULT_HISTORY_SNAPSHOT_FREQUENCY),
-  lastExecutionTimestamp: z.string().optional(),
+  frequency: durationString.default(DEFAULT_HISTORY_SNAPSHOT_FREQUENCY),
+  lastExecutionTimestamp: z.string().max(MAX_TIMESTAMP_STRING_LENGTH).optional(),
   lastError: z
     .object({
-      message: z.string(),
-      timestamp: z.string().optional(),
+      message: z.string().max(MAX_ERROR_MESSAGE_LENGTH),
+      timestamp: z.string().max(MAX_TIMESTAMP_STRING_LENGTH).optional(),
     })
     .optional(),
 });

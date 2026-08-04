@@ -6,7 +6,7 @@
  */
 
 import type { AuthzEnabled } from '@kbn/core/server';
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 import { HistorySnapshotState, LogExtractionConfig } from '../domain/saved_objects';
 
 export const DEFAULT_ENTITY_STORE_PERMISSIONS: AuthzEnabled = {
@@ -42,33 +42,12 @@ export const LogExtractionInstallParams = LogExtractionConfig.pick({
   maxLogsPerWindowCapBehavior: true,
 }).partial();
 
-export type LogExtractionUpdateParams = z.infer<typeof LogExtractionUpdateParams>;
-
-export const LogExtractionUpdateParams = z.object({
-  fieldHistoryLength: z.number().int().optional(),
-  additionalIndexPatterns: z.array(z.string()).optional(),
-  excludedIndexPatterns: z.array(z.string()).optional(),
-  lookbackPeriod: z
-    .string()
-    .regex(/[smdh]$/)
-    .optional(),
-  frequency: z
-    .string()
-    .regex(/[smdh]$/)
-    .optional(),
-  delay: z
-    .string()
-    .regex(/[smdh]$/)
-    .optional(),
-  docsLimit: z.number().int().min(1).optional(),
-  maxLogsPerPage: z.number().int().min(1).optional(),
-  maxTimeWindowSize: z
-    .string()
-    .regex(/[smdh]$/)
-    .optional(),
-  maxLogsPerWindow: z.number().int().min(0).optional(),
-  maxLogsPerWindowCapBehavior: z.enum(['defer', 'drop']).optional(),
-});
+/**
+ * Update body uses the same bounded fields as install (all optional). Defined via the shared
+ * LogExtractionConfig pick so route validation stays in sync with SO/config limits.
+ */
+export type LogExtractionUpdateParams = LogExtractionInstallParams;
+export const LogExtractionUpdateParams = LogExtractionInstallParams;
 
 export type LogExtractionBodyParams = LogExtractionInstallParams | LogExtractionUpdateParams;
 
