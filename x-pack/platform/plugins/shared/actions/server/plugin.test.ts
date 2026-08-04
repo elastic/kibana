@@ -39,6 +39,7 @@ import {
 import { cloudMock } from '@kbn/cloud-plugin/server/mocks';
 import { getConnectorType } from './fixtures';
 import { USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE } from './constants/saved_objects';
+import { LeasePool } from './lib';
 
 function getConfig(overrides = {}) {
   return {
@@ -171,6 +172,14 @@ describe('Actions Plugin', () => {
       expect(pluginsSetup.encryptedSavedObjects.registerType).toHaveBeenCalledWith(
         expect.objectContaining({ type: USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE })
       );
+    });
+
+    it('should expose the same client lease pool before start', async () => {
+      const setupContract = await plugin.setup(coreSetup, pluginsSetup);
+
+      const clientLeasePool = setupContract.getClientLeasePool();
+      expect(clientLeasePool).toBeInstanceOf(LeasePool);
+      expect(setupContract.getClientLeasePool()).toBe(clientLeasePool);
     });
 
     describe('routeHandlerContext.getActionsClient()', () => {

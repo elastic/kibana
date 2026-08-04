@@ -46,12 +46,9 @@ export type {
   ClientTypeSpec,
   BuildContext,
   ConnectorNetwork,
+  ConnectorResponseSettings,
   CredentialAccessor,
   ClientRegistry,
   ClientTypeId,
   ClientTypeSpecs,
-  FetchLike,
-  ConfiguredFetchResource,
-  ConfiguredFetchOptions,
-  ConfiguredFetchFactory,
 } from './src/lib/clients';

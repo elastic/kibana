@@ -64,7 +64,15 @@ describe('generateExecutorFunction', () => {
     mockGetCredential = jest.fn().mockReturnValue(mockCredential);
     mockHandler = jest.fn().mockResolvedValue({ result: 'ok' });
     fakeLeasePool = new LeasePool<unknown>();
-    mockNetwork = { ensureUriAllowed: jest.fn(), ensureHostnameAllowed: jest.fn() };
+    mockNetwork = {
+      ensureUriAllowed: jest.fn(),
+      ensureHostnameAllowed: jest.fn(),
+      getSslSettings: jest.fn(),
+      getProxySettings: jest.fn(),
+      getCustomHostSettings: jest.fn(),
+      getResponseSettings: jest.fn(),
+      getUserAgent: jest.fn(),
+    };
   });
 
   const makeActions = (handler: jest.Mock = mockHandler): ConnectorSpec['actions'] => ({
@@ -228,6 +236,7 @@ describe('generateExecutorFunction', () => {
       await executor(makeExecOptions({ subAction: 'testAction', subActionParams: {} }));
 
       expect(buildSpy).toHaveBeenCalledWith(expect.objectContaining({ network: mockNetwork }));
+      expect(buildSpy.mock.calls[0][0]).not.toHaveProperty('axiosInstance');
     });
 
     it('passes credential to clientType.build from getCredential', async () => {
@@ -279,7 +288,7 @@ describe('generateExecutorFunction', () => {
   });
 
   describe('ctx.getClient — lease receives clientType.terminate as 3rd arg', () => {
-    it('passes clientType.terminate to pool.lease', async () => {
+    it('passes a clientType termination callback to pool.lease', async () => {
       const terminateSpy = jest.fn().mockResolvedValue(undefined);
       const fakeClient = { id: 'x' };
       const fakeClientType = {
@@ -310,7 +319,51 @@ describe('generateExecutorFunction', () => {
 
       await executor(makeExecOptions({ subAction: 'testAction', subActionParams: {} }));
 
-      expect(leaseSpy).toHaveBeenCalledWith(expect.any(String), expect.any(Function), terminateSpy);
+      expect(leaseSpy).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.any(Function),
+        expect.any(Function)
+      );
+    });
+
+    it('calls terminate with the client type instance as its receiver', async () => {
+      const fakeClient = { id: 'x' };
+      class StatefulClientType {
+        public readonly id = 'mcp';
+        public readonly terminated: unknown[] = [];
+
+        public async build(): Promise<unknown> {
+          return fakeClient;
+        }
+
+        public async terminate(client: unknown): Promise<void> {
+          this.terminated.push(client);
+        }
+      }
+      const fakeClientType = new StatefulClientType();
+
+      const executor = generateExecutorFunction({
+        actions: {
+          testAction: {
+            isTool: true,
+            input: {} as never,
+            handler: jest.fn(async (ctx: ActionContext) => {
+              await (ctx.getClient as unknown as (id: string) => Promise<unknown>)('mcp');
+              return {};
+            }),
+          },
+        },
+        getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        getCredential: mockGetCredential,
+        getClientLeasePool: () => fakeLeasePool,
+        network: mockNetwork,
+        clientTypes: { mcp: fakeClientType },
+      });
+
+      await executor(makeExecOptions({ subAction: 'testAction', subActionParams: {} }));
+      await fakeLeasePool.evict(connectorId);
+
+      expect(fakeClientType.terminated).toEqual([fakeClient]);
     });
   });
 
@@ -549,7 +602,7 @@ describe('generateExecutorFunction', () => {
           );
         },
       } as unknown as ActionsConfigurationUtilities;
-      const network = createConnectorNetwork(denyingConfigUtils);
+      const network = createConnectorNetwork(denyingConfigUtils, jest.fn());
 
       const fakeClientType = {
         id: 'mcp',

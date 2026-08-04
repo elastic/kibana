@@ -13,15 +13,9 @@ export type {
   ClientTypeSpec,
   BuildContext,
   ConnectorNetwork,
+  ConnectorResponseSettings,
   CredentialAccessor,
 } from './client_type_spec';
-
-export type {
-  FetchLike,
-  ConfiguredFetchResource,
-  ConfiguredFetchOptions,
-  ConfiguredFetchFactory,
-} from './configured_fetch_types';
 
 // No client types are registered yet. `ClientTypeId` resolves to `never`
 // until a client type is added to `ClientRegistry`.

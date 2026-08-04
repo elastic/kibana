@@ -27,7 +27,8 @@ const toAllowlistDeniedError = (err: unknown): never => {
 };
 
 export const createConnectorNetwork = (
-  configUtils: ActionsConfigurationUtilities
+  configUtils: ActionsConfigurationUtilities,
+  getUserAgent: () => string
 ): ConnectorNetwork => ({
   ensureUriAllowed: (url) => {
     try {
@@ -43,4 +44,9 @@ export const createConnectorNetwork = (
       toAllowlistDeniedError(err);
     }
   },
+  getSslSettings: () => configUtils.getSSLSettings(),
+  getProxySettings: () => configUtils.getProxySettings(),
+  getCustomHostSettings: (url) => configUtils.getCustomHostSettings(url),
+  getResponseSettings: () => configUtils.getResponseSettings(),
+  getUserAgent,
 });

@@ -126,7 +126,11 @@ import { ConnectorUsageReportingTask } from './usage/connector_usage_reporting_t
 import { ConnectorRateLimiter } from './lib/connector_rate_limiter';
 import { OAuthRateLimiter } from './lib/oauth_rate_limiter';
 import type { GetAxiosInstanceWithAuthFnOpts, GetCredentialFnOpts } from './lib/get_axios_instance';
-import { getAxiosInstanceWithAuth, getCredentialWithAuth } from './lib/get_axios_instance';
+import {
+  buildUserAgent,
+  getAxiosInstanceWithAuth,
+  getCredentialWithAuth,
+} from './lib/get_axios_instance';
 import { RelayClient, type RelayClientContract } from './lib/relay';
 
 export interface PluginSetupContract {
@@ -150,7 +154,10 @@ export interface PluginSetupContract {
 
   getCredential(opts: GetCredentialFnOpts): CredentialAccessor;
 
-  /** PoC: process-wide pool for reusable connector clients (MCP, future DB/gRPC). */
+  /**
+   * Process-wide pool for reusable, long-lived connector clients. Empty until a client
+   * type is registered.
+   */
   getClientLeasePool(): LeasePool<unknown>;
 
   isPreconfiguredConnector(connectorId: string): boolean;
@@ -164,6 +171,7 @@ export interface PluginSetupContract {
   >;
   getActionsHealth: () => { hasPermanentEncryptionKey: boolean };
   getActionsConfigurationUtilities: () => ActionsConfigurationUtilities;
+  getUserAgent(): string;
   getRelayClient: () => RelayClientContract | undefined;
   setEnabledConnectorTypes: (connectorTypes: EnabledConnectorTypes) => void;
 
@@ -287,13 +295,14 @@ export class ActionsPlugin
   private connectorUsageReportingTask: ConnectorUsageReportingTask | undefined;
   private connectorLifecycleListeners: ConnectorLifecycleListener[] = [];
   private skippedPreconfiguredConnectorIds: Set<string> = new Set();
-  // PoC: process-wide pool. Warm MCP/DB sessions must outlive a single action; the plugin
-  // instance is the owner (ActionContext dies when the action returns).
-  private clientLeasePool?: LeasePool<unknown>;
+  // Process-wide: a warm client must outlive a single action, and the per-action context is
+  // discarded when the action returns, so the plugin instance owns the pool.
+  private readonly clientLeasePool: LeasePool<unknown>;
   private relayClient?: RelayClientContract;
 
   constructor(initContext: PluginInitializerContext) {
     this.logger = initContext.logger.get();
+    this.clientLeasePool = new LeasePool<unknown>(this.logger);
     this.actionsConfig = getValidatedConfig(
       this.logger,
       resolveCustomHosts(this.logger, initContext.config.get<ActionsConfig>())
@@ -509,7 +518,8 @@ export class ActionsPlugin
         plugins.cloud
       ),
       getCredential: this.getCredentialHelper(actionsConfigUtils),
-      getClientLeasePool: () => this.clientLeasePool!,
+      getClientLeasePool: () => this.clientLeasePool,
+      getUserAgent: () => buildUserAgent(plugins.cloud),
       isPreconfiguredConnector: (connectorId: string): boolean => {
         return !!this.inMemoryConnectors.find(
           (inMemoryConnector) =>
@@ -549,8 +559,6 @@ export class ActionsPlugin
   }
 
   public start(core: CoreStart, plugins: ActionsPluginsStart): PluginStartContract {
-    this.clientLeasePool = new LeasePool<unknown>(this.logger);
-
     const {
       logger,
       licenseState,
@@ -632,7 +640,7 @@ export class ActionsPlugin
         connectorLifecycleListeners: this.connectorLifecycleListeners,
         getCurrentUserProfileId,
         evictClientPool: async (connectorId: string) => {
-          await this.clientLeasePool?.evict(connectorId);
+          await this.clientLeasePool.evict(connectorId);
         },
       });
     };
@@ -1016,7 +1024,7 @@ export class ActionsPlugin
     } = this;
     const getSkippedPreconfiguredIds = () => this.skippedPreconfiguredConnectorIds;
     const evictClientPool = async (connectorId: string): Promise<void> => {
-      await this.clientLeasePool?.evict(connectorId);
+      await this.clientLeasePool.evict(connectorId);
     };
 
     return async function actionsRouteHandlerContext(context, request) {
@@ -1148,7 +1156,7 @@ export class ActionsPlugin
       return false;
     }
     this.inMemoryConnectors.splice(index, 1);
-    void this.clientLeasePool?.evict(connectorId);
+    void this.clientLeasePool.evict(connectorId);
     this.logger.info(`Unregistered dynamic connector with id ${connectorId}`);
     return true;
   };
@@ -1157,7 +1165,7 @@ export class ActionsPlugin
     if (this.licenseState) {
       this.licenseState.clean();
     }
-    this.clientLeasePool?.stop();
+    this.clientLeasePool.stop();
   }
 }
 

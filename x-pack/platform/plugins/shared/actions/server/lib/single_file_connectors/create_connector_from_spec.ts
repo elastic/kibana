@@ -51,7 +51,7 @@ export const createConnectorTypeFromSpec = (
   actions: ActionsPluginSetupContract
 ): ActionType<ActionTypeConfig, ActionTypeSecrets, ActionTypeParams, unknown> => {
   const configUtils = actions.getActionsConfigurationUtilities();
-  const network = createConnectorNetwork(configUtils);
+  const network = createConnectorNetwork(configUtils, actions.getUserAgent);
 
   const hasTest = Boolean(spec.test?.enabled);
   const hasActions = Boolean(spec.actions);

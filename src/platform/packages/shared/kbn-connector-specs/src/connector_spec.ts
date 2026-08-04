@@ -237,8 +237,9 @@ export interface ActionContext {
    * async, side-effecting operation, so this is an explicit call (not a property)
    * and only the client types a handler actually asks for are ever built.
    *
-   * PoC: replaces per-handler `withMcpClient` connect/disconnect; lifetime is governed
-   * by LeasePool on the actions plugin, not the action stack frame.
+   * Lifetime is governed by the actions plugin's client lease pool, not by the action
+   * stack frame. No client types are registered yet, so `ClientTypeId` currently
+   * resolves to `never`.
    */
   getClient: <K extends ClientTypeId>(id: K) => Promise<ClientRegistry[K]>;
   config?: Record<string, unknown>;

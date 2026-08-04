@@ -179,8 +179,8 @@ export const generateExecutorFunction = ({
             profileUid,
             connectorVersion,
           }),
-          () => clientType.build({ logger, axiosInstance, config, network, credential }),
-          clientType.terminate
+          () => clientType.build({ logger, config, network, credential }),
+          (client) => clientType.terminate(client)
         );
       } catch (err) {
         const isUser = isClientUserError(err, clientType);
