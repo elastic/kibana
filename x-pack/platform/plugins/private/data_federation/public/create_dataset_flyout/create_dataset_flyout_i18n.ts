@@ -481,4 +481,147 @@ export const createDatasetFlyoutStrings = {
     i18n.translate('xpack.dataFederation.createDatasetFlyout.saveButton', {
       defaultMessage: 'Save',
     }),
+
+  settingsPresetCustom: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsPresetCustom', {
+      defaultMessage: 'Custom value',
+    }),
+
+  settingsPresetCustomPlaceholder: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsPresetCustomPlaceholder', {
+      defaultMessage: 'Enter a custom value',
+    }),
+
+  settingsFormatCsvDescription: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsFormatCsvDescription', {
+      defaultMessage: 'Comma-separated values with a header row.',
+    }),
+
+  settingsFormatTsvDescription: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsFormatTsvDescription', {
+      defaultMessage: 'Tab-separated values with a header row.',
+    }),
+
+  settingsFormatNdjsonDescription: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsFormatNdjsonDescription', {
+      defaultMessage: 'Newline-delimited JSON objects, one per line.',
+    }),
+
+  settingsFormatParquetDescription: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsFormatParquetDescription', {
+      defaultMessage: 'Columnar storage format optimized for analytics.',
+    }),
+
+  settingsFormatOrcDescription: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsFormatOrcDescription', {
+      defaultMessage: 'Optimized Row Columnar format for Hive workloads.',
+    }),
+
+  settingsSegmentSizeLabel: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsSegmentSizeLabel', {
+      defaultMessage: 'Segment size',
+    }),
+
+  settingsSegmentSizeHelp: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsSegmentSizeHelp', {
+      defaultMessage: 'Target size for NDJSON read segments.',
+    }),
+
+  settingsOptimizedReaderLabel: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsOptimizedReaderLabel', {
+      defaultMessage: 'Optimized reader',
+    }),
+
+  settingsOptimizedReaderHelp: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsOptimizedReaderHelp', {
+      defaultMessage: 'Use the optimized Parquet reader when supported.',
+    }),
+
+  settingsLateMaterializationLabel: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsLateMaterializationLabel', {
+      defaultMessage: 'Late materialization',
+    }),
+
+  settingsLateMaterializationHelp: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsLateMaterializationHelp', {
+      defaultMessage: 'Defer column materialization until values are read.',
+    }),
+
+  settingsPartitionDetectionAutoDescription: () =>
+    i18n.translate(
+      'xpack.dataFederation.createDatasetFlyout.settingsPartitionDetectionAutoDescription',
+      {
+        defaultMessage: 'Detect partitions automatically from the resource path.',
+      }
+    ),
+
+  settingsPartitionDetectionHiveDescription: () =>
+    i18n.translate(
+      'xpack.dataFederation.createDatasetFlyout.settingsPartitionDetectionHiveDescription',
+      {
+        defaultMessage: 'Use Hive-style partition directories (key=value).',
+      }
+    ),
+
+  settingsPartitionDetectionNoneDescription: () =>
+    i18n.translate(
+      'xpack.dataFederation.createDatasetFlyout.settingsPartitionDetectionNoneDescription',
+      {
+        defaultMessage: 'Do not infer partitions from the path.',
+      }
+    ),
+
+  settingsSchemaResolutionFirstFileWinsDescription: () =>
+    i18n.translate(
+      'xpack.dataFederation.createDatasetFlyout.settingsSchemaResolutionFirstFileWinsDescription',
+      {
+        defaultMessage: 'Use the schema from the first matching file.',
+      }
+    ),
+
+  settingsSchemaResolutionStrictDescription: () =>
+    i18n.translate(
+      'xpack.dataFederation.createDatasetFlyout.settingsSchemaResolutionStrictDescription',
+      {
+        defaultMessage: 'Require an identical schema across all files.',
+      }
+    ),
+
+  settingsSchemaResolutionUnionByNameDescription: () =>
+    i18n.translate(
+      'xpack.dataFederation.createDatasetFlyout.settingsSchemaResolutionUnionByNameDescription',
+      {
+        defaultMessage: 'Merge columns by name across files.',
+      }
+    ),
+
+  settingsErrorModeFailFastDescription: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsErrorModeFailFastDescription', {
+      defaultMessage: 'Stop reading as soon as an error is encountered.',
+    }),
+
+  settingsErrorModeSkipRowDescription: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsErrorModeSkipRowDescription', {
+      defaultMessage: 'Skip rows that cannot be parsed.',
+    }),
+
+  settingsErrorModeNullFieldDescription: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsErrorModeNullFieldDescription', {
+      defaultMessage: 'Set invalid fields to null and continue reading.',
+    }),
+
+  settingsModeQuotedDescription: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsModeQuotedDescription', {
+      defaultMessage: 'Fields may be wrapped in quote characters.',
+    }),
+
+  settingsModeEscapedDescription: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsModeEscapedDescription', {
+      defaultMessage: 'Special characters are escaped within fields.',
+    }),
+
+  settingsModePlainDescription: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsModePlainDescription', {
+      defaultMessage: 'Fields are read without quoting rules.',
+    }),
 };

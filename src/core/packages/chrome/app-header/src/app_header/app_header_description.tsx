@@ -23,13 +23,21 @@ export const AppHeaderDescription = React.memo<{
   const { euiTheme } = useEuiTheme();
   const text = typeof description === 'string' ? description : description.text;
   const learnMoreUrl = typeof description === 'string' ? undefined : description.learnMoreUrl;
+  const fullWidth = typeof description === 'string' ? false : description.fullWidth ?? false;
 
   return (
     <EuiText
       color="subdued"
       css={css`
-        max-inline-size: 80ch;
         padding-inline-start: ${euiTheme.size.xs};
+        ${fullWidth
+          ? css`
+              flex: 1 1 100%;
+              max-inline-size: 100%;
+            `
+          : css`
+              max-inline-size: 80ch;
+            `}
       `}
       size="xs"
     >

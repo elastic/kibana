@@ -10,7 +10,7 @@ import type { PluginConfigDescriptor } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 
 const configSchema = schema.object({
-  enabled: schema.boolean({ defaultValue: false }),
+  enabled: schema.boolean({ defaultValue: true }),
   enableFederatedIdentityAuth: schema.boolean({ defaultValue: false }),
   enableGoogleCloudStorageDataSourceType: schema.boolean({ defaultValue: false }),
   enableAzureDataSourceType: schema.boolean({ defaultValue: false }),

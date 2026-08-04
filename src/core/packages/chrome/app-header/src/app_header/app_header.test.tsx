@@ -434,6 +434,39 @@ describe('AppHeaderView', () => {
     });
   });
 
+  describe('description', () => {
+    it('renders a full-width description when fullWidth is true', () => {
+      renderAppHeader(
+        <AppHeaderView
+          title="Data federation"
+          description={{
+            text: 'Connect to external data sources.',
+            learnMoreUrl: 'https://www.elastic.co/docs',
+            fullWidth: true,
+          }}
+        />
+      );
+
+      const descriptionRow = screen.getByTestId(APP_HEADER_TEST_SUBJECTS.description);
+      expect(descriptionRow.firstElementChild).toHaveStyleRule('max-inline-size', '100%');
+    });
+
+    it('limits description width to 80ch by default', () => {
+      renderAppHeader(
+        <AppHeaderView
+          title="Data federation"
+          description={{
+            text: 'Connect to external data sources.',
+            learnMoreUrl: 'https://www.elastic.co/docs',
+          }}
+        />
+      );
+
+      const descriptionRow = screen.getByTestId(APP_HEADER_TEST_SUBJECTS.description);
+      expect(descriptionRow.firstElementChild).toHaveStyleRule('max-inline-size', '80ch');
+    });
+  });
+
   describe('bottom border', () => {
     it('renders a bottom border by default', () => {
       renderAppHeader(<AppHeaderView title="Dashboard" />);

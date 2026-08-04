@@ -16,6 +16,18 @@ import type { DataFederationKibanaServices } from './types';
 
 type MockDatasetsClient = Pick<DataFederationKibanaServices['datasetsClient'], 'add' | 'delete'>;
 
+const mockHistoryPush = jest.fn();
+
+jest.mock('react-router-dom', () => {
+  const actual = jest.requireActual('react-router-dom');
+  return {
+    ...actual,
+    useHistory: () => ({
+      push: mockHistoryPush,
+    }),
+  };
+});
+
 jest.mock('./datasets_table', () => ({
   DatasetsTable: (props: Record<string, unknown>) => {
     const filteredItems = (props.filteredItems as any[]) ?? [];
@@ -51,42 +63,6 @@ jest.mock('./datasets_table', () => ({
       </div>
     );
   },
-}));
-
-jest.mock('./create_dataset_flyout', () => ({
-  CreateDatasetFlyout: (props: {
-    onClose: () => void;
-    onSave: (dataSet: unknown, previousId?: string) => Promise<string | null>;
-  }) => (
-    <div data-test-subj="mockCreateDatasetFlyout">
-      <button data-test-subj="mockFlyoutClose" onClick={props.onClose} />
-      <button
-        data-test-subj="mockFlyoutSave"
-        onClick={() =>
-          void props.onSave({
-            name: 'my-dataset',
-            data_source: 'ds1',
-            resource: 'bucket/*',
-            description: '',
-          })
-        }
-      />
-      <button
-        data-test-subj="mockFlyoutSaveRename"
-        onClick={() =>
-          void props.onSave(
-            {
-              name: 'renamed-dataset',
-              data_source: 'ds1',
-              resource: 'bucket/*',
-              description: '',
-            },
-            'previous-dataset'
-          )
-        }
-      />
-    </div>
-  ),
 }));
 
 jest.mock('./confirm_delete_data_set_modal', () => ({
@@ -177,6 +153,10 @@ const renderComponent = async ({
 };
 
 describe('DatasetsTabContent', () => {
+  beforeEach(() => {
+    mockHistoryPush.mockClear();
+  });
+
   it('disables create when there are no data sources', async () => {
     await renderComponent({
       dataSources: [],
@@ -190,48 +170,17 @@ describe('DatasetsTabContent', () => {
     );
   });
 
-  it('reloads after flyout save', async () => {
-    const loadDataSets = jest.fn().mockResolvedValue(undefined);
-    const addMock = jest.fn().mockResolvedValue(undefined);
-
+  it('navigates to create wizard when create is clicked', async () => {
     await renderComponent({
       dataSources: [createDataSource('ds1')],
       dataSets: [],
-      datasetsClient: { add: addMock, delete: jest.fn() },
-      loadDataSets,
+      datasetsClient: { add: jest.fn(), delete: jest.fn() },
+      loadDataSets: jest.fn().mockResolvedValue(undefined),
     });
 
     fireEvent.click(document.querySelector('[data-test-subj="mockCreate"]') as Element);
-    expect(document.querySelector('[data-test-subj="mockCreateDatasetFlyout"]')).not.toBeNull();
 
-    fireEvent.click(document.querySelector('[data-test-subj="mockFlyoutSave"]') as Element);
-
-    await waitFor(() => {
-      expect(addMock).toHaveBeenCalledTimes(1);
-      expect(loadDataSets).toHaveBeenCalledTimes(1);
-    });
-  });
-
-  it('on rename, saves new then deletes previous id and reloads', async () => {
-    const loadDataSets = jest.fn().mockResolvedValue(undefined);
-    const addMock = jest.fn().mockResolvedValue(undefined);
-    const deleteMock = jest.fn().mockResolvedValue(undefined);
-
-    await renderComponent({
-      dataSources: [createDataSource('ds1')],
-      dataSets: [],
-      datasetsClient: { add: addMock, delete: deleteMock },
-      loadDataSets,
-    });
-
-    fireEvent.click(document.querySelector('[data-test-subj="mockCreate"]') as Element);
-    fireEvent.click(document.querySelector('[data-test-subj="mockFlyoutSaveRename"]') as Element);
-
-    await waitFor(() => {
-      expect(addMock).toHaveBeenCalledTimes(1);
-      expect(deleteMock).toHaveBeenCalledWith('previous-dataset');
-      expect(loadDataSets).toHaveBeenCalledTimes(1);
-    });
+    expect(mockHistoryPush).toHaveBeenCalledWith('/create');
   });
 
   it('confirms single delete via client and reloads', async () => {

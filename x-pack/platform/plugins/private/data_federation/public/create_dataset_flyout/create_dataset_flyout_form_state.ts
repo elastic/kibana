@@ -44,6 +44,10 @@ export interface CreateDatasetSettingsFormValues {
   error_mode: DatasetErrorModeFormValue;
   max_errors: string;
   max_error_ratio: string;
+  // Limits and performance
+  segment_size: string;
+  optimized_reader: DatasetBooleanFormValue;
+  late_materialization: DatasetBooleanFormValue;
 }
 
 export interface CreateDatasetFormValues {
@@ -76,6 +80,9 @@ export const emptyCreateDatasetSettingsFormValues = (): CreateDatasetSettingsFor
   error_mode: '',
   max_errors: '',
   max_error_ratio: '',
+  segment_size: '',
+  optimized_reader: '',
+  late_materialization: '',
 });
 
 const parseOptionalPositiveInteger = (value: string): number | undefined => {
@@ -193,6 +200,18 @@ export const buildDatasetSettingsFromFormValues = (
     if (schemaSampleSize !== undefined) applied.schema_sample_size = schemaSampleSize;
 
     if (settings.datetime_format) applied.datetime_format = settings.datetime_format;
+  }
+
+  if (isNdjson && settings.segment_size) {
+    applied.segment_size = settings.segment_size;
+  }
+
+  if (format === 'parquet') {
+    const optimizedReader = parseBooleanFormValue(settings.optimized_reader);
+    if (optimizedReader !== undefined) applied.optimized_reader = optimizedReader;
+
+    const lateMaterialization = parseBooleanFormValue(settings.late_materialization);
+    if (lateMaterialization !== undefined) applied.late_materialization = lateMaterialization;
   }
 
   return Object.keys(applied).length > 0 ? applied : undefined;

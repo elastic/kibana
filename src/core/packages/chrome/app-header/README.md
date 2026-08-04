@@ -98,6 +98,9 @@ To add a URL rendered with the fixed label "Learn more", use the object form:
 />
 ```
 
+Set `fullWidth: true` on the object form when the description should span the full header width
+instead of the default 80-character max width.
+
 Description and `metadata` share the secondary row and are mutually exclusive. Use metadata for
 structured entity facts such as status, owner, or creation time. Documentation links that are not
 part of a necessary description belong in the app menu via `docLink`.

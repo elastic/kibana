@@ -7,20 +7,21 @@
 
 import React from 'react';
 import { EuiProvider } from '@elastic/eui';
-import { fireEvent, render, waitFor } from '@testing-library/react';
+import { render } from '@testing-library/react';
+import { createMemoryHistory } from 'history';
+import { Router } from '@kbn/shared-ux-router';
 
 import type { ToastsStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { mainTranslations } from './main_i18n';
 import { Main } from './main';
 import type { DataFederationKibanaServices } from './types';
 
-jest.mock('./datasets_tab_content', () => ({
-  DatasetsTabContent: () => <div data-test-subj="datasetsTabContent" />,
+jest.mock('./data_federation_home', () => ({
+  DataFederationHome: () => <div data-test-subj="dataFederationHome" />,
 }));
 
-jest.mock('./data_sources_tab_content', () => ({
-  DataSourcesTabContent: () => <div data-test-subj="dataSourcesTabContent" />,
+jest.mock('./create_dataset_wizard', () => ({
+  DatasetWizardPage: () => <div data-test-subj="datasetWizardPage" />,
 }));
 
 const createToastsMock = (): ToastsStart =>
@@ -47,57 +48,22 @@ const createServicesMock = ({
   } as unknown as DataFederationKibanaServices);
 
 describe('Main', () => {
-  it('defaults to the data sources tab when both lists are empty', async () => {
-    const services = createServicesMock({ dataSources: [], dataSets: [] });
+  const renderMain = () => {
+    const history = createMemoryHistory({ initialEntries: ['/'] });
 
-    const { getByRole, getByTestId, queryByTestId } = render(
+    return render(
       <EuiProvider>
-        <KibanaContextProvider services={services}>
-          <Main />
-        </KibanaContextProvider>
+        <Router history={history}>
+          <KibanaContextProvider services={createServicesMock({ dataSources: [], dataSets: [] })}>
+            <Main />
+          </KibanaContextProvider>
+        </Router>
       </EuiProvider>
     );
+  };
 
-    // Starts on the sets tab, but should switch to sources once both requests complete.
-    expect(getByTestId('datasetsTabContent')).toBeInTheDocument();
-    expect(queryByTestId('dataSourcesTabContent')).toBeNull();
-
-    await waitFor(() => {
-      expect(getByTestId('dataSourcesTabContent')).toBeInTheDocument();
-    });
-
-    expect(getByRole('tab', { name: mainTranslations.tabs.sources })).toHaveAttribute(
-      'aria-selected',
-      'true'
-    );
-  });
-
-  it('switches tabs when user clicks a tab', async () => {
-    const services = createServicesMock({
-      dataSources: [{ name: 'my-source', type: 's3', description: '', settings: {} }],
-      dataSets: [],
-    });
-
-    const { getByRole, getByTestId, queryByTestId } = render(
-      <EuiProvider>
-        <KibanaContextProvider services={services}>
-          <Main />
-        </KibanaContextProvider>
-      </EuiProvider>
-    );
-
-    expect(getByTestId('datasetsTabContent')).toBeInTheDocument();
-    expect(queryByTestId('dataSourcesTabContent')).toBeNull();
-
-    fireEvent.click(getByRole('tab', { name: mainTranslations.tabs.sources }));
-
-    await waitFor(() => {
-      expect(getByTestId('dataSourcesTabContent')).toBeInTheDocument();
-    });
-
-    expect(getByRole('tab', { name: mainTranslations.tabs.sources })).toHaveAttribute(
-      'aria-selected',
-      'true'
-    );
+  it('renders the home route by default', () => {
+    const { getByTestId } = renderMain();
+    expect(getByTestId('dataFederationHome')).toBeInTheDocument();
   });
 });

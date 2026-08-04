@@ -37,6 +37,9 @@ describe('create_dataset_flyout_form_state', () => {
         datetime_format: '',
         multi_value_syntax: '',
         max_field_size: '',
+        segment_size: '',
+        optimized_reader: '',
+        late_materialization: '',
       });
     });
   });

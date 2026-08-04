@@ -246,6 +246,8 @@ export type AppHeaderDescription =
   | {
       text: string;
       learnMoreUrl: string;
+      /** When true, the description spans the full header width instead of the default 80ch max. */
+      fullWidth?: boolean;
     };
 
 interface AppHeaderConfigBase {
