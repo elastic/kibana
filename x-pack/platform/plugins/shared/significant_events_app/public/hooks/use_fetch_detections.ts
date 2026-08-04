@@ -35,17 +35,20 @@ export const useFetchDetections = ({ from, to }: UseFetchDetectionsParams) => {
 
   const fetchDetections = useCallback(
     async ({ signal }: QueryFunctionContext): Promise<PaginatedResponse<Detection>> => {
-      return significantEventsRepositoryClient.fetch('GET /internal/significant_events/detections', {
-        params: {
-          query: {
-            page: pagination.page,
-            perPage: pagination.perPage,
-            from: new Date(from).toISOString(),
-            to: new Date(to).toISOString(),
+      return significantEventsRepositoryClient.fetch(
+        'GET /internal/significant_events/detections',
+        {
+          params: {
+            query: {
+              page: pagination.page,
+              perPage: pagination.perPage,
+              from: new Date(from).toISOString(),
+              to: new Date(to).toISOString(),
+            },
           },
-        },
-        signal: signal ?? null,
-      });
+          signal: signal ?? null,
+        }
+      );
     },
     [significantEventsRepositoryClient, pagination, from, to]
   );
