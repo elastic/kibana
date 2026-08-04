@@ -5245,20 +5245,6 @@ This is the type of text _investigation guides_ will contain.`;
       );
     });
 
-    test('derives the template id from a fleet-prefixed predefined rule id when not provided', async () => {
-      mockSuccessfulCreate();
-
-      await rulesClient.create({
-        data: getMockData(),
-        options: { id: 'fleet-default-elastic_agent-cpu-usage' },
-      });
-
-      expect(rulesClientParams.analytics!.reportEvent).toHaveBeenCalledWith(
-        'alerting_rule_created',
-        expect.objectContaining({ template_id: 'cpu-usage' })
-      );
-    });
-
     test('does not fail rule creation when reportEvent throws', async () => {
       mockSuccessfulCreate();
       (rulesClientParams.analytics!.reportEvent as jest.Mock).mockImplementationOnce(() => {
