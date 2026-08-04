@@ -16,6 +16,9 @@ import {
   EuiButton,
   EuiButtonIcon,
   EuiText,
+  EuiPanel,
+  EuiFlexGroup,
+  EuiFlexItem,
   useEuiTheme,
 } from '@elastic/eui';
 import { megaphone } from '@elastic/eui-illustrations';
@@ -79,7 +82,6 @@ export const AutoOpsPromotionCallout = ({
       size="s"
       color="primary"
       data-test-subj="autoOpsPromotionCalloutConnectBtn"
-      style={compressed ? undefined : { flexShrink: 0 }}
       {...ctaProps}
     >
       {i18n.translate('management.autoOpsPromotionCallout.connectCta', {
@@ -89,73 +91,65 @@ export const AutoOpsPromotionCallout = ({
   );
 
   return (
-    <div
+    <EuiPanel
+      hasBorder
+      hasShadow={false}
+      paddingSize="m"
       style={{
         position: 'relative',
-        display: 'flex',
-        flexDirection: 'row',
-        alignItems: compressed ? 'flex-start' : 'center',
-        gap: euiTheme.size.base,
-        padding: euiTheme.size.m,
         paddingInlineEnd: `calc(${euiTheme.size.s} * 5)`,
-        border: euiTheme.border.thin,
-        borderRadius: euiTheme.border.radius.medium,
         backgroundColor: euiTheme.colors.backgroundBaseHighlighted,
         ...style,
       }}
       data-test-subj="autoOpsPromotionCallout"
     >
-      <div
-        style={{
-          flexShrink: 0,
-          width: illustrationSize,
-          height: illustrationSize,
-        }}
+      <EuiFlexGroup
+        gutterSize="m"
+        alignItems={compressed ? 'flexStart' : 'center'}
+        responsive={false}
       >
-        <EuiIllustration type={megaphone} alt="" />
-      </div>
-      <div
-        style={{
-          flex: '1 1 auto',
-          minWidth: 0,
-          display: 'flex',
-          flexDirection: 'column',
-          gap: euiTheme.size.m,
-        }}
-      >
-        <EuiText size="s">
-          <p style={{ marginBottom: euiTheme.size.xs }}>
-            <strong>
-              {i18n.translate('management.autoOpsPromotionCallout.title', {
-                defaultMessage: 'New! Connect this cluster to AutoOps',
-              })}
-            </strong>
-          </p>
-          <p>
-            <FormattedMessage
-              id="management.autoOpsPromotionCallout.description"
-              defaultMessage="Unlock advanced monitoring of ECE, ECK, and self-managed clusters with AutoOps, now available for free across all license types. Set it up today using {cloudConnectLink}."
-              values={{
-                cloudConnectLink: (
-                  <EuiLink
-                    href={docsUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    data-test-subj="autoOpsPromotionCalloutDocsLink"
-                  >
-                    <FormattedMessage
-                      id="management.autoOpsPromotionCallout.cloudConnectLink"
-                      defaultMessage="Cloud Connect"
-                    />
-                  </EuiLink>
-                ),
-              }}
-            />
-          </p>
-        </EuiText>
-        {compressed && <div>{ctaButton}</div>}
-      </div>
-      {!compressed && ctaButton}
+        <EuiFlexItem grow={false} style={{ width: illustrationSize, height: illustrationSize }}>
+          <EuiIllustration type={megaphone} alt="" />
+        </EuiFlexItem>
+        <EuiFlexItem style={{ minWidth: 0 }}>
+          <EuiFlexGroup direction="column" gutterSize="m" alignItems="flexStart" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiText size="s">
+                <p style={{ marginBottom: euiTheme.size.xs }}>
+                  <strong>
+                    {i18n.translate('management.autoOpsPromotionCallout.title', {
+                      defaultMessage: 'New! Connect this cluster to AutoOps',
+                    })}
+                  </strong>
+                </p>
+                <p>
+                  <FormattedMessage
+                    id="management.autoOpsPromotionCallout.description"
+                    defaultMessage="Unlock advanced monitoring of ECE, ECK, and self-managed clusters with AutoOps, now available for free across all license types. Set it up today using {cloudConnectLink}."
+                    values={{
+                      cloudConnectLink: (
+                        <EuiLink
+                          href={docsUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          data-test-subj="autoOpsPromotionCalloutDocsLink"
+                        >
+                          <FormattedMessage
+                            id="management.autoOpsPromotionCallout.cloudConnectLink"
+                            defaultMessage="Cloud Connect"
+                          />
+                        </EuiLink>
+                      ),
+                    }}
+                  />
+                </p>
+              </EuiText>
+            </EuiFlexItem>
+            {compressed && <EuiFlexItem grow={false}>{ctaButton}</EuiFlexItem>}
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        {!compressed && <EuiFlexItem grow={false}>{ctaButton}</EuiFlexItem>}
+      </EuiFlexGroup>
       <EuiButtonIcon
         iconType="cross"
         onClick={handleDismiss}
@@ -170,6 +164,6 @@ export const AutoOpsPromotionCallout = ({
         })}
         data-test-subj="autoOpsPromotionCallout-dismiss"
       />
-    </div>
+    </EuiPanel>
   );
 };
