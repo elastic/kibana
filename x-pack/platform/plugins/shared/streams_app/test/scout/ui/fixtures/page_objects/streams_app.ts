@@ -471,9 +471,18 @@ export class StreamsApp {
   // Routing-specific utility methods
   async clickCreateRoutingRule() {
     const button = this.page.getByTestId('streamsAppStreamDetailRoutingAddRuleButton');
-    await expect(button).toBeVisible();
-    // Locator.click() can get flaky here due to rapid re-renders; use a direct DOM click.
-    await button.evaluate((el) => (el as HTMLElement).click());
+    const nameField = this.page.getByTestId('streamsAppRoutingStreamEntryNameField');
+    // The button is disabled until the routing state machine returns to `idle` (a background
+    // definition/samples refresh transiently disables it) and its node is swapped
+    // (EuiButton <-> EuiButtonEmpty) once `useAIFeatures()` resolves. Retry an enabled-gated
+    // click until the create form opens, so neither a dropped `routingRule.create` event nor a
+    // mid-action re-render can strand the flow.
+    await expect(async () => {
+      if (await nameField.isVisible()) return;
+      await expect(button).toBeEnabled();
+      await button.click({ timeout: 10_000 });
+      await expect(nameField).toBeVisible({ timeout: 5_000 });
+    }).toPass({ timeout: 30_000 });
   }
 
   async fillRoutingRuleName(name: string) {
