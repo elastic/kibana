@@ -44,6 +44,8 @@ dependsOn:
   - '@kbn/workflows-ui'
   - '@kbn/deeplinks-workflows'
   - '@kbn/deeplinks-management'
+  - '@kbn/deeplinks-analytics'
+  - '@kbn/index-management-shared-types'
   - '@kbn/code-editor'
   - '@kbn/ui-callout'
 tags:
