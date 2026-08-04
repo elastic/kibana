@@ -21,7 +21,10 @@ interface AxeContext {
   exclude?: string[][];
 }
 
-interface TestOptions {
+export type AccessibilitySnapshotProfile = 'default' | 'strictWcag22aa';
+
+export interface AccessibilitySnapshotOptions {
+  profile?: AccessibilitySnapshotProfile;
   excludeTestSubj?: string | string[];
 }
 
@@ -35,6 +38,21 @@ export const normalizeResult = (report: any) => {
   return report.result as false | AxeReport;
 };
 
+const STRICT_AXE_CONFIG = {
+  rules: [],
+};
+
+const STRICT_AXE_OPTIONS = {
+  reporter: 'v2' as const,
+  runOnly: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'],
+  rules: {
+    'color-contrast': { enabled: true },
+    bypass: { enabled: true },
+    'nested-interactive': { enabled: true },
+    'target-size': { enabled: true },
+  },
+};
+
 /**
  * Accessibility testing service using the Axe (https://www.deque.com/axe/)
  * toolset to validate a11y rules similar to ESLint. In order to test against
@@ -44,16 +62,34 @@ export class AccessibilityService extends FtrService {
   private readonly browser = this.ctx.getService('browser');
   private readonly Wd = this.ctx.getService('__webdriver__');
 
-  public async testAppSnapshot(options: TestOptions = {}) {
-    const context = this.getAxeContext(true, options.excludeTestSubj);
-    const report = await this.captureAxeReport(context);
-    this.assertValidAxeReport(report);
+  public async testAppSnapshot(options: AccessibilitySnapshotOptions = {}) {
+    if (options.profile === 'strictWcag22aa') {
+      const context = this.getStrictAxeContext();
+      const report = await this.captureAxeReport(context, STRICT_AXE_CONFIG, STRICT_AXE_OPTIONS);
+      this.assertValidAxeReportStrict(report);
+    } else {
+      const context = this.getAxeContext(true, options.excludeTestSubj);
+      const report = await this.captureAxeReport(context, AXE_CONFIG, AXE_OPTIONS);
+      this.assertValidAxeReport(report);
+    }
   }
 
-  public async testGlobalSnapshot(options: TestOptions = {}) {
-    const context = this.getAxeContext(false, options.excludeTestSubj);
-    const report = await this.captureAxeReport(context);
-    this.assertValidAxeReport(report);
+  public async testGlobalSnapshot(options: AccessibilitySnapshotOptions = {}) {
+    if (options.profile === 'strictWcag22aa') {
+      const context = this.getStrictAxeContext();
+      const report = await this.captureAxeReport(context, STRICT_AXE_CONFIG, STRICT_AXE_OPTIONS);
+      this.assertValidAxeReportStrict(report);
+    } else {
+      const context = this.getAxeContext(false, options.excludeTestSubj);
+      const report = await this.captureAxeReport(context, AXE_CONFIG, AXE_OPTIONS);
+      this.assertValidAxeReport(report);
+    }
+  }
+
+  private getStrictAxeContext(): AxeContext {
+    return {
+      include: [testSubjectToCss('appA11yRoot')],
+    };
   }
 
   private getAxeContext(global: boolean, excludeTestSubj?: string | string[]): AxeContext {
@@ -78,14 +114,37 @@ export class AccessibilityService extends FtrService {
     }
   }
 
-  private async captureAxeReport(context: AxeContext): Promise<AxeReport> {
+  private assertValidAxeReportStrict(report: AxeReport) {
+    if (!report.violations.length) return;
+
+    const lines: string[] = [];
+    for (const violation of report.violations) {
+      for (const node of violation.nodes) {
+        lines.push(
+          [
+            `rule: ${violation.id}`,
+            `impact: ${violation.impact}`,
+            `html: ${node.html}`,
+            `target: ${node.target?.join(', ')}`,
+          ].join(' | ')
+        );
+      }
+    }
+    throw new Error(`strict a11y violations:\n${lines.join('\n')}`);
+  }
+
+  private async captureAxeReport(
+    context: AxeContext,
+    axeConfig: typeof AXE_CONFIG,
+    axeOptions: typeof AXE_OPTIONS
+  ): Promise<AxeReport> {
     await this.Wd.driver.manage().setTimeouts({
       ...(await this.Wd.driver.manage().getTimeouts()),
       script: 600000,
     });
 
     const report = normalizeResult(
-      await this.browser.executeAsync(analyzeWithAxe, context, AXE_CONFIG, AXE_OPTIONS)
+      await this.browser.executeAsync(analyzeWithAxe, context, axeConfig, axeOptions)
     );
 
     if (report !== false) {
@@ -93,7 +152,7 @@ export class AccessibilityService extends FtrService {
     }
 
     const withClientReport = normalizeResult(
-      await this.browser.executeAsync(analyzeWithAxeWithClient, context, AXE_CONFIG, AXE_OPTIONS)
+      await this.browser.executeAsync(analyzeWithAxeWithClient, context, axeConfig, axeOptions)
     );
 
     if (withClientReport === false) {
