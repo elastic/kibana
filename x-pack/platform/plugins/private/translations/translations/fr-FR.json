@@ -1103,8 +1103,6 @@
     "controls.timesliderControl.displayName": "Curseur temporel",
     "core.application.appContainer.loadingAriaLabel": "Chargement de l'application",
     "core.application.appContainer.plainSpinner.loadingAriaLabel": "Chargement de l'application",
-    "core.application.appNotFound.pageDescription": "Aucune application détectée pour cette URL. Revenez en arrière ou sélectionnez une application dans le menu.",
-    "core.application.appNotFound.title": "Application introuvable",
     "core.application.appRenderError.defaultTitle": "Erreur d'application",
     "core.chrome.appHeader.addIntegrationsMenuItemLabel": "Ajouter des intégrations",
     "core.chrome.appHeader.documentationMenuItemLabel": "Documentation",

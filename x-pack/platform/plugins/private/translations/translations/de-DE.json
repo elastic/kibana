@@ -1104,8 +1104,6 @@
     "controls.timesliderControl.displayName": "Zeitschieberegler",
     "core.application.appContainer.loadingAriaLabel": "Anwendung wird geladen",
     "core.application.appContainer.plainSpinner.loadingAriaLabel": "Anwendung wird geladen",
-    "core.application.appNotFound.pageDescription": "Unter dieser URL wurde keine Anwendung gefunden. Versuchen Sie, zurückzugehen oder eine App aus dem Menü auszuwählen.",
-    "core.application.appNotFound.title": "Anwendung nicht gefunden",
     "core.application.appRenderError.defaultTitle": "Anwendungsfehler",
     "core.chrome.appHeader.addIntegrationsMenuItemLabel": "Integrationen hinzufügen",
     "core.chrome.appHeader.documentationMenuItemLabel": "Dokumentation",

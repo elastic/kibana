@@ -1105,8 +1105,6 @@
     "controls.timesliderControl.displayName": "时间滑块",
     "core.application.appContainer.loadingAriaLabel": "正在加载应用程序",
     "core.application.appContainer.plainSpinner.loadingAriaLabel": "正在加载应用程序",
-    "core.application.appNotFound.pageDescription": "在此 URL 未找到任何应用程序。尝试返回或从菜单中选择应用。",
-    "core.application.appNotFound.title": "未找到应用程序",
     "core.application.appRenderError.defaultTitle": "应用程序错误",
     "core.chrome.appHeader.addIntegrationsMenuItemLabel": "添加集成",
     "core.chrome.appHeader.documentationMenuItemLabel": "文档",
