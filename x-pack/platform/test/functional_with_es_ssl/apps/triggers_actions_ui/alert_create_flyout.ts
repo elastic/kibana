@@ -147,11 +147,21 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     },
   };
 
-  // FLAKY: https://github.com/elastic/kibana/issues/246218
-  describe.skip('create alert', function () {
+  describe('create alert', function () {
     let apmSynthtraceEsClient: ApmSynthtraceEsClient;
     const webhookConnectorName = 'webhook-test';
     let esQueryRuleId: string;
+    const generatedRuleNames: string[] = [];
+
+    async function deleteGeneratedRules() {
+      for (const name of generatedRuleNames) {
+        const alerts = await getAlertsByName(name);
+        const exactMatches = alerts.filter((a: { name: string }) => a.name === name);
+        await deleteAlerts(exactMatches.map((a: { id: string }) => a.id));
+      }
+      generatedRuleNames.length = 0;
+    }
+
     before(async () => {
       await esArchiver.load(
         'src/platform/test/api_integration/fixtures/es_archiver/index_patterns/constant_keyword'
@@ -207,9 +217,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await esArchiver.unload(
         'src/platform/test/api_integration/fixtures/es_archiver/index_patterns/constant_keyword'
       );
-      await supertest.delete(`/api/alerting/rule/${esQueryRuleId}`).set('kbn-xsrf', 'foo');
+      await supertest
+        .delete(`/api/alerting/rule/${esQueryRuleId}`)
+        .set('kbn-xsrf', 'foo')
+        .expect(204);
 
       await deleteConnectorByName(webhookConnectorName);
+    });
+
+    afterEach(async () => {
+      await deleteGeneratedRules();
     });
 
     beforeEach(async () => {
@@ -222,6 +239,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     it('should delete the right action when the same action has been added twice', async () => {
       // create a new rule
       const ruleName = generateUniqueKey();
+      generatedRuleNames.push(ruleName);
       await rules.common.defineIndexThresholdAlert(ruleName);
 
       // add webhook connector 1
@@ -248,9 +266,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const modalCards = await find.allByCssSelector(
         '[data-test-subj="ruleActionsConnectorsModalCard"]'
       );
-      const webhookCard = modalCards.find(async (card) => {
-        return (await card.getAttribute('innerText'))?.indexOf(webhookConnectorName) !== -1;
-      });
+      let webhookCard;
+      for (const card of modalCards) {
+        const text = await card.getAttribute('innerText');
+        if (text?.indexOf(webhookConnectorName) !== -1) {
+          webhookCard = card;
+          break;
+        }
+      }
       if (!webhookCard) {
         throw new Error('Webhook connector card not found');
       }
@@ -266,18 +289,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       // check that the removed action is the right one
       const doesExist = await find.existsByXpath(".//*[text()='myUniqueKey']");
       expect(doesExist).to.eql(false);
-
-      // clean up created alert
-      const alertsToDelete = await getAlertsByName(ruleName);
-      await deleteAlerts(alertsToDelete.map((rule: { id: string }) => rule.id));
-      expect(true).to.eql(true);
-      // Additional cleanup step to prevent
-      // FLAKY: https://github.com/elastic/kibana/issues/167443
-      // FLAKY: https://github.com/elastic/kibana/issues/167444
     });
 
     it('should create an alert', async () => {
       const alertName = generateUniqueKey();
+      generatedRuleNames.push(alertName);
       await rules.common.defineIndexThresholdAlert(alertName);
 
       // filterKuery validation
@@ -349,14 +365,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         interval: '1 min',
       });
       expect(searchResultAfterSave.duration).to.match(/\d{2,}:\d{2}/);
-
-      // clean up created alert
-      const alertsToDelete = await getAlertsByName(alertName);
-      await deleteAlerts(alertsToDelete.map((alertItem: { id: string }) => alertItem.id));
     });
 
     it('should create an alert with composite query in filter for conditional action', async () => {
       const alertName = generateUniqueKey();
+      generatedRuleNames.push(alertName);
       await rules.common.defineIndexThresholdAlert(alertName);
 
       // filterKuery validation
@@ -445,14 +458,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         interval: '1 min',
       });
       expect(searchResultAfterSave.duration).to.match(/\d{2,}:\d{2}/);
-
-      // clean up created alert
-      const alertsToDelete = await getAlertsByName(alertName);
-      await deleteAlerts(alertsToDelete.map((alertItem: { id: string }) => alertItem.id));
     });
 
     it('should create an alert with DSL filter for conditional action', async () => {
       const alertName = generateUniqueKey();
+      generatedRuleNames.push(alertName);
       await rules.common.defineIndexThresholdAlert(alertName);
 
       // filterKuery validation
@@ -494,14 +504,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.scrollIntoView('globalQueryBar');
 
       await filterBar.hasFilter('query', filter, true);
-
-      // clean up created alert
-      const alertsToDelete = await getAlertsByName(alertName);
-      await deleteAlerts(alertsToDelete.map((alertItem: { id: string }) => alertItem.id));
     });
 
     it('should create an alert with actions in multiple groups', async () => {
       const alertName = generateUniqueKey();
+      generatedRuleNames.push(alertName);
       await defineAlwaysFiringAlert(alertName);
 
       await testSubjects.click('ruleActionsAddActionButton');
@@ -544,14 +551,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         tags: '',
         interval: '1 min',
       });
-
-      // clean up created alert
-      const alertsToDelete = await getAlertsByName(alertName);
-      await deleteAlerts(alertsToDelete.map((alertItem: { id: string }) => alertItem.id));
     });
 
     it('should show save confirmation before creating alert with no actions', async () => {
       const alertName = generateUniqueKey();
+      generatedRuleNames.push(alertName);
       await defineAlwaysFiringAlert(alertName);
 
       await testSubjects.click('rulePageFooterSaveButton');
@@ -567,14 +571,18 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       const toastTitle = await toasts.getTitleAndDismiss();
       expect(toastTitle).to.eql(`Created rule "${alertName}"`);
-      await new Promise((resolve) => setTimeout(resolve, 1000));
 
       await pageObjects.common.navigateToApp('management', {
         path: 'insightsAndAlerting/triggersActions',
       });
       await testSubjects.click('rulesTab');
 
-      await pageObjects.triggersActionsUI.searchAlerts(alertName);
+      await retry.waitForWithTimeout(`rule "${alertName}" to appear in list`, 15000, async () => {
+        await pageObjects.triggersActionsUI.searchAlerts(alertName);
+        const results = await pageObjects.triggersActionsUI.getAlertsList();
+        return results.length > 0 && results[0].name.startsWith(alertName);
+      });
+
       const searchResultsAfterSave = await pageObjects.triggersActionsUI.getAlertsList();
       const searchResultAfterSave = searchResultsAfterSave[0];
       expect(omit(searchResultAfterSave, 'duration')).to.eql({
@@ -582,10 +590,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         tags: '',
         interval: '1 min',
       });
-
-      // clean up created alert
-      const alertsToDelete = await getAlertsByName(alertName);
-      await deleteAlerts(alertsToDelete.map((alertItem: { id: string }) => alertItem.id));
     });
 
     it('should show discard confirmation before closing flyout without saving', async () => {
@@ -674,14 +678,20 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await testSubjects.click('queryFormTypeChooserCancel');
       await testSubjects.click('queryFormType_esqlQuery');
+
+      await browser.execute(() => window.performance.clearMarks('esql-validation-complete'));
+
       await testSubjects.setValue('ESQLEditor', 'FROM *', {
         clearWithKeyboard: true,
       });
 
       await browser.pressKeys(browser.keys.ESCAPE);
 
-      // Wait 2 seconds for the debounce to take effect
-      await new Promise((res) => setTimeout(res, 2000));
+      await retry.waitForWithTimeout('esql-validation-complete mark', 10000, async () => {
+        return await browser.execute(
+          () => window.performance.getEntriesByName('esql-validation-complete').length > 0
+        );
+      });
 
       await testSubjects.missingOrFail('ESQLEditor-errors-warnings-content');
     });
