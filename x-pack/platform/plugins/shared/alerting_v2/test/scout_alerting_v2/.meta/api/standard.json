@@ -1,5 +1,5 @@
 {
-  "sha1": "d37cd5bec519195e92f0293b5dbde33292ba15b5",
+  "sha1": "3b42f349f443d6b787de835dcbceda34f3b8fcf6",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -6151,8 +6151,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/create_rule.spec.ts",
-        "line": 53,
-        "column": 14
+        "line": 55,
+        "column": 81
       }
     },
     {
@@ -6164,7 +6164,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/create_rule.spec.ts",
-        "line": 68,
+        "line": 69,
         "column": 46
       }
     },
@@ -6177,7 +6177,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/create_rule.spec.ts",
-        "line": 79,
+        "line": 80,
         "column": 30
       }
     },
@@ -6190,7 +6190,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/create_rule.spec.ts",
-        "line": 95,
+        "line": 96,
         "column": 20
       }
     },
@@ -6203,7 +6203,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/create_rule.spec.ts",
-        "line": 110,
+        "line": 111,
         "column": 5
       }
     },
@@ -6216,7 +6216,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/create_rule.spec.ts",
-        "line": 116,
+        "line": 117,
         "column": 8
       }
     },
@@ -6229,7 +6229,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/create_rule.spec.ts",
-        "line": 127,
+        "line": 128,
         "column": 37
       }
     },
@@ -6242,7 +6242,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/create_rule.spec.ts",
-        "line": 137,
+        "line": 138,
         "column": 58
       }
     },
@@ -6255,7 +6255,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/create_rule.spec.ts",
-        "line": 150,
+        "line": 151,
         "column": 19
       }
     },
@@ -6268,7 +6268,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/create_rule.spec.ts",
-        "line": 162,
+        "line": 163,
         "column": 5
       }
     },
@@ -6281,7 +6281,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/create_rule.spec.ts",
-        "line": 171,
+        "line": 172,
         "column": 14
       }
     },
@@ -6294,7 +6294,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/create_rule.spec.ts",
-        "line": 184,
+        "line": 185,
         "column": 5
       }
     },
@@ -6307,7 +6307,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/create_rule.spec.ts",
-        "line": 197,
+        "line": 198,
         "column": 4
       }
     },
@@ -6320,7 +6320,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/create_rule.spec.ts",
-        "line": 212,
+        "line": 213,
         "column": 18
       }
     },
@@ -6333,7 +6333,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/create_rule.spec.ts",
-        "line": 232,
+        "line": 233,
         "column": 19
       }
     },
@@ -6346,7 +6346,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/create_rule.spec.ts",
-        "line": 252,
+        "line": 253,
         "column": 27
       }
     },
@@ -6359,7 +6359,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/create_rule.spec.ts",
-        "line": 272,
+        "line": 273,
         "column": 27
       }
     },
@@ -6372,7 +6372,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/create_rule.spec.ts",
-        "line": 296,
+        "line": 297,
         "column": 16
       }
     },
@@ -6385,8 +6385,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/create_rule.spec.ts",
-        "line": 332,
-        "column": 14
+        "line": 338,
+        "column": 4
       }
     },
     {
@@ -6398,8 +6398,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/create_rule.spec.ts",
-        "line": 353,
-        "column": 10
+        "line": 355,
+        "column": 47
       }
     },
     {
@@ -6411,7 +6411,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/create_rule.spec.ts",
-        "line": 371,
+        "line": 372,
         "column": 4
       }
     },
@@ -6424,7 +6424,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/create_rule.spec.ts",
-        "line": 396,
+        "line": 397,
         "column": 14
       }
     },
@@ -6437,7 +6437,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/create_rule.spec.ts",
-        "line": 414,
+        "line": 415,
         "column": 9
       }
     },
@@ -6450,7 +6450,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/create_rule.spec.ts",
-        "line": 435,
+        "line": 436,
         "column": 9
       }
     },
@@ -6463,7 +6463,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/create_rule.spec.ts",
-        "line": 452,
+        "line": 453,
         "column": 22
       }
     },
@@ -6476,7 +6476,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/create_rule.spec.ts",
-        "line": 464,
+        "line": 465,
         "column": 52
       }
     },
@@ -6489,7 +6489,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/create_rule.spec.ts",
-        "line": 473,
+        "line": 474,
         "column": 24
       }
     },
@@ -6502,7 +6502,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/create_rule.spec.ts",
-        "line": 487,
+        "line": 488,
         "column": 27
       }
     },
@@ -6515,7 +6515,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/create_rule.spec.ts",
-        "line": 496,
+        "line": 497,
         "column": 18
       }
     },
@@ -6528,7 +6528,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/create_rule.spec.ts",
-        "line": 505,
+        "line": 506,
         "column": 92
       }
     },
@@ -6827,8 +6827,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/disable_rule.spec.ts",
-        "line": 81,
-        "column": 62
+        "line": 87,
+        "column": 9
       }
     },
     {
@@ -6840,8 +6840,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/disable_rule.spec.ts",
-        "line": 90,
-        "column": 14
+        "line": 95,
+        "column": 27
       }
     },
     {
@@ -6853,7 +6853,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/disable_rule.spec.ts",
-        "line": 100,
+        "line": 105,
         "column": 14
       }
     },
@@ -6866,7 +6866,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/disable_rule.spec.ts",
-        "line": 113,
+        "line": 118,
         "column": 84
       }
     },
@@ -6879,7 +6879,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/disable_rule.spec.ts",
-        "line": 130,
+        "line": 135,
         "column": 24
       }
     },
@@ -7061,8 +7061,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/enable_rule.spec.ts",
-        "line": 82,
-        "column": 62
+        "line": 88,
+        "column": 9
       }
     },
     {
@@ -7074,8 +7074,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/enable_rule.spec.ts",
-        "line": 91,
-        "column": 14
+        "line": 96,
+        "column": 27
       }
     },
     {
@@ -7087,7 +7087,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/enable_rule.spec.ts",
-        "line": 101,
+        "line": 106,
         "column": 14
       }
     },
@@ -7100,7 +7100,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/enable_rule.spec.ts",
-        "line": 118,
+        "line": 123,
         "column": 7
       }
     },
@@ -7113,7 +7113,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/enable_rule.spec.ts",
-        "line": 143,
+        "line": 148,
         "column": 23
       }
     },
@@ -7685,8 +7685,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/get_rule.spec.ts",
-        "line": 44,
-        "column": 23
+        "line": 45,
+        "column": 9
       }
     },
     {
@@ -7698,7 +7698,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/get_rule.spec.ts",
-        "line": 51,
+        "line": 52,
         "column": 14
       }
     },
@@ -7711,7 +7711,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/get_rule.spec.ts",
-        "line": 59,
+        "line": 60,
         "column": 7
       }
     },
@@ -7724,7 +7724,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/get_rule.spec.ts",
-        "line": 72,
+        "line": 73,
         "column": 14
       }
     },
@@ -7737,7 +7737,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/get_rule.spec.ts",
-        "line": 84,
+        "line": 85,
         "column": 9
       }
     },
@@ -8010,7 +8010,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/update_rule.spec.ts",
-        "line": 58,
+        "line": 59,
         "column": 14
       }
     },
@@ -8023,7 +8023,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/update_rule.spec.ts",
-        "line": 74,
+        "line": 75,
         "column": 14
       }
     },
@@ -8036,7 +8036,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/update_rule.spec.ts",
-        "line": 96,
+        "line": 97,
         "column": 24
       }
     },
@@ -8049,8 +8049,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/update_rule.spec.ts",
-        "line": 119,
-        "column": 59
+        "line": 121,
+        "column": 9
       }
     },
     {
@@ -8062,7 +8062,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/update_rule.spec.ts",
-        "line": 152,
+        "line": 156,
         "column": 17
       }
     },
@@ -8075,7 +8075,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/update_rule.spec.ts",
-        "line": 188,
+        "line": 192,
         "column": 30
       }
     },
@@ -8088,7 +8088,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/update_rule.spec.ts",
-        "line": 207,
+        "line": 211,
         "column": 66
       }
     },
@@ -8101,7 +8101,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/update_rule.spec.ts",
-        "line": 240,
+        "line": 244,
         "column": 28
       }
     },
@@ -8114,7 +8114,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/update_rule.spec.ts",
-        "line": 264,
+        "line": 268,
         "column": 23
       }
     },
@@ -8127,7 +8127,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/update_rule.spec.ts",
-        "line": 279,
+        "line": 283,
         "column": 14
       }
     },
@@ -8140,7 +8140,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/update_rule.spec.ts",
-        "line": 290,
+        "line": 294,
         "column": 32
       }
     },
@@ -8153,7 +8153,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/update_rule.spec.ts",
-        "line": 301,
+        "line": 305,
         "column": 14
       }
     },
@@ -8166,7 +8166,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/update_rule.spec.ts",
-        "line": 315,
+        "line": 319,
         "column": 5
       }
     },
@@ -8179,7 +8179,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/update_rule.spec.ts",
-        "line": 332,
+        "line": 336,
         "column": 23
       }
     },
@@ -8192,7 +8192,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/update_rule.spec.ts",
-        "line": 341,
+        "line": 345,
         "column": 14
       }
     },
@@ -8205,7 +8205,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/update_rule.spec.ts",
-        "line": 353,
+        "line": 357,
         "column": 40
       }
     },
@@ -8218,7 +8218,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/update_rule.spec.ts",
-        "line": 368,
+        "line": 372,
         "column": 27
       }
     },
@@ -8231,7 +8231,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/update_rule.spec.ts",
-        "line": 381,
+        "line": 385,
         "column": 24
       }
     },
@@ -8244,7 +8244,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/update_rule.spec.ts",
-        "line": 394,
+        "line": 398,
         "column": 49
       }
     },
@@ -8257,7 +8257,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/update_rule.spec.ts",
-        "line": 413,
+        "line": 417,
         "column": 49
       }
     },
@@ -8270,7 +8270,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/update_rule.spec.ts",
-        "line": 428,
+        "line": 432,
         "column": 27
       }
     },
@@ -8283,7 +8283,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/update_rule.spec.ts",
-        "line": 447,
+        "line": 451,
         "column": 55
       }
     },
@@ -8309,8 +8309,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/upsert_rule.spec.ts",
-        "line": 51,
-        "column": 14
+        "line": 53,
+        "column": 81
       }
     },
     {
@@ -8322,7 +8322,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/upsert_rule.spec.ts",
-        "line": 84,
+        "line": 87,
         "column": 14
       }
     },
@@ -8335,7 +8335,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/upsert_rule.spec.ts",
-        "line": 109,
+        "line": 112,
         "column": 47
       }
     },
@@ -8348,7 +8348,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/upsert_rule.spec.ts",
-        "line": 136,
+        "line": 139,
         "column": 55
       }
     },
@@ -8361,7 +8361,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/upsert_rule.spec.ts",
-        "line": 143,
+        "line": 146,
         "column": 7
       }
     },
@@ -8374,7 +8374,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/upsert_rule.spec.ts",
-        "line": 162,
+        "line": 165,
         "column": 11
       }
     },
@@ -8387,7 +8387,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/upsert_rule.spec.ts",
-        "line": 164,
+        "line": 167,
         "column": 79
       }
     },
@@ -8400,7 +8400,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/upsert_rule.spec.ts",
-        "line": 174,
+        "line": 177,
         "column": 32
       }
     },
@@ -8413,7 +8413,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/upsert_rule.spec.ts",
-        "line": 183,
+        "line": 186,
         "column": 95
       }
     },
@@ -8426,7 +8426,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/upsert_rule.spec.ts",
-        "line": 196,
+        "line": 199,
         "column": 18
       }
     },
@@ -8439,7 +8439,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/upsert_rule.spec.ts",
-        "line": 206,
+        "line": 209,
         "column": 14
       }
     },
@@ -8452,7 +8452,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/upsert_rule.spec.ts",
-        "line": 215,
+        "line": 218,
         "column": 9
       }
     },
@@ -8465,7 +8465,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/upsert_rule.spec.ts",
-        "line": 227,
+        "line": 230,
         "column": 9
       }
     },
@@ -8478,7 +8478,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/upsert_rule.spec.ts",
-        "line": 241,
+        "line": 244,
         "column": 29
       }
     },
@@ -8491,7 +8491,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/upsert_rule.spec.ts",
-        "line": 256,
+        "line": 259,
         "column": 54
       }
     },
@@ -8504,7 +8504,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/upsert_rule.spec.ts",
-        "line": 269,
+        "line": 272,
         "column": 15
       }
     },
@@ -8517,7 +8517,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/upsert_rule.spec.ts",
-        "line": 281,
+        "line": 284,
         "column": 8
       }
     },
@@ -9141,6 +9141,104 @@
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
         "line": 2158,
         "column": 27
+      }
+    },
+    {
+      "id": "678cdb7d4718d40-7f791e41745c742",
+      "title": "Rule change history create: logs a rule_create entry with sequence 1 and a RuleResponse-shaped snapshot",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_history.spec.ts",
+        "line": 64,
+        "column": 30
+      }
+    },
+    {
+      "id": "678cdb7d4718d40-721824a2cb489b8",
+      "title": "Rule change history update: logs a rule_update entry with sequence 2 and the post-change snapshot",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_history.spec.ts",
+        "line": 99,
+        "column": 14
+      }
+    },
+    {
+      "id": "678cdb7d4718d40-076cbd168c53cad",
+      "title": "Rule change history upsert (create): logs a rule_create entry when the rule does not yet exist",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_history.spec.ts",
+        "line": 169,
+        "column": 14
+      }
+    },
+    {
+      "id": "678cdb7d4718d40-cebbf774add38e2",
+      "title": "Rule change history upsert (update): logs a rule_update entry when the rule already exists",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_history.spec.ts",
+        "line": 201,
+        "column": 9
+      }
+    },
+    {
+      "id": "678cdb7d4718d40-d881130ec7f4802",
+      "title": "Rule change history disable: logs a rule_disable entry with sequence 2 and enabled: false in the snapshot",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_history.spec.ts",
+        "line": 267,
+        "column": 14
+      }
+    },
+    {
+      "id": "678cdb7d4718d40-ffa9ead21e78fee",
+      "title": "Rule change history enable: logs a rule_enable entry with sequence 3 and enabled: true in the snapshot",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_history.spec.ts",
+        "line": 324,
+        "column": 17
+      }
+    },
+    {
+      "id": "678cdb7d4718d40-2bdb5c3af519adc",
+      "title": "Rule change history delete: logs a rule_delete entry with a bumped sequence and a pre-delete snapshot",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_history.spec.ts",
+        "line": 397,
+        "column": 14
       }
     },
     {
