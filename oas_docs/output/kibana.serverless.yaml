@@ -302,6 +302,7 @@ tags:
     name: Security Timeline API
     x-displayName: Security timeline
   - name: significant_events
+    x-displayName: Significant Events
   - description: SLO APIs enable you to define, manage and track service-level objectives
     name: slo
     x-displayName: Service level objectives
@@ -17705,6 +17706,16 @@ paths:
         content:
           application/json:
             examples:
+              ElasticDefend:
+                summary: Cancel a response action on an Elastic Defend host
+                value:
+                  agent_type: endpoint
+                  comment: Cancelling action due to change in requirements
+                  endpoint_ids:
+                    - ed518850-681a-4d60-bb98-e22640cae2a8
+                  parameters:
+                    force: true
+                    id: 7f8c9b2a-4d3e-4f5a-8b1c-2e3f4a5b6c7d
               MicrosoftDefenderEndpoint:
                 summary: Cancel a response action on a Microsoft Defender for Endpoint host
                 value:
@@ -83448,7 +83459,6 @@ components:
                         type: object
                         properties:
                           column_order:
-                            default: []
                             description: Ordered list of field names to display in the data table. If omitted, defaults to the advanced setting "defaultColumns" or the referenced saved object.
                             items:
                               description: Field name of a column in display order.
@@ -83486,8 +83496,7 @@ components:
                               - enum:
                                   - normal
                                 type: string
-                            default: compact
-                            description: Data grid density. Choose "compact", "expanded", or "normal" for row spacing. If omitted, defaults to Discover or embeddable defaults (e.g. user preference / local storage).
+                            description: Data grid density. Choose "compact", "expanded", or "normal" for row spacing. If omitted, Discover or the embedding application determines the density from its current settings, such as the user preference.
                           filters:
                             default: []
                             description: List of filters to apply to the data in the tab.
@@ -83503,8 +83512,7 @@ components:
                               - enum:
                                   - auto
                                 type: string
-                            default: 3
-                            description: Header row height. Use a number (1–5) or "auto" to size based on content. If omitted, defaults to Discover or embeddable defaults (e.g. user preference / local storage).
+                            description: Header row height. Use a number (1–5) or "auto" to size based on content. If omitted, Discover or the embedding application determines the height from its current settings, such as the user preference.
                           query:
                             $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-as-code-query'
                           row_height:
@@ -83515,16 +83523,13 @@ components:
                               - enum:
                                   - auto
                                 type: string
-                            default: 3
                             description: Data row height. Use a number (1–20) or "auto" to size based on content. If omitted, defaults to the advanced setting "discover:rowHeightOption".
                           rows_per_page:
-                            default: 100
                             description: The number of rows to display per page in the data table. If omitted, defaults to the advanced setting "discover:sampleRowsPerPage".
                             maximum: 10000
                             minimum: 1
                             type: number
                           sample_size:
-                            default: 500
                             description: The number of documents to sample for the data table. If omitted, defaults to the advanced setting "discover:sampleSize".
                             maximum: 10000
                             minimum: 10
@@ -83570,7 +83575,6 @@ components:
                         type: object
                         properties:
                           column_order:
-                            default: []
                             description: Ordered list of field names to display in the data table. If omitted, defaults to the advanced setting "defaultColumns" or the referenced saved object.
                             items:
                               description: Field name of a column in display order.
@@ -83601,8 +83605,7 @@ components:
                               - enum:
                                   - normal
                                 type: string
-                            default: compact
-                            description: Data grid density. Choose "compact", "expanded", or "normal" for row spacing. If omitted, defaults to Discover or embeddable defaults (e.g. user preference / local storage).
+                            description: Data grid density. Choose "compact", "expanded", or "normal" for row spacing. If omitted, Discover or the embedding application determines the density from its current settings, such as the user preference.
                           header_row_height:
                             anyOf:
                               - maximum: 5
@@ -83611,8 +83614,7 @@ components:
                               - enum:
                                   - auto
                                 type: string
-                            default: 3
-                            description: Header row height. Use a number (1–5) or "auto" to size based on content. If omitted, defaults to Discover or embeddable defaults (e.g. user preference / local storage).
+                            description: Header row height. Use a number (1–5) or "auto" to size based on content. If omitted, Discover or the embedding application determines the height from its current settings, such as the user preference.
                           row_height:
                             anyOf:
                               - maximum: 20
@@ -83621,16 +83623,13 @@ components:
                               - enum:
                                   - auto
                                 type: string
-                            default: 3
                             description: Data row height. Use a number (1–20) or "auto" to size based on content. If omitted, defaults to the advanced setting "discover:rowHeightOption".
                           rows_per_page:
-                            default: 100
                             description: The number of rows to display per page in the data table. If omitted, defaults to the advanced setting "discover:sampleRowsPerPage".
                             maximum: 10000
                             minimum: 1
                             type: number
                           sample_size:
-                            default: 500
                             description: The number of documents to sample for the data table. If omitted, defaults to the advanced setting "discover:sampleSize".
                             maximum: 10000
                             minimum: 10
@@ -112204,15 +112203,9 @@ components:
         - type: object
           properties:
             parameters:
-              type: object
-              properties:
-                id:
-                  description: ID of the response action to cancel
-                  example: 7f8c9b2a-4d3e-4f5a-8b1c-2e3f4a5b6c7d
-                  minLength: 1
-                  type: string
-              required:
-                - id
+              oneOf:
+                - $ref: '#/components/schemas/Security_Endpoint_Management_API_ElasticDefendCancelParameters'
+                - $ref: '#/components/schemas/Security_Endpoint_Management_API_MDECancelParameters'
           required:
             - parameters
     Security_Endpoint_Management_API_CloudFileScriptParameters:
@@ -112318,6 +112311,23 @@ components:
           example: /api/endpoint/action/497f6eca-6276/file/35645-6276-4993/download
           format: uri-reference
           type: string
+    Security_Endpoint_Management_API_ElasticDefendCancelParameters:
+      description: Elastic Defend agent type
+      properties:
+        force:
+          description: Forcefully cancel the response action even when it is already running
+          example: true
+          type: boolean
+        id:
+          description: ID of the response action to cancel
+          example: 7f8c9b2a-4d3e-4f5a-8b1c-2e3f4a5b6c7d
+          maxLength: 50
+          minLength: 1
+          type: string
+      required:
+        - id
+      title: ElasticDefendCancelParameters
+      type: object
     Security_Endpoint_Management_API_EndDate:
       description: An end date in ISO format or Date Math format.
       example: '2023-10-31T23:59:59.999Z'
@@ -113038,6 +113048,19 @@ components:
       example: "united.endpoint.host.os.name : 'Windows'"
       maxLength: 30000
       type: string
+    Security_Endpoint_Management_API_MDECancelParameters:
+      description: Microsoft Defender for Endpoint agent type
+      properties:
+        id:
+          description: ID of the response action to cancel
+          example: 7f8c9b2a-4d3e-4f5a-8b1c-2e3f4a5b6c7d
+          maxLength: 50
+          minLength: 1
+          type: string
+      required:
+        - id
+      title: MDECancelParameters
+      type: object
     Security_Endpoint_Management_API_MDERunScriptParameters:
       description: Parameters for Run Script response action against Microsoft Defender Endpoint agent type.
       example:
