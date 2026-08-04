@@ -24,12 +24,7 @@ import React, { useState } from 'react';
 import type { GenAiMessage } from './get_genai_fields';
 import { getMessageCopyText } from './get_genai_fields';
 import { GenAiMessageContent } from './genai_message_content';
-import { GENAI_EBT_CLICK_ACTIONS } from './ebt_constants';
-
-export interface GenAiEbtProps {
-  /** Populates `data-ebt-element` on tracked interactive elements (e.g. copy buttons). */
-  element: string;
-}
+import { GENAI_EBT_CLICK_ACTIONS, type GenAiEbtProps } from './ebt_constants';
 
 /**
  * Fixed-size role avatar using EUI semantic background tokens so the circle

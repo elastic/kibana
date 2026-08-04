@@ -17,19 +17,18 @@ type Props = {
 } & Pick<React.ComponentProps<typeof EuiBetaBadge>, 'size' | 'style'>;
 
 export function GenAiTechnicalPreviewBadge({ icon = 'flask', size = 's', style }: Props) {
+  const description = i18n.translate('apmUiShared.genAi.technicalPreviewBadgeDescription', {
+    defaultMessage:
+      'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
+  });
+
   return (
     <EuiBetaBadge
       label={i18n.translate('apmUiShared.genAi.technicalPreviewBadgeLabel', {
         defaultMessage: 'Technical preview',
       })}
-      aria-label={i18n.translate('apmUiShared.genAi.technicalPreviewBadge.ariaLabel', {
-        defaultMessage:
-          'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
-      })}
-      tooltipContent={i18n.translate('apmUiShared.genAi.technicalPreviewBadgeDescription', {
-        defaultMessage:
-          'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
-      })}
+      aria-label={description}
+      tooltipContent={description}
       iconType={icon}
       size={size}
       style={style}

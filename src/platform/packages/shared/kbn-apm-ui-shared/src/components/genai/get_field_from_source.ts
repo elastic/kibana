@@ -18,6 +18,10 @@ import {
  * GenAI fields whose values regularly exceed the `ignore_above: 1024` limit of
  * the `attributes.*` keyword mappings. The ES fields API omits ignored values
  * (the doc lists them under `_ignored`), so these must be read from `_source`.
+ *
+ * Keep in sync with the server-side twin in the APM plugin
+ * (`server/routes/event_metadata/merge_long_fields_from_source.ts`) — the
+ * server cannot import this browser package.
  */
 export const GEN_AI_LONG_MESSAGE_FIELDS = [
   ATTRIBUTE_GEN_AI_INPUT_MESSAGES,
@@ -29,8 +33,8 @@ export const GEN_AI_LONG_MESSAGE_FIELDS = [
  * Reads a dotted field path from a document `_source`, accounting for the two
  * shapes it can take depending on the ingest path:
  *
- * - OTel documents keep attribute names as flattened dotted keys INSIDE the
- *   `attributes` (or `resource.attributes`) object, e.g.
+ * - OTel documents keep attribute names as flattened dotted keys INSIDE a
+ *   top-level container object, e.g.
  *   `_source.attributes['gen_ai.input.messages']`.
  * - Classic APM documents store fully nested objects, e.g.
  *   `_source.span.id`.

@@ -26,7 +26,7 @@ export function TraceDocFlyout({ indexes, ...rest }: TraceDocFlyoutProps) {
     // we might want to pass it as prop and reuse the concept
     <DataSourcesProvider indexes={indexes} profileId="null">
       <DocViewerExtensionActionsProvider>
-        <DocumentDetailFlyout ebtHost={GENAI_EBT_HOSTS.APM} {...rest} />
+        <DocumentDetailFlyout {...rest} ebtHost={GENAI_EBT_HOSTS.APM} />
       </DocViewerExtensionActionsProvider>
     </DataSourcesProvider>
   );

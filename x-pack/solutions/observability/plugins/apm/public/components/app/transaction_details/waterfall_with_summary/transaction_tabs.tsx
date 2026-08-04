@@ -12,13 +12,15 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 import { LazySavedSearchComponent, type SavedSearchTableConfig } from '@kbn/saved-search-component';
 import { getEbtProps, type EbtClickAttrs } from '@kbn/ebt-click';
-import { GENAI_EBT_CLICK_ACTIONS, GENAI_EBT_HOSTS } from '@kbn/apm-ui-shared';
 import { getTimestampUs } from '../../../../../common/utils/get_timestamp_us';
 import { useKibana } from '../../../../context/kibana_context/use_kibana';
 import type { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { useDiscoverHref } from '../../../shared/links/discover_links/use_discover_href';
-import { getGenAiTabContent } from '../../../shared/genai_tab/get_genai_tab_content';
+import {
+  getGenAiTabContent,
+  getGenAiTabEbt,
+} from '../../../shared/genai_tab/get_genai_tab_content';
 import { useGenAiData } from '../../../shared/genai_tab/use_genai_data';
 import { TransactionMetadata } from '../../../shared/metadata_table/transaction_metadata';
 import { UnifiedWaterfallContainer } from './waterfall_container/unified_waterfall_container';
@@ -145,11 +147,7 @@ export function TransactionTabs({
               component: genAiTabContent.content,
               prepend: genAiTabContent.prepend,
               dataTestSubj: genAiTabContent['data-test-subj'],
-              ebt: {
-                action: GENAI_EBT_CLICK_ACTIONS.VIEW_GENAI,
-                element: TRACE_SAMPLE_EBT_ELEMENTS.TABS,
-                detail: GENAI_EBT_HOSTS.APM,
-              },
+              ebt: getGenAiTabEbt(TRACE_SAMPLE_EBT_ELEMENTS.TABS),
             },
           }
         : {}),

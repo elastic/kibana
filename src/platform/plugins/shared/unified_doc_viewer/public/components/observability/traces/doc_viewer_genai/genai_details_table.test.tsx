@@ -13,7 +13,6 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import React from 'react';
 import type { ContentFrameworkTableProps } from '../../../content_framework';
 import {
-  GENAI_DETAIL_FIELD_NAMES,
   GenAiDetailsTable,
   getGenAiDetailFieldNames,
   hasGenAiDetailFields,
@@ -36,21 +35,6 @@ function buildHit(flattened: Record<string, unknown>): DataTableRecord {
 }
 
 const dataView = {} as DataView;
-
-describe('GENAI_DETAIL_FIELD_NAMES', () => {
-  it('includes all three ingest shapes for each detail field', () => {
-    expect(GENAI_DETAIL_FIELD_NAMES).toEqual(
-      expect.arrayContaining([
-        'attributes.gen_ai.response.model',
-        'gen_ai.response.model',
-        'labels.gen_ai_response_model',
-        'attributes.gen_ai.request.temperature',
-        'gen_ai.request.temperature',
-        'labels.gen_ai_request_temperature',
-      ])
-    );
-  });
-});
 
 describe('getGenAiDetailFieldNames', () => {
   it('picks a single field name per canonical attribute, even when multiple shapes are present', () => {

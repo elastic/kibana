@@ -70,7 +70,7 @@ export function useGenAiData({ hit }: { hit: DataTableRecord }): UseGenAiDataRes
 
   const { value: fetchedSource, loading } = useAbortableAsync(
     async ({ signal }) => {
-      if (!shouldFetch) {
+      if (!shouldFetch || !docId || !docIndex) {
         return undefined;
       }
 
@@ -83,7 +83,7 @@ export function useGenAiData({ hit }: { hit: DataTableRecord }): UseGenAiDataRes
               size: 1,
               query: {
                 bool: {
-                  filter: [{ ids: { values: [docId!] } }, { term: { _index: docIndex } }],
+                  filter: [{ ids: { values: [docId] } }],
                 },
               },
               _source: [...GEN_AI_LONG_MESSAGE_FIELDS],

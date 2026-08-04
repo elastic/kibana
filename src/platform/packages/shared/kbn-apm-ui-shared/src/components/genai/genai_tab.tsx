@@ -22,7 +22,8 @@ import React from 'react';
 import { asInteger } from '../../utils';
 import type { GenAiFields } from './get_genai_fields';
 import { GenAiFieldValue } from './genai_field_value';
-import { GenAiMessages, type GenAiEbtProps } from './genai_messages';
+import { GenAiMessages } from './genai_messages';
+import type { GenAiEbtProps } from './ebt_constants';
 import { GenAiSection } from './genai_section';
 
 interface PillProps {
@@ -61,7 +62,9 @@ const detailTableCss = css`
 const DETAIL_COLUMNS: Array<EuiBasicTableColumn<DetailRow>> = [
   {
     field: 'label' as const,
-    name: 'Field',
+    name: i18n.translate('apmUiShared.genAi.details.fieldColumnLabel', {
+      defaultMessage: 'Field',
+    }),
     width: '160px',
     render: (label: React.ReactNode) => (
       <EuiText size="xs">
@@ -71,7 +74,9 @@ const DETAIL_COLUMNS: Array<EuiBasicTableColumn<DetailRow>> = [
   },
   {
     field: 'content' as const,
-    name: 'Value',
+    name: i18n.translate('apmUiShared.genAi.details.valueColumnLabel', {
+      defaultMessage: 'Value',
+    }),
     render: (content: React.ReactNode) => content,
   },
 ];

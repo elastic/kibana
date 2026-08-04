@@ -8,15 +8,17 @@
  */
 
 export { GenAiTab } from './genai_tab';
-export { GenAiMessages, type GenAiEbtProps } from './genai_messages';
 export { GenAiTechnicalPreviewBadge } from './technical_preview_badge';
 export {
   hasGenAiData,
   getGenAiFields,
-  parseGenAiMessages,
-  getMessageCopyText,
   type GenAiFields,
   type GenAiMessage,
 } from './get_genai_fields';
 export { getFieldFromSource, GEN_AI_LONG_MESSAGE_FIELDS } from './get_field_from_source';
-export { GENAI_EBT_CLICK_ACTIONS, GENAI_EBT_HOSTS, type GenAiEbtHost } from './ebt_constants';
+export {
+  GENAI_EBT_CLICK_ACTIONS,
+  GENAI_EBT_HOSTS,
+  type GenAiEbtHost,
+  type GenAiEbtProps,
+} from './ebt_constants';

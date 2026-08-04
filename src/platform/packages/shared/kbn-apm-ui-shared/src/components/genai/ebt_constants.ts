@@ -29,3 +29,8 @@ export const GENAI_EBT_HOSTS = {
 } as const;
 
 export type GenAiEbtHost = (typeof GENAI_EBT_HOSTS)[keyof typeof GENAI_EBT_HOSTS];
+
+export interface GenAiEbtProps {
+  /** Populates `data-ebt-element` on tracked interactive elements (e.g. copy buttons). */
+  element: string;
+}

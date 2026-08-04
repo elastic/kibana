@@ -63,9 +63,6 @@ const DETAIL_FIELD_TITLES: Record<string, string> = {
   [ATTRIBUTE_GEN_AI_REQUEST_SEED]: 'seed',
 };
 
-export const GENAI_DETAIL_FIELD_NAMES: string[] =
-  Object.keys(DETAIL_FIELD_TITLES).flatMap(fallbackShapes);
-
 const FIELD_CONFIGURATIONS: ContentFrameworkTableProps['fieldConfigurations'] = Object.fromEntries(
   Object.entries(DETAIL_FIELD_TITLES).flatMap(([attributeName, title]) =>
     fallbackShapes(attributeName).map((fieldName) => [fieldName, { title }])
