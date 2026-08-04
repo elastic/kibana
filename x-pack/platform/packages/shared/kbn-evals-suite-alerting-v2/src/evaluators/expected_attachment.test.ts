@@ -7,10 +7,7 @@
 
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import type { TaskOutput } from '@kbn/evals';
-import {
-  ACTION_POLICY_ATTACHMENT_TYPE,
-  RULE_ATTACHMENT_TYPE,
-} from '@kbn/alerting-v2-schemas';
+import { ACTION_POLICY_ATTACHMENT_TYPE, RULE_ATTACHMENT_TYPE } from '@kbn/alerting-v2-schemas';
 import {
   RENDER_ATTACHMENT_TAG_RE,
   createExpectedAttachmentDataEvaluator,
