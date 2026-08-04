@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { EMPTY } from 'rxjs';
-import useLocalStorage from 'react-use/lib/useLocalStorage';
 import useObservable from 'react-use/lib/useObservable';
 import {
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
@@ -15,6 +14,33 @@ import {
 } from '@kbn/management-settings-ids';
 import { useKibana } from '../use_kibana';
 import { storageKeys } from '../../storage_keys';
+
+type ConnectorIdListener = (connectorId: string | undefined) => void;
+const connectorIdListeners = new Set<ConnectorIdListener>();
+
+const readStoredConnectorId = (): string | undefined => {
+  try {
+    const raw = localStorage.getItem(storageKeys.lastUsedConnector);
+    if (!raw) return undefined;
+    const parsed: unknown = JSON.parse(raw);
+    return typeof parsed === 'string' ? parsed : undefined;
+  } catch {
+    return undefined;
+  }
+};
+
+let storedConnectorId: string | undefined = readStoredConnectorId();
+
+const writeStoredConnectorId = (connectorId: string): void => {
+  storedConnectorId = connectorId;
+  localStorage.setItem(storageKeys.lastUsedConnector, JSON.stringify(connectorId));
+  connectorIdListeners.forEach((l) => l(connectorId));
+};
+
+export const _resetConnectorSelectionStore = (): void => {
+  storedConnectorId = readStoredConnectorId();
+  connectorIdListeners.clear();
+};
 
 export interface UseConnectorSelectionResult {
   selectedConnector?: string;
@@ -28,9 +54,14 @@ export function useConnectorSelection(): UseConnectorSelectionResult {
     services: { settings },
   } = useKibana();
 
-  const [selectedConnector, setSelectedConnector] = useLocalStorage<string>(
-    storageKeys.lastUsedConnector
-  );
+  const [selectedConnector, setSelectedConnector] = useState<string | undefined>(storedConnectorId);
+
+  useEffect(() => {
+    connectorIdListeners.add(setSelectedConnector);
+    return () => {
+      connectorIdListeners.delete(setSelectedConnector);
+    };
+  }, []);
 
   const defaultConnector$ = useMemo(
     () => settings?.client.get$<string | undefined>(GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR) ?? EMPTY,
@@ -45,12 +76,9 @@ export function useConnectorSelection(): UseConnectorSelectionResult {
   );
   const defaultConnectorOnly = useObservable(defaultConnectorOnly$, false) ?? false;
 
-  const selectConnector = useCallback(
-    (connectorId: string) => {
-      setSelectedConnector(connectorId);
-    },
-    [setSelectedConnector]
-  );
+  const selectConnector = useCallback((connectorId: string) => {
+    writeStoredConnectorId(connectorId);
+  }, []);
 
   return {
     selectedConnector,
