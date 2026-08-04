@@ -148,6 +148,7 @@ export interface EvalsExecutorClient {
       metadata?: Record<string, unknown>;
       task: ExperimentTask<TEvaluationDataset['examples'][number], TTaskOutput>;
       concurrency?: number;
+      trustUpstreamDataset?: boolean;
     },
     evaluators: Array<Evaluator<TEvaluationDataset['examples'][number], TTaskOutput>>
   ): Promise<DatasetRunResult[]>;

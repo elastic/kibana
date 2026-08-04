@@ -417,6 +417,7 @@ export function createEvaluateExternalDataset({
           },
         ],
         task,
+        trustUpstreamDataset: true,
       },
       selectedEvaluators
     );
