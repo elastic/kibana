@@ -19,8 +19,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const svlObltNavigation = getService('svlObltNavigation');
   const toasts = getService('toasts');
 
-  // Failing: See https://github.com/elastic/kibana/issues/246157
-  describe.skip('Cases list', function () {
+  describe('Cases list', function () {
     before(async () => {
       await svlCommonPage.loginWithPrivilegedRole();
       await svlObltNavigation.navigateToLandingPage();
@@ -218,8 +217,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await toasts.dismissAll();
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/246048
-      describe.skip('Status', () => {
+      describe('Status', () => {
         createNCasesBeforeDeleteAllAfter(1, getPageObject, getService);
 
         it('to in progress', async () => {
