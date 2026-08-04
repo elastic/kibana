@@ -104,7 +104,7 @@ export const WorkflowExecutionList = ({
 }: WorkflowExecutionListProps) => {
   const styles = useMemoCss(componentStyles);
   const { cloud } = useKibana().services;
-  const showUnresolvedExecutors = !cloud?.isCloudEnabled;
+  const showUnresolvedExecutors = !cloud?.isServerlessEnabled;
   const scrollableContentRef = useRef<HTMLDivElement>(null);
 
   const executedByValuesToResolve = useMemo(() => {

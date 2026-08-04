@@ -115,11 +115,10 @@ export function ExecutionListFilters({
     [availableExecutedByOptions]
   );
 
-  const getExecutedByOption = (value: string): EuiComboBoxOptionOption<string> | undefined => {
-    const label = availableExecutedByOptionsByValue.get(value);
-
-    return label ? { label, value } : undefined;
-  };
+  const getExecutedByOption = (value: string): EuiComboBoxOptionOption<string> => ({
+    label: availableExecutedByOptionsByValue.get(value) ?? value,
+    value,
+  });
 
   const handleSelectableOptionsChange = (
     newOptions: EuiSelectableOption<ExecutionListFiltersItem>[]
@@ -257,12 +256,14 @@ export function ExecutionListFilters({
                 }
               )}
               options={availableExecutedByOptions.map(({ label, value }) => ({ label, value }))}
-              selectedOptions={filters.executedBy.flatMap((executedBy) => {
-                const option = getExecutedByOption(executedBy);
-
-                return option ? [option] : [];
-              })}
+              selectedOptions={filters.executedBy.map(getExecutedByOption)}
               onChange={handleExecutedByChange}
+              onCreateOption={(searchValue) => {
+                handleExecutedByChange([
+                  ...filters.executedBy.map(getExecutedByOption),
+                  { label: searchValue, value: searchValue },
+                ]);
+              }}
               isClearable={true}
               compressed
               fullWidth
