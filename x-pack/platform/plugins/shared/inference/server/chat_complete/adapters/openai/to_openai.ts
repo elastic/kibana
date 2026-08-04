@@ -136,7 +136,7 @@ export function messagesToOpenAI({
       case MessageRole.Assistant:
         const assistantMessage: ChatCompletionAssistantMessageParam = {
           role: 'assistant',
-          content: message.content || null,
+          content: message.content ?? '',
           tool_calls: message.toolCalls?.map((toolCall) => {
             return {
               function: {
