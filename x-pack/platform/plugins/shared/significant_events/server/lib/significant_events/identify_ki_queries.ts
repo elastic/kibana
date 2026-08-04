@@ -13,7 +13,10 @@ import {
   SIGNIFICANT_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
   SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
 } from '@kbn/significant-events-schema';
-import { identifyKIQueries as identifyKIQueriesThroughAgent } from '@kbn/streams-ai';
+import {
+  identifyKIQueries as identifyKIQueriesThroughAgent,
+  QUERY_GENERATION_EXCLUDED_FEATURE_TYPES,
+} from '@kbn/streams-ai';
 import type { SignificantEventsToolUsage } from '@kbn/streams-ai';
 import type { ToolCallback, ToolDefinition } from '@kbn/inference-common';
 import type { KnowledgeIndicatorClient } from '../knowledge_indicators';
@@ -126,7 +129,10 @@ export async function identifyKIQueries(
     signal,
     systemPrompt: combinedSystemPrompt,
     getFeatures: async (filters) => {
-      const response = await kiClient.getFeatures(definition.name, filters);
+      const response = await kiClient.getFeatures(definition.name, {
+        ...filters,
+        excludedType: [...QUERY_GENERATION_EXCLUDED_FEATURE_TYPES],
+      });
       return response.hits;
     },
     additionalTools: hasAdditionalTools ? additionalTools : undefined,
