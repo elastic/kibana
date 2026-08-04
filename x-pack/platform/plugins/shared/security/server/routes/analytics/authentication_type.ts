@@ -41,7 +41,10 @@ export function defineRecordAnalyticsOnAuthTypeRoutes({
       },
       validate: {
         body: schema.nullable(
-          schema.object({ signature: schema.string({ maxLength: 128 }), timestamp: schema.number() })
+          schema.object({
+            signature: schema.string({ maxLength: 128 }),
+            timestamp: schema.number(),
+          })
         ),
       },
     },
