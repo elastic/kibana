@@ -346,8 +346,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/240911
-    describe.skip('pagination', () => {
+    describe('pagination', () => {
       let createdCase: any;
 
       before(async () => {

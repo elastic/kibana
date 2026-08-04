@@ -115,28 +115,45 @@ export function CasesAPIServiceProvider({ getService }: FtrProviderContext) {
       const severities = Object.values(CaseSeverity);
       const statuses = Object.values(CaseStatuses);
 
+      const maxAttempts = 3;
+
       for (let index = 0; index < totalUpdates; index++) {
         const severity = severities[index % severities.length];
         const status = statuses[index % statuses.length];
 
-        const theCase = await updateCase({
-          supertest: kbnSupertest,
-          params: {
-            cases: [
-              {
-                id: caseId,
-                version: latestVersion,
-                title: `Title update ${index}`,
-                description: `Desc update ${index}`,
-                severity,
-                status,
-                tags: [`tag-${index}`],
+        for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+          try {
+            const theCase = await updateCase({
+              supertest: kbnSupertest,
+              params: {
+                cases: [
+                  {
+                    id: caseId,
+                    version: latestVersion,
+                    title: `Title update ${index}`,
+                    description: `Desc update ${index}`,
+                    severity,
+                    status,
+                    tags: [`tag-${index}`],
+                  },
+                ],
               },
-            ],
-          },
-        });
+            });
 
-        latestVersion = theCase[0].version;
+            latestVersion = theCase[0].version;
+            break;
+          } catch (error) {
+            if (attempt === maxAttempts) {
+              throw error;
+            }
+
+            // The case version captured at creation can go stale before this
+            // runs (e.g. loading the case view page bumps it), so refresh it
+            // and retry on a 409 conflict instead of failing the test.
+            const refreshed = await getCase({ supertest: kbnSupertest, caseId });
+            latestVersion = refreshed.version;
+          }
+        }
       }
     },
 
