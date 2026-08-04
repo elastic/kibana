@@ -45,6 +45,7 @@ export class BrowserAuthService extends FtrService {
   private readonly log = this.ctx.getService('log');
   private readonly deployment = this.ctx.getService('deployment');
   private readonly supertestWithoutAuth = this.ctx.getService('supertestWithoutAuth');
+  private readonly retry = this.ctx.getService('retry');
 
   // Browser-specific services — only present in functional (UI) test contexts.
 
@@ -113,6 +114,18 @@ export class BrowserAuthService extends FtrService {
 
     this.log.debug(`[browserAuth] injecting 'sid' cookie`);
     await this.browser.setCookie('sid', cookie.value);
+
+    // The session is written out-of-band by POST /internal/security/login and is not
+    // immediately retrievable. Poll until the server resolves it before navigating —
+    // navigating into that window makes Kibana raise UNEXPECTED_SESSION_ERROR and
+    // redirect to /login, so the post-navigation userMenuButton wait times out.
+    await this.retry.tryForTime(10_000, async () => {
+      await this.supertestWithoutAuth
+        .get('/internal/security/me')
+        .set('kbn-xsrf', 'xxx')
+        .set('Cookie', `sid=${cookie.value}`)
+        .expect(200);
+    });
 
     const destination = targetUrl ?? this.deployment.getHostPort();
     this.log.debug(`[browserAuth] navigating to ${destination}`);
