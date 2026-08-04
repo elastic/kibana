@@ -212,7 +212,6 @@ export const ConnectorIconsMap: Map<
         )
     ),
   ],
-
   [
     '.snowflake',
     lazy(() => import(/* webpackChunkName: "connectorIconsnowflake" */ './specs/snowflake/icon')),
@@ -302,6 +301,13 @@ export const ConnectorIconsMap: Map<
     '.azure_monitor',
     lazy(
       () => import(/* webpackChunkName: "connectorIconazuremonitor" */ './specs/azure_monitor/icon')
+   ),
+  ],
+  [
+    '.aws_cloudwatch',
+    lazy(
+      () =>
+        import(/* webpackChunkName: "connectorIconawscloudwatch" */ './specs/aws_cloudwatch/icon')
     ),
   ],
   [
