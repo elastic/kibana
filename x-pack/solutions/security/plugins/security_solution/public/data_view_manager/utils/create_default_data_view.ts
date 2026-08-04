@@ -6,7 +6,7 @@
  */
 
 import type { CoreStart } from '@kbn/core/public';
-import { initDataView } from './init_data_view';
+import { initDataView } from '@kbn/data-view-manager';
 import { initializeSecuritySolution } from '../../common/components/initialization/api';
 import {
   INITIALIZATION_FLOW_SECURITY_DATA_VIEWS,

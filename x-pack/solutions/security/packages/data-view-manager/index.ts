@@ -22,4 +22,7 @@ export * from './src/redux/slices';
 export * from './src/redux/reducer';
 export * from './src/redux/selectors';
 
+export * from './src/utils/build_browser_fields';
+export * from './src/utils/init_data_view';
+
 export { DataViewManagerProvider } from './src/provider';

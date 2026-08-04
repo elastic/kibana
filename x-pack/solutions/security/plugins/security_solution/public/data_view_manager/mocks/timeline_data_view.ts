@@ -7,7 +7,7 @@
 
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 import type { BrowserFields } from '@kbn/timelines-plugin/common';
-import { initDataView } from '../utils/init_data_view';
+import { initDataView } from '@kbn/data-view-manager';
 import { mockBrowserFields, mockIndexFields } from '../../common/containers/source/mock';
 import {
   DEFAULT_DATA_VIEW_ID,

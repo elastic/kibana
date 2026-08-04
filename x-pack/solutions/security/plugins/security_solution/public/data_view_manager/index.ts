@@ -33,7 +33,7 @@ export * from './hooks/use_sync_url_state';
 export * from './components/data_view_picker';
 
 export * from './utils/paths';
-export * from './utils/build_browser_fields';
+export { buildBrowserFields } from '@kbn/data-view-manager';
 
 // Imperative selector for non-React consumers (e.g. redux middleware).
 export { scopedDataViewSelector } from '@kbn/data-view-manager';

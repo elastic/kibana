@@ -17,6 +17,8 @@
     "target/**/*"
   ],
   "kbn_references": [
-    "@kbn/data-views-plugin"
+    "@kbn/data-views-plugin",
+    "@kbn/timelines-plugin",
+    "@kbn/response-ops-alerts-fields-browser"
   ]
 }
