@@ -9,7 +9,7 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import type { GlobalSearchResultProvider } from '@kbn/global-search-plugin/public';
 import { distance } from 'fastest-levenshtein';
 import { of } from 'rxjs';
-import { NIGHTSHIFT_PATH, OBSERVABILITY_BASE_PATH } from '../../../../common/locators/paths';
+import { NIGHTSHIFT_PATH, OBSERVABILITY_BASE_PATH } from '../../common/locators/paths';
 
 const APPLICATION_RESULT_TYPE = 'application';
 const SEARCH_TERMS = ['nightshift', 'significant events'] as const;
