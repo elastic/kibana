@@ -312,6 +312,7 @@ describe('Outputs preconfiguration', () => {
           "id": "fleet-default-output",
           "is_default": true,
           "is_default_monitoring": true,
+          "is_default_otel": false,
           "is_preconfigured": true,
           "name": "default",
           "type": "elasticsearch",
