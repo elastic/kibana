@@ -8,7 +8,6 @@
  */
 
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/public';
-import type { ExpressionFunctionKibana } from '@kbn/data-plugin/public';
 import type { Vis } from '@kbn/visualizations-plugin/public';
 import type { VegaExpressionFunctionDefinition, VisParams } from './vega_fn';
 
@@ -18,11 +17,4 @@ export const toExpressionAst = (vis: Vis<VisParams>) => {
   });
 
   return buildExpression([vega]).toAst();
-};
-
-export const toVegaEmbeddableExpressionAst = (spec: string) => {
-  const kibana = buildExpressionFunction<ExpressionFunctionKibana>('kibana', {});
-  const vega = buildExpressionFunction<VegaExpressionFunctionDefinition>('vega', { spec });
-
-  return buildExpression([kibana, vega]).toAst();
 };

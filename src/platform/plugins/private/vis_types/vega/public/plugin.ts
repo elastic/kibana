@@ -108,28 +108,23 @@ export class VegaPlugin implements Plugin<void, void> {
 
     inspector.registerView(getVegaInspectorView({ uiSettings: core.uiSettings }));
 
-    let runtimePromise: Promise<typeof import('./async_module')> | undefined;
-    const loadVegaRuntime = () =>
-      (runtimePromise ??= Promise.all([core.getStartServices(), import('./async_module')]).then(
-        ([[, startDeps], runtime]) => {
-          if (!startDeps.expressions.getFunction('vega')) {
-            expressions.registerFunction(() => runtime.createVegaFn(visualizationDependencies));
-            expressions.registerRenderer(runtime.getVegaVisRenderer(visualizationDependencies));
-          }
-          return runtime;
-        }
-      ));
-
     visualizations.createBaseVisualizationAsync('vega', async () => {
-      const { vegaVisType } = await loadVegaRuntime();
+      const [[, startPlugins], { vegaVisType, createVegaFn, getVegaVisRenderer }] =
+        await Promise.all([core.getStartServices(), import('./async_module')]);
+      if (!startPlugins.expressions.getFunction('vega')) {
+        expressions.registerFunction(() => createVegaFn(visualizationDependencies));
+        expressions.registerRenderer(getVegaVisRenderer(visualizationDependencies));
+      }
       return vegaVisType;
     });
 
     embeddable.registerEmbeddablePublicDefinition(VEGA_EMBEDDABLE_TYPE, async () => {
-      await loadVegaRuntime();
       const [startCore, startDeps] = await core.getStartServices();
       const { vegaEmbeddableFactory } = await import('./embeddable/vega_embeddable');
-      return vegaEmbeddableFactory(startCore, startDeps);
+      return vegaEmbeddableFactory(startCore, {
+        uiActions: startDeps.uiActions,
+        visualizationDependencies,
+      });
     });
   }
 

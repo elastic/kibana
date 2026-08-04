@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useRef } from 'react';
+import React, { Suspense, lazy, useEffect, useRef } from 'react';
+import { EuiLoadingChart } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { dispatchRenderComplete } from '@kbn/kibana-utils-plugin/public';
@@ -20,7 +21,6 @@ import type {
 } from '@kbn/embeddable-plugin/public';
 import { BehaviorSubject, combineLatest, EMPTY, map, merge, skip, switchMap, tap } from 'rxjs';
 import type { Query } from '@kbn/es-query';
-import type { ExpressionRendererParams } from '@kbn/expressions-plugin/public';
 import { parse } from 'hjson';
 import { ON_APPLY_FILTER, ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import {
@@ -28,11 +28,13 @@ import {
   apiIsPresentationContainer,
   areTriggersDisabled,
   fetch$,
+  getInheritedViewMode,
   initializeStateApi,
   initializeTimeRangeManager,
   initializeTitleManager,
   type HasEditCapabilities,
   type ProjectRoutingOverrides,
+  type PublishesBlockingError,
   type PublishesDataLoading,
   type PublishesDataViews,
   type PublishesWritableDescription,
@@ -46,16 +48,21 @@ import {
   timeRangeComparators,
   titleComparators,
   useBatchedPublishingSubjects,
-  useStateFromPublishingSubject,
 } from '@kbn/presentation-publishing';
 import { openLazyFlyout } from '@kbn/presentation-util';
 import { VEGA_EMBEDDABLE_TYPE, VEGA_EVENT_APPLY_FILTER } from '../constants';
-import type { VegaPluginStartDependencies } from '../plugin';
-import { toVegaEmbeddableExpressionAst } from '../to_ast';
+import type { VegaEvent } from '../types';
+import type { VegaPluginStartDependencies, VegaVisualizationDependencies } from '../plugin';
+import type { VegaParser } from '../data_model/vega_parser';
 import { extractIndexPatternsFromSpec } from '../lib/extract_index_pattern';
 import { extractProjectRoutingOverrides } from '../lib/extract_project_routing_overrides';
 import { specUsesEsql } from '../lib/spec_uses_esql';
+import { reportVegaRender } from '../lib/vega_render_telemetry';
 import { createInspectorAdapters } from '../vega_inspector';
+
+const LazyVegaVisComponent = lazy(() =>
+  import('../async_services').then(({ VegaVisComponent }) => ({ default: VegaVisComponent }))
+);
 
 const parseSpec = (specString: string) => {
   try {
@@ -64,6 +71,16 @@ const parseSpec = (specString: string) => {
     return undefined;
   }
 };
+
+/**
+ * Everything `VegaVisComponent` needs for one render, captured together so that `showWarnings` can
+ * only change alongside a new `visData` identity. The component rebuilds its Vega view when
+ * `showWarnings` changes but only draws when `visData` changes, so the two must move as a pair.
+ */
+interface VegaRenderInput {
+  showWarnings: boolean;
+  visData: VegaParser;
+}
 
 /**
  * By-value state for the dedicated Dashboard Vega panel. The panel is UI-only: it is not
@@ -82,6 +99,7 @@ export type VegaEmbeddableApi = DefaultEmbeddableApi<VegaByValueState> &
   HasEditCapabilities &
   HasInspectorAdapters &
   HasSupportedTriggers &
+  PublishesBlockingError &
   PublishesDataLoading &
   PublishesWritableDescription &
   PublishesWritableTitle &
@@ -91,8 +109,8 @@ export type VegaEmbeddableApi = DefaultEmbeddableApi<VegaByValueState> &
   PublishesRendered;
 
 interface VegaEmbeddableDependencies {
-  expressions: Pick<VegaPluginStartDependencies['expressions'], 'ReactExpressionRenderer'>;
   uiActions: Pick<VegaPluginStartDependencies['uiActions'], 'executeTriggerActions'>;
+  visualizationDependencies: VegaVisualizationDependencies;
 }
 
 export const vegaEmbeddableFactory = (
@@ -128,10 +146,11 @@ export const vegaEmbeddableFactory = (
       )
       .subscribe((dataViews) => dataViews$.next(dataViews));
 
-    const expressionParams$ = new BehaviorSubject<ExpressionRendererParams>({ expression: '' });
+    const renderInput$ = new BehaviorSubject<VegaRenderInput | undefined>(undefined);
+    const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
     const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
     const rendered$ = new BehaviorSubject(false);
-    let inspectorAdapters = createInspectorAdapters();
+    const inspectorAdapters = createInspectorAdapters();
     let abortController = new AbortController();
 
     const stateApi = initializeStateApi<VegaByValueState>({
@@ -171,6 +190,7 @@ export const vegaEmbeddableFactory = (
       ...timeRangeManager.api,
       ...drilldownsManager.api,
       ...stateApi,
+      blockingError$,
       dataLoading$,
       rendered$,
       usesEsql$,
@@ -200,8 +220,6 @@ export const vegaEmbeddableFactory = (
                 isNewPanel={isNewPanel}
                 onPreview={(spec) => spec$.next(spec)}
                 onSave={(spec) => spec$.next(spec)}
-                // Runs on any close that is not a Save: a new panel is removed, an existing panel
-                // is restored to the spec captured when the flyout opened.
                 onRevert={() => {
                   if (isNewPanel && apiIsPresentationContainer(parentApi)) {
                     parentApi.removePanel(api.uuid);
@@ -217,61 +235,111 @@ export const vegaEmbeddableFactory = (
       getInspectorAdapters: () => inspectorAdapters,
     });
 
-    const fetchSubscription = combineLatest([spec$, fetch$(api)]).subscribe(([spec, data]) => {
-      abortController.abort();
-      abortController = new AbortController();
-      rendered$.next(false);
-      const timeRange = data.timeslice
-        ? {
-            from: new Date(data.timeslice[0]).toISOString(),
-            to: new Date(data.timeslice[1]).toISOString(),
-            mode: 'absolute' as const,
-          }
-        : data.timeRange;
-      dataLoading$.next(true);
-      expressionParams$.next({
-        expression: toVegaEmbeddableExpressionAst(spec),
-        abortController,
-        searchContext: {
-          timeRange,
-          query: data.query as Query,
-          filters: data.filters,
-          projectRouting: data.projectRouting,
-          isApproximate: data.isApproximate,
-          disableWarningToasts: true,
-        },
-        searchSessionId: data.searchSessionId,
-        interactive: !areTriggersDisabled(api),
-        inspectorAdapters,
-        executionContext: {
-          ...(apiHasExecutionContext(parentApi) ? parentApi.executionContext : {}),
-          child: { type: VEGA_EMBEDDABLE_TYPE, name: 'Vega', id: uuid },
-        },
-        onData$: (_, adapters) => {
-          inspectorAdapters = typeof adapters === 'function' ? adapters() : adapters;
-          dataLoading$.next(false);
-        },
-        onRender$: () => rendered$.next(true),
-        onEvent: async (event) => {
-          if (event.name === VEGA_EVENT_APPLY_FILTER && !areTriggersDisabled(api)) {
-            await deps.uiActions.executeTriggerActions(ON_APPLY_FILTER, {
-              embeddable: api,
-              ...event.data,
-            });
-          }
-        },
-      });
+    const getExecutionContext = () => ({
+      ...(apiHasExecutionContext(parentApi) ? parentApi.executionContext : {}),
+      child: { type: VEGA_EMBEDDABLE_TYPE, name: 'Vega', id: uuid },
     });
+
+    // Identities must be stable: `VegaVisComponent` rebuilds its Vega view whenever `fireEvent`
+    // changes and re-renders whenever `renderComplete` changes.
+    const fireEvent = (event: VegaEvent) => {
+      // `VegaEvent` narrows `name` to the filter event, but the emitter (`vega_base_view.js`) is
+      // untyped JavaScript, so the compiler cannot enforce that on the calling side.
+      if (event.name !== VEGA_EVENT_APPLY_FILTER || areTriggersDisabled(api)) {
+        return;
+      }
+      deps.uiActions.executeTriggerActions(ON_APPLY_FILTER, {
+        embeddable: api,
+        ...event.data,
+      });
+    };
+
+    const onRenderComplete = () => {
+      const visData = renderInput$.getValue()?.visData;
+      if (visData) {
+        reportVegaRender({
+          containerType: apiHasExecutionContext(parentApi)
+            ? parentApi.executionContext.type
+            : undefined,
+          isVegaLite: visData.isVegaLite,
+          useMap: visData.useMap,
+        });
+      }
+      rendered$.next(true);
+    };
+
+    const fetchSubscription = combineLatest([spec$, fetch$(api)])
+      .pipe(
+        switchMap(async ([spec, data]) => {
+          abortController.abort();
+          abortController = new AbortController();
+          const { signal } = abortController;
+
+          rendered$.next(false);
+          dataLoading$.next(true);
+          blockingError$.next(undefined);
+          inspectorAdapters.requests.reset();
+
+          const timeRange = data.timeslice
+            ? {
+                from: new Date(data.timeslice[0]).toISOString(),
+                to: new Date(data.timeslice[1]).toISOString(),
+                mode: 'absolute' as const,
+              }
+            : data.timeRange;
+
+          try {
+            const { createVegaRequestHandler } = await import('../async_services');
+            const requestHandler = createVegaRequestHandler(deps.visualizationDependencies, {
+              abortSignal: signal,
+              inspectorAdapters,
+            });
+            const visData = await requestHandler({
+              timeRange,
+              query: data.query as Query,
+              filters: data.filters,
+              visParams: { spec },
+              searchSessionId: data.searchSessionId,
+              executionContext: getExecutionContext(),
+              projectRouting: data.projectRouting,
+              isApproximate: data.isApproximate,
+            });
+
+            if (signal.aborted) {
+              return;
+            }
+            // Show warnings only in edit mode matching the legacy vega behavior.
+            renderInput$.next({
+              showWarnings: getInheritedViewMode(api) === 'edit',
+              visData,
+            });
+          } catch (error) {
+            if (signal.aborted) {
+              return;
+            }
+            renderInput$.next(undefined);
+            blockingError$.next(error);
+            // Nothing will render, so complete the shared item; otherwise Reporting waits for a
+            // render that never happens.
+            rendered$.next(true);
+          } finally {
+            if (!signal.aborted) {
+              dataLoading$.next(false);
+            }
+          }
+        })
+      )
+      .subscribe();
 
     return {
       api,
       Component: () => {
-        const expressionParams = useStateFromPublishingSubject(expressionParams$);
-        const rendered = useStateFromPublishingSubject(rendered$);
-        const [hideTitle, title, description] = useBatchedPublishingSubjects(
+        const [renderInput, hideTitle, title, description, rendered] = useBatchedPublishingSubjects(
+          renderInput$,
           api.hideTitle$,
           api.title$,
-          api.description$
+          api.description$,
+          rendered$
         );
         const domNode = useRef<HTMLDivElement>(null);
 
@@ -294,13 +362,23 @@ export const vegaEmbeddableFactory = (
         return (
           <div
             ref={domNode}
-            css={{ width: '100%', height: '100%' }}
+            css={{ width: '100%', height: '100%', display: 'flex' }}
             data-render-complete={rendered}
             data-title={hideTitle ? '' : title ?? ''}
             data-description={description ?? ''}
             data-shared-item
           >
-            <deps.expressions.ReactExpressionRenderer {...expressionParams} />
+            {renderInput ? (
+              <Suspense fallback={<EuiLoadingChart size="l" />}>
+                <LazyVegaVisComponent
+                  deps={deps.visualizationDependencies}
+                  fireEvent={fireEvent}
+                  renderComplete={onRenderComplete}
+                  showWarnings={renderInput.showWarnings}
+                  visData={renderInput.visData}
+                />
+              </Suspense>
+            ) : null}
           </div>
         );
       },

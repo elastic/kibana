@@ -44,6 +44,7 @@ describe('VegaPlugin', () => {
     const startCore = coreMock.createStart();
     const startDeps = {
       expressions: { getFunction: jest.fn() },
+      uiActions: { executeTriggerActions: jest.fn() },
     };
     core.getStartServices.mockResolvedValue([startCore, startDeps, {}]);
 
@@ -65,31 +66,28 @@ describe('VegaPlugin', () => {
     return { embeddable, expressions, plugin, visualizations };
   };
 
-  it.each(['legacy', 'embeddable'] as const)(
-    'registers the runtime once when %s loads first',
-    async (first) => {
-      const { embeddable, expressions, visualizations } = setup();
-      const legacyLoader = jest.mocked(visualizations.createBaseVisualizationAsync).mock
-        .calls[0][1];
-      const embeddableLoader = jest.mocked(embeddable.registerEmbeddablePublicDefinition).mock
-        .calls[0][1];
+  it('registers the Vega embeddable definition', async () => {
+    const { embeddable } = setup();
+    const embeddableLoader = jest.mocked(embeddable.registerEmbeddablePublicDefinition).mock
+      .calls[0][1];
 
-      if (first === 'legacy') {
-        await legacyLoader();
-        await embeddableLoader();
-      } else {
-        await embeddableLoader();
-        await legacyLoader();
-      }
+    await embeddableLoader();
 
-      expect(embeddable.registerEmbeddablePublicDefinition).toHaveBeenCalledWith(
-        VEGA_EMBEDDABLE_TYPE,
-        expect.any(Function)
-      );
-      expect(expressions.registerFunction).toHaveBeenCalledTimes(1);
-      expect(expressions.registerRenderer).toHaveBeenCalledTimes(1);
-    }
-  );
+    expect(embeddable.registerEmbeddablePublicDefinition).toHaveBeenCalledWith(
+      VEGA_EMBEDDABLE_TYPE,
+      expect.any(Function)
+    );
+  });
+
+  it('registers the expression runtime once for the legacy visualization', async () => {
+    const { expressions, visualizations } = setup();
+    const legacyLoader = jest.mocked(visualizations.createBaseVisualizationAsync).mock.calls[0][1];
+
+    await legacyLoader();
+
+    expect(expressions.registerFunction).toHaveBeenCalledTimes(1);
+    expect(expressions.registerRenderer).toHaveBeenCalledTimes(1);
+  });
 
   describe('Vega add action feature flag', () => {
     const startPlugin = (flag$: BehaviorSubject<boolean>) => {

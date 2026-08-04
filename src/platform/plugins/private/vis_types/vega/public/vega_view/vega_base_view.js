@@ -87,7 +87,7 @@ export class VegaBaseView {
     this._initialized = false;
     this._externalUrl = opts.externalUrl;
     this._enableExternalUrls = getEnableExternalUrls();
-    this._renderMode = opts.renderMode;
+    this._showWarnings = opts.showWarnings;
     this._vegaStateRestorer = opts.vegaStateRestorer;
   }
 
@@ -270,7 +270,7 @@ export class VegaBaseView {
   }
 
   onWarn(...args) {
-    if (this._renderMode !== 'view' && (!this._parser || !this._parser.hideWarnings)) {
+    if (this._showWarnings && (!this._parser || !this._parser.hideWarnings)) {
       this._addMessage('warn', Utils.formatWarningToStr(...args));
     }
   }

@@ -76,7 +76,7 @@ export class TimeCache {
     return this._cachedBounds;
   }
 
-  setTimeRange(timeRange: TimeRange): void {
+  setTimeRange(timeRange: TimeRange | undefined): void {
     this._timeRange = timeRange;
   }
 
