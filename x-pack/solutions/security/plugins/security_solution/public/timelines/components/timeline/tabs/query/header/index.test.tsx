@@ -24,6 +24,8 @@ const mockUiSettingsForFilterManager = coreMock.createStart().uiSettings;
 jest.mock('../../../../../../common/lib/kibana');
 jest.mock('../hooks/use_show_alerts_only_migration_message');
 
+jest.setTimeout(30_000);
+
 describe('Header', () => {
   const indexPattern = mockIndexPattern;
   const mount = useMountAppended();
@@ -54,10 +56,7 @@ describe('Header', () => {
     timelineType: TimelineTypeEnum.default,
   };
 
-  // FLAKY: https://github.com/elastic/kibana/issues/254016
-  // FLAKY: https://github.com/elastic/kibana/issues/253935
-  // FLAKY: https://github.com/elastic/kibana/issues/253959
-  describe.skip('QueryTabHeader', () => {
+  describe('QueryTabHeader', () => {
     test('should render the data providers when show is true', async () => {
       const testProps = { ...props, show: true };
       const wrapper = await getWrapper(
